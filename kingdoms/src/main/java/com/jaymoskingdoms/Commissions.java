@@ -22,7 +22,7 @@ import net.minecraft.sounds.SoundSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.487) Plans offered to a settlement for its growth: a member (or a well-liked friend) standing in its land gives
+ * (0.7.488) Plans offered to a settlement for its growth: a member (or a well-liked friend) standing in its land gives
  * its steward one of their designs (from a {@link MasonTable}'s screen), and its builders put it up on open ground
  * of their own choosing, before anything of their own catalogue, once they're free and its storage holds the
  * materials ({@link Planner#eligible}). Built like any of their buildings: block by block from raw materials, the

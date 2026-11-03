@@ -5118,3 +5118,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   before the execution kills, will cancel it". Sneak + hold attack (1.5 s) is drawn as three bars under the crosshair (`Finishers.Charge`)
   in place of the action-bar dots. Sneak + double click (0.3 s) starts the execution at once (`Finishers.Rush`), same checks, always the
   kill; letting go of the second press before the killing blow calls it off (`Playing.held`). Symbiote suit executions don't cancel.
+- **0.19.79, one HUD layout** (`client/hud/HudZones`, `HudStyle`, `PowerDock`; plan `docs/HUD-Layout.md`): Andy: "rework
+  the hud so nothing is clashing, there are alot of new elements now, so everything needs to feel coherent". Every HUD
+  piece of Powers, Kingdoms and Kitchen that isn't a full-screen wash now asks one of seven zones where to draw, and the
+  zone stacks whatever is showing, so two pieces can't land on one spot: the right dock (power chips, Flame Avatar,
+  beam-clash panel, mount bars, Rig panel), the left dock (stomach, valor, symbiote arm, a body row of stance figure,
+  wounds doll and body heat), the focus band over the action-bar line (struggles, forms belt, spirit line, clash
+  timing), over the crosshair (charge bars, awareness eye), under it (guard, execution bars, roll pips, horse tag, smithing), right of it
+  (combo, lens, scouter), and a top-left rail under Xaero's minimap (power badge, kin sense, party). The badge no longer
+  sits on the minimap, the riding bar no longer covers the chips, the stance figure left the chat corner, and the
+  body-heat thermometer left the XP number. Our HUD hides during films (ultimates, beam and spirit clashes, handshakes,
+  curtains) as vanilla's does, and the armed crosshair now hides in an ultimate's film too. One look (`HudStyle`, Wind's
+  chips: see-through black plates, a rim in the piece's colour when ready, flat 3 px bars in a black frame, shadowed
+  text), with no resource-pack art, so it reads the same with Excalibur off. Compile-checked; not played.

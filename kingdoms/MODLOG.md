@@ -8308,7 +8308,15 @@ turtle).
   Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
   `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
 
-## 0.7.487: building from schematics
+## 0.7.487: one HUD layout (pack 0.19.79, Kitchen 0.5.55)
+Every Kingdoms HUD piece asks the pack's shared zones where to draw (`client/hud/HudZones`, a copy of Powers'; see
+`docs/HUD-Layout.md` in the pack): riding and dragon bars stack in the right dock over the power chips, the horse tag
+and wild-horse stats sit under the crosshair, the awareness eye over it, the forms chain count right of it, the forms
+belt, spirit line, seizure struggle and the Grue's line in the focus band over the action bar, the valor bar in the left
+dock, and the kin-sense compass (now on a plate, hidden under F3) and party list in the top-left rail under Xaero's
+minimap. Handshake and spirit-clash films and the story and travel curtains hide the zoned HUD.
+
+## 0.7.488: building from schematics
 - **Schematic files as designs** (`SchematicFiles`): a design may now be a `.nbt` (structure block), `.schem` (Sponge
   v1 to v3) or `.litematic` (every region), dropped in `<world>/jaymoskingdoms_designs/` or uploaded; older files are
   brought up to date by the game's data fixer. Only blocks come along (no block entities, no entities). Checked on

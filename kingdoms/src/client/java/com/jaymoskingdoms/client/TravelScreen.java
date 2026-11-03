@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Journeys;
 import com.jaymoskingdoms.Wagon;
@@ -131,6 +132,8 @@ final class TravelScreen extends Screen {
 	/** Black over the world while it fades back in, once they're there. */
 	private static void drawCurtain(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		if (curtain > 0 && trip == null) {
+			// (HUD rework) the curtain is up: hide the zoned HUD
+			HudZones.hideFor(100);
 			float a = Mth.clamp((curtain - delta.getGameTimeDeltaPartialTick(false)) / CURTAIN_TICKS, 0.0F, 1.0F);
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), (int)(a * 255.0F) << 24);
 		}

@@ -16,9 +16,9 @@ import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.487) The schematic files on this computer, and sending one to the server as a design ({@link DesignUploads}).
+ * (0.7.488) The schematic files on this computer, and sending one to the server as a design ({@link DesignUploads}).
  * Files are read from the game folder's {@code schematics} folder (where Litematica keeps its own, so files downloaded
- * for it are already there): {@code .nbt}, {@code .schem} and {@code .litematic}. (0.7.487) Used by the mason's table's
+ * for it are already there): {@code .nbt}, {@code .schem} and {@code .litematic}. (0.7.488) Used by the mason's table's
  * screen ({@link MasonScreen}); no commands.
  */
 public final class DesignUploadClient {

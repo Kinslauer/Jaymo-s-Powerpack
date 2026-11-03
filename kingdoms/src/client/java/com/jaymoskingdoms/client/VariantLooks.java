@@ -46,7 +46,7 @@ public final class VariantLooks {
 		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F),
 		// (0.7.486) a jellyfish's shimmer and a sea slug's bright flecks
 		JELLY_MOTE = new DustParticleOptions(0xE0B8FF, 0.5F), FRILL_MOTE = new DustParticleOptions(0xFF8A30, 0.5F),
-		// (0.7.487) a weedfrond's drifting leaf (used by #879 but never declared, which broke the build)
+		// (0.7.488) a weedfrond's drifting leaf (used by #879 but never declared, which broke the build)
 		LEAF_MOTE = new DustParticleOptions(0x7FB24A, 0.5F);
 
 	static {

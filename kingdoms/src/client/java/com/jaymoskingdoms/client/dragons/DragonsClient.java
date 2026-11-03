@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client.dragons;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.equestrian.FreeReinClient;
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.dragons.DragonBreath;
 import com.jaymoskingdoms.dragons.Dragons;
 import com.jaymoskingdoms.dragons.WindDragon;
@@ -212,22 +213,22 @@ public final class DragonsClient {
 
 	/** A bar in Equestrian's place (right of the hotbar, over the powers' chips), with its label over it. */
 	private static void bar(GuiGraphicsExtractor graphics, Font font, float share, int color, Component label, float mark) {
-		int width = graphics.guiWidth(), height = graphics.guiHeight();
-		int cx = width / 2;
-		int x0 = cx + 91 + 30;
-		int y = height - CHIP - 1 - 6;
-		if (x0 + BAR_WIDTH > width - 2) {
-			x0 = cx + 91 - BAR_WIDTH;
-			y = height - 22 - 30 - CHIP - 6;
+		// (HUD rework) right dock, row 41 (under the riding bar's row 40 in the stack's order); label above the bar
+		int boxW = Math.max(BAR_WIDTH, font.width(label));
+		int[] at = HudZones.place(HudZones.DOCK_RIGHT, "jaymoskingdoms:dragon", 41, boxW, 15);
+		if (at == null) {
+			return;
 		}
+		int x0 = at[0];
+		int y = at[1] + 12;
 		share = Mth.clamp(share, 0.0F, 1.0F);
 		graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 3, 0x90000000);
 		graphics.fill(x0, y, x0 + Mth.ceil(BAR_WIDTH * share), y + 2, 0xFF000000 | color);
 		if (mark > 0.0F) {
-			int at = x0 + Math.round(BAR_WIDTH * mark);
-			graphics.fill(at, y - 1, at + 1, y + 3, 0xFF606060);
+			int markX = x0 + Math.round(BAR_WIDTH * mark);
+			graphics.fill(markX, y - 1, markX + 1, y + 3, 0xFF606060);
 		}
-		graphics.text(font, label, x0 + BAR_WIDTH - font.width(label), y - 11, 0xE0FFFFFF);
+		graphics.text(font, label, x0, y - 11, 0xE0FFFFFF);
 	}
 
 	private static int pulse(int a, int b, float t) {

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.Handshakes;
 import com.jaymoskingdoms.JaymosKingdoms;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -192,6 +193,10 @@ public final class HandshakeCinematic {
 		float shown = Mth.lerp(delta.getGameTimeDeltaPartialTick(false), barsO, bars);
 		if (shown <= 0.0F) {
 			return;
+		}
+		if (running) {
+			// (HUD rework) the film is up for this player (vanilla HUD hidden): hide the zoned HUD too
+			HudZones.hideFor(100);
 		}
 		int width = graphics.guiWidth(), height = graphics.guiHeight();
 		int bar = Math.round(height * BAR_SHARE * shown);

@@ -68,6 +68,9 @@ public final class BeamCinematic {
 			HudElementRegistry.replaceElement(id, old -> (graphics, delta) -> {
 				if (!running) {
 					old.extractRenderState(graphics, delta);
+				} else {
+					// (HUD rework) and every zoned piece of ours with it (the badge, chips, bars, docks)
+					com.jaymospowers.client.hud.HudZones.hideFor(100L);
 				}
 			});
 		}

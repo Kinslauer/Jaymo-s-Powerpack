@@ -44,8 +44,8 @@ public final class FinisherClient {
 	private static final int CHOICE_MARKS = 6;
 	/** (0.19.78) Two presses of attack this close (client ticks) are a double click. */
 	static final int DOUBLE_CLICK_TICKS = 6;
-	/** (0.19.78) The bars: each this wide and tall (gui pixels), this far apart, this far under the crosshair. */
-	static final int BAR_WIDTH = 14, BAR_HEIGHT = 3, BAR_GAP = 3, BAR_DROP = 12;
+	/** (0.19.78) The bars: each this wide and tall (gui pixels), this far apart. (0.19.79) Where they go is the BELOW zone's. */
+	static final int BAR_WIDTH = 14, BAR_HEIGHT = 3, BAR_GAP = 3;
 	/** (0.19.78) A count not renewed for this many ticks is over (let go, or it played). */
 	static final int CHARGE_LINGER = 3;
 	static final int BAR_BACK = 0x90000000, BAR_EMPTY = 0x60FFFFFF, BAR_FILLING = 0xFFB02020, BAR_FULL = 0xFFFF4040,
@@ -150,7 +150,13 @@ public final class FinisherClient {
 		float per = Finishers.HOLD_TICKS / (float) Finishers.HOLD_BARS;
 		int bars = Finishers.HOLD_BARS;
 		int total = bars * BAR_WIDTH + (bars - 1) * BAR_GAP;
-		int x = graphics.guiWidth() / 2 - total / 2, y = graphics.guiHeight() / 2 + BAR_DROP;
+		// (HUD rework) under the crosshair, under the guard bar (BELOW row 20): one piece, the bars and their frames
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.BELOW, "jaymospowers:finisher_bars", 20,
+			total + 2, BAR_HEIGHT + 2);
+		if (at == null) {
+			return;
+		}
+		int x = at[0] + 1, y = at[1] + 1;
 		int filling = chargeChoke ? BAR_CHOKE_FILLING : BAR_FILLING, full = chargeChoke ? BAR_CHOKE_FULL : BAR_FULL;
 		for (int i = 0; i < bars; i++) {
 			float share = Mth.clamp((held - i * per) / per, 0.0F, 1.0F);

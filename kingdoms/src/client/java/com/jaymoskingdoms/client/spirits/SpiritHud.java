@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.spirits;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.spirits.Move;
 import com.jaymoskingdoms.spirits.Spirit;
@@ -124,8 +125,13 @@ public final class SpiritHud {
 			moveName = Component.translatable("gui.jaymoskingdoms.spirit.toggle_on", moveName);
 		}
 		int width = font.width(name) + GAP + font.width(moveName) + GAP + font.width(stats);
-		int x = graphics.guiWidth() / 2 + 91 - width;
-		int y = graphics.guiHeight() - LIFT;
+		// (HUD rework) focus band, row 30, centred
+		int[] at = HudZones.place(HudZones.FOCUS, "jaymoskingdoms:spirit_line", 30, width, 9);
+		if (at == null) {
+			return;
+		}
+		int x = at[0];
+		int y = at[1];
 		graphics.text(font, name, x, y, 0xFFFFFFFF, true);
 		x += font.width(name) + GAP;
 		graphics.text(font, moveName, x, y, ARGB.opaque(moveColor), true);

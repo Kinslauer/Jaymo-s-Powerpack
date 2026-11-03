@@ -64,9 +64,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.487) Building from a design yourself, in survival, from your own materials: our own take on a schematic
+ * (0.7.488) Building from a design yourself, in survival, from your own materials: our own take on a schematic
  * builder, through designs only (saved with the {@link Surveyor}, or uploaded from a schematic file, see {@link Designs}).
- * (0.7.487) Everything is done at the table's screen ({@link MasonNet}, {@code MasonScreen}), no commands:
+ * (0.7.488) Everything is done at the table's screen ({@link MasonNet}, {@code MasonScreen}), no commands:
  * <ul>
  * <li>Use the <b>mason's table</b> empty-handed: its screen lists the schematic files in your game's {@code schematics}
  * folder (a button opens the folder to drop files in) and the designs already on the world. Pick one and draw it on a
@@ -75,7 +75,7 @@ import org.jspecify.annotations.Nullable;
  * shows the table's progress and the materials still needed.</li>
  * <li>Use the plan on the ground to lay the building out there (its lowest north-west corner on the block in front of
  * the face you clicked); sneak and use it to turn it a quarter. While you hold it, its outline shows in sparks.
- * (0.7.487) A laid plan stays standing as see-through ghost blocks everyone near can see ({@link PlanSites}): fill them
+ * (0.7.488) A laid plan stays standing as see-through ghost blocks everyone near can see ({@link PlanSites}): fill them
  * by hand, like a ship's build kit, and once 90% of its blocks are in it's built.</li>
  * <li>Use the plan on the table and it builds it, bottom up, a block at a time, from the chests, barrels and the like
  * touching it: the very block (planks are planks, stairs are stairs, though dirt does for grass and paths; the second
@@ -302,7 +302,7 @@ public final class MasonTable {
 		table.open(player, note);
 	}
 
-	/** (0.7.487) A file {@code player} uploaded from the table at {@code pos}'s screen is in: drawn on a plan, and the screen shown again. */
+	/** (0.7.488) A file {@code player} uploaded from the table at {@code pos}'s screen is in: drawn on a plan, and the screen shown again. */
 	static void uploaded(ServerPlayer player, BlockPos pos, java.util.function.Supplier<@Nullable String> save) {
 		Component note = captured(() -> {
 			String name = save.get();

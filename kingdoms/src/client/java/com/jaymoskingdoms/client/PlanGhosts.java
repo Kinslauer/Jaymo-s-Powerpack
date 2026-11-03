@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.487) Laid plans' ghosts ({@link PlanSites}): every block of a laid-out building not yet in, drawn see-through
+ * (0.7.488) Laid plans' ghosts ({@link PlanSites}): every block of a laid-out building not yet in, drawn see-through
  * in a pale blue where it's to go, near enough to see. A ghost goes once the right block is there; one where something
  * else stands isn't drawn (that block has to come out first).
  */

@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.487) The mason's table's screen, in the Kingdoms screens' look: on the left the schematic files in your own
+ * (0.7.488) The mason's table's screen, in the Kingdoms screens' look: on the left the schematic files in your own
  * {@code schematics} folder (a button opens it, to drop downloaded files in), on the right the designs on the world.
  * Pick one and draw it on a blank building plan (a file of yours is sent up first); offer a world design to the
  * settlement you're in; save what you marked with a surveyor's rod. Below, what the table is building, how far it is,
