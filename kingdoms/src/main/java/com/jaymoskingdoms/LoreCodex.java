@@ -255,7 +255,8 @@ public final class LoreCodex extends Item {
 				Component title = stack.get(DataComponents.CUSTOM_NAME);
 				// (0.7.480) a captain's orders filed unread still teach what reading them would
 				Captains.readOrders(player, stack);
-				pack.setItem(i, ItemStack.EMPTY);
+				// (0.7.480) one copy filed: the rest of a stack stays in the pack, as a book already held does
+				pack.setItem(i, stack.copyWithCount(stack.getCount() - 1));
 				shelf.add(new Entry(id, title != null ? title : Component.literal(content == null ? "?" : content.title().raw()), pages));
 			}
 			held.add(id);
