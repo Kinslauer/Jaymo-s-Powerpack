@@ -89,6 +89,10 @@ final class Caravans {
 	/** No nearer its goal for this long (ticks) and it's helped over whatever is in its way: set this far on. */
 	static final int STUCK_TICKS = 240;
 	static final double HOP = 8.0;
+	/** (0.7.484) A skiff stuck at a shore goes on this far (blocks) toward its goal in the record, so it doesn't come back where it stuck. */
+	static final double SKIFF_SKIP = 32.0;
+	/** (0.7.484) How far (blocks) a following skiff looks for water when its place in the column is land. */
+	static final int SKIFF_SEARCH = 6;
 	/** A caravan on the road longer than this (ticks) is given up (lost to something the world did). */
 	static final long LONGEST = 24000L * 2;
 	/** Reputation: a cart broken open by a player (with the fiefdom, and its overlord). */
@@ -220,6 +224,8 @@ final class Caravans {
 	}
 
 	static void remove(MinecraftServer server, Caravan c, long nextSend) {
+		// ((0.7.484) no one escorts it any more)
+		TradeRoutes.forget(c.id());
 		Ledger l = ledger(server);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.remove(Integer.toString(c.id()));
@@ -828,8 +834,13 @@ final class Caravans {
 			live.improvedAt = now;
 		} else if (now - live.improvedAt > STUCK_TICKS) {
 			if (live.rig == TradeRoutes.BOAT) {
-				// (0.7.484) a skiff with no water ahead sails on out of sight, over the headland, in the record
-				put(server, c.at(lead.blockPosition()));
+				// (0.7.484) a skiff with no water ahead sails on out of sight, over the headland, in the record: set on
+				// along its way, so it isn't seen again at the shore it stuck on (on land it comes back as handcarts)
+				Vec3 here = lead.position();
+				Vec3 flat = new Vec3(to.x - here.x, 0.0, to.z - here.z);
+				double len = flat.length();
+				Vec3 on = len > 1.0E-3 ? here.add(flat.scale(Math.min(SKIFF_SKIP, len) / len)) : here;
+				put(server, c.at(BlockPos.containing(on.x, here.y, on.z)));
 				vanish(level, c);
 				return;
 			}
@@ -958,6 +969,10 @@ final class Caravans {
 		live.rig = rig;
 		for (int i = 0; i < c.carts().size(); i++) {
 			BlockPos spot = ground(level, at.subtract(facing.scale(i * SPACING)));
+			if (rig == TradeRoutes.BOAT && i > 0 && !Wagon.water(level, spot.getX() + 0.5, spot.getZ() + 0.5)) {
+				// ((0.7.484) no water at its place in the column: it sets off from the nearest water by it, else from the lead's)
+				spot = water(level, spot, ground(level, at));
+			}
 			// ((0.7.294) with MCA, one of the fiefdom's people: Drivers)
 			Worker w = home.type() == FactionType.BARBARIAN ? carter(level, home, spot, yaw) : Drivers.hire(level, home, spot, yaw, TASK, 64, null);
 			if (w == null) {
@@ -1078,6 +1093,23 @@ final class Caravans {
 		guard.setTask(TASK);
 		level.addFreshEntity(guard);
 		return guard;
+	}
+
+	/** (0.7.484) The nearest open water to {@code from} within {@link #SKIFF_SEARCH} blocks, at the surface; else {@code otherwise}. */
+	static BlockPos water(ServerLevel level, BlockPos from, BlockPos otherwise) {
+		for (int r = 1; r <= SKIFF_SEARCH; r++) {
+			for (int dx = -r; dx <= r; dx++) {
+				for (int dz = -r; dz <= r; dz++) {
+					if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+						continue;
+					}
+					if (Wagon.water(level, from.getX() + dx + 0.5, from.getZ() + dz + 0.5)) {
+						return ground(level, Vec3.atBottomCenterOf(from.offset(dx, 0, dz)));
+					}
+				}
+			}
+		}
+		return otherwise;
 	}
 
 	static BlockPos ground(ServerLevel level, Vec3 at) {
@@ -1223,7 +1255,12 @@ final class Caravans {
 			put(server, c.carts(carts));
 		}
 		Entity horse = wagon.horse();
-		if (horse != null) {
+		if (horse instanceof Worker || horse != null && (wagon.kind() == Wagon.HANDCART || wagon.kind() == Wagon.SKIFF)) {
+			// ((0.7.484) a handcart's puller, a skiff's deckhand: the carter himself is what it's hitched to)
+			HEADING.remove(horse.getUUID());
+			poof(level, horse);
+			McaCompat.vanish(horse);
+		} else if (horse != null) {
 			for (Entity rider : horse.getPassengers()) {
 				HEADING.remove(rider.getUUID());
 				poof(level, rider);

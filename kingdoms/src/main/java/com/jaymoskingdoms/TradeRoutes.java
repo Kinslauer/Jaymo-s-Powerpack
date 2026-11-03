@@ -168,6 +168,11 @@ final class TradeRoutes {
 		ESCORTS.clear();
 	}
 
+	/** (0.7.484) Caravan {@code id} is off the road (home, lost or broken up): its escorts forgotten. */
+	static void forget(int id) {
+		ESCORTS.remove(id);
+	}
+
 	// ---- who trades, with whom --------------------------------------------------------------------------------------
 
 	/** {@code f}'s kind of trade; null for what trades another way (fiefdoms, greenskin camps) or is gone. */
@@ -324,6 +329,10 @@ final class TradeRoutes {
 			return null;
 		}
 		Profile p = profile(server, f, sort);
+		if (p.rig() == BOAT && (PirateCoves.cove(server, f.id()) == null || PirateCoves.cove(server, to.id()) == null)) {
+			// ((0.7.484) skiffs only from a mooring to a mooring: to a partner inland, the cove's trade goes by handcart)
+			p = new Profile(HAND, p.carts(), HAND_LOAD, p.guards(), p.mounted(), p.sells(), p.wants(), p.levy());
+		}
 		List<Map<String, Integer>> carts;
 		if (Storage.loaded(level, f)) {
 			carts = Caravans.loadUp(level, f, x -> in(p.sells(), x), sort.keep, p.carts() * p.cap(), p.cap());
@@ -534,7 +543,6 @@ final class TradeRoutes {
 			return;
 		}
 		String tribe = home.type() == FactionType.BARBARIAN ? Tribes.of(server, home.id()) : null;
-		Sort sort = sortOf(server, home);
 		for (Map.Entry<UUID, Integer> e : who.entrySet()) {
 			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
 			if (p == null || e.getValue() < ESCORT_TICKS) {
@@ -542,7 +550,8 @@ final class TradeRoutes {
 			}
 			if (tribe != null) {
 				Tribes.add(server, p.getUUID(), tribe, -GREEN_EASE);
-			} else if (sort != null && !sort.camp()) {
+			} else if (!home.fallen() && (home.type().isRealm() || home.type() == FactionType.VILLAGE)) {
+				// ((0.7.484) any settled owner, a fiefdom's own wagons to its overlord among them)
 				Reputation.change(p, home, REP_ESCORT);
 				if (lord.id() != home.id() && (lord.type().isRealm() || lord.type() == FactionType.VILLAGE)) {
 					Reputation.change(p, lord, REP_ESCORT / 2);
