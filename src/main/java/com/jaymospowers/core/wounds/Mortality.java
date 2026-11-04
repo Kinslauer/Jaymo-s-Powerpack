@@ -155,6 +155,14 @@ public final class Mortality {
 	 */
 	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.@Nullable GlobalPos>> CAPTORS = new ArrayList<>();
 
+	/**
+	 * (0.20.27) Deaths that turn one instead of ending them (Kingdoms: the Hollow; Andy: "the death method that killed them turns
+	 * them into one of those specific hollows, like enthralled by a vampire, or maybe zombified by a witch"). Given the player and
+	 * whoever killed them, each may roll and hand back what to do to them as they rise; the first to hand one back has them. A
+	 * turned death is never final: they rise where they fell (the drowned on the shore), with no new injury.
+	 */
+	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, @Nullable Runnable>> TURNINGS = new ArrayList<>();
+
 	static final Identifier PHASE = JaymosPowers.id("mortality");
 	private static final TicketType WAKING = new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_LOADING);
 
@@ -170,12 +178,16 @@ public final class Mortality {
 		final BlockPos fell;
 		final long moveAt;
 		final @Nullable Entity by;
+		/** (0.20.27) What they rise as (see {@link #TURNINGS}), or null for a plain wake. */
+		final @Nullable Runnable turn;
 		int tries;
 		@Nullable BlockPos far;
 		@Nullable CompletableFuture<?> loading;
 
-		Wake(Cause cause, @Nullable String sub, ResourceKey<Level> dimension, BlockPos fell, long moveAt, @Nullable Entity by) {
+		Wake(Cause cause, @Nullable String sub, ResourceKey<Level> dimension, BlockPos fell, long moveAt, @Nullable Entity by,
+			@Nullable Runnable turn) {
 			this.by = by;
+			this.turn = turn;
 			this.cause = cause;
 			this.sub = sub;
 			this.dimension = dimension;
@@ -292,6 +304,14 @@ public final class Mortality {
 		}
 		Cause cause = cause(player, source, felled);
 		Entity by = (felled != null ? felled : source).getEntity();
+		// (0.20.27) the dead, a witch, a vampire may make one of their own of them instead
+		Runnable turn = Boolean.TRUE.equals(executed) || by == null || cause == Cause.LAVA || cause == Cause.VOID || cause == Cause.BEHEADED
+			? null : turning(player, by);
+		if (turn != null) {
+			JaymosPowers.LOGGER.info("{} fell to {} ({}): turned", player.getScoreboardName(), cause.key(), source.getMsgId());
+			leftForDead(player, cause, sub(source, felled), by, turn);
+			return false;
+		}
 		float chance = cause.chance;
 		if (cause == Cause.BOSS && beneath(player, by)) {
 			chance = 0.0F;
@@ -305,8 +325,23 @@ public final class Mortality {
 			player.setAttached(FINAL, cause.key());
 			return true;
 		}
-		leftForDead(player, cause, sub(source, felled), by);
+		leftForDead(player, cause, sub(source, felled), by, null);
 		return false;
+	}
+
+	/** (0.20.27) What {@code by}'s kill turns {@code player} into ({@link #TURNINGS}), or null. */
+	private static @Nullable Runnable turning(ServerPlayer player, Entity by) {
+		for (java.util.function.BiFunction<ServerPlayer, Entity, Runnable> turning : TURNINGS) {
+			try {
+				Runnable turn = turning.apply(player, by);
+				if (turn != null) {
+					return turn;
+				}
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("A turning failed for {}", player.getScoreboardName(), e);
+			}
+		}
+		return null;
 	}
 
 	/** The cause of a death by {@code source}, downed earlier by {@code felled} (or null). */
@@ -430,7 +465,7 @@ public final class Mortality {
 	 * The death is turned away: health back to a little, and out cold where they fell ({@link Downed#knockOut}: the black screen)
 	 * until they are moved to where they wake ({@link #tick}).
 	 */
-	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by) {
+	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn) {
 		ServerLevel level = player.level();
 		player.setHealth(Math.max(1.0F, player.getMaxHealth() * WAKE_HEALTH));
 		player.clearFire();
@@ -445,7 +480,7 @@ public final class Mortality {
 		}
 		Downed.knockOut(level, player, OUT_BEFORE + OUT_AFTER + 20 * 60, false, "message.jaymospowers.mortality.fading", false);
 		WAKES.put(player.getUUID(), new Wake(cause, sub, level.dimension(), player.blockPosition(), level.getServer().getTickCount() + OUT_BEFORE,
-			by));
+			by, turn));
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -524,8 +559,13 @@ public final class Mortality {
 	private static boolean place(MinecraftServer server, ServerPlayer player, ServerLevel level, Wake wake) {
 		RandomSource random = player.getRandom();
 		BlockPos at = null;
+		// (0.20.27) the turned rise where they fell (the drowned wash ashore first, below)
+		if (wake.turn != null && wake.cause != Cause.DROWNING) {
+			wakeAt(player, level, wake.fell, wake, "risen");
+			return true;
+		}
 		// (0.20.26) taken captive by those who downed them, if they're the kind who would
-		if (wake.by != null && wake.tries == 0 && wake.far == null) {
+		if (wake.turn == null && wake.by != null && wake.tries == 0 && wake.far == null) {
 			for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> captor : CAPTORS) {
 				net.minecraft.core.GlobalPos held;
 				try {
@@ -681,14 +721,24 @@ public final class Mortality {
 		}
 		player.resetFallDistance();
 		player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
-		injure(player, wake.cause, wake.sub);
-		player.setAttached(SURVIVOR, true);
+		if (wake.turn == null) {
+			injure(player, wake.cause, wake.sub);
+			player.setAttached(SURVIVOR, true);
+		}
 		// (out cold a while more, wherever they are now: then they come round, still hurt)
 		if (Downed.isDowned(player)) {
 			Downed.forgetQuietly(player);
 		}
-		Downed.knockOut(level, player, OUT_AFTER, false, "message.jaymospowers.mortality.wake." + line, false);
-		level.playSound(null, at, SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F, 0.8F);
+		Downed.knockOut(level, player, OUT_AFTER, false, "message.jaymospowers.mortality.wake." + (wake.turn != null ? "risen" : line), false);
+		level.playSound(null, at, wake.turn != null ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F,
+			wake.turn != null ? 0.6F : 0.8F);
+		if (wake.turn != null) {
+			try {
+				wake.turn.run();
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("{} couldn't be turned", player.getScoreboardName(), e);
+			}
+		}
 	}
 
 	/** The injury {@code cause} leaves on one who lived. */

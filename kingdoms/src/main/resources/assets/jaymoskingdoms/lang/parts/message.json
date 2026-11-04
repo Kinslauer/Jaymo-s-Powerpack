@@ -1203,5 +1203,12 @@
   "message.jaymoskingdoms.rpg_gate.unlearned": "You haven't learned this yet: find it on your skill web, or ask a trainer",
   "message.jaymoskingdoms.aetherion.cataclysm": "Aetherion rears up, and the stars begin to fall.",
   "message.jaymoskingdoms.dragon.crashed_walker": "%s sinks onto its belly, wounded and wary. Come close crouching, with empty hands, and it may come to trust you.",
-  "message.jaymoskingdoms.dragon.bolted_walker": "%s has had enough. It turns and lumbers off."
+  "message.jaymoskingdoms.dragon.bolted_walker": "%s has had enough. It turns and lumbers off.",
+  "message.jaymoskingdoms.hollow.turned.enthralled": "Its voice is still in your head. You hunger for the dark, and for it.",
+  "message.jaymoskingdoms.hollow.turned.reaped": "Something tore your soul loose and put it back crooked.",
+  "message.jaymoskingdoms.hollow.turned.hexed": "The witch's brew is in your blood. Your skin has gone green and cold.",
+  "message.jaymoskingdoms.hollow.turned.zombie": "The bite took. You're hungry, and not for bread.",
+  "message.jaymoskingdoms.hollow.turned.skeleton": "You feel light. Too light. There's very little left of you to feel.",
+  "message.jaymoskingdoms.hollow.turned.wraith": "The cold went in and never came out. Your edges blur.",
+  "message.jaymoskingdoms.hollow.turned.pallid": "The dead took you with them, a little way. You came back grey."
 }

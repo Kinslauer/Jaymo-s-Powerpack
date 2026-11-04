@@ -509,6 +509,11 @@ public final class Heritage {
 
 	/** Makes {@code player} of heritage {@code kind}: its look (a Verdant's green), its attributes, the word of it. */
 	static void set(ServerPlayer player, Kind kind) {
+		set(player, kind, false);
+	}
+
+	/** (0.7.525) {@link #set(ServerPlayer, Kind)}; {@code quiet}: no word of it (one turned says it their own way: {@link Hollows}). */
+	static void set(ServerPlayer player, Kind kind, boolean quiet) {
 		Kind was = of(player);
 		player.setAttached(HERITAGE, kind.key());
 		tag(player, kind);
@@ -517,6 +522,9 @@ public final class Heritage {
 		Skills.refresh(player);
 		if (McaCompat.LOADED) {
 			McaBridge.keepBody(player);
+		}
+		if (quiet) {
+			return;
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 1.0F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.chosen", Component.translatable("heritage.jaymoskingdoms." + kind.key()))

@@ -2254,6 +2254,22 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.525) Hands Powers' death by cause what a kill may turn one into ({@link Hollows}); nothing without Powers (or an older one). */
+	@SuppressWarnings("unchecked")
+	static void tellTurnings(java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,
+		@Nullable Runnable> turning) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("TURNINGS").get(null);
+			((java.util.List<java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,
+				Runnable>>)list).add(turning);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality turnings (older Powers?)", e);
+		}
+	}
+
 	/** (0.7.462) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
 	public static boolean setBones(net.minecraft.world.entity.LivingEntity entity) {
 		lookForHealing();
