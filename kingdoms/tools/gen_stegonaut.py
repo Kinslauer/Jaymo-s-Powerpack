@@ -20,53 +20,69 @@ from gen_dragons import rgb, jitter, mix, shade, write, entry, egg, ASSETS, DATA
 # (name, parent, uv part, (x, y, z, w, h, d), (px, py, pz, rx, ry, rz), mirror). Model pixels, y down, the ground at 24;
 # -z is the front. Parts named in the Java model by these names.
 PLATE_Z = [-12.0, -5.0, 2.0, 9.0, 15.0]
-PLATE_H = [8, 11, 13, 11, 8]
-PLATE_D = [6, 8, 9, 8, 6]
+PLATE_H = [10, 14, 17, 14, 10]
+PLATE_D = [7, 9, 11, 9, 7]
+# (0.7.511, Andy: "longer limbs and necks, and be taller, to be imposing") high on four long pillar legs, a long neck
+# raised up and forward in four segments, the head levelled again at its end, a long drooping tail
+NECK = [('neck0', (13, 11, 8), -0.55), ('neck1', (12, 10, 7), -0.25), ('neck2', (11, 9, 7), -0.1), ('neck3', (10, 9, 6), 0.1)]
+HEAD_TILT = 0.75
+TAIL = [('tail0', (12, 11, 10), 0.18), ('tail1', (10, 9, 10), 0.08), ('tail2', (8, 7, 10), 0.0), ('tail3', (6, 6, 9), -0.04),
+        ('tail4', (5, 5, 9), -0.06)]
 GEOMETRY = [
-    ('body', None, 'body', (-12, -7, -18, 24, 14, 36), (0, 11, 0, 0, 0, 0), False),
-    ('belly', 'body', 'belly', (-10, 0, -13, 20, 3, 26), (0, 7, 0, 0, 0, 0), False),
-    ('neck0', 'body', 'neck0', (-7, -5, -7, 14, 10, 7), (0, -1, -17, 0, 0, 0), False),
-    ('neck1', 'neck0', 'neck1', (-6, -4.5, -6, 12, 9, 6), (0, 0.5, -6, 0, 0, 0), False),
-    ('head', 'neck1', 'skull', (-7, -5, -10, 14, 9, 10), (0, 0, -5, 0, 0, 0), False),
+    ('body', None, 'body', (-12, -8, -18, 24, 16, 36), (0, 2, 0, 0, 0, 0), False),
+    ('belly', 'body', 'belly', (-10, 0, -13, 20, 3, 26), (0, 8, 0, 0, 0, 0), False),
+]
+# each neck segment hangs from the front of the one before
+parent, parent_d = 'body', None
+for n, (w, h, d), rx in NECK:
+    pose = (0, -3, -17, rx, 0, 0) if parent == 'body' else (0, 0, -(parent_d - 1), rx, 0, 0)
+    GEOMETRY.append((n, parent, n, (-w / 2, -h / 2, -d, w, h, d), pose, False))
+    parent, parent_d = n, d
+GEOMETRY += [
+    ('head', 'neck3', 'skull', (-7, -5, -10, 14, 9, 10), (0, 0, -5, HEAD_TILT, 0, 0), False),
     ('snout', 'head', 'snout', (-5, -3, -7, 10, 6, 7), (0, 0, -10, 0, 0, 0), False),
     ('brow', 'head', 'brow', (-7.5, -1.5, -2, 15, 3, 4), (0, -4.5, -7, 0, 0, 0), False),
     ('jaw', 'head', 'jaw', (-5.5, 0, -16, 11, 3, 16), (0, 4, 0, 0, 0, 0), False),
     ('eye_l', 'head', 'eye', (-0.5, -1.5, -1.5, 1, 3, 3), (7.0, -2.0, -6.5, 0, 0, 0), False),
     ('eye_r', 'head', 'eye', (-0.5, -1.5, -1.5, 1, 3, 3), (-7.0, -2.0, -6.5, 0, 0, 0), False),
-    ('horn_l', 'head', 'horn', (-1, -1, 0, 2, 2, 8), (5.5, -4.5, -4, 0.45, 0.35, 0), False),
-    ('horn_r', 'head', 'horn', (-1, -1, 0, 2, 2, 8), (-5.5, -4.5, -4, 0.45, -0.35, 0), False),
+    ('horn_l', 'head', 'horn', (-1, -1, 0, 2, 2, 9), (5.5, -4.5, -4, 0.45, 0.35, 0), False),
+    ('horn_r', 'head', 'horn', (-1, -1, 0, 2, 2, 9), (-5.5, -4.5, -4, 0.45, -0.35, 0), False),
     ('short_horn_l', 'head', 'horn_short', (-1, -1, 0, 2, 2, 4), (5.5, -4.5, -4, 0.5, 0.35, 0), False),
     ('short_horn_r', 'head', 'horn_short', (-1, -1, 0, 2, 2, 4), (-5.5, -4.5, -4, 0.5, -0.35, 0), False),
     ('nose_horn', 'snout', 'nose_horn', (-1, -4, -1, 2, 4, 2), (0, -3, -4, -0.35, 0, 0), False),
-    ('tail0', 'body', 'tail0', (-6, -5, 0, 12, 10, 10), (0, -1, 17, 0, 0, 0), False),
-    ('tail1', 'tail0', 'tail1', (-5, -4, 0, 10, 8, 10), (0, 0.5, 9, 0, 0, 0), False),
-    ('tail2', 'tail1', 'tail2', (-4, -3, 0, 8, 6, 10), (0, 0.5, 9, 0, 0, 0), False),
-    ('tail3', 'tail2', 'tail3', (-3, -2.5, 0, 6, 5, 9), (0, 0.5, 9, 0, 0, 0), False),
-    ('thag0', 'tail3', 'thag', (-1, -1, 0, 2, 2, 8), (2, -1.5, 5, -0.7, 1.1, 0), False),
-    ('thag1', 'tail3', 'thag', (-1, -1, 0, 2, 2, 8), (-2, -1.5, 5, -0.7, -1.1, 0), False),
-    ('thag2', 'tail3', 'thag', (-1, -1, 0, 2, 2, 7), (2, -1.5, 1, -0.9, 0.9, 0), False),
-    ('thag3', 'tail3', 'thag', (-1, -1, 0, 2, 2, 7), (-2, -1.5, 1, -0.9, -0.9, 0), False),
-    ('tail_plate0', 'tail0', 'tail_plate0', (-1, -6, -3, 2, 6, 6), (0, -5, 5, 0, 0, 0), False),
-    ('tail_plate1', 'tail1', 'tail_plate1', (-1, -4, -2.5, 2, 4, 5), (0, -4, 5, 0, 0, 0), False),
-    ('saddle', 'body', 'saddle', (-8, -2, -7, 16, 2, 14), (0, -7, -1, 0, 0, 0), False),
+]
+parent = 'body'
+for n, (w, h, d), rx in TAIL:
+    pose = (0, -2, 17, rx, 0, 0) if parent == 'body' else (0, 0.5, [pd for pn, (pw, ph, pd), _ in TAIL if pn == parent][0] - 1, rx, 0, 0)
+    GEOMETRY.append((n, parent, n, (-w / 2, -h / 2, 0, w, h, d), pose, False))
+    parent = n
+GEOMETRY += [
+    ('thag0', 'tail4', 'thag', (-1, -1, 0, 2, 2, 9), (2, -1.5, 5, -0.7, 1.1, 0), False),
+    ('thag1', 'tail4', 'thag', (-1, -1, 0, 2, 2, 9), (-2, -1.5, 5, -0.7, -1.1, 0), False),
+    ('thag2', 'tail4', 'thag', (-1, -1, 0, 2, 2, 8), (2, -1.5, 1, -0.9, 0.9, 0), False),
+    ('thag3', 'tail4', 'thag', (-1, -1, 0, 2, 2, 8), (-2, -1.5, 1, -0.9, -0.9, 0), False),
+    ('tail_plate0', 'tail0', 'tail_plate0', (-1, -7, -3.5, 2, 7, 7), (0, -5.5, 5, 0, 0, 0), False),
+    ('tail_plate1', 'tail1', 'tail_plate1', (-1, -5, -2.5, 2, 5, 5), (0, -4.5, 5, 0, 0, 0), False),
+    ('saddle', 'body', 'saddle', (-8, -2, -7, 16, 2, 14), (0, -8, -1, 0, 0, 0), False),
     ('pommel', 'saddle', 'pommel', (-2, -3, 0, 4, 3, 2), (0, -2, -7, 0, 0, 0), False),
     ('cantle', 'saddle', 'cantle', (-6, -3, 0, 12, 3, 2), (0, -2, 5, 0, 0, 0), False),
-    ('strap', 'body', 'strap', (-12.5, -7.5, -1.5, 25, 15, 3), (0, 0, -1, 0, 0, 0), False),
-    ('pad', 'body', 'pad', (-7, -2, -5, 14, 2, 10), (0, -7, 9, 0, 0, 0), False),
+    ('strap', 'body', 'strap', (-12.5, -8.5, -1.5, 25, 17, 3), (0, 0, -1, 0, 0, 0), False),
+    ('pad', 'body', 'pad', (-7, -2, -5, 14, 2, 10), (0, -8, 9, 0, 0, 0), False),
 ]
 for i in range(5):
     h, d = PLATE_H[i], PLATE_D[i]
     # two staggered rows, leaning out a little
-    GEOMETRY.append(('plate%d_l' % i, 'body', 'plate%d' % i, (-1, -h, -d / 2, 2, h, d), (2.5, -6, PLATE_Z[i], 0, 0, 0.16), False))
-    GEOMETRY.append(('plate%d_r' % i, 'body', 'plate%d' % i, (-1, -h, -d / 2, 2, h, d), (-2.5, -6, PLATE_Z[i] + 2.5, 0, 0, -0.16), True))
-LEGS = [('left_front', 9.0, -12.0, True), ('right_front', -9.0, -12.0, True), ('left_hind', 9.0, 12.0, False), ('right_hind', -9.0, 12.0, False)]
+    GEOMETRY.append(('plate%d_l' % i, 'body', 'plate%d' % i, (-1, -h, -d / 2, 2, h, d), (2.5, -7, PLATE_Z[i], 0, 0, 0.16), False))
+    GEOMETRY.append(('plate%d_r' % i, 'body', 'plate%d' % i, (-1, -h, -d / 2, 2, h, d), (-2.5, -7, PLATE_Z[i] + 2.5, 0, 0, -0.16), True))
+LEGS = [('left_front', 9.0, -11.0, True), ('right_front', -9.0, -11.0, True), ('left_hind', 9.5, 12.0, False), ('right_hind', -9.5, 12.0, False)]
 for name, x, z, front in LEGS:
     mirror = x < 0
-    up = (-4, -2, -4, 8, 8, 8) if front else (-4.5, -2, -4.5, 9, 8, 9)
-    GEOMETRY.append((name + '_leg', 'body', 'front_upper' if front else 'back_upper', up, (x, 3, z, 0, 0, 0), mirror))
+    # long pillars: thigh 13, shin 8, foot 2 (from a hip 20 pixels up)
+    up = (-4.5, -3, -4.5, 9, 13, 9) if front else (-5, -3, -5, 10, 13, 10)
+    GEOMETRY.append((name + '_leg', 'body', 'front_upper' if front else 'back_upper', up, (x, 2, z, 0, 0, 0), mirror))
     GEOMETRY.append((name + '_shin', name + '_leg', 'front_lower' if front else 'back_lower',
-                     (-3.5, 0, -3.5, 7, 3, 7) if front else (-4, 0, -4, 8, 3, 8), (0, 6, 0, 0, 0, 0), mirror))
-    GEOMETRY.append((name + '_foot', name + '_shin', 'foot', (-4.5, 0, -6, 9, 2, 10), (0, 3, 0, 0, 0, 0), mirror))
+                     (-4, 0, -4, 8, 8, 8) if front else (-4.5, 0, -4.5, 9, 8, 9), (0, 10, 0, 0, 0, 0), mirror))
+    GEOMETRY.append((name + '_foot', name + '_shin', 'foot', (-5, 0, -6.5, 10, 2, 11), (0, 8, 0, 0, 0, 0), mirror))
 
 PARTS = []
 for _, _, uv, (x, y, z, w, h, d), _, _ in GEOMETRY:
@@ -456,7 +472,7 @@ def preview(path, hides, marks):
         if i != 3:
             hidden.add('nose_horn')
         comp = Image.alpha_composite(hide, marks[i]) if False else hide
-        render(comp, img, ox, oy, 2.4 if col == 0 else 0.75, 4.4, hidden)
+        render(comp, img, ox, oy, 2.4 if col == 0 else 1.5708, 4.0, hidden)
         dr.text((ox - 300, oy - 300), ['moss stone, saddled', 'jungle green', 'sandstone, short horns', 'slate, nose horn'][i], fill=(220, 220, 220))
     img.save(path)
 

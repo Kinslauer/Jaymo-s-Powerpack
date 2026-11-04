@@ -8719,7 +8719,8 @@ Reserved, so its eight dragons are rebuilt here with our own models and paint (`
   move. New hooks for the lesser dragons: `aggressive` (a grazer fights only whoever hurts it), `bossBar` (beasts, not
   minibosses), `windDragon` (killing one doesn't count toward Eurus and Aeolus's disguises), `crashKey`/`boltKey`,
   `walkerFight`, and `action` (the move its model is playing, with `actionSeen`/`actionAge` on the client).
-- **Stegonaut** (`StegonautDragon`, `jaymoskingdoms:stegonaut_dragon`): a low, broad, plated dragon of the jungles and
+- **Stegonaut** (`StegonautDragon`, `jaymoskingdoms:stegonaut_dragon`): a tall plated dragon (2.8 x 3 blocks, its back
+  about 2.5 high and its plates near 4) of the jungles and
   plains (`has_stegonaut_dragon`), spawning with the herds in ones and twos and staying put like cattle. 100 health,
   armour 15. Besides the bite and the tail sweep: a **chin slam** (8, a throw up), a **ground slam** (rears, stamps:
   20 in a ring of 5, then seven earth spikes burst along the ground toward its foe, 10 each), **ground eating** (at 7-24
@@ -8728,7 +8729,8 @@ Reserved, so its eight dragons are rebuilt here with our own models and paint (`
   (wear it below a third, crouch empty-handed, raw beef its favourite, Stoneborn twice as fast); ridden, R is the ground
   slam with its spikes running where you look (5 s).
 - **Its look** (`client/dragons/StegonautDragonModel`, `tools/gen_stegonaut.py`, which prints the model's body plan from
-  its own UV table): two staggered rows of horn plates, a bony brow and a shovel jaw, pillar legs, a four-spiked tail;
+  its own UV table): Andy wanted it "taller, to be imposing": long pillar legs, a long neck raised high in four segments,
+  two staggered rows of tall horn plates, a bony brow and a shovel jaw, a long four-spiked tail;
   four hides (moss stone, jungle green, sandstone, slate) with moss on its back and four glowing-lichen marking patterns;
   short/long horns or a nose horn and a broken plate by its DragonLook; drawn 1.3x. It plods, rears and stamps for the
   slam, noses the ground and chews, and flares its plates to roar.

@@ -68,7 +68,7 @@ public final class DragonsClient {
 	/** (0.7.329) How big the Kintsugi wyvern is drawn for each (it stands 7.9 blocks, 25 across the wings), and how far it reaches from its middle at full size. */
 	static final float EURUS_SCALE = 0.28F, AEOLUS_SCALE = 0.75F, KINTSUGI_REACH = 13.0F;
 	/** (0.7.511) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's shadow, how big its model is drawn, its reach (head and tail). */
-	static final float STEGONAUT_SHADOW = 1.6F, STEGONAUT_SCALE = 1.3F, STEGONAUT_REACH = 3.0F;
+	static final float STEGONAUT_SHADOW = 2.0F, STEGONAUT_SCALE = 1.3F, STEGONAUT_REACH = 4.5F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
 	private static @Nullable KeyMapping breathKey;

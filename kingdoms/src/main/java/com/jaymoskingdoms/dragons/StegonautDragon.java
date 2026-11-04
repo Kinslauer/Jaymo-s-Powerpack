@@ -33,8 +33,8 @@ import net.minecraft.world.phys.Vec3;
  * (0.7.511) Stegonaut, the first of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and numbers are
  * ported from Saint's Dragons by Leon Saint (MIT licence; none of its art, models or sounds are used: the model is our
  * own, {@code StegonautDragonModel}, painted by {@code tools/gen_stegonaut.py}). A walker ({@link WindDragon#flies}):
- * a low, broad, plated dragon of the jungles and plains that never flies, grazes about its home in ones and twos and
- * only fights whoever hurts it.
+ * a tall, plated dragon on long pillar legs with a long neck held high, of the jungles and plains. It never flies,
+ * grazes about its home in ones and twos and only fights whoever hurts it.
  * <p>
  * Its moves on its feet, besides the bite and the tail sweep every dragon has:
  * <ul>
@@ -165,17 +165,17 @@ public class StegonautDragon extends WindDragon {
 
 	@Override
 	protected Vec3 seat(int index) {
-		return new Vec3(0.0, 1.75, index == 0 ? 0.2 : -0.75);
+		return new Vec3(0.0, 2.6, index == 0 ? 0.2 : -0.75);
 	}
 
 	@Override
 	protected double mouthAhead(boolean flying) {
-		return 2.3;
+		return 4.4;
 	}
 
 	@Override
 	protected double mouthUp(boolean flying) {
-		return 0.9;
+		return 2.6;
 	}
 
 	@Override
