@@ -642,13 +642,15 @@ public final class Approaches {
 			// (0.7.221) one who looks down on your blood halts you sooner, and searches you more
 			// (0.7.509) and one who distrusts your faith; the Crowned Sun's and The Truth's blessings ease it
 			int minds = Math.max(0, Prejudice.guard(mob, player) + Faiths.guard(mob, player) - Blessings.searchEase(player, f));
-			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= Blessings.haltGap(player, f, Faiths.haltGap(mob, player, Prejudice.haltGap(mob, player, HALT_TICKS))))) {
+			// (0.7.516) a partner realm's people are let by: no halting, no search, no toll
+			boolean passage = !sworn && Treaties.passage(server, f, player);
+			if (!sworn && !passage && rep < KNOWN_REP && (halted == null || now - halted >= Blessings.haltGap(player, f, Faiths.haltGap(mob, player, Prejudice.haltGap(mob, player, HALT_TICKS))))) {
 				w[HALT] = 2;
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper
 			int tv = temper(server, f, player);
 			// (0.7.100) nor of one their settlement owes for bringing one of its own home
-			if (!sworn && Captives.owed(player, f.id()) <= 0) {
+			if (!sworn && !passage && Captives.owed(player, f.id()) <= 0) {
 				// ((0.7.221) fewer where the ruler has eased up to keep his people: Reforms)
 				Faction rules = ruler(server, f);
 				w[SEARCH] = Reforms.guards(server, rules, SEARCH_W[tv]) + minds;
@@ -866,7 +868,9 @@ public final class Approaches {
 			case SEARCH, TOLL, BOUT, LOYALTY -> {
 				// (0.6.2) one way of putting it per temper
 				a.variant = temper(level.getServer(), f, player);
-				a.price = a.topic == SEARCH ? BRIBE : a.topic == TOLL ? TOLLS[a.variant] : WAGER;
+				// (0.7.516) half the toll for a trade charter partner's people
+				a.price = a.topic == SEARCH ? BRIBE : a.topic == TOLL ? (Treaties.charterPlayer(level.getServer(), f, player)
+					? Math.max(1, TOLLS[a.variant] * Treaties.CHARTER_TOLL_PERCENT / 100) : TOLLS[a.variant]) : WAGER;
 			}
 			default -> a.variant = OPENINGS[a.topic] > 0 ? random.nextInt(OPENINGS[a.topic]) : 0;
 		}

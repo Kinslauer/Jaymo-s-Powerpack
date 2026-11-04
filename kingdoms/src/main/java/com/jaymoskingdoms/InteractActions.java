@@ -37,7 +37,9 @@ public final class InteractActions {
 	public static final String MONEY = "money";
 	/** (0.7.513) The cleric's Leaving Rite ({@link Rites}). */
 	public static final String RITE = "rite";
-	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY, RITE);
+	/** (0.7.516) Hear the Envoy: a realm's envoy waiting in a player's hall ({@link Envoys}). */
+	public static final String ENVOY = "envoy";
+	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY, RITE, ENVOY);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -86,6 +88,7 @@ public final class InteractActions {
 			case SPY, RAID -> SwornCaptains.takesOrders(player, v);
 			case MONEY -> v instanceof Villager villager && Directions.offers(villager);
 			case RITE -> Accusations.priest(v) && player.level() instanceof ServerLevel l && Turning.rite(player, Patrons.today(l.getServer())) != null;
+			case ENVOY -> Envoys.hearable(player, v);
 			default -> false;
 		};
 	}
@@ -138,6 +141,10 @@ public final class InteractActions {
 					return Component.translatable("talk.jaymoskingdoms.rite.refuse");
 				}
 				Rites.offer(player, (Villager)v);
+				return null;
+			}
+			case ENVOY -> {
+				Envoys.hear(player, v);
 				return null;
 			}
 			default -> {

@@ -772,9 +772,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				// (0.5.27) a goblin grunts back at one of its own
 				Disguise.greet(level, serverPlayer, this);
 			}
-			KingdomEvents.audience(serverPlayer, this);
-			// (0.5.29) a king also has work for you
-			if (this.role() == KING) {
+			boolean desk = KingdomEvents.audience(serverPlayer, this);
+			// (0.5.29) a king also has work for you (not over the sovereign's desk)
+			if (!desk && this.role() == KING) {
 				Quests.open(serverPlayer, this);
 			}
 			// (0.5.52) a court wizard can unmake what you've learned, for a price

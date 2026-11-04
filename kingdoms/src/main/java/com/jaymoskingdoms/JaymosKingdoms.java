@@ -358,6 +358,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		LOGGER.debug("great wars attachment: {}", GreatWars.LEDGER);
 		Wars.register();
+		// (0.7.516) treaties, envoys, the ruler's desk, elections and regencies
+		Treaties.register();
+		Envoys.register();
+		DiplomacyNet.register();
+		Elections.register();
 		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
 		Sandbags.register();
 		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels

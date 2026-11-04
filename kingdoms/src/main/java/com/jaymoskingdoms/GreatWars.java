@@ -355,7 +355,8 @@ final class GreatWars {
 			delta += RIVAL_GAIN;
 		}
 		Creed ca = creed(server, a), cb = creed(server, b);
-		if (worthA >= TRADE_WORTH && worthB >= TRADE_WORTH && (ca == Creed.COIN || cb == Creed.COIN)) {
+		boolean tradeGain = worthA >= TRADE_WORTH && worthB >= TRADE_WORTH && (ca == Creed.COIN || cb == Creed.COIN);
+		if (tradeGain) {
 			delta += TRADE_GAIN;
 		}
 		// (0.7.513) faiths at odds: holy-war friction (Andy: humans are in a constant battle with the other ideologies)
@@ -365,6 +366,24 @@ final class GreatWars {
 		}
 		if (relation == Relation.ALLIED) {
 			delta = -ALLIED_EASE;
+			tradeGain = false;
+		}
+		// (0.7.516) treaties ease it: recognition most, a charter in place of the trade's friction, aid like an alliance
+		boolean recognised = Treaties.has(server, a, b, Treaties.Kind.RECOGNITION);
+		if (recognised) {
+			delta -= Treaties.RECOGNITION_EASE;
+		}
+		if (Treaties.has(server, a, b, Treaties.Kind.PASSAGE)) {
+			delta -= Treaties.PASSAGE_EASE;
+		}
+		if (Treaties.has(server, a, b, Treaties.Kind.CHARTER)) {
+			delta -= Treaties.CHARTER_EASE;
+			if (tradeGain) {
+				delta -= TRADE_GAIN;
+			}
+		}
+		if (Treaties.has(server, a, b, Treaties.Kind.AID)) {
+			delta = Math.min(delta, -Treaties.AID_EASE);
 		}
 		boolean truce = WarData.truce(server, a.id(), b.id(), now);
 		if (truce) {
@@ -376,7 +395,7 @@ final class GreatWars {
 		if (truce || relation == Relation.ALLIED || Wars.between(server, a.id(), b.id()) != null) {
 			return;
 		}
-		if (relation == Relation.NEUTRAL && t >= RIVAL_AT) {
+		if (relation == Relation.NEUTRAL && t >= RIVAL_AT && !recognised) {
 			Relations.set(server, a.id(), b.id(), Relation.RIVAL);
 			if (RealmFaiths.holy(server, a, b) > 0) {
 				// (0.7.513) the faiths, not the creeds, set them at odds
@@ -395,6 +414,10 @@ final class GreatWars {
 				return;
 			}
 			Faction from = npcA && (!npcB || readyA >= readyB) ? a : b, on = from == a ? b : a;
+			// (0.7.516) a king bound to the other by treaty keeps faith unless he's the breaking sort or tension has boiled over
+			if (!Treaties.mayBreakForWar(server, from, on, level)) {
+				return;
+			}
 			KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.creed.inevitable", from.name(), creed(server, from).named(),
 				on.name(), creed(server, on).named()).withStyle(ChatFormatting.RED));
 			if (Wars.declare(server, from, on, false) == null) {
@@ -411,6 +434,11 @@ final class GreatWars {
 
 	static boolean great(MinecraftServer server, War war) {
 		return great(server, war.id());
+	}
+
+	/** (0.7.516) {@code faction} is pledged to {@code principal}'s side of {@code war} (by a treaty of aid). */
+	static void pledge(MinecraftServer server, int faction, int war, int principal) {
+		edit(server, l -> withPledges(l, with(l.pledges(), Integer.toString(faction), new Pledge(war, principal))));
 	}
 
 	/** The principal {@code faction} (a realm at the head of its own side) is pledged to, or -1. */
@@ -540,7 +568,14 @@ final class GreatWars {
 		if (WarData.truce(server, h.id(), foe.id(), now) || h.relation(foe.id()) == Relation.ALLIED) {
 			return 0.0;
 		}
+		// (0.7.516) one bound by treaty to the foe stays out; one bound to the friend by aid leans to it
+		if (Treaties.any(server, h, foe)) {
+			return 0.0;
+		}
 		double lean = friction(server, h, foe) - friction(server, h, friend);
+		if (Treaties.has(server, h, friend, Treaties.Kind.AID)) {
+			lean += Treaties.AID_LEAN;
+		}
 		if (h.relation(friend.id()) == Relation.ALLIED) {
 			lean += 3.0;
 		}

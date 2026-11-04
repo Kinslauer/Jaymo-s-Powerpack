@@ -5326,3 +5326,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `Wounds.healPart` reading Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection (`MedicineSkill.blessing`): the
   Hearthkeeper's trial and scar on one who turned from it slow every part heal. Not played.
 - **0.20.15**: no Powers change; pack bump for Kingdoms 0.7.514 (the skill web: one radial K screen, six bridge perks).
+- **0.20.17**: no Powers change; pack bump for Kingdoms 0.7.516 (diplomacy and elections: envoys, treaties, elected rulers and regencies).

@@ -332,6 +332,8 @@ public final class Wars {
 			wars.add(war);
 			return b.withWars(wars).withNextId(id + 1);
 		});
+		// (0.7.516) a war on a treaty partner tears the treaties up
+		Treaties.warDeclared(server, a.id(), d.id());
 		// a rivalry at least, from now on
 		if (a.relation(d.id()) == Relation.NEUTRAL) {
 			Relations.set(server, a.id(), d.id(), Relation.RIVAL);
@@ -360,6 +362,8 @@ public final class Wars {
 		}
 		// (0.7.224) between two rich realms, a great war
 		GreatWars.begun(server, war);
+		// (0.7.516) and every partner bound to a side by a treaty of aid is called
+		Treaties.warBegun(server, war);
 	}
 
 	/** (0.7.224) The score that wins {@code war}, and how long it may last (ticks): more for a great war. */
@@ -529,7 +533,8 @@ public final class Wars {
 		for (int i = 0; i < heads.size(); i++) {
 			for (int j = i + 1; j < heads.size(); j++) {
 				Faction a = heads.get(i), b = heads.get(j);
-				if (a.relation(b.id()) != Relation.NEUTRAL || Raids.horizontal(a.seat(), b.seat()) > RIVALRY_RANGE * RIVALRY_RANGE
+				if (a.relation(b.id()) != Relation.NEUTRAL || Treaties.has(server, a, b, Treaties.Kind.RECOGNITION)
+					|| Raids.horizontal(a.seat(), b.seat()) > RIVALRY_RANGE * RIVALRY_RANGE
 					|| WarData.truce(server, a.id(), b.id(), now) || level.getRandom().nextFloat() >= RIVALRY_CHANCE) {
 					continue;
 				}
@@ -565,7 +570,7 @@ public final class Wars {
 		Faction best = null;
 		int bestArmy = Integer.MAX_VALUE;
 		for (Faction other : heads(server)) {
-			if (other.id() == king.id() || king.relation(other.id()) != Relation.RIVAL || !warsOf(server, other.id()).isEmpty()
+			if (other.id() == king.id() || king.relation(other.id()) != Relation.RIVAL || Treaties.any(server, king, other) || !warsOf(server, other.id()).isEmpty()
 				|| Raids.horizontal(king.seat(), other.seat()) > DECLARE_RANGE * DECLARE_RANGE || WarData.truce(server, king.id(), other.id(), now)) {
 				continue;
 			}

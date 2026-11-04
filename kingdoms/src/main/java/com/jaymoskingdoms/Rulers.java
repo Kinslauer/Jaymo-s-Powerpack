@@ -181,10 +181,10 @@ public final class Rulers {
 		if (!is(ruler)) {
 			return;
 		}
-		KingdomEvents.audience(player, ruler, faction(ruler));
+		boolean desk = KingdomEvents.audience(player, ruler, faction(ruler));
 		// (0.7.180) the court names who you stand before
 		Introductions.learn(player, ruler);
-		if (role(ruler) == Folk.KING) {
+		if (!desk && role(ruler) == Folk.KING) {
 			Quests.open(player, ruler);
 		}
 	}
@@ -335,8 +335,13 @@ public final class Rulers {
 	 * first. Returns the faction as stored, with them on it; null if no villager could be had (without MCA).
 	 */
 	static @Nullable Faction crown(ServerLevel level, Faction faction, int role) {
+		return crown(level, faction, role, null);
+	}
+
+	/** (0.7.516) As above, with {@code chosen} (an election's winner, a regent, a ward come of age) first if they are about and grown enough. */
+	static @Nullable Faction crown(ServerLevel level, Faction faction, int role, @Nullable UUID chosen) {
 		MinecraftServer s = level.getServer();
-		Worker w = McaCompat.enlistRuler(level, faction, role, house(s, faction.id()));
+		Worker w = McaCompat.enlistRuler(level, faction, role, house(s, faction.id()), chosen);
 		if (w == null) {
 			return null;
 		}
@@ -373,6 +378,19 @@ public final class Rulers {
 			mob.setHealth(mob.getMaxHealth());
 		}
 		mob.setPersistenceRequired();
+	}
+
+	/** (0.7.516) {@code mob}, a regent, steps down from {@code f}'s throne: their role, regalia and health go, and the throne is empty. */
+	static void stepDown(ServerLevel level, Faction f, PathfinderMob mob) {
+		McaCompat.discharge(mob);
+		unfit(mob);
+		Factions.update(level.getServer(), f.id(), x -> x.withLeader(Optional.empty()));
+	}
+
+	/** (0.7.516) The blood of whoever last ruled {@code f} (a villager crowned), alive or dead, if known. */
+	static Heritage.@Nullable Kind lastBlood(MinecraftServer server, Faction f) {
+		Reign reign = Factions.level(server).getAttachedOrElse(REIGNS, Map.<String, Reign>of()).get(Integer.toString(f.id()));
+		return reign == null ? null : Heritage.Kind.byKey(reign.blood());
 	}
 
 	/** Off the throne (it fell, or went to another; their role already gone): the regalia, royal clothes and health go. */

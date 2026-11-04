@@ -176,7 +176,9 @@ final class Retinue {
 	 * letter or keepsake, or work for him ({@link Quests#questItem}), or one of his guards is taking them to him.
 	 */
 	static boolean passage(Faction f, ServerPlayer p, long now) {
-		return Audiences.passing(f.id(), p.getUUID(), now) || Quests.questItem(p, f.id());
+		// (0.7.516) and a partner realm's people, by a treaty of safe passage
+		return Audiences.passing(f.id(), p.getUUID(), now) || Quests.questItem(p, f.id())
+			|| p.level().getServer() != null && Treaties.passage(p.level().getServer(), f, p);
 	}
 
 	/** (0.7.184) {@code p} has been thrown out of {@code f}'s city, and isn't to come back yet. */

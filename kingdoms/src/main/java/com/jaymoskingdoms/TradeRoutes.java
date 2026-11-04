@@ -257,7 +257,10 @@ final class TradeRoutes {
 				continue;
 			}
 			Sort gs = g.type() == FactionType.FIEFDOM ? Sort.REALM : sortOf(server, g);
-			if (gs == null || !friendly(sort, gs) || Raids.horizontal(f.seat(), g.seat()) > sort.reach * sort.reach) {
+			// (0.7.516) a trade charter partner counts as nearer, and in reach from farther
+			boolean chartered = Treaties.chartered(server, f, g);
+			double reach = sort.reach * (chartered ? Treaties.CHARTER_REACH : 1.0);
+			if (gs == null || !friendly(sort, gs) || Raids.horizontal(f.seat(), g.seat()) > reach * reach) {
 				continue;
 			}
 			if (!sort.camp() && (Relations.atWar(f, g) || Economy.atWar(server, g))) {
@@ -265,7 +268,8 @@ final class TradeRoutes {
 			}
 			near.add(g);
 		}
-		near.sort(Comparator.comparingDouble(g -> Raids.horizontal(f.seat(), g.seat()) / (g.type() == FactionType.KINGDOM ? 1.6 : 1.0)));
+		near.sort(Comparator.comparingDouble(g -> Raids.horizontal(f.seat(), g.seat()) / (g.type() == FactionType.KINGDOM ? 1.6 : 1.0)
+			/ (Treaties.chartered(server, f, g) ? Treaties.CHARTER_PULL : 1.0)));
 		return near.isEmpty() ? null : near.get(level.getRandom().nextInt(Math.min(3, near.size())));
 	}
 
@@ -390,6 +394,10 @@ final class TradeRoutes {
 			return null;
 		}
 		Profile p = profile(server, f, sort);
+		if (Treaties.chartered(server, f, to)) {
+			// (0.7.516) and takes an extra cart
+			p = new Profile(p.rig(), p.carts() + Treaties.CHARTER_CARTS, p.cap(), p.guards(), p.mounted(), p.sells(), p.wants(), p.levy());
+		}
 		if (p.rig() == BOAT && (PirateCoves.cove(server, f.id()) == null || PirateCoves.cove(server, to.id()) == null)) {
 			// ((0.7.490) skiffs only from a mooring to a mooring: to a partner inland, the cove's trade goes by handcart)
 			p = new Profile(HAND, p.carts(), HAND_LOAD, p.guards(), p.mounted(), p.sells(), p.wants(), p.levy());
@@ -416,7 +424,9 @@ final class TradeRoutes {
 		if (carts.isEmpty()) {
 			carts = List.of(Map.of());
 		}
-		Caravans.Caravan c = Caravans.launch(level, f, to, carts, p.guards(), p.mounted(), p.rig(), now + sort.every);
+		// (0.7.516) a charter partner's caravan goes sooner
+		long next = Treaties.chartered(server, f, to) ? now + sort.every * Treaties.CHARTER_EVERY_PERCENT / 100 : now + sort.every;
+		Caravans.Caravan c = Caravans.launch(level, f, to, carts, p.guards(), p.mounted(), p.rig(), next);
 		JaymosKingdoms.LOGGER.info("{} sends {} {} ({} goods) to {}", f.name(), carts.size(), p.rig() == HAND ? "handcarts" : p.rig() == BOAT ? "skiffs" : "carts", load,
 			to.name());
 		return c;
@@ -489,7 +499,9 @@ final class TradeRoutes {
 		EnumSet<Ware> wants = hs == null ? EnumSet.allOf(Ware.class) : wanted(level, home, profile(server, home, hs));
 		int cap = capOf(c);
 		List<Map<String, Integer>> back = List.of();
-		int most = Math.min(c.carts().size() * cap, Math.max(0, c.load() * RETURN_SHARE / 100));
+		// (0.7.516) a charter partner's carts come home fuller
+		int share = RETURN_SHARE + (Treaties.chartered(server, home, lord) ? Treaties.CHARTER_RETURN : 0);
+		int most = Math.min(c.carts().size() * cap, Math.max(0, c.load() * share / 100));
 		if (Storage.loaded(level, lord)) {
 			back = Caravans.loadUp(level, lord, x -> in(wants, x), ls == null ? Sort.REALM.keep : ls.keep, most, cap);
 		} else {
