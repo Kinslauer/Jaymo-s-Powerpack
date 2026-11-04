@@ -23,6 +23,11 @@ public final class Mending {
 		if (!entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
 			return 0.0F;
 		}
+		// the Hearthkeeper's cut comes off the whole amount once, so what a part can't take is not cut again
+		amount *= 1.0F - MedicineSkill.blessing(entity, "wounds_slow");
+		if (amount <= 0.0F) {
+			return 0.0F;
+		}
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null) {
 			float before = entity.getHealth();
@@ -42,7 +47,7 @@ public final class Mending {
 			if (left <= 0.01F) {
 				break;
 			}
-			left -= Wounds.healPart(entity, part, left);
+			left -= Wounds.healPart(entity, part, left, false);
 		}
 		return amount - left;
 	}

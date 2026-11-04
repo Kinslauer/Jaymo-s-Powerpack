@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -34,7 +35,9 @@ public final class InteractActions {
 	public static final String AUDIENCE = "audience", WARES = "wares", TRIBUTE = "tribute", SPY = "spy", RAID = "raid";
 	/** (0.7.498) Ask about Money: emeralds or coin ({@link MoneyTalk}). */
 	public static final String MONEY = "money";
-	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY);
+	/** (0.7.512) The cleric's Leaving Rite ({@link Rites}). */
+	public static final String RITE = "rite";
+	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY, RITE);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -82,6 +85,7 @@ public final class InteractActions {
 			case TRIBUTE -> Tribes.takesTribute(player, v);
 			case SPY, RAID -> SwornCaptains.takesOrders(player, v);
 			case MONEY -> v instanceof Villager villager && Directions.offers(villager);
+			case RITE -> Accusations.priest(v) && player.level() instanceof ServerLevel l && Turning.rite(player, Patrons.today(l.getServer())) != null;
 			default -> false;
 		};
 	}
@@ -128,6 +132,13 @@ public final class InteractActions {
 			}
 			case MONEY -> {
 				return MoneyTalk.answer(player, (Villager)v);
+			}
+			case RITE -> {
+				if (McaBridge.heartsOf((Villager)v, player) < Directions.REFUSE_HEARTS) {
+					return Component.translatable("talk.jaymoskingdoms.rite.refuse");
+				}
+				Rites.offer(player, (Villager)v);
+				return null;
 			}
 			default -> {
 				return null;

@@ -8560,7 +8560,7 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
 - Realm silver and hacksilver are money, not the metal their names say: vampires aren't hurt by a coin and a werewolf
   doesn't take a coin in the hand for a silver weapon.
 - Emeralds stay a gem: ore, enchanting, tinkering's emerald modifier, trims, beacons and caravan gem goods.
-- Not compile-checked yet at this entry; not played.
+- Built, reviewed, and a dev server boots; not played.
 
 ## 0.7.500: cold-blooded Serpen don't overheat
 - Andy: "the reptile beastfolk should be cold blooded, therefore not overheating in the sun". Anyone with the
@@ -8569,7 +8569,7 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
   heatstroke (`HeritageKits.coldBlooded`, `KitchenCompat`).
 - The cold stays their flaw as before (15% lighter blows, 20% slower in the cold lands); body heat's chill is unchanged.
 - The perk's card line says so.
-- Not compile-checked yet at this entry; not played.
+- Built, reviewed, and a dev server boots; not played.
 
 ## 0.7.501: tails with a mind of their own (pack 0.20.1)
 - Andy: "they should pulse and slap like they have their own mind, but they swing violently whenever you walk". Beastfolk
@@ -8601,7 +8601,7 @@ isn't stuck stealing piglin axes.
 - **Sticks in the Nether** (`Trees`): wart blocks (nether and warped) torn down by hand give a stick 15% of the time, as
   leaves do in the overworld.
 - `McaCompat.hearts` is public now (the camp's warmth).
-- Not compile-checked yet at this entry; not played.
+- Built, reviewed, and a dev server boots; not played.
 ## 0.7.503: sworn starts are known, every start carries meds
 - Andy: "the relevant folk should know you as a sworn start" (his king asked his name like a stranger's). While a Sworn
   start's player stays a member of the realm they swore to (`StoryTalk.swornRealm`), its king, its lords (and its fiefs'
@@ -8699,6 +8699,15 @@ Andy picked the Runic Gods idea (our own version, nothing taken from it). `docs/
   Dawnborn villagers hold it (`Faiths.DAWNBORN_SUN_SHARE`). At sunrise some of the Sun's folk near a player praise the sun
   aloud (speech bubbles), and Dawnborn have two more lines of talk about it.
 
+## Patron fixes
+- **Realm census** (`RealmFaiths`): each realm now keeps its own last count day. A realm whose seat was not loaded at the
+  first scan of the day is counted when it loads, not skipped until tomorrow.
+- **Cold shrine** (`Shrine`): the "shrine is cold to you" line goes before the prayer, so the turning progress and the
+  turned line show last and are not overwritten.
+- **Cleric coldness** (`Faiths.minds`): the cleric's extra coldness applies to players of the seven only, not villagers.
+- **Leaving Rite** (`Turning`, `Rites`): the rite is offered for the longest live trial, and paying eases every live full
+  trial of that patron, so a second longer trial no longer stays at full strength.
+
 ## 0.7.510: chopping cracks logs instead of thinning them (pack 0.20.10)
 Andy asked whether Timber Tales' chopping could replace our thinning logs. Its licence allows no derivatives, so this
 is our own take on the idea (none of its code or art).
@@ -8710,3 +8719,28 @@ is our own take on the idea (none of its code or art).
 - Felling, the fall, the crack and crush, Aether Giants, the Great Ape and Towerback trampling trees, and tornadoes are
   unchanged (none of them go through `Trees.chop`).
 - Not played; compile not checked against the game jars.
+
+## 0.7.512: patron gods, part (b): turning away, clerics, realms (pack 0.20.13)
+`docs/Patrons-B-Plan.md`. Andy: turning away should be harsh, "the harsher the better for this pack".
+- **Turning away** (`Turning`): pray three days at another patron's shrine while sworn and you turn. Each of those days
+  costs your patron 5 favour. The old patron leaves a **scar**, a small penalty in its domain that never fades and
+  stacks with each leaving. Then come the **trials**, 7 days (gamerule `jaymoskingdoms:patron_trial_days`, 0 for none;
+  `jaymoskingdoms:patron_scars` false for no scar): the old patron's omens follow you. Hearthkeeper: wounds heal slow.
+  Anvil-Father: tools wear faster and smithing slips. Deep Mother: storms find you, bolts fall near you, the water pulls
+  you under. Green Huntsman: wild beasts turn on you. Lantern Warden: the dead come for you at night. Crowned Sun: guards
+  halt and search you more and good name comes slower. Ash Whisperer: witnesses see farther, guards hunt you longer.
+  The Truth: townsfolk shun you and clerics call you out. The old faith's people mind you hard and its shrines are cold.
+  The new patron's favour starts at 2 and can fall to nothing during the trials. A mark is left for part (c)'s champion hunt.
+- **Clerics** (`Sermons`, `Rites`): clerics preach The Truth against the seven. Evening sermons on the square of Truth
+  realms and villages (a bell, then speech bubbles), words at shrines given to one of the seven and to those sworn to
+  them, apostates denounced. They are colder to the seven's sworn. The **Leaving Rite** (a cleric's Interact page) halves
+  the trials and dulls the omens, during a turning or after it. It costs 8 emeralds' worth in the town's coin, 4 more a
+  scar, double to leave The Truth and half to come to it. It never takes a scar.
+- **Realms** (`RealmFaiths`): Faith-creed realms hold The Truth. Others hold the patron most of their folk do (counted
+  daily). A haven holds its blood's patron. The ruler's info shows it. Folk who share your patron like you more (good name
+  won 15% faster, lost 15% slower, now and then a heart more). The faith you left and its rivals like you less.
+- **Holy wars** (`GreatWars`): realms of rival patrons grow tense each day (a named rival pair faster, more under the
+  Faith creed). A war between them is a holy war: always a great war, and realms of the same faith rally to it.
+- Screens: the patrons screen shows your scars and trials. The rite has its own screen. Loading hints 89-90.
+- Powers 0.20.13: the Hearthkeeper's trial and scar slow every part heal.
+- Built, reviewed, and a dev server boots; not played.

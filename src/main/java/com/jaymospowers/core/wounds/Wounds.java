@@ -267,8 +267,20 @@ public final class Wounds {
 	 * no further than the part may heal ({@link Breaks#caps}). Returns what it took.
 	 */
 	public static float healPart(LivingEntity entity, BodyPart part, float amount) {
+		return healPart(entity, part, amount, true);
+	}
+
+	/** As {@link #healPart(LivingEntity, BodyPart, float)}; {@code slow} false when the caller already applied the cut once (Mending). */
+	static float healPart(LivingEntity entity, BodyPart part, float amount, boolean slow) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null || !(entity.level() instanceof ServerLevel) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
+			return 0.0F;
+		}
+		// (0.20.13) the Hearthkeeper's trial and scar on one who turned from it (Jaymo's Kingdoms): every part heal is slower
+		if (slow) {
+			amount *= 1.0F - MedicineSkill.blessing(entity, "wounds_slow");
+		}
+		if (amount <= 0.0F) {
 			return 0.0F;
 		}
 		if (plan == BodyPlan.SIMPLE) {

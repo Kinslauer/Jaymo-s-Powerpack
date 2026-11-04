@@ -499,6 +499,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.509) the eight patrons, favour and blessings
 		LOGGER.debug("patron attachment: {}", Patrons.STATE);
 		Patrons.register();
+		Rites.register();
+		Sermons.register();
+		RealmFaiths.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		GiftTales.register();

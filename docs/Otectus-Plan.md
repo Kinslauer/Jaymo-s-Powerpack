@@ -16,4 +16,4 @@ our own code from the idea (the mods are GPLv3, ARR or CC BY-NC). One PR per pat
 | 8 | Branching talks, hidden trust/respect/warmth, promises | MCA: Conversations | |
 | 9 | Quests to about 260 (~188 templates now), town situations, shared projects | MCA: Quests ("get close" to 260) | |
 | 10 | Diplomacy (treaties, envoys) and elections | MCA: Kingdoms | |
-| 11 | Patron gods | Runic Gods | (a) built in Kingdoms 0.7.509 (`docs/Patrons-Plan.md`): the eight patrons, shrines, swearing, favour, blessings, faiths. (b) turning away and (c) temples, champions, weapons not built |
+| 11 | Patron gods | Runic Gods | (a) built in Kingdoms 0.7.509 (`docs/Patrons-Plan.md`): the eight patrons, shrines, swearing, favour, blessings, faiths. (b) built in Kingdoms 0.7.512 (`docs/Patrons-B-Plan.md`). (c) temples, champions, weapons not built |

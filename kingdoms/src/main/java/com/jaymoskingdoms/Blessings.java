@@ -148,7 +148,8 @@ public final class Blessings {
 
 	/** True Strike (tier 2): the Smithing Anvil's perfect zone is wider. */
 	static double zoneBonus(ServerPlayer smith) {
-		return has(smith, Patron.ANVIL_FATHER, 2) ? TRUE_STRIKE_ZONE : 0.0;
+		// (0.7.512) the Anvil-Father's trial and scar narrow it
+		return (has(smith, Patron.ANVIL_FATHER, 2) ? TRUE_STRIKE_ZONE : 0.0) + Turning.zone(smith);
 	}
 
 	/** Sound Steel (tier 1) and Father's Fire: a point of wear on what is in your hands, spared some of the time (or all of it). */
@@ -159,6 +160,8 @@ public final class Blessings {
 		if (on(FATHERS_FIRE, player)) {
 			return 0;
 		}
+		// (0.7.512) the Anvil-Father's trial and scar: tools wear faster
+		wear = Turning.wear(player, wear);
 		if (!has(player, Patron.ANVIL_FATHER, 1)) {
 			return wear;
 		}
@@ -230,7 +233,7 @@ public final class Blessings {
 
 	/** Valour's Light (tier 2): Valor feats are worth more. */
 	static float valorGrowth(LivingEntity holder) {
-		return holder instanceof Player p && has(p, Patron.CROWNED_SUN, 2) ? 1.0F + SUN_VALOR : 1.0F;
+		return (holder instanceof Player p && has(p, Patron.CROWNED_SUN, 2) ? 1.0F + SUN_VALOR : 1.0F) * (holder instanceof Player p ? Turning.valor(p) : 1.0F);
 	}
 
 	/** Banner-Bearer (tier 3): a war party you call up musters more. */
@@ -240,6 +243,8 @@ public final class Blessings {
 
 	/** Sun's Favour (tier 1) and Iron Certainty: good name is won faster with any realm that is not a haven. */
 	static int reputation(Faction kingdom, ServerPlayer player, int by) {
+		// (0.7.512) the Crowned Sun's trial: good name comes slower
+		by = Turning.reputation(player, by);
 		if (by > 0 && has(player, Patron.CROWNED_SUN, 1) && !Havens.is(player.level().getServer(), kingdom)) {
 			return Math.max(1, Math.round(by * (1.0F + SUN_REP)));
 		}
@@ -248,7 +253,7 @@ public final class Blessings {
 
 	/** Sun's Favour (tier 1) and Iron Certainty (tier 3): guards halt you less often. */
 	static long haltGap(Player player, @Nullable Faction f, long ticks) {
-		float m = 1.0F;
+		float m = Turning.halt(player);
 		if (has(player, Patron.CROWNED_SUN, 1)) {
 			m *= SUN_HALT;
 		}
@@ -260,7 +265,7 @@ public final class Blessings {
 
 	/** Iron Certainty (tier 3): guards of a Truth realm search you less. */
 	static int searchEase(Player player, @Nullable Faction f) {
-		return truthRealm(player, f) && has(player, Patron.TRUTH, 3) ? BELIEVED_SEARCH : 0;
+		return (truthRealm(player, f) && has(player, Patron.TRUTH, 3) ? BELIEVED_SEARCH : 0) - Turning.search(player);
 	}
 
 	private static boolean truthRealm(Player player, @Nullable Faction f) {
@@ -275,17 +280,17 @@ public final class Blessings {
 
 	/** Quick Fingers (tier 1): a pickpocket's hold is shorter. */
 	static float pickHold(Player player) {
-		return has(player, Patron.ASH_WHISPERER, 1) ? 1.0F - QUICK_FINGERS : 1.0F;
+		return (has(player, Patron.ASH_WHISPERER, 1) ? 1.0F - QUICK_FINGERS : 1.0F) * Turning.pickHold(player);
 	}
 
 	/** Quick Fingers (tier 1): a lock's sweet spot is wider. */
 	static float lockWidth(Player player) {
-		return has(player, Patron.ASH_WHISPERER, 1) ? 1.0F + QUICK_FINGERS : 1.0F;
+		return (has(player, Patron.ASH_WHISPERER, 1) ? 1.0F + QUICK_FINGERS : 1.0F) * Turning.lockWidth(player);
 	}
 
 	/** Short Memories (tier 3): guards hunt you for less time after a crime. */
 	static long wantedTicks(Player player, long ticks) {
-		return has(player, Patron.ASH_WHISPERER, 3) ? Math.round(ticks * SHORT_MEMORY) : ticks;
+		return Turning.wanted(player, has(player, Patron.ASH_WHISPERER, 3) ? Math.round(ticks * SHORT_MEMORY) : ticks);
 	}
 
 	/** Smoke and Whispers: nobody bears witness. */
@@ -308,7 +313,7 @@ public final class Blessings {
 
 	/** Iron Certainty (tier 3): a true accusation wins more. */
 	static int accuseGain(Player accuser, int gain) {
-		return has(accuser, Patron.TRUTH, 3) ? Math.round(gain * BELIEVED_GAIN) : gain;
+		return Math.round((has(accuser, Patron.TRUTH, 3) ? Math.round(gain * BELIEVED_GAIN) : gain) * Turning.accuse(accuser));
 	}
 
 	/** Iron Certainty (tier 3): a false one costs less. */
@@ -343,6 +348,10 @@ public final class Blessings {
 		if (by instanceof ServerPlayer attacker && by == source.getDirectEntity()) {
 			if (has(attacker, Patron.LANTERN_WARDEN, 2) && (target.is(EntityTypeTags.UNDEAD) || Vampires.isVampire(target))) {
 				amount *= 1.0F + GRAVE_BLOWS;
+			}
+			// (0.7.512) the Lantern Warden's scar: blows on the dead land weaker
+			if (target.is(EntityTypeTags.UNDEAD) || Vampires.isVampire(target)) {
+				amount *= Turning.graveBlows(attacker);
 			}
 			if (on(WILD_HUNT, attacker) && beast(target)) {
 				amount *= 1.0F + WILD_HUNT_DAMAGE;

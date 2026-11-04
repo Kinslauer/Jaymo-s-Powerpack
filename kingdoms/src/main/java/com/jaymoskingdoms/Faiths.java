@@ -35,6 +35,9 @@ public final class Faiths {
 	static final float FAITH_RIVALRY = 0.75F, RIVAL_MINDS = 1.0F, FAITH_CREED_HARSH = 1.5F;
 	/** Per degree, as {@link Prejudice}. */
 	static final float PRICE_SHARE = 0.06F, HEARTS_CUT = 0.15F, REP_GAIN_CUT = 0.08F, REP_LOSS_ADD = 0.08F;
+	/** (0.7.512) A shared faith: good name won and lost, clerics' coldness, a kin's heart. */
+	static final float REP_SHARED_GAIN = 0.15F, REP_SHARED_EASE = 0.15F, CLERIC_COLD = 1.5F, KIN_HEART_CHANCE = 0.5F, TRIAL_MINDS_REP = Turning.TRIAL_MINDS;
+	static final int KIN_HEARTS = 1;
 	static final float HEARTS_KEPT_MIN = 0.2F, REP_KEPT_MIN = 0.25F;
 	static final int NEIGHBOUR_STEP = 8, GUARD_SEARCH_W = 1;
 	static final float GUARD_HALT_SOONER = 0.5F;
@@ -45,8 +48,8 @@ public final class Faiths {
 	static final double SUNRISE_PRAISE_RANGE = 32.0;
 	private static long praisedDay = Long.MIN_VALUE;
 
-	/** What a realm holds: a patron (The Truth), or any of the seven (a haven), and how hard it takes a clash. */
-	record RealmFaith(@Nullable Patron patron, boolean seven, float weight) {
+	/** What a realm holds: its state patron ({@link RealmFaiths}), and how hard it takes a clash. */
+	record RealmFaith(Patron patron, boolean seven, float weight) {
 	}
 
 	private Faiths() {
@@ -223,15 +226,13 @@ public final class Faiths {
 		return Banners.owner(server, ChunkPos.containing(who.blockPosition()));
 	}
 
-	/** What a realm holds: null for a barbarian camp, any of the seven for a haven, The Truth for every other. */
+	/** What a realm holds: null for a barbarian camp, else its state patron ({@link RealmFaiths}). */
 	static @Nullable RealmFaith realmFaith(MinecraftServer server, @Nullable Faction f) {
-		if (f == null || f.type() == FactionType.BARBARIAN) {
+		Patron p = RealmFaiths.patron(server, f);
+		if (p == null) {
 			return null;
 		}
-		if (Havens.is(server, f)) {
-			return new RealmFaith(null, true, 1.0F);
-		}
-		return new RealmFaith(Patron.TRUTH, false, GreatWars.creed(server, f) == GreatWars.Creed.FAITH ? FAITH_CREED_HARSH : 1.0F);
+		return new RealmFaith(p, p.seven, GreatWars.creed(server, f) == GreatWars.Creed.FAITH ? FAITH_CREED_HARSH : 1.0F);
 	}
 
 	// ---- who minds ---------------------------------------------------------------------------------------------------------
@@ -264,13 +265,19 @@ public final class Faiths {
 		if (Vampires.isVampire(who) && theirs == Patron.LANTERN_WARDEN) {
 			return RIVAL_MINDS;
 		}
-		if (mine.rival == theirs) {
-			return RIVAL_MINDS;
+		float m = mine.rival == theirs ? RIVAL_MINDS : mine.rivals(theirs) ? FAITH_RIVALRY * weight : 0.0F;
+		if (whom instanceof Player p) {
+			// (0.7.512) the old patron's faithful know an apostate; the Truth's scar
+			m = Math.max(m, Turning.trial(p, mine) * Turning.TRIAL_MINDS * weight);
+			if (mine == Patron.TRUTH) {
+				m += Turning.scars(p, Patron.TRUTH) * Turning.SCAR_TRUTH_MINDS;
+			}
 		}
-		if (mine.rivals(theirs)) {
-			return FAITH_RIVALRY * weight;
+		// (0.7.512) clerics are colder to the seven's sworn players, not to villagers
+		if (whom instanceof Player && Accusations.priest(who) && theirs.seven) {
+			m *= CLERIC_COLD;
 		}
-		return 0.0F;
+		return m;
 	}
 
 	// ---- what it costs -------------------------------------------------------------------------------------------------------------
@@ -315,22 +322,41 @@ public final class Faiths {
 			return by;
 		}
 		Patron mine = Patrons.of(player);
-		if (mine == null) {
-			return by;
-		}
 		RealmFaith rf = realmFaith(player.level().getServer(), kingdom);
-		if (rf == null) {
+		if (mine == null || rf == null) {
 			return by;
 		}
-		boolean clash = rf.patron() == Patron.TRUTH && mine.seven || rf.seven() && mine == Patron.TRUTH;
-		if (!clash) {
+		Patron theirs = rf.patron();
+		float m = 0.0F;
+		if (Turning.trial(player, theirs) > 0.0F) {
+			// the realm's faith you left
+			m = TRIAL_MINDS_REP * Turning.trial(player, theirs);
+		} else if (theirs == mine) {
+			// (0.7.512) Andy: those who share your patron like you more
+			return by > 0 ? Math.max(1, Math.round(by * (1.0F + REP_SHARED_GAIN * rf.weight()))) : Math.round(by * (1.0F - REP_SHARED_EASE));
+		} else if (mine.rivals(theirs)) {
+			m = mine.rival == theirs || theirs.rival == mine ? RIVAL_MINDS : FAITH_RIVALRY;
+		}
+		if (theirs == Patron.TRUTH) {
+			m += Turning.scars(player, Patron.TRUTH) * Turning.SCAR_TRUTH_MINDS;
+		}
+		if (m <= 0.0F) {
 			return by;
 		}
-		float m = FAITH_RIVALRY * rf.weight();
+		m *= rf.weight();
 		if (by > 0) {
 			return Math.max(1, Math.round(by * Math.max(REP_KEPT_MIN, 1.0F - REP_GAIN_CUT * m)));
 		}
 		return Math.round(by * (1.0F + REP_LOSS_ADD * m));
+	}
+
+	/** (0.7.512) Of {@code gained} hearts, one more now and then when {@code villager} holds the faith {@code player} is sworn to. */
+	public static int kinHearts(Villager villager, ServerPlayer player, int gained) {
+		if (gained <= 0 || Prejudice.masked(player)) {
+			return 0;
+		}
+		Patron mine = Patrons.of(player);
+		return mine != null && of(villager) == mine && player.getRandom().nextFloat() < KIN_HEART_CHANCE ? KIN_HEARTS : 0;
 	}
 
 	/** A guard's extra keenness to search {@code player} for their faith. */
@@ -360,9 +386,13 @@ public final class Faiths {
 		if (theirs != null && !Prejudice.masked(player)) {
 			if (theirs == mine) {
 				sb.append(' ').append(Component.translatable("prompt.jaymoskingdoms.faith.same", theirs.named()).getString());
+			} else if (Turning.trial(player, mine) > 0.0F) {
+				sb.append(' ').append(Component.translatable("prompt.jaymoskingdoms.faith.apostate", mine.named()).getString());
 			} else if (minds(villager, player) > 0.0F) {
 				sb.append(' ').append(Component.translatable("prompt.jaymoskingdoms.faith.rival", theirs.named()).getString());
 			}
+		} else if (theirs == null && Turning.trial(player, mine) > 0.0F && !Prejudice.masked(player)) {
+			sb.append(' ').append(Component.translatable("prompt.jaymoskingdoms.faith.apostate", mine.named()).getString());
 		}
 		return sb.toString();
 	}
