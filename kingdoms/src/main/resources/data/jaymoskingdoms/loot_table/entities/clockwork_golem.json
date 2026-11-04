@@ -7,16 +7,14 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:copper_ingot",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 4,
-                "max": 9
-              }
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 4,
+              "max": 9
             }
-          ]
+          }
         }
       ]
     },
@@ -26,27 +24,23 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:redstone",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 5
-              }
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
             }
-          ]
+          }
         }
       ]
     },
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance",
-          "chance": 0.5
-        }
-      ],
+      "condition": {
+        "type": "minecraft:random_chance",
+        "chance": 0.5
+      },
       "entries": [
         {
           "type": "minecraft:item",
