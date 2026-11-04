@@ -2202,7 +2202,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.523) Whether {@code entity} (a player) carries something that will kill them unless a healer clears it: poisoned blood,
+	 * (0.7.524) Whether {@code entity} (a player) carries something that will kill them unless a healer clears it: poisoned blood,
 	 * water in the lungs, withering (Powers' {@code Afflictions.any}). False without Powers.
 	 */
 	public static boolean afflicted(net.minecraft.world.entity.LivingEntity entity) {
@@ -2218,7 +2218,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.523) Tells Powers' death by cause ({@code Mortality.BOSS_TESTS}) what Kingdoms counts as a boss: whatever shows a
+	 * (0.7.524) Tells Powers' death by cause ({@code Mortality.BOSS_TESTS}) what Kingdoms counts as a boss: whatever shows a
 	 * boss bar ({@link BossBars#boss}), so a death to one is a boss's. Nothing happens without Powers (or an older one).
 	 */
 	@SuppressWarnings("unchecked")
@@ -2235,7 +2235,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.523) Tells Powers' death by cause ({@code Mortality.CAPTORS}) who takes one left for dead captive ({@link Captors#take}):
+	 * (0.7.524) Tells Powers' death by cause ({@code Mortality.CAPTORS}) who takes one left for dead captive ({@link Captors#take}):
 	 * the player and whoever downed them in, where they're held out (or null: they wake in the wild). Nothing happens without
 	 * Powers (or an older one).
 	 */

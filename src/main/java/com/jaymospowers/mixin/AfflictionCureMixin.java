@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.20.25) Whatever a player finishes eating or drinking is shown to {@link Afflictions}: honey, milk and the Potion of
+ * (0.20.26) Whatever a player finishes eating or drinking is shown to {@link Afflictions}: honey, milk and the Potion of
  * Cleansing cure, and water may go down the wrong pipe.
  */
 @Mixin(ItemStack.class)

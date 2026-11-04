@@ -797,7 +797,7 @@ public final class Handshakes {
 			greeted(player, villager);
 			return false;
 		}
-		boolean takes = Introductions.takesHand(player, villager) && (!McaCompat.female(villager) || villager.getRandom().nextFloat() < WOMAN_SHAKES);
+		boolean takes = !Introductions.knows(player, villager) && Introductions.takesHand(player, villager) && (!McaCompat.female(villager) || villager.getRandom().nextFloat() < WOMAN_SHAKES);
 		GREETINGS.put(player.getUUID(), new Greeting(villager, player.level().getGameTime() + VILLAGER_THINK, takes));
 		villager.getNavigation().stop();
 		villager.getLookControl().setLookAt(player);
@@ -1013,12 +1013,14 @@ public final class Handshakes {
 		ComingOver.Pick bestWhy = null;
 		int total = 0;
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(COME_RANGE))) {
-			int w = comeWeight(level, player, v, today);
+			boolean known = Introductions.knows(player, v);
+			int w = comeWeight(level, player, v, today, known);
 			if (w <= 0) {
 				continue;
 			}
 			// (0.7.449) Andy: "people wouldnt usually break routine for that unless there was a good reason": no reason, they stay put
-			ComingOver.Pick why = ComingOver.reason(level, player, v, Approaches.home(level, v), today);
+			// (a villager you already know only comes over to hold you to a promise)
+			ComingOver.Pick why = known ? ComingOver.promise(player, v) : ComingOver.reason(level, player, v, Approaches.home(level, v), today);
 			if (why == null) {
 				continue;
 			}
@@ -1036,9 +1038,9 @@ public final class Handshakes {
 	}
 
 	/** (0.7.337) How keen {@code v} is to come over and introduce themselves to {@code player} (0: they won't). */
-	private static int comeWeight(ServerLevel level, ServerPlayer player, Villager v, long today) {
+	private static int comeWeight(ServerLevel level, ServerPlayer player, Villager v, long today, boolean known) {
 		if (!McaCompat.isMca(v) || v.isBaby() || v.isTrading() || McaCompat.panicking(v) || busy(v) || !Approaches.free(v)
-			|| Introductions.knows(player, v) || greetedBy(player, v) || Rulers.is(v) || Recollections.refuses(v, player) || Outlaws.is(v) || ZFighterFolk.is(v)
+			|| known && Promises.dueToday(player, v) == null || !known && (Introductions.knows(player, v) || greetedBy(player, v)) || Rulers.is(v) || Recollections.refuses(v, player) || Outlaws.is(v) || ZFighterFolk.is(v)
 			|| Introductions.wary(player, v)) {
 			// ((0.7.397) looters, bandits and raiders never come over to introduce themselves; (0.7.405) nor Z Fighter characters;
 			// (0.7.504) nor anyone who minds you)
@@ -1122,6 +1124,12 @@ public final class Handshakes {
 		stand(villager, player);
 		// (0.7.449) first, what they came to say
 		ComingOver.arrived(player, villager, c.why);
+		if (Introductions.knows(player, villager)) {
+			// (someone you know came only to remind you: no hand, no name)
+			send(villager, player.getId(), Hand.WAVE);
+			WAVES.add(new Wave(player.getUUID(), villager, now, false));
+			return true;
+		}
 		if (c.takes) {
 			c.offering = true;
 			c.until = now + COME_OFFER_TICKS;

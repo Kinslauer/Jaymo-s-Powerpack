@@ -338,7 +338,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.412: the hard roads (still in chains, sentenced, evicted, cast out) and their attachments
 		LOGGER.debug("story hard attachments: {} {} {}", StoryHard.SHACKLE, StoryHard.EVICTED, StoryHard.CAST_OUT);
 		StoryHard.register();
-		// (0.7.523) left for dead by thinking killers: taken captive, gear worn or buried (Powers' death by cause)
+		// (0.7.524) left for dead by thinking killers: taken captive, gear worn or buried (Powers' death by cause)
 		Captors.register();
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);
@@ -498,6 +498,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
 		SharedHistory.register();
+		// 0.7.523: hidden trust, respect and warmth; talks that matter; promises villagers hold you to
+		LOGGER.debug("promise attachment: {}", Promises.PROMISES);
+		Bearings.register();
+		Talks.register();
+		Promises.register();
 		// (0.7.454) asking the way in town
 		Directions.register();
 		// (0.7.498) emeralds or coin: asked, and said unasked

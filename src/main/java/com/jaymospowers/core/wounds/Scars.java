@@ -24,7 +24,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.20.25) What one left for dead carries for the rest of that life ({@link Mortality}, Jungxvv: "permanent character injuries
+ * (0.20.26) What one left for dead carries for the rest of that life ({@link Mortality}, Jungxvv: "permanent character injuries
  * that forever hinder your gameplay"). Nothing cures a scar; a new life ({@link Mortality#endLife}) starts without them.
  * <ul>
  * <li><b>Burns</b> (fire): the skin is thin and tight, so blows and cuts go deeper: less armour and toughness.</li>

@@ -77,7 +77,7 @@ public final class Feathers {
 
 	/** A power's golden feathers: how many it gives this player right now (0 for none). */
 	private static final List<ToIntFunction<ServerPlayer>> BONUSES = new ArrayList<>();
-	/** (0.20.25) What holds feathers back for good (half-feathers): drowned lungs ({@code Scars}). */
+	/** (0.20.26) What holds feathers back for good (half-feathers): drowned lungs ({@code Scars}). */
 	private static final List<ToIntFunction<ServerPlayer>> PENALTIES = new ArrayList<>();
 
 	/** Server: a player's feathers. */
@@ -105,7 +105,7 @@ public final class Feathers {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> STATES.clear());
 	}
 
-	/** (0.20.25) Holds back {@code penalty} (half-feathers) of each player's row, as armour weight does. */
+	/** (0.20.26) Holds back {@code penalty} (half-feathers) of each player's row, as armour weight does. */
 	public static void addPenalty(ToIntFunction<ServerPlayer> penalty) {
 		PENALTIES.add(penalty);
 	}

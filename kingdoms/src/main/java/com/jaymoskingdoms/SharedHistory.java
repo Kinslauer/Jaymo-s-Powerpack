@@ -71,7 +71,9 @@ public final class SharedHistory {
 		// (0.7.424)
 		Recollections.Kind.QUESTIONED,
 		// (0.7.449) a theft laid at their door wrongly
-		Recollections.Kind.ACCUSED);
+		Recollections.Kind.ACCUSED,
+		// (0.7.523) a promise you broke
+		Recollections.Kind.BROKE_WORD);
 	/** What they did to you, to have out with them. */
 	static final Set<Recollections.Kind> ROUGH = Set.of(Recollections.Kind.SHOVED_YOU, Recollections.Kind.SEARCHED_YOU, Recollections.Kind.HALTED_YOU);
 	/** What you did for them, to ask after. */

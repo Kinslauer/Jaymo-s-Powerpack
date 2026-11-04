@@ -27,7 +27,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.523) Taken by your killers. Andy (2026-11-04), on Powers' death by cause: "Certain wakes, you keep your gear but if you
+ * (0.7.524) Taken by your killers. Andy (2026-11-04), on Powers' death by cause: "Certain wakes, you keep your gear but if you
  * are kidnapped by your sentient murderers (orcs goblins ogres pirates etc) theyll have it hidden or even wear it."
  * <p>
  * One left for dead by someone who thinks (an orc, a goblin, an ogre, a pirate, a barbarian, a bandit or outlaw, an illager:

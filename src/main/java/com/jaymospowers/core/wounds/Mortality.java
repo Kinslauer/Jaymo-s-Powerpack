@@ -71,7 +71,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.25) Death by cause, from Jungxvv's ideas (Andy, 2026-11-04: "show me what you can build from this first", then the
+ * (0.20.26) Death by cause, from Jungxvv's ideas (Andy, 2026-11-04: "show me what you can build from this first", then the
  * answers in the plan doc). A player's death is a roll on <b>what put them down</b> ({@link Cause}): lose it and the
  * character is over for good ({@link #FINAL}: their body stays where it fell, and they are born again through the life story,
  * {@link #endLife}); win it and they are <b>left for dead</b>: the death is turned away and they wake out in the wild a little
@@ -149,7 +149,7 @@ public final class Mortality {
 	public static final List<Predicate<Entity>> BOSS_TESTS = new ArrayList<>();
 
 	/**
-	 * (0.20.25) Who takes one left for dead captive instead of leaving them in the wild (Kingdoms: orcs, goblins, ogres, pirates,
+	 * (0.20.26) Who takes one left for dead captive instead of leaving them in the wild (Kingdoms: orcs, goblins, ogres, pirates,
 	 * the camps' raiders, outlaws; Andy: "if you are kidnapped by your sentient murderers ... theyll have it hidden or even wear
 	 * it"). Given the player and whoever downed them; the first to name a place has them there (it takes their gear itself).
 	 */
@@ -524,7 +524,7 @@ public final class Mortality {
 	private static boolean place(MinecraftServer server, ServerPlayer player, ServerLevel level, Wake wake) {
 		RandomSource random = player.getRandom();
 		BlockPos at = null;
-		// (0.20.25) taken captive by those who downed them, if they're the kind who would
+		// (0.20.26) taken captive by those who downed them, if they're the kind who would
 		if (wake.by != null && wake.tries == 0 && wake.far == null) {
 			for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> captor : CAPTORS) {
 				net.minecraft.core.GlobalPos held;

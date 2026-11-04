@@ -89,7 +89,7 @@ public final class Mending {
 		if (festering != 0) {
 			entity.removeEffect(MobEffects.WEAKNESS);
 		}
-		// (0.20.25) and a healer's hands clear what one left for dead carries: poisoned blood, wet lungs, withering
+		// (0.20.26) and a healer's hands clear what one left for dead carries: poisoned blood, wet lungs, withering
 		if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
 			any |= Afflictions.heal(player);
 		}

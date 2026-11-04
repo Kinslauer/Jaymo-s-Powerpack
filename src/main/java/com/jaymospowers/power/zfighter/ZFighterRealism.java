@@ -47,7 +47,7 @@ public final class ZFighterRealism {
 	static final String SETTING = "realistic_mode";
 	/** (0.17.62) {@code afterlife=true} (the default): a Z Fighter who dies wakes in the Other World ({@link ZFighterAfterlife}). */
 	static final String AFTERLIFE_SETTING = "afterlife";
-	/** (0.20.25) {@code death_by_cause=true} (the default): a player's death is rolled on its cause (Mortality); and {@code final_odds}, a scale on those odds. */
+	/** (0.20.26) {@code death_by_cause=true} (the default): a player's death is rolled on its cause (Mortality); and {@code final_odds}, a scale on those odds. */
 	static final String DEATH_SETTING = "death_by_cause", ODDS_SETTING = "final_odds";
 
 	/** What a ki attack and any other blow do (multiplied). */
@@ -105,12 +105,12 @@ public final class ZFighterRealism {
 		return afterlife;
 	}
 
-	/** (0.20.25) Whether deaths are rolled on their cause ({@code death_by_cause}, on by default; {@code Mortality}). */
+	/** (0.20.26) Whether deaths are rolled on their cause ({@code death_by_cause}, on by default; {@code Mortality}). */
 	public static boolean deathByCause() {
 		return deathByCause;
 	}
 
-	/** (0.20.25) The scale on every cause's chance of a final death ({@code final_odds}, 1 by default; certain ones stay certain). */
+	/** (0.20.26) The scale on every cause's chance of a final death ({@code final_odds}, 1 by default; certain ones stay certain). */
 	public static float finalOdds() {
 		return finalOdds;
 	}

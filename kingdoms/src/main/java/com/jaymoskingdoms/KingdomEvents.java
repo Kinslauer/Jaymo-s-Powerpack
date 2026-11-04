@@ -701,6 +701,10 @@ public final class KingdomEvents {
 		if (faction == null || faction.type() == FactionType.BARBARIAN) {
 			return false;
 		}
+		if (Rulers.is(folk) && !Crowns.rules(server, faction, player.getUUID())) {
+			// (0.7.523) an audience with the ruler keeps a promise to speak for someone
+			Promises.audience(player, factionId);
+		}
 		// (0.7.519) a sovereign's own steward opens the ruler's desk (the old audience stays if their game can't show it)
 		if (Rulers.is(folk) && Crowns.rules(server, faction, player.getUUID()) && RulersDesk.open(player, faction)) {
 			return true;

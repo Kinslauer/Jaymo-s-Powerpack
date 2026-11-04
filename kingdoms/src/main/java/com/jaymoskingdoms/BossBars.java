@@ -37,7 +37,7 @@ public final class BossBars {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> HITTERS.remove(entity.getUUID()));
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> HITTERS.remove(entity.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> HITTERS.clear());
-		// (0.7.523) a death to one of these is a boss's, to Powers' death by cause
+		// (0.7.524) a death to one of these is a boss's, to Powers' death by cause
 		PowersCompat.tellBosses(BossBars::boss);
 	}
 
