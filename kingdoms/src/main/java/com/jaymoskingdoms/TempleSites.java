@@ -54,7 +54,7 @@ final class TempleSites {
 	}
 
 	/**
-	 * The kind of site {@code p} takes in this world, or null if it has none here. (0.7.526) By the realm at the player's height,
+	 * The kind of site {@code p} takes in this world, or null if it has none here. (0.7.528) By the realm at the player's height,
 	 * so a One Dimension world's stacked Nether and Aether bands count ({@link Stacked}).
 	 */
 	static @Nullable Spot spot(ServerLevel level, Patron p, BlockPos playerPos, boolean anywhere) {

@@ -81,7 +81,7 @@ public final class RigWrecks {
 		}
 		ResourceKey<Level> dimension = level.dimension();
 		if (dimension == Level.OVERWORLD && Stacked.joined(level.getServer(), Level.NETHER)) {
-			// (0.20.28) a One Dimension world: the Overworld's chunks hold the stacked Nether's band, where the wrecks go
+			// (0.20.30) a One Dimension world: the Overworld's chunks hold the stacked Nether's band, where the wrecks go
 			dimension = Level.NETHER;
 		}
 		ChunkPos pos = chunk.getPos();

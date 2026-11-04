@@ -120,7 +120,7 @@ public final class GroundChanges {
 		}
 		ChunkPos pos = chunk.getPos();
 		boolean laid = false;
-		// (0.7.526) a One Dimension world: the Overworld's chunks hold the stacked Nether's band too, which gets its own veins
+		// (0.7.528) a One Dimension world: the Overworld's chunks hold the stacked Nether's band too, which gets its own veins
 		boolean nether = table == OVERWORLD && Stacked.joined(level.getServer(), Level.NETHER);
 		int shift = nether ? Stacked.shift(level.getServer(), Level.NETHER) : 0;
 		for (int t = done + 1; t <= tier && t < table.size(); t++) {

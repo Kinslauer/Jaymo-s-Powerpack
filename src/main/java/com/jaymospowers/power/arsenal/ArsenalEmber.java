@@ -110,7 +110,7 @@ public final class ArsenalEmber {
 		if (!emberborn(player) || stranded(player)) {
 			return false;
 		}
-		// (0.20.28) by the layer you stand in, so a One Dimension world's stacked Nether counts (Stacked)
+		// (0.20.30) by the layer you stand in, so a One Dimension world's stacked Nether counts (Stacked)
 		ResourceKey<Level> realm = Stacked.realm(player);
 		boolean home = realm == Level.OVERWORLD;
 		if (escaped(player)) {

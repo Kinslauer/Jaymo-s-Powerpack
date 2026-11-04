@@ -1396,6 +1396,6 @@ Kitchen stays free of Kingdoms; Kingdoms adds both by reflection (`KitchenCompat
 ## 0.5.58: drinks are told (pack 0.20.26)
 `Thirst.DRANK`: every drink of water (a sip, a bottle, a cup) is told to its listeners. Powers adds one by reflection: with
 water in the lungs, a drink may go down the wrong pipe.
-## 0.5.59: the stacked Nether (pack 0.20.28)
-Body heat and thirst know the Nether band of a One Dimension world (Powers 0.20.28), where every band answers
+## 0.5.59: the stacked Nether (pack 0.20.30)
+Body heat and thirst know the Nether band of a One Dimension world (Powers 0.20.30), where every band answers
 `level.dimension() == OVERWORLD`: `Stacked.realm` asks CustomChunks for the realm at the player's height by reflection.

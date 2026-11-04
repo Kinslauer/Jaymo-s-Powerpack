@@ -234,7 +234,7 @@ public final class Dragons {
 			return;
 		}
 		aether(server);
-		// (0.7.526) the Nether's own level, or a One Dimension world's stacked band (Stacked)
+		// (0.7.528) the Nether's own level, or a One Dimension world's stacked band (Stacked)
 		ServerLevel level = Stacked.level(server, Level.NETHER);
 		if (level == null || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
 			return;

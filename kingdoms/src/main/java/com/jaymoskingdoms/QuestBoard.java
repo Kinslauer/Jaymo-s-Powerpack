@@ -526,7 +526,7 @@ final class QuestBoard {
 		if (nether == null) {
 			return null;
 		}
-		// (0.7.526) in a One Dimension world the Nether is a band straight under the realm (Stacked), not an eighth as far
+		// (0.7.528) in a One Dimension world the Nether is a band straight under the realm (Stacked), not an eighth as far
 		int scale = nether.dimension() == net.minecraft.world.level.Level.NETHER ? 8 : 1;
 		BlockPos under = new BlockPos(f.seat().getX() / scale, f.seat().getY() + Stacked.shift(level.getServer(), net.minecraft.world.level.Level.NETHER),
 			f.seat().getZ() / scale);

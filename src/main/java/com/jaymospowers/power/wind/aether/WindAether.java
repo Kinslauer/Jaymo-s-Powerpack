@@ -50,7 +50,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>The way home is the old Aether's: anyone (Wind or not) who falls below {@link #FALL_OUT_Y} lands back in the
  * Overworld, {@link #ARRIVE_ABOVE_GROUND} blocks above the ground at the same x/z, floating down on Slow Falling.</li>
  * </ul>
- * Dying takes you home as usual (your own spawn). (0.20.28) In a One Dimension world with the Aether stacked on top
+ * Dying takes you home as usual (your own spawn). (0.20.30) In a One Dimension world with the Aether stacked on top
  * ({@link Stacked}) none of the jumps happen: see {@link #stackedTick}.
  */
 public final class WindAether {
@@ -102,7 +102,7 @@ public final class WindAether {
 		if (aether == null) {
 			return;
 		}
-		// (0.20.28) in a stacked world this is the old, separate Aether (only the afterlife's hall is still there)
+		// (0.20.30) in a stacked world this is the old, separate Aether (only the afterlife's hall is still there)
 		for (ServerPlayer player : new ArrayList<>(aether.players())) {
 			if (player.isAlive() && player.getY() < FALL_OUT_Y) {
 				fallHome(player, server);
@@ -128,7 +128,7 @@ public final class WindAether {
 	private static final Map<UUID, ResourceKey<Level>> LAST_REALM = new HashMap<>();
 
 	/**
-	 * (0.20.28) A One Dimension world with the Aether stacked over the Overworld ({@link Stacked}): nobody rises or falls home
+	 * (0.20.30) A One Dimension world with the Aether stacked over the Overworld ({@link Stacked}): nobody rises or falls home
 	 * by a jump any more, they fly or climb up into the islands and fall out of them into the Overworld's sky. What the jumps
 	 * gave stays: the first time in, the Aether's lore; falling out, Slow Falling, so the drop home is not a death.
 	 */

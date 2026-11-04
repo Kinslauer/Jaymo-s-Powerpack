@@ -178,9 +178,17 @@ def packMods = [
 	// smelted stacks, so less server tick time and fewer orbs to draw. Needs Fabric API only. Client and server.
 	[dep: "maven.modrinth:clumps:J4I1wxJZ", cf: [256717, 8897016]],
 	// Naturalist (code MIT, art all rights reserved; Starfish Studios' own 26.3 Fabric build, needs only Fabric API):
-	// wildlife. Kingdoms keeps its predators out of natural spawning and sends them as rare wilderness encounters
-	// (Encounters), and keeps its elephants and mammoths out too since Kingdoms has its own
+	// wildlife. (0.20.28) Its predators and elephants spawn naturally again (Andy: "its better when the predators can
+	// naturally spawn"); Kingdoms keeps only its mammoths, whales and boar out, since Kingdoms has its own (Encounters)
 	[dep: "maven.modrinth:naturalist:35ZJ5hlX", cf: [627986, 9004241]],
+	// Cube Animals (CubeDirection, by SupRK and xUszaty; CC0-1.0 in the jar's fabric.mod.json and LICENSE_cubeanimals,
+	// though its CurseForge page says All Rights Reserved, so it ships unchanged; only on CurseForge; needs only Fabric API):
+	// 29 vanilla-style animals (antelope, barn owl, bison, capuchin, caracal, chameleon, cricket, eagle, fennec, lynx,
+	// marmot, mouse, reindeer, sawfish, snow leopard, toucan, walrus...), a Sleep Arrow, an Animal Transporter, the
+	// camouflage enchant, a Hunter villager job and a Zoological Guide. Kingdoms (Encounters) keeps its kinds we already have
+	// out of natural spawning (komodo dragon, moose, piranha, snail, tiger); its rattlesnake, shark, elephant, (0.20.29)
+	// red and roe deer, crocodile and black bear spawn as other breeds beside Naturalist's and Kingdoms' (Andy, 0.20.28)
+	[dep: "curse.maven:cube-animals-1550917:9411257", cf: [1550917, 9411257]],
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium.
 	// Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
@@ -246,7 +254,7 @@ def packMods = [
 	// libraries CustomChunks (CC0 in the jar, CurseForge says all rights reserved; closed source) and Planeshift (CC0, source
 	// github.com/Codx-org/Planeshift) and CodxLib (MIT): new worlds stack the Aether over the Overworld over the Nether in one
 	// level, so you fly up into the islands and dig down into the Nether's sky with no portal and no loading screen, seeing
-	// the next world through the seam (0.20.28, Andy). The pack's default order is written by compat/OneDimensionDefaults;
+	// the next world through the seam (0.20.30, Andy). The pack's default order is written by compat/OneDimensionDefaults;
 	// our code asks which layer you're in through compat/Stacked (and Kingdoms'/Kitchen's own Stacked). Worlds made before,
 	// or with it turned off on the create-world screen, stay as they were. CurseForge only. Kept out of the dev game.
 	[dep: "curse.maven:one-dimension-1633224:9101534", cf: [1633224, 9101534], dev: false],

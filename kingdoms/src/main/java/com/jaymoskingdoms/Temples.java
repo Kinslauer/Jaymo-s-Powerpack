@@ -191,7 +191,7 @@ public final class Temples {
 		}
 	}
 
-	/** (0.7.526) By the realm the player stands in, so a One Dimension world's stacked Nether and Aether bands count ({@link Stacked}). */
+	/** (0.7.528) By the realm the player stands in, so a One Dimension world's stacked Nether and Aether bands count ({@link Stacked}). */
 	private static boolean worldOk(ServerPlayer sp) {
 		ResourceKey<Level> realm = Stacked.realm(sp);
 		return realm == Level.OVERWORLD || realm == Level.NETHER || TempleSites.aether(realm);
@@ -203,7 +203,7 @@ public final class Temples {
 				|| WorldTiers.of(sp).ordinal() < RISE_TIER || level.getRandom().nextFloat() >= RISE_CHANCE) {
 				continue;
 			}
-			// (0.7.526) in the band the player stands in: an Aether temple looks for the islands' ground, not the Overworld's
+			// (0.7.528) in the band the player stands in: an Aether temple looks for the islands' ground, not the Overworld's
 			Stacked.within(level, sp.getBlockY(), () -> riseNear(server, sp, level));
 		}
 	}

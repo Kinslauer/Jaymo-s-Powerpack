@@ -1560,7 +1560,7 @@ public final class LifeStory {
 					} else {
 						ServerLevel there = player.level();
 						home(player, there, player.blockPosition());
-						// (0.7.526) the realm by height: in a One Dimension world the Nether or Aether is a band of the Overworld
+						// (0.7.528) the realm by height: in a One Dimension world the Nether or Aether is a band of the Overworld
 						player.setAttached(STRANDED, Stacked.realm(player).identifier().toString());
 					}
 					return start;
@@ -1651,7 +1651,7 @@ public final class LifeStory {
 	}
 
 	/**
-	 * (0.7.526) The same for a One Dimension world, where the Nether (or the Aether) is a band of the stacked Overworld and
+	 * (0.7.528) The same for a One Dimension world, where the Nether (or the Aether) is a band of the stacked Overworld and
 	 * climbing out of it changes no level: once a second, a player set down in a band who now stands in another has left it.
 	 */
 	private static void leftBand(net.minecraft.server.MinecraftServer server) {

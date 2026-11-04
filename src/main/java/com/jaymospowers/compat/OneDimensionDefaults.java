@@ -12,7 +12,7 @@ import java.util.List;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * (0.20.28) The pack's default stack for One Dimension (CodxIO; shipped unchanged with CustomChunks, Planeshift and CodxLib):
+ * (0.20.30) The pack's default stack for One Dimension (CodxIO; shipped unchanged with CustomChunks, Planeshift and CodxLib):
  * the Aether on top, the Overworld, the Nether underneath, so you fly up into the islands and dig down into the Nether's
  * sky, with no portal and no loading screen. The End stays a dimension of its own (its portal, the dragon, Enderscape), and
  * so does every world of ours you reach some other way (the future, the moons, the Arsenal's pocket...).

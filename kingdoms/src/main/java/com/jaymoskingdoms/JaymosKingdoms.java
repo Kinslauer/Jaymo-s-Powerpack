@@ -565,7 +565,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.384: star charts for sale, and lights in the sky in the Tidings
 		StarFolk.register();
 		Starfall.register();
-		// Naturalist's predators as rare wilderness encounters (0.5.55)
+		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
 		com.jaymoskingdoms.monsters.Monsters.register();

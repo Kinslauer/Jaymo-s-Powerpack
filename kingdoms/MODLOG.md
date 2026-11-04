@@ -584,8 +584,26 @@ Our own take on the idea of MCA: Conversations (none of its code). Plan: `docs/T
   - Any other undead: the Pallid (the Hollow's first look) 20%.
 - One who is Hollow already, or an android, isn't turned. `Heritage.set` can go quietly (no "You are ... born").
   Compile-checked; not played.
-## 0.7.526: the stacked Nether and Aether (pack 0.20.28)
-Powers 0.20.28 ships One Dimension: new worlds stack the Aether over the Overworld over the Nether in the Overworld's own
+
+## 0.7.526: predators spawn on their own, Cube Animals beside ours (pack 0.20.28)
+- Andy: "remove the encounters, its better when the predators can naturally spawn." Nothing comes hunting a player out of
+  nowhere any more (`Encounters` keeps only the quest hunts, `send`). Naturalist's bears, lions, tigers, alligators, komodo
+  dragons, rhinos, scorpions and elephants spawn as Naturalist has them; only its mammoths, whales and boar stay out.
+- Every Kingdoms beast of the old table spawns on its own in its `has_<beast>` biome tag by the table's weight and pack size:
+  feral wolves, coyotes (at night), tarantulas, moose, the monsters of legend and the Boreas, Zephyrus and Notus dragons.
+  On the surface only (the cave ogre anywhere dark); night ones in the dark; monsters of legend only 1 in 10 of the times
+  they could (`LEGEND_CHANCE`), monsters that walk by day 3% (`DAY_MONSTER_CHANCE`); legends and dragons never within 256
+  blocks of a settlement, nor while chunks are first made. Sightings and beast quests work as before.
+- Cube Animals: its kinds we already have (black bear, crocodile, komodo dragon, moose, piranha, red and roe deer, snail,
+  tiger) are kept out of natural spawning (`CUBE_DUPLICATES`); its rattlesnake, shark and elephant spawn as other breeds.
+  Compile-checked; not played.
+
+## 0.7.527: Cube Animals' deer, crocodile and black bear (pack 0.20.29)
+- Andy: "add the deer too and the croc, and the bear." `Encounters.CUBE_DUPLICATES` no longer keeps out Cube Animals' red
+  deer, roe deer, crocodile and black bear; they spawn as other breeds beside Naturalist's. Still kept out: komodo dragon,
+  moose, piranha, snail, tiger. Compile-checked; not played.
+## 0.7.528: the stacked Nether and Aether (pack 0.20.30)
+Powers 0.20.30 ships One Dimension: new worlds stack the Aether over the Overworld over the Nether in the Overworld's own
 level. There every band answers `level.dimension() == OVERWORLD`, so Kingdoms asks its own `Stacked` (a copy of Powers'
 `compat/Stacked`: the realm by height, the level that holds a realm, its height shift, its players, `within` a band).
 - Nether forts, Flame Avatar camps, fortress haunts, portal raids and the Cinder Forge run on the Nether band's players;

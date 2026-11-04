@@ -16,7 +16,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
- * (0.20.28) One Dimension worlds (One Dimension + CustomChunks, CodxIO; shipped unchanged): the Aether, the Overworld and
+ * (0.20.30) One Dimension worlds (One Dimension + CustomChunks, CodxIO; shipped unchanged): the Aether, the Overworld and
  * the Nether stacked as height bands of one level, the Overworld's, top to bottom. In such a world every band answers
  * {@code level.dimension() == OVERWORLD}, and {@code server.getLevel(NETHER)} is still the old, separate Nether that
  * nobody walks in any more. So code that asks "which realm" asks here, by height; code that goes to a realm gets the

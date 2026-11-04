@@ -405,7 +405,7 @@ public final class CinderForge {
 	}
 
 	/**
-	 * Points {@code stack} at the forge in the Nether, or at the forge's spot times eight anywhere else. (0.7.526) In a One
+	 * Points {@code stack} at the forge in the Nether, or at the forge's spot times eight anywhere else. (0.7.528) In a One
 	 * Dimension world the Nether is a band under the Overworld ({@link Stacked}), so the forge is straight below its own spot:
 	 * the needle points there, in the one level both share.
 	 */

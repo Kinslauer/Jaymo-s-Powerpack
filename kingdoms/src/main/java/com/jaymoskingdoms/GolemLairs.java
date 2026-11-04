@@ -92,7 +92,7 @@ public final class GolemLairs {
 				return;
 			}
 			for (BlockEntity be : chunk.getBlockEntities().values()) {
-				// (0.7.526) not in a One Dimension world's stacked Nether band (Stacked): golems keep to the Overworld and the Aether
+				// (0.7.528) not in a One Dimension world's stacked Nether band (Stacked): golems keep to the Overworld and the Aether
 				if ((be instanceof SpawnerBlockEntity || be instanceof TrialSpawnerBlockEntity) && !be.hasAttached(CHECKED)
 					&& WORLDS.contains(Stacked.realm(level, be.getBlockPos().getY()))) {
 					SPAWNERS.computeIfAbsent(level.dimension(), k -> new HashSet<>()).add(be.getBlockPos().immutable());

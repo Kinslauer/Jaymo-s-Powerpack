@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.20.28) In a One Dimension world (the Aether, the Overworld and the Nether stacked in one level, {@link Stacked}) the
+ * (0.20.30) In a One Dimension world (the Aether, the Overworld and the Nether stacked in one level, {@link Stacked}) the
  * ground height at (x, z) is the ground of the band you are in, the Overworld's outside one, not the top of an Aether island
  * three hundred blocks overhead. Without it every villager, camp, meteor and spawn search that asks for the surface would
  * land on the islands. Nothing changes in an ordinary world.

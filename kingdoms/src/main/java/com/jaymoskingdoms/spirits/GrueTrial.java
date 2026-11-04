@@ -253,7 +253,7 @@ public final class GrueTrial {
 			return true;
 		}
 		ServerLevel level = (ServerLevel)player.level();
-		// (0.7.526) under the top of the realm the player is in (a One Dimension world's band, Stacked), not the whole stack's
+		// (0.7.528) under the top of the realm the player is in (a One Dimension world's band, Stacked), not the whole stack's
 		net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> realm = Stacked.realm(player);
 		int floor = Stacked.maxY(level.getServer(), realm) - ARENA_UP;
 		if (floor - Stacked.minY(level.getServer(), realm) < 40) {

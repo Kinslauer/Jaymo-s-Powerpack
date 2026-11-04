@@ -441,7 +441,7 @@ public final class ZFighterStarts {
 		if (server.getTickCount() % 20 != 0) {
 			return;
 		}
-		// (0.20.28) a One Dimension world's Nether is a band of the Overworld, so leaving it changes no level: a ward who has
+		// (0.20.30) a One Dimension world's Nether is a band of the Overworld, so leaving it changes no level: a ward who has
 		// climbed out of it is let go here instead
 		if (Stacked.joined(server, Level.NETHER)) {
 			for (ServerPlayer player : server.overworld().players()) {

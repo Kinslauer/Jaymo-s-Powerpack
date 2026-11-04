@@ -182,7 +182,7 @@ public final class ZFighterDemonRealm {
 	}
 
 	/**
-	 * (0.20.28) Added to the Nether's own heights in this level: 0 in the Nether itself, the Nether band's place in a One
+	 * (0.20.30) Added to the Nether's own heights in this level: 0 in the Nether itself, the Nether band's place in a One
 	 * Dimension world's stacked Overworld ({@link Stacked}). A village marked y 0 is one that had no floor: no Nether floor is
 	 * at 0 either way (the band sits below the Overworld's -64), so built villages are the ones whose y isn't 0.
 	 */
@@ -228,7 +228,7 @@ public final class ZFighterDemonRealm {
 		if (level == null || now % 40 != 0 && now % ARMY_EVERY != 0) {
 			return;
 		}
-		// (0.20.28) the players in the Nether, its own level's or the stacked Nether band's in a One Dimension world
+		// (0.20.30) the players in the Nether, its own level's or the stacked Nether band's in a One Dimension world
 		List<ServerPlayer> there = Stacked.players(server, Level.NETHER);
 		if (there.isEmpty()) {
 			return;
