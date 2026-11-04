@@ -273,3 +273,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   `mixin/lithostitched/LithostitchedBandsMixin` (MixinSquared 0.3.7, MIT, jar-in-jar) cancels only Lithostitched's handler
   when the region is null; vanilla still gets its null. Keeps both One Dimension and Enderscape (which needs
   Lithostitched). Signature checked against the shipped jars; not built or played here (the cloud can't reach Fabric's maven).
+- **0.20.35, Kingdoms 0.7.531, Stegonaut moves:** the Stegonaut's poses redrawn after the Bastionodon animation set
+  (ground eating in three parts, bite, grazing, grumbles, flinch, doze, gallop, swim stroke, death), none of its files used
+  (its rig is Saint's Dragons'). See the Kingdoms MODLOG.
