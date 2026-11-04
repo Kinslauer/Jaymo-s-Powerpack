@@ -5275,3 +5275,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Tooltip: sockets filled, each gem and its cut grade, empty sockets, dormant gems. One data component
     (`jaymospowers:gem_sockets`), no attachments, no new items or packets. Kingdoms only gets loading hint 86 (0.7.508).
   - Sockets: a prise warning now belongs to one piece. Using the anvil on a different socketed piece warns again instead of shattering its gem.
+- **0.20.8**: no Powers change; pack bump for Kingdoms 0.7.509 (chopped logs crack deeper instead of thinning, chop meter).
