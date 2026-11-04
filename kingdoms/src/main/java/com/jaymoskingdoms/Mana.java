@@ -432,14 +432,14 @@ public final class Mana {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2F, 0.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.5F);
 		if (first && !"".equals(how)) {
-			// (0.7.538; "" for a quiet attuning, the ki's way)
+			// (0.7.477; "" for a quiet attuning, the ki's way)
 			player.sendSystemMessage(Component.translatable(natural(player) ? "message.jaymoskingdoms.mana.attuned.natural"
 				: how != null ? how : "message.jaymoskingdoms.mana.attuned").withStyle(ChatFormatting.AQUA));
 		}
 	}
 
 	/**
-	 * (0.7.538) Ki is the magic of this world (Andy's universe rules, from the Gemini handoff): a Z Fighter attunes the
+	 * (0.7.477) Ki is the magic of this world (Andy's universe rules, from the Gemini handoff): a Z Fighter attunes the
 	 * moment the power is theirs (learning to fly with it is still Mastery's), and a Wind Controller once their power
 	 * wakes, their magic only ever worked through the wind ({@link Spellcraft}). Both quietly: no chat line, only the flare.
 	 */
