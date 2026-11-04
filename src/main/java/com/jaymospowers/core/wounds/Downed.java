@@ -815,7 +815,11 @@ public final class Downed {
 		FELLED_BY.put(entity, level.damageSources().playerAttack(by));
 		// ((0.20.26) Andy: an execution is final when a player does it)
 		Mortality.executed(entity, true);
-		finish(level, entity);
+		try {
+			finish(level, entity);
+		} finally {
+			Mortality.doneExecuting(entity);
+		}
 	}
 
 	/**
@@ -828,11 +832,26 @@ public final class Downed {
 		FELLED_BY.put(entity, level.damageSources().mobAttack(by));
 		// ((0.20.26) and when a boss does; any other mob's is rolled on as what it is)
 		Mortality.executed(entity, Mortality.boss(by));
-		finish(level, entity);
+		try {
+			finish(level, entity);
+		} finally {
+			Mortality.doneExecuting(entity);
+		}
 	}
 
 	/** (0.20.26) A timer ran out ({@link Afflictions}): their death now, by their wounds, with no going down first. */
 	static void succumb(ServerLevel level, LivingEntity entity) {
+		finish(level, entity);
+	}
+
+	/**
+	 * (0.20.50) A death held back a moment (Chrono's, unanswered) goes ahead now, as it was coming: by its wounds, credited
+	 * to whoever dealt {@code felled}, with no going down first; death by cause rolls on {@code felled}.
+	 */
+	public static void letDie(ServerLevel level, LivingEntity entity, @Nullable DamageSource felled) {
+		if (felled != null) {
+			FELLED_BY.put(entity, felled);
+		}
 		finish(level, entity);
 	}
 

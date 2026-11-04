@@ -229,12 +229,58 @@ public final class Mortality {
 		}
 	}
 
+	/** (0.20.50) Whether {@code entity} is being executed right now (its death let through by Chrono's rewind). */
+	public static boolean executing(LivingEntity entity) {
+		return EXECUTING.contains(entity);
+	}
+
+	/** (0.20.50) {@code entity}'s next death was already decided (and held back a moment): let it through unrolled. */
+	public static void letThrough(LivingEntity entity) {
+		LET_THROUGH.add(entity);
+	}
+
+	/** (0.20.50) Chrono rewound a death decided final: the character goes on (no rebirth). */
+	public static void undoFinal(Player player) {
+		player.removeAttached(FINAL);
+		REBIRTHS.remove(player.getUUID());
+	}
+
+	/** (0.20.50) Whether {@code player} lies left for dead, waiting to wake somewhere. */
+	public static boolean waking(Player player) {
+		return WAKES.containsKey(player.getUUID());
+	}
+
+	/** (0.20.50) Chrono rewound a left-for-dead: they won't wake anywhere (the caller stands them up). */
+	public static void cancelWake(ServerPlayer player) {
+		Wake wake = WAKES.remove(player.getUUID());
+		if (wake != null) {
+			release(player.level().getServer().getLevel(wake.dimension), wake);
+		}
+	}
+
+	/** (0.20.50) {@code entity}'s death was undone (Chrono cheating death): what the downed state noted of it is dropped. */
+	public static @Nullable DamageSource spare(LivingEntity entity) {
+		EXECUTED.remove(entity);
+		return FELLED.remove(entity);
+	}
+
 	/** {@code entity} is being executed where it lies: {@code finalBlow}, by a player or a boss, ends the character outright. */
 	static void executed(LivingEntity entity, boolean finalBlow) {
 		if (entity instanceof Player) {
 			EXECUTED.put(entity, finalBlow);
+			EXECUTING.add(entity);
 		}
 	}
+
+	/** (0.20.50) The execution {@link #executed} began is over (its death has been dealt). */
+	static void doneExecuting(LivingEntity entity) {
+		EXECUTING.remove(entity);
+	}
+
+	/** (0.20.50) Those being executed this moment (kept past {@link #decide}, for Chrono's rewind, which lets them die). */
+	private static final Set<LivingEntity> EXECUTING = Collections.newSetFromMap(new WeakHashMap<>());
+	/** (0.20.50) Deaths already decided once (held back by Chrono's rewind, then let go): not rolled again. */
+	private static final Set<LivingEntity> LET_THROUGH = Collections.newSetFromMap(new WeakHashMap<>());
 
 	// ---- queries ----------------------------------------------------------------------------------------------------------
 
@@ -296,6 +342,9 @@ public final class Mortality {
 
 	/** Whether {@code player}'s death goes on (true, maybe for good) or is turned away (false: left for dead). */
 	private static boolean decide(ServerPlayer player, DamageSource source) {
+		if (LET_THROUGH.remove(player)) {
+			return true;
+		}
 		DamageSource felled = FELLED.remove(player);
 		Boolean executed = EXECUTED.remove(player);
 		if (!on() || player.isCreative() || player.isSpectator() || isFinal(player) || ZFighterAfterlife.among(player)

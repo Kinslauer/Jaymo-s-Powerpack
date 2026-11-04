@@ -9007,3 +9007,7 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   from our other Blockbench mobs, so he was drawn back to front: face and chest on his back, ponytail and cape in front.
   `SkeletonLordRenderer.scale` now gives the model a half turn about the vertical. Animations, the head's look and the
   sleeping statue all turn with him.
+- **0.7.543, perplexed executioners (pack 0.20.50):** Andy (2026-11-04), on Chrono rewinding out from under an execution:
+  "humanoid mobs can say something about it too, 'I was just about to....kill you?!'". `PowersCompat.tellPerplexed` hooks
+  Powers' `ChronoCheatDeath.PERPLEXED`: a humanoid executioner (`Temperaments.humanoid`) says one of six lines over its
+  head (`lang/parts/perplexed.json`, through `Speech.say`, in its own tongue). Gradle compile only, not played.

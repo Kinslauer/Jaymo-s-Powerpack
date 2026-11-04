@@ -478,6 +478,14 @@ public final class Wounds {
 		}
 	}
 
+	/**
+	 * (0.20.50) Every wound undone, as creative mode heals (Chrono's rewind out of death): breaks, cuts, fevers, severed
+	 * limbs, a bolas trip. Health is the caller's to set after.
+	 */
+	public static void undoAll(ServerPlayer player) {
+		creativeHeal(player);
+	}
+
 	/** Brings the parts in line with the health (healing fills the most hurt part, an unrouted loss comes off the limbs first). */
 	public static void reconcile(LivingEntity entity) {
 		BodyPlan plan = BodyPlan.of(entity);

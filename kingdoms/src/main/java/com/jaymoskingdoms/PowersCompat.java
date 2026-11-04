@@ -483,6 +483,35 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.543) Lines a humanoid says when the one it was executing is gone from under it (Chrono's rewind). */
+	static final int PERPLEXED_LINES = 6;
+
+	/**
+	 * (0.7.543) Powers' Chrono can rewind out from under an execution (pack 0.20.50, {@code ChronoCheatDeath.PERPLEXED}).
+	 * Andy: "humanoid mobs can say something about it too, 'I was just about to....kill you?!'". A humanoid executioner
+	 * ({@link Temperaments#humanoid}) says one of {@link #PERPLEXED_LINES} lines over its head ({@link Speech#say}, in its
+	 * own tongue). Nothing without that Powers.
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellPerplexed() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.power.chrono.ChronoCheatDeath").getField("PERPLEXED").get(null);
+			((java.util.List<java.util.function.BiConsumer<net.minecraft.world.entity.Mob, net.minecraft.server.level.ServerPlayer>>) list)
+				.add((mob, lost) -> {
+					if (Temperaments.humanoid(mob) && mob.level() instanceof net.minecraft.server.level.ServerLevel level) {
+						int line = mob.getRandom().nextInt(PERPLEXED_LINES);
+						Speech.say(level, mob, net.minecraft.network.chat.Component.translatable("speech.jaymoskingdoms.perplexed." + line),
+							Speech.WHITE, 16.0);
+					}
+				});
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no Chrono rewind to be perplexed by (older Powers?)", e);
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle unmaskPlayer, stripCorpse;
 	private static boolean lookedForUnmask;
 

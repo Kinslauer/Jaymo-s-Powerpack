@@ -363,3 +363,29 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.49, Kingdoms 0.7.542, Skeleton Lord turned the right way round:** Andy (2026-11-04): "his head is facing the
   complete wrong way". The whole model was drawn back to front (face on his back, ponytail in front); the renderer now
   gives it a half turn. See Kingdoms MODLOG 0.7.542.
+- **0.20.50, Chrono cheats death:** Andy (2026-11-04): "I want Chrono to have the strongest potential, starting with the
+  ability to cheat death, utilizing [Respawn Recap] ... revert them the maximum, deleting items they gained ... no drops no
+  corpse, no death. They can always use a writ or interact with the judge to rewrite their story." Then: "limit it to
+  chrono, and they can still be executed", "they have to press R, if they dont they still die", "the Chrono is NOT told
+  anywhere that they can revive here, it just is possible during the regular death animation or wakeup or whatever
+  happens, they have a window now, no warning", "make it 4s". `power/chrono/ChronoCheatDeath`: once Rewind is learned, a
+  checkpoint every 5 s wherever you stand safe (on the ground or swimming, nothing burning or falling, 3+ hearts).
+  Nothing is ever shown for it. A death (after the downed state and death by cause have decided) is held back 4 s: the
+  player gets the real death screen and message (health 0 sent, held unseen and unhurt at 1 server-side), and R inside
+  those 4 s rewinds them. Otherwise (time runs out, Respawn clicked, leaving) the death goes ahead exactly as decided
+  (`Downed.letDie`, `Mortality.letThrough` so it isn't rolled again): corpse, drops, final death. Left for dead by death by
+  cause, the same 4 s as they go out: R cancels the waking (`Mortality.cancelWake`) and rewinds. The rewind goes back to
+  the oldest checkpoint in reach: 1 min, +30 s for each further ability, +30 s per Mastery rank, +2 min Timeless (7 min at
+  most). Wounds undone, a final death undone, health (at least 3 hearts), hunger and effects as then; of every item kind
+  you keep at most what you carried then (by item, so worn tools still count) and experience never comes back higher,
+  while what you lost meanwhile stays lost, so nothing is doubled. Executions (`Downed.execute`: finishers, hostiles', the
+  symbiote's, Z Fighters'; now flagged by `Mortality.executing` until the blow is dealt) and /kill still kill once the
+  blow lands, but (Andy: "you can still use the R, before the fatal damage like the cancel, and the executioner will be
+  perplexed and react in their own way") R works the whole time an execution is coming or under way: you're rewound out
+  from under it, a hostile executioner stops over the empty ground, turns about and gives voice its own way
+  (`MobExecutions.executioner`, `ChronoCheatDeath.perplexed`; a humanoid one says so too, Kingdoms 0.7.543: "I was just
+  about to... kill you?!"), and a player's finisher stops as when anyone is spared. Writs and
+  the Judge work as before. Respawn Recap (MIT, DialingSpoon, 1.2.1-26.3, client-only) ships unchanged in packModsOverride
+  and is Chrono's alone (`client/mixin/respawnrecap`, @Pseudo): its replay plays only as a rewind (never for a real death,
+  and with no respawn at its end), it keeps screenshots only while you're a Chrono, and `client/compat/RespawnRecapPlugin`
+  gates its Gui handler so the death screen opens as normal otherwise. Gradle compile only, not played.
