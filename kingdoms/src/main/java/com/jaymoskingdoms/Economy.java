@@ -84,7 +84,7 @@ public final class Economy {
 	}
 
 	public static boolean hasFood(ServerLevel level, Faction faction) {
-		return Storage.food(level, faction) >= FOOD_RESERVE;
+		return Storage.food(level, faction) >= TownProjects.foodReserve(level.getServer(), faction); // (0.7.530) a granary halves the reserve
 	}
 
 	// ---- adequate personnel --------------------------------------------------------------------------------------

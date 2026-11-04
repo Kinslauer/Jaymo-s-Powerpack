@@ -110,8 +110,11 @@ public final class Firefighting {
 			// (0.5.48) a kept fire (a fire pit), not one to put out
 			return;
 		}
-		if (Factions.around(server.getServer(), server, pos, WATCHED) != null) {
+		Faction near = Factions.around(server.getServer(), server, pos, WATCHED);
+		if (near != null) {
 			FIRES.add(pos.immutable());
+			// (0.7.530) enough fires in a town are a fire to recover from
+			TownTroubles.fire(server.getServer(), near);
 		}
 	}
 

@@ -298,6 +298,15 @@ public final class Quests {
 		mark(giver, true);
 	}
 
+	/** (0.7.530) {@code giver}'s offer, if it's one of a trouble's (its template starts with {@code prefix}) and not yet taken, is taken back. */
+	static void withdraw(LivingEntity giver, String prefix) {
+		Offer offer = giver.getAttached(OFFER);
+		if (offer != null && offer.quest().filter(q -> q.template().startsWith(prefix)).isPresent()) {
+			giver.setAttached(OFFER, new Offer(offer.nextDay(), false, Optional.empty()));
+			mark(giver, false);
+		}
+	}
+
 	/** (0.7.21) {@code giver} has a quest on offer just now. */
 	static boolean offering(LivingEntity giver) {
 		Offer offer = giver.getAttached(OFFER);
@@ -415,6 +424,11 @@ public final class Quests {
 			MerchantOrders.act(player, act);
 			return;
 		}
+		if (act.entityId() == QuestNet.PROJECTS) {
+			// (0.7.530) a board's town works
+			TownProjects.act(player, act);
+			return;
+		}
 		Entity found = level.getEntity(act.entityId());
 		if (act.action() == QuestNet.CLOSE) {
 			if (found instanceof LivingEntity giver && HELD.containsKey(giver) && HELD.get(giver).player() == player) {
@@ -484,6 +498,7 @@ public final class Quests {
 		}
 		if (q.kind() == Quest.GATHER) {
 			take(player, item(q.objective().target()), q.objective().count(), minGrade(q.objective().target()));
+			TownTroubles.handedIn(level, f, q); // (0.7.530) food and timber brought for a trouble go into the town's stores
 		} else if (q.kind() == Quest.FETCH) {
 			int slot = find(player, q.id());
 			if (slot >= 0) {
@@ -498,6 +513,8 @@ public final class Quests {
 			for (Mob animal : led.subList(0, Math.min(led.size(), q.objective().count()))) {
 				animal.dropLeash();
 				animal.setPersistenceRequired();
+				// (0.7.530) handed in once: it can't be led to another giver for pay
+				animal.addTag(HANDED_IN_TAG);
 			}
 		}
 		remove(player, q.id());
@@ -584,7 +601,7 @@ public final class Quests {
 	/** (0.7.168) The animals of {@code type} (an entity type id) {@code player} has on a lead close by. */
 	static List<Mob> led(ServerPlayer player, String type) {
 		return player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(LEAD_RANGE),
-			m -> m.isAlive() && m.getLeashHolder() == player && BuiltInRegistries.ENTITY_TYPE.getKey(m.getType()).toString().equals(type));
+			m -> m.isAlive() && m.getLeashHolder() == player && !m.entityTags().contains(HANDED_IN_TAG) && BuiltInRegistries.ENTITY_TYPE.getKey(m.getType()).toString().equals(type));
 	}
 
 	/** Gives up quest {@code id} from anywhere ({@code /kingdom quests abandon}). */
@@ -1047,6 +1064,9 @@ public final class Quests {
 		}
 	}
 
+	/** (0.7.530) An animal led to a giver carries this, so it can't be handed in again. */
+	static final String HANDED_IN_TAG = "jaymoskingdoms.handed_in";
+
 	static boolean matches(String target, Entity entity) {
 		Boolean cure = Cures.matches(target, entity);
 		if (cure != null) {
@@ -1058,6 +1078,11 @@ public final class Quests {
 		if (target.equals("*purist_raider")) {
 			// (0.7.439) one of a purist party raiding a haven
 			return BorderClashes.puristRaider(entity);
+		}
+		if (target.equals("*hornkin")) {
+			// (0.7.530) any of a Hornkin raid party: warriors, hurlers and brutes
+			Identifier key = EntityType.getKey(entity.getType());
+			return key.getNamespace().equals(JaymosKingdoms.MOD_ID) && key.getPath().startsWith("hornkin");
 		}
 		if (target.startsWith("#")) {
 			Identifier id = Identifier.tryParse(target.substring(1));

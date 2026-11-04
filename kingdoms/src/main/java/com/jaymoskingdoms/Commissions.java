@@ -117,12 +117,40 @@ public final class Commissions {
 				// (under way already, or done and not yet thanked for)
 				continue;
 			}
-			Blueprint.Entry e = Designs.entry(c.design());
+			Blueprint.Entry e = Designs.isDesign(c.design()) ? Designs.entry(c.design()) : catalogueEntry(f, c.design());
 			if (e != null) {
 				out.add(e);
 			}
 		}
 		return out;
+	}
+
+	/** (0.7.530) {@code f}'s own catalogue entry {@code id}, or null if its builders have none. */
+	private static Blueprint.@Nullable Entry catalogueEntry(Faction f, String id) {
+		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
+			if (e.id().equals(id)) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * (0.7.530) A town's own shared project ({@link TownProjects}) asks its builders for catalogue building {@code entryId}: queued
+	 * like a plan given, thanked by nobody. False if its list is full or it has no such building.
+	 */
+	static boolean give(MinecraftServer server, Faction f, String entryId) {
+		if (catalogueEntry(f, entryId) == null) {
+			return false;
+		}
+		List<Commission> list = new ArrayList<>(of(server, f.id()));
+		if (list.size() >= MAX_WAITING) {
+			return false;
+		}
+		int baseline = Works.of(server, f.id()).count(entryId) + (int)list.stream().filter(c -> c.design().equals(entryId)).count();
+		list.add(new Commission(entryId, net.minecraft.util.Util.NIL_UUID, "", baseline));
+		put(server, f.id(), list);
+		return true;
 	}
 
 	/** Thanks whoever gave a plan that's now finished, and forgets it. */

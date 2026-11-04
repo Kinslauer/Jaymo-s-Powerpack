@@ -409,6 +409,8 @@ final class WarParties {
 		}
 		tellPlayers(level, party, Component.translatable(cart ? "message.jaymoskingdoms.war.seized" : "message.jaymoskingdoms.war.seized_no_cart",
 			target.name(), silver, goods).withStyle(ChatFormatting.GOLD));
+		// (0.7.530) the sacked town is in trouble
+		TownTroubles.event(server, target.id(), TownTroubles.WAR, Integer.toString(party.faction));
 		// (0.5.29) a warlord's war-party decree done
 		for (UUID id : party.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(id);

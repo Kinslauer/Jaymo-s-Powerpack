@@ -5,6 +5,7 @@ import com.jaymoskingdoms.FactionType;
 import com.jaymoskingdoms.Factions;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Stacked;
+import com.jaymoskingdoms.TownTroubles;
 import com.jaymoskingdoms.WorldTiers;
 import com.mojang.brigadier.context.CommandContext;
 import java.util.ArrayList;
@@ -149,6 +150,8 @@ public final class PortalRaids {
 		level.playSound(null, out, SoundEvents.PORTAL_TRIGGER, SoundSource.HOSTILE, 1.0F, 0.7F);
 		level.playSound(null, out, SoundEvents.HOGLIN_ANGRY, SoundSource.HOSTILE, 2.0F, 0.6F);
 		news(level, seat, Component.translatable("message.jaymoskingdoms.portal_raid", from.name(), town).withStyle(ChatFormatting.RED));
+		// (0.7.530) the town has a portal raid to recover from
+		TownTroubles.portalRaid(level, seat);
 		JaymosKingdoms.LOGGER.info("{} Hornkin from {} came through the portal at {} to raid {}", sent, from.name(), portal.get(), town);
 		return true;
 	}
