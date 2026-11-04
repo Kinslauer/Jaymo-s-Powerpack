@@ -195,7 +195,11 @@ public final class Ooze extends XenoForm {
 		if (e == null || !e.isAlive()) {
 			return;
 		}
-		Vec3 out = player.getEyePosition().add(player.getLookAngle().scale(1.0)).subtract(0.0, e.getBbHeight() * 0.5, 0.0);
+		// (0.19.82) from the middle of its body, never below its feet: its low box puts the eyes only a little off the
+		// ground, so a tall mob let out at eye height came out half in the floor
+		Vec3 out = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0).add(player.getLookAngle().scale(1.0))
+			.subtract(0.0, e.getBbHeight() * 0.5, 0.0);
+		out = new Vec3(out.x, Math.max(player.getY(), out.y), out.z);
 		e.setPos(out.x, out.y, out.z);
 		e.setDeltaMovement(velocity.add(0.0, velocity.lengthSqr() > 0.0 ? 0.2 : 0.0, 0.0));
 		e.syncVelocity = true;

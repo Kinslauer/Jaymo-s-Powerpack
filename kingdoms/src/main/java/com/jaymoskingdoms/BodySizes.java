@@ -64,6 +64,11 @@ public final class BodySizes {
 	 * {@link Goblins#SCALE} (its king the broadest of them); an orc is drawn the tallest and broadest there is (MCA keeps
 	 * anyone's box a man's size at most, so an orc still fits a door; a warchief's own scale makes him huge).
 	 */
+	/**
+	 * (0.7.490) Beastfolk run lean and quick across a wide span (a cat is slight, a serpen long); the Hollow are the dead's own
+	 * frames: gaunt, and never the broadest.
+	 */
+	static final Body BEASTFOLK = new Body(0.1F, 0.85F, 0.1F, 0.7F), HOLLOW = new Body(0.2F, 0.85F, 0.05F, 0.5F);
 	static final Body GOBLIN = new Body(0.15F, 0.5F, 0.2F, 0.75F), ORC = new Body(0.75F, 1.0F, 0.85F, 1.0F);
 
 	/**
@@ -101,6 +106,8 @@ public final class BodySizes {
 			case RUBBERFOLK -> RUBBERFOLK;
 			case GOBLIN -> GOBLIN;
 			case ORC -> ORC;
+			case BEASTFOLK -> BEASTFOLK;
+			case HOLLOW -> HOLLOW;
 			default -> ORDINARY;
 		};
 	}

@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.492) Townsfolk lock their homes and shops at night (Andy's plan). Ownership-aware: player-placed blocks are theirs
+ * (0.7.494) Townsfolk lock their homes and shops at night (Andy's plan). Ownership-aware: player-placed blocks are theirs
  * ({@link Placed}). The state comes from the clock every pass, never toggled, so a sleep skip ({@link Nights}) or a
  * restart lands right.
  *

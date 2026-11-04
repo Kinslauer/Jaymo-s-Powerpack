@@ -74,6 +74,8 @@ public final class VillagerHeritage {
 	 * Divine-born very rare (the peaks lean them); the Bio-built aren't born to villagers at all, only to a Bio-built parent.
 	 */
 	static final int W_RUBBERFOLK = 20, W_DIVINE = 4;
+	/** (0.7.490) The beastfolk: fairly rare, leaning to the savannas, taigas and jungles; the Hollow are earned, only ever inherited. */
+	static final int W_BEASTFOLK = 18;
 	/** (0.7.106) The heights (the peaks, where the storms break): HeritageVariants' HIGH land. */
 	static final int HIGH_Y = 110;
 	/** (0.7.91) The share of folk born plain Heartlanders or Earthlings; the rest are of the rarer bloods. */
@@ -223,6 +225,9 @@ public final class VillagerHeritage {
 				case BIOBUILT -> 0;
 				// (0.7.292) goblins and orcs are only ever born to their own (Greenskins)
 				case GOBLIN, ORC -> 0;
+				// (0.7.490) beastfolk like the wild lands; the Hollow are earned, so only inherited
+				case BEASTFOLK -> W_BEASTFOLK * (biome.is(BiomeTags.IS_SAVANNA) || biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_JUNGLE) ? LEAN : 1);
+				case HOLLOW -> 0;
 			};
 			weights[i] = w;
 			total += w;
@@ -424,6 +429,8 @@ public final class VillagerHeritage {
 		if (kind != Heritage.Kind.WARRIORBORN) {
 			modifier(villager, Attributes.ATTACK_DAMAGE, "villager_heritage_fury", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
+		// (0.7.490) and its kit's plain attribute gifts and flaws (never its ability)
+		HeritageKits.attributes(villager);
 	}
 
 	/** Every second: an Emberborn's fire put out and the cold's toll, a Frostborn's frost shed, the dark for a Nightborn, a Warrior-born's fury. */
@@ -439,6 +446,8 @@ public final class VillagerHeritage {
 			if (kind == null) {
 				continue;
 			}
+			// (0.7.490) the kit's gifts and flaws that follow the weather and the land
+			HeritageKits.tick(villager, server.getTickCount());
 			switch (kind) {
 				case EMBERBORN -> {
 					if (villager.isOnFire()) {

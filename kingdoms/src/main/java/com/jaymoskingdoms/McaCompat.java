@@ -183,6 +183,23 @@ public final class McaCompat {
 		return LOADED ? McaBridge.families(level, box, grownPerYoung, leastGrown, chance, soonUnits, takeIn) : 0;
 	}
 
+	/** (0.7.490) {@code villager} gives up their bed (to look for another, {@link Peoples}); nothing without MCA. */
+	static void leaveHome(Villager villager) {
+		if (LOADED) {
+			McaBridge.leaveHome(villager);
+		}
+	}
+
+	/** (0.7.490) {@link Peoples#meet}: {@code villager} already knows {@code player} (MCA has memories of them), so a first meeting is long past. */
+	static boolean knows(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.knows(villager, player);
+	}
+
+	/** (0.7.490) {@link Settlers}: a lone goblin or orc ({@code kind}) named {@code name} with trade {@code trade}, new to a village, at {@code at}; null without a body made. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, net.minecraft.world.phys.Vec3 at, int trade) {
+		return LOADED ? McaBridge.settler(level, kind, name, at, trade) : null;
+	}
+
 	/** (0.6.9) Where {@code villager} lives (their bed): MCA's home, else the vanilla villager's. */
 	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
 		if (LOADED) {
@@ -520,6 +537,16 @@ public final class McaCompat {
 	public static void rename(net.minecraft.world.entity.LivingEntity mob, String name) {
 		if (!LOADED || !McaBridge.rename(mob, name)) {
 			mob.setCustomName(net.minecraft.network.chat.Component.literal(name));
+		}
+	}
+
+	/**
+	 * (0.7.490) {@code mob} (an MCA villager of {@code kind}'s brood) has just been made or unmade its camp's chief: it carries
+	 * only the gear it now wears, and has a chief's build (the biggest of its brood) or a common one. Anyone else: nothing.
+	 */
+	static void reranked(net.minecraft.world.entity.PathfinderMob mob, Heritage.Kind kind, boolean chief) {
+		if (LOADED) {
+			McaBridge.reranked(mob, kind, chief);
 		}
 	}
 

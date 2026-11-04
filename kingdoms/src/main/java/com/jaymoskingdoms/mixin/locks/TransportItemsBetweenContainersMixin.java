@@ -7,7 +7,7 @@ import net.minecraft.world.entity.ai.behavior.TransportItemsBetweenContainers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/** (0.7.492) A copper golem leaves a locked container alone, as it does one with a vanilla lock code ({@link Locks#sealed}). */
+/** (0.7.494) A copper golem leaves a locked container alone, as it does one with a vanilla lock code ({@link Locks#sealed}). */
 @Mixin(TransportItemsBetweenContainers.class)
 abstract class TransportItemsBetweenContainersMixin {
 	@ModifyReturnValue(method = "isContainerLocked", at = @At("RETURN"))

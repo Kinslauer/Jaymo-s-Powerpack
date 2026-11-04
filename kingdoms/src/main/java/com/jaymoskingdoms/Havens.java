@@ -249,6 +249,10 @@ public final class Havens {
 		if (f == null || fits(level.getServer(), f, kind)) {
 			return null;
 		}
+		if (kind != null && kind.brood) {
+			// (0.7.490) an orc or goblin here came as a Settler (whatever the haven's blood): it keeps its brood
+			return null;
+		}
 		String entry = entry(level.getServer(), f);
 		long drawn = Long.parseLong(entry.substring(entry.indexOf('|') + 1));
 		if (level.getGameTime() - drawn > SETTLE_TICKS) {

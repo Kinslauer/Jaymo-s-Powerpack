@@ -579,13 +579,14 @@ final class OrcBuildings {
 		return containers;
 	}
 
-	/** The warchief's hoard: iron (lots), gold, emeralds, a golden apple, an iron axe, meat, and now and then a diamond. */
+	/** The warchief's hoard: iron (lots), gold, bent ingots (0.7.490), a golden apple, an iron axe, meat, and now and then a diamond. */
 	private static void stockHoard(ServerLevel level, BlockPos chest, RandomSource random) {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;
 		}
 		List<ItemStack> hoard = List.of(new ItemStack(Items.IRON_INGOT, 10 + random.nextInt(13)), new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(7)),
-			new ItemStack(Items.EMERALD, 6 + random.nextInt(9)), new ItemStack(Items.GOLDEN_APPLE, 1 + random.nextInt(2)),
+			new ItemStack(BentIngots.BENT_COPPER, 12 + random.nextInt(17)), new ItemStack(BentIngots.BENT_IRON, 2 + random.nextInt(5)),
+			new ItemStack(Items.GOLDEN_APPLE, 1 + random.nextInt(2)),
 			new ItemStack(Items.IRON_AXE), new ItemStack(Items.COOKED_BEEF, 8 + random.nextInt(9)), new ItemStack(Items.BONE, 6 + random.nextInt(10)),
 			random.nextInt(3) == 0 ? new ItemStack(Items.DIAMOND, 1 + random.nextInt(3)) : new ItemStack(Items.CHAINMAIL_CHESTPLATE));
 		for (ItemStack stack : hoard) {

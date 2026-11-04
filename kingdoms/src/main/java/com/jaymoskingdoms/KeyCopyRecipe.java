@@ -12,7 +12,7 @@ import net.minecraft.world.item.crafting.TransmuteRecipe;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.7.492) A cut key with one to eight blank keys at a crafting table: that many copies of the key, its name kept. The
+ * (0.7.494) A cut key with one to eight blank keys at a crafting table: that many copies of the key, its name kept. The
  * original comes back ({@link Locks}).
  */
 public class KeyCopyRecipe extends CustomRecipe {

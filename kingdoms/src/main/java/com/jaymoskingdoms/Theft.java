@@ -73,7 +73,7 @@ import org.jspecify.annotations.Nullable;
  * <p>(0.5.52) A theft nobody saw is Stealth experience ({@link Skills}); Soft Step hides a sneaking thief from farther
  * off, and a Ghost's unseen thefts are never missed.
  *
- * <p>(0.7.492) Picking a lock or breaking a locked block in a faction's land is burglary ({@link Locks}).
+ * <p>(0.7.494) Picking a lock or breaking a locked block in a faction's land is burglary ({@link Locks}).
  */
 public final class Theft {
 	/** How far a witness sees a crime (sneaking: this share of it); closer than {@link #HEAR_RANGE} they notice whichever way they face. */
@@ -146,7 +146,7 @@ public final class Theft {
 		BLOOD_MAGIC(Weight.HEAVY, "blood_magic"),
 		/** (0.7.446) Powers' rival band worn where a realm that knows the band's aliens sees it ({@link Aliens#rivalBand}). */
 		RIVAL_BAND(Weight.HEAVY, "rival_band"),
-		/** (0.7.492) a lock picked or a locked block broken where a realm's law holds ({@link Locks}). */
+		/** (0.7.494) a lock picked or a locked block broken where a realm's law holds ({@link Locks}). */
 		BURGLARY(Weight.MEDIUM, "burglary");
 
 		final Weight weight;
@@ -419,7 +419,7 @@ public final class Theft {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.gift", f.name()).withStyle(ChatFormatting.GREEN));
 	}
 
-	/** (0.7.492) {@code player} picked the lock at {@code pos}: burglary if its realm's people see it (heavy against a storehouse). */
+	/** (0.7.494) {@code player} picked the lock at {@code pos}: burglary if its realm's people see it (heavy against a storehouse). */
 	static void burgled(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state) {
 		if (player.isCreative() || level != Factions.level(level.getServer()) || Placed.byPlayer(player, level, pos, state)) {
 			return;
@@ -445,7 +445,7 @@ public final class Theft {
 			return;
 		}
 		if (Locks.lockedAgainst(level, pos, state, entity, player)) {
-			// (0.7.492) a locked door, gate, trapdoor or chest broken open is burglary
+			// (0.7.494) a locked door, gate, trapdoor or chest broken open is burglary
 			commit(player, level, f, Crime.BURGLARY, pos, owner != null ? Weight.HEAVY : null, false);
 			return;
 		}
