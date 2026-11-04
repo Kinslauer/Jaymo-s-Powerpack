@@ -22,10 +22,13 @@ public final class XenoformHand {
 		if (player == null || !XenoformState.transformed(player)) {
 			return false;
 		}
-		XenoFormModels.FormModel model = XenoFormModels.of(player.getAttached(XenoformState.FORM));
+		XenoFormModels.FormModel model = XenoformClient.model(player.getAttached(XenoformState.FORM), Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
 		if (model == null) {
 			return false;
 		}
+		// (0.20.9) an Ultimate's model wears its own skin
+		boolean ultimateModel = model instanceof XenoFormModels.UltimateModel;
+		net.minecraft.resources.Identifier skin = ultimateModel ? model.ultimateTexture : model.texture;
 		boolean right = arm == source.rightArm;
 		ModelPart limb = right ? model.rightArm : model.leftArm;
 		limb.resetPose();
@@ -39,6 +42,9 @@ public final class XenoformHand {
 		} else if (model instanceof XenoFormModels.Gremlin gremlin) {
 			// (0.19.66) its knuckle-walking forearm and fist straightened for the first-person arm
 			gremlin.handPose();
+		} else if (model instanceof com.jaymospowers.client.power.xenoform.ultimate.UltimateTitan titan) {
+			// (0.20.9) Titan's forearm and fist straightened for the first-person arm
+			titan.handPose();
 		} else if (model instanceof XenoFormModels.Bulwark bulwark) {
 			// (0.19.84) its forearm and fist straightened for the first-person arm
 			bulwark.handPose();
@@ -66,14 +72,18 @@ public final class XenoformHand {
 		if (model instanceof XenoFormModels.Wisp wisp) {
 			WispKi.submitArm(wisp, right, limb, poseStack, collector, player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true));
 		} else {
-			collector.submitModelPart(limb, poseStack, RenderTypes.entityCutout(model.texture), light, OverlayTexture.NO_OVERLAY, null);
+			collector.submitModelPart(limb, poseStack, RenderTypes.entityCutout(skin), light, OverlayTexture.NO_OVERLAY, null);
+		}
+		if (ultimateModel) {
+			// (0.20.9) an Ultimate's seams, fullbright
+			collector.submitModelPart(limb, poseStack, RenderTypes.entityTranslucentEmissive(model.ultimateGlow), 0xF000F0, OverlayTexture.NO_OVERLAY, null);
 		}
 		if (model instanceof XenoFormModels.Pyre) {
 			collector.submitModelPart(limb, poseStack, RenderTypes.eyes(XenoFormModels.Pyre.GLOW), light, OverlayTexture.NO_OVERLAY, null);
 		}
 		if (XenoformState.ending(player)) {
 			float time = player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
-			collector.submitModelPart(limb, poseStack, RenderTypes.eyes(model.texture), light, OverlayTexture.NO_OVERLAY, null, XenoformLayer.glow(time));
+			collector.submitModelPart(limb, poseStack, RenderTypes.eyes(skin), light, OverlayTexture.NO_OVERLAY, null, XenoformLayer.glow(time));
 		}
 		poseStack.popPose();
 		return true;

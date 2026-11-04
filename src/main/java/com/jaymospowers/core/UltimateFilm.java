@@ -44,6 +44,12 @@ import org.jspecify.annotations.Nullable;
  */
 public final class UltimateFilm {
 	public static final int ZOOM = 0, SKYWARD = 1, CRANE = 2, ORBIT = 3, PROFILE = 4, TRACK = 5, PUSH_IN = 6, CHASE = 7, DUTCH = 8, CUTS = 9;
+	/**
+	 * (0.20.9) {@code MORPH}: letterboxed, it zooms on each changing part of {@code caster} in turn (the {@link Play#parts} list, in
+	 * order), holds while that part grows from the base alien into the Ultimate, then pulls back to the whole new body.
+	 * {@link Play#first} is the long exaggerated cut.
+	 */
+	public static final int MORPH = 10;
 	/** The shortest and longest a film may run (ticks), whatever a move asks for. */
 	public static final int MIN_TICKS = 10, MAX_TICKS = 100;
 
@@ -56,7 +62,13 @@ public final class UltimateFilm {
 	 * Server → client: play a film. {@code caster} is whose ultimate it is; {@code witness} says this player is only near
 	 * it (bars, no camera); (0.18.106) {@code afterDeath}: they've just died, and it plays before their death screen.
 	 */
-	public record Play(int caster, int shot, int ticks, Vec3 at, int target, boolean witness, boolean afterDeath) implements CustomPacketPayload {
+	public record Play(int caster, int shot, int ticks, Vec3 at, int target, boolean witness, boolean afterDeath, List<String> parts, boolean first)
+		implements CustomPacketPayload {
+		/** (0.20.9) {@code parts}: the {@link #MORPH} shot's changing parts in order (empty for every other shot); {@code first}: the long first-time cut. */
+		public Play(int caster, int shot, int ticks, Vec3 at, int target, boolean witness, boolean afterDeath) {
+			this(caster, shot, ticks, at, target, witness, afterDeath, List.of(), false);
+		}
+
 		public static final Type<Play> TYPE = new Type<>(JaymosPowers.id("ultimate_film"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Play> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -67,9 +79,27 @@ public final class UltimateFilm {
 				buf.writeVarInt(p.target);
 				buf.writeBoolean(p.witness);
 				buf.writeBoolean(p.afterDeath);
+				buf.writeVarInt(p.parts.size());
+				for (String part : p.parts) {
+					buf.writeUtf(part);
+				}
+				buf.writeBoolean(p.first);
 			},
-			buf -> new Play(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), Vec3.STREAM_CODEC.decode(buf), buf.readVarInt(), buf.readBoolean(),
-				buf.readBoolean()));
+			buf -> {
+				int caster = buf.readVarInt();
+				int shot = buf.readVarInt();
+				int ticks = buf.readVarInt();
+				Vec3 at = Vec3.STREAM_CODEC.decode(buf);
+				int target = buf.readVarInt();
+				boolean witness = buf.readBoolean();
+				boolean afterDeath = buf.readBoolean();
+				int n = Math.min(buf.readVarInt(), 16);
+				List<String> parts = new ArrayList<>(n);
+				for (int i = 0; i < n; i++) {
+					parts.add(buf.readUtf());
+				}
+				return new Play(caster, shot, ticks, at, target, witness, afterDeath, List.copyOf(parts), buf.readBoolean());
+			});
 
 		@Override
 		public Type<Play> type() {
@@ -104,6 +134,41 @@ public final class UltimateFilm {
 				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, targetId, true, false));
 			}
 		}
+	}
+
+	/** (0.20.9) {@link Play#target} value of a MORPH packet that only syncs the in-world morph (no camera, no bars), and how far it is sent (blocks). */
+	public static final int MORPH_ONLY = -2;
+	private static final double MORPH_SYNC = 128.0;
+
+	/**
+	 * (0.20.9) The change-in film ({@link #MORPH}): the caster always gets it (with their own camera); every other player within
+	 * {@code witnessRange} blocks gets the same film with their own camera unless they are in combat (hurt by a mob or hit one in
+	 * the last {@code combatTicks}): those get no film and no bars and just see the body change in the world. {@code parts} are the
+	 * changing parts in order, {@code first} the long first-time cut.
+	 */
+	public static void shared(ServerPlayer caster, int shot, int ticks, List<String> parts, boolean first, double witnessRange, int combatTicks) {
+		int length = Math.clamp(ticks, MIN_TICKS, MAX_TICKS);
+		Vec3 at = caster.position();
+		ServerPlayNetworking.send(caster, new Play(caster.getId(), shot, length, at, -1, false, false, parts, first));
+		for (ServerPlayer other : caster.level().players()) {
+			if (other == caster || other.isSpectator()) {
+				continue;
+			}
+			double d = other.distanceToSqr(caster);
+			if (witnessRange > 0.0 && d <= witnessRange * witnessRange && !inCombat(other, combatTicks)) {
+				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, -1, false, false, parts, first));
+			} else if (d <= MORPH_SYNC * MORPH_SYNC) {
+				// (0.20.9) in combat or further off: no film, but the in-world morph runs the same length and parts as everyone's
+				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, MORPH_ONLY, false, false, parts, first));
+			}
+		}
+	}
+
+	/** (0.20.9) Whether {@code player} was hurt by a mob, or hit one, in the last {@code ticks} (as {@code ZFighterBattle}'s {@code IN_FIGHT_TICKS} reads it). */
+	public static boolean inCombat(ServerPlayer player, int ticks) {
+		int hit = player.getLastHurtMobTimestamp();
+		return hit > 0 && player.tickCount - hit < ticks
+			|| player.getLastHurtByMob() != null && player.tickCount - player.getLastHurtByMobTimestamp() < ticks;
 	}
 
 	/**
