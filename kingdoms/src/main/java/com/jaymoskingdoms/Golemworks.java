@@ -30,7 +30,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.528) Andy (2026-11-04): "a magically attuned kingdom using golems like these for everyday things".
+ * (0.7.529) Andy (2026-11-04): "a magically attuned kingdom using golems like these for everyday things".
  * <p>
  * A share of realms ({@link #REALM_SHARE}; never a purist's, never a camp) are <b>golemworks</b>: their folk are attuned
  * (each glows faintly to the attuned, {@link Mana}, and can be asked about their magic), and the realm keeps its own town

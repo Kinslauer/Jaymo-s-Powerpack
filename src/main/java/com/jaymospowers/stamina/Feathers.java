@@ -1,6 +1,7 @@
 package com.jaymospowers.stamina;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.Stacked;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -236,7 +237,7 @@ public final class Feathers {
 	private static void update(ServerPlayer player, State s) {
 		ServerLevel level = player.level();
 		s.weight = Math.min(MAX, Math.round(player.getArmorValue() * ARMOR_WEIGHT));
-		int heat = level.dimension() == Level.NETHER && !player.hasEffect(MobEffects.FIRE_RESISTANCE) ? NETHER_PENALTY : 0;
+		int heat = Stacked.in(player, Level.NETHER) && !player.hasEffect(MobEffects.FIRE_RESISTANCE) ? NETHER_PENALTY : 0;
 		int held = 0;
 		for (ToIntFunction<ServerPlayer> penalty : PENALTIES) {
 			held += Math.max(0, penalty.applyAsInt(player));

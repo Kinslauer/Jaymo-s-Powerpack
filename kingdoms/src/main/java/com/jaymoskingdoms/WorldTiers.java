@@ -496,11 +496,11 @@ public final class WorldTiers {
 			if (player.isSpectator()) {
 				continue;
 			}
-			if (player.level().dimension() == Level.NETHER) {
+			if (Stacked.in(player, Level.NETHER)) {
 				feat(player, Progress.NETHER);
 			}
 			// (0.7.383) back in the Overworld with a trophy from the Aether's guardians
-			if (player.level().dimension() == Level.OVERWORLD && !progress(player).has(Progress.AETHER_TROPHY) && carriesTrophy(player)) {
+			if (Stacked.in(player, Level.OVERWORLD) && !progress(player).has(Progress.AETHER_TROPHY) && carriesTrophy(player)) {
 				feat(player, Progress.AETHER_TROPHY);
 			}
 			int tier = of(player).ordinal();

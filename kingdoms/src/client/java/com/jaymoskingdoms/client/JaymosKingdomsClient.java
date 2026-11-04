@@ -46,7 +46,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
 		// (0.7.326) the clockwork golem
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
-		// (0.7.528) town golems
+		// (0.7.529) town golems
 		EntityRenderers.register(com.jaymoskingdoms.TownGolem.TYPE, TownGolemRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.SkeletonLord.TYPE, SkeletonLordRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));

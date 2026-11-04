@@ -2,6 +2,7 @@ package com.jaymoskitchen.climate;
 
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.ModItems;
+import com.jaymoskitchen.Stacked;
 import com.jaymoskitchen.cooking.Dish;
 import com.jaymoskitchen.season.Seasons;
 import com.jaymoskitchen.season.WinterCold;
@@ -298,9 +299,11 @@ public final class BodyHeat {
 		boolean sky = level.canSeeSky(head);
 		float land;
 		float base = 0.8F;
-		if (level.dimension() == Level.NETHER) {
+		// (0.5.59) by the realm at the player's height, so a One Dimension world's stacked Nether counts (Stacked)
+		ResourceKey<Level> realm = Stacked.realm(level, player.getY());
+		if (realm == Level.NETHER) {
 			land = NETHER;
-		} else if (level.dimension() == Level.END) {
+		} else if (realm == Level.END) {
 			land = END;
 		} else {
 			base = level.getBiome(at).value().getBaseTemperature();

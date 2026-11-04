@@ -1,4 +1,4 @@
-"""Town golems (Kingdoms 0.7.528): our own rune golem, painted in three materials (gilt, verdant and the
+"""Town golems (Kingdoms 0.7.529): our own rune golem, painted in three materials (gilt, verdant and the
 throne golem's diamond-set stone), plus their item icons. Ideas from Special Golems (ideas only, its files are not used); every pixel here is painted
 from the ramps below.
 

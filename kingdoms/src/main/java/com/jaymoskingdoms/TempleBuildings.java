@@ -64,7 +64,7 @@ final class TempleBuildings {
 	/** Builds {@code p}'s temple at {@code site} (its floor centre) in {@code level}'s own manner. */
 	static Layout build(ServerLevel level, Patron p, BlockPos site, RandomSource random) {
 		Direction facing = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-		boolean nether = level.dimension() == net.minecraft.world.level.Level.NETHER;
+		boolean nether = Stacked.at(level, site, net.minecraft.world.level.Level.NETHER);
 		int r = radius(p);
 		Buildings.Sketch s;
 		int cx = r, cz = r, y0 = 0;

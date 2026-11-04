@@ -1,6 +1,7 @@
 package com.jaymospowers.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -177,7 +178,7 @@ public final class ChronoEchoes {
 	/** A blinked-out Nether echo counts down while its owner is in the Nether, then appears around them, as hurt as it left. */
 	private static void netherReturn(ServerPlayer player, ChronoMemory memory) {
 		NetherReturn pending = player.getAttached(NETHER_RETURN);
-		if (pending == null || player.level().dimension() != Level.NETHER) {
+		if (pending == null || !Stacked.in(player, Level.NETHER)) {
 			return;
 		}
 		if (pending.bond() != memory.bond) {
@@ -394,7 +395,7 @@ public final class ChronoEchoes {
 			com.jaymospowers.power.chrono.future.Future.echoSlain(player);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chrono_echo_collapsed")
 				.withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
-			if (level.dimension() == net.minecraft.world.level.Level.NETHER && com.jaymospowers.core.Powers.has(player, ChronoPower.INSTANCE)
+			if (Stacked.in(echo, net.minecraft.world.level.Level.NETHER) && com.jaymospowers.core.Powers.has(player, ChronoPower.INSTANCE)
 				&& com.jaymospowers.core.Fate.canCorrupt(player)) {
 				unravel(level, echo, player);
 			}

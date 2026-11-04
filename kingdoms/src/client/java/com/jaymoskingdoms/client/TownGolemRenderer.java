@@ -21,7 +21,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.528) The town golems ({@link TownGolem}): one rune golem of our own (texture 128x64, painted by
+ * (0.7.529) The town golems ({@link TownGolem}): one rune golem of our own (texture 128x64, painted by
  * {@code kingdoms/tools/gen_town_golems.py}), in each kind's stone and size: a block of a head with a crest stone, a broad
  * chest with a carved core set in it, a narrow waist, arms to the knees, short legs. Its eyes and core glow (a lamp
  * warden's only at night). The throne golem kneels and folds into a great throne (and rises out of it) over
