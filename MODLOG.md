@@ -5372,3 +5372,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `Patrons.blessing(player, "patron_weapon/<key>")` by reflection, `KingdomsCompat.blessing`), cold while you're in
   its trials.
   The Sunbrand's Judgement stops at the first block in the way, so it can't mark a foe behind a wall. Not played.
+- **0.20.19**: no Powers change; pack bump for Kingdoms 0.7.519 (diplomacy and elections: envoys, treaties, elected rulers and regencies).

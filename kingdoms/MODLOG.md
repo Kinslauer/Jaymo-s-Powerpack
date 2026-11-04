@@ -8852,3 +8852,50 @@ is our own take on the idea (none of its code or art).
   again.
 - Loading hints 91-92.
 - Built (both mods compile); not played.
+
+## 0.7.519: diplomacy and elections (pack 0.20.19)
+Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its code or art). Plan: `docs/Diplomacy-Plan.md`.
+- **Treaties:** free realms sign four kinds, each for a while and renewable (`Treaties`):
+  - **Recognition** (30 days): tension eases 3 a day, and they don't fall into rivalry. Every other kind needs it.
+  - **Safe passage** (10): the partner's people aren't halted, searched or tolled by the guards, and the ruler's
+    retinue lets them by.
+  - **Trade charter** (15): partner caravans go more often (60% of the wait), take an extra cart and come home 20
+    points fuller, and are preferred. The partner's people get 10% off at traders and pay half the gate toll.
+  - **Aid** (20): when either goes to war, the other is pledged to its side like a great war's ally (its soldiers join
+    the war parties, it shares spoils and reparations). Already at war elsewhere, it sends up to 100 from its treasury.
+  Vassals share their overlord's treaties.
+- **Envoys** (`Envoys`): NPC kingdoms send envoys once a day by creed (Coin wants charters, Conquest aid...). Courts
+  weigh offers by temper, creed, friction, tension, rivalry, a truce, a common foe, blood (purists) and, for a player
+  realm, your reputation. Envoys ride the King's Roads like couriers, with the realm's banner; you can meet them. Kill
+  one and the sender (-200) and the land's realm (-60) remember. Envoys are never drafted as guards or rulers.
+- **Players' realms:** an envoy waits up to two days in your hall and you get a letter. "Hear the Envoy" (MCA Interact
+  page; right-click without MCA) offers Sign, Refuse or Not yet. Seek an audience with your own steward for the Ruler's
+  Desk: the realms in reach, their creed, relation and tension, the treaties in force (Renounce), each kind's odds, and
+  Send an Envoy (20 from the treasury, the rest from your purse).
+- **Breaking faith:** declaring war on a partner, or renouncing, tears treaties up: +25 tension, +8 with the breaker's
+  other partners. A player sovereign loses 150 reputation with the wronged realm and 30 with each other partner. NPC
+  tyrants and warlords may break faith when tension boils over; others hold their hand.
+- **News:** the town boards carry every treaty; the Tidings only aid, a player realm's treaties, great charters,
+  broken faith and war.
+- **Succession** (`Elections`, MCA realms): Coin realms elect, and Warriorborn/Frostborn realms of the Old Blood or
+  Conquest acclaim at a moot. Notables are the grown townsfolk (profession level, guard service, kin to the late
+  ruler, a gift, temper, luck) and sworn players of Knight rank or higher; a player who wins wears the crown with the
+  old steward. In other realms blood inherits, but a child heir gets a regent (the best councillor) until they come of
+  age; then the regent steps down. If the child dies, the regent rules on. A teen is never crowned outright now.
+- **Ruler info** (MCA interact screen): how the realm chooses its rulers, how this one came to the throne, "Regent for
+  ...", and its treaties (hover for the list).
+- Loading hint 93 (89-92 belong to other open PRs and show raw until those merge). Not played; compile-checked with
+  `kingdoms/gradlew build`.
+
+### Fixes: desk, aid coin, wording
+- The Ruler's Desk now stays open: seeking an audience with your own steward no longer opens the quest screen over it
+  (`KingdomEvents.audience` reports that the desk opened; `Rulers.audience` and `Folk` skip `Quests.open`).
+- Renewing a treaty of aid no longer charges an ally's coin again; it is paid once, when the aid is first signed or the
+  war begins.
+- The aid-in-coin board line and the Ruler's Desk treasury and envoy cost now name the realm's coin (the Desk packet
+  carries the worded amounts).
+- Election score: the reputation divisor and cap are now constants (`PLAYER_REP_DIV`, `PLAYER_REP_MOST`).
+- Ruler's Desk: a full road or a closed kind now says so, instead of "your envoy is on the road".
+- Player-crowned realms no longer send envoys or sign treaties on their own in the daily round.
+- A ward who comes of age at the regent's death is now announced on the board.
+- A chartered allied pair no longer loses the trade friction twice.

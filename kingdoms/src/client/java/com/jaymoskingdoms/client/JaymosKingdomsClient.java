@@ -111,6 +111,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.238: black over the world from the story until MCA's creator
 		StoryCurtain.register();
 		LineageScreen.register();
+		// (0.7.519) an envoy's offer, and the sovereign's desk
+		EnvoyScreen.register();
+		RulersDeskScreen.register();
 		// 0.7.201: letters and messenger pigeons
 		LetterScreen.register();
 		// (0.7.234) the Pin and Rotary lockpicking games
