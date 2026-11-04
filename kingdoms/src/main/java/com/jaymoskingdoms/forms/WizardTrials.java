@@ -536,7 +536,7 @@ public final class WizardTrials {
 		if (caster) {
 			player.giveExperiencePoints(CASTER_XP);
 		}
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.trial." + (caster ? "caster" : "passed"), wizard.getDisplayName()));
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.trial." + (caster ? "caster" : "passed"), wizard.getDisplayName()));
 	}
 
 	/** The wizard says one of two variants of {@code key} (speech bubble, not chat). */

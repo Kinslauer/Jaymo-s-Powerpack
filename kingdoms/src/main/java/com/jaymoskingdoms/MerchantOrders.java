@@ -553,7 +553,7 @@ final class MerchantOrders {
 			}
 		}
 		player.setAttached(LEDGER, ledger.bought(WANT + key, today, 1, FAR_STANDING_XP));
-		Post.tidings(player.getUUID(), Component.translatable("orders.jaymoskingdoms.tidings.want", town.name(), worldName(g)));
+		Post.aside(player.getUUID(), Component.translatable("orders.jaymoskingdoms.tidings.want", town.name(), worldName(g)));
 		level.playSound(null, at, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.1F);
 	}
 
@@ -667,7 +667,7 @@ final class MerchantOrders {
 					remove(server, o.id());
 				}
 				Couriers.start(level, courier, parcel(lot), null, first.buyer());
-				Post.tidings(first.buyer(), Component.translatable("orders.jaymoskingdoms.tidings.sent", first.town(), courier.getName()));
+				Post.aside(first.buyer(), Component.translatable("orders.jaymoskingdoms.tidings.sent", first.town(), courier.getName()));
 				// (0.7.418) a life's aim: these orders are on their way
 				LifeAims.ordersSent(server, first.buyer(), lot.size());
 			} else if (now - first.ready() > POST_AFTER) {
@@ -675,7 +675,7 @@ final class MerchantOrders {
 					remove(server, o.id());
 				}
 				Post.later(first.buyer(), parcel(lot));
-				Post.tidings(first.buyer(), Component.translatable("orders.jaymoskingdoms.tidings.post", first.town()));
+				Post.aside(first.buyer(), Component.translatable("orders.jaymoskingdoms.tidings.post", first.town()));
 				LifeAims.ordersSent(server, first.buyer(), lot.size());
 			}
 		}
@@ -723,11 +723,11 @@ final class MerchantOrders {
 		return stack.is(PARCEL);
 	}
 
-	/** (Couriers) The courier bringing {@code to} a parcel was killed at {@code where}: a line in their Tidings. */
+	/** (Couriers) The courier bringing {@code to} a parcel was killed at {@code where}: word sent them. */
 	static void waylaid(UUID to, ItemStack parcel, Villager courier, BlockPos where) {
 		CustomData data = parcel.get(DataComponents.CUSTOM_DATA);
 		String town = data == null ? "" : data.copyTag().getStringOr(PARCEL_KEY, "");
-		Post.tidings(to, Component.translatable("orders.jaymoskingdoms.tidings.waylaid", courier.getName(), town, where.getX(), where.getZ()));
+		Post.report(to, Component.translatable("orders.jaymoskingdoms.tidings.waylaid", courier.getName(), town, where.getX(), where.getZ()));
 	}
 
 	/** A parcel: use it to unwrap it. */
