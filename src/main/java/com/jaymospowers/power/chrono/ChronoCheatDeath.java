@@ -132,6 +132,12 @@ public final class ChronoCheatDeath {
 	private static final Map<UUID, ArrayDeque<Checkpoint>> CHECKPOINTS = new HashMap<>();
 	/** Players held out of time at the black screen, waiting for R. */
 	private static final Map<UUID, Held> HELD = new HashMap<>();
+	/**
+	 * (0.20.42) Another mod's say on a perplexed executioner ({@link #perplexed}), given it and the one it lost: Jaymo's
+	 * Kingdoms has its humanoids speak of it. Added to at start-up.
+	 */
+	public static final List<java.util.function.BiConsumer<net.minecraft.world.entity.Mob, ServerPlayer>> PERPLEXED = new ArrayList<>();
+
 	/** Players left for dead whose window has been opened (once a waking). */
 	private static final Set<UUID> WAKES_OFFERED = new java.util.HashSet<>();
 	/** Players whose death is going ahead right now (no R): let through. */
@@ -383,6 +389,13 @@ public final class ChronoCheatDeath {
 		rewind(player);
 		if (mob != null && mob.isAlive()) {
 			perplexed(mob, was);
+			for (java.util.function.BiConsumer<net.minecraft.world.entity.Mob, ServerPlayer> say : PERPLEXED) {
+				try {
+					say.accept(mob, player);
+				} catch (RuntimeException e) {
+					JaymosPowers.LOGGER.warn("A perplexed executioner's hook failed", e);
+				}
+			}
 		}
 		JaymosPowers.LOGGER.info("{} slipped an execution", player.getScoreboardName());
 	}

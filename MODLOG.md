@@ -353,7 +353,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   blow lands, but (Andy: "you can still use the R, before the fatal damage like the cancel, and the executioner will be
   perplexed and react in their own way") R works the whole time an execution is coming or under way: you're rewound out
   from under it, a hostile executioner stops over the empty ground, turns about and gives voice its own way
-  (`MobExecutions.executioner`, `ChronoCheatDeath.perplexed`), and a player's finisher stops as when anyone is spared. Writs and
+  (`MobExecutions.executioner`, `ChronoCheatDeath.perplexed`; a humanoid one says so too, Kingdoms 0.7.535: "I was just
+  about to... kill you?!"), and a player's finisher stops as when anyone is spared. Writs and
   the Judge work as before. Respawn Recap (MIT, DialingSpoon, 1.2.1-26.3, client-only) ships unchanged in packModsOverride
   and is Chrono's alone (`client/mixin/respawnrecap`, @Pseudo): its replay plays only as a rewind (never for a real death,
   and with no respawn at its end), it keeps screenshots only while you're a Chrono, and `client/compat/RespawnRecapPlugin`
