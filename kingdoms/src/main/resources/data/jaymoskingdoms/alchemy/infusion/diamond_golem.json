@@ -5,8 +5,8 @@
     "minecraft:diamond",
     "minecraft:diamond",
     "minecraft:diamond",
-    "minecraft:amethyst_shard",
-    "minecraft:amethyst_shard",
+    "minecraft:polished_deepslate",
+    "minecraft:polished_deepslate",
     "jaymospowers:ichor",
     "jaymospowers:ichor"
   ],
@@ -18,7 +18,7 @@
   },
   "instability": 9,
   "result": {
-    "item": "jaymoskingdoms:bulwark_diamond",
+    "item": "jaymoskingdoms:diamond_golem",
     "count": 1
   },
   "research": "golemancy",

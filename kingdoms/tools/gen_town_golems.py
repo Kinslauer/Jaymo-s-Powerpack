@@ -1,12 +1,12 @@
-"""Town golems (Kingdoms 0.7.477): our own rune golem, painted in five materials, plus their item icons and the
-Bulwark Diamond's icon. Ideas from Special Golems (ideas only, its files are not used); every pixel here is painted
+"""Town golems (Kingdoms 0.7.477): our own rune golem, painted in three materials (gilt, verdant and the
+throne golem's diamond-set stone), plus their item icons. Ideas from Special Golems (ideas only, its files are not used); every pixel here is painted
 from the ramps below.
 
 Run from the repository root:  python -I kingdoms/tools/gen_town_golems.py
 
 Texture layout (128x64) matches TownGolemModel's cubes (box UV: top, bottom; right, front, left, back):
   head    8x8x8   at (0,0)     crest 2x2x2 at (46,0)   core 4x4x1 at (34,0)
-  chest  14x10x8  at (0,16)    waist 10x6x6 at (0,34)  pack 10x9x4 at (64,46)
+  chest  14x10x8  at (0,16)    waist 10x6x6 at (0,34)  (64,46 unused)
   arm     4x18x5  at (64,0)    leg   5x10x5 at (64,24)
 """
 import os
@@ -27,16 +27,13 @@ def ramp(*s):
 
 # 7 steps each: 0 outline .. 6 glint, light from the top-left (as the vanilla-style icons)
 KINDS = {
-    'clay':    dict(body=ramp('3b1d12', '5e2f1c', '804331', '985a43', 'b0715a', 'c48c72', 'dcae94'),
-                    trim=hx('e9d6b0'), glow=hx('ffb15c'), dark=hx('2a120a')),
-    'frost':   dict(body=ramp('6f8fa3', '9db8c8', 'c3d7e0', 'd9e7ee', 'e8f1f5', 'f4f9fb', 'ffffff'),
-                    trim=hx('8fd0f0'), glow=hx('7fe6ff'), dark=hx('4a6a80')),
     'gilt':    dict(body=ramp('3f2e0e', '825d16', 'b47a12', 'dc9613', 'e9b115', 'f2d23c', 'fdff76'),
                     trim=hx('fff3b0'), glow=hx('fff07a'), dark=hx('2c1f08')),
     'verdant': dict(body=ramp('0a2e16', '0f4f22', '17712f', '1fa03f', '41cd5c', '7ff09a', 'c8ffd6'),
                     trim=hx('eaee57'), glow=hx('9dffb0'), dark=hx('05200e')),
-    'lapis':   dict(body=ramp('0b1638', '14245a', '1d3482', '28479f', '3a5dc1', '5a7fe0', '98b5ff'),
-                    trim=hx('e9b115'), glow=hx('ffe36a'), dark=hx('060c22')),
+    # the throne golem: dark polished stone set with diamond, not a block of diamond (Andy)
+    'diamond': dict(body=ramp('16161b', '25252c', '33333c', '41414b', '50505b', '64646f', '7d7d8a'),
+                    trim=hx('33ebcb'), glow=hx('a4fdf0'), dark=hx('0a0a0e')),
 }
 STONE = ramp('212121', '494949', '5a5a5a', '787777', '95918d', 'b3b1af', 'c9c7c4')
 
@@ -116,7 +113,7 @@ def paint_kind(name, k):
             (4, 6), (5, 6), (6, 6), (7, 6), (8, 6), (9, 6), (1, 1), (2, 1), (11, 1), (12, 1), (6, 8), (7, 8)]
     for (x, y) in ring:
         px[fx + x, fy + y] = k['trim'] + (255,)
-        if name in ('lapis', 'gilt'):
+        if name in ('gilt', 'diamond'):
             gx[fx + x, fy + y] = k['trim'] + (160,)
     # bands round the forearms and shins
     for part, rows in (('arm', (11, 12)), ('leg', (1,))):
@@ -132,15 +129,6 @@ def paint_kind(name, k):
         for y in range(y_from, h):
             for x in range(w):
                 px[x0 + x, y0 + y] = r[2 if face == 'bottom' else 2 + (x + y) % 2] + (255,)
-    # the porter's pack: a woven basket (only the clay porter shows it)
-    for face, (x0, y0, w, h) in PARTS['pack'].items():
-        for y in range(h):
-            for x in range(w):
-                c = hx('9c7a32') if (x + y) % 2 == 0 else hx('755821')
-                if y == 0 or y == h - 1:
-                    c = hx('594319')
-                px[x0 + x, y0 + y] = c + (255,)
-
     os.makedirs(f'{OUT}/entity/golem', exist_ok=True)
     tex.save(f'{OUT}/entity/golem/{name}.png')
     glow.save(f'{OUT}/entity/golem/{name}_glow.png')
@@ -217,8 +205,6 @@ def main():
     for name, k in KINDS.items():
         paint_kind(name, k)
         icon(FIGURE, k['body'], k['trim'], k['glow']).save(f'{OUT}/item/{name}_golem.png')
-    dia = ramp('082520', '0e3f36', '156355', '1e8a77', '2bc7ac', '33ebcb', 'a4fdf0')
-    icon(DIAMOND, dia, hx('a7c7ff'), hx('ffffff')).save(f'{OUT}/item/bulwark_diamond.png')
     print('painted', len(KINDS), 'golems + icons')
 
 

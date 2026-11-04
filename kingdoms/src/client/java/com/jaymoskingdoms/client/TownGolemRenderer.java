@@ -24,7 +24,9 @@ import net.minecraft.util.Mth;
  * (0.7.477) The town golems ({@link TownGolem}): one rune golem of our own (texture 128x64, painted by
  * {@code kingdoms/tools/gen_town_golems.py}), in each kind's stone and size: a block of a head with a crest stone, a broad
  * chest with a carved core set in it, a narrow waist, arms to the knees, short legs. Its eyes and core glow (a lamp
- * warden's only at night, a scribe's only while it has ink); the porter wears a basket on its back while it carries.
+ * warden's only at night). The throne golem kneels and folds into a great throne (and rises out of it) over
+ * {@link #FOLD_TICKS}: its body sinks back to the ground as the throne's back, its arms swing forward level as the armrests,
+ * its legs fold forward flat as the seat.
  */
 public final class TownGolemRenderer extends MobRenderer<TownGolem, TownGolemRenderer.State, TownGolemRenderer.Model> {
 	private static final Identifier[] TEX = new Identifier[TownGolem.Kind.values().length];
@@ -38,8 +40,9 @@ public final class TownGolemRenderer extends MobRenderer<TownGolem, TownGolemRen
 	}
 
 	public static final class State extends LivingEntityRenderState {
-		TownGolem.Kind kind = TownGolem.Kind.CLAY;
-		boolean lit, carrying;
+		TownGolem.Kind kind = TownGolem.Kind.GILT;
+		boolean lit, throne;
+		float sinceChanged;
 		int id;
 	}
 
@@ -58,7 +61,8 @@ public final class TownGolemRenderer extends MobRenderer<TownGolem, TownGolemRen
 		super.extractRenderState(golem, state, partialTicks);
 		state.kind = golem.kind();
 		state.lit = golem.lit();
-		state.carrying = golem.carrying();
+		state.throne = golem.throne();
+		state.sinceChanged = golem.sinceChanged() + partialTicks;
 		state.id = golem.getId();
 	}
 
@@ -79,7 +83,7 @@ public final class TownGolemRenderer extends MobRenderer<TownGolem, TownGolemRen
 				return;
 			}
 			boolean on = switch (state.kind) {
-				case GILT, LAPIS -> state.lit;
+				case GILT -> state.lit;
 				default -> true;
 			};
 			if (!on) {
@@ -90,8 +94,15 @@ public final class TownGolemRenderer extends MobRenderer<TownGolem, TownGolemRen
 		}
 	}
 
+	/** How long kneeling into the throne or rising takes (ticks; the golem's own is the same). */
+	static final float FOLD_TICKS = 30.0F;
+
+	static float ease(float t) {
+		return t * t * (3.0F - 2.0F * t);
+	}
+
 	static final class Model extends EntityModel<State> {
-		private final ModelPart body, head, rightArm, leftArm, rightLeg, leftLeg, pack;
+		private final ModelPart body, head, rightArm, leftArm, rightLeg, leftLeg;
 
 		Model(ModelPart root) {
 			super(root);
@@ -99,7 +110,6 @@ public final class TownGolemRenderer extends MobRenderer<TownGolem, TownGolemRen
 			this.head = this.body.getChild("head");
 			this.rightArm = this.body.getChild("right_arm");
 			this.leftArm = this.body.getChild("left_arm");
-			this.pack = this.body.getChild("pack");
 			this.rightLeg = root.getChild("right_leg");
 			this.leftLeg = root.getChild("left_leg");
 		}
@@ -114,12 +124,35 @@ public final class TownGolemRenderer extends MobRenderer<TownGolem, TownGolemRen
 			body.addOrReplaceChild("head", CubeListBuilder.create()
 				.texOffs(0, 0).addBox(-4, -8, -4, 8, 8, 8)
 				.texOffs(46, 0).addBox(-1, -10, -1, 2, 2, 2), PartPose.offset(0, -16, -1));
-			body.addOrReplaceChild("pack", CubeListBuilder.create().texOffs(64, 46).addBox(-5, 0, 0, 10, 9, 4), PartPose.offset(0, -15, 4));
 			body.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(64, 0).addBox(-2, -2, -2.5F, 4, 18, 5), PartPose.offset(-9, -14, 0));
 			body.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(64, 0).mirror().addBox(-2, -2, -2.5F, 4, 18, 5), PartPose.offset(9, -14, 0));
 			root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(64, 24).addBox(-2.5F, 0, -2.5F, 5, 10, 5), PartPose.offset(-3, 14, 0));
 			root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(64, 24).mirror().addBox(-2.5F, 0, -2.5F, 5, 10, 5), PartPose.offset(3, 14, 0));
 			return LayerDefinition.create(mesh, 128, 64);
+		}
+
+		/**
+		 * Folds the golem {@code f} of the way into its throne: the body sinks 10 pixels and leans back a touch to stand as
+		 * its back, the arms come forward level (the armrests) and in, the legs fold forward flat under them (the seat).
+		 */
+		private void throne(float f) {
+			this.body.y = Mth.lerp(f, 14.0F, 24.0F);
+			this.body.z = Mth.lerp(f, 0.0F, 4.0F);
+			this.body.xRot = Mth.lerp(f, this.body.xRot, -0.08F);
+			this.body.zRot = Mth.lerp(f, this.body.zRot, 0.0F);
+			this.head.xRot = Mth.lerp(f, this.head.xRot, 0.0F);
+			this.head.yRot = Mth.lerp(f, this.head.yRot, 0.0F);
+			for (ModelPart arm : new ModelPart[] {this.rightArm, this.leftArm}) {
+				arm.xRot = Mth.lerp(f, arm.xRot, -Mth.HALF_PI + 0.08F);
+				arm.zRot = Mth.lerp(f, arm.zRot, 0.0F);
+				arm.y = Mth.lerp(f, -14.0F, -8.0F);
+				arm.z = Mth.lerp(f, 0.0F, 4.0F);
+			}
+			for (ModelPart leg : new ModelPart[] {this.rightLeg, this.leftLeg}) {
+				leg.xRot = Mth.lerp(f, leg.xRot, -Mth.HALF_PI);
+				leg.y = Mth.lerp(f, 14.0F, 21.5F);
+				leg.z = Mth.lerp(f, 0.0F, 1.0F);
+			}
 		}
 
 		@Override
@@ -133,18 +166,16 @@ public final class TownGolemRenderer extends MobRenderer<TownGolem, TownGolemRen
 			this.rightArm.xRot = Mth.cos(swing + Mth.PI) * 0.8F * amount;
 			this.leftArm.xRot = Mth.cos(swing) * 0.8F * amount;
 			this.body.zRot = Mth.cos(swing) * 0.05F * amount;
-			// a slow breath, each on its own clock; the scribe holds its hands out a little, as over a page
+			// a slow breath, each on its own clock
 			float breath = Mth.cos((state.ageInTicks + state.id * 13) * 0.05F);
 			this.rightArm.zRot = 0.06F + breath * 0.03F;
 			this.leftArm.zRot = -this.rightArm.zRot;
-			if (state.kind == TownGolem.Kind.LAPIS) {
-				this.rightArm.xRot = this.leftArm.xRot = -0.5F + breath * 0.04F;
+			// the throne: how far into it (0 standing, 1 a throne)
+			float t = Math.clamp(state.sinceChanged / FOLD_TICKS, 0.0F, 1.0F);
+			float fold = state.kind != TownGolem.Kind.DIAMOND ? 0.0F : state.throne ? ease(t) : 1.0F - ease(t);
+			if (fold > 0.0F) {
+				this.throne(fold);
 			}
-			// the porter carries in both arms, held out before it
-			if (state.carrying) {
-				this.rightArm.xRot = this.leftArm.xRot = -0.9F;
-			}
-			this.pack.visible = state.kind == TownGolem.Kind.CLAY;
 		}
 	}
 }

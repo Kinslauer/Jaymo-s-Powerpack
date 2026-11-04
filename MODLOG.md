@@ -4928,7 +4928,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Compile-checked (0 errors against the 26.3 jars); not played.
 - **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
   wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.
-- **0.19.57, Kingdoms 0.7.477, Golemworks:** Some realms are magically attuned and keep town golems for everyday work
-  (porters, frost tenders, lamp wardens, menders, lapis scribes that engrave enchantments), which anyone with Golemancy
-  can also make; and the Bulwark Diamond, an imbued diamond whose ward takes the blows aimed at nearby allies. See
-  Kingdoms' MODLOG 0.7.477.
+- **0.19.57, Kingdoms 0.7.477, Golemworks:** Some realms are magically attuned and keep golems: gilt lamp wardens and
+  verdant menders alongside iron golems, and a throne golem that folds into a giant throne and takes every blow meant for
+  whoever sits in it. Anyone with Golemancy can make them. See Kingdoms' MODLOG 0.7.477.

@@ -69,46 +69,53 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.477) Andy (2026-11-04), after Special Golems (ideas only, none of its files): "a magically attuned kingdom using golems
- * like these for everyday things". A town golem is our own rune golem (a stone body with a carved core in its chest, drawn
- * by {@code TownGolemModel}), in one of five kinds, each with a day's work:
+ * like these". A town golem is our own rune golem (a stone body with a carved core in its chest, eyes and core glowing, drawn
+ * by {@code client/TownGolemRenderer}), in one of three kinds:
  * <ul>
- * <li>{@link Kind#CLAY} the <b>porter</b>: picks up what lies about the town and puts it away in the nearest chest or barrel.</li>
- * <li>{@link Kind#FROST} the <b>frost tender</b>: puts out fires and burning folk, and pelts monsters with snow.</li>
- * <li>{@link Kind#GILT} the <b>lamp warden</b>: glows through the night and burns monsters (undead twice over) with a beam.</li>
- * <li>{@link Kind#VERDANT} the <b>mender</b>: knits the hurt of the town's folk, and once in a while keeps one from dying
- * ({@link Golemworks#sparedByMender}).</li>
- * <li>{@link Kind#LAPIS} the <b>scribe</b>: stands still by the seat, slows and weakens monsters, and engraves: an enchanted
- * item given to it gains a level of one of its enchantments, past the table's limit, and can never be enchanted again.</li>
+ * <li>{@link Kind#GILT} the <b>lamp warden</b>, an iron golem's ally: glows through the night and burns monsters (undead
+ * twice over) with a beam.</li>
+ * <li>{@link Kind#VERDANT} the <b>mender</b>: knits the hurt of those it looks after, and once in a while keeps one from
+ * dying ({@link Golemworks#sparedByMender}).</li>
+ * <li>{@link Kind#DIAMOND} the <b>throne golem</b>: a big, slow guard that on its maker's word kneels and folds itself into
+ * a great throne (its back the chest and head, its arms the armrests, its legs the seat). Whoever sits in it is kept by it:
+ * every blow they take, the throne takes instead ({@link #shieldSitter}). Andy: "I want the diamond one to be a throne, that
+ * takes the damage from the seat holder ... it just needs to transform into a giant throne".</li>
  * </ul>
  * An attuned realm keeps its own ({@link Golemworks}); anyone who knows Golemancy can make one on the infusion altar and set
- * it down where it should work. Its maker can sneak and use it with an empty hand to fold it back into its item.
+ * it down where it should work. Its maker, with an empty hand: use it to make a throne golem kneel into its throne (sneak and
+ * use the throne to have it stand again), or sneak and use a standing golem to fold it back into its item. Anyone it looks
+ * after uses a throne to sit in it; sneak to get up.
  */
 public class TownGolem extends AbstractGolem {
 	public static EntityType<TownGolem> TYPE;
 
 	public enum Kind {
-		CLAY("clay", 40.0, 0.28, 0.85F, 0xE9D6B0),
-		FROST("frost", 30.0, 0.26, 0.72F, 0x8FD0F0),
-		GILT("gilt", 160.0, 0.18, 1.15F, 0xFFF07A),
-		VERDANT("verdant", 90.0, 0.24, 0.95F, 0x9DFFB0),
-		LAPIS("lapis", 120.0, 0.0, 1.0F, 0x5A7FE0);
+		GILT("gilt", 160.0, 0.18, 1.15F),
+		VERDANT("verdant", 90.0, 0.24, 0.95F),
+		DIAMOND("diamond", 300.0, 0.16, 1.35F);
 
 		public final String id;
 		final double health, speed;
 		final float scale;
-		final int colour;
 		public Item item;
 
-		Kind(String id, double health, double speed, float scale, int colour) {
+		Kind(String id, double health, double speed, float scale) {
 			this.id = id;
 			this.health = health;
 			this.speed = speed;
 			this.scale = scale;
-			this.colour = colour;
 		}
 
 		public static Kind byId(int i) {
@@ -119,11 +126,9 @@ public class TownGolem extends AbstractGolem {
 		/** What mends it, a handful at a time. */
 		Item mend() {
 			return switch (this) {
-				case CLAY -> Items.CLAY_BALL;
-				case FROST -> Items.SNOWBALL;
 				case GILT -> Items.GOLD_INGOT;
 				case VERDANT -> Items.EMERALD;
-				case LAPIS -> Items.LAPIS_LAZULI;
+				case DIAMOND -> Items.DIAMOND;
 			};
 		}
 	}
@@ -131,15 +136,6 @@ public class TownGolem extends AbstractGolem {
 	// ---- tuning ----
 	/** How far from its home it works: a realm's golem round its seat, one set down round where it was set. */
 	static final int REALM_RANGE = 40, SET_RANGE = 16;
-	/** How often it looks for work (ticks). */
-	static final int LOOK_EVERY = 20;
-	/** Porter: a thing must have lain this long first (ticks), with no player this near; how near it reaches; a chest this near home. */
-	static final int LYING_TICKS = 1200;
-	static final double PLAYER_CLEAR = 8.0, REACH = 1.8, CHEST_RANGE = 20.0;
-	/** Frost tender: fires this near (blocks), snowballs at monsters this near, one every this many ticks. */
-	static final int FIRE_SEARCH = 10;
-	static final double SNOW_RANGE = 10.0;
-	static final int SNOW_EVERY = 25;
 	/** Lamp warden: its beam's reach, harm (doubled on the undead), and how often. */
 	static final double BEAM_RANGE = 16.0;
 	static final float BEAM_HARM = 6.0F;
@@ -147,28 +143,24 @@ public class TownGolem extends AbstractGolem {
 	/** Mender: hurt folk this near get Regeneration II this long, each at most this often (ticks). */
 	static final double MEND_RANGE = 10.0;
 	static final int MEND_TICKS = 100, MEND_EVERY = 400;
-	/** Scribe: its slowing beam's reach and how often; engravings a day (a realm's) or before it needs lapis blocks (one set down). */
-	static final double SCRIBE_RANGE = 12.0;
-	static final int SCRIBE_EVERY = 20, REALM_INK = 3, SET_INK = 6;
-	/** Scribe: what an engraving costs: lapis from the hand that doesn't hold the item, and emeralds at a realm's scribe. */
-	static final int ENGRAVE_LAPIS = 8, ENGRAVE_EMERALDS = 6;
-	/** The custom-data key that marks an engraved item. */
-	public static final String ENGRAVED = "jaymoskingdoms_engraved";
+	/** Throne golem: its armour, blow; how long kneeling into the throne or rising out of it takes (ticks). */
+	static final double THRONE_ARMOR = 14.0, THRONE_DAMAGE = 14.0;
+	static final int FOLD_TICKS = 30;
+	/** Where a sitter sits, in the throne's own blocks before its scale: above its feet, and forward of its middle. */
+	static final double SEAT_Y = 0.32, SEAT_Z = 0.25;
 
 	private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(TownGolem.class, EntityDataSerializers.INT);
-	/** Synced: a lamp warden's light is up (night) / a scribe still has ink. */
+	/** Synced: a lamp warden's light is up (night). */
 	private static final EntityDataAccessor<Boolean> LIT = SynchedEntityData.defineId(TownGolem.class, EntityDataSerializers.BOOLEAN);
+	/** Synced: a throne golem is folded into its throne. */
+	private static final EntityDataAccessor<Boolean> THRONE = SynchedEntityData.defineId(TownGolem.class, EntityDataSerializers.BOOLEAN);
 
 	/** Its realm (-1: one set down by a player). */
 	private int faction = -1;
 	private @Nullable UUID owner;
-	private int ink = SET_INK;
-	private long inkDay = -1;
 	private int cooldown;
-	/** Porter: what it carries, and what it's after. */
-	private ItemStack carried = ItemStack.EMPTY;
-	private @Nullable ItemEntity fetching;
-	private @Nullable BlockPos goal;
+	/** (Client) the tick it last knelt or rose. */
+	private int changedAt = -1000;
 
 	public TownGolem(EntityType<? extends TownGolem> type, Level level) {
 		super(type, level);
@@ -182,13 +174,14 @@ public class TownGolem extends AbstractGolem {
 		for (Kind kind : Kind.values()) {
 			ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(kind.id + "_golem"));
 			kind.item = Registry.register(BuiltInRegistries.ITEM, itemKey, new Builder(new Item.Properties().setId(itemKey).stacksTo(1)
-				.rarity(Rarity.UNCOMMON), kind));
+				.rarity(kind == Kind.DIAMOND ? Rarity.RARE : Rarity.UNCOMMON), kind));
 		}
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			for (Kind kind : Kind.values()) {
 				output.accept(kind.item);
 			}
 		});
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(TownGolem::shieldSitter);
 	}
 
 	public static AttributeSupplier.Builder createGolemAttributes() {
@@ -206,7 +199,6 @@ public class TownGolem extends AbstractGolem {
 		golem.setKind(kind);
 		golem.faction = faction;
 		golem.owner = owner;
-		golem.ink = faction >= 0 ? REALM_INK : SET_INK;
 		golem.setHomeTo(home, faction >= 0 ? REALM_RANGE : SET_RANGE);
 		golem.setPersistenceRequired();
 		return golem;
@@ -217,19 +209,40 @@ public class TownGolem extends AbstractGolem {
 		super.defineSynchedData(entityData);
 		entityData.define(KIND, 0);
 		entityData.define(LIT, false);
+		entityData.define(THRONE, false);
 	}
 
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
+		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true) {
+			@Override
+			public boolean canUse() {
+				return TownGolem.this.kind() == Kind.DIAMOND && !TownGolem.this.throne() && super.canUse();
+			}
+		});
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.8) {
 			@Override
 			public boolean canUse() {
-				return TownGolem.this.kind() != Kind.LAPIS && TownGolem.this.goal == null && TownGolem.this.fetching == null && super.canUse();
+				return !TownGolem.this.throne() && super.canUse();
 			}
 		});
-		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
-		this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F) {
+			@Override
+			public boolean canUse() {
+				return !TownGolem.this.throne() && super.canUse();
+			}
+		});
+		this.goalSelector.addGoal(9, new RandomLookAroundGoal(this) {
+			@Override
+			public boolean canUse() {
+				return !TownGolem.this.throne() && super.canUse();
+			}
+		});
+		// the throne golem fights what threatens those it keeps, as an iron golem does
+		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 5, false, false,
+			(target, level) -> this.kind() == Kind.DIAMOND && !this.throne() && target instanceof Enemy));
 	}
 
 	public Kind kind() {
@@ -241,6 +254,11 @@ public class TownGolem extends AbstractGolem {
 		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(kind.health);
 		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(kind.speed);
 		this.getAttribute(Attributes.SCALE).setBaseValue(kind.scale);
+		if (kind == Kind.DIAMOND) {
+			this.getAttribute(Attributes.ARMOR).setBaseValue(THRONE_ARMOR);
+			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(THRONE_DAMAGE);
+			this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
+		}
 		this.setHealth(this.getMaxHealth());
 		this.refreshDimensions();
 	}
@@ -249,23 +267,91 @@ public class TownGolem extends AbstractGolem {
 		return this.entityData.get(LIT);
 	}
 
-	public int faction() {
-		return this.faction;
+	public boolean throne() {
+		return this.entityData.get(THRONE);
 	}
 
-	/** The porter shows its basket while it carries something. */
-	public boolean carrying() {
-		return !this.carried.isEmpty();
+	/** (Client) how long since it last knelt into its throne or rose from it (ticks). */
+	public int sinceChanged() {
+		return this.tickCount - this.changedAt;
+	}
+
+	public int faction() {
+		return this.faction;
 	}
 
 	public @Nullable UUID owner() {
 		return this.owner;
 	}
 
-	/** The scribe stands where it's put (no speed, no stroll, and it can't be shoved). */
+	/** Kneels into its throne ({@code true}) or rises out of it, putting off whoever sat in it. */
+	void setThrone(boolean throne) {
+		if (this.kind() != Kind.DIAMOND || this.throne() == throne) {
+			return;
+		}
+		this.entityData.set(THRONE, throne);
+		if (throne) {
+			this.kneltAt = this.tickCount;
+		}
+		this.getNavigation().stop();
+		this.setTarget(null);
+		if (!throne) {
+			this.ejectPassengers();
+		}
+		this.level().broadcastEntityEvent(this, throne ? KNEEL : RISE);
+		this.playSound(throne ? SoundEvents.DEEPSLATE_BRICKS_PLACE : SoundEvents.DEEPSLATE_BRICKS_BREAK, 1.4F, 0.6F);
+		this.playSound(SoundEvents.AMETHYST_BLOCK_RESONATE, 1.0F, throne ? 0.7F : 0.9F);
+	}
+
+	public static final byte KNEEL = 96, RISE = 97;
+
+	@Override
+	public void handleEntityEvent(byte id) {
+		if (id == KNEEL || id == RISE) {
+			this.changedAt = this.tickCount;
+		} else {
+			super.handleEntityEvent(id);
+		}
+	}
+
 	@Override
 	public boolean isPushable() {
-		return this.kind() != Kind.LAPIS && super.isPushable();
+		return !this.throne() && super.isPushable();
+	}
+
+	// ---- the throne ----------------------------------------------------------------------------------------------
+
+	@Override
+	protected boolean canAddPassenger(Entity passenger) {
+		return this.throne() && this.getPassengers().isEmpty() && passenger instanceof LivingEntity;
+	}
+
+	@Override
+	protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
+		return new Vec3(0.0, SEAT_Y * scale, SEAT_Z * scale).yRot(-this.yBodyRot * Mth.DEG_TO_RAD);
+	}
+
+	/** One sat in a throne: a blow meant for them goes to the throne instead. */
+	private static boolean shieldSitter(LivingEntity victim, DamageSource source, float amount) {
+		if (!(victim.getVehicle() instanceof TownGolem throne) || !throne.throne() || !throne.isAlive() || amount <= 0.0F
+			|| source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || source.is(DamageTypes.STARVE) || source.is(DamageTypes.DROWN)
+			|| !(victim.level() instanceof ServerLevel level)) {
+			return true;
+		}
+		throne.hurtServer(level, source, amount);
+		level.sendParticles(new DustParticleOptions(0x7FEFE0, 1.2F), victim.getX(), victim.getY() + 0.8, victim.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
+		level.playSound(null, throne.blockPosition(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.NEUTRAL, 1.0F, 0.6F);
+		return false;
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (this.throne()) {
+			// a throne doesn't turn or walk
+			this.setYRot(this.yBodyRot);
+			this.yHeadRot = this.yBodyRot;
+		}
 	}
 
 	// ---- work ----------------------------------------------------------------------------------------------------
@@ -276,176 +362,18 @@ public class TownGolem extends AbstractGolem {
 		if (this.cooldown > 0) {
 			this.cooldown--;
 		}
-		if (this.kind() == Kind.GILT) {
-			this.entityData.set(LIT, level.isDarkOutside());
-		}
 		switch (this.kind()) {
-			case CLAY -> this.porter(level);
-			case FROST -> this.frost(level);
-			case GILT -> this.lamp(level);
+			case GILT -> {
+				this.entityData.set(LIT, level.isDarkOutside());
+				this.lamp(level);
+			}
 			case VERDANT -> this.mender(level);
-			case LAPIS -> this.scribe(level);
-		}
-	}
-
-	private BlockPos home() {
-		return this.hasHome() ? this.getHomePosition() : this.blockPosition();
-	}
-
-	private double homeRange() {
-		return this.hasHome() ? this.getHomeRadius() : SET_RANGE;
-	}
-
-	private void porter(ServerLevel level) {
-		if (!this.carried.isEmpty()) {
-			if (this.goal == null || this.tickCount % 100 == 0) {
-				this.goal = this.nearestChest(level);
-				if (this.goal == null) {
-					// nowhere to put it: set it down at home
-					if (this.tickCount % 100 == 0) {
-						this.dropCarried(level);
-					}
-					return;
-				}
-			}
-			if (this.distanceToSqr(Vec3.atCenterOf(this.goal)) <= (REACH + 1.0) * (REACH + 1.0)) {
-				Container box = HopperBlockEntity.getContainerAt(level, this.goal);
-				if (box != null) {
-					ItemStack left = HopperBlockEntity.addItem(null, box, this.carried.copy(), Direction.UP);
-					this.carried = left;
-					level.playSound(null, this.goal, SoundEvents.BUNDLE_INSERT, SoundSource.NEUTRAL, 0.8F, 0.8F);
-				}
-				if (!this.carried.isEmpty()) {
-					this.dropCarried(level);
-				}
-				this.goal = null;
-				this.getNavigation().stop();
-			} else if (this.tickCount % 10 == 0) {
-				this.getNavigation().moveTo(this.goal.getX() + 0.5, this.goal.getY(), this.goal.getZ() + 0.5, 1.0);
-			}
-			return;
-		}
-		if (this.fetching != null && (!this.fetching.isAlive() || this.fetching.getItem().isEmpty())) {
-			this.fetching = null;
-		}
-		if (this.fetching == null && this.tickCount % LOOK_EVERY == 0) {
-			BlockPos home = this.home();
-			double range = this.homeRange();
-			this.fetching = level.getEntitiesOfClass(ItemEntity.class, new AABB(home).inflate(range), e -> e.isAlive() && !e.hasPickUpDelay()
-					&& e.getAge() >= LYING_TICKS && level.getNearestPlayer(e, PLAYER_CLEAR) == null)
-				.stream().min(Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
-		}
-		if (this.fetching != null) {
-			if (this.distanceToSqr(this.fetching) <= REACH * REACH) {
-				this.carried = this.fetching.getItem().copy();
-				this.fetching.discard();
-				this.fetching = null;
-				this.playSound(SoundEvents.ITEM_PICKUP, 0.6F, 0.7F);
-			} else if (this.tickCount % 10 == 0) {
-				this.getNavigation().moveTo(this.fetching, 1.0);
-			}
-		}
-	}
-
-	private @Nullable BlockPos nearestChest(ServerLevel level) {
-		BlockPos home = this.home();
-		int r = (int)CHEST_RANGE;
-		BlockPos best = null;
-		double bestD = Double.MAX_VALUE;
-		for (BlockPos p : BlockPos.betweenClosed(home.offset(-r, -6, -r), home.offset(r, 6, r))) {
-			var state = level.getBlockState(p);
-			if (!state.is(Blocks.CHEST) && !state.is(Blocks.BARREL)) {
-				continue;
-			}
-			double d = this.distanceToSqr(Vec3.atCenterOf(p));
-			if (d < bestD) {
-				Container box = HopperBlockEntity.getContainerAt(level, p);
-				if (box != null && hasRoom(box, this.carried)) {
-					bestD = d;
-					best = p.immutable();
+			case DIAMOND -> {
+				if (this.throne()) {
+					this.getNavigation().stop();
 				}
 			}
 		}
-		return best;
-	}
-
-	private static boolean hasRoom(Container box, ItemStack stack) {
-		for (int i = 0; i < box.getContainerSize(); i++) {
-			ItemStack in = box.getItem(i);
-			if (in.isEmpty() || ItemStack.isSameItemSameComponents(in, stack) && in.getCount() < in.getMaxStackSize()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void dropCarried(ServerLevel level) {
-		if (!this.carried.isEmpty()) {
-			ItemEntity drop = this.spawnAtLocation(level, this.carried);
-			if (drop != null) {
-				drop.setPickUpDelay(40);
-			}
-			this.carried = ItemStack.EMPTY;
-		}
-	}
-
-	private void frost(ServerLevel level) {
-		if (this.tickCount % LOOK_EVERY == 0) {
-			// burning folk nearby: put them out
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(8.0),
-				e -> e.isOnFire() && e != this && !(e instanceof Enemy))) {
-				e.clearFire();
-				this.puff(level, e.position().add(0, e.getBbHeight() * 0.5, 0));
-			}
-			if (this.goal == null) {
-				this.goal = this.nearestFire(level);
-			}
-		}
-		if (this.goal != null) {
-			if (!level.getBlockState(this.goal).is(BlockTags.FIRE)) {
-				this.goal = null;
-			} else if (this.distanceToSqr(Vec3.atCenterOf(this.goal)) <= 9.0) {
-				level.removeBlock(this.goal, false);
-				this.puff(level, Vec3.atCenterOf(this.goal));
-				level.playSound(null, this.goal, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 1.2F);
-				this.goal = null;
-			} else if (this.tickCount % 10 == 0) {
-				this.getNavigation().moveTo(this.goal.getX() + 0.5, this.goal.getY(), this.goal.getZ() + 0.5, 1.1);
-			}
-			return;
-		}
-		Mob foe = this.nearestFoe(level, SNOW_RANGE);
-		if (foe != null && this.cooldown == 0) {
-			this.cooldown = SNOW_EVERY;
-			this.getLookControl().setLookAt(foe);
-			Snowball ball = new Snowball(level, this, new ItemStack(Items.SNOWBALL));
-			double dx = foe.getX() - this.getX(), dz = foe.getZ() - this.getZ();
-			double dy = foe.getEyeY() - 1.1 - ball.getY();
-			ball.shoot(dx, dy + Math.sqrt(dx * dx + dz * dz) * 0.2, dz, 1.6F, 8.0F);
-			level.addFreshEntity(ball);
-			this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 0.4F / (this.random.nextFloat() * 0.4F + 0.8F));
-		}
-	}
-
-	private @Nullable BlockPos nearestFire(ServerLevel level) {
-		BlockPos from = this.blockPosition();
-		BlockPos best = null;
-		double bestD = Double.MAX_VALUE;
-		for (BlockPos p : BlockPos.betweenClosed(from.offset(-FIRE_SEARCH, -4, -FIRE_SEARCH), from.offset(FIRE_SEARCH, 4, FIRE_SEARCH))) {
-			if (level.getBlockState(p).is(BlockTags.FIRE) && this.isWithinHome(p)) {
-				double d = p.distSqr(from);
-				if (d < bestD) {
-					bestD = d;
-					best = p.immutable();
-				}
-			}
-		}
-		return best;
-	}
-
-	private void puff(ServerLevel level, Vec3 at) {
-		level.sendParticles(ParticleTypes.SNOWFLAKE, at.x, at.y, at.z, 12, 0.4, 0.4, 0.4, 0.02);
-		level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 4, 0.3, 0.3, 0.3, 0.01);
 	}
 
 	private void lamp(ServerLevel level) {
@@ -483,30 +411,6 @@ public class TownGolem extends AbstractGolem {
 			this.beam(level, e, new DustParticleOptions(0x7FF09A, 1.0F));
 			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.4, 0.3, 0.0);
 			return;
-		}
-	}
-
-	private void scribe(ServerLevel level) {
-		long day = Deeds.today(level.getServer());
-		if (this.faction >= 0 && day != this.inkDay) {
-			this.inkDay = day;
-			this.ink = REALM_INK;
-		}
-		this.entityData.set(LIT, this.ink > 0);
-		if (this.cooldown > 0) {
-			return;
-		}
-		Mob foe = this.nearestFoe(level, SCRIBE_RANGE);
-		if (foe == null) {
-			return;
-		}
-		this.cooldown = SCRIBE_EVERY;
-		this.getLookControl().setLookAt(foe);
-		this.beam(level, foe, new DustParticleOptions(0x5A7FE0, 1.0F));
-		// a scribe with no ink left is weaker
-		foe.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, this.ink > 0 ? 1 : 0), this);
-		if (this.ink > 0) {
-			foe.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0), this);
 		}
 	}
 
@@ -558,9 +462,14 @@ public class TownGolem extends AbstractGolem {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return InteractionResult.SUCCESS;
 		}
-		// its maker folds it back up
-		if (stack.isEmpty() && player.isShiftKeyDown() && this.owner != null && this.owner.equals(player.getUUID())) {
-			this.dropCarried(level);
+		boolean maker = this.owner != null && this.owner.equals(player.getUUID());
+		if (stack.isEmpty() && maker && player.isShiftKeyDown()) {
+			if (this.throne()) {
+				// its maker bids it stand
+				this.setThrone(false);
+				return InteractionResult.SUCCESS;
+			}
+			// its maker folds it back up
 			ItemStack item = new ItemStack(this.kind().item);
 			if (!player.getInventory().add(item)) {
 				this.spawnAtLocation(level, item);
@@ -575,80 +484,42 @@ public class TownGolem extends AbstractGolem {
 			this.playSound(SoundEvents.AMETHYST_BLOCK_HIT, 1.0F, 1.2F);
 			return InteractionResult.SUCCESS;
 		}
-		if (this.kind() == Kind.LAPIS) {
-			if (stack.is(Items.LAPIS_BLOCK) && this.faction < 0) {
-				this.ink++;
-				stack.consume(1, player);
-				this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.0F, 1.0F);
-				return InteractionResult.SUCCESS;
+		if (this.kind() == Kind.DIAMOND && stack.isEmpty() && !player.isShiftKeyDown()) {
+			if (!this.throne()) {
+				if (maker) {
+					// its maker bids it kneel
+					this.setThrone(true);
+					return InteractionResult.SUCCESS;
+				}
+				return InteractionResult.PASS;
 			}
-			if (stack.has(DataComponents.ENCHANTMENTS) && !stack.getEnchantments().isEmpty() && player instanceof ServerPlayer sp) {
-				this.engrave(level, sp, hand, stack);
+			if (this.getPassengers().isEmpty() && this.watches(player) && this.sinceKnelt() >= FOLD_TICKS) {
+				player.startRiding(this);
 				return InteractionResult.SUCCESS;
 			}
 		}
 		return super.mobInteract(player, hand);
 	}
 
-	/** Engraves {@code stack}: one of its enchantments a level up, past the table's limit, and never enchanted again. */
-	private void engrave(ServerLevel level, ServerPlayer player, InteractionHand hand, ItemStack stack) {
-		if (engraved(stack)) {
-			player.sendSystemMessage(Component.translatable("golem.jaymoskingdoms.scribe.already"), true);
-			return;
-		}
-		if (this.ink <= 0) {
-			player.sendSystemMessage(Component.translatable(this.faction >= 0 ? "golem.jaymoskingdoms.scribe.dry" : "golem.jaymoskingdoms.scribe.dry_set"), true);
-			return;
-		}
-		ItemStack lapis = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
-		int emeralds = this.faction >= 0 ? ENGRAVE_EMERALDS : 0;
-		if (!player.isCreative() && (!lapis.is(Items.LAPIS_LAZULI) || lapis.getCount() < ENGRAVE_LAPIS
-			|| emeralds > 0 && Purse.count(player, Items.EMERALD) < emeralds)) {
-			player.sendSystemMessage(Component.translatable("golem.jaymoskingdoms.scribe.price", ENGRAVE_LAPIS, emeralds), true);
-			return;
-		}
-		ItemEnchantments.Mutable next = new ItemEnchantments.Mutable(stack.getEnchantments());
-		List<Holder<Enchantment>> on = List.copyOf(next.keySet());
-		Holder<Enchantment> pick = on.get(this.random.nextInt(on.size()));
-		next.set(pick, next.getLevel(pick) + 1);
-		stack.set(DataComponents.ENCHANTMENTS, next.toImmutable());
-		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putBoolean(ENGRAVED, true));
-		ItemLore lore = stack.getOrDefault(DataComponents.LORE, ItemLore.EMPTY);
-		stack.set(DataComponents.LORE, lore.withLineAdded(Component.translatable("golem.jaymoskingdoms.scribe.lore")
-			.withStyle(net.minecraft.ChatFormatting.DARK_AQUA)));
-		if (!player.isCreative()) {
-			lapis.shrink(ENGRAVE_LAPIS);
-			if (emeralds > 0) {
-				Purse.take(player, Items.EMERALD, emeralds);
-			}
-		}
-		this.ink--;
-		this.entityData.set(LIT, this.ink > 0);
-		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 30, 0.5, 0.6, 0.5, 0.6);
-		level.playSound(null, this.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.NEUTRAL, 1.0F, 0.8F);
-		player.sendSystemMessage(Component.translatable("golem.jaymoskingdoms.scribe.done", Enchantment.getFullname(pick, next.getLevel(pick))), true);
+	/** (Server) ticks since it knelt; it can be sat in once it's down. */
+	private int sinceKnelt() {
+		return this.tickCount - this.kneltAt;
 	}
 
-	/** {@code stack} has been engraved by a scribe (and can't be enchanted again). */
-	public static boolean engraved(ItemStack stack) {
-		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
-		return data != null && data.copyTag().getBooleanOr(ENGRAVED, false);
-	}
+	private int kneltAt = -1000;
 
 	// ---- body ------------------------------------------------------------------------------------------------------
 
 	@Override
 	protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
 		super.dropCustomDeathLoot(level, source, killedByPlayer);
-		this.dropCarried(level);
 		Item bits = switch (this.kind()) {
-			case CLAY -> Items.CLAY_BALL;
-			case FROST -> Items.SNOWBALL;
 			case GILT -> Items.GOLD_NUGGET;
 			case VERDANT -> Items.EMERALD;
-			case LAPIS -> Items.LAPIS_LAZULI;
+			case DIAMOND -> Items.DIAMOND;
 		};
-		this.spawnAtLocation(level, new ItemStack(bits, 2 + this.random.nextInt(4)));
+		int n = this.kind() == Kind.DIAMOND ? 1 + this.random.nextInt(3) : 2 + this.random.nextInt(4);
+		this.spawnAtLocation(level, new ItemStack(bits, n));
 	}
 
 	@Override
@@ -658,17 +529,27 @@ public class TownGolem extends AbstractGolem {
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source) {
-		return this.kind() == Kind.FROST ? SoundEvents.SNOW_GOLEM_HURT : SoundEvents.STONE_HIT;
+		return this.kind() == Kind.DIAMOND ? SoundEvents.DEEPSLATE_BRICKS_HIT : SoundEvents.STONE_HIT;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		return this.kind() == Kind.FROST ? SoundEvents.SNOW_GOLEM_DEATH : SoundEvents.STONE_BREAK;
+		return this.kind() == Kind.DIAMOND ? SoundEvents.DEEPSLATE_BRICKS_BREAK : SoundEvents.STONE_BREAK;
 	}
 
 	@Override
 	protected void playStepSound(BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
-		this.playSound(this.kind() == Kind.FROST ? SoundEvents.SNOW_STEP : SoundEvents.STONE_STEP, 0.8F, 0.7F);
+		this.playSound(this.kind() == Kind.DIAMOND ? SoundEvents.DEEPSLATE_BRICKS_STEP : SoundEvents.STONE_STEP, 0.8F, 0.7F);
+	}
+
+	@Override
+	public boolean doHurtTarget(ServerLevel level, Entity target) {
+		boolean hit = super.doHurtTarget(level, target);
+		if (hit) {
+			target.setDeltaMovement(target.getDeltaMovement().add(0.0, 0.4, 0.0));
+			this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0F, 0.7F);
+		}
+		return hit;
 	}
 
 	@Override
@@ -676,8 +557,7 @@ public class TownGolem extends AbstractGolem {
 		super.addAdditionalSaveData(output);
 		output.putInt("kind", this.kind().ordinal());
 		output.putInt("faction", this.faction);
-		output.putInt("ink", this.ink);
-		output.putLong("ink_day", this.inkDay);
+		output.putBoolean("throne", this.throne());
 		if (this.owner != null) {
 			output.putString("owner", this.owner.toString());
 		}
@@ -685,25 +565,18 @@ public class TownGolem extends AbstractGolem {
 			output.putLong("home", this.getHomePosition().asLong());
 			output.putInt("home_range", this.getHomeRadius());
 		}
-		if (!this.carried.isEmpty()) {
-			output.store("carried", ItemStack.CODEC, this.carried);
-		}
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.entityData.set(KIND, input.getIntOr("kind", 0));
+		this.entityData.set(THRONE, input.getBooleanOr("throne", false));
 		this.faction = input.getIntOr("faction", -1);
-		this.ink = input.getIntOr("ink", SET_INK);
-		this.inkDay = input.getLongOr("ink_day", -1L);
 		this.owner = input.getString("owner").map(UUID::fromString).orElse(null);
-		Optional<Long> home = input.getLong("home");
-		home.ifPresent(h -> this.setHomeTo(BlockPos.of(h), input.getIntOr("home_range", SET_RANGE)));
-		this.carried = input.read("carried", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+		input.getLong("home").ifPresent(h -> this.setHomeTo(BlockPos.of(h), input.getIntOr("home_range", SET_RANGE)));
 	}
 
-	/** The golem's heart, made on the altar: set it down on a block and it stands up and gets to work there. */
 	static final class Builder extends Item {
 		final Kind kind;
 

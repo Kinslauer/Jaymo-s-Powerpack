@@ -10,8 +10,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.item.v1.EnchantmentEvents;
-import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -36,24 +34,25 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * A share of realms ({@link #REALM_SHARE}; never a purist's, never a camp) are <b>golemworks</b>: their folk are attuned
  * (each glows faintly to the attuned, {@link Mana}, and can be asked about their magic), and the realm keeps its own town
- * golems ({@link TownGolem}) about its seat: {@link #ROSTER} of each kind. When a player first comes near, the whole roster
+ * golems ({@link TownGolem}) about its seat: {@link #ROSTER} of each kind (lamp wardens, menders, and a throne golem knelt
+ * into its throne by the seat). When a player first comes near, the whole roster
  * is built at once; after that a lost golem is rebuilt one at a time, one every {@link #REBUILD_TICKS}. Whether a realm is
  * one is drawn once from who it is, so it never changes; an op can set it with {@code /kingdom golemworks on|off} at a seat.
  * <p>
- * Also here: a mender's watch ({@link #sparedByMender}), and an engraved item refusing further enchanting.
+ * Also here: a mender's watch ({@link #sparedByMender}).
  */
 public final class Golemworks {
 	/** How often a realm is a golemworks. */
 	static final float REALM_SHARE = 0.15F;
 	/** How many of each golem a golemworks keeps. */
-	static final Map<TownGolem.Kind, Integer> ROSTER = new EnumMap<>(Map.of(TownGolem.Kind.CLAY, 3, TownGolem.Kind.FROST, 2,
-		TownGolem.Kind.GILT, 2, TownGolem.Kind.VERDANT, 1, TownGolem.Kind.LAPIS, 1));
+	static final Map<TownGolem.Kind, Integer> ROSTER = new EnumMap<>(Map.of(TownGolem.Kind.GILT, 2, TownGolem.Kind.VERDANT, 2,
+		TownGolem.Kind.DIAMOND, 1));
 	/** How often seats near players are looked at (ticks), how near a player must be, and a lost golem's rebuild time. */
 	static final int CHECK_TICKS = 200;
 	static final double PLAYER_NEAR = 96.0;
 	static final long REBUILD_TICKS = 6000L;
-	/** Golems are set down this far from the seat (the scribe nearer), and counted this far. */
-	static final int SET_MIN = 6, SET_MAX = 20, SCRIBE_MIN = 3, SCRIBE_MAX = 7;
+	/** Golems are set down this far from the seat (the throne nearer), and counted this far. */
+	static final int SET_MIN = 6, SET_MAX = 20, THRONE_MIN = 3, THRONE_MAX = 7;
 	static final double COUNT_RANGE = 64.0;
 	/** Its folk: attuned this near the seat, with a power of 1 to this. */
 	static final double FOLK_RANGE = 64.0;
@@ -81,16 +80,12 @@ public final class Golemworks {
 
 	static void register() {
 		TownGolem.register();
-		BulwarkDiamond.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % CHECK_TICKS == 0) {
 				tick(server);
 			}
 		});
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> !sparedByMender(entity));
-		// an engraved item takes no more enchanting (table, anvil, books)
-		EnchantmentEvents.ALLOW_ENCHANTING.register((enchantment, stack, context) ->
-			TownGolem.engraved(stack) ? TriState.FALSE : TriState.DEFAULT);
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("kingdom")
 			.then(Commands.literal("golemworks").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("on").executes(c -> set(c.getSource(), true)))
@@ -210,8 +205,8 @@ public final class Golemworks {
 
 	private static boolean build(ServerLevel level, Faction f, TownGolem.Kind kind) {
 		BlockPos seat = f.seat();
-		boolean scribe = kind == TownGolem.Kind.LAPIS;
-		int min = scribe ? SCRIBE_MIN : SET_MIN, max = scribe ? SCRIBE_MAX : SET_MAX;
+		boolean throne = kind == TownGolem.Kind.DIAMOND;
+		int min = throne ? THRONE_MIN : SET_MIN, max = throne ? THRONE_MAX : SET_MAX;
 		for (int tries = 0; tries < 12; tries++) {
 			double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
 			int r = min + level.getRandom().nextInt(max - min + 1);
@@ -229,6 +224,11 @@ public final class Golemworks {
 				continue;
 			}
 			level.addFreshEntity(golem);
+			if (throne) {
+				// a realm's throne golem kneels by the seat as its throne, and stays one
+				golem.setYBodyRot(level.getRandom().nextFloat() * 360.0F);
+				golem.setThrone(true);
+			}
 			level.sendParticles(ParticleTypes.ENCHANT, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 20, 0.4, 0.8, 0.4, 0.5);
 			return true;
 		}
