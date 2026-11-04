@@ -294,3 +294,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (`ZFighterRogue.raider`, `ZFighterRaiders.raider`). Compile-checked against the 26.3 jars; not played.
 - **0.20.37, Kingdoms 0.7.532, story figure tails:** tails on the life story's figure no longer hang down between the
   legs. See the Kingdoms MODLOG.
+- **0.20.38, sitting knees bend** (`MeditatePose.bendKnees`, via `KneeBend`): Andy: "the knees should bend, because if
+  not, you sit with the legs open". Cross-legged now folds each shin back across in front of the other leg; knees up
+  draws the knees up with the shins down to the feet; seat poses hang the shins down from the knee (legs crossed lifts
+  the right thigh over the left). Leaning back is unchanged. Sitting while still holding Sneak no longer also gets the
+  crouch's legs (`CrouchPose.otherPose`). Compile-checked; leg shapes checked in a box sketch, not seen in game.

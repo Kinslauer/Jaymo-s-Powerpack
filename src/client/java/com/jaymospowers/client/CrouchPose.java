@@ -323,7 +323,9 @@ public final class CrouchPose {
 	private static boolean otherPose(AvatarRenderState state) {
 		return state.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null
 			|| state.getData(com.jaymospowers.client.finisher.FinisherPose.KEY) != null || state.getData(CarryPose.CARRIER_KEY) != null
-			|| state.getData(CrawlPose.KEY) != null;
+			|| state.getData(CrawlPose.KEY) != null
+			// (0.20.38) sitting down while still holding Sneak: the sit's own legs, not the crouch's
+			|| state.getData(MeditatePose.KEY) != null;
 	}
 
 	/** An arm with nothing to do (empty, or just holding something), free to be held out or rested. */
