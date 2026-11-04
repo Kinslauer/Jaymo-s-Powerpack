@@ -622,6 +622,8 @@ public final class Theft {
 			return;
 		}
 		Weight w = weight != null ? weight : crime.weight;
+		// (0.7.535) a crime breaks commandments, seen or not
+		Commandments.crime(player, crime, !seen.isEmpty(), w == Weight.HEAVY);
 		if (!seen.isEmpty()) {
 			// (0.7.102) a hood is a fragile mask: seen close, face on, in the light, it is you
 			Identities.recognise(level, player, f, seen, null);

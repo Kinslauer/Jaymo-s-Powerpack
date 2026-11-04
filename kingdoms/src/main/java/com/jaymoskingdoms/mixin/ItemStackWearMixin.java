@@ -20,6 +20,8 @@ abstract class ItemStackWearMixin {
 	private void jaymoskingdoms$spareWear(int amount, ServerLevel level, @Nullable ServerPlayer player, CallbackInfoReturnable<Integer> cir) {
 		if (player != null) {
 			cir.setReturnValue(Blessings.wear((ItemStack)(Object)this, player, cir.getReturnValue()));
+			// (0.7.535) a tool that breaks in the hand breaks the Anvil-Father's second
+			com.jaymoskingdoms.Commandments.wore((ItemStack)(Object)this, player, cir.getReturnValue());
 		}
 	}
 }

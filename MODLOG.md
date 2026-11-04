@@ -333,5 +333,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   - **Magma blood** (tag `blood/magma`: magma cubes, striders): bright orange, full-bright as it flies, glowing where it
     lands and smoking, then cooling to a dark crust over 45 s (`BloodParticles.MAGMA`).
   Masks and sprites are ours (`tools/blood_textures.py`). Compile-checked against the 26.3 jars; not played.
-- **0.20.42, Kingdoms 0.7.535, Zoological Guide by recipe:** Cube Animals no longer hands out its Zoological Guide on
+- **0.20.42, Kingdoms 0.7.535, commandments for every patron:** every patron now has ten commandments in a book like
+  the Truth's (its ten kept as they were); breaking your own patron's costs favour and is counted in the book, and the
+  Truth's villagers refuse orders that would break theirs. See the Kingdoms MODLOG.
+- **0.20.43, Kingdoms 0.7.536, Zoological Guide by recipe:** Cube Animals no longer hands out its Zoological Guide on
   first join; craft it from a book, a feather, an ink sac and a bone (shapeless). See the Kingdoms MODLOG.

@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.535) Cube Animals hands every player its Zoological Guide (and a chat line about it) the first time they join
+ * (0.7.536) Cube Animals hands every player its Zoological Guide (and a chat line about it) the first time they join
  * (its {@code ExampleMixin.cubeanimals$handleJoin}, merged into {@link Player}). Andy wants it crafted instead (recipe
  * {@code jaymoskingdoms:zoological_guide}), so the join gift is skipped. The priority applies this after Cube Animals'
  * own mixin has added the method; {@code require = 0} so the pack still loads without Cube Animals.
