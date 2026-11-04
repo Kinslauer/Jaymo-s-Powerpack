@@ -39,6 +39,18 @@ public final class XenoformHand {
 		} else if (model instanceof XenoFormModels.Gremlin gremlin) {
 			// (0.19.66) its knuckle-walking forearm and fist straightened for the first-person arm
 			gremlin.handPose();
+		} else if (model instanceof XenoFormModels.Bulwark bulwark) {
+			// (0.19.83) its forearm and fist straightened for the first-person arm
+			bulwark.handPose();
+		} else if (model instanceof XenoFormModels.Knell knell) {
+			// (0.19.83) its bent forearm and fist straightened, the shoulder brought back off the hump
+			knell.handPose();
+		} else if (model instanceof XenoFormModels.Shade shade) {
+			// (0.19.83) its two-segment arm straightened (a crawling Shade drawn last leaves the elbow and hand bent)
+			shade.handPose();
+		} else if (model instanceof XenoFormModels.Lurk lurk) {
+			// (0.19.83) its forearm and hand straightened (on all fours they're bent)
+			lurk.handPose();
 		}
 		poseStack.pushPose();
 		// a slim skin's arm is a pixel thinner; the alien's never is, so nudge it in

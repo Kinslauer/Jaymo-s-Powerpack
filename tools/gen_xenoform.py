@@ -325,16 +325,47 @@ def fallen_star():
 
 # ---- the aliens (entity skins, 64x128) ----
 def bulwark():
-    """Riveted steel plate, amber visor, the insignia stamped on the breastplate."""
+    """(0.19.83 a four-armed brute) Riveted steel plate, amber visor, the insignia stamped on the breastplate. Nothing
+    is left of the man's layout: every box has its own place (see the table in the code), the chest, head, four arms,
+    legs and feet each plated and bricked, darker iron on the forearms and shins, black knuckles and toes. Drawn on its
+    own random stream, then the shared one is left exactly where the old skin left it (`stream_words` draws on), so the
+    forms drawn after it come out as before."""
+    # how many 32-bit draws the shared stream advanced across the old skin (the forms drawn after it keep their speckle)
+    stream_words = 5008
+    saved = rng.getstate()
+    rng.seed(2683)
     img = new_skin()
     steel = (112, 122, 136)
     dark = shade(steel, 0.55)
     rivet = shade(steel, 1.45)
-    parts(img, steel, edge=0.8)
-    # plate seams on every face, bricked, with a rivet where they cross
-    for part in BASE_PARTS:
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name in ("top", "bottom"):
+    heavy = shade(steel, 0.72)
+    iron = shade(steel, 0.78)
+    # every box: name -> (u, v, w, h, d); none overlaps another, all inside 64x128
+    B = {
+        "chest": (0, 0, 10, 8, 5), "head": (30, 0, 6, 6, 6), "spine": (0, 25, 2, 9, 2),
+        "uaUR": (0, 13, 4, 8, 4), "uaUL": (16, 13, 4, 8, 4), "uaLR": (32, 13, 4, 8, 4), "uaLL": (48, 13, 4, 8, 4),
+        "faUR": (8, 25, 5, 6, 5), "faUL": (28, 25, 5, 6, 5), "faLR": (0, 36, 5, 6, 5), "faLL": (20, 36, 5, 6, 5),
+        "fiUR": (40, 36, 6, 4, 6), "fiUL": (0, 47, 6, 4, 6), "fiLR": (24, 47, 6, 4, 6), "fiLL": (0, 57, 6, 4, 6),
+        "thighR": (24, 57, 3, 7, 3), "thighL": (36, 57, 3, 7, 3), "shinR": (48, 57, 3, 7, 3), "shinL": (0, 67, 3, 7, 3),
+        "pauldR": (12, 67, 6, 3, 6), "pauldL": (36, 67, 6, 3, 6), "footR": (0, 77, 4, 3, 6), "footL": (20, 77, 4, 3, 6),
+        "waist": (40, 77, 4, 5, 3), "belt": (0, 86, 6, 2, 4), "brow": (20, 86, 8, 2, 3), "jaw": (42, 86, 6, 2, 3),
+        "tuskR": (60, 86, 1, 3, 1), "tuskL": (0, 92, 1, 3, 1),
+    }
+    plated = [n for n in B if not n.startswith(("tusk", "spine"))]
+    for name in B:
+        if name.startswith(("fa", "fi", "shin")):
+            base = iron
+        elif name.startswith(("pauld", "belt", "brow", "jaw", "spine", "foot")):
+            base = heavy
+        elif name.startswith("tusk"):
+            base = shade(steel, 1.5)
+        else:
+            base = steel
+        box(img, B[name], base, 0.15, edge=0.8)
+    # plate seams on every side face, bricked, with a rivet where they cross
+    for name in plated:
+        for fname, (x0, y0, x1, y1) in faces(*B[name]).items():
+            if fname in ("top", "bottom") or y1 - y0 < 4:
                 continue
             for y in range(y0 + 3, y1 - 1, 4):
                 rect(img, (x0, y, x1, y + 1), dark)
@@ -343,43 +374,60 @@ def bulwark():
                     img.putpixel((x, y), rivet)
                     if y + 1 < y1 - 1 and rng.random() < 0.5:
                         img.putpixel((x, y - 1), rivet)
-    # heavier iron on the forearms and shins, black at the knuckles and toes
-    for part in LIMBS:
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name in ("front", "back", "left", "right"):
-                noise_fill(img, shade(steel, 0.78), 0.15, (x0, y1 - 5, x1, y1 - 2))
-                rect(img, (x0, y1 - 5, x1, y1 - 4), rivet)
-    claws(img, (36, 38, 44, 255))
-    # head: a jaw guard, a vertical seam down the brow, and a wide amber visor
-    hx0, hy0, hx1, hy1 = front(HEAD)
-    noise_fill(img, shade(steel, 0.7), 0.15, (hx0, hy1 - 2, hx1, hy1))
-    rect(img, (11, 8, 13, 10), dark)
-    rect(img, (9, 11, 15, 13), (40, 32, 20, 255))
-    eyes(img, (255, 200, 60, 255), 11, wide=True)
-    img.putpixel((10, 11), (255, 240, 170, 255))
-    img.putpixel((14, 11), (255, 240, 170, 255))
-    # neck bolts on the head's sides
-    for (x0, y0, x1, y1) in (faces(*HEAD)["right"], faces(*HEAD)["left"]):
-        rect(img, (x0 + 3, y1 - 3, x0 + 5, y1 - 1), dark)
-        img.putpixel((x0 + 3, y1 - 3), rivet)
-    # the breastplate (the model's plates cover the top of the body): a central ridge and the insignia under it
-    bx0, by0, bx1, by1 = front(BODY)
-    rect(img, (23, by0, 25, by1), shade(steel, 0.9))
-    chest_insignia(img)
-    # extras: brow 10x3x3 at (0,64); plates 12x4x7 at (0,72); pauldrons 5x3x5 at (40,64)
-    heavy = shade(steel, 0.72)
-    box(img, (0, 64, 10, 3, 3), heavy, 0.15, edge=0.8)
-    box(img, (0, 72, 12, 4, 7), heavy, 0.15, edge=0.8)
-    box(img, (40, 64, 5, 3, 5), heavy, 0.15, edge=0.8)
-    for part in ((0, 64, 10, 3, 3), (0, 72, 12, 4, 7), (40, 64, 5, 3, 5)):
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name != "bottom":
+    # rivets along the rims of the pauldrons, belt and brow
+    for name in ("pauldR", "pauldL", "belt", "brow"):
+        for fname, (x0, y0, x1, y1) in faces(*B[name]).items():
+            if fname not in ("bottom", "top"):
                 for x in range(x0 + 1, x1 - 1, 3):
                     img.putpixel((x, y0 + 1), rivet)
-    # a bright rim along the top of the plates
-    rect(img, (7, 72, 19, 73), shade(steel, 1.2))
-    clear_hat(img)
+    # a bright rim along the top of the pauldrons and the belt
+    for name in ("pauldR", "pauldL", "belt"):
+        tx0, ty0, tx1, ty1 = faces(*B[name])["top"]
+        rect(img, (tx0, ty0, tx1, ty1), shade(steel, 1.2))
+    # black knuckles on the fists, black toes and claws on the feet
+    for name in ("fiUR", "fiUL", "fiLR", "fiLL", "footR", "footL"):
+        for fname, (x0, y0, x1, y1) in faces(*B[name]).items():
+            if fname == "bottom":
+                noise_fill(img, (36, 38, 44, 255), 0.2, (x0, y0, x1, y1))
+            elif fname in ("front", "back", "left", "right"):
+                for x in range(x0, x1, 2):
+                    rect(img, (x, y1 - 1, x + 1, y1), (36, 38, 44, 255))
+    for name in ("fiUR", "fiUL", "fiLR", "fiLL"):
+        fx0, fy0, fx1, fy1 = faces(*B[name])["front"]
+        for x in range(fx0 + 1, fx1 - 1, 2):
+            img.putpixel((x, fy0 + 1), rivet)
+    # a band of darker iron at the wrist, above the fist
+    for name in ("faUR", "faUL", "faLR", "faLL"):
+        for fname, (x0, y0, x1, y1) in faces(*B[name]).items():
+            if fname in ("front", "back", "left", "right"):
+                rect(img, (x0, y1 - 2, x1, y1 - 1), dark)
+    # head: a jaw guard, a vertical seam down the brow, and a wide amber visor
+    hx0, hy0, hx1, hy1 = faces(*B["head"])["front"]
+    noise_fill(img, shade(steel, 0.7), 0.15, (hx0, hy1 - 1, hx1, hy1))
+    rect(img, (hx0 + 2, hy0, hx0 + 4, hy0 + 2), dark)
+    rect(img, (hx0, hy0 + 2, hx1, hy0 + 4), (40, 32, 20, 255))
+    rect(img, (hx0 + 1, hy0 + 2, hx0 + 3, hy0 + 4), (255, 200, 60, 255))
+    rect(img, (hx1 - 3, hy0 + 2, hx1 - 1, hy0 + 4), (255, 200, 60, 255))
+    img.putpixel((hx0 + 1, hy0 + 2), (255, 240, 170, 255))
+    img.putpixel((hx1 - 3, hy0 + 2), (255, 240, 170, 255))
+    # neck bolts on the head's sides
+    for fname in ("right", "left"):
+        x0, y0, x1, y1 = faces(*B["head"])[fname]
+        rect(img, (x0 + 2, y1 - 3, x0 + 4, y1 - 1), dark)
+        img.putpixel((x0 + 2, y1 - 3), rivet)
+    # the jaw guard's dark mouth line under the visor
+    jx0, jy0, jx1, jy1 = faces(*B["jaw"])["front"]
+    rect(img, (jx0 + 1, jy0, jx1 - 1, jy0 + 1), (30, 24, 16, 255))
+    # the breastplate: a central ridge and the insignia under it; the back plate has a ridge too
+    cx0, cy0, cx1, cy1 = faces(*B["chest"])["front"]
+    rect(img, (cx0 + 4, cy0, cx0 + 6, cy1), shade(steel, 0.9))
+    insignia(img, cx0 + 5, cy0 + 2, small=True)
+    bx0, by0, bx1, by1 = faces(*B["chest"])["back"]
+    rect(img, (bx0 + 4, by0, bx0 + 6, by1), dark)
     save(img, "entity/xenoform_bulwark.png")
+    rng.setstate(saved)
+    for _ in range(stream_words):
+        rng.getrandbits(32)
 
 
 # the vanilla fire ramp (campfire flames, blaze powder), hottest first
@@ -1018,70 +1066,159 @@ def gremlin():
 
 
 def knell():
-    """Sculk-dark hide threaded with cyan light, bone horns, a glowing ribcage with the insignia at the sternum,
-    a blind face, and claws of bone."""
+    """(0.19.83) Knell, the hunched deep-dark beast: sculk-dark hide threaded with cyan light, bone horns, a brow and
+    claws of bone, a blind face with a faint glow, a glowing chest cavity behind two bone rib plates (the insignia
+    at its heart, in the gap between the plates), sculk spurs on the hump and tendrils at the chin. Every box is its
+    own (the man's old head/body/limb regions are reused for them, nothing shares a texel): the layout is the UV
+    table in XenoFormModels.Knell's mesh (texOffs)."""
     img = new_skin()
     sculk = (20, 44, 52)
     cold = (31, 184, 200)
     hot = (120, 240, 250)
     bone = (206, 196, 176)
-    parts(img, sculk, 0.3)
-    # veins of light everywhere, thickest down the limbs; sculk growths (darker, with a bright centre) on the back
-    for part in BASE_PARTS:
-        for name, b in faces(*part).items():
-            n = 1 if name in ("top", "bottom") else 3
-            veins(img, b, cold, hot, n + (2 if part in LIMBS else 0), (2, 6))
-    kx0, ky0, kx1, ky1 = faces(*BODY)["back"]
+    deep = (8, 28, 34)
+    uv = {
+        "head": (0, 0, 8, 6, 8), "trunk": (0, 14, 11, 16, 7), "hump": (0, 37, 15, 6, 9), "neck": (36, 0, 6, 11, 6),
+        "fore_r": (36, 17, 6, 10, 6), "fore_l": (0, 52, 6, 10, 6), "arm_r": (24, 52, 5, 11, 5), "arm_l": (44, 52, 5, 11, 5),
+        "fist_r": (0, 68, 6, 4, 7), "fist_l": (26, 68, 6, 4, 7), "thigh_r": (0, 79, 5, 8, 5), "thigh_l": (20, 79, 5, 8, 5),
+        "jaw": (0, 92, 7, 3, 6), "foot_r": (40, 79, 5, 2, 7), "foot_l": (40, 88, 5, 2, 7), "shin_r": (48, 33, 4, 7, 4),
+        "shin_l": (26, 97, 4, 7, 4), "brow": (0, 101, 9, 2, 3), "growth_r": (48, 44, 3, 5, 3), "growth_l": (52, 68, 3, 5, 3),
+        "rib_r": (42, 97, 4, 8, 1), "rib_l": (52, 97, 4, 8, 1), "horn_rb": (0, 106, 2, 6, 2), "horn_lb": (8, 106, 2, 6, 2),
+        "horn_rt": (16, 106, 2, 5, 2), "horn_lt": (42, 106, 2, 5, 2), "tendril0": (32, 0, 1, 4, 1), "tendril1": (60, 0, 1, 4, 1),
+        "tendril2": (32, 5, 1, 4, 1),
+    }
+
+    def hide(name, base=sculk, spread=0.3, n=2):
+        """A box of sculk hide with wandering veins of light (fewer on its top and bottom)."""
+        box(img, uv[name], base, spread)
+        for face, b in faces(*uv[name]).items():
+            veins(img, b, cold, hot, 1 if face in ("top", "bottom") else n, (2, 5))
+
+    def banded(name, rows, color=bone):
+        """Bone plates round the bottom `rows` of a limb box's four sides, in stripes, with a dark claw tip row; bone underneath."""
+        for face, (x0, y0, x1, y1) in faces(*uv[name]).items():
+            if face in ("front", "back", "left", "right"):
+                for x in range(x0, x1, 2):
+                    rect(img, (x, y1 - rows, x + 1, y1), shade(color, 0.95))
+                    rect(img, (x + 1, y1 - rows, x + 2, y1), shade(color, 0.75))
+                rect(img, (x0, y1 - 1, x1, y1), shade(color, 0.5))
+            elif face == "bottom":
+                noise_fill(img, color, 0.15, (x0, y0, x1, y1))
+
+    # ---- the head: blind and smooth, a faint glow where the eyes would be; the mouth's roof glows ----
+    hide("head", shade(sculk, 0.9), 0.2, 2)
+    hx0, hy0, hx1, hy1 = faces(*uv["head"])["front"]
+    noise_fill(img, shade(sculk, 0.9), 0.2, (hx0, hy0, hx1, hy1))
+    rect(img, (hx0 + 1, hy0 + 2, hx1 - 1, hy0 + 4), (18, 90, 100, 255))
+    rect(img, (hx0 + 2, hy0 + 3, hx1 - 2, hy0 + 4), (30, 140, 150, 255))
+    rect(img, (hx0 + 1, hy1 - 1, hx1 - 1, hy1), shade(sculk, 0.55))
+    noise_fill(img, (18, 90, 100), 0.4, faces(*uv["head"])["bottom"])
+    # ---- the brow: a bone ridge, cracked ----
+    box(img, uv["brow"], bone, 0.2, edge=0.7)
+    for face, b in faces(*uv["brow"]).items():
+        speckle(img, b, shade(bone, 0.55), 3)
+    # ---- the jaw: sculk with bone teeth along its front, the inside glowing ----
+    hide("jaw", shade(sculk, 0.8), 0.25, 1)
+    for face, (x0, y0, x1, y1) in faces(*uv["jaw"]).items():
+        if face in ("front", "left", "right"):
+            for x in range(x0, x1, 2):
+                rect(img, (x, y0, x + 1, y0 + 1), shade(bone, 1.05))
+    vgrad(img, faces(*uv["jaw"])["top"], cold, hot, 0.2)
+    # ---- the tendrils hanging from the chin: a lit tip ----
+    for i in range(3):
+        name = "tendril%d" % i
+        box(img, uv[name], shade(sculk, 0.7), 0.2)
+        for face, (x0, y0, x1, y1) in faces(*uv[name]).items():
+            if face in ("front", "back", "left", "right"):
+                rect(img, (x0, y1 - 1, x1, y1), cold + (255,))
+    # ---- the horns: bone, ringed, pale at the tips ----
+    for name in ("horn_rb", "horn_lb", "horn_rt", "horn_lt"):
+        for face, (x0, y0, x1, y1) in faces(*uv[name]).items():
+            top, low = ((236, 230, 214), shade(bone, 0.7)) if name.endswith("t") else (shade(bone, 1.05), shade(bone, 0.6))
+            vgrad(img, (x0, y0, x1, y1), top, low, 0.1)
+            for y in range(y0 + 2, y1, 2):
+                rect(img, (x0, y, x1, y + 1), shade(bone, 0.6))
+    # ---- the neck: thick sculk hide, banded with darker folds ----
+    hide("neck", shade(sculk, 0.85), 0.3, 3)
+    for face, (x0, y0, x1, y1) in faces(*uv["neck"]).items():
+        if face in ("front", "back", "left", "right"):
+            for y in range(y0 + 3, y1, 4):
+                rect(img, (x0, y, x1, y + 1), shade(sculk, 0.55))
+    # ---- the trunk: hide; the chest a glowing cavity (hidden behind the rib plates but for the gap between them) with the insignia at its heart ----
+    hide("trunk", shade(sculk, 0.8), 0.3, 3)
+    # (the face's top 5 rows lie inside the hump's overhang; the ribs hinge over rows 5-12, the plate's middle on row 9)
+    fx0, fy0, fx1, fy1 = faces(*uv["trunk"])["front"]
+    for y in range(fy0 + 5, fy0 + 13):
+        for x in range(fx0, fx1):
+            d = ((x - (fx0 + 5.0)) ** 2 + ((y - (fy0 + 9.0)) / 1.2) ** 2) ** 0.5
+            t = max(0.0, 1.0 - d / 6.0)
+            img.putpixel((x, y), lerp(deep, hot, t ** 1.6 * 0.8 + rng.random() * 0.08))
+    rect(img, (fx0, fy0 + 4, fx1, fy0 + 5), shade(sculk, 0.6))
+    rect(img, (fx0, fy0 + 13, fx1, fy0 + 14), shade(sculk, 0.55))
+    # the belly below the chest: bone plates in bands
+    for y in range(fy0 + 14, fy1, 3):
+        rect(img, (fx0 + 1, y, fx1 - 1, y + 1), shade(bone, 0.75))
+        rect(img, (fx0 + 1, y + 1, fx1 - 1, y + 2), shade(bone, 0.45))
+    insignia(img, fx0 + 5, fy0 + 7, small=True, rim=(8, 24, 30, 255))
+    # sculk growths (darker, with a bright centre) on the back
+    kx0, ky0, kx1, ky1 = faces(*uv["trunk"])["back"]
     for _ in range(4):
         x, y = rng.randrange(kx0 + 1, kx1 - 1), rng.randrange(ky0 + 1, ky1 - 1)
         rect(img, (x - 1, y - 1, x + 2, y + 2), shade(sculk, 0.6))
-        img.putpixel((x, y), hot + (255,) if len(hot) == 3 else hot)
-    # bone plates at the knuckles and shins, claw tips
-    for part in LIMBS:
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name in ("front", "back", "left", "right"):
-                for x in range(x0, x1, 2):
-                    rect(img, (x, y1 - 3, x + 1, y1), bone)
-            elif name == "bottom":
-                noise_fill(img, bone, 0.15, (x0, y0, x1, y1))
-    # the face: blind and smooth, a faint glow where the eyes would be, sculk tendrils at the jaw
-    hx0, hy0, hx1, hy1 = front(HEAD)
-    noise_fill(img, shade(sculk, 0.9), 0.2, (hx0, hy0, hx1, hy1))
-    rect(img, (9, 10, 15, 12), (18, 90, 100, 255))
-    rect(img, (10, 11, 14, 12), (30, 140, 150, 255))
-    for x in (9, 11, 13, 15):
-        rect(img, (x, 14, x + 1, 16), shade(sculk, 0.6))
-        img.putpixel((x, 15), cold + (255,))
-    # the ribs cover the chest; the chest behind is dark, a glow at its heart
-    bx0, by0, bx1, by1 = front(BODY)
-    noise_fill(img, shade(sculk, 0.7), 0.2, (bx0, by0, bx1, by1))
-    veins(img, (bx0, by0, bx1, by1), cold, hot, 3, (2, 5))
-    # extras: horns 2x7x2 at (0,64); ribs 10x8x2 at (8,64); shoulders 12x3x5 at (0,76); tendrils 1x4x1 at (34,64)
-    horns = (0, 64, 2, 7, 2)
-    for name, (x0, y0, x1, y1) in faces(*horns).items():
-        vgrad(img, (x0, y0, x1, y1), (236, 230, 214), shade(bone, 0.7), 0.1)
-        for y in range(y0 + 2, y1, 2):
-            rect(img, (x0, y, x1, y + 1), shade(bone, 0.6))
-    ribs = (8, 64, 10, 8, 2)
-    box(img, ribs, shade(sculk, 0.8), 0.2)
-    for name, (x0, y0, x1, y1) in faces(*ribs).items():
-        if name in ("front", "left", "right", "back"):
-            for y in range(y0 + 1, y1, 2):
-                rect(img, (x0, y, x1, y + 1), lerp(cold, hot, 0.3))
-                rect(img, (x0, y, x1, y + 1), lerp(cold, hot, 0.3))
-    rx0, ry0, rx1, ry1 = front(ribs)
-    rect(img, (rx0 + 4, ry0, rx0 + 6, ry1), shade(sculk, 0.6))
-    insignia(img, rx0 + 5, ry0 + 1, rim=(8, 24, 30, 255))
-    shoulders = (0, 76, 12, 3, 5)
-    box(img, shoulders, shade(sculk, 0.75), 0.25)
-    for name, b in faces(*shoulders).items():
-        veins(img, b, cold, hot, 2, (2, 5))
-        if name == "top":
-            speckle(img, b, shade(sculk, 0.5), 8)
-    tendril = (34, 64, 1, 4, 1)
-    box(img, tendril, shade(sculk, 0.7), 0.2)
-    rect(img, (34, 68, 38, 69), cold + (255,))
-    clear_hat(img)
+        img.putpixel((x, y), hot + (255,))
+    # ---- the hump: heavy shoulders, veined, with growths on top ----
+    hide("hump", shade(sculk, 0.75), 0.25, 4)
+    tx0, ty0, tx1, ty1 = faces(*uv["hump"])["top"]
+    speckle(img, (tx0, ty0, tx1, ty1), shade(sculk, 0.5), 14)
+    for _ in range(5):
+        x, y = rng.randrange(tx0 + 1, tx1 - 1), rng.randrange(ty0 + 1, ty1 - 1)
+        rect(img, (x - 1, y - 1, x + 2, y + 2), shade(sculk, 0.55))
+        img.putpixel((x, y), cold + (255,))
+    # ---- the sculk spurs on the hump: lit at the tip ----
+    for name in ("growth_r", "growth_l"):
+        for face, b in faces(*uv[name]).items():
+            if face == "top":
+                noise_fill(img, hot, 0.1, b)
+            elif face == "bottom":
+                noise_fill(img, shade(sculk, 0.6), 0.2, b)
+            else:
+                vgrad(img, b, lerp(cold, hot, 0.3), shade(sculk, 0.65), 0.15)
+    # ---- the rib plates: bone bars with the glow seeping between ----
+    for name in ("rib_r", "rib_l"):
+        box(img, uv[name], bone, 0.15, edge=0.75)
+        for face, (x0, y0, x1, y1) in faces(*uv[name]).items():
+            if face in ("front", "back"):
+                for y in range(y0 + 1, y1, 2):
+                    rect(img, (x0, y, x1, y + 1), lerp(cold, hot, 0.3))
+    # ---- the arms: long and heavy, veined, bone plates at the wrists and on the knuckles ----
+    for name in ("arm_r", "arm_l"):
+        hide(name, sculk, 0.3, 3)
+    for name in ("fore_r", "fore_l"):
+        hide(name, shade(sculk, 0.9), 0.3, 3)
+        banded(name, 3)
+    for name in ("fist_r", "fist_l"):
+        hide(name, shade(sculk, 0.85), 0.25, 1)
+        banded(name, 2)
+        # knuckle studs along the front
+        fx0, fy0, fx1, fy1 = faces(*uv[name])["front"]
+        for x in range(fx0, fx1, 2):
+            rect(img, (x, fy0, x + 1, fy0 + 2), shade(bone, 1.0))
+    # ---- the legs: short and thick, veined, bone shins and clawed feet ----
+    for name in ("thigh_r", "thigh_l"):
+        hide(name, sculk, 0.3, 3)
+    for name in ("shin_r", "shin_l"):
+        hide(name, shade(sculk, 0.9), 0.3, 2)
+        banded(name, 3)
+    for name in ("foot_r", "foot_l"):
+        box(img, uv[name], shade(sculk, 0.8), 0.25)
+        for face, (x0, y0, x1, y1) in faces(*uv[name]).items():
+            if face == "bottom":
+                noise_fill(img, shade(bone, 0.6), 0.2, (x0, y0, x1, y1))
+        # claws along the toes (the front face and the toe ends of the sides)
+        fx0, fy0, fx1, fy1 = faces(*uv[name])["front"]
+        rect(img, (fx0, fy0, fx1, fy1), bone)
+        for x in range(fx0, fx1, 2):
+            rect(img, (x, fy1 - 1, x + 1, fy1), shade(bone, 0.5))
     save(img, "entity/xenoform_knell.png")
 
 
@@ -1274,68 +1411,58 @@ def wyrm():
 
 
 def nadir():
-    """The void given shape: near-black with faint stars and nebula dust, a face of deep nothing, and the green xeno
-    insignia burning on the chest; the shoulders and mantle are starfields too."""
+    """The void given shape: near-black with faint stars and nebula dust, and the green xeno insignia burning on the
+    chest. (0.19.83) A mass of dark cubes drifting round a dim core: four sizes of cube (A 6, B 4, C 3, D 2 cubed, at
+    (0,64) (0,76) (0,84) (0,90)) of star-dusted dark, and an 8x8x6 core at (0,96) carrying the insignia on its front.
+    The base humanoid parts are still painted (the first-person hand)."""
     img = new_skin()
     void = (9, 7, 16)
-    parts(img, void, 0.25, light={"top": 1.4, "bottom": 0.8, "right": 1.0, "left": 1.0, "front": 1.0, "back": 0.9})
-    # nebula dust: faint patches of violet and blue, then stars, a few bright
+    lit = {"top": 1.4, "bottom": 0.8, "right": 1.0, "left": 1.0, "front": 1.0, "back": 0.9}
+    parts(img, void, 0.25, light=lit)
     for part in BASE_PARTS:
         for name, b in faces(*part).items():
             x0, y0, x1, y1 = b
-            for _ in range(2):
-                cx, cy = rng.randrange(x0, x1), rng.randrange(y0, y1)
-                tint = rng.choice(((50, 30, 90), (24, 40, 90), (70, 24, 70)))
-                for y in range(y0, y1):
-                    for x in range(x0, x1):
-                        d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
-                        if d < 3.5 and rng.random() < 0.7:
-                            img.putpixel((x, y), lerp(img.getpixel((x, y)), tint, 0.5 * (1 - d / 3.5)))
             speckle(img, b, (90, 70, 140, 255), (x1 - x0) * (y1 - y0) // 10)
             speckle(img, b, (160, 140, 220, 255), (x1 - x0) * (y1 - y0) // 24)
-            speckle(img, b, (230, 225, 255, 255), 1)
-    # a faint rim of violet light along the top edge of every face: the shape reads against the dark
-    for part in BASE_PARTS:
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name in ("front", "back", "left", "right"):
-                for x in range(x0, x1):
-                    if rng.random() < 0.6:
-                        img.putpixel((x, y0), (60, 40, 110, 255))
-    # the face (8,8)-(16,16): a deeper void, violet at the edges, a single pale point low in it
-    for y in range(8, 16):
-        for x in range(8, 16):
-            d = max(abs(x - 11.5), abs(y - 11.5)) / 3.5
-            img.putpixel((x, y), lerp((2, 1, 6), (60, 30, 110), d * d))
-    img.putpixel((11, 13), (210, 200, 250, 255))
-    img.putpixel((12, 13), (160, 140, 220, 255))
-    # the insignia: a green glow bleeding into the chest around it, then the hourglass itself
-    bx0, by0, bx1, by1 = front(BODY)
-    for y in range(by0 + 1, by1):
-        for x in range(bx0, bx1):
-            d = max(abs(x - 24), abs(y - 27) * 0.8)
-            if d < 4 and rng.random() < 0.8:
-                img.putpixel((x, y), lerp(img.getpixel((x, y)), (30, 90, 50), 0.6 * (1 - d / 4)))
     chest_insignia(img, rim=(8, 40, 24, 255))
-    # extras: shoulders 12x4x6 at (0,64); mantle 10x14x1 at (36,64); the mantle ragged at its foot
-    shoulders = (0, 64, 12, 4, 6)
-    box(img, shoulders, (6, 4, 12), 0.2)
-    for name, b in faces(*shoulders).items():
-        speckle(img, b, (90, 70, 140, 255), 8)
-        speckle(img, b, (200, 190, 240, 255), 2)
+
+    def nebula(b):
+        x0, y0, x1, y1 = b
+        for _ in range(2):
+            cx, cy = rng.randrange(x0, x1), rng.randrange(y0, y1)
+            tint = rng.choice(((50, 30, 90), (24, 40, 90), (70, 24, 70)))
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+                    if d < 3.0 and rng.random() < 0.7:
+                        img.putpixel((x, y), lerp(img.getpixel((x, y)), tint, 0.5 * (1 - d / 3.0)))
+
+    # the drifting cubes: A 6x6x6, B 4x4x4, C 3x3x3, D 2x2x2, each a different shade of dark with a violet rim on top
+    for part, base in (((0, 64, 6, 6, 6), (8, 6, 15)), ((0, 76, 4, 4, 4), (11, 8, 20)),
+                       ((0, 84, 3, 3, 3), (14, 10, 26)), ((0, 90, 2, 2, 2), (18, 12, 32))):
+        box(img, part, base, 0.3, light=lit)
+        for name, b in faces(*part).items():
+            x0, y0, x1, y1 = b
+            nebula(b)
+            speckle(img, b, (90, 70, 140, 255), max(1, (x1 - x0) * (y1 - y0) // 8))
+            speckle(img, b, (200, 190, 240, 255), 1)
+            if name == "top":
+                rect(img, (x0, y0, x1, y0 + 1), (60, 40, 110, 255))
+    # the core: 8x8x6 at (0,96), a deeper void with a violet haze, the insignia glowing on its front (8x8 at (6,102))
+    core = (0, 96, 8, 8, 6)
+    box(img, core, (4, 3, 10), 0.2, light=lit)
+    for name, b in faces(*core).items():
+        nebula(b)
+        speckle(img, b, (90, 70, 140, 255), 6)
         if name == "top":
-            x0, y0, x1, y1 = b
-            rect(img, (x0, y0, x1, y0 + 1), (70, 50, 120, 255))
-    mantle = (36, 64, 10, 14, 1)
-    box(img, mantle, (14, 10, 26), 0.3)
-    for name, b in faces(*mantle).items():
-        if name in ("front", "back"):
-            x0, y0, x1, y1 = b
-            speckle(img, b, (60, 44, 100, 255), 30)
-            speckle(img, b, (140, 120, 200, 255), 12)
-            speckle(img, b, (230, 225, 255, 255), 3)
-            for x in range(x0, x1):
-                if rng.random() < 0.5:
-                    rect(img, (x, y1 - 1 - rng.randrange(0, 3), x + 1, y1), CLEAR)
+            rect(img, (b[0], b[1], b[2], b[1] + 1), (70, 50, 120, 255))
+    fx0, fy0, fx1, fy1 = faces(*core)["front"]
+    for y in range(fy0, fy1):
+        for x in range(fx0, fx1):
+            d = max(abs(x - (fx0 + fx1 - 1) / 2), abs(y - (fy0 + fy1 - 1) / 2) * 0.9)
+            if d < 4.5:
+                img.putpixel((x, y), lerp(img.getpixel((x, y)), (30, 90, 50), 0.6 * (1 - d / 4.5)))
+    insignia(img, (fx0 + fx1) // 2, fy0 + 1, small=True, rim=(8, 40, 24, 255))
     clear_hat(img)
     save(img, "entity/xenoform_nadir.png")
 
@@ -1420,16 +1547,27 @@ def duplex():
 
 
 def rivet():
-    """(0.18.95) Rivet, living metal: chrome that runs like quicksilver (bright streaks down every face, a blue-grey
-    sheen), green circuit lines down the limbs, a smooth face with two green slit eyes, the insignia on the chest."""
+    """(0.18.95; 0.19.83 a living puddle) Rivet, living metal: chrome that runs like quicksilver (bright streaks down every
+    face, a blue-grey sheen), green circuit lines, rippling rings on the top of its puddle, a smooth squashed face with
+    two green slit eyes, the insignia on the torso's front (it lies face-up on the puddle). The head (6x5x6 at 0,0) and
+    torso (8x9x4 at 16,16) sit where the man's did, smaller, so those regions are cleared first; the arms and legs keep
+    the vanilla regions; the puddle's slab, lobes, wake and mound are in the extras rows."""
     img = new_skin()
     metal = (158, 176, 190)
     green = GREEN
     dark_line = (40, 70, 52, 255)
-    parts(img, metal, 0.08)
-    for part in BASE_PARTS:
+    head = (0, 0, 6, 5, 6)
+    body = (16, 16, 8, 9, 4)
+    pool = (0, 64, 14, 2, 16)
+    lobes = [(0, 82, 4, 3, 4), (16, 82, 4, 3, 4), (32, 82, 4, 3, 4), (48, 82, 4, 3, 4)]
+    wake = (0, 90, 6, 2, 8)
+    mound = (0, 102, 10, 3, 10)
+    for region in ((0, 0, 32, 16), (16, 16, 40, 32)):
+        rect(img, region, CLEAR)
+
+    def liquid(part, bright=(188, 204, 216), lit=0.6):
         for name, (x0, y0, x1, y1) in faces(*part).items():
-            vgrad(img, (x0, y0, x1, y1), (188, 204, 216), shade(metal, LIGHT[name] * 0.6), 0.08)
+            vgrad(img, (x0, y0, x1, y1), bright, shade(metal, LIGHT[name] * lit), 0.08)
             # quicksilver runs: bright drips down the face
             if name in ("front", "back", "left", "right"):
                 for _ in range(max(1, (x1 - x0) // 3)):
@@ -1437,6 +1575,9 @@ def rivet():
                     top = rng.randrange(y0, max(y0 + 1, y1 - 3))
                     for y in range(top, min(y1, top + rng.randint(2, 5))):
                         img.putpixel((x, y), (240, 248, 255, 255))
+
+    for part in LIMBS + (head, body):
+        liquid(part)
     # green circuit lines down the outside of each limb, a ring at the wrist and ankle
     for part in LIMBS:
         f = faces(*part)
@@ -1450,24 +1591,47 @@ def rivet():
         x0, y0, x1, y1 = f["front"]
         for x in range(x0, x1):
             img.putpixel((x, y1 - 3), green)
-    # the body: a dark seam down each side
-    x0, y0, x1, y1 = faces(*BODY)["front"]
+    # the torso: a dark seam down each side of its front, green lines down its flanks
+    bf = faces(*body)
+    x0, y0, x1, y1 = bf["front"]
     for y in range(y0, y1):
         img.putpixel((x0, y), dark_line)
         img.putpixel((x1 - 1, y), dark_line)
-    # the face: smooth, two slit eyes, no mouth
-    rect(img, (9, 11, 11, 12), green)
-    rect(img, (13, 11, 15, 12), green)
-    img.putpixel((9, 11), PALE_GREEN)
-    img.putpixel((14, 11), PALE_GREEN)
-    chest_insignia(img, rim=(30, 40, 52, 255))
-    # extras: crest 1x2x6 at (0,64); drips 2x3x2 at (16,64)
-    for part in ((0, 64, 1, 2, 6), (16, 64, 2, 3, 2)):
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            vgrad(img, (x0, y0, x1, y1), (236, 244, 250), shade(metal, LIGHT[name]), 0.05)
-    x0, y0, x1, y1 = faces(0, 64, 1, 2, 6)["right"]
-    for x in range(x0, x1):
-        img.putpixel((x, y0), green)
+    for name in ("left", "right"):
+        x0, y0, x1, y1 = bf[name]
+        for y in range(y0 + 1, y1 - 1):
+            img.putpixel((x0 + 1, y), green)
+    # the face (6x5 front at 6,6): smooth, two slit eyes with a pale glint, no mouth
+    rect(img, (7, 8, 9, 9), green)
+    rect(img, (10, 8, 12, 9), green)
+    img.putpixel((7, 8), PALE_GREEN)
+    img.putpixel((11, 8), PALE_GREEN)
+    # the insignia, small, on the torso's front (20,20)-(28,29): rows 21-27
+    insignia(img, 24, 22, small=True, rim=(30, 40, 52, 255))
+    # extras: the slab 14x2x16 at (0,64), four lobes 4x3x4 at (0,82) (16,82) (32,82) (48,82), the wake 6x2x8 at (0,90),
+    # the mound 10x3x10 at (0,102)
+    for part in [pool, wake, mound] + lobes:
+        liquid(part, bright=(236, 244, 250), lit=0.7)
+    # rings rippling out across the top of the slab and the mound
+    x0, y0, x1, y1 = faces(*pool)["top"]
+    for inset, col in ((1, (222, 234, 244, 255)), (3, (112, 134, 150, 255)), (5, (222, 234, 244, 255))):
+        outline(img, (x0 + inset, y0 + inset, x1 - inset, y1 - inset), col)
+    speckle(img, (x0, y0, x1, y1), green, 6)
+    x0, y0, x1, y1 = faces(*mound)["top"]
+    outline(img, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), (222, 234, 244, 255))
+    outline(img, (x0 + 3, y0 + 3, x1 - 3, y1 - 3), (112, 134, 150, 255))
+    speckle(img, (x0, y0, x1, y1), green, 3)
+    # a green circuit line round the slab's sides and the wake's top streaming back
+    for name in ("front", "back", "left", "right"):
+        x0, y0, x1, y1 = faces(*pool)[name]
+        for x in range(x0, x1):
+            img.putpixel((x, y1 - 1), green)
+    x0, y0, x1, y1 = faces(*wake)["top"]
+    for y in range(y0, y1, 2):
+        img.putpixel(((x0 + x1) // 2, y), green)
+    for lobe in lobes:
+        x0, y0, x1, y1 = faces(*lobe)["top"]
+        img.putpixel((x0 + 1, y0 + 1), PALE_GREEN)
     clear_hat(img)
     save(img, "entity/xenoform_rivet.png")
 
@@ -1751,35 +1915,109 @@ def polestar():
 
 
 def lurk():
-    """(0.18.96) Lurk, the stalker: a bruise-purple dark that drinks the light, faint violet veins, long grey fingers,
-    and a face that is almost all eyes: six pale ones, the two largest ringed in violet."""
+    """(0.18.96; 0.19.83 on all fours) Lurk, the stalker: a bruise-purple dark that drinks the light, faint violet veins,
+    long grey fingers, and a face that is almost all eyes: six pale ones, the two largest domed and ringed in violet.
+    Its boxes: head 6x6x6 (0,0), eye domes 3x3x1 (24,0) and (24,4), neck 3x4x3 (0,12), torso 5x11x3 (16,16), upper arms
+    2x8x2 (40,16) and (32,48), forearms 2x9x2 (48,16) and (40,48), hands 3x6x2 (0,76) and (10,76), thighs 2x9x2 (0,64)
+    and (16,64), shins 2x8x2 (8,64) and (24,64), feet 3x2x5 (32,64) and (48,64). The head, torso, arms and legs reuse
+    the vanilla regions with their own sizes, so the paint under each box is cleared first."""
     img = new_skin()
     dark = (40, 32, 56)
-    vein = (110, 82, 176)
+    vein = (110, 82, 176, 255)
+    pale = (236, 232, 248, 255)
+    soft = (214, 206, 236, 255)
+    grey = (96, 92, 108)
+    tip = (20, 16, 26, 255)
     parts(img, dark, 0.18)
     for part in BASE_PARTS:
         for name, b in faces(*part).items():
-            veins(img, b, shade(dark + (255,), 0.7), (vein[0], vein[1], vein[2], 255), (b[2] - b[0]) // 3 + 1)
-    # the face: six eyes, two big ones ringed in violet, four small ones round them
-    head = faces(*HEAD)["front"]
-    hx0, hy0 = head[0], head[1]
-    rect(img, (hx0, hy0, hx0 + 8, hy0 + 8), shade(dark + (255,), 0.8))
-    for ex in (hx0 + 1, hx0 + 5):
-        rect(img, (ex, hy0 + 3, ex + 2, hy0 + 5), (110, 82, 176, 255))
-        img.putpixel((ex, hy0 + 3), (236, 232, 248, 255))
-        img.putpixel((ex + 1, hy0 + 4), (236, 232, 248, 255))
-    for ex, ey in ((hx0 + 1, hy0 + 1), (hx0 + 6, hy0 + 1), (hx0 + 3, hy0 + 2), (hx0 + 4, hy0 + 6)):
-        img.putpixel((ex, ey), (214, 206, 236, 255))
+            veins(img, b, shade(dark + (255,), 0.7), vein, (b[2] - b[0]) // 3 + 1)
     chest_insignia(img, rim=(24, 18, 34, 255))
-    # extras: the long hands 3x6x3 at (0,64), grey fingers with dark tips
-    hand = (0, 64, 3, 6, 3)
-    box(img, hand, (96, 92, 108), 0.12)
-    for name, (x0, y0, x1, y1) in faces(*hand).items():
-        if name in ("front", "back", "left", "right"):
-            for x in range(x0, x1):
-                img.putpixel((x, y1 - 1), (20, 16, 26, 255))
-                if x % 2 == 0:
-                    rect(img, (x, y0 + 2, x + 1, y1 - 1), (72, 68, 84, 255))
+    # the man's body is only the plate's hidden anchor now; the torso lies over its region, so its old paint goes
+    rect(img, (16, 16, 40, 32), CLEAR)
+
+    def lay(part, base, spread=0.18):
+        """Clears the old paint under a box, paints it lit per face and runs faint violet veins over it."""
+        u, v, w, h, d = part
+        rect(img, (u, v, u + 2 * (d + w), v + d + h), CLEAR)
+        box(img, part, base, spread)
+        for name, b in faces(*part).items():
+            veins(img, b, shade(base, 0.7), vein, max(1, (b[2] - b[0]) * (b[3] - b[1]) // 12))
+
+    # head 6x6x6 at (0,0): the front face is six rows; the two domes cover rows 1-3, so a small eye sits above and two
+    # below them, and a thin mouth under those
+    head = (0, 0, 6, 6, 6)
+    lay(head, dark)
+    fx0, fy0, fx1, fy1 = faces(*head)["front"]
+    rect(img, (fx0, fy0, fx1, fy1), shade(dark + (255,), 0.8))
+    img.putpixel((fx0 + 1, fy0), soft)
+    img.putpixel((fx1 - 2, fy0), soft)
+    img.putpixel((fx0 + 2, fy0 + 4), soft)
+    img.putpixel((fx1 - 3, fy0 + 4), soft)
+    rect(img, (fx0 + 1, fy0 + 5, fx1 - 1, fy0 + 6), tip)
+    # a small pale eye on each side too
+    for name in ("right", "left"):
+        x0, y0, x1, y1 = faces(*head)[name]
+        img.putpixel(((x0 + x1) // 2, y0 + 2), soft)
+    # eye domes 3x3x1: a violet iris, darker at the corners, a pale glint in the middle
+    for dome in ((24, 0, 3, 3, 1), (24, 4, 3, 3, 1)):
+        box(img, dome, vein[:3], 0.1)
+        for name, b in faces(*dome).items():
+            if name != "front":
+                noise_fill(img, shade(vein, 0.5), 0.1, b)
+        x0, y0, x1, y1 = faces(*dome)["front"]
+        rect(img, (x0, y0, x1, y1), vein)
+        for cx, cy in ((x0, y0), (x1 - 1, y0), (x0, y1 - 1), (x1 - 1, y1 - 1)):
+            img.putpixel((cx, cy), shade(vein, 0.7))
+        img.putpixel(((x0 + x1) // 2, (y0 + y1) // 2), pale)
+    # neck 3x4x3 at (0,12)
+    lay((0, 12, 3, 4, 3), dark)
+    # torso 5x11x3 at (16,16): thin ribs down the sides, the insignia on the chest and, turned over, on the back (the plate
+    # sits on the back when it is on all fours)
+    torso = (16, 16, 5, 11, 3)
+    lay(torso, dark)
+    tf = faces(*torso)
+    for name in ("right", "left"):
+        x0, y0, x1, y1 = tf[name]
+        for y in range(y0 + 1, y1 - 2, 2):
+            rect(img, (x0, y, x1, y + 1), shade(dark + (255,), 1.7))
+    for name in ("front", "back"):
+        x0, y0, x1, y1 = tf[name]
+        rect(img, (x0, y0, x1, y1), shade(dark + (255,), 0.85 if name == "front" else 0.7))
+        insignia(img, (x0 + x1) // 2, y0 + 3, small=True, rim=(24, 18, 34, 255))
+    # arms: dark upper arms, forearms fading to grey toward the wrist, grey hands with dark fingertips
+    for upper, fore, hand in (((40, 16, 2, 8, 2), (48, 16, 2, 9, 2), (0, 76, 3, 6, 2)),
+                              ((32, 48, 2, 8, 2), (40, 48, 2, 9, 2), (10, 76, 3, 6, 2))):
+        lay(upper, dark)
+        lay(fore, dark)
+        for name, (x0, y0, x1, y1) in faces(*fore).items():
+            if name in ("front", "back", "left", "right"):
+                vgrad(img, (x0, y1 - 4, x1, y1), dark, grey, 0.12)
+        rect(img, (hand[0], hand[1], hand[0] + 2 * (hand[4] + hand[2]), hand[1] + hand[4] + hand[3]), CLEAR)
+        box(img, hand, grey, 0.12)
+        for name, (x0, y0, x1, y1) in faces(*hand).items():
+            if name in ("front", "back", "left", "right"):
+                for x in range(x0, x1):
+                    rect(img, (x, y1 - 2, x + 1, y1), tip)
+                    if x % 2 == 0:
+                        rect(img, (x, y0 + 2, x + 1, y1 - 2), (72, 68, 84, 255))
+    # legs: dark thighs and shins, the shins greying toward the ankle, flat dark-grey feet with toes
+    for thigh, shin, foot in (((0, 64, 2, 9, 2), (8, 64, 2, 8, 2), (32, 64, 3, 2, 5)),
+                              ((16, 64, 2, 9, 2), (24, 64, 2, 8, 2), (48, 64, 3, 2, 5))):
+        lay(thigh, dark)
+        lay(shin, dark)
+        for name, (x0, y0, x1, y1) in faces(*shin).items():
+            if name in ("front", "back", "left", "right"):
+                vgrad(img, (x0, y1 - 3, x1, y1), dark, grey, 0.12)
+        box(img, foot, (72, 68, 84), 0.12)
+        ff = faces(*foot)
+        x0, y0, x1, y1 = ff["top"]
+        for x in range(x0 + 1, x1, 1):
+            rect(img, (x, y0 + 1, x + 1, y1), shade((72, 68, 84), 0.7))
+        for name in ("front", "left", "right"):
+            x0, y0, x1, y1 = ff[name]
+            rect(img, (x0, y1 - 1, x1, y1), tip)
+        noise_fill(img, tip, 0.2, ff["bottom"])
     clear_hat(img)
     save(img, "entity/xenoform_lurk.png")
 
@@ -2228,50 +2466,134 @@ def croaker():
 
 def dud():
     """(0.18.103) Dud, the one that can't be hurt: soft pink, round, pale belly, big worried eyes under slanted
-    brows, a wobbly little mouth, two nubs on top of its head."""
+    brows, a wobbly little mouth, two nubs on top of its head; 0.19.83 a soft round ball of a body with the worried
+    face on a plate at its front, nubby hands and stubby feet)."""
     img = new_skin()
     pink = (232, 176, 204)
-    parts(img, pink, 0.08)
-    bx0, by0, bx1, by1 = front(BODY)
-    vgrad(img, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1), (250, 230, 240), (240, 214, 228), 0.05)
-    eyes(img, (250, 250, 250, 255), y=11, wide=True, pupil=(30, 24, 40, 255))
-    # worried brows, sloping up in the middle
-    img.putpixel((9, 10), (120, 70, 100, 255))
-    img.putpixel((10, 9), (120, 70, 100, 255))
-    img.putpixel((14, 10), (120, 70, 100, 255))
-    img.putpixel((13, 9), (120, 70, 100, 255))
-    # a wobbly mouth
-    for x, y in ((10, 14), (11, 15), (12, 14), (13, 15)):
+    deep = (214, 150, 186)
+    soft = {"top": 1.08, "bottom": 0.68, "right": 0.9, "left": 0.9, "front": 1.0, "back": 0.86}
+    # the humanoid parts left to paint: the hands (arms 3x3x3) and the feet (legs 3x3x3)
+    for part in ((40, 16, 3, 3, 3), (32, 48, 3, 3, 3), (0, 16, 3, 3, 3), (16, 48, 3, 3, 3)):
+        box(img, part, deep, 0.08, light=soft)
+    # extras: ball core 12x10x12 at (0,64), top cap 8x2x8 at (0,86), bottom cap 8x2x8 at (32,86), nub 2x2x2 at (0,96)
+    core = (0, 64, 12, 10, 12)
+    box(img, core, pink, 0.08, light=soft)
+    box(img, (0, 86, 8, 2, 8), pink, 0.08, light=soft)
+    box(img, (32, 86, 8, 2, 8), pink, 0.08, light=soft)
+    box(img, (0, 96, 2, 2, 2), deep, 0.08, light=soft)
+    # a pale belly on the core's front, fading into the pink at its sides
+    cx0, cy0, cx1, cy1 = faces(*core)["front"]
+    vgrad(img, (cx0 + 2, cy0 + 3, cx1 - 2, cy1 - 1), (250, 232, 242), (240, 214, 228), 0.05)
+    insignia(img, (cx0 + cx1) // 2, cy0 + 4, small=True, rim=(140, 90, 120, 255))
+    # the face plate 10x5x4 at (0,0): its front is (4,4)-(14,9)
+    box(img, (0, 0, 10, 5, 4), pink, 0.06, light=soft)
+    ink = (120, 70, 100, 255)
+    white = (250, 250, 250, 255)
+    for x0 in (5, 11):
+        rect(img, (x0, 6, x0 + 2, 8), white)
+    img.putpixel((6, 7), (30, 24, 40, 255))
+    img.putpixel((11, 7), (30, 24, 40, 255))
+    # worried brows, the inner ends high
+    for x, y in ((5, 5), (6, 5), (7, 4), (12, 5), (11, 5), (10, 4)):
+        img.putpixel((x, y), ink)
+    # a wobbly little frown
+    for x, y in ((7, 8), (8, 7), (9, 7), (10, 8)):
         img.putpixel((x, y), (140, 70, 100, 255))
-    chest_insignia(img, rim=(140, 90, 120, 255))
-    # extras: nubs 2x2x2 at (0,64)
-    box(img, (0, 64, 2, 2, 2), (214, 150, 186), 0.08)
     clear_hat(img)
     save(img, "entity/xenoform_dud.png")
 
 
 def rime():
-    """(0.18.107, Scan B) Rime, the frost alien: pale blue ice, whiter on top, frost cracks in deeper blue, cold
-    white eyes, an icicle crown and two icicle spines down its back."""
+    """(0.18.107, Scan B; 0.19.83 a stooped ice brute) Rime, the frost alien: pale blue ice, whiter on top, frost cracks
+    in deeper blue, cold white eyes under a heavy brow, an icicle crown and icicle spines down its back, the insignia on
+    the small of its back below them. The man's parts (rows 0-63) stay for the first-person arm (the head keeps its
+    8x8x8 at (0,0)); the body, hump, arms, fists, legs, shins and feet are new boxes in the rows below, packed so nothing
+    shares a texel."""
     img = new_skin()
     ice = (158, 216, 240)
+    deep = (90, 150, 200, 255)
+    pale = (220, 244, 255, 255)
+    claw = (70, 120, 170, 255)
     parts(img, ice, 0.12, edge=0.85)
     for part in BASE_PARTS:
         for name, b in faces(*part).items():
-            veins(img, b, (90, 150, 200, 255), (220, 244, 255, 255), (b[2] - b[0]) // 3 + 1, length=(2, 6))
-    bx0, by0, bx1, by1 = front(BODY)
-    vgrad(img, (bx0 + 2, by0 + 1, bx1 - 2, by1 - 2), (226, 244, 252), (176, 222, 242), 0.06)
-    claws(img, (70, 120, 170, 255))
+            veins(img, b, deep, pale, (b[2] - b[0]) // 3 + 1, length=(2, 6))
+    claws(img, claw)
+    # the head (0,0,8,8,8): frosted on top, a heavy brow, cold eyes, a jagged mouth
+    hx0, hy0, hx1, hy1 = faces(*HEAD)["top"]
+    noise_fill(img, (232, 248, 255), 0.1, (hx0, hy0, hx1, hy1))
+    rect(img, (8, 9, 16, 10), (70, 120, 176, 255))
     eyes(img, (250, 254, 255, 255), y=11, wide=True, pupil=(120, 200, 240, 255))
     rect(img, (10, 14, 14, 15), (80, 130, 180, 255))
-    chest_insignia(img, rim=(40, 80, 120, 255))
-    # extras: icicle 1x4x1 at (0,64); back spines 2x8x2 at (8,64)
-    vgrad(img, (0, 64, 4, 69), (250, 254, 255), (150, 210, 240), 0.05)
-    spine = (8, 64, 2, 8, 2)
-    box(img, spine, (180, 226, 246), 0.1)
-    for name, (x0, y0, x1, y1) in faces(*spine).items():
-        if name in ("front", "back", "left", "right"):
-            vgrad(img, (x0, y0, x1, y1), (150, 206, 236), (240, 250, 255), 0.05)
+    for x in (10, 13):
+        img.putpixel((x, 15), pale)
+
+    def ice_box(part, base=ice, tint=0.12):
+        """A lit box of ice with cracks running over every face."""
+        box(img, part, base, tint, edge=0.88)
+        for name, b in faces(*part).items():
+            veins(img, b, deep, pale, (b[2] - b[0]) // 3 + 1, length=(2, 5))
+
+    def band(part, y_from_bottom, color=deep):
+        """A darker joint band across the four sides of a limb."""
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y1 - y_from_bottom, x1, y1 - y_from_bottom + 1), color)
+
+    # ---- the body 9x10x6 at (0,64): a pale chest, a slate back, the insignia on the small of the back (face (21,70)-(30,80)) ----
+    body = (0, 64, 9, 10, 6)
+    ice_box(body)
+    bf = faces(*body)
+    fx0, fy0, fx1, fy1 = bf["front"]
+    vgrad(img, (fx0 + 1, fy0, fx1 - 1, fy1 - 1), (226, 244, 252), (176, 222, 242), 0.06)
+    kx0, ky0, kx1, ky1 = bf["back"]
+    vgrad(img, (kx0, ky0, kx1, ky1), (118, 170, 212), (84, 136, 188), 0.1)
+    for x in range(kx0 + 1, kx1, 2):
+        rect(img, (x, ky0, x + 1, ky0 + 2 + (x * 3) % 4), (200, 232, 250, 255))
+    insignia(img, 25, 74, small=True, rim=(40, 80, 120, 255))
+    # ---- the shoulder hump 13x5x7 at (0,80): frosted on top ----
+    hump = (0, 80, 13, 5, 7)
+    ice_box(hump, (176, 224, 244))
+    noise_fill(img, (236, 250, 255), 0.1, faces(*hump)["top"])
+    # ---- the arms 5x12x5 at (0,92) and (20,92): long, a dark band at the wrist ----
+    for arm in ((0, 92, 5, 12, 5), (20, 92, 5, 12, 5)):
+        ice_box(arm)
+        band(arm, 2)
+    # ---- the fists 5x5x5 at (0,109) and (20,109): big, pale knuckles, dark claw tips ----
+    fists = ((0, 109, 5, 5, 5), (20, 109, 5, 5, 5))
+    for fist in fists:
+        ice_box(fist, (184, 230, 248), 0.1)
+        for name, (x0, y0, x1, y1) in faces(*fist).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y0, x1, y0 + 1), (232, 248, 255, 255))
+    claws(img, claw, which=fists)
+    # ---- the thighs 5x8x5 at (40,64) and (40,77), the shins 4x7x4 at (40,90) and (40,101): a knee band ----
+    for leg in ((40, 64, 5, 8, 5), (40, 77, 5, 8, 5)):
+        ice_box(leg)
+        band(leg, 1)
+    for shin in ((40, 90, 4, 7, 4), (40, 101, 4, 7, 4)):
+        ice_box(shin, (146, 206, 234))
+        band(shin, 1)
+    # ---- the feet 5x3x6 at (0,119) and (22,119): dark toe claws ----
+    feet = ((0, 119, 5, 3, 6), (22, 119, 5, 3, 6))
+    for foot in feet:
+        ice_box(foot, (140, 200, 230))
+    claws(img, claw, which=feet)
+    # ---- the crown icicles 1x4x1 at (60,64) +5, the spines 2x6x2 at (56,90) +8, the shoulder shards 2x4x2, the fangs 1x3x1 ----
+    def shard(part, top, bottom):
+        box(img, part, bottom, 0.1)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                vgrad(img, (x0, y0, x1, y1), top, bottom, 0.05)
+
+    for i in range(4):
+        shard((60, 64 + 5 * i, 1, 4, 1), (250, 254, 255), (150, 210, 240))
+    for i in range(4):
+        shard((56, 90 + 8 * i, 2, 6, 2), (150, 206, 236), (240, 250, 255))
+    for part in ((44, 119, 2, 4, 2), (56, 122, 2, 4, 2)):
+        shard(part, (170, 222, 245), (250, 254, 255))
+    for part in ((44, 114, 1, 3, 1), (48, 114, 1, 3, 1)):
+        shard(part, (240, 250, 255), (200, 232, 250))
     clear_hat(img)
     save(img, "entity/xenoform_rime.png")
 
@@ -3555,19 +3877,74 @@ def skitter():
 
 
 def shade_form():
-    """(0.18.113, Scan E) Shade, the stealer: near-black with a faint violet sheen, and long narrow glowing violet eyes."""
+    """(0.18.113, Scan E; 0.19.83 a crawling shadow that unfolds tall) Shade, the stealer: near-black with a faint
+    violet sheen, and long narrow glowing violet eyes. The vanilla layout (rows 0-63) is still painted for the
+    first-person arm; the real parts are, in rows 64-111: head 5x6x5 at (0,64), torso 5x11x3 at (0,76), the eight 2x10x2
+    limb segments in a row at v=92 (right arm 0, forearm 8, left arm 16, forearm 24, right thigh 32, shin 40, left
+    thigh 48, shin 56), hands 2x4x2 at (0,106) and (8,106), feet 2x1x4 at (16,106) and (28,106)."""
     img = new_skin()
     dark = (26, 20, 32)
+    sheen = (44, 32, 58, 255)
+    joint = (54, 40, 72, 255)
+    violet = (210, 120, 255, 255)
+    core = (250, 220, 255, 255)
     parts(img, dark, 0.08)
     for part in BASE_PARTS:
         for name, b in faces(*part).items():
-            speckle(img, b, (44, 32, 58, 255), (b[2] - b[0]) * (b[3] - b[1]) // 9 + 1)
-    rect(img, (8, 11, 11, 12), (210, 120, 255, 255))
-    rect(img, (13, 11, 16, 12), (210, 120, 255, 255))
-    img.putpixel((9, 11), (250, 220, 255, 255))
-    img.putpixel((14, 11), (250, 220, 255, 255))
+            speckle(img, b, sheen, (b[2] - b[0]) * (b[3] - b[1]) // 9 + 1)
+    rect(img, (8, 11, 11, 12), violet)
+    rect(img, (13, 11, 16, 12), violet)
+    img.putpixel((9, 11), core)
+    img.putpixel((14, 11), core)
     claws(img, (10, 8, 14, 255))
     chest_insignia(img, rim=(20, 14, 30, 255))
+
+    def seg(part, tip=None):
+        """A thin limb segment: black, flecked, its ends a shade paler (the joints), the fingertips faintly violet."""
+        box(img, part, dark, 0.08)
+        for name, b in faces(*part).items():
+            speckle(img, b, sheen, (b[2] - b[0]) * (b[3] - b[1]) // 9 + 1)
+            if name in ("front", "back", "left", "right"):
+                rect(img, (b[0], b[1], b[2], b[1] + 1), joint)
+                if tip:
+                    rect(img, (b[0], b[3] - 1, b[2], b[3]), tip)
+                else:
+                    rect(img, (b[0], b[3] - 1, b[2], b[3]), joint)
+
+    # head 5x6x5 at (0,64): the long narrow violet eyes slant down toward the nose
+    head = (0, 64, 5, 6, 5)
+    box(img, head, dark, 0.08)
+    for name, b in faces(*head).items():
+        speckle(img, b, sheen, (b[2] - b[0]) * (b[3] - b[1]) // 9 + 1)
+    for x, y in ((5, 71), (6, 71), (6, 72), (9, 71), (8, 71), (8, 72)):
+        img.putpixel((x, y), violet)
+    img.putpixel((6, 71), core)
+    img.putpixel((8, 71), core)
+    # torso 5x11x3 at (0,76): faint ribs on the sides, the insignia on the front (standing) and the back (crawling)
+    torso = (0, 76, 5, 11, 3)
+    box(img, torso, dark, 0.08)
+    fr = faces(*torso)
+    for name, b in fr.items():
+        speckle(img, b, sheen, (b[2] - b[0]) * (b[3] - b[1]) // 9 + 1)
+    for name in ("left", "right"):
+        x0, y0, x1, y1 = fr[name]
+        for y in range(y0 + 1, y1, 2):
+            rect(img, (x0, y, x1, y + 1), joint)
+    x0, y0, x1, y1 = fr["front"]
+    insignia(img, x0 + 2, y0 + 3, small=True, rim=(20, 14, 30, 255))
+    x0, y0, x1, y1 = fr["back"]
+    insignia(img, x0 + 2, y0 + 3, small=True, rim=(20, 14, 30, 255))
+    for y in list(range(y0, y0 + 2)) + list(range(y1 - 2, y1)):
+        img.putpixel((x0 + 2, y), joint)
+    # the eight limb segments, then the hands (long fingers, faint violet tips) and the flat feet
+    for u in range(0, 64, 8):
+        seg((u, 92, 2, 10, 2))
+    for hand in ((0, 106, 2, 4, 2), (8, 106, 2, 4, 2)):
+        seg(hand, tip=(96, 60, 130, 255))
+    for foot in ((16, 106, 2, 1, 4), (28, 106, 2, 1, 4)):
+        box(img, foot, dark, 0.08)
+        for name, b in faces(*foot).items():
+            speckle(img, b, sheen, 2)
     clear_hat(img)
     save(img, "entity/xenoform_shade.png")
 
@@ -3726,30 +4103,96 @@ def fuse():
 
 
 def thornwild():
-    """(0.18.114, Scan F) Thornwild: grey-brown bark in vertical grain, moss on the shoulders, amber eyes, pale thorns."""
+    """(0.18.114, Scan F; 0.19.83 a treant) Thornwild: grey-brown bark in vertical grain, moss on the shoulders, amber eyes, pale thorns; the trunk's chest burl and base, root feet, leafy twigs."""
     img = new_skin()
     bark = (92, 72, 52)
+    dark = (66, 50, 36, 255)
+    moss = (84, 124, 54, 255)
+    amber = (250, 170, 40, 255)
     parts(img, bark, 0.12)
     for part in BASE_PARTS:
         for nm, (x0, y0, x1, y1) in faces(*part).items():
             if nm in ("top", "bottom"):
                 continue
             for x in range(x0, x1, 3):
-                rect(img, (x, y0, x + 1, y1), (66, 50, 36, 255))
-    for part in ARMS + (BODY,):
+                rect(img, (x, y0, x + 1, y1), dark)
+    for part in ARMS:
         for nm, (x0, y0, x1, y1) in faces(*part).items():
             if nm == "top":
-                noise_fill(img, (80, 120, 50, 255), 0.2, (x0, y0, x1, y1))
+                noise_fill(img, moss, 0.2, (x0, y0, x1, y1))
             elif nm in ("front", "back", "left", "right"):
-                rect(img, (x0, y0, x1, y0 + 2), (84, 124, 54, 255))
-    rect(img, (9, 11, 11, 12), (250, 170, 40, 255))
-    rect(img, (13, 11, 15, 12), (250, 170, 40, 255))
-    rect(img, (10, 14, 14, 15), (40, 30, 22, 255))
+                rect(img, (x0, y0, x1, y0 + 2), moss)
+    # head: moss on top and the cheeks' tops, amber eyes under the brow, a dark mouth with pale thorn teeth
+    x0, y0, x1, y1 = faces(*HEAD)["top"]
+    noise_fill(img, moss, 0.25, (x0, y0, x1, y1))
+    for nm in ("right", "left", "back"):
+        x0, y0, x1, y1 = faces(*HEAD)[nm]
+        rect(img, (x0, y0, x1, y0 + 2), moss)
+    rect(img, (9, 11, 11, 13), amber)
+    rect(img, (13, 11, 15, 13), amber)
+    img.putpixel((10, 11), (255, 230, 140, 255))
+    img.putpixel((13, 11), (255, 230, 140, 255))
+    rect(img, (9, 13, 11, 14), dark)
+    rect(img, (13, 13, 15, 14), dark)
+    rect(img, (9, 15, 15, 16), (40, 30, 22, 255))
+    for x in (10, 12, 14):
+        img.putpixel((x, 15), (220, 210, 170, 255))
     claws(img, (50, 38, 28, 255))
-    chest_insignia(img, rim=(50, 38, 26, 255))
-    # extras: twig 1x5x1 at (0,64); thorn 1x1x2 at (6,64)
-    box(img, (0, 64, 1, 5, 1), (80, 62, 44), 0.1)
-    box(img, (6, 64, 1, 1, 2), (220, 210, 170), 0.05)
+    # extras (see XenoFormModels.Thornwild): chest burl 10x9x6 at (0,64) is the body; the plate sits on its front (6,70)-(16,79)
+    burl = (0, 64, 10, 9, 6)
+    box(img, burl, bark, 0.14)
+    for nm, (x0, y0, x1, y1) in faces(*burl).items():
+        if nm == "bottom":
+            continue
+        if nm == "top":
+            noise_fill(img, moss, 0.22, (x0, y0, x1, y1))
+            continue
+        for x in range(x0 + 1, x1, 3):
+            rect(img, (x, y0, x + 1, y1), dark)
+        rect(img, (x0, y0, x1, y0 + 1), moss)
+    for kx, ky in ((7, 72), (14, 77), (2, 75), (20, 70), (25, 74)):
+        outline(img, (kx, ky, kx + 3, ky + 3), dark)
+    insignia(img, 11, 71, rim=(50, 38, 26, 255))
+    # base 12x5x7 at (0,80): darker, rooty, mossy ledge on top
+    base = (0, 80, 12, 5, 7)
+    box(img, base, (74, 56, 40), 0.16)
+    for nm, (x0, y0, x1, y1) in faces(*base).items():
+        if nm == "top":
+            noise_fill(img, moss, 0.22, (x0, y0, x1, y1))
+        elif nm != "bottom":
+            for x in range(x0, x1, 2):
+                rect(img, (x, y0 + 1, x + 1, y1), (56, 42, 30, 255))
+    # hump 8x6x3 at (32,64): bark with bracket fungus and moss
+    hump = (32, 64, 8, 6, 3)
+    box(img, hump, (80, 62, 44), 0.14)
+    x0, y0, x1, y1 = faces(*hump)["top"]
+    noise_fill(img, moss, 0.2, (x0, y0, x1, y1))
+    x0, y0, x1, y1 = faces(*hump)["back"]
+    speckle(img, (x0, y0, x1, y1), (214, 170, 110, 255), 6)
+    # brow 9x2x2 at (32,73), nose 2x3x2 at (54,64): dark knotted bark
+    box(img, (32, 73, 9, 2, 2), (60, 46, 34), 0.12)
+    box(img, (54, 64, 2, 3, 2), (76, 58, 42), 0.1)
+    # thorn 1x1x2 at (54,69), branch 2x7x2 at (54,72), twig 1x5x1 at (44,97)
+    box(img, (54, 69, 1, 1, 2), (220, 210, 170), 0.05)
+    box(img, (54, 72, 2, 7, 2), (84, 66, 46), 0.1)
+    speckle(img, (54, 74, 62, 81), moss, 4)
+    box(img, (44, 97, 1, 5, 1), (80, 62, 44), 0.1)
+    # mossy pad 5x2x6 at (38,81)
+    pad = (38, 81, 5, 2, 6)
+    box(img, pad, moss[:3], 0.25)
+    for nm, (x0, y0, x1, y1) in faces(*pad).items():
+        if nm in ("front", "back", "left", "right"):
+            rect(img, (x0, y1 - 1, x1, y1), (60, 100, 40, 255))
+    speckle(img, (38, 81, 60, 89), (230, 230, 160, 255), 5)
+    # heel 7x4x7 at (0,92), toe 2x3x4 at (28,92), rootlet 1x2x3 at (40,92): earthy roots, paler toward the tips
+    box(img, (0, 92, 7, 4, 7), (60, 46, 34), 0.18)
+    box(img, (28, 92, 2, 3, 4), (74, 56, 40), 0.14)
+    box(img, (40, 92, 1, 2, 3), (104, 82, 58), 0.12)
+    # leaf 4x4 at (28,99): green with a pale midrib and a few amber flecks
+    box(img, (28, 99, 4, 1, 4), (70, 130, 50), 0.25)
+    x0, y0, x1, y1 = faces(28, 99, 4, 1, 4)["top"]
+    rect(img, (x0 + 1, y0, x0 + 2, y1), (130, 180, 90, 255))
+    speckle(img, (x0, y0, x1, y1), (210, 160, 50, 255), 2)
     clear_hat(img)
     save(img, "entity/xenoform_thornwild.png")
 
@@ -3911,13 +4354,10 @@ def ultimate_spikes():
 FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen", "hive", "skitter", "shade", "mirage", "ooze", "magma_ooze", "fuse", "thornwild", "billow", "towerback")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
-    "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
     "pyre": (((12, 78, 5, 5, 1), (10, 10)),),
     "blur": (((34, 68, 4, 2, 3), (10, 6)), ((34, 64, 9, 3, 1), (7, 3)), ((0, 76, 4, 3, 4), (8, 29)), ((16, 76, 4, 3, 4), (12, 29))),
     "wisp": (((0, 64, 10, 10, 10), (7, 0)), ((0, 86, 8, 7, 4), (8, 20))),
     "gremlin": (((0, 64, 10, 10, 10), (7, 0)), ((40, 64, 4, 5, 1), (3, 2)), ((40, 64, 4, 5, 1), (17, 2))),
-    "knell": (((8, 64, 10, 8, 2), (7, 9)), ((0, 76, 12, 3, 5), (6, 6))),
-    "nadir": (((0, 64, 12, 4, 6), (6, 7)),),
 }
 
 

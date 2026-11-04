@@ -1457,8 +1457,18 @@ public final class XenoformPower implements Power {
 	/**
 	 * (0.19.62) What the four-legged aliens' bodies show for everyone ({@link XenoformState#ACT}): Tusk's Charge and
 	 * Gorger's Horn Charge ("charge"), Gorger or Gyre rolled up ("roll"), Gyre's Shell Spin ("spin"), Keen hanging
-	 * from a ceiling ("hang").
+	 * from a ceiling ("hang"); (0.19.82) Prism rooted ("root"), Gnasher's Death Roll ("roll"); (0.19.83) the bipeds:
+	 * Bulwark carrying or leaping ("carry", "leap"), Knell burrowing, tolling or sensing, Shade holding a block or
+	 * staring ("hold", "stare"), Thornwild's Roots and Bloom, Lurk faded ("fade"), Rivet pouring or fighting ("pour",
+	 * "fight"), Dud playing dead or rolling ("dead", "roll").
 	 */
+	/** (0.19.83) Whether {@code player} struck a creature, or was struck by one, in the last {@code ticks}. */
+	private static boolean fighting(ServerPlayer player, int ticks) {
+		int hit = player.getLastHurtMobTimestamp();
+		return hit > 0 && player.tickCount - hit < ticks
+			|| player.getLastHurtByMob() != null && player.tickCount - player.getLastHurtByMobTimestamp() < ticks;
+	}
+
 	private static void syncAct(ServerPlayer player, Live live) {
 		String act = null;
 		if (live.form != null) {
@@ -1471,6 +1481,14 @@ public final class XenoformPower implements Power {
 				// (0.19.82) Prism rooted in crystal while Reflect is held; Gnasher's death roll
 				case "prism" -> act = live.reflecting ? "root" : null;
 				case "gnasher" -> act = live.rolls > 0 ? "roll" : null;
+				// (0.19.83) the bipeds' stances
+				case "bulwark" -> act = live.grabbed >= 0 ? "carry" : live.leaping ? "leap" : null;
+				case "knell" -> act = live.burrow > 0 ? "burrow" : live.tolls > 0 ? "toll" : live.sense ? "sense" : null;
+				case "shade" -> act = live.lifted != null ? "hold" : live.stalked >= 0 ? "stare" : null;
+				case "thornwild" -> act = live.latchTicks > 0 ? "roots" : live.brood > 0 ? "bloom" : null;
+				case "lurk" -> act = live.faded ? "fade" : null;
+				case "rivet" -> act = live.rolls > 0 ? "pour" : fighting(player, com.jaymospowers.power.xenoform.forms.Rivet.FIGHT_TICKS) ? "fight" : null;
+				case "dud" -> act = live.horn > 0 ? "dead" : live.rolls > 0 ? "roll" : null;
 				default -> act = null;
 			}
 		}

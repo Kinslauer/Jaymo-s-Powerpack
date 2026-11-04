@@ -113,37 +113,243 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.95) Rivet: small and smooth, living metal: slim limbs, a fin of a crest down its head, drips hanging off its
-	 * forearms that sway with it. Melded into a shell it's drawn as that block instead ({@code XenoformLayer}).
+	 * (0.18.95; 0.19.83 a puddle that stands up to fight) Rivet: living metal. Left alone it is a low, rippling puddle
+	 * of liquid metal that flows along the ground: a wide slab with a smaller mound on it, four lobes round the rim that
+	 * swell and sink (faster as it moves), a wake dragging behind that swings with its turns, and its face a squashed dome
+	 * at the front with two green slit eyes. Fighting (an attack swing, or {@code XenoformState.ACT} "fight", set while it
+	 * has struck or been struck lately) it RISES: the torso (the hidden-in-the-puddle body, lying face-up with the
+	 * insignia on top) lifts upright into a hunched figure, two stubby legs rise out of the slab, arms form out of the
+	 * mass, and the arm that swings stretches like a whip; when the fight is over it melts back down. "pour" (Pour
+	 * dash) flattens it into a long streak with the wake streaming out behind; sneaking or riding a machine keeps it a
+	 * puddle. Melded into a shell it's drawn as that block instead ({@code XenoformLayer}). The humanoid parts are all
+	 * still here: the body is the torso (and the insignia's anchor), head, arms and legs are the figure's.
 	 */
 	static final class Rivet extends FormModel {
-		private final ModelPart rightDrip, leftDrip;
+		// ---- tuning ----
+		/** How fast it rises, melts back down (slowly, or quickly into a pour) and pours flat (share of the way per tick). */
+		static final float RISE_UP = 0.16F, MELT_DOWN = 0.035F, POUR_MELT = 0.25F, POUR_IN = 0.3F, POUR_OUT = 0.1F;
+		/** The lying torso: its pivot's height, and the z of its hips' end; the risen stance's forward lean (radians). */
+		static final float LIE_Y = 20.7F, LIE_Z = -3.0F, LEAN = 0.3F;
+		/** How far down the torso (pixels) its base point is: the hips meet it, the last pixels of the box ({@link #TORSO_LEN} long) overlap the legs. */
+		static final float TORSO_REACH = 7.5F, TORSO_LEN = 9.0F;
+		/** The legs: hip height standing (the puddle's is {@link #HIP_LOW}), where the feet rest, the box's length and half depth, spread, swing (radians), foot lift and clock. */
+		static final float HIP_RISEN = 14.8F, HIP_LOW = 23.0F, FOOT_Y = 23.9F, LEG_LEN = 11.6F, FOOT_HALF = 1.6F, LEG_X = 2.3F, LEG_SWING = 0.55F, FOOT_LIFT = 1.2F, LEG_RATE = 0.6662F;
+		/** The arms: smallest scale (just a nub), shoulder spread and drop below the torso's top, box length, flare, and the lash arm's extra stretch. */
+		static final float ARM_MIN = 0.05F, ARM_X = 4.5F, ARM_DROP = 2.0F, ARM_LEN = 11.5F, ARM_FLARE = 0.18F, LASH_STRETCH = 0.9F;
+		/** How much of its width the slab, the mound and the lobes' spread keep when it stands. */
+		static final float POOL_RISEN = 0.75F, MOUND_RISEN = 0.6F, LOBE_IN = 0.55F;
+		/** The head: where the dome sits in the puddle (y, z), how far its neck sinks into the torso, how squashed the dome is. */
+		static final float HEAD_Y = 22.5F, HEAD_Z = -5.0F, NECK_SINK = 1.2F, DOME = 0.6F;
+		/** The lobes' places on the slab (x, z). */
+		private static final float[][] LOBES = {{-6.0F, -6.5F}, {6.0F, -6.0F}, {-6.5F, 5.0F}, {6.5F, 5.5F}};
+		private static final int[] LOBE_U = {0, 16, 32, 48};
+		/** Per-entity smoothing between frames: {age, rise, pour}. */
+		private static final java.util.Map<Integer, float[]> TRACKS = new java.util.HashMap<>();
+
+		private final ModelPart pool, mound, wake;
+		private final ModelPart[] lobes = new ModelPart[4];
 
 		Rivet() {
 			super(bake(mesh()), "rivet");
-			this.insigniaZ = -1.8F;
-			this.rightDrip = this.rightArm.getChild("drip");
-			this.leftDrip = this.leftArm.getChild("drip");
+			ModelPart root = this.root();
+			this.pool = root.getChild("pool");
+			this.mound = root.getChild("mound");
+			this.wake = root.getChild("wake");
+			for (int i = 0; i < this.lobes.length; i++) {
+				this.lobes[i] = root.getChild("lobe" + i);
+			}
+			// the plate sits on the torso's front (local -z), which faces up while it lies down and forward once it stands
+			this.insigniaY = 4.5F;
+			this.insigniaZ = -2.0F;
+			this.insigniaSize = 0.7F;
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.2F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			root.getChild("head").addOrReplaceChild("crest", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -10.0F, -3.0F, 1.0F, 2.0F, 6.0F), PartPose.ZERO);
-			root.getChild("right_arm").addOrReplaceChild("drip", CubeListBuilder.create().texOffs(16, 64).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F),
-				PartPose.offset(-1.0F, 9.5F, 0.0F));
-			root.getChild("left_arm").addOrReplaceChild("drip", CubeListBuilder.create().texOffs(16, 64).mirror().addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F),
-				PartPose.offset(1.0F, 9.5F, 0.0F));
+			// the face: a squat dome (squashed further in the puddle)
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0F, -5.0F, -3.0F, 6.0F, 5.0F, 6.0F),
+				PartPose.offset(0.0F, HEAD_Y, HEAD_Z));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			// the torso: 9 long from its top (pivot) down; the puddle lays it face-up on the mound
+			root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 9.0F, 4.0F),
+				PartPose.offset(0.0F, LIE_Y, LIE_Z + TORSO_REACH));
+			// arms and legs: slim and centred on their pivots, grown out of the mass (scaled) when it stands
+			root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(-0.5F)),
+				PartPose.offset(-2.0F, LIE_Y, LIE_Z + 4.5F));
+			root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(-0.5F)),
+				PartPose.offset(2.0F, LIE_Y, LIE_Z + 4.5F));
+			root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(-0.4F)),
+				PartPose.offset(-LEG_X, HIP_LOW, 0.0F));
+			root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(-0.4F)),
+				PartPose.offset(LEG_X, HIP_LOW, 0.0F));
+			// the puddle: a wide slab on the ground, a smaller mound on it, lobes round the rim, a wake behind (all pivoted on the ground, so they swell upward)
+			root.addOrReplaceChild("pool", CubeListBuilder.create().texOffs(0, 64).addBox(-7.0F, -2.0F, -8.0F, 14.0F, 2.0F, 16.0F), PartPose.offset(0.0F, 24.0F, 0.0F));
+			root.addOrReplaceChild("mound", CubeListBuilder.create().texOffs(0, 102).addBox(-5.0F, -3.0F, -5.0F, 10.0F, 3.0F, 10.0F), PartPose.offset(0.0F, 22.2F, 0.0F));
+			for (int i = 0; i < LOBES.length; i++) {
+				root.addOrReplaceChild("lobe" + i, CubeListBuilder.create().texOffs(LOBE_U[i], 82).addBox(-2.0F, -3.0F, -2.0F, 4.0F, 3.0F, 4.0F),
+					PartPose.offset(LOBES[i][0], 24.0F, LOBES[i][1]));
+			}
+			root.addOrReplaceChild("wake", CubeListBuilder.create().texOffs(0, 90).addBox(-3.0F, -2.0F, 0.0F, 6.0F, 2.0F, 8.0F), PartPose.offset(0.0F, 24.0F, 4.5F));
 			return mesh;
+		}
+
+		/** {rise, pour} smoothed per entity over its own age (so a second draw in the same frame changes nothing). */
+		private static float[] track(int id, float age, float riseTo, float pourTo) {
+			if (TRACKS.size() > 64) {
+				TRACKS.clear();
+			}
+			float[] t = TRACKS.get(id);
+			if (t == null) {
+				t = new float[] {age, riseTo, pourTo};
+				TRACKS.put(id, t);
+				return t;
+			}
+			float dt = age - t[0];
+			if (dt < 0.0F || dt > 40.0F) {
+				t[0] = age;
+				t[1] = riseTo;
+				t[2] = pourTo;
+			} else if (dt > 0.0F) {
+				t[0] = age;
+				t[1] += Mth.clamp(riseTo - t[1], -(pourTo > 0.5F ? POUR_MELT : MELT_DOWN) * dt, RISE_UP * dt);
+				t[2] += Mth.clamp(pourTo - t[2], -POUR_OUT * dt, POUR_IN * dt);
+			}
+			return t;
+		}
+
+		private static float smooth(float x) {
+			x = Mth.clamp(x, 0.0F, 1.0F);
+			return x * x * (3.0F - 2.0F * x);
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			// the drips hang straight down whatever the arm does, swaying a little
-			float sway = Mth.sin(state.ageInTicks * 0.2F) * 0.08F;
-			this.rightDrip.xRot = -this.rightArm.xRot + sway;
-			this.leftDrip.xRot = -this.leftArm.xRot - sway;
+			// keep what the swing and the held item did to the arms and body, then start the parts afresh
+			float twist = this.body.yRot;
+			float[] ra = {this.rightArm.xRot, this.rightArm.yRot, this.rightArm.zRot};
+			float[] la = {this.leftArm.xRot, this.leftArm.yRot, this.leftArm.zRot};
+			for (ModelPart part : new ModelPart[] {this.head, this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg}) {
+				part.resetPose();
+			}
+			this.rightArm.xRot = ra[0];
+			this.rightArm.yRot = ra[1];
+			this.rightArm.zRot = ra[2];
+			this.leftArm.xRot = la[0];
+			this.leftArm.yRot = la[1];
+			this.leftArm.zRot = la[2];
+			XenoMotion.Read m = XenoMotion.read(state);
+			float age = state.ageInTicks;
+			String act = state.getData(XenoformClient.ACT);
+			float swingT = Mth.clamp(state.swingAnimation, 0.0F, 1.0F);
+			float swing = Mth.sin(swingT * (float)Math.PI);
+			boolean pouring = "pour".equals(act);
+			// it stands to fight, and melts when the fight's over, when it sneaks, or when it rides; pouring it is flat
+			boolean stand = !pouring && !state.isCrouching && !state.isPassenger && ("fight".equals(act) || swingT > 0.0F);
+			float[] t = track(state.id, age, stand ? 1.0F : 0.0F, pouring ? 1.0F : 0.0F);
+			float e = smooth(t[1]);
+			float p = smooth(t[2]);
+			float speed = Mth.clamp(state.walkAnimationSpeed * 1.3F, 0.0F, 1.0F);
+			float flow = state.walkAnimationPos * 0.9F;
+			float breath = m.breath();
+
+			// ---- the puddle: the slab ripples and stretches with its flow; the mound leans into the way it goes ----
+			float surge = Mth.sin(flow) * 0.08F * speed;
+			float shrink = Mth.lerp(e, 1.0F, POOL_RISEN);
+			this.pool.xScale = shrink * (1.0F - 0.5F * surge) * (1.0F - 0.15F * p);
+			this.pool.zScale = shrink * (1.0F + surge + 0.12F * speed) * (1.0F + 0.9F * p);
+			this.pool.yScale = (1.0F + 0.1F * breath) * (1.0F - 0.35F * p);
+			float moundWide = Mth.lerp(e, 1.0F, MOUND_RISEN) * (1.0F - 0.2F * p);
+			this.mound.xScale = moundWide;
+			this.mound.zScale = moundWide * (1.0F + 0.5F * p);
+			this.mound.yScale = (1.0F + 0.08F * breath) * Mth.lerp(e, 1.0F, 0.6F) * (1.0F - 0.5F * p);
+			this.mound.xRot = speed * 0.12F * (1.0F - e);
+			this.mound.yRot = m.turn() * 0.2F;
+			for (int i = 0; i < this.lobes.length; i++) {
+				ModelPart lobe = this.lobes[i];
+				float ph = age * 0.11F + i * 1.9F;
+				float h = 0.85F + 0.25F * Mth.sin(ph) + 0.45F * speed * Mth.sin(flow + i * 1.57F);
+				h = h * Mth.lerp(e, 1.0F, 0.6F) + swing * 0.5F * e;
+				lobe.yScale = Mth.clamp(h * (1.0F - 0.5F * p), 0.3F, 1.5F);
+				float in = Mth.lerp(e, 1.0F, LOBE_IN) * (1.0F + 0.05F * Mth.sin(ph));
+				lobe.x = LOBES[i][0] * in;
+				lobe.z = LOBES[i][1] * in + p * (LOBES[i][1] > 0.0F ? 3.0F : 4.0F);
+				lobe.zScale = 1.0F + 1.2F * p;
+			}
+			// the wake drags behind, swinging with its turns, and streams out when it pours
+			this.wake.yScale = (0.8F + 0.2F * breath) * (1.0F - 0.3F * p) * Mth.lerp(e, 1.0F, 0.5F);
+			this.wake.zScale = (1.0F + 0.5F * speed) * (1.0F + 2.0F * p) * Mth.lerp(e, 1.0F, 0.6F);
+			this.wake.xScale = 1.0F - 0.2F * p;
+			this.wake.yRot = m.trail() * 0.5F;
+
+			// ---- the legs: stubby columns that rise out of the slab; each foot stays on the floor, lifting only as it swings forward ----
+			float hip = Mth.lerp(e, HIP_LOW, HIP_RISEN);
+			float reach = FOOT_Y - hip;
+			float amp = e * LEG_SWING * Mth.clamp(state.walkAnimationSpeed * 1.4F, 0.0F, 1.0F);
+			float ph = state.walkAnimationPos * LEG_RATE;
+			float stepR = Mth.cos(ph) * amp;
+			float stepL = -stepR;
+			float lift = FOOT_LIFT * e * Mth.clamp(state.walkAnimationSpeed * 1.4F, 0.0F, 1.0F);
+			float bob = "fight".equals(act) ? Mth.sin(age * 0.3F) * 0.4F * e : 0.0F;
+			// (a swung leg's toe or heel corner dips by its half depth times the swing's sine: the hip rises that much so it never sinks into the floor)
+			float yR = hip + reach * (1.0F - Mth.cos(stepR)) - FOOT_HALF * Math.abs(Mth.sin(stepR)) - Math.max(0.0F, -Mth.sin(ph)) * lift + bob;
+			float yL = hip + reach * (1.0F - Mth.cos(stepL)) - FOOT_HALF * Math.abs(Mth.sin(stepL)) - Math.max(0.0F, Mth.sin(ph)) * lift + bob;
+			float legScale = reach / LEG_LEN;
+			this.rightLeg.setPos(-LEG_X, yR, 0.0F);
+			this.leftLeg.setPos(LEG_X, yL, 0.0F);
+			this.rightLeg.xRot = stepR;
+			this.leftLeg.xRot = stepL;
+			this.rightLeg.yScale = this.leftLeg.yScale = legScale;
+
+			// ---- the torso: lying face-up on the mound, it swings up to a hunch; its base point follows the hips ----
+			float lean = LEAN + 0.04F * breath + swing * 0.12F;
+			float a = Mth.lerp(e, -(float)Math.PI * 0.5F, lean);
+			float cs = Mth.cos(a);
+			float sn = Mth.sin(a);
+			float baseY = Mth.lerp(e, LIE_Y, (yR + yL) * 0.5F) + p * 1.0F;
+			float baseZ = Mth.lerp(e, LIE_Z, 0.0F);
+			this.body.setPos(0.0F, baseY - TORSO_REACH * cs, baseZ - TORSO_REACH * sn);
+			this.body.xRot = a;
+			this.body.yRot = twist * e;
+			this.body.zRot = (Mth.sin(age * 0.09F) * 0.03F + m.turn() * 0.08F) * e;
+
+			// ---- the head: a squashed dome at the front of the puddle; on the torso's top once it stands ----
+			// (it rides the torso's axis: at the hips' end, which lies forward, then up to the neck as the torso stands)
+			float along = Mth.lerp(e, TORSO_LEN, NECK_SINK);
+			this.head.setPos(0.0F, this.body.y + along * cs + (1.0F - e) * (HEAD_Y - LIE_Y), this.body.z + along * sn + (1.0F - e) * (HEAD_Z - (LIE_Z + TORSO_REACH - TORSO_LEN)));
+			this.head.yScale = Mth.lerp(e, DOME, 1.0F) * (1.0F - 0.3F * p);
+			this.head.xScale = Mth.lerp(e, 1.2F, 1.0F);
+			this.head.zScale = Mth.lerp(e, 1.15F, 1.0F) * (1.0F + 0.8F * p);
+			this.head.yRot = Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -1.2F, 1.2F) * Mth.lerp(e, 0.7F, 1.0F);
+			this.head.xRot = state.xRot * Mth.DEG_TO_RAD * Mth.lerp(e, 0.3F, 0.9F) + e * 0.1F;
+			this.head.zRot = -m.turn() * 0.1F;
+
+			// ---- the arms: nubs inside the torso until it stands, then they grow out of its sides; the swinging arm stretches ----
+			float armS = ARM_MIN + (1.0F - ARM_MIN) * e;
+			float wob = Mth.sin(age * 0.15F) * 0.05F * e;
+			float sx = Mth.lerp(e, 2.0F, ARM_X);
+			float sy = this.body.y + ARM_DROP * cs;
+			float sz = this.body.z + ARM_DROP * sn;
+			float tw = this.body.yRot;
+			// the arm that swings is the lash: the main arm, or the other one for an off-hand swing
+			boolean offSwing = state.currentSwing != null && state.currentSwing.hand() == net.minecraft.world.InteractionHand.OFF_HAND;
+			boolean rightLash = (state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT) != offSwing;
+			this.arm(this.rightArm, -1, sx, sy, sz, tw, armS, rightLash ? swing * LASH_STRETCH * e : 0.0F, wob);
+			this.arm(this.leftArm, 1, sx, sy, sz, tw, armS, rightLash ? 0.0F : swing * LASH_STRETCH * e, -wob);
+		}
+
+		/** One arm at its shoulder, scaled out of the mass, flared a little, stretched by {@code stretch} but never past the floor. */
+		private void arm(ModelPart arm, int side, float sx, float sy, float sz, float twist, float scale, float stretch, float wobble) {
+			arm.setPos(side * Mth.cos(twist) * sx, sy, -side * Mth.sin(twist) * sx + sz);
+			arm.zRot -= side * (ARM_FLARE * (scale - ARM_MIN) / (1.0F - ARM_MIN) + wobble);
+			float s = scale * (1.0F + stretch);
+			float down = ARM_LEN * Math.max(0.0F, Mth.cos(arm.xRot) * Mth.cos(arm.zRot));
+			if (down > 0.01F) {
+				s = Math.min(s, Math.max(scale, (FOOT_Y - sy) / down));
+			}
+			arm.xScale = arm.zScale = scale;
+			arm.yScale = s;
 		}
 	}
 
@@ -677,38 +883,384 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.96) Lurk, the stalker: tall and thin, arms that hang past its knees ending in long fingers, a face that's
-	 * mostly eyes. It holds its head a little forward and tilted, as if listening.
+	 * (0.18.96; 0.19.83 on all fours when it stalks) Lurk, the stalker: tall and thin, arms that hang past its knees ending
+	 * in long fingers, a face that's mostly eyes. It holds its head a little forward and tilted, as if listening. Sneaking
+	 * or faded ({@code ACT} "fade", set while Fade is on) it drops onto all fours: the long arms become forelegs, hands flat
+	 * on the ground, the torso tipped nearly level, the knees folded up under the belly and the head carried forward and
+	 * level, the eyes watching; it changes stance over {@link #STANCE_TICKS}. Standing, the man's head, arms and legs are
+	 * reshaped (a bulb of a head with two eye domes, thin arms of an upper arm, forearm and long hand, bent legs); on all
+	 * fours a swing is a pounce: the body rises and lunges and the forepaws strike. The hidden body keeps the insignia: on
+	 * the chest standing, on the back on all fours.
 	 */
 	static final class Lurk extends FormModel {
-		private final ModelPart rightHand, leftHand;
+		// ---- tuning ----
+		/** The long bones (model pixels): upper arm and forearm (the hand runs {@link #HAND_LONG} past the wrist), thigh and shin (down to the ankle, the middle of a flat foot). */
+		static final float UPPER_ARM = 6.0F, FOREARM = 8.0F, THIGH = 7.0F, SHIN = 7.0F;
+		/** In the torso's space (its pivot is the hips; the box runs from NECK_Y to a pixel below): the neck's base, the shoulders (down, out), the chest's middle (the insignia) and how far out the hips are. */
+		static final float NECK_Y = -10.0F, SHOULDER_Y = -9.0F, SHOULDER_X = 3.0F, CHEST_Y = -5.0F, HIP_X = 1.5F;
+		/** Standing and on all fours: how high the hips are above the ground, how far the torso leans forward (radians) and how far back the hips are (z). */
+		static final float STAND_HIP_UP = 13.6F, FOURS_HIP_UP = 8.0F, STAND_PITCH = 0.1F, FOURS_PITCH = 1.2F, FOURS_HIP_Z = 8.0F;
+		/** How long the change of stance takes (ticks), and how far the renderer draws a sneaking player lower (the ground is that much higher in model space). */
+		static final float STANCE_TICKS = 9.0F, CROUCH_SINK = 2.0F;
+		/** An ankle (and a flat wrist) sits this far above the ground: the foot and the hand are 2 thick. The hand runs this far past the wrist. */
+		static final float ANKLE_UP = 1.0F, HAND_LONG = 5.0F;
+		/** The head: how far it pokes forward of the neck's base (standing, on all fours), how far it drops there, its tilt (radians), how much it tips forward standing, and how much of the look it follows on all fours. */
+		static final float STAND_HEAD_FWD = 0.5F, FOURS_HEAD_FWD = 4.5F, FOURS_HEAD_DROP = 0.5F, STAND_TILT = 0.18F, FOURS_TILT = 0.08F, STAND_DIP = 0.15F, FOURS_LOOK = 0.6F;
+		/** The gaits: the cycle against the walk (standing, on all fours), and the walking speed that is a full step. */
+		static final float STAND_GAIT = 0.6662F, FOURS_GAIT = 0.5F, STEP_FULL = 0.3F;
+		/** Standing: how far the legs stride (half a stride), how high a foot lifts, how much of the step it is down, how far the hips dip and how far a landing squats. */
+		static final float STAND_STRIDE = 4.0F, STAND_LIFT = 2.6F, STAND_DUTY = 0.6F, STAND_BOB = 0.6F, STAND_DIP_LAND = 1.5F;
+		/** On all fours: where the hind and fore feet rest (z), how far they stride, how high they lift, how much of the step they are down, the hips' bob, the landing squat and the sway of the spine (radians). */
+		static final float HIND_REST_Z = 9.5F, FORE_REST_Z = -7.0F, HIND_STRIDE = 2.0F, FORE_STRIDE = 2.5F, HIND_LIFT = 2.0F, FORE_LIFT = 3.0F;
+		static final float FOURS_DUTY = 0.75F, FOURS_BOB = 0.5F, FOURS_DIP_LAND = 1.0F, SWAY = 0.1F;
+		/** A run stretches the stride by this much. */
+		static final float RUN_STRETCH = 0.35F;
+		/** The walking part of the vanilla arm swing that is kept (the arms are long): the rest is taken out. */
+		static final float ARM_KEEP = 0.45F;
+		/** Standing, a swing leans the torso this far forward. */
+		static final float STAND_LUNGE = 0.2F;
+		/** The pounce (a swing on all fours): how far the torso rises (radians), the hips rise and lunge (pixels), the head thrusts and dips, how far the forepaws reach, rise and drag back, how far the fingers claw down, and how much of it the left hand does. */
+		static final float RISE_PITCH = 0.6F, RISE_UP = 2.5F, LUNGE = 3.0F, THRUST = 2.0F, STRIKE_DIP = 0.2F;
+		static final float STRIKE_REACH = 6.0F, STRIKE_UP = 8.0F, STRIKE_DRAG = 4.0F, CLAW = 1.0F, OFF_HAND = 0.6F;
+		/** In the air: how far the feet lift and trail (hind, standing then on all fours) and how far the forepaws reach forward and up. */
+		static final float AIR_LIFT_STAND = 2.5F, AIR_LIFT_FOURS = 4.5F, AIR_BACK_STAND = 0.5F, AIR_BACK_FOURS = 3.0F, AIR_FORE_FWD = 3.0F, AIR_FORE_UP = 3.5F, FALL_TILT = 0.25F;
+		/** How far the torso breathes at rest (a fraction of its length). */
+		static final float BREATHE = 0.012F;
+		private static final float TAU = (float)Math.PI * 2.0F;
+		private static final float HALF_PI = (float)Math.PI * 0.5F;
+		/** Each foot's place in the cycle on all fours (hind right, fore right, hind left, fore left): a lateral walk. */
+		private static final float[] FOURS_PHASE = {0.0F, 0.25F, 0.5F, 0.75F};
+
+		private final ModelPart torso, neck, rightEye, leftEye;
+		private final ModelPart rightForearm, leftForearm, rightHand, leftHand, rightShin, leftShin, rightFoot, leftFoot;
+		private final ModelPart[] moving;
+		/** Each drawn entity's stance (0 standing, 1 on all fours) and the age it was last stepped at. */
+		private final Map<Integer, float[]> stances = new java.util.HashMap<>();
+		/** Scratch: a point in the torso's space made world, a foot's path, a limb's solved angles. */
+		private final float[] point = new float[3];
+		private final float[] step = new float[2];
+		private final float[] angles = new float[2];
 
 		Lurk() {
 			super(bake(mesh()), "lurk");
-			this.insigniaZ = -1.7F;
-			this.rightHand = this.rightArm.getChild("hand");
-			this.leftHand = this.leftArm.getChild("hand");
+			ModelPart root = this.root();
+			this.torso = root.getChild("torso");
+			this.neck = root.getChild("neck");
+			this.rightEye = this.head.getChild("right_eye");
+			this.leftEye = this.head.getChild("left_eye");
+			this.rightForearm = this.rightArm.getChild("forearm");
+			this.leftForearm = this.leftArm.getChild("forearm");
+			this.rightHand = this.rightForearm.getChild("hand");
+			this.leftHand = this.leftForearm.getChild("hand");
+			this.rightShin = this.rightLeg.getChild("shin");
+			this.leftShin = this.leftLeg.getChild("shin");
+			this.rightFoot = this.rightShin.getChild("foot");
+			this.leftFoot = this.leftShin.getChild("foot");
+			this.moving = new ModelPart[] {this.head, this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg, this.torso, this.neck,
+				this.rightEye, this.leftEye, this.rightForearm, this.leftForearm, this.rightHand, this.leftHand, this.rightShin, this.leftShin,
+				this.rightFoot, this.leftFoot};
+			// the hidden body carries the plate: on the chest standing, on the back on all fours (see setupAnim)
+			this.insigniaY = 0.0F;
+			this.insigniaZ = -1.5F;
+			this.insigniaSize = 0.7F;
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.3F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
 			PartDefinition root = mesh.getRoot();
-			root.getChild("right_arm").addOrReplaceChild("hand", CubeListBuilder.create().texOffs(0, 64).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F),
-				PartPose.offset(-1.0F, 9.5F, 0.0F));
-			root.getChild("left_arm").addOrReplaceChild("hand", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F),
-				PartPose.offset(1.0F, 9.5F, 0.0F));
+			float hipY = 24.0F - STAND_HIP_UP;
+			// the head: a tall bulb, two domes of eyes on its face, a neck (a root part, so it can stretch from the torso to the head)
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0F, -6.0F, -3.0F, 6.0F, 6.0F, 6.0F),
+				PartPose.offset(0.0F, hipY + NECK_Y, -STAND_HEAD_FWD));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			head.addOrReplaceChild("right_eye", CubeListBuilder.create().texOffs(24, 0).addBox(-1.5F, -1.5F, -0.5F, 3.0F, 3.0F, 1.0F), PartPose.offset(-1.5F, -3.5F, -3.5F));
+			head.addOrReplaceChild("left_eye", CubeListBuilder.create().texOffs(24, 4).addBox(-1.5F, -1.5F, -0.5F, 3.0F, 3.0F, 1.0F), PartPose.offset(1.5F, -3.5F, -3.5F));
+			root.addOrReplaceChild("neck", CubeListBuilder.create().texOffs(0, 12).addBox(-1.5F, -3.0F, -1.5F, 3.0F, 4.0F, 3.0F),
+				PartPose.offset(0.0F, hipY + SHOULDER_Y, 0.0F));
+			// the torso: thin, pivoting at the hips; the man's body stays hidden, to carry the insignia
+			root.addOrReplaceChild("torso", CubeListBuilder.create().texOffs(16, 16).addBox(-2.5F, NECK_Y, -1.5F, 5.0F, 11.0F, 3.0F),
+				PartPose.offsetAndRotation(0.0F, hipY, 0.0F, STAND_PITCH, 0.0F, 0.0F));
+			// the arms: an upper arm, a forearm a hair thinner, a long hand; every box runs a pixel past its joints
+			arm(root, "right_arm", false, 40, 16, 48, 16, 0, 76);
+			arm(root, "left_arm", true, 32, 48, 40, 48, 10, 76);
+			// the legs: a thigh, a shin a hair thinner, a flat foot with the toes forward
+			leg(root, "right_leg", false, 0, 64, 8, 64, 32, 64);
+			leg(root, "left_leg", true, 16, 64, 24, 64, 48, 64);
 			return mesh;
+		}
+
+		private static void arm(PartDefinition root, String name, boolean left, int upperU, int upperV, int foreU, int foreV, int handU, int handV) {
+			float side = left ? 1.0F : -1.0F;
+			PartDefinition arm = root.addOrReplaceChild(name, CubeListBuilder.create().texOffs(upperU, upperV)
+				.addBox(-1.0F, -1.0F, -1.0F, 2.0F, 8.0F, 2.0F, new CubeDeformation(-0.1F, 0.0F, -0.1F)),
+				PartPose.offset(side * SHOULDER_X, 24.0F - STAND_HIP_UP + SHOULDER_Y, 0.0F));
+			PartDefinition fore = arm.addOrReplaceChild("forearm", CubeListBuilder.create().texOffs(foreU, foreV)
+				.addBox(-1.0F, -1.0F, -1.0F, 2.0F, 9.0F, 2.0F, new CubeDeformation(-0.3F, 0.0F, -0.3F)),
+				PartPose.offset(0.0F, UPPER_ARM, 0.0F));
+			fore.addOrReplaceChild("hand", CubeListBuilder.create().texOffs(handU, handV).addBox(-1.5F, -1.0F, -1.0F, 3.0F, 6.0F, 2.0F),
+				PartPose.offset(0.0F, FOREARM, 0.0F));
+		}
+
+		private static void leg(PartDefinition root, String name, boolean left, int thighU, int thighV, int shinU, int shinV, int footU, int footV) {
+			float side = left ? 1.0F : -1.0F;
+			PartDefinition leg = root.addOrReplaceChild(name, CubeListBuilder.create().texOffs(thighU, thighV)
+				.addBox(-1.0F, -1.0F, -1.0F, 2.0F, 9.0F, 2.0F, new CubeDeformation(-0.1F, 0.0F, -0.1F)),
+				PartPose.offset(side * HIP_X, 24.0F - STAND_HIP_UP, 0.0F));
+			PartDefinition shin = leg.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(shinU, shinV)
+				.addBox(-1.0F, -1.0F, -1.0F, 2.0F, 8.0F, 2.0F, new CubeDeformation(-0.3F, 0.0F, -0.3F)),
+				PartPose.offset(0.0F, THIGH, 0.0F));
+			shin.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(footU, footV).addBox(-1.5F, -1.0F, -4.0F, 3.0F, 2.0F, 5.0F),
+				PartPose.offset(0.0F, SHIN, 0.0F));
+		}
+
+		/** 0-1 eased. */
+		private static float smooth(float s) {
+			return s * s * (3.0F - 2.0F * s);
+		}
+
+		/** The fraction of {@code x}. */
+		private static float frac(float x) {
+			return x - (float)Math.floor(x);
+		}
+
+		/** {@code state}'s entity's stance this frame, 0 standing to 1 on all fours: it moves toward its target over {@link #STANCE_TICKS}, stepped by the entity's age so a second draw in the same frame changes nothing. */
+		private float stance(AvatarRenderState state, boolean fours) {
+			float now = state.ageInTicks;
+			float[] s = this.stances.get(state.id);
+			if (s == null) {
+				if (this.stances.size() > 64) {
+					this.stances.clear();
+				}
+				s = new float[] {fours ? 1.0F : 0.0F, now};
+				this.stances.put(state.id, s);
+			}
+			if (now < s[1] || now - s[1] > 100.0F) {
+				// seen again after a while (or its age restarted): no slow change from where it was
+				s[0] = fours ? 1.0F : 0.0F;
+				s[1] = now;
+			}
+			float dt = Math.min(now - s[1], 3.0F);
+			if (dt > 0.0F) {
+				s[1] = now;
+				s[0] = fours ? Math.min(1.0F, s[0] + dt / STANCE_TICKS) : Math.max(0.0F, s[0] - dt / STANCE_TICKS);
+			}
+			return s[0];
+		}
+
+		/**
+		 * A point in the torso's space made world, into {@link #point}: the torso leans forward by {@code pitch} about the
+		 * hips (at {@code py}, {@code pz}), then yaws by {@code yaw} about the upright through them.
+		 */
+		private void at(float py, float pz, float pitch, float yaw, float lx, float ly, float lz) {
+			float y1 = ly * Mth.cos(pitch) - lz * Mth.sin(pitch);
+			float z1 = ly * Mth.sin(pitch) + lz * Mth.cos(pitch);
+			this.point[0] = lx * Mth.cos(yaw) + z1 * Mth.sin(yaw);
+			this.point[1] = py + y1;
+			this.point[2] = pz - lx * Mth.sin(yaw) + z1 * Mth.cos(yaw);
+		}
+
+		/**
+		 * A foot's path against the body for a point in the cycle, into {@link #step}: on the ground it slides back at a steady
+		 * pace, then it swings forward in an arc. {fore-aft offset (+ is back), height off the ground}.
+		 */
+		private void path(float p, float duty, float stride, float lift) {
+			if (p < duty) {
+				this.step[0] = -stride + 2.0F * stride * (p / duty);
+				this.step[1] = 0.0F;
+				return;
+			}
+			float v = (p - duty) / (1.0F - duty);
+			this.step[0] = stride * Mth.cos((float)Math.PI * v);
+			this.step[1] = lift * Mth.sin((float)Math.PI * v);
+		}
+
+		/**
+		 * Two bones from a hip to an ankle in the side plane (z along the body, y down): the upper bone's and the lower bone's
+		 * angles from straight down about x (+ swings the end back), into {@link #angles}. {@code bend} is +1 when the middle
+		 * joint points back, -1 when it points forward. A target out of reach is stretched to the nearest reachable point.
+		 */
+		private void solve(float hipZ, float hipY, float targetZ, float targetY, float upper, float lower, float bend) {
+			float dz = targetZ - hipZ;
+			float dy = targetY - hipY;
+			float dist = Mth.clamp((float)Math.sqrt(dz * dz + dy * dy), Math.abs(upper - lower) + 0.05F, upper + lower - 0.001F);
+			float toTarget = (float)Math.atan2(dz, dy);
+			float cos = Mth.clamp((upper * upper + dist * dist - lower * lower) / (2.0F * upper * dist), -1.0F, 1.0F);
+			float t1 = toTarget + bend * (float)Math.acos(cos);
+			float kneeZ = hipZ + upper * Mth.sin(t1);
+			float kneeY = hipY + upper * Mth.cos(t1);
+			this.angles[0] = t1;
+			this.angles[1] = (float)Math.atan2(targetZ - kneeZ, targetY - kneeY);
+		}
+
+		/** The first-person arm (see XenoformHand): the forearm and hand straight, as they hang. */
+		void handPose() {
+			for (ModelPart part : new ModelPart[] {this.rightForearm, this.leftForearm, this.rightHand, this.leftHand}) {
+				part.resetPose();
+			}
+			this.rightForearm.xRot = this.leftForearm.xRot = -0.15F;
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			// the head tips forward and to one side, slowly, as if it's listening
-			this.head.zRot += 0.18F + Mth.sin(state.ageInTicks * 0.03F) * 0.06F;
-			this.head.z -= 1.0F;
-			// the long fingers trail a little behind the arm's swing
-			this.rightHand.xRot = -this.rightArm.xRot * 0.2F;
-			this.leftHand.xRot = -this.leftArm.xRot * 0.2F;
+			// what vanilla made of the arms (held poses, swings, the idle sway) and of the body's twist in a swing: kept while it stands
+			float twist = this.body.yRot;
+			float rightX = this.rightArm.xRot, rightY = this.rightArm.yRot, rightZ = this.rightArm.zRot;
+			float leftX = this.leftArm.xRot, leftY = this.leftArm.yRot, leftZ = this.leftArm.zRot;
+			if (state.isCrouching) {
+				// (vanilla tips a sneaking man's arms forward: the stance does that here, so a sneak doesn't jerk the arms first)
+				rightX -= 0.4F;
+				leftX -= 0.4F;
+			}
+			this.hat.visible = this.body.visible = false;
+			for (ModelPart part : this.moving) {
+				part.resetPose();
+			}
+			XenoMotion.Read m = XenoMotion.read(state);
+			float age = state.ageInTicks;
+			boolean sneaking = state.isCrouching;
+			// sneaking, or faded ("fade", Lurk.faded on the server): all fours. (The shed skin kneels the same way.)
+			float q = smooth(this.stance(state, sneaking || "fade".equals(state.getData(XenoformClient.ACT))));
+			// a sneaking player is drawn CROUCH_SINK lower (a mob, the shed skin, is not): the ground, in model y, is that much higher
+			float ground = 24.0F - (sneaking && !Boolean.TRUE.equals(state.getData(XenoformClient.SHED)) ? CROUCH_SINK : 0.0F);
+			float speed = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
+			float amp = Mth.clamp(speed / STEP_FULL, 0.0F, 1.0F);
+			float stretch = 1.0F + RUN_STRETCH * Mth.clamp((speed - STEP_FULL) / (1.0F - STEP_FULL), 0.0F, 1.0F);
+			float air = Mth.clamp(m.air(), 0.0F, 1.0F);
+			float swing = Mth.clamp(state.swingAnimation, 0.0F, 1.0F);
+			float sw = Mth.sin(swing * (float)Math.PI);
+			float rise = sw * q;
+			float walk = state.walkAnimationPos;
+			float phS = walk * STAND_GAIT;
+			float phF = walk * FOURS_GAIT;
+			float cycS = phS / TAU;
+			float cycF = phF / TAU;
+
+			// the hips: they dip with each step, squat on a landing, and rise and lunge into a pounce
+			float bobS = STAND_BOB * amp * (0.5F - 0.5F * Mth.cos(2.0F * phS));
+			float bobF = FOURS_BOB * amp * (0.5F - 0.5F * Mth.cos(4.0F * phF));
+			float hipUp = Mth.lerp(q, STAND_HIP_UP - bobS - m.land() * STAND_DIP_LAND, FOURS_HIP_UP - bobF - m.land() * FOURS_DIP_LAND) + RISE_UP * rise;
+			float hipY = ground - hipUp;
+			float hipZ = Mth.lerp(q, 0.0F, FOURS_HIP_Z) - LUNGE * rise;
+			// the torso leans forward (and further into a standing swing), rears into a pounce, pitches with a fall; on all fours it sways like a spine
+			float pitch = Mth.lerp(q, STAND_PITCH + STAND_LUNGE * sw, FOURS_PITCH) - RISE_PITCH * rise + m.fall() * air * FALL_TILT;
+			float yaw = Mth.lerp(q, twist, Mth.sin(phF - 0.6F) * SWAY * amp);
+			this.torso.setPos(0.0F, hipY, hipZ);
+			this.torso.xRot = pitch;
+			this.torso.yRot = yaw;
+			this.torso.yScale = 1.0F + BREATHE * m.breath() * (1.0F - amp);
+
+			// the hidden body lies on the torso: its front on the chest standing, turned over onto the back on all fours (it turns
+			// over at once halfway through the change, so the plate is never half inside the torso)
+			this.at(hipY, hipZ, pitch, yaw, 0.0F, CHEST_Y, 0.0F);
+			this.body.setPos(this.point[0], this.point[1], this.point[2]);
+			this.body.xRot = pitch + (q > 0.5F ? (float)Math.PI : 0.0F);
+			this.body.yRot = yaw;
+
+			// the head: on the torso's end, forward of it, looking where you look (level on all fours, and never into the ground)
+			this.at(hipY, hipZ, pitch, yaw, 0.0F, NECK_Y, 0.0F);
+			float headX = this.point[0];
+			float headY = this.point[1] + Mth.lerp(q, 0.0F, FOURS_HEAD_DROP);
+			float headZ = this.point[2] - Mth.lerp(q, STAND_HEAD_FWD, FOURS_HEAD_FWD) - THRUST * rise;
+			float look = Mth.clamp(state.xRot * Mth.DEG_TO_RAD, -1.1F, 1.1F);
+			float lookFours = Mth.clamp(look * FOURS_LOOK, -0.5F, 0.4F);
+			this.head.setPos(headX, headY, headZ);
+			this.head.xRot = Mth.lerp(q, look + STAND_DIP, lookFours) + STRIKE_DIP * rise + m.land() * 0.15F;
+			float gaze = Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -1.1F, 1.1F);
+			this.head.yRot = gaze - yaw * 0.5F * q;
+			this.head.zRot = Mth.lerp(q, STAND_TILT, FOURS_TILT) + Mth.sin(age * 0.03F) * 0.06F - m.turn() * 0.06F;
+			// the eyes blink together and swell and shrink a little as if they were looking at something
+			float blink = Math.max(0.0F, 1.0F - Math.abs(age % 110.0F - 2.0F) * 0.5F);
+			float gleam = 1.0F + 0.05F * Mth.sin(age * 0.11F);
+			this.rightEye.yScale = this.leftEye.yScale = Mth.lerp(blink, gleam, 0.1F);
+			this.rightEye.xScale = this.leftEye.xScale = gleam;
+			// the neck is stretched from the torso's end to the head's pivot, so it never leaves either
+			this.at(hipY, hipZ, pitch, yaw, 0.0F, SHOULDER_Y + 1.0F, 0.0F);
+			float neckY = this.point[1];
+			float neckZ = this.point[2];
+			// (aimed two pixels up into the head, so it joins the head's middle rather than its underside)
+			float dy = headY - 2.0F * Mth.cos(this.head.xRot) - neckY;
+			float dz = headZ - 2.0F * Mth.sin(this.head.xRot) - neckZ;
+			this.neck.setPos(this.point[0], neckY, neckZ);
+			this.neck.xRot = (float)Math.atan2(-dz, -dy);
+			this.neck.yScale = ((float)Math.sqrt(dy * dy + dz * dz) + 0.5F) / 3.0F;
+
+			// the arms: standing, the vanilla pose (the walking swing mostly taken out, the forearm folding as the arm swings forward);
+			// on all fours, forelegs solved to the ground, a pounce raising and clawing them; changing stance, the wrist goes from
+			// where the standing arm holds it to its place on the ground and the arm is solved to reach it, kept high enough that
+			// the hand (turning from hanging to flat) never goes into the ground
+			float armWalk = Mth.cos(walk * 0.6662F) * speed * (1.0F - ARM_KEEP);
+			rightX += armWalk;
+			leftX -= armWalk;
+			for (int side = 0; side < 2; side++) {
+				boolean left = side == 1;
+				float sign = left ? 1.0F : -1.0F;
+				ModelPart arm = left ? this.leftArm : this.rightArm;
+				ModelPart fore = left ? this.leftForearm : this.rightForearm;
+				ModelPart hand = left ? this.leftHand : this.rightHand;
+				this.at(hipY, hipZ, pitch, yaw, sign * SHOULDER_X, SHOULDER_Y, 0.0F);
+				float shoulderX = this.point[0];
+				float shoulderY = this.point[1];
+				float shoulderZ = this.point[2];
+				arm.setPos(shoulderX, shoulderY, shoulderZ);
+				float standX = left ? leftX : rightX;
+				float standFore = -(0.12F + 0.5F * Math.max(0.0F, -standX));
+				float standHand = -0.2F * standX;
+				// the forelegs
+				float strike = sw * (left ? OFF_HAND : 1.0F);
+				float stride = FORE_STRIDE * amp * stretch;
+				float liftMax = FORE_LIFT * amp;
+				this.path(frac(cycF + FOURS_PHASE[side * 2 + 1]), FOURS_DUTY, stride, liftMax);
+				float lift = this.step[1];
+				float wristZ = FORE_REST_Z + this.step[0] - STRIKE_REACH * strike + STRIKE_DRAG * (swing - 0.4F) * strike - AIR_FORE_FWD * air;
+				float wristY = ground - ANKLE_UP - lift - STRIKE_UP * strike - AIR_FORE_UP * air;
+				// the hand lies flat on the ground, its fingers forward; lifted, the fingers droop, and a pounce claws them down
+				float flat = -HALF_PI + CLAW * strike + 0.5F * (liftMax > 0.01F ? lift / liftMax : 0.0F) * amp + 0.4F * air;
+				arm.yRot = Mth.lerp(q, left ? leftY : rightY, 0.0F);
+				arm.zRot = Mth.lerp(q, left ? leftZ : rightZ, 0.0F);
+				if (q <= 0.0F) {
+					arm.xRot = standX;
+					fore.xRot = standFore;
+					hand.xRot = standHand;
+					continue;
+				}
+				float handAngle = Mth.lerp(q, standX + standFore + standHand, flat);
+				float standWristZ = shoulderZ + UPPER_ARM * Mth.sin(standX) + FOREARM * Mth.sin(standX + standFore);
+				float standWristY = shoulderY + UPPER_ARM * Mth.cos(standX) + FOREARM * Mth.cos(standX + standFore);
+				// how far below the wrist the hand reaches at that angle (its length one way, a pixel the other, a pixel thick)
+				float below = Math.max(HAND_LONG * Mth.cos(handAngle), -Mth.cos(handAngle)) + Math.abs(Mth.sin(handAngle));
+				float toY = Math.min(Mth.lerp(q, standWristY, wristY), ground - below);
+				this.solve(shoulderZ, shoulderY, Mth.lerp(q, standWristZ, wristZ), toY, UPPER_ARM, FOREARM, 1.0F);
+				arm.xRot = this.angles[0];
+				fore.xRot = this.angles[1] - this.angles[0];
+				hand.xRot = handAngle - this.angles[1];
+			}
+
+			// the legs: the ankle goes where a foot would be (a stride standing, a lateral walk on all fours) and the thigh and shin are
+			// solved to reach it with the knee forward, so the leg never breaks at a joint; the foot stays flat, toes down as it lifts
+			for (int side = 0; side < 2; side++) {
+				boolean left = side == 1;
+				float sign = left ? 1.0F : -1.0F;
+				ModelPart leg = left ? this.leftLeg : this.rightLeg;
+				ModelPart shin = left ? this.leftShin : this.rightShin;
+				ModelPart foot = left ? this.leftFoot : this.rightFoot;
+				float liftMax = Mth.lerp(q, STAND_LIFT, HIND_LIFT) * amp;
+				this.path(frac(cycS + side * 0.5F), STAND_DUTY, STAND_STRIDE * amp * stretch, STAND_LIFT * amp);
+				float standZ = this.step[0];
+				float standLift = this.step[1];
+				this.path(frac(cycF + FOURS_PHASE[side * 2]), FOURS_DUTY, HIND_STRIDE * amp * stretch, HIND_LIFT * amp);
+				float footZ = Mth.lerp(q, standZ, HIND_REST_Z + this.step[0]) + air * Mth.lerp(q, AIR_BACK_STAND, AIR_BACK_FOURS);
+				float lift = Mth.lerp(q, standLift, this.step[1]);
+				lift = Mth.lerp(air, lift, Mth.lerp(q, AIR_LIFT_STAND, AIR_LIFT_FOURS));
+				this.solve(hipZ, hipY, footZ, ground - ANKLE_UP - lift, THIGH, SHIN, -1.0F);
+				float thigh = this.angles[0];
+				float shinAngle = this.angles[1];
+				float tip = 0.35F * (liftMax > 0.01F ? Mth.clamp(lift / liftMax, 0.0F, 1.0F) : 0.0F) * amp + 0.3F * air;
+				leg.setPos(sign * HIP_X, hipY, hipZ);
+				leg.xRot = thigh;
+				shin.xRot = shinAngle - thigh;
+				foot.xRot = tip - shinAngle;
+			}
 		}
 	}
 
@@ -1814,67 +2366,490 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.103, patch 5) Dud: small, soft and round, two nubs on its head; it wobbles as it goes. */
+	/**
+	 * (0.18.103, patch 5) Dud: small, soft and round, two nubs on its head; it wobbles as it goes.
+	 * <p>
+	 * (0.19.83) A soft round squishy ball, not a man: a stack of boxes rounding a ball (the body part), a worried face on
+	 * a plate bulging from its front (it turns a little where you look), two nubs on top, nubby hands at its sides and
+	 * tiny stubby feet under it. It waddles, rocking from foot to foot with a jiggle; in the air it stretches and on
+	 * landing it squashes (Boing). Reads {@code XenoformClient.ACT}: "dead" while it plays dead (the server's
+	 * {@code Live.horn > 0}) flops it on its back, face up, feet and hands sticking up; "roll" while it rolls away (the
+	 * server's roll timer) tucks its face and nubs in and spins it as a ball. The humanoid head is hidden (empty); the arms
+	 * and legs are the hands and feet.
+	 */
 	static final class Dud extends FormModel {
+		// ---- tuning ----
+		/** The ball's rest height (its centre, model y), its half height (core plus caps) and its half depth lying down. */
+		static final float BODY_Y = 16.0F, RADIUS = 7.0F, LYING_RADIUS = 6.0F;
+		/** The waddle: radians of clock per unit of walk, walking speed it takes to waddle fully, how far it rocks (radians), bobs and jiggles (pixels / fraction). */
+		static final float WADDLE_RATE = 0.6662F * 1.2F, SPEED_GAIN = 1.5F, ROCK = 0.16F, BOB = 0.8F, JIGGLE = 0.05F;
+		/** The feet: how far they stride and lift (pixels), and the rest height of their pivots. */
+		static final float STRIDE = 1.6F, LIFT = 1.6F, FOOT_REST = 21.0F;
+		/** Boing: how much it stretches in the air and squashes on landing (fractions of its height). */
+		static final float STRETCH = 0.2F, SQUASH = 0.25F;
+		/** The hands: how far out they sit (pixels), where on the ball (body-space y), how far they swing and flap out. */
+		static final float HAND_X = 6.5F, HAND_Y = -1.0F, HAND_SWING = 0.7F, HAND_OUT = 0.25F;
+		/** Playing dead: where the feet stick up from the ball's face-up front (body-space y toward the bottom cap, z just inside the front). */
+		static final float DEAD_FOOT_Y = 4.0F, DEAD_FOOT_Z = -5.5F;
+		/** The roll: how far it spins per unit of walk and per tick (radians), how tight it is tucked and its centre height. */
+		static final float ROLL_PER_WALK = 0.9F, ROLL_PER_TICK = 0.3F, ROLL_SCALE = 0.9F, ROLL_Y = 16.6F;
+		/** The roll's tuck: how far the face plate sinks back and down into the ball and the nubs down into the top cap (pixels). */
+		static final float ROLL_FACE_BACK = 2.0F, ROLL_FACE_DOWN = 1.0F, ROLL_NUB_DOWN = 1.0F;
+		/** How far the face turns and nods with your head (radians). */
+		static final float FACE_YAW = 0.6F, FACE_PITCH = 0.3F;
+
+		private final ModelPart face, nubRight, nubLeft;
+
 		Dud() {
 			super(bake(mesh()), "dud");
-			this.insigniaZ = -2.9F;
+			this.face = this.body.getChild("face");
+			this.nubRight = this.body.getChild("right_nub");
+			this.nubLeft = this.body.getChild("left_nub");
+			// small, low on the ball's front under the face plate
+			this.insigniaY = 1.5F;
+			this.insigniaZ = -6.0F;
+			this.insigniaSize = 0.7F;
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.9F), 0.0F);
-			PartDefinition head = mesh.getRoot().getChild("head");
-			head.addOrReplaceChild("right_nub", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F),
-				PartPose.offset(-2.0F, -8.8F, 0.0F));
-			head.addOrReplaceChild("left_nub", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F),
-				PartPose.offset(2.0F, -8.8F, 0.0F));
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			// the humanoid head is only an anchor: the face is on the ball
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(0.0F, BODY_Y, 0.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			// the ball: a fat core with a cap above and below
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create()
+				.texOffs(0, 64).addBox(-6.0F, -5.0F, -6.0F, 12.0F, 10.0F, 12.0F)
+				.texOffs(0, 86).addBox(-4.0F, -7.0F, -4.0F, 8.0F, 2.0F, 8.0F)
+				.texOffs(32, 86).addBox(-4.0F, 5.0F, -4.0F, 8.0F, 2.0F, 8.0F), PartPose.offset(0.0F, BODY_Y, 0.0F));
+			body.addOrReplaceChild("face", CubeListBuilder.create().texOffs(0, 0).addBox(-5.0F, -2.5F, -3.0F, 10.0F, 5.0F, 4.0F),
+				PartPose.offset(0.0F, -4.5F, -4.0F));
+			body.addOrReplaceChild("right_nub", CubeListBuilder.create().texOffs(0, 96).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F),
+				PartPose.offset(-2.5F, -6.5F, 0.0F));
+			body.addOrReplaceChild("left_nub", CubeListBuilder.create().texOffs(0, 96).mirror().addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F),
+				PartPose.offset(2.5F, -6.5F, 0.0F));
+			// nubby hands and stubby feet: the humanoid arms and legs, 3 pixels cube
+			root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 3.0F, 3.0F),
+				PartPose.offset(-HAND_X, BODY_Y + HAND_Y, 0.0F));
+			root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 3.0F, 3.0F),
+				PartPose.offset(HAND_X, BODY_Y + HAND_Y, 0.0F));
+			root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 3.0F, 3.0F),
+				PartPose.offset(-3.0F, FOOT_REST, 0.0F));
+			root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 3.0F, 3.0F),
+				PartPose.offset(3.0F, FOOT_REST, 0.0F));
 			return mesh;
+		}
+
+		/** Puts {@code part} at a point of the ball's own space (x, y, z from its centre), following its tilt and scale. */
+		private void place(ModelPart part, float x, float y, float z) {
+			float xx = x * this.body.xScale, yy = y * this.body.yScale, zz = z * this.body.zScale;
+			float c = Mth.cos(this.body.xRot), s = Mth.sin(this.body.xRot);
+			float y1 = yy * c - zz * s, z1 = yy * s + zz * c;
+			float c2 = Mth.cos(this.body.zRot), s2 = Mth.sin(this.body.zRot);
+			part.x = this.body.x + xx * c2 - y1 * s2;
+			part.y = this.body.y + xx * s2 + y1 * c2;
+			part.z = this.body.z + z1;
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			float wobble = Mth.sin(state.ageInTicks * 0.25F) * 0.05F + Mth.sin(state.walkAnimationPos * 0.6662F) * 0.1F * state.walkAnimationSpeed;
-			this.body.zRot += wobble;
-			this.head.zRot += wobble * 1.5F;
+			this.head.resetPose();
+			this.body.resetPose();
+			this.rightArm.resetPose();
+			this.leftArm.resetPose();
+			this.rightLeg.resetPose();
+			this.leftLeg.resetPose();
+			this.face.resetPose();
+			this.nubRight.resetPose();
+			this.nubLeft.resetPose();
+			this.hat.visible = false;
+			this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = true;
+			XenoMotion.Read m = XenoMotion.read(state);
+			String act = state.getData(XenoformClient.ACT);
+			boolean dead = "dead".equals(act), roll = !dead && "roll".equals(act);
+			float age = state.ageInTicks;
+			float phase = state.walkAnimationPos * WADDLE_RATE;
+			float spd = Mth.clamp(state.walkAnimationSpeed * SPEED_GAIN, 0.0F, 1.0F);
+			float swing = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
+			float air = Mth.clamp(m.air(), 0.0F, 1.0F);
+			float land = Mth.clamp(m.land(), 0.0F, 1.0F);
+			// the face looks where you look (not while it plays dead or rolls), the nubs wag
+			boolean still = dead || roll;
+			this.face.yRot = still ? 0.0F : Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -FACE_YAW, FACE_YAW);
+			this.face.xRot = still ? 0.0F : Mth.clamp(state.xRot * Mth.DEG_TO_RAD * 0.4F, -FACE_PITCH, FACE_PITCH);
+			float wag = Mth.sin(age * 0.17F) * 0.25F + m.turn() * 0.5F;
+			this.nubRight.zRot = wag - 0.1F;
+			this.nubLeft.zRot = wag + 0.1F;
+			if (dead) {
+				// flopped on its back: the ball lies face-up, the feet stick up off its top by the bottom cap, the hands up at its sides; they twitch
+				float breath = Mth.sin(age * 0.08F) * 0.03F;
+				this.body.xRot = -(float)Math.PI / 2.0F;
+				this.body.zRot = 0.0F;
+				this.body.yScale = 1.0F + breath;
+				this.body.xScale = this.body.zScale = 1.0F - breath * 0.5F;
+				this.body.y = 24.0F - LYING_RADIUS * this.body.zScale;
+				for (int side = 0; side < 2; side++) {
+					float sign = side == 0 ? -1.0F : 1.0F;
+					ModelPart foot = side == 0 ? this.rightLeg : this.leftLeg;
+					ModelPart hand = side == 0 ? this.rightArm : this.leftArm;
+					this.place(foot, sign * 3.0F, DEAD_FOOT_Y, DEAD_FOOT_Z);
+					foot.xRot = (float)Math.PI + Mth.sin(age * 0.2F + side * 2.1F) * 0.25F;
+					foot.zRot = sign * 0.15F;
+					this.place(hand, sign * HAND_X, HAND_Y, 0.0F);
+					hand.xRot = (float)Math.PI + Mth.sin(age * 0.17F + side * 1.3F) * 0.2F;
+					hand.zRot = sign * 0.35F;
+				}
+				return;
+			}
+			if (roll) {
+				// tucked into a ball (face and nubs pulled in, so nothing pokes through the ground as it turns), spinning over the ground
+				this.face.z += ROLL_FACE_BACK;
+				this.face.y += ROLL_FACE_DOWN;
+				this.nubRight.y += ROLL_NUB_DOWN;
+				this.nubLeft.y += ROLL_NUB_DOWN;
+				this.body.xRot = state.walkAnimationPos * ROLL_PER_WALK + age * ROLL_PER_TICK;
+				this.body.zRot = 0.0F;
+				this.body.xScale = this.body.yScale = this.body.zScale = ROLL_SCALE;
+				this.body.y = ROLL_Y;
+				this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
+				return;
+			}
+			// the ball: it rocks from foot to foot and jiggles; stretched in the air, squashed on landing and when crouched
+			float height = 1.0F + STRETCH * air - SQUASH * land - (state.isCrouching ? 0.1F : 0.0F) + Mth.sin(age * 0.14F) * 0.03F
+				+ Mth.sin(phase * 2.0F) * JIGGLE * spd - swing * 0.08F;
+			float width = 1.0F / (float)Math.sqrt(height);
+			this.body.yScale = height;
+			this.body.xScale = this.body.zScale = width;
+			float bob = Mth.abs(Mth.sin(phase)) * BOB * spd;
+			this.body.y = 24.0F - 1.0F - RADIUS * height - bob;
+			this.body.zRot = Mth.sin(phase) * ROCK * spd + Mth.sin(age * 0.09F) * 0.02F;
+			this.body.xRot = swing * 0.25F + spd * 0.06F;
+			for (int side = 0; side < 2; side++) {
+				float sign = side == 0 ? -1.0F : 1.0F;
+				ModelPart foot = side == 0 ? this.rightLeg : this.leftLeg;
+				ModelPart hand = side == 0 ? this.rightArm : this.leftArm;
+				// a foot lifts and strides forward while the ball rocks off it, then plants and slides back
+				float s = Mth.sin(phase) * sign * -1.0F;
+				float lift = Math.max(0.0F, s) * LIFT * spd;
+				foot.x = sign * 3.0F;
+				foot.y = FOOT_REST - lift - air * 1.2F;
+				foot.z = -sign * Mth.cos(phase) * STRIDE * spd;
+				this.place(hand, sign * HAND_X, HAND_Y, 0.0F);
+				hand.xRot = -sign * Mth.sin(phase) * HAND_SWING * spd + Mth.sin(age * 0.1F + side * 1.7F) * 0.05F;
+				// out from the ball (a part on the -x side swings out with + zRot, as vanilla's right arm), more in the air
+				hand.zRot = -sign * (HAND_OUT + air * 0.6F);
+			}
+			// the swinging hand jabs ahead
+			this.rightArm.xRot -= swing * 1.8F;
 		}
 	}
 
-	/** (0.18.107, Scan B) Rime: angular ice, a crown of three icicles and two icicle spines down its back that shiver. */
+	/**
+	 * (0.18.107, Scan B; 0.19.83 a stooped ice brute) Rime: angular ice, a crown of icicles and icicle spines down its back
+	 * that shiver. Now a stooped brute: the back bent forward over its hips (the trunk is hung from them, tipped by
+	 * {@link #HUNCH}), a hump of ice for shoulders, icicle spines along the back, a low-set head with a frost crown and two
+	 * fangs, long arms ending in big fists that hang to the knees, thick two-jointed legs. It walks a heavy stooped
+	 * stride: each foot slides back flat on the ground, then swings forward and plants, the hips sinking as the feet
+	 * spread, the shoulders twisting against the hips, the arms swinging against the legs. Every part keeps the man's name
+	 * (head, body, arms, legs) so the held items, the first-person arm, the attack swing and Cryo's poses (Frost Breath,
+	 * the slide, Flash Freeze) all still work: the body part is the pivot {@link #WAIST} above the hips that
+	 * {@code CryoPose.turnTorso} turns the torso about (so Cryo's lean swings the trunk about the hips), turned upside down
+	 * so the insignia plate (which faces the body's front) lies on the back, below the spines, where it shows over the head.
+	 */
 	static final class Rime extends FormModel {
-		private final ModelPart rightSpine, leftSpine;
+		// ---- tuning ----
+		/** The hips (model y, z, and x out from the middle) the trunk hangs from, and how far it is stooped (radians, + is forward). */
+		static final float HIP_Y = 11.0F, HIP_Z = 2.0F, HIP_X = 3.1F, HUNCH = 0.72F;
+		/** {@code CryoPose.WAIST}: Cryo turns the torso about this far below the body part's rest place, so the body part rests this far above the hips. */
+		static final float WAIST = 12.0F;
+		/** The head's neck (model y, z), low and forward of the hump, and how far it is dipped (radians). */
+		static final float HEAD_Y = 5.4F, HEAD_Z = -8.5F, HEAD_DIP = 0.18F;
+		/** The shoulders (model x out from the middle, y, z): the arms' pivots. */
+		static final float SHOULDER_X = 8.0F, SHOULDER_Y = 3.8F, SHOULDER_Z = -4.4F;
+		/** The leg: thigh and shin lengths, where the ankle hangs standing (the foot is 2 thick under it, so the ground is 24), and the ankle's rest place ahead of the hip (z). */
+		private static final float LEG = 6.0F, ANKLE_Y = 22.0F, REST_Z = -1.1F;
+		/** The stride: how far a foot slides each way from its rest place (pixels), how high it lifts, the share of the cycle it is planted, how fast the legs go against the walk, and how much walking speed it takes to stride fully. */
+		static final float STRIDE = 3.2F, LIFT = 2.6F, STANCE = 0.6F, GAIT = 0.6662F * 0.75F, SPEED_GAIN = 1.6F;
+		/** The hips sink this far as the feet spread (pixels), crouched and landing. */
+		static final float BOB = 0.5F, CROUCH_DROP = 1.6F, LAND_DROP = 1.2F;
+		/** The trunk: how much more it stoops at a run and crouched, how far the shoulders twist and the hips roll with the stride, how much it rocks (radians). */
+		static final float RUN_STOOP = 0.18F, CROUCH_STOOP = 0.35F, TWIST = 0.12F, ROLL = 0.05F, ROCK = 0.04F;
+		/** The arms: rest pitch, how far they swing against the legs, how far they hang out (radians), and the fist's curl. */
+		static final float ARM_REST = -0.1F, ARM_SWING = 0.55F, ARM_OUT = 0.1F, FIST_CURL = -0.2F;
+		/** The attack: how far the arm is thrown up and over, how far the trunk lunges, twists and the head drops. */
+		static final float BLOW_ARM = 2.5F, BLOW_LUNGE = 0.25F, BLOW_TWIST = 0.3F, BLOW_HEAD = 0.3F;
+		/** The back spines: their heights on the trunk (y, from the hips; kept above the insignia), how far each is laid back (radians) and how long each is drawn. */
+		private static final float[] SPINE_Y = {-11.4F, -9.6F, -7.8F, -6.0F};
+		private static final float[] SPINE_LEN = {1.25F, 1.1F, 0.95F, 0.8F};
+		static final float SPINE_TILT = -0.8F;
+		/** The insignia on the back (trunk y from the hips, over the skin's rows 73-79 of the back face) and its size. */
+		static final float BACK_INSIGNIA_Y = -3.5F, BACK_INSIGNIA_SIZE = 0.6F;
+		/** The crown's icicles: x, z on the head, how far swept back, how far splayed out (radians), and how long each is drawn. */
+		private static final float[][] CROWN = {{-2.6F, -1.5F, -0.3F, -0.4F}, {2.6F, -1.5F, -0.3F, 0.4F}, {-1.1F, 1.9F, -0.6F, -0.15F}, {1.1F, 1.9F, -0.6F, 0.15F}};
+		private static final float[] CROWN_LEN = {1.1F, 1.1F, 1.0F, 1.0F};
+		/** The hips in the body part's own space (it rests {@link #WAIST} above them, stooped and turned upside down). */
+		private static final float BODY_LY = -WAIST * (float)Math.cos(HUNCH), BODY_LZ = WAIST * (float)Math.sin(HUNCH);
+		/** The neck and the right shoulder in the trunk's space (from the hips, unstooped), so they ride the trunk exactly. */
+		private static final float[] HEAD_AT = trunkSpace(0.0F, HEAD_Y, HEAD_Z), SHOULDER_AT = trunkSpace(-SHOULDER_X, SHOULDER_Y, SHOULDER_Z);
+
+		private final ModelPart trunk;
+		private final ModelPart[] spines = new ModelPart[SPINE_Y.length];
+		private final ModelPart[] crown = new ModelPart[CROWN.length];
+		private final ModelPart shardRight, shardLeft, fistRight, fistLeft;
+		private final ModelPart shinRight, shinLeft, footRight, footLeft;
+		/** This frame's foot (right, left): the ankle's z from the hip, how far it is lifted, the toe's tip (radians). */
+		private final float[] stepRight = new float[3], stepLeft = new float[3];
+		/** Scratch for a turned point. */
+		private final float[] turned = new float[3];
 
 		Rime() {
 			super(bake(mesh()), "rime");
-			this.insigniaZ = -2.2F;
-			this.rightSpine = this.body.getChild("right_spine");
-			this.leftSpine = this.body.getChild("left_spine");
+			this.trunk = this.body.getChild("trunk");
+			for (int i = 0; i < SPINE_Y.length; i++) {
+				this.spines[i] = this.trunk.getChild("spine" + i);
+			}
+			for (int i = 0; i < CROWN.length; i++) {
+				this.crown[i] = this.head.getChild("crown" + i);
+			}
+			this.shardRight = this.trunk.getChild("right_shard");
+			this.shardLeft = this.trunk.getChild("left_shard");
+			this.fistRight = this.rightArm.getChild("fist");
+			this.fistLeft = this.leftArm.getChild("fist");
+			this.shinRight = this.rightLeg.getChild("shin");
+			this.shinLeft = this.leftLeg.getChild("shin");
+			this.footRight = this.shinRight.getChild("foot");
+			this.footLeft = this.shinLeft.getChild("foot");
+			// on the back below the spines (the body part is the trunk turned upside down: its -z is the trunk's back)
+			this.insigniaY = BODY_LY - BACK_INSIGNIA_Y;
+			this.insigniaZ = BODY_LZ - 3.0F;
+			this.insigniaSize = BACK_INSIGNIA_SIZE;
+		}
+
+		/** A model point at rest into the trunk's space: from the hips, the stoop undone. */
+		private static float[] trunkSpace(float x, float y, float z) {
+			float dy = y - HIP_Y;
+			float dz = z - HIP_Z;
+			float c = (float)Math.cos(HUNCH);
+			float s = (float)Math.sin(HUNCH);
+			return new float[] {x, dy * c + dz * s, -dy * s + dz * c};
+		}
+
+		/** {@code (x, y, z)} turned as a model part turns it (x, then y, then z) into {@code out}. */
+		private static void turn(float xRot, float yRot, float zRot, float x, float y, float z, float[] out) {
+			float cx = Mth.cos(xRot), sx = Mth.sin(xRot), cy = Mth.cos(yRot), sy = Mth.sin(yRot), cz = Mth.cos(zRot), sz = Mth.sin(zRot);
+			float y1 = y * cx - z * sx;
+			float z1 = y * sx + z * cx;
+			float x2 = x * cy + z1 * sy;
+			float z2 = -x * sy + z1 * cy;
+			out[0] = x2 * cz - y1 * sz;
+			out[1] = x2 * sz + y1 * cz;
+			out[2] = z2;
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.2F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("crown_mid", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
-				PartPose.offset(0.0F, -8.2F, -1.0F));
-			head.addOrReplaceChild("crown_right", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
-				PartPose.offsetAndRotation(-2.5F, -8.2F, -1.0F, 0.0F, 0.0F, -0.35F));
-			head.addOrReplaceChild("crown_left", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
-				PartPose.offsetAndRotation(2.5F, -8.2F, -1.0F, 0.0F, 0.0F, 0.35F));
-			PartDefinition body = root.getChild("body");
-			body.addOrReplaceChild("right_spine", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 8.0F, 2.0F),
-				PartPose.offsetAndRotation(-1.8F, 4.0F, 2.4F, -0.7F, 0.0F, -0.15F));
-			body.addOrReplaceChild("left_spine", CubeListBuilder.create().texOffs(8, 64).mirror().addBox(-1.0F, -8.0F, -1.0F, 2.0F, 8.0F, 2.0F),
-				PartPose.offsetAndRotation(1.8F, 4.0F, 2.4F, -0.7F, 0.0F, 0.15F));
+			// the head: low and forward of the shoulders, a frost crown of icicles swept back, two fangs hung under the jaw
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F,
+				new CubeDeformation(0.3F)), PartPose.offset(0.0F, HEAD_Y, HEAD_Z));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			for (int i = 0; i < CROWN.length; i++) {
+				float[] c = CROWN[i];
+				head.addOrReplaceChild("crown" + i, CubeListBuilder.create().texOffs(60, 64 + 5 * i).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+					PartPose.offsetAndRotation(c[0], -3.7F, c[1], c[2], 0.0F, c[3]));
+			}
+			head.addOrReplaceChild("right_fang", CubeListBuilder.create().texOffs(44, 114).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 3.0F, 1.0F),
+				PartPose.offset(-2.0F, 3.6F, -3.8F));
+			head.addOrReplaceChild("left_fang", CubeListBuilder.create().texOffs(48, 114).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 3.0F, 1.0F),
+				PartPose.offset(2.0F, 3.6F, -3.8F));
+			// the body part: WAIST above the hips, stooped and turned upside down; the trunk hangs from the hips in it, turned back upright
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(),
+				PartPose.offsetAndRotation(0.0F, HIP_Y - WAIST, HIP_Z, HUNCH + (float)Math.PI, 0.0F, 0.0F));
+			PartDefinition trunk = body.addOrReplaceChild("trunk", CubeListBuilder.create().texOffs(0, 64).addBox(-4.5F, -10.0F, -3.0F, 9.0F, 10.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, BODY_LY, BODY_LZ, (float)Math.PI, 0.0F, 0.0F));
+			trunk.addOrReplaceChild("hump", CubeListBuilder.create().texOffs(0, 80).addBox(-6.5F, -3.0F, -3.5F, 13.0F, 5.0F, 7.0F, new CubeDeformation(0.2F)),
+				PartPose.offset(0.0F, -9.0F, 0.5F));
+			for (int i = 0; i < SPINE_Y.length; i++) {
+				trunk.addOrReplaceChild("spine" + i, CubeListBuilder.create().texOffs(56, 90 + 8 * i).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 6.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, SPINE_Y[i], 2.7F, SPINE_TILT, 0.0F, 0.0F));
+			}
+			trunk.addOrReplaceChild("right_shard", CubeListBuilder.create().texOffs(44, 119).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 4.0F, 2.0F),
+				PartPose.offsetAndRotation(-6.2F, -10.5F, 0.5F, 0.0F, 0.0F, -0.55F));
+			trunk.addOrReplaceChild("left_shard", CubeListBuilder.create().texOffs(56, 122).mirror().addBox(-1.0F, -4.0F, -1.0F, 2.0F, 4.0F, 2.0F),
+				PartPose.offsetAndRotation(6.2F, -10.5F, 0.5F, 0.0F, 0.0F, 0.55F));
+			// the arms: long, from the hump to the knees, a big fist hung on each (its box fattened a little past the arm)
+			PartDefinition right = root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(0, 92).addBox(-2.5F, -1.0F, -2.5F, 5.0F, 12.0F, 5.0F),
+				PartPose.offset(-SHOULDER_X, SHOULDER_Y, SHOULDER_Z));
+			right.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(0, 109).addBox(-2.5F, -1.0F, -2.5F, 5.0F, 5.0F, 5.0F, new CubeDeformation(0.6F)),
+				PartPose.offset(0.0F, 10.5F, 0.0F));
+			PartDefinition left = root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(20, 92).mirror().addBox(-2.5F, -1.0F, -2.5F, 5.0F, 12.0F, 5.0F),
+				PartPose.offset(SHOULDER_X, SHOULDER_Y, SHOULDER_Z));
+			left.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(20, 109).mirror().addBox(-2.5F, -1.0F, -2.5F, 5.0F, 5.0F, 5.0F, new CubeDeformation(0.6F)),
+				PartPose.offset(0.0F, 10.5F, 0.0F));
+			// the legs: thigh, shin and foot, each box running a pixel past its joint so the bends show no gap
+			PartDefinition rightLeg = root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(40, 64).addBox(-2.5F, -1.0F, -2.5F, 5.0F, 8.0F, 5.0F),
+				PartPose.offset(-HIP_X, HIP_Y, HIP_Z));
+			PartDefinition rightShin = rightLeg.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(40, 90).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 7.0F, 4.0F),
+				PartPose.offset(0.0F, LEG, 0.0F));
+			rightShin.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(0, 119).addBox(-2.5F, -1.0F, -4.0F, 5.0F, 3.0F, 6.0F),
+				PartPose.offset(0.0F, LEG, 0.0F));
+			PartDefinition leftLeg = root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(40, 77).mirror().addBox(-2.5F, -1.0F, -2.5F, 5.0F, 8.0F, 5.0F),
+				PartPose.offset(HIP_X, HIP_Y, HIP_Z));
+			PartDefinition leftShin = leftLeg.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(40, 101).mirror().addBox(-2.0F, -1.0F, -2.0F, 4.0F, 7.0F, 4.0F),
+				PartPose.offset(0.0F, LEG, 0.0F));
+			leftShin.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(22, 119).mirror().addBox(-2.5F, -1.0F, -4.0F, 5.0F, 3.0F, 6.0F),
+				PartPose.offset(0.0F, LEG, 0.0F));
 			return mesh;
+		}
+
+		/**
+		 * One foot's place at {@code f} (0-1 through its cycle) into {@code out}: planted flat, sliding back, for the first
+		 * {@link #STANCE} of it; then swung forward, lifted, toe down as it leaves and up as it lands. Scaled by {@code amp}
+		 * (0 stands still, 1 strides fully).
+		 */
+		private static void step(float f, float amp, float[] out) {
+			float z;
+			float lift = 0.0F;
+			float toe = 0.0F;
+			if (f < STANCE) {
+				z = REST_Z - STRIDE * (1.0F - 2.0F * f / STANCE);
+			} else {
+				float s = (f - STANCE) / (1.0F - STANCE);
+				float e = s * s * (3.0F - 2.0F * s);
+				float arc = Mth.sin(s * (float)Math.PI);
+				z = REST_Z + STRIDE * (1.0F - 2.0F * e);
+				lift = LIFT * arc;
+				toe = 0.5F * arc * (1.0F - s) - 0.3F * arc * s;
+			}
+			out[0] = REST_Z + (z - REST_Z) * amp;
+			out[1] = lift * amp;
+			out[2] = toe * amp;
+		}
+
+		/**
+		 * A leg from the hip to the ankle: the thigh and shin are solved to reach it with the knee forward, so the leg never
+		 * breaks at a joint, and the foot is laid at {@code toe} to the ground.
+		 */
+		private static void leg(ModelPart thigh, ModelPart shin, ModelPart foot, float hipY, float ankleY, float ankleZ, float toe) {
+			float dy = ankleY - hipY;
+			float dz = ankleZ - HIP_Z;
+			float reach = Mth.clamp((float)Math.sqrt(dy * dy + dz * dz), 3.0F, 2.0F * LEG - 0.05F);
+			float thighAngle = (float)Math.atan2(dz, dy) - (float)Math.acos(reach / (2.0F * LEG));
+			float kneeY = hipY + LEG * Mth.cos(thighAngle);
+			float kneeZ = HIP_Z + LEG * Mth.sin(thighAngle);
+			float shinAngle = (float)Math.atan2(ankleZ - kneeZ, ankleY - kneeY);
+			thigh.xRot = thighAngle;
+			shin.xRot = shinAngle - thighAngle;
+			foot.xRot = toe - shinAngle;
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			float shiver = Mth.sin(state.ageInTicks * 0.9F) * 0.015F;
-			this.rightSpine.zRot = -0.15F + shiver;
-			this.leftSpine.zRot = 0.15F - shiver;
+			// the arm poses vanilla chose for what is held (a bow drawn, a shield up, ...): kept for those, the walk is ours otherwise
+			float[] heldRight = {this.rightArm.xRot, this.rightArm.yRot, this.rightArm.zRot};
+			float[] heldLeft = {this.leftArm.xRot, this.leftArm.yRot, this.leftArm.zRot};
+			boolean emptyRight = state.rightArmPose == HumanoidModel.ArmPose.EMPTY;
+			boolean emptyLeft = state.leftArmPose == HumanoidModel.ArmPose.EMPTY;
+			boolean itemRight = state.rightArmPose == HumanoidModel.ArmPose.ITEM;
+			boolean itemLeft = state.leftArmPose == HumanoidModel.ArmPose.ITEM;
+			for (ModelPart part : new ModelPart[] {this.head, this.body, this.trunk, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg, this.fistRight,
+				this.fistLeft, this.shinRight, this.shinLeft, this.footRight, this.footLeft, this.shardRight, this.shardLeft}) {
+				part.resetPose();
+			}
+			XenoMotion.Read m = XenoMotion.read(state);
+			float age = state.ageInTicks;
+			float tau = (float)Math.PI * 2.0F;
+			boolean crouch = state.isCrouching || Boolean.TRUE.equals(state.getData(XenoformClient.SNEAK));
+			// Cryo's poses turn the torso from the parts' rest places (CryoPose.turnTorso, not when crouched): the trunk holds its rest stoop for them
+			boolean cryo = !state.isCrouching && state.getData(com.jaymospowers.client.power.cryo.CryoPose.KEY) != null;
+			float amp = Mth.clamp(state.walkAnimationSpeed * SPEED_GAIN, 0.0F, 1.0F);
+			float air = Mth.clamp(m.air(), 0.0F, 1.0F);
+			float sw = Mth.clamp(state.swingAnimation, 0.0F, 1.0F);
+			float blow = Mth.sin(sw * (float)Math.PI);
+			float turns = state.walkAnimationPos * GAIT / tau;
+			float u = turns - (float)Math.floor(turns);
+			float phase = u * tau;
+			step(u, amp, this.stepRight);
+			step(u + 0.5F - (float)Math.floor(u + 0.5F), amp, this.stepLeft);
+
+			// the hips sink as the feet spread, crouched and landing; they hold still in the air
+			float spread = Math.max(Math.abs(this.stepRight[0] - REST_Z), Math.abs(this.stepLeft[0] - REST_Z)) / STRIDE;
+			float hipY = cryo ? HIP_Y : HIP_Y + (BOB * spread + (crouch ? CROUCH_DROP : 0.0F) + m.land() * LAND_DROP) * (1.0F - air);
+			float tuck = air * 2.0F;
+			this.rightLeg.setPos(-HIP_X, hipY, HIP_Z);
+			this.leftLeg.setPos(HIP_X, hipY, HIP_Z);
+			this.legTo(hipY, this.stepRight, this.rightLeg, this.shinRight, this.footRight, tuck);
+			this.legTo(hipY, this.stepLeft, this.leftLeg, this.shinLeft, this.footLeft, tuck);
+
+			// the trunk: stooped, more at a run, crouched, lunging on a blow, tipped nose-down in a fall; the shoulders twist against the hips
+			float sign = state.mainArm == net.minecraft.world.entity.HumanoidArm.LEFT ? -1.0F : 1.0F;
+			float hunch = HUNCH;
+			float twist = 0.0F;
+			float roll = 0.0F;
+			if (!cryo) {
+				hunch += RUN_STOOP * amp + (crouch ? CROUCH_STOOP : 0.0F) + blow * BLOW_LUNGE
+					+ Mth.clamp(m.fall(), -1.0F, 1.0F) * air * 0.2F + 0.02F * m.breath() + ROCK * Mth.cos(phase * 2.0F) * amp;
+				twist = -Mth.sin(phase) * TWIST * amp + sign * Mth.sin((float)Math.sqrt(sw) * tau) * BLOW_TWIST;
+				roll = Mth.sin(phase) * ROLL * amp + m.turn() * 0.08F;
+			}
+			// the body part stands WAIST above the hips in the trunk's turn (upside down), so the hips stay put
+			this.body.xRot = hunch + (float)Math.PI;
+			this.body.yRot = twist;
+			this.body.zRot = roll;
+			turn(this.body.xRot, twist, roll, 0.0F, BODY_LY, BODY_LZ, this.turned);
+			this.body.setPos(-this.turned[0], hipY - this.turned[1], HIP_Z - this.turned[2]);
+			this.trunk.yScale = 1.0F + 0.015F * m.breath();
+			// the head and shoulders ride the trunk as it turns about the hips
+			turn(hunch, twist, roll, HEAD_AT[0], HEAD_AT[1], HEAD_AT[2], this.turned);
+			this.head.setPos(this.turned[0], hipY + this.turned[1], HIP_Z + this.turned[2]);
+			turn(hunch, twist, roll, SHOULDER_AT[0], SHOULDER_AT[1], SHOULDER_AT[2], this.turned);
+			this.rightArm.setPos(this.turned[0], hipY + this.turned[1], HIP_Z + this.turned[2]);
+			turn(hunch, twist, roll, -SHOULDER_AT[0], SHOULDER_AT[1], SHOULDER_AT[2], this.turned);
+			this.leftArm.setPos(this.turned[0], hipY + this.turned[1], HIP_Z + this.turned[2]);
+
+			// the head: dipped, looking where you look, dropping with a blow, rolling with the trunk against the turn
+			float tip = hunch - HUNCH;
+			float look = Mth.clamp(state.xRot * Mth.DEG_TO_RAD, -0.7F, 0.9F);
+			this.head.xRot = look + HEAD_DIP + tip * 0.6F + blow * BLOW_HEAD;
+			this.head.yRot = Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -1.0F, 1.0F) - twist * 0.5F;
+			this.head.zRot = -m.turn() * 0.08F - roll * 0.5F;
+
+			// the arms swing against the legs (each against the opposite foot), hanging a little out, the fists curled
+			float sway = Mth.sin(age * 0.067F) * 0.03F;
+			float rightSwing = ARM_REST + ARM_SWING * (this.stepLeft[0] - REST_Z) / STRIDE + sway;
+			float leftSwing = ARM_REST + ARM_SWING * (this.stepRight[0] - REST_Z) / STRIDE - sway;
+			boolean leftMain = sign < 0.0F;
+			float rightX = leftMain ? rightSwing : rightSwing - blow * BLOW_ARM;
+			float leftX = leftMain ? leftSwing - blow * BLOW_ARM : leftSwing;
+			this.rightArm.xRot = emptyRight ? rightX : itemRight ? rightX * 0.5F - 0.31F : heldRight[0];
+			this.leftArm.xRot = emptyLeft ? leftX : itemLeft ? leftX * 0.5F - 0.31F : heldLeft[0];
+			this.rightArm.yRot = emptyRight || itemRight ? twist * 0.5F : heldRight[1];
+			this.leftArm.yRot = emptyLeft || itemLeft ? twist * 0.5F : heldLeft[1];
+			this.rightArm.zRot = emptyRight || itemRight ? ARM_OUT - roll : heldRight[2];
+			this.leftArm.zRot = emptyLeft || itemLeft ? -ARM_OUT - roll : heldLeft[2];
+			this.fistRight.xRot = this.fistLeft.xRot = FIST_CURL - 0.3F * blow;
+
+			// the spines shiver and lift with each breath; the crown and shoulder shards stand at their lengths
+			for (int i = 0; i < this.spines.length; i++) {
+				ModelPart spine = this.spines[i];
+				spine.xRot = SPINE_TILT - 0.03F * m.breath() - 0.05F * amp;
+				spine.zRot = Mth.sin(age * 0.9F + i * 1.3F) * 0.02F - roll * 0.3F;
+				spine.yScale = SPINE_LEN[i];
+			}
+			for (int i = 0; i < this.crown.length; i++) {
+				ModelPart icicle = this.crown[i];
+				float[] k = CROWN[i];
+				icicle.xRot = k[2] - 0.15F * amp;
+				icicle.zRot = k[3] + Mth.sin(age * 0.7F + i * 1.9F) * 0.025F;
+				icicle.yScale = CROWN_LEN[i];
+			}
+		}
+
+		/** One leg to its foot's step: the ankle ahead of the hip by the step's z, lifted by its lift (and tucked up in the air). */
+		private void legTo(float hipY, float[] step, ModelPart thigh, ModelPart shin, ModelPart foot, float tuck) {
+			leg(thigh, shin, foot, hipY, ANKLE_Y - step[1] - tuck, HIP_Z + step[0], step[2]);
 		}
 	}
 
@@ -4768,11 +5743,362 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.113, Scan E) Shade: very tall and thin; nothing but the body, its eyes do the rest. */
+	/**
+	 * (0.18.113, Scan E; 0.19.83 a crawling shadow that unfolds tall) Shade: very tall and thin, its eyes do the rest.
+	 * <p>
+	 * No longer a man in black. Moving on the ground it goes low on its long limbs, all fours,
+	 * spidery: the torso pitched nearly flat, the arms' elbows high and forward with the hands reaching ahead, the hind
+	 * legs folded back like a cricket's, all of them splayed wide, stepping in a lateral sequence (hind, fore, hind, fore
+	 * across the body) with the torso swaying. Standing still, attacking, staring, holding a stolen block, jumping or
+	 * falling, it unfolds to its full very tall, thin height (a smooth, speed-limited transition both ways, per player:
+	 * stand up fast, fold back slowly). Standing, the arms hang to the knees and swing against the legs; an attack
+	 * chops overhead; {@link XenoformClient#ACT} "hold" (Steal's block held up) raises both arms over the head and
+	 * "stare" (Stare's lock) spreads the arms wide and leans the head in, both server-side from
+	 * {@code XenoformPower.Live}: {@code lifted != null} and {@code stalked >= 0}. Every limb is two segments solved by
+	 * two-bone IK, so the feet and hands stay on the ground through the whole unfold. The man's body is hidden and
+	 * carries only the insignia plate, which rides the torso's front standing and its back crawling. Swimming it stays stretched out.
+	 */
 	static final class Shade extends FormModel {
+		// ---- tuning ----
+		/** Standing: the hips' height (model y; the ground is 24, the ankle {@link #FOOT_H} above it, a leg reaches {@link #MAX_REACH}) and the arms' hang, wrist below shoulder. */
+		static final float STAND_HIP_Y = 5.8F, ARM_HANG = 17.0F;
+		/** Crawling: the hips' height, how far back the hips sit (the body is centred on the box), the torso's pitch (radians, forward) and how much lower it sinks when sneaking. */
+		static final float CRAWL_HIP_Y = 17.0F, CRAWL_Z = 6.0F, CRAWL_PITCH = 1.2F, CRAWL_SINK = 1.0F;
+		/** How far a hind foot sits behind its hip crawling, and how far ahead of the shoulder a hand reaches. */
+		static final float CRAWL_FOOT_DZ = 3.0F, CRAWL_REACH = 8.0F;
+		/** The unfold: ticks to stand up and to fold back down, the walking speed where it starts to crawl and how sharply it goes low. */
+		static final float UNFOLD_TICKS = 5.0F, FOLD_TICKS = 12.0F, CRAWL_FROM = 0.04F, CRAWL_GAIN = 4.0F;
+		/** The gait: radians of clock per unit of walk, how much walking speed it takes to step fully. */
+		static final float GAIT = 0.6662F, GAIT_GAIN = 2.0F;
+		/** Half a stride (pixels) and how high a stepping foot lifts: crawling (legs and arms alike), and standing (legs; the arms' swing). */
+		static final float CRAWL_STRIDE = 4.0F, CRAWL_LIFT = 3.0F, STAND_STRIDE = 3.0F, STAND_LIFT = 2.0F, ARM_STAND_STRIDE = 3.0F;
+		/** The limbs' outward splay (radians about the hip or shoulder): crawling and standing; the arms' extra splay while staring; the arms' inward lean holding a block. */
+		static final float LEG_SPLAY_CRAWL = 0.5F, LEG_SPLAY_STAND = 0.04F, ARM_SPLAY_CRAWL = 0.45F, ARM_SPLAY_STAND = 0.06F, STARE_SPLAY = 0.5F, HOLD_SPLAY = -0.08F;
+		/** Where the limbs hang on the torso: the hips out from the middle (crawling, standing), the shoulders out. */
+		static final float HIP_X_CRAWL = 2.2F, HIP_X_STAND = 1.5F, SHOULDER_X = 3.5F;
+		/** The torso sways (radians of yaw) with the steps: crawling, standing. */
+		static final float CRAWL_SWAY = 0.16F, STAND_SWAY = 0.04F;
+		/** Standing: lean forward while staring, the extra lunge of an attack, the lean back holding a block (radians); sneaking standing drops the hips (pixels). */
+		static final float STARE_LEAN = 0.12F, SWING_LEAN = 0.22F, HOLD_LEAN = -0.06F, CROUCH_DROP = 2.0F;
+		/** The renderer sinks a crouching player 2 pixels, so everything is raised that much first. */
+		static final float CROUCH_RISE = -2.0F;
+		/** The head: how far it tips crawling (radians; the face stays near forward), how much of the look's pitch it takes, and the lunge of an attack. */
+		static final float HEAD_TILT_CRAWL = 0.3F, LOOK_PITCH = 1.0F, SWING_LUNGE = 0.35F;
+		/** The attack's chop: the hand's start and end z against the shoulder (+ is back), and how high the arc lifts it (pixels). */
+		static final float SWING_BACK = 4.0F, SWING_FWD = -13.0F, SWING_ARC = 14.0F;
+		/** Holding a block: how far above the shoulder the wrists rise, and how far the fingers curl (radians). */
+		static final float HOLD_UP = 13.5F, HOLD_CURL = 0.9F;
+		/** Using an item (a bow, a shield, food): how far ahead and how far below the shoulder the hand comes up (pixels). */
+		static final float USE_FWD = -11.0F, USE_DROP = 4.0F;
+		/** Jumping or falling: how far the feet draw up and the hands fly up (pixels); a landing dips the hips (pixels per unit of land). */
+		static final float AIR_LEG = 4.0F, AIR_ARM = 5.0F, LAND_DIP = 2.5F;
+		/**
+		 * A hand crawling points this far forward from straight down (radians, - is forward) and so its wrist sits this
+		 * high off the ground (pixels: the 3-pixel fingers' drop plus the 2-pixel hand's thickness, so no corner sinks in);
+		 * it only starts to hang once the unfold is this far along (so it never swings down into the ground).
+		 */
+		static final float HAND_CRAWL = -1.2F, HAND_GROUND = 2.2F, HAND_LIFT_FROM = 0.5F;
+		/** A segment's length (a limb has two) and how short of fully stretched a limb is kept (so a straight leg still has a hint of bend). */
+		private static final float SEG = 9.0F, SLACK = 0.4F, MAX_REACH = 2.0F * SEG - SLACK, MIN_REACH = 1.5F;
+		/** The foot's thickness: it hangs under the ankle, so the ankle is solved to this far above the ground (no shin corner sinks in). */
+		private static final float FOOT_H = 1.0F;
+		/** The torso's hinge points (y in its own space, up is -): the neck, the shoulders and the middle (where the plate sits). */
+		private static final float NECK_BY = -10.5F, SHOULDER_BY = -9.5F, CHEST_BY = -5.5F;
+
+		/** Per player: the unfold (0 crawling, 1 standing), the hold and stare blends, and the age they were stepped at. */
+		private static final java.util.Map<Integer, float[]> TRACKS = new java.util.HashMap<>();
+
+		private final ModelPart torso;
+		private final ModelPart rightForearm, leftForearm, rightHand, leftHand, rightShin, leftShin, rightFoot, leftFoot;
+		/** Scratch: the IK's two angles, and a point on the torso. */
+		private final float[] angles = new float[2], point = new float[3];
+
 		Shade() {
-			super(bake(HumanoidModel.createMesh(new CubeDeformation(-0.4F), 0.0F)), "shade");
-			this.insigniaZ = -1.6F;
+			super(bake(mesh()), "shade");
+			ModelPart root = this.root();
+			this.torso = root.getChild("torso");
+			this.rightForearm = this.rightArm.getChild("forearm");
+			this.leftForearm = this.leftArm.getChild("forearm");
+			this.rightHand = this.rightForearm.getChild("hand");
+			this.leftHand = this.leftForearm.getChild("hand");
+			this.rightShin = this.rightLeg.getChild("shin");
+			this.leftShin = this.leftLeg.getChild("shin");
+			this.rightFoot = this.rightShin.getChild("foot");
+			this.leftFoot = this.leftShin.getChild("foot");
+			// the hidden body sits at the torso's middle, turned so the plate lies on its front standing and its back crawling
+			this.insigniaY = 0.0F;
+			this.insigniaZ = -1.5F;
+			this.insigniaSize = 0.8F;
+		}
+
+		/** A 2x10x2 segment (a pixel of overlap at its top so the joints close). */
+		private static CubeListBuilder seg(int u, int v, boolean left) {
+			CubeListBuilder b = CubeListBuilder.create().texOffs(u, v);
+			if (left) {
+				b.mirror();
+			}
+			return b.addBox(-1.0F, -1.0F, -1.0F, 2.0F, 10.0F, 2.0F);
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			// a narrow head on the end of the torso
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 64).addBox(-2.5F, -6.0F, -2.5F, 5.0F, 6.0F, 5.0F),
+				PartPose.offset(0.0F, STAND_HIP_Y + NECK_BY, 0.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			// the real torso, thin and long (the man's body, kept for the plate, is hidden)
+			root.addOrReplaceChild("torso", CubeListBuilder.create().texOffs(0, 76).addBox(-2.5F, -11.0F, -1.5F, 5.0F, 11.0F, 3.0F),
+				PartPose.offset(0.0F, STAND_HIP_Y, 0.0F));
+			// arms: upper arm, forearm, a hand of long fingers
+			PartDefinition rightArm = root.addOrReplaceChild("right_arm", seg(0, 92, false), PartPose.offset(-SHOULDER_X, STAND_HIP_Y + SHOULDER_BY, 0.0F));
+			rightArm.addOrReplaceChild("forearm", seg(8, 92, false), PartPose.offset(0.0F, SEG, 0.0F))
+				.addOrReplaceChild("hand", CubeListBuilder.create().texOffs(0, 106).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 4.0F, 2.0F), PartPose.offset(0.0F, SEG, 0.0F));
+			PartDefinition leftArm = root.addOrReplaceChild("left_arm", seg(16, 92, true), PartPose.offset(SHOULDER_X, STAND_HIP_Y + SHOULDER_BY, 0.0F));
+			leftArm.addOrReplaceChild("forearm", seg(24, 92, true), PartPose.offset(0.0F, SEG, 0.0F))
+				.addOrReplaceChild("hand", CubeListBuilder.create().texOffs(8, 106).mirror().addBox(-1.0F, -1.0F, -1.0F, 2.0F, 4.0F, 2.0F), PartPose.offset(0.0F, SEG, 0.0F));
+			// legs: thigh, shin, a long flat foot (under the ankle, its sole FOOT_H below it)
+			PartDefinition rightLeg = root.addOrReplaceChild("right_leg", seg(32, 92, false), PartPose.offset(-HIP_X_STAND, STAND_HIP_Y, 0.0F));
+			rightLeg.addOrReplaceChild("shin", seg(40, 92, false), PartPose.offset(0.0F, SEG, 0.0F))
+				.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(16, 106).addBox(-1.0F, 0.0F, -3.0F, 2.0F, FOOT_H, 4.0F), PartPose.offset(0.0F, SEG, 0.0F));
+			PartDefinition leftLeg = root.addOrReplaceChild("left_leg", seg(48, 92, true), PartPose.offset(HIP_X_STAND, STAND_HIP_Y, 0.0F));
+			leftLeg.addOrReplaceChild("shin", seg(56, 92, true), PartPose.offset(0.0F, SEG, 0.0F))
+				.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(28, 106).mirror().addBox(-1.0F, 0.0F, -3.0F, 2.0F, FOOT_H, 4.0F), PartPose.offset(0.0F, SEG, 0.0F));
+			return mesh;
+		}
+
+		private static float smooth(float s) {
+			return s * s * (3.0F - 2.0F * s);
+		}
+
+		private static float approach(float v, float to, float step) {
+			return v < to ? Math.min(to, v + step) : Math.max(to, v - step);
+		}
+
+		/**
+		 * This player's blends stepped to {@code age}: the unfold toward {@code target} (quick up, slow down), and the
+		 * hold and stare blends. Repeat draws at the same age change nothing; a long gap snaps to the targets.
+		 */
+		private static float[] track(AvatarRenderState state, float target, float hold, float stare) {
+			float now = state.ageInTicks;
+			float[] t = TRACKS.get(state.id);
+			if (t == null) {
+				if (TRACKS.size() > 64) {
+					TRACKS.clear();
+				}
+				t = new float[] {target, hold, stare, now};
+				TRACKS.put(state.id, t);
+				return t;
+			}
+			float dt = now - t[3];
+			if (dt < 0.0F || dt > 40.0F) {
+				t[0] = target;
+				t[1] = hold;
+				t[2] = stare;
+				t[3] = now;
+			} else if (dt > 0.0F) {
+				t[3] = now;
+				t[0] = approach(t[0], target, dt / (target > t[0] ? UNFOLD_TICKS : FOLD_TICKS));
+				t[1] = approach(t[1], hold, dt / UNFOLD_TICKS);
+				t[2] = approach(t[2], stare, dt / UNFOLD_TICKS);
+			}
+			return t;
+		}
+
+		/**
+		 * A point on the torso, {@code bx} out and {@code by} along it (from the hip, up is -), after its pitch and yaw,
+		 * into {@link #point} (x, y, z from the hip).
+		 */
+		private void onTorso(float bx, float by, float pitch, float yaw) {
+			float y1 = by * Mth.cos(pitch);
+			float z1 = by * Mth.sin(pitch);
+			this.point[0] = bx * Mth.cos(yaw) + z1 * Mth.sin(yaw);
+			this.point[1] = y1;
+			this.point[2] = -bx * Mth.sin(yaw) + z1 * Mth.cos(yaw);
+		}
+
+		/**
+		 * Two equal segments reaching {@code (ty, tz)} (down, back) from the hinge: the upper one's angle and the lower
+		 * one's bend against it into {@link #angles}. {@code bend} +1 folds the joint forward, -1 backward, 0 straight.
+		 */
+		private void ik(float ty, float tz, float bend) {
+			float d = Mth.clamp((float)Math.sqrt(ty * ty + tz * tz), MIN_REACH, MAX_REACH);
+			float phi = (float)Math.atan2(tz, ty);
+			float alpha = (float)Math.acos(Mth.clamp(d / (2.0F * SEG), -1.0F, 1.0F));
+			this.angles[0] = phi - bend * alpha;
+			this.angles[1] = 2.0F * bend * alpha;
+		}
+
+		/** The forearm and hand straight for the first-person arm (the model is shared, so they hold whoever was drawn last). */
+		void handPose() {
+			this.rightForearm.xRot = 0.0F;
+			this.leftForearm.xRot = 0.0F;
+			this.rightHand.xRot = 0.2F;
+			this.leftHand.xRot = 0.2F;
+		}
+
+		@Override
+		public void translateToHand(net.minecraft.client.renderer.entity.state.HumanoidRenderState state, net.minecraft.world.entity.HumanoidArm arm,
+			com.mojang.blaze3d.vertex.PoseStack pose) {
+			// what's held sits a pixel past the wrist, at the end of the forearm (the arm is two segments)
+			this.root().translateAndRotate(pose);
+			ModelPart upper = this.getArm(arm);
+			upper.translateAndRotate(pose);
+			upper.getChild("forearm").translateAndRotate(pose);
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.body.visible = false;
+			for (ModelPart part : new ModelPart[] {this.head, this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg}) {
+				part.resetPose();
+			}
+			this.body.visible = false;
+			XenoMotion.Read m = XenoMotion.read(state);
+			String act = state.getData(XenoformClient.ACT);
+			boolean holding = "hold".equals(act);
+			boolean staring = "stare".equals(act);
+			float age = state.ageInTicks;
+			float speed = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
+			float swingT = Mth.clamp(state.swingAnimation, 0.0F, 1.0F);
+			boolean swinging = swingT > 0.0F && swingT < 1.0F;
+			float swingArc = Mth.sin(swingT * (float)Math.PI);
+			float air = Mth.clamp(m.air(), 0.0F, 1.0F);
+			boolean crouch = state.isCrouching;
+			boolean using = state.isUsingItem;
+			// what it wants to be: crawling when it moves, standing when it is still, attacks, stares, holds or uses something
+			float target = 1.0F - Mth.clamp((speed - CRAWL_FROM) * CRAWL_GAIN, 0.0F, 1.0F);
+			if (crouch) {
+				target = 0.0F;
+			}
+			if (holding || staring || swinging || using) {
+				target = 1.0F;
+			}
+			// in the air or swimming (the renderer lays a swimmer flat) it stays stretched out
+			target = Math.max(target, Math.max(air, Mth.clamp(state.swimAmount, 0.0F, 1.0F)));
+			float[] tr = track(state, target, holding ? 1.0F : 0.0F, staring ? 1.0F : 0.0F);
+			float e = smooth(tr[0]);
+			float hold = smooth(tr[1]);
+			float stare = smooth(tr[2]);
+
+			float pi = (float)Math.PI;
+			float walk = state.walkAnimationPos * GAIT;
+			float gait = Mth.clamp(speed * GAIT_GAIN, 0.0F, 1.0F);
+			float ground = 24.0F + (crouch ? CROUCH_RISE : 0.0F);
+			float breath = Mth.sin(age * 0.09F);
+			// the torso: pitched flat crawling, upright standing (leaning for a stare, a blow or a held block)
+			float lean = stare * STARE_LEAN + swingArc * SWING_LEAN + hold * HOLD_LEAN + breath * 0.015F;
+			float theta = Mth.lerp(e, CRAWL_PITCH, lean);
+			float psi = Mth.sin(walk) * Mth.lerp(e, CRAWL_SWAY, STAND_SWAY) * gait + Mth.sin(age * 0.05F) * 0.03F;
+			float hipY = Mth.lerp(e, CRAWL_HIP_Y + (crouch ? CRAWL_SINK : 0.0F), STAND_HIP_Y + (crouch ? CROUCH_DROP : 0.0F)) + (ground - 24.0F)
+				+ m.land() * LAND_DIP + Mth.sin(walk * 2.0F) * 0.4F * gait * (1.0F - e) + breath * 0.12F;
+			float hipZ = Mth.lerp(e, CRAWL_Z, 0.0F);
+			this.torso.y = hipY;
+			this.torso.z = hipZ;
+			this.torso.xRot = theta;
+			this.torso.yRot = psi;
+			this.torso.yScale = 1.0F + breath * 0.012F;
+			// the plate carrier: at the torso's middle, front standing, back crawling (it flips at half unfolded: turned
+			// gradually it would sweep through the torso, its corners poking out of the sides)
+			this.onTorso(0.0F, CHEST_BY, theta, psi);
+			this.body.x = this.point[0];
+			this.body.y = hipY + this.point[1];
+			this.body.z = hipZ + this.point[2];
+			this.body.xRot = theta + (e < 0.5F ? pi : 0.0F);
+			this.body.yRot = psi;
+			// the head, on the torso's end, turned where it looks
+			this.onTorso(0.0F, NECK_BY, theta, psi);
+			this.head.x = this.point[0];
+			this.head.y = hipY + this.point[1];
+			this.head.z = hipZ + this.point[2];
+			float look = Mth.clamp(state.xRot * Mth.DEG_TO_RAD * LOOK_PITCH, -1.0F, 1.0F);
+			this.head.xRot = look + Mth.lerp(e, HEAD_TILT_CRAWL, 0.0F) + stare * 0.12F + swingArc * SWING_LUNGE - hold * 0.3F;
+			this.head.yRot = Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -1.2F, 1.2F) - psi * 0.5F + Mth.sin(age * 0.04F) * 0.12F * (1.0F - e) * (1.0F - gait);
+			this.head.zRot = Mth.sin(age * 0.07F) * 0.04F + stare * (0.12F + Mth.sin(age * 1.9F) * 0.02F);
+
+			// legs: two-bone IK down to the ground in a tilted plane, the hind legs folded back
+			float stride = Mth.lerp(e, CRAWL_STRIDE, STAND_STRIDE) * gait;
+			float liftMax = Mth.lerp(e, CRAWL_LIFT, STAND_LIFT) * gait;
+			float legSplay = Mth.lerp(e, LEG_SPLAY_CRAWL, LEG_SPLAY_STAND);
+			float footDz = Mth.lerp(e, CRAWL_FOOT_DZ, 0.0F);
+			float hipX = Mth.lerp(e, HIP_X_CRAWL, HIP_X_STAND);
+			for (int side = 0; side < 2; side++) {
+				boolean left = side == 1;
+				float sgn = left ? -1.0F : 1.0F;
+				ModelPart leg = left ? this.leftLeg : this.rightLeg;
+				ModelPart shin = left ? this.leftShin : this.rightShin;
+				ModelPart foot = left ? this.leftFoot : this.rightFoot;
+				float phase = walk + (left ? pi : 0.0F);
+				float lift = Math.max(0.0F, -Mth.sin(phase)) * liftMax + air * AIR_LEG;
+				float ty = (ground - FOOT_H - lift - hipY) / Mth.cos(legSplay);
+				this.ik(ty, footDz - Mth.cos(phase) * stride, -1.0F);
+				leg.x = -sgn * hipX;
+				leg.y = hipY;
+				leg.z = hipZ;
+				leg.xRot = this.angles[0];
+				leg.zRot = sgn * legSplay;
+				shin.xRot = this.angles[1];
+				// the foot stays flat (toes down as it swings through the air): it undoes the leg's pitch and its splay,
+				// whose turn Rz(s)Rx(a) it reverses as Rx(-a)Rz(-s), put into the part's Z-Y-X angles
+				float a = this.angles[0] + this.angles[1];
+				float s = sgn * legSplay;
+				foot.xRot = (float)Math.atan2(-Mth.cos(s) * Mth.sin(a), Mth.cos(a)) + air * 0.5F;
+				foot.yRot = (float)Math.asin(Mth.clamp(-Mth.sin(s) * Mth.sin(a), -1.0F, 1.0F));
+				foot.zRot = (float)Math.atan2(-Mth.sin(s) * Mth.cos(a), Mth.cos(s));
+			}
+
+			// arms: from the shoulders on the torso, elbows high and forward crawling, hanging and swinging standing
+			boolean mainLeft = state.mainArm == net.minecraft.world.entity.HumanoidArm.LEFT;
+			boolean useLeft = state.useItemHand == net.minecraft.world.InteractionHand.MAIN_HAND ? mainLeft : !mainLeft;
+			for (int side = 0; side < 2; side++) {
+				boolean left = side == 1;
+				float sgn = left ? -1.0F : 1.0F;
+				ModelPart arm = left ? this.leftArm : this.rightArm;
+				ModelPart forearm = left ? this.leftForearm : this.rightForearm;
+				ModelPart hand = left ? this.leftHand : this.rightHand;
+				this.onTorso(-sgn * SHOULDER_X, SHOULDER_BY, theta, psi);
+				float sx = this.point[0];
+				float sy = hipY + this.point[1];
+				float sz = hipZ + this.point[2];
+				// the lateral sequence crawling (each arm a quarter beat after the hind leg on its side), against the legs standing
+				float phase = walk + (left ? 3.0F : 1.0F) * pi * 0.5F + e * pi * 0.5F;
+				float step = -Mth.cos(phase) * Mth.lerp(e, CRAWL_STRIDE, ARM_STAND_STRIDE) * gait;
+				float lift = Math.max(0.0F, -Mth.sin(phase)) * CRAWL_LIFT * gait * (1.0F - e);
+				// (never below the crawl's height: half unfolded, the standing hang still reaches under the ground)
+				float wristY = Math.min(Mth.lerp(e, ground - HAND_GROUND - lift, sy + ARM_HANG), ground - HAND_GROUND - lift) - air * AIR_ARM;
+				float wristZ = Mth.lerp(e, sz - CRAWL_REACH, sz) + step + Mth.sin(age * 0.05F + side * 2.0F) * 0.6F * e;
+				float splay = Mth.lerp(e, ARM_SPLAY_CRAWL, ARM_SPLAY_STAND) + stare * STARE_SPLAY;
+				float bend = 1.0F;
+				if (swinging && left == mainLeft) {
+					// a chop: back and up, over, down and forward
+					float k = smooth(swingT);
+					wristZ = Mth.lerp(e, wristZ, sz + Mth.lerp(k, SWING_BACK, SWING_FWD));
+					wristY = Mth.lerp(e, wristY, sy + ARM_HANG - swingArc * SWING_ARC);
+				}
+				if (using && left == useLeft) {
+					wristY = sy + USE_DROP;
+					wristZ = sz + USE_FWD + Mth.sin(age * 0.6F) * 0.3F;
+					bend = 0.6F;
+				}
+				// holding a block over its head: both wrists up, elbows forward
+				wristY = Mth.lerp(hold, wristY, sy - HOLD_UP);
+				wristZ = Mth.lerp(hold, wristZ, sz - 0.5F);
+				splay = Mth.lerp(hold, splay, HOLD_SPLAY);
+				bend = Mth.lerp(hold, bend, -1.0F);
+				this.ik((wristY - sy) / Mth.cos(splay), wristZ - sz, bend);
+				arm.x = sx;
+				arm.y = sy;
+				arm.z = sz;
+				arm.xRot = this.angles[0];
+				arm.zRot = sgn * splay;
+				forearm.xRot = this.angles[1];
+				// the hand: flat forward on the ground crawling, hanging with the fingers flexing standing, curled round a block
+				float forearmAngle = this.angles[0] + this.angles[1];
+				float flex = 0.2F + Mth.sin(age * 0.35F + side * 3.0F) * 0.08F;
+				float hang = Mth.clamp((e - HAND_LIFT_FROM) / (1.0F - HAND_LIFT_FROM), 0.0F, 1.0F);
+				hand.xRot = Mth.lerp(hold, Mth.lerp(hang, HAND_CRAWL - forearmAngle, flex), HOLD_CURL);
+			}
 		}
 	}
 
@@ -5098,31 +6424,340 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.117, Scan F) Thornwild: a crown of twigs, and thorns along its arms. */
+	/**
+	 * (0.18.117, Scan F; 0.19.83 a treant on root feet) Thornwild: a crown of twigs, and thorns along its arms. Now a
+	 * treant, not a man: a trunk of bark, wider at the base and burled at the chest, a hump on its back; a knotted face
+	 * (heavy brow, a knot of a nose, two amber eyes) sunk between mossy shoulders; long branching arms with twig
+	 * fingers, a side branch and thorns; and leafy twigs on its head, shoulders and back that sway, trail behind when it
+	 * moves and stir on a turn. Its legs are posts that end in ROOT FEET: a mound with five roots splaying out (each
+	 * ending in a thinner rootlet) that stay flat on the ground. It walks slowly, creaking: short steps, the feet lifting
+	 * little and gripping flat, the trunk rocking over the planted foot and twisting a little with each step, the arms
+	 * swinging short. The man's parts stay (the head, the legs, the arms reshaped; the body part IS the trunk's chest
+	 * burl, so the insignia plate sits flat on it) and take the player's own pose, so held items, swings
+	 * and the first-person arm work. Roots ({@code XenoformClient.ACT} "roots"): it bows over and drives both arms
+	 * overhead and down into the ground in a beat every {@link #ROOT_BEAT} ticks, fingers spread; Bloom ("bloom"): it
+	 * arches back with its arms flung wide and its leaves flourish.
+	 */
 	static final class Thornwild extends FormModel {
+		// ---- tuning ----
+		/** Its lean (radians, + is forward): standing, the extra at a walk, crouched, at the peak of an attack's lunge, after a hard landing. */
+		static final float LEAN = 0.10F, RUN_LEAN = 0.07F, CROUCH_LEAN = 0.38F, LUNGE_LEAN = 0.22F, LAND_LEAN = 0.2F;
+		/** A crouching player is drawn this many pixels lower (AvatarRenderer.getRenderOffset): the ground is that much higher in model space; the extra squat (pixels) and the legs' splay (radians) then. */
+		static final float CROUCH_SINK = 2.0F, CROUCH_SQUAT = 1.5F, CROUCH_SPLAY = 0.14F;
+		/** The walk: radians of clock per unit of walk (slow), how far a leg swings (radians), what is left of that crouched, how high a stepping foot lifts (pixels), how far the arms swing against the legs. */
+		static final float GAIT = 0.6662F * 0.75F, SWING = 0.34F, CROUCH_STRIDE = 0.6F, LIFT = 0.9F, ARM_SWING = 0.4F;
+		/** How much of the leg's swing the foot cancels to stay flat, how far the toes curl up as the foot lifts (radians per pixel), and how far the feet hang forward in the air (radians). */
+		static final float FOOT_KEEP = 0.8F, TOE_CURL = 0.12F, AIR_REACH = 0.15F;
+		/** The trunk's rock over the planted foot and its twist with each step (radians), how far a landing sinks it and how far it breathes (pixels), the arms' slight lean outward (radians). */
+		static final float SWAY = 0.045F, TWIST = 0.09F, LAND_DROP = 1.2F, BREATH = 0.15F, ARM_OUT = 0.07F;
+		/** The head: how far it sits in the shoulders (down, forward; pixels) and how far it moves forward with the lean (pixels per radian). */
+		static final float HEAD_SINK = 1.0F, HEAD_FORWARD = 1.0F, HEAD_LEAN = 3.0F;
+		/** Roots: ticks between blows, the part of the beat spent rearing up and slamming down, the arms' raised and slammed angles (radians), the lean, how far it rears back, the arms' and legs' spread. */
+		static final float ROOT_BEAT = 20.0F, RAISE_END = 0.65F, SLAM_END = 0.8F, ROOT_UP = -2.6F, ROOT_DOWN = -0.3F;
+		static final float ROOT_LEAN = 0.55F, ROOT_LEAN_BACK = 0.4F, ROOT_SPREAD = 0.18F, ROOT_SPLAY = 0.1F, ROOT_GRIP = 0.3F;
+		/** Bloom: the arms' angle out to the sides, how far it arches back (radians), how much bigger the leaves swell. */
+		static final float BLOOM_ARMS = 2.1F, BLOOM_ARCH = 0.12F, BLOOM_FLOURISH = 0.3F;
+		/** The leaves: radians of clock a tick, the stalks' sway, how far they trail when it walks and lean into a turn, the leaf's own flutter. */
+		static final float LEAF_RATE = 0.045F, LEAF_SWAY = 0.09F, LEAF_TRAIL = 0.3F, LEAF_TURN = 0.25F, LEAF_FLUTTER = 0.16F;
+		/** The body's length from its shoulder pivot to the hips, and the shoulder's drop below the pivot (pixels). */
+		private static final float BODY_LEN = 12.0F, SHOULDER = 2.0F;
+		/**
+		 * The legs: half the gap between them (the two 7-wide root mounds then stand a hair apart instead of overlapping
+		 * flush and flickering), the foot's pivot below the hip, the toes' thickness, the farthest a rootlet's tip reaches
+		 * from the pivot, the bottom of the leg post and its half depth.
+		 */
+		private static final float LEG_X = 3.45F, PIVOT = 9.0F, TOE_H = 3.0F, FOOT_R = 6.5F, LEG_BOTTOM = 11.5F, LEG_HALF = 2.5F;
+
+		/** The stalks and leaves that sway, the fingers, the rootlets, and the two foot groups. */
+		private final ModelPart[] stalks, leaves, fingers, tips;
+		private final ModelPart footRight, footLeft;
+
 		Thornwild() {
 			super(bake(mesh()), "thornwild");
-			this.insigniaZ = -2.2F;
+			// flat on the front of the chest burl, between the shoulders
+			this.insigniaY = 4.5F;
+			this.insigniaZ = -3.0F;
+			this.insigniaSize = 1.0F;
+			ModelPart branchR = this.head.getChild("branch_r");
+			ModelPart branchL = this.head.getChild("branch_l");
+			ModelPart sprout = this.head.getChild("sprout");
+			ModelPart sprigR = this.rightArm.getChild("sprig");
+			ModelPart sprigL = this.leftArm.getChild("sprig");
+			ModelPart backR = this.body.getChild("back_r");
+			ModelPart backL = this.body.getChild("back_l");
+			ModelPart twigR = branchR.getChild("twig");
+			ModelPart twigL = branchL.getChild("twig");
+			this.stalks = new ModelPart[] {branchR, branchL, twigR, twigL, sprout, sprigR, sprigL, backR, backL};
+			this.leaves = new ModelPart[] {branchR.getChild("leaf"), branchL.getChild("leaf"), twigR.getChild("leaf"), twigL.getChild("leaf"),
+				sprout.getChild("leaf"), sprigR.getChild("leaf"), sprigL.getChild("leaf"), backR.getChild("leaf"), backL.getChild("leaf")};
+			this.fingers = new ModelPart[6];
+			this.tips = new ModelPart[10];
+			this.footRight = this.rightLeg.getChild("foot");
+			this.footLeft = this.leftLeg.getChild("foot");
+			for (int j = 0; j < 3; j++) {
+				this.fingers[j] = this.rightArm.getChild("finger" + j);
+				this.fingers[3 + j] = this.leftArm.getChild("finger" + j);
+			}
+			for (int i = 0; i < 5; i++) {
+				this.tips[i] = this.footRight.getChild("toe" + i).getChild("tip");
+				this.tips[5 + i] = this.footLeft.getChild("toe" + i).getChild("tip");
+			}
+		}
+
+		/** A twig (1x5x1) pointing up from its pivot with a leaf (4x1x4) at its tip. */
+		private static PartDefinition sprig(PartDefinition parent, String name, float x, float y, float z, float xRot, float zRot) {
+			PartDefinition twig = parent.addOrReplaceChild(name, CubeListBuilder.create().texOffs(44, 97).addBox(-0.5F, -5.0F, -0.5F, 1.0F, 5.0F, 1.0F),
+				PartPose.offsetAndRotation(x, y, z, xRot, 0.0F, zRot));
+			twig.addOrReplaceChild("leaf", CubeListBuilder.create().texOffs(28, 99).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 1.0F, 4.0F), PartPose.offset(0.0F, -4.6F, 0.0F));
+			return twig;
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.2F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			PartDefinition head = root.getChild("head");
-			float[][] twigs = {{-3.0F, -0.4F, -0.3F}, {0.0F, -0.2F, 0.0F}, {3.0F, -0.4F, 0.3F}};
-			for (int i = 0; i < twigs.length; i++) {
-				head.addOrReplaceChild("twig" + i, CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -5.0F, -0.5F, 1.0F, 5.0F, 1.0F),
-					PartPose.offsetAndRotation(twigs[i][0], -8.0F, 1.0F, twigs[i][1], 0.0F, twigs[i][2]));
+			// the head: a knotted block with a heavy brow and a knot of a nose, antlers of branches and a sprout on top, each tipped with leaves
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F),
+				PartPose.ZERO);
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			head.addOrReplaceChild("brow", CubeListBuilder.create().texOffs(32, 73).addBox(-4.5F, -7.0F, -5.5F, 9.0F, 2.0F, 2.0F), PartPose.ZERO);
+			head.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(54, 64).addBox(-1.0F, -4.0F, -6.0F, 2.0F, 3.0F, 2.0F), PartPose.ZERO);
+			for (float s : new float[] {-1.0F, 1.0F}) {
+				String side = s < 0.0F ? "r" : "l";
+				PartDefinition branch = head.addOrReplaceChild("branch_" + side, CubeListBuilder.create().texOffs(54, 72).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
+					PartPose.offsetAndRotation(s * 2.6F, -7.6F, 0.5F, -0.15F, 0.0F, s * 0.5F));
+				branch.addOrReplaceChild("leaf", CubeListBuilder.create().texOffs(28, 99).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 1.0F, 4.0F), PartPose.offset(0.0F, -6.6F, 0.0F));
+				sprig(branch, "twig", 0.0F, -3.5F, 0.0F, -0.1F, s * 0.9F);
 			}
-			for (String arm : new String[] {"right_arm", "left_arm"}) {
-				PartDefinition limb = root.getChild(arm);
-				float side = arm.startsWith("right") ? -1.0F : 1.0F;
+			sprig(head, "sprout", 0.0F, -7.6F, 0.5F, -0.1F, 0.0F);
+			// the trunk: the chest burl is the body (the insignia sits on its front), a wider base below it, a hump on the back with two leafy sprigs
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, 0.0F, -3.0F, 10.0F, 9.0F, 6.0F),
+				PartPose.ZERO);
+			body.addOrReplaceChild("base", CubeListBuilder.create().texOffs(0, 80).addBox(-6.0F, 8.0F, -3.5F, 12.0F, 5.0F, 7.0F), PartPose.ZERO);
+			body.addOrReplaceChild("hump", CubeListBuilder.create().texOffs(32, 64).addBox(-4.0F, 1.0F, 2.5F, 8.0F, 6.0F, 3.0F), PartPose.ZERO);
+			sprig(body, "back_r", -2.5F, 2.5F, 5.0F, -0.6F, -0.25F);
+			sprig(body, "back_l", 2.5F, 2.5F, 5.0F, -0.6F, 0.25F);
+			// the arms: thick bark, a mossy pad on each shoulder with a sprig, a side branch at the elbow, thorns down the outside, three twig fingers
+			for (float s : new float[] {-1.0F, 1.0F}) {
+				boolean right = s < 0.0F;
+				float cx = s;
+				PartDefinition arm = root.addOrReplaceChild(right ? "right_arm" : "left_arm", CubeListBuilder.create().texOffs(right ? 40 : 32, right ? 16 : 48)
+					.addBox(right ? -3.0F : -1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.5F)), PartPose.offset(s * 5.0F, 2.0F, 0.0F));
+				arm.addOrReplaceChild("moss", CubeListBuilder.create().texOffs(38, 81).addBox(cx - 2.5F, -4.3F, -3.0F, 5.0F, 2.0F, 6.0F,
+					new CubeDeformation(0.1F)), PartPose.ZERO);
+				sprig(arm, "sprig", cx, -4.1F, 0.0F, -0.15F, s * 0.35F);
+				arm.addOrReplaceChild("limb", CubeListBuilder.create().texOffs(44, 97).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 5.0F, 1.0F),
+					PartPose.offsetAndRotation(cx + s * 2.3F, 6.0F, 0.5F, 0.0F, 0.0F, -s * 0.8F));
 				for (int i = 0; i < 3; i++) {
-					limb.addOrReplaceChild("thorn" + i, CubeListBuilder.create().texOffs(6, 64).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 2.0F),
-						PartPose.offsetAndRotation(side * (1.0F + 0.3F * i), 1.0F + i * 3.0F, 2.0F, 0.4F, side * 0.3F, 0.0F));
+					arm.addOrReplaceChild("thorn" + i, CubeListBuilder.create().texOffs(54, 69).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 2.0F),
+						PartPose.offsetAndRotation(cx + s * 2.3F, 1.0F + 3.2F * i, -0.5F + 0.5F * i, 0.35F, s * 1.2F, 0.0F));
+				}
+				for (int j = 0; j < 3; j++) {
+					arm.addOrReplaceChild("finger" + j, CubeListBuilder.create().texOffs(44, 97).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 5.0F, 1.0F),
+						PartPose.offsetAndRotation(cx + (j - 1) * 1.2F, 10.0F, j == 1 ? 0.5F : -0.5F, j == 1 ? 0.0F : -0.12F, 0.0F, -(j - 1) * 0.22F));
+				}
+			}
+			// the legs: bark posts ending in a mound with five roots splaying out, each with a rootlet at its end
+			for (float s : new float[] {-1.0F, 1.0F}) {
+				boolean right = s < 0.0F;
+				PartDefinition leg = root.addOrReplaceChild(right ? "right_leg" : "left_leg", CubeListBuilder.create().texOffs(right ? 0 : 16, right ? 16 : 48)
+					.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 11.0F, 4.0F, new CubeDeformation(0.5F)), PartPose.offset(s * LEG_X, 12.0F, 0.0F));
+				PartDefinition foot = leg.addOrReplaceChild("foot", CubeListBuilder.create(), PartPose.offset(0.0F, PIVOT, 0.0F));
+				foot.addOrReplaceChild("heel", CubeListBuilder.create().texOffs(0, 92).addBox(-3.5F, -1.0F, -3.5F, 7.0F, 4.0F, 7.0F, new CubeDeformation(-0.1F)), PartPose.ZERO);
+				// front outer, front inner, side, back outer, back inner (yaw: 0 is straight back, PI straight forward)
+				float[] yaw = {(float)Math.PI - s * 0.4F, (float)Math.PI + s * 0.35F, s * 1.5708F, s * 0.55F, -s * 0.4F};
+				for (int i = 0; i < 5; i++) {
+					PartDefinition toe = foot.addOrReplaceChild("toe" + i, CubeListBuilder.create().texOffs(28, 92).addBox(-1.0F, 0.0F, 0.0F, 2.0F, 3.0F, 4.0F),
+						PartPose.offsetAndRotation(0.0F, i * 0.02F, 0.0F, 0.0F, yaw[i], 0.0F));
+					toe.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(40, 92).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 2.0F, 3.0F),
+						PartPose.offsetAndRotation(0.0F, 1.02F, 3.5F, 0.0F, (i % 2 == 0 ? 0.25F : -0.25F) * s, 0.0F));
 				}
 			}
 			return mesh;
+		}
+
+		/**
+		 * How much of vanilla's walking arm swing an arm in this pose keeps (HumanoidModel.poseRightArm): all of it empty,
+		 * half holding an item, a shield, a trident or a brush, none in an aimed pose that sets the arm outright.
+		 */
+		private static float walkKept(HumanoidModel.ArmPose pose) {
+			return switch (pose) {
+				case EMPTY -> 1.0F;
+				case ITEM, BLOCK, THROW_TRIDENT, BRUSH -> 0.5F;
+				default -> 0.0F;
+			};
+		}
+
+		private static float smooth(float s) {
+			return s * s * (3.0F - 2.0F * s);
+		}
+
+		/**
+		 * Where a leg's hip sits (model y) for the lowest point of its root foot (or its post) to rest on {@code ground},
+		 * less {@code lift}: the leg swung to {@code theta} and splayed out {@code splay}, the foot cancelling most of both.
+		 */
+		private static float plant(float theta, float splay, float lift, float ground) {
+			float phi = theta * (1.0F - FOOT_KEEP);
+			float roll = splay * (1.0F - FOOT_KEEP);
+			float foot = (PIVOT * Mth.cos(theta) + TOE_H * Mth.cos(phi) + FOOT_R * Mth.abs(Mth.sin(phi))) * Mth.cos(splay) + FOOT_R * Mth.abs(Mth.sin(roll));
+			float post = (LEG_BOTTOM * Mth.cos(theta) + LEG_HALF * Mth.abs(Mth.sin(theta))) * Mth.cos(splay) + LEG_HALF * Mth.abs(Mth.sin(splay));
+			return ground - Math.max(foot, post) - lift;
+		}
+
+		/** One leg: hung from its hip, swung to {@code theta}, splayed, its root foot cancelling most of that so it lies flat (the toes curling as it lifts). */
+		private void leg(ModelPart leg, ModelPart foot, float side, float theta, float splay, float lift, float hip, float x, float z) {
+			leg.x = side * LEG_X + x;
+			leg.y = hip;
+			leg.z = z;
+			leg.xRot = theta;
+			leg.zRot = -side * splay;
+			foot.xRot = -theta * FOOT_KEEP - lift * TOE_CURL;
+			foot.zRot = side * splay * FOOT_KEEP;
+		}
+
+		/** The swaying parts: leafy stalks, leaves, fingers and rootlets (each from its rest pose). */
+		private void stir(float age, XenoMotion.Read m, float speed, boolean bloom, boolean roots) {
+			float flourish = bloom ? BLOOM_FLOURISH : 0.0F;
+			for (int i = 0; i < this.stalks.length; i++) {
+				ModelPart stalk = this.stalks[i];
+				stalk.resetPose();
+				float p = age * LEAF_RATE + i * 1.7F;
+				// they trail behind a walk (a stalk points up: - is back) and lean into a turn
+				stalk.xRot += Mth.sin(p) * LEAF_SWAY - speed * LEAF_TRAIL;
+				stalk.zRot += Mth.cos(p * 0.8F) * LEAF_SWAY - m.trail() * LEAF_TURN;
+			}
+			for (int i = 0; i < this.leaves.length; i++) {
+				ModelPart leaf = this.leaves[i];
+				leaf.resetPose();
+				float p = age * LEAF_RATE * 2.3F + i * 1.1F;
+				leaf.xRot += Mth.sin(p) * LEAF_FLUTTER;
+				leaf.zRot += Mth.cos(p * 0.83F) * LEAF_FLUTTER;
+				leaf.xScale = leaf.zScale = 1.0F + flourish + Mth.sin(p * 0.5F) * 0.04F;
+			}
+			for (int i = 0; i < this.fingers.length; i++) {
+				ModelPart finger = this.fingers[i];
+				finger.resetPose();
+				// idle: a slow flex; under Roots they spread wide to grip
+				finger.xRot += Mth.sin(age * 0.05F + i * 1.1F) * 0.07F;
+				finger.zRot += Math.signum(finger.zRot) * (roots ? ROOT_GRIP : 0.0F);
+			}
+			for (int i = 0; i < this.tips.length; i++) {
+				ModelPart tip = this.tips[i];
+				tip.resetPose();
+				tip.yRot += Mth.sin(age * 0.025F + i * 0.9F) * 0.12F;
+			}
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.hat.visible = false;
+			XenoMotion.Read m = XenoMotion.read(state);
+			float age = state.ageInTicks;
+			float speed = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
+			String act = state.getData(XenoformClient.ACT);
+			boolean roots = "roots".equals(act);
+			boolean bloom = "bloom".equals(act);
+			this.stir(age, m, speed, bloom, roots);
+			if (state.isFallFlying || state.isVisuallySwimming || state.isPassenger) {
+				// flying, swimming or riding: vanilla's pose, the leaves still stirring
+				return;
+			}
+			float air = Mth.clamp(m.air(), 0.0F, 1.0F);
+			float run = speed * (1.0F - air);
+			boolean crouch = state.isCrouching;
+			float swing = Mth.clamp(state.swingAnimation, 0.0F, 1.0F);
+			float lunge = Mth.sin(swing * Mth.PI);
+			float land = Math.max(0.0F, m.land());
+			// vanilla twists the body (and moves the arms' roots) only while a swing runs
+			float twist = swing > 0.0F ? this.body.yRot : 0.0F;
+			float rightZ = swing > 0.0F ? this.rightArm.z : 0.0F;
+			float leftZ = swing > 0.0F ? this.leftArm.z : 0.0F;
+			for (ModelPart part : new ModelPart[] {this.head, this.body, this.rightLeg, this.leftLeg, this.footRight, this.footLeft}) {
+				part.resetPose();
+			}
+			float ground = 24.0F - (crouch ? CROUCH_SINK : 0.0F);
+			float phase = state.walkAnimationPos * GAIT;
+			float cos = Mth.cos(phase);
+			float sin = Mth.sin(phase);
+			// Roots: 0 slammed down, 1 reared up, one blow every ROOT_BEAT ticks
+			float up = 0.0F;
+			if (roots) {
+				float u = (age / ROOT_BEAT) % 1.0F;
+				up = u < RAISE_END ? smooth(u / RAISE_END)
+					: u < SLAM_END ? 1.0F - smooth((u - RAISE_END) / (SLAM_END - RAISE_END)) : 0.0F;
+			}
+
+			// ---- the trunk's lean and rock ----
+			float lean = LEAN + run * RUN_LEAN + (crouch ? CROUCH_LEAN : 0.0F) + lunge * LUNGE_LEAN + land * LAND_LEAN;
+			if (roots) {
+				lean = ROOT_LEAN - up * ROOT_LEAN_BACK;
+			} else if (bloom) {
+				lean = -BLOOM_ARCH;
+			}
+			// it rocks over the planted foot: the right foot is planted while its leg swings back (cos > 0)
+			float sway = -cos * SWAY * run;
+
+			// ---- the legs: right back as left comes forward; a foot lifts as its leg swings forward ----
+			float splay = (crouch ? CROUCH_SPLAY : 0.0F) + (roots ? ROOT_SPLAY : 0.0F);
+			float stride = SWING * run * (crouch ? CROUCH_STRIDE : 1.0F);
+			float thetaRight = cos * stride - AIR_REACH * air;
+			float thetaLeft = -cos * stride - AIR_REACH * air;
+			float liftScale = LIFT * run * (crouch ? 0.6F : 1.0F);
+			float liftRight = liftScale * Math.max(0.0F, sin);
+			float liftLeft = liftScale * Math.max(0.0F, -sin);
+			float hipRight = plant(thetaRight, splay, liftRight, ground);
+			float hipLeft = plant(thetaLeft, splay, liftLeft, ground);
+			// the hips stay under the tipped trunk
+			float hipX = -BODY_LEN * Mth.sin(sway) * Mth.cos(lean);
+			float hipZ = BODY_LEN * Mth.sin(lean);
+			this.leg(this.rightLeg, this.footRight, -1.0F, thetaRight, splay, liftRight, hipRight, hipX, hipZ);
+			this.leg(this.leftLeg, this.footLeft, 1.0F, thetaLeft, splay, liftLeft, hipLeft, hipX, hipZ);
+
+			// ---- the body: hung from the hips (the shoulder pivot is at the top of the chest), sinking on a landing, a crouch ----
+			this.body.y = (hipRight + hipLeft) * 0.5F - BODY_LEN * Mth.cos(lean) * Mth.cos(sway) + land * LAND_DROP + (crouch ? CROUCH_SQUAT : 0.0F)
+				+ m.breath() * BREATH;
+			this.body.xRot = lean;
+			this.body.yRot = twist + sin * TWIST * run;
+			this.body.zRot = sway;
+
+			// ---- the arms: on the shoulders of the tipped trunk ----
+			float shoulderY = this.body.y + SHOULDER * Mth.cos(lean);
+			this.rightArm.y = this.leftArm.y = shoulderY;
+			this.rightArm.z = rightZ + SHOULDER * Mth.sin(lean);
+			this.leftArm.z = leftZ + SHOULDER * Mth.sin(lean);
+			if (roots) {
+				// reared overhead, then driven down into the ground, fingers spread
+				float a = Mth.lerp(up, ROOT_DOWN, ROOT_UP);
+				this.rightArm.xRot = this.leftArm.xRot = a;
+				this.rightArm.yRot = this.leftArm.yRot = 0.0F;
+				this.rightArm.zRot = ROOT_SPREAD;
+				this.leftArm.zRot = -ROOT_SPREAD;
+			} else if (bloom) {
+				float flap = Mth.sin(age * 0.08F) * 0.06F;
+				this.rightArm.xRot = this.leftArm.xRot = -0.25F;
+				this.rightArm.yRot = this.leftArm.yRot = 0.0F;
+				this.rightArm.zRot = BLOOM_ARMS + flap;
+				this.leftArm.zRot = -BLOOM_ARMS - flap;
+			} else {
+				// swap vanilla's quick walking swing (right arm -cos, left +cos, the speed over speedValue) for its slow one,
+				// as much of it as the arm's pose kept (an attack's swing and the crouch are added on top, so they stay)
+				boolean twoHanded = state.rightArmPose.isTwoHanded() || state.leftArmPose.isTwoHanded();
+				float vanilla = Mth.cos(state.walkAnimationPos * 0.6662F) * state.walkAnimationSpeed / state.speedValue;
+				float own = cos * ARM_SWING * run;
+				this.rightArm.xRot += (twoHanded ? 0.0F : walkKept(state.rightArmPose)) * (vanilla - own);
+				this.leftArm.xRot += (twoHanded ? 0.0F : walkKept(state.leftArmPose)) * (own - vanilla);
+				this.rightArm.zRot += ARM_OUT;
+				this.leftArm.zRot -= ARM_OUT;
+			}
+
+			// ---- the head: sunk between the shoulders, turning where it looks ----
+			// its neck is a point of the trunk's top (HEAD_SINK down, a little forward and more forward as it hunches), carried round with the lean
+			float neckZ = -HEAD_FORWARD - lean * HEAD_LEAN;
+			this.head.y = this.body.y + HEAD_SINK * Mth.cos(lean) - neckZ * Mth.sin(lean);
+			this.head.z = HEAD_SINK * Mth.sin(lean) + neckZ * Mth.cos(lean);
+			this.head.yRot = Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -1.2F, 1.2F);
+			this.head.xRot = state.xRot * Mth.DEG_TO_RAD - lean * 0.5F + Mth.sin(age * 0.02F) * 0.02F;
+			this.head.zRot = -sway * 0.8F + Mth.sin(age * 0.031F) * 0.02F;
 		}
 	}
 
@@ -5392,48 +7027,272 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Bulwark: thick-set, a heavy brow, pauldrons, and a second pair of arms under the first. */
+	/**
+	 * Bulwark: thick-set, a heavy brow, pauldrons, and a second pair of arms under the first.
+	 * <p>
+	 * (0.19.83) Andy: "bulwark should emphasize the four arms more, with a thinner body and outstretched constantly
+	 * swapping idle stance arms". A tall, narrow-waisted brute with a wedge of a chest, a short thick neck, a heavy
+	 * tusked head and legs bent like a bear's. Four long arms, each an upper arm, a heavy forearm and a fist: the upper
+	 * pair are the humanoid arms (the first-person hand and held items), the lower pair hang off the ribs. Standing, the
+	 * arms are always held OUT, never hanging, and the guard keeps swapping: the upper pair is raised while the lower
+	 * pair is low and out, then they trade places over a few seconds, smoothly, like a fighter shifting guard (the
+	 * right side a beat ahead of the left). Walking swings the arms wide in counter-phase (the upper pair against the
+	 * lower). A punch ({@code swingAnimation}) throws one arm: the main hand the upper arm on its side, the off hand
+	 * the lower arm on the other, so the combo alternates through all four. While it carries a creature overhead
+	 * ({@code XenoformClient.ACT} "carry", from {@code live.grabbed >= 0}) the upper pair is raised over the head round
+	 * the load, forearms folded in, and the lower pair braced out wide at head height under it, clear of the upper arms;
+	 * through the Leap Slam ("leap", from {@code live.leaping}) they are flung up and back. Crouched, the feet are
+	 * planted higher by the renderer's sneak offset so they stay on the ground.
+	 * The legs are solved from their knee angles, and the whole body sinks so the lowest foot is always on the
+	 * ground; the chest carries the insignia.
+	 */
 	static final class Bulwark extends FormModel {
-		private final ModelPart rightLowerArm, leftLowerArm;
+		// ---- tuning ----
+		/** The skeleton (pixels): where the hips (body pivot) and the hip joints sit, the leg's bones and the foot's thickness. */
+		static final float HIP_Y = 12.5F, LEG_Y = 11.2F, THIGH = 6.0F, SHIN = 6.0F, FOOT = 2.0F;
+		/** The resting knee (radians): the thigh forward, the shin folded back under it. */
+		static final float KNEE_T = -0.45F, KNEE_S = 0.9F;
+		/** The torso's forward lean (radians): at rest, per walking speed, and crouched. */
+		static final float LEAN = 0.14F, LEAN_WALK = 0.08F, LEAN_CROUCH = 0.3F;
+		/** The legs' stride (radians), the extra knee bend on the leg coming forward, and the toe curled up as it lifts. */
+		static final float LEG_SWING = 0.7F, KNEE_LIFT = 0.8F, FOOT_TOE = 0.3F;
+		/** The guard's swap: ticks for the pair to go up and come back, how long each stance dwells (higher is longer), and how many ticks the right side leads the left. */
+		static final float SWAP_TICKS = 120.0F, DWELL = 1.8F, SKEW = 6.0F;
+		/** The upper pair's guard, {low, high}: arm swing (x, + is back), splay out (z), forearm bend forward (x) and in (z). */
+		static final float[] UP_X = {0.1F, -0.3F}, UP_Z = {1.45F, 2.15F}, UP_FX = {-0.5F, -0.9F}, UP_FZ = {0.25F, 0.6F};
+		/** The lower pair's guard, {low, high}: always below the upper pair's so the arms never cross. */
+		static final float[] LO_X = {0.15F, -0.35F}, LO_Z = {0.5F, 1.15F}, LO_FX = {-0.3F, -0.6F}, LO_FZ = {0.15F, 0.3F};
+		/** Walking: how far the arms swing, and how much wider they are held out at a run (radians). */
+		static final float ARM_SWING = 0.7F, ARM_WIDE = 0.18F;
+		/** A punch: the arm's swing at full reach, its splay, and how far the other arm of the pair is drawn back. */
+		static final float PUNCH_X = -1.75F, PUNCH_Z = 0.25F, PUNCH_RECOIL = 0.5F;
+		/** Carrying (upper then lower pair): arm swing, splay, forearm bend forward and in (the lower pair braced out at head height, clear of the upper arms); leaping: splay of each pair. */
+		static final float[] CARRY_X = {-0.35F, 0.0F}, CARRY_Z = {2.5F, 2.0F}, CARRY_FX = {-0.4F, -0.4F}, CARRY_FZ = {1.0F, 0.6F};
+		static final float[] LEAP_Z = {2.7F, 2.2F};
+		/** Where the shoulders and the ribs' arms sit on the body (pixels): x out, y up from the hips. */
+		static final float SHOULDER_X = 5.5F, SHOULDER_Y = 11.5F, RIB_X = 5.0F, RIB_Y = 6.5F;
+		/** The renderer draws a sneaking player this many pixels lower (AvatarRenderer.getRenderOffset): crouched, the feet are planted that much higher to stay on the ground. */
+		static final float CROUCH_SINK = 2.0F;
+
+		/** The four arms, forearms and fists: upper right, upper left, lower right, lower left. */
+		private final ModelPart[] arms = new ModelPart[4], fores = new ModelPart[4], fists = new ModelPart[4];
+		private final ModelPart rightShin, leftShin, rightFoot, leftFoot;
+		private final float[] ax = new float[4], az = new float[4], fx = new float[4], fz = new float[4];
 
 		Bulwark() {
 			super(bake(mesh()), "bulwark");
-			this.insigniaZ = -2.9F;
-			this.rightLowerArm = this.body.getChild("right_lower_arm");
-			this.leftLowerArm = this.body.getChild("left_lower_arm");
+			this.arms[0] = this.rightArm;
+			this.arms[1] = this.leftArm;
+			this.arms[2] = this.body.getChild("right_lower_arm");
+			this.arms[3] = this.body.getChild("left_lower_arm");
+			for (int i = 0; i < 4; i++) {
+				this.fores[i] = this.arms[i].getChild("forearm");
+				this.fists[i] = this.fores[i].getChild("fist");
+			}
+			this.rightShin = this.rightLeg.getChild("shin");
+			this.leftShin = this.leftLeg.getChild("shin");
+			this.rightFoot = this.rightShin.getChild("foot");
+			this.leftFoot = this.leftShin.getChild("foot");
+			// flush on the front of the chest (10 wide, 8 tall), centred on the skin's small insignia (rows 6-12 of the face)
+			this.insigniaY = -8.5F;
+			this.insigniaZ = -2.5F;
+			this.insigniaSize = 1.0F;
+		}
+
+		/** One arm: a forearm hung from the upper arm's elbow and a fist hung from the wrist. */
+		private static void addArm(PartDefinition arm, int faU, int faV, int fiU, int fiV) {
+			PartDefinition fore = arm.addOrReplaceChild("forearm", CubeListBuilder.create().texOffs(faU, faV).addBox(-2.5F, -0.5F, -2.5F, 5.0F, 6.0F, 5.0F),
+				PartPose.offset(0.0F, 6.0F, 0.0F));
+			fore.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(fiU, fiV).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 4.0F, 6.0F),
+				PartPose.offset(0.0F, 5.5F, 0.0F));
+		}
+
+		private static void addLeg(PartDefinition root, String name, float x, int thU, int thV, int shU, int shV, int ftU, int ftV) {
+			PartDefinition leg = root.addOrReplaceChild(name, CubeListBuilder.create().texOffs(thU, thV).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 7.0F, 3.0F),
+				PartPose.offset(x, LEG_Y, 0.0F));
+			PartDefinition shin = leg.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(shU, shV).addBox(-1.5F, -1.0F, -1.5F, 3.0F, 7.0F, 3.0F),
+				PartPose.offset(0.0F, 6.0F, 0.0F));
+			shin.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(ftU, ftV).addBox(-2.0F, -1.0F, -4.0F, 4.0F, 3.0F, 6.0F), PartPose.offset(0.0F, 6.0F, 0.0F));
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.9F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("brow", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, -10.0F, -6.0F, 10.0F, 3.0F, 3.0F), PartPose.ZERO);
-			PartDefinition body = root.getChild("body");
-			body.addOrReplaceChild("plates", CubeListBuilder.create().texOffs(0, 72).addBox(-6.0F, -1.0F, -3.0F, 12.0F, 4.0F, 7.0F, new CubeDeformation(0.9F)),
-				PartPose.ZERO);
-			body.addOrReplaceChild("right_lower_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.6F)),
-				PartPose.offset(-5.5F, 8.0F, 0.0F));
-			body.addOrReplaceChild("left_lower_arm", CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.6F)),
-				PartPose.offset(5.5F, 8.0F, 0.0F));
-			// pauldrons on the upper arms
-			root.getChild("right_arm").addOrReplaceChild("pauldron", CubeListBuilder.create().texOffs(40, 64).addBox(-4.0F, -3.5F, -2.5F, 5.0F, 3.0F, 5.0F, new CubeDeformation(0.9F)),
-				PartPose.ZERO);
-			root.getChild("left_arm").addOrReplaceChild("pauldron", CubeListBuilder.create().texOffs(40, 64).mirror().addBox(-1.0F, -3.5F, -2.5F, 5.0F, 3.0F, 5.0F, new CubeDeformation(0.9F)),
-				PartPose.ZERO);
+			// a short thick head, forward of the shoulders, a heavy brow, an underbite and two tusks
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(30, 0).addBox(-3.0F, -6.0F, -3.0F, 6.0F, 6.0F, 6.0F),
+				PartPose.offset(0.0F, 0.8F, -1.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			head.addOrReplaceChild("brow", CubeListBuilder.create().texOffs(20, 86).addBox(-4.0F, -5.5F, -4.0F, 8.0F, 2.0F, 3.0F), PartPose.ZERO);
+			head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(42, 86).addBox(-3.0F, -2.0F, -4.0F, 6.0F, 2.0F, 3.0F), PartPose.ZERO);
+			head.addOrReplaceChild("tusk_r", CubeListBuilder.create().texOffs(60, 86).addBox(-0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F), PartPose.offset(-2.2F, -0.5F, -3.6F));
+			head.addOrReplaceChild("tusk_l", CubeListBuilder.create().texOffs(0, 92).addBox(-0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F), PartPose.offset(2.2F, -0.5F, -3.6F));
+			// the torso: a wedge of a chest on a narrow waist and a belt, a ridge of spine down the back; pivot at the hips
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-5.0F, -13.0F, -2.5F, 10.0F, 8.0F, 5.0F),
+				PartPose.offset(0.0F, HIP_Y, 0.0F));
+			body.addOrReplaceChild("waist", CubeListBuilder.create().texOffs(40, 77).addBox(-2.0F, -5.0F, -1.5F, 4.0F, 5.0F, 3.0F), PartPose.ZERO);
+			body.addOrReplaceChild("belt", CubeListBuilder.create().texOffs(0, 86).addBox(-3.0F, -2.0F, -2.0F, 6.0F, 2.0F, 4.0F), PartPose.ZERO);
+			body.addOrReplaceChild("spine", CubeListBuilder.create().texOffs(0, 25).addBox(-1.0F, -12.5F, 2.5F, 2.0F, 9.0F, 2.0F), PartPose.ZERO);
+			// the upper pair, from the shoulders, with pauldrons
+			PartDefinition rightArm = root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(0, 13).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 8.0F, 4.0F),
+				PartPose.offset(-SHOULDER_X, HIP_Y - SHOULDER_Y, 0.0F));
+			PartDefinition leftArm = root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(16, 13).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 8.0F, 4.0F),
+				PartPose.offset(SHOULDER_X, HIP_Y - SHOULDER_Y, 0.0F));
+			rightArm.addOrReplaceChild("pauldron", CubeListBuilder.create().texOffs(12, 67).addBox(-3.5F, -3.5F, -3.0F, 6.0F, 3.0F, 6.0F), PartPose.ZERO);
+			leftArm.addOrReplaceChild("pauldron", CubeListBuilder.create().texOffs(36, 67).addBox(-2.5F, -3.5F, -3.0F, 6.0F, 3.0F, 6.0F), PartPose.ZERO);
+			addArm(rightArm, 8, 25, 40, 36);
+			addArm(leftArm, 28, 25, 0, 47);
+			// the lower pair, from the ribs (children of the body, so they lean with it)
+			PartDefinition lowerRight = body.addOrReplaceChild("right_lower_arm", CubeListBuilder.create().texOffs(32, 13).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 8.0F, 4.0F),
+				PartPose.offset(-RIB_X, -RIB_Y, 0.0F));
+			PartDefinition lowerLeft = body.addOrReplaceChild("left_lower_arm", CubeListBuilder.create().texOffs(48, 13).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 8.0F, 4.0F),
+				PartPose.offset(RIB_X, -RIB_Y, 0.0F));
+			addArm(lowerRight, 0, 36, 24, 47);
+			addArm(lowerLeft, 20, 36, 0, 57);
+			// legs: a thigh, a shin folded back from the knee, a broad foot
+			addLeg(root, "right_leg", -2.5F, 24, 57, 48, 57, 0, 77);
+			addLeg(root, "left_leg", 2.5F, 36, 57, 0, 67, 20, 77);
 			return mesh;
+		}
+
+		/** The forearms and fists straight for the first-person arm (the model is shared, so they hold whoever was drawn last). */
+		void handPose() {
+			for (int i = 0; i < 2; i++) {
+				this.fores[i].resetPose();
+				this.fists[i].resetPose();
+			}
+		}
+
+		private static float smooth(float x) {
+			x = Mth.clamp(x, 0.0F, 1.0F);
+			return x * x * (3.0F - 2.0F * x);
+		}
+
+		/** The guard's swap at {@code t} ticks: 0 with the upper pair low, 1 with it raised; it dwells in each stance. */
+		private static float swap(float t) {
+			return smooth(0.5F + Mth.clamp(Mth.sin(t * 2.0F * Mth.PI / SWAP_TICKS) * DWELL * 0.5F, -0.5F, 0.5F));
+		}
+
+		/**
+		 * One leg's bones for the walk's phase ({@code c} the cosine, {@code w} the sine): the thigh swings, the knee folds
+		 * on the leg coming forward, the foot is held level (toe curled up as it lifts). Returns how far below the hip joint
+		 * its lowest point sits.
+		 */
+		private float leg(ModelPart thigh, ModelPart shin, ModelPart foot, float c, float w, float sp, float cr, float air) {
+			float lift = Math.max(0.0F, w) * sp;
+			float t = KNEE_T + c * LEG_SWING * sp - lift * 0.25F - cr * 0.35F - air * 0.3F;
+			float s = KNEE_S + lift * KNEE_LIFT + cr * 0.7F + air * 0.4F;
+			float f = -lift * FOOT_TOE;
+			thigh.xRot = t;
+			shin.xRot = s;
+			foot.xRot = -(t + s) + f;
+			// the foot's lowest corner: the toe (4 forward) or the heel (2 back)
+			float foot2 = FOOT * Mth.cos(f);
+			return THIGH * Mth.cos(t) + SHIN * Mth.cos(t + s) + Math.max(foot2 + 4.0F * Mth.sin(f), foot2 - 2.0F * Mth.sin(f));
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
 			XenoMotion.Read m = XenoMotion.read(state);
-			// the lower arms swing the opposite way, half as far, and hang a little out; they rise and fall with its
-			// breath, swing out behind a turn, lift as it falls and jolt down on landing
-			float jolt = m.land() * 0.5F - Math.max(0.0F, m.fall()) * 0.35F * m.air();
-			this.rightLowerArm.xRot = -this.rightArm.xRot * 0.5F;
-			this.leftLowerArm.xRot = -this.leftArm.xRot * 0.5F;
-			this.rightLowerArm.zRot = 0.25F + m.breath() * 0.04F + m.trail() * 0.2F - jolt;
-			this.leftLowerArm.zRot = -0.25F - m.breath() * 0.04F + m.trail() * 0.2F + jolt;
+			String act = state.getData(XenoformClient.ACT);
+			boolean carry = "carry".equals(act), leap = "leap".equals(act);
+			float age = state.ageInTicks;
+			float sp = Math.min(1.0F, state.walkAnimationSpeed);
+			float p = state.walkAnimationPos * 0.6662F;
+			float cc = Mth.cos(p), ww = Mth.sin(p);
+			float air = m.air();
+			float cr = state.isCrouching ? 1.0F : 0.0F;
+			this.head.resetPose();
+			this.body.resetPose();
+			this.rightLeg.resetPose();
+			this.leftLeg.resetPose();
+			this.rightShin.resetPose();
+			this.leftShin.resetPose();
+			this.rightFoot.resetPose();
+			this.leftFoot.resetPose();
+			for (int i = 0; i < 4; i++) {
+				this.arms[i].resetPose();
+				this.fores[i].resetPose();
+				this.fists[i].resetPose();
+			}
+			// the legs: walking solves the knees, then the whole body sinks until the lowest foot is on the ground
+			float depthR = leg(this.rightLeg, this.rightShin, this.rightFoot, cc, ww, sp, cr, air);
+			float depthL = leg(this.leftLeg, this.leftShin, this.leftFoot, -cc, -ww, sp, cr, air);
+			float dy = (24.0F - CROUCH_SINK * cr - LEG_Y) - Math.max(depthR, depthL);
+			// the torso leans into the walk and over when crouched; everything on it is placed through the lean
+			float lean = LEAN + LEAN_WALK * sp + LEAN_CROUCH * cr + m.land() * 0.15F - Math.max(0.0F, m.fall()) * 0.08F * air;
+			float ls = Mth.sin(lean), lc = Mth.cos(lean);
+			this.body.y = HIP_Y + dy;
+			this.body.xRot = lean;
+			this.body.zRot = cc * 0.04F * sp;
+			this.rightLeg.y = this.leftLeg.y = LEG_Y + dy;
+			this.rightLeg.z = this.leftLeg.z = -1.3F * ls;
+			// the head, on a short neck jutting forward of the shoulders, looking where the player looks
+			this.head.y = this.body.y - 11.7F * lc + 1.0F * ls + Mth.sin(age * 0.05F) * 0.25F;
+			this.head.z = -11.7F * ls - 1.0F * lc;
+			this.head.yRot = Mth.clamp(state.yRot, -70.0F, 70.0F) * Mth.DEG_TO_RAD;
+			this.head.xRot = Mth.clamp(state.xRot, -60.0F, 60.0F) * Mth.DEG_TO_RAD - lean * 0.7F;
+			// the upper arms hang off the shoulders, which lean with the body
+			float shy = this.body.y - SHOULDER_Y * lc;
+			float shz = -SHOULDER_Y * ls;
+			this.rightArm.setPos(-SHOULDER_X, shy, shz);
+			this.leftArm.setPos(SHOULDER_X, shy, shz);
+
+			// ---- the arms' targets: the swapping guard, the walk's swing, the air ----
+			float uRight = swap(age + SKEW), uLeft = swap(age);
+			float sw = cc * sp;
+			for (int i = 0; i < 4; i++) {
+				boolean upper = i < 2, rightSide = i % 2 == 0;
+				float k = upper ? (rightSide ? uRight : uLeft) : 1.0F - (rightSide ? uRight : uLeft);
+				float[] x = upper ? UP_X : LO_X, z = upper ? UP_Z : LO_Z, fxs = upper ? UP_FX : LO_FX, fzs = upper ? UP_FZ : LO_FZ;
+				this.ax[i] = Mth.lerp(k, x[0], x[1]);
+				this.az[i] = Mth.lerp(k, z[0], z[1]) + Mth.sin(age * 0.07F + i * 1.3F) * 0.05F;
+				this.fx[i] = Mth.lerp(k, fxs[0], fxs[1]);
+				this.fz[i] = Mth.lerp(k, fzs[0], fzs[1]);
+				// walking: the upper pair swings against its own side's leg, the lower pair against the upper, all held wider
+				float swing = (rightSide ? -sw : sw) * ARM_SWING * (upper ? 1.0F : -0.8F);
+				this.ax[i] += swing;
+				this.az[i] += ARM_WIDE * sp;
+				// in the air they flare; a fall lifts them, a landing slams them down
+				this.az[i] += air * 0.25F + Math.max(0.0F, m.fall()) * air * 0.4F - m.land() * 0.6F;
+				if (carry) {
+					int pair = upper ? 0 : 1;
+					this.ax[i] = CARRY_X[pair] + swing * 0.3F;
+					this.az[i] = CARRY_Z[pair] + Mth.sin(age * 0.6F + i) * 0.03F;
+					this.fx[i] = CARRY_FX[pair];
+					this.fz[i] = CARRY_FZ[pair];
+				} else if (leap) {
+					this.ax[i] = 0.25F;
+					this.az[i] = LEAP_Z[upper ? 0 : 1];
+					this.fx[i] = -0.2F;
+					this.fz[i] = 0.2F;
+				}
+			}
+			// a punch: the main hand throws the upper arm on its side, the off hand the lower arm on the other side
+			float sa = Mth.clamp(state.swingAnimation, 0.0F, 1.0F);
+			if (state.currentSwing != null && sa > 0.0F && !carry) {
+				boolean off = state.currentSwing.hand() == net.minecraft.world.InteractionHand.OFF_HAND;
+				boolean right = (state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT) != off;
+				int punch = (off ? 2 : 0) + (right ? 0 : 1);
+				int other = punch ^ 1;
+				float pk = Mth.sin(sa * Mth.PI);
+				this.ax[punch] = Mth.lerp(pk, this.ax[punch], PUNCH_X);
+				this.az[punch] = Mth.lerp(pk, this.az[punch], PUNCH_Z);
+				this.fx[punch] = Mth.lerp(pk, this.fx[punch], 0.0F);
+				this.fz[punch] = Mth.lerp(pk, this.fz[punch], 0.0F);
+				// the other arm of the pair is drawn back as the fist goes out
+				this.ax[other] += PUNCH_RECOIL * pk;
+				this.az[other] += 0.2F * pk;
+				this.fx[other] -= 0.3F * pk;
+			}
+			for (int i = 0; i < 4; i++) {
+				float sg = i % 2 == 0 ? 1.0F : -1.0F;
+				this.arms[i].xRot = this.ax[i] + (i < 2 ? lean : 0.0F);
+				this.arms[i].zRot = sg * this.az[i];
+				this.fores[i].xRot = this.fx[i];
+				this.fores[i].zRot = sg * this.fz[i];
+				this.fists[i].xRot = -0.25F;
+			}
 		}
 	}
 
@@ -6095,36 +7954,133 @@ public final class XenoFormModels {
 	/**
 	 * Nadir: a tall dark silhouette, broad at the shoulder, a face of nothing; a thin mantle of void drifts behind it.
 	 * The insignia is the skin's alone.
+	 * <p>
+	 * (0.19.83) Shapeless: no limbs, no face. A mass of darkness about a man's height made of twenty-odd dark cubes of
+	 * four sizes that slowly drift, tumble, swell and shrink round a centre, the edges fraying into small loose
+	 * fragments; the insignia floats on a dim core at its heart, facing front. Moving, the mass leans and streams
+	 * behind (the top most), a turn swings it out, a fall lifts it; an attack swells the core and lashes the front
+	 * fragments out ahead. Nothing sinks through the ground: a fragment that drifts down settles on it. The man's parts
+	 * are hidden (the arm stays for the first-person hand); the body is the core. Uses no {@code XenoformClient.ACT}.
 	 */
 	static final class Nadir extends FormModel {
-		private final ModelPart mantle;
+		// ---- tuning ----
+		/** The core's height (model pixels, y down: 10 puts its centre ~14 up, the heart of a 32-pixel column), its bob and how far it sinks when sneaking. */
+		static final float HEART = 10.0F, BOB = 0.8F, CROUCH_DROP = 2.5F;
+		/** The ground (model pixels, y down): no fragment's lowest corner goes below it. */
+		static final float GROUND = 24.0F;
+		/** The core's breath (fraction), its rate, and how much it swells on an attack swing. */
+		static final float BREATH = 0.04F, BREATH_RATE = 0.09F, BURST_CORE = 0.25F;
+		/** How fast the fragments drift (radians a tick), and how far each size drifts (pixels): large, medium, small, tiny. */
+		static final float DRIFT = 0.045F;
+		private static final float[] AMP = {0.8F, 1.4F, 1.9F, 2.4F};
+		/** Each size's half-edge (pixels): large 6, medium 4, small 3, tiny 2 cubed. */
+		private static final float[] HALF = {3.0F, 2.0F, 1.5F, 1.0F};
+		/** How much harder the fragments tumble at a full walk and on an attack swing, and how far that extra tumble sways their turn about y (radians). */
+		static final float SPIN_WALK = 1.5F, SPIN_BURST = 1.0F, SPIN_TURN = 0.6F;
+		/** Moving: how far the top streams behind (pixels), how far a turn swings it, how far a fall lifts it, how much it squashes on landing. */
+		static final float TRAIL = 4.0F, TURN_SWING = 4.0F, FALL_RISE = 5.0F, LAND_SQUASH = 0.2F, CROUCH_SQUASH = 0.8F, LEAN = 0.15F;
+		/** An attack: how far the front fragments lash out ahead (pixels), and how much every fragment swells. */
+		static final float LASH = 11.0F, BURST_SWELL = 0.2F;
+		/** Each fragment: x, y, z of its centre (pixels, y down, ground 24), its size (0 = 6, 1 = 4, 2 = 3, 3 = 2 cubed), how much of a lash it takes (0-1). */
+		private static final float[][] FRAGS = {
+			// the heavy cubes stacked round the core (each overlaps or touches its neighbour; the ones beside the
+			// core's front sit back from it, so they never drift across the insignia)
+			{-3.0F, 3.0F, 0.5F, 0, 1.0F}, {3.0F, 3.0F, 1.5F, 0, 0.6F}, {-2.0F, 16.0F, 1.0F, 0, 0.4F},
+			{3.0F, 18.0F, 0.5F, 0, 1.0F}, {0.0F, 0.0F, 1.0F, 0, 0.5F}, {0.0F, 21.0F, 0.0F, 0, 0.3F},
+			// medium cubes on the flanks
+			{-6.0F, 9.0F, 0.0F, 1, 0.5F}, {6.0F, 11.0F, 1.0F, 1, 0.5F}, {-5.0F, -3.0F, -1.0F, 1, 1.0F},
+			{5.0F, 1.0F, 2.0F, 1, 0.3F}, {-5.0F, 19.0F, 1.0F, 1, 0.6F}, {5.0F, 20.0F, -2.0F, 1, 1.0F},
+			// small ones fraying off the edge
+			{-8.0F, 3.0F, 3.0F, 2, 0.3F}, {8.0F, 6.0F, -3.0F, 2, 1.0F}, {-7.0F, 19.0F, -2.0F, 2, 1.0F},
+			{7.0F, 22.0F, 2.0F, 2, 0.3F}, {2.0F, -7.0F, -2.0F, 2, 1.0F}, {-3.0F, -6.0F, 3.0F, 2, 0.3F},
+			// tiny drifting motes
+			{-9.0F, 12.0F, -3.0F, 3, 1.0F}, {9.0F, 14.0F, 3.0F, 3, 0.3F}, {5.0F, -5.0F, 3.0F, 3, 0.3F},
+			{-4.0F, 23.0F, 0.0F, 3, 0.5F}};
+
+		private final ModelPart[] frags = new ModelPart[FRAGS.length];
 
 		Nadir() {
 			super(bake(mesh()), "nadir");
-			this.insigniaZ = -2.3F;
-			this.mantle = this.body.getChild("mantle");
+			for (int i = 0; i < FRAGS.length; i++) {
+				this.frags[i] = this.root().getChild("frag" + i);
+			}
+			// flush on the front of the core (its front face is at z = -3), in its middle; the core's own scale
+			// (its breath and swell) carries the plate with it, so these stay fixed
+			this.insigniaY = 0.0F;
+			this.insigniaZ = -3.0F;
+			this.insigniaSize = 1.0F;
 		}
 
 		private static MeshDefinition mesh() {
+			// the heavy (+0.3) arms it always had, kept for the first-person hand
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.3F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			// heavy shoulders
-			root.getChild("body").addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 64).addBox(-6.0F, -1.0F, -3.0F, 12.0F, 4.0F, 6.0F),
+			// the head stays (hidden) with its empty hat
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F),
 				PartPose.ZERO);
-			// the mantle: a flat sheet hanging from the back
-			root.getChild("body").addOrReplaceChild("mantle", CubeListBuilder.create().texOffs(36, 64).addBox(-5.0F, 0.0F, 0.0F, 10.0F, 14.0F, 1.0F),
-				PartPose.offset(0.0F, 1.0F, 3.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			// the core: a dim 8x8x6 cube at the heart, carrying the insignia on its front
+			root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 96).addBox(-4.0F, -4.0F, -3.0F, 8.0F, 8.0F, 6.0F),
+				PartPose.offset(0.0F, HEART, 0.0F));
+			for (int i = 0; i < FRAGS.length; i++) {
+				CubeListBuilder c = CubeListBuilder.create();
+				switch ((int)FRAGS[i][3]) {
+					case 0 -> c.texOffs(0, 64).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 6.0F, 6.0F);
+					case 1 -> c.texOffs(0, 76).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 4.0F, 4.0F);
+					case 2 -> c.texOffs(0, 84).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F);
+					default -> c.texOffs(0, 90).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 2.0F);
+				}
+				root.addOrReplaceChild("frag" + i, c, PartPose.offset(FRAGS[i][0], FRAGS[i][1], FRAGS[i][2]));
+			}
 			return mesh;
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
+			this.hat.visible = this.head.visible = this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
+			this.head.resetPose();
+			this.body.resetPose();
 			XenoMotion.Read m = XenoMotion.read(state);
-			// the mantle drifts with its breath, streams out behind as it moves or drops, and swings out of a turn
-			this.mantle.xRot = 0.1F + Mth.sin(state.ageInTicks * 0.07F) * 0.06F + state.walkAnimationSpeed * 0.5F
-				+ Math.max(0.0F, m.fall()) * 0.9F * m.air() + m.land() * 0.25F;
-			this.mantle.zRot = -m.trail() * 0.3F;
+			float age = state.ageInTicks;
+			float speed = Math.min(1.0F, state.walkAnimationSpeed);
+			float burst = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
+			boolean crouch = state.isCrouching;
+			float squash = (crouch ? CROUCH_SQUASH : 1.0F) - m.land() * LAND_SQUASH;
+			float cy = HEART + Mth.sin(age * 0.05F) * BOB + (crouch ? CROUCH_DROP : 0.0F);
+			float rise = Math.max(0.0F, m.fall()) * m.air() * FALL_RISE;
+			// the core: breathing, swelling on a swing, leaning into its way; the insignia rides its front (the plate
+			// is drawn in the core's scaled space, so insigniaZ/insigniaSize stay as set in the constructor)
+			float pulse = 1.0F + Mth.sin(age * BREATH_RATE) * BREATH + burst * BURST_CORE;
+			this.body.y = cy;
+			this.body.xRot = speed * LEAN;
+			this.body.zRot = Mth.sin(age * 0.03F) * 0.03F;
+			this.body.xScale = this.body.yScale = this.body.zScale = pulse;
+			// the fragments: each drifts on its own slow orbit, tumbles and swells; the high ones stream behind
+			float spin = 1.0F + speed * SPIN_WALK + burst * SPIN_BURST;
+			for (int i = 0; i < FRAGS.length; i++) {
+				float[] f = FRAGS[i];
+				ModelPart p = this.frags[i];
+				int size = (int)f[3];
+				float amp = AMP[size];
+				float t = age * DRIFT + i * 2.3F;
+				float high = Mth.clamp((22.0F - f[1]) / 28.0F, 0.0F, 1.0F);
+				p.x = f[0] + Mth.sin(t * 0.9F + i) * amp - m.trail() * TURN_SWING * high;
+				p.y = cy + (f[1] - HEART) * squash + Mth.sin(t * 0.7F + i * 1.3F) * amp * 0.8F - rise * high - burst * f[4] * 2.0F;
+				p.z = f[2] + Mth.cos(t * 0.8F + i * 0.7F) * amp + speed * TRAIL * high - burst * f[4] * LASH * (f[2] < 1.5F ? 1.0F : 0.3F);
+				// the tumble: the angles' wobble grows with the spin, and the turn about y gets a bounded extra sway
+				// (never a rate times the age, which would jump as the spin changes)
+				p.xRot = Mth.sin(t * 0.5F + i) * 0.5F * spin;
+				p.yRot = t * 0.4F + (spin - 1.0F) * SPIN_TURN * Mth.sin(t * 1.3F + i);
+				p.zRot = Mth.sin(t * 0.4F + 1.0F) * 0.5F * spin;
+				float s = 0.85F + 0.15F * Mth.sin(t * 1.2F + i * 0.9F) + burst * BURST_SWELL * f[4];
+				p.xScale = p.yScale = p.zScale = s;
+				// settle on the ground: the turned cube's lowest corner (its half-edge times the y row of Rz*Ry*Rx) stays above it
+				float cx = Mth.cos(p.xRot), sx = Mth.sin(p.xRot), cyr = Mth.cos(p.yRot), syr = Mth.sin(p.yRot);
+				float cz = Mth.cos(p.zRot), sz = Mth.sin(p.zRot);
+				float reach = HALF[size] * s * (Mth.abs(sz * cyr) + Mth.abs(cz * cx + sz * syr * sx) + Mth.abs(sz * syr * cx - cz * sx));
+				p.y = Math.min(p.y, GROUND - reach);
+			}
 		}
 	}
 
@@ -6462,49 +8418,392 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Knell: hulking, horned, with a glowing ribcage, heavy shoulders and sculk tendrils at the jaw. */
+	/**
+	 * Knell: hulking, horned, with a glowing ribcage, heavy shoulders and sculk tendrils at the jaw; (0.19.83 a hunched
+	 * beast on two legs, not a man: a massive humped back leaning far forward over short, thick, bowed legs, a thick neck
+	 * slinging the horned head low and forward, and very long heavy arms that hang to the ground, the knuckles nearly
+	 * dragging). It lumbers, rocking side to side with each step, the arms swinging against the legs (a knuckle-walker's
+	 * diagonal gait, every foot and fist solved to plant flat on the ground). The man's own parts are redefined, so the
+	 * first-person hand, held items and the poses laid over a man still find them: the body is the trunk (a hump, two
+	 * hinged rib plates over a glowing chest, and the insignia in the gap between them, as children), the head the horned
+	 * skull (curling horns, a brow, a hinged jaw with sculk tendrils), the arms and legs jointed. A swing (a Sonic Boom
+	 * or a Shriek is a swing; the attack) throws the head out on its neck, opens the jaw and the ribs and rears the
+	 * back, the right fist slamming forward. {@link XenoformClient#ACT}: "sense" while Tremor Sense is held (low on
+	 * all fours, head down, listening), "toll" during the Tolling (reared up, beating the ground and its chest to the
+	 * toll, the ribs open), "burrow" while it digs in (squatting, scooping with both fists).
+	 */
 	static final class Knell extends FormModel {
-		private final ModelPart[] tendrils = new ModelPart[3];
+		// ---- tuning ----
+		/** The pelvis, the body's pivot (model y, z), the back's forward lean about it at rest (radians), its breath and how far a swing rears it back. */
+		static final float PELVIS_Y = 14.5F, PELVIS_Z = 3.0F, LEAN = 0.62F, LEAN_BREATH = 0.025F, BOOM_REAR = 0.16F;
+		/** How far a sneaking renderer sinks the model (pixels), and how far a landing and a crouch dip the pelvis. */
+		static final float CROUCH_SINK = 2.0F / 0.9375F, LAND_DIP = 2.0F, CROUCH_SQUAT = 1.5F, CROUCH_LEAN = 0.12F;
+		/** The gait: radians of step cycle per unit of walkAnimationPos, how much walk speed it takes to be at full stride, the fraction of the cycle a foot is down. */
+		static final float GAIT = 0.6662F * 0.9F, SPEED_GAIN = 1.25F, DUTY = 0.62F;
+		/** The lumber: how far the body shifts (pixels) and rolls (radians) over the planted foot, how far it bobs (pixels), how far a turn twists it. */
+		static final float ROCK_SHIFT = 0.9F, ROCK = 0.07F, BOB = 0.7F, TURN_TWIST = 0.12F;
+		/** The legs: a hip's offset from the middle and its rest place (model y, z), the thigh's and the shin's length, the ankle's height over the sole. */
+		static final float HIP_X = 3.8F, HIP_Y = 16.0F, HIP_Z = 3.6F, THIGH = 5.0F, SHIN = 5.0F, ANKLE = 1.0F;
+		/** The legs' steps: half a stride and the lift of a swinging foot (pixels), how far ahead of its hip a foot rests, and the bow and the toe-out (radians). */
+		static final float STRIDE = 3.4F, LIFT = 1.8F, FOOT_AHEAD = -0.6F, BOW = 0.2F, TOE_OUT = 0.12F;
+		/** The shoulders (in the body's space: out from the middle, y, z), the arms' two bones, the height of the wrist over the fist's sole and the fist's half length and half width (a tipped fist is lifted by them so its edge stays on the ground). */
+		static final float SHOULDER_X = 7.5F, SHOULDER_Y = -10.5F, SHOULDER_Z = -0.5F, UPPER = 8.0F, FORE = 8.0F, FIST = 3.0F, FIST_HALF = 3.5F, FIST_SIDE = 3.0F;
+		/** The fists' steps: half a stride and the lift of a swinging fist (pixels), how far ahead of its shoulder a fist rests, and how high the wrist rests over the ground. */
+		static final float ARM_STRIDE = 3.8F, ARM_LIFT = 1.6F, ARM_AHEAD = 0.5F, WRIST_Y = 3.4F;
+		/** The neck's base on the body (y, z), its length and its resting pitch (radians, absolute, - is forward), and how far a swing throws it out (pixels). */
+		static final float NECK_Y = -11.0F, NECK_Z = -1.0F, NECK = 7.0F, NECK_PITCH = -0.95F, THRUST = 3.2F;
+		/** The head: how far it hangs down at rest, how far a swing throws it up (radians), and how far the jaw hangs shut and opens on a swing. */
+		static final float HEAD_DROP = 0.22F, BOOM_LIFT = 0.4F, JAW_REST = 0.08F, JAW_BOOM = 0.9F;
+		/** The rib plates: their middle's height on the trunk (below the hump's overhang, which ends at y = -8) and how far they swing open on a swing and in the toll (radians). */
+		static final float RIB_Y = -4.0F, RIB_OPEN = 1.2F;
+		/** Tremor Sense: how much lower the back leans, how far the pelvis squats and how far ahead the fists are put. */
+		static final float SENSE_LEAN = 0.3F, SENSE_SQUAT = 2.0F, SENSE_REACH = 3.0F;
+		/** The Tolling: ticks between tolls (Knell.TOLL_EVERY), the back's lean at rest and reared, how far the pelvis squats, how high the fists rise over the shoulder. */
+		static final float TOLL_TICKS = 40.0F, TOLL_LEAN = 0.35F, TOLL_REAR = 0.25F, TOLL_SQUAT = 2.0F, TOLL_RISE = 6.0F;
+		/** Burrowing: how much lower the back leans, how far the pelvis squats, how fast the fists scoop and how far they reach, how far the head bows. */
+		static final float BURROW_LEAN = 0.4F, BURROW_SQUAT = 4.0F, SCOOP_RATE = 0.7F, SCOOP_REACH = 4.0F, BURROW_BOW = 0.1F;
+		private static final float PI = (float)Math.PI;
+
+		private final ModelPart neck, jaw, ribRight, ribLeft;
+		private final ModelPart[] horns = new ModelPart[4], growths = new ModelPart[2], tendrils = new ModelPart[3];
+		/** Index 0 right, 1 left. */
+		private final ModelPart[] fore = new ModelPart[2], fist = new ModelPart[2], shin = new ModelPart[2], foot = new ModelPart[2];
+		private final ModelPart[] posed;
+		private final float[] at = new float[3], gait = new float[3], bones = new float[2];
 
 		Knell() {
 			super(bake(mesh()), "knell");
-			this.insigniaY = 5.5F;
-			this.insigniaZ = -4.0F;
+			ModelPart root = this.root();
+			this.neck = root.getChild("neck");
+			this.jaw = this.head.getChild("jaw");
+			this.ribRight = this.body.getChild("right_rib");
+			this.ribLeft = this.body.getChild("left_rib");
+			this.horns[0] = this.head.getChild("right_horn");
+			this.horns[1] = this.horns[0].getChild("tip");
+			this.horns[2] = this.head.getChild("left_horn");
+			this.horns[3] = this.horns[2].getChild("tip");
+			this.growths[0] = this.body.getChild("right_growth");
+			this.growths[1] = this.body.getChild("left_growth");
 			for (int i = 0; i < 3; i++) {
-				this.tendrils[i] = this.head.getChild("tendril_" + i);
+				this.tendrils[i] = this.jaw.getChild("tendril_" + i);
 			}
+			this.fore[0] = this.rightArm.getChild("forearm");
+			this.fore[1] = this.leftArm.getChild("forearm");
+			this.fist[0] = this.fore[0].getChild("fist");
+			this.fist[1] = this.fore[1].getChild("fist");
+			this.shin[0] = this.rightLeg.getChild("shin");
+			this.shin[1] = this.leftLeg.getChild("shin");
+			this.foot[0] = this.shin[0].getChild("foot");
+			this.foot[1] = this.shin[1].getChild("foot");
+			this.posed = new ModelPart[] {this.head, this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg, this.neck};
+			// the plate lies in the gap between the rib plates, flush on the trunk's front (the trunk's front face is at z = -3.5),
+			// below the hump's overhang (a whole skin row: the ribs' middle is a row's edge)
+			this.insigniaY = RIB_Y + 0.5F;
+			this.insigniaZ = -3.5F;
+			this.insigniaSize = 0.6F;
+		}
+
+		/** A point of the body's space put where the body is: turned about x (the lean), y, then z, as a part is, then moved to the pelvis. */
+		private static void place(float x, float y, float z, float xr, float yr, float zr, float px, float py, float pz, float[] out) {
+			float y1 = y * Mth.cos(xr) - z * Mth.sin(xr);
+			float z1 = y * Mth.sin(xr) + z * Mth.cos(xr);
+			float x2 = x * Mth.cos(yr) + z1 * Mth.sin(yr);
+			float z2 = -x * Mth.sin(yr) + z1 * Mth.cos(yr);
+			out[0] = px + x2 * Mth.cos(zr) - y1 * Mth.sin(zr);
+			out[1] = py + x2 * Mth.sin(zr) + y1 * Mth.cos(zr);
+			out[2] = pz + z2;
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
+			PartDefinition root = mesh.getRoot();
+			float[] p = new float[3];
+			// the trunk (the man's body): the back, leaning forward about the pelvis; a hump of shoulders over it, rib plates hinged over the glowing chest, spurs of sculk
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 14).addBox(-5.5F, -13.0F, -3.5F, 11.0F, 16.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, PELVIS_Y, PELVIS_Z, LEAN, 0.0F, 0.0F));
+			body.addOrReplaceChild("hump", CubeListBuilder.create().texOffs(0, 37).addBox(-7.5F, -14.0F, -4.5F, 15.0F, 6.0F, 9.0F), PartPose.ZERO);
+			body.addOrReplaceChild("right_rib", CubeListBuilder.create().texOffs(42, 97).addBox(0.0F, -4.0F, -1.0F, 4.0F, 8.0F, 1.0F), PartPose.offset(-5.5F, RIB_Y, -3.5F));
+			body.addOrReplaceChild("left_rib", CubeListBuilder.create().texOffs(52, 97).addBox(-4.0F, -4.0F, -1.0F, 4.0F, 8.0F, 1.0F), PartPose.offset(5.5F, RIB_Y, -3.5F));
+			body.addOrReplaceChild("right_growth", CubeListBuilder.create().texOffs(48, 44).addBox(-1.5F, -5.0F, -1.5F, 3.0F, 5.0F, 3.0F),
+				PartPose.offsetAndRotation(-5.5F, -13.5F, 1.0F, 0.0F, 0.0F, -0.35F));
+			body.addOrReplaceChild("left_growth", CubeListBuilder.create().texOffs(52, 68).addBox(-1.5F, -5.0F, -1.5F, 3.0F, 5.0F, 3.0F),
+				PartPose.offsetAndRotation(5.5F, -13.5F, 1.0F, 0.0F, 0.0F, 0.35F));
+			// the neck, thick, from the hump forward and down; the head on its end
+			place(0.0F, NECK_Y, NECK_Z, LEAN, 0.0F, 0.0F, 0.0F, PELVIS_Y, PELVIS_Z, p);
+			root.addOrReplaceChild("neck", CubeListBuilder.create().texOffs(36, 0).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 11.0F, 6.0F),
+				PartPose.offsetAndRotation(p[0], p[1], p[2], NECK_PITCH, 0.0F, 0.0F));
+			place(0.0F, NECK, 0.0F, NECK_PITCH, 0.0F, 0.0F, p[0], p[1], p[2], p);
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -5.0F, -7.0F, 8.0F, 6.0F, 8.0F),
+				PartPose.offsetAndRotation(p[0], p[1], p[2], HEAD_DROP, 0.0F, 0.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			head.addOrReplaceChild("brow", CubeListBuilder.create().texOffs(0, 101).addBox(-4.5F, -6.0F, -8.0F, 9.0F, 2.0F, 3.0F), PartPose.ZERO);
+			PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(0, 92).addBox(-3.5F, -0.5F, -6.5F, 7.0F, 3.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, 0.5F, -0.5F, JAW_REST, 0.0F, 0.0F));
+			// sculk tendrils hanging from the chin
+			int[][] tendrilUv = {{32, 0}, {60, 0}, {32, 5}};
+			for (int i = 0; i < 3; i++) {
+				jaw.addOrReplaceChild("tendril_" + i, CubeListBuilder.create().texOffs(tendrilUv[i][0], tendrilUv[i][1]).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+					PartPose.offsetAndRotation(-2.5F + 2.5F * i, 2.5F, -5.5F, 0.15F, 0.0F, 0.2F - 0.2F * i));
+			}
+			// the horns curl out and up, then in and forward
+			PartDefinition rightHorn = head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 106).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 6.0F, 2.0F),
+				PartPose.offsetAndRotation(-3.6F, -4.5F, -2.5F, 0.0F, 0.0F, -0.7F));
+			rightHorn.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(16, 106).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offsetAndRotation(0.0F, -6.0F, 0.0F, -0.5F, 0.0F, 1.1F));
+			PartDefinition leftHorn = head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(8, 106).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 6.0F, 2.0F),
+				PartPose.offsetAndRotation(3.6F, -4.5F, -2.5F, 0.0F, 0.0F, 0.7F));
+			leftHorn.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(42, 106).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offsetAndRotation(0.0F, -6.0F, 0.0F, -0.5F, 0.0F, -1.1F));
+			// the arms (the man's): upper arm, forearm bent forward at rest, fist; the shoulders where the hump's ends are
+			place(-SHOULDER_X, SHOULDER_Y, SHOULDER_Z, LEAN, 0.0F, 0.0F, 0.0F, PELVIS_Y, PELVIS_Z, p);
+			PartDefinition rightArm = root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(24, 52).addBox(-2.5F, -2.0F, -2.5F, 5.0F, 11.0F, 5.0F),
+				PartPose.offset(p[0], p[1], p[2]));
+			PartDefinition rightFore = rightArm.addOrReplaceChild("forearm", CubeListBuilder.create().texOffs(36, 17).addBox(-3.0F, -1.0F, -3.0F, 6.0F, 10.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, UPPER, 0.0F, -0.6F, 0.0F, 0.0F));
+			rightFore.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(0, 68).addBox(-3.0F, -1.0F, -3.5F, 6.0F, 4.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, FORE, 0.0F, 0.3F, 0.0F, 0.0F));
+			place(SHOULDER_X, SHOULDER_Y, SHOULDER_Z, LEAN, 0.0F, 0.0F, 0.0F, PELVIS_Y, PELVIS_Z, p);
+			PartDefinition leftArm = root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(44, 52).addBox(-2.5F, -2.0F, -2.5F, 5.0F, 11.0F, 5.0F),
+				PartPose.offset(p[0], p[1], p[2]));
+			PartDefinition leftFore = leftArm.addOrReplaceChild("forearm", CubeListBuilder.create().texOffs(0, 52).addBox(-3.0F, -1.0F, -3.0F, 6.0F, 10.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, UPPER, 0.0F, -0.6F, 0.0F, 0.0F));
+			leftFore.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(26, 68).addBox(-3.0F, -1.0F, -3.5F, 6.0F, 4.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, FORE, 0.0F, 0.3F, 0.0F, 0.0F));
+			// the legs (the man's): thigh, shin, flat foot; knees forward at rest
+			PartDefinition rightLeg = root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 79).addBox(-2.5F, -2.0F, -2.5F, 5.0F, 8.0F, 5.0F),
+				PartPose.offsetAndRotation(-HIP_X, HIP_Y, HIP_Z, -0.8F, 0.0F, 0.0F));
+			PartDefinition rightShin = rightLeg.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(48, 33).addBox(-2.0F, -1.5F, -2.0F, 4.0F, 7.0F, 4.0F),
+				PartPose.offsetAndRotation(0.0F, THIGH, 0.0F, 1.6F, 0.0F, 0.0F));
+			rightShin.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(40, 79).addBox(-2.5F, -1.0F, -5.0F, 5.0F, 2.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, SHIN, 0.0F, -0.8F, 0.0F, 0.0F));
+			PartDefinition leftLeg = root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(20, 79).addBox(-2.5F, -2.0F, -2.5F, 5.0F, 8.0F, 5.0F),
+				PartPose.offsetAndRotation(HIP_X, HIP_Y, HIP_Z, -0.8F, 0.0F, 0.0F));
+			PartDefinition leftShin = leftLeg.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(26, 97).addBox(-2.0F, -1.5F, -2.0F, 4.0F, 7.0F, 4.0F),
+				PartPose.offsetAndRotation(0.0F, THIGH, 0.0F, 1.6F, 0.0F, 0.0F));
+			leftShin.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(40, 88).addBox(-2.5F, -1.0F, -5.0F, 5.0F, 2.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, SHIN, 0.0F, -0.8F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		/** A step's phase at {@code u} (0-1 through a cycle) into {@link #gait}: the foot's place (-1 forward to 1 back), its lift (0-1), 1 while it swings. */
+		private void step(float u) {
+			if (u < DUTY) {
+				this.gait[0] = -1.0F + 2.0F * u / DUTY;
+				this.gait[1] = 0.0F;
+				this.gait[2] = 0.0F;
+			} else {
+				float t = (u - DUTY) / (1.0F - DUTY);
+				float ease = t * t * (3.0F - 2.0F * t);
+				this.gait[0] = 1.0F - 2.0F * ease;
+				this.gait[1] = Mth.sin(t * PI);
+				this.gait[2] = 1.0F;
+			}
+		}
+
+		/** Two bones from (sy, sz) to (ty, tz), the joint on the side {@code bend} (-1 forward, 1 back), into {@link #bones}: each bone's angle from straight down (x rotation). */
+		private void ik(float sy, float sz, float ty, float tz, float l1, float l2, float bend) {
+			float dz = tz - sz;
+			float dy = ty - sy;
+			float dist = Mth.clamp((float)Math.sqrt(dz * dz + dy * dy), Math.abs(l1 - l2) + 0.05F, l1 + l2 - 0.01F);
+			float to = (float)Math.atan2(dz, dy);
+			float cos = Mth.clamp((l1 * l1 + dist * dist - l2 * l2) / (2.0F * l1 * dist), -1.0F, 1.0F);
+			float t1 = to + bend * (float)Math.acos(cos);
+			float jz = sz + l1 * Mth.sin(t1);
+			float jy = sy + l1 * Mth.cos(t1);
+			this.bones[0] = t1;
+			this.bones[1] = (float)Math.atan2(sz + dist * Mth.sin(to) - jz, sy + dist * Mth.cos(to) - jy);
+		}
+
+		/**
+		 * The forearms and fists straight, and the shoulders back over the player's, for the first-person arm (the model is
+		 * shared, so they hold whoever was drawn last, and the arms' rest place is out on the hump, ahead of the chest).
+		 */
+		void handPose() {
+			this.rightArm.z = 0.0F;
+			this.leftArm.z = 0.0F;
+			for (int side = 0; side < 2; side++) {
+				this.fore[side].xRot = 0.0F;
+				this.fist[side].xRot = 0.0F;
+			}
+		}
+
+		private static float fract(float v) {
+			return v - (float)Math.floor(v);
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
+			this.hat.visible = false;
+			for (ModelPart part : this.posed) {
+				part.resetPose();
+			}
 			XenoMotion.Read m = XenoMotion.read(state);
-			// the tendrils hang straight down whichever way it looks, sway on their own and swing out of a turn
+			String act = state.getData(XenoformClient.ACT);
+			boolean burrow = "burrow".equals(act);
+			boolean toll = "toll".equals(act);
+			boolean sense = "sense".equals(act);
+			float age = state.ageInTicks;
+			boolean crouch = state.isCrouching;
+			boolean low = crouch || Boolean.TRUE.equals(state.getData(XenoformClient.SNEAK));
+			float ground = 24.0F - (crouch ? CROUCH_SINK : 0.0F);
+			float air = Mth.clamp(m.air(), 0.0F, 1.0F);
+			// a swing is a Sonic Boom, a Shriek or a blow; burrowing swings too as it starts digging, but that is the scoop's to show
+			float swing = burrow ? 0.0F : Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * PI);
+			float breath = m.breath();
+			float speed = Mth.clamp(state.walkAnimationSpeed * SPEED_GAIN, 0.0F, 1.0F) * (1.0F - air) * (toll ? 0.0F : burrow ? 0.25F : 1.0F);
+			float w = state.walkAnimationPos * GAIT;
+			// the Tolling's beat: the fists rise over the toll and slam down on it (the server tolls when the player's age is a multiple of the interval)
+			float beat = fract(age / TOLL_TICKS);
+			float rise = beat < 0.7F ? Mth.sin(beat / 0.7F * PI * 0.5F) : 1.0F - (float)Math.pow((beat - 0.7F) / 0.3F, 3.0);
+			if (!toll) {
+				rise = 0.0F;
+			}
+
+			// ---- the body: the back leans over the pelvis, rocking over the planted foot ----
+			// (the crouch's own squat and lean only when no ability already has it low)
+			boolean crouchPose = low && !sense && !burrow && !toll;
+			float lean = LEAN + breath * LEAN_BREATH - swing * BOOM_REAR + (crouchPose ? CROUCH_LEAN : 0.0F);
+			float squat = (crouchPose ? CROUCH_SQUAT : 0.0F) + (burrow ? 0.0F : m.land() * LAND_DIP);
+			float wide = 0.0F;
+			if (sense) {
+				lean += SENSE_LEAN;
+				squat += SENSE_SQUAT;
+				wide = 0.8F;
+			}
+			if (burrow) {
+				lean += BURROW_LEAN;
+				squat += BURROW_SQUAT;
+				wide = 0.8F;
+			}
+			if (toll) {
+				lean = TOLL_LEAN - TOLL_REAR * rise;
+				squat += TOLL_SQUAT;
+				wide = 1.0F;
+			}
+			float rock = Mth.cos(w - DUTY * PI) * speed;
+			float bob = Mth.cos(2.0F * (w - DUTY * PI)) * speed * BOB;
+			float px = -rock * ROCK_SHIFT;
+			float py = PELVIS_Y - (crouch ? CROUCH_SINK : 0.0F) + squat - bob;
+			float pz = PELVIS_Z;
+			float yaw = m.turn() * TURN_TWIST;
+			float roll = -rock * ROCK;
+			this.body.setPos(px, py, pz);
+			this.body.xRot = lean;
+			this.body.yRot = yaw;
+			this.body.zRot = roll;
+			// the rib plates: open on a swing (the chest glows) and while it tolls
+			float open = Mth.clamp(swing * 1.1F + rise * 0.9F + (toll ? 0.25F : 0.0F), 0.0F, 1.0F) * RIB_OPEN;
+			this.ribRight.yRot = open;
+			this.ribLeft.yRot = -open;
+			float spur = Mth.sin(age * 0.1F) * 0.05F;
+			this.growths[0].zRot = -0.35F + spur - m.trail() * 0.1F;
+			this.growths[1].zRot = 0.35F - spur - m.trail() * 0.1F;
+
+			// ---- the legs: planted flat on the ground, the knees forward ----
+			float hipY = py + (HIP_Y - PELVIS_Y);
+			for (int side = 0; side < 2; side++) {
+				boolean left = side == 1;
+				float sgn = left ? 1.0F : -1.0F;
+				ModelPart leg = left ? this.leftLeg : this.rightLeg;
+				float hx = sgn * (HIP_X + wide) + px * 0.5F;
+				this.step(fract((w + (left ? PI : 0.0F)) / (2.0F * PI)));
+				float tz = HIP_Z + FOOT_AHEAD + this.gait[0] * STRIDE * speed - air * 1.0F;
+				float ty = ground - ANKLE - this.gait[1] * LIFT * speed - air * 3.5F;
+				this.ik(hipY, HIP_Z, ty, tz, THIGH, SHIN, -1.0F);
+				leg.setPos(hx, hipY, HIP_Z);
+				leg.xRot = this.bones[0];
+				leg.yRot = -sgn * TOE_OUT;
+				leg.zRot = -sgn * (BOW + wide * 0.15F);
+				this.shin[side].xRot = this.bones[1] - this.bones[0];
+				this.shin[side].zRot = sgn * (BOW + wide * 0.15F) * 1.5F;
+				// the foot lies flat on the ground, the toes dropping as it swings
+				float lifted = this.gait[1] * LIFT * speed;
+				this.foot[side].xRot = (float)Math.min(0.3F, Math.asin(Math.min(1.0F, lifted / 5.0F))) - this.bones[1];
+				// and level across: the bow's tilt of the shin taken back out at the ankle, so the sole lies flat
+				this.foot[side].zRot = sgn * (BOW + wide * 0.15F) * 0.5F;
+			}
+
+			// ---- the arms: the fists plant on the ground ahead of the shoulders, swinging against the legs ----
+			float splay = sense || burrow ? 0.3F : toll ? 0.12F : 0.05F;
+			for (int side = 0; side < 2; side++) {
+				boolean left = side == 1;
+				float sgn = left ? 1.0F : -1.0F;
+				ModelPart arm = left ? this.leftArm : this.rightArm;
+				place(sgn * SHOULDER_X, SHOULDER_Y, SHOULDER_Z, lean, yaw, roll, px, py, pz, this.at);
+				float sx = this.at[0];
+				float sy = this.at[1];
+				float sz = this.at[2];
+				// an arm swings with the opposite leg
+				this.step(fract((w + (left ? 0.0F : PI)) / (2.0F * PI)));
+				float tz = sz + ARM_AHEAD + this.gait[0] * ARM_STRIDE * speed + (sense ? SENSE_REACH : 0.0F);
+				float ty = ground - WRIST_Y - this.gait[1] * ARM_LIFT * speed;
+				float fistAbs = this.gait[2] * this.gait[1] * 0.35F;
+				if (burrow) {
+					// scooping the ground back, one fist and then the other
+					float scoop = Mth.sin(age * SCOOP_RATE + (left ? PI : 0.0F));
+					tz = sz + 2.0F - scoop * SCOOP_REACH;
+					ty = ground - WRIST_Y - Math.max(0.0F, Mth.cos(age * SCOOP_RATE + (left ? PI : 0.0F))) * 3.0F;
+					fistAbs = scoop * 0.4F;
+				}
+				if (toll) {
+					// up over the shoulders and down onto the ground
+					tz = Mth.lerp(rise, sz + ARM_AHEAD + 1.0F, sz - 3.0F);
+					ty = Mth.lerp(rise, ground - WRIST_Y, sy - TOLL_RISE);
+					fistAbs = -rise * 0.5F;
+				}
+				if (!left && swing > 0.0F && !toll) {
+					// the swing: the right fist slams forward and up
+					tz = Mth.lerp(swing, tz, sz - 11.0F);
+					ty = Mth.lerp(swing, ty, sy + 2.0F);
+					fistAbs = -swing * 0.4F;
+				}
+				// a tipped fist (pitched or rolled with the arm) is lifted so its lowest edge stays where its flat sole would be
+				float fistRoll = -sgn * splay + roll;
+				ty -= FIST * (Mth.cos(fistAbs) - 1.0F) + FIST_HALF * Math.abs(Mth.sin(fistAbs)) + FIST_SIDE * Math.abs(Mth.sin(fistRoll));
+				// the arm stands splayed out, which shortens it by the splay's cosine
+				float flat = Mth.cos(splay);
+				this.ik(sy, sz, sy + (ty - sy) / flat, tz, UPPER, FORE, 1.0F);
+				arm.setPos(sx, sy, sz);
+				arm.xRot = this.bones[0];
+				arm.yRot = yaw;
+				arm.zRot = fistRoll;
+				this.fore[side].xRot = this.bones[1] - this.bones[0];
+				this.fist[side].xRot = fistAbs - this.bones[1];
+			}
+
+			// ---- the neck and head: slung low and forward; a swing throws them out ----
+			float look = Mth.clamp(state.xRot * Mth.DEG_TO_RAD, -0.9F, 0.9F);
+			float neckPitch = NECK_PITCH + (lean - LEAN) * -0.6F + look * 0.2F;
+			float neckYaw = Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -1.0F, 1.0F) * 0.35F;
+			place(0.0F, NECK_Y, NECK_Z, lean, yaw, roll, px, py, pz, this.at);
+			this.neck.setPos(this.at[0], this.at[1], this.at[2]);
+			this.neck.xRot = neckPitch;
+			this.neck.yRot = yaw + neckYaw;
+			this.neck.zRot = roll;
+			// a swing throws the head out: the neck stretches with it, so the skull never leaves it
+			this.neck.yScale = (NECK + 1.0F + THRUST * swing) / (NECK + 1.0F);
+			place(0.0F, NECK + THRUST * swing, 0.0F, this.neck.xRot, this.neck.yRot, this.neck.zRot, this.at[0], this.at[1], this.at[2], this.at);
+			this.head.setPos(this.at[0], this.at[1], this.at[2]);
+			float listen = sense ? 0.35F + Mth.sin(age * 0.06F) * 0.1F : 0.0F;
+			float headPitch = HEAD_DROP + look * (burrow ? 0.4F : 0.85F) - (neckPitch - NECK_PITCH) * 0.5F - swing * BOOM_LIFT + listen - rise * 0.8F + (burrow ? BURROW_BOW : 0.0F)
+				+ m.land() * 0.2F + Mth.sin(w * 2.0F) * 0.04F * speed + breath * 0.01F;
+			this.head.xRot = headPitch;
+			this.head.yRot = Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -1.2F, 1.2F) + (sense ? Mth.sin(age * 0.045F) * 0.3F : 0.0F);
+			this.head.zRot = roll * 1.5F;
+			this.jaw.xRot = JAW_REST + Mth.sin(age * 0.09F) * 0.03F + swing * JAW_BOOM + rise * 0.9F + Math.max(0.0F, m.fall()) * 0.2F * air;
+			// the tendrils hang straight down whichever way the head turns, sway on their own and swing out of a turn
 			for (int i = 0; i < 3; i++) {
-				float own = Mth.sin(state.ageInTicks * 0.11F + i * 1.7F);
-				this.tendrils[i].xRot = 0.15F - this.head.xRot * 0.85F + own * 0.08F + m.speed() * 0.25F + m.land() * 0.4F;
+				float own = Mth.sin(age * 0.11F + i * 1.7F);
+				this.tendrils[i].xRot = 0.1F - (this.head.xRot + this.jaw.xRot) * 0.9F + own * 0.08F + m.speed() * 0.25F + m.land() * 0.4F;
 				this.tendrils[i].zRot = 0.2F - 0.2F * i + own * 0.06F - m.trail() * 0.4F;
 			}
-		}
-
-		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(1.0F), 0.0F);
-			PartDefinition root = mesh.getRoot();
-			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
-				PartPose.offsetAndRotation(-4.0F, -8.0F, 0.0F, 0.0F, 0.0F, -0.45F));
-			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
-				PartPose.offsetAndRotation(4.0F, -8.0F, 0.0F, 0.0F, 0.0F, 0.45F));
-			PartDefinition body = root.getChild("body");
-			body.addOrReplaceChild("ribs", CubeListBuilder.create().texOffs(8, 64).addBox(-5.0F, 1.0F, -4.0F, 10.0F, 8.0F, 2.0F), PartPose.ZERO);
-			body.addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 76).addBox(-6.0F, -3.0F, -2.5F, 12.0F, 3.0F, 5.0F, new CubeDeformation(1.0F)),
-				PartPose.ZERO);
-			// sculk tendrils hanging from the jaw
-			for (int i = 0; i < 3; i++) {
-				head.addOrReplaceChild("tendril_" + i, CubeListBuilder.create().texOffs(34, 64).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 4.0F, 1.0F),
-					PartPose.offsetAndRotation(-2.5F + 2.5F * i, 0.0F, -4.5F, 0.15F, 0.0F, 0.2F - 0.2F * i));
-			}
-			return mesh;
+			// the horns twitch with the head
+			float flick = Mth.sin(age * 0.07F) * 0.03F + m.land() * 0.15F;
+			this.horns[0].zRot = -0.7F + flick;
+			this.horns[2].zRot = 0.7F - flick;
+			this.horns[1].zRot = 1.1F + flick;
+			this.horns[3].zRot = -1.1F - flick;
 		}
 	}
 

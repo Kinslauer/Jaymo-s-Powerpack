@@ -43,10 +43,11 @@ squid, tentacles trailing), Gnasher (a shark, swims level, drags itself on land)
 floating). Pyre stays humanoid (Andy: "pyre should still be fairly humanoid"). Prism's Reflect is synced
 as the "root" act, Gnasher's Death Roll as "roll"; Cortex's Claw Snap is now Spine Snap.
 
-## Patch 6: non-human bipeds
+## Patch 6 (done, 0.19.83): non-human bipeds
 Bulwark (Andy: the four arms emphasised, a thinner body, the arms held out in an idle stance that keeps swapping which pair is raised), Knell (a hunched horned beast), Rime (a stooped ice brute), Shade (a thin
 crawling shadow that unfolds tall), Thornwild (a treant with root feet), Lurk (on all fours when stalking, tall when
-it stands), Rivet (a living-metal blob that stands up when it fights), Nadir and Dud (shapeless).
+it stands), Rivet (a living-metal blob that stands up when it fights), Nadir and Dud (shapeless). Synced stances (XenoformState.ACT): Bulwark carry/leap, Knell
+burrow/toll/sense, Shade hold/stare, Thornwild roots/bloom, Lurk fade, Rivet pour/fight, Dud dead/roll.
 
 ## Kept humanoid (7 of 41)
 Marrow, Swathe, Mirage, Polestar, Towerback (the Giants' kin), Duplex (a golem's build already) and Pyre (Andy,

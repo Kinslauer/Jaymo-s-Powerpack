@@ -74,6 +74,8 @@ public final class Rivet extends XenoForm {
 	public static final int LASH_COOLDOWN = 40;
 	public static final double POUR_SPEED = 1.4;
 	public static final int POUR_COOLDOWN = 40, POUR_GUARD = 10;
+	/** (0.19.83) How long a pour is drawn streaming (ticks), synced as the "pour" act; and how long it stands after a fight. */
+	public static final int POUR_TICKS = 12, FIGHT_TICKS = 80;
 	/** Riding: reach to climb in, how often the driven machine is steered (ticks), how far ahead it's sent, its boosts. */
 	public static final double RIDE_REACH = 4.0, DRIVE_AHEAD = 3.0, DRIVE_SPEED = 1.3, CART_PUSH = 0.06, CART_MAX = 1.4;
 	public static final int RIDE_COOLDOWN = 20, MACHINE_EFFECT_TICKS = 40;
@@ -162,6 +164,7 @@ public final class Rivet extends XenoForm {
 
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
+		live.rolls = 0;
 		setShell(player, live, null);
 		if (player.getVehicle() != null && driven(player) != null) {
 			player.stopRiding();
@@ -233,6 +236,7 @@ public final class Rivet extends XenoForm {
 					player.setDeltaMovement(look.x * POUR_SPEED, Math.max(0.1, look.y * POUR_SPEED * 0.5), look.z * POUR_SPEED);
 					player.syncVelocity = true;
 					player.setInvulnerableTime(Math.max(player.getInvulnerableTime(), POUR_GUARD));
+					live.rolls = POUR_TICKS;
 					burst(level, ParticleTypes.FALLING_DRIPSTONE_WATER, player.position().add(0.0, 0.3, 0.0), 12, 0.3, 0.05);
 					sound(player, SoundEvents.BUCKET_EMPTY, 0.8F, 1.6F);
 					cooldown(player, live, V, POUR_COOLDOWN);
@@ -771,6 +775,9 @@ public final class Rivet extends XenoForm {
 
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
+		if (live.rolls > 0) {
+			live.rolls--;
+		}
 		ServerLevel level = player.level();
 		Vec3 motion = player.getDeltaMovement();
 		// Brace (piston, smithing table): hold fast against everything
