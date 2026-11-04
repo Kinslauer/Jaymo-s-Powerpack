@@ -601,6 +601,12 @@ public final class HeritageKits {
 		put(entity, Attributes.MOVEMENT_SPEED, KIT_ID + "place_speed", speed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
 
+	/** (0.7.500) Whether {@code entity} is cold-blooded (the Serpen): Kitchen's body heat never overheats them ({@link KitchenCompat}). */
+	public static boolean coldBlooded(LivingEntity entity) {
+		Kit kit = kit(entity);
+		return kit != null && kit.has(Perk.COLD_BLOODED);
+	}
+
 	/**
 	 * (0.7.490) Whether {@code entity} is heavy in water (the Emberborn's flaw): read on both sides, from the synced heritage, by
 	 * {@code mixin.heritage.LivingEntityHeavyWaterMixin} after each tick's swim.
