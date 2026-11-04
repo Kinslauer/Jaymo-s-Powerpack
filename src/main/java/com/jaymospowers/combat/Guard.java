@@ -39,6 +39,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -388,6 +390,8 @@ public final class Guard {
 		return flat.normalize().dot(look) >= Math.cos(Math.toRadians(degrees));
 	}
 
+	private static final Holder<SoundEvent> PARRY_SOUND = Holder.direct(SoundEvent.createVariableRangeEvent(JaymosPowers.id("guard.parry")));
+
 	/**
 	 * (0.18.24, public) A parry landed, by any guard: the sparks and ring, the cue on the bar, a perfect one's feathers back,
 	 * and the attacker (null for an arrow) shoved, staggered, a player's weapon knocked out of rhythm on a perfect one,
@@ -402,8 +406,9 @@ public final class Guard {
 		Vec3 at = player.getEyePosition().add(from.subtract(player.getEyePosition()).normalize().scale(0.7)).add(0.0, -0.3, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, perfect ? 18 : 10, 0.15, 0.15, 0.15, 0.45);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, perfect ? 14 : 6, 0.1, 0.1, 0.1, 0.25);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, perfect ? 0.45F : 0.25F, perfect ? 2.0F : 1.7F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, perfect ? 1.5F : 1.2F);
+		// Steel ring: "Updated Parry Sound" (MIT), from Eelke's CC0 freesound 523521.
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), PARRY_SOUND, SoundSource.PLAYERS, perfect ? 1.0F : 0.8F, (perfect ? 1.1F : 0.95F) + (player.getRandom().nextFloat() - 0.5F) * 0.1F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.35F, perfect ? 1.5F : 1.2F);
 		cue(player, attacker, perfect);
 		Shakes.send(player, perfect ? 1.2F : 0.6F, from);
 		if (perfect) {

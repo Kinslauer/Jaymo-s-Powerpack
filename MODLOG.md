@@ -5339,3 +5339,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     Flint daggers and spears stay in the grid.
   - **Keys:** Spell Engine's "use the item, not the spell" key moves off Left Alt (OK Zoomer) to mouse side button 2
     (`KeyConflicts` v6). Class gates and skill-web perks come in the next patches. Built, not played.
+- **0.20.16, parry sound** (Andy): every guard parry (`Guard.parried`) rings steel instead of the pitched anvil, from
+  "Updated Parry Sound - MedievalWeapons" (MIT, CurseForge 522501) whose two clips are Eelke's CC0 freesound 523521
+  (`sounds/guard/parry_1|2.ogg`, event `jaymospowers:guard.parry`); a quiet shield thud stays under it. Z Fighter
+  bare-hand blocks keep their punches.
