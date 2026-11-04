@@ -1,11 +1,11 @@
-# Locks and keys: Kingdoms 0.7.496 (patch 6)
+# Locks and keys: Kingdoms 0.7.497 (patch 6)
 
 Andy picked the idea of Locks Reforged and wants our own version, with nothing copied from it. The plan text he approved:
 "Forge a lock and its key, fit it to a door, chest, trapdoor or gate. Locked blocks resist villagers, hoppers and
 breaking. Anyone else uses the Pin or Rotary game you already have. Townsfolk lock their homes and shops at night, and a
 break-in that's seen is a crime. Key ring in a bauble slot."
 
-- **Version:** Kingdoms `0.7.496` (`kingdoms/gradle.properties`). Tag every new comment `(0.7.496)`.
+- **Version:** Kingdoms `0.7.497` (`kingdoms/gradle.properties`). Tag every new comment `(0.7.497)`.
 - **Powers is not changed.** The key ring is made wearable by a Kingdoms tag overlay on Powers' bauble tag, which needs
   no Powers code, so Powers stays at 0.19.79 and nothing is tagged 0.19.83.
 - **Kitchen is not changed.**
@@ -76,7 +76,7 @@ break-in that's seen is a crime. Key ring in a bauble slot."
 | `kingdoms/src/main/resources/fabric.mod.json` | Adds `"jaymoskingdoms.locks.mixins.json"` to `mixins` (common). |
 | `kingdoms/src/main/resources/jaymoskingdoms.mca.mixins.json` | Adds `"McaDoorsMixin"`. |
 | `kingdoms/src/main/resources/assets/jaymoskingdoms/lang/en_us.json` | Keys in section 9. Removes `message.jaymoskingdoms.lock.unbreakable`. |
-| `kingdoms/gradle.properties` | `version=0.7.496` |
+| `kingdoms/gradle.properties` | `version=0.7.497` |
 | `kingdoms/MODLOG.md` | Entry in section 10. |
 
 Not touched: Powers (`src/`), Kitchen, `PowersCompat` (`baubles(Player)` already does what's needed),
@@ -102,7 +102,7 @@ Not touched: Powers (`src/`), Kitchen, `PowersCompat` (`baubles(Player)` already
 
 ### `Locks.Fitted`
 ```java
-/** (0.7.496) A lock on a block: the key id it answers (0: a realm's lock, no key), Pin or Rotary, its level 1-5, the
+/** (0.7.497) A lock on a block: the key id it answers (0: a realm's lock, no key), Pin or Rotary, its level 1-5, the
  *  realm that keeps it (-1: none), whether it's locked now, and whether it's a night lock (taken off in the morning). */
 public record Fitted(long key, int kind, int level, int faction, boolean locked, boolean night) {
     CODEC: key LONG opt 0L; kind INT opt 0; level INT opt FORGED_LEVEL; faction INT opt -1; locked BOOL opt true; night BOOL opt false
@@ -122,7 +122,7 @@ public record Fitted(long key, int kind, int level, int faction, boolean locked,
 
 ## 4. `Locks.java` (public final class)
 
-Header javadoc: (0.7.496) Andy's plan text; the idea is Locks Reforged's, our own build, nothing copied; a summary of
+Header javadoc: (0.7.497) Andy's plan text; the idea is Locks Reforged's, our own build, nothing copied; a summary of
 section 1.
 
 ### Constants
@@ -262,7 +262,7 @@ Performance: `slowBreak` returns at once unless `state.is(LOCKABLE)`. Lookups ar
 
 ## 5. `NightLocks.java` (final class)
 
-Header: (0.7.496) Townsfolk lock their homes and shops at night (Andy's plan). Ownership-aware: player-placed blocks
+Header: (0.7.497) Townsfolk lock their homes and shops at night (Andy's plan). Ownership-aware: player-placed blocks
 are theirs (`Placed`). The state comes from the clock every pass, never toggled, so a sleep skip (`Nights`) or a restart
 lands right.
 
@@ -367,7 +367,7 @@ Add it to `fabric.mod.json` `mixins` (a common entry, after `jaymoskingdoms.omni
 | `TransportItemsBetweenContainersMixin` | private `isContainerLocked(TransportItemTarget)` (:330, copper golem) | `@ModifyReturnValue`: `locked \|\| target.blockEntity().getLevel() instanceof ServerLevel s && Locks.sealed(s, target.pos())` |
 | `mixin/mca/McaDoorsMixin` | `net.conczin.mca.entity.ai.PathingBlockInteraction#setOpen(Entity, Level, BlockState, BlockPos, boolean)` static, returns boolean (seen in `libs/mca-fabric-7.8.0-dev...jar`; it calls `DoorBlock.setOpen`, `TrapDoorBlock.toggle` and `Level.setBlock` for gates) | HEAD cancellable: `if (open && Locks.barred(level, pos, entity)) cir.setReturnValue(false)`. Add to `jaymoskingdoms.mca.mixins.json` (plugin-gated on MCA). |
 
-Name injector methods `jaymoskingdoms$...`, the house convention. Each mixin's javadoc carries (0.7.496) and its reason.
+Name injector methods `jaymoskingdoms$...`, the house convention. Each mixin's javadoc carries (0.7.497) and its reason.
 
 ---
 
@@ -389,14 +389,14 @@ Name injector methods `jaymoskingdoms$...`, the house convention. Each mixin's j
   a hopper under an unread dungeon chest must not drain it. Otherwise false. Cheap after the first read.
 - `result()` PICKED: after the halves are set `Lock.OPEN` and before `useWithoutItem`, call
   `Theft.burgled(player, level, pos, state)`.
-- Header doc: `(0.7.496) A locked loot chest is slow to break, not unbreakable (Locks), and picking one in town is burglary.`
+- Header doc: `(0.7.497) A locked loot chest is slow to break, not unbreakable (Locks), and picking one in town is burglary.`
 - Keep `locked(ServerLevel, BlockPos)` as it is (the QuietOne comment refers to it), and keep `lockLevel` and `pickBySpirit`.
 
 **`Theft.java`**
-- Crime: `/** (0.7.496) a lock picked or a locked block broken where a realm's law holds ({@link Locks}). */ BURGLARY(Weight.MEDIUM, "burglary")`.
+- Crime: `/** (0.7.497) a lock picked or a locked block broken where a realm's law holds ({@link Locks}). */ BURGLARY(Weight.MEDIUM, "burglary")`.
 - New:
   ```java
-  /** (0.7.496) player picked the lock at pos: burglary if its realm's people see it (heavy against a storehouse). */
+  /** (0.7.497) player picked the lock at pos: burglary if its realm's people see it (heavy against a storehouse). */
   static void burgled(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state) {
       if (player.isCreative() || level != Factions.level(level.getServer()) || Placed.byPlayer(player, level, pos, state)) return;
       Faction owner = Factions.storageOwner(level.getServer(), pos);
@@ -408,17 +408,17 @@ Name injector methods `jaymoskingdoms$...`, the house convention. Each mixin's j
 - `broke()`: right after the `exempt` return, add
   `if (Locks.lockedAgainst(level, pos, state, entity, player)) { commit(player, level, f, Crime.BURGLARY, pos, owner != null ? Weight.HEAVY : null, false); return; }`.
   This makes a locked door, gate or trapdoor a crime, and a locked chest burglary rather than CHEST.
-- Header javadoc: `(0.7.496) Picking a lock or breaking a locked block in a faction's land is burglary ({@link Locks}).`
+- Header javadoc: `(0.7.497) Picking a lock or breaking a locked block in a faction's land is burglary ({@link Locks}).`
 
 **`Storage.java`** `containers()`: add `&& !Locks.barredTo(level, pos, faction)` to the condition, with the comment
-`(0.7.496) not one under a player's lock`.
+`(0.7.497) not one under a player's lock`.
 
 **`Doorways.java`** `open()`: first line, `if (Locks.barred(level, at, mob)) return false;` with the comment
-`(0.7.496) a locked door or gate they've no key to stays shut; fence gates skip DoorBlock.setOpen`.
+`(0.7.497) a locked door or gate they've no key to stays shut; fence gates skip DoorBlock.setOpen`.
 
 **`JaymosKingdoms.java`**, right after `Lockpicking.register();`:
 ```java
-// (0.7.496) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
+// (0.7.497) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
 LOGGER.debug("locks attachments: {} {} {}", Locks.LOCKS, Locks.WORN_KEYS, NightLocks.INDEX);
 Locks.register();
 NightLocks.register();
@@ -495,7 +495,7 @@ Cries take `SHOUT_VARIANTS = 2`; `Recollections.crime` and `Bounties.crimeBy` re
 ## 10. MODLOG (`kingdoms/MODLOG.md`, appended)
 
 ```markdown
-## 0.7.496: locks and keys (pack 0.19.79, Kitchen 0.5.55)
+## 0.7.497: locks and keys (pack 0.19.79, Kitchen 0.5.55)
 Andy picked the idea of Locks Reforged; this is our own build of it, nothing copied (`Locks`, `NightLocks`).
 - **Lock and key**: three iron ingots and three nuggets forge a lock. Use it on a door, trapdoor, fence gate, chest or
   barrel to fit it, and its key (a new one, cut to that lock) goes in your pack. Hold a cut key in your off hand while

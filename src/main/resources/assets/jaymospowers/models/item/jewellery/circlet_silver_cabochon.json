@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/jewellery/circlet_frame_silver",
+    "layer1": "jaymospowers:item/jewellery/circlet_gem_cabochon"
+  }
+}

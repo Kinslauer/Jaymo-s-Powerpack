@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.496) MCA's villagers don't open a door, trapdoor or gate that is locked against them. This covers its fence gates,
+ * (0.7.497) MCA's villagers don't open a door, trapdoor or gate that is locked against them. This covers its fence gates,
  * which skip {@code DoorBlock.setOpen} ({@link Locks#barred}).
  */
 @Mixin(PathingBlockInteraction.class)

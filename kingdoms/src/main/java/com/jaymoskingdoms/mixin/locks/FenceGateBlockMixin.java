@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.496) Redstone and wind charges don't open a locked fence gate. Player use goes through the use callback ({@link Locks}); the folk's
+ * (0.7.497) Redstone and wind charges don't open a locked fence gate. Player use goes through the use callback ({@link Locks}); the folk's
  * {@code Doorways} and MCA have their own checks.
  */
 @Mixin(FenceGateBlock.class)

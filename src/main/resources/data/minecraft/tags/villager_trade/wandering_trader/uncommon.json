@@ -9,6 +9,10 @@
     "jaymospowers:tinkering/wandering_trader/blueprint_helmet",
     "jaymospowers:tinkering/wandering_trader/blueprint_chestplate",
     "jaymospowers:tinkering/wandering_trader/blueprint_leggings",
-    "jaymospowers:tinkering/wandering_trader/blueprint_boots"
+    "jaymospowers:tinkering/wandering_trader/blueprint_boots",
+    "jaymospowers:tinkering/wandering_trader/blueprint_ring_frame",
+    "jaymospowers:tinkering/wandering_trader/blueprint_amulet_frame",
+    "jaymospowers:tinkering/wandering_trader/blueprint_bracelet_frame",
+    "jaymospowers:tinkering/wandering_trader/blueprint_circlet_frame"
   ]
 }

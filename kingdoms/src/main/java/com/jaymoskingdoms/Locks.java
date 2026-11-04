@@ -68,7 +68,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.496) Locks and keys. Andy picked the idea of Locks Reforged and wanted our own version: this is our own build, with
+ * (0.7.497) Locks and keys. Andy picked the idea of Locks Reforged and wanted our own version: this is our own build, with
  * nothing copied from it. His plan text: "Forge a lock and its key, fit it to a door, chest, trapdoor or gate. Locked
  * blocks resist villagers, hoppers and breaking. Anyone else uses the Pin or Rotary game you already have. Townsfolk lock
  * their homes and shops at night, and a break-in that's seen is a crime. Key ring in a bauble slot."

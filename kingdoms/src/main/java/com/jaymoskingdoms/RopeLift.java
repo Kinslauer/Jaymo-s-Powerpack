@@ -48,6 +48,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
@@ -86,6 +88,8 @@ public final class RopeLift {
 	static final int SHAFT_CHECK_TICKS = 20;
 
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
+	/** (0.7.495) A rope tied to a fence beside it (it holds without anything above). */
+	public static final BooleanProperty TIED = BooleanProperty.create("tied");
 
 	public static Block ROPE, ANCHOR, PULLEY, PLATFORM;
 	public static Item ROPE_ITEM, ANCHOR_ITEM, PULLEY_ITEM, PLATFORM_ITEM;
@@ -130,8 +134,19 @@ public final class RopeLift {
 
 	/** Rope (or a wind chime) may hang under this: rope, an anchor or a pulley. */
 	public static boolean hangsFrom(BlockState above) {
-		return ROPE != null && (above.is(ROPE) || above.is(ANCHOR) || above.is(PULLEY));
+		return ROPE != null && (above.is(ROPE) || above.is(ANCHOR) || above.is(PULLEY) || above.is(BlockTags.FENCES));
 	}
+
+	/** (0.7.495) A fence beside {@code pos} on any side: a rope tied to it there holds. */
+	static boolean tiedBeside(LevelReader level, BlockPos pos) {
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			if (level.getBlockState(pos.relative(side)).is(BlockTags.FENCES)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	/** The lowest rope hanging from {@code top} (an anchor, a pulley or a rope), or {@code top} itself if none hangs. */
 	static BlockPos bottom(Level level, BlockPos top) {
@@ -170,6 +185,24 @@ public final class RopeLift {
 
 		RopeBlock(BlockBehaviour.Properties properties) {
 			super(properties);
+			registerDefaultState(defaultBlockState().setValue(TIED, false));
+		}
+
+		@Override
+		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+			builder.add(TIED);
+		}
+
+		/**
+		 * (0.7.495) Andy (Plant Fibers pick): "a climbable rope you tie to a fence". Set against a fence's side with nothing
+		 * to hang from, the rope is tied to it (at a cliff's edge it hangs over the drop); under a fence it hangs from it.
+		 * More rope on the rope lets more down, as from an anchor.
+		 */
+		@Override
+		public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
+			BlockPos pos = context.getClickedPos();
+			LevelReader level = context.getLevel();
+			return defaultBlockState().setValue(TIED, !hangsFrom(level.getBlockState(pos.above())) && tiedBeside(level, pos));
 		}
 
 		@Override
@@ -179,14 +212,14 @@ public final class RopeLift {
 
 		@Override
 		protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-			return hangsFrom(level.getBlockState(pos.above()));
+			return hangsFrom(level.getBlockState(pos.above())) || state.getValue(TIED) && tiedBeside(level, pos);
 		}
 
 		/** Cut above: it falls away (with whatever hangs below), a length at a time, each dropping its rope. */
 		@Override
 		protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
 			BlockPos neighbourPos, BlockState neighbour, RandomSource random) {
-			if (direction == Direction.UP && !canSurvive(state, level, pos)) {
+			if ((direction == Direction.UP || state.getValue(TIED) && direction.getAxis().isHorizontal()) && !canSurvive(state, level, pos)) {
 				ticks.scheduleTick(pos, this, 1);
 			}
 			return state;

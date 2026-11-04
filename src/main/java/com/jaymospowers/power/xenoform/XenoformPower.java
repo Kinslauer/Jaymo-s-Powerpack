@@ -48,6 +48,9 @@ import org.jspecify.annotations.Nullable;
  * and you become the dialled alien. As an alien, Z held {@link #HOLD_TICKS} turns you back early.</li>
  * <li>R G V B: the alien's moves ({@link XenoForm#onKey}). As a human they do nothing.</li>
  * <li>X held {@link #SCAN_TICKS} at a creature: scan it; if it carries an alien's DNA, the band unlocks that alien.</li>
+ * <li>(0.19.85) Until the band is reforged ({@link BandForge}) a change lasts a random {@link #TIMER_MIN}-{@link #TIMER_MAX}
+ * and the band recharges {@link #TIMER_RECHARGE} after it (Andy: "i want the charge to be something you unlock, its a
+ * random timer before then"); reforged, it holds the charge below ({@link #charged}).</li>
  * <li>(0.18.92) The band's charge: a form spends it a point a tick, more when you're hit ({@link #HURT_DRAIN}) or a move
  * goes on cooldown ({@link #MOVE_DRAIN}); as yourself it refills over {@link #REFILL_TICKS}. Mastery grows it from
  * {@link #CHARGE_MIN} to {@link #CHARGE_MAX}. The band beeps through the last {@link #BEEP_TICKS}. When it's spent, when the
@@ -75,6 +78,12 @@ public final class XenoformPower implements Power {
 	static final float DIAL_CLICK_PITCH = 1.7F;
 	/** (0.18.122, patch 6) A wrong-alien glitch lands this often on an alien the band never held, and the band keeps it. */
 	public static final float GLITCH_TEACH_CHANCE = 0.2F;
+	/**
+	 * (0.19.85) An unforged band's random timer: a change lasts this long at random (1 to 5 minutes), then the band
+	 * recharges this long ({@link #TIMER_KNOCKOUT} after a knockout). Bigger Charge lengthens the change and Faster
+	 * Recharge shortens the wait, as they do the charge.
+	 */
+	public static final int TIMER_MIN = 1200, TIMER_MAX = 6000, TIMER_RECHARGE = 1200, TIMER_KNOCKOUT = 2400;
 	/** (0.18.92) The band's charge (ticks of form): its size unmastered and fully mastered (2 and 5 minutes). */
 	public static final int CHARGE_MIN = 2400, CHARGE_MAX = 6000;
 	/** An empty band refills in this long as yourself; a slam needs at least this much. */
@@ -145,6 +154,8 @@ public final class XenoformPower implements Power {
 		/** The health they had as a human, given back when they turn back. */
 		float humanHealth;
 		int recharge, rechargeTotal;
+		/** (0.19.85) An unforged band's quick change: the time left and the whole to carry into the next alien (0: none). */
+		int carryTicks, carryTotal;
 		/** (0.18.92) The band's charge as yourself (-1: not yet known, full). In a form it is {@link #ticksLeft}. */
 		float charge = -1.0F;
 		/** When the band last saved you from a killing blow (game time, 0: never); ticks to the wild dial's next change. */
@@ -217,6 +228,8 @@ public final class XenoformPower implements Power {
 		public final List<Integer> frozen = new ArrayList<>();
 		public long geodeUntil;
 		public int tolls;
+		/** (0.19.84) Knell: the game time it last tolled at (it tolls once per value of the clock). */
+		public long lastToll = -1L;
 		/** This change has hurt a living thing (the voices' trial counts the ones that don't). */
 		public boolean hurt;
 		/** Nadir: the Beacon's chosen player, R held for this many ticks (0: not held), and when the last tap was. */
@@ -421,6 +434,8 @@ public final class XenoformPower implements Power {
 	}
 
 	private static final Map<UUID, Live> LIVES = new HashMap<>();
+	/** (0.19.85) A player who logged off: {recharge, rechargeTotal, charge} until they're back (this server run). */
+	private static final Map<UUID, int[]> KEPT = new HashMap<>();
 
 	private XenoformPower() {
 	}
@@ -495,11 +510,16 @@ public final class XenoformPower implements Power {
 			if (has(player) && live(player).form != null) {
 				revert(player, false, false);
 			}
-			LIVES.remove(player.getUUID());
+			// (0.19.85) the band's recharge and charge outlast a relog (a relog must not skip the wait)
+			Live gone = LIVES.remove(player.getUUID());
+			if (gone != null && (gone.recharge > 0 || gone.charge >= 0.0F)) {
+				KEPT.put(player.getUUID(), new int[] {gone.recharge, gone.rechargeTotal, Math.round(gone.charge)});
+			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(FallingStars::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			LIVES.clear();
+			KEPT.clear();
 			FallingStars.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> XenoformDebugCommand.register(dispatcher));
@@ -511,7 +531,16 @@ public final class XenoformPower implements Power {
 	}
 
 	static Live live(ServerPlayer player) {
-		return LIVES.computeIfAbsent(player.getUUID(), id -> new Live());
+		return LIVES.computeIfAbsent(player.getUUID(), id -> {
+			Live live = new Live();
+			int[] kept = KEPT.remove(id);
+			if (kept != null) {
+				live.recharge = kept[0];
+				live.rechargeTotal = kept[1];
+				live.charge = kept[2];
+			}
+			return live;
+		});
 	}
 
 	/** No affinity and no random awakening: the band is the only way in. */
@@ -570,6 +599,7 @@ public final class XenoformPower implements Power {
 			revert(player, false, false);
 		}
 		LIVES.remove(player.getUUID());
+		KEPT.remove(player.getUUID());
 		XenoBands.unworn(player);
 		player.removeAttached(XenoformState.RIVAL);
 		player.removeTag(XenoformState.RIVAL_TAG);
@@ -666,6 +696,10 @@ public final class XenoformPower implements Power {
 		} else {
 			// as yourself the charge refills (not while a knockout has the band locked)
 			int capacity = capacity(player);
+			if (!charged(player)) {
+				// (0.19.85) an unforged band holds no charge, only its recharge: kept full so it's ready once that's done
+				live.charge = capacity;
+			}
 			boolean wasReady = live.recharge <= 0 && charge(player, live) >= SLAM_MIN;
 			if (live.recharge > 0) {
 				live.recharge--;
@@ -708,6 +742,12 @@ public final class XenoformPower implements Power {
 			int wait = live.form != null ? 0 : untilReady(player, live);
 			int waitTotal = live.form != null ? 0 : Math.max(wait, live.recharge > 0 ? live.rechargeTotal + Mth.ceil(SLAM_MIN * refillTicks(player) / (float)formTotal)
 				: Mth.ceil(SLAM_MIN * refillTicks(player) / (float)formTotal));
+			if (live.form == null && !charged(player)) {
+				// (0.19.85) an unforged band's bar as yourself is its recharge filling back up
+				formTotal = Math.max(1, live.rechargeTotal);
+				formTicks = live.recharge > 0 ? formTotal - live.recharge : formTotal;
+				waitTotal = Math.max(wait, live.rechargeTotal);
+			}
 			XenoformState.Hud hud = new XenoformState.Hud(formTicks, formTotal, wait, waitTotal, live.cooldownUntil.clone(),
 				live.cooldownLength.clone(), live.scanTicks, SCAN_TICKS, live.scanForm == null ? "" : live.scanForm);
 			if (!hud.same(XenoformState.hud(player))) {
@@ -1110,6 +1150,17 @@ public final class XenoformPower implements Power {
 		live.humanHealth = player.getHealth();
 		live.total = capacity(player);
 		live.ticksLeft = Math.max(1, player.isCreative() ? live.total : (int)charge);
+		if (!charged(player)) {
+			// (0.19.85) unforged: a random time (a quick change carries what was left of the last one)
+			if (live.carryTicks > 0) {
+				live.total = Math.max(live.carryTicks, live.carryTotal);
+				live.ticksLeft = live.carryTicks;
+			} else {
+				live.total = timer(player);
+				live.ticksLeft = live.total;
+			}
+		}
+		live.carryTicks = live.carryTotal = 0;
 		live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
 		player.setAttached(XenoformState.FORM, form.id);
 		player.removeAttached(XenoformState.ENDING);
@@ -1172,6 +1223,11 @@ public final class XenoformPower implements Power {
 		// what's left of the charge stays in the band; a knockout empties and locks it
 		live.charge = knockout ? 0.0F : left;
 		live.recharge = live.rechargeTotal = knockout ? RECHARGE_KNOCKOUT : 0;
+		if (!charged(player)) {
+			// (0.19.85) unforged: nothing kept, the band recharges (longer after a knockout)
+			live.charge = capacity(player);
+			live.recharge = live.rechargeTotal = Math.max(1, Math.round((knockout ? TIMER_KNOCKOUT : TIMER_RECHARGE) * BandUpgrades.refillFactor(player)));
+		}
 		live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
 		if (player.isCreative()) {
 			live.recharge = live.rechargeTotal = 0;
@@ -1310,6 +1366,20 @@ public final class XenoformPower implements Power {
 		return Math.round((CHARGE_MIN + (CHARGE_MAX - CHARGE_MIN) * mastery) * BandUpgrades.capacityFactor(player));
 	}
 
+	/**
+	 * (0.19.85) Whether the band holds a charge: once it's reforged at the moon forge ({@link BandForge}), and always in
+	 * creative. Before that a change lasts a random {@link #timer}.
+	 */
+	public static boolean charged(Player player) {
+		return player.isCreative() || BandUpgrades.get(player).reforged();
+	}
+
+	/** (0.19.85) An unforged band's change: a random {@link #TIMER_MIN}-{@link #TIMER_MAX}, lengthened by Bigger Charge. */
+	static int timer(Player player) {
+		int ticks = TIMER_MIN + player.getRandom().nextInt(TIMER_MAX - TIMER_MIN + 1);
+		return Math.max(SLAM_MIN, Math.round(ticks * (1.0F + BandUpgrades.CHARGE_PER_RANK * BandUpgrades.rank(player, BandUpgrades.Skill.CHARGE))));
+	}
+
 	/** (0.18.123) How long an empty band takes to fill as yourself: {@link #REFILL_TICKS}, cut by Faster Recharge. */
 	static int refillTicks(Player player) {
 		return Math.max(1, Math.round(REFILL_TICKS * BandUpgrades.refillFactor(player)));
@@ -1335,6 +1405,15 @@ public final class XenoformPower implements Power {
 
 	/** Takes {@code amount} off a form's charge (hits, moves). Never in creative. */
 	public static void drain(ServerPlayer player, Live live, int amount) {
+		if (!charged(player)) {
+			// (0.19.85) an unforged band's random timer runs on its own: hits and moves don't shorten it
+			return;
+		}
+		spend(player, live, amount);
+	}
+
+	/** (0.19.85) Takes {@code amount} off a form's time as a move's own price (Fuse's Self-Destruct), charged or not. Never in creative. */
+	public static void spend(ServerPlayer player, Live live, int amount) {
 		if (live.form == null || amount <= 0 || player.isCreative()) {
 			return;
 		}
@@ -1369,10 +1448,15 @@ public final class XenoformPower implements Power {
 	private static boolean swap(ServerPlayer player, Live live, XenoForm target, int cost) {
 		float human = live.humanHealth;
 		int left = Math.max(SLAM_MIN, live.ticksLeft - (player.isCreative() ? 0 : cost));
+		int whole = live.total;
 		revert(player, false, false);
 		live.charge = left;
-		live.recharge = 0;
+		live.recharge = live.rechargeTotal = 0;
+		// (0.19.85) unforged: the next alien runs on what's left of this one's timer
+		live.carryTicks = left;
+		live.carryTotal = whole;
 		if (!transform(player, target, true)) {
+			live.carryTicks = live.carryTotal = 0;
 			return false;
 		}
 		live.humanHealth = human;
@@ -1457,8 +1541,18 @@ public final class XenoformPower implements Power {
 	/**
 	 * (0.19.62) What the four-legged aliens' bodies show for everyone ({@link XenoformState#ACT}): Tusk's Charge and
 	 * Gorger's Horn Charge ("charge"), Gorger or Gyre rolled up ("roll"), Gyre's Shell Spin ("spin"), Keen hanging
-	 * from a ceiling ("hang").
+	 * from a ceiling ("hang"); (0.19.82) Prism rooted ("root"), Gnasher's Death Roll ("roll"); (0.19.84) the bipeds:
+	 * Bulwark carrying or leaping ("carry", "leap"), Knell burrowing, tolling or sensing, Shade holding a block or
+	 * staring ("hold", "stare"), Thornwild's Roots and Bloom, Lurk faded ("fade"), Rivet pouring or fighting ("pour",
+	 * "fight"), Dud playing dead or rolling ("dead", "roll").
 	 */
+	/** (0.19.84) Whether {@code player} struck a creature, or was struck by one, in the last {@code ticks}. */
+	private static boolean fighting(ServerPlayer player, int ticks) {
+		int hit = player.getLastHurtMobTimestamp();
+		return hit > 0 && player.tickCount - hit < ticks
+			|| player.getLastHurtByMob() != null && player.tickCount - player.getLastHurtByMobTimestamp() < ticks;
+	}
+
 	private static void syncAct(ServerPlayer player, Live live) {
 		String act = null;
 		if (live.form != null) {
@@ -1471,6 +1565,14 @@ public final class XenoformPower implements Power {
 				// (0.19.82) Prism rooted in crystal while Reflect is held; Gnasher's death roll
 				case "prism" -> act = live.reflecting ? "root" : null;
 				case "gnasher" -> act = live.rolls > 0 ? "roll" : null;
+				// (0.19.84) the bipeds' stances
+				case "bulwark" -> act = live.grabbed >= 0 ? "carry" : live.leaping ? "leap" : null;
+				case "knell" -> act = live.burrow > 0 ? "burrow" : live.tolls > 0 ? "toll" : live.sense ? "sense" : null;
+				case "shade" -> act = live.lifted != null ? "hold" : live.stalked >= 0 ? "stare" : null;
+				case "thornwild" -> act = live.latchTicks > 0 ? "roots" : live.brood > 0 ? "bloom" : null;
+				case "lurk" -> act = live.faded ? "fade" : null;
+				case "rivet" -> act = live.rolls > 0 ? "pour" : fighting(player, com.jaymospowers.power.xenoform.forms.Rivet.FIGHT_TICKS) ? "fight" : null;
+				case "dud" -> act = live.horn > 0 ? "dead" : live.rolls > 0 ? "roll" : null;
 				default -> act = null;
 			}
 		}

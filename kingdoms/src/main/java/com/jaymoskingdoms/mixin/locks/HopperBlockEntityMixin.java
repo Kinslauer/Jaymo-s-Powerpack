@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.496) A hopper (or hopper minecart) under a locked container pulls nothing ({@link Locks#sealed}). */
+/** (0.7.497) A hopper (or hopper minecart) under a locked container pulls nothing ({@link Locks#sealed}). */
 @Mixin(HopperBlockEntity.class)
 abstract class HopperBlockEntityMixin {
 	@Inject(method = "suckInItems", at = @At("HEAD"), cancellable = true)

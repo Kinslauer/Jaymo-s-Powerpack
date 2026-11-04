@@ -8464,7 +8464,23 @@ hall, land and vassals:
   action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
   tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.
 
-## 0.7.496: locks and keys (pack 0.19.86)
+## 0.7.495: rope ties to fences (pack 0.19.86)
+Andy's Plant Fibers pick: "a climbable rope you tie to a fence". Rope placed against a fence's side with nothing above
+to hang from is tied to the fence (`RopeLift.TIED`) and holds while a fence stands beside it, so at a cliff's edge it
+hangs over the drop; rope also hangs under a fence. Rope in hand on it lets more down as before. With Jaymo's Powers,
+3 plant string in a column make a rope.
+
+## 0.7.496: jewellery orders from town smiths (pack 0.19.87)
+- Armourers ask for a gem amulet (Well Forged or better), weaponsmiths for one or two gem rings (Expertly Forged or
+  better), toolsmiths for a gem bracelet (Well Forged or better), made with Powers' lapidary wheel, anvil and
+  jeweller's bench. They pay 10 to 20 emeralds (`QuestBoard.JEWEL_ORDER_EMERALDS`), to become coin with the coin
+  change.
+- A gather quest's target may now carry a grade floor (`<item id>@<grade>`): only pieces graded at least that
+  count and are taken (`Quests.minGrade`, `GradedTrades.gradeIndex`), and the quest names the grade. Without
+  Powers no such quest is offered. Compile-checked; not played.
+- Two loading hints (84-85).
+
+## 0.7.497: locks and keys (pack 0.19.88)
 Andy picked the idea of Locks Reforged; this is our own build of it, nothing copied (`Locks`, `NightLocks`).
 - **Lock and key**: three iron ingots and three nuggets forge a lock. Use it on a door, trapdoor, fence gate, chest or
   barrel to fit it, and its key (a new one, cut to that lock) goes in your pack. Hold a cut key in your off hand while
@@ -8497,4 +8513,3 @@ Andy picked the idea of Locks Reforged; this is our own build of it, nothing cop
 - Fixes: a wind charge no longer opens a locked gate; breaking one half of a double chest no longer strips the other half's
   lock; a lock no longer outlives a block that an explosion, mob, piston or lost support removed.
 - Fix: a lock now stays when its block turns into another lockable block (copper doors, trapdoors and chests weathering, waxed or scraped).
-- Two loading hints (82-83).

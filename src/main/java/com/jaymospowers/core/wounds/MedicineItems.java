@@ -36,6 +36,8 @@ import net.minecraft.world.level.Level;
  */
 public final class MedicineItems {
 	public static Item LINEN_BANDAGE;
+	/** (0.19.86) Plant Fibers pick: woven grass, the first dressing (a clean rag's worth, never festers). */
+	public static Item GRASS_BANDAGE;
 	public static Item RAG;
 	public static Item SPLINT;
 	public static Item NEEDLE_AND_THREAD;
@@ -57,6 +59,7 @@ public final class MedicineItems {
 
 	static void register() {
 		LINEN_BANDAGE = item("linen_bandage", p -> new MedicineItem(Treatment.Remedy.BANDAGE, p.stacksTo(16)));
+		GRASS_BANDAGE = item("grass_bandage", p -> new MedicineItem(Treatment.Remedy.CLEAN_RAG, p.stacksTo(16)));
 		RAG = item("rag", p -> new MedicineItem(Treatment.Remedy.RAG, p.stacksTo(16)));
 		SPLINT = item("splint", p -> new MedicineItem(Treatment.Remedy.SPLINT, p.stacksTo(16)));
 		NEEDLE_AND_THREAD = item("needle_and_thread", p -> new MedicineItem(Treatment.Remedy.NEEDLE, p.durability(NEEDLE_USES)));

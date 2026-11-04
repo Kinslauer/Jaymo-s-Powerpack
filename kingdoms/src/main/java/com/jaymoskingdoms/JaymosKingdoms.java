@@ -232,7 +232,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.234: locked loot chests and the Pin and Rotary lockpicking games (and its attachment)
 		LOGGER.debug("lock attachment: {}", Lockpicking.LOCK);
 		Lockpicking.register();
-		// (0.7.496) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
+		// (0.7.497) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
 		LOGGER.debug("locks attachments: {} {} {}", Locks.LOCKS, Locks.WORN_KEYS, NightLocks.INDEX);
 		Locks.register();
 		NightLocks.register();

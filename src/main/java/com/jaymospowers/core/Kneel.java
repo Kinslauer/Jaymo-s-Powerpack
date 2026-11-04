@@ -64,7 +64,7 @@ public final class Kneel {
 	 */
 	public static boolean crouched(Player player) {
 		return player.isShiftKeyDown() && Stance.low(player) && player.onGround() && !player.isPassenger() && !player.isSwimming() && !player.isFallFlying()
-			&& !player.isSpectator() && !Carry.isCarried(player);
+			&& !player.isSpectator() && !Carry.isCarried(player) && !com.jaymospowers.power.xenoform.XenoformState.ownCrouch(player);
 	}
 
 	/** A shot just loosed from the knee: turned most of the way back onto the shooter's aim, at the same speed. */

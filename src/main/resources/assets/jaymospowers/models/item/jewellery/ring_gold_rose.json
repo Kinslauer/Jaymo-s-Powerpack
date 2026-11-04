@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/jewellery/ring_frame_gold",
+    "layer1": "jaymospowers:item/jewellery/ring_gem_rose"
+  }
+}

@@ -180,7 +180,7 @@ public final class XenoformState {
 	/** (0.18.113) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
 	public static final AttachmentType<Boolean> CEILING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ceiling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
-	/** (0.19.62) A four-legged alien's ability pose, drawn for everyone: "charge", "roll" or "spin" (see XenoformPower.syncAct). */
+	/** (0.19.62) An alien's ability pose, drawn for everyone: "charge", "roll", "spin" and the rest (see XenoformPower.syncAct). */
 	public static final AttachmentType<String> ACT = AttachmentRegistry.create(JaymosPowers.id("xenoform_act"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 
@@ -276,6 +276,18 @@ public final class XenoformState {
 
 	/** (0.19.66) The aliens that take the swimming pose's low box out of water too (drawn level, at their own pace); (0.19.82) the two oozes too. */
 	public static final java.util.Set<String> LOW_BOX = java.util.Set.of("billow", "croaker", "ooze", "magma_ooze");
+
+	/**
+	 * (0.19.84) The aliens whose bodies solve their own legs and crouch (non-human builds): the low stance still lowers
+	 * them, but they never settle onto a knee (no kneel lock, no kneeling pose, no steadied shots).
+	 */
+	public static final java.util.Set<String> OWN_CROUCH = java.util.Set.of("bulwark", "knell", "rime", "shade", "thornwild", "lurk", "rivet", "nadir", "dud");
+
+	/** (0.19.84) Whether {@code player} is one of the {@link #OWN_CROUCH} aliens (both sides). */
+	public static boolean ownCrouch(Player player) {
+		String form = player.getAttached(FORM);
+		return form != null && OWN_CROUCH.contains(form);
+	}
 
 	/** (0.19.66) Whether {@code player} is one of the {@link #LOW_BOX} aliens (both sides). */
 	public static boolean lowBox(net.minecraft.world.entity.player.Player player) {

@@ -32,6 +32,9 @@ import org.jspecify.annotations.Nullable;
  * they're in the pack), found as {@code /locate} finds them.
  */
 final class QuestBoard {
+	/** (0.7.496) What a smith's jewellery order pays (emeralds, by the floor grade Poor to Masterwork), and its random spread. Coin change will convert these. */
+	static final int[] JEWEL_ORDER_EMERALDS = {6, 10, 16, 24, 40};
+	static final int JEWEL_ORDER_SPREAD = 4;
 	/** (0.5.56) What a beast quest pays at least (emeralds; up to 6 more). */
 	static final int BEAST_EMERALDS = 10;
 	/** How far a villager's (and a king's) fetch or champion quest looks for its ruin (chunks). */
@@ -160,17 +163,20 @@ final class QuestBoard {
 				T.gather("armorer.iron", "minecraft:iron_ingot", 10, 20),
 				T.gather("armorer.coal", "minecraft:coal", 16, 32),
 				T.slay("armorer.pillagers", "#minecraft:illager", 4, 8),
+				T.gather("armorer.amulet", "jaymospowers:gem_amulet@well", 1, 1),
 				T.fetch("armorer.helm", "minecraft:iron_helmet|ancestral_helm", WAR)),
 			List.of("minecraft:iron_chestplate*1-1", "minecraft:iron_helmet*1-1", "minecraft:shield*1-1", "minecraft:iron_ingot*6-12", "minecraft:chainmail_leggings*1-1"))),
 		Map.entry("weaponsmith", new Trade(List.of(
 				T.slay("weaponsmith.zombies", "#minecraft:zombies", 8, 14),
 				T.slay("weaponsmith.pillagers", "#minecraft:illager", 4, 8),
 				T.gather("weaponsmith.iron", "minecraft:iron_ingot", 8, 16),
+				T.gather("weaponsmith.ring", "jaymospowers:gem_ring@expert", 1, 2),
 				T.fetch("weaponsmith.blade", "minecraft:iron_sword|broken_blade", WAR)),
 			List.of("minecraft:iron_sword*1-1", "minecraft:iron_axe*1-1", "minecraft:diamond_sword*1-1", "minecraft:iron_ingot*6-12"))),
 		Map.entry("toolsmith", new Trade(List.of(
 				T.gather("toolsmith.iron", "minecraft:iron_ingot", 8, 16),
 				T.gather("toolsmith.coal", "minecraft:coal", 16, 32),
+				T.gather("toolsmith.bracelet", "jaymospowers:gem_bracelet@well", 1, 1),
 				T.fetch("toolsmith.pick", "minecraft:iron_pickaxe|old_pick", MINES)),
 			List.of("minecraft:iron_pickaxe*1-1", "minecraft:iron_shovel*1-1", "minecraft:diamond_pickaxe*1-1", "minecraft:iron_ingot*6-12", "minecraft:anvil*1-1"))),
 		Map.entry("librarian", new Trade(List.of(
@@ -380,12 +386,14 @@ final class QuestBoard {
 			// (target: the ruin; otherName: what the keepsake is and is called)
 			objective = new Quest.Objective(where, 1, 0, Optional.of(ruin.getFirst()), Optional.empty(), t.keepsake(), where, false);
 		} else {
-			if (t.kind() == Quest.GATHER && BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(t.target())).isEmpty()) {
+			if (t.kind() == Quest.GATHER && BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(Quests.itemId(t.target()))).isEmpty()) {
 				return null;
 			}
 			objective = new Quest.Objective(t.target(), count, 0, Optional.empty(), Optional.empty(), "", "", false);
 		}
-		int emeralds = switch (t.kind()) {
+		// (0.7.496) a jewellery order (a grade floor in the target) pays by that grade
+		int floor = t.kind() == Quest.GATHER ? Quests.minGrade(t.target()) : -1;
+		int emeralds = floor >= 0 ? JEWEL_ORDER_EMERALDS[floor] + random.nextInt(JEWEL_ORDER_SPREAD + 1) : switch (t.kind()) {
 			case Quest.FETCH -> 8 + random.nextInt(7);
 			case Quest.SLAY -> 2 + Math.round(count * 0.6F) + random.nextInt(3);
 			default -> 3 + random.nextInt(6);

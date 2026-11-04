@@ -67,6 +67,8 @@
     "jaymospowers:pattern_chest",
     "jaymospowers:part_chest",
     "#jaymospowers:wood_layers",
-    "jaymospowers:drafting_table"
+    "jaymospowers:drafting_table",
+    "jaymospowers:jewellers_bench",
+    "jaymospowers:lapidary_wheel"
   ]
 }

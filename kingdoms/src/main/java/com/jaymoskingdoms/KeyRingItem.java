@@ -20,7 +20,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.7.496) The key ring: a bundle that takes keys only and doesn't dump its contents when used. Keys stack to
+ * (0.7.497) The key ring: a bundle that takes keys only and doesn't dump its contents when used. Keys stack to
  * {@link Locks#KEY_STACK}, so each weighs 1/16 and a ring holds 16. It is not in the bundles tag, so it gets no dye recipe
  * or scroll-select. Worn in Jaymo's Powers' belt bauble slot (by a tag), it opens its keys' locks ({@link Locks#holdsKey}).
  */
