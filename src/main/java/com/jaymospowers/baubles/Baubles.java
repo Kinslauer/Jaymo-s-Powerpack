@@ -2,8 +2,10 @@ package com.jaymospowers.baubles;
 
 import com.jaymospowers.JaymosPowers;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -40,7 +42,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 /**
  * (0.17.184) Baubles (Andy: "need this", the CurseForge Baubles mod). Baubles itself is a 1.12 Forge mod and no
  * accessory-slot mod (Trinkets, Accessories, Curios) has a Fabric 26.3 build, so this is our own, laid out as Baubles
- * was: seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm.
+ * was: seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm, and a wrist (0.19.82) for bracelets.
  * <ul>
  * <li>The slots have their own screen, opened from a tab on the inventory's left edge (or the unbound Baubles key).</li>
  * <li>What fits each slot is an item tag ({@code jaymospowers:baubles/<slot>}), so any item can be made wearable by
@@ -50,9 +52,11 @@ import net.minecraft.world.level.gamerules.GameRules;
  * </ul>
  */
 public final class Baubles {
-	/** The seven slots, in the order they sit (and are saved). */
+	/** The eight slots, in the order they sit (and are saved). */
 	public enum Kind {
-		AMULET("amulet"), RING("ring"), BELT("belt"), HEAD("head"), BODY("body"), CHARM("charm");
+		AMULET("amulet"), RING("ring"), BELT("belt"), HEAD("head"), BODY("body"), CHARM("charm"),
+		/** (0.19.82) Bracelets. Added last so saved lists of seven still load. */
+		WRIST("wrist");
 
 		public final String id;
 		public final TagKey<Item> tag;
@@ -63,8 +67,8 @@ public final class Baubles {
 		}
 	}
 
-	/** Which kind each of the seven slots takes. */
-	public static final Kind[] SLOTS = {Kind.AMULET, Kind.RING, Kind.RING, Kind.BELT, Kind.HEAD, Kind.BODY, Kind.CHARM};
+	/** Which kind each of the eight slots takes. */
+	public static final Kind[] SLOTS = {Kind.AMULET, Kind.RING, Kind.RING, Kind.BELT, Kind.HEAD, Kind.BODY, Kind.CHARM, Kind.WRIST};
 	public static final int SIZE = SLOTS.length;
 	/** How often (ticks) worn bonuses are checked again, besides whenever the slots change. */
 	static final int REFRESH_TICKS = 20;
@@ -90,6 +94,8 @@ public final class Baubles {
 	/** Every attribute any bauble touches, so stale bonuses can be taken off. */
 	private static final Set<Holder<Attribute>> TOUCHED = new LinkedHashSet<>();
 	private static final List<Item> ITEMS = new ArrayList<>();
+	/** (0.19.82) Slot pictures for kinds that have no bauble of the seven (the wrist's bracelet). */
+	private static final Map<Kind, Item> PICTURES = new EnumMap<>(Kind.class);
 
 	private Baubles() {
 	}
@@ -197,7 +203,7 @@ public final class Baubles {
 			}
 			for (int slot = 0; slot < SIZE; slot++) {
 				List<BaubleItem.Bonus> bonuses = worn.get(slot).getItem() instanceof BaubleItem bauble && fits(slot, worn.get(slot))
-					? bauble.bonuses() : List.of();
+					? bauble.bonuses(worn.get(slot)) : List.of();
 				for (int i = 0; i < BaubleItem.MAX_BONUSES; i++) {
 					Identifier id = modifierId(slot, i);
 					BaubleItem.Bonus bonus = i < bonuses.size() ? bonuses.get(i) : null;
@@ -296,7 +302,18 @@ public final class Baubles {
 				return item;
 			}
 		}
-		return HEARTSTONE_AMULET;
+		Item picture = PICTURES.get(kind);
+		return picture != null ? picture : HEARTSTONE_AMULET;
+	}
+
+	/** (0.19.82) Sets the picture an empty slot of this kind shows when no bauble of the seven has that kind. */
+	public static void picture(Kind kind, Item item) {
+		PICTURES.put(kind, item);
+	}
+
+	/** (0.19.82) Lets bonuses on this attribute be taken off again when the piece comes off (jewellery). */
+	public static void touch(Holder<Attribute> attribute) {
+		TOUCHED.add(attribute);
 	}
 
 	/** Sets a bauble down in an empty, matching slot from the hand (right-clicking with one). False if none fits. */

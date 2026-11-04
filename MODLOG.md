@@ -5131,3 +5131,22 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   curtains) as vanilla's does, and the armed crosshair now hides in an ultimate's film too. One look (`HudStyle`, Wind's
   chips: see-through black plates, a rim in the piece's colour when ready, flat 3 px bars in a black frame, shadowed
   text), with no resource-pack art, so it reads the same with Excalibur off. Compile-checked; not played.
+- **0.19.82, Kingdoms 0.7.491, jewellery (Patch 4)** (`jewellery/`, plan `docs/Jewellery-Plan.md`): Andy picked the
+  idea of the Immersive Jewelry mod; this is our own version (none of its code or art).
+  - A **Lapidary Wheel** cuts gems: lay one on it and choose one of four cuts: Cabochon (3 strokes), Table (4), Rose
+    (5) or Brilliant (6). Then cut in time with the smithing bar. The wheel needs 0.8 s to spin back up after each
+    stroke; a stroke before that **chips** the gem and costs it a grade. Cut gems are graded Poorly Cut to
+    Masterwork and keep their gem, cut, grade and chips in one component (`jaymospowers:cut_gem`), ready to be
+    socketed into weapons and armour next patch.
+  - Emerald, diamond, amethyst, lapis, quartz and the Aether's zanite, glint, corrobonite and golden amber can be
+    cut; each gives its own small bonus (Luck, armour toughness, health, swimming, less burning, mining speed,
+    speed, knockback resistance, breath).
+  - Ring, amulet, bracelet and circlet **frames** are hammered from gold, silver or copper on the Smithing Anvil
+    like any head: graded Poorly Forged to Masterwork, quenched, capped without a blueprint (four new frame
+    blueprints at the wandering trader).
+  - The **Jeweller's Bench** sets a cut gem in a cooled frame. The piece is as good as the worse of the two, and its
+    bonus grows with grade, cut, metal (copper < silver < gold) and frame (amulets most).
+  - Rings, amulets and circlets go in their bauble slots; bracelets in a new eighth bauble slot, the **Wrist**
+    (bottom right). The seven found baubles are unchanged.
+  - Town smiths (Kingdoms) now and then ask for a gem amulet, ring or bracelet of at least a given grade, for more
+    emeralds than their usual errands. Compile-checked; not played.

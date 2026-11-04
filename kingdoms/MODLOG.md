@@ -8351,3 +8351,12 @@ minimap. Handshake and spirit-clash films and the story and travel curtains hide
   can offer one of the world's designs from a mason's table's screen. Its builders put it up on open ground of their choosing before
   their own catalogue, from storage, like any building. Up to 4 waiting per settlement, 1 per player. When finished,
   the giver gets +40 reputation and a message.
+
+## 0.7.491: jewellery orders from town smiths (pack 0.19.82)
+- Armourers ask for a gem amulet (Well Forged or better), weaponsmiths for one or two gem rings (Expertly Forged or
+  better), toolsmiths for a gem bracelet (Well Forged or better), made with Powers' lapidary wheel, anvil and
+  jeweller's bench. They pay 10 to 20 emeralds (`QuestBoard.JEWEL_ORDER_EMERALDS`), to become coin with the coin
+  change.
+- A gather quest's target may now carry a grade floor (`<item id>@<grade>`): only pieces graded at least that
+  count and are taken (`Quests.minGrade`, `GradedTrades.gradeIndex`), and the quest names the grade. Without
+  Powers no such quest is offered. Compile-checked; not played.
