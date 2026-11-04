@@ -417,6 +417,10 @@ public final class BeastParts {
 	 * (0.7.507) How far the body this pose stack is in lies down, from where the world's down points in it: 0 standing (or
 	 * leaning up to {@link #LIE_START} from upright), 1 flat on the ground. The world's entity pose stack carries no camera
 	 * turn, and a screen's figure stands upright, so this reads the body's own tilt.
+	 * <p>
+	 * (0.7.532) A screen's y runs down the screen, so a figure standing upright in a screen (the life story, the inventory)
+	 * has the stack's down pointing up its body. Only the tilt off the up-down line counts, either way up: before, every
+	 * screen figure read as lying flat and its tail hung down between its legs (Andy: "intro animations are broken").
 	 */
 	static float lying(PoseStack ps) {
 		org.joml.Matrix3f m = new org.joml.Matrix3f(ps.last().pose());
@@ -425,7 +429,7 @@ public final class BeastParts {
 		}
 		// the model's own down is +y; how much of the world's down still points that way
 		org.joml.Vector3f down = m.invert().transform(new org.joml.Vector3f(0.0F, -1.0F, 0.0F)).normalize();
-		return Mth.clamp((LIE_START - down.y) / (LIE_START - LIE_FLAT), 0.0F, 1.0F);
+		return Mth.clamp((LIE_START - Math.abs(down.y)) / (LIE_START - LIE_FLAT), 0.0F, 1.0F);
 	}
 
 	/**

@@ -292,3 +292,5 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (`tools/gen_high_sky.py`). Fixes found on the way: a raider band's non-chief raiders were taken for leftover tournament
   champions and removed on their first tick, and were added to the band after the load check ran; both fixed
   (`ZFighterRogue.raider`, `ZFighterRaiders.raider`). Compile-checked against the 26.3 jars; not played.
+- **0.20.37, Kingdoms 0.7.532, story figure tails:** tails on the life story's figure no longer hang down between the
+  legs. See the Kingdoms MODLOG.
