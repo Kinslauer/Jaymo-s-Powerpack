@@ -334,17 +334,18 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
     lands and smoking, then cooling to a dark crust over 45 s (`BloodParticles.MAGMA`).
   Masks and sprites are ours (`tools/blood_textures.py`). Compile-checked against the 26.3 jars; not played.
 - **0.20.42, Chrono cheats death:** Andy (2026-11-04): "I want Chrono to have the strongest potential, starting with the
-  ability to cheat death, utilizing [Respawn Recap] ... prompted with R upon acquiring that ability and dying, that black
-  screen would then revert them the maximum, deleting items they gained ... no drops no corpse, no death. They can always
-  use a writ or interact with the judge to rewrite their story." `power/chrono/ChronoCheatDeath`: once Rewind is learned,
-  a checkpoint every 5 s wherever you stand safe (on the ground or swimming, nothing burning or falling, 3+ hearts). A
-  death (after the downed state's say, before death by cause, the killing blow's dismemberment and the symbiote) is
-  undone: you're held out of time where you fell (unhurt, unseen) on a black screen that asks for R (`ChronoCheatDeathClient`).
-  R takes you back to the oldest checkpoint in reach: 1 min, +30 s for each further ability, +30 s per Mastery rank, +2 min
-  Timeless (7 min at most). Wounds undone, health (at least 3 hearts), hunger and effects as then; of every item kind you
-  keep at most what you carried then (by item, so worn tools still count) and experience never comes back higher, while
-  what you lost meanwhile stays lost, so nothing is doubled. No drops, corpse, death count, final death or waking in the
-  wild. Leaving at the black screen rewinds you; /kill still kills. Writs and the Judge work as before. Respawn Recap
-  (MIT, DialingSpoon, 1.2.1-26.3, client-only) ships unchanged in packModsOverride: on R its memory replay plays as the
-  rewind (`client/mixin/respawnrecap`, @Pseudo, which also asks no respawn at its end), and on ordinary deaths it plays as
-  that mod does (it waits for a Kingdoms death film). Gradle compile only, not played.
+  ability to cheat death, utilizing [Respawn Recap] ... revert them the maximum, deleting items they gained ... no drops no
+  corpse, no death. They can always use a writ or interact with the judge to rewrite their story." Then: "limit it to
+  chrono, and they can still be executed, the player should not be prompted at all, this is all just possible for them
+  now." `power/chrono/ChronoCheatDeath`: once Rewind is learned, a checkpoint every 5 s wherever you stand safe (on the
+  ground or swimming, nothing burning or falling, 3+ hearts). A death (after the downed state's say, before death by
+  cause, the killing blow's dismemberment and the symbiote) is undone with nothing to press: a tick later you're back at
+  the oldest checkpoint in reach: 1 min, +30 s for each further ability, +30 s per Mastery rank, +2 min Timeless (7 min
+  at most). Wounds undone, health (at least 3 hearts), hunger and effects as then; of every item kind you keep at most
+  what you carried then (by item, so worn tools still count) and experience never comes back higher, while what you lost
+  meanwhile stays lost, so nothing is doubled. No drops, corpse, death count, final death or waking in the wild.
+  Executions (`Downed.execute`: finishers, hostiles', the symbiote's, Z Fighters') and /kill still kill. Writs and the
+  Judge work as before. Respawn Recap (MIT, DialingSpoon, 1.2.1-26.3, client-only) ships unchanged in packModsOverride and
+  is Chrono's alone (`client/mixin/respawnrecap`, @Pseudo): its replay plays only as a rewind (never for a real death, and
+  with no respawn at its end), it keeps screenshots only while you're a Chrono, and `client/compat/RespawnRecapPlugin`
+  gates its Gui handler so the death screen opens as normal otherwise. Gradle compile only, not played.

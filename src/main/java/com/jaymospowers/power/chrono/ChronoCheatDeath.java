@@ -48,14 +48,15 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.20.42) Chrono cheats death. Andy: "I want Chrono to have the strongest potential, starting with the ability to cheat
- * death ... they should be prompted with R upon acquiring that ability and dying, that black screen would then revert them
- * the maximum, deleting items they gained [since] that time. no drops no corpse, no death."
+ * death ... revert them the maximum, deleting items they gained [since] that time. no drops no corpse, no death." Then:
+ * "they can still be executed, the player should not be prompted at all, this is all just possible for them now."
  *
  * <p>Once Rewind (R) is learned, time keeps a checkpoint of you every {@link #CHECKPOINT_EVERY} ticks while you stand
  * somewhere safe: where you were, how you looked, your health, hunger, experience, effects, and what you carried. A blow
- * that would kill you (after the downed state has had its say, before death by cause rolls) is undone instead: you stop,
- * out of time (unhurt, unseen, held where you fell), and a black screen asks for R. R takes you back to the oldest
- * checkpoint your power reaches ({@link #window}): one minute at first, up to seven for a Timeless Paragon.
+ * that would kill you (after the downed state has had its say, before death by cause rolls) is undone instead, with no
+ * asking: for a tick you're held out of time where you fell, then taken back to the oldest checkpoint your power reaches
+ * ({@link #window}): one minute at first, up to seven for a Timeless Paragon. An execution (a finisher, a hostile's,
+ * the symbiote's or a Z Fighter's, all through {@code Downed.execute}) still kills.
  *
  * <p>Rewound, nothing of the death happened: no drops, no corpse, no death counted, no final death or waking in the wild.
  * Body wounds are undone (Time Bloom's healing, run to the end). Whatever you gained since the checkpoint is gone: of every
@@ -63,8 +64,8 @@ import org.jspecify.annotations.Nullable;
  * meanwhile (stored, dropped, used up) stays lost, so nothing is ever doubled. Writs and the Judge still rewrite a story as
  * before; this is only for deaths.
  *
- * <p>The client draws the screen ({@code ChronoCheatDeathScreen}) and, with Respawn Recap installed (MIT, shipped
- * unchanged), plays its memory replay as the rewind.
+ * <p>The client ({@code ChronoCheatDeathClient}), with Respawn Recap installed (MIT, shipped unchanged), plays its memory
+ * replay as the rewind ({@link Rewound}); that replay is Chrono's alone, never shown for anyone's real death.
  */
 public final class ChronoCheatDeath {
 	// ---- tuning ----
@@ -112,43 +113,30 @@ public final class ChronoCheatDeath {
 	private ChronoCheatDeath() {
 	}
 
-	/** Server → client: you're out of time; press R. {@code seconds}: how far back the rewind will reach. */
-	public record Prompt(int seconds) implements CustomPacketPayload {
-		public static final Type<Prompt> TYPE = new Type<>(JaymosPowers.id("chrono_cheat_death"));
-		public static final StreamCodec<ByteBuf, Prompt> CODEC = ByteBufCodecs.VAR_INT.map(Prompt::new, Prompt::seconds);
+	/** Server → client: your death was rewound, {@code seconds} back (the client plays Respawn Recap's replay over it). */
+	public record Rewound(int seconds) implements CustomPacketPayload {
+		public static final Type<Rewound> TYPE = new Type<>(JaymosPowers.id("chrono_cheat_death"));
+		public static final StreamCodec<ByteBuf, Rewound> CODEC = ByteBufCodecs.VAR_INT.map(Rewound::new, Rewound::seconds);
 
 		@Override
-		public Type<Prompt> type() {
-			return TYPE;
-		}
-	}
-
-	/** Client → server: R on the black screen. */
-	public record Rewind() implements CustomPacketPayload {
-		public static final Type<Rewind> TYPE = new Type<>(JaymosPowers.id("chrono_cheat_death_rewind"));
-		public static final StreamCodec<ByteBuf, Rewind> CODEC = StreamCodec.unit(new Rewind());
-
-		@Override
-		public Type<Rewind> type() {
+		public Type<Rewound> type() {
 			return TYPE;
 		}
 	}
 
 	static void init() {
-		PayloadTypeRegistry.clientboundPlay().register(Prompt.TYPE, Prompt.CODEC);
-		PayloadTypeRegistry.serverboundPlay().register(Rewind.TYPE, Rewind.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Rewind.TYPE, (payload, ctx) -> rewind(ctx.player()));
+		PayloadTypeRegistry.clientboundPlay().register(Rewound.TYPE, Rewound.CODEC);
 		// after Downed's last word, before death by cause, the killing blow's dismemberment and the symbiote taking your things
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(JaymosPowers.id("downed_last"), PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(PHASE, JaymosPowers.id("mortality"));
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(PHASE, JaymosPowers.id("wounds_killing_blow"));
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(PHASE, JaymosPowers.id("web_symbiote_life"));
 		ServerLivingEntityEvents.ALLOW_DEATH.register(PHASE, ChronoCheatDeath::allowDeath);
-		// out of time, nothing touches you (but /kill still does)
+		// out of time (the tick before the rewind), nothing touches you (but /kill still does)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			!HELD.containsKey(entity.getUUID()) || !(entity instanceof ServerPlayer) || source.is(DamageTypes.GENERIC_KILL));
 		ServerTickEvents.END_SERVER_TICK.register(ChronoCheatDeath::tick);
-		// leaving at the black screen counts as pressing R: there was never going to be a death
+		// leaving in that tick: rewound all the same, there was never going to be a death
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			UUID id = handler.player.getUUID();
 			if (HELD.containsKey(id)) {
@@ -158,7 +146,7 @@ public final class ChronoCheatDeath {
 			CHECKPOINTS.remove(id);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-			// (no one is saved standing at the black screen)
+			// (no one is saved standing where they fell)
 			for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
 				if (HELD.containsKey(player.getUUID())) {
 					rewind(player);
@@ -187,7 +175,7 @@ public final class ChronoCheatDeath {
 		return Math.min(window, MAX_WINDOW);
 	}
 
-	/** Whether {@code player} is out of time at the black screen. */
+	/** Whether {@code player} is out of time, about to be rewound. */
 	public static boolean held(LivingEntity entity) {
 		return HELD.containsKey(entity.getUUID());
 	}
@@ -199,7 +187,7 @@ public final class ChronoCheatDeath {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Held held = HELD.get(player.getUUID());
 			if (held != null) {
-				hold(player, held, now);
+				rewind(player);
 				continue;
 			}
 			if (now % 20 != player.getId() % 20 && !CHECKPOINTS.containsKey(player.getUUID())) {
@@ -246,7 +234,8 @@ public final class ChronoCheatDeath {
 	// ---- the death that isn't ------------------------------------------------------------------------------------------
 
 	private static boolean allowDeath(LivingEntity entity, DamageSource source, float amount) {
-		if (!(entity instanceof ServerPlayer player) || source.is(DamageTypes.GENERIC_KILL)) {
+		if (!(entity instanceof ServerPlayer player) || source.is(DamageTypes.GENERIC_KILL) || Mortality.executing(entity)) {
+			// (an execution ends you all the same; Andy: "they can still be executed")
 			HELD.remove(entity.getUUID());
 			return true;
 		}
@@ -272,30 +261,10 @@ public final class ChronoCheatDeath {
 		ServerLevel level = player.level();
 		long now = level.getServer().overworld().getGameTime();
 		HELD.put(player.getUUID(), new Held(player, now));
-		player.setInvisible(true);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		ChronoFx.particles(level, player, ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.8, 0.4, 0.02);
-		ServerPlayNetworking.send(player, new Prompt(window(player) / 20));
-		JaymosPowers.LOGGER.info("{} cheated death ({}): waiting to rewind", player.getScoreboardName(), source.getMsgId());
+		JaymosPowers.LOGGER.info("{} cheated death ({})", player.getScoreboardName(), source.getMsgId());
 		return false;
-	}
-
-	/** Out of time: unhurt, unmoving, breathing, held where you fell. */
-	private static void hold(ServerPlayer player, Held held, long now) {
-		if (player.getHealth() < 1.0F) {
-			player.setHealth(1.0F);
-		}
-		player.clearFire();
-		player.resetFallDistance();
-		player.setAirSupply(player.getMaxAirSupply());
-		player.setDeltaMovement(Vec3.ZERO);
-		if (player.level().dimension() == held.dimension && player.position().distanceToSqr(held.pos) > 0.01) {
-			player.teleportTo(player.level(), held.pos.x, held.pos.y, held.pos.z, Set.of(), player.getYRot(), player.getXRot(), false);
-		}
-		if ((now - held.since) % 40 == 0) {
-			// in case the screen was lost (a missed packet), ask again
-			ServerPlayNetworking.send(player, new Prompt(window(player) / 20));
-		}
 	}
 
 	/**
@@ -334,7 +303,7 @@ public final class ChronoCheatDeath {
 		player.setInvisible(held.wasInvisible);
 		Checkpoint point = pick(player, held.since);
 		if (point == null) {
-			// (the place you'd go back to was built over while you waited; you rise where you fell)
+			// (every place you'd go back to is built over now: you rise where you fell)
 			point = checkpoint(player, held.since);
 		}
 		ServerLevel from = player.level();
@@ -384,7 +353,9 @@ public final class ChronoCheatDeath {
 
 		to.playSound(null, point.pos().x, point.pos().y, point.pos().z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0F, 0.9F);
 		ChronoFx.particles(to, player, ParticleTypes.END_ROD, point.pos().x, point.pos().y + 1.0, point.pos().z, 30, 0.4, 0.8, 0.4, 0.02);
-		JaymosPowers.LOGGER.info("{} rewound {} s to cheat death", player.getScoreboardName(), (held.since - point.time()) / 20);
+		int seconds = (int) Math.max(0, (held.since - point.time()) / 20);
+		ServerPlayNetworking.send(player, new Rewound(seconds));
+		JaymosPowers.LOGGER.info("{} rewound {} s to cheat death", player.getScoreboardName(), seconds);
 	}
 
 	/**
