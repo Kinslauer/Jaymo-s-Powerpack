@@ -225,3 +225,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   - Wired: `XenoFormModels.ultimate()`, `XenoformHand` arm poses, lang, `gen_xenoform.OWN_ULTIMATES`; Excalibur pack copies regraded. Compile-checked; not played.
 - **0.20.22**: ChoiceTheorem's Overhauled Village (CC BY-NC-ND 4.0, unchanged, 26.2 Fabric build) joins the pack: its villages and outposts spawn in the shared pools, settlements in its villages are havens, and towns take its trade buildings (Kingdoms 0.7.521).
 - **0.20.23, Wisp floats upright** (Andy: "it should float upright instead of an angled glide"): Wisp's B is now Float, not Glide. Held, it hangs in the air upright and drifts where you steer with WASD (0.22 a tick, 0.3 sprinting), Jump rises and Sneak sinks; on the ground it walks as usual until Jump lifts it, and letting go drops it (still no fall damage). The new `XenoformState.FLY_FLOAT` draws it upright with a slow sway, arms hanging loose and the tatters hanging below, and sneaking to sink no longer crouches it (`BillowPoseMixin`). Revenant's Drift floats the same upright way. Keen and Talon keep their tipped glide. Compile-checked; not played.
+- **0.20.24, Kingdoms 0.7.522, Stegonaut, Atroxiia, Varasuchus, Ignivorus, Aetherion:** the first three lesser dragons rebuilt from Saint's
+  Dragons (its MIT code; our own art): a plated walker of the jungles and plains, a frost wyrm of the snow with a spear
+  for a tail, and a crocodile dragon of the beaches and swamps; the last two swim. Plus Ignivorus, a fire dragon on the
+  Kintsugi wyvern that flies about the Nether: fireball volleys and lines of magma pillars; and Aetherion, a star dragon over
+  the Aether with a starlight beam and a Cataclysm of falling stars (Kingdoms' MODLOG has the rest).
