@@ -33,6 +33,7 @@
 		"jaymoskingdoms.heritage.mixins.json",
 		"jaymoskingdoms.beacons.mixins.json",
 		"jaymoskingdoms.omni.mixins.json",
+		"jaymoskingdoms.locks.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },

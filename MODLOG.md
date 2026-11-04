@@ -5202,3 +5202,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.88, a stray Kitchen jar no longer stops the build:** a pull on the home PC left `jaymos-kitchen-0.5.43.jar`
   beside 0.5.54 in `libs/` and the build refused ("must hold exactly one"). It now uses the jar matching
   `kitchen/gradle.properties` (else the newest) and warns about the rest.
+- **0.19.89, Kingdoms 0.7.497, locks and keys (Patch 6)** (`docs/Locks-Plan.md`; see `kingdoms/MODLOG.md`): Powers only
+  gains the graded copies of the four lock and key icons in the optional `excalibur_style` pack.

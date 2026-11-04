@@ -232,6 +232,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.234: locked loot chests and the Pin and Rotary lockpicking games (and its attachment)
 		LOGGER.debug("lock attachment: {}", Lockpicking.LOCK);
 		Lockpicking.register();
+		// (0.7.497) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
+		LOGGER.debug("locks attachments: {} {} {}", Locks.LOCKS, Locks.WORN_KEYS, NightLocks.INDEX);
+		Locks.register();
+		NightLocks.register();
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
