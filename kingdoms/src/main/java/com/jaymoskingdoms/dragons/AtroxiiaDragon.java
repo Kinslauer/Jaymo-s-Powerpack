@@ -203,6 +203,12 @@ public class AtroxiiaDragon extends WindDragon {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
+		// (0.7.535) pulled for now (Dragons.ATROXIIA_ON): any left in a world (or summoned) go quietly
+		if (!Dragons.ATROXIIA_ON) {
+			this.ejectPassengers();
+			this.discard();
+			return;
+		}
 		this.riderIn--;
 		if (this.move != NONE) {
 			moveTick(level, this.tickCount - this.moveStart);

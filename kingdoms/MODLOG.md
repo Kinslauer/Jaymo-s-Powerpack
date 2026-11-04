@@ -8929,3 +8929,8 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   bandana. `Uniforms.POOR` is now six roughspun tunics with a belt and dark breeches, no hat (undyed linen, dun, grey,
   russet, weld green, woad; `tools/gen_nobody_rags.py`, drawn over the deckhands' slops). Nobodies already hired in a
   deckhand's slops change when they load. Not compiled or played yet.
+- **0.7.535, Atroxiia pulled for now (pack 0.20.42):** Andy (2026-11-04): "atroxiia has no walk animation, this is
+  unacceptable". It's off until its walk is redone (`Dragons.ATROXIIA_ON = false`): no biome spawns, gone from
+  `/kingdom dragon`, and any already in a world (or given by egg) are cleared away on their next tick. Its type, model,
+  art and loot stay, so turning it back on is one flag. The other lesser dragons stay in: Stegonaut's gait was redone
+  in 0.7.531, Varasuchus walks on four legs, and Ignivorus and Aetherion fly (both walk on landing).

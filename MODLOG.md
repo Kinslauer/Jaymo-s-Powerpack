@@ -333,3 +333,5 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   - **Magma blood** (tag `blood/magma`: magma cubes, striders): bright orange, full-bright as it flies, glowing where it
     lands and smoking, then cooling to a dark crust over 45 s (`BloodParticles.MAGMA`).
   Masks and sprites are ours (`tools/blood_textures.py`). Compile-checked against the 26.3 jars; not played.
+- **0.20.42, Kingdoms 0.7.535, Atroxiia pulled for now:** Andy: it had no walk animation. It no longer spawns, is out
+  of `/kingdom dragon`, and any already in a world disappear; the code and art are kept for when it's fixed.
