@@ -8909,7 +8909,23 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
 - **0.7.532, story figure tails:** Beastfolk, Canine, Feline, Kitsune, Avian and Serpen tails on the life story's figure
   (and any screen figure) hung down between the legs. 0.7.507's lying-down check read the screen's flipped y as a body
   lying flat; `BeastParts.lying` now counts only the tilt off the up-down line. Compile-checked; not played.
-- **0.7.533, the Nobodies' rags:** the Nobodies start's three hired hands wore a pirate deckhand's striped shirt and
+- **0.7.533, gap jumps and dug-out rooms** (Andy's clips, 2026-11-04):
+  - **Humanoids jump gaps** (`GapJumps`, from `PathNavigationMixin` beside `Unstick`). His hired villagers stopped at the
+    lip of a trench he had jumped: vanilla's pathfinder never plans a jump, so their path ended at the near edge. Now a
+    walking humanoid (MCA villagers, folk, illagers, zombies, skeletons, piglins, witches) standing at the end of a path
+    that falls short, with its goal still 2.5+ blocks off, looks across toward it (straight on and up to 90 degrees
+    either side) for ground past a drop at least 2 deep, 1.5 to 5 blocks away, at most 1 higher or 3 lower, with room
+    for its body over the gap and leaving it 1.5+ blocks nearer its goal. It takes a jump sized to land there (vanilla's
+    air drag and gravity, at most 0.8 blocks a tick), then paths on. Not onto lava, fire, magma, campfires or cactus, not
+    out of water, not while riding. Looks every 5 ticks, waits 30 after a jump and 20 after finding nothing.
+  - **Buried rooms dug out** (`BuriedRooms`, from `StructureStartMixin` before `Foundations`). Dungeons and Taverns saves
+    its taverns with structure voids for rooms (no air blocks) and leaves the digging to the terrain carving round the
+    building, which can't clear a hillside: his desert tavern came out packed with ground, doors blocked. Now every cell
+    of a surface structure's rigid jigsaw piece that no piece saved a block in, with that piece's own blocks over it and
+    on all four sides at its level, is cleared to air (fluids and block entities left alone). Pieces placed inside it
+    (the taverns' tables and stalls) keep their blocks. Accessors `SinglePoolElementAccessor`, `StructureTemplateAccessor`.
+    New chunks only: a tavern already generated stays as it is. Compile-checked; not played.
+- **0.7.534, the Nobodies' rags:** the Nobodies start's three hired hands wore a pirate deckhand's striped shirt and
   bandana. `Uniforms.POOR` is now six roughspun tunics with a belt and dark breeches, no hat (undyed linen, dun, grey,
   russet, weld green, woad; `tools/gen_nobody_rags.py`, drawn over the deckhands' slops). Nobodies already hired in a
   deckhand's slops change when they load. Not compiled or played yet.

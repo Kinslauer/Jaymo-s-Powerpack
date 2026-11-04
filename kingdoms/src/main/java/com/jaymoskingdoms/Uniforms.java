@@ -48,7 +48,7 @@ public final class Uniforms {
 
 	/**
 	 * (0.7.414) The poorest outfits of ours. The Nobodies ({@link StoryKit#nobodies}) wear them, clothes locked so {@link #fit}
-	 * leaves them be (MCA's own clothes are banned; these are the pack's own). (0.7.533) Andy (2026-11-04): they "arent
+	 * leaves them be (MCA's own clothes are banned; these are the pack's own). (0.7.534) Andy (2026-11-04): they "arent
 	 * wearing medieval attire": a deckhand's striped shirt and bandana on land. Now a roughspun tunic, belt and breeches in
 	 * six plain wools ({@code tools/gen_nobody_rags.py}); Nobodies still in a deckhand's slops change when they load.
 	 */
@@ -92,7 +92,7 @@ public final class Uniforms {
 		});
 	}
 
-	/** (0.7.533) A Nobody hired before 0.7.533, still locked in a deckhand's slops, is put in plain rags. */
+	/** (0.7.534) A Nobody hired before 0.7.534, still locked in a deckhand's slops, is put in plain rags. */
 	private static void redressNobody(VillagerEntityMCA villager) {
 		if (villager.level().isClientSide() || !DECKHANDS.contains(villager.getClothes()) || Crewmen.tagged(villager)
 			|| villager.entityTags().stream().noneMatch(t -> t.startsWith(LifeAims.NOBODY_TAG))) {
