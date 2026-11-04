@@ -50,7 +50,7 @@ import org.jspecify.annotations.Nullable;
 public final class RoadLocks {
 	/**
 	 * The roads open from the start: the basic ones (a realm's capital, a village, the wild, sworn, banished, shipwrecked, fate) and the
-	 * heritage-locked ones. (0.7.500, Andy: "these starts should be available from the start") rock bottom, the cells, the nobodies and
+	 * heritage-locked ones. (0.7.501, Andy: "these starts should be available from the start") rock bottom, the cells, the nobodies and
 	 * the burned village too. The Bio-built's own road (cast out) is no longer here: it opens with the Bio-built blood
 	 * ({@link #BIOBUILT_DEED}).
 	 */
@@ -59,7 +59,7 @@ public final class RoadLocks {
 		Start.BURNED));
 
 	/**
-	 * (0.7.500, Andy: "Biobuilt start and heritage should be locked ... only unlocked after meeting the tinkerer or becoming an
+	 * (0.7.501, Andy: "Biobuilt start and heritage should be locked ... only unlocked after meeting the tinkerer or becoming an
 	 * android") The deed that opens the cast-out road, done with the Bio-built blood's waking ({@link Heritage#unlockChecks}).
 	 */
 	static final String BIOBUILT_DEED = "tinkerer.met";
@@ -116,7 +116,7 @@ public final class RoadLocks {
 		lock(Start.EVICTED, p -> is(p, Question.RAISED, "farmers") && is(p, Question.YOUTH, "winter"), "cells.served");
 		// (0.7.443, Havens patch 7b) Andy: "unlockable by reaching good rep with the orcs" (TribePacts); no secret past opens it
 		lock(Start.GREENSKIN, p -> false, TribePacts.FRIEND_DEED);
-		// (0.7.500) the Bio-built's own road opens with their blood: the Mad Tinkerer met, or an android made; no secret past
+		// (0.7.501) the Bio-built's own road opens with their blood: the Mad Tinkerer met, or an android made; no secret past
 		lock(Start.CAST_OUT, p -> false, BIOBUILT_DEED);
 		lock(Start.HIDEOUT, p -> is(p, Question.RAISED, "outlaws") && is(p, Question.YOUTH, "cutpurses"), "market.black", "cells.broke");
 		// the kit roads

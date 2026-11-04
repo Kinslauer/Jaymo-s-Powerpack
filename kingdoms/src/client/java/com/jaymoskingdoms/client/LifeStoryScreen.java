@@ -331,7 +331,7 @@ final class LifeStoryScreen extends Screen {
 		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs()) && earned(a) && woken(a);
 	}
 
-	/** (0.7.500) Whether a birthplace's blood is one this player may be born to: an earned one (the Bio-built's vats) only once woken. */
+	/** (0.7.501) Whether a birthplace's blood is one this player may be born to: an earned one (the Bio-built's vats) only once woken. */
 	private static boolean woken(Answer a) {
 		Minecraft mc = Minecraft.getInstance();
 		return a.heritage() == null || mc.player == null || Heritage.unlocked(mc.player, a.heritage());

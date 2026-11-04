@@ -759,12 +759,12 @@ public final class PowersCompat {
 		return callStart("com.jaymospowers.power.zfighter.ZFighterAndroidStart", player);
 	}
 
-	/** (0.7.500) The entity tag of Jaymo's Powers' Mad Tinkerer (its {@code ZFighterAndroid.TAG}): meeting him wakes the Bio-built. */
+	/** (0.7.501) The entity tag of Jaymo's Powers' Mad Tinkerer (its {@code ZFighterAndroid.TAG}): meeting him wakes the Bio-built. */
 	public static final String TINKERER_TAG = "jaymospowers_scientist";
 	private static java.lang.invoke.@Nullable MethodHandle android;
 	private static boolean androidLooked;
 
-	/** (0.7.500) Whether the Mad Tinkerer has made {@code player} an android (Powers' {@code ZFighterAndroid.android}). False without Powers. */
+	/** (0.7.501) Whether the Mad Tinkerer has made {@code player} an android (Powers' {@code ZFighterAndroid.android}). False without Powers. */
 	public static boolean android(net.minecraft.world.entity.player.Player player) {
 		if (!androidLooked) {
 			androidLooked = true;

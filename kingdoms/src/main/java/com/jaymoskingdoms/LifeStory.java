@@ -120,11 +120,11 @@ public final class LifeStory {
 	/** (0.7.223) Your village burned: the ruin's half-width (blocks), and how many saved things you carry out. */
 	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
 	/**
-	 * (0.7.500) The burning village: how far off the ruin it stands (blocks), how deep its jigsaw runs (a vanilla village's is 6),
+	 * (0.7.501) The burning village: how far off the ruin it stands (blocks), how deep its jigsaw runs (a vanilla village's is 6),
 	 * and how far round its centre cobwebs are looked for and set alight (across, below, above).
 	 */
 	static final int BURNING_AWAY = 10, BURNING_DEPTH = 6, BURNING_REACH = 72, BURNING_BELOW = 12, BURNING_ABOVE = 24;
-	/** (0.7.500) How long the smoke's nausea lasts on waking in the burning village (ticks). */
+	/** (0.7.501) How long the smoke's nausea lasts on waking in the burning village (ticks). */
 	static final int BURNED_NAUSEA_TICKS = 400;
 	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
@@ -934,7 +934,7 @@ public final class LifeStory {
 		if (road != null && !road.fits(heritage)) {
 			return;
 		}
-		// (0.7.500) an earned blood (the Bio-built's vats) is only born to one it has woken in, unless the road makes another
+		// (0.7.501) an earned blood (the Bio-built's vats) is only born to one it has woken in, unless the road makes another
 		if ((road == null || road.makes() == null) && !Heritage.unlocked(player, heritage)) {
 			return;
 		}
@@ -1337,7 +1337,7 @@ public final class LifeStory {
 			case BURNED -> {
 				to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
 				if (to != null) {
-					// (0.7.500, Andy: "the player should be IN the burning village") the village first, round the landing spot,
+					// (0.7.501, Andy: "the player should be IN the burning village") the village first, round the landing spot,
 					// then the ruin you wake in (it only takes ground and plants, so it never cuts into the village's houses)
 					burningVillage(level, to, random);
 					burnedRuin(level, to, random);
@@ -1584,7 +1584,7 @@ public final class LifeStory {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
 		}
 		if (landed == Start.BURNED) {
-			// (0.7.500, Andy) smoke-sick from the fire you woke in
+			// (0.7.501, Andy) smoke-sick from the fire you woke in
 			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, BURNED_NAUSEA_TICKS, 0));
 		}
 		if (landed == Start.SNOWED) {
@@ -1934,7 +1934,7 @@ public final class LifeStory {
 	 * timber and blackened stone, ash underfoot and a cold hearth.
 	 */
 	/**
-	 * (0.7.500, Andy: "The burned village should spawn an abandoned village structure from vanilla, but replace the cobwebs with fire,
+	 * (0.7.501, Andy: "The burned village should spawn an abandoned village structure from vanilla, but replace the cobwebs with fire,
 	 * and obviously the chaos will ensue from there") a vanilla abandoned plains village ({@code burned_village/town_centers}: the
 	 * zombie town centres, which lead on into the zombie streets, houses and zombie villagers) raised {@link #BURNING_AWAY} blocks off
 	 * the ruin you wake in (so you wake inside it), and every cobweb in it set alight. The fire spreads as fire does.
