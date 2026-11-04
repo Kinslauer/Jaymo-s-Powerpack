@@ -174,8 +174,11 @@ public final class Knell extends XenoForm {
 			player.setDeltaMovement(0.0, motion.y, 0.0);
 			player.syncVelocity = true;
 		}
-		// (0.19.83) on the level's clock, which the client's model follows for the fists' slam (an entity's age isn't synced)
-		if (level.getGameTime() % TOLL_EVERY == 0) {
+		// (0.19.83) on the level's clock, which the client's model follows for the fists' slam (an entity's age isn't synced);
+		// once per value of it, so a frozen clock (/tick freeze) holds the toll rather than ringing every tick
+		long now = level.getGameTime();
+		if (now % TOLL_EVERY == 0 && now != live.lastToll) {
+			live.lastToll = now;
 			live.tolls--;
 			for (LivingEntity living : around(player, TOLL_RADIUS)) {
 				if (living.hurtServer(level, level.damageSources().sonicBoom(player), TOLL_DAMAGE)) {

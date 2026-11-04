@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
-import com.jaymospowers.client.power.xenoform.XenoFormModels;
 import com.jaymospowers.power.xenoform.XenoformState;
 
 /**
@@ -164,11 +163,7 @@ public final class CrouchPose {
 	 * (the low stance's height still holds; it just doesn't settle onto a knee).
 	 */
 	public static boolean ownCrouch(net.minecraft.world.entity.Entity entity) {
-		if (!(entity instanceof Player player)) {
-			return false;
-		}
-		XenoFormModels.FormModel model = XenoFormModels.of(player.getAttached(XenoformState.FORM));
-		return model != null && model.ownsCrouch;
+		return entity instanceof Player player && XenoformState.ownCrouch(player);
 	}
 
 	/** Another full-body pose has them: tending, a finisher, carrying or being carried, crawling, downed. */

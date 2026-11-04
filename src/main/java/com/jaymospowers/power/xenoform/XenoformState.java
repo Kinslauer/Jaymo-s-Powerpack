@@ -277,6 +277,18 @@ public final class XenoformState {
 	/** (0.19.66) The aliens that take the swimming pose's low box out of water too (drawn level, at their own pace); (0.19.82) the two oozes too. */
 	public static final java.util.Set<String> LOW_BOX = java.util.Set.of("billow", "croaker", "ooze", "magma_ooze");
 
+	/**
+	 * (0.19.83) The aliens whose bodies solve their own legs and crouch (non-human builds): the low stance still lowers
+	 * them, but they never settle onto a knee (no kneel lock, no kneeling pose, no steadied shots).
+	 */
+	public static final java.util.Set<String> OWN_CROUCH = java.util.Set.of("bulwark", "knell", "rime", "shade", "thornwild", "lurk", "rivet", "nadir", "dud");
+
+	/** (0.19.83) Whether {@code player} is one of the {@link #OWN_CROUCH} aliens (both sides). */
+	public static boolean ownCrouch(Player player) {
+		String form = player.getAttached(FORM);
+		return form != null && OWN_CROUCH.contains(form);
+	}
+
 	/** (0.19.66) Whether {@code player} is one of the {@link #LOW_BOX} aliens (both sides). */
 	public static boolean lowBox(net.minecraft.world.entity.player.Player player) {
 		String form = player.getAttached(FORM);

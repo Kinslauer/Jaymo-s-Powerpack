@@ -37,11 +37,6 @@ public final class XenoFormModels {
 		 * pixels in the body's space, y down) on the front of the chest (z), and its size against the band's 5-pixel face.
 		 */
 		float insigniaY = 7.5F, insigniaZ = -2.0F, insigniaSize = 1.0F;
-		/**
-		 * (0.19.83) Its body solves its own legs and crouch (a non-human build): {@code CrouchPose}'s low crouch, kneel and
-		 * eased bend stay off it, and it raises itself by the renderer's crouch drop itself.
-		 */
-		public boolean ownsCrouch;
 		/** (0.19.83) Its right arm reaches for its own insignia on the change-back tap ({@link XenoformSlap} leaves that arm alone). */
 		public boolean ownsTap;
 		/** (0.19.83) Its legs are solved onto the ground: Cryo's poses leave them alone. */
@@ -164,7 +159,6 @@ public final class XenoFormModels {
 
 		Rivet() {
 			super(bake(mesh()), "rivet");
-			this.ownsCrouch = true;
 			ModelPart root = this.root();
 			this.pool = root.getChild("pool");
 			this.mound = root.getChild("mound");
@@ -966,7 +960,6 @@ public final class XenoFormModels {
 
 		Lurk() {
 			super(bake(mesh()), "lurk");
-			this.ownsCrouch = true;
 			ModelPart root = this.root();
 			this.torso = root.getChild("torso");
 			this.neck = root.getChild("neck");
@@ -2428,7 +2421,6 @@ public final class XenoFormModels {
 
 		Dud() {
 			super(bake(mesh()), "dud");
-			this.ownsCrouch = true;
 			this.face = this.body.getChild("face");
 			this.nubRight = this.body.getChild("right_nub");
 			this.nubLeft = this.body.getChild("left_nub");
@@ -2643,7 +2635,6 @@ public final class XenoFormModels {
 
 		Rime() {
 			super(bake(mesh()), "rime");
-			this.ownsCrouch = true;
 			this.ownsLegs = true;
 			this.trunk = this.body.getChild("trunk");
 			for (int i = 0; i < SPINE_Y.length; i++) {
@@ -5865,7 +5856,6 @@ public final class XenoFormModels {
 
 		Shade() {
 			super(bake(mesh()), "shade");
-			this.ownsCrouch = true;
 			this.ownsTap = true;
 			ModelPart root = this.root();
 			this.torso = root.getChild("torso");
@@ -6546,7 +6536,6 @@ public final class XenoFormModels {
 
 		Thornwild() {
 			super(bake(mesh()), "thornwild");
-			this.ownsCrouch = true;
 			// flat on the front of the chest burl, between the shoulders
 			this.insigniaY = 4.5F;
 			this.insigniaZ = -3.0F;
@@ -7154,7 +7143,6 @@ public final class XenoFormModels {
 
 		Bulwark() {
 			super(bake(mesh()), "bulwark");
-			this.ownsCrouch = true;
 			this.arms[0] = this.rightArm;
 			this.arms[1] = this.leftArm;
 			this.arms[2] = this.body.getChild("right_lower_arm");
@@ -8075,7 +8063,6 @@ public final class XenoFormModels {
 
 		Nadir() {
 			super(bake(mesh()), "nadir");
-			this.ownsCrouch = true;
 			for (int i = 0; i < FRAGS.length; i++) {
 				this.frags[i] = this.root().getChild("frag" + i);
 			}
@@ -8540,8 +8527,8 @@ public final class XenoFormModels {
 		static final float TOLL_TICKS = 40.0F, TOLL_LEAN = 0.35F, TOLL_REAR = 0.25F, TOLL_SQUAT = 2.0F, TOLL_RISE = 6.0F;
 		/** Burrowing: how much lower the back leans, how far the pelvis squats, how fast the fists scoop and how far they reach, how far the head bows. */
 		static final float BURROW_LEAN = 0.4F, BURROW_SQUAT = 4.0F, SCOOP_RATE = 0.7F, SCOOP_REACH = 4.0F, BURROW_BOW = 0.1F;
-		/** The change-back tap: how far in front of the insignia the wrist stops (the fist's length) and how far further out and up it is poised. */
-		static final float TAP_FIST = 4.0F, TAP_POISE = 5.0F, TAP_POISE_UP = 3.0F;
+		/** The change-back tap: how far in front of the insignia the wrist stops (the fist's length, knuckles on the plate) and how far further out and up it is poised. */
+		static final float TAP_FIST = 3.5F, TAP_POISE = 5.0F, TAP_POISE_UP = 3.0F;
 		private static final float PI = (float)Math.PI;
 
 		private final ModelPart neck, jaw, ribRight, ribLeft;
@@ -8553,7 +8540,6 @@ public final class XenoFormModels {
 
 		Knell() {
 			super(bake(mesh()), "knell");
-			this.ownsCrouch = true;
 			this.ownsTap = true;
 			ModelPart root = this.root();
 			this.neck = root.getChild("neck");
@@ -8864,13 +8850,20 @@ public final class XenoFormModels {
 				// the arm stands splayed out (or rolled in), which shortens it by the roll's cosine
 				float flat = Mth.cos(armRoll);
 				this.ik(sy, sz, sy + (ty - sy) / flat, tz, UPPER, FORE, 1.0F);
+				if (tapped > 0.0F) {
+					// tapping, the elbow comes forward out of the chest (the other solution), eased over so it never flips
+					float back0 = this.bones[0], back1 = this.bones[1];
+					this.ik(sy, sz, sy + (ty - sy) / flat, tz, UPPER, FORE, -1.0F);
+					this.bones[0] = Mth.lerp(tapped, back0, this.bones[0]);
+					this.bones[1] = Mth.lerp(tapped, back1, this.bones[1]);
+				}
 				arm.setPos(sx, sy, sz);
 				arm.xRot = this.bones[0];
 				arm.yRot = yaw;
 				arm.zRot = fistRoll;
 				this.fore[side].xRot = this.bones[1] - this.bones[0];
-				// (tapping, the fist goes on straight from the forearm, knuckles to the plate)
-				this.fist[side].xRot = Mth.lerp(tapped, fistAbs - this.bones[1], 0.0F);
+				// (tapping, the fist turns knuckles-first into the chest: square to the leaning trunk's front)
+				this.fist[side].xRot = Mth.lerp(tapped, fistAbs, PI * 0.5F + lean) - this.bones[1];
 			}
 
 			// ---- the neck and head: slung low and forward; a swing throws them out ----

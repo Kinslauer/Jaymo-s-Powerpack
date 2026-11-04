@@ -217,6 +217,8 @@ public final class XenoformPower implements Power {
 		public final List<Integer> frozen = new ArrayList<>();
 		public long geodeUntil;
 		public int tolls;
+		/** (0.19.83) Knell: the game time it last tolled at (it tolls once per value of the clock). */
+		public long lastToll = -1L;
 		/** This change has hurt a living thing (the voices' trial counts the ones that don't). */
 		public boolean hurt;
 		/** Nadir: the Beacon's chosen player, R held for this many ticks (0: not held), and when the last tap was. */
