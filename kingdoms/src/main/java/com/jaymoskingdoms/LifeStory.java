@@ -123,7 +123,9 @@ public final class LifeStory {
 	 * (0.7.500) The burning village: how far off the ruin it stands (blocks), how deep its jigsaw runs (a vanilla village's is 6),
 	 * and how far round its centre cobwebs are looked for and set alight (across, below, above).
 	 */
-	static final int BURNING_AWAY = 40, BURNING_DEPTH = 6, BURNING_REACH = 72, BURNING_BELOW = 12, BURNING_ABOVE = 24;
+	static final int BURNING_AWAY = 10, BURNING_DEPTH = 6, BURNING_REACH = 72, BURNING_BELOW = 12, BURNING_ABOVE = 24;
+	/** (0.7.500) How long the smoke's nausea lasts on waking in the burning village (ticks). */
+	static final int BURNED_NAUSEA_TICKS = 400;
 	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
 	/**
@@ -1335,8 +1337,10 @@ public final class LifeStory {
 			case BURNED -> {
 				to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
 				if (to != null) {
-					burnedRuin(level, to, random);
+					// (0.7.500, Andy: "the player should be IN the burning village") the village first, round the landing spot,
+					// then the ruin you wake in (it only takes ground and plants, so it never cuts into the village's houses)
 					burningVillage(level, to, random);
+					burnedRuin(level, to, random);
 				}
 			}
 			case SNOWED -> {
@@ -1578,6 +1582,10 @@ public final class LifeStory {
 			landed == Start.CHAINED ? StoryHard.shackleCamp(player) : landed == Start.CAPTIVE && held != null ? held.camp() : -1);
 		if (landed == Start.SKYFALL) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
+		}
+		if (landed == Start.BURNED) {
+			// (0.7.500, Andy) smoke-sick from the fire you woke in
+			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, BURNED_NAUSEA_TICKS, 0));
 		}
 		if (landed == Start.SNOWED) {
 			// half-frozen
@@ -1929,7 +1937,7 @@ public final class LifeStory {
 	 * (0.7.500, Andy: "The burned village should spawn an abandoned village structure from vanilla, but replace the cobwebs with fire,
 	 * and obviously the chaos will ensue from there") a vanilla abandoned plains village ({@code burned_village/town_centers}: the
 	 * zombie town centres, which lead on into the zombie streets, houses and zombie villagers) raised {@link #BURNING_AWAY} blocks off
-	 * the ruin, and every cobweb in it set alight. The fire spreads as fire does.
+	 * the ruin you wake in (so you wake inside it), and every cobweb in it set alight. The fire spreads as fire does.
 	 */
 	private static void burningVillage(ServerLevel level, BlockPos ruin, RandomSource random) {
 		var pool = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.TEMPLATE_POOL)
