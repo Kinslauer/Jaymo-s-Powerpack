@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "jaymospowers:block/jewellery/jewellers_bench_top",
+    "front": "jaymospowers:block/jewellery/jewellers_bench_front",
+    "side": "jaymospowers:block/jewellery/jewellers_bench_side",
+    "bottom": "jaymospowers:block/jewellery/jewellers_bench_bottom"
+  }
+}

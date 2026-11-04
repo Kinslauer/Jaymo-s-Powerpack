@@ -332,21 +332,34 @@ def packModsOverride = [
 	[dep: "maven.modrinth:omnicrossbow:1.1.4+mc26.3"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
-def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
-// Exactly one Kitchen jar: two would both be compiled against and shipped in the pack under one mod id. A git pull on
-// Windows can leave the old one behind if the game or Gradle had it open; delete it by hand.
-if (kitchenJar.files.size() != 1) {
-	throw new GradleException("libs/ must hold exactly one jaymos-kitchen-*.jar, found " +
-		(kitchenJar.files.collect { it.name }.sort() ?: "none") + ". Keep the newest and delete the rest.")
+// The Kitchen jar in libs/: the one matching the Kitchen source (kitchen/gradle.properties), else the newest. A git pull on
+// Windows can leave an old one behind if the game or Gradle had it open; extra jars are ignored with a warning (two would
+// both be compiled against and shipped under one mod id), so delete them when you see it.
+def kitchenCandidates = fileTree("libs") { include "jaymos-kitchen-*.jar" }.files.sort { it.name }
+if (kitchenCandidates.isEmpty()) {
+	throw new GradleException("libs/ holds no jaymos-kitchen-*.jar: build kitchen/ and copy its jar into libs/.")
 }
-// The jar should match the Kitchen source (kitchen/gradle.properties). If it doesn't, the pack ships an old Kitchen:
-// build kitchen/ and replace the jar in libs/.
 def kitchenSourceProps = new Properties()
 file("kitchen/gradle.properties").withInputStream { kitchenSourceProps.load(it) }
-if (kitchenJar.singleFile.name != "jaymos-kitchen-${kitchenSourceProps.version}.jar") {
-	logger.warn("WARNING: libs/${kitchenJar.singleFile.name} is not the Kitchen source's version " +
+def kitchenWanted = "jaymos-kitchen-${kitchenSourceProps.version}.jar".toString()
+def kitchenVersion = { File f -> (f.name - "jaymos-kitchen-" - ".jar").findAll(/\d+/).collect { it as long } }
+def kitchenChosen = kitchenCandidates.find { it.name == kitchenWanted } ?: kitchenCandidates.max { a, b ->
+	def x = kitchenVersion(a), y = kitchenVersion(b)
+	for (int i = 0; i < Math.max(x.size(), y.size()); i++) {
+		def c = (i < x.size() ? x[i] : 0L) <=> (i < y.size() ? y[i] : 0L)
+		if (c != 0) return c
+	}
+	0
+}
+if (kitchenCandidates.size() > 1) {
+	logger.warn("WARNING: libs/ holds ${kitchenCandidates.collect { it.name }}; using ${kitchenChosen.name}. " +
+		"Delete the others.")
+}
+if (kitchenChosen.name != kitchenWanted) {
+	logger.warn("WARNING: libs/${kitchenChosen.name} is not the Kitchen source's version " +
 		"(${kitchenSourceProps.version}). Build kitchen/ and replace the jar in libs/.")
 }
+def kitchenJar = files(kitchenChosen)
 // Minecraft Comes Alive (GPL-3.0, by Luke100000 and team): human villagers to befriend, marry and raise children with,
 // village ranks up to monarch. Its newest CurseForge/Modrinth file is for 26.2, so until a 26.3 one comes out the pack
 // ships a jar built from the authors' own 26.3 branch (github.com/Luke100000/minecraft-comes-alive, dev/26.3 at

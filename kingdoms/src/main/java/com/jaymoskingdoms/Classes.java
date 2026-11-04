@@ -55,6 +55,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.6.0) Player classes: what you're good with. The first time you come into a world a screen asks you to pick one of
@@ -76,7 +77,7 @@ public final class Classes {
 	/** How often a court wizard will sell you a Writ of Rebirth (ticks): once a Minecraft week. */
 	static final long WRIT_EVERY = 24000L * 7L;
 	/** What he asks for one. */
-	static final int WRIT_EMERALDS = 30;
+	static final int WRIT_SILVER = 30;
 	/** The chance a rare chest (stronghold library, ancient city, woodland mansion) holds a writ. */
 	static final float WRIT_LOOT_CHANCE = 0.08F;
 	/** Enderscape's stronghold library (optional; matched by id, never linked): its strongholds replace the vanilla ones. */
@@ -474,8 +475,8 @@ public final class Classes {
 					enabled.add(true);
 				}
 				case "writ" -> {
-					options.add(Component.translatable("talk.jaymoskingdoms.wizard.writ.yes", WRIT_EMERALDS));
-					enabled.add(Approaches.emeralds(player) >= WRIT_EMERALDS);
+					options.add(Component.translatable("talk.jaymoskingdoms.wizard.writ.yes", WRIT_SILVER));
+					enabled.add(Money.canPay(player, Money.worth(WRIT_SILVER)));
 				}
 				default -> {
 					options.add(Restoration.optionLine(player, kind));
@@ -483,8 +484,8 @@ public final class Classes {
 				}
 			}
 		}
-		Component words = staff ? Component.translatable("talk.jaymoskingdoms.wizard.staff", WRIT_EMERALDS)
-			: writ ? Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_EMERALDS) : Component.translatable("talk.jaymoskingdoms.healer.ask");
+		Component words = staff ? Component.translatable("talk.jaymoskingdoms.wizard.staff", WRIT_SILVER)
+			: writ ? Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_SILVER) : Component.translatable("talk.jaymoskingdoms.healer.ask");
 		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(), words, options, enabled));
 	}
 
@@ -514,7 +515,7 @@ public final class Classes {
 			Restoration.serve(player, wizard, kind);
 			return true;
 		}
-		if (Approaches.emeralds(player) < WRIT_EMERALDS) {
+		if (!Money.canPay(player, Money.worth(WRIT_SILVER))) {
 			return true;
 		}
 		Long last = player.getAttached(WRIT_BOUGHT);
@@ -522,7 +523,7 @@ public final class Classes {
 		if (last != null && now - last < WRIT_EVERY && now >= last) {
 			return true;
 		}
-		Approaches.take(player, Items.EMERALD, WRIT_EMERALDS);
+		Money.charge(player, Money.worth(WRIT_SILVER)); // (0.7.498) silver coins, not emeralds
 		player.setAttached(WRIT_BOUGHT, player.level().getGameTime());
 		player.getInventory().placeItemBackInInventory(new ItemStack(WRIT), Prediction.SERVER_ONLY);
 		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.writ.done"), Speech.GOLD);

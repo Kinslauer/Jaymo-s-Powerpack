@@ -74,7 +74,7 @@ final class Tempers {
 	static final int[] MATERIALS = {75, 125, 100, 100, 100, 100}, FOOD = {85, 125, 100, 100, 85, 100}, TAXES = {200, 75, 125, 100, 100, 110};
 	/** Good name won with him, and lost, in percent (a purist's goes by your blood too: {@link Purists#reputation}). */
 	static final int[] GAIN = {50, 150, 100, 50, 150, 100}, LOSS = {100, 100, 100, 200, 100, 100};
-	/** The tyrant's daily seizure: this share of each food in the stores (percent), at most this much of each, and goods per emerald. */
+	/** The tyrant's daily seizure: this share of each food in the stores (percent), at most this much of each, and goods per silver coin. */
 	static final int SEIZE_PERCENT = 10, SEIZE_MOST = 32, GOODS_PER_EMERALD = 8;
 	/** What he takes from a stall when he passes it. */
 	static final int STALL_TAKE = 4;
@@ -296,7 +296,7 @@ final class Tempers {
 
 	/**
 	 * A day's goods are in ({@link Production#produce}): the tyrant takes his tithe of the stores (food and
-	 * materials) and sells it for his coffers. Returns the emeralds it made him.
+	 * materials) and sells it for his coffers. Returns the silver it made him.
 	 */
 	static long tithe(ServerLevel level, Faction f, int days) {
 		if (of(f) != Temper.TYRANT || !Storage.loaded(level, f)) {
@@ -313,11 +313,11 @@ final class Tempers {
 				goods += Storage.take(level, f, e.getKey(), take).getCount();
 			}
 		}
-		long emeralds = goods / GOODS_PER_EMERALD;
-		if (emeralds > 0) {
-			Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() + emeralds));
+		long silver = goods / GOODS_PER_EMERALD; // (0.7.498) silver coins, as the treasury counts
+		if (silver > 0) {
+			Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() + silver));
 		}
-		return emeralds;
+		return silver;
 	}
 
 	private static void tick(MinecraftServer server) {

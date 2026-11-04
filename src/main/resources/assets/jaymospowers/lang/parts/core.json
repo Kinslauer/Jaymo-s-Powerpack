@@ -103,6 +103,7 @@
 	"entity.jaymospowers.severed_part": "Severed Part",
 	"message.jaymospowers.fracture.dazed": "Your head rings from the blow",
 	"message.jaymospowers.fracture.priest": "%s sets your broken bones",
+	"message.jaymospowers.fracture.priest_poor": "The priest asks %s to set your bones",
 	"message.jaymospowers.beam_clash.locked": "Beam clash! Mash your power key to push",
 	"message.jaymospowers.beam_clash.locked_key": "Beam clash! Mash %s to push",
 	"message.jaymospowers.beam_clash.won": "You overpower them!",

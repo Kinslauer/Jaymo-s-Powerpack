@@ -16,18 +16,18 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
-import net.minecraft.world.item.Items;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.7.55) Andy: "only possible at a tailor villager, and for varying price". A shepherd (the villager at the loom) is
  * the tailor: MCA's Change Clothes button on them names their fee and opens MCA's editor on its clothing page only
- * (the client's {@code WardrobeScreen}); the fee is paid in emeralds (bundles count) when an outfit is picked. Each
+ * (the client's {@code WardrobeScreen}); the fee is paid in silver coins (purses and bundles count) when an outfit is picked. Each
  * tailor has their own rate, friends pay less, people they dislike more, and family half.
  */
 public final class Tailors {
 	/** The cheapest tailor's rate, and how much dearer the dearest is (by the tailor's UUID). */
 	static final int BASE_FEE = 3, FEE_SPREAD = 5;
-	/** One emerald off per this many hearts with the tailor (on per this many below zero), and the most off / on. */
+	/** One silver off per this many hearts with the tailor (on per this many below zero), and the most off / on. */
 	static final int HEARTS_PER_EMERALD = 25, MOST_OFF = 3, MOST_ON = 2;
 	/** How long a fitting stays open for its pick to be paid, in ticks (5 minutes). */
 	static final int FITTING_TICKS = 20 * 60 * 5;
@@ -38,7 +38,7 @@ public final class Tailors {
 
 	private static final Map<UUID, Fitting> FITTINGS = new HashMap<>();
 
-	/** Server → client: open the wardrobe for {@code fee} emeralds. */
+	/** Server → client: open the wardrobe for {@code fee} silver. */
 	public record Open(int fee) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("wardrobe_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Open::fee, Open::new);
@@ -101,7 +101,7 @@ public final class Tailors {
 			return;
 		}
 		int fee = fee(villager, player);
-		if (!player.isCreative() && Purse.count(player, Items.EMERALD) < fee) {
+		if (!Money.canPay(player, Money.worth(fee))) {
 			Speech.tell(level, villager, player, Component.translatable("tailor.jaymoskingdoms.cant_pay", fee), Speech.WHITE);
 			return;
 		}
@@ -120,9 +120,8 @@ public final class Tailors {
 		if (fitting == null || level.getGameTime() - fitting.opened() > FITTING_TICKS) {
 			return;
 		}
-		if (!player.isCreative()) {
-			Purse.take(player, Items.EMERALD, Math.min(fitting.fee(), Purse.count(player, Items.EMERALD)));
-		}
+		// (0.7.498) as much of the fee as they carry, in silver coins
+		Money.chargeUpTo(player, Money.worth(fitting.fee()));
 		Entity tailor = level.getEntity(fitting.tailor());
 		if (tailor != null) {
 			Speech.tell(level, tailor, player, Component.translatable("tailor.jaymoskingdoms.done"), Speech.WHITE);

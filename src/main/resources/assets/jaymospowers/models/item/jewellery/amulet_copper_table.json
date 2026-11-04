@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/jewellery/amulet_frame_copper",
+    "layer1": "jaymospowers:item/jewellery/amulet_gem_table"
+  }
+}

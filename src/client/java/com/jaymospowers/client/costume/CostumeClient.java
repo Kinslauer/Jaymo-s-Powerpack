@@ -71,9 +71,9 @@ public final class CostumeClient {
 	public static void init() {
 		ClientPlayNetworking.registerGlobalReceiver(CostumeNet.Open.TYPE, (payload, context) ->
 			context.client().gui.setScreen(new CostumeScreen(payload.pos())));
-		// (0.11.78) a tailor's order: the designer, paid in emeralds
+		// (0.11.78) a tailor's order: the designer, paid in silver coins
 		ClientPlayNetworking.registerGlobalReceiver(CostumeTailoring.Open.TYPE, (payload, context) ->
-			context.client().gui.setScreen(CostumeScreen.tailored(payload.price())));
+			context.client().gui.setScreen(CostumeScreen.tailored(payload.price(), payload.cost(), payload.coin(), payload.affordable())));
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new Layer(avatar));

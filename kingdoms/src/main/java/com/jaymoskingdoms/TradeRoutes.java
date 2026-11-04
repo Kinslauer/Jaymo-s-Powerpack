@@ -20,6 +20,8 @@ import net.minecraft.world.Difficulty;
 import com.jaymoskingdoms.equestrian.Breed;
 import com.jaymoskingdoms.equestrian.Equestrian;
 import com.jaymoskingdoms.mixin.MobAccessor;
+import com.jaymoskingdoms.money.Coinage;
+import com.jaymoskingdoms.money.Money;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
@@ -862,7 +864,8 @@ final class TradeRoutes {
 				}
 				long tip = spend(level, home, ESCORT_TIP);
 				if (tip > 0L) {
-					Block.popResource(level, p.blockPosition(), new ItemStack(Items.EMERALD, (int)tip));
+					// (0.7.498) the tip is paid in the home town's coin (the treasury is counted in worth)
+					Money.pay(p, home, Money.worth(tip));
 				}
 				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.escorted", home.name(), lord.name()).withStyle(ChatFormatting.GREEN));
 			}
@@ -870,12 +873,13 @@ final class TradeRoutes {
 	}
 
 	/**
-	 * A player with emeralds in hand right-clicks a cart: he buys what it carries, a handful at a time, at a markup, the emeralds going to the
-	 * cart's owner. True if that was what he did (or was refused); false to let it be looked at.
+	 * A player with coin in hand (a coin, a stack or a purse) right-clicks a cart: he buys what it carries, a handful at a time, at a
+	 * markup, paid in the cart owner's coin out of everything he carries (0.7.498; emeralds are a gem and buy nothing). True if that
+	 * was what he did (or was refused); false to let it be looked at.
 	 */
 	static boolean deal(ServerLevel level, Wagon wagon, ServerPlayer player) {
 		ItemStack held = player.getMainHandItem();
-		if (!held.is(Items.EMERALD)) {
+		if (!Coinage.isMoney(held)) {
 			return false;
 		}
 		MinecraftServer server = level.getServer();
@@ -910,18 +914,25 @@ final class TradeRoutes {
 			return true;
 		}
 		long unit = Math.max(1L, (long)Ware.unit(new ItemStack(item)) * MARKUP / 100L);
-		long n = Math.min(Math.min(pick.getValue(), BUY_MOST), (long)held.getCount() * COPPER_PER_EMERALD / unit);
+		// (0.7.498) what he can pay, in whole emeralds' worth (the price notation), in the coin the cart's owner takes
+		long have = player.hasInfiniteMaterials() ? Integer.MAX_VALUE : Money.count(player, f) / Money.UNIT;
+		long n = Math.min(Math.min(pick.getValue(), BUY_MOST), have * COPPER_PER_EMERALD / unit);
 		long cost = (n * unit + COPPER_PER_EMERALD - 1) / COPPER_PER_EMERALD;
-		while (n > 0L && cost > held.getCount()) {
+		while (n > 0L && cost > have) {
 			n--;
 			cost = (n * unit + COPPER_PER_EMERALD - 1) / COPPER_PER_EMERALD;
 		}
 		if (n <= 0L) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.dear", (unit + COPPER_PER_EMERALD - 1) / COPPER_PER_EMERALD, new ItemStack(item).getHoverName())
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.dear", Money.text(f, Money.worth((unit + COPPER_PER_EMERALD - 1) / COPPER_PER_EMERALD)), new ItemStack(item).getHoverName())
 				.withStyle(ChatFormatting.GRAY), true);
 			return true;
 		}
-		held.shrink((int)cost);
+		if (!Money.charge(player, f, Money.worth(cost))) {
+			// (rounding at the going rate for foreign coin can leave him a hair short)
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.dear", Money.text(f, Money.worth(cost)), new ItemStack(item).getHoverName())
+				.withStyle(ChatFormatting.GRAY), true);
+			return true;
+		}
 		for (long left = n; left > 0L; ) {
 			int stack = (int)Math.min(left, item.getDefaultMaxStackSize());
 			ItemStack give = new ItemStack(item, stack);
@@ -944,7 +955,7 @@ final class TradeRoutes {
 		if (settled) {
 			Reputation.change(player, f, REP_TRADE);
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.bought", n, new ItemStack(item).getHoverName(), f.name(), cost).withStyle(ChatFormatting.GREEN), true);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.bought", n, new ItemStack(item).getHoverName(), f.name(), Money.text(f, Money.worth(cost))).withStyle(ChatFormatting.GREEN), true);
 		return true;
 	}
 

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -676,23 +677,22 @@ public final class Rickshaws {
 			int fare = fare(wagon.position(), dest);
 			int blocks = (int)Math.sqrt(Vec3.atBottomCenterOf(dest.seat()).distanceToSqr(wagon.position()));
 			String command = "/kingdom ride " + wagon.getId() + " " + dest.id();
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.choice", dest.name(), blocks, fare)
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.choice", dest.name(), blocks, Money.text(player, Money.worth(fare)))
 				.withStyle(style -> style.withColor(ChatFormatting.GREEN).withUnderlined(true).withClickEvent(new ClickEvent.RunCommand(command))
-					.withHoverEvent(new HoverEvent.ShowText(Component.translatable("message.jaymoskingdoms.rickshaw.hover", dest.name(), fare)))));
+					.withHoverEvent(new HoverEvent.ShowText(Component.translatable("message.jaymoskingdoms.rickshaw.hover", dest.name(), Money.text(player, Money.worth(fare)))))));
 		}
 		return true;
 	}
 
-	/** {@code player} pays {@code fare} emeralds into {@code f}'s treasury (nothing in creative); false if they can't. */
+	/** {@code player} pays {@code fare} silver coins ((0.7.498), once emeralds) into {@code f}'s treasury (nothing in creative); false if they can't. */
 	static boolean pay(ServerPlayer player, Faction f, int fare) {
 		if (player.isCreative()) {
 			return true;
 		}
-		if (Purse.count(player, Items.EMERALD) < fare) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
+		if (!Money.charge(player, Money.worth(fare))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", Money.text(player, Money.worth(fare))).withStyle(ChatFormatting.RED));
 			return false;
 		}
-		Purse.take(player, Items.EMERALD, fare);
 		Factions.update(player.level().getServer(), f.id(), x -> x.withTreasury(x.treasury() + fare));
 		return true;
 	}
@@ -732,8 +732,8 @@ public final class Rickshaws {
 		if (Cabs.of(level, f) != null) {
 			return 0;
 		}
-		if (!player.isCreative() && player.getInventory().countItem(Items.EMERALD) < fare) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
+		if (!Money.canPay(player, Money.worth(fare))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", Money.text(player, Money.worth(fare))).withStyle(ChatFormatting.RED));
 			return 0;
 		}
 		if (!player.startRiding(rickshaw)) {
@@ -748,7 +748,7 @@ public final class Rickshaws {
 		start(job, HIRED, Construction.standable(level, to.seat(), 6), now);
 		w.setTask("taking a passenger to " + to.name());
 		level.playSound(null, rickshaw.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.off", puller.getName(), to.name(), fare).withStyle(ChatFormatting.GOLD));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.off", puller.getName(), to.name(), Money.text(player, Money.worth(fare))).withStyle(ChatFormatting.GOLD));
 		// (0.7.266) seen setting off, then the road screen: the way itself is never pulled
 		Journeys.begin(level, player, rickshaw, Component.literal(to.name()), job.goal, Journeys.blocks(rickshaw.position(), job.goal), fare, f.id(), RIDE);
 		return 1;

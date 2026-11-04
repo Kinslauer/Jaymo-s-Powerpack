@@ -422,6 +422,11 @@ final class McaBridge {
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
 	}
 
+	/** (0.7.498) {@code v}'s job is one MCA keeps from trading (guards, archers, outlaws, mercenaries, our workers). */
+	static boolean cannotTrade(Villager v) {
+		return v.getVillagerData().profession().unwrapKey().map(ProfessionsMCA.CAN_NOT_TRADE::contains).orElse(false);
+	}
+
 	private static Enlisted worker(VillagerEntityMCA villager) {
 		return (Enlisted)(Object)villager;
 	}
@@ -1289,7 +1294,7 @@ final class McaBridge {
 			return false;
 		}
 		if (Sorcery.isCaster(job)) {
-			// (0.5.53) a wizard's robe on someone who isn't one (the villager editor, say): only a kingdom makes a court wizard
+			// (0.5.54) a wizard's robe on someone who isn't one (the villager editor, say): only a kingdom makes a court wizard
 			// ((0.7.291) and only a court or a camp a necromancer, shaman or blood witch)
 			noTrade(villager);
 			return false;
@@ -1363,7 +1368,7 @@ final class McaBridge {
 		return true;
 	}
 
-	// ---- court wizards (0.5.53) -------------------------------------------------------------------------------------
+	// ---- court wizards (0.5.54) -------------------------------------------------------------------------------------
 
 	static @Nullable Worker enlistWizard(ServerLevel level, Faction f, @Nullable PathfinderMob chosen) {
 		VillagerEntityMCA villager = chosen instanceof VillagerEntityMCA v ? v : eldest(level, f);

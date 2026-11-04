@@ -277,7 +277,9 @@ public class Werewolf extends LegendMonster {
 		if (materials != null && weapon.get(materials) instanceof List<?> parts && !parts.isEmpty()) {
 			return String.valueOf(parts.getFirst());
 		}
-		return BuiltInRegistries.ITEM.getKey(weapon.getItem()).getPath();
+		// (0.7.498) a coin is money, not the metal its name says (realm silver, gold dinars, bent copper)
+		Identifier id = BuiltInRegistries.ITEM.getKey(weapon.getItem());
+		return id.getNamespace().equals(com.jaymoskingdoms.JaymosKingdoms.MOD_ID) && com.jaymoskingdoms.Currency.byItem(weapon.getItem()) != null ? "" : id.getPath();
 	}
 
 	@Override
