@@ -119,6 +119,11 @@ public final class LifeStory {
 	static final int PEAKS_SEARCH = 3200, PEAKS_STEP = 64, PEAKS_VERTICAL_STEP = 32, SNOWED_SLOW_TICKS = 900;
 	/** (0.7.223) Your village burned: the ruin's half-width (blocks), and how many saved things you carry out. */
 	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
+	/**
+	 * (0.7.500) The burning village: how far off the ruin it stands (blocks), how deep its jigsaw runs (a vanilla village's is 6),
+	 * and how far round its centre cobwebs are looked for and set alight (across, below, above).
+	 */
+	static final int BURNING_AWAY = 40, BURNING_DEPTH = 6, BURNING_REACH = 72, BURNING_BELOW = 12, BURNING_ABOVE = 24;
 	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
 	/**
@@ -927,6 +932,10 @@ public final class LifeStory {
 		if (road != null && !road.fits(heritage)) {
 			return;
 		}
+		// (0.7.500) an earned blood (the Bio-built's vats) is only born to one it has woken in, unless the road makes another
+		if ((road == null || road.makes() == null) && !Heritage.unlocked(player, heritage)) {
+			return;
+		}
 		if (road != null && road.makes() != null) {
 			heritage = road.makes();
 			Heritage.unlock(player, heritage);
@@ -1327,6 +1336,7 @@ public final class LifeStory {
 				to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
 				if (to != null) {
 					burnedRuin(level, to, random);
+					burningVillage(level, to, random);
 				}
 			}
 			case SNOWED -> {
@@ -1915,6 +1925,43 @@ public final class LifeStory {
 	 * What's left of your home after the fire, round {@code center} (on natural ground only): low broken walls of charred
 	 * timber and blackened stone, ash underfoot and a cold hearth.
 	 */
+	/**
+	 * (0.7.500, Andy: "The burned village should spawn an abandoned village structure from vanilla, but replace the cobwebs with fire,
+	 * and obviously the chaos will ensue from there") a vanilla abandoned plains village ({@code burned_village/town_centers}: the
+	 * zombie town centres, which lead on into the zombie streets, houses and zombie villagers) raised {@link #BURNING_AWAY} blocks off
+	 * the ruin, and every cobweb in it set alight. The fire spreads as fire does.
+	 */
+	private static void burningVillage(ServerLevel level, BlockPos ruin, RandomSource random) {
+		var pool = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.TEMPLATE_POOL)
+			.get(JaymosKingdoms.id("burned_village/town_centers")).orElse(null);
+		if (pool == null) {
+			return;
+		}
+		double angle = random.nextDouble() * Math.PI * 2.0;
+		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+			ruin.offset((int)Math.round(Math.cos(angle) * BURNING_AWAY), 0, (int)Math.round(Math.sin(angle) * BURNING_AWAY)));
+		try {
+			if (!net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement.generateJigsaw(level, pool,
+				net.minecraft.resources.Identifier.withDefaultNamespace("bottom"), BURNING_DEPTH, at, false)) {
+				return;
+			}
+		} catch (RuntimeException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't raise the burning village at {}", at, e);
+			return;
+		}
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int dx = -BURNING_REACH; dx <= BURNING_REACH; dx++) {
+			for (int dz = -BURNING_REACH; dz <= BURNING_REACH; dz++) {
+				for (int dy = -BURNING_BELOW; dy <= BURNING_ABOVE; dy++) {
+					pos.set(at.getX() + dx, at.getY() + dy, at.getZ() + dz);
+					if (level.getBlockState(pos).is(net.minecraft.world.level.block.Blocks.COBWEB)) {
+						level.setBlock(pos, net.minecraft.world.level.block.BaseFireBlock.getState(level, pos), 3);
+					}
+				}
+			}
+		}
+	}
+
 	private static void burnedRuin(ServerLevel level, BlockPos center, RandomSource random) {
 		net.minecraft.world.level.block.Block[] wall = {net.minecraft.world.level.block.Blocks.STRIPPED_DARK_OAK_LOG, net.minecraft.world.level.block.Blocks.BLACKSTONE,
 			net.minecraft.world.level.block.Blocks.COBBLESTONE, net.minecraft.world.level.block.Blocks.DARK_OAK_PLANKS, net.minecraft.world.level.block.Blocks.COAL_BLOCK};

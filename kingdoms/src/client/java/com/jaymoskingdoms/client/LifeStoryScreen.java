@@ -328,7 +328,13 @@ final class LifeStoryScreen extends Screen {
 	 * (0.7.349) one that's only for a heritage (the Verdant World's start) only for those born to it.
 	 */
 	private static boolean open(Answer a) {
-		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs()) && earned(a);
+		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs()) && earned(a) && woken(a);
+	}
+
+	/** (0.7.500) Whether a birthplace's blood is one this player may be born to: an earned one (the Bio-built's vats) only once woken. */
+	private static boolean woken(Answer a) {
+		Minecraft mc = Minecraft.getInstance();
+		return a.heritage() == null || mc.player == null || Heritage.unlocked(mc.player, a.heritage());
 	}
 
 	/**
@@ -1340,6 +1346,8 @@ final class LifeStoryScreen extends Screen {
 		return !a.offered() ? Component.translatable(a.start() == LifeStory.Start.NOBODIES ? "gui.jaymoskingdoms.story.needs_mca" : "gui.jaymoskingdoms.story.needs_powers")
 			: !a.fits(bornAs())
 				? Component.translatable("gui.jaymoskingdoms.story.only_for", onlyForNames(a))
+				: !woken(a)
+					? Component.translatable("heritage.jaymoskingdoms." + a.heritage().key() + ".hint")
 				: !earned(a)
 					? Component.translatable("story.jaymoskingdoms.road." + a.key() + ".hint")
 					: Component.translatable("gui.jaymoskingdoms.story.no_realms");
