@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>V, Grab and Throw: pick up the creature you look at and carry it overhead; V again hurls it. Looking at a block
  * instead rips a chunk out of the ground and throws it.</li>
  * <li>B, Leap Slam: a great leap; landing hits everything within {@link #SLAM_RADIUS}.</li>
- * <li>C (ascended), Titan: (0.20.1) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Titan}.</li>
+ * <li>C (ascended), Titan: (0.20.7) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Titan}.</li>
  * </ul>
  */
 public final class Bulwark extends XenoForm {
@@ -53,7 +53,7 @@ public final class Bulwark extends XenoForm {
 	public static final float CLAP_SHAKE = 1.0F, SLAM_SHAKE = 1.5F;
 	public static final double CLAP_SHAKE_RANGE = 14.0, SLAM_SHAKE_RANGE = 16.0;
 
-	/** (0.20.1) Its Ultimate, built once. */
+	/** (0.20.7) Its Ultimate, built once. */
 	private final com.jaymospowers.power.xenoform.XenoUltimate titan = new com.jaymospowers.power.xenoform.forms.ultimate.Titan(this);
 
 	public Bulwark() {
@@ -145,7 +145,7 @@ public final class Bulwark extends XenoForm {
 
 	// ---- Titan ----
 
-	/** (0.20.1) Titan is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Titan}. */
+	/** (0.20.7) Titan is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Titan}. */
 	@Override
 	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
 		return titan;

@@ -1,4 +1,4 @@
-"""(0.20.1, Ultimates patch 0) The Ultimates' own skins: one painter per Ultimate, each writing
+"""(0.20.7, Ultimates patch 0) The Ultimates' own skins: one painter per Ultimate, each writing
 textures/entity/xenoform_<id>_ultimate.png and xenoform_<id>_ultimate_glow.png for that Ultimate's own model.
 
 The older skins (gen_xenoform.ultimate()) recolour the base alien's skin on the base UV layout; an evolved Ultimate has its own

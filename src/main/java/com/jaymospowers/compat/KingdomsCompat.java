@@ -5,7 +5,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.entity.Entity;
 
 /**
- * (0.20.1) Jaymo's Kingdoms is optional for Powers: this is the only place that touches it, by reflection, and only when it is
+ * (0.20.7) Jaymo's Kingdoms is optional for Powers: this is the only place that touches it, by reflection, and only when it is
  * loaded. A missing jar (or a changed method) answers "no" instead of crashing.
  */
 public final class KingdomsCompat {

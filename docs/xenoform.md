@@ -299,7 +299,7 @@ Scanning stays the main way in. Beside it:
 - **Ascension.** The power ascends on its own once the band is complete (all nine aliens scanned; Duplex, added in 0.15.51, made it nine, and anyone already ascended stays ascended) and the power fully
   mastered (`XenoformPower.tickAscension`, checked every 2 s as a human; `/power ascend` for testing). Nothing else
   changes until you slam.
-- **The Ultimate (ascended; 0.20.1, Ultimates patch 0).** An Ultimate is its own evolved alien (`XenoUltimate`, one per base
+- **The Ultimate (ascended; 0.20.7, Ultimates patch 0).** An Ultimate is its own evolved alien (`XenoUltimate`, one per base
   alien, `XenoForm.evolved()`), with its own model and skin, its own R G V B and its own C (the big move), and its own health bar
   on top of the base alien's. Bulwark's Titan is the first; the others still use the old fallback buff (`XenoForm.onUltimate`).
   - **Coming on.** Unforged band: C does not change you. The Ultimate comes on by itself, once per change, as a last stand: a hit

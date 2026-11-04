@@ -72,7 +72,7 @@ public final class XenoformPowerClient implements PowerClient {
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
 		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(SkitterCeiling::tick);
-		// (0.20.1) the change-in morph: notices an Ultimate turning on
+		// (0.20.7) the change-in morph: notices an Ultimate turning on
 		ClientTickEvents.END_CLIENT_TICK.register(XenoMorph::tick);
 		PyreComet.init();
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {

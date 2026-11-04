@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>{@code /powerdebug xenoform star}: a star falls where you're looking (about 30 blocks off);</li>
  * <li>{@code /powerdebug xenoform unlock <alien|all>}: the band takes in that alien;</li>
  * <li>{@code /powerdebug xenoform form <alien>}: become it now, recharge or not; {@code revert}: back to yourself;</li>
- * <li>{@code /powerdebug xenoform ultimate <on|off|break>}: change into the alien's Ultimate now, drop back, or break it (0.20.1);</li>
+ * <li>{@code /powerdebug xenoform ultimate <on|off|break>}: change into the alien's Ultimate now, drop back, or break it (0.20.7);</li>
  * <li>{@code /powerdebug xenoform ready}: clears the recharge and every cooldown.</li>
  * </ul>
  */

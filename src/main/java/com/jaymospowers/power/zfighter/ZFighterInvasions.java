@@ -622,7 +622,7 @@ public final class ZFighterInvasions {
 		tyrant.kingdom = inv.kingdom;
 		tyrant.getAttribute(Attributes.SCALE).setBaseValue(inv.theme.bossScale);
 		tyrant.addTag(TAG);
-		tyrant.addTag(com.jaymospowers.power.xenoform.GreatFoes.TAG); // (0.20.1) the invasion's bar
+		tyrant.addTag(com.jaymospowers.power.xenoform.GreatFoes.TAG); // (0.20.7) the invasion's bar
 		inv.boss = tyrant.getUUID();
 		inv.invaders.add(tyrant.getUUID());
 		inv.level.addFreshEntity(tyrant);
