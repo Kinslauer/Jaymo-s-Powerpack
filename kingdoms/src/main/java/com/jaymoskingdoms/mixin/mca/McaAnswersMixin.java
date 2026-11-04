@@ -41,6 +41,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * ({@link com.jaymoskingdoms.InteractActions}): never in the talk menu now.
  * (0.7.449) "Ask what's going on" ({@link com.jaymoskingdoms.ComingOver#ANSWER}) shows only on one who came over to you lately.
  * (0.7.449) "Accuse them of theft" ({@link com.jaymoskingdoms.Crooks#ACCUSE_ANSWER}) shows only after you've found you were robbed.
+ * (0.7.477) On one of Powers' Z Fighter characters ({@link com.jaymoskingdoms.ZFighterFolk}) only "Have a word"
+ * ({@link com.jaymoskingdoms.ZFighterFolk#WORD}), and for a pilot or patrolman MCA's small talk; never on anyone else.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -180,6 +182,14 @@ abstract class McaAnswersMixin {
 			// (0.7.454) on the Interact page now (InteractActions): an audience, a pedlar's wares, tribute, a captain's orders
 			cir.getReturnValue().removeAll(List.of(Rulers.ANSWER, com.jaymoskingdoms.Pedlars.WARES_ANSWER, com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER,
 				com.jaymoskingdoms.SwornCaptains.SPY_ANSWER, com.jaymoskingdoms.SwornCaptains.RAID_ANSWER));
+		}
+		if ("main".equals(name)) {
+			// (0.7.477) Andy: "have a word should be the only option with the judge"
+			if (com.jaymoskingdoms.ZFighterFolk.is(villager)) {
+				cir.getReturnValue().removeIf(answer -> !com.jaymoskingdoms.ZFighterFolk.keeps(villager, answer));
+			} else {
+				cir.getReturnValue().remove(com.jaymoskingdoms.ZFighterFolk.WORD);
+			}
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say
