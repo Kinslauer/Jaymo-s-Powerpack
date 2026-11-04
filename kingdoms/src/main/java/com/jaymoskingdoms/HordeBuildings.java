@@ -1059,4 +1059,118 @@ final class HordeBuildings {
 		t.set(2, 0, 7, Blocks.CAMPFIRE.defaultBlockState());
 		return t.done("orc_war_ring");
 	}
+
+	// ---- (0.7.491) the king city: the arena and the shaman's tower --------------------------------------------------------
+
+	/**
+	 * (0.7.491) Hordes patch 4: the arena (13 x 13) of a horde kingdom or goblin kingdom. A round fighting pit of sand ringed
+	 * by three rising rows of stands (stairs of the camp's stone, facing in), a breast-high wall behind with fence on top,
+	 * bone posts crowned with skulls (orcs) or lanterns on mud-brick posts (goblins) round the rim, and a gap in the front
+	 * for the fighters to walk in.
+	 */
+	static Blueprint arena(boolean orc) {
+		CampBuildings.Draft t = new CampBuildings.Draft();
+		int c = 6;
+		for (int x = 0; x <= 12; x++) {
+			for (int z = 0; z <= 12; z++) {
+				double r = Math.hypot(x - c, z - c);
+				if (r > 6.4) {
+					continue;
+				}
+				boolean gap = z < c && Math.abs(x - c) <= 1;
+				if (r <= 3.5) {
+					t.set(x, -1, z, (x + z) % 5 == 0 ? Blocks.COARSE_DIRT.defaultBlockState() : Blocks.SAND.defaultBlockState());
+					continue;
+				}
+				t.set(x, -1, z, floor(orc, x, z));
+				if (gap) {
+					continue;
+				}
+				// the stands rise outward: a step at each ring, the wall behind
+				int row = r <= 4.5 ? 0 : r <= 5.5 ? 1 : 2;
+				Direction out = Math.abs(x - c) >= Math.abs(z - c) ? (x > c ? Direction.EAST : Direction.WEST) : (z > c ? Direction.SOUTH : Direction.NORTH);
+				for (int y = 0; y < row; y++) {
+					t.set(x, y, z, stone(orc, x, y, z));
+				}
+				if (row < 2) {
+					t.set(x, row, z, standStep(orc, out));
+				} else {
+					t.set(x, 2, z, stone(orc, x, 2, z));
+					t.set(x, 3, z, fence(orc));
+				}
+			}
+		}
+		// posts round the rim, crowned
+		int[][] posts = {{2, 2}, {10, 2}, {2, 10}, {10, 10}, {0, 6}, {12, 6}, {6, 12}};
+		for (int[] p : posts) {
+			for (int y = 0; y <= 3; y++) {
+				t.set(p[0], y, p[1], orc ? Blocks.BONE_BLOCK.defaultBlockState() : Blocks.MUD_BRICK_WALL.defaultBlockState());
+			}
+			t.set(p[0], 4, p[1], orc ? skull() : lantern(false));
+		}
+		// the gate posts, and a banner over the way in
+		for (int y = 0; y <= 3; y++) {
+			t.set(c - 2, y, 1, log(orc));
+			t.set(c + 2, y, 1, log(orc));
+		}
+		for (int x = c - 2; x <= c + 2; x++) {
+			t.set(x, 4, 1, logAlong(orc, Direction.Axis.X));
+		}
+		t.set(c, 4, 2, banner(orc, Direction.SOUTH));
+		// the champion's stake at the far side of the pit
+		t.set(c, 0, c + 3, log(orc));
+		t.set(c, 1, c + 3, orc ? skull() : lantern(false));
+		return t.done(orc ? "orc_arena" : "goblin_arena");
+	}
+
+	/** One step of the stands, its tall side outward. */
+	private static BlockState standStep(boolean orc, Direction out) {
+		return (orc ? Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS : Blocks.MUD_BRICK_STAIRS).defaultBlockState().setValue(StairBlock.FACING, out);
+	}
+
+	/**
+	 * (0.7.491) The shaman's tower (5 x 5, twelve high) of a horde kingdom or goblin kingdom: walls of the camp's stone with
+	 * slit windows, a door at the front, a ladder up the back wall to a flat top with battlements, and up there a brazier
+	 * (soul fire for the orcs' shaman, a bubbling cauldron under a lantern for the goblins' brewer-witch), skulls or green
+	 * banners on the merlons. A brewing stand and a barrel of herbs stand at its foot inside.
+	 */
+	static Blueprint shamanTower(boolean orc) {
+		CampBuildings.Draft t = new CampBuildings.Draft();
+		int top = 9;
+		for (int x = 0; x <= 4; x++) {
+			for (int z = 0; z <= 4; z++) {
+				t.set(x, -1, z, stone(orc, x, -1, z));
+				boolean edge = x == 0 || x == 4 || z == 0 || z == 4;
+				if (edge) {
+					for (int y = 0; y < top; y++) {
+						boolean slit = (y == 3 || y == 6) && (x == 2 || z == 2) && !(z == 0 && x == 2);
+						t.set(x, y, z, slit ? Blocks.AIR.defaultBlockState() : stone(orc, x, y, z));
+					}
+					// the battlements: a merlon at every other block
+					if ((x + z) % 2 == 0) {
+						t.set(x, top + 1, z, stone(orc, x, top + 1, z));
+						t.set(x, top + 2, z, orc ? skull() : Blocks.AIR.defaultBlockState());
+					}
+				}
+				if (!(x == 2 && z == 3)) {
+					t.set(x, top, z, edge ? stone(orc, x, top, z) : planks(orc));
+				}
+			}
+		}
+		door(t, 2, 0, 0, Direction.NORTH);
+		for (int y = 0; y <= top; y++) {
+			t.set(2, y, 3, Blocks.LADDER.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
+		}
+		t.set(1, 0, 3, Blocks.BREWING_STAND.defaultBlockState());
+		t.set(3, 0, 3, Blocks.BARREL.defaultBlockState());
+		t.set(1, 0, 1, lantern(false));
+		if (orc) {
+			t.set(2, top + 1, 1, Blocks.SOUL_CAMPFIRE.defaultBlockState());
+		} else {
+			t.set(2, top + 1, 1, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 3));
+			t.set(1, top + 1, 1, Blocks.CAMPFIRE.defaultBlockState());
+			t.set(2, top - 2, -1, facing(Blocks.WALL_BANNER.pick(DyeColor.GREEN).defaultBlockState(), Direction.NORTH));
+		}
+		return t.done(orc ? "orc_shaman_tower" : "goblin_brewer_tower");
+	}
 }

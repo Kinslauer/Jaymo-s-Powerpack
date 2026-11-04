@@ -5151,3 +5151,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Pyre stays humanoid (Andy). The six lost their Ultimate spikes. Each body was written, then checked by a second
     pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional
     `excalibur_style` pack. Compile-checked; not played.
+- **0.19.83, Kingdoms 0.7.491, greenskin king city and medieval structure mods:** Kingdoms: the king city (see
+  kingdoms/MODLOG.md). Pack: Andy asked to check Rabbit's DawnCraft's structures "or any that have good medieval structures
+  to fill voids we haven't already". DawnCraft is Forge 1.18.2 and only its Structory has a 26.3 Fabric build, so from it
+  and Modrinth's 26.3 list the pack adds, unchanged: Dungeons and Taverns (roadside taverns, dungeons, overhauled
+  strongholds, mansions, outposts and mineshafts), Structory and Structory: Towers (ruins, camps, shrines, watchtowers),
+  and Homesteads (lone farmsteads). CurseForge ids still to look up from home (`packModsNoCf`).

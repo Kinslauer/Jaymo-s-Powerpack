@@ -8417,3 +8417,20 @@ each reviewed with every finding independently verified; compile-checked only, n
     pirates by boat; escort or rob them. Villages keep trade money in their storehouse.
   - **Havens expand** (`HavenGrowth`): havens raise works wherever land and stores allow, send their output by cart, and
     keep sworn defenders by blood who grow with them.
+
+## 0.7.491: the greenskin king city (pack 0.19.83)
+Andy (2026-11-04): "you can start on the king city". Hordes patch 4 (`docs/Hordes-Plan.md`), on top of tier 4's great
+hall, land and vassals:
+- **Arena and shaman's tower** (`HordeBuildings.arena`, `shamanTower`): a tier 4 band also raises a round sand fighting pit
+  ringed by stone stands and crowned posts, and a 12-high tower of the camp's stone with a ladder to a battlemented top
+  (soul fire for the orc shaman, a cauldron for the goblin brewer-witch).
+- **The warpath** (`HordeCity`, hooked into `Raids`): every 6 days the Warlord or Goblin King takes the whole host on the
+  warpath against the nearest settlement within 900 blocks (a human realm or village, or the rival brood's camp), told to
+  everyone. For 2 days the realm and all its vassal camps raid that one target, at half chance per look, a quarter of the
+  usual wait, in bands of up to 14; goblins march too.
+- **Wanted notice** (`Bounties.warlord`): the target's court posts the king as wanted (80) on its bounty board.
+- **Tribute pacts:** each day one realm within 640 blocks whose army is under a quarter of the horde's fighters buys its
+  peace (at most 3): 3 emeralds a day into the king's hoard, and the horde leaves it be. One that can't pay is marched on next.
+- **The horde oath:** `/kingdom pledge <realm>` swears a half-orc to an orc realm, a goblin-raised player to a goblin realm,
+  or anyone once the tribe's favour reaches the ally mark. The tribe spares the sworn, tells them where each warpath goes,
+  and gives them 2 bent copper of each day's tribute. `/kingdom leave` forswears it.
