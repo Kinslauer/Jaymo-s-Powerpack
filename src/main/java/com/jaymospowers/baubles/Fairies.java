@@ -197,7 +197,9 @@ public final class Fairies {
 	/** Every {@link #SHOW_EVERY} ticks: who shows a fairy, villagers putting on one they were given, and the wearers' glow. */
 	private static void wearers(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			boolean wears = wornSlot(player) >= 0;
+			// ((0.20.11) at the hip, from the belt slot, she is drawn as the coin purse is: WornLanterns, not on the chest)
+			int slot = wornSlot(player);
+			boolean wears = slot >= 0 && slot != Baubles.BELT_SLOT;
 			if (wears != player.hasAttached(WEARS)) {
 				set(player, wears);
 			}
@@ -236,7 +238,7 @@ public final class Fairies {
 		}
 	}
 
-	/** The bauble slot a player wears a fairy in (amulet or charm), or -1. */
+	/** The bauble slot a player wears a fairy in (amulet, charm or (0.20.11) belt, hung at the hip), or -1. */
 	static int wornSlot(Player player) {
 		List<ItemStack> worn = Baubles.worn(player);
 		for (int slot = 0; slot < Baubles.SIZE; slot++) {
@@ -263,7 +265,7 @@ public final class Fairies {
 	// ---- turning death aside -----------------------------------------------------------------------------------------
 
 	/**
-	 * The wearer of a bottled fairy (a player's amulet or charm slot, or a villager who was given one) does not die of
+	 * The wearer of a bottled fairy (a player's amulet, charm or belt slot, or a villager who was given one) does not die of
 	 * this: the bottle cracks and she is spent instead.
 	 */
 	static boolean saveFromDeath(LivingEntity entity, DamageSource source, float amount) {

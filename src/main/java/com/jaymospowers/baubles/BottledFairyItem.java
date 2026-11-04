@@ -58,7 +58,7 @@ public class BottledFairyItem extends BaubleItem {
 		}
 	}
 
-	/** She fits the amulet slot (on a cord) or the charm slot. */
+	/** She fits the amulet slot (on a cord), the charm slot, or (0.20.11) the belt slot, hung at the hip. */
 	@Override
 	protected Component slotName() {
 		return Component.translatable("item.jaymospowers.bottled_fairy.slots");

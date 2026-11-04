@@ -5302,4 +5302,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   breaking, shards, a Cracked Fairy Bottle left instead of a glass bottle); and villagers wear her too: one given a fairy
   (MCA's gift lands in their inventory) puts her on, she glows about them and saves them once the same way. Worn fairies
   hang on the chest for all to see, players' and villagers' alike (`Fairies.WEARS`, synced; `client/baubles/WornFairies`,
-  a layer on every humanoid renderer).
+  a layer on every humanoid renderer). She also fits the belt slot, hung at the hip like the coin purse (`#jaymospowers:hip_shown`).
