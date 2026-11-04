@@ -340,3 +340,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   of `/kingdom dragon`, and any already in a world disappear; the code and art are kept for when it's fixed.
 - **0.20.44, Kingdoms 0.7.537, Zoological Guide by recipe:** Cube Animals no longer hands out its Zoological Guide on
   first join; craft it from a book, a feather, an ink sac and a bone (shapeless). See the Kingdoms MODLOG.
+- **0.20.45, sky waterfalls kept rare (Andy, 2026-11-04):** "i like the idea of a waterfall from heaven, but i found this as
+  soon as i spawned since adding the one dimension, and it just spoils the reveal too early". The Aether's springs pour off the
+  sides of islands; on its own the water fell into nothing, but with One Dimension the Overworld is underneath, so it fell the
+  whole way down as a column from the sky. `aether/world/SkySpringFeature` (`jaymospowers:sky_spring`, the old spring config
+  with a new type) floods where a new spring's water could run and drops the spring if it would leave the bottom of the Aether
+  band, unless it is in a heavenfall: one chunk in about one of every three 2048-block squares, never within 3000 blocks of
+  the world spawn or 0, 0. Springs that land on a lower island or in a cave, and the Aether as its own dimension, are unchanged.
+  New chunks only; water already falling in a world stays.
