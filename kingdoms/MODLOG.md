@@ -8964,4 +8964,8 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   through a wall, x0.5 if you open it sneaking (less again with Soft Step and the stealthy heritages, through
   `Skills.sneakFactor`). Whoever wakes mutters a line, turns to you, walks over to the chest and stays up 15 s (put back
   to bed if their brain tries). Awake, they count as witnesses (`Theft.witnesses` skips sleepers), so a guard you woke
-  sees you take from a realm's chest and it is a theft seen. Compiled (Gradle `compileJava`), not played yet.
+  sees you take from a realm's chest and it is a theft seen. Light Fingers (Andy: "the sound lowers with thief skill in
+  light fingers") takes 15% per rank off both the wake chance and the creak itself, so rank 5 opens at a quarter volume:
+  `ContainerOpenersHushMixin` marks who is opening around `ContainerOpenersCounter.incrementOpeners`, and
+  `ChestCreakVolumeMixin` scales `ServerLevel.playSeededSound`'s BLOCKS volume meanwhile (chests and barrels; shulker
+  boxes and modded chests with their own sound code keep full volume). Compiled (Gradle `compileJava`), not played yet.

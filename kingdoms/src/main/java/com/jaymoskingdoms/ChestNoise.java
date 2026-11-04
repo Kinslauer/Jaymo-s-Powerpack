@@ -28,12 +28,15 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.538) Opening a chest makes noise (Andy, 2026-11-04: "opening chests makes noise that can wake sleeping villagers
  * or guards"). Every sleeper but a player within {@link #RANGE} of a chest, barrel or other storage you open may wake:
  * {@link #CLOSE_CHANCE} at arm's length, falling off to nothing at the edge, less through a wall ({@link #WALL_FACTOR}),
  * less again if you open it sneaking ({@link Skills#sneakFactor}, so Soft Step and the Stealth heritages quieten it too).
+ * Each rank of Light Fingers takes {@link #LIGHT_FINGERS_HUSH} off both the chance and the creak itself (the chest or
+ * barrel's open sound, through {@code ContainerOpenersHushMixin} + {@code ChestCreakVolumeMixin}).
  *
  * <p>Whoever wakes mutters, turns to the noise and walks over to see, and stays up for {@link #STAY_AWAKE_TICKS} (their
  * bed can't take them back before). Awake, they're witnesses like anyone else ({@link Theft#witnesses} skips sleepers),
@@ -52,6 +55,8 @@ public final class ChestNoise {
 	/** A sleeper who wakes stays up this long (ticks), and comes to look at this pace. */
 	static final long STAY_AWAKE_TICKS = 300L;
 	static final float LOOK_SPEED = 0.6F;
+	/** (Andy: "the sound lowers with thief skill in light fingers") each rank of Light Fingers takes this share off the creak and the wake chance. */
+	static final float LIGHT_FINGERS_HUSH = 0.15F;
 	/** How many "who's there?" lines there are. */
 	static final int LINES = 4;
 
@@ -60,6 +65,8 @@ public final class ChestNoise {
 	}
 
 	private static final Map<UUID, Woken> WOKEN = new HashMap<>();
+	/** Who is opening a container right now (set around {@code ContainerOpenersCounter.incrementOpeners}, server thread). */
+	private static @Nullable LivingEntity opener;
 
 	private ChestNoise() {
 	}
@@ -74,6 +81,22 @@ public final class ChestNoise {
 		});
 		ServerTickEvents.END_SERVER_TICK.register(ChestNoise::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> WOKEN.clear());
+	}
+
+	/** How loud {@code who} opens a chest: 1, less a share per rank of Light Fingers. */
+	static float loudness(LivingEntity who) {
+		return who instanceof Player p ? Math.max(0.0F, 1.0F - LIGHT_FINGERS_HUSH * Skills.rank(p, Skills.Perk.LIGHT_FINGERS)) : 1.0F;
+	}
+
+	/** (mixin) {@code who} starts opening a container (null: done). */
+	public static void opening(@Nullable LivingEntity who) {
+		opener = who;
+	}
+
+	/** (mixin) How loud a block sound played now is: quieter while a light-fingered thief opens a chest. */
+	public static float hush() {
+		LivingEntity who = opener;
+		return who == null || who.level().isClientSide() ? 1.0F : loudness(who);
 	}
 
 	/** A chest, barrel, shulker box, or another mod's chest, barrel, crate or coffer (by its id). */
@@ -91,7 +114,7 @@ public final class ChestNoise {
 	/** {@code player} opened the storage at {@code pos}: every sleeper in earshot rolls to wake. */
 	private static void opened(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		Vec3 noise = Vec3.atCenterOf(pos);
-		double quiet = player.isShiftKeyDown() ? Skills.sneakFactor(player, SNEAK_FACTOR) : 1.0;
+		double quiet = (player.isShiftKeyDown() ? Skills.sneakFactor(player, SNEAK_FACTOR) : 1.0) * loudness(player);
 		long now = level.getGameTime();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(RANGE),
 			e -> e.isAlive() && e.isSleeping() && !(e instanceof Player))) {
