@@ -5199,3 +5199,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     (bottom right). The seven found baubles are unchanged.
   - Town smiths (Kingdoms) now and then ask for a gem amulet, ring or bracelet of at least a given grade, for more
     emeralds than their usual errands. Compile-checked; not played.
+- **0.19.88, a stray Kitchen jar no longer stops the build:** a pull on the home PC left `jaymos-kitchen-0.5.43.jar`
+  beside 0.5.54 in `libs/` and the build refused ("must hold exactly one"). It now uses the jar matching
+  `kitchen/gradle.properties` (else the newest) and warns about the rest.
