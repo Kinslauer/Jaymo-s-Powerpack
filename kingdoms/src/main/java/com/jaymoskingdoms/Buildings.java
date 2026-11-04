@@ -88,7 +88,7 @@ final class Buildings {
 		// (0.5.27) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
 		Blueprint.register(FactionType.KINGDOM, new Blueprint.Entry("tavern",
 			(level, faction, variant) -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction)), 1, 26));
-		// (0.7.515) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
+		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
 		realm(FactionType.KINGDOM, Temples.GREAT_TEMPLE, GreatTemple::draw, 1, Temples.GREAT_TEMPLE_FROM);
 		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
 		realm(FactionType.VILLAGE, "pen", Buildings::pen, 1, 0);

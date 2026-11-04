@@ -6,7 +6,7 @@ import java.util.List;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 
-/** (0.7.515) A champion's moves. A fresh set for each champion, because the moves keep their own lingering state. */
+/** (0.7.518) A champion's moves. A fresh set for each champion, because the moves keep their own lingering state. */
 public interface Moves {
 	/** [A, B, C]: opened by phases 1, 2 and 3. */
 	List<Move> moves();

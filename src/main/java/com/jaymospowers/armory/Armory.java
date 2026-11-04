@@ -195,7 +195,7 @@ public final class Armory {
 		KingWeapons.GUTTING_HOOK = item("gutting_hook", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.HOOK), KingWeapons::hook);
 		KingWeapons.WARCHIEF_CLEAVER = item("warchief_cleaver", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.CLEAVER), KingWeapons::cleaver);
 		KingWeapons.OGRE_KINGS_MAUL = item("ogre_kings_maul", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.MAUL), KingWeapons::maul);
-		// (0.20.16) the patrons' weapons: iron heads Kingdoms drops off the champions, at the Tool Station only
+		// (0.20.18) the patrons' weapons: iron heads Kingdoms drops off the champions, at the Tool Station only
 		PatronWeapons.HEARTHGUARD = item("hearthguard", p -> new PatronWeaponItem(p, PatronWeapons.Kind.HEARTHGUARD), p -> PatronWeapons.props(PatronWeapons.Kind.HEARTHGUARD, p));
 		PatronWeapons.ANVIL_FATHERS_HAMMER = item("anvil_fathers_hammer", p -> new PatronWeaponItem(p, PatronWeapons.Kind.ANVIL_HAMMER), p -> PatronWeapons.props(PatronWeapons.Kind.ANVIL_HAMMER, p));
 		PatronWeapons.TIDECALLER = item("tidecaller", p -> new PatronWeaponItem(p, PatronWeapons.Kind.TIDECALLER), p -> PatronWeapons.props(PatronWeapons.Kind.TIDECALLER, p));

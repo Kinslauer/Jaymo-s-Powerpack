@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Sun-Marshal's moves: Sunbeam (a ring follows you, then holds), Royal Guard (strike him from behind), Noon (break
+ * (0.7.518) The Sun-Marshal's moves: Sunbeam (a ring follows you, then holds), Royal Guard (strike him from behind), Noon (break
  * his sight); in a group, the sun-guard.
  */
 final class SunMarshalMoves implements Moves {

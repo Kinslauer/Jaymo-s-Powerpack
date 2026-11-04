@@ -17,7 +17,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-/** (0.20.16) A patron's weapon ({@link PatronWeapons}): an on-hit ability, or one used with the right mouse button. */
+/** (0.20.18) A patron's weapon ({@link PatronWeapons}): an on-hit ability, or one used with the right mouse button. */
 public class PatronWeaponItem extends Item {
 	private final PatronWeapons.Kind kind;
 

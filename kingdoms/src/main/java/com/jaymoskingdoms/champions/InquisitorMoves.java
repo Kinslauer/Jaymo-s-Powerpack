@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Inquisitor's moves: Chain of Truth (dragged to him), Strip the Lie (blessings gone, the unseen shown), Judgement
+ * (0.7.518) The Inquisitor's moves: Chain of Truth (dragged to him), Strip the Lie (blessings gone, the unseen shown), Judgement
  * (a column on one player; a harm split among those who stand together); in a group, zealots.
  */
 final class InquisitorMoves implements Moves {
@@ -158,7 +158,7 @@ final class InquisitorMoves implements Moves {
 			if (zealot == null) {
 				continue;
 			}
-			// (0.7.515) EntityType.create skips finalizeSpawn, so the axe is given by hand
+			// (0.7.518) EntityType.create skips finalizeSpawn, so the axe is given by hand
 			zealot.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_AXE));
 			MoveKit.name(zealot, "zealot");
 			c.spawnAdd(level, zealot);

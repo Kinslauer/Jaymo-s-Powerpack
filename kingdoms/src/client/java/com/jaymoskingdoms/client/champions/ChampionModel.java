@@ -11,7 +11,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 
 /**
- * (0.7.515) A patron's champion, all our own: a man's body with each patron's extra parts (an apron, a beard, a veil, antlers, a
+ * (0.7.518) A patron's champion, all our own: a man's body with each patron's extra parts (an apron, a beard, a veil, antlers, a
  * hood, a crown, a mitre) below the humanoid layout of its 64x64 texture ({@code tools/gen_champions.py}). Asleep it bows its
  * head and rests its arms on its weapon; casting it raises both arms (the Antlered Hunter and the Inquisitor throw one forward
  * for their first move); turning, its arms are out wide and its head back.

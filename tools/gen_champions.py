@@ -1,4 +1,4 @@
-"""(0.7.515) The patron champions' art: eight 64x64 skins (the humanoid layout, then each patron's extra parts from row 32,
+"""(0.7.518) The patron champions' art: eight 64x64 skins (the humanoid layout, then each patron's extra parts from row 32,
 matching ChampionModel) and eight 16x16 spawn egg icons, with their models and item files. Kingdoms. Our own, drawn in code.
 Run from the repo root: python -I tools/gen_champions.py"""
 import json

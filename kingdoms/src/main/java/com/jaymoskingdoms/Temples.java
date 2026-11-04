@@ -35,7 +35,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The patrons' temples (docs/Patrons-C-Plan.md): rare structures that rise out of sight near players in the Wildlands or
+ * (0.7.518) The patrons' temples (docs/Patrons-C-Plan.md): rare structures that rise out of sight near players in the Wildlands or
  * higher, each with its patron's champion asleep at the altar. Placed at runtime like the Nether forts, because worldgen cannot
  * read a world tier. The Truth's great temple is built by a Faith-creed kingdom's capital ({@link GreatTemple}).
  */
@@ -68,7 +68,7 @@ public final class Temples {
 	public static final int WILD = 0, RUIN = 1, GREAT = 2;
 	public static final String GREAT_TEMPLE = "great_temple";
 
-	/** (0.7.515) A patron's temple: where, whose, which kind, its altar and champion, and when its champion last fell. */
+	/** (0.7.518) A patron's temple: where, whose, which kind, its altar and champion, and when its champion last fell. */
 	public record Temple(int id, String patron, String world, BlockPos center, BlockPos altar, Direction facing, int kind, int faction,
 		long slainDay, Optional<UUID> champion) {
 		public static final Codec<Temple> CODEC = RecordCodecBuilder.create(i -> i.group(

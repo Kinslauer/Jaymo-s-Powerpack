@@ -42,7 +42,7 @@ public final class KingdomsCompat {
 		}
 	}
 
-	/** (0.20.16) {@code player}'s sworn value for a Kingdoms key (negative: turned from that patron), 0 when unknown or Kingdoms is absent. */
+	/** (0.20.18) {@code player}'s sworn value for a Kingdoms key (negative: turned from that patron), 0 when unknown or Kingdoms is absent. */
 	public static float blessing(Player player, String key) {
 		if (!LOADED || player == null) {
 			return 0.0F;

@@ -11,7 +11,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.ToolMaterial;
 
 /**
- * (0.20.16) The patrons' weapons (Kingdoms 0.7.515: each champion drops its patron's iron head). Put together at the Tool
+ * (0.20.18) The patrons' weapons (Kingdoms 0.7.518: each champion drops its patron's iron head). Put together at the Tool
  * Station like the kings' weapons; each has one ability, stronger for that patron's sworn and cold (nothing) for one who turned
  * from the patron and is in its trials. The numbers are here; the hits are {@link PatronWeaponHits}, the item {@link PatronWeaponItem}.
  */

@@ -173,7 +173,7 @@ public final class Planner {
 				continue;
 			}
 			if (e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f)) {
-				// (0.7.515) only the capital of a Faith-creed realm builds the great temple
+				// (0.7.518) only the capital of a Faith-creed realm builds the great temple
 				continue;
 			}
 			if (e.id().equals(TAVERN)) {

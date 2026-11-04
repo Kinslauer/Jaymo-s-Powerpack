@@ -54,7 +54,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) A patron's champion (docs/Patrons-C-Plan.md): a multi-phase boss, one class for the eight patrons (one entity type
+ * (0.7.518) A patron's champion (docs/Patrons-C-Plan.md): a multi-phase boss, one class for the eight patrons (one entity type
  * each). Asleep at its altar as a statue, it wakes for a Wildlands player. Its health and blows grow with the players near and
  * with the world tier; its phases open its three moves (see {@code champions/}), each telegraphed so good play can dodge.
  * The hunting form is a weaker champion that hunts a player who turned from its patron, once.
@@ -65,7 +65,7 @@ public class PatronChampion extends Monster {
 	/** Each counted player past the first adds this share of the base health and of the blow; at most GROUP_MOST count. */
 	static final double HEALTH_PER_PLAYER = 0.6, DAMAGE_PER_PLAYER = 0.08;
 	static final int GROUP_MOST = 6;
-	/** (0.7.515) The most max health a champion is scaled to. It matches the cap in MaxHealthCapMixin. */
+	/** (0.7.518) The most max health a champion is scaled to. It matches the cap in MaxHealthCapMixin. */
 	static final double HEALTH_CAP = 4096.0;
 	/** Players this near (alive, not spectating, not creative, not downed) count, rechecked this often; the count only grows in a fight. */
 	static final double FIGHT_RANGE = 32.0;
@@ -426,7 +426,7 @@ public class PatronChampion extends Monster {
 		double form = this.quarry != null ? HUNT_HEALTH : 1.0;
 		double dform = this.quarry != null ? HUNT_DAMAGE : 1.0;
 		float share = this.getMaxHealth() > 0.0F ? this.getHealth() / this.getMaxHealth() : 1.0F;
-		// (0.7.515) the scale never takes the health past the cap the max health mixin allows
+		// (0.7.518) the scale never takes the health past the cap the max health mixin allows
 		double base = this.getAttributeBaseValue(Attributes.MAX_HEALTH);
 		double scale = (1.0 + HEALTH_PER_PLAYER * (g - 1)) * (1.0 + WorldTiers.HEALTH[this.tier]) * form;
 		modify(Attributes.MAX_HEALTH, HEALTH_ID, (base > 0.0 ? Math.min(scale, HEALTH_CAP / base) : scale) - 1.0);
@@ -479,7 +479,7 @@ public class PatronChampion extends Monster {
 		this.stepTick = this.tickCount;
 		if (!this.armed) {
 			this.armed = true;
-			// (0.7.515) a smoke double carries no weapon, so Stare Down has nothing to make it drop
+			// (0.7.518) a smoke double carries no weapon, so Stare Down has nothing to make it drop
 			if (!this.decoy() && this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
 				ItemStack weapon = Spoils.powers(PatronChampions.weaponId(this.patron));
 				if (!weapon.isEmpty()) {

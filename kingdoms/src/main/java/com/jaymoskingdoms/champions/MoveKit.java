@@ -15,7 +15,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-/** (0.7.515) Shared helpers for the champions' moves: telegraphs in the patron's colour, shapes, safe spots and pushes. */
+/** (0.7.518) Shared helpers for the champions' moves: telegraphs in the patron's colour, shapes, safe spots and pushes. */
 public final class MoveKit {
 	private MoveKit() {
 	}

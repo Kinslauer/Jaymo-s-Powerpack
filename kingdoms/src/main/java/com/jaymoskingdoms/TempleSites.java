@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) Finding a site for each patron's temple (docs/Patrons-C-Plan.md section 4): the surface, deep stone, the sea,
+ * (0.7.518) Finding a site for each patron's temple (docs/Patrons-C-Plan.md section 4): the surface, deep stone, the sea,
  * high ground, a crypt, a hidden hollow, the Nether, the Aether. Biome tags are data
  * ({@code data/jaymoskingdoms/tags/worldgen/biome/temple/}). Never on a realm's land, never in sight, never near another temple.
  */

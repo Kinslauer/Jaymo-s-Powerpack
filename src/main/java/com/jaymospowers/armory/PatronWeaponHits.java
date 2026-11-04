@@ -38,7 +38,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.16) What the patron weapons do ({@link PatronWeapons}): their timed states (Sunder stacks, Marked Prey, Smokestep's
+ * (0.20.18) What the patron weapons do ({@link PatronWeapons}): their timed states (Sunder stacks, Marked Prey, Smokestep's
  * window, Sun's Judgement's wind-up, Kindled Blow's gap), their server tick, and the guarded extra-damage helper.
  */
 final class PatronWeaponHits {

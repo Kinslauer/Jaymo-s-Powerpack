@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Cinder-Shade's moves: Smokestep (behind you at once), Ember Knives (a fan of small fireballs), Ash Cloud (fight
+ * (0.7.518) The Cinder-Shade's moves: Smokestep (behind you at once), Ember Knives (a fan of small fireballs), Ash Cloud (fight
  * her from outside it); in a group, smoke doubles of herself.
  */
 final class CinderShadeMoves implements Moves {

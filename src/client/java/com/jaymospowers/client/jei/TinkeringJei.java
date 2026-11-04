@@ -136,7 +136,7 @@ public final class TinkeringJei implements IModPlugin {
 				registration.addItemStackInfo(WeaponParts.heads(kind).getFirst(), Component.translatable("jei.jaymospowers.king_head." + part));
 			}
 		}
-		// (0.20.16) the patrons' weapon heads: which champion drops each
+		// (0.20.18) the patrons' weapon heads: which champion drops each
 		for (String part : WeaponParts.PATRONS) {
 			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);
 			if (kind != null && kind.loaded()) {

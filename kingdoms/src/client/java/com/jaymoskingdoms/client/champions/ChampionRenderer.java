@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.resources.Identifier;
 
-/** (0.7.515) Draws a patron's champion ({@link PatronChampion}): one model and skin each, the Forge-Thane broader, all taller than a man. */
+/** (0.7.518) Draws a patron's champion ({@link PatronChampion}): one model and skin each, the Forge-Thane broader, all taller than a man. */
 public final class ChampionRenderer extends HumanoidMobRenderer<PatronChampion, ChampionRenderer.State, ChampionModel> {
 	public static final class State extends HumanoidRenderState {
 		Patron patron = Patron.HEARTHKEEPER;

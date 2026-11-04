@@ -106,6 +106,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.baubles.Baubles.init();
 		// (0.17.188) Friends & Foes' totems work from the charm slot
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
+		// (RPG Series) Spell Engine's spell books, scrolls and quivers work worn in bauble slots
+		com.jaymospowers.compat.SpellEngineCompat.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
 		// (0.19.87) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles

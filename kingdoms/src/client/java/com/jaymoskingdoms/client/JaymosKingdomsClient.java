@@ -71,7 +71,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
-		// (0.7.515) the patron champions
+		// (0.7.518) the patron champions
 		com.jaymoskingdoms.client.champions.ChampionRenderer.register();
 		// (0.7.206) whaling: great whales, their carcasses, harpoons and their lines
 		com.jaymoskingdoms.client.whaling.GreatWhaleRenderer.register();
@@ -155,6 +155,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VictimClient.register();
 		KinshipClient.register();
 		WarriorFury.register();
+		BruteRageHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
 		// (0.7.330) a werewolf's, an ape's or a disguise's voice, through Simple Voice Voice Changer when loaded

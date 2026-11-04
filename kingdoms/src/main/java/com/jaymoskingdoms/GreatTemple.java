@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Truth's great temple, drawn from the realm's palette: a nave eleven wide inside, a bell tower over the doors,
+ * (0.7.518) The Truth's great temple, drawn from the realm's palette: a nave eleven wide inside, a bell tower over the doors,
  * an apse with the altar at the far end, glass windows and a rose window. {@link #nave} is shared with the ruined cathedral
  * ({@link TempleBuildings}). 13 x 19, 20 high; the doors are on the north (z = 0) side, like every blueprint.
  */

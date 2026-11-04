@@ -229,6 +229,13 @@ public final class WeaponParts {
 		add(new Kind("pod_tank_blank", "jaymospowers:pod_tank", Scheme.SINGLE_COPPER, 5 * INGOT, Assembly.ALONE, 1));
 		// (0.18.50) the Sealed Helm (power/zfighter/breath/Breath): an iron seal, finished with a glass block at the Tool Station
 		add(new Kind("helm_seal", "jaymospowers:sealed_helm", Scheme.SINGLE, 2 * INGOT, Assembly.GLASS, 1));
+		// (RPG Series) Rogues & Warriors' and Archers' weapons are forged like the rest (Andy's rule: iron tools come
+		// through Tinkers); their grid recipes are dropped (Uncraftable.RPG_SERIES). Ingots as their old recipes took.
+		add(new Kind("rogue_dagger_blade", "rogues:dagger", Scheme.PREFIX, INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind("sickle_blade", "rogues:sickle", Scheme.PREFIX, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind("double_axe_head", "rogues:double_axe", Scheme.PREFIX, 4 * INGOT, Assembly.TOUGH_BINDING, 1));
+		add(new Kind("war_glaive_blade", "rogues:glaive", Scheme.PREFIX, 3 * INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind("ranger_spear_tip", "archers:spear", Scheme.PREFIX, INGOT, Assembly.ROD_BINDING, 1));
 		// (Havens patch 5) the kings' weapons: iron heads taken from fallen kings, never made
 		add(new Kind(GUTTING_HOOK_BLADE, "jaymospowers:gutting_hook", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
 		add(new Kind(WARCHIEF_CLEAVER_BLADE, "jaymospowers:warchief_cleaver", Scheme.SINGLE, 5 * INGOT, Assembly.TOUGH_BINDING, 1));

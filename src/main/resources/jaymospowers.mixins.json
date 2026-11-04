@@ -10,7 +10,6 @@
 		"AttackTellGoalMixin",
 		"BackpackExplosionMixin",
 		"WillPushMixin",
-		"CarryBlockItemMixin",
 		"CauldronBrewItemMixin",
 		"CarryLivingEntityMixin",
 		"CarryPacketListenerMixin",

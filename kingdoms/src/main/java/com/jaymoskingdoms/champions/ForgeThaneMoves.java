@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Forge-Thane's moves: Hammerfall (a leap onto a marked spot), Slag Spray (a cone of fire), Iron Skin (he takes
+ * (0.7.518) The Forge-Thane's moves: Hammerfall (a leap onto a marked spot), Slag Spray (a cone of fire), Iron Skin (he takes
  * little and wears the weapons that strike him; a kneel ends it); in a group, slag rises from the floor.
  */
 final class ForgeThaneMoves implements Moves {

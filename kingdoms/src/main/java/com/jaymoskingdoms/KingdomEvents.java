@@ -96,7 +96,7 @@ public final class KingdomEvents {
 			}
 			ServerPlayer player = source.getEntity() instanceof ServerPlayer p ? p : null;
 			// a monster cut down on a faction's land: they're grateful (members earn standing too)
-			// (0.7.515) a patron champion and its adds earn no thanks
+			// (0.7.518) a patron champion and its adds earn no thanks
 			if (entity instanceof Enemy && player != null && !PatronChampions.outsideTown(entity)) {
 				Faction faction = Factions.at(level.getServer(), level, entity.blockPosition());
 				if (faction != null) {

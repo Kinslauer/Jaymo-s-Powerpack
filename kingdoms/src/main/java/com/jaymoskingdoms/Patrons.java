@@ -58,7 +58,7 @@ import org.jspecify.annotations.Nullable;
 public final class Patrons {
 	// ---- tuning ----------------------------------------------------------------------------------------------------------
 	/** (0.7.509) Days of prayer at one patron's shrine, running, to be sworn. */
-	/** (0.7.515) The key prefix Powers asks the patron weapons' sworn reading by. */
+	/** (0.7.518) The key prefix Powers asks the patron weapons' sworn reading by. */
 	static final String WEAPON_KEY = "patron_weapon/";
 	public static final int SWEAR_DAYS = 3;
 	public static final int FAVOUR_MAX = 100;
@@ -268,7 +268,7 @@ public final class Patrons {
 
 	/** (0.7.509) Read by Jaymo's Powers by reflection (MedicineSkill): a blessing's strength for this player, 0 if they lack it. */
 	public static float blessing(Player player, String key) {
-		// (0.7.515) Jaymo's Powers' patron weapons: 1 sworn to that patron (tier 1 or more), -1 in its trials (turned from it), else 0
+		// (0.7.518) Jaymo's Powers' patron weapons: 1 sworn to that patron (tier 1 or more), -1 in its trials (turned from it), else 0
 		if (key.startsWith(WEAPON_KEY)) {
 			Patron p = Patron.byKey(key.substring(WEAPON_KEY.length()));
 			if (p == null) {

@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Antlered Hunter's moves: Pinning Spear (a green line, step off it), Into the Green (unseen, behind the farthest
+ * (0.7.518) The Antlered Hunter's moves: Pinning Spear (a green line, step off it), Into the Green (unseen, behind the farthest
  * foe), Stampede (a charge in a line; a wall dazes him); in a group, his hounds.
  */
 final class AntleredHunterMoves implements Moves {

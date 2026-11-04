@@ -63,7 +63,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The eight patron champions' types and everything round them: the hunt (the old patron's champion hunts you once,
+ * (0.7.518) The eight patron champions' types and everything round them: the hunt (the old patron's champion hunts you once,
  * after the trials), what a fallen champion leaves (a weapon head for each fighter, sure by their third kill), the adds, and
  * the op commands. See {@link PatronChampion} and docs/Patrons-C-Plan.md.
  */
@@ -78,7 +78,7 @@ public final class PatronChampions {
 	/** It stands over its downed quarry this long before it goes (ticks). */
 	static final int HUNT_STAND = 60;
 
-	/** (0.7.515) Per player: champion kills of each patron (by key) since that patron's weapon last fell for them. Saved, kept through death. */
+	/** (0.7.518) Per player: champion kills of each patron (by key) since that patron's weapon last fell for them. Saved, kept through death. */
 	static final AttachmentType<Map<String, Integer>> TRIES = AttachmentRegistry.create(JaymosKingdoms.id("champion_tries"),
 		b -> b.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT)).copyOnDeath());
 	/** The chance the head falls for a fighter on their 1st, 2nd and 3rd try since their last: the third is sure. */

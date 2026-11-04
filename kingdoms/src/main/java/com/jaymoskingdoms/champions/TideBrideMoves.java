@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Tide-Bride's moves: Undertow (pulls everyone in), Drowning Grip (one foe drowns until they hit her or break her
+ * (0.7.518) The Tide-Bride's moves: Undertow (pulls everyone in), Drowning Grip (one foe drowns until they hit her or break her
  * sight), Riptide Wave (a marked line); in a group, drowned ones rise.
  */
 final class TideBrideMoves implements Moves {

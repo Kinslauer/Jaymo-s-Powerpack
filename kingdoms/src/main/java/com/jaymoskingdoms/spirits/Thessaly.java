@@ -98,6 +98,7 @@ public final class Thessaly extends Spirit {
 			}
 		});
 		MOVES.add(new JuggleMove());
+		MOVES.add(SpiritCharms.turnBack());
 		// (Andy, 2026-11-01) her mana wings: hover, higher and faster as she is mastered
 		MOVES.add(new Ambrose.Def("wings", ThessalyWings.SPREAD_COST, ThessalyWings.SPREAD_COOLDOWN, 1, Poses.IDLE, Mana.WILL, ThessalyWings::cast));
 		MOVES.add(SpiritExecutions.move("execute_thessaly", Spirits.THESSALY));

@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Hearth-Warden's moves: Banked Coals (marked spots burst), Kept Fire (a channel that mends her; break it),
+ * (0.7.518) The Hearth-Warden's moves: Banked Coals (marked spots burst), Kept Fire (a channel that mends her; break it),
  * Hearth's Wrath (a fiery cone); in a group, embers rise to help her.
  */
 final class HearthWardenMoves implements Moves {

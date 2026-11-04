@@ -808,7 +808,7 @@ public final class Will {
 	/** A foe stared down: it often drops its weapon, and it runs. */
 	static void cowed(ServerLevel level, ServerPlayer sp, Mob seen, long now) {
 		ItemStack weapon = seen.getMainHandItem();
-		// (0.7.515) a patron champion and its adds drop nothing
+		// (0.7.518) a patron champion and its adds drop nothing
 		boolean patron = seen instanceof PatronChampion || PatronChampions.isAdd(seen);
 		if (!patron && !weapon.isEmpty() && level.getRandom().nextFloat() < STARE_DROP_CHANCE) {
 			seen.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);

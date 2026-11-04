@@ -1,7 +1,7 @@
 # Patch 11c: Patron gods, part (c) (temples, champions, the patrons' weapons)
 
-Kingdoms **0.7.515** (`kingdoms/gradle.properties`), Powers **0.20.16** (`gradle.properties`: the eight patron weapons
-and their heads). Kitchen unchanged (0.5.57). Tag new code comments `(0.7.515)` and `(0.20.16)`.
+Kingdoms **0.7.518** (`kingdoms/gradle.properties`), Powers **0.20.18** (`gradle.properties`: the eight patron weapons
+and their heads). Kitchen unchanged (0.5.57). Tag new code comments `(0.7.518)` and `(0.20.18)`.
 
 Part (a) is merged (`docs/Patrons-Plan.md`, Kingdoms 0.7.509). Part (b) is on the branch this worktree is based on
 (`docs/Patrons-B-Plan.md`, Kingdoms 0.7.513). This is part (c), the last part.
@@ -79,10 +79,10 @@ Andy's rulings that shape this:
 - `data/jaymoskingdoms/tags/worldgen/biome/temple/<rule>.json` (section 4.2).
 
 ### Kingdoms, changed
-| File | Change (0.7.515) |
+| File | Change (0.7.518) |
 |---|---|
 | `JaymosKingdoms.java` | `PatronChampions.register(); Temples.register();` right after `RealmFaiths.register();` (line 504). |
-| `BossBars.java` | `boss(...)`: add `\|\| entity instanceof PatronChampion champion && !champion.decoy()`. Class doc: "(0.7.515) a patron's champion". |
+| `BossBars.java` | `boss(...)`: add `\|\| entity instanceof PatronChampion champion && !champion.decoy()`. Class doc: "(0.7.518) a patron's champion". |
 | `BossPosture.java` | `wear(ServerLevel, LivingEntity, float)` goes from `private` to package-private (`PatronChampion.wearPosture` calls it). Nothing else. |
 | `WorldTiers.java` | `hostile(Mob)`: first line `if (mob instanceof PatronChampion \|\| PatronChampions.isAdd(mob)) { return false; }`. Champions scale themselves, so no double scaling and no `MonsterGear`. |
 | `Patrons.java` | `blessing(...)`: the `patron_weapon/<key>` branch (section 7.4). New constant `static final String WEAPON_KEY = "patron_weapon/";`. |
@@ -93,7 +93,7 @@ Andy's rulings that shape this:
 | `client/JaymosKingdomsClient.java` | `com.jaymoskingdoms.client.champions.ChampionRenderer.register();` beside `HornkinRenderer.register()`. |
 | `client/StoryHoldScreen.java` | `HINTS = 92`. |
 | `assets/jaymoskingdoms/lang/en_us.json` | Section 10.1. |
-| `kingdoms/MODLOG.md`, `kingdoms/gradle.properties` (`version=0.7.515`) | Section 11. |
+| `kingdoms/MODLOG.md`, `kingdoms/gradle.properties` (`version=0.7.518`) | Section 11. |
 
 Not changed: `Turning.java` (the hunt reads `Patrons.hunters` and `Turning.trial`; the mark is flipped by the existing
 `Patrons.hunted`), `Shrine.java` (temples set `Shrine.DEDICATION` on a plain `Healing.SHRINE` block), `QuestFoes`,
@@ -107,7 +107,7 @@ Not changed: `Turning.java` (the hunt reads `Patrons.hunters` and `Turning.trial
 | `PatronWeaponHits.java` | Timed states (Sunder stacks, Marked Prey, Smokestep's window, Sun's Judgement wind-up, Hearthguard's gap), their server tick, and the guarded extra-damage helper. |
 
 ### Powers, changed
-| File | Change (0.20.16) |
+| File | Change (0.20.18) |
 |---|---|
 | `armory/Armory.java` | Eight `item(...)` lines after the kings' weapons (line 197). `PatronWeapons.init()` beside `RapierItem.init()`. |
 | `tinkering/WeaponParts.java` | `PATRONS` set, eight `Kind`s, `king()` also true for them, `FOUND` includes them (section 7.1). |
@@ -117,7 +117,7 @@ Not changed: `Turning.java` (the hunt reads `Patrons.hunters` and `Turning.trial
 | `data/jaymospowers/weapon_attributes/<id>.json` x8 (new) | Better Combat parents (section 7.2). |
 | `data/minecraft/tags/item/swords.json` | The eight weapon ids. |
 | `items/`, `models/item/armory/`, `textures/item/armory/`, head models and textures | Written by `tools/patron_weapons_assets.py` and `tools/weapon_parts_assets.py` (section 9.1). |
-| `gradle.properties` (`version=0.20.16`), root `MODLOG.md` | Section 11. |
+| `gradle.properties` (`version=0.20.18`), root `MODLOG.md` | Section 11. |
 
 ### Tools (root `tools/`)
 | File | What |
@@ -153,7 +153,7 @@ the lang keys use `patron_champion`, and each entity type has its own id:
 
 ### 3.1 Record and attachment
 ```java
-/** (0.7.515) A patron's temple: where, whose, which kind, its altar and champion, and when its champion last fell. */
+/** (0.7.518) A patron's temple: where, whose, which kind, its altar and champion, and when its champion last fell. */
 public record Temple(int id, String patron, String world, BlockPos center, BlockPos altar, Direction facing, int kind, int faction,
 	long slainDay, Optional<UUID> champion) { ... CODEC (RecordCodecBuilder, every field; world is the dimension id string) }
 public static final int WILD = 0, RUIN = 1, GREAT = 2;
@@ -537,7 +537,7 @@ For a `PatronChampion` that is not a decoy:
 2. **The fighters**: players in its `HITTERS` who are online, in that world, and within `WorldTiers.CREDIT_RANGE` (64).
 3. **Temple form, the head roll** (the third-try guarantee, per player):
    ```java
-   /** (0.7.515) Per player: champion kills of each patron (by key) since that patron's weapon last fell for them. Saved, kept through death. */
+   /** (0.7.518) Per player: champion kills of each patron (by key) since that patron's weapon last fell for them. Saved, kept through death. */
    static final AttachmentType<Map<String, Integer>> TRIES = AttachmentRegistry.create(JaymosKingdoms.id("champion_tries"),
    	b -> b.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT)).copyOnDeath());
    /** The chance the head falls for a fighter on their 1st, 2nd and 3rd try since their last: the third is sure. */
@@ -623,7 +623,7 @@ temple form (it is a `PatronChampion`).
 ### 7.1 Heads (`tinkering/WeaponParts.java`)
 ```java
 /**
- * (0.20.16) The patrons' weapons (Kingdoms 0.7.515: each champion drops its patron's iron head, armory/PatronWeapons). Like the
+ * (0.20.18) The patrons' weapons (Kingdoms 0.7.518: each champion drops its patron's iron head, armory/PatronWeapons). Like the
  * kings' heads: taken, never shaped, cast or forged anew, only put together at the Tool Station.
  */
 public static final String HEARTHGUARD_HEAD = "hearthguard_head", ANVIL_HAMMER_HEAD = "anvil_fathers_hammer_head",
@@ -652,7 +652,7 @@ the usual grade line, colour and numbers (and the Masterwork glint) show on it.
 
 ### 7.2 Weapons (`armory/PatronWeapons.java`)
 ```java
-/** (0.20.16) The patrons' weapons: their item, their head, and the patron (a Kingdoms key) whose sworn they serve best. */
+/** (0.20.18) The patrons' weapons: their item, their head, and the patron (a Kingdoms key) whose sworn they serve best. */
 enum Kind {
 	HEARTHGUARD("hearthguard", WeaponParts.HEARTHGUARD_HEAD, "hearthkeeper"),
 	ANVIL_HAMMER("anvil_fathers_hammer", WeaponParts.ANVIL_HAMMER_HEAD, "anvil_father"),
@@ -710,7 +710,7 @@ forged piece.
 ### 7.4 Sworn reading (`KingdomsCompat.blessing`, `Patrons.blessing`)
 Powers, `compat/KingdomsCompat.java`:
 ```java
-/** (0.20.16) Kingdoms' Patrons.blessing(player, key) by reflection: 0 without Kingdoms or on any failure. */
+/** (0.20.18) Kingdoms' Patrons.blessing(player, key) by reflection: 0 without Kingdoms or on any failure. */
 public static float blessing(Player player, String key)
 ```
 (Cache the `Method` the way `boss` does. `MedicineSkill` keeps its own copy and is not touched.)
@@ -718,7 +718,7 @@ public static float blessing(Player player, String key)
 
 Kingdoms, `Patrons.blessing` (the key strings are a contract with Powers):
 ```java
-// (0.7.515) Jaymo's Powers' patron weapons: 1 sworn to that patron (tier 1 or more), -1 in its trials (turned from it), else 0
+// (0.7.518) Jaymo's Powers' patron weapons: 1 sworn to that patron (tier 1 or more), -1 in its trials (turned from it), else 0
 if (key.startsWith(WEAPON_KEY)) {
 	Patron p = Patron.byKey(key.substring(WEAPON_KEY.length()));
 	if (p == null) {
@@ -959,11 +959,11 @@ reads its own `Patrons.STATE`, which is synced. `KingdomsCompat.blessing` works 
 
 ## 11. Versions, MODLOG, docs
 
-- `kingdoms/gradle.properties`: `version=0.7.515`. `gradle.properties`: `version=0.20.16`. Kitchen unchanged.
+- `kingdoms/gradle.properties`: `version=0.7.518`. `gradle.properties`: `version=0.20.18`. Kitchen unchanged.
 
 `kingdoms/MODLOG.md`:
 ```
-## 0.7.515: patron gods, part (c): temples, champions, the patrons' weapons (pack 0.20.16)
+## 0.7.518: patron gods, part (c): temples, champions, the patrons' weapons (pack 0.20.18)
 `docs/Patrons-C-Plan.md`. Andy: champions are group fights, "only the strongest can fight alone".
 - **Temples** (`Temples`, `TempleSites`, `TempleBuildings`): once a player is in the Wildlands (or higher), now and then
   a patron's temple rises out of sight in a place that fits it: the Hearthkeeper's hearth-hall in open country, the
@@ -979,7 +979,7 @@ reads its own `Patrons.STATE`, which is synced. `KingdomsCompat.blessing` works 
   the Grave-Lamp, the Sun-Marshal, the Cinder-Shade and the Inquisitor. A boss bar, the posture bar, great-foe credit. It
   leashes to its temple, resets when everyone leaves, and stands again three days after it falls.
 - **The patrons' weapons**: a fallen champion drops its patron's iron head for each fighter, at the latest on their
-  third kill (34%, 50%, sure), Perfect (a solo kill's a Masterwork). Put together at the Tool Station (Powers 0.20.16).
+  third kill (34%, 50%, sure), Perfect (a solo kill's a Masterwork). Put together at the Tool Station (Powers 0.20.18).
 - **The hunt** (part (b)'s mark): after the trials, the patron you left sends its champion once, in a weaker hunting
   form, outside any town. Kill it (the new patron is pleased) or fall to it, and the hunt is over; outrun it and it comes
   again.
@@ -988,8 +988,8 @@ reads its own `Patrons.STATE`, which is synced. `KingdomsCompat.blessing` works 
 ```
 Root `MODLOG.md`:
 ```
-## 0.20.16
-- (Kingdoms 0.7.515) **The patrons' weapons** (`armory/PatronWeapons`): Hearthguard (blows heal you and those near),
+## 0.20.18
+- (Kingdoms 0.7.518) **The patrons' weapons** (`armory/PatronWeapons`): Hearthguard (blows heal you and those near),
   Anvil-Father's Hammer (blows strip armour), Tidecaller (use: drag foes in), Huntsman's Spear (marks prey), Gravelight
   (burns the undead), Sunbrand (use: the sun on a foe), Ashfang (use: smoke and a leap back, then a deep cut), The Plain
   Word (strips blessings, shows the unseen). Heads from Kingdoms' champions only (`WeaponParts.PATRONS`: never cast or
@@ -998,9 +998,9 @@ Root `MODLOG.md`:
   its trials.
 ```
 Docs to touch when built:
-- `docs/Otectus-Plan.md` row 11: "(c) built in Kingdoms 0.7.515 / Powers 0.20.16 (`docs/Patrons-C-Plan.md`)".
+- `docs/Otectus-Plan.md` row 11: "(c) built in Kingdoms 0.7.518 / Powers 0.20.18 (`docs/Patrons-C-Plan.md`)".
 - `docs/Abilities.md`, new row 483: "Everyone (Powers) | right-click with a Tidecaller, Sunbrand or Ashfang | **Patron
-  weapons** | (0.20.16) Undertow (drag foes in), Sun's Judgement (a beam on the foe you look at), Smokestep (a leap back
+  weapons** | (0.20.18) Undertow (drag foes in), Sun's Judgement (a beam on the foe you look at), Smokestep (a leap back
   into smoke, unseen). Stronger for the patron's sworn, cold while in its trials. The other five work on a hit. | |".
 
 ---

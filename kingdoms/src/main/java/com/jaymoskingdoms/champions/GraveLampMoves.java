@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.515) The Grave-Lamp's moves: Lamp Flare (look away), Soul Lanterns (three pulsing lights), Night Falls (darkness and
+ * (0.7.518) The Grave-Lamp's moves: Lamp Flare (look away), Soul Lanterns (three pulsing lights), Night Falls (darkness and
  * harder blows); in a group, lantern wisps.
  */
 final class GraveLampMoves implements Moves {
@@ -140,7 +140,7 @@ final class GraveLampMoves implements Moves {
 			if (vex == null) {
 				continue;
 			}
-			// (0.7.515) EntityType.create skips finalizeSpawn, so the sword is given by hand
+			// (0.7.518) EntityType.create skips finalizeSpawn, so the sword is given by hand
 			vex.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
 			vex.setLimitedLife(WISP_LIFE);
 			MoveKit.name(vex, "wisp");

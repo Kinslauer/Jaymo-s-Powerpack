@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /**
- * (0.7.515) What the patrons' wild temples are built of, all our own. Each is drawn at once (a sketch in its own frame, the
+ * (0.7.518) What the patrons' wild temples are built of, all our own. Each is drawn at once (a sketch in its own frame, the
  * doors on its +z side), then turned to face the way out. Halls carved into stone or built in the Nether are walled and roofed
  * in their own stone so nothing floods; containers are left empty (the champion's head is the prize).
  */

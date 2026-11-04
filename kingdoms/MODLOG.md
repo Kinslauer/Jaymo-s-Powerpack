@@ -8793,7 +8793,44 @@ is our own take on the idea (none of its code or art).
     Pack** (Plague Doctor or Bar Swing; 2 pts): sneaking and sprinting cost 40% less hunger.
 - Mock-ups: project files `art-overhaul/skill-web/`. Kingdoms compiled with Gradle (compileClientJava); not played.
 
-## 0.7.515: patron gods, part (c): temples, champions, the patrons' weapons (pack 0.20.16)
+## 0.7.515: RPG Series class gates (pack 0.20.16)
+- Andy shipped Zsolt Molnar's Wizards, Archers and Rogues & Warriors (Powers' packMods, PR #919). `RpgSeriesGate` answers
+  Spell Engine's cast check (`SpellEvents.CASTING_ATTEMPT.PRE`, both sides) so only the matching class casts their spells:
+  Wizards = Mage; Archers = Archer and Marksman; the rogue book (Slice and Dice, Shock Powder, Shadow Step, Vanish,
+  Mutilate, Bear Trap) = Thief; the warrior book (Shout, Charge, Last Stand, Mortal Strike, Throw, Throw Net) = Warlord,
+  Brute and Rider; the Survivalist also sets the Bear Trap and throws the net. Creative players cast anything. A refused
+  cast shows "Only a Mage can cast this" on the action bar (every 2 s at most). Weapons and armour stay usable by all.
+  Other mods' spells are untouched. Compiled against Spell Engine (compileOnly), never required. Not played.
+
+## 0.7.516: RPG Series spells and forms on the skill web (pack 0.20.16)
+- Andy: spells and moves come only from perks or a trainer. 49 perks appended to `Skills.Perk` (no ordinals moved), in six
+  new branches on the web: **Archery** and **Spellcraft** (arcane, fire, frost chains) in Survival, **Rogue's Arts** and
+  **Knife Arts** in Stealth, **Warfare** and **Weapon Forms** in Strength. Late branches start at ring 3 (`SkillWeb`).
+- `Learnables` maps each perk to its Spell Engine spell or Weapon Form. A class spell perk is locked to its classes (hover
+  shows "For: ..."); Weapon Forms are open to all. Buying a form perk teaches the form; forms learned before are marked
+  taught. Spell Engine reads learned spells from a new source (`RpgSeriesGate`), and the gate refuses spells not learned.
+  Tier 0-1 weapon spells (Arcane Bolt, Fireball, Frost Shard and so on) stay free with the weapon.
+- **Trainers:** veteran drills (`GuardDrills`) and wizard trials (`WizardTrials`, Mage only) teach the next perk free
+  (`@taught` rank: no points, survives a respec). Spell books and the binding table teach nothing. Not played.
+
+## 0.7.517: Brute rage and Enchanted Storage (pack 0.20.16)
+- **Brute rage** (`BruteRage`, Andy; idea from Warrior Rage, all rights reserved, nothing taken): melee blows given (+8%)
+  and taken (+10%) and kills (+25%) fill a meter shown as a thin bar right of the hotbar (`client/BruteRageHud`); it drains
+  5 s after the fight. Full, the Brute roars and rages 12 s: blows +25% and set foes alight 2 s, +0.5 knockback resistance,
+  flames round them; each kill adds 3 s (20 s at most). Then they are spent: Slowness and Mining Fatigue 6 s. The class
+  card lists "Rage +25%".
+- **Enchanted Storage** (`StorageEnchanting`, Andy: wizards enchant storage high on the tree and gain a bag of holding): a
+  3-rank Mage perk atop Spellcraft's arcane column (tier 18, after Arcane Evocation). Sneak-use an enchanting table holding
+  a chest (rank 1: leather Bag of Holding, 3 levels + 2 lapis), a leather bag (rank 2: iron, 6 + 4) or an iron bag
+  (rank 3: golden, 10 + 6); bags keep their contents. Bag of Holding (Fuzs, MPL-2.0) ships in Powers' packMods with its
+  grid recipes dropped. Not played.
+- **Spirit charms** (`spirits/SpiritCharms`, Andy: The Four Houses' spells as "spellcraft perks or moves for the ki
+  spirits"; MIT, ideas only). Disarming and a shield were already the spirits' (Thessaly's Unseen Hand, Ambrose's Aegis),
+  so three new moves: **Petrify** (the Quiet One, level 4: the foe in sight turns to stone 4 s, rooted and weak, dust
+  falling; no bosses), **Guardian Light** (Ambrose, level 5: undead within 12 blocks take 6, burn 4 s, are thrown back),
+  **Turn Back** (Thessaly, level 6: 5 s of arrows and bolts flying at you sent back, now yours). Existing poses. Not played.
+
+## 0.7.518: patron gods, part (c): temples, champions, the patrons' weapons (pack 0.20.18)
 `docs/Patrons-C-Plan.md`. Andy: champions are group fights, "only the strongest can fight alone".
 - **Temples** (`Temples`, `TempleSites`, `TempleBuildings`): once a player is in the Wildlands (or higher), now and then
   a patron's temple rises out of sight in a place that fits it: the Hearthkeeper's hearth-hall in open country, the
@@ -8809,7 +8846,7 @@ is our own take on the idea (none of its code or art).
   the Grave-Lamp, the Sun-Marshal, the Cinder-Shade and the Inquisitor. A boss bar, the posture bar, great-foe credit. It
   leashes to its temple, resets when everyone leaves, and stands again three days after it falls.
 - **The patrons' weapons**: a fallen champion drops its patron's iron head for each fighter, at the latest on their
-  third kill (34%, 50%, sure), Perfect (a solo kill's a Masterwork). Put together at the Tool Station (Powers 0.20.16).
+  third kill (34%, 50%, sure), Perfect (a solo kill's a Masterwork). Put together at the Tool Station (Powers 0.20.18).
 - **The hunt** (part (b)'s mark): after the trials, the patron you left sends its champion once, in a weaker hunting
   form, outside any town. Kill it (the new patron is pleased) or fall to it, and the hunt is over; outrun it and it comes
   again.

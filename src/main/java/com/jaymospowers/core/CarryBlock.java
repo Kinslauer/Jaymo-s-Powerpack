@@ -18,12 +18,9 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.HitResult;
@@ -35,7 +32,6 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -59,15 +55,16 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Carrying a block (anyone): sneak + right-click one with empty hands to lift it out of the world and carry it in both
- * arms, the same as a body ({@link Carry}, hold {@link Carry#BLOCK}). (0.13.11) Right-click puts it straight into the
- * free spot you're looking at, within {@link #PLACE_REACH} (turned to face you, as if placed); with no room there you
- * keep hold of it. Sneak + right-click throws it (never a chest): it lands as a falling block and settles where it
- * comes down (or breaks into its item if it can't stand there).
+ * Carrying a block in both arms, the same as a body ({@link Carry}, hold {@link Carry#BLOCK}). (0.20.17, Andy) Ordinary
+ * blocks are Carry On's now ({@link CarryOnCompat}); this only takes the space pod's parts ({@link #carriable}: sneak +
+ * right-click one with empty hands, or take a mended one off a salvage rack), since they're set down onto a pod or a rack
+ * ({@code PodParts.tryAttach}). Right-click puts it straight into the free spot you're looking at, within
+ * {@link #PLACE_REACH} (turned to face you, as if placed); with no room there you keep hold of it. Sneak + right-click
+ * throws it: it lands as a falling block and settles where it comes down (or breaks into its item if it can't stand there).
+ * Never from protected spots (spawn, adventure mode, claims that hook block breaking).
  * <p>
- * (0.13.11) Only crafting tables, anvils and single chests can be lifted ({@link #carriable}); dirt, stone and every
- * other block stay where they are. A chest comes along with everything in it. Never from protected spots (spawn,
- * adventure mode, claims that hook block breaking). {@link #PLACED} still notes which blocks players placed.
+ * The rest is used by others: Duplex's doubles fetch any solid block on their heads ({@link #liftableAny},
+ * {@link #takeOut}, {@link #place}, {@link #land}), and the Bound Block reads {@link #liftableAny}.
  * <p>
  * The carried block is a display riding at the carrier's feet (a block display, or an item display for blocks drawn
  * by a block entity renderer, like chests, which a block display shows as nothing); each client draws it in their
@@ -85,7 +82,10 @@ public final class CarryBlock {
 	/** Marks a carried block's display, so a stray one is found again after a reload. */
 	static final String TAG = "jaymospowers.carried_block";
 
-	/** On a chunk: the blocks in it that players placed (packed positions). Saved with the chunk. */
+	/**
+	 * On a chunk: the blocks in it that players placed (packed positions). (0.20.17) No longer written or read: kept
+	 * registered only so chunks saved with it still load quietly.
+	 */
 	public static final AttachmentType<LongOpenHashSet> PLACED = AttachmentRegistry.create(JaymosPowers.id("carry_placed"),
 		builder -> builder.persistent(Codec.LONG.listOf().xmap(LongOpenHashSet::new, List::copyOf)));
 	/** On a carried block's display: the block, and what was in it (its block entity, saved), if anything. */
@@ -96,7 +96,7 @@ public final class CarryBlock {
 
 	/** Stray carried blocks found as their chunks loaded, put back into the world next tick. */
 	private static final List<Display> STRAYS = new ArrayList<>();
-	/** Carried blocks on their way down: once each settles, its spot counts as placed, or its contents spill. */
+	/** Carried blocks on their way down: one that breaks instead of settling spills its contents. */
 	private static final Map<FallingBlockEntity, CompoundTag> FALLING = new HashMap<>();
 
 	private CarryBlock() {
@@ -104,7 +104,6 @@ public final class CarryBlock {
 
 	static void init() {
 		UseBlockCallback.EVENT.register(CarryBlock::onUseBlock);
-		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> unmark(level, pos));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> FALLING.clear());
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Display display && is(display) && !Carry.isCarried(display)) {
@@ -145,38 +144,6 @@ public final class CarryBlock {
 		return entity instanceof Display.BlockDisplay display ? display.getBlockState() : Blocks.AIR.defaultBlockState();
 	}
 
-	// ---- which blocks players placed
-
-	/** Server: a player placed a block here (from {@code CarryBlockItemMixin}). */
-	public static void markPlaced(Level level, BlockPos pos) {
-		if (level instanceof ServerLevel) {
-			LevelChunk chunk = level.getChunkAt(pos);
-			LongOpenHashSet placed = chunk.getAttached(PLACED);
-			placed = placed == null ? new LongOpenHashSet() : placed;
-			placed.add(pos.asLong());
-			chunk.setAttached(PLACED, placed);
-			chunk.markUnsaved();
-		}
-	}
-
-	static void unmark(Level level, BlockPos pos) {
-		LevelChunk chunk = level.getChunkAt(pos);
-		LongOpenHashSet placed = chunk.getAttached(PLACED);
-		if (placed != null && placed.remove(pos.asLong())) {
-			if (placed.isEmpty()) {
-				chunk.removeAttached(PLACED);
-			} else {
-				chunk.setAttached(PLACED, placed);
-			}
-			chunk.markUnsaved();
-		}
-	}
-
-	static boolean placed(Level level, BlockPos pos) {
-		LongOpenHashSet placed = level.getChunkAt(pos).getAttached(PLACED);
-		return placed != null && placed.contains(pos.asLong());
-	}
-
 	/** Whether this kind of block could be picked up at all (wherever it came from). */
 	public static boolean liftable(Level level, BlockPos pos, BlockState state) {
 		return liftableShape(level, pos, state) && carriable(state);
@@ -204,16 +171,11 @@ public final class CarryBlock {
 	}
 
 	/**
-	 * (0.13.11) The only blocks that can be carried: a crafting table, an anvil, a single chest (Minecraft's own: other
-	 * mods' chests, like Lootr's, keep each player's loot in them and stay put).
+	 * (0.20.17) The only blocks players lift with this carry: the space pod's parts. Crafting tables, anvils, chests and
+	 * every other block are Carry On's ({@link CarryOnCompat}).
 	 */
 	public static boolean carriable(BlockState state) {
-		if (state.is(Blocks.CRAFTING_TABLE) || state.is(BlockTags.ANVIL) || com.jaymospowers.power.zfighter.pod.PodParts.partOf(state) != null) {
-			return true;
-		}
-		return state.getBlock() instanceof ChestBlock
-			&& BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace().equals("minecraft")
-			&& state.getValue(BlockStateProperties.CHEST_TYPE) == ChestType.SINGLE;
+		return com.jaymospowers.power.zfighter.pod.PodParts.partOf(state) != null;
 	}
 
 	private static InteractionResult onUseBlock(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
@@ -221,7 +183,8 @@ public final class CarryBlock {
 			|| !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty()) {
 			return InteractionResult.PASS;
 		}
-		if (Carry.isCarrying(player) || Carry.isCarried(player) || KitchenCompat.isCarryingCorpse(player) || player.isPassenger() || player.isSleeping()) {
+		if (Carry.isCarrying(player) || Carry.isCarried(player) || KitchenCompat.isCarryingCorpse(player) || CarryOnCompat.isCarrying(player)
+			|| player.isPassenger() || player.isSleeping()) {
 			return InteractionResult.PASS;
 		}
 		BlockPos pos = hit.getBlockPos();
@@ -260,7 +223,6 @@ public final class CarryBlock {
 				clearable.clearContent();
 			}
 		}
-		unmark(level, pos);
 		// a waterlogged block leaves its water behind
 		// (and a block entity's own removal effects, like a furnace's stored XP, stay with the saved contents)
 		level.setBlock(pos, state.getFluidState().createLegacyBlock(),
@@ -407,7 +369,6 @@ public final class CarryBlock {
 				level.setBlockEntity(loaded);
 			}
 		}
-		markPlaced(level, pos);
 		level.playSound(null, pos, state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1.0F, 0.8F);
 		return Vec3.atBottomCenterOf(pos);
 	}
@@ -421,7 +382,7 @@ public final class CarryBlock {
 			state.getBlock() instanceof AnvilBlock ? toward.getClockWise() : toward.getOpposite());
 	}
 
-	/** Carried blocks that came down this tick: where each settled counts as placed; one that broke spills its contents. */
+	/** Carried blocks that came down this tick: one that broke spills its contents. */
 	private static void settle() {
 		var it = FALLING.entrySet().iterator();
 		while (it.hasNext()) {
@@ -437,9 +398,7 @@ public final class CarryBlock {
 			}
 			BlockPos pos = falling.blockPosition();
 			BlockState state = falling.getBlockState();
-			if (level.getBlockState(pos).is(state.getBlock())) {
-				markPlaced(level, pos);
-			} else {
+			if (!level.getBlockState(pos).is(state.getBlock())) {
 				spill(level, pos, state, e.getValue().isEmpty() ? null : e.getValue());
 			}
 		}
