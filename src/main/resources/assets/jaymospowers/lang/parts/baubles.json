@@ -9,6 +9,7 @@
 	"bauble.jaymospowers.slot.head": "Head",
 	"bauble.jaymospowers.slot.body": "Body",
 	"bauble.jaymospowers.slot.charm": "Charm",
+	"bauble.jaymospowers.slot.wrist": "Wrist",
 	"item.jaymospowers.heartstone_amulet": "Heartstone Amulet",
 	"item.jaymospowers.swiftfoot_ring": "Swiftfoot Ring",
 	"item.jaymospowers.delvers_ring": "Delver's Ring",
@@ -18,5 +19,13 @@
 	"item.jaymospowers.rabbit_foot_charm": "Rabbit's Foot Charm",
 	"item.jaymospowers.lantern_pole": "Lantern Pole",
 	"tooltip.jaymospowers.lantern_pole": "Worn on your back, the lantern hung out over your head",
-	"tooltip.jaymospowers.hip_lantern": "Fits the belt slot: hangs at your hip"
+	"tooltip.jaymospowers.hip_lantern": "Fits the belt slot: hangs at your hip",
+	"item.jaymospowers.bottled_fairy": "Bottled Pink Fairy",
+	"item.jaymospowers.bottled_fairy.slots": "Amulet, Charm or Belt (at the hip)",
+	"tooltip.jaymospowers.bottled_fairy.save": "Worn, she turns death aside once; the bottle cracks and she flies free",
+	"tooltip.jaymospowers.bottled_fairy.free": "Sneak + use to let her go",
+	"item.jaymospowers.pink_fairy": "Pink Fairy",
+	"entity.jaymospowers.pink_fairy": "Pink Fairy",
+	"message.jaymospowers.fairy.saved": "A rush of rose light, and you are still breathing",
+	"item.jaymospowers.cracked_fairy_bottle": "Cracked Fairy Bottle"
 }

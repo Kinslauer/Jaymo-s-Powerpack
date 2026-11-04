@@ -50,7 +50,8 @@ patches 6 (Kingdoms side) and 9 (art) can run beside another.
   (patch 8).
 - **Charge:** a band charge replaces the random 1 to 5 minute timer. Changed, it drains one point a tick, and faster
   when you're hit or when a move goes on cooldown. As a human it refills. Mastery makes it bigger, from 2 minutes up to
-  5 at full mastery. The HUD bar becomes the charge, and the last 5 seconds beep and flash (patch 0).
+  5 at full mastery. The HUD bar becomes the charge, and the last 5 seconds beep and flash (patch 0). (0.19.85, Andy: the
+  charge is unlocked by reforging the band at the moon forge; before that it's the random 1 to 5 minute timer.)
 - **Quick change:** while you're an alien, hold Z and scroll to another alien. It costs a quarter of the charge, and
   you're dizzy for a second.
 - **The band saves you:** a killing blow while you're human slams the band for you, before Downed. The form fits the
@@ -170,5 +171,7 @@ alien's own skin (no new art, every alien covered); the preview turns you (the b
 ## Open questions (Claude assumes the first answer and carries on)
 1. Patch 2: does each Ultimate keep its current special move as its C, or should the move fold into the new kit with C
    just turning back? (Assumed: it stays as C.)
-2. Patch 1: should the charge fully replace the random timer before mastery? (Assumed: yes.)
+2. Patch 1: should the charge fully replace the random timer before mastery? (Andy, 2026-11-04: no, "i want the charge to
+   be something you unlock, its a random timer before then"; he picked reforging the band as the unlock. Built in 0.19.85:
+   unforged, a change lasts a random 1 to 5 minutes and the band recharges a minute after; reforged, the charge.)
 3. Patch 8: is Dud on the rival band's dial too, or only the four darkened aliens? (Assumed: only the four.)

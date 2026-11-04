@@ -171,7 +171,7 @@ public final class VillagerLooks {
 			if (kind == null && style == null) {
 				return;
 			}
-			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(style != null ? style.skin() : kind.skin[look.variant()]), lightCoords,
+			collector.order(1).submitModel(marks, state, poseStack, HeritageLooks.marksType(style != null ? style.skin() : kind.skin[look.variant()], style), lightCoords,
 				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 			if (look.glow() != 0) {
 				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(style != null ? style.glow() : kind.glow[look.variant()]), lightCoords,
@@ -186,7 +186,8 @@ public final class VillagerLooks {
 			}
 			if (kind == HeritageLooks.Kind.TIDEBORN) {
 				HeritageLooks.finTextures(style);
-				HeritageLooks.fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0, false, false);
+				SeaParts.Fins keep = SeaParts.fins(style);
+				HeritageLooks.fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0, !keep.head, !keep.arms);
 			}
 			if (kind == HeritageLooks.Kind.STONEBORN) {
 				// (0.7.443) cracks over the face and chest, and the heavy brow

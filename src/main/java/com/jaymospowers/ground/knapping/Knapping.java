@@ -56,10 +56,14 @@ public final class Knapping {
 	private static final Map<GroundRocks.Variant, TinkerMaterial> MATERIALS = Map.of(GroundRocks.Variant.GRANITE, TinkerMaterial.ROCK_GRANITE,
 		GroundRocks.Variant.DIORITE, TinkerMaterial.ROCK_DIORITE);
 	/** The look of a chip, by rock (ARGB). */
-	private static final Map<GroundRocks.Variant, Integer> COLOURS = Map.of(GroundRocks.Variant.STONE, 0xFF8A8A8A, GroundRocks.Variant.MOSSY, 0xFF7A8C6A,
-		GroundRocks.Variant.GRANITE, 0xFF9C6B5B, GroundRocks.Variant.DIORITE, 0xFFBDBDBD, GroundRocks.Variant.ANDESITE, 0xFF878787,
-		GroundRocks.Variant.DEEPSLATE, 0xFF4C4C56, GroundRocks.Variant.TUFF, 0xFF6F6F63, GroundRocks.Variant.SANDSTONE, 0xFFD6C68E,
-		GroundRocks.Variant.RED_SANDSTONE, 0xFFB5613B);
+	private static final Map<GroundRocks.Variant, Integer> COLOURS = Map.ofEntries(Map.entry(GroundRocks.Variant.STONE, 0xFF8A8A8A),
+		Map.entry(GroundRocks.Variant.MOSSY, 0xFF7A8C6A), Map.entry(GroundRocks.Variant.GRANITE, 0xFF9C6B5B),
+		Map.entry(GroundRocks.Variant.DIORITE, 0xFFBDBDBD), Map.entry(GroundRocks.Variant.ANDESITE, 0xFF878787),
+		Map.entry(GroundRocks.Variant.DEEPSLATE, 0xFF4C4C56), Map.entry(GroundRocks.Variant.TUFF, 0xFF6F6F63),
+		Map.entry(GroundRocks.Variant.SANDSTONE, 0xFFD6C68E), Map.entry(GroundRocks.Variant.RED_SANDSTONE, 0xFFB5613B),
+		// (0.20.2) the Nether's
+		Map.entry(GroundRocks.Variant.NETHERRACK, 0xFF7A3434), Map.entry(GroundRocks.Variant.BLACKSTONE, 0xFF2E2930),
+		Map.entry(GroundRocks.Variant.BASALT, 0xFF545458));
 
 	/**
 	 * One shape: three rows of three, {@code #} a chip that stays and {@code .} one knocked out. {@code make} builds the
@@ -215,7 +219,7 @@ public final class Knapping {
 	 */
 	private static boolean hard(Level level, BlockPos pos, BlockState state) {
 		return !(state.getBlock() instanceof LooseStonesBlock) && !state.hasBlockEntity() && !state.is(BlockTags.ANVIL)
-			&& state.requiresCorrectToolForDrops() && state.getDestroySpeed(level, pos) >= 1.0F
+			&& state.requiresCorrectToolForDrops() && (state.getDestroySpeed(level, pos) >= 1.0F || state.is(BlockTags.BASE_STONE_NETHER))
 			&& state.is(BlockTags.MINEABLE_WITH_PICKAXE);
 	}
 

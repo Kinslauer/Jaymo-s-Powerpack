@@ -1178,5 +1178,35 @@
     "id": "jaymoskingdoms:skins/clothing/haven/warriorborn/folk_3.png",
     "profession": "jaymoskingdoms:uniform",
     "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/poor/rags_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/poor/rags_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/poor/rags_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/poor/rags_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/poor/rags_4.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/poor/rags_5.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
   }
 ]

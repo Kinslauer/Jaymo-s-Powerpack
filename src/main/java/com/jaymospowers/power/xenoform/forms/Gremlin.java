@@ -16,7 +16,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -46,8 +45,7 @@ import net.minecraft.world.phys.Vec3;
  * or pop a piece of redstone off its block.</li>
  * <li>V, Bite: a nip that steals hunger from the bitten and feeds you.</li>
  * <li>B (hold), Climb: scuttle straight up any wall.</li>
- * <li>C (ascended), Swarm: you split: {@link #SWARM_CLONES} glowing gremlins scuttle after you, biting what you bite.
- * C again swaps you with the one farthest off (or nearest, when sneaking).</li>
+ * <li>C (ascended), Swarm: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Swarm}.</li>
  * </ul>
  */
 public final class Gremlin extends XenoForm {
@@ -60,9 +58,8 @@ public final class Gremlin extends XenoForm {
 	public static final double BITE_REACH = 2.5;
 	public static final float BITE_DAMAGE = 3.0F, BITE_HEAL = 2.0F;
 	public static final double CLIMB_SPEED = 0.18;
-	/** Swarm: how many gremlins, how closely they follow and how fast, and C's cooldown between swaps. */
-	public static final int SWARM_CLONES = 3, SWAP_COOLDOWN = 20;
-	public static final double SWARM_FOLLOW = 3.0, SWARM_SPEED = 1.3;
+
+	private final com.jaymospowers.power.xenoform.XenoUltimate swarm = new com.jaymospowers.power.xenoform.forms.ultimate.Swarm(this);
 
 	public Gremlin() {
 		super("gremlin", 0.3F, 10.0F, 2.0, 0.2, 0.0, 0.0, Items.REDSTONE, 0x9ADC5A);
@@ -161,88 +158,10 @@ public final class Gremlin extends XenoForm {
 
 	// ---- Swarm ----
 
+	/** (0.20.21) Swarm is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Swarm}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		for (int i = 0; i < SWARM_CLONES; i++) {
-			double a = i / (double)SWARM_CLONES * Math.PI * 2.0;
-			Vec3 at = player.position().add(Math.cos(a) * 1.2, 0.1, Math.sin(a) * 1.2);
-			Silverfish clone = summon(level, net.minecraft.world.entity.EntityTypes.SILVERFISH, at, player.getYRot());
-			if (clone == null) {
-				continue;
-			}
-			clone.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 60 * 10, 0, false, false));
-			clone.setCustomName(player.getDisplayName());
-			clone.setCustomNameVisible(false);
-			live.minions.add(clone.getId());
-		}
-		if (live.minions.isEmpty()) {
-			return false;
-		}
-		burst(level, ParticleTypes.POOF, player.position().add(0.0, 0.3, 0.0), 20, 0.6, 0.05);
-		sound(player, SoundEvents.SILVERFISH_AMBIENT, 1.5F, 1.2F);
-		sound(player, SoundEvents.SILVERFISH_AMBIENT, 1.5F, 1.6F);
-		return true;
-	}
-
-	/** C again: swap places with the gremlin farthest off (nearest, sneaking). */
-	@Override
-	public boolean ultimateHasMove() {
-		return true;
-	}
-
-	@Override
-	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
-		if (!ultimateReady(player, live)) {
-			return;
-		}
-		ServerLevel level = player.level();
-		Mob pick = null;
-		double best = player.isShiftKeyDown() ? Double.MAX_VALUE : -1.0;
-		for (int id : live.minions) {
-			if (level.getEntity(id) instanceof Mob clone && clone.isAlive()) {
-				double d = clone.distanceToSqr(player);
-				if (player.isShiftKeyDown() ? d < best : d > best) {
-					best = d;
-					pick = clone;
-				}
-			}
-		}
-		if (pick == null) {
-			return;
-		}
-		Vec3 mine = player.position();
-		Vec3 theirs = pick.position();
-		player.teleportTo(level, theirs.x, theirs.y, theirs.z, java.util.Set.of(), player.getYRot(), player.getXRot(), false);
-		pick.teleportTo(mine.x, mine.y, mine.z);
-		player.resetFallDistance();
-		burst(level, ParticleTypes.POOF, mine.add(0.0, 0.3, 0.0), 8, 0.3, 0.03);
-		burst(level, ParticleTypes.POOF, theirs.add(0.0, 0.3, 0.0), 8, 0.3, 0.03);
-		sound(player, SoundEvents.SILVERFISH_STEP, 1.0F, 1.8F);
-		ultimateCooldown(player, live, SWAP_COOLDOWN);
-	}
-
-	@Override
-	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		for (java.util.Iterator<Integer> it = live.minions.iterator(); it.hasNext();) {
-			if (!(level.getEntity(it.next()) instanceof Mob clone) || !clone.isAlive()) {
-				it.remove();
-				continue;
-			}
-			// never at a player's throat
-			if (clone.getTarget() instanceof Player || clone.getTarget() != null && clone.getTarget().entityTags().contains(com.jaymospowers.power.xenoform.XenoformState.MINION_TAG)) {
-				clone.setTarget(null);
-			}
-			if (clone.tickCount % 10 == 0 && clone.getTarget() == null && clone.distanceToSqr(player) > SWARM_FOLLOW * SWARM_FOLLOW) {
-				clone.getNavigation().moveTo(player, SWARM_SPEED);
-			}
-		}
-	}
-
-	@Override
-	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
-		dismiss(player.level(), live.minions);
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return swarm;
 	}
 
 	/** The redstone thing you look at, meddled with. */
@@ -294,12 +213,6 @@ public final class Gremlin extends XenoForm {
 		ServerLevel level = player.level();
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		nip(player, target);
-		// the swarm bites too
-		for (int id : live.minions) {
-			if (level.getEntity(id) instanceof Mob clone && clone.isAlive() && clone.distanceToSqr(target) < 16.0) {
-				clone.doHurtTarget(level, target);
-			}
-		}
 		player.heal(BITE_HEAL);
 		player.getFoodData().eat(2, 0.3F);
 		level.sendParticles(ParticleTypes.ITEM_SLIME, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 6, 0.2, 0.2, 0.2, 0.0);

@@ -106,6 +106,95 @@ public final class RagdollBody {
 	}
 
 	/**
+	 * (0.5.53) Held as a carried body is drawn (client CorpseRenderer), so a body let go of, dropped or thrown falls from
+	 * the pose it was seen in rather than snapping into a lying one first. Andy: "thrown mobs should stop snapping to a
+	 * pose, and instead keep the ragdoll, so they fall how they fall". {@code (hx, hy, hz)} is where it's held (the
+	 * corpse's spot), {@code carrierYaw} the way the carrier faces.
+	 * <ul>
+	 * <li>In one hand ({@code inHand}): standing facing the carrier's way, turned head up about its neck, which is at the
+	 * hand ({@code neckFront} of its length forward, {@code neckUp} of its height up), the rest hanging below.</li>
+	 * <li>Across the arms, a tall body (a humanoid): on its back, head to the carrier's right, arms hanging straight down
+	 * and legs as far down as they go, its spine at the carry height.</li>
+	 * <li>Across the arms, anything else: belly down, facing the carrier's right, let down by a little over half its
+	 * height, legs hanging straight down and the head drooping.</li>
+	 * </ul>
+	 */
+	public static RagdollBody held(RagdollRig rig, double hx, double hy, double hz, float carrierYaw, boolean inHand,
+		float neckFront, float neckUp) {
+		RagdollBody body = new RagdollBody(rig);
+		int n = rig.count;
+		float[] bx = rig.restX.clone(), by = rig.restY.clone(), bz = rig.restZ.clone();
+		double s = Math.sin(Math.toRadians(carrierYaw)), c = Math.cos(Math.toRadians(carrierYaw));
+		// the carrier's forward and right in the world
+		double fX = -s, fZ = c, rX = -c, rZ = -s;
+		float h = rig.height;
+		boolean humanoid = rig.shape == RagdollRig.Shape.HUMANOID;
+		boolean tall = humanoid || rig.shape != RagdollRig.Shape.QUADRUPED && h > rig.width * 1.1F;
+		// the body's own left (+x), up (+y) and front (+z) as directions in the world, and where its feet go
+		double[] left, up, front;
+		double ox, oy, oz;
+		if (inHand) {
+			left = new double[] {c, 0.0, s};
+			up = new double[] {-fX, 0.0, -fZ};
+			front = new double[] {0.0, 1.0, 0.0};
+			double neckY = h * neckUp, neckZ = Math.max(rig.width, 0.2F) * neckFront;
+			ox = hx - neckY * up[0];
+			oy = hy - neckZ;
+			oz = hz - neckY * up[2];
+		} else if (tall) {
+			if (humanoid) {
+				// limp on its back: arms straight down behind it, legs back as far as they go, head thrown back
+				hangBack(bx, by, bz, RagdollRig.R_SHOULDER, RagdollRig.R_HAND, Math.PI / 2.0);
+				hangBack(bx, by, bz, RagdollRig.L_SHOULDER, RagdollRig.L_HAND, Math.PI / 2.0);
+				hangBack(bx, by, bz, RagdollRig.R_HIP, RagdollRig.R_FOOT, RagdollRig.HELD_LEG_HANG);
+				hangBack(bx, by, bz, RagdollRig.L_HIP, RagdollRig.L_FOOT, RagdollRig.HELD_LEG_HANG);
+				hangBack(bx, by, bz, RagdollRig.NECK, RagdollRig.HEAD, Math.PI - RagdollRig.HELD_HEAD_BACK);
+			}
+			left = new double[] {-fX, 0.0, -fZ};
+			up = new double[] {rX, 0.0, rZ};
+			front = new double[] {0.0, 1.0, 0.0};
+			ox = hx - rX * h * 0.5;
+			oy = hy;
+			oz = hz - rZ * h * 0.5;
+		} else {
+			if (rig.shape == RagdollRig.Shape.QUADRUPED) {
+				// the head droops over the arms
+				float dy = by[RagdollRig.MUZZLE] - by[RagdollRig.SNOUT], dz = bz[RagdollRig.MUZZLE] - bz[RagdollRig.SNOUT];
+				float length = (float) Math.sqrt(dy * dy + dz * dz);
+				by[RagdollRig.MUZZLE] = by[RagdollRig.SNOUT] - length * (float) Math.sin(HELD_HEAD_DROOP);
+				bz[RagdollRig.MUZZLE] = bz[RagdollRig.SNOUT] + length * (float) Math.cos(HELD_HEAD_DROOP);
+			}
+			left = new double[] {fX, 0.0, fZ};
+			up = new double[] {0.0, 1.0, 0.0};
+			front = new double[] {rX, 0.0, rZ};
+			ox = hx;
+			oy = hy - h * 0.55;
+			oz = hz;
+		}
+		for (int i = 0; i < n; i++) {
+			body.x[i] = body.px[i] = ox + bx[i] * left[0] + by[i] * up[0] + bz[i] * front[0];
+			body.y[i] = body.py[i] = oy + bx[i] * left[1] + by[i] * up[1] + bz[i] * front[1];
+			body.z[i] = body.pz[i] = oz + bx[i] * left[2] + by[i] * up[2] + bz[i] * front[2];
+		}
+		return body;
+	}
+
+	/** (0.5.53) How far a carried animal's head droops below level (radians): inside the muzzle's cone. */
+	private static final double HELD_HEAD_DROOP = 0.6;
+
+	/**
+	 * (0.5.53) Turns a limb (or the head) about its root, in the body's own up-front plane, to {@code angle} (radians)
+	 * from straight down along the body toward its back (so pi / 2 is straight out behind it, pi straight up).
+	 */
+	private static void hangBack(float[] bx, float[] by, float[] bz, int root, int tip, double angle) {
+		float dx = bx[tip] - bx[root], dy = by[tip] - by[root], dz = bz[tip] - bz[root];
+		float length = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+		bx[tip] = bx[root];
+		by[tip] = by[root] - length * (float) Math.cos(angle);
+		bz[tip] = bz[root] - length * (float) Math.sin(angle);
+	}
+
+	/**
 	 * Lying on the ground at the given spot (its middle there, the ground at {@code fy}), along {@code yaw} (the way its
 	 * head points), face up or down, limbs splayed a little: how a body lies after it's been set down or carried.
 	 */

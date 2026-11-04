@@ -1,6 +1,15 @@
 {
   "replace": false,
   "values": [
-    "jaymospowers:divers_circlet"
+    "jaymospowers:divers_circlet",
+    "jaymospowers:gem_circlet",
+    "jaymospowers:alewife_cap",
+    "jaymospowers:jester_cap",
+    "jaymospowers:reed_breather",
+    "jaymospowers:owl_mask",
+    "jaymospowers:villager_hat",
+    "jaymospowers:soothsayer_hood",
+    "jaymospowers:riders_hat",
+    "jaymospowers:fishers_hat"
   ]
 }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -109,7 +110,11 @@ public final class Recollections {
 		SWORE(1, 120, true, false, "You swore to %1$s, under their weapon, that you'd never raise a hand to them.", ""),
 		/** (0.7.449) Accused of a theft they didn't do ({@link Crooks#accuse}). */
 		ACCUSED(-3, 45, true, true, "%1$s accused you of stealing from them, and you'd done nothing of the kind.",
-			"%1$s accused %3$s of theft, and wrongly.");
+			"%1$s accused %3$s of theft, and wrongly."),
+		// (0.7.523) {@link Promises}: made (for the chat AI only), kept, broken
+		PROMISED(0, 30, false, false, "%1$s promised you they would %2$s.", ""),
+		KEPT_WORD(4, 120, true, true, "%1$s kept their promise to you (to %2$s).", "%1$s kept their promise to %3$s (to %2$s)."),
+		BROKE_WORD(-6, 180, true, true, "%1$s broke their promise to you (to %2$s).", "%1$s broke their promise to %3$s (to %2$s).");
 
 		final int weight, days;
 		final boolean remark, tellable;
@@ -203,12 +208,33 @@ public final class Recollections {
 		}
 	}
 
-	/** One player as they remember them: the name they knew them by, the last day they had to do with them, and what happened. */
-	public record Person(String name, long last, List<Recollection> memories) {
+	/** (0.7.523) The talks kept in {@link Bearing#talks}: the newest this many. */
+	static final int TALKS_KEPT = 24;
+
+	/**
+	 * (0.7.523) How they bear toward the player: trust, respect, warmth (-100..100, never shown), the day drift was last
+	 * applied, the talks they've had with them (id -> day; "#day" the last talk day, "#favour" the last favour day), and the
+	 * day a quarrel lasts until (-1: none).
+	 */
+	public record Bearing(int trust, int respect, int warmth, long settled, Map<String, Long> talks, long quarrel) {
+		public static final Bearing NONE = new Bearing(0, 0, 0, 0L, Map.of(), -1L);
+		public static final Codec<Bearing> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.INT.optionalFieldOf("trust", 0).forGetter(Bearing::trust),
+				Codec.INT.optionalFieldOf("respect", 0).forGetter(Bearing::respect),
+				Codec.INT.optionalFieldOf("warmth", 0).forGetter(Bearing::warmth),
+				Codec.LONG.optionalFieldOf("settled", 0L).forGetter(Bearing::settled),
+				Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("talks", Map.of()).forGetter(Bearing::talks),
+				Codec.LONG.optionalFieldOf("quarrel", -1L).forGetter(Bearing::quarrel))
+			.apply(i, Bearing::new));
+	}
+
+	/** One player as they remember them: the name they knew them by, the last day they had to do with them, what happened, and (0.7.523) how they bear toward them. */
+	public record Person(String name, long last, List<Recollection> memories, Bearing bearing) {
 		public static final Codec<Person> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.optionalFieldOf("name", "").forGetter(Person::name),
 				Codec.LONG.optionalFieldOf("last", 0L).forGetter(Person::last),
-				Recollection.CODEC.listOf().optionalFieldOf("memories", List.of()).forGetter(Person::memories))
+				Recollection.CODEC.listOf().optionalFieldOf("memories", List.of()).forGetter(Person::memories),
+				Bearing.CODEC.optionalFieldOf("bearing", Bearing.NONE).forGetter(Person::bearing))
 			.apply(i, Person::new));
 	}
 
@@ -255,6 +281,56 @@ public final class Recollections {
 	/** {@code who} remembers {@code player} doing {@code kind} ({@code detail}: what, if it matters). */
 	static void remember(LivingEntity who, ServerPlayer player, Kind kind, Component detail) {
 		remember(who, key(player, who), nameTo(player, who).getString(), kind, detail, "");
+		// (0.7.523) a wrong done within a promised peace breaks that promise
+		Promises.wronged(player, who, kind);
+	}
+
+	/** (0.7.523) {@code who} heard (from {@code from}) that {@code player} did {@code kind}: it counts half toward how they bear. */
+	static void rememberHeard(LivingEntity who, ServerPlayer player, Kind kind, Component detail, String from) {
+		remember(who, key(player, who), nameTo(player, who).getString(), kind, detail, from);
+	}
+
+	/** (0.7.523) How {@code who} bears toward {@code player}, as stored (no drift or outside input). */
+	static Bearing bearingOf(LivingEntity who, ServerPlayer player) {
+		return bearingOf(who, key(player, who));
+	}
+
+	static Bearing bearingOf(LivingEntity who, UUID id) {
+		Person p = who.getAttachedOrElse(MEMORIES, Map.of()).get(id);
+		return p == null ? Bearing.NONE : p.bearing();
+	}
+
+	/** (0.7.523) {@code who}'s bearing toward {@code player} changed by {@code change}: made under the same key and name as a memory. */
+	static void bear(LivingEntity who, ServerPlayer player, UnaryOperator<Bearing> change) {
+		bear(who, key(player, who), nameTo(player, who).getString(), change);
+	}
+
+	static void bear(LivingEntity who, UUID id, String name, UnaryOperator<Bearing> change) {
+		if (!rememberer(who) || who.level().isClientSide() || who.level().getServer() == null) {
+			return;
+		}
+		long day = today(who);
+		Map<UUID, Person> all = new HashMap<>(who.getAttachedOrElse(MEMORIES, Map.of()));
+		Person had = all.get(id);
+		Bearing now = change.apply(had == null ? Bearing.NONE : had.bearing());
+		if (now.talks().size() > TALKS_KEPT) {
+			// (the oldest day goes first; the "#" markers stay)
+			Map<String, Long> kept = new HashMap<>(now.talks());
+			while (kept.size() > TALKS_KEPT) {
+				String oldest = kept.entrySet().stream().filter(e -> !e.getKey().startsWith("#") && !TalkBook.isOnce(e.getKey())).min(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(null);
+				if (oldest == null) {
+					break;
+				}
+				kept.remove(oldest);
+			}
+			now = new Bearing(now.trust(), now.respect(), now.warmth(), now.settled(), Map.copyOf(kept), now.quarrel());
+		}
+		all.put(id, new Person(name.isEmpty() && had != null ? had.name() : name, day, had == null ? List.of() : had.memories(), now));
+		while (all.size() > PLAYERS) {
+			UUID oldest = all.entrySet().stream().min(Comparator.comparingLong(e -> e.getValue().last())).orElseThrow().getKey();
+			all.remove(oldest);
+		}
+		who.setAttached(MEMORIES, Map.copyOf(all));
 	}
 
 	private static void remember(LivingEntity who, UUID id, String name, Kind kind, Component detail, String from) {
@@ -269,6 +345,7 @@ public final class Recollections {
 		list.removeIf(r -> forgotten(r, day));
 		String detailText = detail.getString();
 		boolean merged = false;
+		boolean pushedPast = false;
 		for (int i = 0; i < list.size(); i++) {
 			Recollection r = list.get(i);
 			if (r.kind().equals(kind.key()) && r.day() == day && r.from().equals(from) && (kind == Kind.TRADE || kind == Kind.STRUCK
@@ -276,6 +353,7 @@ public final class Recollections {
 				// (the same again that day: it counts the more, and is news again)
 				list.set(i, new Recollection(r.kind(), detail, from, day, r.count() + 1, false, now));
 				merged = true;
+				pushedPast = r.count() + 1 > COUNT_CAP;
 				break;
 			}
 		}
@@ -293,12 +371,16 @@ public final class Recollections {
 			// (the least weighty, the oldest first; what's kept for good is kept)
 			list.remove(list.stream().min(Comparator.comparingLong(r -> keep(r, day))).orElseThrow());
 		}
-		all.put(id, new Person(name.isEmpty() && had != null ? had.name() : name, day, List.copyOf(list)));
+		all.put(id, new Person(name.isEmpty() && had != null ? had.name() : name, day, List.copyOf(list), had == null ? Bearing.NONE : had.bearing()));
 		while (all.size() > PLAYERS) {
 			UUID oldest = all.entrySet().stream().min(Comparator.comparingLong(e -> e.getValue().last())).orElseThrow().getKey();
 			all.remove(oldest);
 		}
 		who.setAttached(MEMORIES, Map.copyOf(all));
+		if (!pushedPast) {
+			// (0.7.523) and it moves how they bear toward them (hearsay: by half)
+			Bearings.deed(who, id, kind, !from.isEmpty());
+		}
 	}
 
 	/** How much a memory is worth keeping, for the one to forget when there are too many. */
@@ -336,7 +418,7 @@ public final class Recollections {
 
 	/** {@code who} bears {@code player} too much ill will to chat, joke, be told a story or be hugged. */
 	public static boolean refuses(LivingEntity who, ServerPlayer player) {
-		return leaning(who, player) <= REFUSE;
+		return leaning(who, player) <= REFUSE || Bearings.cold(who, player);
 	}
 
 	/** (0.7.254) {@code who} lets go of {@code r} about {@code player} (an apology taken: {@link SharedHistory}). */
@@ -349,7 +431,7 @@ public final class Recollections {
 		}
 		List<Recollection> list = new ArrayList<>(p.memories());
 		if (list.remove(r)) {
-			all.put(id, new Person(p.name(), p.last(), List.copyOf(list)));
+			all.put(id, new Person(p.name(), p.last(), List.copyOf(list), p.bearing()));
 			who.setAttached(MEMORIES, Map.copyOf(all));
 		}
 	}
@@ -365,7 +447,7 @@ public final class Recollections {
 		int i = list.indexOf(told);
 		if (i >= 0) {
 			list.set(i, told.withTold());
-			all.put(id, new Person(p.name(), p.last(), List.copyOf(list)));
+			all.put(id, new Person(p.name(), p.last(), List.copyOf(list), p.bearing()));
 			who.setAttached(MEMORIES, Map.copyOf(all));
 		}
 	}
@@ -455,9 +537,19 @@ public final class Recollections {
 
 	/** (Approaches) A gossip's talk of something they themselves saw another player do; or null. */
 	static @Nullable Component gossip(LivingEntity who, ServerPlayer listener, RandomSource random) {
-		if (random.nextFloat() >= GOSSIP_CHANCE) {
+		// (0.7.523) one who doesn't trust you says nothing; one who trusts you a great deal says more
+		int trust = Bearings.trust(who, listener);
+		if (trust <= Bearings.GUARDED_TRUST) {
 			return null;
 		}
+		if (random.nextFloat() >= GOSSIP_CHANCE * (trust >= Bearings.CONFIDE_TRUST ? Bearings.CONFIDE_GOSSIP : 1.0F)) {
+			return null;
+		}
+		return gossipLine(who, listener, random);
+	}
+
+	/** (0.7.523) What {@code who} would say of another player they saw do something (no chance roll); or null. */
+	static @Nullable Component gossipLine(LivingEntity who, ServerPlayer listener, RandomSource random) {
 		UUID self = key(listener, who);
 		long day = today(who);
 		List<Component> said = new ArrayList<>();
@@ -546,6 +638,12 @@ public final class Recollections {
 			case "bout/lost" -> Kind.BEAT_YOU;
 			default -> topic.equals("child") && parts.length == 5 && parts[4].equals("reply") ? Kind.PLAYED : null;
 		};
+		// (0.7.535) a rough tongue breaks the Truth's first
+		switch (topic + "/" + outcome) {
+			case "halt/rude", "question/rude", "bout/insult", "loyalty/ill" -> Commandments.act(player, "rude");
+			default -> {
+			}
+		}
 		if (kind != null) {
 			remember(who, player, kind, kind == Kind.STOOD && enemy != null ? Component.literal(enemy) : Component.empty());
 		}
@@ -681,6 +779,9 @@ public final class Recollections {
 		List<String> lines = promptLines(who, player);
 		c.getSource().sendSuccess(() -> Component.translatable("recall.jaymoskingdoms.command.head", who.getDisplayName(), lines.size(), leaning(who, player))
 			.withStyle(ChatFormatting.GOLD), false);
+		Bearing stored = bearingOf(who, player);
+		c.getSource().sendSuccess(() -> Component.translatable("recall.jaymoskingdoms.command.bearing", stored.trust(), Bearings.trust(who, player),
+			stored.respect(), Bearings.respect(who, player), stored.warmth(), Bearings.warmth(who, player)).withStyle(ChatFormatting.GRAY), false);
 		for (String line : lines) {
 			c.getSource().sendSuccess(() -> Component.literal(" - " + line).withStyle(ChatFormatting.GRAY), false);
 		}

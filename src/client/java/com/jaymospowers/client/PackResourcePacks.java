@@ -34,19 +34,43 @@ final class PackResourcePacks {
 	 * for a new pack file in a later pack version). {@code prefix}: the start of its file names on CurseForge.
 	 * {@code olderFormat}: its file is made for an older game version, so 26.3 calls it incompatible and would drop it
 	 * from the options on load; it's listed as an accepted incompatible pack too, as the confirm button in the screen does.
+	 * {@code place}: where it goes in the pack order. {@code null}: on top, like any pack switched on in the screen.
+	 * {@link #BASE}: at the bottom, just above the game's and mods' own packs, so every other pack draws over it (a
+	 * full retexture other packs build on). Anything else: the prefix of a resource pack file it sits just above
+	 * (an add-on to that pack), or on top when that one isn't switched on.
 	 */
-	private record Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat) {
+	record Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat,
+			@Nullable String place, boolean keptOn) {
+		Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat) {
+			this(what, marker, prefix, file, url, sha1, olderFormat, null, false);
+		}
+
+		Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat,
+				@Nullable String place) {
+			this(what, marker, prefix, file, url, sha1, olderFormat, place, false);
+		}
 	}
+
+	/**
+	 * (0.20.40) A pack {@code keptOn} is switched on at every launch it's found off, not just once: its marker is then
+	 * the file that turns that off ({@code <marker>-off} in config/), for a player who'd rather not have it.
+	 */
+	static final String OFF = "-off";
+
+	static final String BASE = "<base>";
 
 	private static final List<Pack> PACKS = List.of(
 		// "MCA - Default Medieval" (by DE4THR4SH, CurseForge 667175) dresses MCA's villagers in vanilla-style medieval
 		// clothes. Its newest file says 1.21.1 (pack_format 55); it only swaps MCA's skin textures, which haven't moved
 		// since. v2 (0.8.106): installs where v1 found no file, or the game later dropped it while the file was missing,
-		// get it once more.
-		new Pack("medieval MCA villagers", "jaymospowers-medieval-villagers-v2", "MCAR_VanillaMedieval",
+		// get it once more. (0.20.40) Andy (2026-11-04): "the outfits seem to be broken again, they arent wearing medieval
+		// attire anymore": his clip showed MCA's own green plaid shirt (neutral/mason/0), which this pack draws as a tan
+		// tunic, so the pack had dropped out of his selected packs while its v2 marker said it was done. Kept on now:
+		// switched back on at any launch it's found off (config/jaymospowers-medieval-villagers-off keeps it off).
+		new Pack("medieval MCA villagers", "jaymospowers-medieval-villagers", "MCAR_VanillaMedieval",
 			"MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip",
 			"https://mediafilez.forgecdn.net/files/8868/890/MCAR_VanillaMedieval_Universal_7.7.36-beta.3%2B1.21.1.zip",
-			"63400dbf8cd26a8b3309c3625c1f5b971b636f57", true),
+			"63400dbf8cd26a8b3309c3625c1f5b971b636f57", true, null, true),
 		// "Fresh Animations: Player Extension" (by FreshLX, CurseForge 1281029, file 8245230; the same file as Modrinth's
 		// 1.1): livelier player animations, run by Entity Model Features. It stands alone (no base Fresh Animations
 		// needed) and supports every format up to 26.3. Our own poses pause it while they play (EmfCompat).
@@ -74,6 +98,27 @@ final class PackResourcePacks {
 			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
 			"fea54f680dc959e122189b2005d11adebcd18b5b", true));
 
+	/** (0.19.72) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
+	static final List<Pack> OPTIONAL = List.of(
+		// (0.19.65; optional and off by default since 0.19.72) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0:
+		// shipped unchanged, never edited or built on, with a link to its official page on the pack's page): the whole game redrawn in its darker, earthier medieval
+		// style. Version 26.3_01, fetched from Modrinth (project hJAzl1Bs). Downloaded into resourcepacks/ but never
+		// switched on by us: /excalibur on (ExcaliburLook) puts it at the bottom of the pack order, so Fresh Animations,
+		// its patch below, our 3D items and every other pack draw over it. Our own textures' graded copies are the
+		// built-in excalibur_style pack (tools/excalibur_style, docs/Excalibur-Style.md); none of its pixels are in them.
+		new Pack("Excalibur", "jaymospowers-excalibur-v1", "Excalibur", "Excalibur_V26.3_01.zip",
+			"https://cdn.modrinth.com/data/hJAzl1Bs/versions/lk2oxwrP/Excalibur_V26.3_01.zip",
+			"97348d602be6def05fdfa9eee339ac64be5badd6", false, BASE),
+		// (0.19.65) "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; all rights reserved, but its page lets
+		// modpacks include it unchanged, never reupload or alter it): Fresh Animations' mobs drawn in Excalibur's style.
+		// Version 1.10.5 Hotfix 1 for 26.3, fetched from Modrinth (project yiTthr0O). It's made against Fresh
+		// Animations 1.10.5 and we ship 1.11.1; the mobs it covers bring their own models, so they still match. It sits
+		// just above Fresh Animations, under Better Horses, so donkeys and mules keep Better Horses' look. Also only switched
+		// on by /excalibur on.
+		new Pack("Excalibur's Fresh Animations", "jaymospowers-excalibur-fa-v1", "EFA_", "EFA_1.10.5 Hotfix 1.zip",
+			"https://cdn.modrinth.com/data/yiTthr0O/versions/UmkPWet8/EFA_1.10.5%20Hotfix%201.zip",
+			"0380c78d4e0086b6cade7597a4b57f14d06616ec", false, "FreshAnimations"));
+
 	private PackResourcePacks() {
 	}
 
@@ -81,16 +126,26 @@ final class PackResourcePacks {
 		for (Pack pack : PACKS) {
 			enableOnce(minecraft, pack);
 		}
+		ExcaliburLook.start(minecraft);
 	}
 
 	private static void enableOnce(Minecraft minecraft, Pack pack) {
-		Path marker = FabricLoader.getInstance().getConfigDir().resolve(pack.marker());
-		if (Files.exists(marker)) {
+		Path config = FabricLoader.getInstance().getConfigDir();
+		Path marker = config.resolve(pack.marker());
+		if (pack.keptOn() ? Files.exists(config.resolve(pack.marker() + OFF)) : Files.exists(marker)) {
 			return;
 		}
 		Path dir = minecraft.getResourcePackDirectory();
 		String file = find(dir, pack);
 		if (file != null) {
+			if (pack.keptOn() && minecraft.options.resourcePacks.contains("file/" + file)) {
+				// on already: only make sure the game won't drop it as made for an older version at the next load
+				if (pack.olderFormat() && !minecraft.options.incompatibleResourcePacks.contains("file/" + file)) {
+					minecraft.options.incompatibleResourcePacks.add("file/" + file);
+					minecraft.options.save();
+				}
+				return;
+			}
 			enable(minecraft, pack, file, marker);
 			return;
 		}
@@ -113,19 +168,50 @@ final class PackResourcePacks {
 			minecraft.options.incompatibleResourcePacks.add(id);
 		}
 		if (!minecraft.options.resourcePacks.contains(id)) {
-			minecraft.options.resourcePacks.add(id);
+			minecraft.options.resourcePacks.add(placeAt(minecraft.options.resourcePacks, pack.place()), id);
+		}
+		// downloads finish in any order: an add-on switched on before the pack it belongs above moves up over it now
+		for (Pack addOn : PACKS) {
+			if (pack.prefix().equals(addOn.place())) {
+				minecraft.options.resourcePacks.stream().filter(s -> s.startsWith("file/" + addOn.prefix())).findFirst().ifPresent(s -> {
+					minecraft.options.resourcePacks.remove(s);
+					minecraft.options.resourcePacks.add(placeAt(minecraft.options.resourcePacks, addOn.place()), s);
+				});
+			}
 		}
 		minecraft.options.loadSelectedResourcePacks(minecraft.getResourcePackRepository());
 		minecraft.options.save();
 		minecraft.reloadResourcePacks();
+		com.jaymospowers.JaymosPowers.LOGGER.info("Switched on resource pack {} ({})", file, pack.what());
 		try {
-			Files.writeString(marker, "Jaymo's Powers switched on " + file + " (" + pack.what() + "). Delete this file to do it again.\n");
+			Files.writeString(marker, "Jaymo's Powers switched on " + file + " (" + pack.what() + "). "
+				+ (pack.keptOn() ? "It's switched on again whenever it's found off; create " + pack.marker() + OFF + " here to keep it off.\n"
+					: "Delete this file to do it again.\n"));
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
 		}
 	}
 
-	private static @Nullable String download(Path dir, Pack pack) {
+	/**
+	 * Where a pack goes in the selected list (first = bottom). On top by default; {@link #BASE} goes just under the
+	 * lowest resource pack file or pack of ours, so the game's and mods' own packs stay beneath it; a file prefix goes
+	 * just above that file.
+	 */
+	static int placeAt(List<String> selected, @Nullable String place) {
+		if (place == null) {
+			return selected.size();
+		}
+		for (int i = 0; i < selected.size(); i++) {
+			String id = selected.get(i);
+			if (BASE.equals(place) ? id.startsWith("file/") || id.contains(com.jaymospowers.JaymosPowers.MOD_ID)
+					: id.startsWith("file/" + place)) {
+				return BASE.equals(place) ? i : i + 1;
+			}
+		}
+		return selected.size();
+	}
+
+	static @Nullable String download(Path dir, Pack pack) {
 		Path target = dir.resolve(pack.file());
 		Path part = dir.resolve(pack.file() + ".part");
 		try {
@@ -156,7 +242,7 @@ final class PackResourcePacks {
 		}
 	}
 
-	private static @Nullable String find(Path dir, Pack pack) {
+	static @Nullable String find(Path dir, Pack pack) {
 		if (!Files.isDirectory(dir)) {
 			return null;
 		}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskingdoms:block/pigeon_roost"
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/pigeon_roost",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/pigeon_roost",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/pigeon_roost",
+      "y": 270
+    }
+  }
+}

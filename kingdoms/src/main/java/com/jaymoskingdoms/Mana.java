@@ -431,10 +431,21 @@ public final class Mana {
 		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.08);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2F, 0.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.5F);
-		if (first) {
+		if (first && !"".equals(how)) {
+			// (0.7.477; "" for a quiet attuning, the ki's way)
 			player.sendSystemMessage(Component.translatable(natural(player) ? "message.jaymoskingdoms.mana.attuned.natural"
 				: how != null ? how : "message.jaymoskingdoms.mana.attuned").withStyle(ChatFormatting.AQUA));
 		}
+	}
+
+	/**
+	 * (0.7.477) Ki is the magic of this world (Andy's universe rules, from the Gemini handoff): a Z Fighter attunes the
+	 * moment the power is theirs (learning to fly with it is still Mastery's), and a Wind Controller once their power
+	 * wakes, their magic only ever worked through the wind ({@link Spellcraft}). Both quietly: no chat line, only the flare.
+	 */
+	static boolean kiAttunes(Player player) {
+		String power = PowersCompat.power(player);
+		return "zfighter".equals(power) || "wind".equals(power);
 	}
 
 	/** Every tick, for each player: a caster attuned, mana coming back (or bleeding off an overload), the amethyst felt. */
@@ -446,6 +457,8 @@ public final class Mana {
 				if (!StoryGround.unseen(player)) {
 					attune(player);
 				}
+			} else if ((now + player.getId()) % 20L == 0L && kiAttunes(player) && !StoryGround.unseen(player)) {
+				attune(player, "");
 			} else if ((now + player.getId()) % AMETHYST_EVERY == 0L && nearAmethyst(player) && !StoryGround.unseen(player)) {
 				attune(player);
 			} else {

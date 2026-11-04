@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
@@ -91,7 +92,7 @@ public final class Captives {
 	static final int FOLK = 0, GUARD = 1, KIN = 2;
 	/** The chance a captive is one of the guards, and the ruler's own kin (a settlement with no ruler has none to lose). */
 	static final float GUARD_CHANCE = 0.2F, KIN_CHANCE = 0.1F;
-	/** Emeralds the family give from their own purse for their return, by standing. */
+	/** Silver coins the family give from their own purse for their return, by standing. */
 	static final int[] PURSE_LEAST = {6, 8, 12}, PURSE_MOST = {12, 16, 24};
 	/**
 	 * What the settlement adds from its treasury, by standing: this much, plus this share of its worth ({@link Wealth#worth}),
@@ -192,7 +193,7 @@ public final class Captives {
 			Captive c = entity.getAttached(CAPTIVE);
 			if (c != null && c.rescuer().isPresent() && entity.level() instanceof ServerLevel level
 				&& level.getServer().getPlayerList().getPlayer(c.rescuer().get()) instanceof ServerPlayer p) {
-				Post.tidings(p.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.died", entity.getDisplayName()));
+				Post.report(p.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.died", entity.getDisplayName()));
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Captives::tick);
@@ -227,6 +228,10 @@ public final class Captives {
 		v.setPersistenceRequired();
 		level.addFreshEntity(v);
 		LOADED.add(v);
+		if (home != null && !Havens.is(level.getServer(), home)) {
+			// (0.7.530) the town they were taken from is missing one of its own
+			TownTroubles.missing(level, home, v, at);
+		}
 		JaymosKingdoms.LOGGER.debug("a captive from {} held at {}", home == null ? "nowhere" : home.name(), at);
 		return v;
 	}
@@ -486,6 +491,7 @@ public final class Captives {
 		// (0.7.439) a haven's child carried off by raiders: home, and the rescue asked for is done
 		BorderClashes.home(level.getServer(), v.getUUID());
 		Quests.rescued(player, v);
+		TownTroubles.found(level.getServer(), v.getUUID()); // (0.7.530)
 		LOADED.remove(v);
 		LOST.remove(v.getUUID());
 		MinecraftServer server = level.getServer();
@@ -496,7 +502,8 @@ public final class Captives {
 		boolean known = !Wars.enemy(player, home) && !Identities.hidden(player, home.id());
 		int bounty = known ? bounty(server, home, standing) : 0;
 		List<ItemStack> rewards = new ArrayList<>();
-		rewards.add(new ItemStack(Items.EMERALD, purse + bounty));
+		// (0.7.498) the family's purse and the realm's bounty are silver coins now
+		rewards.addAll(Money.stacks(Money.worth(purse + bounty)));
 		if (standing == GUARD) {
 			rewards.add(new ItemStack(GUARD_GIFTS.get(random.nextInt(GUARD_GIFTS.size()))));
 		} else if (standing == KIN) {
@@ -511,8 +518,8 @@ public final class Captives {
 				KingdomEvents.standing(server, player, home, member.standing() + HOME_STANDING[standing]);
 			}
 		}
-		// (0.7.340) no chat: the reward comes in your next Tidings
-		Post.tidings(player.getUUID(), bounty > 0
+		// (0.7.340) no chat: the reward comes in your next Word
+		Post.report(player.getUUID(), bounty > 0
 			? Component.translatable("tidings.jaymoskingdoms.captive.home", v.getDisplayName(), home.name(), purse, bounty)
 			: Component.translatable("tidings.jaymoskingdoms.captive.home.purse", v.getDisplayName(), home.name(), purse));
 		if (known) {
@@ -624,7 +631,7 @@ public final class Captives {
 		LOADED.remove(v);
 		LOST.remove(v.getUUID());
 		if (rescuer != null) {
-			Post.tidings(rescuer.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.lost", v.getDisplayName()));
+			Post.report(rescuer.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.lost", v.getDisplayName()));
 		}
 	}
 

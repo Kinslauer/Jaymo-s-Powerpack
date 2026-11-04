@@ -16,6 +16,10 @@ import net.minecraft.util.Mth;
  */
 public final class CarryPose {
 	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:carrying");
+	/** (0.5.50) Carrying something small in the right hand, by the neck. */
+	public static final RenderStateDataKey<Boolean> ONE_HAND = RenderStateDataKey.create(() -> "jaymoskitchen:carrying_one_hand");
+	/** (0.5.50) The right arm holding it: a little forward of hanging (radians), out from the side, and its sway a step. */
+	static final float HAND_HOLD = -0.4F, HAND_OUT = 0.12F, HAND_SWAY = 0.08F;
 
 	/** Holding it: forward and down (radians), angled in, and the strain's tremble (radians, per tick). */
 	static final float HOLD = -0.8F, HOLD_IN = 0.3F, STRAIN = 0.03F, STRAIN_RATE = 0.067F;
@@ -26,7 +30,7 @@ public final class CarryPose {
 	/** The legs' stride shortened under the load (share of the walk kept). */
 	static final float STRIDE_KEPT = 0.8F;
 
-	private static final PoseEase EASE = new PoseEase();
+	private static final PoseEase EASE = new PoseEase(), HAND_EASE = new PoseEase();
 
 	private CarryPose() {
 	}
@@ -35,6 +39,7 @@ public final class CarryPose {
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> humanoid)) {
 			return;
 		}
+		hand(humanoid, avatar);
 		boolean on = Boolean.TRUE.equals(avatar.getData(KEY));
 		PoseEase.Ease ease = EASE.step(avatar.id, on);
 		if (ease == null) {
@@ -56,6 +61,17 @@ public final class CarryPose {
 		humanoid.head.xRot += HEAD_BOW * k;
 		humanoid.rightLeg.xRot *= Mth.lerp(k, 1.0F, STRIDE_KEPT);
 		humanoid.leftLeg.xRot *= Mth.lerp(k, 1.0F, STRIDE_KEPT);
+	}
+
+	/** (0.5.50) Holding something small by the neck in the right hand, down by the side, swaying a little as they walk. */
+	private static void hand(HumanoidModel<?> humanoid, AvatarRenderState avatar) {
+		PoseEase.Ease ease = HAND_EASE.step(avatar.id, Boolean.TRUE.equals(avatar.getData(ONE_HAND)));
+		if (ease == null) {
+			return;
+		}
+		float speed = Mth.clamp(avatar.walkAnimationSpeed, 0.0F, 1.0F);
+		float sway = Mth.sin(avatar.walkAnimationPos * 0.6662F) * speed * HAND_SWAY;
+		set(humanoid.rightArm, HAND_HOLD + sway, 0.0F, HAND_OUT, ease.weight);
 	}
 
 	private static float smooth(float t) {

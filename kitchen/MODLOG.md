@@ -1285,3 +1285,117 @@ run of same-named parts (tail, tail2, tail3...) to its end instead of stopping t
 `tools/ragdoll_sim` gains snake checks (settles flat, drapes over a bump and down a step, bends no further than it can);
 the spine laying was checked against a stand-in of Naturalist's snake model. Not compile-checked against the game; not seen
 in game.
+
+## 0.5.48: fire drinkers (pack 0.19.57, Kingdoms 0.7.477)
+`Thirst.setFireDrinker` (Kingdoms gives it the Emberborn): water only hisses to steam for them (no water, a steam puff,
+an overlay line); sneak-use with an empty hand on a fire or lit campfire drinks it (+4; a loose fire goes out, a campfire
+keeps burning), on lava gulps it (+12, a short regeneration, 3 s apart); soaking in lava gives a point every 3 s; the
+Nether doesn't dry them. Non-water potions, milk, stews and fruit still count. The HUD's sip packet also goes out at open lava.
+
+## 0.5.50: carried snakes drape, small bodies in one hand (pack 0.19.61)
+Andy: "The snake is still very rigid when carried, but the ragdoll looks great." Carried, slung over a horse or falling,
+a corpse has no physics, and `LooseParts` took the snake's neck and first tail segment as the trunk, so only the tail's
+tip hung. Now `ChainSpine.drape` lays the spine over the arms by hand: the middle flat across them (`DRAPE_REST` either
+side), rolling over their edge (`DRAPE_BEND` radius), and both ends hanging down, swung by the corpse's carry swing, more
+the lower they hang (`DRAPE_LAG`). The head hangs off whichever side it already lay. It is drawn through `DRAPE_POINTS`
+(24) points by the same segment laying as the ragdoll. Only chain-tagged bodies (`ragdoll_chain`) drape; old box snake
+corpses drape too. A carried snake is no longer laid back like a tall body (`state.tall`). `LooseParts.Frame` gains a
+`Drape`. The drape was checked headless against the snake stand-in; not compile-checked against the game; not seen in game.
+
+Small bodies in one hand. Andy: "You should carry small mobs like that with one hand, so the snake and chicken would
+be from the neck, you can remove the chicken corpse bag." The pocket pickup (a small corpse turned into a `CorpseItem`
+in your inventory) is gone: an empty-hand click on a small corpse (`fitsInPocket`, now up to 0.6 wide and 0.8 tall:
+chickens, rabbits, snakes, babies; never player corpses or machines) carries it in your right hand
+(`CorpseEntity.handPosition`, `HAND_FORWARD/RIGHT/HEIGHT`). It hangs by the neck (`CorpseRenderer.hangFromHand`,
+`NECK_FRONT/UP`), legs and wings dangling through `LooseParts`; a snake hangs its body down from the hand and trails the
+rest of its length on the ground behind you (`ChainSpine.hang`). Your right arm holds it low and out (`CarryPose`
+`ONE_HAND`, `HAND_HOLD/OUT/SWAY`), not both arms. `CorpseItem` stays registered so bags already held still work.
+Checked headless against the snake stand-in; not compile-checked; not seen in game.
+
+## 0.5.51: meat hooks, blood grates, hanging butchery (pack 0.19.64, Kingdoms 0.7.482)
+Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery's hooks and blood grates; GPLv3 Forge
+1.20.1 and needs Alex's Mobs, so ideas only, nothing copied). New package `butchery/`, the steps in `corpse/Hanging`.
+- **Meat Hook** (`MeatHookBlock`; 2 from chain + iron ingot + nugget): hangs under any block with collision. Right-click it
+  while carrying a carcass, or dragging one within 3 blocks (plus its height), and it hangs there by its hind legs: a
+  ragdoll gripped at the hook (`Hanging.held`: both hind feet, a person's feet, a snake's tail tip), so it swings and
+  turns. Picking it up or dragging it takes it down. Hook gone: it falls. Animals only (no fish, machines, iron).
+- **Blood Grate** (`BloodGrateBlock`; iron bars over an iron basin): `level` 0-8, 250 mB a level, the blood drawn rising
+  in it. A glass bottle takes a level as a **Bottle of Blood** (`BloodBottleItem`); right-click shows how full; a
+  comparator reads it.
+- **Steps on the hook** (right-clicks, each wears the tool): a cleaver (`#jaymoskitchen:cleavers`: axes, Armory and
+  Tinkering cleavers, the warchief cleaver) bleeds it out (small 10 s / 250 mB, most 20 s / 1000 mB, big 40 s / 2000 mB)
+  into a grate up to 4 blocks under it, else the blood pools on the ground (Powers lays stains); the cleaver takes the
+  head (the body's drawn headless; Powers drops it as a trophy head that never despawns); a skinning knife
+  (`#jaymoskitchen:skinning_knives`) takes everything in `#jaymoskitchen:skins` (hide, leather, wool, feathers, pelts),
+  skipped if it has none; three cleaver cuts give the rest a third at a time, with the butcher table's extras, then
+  1-3 bones (and 1-2 animal fat from anything bigger than a chicken) and it's gone. Drained, it can be taken down and finished on the ground.
+- **Too big to lift** (cow and up): bled where it lies with a cleaver (no sneak), then cut up there as before, with the
+  table's extras added.
+- Hooks for the other mods: `Hanging.setOnDrip/setOnSpill/setOnHead`, `Butchery.addOnDrink`, `Butchery.drawGrates`.
+- **Andy: "Yes all of this"** (the follow-up ideas):
+  - **Unbled meat spoils** (`Spoilage`): raw meat cut from a carcass that was never bled (table, ground, cut up where it
+    lay) is marked "Unbled" with the day; after `SPOIL_DAYS` (3) raw in a player's pockets it turns to rotten flesh. Bled on
+    a hook, or cut by a village butcher, it keeps. Fish aren't marked.
+  - **Prime skins**: skinning on the hook gives `PRIME_EXTRA` (1) more of each skin and 1-2 **Leather Scraps**.
+  - **Village butchers use hooks** (`Butchers`): a butcher with a meat hook near the back of the shop hangs the body,
+    bleeds it (`HOOK_CHOP_TICKS`) and works it there instead of on the floor.
+  - **Blood Sausage**: blood bottle + pork/beef/mutton + wheat + animal fat = 3 raw (2 hunger), cooked in a furnace,
+    smoker or campfire (7 hunger). Bottles come back.
+  - **Blood Meal**: blood bottle + bone meal = 3, works as bone meal.
+  - **Leather finishes**: tanned leather + animal fat = **Supple Leather** (book from 3 paper makes 2); + resin =
+    **Harness Leather** (saddle); smelted = **Hardened Leather** (leather horse armour). Leather + a work blade = 4
+    **Leather Scraps**; 4 scraps + resin = leather. Scraps, supple and hardened leather repair leather armour.
+  - **Hide Rug**: 2 hides make 2 rug carpets.
+  - Not done: skeleton displays (need a model per animal) and hide traits (need their own armour items); later if wanted.
+- Tuning: `Hanging.BLEED_*`, `BLOOD_*`, `DRIP_EVERY`, `SPILL_EVERY`, `GRATE_DEPTH`, `DRAG_TO_HOOK`; `BloodGrateBlock.MAX`;
+  `Butchery.MB_PER_LEVEL`; `BloodBottleItem.NAUSEA_TICKS/HUNGER_TICKS`.
+
+## 0.5.52: Excalibur's look (pack 0.19.65, Kingdoms 0.7.483)
+Item and block textures are graded toward Excalibur's darker, earthier palette by the pack's
+`tools/excalibur_style/grade.py`. Rerun it after adding or redrawing a texture.
+
+## 0.5.53: the Excalibur look made optional (pack 0.19.72, Kingdoms 0.7.485)
+Every texture graded in 0.5.52 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.5.54: thrown bodies keep their ragdoll, risen zombies keep their face (pack 0.19.76)
+Andy: "thrown mobs should stop snapping to a pose, and instead keep the ragdoll, so they fall how they fall".
+- Letting go of a carried body (dropped, thrown, tossed into a fire by a guard, its carrier gone, sliding off a horse)
+  used to start its physics from `lyingBody`: sprawled flat, limbs splayed, a fresh random way up. So it snapped into
+  that pose in mid-air. Now `RagdollBody.held` starts it in the pose it was drawn held in (`CorpseRenderer`): a
+  humanoid on its back across the arms, head to the carrier's right, arms hanging and legs back; an animal belly down,
+  legs hanging, head drooping; a small body hanging by the neck from one hand. It keeps the speed it was thrown with
+  and falls however it falls from there.
+- Carried humanoids' legs and heads (client `Limp`) hang as far back as the leg and head cones allow
+  (`RagdollRig.HELD_LEG_HANG`, `HELD_HEAD_BACK`), so the physics never has to swing them on the first tick.
+- The released body's points are sent at once, and clients forget a held body's old points, so it is never drawn for a
+  frame where it lay before it was picked up.
+- `tools/ragdoll_sim` checks a player, cow, chicken, snake and giant let go of in each hold: no point off by more
+  than a hair on the first tick, bones their length, lands and settles out of the ground. All pass.
+- A zombie (or skeleton) body that gets back up came back with a fresh random id. Excalibur picks each zombie's look
+  (its people: hair, clothes) from that id, so it rose wearing someone else's face, or the plain zombie skin, and died
+  again that way (Andy: "the zombie died and changed skins"). It now gets up with the id it had alive, unless
+  something in the world already has it.
+- Compile-checked; not played.
+
+## 0.5.55: one HUD layout (pack 0.19.79, Kingdoms 0.7.487)
+The stomach slots and the body-heat thermometer moved into the left dock beside the hotbar (`client/hud/HudZones`, a
+copy of Powers'; see `docs/HUD-Layout.md` in the pack). The stomach no longer sits where the power chips and the
+attack indicator are; the thermometer no longer covers the XP number.
+## 0.5.56: butchers take coins (pack 0.20.0, Kingdoms 0.7.498)
+Part of Kingdoms' "coins replace emeralds" (`docs/Coins-Plan.md`). A butcher villager's price is now asked in the coin of
+the land where you stand (one emerald's worth in the old price is `KingdomsMoney.worth(1)`, paid in the town's coin and
+copper bits). `KingdomsMoney` is a MethodHandles bridge to `com.jaymoskingdoms.money.Money`, so loose coins, a purse
+(the worn belt purse too) and bundles all count, and change comes back as coins. The butcher screen is sent the price as
+a server-made line ("6 Realm Silver"), one of that coin to draw beside it, the cost and what you carry (`OpenButcher`
+now carries a Component and an ItemStack instead of a silver count). Without Kingdoms the price falls back to emeralds
+one for one.
+## 0.5.57: hooks for the Green Huntsman (pack 0.20.8, Kingdoms 0.7.509)
+`Hanging.addExtraCuts` and `Hanging.addOnDone`: hooks for Kingdoms' Green Huntsman (more from a carcass, and the deed).
+Kitchen stays free of Kingdoms; Kingdoms adds both by reflection (`KitchenCompat.skills`).
+## 0.5.58: drinks are told (pack 0.20.26)
+`Thirst.DRANK`: every drink of water (a sip, a bottle, a cup) is told to its listeners. Powers adds one by reflection: with
+water in the lungs, a drink may go down the wrong pipe.
+## 0.5.59: the stacked Nether (pack 0.20.30)
+Body heat and thirst know the Nether band of a One Dimension world (Powers 0.20.30), where every band answers
+`level.dimension() == OVERWORLD`: `Stacked.realm` asks CustomChunks for the realm at the player's height by reflection.

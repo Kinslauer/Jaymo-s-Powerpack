@@ -1,0 +1,25 @@
+{
+  "centre": "minecraft:emerald_block",
+  "components": [
+    "minecraft:emerald",
+    "minecraft:emerald",
+    "minecraft:emerald",
+    "minecraft:emerald",
+    "minecraft:glistering_melon_slice",
+    "minecraft:glistering_melon_slice",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "life": 14,
+    "plant": 8,
+    "spirit": 6
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymoskingdoms:verdant_golem",
+    "count": 1
+  },
+  "research": "golemancy",
+  "flux": 4
+}

@@ -7,10 +7,6 @@ chieftain.png, chieftain_1.png (bbmodels/chieftain.json): the orc warchief's bod
   Changes: baked to our loader's format; drawn at 0.69 size; its animations played by the warchief's pace, blows,
   slam and roar.
 
-canon.png (bbmodels/canon.json): the field cannon
-  "Canon" by iexogen, https://blockbenchworkshop.com/model/iexogen/canon
-  Changes: baked to our loader's format, the barrel's pivot moved onto its trunnions so it can aim; drawn at 0.93 size.
-
 dead_traveler.png (bbmodels/dead_traveler.json): the silver skeleton
   "Dead Traveler (Skeleton)" by polyjo, https://blockbenchworkshop.com/model/polyjo/dead-traveler-skeleton
   Changes: baked to our loader's format, its three textures (body, sword, buckler) stacked on one sheet.
@@ -33,12 +29,14 @@ reverent_warplate.png (bbmodels/reverent_warplate.json), and textures/item/rever
   Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer (it was made for
   GeckoLib); the item icons are its pieces drawn small with an outline (kingdoms/tools/gen_reverent.py).
 
-kintsugi.png (bbmodels/kintsugi.json), and dragon/eurus/ and dragon/aeolus/ hide_*.png, marks_*.png: Eurus and Aeolus
+kintsugi.png (bbmodels/kintsugi.json), and dragon/eurus/, dragon/aeolus/ and dragon/ignivorus/ hide_*.png, marks_*.png:
+  Eurus, Aeolus and Ignivorus
   "Kintsugi" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi
   Changes: baked to our loader's format; walking, sitting and gliding posed by our own code over its own animations;
   drawn at 0.28 (Eurus) and 0.75 (Aeolus) size. Aeolus's hides are its texture lifted grey-white in four shades, his
   markings its gold seams glowing (gold, the four winds' colours, white-gold, silver); Eurus's hides are it turned
-  storm-blue and violet, his markings its seams in electric cyan (kingdoms/tools/gen_kintsugi_dragons.py).
+  storm-blue and violet, his markings its seams in electric cyan; Ignivorus (drawn at 0.55) has it in obsidian, basalt
+  ash, ember and crimson, its seams glowing as lava cracks (kingdoms/tools/gen_kintsugi_dragons.py).
 
 minotaur.png (bbmodels/minotaur.json): the minotaur
   "Minotaur" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/minotaur

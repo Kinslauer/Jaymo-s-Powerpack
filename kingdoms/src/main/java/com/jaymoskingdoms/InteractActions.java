@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * be talk-menu answers that do something rather than say something are buttons on MCA's Interact page now, each shown
  * only when it applies: seek an audience (a ruler, or a realm's guard who walks you there, {@link Audiences}), a
  * pedlar's wares and tribute to a tribe ({@link Pedlars}, {@link Tribes}), and a sworn captain sent spying or raiding
- * ({@link SwornCaptains}). Ask the Way ({@link Directions}) has its own page.
+ * ({@link SwornCaptains}). (0.7.498) Ask about Money ({@link MoneyTalk}). Ask the Way ({@link Directions}) has its own page.
  * <p>Which apply is worked out here as you right-click a villager and sent ahead of MCA's screen ({@link Offered}); the
  * client hides the rest ({@code McaActionButtonsMixin}). A button pressed comes back as MCA command {@code act.<action>}
  * ({@code McaCommandMixin}), checked again here before it's done.
@@ -32,7 +33,15 @@ public final class InteractActions {
 	/** MCA's command prefix, and the actions in the order their buttons stand. */
 	public static final String COMMAND = "act.";
 	public static final String AUDIENCE = "audience", WARES = "wares", TRIBUTE = "tribute", SPY = "spy", RAID = "raid";
-	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID);
+	/** (0.7.498) Ask about Money: emeralds or coin ({@link MoneyTalk}). */
+	public static final String MONEY = "money";
+	/** (0.7.513) The cleric's Leaving Rite ({@link Rites}). */
+	public static final String RITE = "rite";
+	/** (0.7.519) Hear the Envoy: a realm's envoy waiting in a player's hall ({@link Envoys}). */
+	public static final String ENVOY = "envoy";
+	/** (0.7.523) Keep Your Word: hand over what you promised to bring ({@link Promises}). */
+	public static final String PROMISE = "promise";
+	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY, RITE, ENVOY, PROMISE);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -76,9 +85,13 @@ public final class InteractActions {
 	static boolean offers(ServerPlayer player, LivingEntity v, String action) {
 		return switch (action) {
 			case AUDIENCE -> Rulers.is(v) || Audiences.canAsk(v);
-			case WARES -> Pedlars.pedlar(v);
+			case WARES -> Pedlars.pedlar(v) || com.jaymoskingdoms.nether.CinderForge.ignis(v) || GreenMarket.merchant(v);
 			case TRIBUTE -> Tribes.takesTribute(player, v);
 			case SPY, RAID -> SwornCaptains.takesOrders(player, v);
+			case MONEY -> v instanceof Villager villager && Directions.offers(villager);
+			case RITE -> Accusations.priest(v) && player.level() instanceof ServerLevel l && Turning.rite(player, Patrons.today(l.getServer())) != null;
+			case ENVOY -> Envoys.hearable(player, v);
+			case PROMISE -> v instanceof Villager villager && Promises.handable(player, villager);
 			default -> false;
 		};
 	}
@@ -101,6 +114,16 @@ public final class InteractActions {
 				return null;
 			}
 			case WARES -> {
+				if (com.jaymoskingdoms.nether.CinderForge.ignis(v) && v instanceof Villager villager) {
+					// (0.7.478) Ignis Vael's wares
+					com.jaymoskingdoms.nether.CinderForge.trade(player, villager);
+					return null;
+				}
+				if (GreenMarket.merchant(v)) {
+					// (0.7.490) a greenskin camp's market stall, priced in bent ingots
+					GreenMarket.trade(player, v);
+					return null;
+				}
 				Pedlars.trade(player, v);
 				return null;
 			}
@@ -112,6 +135,23 @@ public final class InteractActions {
 			}
 			case RAID -> {
 				return SwornCaptains.order(player, v, SwornCaptains.RAID_ANSWER);
+			}
+			case MONEY -> {
+				return MoneyTalk.answer(player, (Villager)v);
+			}
+			case RITE -> {
+				if (McaBridge.heartsOf((Villager)v, player) < Directions.REFUSE_HEARTS) {
+					return Component.translatable("talk.jaymoskingdoms.rite.refuse");
+				}
+				Rites.offer(player, (Villager)v);
+				return null;
+			}
+			case ENVOY -> {
+				Envoys.hear(player, v);
+				return null;
+			}
+			case PROMISE -> {
+				return Promises.handOver(player, (Villager)v);
 			}
 			default -> {
 				return null;

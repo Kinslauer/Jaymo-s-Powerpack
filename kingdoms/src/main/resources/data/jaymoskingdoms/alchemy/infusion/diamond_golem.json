@@ -1,0 +1,26 @@
+{
+  "centre": "minecraft:diamond_block",
+  "components": [
+    "minecraft:diamond",
+    "minecraft:diamond",
+    "minecraft:diamond",
+    "minecraft:diamond",
+    "minecraft:polished_deepslate",
+    "minecraft:polished_deepslate",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "crystal": 16,
+    "spirit": 10,
+    "war": 8,
+    "arcana": 8
+  },
+  "instability": 9,
+  "result": {
+    "item": "jaymoskingdoms:diamond_golem",
+    "count": 1
+  },
+  "research": "golemancy",
+  "flux": 6
+}

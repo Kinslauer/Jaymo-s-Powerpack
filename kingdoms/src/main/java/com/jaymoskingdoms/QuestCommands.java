@@ -11,12 +11,14 @@ import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.29) {@code /kingdom quests}: your quests and what's left of each, with a way to give one up from afar. For ops:
@@ -36,7 +38,17 @@ final class QuestCommands {
 				// (0.5.47) a stablehand's or a king's horse quest
 				.then(Commands.literal("horse").executes(c -> offer(c, 5)))
 				.then(Commands.literal("champion").then(Commands.argument("lair", StringArgumentType.word()).executes(c -> offer(c, 3)))))
-			.then(Commands.literal("finish").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(QuestCommands::finish));
+			.then(Commands.literal("finish").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(QuestCommands::finish))
+			// (0.7.530) a town's trouble started or cleared where you stand, and a town works project filled in (testing)
+			.then(Commands.literal("trouble").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.literal("clear").executes(QuestCommands::clearTrouble))
+				.then(Commands.argument("kind", StringArgumentType.word())
+					.suggests((c, b) -> SharedSuggestionProvider.suggest(TownTroubles.ORDER, b))
+					.executes(QuestCommands::trouble)))
+			.then(Commands.literal("works").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.literal("fill").then(Commands.argument("project", StringArgumentType.word())
+					.suggests((c, b) -> SharedSuggestionProvider.suggest(TownProjects.ids(), b))
+					.executes(QuestCommands::fillWorks))));
 	}
 
 	private static int list(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
@@ -106,6 +118,60 @@ final class QuestCommands {
 		g.setAttached(Quests.OFFER, new Quests.Offer(Quests.day(level) + 1, true, q));
 		g.setAttached(Quests.MARK, true);
 		c.getSource().sendSuccess(() -> Component.literal(g.getName().getString() + " (" + QuestBoard.job(g) + ") has work now"), true);
+		return 1;
+	}
+
+	/** (0.7.530) The town {@code player} stands in. */
+	private static @Nullable Faction townHere(ServerPlayer player) {
+		ServerLevel level = (ServerLevel)player.level();
+		Faction f = Factions.around(level.getServer(), level, player.blockPosition(), Villages.VILLAGE_RADIUS);
+		if (f == null || f.fallen() || f.type() == FactionType.BARBARIAN) {
+			f = Factions.at(level.getServer(), level, player.blockPosition());
+		}
+		return f == null || f.fallen() || f.type() == FactionType.BARBARIAN ? null : f;
+	}
+
+	private static int trouble(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		String kind = StringArgumentType.getString(c, "kind");
+		Faction f = townHere(player);
+		if (f == null) {
+			c.getSource().sendFailure(Component.translatable("quest.jaymoskingdoms.command.trouble.nowhere"));
+			return 0;
+		}
+		if (!TownTroubles.test(player, f, kind)) {
+			c.getSource().sendFailure(Component.translatable("quest.jaymoskingdoms.command.trouble.unknown", kind));
+			return 0;
+		}
+		c.getSource().sendSuccess(() -> Component.translatable("quest.jaymoskingdoms.command.trouble.started", kind, f.name()), true);
+		return 1;
+	}
+
+	private static int clearTrouble(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		Faction f = townHere(player);
+		if (f == null) {
+			c.getSource().sendFailure(Component.translatable("quest.jaymoskingdoms.command.trouble.nowhere"));
+			return 0;
+		}
+		int n = TownTroubles.clear((ServerLevel)player.level(), f);
+		c.getSource().sendSuccess(() -> Component.translatable("quest.jaymoskingdoms.command.trouble.cleared", n, f.name()), true);
+		return n;
+	}
+
+	private static int fillWorks(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		String id = StringArgumentType.getString(c, "project");
+		Faction f = townHere(player);
+		if (f == null) {
+			c.getSource().sendFailure(Component.translatable("quest.jaymoskingdoms.command.trouble.nowhere"));
+			return 0;
+		}
+		if (!TownProjects.fill(player, f, id)) {
+			c.getSource().sendFailure(Component.translatable("quest.jaymoskingdoms.command.trouble.unknown", id));
+			return 0;
+		}
+		c.getSource().sendSuccess(() -> Component.translatable("quest.jaymoskingdoms.command.works", id, f.name()), true);
 		return 1;
 	}
 

@@ -420,7 +420,7 @@ final class Couriers {
 	}
 
 	/** A saddled courser under {@code courier}. */
-	private static void mount(ServerLevel level, Villager courier) {
+	static void mount(ServerLevel level, Villager courier) {
 		if (courier.isPassenger()) {
 			return;
 		}

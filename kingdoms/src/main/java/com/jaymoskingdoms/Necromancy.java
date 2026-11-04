@@ -280,6 +280,7 @@ public final class Necromancy {
 		if (Thralls.raise(level, type, corpse.position(), -1, player.getUUID(), true, RAISE_LIFE, null) == null) {
 			return;
 		}
+		Commandments.act(player, "necromancy");
 		Sorcery.beam(level, player, corpse.position().add(0.0, 0.3, 0.0), VIOLET_MOTE);
 		corpse.discard();
 		RAISE_READY.put(player.getUUID(), now + RAISE_COOLDOWN);

@@ -1,0 +1,12 @@
+{
+  "surveyor.jaymoskingdoms.design": "Design",
+  "surveyor.jaymoskingdoms.plot": "Plot",
+  "surveyor.jaymoskingdoms.field": "Field",
+  "surveyor.jaymoskingdoms.quarry": "Quarry",
+  "surveyor.jaymoskingdoms.storage": "Storage",
+  "surveyor.jaymoskingdoms.design.how": "Use the rod on two opposite corners of something you built (take in its floor), then save it at a mason's table.",
+  "surveyor.jaymoskingdoms.plot.how": "Use the rod on two opposite corners of the ground the builders may build on.",
+  "surveyor.jaymoskingdoms.field.how": "Use the rod on two opposite corners of a field. A farmer is taken on to harvest and sow it.",
+  "surveyor.jaymoskingdoms.quarry.how": "Use the rod on two opposite corners on the ground; click lower down for the second corner to set how deep. Miners dig it out layer by layer.",
+  "surveyor.jaymoskingdoms.storage.how": "Use the rod on a chest or barrel to add it to the settlement's storage, or to take it out."
+}

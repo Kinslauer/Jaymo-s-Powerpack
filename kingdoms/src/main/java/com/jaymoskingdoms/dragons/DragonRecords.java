@@ -70,7 +70,7 @@ public final class DragonRecords {
 
 	/**
 	 * Whether a disguised dragon shows itself to {@code player} whatever they've beaten: wind control, Arsenal, Chrono or
-	 * Darktide (Jaymo's Powers), a tamed dragon, or an earned heritage woken.
+	 * Darktide (Jaymo's Powers), a tamed dragon, or an earned heritage woken (not the Hollow).
 	 */
 	public static boolean trusted(Player player) {
 		String power = PowersCompat.power(player);
@@ -78,7 +78,8 @@ public final class DragonRecords {
 			return true;
 		}
 		for (Heritage.Kind kind : Heritage.Kind.values()) {
-			if (kind.earned && Heritage.unlocked(player, kind)) {
+			// (0.7.490) not the Hollow: dying once to the undead is no deed a dragon heeds
+			if (kind.earned && kind != Heritage.Kind.HOLLOW && Heritage.unlocked(player, kind)) {
 				return true;
 			}
 		}

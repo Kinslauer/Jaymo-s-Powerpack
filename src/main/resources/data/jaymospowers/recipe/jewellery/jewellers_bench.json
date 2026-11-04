@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "NAN",
+    "PPP",
+    "P P"
+  ],
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "A": "minecraft:amethyst_shard",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymospowers:jewellers_bench"
+  }
+}

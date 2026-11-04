@@ -37,6 +37,8 @@ public final class Greenskins {
 	/** A goblin's green from palest to deepest, and an orc's; how far a shade leans yellow or blue. */
 	static final int GOBLIN_PALE = 0x9CC25A, GOBLIN_DEEP = 0x587A30, ORC_PALE = 0x8C9A70, ORC_DEEP = 0x46553A;
 	static final int LEAN = 18;
+	/** (0.7.490) One goblin or orc in this many killed by a player drops bent copper (up to this many) and one in this many a bent iron. */
+	static final int DROP_COPPER_ONE_IN = 2, DROP_COPPER_MOST = 2, DROP_IRON_ONE_IN = 8;
 	private Greenskins() {
 	}
 
@@ -87,7 +89,7 @@ public final class Greenskins {
 
 	/** What one of {@code camp}'s villager goblins or orcs ({@code role}) goes for: as its folk did. */
 	static boolean prey(int role, int camp, LivingEntity target) {
-		return Goblins.isGoblin(role) ? Goblins.prey(camp, target) : Orcs.prey(target);
+		return Goblins.isGoblin(role) ? Goblins.prey(camp, target) : Orcs.prey(camp, target);
 	}
 
 	// ---- their skin -----------------------------------------------------------------------------------------------------
@@ -127,6 +129,15 @@ public final class Greenskins {
 		PathfinderMob mob = w.mob();
 		if (!(mob instanceof Folk) && Goblins.isGoblin(w.role()) && !chief(w.role())) {
 			Goblins.died(level, mob, w.role(), source);
+		}
+		// ((0.7.490) their pay: a goblin or an orc killed by a player now and then drops bent ingots)
+		if ((isRole(w.role()) || w.role() == Orcs.SHAMAN) && !chief(w.role()) && source.getEntity() instanceof net.minecraft.server.level.ServerPlayer) {
+			if (level.getRandom().nextInt(DROP_COPPER_ONE_IN) == 0) {
+				mob.spawnAtLocation(level, new net.minecraft.world.item.ItemStack(BentIngots.BENT_COPPER, 1 + level.getRandom().nextInt(DROP_COPPER_MOST)));
+			}
+			if (level.getRandom().nextInt(DROP_IRON_ONE_IN) == 0) {
+				mob.spawnAtLocation(level, new net.minecraft.world.item.ItemStack(BentIngots.BENT_IRON));
+			}
 		}
 	}
 }

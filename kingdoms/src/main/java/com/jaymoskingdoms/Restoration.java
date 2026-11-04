@@ -40,9 +40,10 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Coinage;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.7.212) Restoration, the healing school. Andy (2026-10-25/26): "a restoration arcana that focuses on healing magic. a
@@ -57,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  * later. <b>Lifebloom</b>: every blow they land on a foe heals the most hurt friend near them a little.</li>
  * <li><b>Spells</b> for scrolls and staffs ({@link Arcana#cast}): <b>Mending</b>, <b>Sanctuary</b> (a circle on the ground
  * the undead won't enter), and <b>Restoration</b> (whole again: bones set, festering cured, up if downed).</li>
- * <li><b>Healers:</b> a court wizard mends you for emeralds (free, and your bones set, if his realm thinks well of you)
+ * <li><b>Healers:</b> a court wizard mends you for coin (free, and your bones set, if his realm thinks well of you)
  * and sells scrolls; in a fight he brings the downed of his side round before anything else. A village cleric sells
  * Mending scrolls, mends you, and looks after the hurt and the downed of the village.</li>
  * <li><b>Mercy:</b> villagers healed warm to you and remember it; bringing a downed foe round is mercy, and the devout and
@@ -95,7 +96,7 @@ public final class Restoration {
 	static final float SCROLL_LOOT_CHANCE = 0.08F;
 
 	// ---- the healers ----
-	/** A healer's prices (emeralds): mending your wounds, a Scroll of Mending, a Scroll of Restoration. */
+	/** (0.7.498) A healer's prices (emeralds' worth, asked in the town's coin: {@link Money#text}): mending your wounds, a Scroll of Mending, a Scroll of Restoration. */
 	static final int HEAL_EMERALDS = 3, MENDING_SCROLL_EMERALDS = 4, RESTORATION_SCROLL_EMERALDS = 24;
 	/** At or over this a court wizard's realm mends you free and sets your bones; at or over the next he'll sell a Restoration. */
 	static final int FRIEND_REP = 100, HONOURED_REP = 400;
@@ -168,11 +169,11 @@ public final class Restoration {
 				lifebloom(level, player);
 			}
 		});
-		// a village cleric: sneak and use them (empty-handed, or with emeralds)
+		// a village cleric: sneak and use them (empty-handed, or with coins or a purse in hand) (0.7.498)
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !sp.isShiftKeyDown()
 				|| !(entity instanceof Villager v) || !cleric(v) || CourtWizards.is(v)
-				|| !(sp.getMainHandItem().isEmpty() || sp.getMainHandItem().is(Items.EMERALD))) {
+				|| !(sp.getMainHandItem().isEmpty() || Coinage.isMoney(sp.getMainHandItem()))) {
 				return InteractionResult.PASS;
 			}
 			if (!Languages.understands(sp, v)) {
@@ -636,23 +637,23 @@ public final class Restoration {
 	/** An option's line, and whether it can be taken now. */
 	static Component optionLine(ServerPlayer player, String kind) {
 		return switch (kind) {
-			case "treatment" -> Component.translatable("talk.jaymoskingdoms.healer.treatment", Healing.treatmentPrice(player));
-			case "heal" -> Component.translatable("talk.jaymoskingdoms.healer.heal", HEAL_EMERALDS);
+			case "treatment" -> Component.translatable("talk.jaymoskingdoms.healer.treatment", Money.text(player, Money.worth(Healing.treatmentPrice(player))));
+			case "heal" -> Component.translatable("talk.jaymoskingdoms.healer.heal", Money.text(player, Money.worth(HEAL_EMERALDS)));
 			case "heal_free" -> Component.translatable("talk.jaymoskingdoms.healer.heal_free");
-			case "scroll_mending" -> Component.translatable("talk.jaymoskingdoms.healer.scroll_mending", MENDING_SCROLL_EMERALDS);
-			case "scroll_restoration" -> Component.translatable("talk.jaymoskingdoms.healer.scroll_restoration", RESTORATION_SCROLL_EMERALDS);
+			case "scroll_mending" -> Component.translatable("talk.jaymoskingdoms.healer.scroll_mending", Money.text(player, Money.worth(MENDING_SCROLL_EMERALDS)));
+			case "scroll_restoration" -> Component.translatable("talk.jaymoskingdoms.healer.scroll_restoration", Money.text(player, Money.worth(RESTORATION_SCROLL_EMERALDS)));
 			default -> Component.translatable("talk.jaymoskingdoms.wizard.respec.no");
 		};
 	}
 
 	static boolean optionOpen(ServerPlayer player, String kind) {
-		int emeralds = Approaches.emeralds(player);
+		// (0.7.498) what the coins carried are worth here (foreign coins at a cut), not their face
 		return switch (kind) {
-			case "heal" -> emeralds >= HEAL_EMERALDS && hurt(player);
-			case "treatment" -> Healing.needsTreatment(player) && emeralds >= Healing.treatmentPrice(player);
+			case "heal" -> Money.canPay(player, Money.worth(HEAL_EMERALDS)) && hurt(player);
+			case "treatment" -> Healing.needsTreatment(player) && Money.canPay(player, Money.worth(Healing.treatmentPrice(player)));
 			case "heal_free" -> hurt(player);
-			case "scroll_mending" -> emeralds >= MENDING_SCROLL_EMERALDS;
-			case "scroll_restoration" -> emeralds >= RESTORATION_SCROLL_EMERALDS && restorationDue(player);
+			case "scroll_mending" -> Money.canPay(player, Money.worth(MENDING_SCROLL_EMERALDS));
+			case "scroll_restoration" -> Money.canPay(player, Money.worth(RESTORATION_SCROLL_EMERALDS)) && restorationDue(player);
 			default -> true;
 		};
 	}
@@ -699,7 +700,7 @@ public final class Restoration {
 		switch (kind) {
 			case "heal", "heal_free" -> {
 				if (kind.equals("heal")) {
-					Approaches.take(player, Items.EMERALD, HEAL_EMERALDS);
+					Money.charge(player, Money.worth(HEAL_EMERALDS));
 					PowersCompat.mend(player, player.getMaxHealth());
 					while (PowersCompat.closeCut(player)) {
 						// (every cut closed)
@@ -717,7 +718,7 @@ public final class Restoration {
 			}
 			case "treatment" -> {
 				// (0.7.462) cuts closed, festering cleaned, bones set and knitted, every part healed to full (never a severed limb)
-				Approaches.take(player, Items.EMERALD, Healing.treatmentPrice(player));
+				Money.charge(player, Money.worth(Healing.treatmentPrice(player)));
 				Healing.treat(player);
 				beam(level, healer, player, GOLD_MOTE);
 				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD_MOTE, 18);
@@ -725,12 +726,12 @@ public final class Restoration {
 				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.treated"), Speech.GOLD);
 			}
 			case "scroll_mending" -> {
-				Approaches.take(player, Items.EMERALD, MENDING_SCROLL_EMERALDS);
+				Money.charge(player, Money.worth(MENDING_SCROLL_EMERALDS));
 				player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.SCROLL_MENDING), net.minecraft.util.Prediction.SERVER_ONLY);
 				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.sold"), Speech.GOLD);
 			}
 			case "scroll_restoration" -> {
-				Approaches.take(player, Items.EMERALD, RESTORATION_SCROLL_EMERALDS);
+				Money.charge(player, Money.worth(RESTORATION_SCROLL_EMERALDS));
 				player.setAttached(RESTORATION_BOUGHT, level.getGameTime());
 				player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.SCROLL_RESTORATION), net.minecraft.util.Prediction.SERVER_ONLY);
 				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.sold_restoration"), Speech.GOLD);

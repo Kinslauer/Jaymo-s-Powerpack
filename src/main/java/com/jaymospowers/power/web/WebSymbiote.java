@@ -2324,6 +2324,14 @@ public final class WebSymbiote {
 		} else {
 			return;
 		}
+		noise(level, pos, range);
+	}
+
+	/**
+	 * (0.20.3) A loud noise at {@code pos}: every host within {@code range} flinches from it (once per
+	 * {@link #NOISE_GRACE_TICKS}). Metal banged on metal ({@code combat/ShieldBang}) calls it too.
+	 */
+	public static void noise(ServerLevel level, Vec3 pos, double range) {
 		for (ServerPlayer player : level.players()) {
 			if (isBonded(player) && player.isAlive() && !player.isSpectator() && player.position().distanceToSqr(pos) <= range * range) {
 				Live live = live(player);
@@ -3822,13 +3830,15 @@ public final class WebSymbiote {
 			WebSymbioteBond.refuse(player);
 			return;
 		}
-		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player) && lockedOut(player)) {
+		// (0.19.69) (taking it off always answers: a sulk or a lockout only stops it coming up a form)
+		boolean climbing = ability == ARMOR && isBonded(player) && (form(player) == FORM_SKIN || form(player) < topForm(player));
+		if (climbing && lockedOut(player)) {
 			// you tore yourself out of it: it won't cover you again yet
 			whisper(player, "locked_out." + (1 + player.getRandom().nextInt(LOCKED_OUT_LINES)));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.6F, 1.5F);
 			return;
 		}
-		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player) && sulking(player)) {
+		if (climbing && sulking(player)) {
 			// it won't come: it's still angry with you
 			nag(player, "sulking");
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.6F, 1.5F);

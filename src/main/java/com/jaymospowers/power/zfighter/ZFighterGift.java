@@ -45,6 +45,8 @@ final class ZFighterGift implements GiftKit {
 	static final double WAVE_LENGTH = 28.0, WAVE_WIDTH = 1.6, WAVE_THROW = 1.2;
 	static final float WAVE_DAMAGE = 9.0F;
 	static final int WAVE_SLOW_TICKS = 60, WAVE_FILM = 50;
+	/** (0.19.60) How long it gathers in their hands before it fires (ticks). */
+	static final int WAVE_GATHER = 16;
 	/** Everyday: their shadowboxing, how many punches at a time and how far from them. */
 	static final int SHADOWBOX_PUNCHES = 3;
 	static final double SHADOWBOX_REACH = 1.2;
@@ -85,7 +87,10 @@ final class ZFighterGift implements GiftKit {
 	}
 
 	private static boolean blast(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
-		Vec3 from = caster.getEyePosition().add(0.0, -0.3, 0.0), to = foe.getBoundingBox().getCenter();
+		// (0.19.60) out of the palm, thrown with a thrust of that arm
+		Vec3 to = foe.getBoundingBox().getCenter(), aim = to.subtract(caster.getEyePosition());
+		Vec3 from = ZFighterHands.mainPalm(caster, aim.lengthSqr() < 1.0E-6 ? caster.getLookAngle() : aim.normalize());
+		ZFighterHands.thrust(caster, ZFighterHands.hand(caster, true), ZFighterHands.JAB);
 		line(level, from, to, BLAST_COLOR, 1.2F, 2.0);
 		level.sendParticles(new DustParticleOptions(BLAST_COLOR, 1.8F), to.x, to.y, to.z, 16, 0.3, 0.3, 0.3, 0.1);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y, to.z, 6, 0.2, 0.2, 0.2, 0.2);
@@ -160,12 +165,39 @@ final class ZFighterGift implements GiftKit {
 		return new Ultimate(UltimateFilm.PROFILE, WAVE_FILM, false, ZFighterGift::wave);
 	}
 
+	/** (0.19.60) The wave gathers between their cupped hands at the hip first ({@link #WAVE_GATHER} ticks), then fires. */
 	private static boolean wave(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
-		Vec3 from = caster.getEyePosition().add(0.0, -0.3, 0.0), aim = foe.getBoundingBox().getCenter().subtract(from);
+		if (foe.getBoundingBox().getCenter().distanceToSqr(caster.getEyePosition()) < 1.0E-4) {
+			return false;
+		}
+		ZFighterHands.pose(caster, ZFighterHands.CUP);
+		for (int i = 0; i < WAVE_GATHER; i++) {
+			double size = 0.25 + 0.75 * i / (double)WAVE_GATHER;
+			ZFighterHands.later(caster, i, () -> {
+				caster.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+				ZFighterKi.orb(level, -(caster.getId() * 4 + 3), ZFighterHands.cupped(caster), size, WAVE_COLOR);
+			});
+		}
+		ZFighterHands.later(caster, WAVE_GATHER, () -> {
+			ZFighterHands.pose(caster, ZFighterHands.NONE);
+			if (foe.isAlive() && foe.level() == level) {
+				fireWave(level, caster, foe);
+			}
+		});
+		return true;
+	}
+
+	private static boolean fireWave(ServerLevel level, PathfinderMob caster, LivingEntity foe) {
+		Vec3 aim = foe.getBoundingBox().getCenter().subtract(caster.getEyePosition());
 		if (aim.lengthSqr() < 1.0E-4) {
 			return false;
 		}
-		Vec3 dir = aim.normalize(), end = from.add(dir.scale(WAVE_LENGTH));
+		// (0.19.60) from both hands pushed out together, with a shout
+		Vec3 dir = aim.normalize();
+		Vec3 from = ZFighterHands.palm(caster, dir, false).lerp(ZFighterHands.palm(caster, dir, true), 0.5);
+		Vec3 end = from.add(dir.scale(WAVE_LENGTH));
+		ZFighterHands.thrust(caster, ZFighterHands.BOTH, ZFighterHands.PUSH);
+		ZFighterHands.shout(caster);
 		// the beam: a thick blue coil from the hands to its end, bursting where it stops (no block is touched)
 		line(level, from, end, WAVE_COLOR, 3.0F, 2.0);
 		level.sendParticles(new DustParticleOptions(WAVE_COLOR, 1.5F), end.x, end.y, end.z, 24, 0.4, 0.4, 0.4, 0.2);

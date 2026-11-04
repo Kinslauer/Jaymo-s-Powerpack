@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.monsters.Ogre;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
@@ -79,7 +80,7 @@ public final class Trials {
 	static final int LIFT_TICKS = 100, LIFT_SECONDS = 20, BRAWL_SECONDS = 120;
 	static final double LIFT_REACH = 5.0;
 	static final float BRAWL_DOWN = 0.5F;
-	/** After a trial's passed, a tribe sets no other for this many days; the king's gift (emeralds). */
+	/** After a trial's passed, a tribe sets no other for this many days; the king's gift (silver coins). */
 	static final int AGAIN_DAYS = 3, GIFT = 8;
 	// ================================================================================================================
 
@@ -276,7 +277,7 @@ public final class Trials {
 			t.other = champion.getUUID();
 			TRIALS.put(player.getUUID(), t);
 			level.playSound(null, pit, SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 2.0F, 0.8F);
-			Speech.say(level, champion, Component.translatable("talk.jaymoskingdoms.trial.champion." + champion.getRandom().nextInt(3)), Speech.RED, 32.0);
+			Speech.say(level, champion, Dialects.trBrood(Dialects.ORC, "talk.jaymoskingdoms.trial.champion." + champion.getRandom().nextInt(3)), Speech.RED, 32.0);
 			return line("pit", guard, player);
 		}
 		PathfinderMob king = king(level, camp, throne);
@@ -512,15 +513,16 @@ public final class Trials {
 		} else {
 			Tribes.makeTruce(server, player.getUUID(), t.tribe);
 		}
-		player.getInventory().placeItemBackInInventory(new ItemStack(Items.EMERALD, GIFT), net.minecraft.util.Prediction.SERVER_ONLY);
+		Money.pay(player, Money.worth(GIFT));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.7F);
 		if (other instanceof LivingEntity speaker && speaker.isAlive()) {
-			Speech.say(level, speaker, Component.translatable("talk.jaymoskingdoms.trial.passed." + t.kind.name().toLowerCase(java.util.Locale.ROOT)),
+			Speech.say(level, speaker, t.kind == Kind.BRAWL ? Component.translatable("talk.jaymoskingdoms.trial.passed.brawl")
+				: Dialects.trBrood(t.kind == Kind.PIT ? Dialects.ORC : Dialects.GOBLIN, "talk.jaymoskingdoms.trial.passed." + t.kind.name().toLowerCase(java.util.Locale.ROOT)),
 				Speech.GOLD, 32.0);
 		}
 	}
 
 	private static Component line(String what, LivingEntity guard, ServerPlayer player) {
-		return Component.translatable("dialogue.chat.jaymoskingdoms.trial." + what + "." + guard.getRandom().nextInt(2), Recollections.nameTo(player, guard));
+		return Dialects.tr(guard, "dialogue.chat.jaymoskingdoms.trial." + what + "." + guard.getRandom().nextInt(2), Recollections.nameTo(player, guard));
 	}
 }

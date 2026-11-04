@@ -426,6 +426,8 @@ public final class Forms {
 		player.sendOverlayMessage(Component.translatable(first ? "message.jaymoskingdoms.form.first" : "message.jaymoskingdoms.form.learned",
 			form.name()).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.4F);
+		// (0.7.516) taught by anyone but its own perk: the perk on the skill web is marked taught, free
+		com.jaymoskingdoms.Learnables.formTaught(player, formId);
 		return true;
 	}
 

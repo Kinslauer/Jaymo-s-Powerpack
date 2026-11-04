@@ -1,6 +1,8 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.ClassPerks;
 import com.jaymoskingdoms.Handshakes;
+import com.jaymoskingdoms.McaCompat;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -10,10 +12,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -23,6 +29,10 @@ import org.jspecify.annotations.Nullable;
  * quick dap: the hand up high, one clasp and a tug in. (0.7.204) A villager taking your hand shakes the same way.
  * (0.7.289) A villager's wave at a first meeting: the right hand raised out to the side, swung to and fro a few times;
  * and a shake off film ({@code Hand.PLAIN}) looks the same as one on it.
+ * (0.7.504) A bow to a ruler ({@code Hand.BOW}): bent from the waist, head down, the hands by what's in them. Empty
+ * handed, the hand over the heart and the other swept behind; a blade in hand, held low at your side with the other hand
+ * come across onto its pommel; anything else, held at your side with the free hand over the heart. A hand with something
+ * in it (a shield, a torch) stays down by your side. The ruler's answer, a nod ({@code Hand.NOD}).
  */
 public final class HandshakePose {
 	/** The arm held out: forward and a little down, turned in toward the middle (radians). */
@@ -35,12 +45,29 @@ public final class HandshakePose {
 	static final float REACH_DELAY = 3.0F;
 	/** (0.7.289) The wave: the arm raised out to the side and a little forward, and its swing (radians), and how fast (radians per tick). */
 	static final float WAVE_UP = 2.5F, WAVE_FORWARD = -0.25F, WAVE_SWING = 0.35F, WAVE_SPEED = 0.7F;
+	/** (0.7.504) The bow: how far forward from the waist, and the head further down (radians). */
+	static final float BOW_LEAN = 0.6F, BOW_HEAD = 0.45F;
+	/** (0.7.504) The ruler's nod (radians). */
+	static final float RULER_NOD = 0.35F;
+	/**
+	 * (0.7.504) The arms in a bow, as {forward (x), turned in (y), out to the side (z)} for either arm (mirrored for the
+	 * left), in radians; HEART and BEHIND go with the body as it bends, the rest hang as they would.
+	 */
+	static final float[] HEART = {-1.05F, 0.65F, -0.05F}, BEHIND = {0.55F, 0.0F, 0.12F}, SIDE = {-0.1F, 0.0F, 0.08F},
+		BLADE_LOW = {0.4F, -0.1F, 0.12F}, POMMEL = {-0.3F, 0.0F, -0.7F};
+	/** (0.7.504) What the hands hold in a bow: nothing in the main hand, a blade, or something else; plus this if the off hand holds anything. */
+	static final int FREE = 0, BLADE = 1, HOLDING = 2, OFF_HELD = 4;
+	/** (0.7.504) What a pose is: a shake, a dap, a wave, a bow or a nod. */
+	static final float SHAKE = 0.0F, DAP = 1.0F, WAVE = 2.0F, BOW = 3.0F, NOD = 4.0F;
 	/** Head bowed a touch while shaking (radians). */
-	static final float NOD = 0.12F;
+	static final float SHAKE_NOD = 0.12F;
 	/** The ease: stiffness (per second squared), damping ratio, the longest step (seconds). */
 	static final float STIFFNESS = 60.0F, DAMPING = 0.85F, MAX_DT = 0.1F, SUBSTEP = 0.008F;
 
-	/** This frame's {weight, ticks into the shake (or -1 while just held out), 1 for a dap (0.7.289: 2 for a wave)} on a render state. */
+	/**
+	 * This frame's {weight, ticks into the shake (or -1 while just held out), 1 for a dap (0.7.289: 2 for a wave;
+	 * (0.7.504) 3 a bow, 4 a nod), (0.7.504) what the hands hold for a bow} on a render state.
+	 */
 	static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:handshake");
 
 	/** A player's hand: held out or shaking, toward whom, and since when (client game time, for a shake). */
@@ -93,8 +120,12 @@ public final class HandshakePose {
 		Hand hand = HANDS.get(id);
 		float t = -1.0F;
 		boolean on = hand != null, dap = hand != null && hand.state == Handshakes.Hand.DAP, wave = hand != null && hand.state == Handshakes.Hand.WAVE;
+		boolean bow = hand != null && hand.state == Handshakes.Hand.BOW, nod = hand != null && hand.state == Handshakes.Hand.NOD;
 		float[] ease = EASES.get(id);
-		if (wave) {
+		if (bow || nod) {
+			t = into(hand, partialTicks);
+			on = t < (bow ? Handshakes.BOW_RELEASE : Handshakes.NOD_TICKS);
+		} else if (wave) {
 			t = into(hand, partialTicks);
 			on = t < Handshakes.WAVE_TICKS;
 		} else if (hand != null && (hand.state == Handshakes.Hand.SHAKING || hand.state == Handshakes.Hand.PLAIN || dap)) {
@@ -129,7 +160,14 @@ public final class HandshakePose {
 			EASE_TIMES.remove(id);
 			return;
 		}
-		state.setData(KEY, new float[] {ease[0], t, wave ? 2.0F : dap ? 1.0F : 0.0F});
+		state.setData(KEY, new float[] {ease[0], t, bow ? BOW : nod ? NOD : wave ? WAVE : dap ? DAP : SHAKE, bow ? holds(entity) : 0.0F});
+	}
+
+	/** (0.7.504) What {@code entity}'s hands hold, for a bow ({@link #FREE}, {@link #BLADE} or {@link #HOLDING}, plus {@link #OFF_HELD}). */
+	private static int holds(LivingEntity entity) {
+		ItemStack main = entity.getMainHandItem();
+		int kind = main.isEmpty() ? FREE : main.is(ItemTags.SWORDS) || main.is(ClassPerks.LIGHT_BLADES) ? BLADE : HOLDING;
+		return entity.getOffhandItem().isEmpty() ? kind : kind | OFF_HELD;
 	}
 
 	/** Right after a model was posed for this state: the right hand out, or shaking. */
@@ -144,14 +182,23 @@ public final class HandshakePose {
 		float w = pose[0], t = pose[1];
 		float pump = 0.0F, nod = 0.0F;
 		ModelPart arm = m.rightArm;
-		if (pose[2] > 1.5F) {
+		if (pose[2] == NOD) {
+			// (0.7.504) a ruler inclines their head
+			m.head.xRot += RULER_NOD * Math.min(1.0F, w);
+			return;
+		}
+		if (pose[2] == BOW) {
+			bow(model, m, state, w, (int)pose[3]);
+			return;
+		}
+		if (pose[2] == WAVE) {
 			// (0.7.289) a wave: up and out to the side, to and fro
 			arm.xRot = Mth.lerp(w, arm.xRot, WAVE_FORWARD);
 			arm.yRot = Mth.lerp(w, arm.yRot, 0.0F);
 			arm.zRot = Mth.lerp(w, arm.zRot, WAVE_UP + Mth.sin(Math.max(0.0F, t) * WAVE_SPEED) * WAVE_SWING);
 			return;
 		}
-		if (pose[2] > 0.0F) {
+		if (pose[2] == DAP) {
 			// a dap: the hand comes up high, clasps, one tug in toward the chest
 			float tug = 0.0F;
 			if (t >= Handshakes.DAP_GRIP && t < Handshakes.DAP_RELEASE) {
@@ -167,11 +214,70 @@ public final class HandshakePose {
 			float g = (t - Handshakes.GRIP_TICK) / (Handshakes.RELEASE_TICK - Handshakes.GRIP_TICK);
 			// the pumps start and end gently
 			pump = Mth.sin(g * PUMPS * Mth.TWO_PI) * PUMP * Mth.sin(g * Mth.PI);
-			nod = NOD * Mth.sin(g * Mth.PI);
+			nod = SHAKE_NOD * Mth.sin(g * Mth.PI);
 		}
 		arm.xRot = Mth.lerp(w, arm.xRot, REACH + pump);
 		arm.yRot = Mth.lerp(w, arm.yRot, REACH_IN);
 		arm.zRot = Mth.lerp(w, arm.zRot, 0.0F);
 		m.head.xRot += nod * Math.min(1.0F, w);
+	}
+
+	/** (0.7.504) A bow from the waist, the head down and the hands as {@code holds} has them. */
+	private static void bow(Model<?> model, HumanoidModel<?> m, Object state, float w, int holds) {
+		float k = Math.min(1.0F, w);
+		float lean = BOW_LEAN * k;
+		// bent at the waist as a crouch is: the head and shoulders brought down and forward, the legs back to match
+		float c = lean / 0.5F;
+		m.body.xRot = Mth.lerp(k, m.body.xRot, BOW_LEAN);
+		m.body.y += 3.2F * c;
+		m.head.y += 4.2F * c;
+		m.rightArm.y += 3.2F * c;
+		m.leftArm.y += 3.2F * c;
+		m.rightLeg.z += 4.0F * c;
+		m.leftLeg.z += 4.0F * c;
+		m.head.xRot = Mth.lerp(k, m.head.xRot, BOW_HEAD + BOW_LEAN);
+		m.head.yRot = Mth.lerp(k, m.head.yRot, 0.0F);
+		boolean leftHanded = state instanceof HumanoidRenderState h && h.mainArm == HumanoidArm.LEFT;
+		ModelPart main = leftHanded ? m.leftArm : m.rightArm, off = leftHanded ? m.rightArm : m.leftArm;
+		boolean offHeld = (holds & OFF_HELD) != 0;
+		float[] mainPose, offPose;
+		boolean mainBends, offBends;
+		switch (holds & ~OFF_HELD) {
+			case BLADE -> {
+				// the blade held low at your side, the other hand come across onto its pommel
+				mainPose = BLADE_LOW;
+				mainBends = false;
+				offPose = offHeld ? SIDE : POMMEL;
+				offBends = false;
+			}
+			case HOLDING -> {
+				// what you hold kept at your side, the free hand over your heart
+				mainPose = SIDE;
+				mainBends = false;
+				offPose = offHeld ? SIDE : HEART;
+				offBends = !offHeld;
+			}
+			default -> {
+				// the hand over your heart, the other swept behind you
+				mainPose = HEART;
+				mainBends = true;
+				offPose = offHeld ? SIDE : BEHIND;
+				offBends = !offHeld;
+			}
+		}
+		arm(main, mainPose, mainBends ? lean : 0.0F, main == m.leftArm, w);
+		arm(off, offPose, offBends ? lean : 0.0F, off == m.leftArm, w);
+		if (McaCompat.LOADED) {
+			// an MCA body's breasts lean with it, and its clothes follow the limbs
+			McaPullerPose.follow(model, lean, c);
+		}
+	}
+
+	/** (0.7.504) {@code part} eased toward {@code pose} ({forward, in, out}; mirrored for a left arm), {@code bend} more forward with the body. */
+	private static void arm(ModelPart part, float[] pose, float bend, boolean left, float w) {
+		float side = left ? -1.0F : 1.0F;
+		part.xRot = Mth.lerp(w, part.xRot, pose[0] + bend);
+		part.yRot = Mth.lerp(w, part.yRot, -pose[1] * side);
+		part.zRot = Mth.lerp(w, part.zRot, pose[2] * side);
 	}
 }

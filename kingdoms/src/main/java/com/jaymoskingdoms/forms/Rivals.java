@@ -183,7 +183,7 @@ public final class Rivals {
 		if (mark.equals(TOLD.put(player.getUUID(), mark))) {
 			return;
 		}
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.rival.land." + level.getRandom().nextInt(LINES),
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.rival.land." + level.getRandom().nextInt(LINES),
 			f.name(), name(local), name(mine)));
 	}
 

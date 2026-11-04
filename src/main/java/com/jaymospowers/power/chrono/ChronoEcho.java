@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -328,7 +329,7 @@ public class ChronoEcho extends Monster {
 			this.fight.end();
 			this.fight = null;
 		}
-		if (level.dimension() == Level.NETHER) {
+		if (Stacked.in(this, Level.NETHER)) {
 			if (this.fight == null) {
 				this.fight = new ChronoEchoFight(this);
 			}
@@ -541,7 +542,7 @@ public class ChronoEcho extends Monster {
 			return super.hurtServer(level, source, damage);
 		}
 		// (0.10.111) in the future too it bleeds and can die, and dying for good opens the future to its owner
-		if (source.is(DamageTypes.GENERIC_KILL) || level.dimension() == Level.NETHER
+		if (source.is(DamageTypes.GENERIC_KILL) || Stacked.in(this, Level.NETHER)
 			|| level.dimension() == com.jaymospowers.power.chrono.future.Future.FUTURE) {
 			if (this.fight != null && source.getEntity() instanceof ServerPlayer player) {
 				// (0.8.50) whoever strikes it (or shoots it, or hits it with a power) sees its bar

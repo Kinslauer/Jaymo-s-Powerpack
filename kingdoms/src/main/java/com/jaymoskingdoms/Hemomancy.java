@@ -40,6 +40,9 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Vampires</b> ({@link VampirePlayers}) cast it cheaper and harder, but every cast stokes their blood fever.</li>
  * <li>A camp's <b>blood witch</b> ({@link Sorcery#BLOOD_WITCH}) casts the same: bolts that cut, grips, hemorrhages, and
  * she drinks the bleeding round her to heal.</li>
+ * <li>(0.7.481) Andy: "Blood magic should draw from stains on ground". Both also draw the spilt blood out of the stains
+ * round them (Jaymo's Powers' blood trail, {@link PowersCompat#drawStains}): it rises to them in a thread of red and the
+ * stain shrinks and fades, gone once drawn dry (a trail drawn up can't be followed any more).</li>
  * </ul>
  */
 public final class Hemomancy {
@@ -52,6 +55,21 @@ public final class Hemomancy {
 	/** The pool: the most it holds; what each bleeding cut near feeds it a second (and the most a second); how near. */
 	static final float POOL_MAX = 20.0F, DRINK_PER_CUT = 0.25F, DRINK_MOST = 2.0F;
 	static final double DRINK_RANGE = 8.0;
+	/**
+	 * (0.7.481) Drawing from the stains on the ground: how near; how much of each stain a second (stain size: a drip's is
+	 * about 0.2, a pool 1 to 3); the pool (or a witch's health) each unit of stain is worth. The pool still fills at most
+	 * {@link #DRINK_MOST} a second, the bleeding first.
+	 */
+	static final double STAIN_RANGE = 6.0;
+	static final float STAIN_EACH = 0.12F, STAIN_BLOOD = 4.0F;
+	/**
+	 * (0.7.481) Jaymo's Kitchen's blood grates (under a meat hook): how near, the most levels drawn a second, what each
+	 * level (250 mB) is worth to the pool. A bottle of that blood, drunk: what it gives a Blood Sorcerer's pool, and a
+	 * vampire's heal and food.
+	 */
+	static final int GRATE_RANGE = 6, GRATE_MOST = 1;
+	static final float GRATE_BLOOD = 3.0F, BOTTLE_POOL = 6.0F, BOTTLE_HEAL = 2.0F;
+	static final int BOTTLE_FOOD = 3;
 	/** A vampire's costs and power. */
 	static final float VAMPIRE_COST = 0.75F, VAMPIRE_POWER = 1.5F, VAMPIRE_FEVER = 3.0F;
 	/** Hemorrhage: how far, how many bleed ticks each cut bursts for. */
@@ -87,6 +105,8 @@ public final class Hemomancy {
 			FRENZY.clear();
 		});
 		// Frenzy: your blows heal you
+		// (0.7.481) a bottle of Kitchen's blood: a vampire's thirst and a Blood Sorcerer's pool take it; anyone else retches
+		KitchenCompat.onBloodDrunk(Hemomancy::drankBottle);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player && entity != player && damageTaken > 0.0F
 				&& !blocked && frenzied(player)) {
@@ -228,7 +248,7 @@ public final class Hemomancy {
 		if (target instanceof Player) {
 			target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, (int) (GRIP_WEAKEN * power), 0), player);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, (int) (GRIP_WEAKEN * power), 1), player);
-		} else if (target instanceof Mob mob) {
+		} else if (target instanceof Mob mob && !(mob instanceof PatronChampion)) {
 			ItemStack held = mob.getMainHandItem();
 			if (!held.isEmpty()) {
 				mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
@@ -319,8 +339,16 @@ public final class Hemomancy {
 			Sorcery.beam(level, e, witch.getBoundingBox().getCenter(), BLOOD_MOTE);
 			drank++;
 		}
-		if (drank > 0) {
-			witch.heal(WITCH_DRINK * drank);
+		float heal = WITCH_DRINK * drank;
+		// (0.7.481) and the spilt blood round her (every two seconds: two seconds' worth)
+		float room = witch.getMaxHealth() - witch.getHealth() - heal;
+		if (room > 0.0F) {
+			float seconds = WITCH_DRINK_EVERY / 20.0F;
+			heal += STAIN_BLOOD * PowersCompat.drawStains(level, witch.position(), STAIN_RANGE, STAIN_EACH * seconds,
+				Math.min(room, DRINK_MOST * seconds) / STAIN_BLOOD, at -> rise(level, at, witch));
+		}
+		if (heal > 0.0F) {
+			witch.heal(heal);
 		}
 	}
 
@@ -349,9 +377,52 @@ public final class Hemomancy {
 					level.sendParticles(BLOOD_MOTE, mid.x, mid.y, mid.z, 2, 0.15, 0.15, 0.15, 0.0);
 				}
 			}
+			drank = Math.min(DRINK_MOST, drank);
+			// (0.7.481) and the spilt blood on the ground round them, as much as the pool has room for this second
+			float room = Math.min(DRINK_MOST - drank, POOL_MAX - pool - drank);
+			if (room > 0.0F) {
+				drank += STAIN_BLOOD * PowersCompat.drawStains(level, player.position(), STAIN_RANGE, STAIN_EACH, room / STAIN_BLOOD,
+					at -> rise(level, at, player));
+			}
+			// (0.7.481) and the blood caught in grates round them (Jaymo's Kitchen's butchery)
+			// (a level at a time, over and above what the bleeding and the stains gave this second)
+			room = POOL_MAX - pool - drank;
+			if (room >= GRATE_BLOOD) {
+				drank += GRATE_BLOOD * KitchenCompat.drawGrates(level, player.position(), GRATE_RANGE, Math.min(GRATE_MOST, (int) (room / GRATE_BLOOD)),
+					at -> rise(level, at, player));
+			}
 			if (drank > 0.0F) {
-				POOL.put(player.getUUID(), Math.min(POOL_MAX, pool + Math.min(DRINK_MOST, drank)));
+				POOL.put(player.getUUID(), Math.min(POOL_MAX, pool + drank));
 			}
 		}
+	}
+
+	/** (0.7.481) {@code player} drank a bottle of blood: theirs if they're a vampire (fed, the fever eased) or a Blood Sorcerer (into the pool). */
+	static boolean drankBottle(ServerPlayer player) {
+		boolean used = false;
+		if (VampirePlayers.vampire(player)) {
+			player.heal(BOTTLE_HEAL);
+			player.getFoodData().eat(BOTTLE_FOOD, 0.6F);
+			BloodFever.bit(player);
+			used = true;
+		}
+		if (bloodMage(player)) {
+			POOL.put(player.getUUID(), Math.min(POOL_MAX, pool(player) + BOTTLE_POOL));
+			splash((ServerLevel) player.level(), player, 6);
+			used = true;
+		}
+		return used;
+	}
+
+	/** (0.7.481) Blood drawn up out of a stain at {@code from}: a thread of red motes rising from the ground to {@code to}. */
+	private static void rise(ServerLevel level, Vec3 from, LivingEntity to) {
+		Vec3 end = to.getBoundingBox().getCenter();
+		Vec3 step = end.subtract(from);
+		int n = Math.max(2, (int) (step.length() * 2.0));
+		for (int i = 0; i <= n; i += 2) {
+			Vec3 p = from.add(step.scale(i / (double) n)).add(0.0, 0.1, 0.0);
+			level.sendParticles(BLOOD_MOTE, p.x, p.y, p.z, 1, 0.04, 0.04, 0.04, 0.0);
+		}
+		level.sendParticles(DARK_MOTE, from.x, from.y + 0.05, from.z, 3, 0.2, 0.02, 0.2, 0.0);
 	}
 }

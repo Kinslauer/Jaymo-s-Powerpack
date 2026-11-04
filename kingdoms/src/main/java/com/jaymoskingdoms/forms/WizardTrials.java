@@ -536,7 +536,12 @@ public final class WizardTrials {
 		if (caster) {
 			player.giveExperiencePoints(CASTER_XP);
 		}
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.trial." + (caster ? "caster" : "passed"), wizard.getDisplayName()));
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.trial." + (caster ? "caster" : "passed"), wizard.getDisplayName()));
+		// (0.7.516) and a Mage is taught the next spell they're ready for, free
+		String spell = Classes.is(player, Classes.PlayerClass.MAGE) ? com.jaymoskingdoms.Learnables.teachNext(player, true) : null;
+		if (spell != null) {
+			Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.trial.spell", wizard.getDisplayName(), Component.translatable(spell)));
+		}
 	}
 
 	/** The wizard says one of two variants of {@code key} (speech bubble, not chat). */

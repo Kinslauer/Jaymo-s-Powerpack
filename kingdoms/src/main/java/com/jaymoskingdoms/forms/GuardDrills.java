@@ -610,10 +610,16 @@ public final class GuardDrills {
 		if (known.isEmpty()) {
 			for (String id : Forms.STARTER_FORMS) {
 				if (!Forms.knows(player, id) && Forms.teach(player, id)) {
-					Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.taught", guard.getDisplayName(), formName(id)));
+					Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.taught", guard.getDisplayName(), formName(id)));
 					return;
 				}
 			}
+			return;
+		}
+		// (0.7.516) a veteran teaches the next skill of your class you're ready for (Archer, Thief, Warlord and the rest), free
+		String skill = com.jaymoskingdoms.Learnables.teachNext(player, false);
+		if (skill != null) {
+			Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.taught_skill", guard.getDisplayName(), Component.translatable(skill)));
 			return;
 		}
 		String pick = known.get(0);
@@ -623,7 +629,7 @@ public final class GuardDrills {
 			}
 		}
 		Forms.practice(player, pick, PRACTICE);
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.practiced", guard.getDisplayName(), formName(pick)));
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.practiced", guard.getDisplayName(), formName(pick)));
 	}
 
 	private static Component formName(String id) {

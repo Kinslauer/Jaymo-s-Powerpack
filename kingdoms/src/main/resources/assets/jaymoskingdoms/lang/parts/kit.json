@@ -1,0 +1,8 @@
+{
+  "kit.jaymoskingdoms.card.move.key": "Ability (heritage key): %s: %s",
+  "kit.jaymoskingdoms.card.move.hold": "Ability (hold left mouse): %s: %s",
+  "kit.jaymoskingdoms.card.move.sneak": "Ability (sneak, then heritage key): %s: %s",
+  "kit.jaymoskingdoms.card.move.engulf": "Ability (heritage key): %s: %s",
+  "kit.jaymoskingdoms.card.gift": "Gift: %s",
+  "kit.jaymoskingdoms.card.flaw": "Flaw: %s"
+}

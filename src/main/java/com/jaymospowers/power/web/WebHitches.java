@@ -165,9 +165,27 @@ public final class WebHitches {
 				// this line snaps; any others hold
 				it.remove();
 				Vec3 at = center(entity);
+				// (0.19.70) pulled apart, it parts along the middle; worn out, or its block gone, it comes loose whole
+				WebNet.snap(entity, WebNet.HITCH_LINE, hitch.anchor(), at.lerp(hitch.anchor(), 0.35 + level.getRandom().nextDouble() * 0.3),
+					blockGone ? WebNet.FREED : clock >= hitch.until() ? WebNet.WORN : WebNet.SNAPPED);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
 				syncLater.add(entity);
 				continue;
+			}
+			if (clock % WebHeft.BURN_EVERY == 0) {
+				// (0.19.71) fire burns it through (a symbiote's cord recoils from it instead)
+				Vec3 burn = WebHeft.burning(level, hitch.anchor(), center(entity), entity);
+				if (burn != null) {
+					it.remove();
+					if (hitch.dark()) {
+						WebHeft.recoilFx(level, burn);
+					} else {
+						WebHeft.burnFx(level, burn);
+						WebNet.snap(entity, WebNet.HITCH_LINE, hitch.anchor(), burn, WebNet.SNAPPED);
+					}
+					syncLater.add(entity);
+					continue;
+				}
 			}
 			if (entity instanceof Mob mob) {
 				mob.getNavigation().stop();
@@ -219,8 +237,8 @@ public final class WebHitches {
 
 	private static final List<Entity> syncLater = new ArrayList<>();
 
-	/** Someone punched one of this creature's lines (the one tied near {@code anchor}): it breaks, the rest hold. */
-	static boolean cut(ServerLevel level, Entity entity, Vec3 anchor) {
+	/** Someone punched one of this creature's lines (the one tied near {@code anchor}) at {@code at}: it breaks there, the rest hold. */
+	static boolean cut(ServerLevel level, Entity entity, Vec3 anchor, Vec3 at) {
 		Hitch nearest = null;
 		double best = 2.5;
 		for (Hitch h : HITCHES) {
@@ -233,11 +251,19 @@ public final class WebHitches {
 			return false;
 		}
 		HITCHES.remove(nearest);
+		WebNet.snap(entity, WebNet.HITCH_LINE, nearest.anchor(), at, WebNet.SNAPPED);
 		sync(level, entity);
 		return true;
 	}
 
 	private static void release(ServerLevel level, Entity entity, boolean snapped) {
+		List<Line> had = entity.getAttached(WebPower.HITCH);
+		if (snapped && had != null) {
+			// fought or strained free: every line on it parts along the middle
+			for (Line line : had) {
+				WebNet.snap(entity, WebNet.HITCH_LINE, line.anchor(), center(entity).lerp(line.anchor(), 0.35 + level.getRandom().nextDouble() * 0.3), WebNet.SNAPPED);
+			}
+		}
 		entity.removeAttached(WebPower.HITCH);
 		STRAIN.remove(entity.getUUID());
 		if (entity instanceof LivingEntity living) {

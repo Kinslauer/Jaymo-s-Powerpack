@@ -299,6 +299,8 @@ public final class Downed {
 			}
 			if (isDowned(entity)) {
 				// (a mob, fire, a fall, the void: they die as anyone would, body and all; no second downing)
+				// ((0.20.26) what downed them is the cause the death is rolled on, Mortality)
+				Mortality.felled(entity, FELLED_BY.get(entity));
 				forget(entity);
 				return true;
 			}
@@ -531,6 +533,10 @@ public final class Downed {
 
 	/** Down they go; {@code source}: what felled them (null: nothing did, a knock-out); {@code keepHealth}: (0.14.4) a knock-out takes none. */
 	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
+		goDown(level, entity, source, keepHealth, true);
+	}
+
+	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth, boolean dropArms) {
 		// ((0.19.32) a machine never crawls: it shorts out where it fell, Malfunction)
 		boolean crawler = !(entity instanceof Player) && !Malfunction.is(entity)
 			&& level.getRandom().nextFloat() < (BodyPlan.of(entity) == BodyPlan.HUMANOID ? PERSON_CRAWLER_CHANCE : CRAWLER_CHANCE);
@@ -553,7 +559,9 @@ public final class Downed {
 		Wounds.settle(entity);
 		entity.stopUsingItem();
 		// (0.18.118) most let go of their weapons as they fall
-		DroppedArms.fell(level, entity);
+		if (dropArms) {
+			DroppedArms.fell(level, entity);
+		}
 		if (entity.isSleeping()) {
 			entity.stopSleeping();
 		}
@@ -716,12 +724,17 @@ public final class Downed {
 	 * knocked out is told.
 	 */
 	public static boolean knockOut(ServerLevel level, LivingEntity entity, int ticks, boolean anyBody, String message) {
+		return knockOut(level, entity, ticks, anyBody, message, true);
+	}
+
+	/** (0.20.26) {@code dropArms}: false, they keep hold of what they carry (one left for dead, laid out again where they wake). */
+	static boolean knockOut(ServerLevel level, LivingEntity entity, int ticks, boolean anyBody, String message, boolean dropArms) {
 		boolean was = isDowned(entity);
 		if (!was && !downable(entity) && !(anyBody && stunnable(entity))) {
 			return false;
 		}
 		if (!was) {
-			goDown(level, entity, null, true);
+			goDown(level, entity, null, true, dropArms);
 		}
 		// (out cold: no crawling away)
 		entity.setAttached(DOWNED, since(entity) << 1);
@@ -775,6 +788,8 @@ public final class Downed {
 		}
 		DamageSource felled = FELLED_BY.get(entity);
 		Entity by = felled == null ? null : felled.getEntity();
+		// ((0.20.26) and what downed it is the cause its death is rolled on, Mortality)
+		Mortality.felled(entity, felled);
 		forget(entity);
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(Wounds.WOUNDS_DAMAGE), by);
 		FINISHING.add(entity);
@@ -798,6 +813,8 @@ public final class Downed {
 			return;
 		}
 		FELLED_BY.put(entity, level.damageSources().playerAttack(by));
+		// ((0.20.26) Andy: an execution is final when a player does it)
+		Mortality.executed(entity, true);
 		finish(level, entity);
 	}
 
@@ -809,7 +826,19 @@ public final class Downed {
 			return;
 		}
 		FELLED_BY.put(entity, level.damageSources().mobAttack(by));
+		// ((0.20.26) and when a boss does; any other mob's is rolled on as what it is)
+		Mortality.executed(entity, Mortality.boss(by));
 		finish(level, entity);
+	}
+
+	/** (0.20.26) A timer ran out ({@link Afflictions}): their death now, by their wounds, with no going down first. */
+	static void succumb(ServerLevel level, LivingEntity entity) {
+		finish(level, entity);
+	}
+
+	/** (0.20.26) No longer down, quietly (Mortality moves one left for dead before laying them out again where they wake). */
+	static void forgetQuietly(LivingEntity entity) {
+		forget(entity);
 	}
 
 	/** A player hit a downed one: one more wound; the {@link #MAX_WOUNDS}th is its death. */

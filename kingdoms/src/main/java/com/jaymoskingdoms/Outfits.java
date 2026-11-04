@@ -56,6 +56,12 @@ public final class Outfits {
 	static final float GUARD_SPEAR_CHANCE = 0.3F, JUNGLE_SPEAR_CHANCE = 0.7F;
 	/** A guard's chance of the other helmet of his realm's harness (some variety within a rank). */
 	static final float GUARD_HELM_SWAP_CHANCE = 0.2F;
+	/**
+	 * (0.7.477) Guards of one realm aren't all alike (Andy's Gemini handoff): this share are raw recruits in a quilted
+	 * gambeson (the realm's colour, trimmed) over mail, a leather cap and boots; this share veterans in full plate. The
+	 * rest are footmen in the realm's harness. The land's gear (desert linen, snow hoods...) still goes over all three.
+	 */
+	static final float GUARD_RECRUIT_SHARE = 0.25F, GUARD_VETERAN_SHARE = 0.25F;
 	/** An archer's chance of a hood of his realm's colour rather than a mail coif (where the land doesn't decide). */
 	static final float ARCHER_HOOD_CHANCE = 0.6F;
 	/** A barbarian's chance his hides are marked with his camp's trim. */
@@ -232,6 +238,18 @@ public final class Outfits {
 		};
 		ItemStack legs = trimmed(folk, arms.harness() == HALF_PLATE ? Items.IRON_LEGGINGS : Items.CHAINMAIL_LEGGINGS, arms.pattern(), arms.material());
 		ItemStack feet = new ItemStack(Items.IRON_BOOTS);
+		// (0.7.477) recruit, footman or veteran: fixed by who they are, so a redress keeps their rank
+		float rank = Math.floorMod(folk.getUUID().hashCode(), 1000) / 1000.0F;
+		if (rank < GUARD_RECRUIT_SHARE) {
+			head = trimmed(folk, dyed(Items.LEATHER_HELMET, BOOT_BROWN), arms.pattern(), arms.material());
+			chest = trimmed(folk, dyed(Items.LEATHER_CHESTPLATE, rgb(arms.field())), arms.pattern(), arms.material());
+			legs = trimmed(folk, Items.CHAINMAIL_LEGGINGS, arms.pattern(), arms.material());
+			feet = dyed(Items.LEATHER_BOOTS, BOOT_BROWN);
+		} else if (rank >= 1.0F - GUARD_VETERAN_SHARE) {
+			head = trimmed(folk, Items.IRON_HELMET, arms.pattern(), arms.material());
+			chest = trimmed(folk, Items.IRON_CHESTPLATE, arms.pattern(), arms.material());
+			legs = trimmed(folk, Items.IRON_LEGGINGS, arms.pattern(), arms.material());
+		}
 		switch (climate) {
 			case DESERT, BADLANDS -> {
 				head = trimmed(folk, dyed(Items.LEATHER_HELMET, LINEN), arms.pattern(), TrimMaterials.GOLD);
@@ -275,6 +293,18 @@ public final class Outfits {
 		float spear = climate == Climate.JUNGLE ? JUNGLE_SPEAR_CHANCE : GUARD_SPEAR_CHANCE;
 		folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextFloat() < spear ? Items.IRON_SPEAR : Items.IRON_SWORD));
 		folk.setItemSlot(EquipmentSlot.OFFHAND, shield(folk, arms, false));
+		if (rank >= 1.0F - GUARD_VETERAN_SHARE) {
+			// (0.7.520) a veteran may carry a Rogues & Warriors polearm: a glaive (and his shield), or a double axe in both hands
+			float pick = random.nextFloat();
+			if (pick < RpgKit.VETERAN_GLAIVE) {
+				RpgKit.item("rogues:iron_glaive").ifPresent(g -> folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(g)));
+			} else if (pick < RpgKit.VETERAN_GLAIVE + RpgKit.VETERAN_DOUBLE_AXE) {
+				RpgKit.item("rogues:iron_double_axe").ifPresent(a -> {
+					folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(a));
+					folk.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+				});
+			}
+		}
 	}
 
 	private static void archer(Folk folk, Heraldry arms, Climate climate, RandomSource random) {
@@ -294,8 +324,18 @@ public final class Outfits {
 			default -> {
 			}
 		}
+		ItemStack tunic = trimmed(folk, dyed(Items.LEATHER_CHESTPLATE, rgb(arms.field())), arms.pattern(), arms.material());
+		if (climate != Climate.DESERT && climate != Climate.BADLANDS && climate != Climate.SNOWY) {
+			// (0.7.520) the Archers' own hood and tunic, now and then, in the temperate lands
+			if (random.nextFloat() < RpgKit.ARCHER_HOOD) {
+				head = RpgKit.item("archers:archer_armor_head").map(ItemStack::new).orElse(head);
+			}
+			if (random.nextFloat() < RpgKit.ARCHER_TUNIC) {
+				tunic = RpgKit.item("archers:archer_armor_chest").map(ItemStack::new).orElse(tunic);
+			}
+		}
 		folk.setItemSlot(EquipmentSlot.HEAD, head);
-		folk.setItemSlot(EquipmentSlot.CHEST, trimmed(folk, dyed(Items.LEATHER_CHESTPLATE, rgb(arms.field())), arms.pattern(), arms.material()));
+		folk.setItemSlot(EquipmentSlot.CHEST, tunic);
 		folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, rgb(arms.charge())));
 		folk.setItemSlot(EquipmentSlot.FEET, dyed(Items.LEATHER_BOOTS, boots));
 	}

@@ -213,6 +213,76 @@ final class FortBuildings {
 		return new Layout(center.above(), hoard, f.pos(0, 1, r - 1));
 	}
 
+	/** (0.7.478) The Cinder Forge's reach from its anvil. */
+	static final int FORGE_RADIUS = 6;
+
+	/**
+	 * (0.7.478) Ignis Vael's Cinder Forge round {@code center} ({@link CinderForge}): a blackstone floor under a roof of
+	 * basalt on four pillars, a lava basin he drinks from at the back, a forge of blast furnaces round a magma hearth, an
+	 * anvil and a smithing table at the front, fires on the pillars' heads. Returns where Ignis stands.
+	 */
+	static BlockPos cinderForge(ServerLevel level, BlockPos center, Direction gate, RandomSource random) {
+		Frame f = new Frame(level, center, gate);
+		int r = FORGE_RADIUS;
+		f.groundwork(r, Blocks.BLACKSTONE.defaultBlockState(), null);
+		for (int a = -r; a <= r; a++) {
+			for (int b = -r; b <= r; b++) {
+				float roll = random.nextFloat();
+				f.set(a, 0, b, Math.abs(a) == r || Math.abs(b) == r ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
+					: roll < 0.6F ? Blocks.POLISHED_BLACKSTONE.defaultBlockState() : roll < 0.85F ? Blocks.BLACKSTONE.defaultBlockState()
+					: Blocks.SMOOTH_BASALT.defaultBlockState());
+			}
+		}
+		// four pillars of basalt, a fire on each head, holding up a roof of basalt slabs over the middle
+		int p = r - 1;
+		for (int[] c : new int[][] {{p, p}, {-p, p}, {p, -p}, {-p, -p}}) {
+			for (int y = 1; y <= 4; y++) {
+				f.set(c[0], y, c[1], Blocks.POLISHED_BASALT.defaultBlockState());
+			}
+			f.set(c[0], 5, c[1], Blocks.NETHERRACK.defaultBlockState());
+			f.set(c[0], 6, c[1], Blocks.FIRE.defaultBlockState());
+		}
+		for (int a = -p + 1; a <= p - 1; a++) {
+			for (int b = -p + 1; b <= p - 1; b++) {
+				if (random.nextFloat() < 0.85F) {
+					f.set(a, 5, b, Blocks.BASALT.defaultBlockState());
+				}
+			}
+		}
+		// the basin at the back: lava in a rim of polished blackstone
+		for (int a = -2; a <= 2; a++) {
+			for (int b = -r + 1; b <= -r + 2; b++) {
+				f.set(a, 0, b, Math.abs(a) == 2 ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState() : Blocks.LAVA.defaultBlockState());
+			}
+		}
+		// the forge: blast furnaces round a magma hearth with a fire on it, a chimney of basalt over it
+		f.set(0, 0, -2, Blocks.MAGMA_BLOCK.defaultBlockState());
+		f.set(0, 1, -2, Blocks.NETHERRACK.defaultBlockState());
+		f.set(0, 2, -2, Blocks.FIRE.defaultBlockState());
+		f.set(-1, 1, -2, Blocks.BLAST_FURNACE.defaultBlockState());
+		f.set(1, 1, -2, Blocks.BLAST_FURNACE.defaultBlockState());
+		f.set(0, 1, -3, Blocks.BLAST_FURNACE.defaultBlockState());
+		for (int y = 3; y <= 4; y++) {
+			f.set(0, y, -3, Blocks.POLISHED_BASALT.defaultBlockState());
+		}
+		// the anvil and the smithing table where he works, a cauldron of lava to quench in
+		f.set(-1, 1, 1, Blocks.ANVIL.defaultBlockState());
+		f.set(1, 1, 1, Blocks.SMITHING_TABLE.defaultBlockState());
+		f.set(2, 1, -1, Blocks.LAVA_CAULDRON.defaultBlockState());
+		f.set(-2, 1, -1, Blocks.GRINDSTONE.defaultBlockState());
+		// a chest of what he works with
+		BlockPos stock = f.pos(-3, 1, -1);
+		level.setBlock(stock, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, gate), Block.UPDATE_ALL);
+		if (level.getBlockEntity(stock) instanceof ChestBlockEntity chest) {
+			chest.setItem(0, new ItemStack(Items.BLAZE_ROD, 3 + random.nextInt(4)));
+			chest.setItem(1, new ItemStack(Items.MAGMA_CREAM, 2 + random.nextInt(4)));
+			chest.setItem(2, new ItemStack(Items.IRON_INGOT, 4 + random.nextInt(6)));
+			chest.setItem(3, new ItemStack(Items.COAL, 6 + random.nextInt(8)));
+			chest.setChanged();
+		}
+		return f.pos(0, 1, 0);
+	}
+
 	/** A hoard: gold, and the camp's plunder. */
 	private static void fill(ServerLevel level, BlockPos pos, RandomSource random, boolean hornkin) {
 		if (!(level.getBlockEntity(pos) instanceof ChestBlockEntity chest)) {

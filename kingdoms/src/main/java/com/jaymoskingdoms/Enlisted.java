@@ -8,6 +8,6 @@ public interface Enlisted extends Worker, Aging {
 	/** No longer a worker: their load put down, their tool put away, free to wander. */
 	void discharge();
 
-	/** (0.5.53) A court wizard's spell timers ({@link Sorcery#TIMERS} of them). */
+	/** (0.5.54) A court wizard's spell timers ({@link Sorcery#TIMERS} of them). */
 	int[] spellTimers();
 }

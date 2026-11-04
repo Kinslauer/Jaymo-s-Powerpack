@@ -110,7 +110,15 @@ public final class ZFighterOrbs {
 		Vec3 camera = context.levelState().cameraRenderState.pos;
 		for (Map.Entry<Integer, Live> entry : ORBS.entrySet()) {
 			Live live = entry.getValue();
-			Vec3 at = live.prev.lerp(live.at, partial).subtract(camera);
+			Vec3 at = live.prev.lerp(live.at, partial);
+			if (!live.water && !live.disc) {
+				// (0.19.60) ki gathering in a fighter's hands is drawn in the hands as they're drawn (ZFighterHandsPose)
+				Vec3 hand = ZFighterHandsPose.orb(entry.getKey(), partial);
+				if (hand != null) {
+					at = hand;
+				}
+			}
+			at = at.subtract(camera);
 			// each orb starts its spin somewhere of its own, so a barrage doesn't turn in step
 			float time = live.age + partial + (entry.getKey() & 63) * 7.0F;
 			float size = Mth.lerp(partial, live.prevSize, live.size);
