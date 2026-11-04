@@ -75,8 +75,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>(0.7.499) Andy: "make the flame avatar take you in and amicable to you". An Emberborn is one of their own blood, and a
  * camp takes them in ({@link #welcome}): the first time one comes within {@link #WELCOME_RANGE} of a camp, its nearest avatar
- * greets them, hands over what a newcomer needs to make a start (flint, sticks, plant string, food) and the whole camp warms
- * to them ({@link #WELCOME_HEARTS} hearts, enough for MCA's follow and hire). At the camp's hearth they rest and heal
+ * greets them and the whole camp warms to them ({@link #WELCOME_HEARTS} hearts, enough for MCA's follow and hire). Andy:
+ * "they will fight and help you but will only give you the gear after you speak to them": the newcomer's start (flint,
+ * sticks, plant string, food) comes the first time they speak to one of the camp's avatars ({@link #gift}). At the camp's hearth they rest and heal
  * ({@link #HEARTH_REGEN_TICKS}), and avatars near an Emberborn go for whatever is after them ({@link #prey}). Camps rise
  * near an Emberborn in the Nether more readily ({@link #EMBERBORN_FOUND_CHANCE}).
  */
@@ -104,7 +105,7 @@ public final class AvatarCamps {
 	/** (0.7.499) An Emberborn this near a camp is taken in; the camp warms to them by this many hearts. */
 	public static final double WELCOME_RANGE = 32.0;
 	static final int WELCOME_HEARTS = 50;
-	/** (0.7.499) The newcomer's gifts: flint, sticks, plant string (Jaymo's Powers', if it's there), cooked pork. */
+	/** (0.7.499) The newcomer's gifts, given when they first speak to an avatar: flint, sticks, plant string (Jaymo's Powers', if it's there), cooked pork. */
 	static final int GIFT_FLINT = 3, GIFT_STICKS = 4, GIFT_STRING = 2, GIFT_FOOD = 4;
 	/** (0.7.499) At the hearth (within {@link #HOME_RADIUS}) an Emberborn rests: Regeneration this long, renewed every 10 s. */
 	static final int HEARTH_REGEN_TICKS = 220;
@@ -141,6 +142,9 @@ public final class AvatarCamps {
 	/** On every avatar: its camp's id. Saved, seen by all (the look). */
 	public static final AttachmentType<Integer> AVATAR = AttachmentRegistry.create(JaymosKingdoms.id("flame_avatar"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** (0.7.499) On a player: the camps whose avatars have given them a start (spoken to). Saved, kept through death. */
+	public static final AttachmentType<List<Integer>> GIFTED = AttachmentRegistry.create(JaymosKingdoms.id("avatar_gifted"),
+		builder -> builder.persistent(Codec.INT.listOf()).copyOnDeath());
 	/** (0.7.499) On a player: the camps that have taken them in. Saved, kept through death. */
 	public static final AttachmentType<List<Integer>> WELCOMED = AttachmentRegistry.create(JaymosKingdoms.id("avatar_welcomed"),
 		builder -> builder.persistent(Codec.INT.listOf()).copyOnDeath());
@@ -213,7 +217,14 @@ public final class AvatarCamps {
 
 	/** Anyone not Emberborn gets nothing out of an avatar: no talk, no menu. */
 	private static InteractionResult use(Player player, Entity entity) {
-		if (!avatar(entity) || player.isSpectator() || Heritage.is(player, Heritage.Kind.EMBERBORN)) {
+		if (!avatar(entity) || player.isSpectator()) {
+			return InteractionResult.PASS;
+		}
+		if (Heritage.is(player, Heritage.Kind.EMBERBORN)) {
+			if (player instanceof ServerPlayer sp && entity instanceof Mob avatar && sp.level() instanceof ServerLevel level) {
+				gift(level, sp, avatar);
+			}
+			// MCA's menu opens as ever
 			return InteractionResult.PASS;
 		}
 		if (!player.level().isClientSide()) {
@@ -301,7 +312,7 @@ public final class AvatarCamps {
 		}
 	}
 
-	/** The camp's nearest avatar greets {@code player} and gives them a start; the camp warms to them. False while none is about. */
+	/** The camp's nearest avatar greets {@code player}; the camp warms to them. False while none is about. */
 	private static boolean welcome(ServerLevel nether, ServerPlayer player, Camp camp) {
 		List<Mob> people = members(camp.id());
 		Mob speaker = null;
@@ -316,16 +327,29 @@ public final class AvatarCamps {
 		speaker.getLookControl().setLookAt(player);
 		Speech.tell(nether, speaker, player, Component.translatable("message.jaymoskingdoms.avatar.welcome." + nether.getRandom().nextInt(WELCOME_LINES),
 			Component.literal(camp.name())), Speech.GOLD);
-		give(player, new ItemStack(Items.FLINT, GIFT_FLINT));
-		give(player, new ItemStack(Items.STICK, GIFT_STICKS));
-		BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "plant_string"))
-			.ifPresent(string -> give(player, new ItemStack(string, GIFT_STRING)));
-		give(player, new ItemStack(Items.COOKED_PORKCHOP, GIFT_FOOD));
 		for (Mob m : people) {
 			McaCompat.hearts(m, player, WELCOME_HEARTS);
 		}
 		nether.sendParticles(ParticleTypes.FLAME, camp.center().getX() + 0.5, camp.center().getY() + 2.0, camp.center().getZ() + 0.5, 24, 0.8, 1.0, 0.8, 0.03);
 		return true;
+	}
+
+	/** The first time an Emberborn speaks to one of a camp's avatars: the newcomer's start (once per camp). */
+	private static void gift(ServerLevel level, ServerPlayer player, Mob avatar) {
+		Integer id = avatar.getAttached(AVATAR);
+		List<Integer> gifted = player.getAttached(GIFTED);
+		if (id == null || gifted != null && gifted.contains(id)) {
+			return;
+		}
+		List<Integer> now = new ArrayList<>(gifted == null ? List.of() : gifted);
+		now.add(id);
+		player.setAttached(GIFTED, List.copyOf(now));
+		Speech.tell(level, avatar, player, Component.translatable("message.jaymoskingdoms.avatar.gift." + level.getRandom().nextInt(WELCOME_LINES)), Speech.GOLD);
+		give(player, new ItemStack(Items.FLINT, GIFT_FLINT));
+		give(player, new ItemStack(Items.STICK, GIFT_STICKS));
+		BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "plant_string"))
+			.ifPresent(string -> give(player, new ItemStack(string, GIFT_STRING)));
+		give(player, new ItemStack(Items.COOKED_PORKCHOP, GIFT_FOOD));
 	}
 
 	private static void give(ServerPlayer player, ItemStack stack) {

@@ -8566,9 +8566,11 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
 Andy: "make the flame avatar take you in and amicable to you", with rare Nether rocks and flint in Powers so a Nether start
 isn't stuck stealing piglin axes.
 - **Taken in** (`nether/AvatarCamps`): the first time an Emberborn comes within 32 blocks of an avatar camp, its nearest
-  avatar greets them by speech bubble (`message.jaymoskingdoms.avatar.welcome.0-2`), hands over 3 flint, 4 sticks, 2 plant
-  string (Powers') and 4 cooked pork, and every avatar of the camp warms to them by 50 hearts (MCA's follow and hire). Saved
-  per player per camp (`avatar_welcomed`, kept through death).
+  avatar greets them by speech bubble (`message.jaymoskingdoms.avatar.welcome.0-2`) and every avatar of the camp warms to
+  them by 50 hearts (MCA's follow and hire). Saved per player per camp (`avatar_welcomed`, kept through death).
+- **The gear only when you speak to them** (Andy): the first right click on one of a camp's avatars gives 3 flint, 4 sticks,
+  2 plant string (Powers') and 4 cooked pork with a line (`avatar.gift.0-2`), once per camp (`avatar_gifted`); MCA's menu
+  still opens.
 - **The hearth:** an Emberborn within the camp's home radius who is hurt gets Regeneration I (11 s, renewed every 10 s).
 - **They stand with you:** avatars within 24 blocks of an Emberborn go for any creature hunting them or that hurt them in the
   last 5 s (`AvatarCamps.guarding`; never other players).
