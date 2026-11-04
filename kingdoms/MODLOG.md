@@ -8570,6 +8570,7 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
 - The cold stays their flaw as before (15% lighter blows, 20% slower in the cold lands); body heat's chill is unchanged.
 - The perk's card line says so.
 - Not compile-checked yet at this entry; not played.
+
 ## 0.7.501: tails with a mind of their own (pack 0.20.1)
 - Andy: "they should pulse and slap like they have their own mind, but they swing violently whenever you walk". Beastfolk
   tails (`BeastParts.tail`: beastfolk, canine, feline, kitsune, avian, serpen) swayed at `age * (rate + walk speed)`, so any
