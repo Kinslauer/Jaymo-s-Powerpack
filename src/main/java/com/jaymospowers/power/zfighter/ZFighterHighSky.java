@@ -36,7 +36,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.33, Andy) The high sky: the top band of a One Dimension world, over the Aether's islands, where the air all but runs out
+ * (0.20.36, Andy) The high sky: the top band of a One Dimension world, over the Aether's islands, where the air all but runs out
  * at the edge of space ({@code data/jaymospowers/dimension/high_sky.json}: open air, nothing to stand on; drawn from below with
  * the planet's curve under you and the other worlds hanging close, client {@code ZFighterHighSkyClient}).
  * <ul>

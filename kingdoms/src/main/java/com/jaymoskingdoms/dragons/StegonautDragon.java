@@ -75,9 +75,10 @@ public class StegonautDragon extends WindDragon {
 	static final int RIDER_SLAM_EVERY = 100;
 
 	/** Its moves, for the model ({@link #action}). */
-	public static final int NONE = 0, CHIN_SLAM = 1, GROUND_SLAM = 2, CHEW = 3, ROAR = 4;
-	/** How long the model plays each (ticks). */
-	static final int[] ACTION_TICKS = {0, 12, SLAM_WINDUP + 10, SPIT_CHEW + 8, 30};
+	public static final int NONE = 0, CHIN_SLAM = 1, GROUND_SLAM = 2, CHEW = 3, ROAR = 4, BITE_MOVE = 5, GRAZE = 6;
+	/** How long the model plays each (ticks). (0.7.531) The roar is held longer, a show of its plates, and the bite and
+	 * the grazing are moves of their own. */
+	static final int[] ACTION_TICKS = {0, 16, SLAM_WINDUP + 10, SPIT_CHEW + 8, 60, 20, 30};
 
 	private static final EntityDataAccessor<Integer> DATA_ACTION = SynchedEntityData.defineId(StegonautDragon.class, EntityDataSerializers.INT);
 
@@ -228,6 +229,17 @@ public class StegonautDragon extends WindDragon {
 			Vec3 mouth = this.mouth();
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, under), mouth.x, this.getY() + 0.1, mouth.z, 6, 0.3, 0.05, 0.3, 0.05);
 			this.playSound(SoundEvents.GENERIC_EAT.value(), 0.8F, 0.5F);
+			if (action() == NONE) {
+				act(GRAZE);
+			}
+		}
+	}
+
+	/** (0.7.531) The bite: the neck draws back, jaws wide, and snaps in. */
+	@Override
+	protected void bitten(LivingEntity target) {
+		if (action() == NONE) {
+			act(BITE_MOVE);
 		}
 	}
 

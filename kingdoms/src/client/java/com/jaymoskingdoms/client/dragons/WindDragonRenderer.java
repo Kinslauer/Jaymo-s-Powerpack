@@ -36,6 +36,8 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		/** (0.7.522) The move it's making ({@link WindDragon#action}) and how long it has been at it (ticks, smoothed). */
 		int action;
 		float actionAge;
+		/** (0.7.531) A blow's flinch, 1 as it lands and easing to 0 over half a second. */
+		float hurt;
 	}
 
 	private final String species;
@@ -92,6 +94,7 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		state.saddled = dragon.saddled();
 		state.action = dragon.actionSeen;
 		state.actionAge = dragon.actionAge + partialTicks;
+		state.hurt = dragon.hurtTime > 0 ? Math.max(0.0F, (dragon.hurtTime - partialTicks) / 10.0F) : 0.0F;
 	}
 
 	@Override

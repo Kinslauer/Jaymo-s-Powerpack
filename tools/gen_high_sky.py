@@ -1,4 +1,4 @@
-"""(0.20.33) Paints the high sky's atlas: textures/environment/high_sky.png (64x64).
+"""(0.20.36) Paints the high sky's atlas: textures/environment/high_sky.png (64x64).
 
   0,0  32x32  the planet's surface far below (tiles both ways): sea, land, ice, cloud
  32,0  16x16  the Pale Moon        48,0  16x16  Rustfall

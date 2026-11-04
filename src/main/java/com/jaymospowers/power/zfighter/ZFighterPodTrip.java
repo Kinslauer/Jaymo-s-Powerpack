@@ -92,7 +92,7 @@ public final class ZFighterPodTrip {
 
 	enum Phase {
 		COUNTDOWN, LIFT, FLIGHT, DESCENT,
-		/** (0.20.33) Caught in the high sky by a raider band ({@link ZFighterHighSky}): the pod hangs struck, the pilot is out fighting. */
+		/** (0.20.36) Caught in the high sky by a raider band ({@link ZFighterHighSky}): the pod hangs struck, the pilot is out fighting. */
 		AMBUSH
 	}
 
@@ -118,7 +118,7 @@ public final class ZFighterPodTrip {
 		@Nullable UUID guest;
 		@Nullable ResourceKey<Level> to;
 		@Nullable BlockPos ground;
-		/** (0.20.33) An ambush in the high sky: its raiders, whether they are beaten (or gone), and whether the pod ran with them on it. */
+		/** (0.20.36) An ambush in the high sky: its raiders, whether they are beaten (or gone), and whether the pod ran with them on it. */
 		final List<UUID> raiders = new ArrayList<>();
 		boolean cleared;
 		boolean battered;
@@ -174,7 +174,7 @@ public final class ZFighterPodTrip {
 
 	static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Flight.TYPE, Flight.CODEC);
-		// (0.20.33) nothing hurts you on a trip, but in an ambush you are out of the pod and fair game
+		// (0.20.36) nothing hurts you on a trip, but in an ambush you are out of the pod and fair game
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> hurting || !(entity instanceof ServerPlayer player && shielded(player)));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
@@ -195,7 +195,7 @@ public final class ZFighterPodTrip {
 		return TRIPS.containsKey(player.getUUID()) || GUESTS.containsKey(player.getUUID());
 	}
 
-	/** (0.20.33) Whether {@code player} is on a trip and inside it (not thrown out into an ambush). */
+	/** (0.20.36) Whether {@code player} is on a trip and inside it (not thrown out into an ambush). */
 	private static boolean shielded(ServerPlayer player) {
 		Trip trip = TRIPS.get(player.getUUID());
 		if (trip == null) {
@@ -239,7 +239,7 @@ public final class ZFighterPodTrip {
 		return false;
 	}
 
-	// ---- (0.20.33) the high-sky ambush ----
+	// ---- (0.20.36) the high-sky ambush ----
 	/** How long the raiders stay at it before they break off (ticks), and how near the pod (blocks) you climb back in. */
 	static final int AMBUSH_TICKS = 20 * 180;
 	static final double BOARD_RANGE = 2.5;
@@ -439,7 +439,7 @@ public final class ZFighterPodTrip {
 		int flown = player.getAttachedOrElse(FLIGHTS, 0);
 		player.setAttached(FLIGHTS, flown + 1);
 		if (ZFighterHighSky.ambushes(player, trip.from, flown)) {
-			// (0.20.33) up through the high sky, and a raider band is waiting there
+			// (0.20.36) up through the high sky, and a raider band is waiting there
 			beginAmbush(player, trip);
 			return;
 		}
@@ -458,7 +458,7 @@ public final class ZFighterPodTrip {
 		}
 	}
 
-	// ---------------------------------------------------------------- (0.20.33) the ambush in the high sky
+	// ---------------------------------------------------------------- (0.20.36) the ambush in the high sky
 
 	/**
 	 * Caught in the high sky: the pod is struck and hangs there smoking, the pilot (and passenger) thrown out into the thin air,
@@ -878,7 +878,7 @@ public final class ZFighterPodTrip {
 			trip.pod.discard();
 		}
 		if (trip.phase == Phase.AMBUSH) {
-			// (0.20.33) gone in the middle of the fight: the pod is lost below, and you wake beside it
+			// (0.20.36) gone in the middle of the fight: the pod is lost below, and you wake beside it
 			PodEntity fell = lost(server, trip);
 			if (fell != null && fell.level() instanceof ServerLevel down) {
 				player.setAttached(PENDING, new Pending(down.dimension().identifier().toString(), beside(down, fell.blockPosition())));

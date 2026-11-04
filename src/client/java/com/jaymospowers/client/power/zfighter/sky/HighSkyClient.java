@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.33, Andy: "see space almost, and planets ... fighting above the planet, still technically within its atmosphere, but
+ * (0.20.36, Andy: "see space almost, and planets ... fighting above the planet, still technically within its atmosphere, but
  * barely") The high sky as you see it from inside ({@link ZFighterHighSky}). The game's own sky is shut out behind a dark dome
  * round the camera ({@link #DOME}), and on it: stars by day and night, the sun, the Pale Moon, Rustfall and Glacia hanging close
  * and big, all turning with the day; and below you the planet itself, its curve across the lower part of the view

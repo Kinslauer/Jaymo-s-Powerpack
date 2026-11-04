@@ -473,6 +473,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("faith attachment: {}", Faiths.FAITH);
 		Faiths.register();
 		Quests.register();
+		// (0.7.530) a town's troubles ask for help; its shared projects are built by whoever gives (and their attachments)
+		LOGGER.debug("town trouble and project attachments: {} {} {}", TownTroubles.TROUBLES, TownTroubles.DRY, TownProjects.PROJECTS);
+		TownTroubles.register();
+		TownProjects.register();
 		// 0.5.50: the traveller's journal (book + map): quests, a map, reputations, on M
 		Journal.register();
 		// 0.7.55: tailors change your clothes for a fee (MCA's editor, clothing page only)

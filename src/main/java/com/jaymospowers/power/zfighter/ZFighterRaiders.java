@@ -213,7 +213,7 @@ public final class ZFighterRaiders {
 		band.coming--;
 		ServerLevel level = band.level;
 		BlockPos at = f.ground;
-		// (0.20.33) counted as the band's before it is in the world, so the load check never takes it for a leftover
+		// (0.20.36) counted as the band's before it is in the world, so the load check never takes it for a leftover
 		ZFighterRogue raider = raider(level, at.getX() + 1.5, at.getY(), at.getZ() + 0.5, chief, f.name, TAG, r -> band.raiders.add(r.getUUID()));
 		if (raider != null) {
 			level.playSound(null, at, SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.0F, 1.4F);
@@ -221,7 +221,7 @@ public final class ZFighterRaiders {
 	}
 
 	/**
-	 * (0.20.33) A Warrior-born raider at (x, y, z): the band's chief (a tyrant, named {@code name}) or one of his men, at a raider's
+	 * (0.20.36) A Warrior-born raider at (x, y, z): the band's chief (a tyrant, named {@code name}) or one of his men, at a raider's
 	 * health and blows, tagged {@code tag}. {@code before} sees him just before he is added to the world. Null if none could be made.
 	 */
 	static @Nullable ZFighterRogue raider(ServerLevel level, double x, double y, double z, boolean chief, int name, String tag,

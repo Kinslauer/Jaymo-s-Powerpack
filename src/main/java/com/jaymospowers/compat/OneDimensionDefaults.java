@@ -16,7 +16,7 @@ import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * (0.20.30) The pack's default stack for One Dimension (CodxIO; shipped unchanged with CustomChunks, Planeshift and CodxLib):
- * the high sky on top (0.20.33), then the Aether, the Overworld, the Nether underneath, so you fly up into the islands and on
+ * the high sky on top (0.20.36), then the Aether, the Overworld, the Nether underneath, so you fly up into the islands and on
  * up to the edge of space ({@link com.jaymospowers.power.zfighter.ZFighterHighSky}), and dig down into the Nether's
  * sky, with no portal and no loading screen. The End stays a dimension of its own (its portal, the dragon, Enderscape), and
  * so does every world of ours you reach some other way (the future, the moons, the Arsenal's pocket...).
@@ -27,7 +27,7 @@ import net.fabricmc.loader.api.FabricLoader;
  * Dimension turned off on that screen, stay as they were. Our side of a stacked world is {@link Stacked}.
  */
 public final class OneDimensionDefaults {
-	/** Top to bottom. (0.20.33, Andy) The high sky on top: the thin air at the edge of space, over the Aether's islands. */
+	/** Top to bottom. (0.20.36, Andy) The high sky on top: the thin air at the edge of space, over the Aether's islands. */
 	static final List<String> ORDER = List.of("jaymospowers:high_sky", "jaymospowers:aether", "minecraft:overworld", "minecraft:the_nether");
 	/** The stack this wrote before the high sky: a file still holding exactly this order is ours, unedited, and is brought up to date. */
 	static final List<String> OLD_ORDER = List.of("jaymospowers:aether", "minecraft:overworld", "minecraft:the_nether");
@@ -83,7 +83,7 @@ public final class OneDimensionDefaults {
 	}
 
 	/**
-	 * (0.20.33) A file written before the high sky (its order exactly {@link #OLD_ORDER}) gets the high sky put on top, for the
+	 * (0.20.36) A file written before the high sky (its order exactly {@link #OLD_ORDER}) gets the high sky put on top, for the
 	 * worlds made from now on; anything else in it, and any order someone changed, is left as it is.
 	 */
 	private static void update(Path path) {
