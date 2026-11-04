@@ -266,3 +266,10 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   Cinematic, Dungeons and Taverns (CurseForge stops at 6.0.2). Not built here.
 - **0.20.33**: no Powers change; pack bump for Kingdoms 0.7.530 (quests to 272: more for every trade, town troubles,
   and town works that players build together).
+- **0.20.34, One Dimension x Lithostitched new-world hang:** a new world hung at "Selecting global world spawn": chunk
+  [0, 0] failed at terrain with a NullPointerException in Lithostitched 2.0.6's `fillBands` (head of
+  `NoiseBasedChunkGenerator.buildTerrain`), which calls `carverBiomeRegion.registryAccess()` though vanilla marks it
+  nullable. One Dimension's `StackedChunkGenerator` (CustomChunks) passes null there on purpose for each layer. New
+  `mixin/lithostitched/LithostitchedBandsMixin` (MixinSquared 0.3.7, MIT, jar-in-jar) cancels only Lithostitched's handler
+  when the region is null; vanilla still gets its null. Keeps both One Dimension and Enderscape (which needs
+  Lithostitched). Signature checked against the shipped jars; not built or played here (the cloud can't reach Fabric's maven).

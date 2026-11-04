@@ -22,6 +22,12 @@ repositories {
 		forRepository { maven { url = "https://cursemaven.com" } }
 		filter { includeGroup "curse.maven" }
 	}
+	// MixinSquared (MIT, Bawnorton): lets compat/mixin/lithostitched reach into Lithostitched's own mixin
+	exclusiveContent {
+		forRepository { maven { url = "https://maven.bawnorton.com/releases" } }
+		forRepository { maven { url = "https://maven.enjarai.dev/mirrors" } }
+		filter { includeGroup "com.github.bawnorton.mixinsquared" }
+	}
 }
 
 loom {
@@ -528,6 +534,9 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// (0.20.34) MixinSquared, shipped inside our jar: mixin/lithostitched skips Lithostitched's clay-band hook when One
+	// Dimension builds a layer without a region (it threw, and a new world hung at "Selecting global world spawn")
+	include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.7")))
 
 	// the rest of the modpack, loaded in the dev game only (fabric-api is already on the classpath)
 	localRuntime kitchenJar
