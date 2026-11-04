@@ -40,5 +40,6 @@
 	"message.jaymospowers.scar.wasting": "Hunger has taken something from you that won't come back.",
 	"message.jaymospowers.scar.crushed": "Your ribs knit crooked. Every step pulls.",
 	"message.jaymospowers.mortality.arrow_out": "With the leg held still, you work the arrowhead free.",
-	"message.jaymospowers.mortality.mended": "You've mended. You're no longer living on borrowed time."
+	"message.jaymospowers.mortality.mended": "You've mended. You're no longer living on borrowed time.",
+	"message.jaymospowers.mortality.wake.captured": "You wake in chains. Your things are gone."
 }

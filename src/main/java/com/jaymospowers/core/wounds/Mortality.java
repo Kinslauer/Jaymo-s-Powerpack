@@ -148,6 +148,13 @@ public final class Mortality {
 	 */
 	public static final List<Predicate<Entity>> BOSS_TESTS = new ArrayList<>();
 
+	/**
+	 * (0.20.24) Who takes one left for dead captive instead of leaving them in the wild (Kingdoms: orcs, goblins, ogres, pirates,
+	 * the camps' raiders, outlaws; Andy: "if you are kidnapped by your sentient murderers ... theyll have it hidden or even wear
+	 * it"). Given the player and whoever downed them; the first to name a place has them there (it takes their gear itself).
+	 */
+	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.@Nullable GlobalPos>> CAPTORS = new ArrayList<>();
+
 	static final Identifier PHASE = JaymosPowers.id("mortality");
 	private static final TicketType WAKING = new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_LOADING);
 
@@ -162,11 +169,13 @@ public final class Mortality {
 		final ResourceKey<Level> dimension;
 		final BlockPos fell;
 		final long moveAt;
+		final @Nullable Entity by;
 		int tries;
 		@Nullable BlockPos far;
 		@Nullable CompletableFuture<?> loading;
 
-		Wake(Cause cause, @Nullable String sub, ResourceKey<Level> dimension, BlockPos fell, long moveAt) {
+		Wake(Cause cause, @Nullable String sub, ResourceKey<Level> dimension, BlockPos fell, long moveAt, @Nullable Entity by) {
+			this.by = by;
 			this.cause = cause;
 			this.sub = sub;
 			this.dimension = dimension;
@@ -435,7 +444,8 @@ public final class Mortality {
 			mob.setTarget(null);
 		}
 		Downed.knockOut(level, player, OUT_BEFORE + OUT_AFTER + 20 * 60, false, "message.jaymospowers.mortality.fading", false);
-		WAKES.put(player.getUUID(), new Wake(cause, sub, level.dimension(), player.blockPosition(), level.getServer().getTickCount() + OUT_BEFORE));
+		WAKES.put(player.getUUID(), new Wake(cause, sub, level.dimension(), player.blockPosition(), level.getServer().getTickCount() + OUT_BEFORE,
+			by));
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -514,6 +524,23 @@ public final class Mortality {
 	private static boolean place(MinecraftServer server, ServerPlayer player, ServerLevel level, Wake wake) {
 		RandomSource random = player.getRandom();
 		BlockPos at = null;
+		// (0.20.24) taken captive by those who downed them, if they're the kind who would
+		if (wake.by != null && wake.tries == 0 && wake.far == null) {
+			for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> captor : CAPTORS) {
+				net.minecraft.core.GlobalPos held;
+				try {
+					held = captor.apply(player, wake.by);
+				} catch (RuntimeException e) {
+					JaymosPowers.LOGGER.warn("A captor failed to take {}", player.getScoreboardName(), e);
+					held = null;
+				}
+				ServerLevel to = held == null ? null : server.getLevel(held.dimension());
+				if (to != null) {
+					wakeAt(player, to, held.pos(), wake, "captured");
+					return true;
+				}
+			}
+		}
 		if (wake.cause == Cause.FALL) {
 			// (they wake where they landed)
 			at = wake.fell;
@@ -552,7 +579,7 @@ public final class Mortality {
 				at = wake.fell;
 			}
 		}
-		wakeAt(player, level, at, wake);
+		wakeAt(player, level, at, wake, wake.cause.key());
 		return true;
 	}
 
@@ -648,7 +675,7 @@ public final class Mortality {
 	}
 
 	/** Put down at {@code at}, out cold a little longer, with the injury the cause leaves; they come round by themselves. */
-	private static void wakeAt(ServerPlayer player, ServerLevel level, BlockPos at, Wake wake) {
+	private static void wakeAt(ServerPlayer player, ServerLevel level, BlockPos at, Wake wake, String line) {
 		if (!at.equals(wake.fell) || player.level() != level) {
 			player.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), player.getRandom().nextFloat() * 360.0F, 0.0F, true);
 		}
@@ -660,7 +687,7 @@ public final class Mortality {
 		if (Downed.isDowned(player)) {
 			Downed.forgetQuietly(player);
 		}
-		Downed.knockOut(level, player, OUT_AFTER, false, "message.jaymospowers.mortality.wake." + wake.cause.key(), false);
+		Downed.knockOut(level, player, OUT_AFTER, false, "message.jaymospowers.mortality.wake." + line, false);
 		level.playSound(null, at, SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F, 0.8F);
 	}
 

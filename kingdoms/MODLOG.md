@@ -430,5 +430,11 @@ Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its co
 - Powers' death by cause (`Mortality`) now knows Kingdoms' bosses: whatever shows a boss bar (`BossBars.boss`, told through
   `PowersCompat.tellBosses`), so dying to a king, warlord, champion, wild dragon or Aether Giant is a boss's death (70% final,
   spared if you're far too weak).
+- **Taken captive** (`Captors`). Andy: "if you are kidnapped by your sentient murderers (orcs goblins ogres pirates etc) theyll
+  have it hidden or even wear it". Left for dead by an orc, goblin, ogre, pirate, camp raider, illager or outlaw, you wake
+  chained in their camp (theirs, else the nearest within 640 blocks), shackled like the "still in chains" start (pick it or slip
+  it at night; the camp hunts you for a day after). Everything you carried is taken: about half your armour and weapons are
+  worn by whoever downed you and the camp's people (they drop it when killed), and the rest is in chests buried about the camp.
+  With no camp near, you wake in the wild with your gear.
 - Town healers treat what will kill (poisoned blood, water in the lungs, withering: `PowersCompat.afflicted`), for 8 more coins.
   Compile-checked; not played.
