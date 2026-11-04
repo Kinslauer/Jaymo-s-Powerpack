@@ -9001,3 +9001,9 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   burnt lanterns as they do burnt torches (shared `burnt_torches` list); camps' burnt lanterns rot away with the rest.
   Soul lanterns never go out; copper lanterns and oil lamps are left alone. No rain douse (behind glass). Texture: vanilla
   lantern with the flame painted out to soot. Compiled (Gradle `compileJava processResources`); not played yet.
+
+## 0.7.542: the Skeleton Lord faces the way he walks (pack 0.20.49)
+- Andy: "his head is facing the complete wrong way". The Skeleton Lord's Workshop model is built facing the other way
+  from our other Blockbench mobs, so he was drawn back to front: face and chest on his back, ponytail and cape in front.
+  `SkeletonLordRenderer.scale` now gives the model a half turn about the vertical. Animations, the head's look and the
+  sleeping statue all turn with him.
