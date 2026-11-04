@@ -48,8 +48,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.5.56) The monsters of legend, after Fangs 'n Claws' list: the werewolf, the ogres (green, cave, fire), the wraiths
  * (and the flame wraith), the silver skeleton (after DrZhark's Mo' Creatures, GPL-3, see {@code licenses/mocreatures};
- * this package and its client side are under that licence too), and Kingdoms' own mud golem and chest mimic. They come
- * as wilderness encounters ({@code Encounters}), the fire ogre and the flame wraith also in the Nether, and the mimic
+ * this package and its client side are under that licence too), and Kingdoms' own mud golem and chest mimic. (0.7.526)
+ * They spawn on their own, rarely, out where they roam ({@code Encounters}; no longer as wilderness encounters), the fire ogre and the flame wraith also in the Nether, and the mimic
  * from loot chests out in the wild. The silver sword (from silver skeletons) bites deep into werewolves and the undead.
  */
 public final class Monsters {

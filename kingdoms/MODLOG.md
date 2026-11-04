@@ -584,3 +584,16 @@ Our own take on the idea of MCA: Conversations (none of its code). Plan: `docs/T
   - Any other undead: the Pallid (the Hollow's first look) 20%.
 - One who is Hollow already, or an android, isn't turned. `Heritage.set` can go quietly (no "You are ... born").
   Compile-checked; not played.
+
+## 0.7.526: predators spawn on their own, Cube Animals beside ours (pack 0.20.28)
+- Andy: "remove the encounters, its better when the predators can naturally spawn." Nothing comes hunting a player out of
+  nowhere any more (`Encounters` keeps only the quest hunts, `send`). Naturalist's bears, lions, tigers, alligators, komodo
+  dragons, rhinos, scorpions and elephants spawn as Naturalist has them; only its mammoths, whales and boar stay out.
+- Every Kingdoms beast of the old table spawns on its own in its `has_<beast>` biome tag by the table's weight and pack size:
+  feral wolves, coyotes (at night), tarantulas, moose, the monsters of legend and the Boreas, Zephyrus and Notus dragons.
+  On the surface only (the cave ogre anywhere dark); night ones in the dark; monsters of legend only 1 in 10 of the times
+  they could (`LEGEND_CHANCE`), monsters that walk by day 3% (`DAY_MONSTER_CHANCE`); legends and dragons never within 256
+  blocks of a settlement, nor while chunks are first made. Sightings and beast quests work as before.
+- Cube Animals: its kinds we already have (black bear, crocodile, komodo dragon, moose, piranha, red and roe deer, snail,
+  tiger) are kept out of natural spawning (`CUBE_DUPLICATES`); its rattlesnake, shark and elephant spawn as other breeds.
+  Compile-checked; not played.
