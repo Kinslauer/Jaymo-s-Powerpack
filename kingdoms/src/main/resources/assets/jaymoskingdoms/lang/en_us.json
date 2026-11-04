@@ -12000,7 +12000,7 @@
 	"skill.jaymoskingdoms.perk.beast_of_burden": "Beast of Burden",
 	"skill.jaymoskingdoms.perk.beast_of_burden.desc": "Built to haul and to last: a heart more health, and hunger drains a fifth slower.",
 	"skill.jaymoskingdoms.perk.tracker": "Tracker",
-	"skill.jaymoskingdoms.perk.tracker.desc": "Whatever you wound glows for 8 s, through walls and leaves, so it can't slip away from you.",
+	"skill.jaymoskingdoms.perk.tracker.desc": "Whatever you wound bleeds for 30 s, leaving a trail of its own blood you can follow to it.",
 	"skill.jaymoskingdoms.perk.light_pack": "Light Pack",
 	"skill.jaymoskingdoms.perk.light_pack.desc": "You travel light: sneaking and sprinting cost 40% less hunger.",
 	"gui.jaymoskingdoms.skills.blocked.requires_any": "Learn one of the perks joined to it first, on either side.",

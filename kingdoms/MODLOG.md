@@ -8773,6 +8773,6 @@ is our own take on the idea (none of its code or art).
     blade assassination gives 4 s of Invisibility and Speed.
   - Strength/Survival: **Iron Hide** (Bulldozer or Rally; 1 pt): +2 armour, +1 toughness. **Beast of Burden** (Packhorse or
     Iron Stomach; 2 pts): +1 heart, hunger a fifth slower.
-  - Survival/Stealth: **Tracker** (Field Dresser or Climber; 1 pt): anything you wound (not players) glows 8 s. **Light
+  - Survival/Stealth: **Tracker** (Field Dresser or Climber; 1 pt): anything you wound (not players) bleeds 30 s, a drop of its own blood every 0.75 s (Powers' blood trail, marked as its, `PowersCompat.trailDrop`), so you can follow it (Andy: "they just bleed so you can track them"). **Light
     Pack** (Plague Doctor or Bar Swing; 2 pts): sneaking and sprinting cost 40% less hunger.
 - Mock-ups: project files `art-overhaul/skill-web/`. Kingdoms compiled with Gradle (compileClientJava); not played.

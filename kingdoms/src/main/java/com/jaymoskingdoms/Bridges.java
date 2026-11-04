@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +25,7 @@ import net.minecraft.world.entity.player.Player;
  * <li>Stealth and Strength: Ambusher (a sneak attack staggers: slowed and weakened) and Cutthroat (a kill straight after
  * a sneak attack or an assassination drops you out of sight for a moment).</li>
  * <li>Strength and Survival: Iron Hide (armour and toughness) and Beast of Burden (a heart more, hunger slower).</li>
- * <li>Survival and Stealth: Tracker (whatever you wound glows, so it can't slip away) and Light Pack (sneaking and
+ * <li>Survival and Stealth: Tracker (whatever you wound bleeds a trail you can follow) and Light Pack (sneaking and
  * sprinting cost far less hunger).</li>
  * </ul>
  * Tuning numbers are the constants below.
@@ -39,20 +40,44 @@ public final class Bridges {
 	/** Beast of Burden: health added, and the factor on hunger. */
 	static final double BURDEN_HEALTH = 2.0;
 	static final float BURDEN_EXHAUSTION = 0.8F;
-	/** Tracker: how long a wounded creature glows (ticks). */
-	static final int TRACKER_TICKS = 160;
+	/**
+	 * Tracker (Andy: "they just bleed so you can track them"): a wounded creature bleeds this long (ticks), a drop of its
+	 * own blood (Powers' blood trail, marked as its) every {@link #TRACKER_DROP_TICKS}, this big.
+	 */
+	static final int TRACKER_TICKS = 600, TRACKER_DROP_TICKS = 15;
+	static final float TRACKER_DROP_SIZE = 0.6F;
 	/** Light Pack: the factor on hunger while sneaking or sprinting. */
 	static final float LIGHT_PACK_EXHAUSTION = 0.6F;
 	static final String ARMOR_ID = "bridge_iron_hide_armor", TOUGHNESS_ID = "bridge_iron_hide_toughness", HEALTH_ID = "bridge_beast_of_burden";
 
 	/** Player → game time of their last sneak attack or assassination (Cutthroat). */
 	private static final Map<UUID, Long> LAST_UNSEEN_BLOW = new HashMap<>();
+	/** Tracker: who's bleeding a trail, and the game time it stops. */
+	private static final Map<LivingEntity, Long> BLEEDING = new java.util.WeakHashMap<>();
 
 	private Bridges() {
 	}
 
 	static void register() {
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST_UNSEEN_BLOW.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			LAST_UNSEEN_BLOW.clear();
+			BLEEDING.clear();
+		});
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (BLEEDING.isEmpty() || server.getTickCount() % TRACKER_DROP_TICKS != 0) {
+				return;
+			}
+			var it = BLEEDING.entrySet().iterator();
+			while (it.hasNext()) {
+				var e = it.next();
+				LivingEntity bleeder = e.getKey();
+				if (!bleeder.isAlive() || bleeder.isRemoved() || !(bleeder.level() instanceof ServerLevel level) || level.getGameTime() > e.getValue()) {
+					it.remove();
+				} else if (!bleeder.isInWater()) {
+					PowersCompat.trailDrop(level, bleeder, TRACKER_DROP_SIZE);
+				}
+			}
+		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof ServerPlayer killer && killer != entity && Skills.rank(killer, Skills.Perk.CUTTHROAT) > 0) {
 				Long last = LAST_UNSEEN_BLOW.get(killer.getUUID());
@@ -69,7 +94,7 @@ public final class Bridges {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (!blocked && taken > 0.0F && entity.isAlive() && !(entity instanceof Player) && source.getEntity() instanceof ServerPlayer player
 				&& player != entity && Skills.rank(player, Skills.Perk.TRACKER) > 0) {
-				entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, TRACKER_TICKS, 0, false, false));
+				BLEEDING.put(entity, entity.level().getGameTime() + TRACKER_TICKS);
 			}
 		});
 	}
