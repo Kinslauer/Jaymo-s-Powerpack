@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "NI"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:blank_key",
+    "count": 2
+  }
+}
