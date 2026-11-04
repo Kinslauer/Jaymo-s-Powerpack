@@ -76,6 +76,7 @@ final class KingdomCommands {
 				.then(Commands.literal("blossom").executes(BlossomVillages::foundHere)))
 			.then(Crowns.command())
 			.then(Camps.command())
+			.then(WalledTowns.command())
 			.then(FleetCommands.command())
 			.then(Roads.command())
 			.then(RoamingCaravans.command())

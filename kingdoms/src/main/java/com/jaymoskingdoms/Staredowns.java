@@ -242,6 +242,11 @@ final class Staredowns {
 			tell(sp, "thrown", seen);
 			return true;
 		}
+		if (HavenGrowth.sworn(seen)) {
+			// (0.7.490) a haven's sworn neither drops its weapon nor runs
+			holds(level, sp, seen, "sworn");
+			return true;
+		}
 		if ((Bandits.wears(seen) || Bounties.wanted(level.getServer(), seen)) && PowersCompat.knockOut(level, seen, KNEEL_TICKS)) {
 			seen.setTarget(null);
 			say(level, seen, "outlaw");

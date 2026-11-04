@@ -154,10 +154,10 @@ public final class LifeStory {
 	/** (0.7.417, Andy) The heritages that can wake in the alchemist's lab. */
 	static final Set<Heritage.Kind> LAB_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.of(Heritage.Kind.BIOBUILT,
 		Heritage.Kind.RUBBERFOLK, Heritage.Kind.EMBERBORN, Heritage.Kind.STONEBORN, Heritage.Kind.SYLVAN));
-	/** (0.7.443) The heritages that can take the greenskin road: those that pass for human (not the Tideborn, Stoneborn, Warrior-born, Sylvan or Bio-built). */
+	/** (0.7.443) The heritages that can take the greenskin road: those that pass for human (not the Tideborn, Stoneborn, Warrior-born, Sylvan, Bio-built, (0.7.490) Beastfolk or Hollow). */
 	static final Set<Heritage.Kind> GREENSKIN_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.complementOf(java.util.EnumSet.of(
 		Heritage.Kind.TIDEBORN, Heritage.Kind.STONEBORN, Heritage.Kind.WARRIORBORN, Heritage.Kind.SYLVAN, Heritage.Kind.BIOBUILT, Heritage.Kind.GOBLIN,
-		Heritage.Kind.ORC)));
+		Heritage.Kind.ORC, Heritage.Kind.BEASTFOLK, Heritage.Kind.HOLLOW)));
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
 	/** (0.7.451) "Let fate decide": how its pick is shown across the screen on waking (ticks to fade in, to stay, to fade out). */
@@ -393,7 +393,9 @@ public final class LifeStory {
 				// (0.7.262, Andy's NOEA picks) the new bloods: a workshop's vats, a travelling fair ((0.7.320) the Divine-born's
 				// hilltop shrine is gone: that blood is earned now, by dying again in the afterlife)
 				Answer.born(Heritage.Kind.BIOBUILT, "vats"),
-				Answer.born(Heritage.Kind.RUBBERFOLK, "fair")));
+				Answer.born(Heritage.Kind.RUBBERFOLK, "fair"),
+				// (0.7.490) the beastfolk are picked at the start (a den in the wild); the Hollow are earned and have no birthplace
+				Answer.born(Heritage.Kind.BEASTFOLK, "den")));
 			RAISED.answers.addAll(List.of(
 				Answer.raised("farmers", Items.WHEAT_SEEDS, Stats.Stat.ENDURANCE, false),
 				Answer.raised("smiths", Items.ANVIL, Stats.Stat.MIGHT, false),
@@ -422,18 +424,20 @@ public final class LifeStory {
 				Answer.raised("chieftain", Items.GOAT_HORN, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.WARRIORBORN),
 				Answer.raised("master", Items.STICK, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.EARTHLING),
 				Answer.raised("sunpriests", Items.GLOWSTONE_DUST, Stats.Stat.GRIT, false).onlyBorn(Heritage.Kind.DAWNBORN),
+				// (0.7.490) the pack that raised a beastfolk
+				Answer.raised("pack", Items.BONE, Stats.Stat.AGILITY, false).onlyBorn(Heritage.Kind.BEASTFOLK),
 				Answer.raised("foundling", Items.STRING, null, false)));
 			CHILDHOOD.answers.addAll(List.of(
-				Answer.child("roofs", Items.FEATHER, Stats.Stat.AGILITY, "gravity", "skymarked", "blossomkin", "moonpale", "starlit"),
-				Answer.child("caves", Items.COBWEB, Stats.Stat.ENDURANCE, "web", "obsidian", "hollow"),
-				Answer.child("fights", Items.LEATHER, Stats.Stat.MIGHT, "zfighter", "battlescarred", "ironknuckle", "berrygloss"),
-				Answer.child("books", Items.WRITABLE_BOOK, Stats.Stat.WITS, "chrono", "inkmarked", "opaline"),
-				Answer.child("swimming", Items.KELP, Stats.Stat.AGILITY, "darktide", "abyssal", "reefcrowned", "candystripe"),
-				Answer.child("storms", Items.LIGHTNING_ROD.weathering().unaffected(), Stats.Stat.FINESSE, "wind", "skymarked", "galeborn"),
-				Answer.child("fire", Items.CAMPFIRE, Stats.Stat.GRIT, "smoke", "magmavein", "soulflame", "ashen"),
-				Answer.child("snow", Items.SNOW_BLOCK, Stats.Stat.GRIT, "cryo", "rimeglass", "aurora"),
-				Answer.child("bells", Items.BELL, Stats.Stat.WITS, "resonance", "umbral", "twilight", "seraphic"),
-				Answer.child("blades", Items.BUNDLE, Stats.Stat.FINESSE, "arsenal", "warpainted", "brassbound")));
+				Answer.child("roofs", Items.FEATHER, Stats.Stat.AGILITY, "gravity", "skymarked", "blossomkin", "moonpale", "starlit", "avian", "sprite", "wraith"),
+				Answer.child("caves", Items.COBWEB, Stats.Stat.ENDURANCE, "web", "obsidian", "hollow", "arachnid", "changeling", "skeleton"),
+				Answer.child("fights", Items.LEATHER, Stats.Stat.MIGHT, "zfighter", "battlescarred", "ironknuckle", "berrygloss", "canine", "bloodelf", "zombie"),
+				Answer.child("books", Items.WRITABLE_BOOK, Stats.Stat.WITS, "chrono", "inkmarked", "opaline", "highelf"),
+				Answer.child("swimming", Items.KELP, Stats.Stat.AGILITY, "darktide", "abyssal", "reefcrowned", "candystripe", "serpen", "nymph"),
+				Answer.child("storms", Items.LIGHTNING_ROD.weathering().unaffected(), Stats.Stat.FINESSE, "wind", "skymarked", "galeborn", "dryad"),
+				Answer.child("fire", Items.CAMPFIRE, Stats.Stat.GRIT, "smoke", "magmavein", "soulflame", "ashen", "kitsune", "reaper"),
+				Answer.child("snow", Items.SNOW_BLOCK, Stats.Stat.GRIT, "cryo", "rimeglass", "aurora", "moonelf"),
+				Answer.child("bells", Items.BELL, Stats.Stat.WITS, "resonance", "umbral", "twilight", "seraphic", "faerie"),
+				Answer.child("blades", Items.BUNDLE, Stats.Stat.FINESSE, "arsenal", "warpainted", "brassbound", "feline")));
 			YOUTH.answers.addAll(List.of(
 				Answer.youth("cutpurses", Items.TRIPWIRE_HOOK, Classes.PlayerClass.THIEF),
 				Answer.youth("levy", Items.IRON_AXE, Classes.PlayerClass.WARLORD),
@@ -1659,7 +1663,8 @@ public final class LifeStory {
 	/** The villages of the land a heritage comes from. */
 	private static TagKey<Structure> villages(Heritage.Kind heritage) {
 		return switch (heritage) {
-			case STONEBORN, SYLVAN, NIGHTBORN -> StructureTags.ON_TAIGA_VILLAGE_MAPS;
+			case STONEBORN, SYLVAN, NIGHTBORN, HOLLOW -> StructureTags.ON_TAIGA_VILLAGE_MAPS;
+			case BEASTFOLK -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
 			case FROSTBORN -> StructureTags.ON_SNOWY_VILLAGE_MAPS;
 			case EMBERBORN, WARRIORBORN -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
 			case DAWNBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;

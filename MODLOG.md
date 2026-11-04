@@ -5138,3 +5138,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   they only worked because Moog's Structures upgrades old data on the fly. Rewritten as `modifier`/`condition`
   (`block_state_property` → `match_block`); a dev server loads them without the upgrade. Rift Chains' chain item is made
   on first draw, not when the class loads. Checked by a dev server boot.
+
+- **0.19.81, Kingdoms 0.7.490, greenskin hordes and Runic Races heritages:** Kingdoms only, see kingdoms/MODLOG.md, except
+  that the Forge Hearth now superheats Kingdoms' bent ingots into Hot Ingots (`HotMetal.ingotMetal`), one way to straighten them.
