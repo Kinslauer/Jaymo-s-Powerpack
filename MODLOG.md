@@ -223,3 +223,4 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   - **Gremlin -> Swarm** (tiny, +5 hearts): R Pounce, G Haywire (flips levers, doors and gates from 24 blocks), V Leech Bite, B Scuttle (ceilings, one-block gaps), C splits into 5 glowing gremlins and swaps with them.
   - **Knell -> The Tolling** (1.6x, +18 hearts): R Sonic Lance (24 blocks, 14 damage), G Deep Sense (hold, 40 blocks), V Deep Shriek, B Undertow (come up where you look, 24 blocks), C The Tolling (7 tolls, 10 blocks).
   - Wired: `XenoFormModels.ultimate()`, `XenoformHand` arm poses, lang, `gen_xenoform.OWN_ULTIMATES`; Excalibur pack copies regraded. Compile-checked; not played.
+- **0.20.22**: ChoiceTheorem's Overhauled Village (CC BY-NC-ND 4.0, unchanged, 26.2 Fabric build) joins the pack: its villages and outposts spawn in the shared pools, settlements in its villages are havens, and towns take its trade buildings (Kingdoms 0.7.521).

@@ -205,13 +205,19 @@ public final class KingdomEvents {
 			Math.min(area.maxX(), b.getX() + LOAD_REACH), Math.min(area.maxZ(), b.getZ() + LOAD_REACH))) {
 			return;
 		}
+		Faction founded;
 		if (Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
-			if (foundIn(level, bell.get(), village.start()) == null) {
+			founded = foundIn(level, bell.get(), village.start());
+			if (founded == null) {
 				// (0.5.1) no building there fit for a king: the kingdom raises its citadel beside the village
-				found(level, bell.get(), Castle.Kind.CITADEL);
+				founded = found(level, bell.get(), Castle.Kind.CITADEL);
 			}
 		} else {
-			Villages.found(level, bell.get());
+			founded = Villages.found(level, bell.get());
+		}
+		// (0.7.521) one of ChoiceTheorem's villages is a haven (Havens#ctov)
+		if (founded != null && village.id().startsWith(Havens.CTOV)) {
+			Havens.ctov(level, founded);
 		}
 	}
 

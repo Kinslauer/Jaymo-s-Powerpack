@@ -109,6 +109,14 @@ def packMods = [
 	// and ships. No castles of its own, so none of its structures is a grand seat. Needs Cristel Lib (above). Pinned by its
 	// Modrinth version number (1.13.12, the 26.3 build of 2026-09-16; CurseForge file t_and_t-fabric-neoforge-1.13.12.jar).
 	[dep: "maven.modrinth:towns-and-towers:1.13.12", cf: [626761, 8895612]],
+	// ChoiceTheorem's Overhauled Village (CC BY-NC-ND 4.0, by ChoiceTheorem; shipped unchanged, never edited, with credit
+	// and a link: modrinth.com/mod/ct-overhaul-village): 23 kinds of village and 14 of pillager outpost by land (its
+	// villages are tagged as villages, so they join Jaymo's Kingdoms' shared pool, and a settlement founded in one is a
+	// haven: Havens.ctov). Jaymo's Kingdoms reads its trade buildings in the game (ctov:village/<land>/jobsite/<trade>)
+	// for a town's butcher, fishery, hunting lodge, smithy and mason (CtovHalls). The 26.2 Fabric build (4.1.1, says
+	// minecraft >=26.1, no mixins, almost all data); needs Lithostitched (above). Server-side worldgen.
+	// TODO(home PC): its CurseForge [project id, file id] (the cloud can't reach CurseForge).
+	[dep: "maven.modrinth:ct-overhaul-village:DpxVZVuT", cf: null],
 	// William Wythers' Overhauled Overworld (CC BY-NC-ND 4.0; shipped unchanged, downloaded by id) and its library Cristel
 	// Lib (same licence): every vanilla biome redecorated (trees, foliage, rocks, sub-biomes) under its vanilla id, so
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
