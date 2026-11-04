@@ -186,14 +186,15 @@ public final class UltimateRevenant extends XenoFormModels.UltimateModel {
 			this.spikes[i].xRot += Mth.cos(t * 0.14F + i) * SPIKE_SWAY * 0.5F;
 		}
 		XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
-		if (flight != null && flight.glide() > 0.001F) {
-			// drifting, the hem and the tendrils stream out behind and ripple
-			float g = Mth.clamp(flight.glide(), 0.0F, 1.0F);
+		if (flight != null && flight.drift() > 0.001F) {
+			// (0.20.23) floating upright, the hem and the tendrils hang below and ripple, trailing a little as it drifts
+			float g = Mth.clamp(flight.drift(), 0.0F, 1.0F);
 			g = g * g * (3.0F - 2.0F * g);
-			this.tatters.xRot = Mth.lerp(g, this.tatters.xRot, 1.15F + Mth.sin(t * 0.35F) * 0.22F);
-			this.tatters.zRot = Mth.lerp(g, this.tatters.zRot, Mth.sin(t * 0.23F) * 0.2F);
+			float moving = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
+			this.tatters.xRot = Mth.lerp(g, this.tatters.xRot, 0.12F + moving * 0.35F + Mth.sin(t * 0.2F) * 0.12F);
+			this.tatters.zRot = Mth.lerp(g, this.tatters.zRot, Mth.sin(t * 0.15F) * 0.12F);
 			for (int i = 0; i < TENDRILS; i++) {
-				this.tendrils[i].xRot = Mth.lerp(g, this.tendrils[i].xRot, 0.5F + Mth.sin(t * 0.3F + i) * 0.25F);
+				this.tendrils[i].xRot = Mth.lerp(g, this.tendrils[i].xRot, 0.15F + moving * 0.3F + Mth.sin(t * 0.25F + i) * 0.15F);
 			}
 		}
 	}
