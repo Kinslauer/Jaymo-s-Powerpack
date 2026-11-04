@@ -30,6 +30,12 @@ public class CutGemItem extends Item {
 		return stack;
 	}
 
+	/** (0.20.7) The cut gem item for a saved {@link CutGem} (a gem pulled from a socket), or EMPTY for an unknown gem. */
+	public static ItemStack of(CutGem cut) {
+		Gems.Gem gem = cut.gemType();
+		return gem == null ? ItemStack.EMPTY : of(gem, cut.cutType(), cut.grade(), cut.chips());
+	}
+
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
 		TooltipFlag flag) {
