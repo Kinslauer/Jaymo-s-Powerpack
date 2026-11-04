@@ -434,6 +434,8 @@ public final class XenoformPower implements Power {
 	}
 
 	private static final Map<UUID, Live> LIVES = new HashMap<>();
+	/** (0.19.85) A player who logged off: {recharge, rechargeTotal, charge} until they're back (this server run). */
+	private static final Map<UUID, int[]> KEPT = new HashMap<>();
 
 	private XenoformPower() {
 	}
@@ -508,11 +510,16 @@ public final class XenoformPower implements Power {
 			if (has(player) && live(player).form != null) {
 				revert(player, false, false);
 			}
-			LIVES.remove(player.getUUID());
+			// (0.19.85) the band's recharge and charge outlast a relog (a relog must not skip the wait)
+			Live gone = LIVES.remove(player.getUUID());
+			if (gone != null && (gone.recharge > 0 || gone.charge >= 0.0F)) {
+				KEPT.put(player.getUUID(), new int[] {gone.recharge, gone.rechargeTotal, Math.round(gone.charge)});
+			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(FallingStars::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			LIVES.clear();
+			KEPT.clear();
 			FallingStars.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> XenoformDebugCommand.register(dispatcher));
@@ -524,7 +531,16 @@ public final class XenoformPower implements Power {
 	}
 
 	static Live live(ServerPlayer player) {
-		return LIVES.computeIfAbsent(player.getUUID(), id -> new Live());
+		return LIVES.computeIfAbsent(player.getUUID(), id -> {
+			Live live = new Live();
+			int[] kept = KEPT.remove(id);
+			if (kept != null) {
+				live.recharge = kept[0];
+				live.rechargeTotal = kept[1];
+				live.charge = kept[2];
+			}
+			return live;
+		});
 	}
 
 	/** No affinity and no random awakening: the band is the only way in. */
@@ -583,6 +599,7 @@ public final class XenoformPower implements Power {
 			revert(player, false, false);
 		}
 		LIVES.remove(player.getUUID());
+		KEPT.remove(player.getUUID());
 		XenoBands.unworn(player);
 		player.removeAttached(XenoformState.RIVAL);
 		player.removeTag(XenoformState.RIVAL_TAG);
