@@ -346,6 +346,8 @@ final class HavenBuildings {
 
 	// ---- (0.7.484) Havens expand: the works a haven raises to make the most of its land ----------------------------------
 
+	/** (0.7.484) The dock's rows from this one on (the boat shed's end) stand over water, at least this many of its columns. */
+	static final int DOCK_WATER_ROW = 6, DOCK_WET = 9;
 	/** The works a haven raises, in their catalogue ids ({@link HavenGrowth} says which a blood builds and what each makes). */
 	static final String FIELDS = "haven_fields", WORKSHOP = "haven_workshop", MINE = "haven_mine", DOCK = "haven_dock", MILL = "haven_mill";
 
@@ -578,7 +580,9 @@ final class HavenBuildings {
 
 	/**
 	 * A dock (9 x 13): a plank quay on log piles with a boat shed's roof over its far end, crates and barrels, a drying
-	 * rack of kelp, a lantern at the head. (It stands on the shore; the boats are the haven's own.)
+	 * rack of kelp, a lantern at the head. (It stands on the shore; the boats are the haven's own.) (0.7.484) Its head is on
+	 * dry land toward the town and its far end, the shed's, out over the water ({@link Planner#setShore}): a haven with no
+	 * shore in its land builds none.
 	 */
 	static Blueprint dock(Buildings.Kit k) {
 		Palette p = k.p;
@@ -655,6 +659,7 @@ final class HavenBuildings {
 
 	/** Registers the haven works in the catalogues of the settlements that can be havens (built only where {@link HavenGrowth#allows}). */
 	static void register() {
+		Planner.setShore(DOCK, DOCK_WATER_ROW, DOCK_WET);
 		for (FactionType type : new FactionType[] {FactionType.VILLAGE, FactionType.KINGDOM, FactionType.FIEFDOM}) {
 			Buildings.realm(type, FIELDS, HavenBuildings::fields, HavenGrowth.MOST_BUILT, HavenGrowth.FIELDS_FROM);
 			Buildings.realm(type, WORKSHOP, HavenBuildings::workshop, HavenGrowth.MOST_BUILT, HavenGrowth.WORKSHOP_FROM);

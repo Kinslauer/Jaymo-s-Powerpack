@@ -96,6 +96,11 @@ public final class HavenGrowth {
 	static final int VILLAGE_CLAIM = 5, KINGDOM_CLAIM = 10, FIEFDOM_CLAIM = 8;
 	/** A realm pays this many emeralds for each chunk; a village needs this much food in store to claim at all. */
 	static final int CLAIM_COST = 4, CLAIM_FOOD = 32;
+	/**
+	 * (0.7.484) Once it holds all it may claim, it looks again only when it grows, loses land, or this long has passed
+	 * (ticks); when it can't pay for land that is free, it waits this long before it looks again.
+	 */
+	static final long CLAIM_RECHECK = 24000L, CLAIM_RETRY = 6000L;
 
 	// ---- its sworn order ---------------------------------------------------------------------------------------------
 
@@ -129,6 +134,11 @@ public final class HavenGrowth {
 
 	/** When the next fighter may be sworn in, by haven; when the sworn last rallied, by haven. */
 	private static final Map<Integer, Long> NEXT_SWEAR = new HashMap<>(), RALLIED = new HashMap<>();
+	/** (0.7.484) How far out each haven last looked for land, what it held then, and when it may look again regardless. */
+	private static final Map<Integer, Looked> LOOKED = new HashMap<>();
+
+	private record Looked(int radius, int held, long again) {
+	}
 
 	private HavenGrowth() {
 	}
@@ -139,17 +149,20 @@ public final class HavenGrowth {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			NEXT_SWEAR.clear();
 			RALLIED.clear();
+			LOOKED.clear();
 		});
 	}
 
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
-		boolean order = now % ORDER_TICKS == 0, claim = now % CLAIM_TICKS == 0;
-		if (!order && !claim) {
-			return;
-		}
+		boolean order = now % ORDER_TICKS == 0;
 		for (Faction f : Factions.all(server)) {
+			// (0.7.484) each haven thinks of land on its own tick, so they don't all look at once
+			boolean claim = Math.floorMod(now + f.id(), CLAIM_TICKS) == 0;
+			if (!order && !claim) {
+				continue;
+			}
 			if (f.fallen() || f.type() == FactionType.BARBARIAN || !Havens.is(server, f) || !level.isPositionEntityTicking(f.seat())) {
 				continue;
 			}
@@ -157,7 +170,7 @@ public final class HavenGrowth {
 				order(level, f, now);
 			}
 			if (claim) {
-				grow(level, f);
+				grow(level, f, now);
 			}
 		}
 	}
@@ -482,29 +495,36 @@ public final class HavenGrowth {
 	/**
 	 * Haven {@code f} claims the land its size calls for that no one holds yet. A realm pays for it from its treasury; a village
 	 * needs food in store. A village inside a realm's land (no claims of its own) is left as it is unless the whole of its seat
-	 * chunk comes free.
+	 * chunk comes free. (0.7.484) It only looks again when its size calls for more land, it has lost land, or
+	 * {@link #CLAIM_RECHECK} has passed; it retries after {@link #CLAIM_RETRY} if it couldn't pay.
 	 */
-	static void grow(ServerLevel level, Faction f) {
+	static void grow(ServerLevel level, Faction f, long now) {
 		MinecraftServer server = level.getServer();
 		if (!Economy.atPeace(server, f)) {
 			return;
 		}
-		List<Long> more = KingdomEvents.claim(server, f.seat(), claimRadius(f));
-		if (more.isEmpty()) {
+		int radius = claimRadius(f), held = f.claims().size();
+		Looked last = LOOKED.get(f.id());
+		if (last != null && radius <= last.radius() && held >= last.held() && now < last.again()) {
 			return;
 		}
-		if (f.claims().isEmpty() && !more.contains(ChunkPos.containing(f.seat()).pack())) {
+		List<Long> more = KingdomEvents.claim(server, f.seat(), radius);
+		if (more.isEmpty() || f.claims().isEmpty() && !more.contains(ChunkPos.containing(f.seat()).pack())) {
+			LOOKED.put(f.id(), new Looked(radius, held, now + CLAIM_RECHECK));
 			return;
 		}
 		if (f.type().isRealm()) {
 			long cost = (long)more.size() * CLAIM_COST;
 			if (f.treasury() < cost) {
+				LOOKED.put(f.id(), new Looked(radius, held, now + CLAIM_RETRY));
 				return;
 			}
 			Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() - cost));
 		} else if (!f.holdings().storage().isEmpty() && (!Storage.loaded(level, f) || Storage.food(level, f) < CLAIM_FOOD)) {
+			LOOKED.put(f.id(), new Looked(radius, held, now + CLAIM_RETRY));
 			return;
 		}
+		LOOKED.put(f.id(), new Looked(radius, held + more.size(), now + CLAIM_RECHECK));
 		Factions.update(server, f.id(), x -> {
 			java.util.Set<Long> claims = new java.util.LinkedHashSet<>(x.claims());
 			claims.addAll(more);
