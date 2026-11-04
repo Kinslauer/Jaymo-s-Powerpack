@@ -4928,7 +4928,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Compile-checked (0 errors against the 26.3 jars); not played.
 - **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
   wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.
-- **0.20.3, Kingdoms 0.7.477, Kitchen 0.5.48, Gemini handoff pass 1:** Andy's Gemini handoff, taken as design intent and
+- **0.19.57, Kingdoms 0.7.477, Kitchen 0.5.48, Gemini handoff pass 1:** Andy's Gemini handoff, taken as design intent and
   built on what was already here. Kindle grows with you (`EmberKindle.stage`): four stages by experience level
   (`STAGE_LEVELS` 10/20/30; reach 1.5-2.2, 2.2-3.5, the old 3-5, 4-6.8) and a Flame Avatar's 6-11 block pillar, with
   damage and heat speed by stage. Ki is seen only by the sensitive (`client/power/zfighter/KiSight`): a Z Fighter's aura
