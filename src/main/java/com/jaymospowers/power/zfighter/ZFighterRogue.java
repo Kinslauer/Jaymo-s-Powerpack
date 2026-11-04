@@ -174,6 +174,11 @@ public class ZFighterRogue extends Monster {
 		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true, (target, level) -> tyrant()));
 	}
 
+	/** (0.20.36) One of a raider band's men (on the ground by a town, or up in the high sky), not a tournament champion. */
+	boolean raider() {
+		return this.entityTags().contains(ZFighterRaiders.TAG) || this.entityTags().contains(ZFighterHighSky.TAG);
+	}
+
 	public int kind() {
 		return this.entityData.get(DATA_KIND);
 	}
@@ -226,8 +231,9 @@ public class ZFighterRogue extends Monster {
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
 		boolean tyrant = tyrant();
-		if (!tyrant && !ZFighterTournaments.fighting(this.getUUID())) {
-			// a champion with no bout to fight (left over from a restart): gone
+		if (!tyrant && !ZFighterTournaments.fighting(this.getUUID()) && !raider()) {
+			// a champion with no bout to fight (left over from a restart): gone; (0.20.36) a raider band's men are not champions
+			// of a bout, so they stay (their bands clear away their own leftovers)
 			this.discard();
 			return;
 		}
@@ -261,6 +267,10 @@ public class ZFighterRogue extends Monster {
 		}
 		if (rushing(level)) {
 			return;
+		}
+		if (ZFighterHighSky.airborne(this)) {
+			// (0.20.36) up in the high sky there is nothing to stand on: they fly at their foe, and hang in the air without one
+			ZFighterHighSky.steer(this, target);
 		}
 		if (target == null || !target.isAlive()) {
 			endString();
