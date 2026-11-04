@@ -15,11 +15,12 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
     a bare `% N == 0` sound loop.
   - `docs/Abilities.md`: the table of every ability (the user edits the "Change to" column; "Line" = the row's own line
     number in the file). `docs/Plan-0.7.md`: the 0.7 plan and the user's answers (all built).
-  - `docs/<power>.md`: per-power design notes. `MODLOG.md`: the design log.
+  - `docs/<power>.md`: per-power design notes. `MODLOG.md`: the design log (recent; older entries in `docs/modlog/`).
+  - `docs/codemap/*.md`: one line per class for each project, made by `tools/codemap.py`. Grep it before searching the code.
   - `tools/*.py`: asset generators (sprites, models, worldgen JSON); run `python -I tools/<x>.py` from the root.
 - **`kingdoms/`: Jaymo's Kingdoms** (`jaymoskingdoms`, its own Gradle project; history merged in). An *original*
   mod (Tale of Kingdoms' code is GPL-3.0 and its art all rights reserved, so nothing is taken from it).
-  `kingdoms/MODLOG.md` is its log; `docs/Kingdoms-Plan.md` the plan and the user's answers.
+  `kingdoms/MODLOG.md` is its log (recent; older in `docs/modlog/`); its lang is in `lang/parts/*.json`, merged at build; `docs/Kingdoms-Plan.md` the plan and the user's answers.
 - **`kitchen/`: Jaymo's Kitchen** source (`jaymoskitchen`, its own Gradle project, v0.4.22; not under git before, so no
   history). It requires Cooking for Blockheads and Balm. Its built jar is committed in `libs/` (the pack ships it).
 

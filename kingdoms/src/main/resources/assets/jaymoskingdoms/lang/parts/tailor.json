@@ -1,0 +1,12 @@
+{
+  "tailor.jaymoskingdoms.not": "I'm no tailor. Try a shepherd, at the loom.",
+  "tailor.jaymoskingdoms.fee": "A new outfit? %s silver, paid when you pick.",
+  "tailor.jaymoskingdoms.cant_pay": "A new outfit is %s silver. Come back when you have them.",
+  "tailor.jaymoskingdoms.done": "Suits you.",
+  "tailor.jaymoskingdoms.screen_fee": "The tailor's fee: %s silver",
+  "tailor.jaymoskingdoms.no_costumes": "Costumes? I only sew clothes.",
+  "tailor.jaymoskingdoms.table_sold": "A Costume Table, yours for %s silver. Mind the needles.",
+  "tailor.jaymoskingdoms.table_cant_pay": "A Costume Table is %s silver. Come back when you have them.",
+  "tailor.jaymoskingdoms.costume_fee": "Design your costume and I'll sew it. %s silver, paid when I sew it.",
+  "tailor.jaymoskingdoms.costume_cant_pay": "A costume is %s silver. Come back when you have them."
+}

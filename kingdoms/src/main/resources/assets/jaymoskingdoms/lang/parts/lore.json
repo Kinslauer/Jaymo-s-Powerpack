@@ -1,0 +1,13 @@
+{
+  "lore.jaymoskingdoms.codex.count": "Books kept: %s",
+  "lore.jaymoskingdoms.codex.empty": "Nothing filed yet. Use the codex with a journal or an old book in your pack and it will keep one of each for you.",
+  "lore.jaymoskingdoms.codex.page": "%1$s / %2$s",
+  "lore.jaymoskingdoms.dir.n": "north",
+  "lore.jaymoskingdoms.dir.ne": "north-east",
+  "lore.jaymoskingdoms.dir.e": "east",
+  "lore.jaymoskingdoms.dir.se": "south-east",
+  "lore.jaymoskingdoms.dir.s": "south",
+  "lore.jaymoskingdoms.dir.sw": "south-west",
+  "lore.jaymoskingdoms.dir.w": "west",
+  "lore.jaymoskingdoms.dir.nw": "north-west"
+}
