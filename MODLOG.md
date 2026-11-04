@@ -352,9 +352,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   heaven". At the Other World (`ZFighterAfterlife.inOtherWorld`: within 64 blocks of the Judge's platform in the Aether,
   which covers the hall, road, pavilion, ring and tent) Kitchen's body heat is held neutral (`KitchenCompat.registerTemperate`
   hooks Kitchen's `BodyHeat.addTemperate`). The rest of the Aether keeps its height cold.
-- **0.20.47, Kitchen 0.5.61, no corpses or monsters in heaven:** Andy: "player corpses dont spawn in the otherworld
-  (heaven) not the aether, I died and a zombie tried attacking the judge". At the Other World (`ZFighterAfterlife.inOtherWorld`)
-  nobody leaves a body: `KitchenCompat.registerNoCorpseZone` hooks Kitchen's `Corpses.addNoCorpseZone`, so a player who dies
-  there drops their hotbar with the rest and a body already lying there fades (dropping what it held) instead of getting up
-  as a zombie. `ZFighterAfterlife.sweep` clears every hostile mob (`Enemy`) at the site twice a second while someone is
-  there, in a puff of souls; the tournament's spirit fighters are left alone.
+- **0.20.47, Kitchen 0.5.61, no corpses in heaven:** Andy: "player corpses dont spawn in the otherworld (heaven) not
+  the aether, I died and a zombie tried attacking the judge". At the Other World (`ZFighterAfterlife.inOtherWorld`) nobody
+  leaves a body: `KitchenCompat.registerNoCorpseZone` hooks Kitchen's `Corpses.addNoCorpseZone`, so a player who dies there
+  drops their hotbar with the rest, and a body already lying there fades (dropping what it held) instead of getting up as a
+  zombie. Monsters are still allowed there (Andy: "monsters are fine, since users can train here").
