@@ -551,7 +551,7 @@ public final class Theft {
 			return;
 		}
 		commit(killer, level, f, crime, victim.blockPosition(), null, false);
-		if (crime == Crime.VILLAGER && !witnesses(level, f, killer).isEmpty()) {
+		if (crime == Crime.VILLAGER && !crimeWitnesses(level, f, killer).isEmpty()) {
 			// (0.7.109) seen: the dead one's family won't forget who did it
 			Recollections.murdered(level, killer, victim);
 		}
@@ -559,7 +559,14 @@ public final class Theft {
 
 	// ---- witnesses and consequences -----------------------------------------------------------------------------
 
-	/** The faction's people who see {@code player} now, nearest first. */
+	/** The faction's crime witnesses: those fond enough of the player look away. Only for crime paths. */
+	static List<LivingEntity> crimeWitnesses(ServerLevel level, Faction f, ServerPlayer player) {
+		List<LivingEntity> out = witnesses(level, f, player);
+		out.removeIf(e -> e instanceof Villager v && Bearings.shields(v, player));
+		return out;
+	}
+
+	/** The faction's people who see {@code player} now, nearest first (everyone, fond or not). */
 	static List<LivingEntity> witnesses(ServerLevel level, Faction f, ServerPlayer player) {
 		// (0.7.509) the Ash Whisperer's Smoke and Whispers: nobody bears witness
 		if (Blessings.unseen(player)) {
@@ -605,7 +612,7 @@ public final class Theft {
 			// (no crime against a realm at war with yours)
 			return;
 		}
-		commit(player, level, f, crime, weight, noticeable, witnesses(level, f, player));
+		commit(player, level, f, crime, weight, noticeable, crimeWitnesses(level, f, player));
 	}
 
 	/** {@link #commit}, with who saw it already worked out (a pickpocket's mark knows, or doesn't, whatever way they face). */

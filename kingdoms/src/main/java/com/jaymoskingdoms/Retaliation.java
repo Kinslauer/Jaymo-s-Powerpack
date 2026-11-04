@@ -155,7 +155,7 @@ final class Retaliation {
 			// (an enemy soldier: they run, as from any raider)
 			return;
 		}
-		List<LivingEntity> seen = f == null ? List.of() : Theft.witnesses(level, f, player);
+		List<LivingEntity> seen = f == null ? List.of() : Theft.crimeWitnesses(level, f, player);
 		if (!HavenGrowth.sworn(victim) && (f != null && (Reputation.get(player, f.id()) <= FEARED || Theft.outlaw(player, f.id())) && !Temperaments.bold(victim)
 			|| Temperaments.runs(victim))) {
 			// they know what you are: they run; ((0.7.186) the brave and the hotheaded stand anyway, and the timid always run)

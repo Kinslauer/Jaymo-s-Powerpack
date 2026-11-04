@@ -218,7 +218,7 @@ final class Aliens {
 		if (now < next.getOrDefault(f.id(), 0L)) {
 			return;
 		}
-		List<LivingEntity> seen = Theft.witnesses(level, f, player);
+		List<LivingEntity> seen = Theft.crimeWitnesses(level, f, player);
 		if (seen.isEmpty()) {
 			return;
 		}
