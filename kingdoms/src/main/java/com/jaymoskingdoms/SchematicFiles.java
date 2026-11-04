@@ -28,8 +28,13 @@ import org.jspecify.annotations.Nullable;
 public final class SchematicFiles {
 	/** The extensions a design file may have, the game's own first. */
 	public static final List<String> EXTENSIONS = List.of(".nbt", ".schem", ".litematic");
-	/** The most block positions (air too) a file may span before it's refused unread. */
-	static final long MAX_VOLUME = 4_000_000L;
+	/**
+	 * The most block positions (air too) a file may span before it's refused unread: the largest box a design may fill
+	 * ({@link Designs#PLAN_SIDE} square, {@link Designs#PLAN_HEIGHT} high), so an oversized upload isn't built in full first.
+	 */
+	static final long MAX_VOLUME = (long)Designs.PLAN_SIDE * Designs.PLAN_SIDE * Designs.PLAN_HEIGHT;
+	/** The longest side a Litematica region may claim (its sizes are ints, so their product could overflow). */
+	static final int MAX_REGION_SIDE = 4096;
 	/** Sponge version 1 files carry no data version: taken to be from 1.13.2. */
 	static final int SPONGE_V1_DATA_VERSION = 1631;
 
@@ -185,6 +190,9 @@ public final class SchematicFiles {
 		for (String name : regions.keySet()) {
 			CompoundTag r = regions.getCompoundOrEmpty(name);
 			int[] lo = regionMin(r), size = regionSize(r);
+			if (size[0] < 0 || size[1] < 0 || size[2] < 0 || size[0] > MAX_REGION_SIDE || size[1] > MAX_REGION_SIDE || size[2] > MAX_REGION_SIDE) {
+				return null;
+			}
 			minX = Math.min(minX, lo[0]);
 			minY = Math.min(minY, lo[1]);
 			minZ = Math.min(minZ, lo[2]);

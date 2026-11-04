@@ -5131,3 +5131,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   curtains) as vanilla's does, and the armed crosshair now hides in an ultimate's film too. One look (`HudStyle`, Wind's
   chips: see-through black plates, a rim in the piece's colour when ready, flat 3 px bars in a black frame, shadowed
   text), with no resource-pack art, so it reads the same with Excalibur off. Compile-checked; not played.
+- **0.19.80, bug sweep** (Kingdoms 0.7.489): Andy: "check the pack over for bugs i havent caught". Master didn't compile:
+  `ZFighterHudLayout` still asked for `ApeRageClient.BAR_UP`, which the HUD rework (0.19.79) removed; the Ape rage piece's
+  usual spot is now the focus band's. The 99 layer blocks' and 30 other loot tables (`blocks/*_layer`, pattern chest,
+  withered leaves, Aether mobs...) were in the pre-26.3 `functions`/`conditions` form, which 26.3 ignores; in the pack
+  they only worked because Moog's Structures upgrades old data on the fly. Rewritten as `modifier`/`condition`
+  (`block_state_property` → `match_block`); a dev server loads them without the upgrade. Rift Chains' chain item is made
+  on first draw, not when the class loads. Checked by a dev server boot.

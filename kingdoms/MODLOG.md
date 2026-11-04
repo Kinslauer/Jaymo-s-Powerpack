@@ -8351,3 +8351,18 @@ minimap. Handshake and spirit-clash films and the story and travel curtains hide
   can offer one of the world's designs from a mason's table's screen. Its builders put it up on open ground of their choosing before
   their own catalogue, from storage, like any building. Up to 4 waiting per settlement, 1 per player. When finished,
   the giver gets +40 reputation and a message.
+
+## 0.7.489: bug sweep (pack 0.19.80)
+- **Loot tables**: bog iron ore and the clockwork golem were in the pre-26.3 `functions`/`conditions` form, which 26.3
+  ignores (only Moog's Structures' on-the-fly upgrade kept them working: without it bog iron ore always drops itself and the
+  golem always its clock); rewritten as `modifier`/`condition`.
+- **Schematic uploads** (`SchematicFiles`): a file spanning more than the biggest design (96 × 96 × 128) is refused
+  before it's built in full on the server thread, and a Litematica region claiming a side over 4,096 is refused (the
+  sizes' product could overflow and pass the check, then loop for ever).
+- **Mason's table**: the screen's refresh no longer rereads every design file from disk for its author
+  (`Designs.author` is cached, cleared on save and delete). Where the right block already stands, the table now copies
+  only how it lies (facing, axis, half, shape and other named properties), never counts or switches, so a laid plan of
+  a ripe farm no longer grows crops, fills end portal frames or charges anchors for free.
+- **Cinder Forge**: a second Ignis Vael could be made while the forge's chunks had loaded their blocks but not yet their
+  entities; the watch now waits for the entities. Smiths' rumours no longer stall in a world whose clock is behind one
+  you played before (the cooldown kept the other world's time).

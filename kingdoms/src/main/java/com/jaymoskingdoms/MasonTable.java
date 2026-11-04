@@ -621,6 +621,22 @@ public final class MasonTable {
 			return this.ops;
 		}
 
+		/** {@code here} with the design's choice of each of its enum properties and sign/banner/head rotation (how it lies); counts and on/off left as they are. */
+		private static BlockState turnedLike(BlockState here, BlockState design) {
+			BlockState out = here;
+			for (net.minecraft.world.level.block.state.properties.Property<?> property : design.getProperties()) {
+				if ((property instanceof net.minecraft.world.level.block.state.properties.EnumProperty<?> || property.getName().equals("rotation"))
+					&& out.hasProperty(property)) {
+					out = copy(out, design, property);
+				}
+			}
+			return out;
+		}
+
+		private static <T extends Comparable<T>> BlockState copy(BlockState to, BlockState from, net.minecraft.world.level.block.state.properties.Property<T> property) {
+			return to.setValue(property, from.getValue(property));
+		}
+
 		void serverTick(ServerLevel level) {
 			if (this.plan.isEmpty() || this.done || level.getGameTime() % PLACE_TICKS != 0 || level.getGameTime() < this.waitUntil) {
 				return;
@@ -644,8 +660,12 @@ public final class MasonTable {
 					continue;
 				}
 				if (here.is(op.state().getBlock())) {
-					// the right block, turned or set otherwise: made to match, free
-					level.setBlock(op.pos(), op.state(), FLAGS);
+					// the right block, turned or set otherwise: turned to match, free. Only its lie is copied (facing, axis,
+					// half, shape...), never numbers or switches, so a crop isn't grown, a frame given its eye or an anchor charged
+					BlockState turned = turnedLike(here, op.state());
+					if (turned != here) {
+						level.setBlock(op.pos(), turned, FLAGS);
+					}
 					this.index++;
 					continue;
 				}
