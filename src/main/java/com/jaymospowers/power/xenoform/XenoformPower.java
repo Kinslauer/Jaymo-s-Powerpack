@@ -186,8 +186,8 @@ public final class XenoformPower implements Power {
 		boolean scanning;
 		int scanTicks;
 		@Nullable String scanForm;
-		final long[] cooldownUntil = new long[XenoformState.Hud.SLOTS];
-		final int[] cooldownLength = new int[XenoformState.Hud.SLOTS];
+		public final long[] cooldownUntil = new long[XenoformState.Hud.SLOTS];
+		public final int[] cooldownLength = new int[XenoformState.Hud.SLOTS];
 		public boolean hudDirty = true;
 		int hudTick;
 		long lastHint;
@@ -557,6 +557,9 @@ public final class XenoformPower implements Power {
 			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && has(attacker) && live(attacker).body() == XenoForms.DUD) {
 				return false;
 			}
+			if (com.jaymospowers.power.xenoform.forms.ultimate.Swarm.bitesPlayer(source, entity)) {
+				return false;
+			}
 			if (!(entity instanceof ServerPlayer player) || !has(player)) {
 				return true;
 			}
@@ -606,7 +609,21 @@ public final class XenoformPower implements Power {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(FallingStars::tick);
+		com.jaymospowers.power.xenoform.forms.ultimate.Swarm.init(); // (0.20.21)
+		com.jaymospowers.power.xenoform.forms.ultimate.Geode.init(); // (0.20.21)
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			// (0.20.21) players are disconnected after LIVES is cleared, so an Ultimate's world changes (clones, crystals, a possessed host) are undone here
+			for (Map.Entry<UUID, Live> entry : LIVES.entrySet()) {
+				Live live = entry.getValue();
+				ServerPlayer online = server.getPlayerList().getPlayer(entry.getKey());
+				if (online != null && live.ult != null) {
+					try {
+						live.ult.onExit(online, live);
+					} catch (RuntimeException ignored) {
+						// never block the stop
+					}
+				}
+			}
 			LIVES.clear();
 			KEPT.clear();
 			FallingStars.clear();
@@ -1485,6 +1502,8 @@ public final class XenoformPower implements Power {
 			} else if (kind == DropKind.BROKEN) {
 				live.ultHealth = 0.0F;
 				live.ultBroken = true;
+				// (0.20.21) a break fires at zero health: stand up first so onExit sees a living player (Standstill's return)
+				player.setHealth(Mth.clamp(live.baseHealth, 1.0F, player.getMaxHealth()));
 			}
 			ult.onExit(player, live);
 			System.arraycopy(live.cooldownUntil, 0, live.ultCooldownUntil, 0, live.cooldownUntil.length);
@@ -1777,6 +1796,9 @@ public final class XenoformPower implements Power {
 		boolean wasUlt = live.ult != null;
 		float keptUlt = wasUlt ? player.getHealth() : live.ultHealth;
 		boolean keptBroken = live.ultBroken, keptSpent = live.lastStandSpent || wasUlt;
+		if (live.ult instanceof com.jaymospowers.power.xenoform.forms.ultimate.Tolling) {
+			com.jaymospowers.power.xenoform.forms.ultimate.Tolling.pendingCooldown(player, live); // (0.20.21) a cut-short Tolling's wait is in the snapshot
+		}
 		long[] keptUntil = (wasUlt ? live.cooldownUntil : live.ultCooldownUntil).clone();
 		int[] keptLength = (wasUlt ? live.cooldownLength : live.ultCooldownLength).clone();
 		// (0.20.9) the Ultimates' cooldowns are kept per Ultimate for the whole change, so a round trip through another alien restores them

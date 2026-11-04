@@ -301,7 +301,7 @@ Scanning stays the main way in. Beside it:
   changes until you slam.
 - **The Ultimate (ascended; 0.20.9, Ultimates patch 0).** An Ultimate is its own evolved alien (`XenoUltimate`, one per base
   alien, `XenoForm.evolved()`), with its own model and skin, its own R G V B and its own C (the big move), and its own health bar
-  on top of the base alien's. Bulwark's Titan is the first; the others still use the old fallback buff (`XenoForm.onUltimate`).
+  on top of the base alien's. Built so far: Bulwark's Titan (0.20.9) and, in 0.20.21, Pyre's Sunheart, Velox's Standstill, Prism's Geode, Wisp's Revenant, Gremlin's Swarm and Knell's The Tolling (table below); the others still use the old fallback buff (`XenoForm.onUltimate`).
   - **Coming on.** Unforged band: C does not change you. The Ultimate comes on by itself, once per change, as a last stand: a hit
     that leaves you at or under `ULT_LAST_STAND` (25%) of your health, or would kill you, while fighting a great foe (`GreatFoes`:
     the Ender Dragon, the Wither, the Elder Guardian, the Warden, anything that holds a visible boss bar, Kingdoms' bosses through
@@ -325,12 +325,12 @@ Scanning stays the main way in. Beside it:
 | Alien | Ultimate | What it does |
 |---|---|---|
 | Bulwark | Titan | 2x size, +12 armour, +20 health; the clap smashes walls 3 deep, 3 wide, 3 tall (hardness ≤ 6, no block entities). |
-| Pyre | Sunheart | The jet streaks up to 2.0/tick with a longer, wider comet (flight `FLY_SUN`); R is a held beam (12 blocks, 2 fire damage every 4 ticks, lights what it ends on). |
-| Velox | Standstill | Everything living within 24 blocks gets Slowness VII and its speed cut for 6 s; projectiles hang at 5% speed, then fly on; you get Speed II. C again every 30 s. |
-| Prism | Geode | All within 6 blocks: slowness/weakness/mining fatigue for 4 s, held still, amethyst grown round them (removed after); projectiles shatter; you get Resistance III. Every 20 s. |
-| Wisp | Revenant | Ride inside the mob you look at (8 blocks) for 10 s with its AI off: it walks where you look and jumps at walls; you're invisible and mobs drop you. It wakes dazed, glowing and weak. |
-| Gremlin | Swarm | 3 glowing silverfish follow you, bite what you bite and never attack players. C again swaps places with the farthest (nearest, sneaking), every second. |
-| Knell | The Tolling | Rooted, 5 tolls 2 s apart: 6 sonic damage, a shove and darkness (players) to all within 8; Resistance II meanwhile. Again after 30 s. |
+| Pyre | Sunheart | (0.20.21) 1.25x, +10 hearts: Sunray beam (16 blocks), Sun Jet hover and comet, Blaze Nova, Lava Wake; C Corona (10 blocks, 10 damage and burning, blinds, melts snow and ice, fireball ring). |
+| Velox | Standstill | (0.20.21) 1.15x, +8 hearts: Overdrive, Thousand Blows, Vortex, Flicker Storm; C Standstill (8 s, 24 blocks crawl, projectiles hang, you at Speed III). Every 30 s. |
+| Prism | Geode | (0.20.21) 1.5x, +12 hearts: Shard Storm, Rampart, Mirror Root, Spike Forest; C Geode (8 blocks, 5 s, crystal casing, projectiles shatter). Every 20 s. |
+| Wisp | Revenant | (0.20.21) 1.2x, +6 hearts: Wraithwalk, Veil, Banshee Wail, Drift; C Possession (15 s inside the creature you look at, your swing strikes through it). |
+| Gremlin | Swarm | (0.20.21) Tiny, +5 hearts: Pounce, Haywire, Leech Bite, Scuttle; C splits into 5 glowing gremlins that bite what you bite; C again swaps with the farthest (nearest, sneaking), every second. |
+| Knell | The Tolling | (0.20.21) 1.6x, +18 hearts: Sonic Lance, Deep Sense, Deep Shriek, Undertow; C The Tolling (7 tolls 2 s apart, 10 blocks, 7 damage, Resistance II). Again 30 s after the last. |
 | Wyrm | Elder Wyrm | 2x size, +8 armour, wings cost nothing, breath every 2 s, gust 1.5x wide. |
 | Duplex | Copper Storm | Fills up to 3 doubles, then visual-only lightning on each: 6 lightning damage to everything within 3 of a double (not you or yours), and the doubles get Speed II, Strength and Glowing for 20 s; up to 6 doubles while it lasts (the extras pop when it ends). C again every 20 s. |
 
