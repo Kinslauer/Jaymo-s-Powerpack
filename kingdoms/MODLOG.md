@@ -8958,7 +8958,18 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
   own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
   Cube Animals is loaded. Its loot-chest copies are untouched. Not compiled or played yet.
-- **0.7.538, attributes run 0-100, capped by world tier; Attributes and Jobs tabs no longer overlap** (Andy, 2026-11-04:
+- **0.7.538, opening a chest can wake sleepers** (Andy, 2026-11-04: "opening chests makes noise that can wake sleeping
+  villagers or guards"): `ChestNoise`. Opening a chest, barrel, shulker box or another mod's chest/barrel/crate/coffer
+  rolls for every sleeper but a player within 12 blocks: 85% at 2 blocks or closer, falling off evenly to 0 at 12, x0.4
+  through a wall, x0.5 if you open it sneaking (less again with Soft Step and the stealthy heritages, through
+  `Skills.sneakFactor`). Whoever wakes mutters a line, turns to you, walks over to the chest and stays up 15 s (put back
+  to bed if their brain tries). Awake, they count as witnesses (`Theft.witnesses` skips sleepers), so a guard you woke
+  sees you take from a realm's chest and it is a theft seen. Light Fingers (Andy: "the sound lowers with thief skill in
+  light fingers") takes 15% per rank off both the wake chance and the creak itself, so rank 5 opens at a quarter volume:
+  `ContainerOpenersHushMixin` marks who is opening around `ContainerOpenersCounter.incrementOpeners`, and
+  `ChestCreakVolumeMixin` scales `ServerLevel.playSeededSound`'s BLOCKS volume meanwhile (chests and barrels; shulker
+  boxes and modded chests with their own sound code keep full volume). Compiled (Gradle `compileJava`), not played yet.
+- **0.7.540, attributes run 0-100, capped by world tier; Attributes and Jobs tabs no longer overlap** (Andy, 2026-11-04:
   "UI needs a rework, the text is overlapping. And character level points should scale way further, making stats go from
   0/100 and scale accordingly, giving users a reason to world tier up"):
   - `Stats`: `MAX` 100. One old point is `STEP` (10) new ones: each character level earns `POINTS_PER_LEVEL` (5; was one

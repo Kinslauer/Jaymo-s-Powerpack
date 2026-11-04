@@ -40,13 +40,13 @@ import org.jspecify.annotations.Nullable;
  */
 final class SkillScreen extends Screen {
 	/**
-	 * (0.7.538) The Attributes and Jobs panel: as tall as the screen allows up to {@link #PANEL_H}, the rows from
+	 * (0.7.540) The Attributes and Jobs panel: as tall as the screen allows up to {@link #PANEL_H}, the rows from
 	 * {@link #TREE_Y} down to the detail box ({@link #DETAIL_H} tall, {@link #DETAIL_LINES} lines) just above the footer.
 	 * Rows that don't fit scroll (the wheel), clipped to their own area, so they never run under the detail box.
 	 */
 	static final int PANEL_W = 340, PANEL_H = 300, HEADER = 34, TAB_W = 78, TAB_H = 16, STAT_ROW = 16,
 		TREE_Y = 56, DETAIL_LINES = 5, DETAIL_H = 54, FOOTER = 22, XP_BAR_W = 120;
-	/** (0.7.538) The attribute bar: ten segments of ten points each. */
+	/** (0.7.540) The attribute bar: ten segments of ten points each. */
 	static final int SEG_W = 13, SEG_GAP = 2, SEGMENTS = 10, LOCKED = 0xFF0E0E14;
 
 	private static KeyMapping key;
@@ -67,7 +67,7 @@ final class SkillScreen extends Screen {
 	private static boolean jobs;
 	/** (0.7.220) The Jobs tab's rows. */
 	static final int JOB_ROW = 12, JOB_ACCENT = 0xFFC8A060;
-	/** (0.7.538) How far the Attributes or Jobs rows are scrolled (pixels). */
+	/** (0.7.540) How far the Attributes or Jobs rows are scrolled (pixels). */
 	private static int listScroll;
 
 	SkillScreen() {
@@ -120,12 +120,12 @@ final class SkillScreen extends Screen {
 		return Math.max(4, (this.height - panelH()) / 2);
 	}
 
-	/** (0.7.538) Where the detail box starts, just above the footer. */
+	/** (0.7.540) Where the detail box starts, just above the footer. */
 	private int detailY() {
 		return top() + panelH() - FOOTER - DETAIL_H;
 	}
 
-	/** (0.7.538) The rows' area: from under the tabs to a little above the detail box. */
+	/** (0.7.540) The rows' area: from under the tabs to a little above the detail box. */
 	private int listTop() {
 		return top() + TREE_Y;
 	}
@@ -134,7 +134,7 @@ final class SkillScreen extends Screen {
 		return detailY() - 4;
 	}
 
-	/** (0.7.538) The rows' height, all of them, on the tab shown. */
+	/** (0.7.540) The rows' height, all of them, on the tab shown. */
 	private int listContent() {
 		return jobs ? Careers.Job.values().length * JOB_ROW : stats ? shownStats().size() * STAT_ROW : 0;
 	}
@@ -143,7 +143,7 @@ final class SkillScreen extends Screen {
 		return Math.max(0, listContent() - (listBottom() - listTop()));
 	}
 
-	/** (0.7.538) Whether {@code mouseY} is over the rows' area (rows scrolled out of it can't be pointed at). */
+	/** (0.7.540) Whether {@code mouseY} is over the rows' area (rows scrolled out of it can't be pointed at). */
 	private boolean inList(double mouseY) {
 		return mouseY >= listTop() && mouseY < listBottom();
 	}
@@ -638,13 +638,13 @@ final class SkillScreen extends Screen {
 		return null;
 	}
 
-	/** (0.7.538) Where point {@code p} (0 to {@link Stats#MAX}) falls on the segmented bar starting at {@code x}. */
+	/** (0.7.540) Where point {@code p} (0 to {@link Stats#MAX}) falls on the segmented bar starting at {@code x}. */
 	private static int barX(int x, int p) {
 		int per = Stats.MAX / SEGMENTS, seg = Math.min(SEGMENTS - 1, p / per);
 		return x + seg * (SEG_W + SEG_GAP) + Math.round((p - seg * per) * SEG_W / (float)per);
 	}
 
-	/** (0.7.538) Fills points {@code from} to {@code to} of the segmented bar, segment by segment (the gaps stay empty). */
+	/** (0.7.540) Fills points {@code from} to {@code to} of the segmented bar, segment by segment (the gaps stay empty). */
 	private static void barFill(GuiGraphicsExtractor graphics, int x, int y0, int y1, int from, int to, int color) {
 		int per = Stats.MAX / SEGMENTS;
 		for (int i = 0; i < SEGMENTS; i++) {
@@ -844,7 +844,7 @@ final class SkillScreen extends Screen {
 		Stats.Stat stat = statAt(event.x(), event.y());
 		if (stat != null) {
 			if (this.minecraft.player != null && Stats.blocked(this.minecraft.player, progress(), stat) == null) {
-				// (0.7.538) shift-click: ten at once
+				// (0.7.540) shift-click: ten at once
 				ClientPlayNetworking.send(new Stats.Raise(stat.ordinal(), event.hasShiftDown() ? Stats.SHIFT_STEP : 1));
 				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			}
@@ -904,7 +904,7 @@ final class SkillScreen extends Screen {
 			return true;
 		}
 		if ((stats || jobs) && scrollY != 0.0 && maxScroll() > 0) {
-			// (0.7.538) the Attributes or Jobs rows, a row a notch
+			// (0.7.540) the Attributes or Jobs rows, a row a notch
 			listScroll = Math.clamp(listScroll - (int)Math.signum(scrollY) * (jobs ? JOB_ROW : STAT_ROW), 0, maxScroll());
 			return true;
 		}

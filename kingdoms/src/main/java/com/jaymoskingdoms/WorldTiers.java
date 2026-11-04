@@ -673,7 +673,7 @@ public final class WorldTiers {
 		int before = progress(player).open();
 		int knew = Knowledge.level(progress(player).feats());
 		player.setAttached(PROGRESS, now);
-		// (0.7.538) a newly opened tier lifts the attribute caps: put them on as they stand now
+		// (0.7.540) a newly opened tier lifts the attribute caps: put them on as they stand now
 		if (now.open() > before) {
 			Stats.attributes(player);
 		}

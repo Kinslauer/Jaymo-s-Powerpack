@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link Classes}, its {@link #favoured} attribute) each give a point or two free. The points live in the skill
  * tree's ranks (keys {@code stat_<name>}), so a respec (court wizard, bottle o' enchanting) gives them back with the perks.
  *
- * <p>(0.7.538, Andy: "character level points should scale way further, making stats go from 0/100 ... giving users a
+ * <p>(0.7.540, Andy: "character level points should scale way further, making stats go from 0/100 ... giving users a
  * reason to world tier up") Every attribute now runs 0 to {@link #MAX} (100). One old point is {@link #STEP} new ones:
  * each level earns {@link #POINTS_PER_LEVEL}, a heritage, class or story point gives {@link #STEP}, and every effect per
  * point is a tenth of the old one, times {@link #TOP_SHARE} so a full 100 is half again what the old 10 gave. How high an
@@ -45,20 +45,20 @@ import org.jspecify.annotations.Nullable;
  * in). Each opened tier also adds {@link #TIER_POINTS}. Saved points from before are scaled by {@link #migrate} once.
  */
 public final class Stats {
-	/** (0.7.538) New points per old point: what a heritage, class or story point is worth now, and what old saves are scaled by. */
+	/** (0.7.540) New points per old point: what a heritage, class or story point is worth now, and what old saves are scaled by. */
 	public static final int STEP = 10;
-	/** (0.7.538) Attribute points per character level (all three pillars at their top: 75 levels, 375 points). */
+	/** (0.7.540) Attribute points per character level (all three pillars at their top: 75 levels, 375 points). */
 	public static final int POINTS_PER_LEVEL = 5;
 	/** An attribute's highest value, free points from heritage and class included. */
 	public static final int MAX = 100;
 	/**
-	 * (0.7.538) Per world tier, Hearth to Legend: how high an attribute may go. Hearth's 40 is about where a dedicated
+	 * (0.7.540) Per world tier, Hearth to Legend: how high an attribute may go. Hearth's 40 is about where a dedicated
 	 * player's best attribute sat before; each tier after opens room for 15 to 20 more.
 	 */
 	public static final int[] TIER_CAP = {40, 55, 70, 85, 100};
-	/** (0.7.538) Per world tier: the attribute points it adds once opened (in all, not each). */
+	/** (0.7.540) Per world tier: the attribute points it adds once opened (in all, not each). */
 	public static final int[] TIER_POINTS = {0, 10, 25, 45, 70};
-	/** (0.7.538) What a full 100 gives against the old full 10. */
+	/** (0.7.540) What a full 100 gives against the old full 10. */
 	static final double TOP_SHARE = 1.5;
 	/** Might: attack damage per point (a share; 100: +37.5%). */
 	static final double MIGHT = 0.025 / STEP * TOP_SHARE;
@@ -73,9 +73,9 @@ public final class Stats {
 	/** Wits: this share more skill experience, and this much luck, per point (100: +45%, +1.5 luck). */
 	static final float WITS_XP = (float)(0.03 / STEP * TOP_SHARE);
 	static final double WITS_LUCK = 0.1 / STEP * TOP_SHARE;
-	/** (0.7.538) The rank key that marks a player's points as already on the 0-100 scale. */
+	/** (0.7.540) The rank key that marks a player's points as already on the 0-100 scale. */
 	static final String SCALED_KEY = "stat_scale";
-	/** (0.7.538) Points a shift-click puts in at once. */
+	/** (0.7.540) Points a shift-click puts in at once. */
 	public static final int SHIFT_STEP = 10;
 
 	public enum Stat {
@@ -141,7 +141,7 @@ public final class Stats {
 
 	/**
 	 * Every attribute point earned: from your character level, your heritage's free ones, a Warrior-born's from the brink,
-	 * (0.7.216) a foundling's, and (0.7.538) the world tiers you've opened.
+	 * (0.7.216) a foundling's, and (0.7.540) the world tiers you've opened.
 	 */
 	public static int earned(Player player, Skills.Progress p) {
 		Heritage.Kind kind = Heritage.of(player);
@@ -149,13 +149,13 @@ public final class Stats {
 		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + TIER_POINTS[tier(player)];
 	}
 
-	/** (0.7.538) The world tier that sets {@code player}'s caps (its ordinal): the highest they've opened, or the one they're in if higher. */
+	/** (0.7.540) The world tier that sets {@code player}'s caps (its ordinal): the highest they've opened, or the one they're in if higher. */
 	public static int tier(Player player) {
 		int t = Math.max(WorldTiers.of(player).ordinal(), WorldTiers.progress(player).open());
 		return Math.clamp(t, 0, TIER_CAP.length - 1);
 	}
 
-	/** (0.7.538) How high any attribute of {@code player}'s may go now. */
+	/** (0.7.540) How high any attribute of {@code player}'s may go now. */
 	public static int cap(Player player) {
 		return TIER_CAP[tier(player)];
 	}
@@ -199,7 +199,7 @@ public final class Stats {
 		return spent(p, stat) + fromHeritage(player, stat) + fromClass(player, stat) + fromStory(player, stat);
 	}
 
-	/** {@code stat}'s value for {@code player}: {@link #total}, at most (0.7.538) their tier's {@link #cap}. */
+	/** {@code stat}'s value for {@code player}: {@link #total}, at most (0.7.540) their tier's {@link #cap}. */
 	public static int value(Player player, Skills.Progress p, Stat stat) {
 		return Math.min(cap(player), total(player, p, stat));
 	}
@@ -288,7 +288,7 @@ public final class Stats {
 	}
 
 	/**
-	 * (0.7.538) Scales {@code player}'s spent points from the old 0-10 to the 0-100 scale, once: a save without the
+	 * (0.7.540) Scales {@code player}'s spent points from the old 0-10 to the 0-100 scale, once: a save without the
 	 * {@link #SCALED_KEY} mark has each {@code stat_} rank times {@link #STEP}. Every raise sets the mark, so new points are
 	 * never scaled; a respec drops the mark with the points, which is harmless (nothing is left to scale).
 	 */

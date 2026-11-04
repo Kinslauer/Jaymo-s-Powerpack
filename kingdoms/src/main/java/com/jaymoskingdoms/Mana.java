@@ -72,7 +72,7 @@ import net.minecraft.world.level.block.Blocks;
  */
 public final class Mana {
 	/**
-	 * The most mana a natural (Mage, Sorcerer) and one who found it hold, and what each Arcana point adds. (0.7.538) Arcana
+	 * The most mana a natural (Mage, Sorcerer) and one who found it hold, and what each Arcana point adds. (0.7.540) Arcana
 	 * runs 0-100 now ({@link Stats#MAX}): a point is a tenth of an old one, and a full 100 gives half again the old full 10.
 	 */
 	static final float NATURAL_MAX = 100.0F, FOUND_MAX = 50.0F, NATURAL_PER_POINT = 1.5F, FOUND_PER_POINT = 0.75F;

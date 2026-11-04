@@ -409,7 +409,7 @@ public final class Skills {
 
 		/** How many ranks are learned, in all pillars, and (0.7.57) attribute points spent ({@link Stats}). */
 		public int spent() {
-			// (0.7.538) attribute points are tenths now (0-100): ten count as one rank
+			// (0.7.540) attribute points are tenths now (0-100): ten count as one rank
 			int n = (Stats.spent(this) + Stats.STEP - 1) / Stats.STEP;
 			for (Perk perk : Perk.values()) {
 				n += rank(perk);
@@ -601,7 +601,7 @@ public final class Skills {
 		SurvivalSkill.attributes(player);
 		StrengthSkill.attributes(player);
 		Bridges.attributes(player);
-		// (0.7.538) old saves' attribute points onto the 0-100 scale, once
+		// (0.7.540) old saves' attribute points onto the 0-100 scale, once
 		Stats.migrate(player);
 		Stats.attributes(player);
 		Heritage.attributes(player);

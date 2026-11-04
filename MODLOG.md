@@ -348,6 +348,10 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   band, unless it is in a heavenfall: one chunk in about one of every three 2048-block squares, never within 3000 blocks of
   the world spawn or 0, 0. Springs that land on a lower island or in a cave, and the Aether as its own dimension, are unchanged.
   New chunks only; water already falling in a world stays.
-- **0.20.46, Kingdoms 0.7.538, attributes 0-100 by world tier + character screen layout:** Andy (2026-11-04): "UI needs a
+- **0.20.46, Kitchen 0.5.60, no freezing or overheating in heaven:** Andy: "you should not freeze or overheat in
+  heaven". At the Other World (`ZFighterAfterlife.inOtherWorld`: within 64 blocks of the Judge's platform in the Aether,
+  which covers the hall, road, pavilion, ring and tent) Kitchen's body heat is held neutral (`KitchenCompat.registerTemperate`
+  hooks Kitchen's `BodyHeat.addTemperate`). The rest of the Aether keeps its height cold.
+- **0.20.47, Kingdoms 0.7.540, attributes 0-100 by world tier + character screen layout:** Andy (2026-11-04): "UI needs a
   rework, the text is overlapping. And character level points should scale way further, making stats go from 0/100 and
   scale accordingly, giving users a reason to world tier up." See the Kingdoms MODLOG.
