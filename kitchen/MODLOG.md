@@ -1399,3 +1399,7 @@ water in the lungs, a drink may go down the wrong pipe.
 ## 0.5.59: the stacked Nether (pack 0.20.30)
 Body heat and thirst know the Nether band of a One Dimension world (Powers 0.20.30), where every band answers
 `level.dimension() == OVERWORLD`: `Stacked.realm` asks CustomChunks for the realm at the player's height by reflection.
+## 0.5.60: no cold or heat in heaven (pack 0.20.46)
+Andy: "you should not freeze or overheat in heaven". `BodyHeat.addTemperate(Predicate<Player>)` lets other mods name places
+the weather never reaches. There, body heat goes straight to neutral every second, no warning lines, no frost on the
+screen. Powers adds the Other World (the Judge's hall and the grounds round it) by reflection.
