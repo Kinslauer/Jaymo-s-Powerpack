@@ -48,15 +48,18 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.20.42) Chrono cheats death. Andy: "I want Chrono to have the strongest potential, starting with the ability to cheat
- * death ... revert them the maximum, deleting items they gained [since] that time. no drops no corpse, no death." Then:
- * "they can still be executed, the player should not be prompted at all, this is all just possible for them now."
+ * death ... they should be prompted with R upon ... dying, that black screen would then revert them the maximum, deleting
+ * items they gained [since] that time. no drops no corpse, no death." Then: "they can still be executed", and "they have
+ * to press R, if they dont they still die."
  *
  * <p>Once Rewind (R) is learned, time keeps a checkpoint of you every {@link #CHECKPOINT_EVERY} ticks while you stand
  * somewhere safe: where you were, how you looked, your health, hunger, experience, effects, and what you carried. A blow
- * that would kill you (after the downed state has had its say, before death by cause rolls) is undone instead, with no
- * asking: for a tick you're held out of time where you fell, then taken back to the oldest checkpoint your power reaches
- * ({@link #window}): one minute at first, up to seven for a Timeless Paragon. An execution (a finisher, a hostile's,
- * the symbiote's or a Z Fighter's, all through {@code Downed.execute}) still kills.
+ * that would kill you (after the downed state has had its say, before death by cause rolls) is held back: you stop, out
+ * of time (unhurt, unseen, held where you fell), and a black screen asks for R for {@link #PROMPT_TICKS} ticks. R takes
+ * you back to the oldest checkpoint your power reaches ({@link #window}): one minute at first, up to seven for a Timeless
+ * Paragon. No R in time (or leaving the game), and the death goes ahead as it was coming ({@code Downed.letDie}), death by
+ * cause and all. An execution (a finisher, a hostile's, the symbiote's or a Z Fighter's, all through
+ * {@code Downed.execute}) still kills, with no screen.
  *
  * <p>Rewound, nothing of the death happened: no drops, no corpse, no death counted, no final death or waking in the wild.
  * Body wounds are undone (Time Bloom's healing, run to the end). Whatever you gained since the checkpoint is gone: of every
@@ -81,6 +84,8 @@ public final class ChronoCheatDeath {
 	static final int TIMELESS_BONUS = 120 * 20;
 	/** The longest any window can be: checkpoints older than this are dropped. */
 	static final int MAX_WINDOW = BASE_WINDOW + PER_ABILITY * (Mastery.ALL - 1) + PER_RANK * 5 + TIMELESS_BONUS;
+	/** How long the black screen waits for R (10 s) before the death goes ahead. */
+	static final int PROMPT_TICKS = 200;
 	/** Back from a rewind with at least this much health. */
 	static final float MIN_HEALTH = 6.0F;
 
@@ -96,8 +101,11 @@ public final class ChronoCheatDeath {
 		final Vec3 pos;
 		final boolean wasInvisible;
 		final long since;
+		/** What the death was coming from (what downed them, else the last blow). */
+		final @Nullable DamageSource felled;
 
-		Held(ServerPlayer player, long now) {
+		Held(ServerPlayer player, long now, @Nullable DamageSource felled) {
+			this.felled = felled;
 			this.dimension = player.level().dimension();
 			this.pos = player.position();
 			this.wasInvisible = player.isInvisible();
@@ -109,8 +117,36 @@ public final class ChronoCheatDeath {
 	private static final Map<UUID, ArrayDeque<Checkpoint>> CHECKPOINTS = new HashMap<>();
 	/** Players held out of time at the black screen, waiting for R. */
 	private static final Map<UUID, Held> HELD = new HashMap<>();
+	/** Players whose death is going ahead right now (no R): let through. */
+	private static final Set<UUID> LETTING_GO = new java.util.HashSet<>();
 
 	private ChronoCheatDeath() {
+	}
+
+	/**
+	 * Server → client: you're out of time; press R within {@code ticks} ({@code seconds}: how far back the rewind will
+	 * reach). {@code ticks} 0: the screen closes (the death went ahead).
+	 */
+	public record Prompt(int seconds, int ticks) implements CustomPacketPayload {
+		public static final Type<Prompt> TYPE = new Type<>(JaymosPowers.id("chrono_cheat_death_prompt"));
+		public static final StreamCodec<ByteBuf, Prompt> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Prompt::seconds,
+			ByteBufCodecs.VAR_INT, Prompt::ticks, Prompt::new);
+
+		@Override
+		public Type<Prompt> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client → server: R on the black screen. */
+	public record Rewind() implements CustomPacketPayload {
+		public static final Type<Rewind> TYPE = new Type<>(JaymosPowers.id("chrono_cheat_death_rewind"));
+		public static final StreamCodec<ByteBuf, Rewind> CODEC = StreamCodec.unit(new Rewind());
+
+		@Override
+		public Type<Rewind> type() {
+			return TYPE;
+		}
 	}
 
 	/** Server → client: your death was rewound, {@code seconds} back (the client plays Respawn Recap's replay over it). */
@@ -126,30 +162,33 @@ public final class ChronoCheatDeath {
 
 	static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Rewound.TYPE, Rewound.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Prompt.TYPE, Prompt.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Rewind.TYPE, Rewind.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Rewind.TYPE, (payload, ctx) -> rewind(ctx.player()));
 		// after Downed's last word, before death by cause, the killing blow's dismemberment and the symbiote taking your things
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(JaymosPowers.id("downed_last"), PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(PHASE, JaymosPowers.id("mortality"));
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(PHASE, JaymosPowers.id("wounds_killing_blow"));
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(PHASE, JaymosPowers.id("web_symbiote_life"));
 		ServerLivingEntityEvents.ALLOW_DEATH.register(PHASE, ChronoCheatDeath::allowDeath);
-		// out of time (the tick before the rewind), nothing touches you (but /kill still does)
+		// out of time at the black screen, nothing touches you (but /kill still does)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			!HELD.containsKey(entity.getUUID()) || !(entity instanceof ServerPlayer) || source.is(DamageTypes.GENERIC_KILL));
 		ServerTickEvents.END_SERVER_TICK.register(ChronoCheatDeath::tick);
-		// leaving in that tick: rewound all the same, there was never going to be a death
+		// leaving at the black screen: no R, so the death goes ahead
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			UUID id = handler.player.getUUID();
 			if (HELD.containsKey(id)) {
-				rewind(handler.player);
+				letDie(handler.player);
 			}
 			HELD.remove(id);
 			CHECKPOINTS.remove(id);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-			// (no one is saved standing where they fell)
+			// (no one is saved standing at the black screen: as leaving, the death goes ahead)
 			for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
 				if (HELD.containsKey(player.getUUID())) {
-					rewind(player);
+					letDie(player);
 				}
 			}
 		});
@@ -175,7 +214,7 @@ public final class ChronoCheatDeath {
 		return Math.min(window, MAX_WINDOW);
 	}
 
-	/** Whether {@code player} is out of time, about to be rewound. */
+	/** Whether {@code player} is out of time at the black screen. */
 	public static boolean held(LivingEntity entity) {
 		return HELD.containsKey(entity.getUUID());
 	}
@@ -187,7 +226,11 @@ public final class ChronoCheatDeath {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Held held = HELD.get(player.getUUID());
 			if (held != null) {
-				rewind(player);
+				if (now - held.since >= PROMPT_TICKS) {
+					letDie(player);
+				} else {
+					hold(player, held, now);
+				}
 				continue;
 			}
 			if (now % 20 != player.getId() % 20 && !CHECKPOINTS.containsKey(player.getUUID())) {
@@ -234,7 +277,8 @@ public final class ChronoCheatDeath {
 	// ---- the death that isn't ------------------------------------------------------------------------------------------
 
 	private static boolean allowDeath(LivingEntity entity, DamageSource source, float amount) {
-		if (!(entity instanceof ServerPlayer player) || source.is(DamageTypes.GENERIC_KILL) || Mortality.executing(entity)) {
+		if (!(entity instanceof ServerPlayer player) || source.is(DamageTypes.GENERIC_KILL) || Mortality.executing(entity)
+			|| LETTING_GO.contains(entity.getUUID())) {
 			// (an execution ends you all the same; Andy: "they can still be executed")
 			HELD.remove(entity.getUUID());
 			return true;
@@ -247,8 +291,8 @@ public final class ChronoCheatDeath {
 			|| pick(player, player.level().getServer().overworld().getGameTime()) == null) {
 			return true;
 		}
-		// the fall the downed state noted (for death by cause) never comes now
-		Mortality.spare(player);
+		// the fall the downed state noted (for death by cause) waits with you (and comes back if you let it go)
+		DamageSource felled = Mortality.spare(player);
 		// (an open chest or bag closes, what was on the cursor back into your pockets)
 		player.closeContainer();
 		if (player.isPassenger()) {
@@ -260,11 +304,50 @@ public final class ChronoCheatDeath {
 		player.setDeltaMovement(Vec3.ZERO);
 		ServerLevel level = player.level();
 		long now = level.getServer().overworld().getGameTime();
-		HELD.put(player.getUUID(), new Held(player, now));
+		HELD.put(player.getUUID(), new Held(player, now, felled != null ? felled : source));
+		player.setInvisible(true);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		ChronoFx.particles(level, player, ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.8, 0.4, 0.02);
-		JaymosPowers.LOGGER.info("{} cheated death ({})", player.getScoreboardName(), source.getMsgId());
+		ServerPlayNetworking.send(player, new Prompt(window(player) / 20, PROMPT_TICKS));
+		JaymosPowers.LOGGER.info("{} is out of time ({}): R to rewind", player.getScoreboardName(), source.getMsgId());
 		return false;
+	}
+
+	/** Out of time: unhurt, unmoving, breathing, held where you fell. */
+	private static void hold(ServerPlayer player, Held held, long now) {
+		if (player.getHealth() < 1.0F) {
+			player.setHealth(1.0F);
+		}
+		player.clearFire();
+		player.resetFallDistance();
+		player.setAirSupply(player.getMaxAirSupply());
+		player.setDeltaMovement(Vec3.ZERO);
+		if (player.level().dimension() == held.dimension && player.position().distanceToSqr(held.pos) > 0.01) {
+			player.teleportTo(player.level(), held.pos.x, held.pos.y, held.pos.z, Set.of(), player.getYRot(), player.getXRot(), false);
+		}
+		if ((now - held.since) % 40 == 0 && now > held.since) {
+			// in case the screen was lost (a missed packet), ask again, with what time is left
+			ServerPlayNetworking.send(player, new Prompt(window(player) / 20, (int) (PROMPT_TICKS - (now - held.since))));
+		}
+	}
+
+	/** No R: the death goes ahead as it was coming (death by cause rolls on it, the body falls, things drop). */
+	private static void letDie(ServerPlayer player) {
+		Held held = HELD.remove(player.getUUID());
+		if (held == null) {
+			return;
+		}
+		player.setInvisible(held.wasInvisible);
+		if (ServerPlayNetworking.canSend(player, Prompt.TYPE)) {
+			ServerPlayNetworking.send(player, new Prompt(0, 0));
+		}
+		LETTING_GO.add(player.getUUID());
+		try {
+			Downed.letDie(player.level(), player, held.felled);
+		} finally {
+			LETTING_GO.remove(player.getUUID());
+		}
+		JaymosPowers.LOGGER.info("{} let the rewind pass", player.getScoreboardName());
 	}
 
 	/**

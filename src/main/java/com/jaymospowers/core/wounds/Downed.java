@@ -836,6 +836,17 @@ public final class Downed {
 		finish(level, entity);
 	}
 
+	/**
+	 * (0.20.42) A death held back a moment (Chrono's, unanswered) goes ahead now, as it was coming: by its wounds, credited
+	 * to whoever dealt {@code felled}, with no going down first; death by cause rolls on {@code felled}.
+	 */
+	public static void letDie(ServerLevel level, LivingEntity entity, @Nullable DamageSource felled) {
+		if (felled != null) {
+			FELLED_BY.put(entity, felled);
+		}
+		finish(level, entity);
+	}
+
 	/** (0.20.26) No longer down, quietly (Mortality moves one left for dead before laying them out again where they wake). */
 	static void forgetQuietly(LivingEntity entity) {
 		forget(entity);

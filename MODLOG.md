@@ -336,11 +336,13 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.42, Chrono cheats death:** Andy (2026-11-04): "I want Chrono to have the strongest potential, starting with the
   ability to cheat death, utilizing [Respawn Recap] ... revert them the maximum, deleting items they gained ... no drops no
   corpse, no death. They can always use a writ or interact with the judge to rewrite their story." Then: "limit it to
-  chrono, and they can still be executed, the player should not be prompted at all, this is all just possible for them
-  now." `power/chrono/ChronoCheatDeath`: once Rewind is learned, a checkpoint every 5 s wherever you stand safe (on the
+  chrono, and they can still be executed", and "they have to press R, if they dont they still die."
+  `power/chrono/ChronoCheatDeath`: once Rewind is learned, a checkpoint every 5 s wherever you stand safe (on the
   ground or swimming, nothing burning or falling, 3+ hearts). A death (after the downed state's say, before death by
-  cause, the killing blow's dismemberment and the symbiote) is undone with nothing to press: a tick later you're back at
-  the oldest checkpoint in reach: 1 min, +30 s for each further ability, +30 s per Mastery rank, +2 min Timeless (7 min
+  cause, the killing blow's dismemberment and the symbiote) is held back: you're held out of time where you fell (unhurt,
+  unseen) on a black screen asking for R, with 10 s left on a gold line (`ChronoCheatDeathClient`). No R in time, or
+  leaving the game, and the death goes ahead as it was coming (`Downed.letDie`: death by cause, corpse, drops). R takes
+  you back to the oldest checkpoint in reach: 1 min, +30 s for each further ability, +30 s per Mastery rank, +2 min Timeless (7 min
   at most). Wounds undone, health (at least 3 hearts), hunger and effects as then; of every item kind you keep at most
   what you carried then (by item, so worn tools still count) and experience never comes back higher, while what you lost
   meanwhile stays lost, so nothing is doubled. No drops, corpse, death count, final death or waking in the wild.
