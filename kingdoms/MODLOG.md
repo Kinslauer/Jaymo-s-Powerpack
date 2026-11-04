@@ -8718,7 +8718,7 @@ is our own take on the idea (none of its code or art).
   tales, 4 for children who beg to hold her), once a day each per player, one at a time; an MCA villager's mood rises 3.
 - **MCA gift:** `data/mca/gifts/fairy.json` makes her the dearest gift there is (60; a nether star is 40), +20 for
   children, +15 for the married.
-## 0.7.513: Stegonaut, Atroxiia, Varasuchus and Ignivorus, the first of the lesser dragons (pack 0.20.13)
+## 0.7.513: Stegonaut, Atroxiia, Varasuchus, Ignivorus and Aetherion, the first of the lesser dragons (pack 0.20.13)
 Andy: "we NEED these dragons" (Saint's Dragons). It is a 1.20.1 mod whose code is MIT and whose art is All Rights
 Reserved, so its eight dragons are rebuilt here with our own models and paint (`docs/SaintsDragons-Plan.md`, patches 1
 and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
@@ -8796,5 +8796,22 @@ and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
   Emberborn twice as fast; tame, it's saddled and ridden like the wind dragons (R breathes fire). Drops leather, bone,
   magma cream, blaze powder, obsidian and sometimes netherite scrap. Not one of the wind dragons for Eurus's and
   Aeolus's showing themselves. Its moves follow Saint's Dragons' Ignivorus (none of that mod's art).
-- `/kingdom dragon stegonaut|atroxiia|varasuchus|ignivorus [tame]` (operators).
+- **Aetherion** (`AetherionDragon`, `jaymoskingdoms:aetherion_dragon`): a star dragon Andy sent (a public-domain,
+  CC0 GeckoLib dragon, not Saint's Dragons'): "the wings and head might need upgrading". Our own model on its body plan
+  (`AetherionDragonModel`, `tools/gen_aetherion.py`, a 512 sheet; drawn 1.25x: its back 3.7 blocks up, about 17 across the
+  wings; box 3.2 x 3.8): four long legs, a four-segment neck rising in an S, a seven-segment tail ending in a crossed
+  fan, crystal spines down its neck, back and tail. Each wing is an arm, a forearm and a hand of three fanned finger
+  bones with a thumb claw, a membrane behind each bone tapering to a scalloped trailing edge; the head has a heavy brow,
+  two great swept horns (short, or with a lower pair, by its look), cheek frills and a jaw that opens. Hides night sky,
+  pale silver, dusk violet, dawn gold, with glowing constellations on the membranes, starlit veins, rims or a sky of
+  stars. The wingbeat rolls out from the shoulder a beat per joint, the fingers spreading on the downstroke; gliding
+  they're held open; landed they fold (arm up, forearm down along it, hand up, fingers closed), the fold eased in and
+  out; the neck straightens and the legs tuck in flight. Andy chose "Aether sky dragon, plus Nulljaw": every 30 s each
+  player over the Aether (`jaymospowers:aether`) has a 1 in 240 chance of one turning up flying 40-64 blocks off (none
+  within 160). 420 health, armour 12, bite 18, a boss bar, and it leaves players be until hurt; then its **bite**, a
+  **breath beam** of starlight (28 blocks, stopped by blocks, 7 a strike, burns nothing) and, below half health, the
+  **Cataclysm** (it rears up roaring, wings flung high, and 14 stars fall on its foes and round it, each after a closing
+  ring of light: 14 damage and a throw, no block touched). Glow berries its favourite, Nightborn twice as fast; ridden,
+  R is the beam.
+- `/kingdom dragon stegonaut|atroxiia|varasuchus|ignivorus|aetherion [tame]` (operators).
 - Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.

@@ -49,6 +49,11 @@ listed in the taming tooltip only once you've seen the species, never as a lore 
   merchant: later, if Andy wants them. Their dragonheart/worldroot ores and Draconic Crucible likewise.
 - GeckoLib: our models are vanilla cuboid models with hand-written animation, like the wind dragons.
 
+## Beside the eight
+- **Aetherion**, a star dragon Andy sent (public domain, CC0; not Saint's Dragons'), rebuilt on its body plan with new
+  wings and head, flies over the Aether (Andy: "Aether sky dragon, plus Nulljaw"; Nulljaw stays the Aether's boss).
+  Bite, starlight breath beam, Cataclysm of falling stars. In the same PR as patches 1, 2 and 5.
+
 ## Patches (each its own PR, merged in order; versions set to master + 1 right before merging)
 0. This plan.
 1. Walker hooks on `WindDragon` (the wind dragons unchanged). Stegonaut (walker) end to end as the proof:

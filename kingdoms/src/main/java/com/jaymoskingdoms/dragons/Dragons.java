@@ -86,6 +86,12 @@ public final class Dragons {
 	static final int IGNIVORUS_MIN = 40, IGNIVORUS_MAX = 64;
 	static final double IGNIVORUS_CROWD = 160.0;
 
+	/** (0.7.513) Aetherion, the star dragon over the Aether (Powers' {@code jaymospowers:aether}): its body, and how often each player
+	 * there is weighed for one (about once in two hours), how far off it turns up, and none comes while one is this near already. */
+	static final float AETHERION_WIDTH = 3.2F, AETHERION_HEIGHT = 3.8F;
+	static final float AETHERION_CHANCE = 1.0F / 240.0F;
+	static final ResourceKey<Level> AETHER = ResourceKey.create(Registries.DIMENSION, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "aether"));
+
 	public static final TagKey<Biome> HAS_NOTUS = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_notus_dragon"));
 
 	public static EntityType<NotusDragon> NOTUS_DRAGON;
@@ -97,8 +103,10 @@ public final class Dragons {
 	public static EntityType<AtroxiiaDragon> ATROXIIA_DRAGON;
 	public static EntityType<VarasuchusDragon> VARASUCHUS_DRAGON;
 	public static EntityType<IgnivorusDragon> IGNIVORUS_DRAGON;
+	public static EntityType<AetherionDragon> AETHERION_DRAGON;
 	public static Item NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG, EURUS_DRAGON_SPAWN_EGG, AEOLUS_DRAGON_SPAWN_EGG,
-		STEGONAUT_DRAGON_SPAWN_EGG, ATROXIIA_DRAGON_SPAWN_EGG, VARASUCHUS_DRAGON_SPAWN_EGG, IGNIVORUS_DRAGON_SPAWN_EGG;
+		STEGONAUT_DRAGON_SPAWN_EGG, ATROXIIA_DRAGON_SPAWN_EGG, VARASUCHUS_DRAGON_SPAWN_EGG, IGNIVORUS_DRAGON_SPAWN_EGG,
+		AETHERION_DRAGON_SPAWN_EGG;
 	/** By name, for the op command. */
 	private static final Map<String, EntityType<? extends WindDragon>> BY_NAME = new LinkedHashMap<>();
 
@@ -154,6 +162,9 @@ public final class Dragons {
 		// (0.7.513) Ignivorus, the Nether's fire dragon on the Kintsugi wyvern: it turns up flying about the Nether (nether())
 		IGNIVORUS_DRAGON = dragon("ignivorus", IgnivorusDragon::new, IGNIVORUS_WIDTH, IGNIVORUS_HEIGHT, true, IgnivorusDragon.createAttributes());
 		IGNIVORUS_DRAGON_SPAWN_EGG = egg(IGNIVORUS_DRAGON);
+		// (0.7.513) Aetherion, the star dragon: it turns up flying over the Aether (aether())
+		AETHERION_DRAGON = dragon("aetherion", AetherionDragon::new, AETHERION_WIDTH, AETHERION_HEIGHT, false, AetherionDragon.createAttributes());
+		AETHERION_DRAGON_SPAWN_EGG = egg(AETHERION_DRAGON);
 		JaymosKingdoms.LOGGER.debug("dragon records: {} {}", DragonRecords.SLAIN, DragonRecords.TAMER);
 		Disguises.register();
 		DragonEggs.register();
@@ -167,7 +178,7 @@ public final class Dragons {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dragons::nether);
-		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus|stegonaut|atroxiia|varasuchus|ignivorus] [tame]: a wild one (Notus unless named), or a
+		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus|stegonaut|atroxiia|varasuchus|ignivorus|aetherion] [tame]: a wild one (Notus unless named), or a
 		// tamed, saddled one, at your side
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
 			LiteralArgumentBuilder<CommandSourceStack> dragon = Commands.literal("dragon").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -221,6 +232,7 @@ public final class Dragons {
 		if (server.getTickCount() % NETHER_CHECK_TICKS != 0) {
 			return;
 		}
+		aether(server);
 		ServerLevel level = server.getLevel(Level.NETHER);
 		if (level == null || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
 			return;
@@ -251,13 +263,34 @@ public final class Dragons {
 		}
 	}
 
+	/** (0.7.513) Over the Aether, now and then an Aetherion comes flying about some way off from a player (unless one's near already). */
+	private static void aether(MinecraftServer server) {
+		ServerLevel level = server.getLevel(AETHER);
+		if (level == null || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		for (ServerPlayer player : level.players()) {
+			if (!player.isSpectator() && random.nextFloat() < AETHERION_CHANCE) {
+				aloft(level, player, random, AETHERION_DRAGON, AetherionDragon.class);
+			}
+		}
+	}
+
 	/**
 	 * (0.7.513) Anywhere in the Nether, now and then an Ignivorus comes flying about some way off from a player (unless
 	 * one's near already). It leaves them be unless they hurt it.
 	 */
 	private static void ignivorus(ServerLevel level, ServerPlayer player, RandomSource random) {
-		if (player.isSpectator() || !level.getBiome(player.blockPosition()).is(BiomeTags.IS_NETHER) || random.nextFloat() >= IGNIVORUS_CHANCE
-			|| !level.getEntitiesOfClass(IgnivorusDragon.class, player.getBoundingBox().inflate(IGNIVORUS_CROWD)).isEmpty()) {
+		if (player.isSpectator() || !level.getBiome(player.blockPosition()).is(BiomeTags.IS_NETHER) || random.nextFloat() >= IGNIVORUS_CHANCE) {
+			return;
+		}
+		aloft(level, player, random, IGNIVORUS_DRAGON, IgnivorusDragon.class);
+	}
+
+	/** (0.7.513) A flier of {@code type} turned up in the air some way off from {@code player}, unless one's near already. */
+	private static <T extends WindDragon> void aloft(ServerLevel level, ServerPlayer player, RandomSource random, EntityType<T> type, Class<T> kind) {
+		if (!level.getEntitiesOfClass(kind, player.getBoundingBox().inflate(IGNIVORUS_CROWD)).isEmpty()) {
 			return;
 		}
 		for (int i = 0; i < 16; i++) {
@@ -268,7 +301,7 @@ public final class Dragons {
 			if (!level.isLoaded(at)) {
 				continue;
 			}
-			IgnivorusDragon dragon = IGNIVORUS_DRAGON.create(level, EntitySpawnReason.EVENT);
+			T dragon = type.create(level, EntitySpawnReason.EVENT);
 			if (dragon == null) {
 				return;
 			}
