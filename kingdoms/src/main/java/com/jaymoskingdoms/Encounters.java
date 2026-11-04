@@ -49,7 +49,8 @@ import org.jspecify.annotations.Nullable;
  * could and never on or near a settlement's land ({@link #SETTLEMENT_CLEARANCE}), as are the wind dragons.
  * The table still names where each roams for the talk of them ({@link Sightings}) and the quests that send one after you
  * ({@link #send}). Cube Animals (0.7.526) is let in beside them, with its kinds that Naturalist or Kingdoms already have
- * kept out of natural spawning ({@link #CUBE_DUPLICATES}); its rattlesnake, shark and elephant stay as other breeds.
+ * kept out of natural spawning ({@link #CUBE_DUPLICATES}); its rattlesnake, shark, elephant, (0.7.527) red and roe deer,
+ * crocodile and black bear stay as other breeds.
  */
 public final class Encounters {
 	static final String MOD = "naturalist";
@@ -65,13 +66,12 @@ public final class Encounters {
 		// (0.7.329) its boar: Kingdoms' wild boar takes its place (beasts/WildBoar)
 		"boar");
 	/**
-	 * (0.7.526) Cube Animals: its kinds that Naturalist or Kingdoms already have, kept out of natural spawning (black bear,
-	 * crocodile, komodo dragon, moose, piranha, red and roe deer, snail, tiger). Its rattlesnake, shark and elephant spawn as
-	 * other breeds beside Naturalist's and Kingdoms' (Andy).
+	 * (0.7.526) Cube Animals: its kinds that Naturalist or Kingdoms already have, kept out of natural spawning (komodo dragon,
+	 * moose, piranha, snail, tiger). Its rattlesnake, shark and elephant, and (0.7.527) its red and roe deer, crocodile and
+	 * black bear, spawn as other breeds beside Naturalist's and Kingdoms' (Andy).
 	 */
 	static final String CUBE = "cubeanimals";
-	static final List<String> CUBE_DUPLICATES = List.of("blackbear", "crocodile", "komododragon", "moose", "piranha", "reddeer",
-		"roedeer", "snail", "tiger");
+	static final List<String> CUBE_DUPLICATES = List.of("komododragon", "moose", "piranha", "snail", "tiger");
 	/** Of the times a monster of legend could spawn on its own, how many it does (they stay rare). */
 	static final float LEGEND_CHANCE = 0.1F;
 	/** Of the times a monster that walks by day (ogre, tarantula, minotaur, mud golem) could spawn in daylight, how many it does. */

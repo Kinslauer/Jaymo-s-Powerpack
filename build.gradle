@@ -186,8 +186,8 @@ def packMods = [
 	// 29 vanilla-style animals (antelope, barn owl, bison, capuchin, caracal, chameleon, cricket, eagle, fennec, lynx,
 	// marmot, mouse, reindeer, sawfish, snow leopard, toucan, walrus...), a Sleep Arrow, an Animal Transporter, the
 	// camouflage enchant, a Hunter villager job and a Zoological Guide. Kingdoms (Encounters) keeps its kinds we already have
-	// out of natural spawning (black bear, crocodile, komodo dragon, moose, piranha, red and roe deer, snail, tiger); its
-	// rattlesnake, shark and elephant spawn as other breeds beside Naturalist's and Kingdoms' (Andy, 0.20.28)
+	// out of natural spawning (komodo dragon, moose, piranha, snail, tiger); its rattlesnake, shark, elephant, (0.20.29)
+	// red and roe deer, crocodile and black bear spawn as other breeds beside Naturalist's and Kingdoms' (Andy, 0.20.28)
 	[dep: "curse.maven:cube-animals-1550917:9411257", cf: [1550917, 9411257]],
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium.
 	// Client-only: the server ignores it.

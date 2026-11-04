@@ -597,3 +597,8 @@ Our own take on the idea of MCA: Conversations (none of its code). Plan: `docs/T
 - Cube Animals: its kinds we already have (black bear, crocodile, komodo dragon, moose, piranha, red and roe deer, snail,
   tiger) are kept out of natural spawning (`CUBE_DUPLICATES`); its rattlesnake, shark and elephant spawn as other breeds.
   Compile-checked; not played.
+
+## 0.7.527: Cube Animals' deer, crocodile and black bear (pack 0.20.29)
+- Andy: "add the deer too and the croc, and the bear." `Encounters.CUBE_DUPLICATES` no longer keeps out Cube Animals' red
+  deer, roe deer, crocodile and black bear; they spawn as other breeds beside Naturalist's. Still kept out: komodo dragon,
+  moose, piranha, snail, tiger. Compile-checked; not played.
