@@ -206,13 +206,18 @@ final class Raids {
 			Camps.CampData data = Camps.data(server, camp.id());
 			// ((0.7.490) a hungry greenskin camp raids twice as often, and a hungry goblin village raids at all)
 			boolean hungry = data != null && (data.orc() || data.goblin()) && HordeEconomy.hungry(server, camp.id());
-			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < (hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
-				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry) {
-				// (goblin villages don't raid: they're somewhere to go, unless they're starving)
+			// ((0.7.491) a greenskin realm on the warpath: it and its vassals all go for the one target, often)
+			Faction warpath = data == null ? null : warpathTarget(server, level, camp);
+			if (data == null || data.clearedAt() >= 0
+				|| now - data.lastRaid() < (warpath != null ? COOLDOWN_TICKS / 4 : hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
+				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry && warpath == null) {
+				// (goblin villages don't raid: they're somewhere to go, unless they're starving or their king calls)
 				continue;
 			}
-			Faction target = target(server, level, camp);
-			if (target != null && random.nextFloat() < Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level) * (hungry ? HUNGRY_RAIDS : 1.0F)) {
+			Faction target = warpath != null ? warpath : target(server, level, camp);
+			float chance = warpath != null ? HordeCity.RAID_CHANCE
+				: Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level) * (hungry ? HUNGRY_RAIDS : 1.0F);
+			if (target != null && random.nextFloat() < chance) {
 				start(level, camp, target);
 			}
 		}
@@ -239,6 +244,10 @@ final class Raids {
 				// (0.7.441) a haven that lives alongside the tribes isn't raided by them; (0.7.443) nor one that pays them
 				continue;
 			}
+			if (HordeCity.spared(server, camp, f)) {
+				// (0.7.491) nor a realm that pays the greenskin king tribute
+				continue;
+			}
 			if (pirates && !PirateCoves.coastal(level, f)) {
 				// (0.7.42) pirates raid only from the sea
 				continue;
@@ -247,6 +256,18 @@ final class Raids {
 			bestDist = d;
 		}
 		return best;
+	}
+
+	/**
+	 * (0.7.491) The target of the warpath {@code camp}'s greenskin realm is on ({@link HordeCity#warpath}), if it can be
+	 * raided now: loaded, a player near its seat, and this camp not already at it.
+	 */
+	private static @Nullable Faction warpathTarget(MinecraftServer server, ServerLevel level, Faction camp) {
+		Faction f = HordeCity.warpath(server, camp);
+		if (f == null || !level.isPositionEntityTicking(f.seat()) || !playerNear(level, f.seat(), PLAYER_RANGE)) {
+			return null;
+		}
+		return f;
 	}
 
 	/** The nearest standing settlement to {@code camp}, however far (for {@code /faction camp raid}). */
@@ -282,7 +303,10 @@ final class Raids {
 		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id()), goblins = Camps.goblin(server, camp.id());
 		int band = illagers ? Illagers.fighters(camp) : orcs ? OrcCamps.fighters(camp) : goblins ? GoblinVillages.goblins(camp) : pirates ? PirateCoves.fighters(camp)
 			: camp.holdings().count(Folk.BARBARIAN);
-		int size = Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
+		// ((0.7.491) a warpath's bands are bigger)
+		Faction path = HordeCity.warpath(server, camp);
+		boolean warpath = path != null && path.id() == target.id();
+		int size = warpath ? Math.min(HordeCity.PARTY_MAX, PARTY_BASE + HordeCity.PARTY_EXTRA + band / PARTY_PER) : Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
 		for (int i = 0; i < size; i++) {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
 			if (illagers) {

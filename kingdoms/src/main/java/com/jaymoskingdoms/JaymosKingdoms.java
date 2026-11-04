@@ -295,6 +295,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.490) Currencies: the realms' coins and their money-changers
 		Currencies.register();
 		HordeEconomy.register();
+		// (0.7.491) Hordes patch 4: the greenskin king city (warpath, tribute pacts, the horde oath)
+		HordeCity.register();
 		GreenMarket.register();
 		BorderClashes.register();
 		TribePacts.register();

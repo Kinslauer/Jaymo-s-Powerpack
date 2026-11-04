@@ -96,7 +96,7 @@
 	"message.jaymoskingdoms.info.calm": "all is quiet",
 	"message.jaymoskingdoms.info.attacked": "under attack!",
 	"message.jaymoskingdoms.info.war": "at war with %s",
-	"message.jaymoskingdoms.no_pledge": "%s takes no pledges: only kingdoms and fiefdoms do.",
+	"message.jaymoskingdoms.no_pledge": "%s takes no pledges: only kingdoms, fiefdoms and the greenskin kingdoms do.",
 	"message.jaymoskingdoms.elder_died": "The elder of %s is dead. The village mourns.",
 	"message.jaymoskingdoms.lord_fallen": "The Lord of %s has fallen to %s!",
 	"message.jaymoskingdoms.fate.successor_lord": "%s mourns its lord. Another will take his seat by tomorrow.",
@@ -11503,5 +11503,14 @@
 	"speech.jaymoskingdoms.haven_guard.rally.3": "Shoulder to shoulder. We do not run.",
 	"speech.jaymoskingdoms.stare.sworn_holds.0": "I swore an oath. Your eyes don't unswear it.",
 	"speech.jaymoskingdoms.stare.sworn_holds.1": "Look all you like. I stand here.",
-	"speech.jaymoskingdoms.stare.sworn_holds.2": "Others run. Not the sworn."
+	"speech.jaymoskingdoms.stare.sworn_holds.2": "Others run. Not the sworn.",
+	"message.jaymoskingdoms.warpath.orc": "War drums from %1$s: its Warlord takes the whole horde on the warpath against %2$s.",
+	"message.jaymoskingdoms.warpath.goblin": "Horns from %1$s: its Goblin King sends every goblin he has against %2$s.",
+	"message.jaymoskingdoms.warpath.sworn": "Your horde marches on %1$s (near %2$s, %3$s). Join the host there.",
+	"message.jaymoskingdoms.horde_tribute": "%1$s pays tribute to %2$s rather than face its horde.",
+	"message.jaymoskingdoms.horde_tribute.stopped": "%1$s can no longer pay %2$s its tribute. The horde will come for it.",
+	"message.jaymoskingdoms.horde_oath.sworn": "%1$s has sworn to the horde of %2$s.",
+	"message.jaymoskingdoms.horde_oath.unproven": "The horde of %s won't take your oath: earn the tribe's favour first, or be one of their own.",
+	"message.jaymoskingdoms.horde_oath.left": "You forswear the horde of %s. They won't forget it.",
+	"bounty.jaymoskingdoms.crime.warlord": "leading a horde against the town"
 }

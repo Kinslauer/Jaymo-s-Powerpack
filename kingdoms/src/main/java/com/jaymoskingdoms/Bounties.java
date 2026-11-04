@@ -370,6 +370,24 @@ public final class Bounties {
 		put(server, b);
 	}
 
+	/**
+	 * (0.7.491) A greenskin realm goes on the warpath against {@code target}: its court posts the realm's king as wanted
+	 * ({@code name}, last seen at his seat) for {@code price}, unless it already has. {@link HordeCity}.
+	 */
+	static void warlord(MinecraftServer server, Faction realm, Faction target, String name, int price) {
+		Faction court = court(server, target);
+		if (court == null || realm.leader().isEmpty()) {
+			return;
+		}
+		String uuid = realm.leader().get().toString();
+		Bounty old = all(server).get(key(court.id(), uuid));
+		if (old != null && !old.dead()) {
+			return;
+		}
+		put(server, new Bounty(uuid, false, false, name, court.id(), Math.min(MOST, price), realm.seat(), "warlord",
+			Factions.level(server).getGameTime(), Optional.empty(), 0L, false, false));
+	}
+
 	/** (Theft) {@code player} was seen at a medium or heavy crime ({@code cry}: its kind) against {@code f}: their bounty there grows. */
 	static void crimeBy(ServerPlayer player, ServerLevel level, Faction f, boolean heavy, String cry) {
 		MinecraftServer server = level.getServer();
