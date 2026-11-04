@@ -1457,6 +1457,7 @@ final class McaBridge {
 		Factions.update(server, f.id(), x -> x.withHoldings(x.holdings().adjust(Sorcery.WIZARD, 1)));
 		// (0.7.291) in our robes in their realm's colour
 		Uniforms.fit(villager);
+		RpgKit.robe(villager);
 		level.sendParticles(ParticleTypes.ENCHANT, villager.getX(), villager.getY() + 1.2, villager.getZ(), 40, 0.4, 0.8, 0.4, 0.6);
 		level.playSound(null, villager.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.NEUTRAL, 0.8F, 1.2F);
 		JaymosKingdoms.LOGGER.debug("{} made {} its court wizard", f.name(), villager.getName().getString());
@@ -1565,6 +1566,7 @@ final class McaBridge {
 		e.enlist(Sorcery.WIZARD, Hermits.FACTION);
 		villager.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(Arcana.WIZARD_STAFF));
 		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		RpgKit.robe(villager);
 		villager.setHomeTo(villager.blockPosition(), Hermits.HOME_RADIUS);
 		Hermits.settled(level, villager);
 	}

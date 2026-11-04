@@ -293,6 +293,18 @@ public final class Outfits {
 		float spear = climate == Climate.JUNGLE ? JUNGLE_SPEAR_CHANCE : GUARD_SPEAR_CHANCE;
 		folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextFloat() < spear ? Items.IRON_SPEAR : Items.IRON_SWORD));
 		folk.setItemSlot(EquipmentSlot.OFFHAND, shield(folk, arms, false));
+		if (rank >= 1.0F - GUARD_VETERAN_SHARE) {
+			// (0.7.520) a veteran may carry a Rogues & Warriors polearm: a glaive (and his shield), or a double axe in both hands
+			float pick = random.nextFloat();
+			if (pick < RpgKit.VETERAN_GLAIVE) {
+				RpgKit.item("rogues:iron_glaive").ifPresent(g -> folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(g)));
+			} else if (pick < RpgKit.VETERAN_GLAIVE + RpgKit.VETERAN_DOUBLE_AXE) {
+				RpgKit.item("rogues:iron_double_axe").ifPresent(a -> {
+					folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(a));
+					folk.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+				});
+			}
+		}
 	}
 
 	private static void archer(Folk folk, Heraldry arms, Climate climate, RandomSource random) {
@@ -312,8 +324,18 @@ public final class Outfits {
 			default -> {
 			}
 		}
+		ItemStack tunic = trimmed(folk, dyed(Items.LEATHER_CHESTPLATE, rgb(arms.field())), arms.pattern(), arms.material());
+		if (climate != Climate.DESERT && climate != Climate.BADLANDS && climate != Climate.SNOWY) {
+			// (0.7.520) the Archers' own hood and tunic, now and then, in the temperate lands
+			if (random.nextFloat() < RpgKit.ARCHER_HOOD) {
+				head = RpgKit.item("archers:archer_armor_head").map(ItemStack::new).orElse(head);
+			}
+			if (random.nextFloat() < RpgKit.ARCHER_TUNIC) {
+				tunic = RpgKit.item("archers:archer_armor_chest").map(ItemStack::new).orElse(tunic);
+			}
+		}
 		folk.setItemSlot(EquipmentSlot.HEAD, head);
-		folk.setItemSlot(EquipmentSlot.CHEST, trimmed(folk, dyed(Items.LEATHER_CHESTPLATE, rgb(arms.field())), arms.pattern(), arms.material()));
+		folk.setItemSlot(EquipmentSlot.CHEST, tunic);
 		folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, rgb(arms.charge())));
 		folk.setItemSlot(EquipmentSlot.FEET, dyed(Items.LEATHER_BOOTS, boots));
 	}

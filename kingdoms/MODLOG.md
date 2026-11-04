@@ -8899,3 +8899,13 @@ Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its co
 - Player-crowned realms no longer send envoys or sign treaties on their own in the daily round.
 - A ward who comes of age at the regent's death is now announced on the board.
 - A chartered allied pair no longer loses the trade friction twice.
+
+## 0.7.520: RPG Series kit for starts, guards, archers and wizards (patch 3)
+- `RpgKit` looks up the Wizards, Archers and Rogues & Warriors items (old gear stays without them).
+- **Class starts** (`Classes.gear`): Thief + flint dagger, rogue's tunic and boots; Warlord warrior's chest; Mage the
+  wand of their school (warding = frost, mending = novice) and the wizard's hat and robe; Archer a small quiver and
+  archer's hood and boots; Brute berserker's chest; Marksman + rapid crossbow and 16 arrows, archer's tunic.
+- **Guards** (`Outfits.guard`): veterans carry an iron glaive (30%, with their shield) or an iron double axe (15%,
+  two-handed). **Archers**: in temperate lands the Archers' hood (40%) and tunic (50%) instead of the dyed leathers.
+- **Court wizards and hermits** wear the Wizards' pointed hat over the realm's robes; a slain court wizard drops a
+  school's wand 35% of the time, besides the staff. Not played.
