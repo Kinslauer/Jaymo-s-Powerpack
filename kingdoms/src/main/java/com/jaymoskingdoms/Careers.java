@@ -1329,7 +1329,7 @@ public final class Careers {
 					give(pilot, left);
 				}
 			}
-			com.jaymoskingdoms.Post.tidings(pilot.getUUID(), Component.translatable("message.jaymoskingdoms.job.ferried", yard.faction().name()));
+			com.jaymoskingdoms.Post.aside(pilot.getUUID(), Component.translatable("message.jaymoskingdoms.job.ferried", yard.faction().name()));
 			progress(pilot.level(), pilot, Job.PILOT.key, o.what(), 1);
 			return;
 		}

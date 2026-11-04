@@ -192,7 +192,7 @@ public final class Captives {
 			Captive c = entity.getAttached(CAPTIVE);
 			if (c != null && c.rescuer().isPresent() && entity.level() instanceof ServerLevel level
 				&& level.getServer().getPlayerList().getPlayer(c.rescuer().get()) instanceof ServerPlayer p) {
-				Post.tidings(p.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.died", entity.getDisplayName()));
+				Post.report(p.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.died", entity.getDisplayName()));
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Captives::tick);
@@ -511,8 +511,8 @@ public final class Captives {
 				KingdomEvents.standing(server, player, home, member.standing() + HOME_STANDING[standing]);
 			}
 		}
-		// (0.7.340) no chat: the reward comes in your next Tidings
-		Post.tidings(player.getUUID(), bounty > 0
+		// (0.7.340) no chat: the reward comes in your next Word
+		Post.report(player.getUUID(), bounty > 0
 			? Component.translatable("tidings.jaymoskingdoms.captive.home", v.getDisplayName(), home.name(), purse, bounty)
 			: Component.translatable("tidings.jaymoskingdoms.captive.home.purse", v.getDisplayName(), home.name(), purse));
 		if (known) {
@@ -624,7 +624,7 @@ public final class Captives {
 		LOADED.remove(v);
 		LOST.remove(v.getUUID());
 		if (rescuer != null) {
-			Post.tidings(rescuer.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.lost", v.getDisplayName()));
+			Post.report(rescuer.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.lost", v.getDisplayName()));
 		}
 	}
 
