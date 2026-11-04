@@ -5242,3 +5242,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   harder the longer the charge. A metal weapon banged on a metal shield (metal by name, or the
   `jaymospowers:clanging_metal` item tag, which holds the iron-rimmed vanilla shield) rings like a bell for the symbiote:
   hosts within 12 blocks flinch as from a bell (`WebSymbiote.noise`), loose symbiotes run (`WebSymbioteBlob.startle`).
+- **0.20.4, graded swords no longer crash the server:** an Expert, Perfect or Master grade multiplied every mining
+  rule on a sword-like item, and the instant-mine rule (bamboo, `Float.MAX_VALUE`) overflowed to Infinity, which the
+  game can't sync or save. The first such item (a graded WeaponMod copper boomerang) crashed the server when its owner
+  moved it in their inventory. `Grades.bake` now caps a scaled speed at `Float.MAX_VALUE`.
