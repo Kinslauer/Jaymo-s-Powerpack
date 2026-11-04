@@ -8718,7 +8718,7 @@ is our own take on the idea (none of its code or art).
   tales, 4 for children who beg to hold her), once a day each per player, one at a time; an MCA villager's mood rises 3.
 - **MCA gift:** `data/mca/gifts/fairy.json` makes her the dearest gift there is (60; a nether star is 40), +20 for
   children, +15 for the married.
-## 0.7.513: Stegonaut, Atroxiia and Varasuchus, the first of the lesser dragons (pack 0.20.13)
+## 0.7.513: Stegonaut, Atroxiia, Varasuchus and Ignivorus, the first of the lesser dragons (pack 0.20.13)
 Andy: "we NEED these dragons" (Saint's Dragons). It is a 1.20.1 mod whose code is MIT and whose art is All Rights
 Reserved, so its eight dragons are rebuilt here with our own models and paint (`docs/SaintsDragons-Plan.md`, patches 1
 and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
@@ -8783,5 +8783,18 @@ and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
   segment: Atroxiia's tail jabs, coils and drives straight for Gungnir, swings round low for the sweep; Varasuchus's
   snakes as it walks, lashes after the dash, wraps round to its front for the tailguard and snaps out on a parry; both tuck their
   legs back and scull their tails in the water. (Stegonaut's chewing jaw lost its last kink too.)
-- `/kingdom dragon stegonaut|atroxiia|varasuchus [tame]` (operators).
+- **Ignivorus** (`IgnivorusDragon`, `jaymoskingdoms:ignivorus_dragon`), Andy: "put the effects onto Kintsugi's model
+  then put that in the nether": the Nether's fire dragon, drawn as eanncrod's Kintsugi wyvern (as Eurus and Aeolus) at
+  0.55 (about 4.3 blocks tall, 14 across the wings; box 4.4 x 3.7), its hide obsidian, basalt ash, ember or crimson and
+  its seams glowing lava cracks (orange, magma yellow, white-hot, crimson; `tools/gen_kintsugi_dragons.py`). Every 30 s
+  each player anywhere in the Nether (`#minecraft:is_nether`) has a 1 in 360 chance of one turning up flying about
+  40-64 blocks off (about once in three hours there; never with one within 160 blocks). 450 health, armour 12, bite 22,
+  fire-proof, a boss bar (`c:bosses`), and it leaves players be until one hurts it. Then, besides the swoop, hover, bite
+  and tail sweep: fire breath (Notus's), a **fireball volley** at 10-48 blocks (three exploding fireballs, every 8-11
+  s) and, on its feet within 16 blocks, a stamp that sends a line of seven **magma pillars** bursting toward you, one
+  after another (a smoking warning, then 12 damage, 6 s of fire and a throw upward). Cooked porkchop its favourite,
+  Emberborn twice as fast; tame, it's saddled and ridden like the wind dragons (R breathes fire). Drops leather, bone,
+  magma cream, blaze powder, obsidian and sometimes netherite scrap. Not one of the wind dragons for Eurus's and
+  Aeolus's showing themselves. Its moves follow Saint's Dragons' Ignivorus (none of that mod's art).
+- `/kingdom dragon stegonaut|atroxiia|varasuchus|ignivorus [tame]` (operators).
 - Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.

@@ -5718,6 +5718,8 @@
 	"item.jaymoskingdoms.atroxiia_dragon_spawn_egg": "Atroxiia Spawn Egg",
 	"entity.jaymoskingdoms.varasuchus_dragon": "Varasuchus",
 	"item.jaymoskingdoms.varasuchus_dragon_spawn_egg": "Varasuchus Spawn Egg",
+	"entity.jaymoskingdoms.ignivorus_dragon": "Ignivorus",
+	"item.jaymoskingdoms.ignivorus_dragon_spawn_egg": "Ignivorus Spawn Egg",
 	"message.jaymoskingdoms.dragon.crashed_walker": "%s sinks onto its belly, wounded and wary. Come close crouching, with empty hands, and it may come to trust you.",
 	"message.jaymoskingdoms.dragon.bolted_walker": "%s has had enough. It turns and lumbers off.",
 	"key.category.jaymoskingdoms.dragons": "Jaymo's Dragons",

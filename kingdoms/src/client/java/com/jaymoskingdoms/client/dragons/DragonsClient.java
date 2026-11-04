@@ -72,6 +72,8 @@ public final class DragonsClient {
 	/** (0.7.513) Atroxiia's and Varasuchus's: shadow, drawn size, reach (Atroxiia's neck and tail; Varasuchus's jaws and long tail). */
 	static final float ATROXIIA_SHADOW = 2.0F, ATROXIIA_SCALE = 1.15F, ATROXIIA_REACH = 4.5F;
 	static final float VARASUCHUS_SHADOW = 2.4F, VARASUCHUS_SCALE = 1.3F, VARASUCHUS_REACH = 9.0F;
+	/** (0.7.513) Ignivorus, the Nether's fire dragon on the Kintsugi wyvern: shadow, drawn size. */
+	static final float IGNIVORUS_SHADOW = 3.6F, IGNIVORUS_SCALE = 0.55F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
 	private static @Nullable KeyMapping breathKey;
@@ -97,6 +99,9 @@ public final class DragonsClient {
 			.createBodyLayer().bakeRoot()), ATROXIIA_SHADOW, ATROXIIA_SCALE, ATROXIIA_REACH));
 		EntityRenderers.register(Dragons.VARASUCHUS_DRAGON, c -> new WindDragonRenderer<>(c, "varasuchus", new VarasuchusDragonModel(VarasuchusDragonModel
 			.createBodyLayer().bakeRoot()), VARASUCHUS_SHADOW, VARASUCHUS_SCALE, VARASUCHUS_REACH));
+		// (0.7.513) Ignivorus: the Kintsugi wyvern again, cooled from lava
+		EntityRenderers.register(Dragons.IGNIVORUS_DRAGON, c -> new WindDragonRenderer<>(c, "ignivorus", new KintsugiDragonModel(), IGNIVORUS_SHADOW,
+			IGNIVORUS_SCALE, KINTSUGI_REACH));
 		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,
 			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
 		ClientTickEvents.END_CLIENT_TICK.register(DragonsClient::tick);

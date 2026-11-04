@@ -33,7 +33,7 @@ dragons (trust meter, saddle, momentum flight, own stamina, piggyback rider) so 
 | Dragon | Gait | Home (wild) | Nature and moves (ported from MIT code) | Bonds faster with |
 |---|---|---|---|---|
 | **Raevyx** | flyer | meadows, windswept hills, groves, cherry groves; comes with thunderstorms | lightning beam (drains its own charge, regrows), chain lightning, dive impact, horn gore, ground rend, roar, can call a storm | Stormborn, Wind Control |
-| **Ignivorus** | flyer, huge | its own roost on plains, savanna, desert | the boss: fire breath, fireballs, magma pillars, stomp, body slam, wing swipe, roar; a last-stand ultimate that costs it health. Young hatch small and grow when fed | Emberborn, Notus tamers |
+| **Ignivorus** | flyer, huge (the Kintsugi wyvern) | anywhere in the Nether | the boss: fire breath, fireballs, magma pillars, stomp, body slam, wing swipe, roar; a last-stand ultimate that costs it health. Young hatch small and grow when fed | Emberborn, Notus tamers |
 | **Cindervane** | flyer, small | mountains, hills, badlands | quick fire drake: bite, double bite, slash-grab carry, magma volley, burning body that sets attackers alight | Emberborn |
 | **Volitans** | flyer + swimmer | oceans (beaches, shores as fallback); hunts from under water | poison breath, poison ball, burrows into sand/dirt and bursts out, claws, horn gore, ultimate | Tideborn, Verdant |
 | **Nulljaw** | floater, huge | the Aether sky (Andy, 2026-11-04: "an aether boss that just flies around, and can find you anywhere but heaven") | the Aether's boss, untameable: never lands, roams the Aether sky, blinks forward to bite. Once it has marked you (you hurt it, or it sights you in the Aether) it hunts you into any dimension, blinking in near you; it can't reach the Other World (the afterlife site, `ZFighterAfterlife.inOtherWorld`) and loses you there. A boss bar, `c:bosses`, a monster of legend for world tier | (none, it can't be tamed) |
@@ -57,7 +57,10 @@ listed in the taming tooltip only once you've seen the species, never as a lore 
    wild on beaches and swamps for now, its own roost structure can come with Ignivorus's in patch 5.
 3. Raevyx + Cindervane (flyers, storm spawning).
 4. Volitans (flyer/swimmer, burrow) + Nulljaw (the Aether boss that hunts you anywhere but the Other World).
-5. Ignivorus (boss, roost, growing young), credits, pack page line.
+5. Ignivorus. Done early in the same PR, on Andy's call ("put the effects onto Kintsugi's model then put that in
+   the nether"): drawn as eanncrod's Kintsugi wyvern (CC BY 4.0, as Eurus and Aeolus) in lava hides, it flies about
+   anywhere in the Nether and only fights whoever hurts it: fire breath, fireball volleys, a line of magma pillars.
+   Still to come: its roost and its growing young, the stomp, body slam, wing swipe, roar and last-stand ultimate.
 Previews (front/side renders of each model) go in `/mnt/project-files/art-overhaul/lesser-dragons/` before each PR.
 
 ## Credit
