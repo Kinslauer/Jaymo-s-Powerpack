@@ -40,7 +40,7 @@ abstract class LivingEntityHurtMixin {
 		// (0.7.361) Valor's: Reinforcement, Armament, King's coating, after Will's; last, a spar stops short of harm
 		// (0.7.431) last, a tribe's captain takes it as his traits have it (Captains)
 		// (0.7.433) a tribe's king, while his captains stand (SwornCaptains)
-		// (0.7.490) last, a kneeling boss takes a riposte (BossPosture)
+		// (0.7.491) last, a kneeling boss takes a riposte (BossPosture)
 		return com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)))))));
 	}
 }

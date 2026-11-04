@@ -24,7 +24,8 @@ final class Drivers {
 	 * of its villagers, else a folk carter named {@code folkName} (a translation key taking the realm's name).
 	 */
 	static @Nullable Worker hire(ServerLevel level, Faction f, BlockPos at, float yaw, String task, int radius, @Nullable String folkName) {
-		if (McaCompat.LOADED && f.type().isRealm()) {
+		// ((0.7.490) a village's handcart is pushed by one of its villagers too)
+		if (McaCompat.LOADED && (f.type().isRealm() || f.type() == FactionType.VILLAGE)) {
 			Worker w = McaCompat.driver(level, f, at, yaw, task, radius);
 			if (w != null) {
 				return w;

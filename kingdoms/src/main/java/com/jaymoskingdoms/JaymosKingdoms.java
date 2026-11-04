@@ -154,6 +154,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Crewmen.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		CampChiefs.register();
+		// (0.7.490) orc brawls, chief challenges, camp feuds and goblin slaves
+		Brutality.register();
+		Slaves.register();
 		StoryTalk.register();
 		ShipTalk.register();
 		ZFighterFolk.register();
@@ -161,6 +164,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Purists.register();
 		Prejudice.register();
 		Havens.register();
+		Peoples.register();
+		LOGGER.debug("peoples attachment: {}", Peoples.MET);
 		Emigrants.register();
 		// 0.7.299: meals cooked at home or bought at a cookhouse or tavern, and visitors for the day
 		Meals.register();
@@ -268,6 +273,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tribes.register();
 		Pedlars.register();
 		Bestiary.register();
+		// (0.7.490) Hordes, Orc war journals: the journals orcs and goblins leave, the data books, the Lore Codex that keeps them
+		WarJournal.register();
+		LoreCodex.register();
+		LoreBooks.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
 		BogIron.register();
@@ -279,6 +288,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
+		// (0.7.490) Havens expand: their works, land and sworn order
+		HavenGrowth.register();
+		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
+		BentIngots.register();
+		// (0.7.490) Currencies: the realms' coins and their money-changers
+		Currencies.register();
+		HordeEconomy.register();
+		GreenMarket.register();
 		BorderClashes.register();
 		TribePacts.register();
 		Tails.register();
@@ -323,7 +340,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		ArrivalGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
-		// 0.7.490: a boss's posture: worn by blows, broken to a kneel and a riposte
+		// 0.7.491: a boss's posture: worn by blows, broken to a kneel and a riposte
 		BossPosture.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);

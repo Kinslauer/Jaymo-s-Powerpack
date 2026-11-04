@@ -389,7 +389,7 @@ public final class Bounties {
 		long taken = old == null || old.dead() ? 0L : old.taken();
 		put(server, new Bounty(target, true, persona != null, shown.getString(), court.id(), price, player.blockPosition(), cry, now, hunter, taken, false, false));
 		if (old == null || old.dead()) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.posted", court.name(), shown, price).withStyle(ChatFormatting.DARK_RED));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.posted", court.name(), shown, coin(server, court.id(), price)).withStyle(ChatFormatting.DARK_RED));
 		}
 	}
 
@@ -485,15 +485,17 @@ public final class Bounties {
 	private static QuestNet.View view(ServerLevel level, ServerPlayer player, Faction court, Bounty b, long now) {
 		Component name = Component.literal(b.name());
 		Component title = Component.translatable(b.dead() ? "bounty.jaymoskingdoms.title.dead" : b.masked() ? "bounty.jaymoskingdoms.title.masked"
-			: "bounty.jaymoskingdoms.title", name, b.price());
+			: "bounty.jaymoskingdoms.title", name, coin(level.getServer(), b.court(), b.dead() ? headPrice(b) : b.price()));
 		int head = headPrice(b);
+		Currency money = Currencies.of(level.getServer(), court);
 		Component ruler = rulerName(level, court);
 		Component text = Component.translatable("bounty.jaymoskingdoms.text." + (b.player() ? "player" : "crook"), name,
-				Component.translatable("bounty.jaymoskingdoms.crime." + b.crime()), ruler, b.price(), head)
+				Component.translatable("bounty.jaymoskingdoms.crime." + b.crime()), ruler, coin(level.getServer(), court.id(), b.price()),
+				coin(level.getServer(), court.id(), head))
 			.append(b.boss() ? Component.literal(" ").append(Component.translatable("bounty.jaymoskingdoms.text.boss")) : Component.empty());
 		Component objective;
 		if (b.dead()) {
-			objective = Component.translatable("bounty.jaymoskingdoms.objective.dead", ruler, head);
+			objective = Component.translatable("bounty.jaymoskingdoms.objective.dead", ruler, coin(level.getServer(), court.id(), head));
 		} else if (b.takenBy(player, now)) {
 			objective = where(level, b, player.getUUID());
 		} else if (b.takenByOther(player, now)) {
@@ -505,12 +507,15 @@ public final class Bounties {
 			objective = Component.translatable("bounty.jaymoskingdoms.objective.offer");
 		}
 		List<ItemStack> rewards = new ArrayList<>();
-		for (int left = b.dead() ? head : b.price(); left > 0 && rewards.size() < 5; left -= 64) {
-			rewards.add(new ItemStack(Items.EMERALD, Math.min(64, left)));
+		// (0.7.490) whole coins, and the change in emeralds
+		for (ItemStack stack : Currencies.payEmeralds(money, b.dead() ? head : b.price()).stacks()) {
+			if (rewards.size() < 5) {
+				rewards.add(stack);
+			}
 		}
 		List<Component> extras = new ArrayList<>();
 		if (!b.dead()) {
-			extras.add(Component.translatable("bounty.jaymoskingdoms.extra.head", head));
+			extras.add(Component.translatable("bounty.jaymoskingdoms.extra.head", coin(level.getServer(), court.id(), head)));
 		}
 		int state = b.takenBy(player, now) || b.dead() ? QuestNet.ACTIVE : QuestNet.OFFER;
 		return new QuestNet.View(b.key(), state, b.boss(), title, text, objective, rewards, extras);
@@ -551,6 +556,12 @@ public final class Bounties {
 
 	private static int headPrice(Bounty b) {
 		return Mth.ceil(b.price() * HEAD_SHARE);
+	}
+
+	/** (0.7.490) {@code emeralds} of a bounty as the court's own coin counts it ("12 Realm Silver"): prices are posted, and paid, in it. */
+	private static Component coin(MinecraftServer server, int court, long emeralds) {
+		Currency c = Currencies.of(server, Factions.get(server, court));
+		return Currencies.amount(Currencies.payEmeralds(c, emeralds));
 	}
 
 	private static void send(ServerPlayer player, QuestNet.Open open) {
@@ -606,7 +617,7 @@ public final class Bounties {
 		unpinAll(level, b.key());
 		tearUp(player, b.key());
 		give(player, notice(level, taken, player.getUUID()));
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.took", Component.literal(b.name()), b.price())
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.took", Component.literal(b.name()), coin(server, b.court(), b.price()))
 			.withStyle(ChatFormatting.GOLD));
 		player.sendSystemMessage(where(level, taken, player.getUUID()).copy().withStyle(ChatFormatting.YELLOW));
 		level.playSound(null, at, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 0.9F);
@@ -629,7 +640,8 @@ public final class Bounties {
 		stack.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.bounty_notice.of", Component.literal(b.name()))
 			.withStyle(style -> style.withItalic(false).withColor(ChatFormatting.RED)));
 		List<Component> lore = new ArrayList<>();
-		lore.add(Component.translatable("bounty.jaymoskingdoms.notice.price", b.price(), headPrice(b)));
+		lore.add(Component.translatable("bounty.jaymoskingdoms.notice.price", coin(level.getServer(), b.court(), b.price()),
+			coin(level.getServer(), b.court(), headPrice(b))));
 		lore.add(Component.translatable("bounty.jaymoskingdoms.notice.crime", Component.translatable("bounty.jaymoskingdoms.crime." + b.crime())));
 		if (hunter != null) {
 			lore.add(where(level, b, hunter));
@@ -798,11 +810,11 @@ public final class Bounties {
 			int horns = held.getCount();
 			int emeralds = horns * com.jaymoskingdoms.nether.NetherTrophies.HORN_BOUNTY;
 			held.shrink(horns);
-			for (int left = emeralds; left > 0; left -= 64) {
-				give(player, new ItemStack(Items.EMERALD, Math.min(64, left)));
-			}
+			Currency money = Currencies.of(server, court);
+			Currencies.Pay coins = Currencies.payEmeralds(money, emeralds);
+			Currencies.give(player, coins);
 			Reputation.change(player, court, Math.max(1, horns / 4));
-			Speech.tell(level, ruler, player, Component.translatable("talk.jaymoskingdoms.bounty.horns", horns, emeralds), Speech.GOLD);
+			Speech.tell(level, ruler, player, Component.translatable("talk.jaymoskingdoms.bounty.horns", horns, Currencies.amount(coins)), Speech.GOLD);
 			level.playSound(null, ruler.getX(), ruler.getY(), ruler.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
 			return true;
 		}
@@ -846,29 +858,28 @@ public final class Bounties {
 		remove(level.getServer(), b.key());
 		tearUp(player, b.key());
 		unpinAll(level, b.key());
-		for (int left = emeralds; left > 0; left -= 64) {
-			give(player, new ItemStack(Items.EMERALD, Math.min(64, left)));
-		}
+		// (0.7.490) paid in the court's own coin
+		Currency money = Currencies.of(level.getServer(), court);
+		Currencies.Pay coins = Currencies.payEmeralds(money, emeralds);
+		Currencies.give(player, coins);
 		Reputation.change(player, court, Math.max(REP_MIN, emeralds / REP_PER));
 		Speech.tell(level, ruler, player, Component.translatable("talk.jaymoskingdoms.bounty." + how + "." + level.getRandom().nextInt(3),
-			Component.literal(b.name()), emeralds), Speech.GOLD);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.paid", emeralds, Component.literal(b.name()))
+			Component.literal(b.name()), Currencies.amount(coins)), Speech.GOLD);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.paid", Currencies.amount(coins), Component.literal(b.name()))
 			.withStyle(ChatFormatting.GREEN));
 		level.playSound(null, ruler.getX(), ruler.getY(), ruler.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
 	}
 
 	/** A player brought in alive: fined what they carry (up to the price), forgiven their wanted time there, got back on their feet. */
 	private static void sentence(ServerLevel level, ServerPlayer target, Faction court, Bounty b) {
-		int fine = Math.min(b.price(), Purse.count(target, Items.EMERALD));
-		if (fine > 0) {
-			Purse.take(target, Items.EMERALD, fine);
-		}
+		// (0.7.490) fined in the court's own coin first, then emeralds
+		int fine = Currencies.fine(level.getServer(), target, court, b.price());
 		Map<String, Long> wanted = new HashMap<>(target.getAttachedOrElse(Theft.WANTED, Map.of()));
 		if (wanted.remove(Integer.toString(court.id())) != null) {
 			target.setAttached(Theft.WANTED, Map.copyOf(wanted));
 		}
 		target.addTag(Downed.REVIVE_TAG);
-		target.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.sentenced", court.name(), fine).withStyle(ChatFormatting.DARK_RED));
+		target.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.sentenced", court.name(), coin(level.getServer(), court.id(), fine)).withStyle(ChatFormatting.DARK_RED));
 	}
 
 	private static void give(ServerPlayer player, ItemStack stack) {
@@ -1364,7 +1375,7 @@ public final class Bounties {
 					}
 				} else if (level.getRandom().nextFloat() < POST_SAY_CHANCE) {
 					Speech.say(level, v, Component.translatable("talk.jaymoskingdoms.bounty.posting." + level.getRandom().nextInt(3),
-						Component.literal(b.name()), b.price()), Speech.WHITE, 12.0);
+						Component.literal(b.name()), coin(level.getServer(), b.court(), b.price())), Speech.WHITE, 12.0);
 				}
 			} else {
 				Direction facing = state.getValue(BountyBoard.FACING);

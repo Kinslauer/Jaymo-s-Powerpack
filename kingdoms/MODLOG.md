@@ -8367,7 +8367,58 @@ minimap. Handshake and spirit-clash films and the story and travel curtains hide
   entities; the watch now waits for the entities. Smiths' rumours no longer stall in a world whose clock is behind one
   you played before (the cooldown kept the other world's time).
 
-## 0.7.490: boss posture (Gemini's DawnCraft handoff, reviewed)
+## 0.7.490: greenskin hordes patches 3+, Beastfolk and Hollow, heritage kits, war journals (pack 0.19.81)
+Andy's answers of 2026-11-03 are in `docs/Hordes-Plan.md`; the races in `docs/Races-Plan.md`. Built as parallel tracks,
+each reviewed with every finding independently verified; compile-checked only, not yet seen in game.
+- **Dialects** (`Dialects`): orcs and goblins speak their own broken English (orcs blunt and brutal, goblins quick, greedy
+  and sly). Lines only greenskins say were rewritten; shared ones split into `dialect.jaymoskingdoms.<orc|goblin>.<key>`.
+- **Brutality** (`Brutality`): camp brawls with jeering crowds, the strongest grunt challenging the chief, orc camps raiding
+  other tribes' camps and goblin villages. **Slaves** (`Slaves`): collared goblins do an orc camp's hauling and jobs (not
+  counted in the folk cap), get thrown at foes in a fight, run off to goblin villages, and can be freed for goodwill.
+- **Bent ingots** (`BentIngots`, art `tools/gen_bent.py`): bent copper (1) and bent iron (3) are greenskin money. Sneak-use
+  an ingot on an anvil to bend it. Greenskins refuse plain ingots. A cold anvil won't straighten one (Andy): melt it in a
+  furnace or blast furnace, or superheat it on Powers' Forge Hearth.
+- **Economy** (`HordeEconomy`, `GreenMarket`, `Caravans`): folk work jobs for the camp's daily take, everyone eats, a hungry
+  camp stops growing and raids more, surplus grows faster; greenskin merchants price in bent ingots by stock, only for those
+  the camp spares; tribute and trade fill the chief's hoard, which pays for walls and tiers; carts haul surplus between a
+  tribe's camps and can be raided.
+- **Goblin towns + caps** (`HordeBuildings`, `Hordes`): tier caps 25/32/40; goblin tiers raise stone-and-timber houses,
+  two-storey homes, a tinker workshop, smelter, stalls, counting house, walkways, gardens and stone walls from tier 3; orc
+  tiers bigger and cruder. Structure templates under `data/jaymoskingdoms/structure/horde/<orc|goblin>/<tier>/` are used when
+  present (for Andy's modpack structures).
+- **Living together** (`Peoples`, `Settlers`): a distaste table between every people (orc-goblin at 3) lowers starting
+  hearts, brings glares and insults and brawls; lone orcs and goblins settle in heritage villages and havens, rarely human ones.
+- **War journals + Lore Codex** (`WarJournal`, `LoreBooks`, `LoreCodex`, after RPG Lore, MIT): orcs and goblins drop
+  journals in their dialect built from the real world plus oblique fragments; also in camp stores and broken carts. Extra
+  books as JSON in `data/jaymoskingdoms/lore/`. The soul-bound codex files every lore book.
+- **Beastfolk** (pickable) and **Hollow** (earned by being cut down by the undead and getting up) heritages, after Runic
+  Races (MIT): Arachnid, Avian, Canine, Feline, Kitsune, Serpen; Zombie, Skeleton, Wraith, Reaper. Sylvan takes every fae
+  (Dryad, Changeling, Sprite, Nymph, Faerie) and High, Moon and Blood elves. Heritages may have any number of looks.
+- **Heritage kits** (`HeritageKits`): every heritage and look has an ability (heritage key), a gift and a flaw on its card.
+- **Real model parts** (client `BeastParts`, art `tools/gen_heritage_parts.py`, Andy: "definetly real modeled parts"):
+  Beastfolk ears and tails (Canine, Feline, Kitsune with 1-3 tails), Avian folded wings and crest, Arachnid's four back
+  legs, Serpen's scaled tail, Sprite and Faerie gossamer wings, Dryad sprigs; on players and MCA villagers, hidden under
+  helmets, costumes and the symbiote suit. The painted versions came off the skins.
+- **Patch 5, every settlement** (Andy's answers in `docs/Hordes-Plan.md`):
+  - **Walled towns** (`WalledTowns`): villages and blossom villages climb four tiers with arc-a-day walls (the land's log
+    palisade, stone for villages of prosperous realms, plaster-and-tile for blossom towns), band buildings, newcomers and
+    gate golems; `/kingdom town`. Kingdoms and fiefdoms keep their open growth.
+  - **Plunder** (`Plunder`, `OgreGrowth`, `OgreRaids`, `Outbuild`): pirate coves, illager camps and ogre holds grow while
+    their stores allow; raiders break into chests and storehouses and carry the loot home; pirates take gold first and a
+    beaten ship's cargo.
+  - **Cannons** (`sailing/Bombardment`, `ShotKind`): new cannon models with recoil, smoke and flash; round, heavy, shell,
+    chain and grape shot; round, heavy and shell shot (and field guns) explode where they land and break blocks by blast
+    resistance like TNT, stone and players' builds included (chests and other block entities spared, mob guns only with
+    mob griefing on), heavy shot and shells strip loose soil on down to the rock, spread over ticks. Pirate
+    ships shell foes of their cove on the shore (orcs throwing rocks included).
+  - **Currencies** (`Currencies`): realm coins by culture with our own art (emeralds stay valid), each settlement pricing
+    in its trading hub's or overlord's coin, and money-changers.
+  - **Caravans for all** (`TradeRoutes`, handcarts): every settlement kind trades, the poor by villager-pushed handcart,
+    pirates by boat; escort or rob them. Villages keep trade money in their storehouse.
+  - **Havens expand** (`HavenGrowth`): havens raise works wherever land and stores allow, send their output by cart, and
+    keep sworn defenders by blood who grow with them.
+
+## 0.7.491: boss posture (Gemini's DawnCraft handoff, reviewed)
 - Andy pasted a Gemini handoff (1.21.1 code): a DawnCraft-style boss ladder (Goblin King, Corrupted Ogre, Knight Rober,
   Nine Tails, Frostmaw, Fire Giant), "Guild Master knowledge" locking the anvil, smithing table, enchanting table and
   end portal frames, 12 eyes, one generic Souls-like boss entity with poise, kneel and riposte, a model and a renderer.
