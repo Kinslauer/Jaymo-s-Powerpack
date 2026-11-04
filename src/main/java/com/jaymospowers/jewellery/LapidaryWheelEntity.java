@@ -37,7 +37,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.85) A Lapidary Wheel: one raw gem laid on it ({@link #gem}), a cut chosen ({@link Cutting}), stroke after
+ * (0.19.87) A Lapidary Wheel: one raw gem laid on it ({@link #gem}), a cut chosen ({@link Cutting}), stroke after
  * stroke judged by the server, and the cut gem left on top ({@link #result}). Walking away pauses the cut.
  */
 public class LapidaryWheelEntity extends BlockEntity {

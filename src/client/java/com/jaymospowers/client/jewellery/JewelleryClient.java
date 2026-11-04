@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.85) Jewellery on the client: the Jeweller's Bench screen, the cut screen, the lapidary wheel's gem, and the
+ * (0.19.87) Jewellery on the client: the Jeweller's Bench screen, the cut screen, the lapidary wheel's gem, and the
  * cutting game's bar under the crosshair (the anvil's bar, dimmed while the wheel spins back up).
  */
 public final class JewelleryClient {

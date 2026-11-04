@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
 
-/** (0.19.85) The Jeweller's Bench: set a cut gem in a cooled frame. Opens with anything in hand. */
+/** (0.19.87) The Jeweller's Bench: set a cut gem in a cooled frame. Opens with anything in hand. */
 public class JewellersBenchBlock extends HorizontalDirectionalBlock {
 	public JewellersBenchBlock(Block.Properties properties) {
 		super(properties);

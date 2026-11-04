@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * (0.19.85) The jewellery frames on the Smithing Anvil, like the prosthetics: hammered from gold, silver or copper
+ * (0.19.87) The jewellery frames on the Smithing Anvil, like the prosthetics: hammered from gold, silver or copper
  * ingots. The option ids ("jewel/ring_frame/gold") are saved on forging blanks: never rename them.
  */
 public final class JewelFrames {

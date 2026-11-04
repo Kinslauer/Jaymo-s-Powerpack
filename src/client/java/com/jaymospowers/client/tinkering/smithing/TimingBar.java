@@ -5,7 +5,7 @@ import net.minecraft.util.Mth;
 
 /**
  * The timing bar of the Smithing Anvil, shared with the lapidary wheel: a dark back, the good zone, the perfect zone
- * and the arrow sweeping across. (0.19.85) Taken out of {@code SmithingClient.bar}; the anvil looks the same as before.
+ * and the arrow sweeping across. (0.19.87) Taken out of {@code SmithingClient.bar}; the anvil looks the same as before.
  */
 public final class TimingBar {
 	public static final int BACK = 0xA0000000, GOOD_COLOR = 0xFFE0A030, PERFECT_COLOR = 0xFF60E060, ARROW_COLOR = 0xFFFFFFFF;

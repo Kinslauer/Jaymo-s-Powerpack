@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 
-/** (0.19.85) A gem ring, amulet, bracelet or circlet. Its bonus comes from its gem, grade, cut, metal and frame. */
+/** (0.19.87) A gem ring, amulet, bracelet or circlet. Its bonus comes from its gem, grade, cut, metal and frame. */
 public class JewelleryItem extends BaubleItem {
 	public JewelleryItem(Item.Properties properties, JewelKind kind) {
 		super(properties, kind.bauble, List.of());

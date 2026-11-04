@@ -5,7 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import org.jspecify.annotations.Nullable;
 
-/** (0.19.85) The four kinds of jewellery: their bauble slot, frame and piece ids, ingots and bonus factor. */
+/** (0.19.87) The four kinds of jewellery: their bauble slot, frame and piece ids, ingots and bonus factor. */
 public enum JewelKind {
 	RING("ring", Baubles.Kind.RING, "ring_frame", "gem_ring", 1, 1.0F),
 	AMULET("amulet", Baubles.Kind.AMULET, "amulet_frame", "gem_amulet", 2, 1.5F),

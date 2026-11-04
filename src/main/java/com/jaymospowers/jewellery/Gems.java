@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.85) The gems that can be cut on the lapidary wheel: each one's colour, hardness and the bonus it gives. All the
+ * (0.19.87) The gems that can be cut on the lapidary wheel: each one's colour, hardness and the bonus it gives. All the
  * rules about a gem live here and in {@link CutGem}, so socketing into weapons and armour can reuse them. Items are kept
  * as ids and looked up when used, so the order other mods register in doesn't matter. The ids are saved on cut gems:
  * never rename them.
