@@ -4438,3 +4438,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Enough Animations, EMF Compat: NEA, Sounds, Lithium, FerriteCore, C2ME, Structory, Structory: Towers, Homesteads.
   Still Modrinth-only (no matching CurseForge file): Runes, Grim Kingdoms VE, Repurposed Structures, MidnightLib, Ji AFK
   Cinematic, Dungeons and Taverns (CurseForge stops at 6.0.2). Not built here.
+- **0.20.33, the high sky (Andy, 2026-11-04):** A new top band of the One Dimension stack, `jaymospowers:high_sky` (192 tall,
+  open air), over the Aether: the default stack is now high sky, Aether, Overworld, Nether (`compat/OneDimensionDefaults`; a
+  `config/one-dimension.json` still holding exactly the old pack order gets the high sky put on top; new worlds only).
+  `power/zfighter/ZFighterHighSky`: thin air, where only ki keeps you breathing (a Z Fighter spends 1 ki a second, anyone else
+  or a fighter run dry chokes, 2 damage a second after 3 s; inside a pod is fine), and raiders fly there (no gravity, they fly
+  at their foe). Pod trips out of the stacked Overworld are ambushed there 35% of the time from the second trip on, for a
+  pilot who can fly on ki (`ZFighterPodTrip` phase AMBUSH): the pod is struck and hangs smoking, pilot and passenger are thrown
+  out flying, a tyrant and 2-4 raiders come in. Beat them and fly back to the pod to go on; sneak by it sooner to run for it
+  (the pod lands hard, parts shaken loose); die (or leave) and the pod falls to the ground below, shaken; after 3 minutes the
+  band breaks off. Client `client/power/zfighter/sky/HighSkyClient`: a dark dome round the camera with stars by day, the sun,
+  the Pale Moon, Rustfall and Glacia close and big, and the planet's curve about 15 degrees below level, its seas, lands and
+  clouds sliding past as you fly, lit by the sun, with a blue haze along its edge; drawn on the sky (54 blocks out), so it
+  never hides anything nearer, and fading out near the band's bottom. Atlas `textures/environment/high_sky.png`
+  (`tools/gen_high_sky.py`). Fixes found on the way: a raider band's non-chief raiders were taken for leftover tournament
+  champions and removed on their first tick, and were added to the band after the load check ran; both fixed
+  (`ZFighterRogue.raider`, `ZFighterRaiders.raider`). Compile-checked against the 26.3 jars; not played.

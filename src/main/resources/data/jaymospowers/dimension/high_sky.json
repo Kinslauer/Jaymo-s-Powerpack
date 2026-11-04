@@ -1,0 +1,13 @@
+{
+  "type": "jaymospowers:high_sky",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "jaymospowers:high_sky",
+      "features": false,
+      "lakes": false,
+      "layers": [{"block": "minecraft:air", "height": 1}],
+      "structure_overrides": []
+    }
+  }
+}
