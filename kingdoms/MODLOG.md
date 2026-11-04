@@ -8806,7 +8806,8 @@ and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
   pale silver, dusk violet, dawn gold, with glowing constellations on the membranes, starlit veins, rims or a sky of
   stars. The wingbeat rolls out from the shoulder a beat per joint, the fingers spreading on the downstroke; gliding
   they're held open; landed they fold (arm up, forearm down along it, hand up, fingers closed), the fold eased in and
-  out; the neck straightens and the legs tuck in flight. Andy chose "Aether sky dragon, plus Nulljaw": every 30 s each
+  out; the neck straightens in flight and (Andy: "so much so it looks like it doesn't have any in the air") the legs fold
+  flat back under the belly, drawn in small and up into the body. Andy chose "Aether sky dragon, plus Nulljaw": every 30 s each
   player over the Aether (`jaymospowers:aether`) has a 1 in 240 chance of one turning up flying 40-64 blocks off (none
   within 160). 420 health, armour 12, bite 18, a boss bar, and it leaves players be until hurt; then its **bite**, a
   **breath beam** of starlight (28 blocks, stopped by blocks, 7 a strike, burns nothing) and, below half health, the

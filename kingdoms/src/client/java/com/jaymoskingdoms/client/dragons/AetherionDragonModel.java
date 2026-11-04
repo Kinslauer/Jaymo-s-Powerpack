@@ -25,7 +25,8 @@ import net.minecraft.util.Mth;
  * with wings"): the wingbeat rolls out from the shoulder, the forearm a beat behind the arm and the hand a beat behind
  * that, the fingers spreading on the downstroke; gliding they're held open with a little lift at the tips; landed they
  * fold (arm raised, forearm folded down along it, the hand up again, the fingers closed) and the fold eases in and out.
- * The neck straightens in flight and the legs tuck back; on the ground it walks in a long, high gait, the tail swaying a
+ * The neck straightens in flight and the legs fold away flat under the belly, drawn in so small it looks legless in
+ * the air; on the ground it walks in a long, high gait, the tail swaying a
  * beat per segment. Its moves ({@link AetherionDragon#action}): the bite, the neck darting in and the jaws snapping; and
  * the Cataclysm, rearing up with its wings flung high and coming down with them beating as the stars fall.
  */
@@ -36,6 +37,9 @@ final class AetherionDragonModel extends EntityModel<WindDragonRenderer.State> {
 	/** The wing folded, as offsets from its spread rest for the left wing (the right's are mirrored): the arm (y, z), the forearm (y, z), the hand (z), and how far the fingers close. */
 	static final float FOLD_ARM_Y = -0.35F, FOLD_ARM_Z = -1.25F, FOLD_FORE_Y = 0.2F, FOLD_FORE_Z = 2.75F, FOLD_HAND_Z = -2.55F, FOLD_CLOSE = 0.8F;
 	/** The wingbeat: how far the arm swings up and down about a slight lift, and how much each later joint adds, a beat behind. */
+	/** In flight the legs fold away: the thigh swung flat back, the shin folded up against it, the foot along it; drawn this much smaller and drawn up this far into the body (model pixels). */
+	static final float TUCK_FRONT_UP = 1.45F, TUCK_FRONT_LOW = -2.8F, TUCK_HIND_UP = 1.5F, TUCK_HIND_LOW = -2.6F, TUCK_FOOT = 1.25F;
+	static final float TUCK_SHRINK = 0.55F, TUCK_RAISE = 3.0F;
 	static final float BEAT_ARM = 0.65F, BEAT_LIFT = 0.1F, BEAT_FORE = 0.32F, BEAT_HAND = 0.28F, BEAT_LAG = 0.7F;
 
 	private final ModelPart body, head, jaw;
@@ -48,7 +52,7 @@ final class AetherionDragonModel extends EntityModel<WindDragonRenderer.State> {
 	private final ModelPart[] spines = new ModelPart[DragonLook.SPIKES];
 	private final ModelPart saddle, strap;
 	private final ModelPart[] upper = new ModelPart[4], lower = new ModelPart[4], foot = new ModelPart[4];
-	private final float[] upperRest = new float[4], lowerRest = new float[4], footRest = new float[4];
+	private final float[] upperRest = new float[4], lowerRest = new float[4], footRest = new float[4], upperY = new float[4];
 	/** The wings, left then right: arm, forearm, hand, and the fingers with their spread. */
 	private final ModelPart[] arm = new ModelPart[2], fore = new ModelPart[2], hand = new ModelPart[2];
 	private final ModelPart[][] finger = new ModelPart[2][FINGERS];
@@ -91,6 +95,7 @@ final class AetherionDragonModel extends EntityModel<WindDragonRenderer.State> {
 			this.lower[i] = this.upper[i].getChild(legs[i] + "_shin");
 			this.foot[i] = this.lower[i].getChild(legs[i] + "_foot");
 			this.upperRest[i] = this.upper[i].xRot;
+			this.upperY[i] = this.upper[i].y;
 			this.lowerRest[i] = this.lower[i].xRot;
 			this.footRest[i] = this.foot[i].xRot;
 		}
@@ -240,6 +245,7 @@ final class AetherionDragonModel extends EntityModel<WindDragonRenderer.State> {
 		float onGround = 1.0F - aloft;
 		float walk = Math.min(s.walkAnimationSpeed, 1.0F) * onGround * (1.0F - sit) * (1.0F - crash);
 		float step = s.walkAnimationPos * 0.45F;
+		float tuck = fly;
 		float headYaw = Mth.clamp(s.yRot, -50.0F, 50.0F) * Mth.DEG_TO_RAD;
 		float headPitch = Mth.clamp(s.xRot, -35.0F, 35.0F) * Mth.DEG_TO_RAD;
 		float breath = ease(s.breath);
@@ -294,24 +300,33 @@ final class AetherionDragonModel extends EntityModel<WindDragonRenderer.State> {
 			float knee = lift * lift * 0.45F * walk;
 			float up = this.upperRest[i] + swing, low = this.lowerRest[i] + (front ? -knee : knee);
 			if (front) {
-				up = Mth.lerp(aloft, up, 0.9F);
-				low = Mth.lerp(aloft, low, -1.2F);
+				// (hovering to land, they hang down ready for the ground)
+				up = Mth.lerp(land, up, 0.3F);
+				low = Mth.lerp(land, low, -0.2F);
 				up = Mth.lerp(rear, up, -0.6F);
 				low = Mth.lerp(rear, low, -0.9F);
 			} else {
-				up = Mth.lerp(aloft, up, 1.1F);
-				low = Mth.lerp(aloft, low, 0.3F);
+				up = Mth.lerp(land, up, 0.2F);
+				low = Mth.lerp(land, low, 0.4F);
 				up = Mth.lerp(sit, up, -0.9F);
 				low = Mth.lerp(sit, low, 1.5F);
 				up += rear * 0.5F;
 			}
 			up = Mth.lerp(crash, up, front ? -0.6F : 0.8F);
+			// (Andy: "its legs should collapse very close to its body in flight, so much so it looks like it doesn't have any
+			// in the air") flying, each leg folds flat back under the belly, the shin folded up against it, and draws in
+			// small into the body
+			up = Mth.lerp(tuck, up, front ? TUCK_FRONT_UP : TUCK_HIND_UP);
+			low = Mth.lerp(tuck, low, front ? TUCK_FRONT_LOW : TUCK_HIND_LOW);
+			float legScale = 1.0F - tuck * TUCK_SHRINK;
+			this.upper[i].xScale = this.upper[i].yScale = this.upper[i].zScale = legScale;
+			this.upper[i].y = this.upperY[i] - tuck * TUCK_RAISE;
 			this.upper[i].xRot = up;
 			this.upper[i].zRot = (left ? -1.0F : 1.0F) * crash * 0.7F;
 			this.lower[i].xRot = low;
 			// the foot kept flat on the ground, pointed back in the air
 			float flat = -(up + low - this.upperRest[i] - this.lowerRest[i]);
-			this.foot[i].xRot = this.footRest[i] + flat * onGround * (1.0F - crash) + aloft * 0.6F;
+			this.foot[i].xRot = Mth.lerp(tuck, this.footRest[i] + flat * onGround * (1.0F - crash) + land * 0.4F, TUCK_FOOT);
 		}
 
 		// the wings: beating in time with its stroke, each joint a beat behind the one before it (held open gliding);
