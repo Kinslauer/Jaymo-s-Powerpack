@@ -8,6 +8,7 @@
 		"PetWakeSoundMixin",
 		"GlowingTrimMixin",
 		"ArmourGrimeMixin",
+		"ArmourGrimeIconMixin",
 		"FaceLivingEntityRendererMixin",
 		"TerrainParticleWaterMixin",
 		"DeathScreenFilmMixin",

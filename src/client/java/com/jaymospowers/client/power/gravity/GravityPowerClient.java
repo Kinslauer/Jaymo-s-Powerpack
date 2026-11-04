@@ -173,13 +173,10 @@ public final class GravityPowerClient implements PowerClient {
 		boolean ascended = Fate.isAscended(player) || Fate.isCorrupted(player);
 		int chips = ascended ? 5 : 4;
 		int total = CHIP * chips + CHIP_GAP * (chips - 1);
-		// right of the hotbar, past the off-hand slot; above the hunger bar on narrow screens
-		int x = width / 2 + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + total > width - 2) {
-			x = width / 2 + 91 - total;
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		boolean weightless = player.getAttached(GravityPower.WEIGHTLESS_ON) != null;
 		chip(graphics, font, x, y, PowerKey.ABILITY_1, Items.SHULKER_SHELL, cooldowns.lift() - now, GravityPower.LIFT_COOLDOWN,
 			liftFrom >= 0 ? 1.0F - Mth.clamp((now - liftFrom) / (float)GravityPower.LIFT_MAX_TICKS, 0.0F, 1.0F) : -1.0F);

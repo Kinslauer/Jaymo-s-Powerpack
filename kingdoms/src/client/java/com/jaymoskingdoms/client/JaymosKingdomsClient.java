@@ -147,6 +147,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ScentClient.register();
 		WolfTells.register();
 		ClothesColourClient.register();
+		MasonScreen.register();
+		PlanGhosts.register();
 		// 0.7.332: the victim's memory of the biter, and kin heard in each other
 		VictimClient.register();
 		KinshipClient.register();
@@ -195,6 +197,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VillagerLooks.register();
 		// (0.7.484) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
 		BeastParts.register();
+		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
+		SeaParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		GreenskinLooks.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)

@@ -68,6 +68,8 @@ final class WebSymbioteScreen extends Screen {
 
 	private int selected = -1;
 	private boolean chosen;
+	/** The pick was a right-click. */
+	private boolean down;
 
 	WebSymbioteScreen() {
 		super(Component.translatable("screen.jaymospowers.web_symbiote"));
@@ -107,8 +109,22 @@ final class WebSymbioteScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
+		// (a right-click on the Suit comes down one form, the same as a sneak-pick)
+		down = event.button() == InputConstants.MOUSE_BUTTON_RIGHT;
 		choose();
 		return true;
+	}
+
+	/**
+	 * Sneak held as you pick. Opening the menu lets go of every key binding (the player stops sneaking a tick later, so
+	 * {@code isShiftKeyDown} alone never saw the sneak-pick), so the Sneak key itself is read off the keyboard.
+	 */
+	private boolean sneaking(final LocalPlayer player) {
+		if (down || player.isShiftKeyDown()) {
+			return true;
+		}
+		InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(minecraft.options.keyShift);
+		return key.getType() == InputConstants.Type.KEYBOARD && InputConstants.isKeyDown(key.getValue());
 	}
 
 	private void choose() {
@@ -123,8 +139,8 @@ final class WebSymbioteScreen extends Screen {
 		}
 		if (selected >= 0) {
 			LocalPlayer player = minecraft.player;
-			// (0.17.172) the Suit picked while sneaking: one form down
-			int use = selected == WebSymbiote.ARMOR && player != null && player.isShiftKeyDown() ? WebSymbiote.SUIT_TOGGLE : selected;
+			// (0.19.69) the Suit picked while sneaking (or right-clicked): one form down
+			int use = selected == WebSymbiote.ARMOR && player != null && sneaking(player) ? WebSymbiote.SUIT_TOGGLE : selected;
 			ClientPlayNetworking.send(new WebNet.SymbioteUse(use));
 		}
 		onClose();

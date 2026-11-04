@@ -86,6 +86,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.116) the surveyor's rod, players' own designs and work areas
 		Surveyor.register();
 		Designs.register();
+		// (0.7.488) schematic files: uploads from players' computers, the mason's table, plans given to settlements
+		LOGGER.debug("commission attachment: {}", Commissions.COMMISSIONS);
+		DesignUploads.register();
+		MasonNet.register();
+		MasonTable.register();
+		Commissions.register();
+		PlanSites.register();
 		Armory.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
@@ -306,6 +313,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();
+		// (0.7.486) sea-blooded Tideborn whose heads or backs are their own shape wear no helmet or chestplate
+		SeaBodies.register();
 		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)
 		LOGGER.debug("life story attachment: {}", LifeStory.STORY);
 		LifeStory.register();

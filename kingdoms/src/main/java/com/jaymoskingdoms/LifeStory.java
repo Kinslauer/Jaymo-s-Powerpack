@@ -1630,9 +1630,11 @@ public final class LifeStory {
 	 * looked past a few that are taken; else the nearest at all (null with none).
 	 */
 	private static @Nullable BlockPos freshVillage(ServerLevel level, Heritage.Kind heritage, BlockPos spawn, RandomSource random) {
-		BlockPos first = null;
+		BlockPos first = null, inland = null;
 		BlockPos from = spawn;
-		for (int i = 0; i <= StoryHomes.FRESH_TRIES; i++) {
+		// (0.7.486) a Tideborn's is by the shore: a free one inland is kept only if no shore one turns up
+		int tries = heritage == Heritage.Kind.TIDEBORN ? StoryHomes.FRESH_TRIES * 2 : StoryHomes.FRESH_TRIES;
+		for (int i = 0; i <= tries; i++) {
 			BlockPos village = level.findNearestMapStructure(villages(heritage), from, STRUCTURE_SEARCH, false);
 			if (village == null) {
 				village = level.findNearestMapStructure(StructureTags.VILLAGE, from, STRUCTURE_SEARCH, false);
@@ -1641,7 +1643,12 @@ public final class LifeStory {
 				break;
 			}
 			if (!StoryHomes.taken(level, village)) {
-				return village;
+				if (heritage != Heritage.Kind.TIDEBORN || Havens.shore(level, village)) {
+					return village;
+				}
+				if (inland == null) {
+					inland = village;
+				}
 			}
 			if (first == null) {
 				first = village;
@@ -1650,7 +1657,7 @@ public final class LifeStory {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			from = spawn.offset((int)(Math.cos(angle) * StoryHomes.FRESH_STEP * (i + 1)), 0, (int)(Math.sin(angle) * StoryHomes.FRESH_STEP * (i + 1)));
 		}
-		return first;
+		return inland != null ? inland : first;
 	}
 
 	/** The villages of the land a heritage comes from. */
@@ -1660,7 +1667,7 @@ public final class LifeStory {
 			case BEASTFOLK -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
 			case FROSTBORN -> StructureTags.ON_SNOWY_VILLAGE_MAPS;
 			case EMBERBORN, WARRIORBORN -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
-			case DAWNBORN, TIDEBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;
+			case DAWNBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;
 			default -> StructureTags.ON_PLAINS_VILLAGE_MAPS;
 		};
 	}

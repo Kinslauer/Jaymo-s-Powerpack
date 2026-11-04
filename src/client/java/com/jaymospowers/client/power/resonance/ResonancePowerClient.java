@@ -177,12 +177,12 @@ public final class ResonancePowerClient implements PowerClient {
 		} else {
 			return;
 		}
-		int width = 52;
-		int x0 = cx - width / 2;
-		int y = cy - 20 - RING_RADIUS / 2;
-		graphics.fill(x0 - 1, y - 1, x0 + width + 1, y + 4, 0x90000000);
-		graphics.fill(x0, y, x0 + Mth.ceil(width * fill), y + 3, 0xFF000000 | (fill >= 1.0F ? pulse(0xFFFFFF, color, time * 0.6F) : color));
-		graphics.centeredText(font, label.copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
+		// (HUD rework) Shatter/Boom bar: ABOVE zone, row 20
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:resonance_bar", 20, com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
+		if (at == null) {
+			return;
+		}
+		com.jaymospowers.client.hud.HudStyle.labelledBar(graphics, font, label.copy().withColor(color), at[0], at[1], com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, fill, fill >= 1.0F ? pulse(0xFFFFFF, color, time * 0.6F) : color);
 	}
 
 	// ---------------------------------------------------------------- chips
@@ -197,12 +197,10 @@ public final class ResonancePowerClient implements PowerClient {
 		int total = CHIP * count + CHIP_GAP * (count - 1);
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
-		int x = width / 2 + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + total > width - 2) {
-			x = width / 2 + 91 - total;
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		int step = CHIP + CHIP_GAP;
 		chip(graphics, font, x, y, PowerKey.ABILITY_1, Items.BELL, state, ResonanceState.PULSE, now, -1.0F);
 		float hum = state.humFrom() >= 0 ? Mth.clamp((now - state.humFrom()) / 40.0F, 0.0F, 1.0F) : -1.0F;

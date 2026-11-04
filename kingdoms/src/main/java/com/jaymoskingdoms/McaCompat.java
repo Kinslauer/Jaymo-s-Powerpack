@@ -614,6 +614,16 @@ public final class McaCompat {
 		return LOADED && McaBridge.zfighterOpening(villager, player);
 	}
 
+	/** (0.7.486) {@link SeaBodies}: the {@code slot} armour an MCA villager carries, dropped at their feet; whether there was any. */
+	static boolean shedPacked(net.minecraft.world.entity.Mob mob, net.minecraft.world.entity.EquipmentSlot slot, net.minecraft.server.level.ServerLevel level) {
+		return LOADED && McaBridge.shedPacked(mob, slot, level);
+	}
+
+	/** (0.7.486) {@link SeaBodies}: an MCA guard who can't wear armour takes up the bow; whether they did just now. */
+	static boolean toBow(net.minecraft.world.entity.Mob mob) {
+		return LOADED && McaBridge.toBow(mob);
+	}
+
 	/** (0.7.246) A crewman (one of MCA's villagers) with no armour packed, and a sailor by trade. */
 	static void toSea(PathfinderMob mob) {
 		if (LOADED) {

@@ -134,6 +134,24 @@ public final class HeritageVariants {
 		// ---- Tideborn
 		REEFCROWNED(Heritage.Kind.TIDEBORN, 0xE2A486, 0.15F, Land.WARM_SEA, null, null, Trait.add(Attributes.ARMOR, 1.5)),
 		ABYSSAL(Heritage.Kind.TIDEBORN, 0x30506E, 0.4F, Land.DEEP_SEA, null, Heritage.Kind.DEEPBORN, Trait.add(Attributes.OXYGEN_BONUS, 2.0)),
+		// (0.7.486, Andy: "tideborn need to vary wildly ... they can draw from any sealife") thirteen sea-blooded looks, each with
+		// real model parts (client SeaParts): shark, manta, octopus, anglerfish, jellyfish, moray, crab, pufferfish, lionfish,
+		// seadragon, swordfish, sea slug and sea turtle. They keep the Tideborn's kit; each has one small trait.
+		GREYFIN(Heritage.Kind.TIDEBORN, 0x7E8C96, 0.45F, Land.DEEP_SEA, null, null, Trait.share(Attributes.ATTACK_DAMAGE, 0.05)),
+		MANTAWING(Heritage.Kind.TIDEBORN, 0x34445A, 0.45F, Land.WARM_SEA, Element.HIGHFIELD, null, Trait.add(Attributes.WATER_MOVEMENT_EFFICIENCY, 0.2)),
+		EIGHTARM(Heritage.Kind.TIDEBORN, 0xB0506A, 0.4F, Land.DEEP_SEA, null, null, Trait.add(Attributes.BLOCK_INTERACTION_RANGE, 0.5),
+			Trait.add(Attributes.ENTITY_INTERACTION_RANGE, 0.5)),
+		LANTERNJAW(Heritage.Kind.TIDEBORN, 0x4A4234, 0.5F, Land.DEEP_SEA, null, Heritage.Kind.NIGHTBORN, Trait.add(Attributes.SUBMERGED_MINING_SPEED, 0.5)),
+		DRIFTBELL(Heritage.Kind.TIDEBORN, 0xD8C8F0, 0.3F, Land.WARM_SEA, Element.IRRADIATED, null, Trait.add(Attributes.SAFE_FALL_DISTANCE, 3.0)),
+		MORAY(Heritage.Kind.TIDEBORN, 0x4E6A2E, 0.45F, Land.SWAMP, null, null, Trait.add(Attributes.OXYGEN_BONUS, 1.0)),
+		SHELLCLAW(Heritage.Kind.TIDEBORN, 0xC86A48, 0.3F, Land.WARM_SEA, null, Heritage.Kind.STONEBORN, Trait.add(Attributes.ARMOR, 2.0)),
+		SPINEPUFF(Heritage.Kind.TIDEBORN, 0xD8C070, 0.3F, Land.WARM_SEA, null, null, Trait.add(Attributes.MAX_HEALTH, 2.0)),
+		LIONMANE(Heritage.Kind.TIDEBORN, 0xD89078, 0.22F, Land.WARM_SEA, null, Heritage.Kind.EMBERBORN, Trait.share(Attributes.ATTACK_SPEED, 0.05)),
+		WEEDFROND(Heritage.Kind.TIDEBORN, 0xB8A040, 0.28F, Land.SWAMP, null, Heritage.Kind.SYLVAN, Trait.share(Attributes.SNEAKING_SPEED, 0.25)),
+		SWORDBILL(Heritage.Kind.TIDEBORN, 0x4A6A9A, 0.35F, Land.NONE, null, Heritage.Kind.STORMBORN, Trait.share(Attributes.MOVEMENT_SPEED, 0.04)),
+		FRILLBACK(Heritage.Kind.TIDEBORN, 0x5A6AD0, 0.3F, Land.WARM_SEA, null, null, Trait.add(Attributes.LUCK, 1.0)),
+		OLDSHELL(Heritage.Kind.TIDEBORN, 0x7A8A50, 0.35F, Land.WARM_SEA, Element.ARCTIC, null, Trait.add(Attributes.KNOCKBACK_RESISTANCE, 0.2),
+			Trait.add(Attributes.ARMOR, 1.0), Trait.share(Attributes.MOVEMENT_SPEED, -0.03)),
 		// ---- Sylvan: Andy's thorny rose, and the Highfields' blossom
 		THORNROSE(Heritage.Kind.SYLVAN, 0, 0.0F, Land.FLOWERS, null, null),
 		BLOSSOMKIN(Heritage.Kind.SYLVAN, 0xF4D6DC, 0.14F, Land.CHERRY, Element.HIGHFIELD, null, Trait.add(Attributes.SAFE_FALL_DISTANCE, 2.0)),

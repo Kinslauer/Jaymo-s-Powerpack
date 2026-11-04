@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "omni-ai-mcp": {
+      "command": "uvx",
+      "args": [
+        "omni-ai-mcp==4.8.2"
+      ],
+      "env": {
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}",
+        "GEMINI_ACTIVITY_LOG": "false"
+      }
+    }
+  }
+}

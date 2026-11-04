@@ -5026,5 +5026,110 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     one-high gaps, drawn level and hopping at its own pace. The five lost their Ultimate spikes (the spike model is a
     man's). Each body was written, then checked by a second pass that simulated the poses and fixed what it found.
     The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.
-- **0.19.67, Kingdoms 0.7.484, greenskin hordes and Runic Races heritages:** Kingdoms only, see kingdoms/MODLOG.md, except
+- **0.19.67, Seats and a Sit key** (`core/Sitting`, `Meditate`, `MeditatePose`): Andy: "add a button as well".
+  - **Seats:** right-click a stair (right way up) or a bottom slab with an empty hand, not sneaking, and you sit on it,
+    on a stair facing away from its back. Blocks in `#jaymospowers:seats` (empty; for modded chairs/benches) work too,
+    sitting on the top of their middle and facing their `facing`. Needs two blocks of room above; one sitter per block.
+  - **Sit key** (`]` by default): sits you on the seat under you or the one you look at (3 blocks), else on the ground,
+    at once. Pressed again while sat it changes how you sit: ground = cross-legged, knees up, leaning back; seat =
+    upright, legs crossed, slouched (kept for next time). Sneak (a fresh press) now gets you up from any sit.
+  - **Held items while sat:** a book is held open to read, anything drunk is raised like a cup, a sword lies across the
+    lap. On a seat the body keeps the seat's way and the head turns up to 80 degrees.
+  - **By the fire:** sitting settled within 4 blocks of a lit campfire heals 1 every 5 s and (with Kitchen) adds 10 body
+    heat. Seats count as meditating with the Meditation perk, like the ground sit.
+  - Compile-checked; not seen in game (pose angles may need a tweak).
+- **0.19.68, Kitchen jar 0.5.52:** `libs/` held Kitchen 0.5.48 while its source had moved on to 0.5.52, so the pack
+  shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
+  Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
+  Compile-checked; not played.
+- **0.19.69, taking the symbiote suit off** (`WebSymbioteScreen`, `WebSymbiote.use`): Andy: "I cant seem to take off
+  the symbiote suit." The X menu's sneak-pick (one form down) read `isShiftKeyDown`, but opening a screen lets go of
+  every key binding, so the player had stopped sneaking by the time you picked and every pick climbed again. The menu
+  now reads the Sneak key off the keyboard, and a right-click on the Suit tile also comes down one form. A sulking or
+  locked-out symbiote no longer refuses to come off: it only refuses to come up a form.
+- **0.19.70, broken web lines** (`WebSpentLines`, `WebNet.LineSnap`): Andy: "The b web dropped a fading line at the
+  wrong time ... only when the web is actually broken or deteriorated. it should also split where it was hit." A web
+  let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
+  apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
+  hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
+- **0.19.71, web lines burn; a symbiote's recoil** (`WebHeft.burning`, `WebHitches`, `WebBridges`, `WebCut`): Andy:
+  "weblines should be flammable, giving a counter to web users ... their webs dont burn they recoil, as they are
+  alive." Anything alight crossing a line now burns it through: a burning creature or player brushing it, a fire arrow
+  or fireball through it, the slinger on fire, the undead burning by day too. Hitches and weblines burn as well as
+  swing lines and the Yank lead (webline planks are flammable like wool), and a punch with fire in hand (torch, flint
+  and steel, fire charge, blaze rod, lava, a hot or Fire Aspect blade, or you alight) goes through at once. A
+  symbiote's cords never burn: they recoil into the host with a hiss and a shriek and let go.
+- **0.19.71, tendril globs keep to the back** (`WebGooGlobs`): Andy: the blobs "should only grow tendrils for living
+  tendril grabs and attacks while they move along the back". The twelve tendril globs only creep over the back now;
+  ten bare globs roam the shoulders, arms, legs, sides and belly. The webs and spikes the tendrils form still come off
+  the arms and anywhere else. Compile-checked; not played.
+- **0.19.72, Kingdoms 0.7.485, Kitchen 0.5.53, the Excalibur look made optional:** Andy: "make excalibur and all it's
+  additions from here optional, and off by default. but keep it in the pack." All 7,713 textures graded in 0.19.65 are
+  back to their originals in Powers, Kingdoms and Kitchen. Each restored file was checked: grading it again gives back
+  the graded file exactly. The 10 xenoform skins whose originals were never committed came from `tools/gen_xenoform.py`.
+  The graded copies now live in the built-in pack `excalibur_style`, off by default (`tools/excalibur_style/grade.py`
+  rebuilds it; sources are never touched). The same pack holds calmer leaves: Excalibur's leaf models hang fringes off
+  every leaf block, which inside a canopy repeat "like a hall of mirrors", so it puts plain leaf cubes back, turned at
+  random. Excalibur and its Fresh Animations patch are still downloaded into resourcepacks/ but never switched on.
+  Installs that 0.19.65 switched on get them switched off once (`ExcaliburLook`, marker `jaymospowers-excalibur-off-v1`).
+  `/excalibur on` switches all three on in the right order: Excalibur at the bottom, the patch just above Fresh
+  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
+  (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
+  own resourcepacks/.
+- **0.19.73, flail and whip swings worked out every time** (`armory/Lash`, `client/armory/LashRenderer`): Andy: "the
+  flail and whip do not swing at the proper trajectory, it should be calculated everytime instead of the same canned
+  swing from right to left, also the right click wind up sould take into account where the head is ... working to the
+  OVERHEAD swing ... a shorter axis overhead, that the player lowers infront of themselves as it rounds, to deal damage
+  while the button is held, some attacks can wrap around shields, and will stop momentum upon a heavy enough hit."
+  Each press sends `Lash.Aim` first: the head's real spot (the client's physics chain) and how the mouse turned over
+  the last 3 ticks. A swipe now lies along the flick (left, right, a chop, an uppercut) from the head's side round to
+  the other (`sweepShape`); no flick, from the side the head hangs on across. A swipe can follow a returning swipe.
+  The whirl sets off from the head, round the way you were turning, and works up from the held-out hand to overhead by
+  full speed (`whirlPoint`): tilted down in front (more as you look down), drawn in to 55% behind, the arm dipping as
+  the ball comes round the front. Let go and the ball carries its speed up over your head and down. Whirl (half speed
+  up), slam, chops and the whip's crack wrap a raised shield or guard (`jaymospowers:lash_wrap`, in #bypasses_shield,
+  75% damage); other swings are stopped by it. A guard or anything with more heft (bulk x (1 + 2 x knockback
+  resistance)) than the swing's momentum stops the head: a swipe drops back, a whirl winds up again from there.
+- **0.19.74, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
+  Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you wash
+  it manually". Dirty armour no longer gets a flat tint: it's drawn from a copy of its own texture with dust or mud
+  splotches painted in (10 steps of dirt, 4 of muddiness), and its inventory icon wears the same splotches. Dirt
+  gathers low first (boots, shins, chest hem) and each wash takes splotches away, edges first. Where it goes comes
+  from our masks in `textures/grime/` (`tools/grime_textures.py`; alpha = how early, grey = how dark). The armour's
+  outline stays clean. Grime colours suit the normal textures; with the optional Excalibur pack on they take its
+  grade. Compile-checked; not played.
+- **0.19.75, Patch 4: fliers** (`docs/AlienBodies-Plan.md`): four more aliens are no longer men.
+  - Talon is now a hawk: perched upright on scaly taloned legs, it hops along with the wings folded, its hooked-beak head turning where it looks; in the air the body goes level, the two-part wings spread and beat, hold stiff in a glide and sweep back on a stoop, and a strike rakes the talons forward.
+  - Keen is now a bat: a furry body with the insignia on its back, a pug head with huge ears and fangs, and membrane wings. It crawls on its wrists and feet with the wings folded, beats them fast in flight, holds them out to glide, lies level under Wind's cruise, and hangs head-down from ceilings wrapped in its wings (synced as the "hang" act).
+  - Wyrm is now a small four-legged dragon: a long scaly body trotting in a diagonal lizard gait with solved legs, a long neck to a horned head whose jaw opens on a bite, a spine ridge and a swaying spade-tipped tail; its ender-dragon wings (`WyrmWings`) sit on its shoulders, beat in flight with the body level and the legs tucked, and fold along its back on the ground.
+  - Lumen is now an orb of light: a white-gold core in a dithered halo, floating about a block up and bobbing, with eight motes on tilted rings that stream out behind it as it moves and burst outward when it attacks. It is drawn a second time fullbright, so it shines in the dark.
+  - The four lost their Ultimate spikes (the spike model is a man's). Each body was written, then checked by a second
+    pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
+- **0.19.76, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
+  and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
+  pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
+  `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the
+  same face instead of a new random one (Andy: "the zombie died and changed skins"). Compile-checked and ragdoll-sim
+  checked; not played.
+- **0.19.77, Kingdoms 0.7.486, sea-blooded Tideborn:** Kingdoms only (13 new Tideborn looks with real model parts), see
+  kingdoms/MODLOG.md.
+- **0.19.78, execution bars + double click** (`core/finisher/Finishers`, `client/finisher/FinisherClient`): Andy: "it should be 3 bars
+  that fill, and once the third is filled the execution plays", then "you must sneak and double click + hold, now releasing the hold
+  before the execution kills, will cancel it". Sneak + hold attack (1.5 s) is drawn as three bars under the crosshair (`Finishers.Charge`)
+  in place of the action-bar dots. Sneak + double click (0.3 s) starts the execution at once (`Finishers.Rush`), same checks, always the
+  kill; letting go of the second press before the killing blow calls it off (`Playing.held`). Symbiote suit executions don't cancel.
+- **0.19.79, one HUD layout** (`client/hud/HudZones`, `HudStyle`, `PowerDock`; plan `docs/HUD-Layout.md`): Andy: "rework
+  the hud so nothing is clashing, there are alot of new elements now, so everything needs to feel coherent". Every HUD
+  piece of Powers, Kingdoms and Kitchen that isn't a full-screen wash now asks one of seven zones where to draw, and the
+  zone stacks whatever is showing, so two pieces can't land on one spot: the right dock (power chips, Flame Avatar,
+  beam-clash panel, mount bars, Rig panel), the left dock (stomach, valor, symbiote arm, a body row of stance figure,
+  wounds doll and body heat), the focus band over the action-bar line (struggles, forms belt, spirit line, clash
+  timing), over the crosshair (charge bars, awareness eye), under it (guard, execution bars, roll pips, horse tag, smithing), right of it
+  (combo, lens, scouter), and a top-left rail under Xaero's minimap (power badge, kin sense, party). The badge no longer
+  sits on the minimap, the riding bar no longer covers the chips, the stance figure left the chat corner, and the
+  body-heat thermometer left the XP number. Our HUD hides during films (ultimates, beam and spirit clashes, handshakes,
+  curtains) as vanilla's does, and the armed crosshair now hides in an ultimate's film too. One look (`HudStyle`, Wind's
+  chips: see-through black plates, a rim in the piece's colour when ready, flat 3 px bars in a black frame, shadowed
+  text), with no resource-pack art, so it reads the same with Excalibur off. Compile-checked; not played.
+- **0.19.80, Kingdoms 0.7.489, greenskin hordes and Runic Races heritages:** Kingdoms only, see kingdoms/MODLOG.md, except
   that the Forge Hearth now superheats Kingdoms' bent ingots into Hot Ingots (`HotMetal.ingotMetal`), one way to straighten them.

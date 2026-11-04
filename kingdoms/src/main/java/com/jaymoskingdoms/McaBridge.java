@@ -1134,6 +1134,43 @@ final class McaBridge {
 		return true;
 	}
 
+	/** (0.7.486) {@link SeaBodies}: drops the {@code slot} armour in an MCA villager's pack at their feet; whether there was any. */
+	static boolean shedPacked(net.minecraft.world.entity.Mob mob, EquipmentSlot slot, ServerLevel level) {
+		if (!(mob instanceof VillagerEntityMCA villager)) {
+			return false;
+		}
+		boolean any = false;
+		var pack = villager.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			var stack = pack.getItem(i);
+			var held = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+			if (held != null && held.slot() == slot && SeaBodies.armour(stack, slot)) {
+				pack.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
+				villager.spawnAtLocation(level, stack);
+				any = true;
+			}
+		}
+		return any;
+	}
+
+	/** (0.7.486) {@link SeaBodies}: an MCA guard (not yet an archer) made an archer, a bow and arrows packed if they carry none. */
+	static boolean toBow(net.minecraft.world.entity.Mob mob) {
+		if (!(mob instanceof VillagerEntityMCA villager) || villager.isBaby() || villager.getProfession() != ProfessionsMCA.GUARD) {
+			return false;
+		}
+		villager.setProfession(ProfessionsMCA.ARCHER);
+		var pack = villager.getInventory();
+		boolean bow = villager.getMainHandItem().getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+		for (int i = 0; i < pack.getContainerSize() && !bow; i++) {
+			bow = pack.getItem(i).getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+		}
+		if (!bow) {
+			pack.addItem(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BOW));
+			pack.addItem(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ARROW, 32));
+		}
+		return true;
+	}
+
 	static void toSea(PathfinderMob mob) {
 		if (!(mob instanceof VillagerEntityMCA villager)) {
 			return;
