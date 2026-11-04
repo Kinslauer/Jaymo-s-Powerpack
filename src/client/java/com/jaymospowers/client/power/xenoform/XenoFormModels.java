@@ -8528,9 +8528,9 @@ public final class XenoFormModels {
 		/** Burrowing: how much lower the back leans, how far the pelvis squats, how fast the fists scoop and how far they reach, how far the head bows. */
 		static final float BURROW_LEAN = 0.4F, BURROW_SQUAT = 4.0F, SCOOP_RATE = 0.7F, SCOOP_REACH = 4.0F, BURROW_BOW = 0.1F;
 		/** The change-back tap: how far in front of the insignia the wrist stops (the fist's length, knuckles on the plate) and how far further out and up it is poised. */
-		static final float TAP_FIST = 3.5F, TAP_POISE = 5.0F, TAP_POISE_UP = 3.0F, TAP_DROP = 1.5F;
+		static final float TAP_FIST = 3.5F, TAP_POISE = 4.0F, TAP_POISE_UP = 0.5F, TAP_DROP = 0.75F;
 		/** Which way the tapping elbow points (model space before the body's yaw: out to the right side, a little down and forward). */
-		static final float TAP_POLE_X = -1.0F, TAP_POLE_Y = 0.6F, TAP_POLE_Z = -0.3F;
+		static final float TAP_POLE_X = -1.0F, TAP_POLE_Y = 0.9F, TAP_POLE_Z = 0.0F;
 		private static final float PI = (float)Math.PI;
 
 		private final ModelPart neck, jaw, ribRight, ribLeft;
@@ -8538,7 +8538,7 @@ public final class XenoFormModels {
 		/** Index 0 right, 1 left. */
 		private final ModelPart[] fore = new ModelPart[2], fist = new ModelPart[2], shin = new ModelPart[2], foot = new ModelPart[2];
 		private final ModelPart[] posed;
-		private final float[] at = new float[3], gait = new float[3], bones = new float[2], tapAt = new float[3], tapRot = new float[5];
+		private final float[] at = new float[3], gait = new float[3], bones = new float[2], tapAt = new float[3], tapRot = new float[6], rot = new float[3];
 
 		Knell() {
 			super(bake(mesh()), "knell");
@@ -8689,8 +8689,8 @@ public final class XenoFormModels {
 		 * toward the pole: into {@link #tapRot} the upper arm's x, y, z angles (the parts' Z*Y*X order), the forearm's hinge
 		 * and the fist's turn so its knuckles face into the trunk's front.
 		 */
-		private void tapArm(float sx, float sy, float sz, float lean, float yaw, float roll) {
-			float dx = this.tapAt[0] - sx, dy = this.tapAt[1] - sy, dz = this.tapAt[2] - sz;
+		private void tapArm(float sx, float sy, float sz, float tx, float ty, float tz, float px, float py, float pz, float lean, float yaw, float roll) {
+			float dx = tx - sx, dy = ty - sy, dz = tz - sz;
 			float len = (float)Math.sqrt(dx * dx + dy * dy + dz * dz);
 			if (len < 0.1F) {
 				return;
@@ -8701,8 +8701,8 @@ public final class XenoFormModels {
 			float reach = Mth.clamp(len, Math.abs(UPPER - FORE) + 0.05F, UPPER + FORE - 0.01F);
 			float along = (UPPER * UPPER + reach * reach - FORE * FORE) / (2.0F * reach);
 			float out = (float)Math.sqrt(Math.max(0.0F, UPPER * UPPER - along * along));
-			// the pole, turned with the body, made square to the reach
-			float qx = TAP_POLE_X * Mth.cos(yaw) + TAP_POLE_Z * Mth.sin(yaw), qy = TAP_POLE_Y, qz = -TAP_POLE_X * Mth.sin(yaw) + TAP_POLE_Z * Mth.cos(yaw);
+			// the pole, made square to the reach
+			float qx = px, qy = py, qz = pz;
 			float dot = qx * dx + qy * dy + qz * dz;
 			qx -= dot * dx;
 			qy -= dot * dy;
@@ -8718,8 +8718,9 @@ public final class XenoFormModels {
 			float ex = dx * along + qx * out, ey = dy * along + qy * out, ez = dz * along + qz * out;
 			float yx = ex / UPPER, yy = ey / UPPER, yz = ez / UPPER;
 			float fx = (dx * reach - ex) / FORE, fy = (dy * reach - ey) / FORE, fz = (dz * reach - ez) / FORE;
-			// the hinge (local x) is square to both; local z completes the frame
-			float xx = yy * fz - yz * fy, xy = yz * fx - yx * fz, xz = yx * fy - yy * fx;
+			// the hinge (local x) is square to both, turned so the elbow bends the way the arm's rest pose does (a
+			// negative turn about x), so nothing flips over as the tap starts; local z completes the frame
+			float xx = yz * fy - yy * fz, xy = yx * fz - yz * fx, xz = yy * fx - yx * fy;
 			float xl = (float)Math.sqrt(xx * xx + xy * xy + xz * xz);
 			if (xl < 1.0E-4F) {
 				return;
@@ -8738,8 +8739,21 @@ public final class XenoFormModels {
 			// the trunk's front, inward (its +z turned like the body), in the forearm's frame: the fist turns onto it
 			place(0.0F, 0.0F, 1.0F, lean, yaw, roll, 0.0F, 0.0F, 0.0F, this.at);
 			float ny = this.at[0] * yx + this.at[1] * yy + this.at[2] * yz, nz = this.at[0] * zx + this.at[1] * zy + this.at[2] * zz;
+			float nx = this.at[0] * xx + this.at[1] * xy + this.at[2] * xz;
 			float cf = Mth.cos(fore), sf = Mth.sin(fore);
-			this.tapRot[4] = (float)Math.atan2(-sf * ny + cf * nz, cf * ny + sf * nz);
+			float fy2 = cf * ny + sf * nz, fz2 = -sf * ny + cf * nz;
+			// the fist's +y onto it: Rz(c) * Rx(g) takes (0, 1, 0) to (-sin c cos g, cos c cos g, sin g)
+			this.tapRot[4] = (float)Math.asin(Mth.clamp(fz2, -1.0F, 1.0F));
+			this.tapRot[5] = (float)Math.atan2(-nx, fy2);
+		}
+
+		/** (0.19.83) {@code (x, y, z)} turned as a part is (Z*Y*X by {@code xr, yr, zr}), into {@link #rot}. */
+		private void turnPart(float x, float y, float z, float xr, float yr, float zr) {
+			float y1 = y * Mth.cos(xr) - z * Mth.sin(xr), z1 = y * Mth.sin(xr) + z * Mth.cos(xr);
+			float x2 = x * Mth.cos(yr) + z1 * Mth.sin(yr), z2 = -x * Mth.sin(yr) + z1 * Mth.cos(yr);
+			this.rot[0] = x2 * Mth.cos(zr) - y1 * Mth.sin(zr);
+			this.rot[1] = x2 * Mth.sin(zr) + y1 * Mth.cos(zr);
+			this.rot[2] = z2;
 		}
 
 		/**
@@ -8905,18 +8919,38 @@ public final class XenoFormModels {
 				arm.zRot = fistRoll;
 				this.fore[side].xRot = this.bones[1] - this.bones[0];
 				this.fist[side].xRot = fistAbs - this.bones[1];
+				this.fist[side].zRot = 0.0F;
 				float tapped = left ? 0.0F : tap;
 				if (tapped > 0.0F) {
-					// (0.19.83) the change-back tap: the wrist a fist's length in front of the insignia (poised further out and up),
-					// solved in 3D with the elbow out to the side (clear of the chest and of the neck over it), knuckles square to the plate
+					// (0.19.83) the change-back tap: the wrist a fist's length in front of the insignia (poised further out),
+					// solved in 3D with the elbow out to the side (clear of the chest and of the neck over it), knuckles square to
+					// the plate. The wrist and the elbow's side are eased over from the walking arm's, not its angles, so the arm
+					// stays solved (never sweeping through the trunk) the whole way up.
 					place(0.0F, this.insigniaY + TAP_DROP - TAP_POISE_UP * (1.0F - tapHit), this.insigniaZ - TAP_FIST - TAP_POISE * (1.0F - tapHit), lean, yaw,
 						roll, px, py, pz, this.tapAt);
-					this.tapArm(sx, sy, sz, lean, yaw, roll);
-					arm.xRot = Mth.lerp(tapped, arm.xRot, this.tapRot[0]);
-					arm.yRot = Mth.lerp(tapped, arm.yRot, this.tapRot[1]);
-					arm.zRot = Mth.lerp(tapped, arm.zRot, this.tapRot[2]);
-					this.fore[side].xRot = Mth.lerp(tapped, this.fore[side].xRot, this.tapRot[3]);
+					this.turnPart(0.0F, UPPER, 0.0F, arm.xRot, arm.yRot, arm.zRot);
+					float ex = this.rot[0], ey = this.rot[1], ez = this.rot[2];
+					// the walking forearm, turned with the upper arm: its end is the wrist
+					float fa = this.fore[side].xRot;
+					this.turnPart(0.0F, FORE * Mth.cos(fa), FORE * Mth.sin(fa), arm.xRot, arm.yRot, arm.zRot);
+					float wx = sx + ex + this.rot[0], wy = sy + ey + this.rot[1], wz = sz + ez + this.rot[2];
+					float pole = (float)Math.sqrt(TAP_POLE_X * TAP_POLE_X + TAP_POLE_Y * TAP_POLE_Y + TAP_POLE_Z * TAP_POLE_Z);
+					float qx = (TAP_POLE_X * Mth.cos(yaw) + TAP_POLE_Z * Mth.sin(yaw)) / pole, qy = TAP_POLE_Y / pole;
+					float qz = (-TAP_POLE_X * Mth.sin(yaw) + TAP_POLE_Z * Mth.cos(yaw)) / pole;
+					this.tapRot[0] = arm.xRot;
+					this.tapRot[1] = arm.yRot;
+					this.tapRot[2] = arm.zRot;
+					this.tapRot[3] = this.fore[side].xRot;
+					this.tapRot[4] = this.fist[side].xRot;
+					this.tapRot[5] = 0.0F;
+					this.tapArm(sx, sy, sz, Mth.lerp(tapped, wx, this.tapAt[0]), Mth.lerp(tapped, wy, this.tapAt[1]), Mth.lerp(tapped, wz, this.tapAt[2]),
+						Mth.lerp(tapped, ex / UPPER, qx), Mth.lerp(tapped, ey / UPPER, qy), Mth.lerp(tapped, ez / UPPER, qz), lean, yaw, roll);
+					arm.xRot = this.tapRot[0];
+					arm.yRot = this.tapRot[1];
+					arm.zRot = this.tapRot[2];
+					this.fore[side].xRot = this.tapRot[3];
 					this.fist[side].xRot = Mth.lerp(tapped, this.fist[side].xRot, this.tapRot[4]);
+					this.fist[side].zRot = Mth.lerp(tapped, 0.0F, this.tapRot[5]);
 				}
 			}
 
