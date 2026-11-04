@@ -91,6 +91,8 @@ public final class Trees {
 	static final double CHOP_SCALE = 10.0;
 	/** (0.5.59) Leaves broken by hand: the chance of a stick, for the first hand axe (3 flint and a stick). */
 	static final float LEAF_STICK_CHANCE = 0.12F;
+	/** (0.7.499) Nether wart blocks (the huge fungi's caps) broken by hand: the chance of a stick, so a Nether start can make its first tools. */
+	static final float WART_STICK_CHANCE = 0.15F;
 
 	/** A growing tree: its foot, its sapling, its step, when it next grows. */
 	record Growing(BlockPos pos, String sapling, int stage, long next) {
@@ -126,6 +128,11 @@ public final class Trees {
 				&& !state.getValue(LeavesBlock.PERSISTENT) && player.getMainHandItem().isEmpty()
 				&& server.getRandom().nextFloat() < LEAF_STICK_CHANCE) {
 				Block.popResource(server, pos, new ItemStack(Items.STICK));
+			} else if (level instanceof ServerLevel wart && !player.isCreative() && (state.is(Blocks.NETHER_WART_BLOCK) || state.is(Blocks.WARPED_WART_BLOCK))
+				&& player.getMainHandItem().isEmpty() && wart.getRandom().nextFloat() < WART_STICK_CHANCE) {
+				// (0.7.499) Andy: a start in the Nether could only go on by stealing a piglin's axe. The huge fungi's wart
+				// caps are its leaves: torn by hand they give a dry stalk now and then, the stick a flint knife wants.
+				Block.popResource(wart, pos, new ItemStack(Items.STICK));
 			}
 		});
 	}

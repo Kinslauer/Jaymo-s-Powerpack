@@ -5216,3 +5216,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the right hip with the lantern's sway (`WornLanterns`); it gives no light. Web's symbiote grabs coins as valuables.
   - The melting gap log skips coins (realm silver and the like are money, not metal).
   - Not compile-checked yet at this entry; not played.
+- **0.20.1, Kingdoms 0.7.499, a start in the Nether can make its first tools:** Andy: "add rare pebbles and flint to the
+  nether so those starts are possible for emberborn [...] after trying that start you can only advance by stealing axes from
+  pigmen". `ground/NetherRocksFeature` lays a small cluster of loose rocks on one of the Nether's floors in about one chunk in
+  three (demon biomes too): netherrack rocks on netherrack and nylium, blackstone on blackstone, basalt on basalt and soul
+  ground, and 30% of piles are loose flint (75% on gravel). The three rocks are new `GroundRocks.Variant`s (vanilla textures,
+  4 craft into their block, knap like plain stone). Flint now knaps on netherrack (`FirstTools.hard`, `Knapping.hard`), and
+  crimson/warped roots, nether sprouts and weeping/twisting vines give plant fibre to a knife (`fiber_plants` tag). Kingdoms
+  adds the sticks (wart blocks) and the avatar camps' welcome; see `kingdoms/MODLOG.md`.
+  - Not compile-checked yet at this entry; not played.

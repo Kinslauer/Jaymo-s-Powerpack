@@ -8561,3 +8561,19 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
   doesn't take a coin in the hand for a silver weapon.
 - Emeralds stay a gem: ore, enchanting, tinkering's emerald modifier, trims, beacons and caravan gem goods.
 - Not compile-checked yet at this entry; not played.
+
+## 0.7.499: the Flame Avatars take the Emberborn in (pack 0.20.1)
+Andy: "make the flame avatar take you in and amicable to you", with rare Nether rocks and flint in Powers so a Nether start
+isn't stuck stealing piglin axes.
+- **Taken in** (`nether/AvatarCamps`): the first time an Emberborn comes within 32 blocks of an avatar camp, its nearest
+  avatar greets them by speech bubble (`message.jaymoskingdoms.avatar.welcome.0-2`), hands over 3 flint, 4 sticks, 2 plant
+  string (Powers') and 4 cooked pork, and every avatar of the camp warms to them by 50 hearts (MCA's follow and hire). Saved
+  per player per camp (`avatar_welcomed`, kept through death).
+- **The hearth:** an Emberborn within the camp's home radius who is hurt gets Regeneration I (11 s, renewed every 10 s).
+- **They stand with you:** avatars within 24 blocks of an Emberborn go for any creature hunting them or that hurt them in the
+  last 5 s (`AvatarCamps.guarding`; never other players).
+- Camps rise near an Emberborn in the Nether at 60% per 3-minute roll (others still 25%).
+- **Sticks in the Nether** (`Trees`): wart blocks (nether and warped) torn down by hand give a stick 15% of the time, as
+  leaves do in the overworld.
+- `McaCompat.hearts` is public now (the camp's warmth).
+- Not compile-checked yet at this entry; not played.
