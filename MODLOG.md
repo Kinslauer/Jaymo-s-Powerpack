@@ -5242,3 +5242,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   harder the longer the charge. A metal weapon banged on a metal shield (metal by name, or the
   `jaymospowers:clanging_metal` item tag, which holds the iron-rimmed vanilla shield) rings like a bell for the symbiote:
   hosts within 12 blocks flinch as from a bell (`WebSymbiote.noise`), loose symbiotes run (`WebSymbioteBlob.startle`).
+- **0.20.4, Kingdoms 0.7.505, attack tells are easy to see and hear:** Andy: "the particle effect for attack indicators
+  should be more visible, and a sound should play like for time flow. maybe a star or flash in the respective color". The
+  old tell (a few pale dust specks and sparks) got lost on a face. `combat/AttackTells.glint` now draws our own
+  `jaymospowers:tell_glint` particle (`Glint`: colour + size; client `combat/TellGlintParticle`, sprites
+  `textures/particle/tell/tell_glint_0-1`, dark-rimmed so it reads on pale faces and sky): a full-bright four-point star in the tell's colour (white 0.8 blocks, red 1.1)
+  that pops past full size, settles, turns slowly and holds through the 6-tick wind-up before shrinking away, a small white
+  star at its heart (`tell_glint_core`, no rim), and a ring of dust in the colour. It's sent forced (shows on reduced particles, out to 48 blocks).
+  With it plays Time Flow's warning ping from the mob: a high note-block bell for a parryable blow, a lower bell with a
+  bass drum under it for a heavy one. Every tell uses it: goal- and brain-driven mobs, Burrukai, Bladeshroom Hunters, future
+  gunners, and Kingdoms' fighters, crewmen and gunners (through `PowersCompat.tellGlint`).
+  - Tuning: `GLINT_SIZE`, `HEAVY_GLINT_SIZE`, `CORE_SHARE`, `PING_*`, `DRUM_*`, `GLINT_RANGE` in `AttackTells`; `LIFE`,
+    `OVERSHOOT`, `SPIN` in `TellGlintParticle`.
+  - Compile-checked in the cloud (Gradle `compileClientJava`); not played. Preview:
+    `art-overhaul/attack-tells/tell-glint-preview.png` in the project files.

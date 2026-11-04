@@ -8640,3 +8640,10 @@ isn't stuck stealing piglin axes.
   for the left-handed; MCA bodies' clothes follow (`McaPullerPose.follow`).
 - Not compile-checked against the game jars (none staged in this cloud session); a source-path javac pass showed no
   errors in our own symbols. Not played.
+
+## 0.7.505: attack tells are easy to see and hear (pack 0.20.4)
+Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for time flow".
+- `MobCombat.tell` (fighters' and crewmen's swings) and the gunners' aim tell (`MobCombat.aimed`) call Powers' new glint
+  through `PowersCompat.tellGlint`: a full-bright star in the tell's colour (white parry, red heavy) with a white heart, and
+  Time Flow's warning bell (high for parryable, low with a drum for heavy). Without Powers the old dust stays and a bell
+  plays with it. The gun's flint click stays on top.

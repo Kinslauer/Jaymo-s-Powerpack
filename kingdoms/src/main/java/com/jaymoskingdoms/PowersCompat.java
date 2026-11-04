@@ -33,6 +33,39 @@ public final class PowersCompat {
 	private PowersCompat() {
 	}
 
+	/** (0.7.505) Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle tellGlint;
+	private static boolean lookedForGlint;
+
+	/**
+	 * (0.7.505) Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for
+	 * time flow". An attack tell's glint at {@code at} as Jaymo's Powers draws its own (a full-bright star in the tell's
+	 * colour with a white heart, and Time Flow's warning bell). False without Powers, and the caller draws its old dust.
+	 */
+	public static boolean tellGlint(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, boolean heavy) {
+		if (!lookedForGlint) {
+			lookedForGlint = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					tellGlint = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.combat.AttackTells"), "glint",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.phys.Vec3.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' attack tell glint", e);
+				}
+			}
+		}
+		if (tellGlint == null) {
+			return false;
+		}
+		try {
+			tellGlint.invoke(level, at, heavy);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (Andy, 2026-11-01) Powers' {@code ZFighterFakeMoon.shines(ServerLevel, Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle falseMoon;
 	private static boolean lookedForMoon;
