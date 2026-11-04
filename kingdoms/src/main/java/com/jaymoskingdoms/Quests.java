@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.monsters.Monsters;
+import com.jaymoskingdoms.money.Money;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -99,8 +100,8 @@ public final class Quests {
 	static final int ABANDON_REPUTATION = 10, ABANDON_ROYAL_REPUTATION = 40;
 	/** A delivered letter: hearts with whoever gets it. */
 	static final int LETTER_HEARTS = 5;
-	/** (0.5.29) A king slain cunningly (under a false oath, or out on his round): emeralds this much more (percent), and this much more good name with the giver's realm. */
-	static final int CUNNING_EMERALDS = 50, CUNNING_REPUTATION = 50;
+	/** (0.5.29) A king slain cunningly (under a false oath, or out on his round): silver this much more (percent), and this much more good name with the giver's realm. */
+	static final int CUNNING_SILVER = 50, CUNNING_REPUTATION = 50;
 	/** (0.5.29) A noble king out on his round stops for one who's been sent for him, when they come this close; once per this many ticks, held this long. */
 	static final double ALMS_RANGE = 5.0;
 	static final int ALMS_EVERY = 20 * 120, ALMS_HOLD = 20 * 8;
@@ -217,7 +218,7 @@ public final class Quests {
 	/** Whether {@code q} is done and can be turned in. */
 	static boolean ready(ServerPlayer player, Quest q) {
 		return switch (q.kind()) {
-			case Quest.GATHER -> count(player, item(q.objective().target())) >= q.objective().count();
+			case Quest.GATHER -> count(player, item(q.objective().target()), minGrade(q.objective().target())) >= q.objective().count();
 			case Quest.FETCH -> find(player, q.id()) >= 0;
 			case Quest.BREAK_IN, Quest.STUD -> Stables.questHorse(player, q) != null;
 			case Quest.LEAD -> led(player, q.objective().target()).size() >= q.objective().count();
@@ -482,7 +483,7 @@ public final class Quests {
 			return;
 		}
 		if (q.kind() == Quest.GATHER) {
-			take(player, item(q.objective().target()), q.objective().count());
+			take(player, item(q.objective().target()), q.objective().count(), minGrade(q.objective().target()));
 		} else if (q.kind() == Quest.FETCH) {
 			int slot = find(player, q.id());
 			if (slot >= 0) {
@@ -502,7 +503,8 @@ public final class Quests {
 		remove(player, q.id());
 		// (0.7.0) a priest's hunt: the rite, there and then
 		Cures.rite(level, player, giver, q);
-		for (ItemStack stack : rewards(level, q)) {
+		Money.pay(player, Factions.get(level.getServer(), q.giver().faction()), q.reward().milli());
+		for (ItemStack stack : goods(level, q)) {
 			give(player, stack);
 		}
 		Quest.Reward r = q.reward();
@@ -510,6 +512,10 @@ public final class Quests {
 			McaCompat.hearts(giver, player, r.hearts());
 		}
 		Reputation.change(player, f, r.reputation());
+		if (q.royal()) {
+			// (0.7.509) serving a king pleases the Crowned Sun
+			Patrons.deed(player, Patron.CROWNED_SUN, Patrons.DEED_MID, "royal_quest");
+		}
 		Faction.Member member = f.member(player.getUUID());
 		if (member != null && r.standing() > 0) {
 			KingdomEvents.standing(level.getServer(), player, f, member.standing() + r.standing());
@@ -613,12 +619,16 @@ public final class Quests {
 	static List<ItemStack> rewards(ServerLevel level, Quest q) {
 		List<ItemStack> out = new ArrayList<>();
 		Quest.Reward r = q.reward();
-		int emeralds = r.emeralds();
-		while (emeralds > 0) {
-			int n = Math.min(64, emeralds);
-			out.add(new ItemStack(Items.EMERALD, n));
-			emeralds -= n;
-		}
+		// (0.7.498) the coins (the worth, and any copper bits) are struck in the giver's realm coin
+		out.addAll(Money.stacks(level.getServer(), Factions.get(level.getServer(), q.giver().faction()), r.milli()));
+		out.addAll(goods(level, q));
+		return out;
+	}
+
+	/** (0.7.498) What {@code q} pays besides coins: goods, a book, a relic. */
+	private static List<ItemStack> goods(ServerLevel level, Quest q) {
+		List<ItemStack> out = new ArrayList<>();
+		Quest.Reward r = q.reward();
 		for (String spec : r.items()) {
 			int star = spec.indexOf('*');
 			Item item = item(star < 0 ? spec : spec.substring(0, star));
@@ -696,12 +706,28 @@ public final class Quests {
 		return -1;
 	}
 
+	/** (0.7.496) A gather target's item id: the target up to any '@'. */
+	static String itemId(String target) {
+		int at = target.indexOf('@');
+		return at < 0 ? target : target.substring(0, at);
+	}
+
+	/** (0.7.496) A gather target's grade floor ("jaymospowers:gem_ring@expert"), as a grade index, or -1 for none. */
+	static int minGrade(String target) {
+		int at = target.indexOf('@');
+		return at < 0 ? -1 : GradedTrades.gradeIndex(target.substring(at + 1));
+	}
+
 	private static Item item(String id) {
-		Identifier key = Identifier.tryParse(id);
+		Identifier key = Identifier.tryParse(itemId(id));
 		return key == null ? Items.AIR : BuiltInRegistries.ITEM.getOptional(key).orElse(Items.AIR);
 	}
 
 	private static int count(ServerPlayer player, Item item) {
+		return count(player, item, -1);
+	}
+
+	private static int count(ServerPlayer player, Item item, int minGrade) {
 		if (item == Items.AIR) {
 			return 0;
 		}
@@ -709,18 +735,18 @@ public final class Quests {
 		int n = 0;
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			ItemStack s = inv.getItem(i);
-			if (s.is(item) && questOf(s) == null) {
+			if (s.is(item) && questOf(s) == null && (minGrade < 0 || GradedTrades.gradeIndex(s) >= minGrade)) {
 				n += s.getCount();
 			}
 		}
 		return n;
 	}
 
-	private static void take(ServerPlayer player, Item item, int n) {
+	private static void take(ServerPlayer player, Item item, int n, int minGrade) {
 		Inventory inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize() && n > 0; i++) {
 			ItemStack s = inv.getItem(i);
-			if (s.is(item) && questOf(s) == null) {
+			if (s.is(item) && questOf(s) == null && (minGrade < 0 || GradedTrades.gradeIndex(s) >= minGrade)) {
 				int m = Math.min(n, s.getCount());
 				s.shrink(m);
 				n -= m;
@@ -891,8 +917,8 @@ public final class Quests {
 					.withStyle(ChatFormatting.GOLD));
 				if (oath || out) {
 					Quest.Reward r = done.reward();
-					done = done.withReward(new Quest.Reward(r.emeralds() * (100 + CUNNING_EMERALDS) / 100, r.items(), r.book(), r.relic(), r.hearts(),
-						r.reputation() + CUNNING_REPUTATION, r.standing()));
+					done = done.withReward(new Quest.Reward(r.emeralds() * (100 + CUNNING_SILVER) / 100, r.items(), r.book(), r.relic(), r.hearts(),
+						r.reputation() + CUNNING_REPUTATION, r.standing(), r.copper() * (100 + CUNNING_SILVER) / 100));
 					p.sendSystemMessage(Component.translatable(oath ? "quest.jaymoskingdoms.regicide.cunning.oath" : "quest.jaymoskingdoms.regicide.cunning.round")
 						.withStyle(ChatFormatting.DARK_RED));
 				}
@@ -1152,7 +1178,7 @@ public final class Quests {
 		}
 		if (q.kind() == Quest.HUNT) {
 			boolean gone = o.spawned() && o.other().map(id -> level.getEntity(id) == null).orElse(true);
-			if ((!o.spawned() || gone) && d2 < Sightings.HUNT_RANGE * Sightings.HUNT_RANGE) {
+			if ((!o.spawned() || gone) && d2 < Blessings.huntRange(player, Sightings.HUNT_RANGE) * Blessings.huntRange(player, Sightings.HUNT_RANGE)) {
 				List<Mob> came = Encounters.send(level, player, type, 1, Sightings.QUEST_HUNT_TICKS);
 				if (!came.isEmpty()) {
 					put(player, q.withSpawned(Optional.of(came.getFirst().getUUID())));
@@ -1247,7 +1273,13 @@ public final class Quests {
 	}
 
 	private static Component itemName(String id) {
-		return new ItemStack(item(id)).getHoverName();
+		Component base = new ItemStack(item(id)).getHoverName();
+		int grade = minGrade(id);
+		if (grade < 0) {
+			return base;
+		}
+		String gradeId = GradedTrades.gradeId(grade);
+		return Component.translatable("quest.jaymoskingdoms.graded", base, Component.translatableWithFallback("grade.jaymospowers." + gradeId, gradeId));
 	}
 
 	private static Component keepsakeName(Quest q) {
@@ -1303,7 +1335,7 @@ public final class Quests {
 		return switch (q.kind()) {
 			case Quest.SLAY -> Component.translatable("quest.jaymoskingdoms.objective.slay", foes(o.target()), o.progress(), o.count());
 			case Quest.GATHER -> Component.translatable("quest.jaymoskingdoms.objective.gather", itemName(o.target()),
-				Math.min(count(player, item(o.target())), o.count()), o.count());
+				Math.min(count(player, item(o.target()), minGrade(o.target())), o.count()), o.count());
 			case Quest.LEAD -> Component.translatable("quest.jaymoskingdoms.objective.lead", beastName(o.target()),
 				Math.min(led(player, o.target()).size(), o.count()), o.count(), q.giver().name());
 			case Quest.FETCH -> Component.translatable(QuestFoes.dig(q) ? "quest.jaymoskingdoms.objective.dig" : "quest.jaymoskingdoms.objective.fetch",
@@ -1348,7 +1380,7 @@ public final class Quests {
 			extras.add(Component.translatable("quest.jaymoskingdoms.reward.standing", r.standing()));
 		}
 		if (q.kind() == Quest.REGICIDE && state != QuestNet.READY) {
-			extras.add(Component.translatable("quest.jaymoskingdoms.regicide.hint." + q.objective().otherName(), CUNNING_EMERALDS));
+			extras.add(Component.translatable("quest.jaymoskingdoms.regicide.hint." + q.objective().otherName(), CUNNING_SILVER));
 		}
 		MutableComponent title = title(q).copy();
 		return new QuestNet.View(q.id(), state, q.royal(), title, text(q), objective(level, player, q), rewards(level, q), extras);

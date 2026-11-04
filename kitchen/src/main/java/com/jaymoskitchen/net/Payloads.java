@@ -9,6 +9,7 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.item.ItemStack;
 
 /** Every packet the cooking minigame sends. The server owns the session; the client only presses buttons. */
 public final class Payloads {
@@ -318,9 +319,13 @@ public final class Payloads {
 
 	/**
 	 * (0.4.32) Server → client: a butcher villager looks over the body you brought ({@code what}) and names his price.
-	 * {@code skill}: how many times what you'd get yourself (1 to 3); {@code tier} 0 (clumsy) to 4 (master).
+	 * {@code skill}: how many times what you'd get yourself (1 to 3); {@code tier} 0 (clumsy) to 4 (master). (0.5.56) {@code price}
+	 * is made by the server, in the coin of the land ("6 Realm Silver"), and {@code coin} is one of that coin to draw beside it;
+	 * {@code cost} is the price in milli and {@code have} is that cost when the server's charge rule would take it from what you
+	 * carry (foreign coin at the going rate), else 0 (a purse is hidden from the client).
 	 */
-	public record OpenButcher(int villager, Component name, Component what, float skill, int tier, int price) implements CustomPacketPayload {
+	public record OpenButcher(int villager, Component name, Component what, float skill, int tier, Component price, ItemStack coin, long cost,
+		long have) implements CustomPacketPayload {
 		public static final Type<OpenButcher> TYPE = new Type<>(JaymosKitchen.id("open_butcher"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, OpenButcher> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, OpenButcher::villager,
@@ -328,7 +333,10 @@ public final class Payloads {
 			ComponentSerialization.TRUSTED_STREAM_CODEC, OpenButcher::what,
 			ByteBufCodecs.FLOAT, OpenButcher::skill,
 			ByteBufCodecs.VAR_INT, OpenButcher::tier,
-			ByteBufCodecs.VAR_INT, OpenButcher::price,
+			ComponentSerialization.TRUSTED_STREAM_CODEC, OpenButcher::price,
+			ItemStack.STREAM_CODEC, OpenButcher::coin,
+			ByteBufCodecs.VAR_LONG, OpenButcher::cost,
+			ByteBufCodecs.VAR_LONG, OpenButcher::have,
 			OpenButcher::new);
 
 		@Override

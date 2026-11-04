@@ -121,7 +121,7 @@ final class Frights {
 			// (0.7.292) a camp's orc, an MCA villager now; (0.7.293) a barbarian chief
 			return true;
 		}
-		return m instanceof Enemy || Vampires.exposed(m);
+		return m instanceof Enemy && !(m instanceof PatronChampion) || Vampires.exposed(m);
 	}
 
 	/** (0.6.11) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */

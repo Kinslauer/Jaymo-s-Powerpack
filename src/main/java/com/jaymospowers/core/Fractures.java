@@ -17,6 +17,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
@@ -62,7 +63,7 @@ public final class Fractures {
 	public static final float SKELETON_SCALE = 2.0F;
 	/** (before 0.14.2: started healing's length) Chrono's Bloom and Wind's Zephyr's Breath now set breaks at once; kept for their callers. */
 	public static final int BLOOM_MEND = 2400, ZEPHYR_MEND = 6000;
-	/** What a priest asks to set your bones, in emeralds. */
+	/** What a priest asks to set your bones, in silver coins (before 0.19.69: emeralds, one for one). */
 	public static final int PRIEST_FEE = 2;
 	public static final int DAZE_TICKS = 80;
 
@@ -81,12 +82,16 @@ public final class Fractures {
 		ServerLivingEntityEvents.AFTER_DAMAGE.addPhaseOrdering(Event.DEFAULT_PHASE, AFTER_WOUNDS);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(AFTER_WOUNDS, Fractures::afterDamage);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (hand != InteractionHand.MAIN_HAND || Breaks.unset(player) == 0 || !player.getMainHandItem().is(Items.EMERALD)
-				|| player.getMainHandItem().getCount() < PRIEST_FEE || !priest(entity)) {
+			// (0.20.0) offer coins or a purse in hand (an emerald without Kingdoms); the fee is then paid from everything you carry
+			if (hand != InteractionHand.MAIN_HAND || Breaks.unset(player) == 0 || !offering(player.getMainHandItem()) || !priest(entity)) {
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && level instanceof ServerLevel server) {
-				player.getMainHandItem().consume(PRIEST_FEE, player);
+				if (!(player instanceof ServerPlayer payer) || !KingdomsMoney.charge(payer, KingdomsMoney.worth(PRIEST_FEE))) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.fracture.priest_poor", KingdomsMoney.text(KingdomsMoney.worth(PRIEST_FEE)))
+						.withStyle(ChatFormatting.RED));
+					return InteractionResult.SUCCESS_SERVER;
+				}
 				heal(player);
 				server.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.4, 0.5, 0.4, 0.0);
 				server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.VILLAGER_WORK_CLERIC, SoundSource.NEUTRAL, 1.0F, 1.0F);
@@ -96,6 +101,20 @@ public final class Fractures {
 			return InteractionResult.SUCCESS;
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> heal(newPlayer));
+	}
+
+	/**
+	 * (0.20.0) Whether {@code stack} is money held out to a priest: a coin, a coin stack or a purse of Jaymo's Kingdoms (named by
+	 * id, never compiled against), or an emerald when Kingdoms isn't there (the fallback of {@link KingdomsMoney}).
+	 */
+	private static boolean offering(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return false;
+		}
+		if (!KingdomsMoney.present()) {
+			return stack.is(Items.EMERALD);
+		}
+		return KingdomsMoney.isMoney(stack);
 	}
 
 	/** A cleric (a village's or a kingdom's priest, MCA's included) who can set bones. */

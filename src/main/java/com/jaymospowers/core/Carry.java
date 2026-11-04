@@ -161,6 +161,8 @@ public final class Carry {
 	static final int REGRAB_TICKS = 20;
 	/** Let go: a drop carries on with the carrier's momentum, nudged ahead; a throw goes this fast ahead and up (b/t). */
 	static final double DROP_AHEAD = 0.12, DROP_UP = 0.08, THROW_AHEAD = 0.5, THROW_UP = 0.32;
+	/** (0.19.62) How far a carried head reaches a wall to be mounted on it, and how far out from the face it hangs. */
+	static final double TROPHY_REACH = 3.0, TROPHY_OFF_WALL = 0.18;
 	/** One jump frees a carried player: they spring off up and back (b/t). */
 	static final double ESCAPE_UP = 0.42, ESCAPE_BACK = 0.3;
 	/** A struggle that can't work (stunned, say) can't be retried for this long (ticks). */
@@ -337,6 +339,7 @@ public final class Carry {
 		ServerTickEvents.END_SERVER_TICK.register(Carry::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> clear());
 		CarryBlock.init();
+		CarryOnCompat.init();
 	}
 
 	// ---- queries (both sides, from the synced attachments)
@@ -865,6 +868,19 @@ public final class Carry {
 			entry.placeAt = spot;
 			end(carrier, entry, Let.PLACE);
 			return;
+		}
+		if (!toss && entry.carried instanceof SeveredPart head && head.part() == Dismember.HEAD) {
+			// (0.19.62) a head set down looking at a wall goes up on it as a trophy
+			net.minecraft.world.phys.BlockHitResult wall = carrier.level().clip(new net.minecraft.world.level.ClipContext(carrier.getEyePosition(),
+				carrier.getEyePosition().add(carrier.getViewVector(1.0F).scale(TROPHY_REACH)), net.minecraft.world.level.ClipContext.Block.COLLIDER,
+				net.minecraft.world.level.ClipContext.Fluid.NONE, carrier));
+			if (wall.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && wall.getDirection().getAxis().isHorizontal()) {
+				Vec3 out = Vec3.atLowerCornerOf(wall.getDirection().getUnitVec3i());
+				end(carrier, entry, Let.SET_DOWN);
+				head.mountOn(wall.getLocation().add(out.scale(TROPHY_OFF_WALL)), (float) Math.toDegrees(Math.atan2(-out.x, out.z)));
+				carrier.level().playSound(null, head.getX(), head.getY(), head.getZ(), SoundEvents.WOOD_PLACE, SoundSource.PLAYERS, 0.8F, 0.8F);
+				return;
+			}
 		}
 		// a chest is only ever set down, never thrown
 		end(carrier, entry, toss && !CarryBlock.holdsContents(entry.carried) ? Let.THROW : Let.DROP);

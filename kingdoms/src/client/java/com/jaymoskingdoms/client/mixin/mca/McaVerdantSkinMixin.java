@@ -29,7 +29,8 @@ abstract class McaVerdantSkinMixin {
 	@Inject(method = "getColor(Lnet/conczin/mca/client/render/VillagerVisuals;F)I", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$verdantSkin(VillagerVisuals visuals, float partialTicks, CallbackInfoReturnable<Integer> cir) {
 		Minecraft minecraft = Minecraft.getInstance();
-		Entity entity = minecraft.level == null ? null : minecraft.level.getEntity(visuals.entityId());
+		// (0.7.479) or a corpse's body, not in the world (DrawnBodies)
+		Entity entity = com.jaymoskingdoms.client.DrawnBodies.get(visuals.entityId());
 		if (entity == null) {
 			// (0.7.236) the figure on MCA's editor, which isn't in the world
 			entity = com.jaymoskingdoms.client.EditorFigure.byId(visuals.entityId());
@@ -50,7 +51,8 @@ abstract class McaVerdantSkinMixin {
 	@Inject(method = "getColor(Lnet/conczin/mca/client/render/VillagerVisuals;F)I", at = @At("RETURN"), cancellable = true)
 	private void jaymoskingdoms$heritageSkin(VillagerVisuals visuals, float partialTicks, CallbackInfoReturnable<Integer> cir) {
 		Minecraft minecraft = Minecraft.getInstance();
-		Entity entity = minecraft.level == null ? null : minecraft.level.getEntity(visuals.entityId());
+		// (0.7.479) or a corpse's body, not in the world (DrawnBodies)
+		Entity entity = com.jaymoskingdoms.client.DrawnBodies.get(visuals.entityId());
 		if (entity == null) {
 			// (0.7.236) the figure on MCA's editor, which isn't in the world
 			entity = com.jaymoskingdoms.client.EditorFigure.byId(visuals.entityId());

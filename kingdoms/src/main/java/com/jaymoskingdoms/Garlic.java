@@ -79,12 +79,12 @@ public final class Garlic {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TRIED.clear());
 	}
 
-	/** Whether {@code stack} is garlic or silver. */
+	/** Whether {@code stack} is garlic or silver. (0.7.498) Not the realms' coins: realm silver and hacksilver are money, not the metal. */
 	static boolean bane(ItemStack stack) {
 		if (stack.isEmpty()) {
 			return false;
 		}
-		return stack.is(GARLIC) || BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("silver");
+		return stack.is(GARLIC) || Currency.byItem(stack.getItem()) == null && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("silver");
 	}
 
 	private static void try_(ServerLevel level, ServerPlayer user, LivingEntity target, ItemStack held, InteractionHand hand) {

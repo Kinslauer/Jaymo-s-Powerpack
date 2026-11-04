@@ -166,9 +166,11 @@ public final class Manacles {
 
 	/** The realm's bounty for a manacled outlaw: emeralds in {@code player}'s pack (the floor if it's full) and a little goodwill. */
 	private static void pay(ServerPlayer player, Faction law) {
-		ItemStack purse = new ItemStack(Items.EMERALD, BOUNTY);
-		player.getInventory().placeItemBackInInventory(purse, Prediction.SERVER_ONLY);
+		// (0.7.490) in the realm's own coin
+		Currency money = Currencies.of(player.level().getServer(), law);
+		Currencies.Pay coins = Currencies.payEmeralds(money, BOUNTY);
+		Currencies.give(player, coins);
 		Reputation.change(player, law, BOUNTY_REPUTATION);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.manacles.bounty", BOUNTY, law.name()).withStyle(ChatFormatting.GOLD));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.manacles.bounty", Currencies.amount(coins), law.name()).withStyle(ChatFormatting.GOLD));
 	}
 }

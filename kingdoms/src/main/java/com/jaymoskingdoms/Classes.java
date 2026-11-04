@@ -55,6 +55,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.6.0) Player classes: what you're good with. The first time you come into a world a screen asks you to pick one of
@@ -76,7 +77,7 @@ public final class Classes {
 	/** How often a court wizard will sell you a Writ of Rebirth (ticks): once a Minecraft week. */
 	static final long WRIT_EVERY = 24000L * 7L;
 	/** What he asks for one. */
-	static final int WRIT_EMERALDS = 30;
+	static final int WRIT_SILVER = 30;
 	/** The chance a rare chest (stronghold library, ancient city, woodland mansion) holds a writ. */
 	static final float WRIT_LOOT_CHANCE = 0.08F;
 	/** Enderscape's stronghold library (optional; matched by id, never linked): its strongholds replace the vanilla ones. */
@@ -369,19 +370,24 @@ public final class Classes {
 	 */
 	public static List<ItemStack> gear(PlayerClass cls, String option) {
 		return switch (cls) {
-			case THIEF -> List.of(any(1, "jaymospowers:iron_dagger", "minecraft:iron_sword"), new ItemStack(Items.LEATHER_CHESTPLATE),
-				new ItemStack(Items.LEATHER_LEGGINGS), new ItemStack(Items.LEATHER_BOOTS));
-			case WARLORD -> List.of(any(1, "jaymospowers:iron_claymore", "minecraft:iron_axe"), new ItemStack(Items.IRON_CHESTPLATE), new ItemStack(Items.IRON_BOOTS));
-			case MAGE -> List.of(new ItemStack(Arcana.WIZARD_STAFF), new ItemStack(switch (option) {
+			// (0.7.520) the RPG Series' tier-one kit where it's there (RpgKit): a rogue's flint dagger and rogue's leathers
+			case THIEF -> List.of(any(1, "jaymospowers:iron_dagger", "minecraft:iron_sword"), any(1, "rogues:flint_dagger"),
+				RpgKit.or("rogues:rogue_armor_chest", "minecraft:leather_chestplate"), new ItemStack(Items.LEATHER_LEGGINGS),
+				RpgKit.or("rogues:rogue_armor_feet", "minecraft:leather_boots"));
+			case WARLORD -> List.of(any(1, "jaymospowers:iron_claymore", "minecraft:iron_axe"),
+				RpgKit.or("rogues:warrior_armor_chest", "minecraft:iron_chestplate"), new ItemStack(Items.IRON_BOOTS));
+			case MAGE -> List.of(new ItemStack(Arcana.WIZARD_STAFF), any(1, RpgKit.wand(option)), new ItemStack(switch (option) {
 				case "fire" -> Arcana.SCROLL_FIRE;
 				case "warding" -> Arcana.SCROLL_WARDING;
 				default -> Arcana.SCROLL_ARCANE;
-			}, 3), new ItemStack(Items.LEATHER_HELMET));
-			case ARCHER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 32), new ItemStack(Items.LEATHER_HELMET), new ItemStack(Items.LEATHER_BOOTS));
+			}, 3), RpgKit.or("wizards:wizard_robe_head", "minecraft:leather_helmet"), any(1, "wizards:wizard_robe_chest"));
+			case ARCHER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 32), any(1, "archers:small_quiver"),
+				RpgKit.or("archers:archer_armor_head", "minecraft:leather_helmet"), RpgKit.or("archers:archer_armor_feet", "minecraft:leather_boots"));
 			case SURVIVALIST -> List.of(any(1, "jaymospowers:hand_axe", "minecraft:stone_axe"), new ItemStack(Items.BREAD, 8), new ItemStack(Items.LEATHER_BOOTS));
-			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD), new ItemStack(Items.CHAINMAIL_CHESTPLATE));
+			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD),
+				RpgKit.or("rogues:berserker_armor_chest", "minecraft:chainmail_chestplate"));
 			case MARKSMAN -> List.of(any(1, "weaponmod:musket", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"),
-				new ItemStack(Items.LEATHER_CHESTPLATE));
+				any(1, "archers:rapid_crossbow"), new ItemStack(Items.ARROW, 16), RpgKit.or("archers:archer_armor_chest", "minecraft:leather_chestplate"));
 			case SORCERER -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.LEATHER_CHESTPLATE), new ItemStack(Items.LEATHER_LEGGINGS));
 			case RIDER -> List.of(any(1, "jaymospowers:iron_lance", "minecraft:iron_sword"), new ItemStack(Items.SADDLE), new ItemStack(Items.LEATHER_CHESTPLATE),
 				new ItemStack(Items.LEATHER_BOOTS), new ItemStack(Items.WHEAT, 8));
@@ -474,8 +480,8 @@ public final class Classes {
 					enabled.add(true);
 				}
 				case "writ" -> {
-					options.add(Component.translatable("talk.jaymoskingdoms.wizard.writ.yes", WRIT_EMERALDS));
-					enabled.add(Approaches.emeralds(player) >= WRIT_EMERALDS);
+					options.add(Component.translatable("talk.jaymoskingdoms.wizard.writ.yes", WRIT_SILVER));
+					enabled.add(Money.canPay(player, Money.worth(WRIT_SILVER)));
 				}
 				default -> {
 					options.add(Restoration.optionLine(player, kind));
@@ -483,8 +489,8 @@ public final class Classes {
 				}
 			}
 		}
-		Component words = staff ? Component.translatable("talk.jaymoskingdoms.wizard.staff", WRIT_EMERALDS)
-			: writ ? Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_EMERALDS) : Component.translatable("talk.jaymoskingdoms.healer.ask");
+		Component words = staff ? Component.translatable("talk.jaymoskingdoms.wizard.staff", WRIT_SILVER)
+			: writ ? Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_SILVER) : Component.translatable("talk.jaymoskingdoms.healer.ask");
 		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(), words, options, enabled));
 	}
 
@@ -514,7 +520,7 @@ public final class Classes {
 			Restoration.serve(player, wizard, kind);
 			return true;
 		}
-		if (Approaches.emeralds(player) < WRIT_EMERALDS) {
+		if (!Money.canPay(player, Money.worth(WRIT_SILVER))) {
 			return true;
 		}
 		Long last = player.getAttached(WRIT_BOUGHT);
@@ -522,7 +528,7 @@ public final class Classes {
 		if (last != null && now - last < WRIT_EVERY && now >= last) {
 			return true;
 		}
-		Approaches.take(player, Items.EMERALD, WRIT_EMERALDS);
+		Money.charge(player, Money.worth(WRIT_SILVER)); // (0.7.498) silver coins, not emeralds
 		player.setAttached(WRIT_BOUGHT, player.level().getGameTime());
 		player.getInventory().placeItemBackInInventory(new ItemStack(WRIT), Prediction.SERVER_ONLY);
 		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.writ.done"), Speech.GOLD);

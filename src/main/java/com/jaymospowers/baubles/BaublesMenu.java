@@ -9,12 +9,14 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The bauble slots' screen: the amulet, two rings and the belt down the left of the player, the head, body and charm down
- * the right, the player's inventory below. Drawn by the client's BaublesScreen.
+ * The bauble slots' screen: the amulet, two rings and the belt down the left of the player, the head, body, charm and wrist (0.19.87) down
+ * the right, the feet (Artifacts) in the player box's bottom left corner, the player's inventory below. Drawn by the client's BaublesScreen.
  */
 public class BaublesMenu extends AbstractContainerMenu {
-	/** Where each of the seven slots sits (x, y), in {@link Baubles#SLOTS} order; and the player's inventory. */
-	public static final int[][] SLOT_AT = {{8, 8}, {8, 26}, {8, 44}, {8, 62}, {152, 8}, {152, 26}, {152, 44}};
+	/** Where each of the nine slots sits (x, y), in {@link Baubles#SLOTS} order; and the player's inventory. */
+	public static final int[][] SLOT_AT = {{8, 8}, {8, 26}, {8, 44}, {8, 62}, {152, 8}, {152, 26}, {152, 44}, {152, 62},
+		// (Artifacts) the feet, in the bottom left corner of the player box, by the feet
+		{32, 60}};
 	public static final int INVENTORY_Y = 84;
 
 	private final Container baubles;

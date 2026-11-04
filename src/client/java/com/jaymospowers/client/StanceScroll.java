@@ -148,7 +148,9 @@ public final class StanceScroll {
 
 	/** The stance the local player shows (for {@link StanceHud}): prone, low crouch, crouched, or on their feet. */
 	static int shown(LocalPlayer player) {
-		if (Crawl.crawling(player) || player.getPose() == Pose.SWIMMING && !player.isInWater()) {
+		// (0.19.66) Billow's and Croaker's low box isn't lying down
+		if (Crawl.crawling(player) || player.getPose() == Pose.SWIMMING && !player.isInWater()
+			&& !com.jaymospowers.power.xenoform.XenoformState.lowBox(player)) {
 			return Stance.PRONE;
 		}
 		if (player.isCrouching()) {
@@ -205,7 +207,8 @@ public final class StanceScroll {
 	 * until the wheel takes you up to a sneak or standing (or Jump / a Sneak tap stands you).
 	 */
 	private static void tickKneel(LocalPlayer player) {
-		boolean low = held != null && held == Stance.LOW && Stance.localLow == player.getId() && player.onGround();
+		boolean low = held != null && held == Stance.LOW && Stance.localLow == player.getId() && player.onGround()
+			&& !CrouchPose.ownCrouch(player);
 		double dx = player.getX() - lastX, dz = player.getZ() - lastZ;
 		lastX = player.getX();
 		lastZ = player.getZ();

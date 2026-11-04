@@ -51,6 +51,16 @@ public final class ChatPrompts {
 			if (!blood.isEmpty()) {
 				sb.append(blood).append('\n');
 			}
+			// (0.7.509) what they hold, and what they think of yours
+			String faith = Faiths.prompt(villager, player);
+			if (!faith.isEmpty()) {
+				sb.append(faith).append('\n');
+			}
+			// (0.7.498) coin or emeralds
+			String money = MoneyTalk.prompt(villager);
+			if (!money.isEmpty()) {
+				sb.append(money).append('\n');
+			}
 			String neighbours = neighbours(villager);
 			if (!neighbours.isEmpty()) {
 				sb.append("Your neighbours: ").append(neighbours).append('\n');
@@ -67,6 +77,11 @@ public final class ChatPrompts {
 				int lean = Recollections.leaning(villager, player);
 				sb.append(lean <= Recollections.REFUSE ? "You can hardly bear to speak to them.\n"
 					: lean <= Recollections.COLD ? "You don't trust them.\n" : lean >= Recollections.WARM ? "You think well of them.\n" : "");
+				// (0.7.523) and how they feel about them, in words
+				String bearing = Bearings.prompt(villager, player);
+				if (!bearing.isEmpty()) {
+					sb.append(bearing).append('\n');
+				}
 			}
 			sb.append("Bring these things up when they fit the conversation. Don't invent any other history with ").append(name)
 				.append(". Keep your replies short, like spoken words.\n");

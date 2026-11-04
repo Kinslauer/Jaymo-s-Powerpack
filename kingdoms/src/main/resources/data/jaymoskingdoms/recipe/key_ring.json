@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "N": "minecraft:iron_nugget"
+  },
+  "pattern": [
+    " N ",
+    "N N",
+    " N "
+  ],
+  "result": {
+    "id": "jaymoskingdoms:key_ring",
+    "count": 1
+  }
+}

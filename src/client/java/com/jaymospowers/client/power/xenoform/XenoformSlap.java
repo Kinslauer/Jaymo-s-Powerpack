@@ -301,6 +301,11 @@ public final class XenoformSlap {
 				// your own body: its right arm is hidden and the slam's own hand drawn
 				return;
 			}
+			if (h instanceof XenoFormModels.FormModel form && form.ownsTap) {
+				// (0.19.84) a body whose arm reaches the insignia itself (Knell, Shade): only the head bows to it
+				h.head.xRot += CHEST_HEAD_DOWN * raise;
+				return;
+			}
 			h.rightArm.xRot = Mth.lerp(raise, h.rightArm.xRot, Mth.lerp(strike, CHEST_POISED_X, CHEST_X));
 			h.rightArm.yRot = Mth.lerp(raise, h.rightArm.yRot, Mth.lerp(strike, CHEST_POISED_Y, CHEST_Y));
 			h.rightArm.zRot = Mth.lerp(raise, h.rightArm.zRot, Mth.lerp(strike, CHEST_POISED_Z, 0.0F));

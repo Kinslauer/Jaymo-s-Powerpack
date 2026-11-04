@@ -36,8 +36,7 @@ import net.minecraft.world.phys.Vec3;
  * down. Free. It leaves a comet's tail of flame ({@code PyreComet}).</li>
  * <li>V, Fire Nova: everything within {@link #NOVA_RADIUS} is burnt and set alight.</li>
  * <li>B, Magma Trail: for {@link #TRAIL_TICKS} the ground burns where you step.</li>
- * <li>C (ascended), Sunheart: the jet goes faster (flight {@link XenoformState#FLY_SUN}), and R becomes a held beam of fire
- * {@link #BEAM_RANGE} blocks long that burns whatever it touches.</li>
+ * <li>C (ascended), Sunheart: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Sunheart}.</li>
  * </ul>
  */
 public final class Pyre extends XenoForm {
@@ -57,10 +56,9 @@ public final class Pyre extends XenoForm {
 	/** In water or rain: this much damage every this many ticks. */
 	public static final float WET_DAMAGE = 1.0F;
 	public static final int WET_EVERY = 20;
-	/** Sunheart: the beam's reach, bite (every {@link #BEAM_EVERY} ticks) and burn. */
-	public static final double BEAM_RANGE = 12.0;
-	public static final float BEAM_DAMAGE = 2.0F;
-	public static final int BEAM_EVERY = 4, BEAM_BURN_SECONDS = 3;
+
+	/** (0.20.21) Sunheart is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Sunheart}. */
+	private final com.jaymospowers.power.xenoform.XenoUltimate sunheart = new com.jaymospowers.power.xenoform.forms.ultimate.Sunheart(this);
 
 	public Pyre() {
 		super("pyre", 1.0F, 24.0F, 4.0, 0.0, 0.0, 0.0, Items.MAGMA_BLOCK, 0xFF8A2A);
@@ -79,17 +77,6 @@ public final class Pyre extends XenoForm {
 
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
-		if (key == PowerKey.ABILITY_1 && live.ultimate) {
-			// Sunheart: the bolt is a beam, held
-			if (down != live.beam) {
-				live.beam = down;
-				if (down) {
-					sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 0.6F);
-					cooldown(player, live, R, 1);
-				}
-			}
-			return;
-		}
 		if (key == PowerKey.ABILITY_2) {
 			// a toggle: G takes off, G again ends it (the client flies it, as a Z Fighter's flight)
 			if (down) {
@@ -142,7 +129,7 @@ public final class Pyre extends XenoForm {
 				// sneaking on the ground: landed
 				endJet(player, live);
 			} else if (player.tickCount % 8 == 0) {
-				sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, live.ultimate ? 1.0F : 1.3F);
+				sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, 1.3F);
 			}
 		}
 		// the trail
@@ -201,82 +188,15 @@ public final class Pyre extends XenoForm {
 
 	@Override
 	public int flight(ServerPlayer player, XenoformPower.Live live) {
-		return !live.jet || player.onGround() ? XenoformState.FLY_NONE : live.ultimate ? XenoformState.FLY_SUN : XenoformState.FLY_JET;
+		return !live.jet || player.onGround() ? XenoformState.FLY_NONE : XenoformState.FLY_JET;
 	}
 
 	// ---- Sunheart ----
 
+	/** (0.20.21) Sunheart is its own evolved form: see {@link com.jaymospowers.power.xenoform.forms.ultimate.Sunheart}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		Vec3 at = player.position().add(0.0, 1.0, 0.0);
-		ring(level, ParticleTypes.FLAME, at, 2.0, 24);
-		level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.0);
-		sound(player, SoundEvents.BLAZE_AMBIENT, 2.0F, 0.6F);
-		sound(player, SoundEvents.FIRECHARGE_USE, 1.0F, 0.8F);
-		com.jaymospowers.core.Shakes.heavy(player, at, 16.0, 1.0F);
-		return true;
-	}
-
-	@Override
-	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		// the sun inside: it glows
-		if (player.tickCount % 2 == 0) {
-			level.sendParticles(ParticleTypes.SMALL_FLAME, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.4, 0.6, 0.4, 0.02);
-		}
-		if (live.beam) {
-			beam(player, live);
-		}
-	}
-
-	@Override
-	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
-		live.beam = false;
-	}
-
-	/** The beam, every tick it's held: a line of fire from your hands to the first thing it meets. */
-	private static void beam(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		Vec3 eye = player.getEyePosition().add(0.0, -0.3, 0.0);
-		Vec3 look = player.getLookAngle();
-		Vec3 end = eye.add(look.scale(BEAM_RANGE));
-		var blockHit = level.clip(new net.minecraft.world.level.ClipContext(eye, end, net.minecraft.world.level.ClipContext.Block.COLLIDER,
-			net.minecraft.world.level.ClipContext.Fluid.NONE, player));
-		if (blockHit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
-			end = blockHit.getLocation();
-		}
-		var entityHit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(level, player, eye, end,
-			player.getBoundingBox().expandTowards(look.scale(BEAM_RANGE)).inflate(1.0),
-			e -> e instanceof LivingEntity living && living.isAlive() && e != player && !e.isSpectator(), 0.5F);
-		if (entityHit != null) {
-			end = entityHit.getLocation();
-		}
-		double length = end.distanceTo(eye);
-		for (double d = 0.5; d < length; d += 0.5) {
-			Vec3 p = eye.add(look.scale(d));
-			level.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0.0);
-		}
-		if (player.tickCount % BEAM_EVERY == 0) {
-			if (entityHit != null && entityHit.getEntity() instanceof LivingEntity target) {
-				target.hurtServer(level, player.damageSources().inFire(), BEAM_DAMAGE);
-				target.hurtTime = 0;
-				target.igniteForSeconds(BEAM_BURN_SECONDS);
-			} else if (blockHit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
-				light(level, blockHit.getBlockPos().relative(blockHit.getDirection()));
-			}
-			player.causeFoodExhaustion(0.02F);
-		}
-		if (player.tickCount % 6 == 0) {
-			sound(player, SoundEvents.BLAZE_BURN, 0.6F, 1.5F);
-		}
-	}
-
-	/** Sets {@code pos} alight if fire can stand there. */
-	private static void light(ServerLevel level, BlockPos pos) {
-		if (level.getBlockState(pos).isAir() && BaseFireBlock.canBePlacedAt(level, pos, Direction.NORTH)) {
-			level.setBlock(pos, BaseFireBlock.getState(level, pos), Block.UPDATE_ALL);
-		}
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return sunheart;
 	}
 
 	private static void bolt(ServerPlayer player) {

@@ -429,6 +429,7 @@ public final class ZFighterPower implements Power {
 		ZFighterGift.init();
 		ZFighterKi.init();
 		ZFighterWaveBeam.init();
+		ZFighterHands.init();
 		ZFighterDisc.init();
 		ZFighterItems.init();
 		ZFighterSparring.init();
@@ -490,6 +491,7 @@ public final class ZFighterPower implements Power {
 			ZFighterGrowth.clear();
 			ZFighterKi.clear();
 			ZFighterWaveBeam.clear();
+			ZFighterHands.clear();
 			ZFighterDisc.clear();
 			ZFighterArts.clear();
 		});
@@ -597,6 +599,7 @@ public final class ZFighterPower implements Power {
 		if (live != null && live.flying) {
 			live.flying = false;
 		}
+		ZFighterHands.drop(player);
 		landFlight(player);
 		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID, APE_FIST_ID}) {
 			remove(player, Attributes.ATTACK_DAMAGE, id);
@@ -709,6 +712,7 @@ public final class ZFighterPower implements Power {
 
 		ZFighterKi.tickWave(player, live);
 		ZFighterKi.tickBarrage(player, live);
+		ZFighterHands.sync(player, live);
 		ZFighterTechniques.tickBarrier(player, live);
 		ZFighterTechniques.tickSpirit(player, live);
 

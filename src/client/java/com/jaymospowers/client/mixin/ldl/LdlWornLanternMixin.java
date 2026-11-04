@@ -30,7 +30,8 @@ abstract class LdlWornLanternMixin {
 		}
 		int light = cir.getReturnValueI();
 		ItemStack hip = Baubles.shown(player, 0);
-		if (hip.getItem() instanceof BlockItem item) {
+		// (0.20.0) only lanterns give light: a coin purse at the hip (a hip item that is no lantern) does not
+		if (Baubles.hipLantern(hip) && hip.getItem() instanceof BlockItem item) {
 			light = Math.max(light, item.getBlock().defaultBlockState().getLightEmission());
 		}
 		if (!Baubles.shown(player, 1).isEmpty()) {

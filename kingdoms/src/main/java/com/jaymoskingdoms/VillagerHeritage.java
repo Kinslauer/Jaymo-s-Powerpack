@@ -74,6 +74,8 @@ public final class VillagerHeritage {
 	 * Divine-born very rare (the peaks lean them); the Bio-built aren't born to villagers at all, only to a Bio-built parent.
 	 */
 	static final int W_RUBBERFOLK = 20, W_DIVINE = 4;
+	/** (0.7.490) The beastfolk: fairly rare, leaning to the savannas, taigas and jungles; the Hollow are earned, only ever inherited. */
+	static final int W_BEASTFOLK = 18;
 	/** (0.7.106) The heights (the peaks, where the storms break): HeritageVariants' HIGH land. */
 	static final int HIGH_Y = 110;
 	/** (0.7.91) The share of folk born plain Heartlanders or Earthlings; the rest are of the rarer bloods. */
@@ -112,6 +114,8 @@ public final class VillagerHeritage {
 
 	/** How many lines each kind of talk has ({@code dialogue.chat.jaymoskingdoms.blood_<kind>/<n>}, 1-based). */
 	static final int WRAPPED_LINES = 6, WRAPPED_TURNED_LINES = 4, CUT_LINES = 6, CUT_RAMPAGE_LINES = 4, BLOOD_LINES = 3;
+	/** (0.7.509) Dawnborn have two more: they praise the sun. */
+	static final int DAWNBORN_LINES = 5;
 
 	/** The villagers in the world with a heritage (their gifts are kept up). */
 	private static final Set<LivingEntity> LOADED = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -152,6 +156,14 @@ public final class VillagerHeritage {
 	/** {@code entity}'s heritage (a villager's or a player's), or null. */
 	public static Heritage.@Nullable Kind of(Entity entity) {
 		String key = entity.getAttached(Heritage.HERITAGE);
+		if (key == null && entity.level().isClientSide()) {
+			// (0.7.479) a body drawn from saved data (a corpse's) carries its blood in its tag too
+			for (String tag : entity.entityTags()) {
+				if (tag.startsWith(Heritage.TAG)) {
+					return Heritage.Kind.byKey(tag.substring(Heritage.TAG.length()));
+				}
+			}
+		}
 		return key == null ? null : Heritage.Kind.byKey(key);
 	}
 
@@ -215,6 +227,9 @@ public final class VillagerHeritage {
 				case BIOBUILT -> 0;
 				// (0.7.292) goblins and orcs are only ever born to their own (Greenskins)
 				case GOBLIN, ORC -> 0;
+				// (0.7.490) beastfolk like the wild lands; the Hollow are earned, so only inherited
+				case BEASTFOLK -> W_BEASTFOLK * (biome.is(BiomeTags.IS_SAVANNA) || biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_JUNGLE) ? LEAN : 1);
+				case HOLLOW -> 0;
 			};
 			weights[i] = w;
 			total += w;
@@ -239,6 +254,7 @@ public final class VillagerHeritage {
 	 * (wrapped or cut, rolled here unless {@code tail} says which), and the gifts.
 	 */
 	public static void born(LivingEntity villager, Heritage.Kind kind, @Nullable String tail) {
+		String oldKind = villager.getAttached(Heritage.HERITAGE);
 		villager.setAttached(Heritage.HERITAGE, kind.key());
 		for (Heritage.Kind k : Heritage.Kind.values()) {
 			if (k == kind) {
@@ -270,6 +286,10 @@ public final class VillagerHeritage {
 		fit(villager);
 		// (0.7.214) its variant: kept if it's this blood's, else born to one here
 		HeritageVariants.settle(villager);
+		// (0.7.509) a new blood draws its faith again
+		if (oldKind != null && !oldKind.equals(kind.key())) {
+			Faiths.forget(villager);
+		}
 	}
 
 	/** Takes {@code villager}'s heritage away (a folk set up as something not of flesh and blood). */
@@ -295,6 +315,8 @@ public final class VillagerHeritage {
 		// (0.7.214) its variant from its parents' ({@link HeritageVariants#child}), not a fresh roll
 		HeritageVariants.set(child, HeritageVariants.child(kind, mother, father, at, child.getRandom()));
 		born(child, kind, null);
+		// (0.7.509) and holds its mother's faith, else its father's
+		Faiths.inherit(child, mother, father);
 	}
 
 	/** A baby's heritage from its real parents (a player among them): one of theirs by a coin, or null if neither has one. */
@@ -416,6 +438,8 @@ public final class VillagerHeritage {
 		if (kind != Heritage.Kind.WARRIORBORN) {
 			modifier(villager, Attributes.ATTACK_DAMAGE, "villager_heritage_fury", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
+		// (0.7.490) and its kit's plain attribute gifts and flaws (never its ability)
+		HeritageKits.attributes(villager);
 	}
 
 	/** Every second: an Emberborn's fire put out and the cold's toll, a Frostborn's frost shed, the dark for a Nightborn, a Warrior-born's fury. */
@@ -431,6 +455,8 @@ public final class VillagerHeritage {
 			if (kind == null) {
 				continue;
 			}
+			// (0.7.490) the kit's gifts and flaws that follow the weather and the land
+			HeritageKits.tick(villager, server.getTickCount());
 			switch (kind) {
 				case EMBERBORN -> {
 					if (villager.isOnFire()) {
@@ -590,6 +616,7 @@ public final class VillagerHeritage {
 			case "wrapped_turned" -> WRAPPED_TURNED_LINES;
 			case "cut" -> CUT_LINES;
 			case "cut_rampage" -> CUT_RAMPAGE_LINES;
+			case "dawnborn" -> DAWNBORN_LINES;
 			default -> BLOOD_LINES;
 		};
 		int n = 1 + Mth.floor(level.getRandom().nextFloat() * lines);

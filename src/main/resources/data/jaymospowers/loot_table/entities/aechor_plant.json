@@ -28,11 +28,9 @@
           ]
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:killed_by_player"
+      }
     }
   ],
   "random_sequence": "jaymospowers:entities/aechor_plant"

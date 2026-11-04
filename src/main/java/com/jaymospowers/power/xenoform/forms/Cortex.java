@@ -25,14 +25,14 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.103, Xeno-Band patch 5) Cortex, the thinking crab: a wide plated body, one big claw and one small, and an open
+ * (0.18.103, Xeno-Band patch 5) Cortex, the thinking eye fish (0.19.82; once a crab): one big eye, a spiked hull, a segmented tail and an open
  * skull where a glowing brain sparks. 24 health, fists of 4. Scanned from a guardian. While you're it, looking at a
  * creature reads it: its health, and for folk with a temperament (Kingdoms), what kind of person they are.
  * <ul>
  * <li>R, Arc: lightning from the skull to the creature you look at, jumping on to {@link #ARC_JUMPS} more nearby.</li>
  * <li>G, Bubble: a mind-bubble for {@link #BUBBLE_TICKS} ticks that stops every shot.</li>
  * <li>V, Mind Lift: lift the creature you look at into the air with your mind, and drop it.</li>
- * <li>B, Claw Snap: the big claw, hard, and it holds the target slow.</li>
+ * <li>B, Spine Snap (0.19.82, was Claw Snap): its spikes lash out, hard, and it holds the target slow.</li>
  * </ul>
  */
 public final class Cortex extends XenoForm {

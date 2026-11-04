@@ -82,7 +82,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.477) Andy (2026-11-04), after Special Golems (ideas only, none of its files): "a magically attuned kingdom using golems
+ * (0.7.528) Andy (2026-11-04), after Special Golems (ideas only, none of its files): "a magically attuned kingdom using golems
  * like these". A town golem is our own rune golem (a stone body with a carved core in its chest, eyes and core glowing, drawn
  * by {@code client/TownGolemRenderer}), in one of three kinds:
  * <ul>

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:blood_bottle",
+    [
+      "minecraft:porkchop",
+      "minecraft:beef",
+      "minecraft:mutton",
+      "jaymoskitchen:minced_beef",
+      "jaymoskitchen:raw_bacon"
+    ],
+    "minecraft:wheat",
+    "jaymoskitchen:animal_fat"
+  ],
+  "result": {
+    "id": "jaymoskitchen:raw_blood_sausage",
+    "count": 3
+  }
+}

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.Speakeasy.Pit;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -48,7 +49,7 @@ import org.jspecify.annotations.Nullable;
  * on and yields (nobody's hurt for real: it's a show). Winning bets are paid at the odds. The winner stays on as the
  * house champion for the next bout, until {@link #RETIRE_WINS} wins see him retire rich; the beaten go back up to town.
  *
- * <p><b>Fighting yourself.</b> Ask the bookie for a place on the card ({@link #enter}, {@link #ENTRY} emeralds): you
+ * <p><b>Fighting yourself.</b> Ask the bookie for a place on the card ({@link #enter}, {@link #ENTRY} silver coins): you
  * take the newcomer's place (or a card is called for you), and at the bell you're put in your corner. Punch with an
  * empty hand (anything in it is a foul, and the bout's lost); sneak to cover up and turn half his blows; step out of the
  * ring and you've thrown it. Win and the purse is yours ({@link #PURSE} and more for each win the beaten had), and
@@ -90,7 +91,7 @@ public final class FightPit {
 	/** The loser is led out, the winner rests, this long after (ticks). */
 	static final long AFTER_TICKS = 160L;
 	/**
-	 * A player in the ring: the entry (emeralds), their wind, how they're measured for the odds (power, guard); a full
+	 * A player in the ring: the entry (silver coins), their wind, how they're measured for the odds (power, guard); a full
 	 * punch lands for {@link #PLAYER_POWER} + 0-1 (a half-charged one for less); covering up (sneaking) turns this share
 	 * of blows (percent). The purse: this much, and this much more for each win the beaten had.
 	 */
@@ -913,7 +914,7 @@ public final class FightPit {
 				int beatenWins = bout.stats[1 - i].wins();
 				int purse = PURSE + PURSE_PER_WIN * beatenWins;
 				GreatWars.owe(server, p.getUUID(), purse);
-				p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.you.won", name(level, bout.fighters[1 - i]), purse).withStyle(ChatFormatting.GOLD));
+				p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.you.won", name(level, bout.fighters[1 - i]), Money.text(p, Money.worth(purse))).withStyle(ChatFormatting.GOLD));
 				if (foe != null) {
 					Recollections.remember(foe, p, Recollections.Kind.BEAT_YOU, Component.empty());
 				}
@@ -930,11 +931,11 @@ public final class FightPit {
 				int paid = (int)Math.floor(bet.stake() * bet.odds());
 				GreatWars.owe(server, bet.player(), paid);
 				if (player != null) {
-					player.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.bet.won", name(level, bout.fighters[winner]), paid)
+					player.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.bet.won", name(level, bout.fighters[winner]), Money.text(player, Money.worth(paid)))
 						.withStyle(ChatFormatting.GOLD));
 				}
 			} else if (player != null) {
-				player.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.bet.lost", name(level, bout.fighters[bet.fighter()]), bet.stake())
+				player.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.bet.lost", name(level, bout.fighters[bet.fighter()]), Money.text(player, Money.worth(bet.stake())))
 					.withStyle(ChatFormatting.GRAY));
 			}
 		}
@@ -1071,11 +1072,11 @@ public final class FightPit {
 		}
 		int amount = Math.min(stake, MOST_STAKE - already);
 		if (amount <= 0) {
-			return new GreatWars.Taken(Component.translatable("message.jaymoskingdoms.wager.most", MOST_STAKE), 0);
+			return new GreatWars.Taken(Component.translatable("message.jaymoskingdoms.wager.most", Money.text(player, Money.worth(MOST_STAKE))), 0);
 		}
 		bout.bets.add(new Bet(player.getUUID(), fighter, amount, bout.odds[fighter]));
-		return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.bet.made", amount, name(level, bout.fighters[fighter]),
-			(int)Math.floor(amount * bout.odds[fighter])), amount);
+		return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.bet.made", Money.text(player, Money.worth(amount)), name(level, bout.fighters[fighter]),
+			Money.text(player, Money.worth((int)Math.floor(amount * bout.odds[fighter])))), amount);
 	}
 
 	// ---- their story ---------------------------------------------------------------------------------------------------

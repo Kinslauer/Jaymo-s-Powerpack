@@ -58,6 +58,9 @@ public final class AlchemyJei implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
+		// (0.20.13) brewing quality
+		registration.addIngredientInfo(com.jaymospowers.alchemy.brewing.Brewing.MORTAR, Component.translatable("jei.jaymospowers.mortar"));
+		registration.addIngredientInfo(com.jaymospowers.alchemy.brewing.Brewing.BREWERS_ALEMBIC, Component.translatable("jei.jaymospowers.brewers_alembic"));
 		List<SimpleCategory.Recipe> recipes = new ArrayList<>();
 		for (Infusion.Recipe recipe : Infusion.recipes()) {
 			boolean anyEnchanted = Infusion.ANY_ENCHANTED.equals(recipe.centre());

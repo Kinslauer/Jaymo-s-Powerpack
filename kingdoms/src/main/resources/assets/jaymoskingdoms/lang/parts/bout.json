@@ -1,0 +1,16 @@
+{
+  "bout.jaymoskingdoms.under_way.0": "The bracket is drawn, %s. Keep fighting.",
+  "bout.jaymoskingdoms.under_way.1": "You're already entered, %s.",
+  "bout.jaymoskingdoms.tomorrow.0": "You've had your bout in today's festival, %s.",
+  "bout.jaymoskingdoms.tomorrow.1": "One bracket a festival, %s. Come to the next.",
+  "bout.jaymoskingdoms.not_now.0": "Not like this, %s. Mend first, and then I'll draw the lots.",
+  "bout.jaymoskingdoms.not_now.1": "You're in no state for a bracket, %s.",
+  "bout.jaymoskingdoms.too_few.0": "There aren't enough students at hand for a bracket, %s.",
+  "bout.jaymoskingdoms.too_few.1": "Not enough fighters at the square, %s. Another festival.",
+  "bout.jaymoskingdoms.start.0": "The lots are drawn, %s. Win your way to me.",
+  "bout.jaymoskingdoms.start.1": "The bracket is set, %s. Mind each bout, and hold nothing back.",
+  "bout.jaymoskingdoms.won.0": "The festival's bout is yours, %s. Take your due.",
+  "bout.jaymoskingdoms.won.1": "Champion of the square, %s. Well fought, all the way.",
+  "bout.jaymoskingdoms.out.0": "You're out of the bracket, %s. Good fighting.",
+  "bout.jaymoskingdoms.out.1": "That ends your bout, %s. Stay for the feast."
+}

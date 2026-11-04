@@ -210,6 +210,8 @@ public final class WebPowerClient implements PowerClient {
 			}
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(WebLineRenderer::tick);
+		// a line broke somewhere in sight: it leaves its spent halves behind (anyone sees them, power or not)
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.LineSnap.TYPE, (payload, context) -> WebSpentLines.snapped(payload));
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.SwingReject.TYPE, (payload, context) -> {
 			if (isActive(context.player())) {
 				INSTANCE.swing.rejected(context.player(), payload.hand());
@@ -479,13 +481,10 @@ public final class WebPowerClient implements PowerClient {
 		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);
 		int chips = ascended ? 6 : 5;
 		int total = CHIP * chips + CHIP_GAP * (chips - 1);
-		// past the off-hand slot / attack indicator; above the hunger bar on narrow screens
-		int x = cx + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + total > width - 2) {
-			x = cx + 91 - total;
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		// web wings (hold Jump in mid-air): lit while spread, shaded through their cooldown
 		wingsChip(graphics, font, minecraft, x, y);
 		x += CHIP + CHIP_GAP;

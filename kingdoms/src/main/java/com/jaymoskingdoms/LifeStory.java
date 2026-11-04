@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.money.PurseContents;
 import com.jaymoskingdoms.remnants.Monoliths;
 import com.jaymoskingdoms.whaling.Whaling;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -100,9 +102,10 @@ public final class LifeStory {
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
 	static final float FATE_LEANS = 0.5F;
 	/** Every start's kit: bread; a capital's few coins; a merchant's child's purse; a caver's torches. */
-	static final int KIT_BREAD = 4, CITY_EMERALDS = 2, MERCHANT_EMERALDS = 8, CAVE_TORCHES = 8;
-	/** (0.7.381) The village start, the easiest: more bread on top of the kit's, and a few emeralds. */
-	static final int VILLAGE_BREAD = 4, VILLAGE_EMERALDS = 4;
+	// (0.7.498) the start purses are silver coins in a filled coin purse (1 old emerald = 1 silver)
+	static final int KIT_BREAD = 4, CITY_SILVER = 2, MERCHANT_SILVER = 8, CAVE_TORCHES = 8;
+	/** (0.7.381) The village start, the easiest: more bread on top of the kit's, and a few silver coins. */
+	static final int VILLAGE_BREAD = 4, VILLAGE_SILVER = 4;
 	/**
 	 * (Andy) the starts that come with their class's gear, armour worn ("it wouldn't make sense to start as an unarmed royal
 	 * guardsman"). (0.7.412) The evicted keep the tools of their trade.
@@ -116,6 +119,13 @@ public final class LifeStory {
 	static final int PEAKS_SEARCH = 3200, PEAKS_STEP = 64, PEAKS_VERTICAL_STEP = 32, SNOWED_SLOW_TICKS = 900;
 	/** (0.7.223) Your village burned: the ruin's half-width (blocks), and how many saved things you carry out. */
 	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
+	/**
+	 * (0.7.501) The burning village: how far off the ruin it stands (blocks), how deep its jigsaw runs (a vanilla village's is 6),
+	 * and how far round its centre cobwebs are looked for and set alight (across, below, above).
+	 */
+	static final int BURNING_AWAY = 10, BURNING_DEPTH = 6, BURNING_REACH = 72, BURNING_BELOW = 12, BURNING_ABOVE = 24;
+	/** (0.7.501) How long the smoke's nausea lasts on waking in the burning village (ticks). */
+	static final int BURNED_NAUSEA_TICKS = 400;
 	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
 	/**
@@ -129,10 +139,10 @@ public final class LifeStory {
 	static final int SENTENCED_REPUTATION = -30;
 	static final int HIDEOUT_CAMP_MIN = 2, HIDEOUT_CAMP_MAX = 8;
 	static final int CAST_OUT_MIN = 40, CAST_OUT_MAX = 64;
-	/** (0.7.412) The purses (emeralds) the hard roads come with: a sentenced prisoner's few coins, an evicted one's fuller purse, a hideout's cut. */
-	static final int SENTENCED_EMERALDS = 4, EVICTED_EMERALDS = 6, HIDEOUT_EMERALDS = 3;
-	/** (0.7.414) The kit roads: a trader's pocket money (emeralds), a pup's bones and a sworn recruit's manacles. */
-	static final int TRADER_EMERALDS = 6, PUP_BONES = 4;
+	/** (0.7.412) The purses (silver coins, in a coin purse) the hard roads come with: a sentenced prisoner's few coins, an evicted one's fuller purse, a hideout's cut. */
+	static final int SENTENCED_SILVER = 4, EVICTED_SILVER = 6, HIDEOUT_SILVER = 3;
+	/** (0.7.414) The kit roads: a trader's pocket money (silver coins), a pup's bones and a sworn recruit's manacles. */
+	static final int TRADER_SILVER = 6, PUP_BONES = 4;
 	/** (0.7.414) A trader wakes this far from the milestone's post (blocks). */
 	static final int TRADER_NEAR_MIN = 2, TRADER_NEAR_MAX = 5;
 	/** (0.7.228) A whaler's harpooner: the irons they sign on with. */
@@ -154,10 +164,10 @@ public final class LifeStory {
 	/** (0.7.417, Andy) The heritages that can wake in the alchemist's lab. */
 	static final Set<Heritage.Kind> LAB_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.of(Heritage.Kind.BIOBUILT,
 		Heritage.Kind.RUBBERFOLK, Heritage.Kind.EMBERBORN, Heritage.Kind.STONEBORN, Heritage.Kind.SYLVAN));
-	/** (0.7.443) The heritages that can take the greenskin road: those that pass for human (not the Tideborn, Stoneborn, Warrior-born, Sylvan or Bio-built). */
+	/** (0.7.443) The heritages that can take the greenskin road: those that pass for human (not the Tideborn, Stoneborn, Warrior-born, Sylvan, Bio-built, (0.7.490) Beastfolk or Hollow). */
 	static final Set<Heritage.Kind> GREENSKIN_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.complementOf(java.util.EnumSet.of(
 		Heritage.Kind.TIDEBORN, Heritage.Kind.STONEBORN, Heritage.Kind.WARRIORBORN, Heritage.Kind.SYLVAN, Heritage.Kind.BIOBUILT, Heritage.Kind.GOBLIN,
-		Heritage.Kind.ORC)));
+		Heritage.Kind.ORC, Heritage.Kind.BEASTFOLK, Heritage.Kind.HOLLOW)));
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
 	/** (0.7.451) "Let fate decide": how its pick is shown across the screen on waking (ticks to fade in, to stay, to fade out). */
@@ -197,20 +207,20 @@ public final class LifeStory {
 		}
 	}
 
-	/** (0.7.412) A start's difficulty mark and the emeralds it starts with (not counting a merchant child's extra purse). */
+	/** (0.7.412) A start's difficulty mark and the silver coins it starts with (not counting a merchant child's extra purse). */
 	public record Terms(Mark mark, int purse) {
 	}
 
 	/**
 	 * (0.7.412, Andy's picks: "difficulty and purse on every road") Every start's difficulty and starting purse, in one
-	 * table: the village the easiest, rock bottom the hardest. The purse is what {@link #kit} gives in emeralds.
+	 * table: the village the easiest, rock bottom the hardest. The purse is what {@link #kit} gives in silver coins.
 	 */
 	static final java.util.Map<Start, Terms> TERMS = new java.util.EnumMap<>(Start.class);
 
 	static {
-		TERMS.put(Start.VILLAGE, new Terms(Mark.EASY, VILLAGE_EMERALDS));
+		TERMS.put(Start.VILLAGE, new Terms(Mark.EASY, VILLAGE_SILVER));
 		TERMS.put(Start.SWORN, new Terms(Mark.EASY, 0));
-		TERMS.put(Start.CITY, new Terms(Mark.FAIR, CITY_EMERALDS));
+		TERMS.put(Start.CITY, new Terms(Mark.FAIR, CITY_SILVER));
 		TERMS.put(Start.WILD, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.MONOLITH, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.SHIPWRECK, new Terms(Mark.FAIR, 0));
@@ -224,9 +234,9 @@ public final class LifeStory {
 		TERMS.put(Start.UNARMED, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.DEMON, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.AFTERLIFE, new Terms(Mark.HARD, 0));
-		TERMS.put(Start.EVICTED, new Terms(Mark.HARD, EVICTED_EMERALDS));
-		TERMS.put(Start.SENTENCED, new Terms(Mark.HARD, SENTENCED_EMERALDS));
-		TERMS.put(Start.HIDEOUT, new Terms(Mark.HARD, HIDEOUT_EMERALDS));
+		TERMS.put(Start.EVICTED, new Terms(Mark.HARD, EVICTED_SILVER));
+		TERMS.put(Start.SENTENCED, new Terms(Mark.HARD, SENTENCED_SILVER));
+		TERMS.put(Start.HIDEOUT, new Terms(Mark.HARD, HIDEOUT_SILVER));
 		TERMS.put(Start.CAPTIVE, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.TIMELOST, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.MOON, new Terms(Mark.VERY_HARD, 0));
@@ -238,7 +248,7 @@ public final class LifeStory {
 		TERMS.put(Start.ROCK_BOTTOM, new Terms(Mark.CRUEL, 0));
 		// (0.7.414) the kit roads
 		TERMS.put(Start.HEIRLOOM, new Terms(Mark.HARD, 0));
-		TERMS.put(Start.TRADER, new Terms(Mark.FAIR, TRADER_EMERALDS));
+		TERMS.put(Start.TRADER, new Terms(Mark.FAIR, TRADER_SILVER));
 		TERMS.put(Start.PUP, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.NOBODIES, new Terms(Mark.FAIR, 0));
 		// (0.7.417) the powered roads
@@ -393,13 +403,15 @@ public final class LifeStory {
 				// (0.7.262, Andy's NOEA picks) the new bloods: a workshop's vats, a travelling fair ((0.7.320) the Divine-born's
 				// hilltop shrine is gone: that blood is earned now, by dying again in the afterlife)
 				Answer.born(Heritage.Kind.BIOBUILT, "vats"),
-				Answer.born(Heritage.Kind.RUBBERFOLK, "fair")));
+				Answer.born(Heritage.Kind.RUBBERFOLK, "fair"),
+				// (0.7.490) the beastfolk are picked at the start (a den in the wild); the Hollow are earned and have no birthplace
+				Answer.born(Heritage.Kind.BEASTFOLK, "den")));
 			RAISED.answers.addAll(List.of(
 				Answer.raised("farmers", Items.WHEAT_SEEDS, Stats.Stat.ENDURANCE, false),
 				Answer.raised("smiths", Items.ANVIL, Stats.Stat.MIGHT, false),
 				Answer.raised("fisherfolk", Items.FISHING_ROD, Stats.Stat.AGILITY, false),
 				Answer.raised("hunters", Items.BOW, Stats.Stat.FINESSE, false),
-				Answer.raised("merchants", Items.EMERALD, Stats.Stat.WITS, false),
+				Answer.raised("merchants", net.minecraft.world.item.Items.EMERALD, Stats.Stat.WITS, false),
 				Answer.raised("soldiers", Items.IRON_SWORD, Stats.Stat.MIGHT, false),
 				Answer.raised("healers", Items.GLISTERING_MELON_SLICE, Stats.Stat.WITS, false),
 				Answer.raised("wizard", Items.ENCHANTED_BOOK, Stats.Stat.WITS, false),
@@ -422,18 +434,20 @@ public final class LifeStory {
 				Answer.raised("chieftain", Items.GOAT_HORN, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.WARRIORBORN),
 				Answer.raised("master", Items.STICK, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.EARTHLING),
 				Answer.raised("sunpriests", Items.GLOWSTONE_DUST, Stats.Stat.GRIT, false).onlyBorn(Heritage.Kind.DAWNBORN),
+				// (0.7.490) the pack that raised a beastfolk
+				Answer.raised("pack", Items.BONE, Stats.Stat.AGILITY, false).onlyBorn(Heritage.Kind.BEASTFOLK),
 				Answer.raised("foundling", Items.STRING, null, false)));
 			CHILDHOOD.answers.addAll(List.of(
-				Answer.child("roofs", Items.FEATHER, Stats.Stat.AGILITY, "gravity", "skymarked", "blossomkin", "moonpale", "starlit"),
-				Answer.child("caves", Items.COBWEB, Stats.Stat.ENDURANCE, "web", "obsidian", "hollow"),
-				Answer.child("fights", Items.LEATHER, Stats.Stat.MIGHT, "zfighter", "battlescarred", "ironknuckle", "berrygloss"),
-				Answer.child("books", Items.WRITABLE_BOOK, Stats.Stat.WITS, "chrono", "inkmarked", "opaline"),
-				Answer.child("swimming", Items.KELP, Stats.Stat.AGILITY, "darktide", "abyssal", "reefcrowned", "candystripe"),
-				Answer.child("storms", Items.LIGHTNING_ROD.weathering().unaffected(), Stats.Stat.FINESSE, "wind", "skymarked", "galeborn"),
-				Answer.child("fire", Items.CAMPFIRE, Stats.Stat.GRIT, "smoke", "magmavein", "soulflame", "ashen"),
-				Answer.child("snow", Items.SNOW_BLOCK, Stats.Stat.GRIT, "cryo", "rimeglass", "aurora"),
-				Answer.child("bells", Items.BELL, Stats.Stat.WITS, "resonance", "umbral", "twilight", "seraphic"),
-				Answer.child("blades", Items.BUNDLE, Stats.Stat.FINESSE, "arsenal", "warpainted", "brassbound")));
+				Answer.child("roofs", Items.FEATHER, Stats.Stat.AGILITY, "gravity", "skymarked", "blossomkin", "moonpale", "starlit", "avian", "sprite", "wraith"),
+				Answer.child("caves", Items.COBWEB, Stats.Stat.ENDURANCE, "web", "obsidian", "hollow", "arachnid", "changeling", "skeleton"),
+				Answer.child("fights", Items.LEATHER, Stats.Stat.MIGHT, "zfighter", "battlescarred", "ironknuckle", "berrygloss", "canine", "bloodelf", "zombie"),
+				Answer.child("books", Items.WRITABLE_BOOK, Stats.Stat.WITS, "chrono", "inkmarked", "opaline", "highelf"),
+				Answer.child("swimming", Items.KELP, Stats.Stat.AGILITY, "darktide", "abyssal", "reefcrowned", "candystripe", "serpen", "nymph"),
+				Answer.child("storms", Items.LIGHTNING_ROD.weathering().unaffected(), Stats.Stat.FINESSE, "wind", "skymarked", "galeborn", "dryad"),
+				Answer.child("fire", Items.CAMPFIRE, Stats.Stat.GRIT, "smoke", "magmavein", "soulflame", "ashen", "kitsune", "reaper"),
+				Answer.child("snow", Items.SNOW_BLOCK, Stats.Stat.GRIT, "cryo", "rimeglass", "aurora", "moonelf"),
+				Answer.child("bells", Items.BELL, Stats.Stat.WITS, "resonance", "umbral", "twilight", "seraphic", "faerie"),
+				Answer.child("blades", Items.BUNDLE, Stats.Stat.FINESSE, "arsenal", "warpainted", "brassbound", "feline")));
 			YOUTH.answers.addAll(List.of(
 				Answer.youth("cutpurses", Items.TRIPWIRE_HOOK, Classes.PlayerClass.THIEF),
 				Answer.youth("levy", Items.IRON_AXE, Classes.PlayerClass.WARLORD),
@@ -920,6 +934,10 @@ public final class LifeStory {
 		if (road != null && !road.fits(heritage)) {
 			return;
 		}
+		// (0.7.501) an earned blood (the Bio-built's vats) is only born to one it has woken in, unless the road makes another
+		if ((road == null || road.makes() == null) && !Heritage.unlocked(player, heritage)) {
+			return;
+		}
 		if (road != null && road.makes() != null) {
 			heritage = road.makes();
 			Heritage.unlock(player, heritage);
@@ -946,6 +964,8 @@ public final class LifeStory {
 		// (0.7.420) the harder life they chose: flaws, hard-road options, the points given up (counted off the story just saved)
 		Flaws.choose(player, live.flaws(), live.switches());
 		Heritage.set(player, heritage);
+		// (0.7.509) the patron of their blood is known; a devout upbringing starts sworn
+		Patrons.storyStart(player);
 		HeritageVariants.choose(player, heritage, live.look());
 		Classes.set(player, cls, option);
 		Stats.attributes(player);
@@ -1020,6 +1040,8 @@ public final class LifeStory {
 		story.set(Question.ROAD.ordinal(), road.key);
 		player.setAttached(STORY, List.copyOf(story));
 		PlayerTemperaments.settle(player, true);
+		// (0.7.509) a devout road starts sworn; the road may have changed the blood and temperament, so start the story afresh
+		Patrons.storyRestart(player);
 		// (0.7.420) a road told after the creator may add story points of its own (Rustfall's), which a life from nothing gives up too
 		if (road.start == Start.RUSTFALL) {
 			Flaws.giveUpMore(player, RUSTFALL_STAT, 1);
@@ -1122,6 +1144,10 @@ public final class LifeStory {
 		RAGS_ONLY = Flaws.rags(player);
 		try {
 			kit(player, start, landed, raised, cls, option, random);
+			// (0.7.503) and the medicine that road would have left them (StoryMeds: a full satchel for the sworn, none at rock bottom)
+			for (ItemStack meds : StoryMeds.of(player, start, landed, cls)) {
+				give(player, meds);
+			}
 		} finally {
 			RAGS_ONLY = false;
 		}
@@ -1319,6 +1345,9 @@ public final class LifeStory {
 			case BURNED -> {
 				to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
 				if (to != null) {
+					// (0.7.501, Andy: "the player should be IN the burning village") the village first, round the landing spot,
+					// then the ruin you wake in (it only takes ground and plants, so it never cuts into the village's houses)
+					burningVillage(level, to, random);
 					burnedRuin(level, to, random);
 				}
 			}
@@ -1562,6 +1591,10 @@ public final class LifeStory {
 		if (landed == Start.SKYFALL) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
 		}
+		if (landed == Start.BURNED) {
+			// (0.7.501, Andy) smoke-sick from the fire you woke in
+			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, BURNED_NAUSEA_TICKS, 0));
+		}
 		if (landed == Start.SNOWED) {
 			// half-frozen
 			player.setTicksFrozen(player.getTicksRequiredToFreeze());
@@ -1626,9 +1659,11 @@ public final class LifeStory {
 	 * looked past a few that are taken; else the nearest at all (null with none).
 	 */
 	private static @Nullable BlockPos freshVillage(ServerLevel level, Heritage.Kind heritage, BlockPos spawn, RandomSource random) {
-		BlockPos first = null;
+		BlockPos first = null, inland = null;
 		BlockPos from = spawn;
-		for (int i = 0; i <= StoryHomes.FRESH_TRIES; i++) {
+		// (0.7.486) a Tideborn's is by the shore: a free one inland is kept only if no shore one turns up
+		int tries = heritage == Heritage.Kind.TIDEBORN ? StoryHomes.FRESH_TRIES * 2 : StoryHomes.FRESH_TRIES;
+		for (int i = 0; i <= tries; i++) {
 			BlockPos village = level.findNearestMapStructure(villages(heritage), from, STRUCTURE_SEARCH, false);
 			if (village == null) {
 				village = level.findNearestMapStructure(StructureTags.VILLAGE, from, STRUCTURE_SEARCH, false);
@@ -1637,7 +1672,12 @@ public final class LifeStory {
 				break;
 			}
 			if (!StoryHomes.taken(level, village)) {
-				return village;
+				if (heritage != Heritage.Kind.TIDEBORN || Havens.shore(level, village)) {
+					return village;
+				}
+				if (inland == null) {
+					inland = village;
+				}
 			}
 			if (first == null) {
 				first = village;
@@ -1646,16 +1686,17 @@ public final class LifeStory {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			from = spawn.offset((int)(Math.cos(angle) * StoryHomes.FRESH_STEP * (i + 1)), 0, (int)(Math.sin(angle) * StoryHomes.FRESH_STEP * (i + 1)));
 		}
-		return first;
+		return inland != null ? inland : first;
 	}
 
 	/** The villages of the land a heritage comes from. */
 	private static TagKey<Structure> villages(Heritage.Kind heritage) {
 		return switch (heritage) {
-			case STONEBORN, SYLVAN, NIGHTBORN -> StructureTags.ON_TAIGA_VILLAGE_MAPS;
+			case STONEBORN, SYLVAN, NIGHTBORN, HOLLOW -> StructureTags.ON_TAIGA_VILLAGE_MAPS;
+			case BEASTFOLK -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
 			case FROSTBORN -> StructureTags.ON_SNOWY_VILLAGE_MAPS;
 			case EMBERBORN, WARRIORBORN -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
-			case DAWNBORN, TIDEBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;
+			case DAWNBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;
 			default -> StructureTags.ON_PLAINS_VILLAGE_MAPS;
 		};
 	}
@@ -1737,7 +1778,7 @@ public final class LifeStory {
 		if (landed == Start.SENTENCED) {
 			// bread through the bars, a few coins they let you keep, a pick in your boot
 			give(player, new ItemStack(Items.BREAD, KIT_BREAD / 2));
-			give(player, new ItemStack(Items.EMERALD, SENTENCED_EMERALDS));
+			give(player, purse(player, SENTENCED_SILVER));
 			give(player, new ItemStack(Lockpicking.LOCKPICK, StoryHard.CELL_PICKS));
 			return;
 		}
@@ -1765,13 +1806,13 @@ public final class LifeStory {
 			}
 		}
 		if (landed == Start.CITY) {
-			give(player, new ItemStack(Items.EMERALD, CITY_EMERALDS));
+			give(player, purse(player, CITY_SILVER));
 		}
 		if (landed == Start.EVICTED) {
-			give(player, new ItemStack(Items.EMERALD, EVICTED_EMERALDS));
+			give(player, purse(player, EVICTED_SILVER));
 		}
 		if (landed == Start.HIDEOUT) {
-			give(player, new ItemStack(Items.EMERALD, HIDEOUT_EMERALDS));
+			give(player, purse(player, HIDEOUT_SILVER));
 		}
 		if (landed == Start.GREENSKIN) {
 			// (0.7.443) what the camp gave you: hide on your back, a stone axe, and a goblin's mask (theirs know you by it)
@@ -1800,7 +1841,7 @@ public final class LifeStory {
 			// (0.7.381) the easiest start: a bed of your own, more to eat, a little to spend
 			give(player, new ItemStack(Items.BED.pick(net.minecraft.world.item.DyeColor.WHITE)));
 			give(player, new ItemStack(Items.BREAD, VILLAGE_BREAD));
-			give(player, new ItemStack(Items.EMERALD, VILLAGE_EMERALDS));
+			give(player, purse(player, VILLAGE_SILVER));
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.job",
 				Component.translatable("story.jaymoskingdoms.job." + job)).withStyle(ChatFormatting.GRAY));
 		}
@@ -1810,7 +1851,7 @@ public final class LifeStory {
 		}
 		if (landed == Start.TRADER) {
 			// (0.7.414) a pack mule and its goods (StoryKit), and a little money
-			give(player, new ItemStack(Items.EMERALD, TRADER_EMERALDS));
+			give(player, purse(player, TRADER_SILVER));
 			StoryKit.pack(player);
 		}
 		if (landed == Start.PUP) {
@@ -1827,7 +1868,7 @@ public final class LifeStory {
 			give(player, new ItemStack(Manacles.ITEM, Manacles.RECRUIT_PAIRS));
 		}
 		if (raised.key.equals("merchants")) {
-			give(player, new ItemStack(Items.EMERALD, MERCHANT_EMERALDS));
+			give(player, purse(player, MERCHANT_SILVER));
 		}
 	}
 
@@ -1900,6 +1941,43 @@ public final class LifeStory {
 	 * What's left of your home after the fire, round {@code center} (on natural ground only): low broken walls of charred
 	 * timber and blackened stone, ash underfoot and a cold hearth.
 	 */
+	/**
+	 * (0.7.501, Andy: "The burned village should spawn an abandoned village structure from vanilla, but replace the cobwebs with fire,
+	 * and obviously the chaos will ensue from there") a vanilla abandoned plains village ({@code burned_village/town_centers}: the
+	 * zombie town centres, which lead on into the zombie streets, houses and zombie villagers) raised {@link #BURNING_AWAY} blocks off
+	 * the ruin you wake in (so you wake inside it), and every cobweb in it set alight. The fire spreads as fire does.
+	 */
+	private static void burningVillage(ServerLevel level, BlockPos ruin, RandomSource random) {
+		var pool = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.TEMPLATE_POOL)
+			.get(JaymosKingdoms.id("burned_village/town_centers")).orElse(null);
+		if (pool == null) {
+			return;
+		}
+		double angle = random.nextDouble() * Math.PI * 2.0;
+		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+			ruin.offset((int)Math.round(Math.cos(angle) * BURNING_AWAY), 0, (int)Math.round(Math.sin(angle) * BURNING_AWAY)));
+		try {
+			if (!net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement.generateJigsaw(level, pool,
+				net.minecraft.resources.Identifier.withDefaultNamespace("bottom"), BURNING_DEPTH, at, false)) {
+				return;
+			}
+		} catch (RuntimeException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't raise the burning village at {}", at, e);
+			return;
+		}
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int dx = -BURNING_REACH; dx <= BURNING_REACH; dx++) {
+			for (int dz = -BURNING_REACH; dz <= BURNING_REACH; dz++) {
+				for (int dy = -BURNING_BELOW; dy <= BURNING_ABOVE; dy++) {
+					pos.set(at.getX() + dx, at.getY() + dy, at.getZ() + dz);
+					if (level.getBlockState(pos).is(net.minecraft.world.level.block.Blocks.COBWEB)) {
+						level.setBlock(pos, net.minecraft.world.level.block.BaseFireBlock.getState(level, pos), 3);
+					}
+				}
+			}
+		}
+	}
+
 	private static void burnedRuin(ServerLevel level, BlockPos center, RandomSource random) {
 		net.minecraft.world.level.block.Block[] wall = {net.minecraft.world.level.block.Blocks.STRIPPED_DARK_OAK_LOG, net.minecraft.world.level.block.Blocks.BLACKSTONE,
 			net.minecraft.world.level.block.Blocks.COBBLESTONE, net.minecraft.world.level.block.Blocks.DARK_OAK_PLANKS, net.minecraft.world.level.block.Blocks.COAL_BLOCK};
@@ -2087,6 +2165,11 @@ public final class LifeStory {
 
 	/** (0.7.420) Set while the road's kit is made for someone who chose nothing but rags: nothing is given or put on. */
 	private static boolean RAGS_ONLY;
+
+	/** (0.7.498) A start's little purse: {@code worth} emeralds' worth in the coin of the place they woke in (silver in the wild). */
+	private static ItemStack purse(ServerPlayer player, int worth) {
+		return PurseContents.filled(Currencies.at(player.level(), player.blockPosition()), Money.worth(worth));
+	}
 
 	private static void give(ServerPlayer player, ItemStack stack) {
 		if (RAGS_ONLY) {

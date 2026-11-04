@@ -1,7 +1,31 @@
 {
   "variants": {
-    "": {
+    "patron=none": {
       "model": "jaymoskingdoms:block/shrine"
+    },
+    "patron=hearthkeeper": {
+      "model": "jaymoskingdoms:block/shrine_hearthkeeper"
+    },
+    "patron=anvil_father": {
+      "model": "jaymoskingdoms:block/shrine_anvil_father"
+    },
+    "patron=deep_mother": {
+      "model": "jaymoskingdoms:block/shrine_deep_mother"
+    },
+    "patron=green_huntsman": {
+      "model": "jaymoskingdoms:block/shrine_green_huntsman"
+    },
+    "patron=lantern_warden": {
+      "model": "jaymoskingdoms:block/shrine_lantern_warden"
+    },
+    "patron=crowned_sun": {
+      "model": "jaymoskingdoms:block/shrine_crowned_sun"
+    },
+    "patron=ash_whisperer": {
+      "model": "jaymoskingdoms:block/shrine_ash_whisperer"
+    },
+    "patron=truth": {
+      "model": "jaymoskingdoms:block/shrine_truth"
     }
   }
 }

@@ -69,6 +69,8 @@ public final class FirstTools {
 	public static Item FLINT_SHARD;
 	public static Item PLANT_FIBRE;
 	public static Item PLANT_STRING;
+	/** (0.19.86) Plant Fibers pick: fibre woven into a mesh, soaked into pulp, dried over a fire into paper. */
+	public static Item PLANT_MESH, WET_PAPER_PULP;
 
 	private FirstTools() {
 	}
@@ -77,10 +79,15 @@ public final class FirstTools {
 		FLINT_SHARD = item("flint_shard");
 		PLANT_FIBRE = item("plant_fiber");
 		PLANT_STRING = item("plant_string");
+		PLANT_MESH = item("plant_mesh");
+		WET_PAPER_PULP = item("wet_paper_pulp");
+		GrassBed.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(FLINT_SHARD);
 			output.accept(PLANT_FIBRE);
 			output.accept(PLANT_STRING);
+			output.accept(PLANT_MESH);
+			output.accept(WET_PAPER_PULP);
 		});
 
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -127,9 +134,13 @@ public final class FirstTools {
 		return Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key)));
 	}
 
-	/** Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft. */
+	/**
+	 * Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft. (0.20.2) Netherrack too, though it
+	 * breaks quick, so flint can be knapped anywhere in the Nether.
+	 */
 	private static boolean hard(Level level, BlockPos pos, BlockState state) {
-		return state.requiresCorrectToolForDrops() && state.getDestroySpeed(level, pos) >= 1.0F && state.is(BlockTags.MINEABLE_WITH_PICKAXE);
+		return state.requiresCorrectToolForDrops() && (state.getDestroySpeed(level, pos) >= 1.0F || state.is(BlockTags.BASE_STONE_NETHER))
+			&& state.is(BlockTags.MINEABLE_WITH_PICKAXE);
 	}
 
 	private static InteractionResult knap(Player player, Level level, InteractionHand hand, ItemStack flint, BlockHitResult hit) {

@@ -75,6 +75,26 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * The server runs it all; the head's path is worked out the same on both sides from the synced {@link State} (a player
  * attachment), so the chain or lash is drawn from the hand with no lag (client/armory/LashRenderer).
+ * <p>
+ * (0.19.73) Andy: "the flail and whip do not swing at the proper trajectory, it should be calculated everytime instead
+ * of the same canned swing from right to left, also the right click wind up sould take into account where the head is,
+ * and wind up accordingly everytime, working to the OVERHEAD swing ... a shorter axis overhead, that the player lowers
+ * infront of themselves as it rounds, to deal damage while the button is held, some attacks can wrap around shields, and
+ * will stop momentum upon a heavy enough hit." So every swing now starts from where the head really is (the client's
+ * physics chain, sent with the press as {@link Aim}) and goes the way the mouse was moving:
+ * <ul>
+ * <li>A swipe's arc is laid through your chest along the mouse's flick (left, right, a chop down, an uppercut), from
+ * the head's side round to the other ({@link #sweepShape}); no flick: from where the head hangs across to the far side,
+ * so swing after swing goes back and forth.</li>
+ * <li>The whirl sets off from the head, round the way you were turning, and works up from round the held-out hand to an
+ * overhead whirl ({@link #whirlPoint}): its circle tilted down in front (lower the more you look down, higher behind
+ * and drawn in shorter over your head), the arm dipping as the ball comes round the front, where it hits.</li>
+ * <li>Let go and the ball carries on the way it was going, up over your head and down ({@link #STRIKE}).</li>
+ * <li>The whirl (once it's going), the slam, a chop and the whip's crack wrap round a raised shield or guard
+ * ({@link #WRAP_DAMAGE}); anything else is stopped by it. Hitting a guard, or something too heavy for the swing
+ * ({@link #heft} against {@link #momentum}), stops the head dead: a swipe ends there, a whirl drops and winds up again
+ * from where it stopped.</li>
+ * </ul>
  */
 public final class Lash {
 	public static final byte FLAIL = 0, WHIP = 1;
@@ -97,6 +117,18 @@ public final class Lash {
 	public static final double ARM_LENGTH = 0.66, SHOULDER = 0.716, SHOULDER_OUT = 0.29;
 	/** Ticks to full speed, the ticks the chain takes to pay out to its full circle, and the least spin worth a slam. */
 	public static final int WINDUP = 30, PAY_OUT = 5, MIN_WINDUP = 6;
+	/**
+	 * (0.19.73) The overhead whirl it works up to by {@link #WINDUP}: the arm raised this far, the circle tilted down in
+	 * front this much (radians) when you look level, this much more per radian you look down, between these; behind you
+	 * it's drawn in to this share of its reach (the short axis over your head); and the arm dips this far as the ball
+	 * comes round the front, the wrist turning this much with it.
+	 */
+	public static final float OVERHEAD_WHIRL_RAISE = 2.75F, WHIRL_DIP = 0.6F, WRIST = 0.12F;
+	public static final double TILT_LEVEL = 0.35, TILT_PER_PITCH = 0.6, TILT_MIN = 0.0, TILT_MAX = 0.68, BACK_SHORT = 0.55;
+	/** (0.19.73) Degrees the mouse must have turned over the last few ticks to set which way a swing goes. */
+	public static final float TURN_MIN = 3.0F;
+	/** (0.19.73) The furthest the ball's own speed (blocks) carries the slam's rise off its line. */
+	static final double CARRY_MAX = 3.0;
 	/** The whirl clips what it passes: this share of the flail's damage, this hard a shove, once per creature this often. */
 	static final float GLANCE_SHARE = 0.35F;
 	static final double GLANCE_PUSH = 0.6, BALL_RADIUS = 0.55;
@@ -155,6 +187,25 @@ public final class Lash {
 	static final float SWEEP_MIN_CHARGE = 0.6F, SWEEP_SHARE = 0.22F, SWEEP_WHIP_DAMAGE = 1.5F;
 	static final double SWEEP_HIT = 0.6, SWEEP_PUSH = 0.25;
 	/**
+	 * (0.19.73) A swipe's arc starts at least this far (radians) back round from in front of you, and no further than
+	 * this; the head takes this many ticks to get onto it from where it was. One this near straight up and down (the
+	 * flick's share that's up or down) is a chop, and comes over the top of a guard.
+	 */
+	public static final double SWEEP_BACK_MIN = 1.0, SWEEP_BACK_MAX = 2.6, CHOP = 0.7;
+	public static final int SWEEP_LEAD = 2;
+	/**
+	 * (0.19.73) Momentum: a swing is stopped dead by something this heavy or heavier (bulk, width × width × height in
+	 * blocks³, doubled per point of knockback resistance: a player 0.65, a cow 1.13, an iron golem 5.3): the flail's at
+	 * no spin and the more full spin adds, the whip's the same. A guard that's wrapped round still takes this share.
+	 */
+	static final double FLAIL_MOMENTUM = 0.4, FLAIL_MOMENTUM_SPIN = 2.6, WHIP_MOMENTUM = 0.2, WHIP_MOMENTUM_SPIN = 1.0;
+	static final float WRAP_SHARE = 0.75F;
+	/** (0.19.73) The whirl wraps round a guard once it's this far up to speed. */
+	static final float WRAP_SPIN = 0.5F;
+	/** (0.19.73) A blow that came round a raised shield or guard (in #bypasses_shield). */
+	public static final net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType> WRAP_DAMAGE =
+		net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DAMAGE_TYPE, JaymosPowers.id("lash_wrap"));
+	/**
 	 * (0.16.24) Andy: "also allow the whip to pull items in": a crack that lands on dropped items (within this of where
 	 * it lands; the crack aims at one this near its line) flings them back to you, as the fishing rod does.
 	 */
@@ -165,9 +216,12 @@ public final class Lash {
 	/**
 	 * What a player's flail or whip is doing (synced to everyone near). {@code since}: the game tick it began;
 	 * {@code target}: what it's wrapped round (-1: nothing); {@code from}: where the head was when it began; {@code aim}:
-	 * where it's going (the slam's spot, the crack's).
+	 * where it's going (the slam's spot, the crack's). (0.19.73) {@code shape}: how this swing goes, worked out when it
+	 * began: a whirl's (angle it set off at, round from in front toward your right; which way round, +1 or -1; how many
+	 * times it's been stopped and wound up again), a slam's (the ball's speed when let go, blocks a tick), a swipe's (the
+	 * way it travels, across and up as you see it; the angle it starts at).
 	 */
-	public record State(byte kind, byte phase, long since, int target, Vec3 from, Vec3 aim) {
+	public record State(byte kind, byte phase, long since, int target, Vec3 from, Vec3 aim, Vec3 shape) {
 		public static final StreamCodec<ByteBuf, State> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.BYTE, State::kind,
 			ByteBufCodecs.BYTE, State::phase,
@@ -175,12 +229,56 @@ public final class Lash {
 			ByteBufCodecs.VAR_INT, State::target,
 			Vec3.STREAM_CODEC, State::from,
 			Vec3.STREAM_CODEC, State::aim,
+			Vec3.STREAM_CODEC, State::shape,
 			State::new);
 
 		State to(byte phase, long now, int target, Vec3 from, Vec3 aim) {
-			return new State(this.kind, phase, now, target, from, aim);
+			return to(phase, now, target, from, aim, Vec3.ZERO);
+		}
+
+		State to(byte phase, long now, int target, Vec3 from, Vec3 aim, Vec3 shape) {
+			return new State(this.kind, phase, now, target, from, aim, shape);
 		}
 	}
+
+	/**
+	 * (0.19.73) Client → server, sent with a flail or whip's right- or left-click before the click itself: where its head
+	 * really is (the client's physics chain, from your feet) and how far the mouse turned over the last few ticks
+	 * (degrees: right, down), so the swing starts there and goes that way.
+	 */
+	public record Aim(Vec3 head, float turnYaw, float turnPitch) implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+		public static final Type<Aim> TYPE = new Type<>(JaymosPowers.id("lash_aim"));
+		public static final StreamCodec<ByteBuf, Aim> CODEC = StreamCodec.composite(
+			Vec3.STREAM_CODEC, Aim::head,
+			ByteBufCodecs.FLOAT, Aim::turnYaw,
+			ByteBufCodecs.FLOAT, Aim::turnPitch,
+			Aim::new);
+
+		@Override
+		public Type<Aim> type() {
+			return TYPE;
+		}
+
+		/** No word from the client: the head hanging off the hand, the mouse still. */
+		static Aim resting(Player player, byte kind) {
+			Vec3 hang = hand(player, 1.0F).add(0.0, -(kind == FLAIL ? 0.55 : 1.2) * player.getScale(), 0.0);
+			return new Aim(hang.subtract(player.position()), 0.0F, 0.0F);
+		}
+	}
+
+	/** (0.19.73) What the client said with its last press, and when (game time). */
+	private record Pending(Aim aim, long at) {
+	}
+
+	private static final Map<UUID, Pending> AIMS = new HashMap<>();
+	/** (0.19.73) A press's word is used if it came this recently (ticks). */
+	private static final int AIM_FRESH = 4;
+	/**
+	 * (0.19.73) Set by the client: called as a flail or whip is pressed (right-click, before its packet goes), to tell
+	 * the server where the head is and start drawing the swing.
+	 */
+	public static java.util.function.BiConsumer<Player, Byte> clientPress = (player, kind) -> {
+	};
 
 	public static final AttachmentType<State> STATE = AttachmentRegistry.create(JaymosPowers.id("lash"),
 		builder -> builder.syncWith(State.STREAM_CODEC, AttachmentSyncPredicate.all()));
@@ -210,6 +308,13 @@ public final class Lash {
 	}
 
 	static void init() {
+		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(Aim.TYPE, Aim.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Aim.TYPE, (payload, ctx) -> {
+			Aim aim = payload;
+			if (Double.isFinite(aim.head().lengthSqr()) && Float.isFinite(aim.turnYaw()) && Float.isFinite(aim.turnPitch())) {
+				AIMS.put(ctx.player().getUUID(), new Pending(aim, ctx.player().level().getGameTime()));
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(Lash::tick);
 		// (0.16.24) a blow at someone swipes too (an air swing comes in through mixin/ServerGamePacketListenerImplMixin)
 		net.fabricmc.fabric.api.event.player.AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
@@ -219,6 +324,7 @@ public final class Lash {
 			return InteractionResult.PASS;
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			AIMS.remove(handler.player.getUUID());
 			Run run = RUNS.remove(handler.player.getUUID());
 			if (run != null) {
 				end(run, null);
@@ -253,6 +359,8 @@ public final class Lash {
 		player.startUsingItem(hand);
 		if (player instanceof ServerPlayer server) {
 			begin(server, kind);
+		} else if (level.isClientSide()) {
+			clientPress.accept(player, kind);
 		}
 		return InteractionResult.CONSUME;
 	}
@@ -286,27 +394,32 @@ public final class Lash {
 		Vec3 hand = state.kind() == FLAIL ? armHand(player, partialTick, armRaise(state, t), ARM_OUT) : hand(player, partialTick);
 		return switch (state.phase()) {
 			case WHIRL -> {
-				// (a whirl's aim.x is the angle it set off at, round you from the east) round the held-out hand
-				double angle = state.aim().x + spinAngle(t);
+				// (0.19.73) from wherever the head was, onto a circle that works up from the held-out hand to overhead
+				Vec3 circle = whirlPoint(player, state, t, partialTick);
 				double out = Mth.clamp(t / PAY_OUT, 0.0, 1.0);
-				double radius = Mth.lerp(out, 0.3, WHIRL_RADIUS);
-				Vec3 center = armHand(player, partialTick, WHIRL_RAISE, ARM_OUT).add(0.0, -WHIRL_DROOP * out, 0.0);
-				Vec3 circle = center.add(Math.cos(angle) * radius, 0.0, Math.sin(angle) * radius);
-				yield out < 1.0 ? hand.lerp(circle, smooth(out)) : circle;
+				yield out < 1.0 ? state.from().lerp(circle, smooth(out)) : circle;
 			}
 			case STRIKE -> {
 				Vec3 over = feet.add(0.0, player.getBbHeight() + OVER_UP, 0.0).subtract(ahead(player).scale(OVER_BACK));
+				double fall = STRIKE_TICKS - 1 - STRIKE_OVER;
+				Vec3 down = state.aim().subtract(over);
 				if (t < STRIKE_OVER) {
-					yield state.from().lerp(over, smooth(t / STRIKE_OVER));
+					// (0.19.73) the ball carries on the way it was going as it's hauled up over your head, and leaves the top
+					// already falling toward the spot
+					Vec3 carry = state.shape().scale(STRIKE_OVER);
+					if (carry.length() > CARRY_MAX) {
+						carry = carry.scale(CARRY_MAX / carry.length());
+					}
+					yield hermite(state.from(), carry, over, down.scale(0.5 * STRIKE_OVER / fall), t / STRIKE_OVER);
 				}
-				double s = Math.min(1.0, (t - STRIKE_OVER) / (STRIKE_TICKS - 1 - STRIKE_OVER));
+				double s = Math.min(1.0, (t - STRIKE_OVER) / fall);
 				// brought down hard: it speeds up as it falls
-				yield over.lerp(state.aim(), s * s);
+				yield over.add(down.scale(0.5 * s + 0.5 * s * s));
 			}
 			case CRACK -> state.from().lerp(state.aim(), Math.min(1.0, t / CRACK_TICKS));
 			case SWEEP -> {
 				Vec3 arc = sweepPoint(player, state, t, partialTick);
-				yield t < 2.0 ? state.from().lerp(arc, t / 2.0) : arc;
+				yield t < SWEEP_LEAD ? state.from().lerp(arc, smooth(t / SWEEP_LEAD)) : arc;
 			}
 			case HOOK -> state.aim();
 			case SNAG, HEAVE, YANK -> {
@@ -318,20 +431,133 @@ public final class Lash {
 	}
 
 	/**
-	 * (0.16.24) The swipe's arc, {@code t} ticks in: round from your weapon side to the other, in front of your chest and
-	 * tilted with where you looked ({@code aim}: yaw and pitch in radians, then the reach), speeding up then easing off.
+	 * (0.16.24) The swipe's arc, {@code t} ticks in, in front of your chest and tilted with where you looked ({@code aim}:
+	 * yaw and pitch in radians, then the reach), speeding up then easing off. (0.19.73) No longer always from your weapon
+	 * side to the other: it lies along the way it travels ({@code shape}, see {@link #sweepShape}), from the angle it
+	 * started at round to {@link #SWEEP_ARC} past in front.
 	 */
 	public static Vec3 sweepPoint(Player player, State state, double t, float partialTick) {
 		double s = smooth(Mth.clamp(t / SWEEP_TICKS, 0.0, 1.0));
-		int side = player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? 1 : -1;
-		double a = SWEEP_ARC * side * (1.0 - 2.0 * s);
-		double yaw = state.aim().x, pitch = state.aim().y;
+		double a = Mth.lerp(s, state.shape().z, SWEEP_ARC);
+		Vec3[] plane = sweepPlane(state.aim().x, state.aim().y, state.shape().x, state.shape().y);
+		Vec3 chest = player.getEyePosition(partialTick).add(0.0, -0.4 * player.getScale(), 0.0);
+		// a level sweep is a little low at the ends, highest across the front
+		double droop = 0.25 * Math.abs(state.shape().x) * Math.abs(Math.sin(a));
+		return chest.add(plane[0].scale(Math.cos(a) * state.aim().z)).add(plane[1].scale(Math.sin(a) * state.aim().z)).add(0.0, -droop, 0.0);
+	}
+
+	/** (0.19.73) A swipe's plane: ahead along yaw and pitch (radians), and the way it travels (across and up as you see it). */
+	private static Vec3[] sweepPlane(double yaw, double pitch, double across, double up) {
 		Vec3 forward = new Vec3(-Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
 		Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
-		Vec3 chest = player.getEyePosition(partialTick).add(0.0, -0.4 * player.getScale(), 0.0);
-		// a little low at the ends, highest across the front
-		return chest.add(forward.scale(Math.cos(a) * state.aim().z)).add(right.scale(Math.sin(a) * state.aim().z))
-			.add(0.0, -0.25 * Math.abs(Math.sin(a)), 0.0);
+		Vec3 upward = right.cross(forward);
+		Vec3 travel = right.scale(across).add(upward.scale(up));
+		travel = travel.lengthSqr() < 1.0E-6 ? right : travel.normalize();
+		return new Vec3[] {forward, travel};
+	}
+
+	/**
+	 * (0.19.73) How a swipe goes, from where the head is ({@code head}) and how the mouse turned (degrees, right and down):
+	 * along the flick, else from the side the head hangs on across to the other, a little downward. Starts round on the
+	 * head's side of in front of you, at least {@link #SWEEP_BACK_MIN} back. Returns (across, up, start angle).
+	 */
+	static Vec3 sweepShape(Player player, Vec3 head, float turnYaw, float turnPitch) {
+		double yaw = player.getYRot() * Mth.DEG_TO_RAD, pitch = player.getXRot() * Mth.DEG_TO_RAD;
+		double across, up;
+		if (Math.abs(turnYaw) + Math.abs(turnPitch) >= TURN_MIN) {
+			double length = Math.sqrt(turnYaw * turnYaw + turnPitch * turnPitch);
+			across = turnYaw / length;
+			up = -turnPitch / length;
+		} else {
+			Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
+			double side = head.subtract(player.position()).dot(right);
+			// hanging near the middle: the weapon side's forehand
+			double from = Math.abs(side) > 0.1 ? Math.signum(side) : player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? 1 : -1;
+			across = -from * 0.97;
+			up = -0.24;
+		}
+		Vec3[] plane = sweepPlane(yaw, pitch, across, up);
+		Vec3 chest = player.getEyePosition().add(0.0, -0.4 * player.getScale(), 0.0);
+		Vec3 h = head.subtract(chest);
+		double at = Math.atan2(h.dot(plane[1]), h.dot(plane[0]));
+		double start = Mth.clamp(Math.min(at, -SWEEP_BACK_MIN), -SWEEP_BACK_MAX, -SWEEP_BACK_MIN);
+		return new Vec3(across, up, start);
+	}
+
+	/** (0.19.73) Whether a swipe is a chop (mostly straight up or down), which comes over the top of a guard. */
+	static boolean chop(State state) {
+		return Math.abs(state.shape().y) >= CHOP;
+	}
+
+	/**
+	 * (0.19.73) The whirl's circle, {@code t} ticks in: round the weapon hand, which works up from held out at chest
+	 * height to overhead as it gets up to speed ({@link #overhead}); overhead, the circle is tilted down in front (as far
+	 * as you look down), drawn in shorter behind you, and the arm dips as the ball comes round the front.
+	 */
+	public static Vec3 whirlPoint(Player player, State state, double t, float partialTick) {
+		double out = Mth.clamp(t / PAY_OUT, 0.0, 1.0);
+		double k = overhead(t);
+		double radius = Mth.lerp(out, 0.3, WHIRL_RADIUS);
+		double phi = whirlAngle(state, t);
+		float[] arm = whirlArm(state, t);
+		Vec3 center = armHand(player, partialTick, arm[0], arm[1]).add(0.0, -WHIRL_DROOP * out * (1.0 - k), 0.0);
+		double yaw = player.getViewYRot(partialTick) * Mth.DEG_TO_RAD;
+		double tilt = k * tilt(player, partialTick);
+		Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
+		// ahead, tipped down by the tilt (so behind you it's tipped up, over your head)
+		Vec3 ahead = new Vec3(-Math.sin(yaw) * Math.cos(tilt), -Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt));
+		double f = Math.cos(phi);
+		double along = f * radius * (f < 0.0 ? Mth.lerp(k, 1.0, BACK_SHORT) : 1.0);
+		return center.add(ahead.scale(along)).add(right.scale(Math.sin(phi) * radius));
+	}
+
+	/** (0.19.73) How far the whirl has worked up from round the held-out hand to overhead, 0 to 1. */
+	public static double overhead(double t) {
+		return smooth(Mth.clamp((t - PAY_OUT) / (double)(WINDUP - PAY_OUT), 0.0, 1.0));
+	}
+
+	/** (0.19.73) How far the overhead whirl tips down in front: more the further you look down. */
+	private static double tilt(Player player, float partialTick) {
+		double pitch = player.getViewXRot(partialTick) * Mth.DEG_TO_RAD;
+		return Mth.clamp(TILT_LEVEL + TILT_PER_PITCH * pitch, TILT_MIN, TILT_MAX);
+	}
+
+	/** (0.19.73) Where the ball is round the whirl (radians from in front of you, toward your right) {@code t} ticks in. */
+	public static double whirlAngle(State state, double t) {
+		return state.shape().x + (state.shape().y < 0.0 ? -1.0 : 1.0) * spinAngle(t);
+	}
+
+	/**
+	 * (0.19.73) The whirling arm, {@code t} ticks in: raised (radians from hanging) and out to the side, the wrist turning
+	 * with the ball and, overhead, the arm dipping in front of you as the ball comes round the front.
+	 */
+	public static float[] whirlArm(State state, double t) {
+		double phi = whirlAngle(state, t);
+		float turn = WRIST * Mth.clamp((float)(t / PAY_OUT), 0.0F, 1.0F);
+		double front = Math.max(0.0, Math.cos(phi));
+		float raise = armRaise(state, t) + turn * (float)Math.cos(phi) - (float)(overhead(t) * WHIRL_DIP * front * front);
+		return new float[] {raise, ARM_OUT + turn * (float)Math.sin(phi)};
+	}
+
+	/**
+	 * (0.19.73) A whirl begun now with its head at {@code head}, the mouse having turned {@code turnYaw} degrees (right):
+	 * it sets off from the head's side of you and goes round the way you were turning (still: the weapon side's forehand,
+	 * coming across the front toward the off side). Both sides work it out the same.
+	 */
+	public static State whirlStart(Player player, long now, Vec3 head, float turnYaw) {
+		double yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw)), forward = new Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
+		Vec3 h = head.subtract(player.getEyePosition().add(0.0, -0.5 * player.getScale(), 0.0));
+		double phi = Math.atan2(h.dot(right), h.dot(forward));
+		int side = player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? 1 : -1;
+		double sense = turnYaw >= TURN_MIN ? 1.0 : turnYaw <= -TURN_MIN ? -1.0 : -side;
+		return new State(FLAIL, WHIRL, now, -1, head, Vec3.ZERO, new Vec3(phi, sense, 0.0));
+	}
+
+	/** (0.19.73) Hermite curve from {@code a} (leaving at {@code ta}) to {@code b} (arriving at {@code tb}), {@code s} 0-1. */
+	private static Vec3 hermite(Vec3 a, Vec3 ta, Vec3 b, Vec3 tb, double s) {
+		double s2 = s * s, s3 = s2 * s;
+		return a.scale(2.0 * s3 - 3.0 * s2 + 1.0).add(ta.scale(s3 - 2.0 * s2 + s)).add(b.scale(3.0 * s2 - 2.0 * s3)).add(tb.scale(s3 - s2));
 	}
 
 	/** How far round the whirl has gone after {@code t} ticks (speeding up to full over {@link #WINDUP}). */
@@ -346,22 +572,17 @@ public final class Lash {
 		return (float)Mth.clamp(t / WINDUP, 0.0, 1.0);
 	}
 
-	/** (0.16.2) Where a whirl sets off: straight out ahead of the body (both sides work it out the same). */
-	public static double startAngle(Player player) {
-		float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
-		return Math.atan2(Mth.cos(yaw), -Mth.sin(yaw));
-	}
-
 	/**
 	 * (0.16.2) How far the flail arm is raised from hanging (radians), {@code t} ticks into {@code state}: out to the
 	 * whirl as the chain pays out, up overhead and down hard for the slam, and back to rest.
 	 */
 	public static float armRaise(State state, double t) {
 		return switch (state.phase()) {
-			case WHIRL -> Mth.lerp((float)smooth(Mth.clamp(t / PAY_OUT, 0.0, 1.0)), REST_RAISE, WHIRL_RAISE);
+			case WHIRL -> Mth.lerp((float)overhead(t), Mth.lerp((float)smooth(Mth.clamp(t / PAY_OUT, 0.0, 1.0)), REST_RAISE, WHIRL_RAISE),
+				OVERHEAD_WHIRL_RAISE);
 			case STRIKE -> {
 				if (t < STRIKE_OVER) {
-					yield Mth.lerp((float)smooth(t / STRIKE_OVER), WHIRL_RAISE, OVERHEAD_RAISE);
+					yield Mth.lerp((float)smooth(t / STRIKE_OVER), OVERHEAD_WHIRL_RAISE, OVERHEAD_RAISE);
 				}
 				float s = (float)Math.min(1.0, (t - STRIKE_OVER) / (STRIKE_TICKS - 1 - STRIKE_OVER));
 				yield Mth.lerp(s * s, OVERHEAD_RAISE, DROP_RAISE);
@@ -410,9 +631,10 @@ public final class Lash {
 		long now = level.getGameTime();
 		Run run = new Run(player);
 		RUNS.put(player.getUUID(), run);
-		Vec3 hand = hand(player, 1.0F);
+		Aim press = press(player, kind);
+		Vec3 hand = player.position().add(press.head());
 		if (kind == FLAIL) {
-			player.setAttached(STATE, new State(FLAIL, WHIRL, now, -1, hand, new Vec3(startAngle(player), 0.0, 0.0)));
+			player.setAttached(STATE, whirlStart(player, now, hand, press.turnYaw()));
 			flailThrown(player, true);
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 0.8F, 1.2F);
 			return;
@@ -430,9 +652,26 @@ public final class Lash {
 				target = item.getId();
 			}
 		}
-		player.setAttached(STATE, new State(WHIP, CRACK, now, target, hand, at));
+		player.setAttached(STATE, new State(WHIP, CRACK, now, target, hand, at, Vec3.ZERO));
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.9F, 1.4F);
+	}
+
+	/**
+	 * (0.19.73) What the client said with this press (where the head is, from your feet, and how the mouse turned), if it
+	 * said it just now and the head's within reach of the hand; else the head hanging off the hand, the mouse still.
+	 */
+	private static Aim press(ServerPlayer player, byte kind) {
+		Pending pending = AIMS.remove(player.getUUID());
+		if (pending == null || player.level().getGameTime() - pending.at() > AIM_FRESH) {
+			return Aim.resting(player, kind);
+		}
+		double reach = (kind == FLAIL ? WHIRL_RADIUS + 1.5 : WHIP_REACH + 1.5) * player.getScale();
+		Aim aim = pending.aim();
+		if (player.position().add(aim.head()).distanceTo(hand(player, 1.0F)) > reach) {
+			aim = new Aim(Aim.resting(player, kind).head(), aim.turnYaw(), aim.turnPitch());
+		}
+		return new Aim(aim.head(), Mth.clamp(aim.turnYaw(), -180.0F, 180.0F), Mth.clamp(aim.turnPitch(), -180.0F, 180.0F));
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -520,7 +759,7 @@ public final class Lash {
 			}
 			case SWEEP -> {
 				sweep(run, state, t);
-				if (t >= SWEEP_TICKS) {
+				if (t >= SWEEP_TICKS && player.getAttached(STATE) != null && player.getAttached(STATE).phase() == SWEEP) {
 					back(player, state, now);
 				}
 			}
@@ -565,7 +804,9 @@ public final class Lash {
 				return;
 			}
 			run.spin = spin(t);
-			player.setAttached(STATE, state.to(STRIKE, now, -1, head, strikeSpot(player)));
+			// (0.19.73) the ball's speed as it's let go: the slam carries on from it
+			Vec3 speed = head.subtract(head(player, state, now - 1, 1.0F));
+			player.setAttached(STATE, state.to(STRIKE, now, -1, head, strikeSpot(player), speed));
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.6F);
 			return;
 		}
@@ -629,13 +870,37 @@ public final class Lash {
 				continue;
 			}
 			run.glanced.put(other.getId(), now);
-			if (other.hurtServer(level, level.damageSources().playerAttack(player), damage)) {
+			// (0.19.73) up to speed, the chain wraps round a raised guard; before that the guard stops it
+			boolean guarded = guarding(other, player);
+			boolean wrapped = guarded && spin >= WRAP_SPIN;
+			if (strike(player, other, damage, wrapped)) {
 				Vec3 push = other.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 				push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(GLANCE_PUSH * (0.5 + spin));
 				shove(other, new Vec3(push.x, 0.2, push.z));
 				level.playSound(null, other.getX(), other.getY(), other.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.8F, 1.0F);
 			}
+			if (guarded && !wrapped || heft(other) >= momentum(FLAIL, spin)) {
+				stall(run, state, ball);
+				return;
+			}
 		}
+	}
+
+	/**
+	 * (0.19.73) The whirling ball met a guard or something too heavy for it: it stops dead there, and (still held) the
+	 * whirl winds up again from where it stopped.
+	 */
+	private static void stall(Run run, State state, Vec3 ball) {
+		ServerPlayer player = run.player;
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		State fresh = whirlStart(player, now, ball, 0.0F);
+		player.setAttached(STATE, fresh.to(WHIRL, now, -1, ball, Vec3.ZERO,
+			new Vec3(fresh.shape().x, state.shape().y, state.shape().z + 1.0)));
+		run.glanced.clear();
+		level.playSound(null, ball.x, ball.y, ball.z, SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 1.0F, 0.6F);
+		level.playSound(null, ball.x, ball.y, ball.z, SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.8F, 0.8F);
+		level.sendParticles(ParticleTypes.CRIT, ball.x, ball.y, ball.z, 4, 0.15, 0.15, 0.15, 0.1);
 	}
 
 	/** Where a let-go flail comes down: what you're looking at within reach, else the ground that far ahead. */
@@ -669,7 +934,8 @@ public final class Lash {
 		}
 		if (struck != null) {
 			struck.setInvulnerableTime(0);
-			struck.hurtServer(level, level.damageSources().playerAttack(player), damage);
+			// (0.19.73) it comes down over the top of a guard
+			strike(player, struck, damage, guarding(struck, player));
 			if (struck instanceof ServerPlayer other) {
 				Shakes.send(other, TARGET_SHAKE * (0.5F + run.spin), other.position());
 			}
@@ -679,7 +945,7 @@ public final class Lash {
 			if (other == struck) {
 				continue;
 			}
-			other.hurtServer(level, level.damageSources().playerAttack(player), damage * SPLASH_SHARE);
+			strike(player, other, damage * SPLASH_SHARE, guarding(other, player));
 			Vec3 push = other.position().subtract(at).multiply(1.0, 0.0, 1.0);
 			push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(0.4);
 			shove(other, new Vec3(push.x, 0.25, push.z));
@@ -722,7 +988,8 @@ public final class Lash {
 		if (caught) {
 			if (target instanceof LivingEntity living && struck(player, living)) {
 				living.setInvulnerableTime(0);
-				living.hurtServer(level, level.damageSources().playerAttack(player), CRACK_DAMAGE);
+				// (0.19.73) the lash curls round a guard
+				strike(player, living, CRACK_DAMAGE, guarding(living, player));
 			}
 			if (run.held && player.isUsingItem() && holdable(player, target)) {
 				player.setAttached(STATE, state.to(SNAG, now, target.getId(), at, at));
@@ -854,12 +1121,19 @@ public final class Lash {
 	public static void swipe(ServerPlayer player, @Nullable Entity attacked) {
 		ItemStack held = player.getMainHandItem();
 		boolean flail = isFlail(held);
-		if (!flail && !isWhip(held) || player.getAttached(STATE) != null || player.isUsingItem() || player.isSpectator()
+		State was = player.getAttached(STATE);
+		Run last = RUNS.get(player.getUUID());
+		// (0.19.73) a swipe can follow a swipe still coming back: it goes on from where the head is
+		boolean following = was != null && was.phase() == RETURN && was.kind() == (flail ? FLAIL : WHIP) && last != null && last.swipe;
+		if (!flail && !isWhip(held) || was != null && !following || player.isUsingItem() || player.isSpectator()
 			|| player.getCooldowns().isOnCooldown(held) || player.getAttackStrengthScale(0.5F) < SWEEP_MIN_CHARGE) {
 			return;
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		byte kind = flail ? FLAIL : WHIP;
+		Aim press = press(player, kind);
+		Vec3 head = following ? head(player, was, now, 1.0F) : player.position().add(press.head());
 		Run run = new Run(player);
 		run.held = false;
 		run.swipe = true;
@@ -869,7 +1143,7 @@ public final class Lash {
 		}
 		RUNS.put(player.getUUID(), run);
 		Vec3 aim = new Vec3(player.getYRot() * Mth.DEG_TO_RAD, player.getXRot() * Mth.DEG_TO_RAD, flail ? SWEEP_FLAIL_REACH : SWEEP_WHIP_REACH);
-		player.setAttached(STATE, new State(flail ? FLAIL : WHIP, SWEEP, now, -1, hand(player, 1.0F), aim));
+		player.setAttached(STATE, new State(kind, SWEEP, now, -1, head, aim, sweepShape(player, head, press.turnYaw(), press.turnPitch())));
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7F,
 			flail ? 0.8F : 1.3F);
 		if (flail) {
@@ -899,7 +1173,11 @@ public final class Lash {
 				continue;
 			}
 			run.glanced.put(other.getId(), now);
-			if (other.hurtServer(level, level.damageSources().playerAttack(player), damage)) {
+			// (0.19.73) a chop comes over the top of a guard; any other swipe is stopped by it, as by anything too heavy
+			boolean guarded = guarding(other, player);
+			boolean wrapped = guarded && chop(state);
+			boolean stopped = guarded && !wrapped || heft(other) >= momentum(state.kind(), run.spin);
+			if (strike(player, other, damage, wrapped)) {
 				Vec3 push = head.subtract(last).multiply(1.0, 0.0, 1.0);
 				push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(SWEEP_PUSH);
 				shove(other, new Vec3(push.x, 0.1, push.z));
@@ -907,6 +1185,12 @@ public final class Lash {
 					SoundSource.PLAYERS, 0.7F, flail ? 0.9F : 1.6F);
 				Vec3 at = other.getBoundingBox().getCenter();
 				level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+			if (stopped) {
+				// the head stops dead there and drops back
+				level.playSound(null, head.x, head.y, head.z, flail ? SoundEvents.CHAIN_HIT : SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 0.9F, 0.6F);
+				back(player, state, now);
+				return;
 			}
 		}
 	}
@@ -1010,6 +1294,45 @@ public final class Lash {
 		return entity != player && entity.isAlive() && !entity.isSpectator() && entity.isAttackable() && !(entity instanceof ArmorStand)
 			&& entity != player.getVehicle() && !player.hasPassenger(entity) && !player.isAlliedTo(entity)
 			&& !(entity instanceof Player other && (other.isCreative() || other.isSpectator()));
+	}
+
+	/**
+	 * (0.19.73) Whether {@code other} has a shield or guard raised toward {@code player} (what a swing would be stopped by,
+	 * unless it wraps round).
+	 */
+	private static boolean guarding(LivingEntity other, Player player) {
+		if (!other.isBlocking()) {
+			return false;
+		}
+		Vec3 to = player.position().subtract(other.position()).multiply(1.0, 0.0, 1.0);
+		Vec3 facing = other.getViewVector(1.0F).multiply(1.0, 0.0, 1.0);
+		return to.lengthSqr() < 1.0E-4 || facing.lengthSqr() < 1.0E-4 || to.normalize().dot(facing.normalize()) > 0.0;
+	}
+
+	/**
+	 * (0.19.73) A head's blow on {@code other}: round its guard ({@code wrapped}: a {@link #WRAP_DAMAGE} blow, a share
+	 * lighter, with a rattle of chain or lash) or a plain one. Whether it was hurt.
+	 */
+	private static boolean strike(ServerPlayer player, LivingEntity other, float damage, boolean wrapped) {
+		ServerLevel level = player.level();
+		if (!wrapped) {
+			return other.hurtServer(level, level.damageSources().playerAttack(player), damage);
+		}
+		boolean flail = isFlail(player.getMainHandItem());
+		level.playSound(null, other.getX(), other.getEyeY(), other.getZ(), flail ? SoundEvents.CHAIN_HIT : SoundEvents.LEAD_TIED,
+			SoundSource.PLAYERS, 0.9F, flail ? 0.75F : 1.3F);
+		return other.hurtServer(level, level.damageSources().source(WRAP_DAMAGE, player), damage * WRAP_SHARE);
+	}
+
+	/** (0.19.73) How heavy something is to a swung head: its bulk, doubled per point of knockback resistance. */
+	private static double heft(LivingEntity other) {
+		double bulk = other.getBbWidth() * other.getBbWidth() * other.getBbHeight();
+		return bulk * (1.0 + 2.0 * Math.max(0.0, other.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)));
+	}
+
+	/** (0.19.73) How heavy a thing a flail's or whip's head ({@code kind}) at {@code spin} (0-1) carries on through. */
+	private static double momentum(byte kind, float spin) {
+		return kind == FLAIL ? FLAIL_MOMENTUM + FLAIL_MOMENTUM_SPIN * spin : WHIP_MOMENTUM + WHIP_MOMENTUM_SPIN * spin;
 	}
 
 	/** Something the whip can wrap and hold: a living creature it can strike, not a boss. */

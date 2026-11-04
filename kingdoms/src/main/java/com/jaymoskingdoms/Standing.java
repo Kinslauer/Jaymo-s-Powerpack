@@ -84,6 +84,12 @@ public final class Standing {
 			lines.add(temper(t));
 			hovers.add(Component.translatable("standing.jaymoskingdoms.temper." + t.key() + ".hover", Purists.bloodName(f)));
 		}
+		// (0.7.513) the realm's faith, from its folk
+		Patron faith = RealmFaiths.patron(level.getServer(), f);
+		if (faith != null) {
+			lines.add(Component.translatable("standing.jaymoskingdoms.faith", Patrons.coloured(faith)));
+			hovers.add(Component.translatable("standing.jaymoskingdoms.faith.hover"));
+		}
 		Rulers.Reign reign = Rulers.reignOf(level.getServer(), f);
 		if (reign != null && reign.since() >= 0) {
 			long days = Math.max(0L, Production.day(level.getServer()) - reign.since());
@@ -92,6 +98,13 @@ public final class Standing {
 			Heritage.Kind blood = Heritage.Kind.byKey(reign.blood());
 			hovers.add(blood == null ? Component.empty() : Component.translatable("standing.jaymoskingdoms.reign.hover", Purists.name(blood)));
 		}
+		// (0.7.519) how the realm chooses its rulers and how this one came to the throne, and its treaties
+		Lines elections = Elections.lines(level.getServer(), f, mob);
+		lines.addAll(elections.lines());
+		hovers.addAll(elections.hovers());
+		Lines treaties = Treaties.lines(level.getServer(), f);
+		lines.addAll(treaties.lines());
+		hovers.addAll(treaties.hovers());
 		lines.add(Component.translatable("standing.jaymoskingdoms.status", Component.translatable("standing.jaymoskingdoms.ruler." + rulerDoing(level, mob, f)))
 			.withStyle(ChatFormatting.WHITE));
 		hovers.add(Component.translatable("standing.jaymoskingdoms.ruler.day.hover"));

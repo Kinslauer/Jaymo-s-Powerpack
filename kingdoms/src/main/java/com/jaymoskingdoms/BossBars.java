@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
+ * (0.7.518) a patron's champion (it keeps its own bar, but counts as a boss everywhere else).
  * (0.5.19) A boss's bar (a king, a lord, a chief, a warlord, a quest's champion, (0.7.145) an Aether Giant) shows only to the players who've hit it: by hand, with an
  * arrow or javelin, or with a power. It stays while they're within {@link #RANGE}; once they leave, it's gone until
  * they hit the boss again. Its death or unloading clears it.
@@ -36,6 +37,8 @@ public final class BossBars {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> HITTERS.remove(entity.getUUID()));
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> HITTERS.remove(entity.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> HITTERS.clear());
+		// (0.7.524) a death to one of these is a boss's, to Powers' death by cause
+		PowersCompat.tellBosses(BossBars::boss);
 	}
 
 	private static void hit(LivingEntity entity, DamageSource source) {
@@ -53,7 +56,9 @@ public final class BossBars {
 			|| com.jaymoskingdoms.nether.NetherForts.warlord(entity)
 			|| entity instanceof com.jaymoskingdoms.nether.Hornkin hornkin && hornkin.kind() == com.jaymoskingdoms.nether.Hornkin.Kind.WARLORD
 			// (0.7.145) the Aether Giants
-			|| com.jaymoskingdoms.remnants.Monoliths.giant(entity);
+			|| com.jaymoskingdoms.remnants.Monoliths.giant(entity)
+			// (0.7.518) a patron's champion
+			|| entity instanceof PatronChampion champion && !champion.decoy();
 	}
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */

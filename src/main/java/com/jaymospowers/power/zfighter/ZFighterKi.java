@@ -27,8 +27,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -38,7 +36,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
@@ -75,6 +72,8 @@ public final class ZFighterKi {
 	// ---- Ki Blast ----
 	static final float BLAST_KI = 8.0F;
 	static final int BLAST_COOLDOWN = 6;
+	/** (0.19.60) How big the tapped blast's orb grows in the palm before it's thrown (blocks across). */
+	static final double BLAST_FORM_MIN = 0.12, BLAST_FORM_MAX = 0.28;
 	static final float BLAST_DAMAGE = 5.0F;
 	static final double BLAST_SPEED = 1.6;
 	static final int BLAST_LIFE = 40;
@@ -333,19 +332,29 @@ public final class ZFighterKi {
 			return false;
 		}
 		ServerLevel level = player.level();
-		Vec3 look = LockOn.aim(player);
-		// from the right palm, a little ahead
-		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
-		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
-		Vec3 from = player.getEyePosition().add(look.scale(0.8)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
+		// (0.19.60) it forms in the main palm as the arm draws back (ZFighterHands.THROW_COCK ticks), then is thrown from it
+		int hand = ZFighterHands.hand(player, true);
+		boolean left = hand == ZFighterHands.LEFT;
+		int color = formColor(live);
+		int orbColor = color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color;
+		int orbId = -(player.getId() * 4 + (left ? 2 : 1));
 		float damage = BLAST_DAMAGE * ZFighterPower.kiPower(player, live);
-		BOLTS.add(new Bolt(level, player.getUUID(), from, look.scale(BLAST_SPEED), damage, formColor(live), BOLT, BLAST_LIFE));
-		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		ZFighterHands.thrust(player, hand, ZFighterHands.THROW);
+		for (int i = 0; i < ZFighterHands.THROW_COCK; i++) {
+			double size = BLAST_FORM_MIN + (BLAST_FORM_MAX - BLAST_FORM_MIN) * i / Math.max(1, ZFighterHands.THROW_COCK - 1);
+			ZFighterHands.later(player, i, () -> orb(level, orbId, ZFighterHands.palm(player, LockOn.aim(player), left), size, orbColor));
+		}
+		ZFighterHands.later(player, ZFighterHands.THROW_COCK, () -> {
+			Vec3 look = LockOn.aim(player);
+			BOLTS.add(new Bolt(level, player.getUUID(), ZFighterHands.palm(player, look, left), look.scale(BLAST_SPEED), damage, color, BOLT,
+				BLAST_LIFE));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6F, 1.8F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.7F, 1.5F);
+		});
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(BLAST_EXHAUSTION);
 		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6F, 1.8F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.7F, 1.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.4F, 2.0F);
 		return true;
 	}
 
@@ -432,6 +441,10 @@ public final class ZFighterKi {
 			return;
 		}
 		long firing = held - BARRAGE_WINDUP;
+		// (0.19.60) the next ball is already forming in the other palm while this one flies
+		boolean next = (firing / BARRAGE_EVERY) % 2 == 0;
+		orb(level, -(player.getId() * 4 + (next ? 2 : 1)), palm(player, look, next), BARRAGE_ORB * (0.5 + 0.5 * (firing % BARRAGE_EVERY + 1)
+			/ BARRAGE_EVERY), color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color);
 		if (firing % BARRAGE_EVERY != 0) {
 			return;
 		}
@@ -449,8 +462,8 @@ public final class ZFighterKi {
 			BARRAGE_DAMAGE * ZFighterPower.kiPower(player, live), color, BOLT, BARRAGE_LIFE);
 		bolt.orbSize = BARRAGE_ORB;
 		BOLTS.add(bolt);
-		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
-		player.swing(left == mainRight ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		// thrown forward with a thrust of that arm, the hands taking turns
+		ZFighterHands.thrust(player, left ? ZFighterHands.LEFT : ZFighterHands.RIGHT, ZFighterHands.JAB);
 		exhaust(player, BARRAGE_EXHAUSTION);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.45F,
 			1.6F + random.nextFloat() * 0.3F);
@@ -914,14 +927,12 @@ public final class ZFighterKi {
 
 	/** Where his palm is: the eye, a little ahead, right and down. */
 	static Vec3 palm(ServerPlayer player, Vec3 look) {
-		return palm(player, look, false);
+		return ZFighterHands.mainPalm(player, look);
 	}
 
 	/** His right palm, or his left. */
 	private static Vec3 palm(ServerPlayer player, Vec3 look, boolean left) {
-		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
-		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
-		return player.getEyePosition().add(look.scale(0.8)).add(right.scale(left ? -0.3 : 0.3)).add(0.0, -0.25, 0.0);
+		return ZFighterHands.palm(player, look, left);
 	}
 
 	/**
@@ -966,7 +977,7 @@ public final class ZFighterKi {
 			BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look), spread.scale(VOLLEY_SPEED), damage, formColor(live),
 				HOMING, VOLLEY_LIFE));
 		}
-		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		ZFighterHands.thrust(player, ZFighterHands.hand(player, true), ZFighterHands.JAB);
 		exhaust(player, BLAST_EXHAUSTION * 2.0F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		return true;
@@ -1058,12 +1069,13 @@ public final class ZFighterKi {
 			return;
 		}
 		Vec3 look = player.getViewVector(1.0F);
-		Vec3 hands = player.getEyePosition().add(look.scale(0.7)).add(0.0, -0.45, 0.0);
+		// (0.19.60) between the hands cupped at the lead hip (ZFighterHands; the client draws it in the drawn hands)
+		Vec3 hands = ZFighterHands.cupped(player);
 		RandomSource random = level.getRandom();
 		Signature sig = signature(live);
 		if (sig.style() == NEEDLE && ZFighterTraining.of(player).charged() != ZFighterTraining.KI_BOMB) {
 			// one finger, pointed: the ki gathers at its tip
-			hands = player.getEyePosition().add(look.scale(0.9)).add(0.0, -0.25, 0.0);
+			hands = ZFighterHands.mainPalm(player, look).add(look.scale(0.15));
 		}
 		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : baseColor(live, sig.color()),
 			(0.8F + charge * 1.2F) * (sig.style() == NEEDLE ? 0.5F : 1.0F));
@@ -1118,7 +1130,8 @@ public final class ZFighterKi {
 		ServerLevel level = player.level();
 		Vec3 look = LockOn.aim(player);
 		double size = Mth.lerp(charge, BOMB_SIZE_MIN, BOMB_SIZE_MAX);
-		Vec3 from = player.getEyePosition().add(look.scale(1.0 + size)).add(0.0, -0.2, 0.0);
+		// (0.19.60) pushed out of the cupped hands
+		Vec3 from = waveHands(player, look).add(look.scale(0.3 + size * 0.6));
 		Bolt bolt = new Bolt(level, player.getUUID(), from, look.scale(BOMB_SPEED),
 			Mth.lerp(charge, BOMB_DAMAGE_MIN, BOMB_DAMAGE_MAX) * ZFighterPower.kiPower(player, live),
 			live.superOn() ? formColor(live) : baseColor(live, WAVE_COLOR), BOMB, BOMB_LIFE);
@@ -1127,7 +1140,8 @@ public final class ZFighterKi {
 		bolt.burst = Mth.lerp(charge, BOMB_BLAST_MIN, BOMB_BLAST_MAX) * (live.superOn() ? 1.3F : 1.0F);
 		bolt.griefing = live.superOn() && charge >= 1.0F;
 		BOLTS.add(bolt);
-		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		ZFighterHands.thrust(player, ZFighterHands.BOTH, ZFighterHands.PUSH);
+		ZFighterHands.shout(player);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0F, 0.5F);
 		exhaust(player, WAVE_EXHAUSTION * (1.0F + charge));
 	}
@@ -1178,6 +1192,8 @@ public final class ZFighterKi {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 			}
 		}
+		// (0.19.60) the hands drive forward out of the cup (ZFighterFiringPose) with a shout
+		ZFighterHands.shout(player);
 		com.jaymospowers.core.Shakes.send(player, 0.5F + 0.9F * charge, from);
 		if (!player.onGround()) {
 			// the recoil pushes a fighter in the air back

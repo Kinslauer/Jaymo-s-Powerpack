@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "K": "minecraft:stick",
+    "S": "#minecraft:stone_crafting_materials"
+  },
+  "pattern": [
+    "  K",
+    "S S",
+    " S "
+  ],
+  "result": {
+    "id": "jaymospowers:mortar",
+    "count": 1
+  }
+}
