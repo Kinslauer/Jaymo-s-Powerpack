@@ -210,7 +210,6 @@ public final class Camps {
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Raids.clear();
-			Blasts.clear();
 			OgreRaids.clear();
 			OgreGrowth.clear();
 			IllagerCamps.clear();
@@ -473,8 +472,7 @@ public final class Camps {
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		Raids.tick(server);
-		// (0.7.484) cannon craters are dug a little each tick; ogre raids are driven
-		Blasts.tick(server);
+		// (0.7.484) ogre raids are driven
 		OgreRaids.tick(server);
 		long now = level.getGameTime();
 		if (now % SPAWN_CHECK_TICKS == 0) {

@@ -281,7 +281,7 @@ final class TradeRoutes {
 					new Item[] {Items.WHEAT, Items.BREAD, Items.COBBLESTONE, Items.OAK_LOG, Items.IRON_INGOT, Items.STRING, Items.LEATHER});
 			}
 			case TOWN -> {
-				boolean wagons = folk >= TOWN_WAGON_FOLK && f.treasury() >= TOWN_WAGON_PURSE;
+				boolean wagons = folk >= TOWN_WAGON_FOLK && purse(Factions.level(server), f) >= TOWN_WAGON_PURSE;
 				int carts = wagons ? 1 : Math.min(MOST_HANDCARTS, 1 + folk / 16);
 				yield new Profile(wagons ? CART : HAND, carts + (haven ? HAVEN_CARTS : 0), wagons ? Caravans.CART_LOAD : HAND_LOAD,
 					(wagons ? 1 : 0) + (haven ? HAVEN_GUARDS : 0), false, EnumSet.of(Ware.FOOD, Ware.CLOTH, Ware.HIDE, Ware.TIMBER),
@@ -502,7 +502,7 @@ final class TradeRoutes {
 		for (Map<String, Integer> cart : back) {
 			in += worth(cart);
 		}
-		settle(server, home, lord, out, in);
+		settle(level, home, lord, out, in);
 		return c.turned(fit(back, c.carts().size()), now + Caravans.STOP_TICKS);
 	}
 
@@ -547,8 +547,53 @@ final class TradeRoutes {
 		return worth;
 	}
 
-	/** The one who came out ahead is paid the difference in worth by the other, as far as that one's treasury goes. */
-	static void settle(MinecraftServer server, Faction home, Faction lord, long out, long back) {
+	/**
+	 * (0.7.484) Emeralds {@code f} can pay out: a realm's treasury; a village keeps its money in its storehouse (as haven
+	 * trade, wages and {@link HavenGrowth} do), so its storehouse emeralds while that is loaded, else nothing.
+	 */
+	static long purse(ServerLevel level, Faction f) {
+		if (f.type().isRealm()) {
+			return Math.max(0L, f.treasury());
+		}
+		return Storage.loaded(level, f) ? Storage.count(level, f, Items.EMERALD) : 0L;
+	}
+
+	/** (0.7.484) Takes up to {@code n} emeralds out of {@code f}'s {@link #purse}; returns what was taken. */
+	static long spend(ServerLevel level, Faction f, long n) {
+		long take = Math.min(n, purse(level, f));
+		if (take <= 0L) {
+			return 0L;
+		}
+		if (f.type().isRealm()) {
+			Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() - take));
+			return take;
+		}
+		long got = 0L;
+		while (got < take) {
+			int part = Storage.take(level, f, Items.EMERALD, (int)Math.min(take - got, 64L)).getCount();
+			if (part <= 0) {
+				break;
+			}
+			got += part;
+		}
+		return got;
+	}
+
+	/** (0.7.484) Pays {@code n} emeralds into {@code f}'s purse: a realm's treasury, a village's storehouse (held for it till loaded). */
+	static void earn(ServerLevel level, Faction f, long n) {
+		if (n <= 0L) {
+			return;
+		}
+		if (f.type().isRealm()) {
+			Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() + n));
+			return;
+		}
+		Caravans.deliver(level, f, Map.of(Caravans.key(Items.EMERALD), (int)Math.min(n, (long)Integer.MAX_VALUE)));
+	}
+
+	/** The one who came out ahead is paid the difference in worth by the other, as far as that one's purse goes. */
+	static void settle(ServerLevel level, Faction home, Faction lord, long out, long back) {
+		MinecraftServer server = level.getServer();
 		long diff = (out - back) / COPPER_PER_EMERALD;
 		if (diff == 0L) {
 			return;
@@ -558,12 +603,8 @@ final class TradeRoutes {
 		if (payer == null || payee == null) {
 			return;
 		}
-		long sum = Math.min(Math.abs(diff), payer.treasury());
-		if (sum <= 0L) {
-			return;
-		}
-		Factions.update(server, payer.id(), x -> x.withTreasury(x.treasury() - sum));
-		Factions.update(server, payee.id(), x -> x.withTreasury(x.treasury() + sum));
+		long sum = spend(level, payer, Math.abs(diff));
+		earn(level, payee, sum);
 	}
 
 	// ---- its folk -----------------------------------------------------------------------------------------------------
@@ -818,9 +859,8 @@ final class TradeRoutes {
 				if (lord.id() != home.id() && (lord.type().isRealm() || lord.type() == FactionType.VILLAGE)) {
 					Reputation.change(p, lord, REP_ESCORT / 2);
 				}
-				long tip = Math.min(ESCORT_TIP, home.treasury());
+				long tip = spend(level, home, ESCORT_TIP);
 				if (tip > 0L) {
-					Factions.update(server, home.id(), x -> x.withTreasury(x.treasury() - tip));
 					Block.popResource(level, p.blockPosition(), new ItemStack(Items.EMERALD, (int)tip));
 				}
 				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.escorted", home.name(), lord.name()).withStyle(ChatFormatting.GREEN));
@@ -899,8 +939,7 @@ final class TradeRoutes {
 		carts.set(wagon.slot(), cart);
 		Caravans.put(server, c.carts(carts));
 		wagon.setLoad(Caravans.look(cart));
-		long paid = cost;
-		Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + paid));
+		earn(level, f, cost);
 		if (settled) {
 			Reputation.change(player, f, REP_TRADE);
 		}

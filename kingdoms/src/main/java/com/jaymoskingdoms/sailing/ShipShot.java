@@ -1,6 +1,5 @@
 package com.jaymoskingdoms.sailing;
 
-import com.jaymoskingdoms.Blasts;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Worker;
 import net.minecraft.core.BlockPos;

@@ -535,7 +535,7 @@ final class Raids {
 	 * storage first, then the chests and barrels standing loose on its land, which he breaks into (0.7.484).
 	 */
 	private static void plunder(ServerLevel level, Mob raider, Faction target, Raid raid) {
-		ItemStack taken = Plunder.take(level, raider, target, LOOT_PER_RAIDER, Plunder.SMASH_CHANCE);
+		ItemStack taken = Plunder.take(level, raider, target, LOOT_PER_RAIDER, Plunder.SMASH_CHANCE, PirateCoves.is(level.getServer(), raid.camp));
 		if (taken.isEmpty()) {
 			raid.emptyHanded.add(raider.getUUID());
 			return;

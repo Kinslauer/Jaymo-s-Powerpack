@@ -370,7 +370,7 @@ final class OgreRaids {
 				}
 			}
 			if (near) {
-				ItemStack taken = Plunder.take(level, ogre, target, LOAD, SMASH);
+				ItemStack taken = Plunder.take(level, ogre, target, LOAD, SMASH, false);
 				if (taken.isEmpty()) {
 					if (bare) {
 						raid.loose.remove(aim);

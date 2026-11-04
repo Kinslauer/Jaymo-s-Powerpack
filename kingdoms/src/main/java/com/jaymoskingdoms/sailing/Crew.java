@@ -79,6 +79,8 @@ public final class Crew {
 	 */
 	public @Nullable Vec3 shore;
 	public boolean shoreLiving;
+	/** (0.7.484) Not saved: the game tick {@link #shore} was last set or refreshed; guns ignore an older mark. */
+	public long shoreSet;
 	/**
 	 * (0.7.243) Not saved: open water she makes for to get out of a bay she lay embayed in, until when, how many ways
 	 * round she's tried near {@link #stuckAt} (each looks farther), and where she last lay stuck.

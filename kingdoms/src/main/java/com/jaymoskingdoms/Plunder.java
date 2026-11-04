@@ -151,7 +151,7 @@ final class Plunder {
 	 * What a raider takes when he reaches the settlement: its coin (now and then first), then the valuables and goods in
 	 * its storage, then whatever stands loose in chests and barrels near him, then coin. Empty if there is nothing left.
 	 */
-	static ItemStack take(ServerLevel level, Mob raider, Faction target, int perRaider, float smash) {
+	static ItemStack take(ServerLevel level, Mob raider, Faction target, int perRaider, float smash, boolean pirate) {
 		MinecraftServer server = level.getServer();
 		RandomSource random = level.getRandom();
 		if (random.nextFloat() < COIN_FIRST) {
@@ -163,9 +163,18 @@ final class Plunder {
 		List<ItemStack> contents = Storage.contents(level, target);
 		if (!contents.isEmpty()) {
 			List<ItemStack> valuables = contents.stream().filter(Plunder::valuable).toList();
-			ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
+			ItemStack first = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
 				: contents.get(random.nextInt(contents.size()));
-			ItemStack taken = Storage.take(level, target, s -> ItemStack.isSameItemSameComponents(s, pick), perRaider);
+			// (0.7.484) pirates take anything gold, and the richest gold first
+			ItemStack pick = first;
+			if (pirate) {
+				ItemStack richest = contents.stream().filter(Currencies::gold).max(java.util.Comparator.comparingLong(Currencies::goldWorth)).orElse(null);
+				if (richest != null) {
+					pick = richest;
+				}
+			}
+			ItemStack chosen = pick;
+			ItemStack taken = Storage.take(level, target, s -> ItemStack.isSameItemSameComponents(s, chosen), perRaider);
 			if (!taken.isEmpty()) {
 				level.playSound(null, raider.getX(), raider.getY(), raider.getZ(), SoundEvents.BARREL_OPEN, SoundSource.HOSTILE, 1.0F, 0.8F);
 				return taken;

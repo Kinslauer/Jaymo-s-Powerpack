@@ -217,6 +217,11 @@ final class Corsairs implements Ship.Captaincy {
 			return null;
 		}
 		Ship foe = crew.target >= 0 && level.getEntity(crew.target) instanceof Ship s && !s.isRemoved() && !s.foundering() ? s : null;
+		// (0.7.484) a shore mark not refreshed lately (captain gone, raid over) is dropped
+		if (crew.shore != null && now - crew.shoreSet > SHORE_LOOK + THINK) {
+			crew.shore = null;
+			crew.shoreLiving = false;
+		}
 		if (now % 2 == 0) {
 			this.gunnery(level, ship, crew, foe, now);
 		}
@@ -225,12 +230,37 @@ final class Corsairs implements Ship.Captaincy {
 			Whalers.helm(level, ship, crew);
 		}
 		if (!crew.captained(ship)) {
+			// (0.7.484) no captain to think: her gunners still look ashore (or drop a stale mark) every so often
+			if (crew.side == Crew.Side.PIRATE && (now + ship.getId()) % THINK == 0) {
+				this.lookAshore(level, ship, crew, foe);
+			}
 			return null;
 		}
 		if ((now + ship.getId()) % THINK == 0) {
 			this.think(level, ship, crew);
 		}
 		return Fleet.steer(ship, crew.wantYaw, crew.wantSail, crew.row, crew.astern);
+	}
+
+	/**
+	 * (0.7.484) Her gunners' shore mark: none with a ship to fight or off the pirate side; her cove's landing party ashore, the
+	 * shore it's fighting on; otherwise any foe of her cove ashore in range, looked for now and then. Runs with or without a
+	 * captain, so a mark never outlives its look.
+	 */
+	private void lookAshore(ServerLevel level, Ship ship, Crew crew, @Nullable Ship foe) {
+		long tick = level.getGameTime();
+		if (foe != null || crew.side != Crew.Side.PIRATE) {
+			crew.shore = null;
+			crew.shoreLiving = false;
+		} else if (PirateCoves.raiding(level, crew)) {
+			crew.shore = this.shoreTarget(level, ship, crew);
+			crew.shoreSet = tick;
+		} else if (tick - crew.shoreLooked >= SHORE_LOOK || tick < crew.shoreLooked) {
+			crew.shoreLooked = tick;
+			crew.shore = this.shoreFoe(level, ship, crew);
+			crew.shoreLiving = crew.shore != null;
+			crew.shoreSet = tick;
+		}
 	}
 
 	/** Her captain looks about him: his foe, what he does about it, and the helm he sets. */
@@ -244,20 +274,7 @@ final class Corsairs implements Ship.Captaincy {
 		}
 		crew.target = foe == null ? -1 : foe.getId();
 		crew.goal = null;
-		// (0.7.484) no ship to fight and her cove's landing party ashore: she shells the shore it's fighting on; otherwise
-		// she shells any foes of her cove ashore in range (orcs, goblins, illagers at war with it), looked for now and then
-		if (foe != null || crew.side != Crew.Side.PIRATE) {
-			crew.shore = null;
-		} else if (PirateCoves.raiding(level, crew)) {
-			crew.shore = this.shoreTarget(level, ship, crew);
-		} else {
-			long tick = level.getGameTime();
-			if (tick - crew.shoreLooked >= SHORE_LOOK || tick < crew.shoreLooked) {
-				crew.shoreLooked = tick;
-				crew.shore = this.shoreFoe(level, ship, crew);
-				crew.shoreLiving = crew.shore != null;
-			}
-		}
+		this.lookAshore(level, ship, crew, foe);
 		float want;
 		double sail;
 		if (foe != null && (crew.side == Crew.Side.MERCHANT || crew.side == Crew.Side.WHALER)) {

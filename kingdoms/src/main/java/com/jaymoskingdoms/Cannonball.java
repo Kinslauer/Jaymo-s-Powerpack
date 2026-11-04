@@ -46,8 +46,6 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	/** Its blow on a direct hit; the burst falls off to {@link #BURST_SHARE} of it at this radius. */
 	static final float DAMAGE = 14.0F, BURST_SHARE = 0.3F;
 	static final double BURST_RADIUS = 2.5, KNOCKBACK = 0.9;
-	/** (0.7.484) The crater it digs where it lands (blocks across the middle to the rim; see {@link Blasts}). */
-	static final double CRATER_RADIUS = 2.8;
 
 	public static EntityType<Cannonball> TYPE;
 

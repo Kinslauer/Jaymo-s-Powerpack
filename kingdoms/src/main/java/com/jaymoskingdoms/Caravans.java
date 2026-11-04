@@ -367,23 +367,9 @@ final class Caravans {
 			}
 		}
 		long paid = 0L;
-		if (buyer.type().isRealm()) {
-			paid = Math.min(worth, Math.max(0L, buyer.treasury()));
-			long take = paid;
-			if (take > 0L) {
-				Factions.update(server, buyer.id(), x -> x.withTreasury(x.treasury() - take));
-			}
-		} else if (Storage.loaded(level, buyer)) {
-			paid = Storage.take(level, buyer, Items.EMERALD, (int)Math.min(worth, 64L * 8)).getCount();
-		}
-		if (paid > 0L) {
-			if (home.type().isRealm()) {
-				long give = paid;
-				Factions.update(server, home.id(), x -> x.withTreasury(x.treasury() + give));
-			} else {
-				deliver(level, home, Map.of(key(Items.EMERALD), (int)paid));
-			}
-		}
+		// (0.7.484) a realm pays from its treasury, a village from its storehouse (TradeRoutes.spend / earn)
+		paid = TradeRoutes.spend(level, buyer, buyer.type().isRealm() ? worth : Math.min(worth, 64L * 8));
+		TradeRoutes.earn(level, home, paid);
 		List<Map<String, Integer>> back = List.of();
 		if (Storage.loaded(level, buyer)) {
 			back = loadUp(level, buyer, x -> Storage.isFood(x) || x.is(ItemTags.LOGS) || x.is(Items.COAL) || x.is(Items.IRON_INGOT) || x.is(Items.COBBLESTONE),
