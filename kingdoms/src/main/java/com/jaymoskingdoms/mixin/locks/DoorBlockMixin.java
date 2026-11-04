@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.494) A locked door stays shut for whoever has no key: villagers' AI, wind charges, MCA and our own folk all open it
+ * (0.7.496) A locked door stays shut for whoever has no key: villagers' AI, wind charges, MCA and our own folk all open it
  * through {@code setOpen}; redstone through {@code neighborChanged} ({@link Locks}).
  */
 @Mixin(DoorBlock.class)

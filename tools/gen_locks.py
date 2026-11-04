@@ -1,4 +1,4 @@
-"""Paints Kingdoms' lock, key, blank key and key ring icons (16px, vanilla style), (0.7.494).
+"""Paints Kingdoms' lock, key, blank key and key ring icons (16px, vanilla style), (0.7.496).
 
 Run from the repo root: python -I tools/gen_locks.py
 Our own art, in the palette of tools/gen_lockpick.py.

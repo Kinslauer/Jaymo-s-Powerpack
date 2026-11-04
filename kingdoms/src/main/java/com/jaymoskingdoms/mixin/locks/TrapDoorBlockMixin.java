@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.494) A locked trapdoor stays shut for whoever has no key (use, wind charge, MCA go through {@code toggle}; redstone through {@code neighborChanged}) ({@link Locks}). */
+/** (0.7.496) A locked trapdoor stays shut for whoever has no key (use, wind charge, MCA go through {@code toggle}; redstone through {@code neighborChanged}) ({@link Locks}). */
 @Mixin(TrapDoorBlock.class)
 abstract class TrapDoorBlockMixin {
 	@Inject(method = "toggle", at = @At("HEAD"), cancellable = true)

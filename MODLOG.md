@@ -5157,5 +5157,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and Modrinth's 26.3 list the pack adds, unchanged: Dungeons and Taverns (roadside taverns, dungeons, overhauled
   strongholds, mansions, outposts and mineshafts), Structory and Structory: Towers (ruins, camps, shrines, watchtowers),
   and Homesteads (lone farmsteads). CurseForge ids still to look up from home (`packModsNoCf`).
-- **0.19.85, Kingdoms 0.7.494, locks and keys (Patch 6)** (`docs/Locks-Plan.md`; see `kingdoms/MODLOG.md`): Powers only
+- **0.19.86, Kingdoms 0.7.496, locks and keys (Patch 6)** (`docs/Locks-Plan.md`; see `kingdoms/MODLOG.md`): Powers only
   gains the graded copies of the four lock and key icons in the optional `excalibur_style` pack.

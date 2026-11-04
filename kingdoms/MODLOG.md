@@ -8464,7 +8464,7 @@ hall, land and vassals:
   action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
   tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.
 
-## 0.7.494: locks and keys (pack 0.19.85)
+## 0.7.496: locks and keys (pack 0.19.86)
 Andy picked the idea of Locks Reforged; this is our own build of it, nothing copied (`Locks`, `NightLocks`).
 - **Lock and key**: three iron ingots and three nuggets forge a lock. Use it on a door, trapdoor, fence gate, chest or
   barrel to fit it, and its key (a new one, cut to that lock) goes in your pack. Hold a cut key in your off hand while

@@ -69,7 +69,7 @@ import org.jspecify.annotations.Nullable;
  * took Slip Away's place) widens the sweet spots and eases the strain on the pick; from rank 2 the pick feels the
  * binding pin or the gate, and at rank 3 the first slip of each try is forgiven.
  *
- * <p>(0.7.494) A locked loot chest is slow to break, not unbreakable ({@link Locks}), and picking one in town is burglary.
+ * <p>(0.7.496) A locked loot chest is slow to break, not unbreakable ({@link Locks}), and picking one in town is burglary.
  */
 public final class Lockpicking {
 	/** What a chest's loot must be worth to be locked, and the worth each lock level from 2 up starts at. */
@@ -103,7 +103,7 @@ public final class Lockpicking {
 			Codec.INT.optionalFieldOf("level", 0).forGetter(Lock::level),
 			Codec.LONG.optionalFieldOf("seed", 0L).forGetter(Lock::seed)
 		).apply(i, Lock::new));
-		/** (0.7.494) Synced to the clients, so the crack speed and the use prediction match the server's. */
+		/** (0.7.496) Synced to the clients, so the crack speed and the use prediction match the server's. */
 		static final StreamCodec<io.netty.buffer.ByteBuf, Lock> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.BOOL, Lock::locked, ByteBufCodecs.VAR_INT, Lock::kind, ByteBufCodecs.VAR_INT, Lock::level,
 			ByteBufCodecs.VAR_LONG, Lock::seed, Lock::new);
@@ -160,7 +160,7 @@ public final class Lockpicking {
 	/** (0.7.412) Player → what happens when the lock they're picking is no container's but a story's (a shackle, a cell door): see {@link #pickVirtual}. */
 	private static final Map<UUID, Pending> VIRTUAL = new HashMap<>();
 
-	/** (0.7.494) What a story's lock does when picked, and its level (for the practice it earns). */
+	/** (0.7.496) What a story's lock does when picked, and its level (for the practice it earns). */
 	private record Pending(Runnable picked, int level) {
 	}
 
@@ -270,7 +270,7 @@ public final class Lockpicking {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
 				BlockState state = level.getBlockState(pos);
-				// (0.7.494) picking a loot chest in town, seen, is burglary
+				// (0.7.496) picking a loot chest in town, seen, is burglary
 				Theft.burgled(player, level, pos, state);
 				// and in they go
 				state.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false));
@@ -289,7 +289,7 @@ public final class Lockpicking {
 	}
 
 	/**
-	 * (0.7.494) {@link #pickVirtual} for a lock of any {@code kind} and {@code level}, with its own {@code seed} (a fitted
+	 * (0.7.496) {@link #pickVirtual} for a lock of any {@code kind} and {@code level}, with its own {@code seed} (a fitted
 	 * lock's, {@link Locks}): the game runs on the lock at {@code at}, and {@code picked} runs once it is won. False if they
 	 * have no lockpick (or can't play it).
 	 */
@@ -409,7 +409,7 @@ public final class Lockpicking {
 	}
 
 	/**
-	 * (0.7.494) Whether the container at {@code pos} (either half) is locked against a hopper or a golem: a loot lock that
+	 * (0.7.496) Whether the container at {@code pos} (either half) is locked against a hopper or a golem: a loot lock that
 	 * is locked, read now if it never was (a hopper under an unread dungeon chest must not drain it).
 	 */
 	static boolean sealed(ServerLevel level, BlockPos pos) {

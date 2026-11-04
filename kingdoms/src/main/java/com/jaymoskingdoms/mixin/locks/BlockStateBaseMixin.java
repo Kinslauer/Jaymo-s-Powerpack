@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.494) Breaking a locked block without its key is slow ({@link Locks#slowBreak}). Hooked here, on the public method
+ * (0.7.496) Breaking a locked block without its key is slow ({@link Locks#slowBreak}). Hooked here, on the public method
  * of the state, so blocks that override the protected one are covered, and the crack matches on both sides.
  */
 @Mixin(BlockBehaviour.BlockStateBase.class)

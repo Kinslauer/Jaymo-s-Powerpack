@@ -30,7 +30,7 @@ public final class Storage {
 	public static List<Container> containers(ServerLevel level, Faction faction) {
 		List<Container> out = new ArrayList<>();
 		for (BlockPos pos : faction.holdings().storage()) {
-			// (0.7.494) not one under a player's lock
+			// (0.7.496) not one under a player's lock
 			if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof Container container && !Locks.barredTo(level, pos, faction)) {
 				out.add(container);
 			}
