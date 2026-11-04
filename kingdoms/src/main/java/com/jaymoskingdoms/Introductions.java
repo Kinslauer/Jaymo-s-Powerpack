@@ -295,6 +295,11 @@ public final class Introductions {
 		if (met != null) {
 			return met;
 		}
+		// (0.7.521) a human living in a ChoiceTheorem village's haven says, in a word, why they're there (Havens#ctov)
+		String reason = Havens.humanReason(villager);
+		if (reason != null) {
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_haven_human." + reason, name);
+		}
 		// (0.7.490) a greenskin gives its name in its own dialect
 		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
 	}

@@ -8909,3 +8909,19 @@ Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its co
   two-handed). **Archers**: in temperate lands the Archers' hood (40%) and tunic (50%) instead of the dyed leathers.
 - **Court wizards and hermits** wear the Wizards' pointed hat over the realm's robes; a slain court wizard drops a
   school's wand 35% of the time, besides the staff. Not played.
+
+## 0.7.521: ChoiceTheorem's villages: trade buildings and havens
+- **Trade buildings from CTOV** (`CtovHalls`): ChoiceTheorem's Overhauled Village (CC BY-NC-ND 4.0, shipped unchanged in
+  the pack) has a building for every trade in every kind of land. A town's butcher, fishery, hunting lodge, smithy and
+  mason are now CTOV's own for its land (`ctov:village/<land>/jobsite/butcher|fishing_hut|hunter|smith|mason`), read
+  whole from its structure file in the game and put up block by block by the builders like any design. Its jigsaws
+  become the blocks they're meant to, its street entrance turns to our door side (north), and containers come empty.
+  A realm favours CTOV's fortified towns and a village the plain ones (`CtovHalls.lands`). Ours stay among the cherry
+  trees (Blossom), in havens other than CTOV villages' own, on every second staking try (so a tight site still takes our smaller one), when CTOV has
+  no building there, and on the plain design. Only variants staked from now on carry the CTOV mark (top 16 bits
+  `0xC70A`, `Planner.variant`), so a half-built or standing hall from before keeps its look.
+- **CTOV villages are havens** (`Havens.ctov`). Andy: "those should function like the havens, there should rarely be
+  a human there and if there is theres a REASON." A settlement founded in one of its villages (`ctov:*`) is always a
+  haven, of the land's blood or mixed (never a purist's). About one human in 25 standing there stays human
+  (`Havens.keptHuman`, by who they are), and says why when asked their name: wed in, cast out of the human towns, a
+  foundling, its healer, working off a debt, or a deserter it hid. Compile-checked; not played.

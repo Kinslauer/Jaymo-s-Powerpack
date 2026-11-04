@@ -313,7 +313,8 @@ public final class Planner {
 		v ^= v >>> 31;
 		v *= 0xBF58476D1CE4E5B9L;
 		v ^= v >>> 29;
-		return v == 0L ? 1L : v;
+		// (0.7.521) a trade's building may be CTOV's (every second try), marked so older ones keep their look
+		return CtovHalls.tag(entry, v == 0L ? 1L : v, attempt);
 	}
 
 	private static Works.Project start(ServerLevel level, Faction f, String entry, Placing at, int plot, long variant) {
