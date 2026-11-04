@@ -1,0 +1,11 @@
+-proc:none
+-implicit:none
+-Xmaxerrs
+100000
+-sourcepath
+main/java:client/java
+-d
+/tmp/claude-0/x
+main/java/com/jaymoskingdoms/Handshakes.java
+main/java/com/jaymoskingdoms/Introductions.java
+client/java/com/jaymoskingdoms/client/HandshakePose.java

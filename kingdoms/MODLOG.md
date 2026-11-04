@@ -8602,3 +8602,41 @@ isn't stuck stealing piglin axes.
   leaves do in the overworld.
 - `McaCompat.hearts` is public now (the camp's warmth).
 - Not compile-checked yet at this entry; not played.
+## 0.7.503: sworn starts are known, every start carries meds
+- Andy: "the relevant folk should know you as a sworn start" (his king asked his name like a stranger's). While a Sworn
+  start's player stays a member of the realm they swore to (`StoryTalk.swornRealm`), its king, its lords (and its fiefs'
+  lords) and its guards (`StoryTalk.serves`) know them: within 24 blocks each comes to know them once (`sworn_known`
+  player attachment): you know their name with no introduction, MCA counts you as met, and they start warm (30 hearts for
+  a ruler, 20 for a guard, raised to that, never lowered). Every time you open their menu they greet you as their sworn
+  man or a fellow guard (`story.jaymoskingdoms.sworn.<ruler|guard>.0-2`), not as a stranger, and not only for the first
+  three days. Worlds already played: the Landing a Sworn start saved is enough, so it works there too.
+- Andy: "everyone should start with applicable meds. obviously still none for rock bottom, and a whole medkit for sworn".
+  `StoryMeds` gives each start Jaymo's Powers' medicine (looked up by id) after its kit: Sworn a healer's satchel packed
+  with 4 linen bandages, 2 clean rags, 2 splints, needle and thread, smelling salts, 2 yarrow, 2 knitbone, burn salve,
+  garlic poultice, 2 willow-bark tea and poppy syrup. Nothing for rock bottom, a captive, chained, an android or the
+  afterlife. Others by their road: banished 2 bandages + a rag, cave 2 bandages + yarrow, village 2 bandages + willow tea,
+  whalers 2 bandages + needle, trader 2 bandages + tea + salve, burned 2 salves + a rag, sky fall a splint + 2 rags,
+  snowed-in 2 rags + tea, unarmed 2 clean rags, hideout 2 rags + poppy, greenskin 2 rags + garlic, lab one of each
+  remedy, sentenced/evicted/cast out 1 rag, the rest 2 rags. A Survivalist weaves 2 grass bandages more. The rags flaw
+  still gives nothing.
+
+## 0.7.504: wary folk keep their names; you bow to rulers
+- Andy: "someone who has any distaste toward you would not introduce themselves, i was just on a beastfolk, and the guy
+  said remember this city isnt for you, but still shook my hand, they should be as apprehensive as the old orcs were until
+  you prove yourself". `Introductions.wary`: a villager who minds your blood (`Prejudice.minds`: a haven's folk minding a
+  human, a townsman minding a Tideborn or Beastfolk...), whose realm holds you below welcome, or who remembers you coldly
+  (`Recollections.COLD`). They don't come over to you, don't take your hand (`takesHand`), give a wary line instead of
+  their name (`name_wary.0-4`, orc and goblin dialects too), and at a first meeting step back with that line in place of a
+  wave or a shake (`Handshakes.standOff`), then their menu opens with no name in it. Proven: a warm memory of you
+  (`Recollections.WARM`: a rescue, a kindness), or enough MCA hearts (gifts, talk): 8 per degree they mind, at most 50
+  (`PROVEN_HEARTS_PER_DEGREE`); 20 hearts outweighs a bad name with their realm (`PROVEN_HEARTS_REP`).
+- Andy: "introducing yourself to kings, is no longer a wave or handshake, but you bow, using all the relevant animation in
+  context. (hand on pommel if wielding a sword)". `Handshakes.bowTo`: the first use of a ruler you haven't met, their
+  Introduce, Ask their name and the handshake answer all have you turn to them and bow (`Hand.BOW`, 40 ticks, held still).
+  The ruler inclines their head (`Hand.NOD`) and names themselves with their title; a wary ruler doesn't return it.
+  `HandshakePose.bow`: bent from the waist as a crouch is, head down; empty handed, the hand over the heart and the other
+  swept behind; a sword or light blade in hand, held low at your side with the other hand across on its pommel; anything
+  else, held at your side with the free hand over the heart; an off hand holding something stays at your side. Mirrored
+  for the left-handed; MCA bodies' clothes follow (`McaPullerPose.follow`).
+- Not compile-checked against the game jars (none staged in this cloud session); a source-path javac pass showed no
+  errors in our own symbols. Not played.
