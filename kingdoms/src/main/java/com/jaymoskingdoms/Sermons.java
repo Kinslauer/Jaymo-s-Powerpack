@@ -21,7 +21,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.512) The clerics preach (docs/Patrons-B-Plan.md section 6). Every cleric holds The Truth. In the free evening hours the
+ * (0.7.513) The clerics preach (docs/Patrons-B-Plan.md section 6). Every cleric holds The Truth. In the free evening hours the
  * cleric of a Truth realm or village preaches on the square after a bell; near a shrine given to one of the seven a cleric
  * speaks against it; and a cleric near a player says a word to an apostate, to one just come home to the Truth, or to one
  * sworn to the seven. The Truth's townsfolk shun an apostate. Speech bubbles only, no chat.

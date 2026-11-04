@@ -153,7 +153,7 @@ final class PatronScreen extends Screen {
 			standing = Component.translatable("gui.jaymoskingdoms.patrons.sworn", mine.named(), s.swornDay() + 1,
 				Component.translatable("patron.jaymoskingdoms.tier." + s.tier()));
 			color = mine.colour;
-			// (0.7.512) praying towards another patron: your own will mark you
+			// (0.7.513) praying towards another patron: your own will mark you
 			Patron to = Patron.byKey(s.streak().patron());
 			if (to != null && to != mine && s.streak().days() > 0 && s.streak().lastDay() >= today() - 1) {
 				standing = Component.translatable("gui.jaymoskingdoms.patrons.turning", to.named(), s.streak().days(), Patrons.SWEAR_DAYS);
@@ -173,7 +173,7 @@ final class PatronScreen extends Screen {
 		}
 	}
 
-	/** (0.7.512) The clock's shrine day on this client, or 0 with no world. */
+	/** (0.7.513) The clock's shrine day on this client, or 0 with no world. */
 	private long today() {
 		return this.minecraft.level == null ? 0L : Patrons.day(this.minecraft.level.getOverworldClockTime());
 	}
@@ -182,7 +182,7 @@ final class PatronScreen extends Screen {
 		return Turning.TRIAL.equals(m.kind()) || Turning.TRIAL_EASED_KIND.equals(m.kind());
 	}
 
-	/** (0.7.512) The most days left of any live trial. */
+	/** (0.7.513) The most days left of any live trial. */
 	private long daysLeftMost(Patrons.State s) {
 		long today = today(), most = 0L;
 		for (Patrons.Mark m : s.marks()) {
@@ -207,7 +207,7 @@ final class PatronScreen extends Screen {
 			graphics.fill(x + 4, ry, x + 6, ry + LIST_ROW - 2, p == mine ? Ui.GOLD : known ? p.colour : Ui.HINT);
 			Component name = known ? p.named() : Component.translatable("patron.jaymoskingdoms.unknown");
 			Ui.line(graphics, this.font, name, x + 10, ry + 5, LIST_W - 18, !known ? Ui.HINT : p == mine || picked ? p.colour : p == hover ? Ui.TEXT : Ui.DIM);
-			// (0.7.512) a notch for each scar of this patron (up to 3), and a bar while its trials run
+			// (0.7.513) a notch for each scar of this patron (up to 3), and a bar while its trials run
 			if (this.minecraft.player != null) {
 				int scars = Math.min(3, Turning.scars(this.minecraft.player, p));
 				for (int n = 0; n < scars; n++) {
@@ -277,7 +277,7 @@ final class PatronScreen extends Screen {
 		graphics.disableScissor();
 	}
 
-	/** (0.7.512) Your scars and trials of {@code p}, when you have any. */
+	/** (0.7.513) Your scars and trials of {@code p}, when you have any. */
 	private int marks(GuiGraphicsExtractor graphics, Patron p, Patrons.State s, int x, int y, int width, int clipTop, int clipBottom) {
 		if (s.marks().isEmpty() || this.minecraft.player == null) {
 			return y;

@@ -35,7 +35,7 @@ public final class Faiths {
 	static final float FAITH_RIVALRY = 0.75F, RIVAL_MINDS = 1.0F, FAITH_CREED_HARSH = 1.5F;
 	/** Per degree, as {@link Prejudice}. */
 	static final float PRICE_SHARE = 0.06F, HEARTS_CUT = 0.15F, REP_GAIN_CUT = 0.08F, REP_LOSS_ADD = 0.08F;
-	/** (0.7.512) A shared faith: good name won and lost, clerics' coldness, a kin's heart. */
+	/** (0.7.513) A shared faith: good name won and lost, clerics' coldness, a kin's heart. */
 	static final float REP_SHARED_GAIN = 0.15F, REP_SHARED_EASE = 0.15F, CLERIC_COLD = 1.5F, KIN_HEART_CHANCE = 0.5F, TRIAL_MINDS_REP = Turning.TRIAL_MINDS;
 	static final int KIN_HEARTS = 1;
 	static final float HEARTS_KEPT_MIN = 0.2F, REP_KEPT_MIN = 0.25F;
@@ -267,13 +267,13 @@ public final class Faiths {
 		}
 		float m = mine.rival == theirs ? RIVAL_MINDS : mine.rivals(theirs) ? FAITH_RIVALRY * weight : 0.0F;
 		if (whom instanceof Player p) {
-			// (0.7.512) the old patron's faithful know an apostate; the Truth's scar
+			// (0.7.513) the old patron's faithful know an apostate; the Truth's scar
 			m = Math.max(m, Turning.trial(p, mine) * Turning.TRIAL_MINDS * weight);
 			if (mine == Patron.TRUTH) {
 				m += Turning.scars(p, Patron.TRUTH) * Turning.SCAR_TRUTH_MINDS;
 			}
 		}
-		// (0.7.512) clerics are colder to the seven's sworn players, not to villagers
+		// (0.7.513) clerics are colder to the seven's sworn players, not to villagers
 		if (whom instanceof Player && Accusations.priest(who) && theirs.seven) {
 			m *= CLERIC_COLD;
 		}
@@ -332,7 +332,7 @@ public final class Faiths {
 			// the realm's faith you left
 			m = TRIAL_MINDS_REP * Turning.trial(player, theirs);
 		} else if (theirs == mine) {
-			// (0.7.512) Andy: those who share your patron like you more
+			// (0.7.513) Andy: those who share your patron like you more
 			return by > 0 ? Math.max(1, Math.round(by * (1.0F + REP_SHARED_GAIN * rf.weight()))) : Math.round(by * (1.0F - REP_SHARED_EASE));
 		} else if (mine.rivals(theirs)) {
 			m = mine.rival == theirs || theirs.rival == mine ? RIVAL_MINDS : FAITH_RIVALRY;
@@ -350,7 +350,7 @@ public final class Faiths {
 		return Math.round(by * (1.0F + REP_LOSS_ADD * m));
 	}
 
-	/** (0.7.512) Of {@code gained} hearts, one more now and then when {@code villager} holds the faith {@code player} is sworn to. */
+	/** (0.7.513) Of {@code gained} hearts, one more now and then when {@code villager} holds the faith {@code player} is sworn to. */
 	public static int kinHearts(Villager villager, ServerPlayer player, int gained) {
 		if (gained <= 0 || Prejudice.masked(player)) {
 			return 0;

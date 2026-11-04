@@ -5287,6 +5287,41 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Titan:** Bulwark's Ultimate, a plated four-armed stone giant (2x, +15 hearts): Quake Combo, Wallbreaker Clap, Boulder Hurl, Meteor Slam, and Earthsplitter on C. Model `client/.../ultimate/UltimateTitan`, skin from `tools/gen_xeno_ultimates.py`.
   - Debug: `/powerdebug xenoform ultimate on|off|break`. Compile-checked (no new errors against master); not played.
 - **0.20.10**: no Powers change; pack bump for Kingdoms 0.7.510 (chopped logs crack deeper instead of thinning, chop meter).
-- **0.20.13, Kingdoms 0.7.512, patron gods part (b)** (plan `docs/Patrons-B-Plan.md`; see `kingdoms/MODLOG.md`): Powers only gets
+- **0.20.12, Kingdoms 0.7.512, pink fairies:** Andy wanted Paxo's Pink Fairy as a super rare bauble (that mod is All
+  Rights Reserved and Forge 1.20.1 only, so this is our own, `baubles/Fairies`, `PinkFairy`, `BottledFairyItem`). A pink
+  fairy, a tiny rose-lit sprite with flapping wings, comes very rarely to the flowers of a forest, meadow or cherry grove
+  at night near a player out there (1 in 550 every 10 s, roughly one night in ten spent in the woods; never two within
+  128 blocks). She darts away from anyone who comes within 7 blocks without sneaking; creep up and catch her in an empty
+  glass bottle. Killing one curses you with Bad Luck II for 20 minutes; day fades her away. The Bottled Pink Fairy is an
+  epic, glinting bauble for the amulet or charm slot: +2 luck, +1 heart, a faint rose glow about you, and once she turns
+  a death aside (6 health, Regeneration II for 10 s, before you would go down; never the void or /kill), then flies free
+  and you keep the empty bottle. Sneak + use lets her go for good. Art: `tools/gen_fairy.py` (animated item textures).
+  Kingdoms (`FairyWonder`): villagers who see one worn or held stare and remark on her (envy, awe, old tales; children
+  beg to hold her), once a day each, lifting an MCA villager's mood; given to an MCA villager she is the dearest gift
+  there is (60, above a nether star's 40; `data/mca/gifts/fairy.json`).
+  Andy's follow-ups: the fairy flits round inside the bottle (8 frames); the bottle cracks when she saves you (glass
+  breaking, shards, a Cracked Fairy Bottle left instead of a glass bottle); and villagers wear her too: one given a fairy
+  (MCA's gift lands in their inventory) puts her on, she glows about them and saves them once the same way. Worn fairies
+  hang on the chest for all to see, players' and villagers' alike (`Fairies.WEARS`, synced; `client/baubles/WornFairies`,
+  a layer on every humanoid renderer). She also fits the belt slot, hung at the hip like the coin purse (`#jaymospowers:hip_shown`).
+- **0.20.13, brewing quality (Patch 7)** (`alchemy/brewing/`, `alchemy/cauldron/CauldronStirring`, plan
+  `docs/Brewing-Quality-Plan.md`): Andy picked the idea of Immersive Brewing; this is our own version (none of its code
+  or art).
+  - **Mortar and Pestle:** up to four of a brewing ingredient (`#jaymospowers:mortar_grindable`), five strokes on the
+    timing bar, and the batch comes out Coarsely Ground, Finely Ground or Ground to Dust (`jaymospowers:ground` on the
+    vanilla item, so it still works in stands and recipes). Coarse or Fine can be ground again.
+  - **Timed stirring:** the cauldron's six stir clicks are now six turns on a timing bar (Perfect, Good, Miss), the
+    floating ingredient still swirling round each turn.
+  - **Graded brews:** each ingredient is a step scored on its grind and its stir; the brew's mean gives Crude, Plain,
+    Fine, Expert or Masterwork Brew on bottling (`jaymospowers:brew_grade`). Durations x0.75 / 1 / 1.25 / 1.5 / 2
+    through vanilla's `potion_duration_scale` (so splash and lingering keep it), drinking x1.15 / 1 / 0.9 / 0.8 / 0.6
+    through the stack's own `consumable`, Masterwork glints. Stand-made potions are ungraded (Plain). Tipped arrows don't
+    carry a grade.
+  - **Brewer's Alembic** (`jaymospowers:brewers_alembic`, research Distilling Brews): over heat, 2-3 bottles of one
+    brew become one fewer, a grade better, after 60 s, once per brew. The essence Alembic is unchanged.
+  - Tuning: `BrewQuality` (bars, grind and grade thresholds), `BrewGrade` (multipliers), `MortarEntity`,
+    `BrewersAlembicEntity`, `CauldronStirring`. No new attachments, mixins or keys. Kingdoms and Kitchen untouched.
+    Built, not played.
+- **0.20.14, Kingdoms 0.7.513, patron gods part (b)** (plan `docs/Patrons-B-Plan.md`; see `kingdoms/MODLOG.md`): Powers only gets
   `Wounds.healPart` reading Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection (`MedicineSkill.blessing`): the
   Hearthkeeper's trial and scar on one who turned from it slow every part heal. Not played.

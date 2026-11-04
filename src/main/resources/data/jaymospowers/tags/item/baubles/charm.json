@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "jaymospowers:rabbit_foot_charm",
+    "jaymospowers:bottled_fairy",
     {
       "id": "friendsandfoes:totem_of_freezing",
       "required": false

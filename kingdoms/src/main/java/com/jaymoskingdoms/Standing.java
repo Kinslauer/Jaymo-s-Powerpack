@@ -84,7 +84,7 @@ public final class Standing {
 			lines.add(temper(t));
 			hovers.add(Component.translatable("standing.jaymoskingdoms.temper." + t.key() + ".hover", Purists.bloodName(f)));
 		}
-		// (0.7.512) the realm's faith, from its folk
+		// (0.7.513) the realm's faith, from its folk
 		Patron faith = RealmFaiths.patron(level.getServer(), f);
 		if (faith != null) {
 			lines.add(Component.translatable("standing.jaymoskingdoms.faith", Patrons.coloured(faith)));

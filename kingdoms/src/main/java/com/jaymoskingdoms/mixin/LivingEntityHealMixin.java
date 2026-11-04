@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /** (0.7.231) A death blight ({@link Necromancy#blighted}): no healing reaches the body (food, potions, regeneration) till it wears off. */
 @Mixin(LivingEntity.class)
 abstract class LivingEntityHealMixin {
-	/** (0.7.512) The Hearthkeeper's trial and scar: a player heals slower (food, potions; Powers' part heals read it in healPart). */
+	/** (0.7.513) The Hearthkeeper's trial and scar: a player heals slower (food, potions; Powers' part heals read it in healPart). */
 	@ModifyVariable(method = "heal", at = @At("HEAD"), argsOnly = true)
 	private float jaymoskingdoms$turnedHeal(float amount) {
 		return (Object)this instanceof Player p && !p.level().isClientSide() ? amount * (1.0F - Turning.healing(p)) : amount;

@@ -26,7 +26,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
- * (0.7.512) The cleric's Leaving Rite (docs/Patrons-B-Plan.md section 5). Andy: clerics "will aid you in turning away if you
+ * (0.7.513) The cleric's Leaving Rite (docs/Patrons-B-Plan.md section 5). Andy: clerics "will aid you in turning away if you
  * choose to". On MCA's Interact page ({@link InteractActions#RITE}) a town cleric offers it to one who is turning to another
  * patron or is under the old patron's trials. It halves the trials and dulls the omens, for a price in the town's coin. It
  * never takes a scar.

@@ -35,7 +35,7 @@ public final class InteractActions {
 	public static final String AUDIENCE = "audience", WARES = "wares", TRIBUTE = "tribute", SPY = "spy", RAID = "raid";
 	/** (0.7.498) Ask about Money: emeralds or coin ({@link MoneyTalk}). */
 	public static final String MONEY = "money";
-	/** (0.7.512) The cleric's Leaving Rite ({@link Rites}). */
+	/** (0.7.513) The cleric's Leaving Rite ({@link Rites}). */
 	public static final String RITE = "rite";
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY, RITE);
 

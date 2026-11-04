@@ -524,6 +524,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Pets.register();
 		// 0.7.436: now and then a villager keeps a rare animal from far off, and brags about it
 		RarePets.register();
+		FairyWonder.register();
 		// 0.7.201: letters, messenger pigeons and couriers across the land; the news by letter, not chat (and their attachments)
 		LOGGER.debug("post attachments: {} {} {} {}", Couriers.ERRANDS, PigeonPost.FLIGHTS, Post.NAMES, Post.WAITING);
 		Letters.register();

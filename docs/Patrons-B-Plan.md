@@ -1,7 +1,7 @@
 # Patch 11b: Patron gods, part (b) (turning away, clerics, realms)
 
-Kingdoms **0.7.512** (`kingdoms/gradle.properties`), Powers **0.20.13** (`gradle.properties`, one line in
-`Wounds.healPart`). Kitchen unchanged (0.5.57). Tag new code comments `(0.7.512)` and `(0.20.13)`.
+Kingdoms **0.7.513** (`kingdoms/gradle.properties`), Powers **0.20.14** (`gradle.properties`, one line in
+`Wounds.healPart`). Kitchen unchanged (0.5.57). Tag new code comments `(0.7.513)` and `(0.20.14)`.
 
 Part (a) is merged (`docs/Patrons-Plan.md`, Kingdoms 0.7.509). This is part (b). Part (c) (temples, champion bosses
 fought as a group, the patrons' weapons) is **not** built here. (b) leaves it one hook: the `hunted` mark (section 3.6).
@@ -66,13 +66,13 @@ What the code already gives (checked against the worktree at `107fe5442`):
 | `kingdoms/src/client/.../PatronKeys.java` | Registers the `Rites.OpenRite` receiver, which opens `RiteScreen`. |
 | `kingdoms/src/client/.../StoryHoldScreen.java` | `HINTS = 90`. |
 | `assets/jaymoskingdoms/lang/en_us.json` | Section 9. Remove `message.jaymoskingdoms.shrine.strange`, which is no longer used. |
-| `kingdoms/MODLOG.md`, `kingdoms/gradle.properties` (`version=0.7.512`) | Section 10. |
+| `kingdoms/MODLOG.md`, `kingdoms/gradle.properties` (`version=0.7.513`) | Section 10. |
 
-### Powers, changed (0.20.13)
+### Powers, changed (0.20.14)
 | File | Change |
 |---|---|
 | `src/main/java/com/jaymospowers/core/wounds/Wounds.java` | `healPart`: right after the early-return guard, `amount *= 1.0F - MedicineSkill.blessing(entity, "wounds_slow");` with `if (amount <= 0.0F) return 0.0F;`. `MedicineSkill.blessing` is package-private static in the same package, and gives 0 for anything but a player and on any failure. Every Powers heal (Resting, Herbal, Bleeding, Mending, Treatment) and Kingdoms' `PowersCompat.healEveryPart` (shrine prayer, Hearth's Warmth, Hearthfire) goes through `healPart`. |
-| `gradle.properties` (`version=0.20.13`), root `MODLOG.md` | Section 10. |
+| `gradle.properties` (`version=0.20.14`), root `MODLOG.md` | Section 10. |
 
 No new mixin class, so the mixin JSONs are unchanged. There are no new textures and no recipes.
 
@@ -108,9 +108,9 @@ State withMarks(List<Mark> m) {
 
 ### 3.1 Server settings (gamerules, registered in `Turning.register()`, which `Patrons.register()` calls first)
 ```java
-/** (0.7.512) jaymoskingdoms:patron_trial_days: days of trials after turning from a patron (0: no trials, no champion's hunt). */
+/** (0.7.513) jaymoskingdoms:patron_trial_days: days of trials after turning from a patron (0: no trials, no champion's hunt). */
 public static GameRule<Integer> TRIAL_DAYS;
-/** (0.7.512) jaymoskingdoms:patron_scars: turning from a patron leaves its scar. */
+/** (0.7.513) jaymoskingdoms:patron_scars: turning from a patron leaves its scar. */
 public static GameRule<Boolean> SCARS;
 TRIAL_DAYS = GameRuleBuilder.forInteger(TRIAL_DAYS_DEFAULT).category(GameRuleCategory.MISC).buildAndRegister(JaymosKingdoms.id("patron_trial_days"));
 SCARS = GameRuleBuilder.forBoolean(true).category(GameRuleCategory.MISC).buildAndRegister(JaymosKingdoms.id("patron_scars"));
@@ -125,7 +125,7 @@ Prayer is still once a day in total (`Shrine.PRAYED`), so turning takes `SWEAR_D
 patron's shrine, as swearing does.
 ```java
 } else {
-	// (0.7.512) praying your way to another patron: the streak counts toward them, and your own patron notices each day
+	// (0.7.513) praying your way to another patron: the streak counts toward them, and your own patron notices each day
 	Patron mine = s.patronOf();
 	Streak st = s.streak;
 	int days = st.patron.equals(shrine.key) && st.lastDay == today - 1 ? st.days + 1 : 1;
@@ -196,7 +196,7 @@ A sworn player prays to their own patron, so "mind" from a patron's own folk is 
 #### 3.5.1 Deep Mother storms (`disasters/Storms.java`)
 - In `roll`, after the existing two branches (it already returns when `SERVER.size() >= MOST`):
   ```java
-  // (0.7.512) the Deep Mother's omens: a thunderstorm finds one who turned from her
+  // (0.7.513) the Deep Mother's omens: a thunderstorm finds one who turned from her
   ServerPlayer bait = com.jaymoskingdoms.Turning.stormBait(level, random);
   if (bait != null && !dry(level, bait.blockPosition())) form(level, bait.position(), Storm.THUNDER, random, true);
   ```
@@ -248,9 +248,9 @@ Per alive, non-spectator player with marks:
 
 ### 3.6 Part (c) hook (in `Patrons`)
 ```java
-/** (0.7.512) For part (c): patrons whose champion has still to hunt this player, oldest first (the "hunted" marks). */
+/** (0.7.513) For part (c): patrons whose champion has still to hunt this player, oldest first (the "hunted" marks). */
 public static List<Patron> hunters(Player player)
-/** (0.7.512) For part (c): {@code p}'s champion has had its hunt; the mark is kept as "hunted_done". */
+/** (0.7.513) For part (c): {@code p}'s champion has had its hunt; the mark is kept as "hunted_done". */
 static void hunted(ServerPlayer sp, Patron p)
 ```
 Not shown on any screen in (b), and no effect yet.
@@ -316,7 +316,7 @@ the Anvil-Father, and `Provenance` only adds. So the perfect half stays at 1.0 o
 
 ## 4. Blessings hooks (`Blessings.java`, the callers are unchanged)
 
-| Function | Change (0.7.512) |
+| Function | Change (0.7.513) |
 |---|---|
 | `wear(stack, player, wear)` | After the hand check and the `FATHERS_FIRE` return: `wear = Turning.wear(player, wear);` (adds wear for the Anvil-Father's trial and scar), then Sound Steel as before. |
 | `zoneBonus(smith)` | `(has(...) ? TRUE_STRIKE_ZONE : 0.0) + Turning.zone(smith)` |
@@ -333,7 +333,7 @@ the Anvil-Father, and `Provenance` only adds. So the perfect half stays at 1.0 o
 
 `LivingEntityHealMixin`:
 ```java
-/** (0.7.512) The Hearthkeeper's trial and scar: a player heals slower (food, potions; Powers' part heals read it in healPart). */
+/** (0.7.513) The Hearthkeeper's trial and scar: a player heals slower (food, potions; Powers' part heals read it in healPart). */
 @ModifyVariable(method = "heal", at = @At("HEAD"), argsOnly = true)
 private float jaymoskingdoms$turnedHeal(float amount) {
 	return (Object)this instanceof Player p && !p.level().isClientSide() ? amount * (1.0F - Turning.healing(p)) : amount;
@@ -519,7 +519,7 @@ Patron mine = Patrons.of(player); RealmFaith rf = realmFaith(...);   // null eit
 Patron theirs = rf.patron();
 float m = 0;
 if (Turning.trial(player, theirs) > 0) m = TRIAL_MINDS * Turning.trial(player, theirs);          // the realm's faith you left
-else if (theirs == mine) {                                                                           // (0.7.512) Andy: those who share your patron like you more
+else if (theirs == mine) {                                                                           // (0.7.513) Andy: those who share your patron like you more
 	return by > 0 ? Math.max(1, Math.round(by * (1 + REP_SHARED_GAIN * rf.weight()))) : Math.round(by * (1 - REP_SHARED_EASE));
 }
 else if (mine.rivals(theirs)) m = (mine.rival == theirs || theirs.rival == mine ? RIVAL_MINDS : FAITH_RIVALRY);
@@ -539,7 +539,7 @@ compute `m` instead of returning:
 ```java
 float m = mine.rival == theirs ? RIVAL_MINDS : mine.rivals(theirs) ? FAITH_RIVALRY * weight : 0.0F;
 if (whom instanceof Player p) {
-	m = Math.max(m, Turning.trial(p, mine) * Turning.TRIAL_MINDS * weight);      // (0.7.512) the old patron's faithful know an apostate
+	m = Math.max(m, Turning.trial(p, mine) * Turning.TRIAL_MINDS * weight);      // (0.7.513) the old patron's faithful know an apostate
 	if (mine == Patron.TRUTH) m += Turning.scars(p, Patron.TRUTH) * Turning.SCAR_TRUTH_MINDS;
 }
 if (Accusations.priest(who) && theirs.seven) m *= CLERIC_COLD;
@@ -564,7 +564,7 @@ instead of the rival line.
 Anvil-Father), `HOLY_TRUTH` (1) for The Truth against one of the seven, else 0. Same patron: -1 (kindred).
 - `stir` (`GreatWars.java:345`), after the trade gain and before the alliance override:
   ```java
-  // (0.7.512) faiths at odds: holy-war friction (Andy: humans are in a constant battle with the other ideologies)
+  // (0.7.513) faiths at odds: holy-war friction (Andy: humans are in a constant battle with the other ideologies)
   delta += RealmFaiths.holyTension(server, a, b);
   ```
   `holyTension` is `holy * HOLY_GAIN * (either side's creed == FAITH ? HOLY_FAITH_CREED : 1)` for holy > 0, and
@@ -726,7 +726,7 @@ Add these. Remove `message.jaymoskingdoms.shrine.strange`.
 
 `kingdoms/MODLOG.md`:
 ```
-## 0.7.512: patron gods, part (b): turning away, clerics, realms (pack 0.20.13)
+## 0.7.513: patron gods, part (b): turning away, clerics, realms (pack 0.20.14)
 `docs/Patrons-B-Plan.md`. Andy: turning away should be harsh, "the harsher the better for this pack".
 - **Turning away** (`Turning`): pray three days at another patron's shrine while sworn and you turn. Each of those days
   costs your patron 5 favour. The old patron leaves a **scar**, a small penalty in its domain that never fades and
@@ -748,18 +748,18 @@ Add these. Remove `message.jaymoskingdoms.shrine.strange`.
 - **Holy wars** (`GreatWars`): realms of rival patrons grow tense each day (a named rival pair faster, more under the
   Faith creed). A war between them is a holy war: always a great war, and realms of the same faith rally to it.
 - Screens: the patrons screen shows your scars and trials. The rite has its own screen. Loading hints 89-90.
-- Powers 0.20.13: the Hearthkeeper's trial and scar slow every part heal.
+- Powers 0.20.14: the Hearthkeeper's trial and scar slow every part heal.
 - Not compile-checked yet at this entry; not played.
 ```
 Root `MODLOG.md`:
 ```
-## 0.20.13
-- (Kingdoms 0.7.512) `Wounds.healPart` reads Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection
+## 0.20.14
+- (Kingdoms 0.7.513) `Wounds.healPart` reads Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection
   (`MedicineSkill.blessing`): the Hearthkeeper's trial and scar on one who turned from it slow every part heal.
 ```
-Docs to touch when built: `docs/Otectus-Plan.md` row 11 ("(b) built in Kingdoms 0.7.512 (`docs/Patrons-B-Plan.md`)").
+Docs to touch when built: `docs/Otectus-Plan.md` row 11 ("(b) built in Kingdoms 0.7.513 (`docs/Patrons-B-Plan.md`)").
 In `docs/Abilities.md`, a new row 482, "Everyone (Kingdoms) | Interact page on a cleric | **Leaving Rite** | (Kingdoms
-0.7.512) While turning to another patron or in its trials: pay the cleric to halve the trials and dull the omens; the
+0.7.513) While turning to another patron or in its trials: pay the cleric to halve the trials and dull the omens; the
 scar stays." Row 479 (shrine controls) gains: "Three days at another patron's shrine while sworn turns you away (a
 scar, then trials)."
 

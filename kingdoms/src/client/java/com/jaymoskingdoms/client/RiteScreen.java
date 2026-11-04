@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
 /**
- * (0.7.512) The Leaving Rite's small screen (docs/Patrons-B-Plan.md section 5.5), opened by {@link Rites.OpenRite} when a town
+ * (0.7.513) The Leaving Rite's small screen (docs/Patrons-B-Plan.md section 5.5), opened by {@link Rites.OpenRite} when a town
  * cleric offers the rite from MCA's Interact page: what it does, the price, Pay or Not now. Names and numbers only.
  */
 final class RiteScreen extends Screen {

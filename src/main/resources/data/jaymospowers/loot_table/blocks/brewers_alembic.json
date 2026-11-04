@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/brewers_alembic",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:brewers_alembic"
+        }
+      ]
+    }
+  ]
+}

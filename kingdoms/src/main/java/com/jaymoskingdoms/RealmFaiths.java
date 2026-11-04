@@ -18,7 +18,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.512) What each realm holds (docs/Patrons-B-Plan.md section 7). Andy: The Truth "usually is the faith among humans".
+ * (0.7.513) What each realm holds (docs/Patrons-B-Plan.md section 7). Andy: The Truth "usually is the faith among humans".
  * A Faith-creed realm holds The Truth; any other holds the patron most of its folk do (counted once a day); a realm with
  * too few counted takes its blood's patron. Realms of rival patrons grow tense each day, and a war between them is a holy
  * war ({@link GreatWars}). Saved on the Overworld.

@@ -148,7 +148,7 @@ public final class Blessings {
 
 	/** True Strike (tier 2): the Smithing Anvil's perfect zone is wider. */
 	static double zoneBonus(ServerPlayer smith) {
-		// (0.7.512) the Anvil-Father's trial and scar narrow it
+		// (0.7.513) the Anvil-Father's trial and scar narrow it
 		return (has(smith, Patron.ANVIL_FATHER, 2) ? TRUE_STRIKE_ZONE : 0.0) + Turning.zone(smith);
 	}
 
@@ -160,7 +160,7 @@ public final class Blessings {
 		if (on(FATHERS_FIRE, player)) {
 			return 0;
 		}
-		// (0.7.512) the Anvil-Father's trial and scar: tools wear faster
+		// (0.7.513) the Anvil-Father's trial and scar: tools wear faster
 		wear = Turning.wear(player, wear);
 		if (!has(player, Patron.ANVIL_FATHER, 1)) {
 			return wear;
@@ -243,7 +243,7 @@ public final class Blessings {
 
 	/** Sun's Favour (tier 1) and Iron Certainty: good name is won faster with any realm that is not a haven. */
 	static int reputation(Faction kingdom, ServerPlayer player, int by) {
-		// (0.7.512) the Crowned Sun's trial: good name comes slower
+		// (0.7.513) the Crowned Sun's trial: good name comes slower
 		by = Turning.reputation(player, by);
 		if (by > 0 && has(player, Patron.CROWNED_SUN, 1) && !Havens.is(player.level().getServer(), kingdom)) {
 			return Math.max(1, Math.round(by * (1.0F + SUN_REP)));
@@ -349,7 +349,7 @@ public final class Blessings {
 			if (has(attacker, Patron.LANTERN_WARDEN, 2) && (target.is(EntityTypeTags.UNDEAD) || Vampires.isVampire(target))) {
 				amount *= 1.0F + GRAVE_BLOWS;
 			}
-			// (0.7.512) the Lantern Warden's scar: blows on the dead land weaker
+			// (0.7.513) the Lantern Warden's scar: blows on the dead land weaker
 			if (target.is(EntityTypeTags.UNDEAD) || Vampires.isVampire(target)) {
 				amount *= Turning.graveBlows(attacker);
 			}

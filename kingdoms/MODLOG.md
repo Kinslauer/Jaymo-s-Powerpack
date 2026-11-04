@@ -8720,7 +8720,15 @@ is our own take on the idea (none of its code or art).
   unchanged (none of them go through `Trees.chop`).
 - Not played; compile not checked against the game jars.
 
-## 0.7.512: patron gods, part (b): turning away, clerics, realms (pack 0.20.13)
+## 0.7.512: pink fairies are prized (pack 0.20.12)
+- **FairyWonder:** Jaymo's Powers' Bottled Pink Fairy (a super rare bauble) is the rarest thing townsfolk ever see.
+  Villagers (vanilla and MCA) within 8 blocks who see a player wearing one (amulet or charm slot, via
+  `PowersCompat.baubles`) or holding one stop, stare and say so in a gold bubble (8 grown lines of longing, envy and old
+  tales, 4 for children who beg to hold her), once a day each per player, one at a time; an MCA villager's mood rises 3.
+- **MCA gift:** `data/mca/gifts/fairy.json` makes her the dearest gift there is (60; a nether star is 40), +20 for
+  children, +15 for the married.
+
+## 0.7.513: patron gods, part (b): turning away, clerics, realms (pack 0.20.14)
 `docs/Patrons-B-Plan.md`. Andy: turning away should be harsh, "the harsher the better for this pack".
 - **Turning away** (`Turning`): pray three days at another patron's shrine while sworn and you turn. Each of those days
   costs your patron 5 favour. The old patron leaves a **scar**, a small penalty in its domain that never fades and
@@ -8742,5 +8750,5 @@ is our own take on the idea (none of its code or art).
 - **Holy wars** (`GreatWars`): realms of rival patrons grow tense each day (a named rival pair faster, more under the
   Faith creed). A war between them is a holy war: always a great war, and realms of the same faith rally to it.
 - Screens: the patrons screen shows your scars and trials. The rite has its own screen. Loading hints 89-90.
-- Powers 0.20.13: the Hearthkeeper's trial and scar slow every part heal.
+- Powers 0.20.14: the Hearthkeeper's trial and scar slow every part heal.
 - Built, reviewed, and a dev server boots; not played.

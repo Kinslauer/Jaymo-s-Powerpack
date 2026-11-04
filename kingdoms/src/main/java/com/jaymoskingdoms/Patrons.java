@@ -65,7 +65,7 @@ public final class Patrons {
 	/** Favour on swearing, and for a devout life story's start. */
 	static final int FAVOUR_SWORN = 12, FAVOUR_DEVOUT = 20;
 	static final int FAVOUR_PRAYER = 4, FAVOUR_OFFERING = 3;
-	/** (0.7.512) Favour your own patron loses for each day you pray towards another. */
+	/** (0.7.513) Favour your own patron loses for each day you pray towards another. */
 	static final int FAVOUR_STRAYED = 5;
 	public static final int DEED_SMALL = 1, DEED_MID = 2, DEED_GREAT = 4;
 	/** The most favour deeds give in one day. */
@@ -290,17 +290,17 @@ public final class Patrons {
 		return day(server.overworld().getOverworldClockTime());
 	}
 
-	/** (0.7.512) The shrine day of an overworld clock time (the client reads it too). */
+	/** (0.7.513) The shrine day of an overworld clock time (the client reads it too). */
 	public static long day(long clock) {
 		return Math.floorDiv(clock, Shrine.DAY);
 	}
 
-	/** (0.7.512) Stores new marks on {@code sp}. */
+	/** (0.7.513) Stores new marks on {@code sp}. */
 	static void setMarks(ServerPlayer sp, List<Mark> marks) {
 		set(sp, state(sp).withMarks(marks));
 	}
 
-	/** (0.7.512) For part (c): patrons whose champion has still to hunt this player, oldest first (the "hunted" marks). */
+	/** (0.7.513) For part (c): patrons whose champion has still to hunt this player, oldest first (the "hunted" marks). */
 	public static List<Patron> hunters(Player player) {
 		List<Patron> out = new ArrayList<>();
 		for (Mark m : state(player).marks) {
@@ -312,7 +312,7 @@ public final class Patrons {
 		return out;
 	}
 
-	/** (0.7.512) For part (c): {@code p}'s champion has had its hunt; the mark is kept as "hunted_done". */
+	/** (0.7.513) For part (c): {@code p}'s champion has had its hunt; the mark is kept as "hunted_done". */
 	static void hunted(ServerPlayer sp, Patron p) {
 		long today = today(sp.level().getServer());
 		List<Mark> marks = new ArrayList<>(state(sp).marks);
@@ -414,7 +414,7 @@ public final class Patrons {
 		if (shrine.key.equals(s.patron)) {
 			gain(sp, FAVOUR_PRAYER);
 		} else {
-			// (0.7.512) praying your way to another patron: the streak counts toward them, and your own patron notices each day
+			// (0.7.513) praying your way to another patron: the streak counts toward them, and your own patron notices each day
 			Patron mine = s.patronOf();
 			Streak st = s.streak;
 			int days = st.patron.equals(shrine.key) && st.lastDay == today - 1 ? st.days + 1 : 1;
@@ -433,7 +433,7 @@ public final class Patrons {
 		}
 	}
 
-	/** (0.7.512) Favour down by {@code n} (not below nothing), the tier following. {@code lastFavourDay} is unchanged. */
+	/** (0.7.513) Favour down by {@code n} (not below nothing), the tier following. {@code lastFavourDay} is unchanged. */
 	static void lose(ServerPlayer sp, int n) {
 		State s = state(sp);
 		Patron p = s.patronOf();
@@ -443,7 +443,7 @@ public final class Patrons {
 		retier(sp, s.withFavour(Math.max(0, s.favour - n), s.tier, s.lastFavourDay, s.decayDay), p);
 	}
 
-	/** (0.7.512) Turned to {@code p}: sworn with {@code favour}, the marks in {@code marks}, the old patron's timed boons ended. */
+	/** (0.7.513) Turned to {@code p}: sworn with {@code favour}, the marks in {@code marks}, the old patron's timed boons ended. */
 	static void swornTurned(ServerPlayer sp, Patron p, int favour, long today, List<Mark> marks) {
 		set(sp, state(sp).sworn(p, favour, today).withMarks(marks));
 		learn(sp, p);
@@ -573,7 +573,7 @@ public final class Patrons {
 		long from = Math.max(s.decayDay, s.lastFavourDay + GRACE_DAYS);
 		long days = Math.max(0L, today - from);
 		int perDay = Math.max(DECAY_LEAST, DECAY_PER_DAY - DEVOTION_PER_RANK * Skills.rank(sp, Skills.Perk.DEVOTION));
-		// (0.7.512) while the old patron's trials run there is no floor
+		// (0.7.513) while the old patron's trials run there is no floor
 		int floor = Turning.anyTrial(sp) ? 0 : TIER_AT[0];
 		int favour = (int)Math.max((long)floor, s.favour - days * perDay);
 		if (s.favour < floor) {

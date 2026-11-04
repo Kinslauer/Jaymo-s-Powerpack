@@ -358,7 +358,7 @@ final class GreatWars {
 		if (worthA >= TRADE_WORTH && worthB >= TRADE_WORTH && (ca == Creed.COIN || cb == Creed.COIN)) {
 			delta += TRADE_GAIN;
 		}
-		// (0.7.512) faiths at odds: holy-war friction (Andy: humans are in a constant battle with the other ideologies)
+		// (0.7.513) faiths at odds: holy-war friction (Andy: humans are in a constant battle with the other ideologies)
 		delta += RealmFaiths.holyTension(server, a, b);
 		if (friction == 0) {
 			delta -= KINDRED_EASE;
@@ -379,7 +379,7 @@ final class GreatWars {
 		if (relation == Relation.NEUTRAL && t >= RIVAL_AT) {
 			Relations.set(server, a.id(), b.id(), Relation.RIVAL);
 			if (RealmFaiths.holy(server, a, b) > 0) {
-				// (0.7.512) the faiths, not the creeds, set them at odds
+				// (0.7.513) the faiths, not the creeds, set them at odds
 				KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.holy.rivals", a.name(), RealmFaiths.patron(server, a).named(),
 					b.name(), RealmFaiths.patron(server, b).named()).withStyle(ChatFormatting.GOLD));
 			} else {
@@ -466,7 +466,7 @@ final class GreatWars {
 			return;
 		}
 		long wa = Wealth.worth(server, a), wd = Wealth.worth(server, d);
-		// (0.7.512) a holy war is always a great war
+		// (0.7.513) a holy war is always a great war
 		boolean holy = RealmFaiths.holy(server, a, d) > 0;
 		if (!holy && !(wa >= GREAT_WORTH && wd >= GREAT_WORTH) && wa + wd < GREAT_TOGETHER) {
 			return;
@@ -558,7 +558,7 @@ final class GreatWars {
 		for (War war : WarData.wars(server)) {
 			live.add(war.id());
 		}
-		// (0.7.512) holy marks of wars that are gone
+		// (0.7.513) holy marks of wars that are gone
 		RealmFaiths.forgetEnded(server, live);
 		Ledger l = ledger(server);
 		boolean stale = l.great().stream().anyMatch(id -> !live.contains(id)) || l.pledges().values().stream().anyMatch(p -> !live.contains(p.war()))

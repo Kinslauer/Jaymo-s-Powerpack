@@ -276,7 +276,7 @@ public final class Wounds {
 		if (plan == null || !(entity.level() instanceof ServerLevel) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
 			return 0.0F;
 		}
-		// (0.20.13) the Hearthkeeper's trial and scar on one who turned from it (Jaymo's Kingdoms): every part heal is slower
+		// (0.20.14) the Hearthkeeper's trial and scar on one who turned from it (Jaymo's Kingdoms): every part heal is slower
 		if (slow) {
 			amount *= 1.0F - MedicineSkill.blessing(entity, "wounds_slow");
 		}

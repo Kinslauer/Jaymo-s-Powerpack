@@ -38,7 +38,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.512) Turning away from a patron (docs/Patrons-B-Plan.md). Swear to another patron and the old one marks you: a
+ * (0.7.513) Turning away from a patron (docs/Patrons-B-Plan.md). Swear to another patron and the old one marks you: a
  * <b>scar</b> that never fades (a small penalty in its domain, stacking with each leaving), then <b>trials</b>, days in which
  * its omens follow you. A cleric's Leaving Rite ({@link Rites}) halves the trials and dulls the omens, never the scar.
  * Andy: "the harsher the better for this pack". Two gamerules soften it for a server. Every effect is a small function the
@@ -84,9 +84,9 @@ public final class Turning {
 	// ---- the marks -------------------------------------------------------------------------------------------------------------
 	public static final String SCAR = "scar", TRIAL = "trial", TRIAL_EASED_KIND = "trial_eased", RITE = "rite", HUNTED = "hunted", HUNTED_DONE = "hunted_done";
 
-	/** (0.7.512) jaymoskingdoms:patron_trial_days: days of trials after turning from a patron (0: no trials, no champion's hunt). */
+	/** (0.7.513) jaymoskingdoms:patron_trial_days: days of trials after turning from a patron (0: no trials, no champion's hunt). */
 	public static GameRule<Integer> TRIAL_DAYS;
-	/** (0.7.512) jaymoskingdoms:patron_scars: turning from a patron leaves its scar. */
+	/** (0.7.513) jaymoskingdoms:patron_scars: turning from a patron leaves its scar. */
 	public static GameRule<Boolean> SCARS;
 
 	/** The day each player was last seen by {@link #tick}. Not saved. */

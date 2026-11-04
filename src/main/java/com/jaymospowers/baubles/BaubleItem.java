@@ -67,10 +67,14 @@ public class BaubleItem extends Item {
 		return InteractionResult.SUCCESS;
 	}
 
+	/** The slot (or slots) it fits, for the tooltip. */
+	protected Component slotName() {
+		return Component.translatable("bauble.jaymospowers.slot." + this.kind.id);
+	}
+
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
-		builder.accept(Component.translatable("item.jaymospowers.bauble.slot", Component.translatable("bauble.jaymospowers.slot." + this.kind.id))
-			.withStyle(ChatFormatting.GRAY));
+		builder.accept(Component.translatable("item.jaymospowers.bauble.slot", this.slotName()).withStyle(ChatFormatting.GRAY));
 		for (Bonus bonus : bonuses(stack)) {
 			boolean percent = bonus.operation() != AttributeModifier.Operation.ADD_VALUE;
 			double amount = percent ? bonus.amount() * 100.0 : bonus.amount();
