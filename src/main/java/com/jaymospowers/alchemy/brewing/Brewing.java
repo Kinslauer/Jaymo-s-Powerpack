@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
 /**
- * (0.20.12) Brewing quality: the Mortar and Pestle (grinding), graded brews ({@link BrewGrade}) and the Brewer's
+ * (0.20.13) Brewing quality: the Mortar and Pestle (grinding), graded brews ({@link BrewGrade}) and the Brewer's
  * Alembic. Stirring lives in {@code CauldronStirring}. The plan is docs/Brewing-Quality-Plan.md. Our own version of an
  * idea from Immersive Brewing; none of its code, art or data.
  */

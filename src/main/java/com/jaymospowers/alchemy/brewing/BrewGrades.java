@@ -9,7 +9,7 @@ import net.minecraft.world.item.component.Consumable;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.12) Grades on potion stacks. The potion itself is never rebuilt: the grade scales vanilla's
+ * (0.20.13) Grades on potion stacks. The potion itself is never rebuilt: the grade scales vanilla's
  * {@code potion_duration_scale} (so splash and lingering keep it) and the stack's own {@code consumable} (drink time).
  */
 public final class BrewGrades {

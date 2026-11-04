@@ -6,7 +6,7 @@ import net.minecraft.network.chat.MutableComponent;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.12) How well a brew was made in the cauldron, from Crude to Masterwork. Plain is the same as a vanilla potion.
+ * (0.20.13) How well a brew was made in the cauldron, from Crude to Masterwork. Plain is the same as a vanilla potion.
  * Tune the multipliers here.
  */
 public enum BrewGrade {

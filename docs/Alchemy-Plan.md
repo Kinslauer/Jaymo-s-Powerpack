@@ -104,7 +104,7 @@ essence (`Phials`, the `jaymospowers:essences` component).
   Ichorium tools are better than netherite but every hit/block adds fleeting corruption.
 - **Everflame lamp** (gas-light idea): places an invisible light where you aim.
 
-### 6. Brewing quality (0.20.12)
+### 6. Brewing quality (0.20.13)
 Extends the crucible and alembic section; nothing there is replaced. A Mortar and Pestle grinds brewing ingredients on a
 timing bar (Coarse, Fine, Dust), cauldron stirring is six timed turns, and each bottled brew is graded Crude to
 Masterwork (longer effects through `potion_duration_scale`, faster drinking). A Brewer's Alembic (research Distilling

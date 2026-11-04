@@ -32,7 +32,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.12) A Mortar and Pestle: up to {@link #HOLDS} of one ingredient ({@link #contents}), the grinding game
+ * (0.20.13) A Mortar and Pestle: up to {@link #HOLDS} of one ingredient ({@link #contents}), the grinding game
  * ({@link Grinding}, strokes judged by the server) and the ground batch left in the bowl ({@link #result}).
  * Walking away pauses the grinding.
  */

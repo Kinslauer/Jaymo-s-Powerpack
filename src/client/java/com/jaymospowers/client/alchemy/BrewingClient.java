@@ -32,7 +32,7 @@ import net.minecraft.world.level.block.Blocks;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.12) Brewing on the client: the grinding and stirring bars under the crosshair (the anvil's bar, one at a time),
+ * (0.20.13) Brewing on the client: the grinding and stirring bars under the crosshair (the anvil's bar, one at a time),
  * the mortar's batch, and the tooltips for grades and ground ingredients.
  */
 public final class BrewingClient {

@@ -1,4 +1,4 @@
-"""Brewing quality (0.20.12): textures for the Mortar and Pestle and the Brewer's Alembic's bottle rack.
+"""Brewing quality (0.20.13): textures for the Mortar and Pestle and the Brewer's Alembic's bottle rack.
 
 Style as in tools/gen_alchemy_crucible.py: 16x16, flat shading, a 1 px darker rim, light from the top-left. The
 Brewer's Alembic's pot and bottles reuse alembic_copper.png and alembic_glass.png, which are ours.

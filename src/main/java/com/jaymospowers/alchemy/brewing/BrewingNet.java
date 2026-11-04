@@ -11,7 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-/** (0.20.12) The grinding and stirring bars' packets: the bar's state down, each stroke up. */
+/** (0.20.13) The grinding and stirring bars' packets: the bar's state down, each stroke up. */
 public final class BrewingNet {
 	/** How far a brewer may stand from the block (blocks, squared) for a packet to count. */
 	static final double REACH_SQ = 8 * 8;

@@ -1,13 +1,13 @@
 # Patch 7: Brewing quality (mortar, timed stirring, graded potions, Brewer's Alembic)
 
-Powers **0.20.12**. Kingdoms and Kitchen untouched (no Kingdoms version, no loading hint). Row 7 of
+Powers **0.20.13**. Kingdoms and Kitchen untouched (no Kingdoms version, no loading hint). Row 7 of
 `docs/Otectus-Plan.md`. Andy picked the idea of Immersive Brewing; this is our own version, with none of its code, art or data.
 
 Andy-approved plan text: "A mortar and pestle grinding game before an ingredient goes in the cauldron, stirring timed
 instead of six clicks, potions graded Crude to Masterwork (longer effects, faster drinking), and an alembic that
 distils a brew one grade up."
 
-Comment tag for all new code: `(0.20.12)`. Tuning numbers are `static final` constants at the top of each class.
+Comment tag for all new code: `(0.20.13)`. Tuning numbers are `static final` constants at the top of each class.
 
 ## 0. Decisions (made here, so the edit stage has nothing open)
 
@@ -86,16 +86,16 @@ stays readable. It is package-private where it touches `CauldronBrewing`'s helpe
 ### Changed
 | File | Change |
 |---|---|
-| `gradle.properties:13` | `version=0.20.12` |
-| `alchemy/Alchemy.java` (init, ~line 62) | `com.jaymospowers.alchemy.brewing.Brewing.init();` **before** `CauldronBrewing.init();`, with a comment `// (0.20.12) brewing quality: mortar, graded brews, the Brewer's Alembic`. Class Javadoc list: add `<li>{@code brewing/}: grinding, brew grades and the Brewer's Alembic (0.20.12).</li>`. |
+| `gradle.properties:13` | `version=0.20.13` |
+| `alchemy/Alchemy.java` (init, ~line 62) | `com.jaymospowers.alchemy.brewing.Brewing.init();` **before** `CauldronBrewing.init();`, with a comment `// (0.20.13) brewing quality: mortar, graded brews, the Brewer's Alembic`. Class Javadoc list: add `<li>{@code brewing/}: grinding, brew grades and the Brewer's Alembic (0.20.13).</li>`. |
 | `alchemy/cauldron/CauldronBrewing.java` | See section 4. |
-| `client/alchemy/AlchemyClient.java` (init) | `BrewingClient.init(); // (0.20.12)` |
+| `client/alchemy/AlchemyClient.java` (init) | `BrewingClient.init(); // (0.20.13)` |
 | `client/jei/AlchemyJei.java` (`registerRecipes`, line ~60) | `registration.addIngredientInfo(Brewing.MORTAR, Component.translatable("jei.jaymospowers.mortar"));` and the same for `Brewing.BREWERS_ALEMBIC` / `jei.jaymospowers.brewers_alembic`. Use the `addIngredientInfo(ItemLike, Component...)` overload that `TinkeringJei.java:128` uses. |
 | `lang/parts/alchemy_cauldron.json` | Three texts change (section 7). |
 | `data/minecraft/tags/block/mineable/pickaxe.json` | Add `"jaymospowers:mortar"`, `"jaymospowers:brewers_alembic"` (next to `jaymospowers:alembic`, line ~125). |
 | `docs/HUD-Layout.md` (BELOW row, line 29) | `50 smithing` → `50 smithing · gem cutting · mortar / stir bar (only one shows at a time)`. |
-| `docs/Alchemy-Plan.md` | New section `### 6. Brewing quality (0.20.12)` with one paragraph and a link to this file (extends the crucible/alembic section, replaces nothing). |
-| `docs/Otectus-Plan.md:15` | Status: `built in Powers 0.20.12 (docs/Brewing-Quality-Plan.md)`. |
+| `docs/Alchemy-Plan.md` | New section `### 6. Brewing quality (0.20.13)` with one paragraph and a link to this file (extends the crucible/alembic section, replaces nothing). |
+| `docs/Otectus-Plan.md:15` | Status: `built in Powers 0.20.13 (docs/Brewing-Quality-Plan.md)`. |
 | `MODLOG.md` | The entry in section 13, appended after the 0.20.8 entry (line ~5279). |
 
 **Not changed:** `JaymosPowers.registerAttachments()` (no new attachment: the three new types are *data components*,
@@ -166,7 +166,7 @@ the line from (1,2) doesn't run through another node; if it does, use (3,2).
      perfects + (PERFECT?1:0)); `Brew stirred()` (quality + `BrewQuality.stepScore(stirScore / STIR_TURNS, grind)`,
      steps + 1, stirScore 0, perfects 0, grind -1); `Brew withSeed(long)`; `BrewGrade grade()` → `BrewQuality.grade(quality, steps)`.
 2. **Class Javadoc (lines 54-69):** the stirring bullet becomes "...until it's stirred in: a timed stir
-   ({@link CauldronStirring}, (0.20.12)) of {@link #STIR_TURNS} turns...". Add a bullet: "(0.20.12) Each ingredient
+   ({@link CauldronStirring}, (0.20.13)) of {@link #STIR_TURNS} turns...". Add a bullet: "(0.20.13) Each ingredient
    stirred in is a step graded on its grind ({@code Brewing.GROUND}) and its stir; bottles carry the brew's
    {@link com.jaymospowers.alchemy.brewing.BrewGrade}." `STIR_TURNS` stays 6, and its Javadoc becomes "Stirring turns
    (judged on the stir bar) that work an ingredient in."
@@ -174,7 +174,7 @@ the line from (1,2) doesn't run through another node; if it does, use (3,2).
    ```java
    if (level.isClientSide()) {
        if (stack.is(Items.STICK) || stack.is(ItemTags.SHOVELS)) {
-           CauldronStirring.clientStir.test(player, pos); // (0.20.12) judges and sends a turn when the stir bar is up here
+           CauldronStirring.clientStir.test(player, pos); // (0.20.13) judges and sends a turn when the stir bar is up here
            return InteractionResult.SUCCESS;
        }
        return InteractionResult.PASS;
@@ -286,7 +286,7 @@ public static final float COARSE_SCORE = 0.6F, FINE_SCORE = 0.85F, DUST_SCORE = 
 public static final float GRIND_WEIGHT = 0.4F;
 /** Mean step score each grade needs. */
 public static final float MASTERWORK_AT = 0.95F, EXPERT_AT = 0.8F, FINE_AT_GRADE = 0.6F, PLAIN_AT = 0.35F;
-/** Widens the perfect zone (bar units) for this brewer; empty in 0.20.12 (a later blessing can add to it). */
+/** Widens the perfect zone (bar units) for this brewer; empty in 0.20.13 (a later blessing can add to it). */
 public static final List<ToDoubleFunction<ServerPlayer>> ZONE_BONUS = new ArrayList<>();
 
 public static Bar bar(int game)                    // GRIND_GAME → GRIND, else STIR
@@ -527,7 +527,7 @@ In-game checks for Andy (not run here):
 ## 13. MODLOG entry (append to `MODLOG.md`, after the 0.20.8 entry)
 
 ```markdown
-- **0.20.12, brewing quality (Patch 7)** (`alchemy/brewing/`, `alchemy/cauldron/CauldronStirring`, plan
+- **0.20.13, brewing quality (Patch 7)** (`alchemy/brewing/`, `alchemy/cauldron/CauldronStirring`, plan
   `docs/Brewing-Quality-Plan.md`): Andy picked the idea of Immersive Brewing; this is our own version (none of its code
   or art).
   - **Mortar and Pestle:** up to four of a brewing ingredient (`#jaymospowers:mortar_grindable`), five strokes on the

@@ -26,7 +26,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.12) The Brewer's Alembic: copper and glass, set over a fire. Two or three bottles of one brew distil into one
+ * (0.20.13) The Brewer's Alembic: copper and glass, set over a fire. Two or three bottles of one brew distil into one
  * fewer bottle, a grade better. Not the essence {@code alembic} of the crucible.
  */
 public class BrewersAlembicBlock extends Block implements EntityBlock {

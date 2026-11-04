@@ -22,7 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.12) The Mortar and Pestle: put a brewing ingredient in, then grind it with an empty hand, in time with the bar.
+ * (0.20.13) The Mortar and Pestle: put a brewing ingredient in, then grind it with an empty hand, in time with the bar.
  * Use it again to take the ground batch out.
  */
 public class MortarBlock extends Block implements EntityBlock {

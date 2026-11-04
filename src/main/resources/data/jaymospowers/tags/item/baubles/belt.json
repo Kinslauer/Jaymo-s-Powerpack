@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "jaymospowers:brawlers_belt",
-    "#minecraft:lanterns"
+    "#minecraft:lanterns",
+    "jaymospowers:bottled_fairy"
   ]
 }

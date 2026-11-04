@@ -27,7 +27,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * (0.20.12) A Brewer's Alembic: up to {@link #HOLDS} bottles of one brew, distilled over heat into one fewer bottle,
+ * (0.20.13) A Brewer's Alembic: up to {@link #HOLDS} bottles of one brew, distilled over heat into one fewer bottle,
  * each a grade better. The timer pauses when cold and starts over when the bottles change.
  */
 public class BrewersAlembicEntity extends BlockEntity {

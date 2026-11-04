@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.20.12) The numbers of brewing quality: the grinding and stirring bars (the same on both sides, no world access) and
+ * (0.20.13) The numbers of brewing quality: the grinding and stirring bars (the same on both sides, no world access) and
  * how a step and a whole brew are scored. Tune everything here.
  */
 public final class BrewQuality {
@@ -35,7 +35,7 @@ public final class BrewQuality {
 	public static final float GRIND_WEIGHT = 0.4F;
 	/** Mean step score each grade needs. */
 	public static final float MASTERWORK_AT = 0.95F, EXPERT_AT = 0.8F, FINE_AT_GRADE = 0.6F, PLAIN_AT = 0.35F;
-	/** Widens the perfect zone (bar units) for this brewer; empty in 0.20.12 (a later blessing can add to it). */
+	/** Widens the perfect zone (bar units) for this brewer; empty in 0.20.13 (a later blessing can add to it). */
 	public static final List<ToDoubleFunction<ServerPlayer>> ZONE_BONUS = new ArrayList<>();
 
 	private BrewQuality() {

@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-/** (0.20.12) The ingredient, or the ground batch, lying in the mortar bowl. */
+/** (0.20.13) The ingredient, or the ground batch, lying in the mortar bowl. */
 public class MortarRenderer implements BlockEntityRenderer<MortarEntity, MortarRenderer.State> {
 	public static class State extends BlockEntityRenderState {
 		final ItemStackRenderState item = new ItemStackRenderState();

@@ -62,10 +62,10 @@ import org.jspecify.annotations.Nullable;
  * redstone or glowstone...).
  * <ul>
  * <li>Each ingredient floats in the pot (the thrown item itself, held there with {@link #FLOATING}) until it's stirred in
- * stirred in: a timed stir ({@link CauldronStirring}, (0.20.12)) of {@link #STIR_TURNS} turns with a stick or a shovel,
+ * stirred in: a timed stir ({@link CauldronStirring}, (0.20.13)) of {@link #STIR_TURNS} turns with a stick or a shovel,
  * swirling round with each turn; one thrown in while the last is still unstirred, or one the brew can't take, is spat
  * back out.</li>
- * <li>(0.20.12) Each ingredient stirred in is a step graded on its grind ({@code Brewing.GROUND}) and its stir; bottles
+ * <li>(0.20.13) Each ingredient stirred in is a step graded on its grind ({@code Brewing.GROUND}) and its stir; bottles
  * carry the brew's {@link BrewGrade}.</li>
  * <li>A stirred brew fills three bottles (one per cauldron level). Gunpowder thrown into it makes it splash, dragon's
  * breath lingering (the brewing stand's own recipes).</li>
@@ -90,7 +90,7 @@ public final class CauldronBrewing {
 
 	/**
 	 * A cauldron's brew: the potion one bottle takes, stir turns still owed, and the cauldron level it was left at.
-	 * (0.20.12) Also the ingredient being stirred now ({@code stirScore}, {@code perfects}, {@code seed} of its bar and its
+	 * (0.20.13) Also the ingredient being stirred now ({@code stirScore}, {@code perfects}, {@code seed} of its bar and its
 	 * {@code grind} score, -1 for nothing to grind) and the sum of the finished step scores ({@code quality}, {@code steps}).
 	 */
 	public record Brew(ItemStack potion, int stirs, int fills, float stirScore, int perfects, long seed, float grind, float quality, int steps) {
@@ -114,7 +114,7 @@ public final class CauldronBrewing {
 			return new Brew(potion, stirs, fills, stirScore, perfects, seed, grind, quality, steps);
 		}
 
-		/** A brew saved half-stirred before 0.20.12: the turns already done count as Good. */
+		/** A brew saved half-stirred before 0.20.13: the turns already done count as Good. */
 		public Brew withLegacySeed(long seed) {
 			float credit = (STIR_TURNS - stirs) * BrewQuality.score(BrewQuality.GOOD);
 			return new Brew(potion, stirs, fills, stirScore + credit, perfects, seed, grind, quality, steps);
@@ -160,7 +160,7 @@ public final class CauldronBrewing {
 			if (level.isClientSide()) {
 				// the server decides; just don't let the client predict a water bottle out of a brew
 				if (stack.is(Items.STICK) || stack.is(ItemTags.SHOVELS)) {
-					CauldronStirring.clientStir.test(player, pos); // (0.20.12) judges and sends a turn when the stir bar is up here
+					CauldronStirring.clientStir.test(player, pos); // (0.20.13) judges and sends a turn when the stir bar is up here
 					return InteractionResult.SUCCESS;
 				}
 				return InteractionResult.PASS;
@@ -210,7 +210,7 @@ public final class CauldronBrewing {
 			}
 		});
 		ServerTickEvents.END_LEVEL_TICK.register(CauldronBrewing::bubble);
-		CauldronStirring.init(); // (0.20.12)
+		CauldronStirring.init(); // (0.20.13)
 	}
 
 	/** An item in a water cauldron ({@code LayeredCauldronBlockMixin}): over heat, a brewing ingredient goes in or is spat out. */
@@ -252,7 +252,7 @@ public final class CauldronBrewing {
 		floating.setNeverPickUp();
 		floating.setUnlimitedLifetime();
 		swirl(floating, pos, STIR_TURNS);
-		// (0.20.12) the grind of this ingredient, and what the earlier steps scored
+		// (0.20.13) the grind of this ingredient, and what the earlier steps scored
 		float grind = BrewQuality.grindScore(reagent);
 		set(level, pos, new Brew(result, STIR_TURNS, state.getValue(LayeredCauldronBlock.LEVEL), 0.0F, 0, level.getRandom().nextLong() | 1L, grind,
 			brew == null ? 0.0F : brew.quality(), brew == null ? 0 : brew.steps()));

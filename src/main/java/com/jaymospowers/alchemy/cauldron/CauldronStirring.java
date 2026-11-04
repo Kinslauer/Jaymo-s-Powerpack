@@ -28,7 +28,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.12) The server half of the stir game: who is stirring which pot, each turn judged on the stir bar, and the
+ * (0.20.13) The server half of the stir game: who is stirring which pot, each turn judged on the stir bar, and the
  * finish. The first stick use on an unstirred brew puts the bar up; the turns after that come as packets.
  */
 public final class CauldronStirring {
