@@ -299,3 +299,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   draws the knees up with the shins down to the feet; seat poses hang the shins down from the knee (legs crossed lifts
   the right thigh over the left). Leaning back is unchanged. Sitting while still holding Sneak no longer also gets the
   crouch's legs (`CrouchPose.otherPose`). Compile-checked; leg shapes checked in a box sketch, not seen in game.
+- **0.20.39, Kingdoms 0.7.533, gap jumps and dug-out taverns:** villagers and other humanoids jump gaps their path
+  stops short of, and Dungeons and Taverns' taverns (and any surface building saved with voids for rooms) no longer
+  generate packed with earth. See the Kingdoms MODLOG.
