@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "jaymoskingdoms:block/burnt_lantern"
+    },
+    "hanging=true": {
+      "model": "jaymoskingdoms:block/burnt_lantern_hanging"
+    }
+  }
+}

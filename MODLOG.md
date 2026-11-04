@@ -360,6 +360,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.48, Kingdoms 0.7.540, attributes 0-100 by world tier + character screen layout:** Andy (2026-11-04): "UI needs a
   rework, the text is overlapping. And character level points should scale way further, making stats go from 0/100 and
   scale accordingly, giving users a reason to world tier up." See the Kingdoms MODLOG.
-- **0.20.49, Kingdoms 0.7.541, Skeleton Lord turned the right way round:** Andy (2026-11-04): "his head is facing the
+- **0.20.49, Kingdoms 0.7.542, Skeleton Lord turned the right way round:** Andy (2026-11-04): "his head is facing the
   complete wrong way". The whole model was drawn back to front (face on his back, ponytail in front); the renderer now
-  gives it a half turn. See Kingdoms MODLOG 0.7.541.
+  gives it a half turn. See Kingdoms MODLOG 0.7.542.

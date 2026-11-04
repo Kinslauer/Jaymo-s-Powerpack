@@ -53,7 +53,7 @@ public final class SkeletonLordRenderer extends MobRenderer<SkeletonLord, Skelet
 	@Override
 	protected void scale(State state, PoseStack poseStack) {
 		poseStack.scale(SCALE, SCALE, SCALE);
-		// (0.7.541) Andy: "his head is facing the complete wrong way". The Workshop model is built facing the other way from
+		// (0.7.542) Andy: "his head is facing the complete wrong way". The Workshop model is built facing the other way from
 		// our other Blockbench mobs (his face, toes and badge at -z), so he walked about with his face and chest on his back
 		// and his ponytail in front. A half turn about the vertical puts him the right way round; his animations and the head's
 		// look turn with him.
