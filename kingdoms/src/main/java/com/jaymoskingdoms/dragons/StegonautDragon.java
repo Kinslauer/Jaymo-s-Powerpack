@@ -30,7 +30,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.511) Stegonaut, the first of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and numbers are
+ * (0.7.513) Stegonaut, the first of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and numbers are
  * ported from Saint's Dragons by Leon Saint (MIT licence; none of its art, models or sounds are used: the model is our
  * own, {@code StegonautDragonModel}, painted by {@code tools/gen_stegonaut.py}). A walker ({@link WindDragon#flies}):
  * a tall, plated dragon on long pillar legs with a long neck held high, of the jungles and plains. It never flies,

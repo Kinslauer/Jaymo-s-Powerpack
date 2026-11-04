@@ -177,7 +177,7 @@ public abstract class WindDragon extends AbstractHorse {
 	// ---- the client's smoothed animation (see the model) ----
 	public float flyAnim, flyAnimO, breathAnim, breathAnimO, landAnim, landAnimO, sitAnim, sitAnimO, crashAnim, crashAnimO;
 	public float flapPhase, flapPhaseO, glideAnim, glideAnimO, pitchAnim, pitchAnimO, swimAnim, swimAnimO;
-	/** (0.7.511) The move the model is playing ({@link #action}) and how many ticks it has been playing it. */
+	/** (0.7.513) The move the model is playing ({@link #action}) and how many ticks it has been playing it. */
 	public int actionSeen, actionAge;
 
 	protected WindDragon(EntityType<? extends WindDragon> type, Level level) {
@@ -359,7 +359,7 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	/**
-	 * (0.7.511) Whether it flies (the wind dragons all do). A walker ({@code docs/SaintsDragons-Plan.md}, the lesser dragons
+	 * (0.7.513) Whether it flies (the wind dragons all do). A walker ({@code docs/SaintsDragons-Plan.md}, the lesser dragons
 	 * on their feet: Stegonaut) never takes off: wild it grazes about its home and fights on the ground, ridden it is
 	 * steered like a horse (vanilla's mount travel), and R sends its own move ({@link #riderBreath}).
 	 */
@@ -367,22 +367,22 @@ public abstract class WindDragon extends AbstractHorse {
 		return true;
 	}
 
-	/** (0.7.511) Whether it goes for players who come near (a grazing walker only fights whoever hurts it). */
+	/** (0.7.513) Whether it goes for players who come near (a grazing walker only fights whoever hurts it). */
 	protected boolean aggressive() {
 		return true;
 	}
 
-	/** (0.7.511) Whether a wild one shows a boss bar (the wind dragons are minibosses; the lesser dragons are beasts). */
+	/** (0.7.513) Whether a wild one shows a boss bar (the wind dragons are minibosses; the lesser dragons are beasts). */
 	protected boolean bossBar() {
 		return true;
 	}
 
-	/** (0.7.511) Whether killing one counts toward Eurus and Aeolus's disguises ({@link DragonRecords}): only the wind dragons do. */
+	/** (0.7.513) Whether killing one counts toward Eurus and Aeolus's disguises ({@link DragonRecords}): only the wind dragons do. */
 	protected boolean windDragon() {
 		return true;
 	}
 
-	/** (0.7.511) What everyone near is told when it's worn down, and when it bolts (a walker sinks and lumbers off). */
+	/** (0.7.513) What everyone near is told when it's worn down, and when it bolts (a walker sinks and lumbers off). */
 	protected String crashKey() {
 		return flies() ? "message.jaymoskingdoms.dragon.crashed" : "message.jaymoskingdoms.dragon.crashed_walker";
 	}
@@ -391,12 +391,12 @@ public abstract class WindDragon extends AbstractHorse {
 		return flies() ? "message.jaymoskingdoms.dragon.bolted" : "message.jaymoskingdoms.dragon.bolted_walker";
 	}
 
-	/** (0.7.511) Called every tick a wild walker is fighting {@code target} on its feet (a species adds its own moves). */
+	/** (0.7.513) Called every tick a wild walker is fighting {@code target} on its feet (a species adds its own moves). */
 	protected void walkerFight(ServerLevel level, LivingEntity target) {
 		groundFight(level, target, true);
 	}
 
-	/** (0.7.511) The move it is making now, for its model (0 none; a species' own numbers, synced by the species). */
+	/** (0.7.513) The move it is making now, for its model (0 none; a species' own numbers, synced by the species). */
 	public int action() {
 		return 0;
 	}
@@ -613,11 +613,11 @@ public abstract class WindDragon extends AbstractHorse {
 		}
 	}
 
-	/** (0.7.511) How far a walker strolls from its home, how often it sets off (1 in this many ticks), how fast it runs off. */
+	/** (0.7.513) How far a walker strolls from its home, how often it sets off (1 in this many ticks), how fast it runs off. */
 	static final int WANDER_RADIUS = 14, WANDER_EVERY = 120;
 	static final double WANDER_SPEED = 0.6, FLEE_SPEED = 1.4;
 
-	/** (0.7.511) A walker about its home: it strolls and grazes, and bolting it lumbers away from whoever's near. */
+	/** (0.7.513) A walker about its home: it strolls and grazes, and bolting it lumbers away from whoever's near. */
 	private void walk(ServerLevel level) {
 		if (this.wild == Wild.FLEE) {
 			Player near = level.getNearestPlayer(this, LOSE_RANGE);
@@ -737,7 +737,7 @@ public abstract class WindDragon extends AbstractHorse {
 	protected void fight(ServerLevel level, LivingEntity target) {
 		this.wildTicks++;
 		if (!flies()) {
-			// (0.7.511) a walker stands its ground where it was
+			// (0.7.513) a walker stands its ground where it was
 			this.wild = Wild.GROUND;
 			walkerFight(level, target);
 			return;
