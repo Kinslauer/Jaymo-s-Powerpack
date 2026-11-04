@@ -8948,7 +8948,12 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   (`McaCommandMixin`, and a 2 s look at each player's followers), won't take rot as a gift, won't take a bribe whatever
   their king is like, and their poor don't rob the dead. They say why, hotly (`commandment.jaymoskingdoms.refuse.*`).
   Compiled; not played.
-- **0.7.536, the Zoological Guide is crafted, not given** (Andy, 2026-11-04: "remove the zoo book from player inventory on
+- **0.7.536, Atroxiia pulled for now (pack 0.20.43):** Andy (2026-11-04): "atroxiia has no walk animation, this is
+  unacceptable". It's off until its walk is redone (`Dragons.ATROXIIA_ON = false`): no biome spawns, gone from
+  `/kingdom dragon`, and any already in a world (or given by egg) are cleared away on their next tick. Its type, model,
+  art and loot stay, so turning it back on is one flag. The other lesser dragons stay in: Stegonaut's gait was redone
+  in 0.7.531, Varasuchus walks on four legs, and Ignivorus and Aetherion fly (both walk on landing).
+- **0.7.537, the Zoological Guide is crafted, not given** (Andy, 2026-11-04: "remove the zoo book from player inventory on
   spawn, and add a recipe for it instead"): Cube Animals put its guide in every new player's inventory with a chat line.
   `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
   own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
