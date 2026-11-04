@@ -338,3 +338,5 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   Truth's villagers refuse orders that would break theirs. See the Kingdoms MODLOG.
 - **0.20.43, Kingdoms 0.7.536, Atroxiia pulled for now:** Andy: it had no walk animation. It no longer spawns, is out
   of `/kingdom dragon`, and any already in a world disappear; the code and art are kept for when it's fixed.
+- **0.20.44, Kingdoms 0.7.537, Zoological Guide by recipe:** Cube Animals no longer hands out its Zoological Guide on
+  first join; craft it from a book, a feather, an ink sac and a bone (shapeless). See the Kingdoms MODLOG.

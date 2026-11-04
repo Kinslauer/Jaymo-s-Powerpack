@@ -8953,3 +8953,8 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   `/kingdom dragon`, and any already in a world (or given by egg) are cleared away on their next tick. Its type, model,
   art and loot stay, so turning it back on is one flag. The other lesser dragons stay in: Stegonaut's gait was redone
   in 0.7.531, Varasuchus walks on four legs, and Ignivorus and Aetherion fly (both walk on landing).
+- **0.7.537, the Zoological Guide is crafted, not given** (Andy, 2026-11-04: "remove the zoo book from player inventory on
+  spawn, and add a recipe for it instead"): Cube Animals put its guide in every new player's inventory with a chat line.
+  `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
+  own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
+  Cube Animals is loaded. Its loot-chest copies are untouched. Not compiled or played yet.
