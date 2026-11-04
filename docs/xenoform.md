@@ -37,7 +37,13 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
 - A fresh band holds one of the three starters at random (`XenoForms.STARTERS`). **Scanning (X held)** at a creature for
   3 s from up to 12 blocks: if it carries an alien's DNA (`XenoForm.scans`), the band learns that alien (chime, green
   beam, level-up sound). Only as a human.
-- **The charge** (0.18.92, replaces the random timer): the band holds 2 minutes of form unmastered, growing with
+- **The random timer** (0.19.85; Andy: "i want the charge to be something you unlock, its a random timer before then"):
+  until the band is reforged at the moon forge (`BandForge`), a change lasts a random 1 to 5 minutes (`TIMER_MIN`/`TIMER_MAX`,
+  a quarter longer per rank of Bigger Charge). Hits and moves don't shorten it (Fuse's Self-Destruct still costs its
+  300 ticks). Turning back, the band recharges for a minute (2 after a knockout, a quarter shorter per rank of Faster
+  Recharge); the bar over the dial fills back up through it. A quick change carries what's left of the timer, less its
+  quarter. Reforging gives the band its charge, full. Creative always has the charge.
+- **The charge** (0.18.92; 0.19.85 only on a reforged band): the band holds 2 minutes of form unmastered, growing with
   each mastered ability to 5 at full mastery (`capacity`). Changed, it spends a point a tick, 10 more per point of
   damage taken and 20 more per move put on cooldown. What's left stays in the band when you turn back, and as yourself it
   refills from empty in a minute; a slam needs 10 s of it. The HUD shows it as a thin bar over the dial (grey while too
