@@ -8909,3 +8909,7 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
 - **0.7.532, story figure tails:** Beastfolk, Canine, Feline, Kitsune, Avian and Serpen tails on the life story's figure
   (and any screen figure) hung down between the legs. 0.7.507's lying-down check read the screen's flipped y as a body
   lying flat; `BeastParts.lying` now counts only the tilt off the up-down line. Compile-checked; not played.
+- **0.7.533, the Nobodies' rags:** the Nobodies start's three hired hands wore a pirate deckhand's striped shirt and
+  bandana. `Uniforms.POOR` is now six roughspun tunics with a belt and dark breeches, no hat (undyed linen, dun, grey,
+  russet, weld green, woad; `tools/gen_nobody_rags.py`, drawn over the deckhands' slops). Nobodies already hired in a
+  deckhand's slops change when they load. Not compiled or played yet.

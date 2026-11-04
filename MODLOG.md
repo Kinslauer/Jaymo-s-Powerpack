@@ -294,3 +294,10 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (`ZFighterRogue.raider`, `ZFighterRaiders.raider`). Compile-checked against the 26.3 jars; not played.
 - **0.20.37, Kingdoms 0.7.532, story figure tails:** tails on the life story's figure no longer hang down between the
   legs. See the Kingdoms MODLOG.
+- **0.20.38, Kingdoms 0.7.533, medieval villagers again:** Andy (2026-11-04): "the outfits seem to be broken again,
+  they arent wearing medieval attire anymore". His clip showed MCA's own green plaid shirt (`neutral/mason/0`), which
+  the MCA - Default Medieval resource pack draws as a tan tunic, so the pack had dropped out of his selected packs while
+  its once-only marker said it was done. `PackResourcePacks` now keeps it on: at any launch it's found off it's switched
+  on again (and kept on the accepted older-format list so the game won't drop it on load);
+  `config/jaymospowers-medieval-villagers-off` keeps it off for anyone who'd rather. The Nobodies wear plain rags now,
+  not sailors' stripes (see the Kingdoms MODLOG). Not compiled or played yet.
