@@ -291,7 +291,7 @@ public final class Temperaments {
 		if (!is(helper, Temperament.GREEDY)) {
 			return;
 		}
-		// (0.7.497) the fee in coin, from coins, purses and bundles alike (the coin of the land, else what they carry)
+		// (0.7.498) the fee in coin, from coins, purses and bundles alike (the coin of the land, else what they carry)
 		long took = Money.chargeUpTo(player, Money.worth(GREEDY_FEE));
 		if (took > 0L) {
 			// (0.7.490) in dialect for an orc or goblin

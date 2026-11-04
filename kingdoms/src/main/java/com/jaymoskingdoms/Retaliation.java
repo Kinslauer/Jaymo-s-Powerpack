@@ -59,7 +59,7 @@ final class Retaliation {
 	static final double FOLK_SPEED = 1.15;
 	/** A brawler under this share of their health runs off. */
 	static final float FLEE_SHARE = 0.3F;
-	/** (0.7.497) Paying one off: emeralds' worth in coin to start with, more for each blow you've landed in the fight, and never more than this. */
+	/** (0.7.498) Paying one off: emeralds' worth in coin to start with, more for each blow you've landed in the fight, and never more than this. */
 	static final int PRICE_BASE = 3, PRICE_PER_BLOW = 3, PRICE_MOST = 32;
 	/** Lines for squaring up, running, being paid off and refusing the coin. */
 	static final int LINES = 3;
@@ -211,7 +211,7 @@ final class Retaliation {
 			return true;
 		}
 		int price = price(brawl);
-		// (0.7.497) the payoff comes from everything carried, change given back, so a purse in hand pays as well as a coin
+		// (0.7.498) the payoff comes from everything carried, change given back, so a purse in hand pays as well as a coin
 		if (!Money.charge(player, Money.worth(price))) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.price", Money.text(player, Money.worth(price))).withStyle(ChatFormatting.GRAY));
 			return true;

@@ -257,7 +257,7 @@ final class QuestFoes {
 		BlockEntity be = level.getBlockEntity(spot);
 		if (be instanceof ChestBlockEntity chest) {
 			chest.setItem(13, keepsake);
-			// (0.7.497) coins of the land, an emerald's worth for each emerald it was
+			// (0.7.498) coins of the land, an emerald's worth for each emerald it was
 			chest.setItem(random.nextInt(9), Money.stacks(level, spot, Money.worth(1 + random.nextInt(4))).get(0));
 			chest.setItem(18 + random.nextInt(9), new ItemStack(random.nextBoolean() ? Items.BREAD : Items.BONE, 2 + random.nextInt(4)));
 		}

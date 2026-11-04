@@ -76,7 +76,7 @@ public final class Deeds {
 	static final long SAVE_GAP = 1200L, FIRE_THANKS_GAP = 600L;
 	/** The chance the one you saved hands you something. */
 	static final float SAVE_GIFT_CHANCE = 0.3F;
-	/** What they hand you ((0.7.497) the emerald is a coin of the town's: {@link #gift}). */
+	/** What they hand you ((0.7.498) the emerald is a coin of the town's: {@link #gift}). */
 	static final List<Item> GIFTS = List.of(Items.EMERALD, Items.BREAD, Items.APPLE, Items.COOKIE, Items.BAKED_POTATO, Items.PUMPKIN_PIE,
 		Items.HONEY_BOTTLE);
 	/** How often folk may call out to someone they remember (ticks), and the least gap between two calls to one player. */
@@ -374,7 +374,7 @@ public final class Deeds {
 		}
 	}
 
-	/** (0.7.497) {@code pick} as a gift from {@code from}: an emerald is a coin of the land instead (the emerald is a gem now). */
+	/** (0.7.498) {@code pick} as a gift from {@code from}: an emerald is a coin of the land instead (the emerald is a gem now). */
 	private static Item gift(ServerLevel level, Villager from, Item pick) {
 		return pick == Items.EMERALD ? Currencies.at(level, from.blockPosition()).item() : pick;
 	}

@@ -5157,7 +5157,54 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and Modrinth's 26.3 list the pack adds, unchanged: Dungeons and Taverns (roadside taverns, dungeons, overhauled
   strongholds, mansions, outposts and mineshafts), Structory and Structory: Towers (ruins, camps, shrines, watchtowers),
   and Homesteads (lone farmsteads). CurseForge ids still to look up from home (`packModsNoCf`).
-- **0.19.87, Coins replace emeralds (Andy's Custom Trade Currency pick, `docs/Otectus-Plan.md` patch 3; Kingdoms 0.7.497,
+- **0.19.84, Patch 6: non-human bipeds** (`docs/AlienBodies-Plan.md`, the last of the plan): nine more aliens are no longer men.
+  - Bulwark (Andy: "emphasize the four arms more, with a thinner body and outstretched constantly swapping idle stance arms"): a tall, narrow-waisted brute on bent bear legs with four long fisted arms held out in a guard that keeps swapping which pair is raised; walking swings them wide, the combo punches through all four, and carrying lifts the load with all four.
+  - Knell is a hunched, horned deep-dark beast that knuckle-walks on long arms, its head low on a thick neck; Sonic Boom and Shriek throw the head out and open the glowing ribs; Burrow, the Tolling and Tremor Sense have their own stances.
+  - Rime is a stooped ice brute: hunched trunk, icicle spines, a low frost-crowned head and big fists, the insignia on its back. Cryo's poses (Frost Breath, Ice Slide) turn it about its hips.
+  - Shade crawls on all fours like a spider while it moves and unfolds very tall when it stands, stares, attacks or holds a stolen block overhead.
+  - Thornwild is a treant on splayed root feet with twig-fingered arms and swaying leafy twigs, walking with a slow rooted gait; Roots slams its arms down and Bloom flings them wide.
+  - Lurk stands tall and thin and drops onto all fours when it sneaks or Fades; a swing from all fours is a pounce.
+  - Rivet is a rippling puddle of living metal that rises into a hunched figure with a whip arm when it fights (any swing, or 4 s after striking or being struck), melts back down after, and pours flat into a streak on Pour.
+  - Nadir is shapeless: a man-high mass of drifting, re-stacking dark cubes round a core that carries the insignia.
+  - Dud is a soft round ball on stubby feet with a worried face; it waddles, flops on its back to Play Dead and tucks into a spinning ball to Roll.
+  - The stances the client can't see are synced as `XenoformState.ACT` (`XenoformPower.syncAct`). Bulwark, Knell, Shade and Lurk straighten their bent arms for the first-person hand. The bodies lost their Ultimate spikes. Each body was written, then checked by a second pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
+  - Review fixes: the new bodies pose their own crouch, so the low crouch's thighs, the kneel and the eased bend (`CrouchPose`) stay off them ; the low stance still lowers them, but they don't settle onto a knee (no kneel lock, no steadied shots: `XenoformState.OWN_CROUCH`, read on both sides). Knell and Shade reach their own insignia on the change-back tap (`ownsTap`). Cryo's poses leave Rime's legs alone (`ownsLegs`). Rime, Rivet, Nadir and Dud no longer sink into the floor while sneaking. Knell's Tolling slams on the server's beat (both now use the level's game time, once per tick of it). Rime's fists and Dud's nub hand show right in first person, and Shade's hidden body never shows on the band's hologram. Rivet's feet lift on the forward swing, and Lash now makes it stand and whip its arm.
+- **0.19.85, The charge is unlocked by reforging the band** (Andy: "i want the charge to be something you unlock, its a random timer before then"; he picked reforging as the unlock). Until the band is reforged at the moon forge, each change lasts a random 1 to 5 minutes and isn't shortened by hits or moves, and the band recharges for a minute after you turn back (2 after a knockout). The bar over the dial shows that recharge filling. Bigger Charge makes the timed changes a quarter longer per rank and Faster Recharge makes the wait a quarter shorter, so points spent early aren't wasted. A quick change carries what's left of the timer. Reforging fills the new charge and says so. Fuse's Self-Destruct still costs its time either way (`XenoformPower.spend`). Creative always has the charge. The recharge (and a reforged band's charge) now survives logging off and back on, so a relog can't skip the wait, and the Z key's text says what turning back keeps. Compile-checked; not played.
+- **0.19.86, Fibre kit (Andy's Plant Fibers pick, `docs/Otectus-Plan.md` patch 2; Kingdoms 0.7.495):** more of the start
+  from plant fibre, our own from the idea (Plant Fibers is All Rights Reserved).
+  - **Grass Bandage** (`MedicineItems.GRASS_BANDAGE`): 3 plant fibre + plant string make 2. It dresses a cut like a
+    clean rag (heals 1.5, never festers), so there is a dressing before linen.
+  - **Grass Bed** (`ground/GrassBed`): plant string over plant fibre (3 + 3). A two-block bedroll three pixels high,
+    a vanilla bed in everything but looks: it sleeps, skips the night and sets your spawn. It burns.
+  - **Paper from fibre:** 4 plant string make a Plant Mesh; 3 mesh and a water bucket make 3 Wet Paper Pulp (the bucket
+    comes back); pulp dries into paper on a campfire (20 s) or in a smoker.
+  - **Rope from fibre:** 3 plant string in a column make Kingdoms rope, and rope now ties to fences (Kingdoms 0.7.495).
+  - Art by `tools/fibre_kit_art.py` (the optional Excalibur pack rebuilt with `tools/excalibur_style/grade.py`). Compile-checked; not played.
+- **0.19.87, Kingdoms 0.7.496, jewellery (Patch 4)** (`jewellery/`, plan `docs/Jewellery-Plan.md`): Andy picked the
+  idea of the Immersive Jewelry mod; this is our own version (none of its code or art).
+  - A **Lapidary Wheel** cuts gems: lay one on it and choose one of four cuts: Cabochon (3 strokes), Table (4), Rose
+    (5) or Brilliant (6). Then cut in time with the smithing bar. The wheel needs 0.8 s to spin back up after each
+    stroke; a stroke before that **chips** the gem and costs it a grade. Cut gems are graded Poorly Cut to
+    Masterwork and keep their gem, cut, grade and chips in one component (`jaymospowers:cut_gem`), ready to be
+    socketed into weapons and armour next patch.
+  - Emerald, diamond, amethyst, lapis, quartz and the Aether's zanite, glint, corrobonite and golden amber can be
+    cut; each gives its own small bonus (Luck, armour toughness, health, swimming, less burning, mining speed,
+    speed, knockback resistance, breath).
+  - Ring, amulet, bracelet and circlet **frames** are hammered from gold, silver or copper on the Smithing Anvil
+    like any head: graded Poorly Forged to Masterwork, quenched, capped without a blueprint (four new frame
+    blueprints at the wandering trader).
+  - The **Jeweller's Bench** sets a cut gem in a cooled frame. The piece is as good as the worse of the two, and its
+    bonus grows with grade, cut, metal (copper < silver < gold) and frame (amulets most).
+  - Rings, amulets and circlets go in their bauble slots; bracelets in a new eighth bauble slot, the **Wrist**
+    (bottom right). The seven found baubles are unchanged.
+  - Town smiths (Kingdoms) now and then ask for a gem amulet, ring or bracelet of at least a given grade, for more
+    emeralds than their usual errands. Compile-checked; not played.
+- **0.19.88, a stray Kitchen jar no longer stops the build:** a pull on the home PC left `jaymos-kitchen-0.5.43.jar`
+  beside 0.5.54 in `libs/` and the build refused ("must hold exactly one"). It now uses the jar matching
+  `kitchen/gradle.properties` (else the newest) and warns about the rest.
+- **0.19.89, Kingdoms 0.7.497, locks and keys (Patch 6)** (`docs/Locks-Plan.md`; see `kingdoms/MODLOG.md`): Powers only
+  gains the graded copies of the four lock and key icons in the optional `excalibur_style` pack.
+- **0.20.0, Coins replace emeralds (Andy's Custom Trade Currency pick, `docs/Otectus-Plan.md` patch 3; Kingdoms 0.7.498,
   Kitchen 0.5.56):** Andy chose "Combine: culture coins replace emeralds". The economy lives in Kingdoms
   (`docs/Coins-Plan.md`): the culture coins are the money, a copper bit is the small change and emeralds are a gem sold
   to a money changer. Powers reaches it through `core/KingdomsMoney` (a MethodHandles bridge; amounts in milli, thousandths

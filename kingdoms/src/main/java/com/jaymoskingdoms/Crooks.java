@@ -117,14 +117,14 @@ public final class Crooks {
 	/** From a player: at most this many silver (a handful of coins); with no money, up to half a stack of something else. */
 	static final int PICK_SILVER = 4;
 	/**
-	 * (0.7.497) A pickpocket on a player who wears a coin purse on the belt takes the whole purse this often (times
+	 * (0.7.498) A pickpocket on a player who wears a coin purse on the belt takes the whole purse this often (times
 	 * {@link #PURSE_LIFT_BUSY} at night or in a crowd of at least {@link #CROWD_MIN} within {@link #CROWD_RANGE} blocks).
 	 * It is owed back like anything else: it returns if the crook dies or is downed within RETURN_RANGE.
 	 */
 	static final float PURSE_LIFT_CHANCE = 0.35F, PURSE_LIFT_BUSY = 1.5F;
 	static final int CROWD_MIN = 3;
 	static final double CROWD_RANGE = 8.0;
-	/** (0.7.497) How much likelier a crook is to pick a player who wears a visible purse than one who doesn't (weight against 1). */
+	/** (0.7.498) How much likelier a crook is to pick a player who wears a visible purse than one who doesn't (weight against 1). */
 	static final int MARK_PURSE_WEIGHT = 3;
 	/** The chance a player feels the hand in their pocket. */
 	static final float FEEL_CHANCE = 0.5F;
@@ -352,7 +352,7 @@ public final class Crooks {
 	 */
 	static void scammed(ServerLevel level, Villager crook, ServerPlayer player, int faction, int paid) {
 		long now = level.getGameTime();
-		// (0.7.497) owed back in the coin the crook was paid in (the town's)
+		// (0.7.498) owed back in the coin the crook was paid in (the town's)
 		owe(crook, player.getUUID(), Money.stacks(level.getServer(), Factions.get(level.getServer(), faction), Money.worth(paid)), now);
 		home(crook, faction);
 		Speech.tell(level, crook, player, line("fetch", level.getRandom()), Speech.WHITE);
@@ -474,7 +474,7 @@ public final class Crooks {
 			}
 		}
 		if (!players.isEmpty()) {
-			// (0.7.497) a visible purse on the belt makes a player MARK_PURSE_WEIGHT times likelier to be picked
+			// (0.7.498) a visible purse on the belt makes a player MARK_PURSE_WEIGHT times likelier to be picked
 			int total = 0;
 			for (ServerPlayer p : players) {
 				total += PowersCompat.belt(p).is(MoneyItems.COIN_PURSE) ? MARK_PURSE_WEIGHT : 1;
@@ -667,7 +667,7 @@ public final class Crooks {
 		}
 		if (mark instanceof ServerPlayer player) {
 			if (random.nextFloat() < BLOW_LIFTS) {
-				// (0.7.497) a handful of coins (of whatever they carry), owed back as coin stacks in the land's coin
+				// (0.7.498) a handful of coins (of whatever they carry), owed back as coin stacks in the land's coin
 				// creative players have no coins to lose; chargeUpTo would mint some
 				long n = player.hasInfiniteMaterials() ? 0L : Money.chargeUpTo(player, Money.worth(1 + random.nextInt(PICK_SILVER)));
 				if (n > 0L) {
@@ -717,7 +717,7 @@ public final class Crooks {
 
 	/**
 	 * Something from {@code mark}'s pack or pockets (a villager's goods; a player's worn coin purse, or a handful of
-	 * coins, or half a stack), or a little purse. (0.7.497) The purse on a player's belt goes whole, at
+	 * coins, or half a stack), or a little purse. (0.7.498) The purse on a player's belt goes whole, at
 	 * {@link #PURSE_LIFT_CHANCE}.
 	 */
 	private static List<ItemStack> lift(LivingEntity mark, RandomSource random) {
@@ -763,11 +763,11 @@ public final class Crooks {
 				return List.of(taken);
 			}
 		}
-		// (0.7.497) a little purse in the coin of the land
+		// (0.7.498) a little purse in the coin of the land
 		return List.of(PurseContents.filled(Currencies.at(mark.level(), mark.blockPosition()), Money.worth(PURSE_MIN + random.nextInt(PURSE_MAX - PURSE_MIN + 1))));
 	}
 
-	/** (0.7.497) Night, or a crowd about {@code player}: the best time to lift a purse. */
+	/** (0.7.498) Night, or a crowd about {@code player}: the best time to lift a purse. */
 	private static boolean busy(ServerPlayer player) {
 		ServerLevel level = player.level();
 		if (night(level)) {
@@ -778,7 +778,7 @@ public final class Crooks {
 		return near >= CROWD_MIN;
 	}
 
-	/** (0.7.497) "12 Realm Silver, 3 Copper Bit" for lifted coins (a lifted purse as what it holds), else "2 Bread" for goods. */
+	/** (0.7.498) "12 Realm Silver, 3 Copper Bit" for lifted coins (a lifted purse as what it holds), else "2 Bread" for goods. */
 	private static Component describe(List<ItemStack> taken) {
 		java.util.EnumMap<Currency, Integer> coins = new java.util.EnumMap<>(Currency.class);
 		for (ItemStack stack : taken) {
@@ -799,7 +799,7 @@ public final class Crooks {
 		return Component.translatable("message.jaymoskingdoms.crook.goods", first.getCount(), first.getHoverName());
 	}
 
-	// (0.7.497) Old debts can still be in emeralds (a save from before coins): they are paid back as the emeralds taken.
+	// (0.7.498) Old debts can still be in emeralds (a save from before coins): they are paid back as the emeralds taken.
 
 	/** {@code crook} is behind {@code player}: the player's look and the line to the crook are well apart. */
 	private static boolean behind(ServerPlayer player, LivingEntity crook) {

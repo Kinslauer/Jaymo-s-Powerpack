@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (0.19.87) Money, when Jaymo's Kingdoms is loaded: a bridge (MethodHandles, so Powers never compiles against it) to
+ * (0.20.0) Money, when Jaymo's Kingdoms is loaded: a bridge (MethodHandles, so Powers never compiles against it) to
  * {@code com.jaymoskingdoms.money.Money}, which counts the culture coins (realm silver, hacksilver, dinars, shells, mon,
  * and the copper bit), the coin purses (the worn belt purse too) and bundles. Amounts are in milli, thousandths of an
  * emerald's worth ({@link #worth}: a price of "N emeralds" is {@code worth(N)}), and are paid and asked in the coin of the
@@ -30,7 +30,7 @@ public final class KingdomsMoney {
 	/** Milli in one emerald's worth (what "1" in an old price meant). */
 	public static final long UNIT = 1000L;
 	private static final Identifier SILVER_COIN = Identifier.fromNamespaceAndPath("jaymoskingdoms", "realm_silver");
-	/** (0.19.87) The ids (in Kingdoms' namespace) of what counts as money: the culture coins, the copper bit, the greenskins' bent copper, the purse. */
+	/** (0.20.0) The ids (in Kingdoms' namespace) of what counts as money: the culture coins, the copper bit, the greenskins' bent copper, the purse. */
 	private static final Set<String> MONEY_IDS = Set.of("coin_purse", "copper_coin", "realm_silver", "hacksilver", "gold_dinar", "shell_string",
 		"mon_coin", "bent_copper");
 
@@ -46,7 +46,7 @@ public final class KingdomsMoney {
 	}
 
 	/**
-	 * (0.19.87) Whether {@code stack} is Jaymo's Kingdoms money: one of the coins or the coin purse, by exact id (so realm silver
+	 * (0.20.0) Whether {@code stack} is Jaymo's Kingdoms money: one of the coins or the coin purse, by exact id (so realm silver
 	 * and the like are never taken for the metal their names say, e.g. by the melting gap log).
 	 */
 	public static boolean isMoney(ItemStack stack) {
@@ -197,7 +197,7 @@ public final class KingdomsMoney {
 		return text(milli);
 	}
 
-	/** (0.19.87) One coin of the land where {@code player} stands, to draw beside a price (realm silver if Kingdoms can't say, an emerald without it). */
+	/** (0.20.0) One coin of the land where {@code player} stands, to draw beside a price (realm silver if Kingdoms can't say, an emerald without it). */
 	public static ItemStack icon(ServerPlayer player) {
 		look();
 		if (coin != null) {

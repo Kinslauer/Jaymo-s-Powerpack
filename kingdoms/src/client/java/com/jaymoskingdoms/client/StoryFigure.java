@@ -101,7 +101,7 @@ final class StoryFigure {
 	}
 
 	static {
-		// (0.7.497) the merchant, the evicted and the trader hold a coin (realm silver) now, not an emerald
+		// (0.7.498) the merchant, the evicted and the trader hold a coin (realm silver) now, not an emerald
 		Item lh = Items.LEATHER_HELMET, lc = Items.LEATHER_CHESTPLATE, ll = Items.LEATHER_LEGGINGS, lb = Items.LEATHER_BOOTS;
 		// raised by
 		scene("raised.farmers", Act.WORK, Items.IRON_HOE, null, null, null, ll, lb);

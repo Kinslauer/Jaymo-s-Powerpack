@@ -175,12 +175,12 @@ public final class StarFolk {
 		return is(e) && ready();
 	}
 
-	/** (0.7.497) Whether the player can pay {@code count} of the unit in coin where they stand (foreign coin at its going rate less the cut). */
+	/** (0.7.498) Whether the player can pay {@code count} of the unit in coin where they stand (foreign coin at its going rate less the cut). */
 	private static boolean canPay(ServerPlayer player, int count) {
 		return Money.canPay(player, Money.worth(count));
 	}
 
-	/** (0.7.497) Takes {@code count} of the unit in coin, all or nothing; true if it was paid. */
+	/** (0.7.498) Takes {@code count} of the unit in coin, all or nothing; true if it was paid. */
 	private static boolean take(ServerPlayer player, int count) {
 		return Money.charge(player, Money.worth(count));
 	}
@@ -222,7 +222,7 @@ public final class StarFolk {
 		enabled.add(true);
 		ZFighterFolk.ask(player, speaker, words, options, enabled, pick -> {
 			if (sellsDust && pick == worlds.size()) {
-				// (0.7.497) the dust is handed over only once the coin is taken
+				// (0.7.498) the dust is handed over only once the coin is taken
 				if (!take(player, DUST_PRICE)) {
 					Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.short"), COLOR);
 					return;
@@ -236,7 +236,7 @@ public final class StarFolk {
 				return;
 			}
 			int world = worlds.get(pick);
-			// (0.7.497) the coin is taken first (all or nothing) and given back if the chart can't be sold
+			// (0.7.498) the coin is taken first (all or nothing) and given back if the chart can't be sold
 			if (!take(player, price(world))) {
 				Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.short"), COLOR);
 				return;

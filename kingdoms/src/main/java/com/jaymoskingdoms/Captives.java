@@ -497,7 +497,7 @@ public final class Captives {
 		boolean known = !Wars.enemy(player, home) && !Identities.hidden(player, home.id());
 		int bounty = known ? bounty(server, home, standing) : 0;
 		List<ItemStack> rewards = new ArrayList<>();
-		// (0.7.497) the family's purse and the realm's bounty are silver coins now
+		// (0.7.498) the family's purse and the realm's bounty are silver coins now
 		rewards.addAll(Money.stacks(Money.worth(purse + bounty)));
 		if (standing == GUARD) {
 			rewards.add(new ItemStack(GUARD_GIFTS.get(random.nextInt(GUARD_GIFTS.size()))));

@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
 import com.jaymoskingdoms.Currency;
 
 /**
- * (0.7.497) The coin purse: a leather bag that holds up to {@link PurseContents#PURSE_MOST} coins in its
+ * (0.7.498) The coin purse: a leather bag that holds up to {@link PurseContents#PURSE_MOST} coins in its
  * {@code jaymoskingdoms:coins} component, of any mix of the realms' coins and copper bits (not emeralds, nor the
  * greenskins' or pirates' coins). Worn in Jaymo's Powers' belt slot it hangs on the hip (and a pickpocket can lift
  * the whole thing); in a pack it is safer but pays second. Use it to pour every loose coin you carry into it; sneak

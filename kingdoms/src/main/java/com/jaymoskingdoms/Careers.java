@@ -98,7 +98,7 @@ public final class Careers {
 	public static final int JOURNEYMAN_XP = 100, MASTER_XP = 350;
 	/** Experience and reputation an order earns. */
 	static final int ORDER_XP = 10, ORDER_REPUTATION = 3;
-	/** (0.7.497) An order pays this much by rank (Apprentice, Journeyman, Master), and the least a poor town pays one: in emeralds' worth, paid in the town's coin. */
+	/** (0.7.498) An order pays this much by rank (Apprentice, Journeyman, Master), and the least a poor town pays one: in emeralds' worth, paid in the town's coin. */
 	static final int[] WAGES = {2, 3, 5};
 	static final int WAGE_FLOOR = 1;
 	/** Each other job held at once takes this off every order's wage (never below the floor). */
@@ -814,7 +814,7 @@ public final class Careers {
 				continue;
 			}
 			int owed = p.done() * wage(server, f, p.kind(), rank, held) + (apprentice ? APPRENTICE_CUT : 0);
-			// (0.7.497) wages are paid in the coin of the settlement (silver where it keeps emeralds), out of the same coin and bits in
+			// (0.7.498) wages are paid in the coin of the settlement (silver where it keeps emeralds), out of the same coin and bits in
 			// its storehouse; its emeralds and other realms' coins are the reserve, counted at worth and paid out as the town's coin
 			Currency money = Currencies.of(server, f);
 			if (!money.money()) {
@@ -837,7 +837,7 @@ public final class Careers {
 				int got = Storage.take(store, f, x.item(), (int)Math.min(Integer.MAX_VALUE, want)).getCount();
 				reserve += (long)got * x.base;
 			}
-			// (0.7.497) no bits stocked: break one more of the town's own coin for the change, and put what is left over back
+			// (0.7.498) no bits stocked: break one more of the town's own coin for the change, and put what is left over back
 			long lack = owedMilli - storeMilli - reserve;
 			if (lack > 0L && due.bits() > 0L && bitsStore < due.bits()) {
 				int more = (int)Math.min(Integer.MAX_VALUE, (lack + money.base - 1L) / money.base);
@@ -937,7 +937,7 @@ public final class Careers {
 			if (!money.money()) {
 				money = Currency.SILVER;
 			}
-			// (0.7.497) whole coins, and the change in bits
+			// (0.7.498) whole coins, and the change in bits
 			Currencies.Pay coins = Currencies.pay(money, Money.worth(earned));
 			for (ItemStack each : coins.stacks()) {
 				ItemStack pay = each;
@@ -1268,7 +1268,7 @@ public final class Careers {
 		}
 	}
 
-	/** (0.7.497) A fare or a bonus of {@code worth} emeralds' worth, paid in the coin of the land they stand in. */
+	/** (0.7.498) A fare or a bonus of {@code worth} emeralds' worth, paid in the coin of the land they stand in. */
 	private static void fare(ServerPlayer player, int worth, String message) {
 		if (worth > 0) {
 			Money.pay(player, Money.worth(worth));

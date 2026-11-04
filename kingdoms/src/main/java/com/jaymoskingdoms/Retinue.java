@@ -503,7 +503,7 @@ final class Retinue {
 		}
 	}
 
-	/** (0.7.497) Takes {@code n} silver coins' worth from {@code p} if they have that much. */
+	/** (0.7.498) Takes {@code n} silver coins' worth from {@code p} if they have that much. */
 	private static boolean takeSilver(ServerPlayer p, int n) {
 		return Money.charge(p, Money.worth(n));
 	}

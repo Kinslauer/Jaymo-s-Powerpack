@@ -42,7 +42,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Attention.register();
 		// 0.5.21: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
 		Professions.register();
-		// (0.7.497) the copper bit and the coin purse (the realms' coins are Currencies')
+		// (0.7.498) the copper bit and the coin purse (the realms' coins are Currencies')
 		com.jaymoskingdoms.money.MoneyItems.register();
 		McaCompat.register();
 		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
@@ -72,7 +72,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Awareness.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
-		// (0.7.497) the emeralds in chests, mob drops and hero gifts become silver coins
+		// (0.7.498) the emeralds in chests, mob drops and hero gifts become silver coins
 		LootSwap.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> com.jaymoskingdoms.forms.FormsCommands.register(dispatcher));
@@ -236,6 +236,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.234: locked loot chests and the Pin and Rotary lockpicking games (and its attachment)
 		LOGGER.debug("lock attachment: {}", Lockpicking.LOCK);
 		Lockpicking.register();
+		// (0.7.497) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
+		LOGGER.debug("locks attachments: {} {} {}", Locks.LOCKS, Locks.WORN_KEYS, NightLocks.INDEX);
+		Locks.register();
+		NightLocks.register();
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
@@ -482,7 +486,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		SharedHistory.register();
 		// (0.7.454) asking the way in town
 		Directions.register();
-		// (0.7.497) emeralds or coin: asked, and said unasked
+		// (0.7.498) emeralds or coin: asked, and said unasked
 		MoneyTalk.register();
 		Rescues.register();
 		// 0.7.186: every humanoid's own temperament (and its attachment)

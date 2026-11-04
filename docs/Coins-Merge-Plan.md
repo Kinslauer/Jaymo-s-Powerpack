@@ -11,7 +11,7 @@ keepers; our purses (belt slot, hip, theft), MoneyTalk, keepers and Kitchen pay 
 Defaults (tell Andy, he can change): one universal small coin, the copper bit; foreign realm coin taken at a 10% cut
 outside the trade screen; changer buys emeralds at 90%; no Coin Press for now.
 
-Versions: Kingdoms 0.7.497, Powers 0.19.87, Kitchen 0.5.56 (renumber our "(0.7.487)", "(0.19.74)", "(0.5.54)" tags).
+Versions: Kingdoms 0.7.498, Powers 0.20.0, Kitchen 0.5.56 (renumber our "(0.7.487)", "(0.19.74)", "(0.5.54)" tags).
 
 ## Findings
 - Conflicts (git merge origin/master): MODLOG.md, gradle.properties, kingdoms/MODLOG.md, kingdoms/gradle.properties,

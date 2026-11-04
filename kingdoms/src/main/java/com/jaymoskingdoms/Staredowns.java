@@ -313,7 +313,7 @@ final class Staredowns {
 		long paid = pay;
 		TRIBUTE_READY.put(f.id(), now + TRIBUTE_TICKS);
 		Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - paid)));
-		// (0.7.497) the tribute is silver coins (the treasury counts silver)
+		// (0.7.498) the tribute is silver coins (the treasury counts silver)
 		Money.pay(sp, Money.worth(paid));
 		Reputation.change(sp, f, REP_TRIBUTE);
 		say(level, ruler, "tribute");

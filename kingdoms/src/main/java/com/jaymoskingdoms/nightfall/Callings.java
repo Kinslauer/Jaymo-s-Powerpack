@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * Sneaking passes, so the villager's own screen is still there.
  */
 final class Callings {
-	/** What a calling sells for (emeralds' worth in coin, (0.7.497)), and how many it gives. */
+	/** What a calling sells for (emeralds' worth in coin, (0.7.498)), and how many it gives. */
 	static final int IMMUNITY_PRICE = 6, DRIED_MEAT_PRICE = 2, DRIED_MEAT_COUNT = 3, CARD_PRICE = 12, LUTE_PRICE = 10;
 	/** What it pays (emeralds' worth in coin): the Slaughter for this many red foods, the Chronicler for a book, the Bard for a disc. */
 	static final int RED_FOOD_PER_EMERALD = 4, BOOK_PAYS = 1, DISC_PAYS = 3;

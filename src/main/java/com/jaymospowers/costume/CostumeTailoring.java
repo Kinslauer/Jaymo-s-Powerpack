@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * {@code /costume tailor <player> <price> [<tailor>]} as the server; that opens the designer in its paid mode
  * ({@link Open}) and keeps an order here. Sewing it ({@link Sew}) is checked against the order: still open
  * ({@link #ORDER_TICKS}), the tailor still alive and near ({@link #TAILOR_REACH}), the design one you may sew
- * ({@link CostumeSets}), and the money you carry ((0.19.87) coins, purses and bundles, through {@link KingdomsMoney}, which
+ * ({@link CostumeSets}), and the money you carry ((0.20.0) coins, purses and bundles, through {@link KingdomsMoney}, which
  * falls back to emeralds one for one without Jaymo's Kingdoms; free in creative). One costume per order. The price is in
  * emeralds' worth, which is paid in the coin of the land.
  */
@@ -55,7 +55,7 @@ public final class CostumeTailoring {
 	private static final Map<UUID, Order> ORDERS = new ConcurrentHashMap<>();
 
 	/**
-	 * Server → client: open the designer for a tailor to sew, at {@code price} emeralds' worth (paid in coin). (0.19.87) The cost line is
+	 * Server → client: open the designer for a tailor to sew, at {@code price} emeralds' worth (paid in coin). (0.20.0) The cost line is
 	 * made here, as the client can't count a purse or know the coin of the land: {@code cost} is the price in that coin ("20 Realm Silver"),
 	 * {@code coin} one of it to draw beside, and {@code affordable} whether {@link KingdomsMoney#charge} would take it right now.
 	 */
@@ -107,7 +107,7 @@ public final class CostumeTailoring {
 			return 0;
 		}
 		ORDERS.put(player.getUUID(), new Order(price, tailor != null ? tailor.getUUID() : null, player.level().getGameTime()));
-		// (0.19.87) the price in the coin of the land, with the answer to "can they pay it" from the same rule the charge uses
+		// (0.20.0) the price in the coin of the land, with the answer to "can they pay it" from the same rule the charge uses
 		long milli = KingdomsMoney.worth(price);
 		ServerPlayNetworking.send(player, new Open(price, KingdomsMoney.text(player, milli), KingdomsMoney.icon(player), KingdomsMoney.canPay(player, milli)));
 		return 1;

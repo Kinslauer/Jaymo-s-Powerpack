@@ -539,7 +539,7 @@ public final class Skills {
 		if (!Money.canPay(player, Money.worth(price))) {
 			return true;
 		}
-		Money.charge(player, Money.worth(price)); // (0.7.497) silver coins, not emeralds
+		Money.charge(player, Money.worth(price)); // (0.7.498) silver coins, not emeralds
 		respec(player);
 		ServerLevel level = (ServerLevel) player.level();
 		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.respec.done"), Speech.GOLD);

@@ -76,7 +76,7 @@ import org.jspecify.annotations.Nullable;
  * piece coming back Cinder-forged (fire protection, unbreaking) for blaze rods.</li>
  * <li><b>Finding him:</b> smiths in the Overworld (armourers, weaponsmiths, toolsmiths) now and then pass on the rumour as
  * you talk to them, in a speech bubble, never in chat ({@link #RUMOURS}); one who has told you sells a Charred
- * Wayfinder for {@link #WAYFINDER_PRICE} emeralds' worth in coin (0.7.497; sneak and use them with coins or a purse in hand). The wayfinder is a
+ * Wayfinder for {@link #WAYFINDER_PRICE} emeralds' worth in coin (0.7.498; sneak and use them with coins or a purse in hand). The wayfinder is a
  * compass: in the Overworld it points where a portal should go (the forge's spot times eight), in the Nether at the
  * forge itself. The first time you set foot in the Nether, your next Tidings carries word of it too.</li>
  * </ul>
@@ -90,7 +90,7 @@ public final class CinderForge {
 	static final double BUILD_RANGE = 96.0;
 	/** Ticks between his restocks (a week), and before he comes back if he's gone (a day). */
 	static final long RESTOCK_TICKS = 24000L * 7L, RETURN_TICKS = 24000L;
-	/** The Writ: emeralds (set in coin when the trade opens, (0.7.497): {@link com.jaymoskingdoms.Currencies#localize}) and netherite scrap. */
+	/** The Writ: emeralds (set in coin when the trade opens, (0.7.498): {@link com.jaymoskingdoms.Currencies#localize}) and netherite scrap. */
 	static final int WRIT_EMERALDS = 40, WRIT_SCRAP = 2;
 	/** Reforging a piece: blaze rods, and what it comes back with. */
 	static final int REFORGE_RODS = 4, REFORGE_FIRE_PROTECTION = 3, REFORGE_UNBREAKING = 2, REFORGE_USES = 2;

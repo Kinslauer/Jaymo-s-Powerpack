@@ -96,7 +96,7 @@ public final class Restoration {
 	static final float SCROLL_LOOT_CHANCE = 0.08F;
 
 	// ---- the healers ----
-	/** (0.7.497) A healer's prices (emeralds' worth, asked in the town's coin: {@link Money#text}): mending your wounds, a Scroll of Mending, a Scroll of Restoration. */
+	/** (0.7.498) A healer's prices (emeralds' worth, asked in the town's coin: {@link Money#text}): mending your wounds, a Scroll of Mending, a Scroll of Restoration. */
 	static final int HEAL_EMERALDS = 3, MENDING_SCROLL_EMERALDS = 4, RESTORATION_SCROLL_EMERALDS = 24;
 	/** At or over this a court wizard's realm mends you free and sets your bones; at or over the next he'll sell a Restoration. */
 	static final int FRIEND_REP = 100, HONOURED_REP = 400;
@@ -169,7 +169,7 @@ public final class Restoration {
 				lifebloom(level, player);
 			}
 		});
-		// a village cleric: sneak and use them (empty-handed, or with coins or a purse in hand) (0.7.497)
+		// a village cleric: sneak and use them (empty-handed, or with coins or a purse in hand) (0.7.498)
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !sp.isShiftKeyDown()
 				|| !(entity instanceof Villager v) || !cleric(v) || CourtWizards.is(v)
@@ -647,7 +647,7 @@ public final class Restoration {
 	}
 
 	static boolean optionOpen(ServerPlayer player, String kind) {
-		// (0.7.497) what the coins carried are worth here (foreign coins at a cut), not their face
+		// (0.7.498) what the coins carried are worth here (foreign coins at a cut), not their face
 		return switch (kind) {
 			case "heal" -> Money.canPay(player, Money.worth(HEAL_EMERALDS)) && hurt(player);
 			case "treatment" -> Healing.needsTreatment(player) && Money.canPay(player, Money.worth(Healing.treatmentPrice(player)));

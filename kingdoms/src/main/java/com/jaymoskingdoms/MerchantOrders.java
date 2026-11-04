@@ -80,7 +80,7 @@ final class MerchantOrders {
 	/** Merchants this near the board (blocks) are in its catalog; the most wares shown. */
 	static final double CATALOG_RANGE = 64.0;
 	static final int MOST_WARES = 60;
-	/** (0.7.497) Most coins a ware is asked in (a stack): over it in the town's coin it is asked in copper bits, and over it in bits it is not listed. */
+	/** (0.7.498) Most coins a ware is asked in (a stack): over it in the town's coin it is asked in copper bits, and over it in bits it is not listed. */
 	static final int ORDER_MOST_COINS = 64;
 	/** How long (ticks) a merchant takes to make an order up; how long it waits on an unloaded town before the post takes it. */
 	static final long PREP = 1200L, POST_AFTER = 6000L;
@@ -265,11 +265,11 @@ final class MerchantOrders {
 		List<Ware> out = new ArrayList<>();
 		// (0.7.385) lower while a pod stands in the town's landing yard
 		float factor = LandingYard.tradeFactor(level, town(level, anchor));
-		// (0.7.497) priced in the coin of the town whose board it is (silver where it keeps emeralds)
+		// (0.7.498) priced in the coin of the town whose board it is (silver where it keeps emeralds)
 		Currency coin = coinOf(level, town(level, anchor));
 		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(anchor).inflate(CATALOG_RANGE),
 			v -> v.isAlive() && !v.isBaby() && !Downed.isDowned(v))) {
-			// (0.7.497) a keeper still deals in emeralds, which the board does not take
+			// (0.7.498) a keeper still deals in emeralds, which the board does not take
 			if (v.getVillagerData().profession().is(VillagerProfession.NONE) || v.getVillagerData().profession().is(VillagerProfession.NITWIT) || Currencies.keeper(v)) {
 				continue;
 			}
@@ -285,7 +285,7 @@ final class MerchantOrders {
 				if (priced == null || !priced.human()) {
 					continue;
 				}
-				// (0.7.497) the offer's whole worth (a price in the town's coin may have copper bits in the second slot, or be
+				// (0.7.498) the offer's whole worth (a price in the town's coin may have copper bits in the second slot, or be
 				// still in emeralds if the merchant has not been traded with yet), asked as one coin of the town: the town's own if that
 				// comes near the worth, else the copper bit; too dear for a stack of either is not listed
 				long worth = (long)asked * priced.base;
@@ -327,7 +327,7 @@ final class MerchantOrders {
 		return Factions.around(level.getServer(), level, anchor, Couriers.REALM_RANGE);
 	}
 
-	/** (0.7.497) The coin {@code town} pays and asks in: its own, or realm silver where it has none or keeps emeralds. */
+	/** (0.7.498) The coin {@code town} pays and asks in: its own, or realm silver where it has none or keeps emeralds. */
 	private static Currency coinOf(ServerLevel level, @Nullable Faction town) {
 		Currency c = Currencies.of(level.getServer(), town);
 		return c.money() ? c : Currency.SILVER;
@@ -485,7 +485,7 @@ final class MerchantOrders {
 
 	private static QuestNet.View wantView(ServerLevel level, ServerPlayer player, OffWorldGoods.Good g, Ledger ledger, long today) {
 		BlockPos anchor = READING.getOrDefault(player.getUUID(), BlockPos.ZERO);
-		// (0.7.497) paid in the town's coin
+		// (0.7.498) paid in the town's coin
 		Currency coin = coinOf(level, town(level, anchor));
 		Currencies.Pay pay = Currencies.payEmeralds(coin, g.emeralds());
 		int count = wanted(g, anchor, today);
@@ -540,7 +540,7 @@ final class MerchantOrders {
 			// a full storehouse hands the rest back rather than losing it
 			player.drop(left, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
-		// (0.7.497) whole coins of the town, and the change in bits, into the worn purse or the pack
+		// (0.7.498) whole coins of the town, and the change in bits, into the worn purse or the pack
 		Currencies.give(player, Currencies.payEmeralds(coinOf(level, town), g.emeralds()));
 		player.setAttached(LEDGER, ledger.bought(WANT + key, today, 1, FAR_STANDING_XP));
 		Post.aside(player.getUUID(), Component.translatable("orders.jaymoskingdoms.tidings.want", town.name(), worldName(g)));
@@ -570,7 +570,7 @@ final class MerchantOrders {
 		return parcel.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().toList();
 	}
 
-	/** (0.7.497) Takes {@code price} of {@code coin} out of {@code player}'s pack, purses and bundles too, if they have that many. */
+	/** (0.7.498) Takes {@code price} of {@code coin} out of {@code player}'s pack, purses and bundles too, if they have that many. */
 	private static boolean pay(ServerPlayer player, Currency coin, int price) {
 		return Money.chargeCoin(player, coin, price);
 	}
@@ -582,7 +582,7 @@ final class MerchantOrders {
 		}
 		remove(level.getServer(), id);
 		player.setAttached(LEDGER, ledger(player).bought(o.ware(), Quests.day(level), -1, -o.xp()));
-		// (0.7.497) a coin comes back as that coin; an old order paid in emeralds comes back as the town's coin, worth for worth
+		// (0.7.498) a coin comes back as that coin; an old order paid in emeralds comes back as the town's coin, worth for worth
 		if (o.currency() == Currency.EMERALD) {
 			MinecraftServer server = level.getServer();
 			Currencies.give(player, Currencies.pay(coinOf(level, Factions.get(server, o.townId())), o.paid() * 1000L));

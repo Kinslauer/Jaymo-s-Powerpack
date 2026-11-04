@@ -60,7 +60,7 @@ public final class TailorCostumes {
 				Speech.tell(level, villager, player, Component.translatable("tailor.jaymoskingdoms.table_cant_pay", price), Speech.WHITE);
 				return;
 			}
-			Money.charge(player, Money.worth(price)); // (0.7.497)
+			Money.charge(player, Money.worth(price)); // (0.7.498)
 		}
 		player.getInventory().placeItemBackInInventory(new ItemStack(table.get()), Prediction.SERVER_ONLY);
 		Speech.tell(level, villager, player, Component.translatable("tailor.jaymoskingdoms.table_sold", price), Speech.WHITE);

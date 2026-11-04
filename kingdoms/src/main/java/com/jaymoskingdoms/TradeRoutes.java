@@ -864,7 +864,7 @@ final class TradeRoutes {
 				}
 				long tip = spend(level, home, ESCORT_TIP);
 				if (tip > 0L) {
-					// (0.7.497) the tip is paid in the home town's coin (the treasury is counted in worth)
+					// (0.7.498) the tip is paid in the home town's coin (the treasury is counted in worth)
 					Money.pay(p, home, Money.worth(tip));
 				}
 				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.escorted", home.name(), lord.name()).withStyle(ChatFormatting.GREEN));
@@ -874,7 +874,7 @@ final class TradeRoutes {
 
 	/**
 	 * A player with coin in hand (a coin, a stack or a purse) right-clicks a cart: he buys what it carries, a handful at a time, at a
-	 * markup, paid in the cart owner's coin out of everything he carries (0.7.497; emeralds are a gem and buy nothing). True if that
+	 * markup, paid in the cart owner's coin out of everything he carries (0.7.498; emeralds are a gem and buy nothing). True if that
 	 * was what he did (or was refused); false to let it be looked at.
 	 */
 	static boolean deal(ServerLevel level, Wagon wagon, ServerPlayer player) {
@@ -914,7 +914,7 @@ final class TradeRoutes {
 			return true;
 		}
 		long unit = Math.max(1L, (long)Ware.unit(new ItemStack(item)) * MARKUP / 100L);
-		// (0.7.497) what he can pay, in whole emeralds' worth (the price notation), in the coin the cart's owner takes
+		// (0.7.498) what he can pay, in whole emeralds' worth (the price notation), in the coin the cart's owner takes
 		long have = player.hasInfiniteMaterials() ? Integer.MAX_VALUE : Money.count(player, f) / Money.UNIT;
 		long n = Math.min(Math.min(pick.getValue(), BUY_MOST), have * COPPER_PER_EMERALD / unit);
 		long cost = (n * unit + COPPER_PER_EMERALD - 1) / COPPER_PER_EMERALD;

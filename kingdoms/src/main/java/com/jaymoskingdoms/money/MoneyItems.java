@@ -12,7 +12,7 @@ import net.minecraft.world.item.Item;
 import com.jaymoskingdoms.JaymosKingdoms;
 
 /**
- * (0.7.497) What the money package registers: the copper bit (the small change every trader takes, the coin
+ * (0.7.498) What the money package registers: the copper bit (the small change every trader takes, the coin
  * {@code jaymoskingdoms:copper_coin} of the first coinage, renamed in the lang file) and the coin purse with its
  * {@code jaymoskingdoms:coins} component. The realms' own coins are {@link com.jaymoskingdoms.Currencies}'; the
  * economy itself is {@link Money}.

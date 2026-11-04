@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import com.jaymoskingdoms.money.Money;
 
 /**
- * (0.7.497) Coins for emeralds in the loot of the world. Emeralds are a gem now and the kingdoms' money is the coin, so
+ * (0.7.498) Coins for emeralds in the loot of the world. Emeralds are a gem now and the kingdoms' money is the coin, so
  * the emeralds in found loot (vanilla's and every other mod's chests, mob drops and the village heroes' gifts) are
  * struck into the coin of the land where they were found, an emerald's worth for each ({@link Money#stacks}: the realm
  * coin of the settlement around, with copper bits for the change; silver where there is none). Only the tables under
@@ -49,7 +49,7 @@ public final class LootSwap {
 		if (table.unwrapKey().filter(LootSwap::swaps).isEmpty()) {
 			return;
 		}
-		// (0.7.497) every emerald becomes coins of the land where it was found
+		// (0.7.498) every emerald becomes coins of the land where it was found
 		Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
 		List<ItemStack> out = new ArrayList<>();
 		for (ItemStack drop : drops) {

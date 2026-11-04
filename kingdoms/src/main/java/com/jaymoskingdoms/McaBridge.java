@@ -422,7 +422,7 @@ final class McaBridge {
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
 	}
 
-	/** (0.7.497) {@code v}'s job is one MCA keeps from trading (guards, archers, outlaws, mercenaries, our workers). */
+	/** (0.7.498) {@code v}'s job is one MCA keeps from trading (guards, archers, outlaws, mercenaries, our workers). */
 	static boolean cannotTrade(Villager v) {
 		return v.getVillagerData().profession().unwrapKey().map(ProfessionsMCA.CAN_NOT_TRADE::contains).orElse(false);
 	}

@@ -60,7 +60,7 @@ public final class Drifters {
 	static final float TAVERN_CHANCE = 0.6F;
 	/** On a road: how many route points from the settlement's end they stand (at least, and up to this much more). */
 	static final int ROAD_MIN = 24, ROAD_MORE = 40;
-	/** (0.7.497) Emeralds' worth in coin to hire one (MCA's is 5 for a short contract), how long they're hired for (ticks; MCA's long contract), the least hearts they take to you ({@link #keptHearts} raises it to what MCA needs to keep them). */
+	/** (0.7.498) Emeralds' worth in coin to hire one (MCA's is 5 for a short contract), how long they're hired for (ticks; MCA's long contract), the least hearts they take to you ({@link #keptHearts} raises it to what MCA needs to keep them). */
 	static final int HIRE_COST = 2, HIRED_TICKS = 168000, HIRE_HEARTS = 30;
 	/** What they start with (a villager's is 20 and 1). */
 	static final double HEALTH = 8.0, DAMAGE = 1.0;
@@ -236,7 +236,7 @@ public final class Drifters {
 		}
 	}
 
-	/** (0.7.497) A coin or a coin purse in the main hand, used on an unhired drifter, hires them (the coin comes from everything carried). */
+	/** (0.7.498) A coin or a coin purse in the main hand, used on an unhired drifter, hires them (the coin comes from everything carried). */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, Entity entity, net.minecraft.world.phys.@Nullable EntityHitResult hit) {
 		if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND || sp.isSpectator()
 			|| !unhired(entity) || !Coinage.isMoney(sp.getMainHandItem())) {

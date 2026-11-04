@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.497) Opening their trades, villagers and wandering traders speak of coin or emeralds
+ * (0.7.498) Opening their trades, villagers and wandering traders speak of coin or emeralds
  * ({@link com.jaymoskingdoms.MoneyTalk#tradeOpened}). A villager's offers are priced in coin when it updates its special
  * prices ({@link VillagerPriceMixin}); a merchant that is no villager (the wandering trader) has no such step, so its offers
  * are priced here instead: both call {@code setTradingPlayer} before {@code openTradingScreen} sends the offers

@@ -669,7 +669,7 @@ public final class ZFighterAfterlife {
 				KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
 			return;
 		}
-		// (0.19.87) the silver comes from anywhere you carry it (coins, purses, bundles), no longer only the held stack
+		// (0.20.0) the silver comes from anywhere you carry it (coins, purses, bundles), no longer only the held stack
 		if (!KingdomsMoney.charge(player, KingdomsMoney.worth(PRICE_SILVER))) {
 			ZFighterTraining.Data data = ZFighterTraining.of(player);
 			if (data.tp() < PRICE_TP) {

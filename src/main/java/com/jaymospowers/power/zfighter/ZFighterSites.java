@@ -425,7 +425,7 @@ public final class ZFighterSites {
 		level.addFreshEntity(npc);
 	}
 
-	/** The hermit's wares. (0.19.87) The emerald cost is only the price table: the count is the price in silver (see {@link #hermitTalk}). */
+	/** The hermit's wares. (0.20.0) The emerald cost is only the price table: the count is the price in silver (see {@link #hermitTalk}). */
 	private static MerchantOffers hermitOffers() {
 		MerchantOffers offers = new MerchantOffers();
 		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, 12), new ItemStack(ZFighterItems.HERMIT_BEAN), 999, 0, 0.0F));
@@ -447,7 +447,7 @@ public final class ZFighterSites {
 				() -> ZFighterNpcs.reply(player, keeper, () -> ZFighterSagas.speak(player, keeper, true), back))));
 	}
 
-	/** The Hermit's talk: his wares for silver coins (he no longer keeps a trader's stall). (0.19.87) Was emeralds; prices unchanged, 1 silver = 1 old emerald. */
+	/** The Hermit's talk: his wares for silver coins (he no longer keeps a trader's stall). (0.20.0) Was emeralds; prices unchanged, 1 silver = 1 old emerald. */
 	static void hermitTalk(ServerPlayer player, LivingEntity hermit) {
 		List<ZFighterNpcs.Option> options = new ArrayList<>();
 		for (MerchantOffer offer : hermitOffers()) {
@@ -460,7 +460,7 @@ public final class ZFighterSites {
 	}
 
 	private static void buy(ServerPlayer player, LivingEntity hermit, ItemStack ware, int price) {
-		// (0.19.87) paid through KingdomsMoney (coins, purses and bundles; a creative player pays nothing)
+		// (0.20.0) paid through KingdomsMoney (coins, purses and bundles; a creative player pays nothing)
 		if (!KingdomsMoney.charge(player, KingdomsMoney.worth(price))) {
 			ZFighterNpcs.ask(player, hermit, Component.translatable("talk.jaymospowers.hermit.poor", KingdomsMoney.text(player, KingdomsMoney.worth(price))),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, () -> hermitTalk(player, hermit))));

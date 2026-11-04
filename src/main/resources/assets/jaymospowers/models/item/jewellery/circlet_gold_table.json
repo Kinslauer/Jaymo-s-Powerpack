@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/jewellery/circlet_frame_gold",
+    "layer1": "jaymospowers:item/jewellery/circlet_gem_table"
+  }
+}

@@ -91,7 +91,7 @@ public final class Underworld {
 	static final int START_HEAT = 0, HEAT_PER_SALE = 1, HEAT_PER_DAY = 2, HEAT_PER_BUST = -8, DICE_HEAT = 10, KNOWN_HEAT = 40, MAX_HEAT = 100;
 	/** One dice game in this many warms the city a point. */
 	static final int GAMES_PER_HEAT = 4;
-	/** The fence's prices in emeralds (the den's own make, the other city's), and how many a day: Pmeh. (0.7.497) Set in the town's coin when a trade opens ({@link Currencies#localize}). */
+	/** The fence's prices in emeralds (the den's own make, the other city's), and how many a day: Pmeh. (0.7.498) Set in the town's coin when a trade opens ({@link Currencies#localize}). */
 	static final int PMEH_SELL_HOME = 3, PMEH_SELL_AWAY = 12, PMEH_BUY_HOME = 2, PMEH_BUY_AWAY = 8;
 	/** The same for a Shash brick. */
 	static final int SHASH_SELL_HOME = 7, SHASH_SELL_AWAY = 24, SHASH_BUY_HOME = 4, SHASH_BUY_AWAY = 16;
@@ -976,7 +976,7 @@ public final class Underworld {
 			return;
 		}
 		DICE_NEXT.put(player.getUUID(), now + DICE_COOLDOWN);
-		// (0.7.497) the stake is coin out of the coins or purse in hand (or the pack, behind them), up to MOST_WAGER, in emeralds' worth
+		// (0.7.498) the stake is coin out of the coins or purse in hand (or the pack, behind them), up to MOST_WAGER, in emeralds' worth
 		// (no more than the player can really pay here: foreign coins count for less)
 		int wager = (int)Math.min(Math.min(Coinage.held(player.getMainHandItem()), Money.count(player, (Faction)null)) / Money.UNIT, MOST_WAGER);
 		if (wager < 1 || !Money.charge(player, Money.worth(wager))) {

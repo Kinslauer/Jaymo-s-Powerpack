@@ -1,4 +1,4 @@
-# Coins replace emeralds: the design as built (Kingdoms 0.7.497, Powers 0.19.87, Kitchen 0.5.56)
+# Coins replace emeralds: the design as built (Kingdoms 0.7.498, Powers 0.20.0, Kitchen 0.5.56)
 
 Andy's asks, in order: "Coins replace emeralds" (emeralds become a gem sold to a money changer); "Diversify the
 currencies, it can change based on the prominent trading hub's currency"; "some you come across will still trade in

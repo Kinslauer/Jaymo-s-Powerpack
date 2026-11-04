@@ -79,7 +79,7 @@ public final class Garlic {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TRIED.clear());
 	}
 
-	/** Whether {@code stack} is garlic or silver. (0.7.497) Not the realms' coins: realm silver and hacksilver are money, not the metal. */
+	/** Whether {@code stack} is garlic or silver. (0.7.498) Not the realms' coins: realm silver and hacksilver are money, not the metal. */
 	static boolean bane(ItemStack stack) {
 		if (stack.isEmpty()) {
 			return false;

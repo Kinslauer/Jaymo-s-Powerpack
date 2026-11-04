@@ -129,6 +129,15 @@ Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithT
 - The three arrows are in the `minecraft:arrows` tag, so every bow, crossbow and dispenser takes them. Textures:
   `tools/gen_fletching.py`.
 
+## Jewellery (code: `jewellery/`, docs/Jewellery-Plan.md)
+
+1. **Frames.** Lay hot gold, silver or copper ingots on a Smithing Anvil, hammer to open the forge screen and pick a Ring Frame (1 ingot), Bracelet Frame (2), Amulet Frame (2) or Circlet Frame (3). Hammer it out like a head. It comes off hot: quench it in water, or it loses a grade cooling in the air. A Blueprint for the frame's shape raises the cap above Expertly Forged, as for weapons.
+2. **Cutting.** Place a Lapidary Wheel. Use it holding a cuttable gem to lay one gem on it. Use it again (empty hand or anything else) to choose a cut: Cabochon (3 strokes), Table (4), Rose (5) or Brilliant (6). The bar from the anvil appears under the crosshair: use the wheel when the arrow is in the zone. Each stroke spins the wheel down for 0.8 s (the bar dims). A stroke while it is dimmed chips the gem and costs the finished cut one grade. When the last stroke lands, the cut gem sits on the wheel; use the wheel to take it. Once a cut has started, the gem can't come off until it's finished. Walking away pauses it.
+3. **Setting.** At a Jeweller's Bench put a cooled frame in the left slot and a cut gem in the middle. The piece appears on the right. Its grade is the lower of the frame's and the gem's.
+4. **Wearing.** Rings go in either ring slot, amulets in the amulet slot, circlets on the head, bracelets in the new Wrist slot. Each gives a small bonus decided by its gem, grade, cut, metal and frame.
+5. **Orders.** Town armourers, weaponsmiths and toolsmiths sometimes ask for a gem amulet, ring or bracelet of at least a given grade, and pay more than for their usual errands.
+6. The seven found baubles and the lantern pole are unchanged.
+
 ## Known limits
 - The hammer game is judged by the smith's own client (the server can't see the bouncing arrow); the server checks reach,
   the blow rate, the hammer and the anvil and tier rules on every blow, but a tampered client could claim perfect blows.

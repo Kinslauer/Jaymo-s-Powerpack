@@ -90,17 +90,17 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 
 	/**
 	 * What it pays: coins (the codec key stays {@code emeralds} so old saved quests still read, and counts an emerald's
-	 * worth now, paid in the giver's realm coin; (0.7.497) an optional {@code copper} adds copper bits); items as {@code id*count}; an enchanted book as {@code enchantment id@level}; a relic as
+	 * worth now, paid in the giver's realm coin; (0.7.498) an optional {@code copper} adds copper bits); items as {@code id*count}; an enchanted book as {@code enchantment id@level}; a relic as
 	 * {@code passive@base item id} ({@link Relics}); MCA hearts with the giver; reputation with their settlement; standing
 	 * (for its members).
 	 */
 	public record Reward(int emeralds, List<String> items, Optional<String> book, Optional<String> relic, int hearts, int reputation, int standing, int copper) {
-		/** (0.7.497) The old shape: worth only. */
+		/** (0.7.498) The old shape: worth only. */
 		public Reward(int emeralds, List<String> items, Optional<String> book, Optional<String> relic, int hearts, int reputation, int standing) {
 			this(emeralds, items, book, relic, hearts, reputation, standing, 0);
 		}
 
-		/** (0.7.497) What the coins come to, in milli: the {@code emeralds} field read as worth (an emerald's worth each), the {@code copper} field as copper bits. */
+		/** (0.7.498) What the coins come to, in milli: the {@code emeralds} field read as worth (an emerald's worth each), the {@code copper} field as copper bits. */
 		public long milli() {
 			return com.jaymoskingdoms.money.Money.worth(this.emeralds) + (long)this.copper * Currency.BIT.base;
 		}

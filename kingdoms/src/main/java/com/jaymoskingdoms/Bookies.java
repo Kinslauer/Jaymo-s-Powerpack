@@ -179,7 +179,7 @@ final class Bookies {
 	}
 
 	/**
-	 * (0.7.497) The worth, in whole emeralds' worth ({@link Money#UNIT}), of the coins or coin purse in {@code player}'s hand
+	 * (0.7.498) The worth, in whole emeralds' worth ({@link Money#UNIT}), of the coins or coin purse in {@code player}'s hand
 	 * ({@link Coinage#held}), no more than the player can really pay here ({@link Money#count}: foreign coins count for less);
 	 * null, with a word, if there is none. It was the emeralds in the hand.
 	 */

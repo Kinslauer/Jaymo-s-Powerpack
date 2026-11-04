@@ -1,6 +1,9 @@
 {
   "variants": {
-    "": {
+    "tied=false": {
+      "model": "jaymoskingdoms:block/rope"
+    },
+    "tied=true": {
       "model": "jaymoskingdoms:block/rope"
     }
   }

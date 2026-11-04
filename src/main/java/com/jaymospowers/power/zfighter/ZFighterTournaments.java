@@ -639,7 +639,7 @@ final class ZFighterTournaments {
 		lastBoard = board;
 	}
 
-	/** A Z Fighter is paid in TP; anyone else in silver coins (a Z Fighter gets the coins too). (0.19.87) Was emeralds; 1 silver = 1 old emerald. */
+	/** A Z Fighter is paid in TP; anyone else in silver coins (a Z Fighter gets the coins too). (0.20.0) Was emeralds; 1 silver = 1 old emerald. */
 	static void pay(ServerPlayer player, int tp, int emeralds) {
 		Component money = KingdomsMoney.text(player, KingdomsMoney.worth(emeralds));
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {

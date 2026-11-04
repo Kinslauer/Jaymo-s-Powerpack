@@ -892,7 +892,7 @@ public final class Approaches {
 		Faction ruler = f == null ? null : ruler(level.getServer(), f);
 		Object[] args = switch (a.topic) {
 			// (0.7.130) and the blood: yours, then the purist king's
-			// (0.7.490) a toll is asked in the town's own coin; (0.7.497) so are a bribe and a wager
+			// (0.7.490) a toll is asked in the town's own coin; (0.7.498) so are a bribe and a wager
 			case SEARCH, TOLL, BOUT, LOYALTY -> new Object[] {a.topic == LOYALTY ? a.price : asked(player, a, a.price), Purists.name(Heritage.of(player)),
 				ruler == null ? "?" : Purists.bloodName(ruler)};
 			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), asked(player, a, a.price)};
@@ -1267,7 +1267,7 @@ public final class Approaches {
 			case BARGAIN -> {
 				if (option == 0 && canPay(player, a, a.price) && a.scam && a.mob instanceof Villager crook) {
 					// (0.7.126) paid for goods that will never come
-					// (0.7.497) in the town's coin, then bits
+					// (0.7.498) in the town's coin, then bits
 					Currencies.fine(level.getServer(), player, f, a.price);
 					Crooks.scammed(level, crook, player, f.id(), a.price);
 				} else if (option == 0 && canPay(player, a, a.price)) {
@@ -1391,7 +1391,7 @@ public final class Approaches {
 					}
 				} else if (tv == TYRANT || tv == REVELER || tv == PLAIN || tv == PURIST_KIN) {
 					// (a bribe they'll take: whatever you carry, they never saw it)
-					// (0.7.497) in the town's coin, then bits
+					// (0.7.498) in the town's coin, then bits
 					Currencies.fine(level.getServer(), player, f, a.price);
 					clearSuspicion(player, f.id());
 					reply(level, a, k + "bribe." + temper, Speech.WHITE);
@@ -1446,7 +1446,7 @@ public final class Approaches {
 					a.mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 					level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 1.0F);
 					if (random.nextFloat() < Math.clamp(chance, BOUT_MIN, BOUT_MAX)) {
-						// (0.7.497) the winnings in the town's coin
+						// (0.7.498) the winnings in the town's coin
 						Money.pay(player, f, Money.worth(a.price));
 						Reputation.change(player, f, BOUT_WON_REP[tv]);
 						reply(level, a, k + "won." + temper, Speech.GOLD, asked(player, a, a.price));

@@ -367,7 +367,7 @@ public final class MeltingRecipes {
 			Identifier id = BuiltInRegistries.ITEM.getKey(item);
 			if (item instanceof ToolPartItem || item instanceof WeaponPartItem || item instanceof TinkerTool
 				|| METAL_WORDS.stream().noneMatch(id.getPath()::contains) || Melting.of(new ItemStack(item)) != null
-				// (0.19.87) a coin is money, not metal to melt: realm silver, hacksilver, gold dinars, copper bits and bent copper
+				// (0.20.0) a coin is money, not metal to melt: realm silver, hacksilver, gold dinars, copper bits and bent copper
 				|| com.jaymospowers.core.KingdomsMoney.isMoney(new ItemStack(item))) {
 				continue;
 			}

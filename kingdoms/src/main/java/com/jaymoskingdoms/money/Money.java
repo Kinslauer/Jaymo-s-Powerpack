@@ -22,7 +22,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
 
 /**
- * (0.7.497) The kingdoms' money over {@link Currencies}. Every price is in milli (thousandths of an emerald, the unit
+ * (0.7.498) The kingdoms' money over {@link Currencies}. Every price is in milli (thousandths of an emerald, the unit
  * every settlement's treasury is kept in): {@link #UNIT} is what an emerald was worth, and an old price of "N emeralds"
  * is {@code worth(N)}. Server side, and aware of everywhere a player keeps coins: loose coins in the inventory, coin
  * purses in it, coins in bundles, and the purse worn in Jaymo's Powers' belt slot. Emeralds are a gem now and never pay.
@@ -37,7 +37,7 @@ import com.jaymoskingdoms.PowersCompat;
  * ({@link Currencies#at}); and when that is emeralds, silver.
  */
 public final class Money {
-	/** (0.7.497) A milli price of one emerald's worth: what "1" in an old price meant. */
+	/** (0.7.498) A milli price of one emerald's worth: what "1" in an old price meant. */
 	public static final int UNIT = 1000;
 	/** The most coins one stack of loose coins holds. */
 	private static final int STACK = 64;
@@ -309,7 +309,7 @@ public final class Money {
 		return milli <= 0L ? List.of() : Currencies.pay(coin, milli).stacks();
 	}
 
-	/** (0.7.497) One coin of the land where {@code player} stands, to draw beside a price (Kitchen's butcher, over the bridge). */
+	/** (0.7.498) One coin of the land where {@code player} stands, to draw beside a price (Kitchen's butcher, over the bridge). */
 	public static ItemStack coin(ServerPlayer player) {
 		return new ItemStack(local(player).item());
 	}
@@ -562,7 +562,7 @@ public final class Money {
 			this.inside.add(stack);
 		}
 
-		/** (0.7.497) Adds only as many coins as the bundle's weight still holds; the rest is returned so it goes to the pack. */
+		/** (0.7.498) Adds only as many coins as the bundle's weight still holds; the rest is returned so it goes to the pack. */
 		@Override
 		int add(Currency coin, int n) {
 			int put = Math.min(n, this.room(coin));

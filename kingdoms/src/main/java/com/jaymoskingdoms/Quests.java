@@ -218,7 +218,7 @@ public final class Quests {
 	/** Whether {@code q} is done and can be turned in. */
 	static boolean ready(ServerPlayer player, Quest q) {
 		return switch (q.kind()) {
-			case Quest.GATHER -> count(player, item(q.objective().target())) >= q.objective().count();
+			case Quest.GATHER -> count(player, item(q.objective().target()), minGrade(q.objective().target())) >= q.objective().count();
 			case Quest.FETCH -> find(player, q.id()) >= 0;
 			case Quest.BREAK_IN, Quest.STUD -> Stables.questHorse(player, q) != null;
 			case Quest.LEAD -> led(player, q.objective().target()).size() >= q.objective().count();
@@ -483,7 +483,7 @@ public final class Quests {
 			return;
 		}
 		if (q.kind() == Quest.GATHER) {
-			take(player, item(q.objective().target()), q.objective().count());
+			take(player, item(q.objective().target()), q.objective().count(), minGrade(q.objective().target()));
 		} else if (q.kind() == Quest.FETCH) {
 			int slot = find(player, q.id());
 			if (slot >= 0) {
@@ -615,13 +615,13 @@ public final class Quests {
 	static List<ItemStack> rewards(ServerLevel level, Quest q) {
 		List<ItemStack> out = new ArrayList<>();
 		Quest.Reward r = q.reward();
-		// (0.7.497) the coins (the worth, and any copper bits) are struck in the giver's realm coin
+		// (0.7.498) the coins (the worth, and any copper bits) are struck in the giver's realm coin
 		out.addAll(Money.stacks(level.getServer(), Factions.get(level.getServer(), q.giver().faction()), r.milli()));
 		out.addAll(goods(level, q));
 		return out;
 	}
 
-	/** (0.7.497) What {@code q} pays besides coins: goods, a book, a relic. */
+	/** (0.7.498) What {@code q} pays besides coins: goods, a book, a relic. */
 	private static List<ItemStack> goods(ServerLevel level, Quest q) {
 		List<ItemStack> out = new ArrayList<>();
 		Quest.Reward r = q.reward();
@@ -702,12 +702,28 @@ public final class Quests {
 		return -1;
 	}
 
+	/** (0.7.496) A gather target's item id: the target up to any '@'. */
+	static String itemId(String target) {
+		int at = target.indexOf('@');
+		return at < 0 ? target : target.substring(0, at);
+	}
+
+	/** (0.7.496) A gather target's grade floor ("jaymospowers:gem_ring@expert"), as a grade index, or -1 for none. */
+	static int minGrade(String target) {
+		int at = target.indexOf('@');
+		return at < 0 ? -1 : GradedTrades.gradeIndex(target.substring(at + 1));
+	}
+
 	private static Item item(String id) {
-		Identifier key = Identifier.tryParse(id);
+		Identifier key = Identifier.tryParse(itemId(id));
 		return key == null ? Items.AIR : BuiltInRegistries.ITEM.getOptional(key).orElse(Items.AIR);
 	}
 
 	private static int count(ServerPlayer player, Item item) {
+		return count(player, item, -1);
+	}
+
+	private static int count(ServerPlayer player, Item item, int minGrade) {
 		if (item == Items.AIR) {
 			return 0;
 		}
@@ -715,18 +731,18 @@ public final class Quests {
 		int n = 0;
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			ItemStack s = inv.getItem(i);
-			if (s.is(item) && questOf(s) == null) {
+			if (s.is(item) && questOf(s) == null && (minGrade < 0 || GradedTrades.gradeIndex(s) >= minGrade)) {
 				n += s.getCount();
 			}
 		}
 		return n;
 	}
 
-	private static void take(ServerPlayer player, Item item, int n) {
+	private static void take(ServerPlayer player, Item item, int n, int minGrade) {
 		Inventory inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize() && n > 0; i++) {
 			ItemStack s = inv.getItem(i);
-			if (s.is(item) && questOf(s) == null) {
+			if (s.is(item) && questOf(s) == null && (minGrade < 0 || GradedTrades.gradeIndex(s) >= minGrade)) {
 				int m = Math.min(n, s.getCount());
 				s.shrink(m);
 				n -= m;
@@ -1253,7 +1269,13 @@ public final class Quests {
 	}
 
 	private static Component itemName(String id) {
-		return new ItemStack(item(id)).getHoverName();
+		Component base = new ItemStack(item(id)).getHoverName();
+		int grade = minGrade(id);
+		if (grade < 0) {
+			return base;
+		}
+		String gradeId = GradedTrades.gradeId(grade);
+		return Component.translatable("quest.jaymoskingdoms.graded", base, Component.translatableWithFallback("grade.jaymospowers." + gradeId, gradeId));
 	}
 
 	private static Component keepsakeName(Quest q) {
@@ -1309,7 +1331,7 @@ public final class Quests {
 		return switch (q.kind()) {
 			case Quest.SLAY -> Component.translatable("quest.jaymoskingdoms.objective.slay", foes(o.target()), o.progress(), o.count());
 			case Quest.GATHER -> Component.translatable("quest.jaymoskingdoms.objective.gather", itemName(o.target()),
-				Math.min(count(player, item(o.target())), o.count()), o.count());
+				Math.min(count(player, item(o.target()), minGrade(o.target())), o.count()), o.count());
 			case Quest.LEAD -> Component.translatable("quest.jaymoskingdoms.objective.lead", beastName(o.target()),
 				Math.min(led(player, o.target()).size(), o.count()), o.count(), q.giver().name());
 			case Quest.FETCH -> Component.translatable(QuestFoes.dig(q) ? "quest.jaymoskingdoms.objective.dig" : "quest.jaymoskingdoms.objective.fetch",

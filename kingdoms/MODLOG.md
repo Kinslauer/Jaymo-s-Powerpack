@@ -8463,7 +8463,57 @@ hall, land and vassals:
   World tiers want them too: Borderlands 1, Wildlands 2, Dread 4, Legend 5. The Rung Journal ticks each. A refusal is an
   action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
   tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.
-## 0.7.497: coins replace emeralds (pack 0.19.87, Kitchen 0.5.56)
+## 0.7.495: rope ties to fences (pack 0.19.86)
+Andy's Plant Fibers pick: "a climbable rope you tie to a fence". Rope placed against a fence's side with nothing above
+to hang from is tied to the fence (`RopeLift.TIED`) and holds while a fence stands beside it, so at a cliff's edge it
+hangs over the drop; rope also hangs under a fence. Rope in hand on it lets more down as before. With Jaymo's Powers,
+3 plant string in a column make a rope.
+
+## 0.7.496: jewellery orders from town smiths (pack 0.19.87)
+- Armourers ask for a gem amulet (Well Forged or better), weaponsmiths for one or two gem rings (Expertly Forged or
+  better), toolsmiths for a gem bracelet (Well Forged or better), made with Powers' lapidary wheel, anvil and
+  jeweller's bench. They pay 10 to 20 emeralds (`QuestBoard.JEWEL_ORDER_EMERALDS`), to become coin with the coin
+  change.
+- A gather quest's target may now carry a grade floor (`<item id>@<grade>`): only pieces graded at least that
+  count and are taken (`Quests.minGrade`, `GradedTrades.gradeIndex`), and the quest names the grade. Without
+  Powers no such quest is offered. Compile-checked; not played.
+- Two loading hints (84-85).
+
+## 0.7.497: locks and keys (pack 0.19.89)
+Andy picked the idea of Locks Reforged; this is our own build of it, nothing copied (`Locks`, `NightLocks`).
+- **Lock and key**: three iron ingots and three nuggets forge a lock. Use it on a door, trapdoor, fence gate, chest or
+  barrel to fit it, and its key (a new one, cut to that lock) goes in your pack. Hold a cut key in your off hand while
+  fitting and the lock is cut to that key instead, so one key can open your whole house. Keys carry a short code
+  ("Opens lock 4F2A") and can be renamed at an anvil.
+- **Locked**: only the matching key opens it, in your hand, your pack, or on a key ring. Sneak-use with the key to lock
+  or unlock; sneak-use an unlocked lock empty-handed to take it off. Everyone else gets the Pin or Rotary game
+  (a "fine" level 3 lock; every lock cut to one key shares its combination); picked, it's left unlocked.
+- **Resists villagers, hoppers and breaking**: villagers, folk and MCA can't open a locked door or gate (a realm's own
+  folk pass its night locks); redstone and wind charges don't open it; hoppers, hopper minecarts and copper golems
+  can't take from a locked container. Breaking a locked block without its key is 4 to 20 times slower (by lock
+  level), and the lock drops, still cut. Locked loot chests are no longer unbreakable, only slow, and a hopper under
+  an unread one reads its lock first.
+- **Night locks**: from dusk (13000) to dawn (23500) a realm locks its houses' and barracks' doors and its shops'
+  doors, chests and barrels (market, stall, tavern, smithy, butcher, cookhouse, mason; never its storehouse), and a
+  village the doors by each villager's bed. Blocks a player placed, or already locked, are left alone, and nobody is
+  locked in: a building with a player inside waits. A sleep skip or a restart lands right.
+- **Burglary**: picking a lock or breaking a locked block where a realm's law holds, seen, is a medium crime (heavy
+  against a storehouse): a cry, reputation, guards, a bounty. Sleeping villagers see nothing. Your own blocks, holding
+  the key, and rank enough to take from its stores never count. Picking a locked loot chest in town counts too.
+- **Blank keys and copies**: a nugget and an ingot make two blank keys; a cut key with up to eight blanks at a
+  crafting table makes that many copies (names kept), and the key comes back.
+- **Key ring**: four nuggets in a ring. Click keys onto it (up to 16); right-click to take one out. It opens their
+  locks from your pack, or worn in Jaymo's Powers' belt bauble slot (by tag; no Powers change). It drops on death like
+  any bauble, keys inside. It doesn't show at the hip.
+- Mixins (`mixin/locks`): break speed (`BlockStateBase.getDestroyProgress`, so the crack matches on both sides),
+  `DoorBlock.setOpen`/`neighborChanged`, `TrapDoorBlock.toggle`/`neighborChanged`, `FenceGateBlock.neighborChanged`/`onExplosionHit` (wind charges), `BlockStateBase.affectNeighborsAfterRemoval` (a lock is forgotten when its block is removed by anything but a player),
+  `HopperBlockEntity.suckInItems`, the copper golem's `isContainerLocked`, MCA's `PathingBlockInteraction.setOpen`.
+  Locks are kept per chunk and synced; Lockpicking's loot lock now syncs too.
+- Fixes: a wind charge no longer opens a locked gate; breaking one half of a double chest no longer strips the other half's
+  lock; a lock no longer outlives a block that an explosion, mob, piston or lost support removed.
+- Fix: a lock now stays when its block turns into another lockable block (copper doors, trapdoors and chests weathering, waxed or scraped).
+
+## 0.7.498: coins replace emeralds (pack 0.20.0, Kitchen 0.5.56)
 Andy's Custom Trade Currency pick, and his choice "Combine: culture coins replace emeralds". Design: `docs/Coins-Plan.md`
 in the pack. The culture coins of the currencies patch (`Currency`, `Currencies`: realm silver, hacksilver, gold dinars,
 shell strings, mon, the greenskins' bent copper, pirate gold) are the money everywhere; the emerald is a gem.

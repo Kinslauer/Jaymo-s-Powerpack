@@ -26,8 +26,8 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.497) Andy, on the traders who still deal in emeralds ({@link Currencies#keeper}): "they must speak about this
- * and answer you if asked". (0.7.497) Coins are the culture coins now ("Combine: culture coins replace emeralds"): coin folk
+ * (0.7.498) Andy, on the traders who still deal in emeralds ({@link Currencies#keeper}): "they must speak about this
+ * and answer you if asked". (0.7.498) Coins are the culture coins now ("Combine: culture coins replace emeralds"): coin folk
  * say which coin their town uses and why (its land, or the trading hub whose coin it took), a foreign coin is sent to the
  * money changer, and the changer quotes the emerald in the town's coin. So:
  * <ul>
@@ -82,7 +82,7 @@ public final class MoneyTalk {
 		return Currencies.trades(t);
 	}
 
-	/** (0.7.497) The coin {@code t} trades in: its settlement's, or the land round it, else the realm silver (never the emerald or the bit). */
+	/** (0.7.498) The coin {@code t} trades in: its settlement's, or the land round it, else the realm silver (never the emerald or the bit). */
 	static Currency coinOf(AbstractVillager t) {
 		if (!(t.level() instanceof ServerLevel level)) {
 			return Currency.SILVER;
@@ -92,7 +92,7 @@ public final class MoneyTalk {
 		return c == Currency.EMERALD || c == Currency.BIT ? Currency.SILVER : c;
 	}
 
-	/** (0.7.497) The name of the trading hub whose coin {@code t}'s town took, if it took one; else null. */
+	/** (0.7.498) The name of the trading hub whose coin {@code t}'s town took, if it took one; else null. */
 	static @Nullable String hubOf(AbstractVillager t) {
 		return t.level() instanceof ServerLevel level && Quests.settlement(level, t) instanceof Faction f ? Currencies.hubName(level.getServer(), f) : null;
 	}
@@ -131,7 +131,7 @@ public final class MoneyTalk {
 		if (keeper(v)) {
 			return Component.translatable(line("keeper", random));
 		}
-		// (0.7.497) coin folk say which coin the town uses and why, then where to take emeralds or foreign coin
+		// (0.7.498) coin folk say which coin the town uses and why, then where to take emeralds or foreign coin
 		Component here = here(v, random);
 		if (v.level() instanceof ServerLevel level) {
 			AbstractVillager other = nearest(level, v, o -> o != v && keeper(o));
@@ -146,14 +146,14 @@ public final class MoneyTalk {
 		return here;
 	}
 
-	/** (0.7.497) "Realm Silver here, as is the custom of the land" or "... the coin of Kingdom X, whose merchants..." */
+	/** (0.7.498) "Realm Silver here, as is the custom of the land" or "... the coin of Kingdom X, whose merchants..." */
 	private static Component here(Villager v, RandomSource random) {
 		Component coin = Component.translatable(coinOf(v).key());
 		String hub = hubOf(v);
 		return hub == null ? Component.translatable(line("coin", random), coin) : Component.translatable(line("coin_hub", random), coin, hub);
 	}
 
-	/** (0.7.497) What a changer pays for an emerald in {@code local} coin, about, as shown ("1 Realm Silver, 4 Copper Bit"). */
+	/** (0.7.498) What a changer pays for an emerald in {@code local} coin, about, as shown ("1 Realm Silver, 4 Copper Bit"). */
 	private static Component emeraldQuote(Currency local) {
 		return Currencies.amount(Currencies.pay(local, (long)(Currency.EMERALD.base * Currencies.EMERALD_BUY)));
 	}
@@ -196,7 +196,7 @@ public final class MoneyTalk {
 		return sb.toString();
 	}
 
-	/** (0.7.497) {@code c} as plain English, for the chat prompt (the server has no mod lang to name an item with). */
+	/** (0.7.498) {@code c} as plain English, for the chat prompt (the server has no mod lang to name an item with). */
 	private static String words(Currency c) {
 		return switch (c) {
 			case SILVER -> "realm silver";
@@ -211,7 +211,7 @@ public final class MoneyTalk {
 		};
 	}
 
-	/** (0.7.497) What a changer pays for an emerald in {@code local}, in plain English ("1 realm silver and 4 copper bits"). */
+	/** (0.7.498) What a changer pays for an emerald in {@code local}, in plain English ("1 realm silver and 4 copper bits"). */
 	private static String quoteWords(Currency local) {
 		Currencies.Pay p = Currencies.pay(local, (long)(Currency.EMERALD.base * Currencies.EMERALD_BUY));
 		String out = p.coins() > 0L ? p.coins() + " " + words(p.coin()) : "";
@@ -235,7 +235,7 @@ public final class MoneyTalk {
 	}
 
 	/**
-	 * (0.7.497) A coin trader, opened to a player who carries another realm's coin and none of the town's (a trade screen
+	 * (0.7.498) A coin trader, opened to a player who carries another realm's coin and none of the town's (a trade screen
 	 * takes the exact coin only): "that's not our coin, see the money changer", and where he is if there is one near.
 	 */
 	private static void foreign(ServerLevel level, AbstractVillager trader, ServerPlayer player) {

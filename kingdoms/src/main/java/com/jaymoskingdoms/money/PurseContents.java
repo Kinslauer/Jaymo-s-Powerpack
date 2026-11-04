@@ -21,19 +21,19 @@ import com.jaymoskingdoms.Currencies;
 import com.jaymoskingdoms.Currency;
 
 /**
- * (0.7.497) What a coin purse holds: loose coins by kind ({@code jaymoskingdoms:coins}), only the coins a purse can hold
+ * (0.7.498) What a coin purse holds: loose coins by kind ({@code jaymoskingdoms:coins}), only the coins a purse can hold
  * ({@link Currency#money}; the greenskins' and pirates' coins and emeralds stay in the pack). At most {@value #PURSE_MOST}
  * in all. Whenever it changes, {@link #set} also writes how full the purse is into {@code custom_model_data} (float 0),
  * which {@code items/coin_purse.json} reads to draw a flat or a bulging purse (and Powers draws the same on the hip).
  *
  * <p>Saved as a map of coin id ({@link Currency#id}) to count, like {@code {"silver": 3, "bit": 12}}. The dev format of
- * 0.7.497 ({@code copper}, {@code silver} and {@code gold} as three counts) still loads, as 1 bit, 2 silver and 5 dinars
+ * 0.7.498 ({@code copper}, {@code silver} and {@code gold} as three counts) still loads, as 1 bit, 2 silver and 5 dinars
  * each. (A dev purse of nothing but silver reads as the new format, so as that many silver.)
  */
 public record PurseContents(Map<Currency, Integer> held) {
 	/** Coins a purse holds (ten stacks of 64). */
 	public static final int PURSE_MOST = 640;
-	/** What a coin of the 0.7.497 dev format is worth now: a copper is a bit, a silver two silver, a gold five dinars. */
+	/** What a coin of the 0.7.498 dev format is worth now: a copper is a bit, a silver two silver, a gold five dinars. */
 	private static final int OLD_SILVER = 2, OLD_GOLD = 5;
 
 	public PurseContents {
@@ -53,7 +53,7 @@ public record PurseContents(Map<Currency, Integer> held) {
 		.xmap(PurseContents::new, PurseContents::held)
 		.validate(c -> c.coins() <= PURSE_MOST ? DataResult.success(c) : DataResult.error(() -> "A purse holds at most " + PURSE_MOST + " coins"));
 
-	/** The 0.7.497 dev format: three counts. Only read, never written. */
+	/** The 0.7.498 dev format: three counts. Only read, never written. */
 	private record Old(int copper, int silver, int gold) {
 		static final Codec<Old> CODEC = RecordCodecBuilder.create(i -> i.group(
 				ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("copper", 0).forGetter(Old::copper),

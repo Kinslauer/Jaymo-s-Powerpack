@@ -56,7 +56,7 @@ public class CostumeScreen extends Screen {
 	private final @Nullable BlockPos pos;
 	/** A tailor's price in emeralds' worth, or -1 at a table. */
 	private final int price;
-	/** (0.19.87) The tailor's price as the server wrote it in the coin of the land, one of that coin, and whether the player can pay it (the server counts: a purse is hidden from the client). */
+	/** (0.20.0) The tailor's price as the server wrote it in the coin of the land, one of that coin, and whether the player can pay it (the server counts: a purse is hidden from the client). */
 	private final Component cost;
 	private final ItemStack coin;
 	private final boolean affordable;
@@ -451,7 +451,7 @@ public class CostumeScreen extends Screen {
 		boolean creative = player.isCreative();
 		boolean enough = true;
 		if (tailoring()) {
-			// (0.11.78) the tailor's price; (0.19.87) in coin (purses and bundles count), by worth, with the realm silver coin's icon
+			// (0.11.78) the tailor's price; (0.20.0) in coin (purses and bundles count), by worth, with the realm silver coin's icon
 			boolean ok = creative || this.affordable;
 			enough = ok;
 			graphics.item(this.coin.isEmpty() ? KingdomsMoney.icon() : this.coin, x, iy);

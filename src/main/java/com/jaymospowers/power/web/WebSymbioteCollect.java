@@ -252,7 +252,7 @@ public final class WebSymbioteCollect {
 			|| stack.is(ItemTags.CREEPER_DROP_MUSIC_DISCS) || path.startsWith("music_disc")) {
 			return "noise";
 		}
-		// (0.19.87) Jaymo's Kingdoms' coins, coin stacks and purses are valuables too (found by id, never compiled against)
+		// (0.20.0) Jaymo's Kingdoms' coins, coin stacks and purses are valuables too (found by id, never compiled against)
 		boolean coins = com.jaymospowers.core.KingdomsMoney.isMoney(stack);
 		if (coins || stack.is(Items.DIAMOND) || stack.is(Items.EMERALD) || stack.is(Items.NETHERITE_INGOT) || stack.is(Items.NETHERITE_SCRAP)
 			|| stack.is(Items.TOTEM_OF_UNDYING) || stack.is(Items.GOLDEN_APPLE) || stack.is(Items.ENCHANTED_GOLDEN_APPLE) || stack.is(Items.NETHER_STAR)

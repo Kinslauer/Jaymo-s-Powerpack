@@ -87,13 +87,13 @@ public final class Pickpocket {
 	/** The progress bar's length. */
 	static final int BAR = 12;
 
-	/** (0.7.497) The little purse in a pocket holds this many copper bits' worth (least, most), twice that on a guard or a merchant. */
+	/** (0.7.498) The little purse in a pocket holds this many copper bits' worth (least, most), twice that on a guard or a merchant. */
 	static final int PURSE_MIN_BITS = 4, PURSE_MAX_BITS = 30, RICH_FACTOR = 2;
-	/** (0.7.497) Villagers in these jobs carry a fuller purse (the money changer, and the trades that sell for coin). */
+	/** (0.7.498) Villagers in these jobs carry a fuller purse (the money changer, and the trades that sell for coin). */
 	private static final Set<String> MERCHANTS = Set.of("changer", "cartographer", "librarian", "butcher", "leatherworker");
 
 	/**
-	 * What's in a pocket that holds nothing they carry: item, least, most, weight. (0.7.497) The item is a supplier, since
+	 * What's in a pocket that holds nothing they carry: item, least, most, weight. (0.7.498) The item is a supplier, since
 	 * the coin items are registered after this class loads. A pocket whose item is the coin purse holds a filled purse in
 	 * the victim's own coin, least..most being copper bits' worth (see {@link #PURSE_MIN_BITS}).
 	 */
@@ -386,7 +386,7 @@ public final class Pickpocket {
 		}
 	}
 
-	/** (0.7.497) A guard or a merchant carries more coin than a farmer. */
+	/** (0.7.498) A guard or a merchant carries more coin than a farmer. */
 	private static boolean rich(LivingEntity mark) {
 		if (Downed.isGuard(mark)) {
 			return true;

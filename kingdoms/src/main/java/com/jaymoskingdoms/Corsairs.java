@@ -946,7 +946,7 @@ final class Corsairs implements Ship.Captaincy {
 
 	/** What a share of her hold holds, by who she is. */
 	static void stock(ServerLevel level, Crew crew, List<ItemStack> share, RandomSource random) {
-		// (0.7.497) the coin hauls below are silver coins (they were emeralds), 1 for 1
+		// (0.7.498) the coin hauls below are silver coins (they were emeralds), 1 for 1
 		List<ItemStack> loot = new ArrayList<>();
 		switch (crew.side) {
 			case PIRATE -> {
