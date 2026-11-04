@@ -4429,3 +4429,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Compile-checked (0 errors against the 26.3 jars); not played.
 - **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
   wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.
+- **0.20.32, server start fix and CurseForge ids:** ChoiceTheorem's Overhauled Village (4.1.1, a 26.2 build) stopped the
+  26.3 server loading: 105 of its structures use `minecraft:simple_state_provider`/`weighted_state_provider` (gone in 26.3)
+  and `lithostitched:limited` (not in Lithostitched 2.0.6). It's out of the pack (its line is commented out in build.gradle)
+  and Build Modpack drops it from the profile (`removedIdsFromProfile`); put it back once CTOV has a 26.3 build. The
+  CurseForge manifest had failed on its `cf: null` too. Ten Modrinth-only mods got their CurseForge [project, file] ids
+  (matched by file name) and moved into packMods, so the CurseForge import now downloads them: First-person Model, Not
+  Enough Animations, EMF Compat: NEA, Sounds, Lithium, FerriteCore, C2ME, Structory, Structory: Towers, Homesteads.
+  Still Modrinth-only (no matching CurseForge file): Runes, Grim Kingdoms VE, Repurposed Structures, MidnightLib, Ji AFK
+  Cinematic, Dungeons and Taverns (CurseForge stops at 6.0.2). Not built here.

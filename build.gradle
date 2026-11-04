@@ -115,8 +115,10 @@ def packMods = [
 	// haven: Havens.ctov). Jaymo's Kingdoms reads its trade buildings in the game (ctov:village/<land>/jobsite/<trade>)
 	// for a town's butcher, fishery, hunting lodge, smithy and mason (CtovHalls). The 26.2 Fabric build (4.1.1, says
 	// minecraft >=26.1, no mixins, almost all data); needs Lithostitched (above). Server-side worldgen.
-	// TODO(home PC): its CurseForge [project id, file id] (the cloud can't reach CurseForge).
-	[dep: "maven.modrinth:ct-overhaul-village:DpxVZVuT", cf: null],
+	// Taken out 2026-11-04 (0.20.32): CTOV 4.1.1 is a 26.2 build, and on 26.3 its structures fail to load (vanilla
+	// no longer has minecraft:simple_state_provider / weighted_state_provider, and Lithostitched 2.0.6 has no
+	// lithostitched:limited), so the server refused to start. Put the line back once CTOV has a 26.3 build.
+	// [dep: "maven.modrinth:ct-overhaul-village:DpxVZVuT", cf: [623908, 9435529]],
 	// William Wythers' Overhauled Overworld (CC BY-NC-ND 4.0; shipped unchanged, downloaded by id) and its library Cristel
 	// Lib (same licence): every vanilla biome redecorated (trees, foliage, rocks, sub-biomes) under its vanilla id, so
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
@@ -306,65 +308,60 @@ def packMods = [
 	// the jaymospowers:carry_on_no_lift blocks). Needs Fabric API; Cloth Config (above) gives it a config screen.
 	// 2.12.1 for 26.3 (Modrinth version d0jTyKNs).
 	[dep: "maven.modrinth:carry-on:d0jTyKNs", cf: [274259, 9420425]],
-]
-// First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
-// Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
-// manifest needs ids for every entry there.
-// TODO(home PC): look up their CurseForge [project id, file id] (CurseForge is blocked from the cloud), add a cf entry
-// to each and move both lines into packMods; until then they're in modpack/mods (server, hand-made profile) and the dev
-// game, but not in the CurseForge import zip.
-def packModsNoCf = [
-	// Runes (all rights reserved, Zsolt Molnar; shipped unchanged): the rune reagents Wizards' spells use up, and its
-	// Rune Crafting Altar. TODO(home PC): its CurseForge [project id, file id] (cfwidget doesn't find its page).
-	[dep: "maven.modrinth:runes:PwSpmtFJ", cf: null],
-	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
-	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
+	// First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
+	// Animations (tr7zw Protective License: fine to ship in a pack). 2.7.3 and 1.12.6 for 26.3.
+	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: [333287, 8990505]],
+	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: [433760, 8929069]],
 	// EMF Compat: Not Enough Animations (GPL-3.0, STRadaT; shipped unchanged): keeps Not Enough Animations' eating, map
-	// holding, rowing and petting showing under Fresh Animations. Here beside NEA until NEA's CurseForge ids are looked up
-	// (then this one is CurseForge project 1605181, file 9103628).
-	[dep: "maven.modrinth:not-enough-animations-emf-compat:Xs6WnTQm", cf: null],
+	// holding, rowing and petting showing under Fresh Animations. 1.2.1 for 26.3.
+	[dep: "maven.modrinth:not-enough-animations-emf-compat:Xs6WnTQm", cf: [1605181, 9103628]],
 	// Sounds (all rights reserved, by imb11; modpacks on Modrinth and CurseForge allowed under legal.imb11.dev/mods/eula):
-	// 170+ new sound effects for screens, items and blocks. Client-only; needs MRU and YACL (packMods).
-	// TODO(home PC): its CurseForge [project id, file id], as above (the cloud couldn't find its CurseForge page).
-	[dep: "maven.modrinth:sound:QCFPBvDa", cf: null],
-	// Grim Kingdoms, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): castles, citadels and
-	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts.
-	// TODO(home PC): its CurseForge [project id, file id], as above.
-	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
-	// Repurposed Structures (LGPL-3.0, by TelepathicGrunt; shipped unchanged): biome versions of vanilla structures (its
-	// villages and outposts join Jaymo's Kingdoms' shared pools), and its jungle fortress is the grand seat Jaymo's
-	// Kingdoms raises for a kingdom in the jungle (GrandSeats). Server-side worldgen; needs MidnightLib (below).
-	// TODO(home PC): CurseForge [project id, file id] for it and MidnightLib, as above.
-	[dep: "maven.modrinth:repurposed-structures-fabric:9jHXeIeI", cf: null],
-	// MidnightLib (MIT, by Motschen): config library Repurposed Structures needs.
-	[dep: "maven.modrinth:midnightlib:G9RaNHAC", cf: null],
-	// Ji AFK Cinematic (Ji Mods Source License: official jars may go in modpacks with credit, by Jiory_): stand idle and the
-	// camera goes into slow cinematic shots of you and the world; any key or damage brings you back. Client-only.
-	// TODO(home PC): CurseForge project 1697412 has no 26.3 file yet; add [1697412, <file id>] once it does.
-	[dep: "maven.modrinth:ji-afk-cinematic:7BvkctiX", cf: null],
+	// 170+ new sound effects for screens, items and blocks. Client-only; needs MRU and YACL (above). 2.6.0 for 26.3.
+	[dep: "maven.modrinth:sound:QCFPBvDa", cf: [925889, 9060125]],
 	// Load and chunk speed (0.17.199, Andy's load-time ask; all shipped unchanged, none change what generates):
 	// Lithium (LGPL-3.0, CaffeineMC; Sodium's team): faster game logic, mob AI, chunk ticking and worldgen. 0.26.3.
 	// FerriteCore (MIT, malte0811): less memory for block states and models, so startup and the game use less RAM. 9.0.0.
 	// C2ME (MIT, ishland): generates and loads chunks on every processor core, the big one for new worlds and travel.
 	// Alpha for 26.3 (0.4.2-alpha.0.106); drop it if a worldgen mod misbehaves with it.
-	// TODO(home PC): their CurseForge [project id, file id], as above.
-	[dep: "maven.modrinth:lithium:fWv5bnZk", cf: null],
-	[dep: "maven.modrinth:ferrite-core:d5ddUdiB", cf: null],
-	[dep: "maven.modrinth:c2me-fabric:gKKkuSYc", cf: null],
+	[dep: "maven.modrinth:lithium:fWv5bnZk", cf: [360438, 9357338]],
+	[dep: "maven.modrinth:ferrite-core:d5ddUdiB", cf: [459857, 7806040]],
+	[dep: "maven.modrinth:c2me-fabric:gKKkuSYc", cf: [533097, 9225022]],
+	// Structory and Structory: Towers (Stardust Labs License, which allows modpacks): weathered ruins, camps, shrines and
+	// biome-themed watchtowers with light lore. 1.3.18 and 1.0.19. Server-side worldgen (medieval gap-fillers, below).
+	[dep: "maven.modrinth:structory:GjOkOVW4", cf: [636540, 8968053]],
+	[dep: "maven.modrinth:structory-towers:5ntmnN83", cf: [783522, 8968055]],
+	// Homesteads (all rights reserved; linked, never edited): lone farmsteads and hamlets out in the wilds, the
+	// countryside between our villages and towns. 3.0.0. Server-side worldgen.
+	[dep: "maven.modrinth:homesteads:xYCdL31w", cf: [1336255, 9234266]],
+]
+// on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
+// can't list them: they're in modpack/mods (server, hand-made profile) and the dev game, but not in the CurseForge import
+// zip. Once CurseForge has the matching file, add its [project id, file id] and move the line into packMods.
+def packModsNoCf = [
+	// Runes (all rights reserved, Zsolt Molnar; shipped unchanged): the rune reagents Wizards' spells use up, and its
+	// Rune Crafting Altar. No CurseForge page found.
+	[dep: "maven.modrinth:runes:PwSpmtFJ", cf: null],
+	// Grim Kingdoms, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): castles, citadels and
+	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts. No CurseForge page found.
+	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
+	// Repurposed Structures (LGPL-3.0, by TelepathicGrunt; shipped unchanged): biome versions of vanilla structures (its
+	// villages and outposts join Jaymo's Kingdoms' shared pools), and its jungle fortress is the grand seat Jaymo's
+	// Kingdoms raises for a kingdom in the jungle (GrandSeats). Server-side worldgen; needs MidnightLib (below).
+	// CurseForge project 391366 stops at 7.7.6 for 26.2 (no 26.3 file yet).
+	[dep: "maven.modrinth:repurposed-structures-fabric:9jHXeIeI", cf: null],
+	// MidnightLib (MIT, by Motschen): config library Repurposed Structures needs. CurseForge project 488090 has only
+	// 1.9.3 for Fabric 26.3, not our 1.10.0.
+	[dep: "maven.modrinth:midnightlib:G9RaNHAC", cf: null],
+	// Ji AFK Cinematic (Ji Mods Source License: official jars may go in modpacks with credit, by Jiory_): stand idle and the
+	// camera goes into slow cinematic shots of you and the world; any key or damage brings you back. Client-only.
+	// CurseForge project 1697412 has no 26.3 file yet; add [1697412, <file id>] once it does.
+	[dep: "maven.modrinth:ji-afk-cinematic:7BvkctiX", cf: null],
 	// Medieval structures to fill gaps (Andy, 2026-11-04: "check these structures [Rabbit's DawnCraft] or any that have good
 	// medieval structures to fill voids we haven't already"). DawnCraft is Forge 1.18.2; of its structure mods only
 	// Structory has a 26.3 Fabric build, so the rest come from Modrinth's 26.3 list. All shipped unchanged, server-side worldgen.
 	// Dungeons and Taverns (all rights reserved, nova_wostra; linked, never edited): roadside taverns, dungeons and
-	// overhauled strongholds, mansions, outposts, mineshafts and temples. 6.1.0.
+	// overhauled strongholds, mansions, outposts, mineshafts and temples. 6.1.0. CurseForge project 853794 stops at 6.0.2.
 	[dep: "maven.modrinth:dungeons-and-taverns:hn5CugpP", cf: null],
-	// Structory and Structory: Towers (Stardust Labs License, which allows modpacks): weathered ruins, camps, shrines and
-	// biome-themed watchtowers with light lore. 1.3.18 and 1.0.19.
-	[dep: "maven.modrinth:structory:GjOkOVW4", cf: null],
-	[dep: "maven.modrinth:structory-towers:5ntmnN83", cf: null],
-	// Homesteads (all rights reserved; linked, never edited): lone farmsteads and hamlets out in the wilds, the
-	// countryside between our villages and towns. 3.0.0.
-	// TODO(home PC): CurseForge [project id, file id] for these four, as above.
-	[dep: "maven.modrinth:homesteads:xYCdL31w", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).
@@ -494,8 +491,8 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
-// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar)
-def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll"]
+// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar); CTOV (0.20.32, a 26.2 build that stops a 26.3 server loading)
+def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modJson = { File jar ->
 	try {
