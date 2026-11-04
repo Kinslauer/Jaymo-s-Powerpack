@@ -1,0 +1,394 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "gold",
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "cabochon",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_gold_cabochon",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "table",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_gold_table",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "rose",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_gold_rose",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "brilliant",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_gold_brilliant",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/jewellery/bracelet_gold_table",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -1
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": 16777215
+              }
+            ]
+          }
+        }
+      },
+      {
+        "when": "silver",
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "cabochon",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_silver_cabochon",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "table",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_silver_table",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "rose",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_silver_rose",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "brilliant",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_silver_brilliant",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/jewellery/bracelet_silver_table",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -1
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": 16777215
+              }
+            ]
+          }
+        }
+      },
+      {
+        "when": "copper",
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "cabochon",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_copper_cabochon",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "table",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_copper_table",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "rose",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_copper_rose",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            },
+            {
+              "when": "brilliant",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/jewellery/bracelet_copper_brilliant",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:custom_model_data",
+                    "index": 0,
+                    "default": 16777215
+                  }
+                ]
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/jewellery/bracelet_copper_table",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -1
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": 16777215
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 1,
+      "cases": [
+        {
+          "when": "cabochon",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/jewellery/bracelet_silver_cabochon",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -1
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": 16777215
+              }
+            ]
+          }
+        },
+        {
+          "when": "table",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/jewellery/bracelet_silver_table",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -1
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": 16777215
+              }
+            ]
+          }
+        },
+        {
+          "when": "rose",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/jewellery/bracelet_silver_rose",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -1
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": 16777215
+              }
+            ]
+          }
+        },
+        {
+          "when": "brilliant",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/jewellery/bracelet_silver_brilliant",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -1
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": 16777215
+              }
+            ]
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/jewellery/bracelet_silver_table",
+        "tints": [
+          {
+            "type": "minecraft:constant",
+            "value": -1
+          },
+          {
+            "type": "minecraft:custom_model_data",
+            "index": 0,
+            "default": 16777215
+          }
+        ]
+      }
+    }
+  }
+}

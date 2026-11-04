@@ -8469,3 +8469,13 @@ Andy's Plant Fibers pick: "a climbable rope you tie to a fence". Rope placed aga
 to hang from is tied to the fence (`RopeLift.TIED`) and holds while a fence stands beside it, so at a cliff's edge it
 hangs over the drop; rope also hangs under a fence. Rope in hand on it lets more down as before. With Jaymo's Powers,
 3 plant string in a column make a rope.
+
+## 0.7.496: jewellery orders from town smiths (pack 0.19.87)
+- Armourers ask for a gem amulet (Well Forged or better), weaponsmiths for one or two gem rings (Expertly Forged or
+  better), toolsmiths for a gem bracelet (Well Forged or better), made with Powers' lapidary wheel, anvil and
+  jeweller's bench. They pay 10 to 20 emeralds (`QuestBoard.JEWEL_ORDER_EMERALDS`), to become coin with the coin
+  change.
+- A gather quest's target may now carry a grade floor (`<item id>@<grade>`): only pieces graded at least that
+  count and are taken (`Quests.minGrade`, `GradedTrades.gradeIndex`), and the quest names the grade. Without
+  Powers no such quest is offered. Compile-checked; not played.
+- Two loading hints (82-83).
