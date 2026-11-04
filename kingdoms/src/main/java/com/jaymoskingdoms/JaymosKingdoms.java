@@ -264,6 +264,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("valor attachments: {} {} {} {} {} {}", Valor.VALOR, Valor.STATE, ValorFolk.SEEN, ValorFolk.TOLD, ValorFolk.LED, ValorFolk.AWED);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
+		// (RPG Series patch 1) Wizards', Archers' and Rogues & Warriors' spells only for their classes
+		RpgSeriesGate.init();
 		LOGGER.debug("class attachments: {} {}", Classes.CLASS, Classes.WRIT_BOUGHT);
 		// 0.7.57: heritage (Origins remade: picked between MCA's destiny and the class) and its attachment
 		Heritage.register();
@@ -358,6 +360,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		LOGGER.debug("great wars attachment: {}", GreatWars.LEDGER);
 		Wars.register();
+		// (0.7.519) treaties, envoys, the ruler's desk, elections and regencies
+		Treaties.register();
+		Envoys.register();
+		DiplomacyNet.register();
+		Elections.register();
 		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
 		Sandbags.register();
 		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
@@ -502,6 +509,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rites.register();
 		Sermons.register();
 		RealmFaiths.register();
+		// (0.7.518) patron gods, part (c): the champions and their temples
+		PatronChampions.register();
+		Temples.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		GiftTales.register();
@@ -607,6 +617,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.332: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
 		// room, the morning after, torn cloth as evidence, and what the curse asks for
 		MoonPull.register();
+		BruteRage.register();
+		StorageEnchanting.register();
 		ScentTrails.register();
 		HiddenChange.register();
 		Caging.register();

@@ -8752,3 +8752,160 @@ is our own take on the idea (none of its code or art).
 - Screens: the patrons screen shows your scars and trials. The rite has its own screen. Loading hints 89-90.
 - Powers 0.20.14: the Hearthkeeper's trial and scar slow every part heal.
 - Built, reviewed, and a dev server boots; not played.
+
+## Patron champion fixes
+- Champions no longer freeze: the cast, turn and sleep timers now run from the entity's own tick, so wind-ups end, phase turns finish, sleeping champions wake near a Wildlands player, and a champion can be killed again. The Skeleton Lord got the same fix.
+- A `/kill` and other invulnerability-bypassing damage now work on a sleeping or turning champion.
+- The patron weapon a champion holds is for show only, so its blow stays the tuned number.
+- A temple champion only counts players inside its leash. An archer beyond it no longer holds off the rest heal and reset.
+- Adds give no experience and no loot.
+- The hunt ends when the quarry dies, even if the player respawns at once.
+- Pulls and pushes now reach the moved player's own client (Undertow, Chain of Truth).
+- The great temple's doorway is on the north side like every blueprint, and the Inquisitor's altar is found at its real height.
+- Temple sites check every chunk under the footprint for a realm's land. The forge-hall tunnel keeps its far wall. The ash-hollow ladders reach down to its floor.
+- Town folk no longer fight, flee or fear a patron's champion, and never count as its foes. A champion no longer turns on its own adds.
+- A reset champion goes back to its champion spot, facing the way out. The ruined cathedral's champion stands before the altar. The deep forge-hall's tunnel now ends in a ladder shaft to the surface.
+- The Forge-Thane's slag cubes no longer split into plain cubes. Summoned and egg champions roll a head too. The smoke double's life and the foe memory are constants.
+- The forge-hall's ladder shaft opens into its tunnel. The forge-hall's tunnel and shaft stay off realm land. A rebuilt great temple keeps its one Inquisitor. Champion wind-ups and turns last their full time. Iron Skin wears a weapon only for blows that land.
+- The town's guards, royals and casters no longer see a sleeping or fighting champion, or its adds, as a foe. Champion max health can now grow past 1024 with the group and tier. Blood Grip and the Unseen Hand leave a champion's weapon alone. Adds that reload from a save are discarded. The smoke double's blind and the foe ranges are constants.
+
+## 0.7.514: the skill web (pack 0.20.15)
+- Andy: "the skill trees need a redesign, something more akin to skyrim or path of exile, where the tree branches far out,
+  and you can easily see where what you pick lands. It should also allow you to more easily branch into other trees for
+  builds ... a large circle with three quadrants for stealth survival and strength." He picked bridge perks on the borders.
+- **K screen** (`SkillScreen`, layout in `client/SkillWeb`): the three pillar tabs and their pages are one web. You sit in the
+  middle; Strength takes the top, Survival the lower right, Stealth the lower left. Every old page is a branch running
+  outward (Will with Killing Intent past it, Combat Arts, Might; Foraging, Medicine; Freerunning, Thievery, Shadows), and a
+  perk's ring is how deep it sits along its requirements. Drag to move, scroll to zoom about the mouse, Recentre fits it all.
+  Pointing at a perk lights its path back to the middle in white and the card says what it needs and what it leads to;
+  pointing at a pillar's crest shows what that pillar levels on. Perks are learnt on click-release (a drag never learns one).
+  Names show on every perk from 1.5x zoom. Attributes and Jobs stay as tabs with their panels.
+- Nothing about the old perks changed: ranks, costs, levels, requirements and per-pillar points are as before, saves untouched.
+- **Bridge perks** (`Bridges`, `Skills.Perk.other`), two per border, opened by a rank in any one of the two perks named
+  (one each side), paid from whichever side has more points (saved as `<perk>@<pillar>` in the ranks map, so each side's
+  points count what it paid; `Skills.forget` undoes them when `/skills set` lowers a pillar):
+  - Stealth/Strength: **Ambusher** (Sneak Attack or Grim Hand; 1 pt): a sneak attack leaves its mark Slowness III and
+    Weakness for 3 s. **Cutthroat** (Assassinate or Last Look; 2 pts): a kill within 1 s of a sneak attack or a hidden
+    blade assassination gives 4 s of Invisibility and Speed.
+  - Strength/Survival: **Iron Hide** (Bulldozer or Rally; 1 pt): +2 armour, +1 toughness. **Beast of Burden** (Packhorse or
+    Iron Stomach; 2 pts): +1 heart, hunger a fifth slower.
+  - Survival/Stealth: **Tracker** (Field Dresser or Climber; 1 pt): anything you wound (not players) bleeds 30 s, a drop of its own blood every 0.75 s (Powers' blood trail, marked as its, `PowersCompat.trailDrop`), so you can follow it (Andy: "they just bleed so you can track them"). **Light
+    Pack** (Plague Doctor or Bar Swing; 2 pts): sneaking and sprinting cost 40% less hunger.
+- Mock-ups: project files `art-overhaul/skill-web/`. Kingdoms compiled with Gradle (compileClientJava); not played.
+
+## 0.7.515: RPG Series class gates (pack 0.20.16)
+- Andy shipped Zsolt Molnar's Wizards, Archers and Rogues & Warriors (Powers' packMods, PR #919). `RpgSeriesGate` answers
+  Spell Engine's cast check (`SpellEvents.CASTING_ATTEMPT.PRE`, both sides) so only the matching class casts their spells:
+  Wizards = Mage; Archers = Archer and Marksman; the rogue book (Slice and Dice, Shock Powder, Shadow Step, Vanish,
+  Mutilate, Bear Trap) = Thief; the warrior book (Shout, Charge, Last Stand, Mortal Strike, Throw, Throw Net) = Warlord,
+  Brute and Rider; the Survivalist also sets the Bear Trap and throws the net. Creative players cast anything. A refused
+  cast shows "Only a Mage can cast this" on the action bar (every 2 s at most). Weapons and armour stay usable by all.
+  Other mods' spells are untouched. Compiled against Spell Engine (compileOnly), never required. Not played.
+
+## 0.7.516: RPG Series spells and forms on the skill web (pack 0.20.16)
+- Andy: spells and moves come only from perks or a trainer. 49 perks appended to `Skills.Perk` (no ordinals moved), in six
+  new branches on the web: **Archery** and **Spellcraft** (arcane, fire, frost chains) in Survival, **Rogue's Arts** and
+  **Knife Arts** in Stealth, **Warfare** and **Weapon Forms** in Strength. Late branches start at ring 3 (`SkillWeb`).
+- `Learnables` maps each perk to its Spell Engine spell or Weapon Form. A class spell perk is locked to its classes (hover
+  shows "For: ..."); Weapon Forms are open to all. Buying a form perk teaches the form; forms learned before are marked
+  taught. Spell Engine reads learned spells from a new source (`RpgSeriesGate`), and the gate refuses spells not learned.
+  Tier 0-1 weapon spells (Arcane Bolt, Fireball, Frost Shard and so on) stay free with the weapon.
+- **Trainers:** veteran drills (`GuardDrills`) and wizard trials (`WizardTrials`, Mage only) teach the next perk free
+  (`@taught` rank: no points, survives a respec). Spell books and the binding table teach nothing. Not played.
+
+## 0.7.517: Brute rage and Enchanted Storage (pack 0.20.16)
+- **Brute rage** (`BruteRage`, Andy; idea from Warrior Rage, all rights reserved, nothing taken): melee blows given (+8%)
+  and taken (+10%) and kills (+25%) fill a meter shown as a thin bar right of the hotbar (`client/BruteRageHud`); it drains
+  5 s after the fight. Full, the Brute roars and rages 12 s: blows +25% and set foes alight 2 s, +0.5 knockback resistance,
+  flames round them; each kill adds 3 s (20 s at most). Then they are spent: Slowness and Mining Fatigue 6 s. The class
+  card lists "Rage +25%".
+- **Enchanted Storage** (`StorageEnchanting`, Andy: wizards enchant storage high on the tree and gain a bag of holding): a
+  3-rank Mage perk atop Spellcraft's arcane column (tier 18, after Arcane Evocation). Sneak-use an enchanting table holding
+  a chest (rank 1: leather Bag of Holding, 3 levels + 2 lapis), a leather bag (rank 2: iron, 6 + 4) or an iron bag
+  (rank 3: golden, 10 + 6); bags keep their contents. Bag of Holding (Fuzs, MPL-2.0) ships in Powers' packMods with its
+  grid recipes dropped. Not played.
+- **Spirit charms** (`spirits/SpiritCharms`, Andy: The Four Houses' spells as "spellcraft perks or moves for the ki
+  spirits"; MIT, ideas only). Disarming and a shield were already the spirits' (Thessaly's Unseen Hand, Ambrose's Aegis),
+  so three new moves: **Petrify** (the Quiet One, level 4: the foe in sight turns to stone 4 s, rooted and weak, dust
+  falling; no bosses), **Guardian Light** (Ambrose, level 5: undead within 12 blocks take 6, burn 4 s, are thrown back),
+  **Turn Back** (Thessaly, level 6: 5 s of arrows and bolts flying at you sent back, now yours). Existing poses. Not played.
+
+## 0.7.518: patron gods, part (c): temples, champions, the patrons' weapons (pack 0.20.18)
+`docs/Patrons-C-Plan.md`. Andy: champions are group fights, "only the strongest can fight alone".
+- **Temples** (`Temples`, `TempleSites`, `TempleBuildings`): once a player is in the Wildlands (or higher), now and then
+  a patron's temple rises out of sight in a place that fits it: the Hearthkeeper's hearth-hall in open country, the
+  Anvil-Father's forge-hall carved deep in the stone or in the Nether's wastes, the Deep Mother's tide-court on pillars by
+  the sea, the Green Huntsman's glade in deep forest, the Lantern Warden's graveyard and crypt (or a vault in the soul
+  valleys), the Crowned Sun's sun-court on high ground or in the Aether, the Ash Whisperer's hollow (hidden under dry
+  country, or in the basalt deltas), and the Truth's ruined cathedral. A Faith-creed kingdom's capital builds the Truth's
+  **great temple** (`GreatTemple`). Each altar is the patron's shrine; coming near teaches you the patron.
+- **Champions** (`PatronChampion`, `PatronChampions`, `champions/`): each temple's champion sleeps at its altar as a
+  statue and wakes for a Wildlands player (the great temple's only when struck). Group fights: health and blows grow
+  with every player near (up to six) and with the world tier; a group of three or more brings a fourth phase. Three moves
+  each, opened by the phases, all telegraphed: the Hearth-Warden, the Forge-Thane, the Tide-Bride, the Antlered Hunter,
+  the Grave-Lamp, the Sun-Marshal, the Cinder-Shade and the Inquisitor. A boss bar, the posture bar, great-foe credit. It
+  leashes to its temple, resets when everyone leaves, and stands again three days after it falls.
+- **The patrons' weapons**: a fallen champion drops its patron's iron head for each fighter, at the latest on their
+  third kill (34%, 50%, sure), Perfect (a solo kill's a Masterwork). Put together at the Tool Station (Powers 0.20.18).
+- **The hunt** (part (b)'s mark): after the trials, the patron you left sends its champion once, in a weaker hunting
+  form, outside any town. Kill it (the new patron is pleased) or fall to it, and the hunt is over; outrun it and it comes
+  again.
+- Loading hints 91-92.
+- Built (both mods compile); not played.
+
+## 0.7.519: diplomacy and elections (pack 0.20.19)
+Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its code or art). Plan: `docs/Diplomacy-Plan.md`.
+- **Treaties:** free realms sign four kinds, each for a while and renewable (`Treaties`):
+  - **Recognition** (30 days): tension eases 3 a day, and they don't fall into rivalry. Every other kind needs it.
+  - **Safe passage** (10): the partner's people aren't halted, searched or tolled by the guards, and the ruler's
+    retinue lets them by.
+  - **Trade charter** (15): partner caravans go more often (60% of the wait), take an extra cart and come home 20
+    points fuller, and are preferred. The partner's people get 10% off at traders and pay half the gate toll.
+  - **Aid** (20): when either goes to war, the other is pledged to its side like a great war's ally (its soldiers join
+    the war parties, it shares spoils and reparations). Already at war elsewhere, it sends up to 100 from its treasury.
+  Vassals share their overlord's treaties.
+- **Envoys** (`Envoys`): NPC kingdoms send envoys once a day by creed (Coin wants charters, Conquest aid...). Courts
+  weigh offers by temper, creed, friction, tension, rivalry, a truce, a common foe, blood (purists) and, for a player
+  realm, your reputation. Envoys ride the King's Roads like couriers, with the realm's banner; you can meet them. Kill
+  one and the sender (-200) and the land's realm (-60) remember. Envoys are never drafted as guards or rulers.
+- **Players' realms:** an envoy waits up to two days in your hall and you get a letter. "Hear the Envoy" (MCA Interact
+  page; right-click without MCA) offers Sign, Refuse or Not yet. Seek an audience with your own steward for the Ruler's
+  Desk: the realms in reach, their creed, relation and tension, the treaties in force (Renounce), each kind's odds, and
+  Send an Envoy (20 from the treasury, the rest from your purse).
+- **Breaking faith:** declaring war on a partner, or renouncing, tears treaties up: +25 tension, +8 with the breaker's
+  other partners. A player sovereign loses 150 reputation with the wronged realm and 30 with each other partner. NPC
+  tyrants and warlords may break faith when tension boils over; others hold their hand.
+- **News:** the town boards carry every treaty; the Tidings only aid, a player realm's treaties, great charters,
+  broken faith and war.
+- **Succession** (`Elections`, MCA realms): Coin realms elect, and Warriorborn/Frostborn realms of the Old Blood or
+  Conquest acclaim at a moot. Notables are the grown townsfolk (profession level, guard service, kin to the late
+  ruler, a gift, temper, luck) and sworn players of Knight rank or higher; a player who wins wears the crown with the
+  old steward. In other realms blood inherits, but a child heir gets a regent (the best councillor) until they come of
+  age; then the regent steps down. If the child dies, the regent rules on. A teen is never crowned outright now.
+- **Ruler info** (MCA interact screen): how the realm chooses its rulers, how this one came to the throne, "Regent for
+  ...", and its treaties (hover for the list).
+- Loading hint 93 (89-92 belong to other open PRs and show raw until those merge). Not played; compile-checked with
+  `kingdoms/gradlew build`.
+
+### Fixes: desk, aid coin, wording
+- The Ruler's Desk now stays open: seeking an audience with your own steward no longer opens the quest screen over it
+  (`KingdomEvents.audience` reports that the desk opened; `Rulers.audience` and `Folk` skip `Quests.open`).
+- Renewing a treaty of aid no longer charges an ally's coin again; it is paid once, when the aid is first signed or the
+  war begins.
+- The aid-in-coin board line and the Ruler's Desk treasury and envoy cost now name the realm's coin (the Desk packet
+  carries the worded amounts).
+- Election score: the reputation divisor and cap are now constants (`PLAYER_REP_DIV`, `PLAYER_REP_MOST`).
+- Ruler's Desk: a full road or a closed kind now says so, instead of "your envoy is on the road".
+- Player-crowned realms no longer send envoys or sign treaties on their own in the daily round.
+- A ward who comes of age at the regent's death is now announced on the board.
+- A chartered allied pair no longer loses the trade friction twice.
+
+## 0.7.520: RPG Series kit for starts, guards, archers and wizards (patch 3)
+- `RpgKit` looks up the Wizards, Archers and Rogues & Warriors items (old gear stays without them).
+- **Class starts** (`Classes.gear`): Thief + flint dagger, rogue's tunic and boots; Warlord warrior's chest; Mage the
+  wand of their school (warding = frost, mending = novice) and the wizard's hat and robe; Archer a small quiver and
+  archer's hood and boots; Brute berserker's chest; Marksman + rapid crossbow and 16 arrows, archer's tunic.
+- **Guards** (`Outfits.guard`): veterans carry an iron glaive (30%, with their shield) or an iron double axe (15%,
+  two-handed). **Archers**: in temperate lands the Archers' hood (40%) and tunic (50%) instead of the dyed leathers.
+- **Court wizards and hermits** wear the Wizards' pointed hat over the realm's robes; a slain court wizard drops a
+  school's wand 35% of the time, besides the staff. Not played.

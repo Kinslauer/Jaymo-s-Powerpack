@@ -5325,6 +5325,54 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.20.14, Kingdoms 0.7.513, patron gods part (b)** (plan `docs/Patrons-B-Plan.md`; see `kingdoms/MODLOG.md`): Powers only gets
   `Wounds.healPart` reading Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection (`MedicineSkill.blessing`): the
   Hearthkeeper's trial and scar on one who turned from it slow every part heal. Not played.
+
+- **0.20.15**: no Powers change; pack bump for Kingdoms 0.7.514 (the skill web: one radial K screen, six bridge perks).
+- **0.20.16, Zsolt's RPG Series (patch 0)** (plan in project files `rpg-series-study/RpgSeries-Plan.md`): Andy chose to ship
+  Wizards, Archers and Rogues & Warriors (all rights reserved, unchanged, downloaded by id) with Spell Engine (GPL-3.0),
+  Spell Power (LGPL-3.0), Runes and the small MIT APIs (armour models, ranged weapons, structure pools, bundles) in packMods.
+  - **No Trinkets:** `compat/SpellEngineCompat` hands Spell Engine every worn bauble as a spell source and as an ammo
+    container, so a quiver worn in the body slot feeds bows. Spell Engine's ring, necklace, trinket and quiver tags join
+    our ring, amulet, charm and body tags. The worn list now syncs to its wearer. No slot for spell books: spells are
+    learned on Kingdoms' skill web or from a trainer (Kingdoms 0.7.516), and the Spell Binding Table's recipe is dropped.
+  - **Forged:** Rogues' dagger, sickle, double axe, glaive and Archers' spear (stone, iron, gold) come from new heads
+    (`WeaponParts`: rogue_dagger_blade, sickle_blade, double_axe_head, war_glaive_blade, ranger_spear_tip, drawn in
+    `tools/weapon_parts_assets.py`); their grid recipes and the diamond ones' are dropped (`Uncraftable.RPG_SERIES`).
+    Flint daggers and spears stay in the grid.
+  - **Keys:** Spell Engine's "use the item, not the spell" key moves off Left Alt (OK Zoomer) to mouse side button 2
+    (`KeyConflicts` v6). Class gates and skill-web perks come in the next patches. Built, not played.
+- **0.20.16, parry sound** (Andy): every guard parry (`Guard.parried`) rings steel instead of the pitched anvil, from
+  "Updated Parry Sound - MedievalWeapons" (MIT, CurseForge 522501) whose two clips are Eelke's CC0 freesound 523521
+  (`sounds/guard/parry_1|2.ogg`, event `jaymospowers:guard.parry`); a quiet shield thud stays under it. Z Fighter
+  bare-hand blocks keep their punches.
+- **0.20.16, Bag of Holding** (Fuzs, MPL-2.0, 26.3.5, Item Interactions bundled) in packMods; its three grid recipes are
+  dropped (`Uncraftable.RPG_SERIES`) because Kingdoms' Mages make bags with the Enchanted Storage perk (0.7.517).
+- **0.20.17, Carry On carries blocks** (Andy: "We need to swap our block carrying for this"): Carry On 2.12.1 (LGPL-3.0,
+  Tschipp; official Fabric 26.3 build, shipped unchanged, Modrinth `d0jTyKNs`, CurseForge 274259/9420425) is in
+  `packMods`. Sneak + right-click a chest, furnace, barrel or any other block with something in it, empty hands, to lift
+  it with its contents; right-click to set it down (its own config, `config/carryon-common.json`; `pickupAllBlocks` off,
+  so anvils no longer lift; crafting tables still do, since Kitchen gives them a block entity).
+  - Our own block lifting is gone: `CarryBlock.carriable` is now only the space pod's parts (they're set onto a pod or a
+    salvage rack, which Carry On can't do). The placed-block tracking (`CarryBlockItemMixin`, `markPlaced`) is removed;
+    the `carry_placed` chunk attachment stays registered so old chunks load quietly. Duplex's fetch and the Bound Block
+    still use `CarryBlock.liftableAny` / `takeOut` / `place` / `land`.
+  - Bodies stay ours (`core/Carry`). `core/CarryOnCompat` reads Carry On's state by reflection and
+    `mixin/carryon/CarryOnPickupMixin` (`@Pseudo`, optional `jaymospowers.carryon.mixins.json`) makes its
+    `PickupHandler` never lift an entity, never lift while our carry, a Kitchen corpse, being carried, thrown or downed
+    has your arms, and never lift a `#jaymospowers:carry_on_no_lift` block (pod parts, salvage rack, smeltery controller
+    and drain, kiln load, sentry spawner, infusion matrix; optional: Kingdoms' bounty board, pulley and plot stake,
+    Kitchen's windmill and waterwheel). With a block in Carry On's arms you can't pick up a body or a corpse (a
+    `UseEntityCallback` phase ahead of ours), grab a ledge, take a part off a salvage rack, and our first-person arm
+    poses step aside; it counts as carrying for Z Fighter strength training.
+  - Not played.
+- **0.20.18, Kingdoms 0.7.518, patron gods part (c)** (plan `docs/Patrons-C-Plan.md`; see `kingdoms/MODLOG.md`): **The patrons' weapons** (`armory/PatronWeapons`): Hearthguard (blows heal you and those near),
+  Anvil-Father's Hammer (blows strip armour), Tidecaller (use: drag foes in), Huntsman's Spear (marks prey), Gravelight
+  (burns the undead), Sunbrand (use: the sun on a foe), Ashfang (use: smoke and a leap back, then a deep cut), The Plain
+  Word (strips blessings, shows the unseen). Heads from Kingdoms' champions only (`WeaponParts.PATRONS`: never cast or
+  forged), put together at the Tool Station, graded. Stronger for that patron's sworn (Kingdoms'
+  `Patrons.blessing(player, "patron_weapon/<key>")` by reflection, `KingdomsCompat.blessing`), cold while you're in
+  its trials.
+  The Sunbrand's Judgement stops at the first block in the way, so it can't mark a foe behind a wall. Not played.
+- **0.20.19**: no Powers change; pack bump for Kingdoms 0.7.519 (diplomacy and elections: envoys, treaties, elected rulers and regencies).
 - **0.20.15, Ultimates patch 1: six more Ultimates, each its own alien** (`docs/Ultimates-Plan.md`; Titan from 0.20.9 is the pattern). Each is a `XenoUltimate` with its own body, health bar, R G V B and C, a model in `client/.../ultimate/`, a 128x128 skin from `tools/ultimates/<id>.py` (all run by `tools/gen_xeno_ultimates.py`), and a film part order. The base aliens lost their old 0.18.93 Ultimate-only code and now return the new form from `evolved()`; their models and skins are unchanged.
   - **Pyre -> Sunheart** (1.25x, +10 hearts): R Sunray (held beam, 16 blocks), G Sun Jet (hover, Sprint streaks as a comet that ignites what it passes), V Blaze Nova (7 blocks, 8 damage, knockback, burn), B Lava Wake (8 s of fire and magma underfoot that turns back), C Corona (10 blocks, 10 damage and burning, blinds players, melts snow and ice, ring of fireballs).
   - **Velox -> Standstill** (1.15x, +8 hearts): R Overdrive, G Thousand Blows (12 blows), V Vortex (lifts and holds, then throws outward), B Flicker Storm (up to 8 foes, then back), C Standstill (8 s, 24 blocks, Speed III).

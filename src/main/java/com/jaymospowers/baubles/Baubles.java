@@ -56,7 +56,9 @@ public final class Baubles {
 	public enum Kind {
 		AMULET("amulet"), RING("ring"), BELT("belt"), HEAD("head"), BODY("body"), CHARM("charm"),
 		/** (0.19.87) Bracelets. Added last so saved lists of seven still load. */
-		WRIST("wrist");
+		WRIST("wrist"),
+		/** (Artifacts) Shoes, slippers and flippers. Added after the wrist so saved lists of eight still load. */
+		FEET("feet");
 
 		public final String id;
 		public final TagKey<Item> tag;
@@ -67,15 +69,17 @@ public final class Baubles {
 		}
 	}
 
-	/** Which kind each of the eight slots takes. */
-	public static final Kind[] SLOTS = {Kind.AMULET, Kind.RING, Kind.RING, Kind.BELT, Kind.HEAD, Kind.BODY, Kind.CHARM, Kind.WRIST};
+	/** Which kind each of the nine slots takes. */
+	public static final Kind[] SLOTS = {Kind.AMULET, Kind.RING, Kind.RING, Kind.BELT, Kind.HEAD, Kind.BODY, Kind.CHARM, Kind.WRIST, Kind.FEET};
 	public static final int SIZE = SLOTS.length;
 	/** How often (ticks) worn bonuses are checked again, besides whenever the slots change. */
 	static final int REFRESH_TICKS = 20;
 
-	/** On a player: what they wear in the seven slots (server; the screen syncs what it shows). */
+	/** On a player: what they wear in the slots (saved on the server, synced to the wearer). */
 	public static final AttachmentType<List<ItemStack>> WORN = AttachmentRegistry.create(JaymosPowers.id("baubles"),
-		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath());
+		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath()
+			// (RPG Series) synced to the wearer too: Spell Engine reads worn quivers on the client as well
+			.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
 	/**
 	 * (Motion patch 4) On a player: the worn things others see, synced to everyone for drawing them: the lantern hung
@@ -126,6 +130,8 @@ public final class Baubles {
 		LANTERN_POLE = bauble("lantern_pole", Kind.BODY, Rarity.COMMON);
 		// (0.20.12) the pink fairy, caught in a bottle
 		Fairies.init();
+		// (Artifacts) the Artifacts mod's 45 baubles, ported (MIT), and where they are found
+		com.jaymospowers.baubles.artifacts.ArtifactBaubles.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		BaublesNet.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -172,7 +178,7 @@ public final class Baubles {
 	 * open bauble screen and the saved slots stay the same objects: a worn totem used up while the screen is open
 	 * (FriendsAndFoesCompat) can't come back when it closes.
 	 */
-	static void setWorn(ServerPlayer player, List<ItemStack> stacks) {
+	public static void setWorn(ServerPlayer player, List<ItemStack> stacks) {
 		List<ItemStack> copy = new ArrayList<>(SIZE);
 		for (int i = 0; i < SIZE; i++) {
 			copy.add(i < stacks.size() ? stacks.get(i) : ItemStack.EMPTY);
@@ -188,6 +194,37 @@ public final class Baubles {
 	/** Whether {@code stack} may go in slot {@code slot}. */
 	public static boolean fits(int slot, ItemStack stack) {
 		return slot >= 0 && slot < SIZE && stack.is(SLOTS[slot].tag);
+	}
+
+	/**
+	 * (Artifacts) Whether this player wears {@code item} in a slot that takes it, without copying the list. Works on the
+	 * server, and on the client for the local player (the worn list syncs to its wearer).
+	 */
+	public static boolean wears(Player player, Item item) {
+		List<ItemStack> saved = player.getAttached(WORN);
+		if (saved == null) {
+			return false;
+		}
+		for (int i = 0; i < saved.size() && i < SIZE; i++) {
+			ItemStack stack = saved.get(i);
+			if (stack.is(item) && fits(i, stack)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The worn stack of {@code item} (live), or empty: for cooldowns, which are keyed by the stack. */
+	public static ItemStack wornStack(Player player, Item item) {
+		List<ItemStack> saved = player.getAttached(WORN);
+		if (saved != null) {
+			for (int i = 0; i < saved.size() && i < SIZE; i++) {
+				if (saved.get(i).is(item) && fits(i, saved.get(i))) {
+					return saved.get(i);
+				}
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 
 	/** Whether this player wears {@code item} in any slot (server). */

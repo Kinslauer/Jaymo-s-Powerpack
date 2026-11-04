@@ -4,6 +4,17 @@
     "jaymospowers:heartstone_amulet",
     "jaymospowers:bottled_fairy",
     "jaymospowers:runic_amulet",
-    "jaymospowers:gem_amulet"
+    "jaymospowers:gem_amulet",
+    {
+      "id": "#spell_engine:spell_necklace",
+      "required": false
+    },
+    "jaymospowers:lucky_scarf",
+    "jaymospowers:scarf_of_invisibility",
+    "jaymospowers:cross_necklace",
+    "jaymospowers:panic_necklace",
+    "jaymospowers:shock_pendant",
+    "jaymospowers:flame_pendant",
+    "jaymospowers:thorn_pendant"
   ]
 }

@@ -442,7 +442,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			}
 		});
 		// (0.5.21) the working folk keep out of monsters' way, as villagers do
-		this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.AvoidEntityGoal<>(this, net.minecraft.world.entity.monster.Monster.class, AVOID_RANGE, 0.8, PANIC_SPEED) {
+		this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.AvoidEntityGoal<>(this, net.minecraft.world.entity.monster.Monster.class, AVOID_RANGE, 0.8, PANIC_SPEED, m -> !PatronChampions.outsideTown(m)) {
 			@Override
 			public boolean canUse() {
 				return !Folk.this.combatant() && super.canUse();
@@ -496,7 +496,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 					|| Accusations.wolfExposed(player))));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
-			(target, level) -> this.combatant() && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)
+			(target, level) -> this.combatant() && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper) && !PatronChampions.outsideTown(target)
 				// (0.6.11) and whatever the symbiote has got into (Oddities)
 				|| Oddities.hunted(target)
 				// (0.7.0) and a vampire that's shown itself tonight (Vampires)
@@ -772,9 +772,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				// (0.5.27) a goblin grunts back at one of its own
 				Disguise.greet(level, serverPlayer, this);
 			}
-			KingdomEvents.audience(serverPlayer, this);
-			// (0.5.29) a king also has work for you
-			if (this.role() == KING) {
+			boolean desk = KingdomEvents.audience(serverPlayer, this);
+			// (0.5.29) a king also has work for you (not over the sovereign's desk)
+			if (!desk && this.role() == KING) {
 				Quests.open(serverPlayer, this);
 			}
 			// (0.5.52) a court wizard can unmake what you've learned, for a price

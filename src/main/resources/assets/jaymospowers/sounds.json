@@ -1405,5 +1405,22 @@
 				"name": "jaymospowers:voice/symbiote/say_white_tug_3"
 			}
 		]
+	},
+	"guard.parry": {
+		"sounds": [
+			{
+				"name": "jaymospowers:guard/parry_1"
+			},
+			{
+				"name": "jaymospowers:guard/parry_2"
+			}
+		]
+	},
+	"artifacts.fart": {
+		"subtitle": "subtitles.jaymospowers.artifacts.fart",
+		"sounds": [
+			"jaymospowers:artifacts/fart1",
+			"jaymospowers:artifacts/fart2"
+		]
 	}
 }

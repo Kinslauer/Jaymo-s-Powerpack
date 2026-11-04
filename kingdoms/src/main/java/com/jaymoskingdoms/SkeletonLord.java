@@ -151,6 +151,7 @@ public class SkeletonLord extends Monster {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		this.stepTick = this.tickCount;
 		if (this.dormant()) {
 			Player near = level.getNearestPlayer(this, WAKE_RANGE);
 			if (near != null && !near.isSpectator() && !near.isCreative() && this.hasLineOfSight(near)) {
@@ -225,6 +226,18 @@ public class SkeletonLord extends Monster {
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 1.5, this.getZ(), 60, 0.5, 1.0, 0.5, 0.3);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.HOSTILE, 2.0F, 0.6F);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 0.8F, 1.4F);
+	}
+
+	/** The tick the AI step last ran, so the immobile fallback in aiStep does not run it twice. */
+	private int stepTick = -1;
+
+	/** Being immobile skips the server AI step, so the timers that end those states run here instead. */
+	@Override
+	public void aiStep() {
+		super.aiStep();
+		if (this.level() instanceof ServerLevel level && this.isAlive() && this.isImmobile() && this.stepTick != this.tickCount) {
+			this.customServerAiStep(level);
+		}
 	}
 
 	/** Asleep, laughing or casting, he stands where he is. */

@@ -260,6 +260,10 @@ public final class CourtWizards {
 	 */
 	static boolean foe(Enlisted w, LivingEntity e) {
 		PathfinderMob mob = w.mob();
+		// (0.8.x) a patron's champion and its adds are never the town's fight
+		if (PatronChampions.outsideTown(e)) {
+			return false;
+		}
 		if (e == mob || !e.isAlive() || e instanceof Player p && (p.isCreative() || p.isSpectator()) || ally(w, e) || Thralls.refuses(mob, e)
 			// (0.7.384) the practice foes of a drill or a trial are the player's to beat, never the wizard's
 			|| com.jaymoskingdoms.forms.WizardTrials.practiceFoe(e)) {
@@ -292,6 +296,10 @@ public final class CourtWizards {
 			// (0.6.0) and, as often as not, his staff: a Mage's "find one"
 			if (level.getRandom().nextFloat() < Classes.STAFF_DROP_CHANCE) {
 				w.mob().spawnAtLocation(level, new ItemStack(Arcana.WIZARD_STAFF));
+			}
+			// (0.7.520) and now and then the wand of their school (Wizards)
+			if (level.getRandom().nextFloat() < RpgKit.WIZARD_WAND_DROP) {
+				RpgKit.randomWand(level.getRandom()).ifPresent(wand -> w.mob().spawnAtLocation(level, new ItemStack(wand)));
 			}
 		}
 		FOES.remove(w.mob());
