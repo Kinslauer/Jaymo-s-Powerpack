@@ -259,6 +259,9 @@ final class McaBridge {
 			// (at the contract's end MCA keeps a mercenary only if nextInt(requirement) < hearts)
 			v.getVillagerBrain().getMemoriesForPlayer(player).setHearts(Math.max(Strangers.TRUSTED_HEARTS, Config.getInstance().marriageHeartsRequirement));
 			v.getVillagerBrain().setMoveState(net.conczin.mca.entity.ai.MoveState.FOLLOW, player);
+			// (0.7.510, Andy: "the nobodies ... you do know each other") old companions, not strangers: names known both ways
+			Introductions.learn(player, v);
+			met(v, player);
 			made++;
 		}
 		return made;
