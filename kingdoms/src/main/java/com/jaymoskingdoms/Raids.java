@@ -151,12 +151,6 @@ final class Raids {
 		return ab != null && ab.target == b || ba != null && ba.target == a;
 	}
 
-	/** (0.7.484) The settlement camp {@code camp}'s raid is on just now, or -1. */
-	static int targetOf(int camp) {
-		Raid raid = ACTIVE.get(camp);
-		return raid == null ? -1 : raid.target;
-	}
-
 	/** (0.7.443) Settlement {@code target} has a raid on it just now. */
 	static boolean raided(int target) {
 		return ACTIVE.values().stream().anyMatch(r -> r.target == target);
