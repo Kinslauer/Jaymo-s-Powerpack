@@ -60,7 +60,7 @@ public final class HandshakePose {
 	/** (0.7.504) What a pose is: a shake, a dap, a wave, a bow or a nod. */
 	static final float SHAKE = 0.0F, DAP = 1.0F, WAVE = 2.0F, BOW = 3.0F, NOD = 4.0F;
 	/** Head bowed a touch while shaking (radians). */
-	static final float NOD = 0.12F;
+	static final float SHAKE_NOD = 0.12F;
 	/** The ease: stiffness (per second squared), damping ratio, the longest step (seconds). */
 	static final float STIFFNESS = 60.0F, DAMPING = 0.85F, MAX_DT = 0.1F, SUBSTEP = 0.008F;
 
@@ -214,7 +214,7 @@ public final class HandshakePose {
 			float g = (t - Handshakes.GRIP_TICK) / (Handshakes.RELEASE_TICK - Handshakes.GRIP_TICK);
 			// the pumps start and end gently
 			pump = Mth.sin(g * PUMPS * Mth.TWO_PI) * PUMP * Mth.sin(g * Mth.PI);
-			nod = NOD * Mth.sin(g * Mth.PI);
+			nod = SHAKE_NOD * Mth.sin(g * Mth.PI);
 		}
 		arm.xRot = Mth.lerp(w, arm.xRot, REACH + pump);
 		arm.yRot = Mth.lerp(w, arm.yRot, REACH_IN);

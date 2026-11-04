@@ -8647,3 +8647,8 @@ Andy: "the particle effect for attack indicators should be more visible, and a s
   through `PowersCompat.tellGlint`: a full-bright star in the tell's colour (white parry, red heavy) with a white heart, and
   Time Flow's warning bell (high for parryable, low with a drum for heavy). Without Powers the old dust stays and a bell
   plays with it. The gun's flint click stays on top.
+
+## 0.7.506: builds again (pack 0.20.5)
+
+- A merge left `client/HandshakePose` with two `NOD` constants (the nod pose and the head tilt while shaking hands), so
+  the client didn't compile. The head tilt is now `SHAKE_NOD`; nothing changes in game.

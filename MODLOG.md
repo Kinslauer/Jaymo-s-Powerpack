@@ -5256,3 +5256,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     `OVERSHOOT`, `SPIN` in `TellGlintParticle`.
   - Compile-checked in the cloud (Gradle `compileClientJava`); not played. Preview:
     `art-overhaul/attack-tells/tell-glint-preview.png` in the project files.
+- **0.20.5, graded swords no longer crash the server (Kingdoms 0.7.506):** an Expert, Perfect or Master grade multiplied every mining
+  rule on a sword-like item, and the instant-mine rule (bamboo, `Float.MAX_VALUE`) overflowed to Infinity, which the
+  game can't sync or save. The first such item (a graded WeaponMod copper boomerang) crashed the server when its owner
+  moved it in their inventory. `Grades.bake` now caps a scaled speed at `Float.MAX_VALUE`. Kingdoms 0.7.506 builds again:
+  a merge left `HandshakePose` with two `NOD` constants, so the handshake's head tilt is now `SHAKE_NOD`.
