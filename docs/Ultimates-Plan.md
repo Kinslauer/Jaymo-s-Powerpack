@@ -171,7 +171,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
   - The hit is cancelled, the film plays, and you are the Ultimate with its full health. Once per change.
   - It then lasts for the rest of the random timer. When the timer ends, you go back to human as today.
   - C as the Ultimate is its big move as usual; hold C drops back (and the last stand is spent for that change).
-- **Reforged band:** C changes you in at will. It lasts until the charge runs out: each tick as the Ultimate also takes `ULT_DRAIN` off `ticksLeft` (`ULT_DRAIN = 1` doubles the burn).
+- **Reforged band** (Andy picked "C at will once reforged", 2026-11-04): C changes you in at will. It lasts until the charge runs out: each tick as the Ultimate also takes `ULT_DRAIN` off `ticksLeft` (`ULT_DRAIN = 1` doubles the burn).
   - Do it directly in `tick` with the same `charged()`/creative guard, not through `drain()`. `drain` → `spend` sets `hudDirty` on every call, which would re-sync the HUD every tick.
   - Hits (`HURT_DRAIN`) and moves (`MOVE_DRAIN`) drain as usual.
   - The last stand still works on a reforged band too, so a player caught by a boss with C on cooldown is saved once.
