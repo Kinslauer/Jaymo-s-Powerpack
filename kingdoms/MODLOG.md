@@ -8925,3 +8925,7 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
     on all four sides at its level, is cleared to air (fluids and block entities left alone). Pieces placed inside it
     (the taverns' tables and stalls) keep their blocks. Accessors `SinglePoolElementAccessor`, `StructureTemplateAccessor`.
     New chunks only: a tavern already generated stays as it is. Compile-checked; not played.
+- **0.7.534, the Nobodies' rags:** the Nobodies start's three hired hands wore a pirate deckhand's striped shirt and
+  bandana. `Uniforms.POOR` is now six roughspun tunics with a belt and dark breeches, no hat (undyed linen, dun, grey,
+  russet, weld green, woad; `tools/gen_nobody_rags.py`, drawn over the deckhands' slops). Nobodies already hired in a
+  deckhand's slops change when they load. Not compiled or played yet.
