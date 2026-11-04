@@ -28,20 +28,20 @@ import org.jspecify.annotations.Nullable;
  * (0.7.513) Atroxiia, the frost wyrm of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and numbers
  * are ported from Saint's Dragons by Leon Saint (MIT licence; none of its art, models or sounds are used: the model is
  * our own, {@code AtroxiiaDragonModel}, painted by {@code tools/gen_atroxiia.py}). A walker and a swimmer
- * ({@link WindDragon#swims}) of the snowfields and the cold coasts: tall and gaunt, a long serpent's neck, a ridge of ice
- * down its back and a tail that arches over its hips into a spear of ice. It leaves frozen water where it strolls, and
- * only fights whoever hurts it.
+ * ({@link WindDragon#swims}) of the snowfields and the cold coasts: a pale serpent with no hind legs, raised on two
+ * great arms and its own long tail, which arches over its back into a gold-bound spear of ice. Its head wears a striped
+ * nemes cloth and gold band. It leaves frozen water where it strolls, and only fights whoever hurts it.
  * <p>
  * Its moves, besides the bite and the tail sweep every dragon has:
  * <ul>
- * <li><b>Slam:</b> a forefoot stamped down before it ({@link #SLAM}).</li>
+ * <li><b>Slam:</b> a fist brought down before it ({@link #SLAM}).</li>
  * <li><b>Swipe:</b> a quick claw swung across ({@link #SWIPE}), knocking them aside.</li>
  * <li><b>Precise strike:</b> at a few blocks, three quick jabs of the tail spear that drag them in ({@link #STRIKE} each),
  * the last one stunning them.</li>
  * <li><b>Gungnir:</b> it draws the spear back over its shoulder, lunges and drives it through everything in a line
  * ahead ({@link #GUNGNIR}, a stun).</li>
  * <li><b>Devastating sweep:</b> pressed close, it spins the tail round in a wide ring ({@link #SWEEP_HIT}).</li>
- * <li><b>Helheim quake:</b> it rears and brings both forefeet down twice: the ground shakes for {@link #QUAKE_RADIUS}
+ * <li><b>Helheim quake:</b> it rears and brings both fists down twice: the ground shakes for {@link #QUAKE_RADIUS}
  * blocks round it (anyone on their feet is hurt and thrown, the second one stuns them long) and the water near freezes.</li>
  * </ul>
  * Tamed and ridden it's steered like a horse on land and swims where the rider looks in water; R drives Gungnir where
@@ -163,17 +163,17 @@ public class AtroxiiaDragon extends WindDragon {
 
 	@Override
 	protected Vec3 seat(int index) {
-		return new Vec3(0.0, 3.0, index == 0 ? 0.3 : -0.5);
+		return new Vec3(0.0, index == 0 ? 3.5 : 3.3, index == 0 ? 0.36 : -0.9);
 	}
 
 	@Override
 	protected double mouthAhead(boolean flying) {
-		return 3.9;
+		return 3.3;
 	}
 
 	@Override
 	protected double mouthUp(boolean flying) {
-		return 4.3;
+		return 4.1;
 	}
 
 	@Override

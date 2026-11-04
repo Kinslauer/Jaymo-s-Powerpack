@@ -181,6 +181,8 @@ public abstract class WindDragon extends AbstractHorse {
 	// ---- the client's smoothed animation (see the model) ----
 	public float flyAnim, flyAnimO, breathAnim, breathAnimO, landAnim, landAnimO, sitAnim, sitAnimO, crashAnim, crashAnimO;
 	public float flapPhase, flapPhaseO, glideAnim, glideAnimO, pitchAnim, pitchAnimO, swimAnim, swimAnimO;
+	/** (0.7.513) How far it has risen onto its hind legs ({@link #standing}), eased, for its model. */
+	public float standAnim, standAnimO;
 	/** (0.7.513) The move the model is playing ({@link #action}) and how many ticks it has been playing it. */
 	public int actionSeen, actionAge;
 
@@ -410,6 +412,11 @@ public abstract class WindDragon extends AbstractHorse {
 	 * carries its riders' air.
 	 */
 	public boolean swims() {
+		return false;
+	}
+
+	/** (0.7.513) Whether it stands up on its hind legs now (Varasuchus raging); read on the client from what's synced. */
+	protected boolean standing() {
 		return false;
 	}
 
@@ -1422,6 +1429,7 @@ public abstract class WindDragon extends AbstractHorse {
 		this.glideAnimO = this.glideAnim;
 		this.pitchAnimO = this.pitchAnim;
 		this.swimAnimO = this.swimAnim;
+		this.standAnimO = this.standAnim;
 		boolean air = this.airborne();
 		if (this.flyAnim > 0.5F && !air && this.onGround()) {
 			this.landAnim = 1.0F;
@@ -1440,6 +1448,7 @@ public abstract class WindDragon extends AbstractHorse {
 		float pitch = air ? (float)Mth.clamp(-v.y * 1.2, -0.6, 0.6) : 0.0F;
 		this.pitchAnim += (pitch - this.pitchAnim) * 0.2F;
 		this.swimAnim = Mth.approach(this.swimAnim, this.isInWater() && !air ? 1.0F : 0.0F, 0.1F);
+		this.standAnim = Mth.approach(this.standAnim, standing() ? 1.0F : 0.0F, 0.05F);
 		int action = action();
 		if (action != this.actionSeen) {
 			this.actionSeen = action;

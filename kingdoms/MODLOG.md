@@ -8750,14 +8750,14 @@ and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
   floats with its back out and dives straight at whoever it fights there; ridden in water it swims where you look (W
   ahead, Space up and out at a bank, Shift down, S brakes) and keeps its riders' air topped up. Shared helpers for the
   lesser dragons' moves: `spareable`, `inFront`, `fighting`, `stun` (rooted and heavy-handed, stars over the head).
-- **Atroxiia** (`AtroxiiaDragon`, `jaymoskingdoms:atroxiia_dragon`): a tall, gaunt frost wyrm (3 x 4.3 blocks, its head
-  about 4.5 up) of the snowy plains, ice spikes, snowy taiga, snowy beaches and frozen rivers (`has_atroxiia_dragon`),
+- **Atroxiia** (`AtroxiiaDragon`, `jaymoskingdoms:atroxiia_dragon`): a pale serpent wyrm on two great arms and its tail, no
+  hind legs (3 x 4.3 blocks, its head about 4.5 up) of the snowy plains, ice spikes, snowy taiga, snowy beaches and frozen rivers (`has_atroxiia_dragon`),
   alone and rare. 200 health, armour 10, a grazer that fights only whoever hurts it, and it leaves frosted ice on still
-  water where it strolls. Besides the bite and the tail sweep: a forefoot **slam** (16), a claw **swipe** (12), the
+  water where it strolls. Besides the bite and the tail sweep: a fist **slam** (16), a claw **swipe** (12), the
   **precise strike** (three jabs of its tail spear at 3-6 blocks, 9 each, dragging them in, the last a 2 s stun),
   **Gungnir** (the spear drawn back, a lunge, and driven through everything in an 8-block line: 40 and a stun), the
   **devastating sweep** (pressed close: the tail spun round, 13 in a ring of 7, a big throw) and the **Helheim quake**
-  (at range, or freely once below half: it rears and comes down twice, 25 to everyone on their feet within 9, the second
+  (at range, or freely once below half: it rears and brings both fists down twice, 25 to everyone on their feet within 9, the second
   a 5 s stun, and the water round it freezes). Raw cod its favourite, Frostborn twice as fast; ridden, R is Gungnir
   where you look (5 s).
 - **Varasuchus** (`VarasuchusDragon`, `jaymoskingdoms:varasuchus_dragon`): a crocodile dragon (4 x 3.3 blocks, its back
@@ -8770,15 +8770,18 @@ and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
   Below half it **rages**: bites 25, horns 15.8, claws 12, every move a third quicker. Raw salmon its favourite, Tideborn
   twice as fast; ridden, R charges (a burst of pace, goring whoever it reaches, 4 s).
 - **Their looks** (`AtroxiiaDragonModel`/`VarasuchusDragonModel`, painted and printed by `tools/gen_atroxiia.py` and
-  `tools/gen_varasuchus.py`, sharing `tools/lesser_dragon_art.py`): both tall and long-limbed. Atroxiia: high shoulders on
-  long forelegs, digitigrade hind legs, a six-segment serpent's neck, a crown of swept horns and cheek frills, ice
-  crystals down its spine, the tail arched over its hips into a spear of ice; hides glacier, deep ice, rime grey,
+  `tools/gen_varasuchus.py`, sharing `tools/lesser_dragon_art.py`): both tall and long-limbed. Atroxiia: a serpent's body
+  raised on two long, heavy arms (gold cuffs, three-fingered hands) with no hind legs, the eleven-segment tail as its
+  third support, curling up over its back into a gold-bound spear of ice; a three-segment neck and a head in a striped
+  nemes cloth with a gold band (some wear a short cloth, some an ice uraeus on the brow), gold collar; hides glacier, deep ice, rime grey,
   midnight frost, with glowing frost veins, rims, stars or a spine line; drawn 1.15x. Varasuchus: long sprawling legs, two
-  rows of bony scutes, a long-jawed head with crown eyes and horns swept up and back (a nose horn on some), a great
-  double-crested tail; hides swamp olive, river brown, mangrove black, pale sand, with marsh-light bands, spots, scute
+  rows of bony scutes, a heavy blocky head (squared skull, brow ridge, cheek plates, a broad snout with a blunt tip) with
+  horns swept up and back (a nose horn on some), and a twelve-segment double-crested tail about seven blocks long, long
+  enough to wrap round its flank to the front; raging, it rears up on its hind legs (a generic `standing()` stance on
+  `WindDragon`) and fights with its arms; hides swamp olive, river brown, mangrove black, pale sand, with marsh-light bands, spots, scute
   rims or a jaw line; drawn 1.3x. Every move eases in and out and ends at rest, and the neck and tail roll a beat per
   segment: Atroxiia's tail jabs, coils and drives straight for Gungnir, swings round low for the sweep; Varasuchus's
-  snakes as it walks, lashes after the dash, curls round for the tailguard and snaps out on a parry; both tuck their
+  snakes as it walks, lashes after the dash, wraps round to its front for the tailguard and snaps out on a parry; both tuck their
   legs back and scull their tails in the water. (Stegonaut's chewing jaw lost its last kink too.)
 - `/kingdom dragon stegonaut|atroxiia|varasuchus [tame]` (operators).
 - Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.

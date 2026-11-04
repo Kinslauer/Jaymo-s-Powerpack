@@ -17,70 +17,69 @@ from gen_dragons import rgb, jitter, mix, shade, write, entry, egg, ASSETS, DATA
 from lesser_dragon_art import Plan, chain, noise_field, FACE_I
 
 # ---- the body plan -------------------------------------------------------------------------------------------------
-# (Andy: "longer limbs and necks, and be taller, to be imposing") its back 40 pixels up, its head higher still
-NECK = [('neck0', (11, 10, 8), -0.62), ('neck1', (10, 9, 7), -0.22), ('neck2', (9, 8, 7), -0.12), ('neck3', (8, 8, 7), 0.0),
-        ('neck4', (8, 7, 6), 0.12), ('neck5', (7, 7, 6), 0.2)]
-HEAD_TILT = 0.55
-TAIL = [('tail0', (9, 9, 9), 0.22), ('tail1', (8, 8, 9), 0.26), ('tail2', (7, 7, 9), 0.3), ('tail3', (6, 6, 8), 0.34),
-        ('tail4', (5, 5, 8), 0.36), ('tail5', (4, 4, 7), 0.34), ('tail6', (3, 3, 7), 0.3)]
-SPINE_Z = [-11.0, -5.5, 0.0, 5.5, 11.0]
-SPINE_H = [9, 12, 14, 12, 9]
+# (0.7.513, Andy: "atroxiia does NOT look right") a serpent with two great arms and no hind legs: its chest held high on
+# the arms, the serpent body running back down to the ground and along it as a long tail (its third support), rising at
+# the end into a spear of gold-bound ice; a short raised neck and a head under a pharaoh's headdress of hide (two lappets
+# hanging behind it, a band across the brow). Our own design throughout.
+NECK = [('neck0', (11, 11, 8), -0.75), ('neck1', (10, 10, 7), -0.25), ('neck2', (9, 9, 6), 0.15)]
+HEAD_TILT = 0.75
+TAIL = [('tail0', (16, 14, 12), -0.5), ('tail1', (15, 13, 12), -0.55), ('tail2', (14, 12, 12), -0.45), ('tail3', (13, 11, 12), 0.9),
+        ('tail4', (12, 10, 12), 0.5), ('tail5', (11, 9, 12), 0.15), ('tail6', (10, 8, 11), 0.0), ('tail7', (8, 7, 11), 0.0),
+        ('tail8', (7, 6, 10), 0.22), ('tail9', (6, 5, 10), 0.3), ('tail10', (4, 4, 9), 0.35)]
+SPINE_ON = ['tail0', 'tail1', 'tail2', 'tail3', 'tail4']
+SPINE_H = [10, 12, 11, 9, 7]
 
 GEOMETRY = [
-    ('body', None, 'body', (-8, -8, -15, 16, 16, 30), (0, -8, 0, 0, 0, 0), False),
-    ('chest', 'body', 'chest', (-7, 0, -7, 14, 4, 14), (0, 8, -7, 0, 0, 0), False),
-    ('belly', 'body', 'belly', (-6, 0, -6, 12, 2, 12), (0, 8, 7, 0, 0, 0), False),
+    ('body', None, 'body', (-9, -8, -10, 18, 16, 20), (0, -14, -6, 0, 0, 0), False),
+    ('chest', 'body', 'chest', (-8, 0, -8, 16, 3, 14), (0, 8, -1, 0, 0, 0), False),
+    ('collar', 'body', 'collar', (-9.5, -2, -1.5, 19, 4, 3), (0, -5, -9, 0, 0, 0), False),
 ]
-chain(GEOMETRY, 'body', (0, -3, -14), NECK, -1)
+chain(GEOMETRY, 'body', (0, -4, -9), NECK, -1)
 GEOMETRY += [
-    ('head', 'neck5', 'skull', (-4.5, -4, -11, 9, 7, 11), (0, 0, -5, HEAD_TILT, 0, 0), False),
-    ('snout', 'head', 'snout', (-3.5, -2.5, -8, 7, 5, 8), (0, -0.5, -11, 0, 0, 0), False),
-    ('jaw', 'head', 'jaw', (-3.5, 0, -18, 7, 2, 18), (0, 3, 0, 0, 0, 0), False),
-    ('brow', 'head', 'brow', (-5, -1, -2, 10, 2, 4), (0, -4, -8, 0, 0, 0), False),
-    ('eye_l', 'head', 'eye', (-0.5, -1, -1, 1, 2, 2), (4.5, -2, -8, 0, 0, 0), False),
-    ('eye_r', 'head', 'eye', (-0.5, -1, -1, 1, 2, 2), (-4.5, -2, -8, 0, 0, 0), False),
-    ('horn_l', 'head', 'horn', (-1, -1, 0, 2, 2, 13), (3.5, -3.5, -3, 0.42, 0.28, 0), False),
-    ('horn_r', 'head', 'horn', (-1, -1, 0, 2, 2, 13), (-3.5, -3.5, -3, 0.42, -0.28, 0), False),
-    ('short_horn_l', 'head', 'horn_short', (-1, -1, 0, 2, 2, 6), (3.5, -3.5, -3, 0.5, 0.28, 0), False),
-    ('short_horn_r', 'head', 'horn_short', (-1, -1, 0, 2, 2, 6), (-3.5, -3.5, -3, 0.5, -0.28, 0), False),
-    ('crown_l', 'head', 'crown', (-0.5, -0.5, 0, 1, 1, 8), (4, -1.5, -5, 0.15, 0.62, 0), False),
-    ('crown_r', 'head', 'crown', (-0.5, -0.5, 0, 1, 1, 8), (-4, -1.5, -5, 0.15, -0.62, 0), False),
-    ('frill_l', 'head', 'frill', (0, -2.5, 0, 1, 5, 6), (4.5, 1, -4, 0, 0.35, 0), False),
-    ('frill_r', 'head', 'frill', (-1, -2.5, 0, 1, 5, 6), (-4.5, 1, -4, 0, -0.35, 0), True),
+    ('head', 'neck2', 'skull', (-6, -5, -11, 12, 9, 11), (0, 0, -5, HEAD_TILT, 0, 0), False),
+    ('snout', 'head', 'snout', (-4.5, -3, -9, 9, 6, 9), (0, 0, -11, 0, 0, 0), False),
+    ('jaw', 'head', 'jaw', (-4.5, 0, -19, 9, 3, 19), (0, 3.5, 0, 0, 0, 0), False),
+    ('eye_l', 'head', 'eye', (-0.5, -1, -1.5, 1, 2, 3), (6, -2, -8, 0, 0, 0), False),
+    ('eye_r', 'head', 'eye', (-0.5, -1, -1.5, 1, 2, 3), (-6, -2, -8, 0, 0, 0), False),
+    # the headdress: a band over the brow, two long lappets hanging behind (short ones on some), a crystal at the brow on others
+    ('cap', 'head', 'cap', (-6.5, -1, -5, 13, 2, 10), (0, -5, -5.5, 0, 0, 0), False),
+    ('band', 'head', 'band', (-6.5, -1, -1.5, 13, 2, 3), (0, -5, -10, 0, 0, 0), False),
+    ('nemes_l', 'head', 'nemes', (0, 0, 0, 1, 14, 11), (6, -4, -6, 0.32, 0.22, -0.18), False),
+    ('nemes_r', 'head', 'nemes', (-1, 0, 0, 1, 14, 11), (-6, -4, -6, 0.32, -0.22, 0.18), True),
+    ('short_nemes_l', 'head', 'nemes_short', (0, 0, 0, 1, 8, 9), (6, -4, -6, 0.32, 0.22, -0.18), False),
+    ('short_nemes_r', 'head', 'nemes_short', (-1, 0, 0, 1, 8, 9), (-6, -4, -6, 0.32, -0.22, 0.18), True),
+    ('braid', 'head', 'braid', (-2, 0, 0, 4, 9, 2), (0, -3, 0, 0.35, 0, 0), False),
+    ('uraeus', 'head', 'uraeus', (-1, -6, -1, 2, 6, 2), (0, -5.5, -9, -0.35, 0, 0), False),
 ]
-chain(GEOMETRY, 'body', (0, -3, 14), TAIL, 1, 0.3)
+chain(GEOMETRY, 'body', (0, -2, 9), TAIL, 1)
 GEOMETRY += [
-    # the spear of ice at its tail's end: a shaft, a long blade and a crossguard of shards
-    ('spear', 'tail6', 'spear', (-1, -1, 0, 2, 2, 6), (0, 0, 6, 0.1, 0, 0), False),
-    ('blade', 'spear', 'blade', (-0.5, -2, 0, 1, 4, 10), (0, 0, 5, 0, 0, 0), False),
-    ('guard', 'spear', 'guard', (-3.5, -0.5, 0, 7, 1, 2), (0, 0, 4, 0, 0, 0), False),
-    ('tail_shard0', 'tail1', 'tail_shard', (-0.5, -4, -1.5, 1, 4, 3), (0, -3.5, 4, -0.3, 0, 0), False),
-    ('tail_shard1', 'tail3', 'tail_shard', (-0.5, -4, -1.5, 1, 4, 3), (0, -2.5, 4, -0.3, 0, 0), False),
-    ('saddle', 'body', 'saddle', (-6, -2, -6, 12, 2, 12), (0, -8, -4, 0, 0, 0), False),
+    # the spear at its tail's end: a gold binding, a long blade of ice
+    ('spear', 'tail10', 'spear', (-1.5, -1.5, 0, 3, 3, 4), (0, 0, 8, 0.1, 0, 0), False),
+    ('blade', 'spear', 'blade', (-1, -3.5, 0, 2, 7, 16), (0, 0, 3.5, 0, 0, 0), False),
+    ('guard', 'spear', 'guard', (-5, -1, 0, 10, 2, 2), (0, 0, 2, 0, 0, 0), False),
+    ('saddle', 'body', 'saddle', (-7, -2, -6, 14, 2, 12), (0, -8, 1, 0, 0, 0), False),
     ('pommel', 'saddle', 'pommel', (-2, -3, 0, 4, 3, 2), (0, -2, -6, 0, 0, 0), False),
     ('cantle', 'saddle', 'cantle', (-5, -3, 0, 10, 3, 2), (0, -2, 4, 0, 0, 0), False),
-    ('strap', 'body', 'strap', (-8.5, -8.5, -1.5, 17, 17, 3), (0, 0, -4, 0, 0, 0), False),
-    ('pad', 'body', 'pad', (-5, -2, -4, 10, 2, 8), (0, -8, 7, 0, 0, 0), False),
+    ('strap', 'body', 'strap', (-9.5, -8.5, -1.5, 19, 17, 3), (0, 0, 1, 0, 0, 0), False),
+    ('pad', 'tail0', 'pad', (-6, -2, -4, 12, 2, 8), (0, -7, 6, 0, 0, 0), False),
 ]
-for i in range(5):
+for i, seg in enumerate(SPINE_ON):
     h = SPINE_H[i]
-    GEOMETRY.append(('spine%d' % i, 'body', 'spine%d' % i, (-1, -h, -1.5, 2, h, 3), (0, -7, SPINE_Z[i], -0.32, 0, 0), False))
-# shards on the shoulders
-GEOMETRY.append(('shard_l', 'body', 'shard', (-0.5, -6, -1, 1, 6, 2), (6, -6, -10, -0.2, 0, 0.5), False))
-GEOMETRY.append(('shard_r', 'body', 'shard', (-0.5, -6, -1, 1, 6, 2), (-6, -6, -10, -0.2, 0, -0.5), True))
-# long legs: forelegs straight pillars, hind legs digitigrade (thigh forward, shin back, the foot flat)
-LEGS = [('left_front', 7.0, -9.0, True), ('right_front', -7.0, -9.0, True), ('left_hind', 7.0, 10.0, False), ('right_hind', -7.0, 10.0, False)]
-HIND_THIGH, HIND_SHIN = -0.3, 0.6
-for name, x, z, front in LEGS:
-    m = x < 0
-    if front:
-        GEOMETRY.append((name + '_leg', 'body', 'front_upper', (-3, -3, -3, 6, 15, 6), (x, 4, z, 0, 0, 0), m))
-        GEOMETRY.append((name + '_shin', name + '_leg', 'front_lower', (-2.5, 0, -2.5, 5, 14, 5), (0, 12, 0, 0, 0, 0), m))
-        GEOMETRY.append((name + '_foot', name + '_shin', 'foot', (-3, 0, -5, 6, 2, 8), (0, 14, 0, 0, 0, 0), m))
-    else:
-        GEOMETRY.append((name + '_leg', 'body', 'back_upper', (-3.5, -3, -4, 7, 15, 8), (x, 4, z, HIND_THIGH, 0, 0), m))
-        GEOMETRY.append((name + '_shin', name + '_leg', 'back_lower', (-2.5, 0, -2.5, 5, 15, 5), (0, 12, 0, HIND_SHIN, 0, 0), m))
-        GEOMETRY.append((name + '_foot', name + '_shin', 'foot', (-3, 0, -5, 6, 2, 8), (0, 15, 0, -(HIND_THIGH + HIND_SHIN), 0, 0), m))
+    w = [t[1] for t in TAIL if t[0] == seg][0]
+    GEOMETRY.append(('spine%d' % i, seg, 'spine%d' % i, (-1, -h, -1.5, 2, h, 3), (0, -w[1] / 2 + 1, 6, -0.4, 0, 0), False))
+# the arms: a broad shoulder, a long upper arm bowed out, a long forearm straight down, a gold cuff, a hand of three
+# clawed fingers and a thumb
+ARM_OUT = 0.45
+for side, sx in (('left', 1), ('right', -1)):
+    m = sx < 0
+    GEOMETRY.append((side + '_arm', 'body', 'upper_arm', (-5, -3, -5, 10, 21, 10), (sx * 10, -3, -5, -0.1, 0, -sx * ARM_OUT), m))
+    GEOMETRY.append((side + '_shoulder', side + '_arm', 'shoulder', (-6.5, -5, -6.5, 13, 10, 13), (0, 0, 0, 0, 0, 0), m))
+    GEOMETRY.append((side + '_forearm', side + '_arm', 'forearm', (-4.5, 0, -4.5, 9, 22, 9), (0, 17.5, 0, 0.1, 0, sx * ARM_OUT), m))
+    GEOMETRY.append((side + '_cuff', side + '_forearm', 'cuff', (-5, 0, -5, 10, 3, 10), (0, 3, 0, 0, 0, 0), m))
+    GEOMETRY.append((side + '_hand', side + '_forearm', 'hand', (-5.5, 0, -7, 11, 3, 10), (0, 22.3, 0, 0, 0, 0), m))
+    for f, fx in enumerate((-3, 0, 3)):
+        GEOMETRY.append(('%s_finger%d' % (side, f), side + '_hand', 'finger', (-1, 0, -5, 2, 2, 5), (fx * 1.2, 1, -7, 0, (fx / 3.0) * -0.15, 0), m))
+    GEOMETRY.append((side + '_thumb', side + '_hand', 'finger', (-1, 0, -5, 2, 2, 5), (-sx * 5.5, 1, -3, 0, sx * 0.7, 0), m))
 
 PLAN = Plan(GEOMETRY)
 PARTS, UV = PLAN.parts, PLAN.uv
@@ -98,10 +97,11 @@ EYE, PUPIL, MOUTH, TEETH = rgb(0x9AE8FF), rgb(0x0A1420), rgb(0x3A2A3A), rgb(0xEE
 LEATHER, LEATHER_DARK, SILVER, CLOTH = rgb(0x5A3A2A), rgb(0x3A2418), rgb(0xD0D8E0), rgb(0x2A3E6A)
 FROST, FROST_HOT, FROST_DIM = rgb(0x8FE8FF), rgb(0xE4FCFF), rgb(0x4AA8D0)
 
-ICE = {'spine%d' % i for i in range(5)} | {'shard', 'tail_shard', 'blade', 'guard', 'crown', 'spear'}
-HORNY = {'horn', 'horn_short'}
-BELLIES = {'body', 'chest', 'belly', 'neck0', 'neck1', 'neck2', 'jaw', 'tail0', 'tail1', 'tail2'}
-LEGS_UV = {'front_upper', 'front_lower', 'back_upper', 'back_lower'}
+ICE = {'spine%d' % i for i in range(5)} | {'blade', 'uraeus'}
+GOLD = {'cuff', 'collar', 'spear', 'guard', 'band'}
+GOLD_C, GOLD_DARK, LAPIS = rgb(0xE8C048), rgb(0xA07820), rgb(0x2E4A8A)
+BELLIES = {'body', 'chest', 'neck0', 'neck1', 'neck2', 'jaw'} | {'tail%d' % i for i in range(11)}
+LEGS_UV = {'upper_arm', 'forearm', 'shoulder'}
 TACK = {'saddle', 'pommel', 'cantle', 'strap', 'pad'}
 
 
@@ -139,13 +139,27 @@ def hide_texture(variant):
                     c = rgb(0xFFFFFF)
                 return shade(jitter(c, 6, rnd), face, x, y, fw, fh)
             PLAN.paint(img, name, ice)
-        elif name in HORNY:
-            def horn(face, x, y, fw, fh):
-                t = (x / max(1, fw - 1) if face in ('top', 'bottom') else 0.35) * 0.9
-                if face == 'south':
-                    t = 1.0
-                return shade(jitter(mix(HORN, HORN_TIP, min(1.0, t)), 5, rnd), face, x, y, fw, fh)
-            PLAN.paint(img, name, horn)
+        elif name in GOLD:
+            def gold(face, x, y, fw, fh, name=name):
+                # beaten gold: a darker line round the rim, chased with a band of frost-blue inlay on the bigger pieces
+                c = GOLD_DARK if y in (0, fh - 1) and fh > 2 else GOLD_C
+                if name in ('collar', 'band') and face in ('north', 'east', 'west', 'south') and y == fh // 2 and x % 3 == 1:
+                    c = crystal
+                if rnd.random() < 0.06:
+                    c = rgb(0xFFF0B0)
+                return shade(jitter(c, 6, rnd), face, x, y, fw, fh)
+            PLAN.paint(img, name, gold)
+        elif name in ('nemes', 'nemes_short', 'braid', 'cap'):
+            def nemes(face, x, y, fw, fh, name=name):
+                # the headdress of hide: stripes of gold and the hide's own shade running down it, a gold hem
+                stripe = ((x if name == 'cap' and face == 'top' else y) // 2) % 2 == 0
+                c = GOLD_C if stripe else mix(main, LAPIS, 0.35)
+                if y == fh - 1:
+                    c = GOLD_DARK
+                if name == 'braid':
+                    c = GOLD_C if y % 3 == 0 else mix(main, dark, 0.2)
+                return shade(jitter(c, 5, rnd), face, x, y, fw, fh)
+            PLAN.paint(img, name, nemes)
         elif name in TACK:
             def tack(face, x, y, fw, fh, name=name):
                 if name == 'strap':
@@ -166,19 +180,18 @@ def hide_texture(variant):
                     return PUPIL if x == 1 and y == 1 else jitter(EYE, 6, rnd)
                 return shade(dark, face, x, y, fw, fh)
             PLAN.paint(img, name, eye)
-        elif name == 'frill':
-            def frill(face, x, y, fw, fh):
-                # a thin fan of skin: ribbed, pale toward the edge
-                c = mix(main, crystal, 0.3 + 0.4 * (x / max(1, fw - 1))) if x % 2 else mix(main, dark, 0.3)
-                return shade(jitter(c, 5, rnd), face, x, y, fw, fh)
-            PLAN.paint(img, name, frill)
+        elif name in ('hand', 'finger'):
+            def claw(face, x, y, fw, fh, name=name):
+                # broad hands, the fingers ending in long dark claws
+                if name == 'finger' and (face == 'north' or face in ('top', 'bottom', 'east', 'west') and (y < 2 if face in ('top', 'bottom') else x < 2)):
+                    return shade(jitter(CLAW if face != 'top' else HORN_TIP, 4, rnd), face, x, y, fw, fh)
+                return shade(jitter(mix(main, dark, 0.15) if face != 'bottom' else dark, 4, rnd), face, x, y, fw, fh)
+            PLAN.paint(img, name, claw)
         else:
             def body(face, x, y, fw, fh, name=name):
-                if name == 'foot':
-                    if face == 'north':
-                        return jitter(CLAW, 4, rnd) if x in (0, 2, 3, 5) else shade(jitter(dark, 4, rnd), face, x, y, fw, fh)
-                    if face == 'bottom':
-                        return shade(jitter(dark, 4, rnd), face, x, y, fw, fh)
+                if name == 'skull' and face in ('east', 'west') and y in (3, 4) and 1 <= x <= 5:
+                    # dark lines drawn round the eyes, sweeping back
+                    return rgb(0x161A26)
                 if name in LEGS_UV and face == 'bottom':
                     return shade(jitter(dark, 4, rnd), face, x, y, fw, fh)
                 if name == 'jaw' and face == 'top':
@@ -190,8 +203,6 @@ def hide_texture(variant):
                     return TEETH if x % 2 == 1 else jitter(MOUTH, 4, rnd)
                 if name == 'snout' and face == 'north' and y == 1 and x in (1, fw - 2):
                     return rgb(0x10141C)
-                if name == 'brow':
-                    return shade(jitter(mix(main, crystal, 0.35) if y == 0 else mix(main, dark, 0.35), 4, rnd), face, x, y, fw, fh)
                 if face == 'bottom' and name in BELLIES:
                     return shade(jitter(mix(belly, main, 0.25) if y % 3 == 2 else belly, 5, rnd), face, x, y, fw, fh)
                 if name in BELLIES and face in ('east', 'west', 'north', 'south') and fh >= 6 and y >= fh - 2:
@@ -222,7 +233,7 @@ def marks_texture(pattern):
                 edge = x in (0, fw - 1) or y == 0
                 return glow(FROST_HOT if face == 'top' else FROST) if edge else None
             PLAN.paint(img, name, rim)
-        elif kind == 'veins' and name in {'body', 'neck0', 'neck1', 'neck2', 'skull', 'tail0', 'tail1', 'tail2', 'front_upper', 'back_upper'}:
+        elif kind == 'veins' and name in {'body', 'neck0', 'neck1', 'neck2', 'skull', 'tail0', 'tail1', 'tail2', 'upper_arm', 'forearm'}:
             px = img.load()
             for face, (fx, fy, fw, fh) in PLAN.faces(name).items():
                 if face == 'bottom' or fw < 4 or fh < 4:
@@ -234,7 +245,7 @@ def marks_texture(pattern):
                             px[fx + x, fy + y] = glow(rnd.choice((FROST, FROST_DIM)))
                         x += rnd.choice((-1, 1, 1))
                         y += rnd.choice((-1, 0, 1))
-        elif kind == 'stars' and name in ('body', 'neck0', 'neck1', 'skull', 'tail0', 'tail1', 'front_upper', 'back_upper'):
+        elif kind == 'stars' and name in ('body', 'neck0', 'neck1', 'skull', 'tail0', 'tail1', 'upper_arm', 'forearm'):
             px = img.load()
             for face, (fx, fy, fw, fh) in PLAN.faces(name).items():
                 if face in ('top', 'east', 'west') and fw > 4 and fh > 4:
@@ -257,16 +268,17 @@ def preview(path, hides, marks):
     dr = ImageDraw.Draw(img)
     for i, hide in enumerate(hides):
         col, row = i % 2, i // 2
-        ox, oy = 340 + col * 700, 360 + row * 400
+        ox, oy = 360 + col * 640, 330 + row * 400
         saddled = i == 0
         hidden = set() if saddled else set(TACK)
         if saddled:
             hidden |= {'spine1', 'spine2', 'spine3'}
-        hidden |= {'short_horn_l', 'short_horn_r'} if i != 2 else {'horn_l', 'horn_r'}
+        hidden |= {'short_nemes_l', 'short_nemes_r'} if i != 2 else {'nemes_l', 'nemes_r'}
         if i != 3:
-            hidden |= {'crown_l', 'crown_r'}
-        PLAN.render(hide, img, ox, oy, 2.4 if col == 0 else 1.5708, 3.6, hidden)
-        dr.text((ox - 300, oy - 330), ['glacier, saddled', 'deep ice', 'rime grey, short horns', 'midnight frost, crowned'][i], fill=(220, 220, 220))
+            hidden.add('uraeus')
+        PLAN.render(hide, img, ox, oy, 2.4 if col == 0 else 1.5708, 2.5, hidden)
+        dr.text((ox - 300, oy - 330), ['glacier, saddled', 'deep ice', 'rime grey, short headdress', 'midnight frost, brow crystal'][i],
+                fill=(220, 220, 220))
     img.save(path)
 
 

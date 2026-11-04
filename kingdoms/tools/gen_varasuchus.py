@@ -20,8 +20,11 @@ from lesser_dragon_art import Plan, chain, noise_field, FACE_I
 # ---- the body plan -------------------------------------------------------------------------------------------------
 # (Andy: "longer limbs ... and be taller, to be imposing") its belly 20 pixels off the ground on long sprawling legs
 NECK = [('neck0', (16, 12, 8), -0.3), ('neck1', (15, 11, 7), -0.1)]
-TAIL = [('tail0', (16, 11, 10), -0.2), ('tail1', (14, 10, 10), -0.08), ('tail2', (12, 9, 10), -0.05), ('tail3', (10, 8, 9), 0.0),
-        ('tail4', (8, 6, 9), 0.04), ('tail5', (6, 5, 8), 0.05), ('tail6', (4, 4, 8), 0.06)]
+# (Andy: "the tail a lot longer so it can realistically wrap around to the front for the parry/attacks") twelve segments,
+# about 110 pixels: long enough to curl round its flank to its head
+TAIL = [('tail0', (17, 12, 10), -0.2), ('tail1', (16, 11, 10), -0.1), ('tail2', (15, 10, 10), -0.08), ('tail3', (14, 9, 10), -0.05),
+        ('tail4', (12, 9, 10), 0.0), ('tail5', (11, 8, 10), 0.04), ('tail6', (10, 7, 10), 0.05), ('tail7', (9, 6, 10), 0.05),
+        ('tail8', (8, 6, 9), 0.04), ('tail9', (6, 5, 9), 0.03), ('tail10', (5, 4, 9), 0.03), ('tail11', (4, 3, 9), 0.03)]
 SCUTE_Z = [-15.0, -7.5, 0.0, 7.5, 15.0]
 
 GEOMETRY = [
@@ -30,23 +33,29 @@ GEOMETRY = [
 ]
 chain(GEOMETRY, 'body', (0, -1, -19), NECK, -1)
 GEOMETRY += [
-    ('head', 'neck1', 'skull', (-8, -5.5, -12, 16, 10, 12), (0, 0, -6, 0.36, 0, 0), False),
-    ('snout', 'head', 'snout', (-5, -3, -18, 10, 6, 18), (0, -0.5, -12, 0, 0, 0), False),
-    ('jaw', 'head', 'jaw', (-6, 0, -29, 12, 3, 29), (0, 4.5, -1, 0, 0, 0), False),
-    ('eye_l', 'head', 'eye', (-1, -2, -1.5, 2, 2, 3), (5, -5, -8, 0, 0, 0), False),
-    ('eye_r', 'head', 'eye', (-1, -2, -1.5, 2, 2, 3), (-5, -5, -8, 0, 0, 0), False),
-    ('horn_l', 'head', 'horn', (-1.5, -1.5, 0, 3, 3, 14), (5.5, -4.5, -2, 0.62, 0.38, 0), False),
-    ('horn_r', 'head', 'horn', (-1.5, -1.5, 0, 3, 3, 14), (-5.5, -4.5, -2, 0.62, -0.38, 0), False),
-    ('horn_tip_l', 'horn_l', 'horn_tip', (-1, -1, 0, 2, 2, 6), (0, 0, 13, 0.4, 0, 0), False),
-    ('horn_tip_r', 'horn_r', 'horn_tip', (-1, -1, 0, 2, 2, 6), (0, 0, 13, 0.4, 0, 0), False),
-    ('short_horn_l', 'head', 'horn_short', (-1.5, -1.5, 0, 3, 3, 7), (5.5, -4.5, -2, 0.7, 0.38, 0), False),
-    ('short_horn_r', 'head', 'horn_short', (-1.5, -1.5, 0, 3, 3, 7), (-5.5, -4.5, -2, 0.7, -0.38, 0), False),
-    ('nose_horn', 'snout', 'nose_horn', (-1, -4, -1, 2, 4, 3), (0, -3, -13, -0.35, 0, 0), False),
+    # (Andy: "the head needs to be blockier and built") a deep square skull, a broad blunt snout, a heavy jaw, a ridge of
+    # bone over the eyes and bosses on the cheeks
+    ('head', 'neck1', 'skull', (-9, -6.5, -14, 18, 12, 14), (0, 0, -6, 0.36, 0, 0), False),
+    ('snout', 'head', 'snout', (-7, -3.5, -18, 14, 8, 18), (0, -0.5, -14, 0, 0, 0), False),
+    ('snout_tip', 'snout', 'snout_tip', (-7.5, -4, -4, 15, 8, 4), (0, 0, -15, 0, 0, 0), False),
+    ('jaw', 'head', 'jaw', (-7.5, 0, -33, 15, 4, 33), (0, 5.5, -1, 0, 0, 0), False),
+    ('brow', 'head', 'brow', (-9.5, -1.5, -2.5, 19, 3, 5), (0, -6.5, -10, 0, 0, 0), False),
+    ('cheek_l', 'head', 'cheek', (0, -3.5, -4.5, 3, 7, 9), (9, 1, -6, 0, 0, 0), False),
+    ('cheek_r', 'head', 'cheek', (-3, -3.5, -4.5, 3, 7, 9), (-9, 1, -6, 0, 0, 0), True),
+    ('eye_l', 'head', 'eye', (-1.5, -2, -1.5, 3, 2, 3), (6, -7, -8, 0, 0, 0), False),
+    ('eye_r', 'head', 'eye', (-1.5, -2, -1.5, 3, 2, 3), (-6, -7, -8, 0, 0, 0), False),
+    ('horn_l', 'head', 'horn', (-2, -2, 0, 4, 4, 14), (6.5, -5.5, -3, 0.62, 0.38, 0), False),
+    ('horn_r', 'head', 'horn', (-2, -2, 0, 4, 4, 14), (-6.5, -5.5, -3, 0.62, -0.38, 0), False),
+    ('horn_tip_l', 'horn_l', 'horn_tip', (-1.5, -1.5, 0, 3, 3, 7), (0, 0, 13, 0.4, 0, 0), False),
+    ('horn_tip_r', 'horn_r', 'horn_tip', (-1.5, -1.5, 0, 3, 3, 7), (0, 0, 13, 0.4, 0, 0), False),
+    ('short_horn_l', 'head', 'horn_short', (-2, -2, 0, 4, 4, 8), (6.5, -5.5, -3, 0.7, 0.38, 0), False),
+    ('short_horn_r', 'head', 'horn_short', (-2, -2, 0, 4, 4, 8), (-6.5, -5.5, -3, 0.7, -0.38, 0), False),
+    ('nose_horn', 'snout', 'nose_horn', (-1.5, -5, -1.5, 3, 5, 3), (0, -3.5, -13, -0.35, 0, 0), False),
 ]
 chain(GEOMETRY, 'body', (0, -2, 19), TAIL, 1, 0.3)
 # the tail's crest: two rows down its root, one row toward its tip
 for i, (tn, (w, h, d), _) in enumerate(TAIL[1:], start=1):
-    if i <= 3:
+    if i <= 5:
         for side, sx in (('l', 1), ('r', -1)):
             GEOMETRY.append(('crest%d_%s' % (i, side), tn, 'crest', (-0.5, -3, 0, 1, 3, 7), (sx * (w / 2 - 2), -h / 2, 1.5, 0, 0, 0), side == 'r'))
     else:
@@ -92,13 +101,14 @@ MARSH, MARSH_HOT, MARSH_DIM = rgb(0xC8F060), rgb(0xF4FFB4), rgb(0x86B030)
 
 BONY = {'scute', 'crest', 'crest_tip'}
 HORNY = {'horn', 'horn_tip', 'horn_short', 'nose_horn'}
-BELLIES = {'body', 'belly', 'neck0', 'neck1', 'jaw', 'tail0', 'tail1', 'tail2', 'tail3', 'tail4'}
+BELLIES = {'body', 'belly', 'neck0', 'neck1', 'jaw'} | {'tail%d' % i for i in range(9)}
 LEGS_UV = {'front_upper', 'front_lower', 'back_upper', 'back_lower'}
 TACK = {'saddle', 'pommel', 'cantle', 'strap', 'pad'}
 
 
 def hide_texture(variant):
     main, dark, belly, scute = (rgb(c) for c in HIDES[variant])
+    scute_c = scute
     rnd = random.Random(9100 + variant)
     field = noise_field(510 + variant)
     img = Image.new('RGBA', (SIZE, SIZE), (0, 0, 0, 0))
@@ -173,6 +183,12 @@ def hide_texture(variant):
                     return TEETH if x in (0, fw - 1) and y % 2 == 0 else jitter(MOUTH, 6, rnd)
                 if name == 'jaw' and face in ('east', 'west') and y == 0:
                     return TEETH if x % 3 == 0 else shade(jitter(mix(main, dark, 0.3), 4, rnd), face, x, y, fw, fh)
+                if name == 'snout_tip' and face == 'top' and y in (1, 2) and x in (3, fw - 4):
+                    return rgb(0x100E0A)
+                if name == 'snout_tip' and face in ('east', 'west', 'north') and y == fh - 1:
+                    return TEETH if x % 2 == 1 else jitter(MOUTH, 4, rnd)
+                if name == 'brow':
+                    return shade(jitter(mix(scute_c, dark, 0.2) if y == fh - 1 else scute_c, 5, rnd), face, x, y, fw, fh)
                 if name == 'snout' and face in ('east', 'west') and y == fh - 1:
                     return TEETH if x % 3 == 1 else jitter(MOUTH, 4, rnd)
                 if name == 'snout' and face == 'top' and y in (1, 2) and x in (2, fw - 3):
@@ -205,7 +221,7 @@ def marks_texture(pattern):
                     return glow(MARSH_DIM) if x % 6 in (2, 3) and y < fh // 3 and rnd.random() < 0.7 else None
                 return None
             PLAN.paint(img, name, band)
-        elif kind == 'spots' and name in ('body', 'neck0', 'skull', 'snout', 'tail0', 'tail1', 'tail2', 'tail3', 'front_upper', 'back_upper'):
+        elif kind == 'spots' and name in ('body', 'neck0', 'skull', 'snout', 'snout_tip', 'tail0', 'tail1', 'tail2', 'tail3', 'tail4', 'tail5', 'front_upper', 'back_upper'):
             px = img.load()
             for face, (fx, fy, fw, fh) in PLAN.faces(name).items():
                 if face in ('top', 'east', 'west') and fw > 4 and fh > 4:
@@ -218,10 +234,10 @@ def marks_texture(pattern):
                                     px[fx + cx + xx, fy + cy + yy] = c
         elif kind == 'rims' and name in BONY:
             PLAN.paint(img, name, lambda face, x, y, fw, fh: glow(MARSH_HOT if face == 'top' else MARSH) if face == 'top' or y == 0 else None)
-        elif kind == 'jaw' and name in ('jaw', 'snout', 'skull'):
+        elif kind == 'jaw' and name in ('jaw', 'snout', 'snout_tip', 'skull'):
             def jl(face, x, y, fw, fh, name=name):
                 if face in ('east', 'west'):
-                    if name == 'jaw' and y == 1 or name == 'snout' and y == fh - 2 or name == 'skull' and y == fh - 2 and x % 2 == 0:
+                    if name == 'jaw' and y == 1 or name in ('snout', 'snout_tip') and y == fh - 2 or name == 'skull' and y == fh - 2 and x % 2 == 0:
                         return glow(MARSH)
                 return None
             PLAN.paint(img, name, jl)
@@ -244,7 +260,7 @@ def preview(path, hides, marks):
         hidden |= {'short_horn_l', 'short_horn_r'} if i != 2 else {'horn_l', 'horn_r', 'horn_tip_l', 'horn_tip_r'}
         if i != 3:
             hidden.add('nose_horn')
-        PLAN.render(hide, img, ox, oy, 2.4 if col == 0 else 1.5708, 3.0, hidden)
+        PLAN.render(hide, img, ox, oy, 2.4 if col == 0 else 1.5708, 2.3, hidden)
         dr.text((ox - 320, oy - 260), ['swamp olive, saddled', 'river brown', 'mangrove black, short horns', 'pale sand, nose horn'][i],
                 fill=(220, 220, 220))
     img.save(path)

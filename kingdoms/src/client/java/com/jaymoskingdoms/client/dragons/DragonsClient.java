@@ -71,7 +71,7 @@ public final class DragonsClient {
 	static final float STEGONAUT_SHADOW = 2.0F, STEGONAUT_SCALE = 1.3F, STEGONAUT_REACH = 4.5F;
 	/** (0.7.513) Atroxiia's and Varasuchus's: shadow, drawn size, reach (Atroxiia's neck and tail; Varasuchus's jaws and long tail). */
 	static final float ATROXIIA_SHADOW = 2.0F, ATROXIIA_SCALE = 1.15F, ATROXIIA_REACH = 4.5F;
-	static final float VARASUCHUS_SHADOW = 2.4F, VARASUCHUS_SCALE = 1.3F, VARASUCHUS_REACH = 6.5F;
+	static final float VARASUCHUS_SHADOW = 2.4F, VARASUCHUS_SCALE = 1.3F, VARASUCHUS_REACH = 9.0F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
 	private static @Nullable KeyMapping breathKey;

@@ -13,36 +13,38 @@ import net.minecraft.util.Mth;
 
 /**
  * (0.7.513) Atroxiia, our own model (blocks, as the Kingdoms beasts are; nothing of Saint's Dragons' art is used, see
- * {@code docs/SaintsDragons-Plan.md}): a tall, gaunt frost wyrm (Andy: "longer limbs and necks, and be taller, to be
- * imposing"). High shoulders on long straight forelegs, digitigrade hind legs, a serpent's neck rising in six segments
- * to a narrow head under swept-back horns (long, short, or long with a crown of thin brow tines, by its
- * {@link DragonLook}), cheek frills, five ice crystals down its spine (the middle three give way to the saddle), and a
- * long tail that arches up over its hips and ends in a spear of ice with a crossguard of shards. Texture 256x256
- * ({@code tools/gen_atroxiia.py} prints the body plan below from its own table, so the UVs match the paint).
+ * {@code docs/SaintsDragons-Plan.md}). Andy: "atroxiia does NOT look right": it is a serpent with two great arms and no
+ * hind legs. Its chest is held high on the arms (broad shoulders, long bowed upper arms, long forearms with gold cuffs,
+ * three-clawed hands and a thumb), the serpent body runs back down to the ground and along it as a long tail, its
+ * third support, rising at the end into a spear of ice bound in gold. A short raised neck carries a head under a
+ * headdress of striped hide: a cap and gold brow band, two lappets hanging behind (long or short by its
+ * {@link DragonLook}; a brow crystal on some) and a braid, dark lines round its eyes, ice crystals down its back (the
+ * first gives way to the pillion pad). Texture 256x256 ({@code tools/gen_atroxiia.py} prints the body plan below).
  * <p>
- * Posed procedurally from its render state, every joint eased (Andy: "all the joints should move and blend smoothly"):
- * each move is a smoothstep envelope that starts and ends at rest, and the neck's and tail's segments each follow a
- * beat behind the one before. It walks with its diagonal legs together, its spine waving and its neck swaying against
- * it; in the water it tucks its legs back, stretches its neck out and sculls with its uncurled tail. Its moves
- * ({@link AtroxiiaDragon#action}): the slam rears and stamps a forefoot, the swipe swings a claw across, the precise
- * strike jabs the tail spear forward three times over its back, Gungnir coils the tail back and drives it forward
- * straight as a spear, the sweep swings the tail round low, and the Helheim quake rears twice and comes down with the
- * jaw wide. Crashed it sinks to its belly with its neck along the ground; sitting, it settles on its haunches.
+ * Posed procedurally, every joint eased (Andy: "all the joints should move and blend smoothly"): each move is a
+ * smoothstep envelope that starts and ends at rest, and the neck's and the tail's segments each follow a beat behind
+ * the one before. It walks on its arms in turn, shoulders rolling, the serpent body snaking behind; in the water the
+ * arms fold back and the whole body undulates. Its moves ({@link AtroxiiaDragon#action}): the slam raises an arm
+ * overhead and brings it down, the swipe rakes a hand across, the precise strike jabs with both hands in turn,
+ * Gungnir arches the tail up over its back and drives the spear forward, the sweep swings the tail round, and the
+ * Helheim quake rears the chest up twice and brings both arms down with the jaw wide.
  */
 final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
-	/** How low it sinks crashed and sitting (model pixels). */
-	static final float CRASH_DROP = 20.0F, SIT_DROP = 9.0F;
-	static final int NECK = 6, TAIL = 7;
+	/** How low its chest sinks crashed and sitting (model pixels). */
+	static final float CRASH_DROP = 20.0F, SIT_DROP = 8.0F;
+	static final int NECK = 3, TAIL = 11;
 
-	private final ModelPart body, head, jaw, frillL, frillR;
+	private final ModelPart body, head, jaw, braid;
 	private final ModelPart[] neck = new ModelPart[NECK], tail = new ModelPart[TAIL];
 	private final float[] neckRest = new float[NECK], tailRest = new float[TAIL];
 	private final float headRest;
-	private final ModelPart hornL, hornR, shortL, shortR, crownL, crownR;
+	private final ModelPart nemesL, nemesR, shortL, shortR, uraeus;
 	private final ModelPart[] spines = new ModelPart[DragonLook.SPIKES];
 	private final ModelPart saddle, strap, pad;
-	private final ModelPart[] upper = new ModelPart[4], lower = new ModelPart[4], foot = new ModelPart[4];
-	private final float[] upperRest = new float[4], lowerRest = new float[4];
+	/** The arms, left then right: upper arm, forearm, hand, its three fingers and thumb. */
+	private final ModelPart[] upper = new ModelPart[2], fore = new ModelPart[2], hand = new ModelPart[2];
+	private final ModelPart[][] fingers = new ModelPart[2][4];
+	private final float[] upperX = new float[2], upperZ = new float[2], foreX = new float[2], foreZ = new float[2];
 	private final float bodyY;
 
 	AtroxiiaDragonModel(ModelPart root) {
@@ -58,14 +60,12 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 		this.head = up.getChild("head");
 		this.headRest = this.head.xRot;
 		this.jaw = this.head.getChild("jaw");
-		this.frillL = this.head.getChild("frill_l");
-		this.frillR = this.head.getChild("frill_r");
-		this.hornL = this.head.getChild("horn_l");
-		this.hornR = this.head.getChild("horn_r");
-		this.shortL = this.head.getChild("short_horn_l");
-		this.shortR = this.head.getChild("short_horn_r");
-		this.crownL = this.head.getChild("crown_l");
-		this.crownR = this.head.getChild("crown_r");
+		this.braid = this.head.getChild("braid");
+		this.nemesL = this.head.getChild("nemes_l");
+		this.nemesR = this.head.getChild("nemes_r");
+		this.shortL = this.head.getChild("short_nemes_l");
+		this.shortR = this.head.getChild("short_nemes_r");
+		this.uraeus = this.head.getChild("uraeus");
 		ModelPart parent = this.body;
 		for (int i = 0; i < TAIL; i++) {
 			this.tail[i] = parent.getChild("tail" + i);
@@ -73,18 +73,24 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 			parent = this.tail[i];
 		}
 		for (int i = 0; i < DragonLook.SPIKES; i++) {
-			this.spines[i] = this.body.getChild("spine" + i);
+			this.spines[i] = this.tail[i].getChild("spine" + i);
 		}
 		this.saddle = this.body.getChild("saddle");
 		this.strap = this.body.getChild("strap");
-		this.pad = this.body.getChild("pad");
-		String[] legs = {"left_front", "right_front", "left_hind", "right_hind"};
-		for (int i = 0; i < 4; i++) {
-			this.upper[i] = this.body.getChild(legs[i] + "_leg");
-			this.lower[i] = this.upper[i].getChild(legs[i] + "_shin");
-			this.foot[i] = this.lower[i].getChild(legs[i] + "_foot");
-			this.upperRest[i] = this.upper[i].xRot;
-			this.lowerRest[i] = this.lower[i].xRot;
+		this.pad = this.tail[0].getChild("pad");
+		String[] sides = {"left", "right"};
+		for (int i = 0; i < 2; i++) {
+			this.upper[i] = this.body.getChild(sides[i] + "_arm");
+			this.fore[i] = this.upper[i].getChild(sides[i] + "_forearm");
+			this.hand[i] = this.fore[i].getChild(sides[i] + "_hand");
+			for (int f = 0; f < 3; f++) {
+				this.fingers[i][f] = this.hand[i].getChild(sides[i] + "_finger" + f);
+			}
+			this.fingers[i][3] = this.hand[i].getChild(sides[i] + "_thumb");
+			this.upperX[i] = this.upper[i].xRot;
+			this.upperZ[i] = this.upper[i].zRot;
+			this.foreX[i] = this.fore[i].xRot;
+			this.foreZ[i] = this.fore[i].zRot;
 		}
 	}
 
@@ -100,65 +106,67 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
 		// (printed by tools/gen_atroxiia.py)
-		PartDefinition body = root.addOrReplaceChild("body", box(0, 0, -8.0F, -8.0F, -15.0F, 16, 16, 30), PartPose.offset(0.0F, -8.0F, 0.0F));
-		body.addOrReplaceChild("chest", box(20, 46, -7.0F, 0.0F, -7.0F, 14, 4, 14), PartPose.offset(0.0F, 8.0F, -7.0F));
-		body.addOrReplaceChild("belly", box(178, 65, -6.0F, 0.0F, -6.0F, 12, 2, 12), PartPose.offset(0.0F, 8.0F, 7.0F));
-		PartDefinition neck0 = body.addOrReplaceChild("neck0", box(76, 46, -5.5F, -5.0F, -8.0F, 11, 10, 8), PartPose.offsetAndRotation(0.0F, -3.0F, -14.0F, -0.62F, 0.0F, 0.0F));
-		PartDefinition neck1 = neck0.addOrReplaceChild("neck1", box(0, 65, -5.0F, -4.5F, -7.0F, 10, 9, 7), PartPose.offsetAndRotation(0.0F, 0.0F, -7.0F, -0.22F, 0.0F, 0.0F));
-		PartDefinition neck2 = neck1.addOrReplaceChild("neck2", box(66, 65, -4.5F, -4.0F, -7.0F, 9, 8, 7), PartPose.offsetAndRotation(0.0F, 0.0F, -6.0F, -0.12F, 0.0F, 0.0F));
-		PartDefinition neck3 = neck2.addOrReplaceChild("neck3", box(98, 65, -4.0F, -4.0F, -7.0F, 8, 8, 7), PartPose.offset(0.0F, 0.0F, -6.0F));
-		PartDefinition neck4 = neck3.addOrReplaceChild("neck4", box(70, 81, -4.0F, -3.5F, -6.0F, 8, 7, 6), PartPose.offsetAndRotation(0.0F, 0.0F, -6.0F, 0.12F, 0.0F, 0.0F));
-		PartDefinition neck5 = neck4.addOrReplaceChild("neck5", box(98, 81, -3.5F, -3.5F, -6.0F, 7, 7, 6), PartPose.offsetAndRotation(0.0F, 0.0F, -5.0F, 0.2F, 0.0F, 0.0F));
-		PartDefinition head = neck5.addOrReplaceChild("head", box(114, 46, -4.5F, -4.0F, -11.0F, 9, 7, 11), PartPose.offsetAndRotation(0.0F, 0.0F, -5.0F, 0.55F, 0.0F, 0.0F));
-		head.addOrReplaceChild("snout", box(124, 81, -3.5F, -2.5F, -8.0F, 7, 5, 8), PartPose.offset(0.0F, -0.5F, -11.0F));
-		head.addOrReplaceChild("jaw", box(146, 0, -3.5F, 0.0F, -18.0F, 7, 2, 18), PartPose.offset(0.0F, 3.0F, 0.0F));
-		head.addOrReplaceChild("brow", box(128, 95, -5.0F, -1.0F, -2.0F, 10, 2, 4), PartPose.offset(0.0F, -4.0F, -8.0F));
-		head.addOrReplaceChild("eye_l", box(192, 95, -0.5F, -1.0F, -1.0F, 1, 2, 2), PartPose.offset(4.5F, -2.0F, -8.0F));
-		head.addOrReplaceChild("eye_r", box(192, 95, -0.5F, -1.0F, -1.0F, 1, 2, 2), PartPose.offset(-4.5F, -2.0F, -8.0F));
-		head.addOrReplaceChild("horn_l", box(128, 65, -1.0F, -1.0F, 0.0F, 2, 2, 13), PartPose.offsetAndRotation(3.5F, -3.5F, -3.0F, 0.42F, 0.28F, 0.0F));
-		head.addOrReplaceChild("horn_r", box(128, 65, -1.0F, -1.0F, 0.0F, 2, 2, 13), PartPose.offsetAndRotation(-3.5F, -3.5F, -3.0F, 0.42F, -0.28F, 0.0F));
-		head.addOrReplaceChild("short_horn_l", box(82, 95, -1.0F, -1.0F, 0.0F, 2, 2, 6), PartPose.offsetAndRotation(3.5F, -3.5F, -3.0F, 0.5F, 0.28F, 0.0F));
-		head.addOrReplaceChild("short_horn_r", box(82, 95, -1.0F, -1.0F, 0.0F, 2, 2, 6), PartPose.offsetAndRotation(-3.5F, -3.5F, -3.0F, 0.5F, -0.28F, 0.0F));
-		head.addOrReplaceChild("crown_l", box(64, 95, -0.5F, -0.5F, 0.0F, 1, 1, 8), PartPose.offsetAndRotation(4.0F, -1.5F, -5.0F, 0.15F, 0.62F, 0.0F));
-		head.addOrReplaceChild("crown_r", box(64, 95, -0.5F, -0.5F, 0.0F, 1, 1, 8), PartPose.offsetAndRotation(-4.0F, -1.5F, -5.0F, 0.15F, -0.62F, 0.0F));
-		head.addOrReplaceChild("frill_l", box(200, 81, 0.0F, -2.5F, 0.0F, 1, 5, 6), PartPose.offsetAndRotation(4.5F, 1.0F, -4.0F, 0.0F, 0.35F, 0.0F));
-		head.addOrReplaceChild("frill_r", mirrored(200, 81, -1.0F, -2.5F, 0.0F, 1, 5, 6), PartPose.offsetAndRotation(-4.5F, 1.0F, -4.0F, 0.0F, -0.35F, 0.0F));
-		PartDefinition tail0 = body.addOrReplaceChild("tail0", box(154, 46, -4.5F, -4.5F, 0.0F, 9, 9, 9), PartPose.offsetAndRotation(0.0F, -3.0F, 14.0F, 0.22F, 0.0F, 0.0F));
-		PartDefinition tail1 = tail0.addOrReplaceChild("tail1", box(190, 46, -4.0F, -4.0F, 0.0F, 8, 8, 9), PartPose.offsetAndRotation(0.0F, 0.3F, 8.0F, 0.26F, 0.0F, 0.0F));
-		PartDefinition tail2 = tail1.addOrReplaceChild("tail2", box(34, 65, -3.5F, -3.5F, 0.0F, 7, 7, 9), PartPose.offsetAndRotation(0.0F, 0.3F, 8.0F, 0.3F, 0.0F, 0.0F));
-		PartDefinition tail3 = tail2.addOrReplaceChild("tail3", box(226, 65, -3.0F, -3.0F, 0.0F, 6, 6, 8), PartPose.offsetAndRotation(0.0F, 0.3F, 8.0F, 0.34F, 0.0F, 0.0F));
-		PartDefinition tail4 = tail3.addOrReplaceChild("tail4", box(154, 81, -2.5F, -2.5F, 0.0F, 5, 5, 8), PartPose.offsetAndRotation(0.0F, 0.3F, 7.0F, 0.36F, 0.0F, 0.0F));
-		PartDefinition tail5 = tail4.addOrReplaceChild("tail5", box(214, 81, -2.0F, -2.0F, 0.0F, 4, 4, 7), PartPose.offsetAndRotation(0.0F, 0.3F, 7.0F, 0.34F, 0.0F, 0.0F));
-		PartDefinition tail6 = tail5.addOrReplaceChild("tail6", box(236, 81, -1.5F, -1.5F, 0.0F, 3, 3, 7), PartPose.offsetAndRotation(0.0F, 0.3F, 6.0F, 0.3F, 0.0F, 0.0F));
-		PartDefinition spear = tail6.addOrReplaceChild("spear", box(98, 95, -1.0F, -1.0F, 0.0F, 2, 2, 6), PartPose.offsetAndRotation(0.0F, 0.0F, 6.0F, 0.1F, 0.0F, 0.0F));
-		spear.addOrReplaceChild("blade", box(0, 81, -0.5F, -2.0F, 0.0F, 1, 4, 10), PartPose.offset(0.0F, 0.0F, 5.0F));
-		spear.addOrReplaceChild("guard", box(198, 95, -3.5F, -0.5F, 0.0F, 7, 1, 2), PartPose.offset(0.0F, 0.0F, 4.0F));
-		tail1.addOrReplaceChild("tail_shard0", box(120, 95, -0.5F, -4.0F, -1.5F, 1, 4, 3), PartPose.offsetAndRotation(0.0F, -3.5F, 4.0F, -0.3F, 0.0F, 0.0F));
-		tail3.addOrReplaceChild("tail_shard1", box(120, 95, -0.5F, -4.0F, -1.5F, 1, 4, 3), PartPose.offsetAndRotation(0.0F, -2.5F, 4.0F, -0.3F, 0.0F, 0.0F));
-		PartDefinition saddle = body.addOrReplaceChild("saddle", box(22, 81, -6.0F, -2.0F, -6.0F, 12, 2, 12), PartPose.offset(0.0F, -8.0F, -4.0F));
-		saddle.addOrReplaceChild("pommel", box(156, 95, -2.0F, -3.0F, 0.0F, 4, 3, 2), PartPose.offset(0.0F, -2.0F, -6.0F));
-		saddle.addOrReplaceChild("cantle", box(168, 95, -5.0F, -3.0F, 0.0F, 10, 3, 2), PartPose.offset(0.0F, -2.0F, 4.0F));
-		body.addOrReplaceChild("strap", box(196, 0, -8.5F, -8.5F, -1.5F, 17, 17, 3), PartPose.offset(0.0F, 0.0F, -4.0F));
-		body.addOrReplaceChild("pad", box(0, 95, -5.0F, -2.0F, -4.0F, 10, 2, 8), PartPose.offset(0.0F, -8.0F, 7.0F));
-		body.addOrReplaceChild("spine0", box(180, 81, -1.0F, -9.0F, -1.5F, 2, 9, 3), PartPose.offsetAndRotation(0.0F, -7.0F, -11.0F, -0.32F, 0.0F, 0.0F));
-		body.addOrReplaceChild("spine1", box(158, 65, -1.0F, -12.0F, -1.5F, 2, 12, 3), PartPose.offsetAndRotation(0.0F, -7.0F, -5.5F, -0.32F, 0.0F, 0.0F));
-		body.addOrReplaceChild("spine2", box(224, 46, -1.0F, -14.0F, -1.5F, 2, 14, 3), PartPose.offsetAndRotation(0.0F, -7.0F, 0.0F, -0.32F, 0.0F, 0.0F));
-		body.addOrReplaceChild("spine3", box(168, 65, -1.0F, -12.0F, -1.5F, 2, 12, 3), PartPose.offsetAndRotation(0.0F, -7.0F, 5.5F, -0.32F, 0.0F, 0.0F));
-		body.addOrReplaceChild("spine4", box(190, 81, -1.0F, -9.0F, -1.5F, 2, 9, 3), PartPose.offsetAndRotation(0.0F, -7.0F, 11.0F, -0.32F, 0.0F, 0.0F));
-		body.addOrReplaceChild("shard_l", box(114, 95, -0.5F, -6.0F, -1.0F, 1, 6, 2), PartPose.offsetAndRotation(6.0F, -6.0F, -10.0F, -0.2F, 0.0F, 0.5F));
-		body.addOrReplaceChild("shard_r", mirrored(114, 95, -0.5F, -6.0F, -1.0F, 1, 6, 2), PartPose.offsetAndRotation(-6.0F, -6.0F, -10.0F, -0.2F, 0.0F, -0.5F));
-		PartDefinition leftfrontleg = body.addOrReplaceChild("left_front_leg", box(122, 0, -3.0F, -3.0F, -3.0F, 6, 15, 6), PartPose.offset(7.0F, 4.0F, -9.0F));
-		PartDefinition leftfrontshin = leftfrontleg.addOrReplaceChild("left_front_shin", box(0, 46, -2.5F, 0.0F, -2.5F, 5, 14, 5), PartPose.offset(0.0F, 12.0F, 0.0F));
-		leftfrontshin.addOrReplaceChild("left_front_foot", box(36, 95, -3.0F, 0.0F, -5.0F, 6, 2, 8), PartPose.offset(0.0F, 14.0F, 0.0F));
-		PartDefinition rightfrontleg = body.addOrReplaceChild("right_front_leg", mirrored(122, 0, -3.0F, -3.0F, -3.0F, 6, 15, 6), PartPose.offset(-7.0F, 4.0F, -9.0F));
-		PartDefinition rightfrontshin = rightfrontleg.addOrReplaceChild("right_front_shin", mirrored(0, 46, -2.5F, 0.0F, -2.5F, 5, 14, 5), PartPose.offset(0.0F, 12.0F, 0.0F));
-		rightfrontshin.addOrReplaceChild("right_front_foot", mirrored(36, 95, -3.0F, 0.0F, -5.0F, 6, 2, 8), PartPose.offset(0.0F, 14.0F, 0.0F));
-		PartDefinition lefthindleg = body.addOrReplaceChild("left_hind_leg", box(92, 0, -3.5F, -3.0F, -4.0F, 7, 15, 8), PartPose.offsetAndRotation(7.0F, 4.0F, 10.0F, -0.3F, 0.0F, 0.0F));
-		PartDefinition lefthindshin = lefthindleg.addOrReplaceChild("left_hind_shin", box(236, 0, -2.5F, 0.0F, -2.5F, 5, 15, 5), PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.6F, 0.0F, 0.0F));
-		lefthindshin.addOrReplaceChild("left_hind_foot", box(36, 95, -3.0F, 0.0F, -5.0F, 6, 2, 8), PartPose.offsetAndRotation(0.0F, 15.0F, 0.0F, -0.3F, 0.0F, 0.0F));
-		PartDefinition righthindleg = body.addOrReplaceChild("right_hind_leg", mirrored(92, 0, -3.5F, -3.0F, -4.0F, 7, 15, 8), PartPose.offsetAndRotation(-7.0F, 4.0F, 10.0F, -0.3F, 0.0F, 0.0F));
-		PartDefinition righthindshin = righthindleg.addOrReplaceChild("right_hind_shin", mirrored(236, 0, -2.5F, 0.0F, -2.5F, 5, 15, 5), PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.6F, 0.0F, 0.0F));
-		righthindshin.addOrReplaceChild("right_hind_foot", mirrored(36, 95, -3.0F, 0.0F, -5.0F, 6, 2, 8), PartPose.offsetAndRotation(0.0F, 15.0F, 0.0F, -0.3F, 0.0F, 0.0F));
+		PartDefinition body = root.addOrReplaceChild("body", box(0, 0, -9.0F, -8.0F, -10.0F, 18, 16, 20), PartPose.offset(0.0F, -14.0F, -6.0F));
+		body.addOrReplaceChild("chest", box(118, 83, -8.0F, 0.0F, -8.0F, 16, 3, 14), PartPose.offset(0.0F, 8.0F, -1.0F));
+		body.addOrReplaceChild("collar", box(208, 118, -9.5F, -2.0F, -1.5F, 19, 4, 3), PartPose.offset(0.0F, -5.0F, -9.0F));
+		PartDefinition neck0 = body.addOrReplaceChild("neck0", box(0, 83, -5.5F, -5.5F, -8.0F, 11, 11, 8), PartPose.offsetAndRotation(0.0F, -4.0F, -9.0F, -0.75F, 0.0F, 0.0F));
+		PartDefinition neck1 = neck0.addOrReplaceChild("neck1", box(178, 83, -5.0F, -5.0F, -7.0F, 10, 10, 7), PartPose.offsetAndRotation(0.0F, 0.0F, -7.0F, -0.25F, 0.0F, 0.0F));
+		PartDefinition neck2 = neck1.addOrReplaceChild("neck2", box(34, 102, -4.5F, -4.5F, -6.0F, 9, 9, 6), PartPose.offsetAndRotation(0.0F, 0.0F, -6.0F, 0.15F, 0.0F, 0.0F));
+		PartDefinition head = neck2.addOrReplaceChild("head", box(150, 61, -6.0F, -5.0F, -11.0F, 12, 9, 11), PartPose.offsetAndRotation(0.0F, 0.0F, -5.0F, 0.75F, 0.0F, 0.0F));
+		head.addOrReplaceChild("snout", box(64, 102, -4.5F, -3.0F, -9.0F, 9, 6, 9), PartPose.offset(0.0F, 0.0F, -11.0F));
+		head.addOrReplaceChild("jaw", box(0, 61, -4.5F, 0.0F, -19.0F, 9, 3, 19), PartPose.offset(0.0F, 3.5F, 0.0F));
+		head.addOrReplaceChild("eye_l", box(28, 131, -0.5F, -1.0F, -1.5F, 1, 2, 3), PartPose.offset(6.0F, -2.0F, -8.0F));
+		head.addOrReplaceChild("eye_r", box(28, 131, -0.5F, -1.0F, -1.5F, 1, 2, 3), PartPose.offset(-6.0F, -2.0F, -8.0F));
+		head.addOrReplaceChild("cap", box(82, 118, -6.5F, -1.0F, -5.0F, 13, 2, 10), PartPose.offset(0.0F, -5.0F, -5.5F));
+		head.addOrReplaceChild("band", box(36, 131, -6.5F, -1.0F, -1.5F, 13, 2, 3), PartPose.offset(0.0F, -5.0F, -10.0F));
+		head.addOrReplaceChild("nemes_l", box(208, 0, 0.0F, 0.0F, 0.0F, 1, 14, 11), PartPose.offsetAndRotation(6.0F, -4.0F, -6.0F, 0.32F, 0.22F, -0.18F));
+		head.addOrReplaceChild("nemes_r", mirrored(208, 0, -1.0F, 0.0F, 0.0F, 1, 14, 11), PartPose.offsetAndRotation(-6.0F, -4.0F, -6.0F, 0.32F, -0.22F, 0.18F));
+		head.addOrReplaceChild("short_nemes_l", box(212, 83, 0.0F, 0.0F, 0.0F, 1, 8, 9), PartPose.offsetAndRotation(6.0F, -4.0F, -6.0F, 0.32F, 0.22F, -0.18F));
+		head.addOrReplaceChild("short_nemes_r", mirrored(212, 83, -1.0F, 0.0F, 0.0F, 1, 8, 9), PartPose.offsetAndRotation(-6.0F, -4.0F, -6.0F, 0.32F, -0.22F, 0.18F));
+		head.addOrReplaceChild("braid", box(138, 118, -2.0F, 0.0F, 0.0F, 4, 9, 2), PartPose.offsetAndRotation(0.0F, -3.0F, 0.0F, 0.35F, 0.0F, 0.0F));
+		head.addOrReplaceChild("uraeus", box(200, 118, -1.0F, -6.0F, -1.0F, 2, 6, 2), PartPose.offsetAndRotation(0.0F, -5.5F, -9.0F, -0.35F, 0.0F, 0.0F));
+		PartDefinition tail0 = body.addOrReplaceChild("tail0", box(152, 0, -8.0F, -7.0F, 0.0F, 16, 14, 12), PartPose.offsetAndRotation(0.0F, -2.0F, 9.0F, -0.5F, 0.0F, 0.0F));
+		PartDefinition tail1 = tail0.addOrReplaceChild("tail1", box(0, 36, -7.5F, -6.5F, 0.0F, 15, 13, 12), PartPose.offsetAndRotation(0.0F, 0.0F, 11.0F, -0.55F, 0.0F, 0.0F));
+		PartDefinition tail2 = tail1.addOrReplaceChild("tail2", box(54, 36, -7.0F, -6.0F, 0.0F, 14, 12, 12), PartPose.offsetAndRotation(0.0F, 0.0F, 11.0F, -0.45F, 0.0F, 0.0F));
+		PartDefinition tail3 = tail2.addOrReplaceChild("tail3", box(106, 36, -6.5F, -5.5F, 0.0F, 13, 11, 12), PartPose.offsetAndRotation(0.0F, 0.0F, 11.0F, 0.9F, 0.0F, 0.0F));
+		PartDefinition tail4 = tail3.addOrReplaceChild("tail4", box(56, 61, -6.0F, -5.0F, 0.0F, 12, 10, 12), PartPose.offsetAndRotation(0.0F, 0.0F, 11.0F, 0.5F, 0.0F, 0.0F));
+		PartDefinition tail5 = tail4.addOrReplaceChild("tail5", box(104, 61, -5.5F, -4.5F, 0.0F, 11, 9, 12), PartPose.offsetAndRotation(0.0F, 0.0F, 11.0F, 0.15F, 0.0F, 0.0F));
+		PartDefinition tail6 = tail5.addOrReplaceChild("tail6", box(38, 83, -5.0F, -4.0F, 0.0F, 10, 8, 11), PartPose.offset(0.0F, 0.0F, 11.0F));
+		PartDefinition tail7 = tail6.addOrReplaceChild("tail7", box(80, 83, -4.0F, -3.5F, 0.0F, 8, 7, 11), PartPose.offset(0.0F, 0.0F, 10.0F));
+		PartDefinition tail8 = tail7.addOrReplaceChild("tail8", box(0, 102, -3.5F, -3.0F, 0.0F, 7, 6, 10), PartPose.offsetAndRotation(0.0F, 0.0F, 10.0F, 0.22F, 0.0F, 0.0F));
+		PartDefinition tail9 = tail8.addOrReplaceChild("tail9", box(100, 102, -3.0F, -2.5F, 0.0F, 6, 5, 10), PartPose.offsetAndRotation(0.0F, 0.0F, 9.0F, 0.3F, 0.0F, 0.0F));
+		PartDefinition tail10 = tail9.addOrReplaceChild("tail10", box(204, 102, -2.0F, -2.0F, 0.0F, 4, 4, 9), PartPose.offsetAndRotation(0.0F, 0.0F, 9.0F, 0.35F, 0.0F, 0.0F));
+		PartDefinition spear = tail10.addOrReplaceChild("spear", box(0, 131, -1.5F, -1.5F, 0.0F, 3, 3, 4), PartPose.offsetAndRotation(0.0F, 0.0F, 8.0F, 0.1F, 0.0F, 0.0F));
+		spear.addOrReplaceChild("blade", box(156, 36, -1.0F, -3.5F, 0.0F, 2, 7, 16), PartPose.offset(0.0F, 0.0F, 3.5F));
+		spear.addOrReplaceChild("guard", box(104, 131, -5.0F, -1.0F, 0.0F, 10, 2, 2), PartPose.offset(0.0F, 0.0F, 2.0F));
+		PartDefinition saddle = body.addOrReplaceChild("saddle", box(142, 102, -7.0F, -2.0F, -6.0F, 14, 2, 12), PartPose.offset(0.0F, -8.0F, 1.0F));
+		saddle.addOrReplaceChild("pommel", box(68, 131, -2.0F, -3.0F, 0.0F, 4, 3, 2), PartPose.offset(0.0F, -2.0F, -6.0F));
+		saddle.addOrReplaceChild("cantle", box(80, 131, -5.0F, -3.0F, 0.0F, 10, 3, 2), PartPose.offset(0.0F, -2.0F, 4.0F));
+		body.addOrReplaceChild("strap", box(196, 61, -9.5F, -8.5F, -1.5F, 19, 17, 3), PartPose.offset(0.0F, 0.0F, 1.0F));
+		tail0.addOrReplaceChild("pad", box(150, 118, -6.0F, -2.0F, -4.0F, 12, 2, 8), PartPose.offset(0.0F, -7.0F, 6.0F));
+		tail0.addOrReplaceChild("spine0", box(230, 102, -1.0F, -10.0F, -1.5F, 2, 10, 3), PartPose.offsetAndRotation(0.0F, -6.0F, 6.0F, -0.4F, 0.0F, 0.0F));
+		tail1.addOrReplaceChild("spine1", box(132, 102, -1.0F, -12.0F, -1.5F, 2, 12, 3), PartPose.offsetAndRotation(0.0F, -5.5F, 6.0F, -0.4F, 0.0F, 0.0F));
+		tail2.addOrReplaceChild("spine2", box(194, 102, -1.0F, -11.0F, -1.5F, 2, 11, 3), PartPose.offsetAndRotation(0.0F, -5.0F, 6.0F, -0.4F, 0.0F, 0.0F));
+		tail3.addOrReplaceChild("spine3", box(128, 118, -1.0F, -9.0F, -1.5F, 2, 9, 3), PartPose.offsetAndRotation(0.0F, -4.5F, 6.0F, -0.4F, 0.0F, 0.0F));
+		tail4.addOrReplaceChild("spine4", box(190, 118, -1.0F, -7.0F, -1.5F, 2, 7, 3), PartPose.offsetAndRotation(0.0F, -4.0F, 6.0F, -0.4F, 0.0F, 0.0F));
+		PartDefinition leftarm = body.addOrReplaceChild("left_arm", box(76, 0, -5.0F, -3.0F, -5.0F, 10, 21, 10), PartPose.offsetAndRotation(10.0F, -3.0F, -5.0F, -0.1F, 0.0F, -0.45F));
+		leftarm.addOrReplaceChild("left_shoulder", box(192, 36, -6.5F, -5.0F, -6.5F, 13, 10, 13), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition leftforearm = leftarm.addOrReplaceChild("left_forearm", box(116, 0, -4.5F, 0.0F, -4.5F, 9, 22, 9), PartPose.offsetAndRotation(0.0F, 17.5F, 0.0F, 0.1F, 0.0F, 0.45F));
+		leftforearm.addOrReplaceChild("left_cuff", box(0, 118, -5.0F, 0.0F, -5.0F, 10, 3, 10), PartPose.offset(0.0F, 3.0F, 0.0F));
+		PartDefinition lefthand = leftforearm.addOrReplaceChild("left_hand", box(40, 118, -5.5F, 0.0F, -7.0F, 11, 3, 10), PartPose.offset(0.0F, 22.3F, 0.0F));
+		lefthand.addOrReplaceChild("left_finger0", box(14, 131, -1.0F, 0.0F, -5.0F, 2, 2, 5), PartPose.offsetAndRotation(-3.6F, 1.0F, -7.0F, 0.0F, 0.15F, 0.0F));
+		lefthand.addOrReplaceChild("left_finger1", box(14, 131, -1.0F, 0.0F, -5.0F, 2, 2, 5), PartPose.offset(0.0F, 1.0F, -7.0F));
+		lefthand.addOrReplaceChild("left_finger2", box(14, 131, -1.0F, 0.0F, -5.0F, 2, 2, 5), PartPose.offsetAndRotation(3.6F, 1.0F, -7.0F, 0.0F, -0.15F, 0.0F));
+		lefthand.addOrReplaceChild("left_thumb", box(14, 131, -1.0F, 0.0F, -5.0F, 2, 2, 5), PartPose.offsetAndRotation(-5.5F, 1.0F, -3.0F, 0.0F, 0.7F, 0.0F));
+		PartDefinition rightarm = body.addOrReplaceChild("right_arm", mirrored(76, 0, -5.0F, -3.0F, -5.0F, 10, 21, 10), PartPose.offsetAndRotation(-10.0F, -3.0F, -5.0F, -0.1F, 0.0F, 0.45F));
+		rightarm.addOrReplaceChild("right_shoulder", mirrored(192, 36, -6.5F, -5.0F, -6.5F, 13, 10, 13), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition rightforearm = rightarm.addOrReplaceChild("right_forearm", mirrored(116, 0, -4.5F, 0.0F, -4.5F, 9, 22, 9), PartPose.offsetAndRotation(0.0F, 17.5F, 0.0F, 0.1F, 0.0F, -0.45F));
+		rightforearm.addOrReplaceChild("right_cuff", mirrored(0, 118, -5.0F, 0.0F, -5.0F, 10, 3, 10), PartPose.offset(0.0F, 3.0F, 0.0F));
+		PartDefinition righthand = rightforearm.addOrReplaceChild("right_hand", mirrored(40, 118, -5.5F, 0.0F, -7.0F, 11, 3, 10), PartPose.offset(0.0F, 22.3F, 0.0F));
+		righthand.addOrReplaceChild("right_finger0", mirrored(14, 131, -1.0F, 0.0F, -5.0F, 2, 2, 5), PartPose.offsetAndRotation(-3.6F, 1.0F, -7.0F, 0.0F, 0.15F, 0.0F));
+		righthand.addOrReplaceChild("right_finger1", mirrored(14, 131, -1.0F, 0.0F, -5.0F, 2, 2, 5), PartPose.offset(0.0F, 1.0F, -7.0F));
+		righthand.addOrReplaceChild("right_finger2", mirrored(14, 131, -1.0F, 0.0F, -5.0F, 2, 2, 5), PartPose.offsetAndRotation(3.6F, 1.0F, -7.0F, 0.0F, -0.15F, 0.0F));
+		righthand.addOrReplaceChild("right_thumb", mirrored(14, 131, -1.0F, 0.0F, -5.0F, 2, 2, 5), PartPose.offsetAndRotation(5.5F, 1.0F, -3.0F, 0.0F, -0.7F, 0.0F));
 
 		return LayerDefinition.create(mesh, 256, 256);
 	}
@@ -190,115 +198,137 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 		float crash = ease(s.crash), swim = ease(s.swim) * (1.0F - crash);
 		float sit = ease(s.sit) * (1.0F - crash) * (1.0F - swim);
 		float walk = Math.min(s.walkAnimationSpeed, 1.0F) * (1.0F - crash) * (1.0F - sit) * (1.0F - swim);
-		float step = s.walkAnimationPos * 0.5F;
+		float step = s.walkAnimationPos * 0.45F;
 		float headYaw = Mth.clamp(s.yRot, -60.0F, 60.0F) * Mth.DEG_TO_RAD;
 		float headPitch = Mth.clamp(s.xRot, -35.0F, 35.0F) * Mth.DEG_TO_RAD;
 		float x = AtroxiiaDragon.actionShare(s.action, s.actionAge);
 		int a = s.action;
 
 		// the moves, each a 0..1 envelope that begins and ends at rest
-		float slam = a == AtroxiiaDragon.SLAM_MOVE ? rise(x, 0.0F, 0.5F) * (1.0F - rise(x, 0.5F, 0.65F)) : 0.0F;
+		float slamUp = a == AtroxiiaDragon.SLAM_MOVE ? rise(x, 0.0F, 0.5F) * (1.0F - rise(x, 0.5F, 0.62F)) : 0.0F;
 		float slamDown = a == AtroxiiaDragon.SLAM_MOVE ? rise(x, 0.5F, 0.62F) * (1.0F - rise(x, 0.7F, 1.0F)) : 0.0F;
 		float swipe = a == AtroxiiaDragon.SWIPE_MOVE ? bell(x, 0.0F, 1.0F) : 0.0F;
-		float swipeAcross = a == AtroxiiaDragon.SWIPE_MOVE ? rise(x, 0.25F, 0.65F) : 0.0F;
-		// the precise strike: the tail raised over the back, then three jabs
-		float strike = a == AtroxiiaDragon.STRIKE_MOVE ? rise(x, 0.0F, 0.2F) * (1.0F - rise(x, 0.8F, 1.0F)) : 0.0F;
-		float jab = a == AtroxiiaDragon.STRIKE_MOVE ? bell(x, 0.18F, 0.36F) + bell(x, 0.41F, 0.59F) + bell(x, 0.64F, 0.82F) : 0.0F;
-		// Gungnir: coiled back through the wind-up, then driven out straight, then drawn home
-		float coil = a == AtroxiiaDragon.GUNGNIR_MOVE ? rise(x, 0.0F, 0.5F) * (1.0F - rise(x, 0.5F, 0.6F)) : 0.0F;
-		float thrust = a == AtroxiiaDragon.GUNGNIR_MOVE ? rise(x, 0.5F, 0.6F) * (1.0F - rise(x, 0.72F, 1.0F)) : 0.0F;
-		// the sweep: the tail swung round low and back
+		float swipeAcross = a == AtroxiiaDragon.SWIPE_MOVE ? rise(x, 0.2F, 0.7F) : 0.0F;
+		// the precise strike: a jab of the left hand, the right, the left
+		float jabL = a == AtroxiiaDragon.STRIKE_MOVE ? bell(x, 0.14F, 0.38F) + bell(x, 0.62F, 0.86F) : 0.0F;
+		float jabR = a == AtroxiiaDragon.STRIKE_MOVE ? bell(x, 0.38F, 0.62F) : 0.0F;
+		// Gungnir: the tail arched up over its back through the wind-up, then the spear driven forward, then drawn home
+		float arch = a == AtroxiiaDragon.GUNGNIR_MOVE ? rise(x, 0.0F, 0.45F) * (1.0F - rise(x, 0.75F, 1.0F)) : 0.0F;
+		float thrust = a == AtroxiiaDragon.GUNGNIR_MOVE ? rise(x, 0.5F, 0.6F) * (1.0F - rise(x, 0.7F, 0.95F)) : 0.0F;
+		// the sweep: the tail swung round and back
 		float sweep = a == AtroxiiaDragon.SWEEP_MOVE ? bell(x, 0.0F, 1.0F) : 0.0F;
-		float sweepTurn = a == AtroxiiaDragon.SWEEP_MOVE ? Mth.sin(rise(x, 0.1F, 0.8F) * Mth.PI * 2.0F) : 0.0F;
-		// the Helheim quake: reared and brought down twice, the jaw wide throughout
+		// the Helheim quake: the chest reared and brought down twice, the jaw wide throughout
 		float rear = a == AtroxiiaDragon.QUAKE_MOVE ? rise(x, 0.0F, 0.4F) * (1.0F - rise(x, 0.4F, 0.46F))
 			+ rise(x, 0.5F, 0.68F) * (1.0F - rise(x, 0.68F, 0.74F)) : 0.0F;
 		float roar = a == AtroxiiaDragon.QUAKE_MOVE ? rise(x, 0.0F, 0.15F) * (1.0F - rise(x, 0.8F, 1.0F)) : 0.0F;
-		rear += slam * 0.6F;
 
-		// the body: high and swaying, sunk crashed, settled back sitting, reared for the slam and the quake
-		this.body.y = this.bodyY + crash * CRASH_DROP + sit * SIT_DROP + Math.abs(Mth.sin(step)) * 0.5F * walk + Mth.sin(t * 0.07F) * 0.2F
-			- rear * 4.0F + slamDown * 1.5F + coil * 1.5F;
-		this.body.xRot = -rear * 0.42F + slamDown * 0.08F - sit * 0.2F + coil * 0.08F - thrust * 0.06F;
-		// (its spine waves as it walks, and sweeps round with the tail)
-		this.body.yRot = Mth.sin(step) * 0.06F * walk + Mth.sin(t * 0.12F) * 0.08F * swim + sweepTurn * 0.35F;
-		this.body.zRot = Mth.sin(step) * 0.03F * walk;
+		// the chest: high on the arms, rolling with each step, sunk crashed, lower sitting, reared for the quake
+		float drop = crash * CRASH_DROP + sit * SIT_DROP + swim * 6.0F - rear * 6.0F + slamDown * 1.5F + thrust * 1.5F;
+		this.body.y = this.bodyY + drop + Math.abs(Mth.sin(step)) * 0.8F * walk + Mth.sin(t * 0.07F) * 0.25F;
+		this.body.xRot = -rear * 0.45F - slamUp * 0.12F + slamDown * 0.08F + thrust * 0.06F + swim * 0.15F;
+		this.body.zRot = Mth.sin(step) * 0.06F * walk;
+		this.body.yRot = Mth.sin(step) * 0.07F * walk + Mth.sin(t * 0.12F) * 0.06F * swim - swipeAcross * swipe * 0.15F;
 
-		// the neck: each segment a beat behind the one before, swaying against the spine
-		float neckDown = crash * 1.8F + swim * 0.9F + sit * 0.1F - roar * 0.25F + slamDown * 0.3F + swipe * 0.2F + coil * 0.15F;
+		// the neck: each segment a beat behind the one before
+		float neckDown = crash * 1.0F + swim * 0.6F - roar * 0.25F + slamDown * 0.25F + thrust * 0.2F;
 		for (int i = 0; i < NECK; i++) {
-			float share = (NECK - i) / 21.0F;
-			this.neck[i].xRot = this.neckRest[i] * (1.0F - crash * 0.8F) + neckDown * share
+			float share = (NECK - i) / 6.0F;
+			this.neck[i].xRot = this.neckRest[i] + neckDown * share - this.body.xRot * (i == 0 ? 0.6F : 0.0F)
 				+ Mth.sin(step * 2.0F - i * 0.5F) * 0.03F * walk + Mth.sin(t * 0.05F - i * 0.45F) * 0.02F;
-			this.neck[i].yRot = headYaw * 0.11F - Mth.sin(step - i * 0.55F) * 0.05F * walk + Mth.sin(t * 0.12F - i * 0.5F) * 0.08F * swim
-				- this.body.yRot * 0.25F;
+			this.neck[i].yRot = headYaw * 0.2F - this.body.yRot * (i == 0 ? 0.6F : 0.0F) - Mth.sin(step - i * 0.6F) * 0.04F * walk;
 		}
-		this.head.xRot = this.headRest + headPitch * 0.5F - neckDown * 0.45F - roar * 0.3F;
-		this.head.yRot = headYaw * 0.2F;
-		this.jaw.xRot = 0.05F + roar * 0.8F + (0.5F - 0.5F * Mth.cos(t * 0.04F)) * 0.04F + swipe * 0.25F + thrust * 0.3F;
-		this.frillL.yRot = 0.35F + roar * 0.4F + Mth.sin(t * 0.09F) * 0.04F;
-		this.frillR.yRot = -this.frillL.yRot;
+		this.head.xRot = this.headRest + headPitch * 0.5F - neckDown * 0.4F - roar * 0.3F;
+		this.head.yRot = headYaw * 0.3F;
+		this.jaw.xRot = 0.04F + roar * 0.8F + (0.5F - 0.5F * Mth.cos(t * 0.04F)) * 0.04F + swipe * 0.25F + thrust * 0.3F + s.breath * 0.4F;
+		this.braid.xRot = 0.35F + Mth.sin(t * 0.08F) * 0.04F + walk * 0.1F - this.head.xRot * 0.3F;
+		this.nemesL.zRot = -0.18F - Mth.sin(t * 0.07F) * 0.02F - roar * 0.12F;
+		this.nemesR.zRot = -this.nemesL.zRot;
+		this.shortL.zRot = this.nemesL.zRot;
+		this.shortR.zRot = this.nemesR.zRot;
 
-		// the tail: arched over the hips; it uncurls in the water and crashed, rises and jabs in the strike, coils and
-		// drives out in Gungnir, and swings round low in the sweep (each segment a beat behind the one before)
-		float uncurl = Math.max(swim * 0.85F, Math.max(crash * 0.75F, sweep * 0.6F));
+		// the serpent body and tail: the root keeps its run down to the ground as the chest sinks or rears; the rest
+		// lies along the ground, snaking as it goes (each segment a beat behind), sculling in the water; it arches up
+		// over its back for Gungnir and swings round for the sweep
+		float lift = drop / CRASH_DROP;
 		for (int i = 0; i < TAIL; i++) {
 			float k = i / (float)(TAIL - 1);
-			float rx = this.tailRest[i] * (1.0F - uncurl);
-			// the strike lifts the root and the jabs throw the spear end forward
-			rx += strike * (i < 2 ? 0.25F : 0.05F) + jab * (i < 3 ? 0.18F : -0.12F);
-			// Gungnir: coiled tighter, then the root swung forward and the rest straightened into a spear
-			rx += coil * 0.22F + thrust * (i == 0 ? 0.95F : i == 1 ? 0.5F : -this.tailRest[i] * 0.9F);
-			rx += -walk * 0.03F + Mth.sin(t * 0.06F - i * 0.5F) * 0.02F;
-			this.tail[i].xRot = rx;
-			this.tail[i].yRot = Mth.sin(step - i * 0.6F) * 0.06F * walk + Mth.sin(t * 0.05F - i * 0.5F) * 0.04F
-				+ Mth.sin(t * 0.25F - i * 0.7F) * (0.12F + k * 0.1F) * swim + sweep * 0.55F * (1.0F - k * 0.5F) - sweepTurn * 0.15F;
-		}
-
-		// legs: forelegs swing as pillars; the hind legs fold at the hock; the diagonal pairs move together
-		for (int i = 0; i < 4; i++) {
-			boolean front = i < 2, left = i % 2 == 0;
-			float phase = front == left ? 0.0F : Mth.PI;
-			float swing = Mth.cos(step + phase) * 0.42F * walk;
-			// (the knee folds as the leg swings forward and straightens as it plants: a smooth curve)
-			float lift = (1.0F - Mth.sin(step + phase)) * 0.5F;
-			float knee = lift * lift * 0.5F * walk;
-			float up = this.upperRest[i] + swing, low = this.lowerRest[i] + (front ? knee : knee * 1.3F);
-			if (front) {
-				// reared: both forelegs lifted, the slam's left one stamped; the swipe's left one swung across
-				float raise = left ? Math.max(rear, slam) : rear;
-				up = Mth.lerp(raise, up, -0.9F);
-				low = Mth.lerp(raise, low, 1.1F);
-				if (left) {
-					up = Mth.lerp(swipe, up, -1.25F);
-					low = Mth.lerp(swipe, low, 0.5F);
-				}
-			} else {
-				up = Mth.lerp(sit, up, -1.1F);
-				low = Mth.lerp(sit, low, 1.7F);
-				up = Mth.lerp(rear * 0.5F, up, this.upperRest[i] - 0.25F);
+			float rx = this.tailRest[i];
+			if (i <= 2) {
+				// (the chest lower: the root runs down less steeply; reared: more)
+				rx += lift * 0.45F - (i == 0 ? this.body.xRot : 0.0F);
+			} else if (i == 3) {
+				rx -= lift * 1.2F;
 			}
-			up = Mth.lerp(crash, up, front ? -1.0F : 0.9F);
-			low = Mth.lerp(crash, low, front ? 1.4F : -0.2F);
-			// swimming: tucked back along the body, paddling slowly
-			up = Mth.lerp(swim, up, 1.1F + Mth.sin(t * 0.2F + phase) * 0.25F);
-			low = Mth.lerp(swim, low, 0.4F + Mth.sin(t * 0.2F + phase - 0.5F) * 0.15F);
-			this.upper[i].xRot = up;
-			this.upper[i].zRot = (left ? -1.0F : 1.0F) * (crash * 0.55F + (front && left ? swipeAcross * swipe * 0.6F : 0.0F));
-			this.lower[i].xRot = low;
-			// the foot kept flat on the ground
-			this.foot[i].xRot = -(up + low) * (1.0F - swim);
+			// Gungnir: from the ground up into a scorpion's coil (eased), then the whole arc swung forward past its head
+			if (i >= 3) {
+				rx += arch * 0.27F + thrust * (i == 3 ? 0.7F : i == 4 ? 0.3F : -0.12F);
+			}
+			rx += Mth.sin(t * 0.06F - i * 0.5F) * 0.015F;
+			this.tail[i].xRot = rx;
+			this.tail[i].yRot = Mth.sin(step * 1.2F - i * 0.55F) * (0.04F + k * 0.08F) * walk + Mth.sin(t * 0.05F - i * 0.5F) * 0.03F
+				+ Mth.sin(t * 0.22F - i * 0.6F) * (0.08F + k * 0.1F) * swim + sweep * 0.32F * (1.0F - k * 0.3F) * (i >= 2 ? 1.0F : 0.3F)
+				- (i == 0 ? this.body.yRot : 0.0F);
 		}
 
-		// its look: horns, a lost crystal; its tack
+		// the arms: walking on them in turn (the hand lifts and the elbow folds as it swings forward, a smooth curve)
+		for (int i = 0; i < 2; i++) {
+			boolean left = i == 0;
+			float side = left ? 1.0F : -1.0F;
+			float phase = left ? 0.0F : Mth.PI;
+			float swing = Mth.cos(step + phase) * 0.45F * walk;
+			float raise = (1.0F - Mth.sin(step + phase)) * 0.5F;
+			float elbow = raise * raise * 0.6F * walk;
+			float up = this.upperX[i] + swing, low = this.foreX[i] + elbow;
+			float uz = this.upperZ[i], lz = this.foreZ[i];
+			// the slam (left): raised high, then brought down; the swipe (right): swung out and raked across
+			if (left) {
+				up = Mth.lerp(slamUp, up, -2.4F);
+				low = Mth.lerp(slamUp, low, -0.2F);
+				up = Mth.lerp(slamDown, up, -0.6F);
+				low = Mth.lerp(slamDown, low, 0.3F);
+			} else {
+				up = Mth.lerp(swipe, up, -1.3F);
+				low = Mth.lerp(swipe, low, 0.4F);
+				uz = Mth.lerp(swipe, uz, this.upperZ[i] + side * (0.8F - swipeAcross * 1.4F));
+			}
+			// the strike's jabs: straight ahead
+			float jab = left ? jabL : jabR;
+			up = Mth.lerp(jab, up, -1.4F);
+			low = Mth.lerp(jab, low, -0.1F);
+			// the quake: both raised as it rears, slammed as it lands
+			up = Mth.lerp(rear, up, -1.9F);
+			low = Mth.lerp(rear, low, 0.2F);
+			// sitting: folded before it; crashed: splayed out flat; swimming: swept back along its flanks
+			up = Mth.lerp(sit, up, -0.5F);
+			low = Mth.lerp(sit, low, 1.1F);
+			up = Mth.lerp(crash, up, -0.4F);
+			uz = Mth.lerp(crash, uz, -side * 1.2F);
+			low = Mth.lerp(crash, low, 0.2F);
+			lz = Mth.lerp(crash, lz, side * 0.9F);
+			up = Mth.lerp(swim, up, 1.2F + Mth.sin(t * 0.2F + phase) * 0.2F);
+			low = Mth.lerp(swim, low, 0.3F);
+			this.upper[i].xRot = up;
+			this.upper[i].zRot = uz;
+			this.fore[i].xRot = low;
+			this.fore[i].zRot = lz;
+			// the hand kept flat on the ground as it walks; it opens raised and in the strikes, and grips crashed
+			float flat = 1.0F - Math.max(Math.max(slamUp * (left ? 1.0F : 0.0F), jab), swim);
+			this.hand[i].xRot = -(up + low) * flat + (1.0F - flat) * -0.3F;
+			this.hand[i].zRot = -(uz + lz) * flat;
+			float curl = elbow * 0.6F + crash * 0.3F + (left ? slamDown : swipe) * 0.5F - jab * 0.2F;
+			for (int f = 0; f < 4; f++) {
+				this.fingers[i][f].xRot = curl * (f == 3 ? 0.6F : 1.0F);
+			}
+		}
+
+		// its look: the headdress, a lost crystal; its tack
 		DragonLook look = s.look;
-		boolean shortHorns = look.horns() == DragonLook.SHORT_HORNS;
-		this.hornL.visible = this.hornR.visible = !shortHorns;
-		this.shortL.visible = this.shortR.visible = shortHorns;
-		this.crownL.visible = this.crownR.visible = look.horns() == DragonLook.TWIN_HORNS;
+		boolean shortNemes = look.horns() == DragonLook.SHORT_HORNS;
+		this.nemesL.visible = this.nemesR.visible = !shortNemes;
+		this.shortL.visible = this.shortR.visible = shortNemes;
+		this.uraeus.visible = look.horns() == DragonLook.TWIN_HORNS;
 		for (int i = 0; i < DragonLook.SPIKES; i++) {
-			boolean tack = s.saddled && i >= 1 && i <= 3;
-			this.spines[i].visible = look.spike(i) && !tack;
+			this.spines[i].visible = look.spike(i) && !(s.saddled && i == 0);
 		}
 		this.saddle.visible = this.strap.visible = this.pad.visible = s.saddled;
 	}

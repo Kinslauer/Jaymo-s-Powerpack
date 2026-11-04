@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * numbers are ported from Saint's Dragons by Leon Saint (MIT licence; none of its art, models or sounds are used: the
  * model is our own, {@code VarasuchusDragonModel}, painted by {@code tools/gen_varasuchus.py}). A walker and a swimmer
  * ({@link WindDragon#swims}) of the beaches and the swamps, high on long sprawling legs, armoured in bony scutes, with a
- * great crested tail. Unlike the grazers it hunts: it goes for anyone who comes near, and it is quick in the water.
+ * heavy blocky head and a crested tail long enough to wrap round to its front. Unlike the grazers it hunts: it goes for anyone who comes near, and it is quick in the water.
  * <p>
  * Its moves, besides the bite and the tail sweep every dragon has:
  * <ul>
@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * does.</li>
  * <li><b>Tailguard:</b> struck, it may swing its tail round as a guard: the next blow at it (within a few blocks) is
  * parried as our guard parries ({@code MobParry}'s sparks and ring of steel), the striker hurt and thrown back.</li>
- * <li>Worn to half its health it rages: harder bites, horns and claws, and its moves come quicker.</li>
+ * <li>Worn to half its health it rages: it rears up on its hind legs and fights with its arms, harder bites, horns and claws,
+ * and its moves come quicker.</li>
  * </ul>
  * Tamed and ridden it's steered like a horse on land and swims where the rider looks in water; R charges where the
  * rider looks, goring at the end. Its favourite is raw salmon; Tideborn win it over twice as fast.
@@ -86,6 +87,7 @@ public class VarasuchusDragon extends WindDragon {
 		GUARD_STARTUP + GUARD_HOLD, 12, 30};
 
 	private static final EntityDataAccessor<Integer> DATA_ACTION = SynchedEntityData.defineId(VarasuchusDragon.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Boolean> DATA_RAGING = SynchedEntityData.defineId(VarasuchusDragon.class, EntityDataSerializers.BOOLEAN);
 
 	private int clawIn, hornIn, dashIn = DASH_EVERY / 2, barrageIn = BARRAGE_EVERY / 2, shiftIn, guardIn, riderIn;
 	private boolean raging;
@@ -108,6 +110,7 @@ public class VarasuchusDragon extends WindDragon {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(DATA_ACTION, NONE);
+		builder.define(DATA_RAGING, false);
 	}
 
 	// ---- what sets it apart ---------------------------------------------------------------------------------------------
@@ -164,7 +167,7 @@ public class VarasuchusDragon extends WindDragon {
 
 	@Override
 	protected double mouthAhead(boolean flying) {
-		return 4.6;
+		return 5.0;
 	}
 
 	@Override
@@ -190,6 +193,15 @@ public class VarasuchusDragon extends WindDragon {
 		Vec3 flat = aim.multiply(1.0, 0.0, 1.0);
 		this.moveAim = flat.lengthSqr() < 0.01 ? Vec3.directionFromRotation(0.0F, this.getYRot()) : flat.normalize();
 		this.entityData.set(DATA_ACTION, move);
+	}
+
+	/**
+	 * Raging (and wild, on land) it rises onto its hind legs and fights upright, its forelegs free for its claws (as the
+	 * Saint's Dragons one does in its second phase).
+	 */
+	@Override
+	protected boolean standing() {
+		return this.entityData.get(DATA_RAGING) && !this.isTamed() && !grounded() && !this.isInWater();
 	}
 
 	private int pace(int ticks) {
@@ -439,6 +451,7 @@ public class VarasuchusDragon extends WindDragon {
 	/** Worn to half its health: it roars, and from now on it bites harder and its moves come quicker. */
 	private void rage(ServerLevel level) {
 		this.raging = true;
+		this.entityData.set(DATA_RAGING, true);
 		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(RAGE_BITE);
 		level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 3.0F, 0.45F);
 		level.sendParticles(ParticleTypes.ANGRY_VILLAGER, this.getX(), this.getY() + 2.6, this.getZ(), 6, 1.2, 0.4, 1.2, 0.0);
@@ -468,6 +481,7 @@ public class VarasuchusDragon extends WindDragon {
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.raging = input.getBooleanOr("Raging", false);
+		this.entityData.set(DATA_RAGING, this.raging);
 	}
 
 	/** How far through {@code action} its model is after {@code age} ticks (0 to 1). */
