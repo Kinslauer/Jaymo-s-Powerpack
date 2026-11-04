@@ -71,10 +71,13 @@ import net.minecraft.world.level.block.Blocks;
  * </ul>
  */
 public final class Mana {
-	/** The most mana a natural (Mage, Sorcerer) and one who found it hold, and what each Arcana point adds. */
-	static final float NATURAL_MAX = 100.0F, FOUND_MAX = 50.0F, NATURAL_PER_POINT = 10.0F, FOUND_PER_POINT = 5.0F;
+	/**
+	 * The most mana a natural (Mage, Sorcerer) and one who found it hold, and what each Arcana point adds. (0.7.538) Arcana
+	 * runs 0-100 now ({@link Stats#MAX}): a point is a tenth of an old one, and a full 100 gives half again the old full 10.
+	 */
+	static final float NATURAL_MAX = 100.0F, FOUND_MAX = 50.0F, NATURAL_PER_POINT = 1.5F, FOUND_PER_POINT = 0.75F;
 	/** Mana back per second, a natural's and a finder's, and what each Arcana point adds. */
-	static final float NATURAL_REGEN = 2.0F, FOUND_REGEN = 1.0F, REGEN_PER_POINT = 0.15F;
+	static final float NATURAL_REGEN = 2.0F, FOUND_REGEN = 1.0F, REGEN_PER_POINT = 0.0225F;
 	/** Attunement fills mana to this share of its most; over the most it bleeds away this much a second. */
 	static final float OVERLOAD = 1.5F, SPILL = 3.0F;
 	/** How long the blue overload lasts on screen and in the glow (ticks). */

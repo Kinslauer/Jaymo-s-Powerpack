@@ -8958,3 +8958,23 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
   own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
   Cube Animals is loaded. Its loot-chest copies are untouched. Not compiled or played yet.
+- **0.7.538, attributes run 0-100, capped by world tier; Attributes and Jobs tabs no longer overlap** (Andy, 2026-11-04:
+  "UI needs a rework, the text is overlapping. And character level points should scale way further, making stats go from
+  0/100 and scale accordingly, giving users a reason to world tier up"):
+  - `Stats`: `MAX` 100. One old point is `STEP` (10) new ones: each character level earns `POINTS_PER_LEVEL` (5; was one
+    per 2 levels), heritage/class/story/aim/flaw/Zenkai points count 10 each. Every effect per point is a tenth of the old
+    one times `TOP_SHARE` 1.5, so 100 gives half again the old 10 (Might +37.5% damage, Agility +15% speed, Finesse +37.5%
+    attack speed, Endurance 37.5% less hunger, Grit +7.5 armour and +30% knockback resistance, Wits +45% skill xp and +1.5
+    luck; Arcana +150 / +75 mana and +2.25 a second, `Mana`).
+  - World tier caps (`TIER_CAP`): Hearth 40, Borderlands 55, Wildlands 70, Dread 85, Legend 100, from the highest tier opened
+    (or the one you stand in, if higher), so stepping down to play with a friend costs nothing. Opening a tier also adds
+    `TIER_POINTS` (10 / 25 / 45 / 70 in all). Points past a cap stay banked; a new tier re-applies the attributes.
+  - Old saves: `Stats.migrate` (from `Skills.refresh`) multiplies every `stat_` rank by 10 once and marks the save
+    (`stat_scale`); each raise sets the mark. Respec cost counts ten attribute points as one rank.
+  - Shift-click puts in 10 at once (`Raise` now carries a count).
+  - `SkillScreen`: the panel is as tall as the screen allows (up to 300), the detail box sits just above the footer, and the
+    rows between scroll with the wheel, clipped to their own area (thin scrollbar), so the Jobs list no longer runs under the
+    description. Job rows 12 high. Attribute rows draw a 10-segment bar (heritage, class, story, yours) with the tier cap
+    notched and the locked part dark; the idle box gives your cap and every tier's.
+  - Lang: story/heritage/flaw/Zenkai texts show the new point sizes.
+  Compiled (`compileClientJava`); not played.

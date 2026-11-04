@@ -21,6 +21,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
 import org.jspecify.annotations.Nullable;
 
@@ -38,8 +39,15 @@ import org.jspecify.annotations.Nullable;
  * scroll to zoom; pointing at a perk lights the path to it and says what it leads to.
  */
 final class SkillScreen extends Screen {
-	static final int PANEL_W = 340, PANEL_H = 230, HEADER = 34, TAB_W = 78, TAB_H = 16, STAT_ROW = 16, PIP_W = 9, 
-		TREE_Y = 56, DETAIL_Y = 156, DETAIL_LINES = 5, FOOTER = 22, XP_BAR_W = 120;
+	/**
+	 * (0.7.538) The Attributes and Jobs panel: as tall as the screen allows up to {@link #PANEL_H}, the rows from
+	 * {@link #TREE_Y} down to the detail box ({@link #DETAIL_H} tall, {@link #DETAIL_LINES} lines) just above the footer.
+	 * Rows that don't fit scroll (the wheel), clipped to their own area, so they never run under the detail box.
+	 */
+	static final int PANEL_W = 340, PANEL_H = 300, HEADER = 34, TAB_W = 78, TAB_H = 16, STAT_ROW = 16,
+		TREE_Y = 56, DETAIL_LINES = 5, DETAIL_H = 54, FOOTER = 22, XP_BAR_W = 120;
+	/** (0.7.538) The attribute bar: ten segments of ten points each. */
+	static final int SEG_W = 13, SEG_GAP = 2, SEGMENTS = 10, LOCKED = 0xFF0E0E14;
 
 	private static KeyMapping key;
 	/** (0.7.514) The web's header and footer heights, its zoom range and how much a scroll notch zooms. */
@@ -58,7 +66,9 @@ final class SkillScreen extends Screen {
 	/** (0.7.220) Whether the Jobs tab is the one shown. */
 	private static boolean jobs;
 	/** (0.7.220) The Jobs tab's rows. */
-	static final int JOB_ROW = 10, JOB_ACCENT = 0xFFC8A060;
+	static final int JOB_ROW = 12, JOB_ACCENT = 0xFFC8A060;
+	/** (0.7.538) How far the Attributes or Jobs rows are scrolled (pixels). */
+	private static int listScroll;
 
 	SkillScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.skills.title"));
@@ -102,8 +112,40 @@ final class SkillScreen extends Screen {
 		return (this.width - panelW()) / 2;
 	}
 
+	private int panelH() {
+		return Math.min(PANEL_H, this.height - 8);
+	}
+
 	private int top() {
-		return Math.max(4, (this.height - PANEL_H) / 2);
+		return Math.max(4, (this.height - panelH()) / 2);
+	}
+
+	/** (0.7.538) Where the detail box starts, just above the footer. */
+	private int detailY() {
+		return top() + panelH() - FOOTER - DETAIL_H;
+	}
+
+	/** (0.7.538) The rows' area: from under the tabs to a little above the detail box. */
+	private int listTop() {
+		return top() + TREE_Y;
+	}
+
+	private int listBottom() {
+		return detailY() - 4;
+	}
+
+	/** (0.7.538) The rows' height, all of them, on the tab shown. */
+	private int listContent() {
+		return jobs ? Careers.Job.values().length * JOB_ROW : stats ? shownStats().size() * STAT_ROW : 0;
+	}
+
+	private int maxScroll() {
+		return Math.max(0, listContent() - (listBottom() - listTop()));
+	}
+
+	/** (0.7.538) Whether {@code mouseY} is over the rows' area (rows scrolled out of it can't be pointed at). */
+	private boolean inList(double mouseY) {
+		return mouseY >= listTop() && mouseY < listBottom();
 	}
 
 	@Override
@@ -117,7 +159,7 @@ final class SkillScreen extends Screen {
 			int tabW = Math.min(TAB_W, (panelW() - 12 - 4 * (tabs - 1)) / tabs);
 			int x = left() + (panelW() - tabW * tabs - 4 * (tabs - 1)) / 2, y = top() + HEADER + 2;
 			tabs(x, y, tabW);
-			int fy = top() + PANEL_H - FOOTER + 3;
+			int fy = top() + panelH() - FOOTER + 3;
 			int right = left() + panelW() - 6;
 			addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
 			// (0.7.82) the world tiers, beside Done
@@ -150,6 +192,7 @@ final class SkillScreen extends Screen {
 		addRenderableWidget(webTab);
 		x += tabW + 4;
 		Button statsTab = Button.builder(Component.translatable("gui.jaymoskingdoms.stats.tab"), b -> {
+			listScroll = 0;
 			stats = true;
 			jobs = false;
 			rebuildWidgets();
@@ -158,6 +201,7 @@ final class SkillScreen extends Screen {
 		addRenderableWidget(statsTab);
 		x += tabW + 4;
 		Button jobsTab = Button.builder(Component.translatable("gui.jaymoskingdoms.jobs.tab"), b -> {
+			listScroll = 0;
 			jobs = true;
 			stats = false;
 			rebuildWidgets();
@@ -567,7 +611,7 @@ final class SkillScreen extends Screen {
 
 	// ---- (0.7.57) the Attributes tab --------------------------------------------------------------------------------
 
-	/** (0.7.212) The rows shown: all but Arcana, which shows once you're attuned; a little closer together with it. */
+	/** (0.7.212) The rows shown: all but Arcana, which shows once you're attuned. */
 	private List<Stats.Stat> shownStats() {
 		List<Stats.Stat> out = new ArrayList<>();
 		for (Stats.Stat stat : Stats.Stat.values()) {
@@ -578,33 +622,47 @@ final class SkillScreen extends Screen {
 		return out;
 	}
 
-	private int statRow() {
-		return shownStats().size() > 6 ? STAT_ROW - 2 : STAT_ROW;
-	}
-
 	private int statY(Stats.Stat stat) {
-		return top() + TREE_Y + Math.max(0, shownStats().indexOf(stat)) * statRow();
+		return listTop() + Math.max(0, shownStats().indexOf(stat)) * STAT_ROW - listScroll;
 	}
 
 	private Stats.@Nullable Stat statAt(double mouseX, double mouseY) {
-		if (!stats) {
+		if (!stats || !inList(mouseY)) {
 			return null;
 		}
 		for (Stats.Stat stat : shownStats()) {
-			if (Ui.over((int)mouseX, (int)mouseY, left() + 8, statY(stat), panelW() - 16, statRow() - 2)) {
+			if (Ui.over((int)mouseX, (int)mouseY, left() + 8, statY(stat), panelW() - 16, STAT_ROW - 2)) {
 				return stat;
 			}
 		}
 		return null;
 	}
 
-	/** The header, the six rows of pips and the detail box. */
+	/** (0.7.538) Where point {@code p} (0 to {@link Stats#MAX}) falls on the segmented bar starting at {@code x}. */
+	private static int barX(int x, int p) {
+		int per = Stats.MAX / SEGMENTS, seg = Math.min(SEGMENTS - 1, p / per);
+		return x + seg * (SEG_W + SEG_GAP) + Math.round((p - seg * per) * SEG_W / (float)per);
+	}
+
+	/** (0.7.538) Fills points {@code from} to {@code to} of the segmented bar, segment by segment (the gaps stay empty). */
+	private static void barFill(GuiGraphicsExtractor graphics, int x, int y0, int y1, int from, int to, int color) {
+		int per = Stats.MAX / SEGMENTS;
+		for (int i = 0; i < SEGMENTS; i++) {
+			int lo = Math.max(from, i * per), hi = Math.min(to, (i + 1) * per);
+			if (lo < hi) {
+				graphics.fill(barX(x, lo), y0, i * per + per == hi ? x + i * (SEG_W + SEG_GAP) + SEG_W : barX(x, hi), y1, color);
+			}
+		}
+	}
+
+	/** The header, a row per attribute (a bar of ten segments of ten points, your tier's cap notched) and the detail box. */
 	private void attributes(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
 		int x = left(), y = top(), w = panelW();
 		int accent = Ui.GOLD;
-		Ui.panel(graphics, x, y, w, PANEL_H, accent);
+		Ui.panel(graphics, x, y, w, panelH(), accent);
 		var player = this.minecraft.player;
 		int level = Stats.characterLevel(shown), points = player == null ? 0 : Stats.points(player, shown);
+		int cap = player == null ? Stats.TIER_CAP[0] : Stats.cap(player), tier = player == null ? 0 : Stats.tier(player);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.level", level), x + 9, y + 8, w / 2 - 12, accent);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.points", points), x + 9, y + 19, w / 2 - 12, points > 0 ? Ui.GOOD : Ui.DIM);
 		Heritage.Kind kind = player == null ? null : Heritage.of(player);
@@ -616,33 +674,45 @@ final class SkillScreen extends Screen {
 			: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key())), x + w - 9, y + 19, w / 2 - 12, Ui.GOLD);
 		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
 
+		listScroll = Math.clamp(listScroll, 0, maxScroll());
 		Stats.Stat hovered = statAt(mouseX, mouseY);
-		int pipsX = x + 84;
+		int barX = x + 84, numX = barX + SEGMENTS * (SEG_W + SEG_GAP) + 4, plusX = x + w - 18, rowRight = x + w - (maxScroll() > 0 ? 10 : 8);
+		graphics.enableScissor(x + 1, listTop(), x + w - 1, listBottom());
 		for (Stats.Stat stat : shownStats()) {
 			int ry = statY(stat);
-			Ui.row(graphics, x + 8, ry, x + w - 8, ry + statRow() - 2, stat.ordinal(), stat == hovered);
+			if (ry + STAT_ROW <= listTop() || ry >= listBottom()) {
+				continue;
+			}
+			Ui.row(graphics, x + 8, ry, rowRight, ry + STAT_ROW - 2, stat.ordinal(), stat == hovered);
 			int spent = Stats.spent(shown, stat), fromHeritage = player == null ? 0 : Stats.fromHeritage(player, stat);
 			int fromClass = player == null ? 0 : Stats.fromClass(player, stat);
 			int fromStory = player == null ? 0 : Stats.fromStory(player, stat);
-			int value = Math.min(Stats.MAX, spent + fromHeritage + fromClass + fromStory);
+			int value = Math.min(cap, spent + fromHeritage + fromClass + fromStory);
 			String blocked = player == null ? "" : Stats.blocked(player, shown, stat);
-			Ui.line(graphics, this.font, Component.translatable("stat.jaymoskingdoms." + stat.key()), x + 13, ry + 3, pipsX - x - 18, value > 0 ? Ui.TEXT : Ui.DIM);
-			// ten pips: heritage's (teal), then class's (gold), then (0.7.216) your story's (parchment), then yours (white); the rest empty
-			for (int i = 0; i < Stats.MAX; i++) {
-				int color = i < fromHeritage ? HeritageScreen.ACCENT : i < fromHeritage + fromClass ? Ui.GOLD
-					: i < fromHeritage + fromClass + fromStory ? LifeStoryScreen.ACCENT : i < value ? Ui.TEXT : Ui.BAR_BACK;
-				int px = pipsX + i * (PIP_W + 2);
-				graphics.fill(px, ry + 4, px + PIP_W, ry + 10, color);
+			Ui.line(graphics, this.font, Component.translatable("stat.jaymoskingdoms." + stat.key()), x + 13, ry + 3, barX - x - 18, value > 0 ? Ui.TEXT : Ui.DIM);
+			// heritage's (teal), then class's (gold), then (0.7.216) your story's (parchment), then yours (white); empty to the cap, dark past it
+			int y0 = ry + 4, y1 = ry + 10, h = Math.min(value, fromHeritage), c = Math.min(value, h + fromClass), st = Math.min(value, c + fromStory);
+			barFill(graphics, barX, y0, y1, 0, cap, Ui.BAR_BACK);
+			barFill(graphics, barX, y0, y1, cap, Stats.MAX, LOCKED);
+			barFill(graphics, barX, y0, y1, 0, h, HeritageScreen.ACCENT);
+			barFill(graphics, barX, y0, y1, h, c, Ui.GOLD);
+			barFill(graphics, barX, y0, y1, c, st, LifeStoryScreen.ACCENT);
+			barFill(graphics, barX, y0, y1, st, value, Ui.TEXT);
+			if (cap < Stats.MAX) {
+				int nx = barX(barX, cap) - (cap % (Stats.MAX / SEGMENTS) == 0 ? SEG_GAP / 2 + 1 : 0);
+				graphics.fill(nx, ry + 2, nx + 1, ry + 12, accent);
 			}
-			int nx = pipsX + Stats.MAX * (PIP_W + 2) + 6;
-			graphics.text(this.font, value + "/" + Stats.MAX, nx, ry + 3, value >= Stats.MAX ? accent : Ui.TEXT);
+			Ui.line(graphics, this.font, Component.literal(value + "/" + Stats.MAX), numX, ry + 3, plusX - numX - 2, value >= cap ? accent : Ui.TEXT);
 			if (blocked == null) {
-				graphics.text(this.font, "+", x + w - 18, ry + 3, Ui.GOOD);
+				graphics.text(this.font, "+", plusX, ry + 3, Ui.GOOD);
 			}
 		}
+		graphics.disableScissor();
+		Ui.scrollbar(graphics, x + w - 7, listTop(), listBottom() - listTop(), listBottom() - listTop(), listContent(), listScroll);
 
 		Component name;
 		List<Component> text = new ArrayList<>();
+		Component tierName = com.jaymoskingdoms.WorldTiers.Tier.byOrdinal(tier).title();
 		if (hovered != null && player != null) {
 			int value = Stats.value(player, shown, hovered);
 			name = Component.translatable("stat.jaymoskingdoms." + hovered.key()).append("  " + value + "/" + Stats.MAX);
@@ -657,24 +727,36 @@ final class SkillScreen extends Screen {
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.from", Stats.spent(shown, hovered), Stats.fromHeritage(player, hovered),
 				Stats.fromClass(player, hovered), Stats.fromStory(player, hovered)).withColor(Ui.DIM));
 			String blocked = Stats.blocked(player, shown, hovered);
-			text.add(blocked == null ? Component.translatable("gui.jaymoskingdoms.stats.raise").withColor(Ui.GOOD)
-				: Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
+			if (blocked == null) {
+				text.add(Component.translatable("gui.jaymoskingdoms.stats.raise", Stats.SHIFT_STEP).withColor(Ui.GOOD));
+			} else if (blocked.endsWith(".tier")) {
+				text.add(Component.translatable(blocked, cap, tierName).withColor(accent));
+			} else {
+				text.add(Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
+			}
 		} else {
 			name = Component.translatable("gui.jaymoskingdoms.stats.tab");
-			text.add(Component.translatable("gui.jaymoskingdoms.stats.hint", Stats.LEVELS_PER_POINT).withColor(Ui.DIM));
+			text.add(Component.translatable("gui.jaymoskingdoms.stats.cap", tierName, cap, Stats.MAX).withColor(accent));
+			MutableComponent caps = Component.empty();
+			for (int i = 0; i < Stats.TIER_CAP.length; i++) {
+				com.jaymoskingdoms.WorldTiers.Tier t = com.jaymoskingdoms.WorldTiers.Tier.byOrdinal(i);
+				caps.append(i == 0 ? Component.empty() : Component.literal(", ")).append(t.title().copy().withColor(t.color)).append(" " + Stats.TIER_CAP[i]);
+			}
+			text.add(Component.translatable("gui.jaymoskingdoms.stats.caps", caps).withColor(Ui.DIM));
+			text.add(Component.translatable("gui.jaymoskingdoms.stats.hint", Stats.POINTS_PER_LEVEL).withColor(Ui.DIM));
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.legend").withColor(Ui.HINT));
 		}
-		Ui.detail(graphics, this.font, x, y + DETAIL_Y, w, DETAIL_LINES, name, accent, text);
+		Ui.detail(graphics, this.font, x, detailY(), w, DETAIL_LINES, name, accent, text);
 	}
 
 	// ---- (0.7.220) the Jobs tab --------------------------------------------------------------------------------------
 
 	private int jobY(int index) {
-		return top() + TREE_Y - 2 + index * JOB_ROW;
+		return listTop() + index * JOB_ROW - listScroll;
 	}
 
 	private Careers.@Nullable Job jobAt(double mouseX, double mouseY) {
-		if (!jobs) {
+		if (!jobs || !inList(mouseY)) {
 			return null;
 		}
 		Careers.Job[] all = Careers.Job.values();
@@ -690,7 +772,7 @@ final class SkillScreen extends Screen {
 	private void jobs(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = left(), y = top(), w = panelW();
 		int accent = JOB_ACCENT;
-		Ui.panel(graphics, x, y, w, PANEL_H, accent);
+		Ui.panel(graphics, x, y, w, panelH(), accent);
 		Careers.Career c = this.minecraft.player == null ? Careers.Career.EMPTY : Careers.of(this.minecraft.player);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.title"), x + 9, y + 8, w / 2 - 12, accent);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.held", c.posts().size()), x + 9, y + 19, w / 2 - 12,
@@ -701,29 +783,37 @@ final class SkillScreen extends Screen {
 		Ui.lineRight(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.hint"), x + w - 9, y + 19, w / 2 - 12, Ui.HINT);
 		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
 
+		listScroll = Math.clamp(listScroll, 0, maxScroll());
 		Careers.Job hovered = jobAt(mouseX, mouseY);
 		Careers.Job[] all = Careers.Job.values();
-		int barW = 50, townX = x + 130, barX = x + w - 8 - 40 - barW;
+		int rowRight = x + w - (maxScroll() > 0 ? 10 : 8);
+		int barW = 50, townX = x + 130, barX = rowRight - 42 - barW;
+		graphics.enableScissor(x + 1, listTop(), x + w - 1, listBottom());
 		for (int i = 0; i < all.length; i++) {
 			Careers.Job job = all[i];
 			int ry = jobY(i), xp = c.xpIn(job.key), rank = c.rank(job.key);
+			if (ry + JOB_ROW <= listTop() || ry >= listBottom()) {
+				continue;
+			}
 			Careers.Post post = c.post(job.key);
-			Ui.row(graphics, x + 8, ry, x + w - 8, ry + JOB_ROW - 1, i, job == hovered);
+			Ui.row(graphics, x + 8, ry, rowRight, ry + JOB_ROW - 1, i, job == hovered);
 			if (post != null) {
 				graphics.fill(x + 8, ry, x + 10, ry + JOB_ROW - 1, accent);
 			}
 			Component name = xp > 0 || post != null ? Careers.title(job, rank) : job.title();
-			Ui.line(graphics, this.font, name, x + 13, ry + 1, townX - x - 18, post != null ? Ui.TEXT : xp > 0 ? Ui.DIM : Ui.HINT);
-			Ui.line(graphics, this.font, post == null ? Component.translatable("gui.jaymoskingdoms.jobs.not_held") : Component.literal(post.town()), townX, ry + 1,
+			Ui.line(graphics, this.font, name, x + 13, ry + 2, townX - x - 18, post != null ? Ui.TEXT : xp > 0 ? Ui.DIM : Ui.HINT);
+			Ui.line(graphics, this.font, post == null ? Component.translatable("gui.jaymoskingdoms.jobs.not_held") : Component.literal(post.town()), townX, ry + 2,
 				barX - townX - 6, post == null ? Ui.HINT : Ui.TEXT);
 			int next = Careers.nextRankXp(rank), from = rank == Careers.MASTER ? Careers.MASTER_XP : rank == Careers.JOURNEYMAN ? Careers.JOURNEYMAN_XP : 0;
 			float share = next < 0 ? 1.0F : (xp - from) / (float)Math.max(1, next - from);
-			Ui.bar(graphics, barX, ry + 4, barW, 2, share, rank == Careers.MASTER ? Ui.GOLD : accent);
+			Ui.bar(graphics, barX, ry + 5, barW, 2, share, rank == Careers.MASTER ? Ui.GOLD : accent);
 			if (post != null) {
-				Ui.lineRight(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.orders", post.orders().size()), x + w - 12, ry + 1, 38,
+				Ui.lineRight(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.orders", post.orders().size()), rowRight - 4, ry + 2, 36,
 					post.orders().isEmpty() ? Ui.DIM : Ui.GOOD);
 			}
 		}
+		graphics.disableScissor();
+		Ui.scrollbar(graphics, x + w - 7, listTop(), listBottom() - listTop(), listBottom() - listTop(), listContent(), listScroll);
 
 		Component title;
 		List<Component> text = new ArrayList<>();
@@ -746,7 +836,7 @@ final class SkillScreen extends Screen {
 			text.add(Component.translatable("gui.jaymoskingdoms.jobs.about").withColor(Ui.DIM));
 			text.add(Component.translatable("gui.jaymoskingdoms.jobs.ranks", Careers.JOURNEYMAN_XP, Careers.MASTER_XP).withColor(Ui.HINT));
 		}
-		Ui.detail(graphics, this.font, x, y + DETAIL_Y, w, DETAIL_LINES, title, accent, text);
+		Ui.detail(graphics, this.font, x, detailY(), w, DETAIL_LINES, title, accent, text);
 	}
 
 	@Override
@@ -754,7 +844,8 @@ final class SkillScreen extends Screen {
 		Stats.Stat stat = statAt(event.x(), event.y());
 		if (stat != null) {
 			if (this.minecraft.player != null && Stats.blocked(this.minecraft.player, progress(), stat) == null) {
-				ClientPlayNetworking.send(new Stats.Raise(stat.ordinal()));
+				// (0.7.538) shift-click: ten at once
+				ClientPlayNetworking.send(new Stats.Raise(stat.ordinal(), event.hasShiftDown() ? Stats.SHIFT_STEP : 1));
 				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			}
 			return true;
@@ -810,6 +901,11 @@ final class SkillScreen extends Screen {
 			double ux = (mouseX - centerX()) / before, uy = (mouseY - centerY()) / before;
 			panX += ux * before - ux * zoom;
 			panY += uy * before - uy * zoom;
+			return true;
+		}
+		if ((stats || jobs) && scrollY != 0.0 && maxScroll() > 0) {
+			// (0.7.538) the Attributes or Jobs rows, a row a notch
+			listScroll = Math.clamp(listScroll - (int)Math.signum(scrollY) * (jobs ? JOB_ROW : STAT_ROW), 0, maxScroll());
 			return true;
 		}
 		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
