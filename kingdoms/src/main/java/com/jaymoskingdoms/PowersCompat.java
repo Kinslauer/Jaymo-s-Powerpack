@@ -33,12 +33,12 @@ public final class PowersCompat {
 	private PowersCompat() {
 	}
 
-	/** (0.7.503) Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean)}. */
+	/** (0.7.505) Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle tellGlint;
 	private static boolean lookedForGlint;
 
 	/**
-	 * (0.7.503) Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for
+	 * (0.7.505) Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for
 	 * time flow". An attack tell's glint at {@code at} as Jaymo's Powers draws its own (a full-bright star in the tell's
 	 * colour with a white heart, and Time Flow's warning bell). False without Powers, and the caller draws its old dust.
 	 */

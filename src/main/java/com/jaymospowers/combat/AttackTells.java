@@ -44,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
  * The blows are taken in {@code mixin/AttackTellGoalMixin} (MeleeAttackGoal) and {@code mixin/AttackTellBrainMixin}
  * (the MeleeAttack behaviour).
  * <p>
- * (0.20.3) Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for
+ * (0.20.4) Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for
  * time flow. maybe a star or flash in the respective color". The glint is now our own {@link Glint}: a full-bright
  * four-point star in the tell's colour (the client's {@code TellGlintParticle}) that pops, turns and holds through the
  * wind-up, a small white-hot star at its heart, and a ring of dust in the colour. It's sent to everyone near even on
@@ -58,17 +58,17 @@ public final class AttackTells {
 	public static final double HEAVY_DAMAGE = 10.0, HEAVY_WIDTH = 1.35;
 	public static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
 	public static final float TELL_SIZE = 1.2F;
-	/** (0.20.3) The star's size (1 = about a block across), a heavy blow's, and its white heart's share. */
+	/** (0.20.4) The star's size (1 = about a block across), a heavy blow's, and its white heart's share. */
 	public static final float GLINT_SIZE = 0.8F, HEAVY_GLINT_SIZE = 1.1F, CORE_SHARE = 0.45F;
-	/** (0.20.3) The warning ping: Time Flow's bell (volume, pitch), and a heavy blow's lower bell and drum. */
+	/** (0.20.4) The warning ping: Time Flow's bell (volume, pitch), and a heavy blow's lower bell and drum. */
 	static final float PING_VOLUME = 0.9F, PING_PITCH = 1.9F, HEAVY_PING_PITCH = 1.1F, DRUM_VOLUME = 0.8F, DRUM_PITCH = 0.7F;
-	/** (0.20.3) Players further than this (blocks) don't get the star (the vanilla particle range). */
+	/** (0.20.4) Players further than this (blocks) don't get the star (the vanilla particle range). */
 	static final double GLINT_RANGE = 48.0;
 	/** Reach slack (blocks) for a target that stepped a little since the wind-up began. */
 	static final double REACH_SLACK = 0.25;
 
 	/**
-	 * (0.20.3) The tell's star: this colour (0xRRGGBB), this size. The star has a dark rim so it reads on pale skin and
+	 * (0.20.4) The tell's star: this colour (0xRRGGBB), this size. The star has a dark rim so it reads on pale skin and
 	 * bright sky; its white heart ({@code core}, {@link #GLINT_CORE}) has none.
 	 */
 	public record Glint(int color, float scale, boolean core) implements ParticleOptions {
@@ -139,7 +139,7 @@ public final class AttackTells {
 	}
 
 	/**
-	 * (0.20.3) A tell's glint at {@code at}: the star in white (or red for {@code heavy}), its white heart, a ring of dust,
+	 * (0.20.4) A tell's glint at {@code at}: the star in white (or red for {@code heavy}), its white heart, a ring of dust,
 	 * and the warning ping. Public for Kingdoms (its {@code PowersCompat}) and our own monsters' wind-ups.
 	 */
 	public static void glint(ServerLevel level, Vec3 at, boolean heavy) {

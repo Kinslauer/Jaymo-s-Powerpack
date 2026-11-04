@@ -8,7 +8,7 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.util.Mth;
 
 /**
- * (0.20.3) {@link AttackTells#GLINT}: an attack tell's star. One of our four-point glint sprites, tinted the tell's
+ * (0.20.4) {@link AttackTells#GLINT}: an attack tell's star. One of our four-point glint sprites, tinted the tell's
  * colour (white: parry it, red: dodge or block it), full bright so it reads in daylight and at night. It pops past full
  * size in its first two ticks, settles, turns a little, holds through the wind-up and then shrinks away.
  */
