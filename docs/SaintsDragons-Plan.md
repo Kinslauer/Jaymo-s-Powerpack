@@ -23,9 +23,9 @@ dragons (trust meter, saddle, momentum flight, own stamina, piggyback rider) so 
   Walkers and swimmers reuse the WarElephant ground riding; floaters reuse flight with no landing.
 - Ids keep "dragon" in them (`jaymoskingdoms:raevyx_dragon` etc.) so Dragonblood wakes for them too.
 - Every one rolls a subtle look like the heritages (`DragonLook`): hide shade, horns, spikes, marking glow.
-- **Wild ones are monsters, not bosses**, except Ignivorus. They count as monsters for world tier like any mob;
-  Ignivorus is a monster of legend (no tier unlock, like ogres).
-- No new dimension or portal. Nulljaw lives in the vanilla End, which is already in the game.
+- **Wild ones are monsters, not bosses**, except Ignivorus and Nulljaw. They count as monsters for world tier like
+  any mob; Ignivorus and Nulljaw are monsters of legend (no tier unlock, like ogres).
+- No new dimension or portal. Nulljaw lives in our existing Aether (`jaymospowers:aether`), as its boss.
 - Lore (only as oblique hints in villager talk and books, never screen text): the lesser dragons are the wind
   dragons' far kin, bred down when Aeolus bound the winds.
 
@@ -36,7 +36,7 @@ dragons (trust meter, saddle, momentum flight, own stamina, piggyback rider) so 
 | **Ignivorus** | flyer, huge | its own roost on plains, savanna, desert | the boss: fire breath, fireballs, magma pillars, stomp, body slam, wing swipe, roar; a last-stand ultimate that costs it health. Young hatch small and grow when fed | Emberborn, Notus tamers |
 | **Cindervane** | flyer, small | mountains, hills, badlands | quick fire drake: bite, double bite, slash-grab carry, magma volley, burning body that sets attackers alight | Emberborn |
 | **Volitans** | flyer + swimmer | oceans (beaches, shores as fallback); hunts from under water | poison breath, poison ball, burrows into sand/dirt and bursts out, claws, horn gore, ultimate | Tideborn, Verdant |
-| **Nulljaw** | floater | the End barrens | never lands; blinks forward a few blocks (teleport) to bite | Nightborn, Chrono |
+| **Nulljaw** | floater, huge | the Aether sky (Andy, 2026-11-04: "an aether boss that just flies around, and can find you anywhere but heaven") | the Aether's boss, untameable: never lands, roams the Aether sky, blinks forward to bite. Once it has marked you (you hurt it, or it sights you in the Aether) it hunts you into any dimension, blinking in near you; it can't reach the Other World (the afterlife site, `ZFighterAfterlife.inOtherWorld`) and loses you there. A boss bar, `c:bosses`, a monster of legend for world tier | (none, it can't be tamed) |
 | **Stegonaut** | walker | jungles, plains; also lush caves | plated, slow, very tough (armour 15); eats through blocks with its jaw, chin slam, ground slam that raises stone pillars, a roar that buffs its allies and rider. The easy first tame | Stoneborn |
 | **Atroxiia** | walker + swimmer | snowy plains, ice spikes, cold biomes | serpentine frost dragon: slither, slam, swipe, underwater bite, precise strike (stun), devastating sweep, Gungnir stab, Helheim quake (big stun), frost walker trail | Frostborn |
 | **Varasuchus** | walker + swimmer | its own roost on beaches and swamps | crocodile dragon: bites, claws, tail lash, horn gore, slash barrage, phase shift (a short dodge through), tailguard (tail parry, ties into our guard/parry) | Tideborn |
@@ -55,7 +55,7 @@ listed in the taming tooltip only once you've seen the species, never as a lore 
    model, look rolls, spawning, taming, riding, moves.
 2. Atroxiia + Varasuchus (walker/swimmer, the roost structure, tailguard on our parry).
 3. Raevyx + Cindervane (flyers, storm spawning).
-4. Volitans (flyer/swimmer, burrow) + Nulljaw (floater, End).
+4. Volitans (flyer/swimmer, burrow) + Nulljaw (the Aether boss that hunts you anywhere but the Other World).
 5. Ignivorus (boss, roost, growing young), credits, pack page line.
 Previews (front/side renders of each model) go in `/mnt/project-files/art-overhaul/lesser-dragons/` before each PR.
 
