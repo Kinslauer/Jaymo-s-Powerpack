@@ -5329,10 +5329,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.20.16, Zsolt's RPG Series (patch 0)** (plan in project files `rpg-series-study/RpgSeries-Plan.md`): Andy chose to ship
   Wizards, Archers and Rogues & Warriors (all rights reserved, unchanged, downloaded by id) with Spell Engine (GPL-3.0),
   Spell Power (LGPL-3.0), Runes and the small MIT APIs (armour models, ranged weapons, structure pools, bundles) in packMods.
-  - **No Trinkets:** a ninth bauble slot, the **Tome** (`Baubles.Kind.TOME`, in the player box's bottom right), takes spell
-    books and scrolls; `compat/SpellEngineCompat` hands Spell Engine every worn bauble as a spell source (tome first,
-    after the main hand) and as an ammo container, so a quiver worn in the body slot feeds bows. Spell Engine's ring,
-    necklace, trinket and quiver tags join our ring, amulet, charm and body tags. The worn list now syncs to its wearer.
+  - **No Trinkets:** `compat/SpellEngineCompat` hands Spell Engine every worn bauble as a spell source and as an ammo
+    container, so a quiver worn in the body slot feeds bows. Spell Engine's ring, necklace, trinket and quiver tags join
+    our ring, amulet, charm and body tags. The worn list now syncs to its wearer. No slot for spell books: spells are
+    learned on Kingdoms' skill web or from a trainer (Kingdoms 0.7.516), and the Spell Binding Table's recipe is dropped.
   - **Forged:** Rogues' dagger, sickle, double axe, glaive and Archers' spear (stone, iron, gold) come from new heads
     (`WeaponParts`: rogue_dagger_blade, sickle_blade, double_axe_head, war_glaive_blade, ranger_spear_tip, drawn in
     `tools/weapon_parts_assets.py`); their grid recipes and the diamond ones' are dropped (`Uncraftable.RPG_SERIES`).

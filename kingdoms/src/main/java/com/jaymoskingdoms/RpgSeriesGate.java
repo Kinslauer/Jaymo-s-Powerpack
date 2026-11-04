@@ -2,6 +2,7 @@ package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.Classes.PlayerClass;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -10,8 +11,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
+import net.spell_engine.api.spell.container.SpellContainer;
 import net.spell_engine.api.spell.event.SpellEvents;
 import net.spell_engine.internals.casting.SpellCast;
+import net.spell_engine.internals.container.SpellContainerSource;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -27,6 +30,9 @@ import org.jspecify.annotations.Nullable;
  * <li>Its warrior book (Shout, Charge, Last Stand, Mortal Strike, Throw, Throw Net): the Warlord, the Brute and the Rider;
  * the Survivalist throws the net too.</li>
  * </ul>
+ * (0.7.516) A spell must also be learned ({@link Learnables}): its perk on the skill web or a trainer's lesson. Learned
+ * spells are handed to Spell Engine as one more spell source, so they show on the spell bar with the right weapon held,
+ * and their books, scrolls and binding table teach nothing.
  * Spell Engine asks before every cast on both sides (the class is synced to its player), so the client never even sends
  * a cast it would refuse, and the player is told on the action bar which class casts it. Spells of any other mod are
  * left alone.
@@ -37,6 +43,8 @@ public final class RpgSeriesGate {
 	static final Set<String> ROGUE_SPELLS = Set.of("slice_and_dice", "shock_powder", "shadow_step", "vanish", "mutilate", "bear_trap");
 	/** Spells the Survivalist casts besides their own class's: the trapper's two. */
 	static final Set<String> SURVIVALIST_SPELLS = Set.of("bear_trap", "throw_net");
+	/** The learned spells' source in Spell Engine's list. */
+	static final String SOURCE = "jaymoskingdoms_learned";
 	/** Ticks between two "only a ... casts this" lines for the same player. */
 	static final int TELL_EVERY = 40;
 
@@ -79,7 +87,8 @@ public final class RpgSeriesGate {
 			return true;
 		}
 		PlayerClass cls = Classes.classOf(player);
-		return cls != null && casters.contains(cls);
+		// (0.7.516) and only once it's learned on the skill web or taught by a trainer (Learnables)
+		return cls != null && casters.contains(cls) && Learnables.knowsSpell(player, spell);
 	}
 
 	/** Tells the player (client side, where they pressed) which class casts it, at most every {@link #TELL_EVERY} ticks. */
@@ -97,9 +106,15 @@ public final class RpgSeriesGate {
 		if (casters == null || casters.isEmpty()) {
 			return;
 		}
+		PlayerClass cls = Classes.classOf(player);
+		if (cls != null && casters.contains(cls)) {
+			// (0.7.516) the right class, but not learned yet
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rpg_gate.unlearned").withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		Component names = null;
-		for (PlayerClass cls : casters) {
-			Component name = Component.translatable("class.jaymoskingdoms." + cls.key());
+		for (PlayerClass caster : casters) {
+			Component name = Component.translatable("class.jaymoskingdoms." + caster.key());
 			names = names == null ? name : Component.translatable("message.jaymoskingdoms.rpg_gate.or", names, name);
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rpg_gate.only", names).withStyle(ChatFormatting.GRAY));
@@ -108,6 +123,12 @@ public final class RpgSeriesGate {
 	/** Kept apart so Spell Engine's classes load only when it's there. */
 	private static final class Hooks {
 		static void init() {
+			// (0.7.516) what a player has learned goes on their spell bar, as a spell book's spells would
+			SpellContainerSource.addSource(new SpellContainerSource.Entry(SOURCE, (player, name) -> {
+				List<String> spells = Learnables.spells(player);
+				return spells.isEmpty() ? List.of() : List.of(new SpellContainerSource.SourcedContainer(name, null,
+					new SpellContainer(SpellContainer.ContentType.NONE, "", "", "", 0, spells, 0)));
+			}, Learnables::spells), SpellContainerSource.MAIN_HAND.name());
 			SpellEvents.CASTING_ATTEMPT.PRE.register(args -> {
 				Identifier spell = args.spell().unwrapKey().map(key -> key.identifier()).orElse(null);
 				if (spell == null || mayCast(args.caster(), spell)) {

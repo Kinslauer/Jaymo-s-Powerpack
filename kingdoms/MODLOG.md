@@ -8785,3 +8785,14 @@ is our own take on the idea (none of its code or art).
   Brute and Rider; the Survivalist also sets the Bear Trap and throws the net. Creative players cast anything. A refused
   cast shows "Only a Mage can cast this" on the action bar (every 2 s at most). Weapons and armour stay usable by all.
   Other mods' spells are untouched. Compiled against Spell Engine (compileOnly), never required. Not played.
+
+## 0.7.516: RPG Series spells and forms on the skill web (pack 0.20.16)
+- Andy: spells and moves come only from perks or a trainer. 49 perks appended to `Skills.Perk` (no ordinals moved), in six
+  new branches on the web: **Archery** and **Spellcraft** (arcane, fire, frost chains) in Survival, **Rogue's Arts** and
+  **Knife Arts** in Stealth, **Warfare** and **Weapon Forms** in Strength. Late branches start at ring 3 (`SkillWeb`).
+- `Learnables` maps each perk to its Spell Engine spell or Weapon Form. A class spell perk is locked to its classes (hover
+  shows "For: ..."); Weapon Forms are open to all. Buying a form perk teaches the form; forms learned before are marked
+  taught. Spell Engine reads learned spells from a new source (`RpgSeriesGate`), and the gate refuses spells not learned.
+  Tier 0-1 weapon spells (Arcane Bolt, Fireball, Frost Shard and so on) stay free with the weapon.
+- **Trainers:** veteran drills (`GuardDrills`) and wizard trials (`WizardTrials`, Mage only) teach the next perk free
+  (`@taught` rank: no points, survives a respec). Spell books and the binding table teach nothing. Not played.

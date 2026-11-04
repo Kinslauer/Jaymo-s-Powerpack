@@ -11,15 +11,15 @@ import net.spell_engine.internals.container.SpellContainerSource;
 
 /**
  * (RPG Series) Spell Engine (optional; GPL-3.0, shipped unchanged with Zsolt Molnar's Wizards, Archers and Rogues &amp;
- * Warriors). Spell Engine looks for spell books, scrolls and quivers in Trinkets' slots; the pack has our own
- * {@link Baubles} instead, so this hands it what's worn there:
+ * Warriors). Spell Engine looks for quivers and spell trinkets in Trinkets' slots; the pack has our own {@link Baubles}
+ * instead, so this hands it what's worn there:
  * <ul>
- * <li>as a spell source after the main hand, the tome slot first (a worn spell book's spells join the held wand's,
- * staff's or weapon's, as Trinkets' book slot does), then every other worn piece (rings, necklaces, charms);</li>
+ * <li>as a spell source after the main hand (rings, necklaces and charms that carry spells);</li>
  * <li>as an ammo container, so a quiver worn in the body slot feeds bows and arrow spells.</li>
  * </ul>
- * The slots' tags take Spell Engine's own item tags ({@code jaymospowers:baubles/tome} and the rest). The worn list is
- * synced to its wearer, so the client's spell hotbar sees it too.
+ * The slots' tags take Spell Engine's own item tags. The worn list is synced to its wearer, so the client sees it too.
+ * Spells themselves are learned on Jaymo's Kingdoms' skill web or from a trainer, never from books (its Learnables), so
+ * there's no slot for spell books.
  */
 public final class SpellEngineCompat {
 	private static final String MOD_ID = "spell_engine";
@@ -35,18 +35,11 @@ public final class SpellEngineCompat {
 		}
 	}
 
-	/** What a player wears, tome first, empty slots left out (either side). */
+	/** What a player wears, empty slots left out (either side). */
 	static List<ItemStack> worn(Player player) {
-		List<ItemStack> worn = Baubles.worn(player);
-		List<ItemStack> out = new ArrayList<>(worn.size());
-		for (int i = 0; i < worn.size(); i++) {
-			ItemStack stack = worn.get(i);
-			if (stack.isEmpty()) {
-				continue;
-			}
-			if (Baubles.SLOTS[i] == Baubles.Kind.TOME) {
-				out.addFirst(stack);
-			} else {
+		List<ItemStack> out = new ArrayList<>();
+		for (ItemStack stack : Baubles.worn(player)) {
+			if (!stack.isEmpty()) {
 				out.add(stack);
 			}
 		}

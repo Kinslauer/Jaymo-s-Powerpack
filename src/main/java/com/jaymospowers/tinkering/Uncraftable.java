@@ -48,6 +48,8 @@ public final class Uncraftable {
 			}
 		}
 		ids.add("rogues:stone_double_axe");
+		// (RPG Series patch 2) Andy: spells are learned on the skill web or from a trainer, so no Spell Binding Table
+		ids.add("spell_engine:spell_binding_table");
 		for (String metal : List.of("iron", "golden", "diamond")) {
 			ids.add("archers:" + metal + "_spear");
 		}

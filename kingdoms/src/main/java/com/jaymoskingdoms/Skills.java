@@ -259,7 +259,66 @@ public final class Skills {
 		IRON_HIDE(Pillar.STRENGTH, Pillar.SURVIVAL, 1, 1, BULLDOZER, SECOND_WIND),
 		BEAST_OF_BURDEN(Pillar.STRENGTH, Pillar.SURVIVAL, 1, 2, PACKHORSE, IRON_STOMACH),
 		TRACKER(Pillar.SURVIVAL, Pillar.STEALTH, 1, 1, FIELD_DRESSER, CLIMBER),
-		LIGHT_PACK(Pillar.SURVIVAL, Pillar.STEALTH, 1, 2, PLAGUE_DOCTOR, BAR_SWING);
+		LIGHT_PACK(Pillar.SURVIVAL, Pillar.STEALTH, 1, 2, PLAGUE_DOCTOR, BAR_SWING),
+		// (0.7.516, RPG Series patch 2) Andy: the class skills of Zsolt Molnar's Wizards, Archers and Rogues & Warriors and
+		// the Weapon Forms are learned here (or taught by a trainer's drill, free: {@link Learnables}); a spell's perk is
+		// for its class only (RpgSeriesGate). Last, so no ordinal moves.
+		// Survival's third page, Archery (Archer, Marksman)
+		POWER_SHOT(Pillar.SURVIVAL, 1, 1, 5, 8, 0),
+		ENTANGLING_ROOTS(Pillar.SURVIVAL, 1, 1, 5, 8, 2),
+		BARRAGE(Pillar.SURVIVAL, 1, 2, 9, 9, 0, POWER_SHOT),
+		SPIRIT_WOLF(Pillar.SURVIVAL, 1, 2, 9, 9, 2, ENTANGLING_ROOTS),
+		MAGIC_ARROW(Pillar.SURVIVAL, 1, 2, 13, 10, 0, BARRAGE),
+		RAIN_OF_ARROWS(Pillar.SURVIVAL, 1, 2, 13, 10, 2, SPIRIT_WOLF),
+		// Survival's fourth and fifth pages, Spellcraft (Mage; Andy chose Survival for it): Arcane, Fire and Frost, a column each
+		ARCANE_MISSILE(Pillar.SURVIVAL, 1, 1, 5, 12, 0),
+		ARCANE_EXPLOSION(Pillar.SURVIVAL, 1, 1, 5, 13, 0, ARCANE_MISSILE),
+		ARCANE_BEAM(Pillar.SURVIVAL, 1, 2, 9, 14, 0, ARCANE_EXPLOSION),
+		ARCANE_BARRAGE(Pillar.SURVIVAL, 1, 2, 9, 15, 0, ARCANE_BEAM),
+		ARCANE_BLINK(Pillar.SURVIVAL, 1, 2, 13, 16, 0, ARCANE_BARRAGE),
+		ARCANE_EVOCATION(Pillar.SURVIVAL, 1, 2, 13, 17, 0, ARCANE_BLINK),
+		FIRE_BREATH(Pillar.SURVIVAL, 1, 1, 5, 12, 1),
+		FIRE_SLASH(Pillar.SURVIVAL, 1, 1, 5, 13, 1, FIRE_BREATH),
+		FIRE_METEOR(Pillar.SURVIVAL, 1, 2, 9, 14, 1, FIRE_SLASH),
+		FIRE_STORM(Pillar.SURVIVAL, 1, 2, 9, 15, 1, FIRE_METEOR),
+		FIRE_WALL(Pillar.SURVIVAL, 1, 2, 13, 16, 1, FIRE_STORM),
+		FIRE_HYDRA(Pillar.SURVIVAL, 1, 2, 13, 17, 1, FIRE_WALL),
+		FROST_NOVA(Pillar.SURVIVAL, 1, 1, 5, 12, 2),
+		FROST_SPIKES(Pillar.SURVIVAL, 1, 1, 5, 13, 2, FROST_NOVA),
+		FROST_SHIELD(Pillar.SURVIVAL, 1, 2, 9, 14, 2, FROST_SPIKES),
+		FROST_LANCE(Pillar.SURVIVAL, 1, 2, 9, 15, 2, FROST_SHIELD),
+		FROST_BLIZZARD(Pillar.SURVIVAL, 1, 2, 13, 16, 2, FROST_LANCE),
+		FROST_ELEMENTAL(Pillar.SURVIVAL, 1, 2, 13, 17, 2, FROST_BLIZZARD),
+		// Stealth's fourth page, the Rogue's Arts (Thief; the Bear Trap the Survivalist's too)
+		SLICE_AND_DICE(Pillar.STEALTH, 1, 1, 5, 12, 0),
+		SHOCK_POWDER(Pillar.STEALTH, 1, 1, 5, 12, 2),
+		MUTILATE(Pillar.STEALTH, 1, 2, 13, 13, 0, SLICE_AND_DICE),
+		BEAR_TRAP(Pillar.STEALTH, 1, 2, 9, 13, 1, SLICE_AND_DICE, SHOCK_POWDER),
+		SHADOW_STEP(Pillar.STEALTH, 1, 2, 9, 13, 2, SHOCK_POWDER),
+		VANISH(Pillar.STEALTH, 1, 2, 13, 14, 1, MUTILATE, SHADOW_STEP),
+		// Stealth's fifth page, Knife Arts (Weapon Forms of the knife family, anyone)
+		MARKED_QUARRY(Pillar.STEALTH, 1, 1, 2, 16, 0),
+		TANGLE_CORD(Pillar.STEALTH, 1, 1, 2, 16, 2),
+		CAST_OFF_CLOAK(Pillar.STEALTH, 1, 2, 6, 17, 1, MARKED_QUARRY, TANGLE_CORD),
+		// Strength's fifth page, Warfare (Warlord, Brute, Rider; the net the Survivalist's too). Shown as "Warrior's Charge"
+		// and "Warrior's Last Stand": Combat Arts' Charge and Survival's Last Stand keep their names
+		THROW(Pillar.STRENGTH, 1, 1, 5, 16, 0),
+		SHOUT(Pillar.STRENGTH, 1, 1, 5, 16, 2),
+		THROW_NET(Pillar.STRENGTH, 1, 1, 5, 17, 0, THROW),
+		WARRIOR_CHARGE(Pillar.STRENGTH, 1, 2, 9, 17, 1, THROW, SHOUT),
+		WARRIOR_LAST_STAND(Pillar.STRENGTH, 1, 2, 13, 17, 2, SHOUT),
+		MORTAL_STRIKE(Pillar.STRENGTH, 1, 2, 13, 18, 1, WARRIOR_CHARGE),
+		// Strength's sixth page, Weapon Forms (blade, fist and claw, spear: a column each, anyone)
+		SHEATH_DRAW(Pillar.STRENGTH, 1, 1, 2, 20, 0),
+		CRESCENT_SWEEP(Pillar.STRENGTH, 1, 1, 4, 21, 0, SHEATH_DRAW),
+		RAIN_OF_CUTS(Pillar.STRENGTH, 1, 2, 8, 22, 0, CRESCENT_SWEEP),
+		GROUND_STOMP(Pillar.STRENGTH, 1, 1, 2, 20, 1),
+		FALLING_FIST(Pillar.STRENGTH, 1, 1, 4, 21, 1, GROUND_STOMP),
+		RENDING_CLAW(Pillar.STRENGTH, 1, 1, 6, 22, 1, FALLING_FIST),
+		FERAL_POUNCE(Pillar.STRENGTH, 1, 2, 8, 23, 1, RENDING_CLAW),
+		SPEAR_LUNGE(Pillar.STRENGTH, 1, 1, 2, 20, 2),
+		COUCHED_LANCE(Pillar.STRENGTH, 1, 1, 4, 21, 2, SPEAR_LUNGE),
+		PINNING_THROW(Pillar.STRENGTH, 1, 2, 8, 22, 2, COUCHED_LANCE);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -364,7 +423,8 @@ public final class Skills {
 						spent += ranks.getOrDefault(perk.paidKey(pillar), 0) * perk.cost;
 					}
 				} else if (perk.pillar == pillar) {
-					spent += rank(perk) * perk.cost;
+					// (0.7.516) a rank a trainer taught costs nothing (Learnables)
+					spent += (rank(perk) - ranks.getOrDefault(Learnables.taughtKey(perk), 0)) * perk.cost;
 				}
 			}
 			// (0.7.464) and a bonus point at every milestone level
@@ -532,6 +592,8 @@ public final class Skills {
 
 	/** Puts {@code player}'s attribute perks on them as they stand, and their alignment over their head. */
 	static void refresh(ServerPlayer player) {
+		// (0.7.516) forms known from before the web had them show as taught
+		Learnables.sync(player);
 		SurvivalSkill.attributes(player);
 		StrengthSkill.attributes(player);
 		Bridges.attributes(player);
@@ -580,7 +642,8 @@ public final class Skills {
 				} else {
 					ranks.remove(perk.key());
 				}
-			} else if (perk.pillar == pillar) {
+			} else if (perk.pillar == pillar && !ranks.containsKey(Learnables.taughtKey(perk))) {
+				// (0.7.516) what a trainer taught stays
 				ranks.remove(perk.key());
 			}
 		}
@@ -588,7 +651,9 @@ public final class Skills {
 
 	/** Every point {@code player} spent comes back to spend again; their experience and levels stay. */
 	static void respec(ServerPlayer player) {
-		player.setAttached(PROGRESS, new Progress(of(player).xp(), Map.of()));
+		// (0.7.516) forms bought with points are unlearned with them; what a trainer taught stays
+		Learnables.unlearnBought(player);
+		player.setAttached(PROGRESS, new Progress(of(player).xp(), Learnables.taughtOnly(of(player).ranks())));
 		refresh(player);
 	}
 
@@ -748,6 +813,10 @@ public final class Skills {
 			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
 			return;
 		}
+		if (Learnables.classLocked(player, perk)) {
+			// (0.7.516) a class skill of another class
+			return;
+		}
 		Map<String, Integer> ranks = new HashMap<>(p.ranks());
 		ranks.merge(perk.key(), 1, Integer::sum);
 		if (perk.bridge()) {
@@ -759,6 +828,8 @@ public final class Skills {
 			ranks.merge(perk.paidKey(payer), 1, Integer::sum);
 		}
 		player.setAttached(PROGRESS, new Progress(p.xp(), Map.copyOf(ranks)));
+		// (0.7.516) a form's perk teaches the form
+		Learnables.spent(player, perk);
 		refresh(player);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.5F, 1.4F);
 	}
