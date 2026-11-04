@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.20.42) Respawn Recap keeps its screenshots of your life only while you're a Chrono (no one else's are ever replayed). */
+/** (0.20.50) Respawn Recap keeps its screenshots of your life only while you're a Chrono (no one else's are ever replayed). */
 @Pseudo
 @Mixin(targets = "net.dialingspoon.respawnrecap.client.ReplayRecorder", remap = false)
 abstract class ReplayRecorderMixin {

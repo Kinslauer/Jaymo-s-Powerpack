@@ -366,6 +366,7 @@ public final class Promises {
 				}
 			}
 		} else if (p.broken()) {
+			Commandments.act(player, "broken_word");
 			Recollections.remember(v, player, Recollections.Kind.BROKE_WORD, what);
 			McaCompat.hearts(v, player, -BROKEN_HEARTS);
 			if (f != null) {

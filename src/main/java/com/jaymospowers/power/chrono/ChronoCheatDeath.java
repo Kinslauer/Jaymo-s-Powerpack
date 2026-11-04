@@ -49,7 +49,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.42) Chrono cheats death. Andy: "I want Chrono to have the strongest potential, starting with the ability to cheat
+ * (0.20.50) Chrono cheats death. Andy: "I want Chrono to have the strongest potential, starting with the ability to cheat
  * death ... they should be prompted with R upon ... dying, that black screen would then revert them the maximum, deleting
  * items they gained [since] that time. no drops no corpse, no death." Then: "they can still be executed", and "they have
  * to press R, if they dont they still die."
@@ -133,7 +133,7 @@ public final class ChronoCheatDeath {
 	/** Players held out of time at the black screen, waiting for R. */
 	private static final Map<UUID, Held> HELD = new HashMap<>();
 	/**
-	 * (0.20.42) Another mod's say on a perplexed executioner ({@link #perplexed}), given it and the one it lost: Jaymo's
+	 * (0.20.50) Another mod's say on a perplexed executioner ({@link #perplexed}), given it and the one it lost: Jaymo's
 	 * Kingdoms has its humanoids speak of it. Added to at start-up.
 	 */
 	public static final List<java.util.function.BiConsumer<net.minecraft.world.entity.Mob, ServerPlayer>> PERPLEXED = new ArrayList<>();

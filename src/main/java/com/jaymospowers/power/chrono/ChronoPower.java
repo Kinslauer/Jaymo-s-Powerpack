@@ -139,7 +139,7 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.init();
 		ChronoDirectives.init();
 		StoppedClockItem.init();
-		// (0.20.42) cheating death: R on a black screen instead of dying
+		// (0.20.50) cheating death: R on a black screen instead of dying
 		ChronoCheatDeath.init();
 		// touch the attachment types so they register at startup
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);

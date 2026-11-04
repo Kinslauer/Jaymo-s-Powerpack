@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 /**
- * (0.20.42) Respawn Recap's {@code GuiMixin} keeps the death screen (and, while it plays, every screen) from opening, for
+ * (0.20.50) Respawn Recap's {@code GuiMixin} keeps the death screen (and, while it plays, every screen) from opening, for
  * everyone, always. Andy: "limit it to chrono". Its handler can't be targeted by a mixin, so once it has been merged into
  * {@code Gui} (our {@code RecapGuiMarkerMixin} is applied after it), its first lines become
  * {@code if (!ChronoCheatDeathClient.recapMayHide(screen)) return;}: outside Chrono's rewind it does nothing at all.

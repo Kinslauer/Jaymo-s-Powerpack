@@ -581,7 +581,7 @@ final class CampBuildings {
 	/** What rots away once a camp is cleared: its wool, carpets, hay, fences, skulls, lanterns, ladders, banners, targets and fire. */
 	static boolean perishable(BlockState state) {
 		return state.is(BlockTags.WOOL) || state.is(BlockTags.WOOL_CARPETS) || state.is(Blocks.HAY_BLOCK) || state.is(BlockTags.FENCES)
-			|| state.is(BlockTags.FENCE_GATES) || state.is(Blocks.SKELETON_SKULL) || state.is(Blocks.LANTERN) || state.is(Blocks.LADDER)
+			|| state.is(BlockTags.FENCE_GATES) || state.is(Blocks.SKELETON_SKULL) || state.is(Blocks.LANTERN) || state.is(Lanterns.BURNT_LANTERN) || state.is(Blocks.LADDER)
 			|| state.is(Blocks.CAMPFIRE) || state.is(BlockTags.WOODEN_SLABS) || state.is(BlockTags.BANNERS) || state.is(Blocks.TARGET);
 	}
 }

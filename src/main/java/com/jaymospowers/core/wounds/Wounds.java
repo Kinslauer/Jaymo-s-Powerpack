@@ -479,7 +479,7 @@ public final class Wounds {
 	}
 
 	/**
-	 * (0.20.42) Every wound undone, as creative mode heals (Chrono's rewind out of death): breaks, cuts, fevers, severed
+	 * (0.20.50) Every wound undone, as creative mode heals (Chrono's rewind out of death): breaks, cuts, fevers, severed
 	 * limbs, a bolas trip. Health is the caller's to set after.
 	 */
 	public static void undoAll(ServerPlayer player) {

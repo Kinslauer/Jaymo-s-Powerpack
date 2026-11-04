@@ -1100,6 +1100,7 @@ public final class Crooks {
 	/** {@code player} accuses {@code villager} of robbing them: the thief is confronted; anyone else is hurt by it, and remembers. */
 	public static void accuse(ServerPlayer player, Villager villager) {
 		ServerLevel level = player.level();
+		Commandments.act(player, "accuse");
 		ACCUSED.add(player.getUUID() + "/" + villager.getUUID());
 		if (confront(level, player, villager, true)) {
 			return;

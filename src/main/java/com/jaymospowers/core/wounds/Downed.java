@@ -845,7 +845,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.20.42) A death held back a moment (Chrono's, unanswered) goes ahead now, as it was coming: by its wounds, credited
+	 * (0.20.50) A death held back a moment (Chrono's, unanswered) goes ahead now, as it was coming: by its wounds, credited
 	 * to whoever dealt {@code felled}, with no going down first; death by cause rolls on {@code felled}.
 	 */
 	public static void letDie(ServerLevel level, LivingEntity entity, @Nullable DamageSource felled) {

@@ -333,7 +333,37 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   - **Magma blood** (tag `blood/magma`: magma cubes, striders): bright orange, full-bright as it flies, glowing where it
     lands and smoking, then cooling to a dark crust over 45 s (`BloodParticles.MAGMA`).
   Masks and sprites are ours (`tools/blood_textures.py`). Compile-checked against the 26.3 jars; not played.
-- **0.20.42, Chrono cheats death:** Andy (2026-11-04): "I want Chrono to have the strongest potential, starting with the
+- **0.20.42, Kingdoms 0.7.535, commandments for every patron:** every patron now has ten commandments in a book like
+  the Truth's (its ten kept as they were); breaking your own patron's costs favour and is counted in the book, and the
+  Truth's villagers refuse orders that would break theirs. See the Kingdoms MODLOG.
+- **0.20.43, Kingdoms 0.7.536, Atroxiia pulled for now:** Andy: it had no walk animation. It no longer spawns, is out
+  of `/kingdom dragon`, and any already in a world disappear; the code and art are kept for when it's fixed.
+- **0.20.44, Kingdoms 0.7.537, Zoological Guide by recipe:** Cube Animals no longer hands out its Zoological Guide on
+  first join; craft it from a book, a feather, an ink sac and a bone (shapeless). See the Kingdoms MODLOG.
+- **0.20.45, sky waterfalls kept rare (Andy, 2026-11-04):** "i like the idea of a waterfall from heaven, but i found this as
+  soon as i spawned since adding the one dimension, and it just spoils the reveal too early". The Aether's springs pour off the
+  sides of islands; on its own the water fell into nothing, but with One Dimension the Overworld is underneath, so it fell the
+  whole way down as a column from the sky. `aether/world/SkySpringFeature` (`jaymospowers:sky_spring`, the old spring config
+  with a new type) floods where a new spring's water could run and drops the spring if it would leave the bottom of the Aether
+  band, unless it is in a heavenfall: one chunk in about one of every three 2048-block squares, never within 3000 blocks of
+  the world spawn or 0, 0. Springs that land on a lower island or in a cave, and the Aether as its own dimension, are unchanged.
+  New chunks only; water already falling in a world stays.
+- **0.20.46, Kitchen 0.5.60, no freezing or overheating in heaven:** Andy: "you should not freeze or overheat in
+  heaven". At the Other World (`ZFighterAfterlife.inOtherWorld`: within 64 blocks of the Judge's platform in the Aether,
+  which covers the hall, road, pavilion, ring and tent) Kitchen's body heat is held neutral (`KitchenCompat.registerTemperate`
+  hooks Kitchen's `BodyHeat.addTemperate`). The rest of the Aether keeps its height cold.
+- **0.20.47, Kitchen 0.5.61, no corpses in heaven:** Andy: "player corpses dont spawn in the otherworld (heaven) not
+  the aether, I died and a zombie tried attacking the judge". At the Other World (`ZFighterAfterlife.inOtherWorld`) nobody
+  leaves a body: `KitchenCompat.registerNoCorpseZone` hooks Kitchen's `Corpses.addNoCorpseZone`, so a player who dies there
+  drops their hotbar with the rest, and a body already lying there fades (dropping what it held) instead of getting up as a
+  zombie. Monsters are still allowed there (Andy: "monsters are fine, since users can train here").
+- **0.20.48, Kingdoms 0.7.540, attributes 0-100 by world tier + character screen layout:** Andy (2026-11-04): "UI needs a
+  rework, the text is overlapping. And character level points should scale way further, making stats go from 0/100 and
+  scale accordingly, giving users a reason to world tier up." See the Kingdoms MODLOG.
+- **0.20.49, Kingdoms 0.7.542, Skeleton Lord turned the right way round:** Andy (2026-11-04): "his head is facing the
+  complete wrong way". The whole model was drawn back to front (face on his back, ponytail in front); the renderer now
+  gives it a half turn. See Kingdoms MODLOG 0.7.542.
+- **0.20.50, Chrono cheats death:** Andy (2026-11-04): "I want Chrono to have the strongest potential, starting with the
   ability to cheat death, utilizing [Respawn Recap] ... revert them the maximum, deleting items they gained ... no drops no
   corpse, no death. They can always use a writ or interact with the judge to rewrite their story." Then: "limit it to
   chrono, and they can still be executed", "they have to press R, if they dont they still die", "the Chrono is NOT told
@@ -353,7 +383,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   blow lands, but (Andy: "you can still use the R, before the fatal damage like the cancel, and the executioner will be
   perplexed and react in their own way") R works the whole time an execution is coming or under way: you're rewound out
   from under it, a hostile executioner stops over the empty ground, turns about and gives voice its own way
-  (`MobExecutions.executioner`, `ChronoCheatDeath.perplexed`; a humanoid one says so too, Kingdoms 0.7.535: "I was just
+  (`MobExecutions.executioner`, `ChronoCheatDeath.perplexed`; a humanoid one says so too, Kingdoms 0.7.543: "I was just
   about to... kill you?!"), and a player's finisher stops as when anyone is spared. Writs and
   the Judge work as before. Respawn Recap (MIT, DialingSpoon, 1.2.1-26.3, client-only) ships unchanged in packModsOverride
   and is Chrono's alone (`client/mixin/respawnrecap`, @Pseudo): its replay plays only as a rewind (never for a real death,

@@ -253,6 +253,7 @@ public final class Lockpicking {
 		}
 		switch (result.outcome()) {
 			case Result.SNAPPED -> {
+				Commandments.act(player, "lock_failed");
 				if (!usePick(player)) {
 					PICKING.remove(player.getUUID());
 				}
@@ -271,6 +272,7 @@ public final class Lockpicking {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
 				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
+				Commandments.act(player, "lockpick");
 				BlockState state = level.getBlockState(pos);
 				// (0.7.497) picking a loot chest in town, seen, is burglary
 				Theft.burgled(player, level, pos, state);
@@ -316,6 +318,7 @@ public final class Lockpicking {
 		ServerLevel level = player.level();
 		switch (result.outcome()) {
 			case Result.SNAPPED -> {
+				Commandments.act(player, "lock_failed");
 				if (!usePick(player)) {
 					PICKING.remove(player.getUUID());
 					VIRTUAL.remove(player.getUUID());
@@ -328,6 +331,7 @@ public final class Lockpicking {
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * pending.level());
 				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
+				Commandments.act(player, "lockpick");
 				pending.picked().run();
 			}
 			default -> {
@@ -367,6 +371,7 @@ public final class Lockpicking {
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 		Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
 		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
+		Commandments.act(player, "lockpick");
 		return true;
 	}
 

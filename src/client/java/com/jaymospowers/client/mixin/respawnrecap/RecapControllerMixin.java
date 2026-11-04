@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.20.42) Respawn Recap (MIT, by DialingSpoon; github.com/DialingSpoon527/Respawn-Recap; shipped unchanged, nothing of it
+ * (0.20.50) Respawn Recap (MIT, by DialingSpoon; github.com/DialingSpoon527/Respawn-Recap; shipped unchanged, nothing of it
  * copied) plays its memory replay whenever you're dead. Andy: "limit it to chrono". So, when it's installed:
  * <ul>
  * <li>only Chrono's rewind out of death ({@link ChronoCheatDeathClient}) counts as dead to it, so its replay plays as the

@@ -8929,7 +8929,85 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   bandana. `Uniforms.POOR` is now six roughspun tunics with a belt and dark breeches, no hat (undyed linen, dun, grey,
   russet, weld green, woad; `tools/gen_nobody_rags.py`, drawn over the deckhands' slops). Nobodies already hired in a
   deckhand's slops change when they load. Not compiled or played yet.
-- **0.7.535, perplexed executioners (pack 0.20.42):** Andy (2026-11-04), on Chrono rewinding out from under an execution:
+- **0.7.535, commandments for every patron** (`Commandments`, Andy 2026-11-04: "all the patrons should have commandments
+  like these, these are all good to keep for Truth, and truth villagers will vehemently refuse if asked/forced to break
+  any of them"). Every patron has ten, in lang part `commandments.json` (`commandment.jaymoskingdoms.<patron>.<0-9>`);
+  The Truth's are his ten as they were. Each commandment is a set of named acts (`Commandments.LAWS`), reported from where
+  they happen (`Commandments.act`): kills and blows (AFTER_DEATH/AFTER_DAMAGE), crimes (`Theft.commit`, seen or not),
+  rude answers (`Recollections.replied`), broken promises, bribes/tolls/searches (`Approaches`), accusing, `/introduce`,
+  lockpicks, blood drinking and turning, raising the dead, deep ore, what's eaten (`CommandmentFoodMixin`), blasts
+  (`CommandmentBlastMixin`), tools breaking (`ItemStackWearMixin`), lights and hearths broken, fires lit, the patron's
+  book thrown away, and every 2 s the Nether, the sky (the Aether, or wings), a night not slept (on at midnight, still up
+  at dawn), the sea, three dry days, the dark without a light, invisibility by day. A sworn player who breaks one of their
+  own patron's loses 6 favour (once a day for each). The book of Commandments (`jaymoskingdoms:commandments`, one item, the
+  patron in custom data) is given on swearing and left at a shrine with the lore book; `client/CommandmentsScreen` shows it
+  as an open book, I-V and VI-X, the broken ones struck through in red and "Broken: n / 10" for your own patron (synced
+  attachment `jaymoskingdoms:commandments`, counted fresh when you swear to another).
+  The Truth's folk keep its law: they never go for the unarmed and innocent (`ThrallTargetMixin`, every mob's
+  `canAttack`), won't follow or ride with you at night, in the Nether or up in the sky and leave you if you go there
+  (`McaCommandMixin`, and a 2 s look at each player's followers), won't take rot as a gift, won't take a bribe whatever
+  their king is like, and their poor don't rob the dead. They say why, hotly (`commandment.jaymoskingdoms.refuse.*`).
+  Compiled; not played.
+- **0.7.536, Atroxiia pulled for now (pack 0.20.43):** Andy (2026-11-04): "atroxiia has no walk animation, this is
+  unacceptable". It's off until its walk is redone (`Dragons.ATROXIIA_ON = false`): no biome spawns, gone from
+  `/kingdom dragon`, and any already in a world (or given by egg) are cleared away on their next tick. Its type, model,
+  art and loot stay, so turning it back on is one flag. The other lesser dragons stay in: Stegonaut's gait was redone
+  in 0.7.531, Varasuchus walks on four legs, and Ignivorus and Aetherion fly (both walk on landing).
+- **0.7.537, the Zoological Guide is crafted, not given** (Andy, 2026-11-04: "remove the zoo book from player inventory on
+  spawn, and add a recipe for it instead"): Cube Animals put its guide in every new player's inventory with a chat line.
+  `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
+  own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
+  Cube Animals is loaded. Its loot-chest copies are untouched. Not compiled or played yet.
+- **0.7.538, opening a chest can wake sleepers** (Andy, 2026-11-04: "opening chests makes noise that can wake sleeping
+  villagers or guards"): `ChestNoise`. Opening a chest, barrel, shulker box or another mod's chest/barrel/crate/coffer
+  rolls for every sleeper but a player within 12 blocks: 85% at 2 blocks or closer, falling off evenly to 0 at 12, x0.4
+  through a wall, x0.5 if you open it sneaking (less again with Soft Step and the stealthy heritages, through
+  `Skills.sneakFactor`). Whoever wakes mutters a line, turns to you, walks over to the chest and stays up 15 s (put back
+  to bed if their brain tries). Awake, they count as witnesses (`Theft.witnesses` skips sleepers), so a guard you woke
+  sees you take from a realm's chest and it is a theft seen. Light Fingers (Andy: "the sound lowers with thief skill in
+  light fingers") takes 15% per rank off both the wake chance and the creak itself, so rank 5 opens at a quarter volume:
+  `ContainerOpenersHushMixin` marks who is opening around `ContainerOpenersCounter.incrementOpeners`, and
+  `ChestCreakVolumeMixin` scales `ServerLevel.playSeededSound`'s BLOCKS volume meanwhile (chests and barrels; shulker
+  boxes and modded chests with their own sound code keep full volume). Compiled (Gradle `compileJava`), not played yet.
+- **0.7.540, attributes run 0-100, capped by world tier; Attributes and Jobs tabs no longer overlap** (Andy, 2026-11-04:
+  "UI needs a rework, the text is overlapping. And character level points should scale way further, making stats go from
+  0/100 and scale accordingly, giving users a reason to world tier up"):
+  - `Stats`: `MAX` 100. One old point is `STEP` (10) new ones: each character level earns `POINTS_PER_LEVEL` (5; was one
+    per 2 levels), heritage/class/story/aim/flaw/Zenkai points count 10 each. Every effect per point is a tenth of the old
+    one times `TOP_SHARE` 1.5, so 100 gives half again the old 10 (Might +37.5% damage, Agility +15% speed, Finesse +37.5%
+    attack speed, Endurance 37.5% less hunger, Grit +7.5 armour and +30% knockback resistance, Wits +45% skill xp and +1.5
+    luck; Arcana +150 / +75 mana and +2.25 a second, `Mana`).
+  - World tier caps (`TIER_CAP`): Hearth 40, Borderlands 55, Wildlands 70, Dread 85, Legend 100, from the highest tier opened
+    (or the one you stand in, if higher), so stepping down to play with a friend costs nothing. Opening a tier also adds
+    `TIER_POINTS` (10 / 25 / 45 / 70 in all). Points past a cap stay banked; a new tier re-applies the attributes.
+  - Old saves: `Stats.migrate` (from `Skills.refresh`) multiplies every `stat_` rank by 10 once and marks the save
+    (`stat_scale`); each raise sets the mark. Respec cost counts ten attribute points as one rank.
+  - Shift-click puts in 10 at once (`Raise` now carries a count).
+  - `SkillScreen`: the panel is as tall as the screen allows (up to 300), the detail box sits just above the footer, and the
+    rows between scroll with the wheel, clipped to their own area (thin scrollbar), so the Jobs list no longer runs under the
+    description. Job rows 12 high. Attribute rows draw a 10-segment bar (heritage, class, story, yours) with the tier cap
+    notched and the locked part dark; the idle box gives your cap and every tier's.
+  - Lang: story/heritage/flaw/Zenkai texts show the new point sizes.
+  Compiled (`compileClientJava`); not played.
+- **0.7.541, lanterns burn on fuel and go out** (Andy, 2026-11-04: "lanterns should be fueled with coal or ambergris and
+  go out like torches", "ambergris lasts longer", "it shouldnt tell you how many days are left anywhere, but it can have a
+  durability bar, and soul lanterns should not go out"): `Lanterns` + `LanternBlockMixin` (trees mixins) give lanterns
+  random ticks. Each burns until its fuel runs out (end time and last fill kept per chunk in the `lantern_fuel`
+  attachment), then becomes a dark `burnt_lantern` (standing or hung; drops itself). A lantern never fuelled starts with
+  one coal's worth (3 days). Use coal or charcoal (`#minecraft:coals`) on a lantern, lit or burnt, for +3 days, ambergris
+  for +15 days, up to 30; no message says how much is left. Broken lanterns drop with their fuel left in the
+  `lantern_fuel` item component and burn on it when set down again; `LanternItemBarMixin` draws a durability-style bar
+  (green to red, share of its last fill) once some is burnt. Burnt lantern + coal crafts a lantern. Villagers relight
+  burnt lanterns as they do burnt torches (shared `burnt_torches` list); camps' burnt lanterns rot away with the rest.
+  Soul lanterns never go out; copper lanterns and oil lamps are left alone. No rain douse (behind glass). Texture: vanilla
+  lantern with the flame painted out to soot. Compiled (Gradle `compileJava processResources`); not played yet.
+
+## 0.7.542: the Skeleton Lord faces the way he walks (pack 0.20.49)
+- Andy: "his head is facing the complete wrong way". The Skeleton Lord's Workshop model is built facing the other way
+  from our other Blockbench mobs, so he was drawn back to front: face and chest on his back, ponytail and cape in front.
+  `SkeletonLordRenderer.scale` now gives the model a half turn about the vertical. Animations, the head's look and the
+  sleeping statue all turn with him.
+- **0.7.543, perplexed executioners (pack 0.20.50):** Andy (2026-11-04), on Chrono rewinding out from under an execution:
   "humanoid mobs can say something about it too, 'I was just about to....kill you?!'". `PowersCompat.tellPerplexed` hooks
   Powers' `ChronoCheatDeath.PERPLEXED`: a humanoid executioner (`Temperaments.humanoid`) says one of six lines over its
   head (`lang/parts/perplexed.json`, through `Speech.say`, in its own tongue). Gradle compile only, not played.

@@ -15,7 +15,7 @@ import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.Screen;
 
 /**
- * (0.20.42) Chrono cheating death, on the client ({@link ChronoCheatDeath}): nothing shown (Andy: "the Chrono is NOT told
+ * (0.20.50) Chrono cheating death, on the client ({@link ChronoCheatDeath}): nothing shown (Andy: "the Chrono is NOT told
  * anywhere that they can revive here ... they have a window now, no warning"). Inside the server's window, R (Rewind's
  * key) sends the rewind, whatever screen is up (the death screen, a knock-out). When a death is rewound, Respawn Recap (MIT, by DialingSpoon; shipped unchanged, see {@code client/mixin/respawnrecap}) plays its memory replay
  * as the rewind. Andy: "limit it to chrono": its replay is never shown for a real death, its death-screen takeover is

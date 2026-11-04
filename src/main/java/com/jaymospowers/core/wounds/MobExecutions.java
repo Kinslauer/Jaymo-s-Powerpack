@@ -187,7 +187,7 @@ public final class MobExecutions {
 		return BY_VICTIM.containsKey(player.getUUID());
 	}
 
-	/** (0.20.42) The mob coming to execute {@code player}, or standing over them; null if none. */
+	/** (0.20.50) The mob coming to execute {@code player}, or standing over them; null if none. */
 	public static @Nullable Mob executioner(ServerPlayer player) {
 		Execution e = BY_VICTIM.get(player.getUUID());
 		return e == null ? null : e.mob;

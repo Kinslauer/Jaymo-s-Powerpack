@@ -483,11 +483,11 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.535) Lines a humanoid says when the one it was executing is gone from under it (Chrono's rewind). */
+	/** (0.7.543) Lines a humanoid says when the one it was executing is gone from under it (Chrono's rewind). */
 	static final int PERPLEXED_LINES = 6;
 
 	/**
-	 * (0.7.535) Powers' Chrono can rewind out from under an execution (pack 0.20.42, {@code ChronoCheatDeath.PERPLEXED}).
+	 * (0.7.543) Powers' Chrono can rewind out from under an execution (pack 0.20.50, {@code ChronoCheatDeath.PERPLEXED}).
 	 * Andy: "humanoid mobs can say something about it too, 'I was just about to....kill you?!'". A humanoid executioner
 	 * ({@link Temperaments#humanoid}) says one of {@link #PERPLEXED_LINES} lines over its head ({@link Speech#say}, in its
 	 * own tongue). Nothing without that Powers.

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.20.42) Respawn clicked on the death screen while a Chrono's death is held back ({@link ChronoCheatDeath}): the death
+ * (0.20.50) Respawn clicked on the death screen while a Chrono's death is held back ({@link ChronoCheatDeath}): the death
  * goes ahead first, so the respawn that follows is an ordinary one.
  */
 @Mixin(ServerGamePacketListenerImpl.class)
