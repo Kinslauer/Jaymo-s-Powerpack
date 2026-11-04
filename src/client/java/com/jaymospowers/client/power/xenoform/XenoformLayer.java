@@ -28,17 +28,19 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-		XenoFormModels.FormModel model = XenoFormModels.of(state.getData(XenoformClient.FORM));
+		// (0.20.1) an alien with an Ultimate model wears it while its Ultimate is on
+		boolean ultimate = Boolean.TRUE.equals(state.getData(XenoformClient.ULTIMATE));
+		XenoFormModels.FormModel model = XenoformClient.model(state.getData(XenoformClient.FORM), ultimate);
 		if (model == null) {
 			return;
 		}
+		boolean ultimateModel = model instanceof XenoFormModels.UltimateModel;
 		if (Boolean.TRUE.equals(state.getData(XenoformClient.SHED))) {
 			// (0.18.96) the stalker's shed skin: pale and see-through
 			XenoformClient.submitGhost(state, poseStack, collector, lightCoords, SHED_TINT);
 			state.isInvisible = false;
 			return;
 		}
-		boolean ultimate = Boolean.TRUE.equals(state.getData(XenoformClient.ULTIMATE));
 		String shell = state.getData(XenoformClient.SHELL);
 		if (shell != null) {
 			// (0.18.95) Rivet melded into a shell: drawn as that block, filling its body
@@ -47,10 +49,12 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			return;
 		}
 		poseStack.pushPose();
-		if (model.renderScale != 1.0F) {
+		// (0.20.1) with no parts listed, the whole Ultimate grows in
+		float grow = ultimateModel ? XenoMorph.whole(state.getData(XenoformClient.MORPH)) : 1.0F;
+		if (model.renderScale != 1.0F || grow != 1.0F) {
 			// a form built smaller than the player (Duplex) is drawn up from the feet (model y 24, 1.501 below here)
 			poseStack.translate(0.0F, 1.501F, 0.0F);
-			poseStack.scale(model.renderScale, model.renderScale, model.renderScale);
+			poseStack.scale(model.renderScale * grow, model.renderScale * grow, model.renderScale * grow);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
 		}
 		if (model instanceof XenoFormModels.Wisp wisp) {
@@ -90,8 +94,12 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		}
 		boolean ending = Boolean.TRUE.equals(state.getData(XenoformClient.ENDING));
 		if (ending) {
-			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(skin(model, state, false)), lightCoords, OverlayTexture.NO_OVERLAY,
+			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(skin(model, state, ultimateModel)), lightCoords, OverlayTexture.NO_OVERLAY,
 				glow(state.ageInTicks), null, 0);
+		}
+		if (ultimateModel) {
+			// (0.20.1) the Ultimate model's own passes (wings, comet, ...)
+			model.submitExtras(state, poseStack, collector, lightCoords);
 		}
 		if (model instanceof XenoFormModels.Wyrm) {
 			// Wyrm's wings: the ender dragon's, small, from the game's own dragon texture
@@ -115,9 +123,18 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		com.jaymospowers.power.xenoform.XenoForm form = com.jaymospowers.power.xenoform.XenoForms.get(model.id);
 		int color = form != null ? form.color : 0xFFFFFF;
 		float pulse = 0.75F + 0.25F * Mth.sin(state.ageInTicks * SEAM_PULSE);
+		// (0.20.1) a part landing in the change-in flares the seams
+		XenoMorph.Morph morph = state.getData(XenoformClient.MORPH);
+		if (morph != null) {
+			pulse = Math.max(pulse, morph.flare());
+		}
 		int seams = (int)(pulse * 255.0F) << 24 | 0xFFFFFF;
 		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityTranslucentEmissive(model.ultimateGlow), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 			seams, null, 0);
+		if (model instanceof XenoFormModels.UltimateModel) {
+			// (0.20.1) an Ultimate model has its own spikes in its mesh
+			return;
+		}
 		UltimateSpikes spikes = UltimateSpikes.of(model.id, model);
 		// (0.19.62) Skitter's spider has no man's shape to hang them on
 		Float crawl = state.getData(SkitterCeiling.CRAWL_KEY);

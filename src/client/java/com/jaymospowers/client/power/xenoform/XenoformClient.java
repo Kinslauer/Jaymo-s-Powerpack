@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /** What everyone's client does with a transformed player: hides them, so {@link XenoformLayer} can draw the alien. */
 public final class XenoformClient {
@@ -45,6 +46,8 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<String> ACT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_act");
 	/** (0.19.66) A low-box alien (Croaker) holding sneak, which its pose can't show. */
 	public static final RenderStateDataKey<Boolean> SNEAK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_sneak");
+	/** (0.20.1) The change-in morph this player is in ({@link XenoMorph}), or null. */
+	public static final RenderStateDataKey<XenoMorph.Morph> MORPH = RenderStateDataKey.create(() -> "jaymospowers:xenoform_morph");
 	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
 	private static final double STRIDE_CATCH_UP = 0.3;
 
@@ -58,6 +61,20 @@ public final class XenoformClient {
 	private static final java.util.Map<Player, Stride> STRIDES = new java.util.WeakHashMap<>();
 
 	private XenoformClient() {
+	}
+
+	/**
+	 * (0.20.1) The model a player wearing {@code form} is drawn with: the Ultimate's ({@link XenoFormModels#ultimate}) while their Ultimate is
+	 * on and that alien has one, else the alien's own ({@link XenoFormModels#of}). Null: not transformed.
+	 */
+	public static XenoFormModels.@Nullable FormModel model(@Nullable String form, boolean ultimate) {
+		if (ultimate) {
+			XenoFormModels.FormModel evolved = XenoFormModels.ultimate(form);
+			if (evolved != null) {
+				return evolved;
+			}
+		}
+		return XenoFormModels.of(form);
 	}
 
 	/** From the avatar renderer's extractRenderState, last. */
@@ -82,6 +99,7 @@ public final class XenoformClient {
 			state.setData(SPIKES, false);
 		}
 		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
+		state.setData(MORPH, form != null && player != null ? XenoMorph.get(player, partialTicks) : null);
 		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
 		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);
 		state.setData(TOWER_SWAT, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.swatPhase(player, partialTicks) : -1.0F);
@@ -150,7 +168,7 @@ public final class XenoformClient {
 	 * their own shape.
 	 */
 	public static boolean submitGhost(AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int light, int tint) {
-		XenoFormModels.FormModel model = XenoFormModels.of(state.getData(FORM));
+		XenoFormModels.FormModel model = model(state.getData(FORM), Boolean.TRUE.equals(state.getData(ULTIMATE)));
 		if (model == null) {
 			return false;
 		}
@@ -161,7 +179,7 @@ public final class XenoformClient {
 			poseStack.scale(model.renderScale, model.renderScale, model.renderScale);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
 		}
-		collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(model.texture), light, OverlayTexture.NO_OVERLAY, tint, null,
+		collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(model instanceof XenoFormModels.UltimateModel ? model.ultimateTexture : model.texture), light, OverlayTexture.NO_OVERLAY, tint, null,
 			EntityRenderState.NO_OUTLINE);
 		poseStack.popPose();
 		return true;

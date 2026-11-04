@@ -121,9 +121,11 @@ public final class XenoformState {
 	 * {@code rechargeTotal}: the band's recharge; {@code until}/{@code length}: each move's cooldown end (game time) and
 	 * length; {@code scan}/{@code scanTotal}: the scan's progress; {@code scanForm}: the alien being scanned ("" for none).
 	 */
-	public record Hud(int formTicks, int formTotal, int recharge, int rechargeTotal, long[] until, int[] length, int scan, int scanTotal, String scanForm) {
-		public static final int SLOTS = 4;
-		public static final Hud NONE = new Hud(0, 0, 0, 0, new long[SLOTS], new int[SLOTS], 0, 0, "");
+	public record Hud(int formTicks, int formTotal, int recharge, int rechargeTotal, long[] until, int[] length, int scan, int scanTotal, String scanForm,
+		float under, float underMax) {
+		/** (0.20.1) Five slots: R G V B and C. {@code under}/{@code underMax}: the base alien's held health while its Ultimate is on (0: not). */
+		public static final int SLOTS = 5;
+		public static final Hud NONE = new Hud(0, 0, 0, 0, new long[SLOTS], new int[SLOTS], 0, 0, "", 0.0F, 0.0F);
 		public static final StreamCodec<ByteBuf, Hud> STREAM_CODEC = StreamCodec.of((buf, hud) -> {
 			ByteBufCodecs.VAR_INT.encode(buf, hud.formTicks);
 			ByteBufCodecs.VAR_INT.encode(buf, hud.formTotal);
@@ -136,6 +138,8 @@ public final class XenoformState {
 			ByteBufCodecs.VAR_INT.encode(buf, hud.scan);
 			ByteBufCodecs.VAR_INT.encode(buf, hud.scanTotal);
 			ByteBufCodecs.STRING_UTF8.encode(buf, hud.scanForm);
+			ByteBufCodecs.FLOAT.encode(buf, hud.under);
+			ByteBufCodecs.FLOAT.encode(buf, hud.underMax);
 		}, buf -> {
 			int formTicks = ByteBufCodecs.VAR_INT.decode(buf);
 			int formTotal = ByteBufCodecs.VAR_INT.decode(buf);
@@ -147,8 +151,11 @@ public final class XenoformState {
 				until[i] = ByteBufCodecs.VAR_LONG.decode(buf);
 				length[i] = ByteBufCodecs.VAR_INT.decode(buf);
 			}
-			return new Hud(formTicks, formTotal, recharge, rechargeTotal, until, length, ByteBufCodecs.VAR_INT.decode(buf),
-				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.STRING_UTF8.decode(buf));
+			int scan = ByteBufCodecs.VAR_INT.decode(buf);
+			int scanTotal = ByteBufCodecs.VAR_INT.decode(buf);
+			String scanForm = ByteBufCodecs.STRING_UTF8.decode(buf);
+			return new Hud(formTicks, formTotal, recharge, rechargeTotal, until, length, scan, scanTotal, scanForm,
+				ByteBufCodecs.FLOAT.decode(buf), ByteBufCodecs.FLOAT.decode(buf));
 		});
 
 		public long cooldownLeft(int slot, long now) {
@@ -158,7 +165,7 @@ public final class XenoformState {
 		boolean same(Hud other) {
 			return formTicks == other.formTicks && formTotal == other.formTotal && recharge == other.recharge && rechargeTotal == other.rechargeTotal
 				&& java.util.Arrays.equals(until, other.until) && java.util.Arrays.equals(length, other.length) && scan == other.scan
-				&& scanTotal == other.scanTotal && scanForm.equals(other.scanForm);
+				&& scanTotal == other.scanTotal && scanForm.equals(other.scanForm) && under == other.under && underMax == other.underMax;
 		}
 	}
 
@@ -254,9 +261,18 @@ public final class XenoformState {
 		return hud == null ? Hud.NONE : hud;
 	}
 
-	/** The alien this player is right now, or null (both sides). */
+	/** The alien this player is right now, or null (both sides). While the Ultimate is on, this is still the base alien. */
 	public static @Nullable XenoForm form(Player player) {
 		return XenoForms.get(player.getAttached(FORM));
+	}
+
+	/**
+	 * (0.20.1) The Ultimate this player is right now ({@link #ULTIMATE} on and the base alien has an {@link XenoForm#evolved()}),
+	 * or null (both sides). The fallback 0.18.93 buff has no Ultimate class, so it is null there.
+	 */
+	public static @Nullable XenoUltimate ultimate(Player player) {
+		XenoForm form = form(player);
+		return form != null && Boolean.TRUE.equals(player.getAttached(ULTIMATE)) ? form.evolved() : null;
 	}
 
 	/** How the player's alien is flying ({@link #FLY_NONE} when it isn't). */
