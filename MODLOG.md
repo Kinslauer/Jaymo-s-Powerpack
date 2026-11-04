@@ -4438,3 +4438,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Enough Animations, EMF Compat: NEA, Sounds, Lithium, FerriteCore, C2ME, Structory, Structory: Towers, Homesteads.
   Still Modrinth-only (no matching CurseForge file): Runes, Grim Kingdoms VE, Repurposed Structures, MidnightLib, Ji AFK
   Cinematic, Dungeons and Taverns (CurseForge stops at 6.0.2). Not built here.
+- **0.20.33, Kingdoms 0.7.530, Stegonaut moves:** the Stegonaut's poses redrawn after the Bastionodon animation set
+  (ground eating in three parts, bite, grazing, grumbles, flinch, doze, gallop, swim stroke, death), none of its files used
+  (its rig is Saint's Dragons'). See the Kingdoms MODLOG.

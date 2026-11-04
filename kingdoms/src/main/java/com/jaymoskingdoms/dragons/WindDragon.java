@@ -968,6 +968,10 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	/** On its feet: bite whoever's in reach, sweep the tail round when it's crowded or they're beside it, breathe at range. */
+	/** (0.7.530) Its walker's bite just landed on {@code target} (in {@link #groundFight}), for a model to play it. */
+	protected void bitten(LivingEntity target) {
+	}
+
 	protected void groundFight(ServerLevel level, LivingEntity target, boolean breathe) {
 		lookAt(target);
 		double reach = BITE_REACH + this.getBbWidth() * 0.5 + target.getBbWidth() * 0.5;
@@ -984,6 +988,7 @@ public abstract class WindDragon extends AbstractHorse {
 			this.biteIn = BITE_EVERY;
 			target.hurtServer(level, this.damageSources().mobAttack(this), (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
 			level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ATTACK, SoundSource.HOSTILE, 1.5F, 0.6F);
+			bitten(target);
 		}
 		List<LivingEntity> close = level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(SWEEP_RADIUS),
 			e -> e != this && e.isAlive() && !(e instanceof Player p && (p.isCreative() || p.isSpectator())) && !DragonBreath.spared(this, e)

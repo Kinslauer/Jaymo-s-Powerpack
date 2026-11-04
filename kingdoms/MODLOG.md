@@ -8859,3 +8859,23 @@ beneath it, and flap gently as they hover."
   them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
 - **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
   and sway in the air the way the wind's hover does, for anyone watching.
+
+## 0.7.530: the Stegonaut's moves after the Bastionodon set (pack 0.20.33)
+Andy sent a "Bastionodon" pack and asked to map its animations onto our Stegonaut. Its files say CC0, but its rig is
+Saint's Dragons' Stegonaut (the same 56 bone names, 23 of the pivots, the same 27 animation names and lengths), so none
+of its files are used; its motions were redrawn as procedural poses in `StegonautDragonModel.setupAnim`:
+- **Ground eating** in three parts: the scoop (head to the earth, jaw wide), the chew (head raised, cheeks full, jaw
+  working) and the spit at the moment it fires (head thrown back and flung forward, jaw wide).
+- **Bite** (`StegonautDragon.BITE_MOVE`, 20 ticks): the neck draws back with the jaws wide and snaps in. New
+  `WindDragon.bitten(target)` hook, called when a walker's bite lands in `groundFight`.
+- **Grazing** (`GRAZE`, 30 ticks): when it noses the ground at home, the head goes down for two chomps.
+- **Chin slam** (now 16 ticks): crouch and draw the head down and back, then fling it up, the body rising with it.
+- **Ground slam:** the forelegs splay as it rears, and the body pitches forward on the landing (tail whipping up) and
+  rocks back.
+- **Roar** (now 60 ticks, a show of its plates): the head swings to one side then the other, jaw held wide, tail lashing.
+- **Idle grumbles:** stood still and doing nothing, every 13 s one of three (a head toss, a head tilt, the neck lifted),
+  each with the jaw half open.
+- **Flinch** when struck (body rocks back and over, jaw opens; `WindDragonRenderer.State.hurt`), a **doze** after it has
+  sat (head down and turned aside, slower breaths), a **gallop** at a run (the right pair an eighth of a stride behind,
+  longer strides, rocking), a paddling **swim** (forelegs splayed, tail sweeping), and stiff splayed legs as it **dies**.
+Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. Compile-checked; not played.
