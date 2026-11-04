@@ -484,6 +484,7 @@ public final class Patrons {
 			}
 		}
 		Blessings.tick(server);
+		Faiths.sunrise(server);
 	}
 
 	/** The days without favour cost it: from the later of the last decay and the grace, a few a day, never below tier 1 (in part a). */
@@ -551,7 +552,7 @@ public final class Patrons {
 			return;
 		}
 		set(sp, s.withSeeded());
-		Patron mine = Faiths.human(kind) ? Patron.TRUTH : Faiths.lean(kind);
+		Patron mine = Faiths.startOf(kind);
 		learn(sp, mine);
 		if (PlayerTemperaments.of(sp) == Temperaments.Temperament.DEVOUT && !state(sp).sworn()) {
 			swear(sp, mine, FAVOUR_DEVOUT, today(sp.level().getServer()));

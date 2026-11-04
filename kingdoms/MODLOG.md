@@ -8653,6 +8653,10 @@ Andy: "the particle effect for attack indicators should be more visible, and a s
 - A merge left `client/HandshakePose` with two `NOD` constants (the nod pose and the head tilt while shaking hands), so
   the client didn't compile. The head tilt is now `SHAKE_NOD`; nothing changes in game.
 
+## 0.7.508: gem sockets loading hint (pack 0.20.7)
+- Loading-screen hint 86 explains gem sockets at the Smithing Anvil.
+- Not played.
+
 ## 0.7.509: patron gods, part (a) (pack 0.20.8, Kitchen 0.5.57)
 Andy picked the Runic Gods idea (our own version, nothing taken from it). `docs/Patrons-Plan.md`.
 - **Eight patrons** (`Patron`): the Hearthkeeper, the Anvil-Father, the Deep Mother, the Green Huntsman, the Lantern
@@ -8691,3 +8695,6 @@ Andy picked the Runic Gods idea (our own version, nothing taken from it). `docs/
 - The boon key is now the left square bracket. The full stop is Shoulder Surfing's swap shoulder in the pack.
 - On the Strength page the footer buttons no longer overlap: Patrons sits right of Valor, and World Tier is clear.
 - Dawnlight spares thralls and your realm's folk.
+- Andy: Dawnborn "start crowned sun" and "say praise the sun". A devout Dawnborn starts sworn to the Crowned Sun, and most
+  Dawnborn villagers hold it (`Faiths.DAWNBORN_SUN_SHARE`). At sunrise some of the Sun's folk near a player praise the sun
+  aloud (speech bubbles), and Dawnborn have two more lines of talk about it.

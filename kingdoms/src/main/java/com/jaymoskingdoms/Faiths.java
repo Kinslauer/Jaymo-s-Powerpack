@@ -38,6 +38,12 @@ public final class Faiths {
 	static final float HEARTS_KEPT_MIN = 0.2F, REP_KEPT_MIN = 0.25F;
 	static final int NEIGHBOUR_STEP = 8, GUARD_SEARCH_W = 1;
 	static final float GUARD_HALT_SOONER = 0.5F;
+	/** (0.7.509) Andy: Dawnborn "start crowned sun" and "say praise the sun". Most Dawnborn hold the Crowned Sun; at sunrise
+	 *  some of the Sun's folk near a player call out to it. */
+	static final float DAWNBORN_SUN_SHARE = 0.85F, SUNRISE_PRAISE_CHANCE = 0.5F;
+	static final int SUNRISE_WINDOW = 1200, SUNRISE_PRAISE_LINES = 3;
+	static final double SUNRISE_PRAISE_RANGE = 32.0;
+	private static long praisedDay = Long.MIN_VALUE;
 
 	/** What a realm holds: a patron (The Truth), or any of the seven (a haven), and how hard it takes a clash. */
 	record RealmFaith(@Nullable Patron patron, boolean seven, float weight) {
@@ -81,6 +87,35 @@ public final class Faiths {
 		};
 	}
 
+	/** (0.7.509) The patron a player's blood starts with: Dawnborn the Crowned Sun, other humans The Truth, the rest their lean. */
+	static Patron startOf(Heritage.Kind kind) {
+		if (kind == Heritage.Kind.DAWNBORN) {
+			return Patron.CROWNED_SUN;
+		}
+		return human(kind) ? Patron.TRUTH : lean(kind);
+	}
+
+	/** (0.7.509) Once a day at sunrise, some villagers and townsfolk of the Crowned Sun near a player praise the sun aloud. */
+	static void sunrise(MinecraftServer server) {
+		ServerLevel level = server.overworld();
+		long clock = level.getOverworldClockTime();
+		long day = Math.floorDiv(clock, 24000L);
+		if (Math.floorMod(clock, 24000L) >= SUNRISE_WINDOW || day == praisedDay) {
+			return;
+		}
+		praisedDay = day;
+		java.util.Set<Entity> spoken = new java.util.HashSet<>();
+		for (ServerPlayer sp : level.players()) {
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, sp.getBoundingBox().inflate(SUNRISE_PRAISE_RANGE),
+				x -> x.isAlive() && holds(x) && level.canSeeSky(x.blockPosition().above()))) {
+				if (spoken.add(e) && of(e) == Patron.CROWNED_SUN && e.getRandom().nextFloat() < SUNRISE_PRAISE_CHANCE) {
+					Speech.say(level, e, Component.translatable("speech.jaymoskingdoms.praise_the_sun." + e.getRandom().nextInt(SUNRISE_PRAISE_LINES)),
+						Speech.GOLD, SUNRISE_PRAISE_RANGE);
+				}
+			}
+		}
+	}
+
 	// ---- whose faith -----------------------------------------------------------------------------------------------------
 
 	/** {@code e}'s faith (drawn now, on the server, if it hasn't one); a priest is always The Truth. Null for what holds none. */
@@ -109,6 +144,9 @@ public final class Faiths {
 			return Patron.TRUTH;
 		}
 		Heritage.Kind kind = VillagerHeritage.of(who);
+		if (kind == Heritage.Kind.DAWNBORN) {
+			return random.nextFloat() < DAWNBORN_SUN_SHARE ? Patron.CROWNED_SUN : Patron.TRUTH;
+		}
 		if (human(kind)) {
 			if (random.nextFloat() < TRUTH_SHARE_HUMAN) {
 				return Patron.TRUTH;

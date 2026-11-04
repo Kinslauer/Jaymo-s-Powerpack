@@ -46,6 +46,7 @@ public final class JewelleryClient {
 	}
 
 	public static void init() {
+		SocketTooltip.init(); // (0.20.7)
 		MenuScreens.register(Jewellery.BENCH_MENU, JewellersBenchScreen::new);
 		BlockEntityRenderers.register(Jewellery.LAPIDARY_WHEEL_ENTITY, LapidaryWheelRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(JewelleryNet.OpenCuts.TYPE, (payload, context) ->

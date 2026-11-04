@@ -751,8 +751,8 @@ Two tracks, two at a time (CLAUDE.md), each in its own worktree, no shared files
 
 1. **Left bracket for the boon menu.** Z and sneak + Z are taken by Powers and the full stop by Shoulder Surfing, so the
    boon menu opens on the left square bracket (rebindable). Good, or another key?
-2. **Raised by the sunpriests.** A devout Dawnborn is human, so starts sworn to The Truth by your rule. Should the
-   sunpriests' child go to the Crowned Sun instead?
+2. **Raised by the sunpriests.** Answered: Dawnborn start with the Crowned Sun (devout ones sworn), most Dawnborn villagers hold
+   it, and they praise the sun at sunrise.
 3. **Favour never falls below the first tier in (a).** Losing a patron entirely belongs to turning away (b). OK for now?
 4. **Clean Cuts needs a small Kitchen hook** (Kitchen 0.5.57 and a new jar in `libs/`). Keep it, or give the Green
    Huntsman a different second blessing and leave Kitchen alone?

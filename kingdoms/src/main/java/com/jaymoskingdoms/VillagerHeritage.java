@@ -114,6 +114,8 @@ public final class VillagerHeritage {
 
 	/** How many lines each kind of talk has ({@code dialogue.chat.jaymoskingdoms.blood_<kind>/<n>}, 1-based). */
 	static final int WRAPPED_LINES = 6, WRAPPED_TURNED_LINES = 4, CUT_LINES = 6, CUT_RAMPAGE_LINES = 4, BLOOD_LINES = 3;
+	/** (0.7.509) Dawnborn have two more: they praise the sun. */
+	static final int DAWNBORN_LINES = 5;
 
 	/** The villagers in the world with a heritage (their gifts are kept up). */
 	private static final Set<LivingEntity> LOADED = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -614,6 +616,7 @@ public final class VillagerHeritage {
 			case "wrapped_turned" -> WRAPPED_TURNED_LINES;
 			case "cut" -> CUT_LINES;
 			case "cut_rampage" -> CUT_RAMPAGE_LINES;
+			case "dawnborn" -> DAWNBORN_LINES;
 			default -> BLOOD_LINES;
 		};
 		int n = 1 + Mth.floor(level.getRandom().nextFloat() * lines);
