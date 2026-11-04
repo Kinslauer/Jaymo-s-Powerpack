@@ -8562,7 +8562,15 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
 - Emeralds stay a gem: ore, enchanting, tinkering's emerald modifier, trims, beacons and caravan gem goods.
 - Not compile-checked yet at this entry; not played.
 
-## 0.7.500: tails with a mind of their own (pack 0.20.1)
+## 0.7.500: cold-blooded Serpen don't overheat
+- Andy: "the reptile beastfolk should be cold blooded, therefore not overheating in the sun". Anyone with the
+  `COLD_BLOODED` perk (the Serpen look of the Beastfolk) is heat-proof to Kitchen's body heat, like an Emberborn: the
+  sun, hot lands, armour baking and fires can push them no further than comfortable, so no sweating, overheating or
+  heatstroke (`HeritageKits.coldBlooded`, `KitchenCompat`).
+- The cold stays their flaw as before (15% lighter blows, 20% slower in the cold lands); body heat's chill is unchanged.
+- The perk's card line says so.
+- Not compile-checked yet at this entry; not played.
+## 0.7.501: tails with a mind of their own (pack 0.20.1)
 - Andy: "they should pulse and slap like they have their own mind, but they swing violently whenever you walk". Beastfolk
   tails (`BeastParts.tail`: beastfolk, canine, feline, kitsune, avian, serpen) swayed at `age * (rate + walk speed)`, so any
   change of walk speed spun the phase and the tail whipped about. Now every wave runs on a fixed clock: a lazy wander of two

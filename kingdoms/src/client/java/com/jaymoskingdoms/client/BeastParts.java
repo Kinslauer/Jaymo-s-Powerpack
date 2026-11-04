@@ -57,7 +57,7 @@ import org.jspecify.annotations.Nullable;
 public final class BeastParts {
 	// ---- tuning
 	/**
-	 * (0.7.500, Andy: "they should pulse and slap like they have their own mind") A tail lives on its own clock: a lazy wander
+	 * (0.7.501, Andy: "they should pulse and slap like they have their own mind") A tail lives on its own clock: a lazy wander
 	 * of two slow waves, a curl that comes and goes, and now and then a slap (a few quick whips to the side). Every wave runs on
 	 * the age at a fixed rate; the walk only adds a small swing on the stride ({@code walkAnimationPos}) and calms the rest.
 	 * (Before, the walk speed sped the wave up: age times a changing rate threw the phase around and the tail thrashed.)
@@ -111,7 +111,7 @@ public final class BeastParts {
 		CANINE("canine", new Ears(true, 0.85F, 1.25F, 0.1F, 2.5F),
 			new Tail(new float[] {-0.55F, -0.12F, -0.05F, 0.0F, 0.05F, 0.1F}, new float[] {2.6F, 3.6F, 4.4F, 4.4F, 3.6F, 2.4F}, 3.2F, 0.2F, true), Wings.NONE,
 			false, false, false, false),
-		// (0.7.500, Andy: "like a cheetah's in sprint and otherwise ... sticking straight up and moving") Carried straight up with
+		// (0.7.501, Andy: "like a cheetah's in sprint and otherwise ... sticking straight up and moving") Carried straight up with
 		// the tip hooked over; at a sprint it drops level out behind and steers the turns (TAIL_RUDDER).
 		FELINE("feline", new Ears(true, 1.1F, 0.9F, 0.3F, 3.0F),
 			new Tail(new float[] {1.05F, 0.08F, 0.04F, 0.0F, -0.04F, 0.12F, 0.3F, 0.45F}, new float[] {1.8F, 1.7F, 1.7F, 1.6F, 1.6F, 1.5F, 1.5F, 1.5F}, 3.4F,
