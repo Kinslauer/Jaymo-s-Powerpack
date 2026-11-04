@@ -122,8 +122,9 @@ abstract class LivingEntityMixin implements CorpseCapture {
 		if (self.deathTime != 0) {
 			return;
 		}
-		if (self.entityTags().contains(Corpses.NO_CORPSE_TAG)) {
-			// (marked by another mod: a body that leaves nothing behind, like a Darktide shade)
+		if (self.entityTags().contains(Corpses.NO_CORPSE_TAG) || Corpses.inNoCorpseZone(self)) {
+			// (marked by another mod: a body that leaves nothing behind, like a Darktide shade; (0.5.61) or dying where
+			// no body is left, the Other World)
 			return;
 		}
 		if (self instanceof ServerPlayer player && !player.isSpectator()) {

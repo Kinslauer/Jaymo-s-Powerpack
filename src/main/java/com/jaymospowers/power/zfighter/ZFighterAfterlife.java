@@ -51,6 +51,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.illager.Vindicator;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -199,6 +200,8 @@ public final class ZFighterAfterlife {
 	private static final Map<UUID, Long> WAKINGS = new HashMap<>();
 	/** (0.19.33) How long after waking in the world (ticks) that is asked: past the dimension's loading screen. */
 	static final long WAKE_ASK_DELAY = 40L;
+	/** (0.20.47) How often (ticks) the Other World is cleared of anything hostile while someone is there ({@link #sweep}). */
+	static final long SWEEP_TICKS = 10L;
 
 	/** A tournament in progress: the round, the spirit fighter in the ring, and whether he fell. */
 	private static final class Gauntlet {
@@ -399,8 +402,28 @@ public final class ZFighterAfterlife {
 		if (visited && Boolean.TRUE.equals(world.getAttached(BUILT))) {
 			ensureNpcs(world);
 		}
+		if (visited && now % SWEEP_TICKS == 0L) {
+			sweep(world);
+		}
 		if (!GAUNTLETS.isEmpty()) {
 			gauntlets(server, world);
+		}
+	}
+
+	/**
+	 * (0.20.47) Andy: "I died and a zombie tried attacking the judge, none of that made sense". Nothing hostile walks in the
+	 * Other World: whatever monster turns up at the site (spawned there, wandered or fell in, or got up from a body) fades away
+	 * in a puff of souls. The tournament's spirit fighters are the one exception, as they belong there.
+	 */
+	private static void sweep(ServerLevel world) {
+		double cx = SITE_X + PLATFORM_CX + 0.5;
+		double cz = SITE_Z + PLATFORM_CZ + 0.5;
+		AABB box = new AABB(cx - SITE_RADIUS, world.getMinY(), cz - SITE_RADIUS, cx + SITE_RADIUS, world.getMaxY(), cz + SITE_RADIUS);
+		for (Mob mob : world.getEntitiesOfClass(Mob.class, box, m -> m instanceof Enemy && m.isAlive()
+			&& !m.entityTags().contains(SPIRIT_TAG) && inOtherWorld(m))) {
+			world.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 12,
+				0.3, 0.5, 0.3, 0.02);
+			mob.discard();
 		}
 	}
 

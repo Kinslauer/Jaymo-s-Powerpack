@@ -1403,3 +1403,8 @@ Body heat and thirst know the Nether band of a One Dimension world (Powers 0.20.
 Andy: "you should not freeze or overheat in heaven". `BodyHeat.addTemperate(Predicate<Player>)` lets other mods name places
 the weather never reaches. There, body heat goes straight to neutral every second, no warning lines, no frost on the
 screen. Powers adds the Other World (the Judge's hall and the grounds round it) by reflection.
+## 0.5.61: no bodies in heaven (pack 0.20.47)
+Andy: "player corpses dont spawn in the otherworld". `Corpses.addNoCorpseZone(Predicate<Entity>)`
+lets other mods name places no body is left. Dying there (player or mob) leaves no corpse, a player's hotbar drops with the rest of the
+inventory, and a rising body (zombie, skeleton, player) already there fades and drops what it held instead of getting up.
+Powers adds the Other World (the Judge's hall and the grounds round it) by reflection.
