@@ -31,6 +31,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -68,6 +69,14 @@ public final class Dragons {
 	/** (0.7.513) Stegonaut grazes in the jungles and plains (tag {@code has_stegonaut_dragon}): its spawn weight and herd. */
 	static final int STEGONAUT_WEIGHT = 2, STEGONAUT_MIN = 1, STEGONAUT_MAX = 2;
 	public static final TagKey<Biome> HAS_STEGONAUT = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_stegonaut_dragon"));
+	/** (0.7.513) Atroxiia, the frost wyrm of the snowfields and cold coasts (tag {@code has_atroxiia_dragon}): its body, weight, herd. */
+	static final float ATROXIIA_WIDTH = 3.0F, ATROXIIA_HEIGHT = 4.3F;
+	static final int ATROXIIA_WEIGHT = 1, ATROXIIA_MIN = 1, ATROXIIA_MAX = 1;
+	public static final TagKey<Biome> HAS_ATROXIIA = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_atroxiia_dragon"));
+	/** (0.7.513) Varasuchus, the crocodile dragon of the beaches and swamps (tag {@code has_varasuchus_dragon}): its body, weight, herd. */
+	static final float VARASUCHUS_WIDTH = 4.0F, VARASUCHUS_HEIGHT = 3.3F;
+	static final int VARASUCHUS_WEIGHT = 1, VARASUCHUS_MIN = 1, VARASUCHUS_MAX = 1;
+	public static final TagKey<Biome> HAS_VARASUCHUS = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_varasuchus_dragon"));
 
 	public static final TagKey<Biome> HAS_NOTUS = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_notus_dragon"));
 
@@ -77,8 +86,10 @@ public final class Dragons {
 	public static EntityType<EurusDragon> EURUS_DRAGON;
 	public static EntityType<AeolusDragon> AEOLUS_DRAGON;
 	public static EntityType<StegonautDragon> STEGONAUT_DRAGON;
+	public static EntityType<AtroxiiaDragon> ATROXIIA_DRAGON;
+	public static EntityType<VarasuchusDragon> VARASUCHUS_DRAGON;
 	public static Item NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG, EURUS_DRAGON_SPAWN_EGG, AEOLUS_DRAGON_SPAWN_EGG,
-		STEGONAUT_DRAGON_SPAWN_EGG;
+		STEGONAUT_DRAGON_SPAWN_EGG, ATROXIIA_DRAGON_SPAWN_EGG, VARASUCHUS_DRAGON_SPAWN_EGG;
 	/** By name, for the op command. */
 	private static final Map<String, EntityType<? extends WindDragon>> BY_NAME = new LinkedHashMap<>();
 
@@ -120,6 +131,17 @@ public final class Dragons {
 		SpawnPlacements.register(STEGONAUT_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_STEGONAUT), MobCategory.CREATURE, STEGONAUT_DRAGON, STEGONAUT_WEIGHT, STEGONAUT_MIN,
 			STEGONAUT_MAX);
+		// (0.7.513) Atroxiia and Varasuchus, walkers that swim: alone, on the snow and the cold shores, and the beaches and swamps
+		// (any ground they can stand on: snow and sand aren't grass)
+		ATROXIIA_DRAGON = dragon("atroxiia", AtroxiiaDragon::new, ATROXIIA_WIDTH, ATROXIIA_HEIGHT, false, AtroxiiaDragon.createAttributes());
+		ATROXIIA_DRAGON_SPAWN_EGG = egg(ATROXIIA_DRAGON);
+		SpawnPlacements.register(ATROXIIA_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
+		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_ATROXIIA), MobCategory.CREATURE, ATROXIIA_DRAGON, ATROXIIA_WEIGHT, ATROXIIA_MIN, ATROXIIA_MAX);
+		VARASUCHUS_DRAGON = dragon("varasuchus", VarasuchusDragon::new, VARASUCHUS_WIDTH, VARASUCHUS_HEIGHT, false, VarasuchusDragon.createAttributes());
+		VARASUCHUS_DRAGON_SPAWN_EGG = egg(VARASUCHUS_DRAGON);
+		SpawnPlacements.register(VARASUCHUS_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
+		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_VARASUCHUS), MobCategory.CREATURE, VARASUCHUS_DRAGON, VARASUCHUS_WEIGHT, VARASUCHUS_MIN,
+			VARASUCHUS_MAX);
 		JaymosKingdoms.LOGGER.debug("dragon records: {} {}", DragonRecords.SLAIN, DragonRecords.TAMER);
 		Disguises.register();
 		DragonEggs.register();
@@ -133,7 +155,7 @@ public final class Dragons {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dragons::nether);
-		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus|stegonaut] [tame]: a wild one (Notus unless named), or a
+		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus|stegonaut|atroxiia|varasuchus] [tame]: a wild one (Notus unless named), or a
 		// tamed, saddled one, at your side
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
 			LiteralArgumentBuilder<CommandSourceStack> dragon = Commands.literal("dragon").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))

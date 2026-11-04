@@ -5303,5 +5303,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (MCA's gift lands in their inventory) puts her on, she glows about them and saves them once the same way. Worn fairies
   hang on the chest for all to see, players' and villagers' alike (`Fairies.WEARS`, synced; `client/baubles/WornFairies`,
   a layer on every humanoid renderer). She also fits the belt slot, hung at the hip like the coin purse (`#jaymospowers:hip_shown`).
-- **0.20.13, Kingdoms 0.7.513, Stegonaut:** the first of the lesser dragons rebuilt from Saint's Dragons (its MIT code;
-  our own art), a plated walker of the jungles and plains (Kingdoms' MODLOG has the rest).
+- **0.20.13, Kingdoms 0.7.513, Stegonaut, Atroxiia, Varasuchus:** the first three lesser dragons rebuilt from Saint's
+  Dragons (its MIT code; our own art): a plated walker of the jungles and plains, a frost wyrm of the snow with a spear
+  for a tail, and a crocodile dragon of the beaches and swamps; the last two swim (Kingdoms' MODLOG has the rest).

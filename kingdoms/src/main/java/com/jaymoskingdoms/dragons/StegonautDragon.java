@@ -265,12 +265,6 @@ public class StegonautDragon extends WindDragon {
 		}
 	}
 
-	private boolean inFront(LivingEntity target) {
-		Vec3 facing = Vec3.directionFromRotation(0.0F, this.getYRot());
-		Vec3 to = target.position().subtract(this.position()).multiply(1.0, 0.0, 1.0);
-		return to.lengthSqr() < 0.01 || facing.dot(to.normalize()) > 0.5;
-	}
-
 	private void chin(ServerLevel level, LivingEntity target) {
 		act(CHIN_SLAM);
 		if (target.hurtServer(level, this.damageSources().mobAttack(this), CHIN)) {
@@ -310,12 +304,6 @@ public class StegonautDragon extends WindDragon {
 		for (int i = 1; i <= PILLARS; i++) {
 			this.pillars.add(new Pillar(centre.add(aim.scale(i * PILLAR_STEP)), this.tickCount + i * PILLAR_GAP, ridden));
 		}
-	}
-
-	/** Whoever its blows may hit: not itself, its riders, its owner or anyone it spares. */
-	private boolean spareable(LivingEntity e) {
-		return e != this && e.isAlive() && !this.hasPassenger(e) && !(e instanceof Player p && (p.isCreative() || p.isSpectator()))
-			&& !DragonBreath.spared(this, e) && !(this.isTamed() && this.getOwnerReference() != null && this.getOwnerReference().getUUID().equals(e.getUUID()));
 	}
 
 	private void pillars(ServerLevel level) {

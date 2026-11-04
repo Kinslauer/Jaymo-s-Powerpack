@@ -206,7 +206,7 @@ final class StegonautDragonModel extends EntityModel<WindDragonRenderer.State> {
 		}
 		this.head.xRot = this.headRest + headPitch * 0.4F - neckDown * 0.55F + nose * 0.5F + chinDown * 0.25F - chinUp * 0.35F - roar * 0.25F;
 		this.head.yRot = headYaw * 0.12F;
-		this.jaw.xRot = 0.03F + roar * 0.75F + chinUp * 0.15F + nose * Math.max(0.0F, Mth.sin(t * 0.9F)) * 0.35F + s.breath * 0.4F;
+		this.jaw.xRot = 0.03F + roar * 0.75F + chinUp * 0.15F + nose * (0.5F - 0.5F * Mth.cos(t * 0.9F)) * 0.35F + s.breath * 0.4F;
 
 		// the tail: swaying behind, lifted a little as it walks, lashing in the slam
 		for (int i = 0; i < 5; i++) {

@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
@@ -26,6 +27,8 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -36,6 +39,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -212,8 +216,11 @@ public abstract class WindDragon extends AbstractHorse {
 
 	@Override
 	protected void registerGoals() {
-		// it moves itself (customServerAiStep): no horse goals (no panicking, no bucking)
-		this.goalSelector.addGoal(0, new FloatGoal(this));
+		// it moves itself (customServerAiStep): no horse goals (no panicking, no bucking); (0.7.513) a swimmer floats by its
+		// own travel (the goal's hops would keep it from diving)
+		if (!swims()) {
+			this.goalSelector.addGoal(0, new FloatGoal(this));
+		}
 	}
 
 	@Override
@@ -274,7 +281,7 @@ public abstract class WindDragon extends AbstractHorse {
 
 	/** In the air on its wings (what the model draws as flying). */
 	public boolean airborne() {
-		return this.isNoGravity() && !this.onGround();
+		return this.isNoGravity() && !this.onGround() && !(swims() && this.isInWater());
 	}
 
 	/** Steered off the ground, in the air or (Zephyrus) under water: Shift dives and S brakes rather than dismounting or turning. */
@@ -396,6 +403,21 @@ public abstract class WindDragon extends AbstractHorse {
 		groundFight(level, target, true);
 	}
 
+	/**
+	 * (0.7.513) Whether it swims (a walker of the coasts and the cold waters: Atroxiia, Varasuchus): it breathes under
+	 * water and currents don't push it; wild, it dives after whoever it fights there and floats with its back out
+	 * otherwise; ridden in water it swims where the rider looks ({@code DragonsClient}: W ahead, Space up, Shift down) and
+	 * carries its riders' air.
+	 */
+	public boolean swims() {
+		return false;
+	}
+
+	/** (0.7.513) A swimmer's top speed in water (blocks a tick). */
+	public double swimSpeed() {
+		return 0.35;
+	}
+
 	/** (0.7.513) The move it is making now, for its model (0 none; a species' own numbers, synced by the species). */
 	public int action() {
 		return 0;
@@ -431,6 +453,106 @@ public abstract class WindDragon extends AbstractHorse {
 	@Override
 	public boolean isFood(ItemStack stack) {
 		return favourite(stack);
+	}
+
+	// ---- swimming (0.7.513) ---------------------------------------------------------------------------------------------
+
+	/** A swimmer floats with this much of it under (its height's share), and the water lifts it back toward that this hard. */
+	static final double SWIM_FLOAT = 0.7, SWIM_LIFT = 0.06, SWIM_LIFT_MAX = 0.05, SWIM_SINK_MAX = 0.04;
+	/** Paddling on its own: the share of its speed it pushes with, the way it keeps a tick; steered, the drag the client undoes. */
+	static final float SWIM_PADDLE = 0.4F;
+	static final double SWIM_DRAG = 0.9, SWIM_DRAG_Y = 0.85, SWIM_DRIVEN_DRAG = 0.91, SWIM_DRIVEN_DRAG_Y = 0.98;
+	/** Paddling into a bank: the hop that heaves it out, and the room it needs over it (blocks). */
+	static final double SWIM_BANK_HOP = 0.45, SWIM_BANK_ROOM = 0.6;
+	/** Its riders' air: topped up this long (ticks) while their heads are under. */
+	static final int RIDER_AIR_TICKS = 60;
+
+	/** A wild swimmer diving after its foe doesn't float up till this tick. */
+	private int diveUntil;
+
+	@Override
+	public boolean canBreatheUnderwater() {
+		return swims() || super.canBreatheUnderwater();
+	}
+
+	@Override
+	public boolean isPushedByFluid() {
+		return !swims() && super.isPushedByFluid();
+	}
+
+	@Override
+	public void travel(Vec3 input) {
+		if (!swims() || !this.isInWater()) {
+			super.travel(input);
+			return;
+		}
+		Vec3 v = this.getDeltaMovement();
+		if (this.isNoGravity()) {
+			// steered by its rider ({@code DragonsClient}): it keeps the way it's given, as in the air
+			this.move(MoverType.SELF, v);
+			Vec3 now = this.getDeltaMovement();
+			this.setDeltaMovement(now.x * SWIM_DRIVEN_DRAG, now.y * SWIM_DRIVEN_DRAG_Y, now.z * SWIM_DRIVEN_DRAG);
+			return;
+		}
+		if (input.lengthSqr() > 1.0E-7) {
+			this.moveRelative(this.getSpeed() * SWIM_PADDLE, input);
+		}
+		if (this.tickCount > this.diveUntil) {
+			double lift = Mth.clamp((this.getFluidHeight(FluidTags.WATER) - this.getBbHeight() * SWIM_FLOAT) * SWIM_LIFT, -SWIM_SINK_MAX, SWIM_LIFT_MAX);
+			this.setDeltaMovement(this.getDeltaMovement().add(0.0, lift, 0.0));
+		}
+		this.move(MoverType.SELF, this.getDeltaMovement());
+		Vec3 now = this.getDeltaMovement();
+		if (this.horizontalCollision && this.isFree(now.x, now.y + SWIM_BANK_ROOM, now.z)) {
+			now = new Vec3(now.x, SWIM_BANK_HOP, now.z);
+		}
+		this.setDeltaMovement(now.x * SWIM_DRAG, now.y * SWIM_DRAG_Y, now.z * SWIM_DRAG);
+	}
+
+	/** A wild swimmer in the water goes straight for {@code target}, under or over (navigation can't dive). */
+	protected void swimAt(LivingEntity target) {
+		Vec3 to = target.getBoundingBox().getCenter().subtract(this.getBoundingBox().getCenter());
+		if (to.lengthSqr() < 1.0) {
+			return;
+		}
+		this.getNavigation().stop();
+		this.diveUntil = this.tickCount + 10;
+		this.setDeltaMovement(this.getDeltaMovement().lerp(to.normalize().scale(swimSpeed()), 0.25));
+		face(to);
+	}
+
+	/**
+	 * (0.7.513) Stunned (Atroxiia's precise strike, Gungnir and quake): rooted, its hands heavy, a ring of stars over its
+	 * head; a mob loses its path.
+	 */
+	protected static void stun(ServerLevel level, LivingEntity target, int ticks) {
+		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, 5, false, false, true));
+		target.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, ticks, 2, false, false, true));
+		target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 1, false, false, true));
+		if (target instanceof net.minecraft.world.entity.Mob mob) {
+			mob.getNavigation().stop();
+		}
+		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getEyeY() + 0.5, target.getZ(), 10, 0.35, 0.1, 0.35, 0.05);
+	}
+
+	// ---- what the lesser dragons' moves share (0.7.513) ---------------------------------------------------------------
+
+	/** Whoever its blows may hit: not itself, its riders, its owner, anyone in creative or anyone it spares. */
+	protected boolean spareable(LivingEntity e) {
+		return e != this && e.isAlive() && !this.hasPassenger(e) && !(e instanceof Player p && (p.isCreative() || p.isSpectator()))
+			&& !DragonBreath.spared(this, e) && !(this.isTamed() && this.getOwnerReference() != null && this.getOwnerReference().getUUID().equals(e.getUUID()));
+	}
+
+	/** Whether {@code target} stands before it (within about 60 degrees of its facing). */
+	protected boolean inFront(LivingEntity target) {
+		Vec3 facing = Vec3.directionFromRotation(0.0F, this.getYRot());
+		Vec3 to = target.position().subtract(this.position()).multiply(1.0, 0.0, 1.0);
+		return to.lengthSqr() < 0.01 || facing.dot(to.normalize()) > 0.5;
+	}
+
+	/** Whether a wild one is fighting someone now. */
+	protected boolean fighting() {
+		return this.foe != null;
 	}
 
 	// ---- ticking ----------------------------------------------------------------------------------------------------
@@ -473,9 +595,13 @@ public abstract class WindDragon extends AbstractHorse {
 		LivingEntity rider = this.getControllingPassenger();
 		boolean ridden = rider instanceof Player;
 		this.flying = false;
-		this.setNoGravity(ridden && !grounded() && saddled() && flies());
+		// (0.7.513) a swimmer ridden in the water is steered as in the air (it doesn't sink)
+		this.setNoGravity(ridden && saddled() && (!grounded() && flies() || swims() && this.isInWater()));
 		for (Entity passenger : this.getPassengers()) {
 			passenger.resetFallDistance();
+			if (swims() && passenger instanceof LivingEntity l && l.isEyeInFluid(FluidTags.WATER)) {
+				l.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, RIDER_AIR_TICKS, 0, false, false, true));
+			}
 		}
 		if (ridden && !this.onGround() && !this.isInWater()) {
 			boolean hard = moved.y > 0.05 || moved.horizontalDistance() > 0.5;
@@ -641,7 +767,7 @@ public abstract class WindDragon extends AbstractHorse {
 			int z = Mth.floor(this.home.z) + this.random.nextInt(WANDER_RADIUS * 2 + 1) - WANDER_RADIUS;
 			if (level.isLoaded(new BlockPos(x, 0, z))) {
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
-				if (Math.abs(top.getY() - this.getBlockY()) < 8 && level.getFluidState(top.below()).isEmpty()) {
+				if (Math.abs(top.getY() - this.getBlockY()) < 8 && (swims() || level.getFluidState(top.below()).isEmpty())) {
 					this.getNavigation().moveTo(x + 0.5, top.getY(), z + 0.5, WANDER_SPEED);
 				}
 			}
@@ -740,6 +866,9 @@ public abstract class WindDragon extends AbstractHorse {
 			// (0.7.513) a walker stands its ground where it was
 			this.wild = Wild.GROUND;
 			walkerFight(level, target);
+			if (swims() && this.isInWater() && !grounded()) {
+				swimAt(target);
+			}
 			return;
 		}
 		this.home = target.position();

@@ -8718,10 +8718,10 @@ is our own take on the idea (none of its code or art).
   tales, 4 for children who beg to hold her), once a day each per player, one at a time; an MCA villager's mood rises 3.
 - **MCA gift:** `data/mca/gifts/fairy.json` makes her the dearest gift there is (60; a nether star is 40), +20 for
   children, +15 for the married.
-## 0.7.513: Stegonaut, the first of the lesser dragons (pack 0.20.13)
+## 0.7.513: Stegonaut, Atroxiia and Varasuchus, the first of the lesser dragons (pack 0.20.13)
 Andy: "we NEED these dragons" (Saint's Dragons). It is a 1.20.1 mod whose code is MIT and whose art is All Rights
-Reserved, so its eight dragons are rebuilt here with our own models and paint (`docs/SaintsDragons-Plan.md`, patch 1 of
-5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
+Reserved, so its eight dragons are rebuilt here with our own models and paint (`docs/SaintsDragons-Plan.md`, patches 1
+and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
 - **Walkers** (`WindDragon.flies`): a dragon that never takes off. Wild it strolls and grazes about its home, fights on
   its feet where it stands, and bolting it lumbers off; tamed and saddled it's ridden like a horse, and R sends its own
   move. New hooks for the lesser dragons: `aggressive` (a grazer fights only whoever hurts it), `bossBar` (beasts, not
@@ -8746,5 +8746,39 @@ Reserved, so its eight dragons are rebuilt here with our own models and paint (`
   Andy: "all the joints should move and blend smoothly": every move's envelope is smoothstep-eased and ends where it
   began, sitting/crashing/swimming ease in and out, the knees fold on a smooth curve, and the neck's bob and sway roll up
   it a beat per segment.
-- `/kingdom dragon stegonaut [tame]` (operators).
+- **Swimmers** (`WindDragon.swims`): a walker of the waters. It breathes under water and currents don't push it; wild it
+  floats with its back out and dives straight at whoever it fights there; ridden in water it swims where you look (W
+  ahead, Space up and out at a bank, Shift down, S brakes) and keeps its riders' air topped up. Shared helpers for the
+  lesser dragons' moves: `spareable`, `inFront`, `fighting`, `stun` (rooted and heavy-handed, stars over the head).
+- **Atroxiia** (`AtroxiiaDragon`, `jaymoskingdoms:atroxiia_dragon`): a tall, gaunt frost wyrm (3 x 4.3 blocks, its head
+  about 4.5 up) of the snowy plains, ice spikes, snowy taiga, snowy beaches and frozen rivers (`has_atroxiia_dragon`),
+  alone and rare. 200 health, armour 10, a grazer that fights only whoever hurts it, and it leaves frosted ice on still
+  water where it strolls. Besides the bite and the tail sweep: a forefoot **slam** (16), a claw **swipe** (12), the
+  **precise strike** (three jabs of its tail spear at 3-6 blocks, 9 each, dragging them in, the last a 2 s stun),
+  **Gungnir** (the spear drawn back, a lunge, and driven through everything in an 8-block line: 40 and a stun), the
+  **devastating sweep** (pressed close: the tail spun round, 13 in a ring of 7, a big throw) and the **Helheim quake**
+  (at range, or freely once below half: it rears and comes down twice, 25 to everyone on their feet within 9, the second
+  a 5 s stun, and the water round it freezes). Raw cod its favourite, Frostborn twice as fast; ridden, R is Gungnir
+  where you look (5 s).
+- **Varasuchus** (`VarasuchusDragon`, `jaymoskingdoms:varasuchus_dragon`): a crocodile dragon (4 x 3.3 blocks, its back
+  3.2 up, about 10 long with its tail) of the beaches and swamps (`has_varasuchus_dragon`), alone and rare. 200 health,
+  armour 8, a hunter: it goes for players who come near, and it's quick in the water. Bite 15, **claws** (8) and a
+  **horn gore** (8, a toss), a **dash** at 6-16 blocks (it charges: claws 15 as it reaches you, then its tail lashed
+  round, 10), a **slash barrage** up close (eight claws, 5 each), a **phase shift** (hit, it may slip past you in a blur
+  and come out behind you, untouchable meanwhile) and the **tailguard** (hit, it may curl its tail round as a guard: the
+  next blow within 8 blocks is parried with our parry's sparks and ring, the striker takes 10, is slowed and thrown back).
+  Below half it **rages**: bites 25, horns 15.8, claws 12, every move a third quicker. Raw salmon its favourite, Tideborn
+  twice as fast; ridden, R charges (a burst of pace, goring whoever it reaches, 4 s).
+- **Their looks** (`AtroxiiaDragonModel`/`VarasuchusDragonModel`, painted and printed by `tools/gen_atroxiia.py` and
+  `tools/gen_varasuchus.py`, sharing `tools/lesser_dragon_art.py`): both tall and long-limbed. Atroxiia: high shoulders on
+  long forelegs, digitigrade hind legs, a six-segment serpent's neck, a crown of swept horns and cheek frills, ice
+  crystals down its spine, the tail arched over its hips into a spear of ice; hides glacier, deep ice, rime grey,
+  midnight frost, with glowing frost veins, rims, stars or a spine line; drawn 1.15x. Varasuchus: long sprawling legs, two
+  rows of bony scutes, a long-jawed head with crown eyes and horns swept up and back (a nose horn on some), a great
+  double-crested tail; hides swamp olive, river brown, mangrove black, pale sand, with marsh-light bands, spots, scute
+  rims or a jaw line; drawn 1.3x. Every move eases in and out and ends at rest, and the neck and tail roll a beat per
+  segment: Atroxiia's tail jabs, coils and drives straight for Gungnir, swings round low for the sweep; Varasuchus's
+  snakes as it walks, lashes after the dash, curls round for the tailguard and snaps out on a parry; both tuck their
+  legs back and scull their tails in the water. (Stegonaut's chewing jaw lost its last kink too.)
+- `/kingdom dragon stegonaut|atroxiia|varasuchus [tame]` (operators).
 - Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.

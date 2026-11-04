@@ -69,6 +69,9 @@ public final class DragonsClient {
 	static final float EURUS_SCALE = 0.28F, AEOLUS_SCALE = 0.75F, KINTSUGI_REACH = 13.0F;
 	/** (0.7.513) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's shadow, how big its model is drawn, its reach (head and tail). */
 	static final float STEGONAUT_SHADOW = 2.0F, STEGONAUT_SCALE = 1.3F, STEGONAUT_REACH = 4.5F;
+	/** (0.7.513) Atroxiia's and Varasuchus's: shadow, drawn size, reach (Atroxiia's neck and tail; Varasuchus's jaws and long tail). */
+	static final float ATROXIIA_SHADOW = 2.0F, ATROXIIA_SCALE = 1.15F, ATROXIIA_REACH = 4.5F;
+	static final float VARASUCHUS_SHADOW = 2.4F, VARASUCHUS_SCALE = 1.3F, VARASUCHUS_REACH = 6.5F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
 	private static @Nullable KeyMapping breathKey;
@@ -90,6 +93,10 @@ public final class DragonsClient {
 		// (0.7.513) our own model of Saint's Dragons' Stegonaut (its art isn't used)
 		EntityRenderers.register(Dragons.STEGONAUT_DRAGON, c -> new WindDragonRenderer<>(c, "stegonaut", new StegonautDragonModel(StegonautDragonModel
 			.createBodyLayer().bakeRoot()), STEGONAUT_SHADOW, STEGONAUT_SCALE, STEGONAUT_REACH));
+		EntityRenderers.register(Dragons.ATROXIIA_DRAGON, c -> new WindDragonRenderer<>(c, "atroxiia", new AtroxiiaDragonModel(AtroxiiaDragonModel
+			.createBodyLayer().bakeRoot()), ATROXIIA_SHADOW, ATROXIIA_SCALE, ATROXIIA_REACH));
+		EntityRenderers.register(Dragons.VARASUCHUS_DRAGON, c -> new WindDragonRenderer<>(c, "varasuchus", new VarasuchusDragonModel(VarasuchusDragonModel
+			.createBodyLayer().bakeRoot()), VARASUCHUS_SHADOW, VARASUCHUS_SCALE, VARASUCHUS_REACH));
 		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,
 			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
 		ClientTickEvents.END_CLIENT_TICK.register(DragonsClient::tick);
@@ -128,9 +135,56 @@ public final class DragonsClient {
 		if (dragon.isTamed() && breathHeld(minecraft) && player.tickCount % 2 == 0 && ClientPlayNetworking.canSend(Dragons.Breathe.TYPE)) {
 			ClientPlayNetworking.send(new Dragons.Breathe(yaw, pitch));
 		}
-		if (dragon.isNoGravity()) {
+		if (dragon.swims() && dragon.isInWater() && dragon.isNoGravity()) {
+			swim(minecraft, dragon, yaw, pitch);
+		} else if (dragon.isNoGravity()) {
 			fly(minecraft, dragon, yaw, pitch);
 		}
+	}
+
+	/** (0.7.513) Swimming a ridden swimmer (Atroxiia, Varasuchus): W where you look, Space up (and out at a bank), Shift down, S brakes. */
+	static final double SWIM_THRUST = 0.05, SWIM_DRAG = 0.9, SWIM_RISE = 0.05, SWIM_HOP = 0.5;
+
+	private static void swim(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {
+		boolean up = minecraft.options.keyJump.isDown();
+		boolean forward = minecraft.options.keyUp.isDown();
+		boolean brake = minecraft.options.keyDown.isDown();
+		boolean dive = minecraft.options.keyShift.isDown();
+		double top = dragon.swimSpeed() * (dragon.exhausted() ? 0.5 : 1.0);
+		Vec3 m = dragon.getDeltaMovement();
+		// (undo the drag its own travel put on it this tick: it keeps its way)
+		double x = m.x / AIR_DRAG, y = m.y / AIR_DRAG_Y, z = m.z / AIR_DRAG;
+		if (forward) {
+			Vec3 look = DragonBreath.aim(yaw, pitch);
+			x += look.x * SWIM_THRUST;
+			y += look.y * SWIM_THRUST;
+			z += look.z * SWIM_THRUST;
+		} else {
+			x *= SWIM_DRAG;
+			y *= SWIM_DRAG;
+			z *= SWIM_DRAG;
+		}
+		if (up) {
+			y = Math.min(y + SWIM_RISE, top);
+		} else if (dive) {
+			y = Math.max(y - SWIM_RISE, -top);
+		}
+		if (brake) {
+			x *= BRAKE;
+			y *= BRAKE;
+			z *= BRAKE;
+		}
+		double speed = Math.sqrt(x * x + y * y + z * z);
+		if (speed > top) {
+			x *= top / speed;
+			y *= top / speed;
+			z *= top / speed;
+		}
+		if (up && dragon.horizontalCollision) {
+			// heaving itself out onto the bank
+			y = SWIM_HOP;
+		}
+		dragon.setDeltaMovement(x, y, z);
 	}
 
 	private static void fly(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {

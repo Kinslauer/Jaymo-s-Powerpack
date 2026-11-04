@@ -53,7 +53,8 @@ listed in the taming tooltip only once you've seen the species, never as a lore 
 0. This plan.
 1. Walker hooks on `WindDragon` (the wind dragons unchanged). Stegonaut (walker) end to end as the proof:
    model, look rolls, spawning, taming, riding, moves.
-2. Atroxiia + Varasuchus (walker/swimmer, the roost structure, tailguard on our parry).
+2. Atroxiia + Varasuchus (walker/swimmer, tailguard on our parry). Done in the same PR as patch 1; Varasuchus spawns
+   wild on beaches and swamps for now, its own roost structure can come with Ignivorus's in patch 5.
 3. Raevyx + Cindervane (flyers, storm spawning).
 4. Volitans (flyer/swimmer, burrow) + Nulljaw (the Aether boss that hunts you anywhere but the Other World).
 5. Ignivorus (boss, roost, growing young), credits, pack page line.
