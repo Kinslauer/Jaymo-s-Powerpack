@@ -8752,3 +8752,27 @@ is our own take on the idea (none of its code or art).
 - Screens: the patrons screen shows your scars and trials. The rite has its own screen. Loading hints 89-90.
 - Powers 0.20.14: the Hearthkeeper's trial and scar slow every part heal.
 - Built, reviewed, and a dev server boots; not played.
+
+## 0.7.514: the skill web (pack 0.20.15)
+- Andy: "the skill trees need a redesign, something more akin to skyrim or path of exile, where the tree branches far out,
+  and you can easily see where what you pick lands. It should also allow you to more easily branch into other trees for
+  builds ... a large circle with three quadrants for stealth survival and strength." He picked bridge perks on the borders.
+- **K screen** (`SkillScreen`, layout in `client/SkillWeb`): the three pillar tabs and their pages are one web. You sit in the
+  middle; Strength takes the top, Survival the lower right, Stealth the lower left. Every old page is a branch running
+  outward (Will with Killing Intent past it, Combat Arts, Might; Foraging, Medicine; Freerunning, Thievery, Shadows), and a
+  perk's ring is how deep it sits along its requirements. Drag to move, scroll to zoom about the mouse, Recentre fits it all.
+  Pointing at a perk lights its path back to the middle in white and the card says what it needs and what it leads to;
+  pointing at a pillar's crest shows what that pillar levels on. Perks are learnt on click-release (a drag never learns one).
+  Names show on every perk from 1.5x zoom. Attributes and Jobs stay as tabs with their panels.
+- Nothing about the old perks changed: ranks, costs, levels, requirements and per-pillar points are as before, saves untouched.
+- **Bridge perks** (`Bridges`, `Skills.Perk.other`), two per border, opened by a rank in any one of the two perks named
+  (one each side), paid from whichever side has more points (saved as `<perk>@<pillar>` in the ranks map, so each side's
+  points count what it paid; `Skills.forget` undoes them when `/skills set` lowers a pillar):
+  - Stealth/Strength: **Ambusher** (Sneak Attack or Grim Hand; 1 pt): a sneak attack leaves its mark Slowness III and
+    Weakness for 3 s. **Cutthroat** (Assassinate or Last Look; 2 pts): a kill within 1 s of a sneak attack or a hidden
+    blade assassination gives 4 s of Invisibility and Speed.
+  - Strength/Survival: **Iron Hide** (Bulldozer or Rally; 1 pt): +2 armour, +1 toughness. **Beast of Burden** (Packhorse or
+    Iron Stomach; 2 pts): +1 heart, hunger a fifth slower.
+  - Survival/Stealth: **Tracker** (Field Dresser or Climber; 1 pt): anything you wound (not players) glows 8 s. **Light
+    Pack** (Plague Doctor or Bar Swing; 2 pts): sneaking and sprinting cost 40% less hunger.
+- Mock-ups: project files `art-overhaul/skill-web/`. Kingdoms compiled with Gradle (compileClientJava); not played.
