@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Plundering coves, camps and holds. What a raider (a pirate landing party, an illager war party, a greenskin
+ * (0.7.490) Plundering coves, camps and holds. What a raider (a pirate landing party, an illager war party, a greenskin
  * band, an ogre raid) takes from the settlement it hit, beyond its registered storage ({@link Storage}): the chests and
  * barrels standing loose on its land are broken into ({@link #breakIn}), and its treasury's coin is carried off as
  * emeralds ({@link #coin}). Greenskins bend what they take ({@link #bend}), since they trade in bent ingots.
@@ -55,7 +55,7 @@ final class Plunder {
 	static boolean valuable(ItemStack stack) {
 		return stack.is(Items.EMERALD) || stack.is(Items.GOLD_INGOT) || stack.is(Items.IRON_INGOT) || stack.is(Items.DIAMOND)
 			|| stack.is(Items.EMERALD_BLOCK) || stack.is(Items.GOLD_BLOCK) || BentIngots.bent(stack)
-			// ((0.7.489) any realm's coin, and anything gold)
+			// ((0.7.490) any realm's coin, and anything gold)
 			|| Currencies.isMoney(stack) || Currencies.gold(stack);
 	}
 
@@ -63,7 +63,7 @@ final class Plunder {
 	 * A raider at {@code target}'s land breaks into a chest or barrel that stands loose near him (one that isn't the
 	 * settlement's registered storage and that stands on its land) and takes up to {@link #LOOSE_TAKE} of its best stack.
 	 * A container that is stripped bare is smashed (with the sound of it); one with things left is sometimes smashed
-	 * anyway, spilling them for whoever comes by ((0.7.489) only where mobGriefing is on). Empty if there was nothing.
+	 * anyway, spilling them for whoever comes by ((0.7.490) only where mobGriefing is on). Empty if there was nothing.
 	 */
 	static ItemStack breakIn(ServerLevel level, Mob raider, Faction target, float smash, int take) {
 		MinecraftServer server = level.getServer();
@@ -118,7 +118,7 @@ final class Plunder {
 			bare = container.getItem(slot).isEmpty();
 		}
 		Vec3 at = Vec3.atCenterOf(bestAt);
-		// ((0.7.489) the lid is smashed only where mobs may break blocks: otherwise it is opened and robbed)
+		// ((0.7.490) the lid is smashed only where mobs may break blocks: otherwise it is opened and robbed)
 		boolean griefing = level.getGameRules().get(GameRules.MOB_GRIEFING);
 		if (griefing && (bare || random.nextFloat() < smash)) {
 			// (the lid is smashed in: whatever is left spills out)
@@ -165,7 +165,7 @@ final class Plunder {
 			List<ItemStack> valuables = contents.stream().filter(Plunder::valuable).toList();
 			ItemStack first = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
 				: contents.get(random.nextInt(contents.size()));
-			// (0.7.489) pirates take anything gold, and the richest gold first
+			// (0.7.490) pirates take anything gold, and the richest gold first
 			ItemStack pick = first;
 			if (pirate) {
 				ItemStack richest = contents.stream().filter(Currencies::gold).max(java.util.Comparator.comparingLong(Currencies::goldWorth)).orElse(null);

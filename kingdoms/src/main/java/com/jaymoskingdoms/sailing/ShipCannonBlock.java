@@ -45,7 +45,7 @@ import org.jspecify.annotations.Nullable;
 public final class ShipCannonBlock extends Block {
 	public enum Load implements StringRepresentable {
 		EMPTY, POWDER, SHOT,
-		/** (0.7.489) Loaded with heavy shot, an explosive shell, chain shot, grape. ({@code SHOT} is round shot.) */
+		/** (0.7.490) Loaded with heavy shot, an explosive shell, chain shot, grape. ({@code SHOT} is round shot.) */
 		HEAVY, SHELL, CHAIN, GRAPE;
 
 		/** Whether a shot is in her. */
@@ -65,10 +65,10 @@ public final class ShipCannonBlock extends Block {
 	 */
 	static final float ELEVATION = 1.5F, LOWEST = -6.0F, HIGHEST = 15.0F;
 	static final double MUZZLE = 0.9;
-	/** (0.7.489) How hard a ship is shoved back by a gun firing (blocks, taken up at her next move). */
+	/** (0.7.490) How hard a ship is shoved back by a gun firing (blocks, taken up at her next move). */
 	static final double RECOIL = 0.04;
 	/**
-	 * (0.7.489) How long (ticks) a gun that's fired stays run back on its carriage ({@link #RECOILED}, its model slid back
+	 * (0.7.490) How long (ticks) a gun that's fired stays run back on its carriage ({@link #RECOILED}, its model slid back
 	 * along the deck) before it's run out again.
 	 */
 	static final int RECOIL_TICKS = 12;
@@ -77,7 +77,7 @@ public final class ShipCannonBlock extends Block {
 
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final EnumProperty<Load> LOAD = EnumProperty.create("load", Load.class);
-	/** (0.7.489) Just fired: run back on its carriage by the recoil (a model slid back), for {@link #RECOIL_TICKS}. */
+	/** (0.7.490) Just fired: run back on its carriage by the recoil (a model slid back), for {@link #RECOIL_TICKS}. */
 	public static final BooleanProperty RECOILED = BooleanProperty.create("recoiled");
 	private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 10, 14);
 
@@ -185,7 +185,7 @@ public final class ShipCannonBlock extends Block {
 		Vec3 muzzle = centre.add(fx * MUZZLE, 0.15, fz * MUZZLE);
 		ShipShot.fire(level, gunner, ship, muzzle, dir, kind);
 		level.playSound(null, muzzle.x, muzzle.y, muzzle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.5F, 0.6F);
-		// (0.7.489) the muzzle flash, a wall of smoke rolling out ahead of her and a puff drifting back off the breech
+		// (0.7.490) the muzzle flash, a wall of smoke rolling out ahead of her and a puff drifting back off the breech
 		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFE9A8), muzzle.x + fx * 0.3, muzzle.y, muzzle.z + fz * 0.3, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x + fx * 0.6, muzzle.y, muzzle.z + fz * 0.6, 22, 0.35, 0.3, 0.35, 0.06);
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, muzzle.x + fx * 1.4, muzzle.y + 0.2, muzzle.z + fz * 1.4, 4, 0.2, 0.15, 0.2, 0.01);
@@ -193,7 +193,7 @@ public final class ShipCannonBlock extends Block {
 		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 8, 0.12, 0.12, 0.12, 0.06);
 		level.sendParticles(ParticleTypes.EXPLOSION, muzzle.x + fx * 0.8, muzzle.y, muzzle.z + fz * 0.8, 1, 0.0, 0.0, 0.0, 0.0);
 		if (ship != null) {
-			// (0.7.489) the recoil: she heels a hair the other way
+			// (0.7.490) the recoil: she heels a hair the other way
 			ship.tow(new Vec3(-fx * RECOIL, 0.0, -fz * RECOIL));
 		}
 	}
@@ -223,7 +223,7 @@ public final class ShipCannonBlock extends Block {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** (0.7.489) A gun set down still run back (off a ship broken up just after she fired) is run out again soon. */
+	/** (0.7.490) A gun set down still run back (off a ship broken up just after she fired) is run out again soon. */
 	@Override
 	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moved) {
 		super.onPlace(state, level, pos, old, moved);
@@ -232,7 +232,7 @@ public final class ShipCannonBlock extends Block {
 		}
 	}
 
-	/** (0.7.489) The gun's crew run it out again after its recoil. */
+	/** (0.7.490) The gun's crew run it out again after its recoil. */
 	@Override
 	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		if (state.getValue(RECOILED)) {

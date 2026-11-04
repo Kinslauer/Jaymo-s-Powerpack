@@ -418,7 +418,7 @@ final class McaBridge {
 		}
 		// (0.7.299) a cook keeps the work (and trades: Meals sets its wares)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
-		// (0.7.489) and a money-changer (Currencies sets its offers)
+		// (0.7.490) and a money-changer (Currencies sets its offers)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
 	}
 
@@ -876,7 +876,7 @@ final class McaBridge {
 		}
 	}
 
-	/** (0.7.489) {@link McaCompat#reranked}. */
+	/** (0.7.490) {@link McaCompat#reranked}. */
 	static void reranked(PathfinderMob mob, Heritage.Kind kind, boolean chief) {
 		if (!(mob instanceof VillagerEntityMCA villager)) {
 			return;
@@ -1027,7 +1027,7 @@ final class McaBridge {
 			return false;
 		}
 		Component line = Languages.understands(player, villager)
-			// (0.7.489) an orc or goblin opens in its own dialect
+			// (0.7.490) an orc or goblin opens in its own dialect
 			? Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
 			: Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening.wordless");
 		met(villager, player);
@@ -1736,11 +1736,11 @@ final class McaBridge {
 		return 2;
 	}
 
-	/** (0.7.489) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
+	/** (0.7.490) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
 	static void leaveHome(Villager villager) {
 		if (villager instanceof VillagerEntityMCA v) {
 			v.getResidency().getHome().ifPresent(home -> {
-				// ((0.7.489) invalidateHome only forgets the bed: free its POI ticket first (while HOME still names it), then
+				// ((0.7.490) invalidateHome only forgets the bed: free its POI ticket first (while HOME still names it), then
 				// drop the village's record of it, so MCA has to look for another bed and the old one is free for anyone)
 				v.releasePoi(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
 				v.getResidency().invalidateHome(home);
@@ -1749,7 +1749,7 @@ final class McaBridge {
 		}
 	}
 
-	/** (0.7.489) {@link McaCompat#knows}: {@code villager} already has MCA memories of {@code player} (read, never made). */
+	/** (0.7.490) {@link McaCompat#knows}: {@code villager} already has MCA memories of {@code player} (read, never made). */
 	static boolean knows(Villager villager, ServerPlayer player) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getMemories().get(player.getUUID()) != null;
 	}
@@ -1757,7 +1757,7 @@ final class McaBridge {
 	/** Trades a settler may take ({@link Settlers}): a pedlar, a tinker, a bruiser. */
 	static final int TRADER = 0, TINKER = 1, BRUISER = 2;
 
-	/** (0.7.489) {@link McaCompat#settler}: a grown MCA villager of the brood, in the trade, new to the village. */
+	/** (0.7.490) {@link McaCompat#settler}: a grown MCA villager of the brood, in the trade, new to the village. */
 	static @Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, Vec3 at, int trade) {
 		VillagerProfession job = trade == BRUISER ? ProfessionsMCA.GUARD
 			: BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(trade == TINKER ? VillagerProfession.TOOLSMITH : VillagerProfession.CARTOGRAPHER).value();

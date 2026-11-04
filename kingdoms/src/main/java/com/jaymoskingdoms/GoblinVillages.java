@@ -40,7 +40,7 @@ final class GoblinVillages {
 	static final int MAX_SPREAD = 5;
 	/** A new village's people, and how it grows: another goblin every so many days, every so many of them a slinger, up to a most. */
 	static final int START_GOBLINS = 6, START_DRINKERS = 2, START_SLINGERS = 2, DAYS_PER_GOBLIN = 2, SLINGER_EVERY = 4, MAX_GOBLINS = 16;
-	/** (0.7.489) What a village takes in each day is its folk's jobs now ({@link HordeEconomy}). */
+	/** (0.7.490) What a village takes in each day is its folk's jobs now ({@link HordeEconomy}). */
 	/** The junk heap a new village starts with. */
 	static final int START_LOGS = 24, START_MUD = 16, START_MUSHROOMS = 12, START_ARROWS = 24, START_NUGGETS = 12, START_BENT = 6;
 	/** Raising a building: one a day at most, from this much of its heap; never with a player this near (a hut doesn't appear before your eyes). */
@@ -98,7 +98,7 @@ final class GoblinVillages {
 		Storage.put(level, stocked, Items.ARROW, START_ARROWS);
 		Storage.put(level, stocked, Items.GOLD_NUGGET, START_NUGGETS);
 		Storage.put(level, stocked, BentIngots.BENT_COPPER, START_BENT);
-		// ((0.7.489) and a king's hoard to start on)
+		// ((0.7.490) and a king's hoard to start on)
 		HordeEconomy.deposit(server, id, HordeEconomy.START_HOARD);
 		Camps.takeSides(server, id, KIND);
 		crown(level, Factions.get(server, id), layout.throne(), gate);
@@ -195,7 +195,7 @@ final class GoblinVillages {
 	/** {@code days}' growth: what the village takes in by its own hands, and (as it ages) more goblins. */
 	static void grow(ServerLevel level, Faction village, int days) {
 		MinecraftServer server = level.getServer();
-		// ((0.7.489) its goblins' jobs bring in the goods and the hoard's wages, and everyone eats: HordeEconomy)
+		// ((0.7.490) its goblins' jobs bring in the goods and the hoard's wages, and everyone eats: HordeEconomy)
 		HordeEconomy.day(level, village, false, days);
 		Camps.updateData(server, village.id(), d -> d.withGrown(d.grown() + days));
 		Camps.CampData data = Camps.data(server, village.id());
@@ -203,7 +203,7 @@ final class GoblinVillages {
 			return;
 		}
 		long age = HordeEconomy.age(server, village.id(), data.grown());
-		// ((0.7.475) the cap grows with its tier; (0.7.489) a village in plenty grows faster, a hungry one not at all)
+		// ((0.7.475) the cap grows with its tier; (0.7.490) a village in plenty grows faster, a hungry one not at all)
 		int cap = (int)Math.min(Hordes.folkCap(server, village.id(), false), START_GOBLINS + START_SLINGERS + age / DAYS_PER_GOBLIN);
 		RandomSource random = level.getRandom();
 		BlockPos fire = data.center();
@@ -248,13 +248,13 @@ final class GoblinVillages {
 			crown(level, village, GoblinBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new goblin king (the last was lost)", village.name());
 		}
-		// ((0.7.489) its market merchants stand about their stalls)
+		// ((0.7.490) its market merchants stand about their stalls)
 		GreenMarket.tick(level, village, data);
 		// (0.7.475) past its first stockade: its tier's wall and band
 		if (Hordes.tick(level, village, data, force)) {
 			return;
 		}
-		// ((0.7.489) a hungry village raises nothing; one in plenty ages sooner)
+		// ((0.7.490) a hungry village raises nothing; one in plenty ages sooner)
 		int allowed = Math.min(GoblinBuildings.GROWTH.size(), HordeEconomy.age(server, village.id(), data.grown()));
 		if (data.built() >= allowed || !Storage.loaded(level, village) || HordeEconomy.hungry(server, village.id())) {
 			return;

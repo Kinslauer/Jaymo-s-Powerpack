@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Ogre raids. A standing ogre hold ({@link OgreHolds}) that has the strength for it sends a war band of its
+ * (0.7.490) Ogre raids. A standing ogre hold ({@link OgreHolds}) that has the strength for it sends a war band of its
  * ogres against the nearest settlement with a player near it, the way a camp's war party goes ({@link Raids}): they muster
  * toward the hold, march in, smash into the storehouse and every loose chest and barrel on the land ({@link Plunder}),
  * each carrying one great load (in the off hand, dropped where he falls), and lumber home to heap it in the hold's stash
@@ -360,7 +360,7 @@ final class OgreRaids {
 			if (ogre.getTarget() != null) {
 				continue;
 			}
-			// (0.7.489) the last loose chest may have gone to an earlier ogre this pass: back to the depot then
+			// (0.7.490) the last loose chest may have gone to an earlier ogre this pass: back to the depot then
 			bare &= !raid.loose.isEmpty();
 			BlockPos aim = bare ? raid.loose.get(Math.floorMod(ogre.getUUID().hashCode(), raid.loose.size())) : depot;
 			boolean near = ogre.distanceToSqr(Vec3.atCenterOf(aim)) <= LOOT_REACH * LOOT_REACH;

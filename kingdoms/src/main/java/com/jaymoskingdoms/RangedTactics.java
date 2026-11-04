@@ -345,7 +345,7 @@ public final class RangedTactics {
 			s.side = !s.side;
 		}
 		if (level.getRandom().nextFloat() < SPEAK_CHANCE && (shooter instanceof Folk || shooter instanceof Villager)) {
-			// (0.7.489) orc and goblin shooters shout in their own dialect
+			// (0.7.490) orc and goblin shooters shout in their own dialect
 			Speech.say(level, shooter, Dialects.trShared(shooter, "speech.jaymoskingdoms.ranged." + plan.name().toLowerCase(java.util.Locale.ROOT) + "_"
 				+ level.getRandom().nextInt(SPEECH_LINES)), Speech.YELLOW, 24.0);
 		}

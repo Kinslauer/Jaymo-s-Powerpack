@@ -64,24 +64,24 @@ final class PirateCoves {
 	static final int POLE = 7;
 	/** A new cove: deckhands ashore, and the hoard it starts with (the caps follow). */
 	static final int START_HANDS = 3, DAYS_PER_HAND = 2;
-	/** (0.7.489) Its own caps: the most deckhands ashore, the most bombardiers, the most growth stages (its ground runs out), the most a ship's hold takes in a haul (stacks). */
+	/** (0.7.490) Its own caps: the most deckhands ashore, the most bombardiers, the most growth stages (its ground runs out), the most a ship's hold takes in a haul (stacks). */
 	static final int HANDS_MOST = 16, BOMBARDIERS_MOST = 4, MAX_STAGE = 36, HAUL_MOST = 96;
-	/** (0.7.489) A new hand eats this much cooked fish out of the stores; a stage waits this long (ticks) after the last, and is given up after this many tries at a place. */
+	/** (0.7.490) A new hand eats this much cooked fish out of the stores; a stage waits this long (ticks) after the last, and is given up after this many tries at a place. */
 	static final int HAND_RATION = 2;
 	static final long STAGE_GAP = 6000L;
 	static final int STAGE_TRIES = 3;
-	/** (0.7.489) A stage costs this many dark oak planks and gold nuggets to begin with, more for each stage so far (at most), and powder every fourth. */
+	/** (0.7.490) A stage costs this many dark oak planks and gold nuggets to begin with, more for each stage so far (at most), and powder every fourth. */
 	static final int COST_PLANKS = 12, COST_PLANKS_PER = 2, COST_PLANKS_MOST = 64, COST_NUGGETS = 9, COST_NUGGETS_PER = 1, COST_NUGGETS_MOST = 45, COST_POWDER = 6;
-	/** (0.7.489) Stages ring the cove on its landward side: the first this far from its fire, a ring further every few, no further than the most; and its tower's height. */
+	/** (0.7.490) Stages ring the cove on its landward side: the first this far from its fire, a ring further every few, no further than the most; and its tower's height. */
 	static final int RING_START = RADIUS + 5, RING_STEP = 4, STAGES_PER_RING = 4, RING_MOST = RADIUS + 30, TOWER_HEIGHT = 8;
-	/** (0.7.489) Nothing is built with a player this near. */
+	/** (0.7.490) Nothing is built with a player this near. */
 	static final double STAGE_HIDE = 24.0;
-	/** (0.7.489) A rover that sinks a ship takes: her coin (at most this many emeralds), and a share of her generated hold; the haul is unloaded when her ship is back this near the mooring. */
+	/** (0.7.490) A rover that sinks a ship takes: her coin (at most this many emeralds), and a share of her generated hold; the haul is unloaded when her ship is back this near the mooring. */
 	static final int PRIZE_COIN = 48;
 	static final double UNLOAD_REACH = 36.0;
-	/** (0.7.489) What a new cove starts with, and takes in each day, in planks. */
+	/** (0.7.490) What a new cove starts with, and takes in each day, in planks. */
 	static final int START_PLANKS = 32, DAY_PLANKS = 6;
-	/** (0.7.489) Each stage raises a bigger prize: a ship is a galleon this much likelier for each stage, at most; and carries one more hand for every this many stages. */
+	/** (0.7.490) Each stage raises a bigger prize: a ship is a galleon this much likelier for each stage, at most; and carries one more hand for every this many stages. */
 	static final float GALLEON_PER_STAGE = 0.04F, GALLEON_MOST = 0.9F;
 	static final int STAGES_PER_CREW = 4, CREW_MOST = 4;
 	/** (0.7.107) Its bombardiers ashore (off its roster): one, a second once it has grown this many days; one lost comes back with the next day's growth. */
@@ -119,7 +119,7 @@ final class PirateCoves {
 			return new Cove(this.mooring, this.seaward, Optional.ofNullable(ship), Optional.ofNullable(seen), lostAt, this.haul);
 		}
 
-		/** (0.7.489) With the prizes her ship carries home. */
+		/** (0.7.490) With the prizes her ship carries home. */
 		Cove withHaul(List<ItemStack> haul) {
 			return new Cove(this.mooring, this.seaward, this.ship, this.seen, this.lostAt, List.copyOf(haul));
 		}
@@ -227,7 +227,7 @@ final class PirateCoves {
 		Storage.register(server, id, layout.storage(), layout.depot());
 		Faction stocked = Factions.get(server, id);
 		Storage.put(level, stocked, Items.GOLD_INGOT, START_GOLD);
-		// (0.7.489) pirates take anything gold: what they have taken off ships is dinars, not emeralds
+		// (0.7.490) pirates take anything gold: what they have taken off ships is dinars, not emeralds
 		Storage.put(level, stocked, Currencies.GOLD_DINAR, START_EMERALDS);
 		Storage.put(level, stocked, Items.GUNPOWDER, START_GUNPOWDER);
 		Storage.put(level, stocked, com.jaymoskingdoms.sailing.Sailing.ROUND_SHOT, START_SHOT);
@@ -446,7 +446,7 @@ final class PirateCoves {
 			return null;
 		}
 		RandomSource random = level.getRandom();
-		// ((0.7.489) a cove that has grown puts out bigger ships with bigger crews)
+		// ((0.7.490) a cove that has grown puts out bigger ships with bigger crews)
 		Camps.CampData grown = Camps.data(server, camp.id());
 		int stages = grown == null ? 0 : grown.built();
 		int extra = Math.min(CREW_MOST, stages / STAGES_PER_CREW);
@@ -487,7 +487,7 @@ final class PirateCoves {
 			return;
 		}
 		long now = level.getGameTime();
-		// ((0.7.489) the cove grows as its stores allow, and unloads the prizes her ship brings home)
+		// ((0.7.490) the cove grows as its stores allow, and unloads the prizes her ship brings home)
 		stage(level, camp, data, force);
 		cove = unload(level, camp, cove);
 		if (cove.ship().isPresent()) {
@@ -516,7 +516,7 @@ final class PirateCoves {
 
 	/**
 	 * Its hands ashore, one more every few days and every stage it has grown, up to its own most ({@link #HANDS_MOST}); each
-	 * new one eats a ration out of the stores ((0.7.489) so a cove that is plundered, or has lost its fish, stops taking men on).
+	 * new one eats a ration out of the stores ((0.7.490) so a cove that is plundered, or has lost its fish, stops taking men on).
 	 */
 	private static void grownHands(ServerLevel level, Faction camp, Camps.CampData data) {
 		int cap = (int)Math.min(HANDS_MOST, START_HANDS + data.grown() / DAYS_PER_HAND + data.built());
@@ -570,7 +570,7 @@ final class PirateCoves {
 		return camp.holdings().count(Pirates.DECKHAND) + camp.holdings().vacancies().getOrDefault(Folk.roleName(Pirates.DECKHAND), 0);
 	}
 
-	// ---- (0.7.489) growing by its stores ---------------------------------------------------------------------------
+	// ---- (0.7.490) growing by its stores ---------------------------------------------------------------------------
 
 	/** Camp id → game time its last stage was tried; and how many times in a row the stage now due found no place. */
 	private static final Map<Integer, Long> STAGED = new HashMap<>();
@@ -717,7 +717,7 @@ final class PirateCoves {
 		return true;
 	}
 
-	// ---- (0.7.489) prizes --------------------------------------------------------------------------------------------
+	// ---- (0.7.490) prizes --------------------------------------------------------------------------------------------
 
 	/**
 	 * {@code ship} (of {@code crew}, not a pirate's) was sunk by a gunner of a cove's: the cove's ship takes what she
@@ -834,7 +834,7 @@ final class PirateCoves {
 
 	/**
 	 * {@code crew}'s ship went down (sunk by {@code player}, or anyone): her cove builds another in a while, if it still
-	 * stands. ((0.7.489) the prizes she was carrying spill where {@code ship} founders; with no ship, where she was last
+	 * stands. ((0.7.490) the prizes she was carrying spill where {@code ship} founders; with no ship, where she was last
 	 * seen; if that's not loaded, they stay in the cove's record and the next ship home brings them.)
 	 */
 	static void shipLost(ServerLevel level, Crew crew, @Nullable Ship ship, @Nullable ServerPlayer player) {

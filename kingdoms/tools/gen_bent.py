@@ -1,4 +1,4 @@
-"""Draws Jaymo's Kingdoms' bent ingots (0.7.489; original art). Run from kingdoms/: python -I tools/gen_bent.py
+"""Draws Jaymo's Kingdoms' bent ingots (0.7.490; original art). Run from kingdoms/: python -I tools/gen_bent.py
 
 bent_copper: a copper ingot hammered into a shallow V, one kink in the middle.
 bent_iron: an iron ingot hammered into a Z, two kinks.

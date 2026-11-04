@@ -10,7 +10,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Where a growing camp, cove or hold puts its next outbuilding: on level, dry, clear, unclaimed ground round its
+ * (0.7.490) Where a growing camp, cove or hold puts its next outbuilding: on level, dry, clear, unclaimed ground round its
  * centre, a turn of the golden angle further round each time and a ring further out every few ({@link #ring}). Shared by
  * {@link OgreGrowth}, {@link PirateCoves} and {@link IllagerCamps}, which each build their own kind of thing there.
  */
@@ -30,7 +30,7 @@ final class Outbuild {
 	 * The ground for a footprint of {@code half} either side of the column {@code ring} blocks from {@code centre} at
 	 * {@code angle}: loaded, dry, not on a tree, within {@code spread} of level across the footprint, within
 	 * {@code floorSpread} of {@code refY}, and no other settlement's: land claimed by faction {@code selfId} (the builder's own;
-	 * -1 for none) is its own to build on (0.7.489). Its floor (the first free block above the ground), or null.
+	 * -1 for none) is its own to build on (0.7.490). Its floor (the first free block above the ground), or null.
 	 */
 	static @Nullable BlockPos ground(ServerLevel level, BlockPos centre, double angle, int ring, int half, int refY, int spread, int floorSpread, int selfId) {
 		BlockPos column = centre.offset((int)Math.round(Math.cos(angle) * ring), 0, (int)Math.round(Math.sin(angle) * ring));

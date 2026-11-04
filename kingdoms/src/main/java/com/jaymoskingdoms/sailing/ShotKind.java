@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) The kinds of shot a ship's gun (or a shore gun) fires, each its own item: round shot (the old reliable),
+ * (0.7.490) The kinds of shot a ship's gun (or a shore gun) fires, each its own item: round shot (the old reliable),
  * heavy shot (slower, punches through planking and strips the shore deeper), an explosive shell (bursts on contact,
  * blasts a wide crater), chain shot (tears sails and rigging, not planks) and grape (a spray against crews and
  * foliage). The numbers are all here; {@link Bombardment} reads the crater.

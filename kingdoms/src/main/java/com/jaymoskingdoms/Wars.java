@@ -902,7 +902,7 @@ public final class Wars {
 				if (contents.isEmpty()) {
 					break;
 				}
-				// (0.7.489) any realm's coin, and anything gold, among the valuables
+				// (0.7.490) any realm's coin, and anything gold, among the valuables
 				List<ItemStack> valuables = contents.stream().filter(Raids::valuable).toList();
 				ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
 					: contents.get(random.nextInt(contents.size()));
@@ -923,7 +923,7 @@ public final class Wars {
 		long paid = emeralds;
 		Factions.update(server, loser.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - paid)));
 		Factions.update(server, winner.id(), f -> f.withTreasury(f.treasury() + paid));
-		// (0.7.489) shown in the payer's own coin
+		// (0.7.490) shown in the payer's own coin
 		return Component.translatable(Terms.TRIBUTE.key(), loser.name(), winner.name(), Currencies.amount(Currencies.payEmeralds(Currencies.of(server, loser), paid)), goods);
 	}
 

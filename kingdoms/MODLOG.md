@@ -8367,7 +8367,7 @@ minimap. Handshake and spirit-clash films and the story and travel curtains hide
   entities; the watch now waits for the entities. Smiths' rumours no longer stall in a world whose clock is behind one
   you played before (the cooldown kept the other world's time).
 
-## 0.7.489: greenskin hordes patches 3+, Beastfolk and Hollow, heritage kits, war journals (pack 0.19.80)
+## 0.7.490: greenskin hordes patches 3+, Beastfolk and Hollow, heritage kits, war journals (pack 0.19.81)
 Andy's answers of 2026-11-03 are in `docs/Hordes-Plan.md`; the races in `docs/Races-Plan.md`. Built as parallel tracks,
 each reviewed with every finding independently verified; compile-checked only, not yet seen in game.
 - **Dialects** (`Dialects`): orcs and goblins speak their own broken English (orcs blunt and brutal, goblins quick, greedy

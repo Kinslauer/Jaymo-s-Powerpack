@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.18) A ship's gun's shot: an iron ball that arcs out over the water and holes whatever ship it meets (the planks
  * round where it strikes are smashed out, sails it passes through are torn: {@link Ship#struck}), and hurts everyone near
- * where it lands. It splashes into the sea. (0.7.489) Of five kinds ({@link ShotKind}): round, heavy, explosive shell,
+ * where it lands. It splashes into the sea. (0.7.490) Of five kinds ({@link ShotKind}): round, heavy, explosive shell,
  * chain (rigging only) and grape (a short spray for crews). Where it lands ashore it blasts a crater that strips the
  * ground to the stone, worked off over the next few seconds ({@link Bombardment}). Never saved.
  */
@@ -144,7 +144,7 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 			e -> e != gunner && e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && !(gunner != null && e == gunner.getVehicle())
 				// (0.7.42) nor her own crew, firing out past them
 				&& !(e.getVehicle() != null && e.getVehicle().getId() == this.fromShip)
-				// (0.7.489) nor her own landing party ashore
+				// (0.7.490) nor her own landing party ashore
 				&& !own(gunner, e), 0.3F);
 		if (entityHit != null) {
 			this.burst(level, gunner, entityHit.getLocation(), entityHit.getEntity(), true);
@@ -152,7 +152,7 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		}
 		if (hit instanceof BlockHitResult blockHit && hit.getType() == HitResult.Type.BLOCK) {
 			// it smashes into what it hits: no mercy
-			// (0.7.489) the crater is centred on the block it struck: a hit on an east or south face lies on the
+			// (0.7.490) the crater is centred on the block it struck: a hit on an east or south face lies on the
 			// block's edge, and containing() would find the air in front of it
 			this.burst(level, gunner, hit.getLocation(), null, true, blockHit.getBlockPos());
 			return;
@@ -216,19 +216,19 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		return null;
 	}
 
-	/** (0.7.489) Whether {@code e} is one of the gunner's own folk (a pirate gun's landing party ashore): her shot spares them. */
+	/** (0.7.490) Whether {@code e} is one of the gunner's own folk (a pirate gun's landing party ashore): her shot spares them. */
 	private static boolean own(@Nullable Entity gunner, Entity e) {
 		return gunner instanceof Worker g && g.factionId() >= 0 && e instanceof Worker w && w.factionId() == g.factionId();
 	}
 
 	/**
-	 * (0.7.489) Where it bursts: everyone near is hurt, and if it's ashore, the ground is blasted (queued, {@link Bombardment}).
+	 * (0.7.490) Where it bursts: everyone near is hurt, and if it's ashore, the ground is blasted (queued, {@link Bombardment}).
 	 */
 	private void burst(ServerLevel level, @Nullable Entity gunner, Vec3 at, @Nullable Entity direct, boolean ground) {
 		this.burst(level, gunner, at, direct, ground, null);
 	}
 
-	/** (0.7.489) As above; {@code struck}, when it hit a block, is that block, and the crater is centred on it. */
+	/** (0.7.490) As above; {@code struck}, when it hit a block, is that block, and the crater is centred on it. */
 	private void burst(ServerLevel level, @Nullable Entity gunner, Vec3 at, @Nullable Entity direct, boolean ground, @Nullable BlockPos struck) {
 		ShotKind kind = this.kind();
 		double radius = kind.burst;
@@ -251,7 +251,7 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		}
 		BlockPos land = !ground ? null : struck != null ? struck : this.land(level, at);
 		if (land != null) {
-			// (0.7.489) it struck land: the crater, centred on the block it hit
+			// (0.7.490) it struck land: the crater, centred on the block it hit
 			Bombardment.crater(level, Vec3.atCenterOf(land), kind.crater, gunner != null ? gunner : this);
 		}
 		switch (kind) {

@@ -116,7 +116,7 @@ public final class Captains {
 	static final int FEAR_TICKS = 100, FEAR_AGAIN = 400;
 	/** Bleeding frightens one who fears blood only below this share of his health. */
 	static final float BLOOD_AT = 0.75F;
-	/** The pedlar's rumour of a captain ((0.7.489) in bent worth). */
+	/** The pedlar's rumour of a captain ((0.7.490) in bent worth). */
 	static final int RUMOUR_PRICE = 4;
 	/** (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). */
 	static final int SCENE_TICKS = 90, SCENE_RAISED = 45;
@@ -888,7 +888,7 @@ public final class Captains {
 		CompoundTag tag = new CompoundTag();
 		tag.putString(ORDERS_CAPTAIN, c.id());
 		tag.putString(ORDERS_TRAIT, t.key());
-		// ((0.7.489) the Lore Codex files it, one of each)
+		// ((0.7.490) the Lore Codex files it, one of each)
 		tag.putString(LoreBooks.KEY, "orders:" + c.id() + ":" + t.key());
 		book.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		return book;
@@ -1664,12 +1664,12 @@ public final class Captains {
 		return told(c, t, Dialects.ofTribe(c.tribe()));
 	}
 
-	/** (0.7.489) The same in the dialect of whoever tells it ({@link Dialects#ORC}, {@link Dialects#GOBLIN}). */
+	/** (0.7.490) The same in the dialect of whoever tells it ({@link Dialects#ORC}, {@link Dialects#GOBLIN}). */
 	static Component told(Captain c, Trait t, String brood) {
 		return Dialects.trBrood(brood, "captain.jaymoskingdoms.trait." + t.key() + ".told", Component.literal(c.name()));
 	}
 
-	/** (0.7.489) If {@code stack} is a captain's orders, {@code player} has read them: they know what they told. Used on use, and as the codex files them. */
+	/** (0.7.490) If {@code stack} is a captain's orders, {@code player} has read them: they know what they told. Used on use, and as the codex files them. */
 	static void readOrders(ServerPlayer player, ItemStack stack) {
 		if (!stack.is(Items.WRITTEN_BOOK)) {
 			return;
@@ -1766,7 +1766,7 @@ public final class Captains {
 		if (e == null) {
 			return Dialects.trBrood(Dialects.GOBLIN, "dialogue.chat.jaymoskingdoms.captain.pedlar.none." + random.nextInt(LINES), Recollections.nameTo(player, pedlar));
 		}
-		// ((0.7.489) paid in bent worth, into his tribe's seat's hoard)
+		// ((0.7.490) paid in bent worth, into his tribe's seat's hoard)
 		if (BentIngots.held(player) < RUMOUR_PRICE) {
 			if (BentIngots.plainHeld(player) > 0) {
 				BentIngots.refuse((net.minecraft.server.level.ServerLevel)player.level(), pedlar, player);

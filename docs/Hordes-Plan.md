@@ -83,7 +83,7 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
    resistance like TNT. Terrain damage is spread over ticks, as the meteor fix does, to keep it from lagging.
 4. **Money:** currencies diversify. A settlement uses the currency of its prominent trading hub, or of another factor
    such as its superior (overlord) realm. Greenskins keep bent ingots.
-   Built (settle/currency, 0.7.489): `Currency`/`Currencies`. Emeralds stay the common coin and the treasury's unit of
+   Built (settle/currency, 0.7.490): `Currency`/`Currencies`. Emeralds stay the common coin and the treasury's unit of
    account (old saves hold). Coins by culture: plains Realm Silver, taiga/snow Hacksilver, savanna/desert/badlands
    Gold Dinar, jungle/swamp Shell String, cherry Mon; greenskins bent copper, pirates gold (dinars in their coves).
    A vassal uses its overlord's; a kingdom its land's unless a far richer kingdom nearby is the hub; villages and havens
@@ -110,4 +110,4 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
   - [x] caravans for all (branch settle/caravans): TradeRoutes, handcarts, skiffs, escorts, deals, robbery by kind
 - [ ] Structures from Andy's other modpacks (waiting on which packs)
 - [ ] Check the 7 MCA add-ons and Plant Fibers
-- [x] Patch 5, plundering coves, camps and holds (0.7.489): growth paced by stores with per-kind caps (pirate stages, illager outlying buildings, ogre hold stages), raiders break into loose chests and carry off storage and coin, ogre raids, pirate prize cargo, shore bombardment and spread-out cannon craters, re-modelled ship gun
+- [x] Patch 5, plundering coves, camps and holds (0.7.490): growth paced by stores with per-kind caps (pirate stages, illager outlying buildings, ogre hold stages), raiders break into loose chests and carry off storage and coin, ogre raids, pirate prize cargo, shore bombardment and spread-out cannon craters, re-modelled ship gun

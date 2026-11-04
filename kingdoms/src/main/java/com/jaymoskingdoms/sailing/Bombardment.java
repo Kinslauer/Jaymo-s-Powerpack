@@ -27,7 +27,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.489) What a cannon shot does where it lands: it explodes, and the blast breaks blocks the way TNT's does, by their
+ * (0.7.490) What a cannon shot does where it lands: it explodes, and the blast breaks blocks the way TNT's does, by their
  * blast resistance. Whatever's loose (soil, sand, plants, leaves) always goes; anything harder breaks if the blast is
  * still strong enough where it stands, strongest at the middle and weaker toward the edge, so a heavy shell takes
  * stone, brick, timber and players' builds alike, and the heavier shot strip loose soil below on down to the rock.
@@ -81,7 +81,7 @@ public final class Bombardment {
 		final Crater crater;
 		final List<int[]> columns;
 		int column, y = Integer.MIN_VALUE, wait, removed;
-		/** (0.7.489) this column kept a solid block inside the crater below the centre, so nothing under it is stripped. */
+		/** (0.7.490) this column kept a solid block inside the crater below the centre, so nothing under it is stripped. */
 		boolean kept;
 
 		Job(ServerLevel level, BlockPos centre, Crater crater, List<int[]> columns) {
@@ -204,7 +204,7 @@ public final class Bombardment {
 						remove(level, pos, state, c, job.removed++);
 						removed++;
 					} else if (dy < 0 && !state.isAir() && !(state.getBlock() instanceof LiquidBlock)) {
-						// (0.7.489) a kept floor or stone below the centre shields what lies under it: no stripping beneath
+						// (0.7.490) a kept floor or stone below the centre shields what lies under it: no stripping beneath
 						job.kept = true;
 					}
 				} else if (job.kept) {

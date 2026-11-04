@@ -51,7 +51,7 @@ public final class Treasuries {
 			return;
 		}
 		if (villager instanceof net.minecraft.world.entity.npc.villager.Villager v && Currencies.changer(v)) {
-			// (0.7.489) a money-changer only swaps one coin for another: nothing is earned, so no toll
+			// (0.7.490) a money-changer only swaps one coin for another: nothing is earned, so no toll
 			return;
 		}
 		MinecraftServer server = level.getServer();
@@ -59,7 +59,7 @@ public final class Treasuries {
 		if (owner == null || owner.fallen() || !owner.type().isRealm()) {
 			return;
 		}
-		// (0.7.489) the treasury is still kept in emeralds: a trade in the realm's own coin counts at its worth
+		// (0.7.490) the treasury is still kept in emeralds: a trade in the realm's own coin counts at its worth
 		long emeralds = worth(offer.getCostA()) + worth(offer.getCostB()) + worth(offer.getResult());
 		long toll = Math.max(TOLL_LEAST, emeralds * TOLL_PERCENT / 100);
 		Factions.update(server, owner.id(), f -> f.withTreasury(f.treasury() + toll));

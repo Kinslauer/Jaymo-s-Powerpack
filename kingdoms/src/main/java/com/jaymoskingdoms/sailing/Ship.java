@@ -115,7 +115,7 @@ public final class Ship extends Entity {
 	 * the bottom (ticks) before she's laid there as a wreck.
 	 */
 	static final double HOLE = 1.3, SINK = 0.03;
-	/** (0.7.489) How far round chain shot tears her sails (blocks). */
+	/** (0.7.490) How far round chain shot tears her sails (blocks). */
 	static final double CHAIN_REACH = 2.2;
 	static final float SALVAGE = 0.25F;
 	static final int SINKING_MOST = 600;
@@ -180,7 +180,7 @@ public final class Ship extends Entity {
 	/** (0.7.18) Server: ticks since she began to go down (0: afloat), and the guns of a broadside still to fire (piece, tick). */
 	private int sinking;
 	private final List<int[]> volley = new ArrayList<>();
-	/** (0.7.489) Guns run back by their recoil: {piece index, tick they're run out again}. */
+	/** (0.7.490) Guns run back by their recoil: {piece index, tick they're run out again}. */
 	private final List<long[]> recoiled = new ArrayList<>();
 	private float turn;
 	private int adrift;
@@ -1032,7 +1032,7 @@ public final class Ship extends Entity {
 	}
 
 	/**
-	 * (0.7.489) Everything in her chests and barrels, up to {@code most} stacks, taken out of them: a sea rover's prize
+	 * (0.7.490) Everything in her chests and barrels, up to {@code most} stacks, taken out of them: a sea rover's prize
 	 * when she is sunk by one. Empty if she carries nothing.
 	 */
 	public List<ItemStack> takeCargo(int most) {
@@ -1083,7 +1083,7 @@ public final class Ship extends Entity {
 			ShipCannonBlock.Handled done = ShipCannonBlock.handle(state, player.getItemInHand(hand), player, hand);
 			if (done != null) {
 				if (done.fires()) {
-					// (0.7.489) run back, and queued to run out again after its recoil
+					// (0.7.490) run back, and queued to run out again after its recoil
 					this.recoil(i, done.next());
 					this.fireGun(level, i, state, player);
 				} else {
@@ -1187,7 +1187,7 @@ public final class Ship extends Entity {
 	}
 
 	/**
-	 * (0.7.489) Gun {@code i} has just fired and is now {@code state} (emptied): it's run back on its carriage (its model slid
+	 * (0.7.490) Gun {@code i} has just fired and is now {@code state} (emptied): it's run back on its carriage (its model slid
 	 * back, {@link ShipCannonBlock#RECOILED}) and run out again {@link ShipCannonBlock#RECOIL_TICKS} later ({@link #runOut}).
 	 */
 	private void recoil(int i, BlockState state) {
@@ -1195,13 +1195,13 @@ public final class Ship extends Entity {
 		if (h == null || i < 0 || i >= h.pieces.size()) {
 			return;
 		}
-		// (0.7.489) kept by where the gun sits, not its piece number: pieces smashed out before she runs out shift the numbers
+		// (0.7.490) kept by where the gun sits, not its piece number: pieces smashed out before she runs out shift the numbers
 		Piece p = h.pieces.get(i);
 		this.setPiece(i, state.setValue(ShipCannonBlock.RECOILED, true));
 		this.recoiled.add(new long[] {BlockPos.asLong(p.x(), p.y(), p.z()), this.tickCount + ShipCannonBlock.RECOIL_TICKS});
 	}
 
-	/** (0.7.489) The guns whose recoil is over are run out again. */
+	/** (0.7.490) The guns whose recoil is over are run out again. */
 	private void runOut(Hull h) {
 		if (this.recoiled.isEmpty()) {
 			if (this.tickCount % 100 == 0) {
@@ -1270,7 +1270,7 @@ public final class Ship extends Entity {
 		return state != null && state.getValue(ShipCannonBlock.LOAD).loaded();
 	}
 
-	/** (0.7.489) What the gun at {@code key} is loaded with, or null if it's empty (or gone). */
+	/** (0.7.490) What the gun at {@code key} is loaded with, or null if it's empty (or gone). */
 	public @Nullable ShotKind gunKind(long key) {
 		BlockState state = this.gunState(key);
 		return state == null ? null : ShotKind.of(state.getValue(ShipCannonBlock.LOAD));
@@ -1508,7 +1508,7 @@ public final class Ship extends Entity {
 	}
 
 	/**
-	 * (0.7.489) Chain shot at {@code world}: her sails within reach of it are torn away (her timbers untouched). 1 if it tore
+	 * (0.7.490) Chain shot at {@code world}: her sails within reach of it are torn away (her timbers untouched). 1 if it tore
 	 * any, 2 if it met her hull (where it stops), 0 if it's not in her.
 	 */
 	public int rigged(Vec3 world, @Nullable Entity by) {

@@ -243,7 +243,7 @@ final class Staredowns {
 			return true;
 		}
 		if (HavenGrowth.sworn(seen)) {
-			// (0.7.489) a haven's sworn neither drops its weapon nor runs
+			// (0.7.490) a haven's sworn neither drops its weapon nor runs
 			holds(level, sp, seen, "sworn");
 			return true;
 		}

@@ -44,7 +44,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Walled towns, Patch 5 of {@code docs/Hordes-Plan.md}: villages and Blossom villages tier up as the greenskin
+ * (0.7.490) Walled towns, Patch 5 of {@code docs/Hordes-Plan.md}: villages and Blossom villages tier up as the greenskin
  * camps do ({@link Hordes}): village, palisaded village, walled town, fortified town. Each tier past the first raises a new
  * outer wall round the settlement, one arc a day, never over anything a player placed or anything built; once it closes,
  * gates are cut in the old ring and roads run gate to gate; new buildings go into the band between the walls, laid out
@@ -98,9 +98,9 @@ final class WalledTowns {
 	static final int BAND_INNER = 3, BAND_OUTER = 2;
 	/** Roads are this half-width. */
 	static final int ROAD_HALF = 1;
-	/** (0.7.489) Folk and golems are counted this far past the town's wall radius. */
+	/** (0.7.490) Folk and golems are counted this far past the town's wall radius. */
 	static final int HOME_MARGIN = 4;
-	/** (0.7.489) The settlement's own builders ({@link Planner}) keep this far inside a walled town's newest wall. */
+	/** (0.7.490) The settlement's own builders ({@link Planner}) keep this far inside a walled town's newest wall. */
 	static final int PLAN_MARGIN = 4;
 	// ================================================================================================================
 
@@ -180,7 +180,7 @@ final class WalledTowns {
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Town.CODEC)));
 
 	/**
-	 * (0.7.489) On the Overworld: the footprint of every band building a town has raised, every tier (settlement id to its
+	 * (0.7.490) On the Overworld: the footprint of every band building a town has raised, every tier (settlement id to its
 	 * footprints, four numbers each: min x, min z, max x, max z). The builders ({@link Planner#taken}) keep off them, and
 	 * never take them for old ruins to tear down. Saved.
 	 */
@@ -221,7 +221,7 @@ final class WalledTowns {
 		Factions.level(server).setAttached(TOWNS, Map.copyOf(map));
 	}
 
-	/** (0.7.489) Every band building's footprint, every town: {minX, minZ, maxX, maxZ}. */
+	/** (0.7.490) Every band building's footprint, every town: {minX, minZ, maxX, maxZ}. */
 	static List<int[]> raised(MinecraftServer server) {
 		List<int[]> out = new ArrayList<>();
 		for (List<Integer> all : Factions.level(server).getAttachedOrElse(RAISED, Map.of()).values()) {
@@ -232,7 +232,7 @@ final class WalledTowns {
 		return out;
 	}
 
-	/** (0.7.489) Notes a band building of town {@code id} stands over {@code minX..maxX, minZ..maxZ}. */
+	/** (0.7.490) Notes a band building of town {@code id} stands over {@code minX..maxX, minZ..maxZ}. */
 	private static void raised(MinecraftServer server, int id, int minX, int minZ, int maxX, int maxZ) {
 		Map<String, List<Integer>> map = new HashMap<>(Factions.level(server).getAttachedOrElse(RAISED, Map.of()));
 		List<Integer> list = new ArrayList<>(map.getOrDefault(Integer.toString(id), List.of()));
@@ -246,13 +246,13 @@ final class WalledTowns {
 		return town(server, id).tier();
 	}
 
-	/** {@code f} is a village this class grows. (0.7.489) Never a haven: havens only trade, and grow for their output. */
+	/** {@code f} is a village this class grows. (0.7.490) Never a haven: havens only trade, and grow for their output. */
 	static boolean grows(MinecraftServer server, Faction f) {
 		return f.type() == FactionType.VILLAGE && !f.fallen() && !Havens.is(server, f);
 	}
 
 	/**
-	 * Which way {@code f} builds. (0.7.489) A Blossom village is known by its saved front ({@link Town#gate}, set only
+	 * Which way {@code f} builds. (0.7.490) A Blossom village is known by its saved front ({@link Town#gate}, set only
 	 * when one rises), so one founded outside the cherry groves stays one after a restart; the land decides the rest.
 	 */
 	static Kind kind(ServerLevel level, Faction f) {
@@ -260,12 +260,12 @@ final class WalledTowns {
 			? Kind.BLOSSOM : Kind.VILLAGE;
 	}
 
-	/** (0.7.489) Where a town's folk and golems are counted: the bell's box, or out to its own wall, whichever is wider. */
+	/** (0.7.490) Where a town's folk and golems are counted: the bell's box, or out to its own wall, whichever is wider. */
 	private static AABB home(Faction f, Kind kind, int tier) {
 		return new AABB(f.seat()).inflate(Math.max(Villages.VILLAGE_RADIUS, kind.wall[tier - 1] + HOME_MARGIN));
 	}
 
-	/** (0.7.489) How far round its seat village {@code f}'s folk and golems are counted ({@link Villages}): out to its wall. */
+	/** (0.7.490) How far round its seat village {@code f}'s folk and golems are counted ({@link Villages}): out to its wall. */
 	static double reach(ServerLevel level, Faction f) {
 		MinecraftServer server = level.getServer();
 		if (!grows(server, f)) {
@@ -275,7 +275,7 @@ final class WalledTowns {
 		return tier < 2 ? Villages.VILLAGE_RADIUS : Math.max(Villages.VILLAGE_RADIUS, kind(level, f).wall[tier - 1] + HOME_MARGIN);
 	}
 
-	/** (0.7.489) Village {@code f} has its tier's folk: no newcomer moves into a new house, however many beds stand spare. */
+	/** (0.7.490) Village {@code f} has its tier's folk: no newcomer moves into a new house, however many beds stand spare. */
 	static boolean full(ServerLevel level, Faction f) {
 		MinecraftServer server = level.getServer();
 		if (!grows(server, f)) {
@@ -286,13 +286,13 @@ final class WalledTowns {
 		return level.getEntitiesOfClass(Villager.class, home(f, kind, tier), Villager::isAlive).size() >= kind.folk[tier - 1];
 	}
 
-	/** (0.7.489) Village {@code f} has climbed past tier 1: its own rings wall it in, not the builders' rectangle ({@link Enclosure}). */
+	/** (0.7.490) Village {@code f} has climbed past tier 1: its own rings wall it in, not the builders' rectangle ({@link Enclosure}). */
 	static boolean walled(MinecraftServer server, Faction f) {
 		return grows(server, f) && tier(server, f.id()) >= 2;
 	}
 
 	/**
-	 * (0.7.489) Whether the builders ({@link Planner}) may put up a building over {@code minX..maxX, minZ..maxZ}: well
+	 * (0.7.490) Whether the builders ({@link Planner}) may put up a building over {@code minX..maxX, minZ..maxZ}: well
 	 * inside a walled town's newest wall, and on none of its band's planned plots (raised or still to rise: the raised ones,
 	 * and earlier tiers', are in {@link Planner#taken} too). True for any other place.
 	 */
@@ -313,7 +313,7 @@ final class WalledTowns {
 		}
 		Town t = town(server, f.id());
 		List<IllagerBuildings.Spot> band = plan(level, f, kind(level, f), t.tier());
-		// (0.7.489) every plot of the band, the raised ones too: a building begun in a raised one's place would interleave with it
+		// (0.7.490) every plot of the band, the raised ones too: a building begun in a raised one's place would interleave with it
 		for (IllagerBuildings.Spot spot : band) {
 			CampBuildings.Placer flat = spot.placer(seat, gateOf(t, f));
 			int[] b = Hordes.bounds(new Hordes.Piece(spot.id(), spot.design()));
@@ -369,7 +369,7 @@ final class WalledTowns {
 		return null;
 	}
 
-	/** The closest standing realm within REALM_RANGE of a free village, by distance, not list order (0.7.489). */
+	/** The closest standing realm within REALM_RANGE of a free village, by distance, not list order (0.7.490). */
 	private static @Nullable Faction nearestRealm(MinecraftServer server, BlockPos pos) {
 		Faction best = null;
 		double bestDist = REALM_RANGE * REALM_RANGE;
@@ -463,7 +463,7 @@ final class WalledTowns {
 			} else if (!t.opened()) {
 				out.add("gates and roads not yet cut");
 			}
-			// (0.7.489) the band's designs are drawn only while the town is loaded (an unloaded one reads as bare land, and its
+			// (0.7.490) the band's designs are drawn only while the town is loaded (an unloaded one reads as bare land, and its
 			// designs and plan would keep default stuff for the session): till then it waits, its band not yet counted
 			List<IllagerBuildings.Spot> band = planned(level, f, kind, tier);
 			if (band == null) {
@@ -538,7 +538,7 @@ final class WalledTowns {
 			}
 			EntityTypes.VILLAGER.spawn(level, Construction.standable(level, at, 4), EntitySpawnReason.STRUCTURE);
 		}
-		// (0.7.489) counted over the whole town, so the golem at the gate and newcomers out by the wall are seen
+		// (0.7.490) counted over the whole town, so the golem at the gate and newcomers out by the wall are seen
 		int golems = level.getEntitiesOfClass(IronGolem.class, home(f, kind, t.tier()), IronGolem::isAlive).size();
 		BlockPos gate = frame.at(0, 0, -(r - 5));
 		if (golems < GOLEMS[t.tier() - 1] && level.isLoaded(gate) && !Raids.playerNear(level, gate, BUILD_HIDE_RANGE)) {
@@ -622,7 +622,7 @@ final class WalledTowns {
 				case 5 -> this.land.cracked();
 				default -> Blocks.COBBLESTONE.defaultBlockState();
 			};
-			// (0.7.489) none of the land's own stone in the wall, so a gate cut tells the wall from the ground
+			// (0.7.490) none of the land's own stone in the wall, so a gate cut tells the wall from the ground
 			if (earthy(s)) {
 				for (BlockState other : new BlockState[] {this.land.wall(), this.land.mossy(), this.land.cracked()}) {
 					if (!earthy(other)) {
@@ -644,7 +644,7 @@ final class WalledTowns {
 		}
 	}
 
-	/** (0.7.489) {@code s} is a block the land itself is made of (stone, sandstone, terracotta): never part of a wall. */
+	/** (0.7.490) {@code s} is a block the land itself is made of (stone, sandstone, terracotta): never part of a wall. */
 	private static boolean earthy(BlockState s) {
 		return s.is(Blocks.STONE) || s.is(Blocks.SANDSTONE) || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.TERRACOTTA);
 	}
@@ -673,7 +673,7 @@ final class WalledTowns {
 		} else {
 			post = land.log();
 			beam = land.log();
-			// (0.7.489) the walkway is timber in a stone wall too, so ladders and gate towers find the ground through it
+			// (0.7.490) the walkway is timber in a stone wall too, so ladders and gate towers find the ground through it
 			walk = land.woodSlab();
 			if (walk.hasProperty(BlockStateProperties.SLAB_TYPE)) {
 				walk = walk.setValue(BlockStateProperties.SLAB_TYPE, SlabType.TOP);
@@ -683,7 +683,7 @@ final class WalledTowns {
 			for (BlockState s : new BlockState[] {land.log(), land.fence(), land.woodSlab(), land.slab(), land.wall(), land.mossy(), land.cracked(),
 				Blocks.COBBLESTONE.defaultBlockState(), Blocks.STONE_BRICK_WALL.defaultBlockState(), Blocks.MOSSY_STONE_BRICK_WALL.defaultBlockState(),
 				Blocks.LADDER.defaultBlockState(), land.planks()}) {
-				// (0.7.489) never the land's own stone, sandstone or terracotta: a gate cut would dig into the ground
+				// (0.7.490) never the land's own stone, sandstone or terracotta: a gate cut would dig into the ground
 				if (!earthy(s)) {
 					parts.add(s.getBlock());
 				}
@@ -869,7 +869,7 @@ final class WalledTowns {
 				if (!Hordes.ours(level, f, column)) {
 					continue;
 				}
-				// (0.7.489) the column's own wall: its lowest part from the land's surface up (never in the ground under
+				// (0.7.490) the column's own wall: its lowest part from the land's surface up (never in the ground under
 				// it), up to under a lintel; a gate already open there (a lintel over clear ground) is left as it stands
 				boolean walkway = d < old - 0.5;
 				int land = surface(level, column, look);
@@ -938,7 +938,7 @@ final class WalledTowns {
 	}
 
 	/**
-	 * (0.7.489) The land's surface under a wall's column (the first air over the ground), down through the wall's own
+	 * (0.7.490) The land's surface under a wall's column (the first air over the ground), down through the wall's own
 	 * parts, trees and plants from the top. The wall holds none of the land's own blocks ({@link #earthy}), so this stops
 	 * on the ground, never under it.
 	 */
@@ -960,7 +960,7 @@ final class WalledTowns {
 
 	// ---- the band: what each kind builds -----------------------------------------------------------------------------------------
 
-	// (0.7.489) the tier is in each piece's id and seed: the same key at the next tier is a new building, not the old one's twin
+	// (0.7.490) the tier is in each piece's id and seed: the same key at the next tier is a new building, not the old one's twin
 	private static void piece(List<Hordes.Piece> out, ServerLevel level, Faction f, int tier, String key, int n, Function<Buildings.Kit, Blueprint> design) {
 		for (int i = 0; i < n; i++) {
 			String id = "town_" + f.id() + "_t" + tier + "_" + key + "_" + i;
@@ -1074,7 +1074,7 @@ final class WalledTowns {
 	}
 
 	/**
-	 * (0.7.489) Village {@code f}'s band plan for {@code tier} if it's already worked out or the town is loaded (so its
+	 * (0.7.490) Village {@code f}'s band plan for {@code tier} if it's already worked out or the town is loaded (so its
 	 * designs read its own land); null otherwise.
 	 */
 	private static @Nullable List<IllagerBuildings.Spot> planned(ServerLevel level, Faction f, Kind kind, int tier) {
@@ -1105,7 +1105,7 @@ final class WalledTowns {
 			return Raise.WAIT;
 		}
 		int[] b = Hordes.bounds(new Hordes.Piece(spot.id(), spot.design()));
-		// (0.7.489) never over the builders' own works: a building begun, finished or a plot marked there, or one raised before
+		// (0.7.490) never over the builders' own works: a building begun, finished or a plot marked there, or one raised before
 		BlockPos ca = flat.at(b[0], 0, b[1]), cc = flat.at(b[2], 0, b[3]);
 		int minX = Math.min(ca.getX(), cc.getX()), minZ = Math.min(ca.getZ(), cc.getZ()), maxX = Math.max(ca.getX(), cc.getX()),
 			maxZ = Math.max(ca.getZ(), cc.getZ());

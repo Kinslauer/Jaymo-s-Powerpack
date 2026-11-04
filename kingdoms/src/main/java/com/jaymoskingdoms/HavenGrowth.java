@@ -37,7 +37,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Havens expand (Andy, 2026-11-03: "they only trade, but expand massively to maximize output. They have fierce
+ * (0.7.490) Havens expand (Andy, 2026-11-03: "they only trade, but expand massively to maximize output. They have fierce
  * fighters who are sworn to defend."). A haven has no tiers of the camp kind and takes no tribute beyond what it had; it
  * grows by what it makes and sells:
  * <ul>
@@ -87,7 +87,7 @@ public final class HavenGrowth {
 
 	/**
 	 * How often it thinks of claiming more land (ticks); the size it claims its first ring past its founding land from, and
-	 * another ring for every this many in its size past that. (0.7.489) Rings count out from the land it was founded with
+	 * another ring for every this many in its size past that. (0.7.490) Rings count out from the land it was founded with
 	 * (see {@link #claimRadius}), not from a fixed start inside it.
 	 */
 	static final long CLAIM_TICKS = 1200L;
@@ -97,7 +97,7 @@ public final class HavenGrowth {
 	/** A realm pays this many emeralds for each chunk; a village needs this much food in store to claim at all. */
 	static final int CLAIM_COST = 4, CLAIM_FOOD = 32;
 	/**
-	 * (0.7.489) Once it holds all it may claim, it looks again only when it grows, loses land, or this long has passed
+	 * (0.7.490) Once it holds all it may claim, it looks again only when it grows, loses land, or this long has passed
 	 * (ticks); when it can't pay for land that is free, it waits this long before it looks again.
 	 */
 	static final long CLAIM_RECHECK = 24000L, CLAIM_RETRY = 6000L;
@@ -134,7 +134,7 @@ public final class HavenGrowth {
 
 	/** When the next fighter may be sworn in, by haven; when the sworn last rallied, by haven. */
 	private static final Map<Integer, Long> NEXT_SWEAR = new HashMap<>(), RALLIED = new HashMap<>();
-	/** (0.7.489) How far out each haven last looked for land, what it held then, and when it may look again regardless. */
+	/** (0.7.490) How far out each haven last looked for land, what it held then, and when it may look again regardless. */
 	private static final Map<Integer, Looked> LOOKED = new HashMap<>();
 
 	private record Looked(int radius, int held, long again) {
@@ -158,7 +158,7 @@ public final class HavenGrowth {
 		long now = level.getGameTime();
 		boolean order = now % ORDER_TICKS == 0;
 		for (Faction f : Factions.all(server)) {
-			// (0.7.489) each haven thinks of land on its own tick, so they don't all look at once
+			// (0.7.490) each haven thinks of land on its own tick, so they don't all look at once
 			boolean claim = Math.floorMod(now + f.id(), CLAIM_TICKS) == 0;
 			if (!order && !claim) {
 				continue;
@@ -458,7 +458,7 @@ public final class HavenGrowth {
 	// ---- land --------------------------------------------------------------------------------------------------------
 
 	/**
-	 * The land {@code f}'s size calls for (chunks out from the seat), within the most its kind claims. (0.7.489) It counts
+	 * The land {@code f}'s size calls for (chunks out from the seat), within the most its kind claims. (0.7.490) It counts
 	 * rings out from the land the haven was founded with: a kingdom's ({@link KingdomEvents#CLAIM_RADIUS}), a fiefdom's
 	 * ({@link GrimSites#FIEF_CLAIM}, or a kingdom's if it already holds land past what that and its size would give, as a
 	 * kingdom sworn to an overlord does), a village's ({@link Villages#CLAIM_RADIUS}). The first ring comes at
@@ -482,7 +482,7 @@ public final class HavenGrowth {
 		return Math.min(Math.max(most, base), base + rings);
 	}
 
-	/** (0.7.489) How far out from its seat (chunks, the larger of the two axes) the furthest of {@code f}'s claims lies. */
+	/** (0.7.490) How far out from its seat (chunks, the larger of the two axes) the furthest of {@code f}'s claims lies. */
 	private static int heldRadius(Faction f) {
 		ChunkPos middle = ChunkPos.containing(f.seat());
 		int far = 0;
@@ -495,7 +495,7 @@ public final class HavenGrowth {
 	/**
 	 * Haven {@code f} claims the land its size calls for that no one holds yet. A realm pays for it from its treasury; a village
 	 * needs food in store. A village inside a realm's land (no claims of its own) is left as it is unless the whole of its seat
-	 * chunk comes free. (0.7.489) It only looks again when its size calls for more land, it has lost land, or
+	 * chunk comes free. (0.7.490) It only looks again when its size calls for more land, it has lost land, or
 	 * {@link #CLAIM_RECHECK} has passed; it retries after {@link #CLAIM_RETRY} if it couldn't pay.
 	 */
 	static void grow(ServerLevel level, Faction f, long now) {
@@ -591,7 +591,7 @@ public final class HavenGrowth {
 		} else {
 			sworn = KingdomEvents.spawn(level, f, Folk.GUARD);
 		}
-		// (0.7.489) the bread is taken only once someone has joined (an MCA guard joins with none returned, so the roster tells)
+		// (0.7.490) the bread is taken only once someone has joined (an MCA guard joins with none returned, so the roster tells)
 		Faction after = Factions.get(server, f.id());
 		int joined = after == null ? roster : after.holdings().count(Folk.GUARD) + after.holdings().count(Folk.ARCHER);
 		if (sworn == null && joined <= roster) {
@@ -605,7 +605,7 @@ public final class HavenGrowth {
 		}
 	}
 
-	/** {@code w} takes the oath (once) and is armed in its blood's way then; (0.7.489) arms lost later are its own to win back (Rearm). */
+	/** {@code w} takes the oath (once) and is armed in its blood's way then; (0.7.490) arms lost later are its own to win back (Rearm). */
 	private static void swear(ServerLevel level, Faction f, Worker w) {
 		PathfinderMob mob = w.mob();
 		Heritage.Kind kind = VillagerHeritage.of(mob);
@@ -622,7 +622,7 @@ public final class HavenGrowth {
 			modifier(mob, Attributes.MOVEMENT_SPEED, SPEED_ID, oath.speed(), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 			mob.heal((float)oath.health());
 			if (mob instanceof Folk folk && !mob.entityTags().contains(Caravans.TAG)) {
-				// (0.7.489) armed once, at the oath: a weapon struck from its hand is not handed back for free
+				// (0.7.490) armed once, at the oath: a weapon struck from its hand is not handed back for free
 				arm(folk, kind);
 			}
 		}
@@ -697,12 +697,12 @@ public final class HavenGrowth {
 		rally(level, haven, victim, attacker);
 	}
 
-	/** (0.7.489) {@code sworn} took the haven's oath: it never runs. */
+	/** (0.7.490) {@code sworn} took the haven's oath: it never runs. */
 	static boolean sworn(Entity sworn) {
 		return sworn.entityTags().contains(SWORN);
 	}
 
-	/** (0.7.489) A blow between {@code a} and {@code b} that is no attack on {@code haven}: an honour duel, a drill's spar, or one of its own sworn members. */
+	/** (0.7.490) A blow between {@code a} and {@code b} that is no attack on {@code haven}: an honour duel, a drill's spar, or one of its own sworn members. */
 	private static boolean sanctioned(Faction haven, Entity a, Entity b) {
 		if (com.jaymoskingdoms.forms.Duels.dueling(a, b) || com.jaymoskingdoms.forms.GuardDrills.sparring(a, b)) {
 			return true;

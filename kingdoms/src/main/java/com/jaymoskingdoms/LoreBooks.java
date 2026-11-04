@@ -43,7 +43,7 @@ import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Hordes, Orc war journals (the idea after RPG Lore's lore books, MIT; the code and the words are ours). Orcs and
+ * (0.7.490) Hordes, Orc war journals (the idea after RPG Lore's lore books, MIT; the code and the words are ours). Orcs and
  * goblins leave their writing about, and finding it is how a player learns what they were never told:
  * <ul>
  * <li><b>War journals</b> ({@link WarJournal}) drop now and then from a goblin or an orc a player kills (a chief or a captain
@@ -184,7 +184,7 @@ public final class LoreBooks {
 		for (Component page : lore.pages()) {
 			pages.add(Filterable.passThrough(page));
 		}
-		// (0.7.489) a written book's title is capped (32): a longer one could not be sent or saved, so it is cut, and the full one goes on the name
+		// (0.7.490) a written book's title is capped (32): a longer one could not be sent or saved, so it is cut, and the full one goes on the name
 		String title = lore.title().getString();
 		String shortTitle = StringUtil.truncateStringIfNecessary(title, WrittenBookContent.TITLE_MAX_LENGTH, false);
 		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough(shortTitle), lore.author().orElse(""), 0, pages, true));
@@ -314,7 +314,7 @@ public final class LoreBooks {
 		pages.add(Dialects.trBrood(brood, "journal.cover." + random.nextInt(COVERS), tribeName, capA));
 		List<String> kinds = new ArrayList<>(orc ? ORC_PAGES : GOBLIN_PAGES);
 		if (realm0 == null) {
-			kinds.remove("map"); // (0.7.489) no realm in reach: a map with no way and no distance would read broken
+			kinds.remove("map"); // (0.7.490) no realm in reach: a map with no way and no distance would read broken
 		}
 		Collections.shuffle(kinds, new java.util.Random(seed));
 		List<Integer> frags = new ArrayList<>();

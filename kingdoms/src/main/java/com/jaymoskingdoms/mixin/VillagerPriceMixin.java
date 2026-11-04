@@ -20,7 +20,7 @@ abstract class VillagerPriceMixin {
 		Prejudice.prices((Villager)(Object)this, player);
 		// (0.7.439) a haven's own wares, or a human town buying them
 		com.jaymoskingdoms.HavenWares.offers((Villager)(Object)this, player);
-		// (0.7.489) priced in the coin of the town it stands in, or a money-changer's counter
+		// (0.7.490) priced in the coin of the town it stands in, or a money-changer's counter
 		com.jaymoskingdoms.Currencies.localize((Villager)(Object)this, player);
 	}
 }

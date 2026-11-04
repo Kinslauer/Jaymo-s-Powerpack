@@ -118,7 +118,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			return;
 		}
 		if (hit.getType() != HitResult.Type.MISS) {
-			// (0.7.489) it scuffs the soil where it lands (a field gun's ball is no shell: loose ground and growth only),
+			// (0.7.490) it scuffs the soil where it lands (a field gun's ball is no shell: loose ground and growth only),
 			// but never on its own side's land or in a standing faction's buildings: a wall gun keeps its streets whole
 			net.minecraft.core.BlockPos struck = ((BlockHitResult) hit).getBlockPos();
 			if (!ownGround(level, (Worker) gunner, struck)) {
@@ -132,7 +132,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 		level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(), this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
 	}
 
-	/** (0.7.489) {@code pos} lies on land the gunner's own faction claims, or in a building some standing faction holds. */
+	/** (0.7.490) {@code pos} lies on land the gunner's own faction claims, or in a building some standing faction holds. */
 	private static boolean ownGround(ServerLevel level, Worker gunner, net.minecraft.core.BlockPos pos) {
 		Faction own = Factions.get(level.getServer(), gunner.factionId());
 		if (own != null && own.claims(net.minecraft.world.level.ChunkPos.containing(pos))) {

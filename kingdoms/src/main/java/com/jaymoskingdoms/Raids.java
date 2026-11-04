@@ -50,7 +50,7 @@ final class Raids {
 	static final float RAID_CHANCE = 0.12F;
 	/** (0.7.123) The raid chance's factor in summer and in winter (Kitchen's seasons). */
 	static final float SUMMER_RAIDS = 1.5F, WINTER_RAIDS = 0.4F;
-	/** (0.7.489) The raid chance's factor for a camp that can't feed its folk ({@link HordeEconomy#hungry}). */
+	/** (0.7.490) The raid chance's factor for a camp that can't feed its folk ({@link HordeEconomy#hungry}). */
 	static final float HUNGRY_RAIDS = 3.0F;
 	static final long COOLDOWN_TICKS = 48000L;
 	/** The same settlement isn't raided again for this long (ticks: a day), by any camp. */
@@ -75,7 +75,7 @@ final class Raids {
 	static final double LOOT_REACH = 4.0;
 	static final int LOOT_PER_RAIDER = 32;
 	static final long PLUNDER_TICKS = 20 * 120;
-	/** (0.7.489) How far (blocks) from the seat a party looks for loose chests and barrels to break into. */
+	/** (0.7.490) How far (blocks) from the seat a party looks for loose chests and barrels to break into. */
 	static final int LOOSE_SCAN = 28;
 	/** Golems this near a raider at the seat turn on him. */
 	static final double GOLEM_RANGE = 20.0;
@@ -108,9 +108,9 @@ final class Raids {
 		Phase phase = Phase.MARCH;
 		/** Raiders who made it home. */
 		int home;
-		/** (0.7.489) How many items and coins the party has taken so far. */
+		/** (0.7.490) How many items and coins the party has taken so far. */
 		int looted;
-		/** (0.7.489) Loose chests and barrels on the target's land, looked for once when the party arrives (null until then). */
+		/** (0.7.490) Loose chests and barrels on the target's land, looked for once when the party arrives (null until then). */
 		@Nullable List<BlockPos> loose;
 		final long started;
 		long phaseAt;
@@ -139,13 +139,13 @@ final class Raids {
 		return ACTIVE.containsKey(camp);
 	}
 
-	/** (0.7.489) The settlement camp {@code camp} is raiding just now (its id), or -1 if it isn't. */
+	/** (0.7.490) The settlement camp {@code camp} is raiding just now (its id), or -1 if it isn't. */
 	static int targetOf(int camp) {
 		Raid raid = ACTIVE.get(camp);
 		return raid == null ? -1 : raid.target;
 	}
 
-	/** (0.7.489) Camp {@code a} is raiding camp {@code b} just now, or the other way about. */
+	/** (0.7.490) Camp {@code a} is raiding camp {@code b} just now, or the other way about. */
 	static boolean between(int a, int b) {
 		Raid ab = ACTIVE.get(a), ba = ACTIVE.get(b);
 		return ab != null && ab.target == b || ba != null && ba.target == a;
@@ -204,7 +204,7 @@ final class Raids {
 				continue;
 			}
 			Camps.CampData data = Camps.data(server, camp.id());
-			// ((0.7.489) a hungry greenskin camp raids twice as often, and a hungry goblin village raids at all)
+			// ((0.7.490) a hungry greenskin camp raids twice as often, and a hungry goblin village raids at all)
 			boolean hungry = data != null && (data.orc() || data.goblin()) && HordeEconomy.hungry(server, camp.id());
 			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < (hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
 				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry) {
@@ -436,7 +436,7 @@ final class Raids {
 				if (raid.loose == null) {
 					raid.loose = new ArrayList<>(Plunder.looseAll(level, target, LOOSE_SCAN));
 				}
-				// (0.7.489) once the storehouse is bare they break into the chests and barrels standing about the land
+				// (0.7.490) once the storehouse is bare they break into the chests and barrels standing about the land
 				boolean bare = !raid.loose.isEmpty() && Storage.contents(level, target).isEmpty();
 				boolean done = true;
 				for (Mob raider : party) {
@@ -451,7 +451,7 @@ final class Raids {
 					if (target(raider) != null) {
 						continue;
 					}
-					// (0.7.489) the last loose chest may have gone to an earlier raider this pass: back to the depot then
+					// (0.7.490) the last loose chest may have gone to an earlier raider this pass: back to the depot then
 					bare &= !raid.loose.isEmpty();
 					BlockPos aim = bare ? raid.loose.get(Math.floorMod(raider.getUUID().hashCode(), raid.loose.size())) : depot;
 					if (raider.distanceToSqr(Vec3.atCenterOf(aim)) <= LOOT_REACH * LOOT_REACH || !bare && nearStorage(raider, target)) {
@@ -525,14 +525,14 @@ final class Raids {
 		return false;
 	}
 
-	/** (0.7.489) What a raider (or a war's victor) takes first: coin of any realm, anything gold, iron and diamonds. */
+	/** (0.7.490) What a raider (or a war's victor) takes first: coin of any realm, anything gold, iron and diamonds. */
 	static boolean valuable(ItemStack s) {
 		return Plunder.valuable(s);
 	}
 
 	/**
 	 * A raider at the settlement takes what he can carry ({@link Plunder#take}): coin now and then, valuables from its
-	 * storage first, then the chests and barrels standing loose on its land, which he breaks into (0.7.489).
+	 * storage first, then the chests and barrels standing loose on its land, which he breaks into (0.7.490).
 	 */
 	private static void plunder(ServerLevel level, Mob raider, Faction target, Raid raid) {
 		ItemStack taken = Plunder.take(level, raider, target, LOOT_PER_RAIDER, Plunder.SMASH_CHANCE, PirateCoves.is(level.getServer(), raid.camp));
@@ -563,7 +563,7 @@ final class Raids {
 	private static void goHome(ServerLevel level, @Nullable Faction camp, Mob raider) {
 		ItemStack load = takeCarried(raider);
 		if (camp != null && !camp.fallen() && !load.isEmpty()) {
-			// ((0.7.489) a greenskin camp bends what it brings home)
+			// ((0.7.490) a greenskin camp bends what it brings home)
 			Camps.deposit(level, camp, Camps.orc(level.getServer(), camp.id()) || Camps.goblin(level.getServer(), camp.id()) ? Plunder.bend(load) : load);
 		} else if (!load.isEmpty()) {
 			raider.spawnAtLocation(level, load);

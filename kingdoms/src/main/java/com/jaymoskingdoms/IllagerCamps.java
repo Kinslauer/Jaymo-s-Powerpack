@@ -45,14 +45,14 @@ final class IllagerCamps {
 	/** A new camp's people, and how its band grows: one more every so many days, up to a most. */
 	static final int START_PILLAGERS = 3, START_VINDICATORS = 2, DAYS_PER_ILLAGER = 2;
 	/**
-	 * (0.7.489) Its own caps: the most fighters a camp keeps (the cap climbs with every building it raises, up to this) and the
+	 * (0.7.490) Its own caps: the most fighters a camp keeps (the cap climbs with every building it raises, up to this) and the
 	 * most buildings (its ground runs out: the growth list, then outlying tents, poles, towers and ranges outside the palisade).
 	 */
 	static final int MAX_FIGHTERS = 24, MAX_BUILT = 40;
-	/** (0.7.489) Each new illager eats this out of the loot pile; a building waits this long (ticks) after the last. */
+	/** (0.7.490) Each new illager eats this out of the loot pile; a building waits this long (ticks) after the last. */
 	static final int RATION_BREAD = 2, RATION_ARROWS = 4;
 	static final long BUILD_GAP_TICKS = 9000L;
-	/** (0.7.489) Tries at a blocked building spot (each a {@link #BUILD_GAP_TICKS} apart) before it's given up; the wait after giving up a spot with no level ground. */
+	/** (0.7.490) Tries at a blocked building spot (each a {@link #BUILD_GAP_TICKS} apart) before it's given up; the wait after giving up a spot with no level ground. */
 	static final int BUILD_TRIES = 3;
 	static final long SKIP_GAP_TICKS = 1200L;
 	/** Pillagers to each vindicator as the band grows. */
@@ -67,7 +67,7 @@ final class IllagerCamps {
 	static final int START_LOGS = 32, START_ARROWS = 32, START_BREAD = 16, START_EMERALDS = 5;
 	/**
 	 * Raising a building: from this much of its loot pile to begin with, and more for each building already raised (at
-	 * most the most); never with a player this near. (0.7.489) Paced by the pile, not by the day: the plunder it brings home
+	 * most the most); never with a player this near. (0.7.490) Paced by the pile, not by the day: the plunder it brings home
 	 * pays for the next.
 	 */
 	static final int BUILD_LOGS = 6, BUILD_PLANKS = 8, BUILD_WOOL = 6;
@@ -82,9 +82,9 @@ final class IllagerCamps {
 		"hollow"};
 	private static final DyeColor[] COLOURS = {DyeColor.GRAY, DyeColor.BLACK, DyeColor.LIGHT_GRAY, DyeColor.WHITE};
 
-	/** (0.7.489) Camp id → game time it last raised a building. */
+	/** (0.7.490) Camp id → game time it last raised a building. */
 	private static final Map<Integer, Long> BUILT_AT = new HashMap<>();
-	/** (0.7.489) Camp id to failed tries at its next building spot. */
+	/** (0.7.490) Camp id to failed tries at its next building spot. */
 	private static final Map<Integer, Integer> TRIES = new HashMap<>();
 	/** Camp id → ticks its warlord has been missing. */
 	private static final Map<Integer, Long> MISSING = new HashMap<>();
@@ -207,7 +207,7 @@ final class IllagerCamps {
 			if (now == null || Illagers.fighters(now) >= cap) {
 				break;
 			}
-			// ((0.7.489) each takes his ration out of the pile: a camp that has been plundered, or has nothing, takes on no more)
+			// ((0.7.490) each takes his ration out of the pile: a camp that has been plundered, or has nothing, takes on no more)
 			if (!Storage.loaded(level, now) || Storage.take(level, now, Items.BREAD, RATION_BREAD).isEmpty() || Storage.take(level, now, Items.ARROW, RATION_ARROWS).isEmpty()) {
 				break;
 			}
@@ -279,7 +279,7 @@ final class IllagerCamps {
 		if (built >= MAX_BUILT || !Storage.loaded(level, camp) || !force && now - BUILT_AT.getOrDefault(camp.id(), 0L) < BUILD_GAP_TICKS) {
 			return;
 		}
-		// ((0.7.489) an unloaded spot is tried again later, a bad one given up after a short wait, a blocked one after a few tries)
+		// ((0.7.490) an unloaded spot is tried again later, a bad one given up after a short wait, a blocked one after a few tries)
 		IllagerBuildings.Spot spot;
 		BlockPos base = data.center();
 		if (built < IllagerBuildings.GROWTH.size()) {
@@ -330,7 +330,7 @@ final class IllagerCamps {
 		JaymosKingdoms.LOGGER.debug("{} raised a {}", camp.name(), spot.id());
 	}
 
-	/** (0.7.489) Gives up the camp's next building slot, and waits {@code gap} ticks before trying the one after. */
+	/** (0.7.490) Gives up the camp's next building slot, and waits {@code gap} ticks before trying the one after. */
 	private static void skip(MinecraftServer server, Faction camp, long now, long gap) {
 		TRIES.remove(camp.id());
 		BUILT_AT.put(camp.id(), now - BUILD_GAP_TICKS + gap);

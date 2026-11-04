@@ -85,7 +85,7 @@ import org.jspecify.annotations.Nullable;
  * own marks get the form's plates laid over them ({@code biobuilt_plates_*}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) glossy highlights on the forearms and knuckles over the pink skin (the pink is MCA's skin
  * tint, {@code HeritageVariants#skin}); no glow, no eyes, no particles.</li>
- * <li><b>Beastfolk, Hollow:</b> (0.7.489, textures from {@code tools/gen_heritage_looks.py}) tawny fur painted on the skin (its ears and tail are
+ * <li><b>Beastfolk, Hollow:</b> (0.7.490, textures from {@code tools/gen_heritage_looks.py}) tawny fur painted on the skin (its ears and tail are
  * real model parts, {@link BeastParts}), eyes that catch the night; a drained grey-blue pallor with sunken eyes and a cold pale glow in the veins. Every
  * variant of theirs, like the Sylvan's new fae and elves, draws its own marks over these ({@link VariantLooks}).</li>
  * </ul>
@@ -93,15 +93,15 @@ import org.jspecify.annotations.Nullable;
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/**
-	 * (0.7.489) How a heritage's marks are drawn: cutout, but a Wraith's mist is blended (its skin is painted half-clear), so
-	 * it shows as a haze over the body rather than solid patches. The body under it stays as it is. (0.7.489) The Sprite's and
+	 * (0.7.490) How a heritage's marks are drawn: cutout, but a Wraith's mist is blended (its skin is painted half-clear), so
+	 * it shows as a haze over the body rather than solid patches. The body under it stays as it is. (0.7.490) The Sprite's and
 	 * the Faerie's gossamer wings are model parts now ({@link BeastParts}, blended there), no longer painted on the skin.
 	 */
 	static RenderType marksType(Identifier skin, VariantLooks.@Nullable Style style) {
 		return style != null && TRANSLUCENT_MARKS.contains(style.variant()) ? RenderTypes.entityTranslucent(skin) : RenderTypes.entityCutout(skin);
 	}
 
-	/** (0.7.489) The variants whose marks are painted half-clear (the Wraith's mist): drawn blended. */
+	/** (0.7.490) The variants whose marks are painted half-clear (the Wraith's mist): drawn blended. */
 	private static final java.util.Set<HeritageVariants.Variant> TRANSLUCENT_MARKS = java.util.EnumSet.of(HeritageVariants.Variant.WRAITH);
 
 	/** How a heritage's eyes glow. (0.7.106) {@code NIGHT}: in the dark of night only. */
@@ -125,7 +125,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		DIVINE(Heritage.Kind.DIVINE, "divine", 1, 0xFFFFF4D0, Eyes.ALWAYS, 30),
 		BIOBUILT(Heritage.Kind.BIOBUILT, "biobuilt", 3, 0xFFFFB454, Eyes.ALWAYS, 0),
 		RUBBERFOLK(Heritage.Kind.RUBBERFOLK, "rubberfolk", 1, 0, Eyes.NEVER, 0),
-		// (0.7.489) the beastfolk's fur, ears and tail (their variants add the rest) and the Hollow's drained pallor and cold eyes
+		// (0.7.490) the beastfolk's fur, ears and tail (their variants add the rest) and the Hollow's drained pallor and cold eyes
 		BEASTFOLK(Heritage.Kind.BEASTFOLK, "beastfolk", 1, 0xFFFFD27A, Eyes.NIGHT, 0),
 		HOLLOW(Heritage.Kind.HOLLOW, "hollow", 1, 0xFFBEEBDC, Eyes.ALWAYS, 0);
 

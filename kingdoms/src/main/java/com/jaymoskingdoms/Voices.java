@@ -137,7 +137,7 @@ public final class Voices {
 	public static void register() {
 		for (String key : voiced()) {
 			String path = soundPath(key);
-			// (0.7.489) an answer's tale not yet recorded (born.den, raised.pack) is read in silence, not registered without a clip
+			// (0.7.490) an answer's tale not yet recorded (born.den, raised.pack) is read in silence, not registered without a clip
 			if (key.startsWith("story.jaymoskingdoms.") && key.endsWith(".tale") && !hasNarratorClip(path)) {
 				continue;
 			}
@@ -168,7 +168,7 @@ public final class Voices {
 		PayloadTypeRegistry.clientboundPlay().register(Spoken.TYPE, Spoken.CODEC);
 	}
 
-	/** (0.7.489) Whether the narrator's clip for {@code path} ({@code voice.narrator.<rest>}) is in the jar. */
+	/** (0.7.490) Whether the narrator's clip for {@code path} ({@code voice.narrator.<rest>}) is in the jar. */
 	private static boolean hasNarratorClip(String path) {
 		return Voices.class.getResource("/assets/jaymoskingdoms/sounds/voice/narrator/" + path.substring("voice.narrator.".length()).replace('.', '_') + ".ogg") != null;
 	}

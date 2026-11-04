@@ -300,7 +300,7 @@ final class Retaliation {
 					continue;
 				}
 				if (!HavenGrowth.sworn(mob) && mob.getHealth() < mob.getMaxHealth() * Temperaments.fleeShare(mob, FLEE_SHARE)) {
-					// ((0.7.489) a haven's sworn fights on)
+					// ((0.7.490) a haven's sworn fights on)
 					// badly hurt: they run (and vanilla's panic takes them)
 					b.remove();
 					say(level, mob, "flee");

@@ -54,7 +54,7 @@ import org.jspecify.annotations.Nullable;
 public final class Wagon extends Entity {
 	/** (0.5.26) {@link #CAB}: a hired carriage of a rich realm's, for players ({@link Cabs}). */
 	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2, CAB = 3, COACH = 4;
-	/** (0.7.489) {@link #HANDCART}: a poor settlement's trade, two wheels and a pair of handles in its carter's hands. {@link #SKIFF}: a cove's trade by water, a deckhand at the tiller. */
+	/** (0.7.490) {@link #HANDCART}: a poor settlement's trade, two wheels and a pair of handles in its carter's hands. {@link #SKIFF}: a cove's trade by water, a deckhand at the tiller. */
 	public static final int HANDCART = 5, SKIFF = 6;
 	/** (0.5.28) Its caravan when it's no caravan's: none (a carriage), or a war party's spoils cart ({@link WarParties}). */
 	static final int NO_CARAVAN = -1, WAR_CART = -2;
@@ -64,7 +64,7 @@ public final class Wagon extends Entity {
 	static final double CART_HITCH = 2.9, CARRIAGE_HITCH = 3.3, RICKSHAW_HITCH = 1.75, HAND_HITCH = 1.5;
 	/** Blows a cart takes from players before it breaks open (a carriage never does). */
 	static final float CART_HEALTH = 24.0F, HAND_HEALTH = 12.0F;
-	/** (0.7.489) A skiff's pace on the water (blocks a tick), and how long (ticks) it sails on a heading the caravan last gave it. */
+	/** (0.7.490) A skiff's pace on the water (blocks a tick), and how long (ticks) it sails on a heading the caravan last gave it. */
 	static final double SKIFF_SPEED = 0.2;
 	static final long SAIL_HOLD = 60L;
 	/** Left without its horse this long (ticks), a caravan's cart is done ({@link Caravans}); a carriage just waits. */
@@ -91,7 +91,7 @@ public final class Wagon extends Entity {
 	private final List<ItemStack> cargo = new ArrayList<>();
 	private boolean parked;
 	private int ride = -1;
-	/** (0.7.489) A skiff's heading (set by its caravan) and when it was given. Not saved: a caravan sets it again. */
+	/** (0.7.490) A skiff's heading (set by its caravan) and when it was given. Not saved: a caravan sets it again. */
 	private @Nullable Vec3 sailTarget;
 	private long sailStamp;
 
@@ -315,7 +315,7 @@ public final class Wagon extends Entity {
 		this.trail(horse);
 	}
 
-	/** (0.7.489) A skiff is given a heading by its caravan ({@code null}: it lies at its mooring). */
+	/** (0.7.490) A skiff is given a heading by its caravan ({@code null}: it lies at its mooring). */
 	void sailTo(@Nullable Vec3 to) {
 		this.sailTarget = to;
 		if (this.level() instanceof ServerLevel level) {
@@ -323,7 +323,7 @@ public final class Wagon extends Entity {
 		}
 	}
 
-	/** (0.7.489) Whether there is open water under {@code (x, z)}, its chunk loaded. */
+	/** (0.7.490) Whether there is open water under {@code (x, z)}, its chunk loaded. */
 	static boolean water(ServerLevel level, double x, double z) {
 		BlockPos at = BlockPos.containing(x, 0.0, z);
 		if (!level.isLoaded(at)) {
@@ -334,7 +334,7 @@ public final class Wagon extends Entity {
 	}
 
 	/**
-	 * (0.7.489) A skiff rides the water, never leaving it: toward its heading while it has a fresh one, turning aside
+	 * (0.7.490) A skiff rides the water, never leaving it: toward its heading while it has a fresh one, turning aside
 	 * to the nearest open water when the way is shore, bobbing at the surface. Its deckhand falling ends the voyage
 	 * like a carter's fall ends a cart's.
 	 */
@@ -471,7 +471,7 @@ public final class Wagon extends Entity {
 		}
 		if (player instanceof ServerPlayer sp && this.level() instanceof ServerLevel level) {
 			if ((this.kind() == CART || this.kind() == HANDCART || this.kind() == SKIFF) && TradeRoutes.deal(level, this, sp)) {
-				// ((0.7.489) emeralds in hand: a bargain struck with the cart's carter)
+				// ((0.7.490) emeralds in hand: a bargain struck with the cart's carter)
 				return InteractionResult.SUCCESS;
 			}
 			Component what = this.kind() == CART || this.kind() == HANDCART || this.kind() == SKIFF ? Caravans.describe(level, this)

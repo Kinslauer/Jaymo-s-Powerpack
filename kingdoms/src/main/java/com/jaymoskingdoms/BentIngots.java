@@ -31,7 +31,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Hordes patch 3, Andy's money (2026-11-03): "bent ingots, a bent copper and a bent iron, simple items.
+ * (0.7.490) Hordes patch 3, Andy's money (2026-11-03): "bent ingots, a bent copper and a bent iron, simple items.
  * Greenskins take only bent ones and are dumb enough to refuse the same ingot once it is straightened."
  * <ul>
  * <li>A player bends a copper or iron ingot by using it on an anvil, sneaking, one at a time (sneaking so an iron ingot
@@ -53,7 +53,7 @@ public final class BentIngots {
 	static final int OFFER_RELIEF = 1;
 	/** A plain ingot is refused no more than once in this long (ticks), so a held click doesn't flood the chat. */
 	static final int REFUSE_GAP = 40;
-	/** (0.7.489) The most of one kind of bent ingot a single trade cost can ask for (one stack). */
+	/** (0.7.490) The most of one kind of bent ingot a single trade cost can ask for (one stack). */
 	static final int STACK = 64;
 	// ================================================================================================================
 
@@ -104,7 +104,7 @@ public final class BentIngots {
 	}
 
 	/**
-	 * (0.7.489) An offer that sells {@code result} for {@code worth} in bent ingots. Priced in bent copper (the common
+	 * (0.7.490) An offer that sells {@code result} for {@code worth} in bent ingots. Priced in bent copper (the common
 	 * drop), since a vanilla offer wants that exact item and gives no change: a price asked in iron could not be paid in
 	 * copper. Above one stack of copper, the first cost is bent iron and the second the copper that's left over.
 	 */
@@ -125,7 +125,7 @@ public final class BentIngots {
 		return w % IRON_WORTH == 0 ? new ItemStack(BENT_IRON, Math.min(STACK, w / IRON_WORTH)) : new ItemStack(BENT_COPPER, Math.min(STACK, w));
 	}
 
-	/** (0.7.489) What {@link #coin} really pays for {@code worth}: one stack holds only so much, and a buyer must never be paid less than was booked. */
+	/** (0.7.490) What {@link #coin} really pays for {@code worth}: one stack holds only so much, and a buyer must never be paid less than was booked. */
 	public static int payable(int worth) {
 		int w = Math.max(1, worth);
 		return w % IRON_WORTH == 0 ? Math.min(STACK, w / IRON_WORTH) * IRON_WORTH : Math.min(STACK, w);
@@ -206,7 +206,7 @@ public final class BentIngots {
 			return InteractionResult.SUCCESS;
 		}
 		if (!bending) {
-			// ((0.7.489) cold, it just rings: melt it down or superheat it first)
+			// ((0.7.490) cold, it just rings: melt it down or superheat it first)
 			level.playSound(null, hit.getBlockPos(), SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.3F, 1.6F);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bent.cold"));
 			return InteractionResult.SUCCESS;
@@ -242,7 +242,7 @@ public final class BentIngots {
 		}
 		MinecraftServer minecraft = server.getServer();
 		if (!Hordes.greenskin(minecraft, w.factionId())) {
-			// ((0.7.489) a greenskin living in a human or haven settlement has no chief's hoard to take it)
+			// ((0.7.490) a greenskin living in a human or haven settlement has no chief's hoard to take it)
 			return InteractionResult.PASS;
 		}
 		int worth = worth(held);

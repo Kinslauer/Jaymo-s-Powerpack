@@ -27,7 +27,7 @@ import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.7.489) Hordes, Orc war journals: the book an orc or a goblin leaves behind ({@link LoreBooks}). One item, with a greasy
+ * (0.7.490) Hordes, Orc war journals: the book an orc or a goblin leaves behind ({@link LoreBooks}). One item, with a greasy
  * leather look for an orc's scrawl and a green ledger look for a goblin's; its pages are written once, when it is made,
  * and kept on the stack as any written book's are. Using it opens it; the {@link LoreCodex} files it.
  */

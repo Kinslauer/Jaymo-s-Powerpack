@@ -20,7 +20,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Hordes, "Living together" (Andy, 2026-11-03): orcs and goblins can live among humans, more easily among the
+ * (0.7.490) Hordes, "Living together" (Andy, 2026-11-03): orcs and goblins can live among humans, more easily among the
  * other heritages, and every people has some distaste for the others at its own strength. This is the table of it
  * ({@link #distaste}, 0 none to 3 the worst), and what it does:
  * <ul>
@@ -61,14 +61,14 @@ public final class Peoples {
 	static final int BRAWL_FROM = 2;
 	/** Homes: the distaste at which neither will sleep under the other's roof, how often it's checked (ticks), how long a greenskin waits to look again. */
 	static final int APART_FROM = 3, APART_EVERY = 20 * 30, APART_REST = 20 * 60 * 5;
-	/** (0.7.489) Two beds this near (same dimension) are one house: MCA's home is each villager's own bed, never shared. */
+	/** (0.7.490) Two beds this near (same dimension) are one house: MCA's home is each villager's own bed, never shared. */
 	static final double SAME_HOUSE = 7.0;
-	/** (0.7.489) How far from a greenskin a free bed (under another roof) must be for it to leave home: MCA looks this near when it seeks one. */
+	/** (0.7.490) How far from a greenskin a free bed (under another roof) must be for it to leave home: MCA looks this near when it seeks one. */
 	static final int APART_SEEK = 8;
 	// ================================================================================================================
 
 	/**
-	 * The peoples the table speaks of: ((0.7.489) each blood its own row and column) {@code HUMAN} the common folk
+	 * The peoples the table speaks of: ((0.7.490) each blood its own row and column) {@code HUMAN} the common folk
 	 * (Heartlanders, Earthlings, no blood); {@code OTHER} only a fallback for a blood not named here.
 	 */
 	enum People {
@@ -79,7 +79,7 @@ public final class Peoples {
 	/**
 	 * Row {@code who}, column {@code whom}: how much the one holds the other against them (0 to 3). Order as {@link People}:
 	 * human, Tideborn, Stoneborn, Warrior-born, Sylvan, Bio-built, Verdant, Emberborn, Frostborn, Nightborn, Dawnborn,
-	 * Stormborn, Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, other, orc, goblin, (0.7.489) Beastfolk, Hollow. Only the greenskin rows and
+	 * Stormborn, Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, other, orc, goblin, (0.7.490) Beastfolk, Hollow. Only the greenskin rows and
 	 * columns are used by {@link Prejudice#minds} (the rest of it keeps Prejudice's own degrees); glares and brawls use all
 	 * of it. Every people minds every other at least a little (1); orcs despise goblins (3); goblins fear and resent orcs (3).
 	 */
@@ -124,7 +124,7 @@ public final class Peoples {
 		{1, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1, 2, 0, 1, 1, 2, 1, 0, 3, 1, 1},
 		// goblin: fears and resents orcs, dreads dragons; the big folk are all to be wary of
 		{1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 3, 1, 2, 1, 1, 3, 0, 1, 1},
-		// (0.7.489) Beastfolk: the folk with ears and tails mind the pale dead a little more
+		// (0.7.490) Beastfolk: the folk with ears and tails mind the pale dead a little more
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2},
 		// Hollow: the risen dead mind the sun's and the afterlife's folk
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 0}
@@ -135,7 +135,7 @@ public final class Peoples {
 		builder -> builder.persistent(Codec.STRING.listOf()));
 
 	private static final Map<UUID, Long> GLARED = new HashMap<>(), APARTED = new HashMap<>();
-	/** (0.7.489) The bed each greenskin last gave up: back under that roof again, there was no better, so it stays. */
+	/** (0.7.490) The bed each greenskin last gave up: back under that roof again, there was no better, so it stays. */
 	private static final Map<UUID, net.minecraft.core.GlobalPos> LEFT = new HashMap<>();
 
 	private Peoples() {
@@ -245,12 +245,12 @@ public final class Peoples {
 		for (Villager v : level.getEntitiesOfClass(Villager.class, p.getBoundingBox().inflate(MEET_RANGE),
 			x -> x.isAlive() && !x.isBaby() && McaCompat.isMca(x))) {
 			List<String> met = v.getAttached(MET);
-			// ((0.7.489) one who can't see who they are (a mask they don't see through) hasn't truly met them: MCA's hearts
+			// ((0.7.490) one who can't see who they are (a mask they don't see through) hasn't truly met them: MCA's hearts
 			// wouldn't move, so leave the first meeting for when they do)
 			if (met != null && met.contains(id) || Identities.hiddenFrom(p, v)) {
 				continue;
 			}
-			// ((0.7.489) only a true first meeting: one who already has MCA memories of them (an old friend from before
+			// ((0.7.490) only a true first meeting: one who already has MCA memories of them (an old friend from before
 			// this patch, or one pushed out of a full MET list) is only noted, never cooled)
 			boolean known = McaCompat.knows(v, p);
 			float m = known ? 0.0F : Prejudice.minds(v, p);
@@ -289,7 +289,7 @@ public final class Peoples {
 			if (b == a || b.distanceTo(a) > GLARE_RANGE || theirs == null || mine == theirs) {
 				continue;
 			}
-			// ((0.7.489) as Prejudice sees it: the tolerant and a ruler's edicts ease it, and a haven that lives alongside
+			// ((0.7.490) as Prejudice sees it: the tolerant and a ruler's edicts ease it, and a haven that lives alongside
 			// the tribes minds no greenskin)
 			float d = glareMinds(level, a, mine, theirs);
 			if (d < GLARE_FROM * DEGREE_STEP || random.nextFloat() >= GLARE_CHANCE * d / DEGREE_STEP) {
@@ -304,7 +304,7 @@ public final class Peoples {
 		}
 	}
 
-	/** (0.7.489) How much {@code a} (of blood {@code mine}) minds a neighbour of blood {@code theirs}, for a glare: {@link #minds}, with Prejudice's haven exemption. */
+	/** (0.7.490) How much {@code a} (of blood {@code mine}) minds a neighbour of blood {@code theirs}, for a glare: {@link #minds}, with Prejudice's haven exemption. */
 	private static float glareMinds(ServerLevel level, Villager a, Heritage.Kind mine, Heritage.Kind theirs) {
 		if (!mine.brood && theirs.brood && Havens.greenskin(level.getServer(), Havens.home(a))) {
 			return 0.0F;
@@ -339,19 +339,19 @@ public final class Peoples {
 				continue;
 			}
 			java.util.Optional<net.minecraft.core.GlobalPos> home = McaCompat.home(g);
-			// ((0.7.489) MCA gave them a bed under the roof they left: there was no other, so they put up with it)
+			// ((0.7.490) MCA gave them a bed under the roof they left: there was no other, so they put up with it)
 			if (sameHouse(home, java.util.Optional.ofNullable(LEFT.get(g.getUUID())))) {
 				continue;
 			}
 			for (Villager h : near) {
-				// ((0.7.489) by house, not by bed: each bed holds one, so beds a few steps apart are one roof)
+				// ((0.7.490) by house, not by bed: each bed holds one, so beds a few steps apart are one roof)
 				if (h == g || !sameHouse(McaCompat.home(g), McaCompat.home(h)) || McaCompat.kin(g, h) != McaCompat.STRANGERS) {
 					continue;
 				}
 				Heritage.Kind theirs = VillagerHeritage.of(h);
 				if (mine != theirs && Math.max(distaste(mine, theirs), distaste(theirs, mine)) >= APART_FROM) {
 					APARTED.put(g.getUUID(), now);
-					// ((0.7.489) only for a free bed under another roof nearby, or MCA would just hand back the one let go)
+					// ((0.7.490) only for a free bed under another roof nearby, or MCA would just hand back the one let go)
 					if (freeBedElsewhere(level, g, home)) {
 						LEFT.put(g.getUUID(), home.get());
 						McaCompat.leaveHome(g);
@@ -362,7 +362,7 @@ public final class Peoples {
 		}
 	}
 
-	/** (0.7.489) A bed with room near {@code g}, in their home's dimension but not under its roof (within {@link #APART_SEEK}). */
+	/** (0.7.490) A bed with room near {@code g}, in their home's dimension but not under its roof (within {@link #APART_SEEK}). */
 	private static boolean freeBedElsewhere(ServerLevel level, Villager g, java.util.Optional<net.minecraft.core.GlobalPos> home) {
 		if (home.isEmpty() || !home.get().dimension().equals(level.dimension())) {
 			return false;
@@ -372,7 +372,7 @@ public final class Peoples {
 			net.minecraft.world.entity.ai.village.poi.PoiManager.Occupancy.HAS_SPACE).findAny().isPresent();
 	}
 
-	/** (0.7.489) Beds {@code a} and {@code b} lie under one roof: the same dimension, within {@link #SAME_HOUSE}. */
+	/** (0.7.490) Beds {@code a} and {@code b} lie under one roof: the same dimension, within {@link #SAME_HOUSE}. */
 	private static boolean sameHouse(java.util.Optional<net.minecraft.core.GlobalPos> a, java.util.Optional<net.minecraft.core.GlobalPos> b) {
 		return a.isPresent() && b.isPresent() && a.get().dimension().equals(b.get().dimension())
 			&& a.get().pos().closerThan(b.get().pos(), SAME_HOUSE);

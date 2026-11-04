@@ -250,7 +250,7 @@ public final class Havens {
 			return null;
 		}
 		if (kind != null && kind.brood) {
-			// (0.7.489) an orc or goblin here came as a Settler (whatever the haven's blood): it keeps its brood
+			// (0.7.490) an orc or goblin here came as a Settler (whatever the haven's blood): it keeps its brood
 			return null;
 		}
 		String entry = entry(level.getServer(), f);

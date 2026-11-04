@@ -296,7 +296,7 @@ final class Neighbours {
 		boolean courting = McaCompat.courtable(a, b);
 		boolean lunch = t >= Routines.LUNCH_FROM && t < Routines.LUNCH_TO;
 		if (r <= DISLIKE && Peoples.brawls(a, b, random)) {
-			// ((0.7.489) peoples that despise each other come to blows sooner: Peoples)
+			// ((0.7.490) peoples that despise each other come to blows sooner: Peoples)
 			return Kind.FIGHT;
 		}
 		List<Kind> deck = new ArrayList<>();

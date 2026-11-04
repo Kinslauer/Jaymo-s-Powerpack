@@ -107,7 +107,7 @@ public final class InteractActions {
 					return null;
 				}
 				if (GreenMarket.merchant(v)) {
-					// (0.7.489) a greenskin camp's market stall, priced in bent ingots
+					// (0.7.490) a greenskin camp's market stall, priced in bent ingots
 					GreenMarket.trade(player, v);
 					return null;
 				}

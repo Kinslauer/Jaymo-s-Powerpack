@@ -12,7 +12,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.489) The Lore Codex ({@link LoreCodex}): on the left the books it keeps, newest last, and on the right the one chosen,
+ * (0.7.490) The Lore Codex ({@link LoreCodex}): on the left the books it keeps, newest last, and on the right the one chosen,
  * a page at a time on parchment. Remembers which book you were in for the rest of the session.
  */
 final class LoreCodexScreen extends Screen {

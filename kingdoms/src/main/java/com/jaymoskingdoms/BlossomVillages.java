@@ -228,7 +228,7 @@ final class BlossomVillages {
 			Villages.chooseElder(level, stored);
 		}
 		CLIMATES.put(id, Climate.CHERRY);
-		// (0.7.489) its torii is its front, for the walls it will raise
+		// (0.7.490) its torii is its front, for the walls it will raise
 		WalledTowns.front(server, id, gate);
 		JaymosKingdoms.LOGGER.info("A Blossom village, {}, rose at {}", village.name(), bell);
 		Faction out = Factions.get(server, id);
@@ -295,7 +295,7 @@ final class BlossomVillages {
 		}
 	}
 
-	/** (0.7.489) {@code f} stands among the cherry trees: it walls itself in the Blossom way ({@link WalledTowns}). */
+	/** (0.7.490) {@code f} stands among the cherry trees: it walls itself in the Blossom way ({@link WalledTowns}). */
 	static boolean blossom(ServerLevel level, Faction f) {
 		return climate(level, f) == Climate.CHERRY;
 	}

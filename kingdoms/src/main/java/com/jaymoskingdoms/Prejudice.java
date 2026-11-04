@@ -57,7 +57,7 @@ import org.jspecify.annotations.Nullable;
 public final class Prejudice {
 	/** How far from human each heritage is, by {@link Heritage.Kind} (0: passes for human). Andy's order: Tideborn, Stoneborn, Warrior-born, Sylvan. */
 	static final int TIDEBORN = 4, STONEBORN = 3, WARRIORBORN = 2, SYLVAN = 1;
-	/** (0.7.489) The beastfolk's ears and tails show; the Hollow are the dead walking, the furthest folk shun. */
+	/** (0.7.490) The beastfolk's ears and tails show; the Hollow are the dead walking, the furthest folk shun. */
 	static final int BEASTFOLK = 2, HOLLOW = 4;
 	/** (0.7.357) The Bio-built: made, not born, and plainly so; worse than any. */
 	static final int BIOBUILT = 6;
@@ -192,7 +192,7 @@ public final class Prejudice {
 		// ((0.7.221) less where the ruler has decreed tolerance: Reforms)
 		float edict = edict(who, f);
 		if (Peoples.greenskin(mine, theirs)) {
-			// ((0.7.489) a goblin or an orc on either side: the distaste between peoples, Peoples; none in a haven that lives alongside the tribes)
+			// ((0.7.490) a goblin or an orc on either side: the distaste between peoples, Peoples; none in a haven that lives alongside the tribes)
 			if (!mine.brood && who.level() instanceof ServerLevel hl && Havens.greenskin(hl.getServer(), Havens.home(who))) {
 				return 0.0F;
 			}
@@ -215,7 +215,7 @@ public final class Prejudice {
 		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? (theirs == Heritage.Kind.BIOBUILT ? d * BIO_TOLERANT : 0.0F) : d);
 	}
 
-	/** (0.7.489) The share of their distaste {@code who} keeps under their ruler's tolerance edicts (1: none decreed; {@link Reforms}). */
+	/** (0.7.490) The share of their distaste {@code who} keeps under their ruler's tolerance edicts (1: none decreed; {@link Reforms}). */
 	static float edict(LivingEntity who) {
 		return edict(who, faction(who));
 	}

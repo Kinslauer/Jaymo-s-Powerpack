@@ -289,8 +289,8 @@ def deepborn(rng, solid, glow):
     hands(hand)
 
 
-# ---- (Kingdoms 0.7.489) Beastfolk and Hollow, and the family's variants. Painted on the same UVs as the rest, so every mark is
-# flat on the 64x64 skin. (0.7.489, later) The ears, tails, wings and legs that used to be painted here are real model parts now
+# ---- (Kingdoms 0.7.490) Beastfolk and Hollow, and the family's variants. Painted on the same UVs as the rest, so every mark is
+# flat on the 64x64 skin. (0.7.490, later) The ears, tails, wings and legs that used to be painted here are real model parts now
 # (client BeastParts, textures from tools/gen_heritage_parts.py); the skins keep the fur, the faces and the glow.
 # Head: front (8-16, 8-16, eyes on row 12), top (8-16, 0-8, its front edge the bottom), sides (0-8 / 16-24, 8-16), back (24-32).
 # Body: front (20-28, 20-32), back (32-40, 20-32). Legs' backs: (12-16, 20-32) and (28-32, 52-64).
@@ -330,7 +330,7 @@ def beastfolk(rng, solid, glow):
     fur_arms(rng, solid, FUR)
     hands(lambda x, y: put(solid, x, y, CLAW if rng.random() < 0.6 else FUR[1]))
     muzzle(solid, (226, 200, 160, 255), (52, 36, 36, 255))
-    # (0.7.489) the ears and the tail are model parts now (client BeastParts; tools/gen_heritage_parts.py)
+    # (0.7.490) the ears and the tail are model parts now (client BeastParts; tools/gen_heritage_parts.py)
 
 
 def hollow_heritage(rng, solid, glow):
@@ -382,8 +382,8 @@ write("dawnborn", dawnborn)
 write("endborn", endborn)
 write("dragonblood", dragonblood)
 write("deepborn", deepborn)
-write("beastfolk", beastfolk)  # (0.7.489)
-write("hollow", hollow_heritage)  # (0.7.489) the heritage; hollow in variant/ is the Deepborn's
+write("beastfolk", beastfolk)  # (0.7.490)
+write("hollow", hollow_heritage)  # (0.7.490) the heritage; hollow in variant/ is the Deepborn's
 for key, c in EYE_COLOURS.items():
     img = blank()
     for x, y in EYES:
@@ -864,7 +864,7 @@ def geode(rng, solid, glow):
     hands(lambda x, y: (put(solid, x, y, AM[1]), put(glow, x, y, AM[0])) if rng.random() < 0.5 else None)
 
 
-# ---- (Kingdoms 0.7.489) the Sylvan fae and elves, the Beastfolk family and the Hollow dead. Each is a variant over its heritage's
+# ---- (Kingdoms 0.7.490) the Sylvan fae and elves, the Beastfolk family and the Hollow dead. Each is a variant over its heritage's
 # first look (beastfolk_skin / hollow_skin / sylvan_<n>_skin), so a variant paints only what is its own.
 
 def dryad(rng, solid, glow):
@@ -1088,7 +1088,7 @@ def avian(rng, solid, glow):
                 put(solid, x, y, TIP)
     arm_pixels(feathers)
     hands(lambda x, y: put(solid, x, y, (214, 176, 70, 255)))  # yellow talons
-    # (0.7.489) the folded wings, the crest and the tail feathers are model parts now (client BeastParts)
+    # (0.7.490) the folded wings, the crest and the tail feathers are model parts now (client BeastParts)
     dots(solid, ((11, 13), (12, 13), (11, 14), (12, 14)), (232, 188, 60, 255))  # beak
     dots(solid, ((11, 15), (12, 15)), (200, 150, 40, 255))
 
@@ -1300,7 +1300,7 @@ VARIANTS = {"sunfreckled": sunfreckled, "skymarked": skymarked, "obsidian": obsi
             "lodeborn": lodeborn, "galeborn": galeborn, "twilight": twilight, "gilded": gilded,
             "chorusgrown": chorusgrown, "voidpale": voidpale, "goldscale": goldscale, "rimewyrm": rimewyrm,
             "hollow": hollow, "geode": geode,
-            # (0.7.489) the Sylvan fae and elves, the Beastfolk, the Hollow dead
+            # (0.7.490) the Sylvan fae and elves, the Beastfolk, the Hollow dead
             "dryad": dryad, "changeling": changeling, "sprite": sprite, "nymph": nymph, "faerie": faerie, "highelf": highelf,
             "moonelf": moonelf, "bloodelf": bloodelf, "arachnid": arachnid, "avian": avian, "canine": canine, "feline": feline,
             "kitsune": kitsune, "serpen": serpen, "zombie": zombie, "skeleton": skeleton, "wraith": wraith, "reaper": reaper}

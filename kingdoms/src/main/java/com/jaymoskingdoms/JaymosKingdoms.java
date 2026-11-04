@@ -154,7 +154,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Crewmen.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		CampChiefs.register();
-		// (0.7.489) orc brawls, chief challenges, camp feuds and goblin slaves
+		// (0.7.490) orc brawls, chief challenges, camp feuds and goblin slaves
 		Brutality.register();
 		Slaves.register();
 		StoryTalk.register();
@@ -273,7 +273,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tribes.register();
 		Pedlars.register();
 		Bestiary.register();
-		// (0.7.489) Hordes, Orc war journals: the journals orcs and goblins leave, the data books, the Lore Codex that keeps them
+		// (0.7.490) Hordes, Orc war journals: the journals orcs and goblins leave, the data books, the Lore Codex that keeps them
 		WarJournal.register();
 		LoreCodex.register();
 		LoreBooks.register();
@@ -288,11 +288,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
-		// (0.7.489) Havens expand: their works, land and sworn order
+		// (0.7.490) Havens expand: their works, land and sworn order
 		HavenGrowth.register();
-		// (0.7.489) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
+		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
 		BentIngots.register();
-		// (0.7.489) Currencies: the realms' coins and their money-changers
+		// (0.7.490) Currencies: the realms' coins and their money-changers
 		Currencies.register();
 		HordeEconomy.register();
 		GreenMarket.register();

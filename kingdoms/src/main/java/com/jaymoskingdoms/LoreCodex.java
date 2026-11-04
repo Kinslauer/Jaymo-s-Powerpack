@@ -47,7 +47,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.489) Hordes, Orc war journals: the <b>Lore Codex</b>, a cloth-bound book that keeps every lore book you have found, one
+ * (0.7.490) Hordes, Orc war journals: the <b>Lore Codex</b>, a cloth-bound book that keeps every lore book you have found, one
  * of each: war journals ({@link WarJournal}), data books ({@link LoreBooks}), the school manuals and the captains' orders, and,
  * without taking them from you, the Rung Journal and the Bestiary (which it always shows as they stand now). Using it files
  * every such book in your pack into it (a book it already holds stays in your pack) and opens its reading screen.
@@ -176,7 +176,7 @@ public final class LoreCodex extends Item {
 
 	/** Gives {@code player} their codex back if it was taken as they died. */
 	private static void restore(ServerPlayer player) {
-		// (0.7.489) not to a dead one (rejoined on the death screen): their pack is not carried over, so DUE waits for the respawn
+		// (0.7.490) not to a dead one (rejoined on the death screen): their pack is not carried over, so DUE waits for the respawn
 		if (ITEM != null && player.isAlive() && Boolean.TRUE.equals(player.getAttached(DUE))) {
 			player.removeAttached(DUE);
 			if (!player.getInventory().contains(stack -> stack.is(ITEM))) {
@@ -253,9 +253,9 @@ public final class LoreCodex extends Item {
 					}
 				}
 				Component title = stack.get(DataComponents.CUSTOM_NAME);
-				// (0.7.489) a captain's orders filed unread still teach what reading them would
+				// (0.7.490) a captain's orders filed unread still teach what reading them would
 				Captains.readOrders(player, stack);
-				// (0.7.489) one copy filed: the rest of a stack stays in the pack, as a book already held does
+				// (0.7.490) one copy filed: the rest of a stack stays in the pack, as a book already held does
 				pack.setItem(i, stack.copyWithCount(stack.getCount() - 1));
 				shelf.add(new Entry(id, title != null ? title : Component.literal(content == null ? "?" : content.title().raw()), pages));
 			}

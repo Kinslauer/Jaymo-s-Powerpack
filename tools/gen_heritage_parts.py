@@ -1,4 +1,4 @@
-"""Beastfolk and Sylvan model-part textures (Kingdoms 0.7.489): the ears, tails, wings, legs, crest and sprigs that used to be
+"""Beastfolk and Sylvan model-part textures (Kingdoms 0.7.490): the ears, tails, wings, legs, crest and sprigs that used to be
 painted flat on the skin are real model parts now (client BeastParts), each design with its own 64x64 sheet:
 
 parts/<key>.png       - the sheet (vanilla-style 16px-scale pixel art, nothing copied)

@@ -249,7 +249,7 @@ public final class Rearm {
 	}
 
 	private static void say(ServerLevel level, Mob mob, String kind, int lines, int color) {
-		// (0.7.489) an orc or goblin fighter barks in its own dialect
+		// (0.7.490) an orc or goblin fighter barks in its own dialect
 		Speech.say(level, mob, Dialects.trShared(mob, "talk.jaymoskingdoms." + kind + "." + mob.getRandom().nextInt(lines)), color, SPEECH_RANGE);
 	}
 

@@ -344,9 +344,9 @@ final class HavenBuildings {
 		return s.done();
 	}
 
-	// ---- (0.7.489) Havens expand: the works a haven raises to make the most of its land ----------------------------------
+	// ---- (0.7.490) Havens expand: the works a haven raises to make the most of its land ----------------------------------
 
-	/** (0.7.489) The dock's rows from this one on (the boat shed's end) stand over water, at least this many of its columns. */
+	/** (0.7.490) The dock's rows from this one on (the boat shed's end) stand over water, at least this many of its columns. */
 	static final int DOCK_WATER_ROW = 6, DOCK_WET = 9;
 	/** The works a haven raises, in their catalogue ids ({@link HavenGrowth} says which a blood builds and what each makes). */
 	static final String FIELDS = "haven_fields", WORKSHOP = "haven_workshop", MINE = "haven_mine", DOCK = "haven_dock", MILL = "haven_mill";
@@ -381,7 +381,7 @@ final class HavenBuildings {
 					} else if (z % 3 == 0) {
 						s.set(x, 0, z, water);
 					} else {
-						// (0.7.489) crops stand on farmland (the water rows keep it wet); reeds only on dirt beside a water row
+						// (0.7.490) crops stand on farmland (the water rows keep it wet); reeds only on dirt beside a water row
 						boolean reed = x % 4 == 2 && z > 1;
 						s.set(x, 0, z, reed ? dirt : farmland);
 						s.set(x, 1, z, reed ? Blocks.SUGAR_CANE.defaultBlockState() : crops[(x / 4) % crops.length].defaultBlockState());
@@ -580,7 +580,7 @@ final class HavenBuildings {
 
 	/**
 	 * A dock (9 x 13): a plank quay on log piles with a boat shed's roof over its far end, crates and barrels, a drying
-	 * rack of kelp, a lantern at the head. (It stands on the shore; the boats are the haven's own.) (0.7.489) Its head is on
+	 * rack of kelp, a lantern at the head. (It stands on the shore; the boats are the haven's own.) (0.7.490) Its head is on
 	 * dry land toward the town and its far end, the shed's, out over the water ({@link Planner#setShore}): a haven with no
 	 * shore in its land builds none.
 	 */
