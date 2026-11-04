@@ -33,7 +33,7 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.core.component.DataComponents;
 
 /**
- * (0.20.24) What one left for dead carries away that kills them unless it's cured ({@link Mortality}, Jungxvv's ideas):
+ * (0.20.25) What one left for dead carries away that kills them unless it's cured ({@link Mortality}, Jungxvv's ideas):
  * <ul>
  * <li><b>Venom</b> (a spider's or a snake's): {@link Kind#VENOM}'s two days, worse each half day, then death. Honey, or the
  * Potion of Cleansing (the "major antidote").</li>

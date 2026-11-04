@@ -143,5 +143,10 @@
   "entity.jaymoskingdoms.patron_champion.add.wisp": "Lantern Wisp",
   "entity.jaymoskingdoms.patron_champion.add.sun_guard": "Sun-Guard",
   "entity.jaymoskingdoms.patron_champion.add.double": "The Cinder-Shade",
-  "entity.jaymoskingdoms.patron_champion.add.zealot": "Zealot"
+  "entity.jaymoskingdoms.patron_champion.add.zealot": "Zealot",
+  "entity.jaymoskingdoms.stegonaut_dragon": "Stegonaut",
+  "entity.jaymoskingdoms.atroxiia_dragon": "Atroxiia",
+  "entity.jaymoskingdoms.varasuchus_dragon": "Varasuchus",
+  "entity.jaymoskingdoms.ignivorus_dragon": "Ignivorus",
+  "entity.jaymoskingdoms.aetherion_dragon": "Aetherion"
 }

@@ -1200,5 +1200,8 @@
   "message.jaymoskingdoms.enchanted_storage.rank_2": "You need Enchanted Storage II to enchant a leather bag",
   "message.jaymoskingdoms.enchanted_storage.rank_3": "You need Enchanted Storage III to enchant an iron bag",
   "message.jaymoskingdoms.enchanted_storage.cost": "Takes %s levels and %s lapis lazuli",
-  "message.jaymoskingdoms.rpg_gate.unlearned": "You haven't learned this yet: find it on your skill web, or ask a trainer"
+  "message.jaymoskingdoms.rpg_gate.unlearned": "You haven't learned this yet: find it on your skill web, or ask a trainer",
+  "message.jaymoskingdoms.aetherion.cataclysm": "Aetherion rears up, and the stars begin to fall.",
+  "message.jaymoskingdoms.dragon.crashed_walker": "%s sinks onto its belly, wounded and wary. Come close crouching, with empty hands, and it may come to trust you.",
+  "message.jaymoskingdoms.dragon.bolted_walker": "%s has had enough. It turns and lumbers off."
 }

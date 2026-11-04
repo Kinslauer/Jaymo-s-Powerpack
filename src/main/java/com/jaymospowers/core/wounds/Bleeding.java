@@ -338,7 +338,7 @@ public final class Bleeding {
 		return any;
 	}
 
-	/** (0.20.24) {@code part} festers now (a zombie's bite on one left for dead, Mortality). */
+	/** (0.20.25) {@code part} festers now (a zombie's bite on one left for dead, Mortality). */
 	static void festerNow(LivingEntity entity, BodyPart part) {
 		fester(entity, part, entity.level().getGameTime());
 	}

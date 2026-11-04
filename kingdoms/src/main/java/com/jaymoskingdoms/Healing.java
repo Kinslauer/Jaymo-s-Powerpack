@@ -46,7 +46,7 @@ public final class Healing {
 	// ---- the healer's price (silver coins, (0.7.498) was emeralds) ----
 	/** (0.7.462) A full treatment: a base, then so much for each break, each open cut, each festering part, and for every quarter of health lost. */
 	static final int TREATMENT_BASE = 4, PER_BREAK = 5, PER_CUT = 1, PER_FESTER = 3, PER_QUARTER_LOST = 2;
-	/** (0.7.522) And for drawing out what will kill (poisoned blood, water in the lungs, withering: Powers' afflictions). */
+	/** (0.7.523) And for drawing out what will kill (poisoned blood, water in the lungs, withering: Powers' afflictions). */
 	static final int PER_AFFLICTION = 8;
 	/** (0.7.462) The most a treatment ever costs. */
 	static final int TREATMENT_MAX = 48;

@@ -163,7 +163,7 @@ public final class Wounds {
 		// (0.15.99) kneeling at someone's side to treat them
 		Tending.register();
 		SelfRevive.register();
-		// (0.20.24) death by cause: final, or left for dead with an injury that fits (after the downed state, which it follows)
+		// (0.20.25) death by cause: final, or left for dead with an injury that fits (after the downed state, which it follows)
 		Mortality.register();
 		// (0.19.20) hostiles walk up and finish a downed player off, filmed for them
 		MobExecutions.register();

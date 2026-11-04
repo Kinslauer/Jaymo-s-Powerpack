@@ -299,7 +299,7 @@ public final class Downed {
 			}
 			if (isDowned(entity)) {
 				// (a mob, fire, a fall, the void: they die as anyone would, body and all; no second downing)
-				// ((0.20.24) what downed them is the cause the death is rolled on, Mortality)
+				// ((0.20.25) what downed them is the cause the death is rolled on, Mortality)
 				Mortality.felled(entity, FELLED_BY.get(entity));
 				forget(entity);
 				return true;
@@ -727,7 +727,7 @@ public final class Downed {
 		return knockOut(level, entity, ticks, anyBody, message, true);
 	}
 
-	/** (0.20.24) {@code dropArms}: false, they keep hold of what they carry (one left for dead, laid out again where they wake). */
+	/** (0.20.25) {@code dropArms}: false, they keep hold of what they carry (one left for dead, laid out again where they wake). */
 	static boolean knockOut(ServerLevel level, LivingEntity entity, int ticks, boolean anyBody, String message, boolean dropArms) {
 		boolean was = isDowned(entity);
 		if (!was && !downable(entity) && !(anyBody && stunnable(entity))) {
@@ -788,7 +788,7 @@ public final class Downed {
 		}
 		DamageSource felled = FELLED_BY.get(entity);
 		Entity by = felled == null ? null : felled.getEntity();
-		// ((0.20.24) and what downed it is the cause its death is rolled on, Mortality)
+		// ((0.20.25) and what downed it is the cause its death is rolled on, Mortality)
 		Mortality.felled(entity, felled);
 		forget(entity);
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(Wounds.WOUNDS_DAMAGE), by);
@@ -813,7 +813,7 @@ public final class Downed {
 			return;
 		}
 		FELLED_BY.put(entity, level.damageSources().playerAttack(by));
-		// ((0.20.24) Andy: an execution is final when a player does it)
+		// ((0.20.25) Andy: an execution is final when a player does it)
 		Mortality.executed(entity, true);
 		finish(level, entity);
 	}
@@ -826,17 +826,17 @@ public final class Downed {
 			return;
 		}
 		FELLED_BY.put(entity, level.damageSources().mobAttack(by));
-		// ((0.20.24) and when a boss does; any other mob's is rolled on as what it is)
+		// ((0.20.25) and when a boss does; any other mob's is rolled on as what it is)
 		Mortality.executed(entity, Mortality.boss(by));
 		finish(level, entity);
 	}
 
-	/** (0.20.24) A timer ran out ({@link Afflictions}): their death now, by their wounds, with no going down first. */
+	/** (0.20.25) A timer ran out ({@link Afflictions}): their death now, by their wounds, with no going down first. */
 	static void succumb(ServerLevel level, LivingEntity entity) {
 		finish(level, entity);
 	}
 
-	/** (0.20.24) No longer down, quietly (Mortality moves one left for dead before laying them out again where they wake). */
+	/** (0.20.25) No longer down, quietly (Mortality moves one left for dead before laying them out again where they wake). */
 	static void forgetQuietly(LivingEntity entity) {
 		forget(entity);
 	}

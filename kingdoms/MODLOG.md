@@ -426,7 +426,105 @@ Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its co
   (`Havens.keptHuman`, by who they are), and says why when asked their name: wed in, cast out of the human towns, a
   foundling, its healer, working off a debt, or a deserter it hid. Compile-checked; not played.
 
-## 0.7.522: death by cause hooks (pack 0.20.24)
+## 0.7.522: Stegonaut, Atroxiia, Varasuchus, Ignivorus and Aetherion, the first of the lesser dragons (pack 0.20.24)
+Andy: "we NEED these dragons" (Saint's Dragons). It is a 1.20.1 mod whose code is MIT and whose art is All Rights
+Reserved, so its eight dragons are rebuilt here with our own models and paint (`docs/SaintsDragons-Plan.md`, patches 1
+and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
+- **Walkers** (`WindDragon.flies`): a dragon that never takes off. Wild it strolls and grazes about its home, fights on
+  its feet where it stands, and bolting it lumbers off; tamed and saddled it's ridden like a horse, and R sends its own
+  move. New hooks for the lesser dragons: `aggressive` (a grazer fights only whoever hurts it), `bossBar` (beasts, not
+  minibosses), `windDragon` (killing one doesn't count toward Eurus and Aeolus's disguises), `crashKey`/`boltKey`,
+  `walkerFight`, and `action` (the move its model is playing, with `actionSeen`/`actionAge` on the client).
+- **Stegonaut** (`StegonautDragon`, `jaymoskingdoms:stegonaut_dragon`): a tall plated dragon (2.8 x 3.4 blocks, its back
+  about 2.9 high and its plates over 4) of the jungles and
+  plains (`has_stegonaut_dragon`), spawning with the herds in ones and twos and staying put like cattle. 100 health,
+  armour 15. Besides the bite and the tail sweep: a **chin slam** (8, a throw up), a **ground slam** (rears, stamps:
+  20 in a ring of 5, then seven earth spikes burst along the ground toward its foe, 10 each), **ground eating** (at 7-24
+  blocks it bites up the earth, chews, and spits a clod in an arc, 10) and, worn down or ridden and hit, a **roar** that
+  hardens its plates (Resistance and Absorption for it, its riders and its owner near it, 10 s). Tamed the usual way
+  (wear it below a third, crouch empty-handed, raw beef its favourite, Stoneborn twice as fast); ridden, R is the ground
+  slam with its spikes running where you look (5 s).
+- **Its look** (`client/dragons/StegonautDragonModel`, `tools/gen_stegonaut.py`, which prints the model's body plan from
+  its own UV table): Andy wanted it "taller, to be imposing": long pillar legs with long shins ("longer cannons"), a long neck
+  raised high in four segments,
+  two staggered rows of tall horn plates, a bony brow and a shovel jaw, a long four-spiked tail;
+  four hides (moss stone, jungle green, sandstone, slate) with moss on its back and four glowing-lichen marking patterns;
+  short/long horns or a nose horn and a broken plate by its DragonLook; drawn 1.3x. It plods, rears and stamps for the
+  slam, noses the ground and chews, and flares its plates to roar.
+  Andy: "all the joints should move and blend smoothly": every move's envelope is smoothstep-eased and ends where it
+  began, sitting/crashing/swimming ease in and out, the knees fold on a smooth curve, and the neck's bob and sway roll up
+  it a beat per segment.
+- **Swimmers** (`WindDragon.swims`): a walker of the waters. It breathes under water and currents don't push it; wild it
+  floats with its back out and dives straight at whoever it fights there; ridden in water it swims where you look (W
+  ahead, Space up and out at a bank, Shift down, S brakes) and keeps its riders' air topped up. Shared helpers for the
+  lesser dragons' moves: `spareable`, `inFront`, `fighting`, `stun` (rooted and heavy-handed, stars over the head).
+- **Atroxiia** (`AtroxiiaDragon`, `jaymoskingdoms:atroxiia_dragon`): a pale serpent wyrm on two great arms and its tail, no
+  hind legs (3 x 4.3 blocks, its head about 4.5 up) of the snowy plains, ice spikes, snowy taiga, snowy beaches and frozen rivers (`has_atroxiia_dragon`),
+  alone and rare. 200 health, armour 10, a grazer that fights only whoever hurts it, and it leaves frosted ice on still
+  water where it strolls. Besides the bite and the tail sweep: a fist **slam** (16), a claw **swipe** (12), the
+  **precise strike** (three jabs of its tail spear at 3-6 blocks, 9 each, dragging them in, the last a 2 s stun),
+  **Gungnir** (the spear drawn back, a lunge, and driven through everything in an 8-block line: 40 and a stun), the
+  **devastating sweep** (pressed close: the tail spun round, 13 in a ring of 7, a big throw) and the **Helheim quake**
+  (at range, or freely once below half: it rears and brings both fists down twice, 25 to everyone on their feet within 9, the second
+  a 5 s stun, and the water round it freezes). Raw cod its favourite, Frostborn twice as fast; ridden, R is Gungnir
+  where you look (5 s).
+- **Varasuchus** (`VarasuchusDragon`, `jaymoskingdoms:varasuchus_dragon`): a crocodile dragon (4 x 3.3 blocks, its back
+  3.2 up, about 10 long with its tail) of the beaches and swamps (`has_varasuchus_dragon`), alone and rare. 200 health,
+  armour 8, a hunter: it goes for players who come near, and it's quick in the water. Bite 15, **claws** (8) and a
+  **horn gore** (8, a toss), a **dash** at 6-16 blocks (it charges: claws 15 as it reaches you, then its tail lashed
+  round, 10), a **slash barrage** up close (eight claws, 5 each), a **phase shift** (hit, it may slip past you in a blur
+  and come out behind you, untouchable meanwhile) and the **tailguard** (hit, it may curl its tail round as a guard: the
+  next blow within 8 blocks is parried with our parry's sparks and ring, the striker takes 10, is slowed and thrown back).
+  Below half it **rages**: bites 25, horns 15.8, claws 12, every move a third quicker. Raw salmon its favourite, Tideborn
+  twice as fast; ridden, R charges (a burst of pace, goring whoever it reaches, 4 s).
+- **Their looks** (`AtroxiiaDragonModel`/`VarasuchusDragonModel`, painted and printed by `tools/gen_atroxiia.py` and
+  `tools/gen_varasuchus.py`, sharing `tools/lesser_dragon_art.py`): both tall and long-limbed. Atroxiia: a serpent's body
+  raised on two long, heavy arms (gold cuffs, three-fingered hands) with no hind legs, the eleven-segment tail as its
+  third support, curling up over its back into a gold-bound spear of ice; a three-segment neck and a head in a striped
+  nemes cloth with a gold band (some wear a short cloth, some an ice uraeus on the brow), gold collar; hides glacier, deep ice, rime grey,
+  midnight frost, with glowing frost veins, rims, stars or a spine line; drawn 1.15x. Varasuchus: long sprawling legs, two
+  rows of bony scutes, a heavy blocky head (squared skull, brow ridge, cheek plates, a broad snout with a blunt tip) with
+  horns swept up and back (a nose horn on some), and a twelve-segment double-crested tail about seven blocks long, long
+  enough to wrap round its flank to the front; raging, it rears up on its hind legs (a generic `standing()` stance on
+  `WindDragon`) and fights with its arms; hides swamp olive, river brown, mangrove black, pale sand, with marsh-light bands, spots, scute
+  rims or a jaw line; drawn 1.3x. Every move eases in and out and ends at rest, and the neck and tail roll a beat per
+  segment: Atroxiia's tail jabs, coils and drives straight for Gungnir, swings round low for the sweep; Varasuchus's
+  snakes as it walks, lashes after the dash, wraps round to its front for the tailguard and snaps out on a parry; both tuck their
+  legs back and scull their tails in the water. (Stegonaut's chewing jaw lost its last kink too.)
+- **Ignivorus** (`IgnivorusDragon`, `jaymoskingdoms:ignivorus_dragon`), Andy: "put the effects onto Kintsugi's model
+  then put that in the nether": the Nether's fire dragon, drawn as eanncrod's Kintsugi wyvern (as Eurus and Aeolus) at
+  0.55 (about 4.3 blocks tall, 14 across the wings; box 4.4 x 3.7), its hide obsidian, basalt ash, ember or crimson and
+  its seams glowing lava cracks (orange, magma yellow, white-hot, crimson; `tools/gen_kintsugi_dragons.py`). Every 30 s
+  each player anywhere in the Nether (`#minecraft:is_nether`) has a 1 in 360 chance of one turning up flying about
+  40-64 blocks off (about once in three hours there; never with one within 160 blocks). 450 health, armour 12, bite 22,
+  fire-proof, a boss bar (`c:bosses`), and it leaves players be until one hurts it. Then, besides the swoop, hover, bite
+  and tail sweep: fire breath (Notus's), a **fireball volley** at 10-48 blocks (three exploding fireballs, every 8-11
+  s) and, on its feet within 16 blocks, a stamp that sends a line of seven **magma pillars** bursting toward you, one
+  after another (a smoking warning, then 12 damage, 6 s of fire and a throw upward). Cooked porkchop its favourite,
+  Emberborn twice as fast; tame, it's saddled and ridden like the wind dragons (R breathes fire). Drops leather, bone,
+  magma cream, blaze powder, obsidian and sometimes netherite scrap. Not one of the wind dragons for Eurus's and
+  Aeolus's showing themselves. Its moves follow Saint's Dragons' Ignivorus (none of that mod's art).
+- **Aetherion** (`AetherionDragon`, `jaymoskingdoms:aetherion_dragon`): a star dragon Andy sent (a public-domain,
+  CC0 GeckoLib dragon, not Saint's Dragons'): "the wings and head might need upgrading". Our own model on its body plan
+  (`AetherionDragonModel`, `tools/gen_aetherion.py`, a 512 sheet; drawn 1.25x: its back 3.7 blocks up, about 17 across the
+  wings; box 3.2 x 3.8): four long legs, a four-segment neck rising in an S, a seven-segment tail ending in a crossed
+  fan, crystal spines down its neck, back and tail. Each wing is an arm, a forearm and a hand of three fanned finger
+  bones with a thumb claw, a membrane behind each bone tapering to a scalloped trailing edge; the head has a heavy brow,
+  two great swept horns (short, or with a lower pair, by its look), cheek frills and a jaw that opens. Hides night sky,
+  pale silver, dusk violet, dawn gold, with glowing constellations on the membranes, starlit veins, rims or a sky of
+  stars. The wingbeat rolls out from the shoulder a beat per joint, the fingers spreading on the downstroke; gliding
+  they're held open; landed they fold (arm up, forearm down along it, hand up, fingers closed), the fold eased in and
+  out; the neck straightens in flight and (Andy: "so much so it looks like it doesn't have any in the air") the legs fold
+  flat back under the belly, drawn in small and up into the body. Andy chose "Aether sky dragon, plus Nulljaw": every 30 s each
+  player over the Aether (`jaymospowers:aether`) has a 1 in 240 chance of one turning up flying 40-64 blocks off (none
+  within 160). 420 health, armour 12, bite 18, a boss bar, and it leaves players be until hurt; then its **bite**, a
+  **breath beam** of starlight (28 blocks, stopped by blocks, 7 a strike, burns nothing) and, below half health, the
+  **Cataclysm** (it rears up roaring, wings flung high, and 14 stars fall on its foes and round it, each after a closing
+  ring of light: 14 damage and a throw, no block touched). Glow berries its favourite, Nightborn twice as fast; ridden,
+  R is the beam.
+- `/kingdom dragon stegonaut|atroxiia|varasuchus|ignivorus|aetherion [tame]` (operators).
+- Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.
+## 0.7.523: death by cause hooks (pack 0.20.25)
 - Powers' death by cause (`Mortality`) now knows Kingdoms' bosses: whatever shows a boss bar (`BossBars.boss`, told through
   `PowersCompat.tellBosses`), so dying to a king, warlord, champion, wild dragon or Aether Giant is a boss's death (70% final,
   spared if you're far too weak).
