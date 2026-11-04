@@ -8753,6 +8753,22 @@ is our own take on the idea (none of its code or art).
 - Powers 0.20.14: the Hearthkeeper's trial and scar slow every part heal.
 - Built, reviewed, and a dev server boots; not played.
 
+## Patron champion fixes
+- Champions no longer freeze: the cast, turn and sleep timers now run from the entity's own tick, so wind-ups end, phase turns finish, sleeping champions wake near a Wildlands player, and a champion can be killed again. The Skeleton Lord got the same fix.
+- A `/kill` and other invulnerability-bypassing damage now work on a sleeping or turning champion.
+- The patron weapon a champion holds is for show only, so its blow stays the tuned number.
+- A temple champion only counts players inside its leash. An archer beyond it no longer holds off the rest heal and reset.
+- Adds give no experience and no loot.
+- The hunt ends when the quarry dies, even if the player respawns at once.
+- Pulls and pushes now reach the moved player's own client (Undertow, Chain of Truth).
+- The great temple's doorway is on the north side like every blueprint, and the Inquisitor's altar is found at its real height.
+- Temple sites check every chunk under the footprint for a realm's land. The forge-hall tunnel keeps its far wall. The ash-hollow ladders reach down to its floor.
+- Town folk no longer fight, flee or fear a patron's champion, and never count as its foes. A champion no longer turns on its own adds.
+- A reset champion goes back to its champion spot, facing the way out. The ruined cathedral's champion stands before the altar. The deep forge-hall's tunnel now ends in a ladder shaft to the surface.
+- The Forge-Thane's slag cubes no longer split into plain cubes. Summoned and egg champions roll a head too. The smoke double's life and the foe memory are constants.
+- The forge-hall's ladder shaft opens into its tunnel. The forge-hall's tunnel and shaft stay off realm land. A rebuilt great temple keeps its one Inquisitor. Champion wind-ups and turns last their full time. Iron Skin wears a weapon only for blows that land.
+- The town's guards, royals and casters no longer see a sleeping or fighting champion, or its adds, as a foe. Champion max health can now grow past 1024 with the group and tier. Blood Grip and the Unseen Hand leave a champion's weapon alone. Adds that reload from a save are discarded. The smoke double's blind and the foe ranges are constants.
+
 ## 0.7.514: the skill web (pack 0.20.15)
 - Andy: "the skill trees need a redesign, something more akin to skyrim or path of exile, where the tree branches far out,
   and you can easily see where what you pick lands. It should also allow you to more easily branch into other trees for
@@ -8813,3 +8829,26 @@ is our own take on the idea (none of its code or art).
   so three new moves: **Petrify** (the Quiet One, level 4: the foe in sight turns to stone 4 s, rooted and weak, dust
   falling; no bosses), **Guardian Light** (Ambrose, level 5: undead within 12 blocks take 6, burn 4 s, are thrown back),
   **Turn Back** (Thessaly, level 6: 5 s of arrows and bolts flying at you sent back, now yours). Existing poses. Not played.
+
+## 0.7.518: patron gods, part (c): temples, champions, the patrons' weapons (pack 0.20.18)
+`docs/Patrons-C-Plan.md`. Andy: champions are group fights, "only the strongest can fight alone".
+- **Temples** (`Temples`, `TempleSites`, `TempleBuildings`): once a player is in the Wildlands (or higher), now and then
+  a patron's temple rises out of sight in a place that fits it: the Hearthkeeper's hearth-hall in open country, the
+  Anvil-Father's forge-hall carved deep in the stone or in the Nether's wastes, the Deep Mother's tide-court on pillars by
+  the sea, the Green Huntsman's glade in deep forest, the Lantern Warden's graveyard and crypt (or a vault in the soul
+  valleys), the Crowned Sun's sun-court on high ground or in the Aether, the Ash Whisperer's hollow (hidden under dry
+  country, or in the basalt deltas), and the Truth's ruined cathedral. A Faith-creed kingdom's capital builds the Truth's
+  **great temple** (`GreatTemple`). Each altar is the patron's shrine; coming near teaches you the patron.
+- **Champions** (`PatronChampion`, `PatronChampions`, `champions/`): each temple's champion sleeps at its altar as a
+  statue and wakes for a Wildlands player (the great temple's only when struck). Group fights: health and blows grow
+  with every player near (up to six) and with the world tier; a group of three or more brings a fourth phase. Three moves
+  each, opened by the phases, all telegraphed: the Hearth-Warden, the Forge-Thane, the Tide-Bride, the Antlered Hunter,
+  the Grave-Lamp, the Sun-Marshal, the Cinder-Shade and the Inquisitor. A boss bar, the posture bar, great-foe credit. It
+  leashes to its temple, resets when everyone leaves, and stands again three days after it falls.
+- **The patrons' weapons**: a fallen champion drops its patron's iron head for each fighter, at the latest on their
+  third kill (34%, 50%, sure), Perfect (a solo kill's a Masterwork). Put together at the Tool Station (Powers 0.20.18).
+- **The hunt** (part (b)'s mark): after the trials, the patron you left sends its champion once, in a weaker hunting
+  form, outside any town. Kill it (the new patron is pleased) or fall to it, and the hunt is over; outrun it and it comes
+  again.
+- Loading hints 91-92.
+- Built (both mods compile); not played.

@@ -49,6 +49,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		com.jaymospowers.armory.PatronWeapons.VIEWER = () -> Minecraft.getInstance().player;
 		// (0.17.67) after every mod's main entrypoint (TaCZ's vanilla registry lookup), for singleplayer worlds
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
 		// (0.15.147) the inventory's tab to the powers screen

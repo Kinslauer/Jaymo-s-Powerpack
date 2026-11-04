@@ -504,6 +504,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rites.register();
 		Sermons.register();
 		RealmFaiths.register();
+		// (0.7.518) patron gods, part (c): the champions and their temples
+		PatronChampions.register();
+		Temples.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		GiftTales.register();

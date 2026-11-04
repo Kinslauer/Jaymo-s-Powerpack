@@ -544,7 +544,7 @@ public final class Rulers {
 			return false;
 		}
 		return !level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(THREAT_RANGE),
-			e -> e.isAlive() && (e instanceof Enemy || e instanceof ServerPlayer p && !p.isCreative() && !p.isSpectator()
+			e -> e.isAlive() && (e instanceof Enemy && !PatronChampions.outsideTown(e) || e instanceof ServerPlayer p && !p.isCreative() && !p.isSpectator()
 				&& Reputation.get(p, f.id()) <= Reputation.HOSTILE)).isEmpty();
 	}
 
@@ -620,7 +620,7 @@ public final class Rulers {
 
 	static boolean foeNear(ServerLevel level, PathfinderMob guard) {
 		return !level.getEntitiesOfClass(LivingEntity.class, guard.getBoundingBox().inflate(ESCORT_THREAT_RANGE),
-			e -> e.isAlive() && e != guard && (e instanceof Enemy || McaCompat.foe(guard, e))).isEmpty();
+			e -> e.isAlive() && e != guard && (e instanceof Enemy && !PatronChampions.outsideTown(e) || McaCompat.foe(guard, e))).isEmpty();
 	}
 
 	/** The guards (folk and villagers) of {@code f} in {@code box}. */

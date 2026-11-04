@@ -5325,6 +5325,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.20.14, Kingdoms 0.7.513, patron gods part (b)** (plan `docs/Patrons-B-Plan.md`; see `kingdoms/MODLOG.md`): Powers only gets
   `Wounds.healPart` reading Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection (`MedicineSkill.blessing`): the
   Hearthkeeper's trial and scar on one who turned from it slow every part heal. Not played.
+
 - **0.20.15**: no Powers change; pack bump for Kingdoms 0.7.514 (the skill web: one radial K screen, six bridge perks).
 - **0.20.16, Zsolt's RPG Series (patch 0)** (plan in project files `rpg-series-study/RpgSeries-Plan.md`): Andy chose to ship
   Wizards, Archers and Rogues & Warriors (all rights reserved, unchanged, downloaded by id) with Spell Engine (GPL-3.0),
@@ -5363,3 +5364,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     `UseEntityCallback` phase ahead of ours), grab a ledge, take a part off a salvage rack, and our first-person arm
     poses step aside; it counts as carrying for Z Fighter strength training.
   - Not played.
+- **0.20.18, Kingdoms 0.7.518, patron gods part (c)** (plan `docs/Patrons-C-Plan.md`; see `kingdoms/MODLOG.md`): **The patrons' weapons** (`armory/PatronWeapons`): Hearthguard (blows heal you and those near),
+  Anvil-Father's Hammer (blows strip armour), Tidecaller (use: drag foes in), Huntsman's Spear (marks prey), Gravelight
+  (burns the undead), Sunbrand (use: the sun on a foe), Ashfang (use: smoke and a leap back, then a deep cut), The Plain
+  Word (strips blessings, shows the unseen). Heads from Kingdoms' champions only (`WeaponParts.PATRONS`: never cast or
+  forged), put together at the Tool Station, graded. Stronger for that patron's sworn (Kingdoms'
+  `Patrons.blessing(player, "patron_weapon/<key>")` by reflection, `KingdomsCompat.blessing`), cold while you're in
+  its trials.
+  The Sunbrand's Judgement stops at the first block in the way, so it can't mark a foe behind a wall. Not played.
