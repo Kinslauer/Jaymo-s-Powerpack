@@ -521,6 +521,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.509) the eight patrons, favour and blessings
 		LOGGER.debug("patron attachment: {}", Patrons.STATE);
 		Patrons.register();
+		// (0.7.535) every patron's ten commandments, and the Truth's folk keeping its own
+		Commandments.register();
 		Rites.register();
 		Sermons.register();
 		RealmFaiths.register();

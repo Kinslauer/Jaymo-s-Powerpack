@@ -1361,6 +1361,15 @@ public final class Approaches {
 
 	// ---- (0.6.2) the guards' business, by temper -----------------------------------------------------------------------
 
+	/**
+	 * (0.7.535) A bribe offered: it breaks the offerer's commandments, and a guard of The Truth won't take it (true if he
+	 * might).
+	 */
+	private static boolean bribe(ServerPlayer player, Approach a) {
+		Commandments.act(player, "bribe");
+		return !Commandments.truth(a.mob);
+	}
+
 	/** The player answered a guard's search, toll, bout or loyalty test: what comes of it depends on the king. */
 	private static void guardsBusiness(ServerLevel level, Approach a, ServerPlayer player, Faction f, int option) {
 		int tv = a.variant;
@@ -1371,6 +1380,8 @@ public final class Approaches {
 		switch (a.topic) {
 			case SEARCH -> {
 				if (option == 0) {
+					// (0.7.535) the Ash Whisperer's tenth: a pack opened to a guard
+					Commandments.act(player, "searched");
 					if (suspected(player, f.id(), now)) {
 						// (what was taken turns up: it goes back, with a fine)
 						// (0.7.490) in the town's coin first, then emeralds
@@ -1400,12 +1411,16 @@ public final class Approaches {
 						// (0.7.130) shoved out of his way: he'll not lower himself to more
 						Purists.shoulder(level, a.mob, player);
 					}
-				} else if (tv == TYRANT || tv == REVELER || tv == PLAIN || tv == PURIST_KIN) {
+				} else if (bribe(player, a) && (tv == TYRANT || tv == REVELER || tv == PLAIN || tv == PURIST_KIN)) {
 					// (a bribe they'll take: whatever you carry, they never saw it)
 					// (0.7.498) in the town's coin, then bits
 					Currencies.fine(level.getServer(), player, f, a.price);
 					clearSuspicion(player, f.id());
 					reply(level, a, k + "bribe." + temper, Speech.WHITE);
+				} else if (Commandments.truth(a.mob)) {
+					// (0.7.535) the Truth's guard won't lie for coin, whatever his king is like
+					Reputation.change(player, f, BRIBE_REFUSED_REP);
+					Commandments.refuse(a.mob, player, Commandments.TONGUE);
 				} else {
 					Reputation.change(player, f, BRIBE_REFUSED_REP);
 					reply(level, a, k + "bribe." + temper, Speech.RED);
@@ -1416,6 +1431,7 @@ public final class Approaches {
 			}
 			case TOLL -> {
 				if (option == 0 && canPay(player, a, a.price)) {
+					Commandments.act(player, "toll");
 					// (0.7.490) paid in the town's coin first, then emeralds
 					toTreasury(level, f, Currencies.fine(level.getServer(), player, f, a.price));
 					Reputation.change(player, f, tv == REVELER ? REVELER_TOLL_REP : TOLL_PAID_REP);

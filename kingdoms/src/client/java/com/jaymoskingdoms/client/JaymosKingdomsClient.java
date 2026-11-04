@@ -118,6 +118,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		RulersDeskScreen.register();
 		// 0.7.201: letters and messenger pigeons
 		LetterScreen.register();
+		// (0.7.535) a patron's book of commandments
+		CommandmentsScreen.register();
 		// (0.7.234) the Pin and Rotary lockpicking games
 		LockpickScreen.register();
 		// (0.7.266) the road screen a ride to another settlement goes by on
