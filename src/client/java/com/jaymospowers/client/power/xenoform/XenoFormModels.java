@@ -3348,7 +3348,8 @@ public final class XenoFormModels {
 			this.fins[0].zRot = fin * Mth.sin(age * 0.2F);
 			this.fins[1].zRot = -this.fins[0].zRot;
 			for (int k = 0; k < ARMS; k++) {
-				float s = RING_X[k] >= 0.0F ? 1.0F : -1.0F;
+				// (0.19.76) a positive yaw swings a forward-pointing arm toward -x, so the +x arms take a negative one to fan out
+				float s = RING_X[k] >= 0.0F ? -1.0F : 1.0F;
 				float outer = Math.abs(RING_X[k]) / RING_RX;
 				int j = k < 4 ? k : 7 - k;
 				// the pull: the pairs in antiphase, rippling down each side; a reaching one lifts and narrows, a planted one swings wide
@@ -3415,7 +3416,8 @@ public final class XenoFormModels {
 			this.fins[0].zRot = flap;
 			this.fins[1].zRot = -flap;
 			for (int k = 0; k < ARMS; k++) {
-				float s = RING_X[k] >= 0.0F ? 1.0F : -1.0F;
+				// (0.19.76) a positive yaw swings a forward-pointing arm toward -x, so the +x arms take a negative one to fan out
+				float s = RING_X[k] >= 0.0F ? -1.0F : 1.0F;
 				float outer = Math.abs(RING_X[k]) / RING_RX;
 				// open: spread wide (the outer ones wider) and fanned up and down by the ring; shut: straight back
 				float spread = 0.05F + (o + lash) * OPEN_SPREAD * (0.4F + 0.6F * outer);
