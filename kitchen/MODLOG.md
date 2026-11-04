@@ -1393,3 +1393,6 @@ one for one.
 ## 0.5.57: hooks for the Green Huntsman (pack 0.20.8, Kingdoms 0.7.509)
 `Hanging.addExtraCuts` and `Hanging.addOnDone`: hooks for Kingdoms' Green Huntsman (more from a carcass, and the deed).
 Kitchen stays free of Kingdoms; Kingdoms adds both by reflection (`KitchenCompat.skills`).
+## 0.5.58: drinks are told (pack 0.20.26)
+`Thirst.DRANK`: every drink of water (a sip, a bottle, a cup) is told to its listeners. Powers adds one by reflection: with
+water in the lungs, a drink may go down the wrong pipe.

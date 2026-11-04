@@ -258,6 +258,12 @@ public final class Thirst {
 		return dish != null && dish.bowlFood() ? STEW : 0;
 	}
 
+	/**
+	 * (0.5.58) Told of every drink of water a player takes (a sip, a bottle, a cup): Jaymo's Powers' water in the lungs may
+	 * send it down the wrong pipe. Filled by reflection.
+	 */
+	public static final java.util.List<java.util.function.Consumer<ServerPlayer>> DRANK = new java.util.concurrent.CopyOnWriteArrayList<>();
+
 	/** A drink of water: {@code clean} or with {@code sickChance} of a turned stomach. */
 	public static void drink(ServerPlayer player, int water, boolean clean, float sickChance) {
 		if (fireDrinker(player)) {
@@ -265,6 +271,9 @@ public final class Thirst {
 			return;
 		}
 		set(player, water(player) + water);
+		for (java.util.function.Consumer<ServerPlayer> listener : DRANK) {
+			listener.accept(player);
+		}
 		if (!clean && player.getRandom().nextFloat() < sickChance) {
 			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SICK_NAUSEA, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, SICK_HUNGER, 0));
