@@ -5232,3 +5232,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   crimson/warped roots, nether sprouts and weeping/twisting vines give plant fibre to a knife (`fiber_plants` tag). Kingdoms
   adds the sticks (wart blocks) and the avatar camps' welcome; see `kingdoms/MODLOG.md`.
   - Not compile-checked yet at this entry; not played.
+- **0.20.3, shield bang:** With a shield raised in the off hand and a weapon in the main hand, left click bangs the
+  weapon on the shield (`combat/ShieldBang`, `client/combat/ShieldBangClient`): a loud clang, the weapon arm swings and
+  a vibration goes out for sculk and wardens. Hostile mobs within 24 blocks that aren't already fighting walk to the
+  noise; wild animals, bats and fish within 16 run from it. Neutral mobs and anything tamed, ridden or leashed ignore it.
+  One bang per click, half a second apart. Left click with the shield down still attacks as before.
+  Holding the click instead charges a **shield bash** (a bar fills over 1.5 s; 2 feathers): let go and you step in and
+  throw the shield forward, striking, shoving and staggering what's in front of you and knocking raised shields aside,
+  harder the longer the charge. A metal weapon banged on a metal shield (metal by name, or the
+  `jaymospowers:clanging_metal` item tag, which holds the iron-rimmed vanilla shield) rings like a bell for the symbiote:
+  hosts within 12 blocks flinch as from a bell (`WebSymbiote.noise`), loose symbiotes run (`WebSymbioteBlob.startle`).

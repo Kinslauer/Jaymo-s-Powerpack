@@ -44,6 +44,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.LockOn.init();
 		// (0.17.67) the guard and the parry, for everyone
 		com.jaymospowers.combat.Guard.init();
+		// (0.20.3) a weapon banged on a raised shield: hostiles come, animals bolt
+		com.jaymospowers.combat.ShieldBang.init();
 		com.jaymospowers.combat.AttackTells.init();
 		com.jaymospowers.core.HiddenArmor.init();
 		com.jaymospowers.core.Dismember.init();
