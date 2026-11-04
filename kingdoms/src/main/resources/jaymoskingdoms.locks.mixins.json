@@ -3,6 +3,7 @@
 	"package": "com.jaymoskingdoms.mixin.locks",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": ["BlockStateBaseMixin", "DoorBlockMixin", "TrapDoorBlockMixin", "FenceGateBlockMixin",
-		"HopperBlockEntityMixin", "TransportItemsBetweenContainersMixin"],
+		"HopperBlockEntityMixin", "TransportItemsBetweenContainersMixin",
+		"ContainerOpenersHushMixin", "ChestCreakVolumeMixin"],
 	"injectors": { "defaultRequire": 1 }
 }
