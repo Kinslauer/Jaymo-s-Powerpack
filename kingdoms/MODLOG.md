@@ -571,3 +571,16 @@ Our own take on the idea of MCA: Conversations (none of its code). Plan: `docs/T
   With no camp near, you wake in the wild with your gear.
 - Town healers treat what will kill (poisoned blood, water in the lungs, withering: `PowersCompat.afflicted`), for 8 more coins.
   Compile-checked; not played.
+
+## 0.7.525: turned by what killed you (pack 0.20.27)
+- Andy: "whenever they die, there's a chance that the death method that killed them turns them into one of those specific
+  hollows, like enthralled by a vampire, or maybe zombified by a witch." Powers' death by cause now asks `Hollows` first: killed
+  by one of these, you may rise where you fell as a Hollow instead of rolling for your life (never final, no new injury, the
+  Hollow unlocked for your children too, each look with its own line):
+  - Zombie: zombies of every kind 25%, witches and blood witches 30% ("zombified by a witch").
+  - Skeleton: skeletons of every kind 25%.
+  - Wraith: a vampire, players too, 40% (enthralled); a phantom or a vex 25%.
+  - Reaper: a necromancer or the Wither 35%.
+  - Any other undead: the Pallid (the Hollow's first look) 20%.
+- One who is Hollow already, or an android, isn't turned. `Heritage.set` can go quietly (no "You are ... born").
+  Compile-checked; not played.
