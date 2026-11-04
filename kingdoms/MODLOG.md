@@ -8584,3 +8584,24 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
   life fades. Turning swings it: level, sideways like a rudder; upright, leaning across like an aileron. It swings into the
   turn (`TAIL_RUDDER` -3.5; flip the sign to swing it out). Sprint and turn are eased per entity each frame (`EASED`).
 - Not compile-checked in the cloud; not played.
+
+## 0.7.502: wary folk keep their names; you bow to rulers
+- Andy: "someone who has any distaste toward you would not introduce themselves, i was just on a beastfolk, and the guy
+  said remember this city isnt for you, but still shook my hand, they should be as apprehensive as the old orcs were until
+  you prove yourself". `Introductions.wary`: a villager who minds your blood (`Prejudice.minds`: a haven's folk minding a
+  human, a townsman minding a Tideborn or Beastfolk...), whose realm holds you below welcome, or who remembers you coldly
+  (`Recollections.COLD`). They don't come over to you, don't take your hand (`takesHand`), give a wary line instead of
+  their name (`name_wary.0-4`, orc and goblin dialects too), and at a first meeting step back with that line in place of a
+  wave or a shake (`Handshakes.standOff`), then their menu opens with no name in it. Proven: a warm memory of you
+  (`Recollections.WARM`: a rescue, a kindness), or enough MCA hearts (gifts, talk): 8 per degree they mind, at most 50
+  (`PROVEN_HEARTS_PER_DEGREE`); 20 hearts outweighs a bad name with their realm (`PROVEN_HEARTS_REP`).
+- Andy: "introducing yourself to kings, is no longer a wave or handshake, but you bow, using all the relevant animation in
+  context. (hand on pommel if wielding a sword)". `Handshakes.bowTo`: the first use of a ruler you haven't met, their
+  Introduce, Ask their name and the handshake answer all have you turn to them and bow (`Hand.BOW`, 40 ticks, held still).
+  The ruler inclines their head (`Hand.NOD`) and names themselves with their title; a wary ruler doesn't return it.
+  `HandshakePose.bow`: bent from the waist as a crouch is, head down; empty handed, the hand over the heart and the other
+  swept behind; a sword or light blade in hand, held low at your side with the other hand across on its pommel; anything
+  else, held at your side with the free hand over the heart; an off hand holding something stays at your side. Mirrored
+  for the left-handed; MCA bodies' clothes follow (`McaPullerPose.follow`).
+- Not compile-checked against the game jars (none staged in this cloud session); a source-path javac pass showed no
+  errors in our own symbols. Not played.

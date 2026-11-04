@@ -64,6 +64,13 @@ public final class Introductions {
 	static final int LINES = 3, RULER_LINES = 2;
 	/** (0.7.397) Lines an outlaw has for keeping their name to themselves. */
 	static final int OUTLAW_LINES = 3;
+	/** (0.7.502) Lines a wary villager has for keeping their name from you until you've proven yourself ({@link #wary}). */
+	public static final int WARY_LINES = 5;
+	/**
+	 * (0.7.502) Proving yourself to one who minds your blood ({@link Prejudice#minds}): MCA hearts needed per degree they
+	 * mind, never more than {@link Strangers#TRUSTED_HEARTS}; and the hearts that win over one whose people think ill of you.
+	 */
+	static final int PROVEN_HEARTS_PER_DEGREE = 8, PROVEN_HEARTS_REP = 20;
 
 	/**
 	 * (0.7.204) Taking an offered hand ({@link Handshakes#offerTo}): the odds before anything else, what each heart and
@@ -221,11 +228,46 @@ public final class Introductions {
 		return true;
 	}
 
+	/**
+	 * (0.7.502) Andy: "someone who has any distaste toward you would not introduce themselves, i was just on a beastfolk,
+	 * and the guy said remember this city isnt for you, but still shook my hand, they should be as apprehensive as the old
+	 * orcs were until you prove yourself". {@code villager} keeps you at arm's length: no name, no hand, no coming over to
+	 * say hello. Anyone who minds your blood ({@link Prejudice#minds}: a haven's folk minding a human, a townsman minding a
+	 * Tideborn...), whose people think ill of you (their realm's reputation below welcome), or who remembers you coldly.
+	 * You've proven yourself once they remember you warmly ({@link Recollections#WARM}: a rescue, a kindness), or once
+	 * you've won enough of MCA's hearts (gifts and talk): {@link #PROVEN_HEARTS_PER_DEGREE} for each degree they mind.
+	 */
+	public static boolean wary(ServerPlayer player, Villager villager) {
+		int lean = Recollections.leaning(villager, player);
+		if (lean >= Recollections.WARM) {
+			return false;
+		}
+		if (lean <= Recollections.COLD) {
+			return true;
+		}
+		int hearts = McaCompat.heartsOf(villager, player);
+		float minds = Prejudice.minds(villager, player);
+		if (minds > 0.0F && hearts < Math.min(Strangers.TRUSTED_HEARTS, Math.round(minds * PROVEN_HEARTS_PER_DEGREE))) {
+			return true;
+		}
+		Faction f = Approaches.home(player.level(), villager);
+		return f != null && Reputation.get(player, f.id()) < Reputation.WELCOME && hearts < PROVEN_HEARTS_REP;
+	}
+
+	/** (0.7.502) What a {@linkplain #wary wary} villager says in place of their name (a greenskin in its own dialect). */
+	public static Component waryLine(Villager villager) {
+		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_wary." + villager.getRandom().nextInt(WARY_LINES));
+	}
+
 	/** {@code player} asked {@code villager}'s name (MCA's menu): what they answer, and {@code player} knows it from then. */
 	public static Component askName(ServerPlayer player, Villager villager) {
 		if (Recollections.refuses(villager, player)) {
 			// (0.7.490) an orc or goblin with a grudge refuses in its own dialect
 			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused");
+		}
+		if (!Outlaws.is(villager) && !ZFighterFolk.is(villager) && wary(player, villager)) {
+			// (0.7.502) one who minds you keeps their name until you've proven yourself
+			return waryLine(villager);
 		}
 		if (Outlaws.is(villager)) {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
@@ -263,7 +305,8 @@ public final class Introductions {
 	 * with a grudge, likelier the more hearts, the better their mood and the warmer their temper.
 	 */
 	static boolean takesHand(ServerPlayer player, Villager villager) {
-		if (Recollections.refuses(villager, player) || Outlaws.is(villager)) {
+		if (Recollections.refuses(villager, player) || Outlaws.is(villager) || wary(player, villager)) {
+			// ((0.7.502) nor one who minds you, till you've proven yourself)
 			return false;
 		}
 		float chance = HAND_TAKEN + McaCompat.heartsOf(villager, player) * HAND_PER_HEART + McaCompat.mood(villager) * HAND_PER_MOOD
