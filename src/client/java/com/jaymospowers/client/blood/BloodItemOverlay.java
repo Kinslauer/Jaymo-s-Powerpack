@@ -18,7 +18,7 @@ import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.39) Andy liked Hematic's blood on swords and axes (ideas only). A bloody item ({@link Bloodied#BLOOD}: a blade
+ * (0.20.41) Andy liked Hematic's blood on swords and axes (ideas only). A bloody item ({@link Bloodied#BLOOD}: a blade
  * that cut, a hammer that crushed) carries its blood wherever it's drawn: in the hand, on the ground, in a frame, by one
  * more layer laid over its own, the item's picture with blood painted where it has pixels
  * ({@link ArmourGrimeTextures#icon}), on both faces. Only flat items (a sprite drawn with depth, as swords and axes are);

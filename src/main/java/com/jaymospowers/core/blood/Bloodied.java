@@ -26,7 +26,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.39) Andy liked Hematic's blood on creatures, armour and weapons (ideas only: its licence allows no ports or reuse,
+ * (0.20.41) Andy liked Hematic's blood on creatures, armour and weapons (ideas only: its licence allows no ports or reuse,
  * and it is Forge/NeoForge only). Whoever bleeds is splashed with their own blood ({@link Coat}, synced to everyone and
  * drawn over the body by the client's {@code BloodCoatLayer}), and so is the armour they wear; the weapon that drew it
  * (a blade, or a heavy blunt one) and whoever swung it up close get some too ({@link Blood} on the item, painted into the

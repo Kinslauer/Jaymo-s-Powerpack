@@ -14,7 +14,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.20.39) Andy liked Hematic's blood on creatures (ideas only). A body splashed with blood ({@link Bloodied#COAT}) is
+ * (0.20.41) Andy liked Hematic's blood on creatures (ideas only). A body splashed with blood ({@link Bloodied#COAT}) is
  * drawn with it over its skin: splotches from our own mask ({@code textures/blood/body_blood.png}), more as it gets
  * bloodier, laid only where the skin has pixels ({@link ArmourGrimeTextures#skin}), in its own blood's colour. A
  * player's outer skin layer stays clean, so nothing floats off the body. It wears off by itself and washes off in water.

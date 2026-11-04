@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.20.39) A bloody weapon (or any bloody item) is drawn with its blood over it, in the hand, dropped or framed (BloodItemOverlay). */
+/** (0.20.41) A bloody weapon (or any bloody item) is drawn with its blood over it, in the hand, dropped or framed (BloodItemOverlay). */
 @Mixin(ItemModelResolver.class)
 abstract class BloodItemOverlayMixin {
 	@Inject(method = "appendItemLayers", at = @At("TAIL"), require = 0)

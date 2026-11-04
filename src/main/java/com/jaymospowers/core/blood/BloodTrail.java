@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #LIFE}, darkening as it dries, for anyone who comes by later; a body that keeps bleeding on one spot grows the
  * stain there instead of stacking new ones. Hunting mobs ({@link #TRACKERS}) follow a living bleeder's stains from the
  * oldest to the freshest ({@link BloodTracking}).
- * <p>(0.20.39, Hematic's idea) Whoever walks through a fresh pool carries it on their feet for a few steps
+ * <p>(0.20.41, Hematic's idea) Whoever walks through a fresh pool carries it on their feet for a few steps
  * ({@link #print}): a line of footprints, left and right, pointing the way they went, fainter as it wears off. The prints
  * are the walker's (tracked like their blood).
  */
@@ -60,7 +60,7 @@ public final class BloodTrail {
 	static final int DRAWN_GONE = 20;
 
 	/**
-	 * (0.20.39) Footprints: how often walkers are checked (ticks); a pool this big or more, spilt less than this many ticks
+	 * (0.20.41) Footprints: how often walkers are checked (ticks); a pool this big or more, spilt less than this many ticks
 	 * ago, wets the feet for this many prints, one every this far (blocks), this big (a man's; scaled by width), set this
 	 * far either side of the path.
 	 */
@@ -131,7 +131,7 @@ public final class BloodTrail {
 	private static final Map<ServerLevel, Marks> LEVELS = new WeakHashMap<>();
 	private static final Map<ServerPlayer, Sent> SENT = new WeakHashMap<>();
 
-	/** (0.20.39) Bloody feet: prints left to lay, their colour, where the last one fell, how far along the next is, which foot. */
+	/** (0.20.41) Bloody feet: prints left to lay, their colour, where the last one fell, how far along the next is, which foot. */
 	private static final class Feet {
 		int left;
 		int color;
@@ -302,7 +302,7 @@ public final class BloodTrail {
 		}
 	}
 
-	// ---- footprints (0.20.39) ------------------------------------------------------------------------------------------
+	// ---- footprints (0.20.41) ------------------------------------------------------------------------------------------
 
 	/** Everyone walking near a player: feet wet in a pool, and bloody feet leaving prints. */
 	private static void walk(ServerLevel level) {
@@ -367,7 +367,7 @@ public final class BloodTrail {
 	}
 
 	/**
-	 * (0.20.39) Andy liked Hematic's stains that "smear and transfer on contact". Lays {@code body}'s bloody footprints
+	 * (0.20.41) Andy liked Hematic's stains that "smear and transfer on contact". Lays {@code body}'s bloody footprints
 	 * along the ground it has walked since the last one, a stride apart, left and right of its path, pointing the way it
 	 * went.
 	 */

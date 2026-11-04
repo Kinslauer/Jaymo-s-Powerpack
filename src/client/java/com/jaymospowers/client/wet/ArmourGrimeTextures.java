@@ -39,7 +39,7 @@ import org.jspecify.annotations.Nullable;
  * The colours suit the normal textures. With the optional Excalibur pack switched on, the grime takes Excalibur's grade
  * (darker, less saturated; {@code tools/excalibur_style/grade.py} on the default colours).
  * <p>
- * (0.20.39) Blood ({@link Bloodied}) is painted the same way over the grime, from its own masks in {@code textures/blood/}
+ * (0.20.41) Blood ({@link Bloodied}) is painted the same way over the grime, from its own masks in {@code textures/blood/}
  * ({@code tools/blood_textures.py}): armour, any item's icon and a held weapon ({@link #icon}, the client's
  * {@code BloodItemOverlay}), and a bloodied body's skin ({@link #skin}). It darkens to a dried brown as it ages.
  */
@@ -61,12 +61,12 @@ public final class ArmourGrimeTextures {
 	private static final Map<String, Identifier> MADE = new HashMap<>();
 	private static final Set<Identifier> UNREADABLE = new HashSet<>();
 	private static @Nullable Mask armourDust, armourMud, itemDust, itemMud;
-	/** (0.20.39) The blood masks: armour sheet, item icon, body skin. */
+	/** (0.20.41) The blood masks: armour sheet, item icon, body skin. */
 	private static @Nullable Mask armourBlood, itemBlood, bodyBlood;
-	/** (0.20.39) Blood's steps of wetness (fresh to dried), how much of the mask's order soaked blood reaches, and how strong it is. */
+	/** (0.20.41) Blood's steps of wetness (fresh to dried), how much of the mask's order soaked blood reaches, and how strong it is. */
 	static final int DRY_STEPS = 2;
 	static final float MOST_BLOOD = 0.85F, BLOOD_EDGE = 0.6F, BLOOD_HEART = 0.95F;
-	/** (0.20.39) Dried blood is this dark a share of the fresh colour, and this much browner. */
+	/** (0.20.41) Dried blood is this dark a share of the fresh colour, and this much browner. */
 	static final float DRIED = 0.5F;
 	static final int DRIED_TOWARD = 0x3B1E12;
 	private static boolean masksRead;
@@ -107,7 +107,7 @@ public final class ArmourGrimeTextures {
 		return armour(base, grime, null);
 	}
 
-	/** (0.20.39) The worn texture {@code base} with {@code grime} and {@code blood} painted in, or {@code base} when it's clean. */
+	/** (0.20.41) The worn texture {@code base} with {@code grime} and {@code blood} painted in, or {@code base} when it's clean. */
 	public static Identifier armour(Identifier base, ArmourGrime.@Nullable Grime grime, Bloodied.@Nullable Blood blood) {
 		boolean dirty = grime != null && grime.amount() > 0;
 		Smear smear = smear(blood);
@@ -126,7 +126,7 @@ public final class ArmourGrimeTextures {
 	public static @Nullable Identifier icon(ItemStack stack) {
 		ArmourGrime.Grime grime = ArmourGrime.grime(stack);
 		boolean dirty = grime != null && grime.amount() > 0;
-		// (0.20.39) and blood, on any item
+		// (0.20.41) and blood, on any item
 		Smear smear = smear(Bloodied.blood(stack));
 		if (!dirty && smear == null) {
 			return null;
@@ -144,7 +144,7 @@ public final class ArmourGrimeTextures {
 	}
 
 	/**
-	 * (0.20.39) Just the blood to lay over a body drawn from the skin {@code base} ({@code BloodCoatLayer}): splotches where
+	 * (0.20.41) Just the blood to lay over a body drawn from the skin {@code base} ({@code BloodCoatLayer}): splotches where
 	 * the skin has pixels, or, for a skin that can't be read (a player's, downloaded), where the mask says, as if the
 	 * skin were whole. Null for none.
 	 */
@@ -161,7 +161,7 @@ public final class ArmourGrimeTextures {
 		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), null, null, null, smear, bodyBlood, true, true);
 	}
 
-	/** (0.20.39) Blood to paint: how soaked (a stage, 1 to {@link #STAGES}) and its colour as it looks now (drying darker). */
+	/** (0.20.41) Blood to paint: how soaked (a stage, 1 to {@link #STAGES}) and its colour as it looks now (drying darker). */
 	record Smear(int stage, int colour) {
 	}
 
@@ -201,7 +201,7 @@ public final class ArmourGrimeTextures {
 		}
 		NativeImage image;
 		if (whole && bloodMask != null) {
-			// (0.20.39) a skin we can't read: paint over a whole, plain one the mask's size
+			// (0.20.41) a skin we can't read: paint over a whole, plain one the mask's size
 			image = new NativeImage(bloodMask.width(), bloodMask.height(), false);
 			for (int y = 0; y < bloodMask.height(); y++) {
 				for (int x = 0; x < bloodMask.width(); x++) {
@@ -232,7 +232,7 @@ public final class ArmourGrimeTextures {
 				float lum = r * 0.3F + g * 0.59F + b * 0.11F;
 				int out = overlay ? 0 : argb;
 				if (smear != null && bloodMask != null && a != 0 && (whole || lum >= OUTLINE || bloodMask == bodyBlood)) {
-					// (0.20.39) blood first, so grime over it reads as grime and the blood's own pixels below it as blood
+					// (0.20.41) blood first, so grime over it reads as grime and the blood's own pixels below it as blood
 					int bm = bloodMask.at(x, y, w, h);
 					float order = (bm >>> 24) / 255.0F;
 					if (order > 0.0F && order > bloodThreshold) {

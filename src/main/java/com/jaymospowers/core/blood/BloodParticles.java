@@ -24,12 +24,12 @@ import net.minecraft.network.codec.StreamCodec;
  */
 public final class BloodParticles {
 	/**
-	 * (0.20.39) Magma creatures' blood (Hematic's idea): it glows as it flies and where it lands, then cools to a dark crust
+	 * (0.20.41) Magma creatures' blood (Hematic's idea): it glows as it flies and where it lands, then cools to a dark crust
 	 * over {@link #MAGMA_COOLS} ticks. The client knows it by this colour.
 	 */
 	public static final int MAGMA = 0xFF5A0A;
 	public static final int MAGMA_COOLS = 900;
-	/** (0.20.39) A crust's colour once cooled. */
+	/** (0.20.41) A crust's colour once cooled. */
 	public static final int MAGMA_CRUST = 0x3A2622;
 
 	/**
@@ -64,12 +64,12 @@ public final class BloodParticles {
 	public record Puddle(int color, float scale, long mark, int age, int life, int shape) implements ParticleOptions {
 		public static final int ROUND = 0, SMEAR_X = 1, SMEAR_Z = 2;
 		/**
-		 * (0.20.39) A bloody footprint ({@link BloodTrail#print}): {@code PRINT} plus the way it points (sixteenths of a turn,
+		 * (0.20.41) A bloody footprint ({@link BloodTrail#print}): {@code PRINT} plus the way it points (sixteenths of a turn,
 		 * 0 = south, clockwise as yaw goes), plus {@link #PRINT_RIGHT} for a right foot.
 		 */
 		public static final int PRINT = 16, PRINT_RIGHT = 16, PRINT_END = PRINT + 32;
 
-		/** (0.20.39) Whether {@code shape} is a footprint. */
+		/** (0.20.41) Whether {@code shape} is a footprint. */
 		public static boolean print(int shape) {
 			return shape >= PRINT && shape < PRINT_END;
 		}
@@ -122,7 +122,7 @@ public final class BloodParticles {
 	public static final SimpleParticleType RED_FLECK = simple("blood_fleck_red");
 
 	/** The drops a {@link Spray} picks from (each its own sprites, {@code particles/<name>.json}). */
-	/** (0.20.39) Sprites only (looked up by the client): the footprints and the runs down a wall. */
+	/** (0.20.41) Sprites only (looked up by the client): the footprints and the runs down a wall. */
 	public static final SimpleParticleType PRINT_SPRITES = simple("blood_print"), RUN_SPRITES = simple("blood_run");
 	public static final SimpleParticleType DROP = simple("blood_drop"), SPAT_1 = simple("blood_spat_1"), SPAT_2 = simple("blood_spat_2"),
 		SPURT = simple("blood_spurt"), SWIPE_1 = simple("blood_swipe_1"), SWIPE_2 = simple("blood_swipe_2");

@@ -190,7 +190,7 @@ public final class ArsenalFlintlock {
 			float damage = DAMAGE * (Fate.isCorrupted(player) ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F);
 			if (hit != null) {
 				hit.hurtServer(level, level.damageSources().playerAttack(player), damage);
-				// (0.20.39) the ball's blood, in and out the far side
+				// (0.20.41) the ball's blood, in and out the far side
 				if (hit instanceof net.minecraft.world.entity.LivingEntity shot) {
 					com.jaymospowers.core.BladeBlood.shot(shot, player, damage);
 				}

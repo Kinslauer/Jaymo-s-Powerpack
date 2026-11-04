@@ -59,7 +59,7 @@ import org.jspecify.annotations.Nullable;
  * armour (a level of water each scrub), sneak + use a wet sponge anywhere, or use a dirty piece on a water cauldron.</li>
  * </ul>
  * Everyone wearing armour near a player is kept, not only players, so guards and villagers come back muddy too.
- * <p>(0.20.39) The washes by hand take blood off too ({@code Bloodied}): a scrub or a sponge washes your own coat as well,
+ * <p>(0.20.41) The washes by hand take blood off too ({@code Bloodied}): a scrub or a sponge washes your own coat as well,
  * and dunking any bloody item (a blade too) in a cauldron rinses it.
  */
 public final class ArmourGrime {

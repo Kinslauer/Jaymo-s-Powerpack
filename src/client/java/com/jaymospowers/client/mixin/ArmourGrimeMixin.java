@@ -30,7 +30,7 @@ abstract class ArmourGrimeMixin {
 	/** The grime of the piece being drawn now, or null (render thread only). */
 	@Unique
 	private static ArmourGrime.@Nullable Grime jaymospowers$grime;
-	/** (0.20.39) And its blood. */
+	/** (0.20.41) And its blood. */
 	@Unique
 	private static com.jaymospowers.core.blood.Bloodied.@Nullable Blood jaymospowers$blood;
 

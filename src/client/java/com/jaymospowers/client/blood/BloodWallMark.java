@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.39) Andy liked Hematic's blood that "pours over block edges" (ideas only). Blood on the side of a block, drawn
+ * (0.20.41) Andy liked Hematic's blood that "pours over block edges" (ideas only). Blood on the side of a block, drawn
  * flat on the face like a {@link BloodPuddle} is on the ground ({@link BloodDecals}):
  * <ul>
  * <li>a drop that flies into a wall splats on it ({@link #splat}), a bigger one with a run trickling down from it;</li>

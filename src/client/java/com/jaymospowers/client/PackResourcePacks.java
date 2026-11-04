@@ -40,11 +40,22 @@ final class PackResourcePacks {
 	 * (an add-on to that pack), or on top when that one isn't switched on.
 	 */
 	record Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat,
-			@Nullable String place) {
+			@Nullable String place, boolean keptOn) {
 		Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat) {
-			this(what, marker, prefix, file, url, sha1, olderFormat, null);
+			this(what, marker, prefix, file, url, sha1, olderFormat, null, false);
+		}
+
+		Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat,
+				@Nullable String place) {
+			this(what, marker, prefix, file, url, sha1, olderFormat, place, false);
 		}
 	}
+
+	/**
+	 * (0.20.40) A pack {@code keptOn} is switched on at every launch it's found off, not just once: its marker is then
+	 * the file that turns that off ({@code <marker>-off} in config/), for a player who'd rather not have it.
+	 */
+	static final String OFF = "-off";
 
 	static final String BASE = "<base>";
 
@@ -52,11 +63,14 @@ final class PackResourcePacks {
 		// "MCA - Default Medieval" (by DE4THR4SH, CurseForge 667175) dresses MCA's villagers in vanilla-style medieval
 		// clothes. Its newest file says 1.21.1 (pack_format 55); it only swaps MCA's skin textures, which haven't moved
 		// since. v2 (0.8.106): installs where v1 found no file, or the game later dropped it while the file was missing,
-		// get it once more.
-		new Pack("medieval MCA villagers", "jaymospowers-medieval-villagers-v2", "MCAR_VanillaMedieval",
+		// get it once more. (0.20.40) Andy (2026-11-04): "the outfits seem to be broken again, they arent wearing medieval
+		// attire anymore": his clip showed MCA's own green plaid shirt (neutral/mason/0), which this pack draws as a tan
+		// tunic, so the pack had dropped out of his selected packs while its v2 marker said it was done. Kept on now:
+		// switched back on at any launch it's found off (config/jaymospowers-medieval-villagers-off keeps it off).
+		new Pack("medieval MCA villagers", "jaymospowers-medieval-villagers", "MCAR_VanillaMedieval",
 			"MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip",
 			"https://mediafilez.forgecdn.net/files/8868/890/MCAR_VanillaMedieval_Universal_7.7.36-beta.3%2B1.21.1.zip",
-			"63400dbf8cd26a8b3309c3625c1f5b971b636f57", true),
+			"63400dbf8cd26a8b3309c3625c1f5b971b636f57", true, null, true),
 		// "Fresh Animations: Player Extension" (by FreshLX, CurseForge 1281029, file 8245230; the same file as Modrinth's
 		// 1.1): livelier player animations, run by Entity Model Features. It stands alone (no base Fresh Animations
 		// needed) and supports every format up to 26.3. Our own poses pause it while they play (EmfCompat).
@@ -116,13 +130,22 @@ final class PackResourcePacks {
 	}
 
 	private static void enableOnce(Minecraft minecraft, Pack pack) {
-		Path marker = FabricLoader.getInstance().getConfigDir().resolve(pack.marker());
-		if (Files.exists(marker)) {
+		Path config = FabricLoader.getInstance().getConfigDir();
+		Path marker = config.resolve(pack.marker());
+		if (pack.keptOn() ? Files.exists(config.resolve(pack.marker() + OFF)) : Files.exists(marker)) {
 			return;
 		}
 		Path dir = minecraft.getResourcePackDirectory();
 		String file = find(dir, pack);
 		if (file != null) {
+			if (pack.keptOn() && minecraft.options.resourcePacks.contains("file/" + file)) {
+				// on already: only make sure the game won't drop it as made for an older version at the next load
+				if (pack.olderFormat() && !minecraft.options.incompatibleResourcePacks.contains("file/" + file)) {
+					minecraft.options.incompatibleResourcePacks.add("file/" + file);
+					minecraft.options.save();
+				}
+				return;
+			}
 			enable(minecraft, pack, file, marker);
 			return;
 		}
@@ -159,8 +182,11 @@ final class PackResourcePacks {
 		minecraft.options.loadSelectedResourcePacks(minecraft.getResourcePackRepository());
 		minecraft.options.save();
 		minecraft.reloadResourcePacks();
+		com.jaymospowers.JaymosPowers.LOGGER.info("Switched on resource pack {} ({})", file, pack.what());
 		try {
-			Files.writeString(marker, "Jaymo's Powers switched on " + file + " (" + pack.what() + "). Delete this file to do it again.\n");
+			Files.writeString(marker, "Jaymo's Powers switched on " + file + " (" + pack.what() + "). "
+				+ (pack.keptOn() ? "It's switched on again whenever it's found off; create " + pack.marker() + OFF + " here to keep it off.\n"
+					: "Delete this file to do it again.\n"));
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
 		}

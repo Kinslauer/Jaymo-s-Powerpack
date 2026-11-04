@@ -27,7 +27,7 @@ abstract class DismemberLivingEntityRendererMixin {
 		com.jaymospowers.client.power.ember.FlameAvatarClient.extract(entity, state);
 		// (0.20.12) and a bottled fairy worn on the chest
 		com.jaymospowers.client.baubles.WornFairies.extract(entity, state);
-		// (0.20.39) and the blood splashed on it
+		// (0.20.41) and the blood splashed on it
 		com.jaymospowers.client.blood.BloodCoatLayer.extract(entity, state);
 	}
 }

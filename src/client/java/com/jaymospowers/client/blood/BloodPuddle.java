@@ -30,7 +30,7 @@ import java.util.TreeSet;
  * <p>(0.17.182) One of the server's lasting stains ({@link BloodTrail}) lies as long as the server says, darkening to a
  * dried brown as it ages (so a trail reads fresh to old), and fades over {@link BloodTrail#FADE}.
  *
- * <p>(0.20.39, Hematic's ideas) A pool that spreads over the edge of a drop-off pours down the side
+ * <p>(0.20.41, Hematic's ideas) A pool that spreads over the edge of a drop-off pours down the side
  * ({@link BloodWallMark#edges}). A bloody footprint ({@link BloodParticles.Puddle#print}) is one sole, turned the way its
  * walker went and laid flat where it fell. Magma blood ({@link BloodParticles#MAGMA}) glows bright and cools to a dark crust
  * ({@link #shade}, {@link #glow}), smoking while it's hot.
@@ -71,7 +71,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	private final float zFight;
 	private final TextureAtlasSprite sprite;
 	private float alpha = ALPHA;
-	/** (0.20.39) A footprint: its turn (radians, as yaw) and whether it's a right foot (its sole mirrored); its colour as it is. */
+	/** (0.20.41) A footprint: its turn (radians, as yaw) and whether it's a right foot (its sole mirrored); its colour as it is. */
 	private final boolean print;
 	private final float printYaw;
 	private final boolean rightFoot;
@@ -135,7 +135,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.b = blue(color);
 		this.zFight = this.random.nextFloat();
 		if (!wet && !this.print && round) {
-			// (0.20.39) a pool spread over a ledge pours down its side
+			// (0.20.41) a pool spread over a ledge pours down its side
 			BloodWallMark.edges(level, x, y, z, this.baseSize, color, this.age, this.lifetime - this.age, this.stain);
 		}
 		if (this.magma && this.age < 40) {
@@ -145,7 +145,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	}
 
 	/**
-	 * (0.20.39) The colour blood of {@code color} shows {@code age} ticks after it was spilt: a lasting stain
+	 * (0.20.41) The colour blood of {@code color} shows {@code age} ticks after it was spilt: a lasting stain
 	 * ({@code stain}) darkens to dried brown; magma glows its own orange, then cools to a crust.
 	 */
 	static int shade(int color, float age, boolean stain) {
@@ -161,7 +161,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			& 0xFFFFFF;
 	}
 
-	/** (0.20.39) Hot magma blood lights itself: {@code light} with its block light raised by how hot it still is. */
+	/** (0.20.41) Hot magma blood lights itself: {@code light} with its block light raised by how hot it still is. */
 	static int glow(int light, float age) {
 		float heat = 1.0F - Mth.clamp(age / BloodParticles.MAGMA_COOLS, 0.0F, 1.0F);
 		int block = Math.max(light >> 4 & 0xF, Math.round(heat * 15.0F));
@@ -272,10 +272,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		}
 	}
 
-	/** (0.20.39) This frame's colour (RGB): {@link #shade}. */
+	/** (0.20.41) This frame's colour (RGB): {@link #shade}. */
 	private int shown;
 
-	/** (0.20.39) A footprint: one sole lying flat where it fell, toes the way its walker went. */
+	/** (0.20.41) A footprint: one sole lying flat where it fell, toes the way its walker went. */
 	private void printQuad(BloodDecals.State decals, Camera camera, double cx, double cy, double cz, float size, int light) {
 		float u0 = this.sprite.getU0(), u1 = this.sprite.getU1(), v0 = this.sprite.getV0(), v1 = this.sprite.getV1();
 		if (this.rightFoot) {
@@ -359,7 +359,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float cos = Mth.cos(this.yaw), sin = Mth.sin(this.yaw);
 		// (a hair above the block, a little different for each puddle so overlapping ones don't flicker)
 		float lift = (this.zFight + 0.08F) * Math.max(0.05F, this.alpha - 0.3F) * 0.05F;
-		// (0.20.39) drying darker, or magma cooling: shade()
+		// (0.20.41) drying darker, or magma cooling: shade()
 		int color = this.wet ? ARGB.colorFromFloat(this.alpha * fade, this.r, this.g, this.b)
 			: ARGB.color(Math.round(this.alpha * fade * 255.0F), this.shown);
 		double[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};

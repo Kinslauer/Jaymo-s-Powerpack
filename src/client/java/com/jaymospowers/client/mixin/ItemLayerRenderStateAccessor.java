@@ -9,7 +9,7 @@ import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-/** (0.20.39) One drawn layer of an item: how it's placed and how big it is, for the blood laid over it (BloodItemOverlay). */
+/** (0.20.41) One drawn layer of an item: how it's placed and how big it is, for the blood laid over it (BloodItemOverlay). */
 @Mixin(ItemStackRenderState.LayerRenderState.class)
 public interface ItemLayerRenderStateAccessor {
 	@Accessor("itemTransform")

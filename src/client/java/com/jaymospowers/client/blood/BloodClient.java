@@ -34,7 +34,7 @@ public final class BloodClient {
 	/** (0.17.182) The server's lasting stains lying in {@link #stainsIn}, by their mark id. */
 	private static final Map<Long, BloodPuddle> STAINS = new HashMap<>();
 	private static @Nullable ClientLevel stainsIn;
-	/** (0.20.39) Sprites kept to draw with: the pools', a plain drop's, the footprints' and the runs down walls'. */
+	/** (0.20.41) Sprites kept to draw with: the pools', a plain drop's, the footprints' and the runs down walls'. */
 	private static @Nullable SpriteSet puddles, drops, prints, runs;
 
 	private BloodClient() {
@@ -62,7 +62,7 @@ public final class BloodClient {
 			puddles = sprites;
 			return (options, level, x, y, z, xd, yd, zd, random) -> puddle(level, x, y, z, sprites, options);
 		});
-		// (0.20.39) sprites only: a bare /particle of either lays nothing
+		// (0.20.41) sprites only: a bare /particle of either lays nothing
 		registry.register(BloodParticles.PRINT_SPRITES, sprites -> {
 			prints = sprites;
 			return (options, level, x, y, z, xd, yd, zd, random) -> null;
@@ -109,7 +109,7 @@ public final class BloodClient {
 		return runs;
 	}
 
-	/** (0.20.39) A drop of {@code color} this big falling straight down from here (off the end of a run on a wall). */
+	/** (0.20.41) A drop of {@code color} this big falling straight down from here (off the end of a run on a wall). */
 	static void drip(ClientLevel level, double x, double y, double z, int color, float scale) {
 		if (drops != null) {
 			net.minecraft.client.Minecraft.getInstance().particleEngine.add(new BloodDrop(level, x, y, z, 0.0, 0.0, 0.0, drops, 1, 16, false, color, scale,

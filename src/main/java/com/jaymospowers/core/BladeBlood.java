@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
  * hammer or club hitting for 3 hearts or more) splatters too, and pools under the body, more and wider the harder it
  * was. A blow that kills bleeds as well (it's noted in {@code ALLOW_DEATH}, as {@code AFTER_DAMAGE} never sees it).
  * Wounds' open cuts drip ({@link #drip}).
- * <p>(0.20.39, Hematic's ideas) Whoever bleeds is splashed with it, and so are the weapon that did it and whoever swung it
+ * <p>(0.20.41, Hematic's ideas) Whoever bleeds is splashed with it, and so are the weapon that did it and whoever swung it
  * ({@link Bloodied}). Arrows and bullets bleed too ({@link #shot}): an arrow where it goes in, a bullet out the far side as
  * well, thrown on along its path. Magma creatures bleed glowing magma ({@link BloodParticles#MAGMA}) that cools on the ground.
  */
@@ -42,7 +42,7 @@ public final class BladeBlood {
 	/** Red blood (Simple Blood's), and the other kinds' colours (see {@link #color}). */
 	static final int RED = 0x80000D, ENDER = 0x800D80, DARK = 0x231D21, SLIME = 0x76BE6D, BUG = 0xD8CB3A;
 	/**
-	 * (0.20.39) A shot's blood: the drops where it went in (this many, plus this many per point of damage, at most this many),
+	 * (0.20.41) A shot's blood: the drops where it went in (this many, plus this many per point of damage, at most this many),
 	 * flying back toward the shooter this fast; and for a bullet out the far side, this many times as many, this fast, and
 	 * stains laid along its path behind the body, up to this far (blocks).
 	 */
@@ -102,7 +102,7 @@ public final class BladeBlood {
 
 	public static void init() {
 		BloodParticles.init();
-		// (0.20.39) blood on bodies, armour and weapons
+		// (0.20.41) blood on bodies, armour and weapons
 		Bloodied.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(BladeBlood::afterDamage);
 		ServerLivingEntityEvents.ALLOW_DEATH.register((target, source, damage) -> {
@@ -140,7 +140,7 @@ public final class BladeBlood {
 			}
 			return;
 		}
-		// (0.20.39) an arrow or bullet (not a fireball or a snowball)
+		// (0.20.41) an arrow or bullet (not a fireball or a snowball)
 		if (source.getDirectEntity() instanceof Projectile projectile && projectile != source.getEntity() && pierces(projectile)) {
 			Vec3 dir = projectile.getDeltaMovement();
 			if (dir.lengthSqr() < 1.0E-6 && source.getEntity() != null) {
@@ -152,7 +152,7 @@ public final class BladeBlood {
 		}
 	}
 
-	/** (0.20.39) A projectile that cuts into a body: not fire, ice, wind, spit or magic. */
+	/** (0.20.41) A projectile that cuts into a body: not fire, ice, wind, spit or magic. */
 	static boolean pierces(Projectile projectile) {
 		String path = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(projectile.getType()).getPath();
 		return !(path.contains("fire") || path.contains("snow") || path.contains("wind") || path.contains("spit") || path.contains("potion")
@@ -160,7 +160,7 @@ public final class BladeBlood {
 			|| path.contains("experience") || path.contains("firework") || path.contains("orb") || path.contains("web") || path.contains("ki"));
 	}
 
-	/** (0.20.39) Whether {@code projectile} is a bullet (WeaponMod's, TaCZ's, any mod's shot or ball) rather than an arrow or bolt. */
+	/** (0.20.41) Whether {@code projectile} is a bullet (WeaponMod's, TaCZ's, any mod's shot or ball) rather than an arrow or bolt. */
 	static boolean bullet(Projectile projectile) {
 		String path = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(projectile.getType()).getPath();
 		return path.contains("bullet") || path.contains("pellet") || path.contains("musket") || path.contains("buckshot")
@@ -168,7 +168,7 @@ public final class BladeBlood {
 	}
 
 	/**
-	 * (0.20.39) Andy liked Hematic's bullets leaving blood "and exit wounds along their path". {@code target} was shot along
+	 * (0.20.41) Andy liked Hematic's bullets leaving blood "and exit wounds along their path". {@code target} was shot along
 	 * {@code dir} (the way the shot flew) for {@code damage}: drops spit back out where it went in, and for a bullet
 	 * ({@code through}) a cone of them bursts out the far side and flies on, splashing whatever they hit (a wall behind
 	 * gets its own splat, see the client's {@code BloodWallMark}), with stains laid on the ground along the path. Our own
@@ -214,7 +214,7 @@ public final class BladeBlood {
 		return true;
 	}
 
-	/** (0.20.39) {@link #shot} as a bullet, from {@code shooter}'s eyes along its look, for guns that hit without a projectile. */
+	/** (0.20.41) {@link #shot} as a bullet, from {@code shooter}'s eyes along its look, for guns that hit without a projectile. */
 	public static void shot(LivingEntity target, Entity shooter, float damage) {
 		if (target.isAlive() || target.isDeadOrDying()) {
 			Vec3 dir = target.getBoundingBox().getCenter().subtract(shooter.getEyePosition());
@@ -278,7 +278,7 @@ public final class BladeBlood {
 	/** A blade's blow just landed on {@code target} for {@code damage}: blood, more the harder it was. */
 	public static void splash(LivingEntity target, float damage) {
 		if (spray(target, damage, 1.0F)) {
-			// (0.20.39) a power's own blade: the bleeder is splashed (no weapon to bloody)
+			// (0.20.41) a power's own blade: the bleeder is splashed (no weapon to bloody)
 			Bloodied.struck(target, null, damage, color(target));
 		}
 	}
