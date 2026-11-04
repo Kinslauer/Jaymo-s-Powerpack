@@ -336,3 +336,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.42, Kingdoms 0.7.535, commandments for every patron:** every patron now has ten commandments in a book like
   the Truth's (its ten kept as they were); breaking your own patron's costs favour and is counted in the book, and the
   Truth's villagers refuse orders that would break theirs. See the Kingdoms MODLOG.
+- **0.20.43, sky waterfalls kept rare (Andy, 2026-11-04):** "i like the idea of a waterfall from heaven, but i found this as
+  soon as i spawned since adding the one dimension, and it just spoils the reveal too early". The Aether's springs pour off the
+  sides of islands; on its own the water fell into nothing, but with One Dimension the Overworld is underneath, so it fell the
+  whole way down as a column from the sky. `aether/world/SkySpringFeature` (`jaymospowers:sky_spring`, the old spring config
+  with a new type) floods where a new spring's water could run and drops the spring if it would leave the bottom of the Aether
+  band, unless it is in a heavenfall: one chunk in about one of every three 2048-block squares, never within 3000 blocks of
+  the world spawn or 0, 0. Springs that land on a lower island or in a cave, and the Aether as its own dimension, are unchanged.
+  New chunks only; water already falling in a world stays.
