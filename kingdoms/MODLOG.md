@@ -8584,3 +8584,21 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
   life fades. Turning swings it: level, sideways like a rudder; upright, leaning across like an aileron. It swings into the
   turn (`TAIL_RUDDER` -3.5; flip the sign to swing it out). Sprint and turn are eased per entity each frame (`EASED`).
 - Not compile-checked in the cloud; not played.
+
+## 0.7.502: sworn starts are known, every start carries meds
+- Andy: "the relevant folk should know you as a sworn start" (his king asked his name like a stranger's). While a Sworn
+  start's player stays a member of the realm they swore to (`StoryTalk.swornRealm`), its king, its lords (and its fiefs'
+  lords) and its guards (`StoryTalk.serves`) know them: within 24 blocks each comes to know them once (`sworn_known`
+  player attachment): you know their name with no introduction, MCA counts you as met, and they start warm (30 hearts for
+  a ruler, 20 for a guard, raised to that, never lowered). Every time you open their menu they greet you as their sworn
+  man or a fellow guard (`story.jaymoskingdoms.sworn.<ruler|guard>.0-2`), not as a stranger, and not only for the first
+  three days. Worlds already played: the Landing a Sworn start saved is enough, so it works there too.
+- Andy: "everyone should start with applicable meds. obviously still none for rock bottom, and a whole medkit for sworn".
+  `StoryMeds` gives each start Jaymo's Powers' medicine (looked up by id) after its kit: Sworn a healer's satchel packed
+  with 4 linen bandages, 2 clean rags, 2 splints, needle and thread, smelling salts, 2 yarrow, 2 knitbone, burn salve,
+  garlic poultice, 2 willow-bark tea and poppy syrup. Nothing for rock bottom, a captive, chained, an android or the
+  afterlife. Others by their road: banished 2 bandages + a rag, cave 2 bandages + yarrow, village 2 bandages + willow tea,
+  whalers 2 bandages + needle, trader 2 bandages + tea + salve, burned 2 salves + a rag, sky fall a splint + 2 rags,
+  snowed-in 2 rags + tea, unarmed 2 clean rags, hideout 2 rags + poppy, greenskin 2 rags + garlic, lab one of each
+  remedy, sentenced/evicted/cast out 1 rag, the rest 2 rags. A Survivalist weaves 2 grass bandages more. The rags flaw
+  still gives nothing.

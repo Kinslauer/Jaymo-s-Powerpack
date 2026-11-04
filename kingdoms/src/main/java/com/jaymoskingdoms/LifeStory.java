@@ -1140,6 +1140,10 @@ public final class LifeStory {
 		RAGS_ONLY = Flaws.rags(player);
 		try {
 			kit(player, start, landed, raised, cls, option, random);
+			// (0.7.502) and the medicine that road would have left them (StoryMeds: a full satchel for the sworn, none at rock bottom)
+			for (ItemStack meds : StoryMeds.of(player, start, landed, cls)) {
+				give(player, meds);
+			}
 		} finally {
 			RAGS_ONLY = false;
 		}
