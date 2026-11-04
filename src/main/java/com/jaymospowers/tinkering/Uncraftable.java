@@ -33,6 +33,27 @@ public final class Uncraftable {
 	 */
 	static final Set<String> TANNED = Set.of("minecraft:leather");
 
+	/**
+	 * (RPG Series) Rogues &amp; Warriors' and Archers' stone, iron and golden weapons are forged from heads
+	 * ({@link WeaponParts}), and their diamond ones are loot only, like every diamond weapon (their netherite ones smith
+	 * from those). Flint daggers and spears stay in the grid, as the flint hatchet does.
+	 */
+	static final Set<String> RPG_SERIES = rpgSeries();
+
+	private static Set<String> rpgSeries() {
+		Set<String> ids = new java.util.HashSet<>();
+		for (String weapon : List.of("dagger", "sickle", "double_axe", "glaive")) {
+			for (String metal : List.of("iron", "golden", "diamond")) {
+				ids.add("rogues:" + metal + "_" + weapon);
+			}
+		}
+		ids.add("rogues:stone_double_axe");
+		for (String metal : List.of("iron", "golden", "diamond")) {
+			ids.add("archers:" + metal + "_spear");
+		}
+		return Set.copyOf(ids);
+	}
+
 	/** (0.16.18) Andy: "the wooden weapons should not be craftable". Balkon's wooden ones (Armory's and vanilla's are off in data). */
 	static final Set<String> WOODEN = wooden();
 
@@ -82,6 +103,6 @@ public final class Uncraftable {
 
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
-		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !TACZ.contains(id) && !RPG_SERIES.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

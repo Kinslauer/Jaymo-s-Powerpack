@@ -4,6 +4,10 @@
     "jaymospowers:heartstone_amulet",
     "jaymospowers:bottled_fairy",
     "jaymospowers:runic_amulet",
-    "jaymospowers:gem_amulet"
+    "jaymospowers:gem_amulet",
+    {
+      "id": "#spell_engine:spell_necklace",
+      "required": false
+    }
   ]
 }

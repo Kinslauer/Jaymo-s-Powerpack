@@ -52,11 +52,16 @@ import net.minecraft.world.level.gamerules.GameRules;
  * </ul>
  */
 public final class Baubles {
-	/** The eight slots, in the order they sit (and are saved). */
+	/** The nine slots, in the order they sit (and are saved). */
 	public enum Kind {
 		AMULET("amulet"), RING("ring"), BELT("belt"), HEAD("head"), BODY("body"), CHARM("charm"),
 		/** (0.19.87) Bracelets. Added last so saved lists of seven still load. */
-		WRIST("wrist");
+		WRIST("wrist"),
+		/**
+		 * (RPG Series) A spell book or scroll (Spell Engine's, from Wizards, Archers and Rogues &amp; Warriors), whose spells
+		 * join the held weapon's while worn ({@code compat/SpellEngineCompat}). Added last so saved lists of eight still load.
+		 */
+		TOME("tome");
 
 		public final String id;
 		public final TagKey<Item> tag;
@@ -67,15 +72,17 @@ public final class Baubles {
 		}
 	}
 
-	/** Which kind each of the eight slots takes. */
-	public static final Kind[] SLOTS = {Kind.AMULET, Kind.RING, Kind.RING, Kind.BELT, Kind.HEAD, Kind.BODY, Kind.CHARM, Kind.WRIST};
+	/** Which kind each of the nine slots takes. */
+	public static final Kind[] SLOTS = {Kind.AMULET, Kind.RING, Kind.RING, Kind.BELT, Kind.HEAD, Kind.BODY, Kind.CHARM, Kind.WRIST, Kind.TOME};
 	public static final int SIZE = SLOTS.length;
 	/** How often (ticks) worn bonuses are checked again, besides whenever the slots change. */
 	static final int REFRESH_TICKS = 20;
 
-	/** On a player: what they wear in the seven slots (server; the screen syncs what it shows). */
+	/** On a player: what they wear in the slots (saved on the server, synced to the wearer). */
 	public static final AttachmentType<List<ItemStack>> WORN = AttachmentRegistry.create(JaymosPowers.id("baubles"),
-		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath());
+		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath()
+			// (RPG Series) synced to the wearer too: Spell Engine reads worn spell books on the client as well
+			.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
 	/**
 	 * (Motion patch 4) On a player: the worn things others see, synced to everyone for drawing them: the lantern hung
@@ -101,6 +108,8 @@ public final class Baubles {
 	private static final List<Item> ITEMS = new ArrayList<>();
 	/** (0.19.87) Slot pictures for kinds that have no bauble of the seven (the wrist's bracelet). */
 	private static final Map<Kind, Item> PICTURES = new EnumMap<>(Kind.class);
+	/** (RPG Series) Another mod's item to picture a kind with when it's there, looked up when drawn (it may register after us). */
+	private static final Map<Kind, Identifier> PICTURE_IDS = new EnumMap<>(Kind.class);
 
 	private Baubles() {
 	}
@@ -126,6 +135,9 @@ public final class Baubles {
 		LANTERN_POLE = bauble("lantern_pole", Kind.BODY, Rarity.COMMON);
 		// (0.20.12) the pink fairy, caught in a bottle
 		Fairies.init();
+		// (RPG Series) the tome slot's picture: Spell Engine's spell book when it's loaded, else a plain book
+		PICTURE_IDS.put(Kind.TOME, Identifier.fromNamespaceAndPath("spell_engine", "spell_book"));
+		PICTURES.put(Kind.TOME, net.minecraft.world.item.Items.BOOK);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		BaublesNet.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -339,6 +351,13 @@ public final class Baubles {
 		for (Item item : ITEMS) {
 			if (item instanceof BaubleItem bauble && bauble.kind() == kind) {
 				return item;
+			}
+		}
+		Identifier other = PICTURE_IDS.get(kind);
+		if (other != null) {
+			Item found = BuiltInRegistries.ITEM.getOptional(other).orElse(null);
+			if (found != null) {
+				return found;
 			}
 		}
 		Item picture = PICTURES.get(kind);
