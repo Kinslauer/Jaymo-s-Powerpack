@@ -512,6 +512,10 @@ public final class Quests {
 			McaCompat.hearts(giver, player, r.hearts());
 		}
 		Reputation.change(player, f, r.reputation());
+		if (q.royal()) {
+			// (0.7.509) serving a king pleases the Crowned Sun
+			Patrons.deed(player, Patron.CROWNED_SUN, Patrons.DEED_MID, "royal_quest");
+		}
 		Faction.Member member = f.member(player.getUUID());
 		if (member != null && r.standing() > 0) {
 			KingdomEvents.standing(level.getServer(), player, f, member.standing() + r.standing());
@@ -1174,7 +1178,7 @@ public final class Quests {
 		}
 		if (q.kind() == Quest.HUNT) {
 			boolean gone = o.spawned() && o.other().map(id -> level.getEntity(id) == null).orElse(true);
-			if ((!o.spawned() || gone) && d2 < Sightings.HUNT_RANGE * Sightings.HUNT_RANGE) {
+			if ((!o.spawned() || gone) && d2 < Blessings.huntRange(player, Sightings.HUNT_RANGE) * Blessings.huntRange(player, Sightings.HUNT_RANGE)) {
 				List<Mob> came = Encounters.send(level, player, type, 1, Sightings.QUEST_HUNT_TICKS);
 				if (!came.isEmpty()) {
 					put(player, q.withSpawned(Optional.of(came.getFirst().getUUID())));

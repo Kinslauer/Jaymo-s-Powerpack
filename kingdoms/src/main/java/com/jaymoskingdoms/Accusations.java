@@ -89,8 +89,15 @@ public final class Accusations {
 	}
 
 	/** Whether {@code p} is what the priest would find: a vampire (not a dhampir), or a werewolf cursed in full. */
-	private static boolean guilty(ServerPlayer p) {
+	static boolean guilty(ServerPlayer p) {
 		return Vampires.isVampire(p) && !VampirePlayers.dhampir(p) || FeralCurse.stillCursed(p);
+	}
+
+	/** (0.7.509) {@code accused} is named to the realm until dawn, and everyone near suspects them (a true accusation; The Truth's Judgement). */
+	static void expose(ServerLevel level, ServerPlayer accused, long now) {
+		boolean vampire = Vampires.isVampire(accused) && !VampirePlayers.dhampir(accused);
+		EXPOSED.put(accused.getUUID(), now + untilDawn(level.getOverworldClockTime()));
+		Suspicion.witnessed(level, accused, vampire ? Suspicion.VAMPIRE : Suspicion.WOLF, Suspicion.MAX, WORD_RANGE, true);
 	}
 
 	private static ServerPlayer nearest(ServerPlayer accuser) {
@@ -138,18 +145,23 @@ public final class Accusations {
 		Component name = Recollections.nameTo(accused, priest);
 		boolean vampire = Vampires.isVampire(accused) && !VampirePlayers.dhampir(accused);
 		if (guilty(accused)) {
-			EXPOSED.put(accused.getUUID(), now + untilDawn(level.getOverworldClockTime()));
-			Suspicion.witnessed(level, accused, vampire ? Suspicion.VAMPIRE : Suspicion.WOLF, Suspicion.MAX, WORD_RANGE, true);
-			if (f != null) {
-				Reputation.change(accuser, f, GAIN);
+			// (a repeat on one already exposed earns nothing more)
+			boolean fresh = !exposed(accused);
+			expose(level, accused, now);
+			if (fresh) {
+				if (f != null) {
+					Reputation.change(accuser, f, Blessings.accuseGain(accuser, GAIN));
+				}
+				// (0.7.509) a true word pleases The Truth
+				Patrons.deed(accuser, Patron.TRUTH, Patrons.DEED_GREAT, "accusation");
 			}
 			Speech.say(level, priest, Component.translatable("talk.jaymoskingdoms.accuse.guilty." + (vampire ? "vampire" : "wolf"), name), Speech.RED, CRY_RANGE);
 			accuser.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.accuse.right", name).withStyle(ChatFormatting.GOLD));
 			accused.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.accuse.burned").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
 		} else {
-			accuser.setAttached(DEAF_UNTIL, now + DEAF_TICKS);
+			accuser.setAttached(DEAF_UNTIL, now + Blessings.deafTicks(accuser, DEAF_TICKS));
 			if (f != null) {
-				Reputation.change(accuser, f, -LOSS);
+				Reputation.change(accuser, f, -Blessings.accuseLoss(accuser, LOSS));
 			}
 			Speech.say(level, priest, Component.translatable("talk.jaymoskingdoms.accuse.wrong", name), Speech.YELLOW, CRY_RANGE);
 			accuser.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.accuse.wrong", name).withStyle(ChatFormatting.RED));

@@ -1390,3 +1390,6 @@ copper bits). `KingdomsMoney` is a MethodHandles bridge to `com.jaymoskingdoms.m
 a server-made line ("6 Realm Silver"), one of that coin to draw beside it, the cost and what you carry (`OpenButcher`
 now carries a Component and an ItemStack instead of a silver count). Without Kingdoms the price falls back to emeralds
 one for one.
+## 0.5.57: hooks for the Green Huntsman (pack 0.20.8, Kingdoms 0.7.509)
+`Hanging.addExtraCuts` and `Hanging.addOnDone`: hooks for Kingdoms' Green Huntsman (more from a carcass, and the deed).
+Kitchen stays free of Kingdoms; Kingdoms adds both by reflection (`KitchenCompat.skills`).

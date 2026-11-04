@@ -249,7 +249,9 @@ public final class Skills {
 		// (0.7.424) Andy: "it should be early on the tree, and available in stealth and strength as well": the same choice,
 		// each with its own edge ({@link Questioning})
 		ROUGH_QUESTIONS(Pillar.STRENGTH, 1, 1, 0, 1, 1, HEAVY_BLOWS),
-		QUIET_WORD(Pillar.STEALTH, 1, 1, 0, 1, 1, LIGHT_FINGERS);
+		QUIET_WORD(Pillar.STEALTH, 1, 1, 0, 1, 1, LIGHT_FINGERS),
+		// (0.7.509) the patrons' favour slips more slowly (Patrons); last, so no ordinal moves
+		DEVOTION(Pillar.SURVIVAL, 3, 1, 3, 0, 2);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -680,6 +682,8 @@ public final class Skills {
 			xp *= XP_ASLEEP;
 		}
 		int amount = Math.max(1, Math.round(xp));
+		// (0.7.509) a clean pickpocket pleases the Ash Whisperer
+		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "pickpocket");
 		if (of(player).xp(Pillar.STEALTH) >= total(Pillar.STEALTH.maxLevel)) {
 			return 0;
 		}
@@ -693,6 +697,8 @@ public final class Skills {
 			return;
 		}
 		NEXT_THEFT_XP.put(player.getUUID(), now + THEFT_XP_TICKS);
+		// (0.7.509) a theft nobody saw pleases the Ash Whisperer
+		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "unseen_theft");
 		grant(player, Pillar.STEALTH, XP_THEFT);
 	}
 
@@ -737,7 +743,9 @@ public final class Skills {
 	static float holdTicks(Player player, float ticks) {
 		Progress p = of(player);
 		// (0.7.102) practice counts the first page's 15 levels only: the levels past it pay for freerunning
-		return ticks * (1.0F - PRACTICE_PER_LEVEL * Math.min(MAX_LEVEL, p.level(Pillar.STEALTH))) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS));
+		// (0.7.509) and the Ash Whisperer's Quick Fingers
+		return ticks * (1.0F - PRACTICE_PER_LEVEL * Math.min(MAX_LEVEL, p.level(Pillar.STEALTH))) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS))
+			* Blessings.pickHold(player);
 	}
 
 	/** Ghost: a guard takes no longer to rob than anyone else, and a theft nobody saw is never missed. */
@@ -757,7 +765,7 @@ public final class Skills {
 
 	/** The share of their sight sneaking hides {@code player} by (Soft Step). */
 	static double sneakFactor(Player player, double base) {
-		return Math.max(0.1, base - SOFT_STEP_PER_RANK * rank(player, Perk.SOFT_STEP) - Heritage.sneak(player));
+		return Math.max(0.1, base - SOFT_STEP_PER_RANK * rank(player, Perk.SOFT_STEP) - Heritage.sneak(player) - Blessings.sneak(player));
 	}
 
 	/** How far round the mark {@code player} may stand and still reach in (Quick Hands: the side will do). */

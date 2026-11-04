@@ -640,8 +640,9 @@ public final class Approaches {
 			}
 			Long halted = MET.get("halt/" + f.id() + "/" + player.getUUID());
 			// (0.7.221) one who looks down on your blood halts you sooner, and searches you more
-			int minds = Prejudice.guard(mob, player);
-			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= Prejudice.haltGap(mob, player, HALT_TICKS))) {
+			// (0.7.509) and one who distrusts your faith; the Crowned Sun's and The Truth's blessings ease it
+			int minds = Math.max(0, Prejudice.guard(mob, player) + Faiths.guard(mob, player) - Blessings.searchEase(player, f));
+			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= Blessings.haltGap(player, f, Faiths.haltGap(mob, player, Prejudice.haltGap(mob, player, HALT_TICKS))))) {
 				w[HALT] = 2;
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper

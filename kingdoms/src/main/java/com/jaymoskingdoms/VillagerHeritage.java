@@ -114,6 +114,8 @@ public final class VillagerHeritage {
 
 	/** How many lines each kind of talk has ({@code dialogue.chat.jaymoskingdoms.blood_<kind>/<n>}, 1-based). */
 	static final int WRAPPED_LINES = 6, WRAPPED_TURNED_LINES = 4, CUT_LINES = 6, CUT_RAMPAGE_LINES = 4, BLOOD_LINES = 3;
+	/** (0.7.509) Dawnborn have two more: they praise the sun. */
+	static final int DAWNBORN_LINES = 5;
 
 	/** The villagers in the world with a heritage (their gifts are kept up). */
 	private static final Set<LivingEntity> LOADED = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -252,6 +254,7 @@ public final class VillagerHeritage {
 	 * (wrapped or cut, rolled here unless {@code tail} says which), and the gifts.
 	 */
 	public static void born(LivingEntity villager, Heritage.Kind kind, @Nullable String tail) {
+		String oldKind = villager.getAttached(Heritage.HERITAGE);
 		villager.setAttached(Heritage.HERITAGE, kind.key());
 		for (Heritage.Kind k : Heritage.Kind.values()) {
 			if (k == kind) {
@@ -283,6 +286,10 @@ public final class VillagerHeritage {
 		fit(villager);
 		// (0.7.214) its variant: kept if it's this blood's, else born to one here
 		HeritageVariants.settle(villager);
+		// (0.7.509) a new blood draws its faith again
+		if (oldKind != null && !oldKind.equals(kind.key())) {
+			Faiths.forget(villager);
+		}
 	}
 
 	/** Takes {@code villager}'s heritage away (a folk set up as something not of flesh and blood). */
@@ -308,6 +315,8 @@ public final class VillagerHeritage {
 		// (0.7.214) its variant from its parents' ({@link HeritageVariants#child}), not a fresh roll
 		HeritageVariants.set(child, HeritageVariants.child(kind, mother, father, at, child.getRandom()));
 		born(child, kind, null);
+		// (0.7.509) and holds its mother's faith, else its father's
+		Faiths.inherit(child, mother, father);
 	}
 
 	/** A baby's heritage from its real parents (a player among them): one of theirs by a coin, or null if neither has one. */
@@ -607,6 +616,7 @@ public final class VillagerHeritage {
 			case "wrapped_turned" -> WRAPPED_TURNED_LINES;
 			case "cut" -> CUT_LINES;
 			case "cut_rampage" -> CUT_RAMPAGE_LINES;
+			case "dawnborn" -> DAWNBORN_LINES;
 			default -> BLOOD_LINES;
 		};
 		int n = 1 + Mth.floor(level.getRandom().nextFloat() * lines);

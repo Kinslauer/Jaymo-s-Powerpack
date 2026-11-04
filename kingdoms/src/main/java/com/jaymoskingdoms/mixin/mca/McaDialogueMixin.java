@@ -486,10 +486,16 @@ abstract class McaDialogueMixin {
 		if (before != null) {
 			int gained = villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before;
 			// (0.7.221) one who looks down on your blood warms to you slower
-			int taken = Prejudice.hearts(villager, player, gained);
+			int taken = Prejudice.hearts(villager, player, gained) + com.jaymoskingdoms.Faiths.hearts(villager, player, gained);
 			if (taken > 0) {
 				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(-taken);
 				gained -= taken;
+			}
+			// (0.7.509) The Truth's flock warm to one of their own sooner
+			int warm = com.jaymoskingdoms.Blessings.flockHearts(villager, player, gained);
+			if (warm > 0) {
+				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(warm);
+				gained += warm;
 			}
 			Recollections.socialised(villager, player, question, gained);
 		}

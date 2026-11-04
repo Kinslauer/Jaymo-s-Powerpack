@@ -81,7 +81,7 @@ public final class Healing {
 			output.insertAfter(COT_ITEM, SHRINE_ITEM);
 		});
 		// (the shrine's attachment loads with its class)
-		JaymosKingdoms.LOGGER.debug("shrine attachment: {}", Shrine.PRAYED);
+		JaymosKingdoms.LOGGER.debug("shrine attachment: {} {} {}", Shrine.PRAYED, Patrons.STATE, Faiths.FAITH);
 		ServerTickEvents.END_SERVER_TICK.register(Healing::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
