@@ -12,7 +12,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-/** (0.19.82) The Jeweller's Bench: a frame, a plus, a cut gem, an arrow and the set piece. */
+/** (0.19.84) The Jeweller's Bench: a frame, a plus, a cut gem, an arrow and the set piece. */
 public class JewellersBenchScreen extends AbstractContainerScreen<JewellersBenchMenu> {
 	private static final int REFUSAL_COLOR = 0xFFE06060;
 	private static final DecimalFormat NUMBER = new DecimalFormat("#.##");

@@ -56,7 +56,7 @@ import org.jspecify.annotations.Nullable;
  * camp belongs to its brood's tribe there, and the oldest camp of it is the king's seat. Each tribe keeps <b>one grudge per
  * player</b> ({@link #MOST} at most): killing its folk raises it ({@link #KILL}, a king or warchief {@link #CHIEF}, its
  * pedlar {@link Pedlars#GRUDGE}), and it falls with time ({@link #DAILY}), tribute paid to a chief or the pedlar
- * ({@link #TRIBUTE_EMERALDS}), killing its rival brood's folk in the same region ({@link #RIVAL}), or a truce token
+ * ({@link #TRIBUTE_BENT}), killing its rival brood's folk in the same region ({@link #RIVAL}), or a truce token
  * ({@link #TOKEN}, from the pedlar: wiped clean and a truce of {@link #TRUCE_DAYS} days in which they don't attack you
  * unless struck). A high grudge ({@link #HUNT_AT}) sends a <b>hunting band</b> after you when you're in their country.
  * You hear the mood only by talk: from the pedlar, or one you question ("What does your king think of me?").
@@ -69,10 +69,10 @@ public final class Tribes {
 	static final int REGION = 1536;
 	/** The grudge: its most, and what raises or lowers it. */
 	static final int MOST = 100, KILL = 4, CHIEF = 30, RIVAL = -2, DAILY = 3;
-	/** Tribute: emeralds for each {@link #TRIBUTE_STEP} of grudge paid off. */
-	static final int TRIBUTE_EMERALDS = 3, TRIBUTE_STEP = 10;
-	/** A truce token's truce (days), and what it costs at the pedlar (emeralds). */
-	static final int TRUCE_DAYS = 3, TOKEN_PRICE = 16;
+	/** Tribute: (0.7.490) bent worth ({@link BentIngots}) for each {@link #TRIBUTE_STEP} of grudge paid off. */
+	static final int TRIBUTE_BENT = 6, TRIBUTE_STEP = 10;
+	/** A truce token's truce (days), and what it costs at the pedlar ((0.7.490) in bent worth). */
+	static final int TRUCE_DAYS = 3, TOKEN_PRICE = 30;
 	/** A hunting band: sent at this grudge, at most once in this long (ticks) for a player, while they're this near the tribe's camps. */
 	static final int HUNT_AT = 60;
 	static final long HUNT_COOLDOWN = 24000L * 2;
@@ -288,7 +288,8 @@ public final class Tribes {
 		MinecraftServer server = player.level().getServer();
 		// ((0.7.443) and one in its good books)
 		return tribe != null && (truce(server, player.getUUID(), tribe) || SwornCaptains.rules(server, tribe, player.getUUID())
-			|| grudge(server, player.getUUID(), tribe) <= TribePacts.FRIEND_AT || GreenskinLife.raised(player));
+			|| grudge(server, player.getUUID(), tribe) <= TribePacts.FRIEND_AT || GreenskinLife.raised(player)
+			|| HordeCity.sworn(server, tribe, player.getUUID()));
 	}
 
 	/** Someone died: one of a tribe's at a player's hand raises their grudge (and lowers it with the rival brood's tribe). */
@@ -314,7 +315,7 @@ public final class Tribes {
 		MinecraftServer server = player.level().getServer();
 		int g = grudge(server, player.getUUID(), tribe);
 		String band = g <= TribePacts.ALLY_AT ? "friend" : truce(server, player.getUUID(), tribe) ? "truce" : g >= MOOD_HUNTED ? "hunted" : g >= MOOD_ANGRY ? "angry" : g >= MOOD_WARY ? "wary" : "calm";
-		return Component.translatable("dialogue.chat.jaymoskingdoms.tribe.mood." + band + "." + speaker.getRandom().nextInt(3),
+		return Dialects.tr(speaker, "dialogue.chat.jaymoskingdoms.tribe.mood." + band + "." + speaker.getRandom().nextInt(3),
 			Recollections.nameTo(player, speaker), name(tribe));
 	}
 
@@ -338,24 +339,22 @@ public final class Tribes {
 		int g = grudge(server, player.getUUID(), tribe);
 		// ((0.7.443) no grudge left: a gift, toward the tribe's favour)
 		boolean gift = g <= 0;
-		int want = gift ? TribePacts.GIFT_EMERALDS : (g + TRIBUTE_STEP - 1) / TRIBUTE_STEP * TRIBUTE_EMERALDS;
-		int paid = 0;
-		var inv = player.getInventory();
-		for (int slot = 0; slot < inv.getContainerSize() && paid < want; slot++) {
-			ItemStack s = inv.getItem(slot);
-			if (s.is(Items.EMERALD)) {
-				int take = Math.min(s.getCount(), want - paid);
-				s.shrink(take);
-				paid += take;
-			}
-		}
-		int steps = paid / TRIBUTE_EMERALDS;
+		// ((0.7.490) paid in bent ingots only: a plain one is refused, and what is paid goes into the chief's hoard)
+		int want = gift ? TribePacts.GIFT_BENT : (g + TRIBUTE_STEP - 1) / TRIBUTE_STEP * TRIBUTE_BENT;
+		int paid = BentIngots.take(player, want);
+		int steps = paid / TRIBUTE_BENT;
 		String line;
+		if (paid == 0 && BentIngots.plainHeld(player) > 0) {
+			BentIngots.refuse((ServerLevel)player.level(), villager, player);
+			return Component.translatable("dialogue.chat.jaymoskingdoms.tribe.tribute.plain." + villager.getRandom().nextInt(3),
+				Recollections.nameTo(player, villager));
+		}
 		if (gift) {
 			if (paid < want) {
 				// (short: handed back)
 				if (paid > 0) {
-					player.getInventory().placeItemBackInInventory(new ItemStack(Items.EMERALD, paid), net.minecraft.util.Prediction.SERVER_ONLY);
+					BentIngots.give(player, paid);
+					paid = 0;
 				}
 				line = "none";
 			} else {
@@ -364,13 +363,25 @@ public final class Tribes {
 				player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.6F);
 			}
 		} else if (steps <= 0) {
+			// (not enough for a step: handed back)
+			if (paid > 0) {
+				BentIngots.give(player, paid);
+				paid = 0;
+			}
 			line = "none";
 		} else {
 			add(server, player.getUUID(), tribe, -steps * TRIBUTE_STEP);
 			line = grudge(server, player.getUUID(), tribe) == 0 ? "paid" : "part";
 			player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.6F);
 		}
-		return Component.translatable("dialogue.chat.jaymoskingdoms.tribe.tribute." + line + "." + villager.getRandom().nextInt(3),
+		if (paid > 0) {
+			// (what was taken is the chief's: into his hoard, or his tribe's seat's for a pedlar)
+			Faction keeper = villager instanceof Worker w && Greenskins.chief(w.role()) ? Factions.get(server, w.factionId()) : HordeEconomy.treasury(server, tribe);
+			if (keeper != null) {
+				HordeEconomy.deposit(server, keeper.id(), paid);
+			}
+		}
+		return Dialects.tr(villager, "dialogue.chat.jaymoskingdoms.tribe.tribute." + line + "." + villager.getRandom().nextInt(3),
 			Recollections.nameTo(player, villager), Component.literal(Integer.toString(want)));
 	}
 
@@ -599,7 +610,7 @@ public final class Tribes {
 						mob.getNavigation().moveTo(quarry, 1.1);
 					}
 					if (mob.tickCount % 200 == 0 && mob.distanceTo(quarry) < 24.0F && mob.getRandom().nextInt(3) == 0) {
-						Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.tribe.hunter." + mob.getRandom().nextInt(4)), Speech.RED, 24.0);
+						Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.tribe.hunter." + mob.getRandom().nextInt(4)), Speech.RED, 24.0);
 					}
 					return true;
 				}

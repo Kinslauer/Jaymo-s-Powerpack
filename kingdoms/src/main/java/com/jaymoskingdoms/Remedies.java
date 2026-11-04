@@ -119,9 +119,9 @@ final class Remedies {
 		}
 	}
 
-	/** One of ours: {@code item} for emeralds. */
+	/** One of ours: {@code item} for emeralds (or, (0.7.490), the town's coin they were set in: {@link Currencies#localize}). */
 	private static boolean ours(MerchantOffer offer, Item item) {
-		return offer.getResult().is(item) && offer.getCostA().is(Items.EMERALD);
+		return offer.getResult().is(item) && Currencies.isMoney(offer.getCostA());
 	}
 
 	/** The item by its id, or null if no mod here has it. */

@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The bauble slots, drawn in the survival inventory's own greys and bevels so it reads as part of it: the player in a
  * black box in the middle (following the mouse, as in the inventory), the amulet, rings and belt on the left, the head,
- * body, charm and wrist (0.19.82) on the right. An empty slot shows a faint picture of what goes there.
+ * body, charm and wrist (0.19.84) on the right. An empty slot shows a faint picture of what goes there.
  */
 public class BaublesScreen extends AbstractContainerScreen<BaublesMenu> {
 	static final int PANEL = 0xFFC6C6C6, LIGHT = 0xFFFFFFFF, SHADE = 0xFF555555, EDGE = 0xFF000000, WELL = 0xFF8B8B8B, WELL_DARK = 0xFF373737,

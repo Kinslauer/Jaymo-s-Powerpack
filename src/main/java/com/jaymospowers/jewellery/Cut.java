@@ -3,7 +3,7 @@ package com.jaymospowers.jewellery;
 import net.minecraft.network.chat.Component;
 
 /**
- * (0.19.82) The four ways a gem is cut on the lapidary wheel. A harder cut takes more strokes, is harder to time and
+ * (0.19.84) The four ways a gem is cut on the lapidary wheel. A harder cut takes more strokes, is harder to time and
  * gives a bigger bonus. The ids are saved on cut gems: never rename them.
  */
 public enum Cut {

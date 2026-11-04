@@ -71,7 +71,8 @@ public final class BogIron {
 			}
 		});
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
-			if (!state.is(ORE) || !(level instanceof ServerLevel server) || felled(server.getServer()) || player.isCreative()) {
+			// (0.7.492) or for anyone with Knowledge 1 (the Goblin King slain)
+			if (!state.is(ORE) || !(level instanceof ServerLevel server) || felled(server.getServer()) || Knowledge.has(player, Knowledge.ANVILS)) {
 				return true;
 			}
 			// (held by a king: it crumbles to rust)

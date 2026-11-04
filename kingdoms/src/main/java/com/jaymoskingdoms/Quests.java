@@ -696,13 +696,13 @@ public final class Quests {
 		return -1;
 	}
 
-	/** (0.7.491) A gather target's item id: the target up to any '@'. */
+	/** (0.7.493) A gather target's item id: the target up to any '@'. */
 	static String itemId(String target) {
 		int at = target.indexOf('@');
 		return at < 0 ? target : target.substring(0, at);
 	}
 
-	/** (0.7.491) A gather target's grade floor ("jaymospowers:gem_ring@expert"), as a grade index, or -1 for none. */
+	/** (0.7.493) A gather target's grade floor ("jaymospowers:gem_ring@expert"), as a grade index, or -1 for none. */
 	static int minGrade(String target) {
 		int at = target.indexOf('@');
 		return at < 0 ? -1 : GradedTrades.gradeIndex(target.substring(at + 1));

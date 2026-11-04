@@ -51,7 +51,7 @@ public class BaubleItem extends Item {
 		return this.bonuses;
 	}
 
-	/** (0.19.82) The bonuses this stack gives. Jewellery works them out from its gem; the rest use the item's. */
+	/** (0.19.84) The bonuses this stack gives. Jewellery works them out from its gem; the rest use the item's. */
 	public List<Bonus> bonuses(ItemStack stack) {
 		return this.bonuses;
 	}

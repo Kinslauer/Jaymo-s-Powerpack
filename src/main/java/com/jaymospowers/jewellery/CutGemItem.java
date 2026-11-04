@@ -12,7 +12,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.TooltipDisplay;
 
-/** (0.19.82) A gem cut on the lapidary wheel. Its gem, cut, grade and chips are one component ({@link CutGem}). */
+/** (0.19.84) A gem cut on the lapidary wheel. Its gem, cut, grade and chips are one component ({@link CutGem}). */
 public class CutGemItem extends Item {
 	public CutGemItem(Item.Properties properties) {
 		super(properties);

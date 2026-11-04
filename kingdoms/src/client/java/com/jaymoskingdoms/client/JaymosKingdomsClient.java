@@ -93,6 +93,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
+		// (0.7.490) Hordes, Orc war journals: the Lore Codex screen
+		LoreCodexClient.register();
 		// 0.7.55: the wardrobe (MCA's editor, clothes only) from the inventory
 		Wardrobe.register();
 		// 0.5.52: the skill tree (K)
@@ -193,6 +195,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.BarrageClient.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
+		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
+		BeastParts.register();
 		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
 		SeaParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers

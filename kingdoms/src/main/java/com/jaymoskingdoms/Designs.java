@@ -61,6 +61,8 @@ public final class Designs {
 
 	/** Read designs by name (an empty one: none, or it can't be read). Cleared when one is saved or deleted. */
 	private static final Map<String, Optional<Blueprint>> CACHE = new HashMap<>();
+	/** Who made each design: the Mason's Table screen asks for every design on each refresh, so the files aren't reread. */
+	private static final Map<String, String> AUTHORS = new HashMap<>();
 
 	/** The server running (designs are read from its world's save). */
 	private static @Nullable MinecraftServer server;
@@ -72,6 +74,7 @@ public final class Designs {
 		ServerLifecycleEvents.SERVER_STARTED.register(s -> server = s);
 		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
 			CACHE.clear();
+			AUTHORS.clear();
 			server = null;
 		});
 	}
@@ -160,6 +163,10 @@ public final class Designs {
 
 	/** Who saved design {@code name} (the template's author), or "". */
 	static String author(MinecraftServer server, String name) {
+		return AUTHORS.computeIfAbsent(name, n -> readAuthor(server, n));
+	}
+
+	private static String readAuthor(MinecraftServer server, String name) {
 		try {
 			CompoundTag tag = NbtIo.readCompressed(file(server, name), NbtAccounter.unlimitedHeap());
 			String by = tag.getStringOr("author", "");
@@ -256,6 +263,7 @@ public final class Designs {
 			return false;
 		}
 		CACHE.remove(name);
+		AUTHORS.remove(name);
 		return true;
 	}
 
@@ -337,6 +345,7 @@ public final class Designs {
 			return false;
 		}
 		CACHE.remove(name);
+		AUTHORS.remove(name);
 		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.deleted", name).withStyle(ChatFormatting.YELLOW));
 		return true;
 	}

@@ -12,7 +12,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.TooltipDisplay;
 
-/** (0.19.82) A forged ring, bracelet, amulet or circlet frame: metal with an empty setting for a cut gem. */
+/** (0.19.84) A forged ring, bracelet, amulet or circlet frame: metal with an empty setting for a cut gem. */
 public class JewelFrameItem extends Item {
 	public JewelFrameItem(Item.Properties properties) {
 		super(properties);

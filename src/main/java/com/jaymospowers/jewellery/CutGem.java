@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.82) A cut gem: which gem, which cut, how well it was cut ({@link Grade} id) and how often it chipped. One
+ * (0.19.84) A cut gem: which gem, which cut, how well it was cut ({@link Grade} id) and how often it chipped. One
  * component (jaymospowers:cut_gem) on the cut gem item, kept on jewellery set with it, and ready to be socketed into
  * weapons and armour. The ids are saved on items: never rename them.
  */

@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
-/** (0.19.82) The Jeweller's Bench: a cooled frame on the left, a cut gem in the middle, the set piece on the right. */
+/** (0.19.84) The Jeweller's Bench: a cooled frame on the left, a cut gem in the middle, the set piece on the right. */
 public class JewellersBenchMenu extends ItemCombinerMenu {
 	public static final int FRAME = 0, GEM = 1;
 
