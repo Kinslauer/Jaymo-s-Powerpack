@@ -257,11 +257,20 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
 			return 0;
 		}
+		if (k.type() == FactionType.BARBARIAN && Hordes.realm(server, k.id())) {
+			// (0.7.491) the horde oath: swearing to a greenskin king (HordeCity)
+			String failure = HordeCity.swear(player, k);
+			if (failure != null) {
+				c.getSource().sendFailure(Component.translatable(failure, k.name()));
+				return 0;
+			}
+			return 1;
+		}
 		if (!k.type().isRealm()) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_pledge", k.name()));
 			return 0;
 		}
-		if (Factions.of(server, player.getUUID()) != null) {
+		if (Factions.of(server, player.getUUID()) != null || HordeCity.oathOf(server, player.getUUID()) != null) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.already_sworn"));
 			return 0;
 		}
@@ -295,6 +304,12 @@ final class KingdomCommands {
 		MinecraftServer server = c.getSource().getServer();
 		Faction k = Factions.of(server, player.getUUID());
 		if (k == null) {
+			// (0.7.491) or a horde oath forsworn
+			Faction horde = HordeCity.forswear(player);
+			if (horde != null) {
+				c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.horde_oath.left", horde.name()), false);
+				return 1;
+			}
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_sworn"));
 			return 0;
 		}

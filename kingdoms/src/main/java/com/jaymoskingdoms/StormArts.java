@@ -64,7 +64,7 @@ public final class StormArts {
 	 * Sneak and {@code J} for a lightning Sorcerer: Bolt Step if no one is in sight, else false (let the bolt go).
 	 */
 	static boolean stepKey(ServerPlayer player, ServerLevel level) {
-		// (0.7.491) a higher art: Knowledge 4 (else the plain bolt goes)
+		// (0.7.492) a higher art: Knowledge 4 (else the plain bolt goes)
 		if (Arcana.sighted(player) != null || !Knowledge.has(player, Knowledge.HIGHER_ARTS)) {
 			return false;
 		}
@@ -135,7 +135,7 @@ public final class StormArts {
 	 */
 	static boolean ring(ServerPlayer player, ServerLevel level) {
 		if (!Knowledge.has(player, Knowledge.HIGHER_ARTS)) {
-			// (0.7.491) a higher art: Knowledge 4
+			// (0.7.492) a higher art: Knowledge 4
 			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
 			return true;
 		}

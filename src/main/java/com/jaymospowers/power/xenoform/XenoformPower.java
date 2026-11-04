@@ -1468,6 +1468,9 @@ public final class XenoformPower implements Power {
 				case "gyre" -> act = live.spin > 0 ? "spin" : live.rolled ? "roll" : null;
 				// (0.19.75) Keen hanging from a ceiling by its feet
 				case "keen" -> act = live.perched ? "hang" : null;
+				// (0.19.82) Prism rooted in crystal while Reflect is held; Gnasher's death roll
+				case "prism" -> act = live.reflecting ? "root" : null;
+				case "gnasher" -> act = live.rolls > 0 ? "roll" : null;
 				default -> act = null;
 			}
 		}

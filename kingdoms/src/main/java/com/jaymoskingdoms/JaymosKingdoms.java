@@ -295,6 +295,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.490) Currencies: the realms' coins and their money-changers
 		Currencies.register();
 		HordeEconomy.register();
+		// (0.7.491) Hordes patch 4: the greenskin king city (warpath, tribute pacts, the horde oath)
+		HordeCity.register();
 		GreenMarket.register();
 		BorderClashes.register();
 		TribePacts.register();
@@ -340,9 +342,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		ArrivalGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
-		// 0.7.491: a boss's posture: worn by blows, broken to a kneel and a riposte
+		// 0.7.492: a boss's posture: worn by blows, broken to a kneel and a riposte
 		BossPosture.register();
-		// 0.7.491: knowledge: the boss ladder that opens anvils, smithing, enchanting, the higher arts and the End
+		// 0.7.492: knowledge: the boss ladder that opens anvils, smithing, enchanting, the higher arts and the End
 		Knowledge.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);

@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.7.491) Knowledge: the boss ladder Andy kept from Gemini's DawnCraft handoff ("tying combat directly into progression";
+ * (0.7.492) Knowledge: the boss ladder Andy kept from Gemini's DawnCraft handoff ("tying combat directly into progression";
  * DawnCraft's idea only, our own bosses, code and words). Five levels, each earned by one great foe slain, in order
  * ({@link #level}: a level counts only once every boss below it has fallen too). Each opens a piece of the craft:
  * <ol>

@@ -69,7 +69,7 @@ public final class RungJournal extends Item {
 	/**
 	 * Per tier (Hearth to Legend), its lines in the order they're written; line {@code n} of tier {@code t} is the lang key
 	 * {@code journal.jaymoskingdoms.<tier>.<n>}. The step into Wildlands carries the Aether test; the pod and the wreck come
-	 * with Dread and Legend. (0.7.491) The {@link com.jaymoskingdoms.Knowledge} bosses come last on each page.
+	 * with Dread and Legend. (0.7.492) The {@link com.jaymoskingdoms.Knowledge} bosses come last on each page.
 	 */
 	private static final Line[][] PAGES = {
 		{Line.hint(), Line.hint(), Line.hint()},

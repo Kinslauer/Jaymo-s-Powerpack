@@ -656,7 +656,7 @@ public final class Skills {
 			return;
 		}
 		if (Knowledge.lockedPerk(player, perk)) {
-			// (0.7.491) a higher technique: Knowledge 4
+			// (0.7.492) a higher technique: Knowledge 4
 			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
 			return;
 		}

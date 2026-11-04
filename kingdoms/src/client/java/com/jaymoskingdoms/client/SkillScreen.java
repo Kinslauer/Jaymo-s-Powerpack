@@ -432,7 +432,7 @@ final class SkillScreen extends Screen {
 			}
 			text.add(cost.copy().withColor(Ui.DIM));
 			String blocked = shown.blocked(hovered);
-			// (0.7.491) a higher technique wants Knowledge 4
+			// (0.7.492) a higher technique wants Knowledge 4
 			if (blocked == null && this.minecraft.player != null && com.jaymoskingdoms.Knowledge.lockedPerk(this.minecraft.player, hovered)) {
 				blocked = "gui.jaymoskingdoms.skills.blocked.knowledge";
 			}

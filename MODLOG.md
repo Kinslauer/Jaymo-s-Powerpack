@@ -5141,3 +5141,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 
 - **0.19.81, Kingdoms 0.7.490, greenskin hordes and Runic Races heritages:** Kingdoms only, see kingdoms/MODLOG.md, except
   that the Forge Hearth now superheats Kingdoms' bent ingots into Hot Ingots (`HotMetal.ingotMetal`), one way to straighten them.
+- **0.19.82, Patch 5: floaters and blobs** (`docs/AlienBodies-Plan.md`): six more aliens are no longer men.
+  - Ooze and Magma Ooze are now low cubes of jelly that hop as they move: squashed wide on landing, stretched tall in the air, wobbling at rest. Ooze is a see-through shell around a dark core with eyes; Magma Ooze is three crust slabs whose gaps open as it stretches, showing the glowing core. They take the low box (`XenoformState.LOW_BOX`, with Billow and Croaker), so they fit through one-high gaps.
+  - Prism is now a crystal cluster: a faceted core with ten amethyst prisms tilted out of it, walking on six thin shard legs in a tripod gait. Holding Reflect roots it (synced as the "root" act): the legs splay and dig in and the crystals flare.
+  - Cortex is now a floating, guardian-like eye fish: one big eye that follows your look, a cracked dome where the brain sparks, three spikes a side that slowly push out and draw in, and a finned tail. It bobs half a block up and swims level in water. With no claws left, Claw Snap is now Spine Snap (same move).
+  - Murk is now a real squid: on land it drags itself on eight jointed tentacles with the mantle raised behind; in water it swims mantle-first, the tentacles opening and snapping shut to jet.
+  - Gnasher is now a shark: it swims level with a wave down its body, drags itself on its fins on land, lunges with a jaw snap, and spins along its length in a Death Roll (synced as the "roll" act).
+  - Blight is now a floating Wither: three skulls on a crossbar over a ribbed chest and a swaying tail, the side skulls looking round on their own; an attack snaps all three heads forward.
+  - Pyre stays humanoid (Andy). The six lost their Ultimate spikes. Each body was written, then checked by a second
+    pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional
+    `excalibur_style` pack. Compile-checked; not played.
+- **0.19.83, Kingdoms 0.7.491, greenskin king city and medieval structure mods:** Kingdoms: the king city (see
+  kingdoms/MODLOG.md). Pack: Andy asked to check Rabbit's DawnCraft's structures "or any that have good medieval structures
+  to fill voids we haven't already". DawnCraft is Forge 1.18.2 and only its Structory has a 26.3 Fabric build, so from it
+  and Modrinth's 26.3 list the pack adds, unchanged: Dungeons and Taverns (roadside taverns, dungeons, overhauled
+  strongholds, mansions, outposts and mineshafts), Structory and Structory: Towers (ruins, camps, shrines, watchtowers),
+  and Homesteads (lone farmsteads). CurseForge ids still to look up from home (`packModsNoCf`).

@@ -95,7 +95,7 @@ public final class WorldTiers {
 	/**
 	 * (0.7.383) Per tier, the feats (bits, all of them) it also needs: Borderlands your first forged iron tool, Wildlands the
 	 * Nether and a trophy from the Aether's guardians, Dread the Wither and a pod flown home, Legend the Dragon and a part set
-	 * salvaged from a Maw wreck. (0.7.491) And the {@link Knowledge} levels: Borderlands 1, Wildlands 2, Dread 4, Legend 5.
+	 * salvaged from a Maw wreck. (0.7.492) And the {@link Knowledge} levels: Borderlands 1, Wildlands 2, Dread 4, Legend 5.
 	 */
 	static final int[] FEAT_NEEDED = {0, Progress.FORGED | Progress.KNOW_1,
 		Progress.NETHER | Progress.AETHER_TROPHY | Progress.KNOW_1 | Progress.KNOW_2,
@@ -162,7 +162,7 @@ public final class WorldTiers {
 				return Component.translatable("tier.jaymoskingdoms.need.none");
 			}
 			Component text = Component.translatable(FOES_NEEDED[i] == 1 ? "tier.jaymoskingdoms.need.foe" : "tier.jaymoskingdoms.need.foes", FOES_NEEDED[i]);
-			// (0.7.491) of the knowledge bits, only the highest is named (it wants the ones below)
+			// (0.7.492) of the knowledge bits, only the highest is named (it wants the ones below)
 			int knowledge = FEAT_NEEDED[i] & Knowledge.ALL;
 			int top = Integer.highestOneBit(knowledge);
 			for (int bit : Progress.BITS) {
@@ -187,7 +187,7 @@ public final class WorldTiers {
 		public static final int NETHER = 1, WITHER = 2, DRAGON = 4;
 		/** (0.7.383) The ladder's exit deeds: a first forged iron tool, a trophy home from the Aether, a pod flown and landed home, a Maw wreck salvaged. */
 		public static final int FORGED = 8, AETHER_TROPHY = 16, POD_FLIGHT = 32, MAW_SALVAGE = 64;
-		/** (0.7.491) The {@link Knowledge} bosses slain: the Goblin King, the Ogre King, the Skeleton Lord, the Piglin King, the Wither. */
+		/** (0.7.492) The {@link Knowledge} bosses slain: the Goblin King, the Ogre King, the Skeleton Lord, the Piglin King, the Wither. */
 		public static final int KNOW_1 = 128, KNOW_2 = 256, KNOW_3 = 512, KNOW_4 = 1024, KNOW_5 = 2048;
 		/** Every feat bit, in the order they're listed. */
 		static final int[] BITS = {KNOW_1, KNOW_2, KNOW_3, KNOW_4, KNOW_5, NETHER, WITHER, DRAGON, FORGED, AETHER_TROPHY, POD_FLIGHT, MAW_SALVAGE};
@@ -219,7 +219,7 @@ public final class WorldTiers {
 			return openIgnoring(0);
 		}
 
-		/** (0.7.491) As {@link #open}, as if the tiers didn't want the feats in {@code ignored} (what it was before knowledge). */
+		/** (0.7.492) As {@link #open}, as if the tiers didn't want the feats in {@code ignored} (what it was before knowledge). */
 		public int openIgnoring(int ignored) {
 			int top = 0;
 			while (top + 1 < FOES_NEEDED.length && this.foes >= FOES_NEEDED[top + 1]
@@ -578,7 +578,7 @@ public final class WorldTiers {
 		}
 		EntityType<?> type = entity.getType();
 		boolean dragon = type == EntityTypes.ENDER_DRAGON, wither = type == EntityTypes.WITHER;
-		// (0.7.491) and the knowledge bosses: they earn their level besides
+		// (0.7.492) and the knowledge bosses: they earn their level besides
 		int knowledge = Knowledge.bitFor(entity);
 		if (!(dragon || wither || type == EntityTypes.ELDER_GUARDIAN || type == EntityTypes.WARDEN || BossBars.boss(entity) || knowledge != 0)) {
 			return;
@@ -598,7 +598,7 @@ public final class WorldTiers {
 		credit.forEach(WorldTiers::update);
 	}
 
-	/** (0.7.491) Adds the feat bits {@code bits} to {@code player}'s progress (and their party's), quietly but for what it opens. */
+	/** (0.7.492) Adds the feat bits {@code bits} to {@code player}'s progress (and their party's), quietly but for what it opens. */
 	static void grant(ServerPlayer player, int bits) {
 		Progress p = progress(player);
 		update(player, new Progress(p.foes(), p.feats() | bits, p.unlocked()));
@@ -670,7 +670,7 @@ public final class WorldTiers {
 		int before = progress(player).open();
 		int knew = Knowledge.level(progress(player).feats());
 		player.setAttached(PROGRESS, now);
-		// (0.7.491) a new knowledge level: a chime, a line on the action bar
+		// (0.7.492) a new knowledge level: a chime, a line on the action bar
 		Knowledge.risen(player, knew, Knowledge.level(now.feats()));
 		for (int i = before + 1; i <= now.open(); i++) {
 			Tier tier = Tier.byOrdinal(i);

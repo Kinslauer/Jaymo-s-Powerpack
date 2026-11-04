@@ -22,7 +22,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.491) A great foe's posture, the one piece of Gemini's "DawnCraft" boss handoff that the pack didn't have yet (its
+ * (0.7.492) A great foe's posture, the one piece of Gemini's "DawnCraft" boss handoff that the pack didn't have yet (its
  * idea only, written our own way on the pack's bosses; nothing of DawnCraft or Epic Fight is copied). Every boss with a
  * bar ({@link #applies}: kings, lords, chiefs, warlords, champions, Aether Giants, the Ogre King, the Skeleton Lord, the
  * Piglin King) carries a posture beside its health:
