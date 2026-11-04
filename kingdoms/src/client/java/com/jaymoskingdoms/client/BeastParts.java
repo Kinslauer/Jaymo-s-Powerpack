@@ -46,7 +46,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Sprite, Faerie:</b> translucent gossamer wings, folded back at rest, spreading and fluttering as they move.
  * <b>Dryad:</b> small branch sprigs with leaves on the head.</li>
  * </ul>
- * Tails sway with the walking speed. Ears, crest and sprigs are hidden under a helmet or a hood, tails, wings and legs
+ * Tails wander, curl and slap on their own, only calmed and swung a little by the walk. Ears, crest and sprigs are hidden
+ * under a helmet or a hood, tails, wings and legs
  * stand off the back clear of a chestplate or leggings, and everything is hidden under a Powers costume
  * ({@link PowersCover}, as the Tideborn's fins are) and on the invisible. The local player's own first-person view never
  * draws the avatar's layers, so nothing shows over the camera. Parts are baked lazily like the fins and never mutated (a
@@ -54,10 +55,19 @@ import org.jspecify.annotations.Nullable;
  */
 public final class BeastParts {
 	// ---- tuning
-	/** The tails' sway (radians) and how fast it swings, with the walk speed adding to both. */
-	static final float SWAY_SPEED = 0.1F, SWAY_RUN_SPEED = 0.15F, SWAY_RUN = 1.0F;
+	/**
+	 * (0.7.500, Andy: "they should pulse and slap like they have their own mind") A tail lives on its own clock: a lazy wander
+	 * of two slow waves, a curl that comes and goes, and now and then a slap (a few quick whips to the side). Every wave runs on
+	 * the age at a fixed rate; the walk only adds a small swing on the stride ({@code walkAnimationPos}) and calms the rest.
+	 * (Before, the walk speed sped the wave up: age times a changing rate threw the phase around and the tail thrashed.)
+	 */
+	static final float WANDER_RATE = 0.06F, WANDER_SLOW = 0.023F, WALK_CALM = 0.5F, STRIDE_SWAY = 0.05F;
+	/** The slap: how often its slow gate opens (radians a tick), the share of each beat it stays open, its whip rate and size. */
+	static final float SLAP_GATE = 0.031F, SLAP_OPEN = 0.08F, SLAP_RATE = 0.7F, SLAP = 0.3F;
+	/** The curl: how often it comes (radians a tick) and how far the later segments roll up at its height. */
+	static final float CURL_RATE = 0.04F, CURL = 0.14F;
 	/** How much a run lifts a tail (radians off its first bend), and how much it straightens the rest. */
-	static final float RUN_LIFT = 0.25F, RUN_STRAIGHTEN = 0.3F;
+	static final float RUN_LIFT = 0.15F, RUN_STRAIGHTEN = 0.2F;
 	/** Where a tail leaves the body: the small of the back (body space), and how far back it starts clear of armour. */
 	static final float TAIL_Y = 10.5F, TAIL_Z = 1.7F, ARMOUR_Z = 3.3F;
 	/** Wings and legs on the back: how far out they sit, and the added gap under armour. */
@@ -224,7 +234,7 @@ public final class BeastParts {
 				for (int i = 0; i < tails; i++) {
 					// a fan of tails: spread apart, the outer ones lifted a little, each swaying on its own beat
 					float spread = tails == 1 ? 0.0F : (i - (tails - 1) * 0.5F) * 0.55F;
-					tail(ctx, posed, design.tail, armour, state.ageInTicks, run, spread, tails == 1 ? 0.0F : Math.abs(spread) * 0.3F, phase + i * 1.9F);
+					tail(ctx, posed, design.tail, armour, state.ageInTicks, state.walkAnimationPos, run, spread, tails == 1 ? 0.0F : Math.abs(spread) * 0.3F, phase + i * 1.9F);
 				}
 			}
 			if (design.wings == Wings.FOLDED) {
@@ -313,26 +323,43 @@ public final class BeastParts {
 
 	// ---- body: tails, wings, legs (body space: the box is -4..4 x, 0..12 y, -2..2 z; +z is behind)
 
-	private static void tail(Ctx ctx, HumanoidModel<?> model, Tail tail, boolean armour, float age, float run, float yawSpread, float lift, float phase) {
+	private static void tail(Ctx ctx, HumanoidModel<?> model, Tail tail, boolean armour, float age, float walkPos, float run, float yawSpread, float lift,
+		float phase) {
 		ModelPart segment = Geo.tail(), tip = Geo.tip();
+		float calm = 1.0F - WALK_CALM * run;
+		float slap = slap(age, phase) * calm;
+		float curl = 0.5F + 0.5F * Mth.sin(age * CURL_RATE + phase * 1.3F);
+		curl = curl * curl * curl * calm;
 		ctx.ps.pushPose();
 		model.body.translateAndRotate(ctx.ps);
 		ctx.ps.translate(0.0F, TAIL_Y / 16.0F, (armour ? ARMOUR_Z : TAIL_Z) / 16.0F);
-		for (int i = 0; i < tail.bend.length; i++) {
+		int n = tail.bend.length;
+		for (int i = 0; i < n; i++) {
+			float along = n == 1 ? 1.0F : i / (float)(n - 1);
 			float pitch = i == 0 ? tail.bend[0] - lift - RUN_LIFT * run : tail.bend[i] * (1.0F - RUN_STRAIGHTEN * run);
-			pitch += 0.04F * Mth.sin(age * 0.08F + i + phase);
-			float yaw = (i == 0 ? yawSpread : 0.0F) + tail.sway * (1.0F + SWAY_RUN * run) * Mth.sin(age * (SWAY_SPEED + SWAY_RUN_SPEED * run) + phase - i * 0.6F);
+			// a slow pulse down the tail, the curl rolling up its far half, a little bob on the stride
+			pitch += 0.04F * Mth.sin(age * 0.08F + i + phase) + CURL * curl * along + 0.03F * run * Mth.sin(walkPos * 1.3324F - i * 0.5F);
+			float wander = 0.6F * Mth.sin(age * WANDER_RATE + phase - i * 0.5F) + 0.4F * Mth.sin(age * WANDER_SLOW + phase * 1.7F - i * 0.3F);
+			float yaw = (i == 0 ? yawSpread : 0.0F) + tail.sway * calm * wander
+				+ SLAP * slap * Mth.sin(age * SLAP_RATE + phase - i * 0.5F) * (0.4F + 0.6F * along)
+				+ STRIDE_SWAY * run * Mth.sin(walkPos * 0.6662F - i * 0.5F);
 			ctx.ps.rotate(Axis.XP, pitch);
 			ctx.ps.rotate(Axis.YP, yaw);
 			ctx.ps.pushPose();
 			// the box is 3 x 3 x 4: stretch it to this segment's thickness and length
 			float thick = tail.thick[i] / 3.0F;
 			ctx.ps.scale(thick, thick, tail.length / 4.0F);
-			ctx.draw(tail.tip && i == tail.bend.length - 1 ? tip : segment);
+			ctx.draw(tail.tip && i == n - 1 ? tip : segment);
 			ctx.ps.popPose();
 			ctx.ps.translate(0.0F, 0.0F, tail.length / 16.0F);
 		}
 		ctx.ps.popPose();
+	}
+
+	/** How hard a tail is slapping, 0 most of the time: a slow wave's crest opens it for a moment, eased in and out. */
+	static float slap(float age, float phase) {
+		float open = Math.max(0.0F, Mth.sin(age * SLAP_GATE + phase * 2.3F) - (1.0F - SLAP_OPEN)) / SLAP_OPEN;
+		return open * open * (3.0F - 2.0F * open);
 	}
 
 	/**

@@ -5216,3 +5216,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the right hip with the lantern's sway (`WornLanterns`); it gives no light. Web's symbiote grabs coins as valuables.
   - The melting gap log skips coins (realm silver and the like are money, not metal).
   - Not compile-checked yet at this entry; not played.
+- **0.20.1, Kingdoms 0.7.500, tails calm down when walking:** Andy: "they should pulse and slap like they have their own
+  mind, but they swing violently whenever you walk". The cause: the sway wave ran at `age * (rate + walk speed)`, and with
+  the age in the thousands every change of walk speed threw the phase round, so the tail thrashed. Warrior-born tails
+  (`ZFighterTail`) and the Great Ape's tail now run on fixed clocks: a lazy wander of two slow waves, a curl that comes and
+  goes, and now and then a slap (a few quick whips to the side). The walk only calms them by half, lifts them a little and
+  adds a small swing on the stride (`walkAnimationPos`). Beastfolk tails in Kingdoms get the same (see `kingdoms/MODLOG.md`).
+  Not compile-checked in the cloud (pure math on fields already used there); not played.

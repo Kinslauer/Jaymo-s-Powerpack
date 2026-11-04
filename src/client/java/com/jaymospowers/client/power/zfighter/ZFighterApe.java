@@ -223,8 +223,9 @@ public final class ZFighterApe {
 			// the arms hang a little out from the bulk of him and sway heavily
 			this.rightArm.zRot += 0.12F + 0.03F * Mth.sin(time * 0.07F);
 			this.leftArm.zRot -= 0.12F + 0.03F * Mth.sin(time * 0.07F);
-			// the tail swings, more as he lumbers along
-			this.tail.yRot = (0.25F + 0.35F * walk) * Mth.sin(time * (0.08F + 0.12F * walk));
+			// the tail wanders on its own clock, calmer as he lumbers along, with a small swing on his stride (a walk-sped
+			// wave threw it about)
+			this.tail.yRot = 0.25F * (1.0F - 0.4F * walk) * Mth.sin(time * 0.08F) + 0.12F * walk * Mth.sin(walked * 0.6662F);
 			this.tail.xRot = -0.6F + 0.1F * Mth.sin(time * 0.05F);
 			// (0.16.36) this character's own build: head, arm length, bulk, tail
 			WarriorLooks.Ape build = state.getData(STYLE);
