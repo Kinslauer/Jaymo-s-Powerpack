@@ -2,6 +2,7 @@ package com.jaymoskitchen.climate;
 
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.ModItems;
+import com.jaymoskitchen.Stacked;
 import com.jaymoskitchen.brewing.Brewing;
 import com.jaymoskitchen.cooking.Dish;
 import com.jaymoskitchen.kitchen.KitchenBlocks;
@@ -155,7 +156,7 @@ public final class Thirst {
 			rate += SWIM_DRAIN;
 		}
 		boolean fire = fireDrinker(player);
-		if (level.dimension() == Level.NETHER && !fire) {
+		if (Stacked.in(player, Level.NETHER) && !fire) {
 			rate += NETHER_DRAIN;
 		}
 		if (fire && player.isInLava() && seconds % LAVA_SOAK_EVERY == 0L) {

@@ -602,3 +602,17 @@ Our own take on the idea of MCA: Conversations (none of its code). Plan: `docs/T
 - Andy: "add the deer too and the croc, and the bear." `Encounters.CUBE_DUPLICATES` no longer keeps out Cube Animals' red
   deer, roe deer, crocodile and black bear; they spawn as other breeds beside Naturalist's. Still kept out: komodo dragon,
   moose, piranha, snail, tiger. Compile-checked; not played.
+## 0.7.528: the stacked Nether and Aether (pack 0.20.30)
+Powers 0.20.30 ships One Dimension: new worlds stack the Aether over the Overworld over the Nether in the Overworld's own
+level. There every band answers `level.dimension() == OVERWORLD`, so Kingdoms asks its own `Stacked` (a copy of Powers'
+`compat/Stacked`: the realm by height, the level that holds a realm, its height shift, its players, `within` a band).
+- Nether forts, Flame Avatar camps, fortress haunts, portal raids and the Cinder Forge run on the Nether band's players;
+  the forge's wayfinder points straight down at it in a stacked world (the band is under the Overworld 1:1, not an
+  eighth). Their op commands check the band you stand in.
+- Notus and Ignivorus over the Nether band, Aetherions over the Aether band; Nether bounties find the fort under the realm.
+- Temples rise by the band you're in (an Aether temple looks for the islands' ground, `Stacked.within`); golem lairs keep
+  out of the Nether band; ore veins seed the Nether band's ancient debris too; mythic mounts, Nether world-tier feats,
+  patron champions' hunts, the Wind dragon's cruise and perch read the band.
+- Life-story starts set down in a band (the demon start) let you go once you climb out of it (`LifeStory.leftBand`).
+- The Grue's trial arena and the monoliths' height keep under their own realm's top, not the Aether's.
+Compile-checked; not played.

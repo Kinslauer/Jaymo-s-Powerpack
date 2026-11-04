@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.wounds.MedicineItems;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
@@ -440,6 +441,15 @@ public final class ZFighterStarts {
 		if (server.getTickCount() % 20 != 0) {
 			return;
 		}
+		// (0.20.30) a One Dimension world's Nether is a band of the Overworld, so leaving it changes no level: a ward who has
+		// climbed out of it is let go here instead
+		if (Stacked.joined(server, Level.NETHER)) {
+			for (ServerPlayer player : server.overworld().players()) {
+				if (ward(player) && !Stacked.in(player, Level.NETHER)) {
+					player.removeAttached(WARD);
+				}
+			}
+		}
 		ServerLevel rustfall = server.getLevel(ZFighterSpace.DESTS[ZFighterSpace.RUSTFALL].level());
 		if (rustfall == null) {
 			return;
@@ -511,12 +521,12 @@ public final class ZFighterStarts {
 	// ---------------------------------------------------------------- the demon realm
 
 	private static boolean demon(MinecraftServer server, ServerPlayer player, RandomSource random) {
-		ServerLevel nether = server.getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		if (nether == null) {
 			return false;
 		}
 		BlockPos spawn = server.overworld().getRespawnData().pos();
-		BlockPos from = new BlockPos(spawn.getX() / 8, 64, spawn.getZ() / 8);
+		BlockPos from = new BlockPos(spawn.getX() / 8, 64 + Stacked.shift(server, Level.NETHER), spawn.getZ() / 8);
 		com.mojang.datafixers.util.Pair<BlockPos, net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> gloam = nether.findClosestBiome3d(
 			b -> b.is(ZFighterDemonRealm.BIOMES.get(0)), from, DEMON_SEARCH, DEMON_STEP, DEMON_VERTICAL_STEP);
 		if (gloam == null) {

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.nether;
 
+import com.jaymoskingdoms.Stacked;
 import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.money.Coinage;
 import com.jaymoskingdoms.Heritage;
@@ -140,7 +141,7 @@ public final class CinderForge {
 			if (ignis(v)) {
 				return useIgnis(sp, v);
 			}
-			if (smith(v) && v.level().dimension() != Level.NETHER) {
+			if (smith(v) && !Stacked.in(v, Level.NETHER)) {
 				return useSmith(sp, v);
 			}
 			return InteractionResult.PASS;
@@ -184,12 +185,12 @@ public final class CinderForge {
 		if (server.getTickCount() % 40 != 0) {
 			return;
 		}
-		ServerLevel nether = server.getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (nether != null) {
 				wayfinders(player, nether);
 			}
-			if (player.level() == nether && !player.entityTags().contains(TIDINGS_TAG)) {
+			if (nether != null && Stacked.in(player, Level.NETHER) && !player.entityTags().contains(TIDINGS_TAG)) {
 				// the first time in the Nether: word of the forge ((0.7.494) over the hotbar, not in the Tidings)
 				player.addTag(TIDINGS_TAG);
 				Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.cinder_forge"));
@@ -199,7 +200,7 @@ public final class CinderForge {
 			return;
 		}
 		Forge forge = forge(nether);
-		for (ServerPlayer player : nether.players()) {
+		for (ServerPlayer player : Stacked.players(nether.getServer(), Level.NETHER)) {
 			if (player.isSpectator()) {
 				continue;
 			}
@@ -350,9 +351,9 @@ public final class CinderForge {
 				Speech.tell(level, v, player, Component.translatable("speech.jaymoskingdoms.wayfinder.price", Money.text(player, Money.worth(WAYFINDER_PRICE))), Speech.WHITE);
 				return InteractionResult.SUCCESS;
 			}
-			ServerLevel nether = level.getServer().getLevel(Level.NETHER);
+			ServerLevel nether = Stacked.level(level.getServer(), Level.NETHER);
 			if (nether != null) {
-				player.getInventory().placeItemBackInInventory(wayfinder(nether, level.dimension()), net.minecraft.util.Prediction.SERVER_ONLY);
+				player.getInventory().placeItemBackInInventory(wayfinder(nether, Stacked.realm(player)), net.minecraft.util.Prediction.SERVER_ONLY);
 			}
 			Speech.tell(level, v, player, Component.translatable("speech.jaymoskingdoms.wayfinder.sold"), Speech.GOLD);
 			return InteractionResult.SUCCESS;
@@ -364,7 +365,7 @@ public final class CinderForge {
 			return InteractionResult.PASS;
 		}
 		LAST_RUMOUR.put(player.getUUID(), now);
-		ServerLevel nether = level.getServer().getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(level.getServer(), Level.NETHER);
 		int which = level.getRandom().nextInt(RUMOURS);
 		Component line = which == 0 && nether != null
 			? Component.translatable("rumour.jaymoskingdoms.cinder_forge.0", Component.translatable("direction.jaymoskingdoms." + compass(forge(nether).site())))
@@ -403,10 +404,16 @@ public final class CinderForge {
 		return stack.is(Items.COMPASS) && data != null && data.copyTag().getBooleanOr(WAYFINDER_KEY, false);
 	}
 
-	/** Points {@code stack} at the forge in the Nether, or at the forge's spot times eight anywhere else. */
+	/**
+	 * Points {@code stack} at the forge in the Nether, or at the forge's spot times eight anywhere else. (0.7.528) In a One
+	 * Dimension world the Nether is a band under the Overworld ({@link Stacked}), so the forge is straight below its own spot:
+	 * the needle points there, in the one level both share.
+	 */
 	static void point(ItemStack stack, ServerLevel nether, net.minecraft.resources.ResourceKey<Level> dimension) {
 		BlockPos site = forge(nether).site();
-		GlobalPos target = dimension == Level.NETHER ? GlobalPos.of(Level.NETHER, site)
+		boolean stacked = nether.dimension() != Level.NETHER;
+		GlobalPos target = dimension == Level.NETHER ? GlobalPos.of(nether.dimension(), site)
+			: stacked ? GlobalPos.of(Level.OVERWORLD, new BlockPos(site.getX(), 64, site.getZ()))
 			: GlobalPos.of(Level.OVERWORLD, new BlockPos(site.getX() * 8, 64, site.getZ() * 8));
 		LodestoneTracker now = stack.get(DataComponents.LODESTONE_TRACKER);
 		if (now == null || !now.target().equals(Optional.of(target))) {
@@ -420,7 +427,7 @@ public final class CinderForge {
 		for (int i = 0; i < inventory.getContainerSize(); i++) {
 			ItemStack stack = inventory.getItem(i);
 			if (!stack.isEmpty() && isWayfinder(stack)) {
-				point(stack, nether, player.level().dimension());
+				point(stack, nether, Stacked.realm(player));
 			}
 		}
 	}
@@ -428,7 +435,7 @@ public final class CinderForge {
 	// ---- commands (operators; debug: plain text) -------------------------------------------------------------------
 
 	private static int info(CommandContext<CommandSourceStack> c) {
-		ServerLevel nether = c.getSource().getServer().getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(c.getSource().getServer(), Level.NETHER);
 		if (nether == null) {
 			return 0;
 		}
@@ -440,7 +447,7 @@ public final class CinderForge {
 
 	private static int buildHere(CommandContext<CommandSourceStack> c) {
 		ServerLevel level = c.getSource().getLevel();
-		if (level.dimension() != Level.NETHER) {
+		if (!Stacked.at(level, BlockPos.containing(c.getSource().getPosition()), Level.NETHER)) {
 			c.getSource().sendFailure(Component.literal("The Cinder Forge stands in the Nether."));
 			return 0;
 		}
@@ -456,7 +463,7 @@ public final class CinderForge {
 
 	private static int giveWayfinder(CommandContext<CommandSourceStack> c) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
-		ServerLevel nether = c.getSource().getServer().getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(c.getSource().getServer(), Level.NETHER);
 		if (nether == null) {
 			return 0;
 		}

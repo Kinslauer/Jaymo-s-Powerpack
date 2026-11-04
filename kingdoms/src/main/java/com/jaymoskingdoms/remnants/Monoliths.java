@@ -3,6 +3,7 @@ package com.jaymoskingdoms.remnants;
 import com.jaymoskingdoms.Encounters;
 import com.jaymoskingdoms.Factions;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Stacked;
 import com.jaymoskingdoms.WorldTiers;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Codec;
@@ -472,8 +473,9 @@ public final class Monoliths {
 	 */
 	public static Monolith raise(ServerLevel level, BlockPos foot, Element element, RandomSource random) {
 		int height = PILLAR_LEAST + random.nextInt(PILLAR_MOST - PILLAR_LEAST + 1);
-		// never into the world's ceiling: the crown, the gap and the heart's swing all fit under it
-		int room = (level.getMaxY() - CEILING_ROOM - foot.getY()) / SCALE - CORE_GAP - 3;
+		// never into the world's ceiling: the crown, the gap and the heart's swing all fit under it ((0.7.528) the Overworld's
+		// own, not a One Dimension world's Aether band over it)
+		int room = (Stacked.maxY(level.getServer(), Stacked.realm(level, foot.getY())) - CEILING_ROOM - foot.getY()) / SCALE - CORE_GAP - 3;
 		height = Math.max(8, Math.min(height, room));
 		BlockState stone = element.stone().defaultBlockState(), band = element.band().defaultBlockState();
 		// the ground round its foot, its own

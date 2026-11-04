@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.dragons;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Stacked;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -233,12 +234,13 @@ public final class Dragons {
 			return;
 		}
 		aether(server);
-		ServerLevel level = server.getLevel(Level.NETHER);
+		// (0.7.528) the Nether's own level, or a One Dimension world's stacked band (Stacked)
+		ServerLevel level = Stacked.level(server, Level.NETHER);
 		if (level == null || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
 			return;
 		}
 		RandomSource random = level.getRandom();
-		for (ServerPlayer player : level.players()) {
+		for (ServerPlayer player : Stacked.players(server, Level.NETHER)) {
 			ignivorus(level, player, random);
 			if (player.isCreative() || player.isSpectator() || !level.getBiome(player.blockPosition()).is(HAS_NOTUS)
 				|| random.nextFloat() >= NETHER_CHANCE) {
@@ -265,12 +267,12 @@ public final class Dragons {
 
 	/** (0.7.522) Over the Aether, now and then an Aetherion comes flying about some way off from a player (unless one's near already). */
 	private static void aether(MinecraftServer server) {
-		ServerLevel level = server.getLevel(AETHER);
+		ServerLevel level = Stacked.level(server, AETHER);
 		if (level == null || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
 			return;
 		}
 		RandomSource random = level.getRandom();
-		for (ServerPlayer player : level.players()) {
+		for (ServerPlayer player : Stacked.players(server, AETHER)) {
 			if (!player.isSpectator() && random.nextFloat() < AETHERION_CHANCE) {
 				aloft(level, player, random, AETHERION_DRAGON, AetherionDragon.class);
 			}

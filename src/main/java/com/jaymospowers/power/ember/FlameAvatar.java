@@ -1,6 +1,7 @@
 package com.jaymospowers.power.ember;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
@@ -242,7 +243,7 @@ public final class FlameAvatar {
 			return;
 		}
 		int was = player.getAttachedOrElse(NETHER, 0);
-		boolean nether = player.level().dimension() == Level.NETHER;
+		boolean nether = Stacked.in(player, Level.NETHER);
 		int now = nether ? was + CHECK_EVERY : Math.max(0, was - Math.round(CHECK_EVERY * COOL_SHARE));
 		if (now == was) {
 			return;

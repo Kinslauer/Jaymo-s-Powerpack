@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.Stacked;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -733,7 +734,7 @@ public abstract class WindDragon extends AbstractHorse {
 				setFlying(true);
 				this.circleAngle += cruiseSpeed() / CIRCLE_RADIUS;
 				double floor = this.homeFloor(level);
-				double height = level.dimension() == Level.NETHER ? NETHER_CRUISE_HEIGHT : CRUISE_HEIGHT;
+				double height = Stacked.in(this, Level.NETHER) ? NETHER_CRUISE_HEIGHT : CRUISE_HEIGHT;
 				Vec3 point = new Vec3(this.home.x + Math.cos(this.circleAngle) * CIRCLE_RADIUS, floor + height,
 					this.home.z + Math.sin(this.circleAngle) * CIRCLE_RADIUS);
 				flyToward(level, point, cruiseSpeed(), false);
@@ -812,7 +813,7 @@ public abstract class WindDragon extends AbstractHorse {
 	protected @Nullable BlockPos findPerch(ServerLevel level) {
 		Vec3 centre = this.home == null ? this.position() : this.home;
 		BlockPos best = null;
-		boolean nether = level.dimension() == Level.NETHER;
+		boolean nether = Stacked.in(this, Level.NETHER);
 		for (int i = 0; i < PERCH_TRIES; i++) {
 			int x = Mth.floor(centre.x) + this.random.nextInt(PERCH_SEARCH * 2 + 1) - PERCH_SEARCH;
 			int z = Mth.floor(centre.z) + this.random.nextInt(PERCH_SEARCH * 2 + 1) - PERCH_SEARCH;
