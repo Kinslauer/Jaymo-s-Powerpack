@@ -8418,7 +8418,7 @@ each reviewed with every finding independently verified; compile-checked only, n
   - **Havens expand** (`HavenGrowth`): havens raise works wherever land and stores allow, send their output by cart, and
     keep sworn defenders by blood who grow with them.
 
-## 0.7.491: the greenskin king city (pack 0.19.82)
+## 0.7.491: the greenskin king city (pack 0.19.83)
 Andy (2026-11-04): "you can start on the king city". Hordes patch 4 (`docs/Hordes-Plan.md`), on top of tier 4's great
 hall, land and vassals:
 - **Arena and shaman's tower** (`HordeBuildings.arena`, `shamanTower`): a tier 4 band also raises a round sand fighting pit
