@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 
-/** (0.7.540) Lanterns take random ticks, on which they burn through their fuel, and set down from an item burn on what it carried ({@link Lanterns}). */
+/** (0.7.541) Lanterns take random ticks, on which they burn through their fuel, and set down from an item burn on what it carried ({@link Lanterns}). */
 @Mixin(LanternBlock.class)
 abstract class LanternBlockMixin extends Block {
 	protected LanternBlockMixin(Properties properties) {

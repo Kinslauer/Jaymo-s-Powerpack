@@ -47,7 +47,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.540) Lanterns burn down like {@link Torches} do, but on fuel you put in them (Andy, 2026-11-04). A lantern burns until
+ * (0.7.541) Lanterns burn down like {@link Torches} do, but on fuel you put in them (Andy, 2026-11-04). A lantern burns until
  * its fuel runs out, then goes out and is left a {@link #BURNT_LANTERN} (no light). Use coal or charcoal on a lantern, lit or
  * burnt out, to add {@link #COAL_TICKS} of burning; ambergris burns slow and adds {@link #AMBERGRIS_TICKS}. A lantern holds at
  * most {@link #MOST_TICKS}. A lantern never fuelled (fresh from the crafting grid, or set by world generation or a settlement)

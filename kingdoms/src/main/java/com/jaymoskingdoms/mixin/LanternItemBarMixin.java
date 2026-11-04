@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.540) A lantern item that has burnt some of its fuel shows a durability-style bar for what is left ({@link Lanterns}). */
+/** (0.7.541) A lantern item that has burnt some of its fuel shows a durability-style bar for what is left ({@link Lanterns}). */
 @Mixin(Item.class)
 abstract class LanternItemBarMixin {
 	@Inject(method = "isBarVisible", at = @At("HEAD"), cancellable = true)

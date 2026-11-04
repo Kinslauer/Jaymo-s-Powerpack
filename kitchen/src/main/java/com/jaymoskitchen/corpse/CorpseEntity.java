@@ -1431,7 +1431,19 @@ public class CorpseEntity extends Entity {
 				return;
 			}
 		}
-		if (rises()) {
+		if (rises() && Corpses.inNoCorpseZone(this)) {
+			// (0.5.61) a body carried into (or left in) the Other World before this: it fades, it never gets up
+			level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.3, getZ(), 6, 0.3, 0.2, 0.3, 0.01);
+			dropLoot(level);
+			for (int i = 0; i < hotbar.size(); i++) {
+				if (!hotbar.get(i).isEmpty()) {
+					spawnAtLocation(level, hotbar.get(i).copy(), 0.3F);
+					hotbar.set(i, ItemStack.EMPTY);
+				}
+			}
+			discard();
+			return;
+		} else if (rises()) {
 			if (age > REANIMATE_TICKS - 200 && random.nextInt(40) == 0) {
 				// twitching (rattling): it's about to get up
 				play(level, kind == CorpseKind.SKELETON ? SoundEvents.SKELETON_AMBIENT : SoundEvents.ZOMBIE_AMBIENT, 0.6F * voice());

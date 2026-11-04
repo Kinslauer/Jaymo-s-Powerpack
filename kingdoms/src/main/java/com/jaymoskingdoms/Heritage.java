@@ -340,12 +340,12 @@ public final class Heritage {
 		public List<Component> card(HeritageVariants.@Nullable Variant variant) {
 			List<Component> out = new ArrayList<>();
 			if (this.freePoints > 0) {
-				out.add(Component.translatable("heritage.jaymoskingdoms.free", this.freePoints));
+				out.add(Component.translatable("heritage.jaymoskingdoms.free", this.freePoints * Stats.STEP));
 			}
 			for (Stats.Stat stat : Stats.Stat.values()) {
 				int n = bonus(stat);
 				if (n > 0) {
-					out.add(Component.translatable("heritage.jaymoskingdoms.bonus", n, Component.translatable("stat.jaymoskingdoms." + stat.key())));
+					out.add(Component.translatable("heritage.jaymoskingdoms.bonus", n * Stats.STEP, Component.translatable("stat.jaymoskingdoms." + stat.key())));
 				}
 			}
 			// (0.7.490) a Rimewyrm takes no halving from fire (dealt), so its card leaves that out
