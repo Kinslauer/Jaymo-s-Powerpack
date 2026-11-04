@@ -236,6 +236,11 @@ public final class CryoPose {
 		ModelPart off = leftMain ? h.rightArm : h.leftArm;
 		ModelPart mainLeg = leftMain ? h.leftLeg : h.rightLeg;
 		ModelPart offLeg = leftMain ? h.rightLeg : h.leftLeg;
+		// (0.19.84) a body whose legs are solved onto the ground (Rime's two-jointed legs): its thighs keep their angles,
+		// so the shins and feet hung off them stay planted (the poses' torso and arms still play)
+		boolean ownLegs = model instanceof com.jaymospowers.client.power.xenoform.XenoFormModels.FormModel form && form.ownsLegs;
+		PartPose rightLeg = ownLegs ? h.rightLeg.storePose() : null;
+		PartPose leftLeg = ownLegs ? h.leftLeg.storePose() : null;
 		// +1 for the right arm: zRot times this is out from the body, yRot times minus this in across it
 		float mainOut = leftMain ? -1.0F : 1.0F;
 		// the torso at the waist (pitch + forward, yaw + turns the main shoulder back for a right-hander, roll + to the left)
@@ -259,6 +264,10 @@ public final class CryoPose {
 		// (crouching, the walk's own crouch has moved the parts already: the torso stays as it is)
 		if (!avatar.isCrouching) {
 			turnTorso(h, torso[0], torso[1], torso[2]);
+		}
+		if (ownLegs) {
+			h.rightLeg.loadPose(rightLeg);
+			h.leftLeg.loadPose(leftLeg);
 		}
 	}
 
