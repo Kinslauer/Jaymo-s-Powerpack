@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.484) A field cannon, our own model and texture (it was iexogen's "Canon" until now): a cast barrel of eight faces with
+ * (0.7.489) A field cannon, our own model and texture (it was iexogen's "Canon" until now): a cast barrel of eight faces with
  * reinforcing bands, a swelling muzzle and a cascabel, laid on trunnions in a wooden carriage with two cheeks, a transom,
  * a trail to the ground and two spoked wheels. It swings round to its mark; firing, the barrel runs back along its line
  * and the whole carriage rolls back on its wheels, then is hauled up again slowly. (Smoke, flame and the flash are the

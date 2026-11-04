@@ -40,7 +40,7 @@ final class GoblinSkins {
 		JaymosKingdomsClient.SKINS.put(Goblins.GOBLIN, state -> GOBLINS[state.variant % GOBLIN_FACES]);
 		JaymosKingdomsClient.SKINS.put(Goblins.SLINGER, state -> SLINGERS[state.variant % SLINGER_FACES]);
 		JaymosKingdomsClient.SKINS.put(Goblins.KING, state -> KING);
-		// (0.7.484) a goblin slave in an orc camp is one of the goblin faces, ears and nose too
+		// (0.7.489) a goblin slave in an orc camp is one of the goblin faces, ears and nose too
 		JaymosKingdomsClient.SKINS.put(com.jaymoskingdoms.Slaves.SLAVE, state -> GOBLINS[state.variant % GOBLIN_FACES]);
 	}
 

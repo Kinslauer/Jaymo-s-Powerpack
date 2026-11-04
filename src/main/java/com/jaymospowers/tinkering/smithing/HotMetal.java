@@ -64,7 +64,7 @@ public final class HotMetal {
 				return entry.getKey();
 			}
 		}
-		// (0.19.67) Kingdoms' greenskin bent ingots: superheated on the hearth they come off straight Hot Ingots
+		// (0.19.80) Kingdoms' greenskin bent ingots: superheated on the hearth they come off straight Hot Ingots
 		Identifier id = BuiltInRegistries.ITEM.getKey(item);
 		if ("jaymoskingdoms".equals(id.getNamespace())) {
 			if (id.getPath().equals("bent_iron")) {

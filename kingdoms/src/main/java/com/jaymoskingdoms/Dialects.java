@@ -6,7 +6,7 @@ import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) Hordes, Dialects: orcs and goblins speak two dialects of one broken English. The orc's is short, loud and
+ * (0.7.489) Hordes, Dialects: orcs and goblins speak two dialects of one broken English. The orc's is short, loud and
  * brutal; the goblin's is quicker, greedier, more nervous and a bit sharper. A line that both broods share (or that a
  * human may share with them) lives twice, as {@code dialect.jaymoskingdoms.<brood>.<the plain key>}; this picks the
  * right one by who is speaking. Lines only one brood ever says keep their own keys.
@@ -28,7 +28,7 @@ public final class Dialects {
 		if (kind != null) {
 			return kind == Heritage.Kind.GOBLIN ? GOBLIN : ORC;
 		}
-		// (0.7.484) a Folk orc or goblin carries no heritage (no MCA, or a shaman not yet handed to a villager): its role
+		// (0.7.489) a Folk orc or goblin carries no heritage (no MCA, or a shaman not yet handed to a villager): its role
 		// tells its brood, the orc shaman's too (Tribes.of leaves him out)
 		if (e instanceof Worker w) {
 			Heritage.Kind role = Greenskins.brood(w.role());

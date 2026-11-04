@@ -889,7 +889,7 @@ public final class Approaches {
 		Faction ruler = f == null ? null : ruler(level.getServer(), f);
 		Object[] args = switch (a.topic) {
 			// (0.7.130) and the blood: yours, then the purist king's
-			// (0.7.484) a toll is asked in the town's own coin
+			// (0.7.489) a toll is asked in the town's own coin
 			case SEARCH, TOLL, BOUT, LOYALTY -> new Object[] {a.topic == TOLL ? asked(player, a, a.price) : a.price, Purists.name(Heritage.of(player)),
 				ruler == null ? "?" : Purists.bloodName(ruler)};
 			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
@@ -1201,7 +1201,7 @@ public final class Approaches {
 		switch (a.topic) {
 			case ACCUSE -> {
 				if (option == 0) {
-					// (0.7.484) in the town's coin first, then emeralds
+					// (0.7.489) in the town's coin first, then emeralds
 					Currencies.fine(level.getServer(), player, f, FINE);
 					Reputation.change(player, f, CONFESS_REP);
 					clearSuspicion(player, f.id());
@@ -1325,7 +1325,7 @@ public final class Approaches {
 			}
 		} else if (option == 1) {
 			if (suspected(player, f.id(), now)) {
-				// (0.7.484) in the town's coin first, then emeralds
+				// (0.7.489) in the town's coin first, then emeralds
 				int fine = Currencies.fine(level.getServer(), player, f, FINE);
 				toTreasury(level, f, fine);
 				clearSuspicion(player, f.id());
@@ -1358,7 +1358,7 @@ public final class Approaches {
 				if (option == 0) {
 					if (suspected(player, f.id(), now)) {
 						// (what was taken turns up: it goes back, with a fine)
-						// (0.7.484) in the town's coin first, then emeralds
+						// (0.7.489) in the town's coin first, then emeralds
 						int fine = Currencies.fine(level.getServer(), player, f, FINE);
 						toTreasury(level, f, fine);
 						clearSuspicion(player, f.id());
@@ -1400,7 +1400,7 @@ public final class Approaches {
 			}
 			case TOLL -> {
 				if (option == 0 && canPay(player, a, a.price)) {
-					// (0.7.484) paid in the town's coin first, then emeralds
+					// (0.7.489) paid in the town's coin first, then emeralds
 					toTreasury(level, f, Currencies.fine(level.getServer(), player, f, a.price));
 					Reputation.change(player, f, tv == REVELER ? REVELER_TOLL_REP : TOLL_PAID_REP);
 					if (tv == REVELER) {
@@ -1585,13 +1585,13 @@ public final class Approaches {
 		return Purse.count(player, Items.EMERALD);
 	}
 
-	/** (0.7.484) {@code player} carries {@code emeralds} of worth that the realm of {@code a} takes: its coin, and emeralds. */
+	/** (0.7.489) {@code player} carries {@code emeralds} of worth that the realm of {@code a} takes: its coin, and emeralds. */
 	private static boolean canPay(ServerPlayer player, Approach a, long emeralds) {
 		MinecraftServer server = player.level().getServer();
 		return Currencies.canPay(server, player, Factions.get(server, a.faction), emeralds);
 	}
 
-	/** (0.7.484) {@code emeralds} of worth as the realm of {@code a} asks it, in its own coin ("6 Realm Silver"). */
+	/** (0.7.489) {@code emeralds} of worth as the realm of {@code a} asks it, in its own coin ("6 Realm Silver"). */
 	private static Component asked(ServerPlayer player, Approach a, long emeralds) {
 		MinecraftServer server = player.level().getServer();
 		return Currencies.asked(server, Factions.get(server, a.faction), emeralds);

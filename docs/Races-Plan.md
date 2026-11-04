@@ -8,7 +8,7 @@ and art with the MIT notice; we write our own 26.3 code. Each race has one activ
 | Runic race | Our heritage | Their kit we borrow |
 |---|---|---|
 | Primian, Celeron, Valen (Human) | Heartlander (variants) | Stroke of Fortune / Messenger's Dash / Unbreakable Stand |
-| Magi (Human) | Earthling (Inkmarked look) | Arcane Overflow; warded / frail. Folded into the Earthling's Inkmarked rather than a fourth Heartlander look (0.7.484) |
+| Magi (Human) | Earthling (Inkmarked look) | Arcane Overflow; warded / frail. Folded into the Earthling's Inkmarked rather than a fourth Heartlander look (0.7.489) |
 | High Elf, Moon Elf | Sylvan | Arcane Reflex, Moonlit Veil; weak by day / frail |
 | Dark Elf | Nightborn | Shadowmeld; sunlight weakness |
 | Ice Elf, Frost One, Ice Drake | Frostborn | Frostbind / Glacial Resolve; fire weakness |
@@ -40,7 +40,7 @@ Andy (17:30): "Dryad and all the fae are kind of what i intended from sylvan, so
 takes every Faeborne race (Dryad, Changeling, Sprite, Nymph, Faerie) as variants, alongside its elves (High, Moon, Blood).
 Races we already have fold in as kits.
 
-## Built: heritages and variants (Kingdoms 0.7.484)
+## Built: heritages and variants (Kingdoms 0.7.489)
 The Magi kit (Arcane Overflow) went on the Earthling's Inkmarked look, since Heartlander has only three looks.
 - **Beastfolk** (`BEASTFOLK`, **pickable**, stats Agility + Endurance): base look "Tawny" plus the variants `arachnid`, `avian`,
   `canine`, `feline`, `kitsune`, `serpen`. Life story: born in a den (`born.den`), raised by the pack (`raised.pack`).
@@ -68,7 +68,7 @@ The Magi kit (Arcane Overflow) went on the Earthling's Inkmarked look, since Hea
 ## Checklist
 - [x] Andy picks the shape (by family, races as variants)
 - [x] New heritages + variants: looks, body sizes, stats, skin ranges, life-story births (tongues: none exist per heritage)
-- [x] Kits (active, passive, weakness) for every heritage and look: `HeritageKits` (Kingdoms 0.7.484 marks). Ability on the heritage key `;`
+- [x] Kits (active, passive, weakness) for every heritage and look: `HeritageKits` (Kingdoms 0.7.489 marks). Ability on the heritage key `;`
   (existing left-mouse holds kept: Frostbind, Thunderclap, Sunflare, Stretch; the Bio-built's and Rubber-folk's engulfing), gift and flaw
   as plain attributes or hooks; villagers get the gifts and flaws. Card rows are coloured by kind (gift green, flaw red, ability gold).
 - [x] MIT notice for Runic Races in the credits (`kingdoms/src/main/resources/licenses/runic-races`; **Andy to confirm the copyright line**)

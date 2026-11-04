@@ -6,7 +6,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) Currencies, Andy (2026-11-03): "Diversify the currencies, it can change based on the prominent trading hub's
+ * (0.7.489) Currencies, Andy (2026-11-03): "Diversify the currencies, it can change based on the prominent trading hub's
  * currency or other factors." Emeralds stay the one coin every trader knows; each culture also has a coin of its own,
  * the greenskins keep their bent ingots and pirates take anything gold. {@link #base} is what one coin is worth at the
  * standard rate, in thousandths of an emerald (the unit every settlement's treasury is still kept in, so old saves
@@ -17,13 +17,13 @@ public enum Currency {
 	EMERALD(1000),
 	/** The Common realms' (plains) silver penny. */
 	SILVER(500),
-	/** The North's (taiga and snow) chopped hacksilver, weighed more than counted. (0.7.484) Four to the emerald, so prices land on whole coins. */
+	/** The North's (taiga and snow) chopped hacksilver, weighed more than counted. (0.7.489) Four to the emerald, so prices land on whole coins. */
 	HACKSILVER(250),
 	/** The South's (savanna, desert, badlands) gold dinar. */
 	DINAR(2000),
 	/** The Wildwood's (jungle and swamp) strings of shells. */
 	SHELLS(250),
-	/** The Blossom land's copper mon, with the square hole. (0.7.484) Five to the emerald, so prices land on whole coins. */
+	/** The Blossom land's copper mon, with the square hole. (0.7.489) Five to the emerald, so prices land on whole coins. */
 	MON(200),
 	/** The greenskins' bent copper ({@link BentIngots}); two to the emerald, as {@link TribePacts} has always paid. */
 	BENT(500),

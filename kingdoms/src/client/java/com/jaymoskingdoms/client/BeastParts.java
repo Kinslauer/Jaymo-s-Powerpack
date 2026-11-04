@@ -31,7 +31,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484, Andy: "definetly real modeled parts") The Beastfolk's ears, tails, wings and legs, the Avian's crest and the
+ * (0.7.489, Andy: "definetly real modeled parts") The Beastfolk's ears, tails, wings and legs, the Avian's crest and the
  * Sylvan fae's wings and sprigs as real model parts, no longer painted flat on the skin ({@code tools/gen_heritage_looks.py}
  * paints only the fur now). Textures {@code parts/<design>.png} from {@code tools/gen_heritage_parts.py}, one 64x64 sheet per
  * design (the layout is in that script's header; every box here is built to match it). They follow the parent model's head
@@ -87,7 +87,7 @@ public final class BeastParts {
 		BEASTFOLK("beastfolk", new Ears(false, 1.0F, 1.0F, 0.2F, 2.6F),
 			new Tail(new float[] {-0.6F, -0.1F, -0.05F, 0.05F, 0.1F}, new float[] {2.4F, 2.4F, 2.4F, 2.2F, 1.8F}, 3.2F, 0.18F, true), Wings.NONE, false, false,
 			false, false),
-		// The bushy tail levels out at the end so its tip stays above the feet when standing (0.7.484).
+		// The bushy tail levels out at the end so its tip stays above the feet when standing (0.7.489).
 		CANINE("canine", new Ears(true, 0.85F, 1.25F, 0.1F, 2.5F),
 			new Tail(new float[] {-0.55F, -0.12F, -0.05F, 0.0F, 0.05F, 0.1F}, new float[] {2.6F, 3.6F, 4.4F, 4.4F, 3.6F, 2.4F}, 3.2F, 0.2F, true), Wings.NONE,
 			false, false, false, false),

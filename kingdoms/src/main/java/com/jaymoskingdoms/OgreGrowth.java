@@ -30,7 +30,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) Ogre holds grow for as long as they hold ground and stores, with no list to run out of. Every
+ * (0.7.489) Ogre holds grow for as long as they hold ground and stores, with no list to run out of. Every
  * {@link #EVERY} ticks a standing hold's ogres forage something into its stash (the chests its raiders fill too:
  * {@link OgreRaids}), and when the stash can pay for the next stage, one is raised: in turn a <b>hut</b> of old stone
  * outside the walls, a <b>new ogre</b> (while the huts have room), and a <b>bone totem</b> with a stash chest of its own.
@@ -63,16 +63,16 @@ final class OgreGrowth {
 	static final double HIDE_RANGE = 24.0;
 	/** A hut: its inner width (odd), its wall height (ogres are tall) and the doorway's width. */
 	static final int HUT_HALF = 2, HUT_WALL = 4;
-	/** (0.7.484) Rounds a stage may find no ground before the hold lets it go, unpaid, and tries the next stage's spot. */
+	/** (0.7.489) Rounds a stage may find no ground before the hold lets it go, unpaid, and tries the next stage's spot. */
 	static final int STAGE_TRIES = 3;
-	/** (0.7.484) How far (blocks, a square) from its centre a hold that lost every stash chest looks for ground for a new one. */
+	/** (0.7.489) How far (blocks, a square) from its centre a hold that lost every stash chest looks for ground for a new one. */
 	static final int HOARD_SEARCH = 6;
 	// ================================================================================================================
 
 		private OgreGrowth() {
 	}
 
-	/** (0.7.484) Failed rounds at the current stage, by hold id. */
+	/** (0.7.489) Failed rounds at the current stage, by hold id. */
 	private static final Map<Integer, Integer> TRIES = new HashMap<>();
 
 	static void clear() {
@@ -115,7 +115,7 @@ final class OgreGrowth {
 
 	/**
 	 * A hold raised before it kept a stash list has its hoard chest found (the nearest chest inside its walls) and kept.
-	 * (0.7.484) Stash chests that are gone (looted and broken) are struck off the list; if none is left, the nearest chest
+	 * (0.7.489) Stash chests that are gone (looted and broken) are struck off the list; if none is left, the nearest chest
 	 * inside the walls is taken up instead, or failing that a new hoard chest is set down by its centre, so the hold
 	 * carries on growing (and its waiting loot has somewhere to go).
 	 */
@@ -160,7 +160,7 @@ final class OgreGrowth {
 		return adopted;
 	}
 
-	/** (0.7.484) A new, empty hoard chest set down on clear ground near the hold's centre (not with a player near), or null. */
+	/** (0.7.489) A new, empty hoard chest set down on clear ground near the hold's centre (not with a player near), or null. */
 	private static @Nullable BlockPos newHoard(ServerLevel level, OgreHolds.Site site) {
 		if (Raids.playerNear(level, site.at(), HIDE_RANGE)) {
 			return null;
@@ -224,10 +224,10 @@ final class OgreGrowth {
 			return;
 		}
 		MinecraftServer server = level.getServer();
-		// (0.7.484) the record as it now stands: an ogre home before this one may have left loot waiting too
+		// (0.7.489) the record as it now stands: an ogre home before this one may have left loot waiting too
 		OgreHolds.Site current = OgreHolds.site(server, site.id());
 		OgreHolds.Site base = current != null ? current : site;
-		// (0.7.484) the whole stack waits, so enchantments, names, potions and a box's contents come home with it
+		// (0.7.489) the whole stack waits, so enchantments, names, potions and a box's contents come home with it
 		List<ItemStack> pending = new ArrayList<>(base.pending());
 		pending.add(left.copy());
 		OgreHolds.put(server, base.withPending(pending));

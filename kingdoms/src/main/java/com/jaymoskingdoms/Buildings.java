@@ -118,7 +118,7 @@ final class Buildings {
 			Planner.setRings(ring, WALL_RING_MIN, WALL_RING_MAX);
 		}
 		Planner.setRings("palisade", PALISADE_RING_MIN, PALISADE_RING_MAX);
-		// (0.7.484) the works a haven raises ({@link HavenGrowth})
+		// (0.7.489) the works a haven raises ({@link HavenGrowth})
 		HavenBuildings.register();
 	}
 

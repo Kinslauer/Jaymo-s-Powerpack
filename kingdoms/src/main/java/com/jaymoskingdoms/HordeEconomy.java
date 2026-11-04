@@ -18,7 +18,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) Hordes patch 3, a greenskin camp's own economy ({@code docs/Hordes-Plan.md}), replacing the flat daily takings and
+ * (0.7.489) Hordes patch 3, a greenskin camp's own economy ({@code docs/Hordes-Plan.md}), replacing the flat daily takings and
  * {@code Hordes}' yield percent.
  * <ul>
  * <li><b>Jobs.</b> The camp's working folk (its grunts, or its goblins; the rangers and slingers keep watch) take jobs from a
@@ -153,7 +153,7 @@ final class HordeEconomy {
 
 	/** The camp's working folk: its grunts (an orc camp) or goblins; the rangers and slingers keep watch and have no job. */
 	static int workers(ServerLevel level, Faction camp, Camps.CampData data, boolean orc) {
-		// ((0.7.484) an orc camp's goblin slaves do its work too, but are no folk of the camp: they are counted from the
+		// ((0.7.489) an orc camp's goblin slaves do its work too, but are no folk of the camp: they are counted from the
 		// world, loaded ones only, and never in its holdings or its cap)
 		return camp.holdings().count(orc ? Orcs.GRUNT : Goblins.GOBLIN) + (orc ? Slaves.count(level, camp.id(), data.center()) : 0);
 	}
@@ -235,7 +235,7 @@ final class HordeEconomy {
 		return Storage.isFood(stack) || stack.is(Items.BROWN_MUSHROOM) || stack.is(Items.RED_MUSHROOM);
 	}
 
-	/** How many meals the camp's folk need a day ((0.7.484) only the living eat: a dead one's place waiting to be filled doesn't). */
+	/** How many meals the camp's folk need a day ((0.7.489) only the living eat: a dead one's place waiting to be filled doesn't). */
 	static int meals(ServerLevel level, Faction camp, Camps.CampData data, boolean orc) {
 		int folk = orc ? camp.holdings().count(Orcs.GRUNT) + camp.holdings().count(Orcs.RANGER) + 2 + Slaves.count(level, camp.id(), data.center())
 			: camp.holdings().count(Goblins.GOBLIN) + camp.holdings().count(Goblins.SLINGER) + 1;
@@ -251,7 +251,7 @@ final class HordeEconomy {
 		if (!Storage.loaded(level, camp)) {
 			return;
 		}
-		// ((0.7.484) now and then it leaves a war journal in the store)
+		// ((0.7.489) now and then it leaves a war journal in the store)
 		LoreBooks.camp(level, camp, orc, days);
 		for (int d = 0; d < days; d++) {
 			Faction now = Factions.get(server, camp.id());

@@ -507,7 +507,7 @@ public final class Bounties {
 			objective = Component.translatable("bounty.jaymoskingdoms.objective.offer");
 		}
 		List<ItemStack> rewards = new ArrayList<>();
-		// (0.7.484) whole coins, and the change in emeralds
+		// (0.7.489) whole coins, and the change in emeralds
 		for (ItemStack stack : Currencies.payEmeralds(money, b.dead() ? head : b.price()).stacks()) {
 			if (rewards.size() < 5) {
 				rewards.add(stack);
@@ -558,7 +558,7 @@ public final class Bounties {
 		return Mth.ceil(b.price() * HEAD_SHARE);
 	}
 
-	/** (0.7.484) {@code emeralds} of a bounty as the court's own coin counts it ("12 Realm Silver"): prices are posted, and paid, in it. */
+	/** (0.7.489) {@code emeralds} of a bounty as the court's own coin counts it ("12 Realm Silver"): prices are posted, and paid, in it. */
 	private static Component coin(MinecraftServer server, int court, long emeralds) {
 		Currency c = Currencies.of(server, Factions.get(server, court));
 		return Currencies.amount(Currencies.payEmeralds(c, emeralds));
@@ -858,7 +858,7 @@ public final class Bounties {
 		remove(level.getServer(), b.key());
 		tearUp(player, b.key());
 		unpinAll(level, b.key());
-		// (0.7.484) paid in the court's own coin
+		// (0.7.489) paid in the court's own coin
 		Currency money = Currencies.of(level.getServer(), court);
 		Currencies.Pay coins = Currencies.payEmeralds(money, emeralds);
 		Currencies.give(player, coins);
@@ -872,7 +872,7 @@ public final class Bounties {
 
 	/** A player brought in alive: fined what they carry (up to the price), forgiven their wanted time there, got back on their feet. */
 	private static void sentence(ServerLevel level, ServerPlayer target, Faction court, Bounty b) {
-		// (0.7.484) fined in the court's own coin first, then emeralds
+		// (0.7.489) fined in the court's own coin first, then emeralds
 		int fine = Currencies.fine(level.getServer(), target, court, b.price());
 		Map<String, Long> wanted = new HashMap<>(target.getAttachedOrElse(Theft.WANTED, Map.of()));
 		if (wanted.remove(Integer.toString(court.id())) != null) {

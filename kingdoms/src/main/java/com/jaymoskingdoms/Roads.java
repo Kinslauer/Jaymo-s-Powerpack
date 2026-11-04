@@ -329,7 +329,7 @@ public final class Roads {
 				}
 			}
 		}
-		// ((0.7.484) greenskin camps are joined to the nearest other camp of their tribe, for their carts: Caravans.startGreen)
+		// ((0.7.489) greenskin camps are joined to the nearest other camp of their tribe, for their carts: Caravans.startGreen)
 		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
 			String tribe = f.fallen() || !Hordes.greenskin(server, f.id()) ? null : Tribes.of(server, f.id());
 			if (tribe != null) {

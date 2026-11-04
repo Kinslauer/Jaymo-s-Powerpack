@@ -42,7 +42,7 @@ final class OrcCamps {
 	static final int MAX_SPREAD = 5;
 	/** A new camp's orcs, and how it grows: another orc every so many days, every so many of them a ranger, up to a most. */
 	static final int START_GRUNTS = 6, START_SPARRING = 2, START_RANGERS = 3, DAYS_PER_ORC = 2, RANGER_EVERY = 4, MAX_ORCS = 15;
-	/** (0.7.484) What a camp takes in each day is its folk's jobs now ({@link HordeEconomy}); this is the plunder a new camp starts with (and bent copper in the store). */
+	/** (0.7.489) What a camp takes in each day is its folk's jobs now ({@link HordeEconomy}); this is the plunder a new camp starts with (and bent copper in the store). */
 	static final int START_LOGS = 24, START_HIDES = 16, START_MEAT = 16, START_ARROWS = 32, START_IRON = 8, START_BENT = 6;
 	/** Raising a building: one a day at most, from this much of its pile; never with a player this near. */
 	static final int BUILD_LOGS = 4, BUILD_HIDES = 4;
@@ -98,7 +98,7 @@ final class OrcCamps {
 		Storage.put(level, stocked, Items.ARROW, START_ARROWS);
 		Storage.put(level, stocked, Items.IRON_INGOT, START_IRON);
 		Storage.put(level, stocked, BentIngots.BENT_COPPER, START_BENT);
-		// ((0.7.484) and a chief's hoard to start on)
+		// ((0.7.489) and a chief's hoard to start on)
 		HordeEconomy.deposit(server, id, HordeEconomy.START_HOARD);
 		Camps.takeSides(server, id, KIND);
 		crown(level, Factions.get(server, id), layout.throne(), gate);
@@ -211,14 +211,14 @@ final class OrcCamps {
 	/** {@code days}' growth: what the camp takes in by its own hands, and (as it ages) more orcs. */
 	static void grow(ServerLevel level, Faction camp, int days) {
 		MinecraftServer server = level.getServer();
-		// ((0.7.484) its folk's jobs bring in the goods and the hoard's wages, and everyone eats: HordeEconomy)
+		// ((0.7.489) its folk's jobs bring in the goods and the hoard's wages, and everyone eats: HordeEconomy)
 		HordeEconomy.day(level, camp, true, days);
 		Camps.updateData(server, camp.id(), d -> d.withGrown(d.grown() + days));
 		Camps.CampData data = Camps.data(server, camp.id());
 		if (data == null) {
 			return;
 		}
-		// ((0.7.475) the cap grows with its tier; (0.7.484) a camp in plenty grows faster, a hungry one not at all)
+		// ((0.7.475) the cap grows with its tier; (0.7.489) a camp in plenty grows faster, a hungry one not at all)
 		int cap = Math.min(Hordes.folkCap(server, camp.id(), true),
 			START_GRUNTS + START_RANGERS + HordeEconomy.age(server, camp.id(), data.grown()) / DAYS_PER_ORC);
 		RandomSource random = level.getRandom();
@@ -264,9 +264,9 @@ final class OrcCamps {
 			crown(level, camp, OrcBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new warchief (the last was lost)", camp.name());
 		}
-		// (0.7.484) now and then it takes another goblin slave
+		// (0.7.489) now and then it takes another goblin slave
 		Slaves.restock(level, camp, data);
-		// ((0.7.484) its market merchants stand about their stalls)
+		// ((0.7.489) its market merchants stand about their stalls)
 		GreenMarket.tick(level, camp, data);
 		// (0.7.475) past its first stockade: its tier's wall and band
 		if (Hordes.tick(level, camp, data, force)) {
@@ -274,7 +274,7 @@ final class OrcCamps {
 		}
 		// ((0.7.474) each of its ogres hauls for the builders: another building a day apiece, OgreHolds)
 		int ogres = OgreHolds.haulers(level, camp.id(), data.center()).size();
-		// ((0.7.484) a hungry camp raises nothing; one in plenty ages sooner)
+		// ((0.7.489) a hungry camp raises nothing; one in plenty ages sooner)
 		int allowed = Math.min(OrcBuildings.GROWTH.size(), HordeEconomy.age(server, camp.id(), data.grown()) * (1 + ogres));
 		if (data.built() >= allowed || !Storage.loaded(level, camp) || HordeEconomy.hungry(server, camp.id())) {
 			return;
@@ -298,7 +298,7 @@ final class OrcCamps {
 		}
 		OrcBuildings.place(level, spot, data.center(), data.gate());
 		OgreHolds.haul(level, camp.id(), data.center(), where);
-		// (0.7.484) and its goblin slaves carry logs to the new building
+		// (0.7.489) and its goblin slaves carry logs to the new building
 		Slaves.haul(level, camp.id(), data.center(), where);
 		Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
 		JaymosKingdoms.LOGGER.debug("{} raised a {}", camp.name(), spot.id());

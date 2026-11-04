@@ -566,7 +566,7 @@ final class HordeBuildings {
 		return t.done("goblin_great_hall");
 	}
 
-	// ---- (0.7.484) the goblin town: stone and timber ----------------------------------------------------------------------
+	// ---- (0.7.489) the goblin town: stone and timber ----------------------------------------------------------------------
 
 	/** A storey of a town building is this high (three of wall and a beam or ceiling course). */
 	private static final int STOREY = 4;
@@ -819,7 +819,7 @@ final class HordeBuildings {
 			}
 		}
 		// the vault: iron bars round gold and a chest, its door a gap bars leave on the counter side
-		// (0.7.484) the gap is (7, 5), opening north toward the counter and onto the empty cell before the chest
+		// (0.7.489) the gap is (7, 5), opening north toward the counter and onto the empty cell before the chest
 		for (int x = 5; x <= 7; x++) {
 			for (int z = 5; z <= 7; z++) {
 				boolean edge = (x == 5 || z == 5) && !(x == 7 && z == 5);
@@ -931,7 +931,7 @@ final class HordeBuildings {
 		return t.done("goblin_footbridge");
 	}
 
-	// ---- (0.7.484) the orc holds: bigger, but crude -----------------------------------------------------------------------
+	// ---- (0.7.489) the orc holds: bigger, but crude -----------------------------------------------------------------------
 
 	/**
 	 * A bone hall (9 x 7): blackstone feet under dark oak log walls, bone-block corner posts crowned with skulls, a doorway

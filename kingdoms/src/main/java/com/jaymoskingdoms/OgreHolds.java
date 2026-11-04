@@ -101,7 +101,7 @@ public final class OgreHolds {
 		GUARD_TAG = "jaymoskingdoms.ogre_guard";
 
 	/**
-	 * An ogre site: an outpost or a hold, where, its region, its leader (or king), and whether it's cleared. (0.7.484) A hold
+	 * An ogre site: an outpost or a hold, where, its region, its leader (or king), and whether it's cleared. (0.7.489) A hold
 	 * also keeps its stores ({@code stash}: the chests its raiders fill, the first its hoard), how many growth stages it has
 	 * been through ({@link OgreGrowth}), when it last raided and when it last grew ({@link OgreRaids}), and loot waiting for
 	 * its chests to load (whole stacks, enchantments, names and contents kept; an older save's item-id-to-count map is
@@ -117,13 +117,13 @@ public final class OgreHolds {
 				Codec.INT.optionalFieldOf("stage", 0).forGetter(Site::stage),
 				Codec.LONG.optionalFieldOf("last_raid", 0L).forGetter(Site::lastRaid),
 				Codec.LONG.optionalFieldOf("grew_at", 0L).forGetter(Site::grewAt),
-				// (0.7.484) loot waiting is kept as full stacks; the old "pending" map (id to count) is only read, and never written again
+				// (0.7.489) loot waiting is kept as full stacks; the old "pending" map (id to count) is only read, and never written again
 				ItemStack.OPTIONAL_CODEC.listOf().optionalFieldOf("pending_stacks", List.of()).forGetter(Site::pending),
 				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("pending", Map.of()).forGetter(site -> Map.of()))
 			.apply(i, (id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, stacks, old) ->
 				new Site(id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, withOld(stacks, old))));
 
-		/** (0.7.484) An older save's waiting loot (item id to count) as plain stacks after the full ones; ids that name no item are dropped. */
+		/** (0.7.489) An older save's waiting loot (item id to count) as plain stacks after the full ones; ids that name no item are dropped. */
 		private static List<ItemStack> withOld(List<ItemStack> stacks, Map<String, Integer> old) {
 			List<ItemStack> all = new ArrayList<>();
 			for (ItemStack stack : stacks) {
@@ -208,7 +208,7 @@ public final class OgreHolds {
 			if (server.getTickCount() % 5 == 0) {
 				tend(level);
 			}
-			// (0.7.484) holds forage, build and take on ogres as their stores allow; and they raid
+			// (0.7.489) holds forage, build and take on ogres as their stores allow; and they raid
 			if (server.getTickCount() % OgreGrowth.EVERY == 0) {
 				OgreGrowth.grow(level);
 			}
@@ -219,7 +219,7 @@ public final class OgreHolds {
 				// (its outpost or hold was cleared while it was away: it's gone)
 				entity.discard();
 			} else {
-				// ((0.7.484) a raider left over from a raid that was lost is sent home)
+				// ((0.7.489) a raider left over from a raid that was lost is sent home)
 				OgreRaids.loaded(entity);
 			}
 		});
@@ -320,12 +320,12 @@ public final class OgreHolds {
 		return out;
 	}
 
-	/** (0.7.484) Every standing hold (its king still on his seat): the ones that send their hauls ({@link TradeRoutes#ogres}). */
+	/** (0.7.489) Every standing hold (its king still on his seat): the ones that send their hauls ({@link TradeRoutes#ogres}). */
 	static List<Site> standingHolds(MinecraftServer server) {
 		return sites(server).stream().filter(s -> s.hold() && !s.cleared()).toList();
 	}
 
-	/** (0.7.484) Where hold {@code id} stands, or null when it is gone (cleared, or no such site). */
+	/** (0.7.489) Where hold {@code id} stands, or null when it is gone (cleared, or no such site). */
 	static @Nullable BlockPos holdAt(MinecraftServer server, int id) {
 		for (Site s : sites(server)) {
 			if (s.id() == id && s.hold() && !s.cleared()) {
@@ -336,7 +336,7 @@ public final class OgreHolds {
 	}
 
 	/**
-	 * (0.7.484) An ogre between the shafts of his hold's cart ({@link Caravans#appear}): a plain ogre of no site (his
+	 * (0.7.489) An ogre between the shafts of his hold's cart ({@link Caravans#appear}): a plain ogre of no site (his
 	 * caravan sees to him, and he's gone with it), steered by {@link Caravans.Haul}.
 	 */
 	static @Nullable Ogre hauler(ServerLevel level, BlockPos at, float yaw) {

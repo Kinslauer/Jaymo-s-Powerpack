@@ -197,14 +197,14 @@ public final class Camps {
 		Goblins.init();
 		// 0.5.45: orc war camps
 		Orcs.init();
-		// (0.7.484) goblin slaves in the orc camps
+		// (0.7.489) goblin slaves in the orc camps
 		Slaves.init();
 		// 0.7.42: pirate coves and the sailors of the kingdoms
 		Pirates.init();
 		CampBuildings.registerCatalogue();
 		// (0.7.475) greenskin camps grow in tiers
 		Hordes.register();
-		// (0.7.484) villages and Blossom villages grow into walled towns
+		// (0.7.489) villages and Blossom villages grow into walled towns
 		JaymosKingdoms.LOGGER.debug("walled town attachment: {}", WalledTowns.TOWNS);
 		WalledTowns.register();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
@@ -472,7 +472,7 @@ public final class Camps {
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		Raids.tick(server);
-		// (0.7.484) ogre raids are driven
+		// (0.7.489) ogre raids are driven
 		OgreRaids.tick(server);
 		long now = level.getGameTime();
 		if (now % SPAWN_CHECK_TICKS == 0) {
@@ -678,7 +678,7 @@ public final class Camps {
 		}
 		// (0.7.475) a greenskin realm's vassals are free
 		Hordes.fell(server, camp.id());
-		// (0.7.484) its slaves stay: Slaves.tick sees the camp gone and sends them running
+		// (0.7.489) its slaves stay: Slaves.tick sees the camp gone and sends them running
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, new AABB(camp.seat()).inflate(SCATTER_RANGE),
 			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f) && f.role() != Slaves.SLAVE)) {
 			if (folk.isCarrying()) {

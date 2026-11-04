@@ -43,7 +43,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) Currencies, Andy (2026-11-03): "Diversify the currencies, it can change based on the prominent trading hub's
+ * (0.7.489) Currencies, Andy (2026-11-03): "Diversify the currencies, it can change based on the prominent trading hub's
  * currency or other factors, like superior." The five coins of the realms ({@link #REALM_SILVER}, {@link #HACKSILVER},
  * {@link #GOLD_DINAR}, {@link #SHELL_STRING}, {@link #MON_COIN}), beside the emerald every trader knows
  * ({@link Currency}).
@@ -84,27 +84,27 @@ public final class Currencies {
 	/** A kingdom's taxes: this share (percent) is also paid into the storehouse in its coin, for the town's own wages. */
 	static final int TAX_COIN_PERCENT = 20;
 	/**
-	 * (0.7.484) Coin is only kept in a storehouse up to this much worth (emeralds), the town's wage reserve: past it, the
+	 * (0.7.489) Coin is only kept in a storehouse up to this much worth (emeralds), the town's wage reserve: past it, the
 	 * coined share of the taxes stays in the treasury, so coin doesn't pile up and crowd the storehouse.
 	 */
 	static final int TAX_COIN_RESERVE = 48;
-	/** (0.7.484) A payout or price split into coin and emerald change may be off its worth by this share at most, to use more of the town's coin. */
+	/** (0.7.489) A payout or price split into coin and emerald change may be off its worth by this share at most, to use more of the town's coin. */
 	static final double PAY_SLACK = 0.01;
-	/** (0.7.484) How many coin counts below the most are tried when a sum is split into coin and emerald change. */
+	/** (0.7.489) How many coin counts below the most are tried when a sum is split into coin and emerald change. */
 	static final int PAY_TRIES = 12;
 	/**
-	 * (0.7.484) A price is put in a coin only when that many coins come within this share of its worth (asked: never under
+	 * (0.7.489) A price is put in a coin only when that many coins come within this share of its worth (asked: never under
 	 * it; paid: never over it); else it stays in emeralds, or its own coin, so rounding to a big coin never makes money.
 	 */
 	static final double ROUND_SLACK = 0.10;
-	/** (0.7.484) How many offers' worths a trader keeps, those in its list now first, then those put away for a while (TierGate). */
+	/** (0.7.489) How many offers' worths a trader keeps, those in its list now first, then those put away for a while (TierGate). */
 	static final int BASES_KEPT = 64;
 	// ================================================================================================================
 
 	public static Item REALM_SILVER, HACKSILVER, GOLD_DINAR, SHELL_STRING, MON_COIN;
 
 	/**
-	 * (0.7.484) A trader's offer as it was before any town's coin was put on it: its place in the trader's list when last
+	 * (0.7.489) A trader's offer as it was before any town's coin was put on it: its place in the trader's list when last
 	 * set (only a note), the offer as last set (how it is known again, wherever it has moved to in the list or if it was
 	 * put away and brought back), the worth of each of its coin slots (cost A, cost B, result) in thousandths of an emerald
 	 * (0 where the slot isn't coin), the coin each slot first was ({@link Currency#id}, "" where unknown), and how many of
@@ -128,10 +128,10 @@ public final class Currencies {
 			.apply(i, Base::new));
 	}
 
-	/** (0.7.484) A trader's offers in their own coin ({@link Base}), the ones with coin in them. */
+	/** (0.7.489) A trader's offers in their own coin ({@link Base}), the ones with coin in them. */
 	static final AttachmentType<List<Base>> BASES = AttachmentRegistry.create(JaymosKingdoms.id("trade_bases"),
 		b -> b.persistent(Base.CODEC.listOf()));
-	/** (0.7.484) The day a money-changer's counter last restocked. */
+	/** (0.7.489) The day a money-changer's counter last restocked. */
 	static final AttachmentType<Long> CHANGER_DAY = AttachmentRegistry.create(JaymosKingdoms.id("changer_day"), b -> b.persistent(Codec.LONG));
 
 	/** Faction id → (its coin, when it was worked out). */
@@ -287,7 +287,7 @@ public final class Currencies {
 	}
 
 	/**
-	 * (0.7.484) A sum as it is handed over: whole coins of {@code coin}, and the change in emeralds. What is paid out
+	 * (0.7.489) A sum as it is handed over: whole coins of {@code coin}, and the change in emeralds. What is paid out
 	 * ({@link #pay}) is never worth more than is owed, and what is asked ({@link #owe}) never less, so no rounding to a big
 	 * coin makes money.
 	 */
@@ -314,23 +314,23 @@ public final class Currencies {
 		}
 	}
 
-	/** (0.7.484) {@code milli} of worth paid out in {@code c}: as many whole coins as fit, the change in emeralds, never more than the worth. */
+	/** (0.7.489) {@code milli} of worth paid out in {@code c}: as many whole coins as fit, the change in emeralds, never more than the worth. */
 	public static Pay pay(Currency c, long milli) {
 		return split(c, milli, false, Long.MAX_VALUE);
 	}
 
-	/** (0.7.484) {@code emeralds} of worth paid out in {@code c} ({@link #pay}). */
+	/** (0.7.489) {@code emeralds} of worth paid out in {@code c} ({@link #pay}). */
 	public static Pay payEmeralds(Currency c, long emeralds) {
 		return pay(c, emeralds * 1000L);
 	}
 
-	/** (0.7.484) {@code milli} of worth asked in {@code c}: whole coins, the rest in emeralds, never less than the worth. */
+	/** (0.7.489) {@code milli} of worth asked in {@code c}: whole coins, the rest in emeralds, never less than the worth. */
 	public static Pay owe(Currency c, long milli) {
 		return split(c, milli, true, Long.MAX_VALUE);
 	}
 
 	/**
-	 * (0.7.484) {@code milli} split into at most {@code most} of {@code c}'s coins and emerald change, over the worth if
+	 * (0.7.489) {@code milli} split into at most {@code most} of {@code c}'s coins and emerald change, over the worth if
 	 * {@code over} (asked), else under it (paid): the exact split with the most coins, or if there is none, of those
 	 * within {@link #PAY_SLACK} of the worth (or as near as any comes), the one with the most coins.
 	 */
@@ -372,7 +372,7 @@ public final class Currencies {
 		return Component.literal(n + " ").append(new ItemStack(c.item()).getHoverName());
 	}
 
-	/** (0.7.484) {@code p} as shown: "12 Realm Silver", or with its change, "1 Gold Dinar, 1 Emerald". */
+	/** (0.7.489) {@code p} as shown: "12 Realm Silver", or with its change, "1 Gold Dinar, 1 Emerald". */
 	public static Component amount(Pay p) {
 		if (p.coin() == Currency.EMERALD || p.coins() <= 0L && p.emeralds() > 0L) {
 			return amount(Currency.EMERALD, p.emeralds() + (p.coin() == Currency.EMERALD ? p.coins() : 0L));
@@ -383,13 +383,13 @@ public final class Currencies {
 		return amount(p.coin(), p.coins()).copy().append(Component.literal(", ")).append(amount(Currency.EMERALD, p.emeralds()));
 	}
 
-	/** (0.7.484) Gives {@code player} {@code p}: its coins and its change. */
+	/** (0.7.489) Gives {@code player} {@code p}: its coins and its change. */
 	public static void give(ServerPlayer player, Pay p) {
 		give(player, p.coin(), p.coins());
 		give(player, Currency.EMERALD, p.emeralds());
 	}
 
-	/** (0.7.484) The worth (thousandths of an emerald) {@code player} carries that {@code f} takes: its coin and emeralds. */
+	/** (0.7.489) The worth (thousandths of an emerald) {@code player} carries that {@code f} takes: its coin and emeralds. */
 	public static long purse(MinecraftServer server, ServerPlayer player, @Nullable Faction f) {
 		Currency c = of(server, f);
 		long milli = Purse.count(player, Items.EMERALD) * 1000L;
@@ -399,12 +399,12 @@ public final class Currencies {
 		return milli;
 	}
 
-	/** (0.7.484) {@code player} carries {@code emeralds} of worth that {@code f} takes ({@link #purse}). */
+	/** (0.7.489) {@code player} carries {@code emeralds} of worth that {@code f} takes ({@link #purse}). */
 	public static boolean canPay(MinecraftServer server, ServerPlayer player, @Nullable Faction f, long emeralds) {
 		return purse(server, player, f) >= emeralds * 1000L;
 	}
 
-	/** (0.7.484) The worth (thousandths of an emerald) of the realms' coin in {@code f}'s storehouse (not its emeralds, which are goods as much as coin). */
+	/** (0.7.489) The worth (thousandths of an emerald) of the realms' coin in {@code f}'s storehouse (not its emeralds, which are goods as much as coin). */
 	static long stored(ServerLevel level, Faction f) {
 		long milli = 0L;
 		for (Currency x : Currency.values()) {
@@ -415,7 +415,7 @@ public final class Currencies {
 		return milli;
 	}
 
-	/** (0.7.484) {@code emeralds} of worth as {@code f} asks it ({@link #owe}), as shown. */
+	/** (0.7.489) {@code emeralds} of worth as {@code f} asks it ({@link #owe}), as shown. */
 	public static Component asked(MinecraftServer server, @Nullable Faction f, long emeralds) {
 		return amount(owe(of(server, f), emeralds * 1000L));
 	}
@@ -433,7 +433,7 @@ public final class Currencies {
 	 */
 	public static int fine(MinecraftServer server, ServerPlayer player, @Nullable Faction f, int emeralds) {
 		Currency c = of(server, f);
-		// (0.7.484) counted in thousandths of an emerald, so a few small coins count for what they are worth: as many whole
+		// (0.7.489) counted in thousandths of an emerald, so a few small coins count for what they are worth: as many whole
 		// coins as fit in the worth, the rest in emeralds, and only when short of emeralds one more coin
 		long owed = emeralds * 1000L, taken = 0L;
 		boolean coin = c != Currency.EMERALD && c.human();
@@ -513,7 +513,7 @@ public final class Currencies {
 		if (Underworld.blackMarket(villager) || !c.human()) {
 			return;
 		}
-		// (0.7.484) each price worked out from the offer's own worth (Base), never from the coin it was last set in; a Base is
+		// (0.7.489) each price worked out from the offer's own worth (Base), never from the coin it was last set in; a Base is
 		// found by the offer as it was last set (its print), not by its place, since TierGate moves offers about and puts them away
 		Map<String, ArrayDeque<Base>> known = new HashMap<>();
 		List<Base> stored = villager.getAttachedOrElse(BASES, List.<Base>of());
@@ -538,14 +538,14 @@ public final class Currencies {
 					o.getItemCostA().count(), o.getItemCostB().map(ItemCost::count).orElse(0), o.getResult().getCount());
 			}
 			Base was = base;
-			// (0.7.484) the goods as they first were, before any scaling to a town's coin
+			// (0.7.489) the goods as they first were, before any scaling to a town's coin
 			ItemCost goodsA = was.a() > 0 ? o.getItemCostA() : recount(o.getItemCostA(), was.ga());
 			Optional<ItemCost> goodsB = was.b() > 0 ? o.getItemCostB() : was.gb() == 0 ? Optional.empty() : o.getItemCostB().map(x -> recount(x, was.gb()));
 			ItemStack goodsR = was.r() > 0 ? o.getResult() : recount(o.getResult(), was.gr());
 			ItemCost a = was.a() > 0 ? asked(was.a(), c, was.ca(), o.getItemCostA()) : goodsA;
 			Optional<ItemCost> b = was.b() > 0 ? o.getItemCostB().map(x -> asked(was.b(), c, was.cb(), x)) : goodsB;
 			ItemStack result = was.r() > 0 ? paid(was.r(), c, was.cr(), o.getResult()) : goodsR;
-			// (0.7.484) a price that won't land on whole town coins: the goods are scaled until it does (2 hacksilver for 16
+			// (0.7.489) a price that won't land on whole town coins: the goods are scaled until it does (2 hacksilver for 16
 			// wheat, not 1 emerald for 20), or else the rest is asked as emerald change in the empty second slot
 			boolean single = was.b() == 0 && was.gb() == 0;
 			if (single && was.a() > 0 && was.r() == 0 && a.item().value() != c.item() && !goodsR.isEmpty()) {
@@ -569,7 +569,7 @@ public final class Currencies {
 			}
 			String print = print(a, b, result);
 			now.add(new Base(i, print, was.a(), was.b(), was.r(), was.ca(), was.cb(), was.cr(), was.ga(), was.gb(), was.gr()));
-			// (0.7.484) vanilla's discount (and Purists' and Prejudice's) is a count of whatever cost A is now, set afresh on
+			// (0.7.489) vanilla's discount (and Purists' and Prejudice's) is a count of whatever cost A is now, set afresh on
 			// every open: it is put back in the goods or coin it was first asked in, then into cost A as it now is, every time
 			int diff = discount(o.getSpecialPriceDiff(), was, o.getItemCostA(), a);
 			if (print.equals(had)) {
@@ -600,7 +600,7 @@ public final class Currencies {
 	}
 
 	/**
-	 * (0.7.484) A discount (or mark-up) of {@code diff} counted as though cost A were still as it was first asked ({@code was}),
+	 * (0.7.489) A discount (or mark-up) of {@code diff} counted as though cost A were still as it was first asked ({@code was}),
 	 * as a count of {@code a}: coin by worth (each of the coin it was first asked in),
 	 * goods by count. Where the first count isn't known, {@code now} (cost A as it is) stands for it.
 	 */
@@ -618,7 +618,7 @@ public final class Currencies {
 		return first <= 0 ? diff : Math.round(diff * (float)a.count() / first);
 	}
 
-	/** (0.7.484) {@code cost} with {@code n} of its goods ({@code n} of 0 or less: as it is). */
+	/** (0.7.489) {@code cost} with {@code n} of its goods ({@code n} of 0 or less: as it is). */
 	private static ItemCost recount(ItemCost cost, int n) {
 		return n <= 0 || n == cost.count() ? cost : new ItemCost(cost.item(), n, cost.components());
 	}
@@ -628,7 +628,7 @@ public final class Currencies {
 	}
 
 	/**
-	 * (0.7.484) {@code goods} goods worth {@code milli} traded instead as {coins, goods} of {@code c}'s coin, the price per
+	 * (0.7.489) {@code goods} goods worth {@code milli} traded instead as {coins, goods} of {@code c}'s coin, the price per
 	 * good within {@link #ROUND_SLACK} of what it was (asked: never under it; paid: never over it), at most a stack of each:
 	 * the nearest price, then the count of goods nearest what it was. Null if none comes near.
 	 */
@@ -693,7 +693,7 @@ public final class Currencies {
 		return null;
 	}
 
-	/** (0.7.484) {@code coins} (thousandths of an emerald) is within {@link #ROUND_SLACK} of {@code milli}: over it if {@code over}, else under it. */
+	/** (0.7.489) {@code coins} (thousandths of an emerald) is within {@link #ROUND_SLACK} of {@code milli}: over it if {@code over}, else under it. */
 	public static boolean near(long coins, long milli, boolean over) {
 		return over ? coins >= milli && coins <= milli * (1.0 + ROUND_SLACK) : coins <= milli && coins >= milli * (1.0 - ROUND_SLACK);
 	}
@@ -736,7 +736,7 @@ public final class Currencies {
 	}
 
 	/**
-	 * (0.7.484) A changer's counter set at today's rates in town coin {@code local}, each trade keeping the uses it has had
+	 * (0.7.489) A changer's counter set at today's rates in town coin {@code local}, each trade keeping the uses it has had
 	 * since it last restocked (once every {@link #CHANGE_RESTOCK_DAYS}), so opening the trade again doesn't restock it.
 	 */
 	private static void counter(ServerLevel level, Villager v, Currency local) {
@@ -768,7 +768,7 @@ public final class Currencies {
 	static MerchantOffers changes(MinecraftServer server, Currency local) {
 		MerchantOffers offers = new MerchantOffers();
 		for (Currency other : Currency.values()) {
-			// (0.7.484) only the realms' coins: no gold or bent copper over a town's counter
+			// (0.7.489) only the realms' coins: no gold or bent copper over a town's counter
 			if (other == local || !other.human()) {
 				continue;
 			}

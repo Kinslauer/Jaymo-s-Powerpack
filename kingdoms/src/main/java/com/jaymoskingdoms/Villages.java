@@ -52,7 +52,7 @@ public final class Villages {
 
 	/** Its elder: the oldest-standing grown villager nearest the bell, named for the village. Returns him (or null if none is near). */
 	static @Nullable Villager chooseElder(ServerLevel level, Faction village) {
-		// (0.7.484) a walled town's folk out to its wall
+		// (0.7.489) a walled town's folk out to its wall
 		List<Villager> villagers = new ArrayList<>(level.getEntitiesOfClass(Villager.class, new AABB(village.seat()).inflate(WalledTowns.reach(level, village)),
 			v -> v.isAlive() && !v.isBaby()));
 		if (villagers.isEmpty()) {
@@ -103,13 +103,13 @@ public final class Villages {
 
 	/** A village's guards: its iron golems. */
 	public static List<IronGolem> guards(ServerLevel level, Faction village) {
-		// (0.7.484) a walled town's out to its wall
+		// (0.7.489) a walled town's out to its wall
 		return level.getEntitiesOfClass(IronGolem.class, new AABB(village.seat()).inflate(WalledTowns.reach(level, village)), IronGolem::isAlive);
 	}
 
 	/** Its people: the villagers round its bell (loaded ones). */
 	public static List<Villager> people(ServerLevel level, Faction village) {
-		// (0.7.484) a walled town's out to its wall
+		// (0.7.489) a walled town's out to its wall
 		return level.getEntitiesOfClass(Villager.class, new AABB(village.seat()).inflate(WalledTowns.reach(level, village)), Villager::isAlive);
 	}
 

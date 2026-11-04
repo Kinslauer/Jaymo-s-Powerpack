@@ -79,7 +79,7 @@ final class MerchantOrders {
 	/** Merchants this near the board (blocks) are in its catalog; the most wares shown. */
 	static final double CATALOG_RANGE = 64.0;
 	static final int MOST_WARES = 60;
-	/** (0.7.484) Most emeralds a ware with emerald change is asked in, when its worth won't land on the town's coin. */
+	/** (0.7.489) Most emeralds a ware with emerald change is asked in, when its worth won't land on the town's coin. */
 	static final int ORDER_MOST_EMERALDS = 64;
 	/** How long (ticks) a merchant takes to make an order up; how long it waits on an unloaded town before the post takes it. */
 	static final long PREP = 1200L, POST_AFTER = 6000L;
@@ -134,7 +134,7 @@ final class MerchantOrders {
 			Codec.LONG.fieldOf("ready").forGetter(Order::ready),
 			Codec.STRING.optionalFieldOf("ware", "").forGetter(Order::ware),
 			Codec.INT.optionalFieldOf("xp", 0).forGetter(Order::xp),
-			// (0.7.484) the coin it was paid in (emeralds in an older save)
+			// (0.7.489) the coin it was paid in (emeralds in an older save)
 			Codec.STRING.optionalFieldOf("coin", Currency.EMERALD.id()).forGetter(Order::coin)).apply(i, Order::new));
 
 		Currency currency() {
@@ -264,7 +264,7 @@ final class MerchantOrders {
 		List<Ware> out = new ArrayList<>();
 		// (0.7.385) lower while a pod stands in the town's landing yard
 		float factor = LandingYard.tradeFactor(level, town(level, anchor));
-		// (0.7.484) priced in the coin of the town whose board it is
+		// (0.7.489) priced in the coin of the town whose board it is
 		Currency coin = Currencies.of(level.getServer(), town(level, anchor));
 		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(anchor).inflate(CATALOG_RANGE),
 			v -> v.isAlive() && !v.isBaby() && !Downed.isDowned(v))) {
@@ -280,7 +280,7 @@ final class MerchantOrders {
 				}
 				int asked = price(o, factor);
 				Currency priced = Currency.byItem(o.getBaseCostA().getItem());
-				// (0.7.484) a price in a town's coin with emerald change in the second slot (set so by Currencies.localize when it
+				// (0.7.489) a price in a town's coin with emerald change in the second slot (set so by Currencies.localize when it
 				// won't land on whole coins): its whole worth, in the town's coin if that comes near, else in whole emeralds
 				int change = 0;
 				if (o.getItemCostB().isPresent()) {
@@ -307,7 +307,7 @@ final class MerchantOrders {
 						continue;
 					}
 				} else if (coin.human() && priced != null && priced != coin) {
-					// (0.7.484) the same worth in the town's coin, unless that is more than a stack, or rounding to the town's coin
+					// (0.7.489) the same worth in the town's coin, unless that is more than a stack, or rounding to the town's coin
 					// would ask much more than it is worth: then it stays in its own coin
 					long worth = (long)asked * priced.base;
 					long local = Math.max(1L, (worth + coin.base - 1L) / coin.base);
@@ -490,7 +490,7 @@ final class MerchantOrders {
 
 	private static QuestNet.View wantView(ServerLevel level, ServerPlayer player, OffWorldGoods.Good g, Ledger ledger, long today) {
 		BlockPos anchor = READING.getOrDefault(player.getUUID(), BlockPos.ZERO);
-		// (0.7.484) paid in the town's coin
+		// (0.7.489) paid in the town's coin
 		Currency coin = Currencies.of(level.getServer(), town(level, anchor));
 		Currencies.Pay pay = Currencies.payEmeralds(coin, g.emeralds());
 		int count = wanted(g, anchor, today);
@@ -546,7 +546,7 @@ final class MerchantOrders {
 			player.drop(left, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
 		Currency coin = Currencies.of(level.getServer(), town);
-		// (0.7.484) whole coins, and the change in emeralds
+		// (0.7.489) whole coins, and the change in emeralds
 		for (ItemStack pay : Currencies.payEmeralds(coin, g.emeralds()).stacks()) {
 			if (!player.getInventory().add(pay) && !pay.isEmpty()) {
 				player.drop(pay, false, net.minecraft.util.Prediction.SERVER_ONLY);

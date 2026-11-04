@@ -54,9 +54,9 @@ public final class TribePacts {
 	// Tuning
 	/** A tribe's favour: its most (as a negative grudge), what calls a war band, what opens the greenskin road, how fast it fades (a day). */
 	public static final int FAVOUR_MOST = 60, ALLY_AT = -30, FRIEND_AT = -20, FAVOUR_DAILY = 1;
-	/** A gift to a chief or pedlar once the grudge is paid off: bent worth (0.7.484), and the favour it wins. */
+	/** A gift to a chief or pedlar once the grudge is paid off: bent worth (0.7.489), and the favour it wins. */
 	public static final int GIFT_BENT = 12, GIFT_FAVOUR = 10;
-	/** (0.7.484) A haven's emerald treasury pays in bent worth at this rate (the tribes take only bent ingots). */
+	/** (0.7.489) A haven's emerald treasury pays in bent worth at this rate (the tribes take only bent ingots). */
 	static final int BENT_PER_EMERALD = 2;
 	/** A non-human's grudge rises at this share of the usual (at least 1). */
 	static final float NONHUMAN_SHARE = 0.5F;
@@ -213,7 +213,7 @@ public final class TribePacts {
 				if (pay(server, haven.id(), HAVEN_TRIBUTE)) {
 					Faction seat = Tribes.seat(server, tribe);
 					if (seat != null) {
-						// ((0.7.484) the tribe is paid in bent ingots, into its seat's hoard)
+						// ((0.7.489) the tribe is paid in bent ingots, into its seat's hoard)
 						HordeEconomy.deposit(server, seat.id(), (long)HAVEN_TRIBUTE * BENT_PER_EMERALD);
 					}
 					paid.put(haven.id() + "|" + tribe, day);
@@ -245,7 +245,7 @@ public final class TribePacts {
 		return true;
 	}
 
-	/** The tribute goes into a chest of the king's hold, if it's loaded ((0.7.484) as bent copper, so many to the emerald). */
+	/** The tribute goes into a chest of the king's hold, if it's loaded ((0.7.489) as bent copper, so many to the emerald). */
 	private static void hoard(ServerLevel level, BlockPos at, int emeralds) {
 		if (!level.isLoaded(at)) {
 			return;

@@ -35,7 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) Caravans for all (Andy, 2026-11-03: "everyone can trade in their own way, even down to using handcarts if they
+ * (0.7.489) Caravans for all (Andy, 2026-11-03: "everyone can trade in their own way, even down to using handcarts if they
  * have to"). Every settlement sends its surplus to a trading partner and gets back what it lacks, in the way it can afford:
  * <ul>
  * <li><b>Kingdoms</b> send wagons to other realms and towns (more of them, and mounted guards, the richer they are);</li>
@@ -136,7 +136,7 @@ final class TradeRoutes {
 		}
 	}
 
-	/** What a settlement sends and how: its rig, carts, a cart's load, guards, what it sells and wants, and a levy to draw on when its storehouse is out of reach ((0.7.484) camps and coves too). */
+	/** What a settlement sends and how: its rig, carts, a cart's load, guards, what it sells and wants, and a levy to draw on when its storehouse is out of reach ((0.7.489) camps and coves too). */
 	record Profile(int rig, int carts, int cap, int guards, boolean mounted, EnumSet<Ware> sells, EnumSet<Ware> wants, Item @Nullable [] levy) {
 	}
 
@@ -156,7 +156,7 @@ final class TradeRoutes {
 	/** With its storehouse out of reach, a kingdom or town sends this levy (items), plus this per villager, never more than a rig takes. */
 	static final int LEVY_BASE = 64, LEVY_PER_VILLAGER = 2;
 	/**
-	 * (0.7.484) What a camp or cove draws its levy from while its storehouse is out of reach (it is far from any player as a rule): a
+	 * (0.7.489) What a camp or cove draws its levy from while its storehouse is out of reach (it is far from any player as a rule): a
 	 * bandit camp's hides, meat and scrap iron, an illager camp's loot (no emeralds), a cove's powder, fish and iron.
 	 */
 	private static final Item[] HUMAN_LEVY = {Items.LEATHER, Items.LEATHER, Items.BONE, Items.BEEF, Items.COOKED_BEEF, Items.RAW_IRON, Items.COAL};
@@ -179,12 +179,12 @@ final class TradeRoutes {
 	static final double ESCORT_RANGE = 28.0, PLUNDER_RANGE = 500.0;
 
 	/**
-	 * (0.7.484) A handcart (or an ogre's cart) is slow: out of sight it goes at this share of a wagon's pace on the road; seen, its
+	 * (0.7.489) A handcart (or an ogre's cart) is slow: out of sight it goes at this share of a wagon's pace on the road; seen, its
 	 * puller walks at this pace (a horse is driven at {@link Caravans#DRIVE_SPEED}), the cart's weight in his hands.
 	 */
 	static final double HAND_PACE = 0.5, HAND_WALK = 0.45;
 	/**
-	 * (0.7.484) An ogre hold's trade: an ogre hauls a cart of what the hold has in plenty (hides, meat, hewn stone) to the nearest
+	 * (0.7.489) An ogre hold's trade: an ogre hauls a cart of what the hold has in plenty (hides, meat, hewn stone) to the nearest
 	 * greenskin camp, this often (ticks; tried again after {@link #OGRE_RETRY} with no camp near), in this reach (blocks), this many
 	 * goods at most and at least; the camp sends him home with some of its food, never more than this share of the haul (percent).
 	 */
@@ -193,9 +193,9 @@ final class TradeRoutes {
 	static final int OGRE_HAUL_MOST = 192, OGRE_HAUL_LEAST = 64, OGRE_FOOD_BACK = 50;
 
 	static final String PULL_TAG = "jaymoskingdoms.handcart_puller";
-	/** (0.7.484) On an illager camp's carter and guards (real illagers: no folk, no villager), so their caravan knows its own. */
+	/** (0.7.489) On an illager camp's carter and guards (real illagers: no folk, no villager), so their caravan knows its own. */
 	static final String CREW_TAG = "jaymoskingdoms.caravan_crew";
-	/** (0.7.484) What an ogre hold hauls. */
+	/** (0.7.489) What an ogre hold hauls. */
 	private static final Item[] OGRE_GOODS = {Items.LEATHER, Items.LEATHER, Items.BEEF, Items.MUTTON, Items.BONE, Items.COBBLESTONE, Items.COBBLESTONE, Items.STONE};
 
 	/** Caravan id → who has kept it company on the road (player → ticks). Not saved. */
@@ -208,7 +208,7 @@ final class TradeRoutes {
 		ESCORTS.clear();
 	}
 
-	/** (0.7.484) Caravan {@code id} is off the road (home, lost or broken up): its escorts forgotten. */
+	/** (0.7.489) Caravan {@code id} is off the road (home, lost or broken up): its escorts forgotten. */
 	static void forget(int id) {
 		ESCORTS.remove(id);
 	}
@@ -317,7 +317,7 @@ final class TradeRoutes {
 	}
 
 	/**
-	 * (0.7.484) How fast {@code c} goes out of sight, as a share of a wagon's pace: a handcart (a cove's skiffs on land too, and an ogre's
+	 * (0.7.489) How fast {@code c} goes out of sight, as a share of a wagon's pace: a handcart (a cove's skiffs on land too, and an ogre's
 	 * cart) at {@link #HAND_PACE}; a skiff on unseen water at full pace.
 	 */
 	static double pace(ServerLevel level, Caravans.Caravan c) {
@@ -347,12 +347,12 @@ final class TradeRoutes {
 	/** Each settlement (not a fiefdom or a greenskin camp: {@link Caravans} has theirs) whose time has come sends its caravan. */
 	static void send(ServerLevel level, long now) {
 		MinecraftServer server = level.getServer();
-		// ((0.7.484) and the ogre holds, which are no one's faction: theirs go by their sites)
+		// ((0.7.489) and the ogre holds, which are no one's faction: theirs go by their sites)
 		ogres(level, now);
 		Caravans.Ledger l = Caravans.ledger(server);
 		for (Faction f : Factions.all(server)) {
 			Sort sort = sortOf(server, f);
-			// ((0.7.484) a haven trading on its own account sends its output by Caravans.startHaven, not from here)
+			// ((0.7.489) a haven trading on its own account sends its output by Caravans.startHaven, not from here)
 			if (sort == null || Caravans.tradingHaven(server, f)) {
 				continue;
 			}
@@ -383,13 +383,13 @@ final class TradeRoutes {
 			return null;
 		}
 		if (sort == Sort.ILLAGER && peaceful(level)) {
-			// ((0.7.484) on Peaceful no illager stays in the world to drive or guard a cart: the camp keeps its goods home)
+			// ((0.7.489) on Peaceful no illager stays in the world to drive or guard a cart: the camp keeps its goods home)
 			Caravans.later(server, f, now + RETRY);
 			return null;
 		}
 		Profile p = profile(server, f, sort);
 		if (p.rig() == BOAT && (PirateCoves.cove(server, f.id()) == null || PirateCoves.cove(server, to.id()) == null)) {
-			// ((0.7.484) skiffs only from a mooring to a mooring: to a partner inland, the cove's trade goes by handcart)
+			// ((0.7.489) skiffs only from a mooring to a mooring: to a partner inland, the cove's trade goes by handcart)
 			p = new Profile(HAND, p.carts(), HAND_LOAD, p.guards(), p.mounted(), p.sells(), p.wants(), p.levy());
 		}
 		List<Map<String, Integer>> carts;
@@ -425,7 +425,7 @@ final class TradeRoutes {
 		return levy(level, p.levy(), n, p.cap());
 	}
 
-	/** (0.7.484) {@code n} goods drawn at random from {@code goods}, in carts of {@code cap} each. */
+	/** (0.7.489) {@code n} goods drawn at random from {@code goods}, in carts of {@code cap} each. */
 	private static List<Map<String, Integer>> levy(ServerLevel level, Item[] goods, int n, int cap) {
 		if (goods.length == 0 || n <= 0) {
 			return List.of();
@@ -490,7 +490,7 @@ final class TradeRoutes {
 		if (Storage.loaded(level, lord)) {
 			back = Caravans.loadUp(level, lord, x -> in(wants, x), ls == null ? Sort.REALM.keep : ls.keep, most, cap);
 		} else {
-			// ((0.7.484) its storehouse out of reach: the carts go home with a levy of what it makes that the sender wants, its stock untouched)
+			// ((0.7.489) its storehouse out of reach: the carts go home with a levy of what it makes that the sender wants, its stock untouched)
 			Sort lk = ls != null ? ls : lord.type() == FactionType.FIEFDOM ? Sort.REALM : null;
 			Item[] levy = lk == null ? null : profile(server, lord, lk).levy();
 			if (levy != null) {
@@ -548,7 +548,7 @@ final class TradeRoutes {
 	}
 
 	/**
-	 * (0.7.484) Emeralds {@code f} can pay out: a realm's treasury; a village keeps its money in its storehouse (as haven
+	 * (0.7.489) Emeralds {@code f} can pay out: a realm's treasury; a village keeps its money in its storehouse (as haven
 	 * trade, wages and {@link HavenGrowth} do), so its storehouse emeralds while that is loaded, else nothing.
 	 */
 	static long purse(ServerLevel level, Faction f) {
@@ -558,7 +558,7 @@ final class TradeRoutes {
 		return Storage.loaded(level, f) ? Storage.count(level, f, Items.EMERALD) : 0L;
 	}
 
-	/** (0.7.484) Takes up to {@code n} emeralds out of {@code f}'s {@link #purse}; returns what was taken. */
+	/** (0.7.489) Takes up to {@code n} emeralds out of {@code f}'s {@link #purse}; returns what was taken. */
 	static long spend(ServerLevel level, Faction f, long n) {
 		long take = Math.min(n, purse(level, f));
 		if (take <= 0L) {
@@ -579,7 +579,7 @@ final class TradeRoutes {
 		return got;
 	}
 
-	/** (0.7.484) Pays {@code n} emeralds into {@code f}'s purse: a realm's treasury, a village's storehouse (held for it till loaded). */
+	/** (0.7.489) Pays {@code n} emeralds into {@code f}'s purse: a realm's treasury, a village's storehouse (held for it till loaded). */
 	static void earn(ServerLevel level, Faction f, long n) {
 		if (n <= 0L) {
 			return;
@@ -610,7 +610,7 @@ final class TradeRoutes {
 	// ---- its folk -----------------------------------------------------------------------------------------------------
 
 	/**
-	 * One of a trade caravan's guards for {@code f} at {@code at}: its own kind of fighter (a camp's own raiders or deckhands; (0.7.484)
+	 * One of a trade caravan's guards for {@code f} at {@code at}: its own kind of fighter (a camp's own raiders or deckhands; (0.7.489)
 	 * an illager camp's own vindicators, real illagers; a town's or realm's guards, MCA's with MCA).
 	 */
 	static @Nullable PathfinderMob guard(ServerLevel level, Faction f, BlockPos at, float yaw) {
@@ -627,7 +627,7 @@ final class TradeRoutes {
 			return w == null ? null : w.mob();
 		}
 		if (sort == Sort.ILLAGER) {
-			// ((0.7.484) never a folk or a villager by an illager's name: one of the camp's vindicators)
+			// ((0.7.489) never a folk or a villager by an illager's name: one of the camp's vindicators)
 			return illager(level, f, false, at, yaw);
 		}
 		int role = sort == Sort.PIRATE ? Pirates.DECKHAND : Folk.BARBARIAN;
@@ -647,13 +647,13 @@ final class TradeRoutes {
 		return man.mob();
 	}
 
-	/** (0.7.484) The world is on Peaceful, where monsters (illagers, ogres) are taken out of the world as soon as they're in it. */
+	/** (0.7.489) The world is on Peaceful, where monsters (illagers, ogres) are taken out of the world as soon as they're in it. */
 	static boolean peaceful(ServerLevel level) {
 		return level.getDifficulty() == Difficulty.PEACEFUL;
 	}
 
 	/**
-	 * (0.7.484) {@code c} is crewed by monsters (an ogre hold's haul, an illager camp's carts) and the world is on Peaceful: its crew
+	 * (0.7.489) {@code c} is crewed by monsters (an ogre hold's haul, an illager camp's carts) and the world is on Peaceful: its crew
 	 * can't stay in the world, so it never comes into sight and goes on in the record instead of spilling its carts.
 	 */
 	static boolean unseenCrew(ServerLevel level, Caravans.Caravan c) {
@@ -667,18 +667,18 @@ final class TradeRoutes {
 		return home != null && illagers(level.getServer(), home);
 	}
 
-	/** (0.7.484) {@code f} is an illager camp: its carts are driven and guarded by its own illagers ({@link #illager}). */
+	/** (0.7.489) {@code f} is an illager camp: its carts are driven and guarded by its own illagers ({@link #illager}). */
 	static boolean illagers(MinecraftServer server, Faction f) {
 		return sortOf(server, f) == Sort.ILLAGER;
 	}
 
-	/** (0.7.484) {@code mob} is one of an illager camp's caravan crew. */
+	/** (0.7.489) {@code mob} is one of an illager camp's caravan crew. */
 	static boolean crew(Entity mob) {
 		return mob.entityTags().contains(CREW_TAG);
 	}
 
 	/**
-	 * (0.7.484) One of illager camp {@code f}'s caravan crew at {@code at}: its carter a pillager, its guards vindicators. Real illagers,
+	 * (0.7.489) One of illager camp {@code f}'s caravan crew at {@code at}: its carter a pillager, its guards vindicators. Real illagers,
 	 * not on the camp's roster nor tagged as its raiders (so neither {@link Illagers} nor {@link Raids} sends them home): their caravan
 	 * steers them ({@link Caravans.Haul}) and takes them out of the world with it.
 	 */
@@ -702,7 +702,7 @@ final class TradeRoutes {
 		return crew;
 	}
 
-	/** (0.7.484) A draft horse of {@code f}'s for a carter who is no folk or villager (an illager camp's pillager), and him in the saddle. */
+	/** (0.7.489) A draft horse of {@code f}'s for a carter who is no folk or villager (an illager camp's pillager), and him in the saddle. */
 	static @Nullable AbstractHorse horse(ServerLevel level, PathfinderMob rider, Faction f) {
 		AbstractHorse horse = Equestrian.create(level, Breed.DRAFT, rider.blockPosition(), EntitySpawnReason.MOB_SUMMONED);
 		if (horse == null) {
@@ -720,13 +720,13 @@ final class TradeRoutes {
 
 	// ---- ogre holds -----------------------------------------------------------------------------------------------------
 
-	/** (0.7.484) The ledger's key for when ogre hold {@code site} next sends its haul. */
+	/** (0.7.489) The ledger's key for when ogre hold {@code site} next sends its haul. */
 	static String holdKey(int site) {
 		return "ogre." + site;
 	}
 
 	/**
-	 * (0.7.484) Each standing ogre hold whose time has come sends an ogre hauling a cart of hides, meat and hewn stone to the nearest
+	 * (0.7.489) Each standing ogre hold whose time has come sends an ogre hauling a cart of hides, meat and hewn stone to the nearest
 	 * greenskin camp in reach ({@link #OGRE_REACH}); the camp stores it, and sends him home with some of its food ({@link #arriveOgre}).
 	 * The haul is the camp's caravan by name (its road, its robbery, its tribe's grudge), but timed and sent home by its hold.
 	 */
@@ -745,7 +745,7 @@ final class TradeRoutes {
 				continue;
 			}
 			if (peaceful(level)) {
-				// ((0.7.484) on Peaceful no ogre stays in the world to pull a haul: none is sent)
+				// ((0.7.489) on Peaceful no ogre stays in the world to pull a haul: none is sent)
 				next(server, key, now + OGRE_RETRY);
 				continue;
 			}
@@ -782,7 +782,7 @@ final class TradeRoutes {
 		Caravans.save(server, new Caravans.Ledger(l.caravans(), next, l.pending(), l.nextId()));
 	}
 
-	/** (0.7.484) The standing greenskin camp nearest {@code at} in {@link #OGRE_REACH}, or null. */
+	/** (0.7.489) The standing greenskin camp nearest {@code at} in {@link #OGRE_REACH}, or null. */
 	private static @Nullable Faction ogreCamp(MinecraftServer server, BlockPos at) {
 		Faction best = null;
 		double bestD = OGRE_REACH * OGRE_REACH;
@@ -801,7 +801,7 @@ final class TradeRoutes {
 	}
 
 	/**
-	 * (0.7.484) An ogre's haul at its end: at the camp ({@code camp}), the goods into its storehouse, and some of its food loaded for the
+	 * (0.7.489) An ogre's haul at its end: at the camp ({@code camp}), the goods into its storehouse, and some of its food loaded for the
 	 * hold (none when it is hungry itself); back at the hold, the food is eaten. Null when the round is done.
 	 */
 	static Caravans.@Nullable Caravan arriveOgre(ServerLevel level, Caravans.Caravan c, Faction camp, long now) {
@@ -825,7 +825,7 @@ final class TradeRoutes {
 
 	// ---- players: escorting, trading, robbing ------------------------------------------------------------------------------
 
-	/** Players near {@code lead} keep {@code c} company (called each time it is moved on while seen; (0.7.484) only while it is on the move, not while it stands loading). */
+	/** Players near {@code lead} keep {@code c} company (called each time it is moved on while seen; (0.7.489) only while it is on the move, not while it stands loading). */
 	static void escort(ServerLevel level, Caravans.Caravan c, net.minecraft.world.entity.Entity lead) {
 		for (ServerPlayer p : level.players()) {
 			if (!p.isSpectator() && p.isAlive() && p.distanceToSqr(lead) <= ESCORT_RANGE * ESCORT_RANGE) {
@@ -848,13 +848,13 @@ final class TradeRoutes {
 				continue;
 			}
 			if (p.level() != level || p.isSpectator() || !p.isAlive() || p.distanceToSqr(Vec3.atCenterOf(c.at())) > ESCORT_RANGE * ESCORT_RANGE) {
-				// ((0.7.484) he left it on the road: only one still with it at the end is thanked)
+				// ((0.7.489) he left it on the road: only one still with it at the end is thanked)
 				continue;
 			}
 			if (tribe != null) {
 				Tribes.add(server, p.getUUID(), tribe, -GREEN_EASE);
 			} else if (!home.fallen() && (home.type().isRealm() || home.type() == FactionType.VILLAGE)) {
-				// ((0.7.484) any settled owner, a fiefdom's own wagons to its overlord among them)
+				// ((0.7.489) any settled owner, a fiefdom's own wagons to its overlord among them)
 				Reputation.change(p, home, REP_ESCORT);
 				if (lord.id() != home.id() && (lord.type().isRealm() || lord.type() == FactionType.VILLAGE)) {
 					Reputation.change(p, lord, REP_ESCORT / 2);

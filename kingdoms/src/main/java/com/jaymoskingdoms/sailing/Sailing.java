@@ -48,7 +48,7 @@ public final class Sailing {
 		OAR_ITEM = blockItem("oar", OAR);
 		CANNON_ITEM = blockItem("ship_cannon", CANNON);
 		ROUND_SHOT = item("round_shot", Item::new, new Item.Properties().stacksTo(16));
-		// (0.7.484) heavy shot, explosive shells, chain and grape
+		// (0.7.489) heavy shot, explosive shells, chain and grape
 		HEAVY_SHOT = item("heavy_shot", Item::new, new Item.Properties().stacksTo(16));
 		SHELL = item("explosive_shell", Item::new, new Item.Properties().stacksTo(16));
 		CHAIN_SHOT = item("chain_shot", Item::new, new Item.Properties().stacksTo(16));

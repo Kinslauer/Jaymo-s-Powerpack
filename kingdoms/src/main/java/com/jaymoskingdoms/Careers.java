@@ -815,9 +815,9 @@ public final class Careers {
 				continue;
 			}
 			int owed = p.done() * wage(server, f, p.kind(), rank, held) + (apprentice ? APPRENTICE_CUT : 0);
-			// (0.7.484) wages are paid in the coin of the settlement, out of the same coin in its storehouse
+			// (0.7.489) wages are paid in the coin of the settlement, out of the same coin in its storehouse
 			Currency money = Currencies.of(server, f);
-			// (0.7.484) the wage as whole coins and emerald change, never worth more than it is (Currencies.pay)
+			// (0.7.489) the wage as whole coins and emerald change, never worth more than it is (Currencies.pay)
 			Currencies.Pay due = owed > 0 ? Currencies.payEmeralds(money, owed) : new Currencies.Pay(money, 0L, 0L);
 			long owedMilli = due.milli();
 			long floorMilli = p.done() > 0 ? (long)p.done() * WAGE_FLOOR * 1000L : 0L;
@@ -831,7 +831,7 @@ public final class Careers {
 					storeMilli += got * 1000L;
 				}
 			}
-			// (0.7.484) short of the town's coin: the rest out of the storehouse's emeralds, then any other realm's coin at its
+			// (0.7.489) short of the town's coin: the rest out of the storehouse's emeralds, then any other realm's coin at its
 			// standard worth (old saves, earlier orders, a coin the town used before), each paid out as it is
 			if (money.human()) {
 				List<Currency> order = new ArrayList<>();
@@ -944,9 +944,9 @@ public final class Careers {
 		}
 		edit(player, k -> k.withSoldDay(today));
 		if (earned > 0) {
-			// (0.7.484) the villagers pay in the town's coin
+			// (0.7.489) the villagers pay in the town's coin
 			Currency money = Currencies.of(server, f);
-			// (0.7.484) whole coins, and the change in emeralds
+			// (0.7.489) whole coins, and the change in emeralds
 			Currencies.Pay coins = Currencies.payEmeralds(money, earned);
 			for (ItemStack each : coins.stacks()) {
 				ItemStack pay = each;

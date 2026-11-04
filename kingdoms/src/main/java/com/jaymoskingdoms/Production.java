@@ -136,12 +136,12 @@ public final class Production {
 			taxes = Reforms.taxes(level.getServer(), f, taxes);
 			taxes += Tempers.tithe(level, f, days);
 			long tribute = f.type() == FactionType.FIEFDOM && f.overlord() >= 0 ? taxes * TRIBUTE_PERCENT / 100 : 0;
-			// (0.7.484) and some of what it keeps comes in as coin, in the settlement's own currency, to the storehouse its
+			// (0.7.489) and some of what it keeps comes in as coin, in the settlement's own currency, to the storehouse its
 			// wages are paid from: that share is put there instead of in the treasury (only what fits, at what it is worth)
 			long coined = 0L;
 			Currency money = Currencies.of(server, f);
 			long coins = (taxes - tribute) * Currencies.TAX_COIN_PERCENT / 100;
-			// (0.7.484) only up to the town's wage reserve: coin already in the storehouse counts against it, and the rest of
+			// (0.7.489) only up to the town's wage reserve: coin already in the storehouse counts against it, and the rest of
 			// the share stays in the treasury, so coin never piles up and crowds out goods (and wealth isn't lost to it)
 			long room = Math.max(0L, Currencies.TAX_COIN_RESERVE * 1000L - Currencies.stored(level, f));
 			int n = (int)Math.min(Integer.MAX_VALUE, Math.min(coins * 1000L, room) / money.base);
@@ -157,7 +157,7 @@ public final class Production {
 				Factions.update(server, f.overlord(), x -> x.withTreasury(x.treasury() + tribute));
 			}
 		}
-		// (0.7.484) a haven's works make their goods besides
+		// (0.7.489) a haven's works make their goods besides
 		HavenGrowth.produce(level, f, days);
 		JaymosKingdoms.LOGGER.debug("{} produced {} logs, {} rock, {} food, {} emeralds ({} days; {} lost for want of room)", f.name(), logs, rock, food,
 			taxes, days, lost);

@@ -66,7 +66,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) Heritage kits (Andy: "using the weakness/abilities"; docs/Races-Plan.md). Every heritage and look has a Runic Races
+ * (0.7.489) Heritage kits (Andy: "using the weakness/abilities"; docs/Races-Plan.md). Every heritage and look has a Runic Races
  * style kit: one active ability on the heritage key ({@code ;}), one passive (a gift) and one weakness (a flaw), shown as
  * Ability / Gift / Flaw on the heritage card. A kit sits on top of the heritage's own gifts and flaws (they stay as they were,
  * and a kit never repeats one: where the heritage already has the passive or the weakness, the kit's slot is {@link Perk#NONE}).
@@ -112,7 +112,7 @@ public final class HeritageKits {
 	/** Arcane Reflex: how long (ticks) blows land at {@code REFLEX_TAKEN}. */
 	static final int REFLEX_TICKS = 60;
 	static final float REFLEX_TAKEN = 0.3F;
-	/** (0.7.484) Arcane Reflex: how hard a blow that lands throws its striker back, and up. */
+	/** (0.7.489) Arcane Reflex: how hard a blow that lands throws its striker back, and up. */
 	static final double REFLEX_SHOVE = 0.6, REFLEX_LIFT = 0.2;
 	/** Faerie Bargain: the health paid (it needs more than {@code BARGAIN_FLOOR} to strike) and the seconds of strength bought. */
 	static final float BARGAIN_COST = 4.0F, BARGAIN_FLOOR = 8.0F;
@@ -134,7 +134,7 @@ public final class HeritageKits {
 	static final double COLD_BLOOD_DAMAGE = 0.15, COLD_BLOOD_SPEED = 0.20, DRY_DAMAGE = 0.15, DRY_SPEED = 0.10, LAND_SPEED = 0.05;
 	static final double HEAVY_SPEED = 0.15, GROUNDED_DAMAGE = 0.12, MOON_SPEED = 0.05;
 	/**
-	 * (0.7.484) Heavy in water: each tick in water, the swim's sideways speed is kept at this factor (about 15% slower, sprinting
+	 * (0.7.489) Heavy in water: each tick in water, the swim's sideways speed is kept at this factor (about 15% slower, sprinting
 	 * or not) and they're pulled down this much (blocks per tick), as a stone sinks. Swimming ignores speed attributes.
 	 */
 	public static final double HEAVY_DRAG = 0.97, HEAVY_SINK = 0.012;
@@ -242,26 +242,26 @@ public final class HeritageKits {
 		kind(Heritage.Kind.FROSTBORN, Move.FROSTBIND, Perk.GLACIAL, Perk.FIRE_FRAIL);
 		kind(Heritage.Kind.NIGHTBORN, Move.SHADOWMELD, Perk.NIGHT_EYES, Perk.NONE);
 		kind(Heritage.Kind.WARRIORBORN, Move.WAR_CRY, Perk.NONE, Perk.NONE);
-		// (0.7.484) every heritage has a flaw: the Earthling's body needs more feeding than a blooded one's
+		// (0.7.489) every heritage has a flaw: the Earthling's body needs more feeding than a blooded one's
 		kind(Heritage.Kind.EARTHLING, Move.SECOND_WIND, Perk.NONE, Perk.HUNGRY);
 		kind(Heritage.Kind.STORMBORN, Move.THUNDERCLAP, Perk.NONE, Perk.WET_GROUNDED);
 		kind(Heritage.Kind.DAWNBORN, Move.SUNFLARE, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.ENDBORN, Move.ENDER_STEP, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.DRAGONBLOOD, Move.FIRE_BREATH, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.DEEPBORN, Move.TREMORSENSE, Perk.DEEP_EYES, Perk.NONE);
-		// (0.7.484) the Divine-born never hunger, so theirs is a softer skin
+		// (0.7.489) the Divine-born never hunger, so theirs is a softer skin
 		kind(Heritage.Kind.DIVINE, Move.HALO_PULSE, Perk.NONE, Perk.SOFT);
 		kind(Heritage.Kind.BIOBUILT, Move.ENGULF, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.RUBBERFOLK, Move.ENGULF, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.BEASTFOLK, Move.FERAL_SPRINT, Perk.SWIFT, Perk.HUNGRY);
 		kind(Heritage.Kind.HOLLOW, Move.GRAVE_CHILL, Perk.UNDEAD_STOMACH, Perk.LESS_HEALING);
 		// the looks with a race of their own
-		// (0.7.484) the look's own +3% speed is its gift: no second SWIFT on top
+		// (0.7.489) the look's own +3% speed is its gift: no second SWIFT on top
 		look(HeritageVariants.Variant.SUNFRECKLED, Move.MESSENGERS_DASH, Perk.NONE, Perk.HUNGRY);
 		look(HeritageVariants.Variant.SKYMARKED, Move.UNBREAKABLE_STAND, Perk.STURDY, Perk.HEAVY_FOOTED);
 		look(HeritageVariants.Variant.OBSIDIAN, Move.RUNE_OF_WARDING, Perk.WARDED, Perk.NONE);
 		look(HeritageVariants.Variant.MAGMAVEIN, Move.MOUNTAIN_LEAP, Perk.FEATHERFALL, Perk.NONE);
-		// (0.7.484) the Terra drake's matching weakness: earth-heavy, slow on its feet
+		// (0.7.489) the Terra drake's matching weakness: earth-heavy, slow on its feet
 		look(HeritageVariants.Variant.GOLDSCALE, Move.TERRA_QUAKE, Perk.STURDY, Perk.HEAVY_FOOTED);
 		look(HeritageVariants.Variant.RIMEWYRM, Move.FROST_BREATH, Perk.ICE_SCALES, Perk.FIRE_FRAIL);
 		look(HeritageVariants.Variant.INKMARKED, Move.ARCANE_OVERFLOW, Perk.WARDED, Perk.FRAIL);
@@ -290,7 +290,7 @@ public final class HeritageKits {
 		Attributes.ARMOR, Attributes.SAFE_FALL_DISTANCE, Attributes.ATTACK_SPEED, Attributes.SNEAKING_SPEED, Attributes.MAX_HEALTH);
 
 	/**
-	 * Per player: when the ability is ready again (game time), and the windows the abilities open. (0.7.484) {@code READY} and
+	 * Per player: when the ability is ready again (game time), and the windows the abilities open. (0.7.489) {@code READY} and
 	 * {@code LIVED} outlast a logout, so a relog doesn't reset a cooldown.
 	 */
 	private static final Map<UUID, Long> READY = new HashMap<>();
@@ -302,7 +302,7 @@ public final class HeritageKits {
 	}
 
 	private static final Map<UUID, Conscript> CONSCRIPTS = new HashMap<>();
-	/** (0.7.484) The scoreboard tag on a risen skeleton, so one that outlives its entry is found and dropped when it loads. */
+	/** (0.7.489) The scoreboard tag on a risen skeleton, so one that outlives its entry is found and dropped when it loads. */
 	private static final String CONSCRIPT_TAG = "jaymoskingdoms_conscript";
 
 	private HeritageKits() {
@@ -318,14 +318,14 @@ public final class HeritageKits {
 			Entity by = source.getEntity();
 			return !(entity instanceof Player && by != null && CONSCRIPTS.containsKey(by.getUUID()));
 		});
-		// (0.7.484) venom, the pounce and lifesteal: only for a blow that got through
+		// (0.7.489) venom, the pounce and lifesteal: only for a blow that got through
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			landed(entity, source, taken, blocked);
 			reflexed(entity, source, taken, blocked);
 		});
 		// Nine Lives: the Feline gets up at one health, now and then
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
-			// (0.7.484) a risen skeleton cut down crumbles: no bones, arrows or experience for its caller to farm
+			// (0.7.489) a risen skeleton cut down crumbles: no bones, arrows or experience for its caller to farm
 			if (entity.entityTags().contains(CONSCRIPT_TAG)) {
 				dismiss(entity.getUUID());
 				CONSCRIPTS.remove(entity.getUUID());
@@ -340,7 +340,7 @@ public final class HeritageKits {
 				// (a new life starts at full health: that is not a mend to cut)
 				HEALTH.remove(dead.getUUID());
 			} else {
-				// (0.7.484) a dead villager's dry count goes with it
+				// (0.7.489) a dead villager's dry count goes with it
 				LAST_WET.remove(entity.getUUID());
 			}
 			if (source.getEntity() instanceof LivingEntity killer && killer != entity && killer.isAlive()) {
@@ -355,7 +355,7 @@ public final class HeritageKits {
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			UUID id = handler.player.getUUID();
-			// (0.7.484) READY and LIVED stay: cooldowns run on through a relog
+			// (0.7.489) READY and LIVED stay: cooldowns run on through a relog
 			PHASED.remove(id);
 			REFLEX.remove(id);
 			POUNCED.remove(id);
@@ -363,13 +363,13 @@ public final class HeritageKits {
 			STEAL.remove(id);
 			HEALTH.remove(id);
 		});
-		// (0.7.484) an unloaded villager's dry count is dropped (a player's is kept until they log off)
+		// (0.7.489) an unloaded villager's dry count is dropped (a player's is kept until they log off)
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			if (!(entity instanceof ServerPlayer)) {
 				LAST_WET.remove(entity.getUUID());
 			}
 		});
-		// (0.7.484) a risen skeleton left behind in an unloaded chunk (or saved over a restart) falls when it loads again
+		// (0.7.489) a risen skeleton left behind in an unloaded chunk (or saved over a restart) falls when it loads again
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity.entityTags().contains(CONSCRIPT_TAG) && !CONSCRIPTS.containsKey(entity.getUUID())) {
 				entity.discard();
@@ -587,7 +587,7 @@ public final class HeritageKits {
 				speed -= LAND_SPEED;
 			}
 			if (kit.has(Perk.HEAVY_WATER) && entity.isInWater()) {
-				// (0.7.484) wading; the swim itself is slowed in travelInWater ({@link #heavyInWater})
+				// (0.7.489) wading; the swim itself is slowed in travelInWater ({@link #heavyInWater})
 				speed -= HEAVY_SPEED;
 			}
 			if (kit.has(Perk.WET_GROUNDED) && entity.isInWater()) {
@@ -602,7 +602,7 @@ public final class HeritageKits {
 	}
 
 	/**
-	 * (0.7.484) Whether {@code entity} is heavy in water (the Emberborn's flaw): read on both sides, from the synced heritage, by
+	 * (0.7.489) Whether {@code entity} is heavy in water (the Emberborn's flaw): read on both sides, from the synced heritage, by
 	 * {@code mixin.heritage.LivingEntityHeavyWaterMixin} after each tick's swim.
 	 */
 	public static boolean heavyInWater(LivingEntity entity) {
@@ -613,7 +613,7 @@ public final class HeritageKits {
 	/** A bound-to-water one who's been out of water and rain for {@link #DRY_LIMIT_TICKS} (a villager's count starts when it's loaded). */
 	private static boolean dry(LivingEntity entity) {
 		if (entity.isInWaterOrRain()) {
-			// (0.7.484) wetting restarts the count for villagers too, not only players
+			// (0.7.489) wetting restarts the count for villagers too, not only players
 			LAST_WET.put(entity.getUUID(), entity.level().getGameTime());
 			return false;
 		}
@@ -711,7 +711,7 @@ public final class HeritageKits {
 		if (target instanceof ServerPlayer player) {
 			Long until = REFLEX.get(player.getUUID());
 			if (until != null && player.level().getGameTime() < until) {
-				// (0.7.484) only the factor here: the shove is for a blow that lands (reflexed)
+				// (0.7.489) only the factor here: the shove is for a blow that lands (reflexed)
 				amount *= REFLEX_TAKEN;
 			}
 		}
@@ -734,7 +734,7 @@ public final class HeritageKits {
 			amount *= ARCHER_DEALT;
 		}
 		if (melee(striker, target, source)) {
-			// (0.7.484) only the factor here: the pounce is spent by a blow that lands (landed)
+			// (0.7.489) only the factor here: the pounce is spent by a blow that lands (landed)
 			Long pounce = POUNCED.get(striker.getUUID());
 			if (pounce != null && striker.level().getGameTime() < pounce) {
 				amount *= POUNCE_DAMAGE;
@@ -748,7 +748,7 @@ public final class HeritageKits {
 	}
 
 	/**
-	 * (0.7.484) A blow by {@code striker} that {@code target} has actually taken ({@code taken} after armour, past the
+	 * (0.7.489) A blow by {@code striker} that {@code target} has actually taken ({@code taken} after armour, past the
 	 * invulnerable ticks and the shield): the venom, the pounce spent, and the lifesteal on what got through.
 	 */
 	private static void landed(LivingEntity target, DamageSource source, float taken, boolean blocked) {
@@ -769,7 +769,7 @@ public final class HeritageKits {
 		}
 	}
 
-	/** (0.7.484) Arcane Reflex: a blow that got through inside the window throws its striker back. */
+	/** (0.7.489) Arcane Reflex: a blow that got through inside the window throws its striker back. */
 	private static void reflexed(LivingEntity target, DamageSource source, float taken, boolean blocked) {
 		if (blocked || taken <= 0.0F || !(target instanceof ServerPlayer player)) {
 			return;
@@ -1121,7 +1121,7 @@ public final class HeritageKits {
 			case MIRROR_SHIFT -> {
 				LivingEntity target = Arcana.sighted(p);
 				Vec3 mine = p.position();
-				// (0.7.484) only a mob, never a player or a great one, and only where each fits in the other's place
+				// (0.7.489) only a mob, never a player or a great one, and only where each fits in the other's place
 				if (!(target instanceof Mob) || unmirrorable(target) || target.distanceTo(p) > MIRROR_RANGE
 					|| !level.noCollision(target, target.getBoundingBox().move(mine.subtract(target.position())))
 					|| !level.noCollision(p, p.getBoundingBox().move(target.position().subtract(mine)))) {
@@ -1324,7 +1324,7 @@ public final class HeritageKits {
 		}
 	}
 
-	/** (0.7.484) Mirror Shift: the great ones (and anything a player rides or is riding) are not to be swapped. */
+	/** (0.7.489) Mirror Shift: the great ones (and anything a player rides or is riding) are not to be swapped. */
 	private static boolean unmirrorable(LivingEntity target) {
 		return target instanceof WitherBoss || target instanceof EnderDragon || target instanceof ElderGuardian || target instanceof Warden
 			|| target.isVehicle() || target.isPassenger();
@@ -1333,7 +1333,7 @@ public final class HeritageKits {
 	// ---- conscripts ---------------------------------------------------------------------------------------------------------------
 
 	private static boolean conscript(ServerPlayer p, ServerLevel level, long now) {
-		// (0.7.484) on Peaceful a skeleton is gone the moment it rises: the call fails and costs nothing
+		// (0.7.489) on Peaceful a skeleton is gone the moment it rises: the call fails and costs nothing
 		if (level.getDifficulty() == Difficulty.PEACEFUL) {
 			p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.nothing").withStyle(ChatFormatting.GRAY), true);
 			return false;
@@ -1349,9 +1349,9 @@ public final class HeritageKits {
 			mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.MOB_SUMMONED, null);
 			mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 			mob.setDropChance(EquipmentSlot.HEAD, 0.0F);
-			// (0.7.484) the risen keep their 30 seconds in daylight: they don't burn
+			// (0.7.489) the risen keep their 30 seconds in daylight: they don't burn
 			mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, CONSCRIPT_TICKS + 40, 0, false, false));
-			// (0.7.484) not kept for good, tagged (so a stray one is dropped on load), and blind to players: they pick foes only by conscripts()
+			// (0.7.489) not kept for good, tagged (so a stray one is dropped on load), and blind to players: they pick foes only by conscripts()
 			mob.addTag(CONSCRIPT_TAG);
 			((MobAccessor) mob).jaymoskingdoms$targets().removeAllGoals(g -> g instanceof NearestAttackableTargetGoal<?>);
 			CONSCRIPTS.put(mob.getUUID(), new Conscript(level, p.getUUID(), now + CONSCRIPT_TICKS));
@@ -1379,7 +1379,7 @@ public final class HeritageKits {
 				CONSCRIPTS.remove(id);
 				continue;
 			}
-			// (0.7.484) the sun sets them alight each tick; the fire resistance keeps it harmless, and this puts it out
+			// (0.7.489) the sun sets them alight each tick; the fire resistance keeps it harmless, and this puts it out
 			if (mob.isOnFire()) {
 				mob.clearFire();
 			}

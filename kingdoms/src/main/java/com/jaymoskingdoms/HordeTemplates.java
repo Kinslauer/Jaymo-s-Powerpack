@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 /**
- * (0.7.484) The hook for buildings from other packs: structure templates (a structure block's NBT) saved under
+ * (0.7.489) The hook for buildings from other packs: structure templates (a structure block's NBT) saved under
  * {@code data/jaymoskingdoms/structure/horde/<orc|goblin>/<tier>/} (tier 2, 3 or 4) are read through the game's
  * {@link StructureTemplateManager}, so they can come from this mod's resources, a data pack, or the world's own
  * {@code generated/} folder. If a tier has any, they are that tier's whole building list ({@link Hordes}' planner places
@@ -31,7 +31,7 @@ final class HordeTemplates {
 	/** The most copies of one template a {@code _xN} name asks for. */
 	static final int MAX_COPIES = 6;
 
-	/** (0.7.484) At most two digits, so a long number in a pack's file name can't overflow the parse. */
+	/** (0.7.489) At most two digits, so a long number in a pack's file name can't overflow the parse. */
 	private static final Pattern COPIES = Pattern.compile("_x(\\d{1,2})$");
 	/** "orc/3" → that tier's templates, each repeated as asked (read once per server run). */
 	private static final Map<String, List<Blueprint>> CACHE = new HashMap<>();
@@ -89,7 +89,7 @@ final class HordeTemplates {
 				blueprint == null ? 0 : blueprint.width(), blueprint == null ? 0 : blueprint.depth());
 			return null;
 		}
-		// (0.7.484) fromTemplate puts the lowest layer at y=0, but Hordes raises its designs on the first air block with
+		// (0.7.489) fromTemplate puts the lowest layer at y=0, but Hordes raises its designs on the first air block with
 		// the floor at y=-1, so lower every block one to keep the template's floor in place of the ground
 		List<Blueprint.Placement> lowered = new ArrayList<>(blueprint.blocks().size());
 		for (Blueprint.Placement pl : blueprint.blocks()) {

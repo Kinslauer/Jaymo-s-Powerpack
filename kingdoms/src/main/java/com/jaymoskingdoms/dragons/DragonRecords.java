@@ -78,7 +78,7 @@ public final class DragonRecords {
 			return true;
 		}
 		for (Heritage.Kind kind : Heritage.Kind.values()) {
-			// (0.7.484) not the Hollow: dying once to the undead is no deed a dragon heeds
+			// (0.7.489) not the Hollow: dying once to the undead is no deed a dragon heeds
 			if (kind.earned && kind != Heritage.Kind.HOLLOW && Heritage.unlocked(player, kind)) {
 				return true;
 			}

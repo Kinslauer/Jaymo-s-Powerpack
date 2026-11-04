@@ -68,17 +68,17 @@ final class Corsairs implements Ship.Captaincy {
 	/** Her guns: their reach, the least range, how far off their line they're laid (a cosine), and how long a reload takes (ticks). */
 	static final double GUN_RANGE = 52.0, GUN_NEAREST = 5.0, GUN_ARC = 0.86;
 	static final int RELOAD = 160, RELOAD_MONKEY = 100, GUN_GAP = 4;
-	/** (0.7.484) With no ship to fight, how often (ticks) her gunners look ashore for a foe; between looks they keep the last one. */
+	/** (0.7.489) With no ship to fight, how often (ticks) her gunners look ashore for a foe; between looks they keep the last one. */
 	static final int SHORE_LOOK = 30;
 	/** How fast round shot flies and falls (as {@code ShipShot}), and how much they miss by (degrees). */
 	static final double SHOT_SPEED = 1.6, SHOT_FALL = 0.015;
 	/**
-	 * (0.7.484) Shelling the shore her cove raids: how far her lookout sees a target ashore, how far grape carries, how near
+	 * (0.7.489) Shelling the shore her cove raids: how far her lookout sees a target ashore, how far grape carries, how near
 	 * the raid's landing she lies to lay her broadside on it, and the sail she keeps to hold her station.
 	 */
 	static final double SHORE_SIGHT = 52.0, GRAPE_RANGE = 20.0, GRAPE_PICK = 0.6, SHORE_STATION = 36.0, SHORE_SAIL = 0.15;
 	/**
-	 * (0.7.484) Her guns hold off anywhere one of her own landing party is within this (blocks: past a shell's burst and
+	 * (0.7.489) Her guns hold off anywhere one of her own landing party is within this (blocks: past a shell's burst and
 	 * its crater), and lay on the ground ashore this far apart (blocks) as they look along the line in for clear ground.
 	 */
 	static final double SHORE_CLEAR = 8.0, SHORE_STEP = 3.0;
@@ -217,7 +217,7 @@ final class Corsairs implements Ship.Captaincy {
 			return null;
 		}
 		Ship foe = crew.target >= 0 && level.getEntity(crew.target) instanceof Ship s && !s.isRemoved() && !s.foundering() ? s : null;
-		// (0.7.484) a shore mark not refreshed lately (captain gone, raid over) is dropped
+		// (0.7.489) a shore mark not refreshed lately (captain gone, raid over) is dropped
 		if (crew.shore != null && now - crew.shoreSet > SHORE_LOOK + THINK) {
 			crew.shore = null;
 			crew.shoreLiving = false;
@@ -230,7 +230,7 @@ final class Corsairs implements Ship.Captaincy {
 			Whalers.helm(level, ship, crew);
 		}
 		if (!crew.captained(ship)) {
-			// (0.7.484) no captain to think: her gunners still look ashore (or drop a stale mark) every so often
+			// (0.7.489) no captain to think: her gunners still look ashore (or drop a stale mark) every so often
 			if (crew.side == Crew.Side.PIRATE && (now + ship.getId()) % THINK == 0) {
 				this.lookAshore(level, ship, crew, foe);
 			}
@@ -243,7 +243,7 @@ final class Corsairs implements Ship.Captaincy {
 	}
 
 	/**
-	 * (0.7.484) Her gunners' shore mark: none with a ship to fight or off the pirate side; her cove's landing party ashore, the
+	 * (0.7.489) Her gunners' shore mark: none with a ship to fight or off the pirate side; her cove's landing party ashore, the
 	 * shore it's fighting on; otherwise any foe of her cove ashore in range, looked for now and then. Runs with or without a
 	 * captain, so a mark never outlives its look.
 	 */
@@ -324,12 +324,12 @@ final class Corsairs implements Ship.Captaincy {
 			if (crew.side == Crew.Side.PIRATE && !PirateCoves.raiding(level, crew)) {
 				crew.bound = null;
 			} else if (crew.shore != null && d < SHORE_STATION) {
-				// (0.7.484) on station off the landing: her beam to the shore, creeping, her guns bearing
+				// (0.7.489) on station off the landing: her beam to the shore, creeping, her guns bearing
 				crew.mode = "shell";
 				float to = Fleet.bearing(ship, crew.shore.x, crew.shore.z);
 				float port = to - 90.0F, starboard = to + 90.0F;
 				want = Math.abs(Mth.wrapDegrees(port - ship.getYRot())) < Math.abs(Mth.wrapDegrees(starboard - ship.getYRot())) ? port : starboard;
-				// (0.7.484) on her mark she lies hove to (she still swings her beam round), not creeping off it
+				// (0.7.489) on her mark she lies hove to (she still swings her beam round), not creeping off it
 				sail = d < WAYPOINT_REACH ? 0.0 : SHORE_SAIL;
 			}
 		} else {
@@ -355,7 +355,7 @@ final class Corsairs implements Ship.Captaincy {
 			}
 		}
 		// (0.7.285) her course round the land to where she's making for (not laying her guns on a foe close by)
-		// (0.7.484) nor on station shelling the shore, where her beam, not her bow, bears on her mark
+		// (0.7.489) nor on station shelling the shore, where her beam, not her bow, bears on her mark
 		if (sail > 0.0 && crew.detour == null && !"engage".equals(crew.mode) && !"shell".equals(crew.mode)) {
 			BlockPos goal = crew.goal != null ? crew.goal : BlockPos.containing(ship.getX() - Mth.sin(want * Mth.DEG_TO_RAD) * ROUTE_AIM,
 				ship.getY(), ship.getZ() + Mth.cos(want * Mth.DEG_TO_RAD) * ROUTE_AIM);
@@ -417,7 +417,7 @@ final class Corsairs implements Ship.Captaincy {
 	}
 
 	/**
-	 * (0.7.484) Where her guns lay ashore while her cove raids: the nearest living foe of the cove's within sight of the water
+	 * (0.7.489) Where her guns lay ashore while her cove raids: the nearest living foe of the cove's within sight of the water
 	 * (a player it hunts, or someone of the settlement being raided: orcs, villagers, guards), else the raided settlement's
 	 * ground itself (its seat, or as near it as her guns reach) so shell and heavy shot strip the shore. Null if nothing is in reach.
 	 */
@@ -430,7 +430,7 @@ final class Corsairs implements Ship.Captaincy {
 			e -> e.isAlive() && !e.isSpectator() && !e.isInWater() && !e.isPassenger())) {
 			boolean foe = Pirates.prey(crew.faction, e) || target >= 0 && e instanceof Worker w && w.factionId() == target;
 			if (!foe || e instanceof Worker w && w.factionId() == crew.faction || ship.getBoundingBox().inflate(1.0).contains(e.position())
-				// (0.7.484) not on a foe her own landing party's fighting hand to hand
+				// (0.7.489) not on a foe her own landing party's fighting hand to hand
 				|| ownNear(level, crew.faction, e.position())) {
 				continue;
 			}
@@ -447,7 +447,7 @@ final class Corsairs implements Ship.Captaincy {
 		if (target < 0 || !(Factions.get(level.getServer(), target) instanceof Faction raided)) {
 			return null;
 		}
-		// the settlement itself, or the near edge of it that her guns reach. (0.7.484) Not where her own landing party is
+		// the settlement itself, or the near edge of it that her guns reach. (0.7.489) Not where her own landing party is
 		// plundering: she looks in along the line from the farthest her guns reach back to the shore for dry ground clear of
 		// them, so she strips the shore in front of the raid (or the far side of it), never the ground under their feet
 		double dx = raided.seat().getX() + 0.5 - from.x, dz = raided.seat().getZ() + 0.5 - from.z;
@@ -473,14 +473,14 @@ final class Corsairs implements Ship.Captaincy {
 		return null;
 	}
 
-	/** (0.7.484) Whether one of {@code faction}'s own (her landing party) is within {@link #SHORE_CLEAR} of {@code at}. */
+	/** (0.7.489) Whether one of {@code faction}'s own (her landing party) is within {@link #SHORE_CLEAR} of {@code at}. */
 	private static boolean ownNear(ServerLevel level, int faction, Vec3 at) {
 		return faction >= 0 && !level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(SHORE_CLEAR),
 			e -> e.isAlive() && e instanceof Worker w && w.factionId() == faction && e.distanceToSqr(at) < SHORE_CLEAR * SHORE_CLEAR).isEmpty();
 	}
 
 	/**
-	 * (0.7.484) What her gunner ships in the gun he's loading: against a ship, mostly round shot with heavy shot, chain for her
+	 * (0.7.489) What her gunner ships in the gun he's loading: against a ship, mostly round shot with heavy shot, chain for her
 	 * rigging and grape if she's close; against the shore, shell and heavy shot for ground and works, grape for crews close in.
 	 */
 	private ShotKind pick(ServerLevel level, Ship ship, Crew crew, @Nullable Ship foe) {
@@ -604,7 +604,7 @@ final class Corsairs implements Ship.Captaincy {
 			if (foe == null && crew.shore == null || now - crew.lastFired < GUN_GAP) {
 				continue;
 			}
-			// (0.7.484) a ship to fight first, else the shore her cove is raiding
+			// (0.7.489) a ship to fight first, else the shore her cove is raiding
 			Vec3 dir = foe != null ? this.lay(level, ship, gun, foe) : this.layAt(level, ship, gun, crew.shore, Vec3.ZERO);
 			if (dir != null && ship.fireGunAlong(level, gun, dir, gunner)) {
 				crew.lastFired = (int)now;
@@ -626,7 +626,7 @@ final class Corsairs implements Ship.Captaincy {
 	}
 
 	/**
-	 * (0.7.484) How the gun at {@code gun} is laid on the point {@code aim} (a target moving {@code drift} a tick, led), or null
+	 * (0.7.489) How the gun at {@code gun} is laid on the point {@code aim} (a target moving {@code drift} a tick, led), or null
 	 * if it doesn't bear. The shot it holds sets how fast and how far it flies.
 	 */
 	private @Nullable Vec3 layAt(ServerLevel level, Ship ship, long gun, Vec3 aim, Vec3 drift) {
@@ -638,7 +638,7 @@ final class Corsairs implements Ship.Captaincy {
 		double speed = SHOT_SPEED * kind.speed, fall = SHOT_FALL * kind.gravity;
 		Vec3 muzzle = ship.gunAt(gun);
 		double d = Math.sqrt((aim.x - muzzle.x) * (aim.x - muzzle.x) + (aim.z - muzzle.z) * (aim.z - muzzle.z));
-		// (0.7.484) grape loaded for a close foe who has since drawn off is fired anyway (it spreads short, at its life),
+		// (0.7.489) grape loaded for a close foe who has since drawn off is fired anyway (it spreads short, at its life),
 		// so the gun is cleared for a better load and doesn't sit silent; it's only loaded well inside its range (GRAPE_PICK)
 		if (d < GUN_NEAREST || d > GUN_RANGE) {
 			return null;
@@ -665,7 +665,7 @@ final class Corsairs implements Ship.Captaincy {
 	}
 
 	/**
-	 * (0.7.484) Whom a pirate ship shells ashore when she has no ship to fight: the nearest of the folk on land within
+	 * (0.7.489) Whom a pirate ship shells ashore when she has no ship to fight: the nearest of the folk on land within
 	 * her guns' range that are at war with her cove (the other camps: orcs, goblins, illagers, barbarians) or defend the
 	 * settlement her cove is raiding, with a player near to see it. The point to aim at, or null.
 	 */
@@ -894,7 +894,7 @@ final class Corsairs implements Ship.Captaincy {
 			hand.hurtServer(level, source, Float.MAX_VALUE);
 		}
 		if (crew.side != Crew.Side.PIRATE) {
-			// ((0.7.484) a sea rover that sank her takes her cargo home)
+			// ((0.7.489) a sea rover that sank her takes her cargo home)
 			PirateCoves.captured(level, ship, crew, by);
 		}
 		KingdomEvents.announce(level.getServer(), Component.translatable("message.jaymoskingdoms.ship.sunk." + crew.side.id(), crew.name,

@@ -31,7 +31,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.484) What a cannon shot does to the ground it lands on: a crater that strips soil, sand, wood, leaves and (for the
+ * (0.7.489) What a cannon shot does to the ground it lands on: a crater that strips soil, sand, wood, leaves and (for the
  * heavier shot) weak masonry down to the natural stone, the way a shelled shore would be left. Nothing is broken at the
  * moment of impact: the crater is queued and worked off a little each tick, outward from the middle, only near players,
  * at most {@link #BLOCKS_PER_TICK} blocks a tick for everything shelled at once, the way the flood is spread
@@ -81,7 +81,7 @@ public final class Bombardment {
 		final Crater crater;
 		final List<int[]> columns;
 		int column, y = Integer.MIN_VALUE, wait, removed;
-		/** (0.7.484) this column kept a solid block inside the crater below the centre, so nothing under it is stripped. */
+		/** (0.7.489) this column kept a solid block inside the crater below the centre, so nothing under it is stripped. */
 		boolean kept;
 
 		Job(ServerLevel level, BlockPos centre, Crater crater, List<int[]> columns) {
@@ -204,7 +204,7 @@ public final class Bombardment {
 						remove(level, pos, state, c, job.removed++);
 						removed++;
 					} else if (dy < 0 && !state.isAir() && !(state.getBlock() instanceof LiquidBlock)) {
-						// (0.7.484) a kept floor or stone below the centre shields what lies under it: no stripping beneath
+						// (0.7.489) a kept floor or stone below the centre shields what lies under it: no stripping beneath
 						job.kept = true;
 					}
 				} else if (job.kept) {
@@ -272,7 +272,7 @@ public final class Bombardment {
 		if (state.getDestroySpeed(level, pos) < 0.0F || state.getBlock().getExplosionResistance() >= TOUGHEST) {
 			return false;
 		}
-		// (0.7.484) ore by its tags (redstone ore isn't a DropExperienceBlock), and anything else that drops experience
+		// (0.7.489) ore by its tags (redstone ore isn't a DropExperienceBlock), and anything else that drops experience
 		if (state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.BASE_STONE_NETHER) || state.is(ConventionalBlockTags.ORES)
 			|| state.is(BlockTags.ORES) || state.getBlock() instanceof DropExperienceBlock || state.getBlock() instanceof EntityBlock) {
 			return false;
@@ -295,7 +295,7 @@ public final class Bombardment {
 
 	/**
 	 * Worked stone that a heavy shot shatters: anything a pick mines that isn't natural stone (already ruled out), nor
-	 * (0.7.484) metal or gem: blocks of iron, gold, diamond, emerald, copper, redstone and the like, bars and chains.
+	 * (0.7.489) metal or gem: blocks of iron, gold, diamond, emerald, copper, redstone and the like, bars and chains.
 	 */
 	private static boolean masonry(BlockState state) {
 		if (!state.is(BlockTags.MINEABLE_WITH_PICKAXE) || state.is(BlockTags.BEACON_BASE_BLOCKS) || state.is(ConventionalBlockTags.STORAGE_BLOCKS)

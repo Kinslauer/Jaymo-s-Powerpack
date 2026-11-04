@@ -156,7 +156,7 @@ public final class HavenWares {
 			wares.add(sale(HIDE_PRICE, new ItemStack(WAR_HIDE, HIDE_COUNT)));
 			wares.add(sale(JERKIN_PRICE, jerkin(level, blood)));
 		}
-		// (0.7.484) the haven's works keep its traders stocked: more uses before an offer runs out
+		// (0.7.489) the haven's works keep its traders stocked: more uses before an offer runs out
 		int more = HavenGrowth.stock(level.getServer(), f);
 		MerchantOffers offers = v.getOffers();
 		for (MerchantOffer base : wares) {
@@ -170,7 +170,7 @@ public final class HavenWares {
 			if (at < 0) {
 				offers.add(ware);
 			} else if (offers.get(at).getMaxUses() < SELL_USES + more) {
-				// (0.7.484) an offer made before the works grew: the same trade, its uses and demand kept, with the new stock
+				// (0.7.489) an offer made before the works grew: the same trade, its uses and demand kept, with the new stock
 				MerchantOffer old = offers.get(at);
 				MerchantOffer grown = new MerchantOffer(old.getItemCostA(), old.getItemCostB(), old.getResult(), old.getUses(),
 					SELL_USES + more, old.getXp(), old.getPriceMultiplier(), old.getDemand());

@@ -213,7 +213,7 @@ public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.Sta
 	}
 
 	/**
-	 * (0.7.484) A poor settlement's handcart: two tall thin wheels either side of a shallow plank tray, its end-boards and side-rails low, a
+	 * (0.7.489) A poor settlement's handcart: two tall thin wheels either side of a shallow plank tray, its end-boards and side-rails low, a
 	 * prop post under the back so it stands, and two long handles out in front for the carter's hands. The load shows heaped in the tray under a
 	 * cloth in the settlement's colour, tied down with cord. Original, no other mod's model.
 	 */
@@ -259,7 +259,7 @@ public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.Sta
 	}
 
 	/**
-	 * (0.7.484) A cove's trade skiff: a narrow plank hull, pointed at the bow and square at the stern, low gunwales, a short mast with a sail in
+	 * (0.7.489) A cove's trade skiff: a narrow plank hull, pointed at the bow and square at the stern, low gunwales, a short mast with a sail in
 	 * the cove's colour and a pennant, a tiller aft, and the cargo in barrels amidships. Original, no other mod's model.
 	 */
 	private static void skiff(List<Box> b, int load, int color) {
