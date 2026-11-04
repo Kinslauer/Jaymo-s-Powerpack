@@ -654,6 +654,33 @@ throne. LIKE THE MOD". Ideas from Special Golems (custom licence, files not used
     to fold it back into its item.
 - Compiled clean with Gradle (`compileClientJava`); not played.
 
+## 0.7.530: quests to 272, town troubles and town works (pack 0.20.33)
+Patch 9. Andy picked the idea of the MCA: Quests add-on and asked for "260+ ... get close"; our own version, none of
+its code. Plan: `docs/Quests-Plan.md`. There were 189 quest titles (187 quest templates); now there are 272.
+- **55 more trade quests** (`QuestBoard`): two or three more for every trade, from farmers to farriers, the tailor's
+  and healer's (shepherd, cleric) and the whalers' (whale oil and blubber at the harbour). Cooks, pullers and
+  money-changers give their own quests now. Some ask you to lead cows, pigs or sheep home on a lead.
+- **Town troubles** (`TownTroubles`, 28 quests): while a town is hungry (stores nearly bare), sick (the Nightfall
+  plague, or many wounded), raided (a camp's raid or a portal raid), burned, sacked in war, in drought, missing one of
+  its own (taken captive) or feuding with a neighbour, 2-4 of its villagers ask for help with that trouble. Food,
+  wheat, timber and iron brought for it go into the town's stores. When the trouble ends, the asks not taken go too.
+  Taken ones still pay. Players near the town hear when it starts and ends.
+- **Town works** (`TownProjects`): a Town works sheet on every town board lists six shared projects (well, granary,
+  wall, watchtower, bridge, infirmary). Anyone gives goods or coin. Progress is shared and saved per town. When it's
+  done the town gets it for real: the builders raise the well or infirmary, a granary keeps it fed on half the food, a
+  wall and a watchtower mean fewer raids (the tower warns of one mustering), and a bridge lays a new road with bridges
+  to one more neighbour. Everyone who gave is paid coin and reputation by their share, and paid on joining if they
+  were away.
+- A trouble pushed out of a full town (two troubles already, a more urgent one came) is removed quietly. It no longer
+  says it is over while its cause is still there.
+- Ops: `/kingdom quests trouble <kind>|clear`, `/kingdom quests works fill <project>`.
+- Loading hints 96-97. Not played; compile-checked with `kingdoms/gradlew build`.
+- The Old Quiver keepsake is now built on leather, not an arrow, so a bow or crossbow can no longer fire it and lose the quest item.
+
+### Fixes: Hornkin and led animals
+- The raid trouble's "Hornkin in the Streets" counts any Hornkin: warriors, hurlers and brutes.
+- An animal handed in on a lead quest is marked, so the same cows, pigs or sheep can't be led to another giver for pay.
+
 ## 0.1.0: stage 1
 - **Kingdoms** (`Kingdom`, stored on the Overworld by `Kingdoms`): name, colour, capital (a village bell), king,
   members (rank and standing), treasury (emeralds), claimed chunks (7 x 7 round the capital), overlord, fallen,
@@ -8860,7 +8887,7 @@ beneath it, and flap gently as they hover."
 - **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
   and sway in the air the way the wind's hover does, for anyone watching.
 
-## 0.7.530: the Stegonaut's moves after the Bastionodon set (pack 0.20.33)
+## 0.7.531: the Stegonaut's moves after the Bastionodon set (pack 0.20.35)
 Andy sent a "Bastionodon" pack and asked to map its animations onto our Stegonaut. Its files say CC0, but its rig is
 Saint's Dragons' Stegonaut (the same 56 bone names, 23 of the pivots, the same 27 animation names and lengths), so none
 of its files are used; its motions were redrawn as procedural poses in `StegonautDragonModel.setupAnim`:

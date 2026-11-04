@@ -36,7 +36,7 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		/** (0.7.522) The move it's making ({@link WindDragon#action}) and how long it has been at it (ticks, smoothed). */
 		int action;
 		float actionAge;
-		/** (0.7.530) A blow's flinch, 1 as it lands and easing to 0 over half a second. */
+		/** (0.7.531) A blow's flinch, 1 as it lands and easing to 0 over half a second. */
 		float hurt;
 	}
 

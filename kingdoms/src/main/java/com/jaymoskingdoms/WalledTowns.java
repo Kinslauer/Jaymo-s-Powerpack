@@ -215,6 +215,14 @@ final class WalledTowns {
 		return Factions.level(server).getAttachedOrElse(TOWNS, Map.of()).getOrDefault(Integer.toString(id), Town.START);
 	}
 
+	/** (0.7.530) A finished wall project ({@link TownProjects}) adds {@code add} to a village's purse, toward its next wall tier. */
+	static void fund(MinecraftServer server, Faction f, long add) {
+		if (f.type() == FactionType.VILLAGE) {
+			Town t = town(server, f.id());
+			put(server, f.id(), t.withPurse(t.purse() + add));
+		}
+	}
+
 	private static void put(MinecraftServer server, int id, Town town) {
 		Map<String, Town> map = new HashMap<>(Factions.level(server).getAttachedOrElse(TOWNS, Map.of()));
 		map.put(Integer.toString(id), town);

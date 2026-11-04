@@ -228,6 +228,10 @@ public final class Captives {
 		v.setPersistenceRequired();
 		level.addFreshEntity(v);
 		LOADED.add(v);
+		if (home != null && !Havens.is(level.getServer(), home)) {
+			// (0.7.530) the town they were taken from is missing one of its own
+			TownTroubles.missing(level, home, v, at);
+		}
 		JaymosKingdoms.LOGGER.debug("a captive from {} held at {}", home == null ? "nowhere" : home.name(), at);
 		return v;
 	}
@@ -487,6 +491,7 @@ public final class Captives {
 		// (0.7.439) a haven's child carried off by raiders: home, and the rescue asked for is done
 		BorderClashes.home(level.getServer(), v.getUUID());
 		Quests.rescued(player, v);
+		TownTroubles.found(level.getServer(), v.getUUID()); // (0.7.530)
 		LOADED.remove(v);
 		LOST.remove(v.getUUID());
 		MinecraftServer server = level.getServer();

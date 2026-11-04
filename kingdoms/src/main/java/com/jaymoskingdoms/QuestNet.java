@@ -28,6 +28,10 @@ public final class QuestNet {
 	public static final int BOARD = -7;
 	/** (0.7.256) The "giver" a board's merchant orders screen is opened for ({@link MerchantOrders}): no entity. */
 	public static final int ORDERS = -8;
+	/** (0.7.530) The "giver" a board's town works screen is opened for ({@link TownProjects}): no entity. */
+	public static final int PROJECTS = -9;
+	/** (0.7.530) What a player chose on the town works screen (in {@link Act#action}): give goods, give a coin, give five coins. */
+	public static final int GIVE_GOODS = 4, GIVE_COIN = 5, GIVE_COINS = 6;
 
 	/** One quest as the giver's screen shows it. */
 	public record View(String id, int state, boolean royal, Component title, Component text, Component objective, List<ItemStack> rewards, List<Component> extras) {

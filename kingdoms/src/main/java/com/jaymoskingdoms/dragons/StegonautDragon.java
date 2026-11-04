@@ -76,7 +76,7 @@ public class StegonautDragon extends WindDragon {
 
 	/** Its moves, for the model ({@link #action}). */
 	public static final int NONE = 0, CHIN_SLAM = 1, GROUND_SLAM = 2, CHEW = 3, ROAR = 4, BITE_MOVE = 5, GRAZE = 6;
-	/** How long the model plays each (ticks). (0.7.530) The roar is held longer, a show of its plates, and the bite and
+	/** How long the model plays each (ticks). (0.7.531) The roar is held longer, a show of its plates, and the bite and
 	 * the grazing are moves of their own. */
 	static final int[] ACTION_TICKS = {0, 16, SLAM_WINDUP + 10, SPIT_CHEW + 8, 60, 20, 30};
 
@@ -235,7 +235,7 @@ public class StegonautDragon extends WindDragon {
 		}
 	}
 
-	/** (0.7.530) The bite: the neck draws back, jaws wide, and snaps in. */
+	/** (0.7.531) The bite: the neck draws back, jaws wide, and snaps in. */
 	@Override
 	protected void bitten(LivingEntity target) {
 		if (action() == NONE) {

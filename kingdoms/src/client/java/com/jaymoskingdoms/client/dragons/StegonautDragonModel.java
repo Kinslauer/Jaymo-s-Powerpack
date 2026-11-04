@@ -25,7 +25,7 @@ import net.minecraft.util.Mth;
  * its moves ({@link StegonautDragon#action}): the chin slam drives the head down and snaps it up, the ground slam rears
  * the forequarters and stamps them down, the ground eating noses into the earth and chews, and the roar throws the head
  * up with the jaw wide and the plates flared. Crashed (worn down) it sinks to its belly, legs splayed and neck down; sitting, it settles on its hind legs.
- * (0.7.530) Every move after the Bastionodon set's (wind-up, strike, settle): the ground eating as scoop, chew and spit, a
+ * (0.7.531) Every move after the Bastionodon set's (wind-up, strike, settle): the ground eating as scoop, chew and spit, a
  * bite of its own, grazing chomps, three idle grumbles, a flinch when struck, a doze when it has sat a while, a gallop at
  * a run, a paddling swim, and stiff legs as it dies.
  */
@@ -185,7 +185,7 @@ final class StegonautDragonModel extends EntityModel<WindDragonRenderer.State> {
 		float crash = ease(s.crash), swim = ease(s.swim) * (1.0F - crash);
 		float sit = ease(s.sit) * (1.0F - crash) * (1.0F - swim);
 		float walk = Math.min(s.walkAnimationSpeed, 1.0F) * (1.0F - crash) * (1.0F - sit) * (1.0F - dead);
-		// (0.7.530) at a run it gallops: the pairs fall out of step, the strides lengthen and it rocks fore and aft
+		// (0.7.531) at a run it gallops: the pairs fall out of step, the strides lengthen and it rocks fore and aft
 		float run = ease((s.walkAnimationSpeed - 0.55F) / 0.35F) * walk;
 		float step = s.walkAnimationPos * 0.55F;
 		float headYaw = Mth.clamp(s.yRot, -50.0F, 50.0F) * Mth.DEG_TO_RAD;
@@ -195,7 +195,7 @@ final class StegonautDragonModel extends EntityModel<WindDragonRenderer.State> {
 		// the moves, each a 0..1 envelope over its length
 		// (0.7.522, Andy: "all the joints should move and blend smoothly") every envelope eases in and out (smoothstep) and
 		// ends where it began, so a move flows out of the walk and back into it with no snap
-		// (0.7.530, Andy: "map these animations to our stegonaut") the moves follow the Bastionodon set's keys: a wind-up, a
+		// (0.7.531, Andy: "map these animations to our stegonaut") the moves follow the Bastionodon set's keys: a wind-up, a
 		// strike and a settle for each, the ground eating in its three parts (scoop, chew, spit), and the bite, the
 		// grazing, the grumbles, the flinch, the gallop and the swim stroke added; all drawn here, none of its files used
 		float chin = s.action == StegonautDragon.CHIN_SLAM ? share : 0.0F;

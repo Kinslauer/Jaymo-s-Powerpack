@@ -968,7 +968,7 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	/** On its feet: bite whoever's in reach, sweep the tail round when it's crowded or they're beside it, breathe at range. */
-	/** (0.7.530) Its walker's bite just landed on {@code target} (in {@link #groundFight}), for a model to play it. */
+	/** (0.7.531) Its walker's bite just landed on {@code target} (in {@link #groundFight}), for a model to play it. */
 	protected void bitten(LivingEntity target) {
 	}
 
