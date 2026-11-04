@@ -15,9 +15,9 @@ import org.jspecify.annotations.Nullable;
  * foliage). The numbers are all here; {@link Bombardment} reads the crater.
  */
 public enum ShotKind implements StringRepresentable {
-	ROUND(1.0, 1.0, 160, 16.0F, 2.0, 0.8, 0, false, new Bombardment.Crater(3.2, 2, 4, 3.5F, Bombardment.Strip.STRUCTURES, 14, false)),
-	HEAVY(0.85, 1.3, 170, 24.0F, 2.6, 1.1, 2, false, new Bombardment.Crater(4.8, 3, 6, 6.5F, Bombardment.Strip.MASONRY, 16, true)),
-	SHELL(0.9, 1.2, 170, 20.0F, 4.6, 1.5, 0, true, new Bombardment.Crater(7.5, 4, 9, 10.0F, Bombardment.Strip.MASONRY, 18, true)),
+	ROUND(1.0, 1.0, 160, 16.0F, 2.0, 0.8, 0, false, new Bombardment.Crater(3.2, 2, 4, 7.5F, Bombardment.Strip.STRUCTURES, 14, false)),
+	HEAVY(0.85, 1.3, 170, 24.0F, 2.6, 1.1, 2, false, new Bombardment.Crater(4.8, 3, 6, 10.0F, Bombardment.Strip.MASONRY, 16, true)),
+	SHELL(0.9, 1.2, 170, 20.0F, 4.6, 1.5, 0, true, new Bombardment.Crater(7.5, 4, 9, 14.0F, Bombardment.Strip.MASONRY, 18, true)),
 	CHAIN(1.05, 0.9, 120, 12.0F, 2.8, 0.6, 0, false, new Bombardment.Crater(1.6, 0, 3, 1.0F, Bombardment.Strip.SOFT, 30, false)),
 	GRAPE(1.0, 0.8, 14, 9.0F, 5.0, 0.5, 0, false, new Bombardment.Crater(2.6, 0, 3, 1.0F, Bombardment.Strip.SOFT, 30, false));
 

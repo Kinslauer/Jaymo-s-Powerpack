@@ -1,6 +1,5 @@
 package com.jaymoskingdoms.sailing;
 
-import com.jaymoskingdoms.Placed;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -22,22 +20,22 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.LiquidBlock;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.489) What a cannon shot does to the ground it lands on: a crater that strips soil, sand, wood, leaves and (for the
- * heavier shot) weak masonry down to the natural stone, the way a shelled shore would be left. Nothing is broken at the
- * moment of impact: the crater is queued and worked off a little each tick, outward from the middle, only near players,
- * at most {@link #BLOCKS_PER_TICK} blocks a tick for everything shelled at once, the way the flood is spread
- * ({@code Calamities}). Most of what's destroyed drops nothing. Never touched: bedrock and what's as hard as obsidian,
- * natural stone and ore, anything with a block entity (chests, spawners), anything a player placed ({@link Placed}), and,
- * from a mob's gun, anything at all while mob griefing is off.
+ * (0.7.489) What a cannon shot does where it lands: it explodes, and the blast breaks blocks the way TNT's does, by their
+ * blast resistance. Whatever's loose (soil, sand, plants, leaves) always goes; anything harder breaks if the blast is
+ * still strong enough where it stands, strongest at the middle and weaker toward the edge, so a heavy shell takes
+ * stone, brick, timber and players' builds alike, and the heavier shot strip loose soil below on down to the rock.
+ * Nothing is broken at the moment of impact: the crater is queued and worked off a little each tick, outward from the
+ * middle, only near players, at most {@link #BLOCKS_PER_TICK} blocks a tick for everything shelled at once, the way the
+ * flood is spread ({@code Calamities}). Most of what's destroyed drops nothing. Never touched: bedrock and what's as
+ * hard as obsidian, anything with a block entity (so chests and their loot survive), and, from a mob's gun, anything at
+ * all while mob griefing is off.
  */
 public final class Bombardment {
 	/** Blocks removed per tick, over all craters; blocks looked at per tick at most; columns waiting at most. */
@@ -50,30 +48,32 @@ public final class Bombardment {
 	static final double STRIP_SHARE = 0.7;
 	/** Nothing this tough (explosion resistance, like obsidian's) breaks. */
 	static final float TOUGHEST = 1200.0F;
+	/** At a crater's edge its blast keeps this share of its strength; each block's blast is jittered by this share either way. */
+	static final float EDGE_STRENGTH = 0.35F, JITTER = 0.2F;
 	/** The share of broken blocks that fling up dust, and the number of blocks between thuds. */
 	static final float DUST = 0.12F;
 	static final int THUD_EVERY = 25;
 
 	/** How much a crater takes. */
 	public enum Strip {
-		/** Loose soil, sand, gravel, snow, plants and leaves. */
+		/** Only loose soil, sand, gravel, snow, plants and leaves (chain and grape: they tear, they don't explode). */
 		SOFT,
-		/** And what's built light: timber, thatch, wool, glass, doors. */
+		/** An explosion: anything whose blast resistance its blast still beats where it stands. */
 		STRUCTURES,
-		/** And weak masonry (cobble, brick, sandstone, plaster), up to the crater's reach. */
+		/** The same, for the heavy shot and shells (kept apart for their names in {@code ShotKind}). */
 		MASONRY
 	}
 
 	/**
-	 * A crater's shape: its radius, how far it goes down and up (blocks), the toughest (explosion resistance) masonry it
-	 * breaks, what it takes, how many blocks it destroys per one that drops its items, and whether it strips the soil
-	 * below its floor on down to the stone.
+	 * A crater's shape: its radius, how far it goes down and up (blocks), its blast strength at the middle (the blast
+	 * resistance it beats there: stone and cobble are 6, TNT's own blast is about 4 near the middle), what it takes, how
+	 * many blocks it destroys per one that drops its items, and whether it strips the soil below its floor on down to the stone.
 	 */
 	public record Crater(double radius, int down, int up, float reach, Strip strip, int dropEvery, boolean stripDown) {
 	}
 
-	/** A field cannon's ball: it only scuffs the ground. */
-	public static final Crater FIELD = new Crater(2.2, 1, 2, 1.0F, Strip.SOFT, 20, false);
+	/** A field cannon's ball: a small blast, about a TNT's. */
+	public static final Crater FIELD = new Crater(2.6, 2, 2, 6.5F, Strip.STRUCTURES, 16, false);
 
 	private static final class Job {
 		final ServerLevel level;
@@ -200,7 +200,7 @@ public final class Bombardment {
 				double span = dy < 0 ? Math.max(1, c.down()) : Math.max(1, c.up());
 				double r = flat / c.radius(), v = dy / span;
 				if (r * r + v * v <= 1.0) {
-					if (breaks(level, pos, state, c)) {
+					if (breaks(level, pos, state, c, Math.sqrt(r * r + v * v))) {
 						remove(level, pos, state, c, job.removed++);
 						removed++;
 					} else if (dy < 0 && !state.isAir() && !(state.getBlock() instanceof LiquidBlock)) {
@@ -249,35 +249,29 @@ public final class Bombardment {
 
 	// ---- what breaks --------------------------------------------------------------------------------------------------
 
-	/** Whether the crater {@code c} takes the block at {@code pos}. */
-	static boolean breaks(Level level, BlockPos pos, BlockState state, Crater c) {
+	/**
+	 * Whether the crater {@code c} takes the block at {@code pos}, {@code out} of the way from its middle to its edge (0 to
+	 * 1): loose ground always, anything else if the blast there (weaker toward the edge, a little random) beats its blast
+	 * resistance, the way TNT's does.
+	 */
+	static boolean breaks(Level level, BlockPos pos, BlockState state, Crater c, double out) {
 		if (state.isAir() || state.getBlock() instanceof LiquidBlock || !allowed(level, pos, state)) {
 			return false;
 		}
 		if (soft(level, pos, state)) {
 			return true;
 		}
-		if (state.getBlock().getExplosionResistance() > c.reach()) {
+		if (c.strip() == Strip.SOFT) {
 			return false;
 		}
-		return switch (c.strip()) {
-			case SOFT -> false;
-			case STRUCTURES -> light(level, pos, state);
-			case MASONRY -> light(level, pos, state) || masonry(state);
-		};
+		double blast = c.reach() * (1.0 - (1.0 - EDGE_STRENGTH) * Math.min(1.0, out)) * (1.0 + JITTER * (level.getRandom().nextFloat() * 2.0F - 1.0F));
+		return state.getBlock().getExplosionResistance() <= blast;
 	}
 
-	/** Whatever no shot may break: the unbreakable, the tough, the natural stone and ore, a block entity, a player's own work. */
+	/** Whatever no shot may break: the unbreakable, the as-tough-as-obsidian, a block entity (a chest keeps its loot). */
 	private static boolean allowed(Level level, BlockPos pos, BlockState state) {
-		if (state.getDestroySpeed(level, pos) < 0.0F || state.getBlock().getExplosionResistance() >= TOUGHEST) {
-			return false;
-		}
-		// (0.7.489) ore by its tags (redstone ore isn't a DropExperienceBlock), and anything else that drops experience
-		if (state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.BASE_STONE_NETHER) || state.is(ConventionalBlockTags.ORES)
-			|| state.is(BlockTags.ORES) || state.getBlock() instanceof DropExperienceBlock || state.getBlock() instanceof EntityBlock) {
-			return false;
-		}
-		return !(level instanceof ServerLevel server && Placed.any(server, pos));
+		return state.getDestroySpeed(level, pos) >= 0.0F && state.getBlock().getExplosionResistance() < TOUGHEST
+			&& !(state.getBlock() instanceof EntityBlock);
 	}
 
 	/** Loose ground and growth: soil, sand, gravel, snow, plants, leaves. */
@@ -285,25 +279,5 @@ public final class Bombardment {
 		return state.is(BlockTags.MINEABLE_WITH_SHOVEL) || state.is(BlockTags.LEAVES) || state.is(BlockTags.REPLACEABLE)
 			|| state.is(BlockTags.CROPS) || state.is(BlockTags.FLOWERS) || state.is(BlockTags.SAPLINGS)
 			|| state.is(BlockTags.MINEABLE_WITH_HOE) && state.getDestroySpeed(level, pos) <= 1.0F;
-	}
-
-	/** Timber, thatch, cloth, glass and the like: whatever's built light. */
-	private static boolean light(Level level, BlockPos pos, BlockState state) {
-		return state.is(BlockTags.MINEABLE_WITH_AXE) || state.is(BlockTags.WOOL) || state.is(BlockTags.WOOL_CARPETS) || state.is(BlockTags.BEDS)
-			|| state.is(BlockTags.BANNERS) || state.is(BlockTags.IMPERMEABLE) || state.getDestroySpeed(level, pos) <= 0.5F;
-	}
-
-	/**
-	 * Worked stone that a heavy shot shatters: anything a pick mines that isn't natural stone (already ruled out), nor
-	 * (0.7.489) metal or gem: blocks of iron, gold, diamond, emerald, copper, redstone and the like, bars and chains.
-	 */
-	private static boolean masonry(BlockState state) {
-		if (!state.is(BlockTags.MINEABLE_WITH_PICKAXE) || state.is(BlockTags.BEACON_BASE_BLOCKS) || state.is(ConventionalBlockTags.STORAGE_BLOCKS)
-			|| state.is(BlockTags.BARS)) {
-			return false;
-		}
-		SoundType sound = state.getSoundType();
-		return sound != SoundType.METAL && sound != SoundType.COPPER && sound != SoundType.CHAIN && sound != SoundType.COPPER_BULB
-			&& sound != SoundType.COPPER_GRATE && sound != SoundType.AMETHYST && sound != SoundType.NETHERITE_BLOCK;
 	}
 }

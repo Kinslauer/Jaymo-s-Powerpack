@@ -8392,7 +8392,9 @@ each reviewed with every finding independently verified; compile-checked only, n
     their stores allow; raiders break into chests and storehouses and carry the loot home; pirates take gold first and a
     beaten ship's cargo.
   - **Cannons** (`sailing/Bombardment`, `ShotKind`): new cannon models with recoil, smoke and flash; round, heavy, shell,
-    chain and grape shot; shot ashore strips soil, sand, wood and weak stone down to the stone, spread over ticks. Pirate
+    chain and grape shot; round, heavy and shell shot (and field guns) explode where they land and break blocks by blast
+    resistance like TNT, stone and players' builds included (chests and other block entities spared, mob guns only with
+    mob griefing on), heavy shot and shells strip loose soil on down to the rock, spread over ticks. Pirate
     ships shell foes of their cove on the shore (orcs throwing rocks included).
   - **Currencies** (`Currencies`): realm coins by culture with our own art (emeralds stay valid), each settlement pricing
     in its trading hub's or overlord's coin, and money-changers.

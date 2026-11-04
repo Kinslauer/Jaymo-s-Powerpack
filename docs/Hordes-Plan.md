@@ -79,7 +79,8 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
    they fight or raid (loot goes home into their stores). Pirates need better cannons: better modelled and destructive to
    all terrain, not just ships. Andy saw pirates shelling orcs throwing rocks from the shore; the blasts should have
    torn the coast down to the stone. (Pirate Cannons! on CurseForge is All Rights Reserved, Forge only: ideas only.)
-   Terrain damage is spread over ticks, as the meteor fix does, to keep it from lagging.
+   Andy (2026-11-04): he meant the shots should explode and damage blocks, not just boats: they break blocks by blast
+   resistance like TNT. Terrain damage is spread over ticks, as the meteor fix does, to keep it from lagging.
 4. **Money:** currencies diversify. A settlement uses the currency of its prominent trading hub, or of another factor
    such as its superior (overlord) realm. Greenskins keep bent ingots.
    Built (settle/currency, 0.7.489): `Currency`/`Currencies`. Emeralds stay the common coin and the treasury's unit of
