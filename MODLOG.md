@@ -5261,3 +5261,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   game can't sync or save. The first such item (a graded WeaponMod copper boomerang) crashed the server when its owner
   moved it in their inventory. `Grades.bake` now caps a scaled speed at `Float.MAX_VALUE`. Kingdoms 0.7.506 builds again:
   a merge left `HandshakePose` with two `NOD` constants, so the handshake's head tilt is now `SHAKE_NOD`.
+- **0.20.7, gem sockets (Patch 5)** (`jewellery/sockets/`, plan `docs/Sockets-Plan.md`): Andy picked the idea of
+  Immersive Apotheosis; this is our own version (none of its code or art).
+  - Forged weapons and armour get gem sockets by grade: Expertly and Perfectly Forged one, Masterwork two, Poorly and
+    Well Forged none. Tinkering tools and jewellery take no gems.
+  - Socketing: piece in the main hand, a cut gem in the off hand, sneak-use a Smithing Anvil (iron or stone). With
+    tongs in the off hand the last gem comes out whole (tongs wear 8); with an empty off hand it is prised out and
+    shatters (use twice to confirm).
+  - Each gem adds its own bonus (the jewellery gem's attribute) times its grade and cut: full on a weapon in the main
+    hand, half on worn armour. The bonuses are item modifiers baked by `Grades.bake` through the new
+    `Grades.ATTRIBUTE_PASSES` (ids `socket_<slot>_<n>`), so a broken piece loses them until repaired. If a piece's grade
+    drops, gems past its count go dormant.
+  - Tooltip: sockets filled, each gem and its cut grade, empty sockets, dormant gems. One data component
+    (`jaymospowers:gem_sockets`), no attachments, no new items or packets. Kingdoms only gets loading hint 86 (0.7.508).
+  - Sockets: a prise warning now belongs to one piece. Using the anvil on a different socketed piece warns again instead of shattering its gem.

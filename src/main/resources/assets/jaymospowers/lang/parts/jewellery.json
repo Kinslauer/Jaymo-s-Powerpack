@@ -45,7 +45,7 @@
   "grade.jaymospowers.cut.master": "Masterwork",
   "tooltip.jaymospowers.jewellery.chipped": "Chipped (%s)",
   "tooltip.jaymospowers.jewellery.gives": "Set in jewellery: %s",
-  "tooltip.jaymospowers.jewellery.gem_hint": "Set it in a frame at a Jeweller's Bench",
+  "tooltip.jaymospowers.jewellery.gem_hint": "Set it in a frame at a Jeweller's Bench, or in a forged weapon or armour's socket at a Smithing Anvil",
   "tooltip.jaymospowers.jewellery.frame_hint": "Set a cut gem in it at a Jeweller's Bench",
   "tooltip.jaymospowers.jewellery.set_with": "Set with: %s (%s)",
   "screen.jaymospowers.jewellery.cuts": "Choose a Cut",

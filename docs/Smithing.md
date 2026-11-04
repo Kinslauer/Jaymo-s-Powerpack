@@ -138,7 +138,16 @@ Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithT
 5. **Orders.** Town armourers, weaponsmiths and toolsmiths sometimes ask for a gem amulet, ring or bracelet of at least a given grade, and pay more than for their usual errands.
 6. The seven found baubles and the lantern pole are unchanged.
 
+## Gem sockets (code: `jewellery/sockets/`, docs/Sockets-Plan.md)
+
+1. **Sockets.** Forged weapons and armour get gem sockets by grade: Expertly and Perfectly Forged have one, a Masterwork has two. Poorly and Well Forged have none. Tinkering tools and jewellery take no gems.
+2. **Socketing.** Hold the piece in your main hand and a cut gem in your off hand, then sneak and use a Smithing Anvil (iron or stone). The gem goes into the next free socket. A hot or broken piece can't take a gem.
+3. **Bonus.** Each gem adds its own bonus: emerald Luck, diamond armour toughness, amethyst health, lapis swimming, quartz less burning, zanite mining speed, glint speed, corrobonite knockback resistance, golden amber breath. A better cut and a finer gem give more. A weapon gives the bonus while it is held in the main hand. Armour gives half as much, while it is worn.
+4. **Taking a gem out.** Sneak-use the anvil with the piece in your main hand and **tongs** in your off hand to pull the last gem out whole (it wears the tongs a little). With an empty off hand you prise it out instead, and **the gem shatters**. You have to use the anvil twice to do it.
+5. A broken piece's gems do nothing until it is repaired. If a piece's grade drops, gems past its new count go dormant until they are taken out.
+
 ## Known limits
 - The hammer game is judged by the smith's own client (the server can't see the bouncing arrow); the server checks reach,
   the blow rate, the hammer and the anvil and tier rules on every blow, but a tampered client could claim perfect blows.
 - A lingering arrow still in flight when its chunk unloads comes back as a plain tipped arrow.
+- Melting or salvaging a socketed piece loses its gems; a vanilla anvil repair keeps only the left item's gems.

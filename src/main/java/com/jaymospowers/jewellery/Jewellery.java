@@ -26,6 +26,7 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.level.block.Block;
@@ -97,6 +98,7 @@ public final class Jewellery {
 		}
 		Baubles.picture(Baubles.Kind.WRIST, PIECES.get(JewelKind.BRACELET));
 		JewelleryNet.register();
+		com.jaymospowers.jewellery.sockets.Sockets.register(); // (0.20.7) gem sockets in forged gear
 
 		CreativeModeTabEvents.modifyOutputEvent(Kiln.tab()).register(output -> {
 			output.accept(JEWELLERS_BENCH);
@@ -115,6 +117,10 @@ public final class Jewellery {
 				Grades.set(frame, Grade.WELL);
 				output.accept(piece(frame, CutGemItem.of(emerald, Cut.TABLE, Grade.WELL, 0)));
 			}
+			// (0.20.7) a Masterwork sword with two empty gem sockets
+			ItemStack sword = new ItemStack(Items.IRON_SWORD);
+			Grades.set(sword, Grade.MASTER);
+			output.accept(sword);
 		});
 	}
 
