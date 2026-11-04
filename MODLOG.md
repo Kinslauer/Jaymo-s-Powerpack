@@ -5244,3 +5244,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   gunners, and Kingdoms' fighters, crewmen and gunners (through `PowersCompat.tellGlint`).
   - Tuning: `GLINT_SIZE`, `HEAVY_GLINT_SIZE`, `CORE_SHARE`, `PING_*`, `DRUM_*`, `GLINT_RANGE` in `AttackTells`; `LIFE`,
     `OVERSHOOT`, `SPIN` in `TellGlintParticle`.
+  - Compile-checked in the cloud (Gradle `compileClientJava`); not played. Preview:
+    `art-overhaul/attack-tells/tell-glint-preview.png` in the project files.
