@@ -57,7 +57,7 @@ public final class SkeletonLordRenderer extends MobRenderer<SkeletonLord, Skelet
 		// our other Blockbench mobs (his face, toes and badge at -z), so he walked about with his face and chest on his back
 		// and his ponytail in front. A half turn about the vertical puts him the right way round; his animations and the head's
 		// look turn with him.
-		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+		poseStack.rotate(Axis.YP.rotationDegrees(180.0F));
 	}
 
 	@Override
