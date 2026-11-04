@@ -10,6 +10,7 @@ What was built in 0.18.93 (an armoured skin and spikes on the base body, +50% he
 move on B) stays as the fallback until each alien's patch lands. Patch 6 removes it.
 
 Each alien entry below gives what its Ultimate does **today** (read from the code), then the new body, kit, health and film.
+Before the band is reforged, an Ultimate only comes on by itself as a last stand, when a boss or great foe is about to kill you (item 5). The change-in film letterboxes and zooms on each changing part, longer the first time, and others nearby see it unless they're fighting (item 2).
 Every entry was checked against the code by a second pass. Drop-back is written as the recommended key (open question 2).
 
 ## Patch 0: the framework
@@ -22,7 +23,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - New hooks on it:
   - `onBigMove(player, live)` for C.
   - `Item[] icons()` for the R G V B C chips, so tracks don't edit `XenoformHud.ICONS`. The client can reach it through `XenoformState.form(player).evolved()`, because `XenoForm` is common code.
-  - `int filmShot()`, default `UltimateFilm.ORBIT`.
+  - `String[] morphParts()`, the parts the change-in film zooms on, in order (see item 2).
   - It keeps `onEnter`, `onExit`, `tick`, `onKey`, `flight`, `allowsFloating`, `skipsMovementCheck`, `allowDamage`, `onDealtDamage` and `onModeTap` (which returns boolean) from `XenoForm`.
 - On `XenoForm`, add `public @Nullable XenoUltimate evolved()`, null by default.
   - `Ooze` is registered twice (`OOZE = new Ooze(false)`, `MAGMA_OOZE = new Ooze(true)`; its field is `magma`). Each instance builds its own `UltimateOoze(boolean magma)` from the one class.
@@ -73,9 +74,12 @@ Every entry was checked against the code by a second pass. Drop-back is written 
     - `ULTIMATE` removed
     - `form.onEnter`, so the base alien's extras come back
   - `revert` with `live.ult != null` calls `ult.onExit` and then continues with today's steps, including `form.onExit`. It does not run the drop-back's `form.onEnter`. `form.onExit` was already called at change-in, so it now runs twice. Each base `onExit` must be safe to run twice, or `revert` skips it when an Ultimate was on.
-- The body swaps at once, under the existing change-in flash, particles and sound in `onUltimate`. Then `UltimateFilm.play(player, ult.filmShot(), ULTIMATE_FILM_TICKS, 0.0)` plays. The signature is `(caster, shot, ticks, witnesses)`, and 0.0 means no witnesses.
-  - The shot is ORBIT by default. `ULTIMATE_FILM_TICKS` (package-private) is raised from 36 to 40 ticks, so the camera circles the new body.
-  - Skipping the film only ends the camera move. Nothing on the server is timed to the film (no `UltimateFilm.later`), so a knockout or a revert during it has no race to handle.
+- **The change-in film** (Andy, 2026-11-04: "the film should letterbox and zoom on the parts of the user that are changing, meaning the first ultimate transformation can be a bit longer and exaggerated, and the cutscene shows for other players unless they are in combat, if not they can just see the transformation in world").
+  - New shot `UltimateFilm.MORPH` (10): letterboxed, it zooms in on each changing part in turn (each Ultimate lists its parts in order, `XenoUltimate.morphParts()`, e.g. Bulwark: arms, shoulders, back plates, head), holds while that part grows from the base body into the Ultimate's, then pulls back to show the whole new body. The `Play` packet gains the part list and the per-part beat.
+  - The body changes part by part on the client in step with the film (`XenoformClient` lerps each part from the base model's size and place to the Ultimate's over its beat, its seams lighting as it lands). Everyone sees this, film or not.
+  - **First time** each player becomes a given Ultimate: the long cut, `ULT_FILM_FIRST` (100 ticks, `MAX_TICKS`), with bigger zooms, a slow-down on each part, the band crackling, a shake and a roar on the last beat. After that: the short cut, `ULT_FILM_TICKS` (40). The seen Ultimates are kept on `BandUpgrades` (a new `seenUltimates` set, saved).
+  - **Other players** within `ULT_FILM_WITNESS` (32 blocks) get the same film with their own camera, unless they are in combat (hurt by or hitting a mob in the last `ULT_FILM_COMBAT` 100 ticks, as `ZFighterBattle`'s `IN_FIGHT_TICKS` reads it). Those in combat get no film and no bars and just see the change happen in the world. A new `UltimateFilm.shared(...)` sends the caster's film to each witness (today's `witnessed` only sends bars).
+  - Skipping works as today (skip key, an attack, a hit) for the caster and each witness alone. Nothing on the server is timed to the film, so a knockout or a revert during it has no race to handle. The base alien's stats switch to the Ultimate's at the start; only the look grows in.
 - Client: keep `ULTIMATE` as a synced Boolean (`AttachmentSyncPredicate.all()`, not persistent). `XenoformClient` already copies it into the `XenoformClient.ULTIMATE` render-state key. The Ultimate model is found from the base id in `FORM`.
   - Add one resolver, `XenoformClient.model(String form, boolean ultimate)`. It tries `XenoFormModels.ultimate(id)` and falls back to `of(id)`.
   - Use it in the three places that resolve the model a player is wearing:
@@ -162,12 +166,17 @@ Every entry was checked against the code by a second pass. Drop-back is written 
   - `Fate.canAscend` passes, which means full mastery (`Mastery.unlocked >= Mastery.ALL`).
 
   It does not check `BandUpgrades.get(player).reforged()`, so an ascended player can still have an unforged band. `charged()` is also true in creative.
-- Rule (proposed): the Ultimate lasts for the rest of the current change. When `ticksLeft` reaches 0, `revert` sends you back to human, as it does today.
-  - Reforged (`charged()`): each tick as the Ultimate also takes `ULT_DRAIN` off `ticksLeft`. `ULT_DRAIN = 1` doubles the burn.
-    - Do it directly in `tick` with the same `charged()`/creative guard, not through `drain()`. `drain` → `spend` sets `hudDirty` on every call, which would re-sync the HUD every tick.
-    - Hits (`HURT_DRAIN`) and moves (`MOVE_DRAIN`) drain as usual.
-  - Unforged: `drain` does nothing, so the Ultimate runs out the random `timer()` and nothing shortens it.
-  - Both cases: change-in needs `ticksLeft >= ULT_MIN_LEFT` (400 ticks), or C shows the `ultimate_not_now` hint. A move with its own charge price uses `spend()`, which costs charge whether the band is forged or not (never in creative, and never below 1 tick).
+- **Unforged band: the last stand** (Andy, 2026-11-04: "they are activated if you are in a situation where you are about to die, usually to a boss or great foe"). Before the reforge, C does not change you. Instead the Ultimate comes on by itself:
+  - When a hit would take an ascended alien below `ULT_LAST_STAND` (25%) health, or kill it, while it is fighting a great foe: a vanilla boss (Ender Dragon, Wither, Elder Guardian, Warden) or anything showing a boss bar (Kingdoms' giants, monster kings, knowledge bosses; the same test as Kingdoms' `WorldTiers`, read through a `KingdomsCompat` check, with the vanilla list as the fallback).
+  - The hit is cancelled, the film plays, and you are the Ultimate with its full health. Once per change.
+  - It then lasts for the rest of the random timer. When the timer ends, you go back to human as today.
+  - C as the Ultimate is its big move as usual; hold C drops back (and the last stand is spent for that change).
+- **Reforged band:** C changes you in at will. It lasts until the charge runs out: each tick as the Ultimate also takes `ULT_DRAIN` off `ticksLeft` (`ULT_DRAIN = 1` doubles the burn).
+  - Do it directly in `tick` with the same `charged()`/creative guard, not through `drain()`. `drain` → `spend` sets `hudDirty` on every call, which would re-sync the HUD every tick.
+  - Hits (`HURT_DRAIN`) and moves (`MOVE_DRAIN`) drain as usual.
+  - The last stand still works on a reforged band too, so a player caught by a boss with C on cooldown is saved once.
+  - Change-in by C needs `ticksLeft >= ULT_MIN_LEFT` (400 ticks), or C shows the `ultimate_not_now` hint. A move with its own charge price uses `spend()`, which costs charge whether the band is forged or not (never in creative, and never below 1 tick).
+- When the time runs out as the Ultimate, `revert` sends you straight back to human.
 
 **6. Everything else every batch needs**
 - Nadir: the `ultimateIsMove` path is untouched. It plays `NadirFilm`, fires on press, and keeps `live.ultimateNext`/`ultimateReady`/`ultimateCooldown`.
@@ -178,7 +187,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - Kingdoms: no change. The tags are still `jaymospowers_xenoform` and `jaymospowers_xenoform:<id>` (`XenoformState.TAG`).
 - Insignia and first-person hand: covered by the model rules in item 2.
 - Tuning: all new numbers are `static final` constants at the top of each class:
-  - In `XenoformPower`: `ULT_DROP_HOLD`, `ULT_BREAK_STUN`, `ULT_REENTER`, `ULT_DRAIN`, `ULT_MIN_LEFT`, and `ULTIMATE_FILM_TICKS` (which already exists).
+  - In `XenoformPower`: `ULT_DROP_HOLD`, `ULT_BREAK_STUN`, `ULT_REENTER`, `ULT_DRAIN`, `ULT_MIN_LEFT`, `ULT_LAST_STAND`, `ULT_FILM_TICKS` (today's `ULTIMATE_FILM_TICKS`), `ULT_FILM_FIRST`, `ULT_FILM_WITNESS` and `ULT_FILM_COMBAT`.
   - In each `XenoUltimate`: that Ultimate's own numbers.
 - Debug: add `/powerdebug xenoform ultimate <on|off|break>` next to the existing `band`/`bands`/`hunter`/`star`/`unlock`/`form` literals in `XenoformDebugCommand`.
 - Docs: rewrite the Stage 3 section of `docs/xenoform.md` ("## Stage 3: ascension, the Ultimates, the twists, the kingdoms"). Bump the version (currently 0.19.85 in `gradle.properties`).
@@ -195,7 +204,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Meteor Slam, a stronger Leap Slam. The leap goes higher. The landing hits everything within 6 for 12, shakes the screen at Titan strength (`TITAN_SHAKE`) and shoves everything outward.
 - **C:** Earthsplitter. All four fists hammer the ground. A fissure runs 12 blocks along your look and tears up soft blocks as `Debris`. Everything on the line takes 14 and is flung up. Every 30 s. Holding C for 1 s drops you back to Bulwark.
 - **Health:** +15 hearts (30).
-- **Film:** CRANE, rising and circling wide as the plates slam onto the arms one pair at a time and all four fists strike the ground.
+- **Film:** MORPH on right_lower_arm, left_lower_arm, pauldron, spine, then head, then the whole body. First time: each gauntlet arm slams down in slow motion, the band crackling as stone plates lock on and the ground shakes.
 
 ### Pyre -> Sunheart
 - **Today:** Sunheart makes the Flame Jet streak faster (`FLY_SUN`: top cruise `CRUISE_TOP_SUN` 2.0 instead of 1.4) with a longer, wider comet (`PyreComet`). R becomes a held beam of fire, 12 blocks long (`BEAM_RANGE`). Every 4 ticks it deals 2 to the creature it hits and sets it alight for 3 s, or, if it hits no creature, it lights the block it ends on. It has no move of its own (`ultimateHasMove` is false), so B stays Magma Trail.
@@ -206,7 +215,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Lava Wake, a stronger Magma Trail. For 8 s (today 6 s), every step leaves fire and temporary magma blocks, which turn back into the old block after 5 s. Anything standing in the wake burns.
 - **C:** Corona. You flare like a small sun. Everything within 10 takes 10 fire damage and burns for 8 s. Players get 2 s of Blindness. Snow and ice within 6 melt, and a flat ring of 12 `SmallFireball`s flies outward. Every 30 s. Holding C for 1 s drops you back to Pyre.
 - **Health:** +10 hearts (20).
-- **Film:** SKYWARD, with flame spiralling up the body as the crust forms and cracks open white-hot.
+- **Film:** MORPH on right_arm, left_arm, core, hair, crown, then the whole body. First time: the basalt crust creeps over each limb in slow motion and splits white-hot, then the flame crown flares skyward with a roar.
 
 ### Velox -> Standstill
 - **Today:** Pressing C to ascend casts Standstill straight away, and while ascended B casts it again once the 30 s cooldown is over (`STANDSTILL_COOLDOWN`). For 6 s, everything living within 24 gets Slowness VII and its motion cut to 10% each tick. Projectiles within 24 hang at 5% speed and fly on at full speed, with their gravity back, when it ends or when they leave the range (`XenoformPower.Held`). You get Speed II, and any Speed you already had comes back afterwards.
@@ -217,7 +226,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Flicker Storm, a stronger Chain Strike. It flickers between up to 8 foes within 14 blocks for 7 each (today 5 within 8 for 5), then returns you to where you started.
 - **C:** Standstill, today's move. It now lasts 8 s, and the Speed it gives you is Speed III. Light blue after-images trail your path (`ChronoSpeed` streak) while it runs. Every 30 s. Holding C for 1 s drops you back to Velox.
 - **Health:** +8 hearts (16).
-- **Film:** PROFILE, side-on as it sprints. The world drains to grey and slows, and the plates snap on stride by stride.
+- **Film:** MORPH on sickle, tail4, crest, visor, then the whole body. First time: the world slows to grey as each plate snaps on, and the crest fans into blade quills with a shriek.
 
 ### Prism -> Geode
 - **Today:** Pressing C to ascend casts Geode straight away, and while ascended B casts it again once the 20 s cooldown is over (`GEODE_COOLDOWN`). Everything within 6 (`GEODE_RADIUS`) gets Slowness, Weakness and Mining Fatigue for 4 s and has amethyst blocks grown round its feet and head. It is held still and loses its target. Projectiles within 6 shatter. You get Resistance III. The amethyst is removed when it ends.
@@ -228,7 +237,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Spike Forest, a stronger Spike Field. It reaches 7 blocks (today 4.5) and deals 7, with the same slow. Temporary amethyst clusters stay up for 3 s and are removed the way Geode's crystals are. Anything stepping in them takes 2.
 - **C:** Geode, today's move, now reaching 8 blocks and lasting 5 s. Every 20 s. Holding C for 1 s drops you back to Prism.
 - **Health:** +12 hearts (24).
-- **Film:** ORBIT around the cluster as amethyst grows over it, cracks, and bursts outward into the new spires.
+- **Film:** MORPH on leg, core, crystal, then the whole body. First time: amethyst crawls up each leg in slow motion and the core cracks, then the spires burst up chiming as the ground shakes.
 
 ### Wisp -> Revenant
 - **Today:** Pressing C to ascend slips you into the mob you look at (8 blocks, not a player or a minion) straight away. While ascended, B does it again once the 15 s cooldown is over (`POSSESS_COOLDOWN`), or lets go while you wear one. You wear the mob for up to 10 s with its AI off. It walks where you look and jumps at walls, you are invisible, and mobs stop targeting you. When you let go it wakes with Weakness II, Glowing and Slowness III.
@@ -239,7 +248,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Drift, a stronger Glide (hold). It becomes slow true flight: you float forward along your look, Jump rises gently, and you pass through creatures.
 - **C:** Revenant, today's move. You wear the host for 15 s, and the host's own attack strikes what you aim at (`doHurtTarget`). C again while worn lets go. Every 15 s. Holding C for 1 s drops you back to Wisp.
 - **Health:** +6 hearts (12).
-- **Film:** ORBIT round the hood as the ghost unravels to mist and reforms larger, with the mask settling over the face.
+- **Film:** MORPH on tatters, body, hood, head, then the whole body. First time: the ghost frays to mist in slow motion and reforms larger, and the bone mask slams onto the face with an icy wail.
 
 ### Gremlin -> Swarm
 - **Today:** Pressing C to ascend splits off three glowing silverfish clones that follow you and never attack players or minions. When you Bite (V), any clone within 4 blocks of the target bites it too. While ascended, B swaps you with the farthest clone (the nearest while sneaking), at most once a second (`SWAP_COOLDOWN`). The clones are dismissed when it ends.
@@ -250,7 +259,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Scuttle, a stronger Climb (hold). You climb at 0.3 (today 0.18) and keep going along ceilings, reusing the ceiling crawl (`SkitterCeiling`, synced `XenoformState.CLIMB`).
 - **C:** Swarm, today's move. The first C splits off 5 glowing gremlin clones (silverfish, as today). Each C after that swaps you with the farthest clone (the nearest while sneaking), at most once a second. Holding C for 1 s drops you back to Gremlin.
 - **Health:** +5 hearts (10).
-- **Film:** CUTS, with quick cuts of a heap of gremlins tumbling over each other and the plated one climbing out on top.
+- **Film:** MORPH on fist, tail, right_ear, head, then the whole body. First time: the knuckle plates clack on one by one, the barbed tail curls up overhead, and the horned brow bursts out with a shrill screech.
 
 ### Knell -> The Tolling
 - **Today:** Pressing C to ascend starts the Tolling straight away, but only on the ground. While ascended, B starts it again once the last round is over and the 30 s cooldown has passed (`TOLL_COOLDOWN`, counted from the last toll). You are planted for 5 tolls, 2 s apart, with Resistance II. Each toll deals 6 sonic damage to everything within 8, and whatever it hurts is shoved away, with 3 s of darkness for players.
@@ -261,7 +270,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Undertow, a stronger Burrow. You surface up to 24 blocks away (today 16). Coming up throws everything within 4 into the air and deals 8.
 - **C:** The Tolling, today's move, now 7 tolls 2 s apart, hitting everything within 10 for 7 each, with the same shove and darkness and with Resistance II. Again 30 s after the last toll. Holding C for 1 s drops you back to Knell.
 - **Health:** +18 hearts (36).
-- **Film:** CRANE, rising and circling wide as Knell sinks into the ground, teal light cracks through the earth, and it heaves up plated as the first toll rings.
+- **Film:** MORPH on forearm, hump, right_rib, right_horn, then the whole body. First time: the sculk spikes erupt down the spine in slow motion, the ribs swing open on a heartbeat, and the horns curl out as the first toll shakes the screen.
 
 ## Patch 2: Wyrm, Duplex, Rivet, Gorger, Slipfin, Polestar, Lurk
 
@@ -274,7 +283,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Void Rift, a stronger take on Rift. It teleports up to 24 blocks where you look (today 12). A small dragon's-breath cloud (radius 2, 3 s) is left where you stood and another where you land. Creatures within 2 of the landing take 4.
 - **C:** Endfire Volley (new, since today has no move). Five vanilla `DragonFireball`s fly out in a fan where you look. Each bursts into its own dragon's-breath cloud. Cooldown 20 s.
 - **Health:** +24 (12 hearts).
-- **Film:** Wyrm rears onto its hind legs and wraps its wings round itself. Purple seams crack across the scales, then it throws the wings open at twice the size and roars (`ENDER_DRAGON_GROWL`, portal particles).
+- **Film:** MORPH on tail3 and spade, torso, neck1 and neck2, then right_horn and left_horn, then the whole body. First time: the spade splits into its barbed blade with a crack and the horns sweep back into the crown on a slowed beat, then it roars (`ENDER_DRAGON_GROWL`) as the void purple wing veins flare.
 
 ### Duplex -> Copper Storm
 - **Today:** Spawns doubles until 3 are loyal (no more than 6 in all), then calls visual-only lightning on each. Everything within 3 of a double takes 6 lightning damage, never you or yours. The doubles are charged (Speed II, Strength, Glowing) for 20 s. While it lasts Split's cap is 6 doubles, and the extras pop when it ends. The storm sits on B (`onUltimateAgain`) every 20 s (`STORM_COOLDOWN` 400). On top come the general +50% health and fists, 15% bigger, and every base cooldown halved.
@@ -285,7 +294,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Overcharge Merge, a stronger take on Merge. Doubles within 24 run back into you and heal 4 each (today 3). Each merged double also gives you 3 s of Speed II and Strength. If 3 or more merge, a shock ring deals 3 to everything within 4.
 - **C:** Copper Storm, today's move moved off B. Visual-only lightning strikes every double. Everything within 3 of a double takes 6, and the doubles are charged for 20 s. Cooldown 20 s (`STORM_COOLDOWN`).
 - **Health:** +12 (6 hearts).
-- **Film:** A visual-only bolt strikes Duplex's rod. In the flash patina creeps over the bright copper and sets into plates, then the doubles step out of the glare one at a time.
+- **Film:** MORPH on belt, right_arm and left_arm, head, then rod and knob, then the whole body. First time: a visual-only bolt hits the knob and the coil winds down the rod in a flash of blue-white sparks.
 
 ### Rivet -> Ironpour
 - **Today:** Only the general buff: +50% health and fists, 15% bigger, and every cooldown halved (the shells' moves too), with a spark burst and an anvil clang (`ANVIL_LAND`). There is no move of its own.
@@ -296,7 +305,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Overdrive Ride, a stronger take on Ride. The reach is 6 (today 4). The minecart, iron or clockwork golem, or android mech you drive also gets Resistance II and bolted plates. Running into a creature rams it for 6. B again climbs out.
 - **C:** Foundry Slam (new). Rivet surges up into a tall metal pillar and slams both whip-arms down. Everything within 5 takes 10 and is thrown up, with a ring of `LAVA` and `ELECTRIC_SPARK` particles. Cooldown 20 s.
 - **Health:** +14 (7 hearts).
-- **Film:** The puddle boils up into a column of liquid metal. Plates slam onto it with anvil clangs (`ANVIL_LAND`), and it stands up with its seams glowing.
+- **Film:** MORPH on pool, mound, right_arm and left_arm, then head, then the whole body. First time: the pool boils up into a tall column, each plate slams on with an anvil clang (`ANVIL_LAND`), and the joints flash white-hot as the head rises.
 
 ### Gorger -> Worldmaw
 - **Today:** The general buff (+50% health and fists, 15% bigger, cooldowns halved), an explosion-particle ring and a deep roll sound. The gut starts full (`gorge = GORGE_MAX`, 12). There is no move of its own.
@@ -307,7 +316,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Spiked Roll, a stronger take on Roll Up. Hold to curl into the spiked ball, which rolls at walking speed (Slowness I instead of IV). Shots still glance off. Anything you roll into takes 4 and bounces off.
 - **C:** Worldmaw (new). Gorger unhinges its jaw and inhales for 2 s. Blocks in a cone 5 wide and 6 deep are gulped by Gulp's rules. Creatures in the cone are dragged in and bitten for 4 every half second. Then the whole gut comes out as one Gut Blast at double damage. Cooldown 30 s.
 - **Health:** +24 (12 hearts).
-- **Film:** Gorger curls into its ball, and the ball cracks with orange light. It unrolls half again bigger, with spiked bands and a forked horn, and stamps (`MACE_SMASH_GROUND_HEAVY`).
+- **Film:** MORPH on shell, tail and tail2, snout, then horn, then the whole body. First time: the shell bands crack with ember light and grow spikes one band at a time, then the horn splits in two and it stamps (`MACE_SMASH_GROUND_HEAVY`).
 
 ### Slipfin -> Brinecrown
 - **Today:** The general buff (+50% health and fists, 15% bigger, cooldowns halved), a splash burst and the axolotl bucket sound (`BUCKET_EMPTY_AXOLOTL`). You are soaked through (`live.dry = 0`). There is no move of its own.
@@ -318,7 +327,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Bloom Regrow, a stronger take on Regrow. Every lost limb grows back and every break knits. You get Regeneration III for 6 s (today II for 5 s), and allies within 6 get Regeneration I for 6 s. Cooldown 30 s (today 45 s).
 - **C:** Brinecrown (new). A local downpour of `SPLASH` and `FALLING_WATER` particles falls within 10 blocks for 12 s. You stay wet even on land, fire inside it goes out, and enemies inside get Slowness II. Every 2 s a wave pushes them 1.0 away from you. Cooldown 30 s.
 - **Health:** +12 (6 hearts).
-- **Film:** A ball of water rises round Slipfin and its gills flare and glow. It drops out bigger with the fin sail raised and water spraying off (`BUCKET_EMPTY_AXOLOTL`).
+- **Film:** MORPH on tail_0 to tail_3, rear, jaw, then the gill_ stalks, then the whole body. First time: the fin sail rises along the spine in a spray of water, then the gills unfurl into glowing coral crowns (`BUCKET_EMPTY_AXOLOTL`).
 
 ### Polestar -> Lodestar
 - **Today:** The general buff (+50% health and fists, 15% bigger, cooldowns halved), with a spark ring and the lodestone lock sound. There is no move of its own.
@@ -329,7 +338,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Bastion Field, a stronger take on Field. Hold for radius 9 (today 6). Arrows fly back at their shooter at 1.5x speed (today 1.1x), and iron-wearers that step inside are pushed out.
 - **C:** Lodestar (new). You become a magnetic pole for 6 s. Every iron-wearer and iron golem within 16 is dragged in and held still against you, and loose iron items fly in. At the end, or on C again, all of them are thrown out at 2.0, taking 2 a piece of iron. Cooldown 30 s.
 - **Health:** +24 (12 hearts).
-- **Film:** Polestar plants its feet and spreads its arms. Iron dust swirls in and locks on as plates, and the prongs arc from red to blue (`LODESTONE_COMPASS_LOCK`).
+- **Film:** MORPH on body, plates, then right_prong and left_prong, then the whole body. First time: iron dust swirls in and locks on as lodestone plates, then the prongs curl long and an arc jumps red to blue between the tips (`LODESTONE_COMPASS_LOCK`).
 
 ### Lurk -> Nightfall
 - **Today:** The general buff (+50% health and fists, 15% bigger, cooldowns halved), with a squid-ink burst and the elder guardian curse sound. There is no move of its own.
@@ -340,7 +349,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Deep Fade, a stronger take on Fade. You are unseen (invisible, and hunters forget you) with Speed I. The first strike from Fade does not break it. The second strike or B again does.
 - **C:** Nightfall (new). For 8 s everything else within 16 gets Darkness and Blindness, and every creature inside glows on your screen alone (client-side outline). A ring of `SQUID_INK` marks the edge. Cooldown 40 s.
 - **Health:** +12 (6 hearts).
-- **Film:** Lurk folds onto all fours and goes still while the light drains to black round it (ink burst, `ELDER_GUARDIAN_CURSE`). Its eyes open one pair at a time as it unfolds taller.
+- **Film:** MORPH on forearm and hand, torso, neck, then head with right_eye and left_eye, then the whole body. First time: the light drains to black (`ELDER_GUARDIAN_CURSE`), the spine spikes rise, and the eye domes open one pair at a time, the new pair last.
 
 ## Patch 3: Gyre, Cortex, Locust, Croaker, Rime, Marrow, Swathe
 
@@ -353,7 +362,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Storm Shell, a stronger take on Shell (hold). You pull in as before. Shots are turned round and sent back at the shooter instead of glancing off. You crawl at walking pace instead of Slowness IV, and creatures that touch the shell are shoved away.
 - **C:** Tempest. Gyre spins in place as the eye of a storm for 6 s. Everything within 10 blocks is pulled round and lifted, and every fire in that area goes out. When it ends, everything caught is flung outward for 10 damage. The visuals borrow the column from Wind's `WindCyclone`.
 - **Health:** Its own pool of 14 health (7 hearts), on top of Gyre's 28. Damage takes it first.
-- **Film:** ORBIT low round the turtle as it tucks in and spins up, then the rim spikes and vents flare out as it lands.
+- **Film:** MORPH on the flippers, the plastron, the shell, the shell_top dome and its rim spikes, then the whole body. First time: the shell slows to a crawl as each scute plate snaps on, then the rim spikes flare out all at once with a gust that shakes the shot.
 
 ### Cortex -> Mindcrown
 - **Today:** C turns on the generic Ultimate buff: half again Cortex's health on top, fists +50%, 15% bigger, and the armoured skin with no spikes. All four base moves' cooldowns are halved. It comes on with a spark burst and thunder. Cortex has no Ultimate move: `onUltimate` only plays the effect.
@@ -364,7 +373,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Spine Storm, a stronger take on Spine Snap. Instead of one creature within 3.5 taking 7, the spikes shoot out on every side and hit everything within 4 for 8. Each one hit gets Slowness III for 3 s, as Spine Snap does.
 - **C:** Mind Riot. For 6 s, every creature within 16 blocks that Cortex can see gets Glowing. Hostile mobs within 12 lose you as a target and are set on the nearest other hostile mob (`Mob.setTarget`). Once a second, an arc from the skull hits one glowing creature for 6.
 - **Health:** Its own pool of 12 health (6 hearts), on top of Cortex's 24. Damage takes it first.
-- **Film:** PUSH_IN on the eye as it opens wide, the dome cracks and the brain flares with sparks.
+- **Film:** MORPH on the tail, the spikes, the dome, the brain, the eye, then the whole body. First time: the dome cracks open in slow motion and the brain flares with sparks before the second lens ring rolls shut over the eye.
 
 ### Locust -> Swarmking
 - **Today:** C turns on the generic Ultimate buff: half again Locust's health on top, fists +50%, 15% bigger, and the armoured skin with no spikes. All four base moves' cooldowns are halved. It comes on with a cloud burst and a goat scream. Locust has no Ultimate move: `onUltimate` only plays the effect.
@@ -375,7 +384,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Swarm Hops, a stronger take on Hops: five hops instead of three. Each landing makes a 2-block shock ring for 3 damage.
 - **C:** Plague Dive. You spring 20 blocks up in a cloud of buzzing particles, hang and steer for up to 3 s, then dive where you look. The impact ring is 8 blocks wide, deals 14 and launches creatures. Locust takes no fall damage already, so the dive needs no extra guard.
 - **Health:** Its own pool of 11 health (5.5 hearts), on top of Locust's 22. Damage takes it first.
-- **Film:** DUTCH low on the locust as its wings split, the second pair unfolds with a buzz and the crest rises.
+- **Film:** MORPH on the hind legs, the abdomen, the thorax wings, the head, then the whole body. First time: the wings split open in slow motion to show the second pair, and the crest rises with a screaming buzz.
 
 ### Croaker -> Marshmaw
 - **Today:** C turns on the generic Ultimate buff: half again Croaker's health on top, fists +50%, 15% bigger, and the armoured skin with no spikes. All four base moves' cooldowns are halved. It comes on with a splash burst and a deep croak. Croaker has no Ultimate move: `onUltimate` only plays the effect.
@@ -386,7 +395,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Thunder Croak, a stronger take on Croak. Radius 10 instead of 6, and 4 damage instead of 2. The stun is the same: Slowness IV, Nausea for players, and monsters lose their target.
 - **C:** Bog Boom. The throat sac balloons and bursts in one croak. Everything within 10 is launched up for 8 damage, then mired for 6 s (Slowness III, Mining Fatigue, Weakness), with splash and mud particles.
 - **Health:** Its own pool of 13 health (6.5 hearts), on top of Croaker's 26. Damage takes it first.
-- **Film:** ORBIT low as the throat sac puffs huge and the back plates rise, then a croak shakes the shot.
+- **Film:** MORPH on the thighs, the torso back plates, the sac, the head, then the whole body. First time: the throat sac swells far past full size and glows before the horn crown punches up with a croak that shakes the shot.
 
 ### Rime -> Hoarfrost
 - **Today:** C turns on the generic Ultimate buff: half again Rime's health on top, fists +50%, 15% bigger, and the armoured skin with no spikes. It comes on with a snowflake burst. R G V cooldowns are halved. Its Ultimate move takes B: the Blizzard. `onUltimateAgain` calls `CryoLent.blizzard` with cooldown `CryoBlizzard.DURATION_TICKS + 600` (1000 ticks), so Ice Wall can't be used.
@@ -397,7 +406,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Glacier Ring, a stronger take on Ice Wall. Instead of one 5-wide wall where you aim, it raises four walls round you as a closed ring that melts as Ice Wall does.
 - **C:** Blizzard. Today's Ultimate move, moved from B to C, unchanged: `CryoLent.blizzard`, a 20 s whiteout, radius 16, the same 1000-tick cooldown.
 - **Health:** Its own pool of 15 health (7.5 hearts), on top of Rime's 30. Damage takes it first.
-- **Film:** CRANE rising and circling as ice plates crack out over its shoulders, the crown spikes up and snow starts to fall.
+- **Film:** MORPH on the fists, the trunk, the spine, the crown, then the whole body. First time: each fist freezes over into a glacier block in slow motion, and the crown spikes up into its crest as snow bursts out.
 
 ### Marrow -> Ossuary
 - **Today:** C turns on the generic Ultimate buff: half again Marrow's health on top, fists +50%, 15% bigger, and the armoured skin with its `UltimateSpikes` style. All four base moves' cooldowns are halved. It comes on with a bone burst. It also grows back the rise (`live.risen = false`): one more killing blow drops it into a heap, and it stands up at half health. It has no Ultimate move.
@@ -408,7 +417,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Scatter, a stronger take on Fall Apart. You drop into a heap as before, then put yourself back together up to 8 blocks away, where you look. Whatever was hunting you loses interest.
 - **C:** Bone Cage. Bone spears burst up round the creature you look at (up to 16 blocks) and cage it for 4 s. It is held still and takes 3 a second, and every creature within 3 of it is tossed out. The Ultimate keeps its own rise, once per Ultimate, as `live.risen` does today.
 - **Health:** Its own pool of 12 health (6 hearts), on top of Marrow's 24. Damage takes it first. It also has the Ultimate's own rise.
-- **Film:** DUTCH low as bones clatter together over the ribcage, the rib arms unfold and the extra horns grow.
+- **Film:** MORPH on the spine, the ribs, the new rib arms, the horns, then the whole body. First time: the bones clatter shut over the ribcage one by one, then the rib arms unfold and the extra horns curl out with a roar.
 
 ### Swathe -> Unbound
 - **Today:** C turns on the generic Ultimate buff: half again Swathe's health on top, fists +50%, 15% bigger, and the armoured skin with its `UltimateSpikes` style. All four base moves' cooldowns are halved. It comes on with a sand burst. It has no Ultimate move. As always, it never drowns or starves.
@@ -419,7 +428,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Rewrap, a stronger take on Wrap. Bleeding stops, as before, and you heal faster: Regeneration III instead of II. You also get +4 armour for 10 s, and spared allies within 4 have their bleeding stopped.
 - **C:** Unravelling. The wrappings shoot out as lashes to every creature within 12 and bind them (`Tripped.bind`, or held fast). Then they are dragged into a ring round you, and a burst of sand hits them for 8.
 - **Health:** Its own pool of 13 health (6.5 hearts), on top of Swathe's 26. Damage takes it first.
-- **Film:** ORBIT as the wrappings unwind and lash out round it, then snap back tight under the bronze bands as the eyes ignite.
+- **Film:** MORPH on the arm loose ends, the trail, the body bands, the head, then the whole body. First time: the wrappings unwind and lash out wide in slow motion, then snap back tight under the bronze bands as the eyes ignite.
 
 ## Patch 4: Blight, Howl, Prowl, Tusk, Talon, Murk, Gnasher
 
@@ -432,7 +441,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Dark Tide, a stronger Dark Pulse: two rings of decay 10 ticks apart, radius 10 instead of 6. Each ring throws back and gives Wither II (today Wither I). It uses `Shakes.heavy`. The dark shield (shots can't touch it) rises for 5 s whatever your health.
 - **C:** Ashfall (new, since today has no move): it rises 3 blocks and hangs there for 4 s. Every half second it drops a wither skull on a random creature within 16, sparing you and your pets. It ends with one blue skull where you look. A soul-fire ring (`ring`, `SOUL_FIRE_FLAME`) burns below it.
 - **Health:** +15 hearts (30) on top of its 60.
-- **Film:** The camera looks up from below as the skulls light blue one at a time. Plates crack shut over the ribs, and the fourth tail joint snaps out in a burst of soul flame.
+- **Film:** MORPH on tail2, rib, bar, mid_skull, then the whole body. First time: the camera crawls up from the barbed fourth tail joint, plates crack shut over each rib one by one, and the horn crown bursts from the middle skull in a gout of soul flame.
 
 ### Howl -> Alpha
 - **Today:** C turns on the shared buff: +50% health and fists, 15% bigger, an armoured skin with glowing seams, and base cooldowns halved. It comes with the band's flash and a short orbit film, plus Howl's own cloud burst and a low howl. It has no Ultimate move of its own. The Strength and Speed at night are a base Howl trait.
@@ -443,7 +452,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Crushing Jaw, a stronger Lockjaw: the bite does 6 instead of 4 and holds for 6 s instead of 4, gnawing for 3 every second instead of 2. B again throws the held creature forward (1.5) instead of just letting go.
 - **C:** Dread Howl: a howl you hear far off. Every mob within 16 gets Weakness II and Slowness II for 8 s. You and your pack get Strength II and Speed II for 10 s, night or day. It throws out a cloud ring and uses `Shakes.heavy`.
 - **Health:** +9 hearts (18) on top of its 26.
-- **Film:** The wolf throws its head back and howls. The ruff bristles into plates and it grows a size mid-howl as the amber eyes flare.
+- **Film:** MORPH on torso, chest, ruff, head, then the whole body. First time: the wolf throws its head back in a long howl as the ruff bristles into bone plates, the fangs stretch out and the gold eyes flare.
 
 ### Prowl -> Apex
 - **Today:** C turns on the shared buff: +50% health and fists, 15% bigger, an armoured skin with glowing seams, and base cooldowns halved. It comes with the band's flash and a short orbit film, plus Prowl's own crit burst and a high roar. It has no Ultimate move of its own. Moving silently, being hard to see while sneaking, and safe falls under 12 blocks are base Prowl traits.
@@ -454,7 +463,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Thunder Roar, a stronger Roar: radius 16 instead of 12. Mobs break off, run, and get Weakness I for 6 s. Players caught in it get Darkness for 3 s.
 - **C:** Sabre Rush: it blurs between up to 5 creatures within 12, teleporting to a clear spot behind each in turn. Each takes 8 and a bleeding cut, with a `SWEEP_ATTACK` puff at each one. It ends crouched behind the last.
 - **Health:** +8 hearts (16) on top of its 24.
-- **Film:** The cat sinks into its stalk and the sabre fangs slide out. The stripes harden into plates, and its head lifts as the seams light orange.
+- **Film:** MORPH on tail1, haunch, chest, cat_head, then the whole body. First time: the cat sinks low as the stripes harden into bands, then its jaw stretches long and the sabre fangs slide out slowly in a close-up.
 
 ### Tusk -> Warhog
 - **Today:** C turns on the shared buff: +50% health and fists, 15% bigger, an armoured skin with glowing seams, and base cooldowns halved. It comes with the band's flash and a short orbit film, plus Tusk's own smoke burst and an angry hoglin grunt. It has no Ultimate move of its own.
@@ -465,7 +474,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Iron Hide, a stronger Thick Hide: 15 s instead of 10, with no knockback and Resistance II instead of I. Melee attackers take 2 back.
 - **C:** Quake Slam: it rears and slams down its front legs. Every creature within 8 takes 10, is tossed up 1.0 and gets Slowness III for 4 s. A ring of ground particles spreads out and `Shakes.heavy` shakes the screen.
 - **Health:** +12 hearts (24) on top of its 34.
-- **Film:** The boar paws the ground twice and snorts steam. The mane rises into spikes, the brow plate slams down like a visor, and embers glow along the seams.
+- **Film:** MORPH on body, mane, head, snout, then the whole body. First time: the boar paws the ground and snorts steam as the mane rises into spikes, the brow plate slams down like a visor and the tusks fork into four with a crack.
 
 ### Talon -> Sky Tyrant
 - **Today:** C turns on the shared buff: +50% health and fists, 15% bigger, an armoured skin with glowing seams, and base cooldowns halved. It comes with the band's flash and a short orbit film, plus Talon's own cloud burst and a phantom swoop sound. It has no Ultimate move of its own. Flight and safe falls are base Talon traits.
@@ -476,7 +485,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Quill Storm, a stronger Feather Darts: two fans of 9 hard quills (`Arrow`, pickup disallowed, as today) at speed 3.0 for 4 each. Today it fires one fan of 5 at 2.2 for 2.5.
 - **C:** Gale Beat: it hovers and gives one huge wingbeat. Everything in a 10-block cone ahead takes 6 and is blown back 2.0 and up. Arrows and other projectiles in the cone are turned back.
 - **Health:** +6 hearts (12) on top of its 20.
-- **Film:** The hawk rears up on its perch and spreads its wings full. Quill blades slide out of every feather and the crest flares. One beat throws a ring of dust and cloud off the ground round it.
+- **Film:** MORPH on tail, feather, foot, skull, beak, then the whole body. First time: the hawk spreads its wings full as quill blades slide out of every feather one after another, and the head crest flares as the beak plate snaps shut.
 
 ### Murk -> Kraken
 - **Today:** C turns on the shared buff: +50% health and fists, 15% bigger, an armoured skin with glowing seams, and base cooldowns halved. It comes with the band's flash and a short orbit film, plus Murk's own glow-ink burst and a squirt sound. It has no Ultimate move of its own. Fast swimming, water breathing and night vision in water are base Murk traits.
@@ -487,7 +496,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Deep Lure, a stronger Lure: radius 32 instead of 24. Lured creatures also get Slowness II and Glowing.
 - **C:** Maelstrom: in water, a whirlpool of radius 10 spins for 6 s. Everything in it is pulled round and in toward you, taking 2 a second, shown with bubble particles. On land, the two hunting arms slam down instead: 8 to everything in a 6-block line, with an ink burst.
 - **Health:** +8 hearts (16) on top of its 22.
-- **Film:** The squid curls in a cloud of dark ink, in water or on land. The mantle plates shutter closed one by one, two hunting arms uncoil from beneath, and the eyes and seams flare cyan.
+- **Film:** MORPH on arm_, fin_0, mantle_0, mantle_3, eye_0, then the whole body. First time: the squid curls in dark ink while the mantle plates shutter closed one by one, two toothed hunting arms uncoil from beneath, and the eyes flare cyan.
 
 ### Gnasher -> Megalodon
 - **Today:** C turns on the shared buff: +50% health and fists, 15% bigger, an armoured skin with glowing seams, and base cooldowns halved. It comes with the band's flash and a short orbit film, plus Gnasher's own bubble burst and a guardian attack sound. It has no Ultimate move of its own. Fast swimming and seeing bleeders in water within 48 are base Gnasher traits.
@@ -498,7 +507,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Drowning Roll, a stronger Death Roll: it rolls for 3 s instead of 2, dealing 5 every 10 ticks instead of 3. Then it throws the creature down, knocked over for 4 s instead of 3 (`Tripped.bind`). In water, the creature is dragged 3 blocks down.
 - **C:** Abyss Charge: a straight 16-block rush, in water or on land, with the jaw wide open. Everything in the path takes 12 and bleeds. The last creature hit is clamped in the jaws at the end.
 - **Health:** +10 hearts (20) on top of its 30.
-- **Film:** The shark circles once, low, with the fin high. The jaw opens on the second row of teeth, plates slam down the back, and the red seams light up as it lunges at the camera.
+- **Film:** MORPH on caudal, pec_0, dorsal, fore, jaw, then the whole body. First time: the shark circles low as plates slam down its back, then the jaw gapes wide on the second row of teeth and it lunges at the camera.
 
 ## Patch 5: Lumen, Keen, Hive, Skitter, Shade, Mirage
 
@@ -511,7 +520,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Gather, stronger take on Fetch. For 10 s (Fetch's `FETCH_TICKS`), items of the held kind (any item with an empty hand) and every experience orb within 32 (Fetch: 24) fly to you.
 - **C:** Nova. The core swells for 1 s, then bursts. Within 14, players and pets heal 10 and get Absorption II for 10 s. Hostiles are knocked back 2 blocks, blinded for 4 s and get Glowing for 10 s. Undead also take 8. Cooldown 30 s (`live.ultimateNext`).
 - **Health:** +6 hearts (12 health) on top.
-- **Film:** `UltimateFilm.CRANE`. The camera rises and circles while the orb's halo cracks into plates and the light rays unfold.
+- **Film:** MORPH on core_x, core_y, mote, halo, then the whole body. First time: the halo shell cracks apart into six crystal plates with a white-gold flash and the three light-spike rays snap out like a star.
 
 ### Keen -> Vesperwing
 - **Today:** Only the generic Ultimate buff. Health goes up by half of Keen's 14 (+7, healed in full), fists hit 50% harder, it is 15% bigger, it gets the armoured skin, and every cooldown is halved. The shared C plays a flash, particles, the `UltimateFilm.ORBIT` film, and shows the name (today's name is "Nightwing"). No `ultimateHasMove`, so B stays Echo. Keen's own `onUltimate` adds a smoke burst and the bat takeoff sound. No `UltimateSpikes` entry. C again drops back.
@@ -522,7 +531,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Night Dash, stronger take on Echo. The dash is 1.5x Echo's `ECHO_SPEED`. It always makes you invisible for 1.5 s (Echo's `ECHO_HIDE`), not only in the dark. Creatures you pass through take 4.
 - **C:** Blackout. 12 vanilla bats (`EntityTypes.BAT`, through the `summon`/`dismiss` minion helpers) burst out and swirl round you for 10 s. Every hostile within 20 gets Darkness and Blindness and loses its target, and the Sonar outline runs for the whole 10 s. Cooldown 30 s (`live.ultimateNext`).
 - **Health:** +5 hearts (10 health) on top.
-- **Film:** `UltimateFilm.PUSH_IN`. Over the shoulder, pushing in on Keen as the spurred wings spread wide at the camera and the red seams light.
+- **Film:** MORPH on finger, thumb, body, right_ear, bat_head, then the whole body. First time: the wings flare wide as the hooked spurs and torn membranes tear out, then the chitin skull plates clamp shut over glowing red eyes.
 
 ### Hive -> Queen of the Hive
 - **Today:** Only the generic Ultimate buff. Health goes up by half of Hive's 16 (+8, healed in full), fists hit 50% harder, it is 15% bigger, it gets the armoured skin, and every cooldown is halved. The shared C plays a flash, particles, the `UltimateFilm.ORBIT` film, and shows the name. No `ultimateHasMove`, so B stays Swarm. Hive's own `onUltimate` adds an amber dust burst and the angry bee loop. No `UltimateSpikes` entry. C again drops back.
@@ -533,7 +542,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Split Swarm, stronger take on Swarm. Swarms latch onto the aimed creature (reach 24) and up to 2 more hostiles near it. Each one stings as today for 6 s. This needs a list of latched ids in place of the single `live.latched`.
 - **C:** The Hive. A humming swarm cloud fills 8 blocks round you for 8 s. Everything inside except you and yours takes 1.5 every 10 ticks and gets Poison and Slowness. You get Regeneration I while you stay in it. Cooldown 30 s (`live.ultimateNext`).
 - **Health:** +6 hearts (12 health) on top.
-- **Film:** `UltimateFilm.ORBIT`. A low, close sweep round the bee as the third pair of wings unfolds and the crown spikes rise.
+- **Film:** MORPH on abdomen, stinger, right_hind_wing, bee_head, then the whole body. First time: the abdomen swells plate by amber plate and the third pair of wings bursts out buzzing before the spiked crown rises on the head.
 
 ### Skitter -> Silkmother
 - **Today:** Only the generic Ultimate buff. Health goes up by half of Skitter's 22 (+11, healed in full), fists hit 50% harder, it is 15% bigger, it gets the armoured skin, and every cooldown is halved. It also gets the `UltimateSpikes` "skitter" style on the upright body. The shared C plays a flash, particles, the `UltimateFilm.ORBIT` film, and shows the name (today's name is "Broodmother"). No `ultimateHasMove`, so B stays Egg Sac. Skitter's own `onUltimate` adds a cobweb burst and the spider sound. C again drops back.
@@ -547,7 +556,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Brood Wave, stronger take on Egg Sac. 6 cave spiders hatch (Egg Sac: 3) and fight for you for 45 s (Egg Sac: 30 s).
 - **C:** The Nest. A ring of temporary cobwebs, 3 high, forms 6 blocks out round you, only where you may build, and lasts 12 s. A cave spider hatches from the webs every 2 s, up to 8 alive. Spiders aren't slowed by cobwebs. Hostiles inside the ring get Slowness II. The webs and spiders are cleared when it ends. Cooldown 40 s (`live.ultimateNext`).
 - **Health:** +9 hearts (18 health) on top.
-- **Film:** `UltimateFilm.DUTCH`. Low and tilted on the swelling abdomen as the spiked legs unfold round it and the eyes light red.
+- **Film:** MORPH on back_leg, back_abdomen, thorax, spider_head, then the whole body. First time: the abdomen balloons with pulsing egg sacs while the legs crack and sprout spiked joints, then the eye cluster lights up red one eye at a time.
 
 ### Shade -> Endshade
 - **Today:** Only the generic Ultimate buff. Health goes up by half of Shade's 30 (+15, healed in full), fists hit 50% harder, it is 15% bigger, it gets the armoured skin, and every cooldown is halved. The shared C plays a flash, particles, the `UltimateFilm.ORBIT` film, and shows the name. No `ultimateHasMove`, so B stays Wary. Shade's own `onUltimate` adds a reverse-portal burst and the enderman scream. No `UltimateSpikes` entry. Water and rain still burn it. C again drops back.
@@ -558,7 +567,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Afterimage, stronger take on Wary. For 15 s (Wary: 10 s), up to 3 blows blink you away instead of landing (Wary: one). Each one leaves a portal burst that blinds the attacker for 2 s.
 - **C:** Night Snatch. You blink behind the aimed creature (out to 24) and lift it over your head, as Steal lifts a block. It is helpless for 2 s, then you hurl it where you look. It takes 8 on impact, and you drop it if you are hurt first. Cooldown 25 s (`live.ultimateNext`).
 - **Health:** +12 hearts (24 health) on top.
-- **Film:** `UltimateFilm.PUSH_IN`. Over the shoulder as the shadow draws itself up past the top of the frame. The horns and violet seams light last.
+- **Film:** MORPH on shin, forearm, torso, head, then the whole body. First time: the limbs stretch out impossibly long and the back spines ripple up the torso before the swept-back horns slowly grow from the head.
 
 ### Mirage -> Hall of Mirrors
 - **Today:** Only the generic Ultimate buff. Health goes up by half of Mirage's 20 (+10, healed in full), fists hit 50% harder, it is 15% bigger, it gets the armoured skin, and every cooldown is halved. It also gets the `UltimateSpikes` "mirage" style. The shared C plays a flash, particles, the `UltimateFilm.ORBIT` film, and shows the name. No `ultimateHasMove`, so B stays Swap. Mirage's own `onUltimate` adds a witch burst and the illusioner cast sound. C again drops back.
@@ -569,7 +578,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Shatter Swap, stronger take on Swap. You trade places with a copy as today (the farthest; the nearest when sneaking), and then the copy shatters. Everything within 3 of it takes 4 and is blinded for 2 s.
 - **C:** Mirror Ring. 8 copies stand in a ring 6 blocks round the spot you look at (out to 12) for 10 s. Every mob within 24 that was after you goes after a copy. You stay invisible while any copy stands, until you strike. Cooldown 30 s (`live.ultimateNext`).
 - **Health:** +7 hearts (14 health) on top.
-- **Film:** `UltimateFilm.CUTS`. Hard cuts between three angles round Mirage. Its mirror plates catch the light at each cut, and on the last cut the shard halo flares.
+- **Film:** MORPH on robe, robe, hood, hood, then the whole body. First time: mirror plates spread across the robe like frost and the six-shard halo shatters into place around the hood with a gold flash.
 
 ## Patch 6: Ooze and Magma Ooze, Fuse, Thornwild, Billow, Towerback, Dud (and the old buff removed)
 
@@ -582,7 +591,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Royal Split, a stronger take on Split: four size-2 slimes (magma cubes for Molten) drop off at once. When one dies, two size-1 blobs of its own drop in its place and count toward the cap. This does not use vanilla's split on death, because those children would be wild slimes outside `live.minions` and would attack you. The cap rises from 4 to 6, and each still heals 3 when it rejoins.
 - **C:** King's Crush (new, since there is no Ultimate move today): it springs high and comes down flat. Everything within 5 takes 10 and gets Slowness IV for 3 s, and the smallest creature under it is engulfed. Molten King also ignites them and rings the spot with flame. It reuses `GroundCracks` and `Shakes`. Every 30 s.
 - **Health:** +10 hearts (20).
-- **Film:** ORBIT low round the cube as it swells, plates crust over its corners and the crown of spikes pushes up, then one squelching bounce.
+- **Film:** MORPH on the shell as it swells to twice its size, the gel corner plates (black crust over the slabs for Molten), the spike crown pushing up along the top edge, then the glowing core, then the whole body. First time: the cube bloats past its new size and wobbles back down before the crown spikes crack up one by one with a heavy squelch.
 
 ### Fuse -> Chain Reaction
 - **Today:** C turns on the generic buff (+50% health and damage, 15% bigger, halved cooldowns) with a puff of smoke and a creeper hiss. There is no Ultimate move, so B stays Defuse.
@@ -593,7 +602,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Blast Shell, a stronger take on Defuse: it defuses primed TNT and swelling creepers within 16 (today 10). For 8 s after (today 5 s), every blast that reaches you heals 2 instead of only doing nothing.
 - **C:** Cascade: every creature within 12 gets a primed pod. They go off one by one, nearest first, 4 ticks apart (power 2 each, block damage by mobGriefing as the pods are). Every 30 s.
 - **Health:** +8 hearts (16).
-- **Film:** DUTCH low on it as it hisses and swells until it cracks, plates slam over the cracks and the seams flare white-green.
+- **Film:** MORPH on the legs as they thicken, the body as scorched plates slam onto its back, the vent spikes punching up its spine, then the head as its seams flare white-green, then the whole body. First time: it swells until hairline cracks split it, hissing louder, and each plate lands with a smoke puff as the seams pulse ever faster.
 
 ### Thornwild -> Elder Grove
 - **Today:** C turns on the generic buff (+50% health and damage, 15% bigger, halved cooldowns) with a spore-blossom burst and a creaking sound. There is no Ultimate move, so B stays Bloom.
@@ -604,7 +613,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Grove Bloom, a stronger take on Bloom: radius 6 (today 3) for 15 s (today 10 s), and you and friends inside get Regeneration I.
 - **C:** Wildwood Rising (new, since there is no Ultimate move today): it drives its arms into the ground, as in the "roots" act, and a ring of roots erupts out to 10. Every creature caught takes 6, is thrown up a little and is then held for 4 s. It reuses `GroundCracks` and rooted-dirt `BlockParticleOption`. Every 30 s.
 - **Health:** +12 hearts (24).
-- **Film:** CRANE rising round it as bark plates grow over its trunk, the antler crown spreads and its amber eyes flare.
+- **Film:** MORPH on the root feet as they grow taller, the trunk as bark plates overlap with amber sap in the seams, the arms as thorn spikes run along them and the back branch arms sprout, then the crown as it spreads into leafy antlers, then the whole body. First time: the camera creeps up its trunk in slow motion as each bark plate creaks shut and the antler crown unfurls with a burst of leaves.
 
 ### Billow -> Stormfront
 - **Today:** C turns on the generic buff (+50% health and damage, 15% bigger, halved cooldowns) with a cloud burst and a happy-ghast sound. There is no Ultimate move, so B stays Fog.
@@ -615,7 +624,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Whiteout, a stronger take on Fog: radius 12 for 12 s (today 8 for 10 s). Creatures inside get Blindness and Slowness and lose you and your riders.
 - **C:** Tempest (new, since there is no Ultimate move today): for 8 s it is a live storm. Every second a no-fire bolt strikes a random enemy within 16 for 8. Rain particles fall round it (the weather does not change), and a wind drags everything within 10 slowly towards it. Every 30 s.
 - **Health:** +15 hearts (30).
-- **Film:** SKYWARD low behind it as it towers up into a dark thunderhead, its seams flashing.
+- **Film:** MORPH on the underside as it darkens to storm grey with dense storm-cell plates, the rain streaks starting to fall, the puffs heaping up into a thunderhead, then the anvil crown flattening on top as its seams flicker, then the whole body. First time: the cloud boils up far taller than it ends, then flattens into the anvil with one blinding blue-white flash and a thunderclap.
 
 ### Towerback -> Colossus
 - **Today:** C turns on the generic buff (+50% health and damage, 15% bigger, halved cooldowns) with campfire smoke and a deep warden roar. There is no Ultimate move, so B stays Roar.
@@ -626,7 +635,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Warcry, a stronger take on Roar: 4 per scale of reach (today 3). Monsters get Weakness III and Slowness IV for 10 s and lose their target (today Weakness II and Slowness III for 8 s), and friends near get Strength I and Resistance I for 10 s.
 - **C:** Landfall (new, since there is no Ultimate move today): it heaves up and crashes down as a triple stomp. It does 20 close in, sends `GroundCracks` 12 out, gives everyone within 64 a `Shakes` jolt, and throws everything up. Every 30 s.
 - **Health:** +40 hearts (80).
-- **Film:** CRANE rising up its body as stone plates slam on, the tower on its back grows into a keep, and its eyes flare.
+- **Film:** MORPH on the forearms and chest as slate-blue slab armour slams on, the boulder pauldrons as stone shards jut out, the tower as it rises into a whole keep with a beacon glow, then the head as its eyes and cracks flare pale blue, then the whole body. First time: each plate lands with a ground shake, the keep stacks up course by course, and the beacon flares on top before the eyes ignite.
 
 ### Dud -> Bouncer
 - **Today:** Dud has no Ultimate. It doesn't override `onUltimate`, so C returns false and the band only shows the "Not here, not now." hint. The key tooltip says "Dud has no Ultimate: nothing happens".
@@ -637,15 +646,15 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **B:** Bowling Roll, a stronger take on Roll: twice the speed for 1.5 s (Roll is one push of 1.1 for 15 ticks), steering where you look. Every creature it hits is bowled over and thrown hard (no damage).
 - **C:** Bounce House (new): for 6 s every monster within 10 is pulled to it and flung off it each time it touches. Bouncer hurts nothing itself, but the falls do. Every 30 s.
 - **Health:** +10 hearts (20). This is a shell: while it holds, blows drain it instead of flinging Bouncer away, so Bouncer stands its ground. Falls never drain it. When the shell breaks, you are back to the unhurtable Dud.
-- **Film:** ORBIT round it as it puffs up, the quilted plates pop on and it bounces once with its face set.
+- **Film:** MORPH on the body as it puffs up and the quilted bumper plates pop on, the rubber nubs studding out all over, the nub hands swelling into mitts, then the face as its brow sets, then the whole body. First time: it inflates like a balloon past its new size with a squeak, the nubs pop out in a ripple, and the worried face hardens into a glare on the final beat.
 
 ## Open questions
 
-1. **Should an unforged band allow Ultimates?** Recommended: yes. Ascension doesn't require the reforge, so gating it would lock a stage behind the moon forge. On an unforged band the Ultimate runs out the random timer; on a reforged band it burns charge at double rate (`ULT_DRAIN = 1`).
+1. ~~Should an unforged band allow Ultimates?~~ Andy (2026-11-04): they come on when you are about to die, usually to a boss or great foe. Planned as the last stand in item 5: before the reforge only that way, after it C at will as well.
 2. **Drop-back key: hold C (0.5 s) or sneak+C?** Recommended: hold C, the same as holding Z to turn back. C moves then fire on release of a tap.
 3. **When the Ultimate's health runs out: back to the base alien with a 1.5 s stun and no Ultimate again this change, or allowed again after a cooldown?** Recommended: stun, and locked for the rest of the change.
 4. **When the band's time runs out as an Ultimate: straight to human, or first back to the base alien for a grace period?** Recommended: straight to human ("lasts until the charge runs out").
 5. **Should the rival band's darkened aliens (RivalAlien) also use Ultimates, for example a low-health last stand?** Recommended: not now; a later patch once the 40 Ultimates exist (41 aliens without Nadir, with Ooze and Magma Ooze sharing one class).
-6. **Should other players near the change-in see the film's black bars?** Recommended: no (witnesses 0.0, as today), so a friend's change doesn't cover their screen. Nadir's `NadirFilm` keeps its own `WITNESS_RANGE`.
+6. ~~Should other players near the change-in see the film?~~ Andy (2026-11-04): yes, the whole film, unless they are in combat; then they just see the change in the world. The film letterboxes and zooms on each changing part, and the first time is longer and exaggerated (item 2).
 7. **Should Dud's Ultimate deal damage, or stay a no-damage clown that only taunts and throws?** Recommended: it deals light damage, as the one payoff for the joke alien. This needs the `body()` fix to the Dud check in `ALLOW_DAMAGE`.
 8. **Renames.** Some of today's Ultimate names match characters or names in other games, shows and films, so the plan gives them new ones: Rivet Ironclad to Ironpour, Slipfin Tidecaller to Brinecrown, Cortex Overmind to Mindcrown, Croaker Bog King to Marshmaw, Keen Nightwing to Vesperwing, and Skitter Broodmother to Silkmother. A few move names were changed for the same reason. Recommended: take the new names (lang only, nothing saved uses them).
