@@ -8698,3 +8698,15 @@ Andy picked the Runic Gods idea (our own version, nothing taken from it). `docs/
 - Andy: Dawnborn "start crowned sun" and "say praise the sun". A devout Dawnborn starts sworn to the Crowned Sun, and most
   Dawnborn villagers hold it (`Faiths.DAWNBORN_SUN_SHARE`). At sunrise some of the Sun's folk near a player praise the sun
   aloud (speech bubbles), and Dawnborn have two more lines of talk about it.
+
+## 0.7.510: chopping cracks logs instead of thinning them (pack 0.20.10)
+Andy asked whether Timber Tales' chopping could replace our thinning logs. Its licence allows no derivatives, so this
+is our own take on the idea (none of its code or art).
+- `ChoppedLog` keeps the whole log's size and shape now. The game's own crack stages are drawn on it, deeper with each
+  chop (6 chops reach the deepest), and deeper still while an axe is mid-swing. Chops past 6 still go into the log above.
+- Each chop throws wood chips off the face toward the chopper (players and woodcutters).
+- A chop meter on the action bar (filled/empty squares, up to 12) shows how near the tree is to coming down. When it's
+  full and red, the next stroke fells it. It uses squares, not the `|...` charge bar, so it never locks the mouse.
+- Felling, the fall, the crack and crush, Aether Giants, the Great Ape and Towerback trampling trees, and tornadoes are
+  unchanged (none of them go through `Trees.chop`).
+- Not played; compile not checked against the game jars.

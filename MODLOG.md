@@ -5285,3 +5285,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Film:** the new MORPH shot letterboxes and zooms on each changing part as it grows into place, then pulls back. The first time you become a given Ultimate it's the long, exaggerated cut (5 s, crackles and a roar). Players within 32 who aren't fighting see the same film; everyone else just sees the change in the world.
   - **Titan:** Bulwark's Ultimate, a plated four-armed stone giant (2x, +15 hearts): Quake Combo, Wallbreaker Clap, Boulder Hurl, Meteor Slam, and Earthsplitter on C. Model `client/.../ultimate/UltimateTitan`, skin from `tools/gen_xeno_ultimates.py`.
   - Debug: `/powerdebug xenoform ultimate on|off|break`. Compile-checked (no new errors against master); not played.
+- **0.20.10**: no Powers change; pack bump for Kingdoms 0.7.510 (chopped logs crack deeper instead of thinning, chop meter).
