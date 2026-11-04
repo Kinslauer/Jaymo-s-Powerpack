@@ -64,10 +64,10 @@ public final class Introductions {
 	static final int LINES = 3, RULER_LINES = 2;
 	/** (0.7.397) Lines an outlaw has for keeping their name to themselves. */
 	static final int OUTLAW_LINES = 3;
-	/** (0.7.502) Lines a wary villager has for keeping their name from you until you've proven yourself ({@link #wary}). */
+	/** (0.7.504) Lines a wary villager has for keeping their name from you until you've proven yourself ({@link #wary}). */
 	public static final int WARY_LINES = 5;
 	/**
-	 * (0.7.502) Proving yourself to one who minds your blood ({@link Prejudice#minds}): MCA hearts needed per degree they
+	 * (0.7.504) Proving yourself to one who minds your blood ({@link Prejudice#minds}): MCA hearts needed per degree they
 	 * mind, never more than {@link Strangers#TRUSTED_HEARTS}; and the hearts that win over one whose people think ill of you.
 	 */
 	static final int PROVEN_HEARTS_PER_DEGREE = 8, PROVEN_HEARTS_REP = 20;
@@ -229,7 +229,7 @@ public final class Introductions {
 	}
 
 	/**
-	 * (0.7.502) Andy: "someone who has any distaste toward you would not introduce themselves, i was just on a beastfolk,
+	 * (0.7.504) Andy: "someone who has any distaste toward you would not introduce themselves, i was just on a beastfolk,
 	 * and the guy said remember this city isnt for you, but still shook my hand, they should be as apprehensive as the old
 	 * orcs were until you prove yourself". {@code villager} keeps you at arm's length: no name, no hand, no coming over to
 	 * say hello. Anyone who minds your blood ({@link Prejudice#minds}: a haven's folk minding a human, a townsman minding a
@@ -254,7 +254,7 @@ public final class Introductions {
 		return f != null && Reputation.get(player, f.id()) < Reputation.WELCOME && hearts < PROVEN_HEARTS_REP;
 	}
 
-	/** (0.7.502) What a {@linkplain #wary wary} villager says in place of their name (a greenskin in its own dialect). */
+	/** (0.7.504) What a {@linkplain #wary wary} villager says in place of their name (a greenskin in its own dialect). */
 	public static Component waryLine(Villager villager) {
 		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_wary." + villager.getRandom().nextInt(WARY_LINES));
 	}
@@ -266,7 +266,7 @@ public final class Introductions {
 			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused");
 		}
 		if (!Outlaws.is(villager) && !ZFighterFolk.is(villager) && wary(player, villager)) {
-			// (0.7.502) one who minds you keeps their name until you've proven yourself
+			// (0.7.504) one who minds you keeps their name until you've proven yourself
 			return waryLine(villager);
 		}
 		if (Outlaws.is(villager)) {
@@ -306,7 +306,7 @@ public final class Introductions {
 	 */
 	static boolean takesHand(ServerPlayer player, Villager villager) {
 		if (Recollections.refuses(villager, player) || Outlaws.is(villager) || wary(player, villager)) {
-			// ((0.7.502) nor one who minds you, till you've proven yourself)
+			// ((0.7.504) nor one who minds you, till you've proven yourself)
 			return false;
 		}
 		float chance = HAND_TAKEN + McaCompat.heartsOf(villager, player) * HAND_PER_HEART + McaCompat.mood(villager) * HAND_PER_MOOD

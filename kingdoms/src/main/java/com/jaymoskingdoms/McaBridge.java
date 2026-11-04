@@ -1010,7 +1010,7 @@ final class McaBridge {
 		}
 		met(villager, player);
 		memory.remember(told);
-		if (StoryTalk.shipmate((ServerLevel) villager.level(), player, villager)) {
+		if (StoryTalk.shipmate((ServerLevel) villager.level(), player, villager) || StoryTalk.swornFellow(player, villager)) {
 			Introductions.learn(player, villager);
 		}
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);

@@ -157,7 +157,7 @@ abstract class McaDialogueMixin {
 			// (0.7.230) the stranger page's Introduce: their name if you share a tongue, else a hand held out (the screen stays
 			// open, and fills in once you know them)
 			if (Rulers.is(villager) && !Introductions.knows(player, villager) && Handshakes.bowTo(player, villager, true)) {
-				// (0.7.502) to a ruler you bow (a bow needs no words): the screen closes for it and opens again after
+				// (0.7.504) to a ruler you bow (a bow needs no words): the screen closes for it and opens again after
 				villager.getInteractions().stopInteracting();
 			} else if (Languages.understands(player, villager)) {
 				villager.sendChatMessage(Introductions.askName(player, villager), player);
@@ -386,7 +386,7 @@ abstract class McaDialogueMixin {
 		}
 		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
 			// (0.7.180) asked their name: they say it, and you know it from now on
-			// ((0.7.502) a ruler you've not met you bow to first, and they name themselves after: Handshakes#bowTo)
+			// ((0.7.504) a ruler you've not met you bow to first, and they name themselves after: Handshakes#bowTo)
 			if (!Rulers.is(villager) || Introductions.knows(player, villager) || !Handshakes.bowTo(player, villager, false)) {
 				villager.sendChatMessage(Introductions.askName(player, villager), player);
 			}

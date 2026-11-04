@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * quick dap: the hand up high, one clasp and a tug in. (0.7.204) A villager taking your hand shakes the same way.
  * (0.7.289) A villager's wave at a first meeting: the right hand raised out to the side, swung to and fro a few times;
  * and a shake off film ({@code Hand.PLAIN}) looks the same as one on it.
- * (0.7.502) A bow to a ruler ({@code Hand.BOW}): bent from the waist, head down, the hands by what's in them. Empty
+ * (0.7.504) A bow to a ruler ({@code Hand.BOW}): bent from the waist, head down, the hands by what's in them. Empty
  * handed, the hand over the heart and the other swept behind; a blade in hand, held low at your side with the other hand
  * come across onto its pommel; anything else, held at your side with the free hand over the heart. A hand with something
  * in it (a shield, a torch) stays down by your side. The ruler's answer, a nod ({@code Hand.NOD}).
@@ -45,19 +45,19 @@ public final class HandshakePose {
 	static final float REACH_DELAY = 3.0F;
 	/** (0.7.289) The wave: the arm raised out to the side and a little forward, and its swing (radians), and how fast (radians per tick). */
 	static final float WAVE_UP = 2.5F, WAVE_FORWARD = -0.25F, WAVE_SWING = 0.35F, WAVE_SPEED = 0.7F;
-	/** (0.7.502) The bow: how far forward from the waist, and the head further down (radians). */
+	/** (0.7.504) The bow: how far forward from the waist, and the head further down (radians). */
 	static final float BOW_LEAN = 0.6F, BOW_HEAD = 0.45F;
-	/** (0.7.502) The ruler's nod (radians). */
+	/** (0.7.504) The ruler's nod (radians). */
 	static final float RULER_NOD = 0.35F;
 	/**
-	 * (0.7.502) The arms in a bow, as {forward (x), turned in (y), out to the side (z)} for either arm (mirrored for the
+	 * (0.7.504) The arms in a bow, as {forward (x), turned in (y), out to the side (z)} for either arm (mirrored for the
 	 * left), in radians; HEART and BEHIND go with the body as it bends, the rest hang as they would.
 	 */
 	static final float[] HEART = {-1.05F, 0.65F, -0.05F}, BEHIND = {0.55F, 0.0F, 0.12F}, SIDE = {-0.1F, 0.0F, 0.08F},
 		BLADE_LOW = {0.4F, -0.1F, 0.12F}, POMMEL = {-0.3F, 0.0F, -0.7F};
-	/** (0.7.502) What the hands hold in a bow: nothing in the main hand, a blade, or something else; plus this if the off hand holds anything. */
+	/** (0.7.504) What the hands hold in a bow: nothing in the main hand, a blade, or something else; plus this if the off hand holds anything. */
 	static final int FREE = 0, BLADE = 1, HOLDING = 2, OFF_HELD = 4;
-	/** (0.7.502) What a pose is: a shake, a dap, a wave, a bow or a nod. */
+	/** (0.7.504) What a pose is: a shake, a dap, a wave, a bow or a nod. */
 	static final float SHAKE = 0.0F, DAP = 1.0F, WAVE = 2.0F, BOW = 3.0F, NOD = 4.0F;
 	/** Head bowed a touch while shaking (radians). */
 	static final float NOD = 0.12F;
@@ -66,7 +66,7 @@ public final class HandshakePose {
 
 	/**
 	 * This frame's {weight, ticks into the shake (or -1 while just held out), 1 for a dap (0.7.289: 2 for a wave;
-	 * (0.7.502) 3 a bow, 4 a nod), (0.7.502) what the hands hold for a bow} on a render state.
+	 * (0.7.504) 3 a bow, 4 a nod), (0.7.504) what the hands hold for a bow} on a render state.
 	 */
 	static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:handshake");
 
@@ -163,7 +163,7 @@ public final class HandshakePose {
 		state.setData(KEY, new float[] {ease[0], t, bow ? BOW : nod ? NOD : wave ? WAVE : dap ? DAP : SHAKE, bow ? holds(entity) : 0.0F});
 	}
 
-	/** (0.7.502) What {@code entity}'s hands hold, for a bow ({@link #FREE}, {@link #BLADE} or {@link #HOLDING}, plus {@link #OFF_HELD}). */
+	/** (0.7.504) What {@code entity}'s hands hold, for a bow ({@link #FREE}, {@link #BLADE} or {@link #HOLDING}, plus {@link #OFF_HELD}). */
 	private static int holds(LivingEntity entity) {
 		ItemStack main = entity.getMainHandItem();
 		int kind = main.isEmpty() ? FREE : main.is(ItemTags.SWORDS) || main.is(ClassPerks.LIGHT_BLADES) ? BLADE : HOLDING;
@@ -183,7 +183,7 @@ public final class HandshakePose {
 		float pump = 0.0F, nod = 0.0F;
 		ModelPart arm = m.rightArm;
 		if (pose[2] == NOD) {
-			// (0.7.502) a ruler inclines their head
+			// (0.7.504) a ruler inclines their head
 			m.head.xRot += RULER_NOD * Math.min(1.0F, w);
 			return;
 		}
@@ -222,7 +222,7 @@ public final class HandshakePose {
 		m.head.xRot += nod * Math.min(1.0F, w);
 	}
 
-	/** (0.7.502) A bow from the waist, the head down and the hands as {@code holds} has them. */
+	/** (0.7.504) A bow from the waist, the head down and the hands as {@code holds} has them. */
 	private static void bow(Model<?> model, HumanoidModel<?> m, Object state, float w, int holds) {
 		float k = Math.min(1.0F, w);
 		float lean = BOW_LEAN * k;
@@ -273,7 +273,7 @@ public final class HandshakePose {
 		}
 	}
 
-	/** (0.7.502) {@code part} eased toward {@code pose} ({forward, in, out}; mirrored for a left arm), {@code bend} more forward with the body. */
+	/** (0.7.504) {@code part} eased toward {@code pose} ({forward, in, out}; mirrored for a left arm), {@code bend} more forward with the body. */
 	private static void arm(ModelPart part, float[] pose, float bend, boolean left, float w) {
 		float side = left ? -1.0F : 1.0F;
 		part.xRot = Mth.lerp(w, part.xRot, pose[0] + bend);
