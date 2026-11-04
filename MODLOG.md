@@ -5373,3 +5373,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   its trials.
   The Sunbrand's Judgement stops at the first block in the way, so it can't mark a foe behind a wall. Not played.
 - **0.20.19**: no Powers change; pack bump for Kingdoms 0.7.519 (diplomacy and elections: envoys, treaties, elected rulers and regencies).
+- **0.20.21, RPG Series art (patch 4, part 1):** the vanilla-style pack (on by default) repaints Rogues & Warriors'
+  daggers, sickles, double axes and glaives and Archers' spears in every vanilla metal (23 icons, `tools/vanilla_style/
+  rpg_series.py`), our own paintings so the forged weapons match their heads. Their other icons stay as drawn.
