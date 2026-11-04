@@ -126,23 +126,23 @@ public final class XenoformPower implements Power {
 	/** How often (ticks) a human checks whether the band is complete and the power ready to ascend. */
 	public static final int ASCEND_CHECK_EVERY = 40;
 	/**
-	 * (0.20.8, Ultimates patch 0) Each Ultimate is its own evolved alien ({@link XenoUltimate}). C held this long (ticks) as the
+	 * (0.20.9, Ultimates patch 0) Each Ultimate is its own evolved alien ({@link XenoUltimate}). C held this long (ticks) as the
 	 * Ultimate drops back to the base alien; a shorter tap is the Ultimate's big move.
 	 */
 	public static final int ULT_DROP_HOLD = 10;
-	/** (0.20.8) When the Ultimate's own health runs out: this long stunned (Slowness III and nausea), and locked for the rest of the change. */
+	/** (0.20.9) When the Ultimate's own health runs out: this long stunned (Slowness III and nausea), and locked for the rest of the change. */
 	public static final int ULT_BREAK_STUN = 30;
-	/** (0.20.8) After a voluntary drop-back, C (slot {@link XenoForm#C}) is on cooldown this long before the Ultimate comes again. */
+	/** (0.20.9) After a voluntary drop-back, C (slot {@link XenoForm#C}) is on cooldown this long before the Ultimate comes again. */
 	public static final int ULT_REENTER = 200;
-	/** (0.20.8) On a reforged band, each tick as the Ultimate takes this much extra off the charge (1 doubles the burn). */
+	/** (0.20.9) On a reforged band, each tick as the Ultimate takes this much extra off the charge (1 doubles the burn). */
 	public static final int ULT_DRAIN = 1;
-	/** (0.20.8) Changing in by C needs at least this much charge left (ticks). */
+	/** (0.20.9) Changing in by C needs at least this much charge left (ticks). */
 	public static final int ULT_MIN_LEFT = 400;
-	/** (0.20.8) The last stand: a hit that would leave you at or under this share of your health (or kill you) while fighting a great foe. */
+	/** (0.20.9) The last stand: a hit that would leave you at or under this share of your health (or kill you) while fighting a great foe. */
 	public static final float ULT_LAST_STAND = 0.25F;
-	/** (0.20.8) The change-in film's length (ticks): the short cut, and the long first-time cut. */
+	/** (0.20.9) The change-in film's length (ticks): the short cut, and the long first-time cut. */
 	public static final int ULT_FILM_TICKS = 40, ULT_FILM_FIRST = 100;
-	/** (0.20.8) Other players this near (blocks) see the change-in film too, unless they were in combat in the last {@link #ULT_FILM_COMBAT} ticks. */
+	/** (0.20.9) Other players this near (blocks) see the change-in film too, unless they were in combat in the last {@link #ULT_FILM_COMBAT} ticks. */
 	public static final double ULT_FILM_WITNESS = 32.0;
 	public static final int ULT_FILM_COMBAT = 100;
 	/**
@@ -232,7 +232,7 @@ public final class XenoformPower implements Power {
 		public boolean wings;
 		// ---- stage 3: the Ultimate and the corruption ----
 		/**
-		 * (0.20.8) The Ultimate the player is right now (an evolved alien, {@link XenoForm#evolved()}); {@link #form} stays the base
+		 * (0.20.9) The Ultimate the player is right now (an evolved alien, {@link XenoForm#evolved()}); {@link #form} stays the base
 		 * alien under it. Null: none (or the fallback buff, {@link #ultimate}).
 		 */
 		public @Nullable XenoUltimate ult;
@@ -240,17 +240,17 @@ public final class XenoformPower implements Power {
 		public float baseHealth;
 		final long[] baseCooldownUntil = new long[XenoformState.Hud.SLOTS];
 		final int[] baseCooldownLength = new int[XenoformState.Hud.SLOTS];
-		/** (0.20.8) The Ultimate's own cooldowns while the base alien is back, kept for the next change-in of this change. */
+		/** (0.20.9) The Ultimate's own cooldowns while the base alien is back, kept for the next change-in of this change. */
 		final long[] ultCooldownUntil = new long[XenoformState.Hud.SLOTS];
 		final int[] ultCooldownLength = new int[XenoformState.Hud.SLOTS];
-		/** (0.20.8) Cooldowns of Ultimates left behind by quick changes this change, keyed by Ultimate (until, then length). */
+		/** (0.20.9) Cooldowns of Ultimates left behind by quick changes this change, keyed by Ultimate (until, then length). */
 		final Map<XenoUltimate, long[]> keptUltUntil = new HashMap<>();
 		final Map<XenoUltimate, int[]> keptUltLength = new HashMap<>();
-		/** (0.20.8) The last stand just cancelled a hit: that hit must not drain the charge. */
+		/** (0.20.9) The last stand just cancelled a hit: that hit must not drain the charge. */
 		boolean lastStandHit;
-		/** (0.20.8) Health and absorption just before the hit now being taken (set in ALLOW_DAMAGE), what the last stand puts the base alien back to. */
+		/** (0.20.9) Health and absorption just before the hit now being taken (set in ALLOW_DAMAGE), what the last stand puts the base alien back to. */
 		float healthBefore, absorbBefore;
-		/** (0.20.8) The base alien's absorption while the Ultimate is on. */
+		/** (0.20.9) The base alien's absorption while the Ultimate is on. */
 		float baseAbsorb;
 		/** The Ultimate's health when it was dropped by hand (-1: none kept), given back on the next change-in this change. */
 		public float ultHealth = -1.0F;
@@ -387,7 +387,7 @@ public final class XenoformPower implements Power {
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
-		/** (0.20.8) The body whose kit is live: the Ultimate while it is on, else the base alien (null: none). */
+		/** (0.20.9) The body whose kit is live: the Ultimate while it is on, else the base alien (null: none). */
 		public @Nullable XenoForm body() {
 			return ult != null ? ult : form;
 		}
@@ -541,19 +541,19 @@ public final class XenoformPower implements Power {
 			}
 			Live live = live(player);
 			if (live.ult != null) {
-				// (0.20.8) the Ultimate's own health is gone: it breaks, and you are the base alien again (the rest of the blow is lost)
+				// (0.20.9) the Ultimate's own health is gone: it breaks, and you are the base alien again (the rest of the blow is lost)
 				breakUltimate(player, live);
 				return false;
 			}
 			if (lastStand(player, live, source, live.healthBefore)) {
-				// (0.20.8) the unforged band's last stand: the Ultimate comes on in place of the killing blow
+				// (0.20.9) the unforged band's last stand: the Ultimate comes on in place of the killing blow
 				return false;
 			}
 			revert(player, true, true);
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			// (0.18.103) Dud can't hurt anything (0.20.8: its Ultimate can)
+			// (0.18.103) Dud can't hurt anything (0.20.9: its Ultimate can)
 			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && has(attacker) && live(attacker).body() == XenoForms.DUD) {
 				return false;
 			}
@@ -565,7 +565,7 @@ public final class XenoformPower implements Power {
 			live.absorbBefore = player.getAbsorptionAmount();
 			return live.form == null || live.body().allowDamage(player, live, source, amount);
 		});
-		// (0.20.8) the last stand, judged on the damage actually taken (after the form's allowDamage, shield, armour and i-frames): a hit that
+		// (0.20.9) the last stand, judged on the damage actually taken (after the form's allowDamage, shield, armour and i-frames): a hit that
 		// leaves you at or under ULT_LAST_STAND brings the Ultimate on and is undone (the base alien is put back to its health before the hit)
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (entity instanceof ServerPlayer player && has(player) && damageTaken > 0.0F && player.isAlive()) {
@@ -659,7 +659,7 @@ public final class XenoformPower implements Power {
 		XenoForm form = XenoformState.form(player);
 		String shell = player.getAttached(XenoformState.SHELL);
 		// (0.18.95) Rivet melded into a shell: that shell's keys
-		// (0.20.8) the Ultimate has keys of its own ("_ultimate"), where the alien has an evolved form
+		// (0.20.9) the Ultimate has keys of its own ("_ultimate"), where the alien has an evolved form
 		if (form != null && XenoformState.ultimate(player) != null) {
 			return "." + form.id + "_ultimate";
 		}
@@ -741,13 +741,13 @@ public final class XenoformPower implements Power {
 			int before = live.ticksLeft;
 			live.ticksLeft--;
 			if (live.ult != null && charged(player) && !player.isCreative()) {
-				// (0.20.8) a reforged band burns faster as the Ultimate (directly, not through drain(), which would re-sync the HUD every tick)
+				// (0.20.9) a reforged band burns faster as the Ultimate (directly, not through drain(), which would re-sync the HUD every tick)
 				live.ticksLeft -= ULT_DRAIN;
 			}
 			if (live.ticksLeft <= BEEP_TICKS && !XenoformState.ending(player)) {
 				player.setAttached(XenoformState.ENDING, true);
 			}
-			// (0.20.8) the Ultimate's drain steps over 2 ticks at a time: a beep tick it stepped over counts
+			// (0.20.9) the Ultimate's drain steps over 2 ticks at a time: a beep tick it stepped over counts
 			if (beepsAt(live.ticksLeft) || before - live.ticksLeft > 1 && beepsAt(live.ticksLeft + 1)) {
 				float pitch = live.ticksLeft <= BEEP_FAST_TICKS ? 1.8F : 1.4F;
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.6F, pitch);
@@ -1100,7 +1100,7 @@ public final class XenoformPower implements Power {
 	}
 
 	/**
-	 * C, once the power has ascended. (0.20.8) As an alien with an evolved form ({@link XenoForm#evolved()}): on a reforged band, a
+	 * C, once the power has ascended. (0.20.9) As an alien with an evolved form ({@link XenoForm#evolved()}): on a reforged band, a
 	 * press changes you into it ({@link #evolve}); before the reforge it does nothing (the Ultimate only comes on by itself as a
 	 * last stand, {@link #lastStand}). As the Ultimate, a tap is its big move and C held {@link #ULT_DROP_HOLD} drops back to the
 	 * base alien, both on release. A form with no evolved form yet keeps the 0.18.93 buff on the base body. As yourself, nothing:
@@ -1131,7 +1131,7 @@ public final class XenoformPower implements Power {
 			return;
 		}
 		if (live.ult != null) {
-			// (0.20.8) the Ultimate: press notes the time, release decides (a tap is the big move, a hold drops back)
+			// (0.20.9) the Ultimate: press notes the time, release decides (a tap is the big move, a hold drops back)
 			long now = player.level().getGameTime();
 			if (down) {
 				live.ultDownAt = now;
@@ -1151,7 +1151,7 @@ public final class XenoformPower implements Power {
 		}
 		if (form.evolved() != null) {
 			if (!charged(player)) {
-				// (0.20.8) an unforged band: C changes nothing, the Ultimate comes by itself as a last stand
+				// (0.20.9) an unforged band: C changes nothing, the Ultimate comes by itself as a last stand
 				hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_unforged"));
 				return;
 			}
@@ -1345,7 +1345,7 @@ public final class XenoformPower implements Power {
 		}
 		XenoUltimate ult = live.ult;
 		if (ult != null) {
-			// (0.20.8) the evolved Ultimate: its own undoing; the base alien's onExit already ran at the change-in, so it is skipped below
+			// (0.20.9) the evolved Ultimate: its own undoing; the base alien's onExit already ran at the change-in, so it is skipped below
 			ult.onExit(player, live);
 			player.removeAttached(XenoformState.ULTIMATE);
 		} else if (live.ultimate) {
@@ -1407,13 +1407,13 @@ public final class XenoformPower implements Power {
 		live.hudDirty = true;
 	}
 
-	/** (0.20.8) How the Ultimate ends short of the band running out: dropped by hand (hold C), broken (its health gone), or the fallback buff. */
+	/** (0.20.9) How the Ultimate ends short of the band running out: dropped by hand (hold C), broken (its health gone), or the fallback buff. */
 	private enum DropKind {
 		VOLUNTARY, BROKEN, DEBUG, FALLBACK
 	}
 
 	/**
-	 * (0.20.8) The change-in: the base alien becomes its {@link XenoForm#evolved()} Ultimate. The caller has checked the entry rules
+	 * (0.20.9) The change-in: the base alien becomes its {@link XenoForm#evolved()} Ultimate. The caller has checked the entry rules
 	 * (C: reforged, not broken, off cooldown, {@link #ULT_MIN_LEFT} left; the last stand: {@link #lastStand}). The base alien's extras
 	 * are turned off ({@code onExit}, not {@code clearForm}), its health and cooldowns put aside, the Ultimate's body applied with its
 	 * own health bar (what a hand-drop left of it, else full), and the film plays for the caster and the out-of-combat witnesses.
@@ -1429,7 +1429,7 @@ public final class XenoformPower implements Power {
 		live.baseAbsorb = lastStand ? live.absorbBefore : player.getAbsorptionAmount();
 		System.arraycopy(live.cooldownUntil, 0, live.baseCooldownUntil, 0, live.cooldownUntil.length);
 		System.arraycopy(live.cooldownLength, 0, live.baseCooldownLength, 0, live.cooldownLength.length);
-		// (0.20.8) the Ultimate's own cooldowns carry through a drop and a change-in of the same change (all clear the first time)
+		// (0.20.9) the Ultimate's own cooldowns carry through a drop and a change-in of the same change (all clear the first time)
 		System.arraycopy(live.ultCooldownUntil, 0, live.cooldownUntil, 0, live.cooldownUntil.length);
 		System.arraycopy(live.ultCooldownLength, 0, live.cooldownLength, 0, live.cooldownLength.length);
 		live.ult = ult;
@@ -1463,7 +1463,7 @@ public final class XenoformPower implements Power {
 	}
 
 	/**
-	 * (0.20.8) The Ultimate ends and the base alien is back, at the health it held and with its cooldowns put back. A hand-drop keeps
+	 * (0.20.9) The Ultimate ends and the base alien is back, at the health it held and with its cooldowns put back. A hand-drop keeps
 	 * the Ultimate's health for the next change-in this change, spends the last stand and starts the {@link #ULT_REENTER} wait on C;
 	 * a break locks the Ultimate for the rest of the change. The charge runs on. (The fallback buff just comes off.)
 	 */
@@ -1516,7 +1516,7 @@ public final class XenoformPower implements Power {
 	}
 
 	/**
-	 * (0.20.8) The Ultimate's own health is gone: it breaks. You are the base alien again at its held health, stunned for
+	 * (0.20.9) The Ultimate's own health is gone: it breaks. You are the base alien again at its held health, stunned for
 	 * {@link #ULT_BREAK_STUN}, and the Ultimate is locked for the rest of this change. Not a knockout: no corruption, no knockout count.
 	 */
 	private static void breakUltimate(ServerPlayer player, Live live) {
@@ -1531,7 +1531,7 @@ public final class XenoformPower implements Power {
 	}
 
 	/**
-	 * (0.20.8) The last stand's standing rules: an ascended alien whose Ultimate hasn't been spent or broken this change, hit
+	 * (0.20.9) The last stand's standing rules: an ascended alien whose Ultimate hasn't been spent or broken this change, hit
 	 * (not by the void or /kill) while fighting a great foe ({@link GreatFoes}). Works on a reforged band too.
 	 */
 	private static boolean lastStandReady(ServerPlayer player, Live live, DamageSource source) {
@@ -1540,12 +1540,12 @@ public final class XenoformPower implements Power {
 			&& com.jaymospowers.core.Fate.isAscended(player) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && greatFoe(player, source);
 	}
 
-	/** (0.20.8) The last stand: the Ultimate comes on by itself, once per change. Returns whether it did (the caller then cancels the hit). */
+	/** (0.20.9) The last stand: the Ultimate comes on by itself, once per change. Returns whether it did (the caller then cancels the hit). */
 	private static boolean lastStand(ServerPlayer player, Live live, DamageSource source, float baseAtLeast) {
 		return lastStandReady(player, live, source) && evolve(player, live, true, baseAtLeast);
 	}
 
-	/** (0.20.8) A great foe is hitting you, or you fought one in the last {@link #ULT_FILM_COMBAT} ticks. */
+	/** (0.20.9) A great foe is hitting you, or you fought one in the last {@link #ULT_FILM_COMBAT} ticks. */
 	private static boolean greatFoe(ServerPlayer player, DamageSource source) {
 		Entity attacker = source.getEntity();
 		Entity direct = source.getDirectEntity();
@@ -1561,7 +1561,7 @@ public final class XenoformPower implements Power {
 	}
 
 	/**
-	 * (0.20.8) The debug command's hand on the Ultimate: {@code on} (change in now, no entry rules), {@code off} (drop back, no
+	 * (0.20.9) The debug command's hand on the Ultimate: {@code on} (change in now, no entry rules), {@code off} (drop back, no
 	 * locks), {@code break} (break it as if its health ran out). Returns a message for the command to show, or null if it worked.
 	 */
 	static @Nullable String debugUltimate(ServerPlayer player, String mode) {
@@ -1773,13 +1773,13 @@ public final class XenoformPower implements Power {
 	/** From one alien straight into another, {@code cost} off the charge, keeping the health you'll turn back at. */
 	private static boolean swap(ServerPlayer player, Live live, XenoForm target, int cost) {
 		float human = live.humanHealth;
-		// (0.20.8) the Ultimate's locks belong to the change, not the alien: they ride through a quick change (as the Ultimate, its health is what's left)
+		// (0.20.9) the Ultimate's locks belong to the change, not the alien: they ride through a quick change (as the Ultimate, its health is what's left)
 		boolean wasUlt = live.ult != null;
 		float keptUlt = wasUlt ? player.getHealth() : live.ultHealth;
 		boolean keptBroken = live.ultBroken, keptSpent = live.lastStandSpent || wasUlt;
 		long[] keptUntil = (wasUlt ? live.cooldownUntil : live.ultCooldownUntil).clone();
 		int[] keptLength = (wasUlt ? live.cooldownLength : live.ultCooldownLength).clone();
-		// (0.20.8) the Ultimates' cooldowns are kept per Ultimate for the whole change, so a round trip through another alien restores them
+		// (0.20.9) the Ultimates' cooldowns are kept per Ultimate for the whole change, so a round trip through another alien restores them
 		java.util.Map<XenoUltimate, long[]> mapUntil = new java.util.HashMap<>(live.keptUltUntil);
 		java.util.Map<XenoUltimate, int[]> mapLength = new java.util.HashMap<>(live.keptUltLength);
 		XenoUltimate fromUlt = wasUlt ? live.ult : live.form == null ? null : live.form.evolved();

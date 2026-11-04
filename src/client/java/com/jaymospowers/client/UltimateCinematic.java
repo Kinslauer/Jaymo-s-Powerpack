@@ -61,7 +61,7 @@ public final class UltimateCinematic {
 	/** (0.18.46) {@link UltimateFilm#CUTS}: the tilt of the sideways cut (degrees). */
 	static final float CUT_ROLL = 11.0F;
 	/**
-	 * (0.20.8) {@link UltimateFilm#MORPH}: the share of a part's beat the camera takes to zoom in (the part grows while it holds), how
+	 * (0.20.9) {@link UltimateFilm#MORPH}: the share of a part's beat the camera takes to zoom in (the part grows while it holds), how
 	 * far it keeps pushing in over the hold, how far out it starts and ends (times the body's height), and how far to the side (degrees).
 	 * {@code *_FIRST} are the first-time cut's: bigger zooms, a slower push, and a shake on the last beat.
 	 */
@@ -81,7 +81,7 @@ public final class UltimateCinematic {
 	private static boolean afterDeath;
 	private static @Nullable CameraType viewBefore;
 	private static int shot, length, age, target = -1, hurtBefore;
-	/** (0.20.8) {@link UltimateFilm#MORPH}: whose body changes, the parts in order, whether it is the long first-time cut. */
+	/** (0.20.9) {@link UltimateFilm#MORPH}: whose body changes, the parts in order, whether it is the long first-time cut. */
 	private static int casterId = -1;
 	private static java.util.List<String> parts = java.util.List.of();
 	private static boolean first;
@@ -129,7 +129,7 @@ public final class UltimateCinematic {
 	private static void start(Minecraft minecraft, UltimateFilm.Play play) {
 		LocalPlayer self = minecraft.player;
 		if (play.shot() == UltimateFilm.MORPH) {
-			// (0.20.8) everyone's world shows the body changing, film or not
+			// (0.20.9) everyone's world shows the body changing, film or not
 			XenoMorph.film(minecraft, play.caster(), play.ticks(), play.parts(), play.first());
 			if (play.target() == UltimateFilm.MORPH_ONLY) {
 				return;
@@ -333,7 +333,7 @@ public final class UltimateCinematic {
 	}
 
 	/**
-	 * (0.20.8) {@link UltimateFilm#MORPH}: wide on the whole body, then in turn on each changing part (a pleasing angle, alternating
+	 * (0.20.9) {@link UltimateFilm#MORPH}: wide on the whole body, then in turn on each changing part (a pleasing angle, alternating
 	 * sides, zooming in while it grows, holding with a slow push), then a pull back to frame the whole new body. The beats are
 	 * {@link XenoMorph#windowStart}'s, the same the body grows by. First time: wider start, closer zooms, a shake on the last beat.
 	 * Whoever's body it is (a witness's film is the caster's), the camera is the viewer's own.

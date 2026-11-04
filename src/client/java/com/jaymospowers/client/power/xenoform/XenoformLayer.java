@@ -28,7 +28,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-		// (0.20.8) an alien with an Ultimate model wears it while its Ultimate is on
+		// (0.20.9) an alien with an Ultimate model wears it while its Ultimate is on
 		boolean ultimate = Boolean.TRUE.equals(state.getData(XenoformClient.ULTIMATE));
 		XenoFormModels.FormModel model = XenoformClient.model(state.getData(XenoformClient.FORM), ultimate);
 		if (model == null) {
@@ -49,7 +49,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			return;
 		}
 		poseStack.pushPose();
-		// (0.20.8) with no parts listed, the whole Ultimate grows in
+		// (0.20.9) with no parts listed, the whole Ultimate grows in
 		float grow = ultimateModel ? XenoMorph.whole(state.getData(XenoformClient.MORPH)) : 1.0F;
 		if (model.renderScale != 1.0F || grow != 1.0F) {
 			// a form built smaller than the player (Duplex) is drawn up from the feet (model y 24, 1.501 below here)
@@ -98,7 +98,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 				glow(state.ageInTicks), null, 0);
 		}
 		if (ultimateModel) {
-			// (0.20.8) the Ultimate model's own passes (wings, comet, ...)
+			// (0.20.9) the Ultimate model's own passes (wings, comet, ...)
 			model.submitExtras(state, poseStack, collector, lightCoords);
 		}
 		if (model instanceof XenoFormModels.Wyrm) {
@@ -123,7 +123,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		com.jaymospowers.power.xenoform.XenoForm form = com.jaymospowers.power.xenoform.XenoForms.get(model.id);
 		int color = form != null ? form.color : 0xFFFFFF;
 		float pulse = 0.75F + 0.25F * Mth.sin(state.ageInTicks * SEAM_PULSE);
-		// (0.20.8) a part landing in the change-in flares the seams
+		// (0.20.9) a part landing in the change-in flares the seams
 		XenoMorph.Morph morph = state.getData(XenoformClient.MORPH);
 		if (morph != null) {
 			pulse = Math.max(pulse, morph.flare());
@@ -132,7 +132,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityTranslucentEmissive(model.ultimateGlow), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 			seams, null, 0);
 		if (model instanceof XenoFormModels.UltimateModel) {
-			// (0.20.8) an Ultimate model has its own spikes in its mesh
+			// (0.20.9) an Ultimate model has its own spikes in its mesh
 			return;
 		}
 		UltimateSpikes spikes = UltimateSpikes.of(model.id, model);

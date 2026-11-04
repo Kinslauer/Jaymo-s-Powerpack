@@ -89,3 +89,6 @@ full.
 ## 11. Shrine (Kingdoms)
 A small stone altar with candles. Hold use to pray for 5 seconds: once a Minecraft day, a small heal on every part and
 festering cleared. Crafted (stone bricks, candles, gold nugget).
+(0.7.509) Patron gods: use a patron's offering on a plain shrine to give it to them (a glyph shows on the altar). Praying
+at a patron's shrine three days running swears you; an offering there once a day adds favour. Sneak and use with an empty
+hand opens the patrons screen. See `docs/Patrons-Plan.md`.

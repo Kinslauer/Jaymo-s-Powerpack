@@ -113,7 +113,7 @@ public final class BandUpgrades {
 				Codec.STRING.listOf().optionalFieldOf("known", List.of()).forGetter(Upgrades::known),
 				Codec.STRING.listOf().optionalFieldOf("fitted", List.of()).forGetter(Upgrades::fitted),
 				Codec.STRING.listOf().optionalFieldOf("skills", List.of()).forGetter(Upgrades::skills),
-				// (0.20.8) old saves have no "seen": none seen yet
+				// (0.20.9) old saves have no "seen": none seen yet
 				Codec.STRING.listOf().optionalFieldOf("seen", List.of()).forGetter(Upgrades::seen))
 			.apply(i, Upgrades::new));
 		public static final StreamCodec<ByteBuf, Upgrades> STREAM_CODEC = StreamCodec.composite(
@@ -167,7 +167,7 @@ public final class BandUpgrades {
 			return new Upgrades(reforged, known, fitted, plus(skills, s.id), seen);
 		}
 
-		/** (0.20.8) Whether the wearer has already become this Ultimate (an alien's id): the film is the short cut after the first. */
+		/** (0.20.9) Whether the wearer has already become this Ultimate (an alien's id): the film is the short cut after the first. */
 		public boolean saw(String ultimate) {
 			return seen.contains(ultimate);
 		}
@@ -277,12 +277,12 @@ public final class BandUpgrades {
 		return up == null ? Upgrades.NONE : up;
 	}
 
-	/** (0.20.8) Whether {@code player} has become the Ultimate of the alien {@code id} before. */
+	/** (0.20.9) Whether {@code player} has become the Ultimate of the alien {@code id} before. */
 	public static boolean seenUltimate(Player player, String id) {
 		return get(player).saw(id);
 	}
 
-	/** (0.20.8) Remembers that {@code player} has become the Ultimate of the alien {@code id} (saved with the band). */
+	/** (0.20.9) Remembers that {@code player} has become the Ultimate of the alien {@code id} (saved with the band). */
 	public static void markUltimateSeen(ServerPlayer player, String id) {
 		Upgrades up = get(player);
 		if (!up.saw(id)) {

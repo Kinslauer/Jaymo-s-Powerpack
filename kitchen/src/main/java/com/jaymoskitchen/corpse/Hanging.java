@@ -7,6 +7,7 @@ import com.jaymoskitchen.ragdoll.RagdollRig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -57,6 +58,20 @@ public final class Hanging {
 	static final int PRIME_EXTRA = 1, SCRAPS_MORE = 1;
 	/** Animal fat from anything bigger than a chicken after the last cut (at least one, up to this many more). */
 	static final int FAT_MORE = 1;
+
+	/** (Kitchen 0.5.57) Other mods' hooks: extra butcher-table extras for whoever cuts, and a word when a carcass is finished. Kitchen knows nothing of who adds them. */
+	private static final List<ToIntFunction<Player>> EXTRA_CUTS = new ArrayList<>();
+	private static final List<BiConsumer<Player, Entity>> ON_DONE = new ArrayList<>();
+
+	/** (Kitchen 0.5.57) {@code extra} says how many more times the butcher-table extras are added for this player's hung carcass. */
+	public static void addExtraCuts(ToIntFunction<Player> extra) {
+		EXTRA_CUTS.add(extra);
+	}
+
+	/** (Kitchen 0.5.57) {@code done} is told of the player and the carcass when a hung carcass is finished. */
+	public static void addOnDone(BiConsumer<Player, Entity> done) {
+		ON_DONE.add(done);
+	}
 	/** Kitchen's own drop, without Jaymo's Powers' blood. */
 	static final DustParticleOptions DROP = new DustParticleOptions(0x6A0A0C, 0.7F);
 
@@ -350,6 +365,14 @@ public final class Hanging {
 		if (done == 0) {
 			// done properly, hung and bled: what a butcher table gets out of it too
 			corpse.addLoot(corpse.blockExtras());
+			// (Kitchen 0.5.57) and what other mods add for this butcher
+			int more = 0;
+			for (ToIntFunction<Player> extra : EXTRA_CUTS) {
+				more += extra.applyAsInt(player);
+			}
+			for (int i = 0; i < more; i++) {
+				corpse.addLoot(corpse.blockExtras());
+			}
 		}
 		int cutsLeft = CUTS - done;
 		corpse.jolt(true);
@@ -368,6 +391,9 @@ public final class Hanging {
 			level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 20, 0.4, 0.3, 0.4, 0.2);
 			level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.done"));
+			for (BiConsumer<Player, Entity> listener : ON_DONE) {
+				listener.accept(player, corpse);
+			}
 			corpse.discard();
 			return;
 		}

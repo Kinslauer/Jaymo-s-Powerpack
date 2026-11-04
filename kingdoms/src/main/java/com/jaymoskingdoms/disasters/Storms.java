@@ -275,6 +275,10 @@ public final class Storms {
 		if (level.getBiome(top).value().getPrecipitationAt(top, level.getSeaLevel()) != Biome.Precipitation.RAIN) {
 			return;
 		}
+		// (0.7.509) the Deep Mother's Calm Water keeps the bolts from those at sea
+		if (com.jaymoskingdoms.Blessings.calmsSea(level, top)) {
+			return;
+		}
 		// a lightning rod nearby takes it
 		BlockPos rod = BlockPos.betweenClosedStream(top.offset(-8, -6, -8), top.offset(8, 10, 8))
 			.filter(p -> level.getBlockState(p).is(BlockTags.LIGHTNING_RODS)).findFirst().map(BlockPos::immutable).orElse(null);

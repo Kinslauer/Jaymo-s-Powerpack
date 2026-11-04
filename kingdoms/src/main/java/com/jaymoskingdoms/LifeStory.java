@@ -964,6 +964,8 @@ public final class LifeStory {
 		// (0.7.420) the harder life they chose: flaws, hard-road options, the points given up (counted off the story just saved)
 		Flaws.choose(player, live.flaws(), live.switches());
 		Heritage.set(player, heritage);
+		// (0.7.509) the patron of their blood is known; a devout upbringing starts sworn
+		Patrons.storyStart(player);
 		HeritageVariants.choose(player, heritage, live.look());
 		Classes.set(player, cls, option);
 		Stats.attributes(player);
@@ -1038,6 +1040,8 @@ public final class LifeStory {
 		story.set(Question.ROAD.ordinal(), road.key);
 		player.setAttached(STORY, List.copyOf(story));
 		PlayerTemperaments.settle(player, true);
+		// (0.7.509) a devout road starts sworn; the road may have changed the blood and temperament, so start the story afresh
+		Patrons.storyRestart(player);
 		// (0.7.420) a road told after the creator may add story points of its own (Rustfall's), which a life from nothing gives up too
 		if (road.start == Start.RUSTFALL) {
 			Flaws.giveUpMore(player, RUSTFALL_STAT, 1);

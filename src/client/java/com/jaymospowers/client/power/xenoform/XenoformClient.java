@@ -46,7 +46,7 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<String> ACT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_act");
 	/** (0.19.66) A low-box alien (Croaker) holding sneak, which its pose can't show. */
 	public static final RenderStateDataKey<Boolean> SNEAK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_sneak");
-	/** (0.20.8) The change-in morph this player is in ({@link XenoMorph}), or null. */
+	/** (0.20.9) The change-in morph this player is in ({@link XenoMorph}), or null. */
 	public static final RenderStateDataKey<XenoMorph.Morph> MORPH = RenderStateDataKey.create(() -> "jaymospowers:xenoform_morph");
 	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
 	private static final double STRIDE_CATCH_UP = 0.3;
@@ -64,7 +64,7 @@ public final class XenoformClient {
 	}
 
 	/**
-	 * (0.20.8) The model a player wearing {@code form} is drawn with: the Ultimate's ({@link XenoFormModels#ultimate}) while their Ultimate is
+	 * (0.20.9) The model a player wearing {@code form} is drawn with: the Ultimate's ({@link XenoFormModels#ultimate}) while their Ultimate is
 	 * on and that alien has one, else the alien's own ({@link XenoFormModels#of}). Null: not transformed.
 	 */
 	public static XenoFormModels.@Nullable FormModel model(@Nullable String form, boolean ultimate) {

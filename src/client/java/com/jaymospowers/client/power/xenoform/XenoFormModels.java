@@ -51,7 +51,7 @@ public final class XenoFormModels {
 		}
 
 		/**
-		 * (0.20.8) A model's own extra passes (glow, wings, comet), drawn after its body inside {@link XenoformLayer}'s pose. A no-op
+		 * (0.20.9) A model's own extra passes (glow, wings, comet), drawn after its body inside {@link XenoformLayer}'s pose. A no-op
 		 * by default: the older models keep their effects in the layer's {@code instanceof} branches.
 		 */
 		public void submitExtras(AvatarRenderState state, com.mojang.blaze3d.vertex.PoseStack poseStack,
@@ -60,7 +60,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.20.8, Ultimates patch 0) The base of every Ultimate's model ({@code client/.../ultimate/Ultimate<Name>.java}). It is a
+	 * (0.20.9, Ultimates patch 0) The base of every Ultimate's model ({@code client/.../ultimate/Ultimate<Name>.java}). It is a
 	 * {@link FormModel} built with the BASE alien's id, so {@link #ultimateTexture} / {@link #ultimateGlow} are the Ultimate's skin
 	 * ({@code textures/entity/xenoform_<id>_ultimate[_glow].png}); the layer draws those, skips {@code UltimateSpikes}, and calls
 	 * {@link #submitExtras}. Subclasses pose themselves in {@link #pose} (not {@code setupAnim}, which is final here): after it,
@@ -105,7 +105,7 @@ public final class XenoFormModels {
 				return centres.get(name);
 			}
 			if (name.contains("+")) {
-				// (0.20.8) a beat of several parts: the middle of their middles
+				// (0.20.9) a beat of several parts: the middle of their middles
 				float[] sum = new float[3];
 				int got = 0;
 				for (String piece : name.split("\\+")) {
@@ -124,7 +124,7 @@ public final class XenoFormModels {
 			float[] found = null;
 			ModelPart part = part(name);
 			if (part != null) {
-				// (0.20.8) from the rest pose of every part, not however the last frame left them
+				// (0.20.9) from the rest pose of every part, not however the last frame left them
 				root.getAllParts().forEach(ModelPart::resetPose);
 				float[] sum = new float[3];
 				int[] count = new int[1];
@@ -156,18 +156,18 @@ public final class XenoFormModels {
 	private XenoFormModels() {
 	}
 
-	/** (0.20.8) The Ultimate models by BASE alien id, filled lazily like {@link #MODELS}: one line per Ultimate, added by its stage. */
+	/** (0.20.9) The Ultimate models by BASE alien id, filled lazily like {@link #MODELS}: one line per Ultimate, added by its stage. */
 	private static final Map<String, FormModel> ULTIMATES = new LinkedHashMap<>();
 	private static boolean ultimatesFilled;
 
-	/** (0.20.8) The Ultimate model of the alien {@code form} (its base id; {@code ooze} and {@code magma_ooze} are separate), or null if none was added yet. */
+	/** (0.20.9) The Ultimate model of the alien {@code form} (its base id; {@code ooze} and {@code magma_ooze} are separate), or null if none was added yet. */
 	public static @Nullable FormModel ultimate(@Nullable String form) {
 		if (form == null) {
 			return null;
 		}
 		if (!ultimatesFilled) {
 			ultimatesFilled = true;
-			// (0.20.8) one line per Ultimate
+			// (0.20.9) one line per Ultimate
 			ULTIMATES.put("bulwark", new com.jaymospowers.client.power.xenoform.ultimate.UltimateTitan());
 		}
 		return ULTIMATES.get(form);
@@ -233,7 +233,7 @@ public final class XenoFormModels {
 		return bake(mesh, 64, 128);
 	}
 
-	/** (0.20.8) An Ultimate's model root: its own UV size (64x128, or larger where it needs it). */
+	/** (0.20.9) An Ultimate's model root: its own UV size (64x128, or larger where it needs it). */
 	public static ModelPart bake(MeshDefinition mesh, int textureWidth, int textureHeight) {
 		return LayerDefinition.create(mesh, textureWidth, textureHeight).bakeRoot();
 	}

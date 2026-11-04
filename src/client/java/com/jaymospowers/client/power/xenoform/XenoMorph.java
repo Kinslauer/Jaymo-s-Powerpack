@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.8, Ultimates patch 0) The change-in as the world sees it. When a player's Ultimate turns on, this client times a morph
+ * (0.20.9, Ultimates patch 0) The change-in as the world sees it. When a player's Ultimate turns on, this client times a morph
  * (as long as the film: {@code ULT_FILM_TICKS}, or {@code ULT_FILM_FIRST} the first time, whatever the film packet said): each
  * part named in {@link XenoUltimate#morphParts()} grows from small into place over its beat, in order, its seams flaring as it
  * lands, and the whole body is there for the last stretch. Everyone sees it, film or not. With no parts listed the whole model
@@ -42,7 +42,7 @@ public final class XenoMorph {
 
 	private static final class Track {
 		boolean seen, was, first, roared;
-		/** (0.20.8) How many parts' first-time crackles have played. */
+		/** (0.20.9) How many parts' first-time crackles have played. */
 		int crackled;
 		long start = -1L;
 		int ticks;
@@ -99,7 +99,7 @@ public final class XenoMorph {
 		}
 	}
 
-	/** (0.20.8) The first-time cut's sound: the band crackles as each part locks on, and a roar lands with the last beat. */
+	/** (0.20.9) The first-time cut's sound: the band crackles as each part locks on, and a roar lands with the last beat. */
 	private static void sounds(Minecraft minecraft, Player player, Track t, long now) {
 		float p = (now - t.start) / (float)t.ticks;
 		int n = t.parts.size();
@@ -208,7 +208,7 @@ public final class XenoMorph {
 		int n = morph.parts.size();
 		for (int i = 0; i < n; i++) {
 			float s = Mth.lerp(grown(i, n, morph.p), FROM_SCALE, 1.0F);
-			// (0.20.8) "a+b" is one beat for several parts (Titan's two shoulder plates)
+			// (0.20.9) "a+b" is one beat for several parts (Titan's two shoulder plates)
 			for (String name : morph.parts.get(i).split("\\+")) {
 				ModelPart part = model.part(name);
 				if (part == null || part == model.root()) {

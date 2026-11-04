@@ -112,6 +112,8 @@ final class WarParties {
 		/** Its spoils cart: carter, horse and wagon; and whether it was broken open. */
 		@Nullable UUID carter, horse, wagon;
 		boolean cartBroken;
+		/** Set when the siege took the enemy's riches; the Crowned Sun's deed is paid once for it. */
+		boolean sacked;
 		/** Where its cart last got on, and when (to help it over what stops it). */
 		@Nullable Vec3 cartMark;
 		long cartMarkAt;
@@ -219,11 +221,11 @@ final class WarParties {
 		if (target == null || ACTIVE.containsKey(key(war.id(), side))) {
 			return null;
 		}
-		return start(level, war, side, from, target, null) != null ? target : null;
+		return start(level, war, side, from, target, null, 0) != null ? target : null;
 	}
 
 	/** Sends {@code from}'s party against {@code target}: from {@code muster} (its own seat, for a party a player calls), else on the enemy's frontier. */
-	private static @Nullable Party start(ServerLevel level, War war, int side, Faction from, Faction target, @Nullable BlockPos musterAt) {
+	private static @Nullable Party start(ServerLevel level, War war, int side, Faction from, Faction target, @Nullable BlockPos musterAt, int extra) {
 		MinecraftServer server = level.getServer();
 		RandomSource random = level.getRandom();
 		BlockPos muster = musterAt != null ? musterAt : muster(level, side, Wars.otherSide(war, side), from, target);
@@ -237,7 +239,7 @@ final class WarParties {
 		int army = from.holdings().count(Folk.GUARD) + from.holdings().count(Folk.ARCHER);
 		// (0.7.224) a great war's parties are bigger, and take sellswords from the war chest
 		boolean great = GreatWars.great(server, war);
-		int size = Math.min(great ? GreatWars.PARTY_MAX : PARTY_MAX, PARTY_BASE + army / PARTY_PER) + Tempers.warExtra(from);
+		int size = Math.min(great ? GreatWars.PARTY_MAX : PARTY_MAX, PARTY_BASE + army / PARTY_PER) + Tempers.warExtra(from) + extra;
 		if (great) {
 			size += GreatWars.draftMercs(server, war, side, GreatWars.MERCS_PER_PARTY);
 		}
@@ -367,7 +369,8 @@ final class WarParties {
 				continue;
 			}
 			BlockPos muster = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition());
-			Party party = start(level, war, side, mine, target, muster);
+			// (0.7.509) the Crowned Sun's Banner-Bearer musters more
+			Party party = start(level, war, side, mine, target, muster, Blessings.partyExtra(player));
 			if (party == null) {
 				continue;
 			}
@@ -379,6 +382,7 @@ final class WarParties {
 
 	/** Its siege over, a party with players in it takes the enemy's riches: a share of its treasury and goods from its storehouse. */
 	private static void seize(ServerLevel level, Party party, Faction target) {
+		party.sacked = true;
 		MinecraftServer server = level.getServer();
 		boolean cart = cart(level, party) != null;
 		long share = Math.round(target.treasury() * SPOILS_SHARE);
@@ -416,6 +420,16 @@ final class WarParties {
 
 	/** The spoils are home: goods into the storehouse (what won't fit, at the seat), silver into the treasury; the players their cut, paid in coins. */
 	private static void deliver(ServerLevel level, Party party, @Nullable Faction from) {
+		// (0.7.509) marching home from a won siege pleases the Crowned Sun (once per party)
+		if (party.sacked) {
+			party.sacked = false;
+			for (java.util.UUID id : party.players) {
+				ServerPlayer p = level.getServer().getPlayerList().getPlayer(id);
+				if (p != null) {
+					Patrons.deed(p, Patron.CROWNED_SUN, Patrons.DEED_GREAT, "siege");
+				}
+			}
+		}
 		if (from == null || party.spoils.isEmpty() && party.spoilsSilver == 0) {
 			return;
 		}
