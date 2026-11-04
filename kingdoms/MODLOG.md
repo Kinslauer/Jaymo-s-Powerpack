@@ -8278,3 +8278,142 @@ or the symbiote suit it isn't drawn (`PowersCover.body`).
 ## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
 Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
 off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.7.486: thirteen sea-blooded Tideborn looks (pack 0.19.77)
+Andy (2026-11-03): "tideborn need to vary wildly, at least 13 different tideborn variations, they are fish people so they
+can draw from any sealife". Tideborn now have 16 looks: the first three, plus Greyfin (shark), Mantawing (manta),
+Eightarm (octopus), Lanternjaw (anglerfish), Driftbell (jellyfish), Moray (eel), Shellclaw (crab), Spinepuff
+(pufferfish), Lionmane (lionfish), Weedfrond (seadragon), Swordbill (swordfish), Frillback (sea slug) and Oldshell (sea
+turtle).
+- **Real model parts** (client `SeaParts`, beside `BeastParts`): dorsal fins, tails and caudal fins, back-wings, horns,
+  a mantle and tentacles, a lit lure and fangs, a clear bell and threads, ribbon fins, a shell, claws and eyestalks,
+  spines, a mane of venom rays and arm fans, leafy fronds, a bill and sail, frills, a turtle's shell and beak. Every piece
+  is one line of `SeaParts.TABLE` (box, pivot, turn, segments, sway); they follow the head, body and arms on players and
+  MCA villagers, hide under helmets (head parts) and Powers costumes, and stand off a chestplate.
+- Each look keeps only the Tideborn fins its parts leave room for (`SeaParts.Fins`), has its own marks, eyes and fin
+  colours, a tint, a land lean and one small trait (`HeritageVariants`); they keep the Tideborn kit.
+- **No traditional armour on strange shapes** (`SeaBodies`, Andy: "the ones with nonstandard heads or bodies cannot wear
+  traditional armor"): no helmet for Eightarm, Lanternjaw, Driftbell, Shellclaw, Swordbill, Lionmane, Spinepuff,
+  Frillback, Weedfrond; no chestplate (or elytra) for Greyfin, Mantawing, Shellclaw, Oldshell, Lionmane, Swordbill,
+  Spinepuff, Frillback, Weedfrond, Moray. A piece put on slides back into the pack with a word on the action bar;
+  headwear that gives no armour (crowns, pumpkins) still fits. The trait lines say so.
+  Villagers too (Andy: "this applies period, the villagers will comment on it, and find alternatives"): what they wear
+  or carry for MCA's armour routine is shed at their feet with a remark; their guards become MCA archers (a bow and arrows
+  packed if they have none, with a remark), and they're first in line for their realm's horses (`Cavalry`).
+- **By the shore** (Andy: "it just makes sense for their havens or settlements to be by the shore"): a haven is drawn
+  Tideborn only when its seat has sea, river or beach within 72 blocks (`Havens.shore`), and an inland haven never is; the
+  Tideborn village start looks for a village by the water first (plains maps, not desert), falling back inland only if
+  none is free. Havens already drawn keep their blood.
+- Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
+  Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
+  `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
+
+## 0.7.487: one HUD layout (pack 0.19.79, Kitchen 0.5.55)
+Every Kingdoms HUD piece asks the pack's shared zones where to draw (`client/hud/HudZones`, a copy of Powers'; see
+`docs/HUD-Layout.md` in the pack): riding and dragon bars stack in the right dock over the power chips, the horse tag
+and wild-horse stats sit under the crosshair, the awareness eye over it, the forms chain count right of it, the forms
+belt, spirit line, seizure struggle and the Grue's line in the focus band over the action bar, the valor bar in the left
+dock, and the kin-sense compass (now on a plate, hidden under F3) and party list in the top-left rail under Xaero's
+minimap. Handshake and spirit-clash films and the story and travel curtains hide the zoned HUD.
+
+## 0.7.488: building from schematics
+- **Schematic files as designs** (`SchematicFiles`): a design may now be a `.nbt` (structure block), `.schem` (Sponge
+  v1 to v3) or `.litematic` (every region), dropped in `<world>/jaymoskingdoms_designs/` or uploaded; older files are
+  brought up to date by the game's data fixer. Only blocks come along (no block entities, no entities). Checked on
+  Structura's "Medieval House": all three of its Java files read to the same 1,410 blocks.
+  26.3 names a palette entry `id`/`properties`; the formats (and tools writing .nbt themselves) still use
+  `Name`/`Properties`, which 26.3 reads as air, so entries are renamed after fixing.
+- **Uploads from your own computer** (`DesignUploads`, client `DesignUploadClient`): put files in the game folder's
+  `schematics/` (Litematica's own folder; the screen's Open folder button opens it) and pick one on the mason's table's
+  screen. It goes up in 30 KB pieces (at most about 1.9 MB); the server reads it as NBT within a 64 MB quota and keeps it
+  as the uploader's design (if someone else has that name, it gets `_2`, `_3`...). No commands.
+- **Bigger designs**: up to 96 across, 128 high, 120,000 blocks. Builder crews still take only plot-sized ones
+  (32 across, 48 high, 16,000 blocks); bigger ones are marked "mason's table only" on the table's screen.
+- **Building plan and mason's table** (`MasonTable`): two paper and a charcoal make a blank plan;
+  the table's screen draws a design on it. Use it on the ground to lay it out (sneak-use turns it a quarter;
+  its outline shows while held), then put it in a mason's table (paper, crafting table, stone bricks). The table lays
+  it bottom up, one block every 5 ticks, from the containers touching it, the exact block each time; doors and beds go
+  in whole. Blocks in the way are skipped (use the finished table to try them again), matching ones only turned.
+  Laid blocks count as the plan owner's (`Placed`). Dev-server test: a table built the whole Medieval House (turned 90 degrees) from barrels in
+  about six minutes, 1,409 of 1,410 blocks exact (one dirt had greened).
+- **Build a laid plan by hand, like a ship's build kit** (`PlanSites`, client `PlanGhosts`): a laid plan stays
+  standing as see-through pale-blue ghost blocks that everyone within 128 blocks sees (nearest 6,000 within 48 drawn).
+  Place the right blocks yourself (any facing counts; dirt and grass stand in for each other) and each ghost goes as
+  it's filled. Standing in it shows `design: placed / needed blocks`. At 90% of its blocks it's built: ghosts gone,
+  a fanfare and a message. Laying the plan again moves it; drawing a new design takes it down; at most 3 per player.
+  Dev-client test: the Medieval House's ghost showed, half-built showed `704 / 1269`, and at 95% it was built.
+- **Mason's table screen** (`MasonNet`, client `MasonScreen`), opened by using the table: your schematic files on the
+  left, the world's designs on the right (size, author, whether crews can build it). Buttons: Draw on a blank plan,
+  Offer to this settlement, Save marked build (the area marked with a surveyor's rod, under a typed name), Take the
+  plan back, Try skipped blocks again. It shows the plan's progress, the block it waits for and the top materials
+  still needed; answers show at the bottom. The lists shrink to fit at large GUI scales. Sneak-use takes the plan back.
+- **Plans for a settlement** (`Commissions`): a member, or a friend with 100 reputation, standing in a settlement
+  can offer one of the world's designs from a mason's table's screen. Its builders put it up on open ground of their choosing before
+  their own catalogue, from storage, like any building. Up to 4 waiting per settlement, 1 per player. When finished,
+  the giver gets +40 reputation and a message.
+
+## 0.7.489: bug sweep (pack 0.19.80)
+- **Loot tables**: bog iron ore and the clockwork golem were in the pre-26.3 `functions`/`conditions` form, which 26.3
+  ignores (only Moog's Structures' on-the-fly upgrade kept them working: without it bog iron ore always drops itself and the
+  golem always its clock); rewritten as `modifier`/`condition`.
+- **Schematic uploads** (`SchematicFiles`): a file spanning more than the biggest design (96 × 96 × 128) is refused
+  before it's built in full on the server thread, and a Litematica region claiming a side over 4,096 is refused (the
+  sizes' product could overflow and pass the check, then loop for ever).
+- **Mason's table**: the screen's refresh no longer rereads every design file from disk for its author
+  (`Designs.author` is cached, cleared on save and delete). Where the right block already stands, the table now copies
+  only how it lies (facing, axis, half, shape and other named properties), never counts or switches, so a laid plan of
+  a ripe farm no longer grows crops, fills end portal frames or charges anchors for free.
+- **Cinder Forge**: a second Ignis Vael could be made while the forge's chunks had loaded their blocks but not yet their
+  entities; the watch now waits for the entities. Smiths' rumours no longer stall in a world whose clock is behind one
+  you played before (the cooldown kept the other world's time).
+
+## 0.7.490: greenskin hordes patches 3+, Beastfolk and Hollow, heritage kits, war journals (pack 0.19.81)
+Andy's answers of 2026-11-03 are in `docs/Hordes-Plan.md`; the races in `docs/Races-Plan.md`. Built as parallel tracks,
+each reviewed with every finding independently verified; compile-checked only, not yet seen in game.
+- **Dialects** (`Dialects`): orcs and goblins speak their own broken English (orcs blunt and brutal, goblins quick, greedy
+  and sly). Lines only greenskins say were rewritten; shared ones split into `dialect.jaymoskingdoms.<orc|goblin>.<key>`.
+- **Brutality** (`Brutality`): camp brawls with jeering crowds, the strongest grunt challenging the chief, orc camps raiding
+  other tribes' camps and goblin villages. **Slaves** (`Slaves`): collared goblins do an orc camp's hauling and jobs (not
+  counted in the folk cap), get thrown at foes in a fight, run off to goblin villages, and can be freed for goodwill.
+- **Bent ingots** (`BentIngots`, art `tools/gen_bent.py`): bent copper (1) and bent iron (3) are greenskin money. Sneak-use
+  an ingot on an anvil to bend it. Greenskins refuse plain ingots. A cold anvil won't straighten one (Andy): melt it in a
+  furnace or blast furnace, or superheat it on Powers' Forge Hearth.
+- **Economy** (`HordeEconomy`, `GreenMarket`, `Caravans`): folk work jobs for the camp's daily take, everyone eats, a hungry
+  camp stops growing and raids more, surplus grows faster; greenskin merchants price in bent ingots by stock, only for those
+  the camp spares; tribute and trade fill the chief's hoard, which pays for walls and tiers; carts haul surplus between a
+  tribe's camps and can be raided.
+- **Goblin towns + caps** (`HordeBuildings`, `Hordes`): tier caps 25/32/40; goblin tiers raise stone-and-timber houses,
+  two-storey homes, a tinker workshop, smelter, stalls, counting house, walkways, gardens and stone walls from tier 3; orc
+  tiers bigger and cruder. Structure templates under `data/jaymoskingdoms/structure/horde/<orc|goblin>/<tier>/` are used when
+  present (for Andy's modpack structures).
+- **Living together** (`Peoples`, `Settlers`): a distaste table between every people (orc-goblin at 3) lowers starting
+  hearts, brings glares and insults and brawls; lone orcs and goblins settle in heritage villages and havens, rarely human ones.
+- **War journals + Lore Codex** (`WarJournal`, `LoreBooks`, `LoreCodex`, after RPG Lore, MIT): orcs and goblins drop
+  journals in their dialect built from the real world plus oblique fragments; also in camp stores and broken carts. Extra
+  books as JSON in `data/jaymoskingdoms/lore/`. The soul-bound codex files every lore book.
+- **Beastfolk** (pickable) and **Hollow** (earned by being cut down by the undead and getting up) heritages, after Runic
+  Races (MIT): Arachnid, Avian, Canine, Feline, Kitsune, Serpen; Zombie, Skeleton, Wraith, Reaper. Sylvan takes every fae
+  (Dryad, Changeling, Sprite, Nymph, Faerie) and High, Moon and Blood elves. Heritages may have any number of looks.
+- **Heritage kits** (`HeritageKits`): every heritage and look has an ability (heritage key), a gift and a flaw on its card.
+- **Real model parts** (client `BeastParts`, art `tools/gen_heritage_parts.py`, Andy: "definetly real modeled parts"):
+  Beastfolk ears and tails (Canine, Feline, Kitsune with 1-3 tails), Avian folded wings and crest, Arachnid's four back
+  legs, Serpen's scaled tail, Sprite and Faerie gossamer wings, Dryad sprigs; on players and MCA villagers, hidden under
+  helmets, costumes and the symbiote suit. The painted versions came off the skins.
+- **Patch 5, every settlement** (Andy's answers in `docs/Hordes-Plan.md`):
+  - **Walled towns** (`WalledTowns`): villages and blossom villages climb four tiers with arc-a-day walls (the land's log
+    palisade, stone for villages of prosperous realms, plaster-and-tile for blossom towns), band buildings, newcomers and
+    gate golems; `/kingdom town`. Kingdoms and fiefdoms keep their open growth.
+  - **Plunder** (`Plunder`, `OgreGrowth`, `OgreRaids`, `Outbuild`): pirate coves, illager camps and ogre holds grow while
+    their stores allow; raiders break into chests and storehouses and carry the loot home; pirates take gold first and a
+    beaten ship's cargo.
+  - **Cannons** (`sailing/Bombardment`, `ShotKind`): new cannon models with recoil, smoke and flash; round, heavy, shell,
+    chain and grape shot; round, heavy and shell shot (and field guns) explode where they land and break blocks by blast
+    resistance like TNT, stone and players' builds included (chests and other block entities spared, mob guns only with
+    mob griefing on), heavy shot and shells strip loose soil on down to the rock, spread over ticks. Pirate
+    ships shell foes of their cove on the shore (orcs throwing rocks included).
+  - **Currencies** (`Currencies`): realm coins by culture with our own art (emeralds stay valid), each settlement pricing
+    in its trading hub's or overlord's coin, and money-changers.
+  - **Caravans for all** (`TradeRoutes`, handcarts): every settlement kind trades, the poor by villager-pushed handcart,
+    pirates by boat; escort or rob them. Villages keep trade money in their storehouse.
+  - **Havens expand** (`HavenGrowth`): havens raise works wherever land and stores allow, send their output by cart, and
+    keep sworn defenders by blood who grow with them.

@@ -37,7 +37,7 @@ Talon (a bird: perches upright, wings spread in the air), Keen (a bat, hangs fro
 four legs with the wings it has), Lumen (an orb of light with trailing motes). Wisp keeps its hooded legless ghost.
 Keen's hang is synced as the "hang" act; Lumen is drawn a second time fullbright.
 
-## Patch 5 (done, 0.19.76): floaters and blobs
+## Patch 5 (done, 0.19.82): floaters and blobs
 Ooze and Magma Ooze (a cube that squashes and bounces as it moves; both take the low box), Prism (a crystal cluster that walks on shards), Cortex (a guardian-like eye fish, floats), Murk (a
 squid, tentacles trailing), Gnasher (a shark, swims level, drags itself on land), Blight (three heads over a spine,
 floating). Pyre stays humanoid (Andy: "pyre should still be fairly humanoid"). Prism's Reflect is synced

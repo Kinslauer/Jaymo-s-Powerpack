@@ -274,7 +274,7 @@ public final class XenoformState {
 		return player.hasAttached(FORM);
 	}
 
-	/** (0.19.66) The aliens that take the swimming pose's low box out of water too (drawn level, at their own pace); (0.19.76) the two oozes too. */
+	/** (0.19.66) The aliens that take the swimming pose's low box out of water too (drawn level, at their own pace); (0.19.82) the two oozes too. */
 	public static final java.util.Set<String> LOW_BOX = java.util.Set.of("billow", "croaker", "ooze", "magma_ooze");
 
 	/** (0.19.66) Whether {@code player} is one of the {@link #LOW_BOX} aliens (both sides). */

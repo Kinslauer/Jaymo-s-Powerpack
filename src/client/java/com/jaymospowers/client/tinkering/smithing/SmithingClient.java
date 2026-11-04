@@ -32,8 +32,8 @@ import org.jspecify.annotations.Nullable;
  * lines on tooltips; and what lies on anvils and in hearths.
  */
 public final class SmithingClient {
-	/** The bar: half its width (px), height, and how far under the crosshair. */
-	private static final int BAR_HALF = 80, BAR_HEIGHT = 7, BAR_DROP = 22;
+	/** The bar: half its width (px) and height. (HUD rework) Where it goes is the BELOW zone's. */
+	private static final int BAR_HALF = 80, BAR_HEIGHT = 7;
 	private static final int BACK = 0xA0000000, GOOD_COLOR = 0xFFE0A030, PERFECT_COLOR = 0xFF60E060, ARROW_COLOR = 0xFFFFFFFF,
 		MISS_COLOR = 0xFFE04040;
 	/** How long a blow's colour flashes on the bar (ticks). */
@@ -124,7 +124,13 @@ public final class SmithingClient {
 		if (s == null || minecraft.player == null || s.done() >= s.total()) {
 			return;
 		}
-		int cx = graphics.guiWidth() / 2, y = graphics.guiHeight() / 2 + BAR_DROP;
+		// (HUD rework) the last piece under the crosshair (under the guard bar and the rest), the count under it
+		int[] slot = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.BELOW, "jaymospowers:smithing", 50,
+			BAR_HALF * 2 + 4, BAR_HEIGHT + 6 + 4 + 9);
+		if (slot == null) {
+			return;
+		}
+		int cx = slot[0] + BAR_HALF + 2, y = slot[1] + 3;
 		int left = cx - BAR_HALF, width = BAR_HALF * 2;
 		float centre = Forging.centre(s.seed(), s.done());
 		float good = Forging.goodHalf(s.done(), s.difficulty(), s.bonus()), perfect = Forging.perfectHalf(s.done(), s.difficulty(), s.bonus());

@@ -5105,7 +5105,43 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Lumen is now an orb of light: a white-gold core in a dithered halo, floating about a block up and bobbing, with eight motes on tilted rings that stream out behind it as it moves and burst outward when it attacks. It is drawn a second time fullbright, so it shines in the dark.
   - The four lost their Ultimate spikes (the spike model is a man's). Each body was written, then checked by a second
     pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
-- **0.19.76, Patch 5: floaters and blobs** (`docs/AlienBodies-Plan.md`): six more aliens are no longer men.
+- **0.19.76, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
+  and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
+  pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
+  `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the
+  same face instead of a new random one (Andy: "the zombie died and changed skins"). Compile-checked and ragdoll-sim
+  checked; not played.
+- **0.19.77, Kingdoms 0.7.486, sea-blooded Tideborn:** Kingdoms only (13 new Tideborn looks with real model parts), see
+  kingdoms/MODLOG.md.
+- **0.19.78, execution bars + double click** (`core/finisher/Finishers`, `client/finisher/FinisherClient`): Andy: "it should be 3 bars
+  that fill, and once the third is filled the execution plays", then "you must sneak and double click + hold, now releasing the hold
+  before the execution kills, will cancel it". Sneak + hold attack (1.5 s) is drawn as three bars under the crosshair (`Finishers.Charge`)
+  in place of the action-bar dots. Sneak + double click (0.3 s) starts the execution at once (`Finishers.Rush`), same checks, always the
+  kill; letting go of the second press before the killing blow calls it off (`Playing.held`). Symbiote suit executions don't cancel.
+- **0.19.79, one HUD layout** (`client/hud/HudZones`, `HudStyle`, `PowerDock`; plan `docs/HUD-Layout.md`): Andy: "rework
+  the hud so nothing is clashing, there are alot of new elements now, so everything needs to feel coherent". Every HUD
+  piece of Powers, Kingdoms and Kitchen that isn't a full-screen wash now asks one of seven zones where to draw, and the
+  zone stacks whatever is showing, so two pieces can't land on one spot: the right dock (power chips, Flame Avatar,
+  beam-clash panel, mount bars, Rig panel), the left dock (stomach, valor, symbiote arm, a body row of stance figure,
+  wounds doll and body heat), the focus band over the action-bar line (struggles, forms belt, spirit line, clash
+  timing), over the crosshair (charge bars, awareness eye), under it (guard, execution bars, roll pips, horse tag, smithing), right of it
+  (combo, lens, scouter), and a top-left rail under Xaero's minimap (power badge, kin sense, party). The badge no longer
+  sits on the minimap, the riding bar no longer covers the chips, the stance figure left the chat corner, and the
+  body-heat thermometer left the XP number. Our HUD hides during films (ultimates, beam and spirit clashes, handshakes,
+  curtains) as vanilla's does, and the armed crosshair now hides in an ultimate's film too. One look (`HudStyle`, Wind's
+  chips: see-through black plates, a rim in the piece's colour when ready, flat 3 px bars in a black frame, shadowed
+  text), with no resource-pack art, so it reads the same with Excalibur off. Compile-checked; not played.
+- **0.19.80, bug sweep** (Kingdoms 0.7.489): Andy: "check the pack over for bugs i havent caught". Master didn't compile:
+  `ZFighterHudLayout` still asked for `ApeRageClient.BAR_UP`, which the HUD rework (0.19.79) removed; the Ape rage piece's
+  usual spot is now the focus band's. The 99 layer blocks' and 30 other loot tables (`blocks/*_layer`, pattern chest,
+  withered leaves, Aether mobs...) were in the pre-26.3 `functions`/`conditions` form, which 26.3 ignores; in the pack
+  they only worked because Moog's Structures upgrades old data on the fly. Rewritten as `modifier`/`condition`
+  (`block_state_property` → `match_block`); a dev server loads them without the upgrade. Rift Chains' chain item is made
+  on first draw, not when the class loads. Checked by a dev server boot.
+
+- **0.19.81, Kingdoms 0.7.490, greenskin hordes and Runic Races heritages:** Kingdoms only, see kingdoms/MODLOG.md, except
+  that the Forge Hearth now superheats Kingdoms' bent ingots into Hot Ingots (`HotMetal.ingotMetal`), one way to straighten them.
+- **0.19.82, Patch 5: floaters and blobs** (`docs/AlienBodies-Plan.md`): six more aliens are no longer men.
   - Ooze and Magma Ooze are now low cubes of jelly that hop as they move: squashed wide on landing, stretched tall in the air, wobbling at rest. Ooze is a see-through shell around a dark core with eyes; Magma Ooze is three crust slabs whose gaps open as it stretches, showing the glowing core. They take the low box (`XenoformState.LOW_BOX`, with Billow and Croaker), so they fit through one-high gaps.
   - Prism is now a crystal cluster: a faceted core with ten amethyst prisms tilted out of it, walking on six thin shard legs in a tripod gait. Holding Reflect roots it (synced as the "root" act): the legs splay and dig in and the crystals flare.
   - Cortex is now a floating, guardian-like eye fish: one big eye that follows your look, a cracked dome where the brain sparks, three spikes a side that slowly push out and draw in, and a finned tail. It bobs half a block up and swims level in water. With no claws left, Claw Snap is now Spine Snap (same move).

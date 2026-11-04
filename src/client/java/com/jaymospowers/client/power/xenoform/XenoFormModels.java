@@ -930,7 +930,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.103, patch 5; 0.19.76 an eye fish) Cortex: plated, one big claw on the right hand and a small one on the left
+	 * (0.18.103, patch 5; 0.19.82 an eye fish) Cortex: plated, one big claw on the right hand and a small one on the left
 	 * that open and shut, and an open skull with the brain showing, pulsing a little. Now an eye fish, after the guardian
 	 * it was scanned from: a floating, boxy fish, not a man: a plated hull with one big eye on its front that looks where
 	 * the head looks, a cracked skull-dome on top with the brain sparking in it (the insignia plate lies on the hull
@@ -1949,7 +1949,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.107, Scan B; 0.19.76 a floating Wither) Blight: coal-black bone, a skull on each shoulder beside the big middle one, a ribbed tail that swings.
+	 * (0.18.107, Scan B; 0.19.82 a floating Wither) Blight: coal-black bone, a skull on each shoulder beside the big middle one, a ribbed tail that swings.
 	 * Now the Wither, not a man: three skulls (the middle one largest) on a crossbar over a ribbed chest that tapers
 	 * down into a three-joint tail, no legs. It floats, its lowest tail joint about 5 pixels off the ground, bobbing
 	 * and leaning its heads into a move; the tail sways in a wave (each joint a beat behind the last), streams back
@@ -3141,7 +3141,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.111, Scan D; 0.19.76 a real squid) Murk: a long soft mantle swept back from its head, big black eyes, a
+	 * (0.18.111, Scan D; 0.19.82 a real squid) Murk: a long soft mantle swept back from its head, big black eyes, a
 	 * beak ringed by eight jointed tentacles. In water it swims mantle-first (the man's swim pitch is cancelled and the
 	 * body drawn level, pitched where it looks): the tentacles trail and open slowly, then snap together as the mantle
 	 * squeezes and the fins ripple. On land it drags itself with its head low, the mantle slumped or raised behind it,
@@ -3348,7 +3348,7 @@ public final class XenoFormModels {
 			this.fins[0].zRot = fin * Mth.sin(age * 0.2F);
 			this.fins[1].zRot = -this.fins[0].zRot;
 			for (int k = 0; k < ARMS; k++) {
-				// (0.19.76) a positive yaw swings a forward-pointing arm toward -x, so the +x arms take a negative one to fan out
+				// (0.19.82) a positive yaw swings a forward-pointing arm toward -x, so the +x arms take a negative one to fan out
 				float s = RING_X[k] >= 0.0F ? -1.0F : 1.0F;
 				float outer = Math.abs(RING_X[k]) / RING_RX;
 				int j = k < 4 ? k : 7 - k;
@@ -3416,7 +3416,7 @@ public final class XenoFormModels {
 			this.fins[0].zRot = flap;
 			this.fins[1].zRot = -flap;
 			for (int k = 0; k < ARMS; k++) {
-				// (0.19.76) a positive yaw swings a forward-pointing arm toward -x, so the +x arms take a negative one to fan out
+				// (0.19.82) a positive yaw swings a forward-pointing arm toward -x, so the +x arms take a negative one to fan out
 				float s = RING_X[k] >= 0.0F ? -1.0F : 1.0F;
 				float outer = Math.abs(RING_X[k]) / RING_RX;
 				// open: spread wide (the outer ones wider) and fanned up and down by the ring; shut: straight back
@@ -3487,7 +3487,7 @@ public final class XenoFormModels {
 	/**
 	 * (0.18.111, Scan D) Gnasher: a blunt snout over a toothed jaw, a tall fin on its back, a heavy tail that sweeps.
 	 * <p>
-	 * (0.19.76) A shark, not a man: a torpedo of three segments (the chest, the belly and the rear, each bending a little
+	 * (0.19.82) A shark, not a man: a torpedo of three segments (the chest, the belly and the rear, each bending a little
 	 * past the one before it) with a blunt skull on the chest and a toothed jaw hinged under it, a tall swept dorsal fin on
 	 * the chest, a small one on the rear, two pectoral fins, and a crescent tail (a long upper lobe and a short lower one)
 	 * on the end of the rear. The man's parts are all hidden (only the body is still posed, on the chest's back, for the
@@ -4797,7 +4797,7 @@ public final class XenoFormModels {
 	/**
 	 * (0.18.117, Scan F) Ooze (and Magma Ooze): a soft, swollen body with a blob on its head that wobbles as it moves.
 	 * <p>
-	 * (0.19.76) A cube of jelly, drawn low (a box under 0.6 blocks, {@code XenoformState.LOW_BOX}). Ooze is a see-through
+	 * (0.19.82) A cube of jelly, drawn low (a box under 0.6 blocks, {@code XenoformState.LOW_BOX}). Ooze is a see-through
 	 * outer cube (window-paned sides, a gooey floor) around a darker core with two eyes; Magma Ooze is the magma cube's
 	 * three stacked slabs around a glowing core. Every step is a hop: a squat wind-up, a stretch tall as it leaves the
 	 * ground, squashed wide and flat on landing, wobbling out; at rest it jiggles with its breath. Falls stretch it, a
@@ -5853,7 +5853,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * Prism: angular, a crown of crystal and crystals jutting from its back and shoulders (0.19.76 a crystal cluster that
+	 * Prism: angular, a crown of crystal and crystals jutting from its back and shoulders (0.19.82 a crystal cluster that
 	 * walks on shards, not a man).
 	 * <p>
 	 * A faceted core slab (the insignia set in its top, two glowing facets on its front) bearing {@link #CRYSTALS} amethyst

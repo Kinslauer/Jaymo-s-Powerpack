@@ -13,7 +13,7 @@ abstract class BillowDriftMixin {
 	private void jaymospowers$billowDrift(CallbackInfoReturnable<Boolean> cir) {
 		LocalPlayer self = (LocalPlayer)(Object)this;
 		if (com.jaymospowers.power.xenoform.XenoformState.lowBox(self)) {
-			// (0.19.66) Croaker sneaks at a sneak's pace all the same (its pose stays the low box's); (0.19.76) so do the oozes
+			// (0.19.66) Croaker sneaks at a sneak's pace all the same (its pose stays the low box's); (0.19.82) so do the oozes
 			String form = self.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM);
 			cir.setReturnValue(form != null && !"billow".equals(form) && self.isShiftKeyDown()
 				&& !self.isInWater() && !self.getAbilities().flying);

@@ -125,24 +125,22 @@ public final class CryoPowerClient implements PowerClient {
 		} else {
 			return;
 		}
-		int width = 52;
-		int x0 = cx - width / 2;
-		int y = cy - 33;
-		graphics.fill(x0 - 1, y - 1, x0 + width + 1, y + 4, 0x90000000);
-		graphics.fill(x0, y, x0 + Mth.ceil(width * fill), y + 3, 0xFF000000 | CHIP_COLOR);
-		graphics.centeredText(font, label.copy().withColor(CHIP_COLOR), cx, y - 11, 0xFFFFFFFF);
+		// (HUD rework) Cryo bar: ABOVE zone, row 20
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:cryo_bar", 20, com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
+		if (at == null) {
+			return;
+		}
+		com.jaymospowers.client.hud.HudStyle.labelledBar(graphics, font, label.copy().withColor(CHIP_COLOR), at[0], at[1], com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, fill, CHIP_COLOR);
 	}
 
 	private static void chips(GuiGraphicsExtractor graphics, Font font, CryoState state, long now, boolean snow) {
 		int total = CHIP * 4 + CHIP_GAP * 3;
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
-		int x = width / 2 + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + total > width - 2) {
-			x = width / 2 + 91 - total;
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		int step = CHIP + CHIP_GAP;
 		chip(graphics, font, x, y, PowerKey.ABILITY_1, Items.ICE, state, CryoState.SLIDE, now);
 		chip(graphics, font, x + step, y, PowerKey.ABILITY_2, snow ? Items.SNOWBALL : Items.POWDER_SNOW_BUCKET, state, CryoState.BREATH, now);

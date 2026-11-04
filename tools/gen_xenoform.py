@@ -719,7 +719,7 @@ def blur():
 
 
 def prism():
-    """Faceted violet crystal, white-hot tips, fracture lines. (0.19.76) A crystal cluster on shard legs: a core slab with
+    """Faceted violet crystal, white-hot tips, fracture lines. (0.19.82) A crystal cluster on shard legs: a core slab with
     a glow in its sides and the insignia set in its top like an inclusion, amethyst prisms tilted up out of it, and thin
     pointed legs."""
     img = new_skin()
@@ -1882,7 +1882,7 @@ def gyre():
 
 
 def cortex():
-    """(0.18.103; 0.19.76 an eye fish) Cortex, the thinking eye: a coral-red plated hull with a cream belly, one big
+    """(0.18.103; 0.19.82 an eye fish) Cortex, the thinking eye: a coral-red plated hull with a cream belly, one big
     cream eye with a teal iris and a black pupil, a cracked dome on its back where a pink brain laced with glowing teal
     shows, bone-pale spikes with teal tips, and a tail of three shrinking plated segments ending in a coral fin. The man's
     parts (hidden in the model) keep the old coral look for the first-person arm.
@@ -2353,7 +2353,7 @@ def swathe():
 
 def blight():
     """(0.18.107, Scan B) Blight, the wither alien: coal-black bone with grey ash on top, a ribbed chest, three
-    skulls with pale glowing eyes, a ribbed tail. (0.19.76) The Wither floating: a middle skull (the head box, 8x8x8
+    skulls with pale glowing eyes, a ribbed tail. (0.19.82) The Wither floating: a middle skull (the head box, 8x8x8
     at (0,0)) and two side skulls 6x6x6 at (0,64) on a crossbar 22x3x3 at (0,80), over a chest 6x7x4 at (0,88) with the
     insignia on its front, three ribs 14x1x2 / 12x1x2 / 10x1x2 at (0,100) / (0,104) / (0,108) with 1x1x3 tips at
     (32,100), and a tail of 3x5x3 at (28,104), 2x4x2 at (42,104) and 1x4x1 at (52,104). The man's parts are still
@@ -2997,7 +2997,7 @@ def talon():
 
 
 def murk():
-    """(0.18.111, Scan D; 0.19.76 a real squid) Murk, the ink squid: soft purple-grey, mottled darker, a paler belly,
+    """(0.18.111, Scan D; 0.19.82 a real squid) Murk, the ink squid: soft purple-grey, mottled darker, a paler belly,
     big black eyes with a pale ring, a long tapering mantle with a fin either side of its tail, a dark beak ringed by
     eight pale-suckered tentacles. The man's parts keep the old paint (the first-person hand); the squid's boxes are in
     rows 64-107."""
@@ -3018,7 +3018,7 @@ def murk():
     claws(img, (70, 56, 86, 255))
     chest_insignia(img, rim=(50, 38, 64, 255))
 
-    # (0.19.76) the squid, every box in rows 64-107: mantle sections 7x6x8 (0,64), 6x5x6 (0,80), 4x4x5 (26,80), 2x2x3
+    # (0.19.82) the squid, every box in rows 64-107: mantle sections 7x6x8 (0,64), 6x5x6 (0,80), 4x4x5 (26,80), 2x2x3
     # (46,80); head 6x5x5 (32,64); fin 5x1x4 (0,94); tentacle joints 2x2x4 (20,94) and 1x1x4 (34,94); eye 1x4x4 (46,94);
     # beak 2x2x2 (46,104)
     def mottled(part, base, blotches=5, spots=6):
@@ -3100,7 +3100,7 @@ def murk():
 
 def gnasher():
     """(0.18.111, Scan D) Gnasher, the shark: grey-blue on top, sharp white underneath, gill slits, flat black eyes, a
-    jaw of white teeth, a tall fin and tail. (0.19.76) A shark, not a man: the man's parts keep the old paint (the
+    jaw of white teeth, a tall fin and tail. (0.19.82) A shark, not a man: the man's parts keep the old paint (the
     first-person hand); the animal's boxes are in rows 64-115: chest 8x8x11 (0,64), rear 5x5x8 (38,64), small dorsal
     1x3x3 (38,77), lower tail lobe 1x4x3 (46,77), belly 7x7x8 (0,84), skull 7x5x9 (30,84), jaw 6x2x7 (0,99), dorsal
     fin 1x8x4 (26,99), upper tail lobe 1x8x4 (36,99), pectoral fin 6x1x4 (0,111)."""
@@ -3623,7 +3623,7 @@ def jelly_pane(img, b, base):
 
 def ooze_skin(name, base, core, dark, eye, magma=False):
     """(0.18.114, Scan F) Ooze: soft jelly lighter at the edges, a darker core in the chest, two dark eyes, a blob on top.
-    (0.19.76) Rows 0-63 stay the humanoid skin (the first-person hand); the cube is in rows 64+. Ooze: the jelly shell
+    (0.19.82) Rows 0-63 stay the humanoid skin (the first-person hand); the cube is in rows 64+. Ooze: the jelly shell
     10x8x10 at (0,64), its sides cut out so the core shows through, and the core 6x5x6 at (0,84) with the eyes.
     Magma Ooze: three crust slabs 10x2x10 at (0,64), (0,76), (0,88) with glowing seams, and the glowing core 8x8x8 at (0,100)."""
     img = new_skin()

@@ -272,12 +272,10 @@ final class XenoformHud {
 
 	private static int[] chipsOrigin(int width, int height, int count) {
 		int cx = width / 2;
-		int x = cx + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + chipsWidth(count) > width - 2) {
-			x = cx + 91 - chipsWidth(count);
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		return new int[] {x, y};
 	}
 

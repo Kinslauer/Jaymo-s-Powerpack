@@ -118,14 +118,16 @@ final class Buildings {
 			Planner.setRings(ring, WALL_RING_MIN, WALL_RING_MAX);
 		}
 		Planner.setRings("palisade", PALISADE_RING_MIN, PALISADE_RING_MAX);
+		// (0.7.490) the works a haven raises ({@link HavenGrowth})
+		HavenBuildings.register();
 	}
 
-	private interface Design {
+	interface Design {
 		Blueprint draw(Kit k);
 	}
 
 	/** A building whose materials and details are its own. */
-	private static void realm(FactionType type, String id, Design design, int max, int minSize) {
+	static void realm(FactionType type, String id, Design design, int max, int minSize) {
 		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> design.draw(Kit.of(level, faction, variant, variant)), max,
 			minSize));
 	}
