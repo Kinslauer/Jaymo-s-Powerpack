@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
@@ -91,7 +92,7 @@ public final class Captives {
 	static final int FOLK = 0, GUARD = 1, KIN = 2;
 	/** The chance a captive is one of the guards, and the ruler's own kin (a settlement with no ruler has none to lose). */
 	static final float GUARD_CHANCE = 0.2F, KIN_CHANCE = 0.1F;
-	/** Emeralds the family give from their own purse for their return, by standing. */
+	/** Silver coins the family give from their own purse for their return, by standing. */
 	static final int[] PURSE_LEAST = {6, 8, 12}, PURSE_MOST = {12, 16, 24};
 	/**
 	 * What the settlement adds from its treasury, by standing: this much, plus this share of its worth ({@link Wealth#worth}),
@@ -496,7 +497,8 @@ public final class Captives {
 		boolean known = !Wars.enemy(player, home) && !Identities.hidden(player, home.id());
 		int bounty = known ? bounty(server, home, standing) : 0;
 		List<ItemStack> rewards = new ArrayList<>();
-		rewards.add(new ItemStack(Items.EMERALD, purse + bounty));
+		// (0.7.498) the family's purse and the realm's bounty are silver coins now
+		rewards.addAll(Money.stacks(Money.worth(purse + bounty)));
 		if (standing == GUARD) {
 			rewards.add(new ItemStack(GUARD_GIFTS.get(random.nextInt(GUARD_GIFTS.size()))));
 		} else if (standing == KIN) {

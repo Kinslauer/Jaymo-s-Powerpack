@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.sailing.Crew;
 import com.jaymoskingdoms.sailing.Ship;
 import java.util.HashMap;
@@ -312,10 +313,8 @@ final class Staredowns {
 		long paid = pay;
 		TRIBUTE_READY.put(f.id(), now + TRIBUTE_TICKS);
 		Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - paid)));
-		ItemStack emeralds = new ItemStack(Items.EMERALD, (int) paid);
-		if (!sp.getInventory().add(emeralds) && !emeralds.isEmpty()) {
-			sp.spawnAtLocation(level, emeralds);
-		}
+		// (0.7.498) the tribute is silver coins (the treasury counts silver)
+		Money.pay(sp, Money.worth(paid));
 		Reputation.change(sp, f, REP_TRIBUTE);
 		say(level, ruler, "tribute");
 		sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stare.tribute", ruler.getDisplayName(), paid, f.name()).withStyle(ChatFormatting.GOLD));

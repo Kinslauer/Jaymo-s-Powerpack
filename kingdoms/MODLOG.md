@@ -8463,7 +8463,6 @@ hall, land and vassals:
   World tiers want them too: Borderlands 1, Wildlands 2, Dread 4, Legend 5. The Rung Journal ticks each. A refusal is an
   action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
   tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.
-
 ## 0.7.495: rope ties to fences (pack 0.19.86)
 Andy's Plant Fibers pick: "a climbable rope you tie to a fence". Rope placed against a fence's side with nothing above
 to hang from is tied to the fence (`RopeLift.TIED`) and holds while a fence stands beside it, so at a cliff's edge it
@@ -8513,3 +8512,52 @@ Andy picked the idea of Locks Reforged; this is our own build of it, nothing cop
 - Fixes: a wind charge no longer opens a locked gate; breaking one half of a double chest no longer strips the other half's
   lock; a lock no longer outlives a block that an explosion, mob, piston or lost support removed.
 - Fix: a lock now stays when its block turns into another lockable block (copper doors, trapdoors and chests weathering, waxed or scraped).
+
+## 0.7.498: coins replace emeralds (pack 0.20.0, Kitchen 0.5.56)
+Andy's Custom Trade Currency pick, and his choice "Combine: culture coins replace emeralds". Design: `docs/Coins-Plan.md`
+in the pack. The culture coins of the currencies patch (`Currency`, `Currencies`: realm silver, hacksilver, gold dinars,
+shell strings, mon, the greenskins' bent copper, pirate gold) are the money everywhere; the emerald is a gem.
+- **Copper bit** (`Currency.BIT`, the item `jaymoskingdoms:copper_coin`, shown as "Copper Bit", a tenth of an emerald):
+  the one small coin every town takes at par, the change for any price in place of emerald change.
+- **What a payer takes** (`Money`): the settlement's own coin at par, bits at par, and any other realm's coin at its going
+  rate less `FOREIGN_CUT` (10%, switch `FOREIGN_TAKEN`). Never emeralds. Change comes back in the town's coin and bits.
+  Outside any settlement (wild villages, wanderers) the coin is that of a settlement within 160 blocks, else realm silver.
+  The trade screen stays strict (a slot needs the exact coin) and fills the slot from purses and bundles
+  (`MerchantMenuCoinMixin`, `Coinage.fill`); the money changer has a real job. A price over 64 of the town's coin is asked
+  in dinars with the rest in the town's coin.
+- **Emeralds as a gem:** the money changer (master's profession) buys emeralds at 90% of their worth in his town's coin
+  and sells them at 112%, an emerald block is nine, he buys a diamond at four and no more, and bits trade for the town's
+  coin at par. Keepers (15% of villagers, 40% of wandering traders, fixed by who they are, only real traders: `Currencies.keeper`)
+  still price in emeralds; a keeper's offers go back to emeralds on a save from before.
+- **Coin purse** (`money/`): holds mixed coins, up to 640, and shows how full it is (leather, string, one copper bit).
+  A purse from the first dev format (copper, silver, gold) reads as bits, two silver and five dinars. Worn on the belt
+  slot of Jaymo's Powers and drawn on the hip. `Money` counts loose coins, the worn purse, purses in the pack and bundles,
+  takes the town's coin first, breaks the smallest coin that covers the rest and puts the change back where it came
+  from, and lets creative players through. `Purse` is a thin wrapper kept for old callers.
+- **Dropped from the first coinage:** the silver and gold coin items, the ten-coin stacks and piles, the Coin Press, the
+  Counting Table, our own money changer, `VillagerTradeCoinMixin` and `Coinage.convert` (trades are priced in coin
+  when they open, `Currencies.localize`).
+- **They talk about it** (`MoneyTalk`). Andy: "they must speak about this and answer you if asked".
+  - Interact has Ask about Money. A keeper says so. The money changer gives his emerald rate in the town's coin. Anyone
+    else says which coin the town uses and why (the trading hub's name, else the land), and that foreign coin is the
+    changer's business.
+  - Ask the Way has Who Takes Emeralds and A Money Changer.
+  - Unasked: a keeper says it as you open their trades, and a coin trader tells you they don't take emeralds if you come
+    with emeralds and no coin. Each at most once every 5 minutes to the same player (speech bubble).
+  - MCA's chat AI is told the town's coin, its hub and who nearby still takes emeralds.
+  - Andy: "people who use coin generally look down upon emerald traders as outdated luddites". Coin folk sneer at
+    them and the keepers know it and don't care.
+- **Thieves:** crooks go for a visible belt purse first and may take it whole (`Crooks`, `PURSE_LIFT_CHANCE`); a mugging
+  takes a handful of whatever you carry, owed back in the land's coin. Pickpocketing a villager mostly lifts a small
+  purse in the victim's own coin or a copper bit.
+- **Loot:** `LootSwap` turns emeralds in chest, mob and hero-of-the-village loot into the coin of the land where they
+  were found (an emerald's worth each); mined emerald ore still drops emeralds.
+- **Wages and rewards:** careers are paid in the town's coin out of the storehouse's coin and bits, with its emeralds and
+  other coin held as reserve at worth; pilot fares and prospector bonuses in the coin of the land. Quest rewards are in
+  the giver's coin (the old `emeralds` field reads as worth, `copper` as bits). Merchant orders are asked in the town's
+  coin (bits where it won't land) and refunded as the coin paid. Life-story start purses are in the birthplace's coin.
+  Lockpicking counts coin by worth.
+- Realm silver and hacksilver are money, not the metal their names say: vampires aren't hurt by a coin and a werewolf
+  doesn't take a coin in the hand for a silver weapon.
+- Emeralds stay a gem: ore, enchanting, tinkering's emerald modifier, trims, beacons and caravan gem goods.
+- Not compile-checked yet at this entry; not played.

@@ -1,5 +1,7 @@
 package com.jaymoskingdoms.nightfall;
 
+import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.money.Coinage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Vampires;
 import com.mojang.serialization.Codec;
@@ -27,14 +29,14 @@ import org.jspecify.annotations.Nullable;
 /**
  * The vampires' callings (after Nightfall Plague's vampire villagers), on our own vampires ({@link Vampires}): hand one
  * a brewing stand, a smoker, a chiseled bookshelf or a note block and it takes up that calling for good (an ordinary
- * villager just looks puzzled). Then it trades from its hand: right-click it holding emeralds for its special ware,
+ * villager just looks puzzled). Then it trades from its hand: right-click it holding coins (or a purse) for its special ware,
  * or holding what it buys to sell it. And any vampire handed raw beef eats it and is quiet for the night, as if it had fed.
  * Sneaking passes, so the villager's own screen is still there.
  */
 final class Callings {
-	/** What a calling sells for (emeralds), and how many it gives. */
+	/** What a calling sells for (emeralds' worth in coin, (0.7.498)), and how many it gives. */
 	static final int IMMUNITY_PRICE = 6, DRIED_MEAT_PRICE = 2, DRIED_MEAT_COUNT = 3, CARD_PRICE = 12, LUTE_PRICE = 10;
-	/** What it pays (emeralds): the Slaughter for this many red foods, the Chronicler for a book, the Bard for a disc. */
+	/** What it pays (emeralds' worth in coin): the Slaughter for this many red foods, the Chronicler for a book, the Bard for a disc. */
 	static final int RED_FOOD_PER_EMERALD = 4, BOOK_PAYS = 1, DISC_PAYS = 3;
 
 	enum Calling {
@@ -112,14 +114,14 @@ final class Callings {
 		if (calling == null) {
 			return false;
 		}
-		if (held.is(Items.EMERALD)) {
-			return sell(level, player, mob, calling, held);
+		if (Coinage.held(held) > 0L) {
+			return sell(level, player, mob, calling);
 		}
 		return buy(level, player, mob, calling, held);
 	}
 
-	/** Its special ware, for emeralds. */
-	private static boolean sell(ServerLevel level, ServerPlayer player, PathfinderMob mob, Calling calling, ItemStack emeralds) {
+	/** Its special ware, for coin out of the coins and purses carried. */
+	private static boolean sell(ServerLevel level, ServerPlayer player, PathfinderMob mob, Calling calling) {
 		int price;
 		ItemStack ware;
 		switch (calling) {
@@ -140,11 +142,10 @@ final class Callings {
 				ware = new ItemStack(Nightfall.LUTE);
 			}
 		}
-		if (emeralds.getCount() < price) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightfall.price", mob.getDisplayName(), price, ware.getHoverName()));
+		if (!Money.charge(player, Money.worth(price))) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightfall.price", mob.getDisplayName(), Money.text(player, Money.worth(price)), ware.getHoverName()));
 			return true;
 		}
-		emeralds.consume(price, player);
 		player.getInventory().placeItemBackInInventory(ware, Prediction.SERVER_ONLY);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.75F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightfall.sold." + calling.id(), mob.getDisplayName()));
@@ -181,7 +182,7 @@ final class Callings {
 			}
 		}
 		held.consume(take, player);
-		player.getInventory().placeItemBackInInventory(new ItemStack(Items.EMERALD, pay), Prediction.SERVER_ONLY);
+		Money.pay(player, Money.worth(pay));
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.75F);
 		return true;
 	}

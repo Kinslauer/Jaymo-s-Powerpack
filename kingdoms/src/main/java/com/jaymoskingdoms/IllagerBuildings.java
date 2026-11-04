@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -598,14 +599,15 @@ final class IllagerBuildings {
 		}
 	}
 
-	/** The warlord's hoard: emeralds, iron, a crossbow, arrows, an enchanted book's worth of lapis, a golden apple. */
+	/** The warlord's hoard: silver coins (0.7.486; once emeralds), iron, a crossbow, arrows, an enchanted book's worth of lapis, a golden apple. */
 	private static void stockHoard(ServerLevel level, BlockPos chest, RandomSource random) {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;
 		}
-		List<ItemStack> hoard = List.of(new ItemStack(Items.EMERALD, 8 + random.nextInt(9)), new ItemStack(Items.IRON_INGOT, 6 + random.nextInt(9)),
+		List<ItemStack> hoard = new java.util.ArrayList<>(Money.stacks(Money.worth(8 + random.nextInt(9))));
+		hoard.addAll(List.of(new ItemStack(Items.IRON_INGOT, 6 + random.nextInt(9)),
 			new ItemStack(Items.CROSSBOW), new ItemStack(Items.ARROW, 16 + random.nextInt(17)), new ItemStack(Items.LAPIS_LAZULI, 6 + random.nextInt(10)),
-			new ItemStack(Items.GOLDEN_APPLE), new ItemStack(Items.DARK_OAK_LOG, 8 + random.nextInt(9)), new ItemStack(Items.BREAD, 4 + random.nextInt(6)));
+			new ItemStack(Items.GOLDEN_APPLE), new ItemStack(Items.DARK_OAK_LOG, 8 + random.nextInt(9)), new ItemStack(Items.BREAD, 4 + random.nextInt(6))));
 		for (ItemStack stack : hoard) {
 			for (int tries = 0; tries < 10; tries++) {
 				int slot = random.nextInt(c.getContainerSize());

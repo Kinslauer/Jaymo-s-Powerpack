@@ -85,6 +85,11 @@ public final class Baubles {
 		builder -> builder.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.all()));
 	/** Vanilla's lanterns tag (plain, soul, every copper one): what hangs at the hip from the belt slot. */
 	static final TagKey<Item> LANTERNS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("minecraft", "lanterns"));
+	/**
+	 * (0.20.0) Items besides lanterns that hang at the hip from the belt slot: the tag {@code jaymospowers:hip_shown}, which
+	 * Jaymo's Kingdoms fills with its coin purse. The client draws a non-lantern hip item with the item renderer.
+	 */
+	static final TagKey<Item> HIP_SHOWN = TagKey.create(Registries.ITEM, JaymosPowers.id("hip_shown"));
 	/** The belt and body slots, for {@link #SHOWN}. */
 	static final int BELT_SLOT = 3, BODY_SLOT = 5;
 
@@ -229,9 +234,36 @@ public final class Baubles {
 		return stack.is(LANTERNS);
 	}
 
+	/** (0.20.0) A hip item: a lantern, or anything in {@code #jaymospowers:hip_shown} (a coin purse) in the belt slot. */
+	public static boolean hipItem(ItemStack stack) {
+		return stack.is(LANTERNS) || stack.is(HIP_SHOWN);
+	}
+
+	/**
+	 * (0.20.0) What {@code player} wears in the belt slot: the live stack (changing a purse's contents in place changes it),
+	 * or empty. Jaymo's Kingdoms reads its coin purse from here ({@code PowersCompat.belt}).
+	 */
+	public static ItemStack belt(Player player) {
+		List<ItemStack> saved = player.getAttached(WORN);
+		return saved != null && BELT_SLOT < saved.size() ? saved.get(BELT_SLOT) : ItemStack.EMPTY;
+	}
+
+	/**
+	 * (0.20.0) Puts {@code stack} in the belt slot (if it fits there, or is empty), redoing the bonuses and the hip. Kingdoms
+	 * calls it after changing a worn purse, or when a pickpocket lifts the whole thing ({@code PowersCompat.setBelt}).
+	 */
+	public static void setBelt(ServerPlayer player, ItemStack stack) {
+		if (!stack.isEmpty() && !fits(BELT_SLOT, stack)) {
+			return;
+		}
+		List<ItemStack> worn = worn(player);
+		worn.set(BELT_SLOT, stack);
+		setWorn(player, worn);
+	}
+
 	/** Syncs the hip lantern and lantern pole others should see, only when they change. */
 	private static void show(ServerPlayer player, List<ItemStack> worn) {
-		ItemStack hip = hipLantern(worn.get(BELT_SLOT)) ? worn.get(BELT_SLOT).copyWithCount(1) : ItemStack.EMPTY;
+		ItemStack hip = hipItem(worn.get(BELT_SLOT)) ? worn.get(BELT_SLOT).copyWithCount(1) : ItemStack.EMPTY;
 		ItemStack back = worn.get(BODY_SLOT).is(LANTERN_POLE) ? worn.get(BODY_SLOT).copyWithCount(1) : ItemStack.EMPTY;
 		List<ItemStack> now = player.getAttached(SHOWN);
 		if (hip.isEmpty() && back.isEmpty()) {
@@ -240,13 +272,14 @@ public final class Baubles {
 			}
 			return;
 		}
-		if (now == null || now.size() != 2 || !ItemStack.isSameItem(now.get(0), hip) || !ItemStack.isSameItem(now.get(1), back)
+		// (0.20.0) same components too: a purse's fullness (its model data) changes what is drawn
+		if (now == null || now.size() != 2 || !ItemStack.isSameItemSameComponents(now.get(0), hip) || !ItemStack.isSameItem(now.get(1), back)
 			|| now.get(0).isEmpty() != hip.isEmpty() || now.get(1).isEmpty() != back.isEmpty()) {
 			player.setAttached(SHOWN, List.of(hip, back));
 		}
 	}
 
-	/** What a player shows hung on them: {hip lantern, lantern pole}, either empty (client and server). */
+	/** What a player shows hung on them: {hip item (a lantern, or a coin purse), lantern pole}, either empty (client and server). */
 	public static ItemStack shown(Player player, int which) {
 		List<ItemStack> now = player.getAttached(SHOWN);
 		return now != null && which < now.size() ? now.get(which) : ItemStack.EMPTY;

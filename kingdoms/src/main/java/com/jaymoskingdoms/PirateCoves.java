@@ -747,7 +747,8 @@ final class PirateCoves {
 		if (owner != null && owner.type().isRealm() && owner.treasury() > 0L) {
 			long coin = Math.min(owner.treasury(), PRIZE_COIN);
 			Factions.update(server, owner.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - coin)));
-			prize.add(new ItemStack(Items.EMERALD, (int)coin));
+			// (0.7.498) the prize is struck in the owner realm's coin, not emeralds
+			prize.addAll(com.jaymoskingdoms.money.Money.stacks(server, owner, com.jaymoskingdoms.money.Money.worth(coin)));
 		}
 		List<ItemStack> haul = new ArrayList<>();
 		for (ItemStack stack : cove.haul()) {

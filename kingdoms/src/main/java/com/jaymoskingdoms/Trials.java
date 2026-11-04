@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.monsters.Ogre;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
@@ -79,7 +80,7 @@ public final class Trials {
 	static final int LIFT_TICKS = 100, LIFT_SECONDS = 20, BRAWL_SECONDS = 120;
 	static final double LIFT_REACH = 5.0;
 	static final float BRAWL_DOWN = 0.5F;
-	/** After a trial's passed, a tribe sets no other for this many days; the king's gift (emeralds). */
+	/** After a trial's passed, a tribe sets no other for this many days; the king's gift (silver coins). */
 	static final int AGAIN_DAYS = 3, GIFT = 8;
 	// ================================================================================================================
 
@@ -512,7 +513,7 @@ public final class Trials {
 		} else {
 			Tribes.makeTruce(server, player.getUUID(), t.tribe);
 		}
-		player.getInventory().placeItemBackInInventory(new ItemStack(Items.EMERALD, GIFT), net.minecraft.util.Prediction.SERVER_ONLY);
+		Money.pay(player, Money.worth(GIFT));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.7F);
 		if (other instanceof LivingEntity speaker && speaker.isAlive()) {
 			Speech.say(level, speaker, t.kind == Kind.BRAWL ? Component.translatable("talk.jaymoskingdoms.trial.passed.brawl")

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -131,7 +132,7 @@ final class Assassins {
 	static final int ROGUE_SENSE_LEVEL = 3;
 	/** Good name: warning a ruler, curing him, and cutting down the blade sent for him. */
 	static final int REP_WARN = 15, REP_CURE = 40, REP_CAUGHT = 50;
-	/** A cured ruler's thanks from his treasury (emeralds, as far as it goes), and the assassin's purse. */
+	/** A cured ruler's thanks from his treasury (silver coins, as far as it goes), and the assassin's purse. */
 	static final int CURE_REWARD = 16, FEE_MIN = 8, FEE_MAX = 20;
 	/** How often villagers may whisper of a contract to a player (ticks), the chance one does, and how near the villager is. */
 	static final int WHISPER_TICKS = 600;
@@ -935,10 +936,8 @@ final class Assassins {
 			int reward = (int)Math.min(CURE_REWARD, f.treasury());
 			if (reward > 0) {
 				Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() - reward));
-				ItemStack emeralds = new ItemStack(Items.EMERALD, reward);
-				if (!player.getInventory().add(emeralds)) {
-					player.drop(emeralds, false, net.minecraft.util.Prediction.SERVER_ONLY);
-				}
+				// (0.7.498) the thanks come as silver coins
+				Money.pay(player, Money.worth(reward));
 			}
 		}
 		Speech.say(level, ruler, Component.translatable("assassin.jaymoskingdoms.cured.says", Identities.shownName(player)), Speech.GOLD, WITNESS_RANGE);
@@ -961,7 +960,10 @@ final class Assassins {
 		Faction hirer = c.hirer() >= 0 ? Factions.get(server, c.hirer()) : null;
 		Component victimName = c.realm() >= 0 ? realmRuler(level, c.realm()) : playerName(server, c.player());
 		a.spawnAtLocation(level, sealedContract(victimName, hirer, c));
-		a.spawnAtLocation(level, new ItemStack(Items.EMERALD, c.fee()));
+		// (0.7.498) the blade's fee, in silver coins
+		for (ItemStack coins : Money.stacks(Money.worth(c.fee()))) {
+			a.spawnAtLocation(level, coins);
+		}
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer sp ? sp : null;
 		if (c.realm() >= 0) {
 			Faction f = Factions.get(server, c.realm());

@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.53) With Minecraft Comes Alive, a kingdom's court wizard ({@link Sorcery#WIZARD}) is one of its own villagers who
+ * (0.5.54) With Minecraft Comes Alive, a kingdom's court wizard ({@link Sorcery#WIZARD}) is one of its own villagers who
  * has grown old: they keep their name, family and hearts, put on the wizard's robe, hat and staff, and take the
  * profession {@code jaymoskingdoms:wizard}. MCA has no old age of its own (its villagers stay adults), so a villager's
  * age is counted from the day they came of age ({@link #grownDays}); one grown {@link #ELDER_DAYS} days is an elder,

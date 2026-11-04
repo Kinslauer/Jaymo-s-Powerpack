@@ -5204,3 +5204,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `kitchen/gradle.properties` (else the newest) and warns about the rest.
 - **0.19.89, Kingdoms 0.7.497, locks and keys (Patch 6)** (`docs/Locks-Plan.md`; see `kingdoms/MODLOG.md`): Powers only
   gains the graded copies of the four lock and key icons in the optional `excalibur_style` pack.
+- **0.20.0, Coins replace emeralds (Andy's Custom Trade Currency pick, `docs/Otectus-Plan.md` patch 3; Kingdoms 0.7.498,
+  Kitchen 0.5.56):** Andy chose "Combine: culture coins replace emeralds". The economy lives in Kingdoms
+  (`docs/Coins-Plan.md`): the culture coins are the money, a copper bit is the small change and emeralds are a gem sold
+  to a money changer. Powers reaches it through `core/KingdomsMoney` (a MethodHandles bridge; amounts in milli, thousandths
+  of an emerald, `KingdomsMoney.worth(n)`; emeralds as the fallback without Kingdoms).
+  - Z Fighter prizes, raid and invasion shares, the Riches wish, patrol bounties, space-mission pay, the hermit, the
+    afterlife teller, the costume table and the bone-setting priest all pay and charge in the coin of the land, from
+    purses and bundles too, and name the price in that coin.
+  - **Purse on the hip:** a coin purse in the belt bauble slot (`Baubles.belt`, tag `jaymospowers:hip_shown`) is drawn on
+    the right hip with the lantern's sway (`WornLanterns`); it gives no light. Web's symbiote grabs coins as valuables.
+  - The melting gap log skips coins (realm silver and the like are money, not metal).
+  - Not compile-checked yet at this entry; not played.

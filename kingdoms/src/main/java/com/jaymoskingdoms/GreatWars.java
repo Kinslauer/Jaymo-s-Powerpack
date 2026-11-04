@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.WarData.War;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -20,10 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -55,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Rebellions.</b> In a great war, a fiefdom of another creed whose overlord is losing may rise, crown its lord
  * king and go over to the other side.</li>
  * <li><b>Wagers.</b> (Andy: "War wagers can only be done with bookie npcs in speakeasies.") While a war is mustering or
- * young, a speakeasy's bookie takes emeralds on a side at his odds ({@link Bookies}): paid at the odds if it wins, the
+ * young, a speakeasy's bookie takes silver coins on a side at his odds ({@link Bookies}): paid at the odds if it wins, the
  * stake back on a white peace.</li>
  * </ul>
  */
@@ -153,7 +151,7 @@ final class GreatWars {
 	static final float REBEL_CHANCE = 0.15F;
 	/** A rebel and its old overlord start from this tension. */
 	static final float REBEL_TENSION = 60.0F;
-	/** Wagers: open until the war is this old (ticks), at most this many emeralds a player a war. */
+	/** Wagers: open until the war is this old (ticks), at most this many silver coins a player a war. */
 	static final long WAGER_OPEN_TICKS = 24000L;
 	static final int WAGER_MOST = 128;
 	/** What a wager saved before odds were given pays (times the stake). */
@@ -700,7 +698,7 @@ final class GreatWars {
 	}
 
 	/**
-	 * (From a speakeasy's {@link Bookies bookie}) {@code player} stakes {@code stake} emeralds, already taken from them, on
+	 * (From a speakeasy's {@link Bookies bookie}) {@code player} stakes {@code stake} silver coins, already taken from them, on
 	 * {@code side} of {@code war} at {@code odds}. Returns what the bookie says, and how much he kept (the rest goes back).
 	 */
 	record Taken(Component said, int kept) {
@@ -722,7 +720,7 @@ final class GreatWars {
 		}
 		int amount = Math.min(stake, WAGER_MOST - already);
 		if (amount <= 0) {
-			return new Taken(Component.translatable("message.jaymoskingdoms.wager.most", WAGER_MOST), 0);
+			return new Taken(Component.translatable("message.jaymoskingdoms.wager.most", Money.text(player, Money.worth(WAGER_MOST))), 0);
 		}
 		Wager made = new Wager(player.getUUID(), war.id(), side, amount, odds);
 		edit(server, l -> {
@@ -730,7 +728,7 @@ final class GreatWars {
 			wagers.add(made);
 			return withWagers(l, wagers, l.owed());
 		});
-		return new Taken(Component.translatable("message.jaymoskingdoms.wager.made", amount, Wars.name(server, side), (int)Math.floor(amount * odds)), amount);
+		return new Taken(Component.translatable("message.jaymoskingdoms.wager.made", Money.text(player, Money.worth(amount)), Wars.name(server, side), Money.text(player, Money.worth((int)Math.floor(amount * odds)))), amount);
 	}
 
 	/** Winnings (or a stake back) owed to {@code player}: paid now if they're on, else when they're next on. */
@@ -778,16 +776,9 @@ final class GreatWars {
 			if (player == null) {
 				continue;
 			}
-			int n = e.getValue();
-			while (n > 0) {
-				int stack = Math.min(64, n);
-				ItemStack coins = new ItemStack(Items.EMERALD, stack);
-				if (!player.getInventory().add(coins)) {
-					player.drop(coins, false, Prediction.SERVER_ONLY);
-				}
-				n -= stack;
-			}
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.wager.paid", e.getValue()).withStyle(ChatFormatting.GOLD));
+			// (0.7.498) the winnings are silver coins, into the worn purse if there's room
+			Money.pay(player, Money.worth(e.getValue()));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.wager.paid", Money.text(player, Money.worth(e.getValue()))).withStyle(ChatFormatting.GOLD));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.6F, 0.8F);
 			left.remove(e.getKey());
 		}

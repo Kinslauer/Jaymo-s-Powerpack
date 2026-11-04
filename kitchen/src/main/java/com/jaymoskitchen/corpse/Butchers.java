@@ -1,6 +1,7 @@
 package com.jaymoskitchen.corpse;
 
 import com.jaymoskitchen.JaymosKitchen;
+import com.jaymoskitchen.KingdomsMoney;
 import com.jaymoskitchen.net.Payloads;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -33,7 +34,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Prediction;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -45,7 +45,6 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
@@ -65,7 +64,7 @@ public final class Butchers {
 	/** A butcher's skill, fixed for each one: anywhere between these, evenly spread. */
 	private static final float MIN_SKILL = 1.0F, MAX_SKILL = 3.0F;
 	/**
-	 * Emeralds per job for a small body and for a big carcass (a cow, a horse), times what this butcher thinks they're
+	 * Silver coins per job (before 0.5.53: emeralds, one for one) for a small body and for a big carcass (a cow, a horse), times what this butcher thinks they're
 	 * worth (1x to {@code MAX_ASKING}x, their own, unrelated to how good they are).
 	 */
 	private static final float PRICE_SMALL = 1.0F, PRICE_BIG = 2.0F;
@@ -354,8 +353,13 @@ public final class Butchers {
 		EntityType<?> type = body.sourceType();
 		Component what = type != null ? type.getDescription() : Component.translatable("message.jaymoskitchen.butcher.carcass");
 		// how good they are stays hidden until you've heard (or seen)
-		ServerPlayNetworking.send((ServerPlayer) player, new Payloads.OpenButcher(butcher.getId(), butcher.getDisplayName(), what,
-			known ? skill : 0.0F, known ? tier(skill) : -1, price(butcher, body.isBigCarcass())));
+		// (0.5.56) the price is made here, in the coin of the land, with one of that coin to draw beside it
+		ServerPlayer payer = (ServerPlayer) player;
+		long cost = KingdomsMoney.worth(price(butcher, body.isBigCarcass()));
+		ServerPlayNetworking.send(payer, new Payloads.OpenButcher(butcher.getId(), butcher.getDisplayName(), what,
+			known ? skill : 0.0F, known ? tier(skill) : -1, KingdomsMoney.text(payer, cost), KingdomsMoney.icon(payer), cost,
+			// (0.5.56) 'have' is the cost when the same rule the charge uses would take it (foreign coin at the going rate), else nothing
+			KingdomsMoney.canPay(payer, cost) ? cost : 0L));
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
@@ -378,7 +382,7 @@ public final class Butchers {
 		return body;
 	}
 
-	/** The player said yes on the screen: check it all again, take the emeralds and the body, and send him out back. */
+	/** The player said yes on the screen: check it all again, take the coins and the body, and send him out back. */
 	private static void deal(ServerPlayer player, int villagerId) {
 		ServerLevel level = player.level();
 		if (!(level.getEntity(villagerId) instanceof Villager butcher) || !isButcher(butcher) || !butcher.isAlive()
@@ -392,13 +396,12 @@ public final class Butchers {
 		}
 		float skill = skill(butcher);
 		int price = price(butcher, body.isBigCarcass());
-		if (!player.hasInfiniteMaterials()) {
-			if (ContainerHelper.clearOrCountMatchingItems(player.getInventory(), s -> s.is(Items.EMERALD), price, true) < price) {
-				butcher.playSound(SoundEvents.VILLAGER_NO);
-				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.cant_pay", price));
-				return;
-			}
-			ContainerHelper.clearOrCountMatchingItems(player.getInventory(), s -> s.is(Items.EMERALD), price, false);
+		// (0.5.56) paid in the coin of the land through Jaymo's Kingdoms' money (purses and bundles count; emeralds without Kingdoms)
+		long cost = KingdomsMoney.worth(price);
+		if (!KingdomsMoney.charge(player, cost)) {
+			butcher.playSound(SoundEvents.VILLAGER_NO);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.cant_pay", KingdomsMoney.text(player, cost)));
+			return;
 		}
 
 		// the body changes hands: from your arms to his, or out of the bag and into his arms

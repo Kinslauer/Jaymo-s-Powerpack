@@ -143,7 +143,7 @@ public final class Workers {
 		}
 		if (mob.tickCount % RECONCILE_TICKS == 0) {
 			if (w instanceof Enlisted e) {
-				// (0.5.53) how long they've been grown (elders become court wizards)
+				// (0.5.54) how long they've been grown (elders become court wizards)
 				CourtWizards.age(level, e);
 				// (0.7.218) a gifted Wind the storm has taken
 				GiftedFolk.step(level, e.mob());
@@ -179,7 +179,7 @@ public final class Workers {
 			return Rulers.guardStep(level, e);
 		}
 		if (w.role() == Sorcery.WIZARD && w instanceof Enlisted e) {
-			// (0.5.53) a court wizard lives as a villager until a foe comes near
+			// (0.5.54) a court wizard lives as a villager until a foe comes near
 			if (Hermits.is(e)) {
 				// (0.5.62) a floating island's hermit: their fall caught, visitors greeted
 				Hermits.step(level, e);

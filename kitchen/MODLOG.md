@@ -1382,3 +1382,11 @@ Andy: "thrown mobs should stop snapping to a pose, and instead keep the ragdoll,
 The stomach slots and the body-heat thermometer moved into the left dock beside the hotbar (`client/hud/HudZones`, a
 copy of Powers'; see `docs/HUD-Layout.md` in the pack). The stomach no longer sits where the power chips and the
 attack indicator are; the thermometer no longer covers the XP number.
+## 0.5.56: butchers take coins (pack 0.20.0, Kingdoms 0.7.498)
+Part of Kingdoms' "coins replace emeralds" (`docs/Coins-Plan.md`). A butcher villager's price is now asked in the coin of
+the land where you stand (one emerald's worth in the old price is `KingdomsMoney.worth(1)`, paid in the town's coin and
+copper bits). `KingdomsMoney` is a MethodHandles bridge to `com.jaymoskingdoms.money.Money`, so loose coins, a purse
+(the worn belt purse too) and bundles all count, and change comes back as coins. The butcher screen is sent the price as
+a server-made line ("6 Realm Silver"), one of that coin to draw beside it, the cost and what you carry (`OpenButcher`
+now carries a Component and an ItemStack instead of a silver count). Without Kingdoms the price falls back to emeralds
+one for one.

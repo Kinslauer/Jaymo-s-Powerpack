@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.Captains.Captain;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -69,7 +70,7 @@ public final class SwornCaptains {
 	static final double FOLLOW_FAR = 48.0;
 	/** Spying: days away, and how many of the tribe's secrets he brings back at most. */
 	static final int SPY_DAYS = 2, SPY_TELLS = 2;
-	/** A raid's odds (even ranks), and how much each rank of difference moves them; its loot (emeralds). */
+	/** A raid's odds (even ranks), and how much each rank of difference moves them; its loot (silver). */
 	static final float RAID_WINS = 0.55F, RAID_PER_RANK = 0.1F;
 	static final int RAID_LOOT = 6, RAID_GRUDGE = 8;
 	/** A king's share of each blow while his captains stand; how often he says so (ticks). */
@@ -571,7 +572,10 @@ public final class SwornCaptains {
 			}
 			Captains.raise(level, c, random);
 			if (lordId != null) {
-				Post.later(lordId, new ItemStack(Items.EMERALD, RAID_LOOT + random.nextInt(RAID_LOOT)));
+				// (0.7.498) the lord's share of the loot comes in silver coins
+				for (ItemStack coins : Money.stacks(Money.worth(RAID_LOOT + random.nextInt(RAID_LOOT)))) {
+					Post.later(lordId, coins);
+				}
 				Tribes.add(server, lordId, c.tribe(), RAID_GRUDGE);
 			}
 			put(server, c.id(), b.doing("guard", -1L, -1));
