@@ -85,11 +85,15 @@ public final class HavenGrowth {
 
 	// ---- its land ----------------------------------------------------------------------------------------------------
 
-	/** How often it thinks of claiming more land (ticks), the land it starts with (chunks out from the seat), and the size it grows from. */
+	/**
+	 * How often it thinks of claiming more land (ticks); the size it claims its first ring past its founding land from, and
+	 * another ring for every this many in its size past that. (0.7.484) Rings count out from the land it was founded with
+	 * (see {@link #claimRadius}), not from a fixed start inside it.
+	 */
 	static final long CLAIM_TICKS = 1200L;
-	static final int CLAIM_START = 3, CLAIM_FROM = 14, SIZE_PER_RING = 10;
-	/** The furthest out it claims (chunks) by kind: a village, a kingdom, a fiefdom. */
-	static final int VILLAGE_CLAIM = 5, KINGDOM_CLAIM = 7, FIEFDOM_CLAIM = 6;
+	static final int CLAIM_FROM = 14, SIZE_PER_RING = 10;
+	/** The furthest out it claims (chunks) by kind: a village, a kingdom, a fiefdom (each above the land it is founded with). */
+	static final int VILLAGE_CLAIM = 5, KINGDOM_CLAIM = 10, FIEFDOM_CLAIM = 8;
 	/** A realm pays this many emeralds for each chunk; a village needs this much food in store to claim at all. */
 	static final int CLAIM_COST = 4, CLAIM_FOOD = 32;
 
@@ -440,10 +444,39 @@ public final class HavenGrowth {
 
 	// ---- land --------------------------------------------------------------------------------------------------------
 
-	/** The land {@code f}'s size calls for (chunks out from the seat), within the most its kind claims. */
+	/**
+	 * The land {@code f}'s size calls for (chunks out from the seat), within the most its kind claims. (0.7.484) It counts
+	 * rings out from the land the haven was founded with: a kingdom's ({@link KingdomEvents#CLAIM_RADIUS}), a fiefdom's
+	 * ({@link GrimSites#FIEF_CLAIM}, or a kingdom's if it already holds land past what that and its size would give, as a
+	 * kingdom sworn to an overlord does), a village's ({@link Villages#CLAIM_RADIUS}). The first ring comes at
+	 * {@link #CLAIM_FROM}. The base is always one of those fixed founding sizes, never the land it holds now, so each claim
+	 * does not lead straight on to the next.
+	 */
 	static int claimRadius(Faction f) {
-		int most = f.type() == FactionType.KINGDOM ? KINGDOM_CLAIM : f.type() == FactionType.FIEFDOM ? FIEFDOM_CLAIM : VILLAGE_CLAIM;
-		return Math.min(most, CLAIM_START + Math.max(0, Planner.size(f) - CLAIM_FROM) / SIZE_PER_RING);
+		int size = Planner.size(f);
+		int rings = size < CLAIM_FROM ? 0 : 1 + (size - CLAIM_FROM) / SIZE_PER_RING;
+		int base, most;
+		if (f.type() == FactionType.KINGDOM) {
+			base = KingdomEvents.CLAIM_RADIUS;
+			most = KINGDOM_CLAIM;
+		} else if (f.type() == FactionType.FIEFDOM) {
+			base = heldRadius(f) > GrimSites.FIEF_CLAIM + rings ? Math.max(GrimSites.FIEF_CLAIM, KingdomEvents.CLAIM_RADIUS) : GrimSites.FIEF_CLAIM;
+			most = FIEFDOM_CLAIM;
+		} else {
+			base = Villages.CLAIM_RADIUS;
+			most = VILLAGE_CLAIM;
+		}
+		return Math.min(Math.max(most, base), base + rings);
+	}
+
+	/** (0.7.484) How far out from its seat (chunks, the larger of the two axes) the furthest of {@code f}'s claims lies. */
+	private static int heldRadius(Faction f) {
+		ChunkPos middle = ChunkPos.containing(f.seat());
+		int far = 0;
+		for (long claim : f.claims()) {
+			far = Math.max(far, Math.max(Math.abs(ChunkPos.getX(claim) - middle.x()), Math.abs(ChunkPos.getZ(claim) - middle.z())));
+		}
+		return far;
 	}
 
 	/**
