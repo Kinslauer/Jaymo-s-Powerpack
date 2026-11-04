@@ -229,6 +229,12 @@ public final class Mortality {
 		}
 	}
 
+	/** (0.20.42) {@code entity}'s death was undone (Chrono cheating death): what the downed state noted of it is dropped. */
+	public static void spare(LivingEntity entity) {
+		FELLED.remove(entity);
+		EXECUTED.remove(entity);
+	}
+
 	/** {@code entity} is being executed where it lies: {@code finalBlow}, by a player or a boss, ends the character outright. */
 	static void executed(LivingEntity entity, boolean finalBlow) {
 		if (entity instanceof Player) {

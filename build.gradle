@@ -389,6 +389,12 @@ def packModsOverride = [
 	// Pinned by its Modrinth version number (modrinth.com/mod/omnicrossbow/version/1.1.4+mc26.3, project TxqFWfQR), as
 	// Cloth Config and Balm are. TODO(home PC): move it to packMods if it has a CurseForge file.
 	[dep: "maven.modrinth:omnicrossbow:1.1.4+mc26.3"],
+	// Respawn Recap (MIT, by DialingSpoon; github.com/DialingSpoon527/Respawn-Recap; shipped as the untouched jar with credit):
+	// an Outer Wilds-style memory replay of your last life on death, from screenshots it takes as you play (kept in
+	// .minecraft/respawnrecap). Client-only. Andy (2026-11-04): Chrono's cheat-death rewind uses it: R on the black screen
+	// plays the replay as the rewind (client/mixin/respawnrecap). Needs Fabric Language Kotlin 1.13.12+ (packMods has 1.14.2).
+	// Pinned by its Modrinth version number (project rgcja1LM). TODO(home PC): move it to packMods if it has a CurseForge file.
+	[dep: "maven.modrinth:respawn-recap:1.2.1-26.3"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 // The Kitchen jar in libs/: the one matching the Kitchen source (kitchen/gradle.properties), else the newest. A git pull on

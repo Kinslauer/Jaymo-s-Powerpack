@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.respawnrecap",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"RecapControllerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

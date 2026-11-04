@@ -98,6 +98,7 @@ public final class ChronoPowerClient implements PowerClient {
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.WORKY, WorkyRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
+		ChronoCheatDeathClient.init();
 		ChronoStreak.init();
 		MuzzleFlashParticle.register();
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ChronoSpaceCue::render);

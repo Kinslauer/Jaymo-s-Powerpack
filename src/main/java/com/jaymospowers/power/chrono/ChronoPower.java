@@ -139,6 +139,8 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.init();
 		ChronoDirectives.init();
 		StoppedClockItem.init();
+		// (0.20.42) cheating death: R on a black screen instead of dying
+		ChronoCheatDeath.init();
 		// touch the attachment types so they register at startup
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);
 		ServerTickEvents.END_SERVER_TICK.register(ChronoPunch::tick);
@@ -254,6 +256,7 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.fadeAll(player);
 		ChronoMemory.forget(player);
 		ChronoDirectives.forget(player);
+		ChronoCheatDeath.forget(player);
 		// clear the HUD state on the client
 		if (ServerPlayNetworking.canSend(player, ChronoSync.TYPE)) {
 			int[] zero = new int[ChronoSync.ABILITIES];
