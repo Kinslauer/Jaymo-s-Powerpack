@@ -52,7 +52,7 @@ final class PackResourcePacks {
 	}
 
 	/**
-	 * (0.20.38) A pack {@code keptOn} is switched on at every launch it's found off, not just once: its marker is then
+	 * (0.20.39) A pack {@code keptOn} is switched on at every launch it's found off, not just once: its marker is then
 	 * the file that turns that off ({@code <marker>-off} in config/), for a player who'd rather not have it.
 	 */
 	static final String OFF = "-off";
@@ -63,7 +63,7 @@ final class PackResourcePacks {
 		// "MCA - Default Medieval" (by DE4THR4SH, CurseForge 667175) dresses MCA's villagers in vanilla-style medieval
 		// clothes. Its newest file says 1.21.1 (pack_format 55); it only swaps MCA's skin textures, which haven't moved
 		// since. v2 (0.8.106): installs where v1 found no file, or the game later dropped it while the file was missing,
-		// get it once more. (0.20.38) Andy (2026-11-04): "the outfits seem to be broken again, they arent wearing medieval
+		// get it once more. (0.20.39) Andy (2026-11-04): "the outfits seem to be broken again, they arent wearing medieval
 		// attire anymore": his clip showed MCA's own green plaid shirt (neutral/mason/0), which this pack draws as a tan
 		// tunic, so the pack had dropped out of his selected packs while its v2 marker said it was done. Kept on now:
 		// switched back on at any launch it's found off (config/jaymospowers-medieval-villagers-off keeps it off).
