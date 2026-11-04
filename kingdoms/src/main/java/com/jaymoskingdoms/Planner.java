@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
@@ -103,6 +104,8 @@ public final class Planner {
 	}
 
 	private static final Map<String, int[]> RINGS = new HashMap<>();
+	/** (0.7.484) Builds that stand on the shore, by entry: {the blueprint row their water end starts at, the least of their columns over water}. */
+	private static final Map<String, int[]> SHORE = new HashMap<>();
 	private static final Map<Integer, Map<Item, Integer>> NEEDS = new HashMap<>();
 	private static final Map<Integer, Long> NEEDS_AT = new HashMap<>();
 
@@ -112,6 +115,20 @@ public final class Planner {
 	/** Builds of {@code entry} (any faction type) go up between {@code min} and {@code max} blocks from the seat. */
 	public static void setRings(String entry, int min, int max) {
 		RINGS.put(entry, new int[] {min, max});
+	}
+
+	/**
+	 * (0.7.484) Builds of {@code entry} stand on the shore: the blueprint's rows from {@code fromRow} on (drawn north, its
+	 * head toward the seat) may lie over water, and at least {@code leastWet} of its columns must, its surface no higher
+	 * than the floor and within {@link #LEVEL_TOLERANCE} below it. The rows before stand on dry ground as usual.
+	 */
+	public static void setShore(String entry, int fromRow, int leastWet) {
+		SHORE.put(entry, new int[] {fromRow, leastWet});
+	}
+
+	/** (0.7.484) Whether builds of {@code entry} stand partly over water (their builders don't fill under them). */
+	static boolean shore(String entry) {
+		return SHORE.containsKey(entry);
 	}
 
 	/** The settlement's size, for the catalogue's gates: its villagers and its folk. */
@@ -153,7 +170,8 @@ public final class Planner {
 				tavern = size >= e.minPopulation() && works.count(e.id()) < e.max() ? e : null;
 				continue;
 			}
-			if (size >= e.minPopulation() && works.count(e.id()) < Focus.max(server, f, e.id(), e.max()) && seen.add(e.id())) {
+			// (0.7.484) a haven's works by its blood and its size ({@link HavenGrowth})
+			if (size >= e.minPopulation() && works.count(e.id()) < HavenGrowth.max(server, f, e.id(), Focus.max(server, f, e.id(), e.max())) && seen.add(e.id())) {
 				out.add(e);
 			}
 		}
@@ -172,7 +190,7 @@ public final class Planner {
 		Works.Site works = Works.of(server, f.id());
 		Map<String, Integer> most = new HashMap<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
-			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && e.minPopulation() < Integer.MAX_VALUE
+			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && !HavenGrowth.isWork(e.id()) && e.minPopulation() < Integer.MAX_VALUE
 				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))) {
 				most.merge(e.id(), Focus.max(server, f, e.id(), e.max()), Math::max);
 			}
@@ -394,6 +412,7 @@ public final class Planner {
 	/** The best open site for {@code bp} in {@code f}'s land, ring by ring out from the seat; null if none. */
 	static @Nullable Placing site(ServerLevel level, Faction f, String entry, Blueprint bp) {
 		int[] rings = RINGS.getOrDefault(entry, new int[] {RING_MIN, MAX_RADIUS});
+		int[] shore = SHORE.get(entry);
 		int reach = Math.min(rings[1], landRadius(f));
 		Palette palette = Palette.at(level, f.seat());
 		List<int[]> taken = taken(level, f);
@@ -423,7 +442,7 @@ public final class Planner {
 					corner.getZ() + size[1] + GAP)) {
 					continue;
 				}
-				Footing footing = check(level, f, corner, size[0], size[1], bp.height(), taken);
+				Footing footing = check(level, f, corner, size[0], size[1], bp.height(), taken, rotation, bp.depth(), shore);
 				if (footing == null) {
 					continue;
 				}
@@ -476,9 +495,11 @@ public final class Planner {
 	 * {@link #LEVEL_TOLERANCE}, and open air above. A column may instead stand on an old structure ({@link Ruins}): its
 	 * ground is then the land under the structure, and the structure's blocks above count as open (they'll be torn
 	 * down), unless the site is {@link Ruins#guarded} or has a bell. Returns the floor height (the median ground block)
-	 * and whether it's on an old structure, or null.
+	 * and whether it's on an old structure, or null. (0.7.484) With {@code shore} (see {@link #setShore}), the rows of the
+	 * blueprint ({@code depth} deep, turned by {@code rotation}) from its water end on may lie over water instead.
 	 */
-	static @Nullable Footing check(ServerLevel level, Faction f, BlockPos corner, int w, int d, int height, List<int[]> taken) {
+	static @Nullable Footing check(ServerLevel level, Faction f, BlockPos corner, int w, int d, int height, List<int[]> taken, Rotation rotation,
+		int depth, int @Nullable [] shore) {
 		int x0 = corner.getX(), z0 = corner.getZ(), x1 = x0 + w - 1, z1 = z0 + d - 1;
 		// in its land
 		for (int[] c : new int[][] {{x0 - MARGIN, z0 - MARGIN}, {x1 + MARGIN, z0 - MARGIN}, {x0 - MARGIN, z1 + MARGIN}, {x1 + MARGIN, z1 + MARGIN}}) {
@@ -500,7 +521,7 @@ public final class Planner {
 		}
 		// the ground (a margin column over an old structure is left as it stands, and not looked over)
 		int[] grounds = new int[(w + 2 * MARGIN) * (d + 2 * MARGIN)];
-		List<Integer> inside = new ArrayList<>();
+		List<Integer> inside = new ArrayList<>(), surfaces = new ArrayList<>();
 		boolean ruins = false;
 		int n = 0;
 		for (int x = x0 - MARGIN; x <= x1 + MARGIN; x++) {
@@ -512,11 +533,20 @@ public final class Planner {
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 				BlockState ground = level.getBlockState(top.below());
 				boolean margin = x < x0 || x > x1 || z < z0 || z > z1;
-				if (!level.getFluidState(top).isEmpty() || !level.getFluidState(top.below()).isEmpty()) {
-					return null;
-				}
 				int at;
-				if (Storehouse.ground(ground) || (margin && road(ground, null))) {
+				boolean wet = false;
+				if (!level.getFluidState(top).isEmpty() || !level.getFluidState(top.below()).isEmpty()) {
+					// (0.7.484) only a shore build's water end may lie over water, and only open water
+					if (shore == null || row(rotation, x - x0, z - z0, depth) < shore[0] || !level.getFluidState(top).isEmpty()
+						|| !level.getFluidState(top.below()).is(FluidTags.WATER)) {
+						return null;
+					}
+					at = top.getY() - 1;
+					wet = true;
+					if (!margin) {
+						surfaces.add(at);
+					}
+				} else if (Storehouse.ground(ground) || (margin && road(ground, null))) {
 					at = top.getY() - 1;
 				} else if (Ruins.inPiece(level, top.below())) {
 					if (margin) {
@@ -533,15 +563,23 @@ public final class Planner {
 					return null;
 				}
 				grounds[n++] = at;
-				if (!margin) {
+				if (!margin && !wet) {
 					inside.add(at);
 				}
 			}
+		}
+		if (inside.isEmpty() || shore != null && surfaces.size() < shore[1]) {
+			return null;
 		}
 		inside.sort(Integer::compare);
 		int floor = inside.get(inside.size() / 2);
 		for (int g : inside) {
 			if (Math.abs(g - floor) > LEVEL_TOLERANCE) {
+				return null;
+			}
+		}
+		for (int g : surfaces) {
+			if (g > floor || floor - g > LEVEL_TOLERANCE) {
 				return null;
 			}
 		}
@@ -572,6 +610,16 @@ public final class Planner {
 			return null;
 		}
 		return new Footing(floor, ruins);
+	}
+
+	/** (0.7.484) Which row of a {@code depth}-deep blueprint, turned by {@code rotation}, the footprint's column at {@code (x, z)} is. */
+	private static int row(Rotation rotation, int x, int z, int depth) {
+		return switch (rotation) {
+			case CLOCKWISE_90 -> depth - 1 - x;
+			case CLOCKWISE_180 -> depth - 1 - z;
+			case COUNTERCLOCKWISE_90 -> x;
+			default -> z;
+		};
 	}
 
 	/**

@@ -352,7 +352,8 @@ final class TradeRoutes {
 		Caravans.Ledger l = Caravans.ledger(server);
 		for (Faction f : Factions.all(server)) {
 			Sort sort = sortOf(server, f);
-			if (sort == null) {
+			// ((0.7.484) a haven trading on its own account sends its output by Caravans.startHaven, not from here)
+			if (sort == null || Caravans.tradingHaven(server, f)) {
 				continue;
 			}
 			String key = Integer.toString(f.id());

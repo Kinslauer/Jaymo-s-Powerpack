@@ -213,18 +213,18 @@ public final class KingdomEvents {
 	static List<Long> claim(MinecraftServer server, BlockPos center, int radius) {
 		List<Long> claims = new ArrayList<>();
 		ChunkPos middle = ChunkPos.containing(center);
+		// (0.7.484) every claim held, gathered once, so each chunk is one lookup rather than a search of every faction's land
+		java.util.Set<Long> taken = new java.util.HashSet<>();
+		for (Faction other : Factions.all(server)) {
+			if (!other.fallen()) {
+				taken.addAll(other.claims());
+			}
+		}
 		for (int dx = -radius; dx <= radius; dx++) {
 			for (int dz = -radius; dz <= radius; dz++) {
-				ChunkPos chunk = new ChunkPos(middle.x() + dx, middle.z() + dz);
-				boolean taken = false;
-				for (Faction other : Factions.all(server)) {
-					if (other.claims(chunk)) {
-						taken = true;
-						break;
-					}
-				}
-				if (!taken) {
-					claims.add(chunk.pack());
+				long chunk = new ChunkPos(middle.x() + dx, middle.z() + dz).pack();
+				if (!taken.contains(chunk)) {
+					claims.add(chunk);
 				}
 			}
 		}

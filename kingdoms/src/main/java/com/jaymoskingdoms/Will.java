@@ -918,6 +918,10 @@ public final class Will {
 
 	/** {@code mob} runs from {@code from} for {@code ticks}. */
 	static void flee(Mob mob, Player from, long now, int ticks) {
+		if (HavenGrowth.sworn(mob)) {
+			// (0.7.484) a haven's sworn never run: they stand their ground
+			return;
+		}
 		Flee was = FLEEING.get(mob);
 		if (was == null || was.until() < now + ticks) {
 			FLEEING.put(mob, new Flee(from.getUUID(), now + ticks));

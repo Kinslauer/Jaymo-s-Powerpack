@@ -105,6 +105,13 @@ final class Caravans {
 	static final int GREEN_KEEPS = 40, GREEN_LOAD_MOST = 192, GREEN_CARTS = 2, GREEN_GUARDS = 2, GREEN_ROB_GRUDGE = 12;
 	static final long GREEN_TICKS = 24000L, GREEN_RETRY = 4800L;
 	static final double GREEN_REACH = 900.0;
+	/**
+	 * (0.7.484) Haven carts: a haven sends once in this long (ticks), and retries after the other; one cart for every this many works it
+	 * has (and one more), at most {@link #MOST_CARTS}; this many guards (its sworn, and one more per {@link #CARTS_PER_GUARD} carts);
+	 * unseen, it sends a levy of this many goods and this many more for every work.
+	 */
+	static final long HAVEN_TICKS = 16000L, HAVEN_RETRY = 4800L;
+	static final int HAVEN_WORKS_PER_CART = 3, HAVEN_GUARDS = 2, HAVEN_LEVY_BASE = 32, HAVEN_LEVY_PER_WORK = 24;
 
 	static final String TAG = "jaymoskingdoms.caravan", TAG_OF = "jaymoskingdoms.caravan_of.";
 	/** A caravan folk's task. */
@@ -273,8 +280,126 @@ final class Caravans {
 			}
 			startGreen(level, f, false);
 		}
-		// ((0.7.484) and everyone else: kingdoms, villages and towns, havens, bandit, illager and pirate camps)
+		// ((0.7.484) and everyone else: kingdoms, villages and towns, bandit, illager and pirate camps; havens send their own, below)
 		TradeRoutes.send(level, now);
+		// ((0.7.484) and the havens, which only trade, send their output to the settlement that buys it best)
+		for (Faction f : Factions.all(server)) {
+			if (f.fallen() || f.type() == FactionType.BARBARIAN || !tradingHaven(server, f) || l.caravans().values().stream().anyMatch(c -> c.home() == f.id())
+				|| now < l.next().getOrDefault(Integer.toString(f.id()), 0L)) {
+				continue;
+			}
+			startHaven(level, f, false);
+		}
+	}
+
+	/** (0.7.484) {@code f} is a haven that trades on its own account (a fiefdom of an overlord sends to it, as ever). */
+	static boolean tradingHaven(MinecraftServer server, Faction f) {
+		return Havens.is(server, f) && Relations.overlord(server, f) == null;
+	}
+
+	/**
+	 * (0.7.484) Haven {@code f} sends a cart or three of its output (and its wares) to the settlement that buys it best, guarded by its
+	 * sworn fighters; the more it works, the more carts. {@code force}: whatever the time and the load.
+	 */
+	static @Nullable Caravan startHaven(ServerLevel level, Faction f, boolean force) {
+		MinecraftServer server = level.getServer();
+		long now = level.getGameTime();
+		Faction to = f.fallen() || !Economy.atPeace(server, f) ? null : HavenGrowth.partner(server, f);
+		int works = HavenGrowth.works(server, f);
+		if (to == null || works == 0 && !force) {
+			later(server, f, now + HAVEN_RETRY);
+			return null;
+		}
+		int most = Math.min(MOST_CARTS, 1 + works / HAVEN_WORKS_PER_CART) * CART_LOAD;
+		List<Map<String, Integer>> carts = Storage.loaded(level, f) ? loadUp(level, f, HavenGrowth::trades, HavenGrowth::keeps, most) : havenLevy(level, f, works);
+		int load = carts.stream().mapToInt(c -> c.values().stream().mapToInt(Integer::intValue).sum()).sum();
+		if (load < LOAD_LEAST && !force) {
+			for (Map<String, Integer> cart : carts) {
+				deliver(level, f, cart);
+			}
+			later(server, f, now + HAVEN_RETRY);
+			return null;
+		}
+		if (carts.isEmpty()) {
+			carts = List.of(Map.of());
+		}
+		Ledger l = ledger(server);
+		int id = l.nextId();
+		boolean mounted = f.type().isRealm() && Wealth.atLeast(server, f, Wealth.Tier.PROSPEROUS);
+		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, HAVEN_GUARDS + carts.size() / CARTS_PER_GUARD, mounted, now, now + STOP_TICKS / 2);
+		Map<String, Caravan> all = new HashMap<>(l.caravans());
+		all.put(Integer.toString(id), c);
+		Map<String, Long> next = new HashMap<>(l.next());
+		next.put(Integer.toString(f.id()), now + HAVEN_TICKS);
+		save(server, new Ledger(all, next, l.pending(), id + 1));
+		JaymosKingdoms.LOGGER.info("{} sends {} carts of its output ({} goods) to {}", f.name(), carts.size(), load, to.name());
+		if (level.isPositionEntityTicking(c.at())) {
+			appear(level, c);
+		}
+		return c;
+	}
+
+	/** (0.7.484) A levy of a haven's works' goods, sent while its storehouse is out of reach (nothing is taken from it). */
+	private static List<Map<String, Integer>> havenLevy(ServerLevel level, Faction f, int works) {
+		List<Item> goods = HavenGrowth.levyGoods(level.getServer(), f);
+		Map<String, Integer> all = new LinkedHashMap<>();
+		if (!goods.isEmpty()) {
+			for (int i = 0; i < HAVEN_LEVY_BASE + works * HAVEN_LEVY_PER_WORK; i++) {
+				all.merge(key(goods.get(level.getRandom().nextInt(goods.size()))), 1, Integer::sum);
+			}
+		}
+		return split(all);
+	}
+
+	/**
+	 * (0.7.484) A haven's cart at the settlement that buys: the goods handed over and paid for in emeralds (a realm's treasury or a
+	 * village's storehouse pays as much as it holds, into the haven's own), the carts loaded again for home with what the buyer has
+	 * in plenty that the haven builds with (timber, rock, ore, bread).
+	 */
+	private static Caravan arriveHaven(ServerLevel level, Caravan c, Faction home, Faction buyer, long now) {
+		MinecraftServer server = level.getServer();
+		long worth = 0L;
+		for (Map<String, Integer> cart : c.carts()) {
+			deliver(level, buyer, cart);
+			for (Map.Entry<String, Integer> e : cart.entrySet()) {
+				Item item = item(e.getKey());
+				worth += item == null ? 0L : HavenGrowth.worth(item, e.getValue());
+			}
+		}
+		long paid = 0L;
+		if (buyer.type().isRealm()) {
+			paid = Math.min(worth, Math.max(0L, buyer.treasury()));
+			long take = paid;
+			if (take > 0L) {
+				Factions.update(server, buyer.id(), x -> x.withTreasury(x.treasury() - take));
+			}
+		} else if (Storage.loaded(level, buyer)) {
+			paid = Storage.take(level, buyer, Items.EMERALD, (int)Math.min(worth, 64L * 8)).getCount();
+		}
+		if (paid > 0L) {
+			if (home.type().isRealm()) {
+				long give = paid;
+				Factions.update(server, home.id(), x -> x.withTreasury(x.treasury() + give));
+			} else {
+				deliver(level, home, Map.of(key(Items.EMERALD), (int)paid));
+			}
+		}
+		List<Map<String, Integer>> back = List.of();
+		if (Storage.loaded(level, buyer)) {
+			back = loadUp(level, buyer, x -> Storage.isFood(x) || x.is(ItemTags.LOGS) || x.is(Items.COAL) || x.is(Items.IRON_INGOT) || x.is(Items.COBBLESTONE),
+				KINGDOM_KEEPS, Math.min(c.carts().size() * CART_LOAD, (int)Math.min((long)Integer.MAX_VALUE, c.load() * (long)RETURN_SHARE / 100)));
+		}
+		List<Map<String, Integer>> carts = new ArrayList<>(back);
+		while (carts.size() < c.carts().size()) {
+			carts.add(Map.of());
+		}
+		while (carts.size() > c.carts().size()) {
+			Map<String, Integer> extra = carts.removeLast();
+			Map<String, Integer> merged = new HashMap<>(carts.getLast());
+			extra.forEach((k, v) -> merged.merge(k, v, Integer::sum));
+			carts.set(carts.size() - 1, merged);
+		}
+		return c.turned(carts, now + STOP_TICKS);
 	}
 
 	/** (0.7.484) How long after {@code c} is done its home waits to send another (ticks). */
@@ -462,17 +587,29 @@ final class Caravans {
 
 	/** Takes from {@code f}'s storage what it has of {@code what} beyond {@code keep} of each, at most {@code most}, a cart's load at a time. */
 	static List<Map<String, Integer>> loadUp(ServerLevel level, Faction f, Predicate<ItemStack> what, int keep, int most) {
-		return loadUp(level, f, what, keep, most, CART_LOAD);
+		return loadUp(level, f, what, x -> keep, most, CART_LOAD);
 	}
 
 	/** (0.7.484) {@link #loadUp} into carts of {@code cap} items each (a handcart takes less than a wagon). */
 	static List<Map<String, Integer>> loadUp(ServerLevel level, Faction f, Predicate<ItemStack> what, int keep, int most, int cap) {
+		return loadUp(level, f, what, x -> keep, most, cap);
+	}
+
+	/** (0.7.484) The same, keeping {@code keeps} of each good (a haven keeps more of what it builds with). */
+	private static List<Map<String, Integer>> loadUp(ServerLevel level, Faction f, Predicate<ItemStack> what, java.util.function.ToIntFunction<ItemStack> keeps,
+		int most) {
+		return loadUp(level, f, what, keeps, most, CART_LOAD);
+	}
+
+	/** (0.7.484) The same, in carts of {@code cap} items each. */
+	private static List<Map<String, Integer>> loadUp(ServerLevel level, Faction f, Predicate<ItemStack> what, java.util.function.ToIntFunction<ItemStack> keeps,
+		int most, int cap) {
 		List<Map<String, Integer>> carts = new ArrayList<>();
 		Map<String, Integer> cart = new LinkedHashMap<>();
 		int inCart = 0, total = 0;
 		for (Map.Entry<Item, Integer> e : Storage.totals(level, f).entrySet()) {
 			ItemStack sample = new ItemStack(e.getKey());
-			int spare = e.getValue() - keep;
+			int spare = e.getValue() - keeps.applyAsInt(sample);
 			if (spare <= 0 || !what.test(sample)) {
 				continue;
 			}
@@ -621,6 +758,10 @@ final class Caravans {
 		}
 		if (!c.back() && home != null && lord != null && home.type() == FactionType.BARBARIAN) {
 			return arriveGreen(level, c, home, lord, now);
+		}
+		if (!c.back() && home != null && lord != null && home.type() != FactionType.BARBARIAN && tradingHaven(server, home)) {
+			// ((0.7.484) a haven's cart at the buyer)
+			return arriveHaven(level, c, home, lord, now);
 		}
 		if (!c.back()) {
 			int load = c.load();
