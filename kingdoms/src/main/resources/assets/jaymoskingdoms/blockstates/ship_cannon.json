@@ -1,48 +1,33 @@
 {
   "variants": {
-    "facing=north,load=empty": {
+    "facing=north,recoiled=false": {
       "model": "jaymoskingdoms:block/ship_cannon"
     },
-    "facing=north,load=powder": {
-      "model": "jaymoskingdoms:block/ship_cannon"
+    "facing=north,recoiled=true": {
+      "model": "jaymoskingdoms:block/ship_cannon_recoil"
     },
-    "facing=north,load=shot": {
-      "model": "jaymoskingdoms:block/ship_cannon"
-    },
-    "facing=east,load=empty": {
+    "facing=east,recoiled=false": {
       "model": "jaymoskingdoms:block/ship_cannon",
       "y": 90
     },
-    "facing=east,load=powder": {
-      "model": "jaymoskingdoms:block/ship_cannon",
+    "facing=east,recoiled=true": {
+      "model": "jaymoskingdoms:block/ship_cannon_recoil",
       "y": 90
     },
-    "facing=east,load=shot": {
-      "model": "jaymoskingdoms:block/ship_cannon",
-      "y": 90
-    },
-    "facing=south,load=empty": {
+    "facing=south,recoiled=false": {
       "model": "jaymoskingdoms:block/ship_cannon",
       "y": 180
     },
-    "facing=south,load=powder": {
-      "model": "jaymoskingdoms:block/ship_cannon",
+    "facing=south,recoiled=true": {
+      "model": "jaymoskingdoms:block/ship_cannon_recoil",
       "y": 180
     },
-    "facing=south,load=shot": {
-      "model": "jaymoskingdoms:block/ship_cannon",
-      "y": 180
-    },
-    "facing=west,load=empty": {
+    "facing=west,recoiled=false": {
       "model": "jaymoskingdoms:block/ship_cannon",
       "y": 270
     },
-    "facing=west,load=powder": {
-      "model": "jaymoskingdoms:block/ship_cannon",
-      "y": 270
-    },
-    "facing=west,load=shot": {
-      "model": "jaymoskingdoms:block/ship_cannon",
+    "facing=west,recoiled=true": {
+      "model": "jaymoskingdoms:block/ship_cannon_recoil",
       "y": 270
     }
   }

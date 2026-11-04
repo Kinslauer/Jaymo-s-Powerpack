@@ -183,6 +183,23 @@ public final class McaCompat {
 		return LOADED ? McaBridge.families(level, box, grownPerYoung, leastGrown, chance, soonUnits, takeIn) : 0;
 	}
 
+	/** (0.7.490) {@code villager} gives up their bed (to look for another, {@link Peoples}); nothing without MCA. */
+	static void leaveHome(Villager villager) {
+		if (LOADED) {
+			McaBridge.leaveHome(villager);
+		}
+	}
+
+	/** (0.7.490) {@link Peoples#meet}: {@code villager} already knows {@code player} (MCA has memories of them), so a first meeting is long past. */
+	static boolean knows(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.knows(villager, player);
+	}
+
+	/** (0.7.490) {@link Settlers}: a lone goblin or orc ({@code kind}) named {@code name} with trade {@code trade}, new to a village, at {@code at}; null without a body made. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, net.minecraft.world.phys.Vec3 at, int trade) {
+		return LOADED ? McaBridge.settler(level, kind, name, at, trade) : null;
+	}
+
 	/** (0.6.9) Where {@code villager} lives (their bed): MCA's home, else the vanilla villager's. */
 	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
 		if (LOADED) {
@@ -523,6 +540,16 @@ public final class McaCompat {
 		}
 	}
 
+	/**
+	 * (0.7.490) {@code mob} (an MCA villager of {@code kind}'s brood) has just been made or unmade its camp's chief: it carries
+	 * only the gear it now wears, and has a chief's build (the biggest of its brood) or a common one. Anyone else: nothing.
+	 */
+	static void reranked(net.minecraft.world.entity.PathfinderMob mob, Heritage.Kind kind, boolean chief) {
+		if (LOADED) {
+			McaBridge.reranked(mob, kind, chief);
+		}
+	}
+
 	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
 	static boolean becomeGreenskin(ServerLevel level, Folk folk) {
 		return LOADED && Greenskins.mayConvert(level, folk) && McaBridge.convertGreenskin(level, folk);
@@ -585,6 +612,16 @@ public final class McaCompat {
 	/** (0.7.405) A Z Fighter character's own opening, never MCA's stranger's welcome ({@link McaBridge#zfighterOpening}). */
 	public static boolean zfighterOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.zfighterOpening(villager, player);
+	}
+
+	/** (0.7.486) {@link SeaBodies}: the {@code slot} armour an MCA villager carries, dropped at their feet; whether there was any. */
+	static boolean shedPacked(net.minecraft.world.entity.Mob mob, net.minecraft.world.entity.EquipmentSlot slot, net.minecraft.server.level.ServerLevel level) {
+		return LOADED && McaBridge.shedPacked(mob, slot, level);
+	}
+
+	/** (0.7.486) {@link SeaBodies}: an MCA guard who can't wear armour takes up the bow; whether they did just now. */
+	static boolean toBow(net.minecraft.world.entity.Mob mob) {
+		return LOADED && McaBridge.toBow(mob);
 	}
 
 	/** (0.7.246) A crewman (one of MCA's villagers) with no armour packed, and a sailor by trade. */

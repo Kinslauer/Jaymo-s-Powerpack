@@ -611,9 +611,11 @@ public final class Construction {
 			return 0;
 		}
 		int n = 0;
+		boolean shore = Planner.shore(l.entry());
 		for (int y = column.getY() - 1; y >= column.getY() - FILL_MAX; y--) {
 			BlockState state = level.getBlockState(column.atY(y));
-			if (!(state.isAir() || state.canBeReplaced())) {
+			// (0.7.490) a shore build's water end stands on its piles over the water, not on a fill
+			if (!(state.isAir() || state.canBeReplaced()) || shore && !state.getFluidState().isEmpty()) {
 				break;
 			}
 			n++;

@@ -7,7 +7,7 @@ our own code from the idea (the mods are GPLv3, ARR or CC BY-NC). One PR per pat
 | # | Patch | From | Status |
 |---|---|---|---|
 | 1 | Seats and a Sit key | Sitting+ ("add a button as well") | built by the sitting thread |
-| 2 | Fibre kit: grass bandage, grass bed, mesh to paper, rope ties to fences | Plant Fibers | Powers 0.19.73 / Kingdoms 0.7.486 |
+| 2 | Fibre kit: grass bandage, grass bed, mesh to paper, rope ties to fences | Plant Fibers | Powers 0.19.86 / Kingdoms 0.7.495 |
 | 3 | Coins replace emeralds; coin purses in the belt bauble slot, worn visibly, what pickpockets mainly lift | Custom Trade Currency | Andy chose the full switch (emeralds become a gem sold to a money changer) |
 | 4 | Jewellery making (bench, lapidary, graded frames) | Immersive Jewelry | |
 | 5 | Gem sockets in forged gear | Immersive Apotheosis | after 4 |

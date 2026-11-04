@@ -1,6 +1,7 @@
 package com.jaymoskitchen.client.stomach;
 
 import com.jaymoskitchen.JaymosKitchen;
+import com.jaymoskitchen.client.hud.HudZones;
 import com.jaymoskitchen.stomach.Stomach;
 import java.util.List;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -44,8 +45,13 @@ public final class StomachHud {
 		}
 		List<Stomach.Meal> meals = Stomach.meals(player);
 		int slots = Stomach.slots(player);
-		int x = graphics.guiWidth() / 2 + 91 + GAP;
-		int y = graphics.guiHeight() - 20;
+		// (HUD rework) left dock, row 10 (food slots left to right, then the drink slot after a 4 px gap); 17x19 each
+		int[] at = HudZones.place(HudZones.DOCK_LEFT, "jaymoskitchen:stomach", 10, slots * SLOT + 4 + 17, 19);
+		if (at == null) {
+			return;
+		}
+		int x = at[0];
+		int y = at[1];
 		int food = 0;
 		for (Stomach.Meal meal : meals) {
 			if (!meal.drink()) {

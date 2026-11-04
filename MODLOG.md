@@ -5076,7 +5076,101 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
   (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
   own resourcepacks/.
-- **0.19.73, Fibre kit (Andy's Plant Fibers pick, `docs/Otectus-Plan.md` patch 2; Kingdoms 0.7.486):** more of the start
+- **0.19.73, flail and whip swings worked out every time** (`armory/Lash`, `client/armory/LashRenderer`): Andy: "the
+  flail and whip do not swing at the proper trajectory, it should be calculated everytime instead of the same canned
+  swing from right to left, also the right click wind up sould take into account where the head is ... working to the
+  OVERHEAD swing ... a shorter axis overhead, that the player lowers infront of themselves as it rounds, to deal damage
+  while the button is held, some attacks can wrap around shields, and will stop momentum upon a heavy enough hit."
+  Each press sends `Lash.Aim` first: the head's real spot (the client's physics chain) and how the mouse turned over
+  the last 3 ticks. A swipe now lies along the flick (left, right, a chop, an uppercut) from the head's side round to
+  the other (`sweepShape`); no flick, from the side the head hangs on across. A swipe can follow a returning swipe.
+  The whirl sets off from the head, round the way you were turning, and works up from the held-out hand to overhead by
+  full speed (`whirlPoint`): tilted down in front (more as you look down), drawn in to 55% behind, the arm dipping as
+  the ball comes round the front. Let go and the ball carries its speed up over your head and down. Whirl (half speed
+  up), slam, chops and the whip's crack wrap a raised shield or guard (`jaymospowers:lash_wrap`, in #bypasses_shield,
+  75% damage); other swings are stopped by it. A guard or anything with more heft (bulk x (1 + 2 x knockback
+  resistance)) than the swing's momentum stops the head: a swipe drops back, a whirl winds up again from there.
+- **0.19.74, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
+  Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you wash
+  it manually". Dirty armour no longer gets a flat tint: it's drawn from a copy of its own texture with dust or mud
+  splotches painted in (10 steps of dirt, 4 of muddiness), and its inventory icon wears the same splotches. Dirt
+  gathers low first (boots, shins, chest hem) and each wash takes splotches away, edges first. Where it goes comes
+  from our masks in `textures/grime/` (`tools/grime_textures.py`; alpha = how early, grey = how dark). The armour's
+  outline stays clean. Grime colours suit the normal textures; with the optional Excalibur pack on they take its
+  grade. Compile-checked; not played.
+- **0.19.75, Patch 4: fliers** (`docs/AlienBodies-Plan.md`): four more aliens are no longer men.
+  - Talon is now a hawk: perched upright on scaly taloned legs, it hops along with the wings folded, its hooked-beak head turning where it looks; in the air the body goes level, the two-part wings spread and beat, hold stiff in a glide and sweep back on a stoop, and a strike rakes the talons forward.
+  - Keen is now a bat: a furry body with the insignia on its back, a pug head with huge ears and fangs, and membrane wings. It crawls on its wrists and feet with the wings folded, beats them fast in flight, holds them out to glide, lies level under Wind's cruise, and hangs head-down from ceilings wrapped in its wings (synced as the "hang" act).
+  - Wyrm is now a small four-legged dragon: a long scaly body trotting in a diagonal lizard gait with solved legs, a long neck to a horned head whose jaw opens on a bite, a spine ridge and a swaying spade-tipped tail; its ender-dragon wings (`WyrmWings`) sit on its shoulders, beat in flight with the body level and the legs tucked, and fold along its back on the ground.
+  - Lumen is now an orb of light: a white-gold core in a dithered halo, floating about a block up and bobbing, with eight motes on tilted rings that stream out behind it as it moves and burst outward when it attacks. It is drawn a second time fullbright, so it shines in the dark.
+  - The four lost their Ultimate spikes (the spike model is a man's). Each body was written, then checked by a second
+    pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
+- **0.19.76, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
+  and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
+  pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
+  `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the
+  same face instead of a new random one (Andy: "the zombie died and changed skins"). Compile-checked and ragdoll-sim
+  checked; not played.
+- **0.19.77, Kingdoms 0.7.486, sea-blooded Tideborn:** Kingdoms only (13 new Tideborn looks with real model parts), see
+  kingdoms/MODLOG.md.
+- **0.19.78, execution bars + double click** (`core/finisher/Finishers`, `client/finisher/FinisherClient`): Andy: "it should be 3 bars
+  that fill, and once the third is filled the execution plays", then "you must sneak and double click + hold, now releasing the hold
+  before the execution kills, will cancel it". Sneak + hold attack (1.5 s) is drawn as three bars under the crosshair (`Finishers.Charge`)
+  in place of the action-bar dots. Sneak + double click (0.3 s) starts the execution at once (`Finishers.Rush`), same checks, always the
+  kill; letting go of the second press before the killing blow calls it off (`Playing.held`). Symbiote suit executions don't cancel.
+- **0.19.79, one HUD layout** (`client/hud/HudZones`, `HudStyle`, `PowerDock`; plan `docs/HUD-Layout.md`): Andy: "rework
+  the hud so nothing is clashing, there are alot of new elements now, so everything needs to feel coherent". Every HUD
+  piece of Powers, Kingdoms and Kitchen that isn't a full-screen wash now asks one of seven zones where to draw, and the
+  zone stacks whatever is showing, so two pieces can't land on one spot: the right dock (power chips, Flame Avatar,
+  beam-clash panel, mount bars, Rig panel), the left dock (stomach, valor, symbiote arm, a body row of stance figure,
+  wounds doll and body heat), the focus band over the action-bar line (struggles, forms belt, spirit line, clash
+  timing), over the crosshair (charge bars, awareness eye), under it (guard, execution bars, roll pips, horse tag, smithing), right of it
+  (combo, lens, scouter), and a top-left rail under Xaero's minimap (power badge, kin sense, party). The badge no longer
+  sits on the minimap, the riding bar no longer covers the chips, the stance figure left the chat corner, and the
+  body-heat thermometer left the XP number. Our HUD hides during films (ultimates, beam and spirit clashes, handshakes,
+  curtains) as vanilla's does, and the armed crosshair now hides in an ultimate's film too. One look (`HudStyle`, Wind's
+  chips: see-through black plates, a rim in the piece's colour when ready, flat 3 px bars in a black frame, shadowed
+  text), with no resource-pack art, so it reads the same with Excalibur off. Compile-checked; not played.
+- **0.19.80, bug sweep** (Kingdoms 0.7.489): Andy: "check the pack over for bugs i havent caught". Master didn't compile:
+  `ZFighterHudLayout` still asked for `ApeRageClient.BAR_UP`, which the HUD rework (0.19.79) removed; the Ape rage piece's
+  usual spot is now the focus band's. The 99 layer blocks' and 30 other loot tables (`blocks/*_layer`, pattern chest,
+  withered leaves, Aether mobs...) were in the pre-26.3 `functions`/`conditions` form, which 26.3 ignores; in the pack
+  they only worked because Moog's Structures upgrades old data on the fly. Rewritten as `modifier`/`condition`
+  (`block_state_property` → `match_block`); a dev server loads them without the upgrade. Rift Chains' chain item is made
+  on first draw, not when the class loads. Checked by a dev server boot.
+
+- **0.19.81, Kingdoms 0.7.490, greenskin hordes and Runic Races heritages:** Kingdoms only, see kingdoms/MODLOG.md, except
+  that the Forge Hearth now superheats Kingdoms' bent ingots into Hot Ingots (`HotMetal.ingotMetal`), one way to straighten them.
+- **0.19.82, Patch 5: floaters and blobs** (`docs/AlienBodies-Plan.md`): six more aliens are no longer men.
+  - Ooze and Magma Ooze are now low cubes of jelly that hop as they move: squashed wide on landing, stretched tall in the air, wobbling at rest. Ooze is a see-through shell around a dark core with eyes; Magma Ooze is three crust slabs whose gaps open as it stretches, showing the glowing core. They take the low box (`XenoformState.LOW_BOX`, with Billow and Croaker), so they fit through one-high gaps.
+  - Prism is now a crystal cluster: a faceted core with ten amethyst prisms tilted out of it, walking on six thin shard legs in a tripod gait. Holding Reflect roots it (synced as the "root" act): the legs splay and dig in and the crystals flare.
+  - Cortex is now a floating, guardian-like eye fish: one big eye that follows your look, a cracked dome where the brain sparks, three spikes a side that slowly push out and draw in, and a finned tail. It bobs half a block up and swims level in water. With no claws left, Claw Snap is now Spine Snap (same move).
+  - Murk is now a real squid: on land it drags itself on eight jointed tentacles with the mantle raised behind; in water it swims mantle-first, the tentacles opening and snapping shut to jet.
+  - Gnasher is now a shark: it swims level with a wave down its body, drags itself on its fins on land, lunges with a jaw snap, and spins along its length in a Death Roll (synced as the "roll" act).
+  - Blight is now a floating Wither: three skulls on a crossbar over a ribbed chest and a swaying tail, the side skulls looking round on their own; an attack snaps all three heads forward.
+  - Pyre stays humanoid (Andy). The six lost their Ultimate spikes. Each body was written, then checked by a second
+    pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional
+    `excalibur_style` pack. Compile-checked; not played.
+- **0.19.83, Kingdoms 0.7.491, greenskin king city and medieval structure mods:** Kingdoms: the king city (see
+  kingdoms/MODLOG.md). Pack: Andy asked to check Rabbit's DawnCraft's structures "or any that have good medieval structures
+  to fill voids we haven't already". DawnCraft is Forge 1.18.2 and only its Structory has a 26.3 Fabric build, so from it
+  and Modrinth's 26.3 list the pack adds, unchanged: Dungeons and Taverns (roadside taverns, dungeons, overhauled
+  strongholds, mansions, outposts and mineshafts), Structory and Structory: Towers (ruins, camps, shrines, watchtowers),
+  and Homesteads (lone farmsteads). CurseForge ids still to look up from home (`packModsNoCf`).
+- **0.19.84, Patch 6: non-human bipeds** (`docs/AlienBodies-Plan.md`, the last of the plan): nine more aliens are no longer men.
+  - Bulwark (Andy: "emphasize the four arms more, with a thinner body and outstretched constantly swapping idle stance arms"): a tall, narrow-waisted brute on bent bear legs with four long fisted arms held out in a guard that keeps swapping which pair is raised; walking swings them wide, the combo punches through all four, and carrying lifts the load with all four.
+  - Knell is a hunched, horned deep-dark beast that knuckle-walks on long arms, its head low on a thick neck; Sonic Boom and Shriek throw the head out and open the glowing ribs; Burrow, the Tolling and Tremor Sense have their own stances.
+  - Rime is a stooped ice brute: hunched trunk, icicle spines, a low frost-crowned head and big fists, the insignia on its back. Cryo's poses (Frost Breath, Ice Slide) turn it about its hips.
+  - Shade crawls on all fours like a spider while it moves and unfolds very tall when it stands, stares, attacks or holds a stolen block overhead.
+  - Thornwild is a treant on splayed root feet with twig-fingered arms and swaying leafy twigs, walking with a slow rooted gait; Roots slams its arms down and Bloom flings them wide.
+  - Lurk stands tall and thin and drops onto all fours when it sneaks or Fades; a swing from all fours is a pounce.
+  - Rivet is a rippling puddle of living metal that rises into a hunched figure with a whip arm when it fights (any swing, or 4 s after striking or being struck), melts back down after, and pours flat into a streak on Pour.
+  - Nadir is shapeless: a man-high mass of drifting, re-stacking dark cubes round a core that carries the insignia.
+  - Dud is a soft round ball on stubby feet with a worried face; it waddles, flops on its back to Play Dead and tucks into a spinning ball to Roll.
+  - The stances the client can't see are synced as `XenoformState.ACT` (`XenoformPower.syncAct`). Bulwark, Knell, Shade and Lurk straighten their bent arms for the first-person hand. The bodies lost their Ultimate spikes. Each body was written, then checked by a second pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
+  - Review fixes: the new bodies pose their own crouch, so the low crouch's thighs, the kneel and the eased bend (`CrouchPose`) stay off them ; the low stance still lowers them, but they don't settle onto a knee (no kneel lock, no steadied shots: `XenoformState.OWN_CROUCH`, read on both sides). Knell and Shade reach their own insignia on the change-back tap (`ownsTap`). Cryo's poses leave Rime's legs alone (`ownsLegs`). Rime, Rivet, Nadir and Dud no longer sink into the floor while sneaking. Knell's Tolling slams on the server's beat (both now use the level's game time, once per tick of it). Rime's fists and Dud's nub hand show right in first person, and Shade's hidden body never shows on the band's hologram. Rivet's feet lift on the forward swing, and Lash now makes it stand and whip its arm.
+- **0.19.85, The charge is unlocked by reforging the band** (Andy: "i want the charge to be something you unlock, its a random timer before then"; he picked reforging as the unlock). Until the band is reforged at the moon forge, each change lasts a random 1 to 5 minutes and isn't shortened by hits or moves, and the band recharges for a minute after you turn back (2 after a knockout). The bar over the dial shows that recharge filling. Bigger Charge makes the timed changes a quarter longer per rank and Faster Recharge makes the wait a quarter shorter, so points spent early aren't wasted. A quick change carries what's left of the timer. Reforging fills the new charge and says so. Fuse's Self-Destruct still costs its time either way (`XenoformPower.spend`). Creative always has the charge. The recharge (and a reforged band's charge) now survives logging off and back on, so a relog can't skip the wait, and the Z key's text says what turning back keeps. Compile-checked; not played.
+- **0.19.86, Fibre kit (Andy's Plant Fibers pick, `docs/Otectus-Plan.md` patch 2; Kingdoms 0.7.495):** more of the start
   from plant fibre, our own from the idea (Plant Fibers is All Rights Reserved).
   - **Grass Bandage** (`MedicineItems.GRASS_BANDAGE`): 3 plant fibre + plant string make 2. It dresses a cut like a
     clean rag (heals 1.5, never festers), so there is a dressing before linen.
@@ -5084,5 +5178,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     a vanilla bed in everything but looks: it sleeps, skips the night and sets your spawn. It burns.
   - **Paper from fibre:** 4 plant string make a Plant Mesh; 3 mesh and a water bucket make 3 Wet Paper Pulp (the bucket
     comes back); pulp dries into paper on a campfire (20 s) or in a smoker.
-  - **Rope from fibre:** 3 plant string in a column make Kingdoms rope, and rope now ties to fences (Kingdoms 0.7.486).
+  - **Rope from fibre:** 3 plant string in a column make Kingdoms rope, and rope now ties to fences (Kingdoms 0.7.495).
   - Art by `tools/fibre_kit_art.py` (the optional Excalibur pack rebuilt with `tools/excalibur_style/grade.py`). Compile-checked; not played.

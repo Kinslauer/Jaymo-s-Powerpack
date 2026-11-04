@@ -8279,7 +8279,192 @@ or the symbiote suit it isn't drawn (`PowersCover.body`).
 Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
 off-by-default `excalibur_style` built-in pack (`/excalibur on`).
 
-## 0.7.486: rope ties to fences (pack 0.19.73)
+## 0.7.486: thirteen sea-blooded Tideborn looks (pack 0.19.77)
+Andy (2026-11-03): "tideborn need to vary wildly, at least 13 different tideborn variations, they are fish people so they
+can draw from any sealife". Tideborn now have 16 looks: the first three, plus Greyfin (shark), Mantawing (manta),
+Eightarm (octopus), Lanternjaw (anglerfish), Driftbell (jellyfish), Moray (eel), Shellclaw (crab), Spinepuff
+(pufferfish), Lionmane (lionfish), Weedfrond (seadragon), Swordbill (swordfish), Frillback (sea slug) and Oldshell (sea
+turtle).
+- **Real model parts** (client `SeaParts`, beside `BeastParts`): dorsal fins, tails and caudal fins, back-wings, horns,
+  a mantle and tentacles, a lit lure and fangs, a clear bell and threads, ribbon fins, a shell, claws and eyestalks,
+  spines, a mane of venom rays and arm fans, leafy fronds, a bill and sail, frills, a turtle's shell and beak. Every piece
+  is one line of `SeaParts.TABLE` (box, pivot, turn, segments, sway); they follow the head, body and arms on players and
+  MCA villagers, hide under helmets (head parts) and Powers costumes, and stand off a chestplate.
+- Each look keeps only the Tideborn fins its parts leave room for (`SeaParts.Fins`), has its own marks, eyes and fin
+  colours, a tint, a land lean and one small trait (`HeritageVariants`); they keep the Tideborn kit.
+- **No traditional armour on strange shapes** (`SeaBodies`, Andy: "the ones with nonstandard heads or bodies cannot wear
+  traditional armor"): no helmet for Eightarm, Lanternjaw, Driftbell, Shellclaw, Swordbill, Lionmane, Spinepuff,
+  Frillback, Weedfrond; no chestplate (or elytra) for Greyfin, Mantawing, Shellclaw, Oldshell, Lionmane, Swordbill,
+  Spinepuff, Frillback, Weedfrond, Moray. A piece put on slides back into the pack with a word on the action bar;
+  headwear that gives no armour (crowns, pumpkins) still fits. The trait lines say so.
+  Villagers too (Andy: "this applies period, the villagers will comment on it, and find alternatives"): what they wear
+  or carry for MCA's armour routine is shed at their feet with a remark; their guards become MCA archers (a bow and arrows
+  packed if they have none, with a remark), and they're first in line for their realm's horses (`Cavalry`).
+- **By the shore** (Andy: "it just makes sense for their havens or settlements to be by the shore"): a haven is drawn
+  Tideborn only when its seat has sea, river or beach within 72 blocks (`Havens.shore`), and an inland haven never is; the
+  Tideborn village start looks for a village by the water first (plains maps, not desert), falling back inland only if
+  none is free. Havens already drawn keep their blood.
+- Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
+  Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
+  `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
+
+## 0.7.487: one HUD layout (pack 0.19.79, Kitchen 0.5.55)
+Every Kingdoms HUD piece asks the pack's shared zones where to draw (`client/hud/HudZones`, a copy of Powers'; see
+`docs/HUD-Layout.md` in the pack): riding and dragon bars stack in the right dock over the power chips, the horse tag
+and wild-horse stats sit under the crosshair, the awareness eye over it, the forms chain count right of it, the forms
+belt, spirit line, seizure struggle and the Grue's line in the focus band over the action bar, the valor bar in the left
+dock, and the kin-sense compass (now on a plate, hidden under F3) and party list in the top-left rail under Xaero's
+minimap. Handshake and spirit-clash films and the story and travel curtains hide the zoned HUD.
+
+## 0.7.488: building from schematics
+- **Schematic files as designs** (`SchematicFiles`): a design may now be a `.nbt` (structure block), `.schem` (Sponge
+  v1 to v3) or `.litematic` (every region), dropped in `<world>/jaymoskingdoms_designs/` or uploaded; older files are
+  brought up to date by the game's data fixer. Only blocks come along (no block entities, no entities). Checked on
+  Structura's "Medieval House": all three of its Java files read to the same 1,410 blocks.
+  26.3 names a palette entry `id`/`properties`; the formats (and tools writing .nbt themselves) still use
+  `Name`/`Properties`, which 26.3 reads as air, so entries are renamed after fixing.
+- **Uploads from your own computer** (`DesignUploads`, client `DesignUploadClient`): put files in the game folder's
+  `schematics/` (Litematica's own folder; the screen's Open folder button opens it) and pick one on the mason's table's
+  screen. It goes up in 30 KB pieces (at most about 1.9 MB); the server reads it as NBT within a 64 MB quota and keeps it
+  as the uploader's design (if someone else has that name, it gets `_2`, `_3`...). No commands.
+- **Bigger designs**: up to 96 across, 128 high, 120,000 blocks. Builder crews still take only plot-sized ones
+  (32 across, 48 high, 16,000 blocks); bigger ones are marked "mason's table only" on the table's screen.
+- **Building plan and mason's table** (`MasonTable`): two paper and a charcoal make a blank plan;
+  the table's screen draws a design on it. Use it on the ground to lay it out (sneak-use turns it a quarter;
+  its outline shows while held), then put it in a mason's table (paper, crafting table, stone bricks). The table lays
+  it bottom up, one block every 5 ticks, from the containers touching it, the exact block each time; doors and beds go
+  in whole. Blocks in the way are skipped (use the finished table to try them again), matching ones only turned.
+  Laid blocks count as the plan owner's (`Placed`). Dev-server test: a table built the whole Medieval House (turned 90 degrees) from barrels in
+  about six minutes, 1,409 of 1,410 blocks exact (one dirt had greened).
+- **Build a laid plan by hand, like a ship's build kit** (`PlanSites`, client `PlanGhosts`): a laid plan stays
+  standing as see-through pale-blue ghost blocks that everyone within 128 blocks sees (nearest 6,000 within 48 drawn).
+  Place the right blocks yourself (any facing counts; dirt and grass stand in for each other) and each ghost goes as
+  it's filled. Standing in it shows `design: placed / needed blocks`. At 90% of its blocks it's built: ghosts gone,
+  a fanfare and a message. Laying the plan again moves it; drawing a new design takes it down; at most 3 per player.
+  Dev-client test: the Medieval House's ghost showed, half-built showed `704 / 1269`, and at 95% it was built.
+- **Mason's table screen** (`MasonNet`, client `MasonScreen`), opened by using the table: your schematic files on the
+  left, the world's designs on the right (size, author, whether crews can build it). Buttons: Draw on a blank plan,
+  Offer to this settlement, Save marked build (the area marked with a surveyor's rod, under a typed name), Take the
+  plan back, Try skipped blocks again. It shows the plan's progress, the block it waits for and the top materials
+  still needed; answers show at the bottom. The lists shrink to fit at large GUI scales. Sneak-use takes the plan back.
+- **Plans for a settlement** (`Commissions`): a member, or a friend with 100 reputation, standing in a settlement
+  can offer one of the world's designs from a mason's table's screen. Its builders put it up on open ground of their choosing before
+  their own catalogue, from storage, like any building. Up to 4 waiting per settlement, 1 per player. When finished,
+  the giver gets +40 reputation and a message.
+
+## 0.7.489: bug sweep (pack 0.19.80)
+- **Loot tables**: bog iron ore and the clockwork golem were in the pre-26.3 `functions`/`conditions` form, which 26.3
+  ignores (only Moog's Structures' on-the-fly upgrade kept them working: without it bog iron ore always drops itself and the
+  golem always its clock); rewritten as `modifier`/`condition`.
+- **Schematic uploads** (`SchematicFiles`): a file spanning more than the biggest design (96 × 96 × 128) is refused
+  before it's built in full on the server thread, and a Litematica region claiming a side over 4,096 is refused (the
+  sizes' product could overflow and pass the check, then loop for ever).
+- **Mason's table**: the screen's refresh no longer rereads every design file from disk for its author
+  (`Designs.author` is cached, cleared on save and delete). Where the right block already stands, the table now copies
+  only how it lies (facing, axis, half, shape and other named properties), never counts or switches, so a laid plan of
+  a ripe farm no longer grows crops, fills end portal frames or charges anchors for free.
+- **Cinder Forge**: a second Ignis Vael could be made while the forge's chunks had loaded their blocks but not yet their
+  entities; the watch now waits for the entities. Smiths' rumours no longer stall in a world whose clock is behind one
+  you played before (the cooldown kept the other world's time).
+
+## 0.7.490: greenskin hordes patches 3+, Beastfolk and Hollow, heritage kits, war journals (pack 0.19.81)
+Andy's answers of 2026-11-03 are in `docs/Hordes-Plan.md`; the races in `docs/Races-Plan.md`. Built as parallel tracks,
+each reviewed with every finding independently verified; compile-checked only, not yet seen in game.
+- **Dialects** (`Dialects`): orcs and goblins speak their own broken English (orcs blunt and brutal, goblins quick, greedy
+  and sly). Lines only greenskins say were rewritten; shared ones split into `dialect.jaymoskingdoms.<orc|goblin>.<key>`.
+- **Brutality** (`Brutality`): camp brawls with jeering crowds, the strongest grunt challenging the chief, orc camps raiding
+  other tribes' camps and goblin villages. **Slaves** (`Slaves`): collared goblins do an orc camp's hauling and jobs (not
+  counted in the folk cap), get thrown at foes in a fight, run off to goblin villages, and can be freed for goodwill.
+- **Bent ingots** (`BentIngots`, art `tools/gen_bent.py`): bent copper (1) and bent iron (3) are greenskin money. Sneak-use
+  an ingot on an anvil to bend it. Greenskins refuse plain ingots. A cold anvil won't straighten one (Andy): melt it in a
+  furnace or blast furnace, or superheat it on Powers' Forge Hearth.
+- **Economy** (`HordeEconomy`, `GreenMarket`, `Caravans`): folk work jobs for the camp's daily take, everyone eats, a hungry
+  camp stops growing and raids more, surplus grows faster; greenskin merchants price in bent ingots by stock, only for those
+  the camp spares; tribute and trade fill the chief's hoard, which pays for walls and tiers; carts haul surplus between a
+  tribe's camps and can be raided.
+- **Goblin towns + caps** (`HordeBuildings`, `Hordes`): tier caps 25/32/40; goblin tiers raise stone-and-timber houses,
+  two-storey homes, a tinker workshop, smelter, stalls, counting house, walkways, gardens and stone walls from tier 3; orc
+  tiers bigger and cruder. Structure templates under `data/jaymoskingdoms/structure/horde/<orc|goblin>/<tier>/` are used when
+  present (for Andy's modpack structures).
+- **Living together** (`Peoples`, `Settlers`): a distaste table between every people (orc-goblin at 3) lowers starting
+  hearts, brings glares and insults and brawls; lone orcs and goblins settle in heritage villages and havens, rarely human ones.
+- **War journals + Lore Codex** (`WarJournal`, `LoreBooks`, `LoreCodex`, after RPG Lore, MIT): orcs and goblins drop
+  journals in their dialect built from the real world plus oblique fragments; also in camp stores and broken carts. Extra
+  books as JSON in `data/jaymoskingdoms/lore/`. The soul-bound codex files every lore book.
+- **Beastfolk** (pickable) and **Hollow** (earned by being cut down by the undead and getting up) heritages, after Runic
+  Races (MIT): Arachnid, Avian, Canine, Feline, Kitsune, Serpen; Zombie, Skeleton, Wraith, Reaper. Sylvan takes every fae
+  (Dryad, Changeling, Sprite, Nymph, Faerie) and High, Moon and Blood elves. Heritages may have any number of looks.
+- **Heritage kits** (`HeritageKits`): every heritage and look has an ability (heritage key), a gift and a flaw on its card.
+- **Real model parts** (client `BeastParts`, art `tools/gen_heritage_parts.py`, Andy: "definetly real modeled parts"):
+  Beastfolk ears and tails (Canine, Feline, Kitsune with 1-3 tails), Avian folded wings and crest, Arachnid's four back
+  legs, Serpen's scaled tail, Sprite and Faerie gossamer wings, Dryad sprigs; on players and MCA villagers, hidden under
+  helmets, costumes and the symbiote suit. The painted versions came off the skins.
+- **Patch 5, every settlement** (Andy's answers in `docs/Hordes-Plan.md`):
+  - **Walled towns** (`WalledTowns`): villages and blossom villages climb four tiers with arc-a-day walls (the land's log
+    palisade, stone for villages of prosperous realms, plaster-and-tile for blossom towns), band buildings, newcomers and
+    gate golems; `/kingdom town`. Kingdoms and fiefdoms keep their open growth.
+  - **Plunder** (`Plunder`, `OgreGrowth`, `OgreRaids`, `Outbuild`): pirate coves, illager camps and ogre holds grow while
+    their stores allow; raiders break into chests and storehouses and carry the loot home; pirates take gold first and a
+    beaten ship's cargo.
+  - **Cannons** (`sailing/Bombardment`, `ShotKind`): new cannon models with recoil, smoke and flash; round, heavy, shell,
+    chain and grape shot; round, heavy and shell shot (and field guns) explode where they land and break blocks by blast
+    resistance like TNT, stone and players' builds included (chests and other block entities spared, mob guns only with
+    mob griefing on), heavy shot and shells strip loose soil on down to the rock, spread over ticks. Pirate
+    ships shell foes of their cove on the shore (orcs throwing rocks included).
+  - **Currencies** (`Currencies`): realm coins by culture with our own art (emeralds stay valid), each settlement pricing
+    in its trading hub's or overlord's coin, and money-changers.
+  - **Caravans for all** (`TradeRoutes`, handcarts): every settlement kind trades, the poor by villager-pushed handcart,
+    pirates by boat; escort or rob them. Villages keep trade money in their storehouse.
+  - **Havens expand** (`HavenGrowth`): havens raise works wherever land and stores allow, send their output by cart, and
+    keep sworn defenders by blood who grow with them.
+
+## 0.7.491: the greenskin king city (pack 0.19.83)
+Andy (2026-11-04): "you can start on the king city". Hordes patch 4 (`docs/Hordes-Plan.md`), on top of tier 4's great
+hall, land and vassals:
+- **Arena and shaman's tower** (`HordeBuildings.arena`, `shamanTower`): a tier 4 band also raises a round sand fighting pit
+  ringed by stone stands and crowned posts, and a 12-high tower of the camp's stone with a ladder to a battlemented top
+  (soul fire for the orc shaman, a cauldron for the goblin brewer-witch).
+- **The warpath** (`HordeCity`, hooked into `Raids`): every 6 days the Warlord or Goblin King takes the whole host on the
+  warpath against the nearest settlement within 900 blocks (a human realm or village, or the rival brood's camp), told to
+  everyone. For 2 days the realm and all its vassal camps raid that one target, at half chance per look, a quarter of the
+  usual wait, in bands of up to 14; goblins march too.
+- **Wanted notice** (`Bounties.warlord`): the target's court posts the king as wanted (80) on its bounty board.
+- **Tribute pacts:** each day one realm within 640 blocks whose army is under a quarter of the horde's fighters buys its
+  peace (at most 3): 3 emeralds a day into the king's hoard, and the horde leaves it be. One that can't pay is marched on next.
+- **The horde oath:** `/kingdom pledge <realm>` swears a half-orc to an orc realm, a goblin-raised player to a goblin realm,
+  or anyone once the tribe's favour reaches the ally mark. The tribe spares the sworn, tells them where each warpath goes,
+  and gives them 2 bent copper of each day's tribute. `/kingdom leave` forswears it.
+
+## 0.7.492: boss posture and knowledge (Gemini's DawnCraft handoff, reviewed)
+- Andy pasted a Gemini handoff (1.21.1 code): a DawnCraft-style boss ladder (Goblin King, Corrupted Ogre, Knight Rober,
+  Nine Tails, Frostmaw, Fire Giant), "Guild Master knowledge" locking the anvil, smithing table, enchanting table and
+  end portal frames, 12 eyes, one generic Souls-like boss entity with poise, kneel and riposte, a model and a renderer.
+  None of it compiles on 26.3, and most of it is already in the pack in our own form (world tiers and their great foes,
+  the Goblin King, the Ogre King's three phases, the Skeleton Lord, the Cinder Forge's Ignis Vael, Tinkering and the
+  enchanting overhaul, red-glint heavy blows, Powers' guard and riposte). Kept the part we didn't have, and (Andy) the boss ladder:
+- **Boss posture** (`BossPosture`): every boss with a Kingdoms bar, plus the Ogre King, Skeleton Lord and Piglin King,
+  has a posture of 20 + 35% of its health. Melee wears it by the damage taken (x1.6 sprinting or falling), arrows and
+  thrown weapons at 40%, its own blows caught on a shield or guard at 75%. After 3 quiet seconds it refills over 5.
+  Broken, the boss kneels 3 seconds (stopped, head bowed, can't strike; sparks, an anvil's clang); the first melee blow
+  then is a riposte at 2.25x and brings it up. Then 8 seconds when posture can't be worn. A thin "Posture" bar shows
+  under the boss bar to the players who have that bar, only while it's worn. No chat text. Vanilla bosses untouched.
+- Dropped: the generic boss entity, model and renderer (no textures, duplicates of bosses we have), the 12 eyes.
+- **Knowledge** (`Knowledge`; Andy kept the ladder: "tying combat directly into progression"). Five levels, earned by
+  slaying bosses in order (a level counts once every boss below it has fallen too). Each kill is a world-tier feat, so it
+  is shared by everyone near and by the party:
+  1. Goblin King: anvils (vanilla and the iron Smithing Anvil; the Stone Anvil stays open) and bog iron (also open
+     world-wide once an Ogre King falls, as before).
+  2. An Ogre King: the smithing table, and the heavy arms on the Smithing Anvil (claymore, war scythe, glaive, halberd,
+     broad blade).
+  3. The Skeleton Lord: the enchanting table.
+  4. The Piglin King: learning a spell from a scroll (reading one once still works for anyone), the Storm Arts, and skill
+     perks that want pillar level 15+.
+  5. The Wither: End portal frames take eyes.
+  World tiers want them too: Borderlands 1, Wildlands 2, Dread 4, Legend 5. The Rung Journal ticks each. A refusal is an
+  action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
+  tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.
+
+## 0.7.495: rope ties to fences (pack 0.19.86)
 Andy's Plant Fibers pick: "a climbable rope you tie to a fence". Rope placed against a fence's side with nothing above
 to hang from is tied to the fence (`RopeLift.TIED`) and holds while a fence stands beside it, so at a cliff's edge it
 hangs over the drop; rope also hangs under a fence. Rope in hand on it lets more down as before. With Jaymo's Powers,

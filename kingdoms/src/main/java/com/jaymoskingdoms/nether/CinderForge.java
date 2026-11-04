@@ -188,9 +188,9 @@ public final class CinderForge {
 				wayfinders(player, nether);
 			}
 			if (player.level() == nether && !player.entityTags().contains(TIDINGS_TAG)) {
-				// the first time in the Nether: word of the forge in their next Tidings
+				// the first time in the Nether: word of the forge ((0.7.494) over the hotbar, not in the Tidings)
 				player.addTag(TIDINGS_TAG);
-				Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.cinder_forge"));
+				Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.cinder_forge"));
 			}
 		}
 		if (nether == null || server.getTickCount() % 100 != 0) {
@@ -233,6 +233,15 @@ public final class CinderForge {
 	private static void watch(ServerLevel nether, Forge forge) {
 		if (!nether.isLoaded(forge.site())) {
 			return;
+		}
+		// (a chunk's blocks load before its entities: until they're in, Ignis would look gone and a second be made)
+		int cx = forge.site().getX() >> 4, cz = forge.site().getZ() >> 4;
+		for (int dx = -3; dx <= 3; dx++) {
+			for (int dz = -3; dz <= 3; dz++) {
+				if (!nether.areEntitiesLoaded(net.minecraft.world.level.ChunkPos.pack(cx + dx, cz + dz))) {
+					return;
+				}
+			}
 		}
 		List<Villager> there = nether.getEntitiesOfClass(Villager.class, new net.minecraft.world.phys.AABB(forge.site()).inflate(48.0), CinderForge::ignis);
 		long now = nether.getGameTime();
@@ -351,7 +360,8 @@ public final class CinderForge {
 		}
 		long now = level.getGameTime();
 		Long last = LAST_RUMOUR.get(player.getUUID());
-		if (last != null && now - last < RUMOUR_COOLDOWN || level.getRandom().nextFloat() >= RUMOUR_CHANCE) {
+		// (a time from another world's clock, ahead of this one, counts as long ago)
+		if (last != null && now >= last && now - last < RUMOUR_COOLDOWN || level.getRandom().nextFloat() >= RUMOUR_CHANCE) {
 			return InteractionResult.PASS;
 		}
 		LAST_RUMOUR.put(player.getUUID(), now);

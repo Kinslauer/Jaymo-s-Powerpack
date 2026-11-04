@@ -1,4 +1,4 @@
-"""(0.19.73) Item art for the fibre kit: grass bandage (the linen bandage's shape in grass colours), plant mesh, wet
+"""(0.19.86) Item art for the fibre kit: grass bandage (the linen bandage's shape in grass colours), plant mesh, wet
 paper pulp, grass bed item. Run from the repo root: python -I tools/fibre_kit_art.py"""
 from PIL import Image
 

@@ -1,5 +1,7 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.NightGifts;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -149,31 +151,50 @@ public final class NightGiftsClient {
 			return;
 		}
 		Font font = minecraft.font;
-		if (g == null) {
-			// (0.7.88) a cured Nightborn's trace: only the faint line
-			if (!faintBearings.isEmpty()) {
-				graphics.text(font, Component.translatable("hud.jaymoskingdoms.night.faint", line(player, faintBearings, faintDistances, "~")), 4, 4,
-					TEXT_FAINT, true);
-			}
+		if (minecraft.debugEntries.isOverlayVisible()) {
+			// (HUD rework) hidden while F3 is open, like the party list
 			return;
 		}
-		int color = g.wolf() ? TEXT_WOLF : TEXT_BLOOD;
-		String line = line(player, bearings, distances, "");
-		Component label = Component.translatable(g.wolf() ? "hud.jaymoskingdoms.night.pack" : "hud.jaymoskingdoms.night.kin");
-		Component text = kinCount == 0 ? Component.translatable("hud.jaymoskingdoms.night.none", label)
-			: Component.translatable("hud.jaymoskingdoms.night.sense", label, line,
-				kinCount > bearings.size() ? Component.translatable("hud.jaymoskingdoms.night.more", kinCount - bearings.size()) : Component.empty());
-		graphics.text(font, text, 4, 4, kinCount == 0 ? TEXT_DIM : color, true);
-		int y = 15;
-		if (!faintBearings.isEmpty()) {
-			graphics.text(font, Component.translatable("hud.jaymoskingdoms.night.faint", line(player, faintBearings, faintDistances, "~")), 4, y,
-				TEXT_FAINT, true);
-			y += 11;
+		java.util.List<Component> lines = new java.util.ArrayList<>();
+		java.util.List<Integer> colors = new java.util.ArrayList<>();
+		if (g == null) {
+			// (0.7.88) a cured Nightborn's trace: only the faint line
+			if (faintBearings.isEmpty()) {
+				return;
+			}
+			lines.add(Component.translatable("hud.jaymoskingdoms.night.faint", line(player, faintBearings, faintDistances, "~")));
+			colors.add(TEXT_FAINT);
+		} else {
+			int color = g.wolf() ? TEXT_WOLF : TEXT_BLOOD;
+			String line = line(player, bearings, distances, "");
+			Component label = Component.translatable(g.wolf() ? "hud.jaymoskingdoms.night.pack" : "hud.jaymoskingdoms.night.kin");
+			lines.add(kinCount == 0 ? Component.translatable("hud.jaymoskingdoms.night.none", label)
+				: Component.translatable("hud.jaymoskingdoms.night.sense", label, line,
+					kinCount > bearings.size() ? Component.translatable("hud.jaymoskingdoms.night.more", kinCount - bearings.size()) : Component.empty()));
+			colors.add(kinCount == 0 ? TEXT_DIM : color);
+			if (!faintBearings.isEmpty()) {
+				lines.add(Component.translatable("hud.jaymoskingdoms.night.faint", line(player, faintBearings, faintDistances, "~")));
+				colors.add(TEXT_FAINT);
+			}
+			if (g.blood() && g.wings() < NightGifts.WINGS_MAX) {
+				// (the wings' strength, under the compass, while they're worn down)
+				lines.add(Component.translatable("hud.jaymoskingdoms.night.wings", Math.round(100.0F * g.wings() / NightGifts.WINGS_MAX)));
+				colors.add(TEXT_DIM);
+			}
 		}
-		if (g.blood() && g.wings() < NightGifts.WINGS_MAX) {
-			// (the wings' strength, under the compass, while they're worn down)
-			graphics.text(font, Component.translatable("hud.jaymoskingdoms.night.wings", Math.round(100.0F * g.wings() / NightGifts.WINGS_MAX)), 4, y,
-				TEXT_DIM, true);
+		// (HUD rework) top-left rail, row 20, on a soft plate like the party list's; lines 11 px apart
+		int textW = 0;
+		for (Component c : lines) {
+			textW = Math.max(textW, font.width(c));
+		}
+		int boxW = textW + 4, boxH = lines.size() * 11 - 2 + 4;
+		int[] at = HudZones.place(HudZones.RAIL, "jaymoskingdoms:kin_sense", 20, boxW, boxH);
+		if (at == null) {
+			return;
+		}
+		graphics.fill(at[0], at[1], at[0] + boxW, at[1] + boxH, HudStyle.PLATE_SOFT);
+		for (int i = 0; i < lines.size(); i++) {
+			graphics.text(font, lines.get(i), at[0] + 2, at[1] + 2 + i * 11, colors.get(i), true);
 		}
 	}
 

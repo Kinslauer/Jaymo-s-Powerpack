@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.spirits;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.spirits.SpiritBarrage;
@@ -260,6 +261,10 @@ public final class ClashCinematic {
 		float partial = delta.getGameTimeDeltaPartialTick(false);
 		float shown = Mth.lerp(partial, barsO, bars);
 		if (shown > 0.0F) {
+			if (running) {
+				// (HUD rework) the film is up for this player (vanilla HUD hidden): hide the zoned HUD too
+				HudZones.hideFor(100);
+			}
 			int bar = Math.round(height * BAR_SHARE * shown);
 			graphics.fill(0, 0, width, bar, 0xFF000000);
 			graphics.fill(0, height - bar, width, height, 0xFF000000);

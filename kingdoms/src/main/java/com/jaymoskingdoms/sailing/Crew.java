@@ -71,6 +71,16 @@ public final class Crew {
 	public int target = -1;
 	public @Nullable BlockPos waypoint;
 	public int stuck, lastFired, backing;
+	/** (0.7.490) Not saved: when her gunners last looked ashore for a foe at war with her cove (with no ship to fight). */
+	public long shoreLooked = Long.MIN_VALUE / 2;
+	/**
+	 * (0.7.490) Not saved: a shore target her guns are laid on while her cove's landing party is ashore (where to aim), and
+	 * whether it's someone living (grape for crews) or ground and works (shell and heavy shot).
+	 */
+	public @Nullable Vec3 shore;
+	public boolean shoreLiving;
+	/** (0.7.490) Not saved: the game tick {@link #shore} was last set or refreshed; guns ignore an older mark. */
+	public long shoreSet;
 	/**
 	 * (0.7.243) Not saved: open water she makes for to get out of a bay she lay embayed in, until when, how many ways
 	 * round she's tried near {@link #stuckAt} (each looks farther), and where she last lay stuck.

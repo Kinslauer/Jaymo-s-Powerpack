@@ -86,6 +86,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.116) the surveyor's rod, players' own designs and work areas
 		Surveyor.register();
 		Designs.register();
+		// (0.7.488) schematic files: uploads from players' computers, the mason's table, plans given to settlements
+		LOGGER.debug("commission attachment: {}", Commissions.COMMISSIONS);
+		DesignUploads.register();
+		MasonNet.register();
+		MasonTable.register();
+		Commissions.register();
+		PlanSites.register();
 		Armory.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
@@ -147,6 +154,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Crewmen.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		CampChiefs.register();
+		// (0.7.490) orc brawls, chief challenges, camp feuds and goblin slaves
+		Brutality.register();
+		Slaves.register();
 		StoryTalk.register();
 		ShipTalk.register();
 		ZFighterFolk.register();
@@ -154,6 +164,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Purists.register();
 		Prejudice.register();
 		Havens.register();
+		Peoples.register();
+		LOGGER.debug("peoples attachment: {}", Peoples.MET);
 		Emigrants.register();
 		// 0.7.299: meals cooked at home or bought at a cookhouse or tavern, and visitors for the day
 		Meals.register();
@@ -261,6 +273,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tribes.register();
 		Pedlars.register();
 		Bestiary.register();
+		// (0.7.490) Hordes, Orc war journals: the journals orcs and goblins leave, the data books, the Lore Codex that keeps them
+		WarJournal.register();
+		LoreCodex.register();
+		LoreBooks.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
 		BogIron.register();
@@ -272,6 +288,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
+		// (0.7.490) Havens expand: their works, land and sworn order
+		HavenGrowth.register();
+		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
+		BentIngots.register();
+		// (0.7.490) Currencies: the realms' coins and their money-changers
+		Currencies.register();
+		HordeEconomy.register();
+		// (0.7.491) Hordes patch 4: the greenskin king city (warpath, tribute pacts, the horde oath)
+		HordeCity.register();
+		GreenMarket.register();
 		BorderClashes.register();
 		TribePacts.register();
 		Tails.register();
@@ -289,6 +315,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();
+		// (0.7.486) sea-blooded Tideborn whose heads or backs are their own shape wear no helmet or chestplate
+		SeaBodies.register();
 		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)
 		LOGGER.debug("life story attachment: {}", LifeStory.STORY);
 		LifeStory.register();
@@ -314,6 +342,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		ArrivalGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
+		// 0.7.492: a boss's posture: worn by blows, broken to a kneel and a riposte
+		BossPosture.register();
+		// 0.7.492: knowledge: the boss ladder that opens anvils, smithing, enchanting, the higher arts and the End
+		Knowledge.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		LOGGER.debug("great wars attachment: {}", GreatWars.LEDGER);
@@ -355,6 +387,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		BedRest.register();
 		// (0.7.462) more healing: the infirmary cot, the shrine, and a healer's full treatment (and the shrine's attachment)
 		Healing.register();
+		Roost.register();
 		// (0.7.17) placed torches burn down and go out (our own take on Realistic Torches)
 		Torches.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)

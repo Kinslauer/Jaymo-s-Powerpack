@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Senses;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -59,7 +60,12 @@ public final class SensesClient {
 		if (a <= 0.01F || minecraft.player == null || minecraft.player.isSpectator()) {
 			return;
 		}
-		int x = graphics.guiWidth() / 2 - SIZE / 2, y = graphics.guiHeight() / 2 - ABOVE - SIZE;
+		// (HUD rework) above the crosshair, ABOVE row 10
+		int[] at = HudZones.place(HudZones.ABOVE, "jaymoskingdoms:awareness_eye", 10, SIZE, SIZE);
+		if (at == null) {
+			return;
+		}
+		int x = at[0], y = at[1];
 		int color = ARGB.white(a);
 		switch (state) {
 			case Senses.SPOTTED -> frame(graphics, OPEN, x, y, color);

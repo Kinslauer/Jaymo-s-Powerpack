@@ -27,7 +27,15 @@ public interface PowerClient {
 	default void onUltimate(LocalPlayer player, boolean down) {
 	}
 
-	/** Draw this power's HUD (cooldowns, meters). The core already draws the power badge in the top-left corner. */
+	/**
+	 * (HUD rework) How tall this power's block in the right dock is (gui pixels): the chip row plus the lines it draws over it.
+	 * The chips sit on its bottom ({@link com.jaymospowers.client.hud.PowerDock#origin}).
+	 */
+	default int hudHeight(LocalPlayer player) {
+		return com.jaymospowers.client.hud.PowerDock.DEFAULT_HEIGHT;
+	}
+
+	/** Draw this power's HUD (cooldowns, meters). The core already draws the power badge (top-left rail); this draws from {@link com.jaymospowers.client.hud.PowerDock#origin}. */
 	default void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 	}
 

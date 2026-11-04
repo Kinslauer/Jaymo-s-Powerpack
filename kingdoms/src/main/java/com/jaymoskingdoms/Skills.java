@@ -655,6 +655,11 @@ public final class Skills {
 		if (p.blocked(perk) != null) {
 			return;
 		}
+		if (Knowledge.lockedPerk(player, perk)) {
+			// (0.7.492) a higher technique: Knowledge 4
+			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
+			return;
+		}
 		Map<String, Integer> ranks = new HashMap<>(p.ranks());
 		ranks.merge(perk.key(), 1, Integer::sum);
 		player.setAttached(PROGRESS, new Progress(p.xp(), Map.copyOf(ranks)));
