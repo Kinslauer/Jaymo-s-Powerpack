@@ -159,10 +159,13 @@ final class SkillScreen extends Screen {
 		// (0.7.82) the world tiers, beside Done
 		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
 			.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
+		// (0.7.509) the patrons, beside the world tiers
+		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.patrons.button"), b -> this.minecraft.gui.setScreen(new PatronScreen(this, null)))
+			.bounds(patronsX(right), fy, patronsW(), 16).build());
 		if (!stats && !jobs && pillar == Skills.Pillar.STRENGTH) {
 			// (0.7.361) Valor's page, from Strength
 			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.valor.button"), b -> this.minecraft.gui.setScreen(new ValorScreen(this)))
-				.bounds(left() + 6 + 92 + 4, fy, 60, 16).build());
+				.bounds(left() + 6 + pageW() + 4, fy, valorW(), 16).build());
 		}
 		int pages = pages();
 		if (stats || jobs || pages < 2) {
@@ -173,8 +176,33 @@ final class SkillScreen extends Screen {
 			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + "." + next), b -> {
 				page = next;
 				rebuildWidgets();
-			}).bounds(left() + 6, fy, 92, 16).build());
+			}).bounds(left() + 6, fy, pageW(), 16).build());
 		}
+	}
+
+	/** On the Strength page the footer holds page, Valor, Patrons, World Tier and Done in 328 px, so the first three are narrower there. */
+	private boolean strengthFooter() {
+		return !stats && !jobs && pillar == Skills.Pillar.STRENGTH;
+	}
+
+	private int pageW() {
+		return strengthFooter() ? 80 : 92;
+	}
+
+	private int valorW() {
+		return 42;
+	}
+
+	private int patronsW() {
+		return strengthFooter() ? 50 : 70;
+	}
+
+	/** The patrons button sits beside the world tiers; on Strength it sits right of the Valor button instead, so no two footer buttons overlap. */
+	private int patronsX(int right) {
+		if (strengthFooter()) {
+			return left() + 6 + pageW() + 4 + valorW() + 4;
+		}
+		return right - 60 - 4 - 80 - 4 - 70;
 	}
 
 	private Skills.@Nullable Perk perkAt(double mouseX, double mouseY) {

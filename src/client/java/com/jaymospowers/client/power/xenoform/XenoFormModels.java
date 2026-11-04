@@ -31,29 +31,146 @@ public final class XenoFormModels {
 		/** The model's id (its form's). */
 		public final String id;
 		/** How much bigger than the player's body it's drawn, from the feet (a small form's model built small). */
-		float renderScale = 1.0F;
+		protected float renderScale = 1.0F;
 		/**
 		 * (0.18.90) The insignia on its chest, which it taps to change back (it wears no band): the middle of it (model
 		 * pixels in the body's space, y down) on the front of the chest (z), and its size against the band's 5-pixel face.
 		 */
-		float insigniaY = 7.5F, insigniaZ = -2.0F, insigniaSize = 1.0F;
+		protected float insigniaY = 7.5F, insigniaZ = -2.0F, insigniaSize = 1.0F;
 		/** (0.19.84) Its right arm reaches for its own insignia on the change-back tap ({@link XenoformSlap} leaves that arm alone). */
 		public boolean ownsTap;
 		/** (0.19.84) Its legs are solved onto the ground: Cryo's poses leave them alone. */
 		public boolean ownsLegs;
 
-		FormModel(ModelPart root, String id) {
+		protected FormModel(ModelPart root, String id) {
 			super(root);
 			this.texture = JaymosPowers.id("textures/entity/xenoform_" + id + ".png");
 			this.ultimateTexture = JaymosPowers.id("textures/entity/xenoform_" + id + "_ultimate.png");
 			this.ultimateGlow = JaymosPowers.id("textures/entity/xenoform_" + id + "_ultimate_glow.png");
 			this.id = id;
 		}
+
+		/**
+		 * (0.20.9) A model's own extra passes (glow, wings, comet), drawn after its body inside {@link XenoformLayer}'s pose. A no-op
+		 * by default: the older models keep their effects in the layer's {@code instanceof} branches.
+		 */
+		public void submitExtras(AvatarRenderState state, com.mojang.blaze3d.vertex.PoseStack poseStack,
+			net.minecraft.client.renderer.SubmitNodeCollector collector, int light) {
+		}
+	}
+
+	/**
+	 * (0.20.9, Ultimates patch 0) The base of every Ultimate's model ({@code client/.../ultimate/Ultimate<Name>.java}). It is a
+	 * {@link FormModel} built with the BASE alien's id, so {@link #ultimateTexture} / {@link #ultimateGlow} are the Ultimate's skin
+	 * ({@code textures/entity/xenoform_<id>_ultimate[_glow].png}); the layer draws those, skips {@code UltimateSpikes}, and calls
+	 * {@link #submitExtras}. Subclasses pose themselves in {@link #pose} (not {@code setupAnim}, which is final here): after it,
+	 * the change-in morph ({@link XenoMorph}) scales the parts named in {@code XenoUltimate.morphParts()} that haven't grown in yet.
+	 */
+	public abstract static class UltimateModel extends FormModel {
+		private java.util.function.Function<String, ModelPart> lookup;
+		private final Map<String, float[]> centres = new java.util.HashMap<>();
+
+		protected UltimateModel(ModelPart root, String id) {
+			super(root, id);
+		}
+
+		/** The body's pose for this state: override this and call {@code super.pose(state)} first (it is the humanoid pose). */
+		protected void pose(AvatarRenderState state) {
+			super.setupAnim(state);
+		}
+
+		@Override
+		public final void setupAnim(AvatarRenderState state) {
+			pose(state);
+			XenoMorph.apply(this, state);
+		}
+
+		/**
+		 * The part called {@code name} anywhere in the model (a ModelPart child at any depth, by the name it was added under in the
+		 * MeshDefinition; "root" is the root), or null when there is none: a morph part that isn't found is skipped.
+		 */
+		public @Nullable ModelPart part(String name) {
+			if (lookup == null) {
+				lookup = root.createPartLookup();
+			}
+			return lookup.apply(name);
+		}
+
+		/**
+		 * Where {@code name} sits at rest, as a point in blocks in the entity's frame (right, up from the feet, back; the model's
+		 * 1.501 above the feet and its y flipped): the middle of its cubes and its descendants'. Null if there is no such part.
+		 */
+		public float @Nullable [] centre(String name) {
+			if (centres.containsKey(name)) {
+				return centres.get(name);
+			}
+			if (name.contains("+")) {
+				// (0.20.9) a beat of several parts: the middle of their middles
+				float[] sum = new float[3];
+				int got = 0;
+				for (String piece : name.split("\\+")) {
+					float[] c = centre(piece);
+					if (c != null) {
+						sum[0] += c[0];
+						sum[1] += c[1];
+						sum[2] += c[2];
+						got++;
+					}
+				}
+				float[] found = got == 0 ? null : new float[] {sum[0] / got, sum[1] / got, sum[2] / got};
+				centres.put(name, found);
+				return found;
+			}
+			float[] found = null;
+			ModelPart part = part(name);
+			if (part != null) {
+				// (0.20.9) from the rest pose of every part, not however the last frame left them
+				root.getAllParts().forEach(ModelPart::resetPose);
+				float[] sum = new float[3];
+				int[] count = new int[1];
+				root.visit(new com.mojang.blaze3d.vertex.PoseStack(), (pose, path, index, cube) -> {
+					boolean in = false;
+					for (String segment : path.split("/")) {
+						in |= segment.equals(name);
+					}
+					if (in) {
+						org.joml.Vector3f at = pose.pose().transformPosition((cube.minX + cube.maxX) * 0.03125F, (cube.minY + cube.maxY) * 0.03125F,
+							(cube.minZ + cube.maxZ) * 0.03125F, new org.joml.Vector3f());
+						sum[0] += at.x;
+						sum[1] += at.y;
+						sum[2] += at.z;
+						count[0]++;
+					}
+				});
+				if (count[0] > 0) {
+					found = new float[] {-sum[0] / count[0], 1.501F - sum[1] / count[0], sum[2] / count[0]};
+				}
+			}
+			centres.put(name, found);
+			return found;
+		}
 	}
 
 	private static final Map<String, FormModel> MODELS = new LinkedHashMap<>();
 
 	private XenoFormModels() {
+	}
+
+	/** (0.20.9) The Ultimate models by BASE alien id, filled lazily like {@link #MODELS}: one line per Ultimate, added by its stage. */
+	private static final Map<String, FormModel> ULTIMATES = new LinkedHashMap<>();
+	private static boolean ultimatesFilled;
+
+	/** (0.20.9) The Ultimate model of the alien {@code form} (its base id; {@code ooze} and {@code magma_ooze} are separate), or null if none was added yet. */
+	public static @Nullable FormModel ultimate(@Nullable String form) {
+		if (form == null) {
+			return null;
+		}
+		if (!ultimatesFilled) {
+			ultimatesFilled = true;
+			// (0.20.9) one line per Ultimate
+			ULTIMATES.put("bulwark", new com.jaymospowers.client.power.xenoform.ultimate.UltimateTitan());
+		}
+		return ULTIMATES.get(form);
 	}
 
 	public static @Nullable FormModel of(@Nullable String form) {
@@ -113,7 +230,12 @@ public final class XenoFormModels {
 	}
 
 	private static ModelPart bake(MeshDefinition mesh) {
-		return LayerDefinition.create(mesh, 64, 128).bakeRoot();
+		return bake(mesh, 64, 128);
+	}
+
+	/** (0.20.9) An Ultimate's model root: its own UV size (64x128, or larger where it needs it). */
+	public static ModelPart bake(MeshDefinition mesh, int textureWidth, int textureHeight) {
+		return LayerDefinition.create(mesh, textureWidth, textureHeight).bakeRoot();
 	}
 
 	/**

@@ -222,7 +222,7 @@ public final class Lockpicking {
 		PICKING.put(sp.getUUID(), lockPos);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
-		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess);
+		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp);
 		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess);
 		ServerPlayNetworking.send(sp, new Open(lockPos, lock.kind(), lock.level(), lock.seed(), width, strain, prowess >= PROWESS_FEEL,
 			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
@@ -270,6 +270,7 @@ public final class Lockpicking {
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
+				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 				BlockState state = level.getBlockState(pos);
 				// (0.7.497) picking a loot chest in town, seen, is burglary
 				Theft.burgled(player, level, pos, state);
@@ -303,7 +304,7 @@ public final class Lockpicking {
 		PICKING.put(sp.getUUID(), at);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
-		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess);
+		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp);
 		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess);
 		ServerPlayNetworking.send(sp, new Open(at, kind.ordinal(), level, seed, width, strain, prowess >= PROWESS_FEEL,
 			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
@@ -326,6 +327,7 @@ public final class Lockpicking {
 				VIRTUAL.remove(player.getUUID());
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * pending.level());
+				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 				pending.picked().run();
 			}
 			default -> {
@@ -364,6 +366,7 @@ public final class Lockpicking {
 		level.playSound(null, at, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 		Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
+		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 		return true;
 	}
 

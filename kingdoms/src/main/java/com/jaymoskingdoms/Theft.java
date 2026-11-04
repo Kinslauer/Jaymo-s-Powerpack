@@ -561,6 +561,10 @@ public final class Theft {
 
 	/** The faction's people who see {@code player} now, nearest first. */
 	static List<LivingEntity> witnesses(ServerLevel level, Faction f, ServerPlayer player) {
+		// (0.7.509) the Ash Whisperer's Smoke and Whispers: nobody bears witness
+		if (Blessings.unseen(player)) {
+			return new ArrayList<>();
+		}
 		// (0.7.102) a hood hides you from farther off, on top of sneaking
 		double range = (player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE) * Identities.hoodSight(player);
 		List<LivingEntity> out = new ArrayList<>();
@@ -644,10 +648,11 @@ public final class Theft {
 		if (w == Weight.LIGHT) {
 			return;
 		}
-		long until = level.getGameTime() + (w == Weight.HEAVY ? OUTLAW_TICKS : HUNT_TICKS);
+		// (0.7.509) the Ash Whisperer's Short Memories
+		long until = level.getGameTime() + Blessings.wantedTicks(player, w == Weight.HEAVY ? OUTLAW_TICKS : HUNT_TICKS);
 		markWanted(player, f.id(), until);
 		if (w == Weight.HEAVY) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), OUTLAW_TICKS / 24000L)
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), Math.max(1L, (until - level.getGameTime()) / 24000L))
 				.withStyle(ChatFormatting.DARK_RED));
 		}
 		// (0.7.125) a price on their head (or their mask's)

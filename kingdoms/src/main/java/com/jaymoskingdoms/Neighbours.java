@@ -193,6 +193,8 @@ final class Neighbours {
 		r += TEMPER_STEP * (Temperaments.warmth(a) + Temperaments.warmth(b));
 		// ((0.7.221) and cooler where one looks down on the other's blood)
 		r -= Prejudice.neighbourLean(a, b);
+		// ((0.7.509) and where their faiths clash)
+		r -= Faiths.neighbourLean(a, b);
 		int kin = McaCompat.kin(a, b);
 		if (kin == McaCompat.PARTNER) {
 			r = Math.max(r, PARTNER_START);

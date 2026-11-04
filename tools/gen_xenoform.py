@@ -4295,6 +4295,8 @@ ULTIMATE_COLORS = {
     "towerback": (200, 240, 255),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
+# (0.20.9) the Ultimates with their own model and skin, painted by gen_xeno_ultimates.py (never recoloured from the base skin here)
+OWN_ULTIMATES = ("bulwark",)
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
 PATCH5 = ("gyre", "cortex", "locust", "croaker")
 SCAN_B = ("rime", "marrow", "swathe", "blight")
@@ -4421,7 +4423,7 @@ if __name__ == "__main__":
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:
-        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D + SCAN_E + SCAN_F + SCAN_G:
+        if form not in OWN_ULTIMATES + PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D + SCAN_E + SCAN_F + SCAN_G:
             ultimate(form)
     ultimate_spikes()
     # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has

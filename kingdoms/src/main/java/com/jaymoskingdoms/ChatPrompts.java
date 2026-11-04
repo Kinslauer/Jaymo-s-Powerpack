@@ -51,6 +51,11 @@ public final class ChatPrompts {
 			if (!blood.isEmpty()) {
 				sb.append(blood).append('\n');
 			}
+			// (0.7.509) what they hold, and what they think of yours
+			String faith = Faiths.prompt(villager, player);
+			if (!faith.isEmpty()) {
+				sb.append(faith).append('\n');
+			}
 			// (0.7.498) coin or emeralds
 			String money = MoneyTalk.prompt(villager);
 			if (!money.isEmpty()) {

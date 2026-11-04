@@ -8657,7 +8657,49 @@ Andy: "the particle effect for attack indicators should be more visible, and a s
 - Loading-screen hint 86 explains gem sockets at the Smithing Anvil.
 - Not played.
 
-## 0.7.509: chopping cracks logs instead of thinning them (pack 0.20.8)
+## 0.7.509: patron gods, part (a) (pack 0.20.8, Kitchen 0.5.57)
+Andy picked the Runic Gods idea (our own version, nothing taken from it). `docs/Patrons-Plan.md`.
+- **Eight patrons** (`Patron`): the Hearthkeeper, the Anvil-Father, the Deep Mother, the Green Huntsman, the Lantern
+  Warden, the Crowned Sun, the Ash Whisperer, and The Truth, the human faith (Andy: "it usually is the faith among
+  humans, you will rarely find one who entertains another creed"). Rivals: the Sun and the Ash Whisperer, the Mother and
+  the Anvil-Father, the Lantern Warden and the vampires' dark; The Truth and the seven.
+- **Shrines** (`Shrine`): use a patron's offering on a plain shrine to give it to them (a glyph shows on the altar).
+  Hold use to pray as before. Sneak and use with an empty hand for the patrons screen.
+- **Swearing** (`Patrons`): pray at a patron's shrine three days running. A devout life story starts sworn: The Truth
+  for a human, their blood's patron for anyone else.
+- **Favour**: prayer, a fitting offering once a day, their kind of deeds; four tiers (10, 30, 55, 80 of 100); after two
+  days without any it slips 5 a day (the new Survival perk **Devotion** takes a point off a rank), never below the
+  first tier for now.
+- **Blessings** (`Blessings`): a passive at tiers 1-3 and a boon at tier 4 (the left square bracket key, every three days), each
+  hooked into what was there: Wounds' healing and revives, the Smithing Anvil, tool wear, ore drops, breath, storms,
+  great whales, sneaking, Kitchen's meat hooks, legend hunts, Night Vision, blows on the undead, the Nightfall plague,
+  reputation, guards, Valor, war parties, pickpocketing, locks, fire, the guards' hunt, accusations, spells.
+- **Faiths** (`Faiths`): every villager and townsperson holds a faith, drawn once: most humans The Truth, clerics always,
+  Faith-creed realms' folk always; non-human folk mostly their blood's patron. Truth and the seven, and rival pairs,
+  think less of each other: a little dearer, slower to warm, more guard trouble, cooler neighbours and good name, on
+  top of blood prejudice. MCA's chat AI is told.
+- The patrons' books (lore) are left on a shrine the first time you meet its patron.
+- Loading hints 87-88 (86 is gem sockets).
+- Built and fixed up (below); not played.
+
+### Fixes to the patrons
+- Rich Seam and Father's Fire, and the deep-ore deed, need a tool that could harvest the ore.
+- The Crowned Sun's siege deed is paid once, and only for a party that sacked a realm.
+- An MCA villager keeps its faith across loads; it is drawn again only when its blood changes.
+- A road told after the creator starts the patron story again (a devout road starts sworn).
+- A true accusation of one already exposed earns no more favour or name.
+- The outlaw message shows the days after Short Memories.
+- The patrons button no longer covers the Valor button. The boon key is no longer Z (see the last fix below).
+
+### More patron fixes
+- The boon key is now the left square bracket. The full stop is Shoulder Surfing's swap shoulder in the pack.
+- On the Strength page the footer buttons no longer overlap: Patrons sits right of Valor, and World Tier is clear.
+- Dawnlight spares thralls and your realm's folk.
+- Andy: Dawnborn "start crowned sun" and "say praise the sun". A devout Dawnborn starts sworn to the Crowned Sun, and most
+  Dawnborn villagers hold it (`Faiths.DAWNBORN_SUN_SHARE`). At sunrise some of the Sun's folk near a player praise the sun
+  aloud (speech bubbles), and Dawnborn have two more lines of talk about it.
+
+## 0.7.510: chopping cracks logs instead of thinning them (pack 0.20.10)
 Andy asked whether Timber Tales' chopping could replace our thinning logs. Its licence allows no derivatives, so this
 is our own take on the idea (none of its code or art).
 - `ChoppedLog` keeps the whole log's size and shape now. The game's own crack stages are drawn on it, deeper with each

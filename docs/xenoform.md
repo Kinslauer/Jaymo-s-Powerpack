@@ -299,18 +299,27 @@ Scanning stays the main way in. Beside it:
 - **Ascension.** The power ascends on its own once the band is complete (all nine aliens scanned; Duplex, added in 0.15.51, made it nine, and anyone already ascended stays ascended) and the power fully
   mastered (`XenoformPower.tickAscension`, checked every 2 s as a human; `/power ascend` for testing). Nothing else
   changes until you slam.
-- **The Ultimate (C, ascended).** As an alien, C makes you its Ultimate form until the charge runs out
-  (`XenoForm.onUltimate`; `tickUltimate` every tick; `onUltimateEnd` before `onExit`). (0.18.93, patch 2, Andy: "real
-  ultimate forms, all we have are a few special attacks") It is its own body:
-  - **Look:** an armoured skin made from the alien's own (darker plates, seams glowing in its colour, eyes and
-    insignia burning through; `xenoform_<id>_ultimate.png` + `_ultimate_glow.png` drawn fullbright, pulsing), and its
-    own spikes, horns, crests and forearm blades (`UltimateSpikes.Style`, one bone strip tinted per alien). Synced as
-    `XenoformState.ULTIMATE`.
-  - **Body:** half again the alien's health on top of its own (healed in full as it comes on, gone when it ends), fists
-    +50%, 15% bigger (`ULT_HEALTH`, `ULT_DAMAGE`, `ULT_SCALE`).
-  - **Kit:** R G V are the base moves with every cooldown halved (`ULT_COOLDOWN`, in `XenoForm.cooldown`). The
-    Ultimate's own move (`onUltimateAgain`, where `ultimateHasMove`) moves to B; its cooldown is its own
-    (`live.ultimateNext`). C again drops back to the base alien (`dropUltimate`), the charge running on.
+- **The Ultimate (ascended; 0.20.9, Ultimates patch 0).** An Ultimate is its own evolved alien (`XenoUltimate`, one per base
+  alien, `XenoForm.evolved()`), with its own model and skin, its own R G V B and its own C (the big move), and its own health bar
+  on top of the base alien's. Bulwark's Titan is the first; the others still use the old fallback buff (`XenoForm.onUltimate`).
+  - **Coming on.** Unforged band: C does not change you. The Ultimate comes on by itself, once per change, as a last stand: a hit
+    that leaves you at or under `ULT_LAST_STAND` (25%) of your health, or would kill you, while fighting a great foe (`GreatFoes`:
+    the Ender Dragon, the Wither, the Elder Guardian, the Warden, anything that holds a visible boss bar, Kingdoms' bosses through
+    `KingdomsCompat`, or anything tagged `jaymospowers_great_foe`). The hit is judged after the base alien's `allowDamage`, shields,
+    armour and i-frames (`AFTER_DAMAGE`, or `ALLOW_DEATH` for a killing blow) and is undone. Reforged band: C changes you in at
+    will as well (off cooldown, not broken), and the last stand still works.
+  - **Leaving.** Hold C (`ULT_DROP_HOLD`) to drop back to the base alien; it keeps the health the Ultimate had and its cooldowns
+    for the next change-in of the same change (`ultHealth`, `ultCooldownUntil`), and C waits `ULT_REENTER`. The Ultimate's own
+    health running out breaks it: back to the base alien with a short stun, locked for the rest of that change (`ultBroken`).
+    Time running out as the Ultimate is straight back to human. A reforged band burns the charge faster as the Ultimate
+    (`ULT_DRAIN`). A quick change carries the locks, health and cooldowns with it.
+  - **The film.** `UltimateFilm.MORPH`: letterboxed, it zooms on each changing part in turn (`XenoUltimate.morphParts()`) while the
+    body grows from base to Ultimate part by part on the client (`XenoMorph`), so everyone sees it in the world. The first time
+    a player becomes a given Ultimate it is the long exaggerated cut (`ULT_FILM_FIRST`), else `ULT_FILM_TICKS`; seen Ultimates
+    are saved on `BandUpgrades`. Players within `ULT_FILM_WITNESS` get the film with their own camera unless in combat
+    (`ULT_FILM_COMBAT`); those, and players further off, get only the morph's length and parts (`MORPH_ONLY`), no camera.
+  - **The fallback buff** (aliens without an evolved Ultimate yet, `XenoForm.onUltimate`): half again the health, fists +50%,
+    15% bigger, base moves with halved cooldowns, the Ultimate's move on B, and C again drops back.
   - As yourself C only says to slam first (or, with Z held, flips the wild dial).
 
 | Alien | Ultimate | What it does |

@@ -195,6 +195,18 @@ final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to know who's experienced with butchering (needs 0.4.32): {}", e.toString());
 		}
+		// (0.7.509) the Green Huntsman: Clean Cuts gives a hung carcass more, and finishing one is his kind of deed (Kitchen's Hanging hooks)
+		try {
+			Class<?> hanging = Class.forName("com.jaymoskitchen.corpse.Hanging");
+			hanging.getMethod("addExtraCuts", java.util.function.ToIntFunction.class)
+				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) player ->
+					Patrons.blessed(player, Patron.GREEN_HUNTSMAN, 2) ? Blessings.CLEAN_CUTS_EXTRA : 0);
+			hanging.getMethod("addOnDone", java.util.function.BiConsumer.class)
+				.invoke(null, (java.util.function.BiConsumer<net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity>) (player, carcass) ->
+					Patrons.deed(player, Patron.GREEN_HUNTSMAN, Patrons.DEED_SMALL, "carcass"));
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Green Huntsman's meat hook blessings (needs 0.5.57): {}", e.toString());
+		}
 		// (0.7.123) winter's cold doesn't touch a Frostborn
 		if (SEASON_NAME != null) {
 			try {
