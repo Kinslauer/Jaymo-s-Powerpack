@@ -54,7 +54,7 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   double axes and glaives and Archers' spears (32px, on the mod's x2 models), in flint, stone, iron, gold, diamond and
   netherite as the mod has them, painted fresh in vanilla's ramps on vanilla's stick (their art is all rights reserved,
   so none of its pixels). Ruby, aether and aeternium tiers and the mods' other icons keep their own art, which already
-  reads as vanilla (Andy's call pending, 2026-11-04).
+  reads as vanilla (Andy chose forged weapons only, 2026-11-04).
 
 Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
 `python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>`, `powers.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
