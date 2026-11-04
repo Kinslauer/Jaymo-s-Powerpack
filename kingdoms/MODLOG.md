@@ -8958,3 +8958,12 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
   own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
   Cube Animals is loaded. Its loot-chest copies are untouched. Not compiled or played yet.
+- **0.7.538, lanterns burn on fuel and go out** (Andy, 2026-11-04: "lanterns should be fueled with coal or ambergris and
+  go out like torches", "ambergris lasts longer"): `Lanterns` + `LanternBlockMixin` (trees mixins) give lanterns and soul
+  lanterns random ticks. Each burns until its fuel runs out (end time kept per chunk in the `lantern_fuel` attachment),
+  then becomes a dark `burnt_lantern` (standing or hung, remembers if it was a soul lantern; drops itself). A lantern never
+  fuelled starts with one coal's worth (3 days). Use coal or charcoal (`#minecraft:coals`) on a lantern, lit or burnt, for
+  +3 days, ambergris for +15 days, up to 30; the action bar says how many days are left. Burnt lantern + coal crafts a
+  lantern. Villagers relight burnt lanterns as they do burnt torches (shared `burnt_torches` list); camps' burnt lanterns
+  rot away with the rest. Copper lanterns and oil lamps are left alone. No rain douse (behind glass). Texture: vanilla
+  lantern with the flame painted out to soot. Compiled; not played yet.

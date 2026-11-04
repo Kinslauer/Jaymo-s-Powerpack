@@ -21,7 +21,7 @@ public final class ManaFolk {
 	static final int EVERY = 100;
 	static final double RANGE = 48.0;
 	/** Their power: a hermit, a court wizard, a necromancer, a blood witch, a shaman, a cleric. */
-	/** (0.7.477) Folk gifted the Z Fighter's ki, or the wind. */
+	/** (0.7.538) Folk gifted the Z Fighter's ki, or the wind. */
 	static final int KI_FIGHTER = 5, KI_WIND = 4;
 	static final int HERMIT = 8, WIZARD = 6, NECROMANCER = 6, BLOOD_WITCH = 5, SHAMAN = 4, CLERIC = 3;
 	/** The tiers of power they speak of (1-2, 3-4 ...), and how near another's power counts as the same. */
@@ -66,7 +66,7 @@ public final class ManaFolk {
 		if (CourtWizards.is(e)) {
 			return WIZARD;
 		}
-		// (0.7.477) ki is magic: a villager gifted the Z Fighter's ki or the wind is attuned by it
+		// (0.7.538) ki is magic: a villager gifted the Z Fighter's ki or the wind is attuned by it
 		String gift = PowersCompat.gift(e);
 		if ("zfighter".equals(gift)) {
 			return KI_FIGHTER;

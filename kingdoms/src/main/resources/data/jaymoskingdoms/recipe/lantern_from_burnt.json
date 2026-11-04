@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskingdoms:burnt_lantern",
+    "#minecraft:coals"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:lantern"
+  }
+}

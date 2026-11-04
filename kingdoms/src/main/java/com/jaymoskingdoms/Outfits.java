@@ -57,7 +57,7 @@ public final class Outfits {
 	/** A guard's chance of the other helmet of his realm's harness (some variety within a rank). */
 	static final float GUARD_HELM_SWAP_CHANCE = 0.2F;
 	/**
-	 * (0.7.477) Guards of one realm aren't all alike (Andy's Gemini handoff): this share are raw recruits in a quilted
+	 * (0.7.538) Guards of one realm aren't all alike (Andy's Gemini handoff): this share are raw recruits in a quilted
 	 * gambeson (the realm's colour, trimmed) over mail, a leather cap and boots; this share veterans in full plate. The
 	 * rest are footmen in the realm's harness. The land's gear (desert linen, snow hoods...) still goes over all three.
 	 */
@@ -238,7 +238,7 @@ public final class Outfits {
 		};
 		ItemStack legs = trimmed(folk, arms.harness() == HALF_PLATE ? Items.IRON_LEGGINGS : Items.CHAINMAIL_LEGGINGS, arms.pattern(), arms.material());
 		ItemStack feet = new ItemStack(Items.IRON_BOOTS);
-		// (0.7.477) recruit, footman or veteran: fixed by who they are, so a redress keeps their rank
+		// (0.7.538) recruit, footman or veteran: fixed by who they are, so a redress keeps their rank
 		float rank = Math.floorMod(folk.getUUID().hashCode(), 1000) / 1000.0F;
 		if (rank < GUARD_RECRUIT_SHARE) {
 			head = trimmed(folk, dyed(Items.LEATHER_HELMET, BOOT_BROWN), arms.pattern(), arms.material());
