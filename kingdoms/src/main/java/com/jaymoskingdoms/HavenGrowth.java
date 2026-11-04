@@ -574,9 +574,10 @@ public final class HavenGrowth {
 			return;
 		}
 		NEXT_SWEAR.put(f.id(), now + SWEAR_GAP);
-		if (!h.storage().isEmpty()) {
+		boolean paid = !h.storage().isEmpty();
+		if (paid) {
 			// the oath is paid in bread: it takes stores
-			if (!Storage.loaded(level, f) || Storage.food(level, f) < OATH_FOOD_LEAST || Storage.take(level, f, Storage::isFood, OATH_FOOD).isEmpty()) {
+			if (!Storage.loaded(level, f) || Storage.food(level, f) < OATH_FOOD_LEAST) {
 				return;
 			}
 		}
@@ -589,6 +590,15 @@ public final class HavenGrowth {
 			sworn = Factions.keep(server, f.id()) != null ? KingdomEvents.spawnArcher(level, f) : KingdomEvents.spawn(level, f, Folk.ARCHER);
 		} else {
 			sworn = KingdomEvents.spawn(level, f, Folk.GUARD);
+		}
+		// (0.7.484) the bread is taken only once someone has joined (an MCA guard joins with none returned, so the roster tells)
+		Faction after = Factions.get(server, f.id());
+		int joined = after == null ? roster : after.holdings().count(Folk.GUARD) + after.holdings().count(Folk.ARCHER);
+		if (sworn == null && joined <= roster) {
+			return;
+		}
+		if (paid) {
+			Storage.take(level, f, Storage::isFood, OATH_FOOD);
 		}
 		if (sworn != null) {
 			swear(level, f, sworn);

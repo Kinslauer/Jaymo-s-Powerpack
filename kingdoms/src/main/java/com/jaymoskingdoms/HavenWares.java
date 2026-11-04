@@ -30,6 +30,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -157,10 +158,24 @@ public final class HavenWares {
 		}
 		// (0.7.484) the haven's works keep its traders stocked: more uses before an offer runs out
 		int more = HavenGrowth.stock(level.getServer(), f);
+		MerchantOffers offers = v.getOffers();
 		for (MerchantOffer base : wares) {
 			MerchantOffer ware = new MerchantOffer(base.getItemCostA(), base.getResult(), SELL_USES + more, XP, PRICE_MULT);
-			if (v.getOffers().stream().noneMatch(o -> same(o.getResult(), ware.getResult()))) {
-				v.getOffers().add(ware);
+			int at = -1;
+			for (int i = 0; i < offers.size() && at < 0; i++) {
+				if (same(offers.get(i).getResult(), ware.getResult())) {
+					at = i;
+				}
+			}
+			if (at < 0) {
+				offers.add(ware);
+			} else if (offers.get(at).getMaxUses() < SELL_USES + more) {
+				// (0.7.484) an offer made before the works grew: the same trade, its uses and demand kept, with the new stock
+				MerchantOffer old = offers.get(at);
+				MerchantOffer grown = new MerchantOffer(old.getItemCostA(), old.getItemCostB(), old.getResult(), old.getUses(),
+					SELL_USES + more, old.getXp(), old.getPriceMultiplier(), old.getDemand());
+				grown.setSpecialPriceDiff(old.getSpecialPriceDiff());
+				offers.set(at, grown);
 			}
 		}
 	}
