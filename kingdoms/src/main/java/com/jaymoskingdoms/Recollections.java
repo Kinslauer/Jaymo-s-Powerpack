@@ -638,6 +638,12 @@ public final class Recollections {
 			case "bout/lost" -> Kind.BEAT_YOU;
 			default -> topic.equals("child") && parts.length == 5 && parts[4].equals("reply") ? Kind.PLAYED : null;
 		};
+		// (0.7.535) a rough tongue breaks the Truth's first
+		switch (topic + "/" + outcome) {
+			case "halt/rude", "question/rude", "bout/insult", "loyalty/ill" -> Commandments.act(player, "rude");
+			default -> {
+			}
+		}
 		if (kind != null) {
 			remember(who, player, kind, kind == Kind.STOOD && enemy != null ? Component.literal(enemy) : Component.empty());
 		}

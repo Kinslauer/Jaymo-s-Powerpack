@@ -75,7 +75,7 @@ public final class Dragons {
 	static final float ATROXIIA_WIDTH = 3.0F, ATROXIIA_HEIGHT = 4.3F;
 	static final int ATROXIIA_WEIGHT = 1, ATROXIIA_MIN = 1, ATROXIIA_MAX = 1;
 	public static final TagKey<Biome> HAS_ATROXIIA = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_atroxiia_dragon"));
-	/** (0.7.535) Whether Atroxiia is in the game: off until its walk is redone (it glided along with no steps). */
+	/** (0.7.536) Whether Atroxiia is in the game: off until its walk is redone (it glided along with no steps). */
 	public static final boolean ATROXIIA_ON = false;
 	/** (0.7.522) Varasuchus, the crocodile dragon of the beaches and swamps (tag {@code has_varasuchus_dragon}): its body, weight, herd. */
 	static final float VARASUCHUS_WIDTH = 4.0F, VARASUCHUS_HEIGHT = 3.3F;
@@ -156,7 +156,7 @@ public final class Dragons {
 		ATROXIIA_DRAGON = dragon("atroxiia", AtroxiiaDragon::new, ATROXIIA_WIDTH, ATROXIIA_HEIGHT, false, AtroxiiaDragon.createAttributes());
 		ATROXIIA_DRAGON_SPAWN_EGG = egg(ATROXIIA_DRAGON);
 		SpawnPlacements.register(ATROXIIA_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
-		// (0.7.535) Andy: Atroxiia is pulled until it has a proper walk (ATROXIIA_ON): no biome spawns, no op command, and
+		// (0.7.536) Andy: Atroxiia is pulled until it has a proper walk (ATROXIIA_ON): no biome spawns, no op command, and
 		// any already in a world are cleared away (AtroxiiaDragon.tick). Its type, model and art stay for when it's fixed.
 		if (ATROXIIA_ON) {
 			BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_ATROXIIA), MobCategory.CREATURE, ATROXIIA_DRAGON, ATROXIIA_WEIGHT, ATROXIIA_MIN,

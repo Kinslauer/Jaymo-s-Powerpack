@@ -339,6 +339,7 @@ public final class Introductions {
 		}
 		LAST.remove(player.getUUID(), to.getUUID());
 		boolean fresh = learn(to, player);
+		Commandments.act(player, "introduce");
 		Component shown = Identities.trueName(player);
 		Component them = knows(player, to) ? Identities.trueName(to) : stranger();
 		player.sendSystemMessage(Component.translatable(fresh ? "message.jaymoskingdoms.introduce.done" : "message.jaymoskingdoms.introduce.again", them)
