@@ -557,18 +557,18 @@ public final class Trees {
 		ChoppedLog.set(level, at, there, ChoppedLog.chops(there) + 1);
 		chips(level, cut, real, cutter);
 		if (cutter instanceof ServerPlayer player) {
-			// (0.7.509) as in Timber Tales: the chopper sees how near the tree is to coming down; full, the next stroke fells it
+			// (0.7.510) as in Timber Tales: the chopper sees how near the tree is to coming down; full, the next stroke fells it
 			int need = needed(logs.size());
 			showChops(player, Math.min(need, taken + 1 + Careers.chop(cutter)), need);
 		}
 		return 0;
 	}
 
-	/** (0.7.509) The most marks the chop meter draws; bigger trees fill it a mark per few chops. */
+	/** (0.7.510) The most marks the chop meter draws; bigger trees fill it a mark per few chops. */
 	static final int METER = 12;
 
 	/**
-	 * (0.7.509) The chop meter on the action bar: {@code done} of {@code need} chops, as filled and empty squares (never the
+	 * (0.7.510) The chop meter on the action bar: {@code done} of {@code need} chops, as filled and empty squares (never the
 	 * {@code |...} charge bar, which would hold the mouse and stop the next swing).
 	 */
 	private static void showChops(ServerPlayer player, int done, int need) {
@@ -579,7 +579,7 @@ public final class Trees {
 		player.sendOverlayMessage(bar);
 	}
 
-	/** (0.7.509) Wood chips flying off the face of {@code cut} toward whoever's chopping. */
+	/** (0.7.510) Wood chips flying off the face of {@code cut} toward whoever's chopping. */
 	private static void chips(ServerLevel level, BlockPos cut, BlockState log, @Nullable Entity cutter) {
 		double x = cut.getX() + 0.5, y = cut.getY() + 0.5, z = cut.getZ() + 0.5;
 		if (cutter != null) {

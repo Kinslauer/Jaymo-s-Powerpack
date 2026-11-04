@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.25) A log a few axe strokes into a tree (our own code): it stands where the log stood, drawn as the log it was
- * ({@code ChoppedLogRenderer}), and gives that log's wood when it comes down with the tree or is broken. (0.7.509) Andy,
+ * ({@code ChoppedLogRenderer}), and gives that log's wood when it comes down with the tree or is broken. (0.7.510) Andy,
  * after Timber Tales: it no longer thins; it keeps the whole log's size and its cracks run deeper with every chop
  * ({@link #CHOPS}), while the chopper sees how far the tree is from coming down ({@link Trees#chop}). It's one of the game's logs (the {@code logs} tag), so leaves
  * keep to it and the tree is still a tree. See {@link Trees#chop}.

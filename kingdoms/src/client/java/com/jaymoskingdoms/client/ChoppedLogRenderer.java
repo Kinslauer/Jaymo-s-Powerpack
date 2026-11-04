@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.25) A chopped log: the log it was. (0.7.509) Drawn whole, as Timber Tales has it, with the game's own cracks cut
+ * (0.5.25) A chopped log: the log it was. (0.7.510) Drawn whole, as Timber Tales has it, with the game's own cracks cut
  * into it deeper for every chop (or deeper still while someone's axe is at it).
  */
 public final class ChoppedLogRenderer implements BlockEntityRenderer<ChoppedLog.Entity, ChoppedLogRenderer.State> {
