@@ -263,13 +263,15 @@ public final class MeditatePose {
 		int pose = Math.floorMod(m.pose(), Meditate.POSES);
 		if (!m.seated()) {
 			if (pose == 0) {
-				blend(h.rightLeg, -1.45F, 0.95F, 0.1F, in);
-				blend(h.leftLeg, -1.45F, -0.95F, -0.1F, in);
+				// thighs out to the sides along the ground; the shins fold back across in front (bendKnees)
+				blend(h.rightLeg, -1.5F, 0.9F, 0.0F, in);
+				blend(h.leftLeg, -1.5F, -0.9F, 0.0F, in);
 				blend(h.rightArm, -0.75F, 0.25F, 0.2F, in);
 				blend(h.leftArm, -0.75F, -0.25F, -0.2F, in);
 			} else if (pose == 1) {
-				blend(h.rightLeg, -0.85F, 0.15F, 0.05F, in);
-				blend(h.leftLeg, -0.85F, -0.15F, -0.05F, in);
+				// knees drawn up together, the shins back down to the feet flat in front (bendKnees)
+				blend(h.rightLeg, -2.3F, 0.08F, 0.0F, in);
+				blend(h.leftLeg, -2.3F, -0.08F, 0.0F, in);
 				blend(h.rightArm, -1.0F, -0.35F, 0.0F, in);
 				blend(h.leftArm, -1.0F, 0.35F, 0.0F, in);
 				headX = 0.35F;
@@ -282,21 +284,22 @@ public final class MeditatePose {
 				headX = -0.1F;
 			}
 		} else if (pose == 0) {
-			blend(h.rightLeg, -1.3F, 0.12F, 0.0F, in);
-			blend(h.leftLeg, -1.3F, -0.12F, 0.0F, in);
+			// thighs along the seat, knees together, shins hanging down (bendKnees)
+			blend(h.rightLeg, -1.5F, 0.04F, 0.0F, in);
+			blend(h.leftLeg, -1.5F, -0.04F, 0.0F, in);
 			blend(h.rightArm, -0.55F, 0.05F, 0.05F, in);
 			blend(h.leftArm, -0.55F, -0.05F, -0.05F, in);
 			headX = 0.05F;
 		} else if (pose == 1) {
 			// the right leg over the left
-			blend(h.rightLeg, -1.55F, -0.35F, 0.0F, in);
-			blend(h.leftLeg, -1.25F, 0.1F, 0.0F, in);
+			blend(h.rightLeg, -1.95F, -0.35F, 0.0F, in);
+			blend(h.leftLeg, -1.5F, 0.0F, 0.0F, in);
 			blend(h.rightArm, -0.75F, -0.25F, 0.0F, in);
 			blend(h.leftArm, -0.45F, 0.35F, 0.0F, in);
 			headX = 0.05F;
 		} else {
-			blend(h.rightLeg, -1.45F, 0.35F, 0.0F, in);
-			blend(h.leftLeg, -1.45F, -0.35F, 0.0F, in);
+			blend(h.rightLeg, -1.4F, 0.2F, 0.0F, in);
+			blend(h.leftLeg, -1.4F, -0.2F, 0.0F, in);
 			blend(h.rightArm, -0.15F, 0.0F, 0.2F, in);
 			blend(h.leftArm, -0.15F, 0.0F, -0.2F, in);
 			lean = -0.25F;
@@ -326,6 +329,36 @@ public final class MeditatePose {
 			h.head.yRot = Mth.lerp(in, h.head.yRot, 0.0F);
 		}
 		tip(h, lean * in, 0.0F);
+	}
+
+	/**
+	 * (0.20.38) The knees, bent for each way of sitting (radians: right, left; Andy: "the knees should bend"): {@code
+	 * [seated ? 1 : 0][pose]}. On the ground cross-legged the shins fold sideways, back across in front; knees up and on
+	 * a seat they fold down at the knee. Leaning back on the hands keeps the legs straight.
+	 */
+	private static final float[][][] KNEES = {
+		{{-2.6F, 2.6F}, {2.05F, 2.05F}, {0.0F, 0.0F}},
+		{{1.45F, 1.45F}, {1.35F, 1.55F}, {0.9F, 0.9F}}};
+
+	/**
+	 * (0.20.38) Right before the model is drawn (after {@link #applyModel}): a sitter's knees bent for this one draw
+	 * ({@link KneeBend#restore} once it's drawn).
+	 */
+	public static void bendKnees(Model<?> model, Object renderState) {
+		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h) || state.deathTime > 0.0F) {
+			return;
+		}
+		State m = state.getData(KEY);
+		if (m == null || m.kind() != Meditate.MEDITATING) {
+			return;
+		}
+		float in = settle(m.time());
+		int pose = Math.floorMod(m.pose(), Meditate.POSES);
+		float[] knees = KNEES[m.seated() ? 1 : 0][pose];
+		// cross-legged folds across (the right shin toward the left, the left toward the right); the rest at the knee
+		boolean sideways = !m.seated() && pose == 0;
+		KneeBend.bend(h.rightLeg, knees[0] * in, KneeBend.KNEE, sideways);
+		KneeBend.bend(h.leftLeg, knees[1] * in, KneeBend.KNEE, sideways);
 	}
 
 	/** An arm's pose with its turn toward the middle of the body ({@code inward}) and out to the side ({@code out}), either arm. */
