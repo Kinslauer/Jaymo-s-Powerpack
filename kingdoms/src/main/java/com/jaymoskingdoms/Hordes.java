@@ -273,6 +273,8 @@ final class Hordes {
 		Faction now = Factions.get(server, id);
 		if (now != null && realm(server, id)) {
 			vassals(server, now);
+			// (0.7.491) the king city: tribute, pacts and the warpath
+			HordeCity.day(level, now);
 		}
 	}
 
@@ -402,6 +404,8 @@ final class Hordes {
 			}
 		}
 		PLANS.remove(id);
+		// (0.7.491) and its warpath, pacts and oaths with it
+		HordeCity.fell(server, id);
 	}
 
 	// ---- building, each look at a loaded camp ------------------------------------------------------------------------------
@@ -913,7 +917,9 @@ final class Hordes {
 			switch (tier) {
 				case 2 -> add(out, pens, 1, boneHall, 1, forge, 1, tentBlack, 2, tentBrown, 1, tower, 1, pit, 1, rack, 1, spit, 1, totem, 2);
 				case 3 -> add(out, market, 1, den, 1, smelter, 1, pens, 1, boneHall, 2, ring, 1, tentBlack, 3, tentBrown, 2, tower, 2, rack, 2, totem, 3);
-				default -> add(out, market, 1, smelter, 1, den, 2, pens, 2, forge, 1, boneHall, 3, ring, 2, tentBlack, 3, tentBrown, 3, tower, 3, pit, 2, rack, 2, totem, 4);
+				// ((0.7.491) the king city's arena and shaman's tower, biggest first so they find room)
+				default -> add(out, new Piece("orc_arena", () -> HordeBuildings.arena(true)), 1, new Piece("orc_shaman_tower", () -> HordeBuildings.shamanTower(true)), 1,
+					market, 1, smelter, 1, den, 2, pens, 2, forge, 1, boneHall, 3, ring, 1, tentBlack, 3, tentBrown, 3, tower, 3, pit, 2, rack, 2, totem, 4);
 			}
 		} else {
 			Piece hutRed = new Piece("goblin_hut_red", () -> GoblinBuildings.hut(true)), hutBrown = new Piece("goblin_hut_brown", () -> GoblinBuildings.hut(false));
@@ -932,7 +938,8 @@ final class Hordes {
 				case 2 -> add(out, pens, 1, tavern, 1, houseRed, 2, houseBrown, 2, hutBrown, 1, lookout, 1, patch, 2, stewpot, 1, totem, 2);
 				case 3 -> add(out, market, 1, stalls, 1, workshop, 1, townSmelter, 1, brewery, 1, pens, 1, home, 2, houseRed, 2, houseBrown, 1, garden, 1, bridge, 1,
 					lookout, 1, patch, 2, totem, 2);
-				default -> add(out, market, 1, stalls, 2, workshop, 1, townSmelter, 1, counting, 1, brewery, 1, tavern, 1, pens, 1, home, 3, houseRed, 2, houseBrown, 2,
+				default -> add(out, new Piece("goblin_arena", () -> HordeBuildings.arena(false)), 1, new Piece("goblin_brewer_tower", () -> HordeBuildings.shamanTower(false)), 1,
+					market, 1, stalls, 2, workshop, 1, townSmelter, 1, counting, 1, brewery, 1, tavern, 1, pens, 1, home, 3, houseRed, 2, houseBrown, 2,
 					garden, 2, bridge, 1, lookout, 2, patch, 2, totem, 3);
 			}
 		}

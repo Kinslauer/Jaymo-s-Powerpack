@@ -5151,7 +5151,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Pyre stays humanoid (Andy). The six lost their Ultimate spikes. Each body was written, then checked by a second
     pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional
     `excalibur_style` pack. Compile-checked; not played.
-- **0.19.83, Patch 6: non-human bipeds** (`docs/AlienBodies-Plan.md`, the last of the plan): nine more aliens are no longer men.
+- **0.19.83, Kingdoms 0.7.491, greenskin king city and medieval structure mods:** Kingdoms: the king city (see
+  kingdoms/MODLOG.md). Pack: Andy asked to check Rabbit's DawnCraft's structures "or any that have good medieval structures
+  to fill voids we haven't already". DawnCraft is Forge 1.18.2 and only its Structory has a 26.3 Fabric build, so from it
+  and Modrinth's 26.3 list the pack adds, unchanged: Dungeons and Taverns (roadside taverns, dungeons, overhauled
+  strongholds, mansions, outposts and mineshafts), Structory and Structory: Towers (ruins, camps, shrines, watchtowers),
+  and Homesteads (lone farmsteads). CurseForge ids still to look up from home (`packModsNoCf`).
+- **0.19.84, Patch 6: non-human bipeds** (`docs/AlienBodies-Plan.md`, the last of the plan): nine more aliens are no longer men.
   - Bulwark (Andy: "emphasize the four arms more, with a thinner body and outstretched constantly swapping idle stance arms"): a tall, narrow-waisted brute on bent bear legs with four long fisted arms held out in a guard that keeps swapping which pair is raised; walking swings them wide, the combo punches through all four, and carrying lifts the load with all four.
   - Knell is a hunched, horned deep-dark beast that knuckle-walks on long arms, its head low on a thick neck; Sonic Boom and Shriek throw the head out and open the glowing ribs; Burrow, the Tolling and Tremor Sense have their own stances.
   - Rime is a stooped ice brute: hunched trunk, icicle spines, a low frost-crowned head and big fists, the insignia on its back. Cryo's poses (Frost Breath, Ice Slide) turn it about its hips.

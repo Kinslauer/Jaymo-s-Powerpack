@@ -278,12 +278,12 @@ public final class XenoformState {
 	public static final java.util.Set<String> LOW_BOX = java.util.Set.of("billow", "croaker", "ooze", "magma_ooze");
 
 	/**
-	 * (0.19.83) The aliens whose bodies solve their own legs and crouch (non-human builds): the low stance still lowers
+	 * (0.19.84) The aliens whose bodies solve their own legs and crouch (non-human builds): the low stance still lowers
 	 * them, but they never settle onto a knee (no kneel lock, no kneeling pose, no steadied shots).
 	 */
 	public static final java.util.Set<String> OWN_CROUCH = java.util.Set.of("bulwark", "knell", "rime", "shade", "thornwild", "lurk", "rivet", "nadir", "dud");
 
-	/** (0.19.83) Whether {@code player} is one of the {@link #OWN_CROUCH} aliens (both sides). */
+	/** (0.19.84) Whether {@code player} is one of the {@link #OWN_CROUCH} aliens (both sides). */
 	public static boolean ownCrouch(Player player) {
 		String form = player.getAttached(FORM);
 		return form != null && OWN_CROUCH.contains(form);

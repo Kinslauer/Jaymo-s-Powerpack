@@ -113,7 +113,7 @@ public final class CrouchPose {
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		if (ownCrouch(entity)) {
-			// (0.19.83) an alien that poses its own crouch: vanilla's drop only, none of the low crouch, kneel or eased bend
+			// (0.19.84) an alien that poses its own crouch: vanilla's drop only, none of the low crouch, kneel or eased bend
 			TRACKS.remove(entity.getId());
 			state.setData(KEY, null);
 			return;
@@ -158,7 +158,7 @@ public final class CrouchPose {
 	}
 
 	/**
-	 * (0.19.83) {@code entity} is an alien whose body solves its own legs and crouch (Bulwark, Knell, Rime, Shade, ...):
+	 * (0.19.84) {@code entity} is an alien whose body solves its own legs and crouch (Bulwark, Knell, Rime, Shade, ...):
 	 * the low crouch's thighs, the kneel's vanilla places and the eased bend would pull it apart, so they stay off it
 	 * (the low stance's height still holds; it just doesn't settle onto a knee).
 	 */

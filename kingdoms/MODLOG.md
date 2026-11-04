@@ -8417,3 +8417,49 @@ each reviewed with every finding independently verified; compile-checked only, n
     pirates by boat; escort or rob them. Villages keep trade money in their storehouse.
   - **Havens expand** (`HavenGrowth`): havens raise works wherever land and stores allow, send their output by cart, and
     keep sworn defenders by blood who grow with them.
+
+## 0.7.491: the greenskin king city (pack 0.19.83)
+Andy (2026-11-04): "you can start on the king city". Hordes patch 4 (`docs/Hordes-Plan.md`), on top of tier 4's great
+hall, land and vassals:
+- **Arena and shaman's tower** (`HordeBuildings.arena`, `shamanTower`): a tier 4 band also raises a round sand fighting pit
+  ringed by stone stands and crowned posts, and a 12-high tower of the camp's stone with a ladder to a battlemented top
+  (soul fire for the orc shaman, a cauldron for the goblin brewer-witch).
+- **The warpath** (`HordeCity`, hooked into `Raids`): every 6 days the Warlord or Goblin King takes the whole host on the
+  warpath against the nearest settlement within 900 blocks (a human realm or village, or the rival brood's camp), told to
+  everyone. For 2 days the realm and all its vassal camps raid that one target, at half chance per look, a quarter of the
+  usual wait, in bands of up to 14; goblins march too.
+- **Wanted notice** (`Bounties.warlord`): the target's court posts the king as wanted (80) on its bounty board.
+- **Tribute pacts:** each day one realm within 640 blocks whose army is under a quarter of the horde's fighters buys its
+  peace (at most 3): 3 emeralds a day into the king's hoard, and the horde leaves it be. One that can't pay is marched on next.
+- **The horde oath:** `/kingdom pledge <realm>` swears a half-orc to an orc realm, a goblin-raised player to a goblin realm,
+  or anyone once the tribe's favour reaches the ally mark. The tribe spares the sworn, tells them where each warpath goes,
+  and gives them 2 bent copper of each day's tribute. `/kingdom leave` forswears it.
+
+## 0.7.492: boss posture and knowledge (Gemini's DawnCraft handoff, reviewed)
+- Andy pasted a Gemini handoff (1.21.1 code): a DawnCraft-style boss ladder (Goblin King, Corrupted Ogre, Knight Rober,
+  Nine Tails, Frostmaw, Fire Giant), "Guild Master knowledge" locking the anvil, smithing table, enchanting table and
+  end portal frames, 12 eyes, one generic Souls-like boss entity with poise, kneel and riposte, a model and a renderer.
+  None of it compiles on 26.3, and most of it is already in the pack in our own form (world tiers and their great foes,
+  the Goblin King, the Ogre King's three phases, the Skeleton Lord, the Cinder Forge's Ignis Vael, Tinkering and the
+  enchanting overhaul, red-glint heavy blows, Powers' guard and riposte). Kept the part we didn't have, and (Andy) the boss ladder:
+- **Boss posture** (`BossPosture`): every boss with a Kingdoms bar, plus the Ogre King, Skeleton Lord and Piglin King,
+  has a posture of 20 + 35% of its health. Melee wears it by the damage taken (x1.6 sprinting or falling), arrows and
+  thrown weapons at 40%, its own blows caught on a shield or guard at 75%. After 3 quiet seconds it refills over 5.
+  Broken, the boss kneels 3 seconds (stopped, head bowed, can't strike; sparks, an anvil's clang); the first melee blow
+  then is a riposte at 2.25x and brings it up. Then 8 seconds when posture can't be worn. A thin "Posture" bar shows
+  under the boss bar to the players who have that bar, only while it's worn. No chat text. Vanilla bosses untouched.
+- Dropped: the generic boss entity, model and renderer (no textures, duplicates of bosses we have), the 12 eyes.
+- **Knowledge** (`Knowledge`; Andy kept the ladder: "tying combat directly into progression"). Five levels, earned by
+  slaying bosses in order (a level counts once every boss below it has fallen too). Each kill is a world-tier feat, so it
+  is shared by everyone near and by the party:
+  1. Goblin King: anvils (vanilla and the iron Smithing Anvil; the Stone Anvil stays open) and bog iron (also open
+     world-wide once an Ogre King falls, as before).
+  2. An Ogre King: the smithing table, and the heavy arms on the Smithing Anvil (claymore, war scythe, glaive, halberd,
+     broad blade).
+  3. The Skeleton Lord: the enchanting table.
+  4. The Piglin King: learning a spell from a scroll (reading one once still works for anyone), the Storm Arts, and skill
+     perks that want pillar level 15+.
+  5. The Wither: End portal frames take eyes.
+  World tiers want them too: Borderlands 1, Wildlands 2, Dread 4, Legend 5. The Rung Journal ticks each. A refusal is an
+  action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
+  tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.

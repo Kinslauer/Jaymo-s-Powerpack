@@ -275,7 +275,7 @@ public final class StarFolk {
 			return;
 		}
 		TOLD.put(key, now);
-		Post.tidings(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky.gazer." + level.getRandom().nextInt(NEWS_LINES), speaker.getDisplayName()));
+		Post.aside(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky.gazer." + level.getRandom().nextInt(NEWS_LINES), speaker.getDisplayName()));
 	}
 
 	// ---- lights in the sky --------------------------------------------------------------------------------------------
@@ -320,8 +320,14 @@ public final class StarFolk {
 						seen.clear();
 					}
 					if (seen.add(pod.getUUID())) {
-						Post.tidings(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky." + (raiders ? "raiders." : "patrol.")
-							+ level.getRandom().nextInt(NEWS_LINES), town.name()));
+						// ((0.7.494) raiders falling on a town are great news, for a roost-keeper; a patrolman setting down is a passing sight)
+						Component line = Component.translatable("news.jaymoskingdoms.sky." + (raiders ? "raiders." : "patrol.")
+							+ level.getRandom().nextInt(NEWS_LINES), town.name());
+						if (raiders) {
+							Post.tidings(player.getUUID(), line);
+						} else {
+							Post.aside(player.getUUID(), line);
+						}
 					}
 				}
 			}

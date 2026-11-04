@@ -39,7 +39,7 @@ public final class Dud extends XenoForm {
 	public static final int BOING_COOLDOWN = 20;
 	public static final int PLAY_DEAD_TICKS = 60, PLAY_DEAD_COOLDOWN = 200;
 	public static final double ROLL_SPEED = 1.1;
-	/** (0.19.83) How long a roll is drawn as a tucked ball (ticks), synced as the "roll" act. */
+	/** (0.19.84) How long a roll is drawn as a tucked ball (ticks), synced as the "roll" act. */
 	public static final int ROLL_TICKS = 15;
 	public static final int ROLL_COOLDOWN = 40;
 

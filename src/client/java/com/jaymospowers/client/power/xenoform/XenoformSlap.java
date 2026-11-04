@@ -302,7 +302,7 @@ public final class XenoformSlap {
 				return;
 			}
 			if (h instanceof XenoFormModels.FormModel form && form.ownsTap) {
-				// (0.19.83) a body whose arm reaches the insignia itself (Knell, Shade): only the head bows to it
+				// (0.19.84) a body whose arm reaches the insignia itself (Knell, Shade): only the head bows to it
 				h.head.xRot += CHEST_HEAD_DOWN * raise;
 				return;
 			}

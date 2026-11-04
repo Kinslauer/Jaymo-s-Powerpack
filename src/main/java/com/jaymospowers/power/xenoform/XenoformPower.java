@@ -217,7 +217,7 @@ public final class XenoformPower implements Power {
 		public final List<Integer> frozen = new ArrayList<>();
 		public long geodeUntil;
 		public int tolls;
-		/** (0.19.83) Knell: the game time it last tolled at (it tolls once per value of the clock). */
+		/** (0.19.84) Knell: the game time it last tolled at (it tolls once per value of the clock). */
 		public long lastToll = -1L;
 		/** This change has hurt a living thing (the voices' trial counts the ones that don't). */
 		public boolean hurt;
@@ -1459,12 +1459,12 @@ public final class XenoformPower implements Power {
 	/**
 	 * (0.19.62) What the four-legged aliens' bodies show for everyone ({@link XenoformState#ACT}): Tusk's Charge and
 	 * Gorger's Horn Charge ("charge"), Gorger or Gyre rolled up ("roll"), Gyre's Shell Spin ("spin"), Keen hanging
-	 * from a ceiling ("hang"); (0.19.82) Prism rooted ("root"), Gnasher's Death Roll ("roll"); (0.19.83) the bipeds:
+	 * from a ceiling ("hang"); (0.19.82) Prism rooted ("root"), Gnasher's Death Roll ("roll"); (0.19.84) the bipeds:
 	 * Bulwark carrying or leaping ("carry", "leap"), Knell burrowing, tolling or sensing, Shade holding a block or
 	 * staring ("hold", "stare"), Thornwild's Roots and Bloom, Lurk faded ("fade"), Rivet pouring or fighting ("pour",
 	 * "fight"), Dud playing dead or rolling ("dead", "roll").
 	 */
-	/** (0.19.83) Whether {@code player} struck a creature, or was struck by one, in the last {@code ticks}. */
+	/** (0.19.84) Whether {@code player} struck a creature, or was struck by one, in the last {@code ticks}. */
 	private static boolean fighting(ServerPlayer player, int ticks) {
 		int hit = player.getLastHurtMobTimestamp();
 		return hit > 0 && player.tickCount - hit < ticks
@@ -1483,7 +1483,7 @@ public final class XenoformPower implements Power {
 				// (0.19.82) Prism rooted in crystal while Reflect is held; Gnasher's death roll
 				case "prism" -> act = live.reflecting ? "root" : null;
 				case "gnasher" -> act = live.rolls > 0 ? "roll" : null;
-				// (0.19.83) the bipeds' stances
+				// (0.19.84) the bipeds' stances
 				case "bulwark" -> act = live.grabbed >= 0 ? "carry" : live.leaping ? "leap" : null;
 				case "knell" -> act = live.burrow > 0 ? "burrow" : live.tolls > 0 ? "toll" : live.sense ? "sense" : null;
 				case "shade" -> act = live.lifted != null ? "hold" : live.stalked >= 0 ? "stare" : null;

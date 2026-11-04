@@ -453,7 +453,7 @@ public final class LifeAims {
 		}
 		if (player.distanceToSqr(body) <= ABANDON_RANGE * ABANDON_RANGE) {
 			player.setAttached(LIFE_AIM, life.asLost());
-			Post.tidings(player.getUUID(), Component.translatable("aim.jaymoskingdoms.tidings.lost"));
+			Post.aside(player.getUUID(), Component.translatable("aim.jaymoskingdoms.tidings.lost"));
 		} else {
 			betray(player, Start.NOBODIES);
 		}
@@ -656,7 +656,7 @@ public final class LifeAims {
 		MinecraftServer server = player.level().getServer();
 		Stats.attributes(player);
 		Component title = Component.translatable("aim.jaymoskingdoms." + life.aim() + ".title");
-		Post.tidings(player.getUUID(), Component.translatable("aim.jaymoskingdoms.tidings.done", title));
+		Post.aside(player.getUUID(), Component.translatable("aim.jaymoskingdoms.tidings.done", title));
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.1F);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 14, 0.5, 0.6, 0.5, 0.0);
@@ -699,7 +699,7 @@ public final class LifeAims {
 		if (realm != null && !realm.fallen()) {
 			Reputation.change(player, realm, -BETRAY_REP);
 		}
-		Post.tidings(player.getUUID(), Component.translatable("aim.jaymoskingdoms.tidings.broken"));
+		Post.aside(player.getUUID(), Component.translatable("aim.jaymoskingdoms.tidings.broken"));
 	}
 
 	/** The next villager who knows the story to be near {@code player} says what they think of them, as their temper takes it. */

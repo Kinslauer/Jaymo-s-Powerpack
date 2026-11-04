@@ -295,6 +295,20 @@ def packModsNoCf = [
 	[dep: "maven.modrinth:lithium:fWv5bnZk", cf: null],
 	[dep: "maven.modrinth:ferrite-core:d5ddUdiB", cf: null],
 	[dep: "maven.modrinth:c2me-fabric:gKKkuSYc", cf: null],
+	// Medieval structures to fill gaps (Andy, 2026-11-04: "check these structures [Rabbit's DawnCraft] or any that have good
+	// medieval structures to fill voids we haven't already"). DawnCraft is Forge 1.18.2; of its structure mods only
+	// Structory has a 26.3 Fabric build, so the rest come from Modrinth's 26.3 list. All shipped unchanged, server-side worldgen.
+	// Dungeons and Taverns (all rights reserved, nova_wostra; linked, never edited): roadside taverns, dungeons and
+	// overhauled strongholds, mansions, outposts, mineshafts and temples. 6.1.0.
+	[dep: "maven.modrinth:dungeons-and-taverns:hn5CugpP", cf: null],
+	// Structory and Structory: Towers (Stardust Labs License, which allows modpacks): weathered ruins, camps, shrines and
+	// biome-themed watchtowers with light lore. 1.3.18 and 1.0.19.
+	[dep: "maven.modrinth:structory:GjOkOVW4", cf: null],
+	[dep: "maven.modrinth:structory-towers:5ntmnN83", cf: null],
+	// Homesteads (all rights reserved; linked, never edited): lone farmsteads and hamlets out in the wilds, the
+	// countryside between our villages and towns. 3.0.0.
+	// TODO(home PC): CurseForge [project id, file id] for these four, as above.
+	[dep: "maven.modrinth:homesteads:xYCdL31w", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).

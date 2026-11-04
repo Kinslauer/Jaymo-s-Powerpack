@@ -40,22 +40,22 @@ public final class XenoformHand {
 			// (0.19.66) its knuckle-walking forearm and fist straightened for the first-person arm
 			gremlin.handPose();
 		} else if (model instanceof XenoFormModels.Bulwark bulwark) {
-			// (0.19.83) its forearm and fist straightened for the first-person arm
+			// (0.19.84) its forearm and fist straightened for the first-person arm
 			bulwark.handPose();
 		} else if (model instanceof XenoFormModels.Knell knell) {
-			// (0.19.83) its bent forearm and fist straightened, the shoulder brought back off the hump
+			// (0.19.84) its bent forearm and fist straightened, the shoulder brought back off the hump
 			knell.handPose();
 		} else if (model instanceof XenoFormModels.Shade shade) {
-			// (0.19.83) its two-segment arm straightened (a crawling Shade drawn last leaves the elbow and hand bent)
+			// (0.19.84) its two-segment arm straightened (a crawling Shade drawn last leaves the elbow and hand bent)
 			shade.handPose();
 		} else if (model instanceof XenoFormModels.Lurk lurk) {
-			// (0.19.83) its forearm and hand straightened (on all fours they're bent)
+			// (0.19.84) its forearm and hand straightened (on all fours they're bent)
 			lurk.handPose();
 		} else if (model instanceof XenoFormModels.Rime rime) {
-			// (0.19.83) its fists back at their rest curl (a blow drawn last leaves them curled further)
+			// (0.19.84) its fists back at their rest curl (a blow drawn last leaves them curled further)
 			rime.handPose();
 		} else if (model instanceof XenoFormModels.Dud dud) {
-			// (0.19.83) its nub hand down where a fist would be (it hangs at the shoulder)
+			// (0.19.84) its nub hand down where a fist would be (it hangs at the shoulder)
 			dud.handPose(limb);
 		}
 		poseStack.pushPose();

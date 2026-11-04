@@ -37,9 +37,9 @@ public final class XenoFormModels {
 		 * pixels in the body's space, y down) on the front of the chest (z), and its size against the band's 5-pixel face.
 		 */
 		float insigniaY = 7.5F, insigniaZ = -2.0F, insigniaSize = 1.0F;
-		/** (0.19.83) Its right arm reaches for its own insignia on the change-back tap ({@link XenoformSlap} leaves that arm alone). */
+		/** (0.19.84) Its right arm reaches for its own insignia on the change-back tap ({@link XenoformSlap} leaves that arm alone). */
 		public boolean ownsTap;
-		/** (0.19.83) Its legs are solved onto the ground: Cryo's poses leave them alone. */
+		/** (0.19.84) Its legs are solved onto the ground: Cryo's poses leave them alone. */
 		public boolean ownsLegs;
 
 		FormModel(ModelPart root, String id) {
@@ -117,7 +117,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.95; 0.19.83 a puddle that stands up to fight) Rivet: living metal. Left alone it is a low, rippling puddle
+	 * (0.18.95; 0.19.84 a puddle that stands up to fight) Rivet: living metal. Left alone it is a low, rippling puddle
 	 * of liquid metal that flows along the ground: a wide slab with a smaller mound on it, four lobes round the rim that
 	 * swell and sink (faster as it moves), a wake dragging behind that swings with its turns, and its face a squashed dome
 	 * at the front with two green slit eyes. Fighting (an attack swing, or {@code XenoformState.ACT} "fight", set while it
@@ -303,7 +303,7 @@ public final class XenoFormModels {
 			float lift = FOOT_LIFT * e * Mth.clamp(state.walkAnimationSpeed * 1.4F, 0.0F, 1.0F);
 			float bob = "fight".equals(act) ? Mth.sin(age * 0.3F) * 0.4F * e : 0.0F;
 			// (a swung leg's toe or heel corner dips by its half depth times the swing's sine: the hip rises that much so it never sinks into the floor)
-			// (0.19.83) a foot swings forward (its angle falling) while the other half of the cycle pushes back: it lifts on the swing
+			// (0.19.84) a foot swings forward (its angle falling) while the other half of the cycle pushes back: it lifts on the swing
 			float yR = hip + reach * (1.0F - Mth.cos(stepR)) - FOOT_HALF * Math.abs(Mth.sin(stepR)) - Math.max(0.0F, Mth.sin(ph)) * lift + bob;
 			float yL = hip + reach * (1.0F - Mth.cos(stepL)) - FOOT_HALF * Math.abs(Mth.sin(stepL)) - Math.max(0.0F, -Mth.sin(ph)) * lift + bob;
 			float legScale = reach / LEG_LEN;
@@ -348,7 +348,7 @@ public final class XenoFormModels {
 			boolean rightLash = (state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT) != offSwing;
 			this.arm(this.rightArm, -1, sx, sy, sz, tw, armS, rightLash ? swing * LASH_STRETCH * e : 0.0F, wob);
 			this.arm(this.leftArm, 1, sx, sy, sz, tw, armS, rightLash ? 0.0F : swing * LASH_STRETCH * e, -wob);
-			// (0.19.83) a sneaking player is drawn CROUCH_SINK lower: everything raised that much, so the puddle stays on the floor
+			// (0.19.84) a sneaking player is drawn CROUCH_SINK lower: everything raised that much, so the puddle stays on the floor
 			if (state.isCrouching) {
 				for (ModelPart part : this.all) {
 					part.y -= CROUCH_SINK;
@@ -900,7 +900,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.96; 0.19.83 on all fours when it stalks) Lurk, the stalker: tall and thin, arms that hang past its knees ending
+	 * (0.18.96; 0.19.84 on all fours when it stalks) Lurk, the stalker: tall and thin, arms that hang past its knees ending
 	 * in long fingers, a face that's mostly eyes. It holds its head a little forward and tilted, as if listening. Sneaking
 	 * or faded ({@code ACT} "fade", set while Fade is on) it drops onto all fours: the long arms become forelegs, hands flat
 	 * on the ground, the torso tipped nearly level, the knees folded up under the belly and the head carried forward and
@@ -2386,7 +2386,7 @@ public final class XenoFormModels {
 	/**
 	 * (0.18.103, patch 5) Dud: small, soft and round, two nubs on its head; it wobbles as it goes.
 	 * <p>
-	 * (0.19.83) A soft round squishy ball, not a man: a stack of boxes rounding a ball (the body part), a worried face on
+	 * (0.19.84) A soft round squishy ball, not a man: a stack of boxes rounding a ball (the body part), a worried face on
 	 * a plate bulging from its front (it turns a little where you look), two nubs on top, nubby hands at its sides and
 	 * tiny stubby feet under it. It waddles, rocking from foot to foot with a jiggle; in the air it stretches and on
 	 * landing it squashes (Boing). Reads {@code XenoformClient.ACT}: "dead" while it plays dead (the server's
@@ -2459,7 +2459,7 @@ public final class XenoFormModels {
 			return mesh;
 		}
 
-		/** (0.19.83) The nub hand drawn down the arm, where a player's fist would be, for the first-person arm (the arm is only the nub). */
+		/** (0.19.84) The nub hand drawn down the arm, where a player's fist would be, for the first-person arm (the arm is only the nub). */
 		void handPose(ModelPart limb) {
 			limb.y += HAND_DOWN;
 		}
@@ -2492,7 +2492,7 @@ public final class XenoFormModels {
 			XenoMotion.Read m = XenoMotion.read(state);
 			String act = state.getData(XenoformClient.ACT);
 			boolean dead = "dead".equals(act), roll = !dead && "roll".equals(act);
-			// (0.19.83) a sneaking player is drawn CROUCH_SINK lower: the ground that much higher in the model
+			// (0.19.84) a sneaking player is drawn CROUCH_SINK lower: the ground that much higher in the model
 			float sink = state.isCrouching ? CROUCH_SINK : 0.0F;
 			float age = state.ageInTicks;
 			float phase = state.walkAnimationPos * WADDLE_RATE;
@@ -2572,7 +2572,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.107, Scan B; 0.19.83 a stooped ice brute) Rime: angular ice, a crown of icicles and icicle spines down its back
+	 * (0.18.107, Scan B; 0.19.84 a stooped ice brute) Rime: angular ice, a crown of icicles and icicle spines down its back
 	 * that shiver. Now a stooped brute: the back bent forward over its hips (the trunk is hung from them, tipped by
 	 * {@link #HUNCH}), a hump of ice for shoulders, icicle spines along the back, a low-set head with a frost crown and two
 	 * fangs, long arms ending in big fists that hang to the knees, thick two-jointed legs. It walks a heavy stooped
@@ -2807,7 +2807,7 @@ public final class XenoFormModels {
 
 			// the hips sink as the feet spread, crouched and landing; they hold still in the air
 			float spread = Math.max(Math.abs(this.stepRight[0] - REST_Z), Math.abs(this.stepLeft[0] - REST_Z)) / STRIDE;
-			// (0.19.83) a sneaking player is drawn CROUCH_SINK lower: the ground (and so the hips) that much higher in the model
+			// (0.19.84) a sneaking player is drawn CROUCH_SINK lower: the ground (and so the hips) that much higher in the model
 			this.sink = state.isCrouching ? CROUCH_SINK : 0.0F;
 			float hipY = (cryo ? HIP_Y : HIP_Y + (BOB * spread + (crouch ? CROUCH_DROP : 0.0F) + m.land() * LAND_DROP) * (1.0F - air)) - this.sink;
 			float tuck = air * 2.0F;
@@ -2880,7 +2880,7 @@ public final class XenoFormModels {
 			}
 		}
 
-		/** (0.19.83) The fists at their rest curl for the first-person arm (the model is shared, so they hold whoever was drawn last). */
+		/** (0.19.84) The fists at their rest curl for the first-person arm (the model is shared, so they hold whoever was drawn last). */
 		void handPose() {
 			this.fistRight.xRot = FIST_CURL;
 			this.fistLeft.xRot = FIST_CURL;
@@ -5783,7 +5783,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.113, Scan E; 0.19.83 a crawling shadow that unfolds tall) Shade: very tall and thin, its eyes do the rest.
+	 * (0.18.113, Scan E; 0.19.84 a crawling shadow that unfolds tall) Shade: very tall and thin, its eyes do the rest.
 	 * <p>
 	 * No longer a man in black. Moving on the ground it goes low on its long limbs, all fours,
 	 * spidery: the torso pitched nearly flat, the arms' elbows high and forward with the hands reaching ahead, the hind
@@ -5867,7 +5867,7 @@ public final class XenoFormModels {
 			this.leftShin = this.leftLeg.getChild("shin");
 			this.rightFoot = this.rightShin.getChild("foot");
 			this.leftFoot = this.leftShin.getChild("foot");
-			// (0.19.83) the man's body is hidden from the start: the band's hologram and plate draw the root without setupAnim
+			// (0.19.84) the man's body is hidden from the start: the band's hologram and plate draw the root without setupAnim
 			this.body.visible = false;
 			this.hat.visible = false;
 			// the hidden body sits at the torso's middle, turned so the plate lies on its front standing and its back crawling
@@ -6017,7 +6017,7 @@ public final class XenoFormModels {
 			if (crouch) {
 				target = 0.0F;
 			}
-			// (0.19.83) the change-back tap: the right hand comes up onto the insignia (XenoformSlap leaves that arm to us); it stands for it
+			// (0.19.84) the change-back tap: the right hand comes up onto the insignia (XenoformSlap leaves that arm to us); it stands for it
 			XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
 			float tap = slap != null && slap.chest() && !XenoformSlap.ownBody(state) ? slap.raise() : 0.0F;
 			float tapHit = slap != null ? slap.strike() : 0.0F;
@@ -6487,7 +6487,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.117, Scan F; 0.19.83 a treant on root feet) Thornwild: a crown of twigs, and thorns along its arms. Now a
+	 * (0.18.117, Scan F; 0.19.84 a treant on root feet) Thornwild: a crown of twigs, and thorns along its arms. Now a
 	 * treant, not a man: a trunk of bark, wider at the base and burled at the chest, a hump on its back; a knotted face
 	 * (heavy brow, a knot of a nose, two amber eyes) sunk between mossy shoulders; long branching arms with twig
 	 * fingers, a side branch and thorns; and leafy twigs on its head, shoulders and back that sway, trail behind when it
@@ -7092,7 +7092,7 @@ public final class XenoFormModels {
 	/**
 	 * Bulwark: thick-set, a heavy brow, pauldrons, and a second pair of arms under the first.
 	 * <p>
-	 * (0.19.83) Andy: "bulwark should emphasize the four arms more, with a thinner body and outstretched constantly
+	 * (0.19.84) Andy: "bulwark should emphasize the four arms more, with a thinner body and outstretched constantly
 	 * swapping idle stance arms". A tall, narrow-waisted brute with a wedge of a chest, a short thick neck, a heavy
 	 * tusked head and legs bent like a bear's. Four long arms, each an upper arm, a heavy forearm and a fist: the upper
 	 * pair are the humanoid arms (the first-person hand and held items), the lower pair hang off the ribs. Standing, the
@@ -8017,7 +8017,7 @@ public final class XenoFormModels {
 	 * Nadir: a tall dark silhouette, broad at the shoulder, a face of nothing; a thin mantle of void drifts behind it.
 	 * The insignia is the skin's alone.
 	 * <p>
-	 * (0.19.83) Shapeless: no limbs, no face. A mass of darkness about a man's height made of twenty-odd dark cubes of
+	 * (0.19.84) Shapeless: no limbs, no face. A mass of darkness about a man's height made of twenty-odd dark cubes of
 	 * four sizes that slowly drift, tumble, swell and shrink round a centre, the edges fraying into small loose
 	 * fragments; the insignia floats on a dim core at its heart, facing front. Moving, the mass leans and streams
 	 * behind (the top most), a turn swings it out, a fall lifts it; an attack swells the core and lashes the front
@@ -8109,7 +8109,7 @@ public final class XenoFormModels {
 			float burst = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
 			boolean crouch = state.isCrouching;
 			float squash = (crouch ? CROUCH_SQUASH : 1.0F) - m.land() * LAND_SQUASH;
-			// (0.19.83) a sneaking player is drawn CROUCH_SINK lower: the ground (and the core) that much higher in the model
+			// (0.19.84) a sneaking player is drawn CROUCH_SINK lower: the ground (and the core) that much higher in the model
 			float sink = crouch ? CROUCH_SINK : 0.0F;
 			float ground = GROUND - sink;
 			float cy = HEART + Mth.sin(age * 0.05F) * BOB + (crouch ? CROUCH_DROP : 0.0F) - sink;
@@ -8484,7 +8484,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * Knell: hulking, horned, with a glowing ribcage, heavy shoulders and sculk tendrils at the jaw; (0.19.83 a hunched
+	 * Knell: hulking, horned, with a glowing ribcage, heavy shoulders and sculk tendrils at the jaw; (0.19.84 a hunched
 	 * beast on two legs, not a man: a massive humped back leaning far forward over short, thick, bowed legs, a thick neck
 	 * slinging the horned head low and forward, and very long heavy arms that hang to the ground, the knuckles nearly
 	 * dragging). It lumbers, rocking side to side with each step, the arms swinging against the legs (a knuckle-walker's
@@ -8689,7 +8689,7 @@ public final class XenoFormModels {
 		}
 
 		/**
-		 * (0.19.83) The right arm from the shoulder (sx, sy, sz) to put the fist's middle on (tx, ty, tz), a 3D two-bone
+		 * (0.19.84) The right arm from the shoulder (sx, sy, sz) to put the fist's middle on (tx, ty, tz), a 3D two-bone
 		 * reach with the elbow toward the pole (px, py, pz) and the wrist straight: into {@link #tapRot} the upper arm's
 		 * x, y, z angles (the parts' Z*Y*X order) and the forearm's hinge.
 		 */
@@ -8744,7 +8744,7 @@ public final class XenoFormModels {
 			this.tapRot[3] = fore;
 		}
 
-		/** (0.19.83) {@code (x, y, z)} turned as a part is (Z*Y*X by {@code xr, yr, zr}), into {@link #rot}. */
+		/** (0.19.84) {@code (x, y, z)} turned as a part is (Z*Y*X by {@code xr, yr, zr}), into {@link #rot}. */
 		private void turnPart(float x, float y, float z, float xr, float yr, float zr) {
 			float y1 = y * Mth.cos(xr) - z * Mth.sin(xr), z1 = y * Mth.sin(xr) + z * Mth.cos(xr);
 			float x2 = x * Mth.cos(yr) + z1 * Mth.sin(yr), z2 = -x * Mth.sin(yr) + z1 * Mth.cos(yr);
@@ -8801,7 +8801,7 @@ public final class XenoFormModels {
 			if (!toll) {
 				rise = 0.0F;
 			}
-			// (0.19.83) the change-back tap: the right fist comes up off the ground onto the insignia (XenoformSlap leaves that arm to us)
+			// (0.19.84) the change-back tap: the right fist comes up off the ground onto the insignia (XenoformSlap leaves that arm to us)
 			XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
 			float tap = slap != null && slap.chest() && !XenoformSlap.ownBody(state) ? slap.raise() : 0.0F;
 			float tapHit = slap != null ? slap.strike() : 0.0F;
@@ -8918,7 +8918,7 @@ public final class XenoFormModels {
 				this.fist[side].xRot = fistAbs - this.bones[1];
 				float tapped = left ? 0.0F : tap;
 				if (tapped > 0.0F) {
-					// (0.19.83) the change-back tap: the forearm comes in across the chest with the wrist straight, the fist's
+					// (0.19.84) the change-back tap: the forearm comes in across the chest with the wrist straight, the fist's
 					// face flat on the insignia (poised a little further out), the elbow out to the side clear of the chest and
 					// the neck. The fist's middle and the elbow's side are eased over from the walking arm's, not its angles,
 					// so the arm stays solved (never sweeping through the trunk) the whole way up.

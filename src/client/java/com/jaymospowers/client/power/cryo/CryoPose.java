@@ -236,7 +236,7 @@ public final class CryoPose {
 		ModelPart off = leftMain ? h.rightArm : h.leftArm;
 		ModelPart mainLeg = leftMain ? h.leftLeg : h.rightLeg;
 		ModelPart offLeg = leftMain ? h.rightLeg : h.leftLeg;
-		// (0.19.83) a body whose legs are solved onto the ground (Rime's two-jointed legs): its thighs keep their angles,
+		// (0.19.84) a body whose legs are solved onto the ground (Rime's two-jointed legs): its thighs keep their angles,
 		// so the shins and feet hung off them stay planted (the poses' torso and arms still play)
 		boolean ownLegs = model instanceof com.jaymospowers.client.power.xenoform.XenoFormModels.FormModel form && form.ownsLegs;
 		PartPose rightLeg = ownLegs ? h.rightLeg.storePose() : null;

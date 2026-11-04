@@ -325,7 +325,7 @@ def fallen_star():
 
 # ---- the aliens (entity skins, 64x128) ----
 def bulwark():
-    """(0.19.83 a four-armed brute) Riveted steel plate, amber visor, the insignia stamped on the breastplate. Nothing
+    """(0.19.84 a four-armed brute) Riveted steel plate, amber visor, the insignia stamped on the breastplate. Nothing
     is left of the man's layout: every box has its own place (see the table in the code), the chest, head, four arms,
     legs and feet each plated and bricked, darker iron on the forearms and shins, black knuckles and toes. Drawn on its
     own random stream, then the shared one is left exactly where the old skin left it (`stream_words` draws on), so the
@@ -1066,7 +1066,7 @@ def gremlin():
 
 
 def knell():
-    """(0.19.83) Knell, the hunched deep-dark beast: sculk-dark hide threaded with cyan light, bone horns, a brow and
+    """(0.19.84) Knell, the hunched deep-dark beast: sculk-dark hide threaded with cyan light, bone horns, a brow and
     claws of bone, a blind face with a faint glow, a glowing chest cavity behind two bone rib plates (the insignia
     at its heart, in the gap between the plates), sculk spurs on the hump and tendrils at the chin. Every box is its
     own (the man's old head/body/limb regions are reused for them, nothing shares a texel): the layout is the UV
@@ -1412,7 +1412,7 @@ def wyrm():
 
 def nadir():
     """The void given shape: near-black with faint stars and nebula dust, and the green xeno insignia burning on the
-    chest. (0.19.83) A mass of dark cubes drifting round a dim core: four sizes of cube (A 6, B 4, C 3, D 2 cubed, at
+    chest. (0.19.84) A mass of dark cubes drifting round a dim core: four sizes of cube (A 6, B 4, C 3, D 2 cubed, at
     (0,64) (0,76) (0,84) (0,90)) of star-dusted dark, and an 8x8x6 core at (0,96) carrying the insignia on its front.
     The base humanoid parts are still painted (the first-person hand)."""
     img = new_skin()
@@ -1547,7 +1547,7 @@ def duplex():
 
 
 def rivet():
-    """(0.18.95; 0.19.83 a living puddle) Rivet, living metal: chrome that runs like quicksilver (bright streaks down every
+    """(0.18.95; 0.19.84 a living puddle) Rivet, living metal: chrome that runs like quicksilver (bright streaks down every
     face, a blue-grey sheen), green circuit lines, rippling rings on the top of its puddle, a smooth squashed face with
     two green slit eyes, the insignia on the torso's front (it lies face-up on the puddle). The head (6x5x6 at 0,0) and
     torso (8x9x4 at 16,16) sit where the man's did, smaller, so those regions are cleared first; the arms and legs keep
@@ -1915,7 +1915,7 @@ def polestar():
 
 
 def lurk():
-    """(0.18.96; 0.19.83 on all fours) Lurk, the stalker: a bruise-purple dark that drinks the light, faint violet veins,
+    """(0.18.96; 0.19.84 on all fours) Lurk, the stalker: a bruise-purple dark that drinks the light, faint violet veins,
     long grey fingers, and a face that is almost all eyes: six pale ones, the two largest domed and ringed in violet.
     Its boxes: head 6x6x6 (0,0), eye domes 3x3x1 (24,0) and (24,4), neck 3x4x3 (0,12), torso 5x11x3 (16,16), upper arms
     2x8x2 (40,16) and (32,48), forearms 2x9x2 (48,16) and (40,48), hands 3x6x2 (0,76) and (10,76), thighs 2x9x2 (0,64)
@@ -2466,7 +2466,7 @@ def croaker():
 
 def dud():
     """(0.18.103) Dud, the one that can't be hurt: soft pink, round, pale belly, big worried eyes under slanted
-    brows, a wobbly little mouth, two nubs on top of its head; 0.19.83 a soft round ball of a body with the worried
+    brows, a wobbly little mouth, two nubs on top of its head; 0.19.84 a soft round ball of a body with the worried
     face on a plate at its front, nubby hands and stubby feet)."""
     img = new_skin()
     pink = (232, 176, 204)
@@ -2504,7 +2504,7 @@ def dud():
 
 
 def rime():
-    """(0.18.107, Scan B; 0.19.83 a stooped ice brute) Rime, the frost alien: pale blue ice, whiter on top, frost cracks
+    """(0.18.107, Scan B; 0.19.84 a stooped ice brute) Rime, the frost alien: pale blue ice, whiter on top, frost cracks
     in deeper blue, cold white eyes under a heavy brow, an icicle crown and icicle spines down its back, the insignia on
     the small of its back below them. The man's parts (rows 0-63) stay for the first-person arm (the head keeps its
     8x8x8 at (0,0)); the body, hump, arms, fists, legs, shins and feet are new boxes in the rows below, packed so nothing
@@ -3877,7 +3877,7 @@ def skitter():
 
 
 def shade_form():
-    """(0.18.113, Scan E; 0.19.83 a crawling shadow that unfolds tall) Shade, the stealer: near-black with a faint
+    """(0.18.113, Scan E; 0.19.84 a crawling shadow that unfolds tall) Shade, the stealer: near-black with a faint
     violet sheen, and long narrow glowing violet eyes. The vanilla layout (rows 0-63) is still painted for the
     first-person arm; the real parts are, in rows 64-111: head 5x6x5 at (0,64), torso 5x11x3 at (0,76), the eight 2x10x2
     limb segments in a row at v=92 (right arm 0, forearm 8, left arm 16, forearm 24, right thigh 32, shin 40, left
@@ -4103,7 +4103,7 @@ def fuse():
 
 
 def thornwild():
-    """(0.18.114, Scan F; 0.19.83 a treant) Thornwild: grey-brown bark in vertical grain, moss on the shoulders, amber eyes, pale thorns; the trunk's chest burl and base, root feet, leafy twigs."""
+    """(0.18.114, Scan F; 0.19.84 a treant) Thornwild: grey-brown bark in vertical grain, moss on the shoulders, amber eyes, pale thorns; the trunk's chest burl and base, root feet, leafy twigs."""
     img = new_skin()
     bark = (92, 72, 52)
     dark = (66, 50, 36, 255)

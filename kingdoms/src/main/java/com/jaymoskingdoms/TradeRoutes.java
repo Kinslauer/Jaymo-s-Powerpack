@@ -393,8 +393,9 @@ final class TradeRoutes {
 			p = new Profile(HAND, p.carts(), HAND_LOAD, p.guards(), p.mounted(), p.sells(), p.wants(), p.levy());
 		}
 		List<Map<String, Integer>> carts;
+		java.util.EnumSet<Ware> sells = p.sells();
 		if (Storage.loaded(level, f)) {
-			carts = Caravans.loadUp(level, f, x -> in(p.sells(), x), sort.keep, p.carts() * p.cap(), p.cap());
+			carts = Caravans.loadUp(level, f, x -> in(sells, x), sort.keep, p.carts() * p.cap(), p.cap());
 		} else if (p.levy() != null) {
 			carts = levy(level, f, p);
 		} else {
