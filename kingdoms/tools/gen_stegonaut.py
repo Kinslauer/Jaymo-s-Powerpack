@@ -29,7 +29,7 @@ HEAD_TILT = 0.75
 TAIL = [('tail0', (12, 11, 10), 0.18), ('tail1', (10, 9, 10), 0.08), ('tail2', (8, 7, 10), 0.0), ('tail3', (6, 6, 9), -0.04),
         ('tail4', (5, 5, 9), -0.06)]
 GEOMETRY = [
-    ('body', None, 'body', (-12, -8, -18, 24, 16, 36), (0, 2, 0, 0, 0, 0), False),
+    ('body', None, 'body', (-12, -8, -18, 24, 16, 36), (0, -4, 0, 0, 0, 0), False),
     ('belly', 'body', 'belly', (-10, 0, -13, 20, 3, 26), (0, 8, 0, 0, 0, 0), False),
 ]
 # each neck segment hangs from the front of the one before
@@ -77,12 +77,12 @@ for i in range(5):
 LEGS = [('left_front', 9.0, -11.0, True), ('right_front', -9.0, -11.0, True), ('left_hind', 9.5, 12.0, False), ('right_hind', -9.5, 12.0, False)]
 for name, x, z, front in LEGS:
     mirror = x < 0
-    # long pillars: thigh 13, shin 8, foot 2 (from a hip 20 pixels up)
+    # long pillars (Andy: "longer cannons"): thigh 13, a long slimmer shin 14, foot 2, from a hip 26 pixels up
     up = (-4.5, -3, -4.5, 9, 13, 9) if front else (-5, -3, -5, 10, 13, 10)
     GEOMETRY.append((name + '_leg', 'body', 'front_upper' if front else 'back_upper', up, (x, 2, z, 0, 0, 0), mirror))
     GEOMETRY.append((name + '_shin', name + '_leg', 'front_lower' if front else 'back_lower',
-                     (-4, 0, -4, 8, 8, 8) if front else (-4.5, 0, -4.5, 9, 8, 9), (0, 10, 0, 0, 0, 0), mirror))
-    GEOMETRY.append((name + '_foot', name + '_shin', 'foot', (-5, 0, -6.5, 10, 2, 11), (0, 8, 0, 0, 0, 0), mirror))
+                     (-3.5, 0, -3.5, 7, 14, 7) if front else (-4, 0, -4, 8, 14, 8), (0, 10, 0, 0, 0, 0), mirror))
+    GEOMETRY.append((name + '_foot', name + '_shin', 'foot', (-5, 0, -6.5, 10, 2, 11), (0, 14, 0, 0, 0, 0), mirror))
 
 PARTS = []
 for _, _, uv, (x, y, z, w, h, d), _, _ in GEOMETRY:

@@ -165,7 +165,7 @@ public class StegonautDragon extends WindDragon {
 
 	@Override
 	protected Vec3 seat(int index) {
-		return new Vec3(0.0, 2.6, index == 0 ? 0.2 : -0.75);
+		return new Vec3(0.0, 3.0, index == 0 ? 0.2 : -0.75);
 	}
 
 	@Override
@@ -175,7 +175,7 @@ public class StegonautDragon extends WindDragon {
 
 	@Override
 	protected double mouthUp(boolean flying) {
-		return 2.6;
+		return 3.0;
 	}
 
 	@Override

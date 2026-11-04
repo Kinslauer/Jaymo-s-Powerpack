@@ -64,7 +64,7 @@ public final class Dragons {
 	static final float NOTUS_WIDTH = 3.0F, NOTUS_HEIGHT = 2.4F, BOREAS_WIDTH = 2.6F, BOREAS_HEIGHT = 2.0F, ZEPHYRUS_WIDTH = 2.6F,
 		ZEPHYRUS_HEIGHT = 1.8F, EURUS_WIDTH = 2.4F, EURUS_HEIGHT = 1.8F, AEOLUS_WIDTH = 6.0F, AEOLUS_HEIGHT = 5.0F;
 	/** (0.7.511) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's body. */
-	static final float STEGONAUT_WIDTH = 2.8F, STEGONAUT_HEIGHT = 3.0F;
+	static final float STEGONAUT_WIDTH = 2.8F, STEGONAUT_HEIGHT = 3.4F;
 	/** (0.7.511) Stegonaut grazes in the jungles and plains (tag {@code has_stegonaut_dragon}): its spawn weight and herd. */
 	static final int STEGONAUT_WEIGHT = 2, STEGONAUT_MIN = 1, STEGONAUT_MAX = 2;
 	public static final TagKey<Biome> HAS_STEGONAUT = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_stegonaut_dragon"));
