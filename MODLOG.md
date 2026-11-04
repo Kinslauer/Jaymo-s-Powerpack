@@ -336,7 +336,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.42, Kingdoms 0.7.535, commandments for every patron:** every patron now has ten commandments in a book like
   the Truth's (its ten kept as they were); breaking your own patron's costs favour and is counted in the book, and the
   Truth's villagers refuse orders that would break theirs. See the Kingdoms MODLOG.
-- **0.20.43, sky waterfalls kept rare (Andy, 2026-11-04):** "i like the idea of a waterfall from heaven, but i found this as
+- **0.20.43, Kingdoms 0.7.536, Atroxiia pulled for now:** Andy: it had no walk animation. It no longer spawns, is out
+  of `/kingdom dragon`, and any already in a world disappear; the code and art are kept for when it's fixed.
+- **0.20.44, Kingdoms 0.7.537, Zoological Guide by recipe:** Cube Animals no longer hands out its Zoological Guide on
+  first join; craft it from a book, a feather, an ink sac and a bone (shapeless). See the Kingdoms MODLOG.
+- **0.20.45, sky waterfalls kept rare (Andy, 2026-11-04):** "i like the idea of a waterfall from heaven, but i found this as
   soon as i spawned since adding the one dimension, and it just spoils the reveal too early". The Aether's springs pour off the
   sides of islands; on its own the water fell into nothing, but with One Dimension the Overworld is underneath, so it fell the
   whole way down as a column from the sky. `aether/world/SkySpringFeature` (`jaymospowers:sky_spring`, the old spring config

@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.SpringFeature;
 
 /**
- * (0.20.43, Andy) The Aether's water springs, with the sky waterfalls kept for a few far-off places.
+ * (0.20.45, Andy) The Aether's water springs, with the sky waterfalls kept for a few far-off places.
  * <p>
  * A spring in an island's side pours off the edge. In the Aether on its own that water fell away into nothing; in a One
  * Dimension world ({@link Stacked}) the Overworld is right under the Aether, so it fell the whole way down and stood as a
