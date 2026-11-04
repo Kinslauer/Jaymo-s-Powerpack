@@ -1,0 +1,15 @@
+{
+  "conditions": [
+    {
+      "age_group": "child",
+      "satisfaction_boost": 20
+    },
+    {
+      "is_married": true,
+      "satisfaction_boost": 15
+    }
+  ],
+  "items": {
+    "jaymospowers:bottled_fairy": 60
+  }
+}

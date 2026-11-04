@@ -5286,3 +5286,20 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Titan:** Bulwark's Ultimate, a plated four-armed stone giant (2x, +15 hearts): Quake Combo, Wallbreaker Clap, Boulder Hurl, Meteor Slam, and Earthsplitter on C. Model `client/.../ultimate/UltimateTitan`, skin from `tools/gen_xeno_ultimates.py`.
   - Debug: `/powerdebug xenoform ultimate on|off|break`. Compile-checked (no new errors against master); not played.
 - **0.20.10**: no Powers change; pack bump for Kingdoms 0.7.510 (chopped logs crack deeper instead of thinning, chop meter).
+- **0.20.12, Kingdoms 0.7.512, pink fairies:** Andy wanted Paxo's Pink Fairy as a super rare bauble (that mod is All
+  Rights Reserved and Forge 1.20.1 only, so this is our own, `baubles/Fairies`, `PinkFairy`, `BottledFairyItem`). A pink
+  fairy, a tiny rose-lit sprite with flapping wings, comes very rarely to the flowers of a forest, meadow or cherry grove
+  at night near a player out there (1 in 550 every 10 s, roughly one night in ten spent in the woods; never two within
+  128 blocks). She darts away from anyone who comes within 7 blocks without sneaking; creep up and catch her in an empty
+  glass bottle. Killing one curses you with Bad Luck II for 20 minutes; day fades her away. The Bottled Pink Fairy is an
+  epic, glinting bauble for the amulet or charm slot: +2 luck, +1 heart, a faint rose glow about you, and once she turns
+  a death aside (6 health, Regeneration II for 10 s, before you would go down; never the void or /kill), then flies free
+  and you keep the empty bottle. Sneak + use lets her go for good. Art: `tools/gen_fairy.py` (animated item textures).
+  Kingdoms (`FairyWonder`): villagers who see one worn or held stare and remark on her (envy, awe, old tales; children
+  beg to hold her), once a day each, lifting an MCA villager's mood; given to an MCA villager she is the dearest gift
+  there is (60, above a nether star's 40; `data/mca/gifts/fairy.json`).
+  Andy's follow-ups: the fairy flits round inside the bottle (8 frames); the bottle cracks when she saves you (glass
+  breaking, shards, a Cracked Fairy Bottle left instead of a glass bottle); and villagers wear her too: one given a fairy
+  (MCA's gift lands in their inventory) puts her on, she glows about them and saves them once the same way. Worn fairies
+  hang on the chest for all to see, players' and villagers' alike (`Fairies.WEARS`, synced; `client/baubles/WornFairies`,
+  a layer on every humanoid renderer). She also fits the belt slot, hung at the hip like the coin purse (`#jaymospowers:hip_shown`).
