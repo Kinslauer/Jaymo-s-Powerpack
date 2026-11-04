@@ -8569,4 +8569,9 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
   slow waves, a curl rolling up the far half now and then, and an occasional slap (`slap()`: a slow gate opens for a moment
   and the tail whips quickly to the side, harder toward the tip). Walking calms all of that by half, lifts the tail a little
   (`RUN_LIFT` 0.15, was 0.25; `RUN_STRAIGHTEN` 0.2, was 0.3) and adds only a small swing in step with the stride.
+- Feline tails (Andy: "like a cheetah's in sprint and otherwise, like an aileron helping them achieve speed in turning,
+  sticking straight up and moving"): carried straight up with the tip hooked over, still wandering, curling and slapping;
+  at a sprint (the sprint flag, or over 0.2 blocks a tick for villagers) the tail eases down level out behind and its own
+  life fades. Turning swings it: level, sideways like a rudder; upright, leaning across like an aileron. It swings into the
+  turn (`TAIL_RUDDER` -3.5; flip the sign to swing it out). Sprint and turn are eased per entity each frame (`EASED`).
 - Not compile-checked in the cloud; not played.
