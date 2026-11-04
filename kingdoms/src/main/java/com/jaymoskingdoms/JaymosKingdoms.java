@@ -264,6 +264,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("valor attachments: {} {} {} {} {} {}", Valor.VALOR, Valor.STATE, ValorFolk.SEEN, ValorFolk.TOLD, ValorFolk.LED, ValorFolk.AWED);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
+		// (RPG Series patch 1) Wizards', Archers' and Rogues & Warriors' spells only for their classes
+		RpgSeriesGate.init();
 		LOGGER.debug("class attachments: {} {}", Classes.CLASS, Classes.WRIT_BOUGHT);
 		// 0.7.57: heritage (Origins remade: picked between MCA's destiny and the class) and its attachment
 		Heritage.register();
@@ -607,6 +609,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.332: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
 		// room, the morning after, torn cloth as evidence, and what the curse asks for
 		MoonPull.register();
+		BruteRage.register();
+		StorageEnchanting.register();
 		ScentTrails.register();
 		HiddenChange.register();
 		Caging.register();

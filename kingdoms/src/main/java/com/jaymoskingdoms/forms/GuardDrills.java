@@ -616,6 +616,12 @@ public final class GuardDrills {
 			}
 			return;
 		}
+		// (0.7.516) a veteran teaches the next skill of your class you're ready for (Archer, Thief, Warlord and the rest), free
+		String skill = com.jaymoskingdoms.Learnables.teachNext(player, false);
+		if (skill != null) {
+			Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.taught_skill", guard.getDisplayName(), Component.translatable(skill)));
+			return;
+		}
 		String pick = known.get(0);
 		for (String id : known) {
 			if (Forms.rank(player, id) < Forms.rank(player, pick)) {

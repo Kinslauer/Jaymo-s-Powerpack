@@ -73,6 +73,12 @@ PARTS = [
     ("gutting_hook_blade", "Gutting Hook Blade", "drawn:gutting_hook_blade", ["iron"]),
     ("warchief_cleaver_blade", "Warchief's Cleaver Blade", "drawn:warchief_cleaver_blade", ["iron"]),
     ("ogre_maul_head", "Ogre King's Maul Head", "drawn:ogre_maul_head", ["iron"]),
+    # (RPG Series) Rogues & Warriors' and Archers' forged weapons (their own art is all rights reserved, so drawn here)
+    ("rogue_dagger_blade", "Rogue Dagger Blade", "drawn:rogue_dagger_blade", ["iron", "gold"]),
+    ("sickle_blade", "Sickle Blade", "drawn:sickle_blade", ["iron", "gold"]),
+    ("double_axe_head", "Double Axe Head", "drawn:double_axe_head", ["iron", "gold"]),
+    ("war_glaive_blade", "War Glaive Blade", "drawn:war_glaive_blade", ["iron", "gold"]),
+    ("ranger_spear_tip", "Ranger Spear Tip", "drawn:ranger_spear_tip", ["iron", "gold"]),
 ]
 # our own 16x16 heads: '#' outline, 'x' metal, 'o' shine, '.' clear
 DRAWN = {
@@ -267,7 +273,9 @@ DRAWN["ogre_maul_head"] = [
 # outline, metal, shine
 DRAWN_COLOURS = {"iron": ((60, 60, 64), (160, 162, 166), (226, 228, 230)),
                  "copper": ((96, 42, 26), (196, 108, 74), (242, 170, 128)),
-                 "steel": ((34, 38, 46), (112, 122, 136), (186, 196, 210))}
+                 "steel": ((34, 38, 46), (112, 122, 136), (186, 196, 210)),
+                 # (RPG Series) for drawn heads that come in gold too
+                 "gold": ((92, 46, 6), (214, 158, 36), (250, 232, 120))}
 # (0.15.138) Andy's redrawn iron heads (made with Gemini), 16x16 so each fills its own weapon cast 1:1. They replace the
 # cut sprites for these parts; the other metals are the iron one recoloured. Kept in tools/redrawn_heads/<part>.png, with
 # the gold Weapon Cast of each in tools/redrawn_heads/cast/<part>.png (the cast shows its head's shape).
@@ -277,6 +285,94 @@ RAMPS = {"gold": ((92, 46, 6), (182, 111, 24), (237, 200, 52), (255, 250, 170)),
          "copper": ((80, 34, 20), (156, 78, 46), (210, 120, 82), (246, 182, 140))}
 METAL_NAMES = {"stone": "Stone", "iron": "Iron", "gold": "Gold", "copper": "Copper", "steel": "Steel"}
 ARMORY_TIER = {"stone": "stone", "iron": "iron", "gold": "golden"}
+
+
+# (RPG Series) Rogues & Warriors' and Archers' heads, our own drawings
+DRAWN["rogue_dagger_blade"] = [
+    "................",
+    "................",
+    "................",
+    "...........##...",
+    "..........#o#...",
+    ".........#ox#...",
+    "........#ox#....",
+    ".......#ox#.....",
+    "......#ox#......",
+    ".....#oxx#......",
+    "....#oxx#.......",
+    "....#xx#........",
+    ".....##.........",
+    "................",
+    "................",
+    "................"]
+DRAWN["sickle_blade"] = [
+    "................",
+    "......#####.....",
+    "....##ooooo##...",
+    "...#oxxxxxxxo#..",
+    "..#oxx#####xx#..",
+    "..#ox#.....#x#..",
+    ".#ox#.......##..",
+    ".#ox#...........",
+    ".#xx#...........",
+    ".#xx#...........",
+    "..#xx#..........",
+    "..#xxx#.........",
+    "...#xxx##.......",
+    "....##xx#.......",
+    "......##........",
+    "................"]
+DRAWN["double_axe_head"] = [
+    "................",
+    "..##........##..",
+    ".#o#........#o#.",
+    "#ox##......##xo#",
+    "#oxx#.####.#xxo#",
+    "#oxxx#oooo#xxxo#",
+    "#oxxxxxxxxxxxxo#",
+    "#oxxxx#xx#xxxxo#",
+    "#oxxxxxxxxxxxxo#",
+    "#oxxx#xxxx#xxxo#",
+    "#oxx#.####.#xxo#",
+    "#ox##......##xo#",
+    ".#o#........#o#.",
+    "..##........##..",
+    "................",
+    "................"]
+DRAWN["war_glaive_blade"] = [
+    "............###.",
+    "...........#oo#.",
+    "..........#oxx#.",
+    ".........#oxxx#.",
+    "........#oxxx#..",
+    ".......#oxxx#...",
+    "......#oxxx#....",
+    ".....#oxxx#.....",
+    "....#oxxx#......",
+    "....#xxx#.......",
+    "...#xxx#........",
+    "...#xx#.........",
+    "..#xx#..........",
+    "..###...........",
+    "................",
+    "................"]
+DRAWN["ranger_spear_tip"] = [
+    "................",
+    "................",
+    "............##..",
+    "..........##o#..",
+    ".........#oox#..",
+    "........#oxxx#..",
+    ".......#oxxx#...",
+    "......#oxxx#....",
+    "......#xxx#.....",
+    ".....#xxx#......",
+    ".....#x##.......",
+    "....#x#.........",
+    "....##..........",
+    "................",
+    "................",
+    "................"]
 
 
 def write(path, obj):

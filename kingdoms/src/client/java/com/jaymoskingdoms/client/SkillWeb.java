@@ -19,6 +19,8 @@ final class SkillWeb {
 	static final double COLUMN_SPREAD = 0.30, MEDITATION_SPREAD = -0.42;
 	/** Will's second page (Killing Intent) starts this many rings out, past Will's own label. */
 	static final int KILLING_INTENT_RING = 5;
+	/** (0.7.516) The class-skill and Weapon Forms branches start this many rings out, where their narrow wedges have room. */
+	static final int SKILL_BRANCH_RING = 3;
 	/** The first bridge on a border sits on this ring, each next one this much further out. */
 	static final double BRIDGE_RING = 2.0, BRIDGE_RING_STEP = 1.6;
 	/** How far past a branch's last ring its name sits (rings). */
@@ -53,9 +55,12 @@ final class SkillWeb {
 
 	/** A branch: a pillar's page, in order round its wedge. */
 	enum Branch {
-		WILL(Skills.Pillar.STRENGTH), COMBAT_ARTS(Skills.Pillar.STRENGTH), MIGHT(Skills.Pillar.STRENGTH),
-		FORAGING(Skills.Pillar.SURVIVAL), MEDICINE(Skills.Pillar.SURVIVAL),
-		FREERUNNING(Skills.Pillar.STEALTH), THIEVERY(Skills.Pillar.STEALTH), SHADOWS(Skills.Pillar.STEALTH);
+		// (0.7.516) the RPG Series' skills and the Weapon Forms (Learnables) sit in the middle of each wedge, clear of the bridges
+		WILL(Skills.Pillar.STRENGTH), COMBAT_ARTS(Skills.Pillar.STRENGTH), WARFARE(Skills.Pillar.STRENGTH), WEAPON_FORMS(Skills.Pillar.STRENGTH),
+		MIGHT(Skills.Pillar.STRENGTH),
+		FORAGING(Skills.Pillar.SURVIVAL), ARCHERY(Skills.Pillar.SURVIVAL), SPELLCRAFT(Skills.Pillar.SURVIVAL), MEDICINE(Skills.Pillar.SURVIVAL),
+		FREERUNNING(Skills.Pillar.STEALTH), ROGUES_ARTS(Skills.Pillar.STEALTH), KNIFE_ARTS(Skills.Pillar.STEALTH), THIEVERY(Skills.Pillar.STEALTH),
+		SHADOWS(Skills.Pillar.STEALTH);
 
 		final Skills.Pillar pillar;
 
@@ -67,6 +72,10 @@ final class SkillWeb {
 			return name().toLowerCase(java.util.Locale.ROOT);
 		}
 	}
+
+	/** (0.7.516) The branches that start {@link #SKILL_BRANCH_RING} rings out. */
+	static final java.util.Set<Branch> LATE_BRANCHES = java.util.EnumSet.of(Branch.WARFARE, Branch.WEAPON_FORMS, Branch.ARCHERY,
+		Branch.SPELLCRAFT, Branch.ROGUES_ARTS, Branch.KNIFE_ARTS);
 
 	/** A point on the web (web units). */
 	record Spot(double x, double y) {
@@ -94,9 +103,11 @@ final class SkillWeb {
 	static Branch branch(Skills.Perk perk) {
 		int page = page(perk);
 		return switch (perk.pillar) {
-			case STRENGTH -> page >= 2 ? Branch.WILL : page == 1 || perk == Skills.Perk.WEAPON_FORMS ? Branch.COMBAT_ARTS : Branch.MIGHT;
-			case SURVIVAL -> page >= 1 ? Branch.MEDICINE : Branch.FORAGING;
-			case STEALTH -> page == 1 ? Branch.FREERUNNING : page >= 2 ? Branch.SHADOWS : Branch.THIEVERY;
+			case STRENGTH -> page >= 5 ? Branch.WEAPON_FORMS : page == 4 ? Branch.WARFARE : page >= 2 ? Branch.WILL
+				: page == 1 || perk == Skills.Perk.WEAPON_FORMS ? Branch.COMBAT_ARTS : Branch.MIGHT;
+			case SURVIVAL -> page >= 3 ? Branch.SPELLCRAFT : page == 2 ? Branch.ARCHERY : page == 1 ? Branch.MEDICINE : Branch.FORAGING;
+			case STEALTH -> page >= 4 ? Branch.KNIFE_ARTS : page == 3 ? Branch.ROGUES_ARTS : page == 1 ? Branch.FREERUNNING
+				: page == 2 ? Branch.SHADOWS : Branch.THIEVERY;
 		};
 	}
 
@@ -104,7 +115,9 @@ final class SkillWeb {
 	private static List<Skills.Perk> parents(Skills.Perk perk) {
 		List<Skills.Perk> out = new ArrayList<>();
 		for (Skills.Perk need : perk.requires) {
-			if (!need.bridge() && page(need) == page(perk) && (need == Skills.Perk.WEAPON_FORMS) == (perk == Skills.Perk.WEAPON_FORMS)) {
+			// (0.7.516) Spellcraft runs over two pages as one branch
+			boolean samePage = page(need) == page(perk) || branch(perk) == Branch.SPELLCRAFT && branch(need) == Branch.SPELLCRAFT;
+			if (!need.bridge() && samePage && (need == Skills.Perk.WEAPON_FORMS) == (perk == Skills.Perk.WEAPON_FORMS)) {
 				out.add(need);
 			}
 		}
@@ -127,6 +140,9 @@ final class SkillWeb {
 		}
 		if (parents.isEmpty() && perk.pillar == Skills.Pillar.STRENGTH && page(perk) == 3) {
 			d = KILLING_INTENT_RING;
+		}
+		if (parents.isEmpty() && LATE_BRANCHES.contains(branch(perk))) {
+			d = SKILL_BRANCH_RING;
 		}
 		DEPTH.put(perk, d);
 		return d;

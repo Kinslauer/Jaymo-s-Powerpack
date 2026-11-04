@@ -10,6 +10,10 @@
     {
       "id": "friendsandfoes:totem_of_illusion",
       "required": false
+    },
+    {
+      "id": "#spell_engine:spell_trinket",
+      "required": false
     }
   ]
 }

@@ -5326,3 +5326,22 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `Wounds.healPart` reading Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection (`MedicineSkill.blessing`): the
   Hearthkeeper's trial and scar on one who turned from it slow every part heal. Not played.
 - **0.20.15**: no Powers change; pack bump for Kingdoms 0.7.514 (the skill web: one radial K screen, six bridge perks).
+- **0.20.16, Zsolt's RPG Series (patch 0)** (plan in project files `rpg-series-study/RpgSeries-Plan.md`): Andy chose to ship
+  Wizards, Archers and Rogues & Warriors (all rights reserved, unchanged, downloaded by id) with Spell Engine (GPL-3.0),
+  Spell Power (LGPL-3.0), Runes and the small MIT APIs (armour models, ranged weapons, structure pools, bundles) in packMods.
+  - **No Trinkets:** `compat/SpellEngineCompat` hands Spell Engine every worn bauble as a spell source and as an ammo
+    container, so a quiver worn in the body slot feeds bows. Spell Engine's ring, necklace, trinket and quiver tags join
+    our ring, amulet, charm and body tags. The worn list now syncs to its wearer. No slot for spell books: spells are
+    learned on Kingdoms' skill web or from a trainer (Kingdoms 0.7.516), and the Spell Binding Table's recipe is dropped.
+  - **Forged:** Rogues' dagger, sickle, double axe, glaive and Archers' spear (stone, iron, gold) come from new heads
+    (`WeaponParts`: rogue_dagger_blade, sickle_blade, double_axe_head, war_glaive_blade, ranger_spear_tip, drawn in
+    `tools/weapon_parts_assets.py`); their grid recipes and the diamond ones' are dropped (`Uncraftable.RPG_SERIES`).
+    Flint daggers and spears stay in the grid.
+  - **Keys:** Spell Engine's "use the item, not the spell" key moves off Left Alt (OK Zoomer) to mouse side button 2
+    (`KeyConflicts` v6). Class gates and skill-web perks come in the next patches. Built, not played.
+- **0.20.16, parry sound** (Andy): every guard parry (`Guard.parried`) rings steel instead of the pitched anvil, from
+  "Updated Parry Sound - MedievalWeapons" (MIT, CurseForge 522501) whose two clips are Eelke's CC0 freesound 523521
+  (`sounds/guard/parry_1|2.ogg`, event `jaymospowers:guard.parry`); a quiet shield thud stays under it. Z Fighter
+  bare-hand blocks keep their punches.
+- **0.20.16, Bag of Holding** (Fuzs, MPL-2.0, 26.3.5, Item Interactions bundled) in packMods; its three grid recipes are
+  dropped (`Uncraftable.RPG_SERIES`) because Kingdoms' Mages make bags with the Enchanted Storage perk (0.7.517).
