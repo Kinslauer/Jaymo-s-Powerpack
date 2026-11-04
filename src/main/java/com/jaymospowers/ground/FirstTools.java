@@ -134,9 +134,13 @@ public final class FirstTools {
 		return Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key)));
 	}
 
-	/** Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft. */
+	/**
+	 * Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft. (0.20.2) Netherrack too, though it
+	 * breaks quick, so flint can be knapped anywhere in the Nether.
+	 */
 	private static boolean hard(Level level, BlockPos pos, BlockState state) {
-		return state.requiresCorrectToolForDrops() && state.getDestroySpeed(level, pos) >= 1.0F && state.is(BlockTags.MINEABLE_WITH_PICKAXE);
+		return state.requiresCorrectToolForDrops() && (state.getDestroySpeed(level, pos) >= 1.0F || state.is(BlockTags.BASE_STONE_NETHER))
+			&& state.is(BlockTags.MINEABLE_WITH_PICKAXE);
 	}
 
 	private static InteractionResult knap(Player player, Level level, InteractionHand hand, ItemStack flint, BlockHitResult hit) {

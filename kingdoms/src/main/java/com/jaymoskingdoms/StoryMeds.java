@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 
 /**
- * (0.7.502) Andy: "everyone should start with applicable meds. obviously still none for rock bottom, and a whole medkit
+ * (0.7.503) Andy: "everyone should start with applicable meds. obviously still none for rock bottom, and a whole medkit
  * for sworn". What medicine (Jaymo's Powers' medieval kit, {@code MedicineItems}) each life-story start wakes with,
  * fitting how it came:
  * <ul>
