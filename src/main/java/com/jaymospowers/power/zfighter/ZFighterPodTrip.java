@@ -91,7 +91,9 @@ public final class ZFighterPodTrip {
 	public static final String TAG = "jaymospowers.space_pod";
 
 	enum Phase {
-		COUNTDOWN, LIFT, FLIGHT, DESCENT
+		COUNTDOWN, LIFT, FLIGHT, DESCENT,
+		/** (0.20.36) Caught in the high sky by a raider band ({@link ZFighterHighSky}): the pod hangs struck, the pilot is out fighting. */
+		AMBUSH
 	}
 
 	/** One trip: where to (a destination index or Home), the fuel it will leave in the pod, the parts it carries, and where it is in the flight. */
@@ -116,6 +118,10 @@ public final class ZFighterPodTrip {
 		@Nullable UUID guest;
 		@Nullable ResourceKey<Level> to;
 		@Nullable BlockPos ground;
+		/** (0.20.36) An ambush in the high sky: its raiders, whether they are beaten (or gone), and whether the pod ran with them on it. */
+		final List<UUID> raiders = new ArrayList<>();
+		boolean cleared;
+		boolean battered;
 
 		Trip(int dest, int fuelLeft, int fuelBefore, ResourceKey<Level> from, BlockPos origin) {
 			this.dest = dest;
@@ -168,7 +174,17 @@ public final class ZFighterPodTrip {
 
 	static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Flight.TYPE, Flight.CODEC);
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> hurting || !(entity instanceof ServerPlayer player && flying(player)));
+		// (0.20.36) nothing hurts you on a trip, but in an ambush you are out of the pod and fair game
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> hurting || !(entity instanceof ServerPlayer player && shielded(player)));
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer player) {
+				Trip trip = TRIPS.get(player.getUUID());
+				if (trip != null && trip.phase == Phase.AMBUSH) {
+					TRIPS.remove(player.getUUID());
+					lost(player.level().getServer(), trip);
+				}
+			}
+		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> leave(handler.getPlayer()));
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> wake(handler.getPlayer()));
 		// (a pod left over from a trip that no longer runs loses its trip tag when it loads: see PodEntity.init)
@@ -177,6 +193,19 @@ public final class ZFighterPodTrip {
 	/** Whether {@code player} is on a trip (seated, lifting, flying or coming down). */
 	public static boolean flying(ServerPlayer player) {
 		return TRIPS.containsKey(player.getUUID()) || GUESTS.containsKey(player.getUUID());
+	}
+
+	/** (0.20.36) Whether {@code player} is on a trip and inside it (not thrown out into an ambush). */
+	private static boolean shielded(ServerPlayer player) {
+		Trip trip = TRIPS.get(player.getUUID());
+		if (trip == null) {
+			UUID pilot = GUESTS.get(player.getUUID());
+			if (pilot == null) {
+				return false;
+			}
+			trip = TRIPS.get(pilot);
+		}
+		return trip == null || trip.phase != Phase.AMBUSH;
 	}
 
 	/** (0.18.51) The passenger of {@code trip}, if they are still aboard and about; otherwise the trip forgets them. */
@@ -209,6 +238,11 @@ public final class ZFighterPodTrip {
 		}
 		return false;
 	}
+
+	// ---- (0.20.36) the high-sky ambush ----
+	/** How long the raiders stay at it before they break off (ticks), and how near the pod (blocks) you climb back in. */
+	static final int AMBUSH_TICKS = 20 * 180;
+	static final double BOARD_RANGE = 2.5;
 
 	/** The flight's length for a trip that burns {@code cost} fuel. */
 	public static int flightTicks(int cost) {
@@ -292,6 +326,9 @@ public final class ZFighterPodTrip {
 
 	/** One tick of a trip; true when it is over. */
 	private static boolean step(ServerPlayer player, Trip trip) {
+		if (trip.phase == Phase.AMBUSH) {
+			return ambush(player, trip);
+		}
 		ServerLevel level = player.level();
 		if (trip.pod == null || trip.pod.isRemoved() || trip.pod.level() != level) {
 			if (trip.pod != null && !trip.pod.isRemoved()) {
@@ -399,15 +436,157 @@ public final class ZFighterPodTrip {
 	/** Past the clouds: the landing is found (and its ground made, behind the screen) and the flight shows. */
 	private static void beginFlight(ServerPlayer player, Trip trip) {
 		target(player, trip);
-		int cost = ZFighterSpace.cost(trip.dest, trip.from);
 		int flown = player.getAttachedOrElse(FLIGHTS, 0);
 		player.setAttached(FLIGHTS, flown + 1);
+		if (ZFighterHighSky.ambushes(player, trip.from, flown)) {
+			// (0.20.36) up through the high sky, and a raider band is waiting there
+			beginAmbush(player, trip);
+			return;
+		}
+		showFlight(player, trip);
+	}
+
+	/** The flight shows: the pod crossing space, for the trip's length. */
+	private static void showFlight(ServerPlayer player, Trip trip) {
+		int cost = ZFighterSpace.cost(trip.dest, trip.from);
 		trip.phase = Phase.FLIGHT;
 		trip.ticks = flightTicks(cost);
-		ServerPlayNetworking.send(player, new Flight(trip.dest, trip.ticks, flown > 0, trip.lens));
+		ServerPlayNetworking.send(player, new Flight(trip.dest, trip.ticks, player.getAttachedOrElse(FLIGHTS, 0) > 1, trip.lens));
 		ServerPlayer guest = guest(player.level().getServer(), trip);
 		if (guest != null) {
 			ServerPlayNetworking.send(guest, new Flight(trip.dest, trip.ticks, false, trip.lens));
+		}
+	}
+
+	// ---------------------------------------------------------------- (0.20.36) the ambush in the high sky
+
+	/**
+	 * Caught in the high sky: the pod is struck and hangs there smoking, the pilot (and passenger) thrown out into the thin air,
+	 * flying on ki, and a tyrant's band comes in at them. Beat them and climb back in to fly on; climb in sooner (sneak by the
+	 * hatch) and the pod runs for it with them battering it, so it lands hard. Fall in the fight and the pod falls too.
+	 */
+	private static void beginAmbush(ServerPlayer player, Trip trip) {
+		ServerLevel level = player.level();
+		MinecraftServer server = level.getServer();
+		PodEntity pod = trip.pod;
+		if (pod == null) {
+			showFlight(player, trip);
+			return;
+		}
+		Vec3 at = new Vec3(pod.getX(), ZFighterHighSky.ambushY(server), pod.getZ());
+		ServerPlayer guest = guest(server, trip);
+		player.stopRiding();
+		if (guest != null) {
+			guest.stopRiding();
+		}
+		move(pod, at);
+		pod.setDeltaMovement(Vec3.ZERO);
+		trip.phase = Phase.AMBUSH;
+		trip.ticks = AMBUSH_TICKS;
+		trip.cleared = false;
+		float yaw = player.getYRot();
+		player.teleportTo(level, at.x + 2.5, at.y + 1.0, at.z, Set.of(), yaw, 0.0F, true);
+		ZFighterHighSky.thrown(player);
+		if (guest != null) {
+			guest.teleportTo(level, at.x - 2.5, at.y + 1.0, at.z, Set.of(), yaw, 0.0F, true);
+			ZFighterHighSky.thrown(guest);
+		}
+		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 1.5, at.z, 3, 0.8, 0.8, 0.8, 0.0);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.0F, 0.8F);
+		Shakes.send(player, 1.0F, at);
+		trip.raiders.clear();
+		trip.raiders.addAll(ZFighterHighSky.raid(level, at, player, guest));
+		tell(player, guest, Component.translatable("message.jaymospowers.high_sky.ambush").withStyle(ChatFormatting.RED));
+	}
+
+	/** One tick of an ambush; true when the trip is over (the pod lost). */
+	private static boolean ambush(ServerPlayer player, Trip trip) {
+		ServerLevel level = player.level();
+		MinecraftServer server = level.getServer();
+		PodEntity pod = trip.pod;
+		if (pod == null || pod.isRemoved() || !player.isAlive() || pod.level() != level) {
+			lost(server, trip);
+			return true;
+		}
+		pod.setDeltaMovement(Vec3.ZERO);
+		Vec3 at = pod.position();
+		if (trip.ticks % 5 == 0) {
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.5, at.z, 2, 0.4, 0.4, 0.4, 0.02);
+		}
+		ServerPlayer guest = guest(server, trip);
+		if (!trip.cleared) {
+			ZFighterHighSky.forgetDead(level, trip.raiders);
+			if (trip.raiders.isEmpty()) {
+				trip.cleared = true;
+				tell(player, guest, Component.translatable("message.jaymospowers.high_sky.clear").withStyle(ChatFormatting.GOLD));
+			} else if (--trip.ticks <= 0) {
+				ZFighterHighSky.flee(level, trip.raiders);
+				trip.raiders.clear();
+				trip.cleared = true;
+				tell(player, guest, Component.translatable("message.jaymospowers.high_sky.broke_off").withStyle(ChatFormatting.GOLD));
+			}
+		}
+		boolean near = player.distanceToSqr(at.add(0.0, 1.5, 0.0)) < BOARD_RANGE * BOARD_RANGE;
+		if (!near || !trip.cleared && !player.isShiftKeyDown()) {
+			return false;
+		}
+		// back in the pod, and on
+		if (!trip.cleared) {
+			// running with the band still at it: they batter the pod as it goes, and it comes down hard
+			trip.battered = true;
+			ZFighterHighSky.flee(level, trip.raiders);
+			trip.raiders.clear();
+			trip.cleared = true;
+			level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 1.5, at.z, 2, 0.6, 0.6, 0.6, 0.0);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.5F, 1.1F);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.high_sky.ran").withStyle(ChatFormatting.RED));
+		}
+		ZFighterPower.endFlight(player, ZFighterPower.live(player));
+		player.startRiding(pod, true, true);
+		if (guest != null) {
+			if (guest.level() == level && guest.distanceToSqr(pod) < 64.0 * 64.0) {
+				ZFighterPower.endFlight(guest, ZFighterPower.live(guest));
+				guest.startRiding(pod, true, true);
+			} else {
+				forget(trip);
+			}
+		}
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.0F, 0.7F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.BLOCKS, 2.0F, 0.6F);
+		showFlight(player, trip);
+		return false;
+	}
+
+	/** The pilot fell (or left) in an ambush: the band breaks off, and the pod drops out of the sky onto the ground below it, shaken. */
+	private static @Nullable PodEntity lost(MinecraftServer server, Trip trip) {
+		forget(trip);
+		PodEntity pod = trip.pod;
+		ServerLevel level = pod != null && pod.level() instanceof ServerLevel l ? l : server.overworld();
+		ZFighterHighSky.flee(level, trip.raiders);
+		trip.raiders.clear();
+		double x = pod != null ? pod.getX() : trip.origin.getX() + 0.5, z = pod != null ? pod.getZ() : trip.origin.getZ() + 0.5;
+		if (pod != null && !pod.isRemoved()) {
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, pod.getX(), pod.getY() + 1.0, pod.getZ(), 30, 0.6, 0.8, 0.6, 0.04);
+			pod.discard();
+		}
+		trip.pod = null;
+		int bx = Mth.floor(x), bz = Mth.floor(z);
+		level.getChunk(bx >> 4, bz >> 4);
+		BlockPos ground = new BlockPos(bx, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz), bz);
+		PodEntity stood = stand(level, ground, trip, trip.fuelLeft);
+		level.sendParticles(ParticleTypes.EXPLOSION, stood.getX(), stood.getY() + 1.0, stood.getZ(), 3, 0.8, 0.5, 0.8, 0.0);
+		level.playSound(null, stood.getX(), stood.getY(), stood.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.0F, 0.7F);
+		if (!PodGrades.softLanding(stood.grade())) {
+			shake(level, stood);
+		}
+		return stood;
+	}
+
+	/** Says {@code message} to the pilot and the passenger. */
+	private static void tell(ServerPlayer player, @Nullable ServerPlayer guest, Component message) {
+		player.sendSystemMessage(message);
+		if (guest != null) {
+			guest.sendSystemMessage(message);
 		}
 	}
 
@@ -547,7 +726,7 @@ public final class ZFighterPodTrip {
 		level.playSound(null, at, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.6F, 0.6F);
 		level.playSound(null, at, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.7F);
 		Shakes.send(player, 0.6F, Vec3.atCenterOf(at));
-		if (!pod.complete()) {
+		if (!pod.complete() || trip.battered) {
 			hardLanding(level, player, guest, pod);
 		}
 		ZFighterSpace.Dest dest = trip.dest == ZFighterSpace.HOME_INDEX ? null : ZFighterSpace.DESTS[trip.dest];
@@ -582,6 +761,12 @@ public final class ZFighterPodTrip {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.hard_landing_soft").withStyle(ChatFormatting.GOLD));
 			return;
 		}
+		shake(level, pod);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.hard_landing").withStyle(ChatFormatting.RED));
+	}
+
+	/** {@link #SHAKEN_MIN} to {@link #SHAKEN_MAX} of the pod's parts shaken off (never the keel), dropped beside it. */
+	private static void shake(ServerLevel level, PodEntity pod) {
 		List<Integer> loose = new ArrayList<>();
 		for (int bit = 1; bit != 0 && bit <= PodPart.ALL_SLOTS; bit <<= 1) {
 			if ((pod.filled() & bit) != 0 && (PodPart.KEEL.bits() & bit) == 0) {
@@ -598,7 +783,6 @@ public final class ZFighterPodTrip {
 				Block.popResource(level, pod.blockPosition().above(), stack);
 			}
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.hard_landing").withStyle(ChatFormatting.RED));
 	}
 
 	/** Stands a pod with the trip's parts and {@code fuel} at {@code ground} (or the nearest room for it); the pod. */
@@ -692,6 +876,14 @@ public final class ZFighterPodTrip {
 		}
 		if (trip.pod != null) {
 			trip.pod.discard();
+		}
+		if (trip.phase == Phase.AMBUSH) {
+			// (0.20.36) gone in the middle of the fight: the pod is lost below, and you wake beside it
+			PodEntity fell = lost(server, trip);
+			if (fell != null && fell.level() instanceof ServerLevel down) {
+				player.setAttached(PENDING, new Pending(down.dimension().identifier().toString(), beside(down, fell.blockPosition())));
+			}
+			return;
 		}
 		ServerLevel level;
 		BlockPos at;
