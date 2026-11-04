@@ -11327,5 +11327,12 @@
 	"message.jaymoskingdoms.town.village.4": "%1$s is now a fortified town, its walls pushed out again and its gates held by iron golems.",
 	"message.jaymoskingdoms.town.blossom.2": "%1$s has outgrown its ring of minka: a fence of timber and plaster will rise round it, a stretch of it every day.",
 	"message.jaymoskingdoms.town.blossom.3": "The folk of %1$s have raised a walled blossom town, white plaster under dark tile all the way round.",
-	"message.jaymoskingdoms.town.blossom.4": "%1$s has become a castle town, its walls pushed out again round shrine and market alike."
+	"message.jaymoskingdoms.town.blossom.4": "%1$s has become a castle town, its walls pushed out again round shrine and market alike.",
+	"message.jaymoskingdoms.raid.looted": "The raiders of %s carried off %s items and coins. Cut the carriers down to take it back.",
+	"message.jaymoskingdoms.raid.announce.ogre": "The ground shakes! %s leads his ogres down on %s!",
+	"message.jaymoskingdoms.raid.arrive.ogre": "The ogres are at the gates of %s, smashing for loot!",
+	"message.jaymoskingdoms.raid.ogre.beaten": "The ogre raid is beaten off.",
+	"message.jaymoskingdoms.raid.ogre.withdraw": "The ogres lumber home with their plunder.",
+	"message.jaymoskingdoms.raid.ogre.looted": "The ogres carried off %s items and coins. Cut the carriers down to take it back.",
+	"message.jaymoskingdoms.pirate.prize": "The pirates of %s took the cargo of %s!"
 }

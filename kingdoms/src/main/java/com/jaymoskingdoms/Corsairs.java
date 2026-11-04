@@ -65,6 +65,8 @@ final class Corsairs implements Ship.Captaincy {
 	/** Her guns: their reach, the least range, how far off their line they're laid (a cosine), and how long a reload takes (ticks). */
 	static final double GUN_RANGE = 52.0, GUN_NEAREST = 5.0, GUN_ARC = 0.86;
 	static final int RELOAD = 160, RELOAD_MONKEY = 100, GUN_GAP = 4;
+	/** (0.7.484) With no ship to fight, how often (ticks) her gunners look ashore for a foe; between looks they keep the last one. */
+	static final int SHORE_LOOK = 30;
 	/** How fast round shot flies and falls (as {@code ShipShot}), and how much they miss by (degrees). */
 	static final double SHOT_SPEED = 1.6, SHOT_FALL = 0.015;
 	static final float AIM_SPREAD = 1.2F, LOWEST = -6.0F, HIGHEST = 18.0F;
@@ -431,6 +433,8 @@ final class Corsairs implements Ship.Captaincy {
 			aboard.put(e.getUUID(), e);
 			monkey |= Crewmen.role(e) == Pirates.POWDER_MONKEY;
 		}
+		Vec3 shore = null;
+		boolean looked = false;
 		for (long gun : ship.guns()) {
 			UUID who = crew.gunners.get(gun);
 			LivingEntity gunner = who == null ? null : aboard.get(who);
@@ -452,14 +456,33 @@ final class Corsairs implements Ship.Captaincy {
 				}
 				continue;
 			}
-			if (foe == null || now - crew.lastFired < GUN_GAP) {
+			if (now - crew.lastFired < GUN_GAP) {
 				continue;
 			}
-			Vec3 dir = this.lay(level, ship, gun, foe);
+			Vec3 dir = null, mark = null;
+			if (foe != null) {
+				dir = this.lay(level, ship, gun, foe);
+				mark = foe.position().add(0.0, 2.0, 0.0);
+			} else if (crew.side == Crew.Side.PIRATE) {
+				// ((0.7.484) no ship to fight: she shells the enemy ashore, folk at war with her cove or the ones she is raiding)
+				if (!looked) {
+					looked = true;
+					// ((0.7.484) a look ashore is a wide search: only every SHORE_LOOK ticks, the last one kept between)
+					if (now - crew.shoreLooked >= SHORE_LOOK || now < crew.shoreLooked) {
+						crew.shoreLooked = now;
+						crew.shore = this.shoreFoe(level, ship, crew);
+					}
+					shore = crew.shore;
+				}
+				if (shore != null) {
+					dir = this.layAt(level, ship, gun, shore, Vec3.ZERO);
+					mark = shore;
+				}
+			}
 			if (dir != null && ship.fireGunAlong(level, gun, dir, gunner)) {
 				crew.lastFired = (int)now;
 				if (gunner instanceof net.minecraft.world.entity.Mob m) {
-					m.getLookControl().setLookAt(foe.getX(), foe.getY() + 2.0, foe.getZ());
+					m.getLookControl().setLookAt(mark.x, mark.y, mark.z);
 				}
 			}
 		}
@@ -472,15 +495,24 @@ final class Corsairs implements Ship.Captaincy {
 		if (way == null || h == null) {
 			return null;
 		}
-		Vec3 muzzle = ship.gunAt(gun);
 		Vec3 aim = new Vec3(foe.getX(), foe.getY() + h.minY + Math.max(1.0, h.draft + 0.6), foe.getZ());
+		return this.layAt(level, ship, gun, aim, foe.drift());
+	}
+
+	/** How the gun at {@code gun} is laid on the point {@code aim} (led by {@code drift}, per tick), or null if it doesn't bear. */
+	private @Nullable Vec3 layAt(ServerLevel level, Ship ship, long gun, Vec3 aim, Vec3 drift) {
+		double[] way = ship.gunWay(gun);
+		if (way == null) {
+			return null;
+		}
+		Vec3 muzzle = ship.gunAt(gun);
 		double d = Math.sqrt((aim.x - muzzle.x) * (aim.x - muzzle.x) + (aim.z - muzzle.z) * (aim.z - muzzle.z));
 		if (d < GUN_NEAREST || d > GUN_RANGE) {
 			return null;
 		}
 		// led: where she'll be when the ball gets there
 		double flight = d / SHOT_SPEED;
-		aim = aim.add(foe.drift().x * flight, 0.0, foe.drift().z * flight);
+		aim = aim.add(drift.x * flight, 0.0, drift.z * flight);
 		double dx = aim.x - muzzle.x, dz = aim.z - muzzle.z;
 		d = Math.sqrt(dx * dx + dz * dz);
 		double hx = dx / d, hz = dz / d;
@@ -497,6 +529,36 @@ final class Corsairs implements Ship.Captaincy {
 		double ax = hx * c - hz * s, az = hx * s + hz * c;
 		double up = Math.toRadians(Mth.clamp(elevation, LOWEST, HIGHEST));
 		return new Vec3(ax * Math.cos(up), Math.sin(up), az * Math.cos(up)).normalize();
+	}
+
+	/**
+	 * (0.7.484) Whom a pirate ship shells ashore when she has no ship to fight: the nearest of the folk on land within
+	 * her guns' range that are at war with her cove (the other camps: orcs, goblins, illagers, barbarians) or defend the
+	 * settlement her cove is raiding, with a player near to see it. The point to aim at, or null.
+	 */
+	private @Nullable Vec3 shoreFoe(ServerLevel level, Ship ship, Crew crew) {
+		net.minecraft.server.MinecraftServer server = level.getServer();
+		if (!Raids.playerNear(level, ship.blockPosition(), GUN_RANGE + 40.0)) {
+			return null;
+		}
+		int raided = Raids.targetOf(crew.faction);
+		Faction mine = Factions.get(server, crew.faction);
+		Vec3 muzzle = ship.position();
+		LivingEntity best = null;
+		double bestD = Double.MAX_VALUE;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, ship.getBoundingBox().inflate(GUN_RANGE), x -> x.isAlive() && x instanceof Worker && !(x.getVehicle() instanceof Ship))) {
+			Worker w = (Worker)e;
+			Faction theirs = Factions.get(server, w.factionId());
+			if (theirs == null || w.factionId() == crew.faction || mine == null || !(w.factionId() == raided || theirs.type() == FactionType.BARBARIAN && Relations.atWar(mine, theirs))) {
+				continue;
+			}
+			double d = e.distanceToSqr(muzzle);
+			if (d >= GUN_NEAREST * GUN_NEAREST && d < bestD) {
+				bestD = d;
+				best = e;
+			}
+		}
+		return best == null ? null : best.position().add(0.0, best.getBbHeight() * 0.5, 0.0);
 	}
 
 	// ---- (0.7.179) about her deck -----------------------------------------------------------------------------------
@@ -698,6 +760,10 @@ final class Corsairs implements Ship.Captaincy {
 			hand.setInvulnerableTime(0);
 			hand.hurtServer(level, source, Float.MAX_VALUE);
 		}
+		if (crew.side != Crew.Side.PIRATE) {
+			// ((0.7.484) a sea rover that sank her takes her cargo home)
+			PirateCoves.captured(level, ship, crew, by);
+		}
 		KingdomEvents.announce(level.getServer(), Component.translatable("message.jaymoskingdoms.ship.sunk." + crew.side.id(), crew.name,
 			player == null ? Component.translatable("message.jaymoskingdoms.someone") : player.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		switch (crew.side) {
@@ -706,7 +772,7 @@ final class Corsairs implements Ship.Captaincy {
 				if (FarGrounds.rover(level, ship)) {
 					FarGrounds.roverLost(level, ship);
 				} else {
-					PirateCoves.shipLost(level, crew, player);
+					PirateCoves.shipLost(level, crew, ship, player);
 				}
 			}
 			case NAVY, MERCHANT -> Navies.shipLost(level, crew, player);
