@@ -107,3 +107,14 @@ click; only the Stone Age primitive and bone knives parried. Andy picked: the We
   read from their registered attack modifiers at start. Thrown damage and attack speed are unchanged. Copper knives
   have no Armory dagger and keep theirs.
 - Armory daggers keep their throw, and names are unchanged.
+
+## Shield bang (Powers 0.20.3)
+Andy (2026-11-04): "while holding a shield and wielding a weapon, left click slams the shield generating noise and
+attracting mobs (or repelling sensitive ones...)".
+- Only while the shield is raised (right click held) in the off hand with a weapon in the main hand: vanilla ignores
+  attack clicks while blocking, so nothing is taken from normal attacks. `HeldInput.locksAttack` keeps Better Combat
+  from swinging on the same click.
+- The client sends `ShieldBang.Bang`; the server checks the hands again (`ShieldBang.ready`) and a 10-tick cooldown.
+- Hostiles (`Enemy`, not `NeutralMob`) with no target within `DRAW_RANGE` (24) walk to where you stood; skittish mobs
+  (wild `Animal`, `AmbientCreature`, water creatures; not neutral, tamed, ridden or leashed) within `STARTLE_RANGE` (16)
+  run `FLEE_DISTANCE` away. Goal mobs get a navigation path, brain mobs a walk target.
