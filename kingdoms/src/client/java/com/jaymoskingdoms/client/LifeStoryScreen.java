@@ -1511,12 +1511,12 @@ final class LifeStoryScreen extends Screen {
 		this.choiceRows.clear();
 		y += 6;
 		Ui.rule(graphics, px + 6, px + pw - 6, y - 3);
-		int free = Integer.bitCount(draft.flaws) * Flaws.POINTS_EACH;
+		int free = Integer.bitCount(draft.flaws) * Flaws.POINTS_EACH * com.jaymoskingdoms.Stats.STEP;
 		graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.harder"), px + 10, y, ACCENT);
 		y += 11;
 		for (int i = 0; i < 8; i++) {
 			if (i == 0) {
-				graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.flaws", Flaws.MAX, Flaws.POINTS_EACH, free), px + 10, y, Ui.DIM);
+				graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.flaws", Flaws.MAX, Flaws.POINTS_EACH * com.jaymoskingdoms.Stats.STEP, free), px + 10, y, Ui.DIM);
 				y += 11;
 			} else if (i == 4) {
 				y += 4;
@@ -1683,10 +1683,10 @@ final class LifeStoryScreen extends Screen {
 				story && draft.heritage >= 0));
 		}
 		if (a.stat() != null) {
-			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + a.stat().key())));
+			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + a.stat().key()), com.jaymoskingdoms.Stats.STEP));
 		}
 		if (a.freePoint()) {
-			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.free"));
+			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.free", com.jaymoskingdoms.Stats.STEP));
 		}
 		if (a.realm() && q == Question.RAISED) {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.noble"));
@@ -1723,7 +1723,7 @@ final class LifeStoryScreen extends Screen {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.moon_ki", power("zfighter")));
 		}
 		if (a.start() == LifeStory.Start.RUSTFALL) {
-			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + com.jaymoskingdoms.Stats.Stat.MIGHT.key())));
+			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + com.jaymoskingdoms.Stats.Stat.MIGHT.key()), com.jaymoskingdoms.Stats.STEP));
 		}
 		if (a.start() != null) {
 			out.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".wake"));
