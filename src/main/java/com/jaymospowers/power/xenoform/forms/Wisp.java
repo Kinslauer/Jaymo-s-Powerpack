@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>R, Phase: slip through a wall up to {@link #PHASE_BLOCKS} thick to the air beyond.</li>
  * <li>G, Shroud: fade from sight until you strike something.</li>
  * <li>V, Dread Wail: every creature within {@link #WAIL_RADIUS} turns and flees; players are plunged into darkness.</li>
- * <li>B (hold), Glide: fall slowly and drift forward.</li>
+ * <li>B (hold), Float: (0.20.23) float upright where you steer, Jump rising and sneaking sinking; let go and you drop.</li>
  * <li>C (ascended), Revenant: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}.</li>
  * </ul>
  */
@@ -42,7 +42,9 @@ public final class Wisp extends XenoForm {
 	public static final int SHROUD_COOLDOWN = 40;
 	public static final int WAIL_COOLDOWN = 300, WAIL_TICKS = 60, WAIL_DARKNESS_TICKS = 100;
 	public static final double WAIL_RADIUS = 10.0, WAIL_FLEE = 10.0, WAIL_FLEE_SPEED = 1.5;
-	public static final double GLIDE_FALL = -0.12, GLIDE_PUSH = 0.06, GLIDE_MAX = 0.7;
+	/** (0.20.23, Andy: "it should float upright instead of an angled glide") Float: how fast it drifts where you steer
+	 * (blocks a tick; sprinting faster), how fast Jump lifts and sneaking sinks it, how fast it eases to that (share a tick). */
+	public static final double FLOAT_SPEED = 0.22, FLOAT_SPRINT = 0.3, FLOAT_RISE = 0.12, FLOAT_SINK = 0.12, FLOAT_EASE = 0.25;
 
 	/** (0.20.21) Revenant is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Revenant}. */
 	private final com.jaymospowers.power.xenoform.XenoUltimate revenant = new com.jaymospowers.power.xenoform.forms.ultimate.Revenant(this);
@@ -100,23 +102,14 @@ public final class Wisp extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
-		if (live.glide && !player.onGround() && !player.isInWater()) {
-			Vec3 motion = player.getDeltaMovement();
-			Vec3 push = player.getLookAngle().horizontal();
-			push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(GLIDE_PUSH);
-			Vec3 next = new Vec3(motion.x + push.x, Math.max(motion.y, GLIDE_FALL), motion.z + push.z);
-			if (next.horizontalDistance() > GLIDE_MAX) {
-				Vec3 flat = new Vec3(next.x, 0.0, next.z).normalize().scale(GLIDE_MAX);
-				next = new Vec3(flat.x, next.y, flat.z);
-			}
-			player.setDeltaMovement(next);
-			player.syncVelocity = true;
-			player.resetFallDistance();
+		// (on the ground it walks as usual until Jump lifts it off)
+		if (live.glide && !player.isInWater() && player.getVehicle() == null && (!player.onGround() || player.getLastClientInput().jump())) {
+			floatUpright(player);
 			if (player.tickCount % 3 == 0) {
 				level.sendParticles(ParticleTypes.SCULK_SOUL, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.2, 0.2, 0.2, 0.0);
 			}
-			if (player.tickCount % 16 == 0) {
-				sound(player, SoundEvents.PHANTOM_FLAP, 0.5F, 1.4F);
+			if (player.tickCount % 24 == 0) {
+				sound(player, SoundEvents.PHANTOM_FLAP, 0.4F, 1.4F);
 			}
 		}
 		if (live.shroud) {
@@ -161,7 +154,30 @@ public final class Wisp extends XenoForm {
 	@Override
 	public int flight(ServerPlayer player, XenoformPower.Live live) {
 		return live.glide && !player.onGround() && !player.isInWater() && player.getVehicle() == null
-			? XenoformState.FLY_GLIDE : XenoformState.FLY_NONE;
+			? XenoformState.FLY_FLOAT : XenoformState.FLY_NONE;
+	}
+
+	/**
+	 * (0.20.23) Float: no fall, the body upright; WASD steers it (relative to where you face), Jump lifts and sneaking sinks.
+	 * The speed eases toward the steer so it drifts like a ghost rather than snapping.
+	 */
+	private static void floatUpright(ServerPlayer player) {
+		net.minecraft.world.entity.player.Input input = player.getLastClientInput();
+		double forward = (input.forward() ? 1.0 : 0.0) - (input.backward() ? 1.0 : 0.0);
+		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
+		double speed = input.sprint() ? FLOAT_SPRINT : FLOAT_SPEED;
+		Vec3 want = Vec3.ZERO;
+		if (forward != 0.0 || strafe != 0.0) {
+			float yaw = player.getYRot() * net.minecraft.util.Mth.DEG_TO_RAD;
+			double sin = net.minecraft.util.Mth.sin(yaw), cos = net.minecraft.util.Mth.cos(yaw);
+			// facing is (-sin, cos); to its left is (cos, sin)
+			want = new Vec3(-sin * forward + cos * strafe, 0.0, cos * forward + sin * strafe).normalize().scale(speed);
+		}
+		double up = input.jump() ? FLOAT_RISE : input.shift() ? -FLOAT_SINK : 0.0;
+		Vec3 motion = player.getDeltaMovement();
+		player.setDeltaMovement(new Vec3(motion.x + (want.x - motion.x) * FLOAT_EASE, up, motion.z + (want.z - motion.z) * FLOAT_EASE));
+		player.syncVelocity = true;
+		player.resetFallDistance();
 	}
 
 	// ---- Revenant ----

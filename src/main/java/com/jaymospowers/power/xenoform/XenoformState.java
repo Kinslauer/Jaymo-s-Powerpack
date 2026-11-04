@@ -179,7 +179,7 @@ public final class XenoformState {
 		builder -> builder.syncWith(Hud.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/**
 	 * How the alien is flying right now, for everyone's client to pose it ({@link XenoForm#flight}): {@link #FLY_JET}
-	 * (Pyre; {@link #FLY_SUN} under Sunheart, faster), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Wisp), {@link #FLY_VOID}
+	 * (Pyre; {@link #FLY_SUN} under Sunheart, faster), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Keen, Talon), {@link #FLY_FLOAT} (Wisp, Revenant), {@link #FLY_VOID}
 	 * (Nadir). Absent: not flying.
 	 */
 	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("xenoform_flight"),
@@ -206,7 +206,9 @@ public final class XenoformState {
 	/** (0.19.28) Towerback's footfalls so far: each new one, every client brings its legs' stride round to a foot coming down. */
 	public static final AttachmentType<Integer> STEP = AttachmentRegistry.create(JaymosPowers.id("xenoform_step"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5;
+	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5,
+		/** (0.20.23) Wisp's and Revenant's upright float. */
+		FLY_FLOAT = 6;
 
 	/** Pyre's jet, plain or Sunheart's. */
 	public static boolean jet(int kind) {

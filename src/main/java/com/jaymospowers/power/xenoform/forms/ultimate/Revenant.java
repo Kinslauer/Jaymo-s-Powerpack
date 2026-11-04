@@ -224,7 +224,7 @@ public final class Revenant extends XenoUltimate {
 
 	@Override
 	public int flight(ServerPlayer player, XenoformPower.Live live) {
-		return live.glide && player.getVehicle() == null && !player.isInWater() ? XenoformState.FLY_GLIDE : XenoformState.FLY_NONE;
+		return live.glide && player.getVehicle() == null && !player.isInWater() ? XenoformState.FLY_FLOAT : XenoformState.FLY_NONE;
 	}
 
 	// ---- R: Wraithwalk ----
