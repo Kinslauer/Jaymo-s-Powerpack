@@ -6,7 +6,7 @@ model (client/power/xenoform/ultimate/Ultimate<Name>.java) and so its own layout
 Each painter seeds gen_xenoform.rng with "<id>_ultimate" first, because gen_xenoform's helpers draw from that module-level
 stream, not from the global `random`; that way no painter shifts another skin's speckle.
 
-    python3 tools/gen_xeno_ultimates.py            paint every Ultimate here
+    python3 tools/gen_xeno_ultimates.py            paint every Ultimate (the later ones through tools/ultimates/*.py)
     python3 tools/gen_xeno_ultimates.py layout     print Titan's UV table (the Java model holds the same table)
 
 When an alien's Ultimate lands here, take it out of gen_xenoform's ultimate() loops (OWN_ULTIMATES there).
@@ -181,4 +181,9 @@ if __name__ == "__main__":
     else:
         for painter in PAINTERS:
             painter()
+        # (0.20.15) the later Ultimates have a painter of their own in tools/ultimates/<id>.py, each with paint()
+        import importlib
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "ultimates"))
+        for name in ("pyre", "blur", "prism", "wisp", "gremlin", "knell"):
+            importlib.import_module(name).paint()
         print("Ultimate skins written under", gx.ROOT)

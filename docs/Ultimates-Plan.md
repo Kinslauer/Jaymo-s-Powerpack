@@ -193,7 +193,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - Docs: rewrite the Stage 3 section of `docs/xenoform.md` ("## Stage 3: ascension, the Ultimates, the twists, the kingdoms"). Bump the version (currently 0.19.85 in `gradle.properties`).
 - Patch 0 ships with one Ultimate migrated end to end, for example Bulwark's Titan, to prove the framework. The other batches run 2 tracks at a time. Each touches only its own `forms/ultimate/*`, `client/.../ultimate/*` and painter, plus one line each in the `ULTIMATES` map, `evolved()` and the lang.
 
-## Patch 1: the first Ultimates (Bulwark, Pyre, Velox, Prism, Wisp, Gremlin, Knell)
+## Patch 1: the first Ultimates (Bulwark, Pyre, Velox, Prism, Wisp, Gremlin, Knell) (done, 0.20.15)
 
 ### Bulwark -> Titan
 - **Today:** Titan makes you twice your size (`TITAN_EXTRA_SCALE`), gives you +12 armour (`TITAN_ARMOR`) and +20 health (`TITAN_HEALTH`), and heals that 20 when it starts, with a ring of `Debris` and a heavy shake. While it lasts, every Ground Clap also smashes walls 3 deep, 3 wide and 3 tall ahead (`smashWalls`, hardness up to `TITAN_BREAK_MAX_HARDNESS` 6), and you puff dust (POOF) as you move (`tickUltimate`). It has no move of its own (`ultimateHasMove` is false), so B stays Leap Slam.
@@ -245,7 +245,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **R:** Wraithwalk, a stronger Phase. It goes through walls up to 5 thick (today 2). Creatures in the way are passed through, take 3 and get Slowness II for 3 s.
 - **G:** Veil, a stronger Shroud. You fade from sight as now. The first strike out of it deals +6 and breaks it.
 - **V:** Banshee Wail, a stronger Dread Wail. It reaches 16 blocks (today 10) and deals 4. Everything gets Weakness for 6 s, creatures flee as now, and players get darkness.
-- **B:** Drift, a stronger Glide (hold). It becomes slow true flight: you float forward along your look, Jump rises gently, and you pass through creatures.
+- **B:** Drift, a stronger Glide (hold). It becomes slow true flight: you float forward along your look, Jump rises gently.
 - **C:** Revenant, today's move. You wear the host for 15 s, and the host's own attack strikes what you aim at (`doHurtTarget`). C again while worn lets go. Every 15 s. Holding C for 1 s drops you back to Wisp.
 - **Health:** +6 hearts (12).
 - **Film:** MORPH on tatters, body, hood, head, then the whole body. First time: the ghost frays to mist in slow motion and reforms larger, and the bone mask slams onto the face with an icy wail.

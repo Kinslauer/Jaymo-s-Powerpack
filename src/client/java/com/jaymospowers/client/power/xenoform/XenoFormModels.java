@@ -169,6 +169,12 @@ public final class XenoFormModels {
 			ultimatesFilled = true;
 			// (0.20.9) one line per Ultimate
 			ULTIMATES.put("bulwark", new com.jaymospowers.client.power.xenoform.ultimate.UltimateTitan());
+			ULTIMATES.put("pyre", new com.jaymospowers.client.power.xenoform.ultimate.UltimateSunheart()); // (0.20.15)
+			ULTIMATES.put("blur", new com.jaymospowers.client.power.xenoform.ultimate.UltimateStandstill()); // (0.20.15)
+			ULTIMATES.put("prism", new com.jaymospowers.client.power.xenoform.ultimate.UltimateGeode()); // (0.20.15)
+			ULTIMATES.put("wisp", new com.jaymospowers.client.power.xenoform.ultimate.UltimateRevenant()); // (0.20.15)
+			ULTIMATES.put("gremlin", new com.jaymospowers.client.power.xenoform.ultimate.UltimateSwarm()); // (0.20.15)
+			ULTIMATES.put("knell", new com.jaymospowers.client.power.xenoform.ultimate.UltimateTolling()); // (0.20.15)
 		}
 		return ULTIMATES.get(form);
 	}
