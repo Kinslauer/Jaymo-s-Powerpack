@@ -55,7 +55,7 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Carrying a block in both arms, the same as a body ({@link Carry}, hold {@link Carry#BLOCK}). (0.20.16, Andy) Ordinary
+ * Carrying a block in both arms, the same as a body ({@link Carry}, hold {@link Carry#BLOCK}). (0.20.17, Andy) Ordinary
  * blocks are Carry On's now ({@link CarryOnCompat}); this only takes the space pod's parts ({@link #carriable}: sneak +
  * right-click one with empty hands, or take a mended one off a salvage rack), since they're set down onto a pod or a rack
  * ({@code PodParts.tryAttach}). Right-click puts it straight into the free spot you're looking at, within
@@ -83,7 +83,7 @@ public final class CarryBlock {
 	static final String TAG = "jaymospowers.carried_block";
 
 	/**
-	 * On a chunk: the blocks in it that players placed (packed positions). (0.20.16) No longer written or read: kept
+	 * On a chunk: the blocks in it that players placed (packed positions). (0.20.17) No longer written or read: kept
 	 * registered only so chunks saved with it still load quietly.
 	 */
 	public static final AttachmentType<LongOpenHashSet> PLACED = AttachmentRegistry.create(JaymosPowers.id("carry_placed"),
@@ -171,7 +171,7 @@ public final class CarryBlock {
 	}
 
 	/**
-	 * (0.20.16) The only blocks players lift with this carry: the space pod's parts. Crafting tables, anvils, chests and
+	 * (0.20.17) The only blocks players lift with this carry: the space pod's parts. Crafting tables, anvils, chests and
 	 * every other block are Carry On's ({@link CarryOnCompat}).
 	 */
 	public static boolean carriable(BlockState state) {

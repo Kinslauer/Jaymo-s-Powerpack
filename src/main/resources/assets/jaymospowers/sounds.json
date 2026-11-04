@@ -1405,5 +1405,15 @@
 				"name": "jaymospowers:voice/symbiote/say_white_tug_3"
 			}
 		]
+	},
+	"guard.parry": {
+		"sounds": [
+			{
+				"name": "jaymospowers:guard/parry_1"
+			},
+			{
+				"name": "jaymospowers:guard/parry_2"
+			}
+		]
 	}
 }

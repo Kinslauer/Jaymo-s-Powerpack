@@ -134,7 +134,7 @@ Each pickup rolls a hold (synced in the carrier's `jaymospowers:carry_carrying` 
 - Injection order: the carry's render hooks run at priority 2000 so they come last; another mod's pose code that runs
   later could still move a carried body's limbs.
 
-# Blocks: Carry On (0.20.16)
+# Blocks: Carry On (0.20.17)
 
 Blocks are carried by **Carry On** (LGPL-3.0, Tschipp; shipped unchanged in `packMods`): sneak + right-click a chest,
 furnace, barrel or any other block with something in it, empty hands, to lift it with everything inside; right-click to

@@ -386,7 +386,8 @@ final class SkillScreen extends Screen {
 			}
 			int x = (int)Math.round(sx(spot)), y = (int)Math.round(sy(spot)), h = half(perk);
 			int rank = shown.rank(perk), accent = perk.bridge() ? Ui.GOLD : accent(perk.pillar);
-			boolean open = shown.blocked(perk) == null && (player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(player, perk));
+			boolean open = shown.blocked(perk) == null && (player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(player, perk)
+				&& !com.jaymoskingdoms.Learnables.classLocked(player, perk));
 			int rim = perk == hovered ? COLOR_PATH : rank > 0 ? Ui.GOLD : open ? accent : COLOR_LOCKED_RIM;
 			int fill = rank >= perk.maxRank ? darker(accent, 0.75F) : rank > 0 ? darker(accent, 0.5F) : open ? COLOR_OPEN_FILL : COLOR_LOCKED_FILL;
 			if (perk.bridge()) {
@@ -500,6 +501,17 @@ final class SkillScreen extends Screen {
 			if (blocked == null && player != null && com.jaymoskingdoms.Knowledge.lockedPerk(player, hovered)) {
 				blocked = "gui.jaymoskingdoms.skills.blocked.knowledge";
 			}
+			// (0.7.516) a class skill of another class
+			if (blocked == null && player != null && com.jaymoskingdoms.Learnables.classLocked(player, hovered)) {
+				blocked = "gui.jaymoskingdoms.skills.blocked.class";
+			}
+			java.util.Set<com.jaymoskingdoms.Classes.PlayerClass> forClasses = com.jaymoskingdoms.Learnables.classesFor(hovered);
+			if (forClasses != null) {
+				text.add(Component.translatable("gui.jaymoskingdoms.skills.for_classes", classNames(forClasses)).withColor(Ui.DIM));
+			}
+			if (shown.ranks().containsKey(com.jaymoskingdoms.Learnables.taughtKey(hovered))) {
+				text.add(Component.translatable("gui.jaymoskingdoms.skills.taught").withColor(Ui.GOOD));
+			}
 			text.add(blocked == null ? Component.translatable("gui.jaymoskingdoms.skills.learn").withColor(Ui.GOOD)
 				: Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
 		} else if (crest != null) {
@@ -525,6 +537,20 @@ final class SkillScreen extends Screen {
 		graphics.fill(x, y, x + w, y + h, Ui.PANEL);
 		graphics.fill(x, y, x + 2, y + h, nameColor);
 		Ui.detail(graphics, this.font, x, y, w, lines, name, nameColor, text);
+	}
+
+	/** (0.7.516) Classes' names, joined with commas. */
+	private static Component classNames(java.util.Set<com.jaymoskingdoms.Classes.PlayerClass> classes) {
+		net.minecraft.network.chat.MutableComponent out = Component.empty();
+		boolean first = true;
+		for (com.jaymoskingdoms.Classes.PlayerClass cls : classes) {
+			if (!first) {
+				out.append(", ");
+			}
+			out.append(Component.translatable("class.jaymoskingdoms." + cls.key()));
+			first = false;
+		}
+		return out;
 	}
 
 	/** Perks' names, joined with commas. */
@@ -765,7 +791,8 @@ final class SkillScreen extends Screen {
 			pressedPerk = null;
 			double moved = Math.abs(event.x() - pressX) + Math.abs(event.y() - pressY);
 			if (perk != null && moved < 4.0 && perk == perkAt(event.x(), event.y()) && progress().blocked(perk) == null
-				&& (this.minecraft.player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(this.minecraft.player, perk))) {
+				&& (this.minecraft.player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(this.minecraft.player, perk)
+					&& !com.jaymoskingdoms.Learnables.classLocked(this.minecraft.player, perk))) {
 				ClientPlayNetworking.send(new Skills.Spend(perk.ordinal()));
 				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			}

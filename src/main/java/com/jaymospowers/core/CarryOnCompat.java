@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.16, Andy: "We need to swap our block carrying for this", Carry On) Blocks are carried by Carry On (LGPL-3.0,
+ * (0.20.17, Andy: "We need to swap our block carrying for this", Carry On) Blocks are carried by Carry On (LGPL-3.0,
  * Tschipp; shipped unchanged, nothing of it copied): sneak + right-click a chest, furnace, barrel or any other block with
  * a block entity, empty hands, to lift it with everything in it; right-click to set it down. Bodies stay ours
  * ({@link Carry}: players, small animals, Gravity's big mobs, Kitchen's corpses): {@code mixin/carryon/CarryOnPickupMixin}

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.20.16) Carry On (LGPL-3.0, Tschipp; optional, shipped unchanged, nothing of it copied) carries blocks; bodies stay
+ * (0.20.17) Carry On (LGPL-3.0, Tschipp; optional, shipped unchanged, nothing of it copied) carries blocks; bodies stay
  * ours ({@link CarryOnCompat}). Its pick-ups all go through {@code PickupHandler}: no entity is ever lifted by it, nothing is
  * lifted while our carry, a Kitchen corpse or being down has your arms, and the {@code jaymospowers:carry_on_no_lift}
  * blocks stay put. Skipped when Carry On isn't there.

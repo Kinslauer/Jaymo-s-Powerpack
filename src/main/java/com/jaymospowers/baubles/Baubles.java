@@ -73,9 +73,11 @@ public final class Baubles {
 	/** How often (ticks) worn bonuses are checked again, besides whenever the slots change. */
 	static final int REFRESH_TICKS = 20;
 
-	/** On a player: what they wear in the seven slots (server; the screen syncs what it shows). */
+	/** On a player: what they wear in the slots (saved on the server, synced to the wearer). */
 	public static final AttachmentType<List<ItemStack>> WORN = AttachmentRegistry.create(JaymosPowers.id("baubles"),
-		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath());
+		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath()
+			// (RPG Series) synced to the wearer too: Spell Engine reads worn quivers on the client as well
+			.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
 	/**
 	 * (Motion patch 4) On a player: the worn things others see, synced to everyone for drawing them: the lantern hung
