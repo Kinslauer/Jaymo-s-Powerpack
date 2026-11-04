@@ -12,4 +12,7 @@ if [ -z "$key" ]; then
 fi
 export GEMINI_API_KEY="$key"
 export GEMINI_ACTIVITY_LOG=false
+# Free-tier keys get no quota (limit 0) on the pro models (gemini-4-argon, gemini-3.1-pro), so by default every
+# "pro" call goes to Flash. With billing on, set GEMINI_MODEL_PRO=gemini-4-argon in the environment instead.
+export GEMINI_MODEL_PRO="${GEMINI_MODEL_PRO:-gemini-3.8-flash}"
 exec uvx omni-ai-mcp==4.8.2
