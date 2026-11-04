@@ -82,13 +82,13 @@ public final class Fractures {
 		ServerLivingEntityEvents.AFTER_DAMAGE.addPhaseOrdering(Event.DEFAULT_PHASE, AFTER_WOUNDS);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(AFTER_WOUNDS, Fractures::afterDamage);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			// (0.19.74) offer coins or a purse in hand (an emerald without Kingdoms); the fee is then paid from everything you carry
+			// (0.19.87) offer coins or a purse in hand (an emerald without Kingdoms); the fee is then paid from everything you carry
 			if (hand != InteractionHand.MAIN_HAND || Breaks.unset(player) == 0 || !offering(player.getMainHandItem()) || !priest(entity)) {
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && level instanceof ServerLevel server) {
-				if (!(player instanceof ServerPlayer payer) || !KingdomsMoney.charge(payer, KingdomsMoney.silver(PRIEST_FEE))) {
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.fracture.priest_poor", KingdomsMoney.text(KingdomsMoney.silver(PRIEST_FEE)))
+				if (!(player instanceof ServerPlayer payer) || !KingdomsMoney.charge(payer, KingdomsMoney.worth(PRIEST_FEE))) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.fracture.priest_poor", KingdomsMoney.text(KingdomsMoney.worth(PRIEST_FEE)))
 						.withStyle(ChatFormatting.RED));
 					return InteractionResult.SUCCESS_SERVER;
 				}
@@ -104,7 +104,7 @@ public final class Fractures {
 	}
 
 	/**
-	 * (0.19.74) Whether {@code stack} is money held out to a priest: a coin, a coin stack or a purse of Jaymo's Kingdoms (named by
+	 * (0.19.87) Whether {@code stack} is money held out to a priest: a coin, a coin stack or a purse of Jaymo's Kingdoms (named by
 	 * id, never compiled against), or an emerald when Kingdoms isn't there (the fallback of {@link KingdomsMoney}).
 	 */
 	private static boolean offering(ItemStack stack) {

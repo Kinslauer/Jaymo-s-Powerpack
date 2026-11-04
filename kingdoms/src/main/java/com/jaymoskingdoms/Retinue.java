@@ -399,7 +399,7 @@ final class Retinue {
 				}
 				if (takeSilver(p, FINE)) {
 					Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() + FINE));
-					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue.tyrant.fined", FINE, king.getDisplayName())
+					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue.tyrant.fined", Money.text(p, Money.worth(FINE)), king.getDisplayName())
 						.withStyle(ChatFormatting.RED));
 				}
 				Speech.say(level, by, Component.translatable(speech(t, "watch" + level.getRandom().nextInt(4))), Speech.RED, SPEECH_RANGE);
@@ -503,9 +503,9 @@ final class Retinue {
 		}
 	}
 
-	/** (0.7.487) Takes {@code n} silver coins' worth from {@code p} if they have that much. */
+	/** (0.7.497) Takes {@code n} silver coins' worth from {@code p} if they have that much. */
 	private static boolean takeSilver(ServerPlayer p, int n) {
-		return Money.charge(p, Money.silver(n));
+		return Money.charge(p, Money.worth(n));
 	}
 
 	/** {@code player} is still someone a guard should be after. */

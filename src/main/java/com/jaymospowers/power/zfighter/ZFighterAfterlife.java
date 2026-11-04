@@ -666,15 +666,15 @@ public final class ZFighterAfterlife {
 		}
 		if (!player.isShiftKeyDown()) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_offer", teller.getDisplayName(),
-				KingdomsMoney.text(KingdomsMoney.silver(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
+				KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
 			return;
 		}
-		// (0.19.74) the silver comes from anywhere you carry it (coins, purses, bundles), no longer only the held stack
-		if (!KingdomsMoney.charge(player, KingdomsMoney.silver(PRICE_SILVER))) {
+		// (0.19.87) the silver comes from anywhere you carry it (coins, purses, bundles), no longer only the held stack
+		if (!KingdomsMoney.charge(player, KingdomsMoney.worth(PRICE_SILVER))) {
 			ZFighterTraining.Data data = ZFighterTraining.of(player);
 			if (data.tp() < PRICE_TP) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_poor", teller.getDisplayName(),
-					KingdomsMoney.text(KingdomsMoney.silver(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
+					KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
 				return;
 			}
 			player.setAttached(ZFighterTraining.DATA, data.withTp(data.tp() - PRICE_TP));
@@ -724,10 +724,10 @@ public final class ZFighterAfterlife {
 						})) : List.of());
 					return;
 				}
-				boolean emeralds = KingdomsMoney.canPay(player, KingdomsMoney.silver(PRICE_SILVER));
+				boolean emeralds = KingdomsMoney.canPay(player, KingdomsMoney.worth(PRICE_SILVER));
 				boolean tp = ZFighterTraining.of(player).tp() >= PRICE_TP;
-				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", KingdomsMoney.text(KingdomsMoney.silver(PRICE_SILVER)), PRICE_TP), List.of(
-					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> paid(player, npc, true, back), KingdomsMoney.text(KingdomsMoney.silver(PRICE_SILVER))),
+				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP), List.of(
+					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> paid(player, npc, true, back), KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER))),
 					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_tp", tp, () -> paid(player, npc, false, back), PRICE_TP)));
 			}
 		}
@@ -739,7 +739,7 @@ public final class ZFighterAfterlife {
 			return;
 		}
 		if (emeralds) {
-			if (!KingdomsMoney.charge(player, KingdomsMoney.silver(PRICE_SILVER))) {
+			if (!KingdomsMoney.charge(player, KingdomsMoney.worth(PRICE_SILVER))) {
 				return;
 			}
 		} else {

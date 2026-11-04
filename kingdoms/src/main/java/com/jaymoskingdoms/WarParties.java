@@ -442,8 +442,8 @@ final class WarParties {
 		for (ServerPlayer p : marched) {
 			int each = (int)(cut / marched.size());
 			if (each > 0) {
-				// (0.7.487) their cut in silver: the worn purse first, then the pack, then the ground
-				Money.pay(p, Money.silver(each));
+				// (0.7.497) their cut in silver: the worn purse first, then the pack, then the ground
+				Money.pay(p, Money.worth(each));
 			}
 			Reputation.change(p, from, SPOILS_REPUTATION);
 			p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.war.spoils_home", from.name(), toTreasury, each).withStyle(ChatFormatting.GOLD));
@@ -587,8 +587,8 @@ final class WarParties {
 		for (ItemStack stack : party.spoils) {
 			net.minecraft.world.level.block.Block.popResource(level, at, stack);
 		}
-		// (0.7.487) the silver spills as coins (the treasury counts in silver)
-		for (ItemStack coins : Money.stacks(Money.silver(party.spoilsSilver))) {
+		// (0.7.497) the silver spills as coins (the treasury counts in silver)
+		for (ItemStack coins : Money.stacks(Money.worth(party.spoilsSilver))) {
 			net.minecraft.world.level.block.Block.popResource(level, at, coins);
 		}
 		tellPlayers(level, party, Component.translatable(party.laden() ? "message.jaymoskingdoms.war.spoils_spilled" : "message.jaymoskingdoms.war.cart_lost",

@@ -56,11 +56,11 @@ public final class TailorCostumes {
 		}
 		int price = Tailors.price(villager, player, TABLE_BASE);
 		if (!player.isCreative()) {
-			if (!Money.canPay(player, Money.silver(price))) {
+			if (!Money.canPay(player, Money.worth(price))) {
 				Speech.tell(level, villager, player, Component.translatable("tailor.jaymoskingdoms.table_cant_pay", price), Speech.WHITE);
 				return;
 			}
-			Money.charge(player, Money.silver(price)); // (0.7.487)
+			Money.charge(player, Money.worth(price)); // (0.7.497)
 		}
 		player.getInventory().placeItemBackInInventory(new ItemStack(table.get()), Prediction.SERVER_ONLY);
 		Speech.tell(level, villager, player, Component.translatable("tailor.jaymoskingdoms.table_sold", price), Speech.WHITE);
@@ -79,7 +79,7 @@ public final class TailorCostumes {
 			return;
 		}
 		int price = costumePrice(villager, player);
-		if (!Money.canPay(player, Money.silver(price))) {
+		if (!Money.canPay(player, Money.worth(price))) {
 			Speech.tell(level, villager, player, Component.translatable("tailor.jaymoskingdoms.costume_cant_pay", price), Speech.WHITE);
 			return;
 		}

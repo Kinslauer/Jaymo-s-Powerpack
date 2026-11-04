@@ -719,10 +719,13 @@ def blur():
 
 
 def prism():
-    """Faceted violet crystal, white-hot tips, fracture lines, and the insignia set in the chest like an inclusion."""
+    """Faceted violet crystal, white-hot tips, fracture lines. (0.19.82) A crystal cluster on shard legs: a core slab with
+    a glow in its sides and the insignia set in its top like an inclusion, amethyst prisms tilted up out of it, and thin
+    pointed legs."""
     img = new_skin()
     crystal = (146, 98, 208)
     bright = (236, 220, 255, 255)
+    glow = (222, 190, 255)
     fracture = shade(crystal, 0.5)
     parts(img, crystal, 0.12)
     # facets: diagonal bands of light and shade over every face, each face lit its own way
@@ -757,13 +760,88 @@ def prism():
         img.putpixel((14 - (y - 13) // 2, y), fracture)
     rect(img, (11, 14, 13, 15), shade(crystal, 0.6))
     chest_insignia(img, rim=(50, 24, 90, 255))
-    # extras: crown 2x6x2 at (0,64); crystals 2x5x2 at (8,64); back 6x6x3 at (16,64); spine 2x5x2 at (34,64);
-    # shoulder crystals 2x4x2 at (42,64)
-    for part in ((0, 64, 2, 6, 2), (8, 64, 2, 5, 2), (16, 64, 6, 6, 3), (34, 64, 2, 5, 2), (42, 64, 2, 4, 2)):
+
+    def facets(part, base, step=3, bands=(1.25, 1.0, 0.72)):
+        """Diagonal bands of light over each face of a part, lit per face."""
         for name, (x0, y0, x1, y1) in faces(*part).items():
-            vgrad(img, (x0, y0, x1, y1), (246, 236, 255), shade(crystal, LIGHT[name]), 0.1)
-            if name == "top":
-                noise_fill(img, (250, 245, 255), 0.05, (x0, y0, x1, y1))
+            c = shade(base, LIGHT[name])
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    img.putpixel((x, y), shade(c, bands[((x - x0) + (y - y0)) // step % 3] * (0.95 + rng.random() * 0.1)))
+
+    def paler(part, amount, sides=("front", "back", "left", "right")):
+        """Blends the side faces toward white-violet, more toward the top of the box."""
+        for name in sides:
+            x0, y0, x1, y1 = faces(*part)[name]
+            for y in range(y0, y1):
+                t = 1.0 - (y - y0) / max(1, y1 - y0 - 1)
+                for x in range(x0, x1):
+                    r, g, b, a = img.getpixel((x, y))
+                    img.putpixel((x, y), lerp((r, g, b), (246, 236, 255), t * amount))
+
+    # extras (rows 64+): core slab 8x6x12 at (0,64); shard leg 3x4x3 at (40,64), 2x4x2 at (52,64), 1x4x1 at (60,64);
+    # crystal bodies 4x11x4 (0,82), 3x8x3 (32,82), 3x7x3 (32,93), 3x6x3 (0,97); small crystal body 2x4x2 (40,76);
+    # tips 2x3x2 (40,71), 1x3x1 (48,71), 1x2x1 (52,71). The six small crystals and the six legs share their boxes.
+    # core: deep violet facets with a glow in the middle of every side, fracture lines, the insignia in the top
+    core = (0, 64, 8, 6, 12)
+    deep = (86, 54, 142)
+    facets(core, deep, 4)
+    for name, (x0, y0, x1, y1) in faces(*core).items():
+        if name in ("top", "bottom"):
+            continue
+        cx, cy = (x0 + x1 - 1) / 2.0, (y0 + y1 - 1) / 2.0
+        rx, ry = max(1.0, (x1 - x0) / 2.0), max(1.0, (y1 - y0) / 2.0)
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                d = (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2) ** 0.5
+                k = max(0.0, 1.0 - d * 1.15) * 0.85
+                if k > 0.05:
+                    r, g, b, a = img.getpixel((x, y))
+                    img.putpixel((x, y), lerp((r, g, b), glow, k))
+        veins(img, (x0, y0, x1, y1), shade(deep, 1.1), (255, 245, 255), 2, (3, 6))
+    # two glowing facets on its front, like eyes
+    fx0, fy0, fx1, fy1 = faces(*core)["front"]
+    rect(img, (fx0 + 1, fy0 + 2, fx0 + 3, fy0 + 4), (255, 255, 255, 255))
+    rect(img, (fx1 - 3, fy0 + 2, fx1 - 1, fy0 + 4), (255, 255, 255, 255))
+    # the underside dark, the top a clean facet for the insignia
+    bx0, by0, bx1, by1 = faces(*core)["bottom"]
+    noise_fill(img, shade(deep, 0.55), 0.15, (bx0, by0, bx1, by1))
+    tx0, ty0, tx1, ty1 = faces(*core)["top"]
+    noise_fill(img, shade(deep, 1.25), 0.1, (tx0, ty0, tx1, ty1))
+    outline(img, (tx0, ty0, tx1, ty1), shade(deep, 0.8))
+    insignia(img, (tx0 + tx1) // 2, ty0 + 3, rim=(50, 24, 90, 255))
+    # crystal bodies and tips: pale-lit amethyst prisms, fracture lines, white tips
+    bodies = ((0, 82, 4, 11, 4), (32, 82, 3, 8, 3), (32, 93, 3, 7, 3), (0, 97, 3, 6, 3), (40, 76, 2, 4, 2))
+    tips = ((40, 71, 2, 3, 2), (48, 71, 1, 3, 1), (52, 71, 1, 2, 1))
+    for part in bodies:
+        facets(part, crystal, 3)
+        paler(part, 0.35)
+        for name in ("front", "back", "left", "right"):
+            x0, y0, x1, y1 = faces(*part)[name]
+            if y1 - y0 >= 6:
+                x = rng.randrange(x0, x1)
+                for y in range(y0 + 2, y1 - 1):
+                    img.putpixel((x, y), fracture)
+                    x = min(x1 - 1, max(x0, x + rng.choice((-1, 0, 0, 1))))
+        bx0, by0, bx1, by1 = faces(*part)["bottom"]
+        noise_fill(img, shade(crystal, 0.5), 0.1, (bx0, by0, bx1, by1))
+    for part in tips:
+        facets(part, (226, 210, 252), 2, (1.05, 0.95, 0.82))
+        x0, y0, x1, y1 = faces(*part)["top"]
+        noise_fill(img, (252, 248, 255), 0.04, (x0, y0, x1, y1))
+        x0, y0, x1, y1 = faces(*part)["bottom"]
+        noise_fill(img, shade(crystal, 0.7), 0.1, (x0, y0, x1, y1))
+    # legs: dark violet at the hip, amethyst in the middle, a pale white-hot point
+    facets((40, 64, 3, 4, 3), deep, 3)
+    facets((52, 64, 2, 4, 2), crystal, 3)
+    facets((60, 64, 1, 4, 1), (214, 190, 250), 2, (1.05, 0.95, 0.85))
+    for part in ((40, 64, 3, 4, 3), (52, 64, 2, 4, 2), (60, 64, 1, 4, 1)):
+        x0, y0, x1, y1 = faces(*part)["bottom"]
+        noise_fill(img, (250, 244, 255), 0.04, (x0, y0, x1, y1))
+        if part[2] > 1:
+            for name in ("front", "back", "left", "right"):
+                x0, y0, x1, y1 = faces(*part)[name]
+                rect(img, (x0, y1 - 1, x1, y1), shade(crystal, 0.6))
     clear_hat(img)
     save(img, "entity/xenoform_prism.png")
 
@@ -1008,36 +1086,52 @@ def knell():
 
 
 def wyrm():
-    """Dark violet scales, pale belly plates, bone horns, bat wings with bones and torn edges, a finned tail, and the
-    insignia on the breast plates."""
+    """(0.19.75) Wyrm, a small four-legged dragon: dark violet scales in a brick pattern, pale belly plates under the
+    chest, belly, neck and tail, bone horns, teeth and claws, violet slit eyes, a ridge of bone spines, a tail ending in a
+    violet spade, and the insignia on the front of the chest. The man's parts are still painted (the first-person hand
+    is his arm). Drawn on its own random stream, then the shared one is left exactly where the old skin left it
+    (`stream_words` draws on), so the forms drawn after it come out as before."""
+    # how many 32-bit draws the shared stream advanced across the old skin (the forms drawn after it keep their speckle)
+    stream_words = 4902
+    saved = rng.getstate()
+    rng.seed(2629)
     img = new_skin()
     scale = (32, 24, 44)
     plate = (120, 100, 130)
     membrane = (112, 50, 152)
     bone = (190, 180, 170)
-    parts(img, scale, 0.25)
-    # scales: a brick pattern of lighter crescents on every face, belly plates on the front of the body and legs
-    for part in BASE_PARTS:
+    dark = (26, 14, 36, 255)
+    mouth = (104, 36, 66, 255)
+    violet = (210, 90, 240, 255)
+
+    def scales(part, belly=()):
+        """The brick of lighter crescents on every face of a box; the faces named in `belly` are pale plates instead."""
+        box(img, part, scale, 0.25)
         for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name == "front" and part in (BODY,) + LEGS:
-                for y in range(y0 + 1, y1 - 1, 3):
-                    rect(img, (x0 + 1, y, x1 - 1, y + 2), shade(plate, 0.9 + ((y - y0) // 3) % 2 * 0.12))
-                    rect(img, (x0 + 1, y + 2, x1 - 1, y + 3), shade(scale, 0.8))
+            if name in belly:
+                for y in range(y0, y1, 2):
+                    rect(img, (x0, y, x1, y + 1), shade(plate, (0.9 + ((y - y0) // 2) % 2 * 0.14) * LIGHT[name] ** 0.5))
+                    rect(img, (x0, y + 1, x1, min(y + 2, y1)), shade(scale, 0.8))
                 continue
             for y in range(y0, y1, 3):
                 for x in range(x0 + (y // 3) % 2 * 2, x1, 4):
                     rect(img, (x, y, min(x + 2, x1), y + 1), shade(scale, 1.35 * LIGHT[name]))
                     if x + 1 < x1 and y + 1 < y1:
                         img.putpixel((x + 1, y + 1), shade(scale, 0.7))
-    # spines down the back of the body and the head
+
+    def ridge(part):
+        """A darker band down the middle of a box's top, under the spines."""
+        x0, y0, x1, y1 = faces(*part)["top"]
+        rect(img, ((x0 + x1 - 1) // 2, y0, (x0 + x1 - 1) // 2 + 1, y1), shade(scale, 0.55))
+
+    # ---- the man's parts, still painted (the first-person hand is his arm) ----
+    for part in BASE_PARTS:
+        scales(part, ("front",) if part in (BODY,) + LEGS else ())
     for face_box in (faces(*BODY)["back"], faces(*HEAD)["back"]):
         x0, y0, x1, y1 = face_box
         for y in range(y0, y1, 2):
             rect(img, (x0 + 3, y, x0 + 5, y + 1), bone)
-    # talons
     claws(img, bone)
-    # head: a horned brow, violet slit eyes, nostrils and a jaw line of teeth
-    hx0, hy0, hx1, hy1 = front(HEAD)
     rect(img, (9, 9, 15, 10), shade(scale, 0.7))
     rect(img, (9, 10, 15, 13), shade(scale, 0.85))
     eyes(img, (210, 90, 240, 255), 11, wide=True, pupil=(20, 8, 24, 255))
@@ -1047,11 +1141,91 @@ def wyrm():
     for x in range(9, 15, 2):
         img.putpixel((x, 14), bone)
     chest_insignia(img, rim=(30, 14, 40, 255))
-    # extras: horns 2x2x7 at (0,64); tail 3x3x10 at (18,64); tip 2x2x8 at (0,78); wings 14x1x8 at (20,80);
-    # tail fin 1x4x3 at (44,64)
-    horns = (0, 64, 2, 2, 7)
-    box(img, horns, bone, 0.15)
-    for name, (x0, y0, x1, y1) in faces(*horns).items():
+
+    # ---- the dragon's boxes (u, v, w, h, d), all in rows 64-127 so nothing shares texels with the man's parts:
+    # torso 7x6x11 at (0,64); chest 7x7x4 (36,64); tail 4x4x7 (0,81); tail 3x3x7 (22,81); spade 1x5x5 (42,81);
+    # neck 3x3x6 (0,92); skull 5x4x5 (18,92); neck 3x3x5 (38,92); tail tip 2x2x6 (0,101); thigh 3x5x3 (16,101);
+    # jaw 3x1x6 (28,101); horn 2x2x5 (46,101); shin 2x5x2 (0,109); snout 3x2x4 (8,109); foot 3x2x4 (22,109);
+    # spade 5x1x4 (36,109); spike 1x2x2 (54,109). The four legs, the two horns and the nine spines each share one box's
+    # texels (same shape, same skin) ----
+    torso = (0, 64, 7, 6, 11)
+    chest = (36, 64, 7, 7, 4)
+    tail1 = (0, 81, 4, 4, 7)
+    tail2 = (22, 81, 3, 3, 7)
+    spade_v = (42, 81, 1, 5, 5)
+    neck1 = (0, 92, 3, 3, 6)
+    skull = (18, 92, 5, 4, 5)
+    neck2 = (38, 92, 3, 3, 5)
+    tail3 = (0, 101, 2, 2, 6)
+    thigh = (16, 101, 3, 5, 3)
+    jaw = (28, 101, 3, 1, 6)
+    horn = (46, 101, 2, 2, 5)
+    shin = (0, 109, 2, 5, 2)
+    snout = (8, 109, 3, 2, 4)
+    foot = (22, 109, 3, 2, 4)
+    spade_h = (36, 109, 5, 1, 4)
+    spike = (54, 109, 1, 2, 2)
+
+    # torso, chest, neck and tail: scaled above, pale plates on the belly side
+    for part in (torso, chest, neck1, neck2, tail1, tail2, tail3):
+        scales(part, ("bottom",))
+    for part in (torso, neck1, neck2, tail1, tail2):
+        ridge(part)
+    # the chest's front: plates across, and the insignia on it
+    cx0, cy0, cx1, cy1 = faces(*chest)["front"]
+    for y in range(cy0, cy1, 2):
+        rect(img, (cx0, y, cx1, y + 1), shade(plate, 0.95 + ((y - cy0) // 2) % 2 * 0.14))
+        rect(img, (cx0, y + 1, cx1, min(y + 2, cy1)), shade(scale, 0.8))
+    insignia(img, (cx0 + cx1) // 2, cy0 + 1, small=True, rim=(30, 14, 40, 255))
+    # a lighter stripe along each flank
+    for part in (torso,):
+        for name in ("left", "right"):
+            x0, y0, x1, y1 = faces(*part)[name]
+            rect(img, (x0, y0 + 2, x1, y0 + 3), shade(plate, 0.85))
+
+    # the head: scales, a darker brow, violet slit eyes at the sides of the face, a bone crest
+    scales(skull)
+    scales(snout)
+    sx0, sy0, sx1, sy1 = faces(*skull)["front"]
+    rect(img, (sx0, sy0, sx1, sy0 + 1), dark)
+    img.putpixel((sx0, sy0 + 1), violet)
+    img.putpixel((sx1 - 1, sy0 + 1), violet)
+    rx0, ry0, rx1, ry1 = faces(*skull)["right"]
+    rect(img, (rx0, ry0, rx1, ry0 + 1), shade(scale, 0.6))
+    rect(img, (rx1 - 3, ry0 + 1, rx1, ry0 + 2), violet)
+    img.putpixel((rx1 - 2, ry0 + 1), dark)
+    lx0, ly0, lx1, ly1 = faces(*skull)["left"]
+    rect(img, (lx0, ly0, lx1, ly0 + 1), shade(scale, 0.6))
+    rect(img, (lx0, ly0 + 1, lx0 + 3, ly0 + 2), violet)
+    img.putpixel((lx0 + 1, ly0 + 1), dark)
+    tx0, ty0, tx1, ty1 = faces(*skull)["top"]
+    rect(img, ((tx0 + tx1 - 1) // 2, ty0, (tx0 + tx1 - 1) // 2 + 1, ty1), shade(bone, 0.7))
+    # the skull's bottom row is the lip, dark
+    for name in ("front", "left", "right", "back"):
+        x0, y0, x1, y1 = faces(*skull)[name]
+        rect(img, (x0, y1 - 1, x1, y1), shade(scale, 0.55))
+    # the snout: nostrils, and a row of teeth along the upper lip
+    nx0, ny0, nx1, ny1 = faces(*snout)["front"]
+    img.putpixel((nx0, ny0), dark)
+    img.putpixel((nx1 - 1, ny0), dark)
+    for x in range(nx0, nx1, 2):
+        img.putpixel((x, ny1 - 1), bone)
+    for name in ("left", "right"):
+        x0, y0, x1, y1 = faces(*snout)[name]
+        for x in range(x0, x1, 2):
+            img.putpixel((x, y1 - 1), bone)
+    bx0, by0, bx1, by1 = faces(*snout)["bottom"]
+    rect(img, (bx0, by0, bx1, by1), mouth)
+    # the jaw: the inside of the mouth when it opens, with teeth along both edges; plates under it
+    scales(jaw, ("bottom",))
+    jx0, jy0, jx1, jy1 = faces(*jaw)["top"]
+    rect(img, (jx0, jy0, jx1, jy1), mouth)
+    for y in range(jy0 + 1, jy1, 2):
+        img.putpixel((jx0, y), bone)
+        img.putpixel((jx1 - 1, y), bone)
+    # the horns: bone, ridged
+    box(img, horn, bone, 0.15)
+    for name, (x0, y0, x1, y1) in faces(*horn).items():
         if name in ("top", "bottom"):
             for x in range(x0 + 1, x1, 2):
                 rect(img, (x, y0, x + 1, y1), shade(bone, 0.75))
@@ -1059,72 +1233,44 @@ def wyrm():
             for y in range(y0, y1):
                 for x in range(x0 + 1, x1, 2):
                     img.putpixel((x, y), shade(bone, 0.75))
-        if name in ("front",):
+        if name == "front":
             noise_fill(img, shade(bone, 0.6), 0.1, (x0, y0, x1, y1))
-    for part in ((18, 64, 3, 3, 10), (0, 78, 2, 2, 8)):
-        box(img, part, scale, 0.25)
+    # the spine ridge
+    box(img, spike, bone, 0.12)
+    for name, (x0, y0, x1, y1) in faces(*spike).items():
+        if name in ("front", "back", "left", "right"):
+            rect(img, (x0, y1 - 1, x1, y1), shade(bone, 0.65))
+
+    # the legs: scaled, a pale patch on the front of the thigh, claws and dark soles on the feet
+    for part in (thigh, shin, foot):
+        scales(part)
+    x0, y0, x1, y1 = faces(*thigh)["front"]
+    rect(img, (x0, y0 + 1, x1, y1 - 1), shade(plate, 0.8))
+    x0, y0, x1, y1 = faces(*shin)["front"]
+    rect(img, (x0, y0 + 1, x1, y1 - 1), shade(plate, 0.7))
+    for name, (x0, y0, x1, y1) in faces(*foot).items():
+        if name in ("front", "left", "right", "back"):
+            for x in range(x0, x1, 2):
+                img.putpixel((x, y1 - 1), bone)
+            for x in range(x0 + 1, x1, 2):
+                img.putpixel((x, y1 - 1), shade(scale, 0.5))
+        elif name == "bottom":
+            noise_fill(img, (36, 28, 42, 255), 0.2, (x0, y0, x1, y1))
+
+    # the tail's spade: a violet blade, bone along its edge, veined
+    for part in (spade_v, spade_h):
         for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name == "bottom":
-                for x in range(x0 + 1, x1, 3):
-                    rect(img, (x, y0, x + 2, y1), plate)
-            elif name == "top":
-                for x in range(x0, x1, 2):
-                    rect(img, (x, y0, x + 1, y1), bone)
+            vgrad(img, (x0, y0, x1, y1), shade(membrane, 1.1), shade(membrane, 0.7), 0.15)
+            if x1 - x0 > 1 and y1 - y0 > 1:
+                veins(img, (x0, y0, x1, y1), shade(membrane, 0.7), shade(membrane, 0.55), 2, (2, 4))
+                rect(img, (x0, y0, x1, y0 + 1), dark)
             else:
-                for x in range(x0, x1, 3):
-                    rect(img, (x, y0, x + 1, y1), shade(scale, 1.3))
-    wing = (20, 80, 14, 1, 8)
-    for name, (x0, y0, x1, y1) in faces(*wing).items():
-        vgrad(img, (x0, y0, x1, y1), shade(membrane, 1.15), shade(membrane, 0.75), 0.2)
-        if name in ("top", "bottom"):
-            # bones fanning from the shoulder (the inner edge), a torn trailing edge, veins between
-            for x in range(x0, x1, 4):
-                rect(img, (x, y0, x + 1, y1), (26, 14, 36, 255))
-            rect(img, (x0, y0, x1, y0 + 1), (26, 14, 36, 255))
-            veins(img, (x0, y0 + 1, x1, y1), shade(membrane, 0.7), shade(membrane, 0.55), 6, (3, 7))
-            for x in range(x0 + 1, x1, 4):
-                if rng.random() < 0.7:
-                    rect(img, (x, y1 - 1 - rng.randrange(0, 2), x + 2, y1), CLEAR)
-    fin = (44, 64, 1, 4, 3)
-    for name, (x0, y0, x1, y1) in faces(*fin).items():
-        vgrad(img, (x0, y0, x1, y1), shade(membrane, 1.1), shade(membrane, 0.7), 0.15)
-        if name in ("left", "right"):
-            rect(img, (x0, y0, x0 + 1, y1), (26, 14, 36, 255))
-    # (0.10.29) bigger two-part wings that wrap round it on the ground: each half 10x1x14 at (0,90), the inner and
-    # outer halves sharing it; a longer tail: base 3x3x13 at (0,106), middle 2x2x10 at (32,106), then the old tip.
-    # Its own random stream, so the forms drawn after it come out as before.
-    saved = rng.getstate()
-    rng.seed(2629)
-    wrng = rng
-    big_wing = (0, 90, 10, 1, 14)
-    for name, (x0, y0, x1, y1) in faces(*big_wing).items():
-        vgrad(img, (x0, y0, x1, y1), shade(membrane, 1.15), shade(membrane, 0.72), 0.2)
-        if name in ("top", "bottom"):
-            # a bone along the leading edge, finger bones fanning back, veins between, a torn trailing edge
-            rect(img, (x0, y0, x1, y0 + 1), (26, 14, 36, 255))
-            for x in range(x0, x1, 3):
-                for y in range(y0, y1 - 2):
-                    if (y - y0) < (y1 - y0) * (0.55 + 0.4 * ((x - x0) % 6 == 0)):
-                        img.putpixel((x, y), (40, 20, 52, 255))
-            veins(img, (x0, y0 + 1, x1, y1), shade(membrane, 0.7), shade(membrane, 0.55), 8, (3, 8))
-            for x in range(x0 + 1, x1, 3):
-                if wrng.random() < 0.7:
-                    rect(img, (x, y1 - 1 - wrng.randrange(0, 3), x + 2, y1), CLEAR)
-    for part in ((0, 106, 3, 3, 13), (32, 106, 2, 2, 10)):
-        box(img, part, scale, 0.25)
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name == "bottom":
-                for x in range(x0 + 1, x1, 3):
-                    rect(img, (x, y0, x + 2, y1), plate)
-            elif name == "top":
-                for x in range(x0, x1, 2):
-                    rect(img, (x, y0, x + 1, y1), bone)
-            else:
-                for x in range(x0, x1, 3):
-                    rect(img, (x, y0, x + 1, y1), shade(scale, 1.3))
-    rng.setstate(saved)
+                rect(img, (x0, y0, x1, y1), shade(bone, 0.5))
     clear_hat(img)
     save(img, "entity/xenoform_wyrm.png")
+    rng.setstate(saved)
+    for _ in range(stream_words):
+        rng.getrandbits(32)
 
 
 def nadir():
@@ -1736,10 +1882,18 @@ def gyre():
 
 
 def cortex():
-    """(0.18.103) Cortex, the thinking crab: coral-red plates edged dark, a cream belly, small black eyes, one big claw
-    and one small (pale-tipped), and an open skull where a pink brain shows, laced with glowing teal."""
+    """(0.18.103; 0.19.82 an eye fish) Cortex, the thinking eye: a coral-red plated hull with a cream belly, one big
+    cream eye with a teal iris and a black pupil, a cracked dome on its back where a pink brain laced with glowing teal
+    shows, bone-pale spikes with teal tips, and a tail of three shrinking plated segments ending in a coral fin. The man's
+    parts (hidden in the model) keep the old coral look for the first-person arm.
+    Boxes (rows 64-127; left and right spikes share one): hull 10x9x13 at (0,64); spike shaft 6x2x2 at (46,64); spike
+    tip 3x1x1 at (46,68); tail fin 1x8x4 at (46,70); eye 6x6x6 at (0,86); dome 6x3x6 at (24,86); brain 4x2x4 at (48,86);
+    spark 1x1x1 at (48,92); tail segments 7x6x5 at (0,98), 5x4x5 at (24,98), 3x3x5 at (44,98)."""
     img = new_skin()
     shell = (196, 78, 62)
+    teal = (110, 240, 230, 255)
+    dark = (80, 26, 22, 255)
+    cream = (236, 212, 180)
     parts(img, shell, 0.14, edge=0.7)
     bx0, by0, bx1, by1 = front(BODY)
     vgrad(img, (bx0 + 1, by0 + 2, bx1 - 1, by1 - 1), (236, 212, 180), (214, 186, 150), 0.08)
@@ -1747,16 +1901,104 @@ def cortex():
     eyes(img, (16, 12, 12, 255), y=12)
     rect(img, (10, 14, 14, 15), (120, 40, 34, 255))
     chest_insignia(img, rim=(80, 26, 22, 255))
-    # extras: big claw 5x5x5 at (0,64); small claw 3x3x3 at (24,64); brain 6x3x6 at (0,76)
-    for part in ((0, 64, 5, 5, 5), (24, 64, 3, 3, 3)):
-        box(img, part, (214, 90, 70), 0.12, edge=0.7)
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name in ("front", "left", "right", "back"):
-                rect(img, (x0, y1 - 1, x1, y1), (244, 226, 200, 255))
-    brain = (0, 76, 6, 3, 6)
+
+    # the hull: plated coral, a cream belly, seams along the sides, dark sockets where the spikes grow
+    hull = (0, 64, 10, 9, 13)
+    box(img, hull, shell, 0.14, edge=0.7)
+    hf = faces(*hull)
+    x0, y0, x1, y1 = hf["bottom"]
+    noise_fill(img, cream, 0.1, (x0 + 1, y0 + 1, x1 - 1, y1 - 1))
+    for name in ("left", "right"):
+        x0, y0, x1, y1 = hf[name]
+        vgrad(img, (x0 + 1, y0 + 6, x1 - 1, y1 - 1), (214, 140, 112), cream, 0.08)
+        for y in (y0 + 3, y0 + 6):
+            rect(img, (x0 + 1, y, x1 - 1, y + 1), shade(shell + (255,), 0.62))
+        # a spike's socket: a 3x3 dark patch where its pivot sits (z -3.5, 0.5, 4.5; y -0.5, 0.8, -0.3; the right face has the front at its right edge, the left face at its left)
+        for z, y in ((-3.5, -0.5), (0.5, 0.8), (4.5, -0.3)):
+            col = int(round(x1 - (z + 6.5) - 1.5)) if name == "right" else int(round(x0 + (z + 6.5) - 1.5))
+            row = int(round(y0 + (y + 4.5) - 1.5))
+            rect(img, (col, row, col + 3, row + 3), dark)
+            img.putpixel((col + 1, row + 1), shade(teal, 0.7))
+    # the front: the eye's socket, a dark ring round where the eye comes out
+    x0, y0, x1, y1 = hf["front"]
+    noise_fill(img, shade(shell + (255,), 0.8), 0.12, (x0, y0, x1, y1))
+    outline(img, (x0, y0, x1, y1), shade(shell + (255,), 0.55))
+    rect(img, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), dark)
+    # the back: darker, with a dark socket where the tail grows
+    x0, y0, x1, y1 = hf["back"]
+    noise_fill(img, shade(shell + (255,), 0.74), 0.12, (x0, y0, x1, y1))
+    outline(img, (x0, y0, x1, y1), shade(shell + (255,), 0.5))
+    rect(img, (x0 + 2, y0 + 2, x1 - 2, y1 - 2), dark)
+    # the top: plate seams across it, the insignia at the rear (the top face's first rows are the hull's tail end; its
+    # rows 0-6 lie behind the dome, which covers rows 6-12, so the insignia's rim sits in rows 0 and 6, centred 3 behind the middle)
+    x0, y0, x1, y1 = hf["top"]
+    for y in (y0 + 8, y0 + 10):
+        rect(img, (x0 + 1, y, x1 - 1, y + 1), shade(shell + (255,), 0.7))
+    insignia(img, (x0 + x1) // 2, y0 + 1, small=True, rim=dark)
+
+    # the eye: cream, a teal iris ringed dark, a black pupil with a glint, red veins in the corners; the lid is dark coral
+    eye = (0, 86, 6, 6, 6)
+    box(img, eye, (150, 56, 46), 0.12, edge=0.7)
+    x0, y0, x1, y1 = faces(*eye)["front"]
+    noise_fill(img, (240, 234, 216), 0.06, (x0, y0, x1, y1))
+    outline(img, (x0, y0, x1, y1), (90, 34, 30, 255))
+    rect(img, (x0 + 2, y0 + 1, x1 - 2, y1 - 1), (110, 240, 230, 255))
+    rect(img, (x0 + 1, y0 + 2, x1 - 1, y1 - 2), (110, 240, 230, 255))
+    rect(img, (x0 + 2, y0 + 2, x1 - 2, y1 - 2), (12, 10, 14, 255))
+    img.putpixel((x0 + 2, y0 + 2), (255, 255, 255, 255))
+    for px, py in ((x0, y0 + 1), (x1 - 1, y1 - 2), (x0, y1 - 3)):
+        img.putpixel((px, py), (200, 60, 60, 255))
+
+    # the dome: lighter coral, cracked, glowing teal in the cracks, its top an open ring round the brain
+    dome = (24, 86, 6, 3, 6)
+    box(img, dome, (214, 90, 70), 0.12, edge=0.7)
+    for name, b in faces(*dome).items():
+        if name != "bottom":
+            veins(img, b, (60, 20, 18, 255), teal, (b[2] - b[0]) // 2 + 1, length=(2, 5))
+    x0, y0, x1, y1 = faces(*dome)["top"]
+    rect(img, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), (70, 20, 26, 255))
+
+    # the brain: pink, veined with glowing teal
+    brain = (48, 86, 4, 2, 4)
     box(img, brain, (232, 150, 170), 0.12)
     for name, b in faces(*brain).items():
-        veins(img, b, (200, 110, 140, 255), (110, 240, 230, 255), (b[2] - b[0]) // 2 + 1, length=(2, 5))
+        veins(img, b, (200, 110, 140, 255), teal, (b[2] - b[0]) // 2 + 1, length=(2, 4))
+
+    # a spark: one bright texel on every face
+    rect(img, (48, 92, 52, 94), (214, 255, 250, 255))
+
+    # the spikes: pale bone shafts ringed darker, glowing teal tips
+    shaft = (46, 64, 6, 2, 2)
+    box(img, shaft, (232, 222, 196), 0.1, edge=0.8)
+    for name, (x0, y0, x1, y1) in faces(*shaft).items():
+        if name in ("front", "back", "top", "bottom", "left", "right") and x1 - x0 > 2:
+            for x in range(x0 + 2, x1, 3):
+                rect(img, (x, y0, x + 1, y1), shade((232, 222, 196), 0.62))
+    tip = (46, 68, 3, 1, 1)
+    box(img, tip, (110, 240, 230), 0.08)
+    rect(img, (46, 68, 54, 70), shade(teal, 0.9))
+
+    # the tail fin: coral, with pale ribs down its broad sides
+    fin = (46, 70, 1, 8, 4)
+    box(img, fin, (214, 90, 70), 0.14, edge=0.75)
+    for name in ("left", "right"):
+        x0, y0, x1, y1 = faces(*fin)[name]
+        for x in range(x0 + 1, x1, 2):
+            rect(img, (x, y0 + 1, x + 1, y1 - 1), (244, 190, 160, 255))
+
+    # the tail: three plated segments, cream underneath, seamed across
+    for seg, base in (((0, 98, 7, 6, 5), (196, 78, 62)), ((24, 98, 5, 4, 5), (188, 72, 58)), ((44, 98, 3, 3, 5), (178, 66, 54))):
+        box(img, seg, base, 0.14, edge=0.7)
+        sf = faces(*seg)
+        x0, y0, x1, y1 = sf["bottom"]
+        noise_fill(img, cream, 0.1, (x0 + 1, y0 + 1, x1 - 1, y1 - 1))
+        for name in ("top", "left", "right"):
+            x0, y0, x1, y1 = sf[name]
+            for k in (2, 4):
+                if name == "top":
+                    rect(img, (x0 + 1, y1 - 1 - k, x1 - 1, y1 - k), shade(base + (255,), 0.62))
+                else:
+                    rect(img, (x0 + k, y0 + 1, x0 + k + 1, y1 - 1), shade(base + (255,), 0.62))
     clear_hat(img)
     save(img, "entity/xenoform_cortex.png")
 
@@ -2111,38 +2353,85 @@ def swathe():
 
 def blight():
     """(0.18.107, Scan B) Blight, the wither alien: coal-black bone with grey ash on top, a ribbed chest, three
-    skulls (the side ones on the shoulders) with pale glowing eyes, a ribbed tail."""
+    skulls with pale glowing eyes, a ribbed tail. (0.19.82) The Wither floating: a middle skull (the head box, 8x8x8
+    at (0,0)) and two side skulls 6x6x6 at (0,64) on a crossbar 22x3x3 at (0,80), over a chest 6x7x4 at (0,88) with the
+    insignia on its front, three ribs 14x1x2 / 12x1x2 / 10x1x2 at (0,100) / (0,104) / (0,108) with 1x1x3 tips at
+    (32,100), and a tail of 3x5x3 at (28,104), 2x4x2 at (42,104) and 1x4x1 at (52,104). The man's parts are still
+    painted (the first-person hand)."""
     img = new_skin()
     coal = (58, 52, 64)
+    bone = (96, 90, 104, 255)
+    ash = (112, 108, 118)
+    dark = (20, 16, 24, 255)
+    pale = (220, 236, 255, 255)
     parts(img, coal, 0.14, edge=0.7)
     bx0, by0, bx1, by1 = front(BODY)
     for y in range(by0 + 1, by1 - 3, 2):
-        rect(img, (bx0 + 1, y, bx1 - 1, y + 1), (96, 90, 104, 255))
+        rect(img, (bx0 + 1, y, bx1 - 1, y + 1), bone)
     rect(img, ((bx0 + bx1) // 2 - 1, by0, (bx0 + bx1) // 2 + 1, by1), (86, 80, 94, 255))
-
-    def skull_face(x0, y0):
-        # sockets with pale light, a dark grin
-        rect(img, (x0 + 1, y0 + 2, x0 + 3, y0 + 4), (20, 16, 24, 255))
-        rect(img, (x0 + 5, y0 + 2, x0 + 7, y0 + 4) if x0 == 8 else (x0 + 3, y0 + 2, x0 + 5, y0 + 4), (20, 16, 24, 255))
-        img.putpixel((x0 + 2, y0 + 3), (220, 236, 255, 255))
-        img.putpixel((x0 + 6 if x0 == 8 else x0 + 4, y0 + 3), (220, 236, 255, 255))
-
-    skull_face(8, 8)
-    rect(img, (10, 14, 14, 15), (20, 16, 24, 255))
     claws(img, (24, 20, 28, 255))
-    chest_insignia(img, rim=(20, 16, 24, 255))
-    # extras: shoulder skulls 6x6x6 at (0,64); tail 3x10x3 at (24,64)
-    skull = (0, 64, 6, 6, 6)
-    box(img, skull, (70, 64, 76), 0.12, edge=0.7)
-    fx0, fy0, fx1, fy1 = faces(*skull)["front"]
-    skull_face(fx0, fy0)
-    rect(img, (fx0 + 2, fy0 + 5, fx1 - 2, fy0 + 6), (20, 16, 24, 255))
-    tail = (24, 64, 3, 10, 3)
-    box(img, tail, (62, 56, 68), 0.12)
-    for name, (x0, y0, x1, y1) in faces(*tail).items():
-        if name in ("front", "back", "left", "right"):
-            for y in range(y0 + 1, y1, 2):
-                rect(img, (x0, y, x1, y + 1), (96, 90, 104, 255))
+    chest_insignia(img, rim=dark)
+
+    def skull_face(face, big):
+        # dark sockets with a pale light in each, a dark nose and grin (symmetric, so the mirrored skull matches)
+        x0, y0, x1, y1 = face
+        if big:
+            rect(img, (x0 + 1, y0 + 2, x0 + 3, y0 + 4), dark)
+            rect(img, (x1 - 3, y0 + 2, x1 - 1, y0 + 4), dark)
+            img.putpixel((x0 + 2, y0 + 3), pale)
+            img.putpixel((x1 - 3, y0 + 3), pale)
+            rect(img, (x0 + 3, y0 + 4, x0 + 5, y0 + 6), dark)
+            rect(img, (x0 + 1, y0 + 6, x1 - 1, y0 + 8), dark)
+            for x in range(x0 + 2, x1 - 2, 2):
+                img.putpixel((x, y0 + 7), bone)
+        else:
+            rect(img, (x0 + 1, y0 + 2, x0 + 3, y0 + 4), dark)
+            rect(img, (x0 + 3, y0 + 2, x0 + 5, y0 + 4), dark)
+            img.putpixel((x0 + 1, y0 + 3), pale)
+            img.putpixel((x0 + 4, y0 + 3), pale)
+            rect(img, (x0 + 2, y0 + 5, x1 - 2, y0 + 6), dark)
+
+    def skull(part, big):
+        box(img, part, (70, 64, 76), 0.12, edge=0.7)
+        f = faces(*part)
+        noise_fill(img, ash, 0.2, f["top"])
+        veins(img, f["back"], (30, 26, 36), (44, 40, 50), 3)
+        veins(img, f["top"], (84, 80, 92), (130, 126, 136), 2)
+        skull_face(f["front"], big)
+
+    skull(HEAD, True)
+    skull((0, 64, 6, 6, 6), False)
+    # the crossbar: a vertebra seam every third pixel, ash on top
+    bar = (0, 80, 22, 3, 3)
+    box(img, bar, (60, 54, 66), 0.12, edge=0.7)
+    bf = faces(*bar)
+    noise_fill(img, ash, 0.2, bf["top"])
+    for name in ("front", "back"):
+        x0, y0, x1, y1 = bf[name]
+        for x in range(x0 + 2, x1, 3):
+            rect(img, (x, y0, x + 1, y1), shade(coal + (255,), 0.6))
+    # the chest: the insignia small on its 6x7 front (a bone strip down the spare column), rib seams on its sides
+    chest = (0, 88, 6, 7, 4)
+    box(img, chest, (62, 56, 68), 0.12, edge=0.7)
+    cf = faces(*chest)
+    fx0, fy0, fx1, fy1 = cf["front"]
+    rect(img, (fx0, fy0, fx0 + 1, fy1), bone)
+    insignia(img, fx0 + 3, fy0 + 1, small=True, rim=dark)
+    for name in ("left", "right", "back"):
+        x0, y0, x1, y1 = cf[name]
+        for y in range(y0 + 1, y1, 2):
+            rect(img, (x0, y, x1, y + 1), bone)
+    noise_fill(img, ash, 0.2, cf["top"])
+    # the ribs and their tips: pale bone
+    for rib in ((0, 100, 14, 1, 2), (0, 104, 12, 1, 2), (0, 108, 10, 1, 2), (32, 100, 1, 1, 3)):
+        box(img, rib, bone[:3], 0.1, edge=0.8)
+    # the tail: ringed, darker towards the tip
+    for part, base in (((28, 104, 3, 5, 3), (62, 56, 68)), ((42, 104, 2, 4, 2), (54, 48, 60)), ((52, 104, 1, 4, 1), (46, 40, 52))):
+        box(img, part, base, 0.12)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                for y in range(y0 + 1, y1, 2):
+                    rect(img, (x0, y, x1, y + 1), bone)
     clear_hat(img)
     save(img, "entity/xenoform_blight.png")
 
@@ -2519,10 +2808,21 @@ def tusk():
 
 
 def talon():
-    """(0.18.109, Scan C) Talon, the raptor: brown feathers barred paler, a white-feathered head, fierce yellow eyes,
-    a hooked yellow beak dark at the tip, broad barred wings, a fanned tail, yellow scaled legs with black talons."""
+    """(0.18.109, Scan C; 0.19.75 a hawk) Talon, the raptor: brown feathers barred paler, a cream barred breast with the
+    insignia on it, a white-feathered head with a dark brow and fierce yellow eyes, a hooked yellow beak dark at the tip,
+    broad barred wings with long dark-tipped flight feathers, a fanned barred tail, feathered thighs and yellow scaled
+    legs with black talons. The man's parts (rows 0-63) stay, hidden, for the first-person arm (his wing). Boxes: torso
+    7x10x5 at (0,64), head 5x7x5 at (24,64), beak 2x2x3 at (44,64), hook 2x3x2 at (54,64), brow 5x1x1 at (44,70), wing
+    arm 7x5x1 at (0,80), hand 3x4x1 at (16,80), flight feather 8x2x1 at (24,80), tail feather 2x9x1 at (42,80), thigh
+    3x4x3 at (0,90), shin 2x6x2 at (12,90), foot 2x1x2 at (20,90), toe 1x1x4 at (28,90); the left side mirrors the right's."""
     img = new_skin()
     brown = (130, 88, 52)
+    dark = (84, 56, 34, 255)
+    pale = (186, 150, 108, 255)
+    cream = (232, 222, 198)
+    yellow = (214, 180, 60)
+    black = (20, 16, 14, 255)
+    # the man's parts, hidden: his arms are the first-person wing (barred, the last rows dark feather tips, then talons)
     parts(img, brown, 0.14, which=(BODY, RARM, LARM))
     for part in (BODY, RARM, LARM):
         for name, (x0, y0, x1, y1) in faces(*part).items():
@@ -2530,7 +2830,11 @@ def talon():
                 continue
             for y in range(y0 + 2, y1, 3):
                 for x in range(x0, x1, 2):
-                    img.putpixel((x, y), (186, 150, 108, 255))
+                    img.putpixel((x, y), pale)
+    for part in ARMS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y1 - 3, x1, y1), dark)
     parts(img, (236, 232, 222), 0.06, which=(HEAD,))
     parts(img, (214, 180, 60), 0.12, which=LEGS)
     for part in LEGS:
@@ -2539,27 +2843,168 @@ def talon():
                 rect(img, (x0, y0, x1, y0 + 4), shade(brown + (255,), 0.9))
     eyes(img, (250, 210, 40, 255), y=11, wide=True, pupil=(10, 10, 10, 255))
     rect(img, (8, 10, 16, 11), (110, 96, 80, 255))
-    claws(img, (20, 18, 16, 255), which=LEGS)
+    claws(img, black, which=LEGS + ARMS)
     chest_insignia(img, rim=(70, 46, 26, 255))
-    # extras: beak 2x2x3 at (0,64); wings 1x10x6 at (12,64); tail fan 6x1x5 at (0,82)
-    beak = (0, 64, 2, 2, 3)
+
+    # ---- the bird ----
+    torso = (0, 64, 7, 10, 5)
+    box(img, torso, brown, 0.14)
+    tf = faces(*torso)
+    # the breast: cream, barred in brown, the small insignia on it
+    fx0, fy0, fx1, fy1 = tf["front"]
+    vgrad(img, (fx0, fy0, fx1, fy1), cream, (206, 176, 132), 0.08)
+    for y in range(fy0 + 1, fy1, 2):
+        for x in range(fx0, fx1):
+            if (x + y) % 3:
+                img.putpixel((x, y), (158, 116, 76, 255))
+    insignia(img, fx0 + 3, fy0 + 3, small=True, rim=(70, 46, 26, 255))
+    # the sides shade from brown to cream toward the belly; the back is brown, scalloped paler
+    for name in ("left", "right"):
+        x0, y0, x1, y1 = tf[name]
+        rect(img, (x0, y1 - 3, x1, y1), shade(cream, 0.85))
+        speckle(img, (x0, y0, x1, y1 - 3), pale, 4)
+    bx0, by0, bx1, by1 = tf["back"]
+    for y in range(by0 + 1, by1, 2):
+        for x in range(bx0 + (y // 2) % 2, bx1, 2):
+            img.putpixel((x, y), pale)
+    noise_fill(img, shade(cream, 0.8), 0.1, tf["bottom"])
+
+    head = (24, 64, 5, 7, 5)
+    box(img, head, (236, 232, 222), 0.06)
+    hf = faces(*head)
+    # a brown crown and nape, streaked
+    for name in ("top", "back"):
+        b = hf[name]
+        noise_fill(img, (150, 108, 70), 0.14, b)
+        speckle(img, b, (236, 232, 222, 255), (b[2] - b[0]) * (b[3] - b[1]) // 5)
+    for name in ("left", "right", "front"):
+        x0, y0, x1, y1 = hf[name]
+        speckle(img, (x0, y0, x1, y1 - 2), (170, 130, 92, 255), 4)
+    # fierce yellow eyes at the edges of the front, wrapping round the sides
+    fx0, fy0, fx1, fy1 = hf["front"]
+    for x in (fx0, fx1 - 1):
+        rect(img, (x, fy0 + 2, x + 1, fy0 + 4), (250, 210, 40, 255))
+    rx0, ry0, rx1, ry1 = hf["right"]
+    lx0, ly0, lx1, ly1 = hf["left"]
+    rect(img, (rx1 - 2, ry0 + 2, rx1, ry0 + 4), (250, 210, 40, 255))
+    rect(img, (lx0, ly0 + 2, lx0 + 2, ly0 + 4), (250, 210, 40, 255))
+    img.putpixel((rx1 - 2, ry0 + 3), (10, 10, 10, 255))
+    img.putpixel((lx0 + 1, ly0 + 3), (10, 10, 10, 255))
+    img.putpixel((fx0, fy0 + 3), (10, 10, 10, 255))
+    img.putpixel((fx1 - 1, fy0 + 3), (10, 10, 10, 255))
+
+    beak = (44, 64, 2, 2, 3)
     box(img, beak, (232, 196, 60), 0.08)
-    bx0, by0, bx1, by1 = faces(*beak)["front"]
-    rect(img, (bx0, by1 - 1, bx1, by1), (40, 30, 20, 255))
-    for part in ((12, 64, 1, 10, 6), (0, 82, 6, 1, 5)):
-        box(img, part, (110, 74, 44), 0.12)
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            for y in range(y0 + 1, y1, 2):
-                rect(img, (x0, y, x1, y + 1), (176, 140, 98, 255))
+    bf = faces(*beak)
+    rect(img, bf["front"], (46, 36, 24, 255))
+    x0, y0, x1, y1 = bf["right"]
+    rect(img, (x1 - 1, y0, x1, y1), (46, 36, 24, 255))
+    rect(img, (x0, y1 - 1, x1, y1), (150, 120, 40, 255))
+    x0, y0, x1, y1 = bf["left"]
+    rect(img, (x0, y0, x0 + 1, y1), (46, 36, 24, 255))
+    rect(img, (x0, y1 - 1, x1, y1), (150, 120, 40, 255))
+    x0, y0, x1, y1 = bf["top"]
+    rect(img, (x0, y1 - 1, x1, y1), (46, 36, 24, 255))
+    # the cere at the beak's root, deeper yellow
+    rect(img, (x0, y0, x1, y0 + 1), (240, 170, 30, 255))
+    hook = (54, 64, 2, 3, 2)
+    box(img, hook, (60, 48, 32), 0.1)
+    rect(img, faces(*hook)["top"], (232, 196, 60, 255))
+    box(img, (44, 70, 5, 1, 1), (84, 56, 34), 0.1)
+
+    # the wing: the underside (the arm's front) cream and barred, the upper side brown scalloped pale, a dark trailing edge
+    arm = (0, 80, 7, 5, 1)
+    box(img, arm, (122, 82, 48), 0.14)
+    af = faces(*arm)
+    x0, y0, x1, y1 = af["front"]
+    vgrad(img, (x0, y0, x1, y1), cream, (190, 160, 118), 0.08)
+    for x in range(x0 + 1, x1, 2):
+        rect(img, (x, y0 + 2, x + 1, y1), (150, 110, 72, 255))
+    rect(img, (x0, y1 - 1, x1, y1), dark)
+    x0, y0, x1, y1 = af["back"]
+    for y in range(y0 + 1, y1 - 1, 2):
+        for x in range(x0 + (y // 2) % 2, x1, 2):
+            img.putpixel((x, y), pale)
+    rect(img, (x0, y1 - 1, x1, y1), dark)
+    rect(img, af["top"], shade(pale[:3], 1.0))
+    rect(img, af["bottom"], dark)
+    hand = (16, 80, 3, 4, 1)
+    box(img, hand, (110, 74, 44), 0.14)
+    x0, y0, x1, y1 = faces(*hand)["front"]
+    vgrad(img, (x0, y0, x1, y1), (214, 192, 156), (170, 140, 100), 0.08)
+    rect(img, (x0, y1 - 1, x1, y1), dark)
+    for name, (x0, y0, x1, y1) in faces(*hand).items():
+        if name == "back":
+            rect(img, (x0, y1 - 1, x1, y1), dark)
+    # a long primary: brown, barred pale, the tip (the outer end) dark; the front face's outer end is its left
+    feather = (24, 80, 8, 2, 1)
+    box(img, feather, (110, 74, 44), 0.12)
+    ff = faces(*feather)
+    for name in ("front", "back", "top", "bottom"):
+        x0, y0, x1, y1 = ff[name]
+        for x in (x0 + 3, x0 + 6) if name != "back" else (x0 + 1, x0 + 4):
+            rect(img, (x, y0, x + 1, y1), pale)
+    x0, y0, x1, y1 = ff["front"]
+    rect(img, (x0, y0, x0 + 2, y1), dark)
+    x0, y0, x1, y1 = ff["top"]
+    rect(img, (x0, y0, x0 + 2, y1), dark)
+    x0, y0, x1, y1 = ff["bottom"]
+    rect(img, (x0, y0, x0 + 2, y1), dark)
+    x0, y0, x1, y1 = ff["back"]
+    rect(img, (x1 - 2, y0, x1, y1), dark)
+    rect(img, ff["right"], dark)
+    rect(img, ff["left"], dark)
+
+    # a tail feather: base to tip down the image: pale bars, a dark band, a white tip
+    tail = (42, 80, 2, 9, 1)
+    box(img, tail, (122, 82, 48), 0.12)
+    for name, (x0, y0, x1, y1) in faces(*tail).items():
+        if name in ("top", "bottom"):
+            continue
+        for y in (y0 + 2, y0 + 4):
+            rect(img, (x0, y, x1, y + 1), pale)
+        rect(img, (x0, y1 - 3, x1, y1 - 1), dark)
+        rect(img, (x0, y1 - 1, x1, y1), (236, 232, 222, 255))
+    rect(img, faces(*tail)["bottom"], (236, 232, 222, 255))
+
+    # legs: feathered thighs, yellow scaly shins and feet, black talons
+    thigh = (0, 90, 3, 4, 3)
+    box(img, thigh, (206, 168, 120), 0.12)
+    for name, b in faces(*thigh).items():
+        speckle(img, b, (140, 100, 64, 255), (b[2] - b[0]) * (b[3] - b[1]) // 4)
+    shin = (12, 90, 2, 6, 2)
+    box(img, shin, yellow, 0.1)
+    for name, (x0, y0, x1, y1) in faces(*shin).items():
+        if name in ("top", "bottom"):
+            continue
+        for y in range(y0 + 1, y1, 2):
+            rect(img, (x0, y, x1, y + 1), shade(yellow, 0.78))
+    box(img, (20, 90, 2, 1, 2), yellow, 0.1)
+    toe = (28, 90, 1, 1, 4)
+    box(img, toe, yellow, 0.1)
+    tof = faces(*toe)
+    rect(img, tof["front"], black)
+    x0, y0, x1, y1 = tof["right"]
+    rect(img, (x1 - 1, y0, x1, y1), black)
+    x0, y0, x1, y1 = tof["left"]
+    rect(img, (x0, y0, x0 + 1, y1), black)
+    for name in ("top", "bottom"):
+        x0, y0, x1, y1 = tof[name]
+        rect(img, (x0, y0, x1, y0 + 1), black)
+        rect(img, (x0, y1 - 1, x1, y1), black)
     clear_hat(img)
     save(img, "entity/xenoform_talon.png")
 
 
 def murk():
-    """(0.18.111, Scan D) Murk, the ink squid: soft purple-grey, mottled darker, a paler belly, big black eyes with a
-    pale ring, a long mantle and pale-suckered tentacles."""
+    """(0.18.111, Scan D; 0.19.82 a real squid) Murk, the ink squid: soft purple-grey, mottled darker, a paler belly,
+    big black eyes with a pale ring, a long tapering mantle with a fin either side of its tail, a dark beak ringed by
+    eight pale-suckered tentacles. The man's parts keep the old paint (the first-person hand); the squid's boxes are in
+    rows 64-107."""
     img = new_skin()
     skin = (106, 88, 120)
+    dark = (70, 54, 86, 255)
+    pale = (176, 160, 186)
     parts(img, skin, 0.12)
     for part in BASE_PARTS:
         for name, b in faces(*part).items():
@@ -2572,26 +3017,101 @@ def murk():
     rect(img, (13, 11, 15, 13), (10, 8, 14, 255))
     claws(img, (70, 56, 86, 255))
     chest_insignia(img, rim=(50, 38, 64, 255))
-    # extras: mantle 6x8x4 at (0,64); tentacles 1x6x1 at (20,64)
-    mantle = (0, 64, 6, 8, 4)
-    box(img, mantle, (96, 78, 112), 0.14)
-    for name, b in faces(*mantle).items():
-        speckle(img, b, (70, 54, 86, 255), 6)
-    tent = (20, 64, 1, 6, 1)
-    box(img, tent, (120, 100, 134), 0.08)
-    for name, (x0, y0, x1, y1) in faces(*tent).items():
-        if name == "front":
-            for y in range(y0 + 1, y1, 2):
-                img.putpixel((x0, y), (226, 214, 232, 255))
+
+    # (0.19.82) the squid, every box in rows 64-107: mantle sections 7x6x8 (0,64), 6x5x6 (0,80), 4x4x5 (26,80), 2x2x3
+    # (46,80); head 6x5x5 (32,64); fin 5x1x4 (0,94); tentacle joints 2x2x4 (20,94) and 1x1x4 (34,94); eye 1x4x4 (46,94);
+    # beak 2x2x2 (46,104)
+    def mottled(part, base, blotches=5, spots=6):
+        """The hide: lit per face, speckled dark, with a few larger blotches on top and the sides, a pale belly below."""
+        box(img, part, base, 0.14)
+        f = faces(*part)
+        for name in ("top", "left", "right", "back"):
+            x0, y0, x1, y1 = f[name]
+            speckle(img, f[name], dark, max(2, (x1 - x0) * (y1 - y0) // spots))
+            if name in ("top", "back"):
+                for _ in range(blotches):
+                    bx, by = rng.randrange(x0, x1), rng.randrange(y0, y1)
+                    rect(img, (bx, by, min(x1, bx + 2), min(y1, by + rng.choice((1, 2)))), shade(dark, 1.05))
+        vgrad(img, f["bottom"], pale, shade(pale + (255,), 0.9)[:3], 0.06)
+        # the belly colour wraps a little way up the sides
+        for name in ("front", "left", "right", "back"):
+            x0, y0, x1, y1 = f[name]
+            vgrad(img, (x0, y1 - 1, x1, y1), pale, pale, 0.05)
+
+    m0 = (0, 64, 7, 6, 8)
+    mottled(m0, (98, 80, 114), blotches=7, spots=5)
+    # the xeno insignia on the back of the first section, where the hidden body's plate lies (its centre row 2.5 px
+    # behind the pivot, PLATE_Z: the top face runs from the tail end at its first row to the head end at its last)
+    tx0, ty0, tx1, ty1 = faces(*m0)["top"]
+    insignia(img, (tx0 + tx1) // 2, ty0 + 1, small=True, rim=(50, 38, 64, 255))
+    mottled((0, 80, 6, 5, 6), (92, 74, 108), blotches=5, spots=5)
+    mottled((26, 80, 4, 4, 5), (86, 68, 102), blotches=3, spots=6)
+    tip = (46, 80, 2, 2, 3)
+    mottled(tip, (80, 62, 96), blotches=0, spots=8)
+    # the tail's end is darkest
+    tf = faces(*tip)
+    rect(img, tf["back"], shade((80, 62, 96, 255), 0.7))
+
+    # the head: a shade lighter than the mantle, a dark ring round the beak on its front
+    head = (32, 64, 6, 5, 5)
+    mottled(head, (112, 94, 126), blotches=2, spots=7)
+    hx0, hy0, hx1, hy1 = faces(*head)["front"]
+    rect(img, (hx0 + 1, hy0 + 1, hx1 - 1, hy1 - 1), (62, 46, 76, 255))
+    # the eyes: black with a pale ring on the face that looks out, a glint in the corner (both side faces painted, so the mirrored one reads)
+    eye = (46, 94, 1, 4, 4)
+    for name, b in faces(*eye).items():
+        rect(img, b, (10, 8, 14, 255))
+    for name in ("right", "left"):
+        x0, y0, x1, y1 = faces(*eye)[name]
+        outline(img, (x0, y0, x1, y1), (214, 206, 226, 255))
+        img.putpixel((x0 + 1, y0 + 1), (244, 240, 250, 255))
+        rect(img, (x0 + 1, y0 + 2, x1 - 1, y0 + 3), (36, 28, 44, 255))
+
+    # the beak
+    beak = (46, 104, 2, 2, 2)
+    box(img, beak, (44, 32, 50), 0.1)
+    bf = faces(*beak)["front"]
+    rect(img, (bf[0], bf[1] + 1, bf[2], bf[3]), (18, 12, 22, 255))
+
+    # the fins: pale and thin, veined, a pale rim
+    fin = (0, 94, 5, 1, 4)
+    box(img, fin, (146, 126, 162), 0.1)
+    for name, b in faces(*fin).items():
+        if name in ("top", "bottom"):
+            veins(img, b, (116, 98, 134), (176, 158, 192), 3, length=(2, 5))
+            outline(img, b, (186, 170, 200, 255))
+
+    # the tentacles: mottled on top, pale and suckered underneath, a dark tip
+    for part, base in (((20, 94, 2, 2, 4), (118, 98, 132)), ((34, 94, 1, 1, 4), (130, 110, 144))):
+        box(img, part, base, 0.1)
+        f = faces(*part)
+        for name in ("top", "left", "right"):
+            speckle(img, f[name], dark, max(1, (f[name][2] - f[name][0]) * (f[name][3] - f[name][1]) // 5))
+        bx0, by0, bx1, by1 = f["bottom"]
+        vgrad(img, f["bottom"], (206, 192, 216), (190, 174, 202), 0.04)
+        # suckers: a pale dot every other row, staggered across the two
+        for i, y in enumerate(range(by0, by1, 2)):
+            img.putpixel((bx0 + (i % 2) * (bx1 - bx0 - 1), y), (244, 234, 248, 255))
+        if part[2] == 1:
+            rect(img, f["front"], (60, 44, 74, 255))
     clear_hat(img)
     save(img, "entity/xenoform_murk.png")
 
 
 def gnasher():
     """(0.18.111, Scan D) Gnasher, the shark: grey-blue on top, sharp white underneath, gill slits, flat black eyes, a
-    jaw of white teeth, a tall fin and tail."""
+    jaw of white teeth, a tall fin and tail. (0.19.82) A shark, not a man: the man's parts keep the old paint (the
+    first-person hand); the animal's boxes are in rows 64-115: chest 8x8x11 (0,64), rear 5x5x8 (38,64), small dorsal
+    1x3x3 (38,77), lower tail lobe 1x4x3 (46,77), belly 7x7x8 (0,84), skull 7x5x9 (30,84), jaw 6x2x7 (0,99), dorsal
+    fin 1x8x4 (26,99), upper tail lobe 1x8x4 (36,99), pectoral fin 6x1x4 (0,111)."""
     img = new_skin()
     top = (92, 116, 136)
+    topa = top + (255,)
+    white = (226, 230, 232, 255)
+    dark = (50, 64, 78, 255)
+    finc = (82, 104, 124, 255)
+    mouth = (104, 26, 38, 255)
+    tooth = (250, 250, 246, 255)
     parts(img, top, 0.1)
     for part in BASE_PARTS:
         fx0, fy0, fx1, fy1 = faces(*part)["front"]
@@ -2607,42 +3127,180 @@ def gnasher():
         rect(img, (x * 1, 22, x + 1, 26), (50, 64, 78, 255))
     claws(img, (60, 76, 90, 255))
     chest_insignia(img, rim=(50, 64, 78, 255))
-    # extras: fin 1x6x4 at (0,64); snout 6x2x3 at (12,64); tail 2x2x6 at (30,64)
-    box(img, (0, 64, 1, 6, 4), (82, 104, 124), 0.08)
-    snout = (12, 64, 6, 2, 3)
-    box(img, snout, (96, 120, 140), 0.08)
-    sx0, sy0, sx1, sy1 = faces(*snout)["bottom"]
-    rect(img, (sx0, sy0, sx1, sy1), (226, 230, 232, 255))
-    box(img, (30, 64, 2, 2, 6), (86, 108, 128), 0.1)
+
+    def shark(part, ytop, line=1.0):
+        """Grey-blue above the waterline (y `line`, in the chest's pivot space; `ytop` is the box's top there), white
+        below it with a jagged edge, a white underside, a darker back."""
+        f = faces(*part)
+        noise_fill(img, shade(topa, LIGHT["top"]), 0.1, f["top"])
+        noise_fill(img, shade(white, 0.88), 0.05, f["bottom"])
+        for name in ("front", "back", "left", "right"):
+            x0, y0, x1, y1 = f[name]
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    wl = line + (0.0, 0.5, -0.5)[(x * 5) % 3]
+                    if ytop + (y - y0) + 0.5 < wl:
+                        c = shade(topa, LIGHT[name] * (0.94 + rng.random() * 0.12))
+                    else:
+                        c = shade(white, (0.78 + LIGHT[name] * 0.22) * (0.97 + rng.random() * 0.06))
+                    img.putpixel((x, y), c)
+        # a few darker flecks on the back
+        x0, y0, x1, y1 = f["top"]
+        speckle(img, (x0, y0, x1, y1), shade(topa, 0.8), (x1 - x0) * (y1 - y0) // 10)
+
+    def fin(part, root, tip):
+        """A fin's big faces: `root` at the bottom fading to `tip` at the top, its trailing edge darker."""
+        f = faces(*part)
+        for name in ("top", "bottom", "front", "back"):
+            noise_fill(img, shade(root, LIGHT[name]), 0.06, f[name])
+        for name in ("right", "left"):
+            x0, y0, x1, y1 = f[name]
+            vgrad(img, (x0, y0, x1, y1), tip, root, 0.07)
+            # the trailing edge: the back of the right face is its left column, of the left face its right column
+            tx = x0 if name == "right" else x1 - 1
+            rect(img, (tx, y0, tx + 1, y1), shade(tip, 0.8))
+
+    # the chest (the waterline at y +1 of the pivot space), its gill slits just behind the head, the insignia on the middle
+    # of its back (its plate centred at z 0: the top face's row 69), the dorsal fin standing just behind it
+    fore = (0, 64, 8, 8, 11)
+    shark(fore, -4)
+    rx0, ry0, rx1, ry1 = faces(*fore)["right"]
+    lx0, ly0, lx1, ly1 = faces(*fore)["left"]
+    for k in range(4):
+        for (sx, sy0, sy1) in ((rx1 - 3 - 2 * k, ry0 + 1, ry0 + 5 - (k // 3)), (lx0 + 2 + 2 * k, ly0 + 1, ly0 + 5 - (k // 3))):
+            rect(img, (sx, sy0, sx + 1, sy1), dark)
+    tx0, ty0, tx1, ty1 = faces(*fore)["top"]
+    insignia(img, (tx0 + tx1) // 2, ty0 + 3, small=True, rim=dark)
+
+    # the belly and rear: the same grey over white, darker towards the tail
+    shark((0, 84, 7, 7, 8), -3)
+    shark((38, 64, 5, 5, 8), -1)
+    for part in ((38, 64, 5, 5, 8),):
+        for name in ("top", "left", "right"):
+            x0, y0, x1, y1 = faces(*part)[name]
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    img.putpixel((x, y), shade(img.getpixel((x, y)), 0.94))
+
+    # the skull: a blunt snout, the eyes flat black on its sides well forward, nostrils on the nose, a row of teeth along its lower edge
+    skull = (30, 84, 7, 5, 9)
+    shark(skull, -3)
+    sf = faces(*skull)
+    sx0, sy0, sx1, sy1 = sf["front"]
+    rect(img, (sx0, sy0, sx1, sy0 + 1), shade(topa, 1.1))
+    img.putpixel((sx0 + 2, sy0 + 1), dark)
+    img.putpixel((sx1 - 3, sy0 + 1), dark)
+    ex0, ey0, ex1, ey1 = sf["right"]
+    rect(img, (ex1 - 3, ey0 + 1, ex1 - 1, ey0 + 3), (8, 8, 10, 255))
+    ex0, ey0, ex1, ey1 = sf["left"]
+    rect(img, (ex0 + 1, ey0 + 1, ex0 + 3, ey0 + 3), (8, 8, 10, 255))
+    # the mouth line and the upper teeth: the lowest row of the front and sides, white points over dark
+    for name in ("front", "right", "left"):
+        x0, y0, x1, y1 = sf[name]
+        for x in range(x0, x1):
+            img.putpixel((x, y1 - 1), tooth if x % 2 == 0 else (40, 20, 24, 255))
+    # the roof of the mouth (under the skull): deep red, a ring of teeth
+    bx0, by0, bx1, by1 = sf["bottom"]
+    rect(img, (bx0, by0, bx1, by1), mouth)
+    for x in range(bx0, bx1):
+        for y in (by0, by1 - 1):
+            img.putpixel((x, y), tooth if x % 2 == 0 else (200, 196, 190, 255))
+    for y in range(by0, by1):
+        for x in (bx0, bx1 - 1):
+            img.putpixel((x, y), tooth if y % 2 == 0 else (200, 196, 190, 255))
+    noise_fill(img, (130, 40, 54), 0.2, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1))
+
+    # the jaw: white, its top row a bite of teeth, its top face the floor of the mouth
+    jaw = (0, 99, 6, 2, 7)
+    jf = faces(*jaw)
+    for name in ("front", "back", "left", "right", "bottom"):
+        noise_fill(img, shade(white, 0.8 + LIGHT[name] * 0.2), 0.05, jf[name])
+    for name in ("front", "left", "right"):
+        x0, y0, x1, y1 = jf[name]
+        for x in range(x0, x1):
+            img.putpixel((x, y0), tooth if x % 2 == 0 else (214, 210, 204, 255))
+    jx0, jy0, jx1, jy1 = jf["top"]
+    rect(img, (jx0, jy0, jx1, jy1), (120, 34, 48, 255))
+    noise_fill(img, (130, 40, 54), 0.2, (jx0 + 1, jy0 + 1, jx1 - 1, jy1 - 1))
+    for x in range(jx0, jx1):
+        for y in (jy0, jy1 - 1):
+            img.putpixel((x, y), tooth)
+    for y in range(jy0, jy1):
+        for x in (jx0, jx1 - 1):
+            img.putpixel((x, y), tooth if y % 2 == 0 else (214, 210, 204, 255))
+
+    # the fins: the tall dorsal and the small one, the two tail lobes, the pectoral paddle
+    fin((26, 99, 1, 8, 4), finc, (58, 74, 90, 255))
+    fin((38, 77, 1, 3, 3), finc, (58, 74, 90, 255))
+    fin((36, 99, 1, 8, 4), (86, 108, 128, 255), (56, 72, 88, 255))
+    fin((46, 77, 1, 4, 3), (96, 118, 138, 255), (70, 88, 104, 255))
+    pec = (0, 111, 6, 1, 4)
+    pf = faces(*pec)
+    noise_fill(img, shade(finc, LIGHT["top"]), 0.06, pf["top"])
+    noise_fill(img, shade(white, 0.85), 0.05, pf["bottom"])
+    for name in ("front", "back", "left", "right"):
+        noise_fill(img, shade(finc, LIGHT[name]), 0.06, pf[name])
+    for name in ("top", "bottom"):
+        x0, y0, x1, y1 = pf[name]
+        rect(img, (x0, y0, x0 + 1, y1), (58, 74, 90, 255))
+        rect(img, (x0, y1 - 1, x1, y1), shade(img.getpixel((x0 + 2, y0)), 0.85))
     clear_hat(img)
     save(img, "entity/xenoform_gnasher.png")
 
 
 def lumen():
     """(0.18.111, Scan D) Lumen, the light: pale sky blue, lighter towards the edges, a bright white-gold core in its
-    chest, soft white eyes, thin pale fins."""
+    chest, soft white eyes, thin pale fins. (0.19.75) An orb of light: a white-gold core (a 7x7x8 head box with two
+    crossed 8x7x7 / 7x8x7 boxes to round its corners) inside a dithered pale-blue halo shell whose front is left clear,
+    and eight tiny motes. The base humanoid parts are still painted (the first-person hand)."""
     img = new_skin()
     blue = (154, 220, 244)
     parts(img, blue, 0.06, edge=1.12)
-    fx0, fy0, fx1, fy1 = front(BODY)
-    rect(img, (fx0 + 2, fy0 + 2, fx1 - 2, fy0 + 7), (252, 246, 210, 255))
-    rect(img, (fx0 + 3, fy0 + 3, fx1 - 3, fy0 + 6), (255, 255, 250, 255))
-    eyes(img, (250, 255, 255, 255), y=11, wide=True, pupil=(90, 170, 220, 255))
     claws(img, (210, 240, 252, 255))
     chest_insignia(img, rim=(70, 140, 180, 255))
-    # extras: fins 1x5x4 at (0,64)
-    box(img, (0, 64, 1, 5, 4), (210, 240, 252), 0.05)
+    glow = {"top": 1.0, "bottom": 0.93, "right": 0.97, "left": 0.97, "front": 1.0, "back": 0.96}
+    gold = (250, 236, 186, 255)
+    # the core: the head box (0,0) 7x7x8 (overpaints the old head), crossed boxes 8x7x7 at (0,94) and 7x8x7 at (30,94)
+    core = (0, 0, 7, 7, 8)
+    for part, base in ((core, (255, 252, 228)), ((0, 94, 8, 7, 7), (252, 246, 210)), ((30, 94, 7, 8, 7), (252, 246, 210))):
+        box(img, part, base, 0.03, light=glow)
+        for b in faces(*part).values():
+            outline(img, b, gold)
+    fx0, fy0, fx1, fy1 = faces(*core)["front"]
+    rect(img, (fx0 + 1, fy0 + 1, fx1 - 1, fy1 - 1), (255, 255, 250, 255))
+    # the insignia on the front of the core: its 5x7 rim fills the 7x7 face's height
+    insignia(img, (fx0 + fx1) // 2, fy0 + 1, small=True, rim=(70, 140, 180, 255))
+    # the motes: 1x1x1 at (0,64) bright and (8,64) pale
+    box(img, (0, 64, 1, 1, 1), (255, 255, 240), 0.02, light=glow)
+    box(img, (8, 64, 1, 1, 1), (200, 236, 250), 0.02, light=glow)
+    # the halo shell: 11x11x11 at (0,70), a one-pixel pale rim and a dither inside, the front face clear so the
+    # core and its insignia show through
+    shell = (0, 70, 11, 11, 11)
+    for name, (x0, y0, x1, y1) in faces(*shell).items():
+        rect(img, (x0, y0, x1, y1), CLEAR)
+        if name == "front":
+            continue
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                if x in (x0, x1 - 1) or y in (y0, y1 - 1):
+                    img.putpixel((x, y), (214, 240, 252, 255))
+                elif (x + y) % 2 == 0:
+                    img.putpixel((x, y), (186, 230, 250, 255))
     clear_hat(img)
     save(img, "entity/xenoform_lumen.png")
 
 
 def keen():
-    """(0.18.111, Scan D) Keen, the sonar bat: dark brown-grey fur, a lighter chest, tiny red eyes, a pink pug snout,
-    huge ears with pink insides, leathery near-black wings."""
+    """(0.18.111, Scan D; 0.19.75 a real bat) Keen, the sonar bat: dark brown-grey fur, a paler belly (it hangs belly to
+    the front), the insignia on its back, tiny red eyes, a pink pug snout over a pale jaw with two white fangs, huge ears
+    with pink insides, hind legs, and near-black leathery wings: bones in a dark fur brown, veined membrane between
+    them, a dark thumb claw at each wrist. The man's parts (hidden in the model) keep the old look for the first-person arm."""
     img = new_skin()
     fur_c = (74, 60, 64)
+    dark = (50, 40, 44, 255)
+    ink = (30, 22, 28, 255)
     parts(img, fur_c, 0.16)
-    fur(img, BASE_PARTS, fur_c, (50, 40, 44, 255), 5)
+    fur(img, BASE_PARTS, fur_c, dark, 5)
     fx0, fy0, fx1, fy1 = front(BODY)
     vgrad(img, (fx0 + 2, fy0, fx1 - 2, fy1 - 3), (128, 108, 104), (100, 84, 84), 0.08)
     rect(img, (10, 11, 11, 12), (220, 40, 40, 255))
@@ -2650,17 +3308,75 @@ def keen():
     rect(img, (11, 13, 13, 15), (200, 140, 140, 255))
     claws(img, (30, 24, 26, 255))
     chest_insignia(img, rim=(40, 30, 32, 255))
-    # extras: ears 2x4x1 at (0,64); wings 1x10x5 at (6,64)
-    ear = (0, 64, 2, 4, 1)
+    # (0.19.75) the bat, every box in rows 64-127: torso 6x7x5 at (0,64), head 5x3x4 at (22,64), nose 3x2x1 at (40,64),
+    # jaw 4x1x3 at (48,64), ear 3x6x1 at (0,76), fang 1x2x1 at (8,76), hind leg 2x5x2 at (12,76), foot 2x1x3 at (20,76),
+    # humerus 6x2x2 at (30,76), forearm 11x1x1 at (0,84), fingers 11x1x1 at (24,84), 10x1x1 at (0,86) and 8x1x1 at (22,86),
+    # wrist knob 2x2x2 at (40,86), thumb 1x3x1 at (48,84), tail membrane 7x5x1 at (0,90), wing membrane 16x9x1 at
+    # (16,90), finger membranes 10x6x1 at (0,100) and 9x6x1 at (22,100)
+    torso = (0, 64, 6, 7, 5)
+    box(img, torso, fur_c, 0.16)
+    fur(img, (torso,), fur_c, dark, 4)
+    tf = faces(*torso)
+    # the belly ("back" face, +z) pale and warm, the back ("front" face, -z) a darker saddle with the insignia
+    vgrad(img, tf["back"], (140, 118, 112), (108, 90, 90), 0.08)
+    bx0, by0, bx1, by1 = tf["front"]
+    vgrad(img, tf["front"], (66, 54, 58), (58, 46, 50), 0.1)
+    insignia(img, (bx0 + bx1) // 2, by0 + 1, small=True, rim=(30, 22, 26, 255))
+    # the neck end (the chest's ruff) paler
+    noise_fill(img, (150, 126, 118), 0.14, tf["bottom"])
+    head = (22, 64, 5, 3, 4)
+    box(img, head, (84, 70, 74), 0.14)
+    fur(img, (head,), (84, 70, 74), dark, 4)
+    hx0, hy0, hx1, hy1 = faces(*head)["front"]
+    # tiny red eyes high on the face either side of the snout, paler cheeks under them
+    img.putpixel((hx0 + 1, hy0), (230, 40, 40, 255))
+    img.putpixel((hx1 - 2, hy0), (230, 40, 40, 255))
+    rect(img, (hx0, hy0 + 1, hx0 + 1, hy1), (118, 96, 98, 255))
+    rect(img, (hx1 - 1, hy0 + 1, hx1, hy1), (118, 96, 98, 255))
+    nose = (40, 64, 3, 2, 1)
+    box(img, nose, (196, 132, 138), 0.1)
+    nx0, ny0, nx1, ny1 = faces(*nose)["front"]
+    img.putpixel((nx0, ny0 + 1), (60, 30, 36, 255))
+    img.putpixel((nx1 - 1, ny0 + 1), (60, 30, 36, 255))
+    jaw = (48, 64, 4, 1, 3)
+    box(img, jaw, (150, 112, 114), 0.1)
+    jx0, jy0, jx1, jy1 = faces(*jaw)["front"]
+    rect(img, (jx0, jy0, jx1, jy1), (112, 54, 64, 255))
+    box(img, (8, 76, 1, 2, 1), (238, 234, 222), 0.05)
+    ear = (0, 76, 3, 6, 1)
     box(img, ear, (70, 56, 60), 0.1)
     ex0, ey0, ex1, ey1 = faces(*ear)["front"]
-    rect(img, (ex0, ey0 + 1, ex1, ey1), (190, 130, 130, 255))
-    wing = (6, 64, 1, 10, 5)
-    box(img, wing, (44, 36, 40), 0.1)
-    for name, (x0, y0, x1, y1) in faces(*wing).items():
-        if name in ("left", "right"):
-            for x in range(x0 + 1, x1, 2):
-                rect(img, (x, y0, x + 1, y1), (30, 24, 28, 255))
+    rect(img, (ex0 + 1, ey0 + 1, ex1 - 1, ey1), (196, 136, 138, 255))
+    rect(img, (ex0, ey0, ex1, ey0 + 1), (46, 36, 40, 255))
+    box(img, (12, 76, 2, 5, 2), fur_c, 0.14)
+    foot = (20, 76, 2, 1, 3)
+    box(img, foot, (62, 50, 54), 0.12)
+    rect(img, faces(*foot)["front"], (28, 22, 24, 255))
+    # the wing's bones
+    box(img, (30, 76, 6, 2, 2), (70, 56, 60), 0.12)
+    fur(img, ((30, 76, 6, 2, 2),), (70, 56, 60), dark, 3)
+    box(img, (0, 84, 11, 1, 1), (62, 48, 52), 0.1)
+    for bone in ((24, 84, 11, 1, 1), (0, 86, 10, 1, 1), (22, 86, 8, 1, 1)):
+        box(img, bone, (46, 36, 40), 0.1)
+    box(img, (40, 86, 2, 2, 2), (88, 72, 72), 0.12)
+    box(img, (48, 84, 1, 3, 1), (28, 22, 24), 0.08)
+
+    def membrane(part, base, step):
+        # leathery membrane: a dark grain, veins running out along its length, a darker edge on the leading (lower) side
+        box(img, part, base, 0.12)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back"):
+                for x in range(x0 + 1, x1, step):
+                    rect(img, (x, y0, x + 1, y1), ink)
+                rect(img, (x0, y1 - 1, x1, y1), (40, 30, 36, 255))
+                # fur creeping out from the body end
+                rect(img, (x0, y0, x0 + 2, y1), (74, 60, 64, 255))
+                speckle(img, (x0, y0, x1, y1), (86, 66, 72, 255), (x1 - x0) * (y1 - y0) // 14 + 1)
+
+    membrane((0, 90, 7, 5, 1), (54, 42, 50), 2)
+    membrane((16, 90, 16, 9, 1), (58, 44, 52), 3)
+    membrane((0, 100, 10, 6, 1), (52, 40, 48), 3)
+    membrane((22, 100, 9, 6, 1), (52, 40, 48), 3)
     clear_hat(img)
     save(img, "entity/xenoform_keen.png")
 
@@ -2895,21 +3611,83 @@ def mirage():
     save(img, "entity/xenoform_mirage.png")
 
 
-def ooze_skin(name, base, core, dark, eye):
-    """(0.18.114, Scan F) Ooze: soft jelly lighter at the edges, a darker core in the chest, two dark eyes, a blob on top."""
+def jelly_pane(img, b, base):
+    """A see-through side of the jelly (the skin is cut out, not blended): clear but for a lighter frame, a few bright
+    bubbles and a gooey floor, so the core shows through."""
+    x0, y0, x1, y1 = b
+    rect(img, b, CLEAR)
+    speckle(img, (x0 + 1, y0 + 1, x1 - 1, y1 - 2), lerp(base, (255, 255, 255), 0.45), (x1 - x0) * (y1 - y0) // 20)
+    noise_fill(img, shade(base, 0.9), 0.1, (x0, y1 - 2, x1, y1))
+    outline(img, b, shade(base, 1.15))
+
+
+def ooze_skin(name, base, core, dark, eye, magma=False):
+    """(0.18.114, Scan F) Ooze: soft jelly lighter at the edges, a darker core in the chest, two dark eyes, a blob on top.
+    (0.19.82) Rows 0-63 stay the humanoid skin (the first-person hand); the cube is in rows 64+. Ooze: the jelly shell
+    10x8x10 at (0,64), its sides cut out so the core shows through, and the core 6x5x6 at (0,84) with the eyes.
+    Magma Ooze: three crust slabs 10x2x10 at (0,64), (0,76), (0,88) with glowing seams, and the glowing core 8x8x8 at (0,100)."""
     img = new_skin()
+    dk = dark + (255,)
     parts(img, base, 0.08, edge=1.12)
     fx0, fy0, fx1, fy1 = front(BODY)
     rect(img, (fx0 + 2, fy0 + 2, fx1 - 2, fy0 + 8), core + (255,))
     rect(img, (9, 10, 11, 12), eye)
     rect(img, (13, 10, 15, 12), eye)
-    rect(img, (10, 14, 14, 15), shade(dark + (255,), 1.0))
+    rect(img, (10, 14, 14, 15), dk)
     for part in BASE_PARTS:
         for nm, b in faces(*part).items():
-            speckle(img, b, shade(dark + (255,), 1.0), (b[2] - b[0]) * (b[3] - b[1]) // 14 + 1)
-    chest_insignia(img, rim=shade(dark + (255,), 0.8))
-    # extras: head blob 6x3x6 at (0,64)
-    box(img, (0, 64, 6, 3, 6), base, 0.08, edge=1.12)
+            speckle(img, b, dk, (b[2] - b[0]) * (b[3] - b[1]) // 14 + 1)
+    if magma:
+        # glowing cracks across the dark crust
+        for part in BASE_PARTS:
+            for nm, b in faces(*part).items():
+                if nm in ("front", "back", "left", "right"):
+                    for y in range(b[1] + 2, b[3], 4):
+                        rect(img, (b[0], y, b[2], y + 1), (240, 120, 30, 255))
+    rim = (60, 20, 10, 255) if magma else shade(dk, 0.8)
+    chest_insignia(img, rim=rim)
+    if magma:
+        hot = (240, 120, 30)
+        slabs = [(0, 64 + 12 * i, 10, 2, 10) for i in range(3)]
+        for slab in slabs:
+            box(img, slab, base, 0.12, edge=0.8)
+            fc = faces(*slab)
+            veins(img, fc["top"], base, hot, 4, length=(2, 5))
+            for nm in ("front", "back", "left", "right"):
+                x0, y0, x1, y1 = fc[nm]
+                # light leaking from the seams above and below the slab
+                for x in range(x0, x1):
+                    if (x + slab[1]) % 3:
+                        img.putpixel((x, y1 - 1), lerp(base, hot, 0.8))
+                    else:
+                        img.putpixel((x, y0), lerp(base, hot, 0.5))
+        lava = (250, 150, 40)
+        glow = (0, 100, 8, 8, 8)
+        box(img, glow, lava, 0.15, light={"top": 1.1, "bottom": 0.9, "right": 0.95, "left": 0.95, "front": 1.0, "back": 0.9})
+        gf = faces(*glow)
+        for nm, b in gf.items():
+            speckle(img, b, (255, 214, 90, 255), (b[2] - b[0]) * (b[3] - b[1]) // 8)
+        ex0, ey0, ex1, ey1 = gf["front"]
+        rect(img, (ex0 + 1, ey0 + 2, ex0 + 3, ey0 + 4), dk)
+        rect(img, (ex0 + 5, ey0 + 2, ex0 + 7, ey0 + 4), dk)
+        rect(img, (ex0 + 3, ey0 + 5, ex0 + 5, ey0 + 6), dk)
+        tx0, ty0, tx1, ty1 = faces(*slabs[2])["top"]
+        insignia(img, (tx0 + tx1) // 2, ty0 + 1, rim=rim)
+    else:
+        shell = (0, 64, 10, 8, 10)
+        box(img, shell, base, 0.08, edge=1.12)
+        for nm, b in faces(*shell).items():
+            if nm in ("front", "back", "left", "right"):
+                jelly_pane(img, b, base)
+        tx0, ty0, tx1, ty1 = faces(*shell)["top"]
+        insignia(img, (tx0 + tx1) // 2, ty0 + 1, rim=rim)
+        inner = (0, 84, 6, 5, 6)
+        box(img, inner, core, 0.1)
+        ex0, ey0, ex1, ey1 = faces(*inner)["front"]
+        # eyes and mouth kept above the front pane's 2px gooey floor, so the whole face shows through the window
+        rect(img, (ex0, ey0, ex0 + 2, ey0 + 2), eye)
+        rect(img, (ex0 + 4, ey0, ex0 + 6, ey0 + 2), eye)
+        rect(img, (ex0 + 2, ey0 + 3, ex0 + 4, ey0 + 4), dk)
     clear_hat(img)
     save(img, f"entity/xenoform_{name}.png")
 
@@ -2919,16 +3697,7 @@ def ooze():
 
 
 def magma_ooze():
-    ooze_skin("magma_ooze", (70, 30, 24), (250, 150, 40), (30, 12, 10), (255, 200, 60, 255))
-    img = Image.open(ROOT / "textures" / "entity" / "xenoform_magma_ooze.png").convert("RGBA")
-    # glowing cracks across the dark crust
-    for part in BASE_PARTS:
-        for nm, b in faces(*part).items():
-            if nm in ("front", "back", "left", "right"):
-                for y in range(b[1] + 2, b[3], 4):
-                    rect(img, (b[0], y, b[2], y + 1), (240, 120, 30, 255))
-    chest_insignia(img, rim=(60, 20, 10, 255))
-    save(img, "entity/xenoform_magma_ooze.png")
+    ooze_skin("magma_ooze", (70, 30, 24), (250, 150, 40), (30, 12, 10), (255, 200, 60, 255), magma=True)
 
 
 def fuse():

@@ -29,8 +29,7 @@ def loot():
     table('redstone_golem', [entry('minecraft:redstone', 6, 14), entry('minecraft:redstone_block', 0, 2), rare('minecraft:diamond', 0.25)])
     table('skulk_golem', [entry('minecraft:sculk', 2, 5), entry('minecraft:cobbled_deepslate', 1, 3), rare('minecraft:echo_shard', 0.3)])
     table('wild_boar', [entry('minecraft:porkchop', 1, 3), entry('minecraft:leather', 0, 1)])
-    # (0.7.486) the emerald drop is a silver coin now (the kingdoms' money)
-    table('gorgon', [entry('minecraft:arrow', 2, 6), entry('minecraft:string', 1, 3), rare('jaymoskingdoms:silver_coin', 0.5),
+    table('gorgon', [entry('minecraft:arrow', 2, 6), entry('minecraft:string', 1, 3), rare('minecraft:emerald', 0.5),
                      rare('minecraft:bow', 0.2)])
     table('war_barrel', [entry('minecraft:oak_planks', 4, 10), entry('minecraft:iron_nugget', 6, 14), rare('minecraft:lantern', 0.5),
                          entry('minecraft:gold_nugget', 2, 6)])

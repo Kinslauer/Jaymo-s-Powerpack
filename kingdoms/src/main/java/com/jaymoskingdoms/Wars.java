@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Coin;
 import com.jaymoskingdoms.WarData.Side;
 import com.jaymoskingdoms.WarData.War;
 import java.util.ArrayList;
@@ -77,11 +76,11 @@ public final class Wars {
 	static final int WIN_SCORE = 120, WIN_LEAD = 50;
 	/** The terms, by the winner's lead: tribute from this lead, land ceded from this, vassalage from this. */
 	static final int TRIBUTE_LEAD = 15, CEDE_LEAD = 45, VASSAL_LEAD = 90;
-	/** Tribute: this share of the loser's treasury (at least {@code TRIBUTE_MIN_SILVER} if it has them), and this many loads of goods of up to a stack each. */
+	/** Tribute: this share of the loser's treasury (at least {@code TRIBUTE_MIN_EMERALDS} if it has them), and this many loads of goods of up to a stack each. */
 	static final double TRIBUTE_SHARE = 0.3;
-	static final int TRIBUTE_MIN_SILVER = 10, TRIBUTE_LOADS = 6, TRIBUTE_LOAD_MAX = 64;
-	/** When the goods can't be moved (storage not loaded), they're paid in this much silver per load instead (as far as the treasury goes). */
-	static final int TRIBUTE_SILVER_PER_LOAD = 4;
+	static final int TRIBUTE_MIN_EMERALDS = 10, TRIBUTE_LOADS = 6, TRIBUTE_LOAD_MAX = 64;
+	/** When the goods can't be moved (storage not loaded), they're paid in this many emeralds per load instead (as far as the treasury goes). */
+	static final int TRIBUTE_EMERALDS_PER_LOAD = 4;
 	/** Land ceded: this many chunks (nearest the winner first), never within this many chunks of the loser's seat. */
 	static final int CEDE_CHUNKS = 4, CEDE_SEAT_KEEP = 2;
 	/** A peace offer stands this long (ticks); an NPC king answers it after this long. */
@@ -894,7 +893,7 @@ public final class Wars {
 	private static Component tribute(ServerLevel level, Faction winner, Faction loser, double share) {
 		MinecraftServer server = level.getServer();
 		long treasury = loser.treasury();
-		long silver = Math.min(treasury, Math.max(TRIBUTE_MIN_SILVER, Math.round(treasury * share)));
+		long emeralds = Math.min(treasury, Math.max(TRIBUTE_MIN_EMERALDS, Math.round(treasury * share)));
 		int goods = 0;
 		if (Storage.loaded(level, loser) && Storage.loaded(level, winner)) {
 			RandomSource random = level.getRandom();
@@ -903,8 +902,8 @@ public final class Wars {
 				if (contents.isEmpty()) {
 					break;
 				}
-				List<ItemStack> valuables = contents.stream()
-					.filter(s -> Coin.valueOf(s) > 0L || s.is(Items.EMERALD) || s.is(Items.GOLD_INGOT) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND)).toList();
+				// (0.7.490) any realm's coin, and anything gold, among the valuables
+				List<ItemStack> valuables = contents.stream().filter(Raids::valuable).toList();
 				ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
 					: contents.get(random.nextInt(contents.size()));
 				ItemStack taken = Storage.take(level, loser, s -> ItemStack.isSameItemSameComponents(s, pick), TRIBUTE_LOAD_MAX);
@@ -919,12 +918,13 @@ public final class Wars {
 				}
 			}
 		} else {
-			silver = Math.min(treasury, silver + (long)TRIBUTE_LOADS * TRIBUTE_SILVER_PER_LOAD);
+			emeralds = Math.min(treasury, emeralds + (long)TRIBUTE_LOADS * TRIBUTE_EMERALDS_PER_LOAD);
 		}
-		long paid = silver;
+		long paid = emeralds;
 		Factions.update(server, loser.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - paid)));
 		Factions.update(server, winner.id(), f -> f.withTreasury(f.treasury() + paid));
-		return Component.translatable(Terms.TRIBUTE.key(), loser.name(), winner.name(), paid, goods);
+		// (0.7.490) shown in the payer's own coin
+		return Component.translatable(Terms.TRIBUTE.key(), loser.name(), winner.name(), Currencies.amount(Currencies.payEmeralds(Currencies.of(server, loser), paid)), goods);
 	}
 
 	/** {@code loser} cedes land to {@code winner}: the chunks nearest the winner's seat, never those round its own seat. */

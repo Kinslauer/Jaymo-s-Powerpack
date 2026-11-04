@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -174,13 +175,14 @@ public final class StarFolk {
 		return is(e) && ready();
 	}
 
-	/** (0.7.487) Whole silver coins' worth the player carries (coins, purses, bundles, the worn purse), the unit the prices are in. */
-	private static int silver(ServerPlayer player) {
-		return Approaches.silver(player);
+	/** (0.7.497) Whether the player can pay {@code count} of the unit in coin where they stand (foreign coin at its going rate less the cut). */
+	private static boolean canPay(ServerPlayer player, int count) {
+		return Money.canPay(player, Money.worth(count));
 	}
 
-	private static void take(ServerPlayer player, int count) {
-		Approaches.payUpTo(player, count);
+	/** (0.7.497) Takes {@code count} of the unit in coin, all or nothing; true if it was paid. */
+	private static boolean take(ServerPlayer player, int count) {
+		return Money.charge(player, Money.worth(count));
 	}
 
 	/** "Ask about the stars": a few words about the sky, and the charts for sale on the talk screen. */
@@ -205,27 +207,26 @@ public final class StarFolk {
 		if (worlds.isEmpty()) {
 			words = Component.translatable("talk.jaymoskingdoms.stars.none");
 		}
-		int have = silver(player);
 		List<Component> options = new ArrayList<>();
 		List<Boolean> enabled = new ArrayList<>();
 		for (int world : worlds) {
-			options.add(Component.translatable("talk.jaymoskingdoms.stars.buy", name(world), price(world)));
-			enabled.add(have >= price(world));
+			options.add(Component.translatable("talk.jaymoskingdoms.stars.buy", name(world), Money.text(player, Money.worth(price(world)))));
+			enabled.add(canPay(player, price(world)));
 		}
 		boolean sellsDust = dust != Items.AIR;
 		if (sellsDust) {
-			options.add(Component.translatable("talk.jaymoskingdoms.stars.dust", DUST_COUNT, DUST_PRICE));
-			enabled.add(have >= DUST_PRICE);
+			options.add(Component.translatable("talk.jaymoskingdoms.stars.dust", DUST_COUNT, Money.text(player, Money.worth(DUST_PRICE))));
+			enabled.add(canPay(player, DUST_PRICE));
 		}
 		options.add(Component.translatable("talk.jaymoskingdoms.stars.leave"));
 		enabled.add(true);
 		ZFighterFolk.ask(player, speaker, words, options, enabled, pick -> {
 			if (sellsDust && pick == worlds.size()) {
-				if (silver(player) < DUST_PRICE) {
+				// (0.7.497) the dust is handed over only once the coin is taken
+				if (!take(player, DUST_PRICE)) {
 					Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.short"), COLOR);
 					return;
 				}
-				take(player, DUST_PRICE);
 				player.getInventory().placeItemBackInInventory(new ItemStack(dust, DUST_COUNT), net.minecraft.util.Prediction.SERVER_ONLY);
 				level.playSound(null, speaker.getX(), speaker.getY(), speaker.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 				Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.dust_sold"), COLOR);
@@ -235,15 +236,18 @@ public final class StarFolk {
 				return;
 			}
 			int world = worlds.get(pick);
-			if (silver(player) < price(world)) {
+			// (0.7.497) the coin is taken first (all or nothing) and given back if the chart can't be sold
+			if (!take(player, price(world))) {
 				Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.short"), COLOR);
 				return;
 			}
 			if (!sell(player, world)) {
+				if (!player.hasInfiniteMaterials()) {
+					Money.pay(player, Money.worth(price(world)));
+				}
 				Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.known"), COLOR);
 				return;
 			}
-			take(player, price(world));
 			level.playSound(null, speaker.getX(), speaker.getY(), speaker.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.sold", name(world)), COLOR);
 		});
@@ -263,7 +267,7 @@ public final class StarFolk {
 			return;
 		}
 		TOLD.put(key, now);
-		Post.tidings(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky.gazer." + level.getRandom().nextInt(NEWS_LINES), speaker.getDisplayName()));
+		Post.aside(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky.gazer." + level.getRandom().nextInt(NEWS_LINES), speaker.getDisplayName()));
 	}
 
 	// ---- lights in the sky --------------------------------------------------------------------------------------------
@@ -308,8 +312,14 @@ public final class StarFolk {
 						seen.clear();
 					}
 					if (seen.add(pod.getUUID())) {
-						Post.tidings(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky." + (raiders ? "raiders." : "patrol.")
-							+ level.getRandom().nextInt(NEWS_LINES), town.name()));
+						// ((0.7.494) raiders falling on a town are great news, for a roost-keeper; a patrolman setting down is a passing sight)
+						Component line = Component.translatable("news.jaymoskingdoms.sky." + (raiders ? "raiders." : "patrol.")
+							+ level.getRandom().nextInt(NEWS_LINES), town.name());
+						if (raiders) {
+							Post.tidings(player.getUUID(), line);
+						} else {
+							Post.aside(player.getUUID(), line);
+						}
 					}
 				}
 			}

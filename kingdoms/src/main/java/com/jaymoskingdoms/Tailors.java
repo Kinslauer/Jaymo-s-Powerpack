@@ -101,7 +101,7 @@ public final class Tailors {
 			return;
 		}
 		int fee = fee(villager, player);
-		if (!Money.canPay(player, Money.silver(fee))) {
+		if (!Money.canPay(player, Money.worth(fee))) {
 			Speech.tell(level, villager, player, Component.translatable("tailor.jaymoskingdoms.cant_pay", fee), Speech.WHITE);
 			return;
 		}
@@ -120,8 +120,8 @@ public final class Tailors {
 		if (fitting == null || level.getGameTime() - fitting.opened() > FITTING_TICKS) {
 			return;
 		}
-		// (0.7.487) as much of the fee as they carry, in silver coins
-		Money.chargeUpTo(player, Money.silver(fitting.fee()));
+		// (0.7.497) as much of the fee as they carry, in silver coins
+		Money.chargeUpTo(player, Money.worth(fitting.fee()));
 		Entity tailor = level.getEntity(fitting.tailor());
 		if (tailor != null) {
 			Speech.tell(level, tailor, player, Component.translatable("tailor.jaymoskingdoms.done"), Speech.WHITE);

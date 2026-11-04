@@ -6,7 +6,7 @@
 			"entries": [
 				{
 					"type": "minecraft:item",
-					"name": "jaymoskingdoms:silver_coin",
+					"name": "minecraft:emerald",
 					"modifier": [
 						{
 							"type": "minecraft:set_count",

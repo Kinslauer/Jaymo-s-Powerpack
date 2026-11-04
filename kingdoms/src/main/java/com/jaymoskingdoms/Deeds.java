@@ -2,7 +2,6 @@ package com.jaymoskingdoms;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.jaymoskingdoms.money.Coin;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,9 +76,9 @@ public final class Deeds {
 	static final long SAVE_GAP = 1200L, FIRE_THANKS_GAP = 600L;
 	/** The chance the one you saved hands you something. */
 	static final float SAVE_GIFT_CHANCE = 0.3F;
-	/** What they hand you (0.7.486: a silver coin, where it was an emerald; suppliers because the coins register after this class loads). */
-	static final List<java.util.function.Supplier<Item>> GIFTS = List.of(Coin.SILVER::item, () -> Items.BREAD, () -> Items.APPLE, () -> Items.COOKIE,
-		() -> Items.BAKED_POTATO, () -> Items.PUMPKIN_PIE, () -> Items.HONEY_BOTTLE);
+	/** What they hand you ((0.7.497) the emerald is a coin of the town's: {@link #gift}). */
+	static final List<Item> GIFTS = List.of(Items.EMERALD, Items.BREAD, Items.APPLE, Items.COOKIE, Items.BAKED_POTATO, Items.PUMPKIN_PIE,
+		Items.HONEY_BOTTLE);
 	/** How often folk may call out to someone they remember (ticks), and the least gap between two calls to one player. */
 	static final int GREET_EVERY = 100;
 	static final long GREET_GAP = 2400L;
@@ -257,7 +256,7 @@ public final class Deeds {
 		// (0.7.109) and never forgets it
 		Recollections.remember(saved, player, Recollections.Kind.SAVED, Component.empty());
 		if (level.getRandom().nextFloat() < SAVE_GIFT_CHANCE) {
-			give(player, new ItemStack(GIFTS.get(level.getRandom().nextInt(GIFTS.size())).get()));
+			give(player, new ItemStack(gift(level, saved, GIFTS.get(level.getRandom().nextInt(GIFTS.size())))));
 			saved.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		}
 		cheer(level, player, saved, "talk.jaymoskingdoms.deed.save.cheer");
@@ -373,6 +372,11 @@ public final class Deeds {
 		} else if (who instanceof Mob mob) {
 			mob.getLookControl().setLookAt(at, 30.0F, 30.0F);
 		}
+	}
+
+	/** (0.7.497) {@code pick} as a gift from {@code from}: an emerald is a coin of the land instead (the emerald is a gem now). */
+	private static Item gift(ServerLevel level, Villager from, Item pick) {
+		return pick == Items.EMERALD ? Currencies.at(level, from.blockPosition()).item() : pick;
 	}
 
 	private static void give(ServerPlayer player, ItemStack stack) {

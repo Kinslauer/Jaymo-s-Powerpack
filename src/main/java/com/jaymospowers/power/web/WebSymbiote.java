@@ -3822,7 +3822,7 @@ public final class WebSymbiote {
 			WebSymbioteBond.refuse(player);
 			return;
 		}
-		// (0.19.74) (taking it off always answers: a sulk or a lockout only stops it coming up a form)
+		// (0.19.69) (taking it off always answers: a sulk or a lockout only stops it coming up a form)
 		boolean climbing = ability == ARMOR && isBonded(player) && (form(player) == FORM_SKIN || form(player) < topForm(player));
 		if (climbing && lockedOut(player)) {
 			// you tore yourself out of it: it won't cover you again yet

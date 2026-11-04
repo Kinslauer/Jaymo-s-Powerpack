@@ -17,8 +17,8 @@ import net.minecraft.world.entity.player.Input;
 public final class ApeRageClient {
 	/** Each heave jolts the view this much (degrees), more as the bar fills. */
 	static final float JOLT = 0.6F, JOLT_PER = 1.2F;
-	/** The bars: width, how far above the bottom (pixels). */
-	static final int BAR_W = 120, BAR_UP = 62;
+	/** The bars' width (pixels). (HUD rework) Where they go is the FOCUS zone's. */
+	static final int BAR_W = 120;
 	static final int RAGE_COLOR = 0xC03020, FIT_COLOR = 0xFFD040;
 
 	private static Input heldKeys = Input.EMPTY;
@@ -49,22 +49,27 @@ public final class ApeRageClient {
 		if (!ZFighterLineage.ape(player) || !player.hasAttached(ApeRage.RAGE)) {
 			return;
 		}
-		int x = (graphics.guiWidth() - BAR_W) / 2;
-		int y = graphics.guiHeight() - BAR_UP;
+		// (HUD rework) rage / fit bar: FOCUS zone, row 15 (label on top, bar 11 below)
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.FOCUS, "jaymospowers:ape_rage", 15, BAR_W, 17);
+		if (at == null) {
+			return;
+		}
+		int x = at[0];
+		int y = at[1] + 11;
 		Float fit = player.getAttached(ApeRage.FIT);
 		if (fit != null) {
 			// the fight against the fit: a fuller, throbbing bar
 			int fill = Math.round(BAR_W * Mth.clamp(fit, 0.0F, 1.0F));
 			graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + 6, 0xA0000000);
 			graphics.fill(x, y, x + fill, y + 5, 0xFF000000 | FIT_COLOR);
-			graphics.centeredText(font, Component.translatable("hud.jaymospowers.zfighter.ape_fit"), graphics.guiWidth() / 2, y - 11,
+			graphics.centeredText(font, Component.translatable("hud.jaymospowers.zfighter.ape_fit"), x + BAR_W / 2, y - 11,
 				0xFF000000 | (Mth.sin(time * 0.4F) > 0.0F ? 0xFF6040 : 0xFFD0C0));
 			return;
 		}
 		float rage = Mth.clamp(ApeRage.rage(player) / 100.0F, 0.0F, 1.0F);
 		graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + 3, 0x80000000);
 		graphics.fill(x, y, x + Math.round(BAR_W * rage), y + 2, 0xFF000000 | RAGE_COLOR);
-		graphics.centeredText(font, Component.translatable("hud.jaymospowers.zfighter.ape_rage", ApeRage.primal(player)), graphics.guiWidth() / 2,
+		graphics.centeredText(font, Component.translatable("hud.jaymospowers.zfighter.ape_rage", ApeRage.primal(player)), x + BAR_W / 2,
 			y - 10, 0xFFC0A0A0);
 	}
 }

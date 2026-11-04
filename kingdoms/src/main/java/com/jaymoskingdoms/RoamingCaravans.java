@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Coin;
 import com.jaymoskingdoms.mixin.ChestedHorseInvoker;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -582,7 +581,7 @@ final class RoamingCaravans {
 			if (!offered.add(g.item())) {
 				continue;
 			}
-			trader.getOffers().add(new MerchantOffer(new ItemCost(Coin.SILVER.item(), 1 + random.nextInt(3)), new ItemStack(g.item(), g.most()),
+			trader.getOffers().add(new MerchantOffer(new ItemCost(Items.EMERALD, 1 + random.nextInt(3)), new ItemStack(g.item(), g.most()),
 				8, 1, 0.05F));
 		}
 	}

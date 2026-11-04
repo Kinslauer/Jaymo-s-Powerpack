@@ -1,25 +1,30 @@
 package com.jaymoskingdoms;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
-import com.jaymoskingdoms.money.Coin;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
+import com.jaymoskingdoms.money.Money;
 
 /**
- * (0.7.487) Coins for emeralds in the loot of the world. Emeralds are gems now and the kingdoms' money is the coin, so
+ * (0.7.497) Coins for emeralds in the loot of the world. Emeralds are a gem now and the kingdoms' money is the coin, so
  * the emeralds in found loot (vanilla's and every other mod's chests, mob drops and the village heroes' gifts) are
- * struck into silver coins on the way out of the loot table, one for one (an emerald was a silver's worth). Only the
- * tables under {@code chests/}, {@code entities/} and {@code gameplay/hero_of_the_village/} are swapped; what is mined
- * (emerald ore and the like, {@code blocks/}) stays a gem, as do the trades' own (the villagers' trade data is
- * converted by {@code Coinage}, not here).
+ * struck into the coin of the land where they were found, an emerald's worth for each ({@link Money#stacks}: the realm
+ * coin of the settlement around, with copper bits for the change; silver where there is none). Only the tables under
+ * {@code chests/}, {@code entities/} and {@code gameplay/hero_of_the_village/} are swapped; what is mined (emerald ore
+ * and the like, {@code blocks/}) stays a gem, as do the trades' own (their prices are made coins when a trade opens,
+ * {@link Currencies#localize}, not here).
  */
 public final class LootSwap {
-	/** The loot-table folders whose emeralds become silver coins. */
+	/** The loot-table folders whose emeralds become coins. */
 	static final List<String> FOLDERS = List.of("chests/", "entities/", "gameplay/hero_of_the_village/");
 
 	private LootSwap() {
@@ -44,11 +49,18 @@ public final class LootSwap {
 		if (table.unwrapKey().filter(LootSwap::swaps).isEmpty()) {
 			return;
 		}
-		for (int i = 0; i < drops.size(); i++) {
-			ItemStack drop = drops.get(i);
+		// (0.7.497) every emerald becomes coins of the land where it was found
+		Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
+		List<ItemStack> out = new ArrayList<>();
+		for (ItemStack drop : drops) {
 			if (drop.is(Items.EMERALD)) {
-				drops.set(i, Coin.SILVER.stack(drop.getCount()));
+				long milli = Money.worth(drop.getCount());
+				out.addAll(origin == null ? Money.stacks(milli) : Money.stacks(context.getLevel(), BlockPos.containing(origin), milli));
+			} else {
+				out.add(drop);
 			}
 		}
+		drops.clear();
+		drops.addAll(out);
 	}
 }

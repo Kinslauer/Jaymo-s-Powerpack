@@ -69,7 +69,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.47) Equestrian stage 3: a settlement's stable at work. Its {@link Folk#STABLEHAND} boards players' horses (fed,
- * watered and brushed while they're away, {@link #WEEKLY_FEE} silver coins ((0.7.487), once emeralds) for each week begun, paid when the horse is
+ * watered and brushed while they're away, {@link #WEEKLY_FEE} silver coins ((0.7.497), once emeralds) for each week begun, paid when the horse is
  * taken back out), sells horses (the breed by the land and the realm's wealth, the quality by its wealth) and buys
  * them back; its {@link Folk#FARRIER} shoes horses and sells tack, better tack in wealthier kingdoms. Walk up to either
  * and they say what they offer (clickable), or use {@code /kingdom stable} and {@code /kingdom farrier} beside them.
@@ -363,7 +363,7 @@ public final class Stables {
 		}
 		String role = w.role() == Folk.FARRIER ? "farrier" : "stable";
 		Component how = Component.translatable(McaCompat.isMca(w.mob()) ? "message.jaymoskingdoms.stable.how_mca" : "message.jaymoskingdoms.stable.how");
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms." + role + ".greet", w.mob().getName(), f.name(), WEEKLY_FEE).withStyle(ChatFormatting.GOLD));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms." + role + ".greet", w.mob().getName(), f.name(), coins(player, WEEKLY_FEE)).withStyle(ChatFormatting.GOLD));
 		option(player, Component.translatable("message.jaymoskingdoms.stable.open", w.mob().getName(), how), "/kingdom " + role);
 	}
 
@@ -520,7 +520,7 @@ public final class Stables {
 		horse.setAttached(STALL, new Stall(f.id(), Production.day(level.getServer()), at));
 		care(level, horse);
 		level.playSound(null, at, SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.0F);
-		tell(player, Component.translatable("message.jaymoskingdoms.stable.boarded", Bonding.name(horse), w.mob().getName(), WEEKLY_FEE)
+		tell(player, Component.translatable("message.jaymoskingdoms.stable.boarded", Bonding.name(horse), w.mob().getName(), coins(player, WEEKLY_FEE))
 			.withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
@@ -546,7 +546,7 @@ public final class Stables {
 		BlockPos at = Construction.standable(level, player.blockPosition(), 3);
 		horse.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
 		level.playSound(null, at, SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.1F);
-		tell(player, Component.translatable("message.jaymoskingdoms.stable.collected", Bonding.name(horse), fee).withStyle(ChatFormatting.YELLOW));
+		tell(player, Component.translatable("message.jaymoskingdoms.stable.collected", Bonding.name(horse), coins(player, fee)).withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
 
@@ -564,7 +564,7 @@ public final class Stables {
 			if (horse.isVehicle()) {
 				for (Entity rider : horse.getPassengers()) {
 					if (rider instanceof ServerPlayer p) {
-						p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.pay_first", Bonding.name(horse), fee(level, horse))
+						p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.pay_first", Bonding.name(horse), coins(p, fee(level, horse)))
 							.withStyle(ChatFormatting.GRAY), true);
 					}
 				}
@@ -606,8 +606,8 @@ public final class Stables {
 		if (player.isCreative() || cost <= 0) {
 			return true;
 		}
-		if (!Money.charge(player, Money.silver(cost))) {
-			tell(player, Component.translatable("message.jaymoskingdoms.stable.cant_pay", cost).withStyle(ChatFormatting.RED));
+		if (!Money.charge(player, Money.worth(cost))) {
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.cant_pay", coins(player, cost)).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		Factions.update(player.level().getServer(), f.id(), x -> x.withTreasury(x.treasury() + cost));
@@ -620,9 +620,14 @@ public final class Stables {
 		}
 	}
 
-	/** (0.7.487) {@code n} silver coins' worth to {@code player}: into the worn purse if it has room, else the pack, else the ground. */
+	/** (0.7.497) {@code n} emeralds' worth as a price in the coin of the land where {@code player} stands ("8 Realm Silver"). */
+	private static Component coins(ServerPlayer player, long n) {
+		return Money.text(player, Money.worth(n));
+	}
+
+	/** (0.7.497) {@code n} emeralds' worth to {@code player}: into the worn purse if it has room, else the pack, else the ground. */
 	private static void giveSilver(ServerPlayer player, int n) {
-		Money.pay(player, Money.silver(n));
+		Money.pay(player, Money.worth(n));
 	}
 
 	// ---- the market -------------------------------------------------------------------------------------------------
@@ -712,7 +717,7 @@ public final class Stables {
 			Equine e = offers.get(i).equine();
 			MutableComponent line = Component.translatable("message.jaymoskingdoms.stable.offer", Component.translatable(e.breed().key()),
 				Component.translatable("coat.jaymoskingdoms." + e.coatName()), pct(e.speed()), pct(e.stamina()), pct(e.jump()), pct(e.courage()),
-				offers.get(i).price());
+				coins(player, offers.get(i).price()));
 			option(player, line, "/kingdom stable buy " + i);
 			shown++;
 		}
@@ -757,7 +762,7 @@ public final class Stables {
 		SOLD.put(key, true);
 		level.playSound(null, at, SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		tell(player, Component.translatable("message.jaymoskingdoms.stable.bought", Component.translatable(offer.equine().breed().key()),
-			offer.price()).withStyle(ChatFormatting.YELLOW));
+			coins(player, offer.price())).withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
 
@@ -776,14 +781,14 @@ public final class Stables {
 		int price = sellPrice(horse);
 		Faction now = Factions.get(level.getServer(), f.id());
 		if (now == null || now.treasury() < price) {
-			tell(player, Component.translatable("message.jaymoskingdoms.stable.too_poor", w.mob().getName(), price).withStyle(ChatFormatting.GRAY));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.too_poor", w.mob().getName(), coins(player, price)).withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
 		Factions.update(level.getServer(), f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - price)));
 		giveSilver(player, price);
 		Component name = Bonding.name(horse);
 		handOver(level, player, horse, f, w.blockPosition());
-		tell(player, Component.translatable("message.jaymoskingdoms.stable.sold", name, price).withStyle(ChatFormatting.YELLOW));
+		tell(player, Component.translatable("message.jaymoskingdoms.stable.sold", name, coins(player, price)).withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
 
@@ -859,7 +864,7 @@ public final class Stables {
 			if (!Wealth.atLeast(server, f, ware.tier())) {
 				continue;
 			}
-			option(player, Component.translatable("message.jaymoskingdoms.farrier.ware", ware.count(), new ItemStack(ware.item()).getHoverName(), ware.price()),
+			option(player, Component.translatable("message.jaymoskingdoms.farrier.ware", ware.count(), new ItemStack(ware.item()).getHoverName(), coins(player, ware.price())),
 				"/kingdom farrier buy " + i);
 		}
 		if (stock(server, f).size() < all.size()) {
@@ -888,7 +893,7 @@ public final class Stables {
 			// (in the realm's colour)
 			stack.set(DataComponents.DYED_COLOR, new DyedItemColor(f.styleColor(server).getTextureDiffuseColor() & 0xFFFFFF));
 		}
-		tell(player, Component.translatable("message.jaymoskingdoms.farrier.bought", stack.getHoverName(), ware.price()).withStyle(ChatFormatting.YELLOW));
+		tell(player, Component.translatable("message.jaymoskingdoms.farrier.bought", stack.getHoverName(), coins(player, ware.price())).withStyle(ChatFormatting.YELLOW));
 		give(player, stack);
 		return 1;
 	}
@@ -912,7 +917,7 @@ public final class Stables {
 		horse.setAttached(Bonding.BOND, b.withFeet(Bond.FULL, Bond.FULL));
 		level.playSound(null, horse.blockPosition(), SoundEvents.ANVIL_USE, SoundSource.NEUTRAL, 0.6F, 1.5F);
 		level.sendParticles(ParticleTypes.CRIT, horse.getX(), horse.getY() + 0.3, horse.getZ(), 12, 0.4, 0.1, 0.4, 0.05);
-		tell(player, Component.translatable("message.jaymoskingdoms.farrier.shod", w.mob().getName(), Bonding.name(horse), SHOE_PRICE)
+		tell(player, Component.translatable("message.jaymoskingdoms.farrier.shod", w.mob().getName(), Bonding.name(horse), coins(player, SHOE_PRICE))
 			.withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
@@ -985,9 +990,10 @@ public final class Stables {
 		ServerLevel level = player.level();
 		boolean farrier = w.role() == Folk.FARRIER;
 		Component title = Component.translatable("gui.jaymoskingdoms." + (farrier ? "farrier" : "stable") + ".title", w.mob().getName(), f.name());
-		int purse = (int)Math.min(Integer.MAX_VALUE, Money.count(player) / Money.SILVER);
-		Component subtitle = farrier ? Component.translatable("gui.jaymoskingdoms.farrier.subtitle", SHOE_PRICE, purse)
-			: Component.translatable("gui.jaymoskingdoms.stable.subtitle", WEEKLY_FEE, purse);
+		// (0.7.497) the price and the purse are shown in the coin this stable is paid in
+		Component purse = Money.text(player, Money.count(player, f));
+		Component subtitle = farrier ? Component.translatable("gui.jaymoskingdoms.farrier.subtitle", coins(player, SHOE_PRICE), purse)
+			: Component.translatable("gui.jaymoskingdoms.stable.subtitle", coins(player, WEEKLY_FEE), purse);
 		MutableComponent note = Component.empty();
 		for (Component c : said) {
 			note.append(note.getSiblings().isEmpty() ? Component.empty() : Component.literal(" ")).append(c);
@@ -1002,13 +1008,13 @@ public final class Stables {
 			boolean sellable = !(horse instanceof WarElephant);
 			yours.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), Optional.of(Equestrian.equine(horse)), label(horse), stats(Equestrian.equine(horse)), List.of(
 				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.board"), StableNet.BOARD, horse.getId(), true),
-				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.sell", sellPrice(horse)), StableNet.SELL, horse.getId(), sellable))));
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.sell", coins(player, sellPrice(horse))), StableNet.SELL, horse.getId(), sellable))));
 		}
 		List<StableNet.Row> kept = new ArrayList<>();
 		for (AbstractHorse horse : boardedHere(level, player, f)) {
 			int fee = fee(level, horse);
-			kept.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), Optional.of(Equestrian.equine(horse)), label(horse), Component.translatable("gui.jaymoskingdoms.stable.owed", fee),
-				List.of(new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.collect", fee), StableNet.COLLECT, horse.getId(), true))));
+			kept.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), Optional.of(Equestrian.equine(horse)), label(horse), Component.translatable("gui.jaymoskingdoms.stable.owed", coins(player, fee)),
+				List.of(new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.collect", coins(player, fee)), StableNet.COLLECT, horse.getId(), true))));
 		}
 		List<StableNet.Row> market = new ArrayList<>();
 		List<Offer> offers = offers(level, f);
@@ -1020,7 +1026,7 @@ public final class Stables {
 			Component name = Component.translatable("gui.jaymoskingdoms.stable.offer", Component.translatable(e.breed().key()),
 				Component.translatable("coat.jaymoskingdoms." + e.coatName()));
 			market.add(new StableNet.Row(icon(e.breed()), Optional.of(e), name, stats(e), List.of(
-				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.buy", offers.get(i).price()), StableNet.BUY, i, true))));
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.buy", coins(player, offers.get(i).price())), StableNet.BUY, i, true))));
 		}
 		return List.of(
 			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.yours"), Component.translatable("gui.jaymoskingdoms.stable.yours_none"), yours),
@@ -1040,7 +1046,7 @@ public final class Stables {
 			Component feet = Component.translatable("gui.jaymoskingdoms.farrier.feet", Math.round(b.hooves() / Bond.FULL * 100.0F),
 				Math.round(b.shoes() / Bond.FULL * 100.0F));
 			horses.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), Optional.of(Equestrian.equine(horse)), label(horse), feet, List.of(
-				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.farrier.shoe", SHOE_PRICE), StableNet.SHOE, horse.getId(), true))));
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.farrier.shoe", coins(player, SHOE_PRICE)), StableNet.SHOE, horse.getId(), true))));
 		}
 		MinecraftServer server = player.level().getServer();
 		List<StableNet.Row> shop = new ArrayList<>();
@@ -1052,7 +1058,7 @@ public final class Stables {
 			Component detail = stocked ? Component.translatable("gui.jaymoskingdoms.farrier.stocked")
 				: Component.translatable("gui.jaymoskingdoms.farrier.locked." + ware.tier().name().toLowerCase(java.util.Locale.ROOT));
 			shop.add(new StableNet.Row(stack, Optional.empty(), stack.getHoverName(), detail, List.of(
-				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.farrier.buy", ware.price()), StableNet.BUY_TACK, i, stocked))));
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.farrier.buy", coins(player, ware.price())), StableNet.BUY_TACK, i, stocked))));
 		}
 		return List.of(
 			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.farrier.horses"), Component.translatable("gui.jaymoskingdoms.stable.yours_none"), horses),
@@ -1213,7 +1219,7 @@ public final class Stables {
 		}
 		if (boarded(horse) && player.getMainHandItem().isEmpty() && !player.isSecondaryUseActive()) {
 			// (no riding off without paying)
-			sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.pay_first", Bonding.name(horse), fee(server, horse))
+			sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.pay_first", Bonding.name(horse), coins(sp, fee(server, horse)))
 				.withStyle(ChatFormatting.GRAY), true);
 			return InteractionResult.FAIL;
 		}
@@ -1279,7 +1285,7 @@ public final class Stables {
 			withSilver(reward, BREED_PRICE[breed.ordinal()] * (50 + quality) / 100 + 6 + random.nextInt(6)), 0L);
 	}
 
-	/** (0.7.487) {@code r} with a reward of {@code silver} silver coins (the codec key stays {@code emeralds}). */
+	/** (0.7.497) {@code r} with a reward of {@code silver} silver coins (the codec key stays {@code emeralds}). */
 	private static Quest.Reward withSilver(Quest.Reward r, int silver) {
 		return new Quest.Reward(silver, r.items(), r.book(), r.relic(), r.hearts(), r.reputation(), r.standing());
 	}

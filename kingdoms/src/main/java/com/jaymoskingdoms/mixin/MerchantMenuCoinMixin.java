@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.487) Paying from the purse in the trade screen: when a trade is picked, the screen moves the price from the pack
+ * (0.7.497) Paying from the purse in the trade screen: when a trade is picked, the screen moves the price from the pack
  * into the payment slot. Where the pack lacks the coin the price asks for, the coins are made from the purse or from a
  * larger coin ({@link Coinage#fill}), change going back into the purse.
  */
@@ -40,7 +40,7 @@ abstract class MerchantMenuCoinMixin {
 		}
 	}
 
-	/** (0.7.487) What the price really is now: the base cost plus demand and special-price changes, which the offer holds. */
+	/** (0.7.497) What the price really is now: the base cost plus demand and special-price changes, which the offer holds. */
 	private int jaymoskingdoms$count(ItemCost cost) {
 		for (MerchantOffer offer : this.trader.getOffers()) {
 			if (offer.getItemCostA() == cost) {

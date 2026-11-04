@@ -59,7 +59,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
-import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.7.431) Havens patch 3, <b>captains</b> (ideas from Shadow of War, a commercial game, and King's Monsters, ARR: our own
@@ -117,8 +116,8 @@ public final class Captains {
 	static final int FEAR_TICKS = 100, FEAR_AGAIN = 400;
 	/** Bleeding frightens one who fears blood only below this share of his health. */
 	static final float BLOOD_AT = 0.75F;
-	/** The pedlar's rumour of a captain (silver coins). */
-	static final int RUMOUR_PRICE = 2;
+	/** The pedlar's rumour of a captain ((0.7.490) in bent worth). */
+	static final int RUMOUR_PRICE = 4;
 	/** (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). */
 	static final int SCENE_TICKS = 90, SCENE_RAISED = 45;
 	static final double CHEER_RANGE = 20.0;
@@ -414,17 +413,8 @@ public final class Captains {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> hurt(victim, source, taken, blocked));
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack held = player.getItemInHand(hand);
-			if (player instanceof ServerPlayer sp && held.is(Items.WRITTEN_BOOK)) {
-				CustomData data = held.get(DataComponents.CUSTOM_DATA);
-				if (data != null) {
-					CompoundTag tag = data.copyTag();
-					String captain = tag.getStringOr(ORDERS_CAPTAIN, "");
-					Trait trait = Trait.parse(tag.getStringOr(ORDERS_TRAIT, ""));
-					if (!captain.isEmpty() && trait != null) {
-						// (a chief's orders, read: you know it now; the book opens as any)
-						learn(sp, captain, trait);
-					}
-				}
+			if (player instanceof ServerPlayer sp) {
+				readOrders(sp, held);
 			}
 			return InteractionResult.PASS;
 		});
@@ -891,13 +881,15 @@ public final class Captains {
 
 	private static ItemStack ordersBook(Captain c, Trait t) {
 		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
-		List<Filterable<Component>> pages = List.of(Filterable.passThrough(Component.translatable("book.jaymoskingdoms.captain_orders.page",
+		List<Filterable<Component>> pages = List.of(Filterable.passThrough(Dialects.trTribe(c.tribe(), "book.jaymoskingdoms.captain_orders.page",
 			Component.literal(c.name()), told(c, t))));
 		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough("Orders"), "", 0, pages, true));
 		book.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.captain_orders"));
 		CompoundTag tag = new CompoundTag();
 		tag.putString(ORDERS_CAPTAIN, c.id());
 		tag.putString(ORDERS_TRAIT, t.key());
+		// ((0.7.490) the Lore Codex files it, one of each)
+		tag.putString(LoreBooks.KEY, "orders:" + c.id() + ":" + t.key());
 		book.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		return book;
 	}
@@ -1012,7 +1004,7 @@ public final class Captains {
 		FEARED_FROM.put(id, from);
 		FEAR_READY.put(id, now + FEAR_TICKS + FEAR_AGAIN);
 		mob.setTarget(null);
-		Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.captain.afraid." + fear.key() + "." + mob.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
+		Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.afraid." + fear.key() + "." + mob.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
 		flee(mob, from);
 		return true;
 	}
@@ -1048,7 +1040,7 @@ public final class Captains {
 			w.mob().addEffect(new MobEffectInstance(MobEffects.STRENGTH, RALLY_TICKS, 0, false, true));
 		}
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 1.2F, 1.1F);
-		Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.captain.rally." + mob.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
+		Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.rally." + mob.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
 	}
 
 	// ---- meetings ------------------------------------------------------------------------------------------------------
@@ -1064,11 +1056,11 @@ public final class Captains {
 			Component line;
 			if (m == null) {
 				PowersCompat.film(mob, p, PowersCompat.FILM_PUSH_IN, FILM_TICKS, mob.getEyePosition(), mob, FILM_WITNESSES);
-				line = Component.translatable("talk.jaymoskingdoms.captain.first." + mob.getRandom().nextInt(LINES), Recollections.nameTo(p, mob),
+				line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.first." + mob.getRandom().nextInt(LINES), Recollections.nameTo(p, mob),
 					Component.literal(c.name()), Tribes.name(c.tribe()));
 			} else {
 				String last = "slain".equals(m.last()) && c.has(Trait.DEATHLESS) ? "raised" : m.last();
-				line = Component.translatable("talk.jaymoskingdoms.captain.again." + last + "." + mob.getRandom().nextInt(LINES),
+				line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.again." + last + "." + mob.getRandom().nextInt(LINES),
 					Recollections.nameTo(p, mob), Component.literal(c.name()));
 			}
 			Speech.say(level, mob, line, Speech.RED, SAY_RANGE);
@@ -1181,7 +1173,7 @@ public final class Captains {
 			if (victim.isAlive() && has(victim, Trait.HARD_TO_KILL) && victim.getHealth() < victim.getMaxHealth() * HARD_AT && GOT_UP.add(victim.getUUID())) {
 				victim.setHealth(victim.getMaxHealth() * HARD_TO);
 				level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.2F, 1.2F);
-				Speech.say(level, victim, Component.translatable("talk.jaymoskingdoms.captain.not_yet." + victim.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
+				Speech.say(level, victim, Dialects.tr(victim, "talk.jaymoskingdoms.captain.not_yet." + victim.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
 			}
 		}
 		if (by instanceof LivingEntity attacker && is(attacker)) {
@@ -1380,7 +1372,7 @@ public final class Captains {
 			sworn.add(c.id());
 			player.setAttached(SWORN, List.copyOf(sworn));
 		}
-		Speech.say(level, killer, Component.translatable("talk.jaymoskingdoms.captain.gloat." + random.nextInt(LINES), player.getDisplayName()), Speech.RED, SAY_RANGE);
+		Speech.say(level, killer, Dialects.tr(killer, "talk.jaymoskingdoms.captain.gloat." + random.nextInt(LINES), player.getDisplayName()), Speech.RED, SAY_RANGE);
 		Post.news(server, Component.translatable(risen ? "news.jaymoskingdoms.captain.risen" : "news.jaymoskingdoms.captain.slew", c.name(),
 			player.getDisplayName(), Tribes.name(c.tribe())));
 	}
@@ -1413,7 +1405,7 @@ public final class Captains {
 		if (killer instanceof Mob mob) {
 			mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		}
-		Speech.say(level, killer, Component.translatable("talk.jaymoskingdoms.captain." + (risen ? "risen" : "climbed") + "." + killer.getRandom().nextInt(LINES),
+		Speech.say(level, killer, Dialects.tr(killer, "talk.jaymoskingdoms.captain." + (risen ? "risen" : "climbed") + "." + killer.getRandom().nextInt(LINES),
 			Component.literal(c.name())), Speech.RED, SAY_RANGE);
 		int faction = killer instanceof Worker w ? w.factionId() : -1;
 		int cheers = 0;
@@ -1421,7 +1413,7 @@ public final class Captains {
 			if (cheers++ >= 3) {
 				break;
 			}
-			Speech.say(level, w.mob(), Component.translatable("talk.jaymoskingdoms.captain.cheer." + w.mob().getRandom().nextInt(LINES), Component.literal(c.name())),
+			Speech.say(level, w.mob(), Dialects.tr(w.mob(), "talk.jaymoskingdoms.captain.cheer." + w.mob().getRandom().nextInt(LINES), Component.literal(c.name())),
 				Speech.RED, SAY_RANGE);
 		}
 	}
@@ -1435,7 +1427,7 @@ public final class Captains {
 			return;
 		}
 		brother.setTarget(player);
-		Speech.say(level, brother, Component.translatable("talk.jaymoskingdoms.captain.brother." + brother.getRandom().nextInt(LINES), Component.literal(c.name())),
+		Speech.say(level, brother, Dialects.tr(brother, "talk.jaymoskingdoms.captain.brother." + brother.getRandom().nextInt(LINES), Component.literal(c.name())),
 			Speech.RED, SAY_RANGE);
 	}
 
@@ -1632,7 +1624,7 @@ public final class Captains {
 		}
 		if (sp.getMainHandItem().isEmpty()) {
 			outcome(server, c.id(), sp.getUUID(), "spared", now);
-			Speech.say(level, seen, Component.translatable("talk.jaymoskingdoms.captain.let_up." + random.nextInt(LINES), Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
+			Speech.say(level, seen, Dialects.tr(seen, "talk.jaymoskingdoms.captain.let_up." + random.nextInt(LINES), Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
 			Will.flee(seen, sp, now, Will.FLEE_TICKS);
 			return;
 		}
@@ -1660,7 +1652,7 @@ public final class Captains {
 			damage.setBaseValue(Math.max(1.0, damage.getBaseValue() - DAMAGE_PER_RANK));
 		}
 		level.playSound(null, seen.getX(), seen.getY(), seen.getZ(), SoundEvents.VILLAGER_NO, SoundSource.HOSTILE, 1.2F, 0.6F);
-		Speech.say(level, seen, Component.translatable("talk.jaymoskingdoms.captain.shamed." + random.nextInt(LINES), Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
+		Speech.say(level, seen, Dialects.tr(seen, "talk.jaymoskingdoms.captain.shamed." + random.nextInt(LINES), Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
 		Will.flee(seen, sp, now, Will.FLEE_TICKS * 2);
 		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.shamed", c.name(), sp.getDisplayName(), Tribes.name(c.tribe())));
 	}
@@ -1669,7 +1661,29 @@ public final class Captains {
 
 	/** How {@code t} of {@code c} is told (hearsay). */
 	static Component told(Captain c, Trait t) {
-		return Component.translatable("captain.jaymoskingdoms.trait." + t.key() + ".told", Component.literal(c.name()));
+		return told(c, t, Dialects.ofTribe(c.tribe()));
+	}
+
+	/** (0.7.490) The same in the dialect of whoever tells it ({@link Dialects#ORC}, {@link Dialects#GOBLIN}). */
+	static Component told(Captain c, Trait t, String brood) {
+		return Dialects.trBrood(brood, "captain.jaymoskingdoms.trait." + t.key() + ".told", Component.literal(c.name()));
+	}
+
+	/** (0.7.490) If {@code stack} is a captain's orders, {@code player} has read them: they know what they told. Used on use, and as the codex files them. */
+	static void readOrders(ServerPlayer player, ItemStack stack) {
+		if (!stack.is(Items.WRITTEN_BOOK)) {
+			return;
+		}
+		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		if (data != null) {
+			CompoundTag tag = data.copyTag();
+			String captain = tag.getStringOr(ORDERS_CAPTAIN, "");
+			Trait trait = Trait.parse(tag.getStringOr(ORDERS_TRAIT, ""));
+			if (!captain.isEmpty() && trait != null) {
+				// (a chief's orders, read: you know it now; the book opens as any)
+				learn(player, captain, trait);
+			}
+		}
 	}
 
 	/** {@code player} knows {@code t} of captain {@code id} now. */
@@ -1718,7 +1732,7 @@ public final class Captains {
 			e = unknown(player, tribe, Rulers.faction(body), EnumSet.allOf(Sort.class), random);
 		}
 		if (e == null) {
-			return Component.translatable("dialogue.chat.jaymoskingdoms.captain.none." + random.nextInt(LINES), Recollections.nameTo(player, body));
+			return Dialects.tr(body, "dialogue.chat.jaymoskingdoms.captain.none." + random.nextInt(LINES), Recollections.nameTo(player, body));
 		}
 		Captain c = e.getKey();
 		Trait t = e.getValue();
@@ -1735,10 +1749,11 @@ public final class Captains {
 		} else {
 			learn(player, c.id(), t);
 		}
-		return Component.translatable("dialogue.chat.jaymoskingdoms.captain.told." + random.nextInt(LINES), Recollections.nameTo(player, body), told(c, t));
+		return Dialects.tr(body, "dialogue.chat.jaymoskingdoms.captain.told." + random.nextInt(LINES), Recollections.nameTo(player, body),
+			told(c, t, Dialects.ofTribe(tribe)));
 	}
 
-	/** (MCA's talk) a tribe's pedlar: what he's heard of its captains, for {@link #RUMOUR_PRICE} silver. */
+	/** (MCA's talk) a tribe's pedlar: what he's heard of its captains, for {@link #RUMOUR_PRICE} bent worth. */
 	public static boolean pedlarHears(LivingEntity villager) {
 		return Pedlars.pedlar(villager) && Tribes.of(villager) != null;
 	}
@@ -1749,17 +1764,24 @@ public final class Captains {
 		RandomSource random = pedlar.getRandom();
 		Map.Entry<Captain, Trait> e = tribe == null ? null : unknown(player, tribe, -1, EnumSet.allOf(Sort.class), random);
 		if (e == null) {
-			return Component.translatable("dialogue.chat.jaymoskingdoms.captain.pedlar.none." + random.nextInt(LINES), Recollections.nameTo(player, pedlar));
+			return Dialects.trBrood(Dialects.GOBLIN, "dialogue.chat.jaymoskingdoms.captain.pedlar.none." + random.nextInt(LINES), Recollections.nameTo(player, pedlar));
 		}
-		// (0.7.487) silver coins from everywhere they are kept (purses and bundles too, which the old loose-emerald count missed)
-		if (!Money.canPay(player, Money.silver(RUMOUR_PRICE))) {
-			return Component.translatable("dialogue.chat.jaymoskingdoms.captain.pedlar.price." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),
+		// ((0.7.490) paid in bent worth, into his tribe's seat's hoard)
+		if (BentIngots.held(player) < RUMOUR_PRICE) {
+			if (BentIngots.plainHeld(player) > 0) {
+				BentIngots.refuse((net.minecraft.server.level.ServerLevel)player.level(), pedlar, player);
+			}
+			return Dialects.trBrood(Dialects.GOBLIN, "dialogue.chat.jaymoskingdoms.captain.pedlar.price." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),
 				Component.literal(Integer.toString(RUMOUR_PRICE)));
 		}
-		Money.charge(player, Money.silver(RUMOUR_PRICE));
+		int paid = BentIngots.take(player, RUMOUR_PRICE);
+		Faction keeper = HordeEconomy.treasury(player.level().getServer(), tribe);
+		if (keeper != null) {
+			HordeEconomy.deposit(player.level().getServer(), keeper.id(), paid);
+		}
 		learn(player, e.getKey().id(), e.getValue());
-		return Component.translatable("dialogue.chat.jaymoskingdoms.captain.pedlar.told." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),
-			told(e.getKey(), e.getValue()));
+		return Dialects.trBrood(Dialects.GOBLIN, "dialogue.chat.jaymoskingdoms.captain.pedlar.told." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),
+			told(e.getKey(), e.getValue(), Dialects.GOBLIN));
 	}
 
 	/** (The journal) {@code player}'s sworn foes, then the other captains they know something of. */

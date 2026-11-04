@@ -271,7 +271,7 @@ public class SkeletonLord extends Monster {
 		super.dropCustomDeathLoot(level, source, killedByPlayer);
 		this.spawnAtLocation(level, new ItemStack(Items.BONE, BONES_MIN + this.random.nextInt(BONES_MAX - BONES_MIN + 1)));
 		this.spawnAtLocation(level, new ItemStack(Items.AMETHYST_SHARD, AMETHYST_MIN + this.random.nextInt(AMETHYST_MAX - AMETHYST_MIN + 1)));
-		for (ItemStack coins : Money.stacks(Money.silver(SILVER_MIN + this.random.nextInt(SILVER_MAX - SILVER_MIN + 1)))) {
+		for (ItemStack coins : Money.stacks(Money.worth(SILVER_MIN + this.random.nextInt(SILVER_MAX - SILVER_MIN + 1)))) {
 			this.spawnAtLocation(level, coins);
 		}
 	}

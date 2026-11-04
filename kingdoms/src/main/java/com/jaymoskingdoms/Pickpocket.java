@@ -87,15 +87,15 @@ public final class Pickpocket {
 	/** The progress bar's length. */
 	static final int BAR = 12;
 
-	/** (0.7.487) The little purse in a pocket holds this many copper pieces (least, most), twice that on a guard or a merchant. */
-	static final int PURSE_MIN_CP = 4, PURSE_MAX_CP = 30, RICH_FACTOR = 2;
-	/** (0.7.487) Villagers in these jobs carry a fuller purse (the money changer, and the trades that sell for coin). */
-	private static final Set<String> MERCHANTS = Set.of("money_changer", "cartographer", "librarian", "butcher", "leatherworker");
+	/** (0.7.497) The little purse in a pocket holds this many copper bits' worth (least, most), twice that on a guard or a merchant. */
+	static final int PURSE_MIN_BITS = 4, PURSE_MAX_BITS = 30, RICH_FACTOR = 2;
+	/** (0.7.497) Villagers in these jobs carry a fuller purse (the money changer, and the trades that sell for coin). */
+	private static final Set<String> MERCHANTS = Set.of("changer", "cartographer", "librarian", "butcher", "leatherworker");
 
 	/**
-	 * What's in a pocket that holds nothing they carry: item, least, most, weight. (0.7.487) The item is a supplier, since
-	 * the coin items are registered after this class loads. A pocket whose item is the coin purse holds a filled purse,
-	 * least..most being copper pieces (see {@link #PURSE_MIN_CP}).
+	 * What's in a pocket that holds nothing they carry: item, least, most, weight. (0.7.497) The item is a supplier, since
+	 * the coin items are registered after this class loads. A pocket whose item is the coin purse holds a filled purse in
+	 * the victim's own coin, least..most being copper bits' worth (see {@link #PURSE_MIN_BITS}).
 	 */
 	private record Pocket(Supplier<Item> item, int least, int most, int weight) {
 		Pocket(Item item, int least, int most, int weight) {
@@ -103,8 +103,8 @@ public final class Pickpocket {
 		}
 	}
 
-	private static final List<Pocket> POCKETS = List.of(new Pocket(() -> MoneyItems.COIN_PURSE, PURSE_MIN_CP, PURSE_MAX_CP, 6),
-		new Pocket(() -> MoneyItems.COIN_ITEMS[0], 1, 6, 3), new Pocket(Items.GOLD_NUGGET, 1, 4, 3),
+	private static final List<Pocket> POCKETS = List.of(new Pocket(() -> MoneyItems.COIN_PURSE, PURSE_MIN_BITS, PURSE_MAX_BITS, 6),
+		new Pocket(() -> MoneyItems.COPPER_BIT, 1, 6, 3), new Pocket(Items.GOLD_NUGGET, 1, 4, 3),
 		new Pocket(Items.IRON_NUGGET, 1, 5, 3), new Pocket(Items.BREAD, 1, 2, 3), new Pocket(Items.APPLE, 1, 2, 2),
 		new Pocket(Items.STRING, 1, 3, 1), new Pocket(Items.PAPER, 1, 2, 1), new Pocket(Items.FLINT, 1, 1, 1));
 	/** Out of all the weights plus this, the pocket is empty. */
@@ -321,7 +321,7 @@ public final class Pickpocket {
 		RandomSource random = level.getRandom();
 		Faction f = law(level, mark);
 		boolean fresh = PICKED.getOrDefault(mark.getUUID(), 0L) <= now;
-		ItemStack loot = fresh ? loot(player, mark, random) : ItemStack.EMPTY;
+		ItemStack loot = fresh ? loot(player, mark, random, f != null ? Currencies.of(level.getServer(), f) : Currencies.at(level, mark.blockPosition())) : ItemStack.EMPTY;
 		PICKED.put(mark.getUUID(), now + EMPTY_TICKS);
 		// (0.5.52) a pocket picked clean is Stealth practice (one already emptied teaches nothing)
 		int xp = fresh ? Skills.pickedClean(player, !loot.isEmpty(), mark instanceof Folk folk && folk.combatant(), mark.isSleeping()) : 0;
@@ -386,7 +386,7 @@ public final class Pickpocket {
 		}
 	}
 
-	/** (0.7.487) A guard or a merchant carries more coin than a farmer. */
+	/** (0.7.497) A guard or a merchant carries more coin than a farmer. */
 	private static boolean rich(LivingEntity mark) {
 		if (Downed.isGuard(mark)) {
 			return true;
@@ -396,7 +396,7 @@ public final class Pickpocket {
 	}
 
 	/** What {@code mark} has on them: a share of something they carry, or else a pocket's worth (or nothing). */
-	private static ItemStack loot(ServerPlayer player, LivingEntity mark, RandomSource random) {
+	private static ItemStack loot(ServerPlayer player, LivingEntity mark, RandomSource random, Currency coin) {
 		if (mark instanceof Villager v) {
 			SimpleContainer bag = v.getInventory();
 			List<Integer> full = new ArrayList<>();
@@ -425,7 +425,7 @@ public final class Pickpocket {
 					int n = p.least() + random.nextInt(p.most() - p.least() + 1);
 					Item item = p.item().get();
 					if (item == MoneyItems.COIN_PURSE) {
-						return PurseContents.filled((long)n * (rich(mark) ? RICH_FACTOR : 1));
+						return PurseContents.filled(coin, (long)n * Currency.BIT.base * (rich(mark) ? RICH_FACTOR : 1));
 					}
 					return new ItemStack(item, n);
 				}

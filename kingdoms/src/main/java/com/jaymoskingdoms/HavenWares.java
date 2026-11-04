@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Coin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -45,11 +45,11 @@ import org.jspecify.annotations.Nullable;
  * The offers are added when a trade opens ({@code VillagerPriceMixin}), once each.
  */
 public final class HavenWares {
-	/** What a haven asks (silver coins, once emeralds): pearl, deep fish (two), cut gem, herbs (three), hide (two), stone tool, bow, war jerkin. */
+	/** What a haven asks (emeralds): pearl, deep fish (two), cut gem, herbs (three), hide (two), stone tool, bow, war jerkin. */
 	static final int PEARL_PRICE = 4, FISH_PRICE = 1, GEM_PRICE = 6, HERB_PRICE = 1, HIDE_PRICE = 2, TOOL_PRICE = 4, BOW_PRICE = 6, JERKIN_PRICE = 7;
 	/** How many come for the price: deep fish, herbs, hides. */
 	static final int FISH_COUNT = 2, HERB_COUNT = 3, HIDE_COUNT = 2;
-	/** What a human town pays for one (silver coins, once emeralds): pearl, deep fish, cut gem, herbs, hide. */
+	/** What a human town pays for one (emeralds): pearl, deep fish, cut gem, herbs, hide. */
 	static final int PEARL_PAID = 9, FISH_PAID = 2, GEM_PAID = 12, HERB_PAID = 2, HIDE_PAID = 3;
 	/** Uses before an offer runs out (it restocks as the trader's others do); trader's xp per trade. */
 	static final int SELL_USES = 8, BUY_USES = 12, XP = 5;
@@ -156,9 +156,26 @@ public final class HavenWares {
 			wares.add(sale(HIDE_PRICE, new ItemStack(WAR_HIDE, HIDE_COUNT)));
 			wares.add(sale(JERKIN_PRICE, jerkin(level, blood)));
 		}
-		for (MerchantOffer ware : wares) {
-			if (v.getOffers().stream().noneMatch(o -> same(o.getResult(), ware.getResult()))) {
-				v.getOffers().add(ware);
+		// (0.7.490) the haven's works keep its traders stocked: more uses before an offer runs out
+		int more = HavenGrowth.stock(level.getServer(), f);
+		MerchantOffers offers = v.getOffers();
+		for (MerchantOffer base : wares) {
+			MerchantOffer ware = new MerchantOffer(base.getItemCostA(), base.getResult(), SELL_USES + more, XP, PRICE_MULT);
+			int at = -1;
+			for (int i = 0; i < offers.size() && at < 0; i++) {
+				if (same(offers.get(i).getResult(), ware.getResult())) {
+					at = i;
+				}
+			}
+			if (at < 0) {
+				offers.add(ware);
+			} else if (offers.get(at).getMaxUses() < SELL_USES + more) {
+				// (0.7.490) an offer made before the works grew: the same trade, its uses and demand kept, with the new stock
+				MerchantOffer old = offers.get(at);
+				MerchantOffer grown = new MerchantOffer(old.getItemCostA(), old.getItemCostB(), old.getResult(), old.getUses(),
+					SELL_USES + more, old.getXp(), old.getPriceMultiplier(), old.getDemand());
+				grown.setSpecialPriceDiff(old.getSpecialPriceDiff());
+				offers.set(at, grown);
 			}
 		}
 	}
@@ -171,7 +188,7 @@ public final class HavenWares {
 				|| v.getOffers().stream().anyMatch(o -> o.getBaseCostA().is(good))) {
 				continue;
 			}
-			v.getOffers().add(new MerchantOffer(new ItemCost(good, 1), Coin.SILVER.stack(paid(good)), BUY_USES, XP, PRICE_MULT));
+			v.getOffers().add(new MerchantOffer(new ItemCost(good, 1), new ItemStack(Items.EMERALD, paid(good)), BUY_USES, XP, PRICE_MULT));
 		}
 	}
 
@@ -179,9 +196,8 @@ public final class HavenWares {
 		return good == TIDE_PEARL ? PEARL_PAID : good == DEEP_FISH ? FISH_PAID : good == CUT_GEM ? GEM_PAID : good == SYLVAN_HERBS ? HERB_PAID : HIDE_PAID;
 	}
 
-	/** (0.7.487) A ware for {@code silver} silver coins (the old price in emeralds, one for one). */
-	private static MerchantOffer sale(int silver, ItemStack ware) {
-		return new MerchantOffer(new ItemCost(Coin.SILVER.item(), silver), ware, SELL_USES, XP, PRICE_MULT);
+	private static MerchantOffer sale(int emeralds, ItemStack ware) {
+		return new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), ware, SELL_USES, XP, PRICE_MULT);
 	}
 
 	/** The same ware: the same item, and for made goods the same haven mark. */

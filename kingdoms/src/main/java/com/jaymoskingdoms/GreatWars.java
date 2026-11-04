@@ -720,7 +720,7 @@ final class GreatWars {
 		}
 		int amount = Math.min(stake, WAGER_MOST - already);
 		if (amount <= 0) {
-			return new Taken(Component.translatable("message.jaymoskingdoms.wager.most", WAGER_MOST), 0);
+			return new Taken(Component.translatable("message.jaymoskingdoms.wager.most", Money.text(player, Money.worth(WAGER_MOST))), 0);
 		}
 		Wager made = new Wager(player.getUUID(), war.id(), side, amount, odds);
 		edit(server, l -> {
@@ -728,7 +728,7 @@ final class GreatWars {
 			wagers.add(made);
 			return withWagers(l, wagers, l.owed());
 		});
-		return new Taken(Component.translatable("message.jaymoskingdoms.wager.made", amount, Wars.name(server, side), (int)Math.floor(amount * odds)), amount);
+		return new Taken(Component.translatable("message.jaymoskingdoms.wager.made", Money.text(player, Money.worth(amount)), Wars.name(server, side), Money.text(player, Money.worth((int)Math.floor(amount * odds)))), amount);
 	}
 
 	/** Winnings (or a stake back) owed to {@code player}: paid now if they're on, else when they're next on. */
@@ -776,9 +776,9 @@ final class GreatWars {
 			if (player == null) {
 				continue;
 			}
-			// (0.7.487) the winnings are silver coins, into the worn purse if there's room
-			Money.pay(player, Money.silver(e.getValue()));
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.wager.paid", e.getValue()).withStyle(ChatFormatting.GOLD));
+			// (0.7.497) the winnings are silver coins, into the worn purse if there's room
+			Money.pay(player, Money.worth(e.getValue()));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.wager.paid", Money.text(player, Money.worth(e.getValue()))).withStyle(ChatFormatting.GOLD));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.6F, 0.8F);
 			left.remove(e.getKey());
 		}

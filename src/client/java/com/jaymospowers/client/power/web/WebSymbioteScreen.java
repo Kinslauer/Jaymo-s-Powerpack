@@ -139,7 +139,7 @@ final class WebSymbioteScreen extends Screen {
 		}
 		if (selected >= 0) {
 			LocalPlayer player = minecraft.player;
-			// (0.19.74) the Suit picked while sneaking (or right-clicked): one form down
+			// (0.19.69) the Suit picked while sneaking (or right-clicked): one form down
 			int use = selected == WebSymbiote.ARMOR && player != null && sneaking(player) ? WebSymbiote.SUIT_TOGGLE : selected;
 			ClientPlayNetworking.send(new WebNet.SymbioteUse(use));
 		}

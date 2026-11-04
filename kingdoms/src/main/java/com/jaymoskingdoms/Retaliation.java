@@ -26,6 +26,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.component.SwingAnimation;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Coinage;
 import com.jaymoskingdoms.money.Money;
 
 /**
@@ -58,7 +59,7 @@ final class Retaliation {
 	static final double FOLK_SPEED = 1.15;
 	/** A brawler under this share of their health runs off. */
 	static final float FLEE_SHARE = 0.3F;
-	/** Paying one off: silver coins to start with, more for each blow you've landed in the fight, and never more than this. */
+	/** (0.7.497) Paying one off: emeralds' worth in coin to start with, more for each blow you've landed in the fight, and never more than this. */
 	static final int PRICE_BASE = 3, PRICE_PER_BLOW = 3, PRICE_MOST = 32;
 	/** Lines for squaring up, running, being paid off and refusing the coin. */
 	static final int LINES = 3;
@@ -91,7 +92,7 @@ final class Retaliation {
 	static void register() {
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(world instanceof ServerLevel level)
-				|| !(entity instanceof LivingEntity who) || !Approaches.isMoney(player.getItemInHand(hand))) {
+				|| !(entity instanceof LivingEntity who) || !Coinage.isMoney(player.getItemInHand(hand))) {
 				return InteractionResult.PASS;
 			}
 			return payOff(sp, level, who) ? InteractionResult.SUCCESS : InteractionResult.PASS;
@@ -155,8 +156,8 @@ final class Retaliation {
 			return;
 		}
 		List<LivingEntity> seen = f == null ? List.of() : Theft.witnesses(level, f, player);
-		if (f != null && (Reputation.get(player, f.id()) <= FEARED || Theft.outlaw(player, f.id())) && !Temperaments.bold(victim)
-			|| Temperaments.runs(victim)) {
+		if (!HavenGrowth.sworn(victim) && (f != null && (Reputation.get(player, f.id()) <= FEARED || Theft.outlaw(player, f.id())) && !Temperaments.bold(victim)
+			|| Temperaments.runs(victim))) {
 			// they know what you are: they run; ((0.7.186) the brave and the hotheaded stand anyway, and the timid always run)
 			say(level, victim, "flee");
 			return;
@@ -210,9 +211,9 @@ final class Retaliation {
 			return true;
 		}
 		int price = price(brawl);
-		// (0.7.487) the payoff comes from everything carried, change given back, so a purse in hand pays as well as a coin
-		if (!Money.charge(player, Money.silver(price))) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.price", price).withStyle(ChatFormatting.GRAY));
+		// (0.7.497) the payoff comes from everything carried, change given back, so a purse in hand pays as well as a coin
+		if (!Money.charge(player, Money.worth(price))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.price", Money.text(player, Money.worth(price))).withStyle(ChatFormatting.GRAY));
 			return true;
 		}
 		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
@@ -225,7 +226,7 @@ final class Retaliation {
 		} else {
 			brawl.brawlers.remove(who.getUUID());
 			calm(level, who.getUUID());
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.paid", price).withStyle(ChatFormatting.GRAY));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.paid", Money.text(player, Money.worth(price))).withStyle(ChatFormatting.GRAY));
 		}
 		return true;
 	}
@@ -297,7 +298,8 @@ final class Retaliation {
 					b.remove();
 					continue;
 				}
-				if (mob.getHealth() < mob.getMaxHealth() * Temperaments.fleeShare(mob, FLEE_SHARE)) {
+				if (!HavenGrowth.sworn(mob) && mob.getHealth() < mob.getMaxHealth() * Temperaments.fleeShare(mob, FLEE_SHARE)) {
+					// ((0.7.490) a haven's sworn fights on)
 					// badly hurt: they run (and vanilla's panic takes them)
 					b.remove();
 					say(level, mob, "flee");

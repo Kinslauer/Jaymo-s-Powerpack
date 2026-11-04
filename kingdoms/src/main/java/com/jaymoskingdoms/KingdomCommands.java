@@ -77,6 +77,7 @@ final class KingdomCommands {
 				.then(Commands.literal("blossom").executes(BlossomVillages::foundHere)))
 			.then(Crowns.command())
 			.then(Camps.command())
+			.then(WalledTowns.command())
 			.then(FleetCommands.command())
 			.then(Roads.command())
 			.then(RoamingCaravans.command())
@@ -257,11 +258,20 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
 			return 0;
 		}
+		if (k.type() == FactionType.BARBARIAN && Hordes.realm(server, k.id())) {
+			// (0.7.491) the horde oath: swearing to a greenskin king (HordeCity)
+			String failure = HordeCity.swear(player, k);
+			if (failure != null) {
+				c.getSource().sendFailure(Component.translatable(failure, k.name()));
+				return 0;
+			}
+			return 1;
+		}
 		if (!k.type().isRealm()) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_pledge", k.name()));
 			return 0;
 		}
-		if (Factions.of(server, player.getUUID()) != null) {
+		if (Factions.of(server, player.getUUID()) != null || HordeCity.oathOf(server, player.getUUID()) != null) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.already_sworn"));
 			return 0;
 		}
@@ -295,6 +305,12 @@ final class KingdomCommands {
 		MinecraftServer server = c.getSource().getServer();
 		Faction k = Factions.of(server, player.getUUID());
 		if (k == null) {
+			// (0.7.491) or a horde oath forsworn
+			Faction horde = HordeCity.forswear(player);
+			if (horde != null) {
+				c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.horde_oath.left", horde.name()), false);
+				return 1;
+			}
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_sworn"));
 			return 0;
 		}
@@ -317,16 +333,16 @@ final class KingdomCommands {
 			return 0;
 		}
 		int want = IntegerArgumentType.getInteger(c, "silver");
-		// (0.7.487) silver is the treasury's unit; coins, coin stacks, purses (worn too) and bundles all count
+		// (0.7.497) silver is the treasury's unit; coins, coin stacks, purses (worn too) and bundles all count
 		// creative players pay nothing, so they may not deposit (it would mint treasury)
-		if (player.hasInfiniteMaterials() || !Money.charge(player, Money.silver(want))) {
+		if (player.hasInfiniteMaterials() || !Money.charge(player, Money.worth(want))) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_enough", Money.text(Money.count(player))));
 			return 0;
 		}
 		Faction paid = Factions.update(server, k.id(), f -> f.withTreasury(f.treasury() + want));
 		Reputation.change(player, paid, want / 4);
 		KingdomEvents.standing(server, player, paid, paid.member(player.getUUID()).standing() + want);
-		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.deposited", Money.text(Money.silver(want)), k.name(), paid.treasury()), false);
+		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.deposited", Money.text(Money.worth(want)), k.name(), paid.treasury()), false);
 		return want;
 	}
 
@@ -341,9 +357,9 @@ final class KingdomCommands {
 		}
 		int want = (int)Math.min(IntegerArgumentType.getInteger(c, "silver"), k.treasury());
 		Factions.update(server, k.id(), f -> f.withTreasury(f.treasury() - want));
-		// (0.7.487) paid out in silver: into the worn purse if it has room, else the pack, else the ground
-		Money.pay(player, Money.silver(want));
-		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.withdrew", Money.text(Money.silver(want)), k.name()), false);
+		// (0.7.497) paid out in silver: into the worn purse if it has room, else the pack, else the ground
+		Money.pay(player, Money.worth(want));
+		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.withdrew", Money.text(Money.worth(want)), k.name()), false);
 		return want;
 	}
 

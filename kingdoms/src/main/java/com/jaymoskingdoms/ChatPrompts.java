@@ -51,7 +51,7 @@ public final class ChatPrompts {
 			if (!blood.isEmpty()) {
 				sb.append(blood).append('\n');
 			}
-			// (0.7.487) coin or emeralds
+			// (0.7.497) coin or emeralds
 			String money = MoneyTalk.prompt(villager);
 			if (!money.isEmpty()) {
 				sb.append(money).append('\n');

@@ -56,11 +56,10 @@ public final class LootGoblins {
 	private LootGoblins() {
 	}
 
-	// (0.7.487) the loot's emeralds are silver coins now ("jaymoskingdoms:silver_coin"), the money of the kingdoms.
 	// ---- the loot tables (item ids, vanilla's unless named; any this game lacks are left out) --------------------------------------------------
 
 	static final String[] GENERIC = {"granite", "andesite", "diorite", "blackstone", "tuff", "stone", "deepslate", "lapis_lazuli",
-		"jaymoskingdoms:silver_coin", "saddle", "lead", "acacia_wood", "birch_wood", "dark_oak_wood", "jungle_wood", "oak_wood", "spruce_wood",
+		"emerald", "saddle", "lead", "acacia_wood", "birch_wood", "dark_oak_wood", "jungle_wood", "oak_wood", "spruce_wood",
 		"gold_nugget", "iron_nugget", "amethyst_shard", "apple", "potato", "beetroot", "bamboo", "honeycomb", "gunpowder", "ice",
 		"glistering_melon_slice", "golden_carrot", "melon", "pumpkin", "fishing_rod", "coal", "charcoal", "fire_charge", "beef",
 		"porkchop", "chicken", "cod", "salmon", "bread", "sponge", "glass", "tinted_glass", "white_wool", "obsidian",
@@ -95,7 +94,7 @@ public final class LootGoblins {
 			"grass_block", "bone_meal", "potato", "carrot", "fern", "large_fern", "stone_shovel", "stone_hoe", "wooden_shovel",
 			"wooden_hoe", "shears", "flower_pot"},
 		{"rabbit_foot", "rabbit_hide", "rabbit", "egg", "carrot", "carrot"},
-		{"glass_bottle", "gunpowder", "redstone", "spider_eye", "jaymoskingdoms:silver_coin", "cauldron", "string", "glowstone_dust", "blaze_powder"}};
+		{"glass_bottle", "gunpowder", "redstone", "spider_eye", "emerald", "cauldron", "string", "glowstone_dust", "blaze_powder"}};
 
 	// ---- registration ---------------------------------------------------------------------------------------------
 

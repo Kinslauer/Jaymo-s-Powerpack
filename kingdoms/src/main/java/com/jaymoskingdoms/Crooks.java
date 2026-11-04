@@ -43,13 +43,11 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import com.jaymoskingdoms.money.Coin;
 import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.money.MoneyItems;
 import com.jaymoskingdoms.money.PurseContents;
@@ -119,14 +117,14 @@ public final class Crooks {
 	/** From a player: at most this many silver (a handful of coins); with no money, up to half a stack of something else. */
 	static final int PICK_SILVER = 4;
 	/**
-	 * (0.7.487) A pickpocket on a player who wears a coin purse on the belt takes the whole purse this often (times
+	 * (0.7.497) A pickpocket on a player who wears a coin purse on the belt takes the whole purse this often (times
 	 * {@link #PURSE_LIFT_BUSY} at night or in a crowd of at least {@link #CROWD_MIN} within {@link #CROWD_RANGE} blocks).
 	 * It is owed back like anything else: it returns if the crook dies or is downed within RETURN_RANGE.
 	 */
 	static final float PURSE_LIFT_CHANCE = 0.35F, PURSE_LIFT_BUSY = 1.5F;
 	static final int CROWD_MIN = 3;
 	static final double CROWD_RANGE = 8.0;
-	/** (0.7.487) How much likelier a crook is to pick a player who wears a visible purse than one who doesn't (weight against 1). */
+	/** (0.7.497) How much likelier a crook is to pick a player who wears a visible purse than one who doesn't (weight against 1). */
 	static final int MARK_PURSE_WEIGHT = 3;
 	/** The chance a player feels the hand in their pocket. */
 	static final float FEEL_CHANCE = 0.5F;
@@ -354,7 +352,8 @@ public final class Crooks {
 	 */
 	static void scammed(ServerLevel level, Villager crook, ServerPlayer player, int faction, int paid) {
 		long now = level.getGameTime();
-		owe(crook, player.getUUID(), Money.stacks(Money.silver(paid)), now);
+		// (0.7.497) owed back in the coin the crook was paid in (the town's)
+		owe(crook, player.getUUID(), Money.stacks(level.getServer(), Factions.get(level.getServer(), faction), Money.worth(paid)), now);
 		home(crook, faction);
 		Speech.tell(level, crook, player, line("fetch", level.getRandom()), Speech.WHITE);
 		Vec3 away = crook.position().subtract(player.position()).normalize().scale(10.0).add(crook.position());
@@ -475,7 +474,7 @@ public final class Crooks {
 			}
 		}
 		if (!players.isEmpty()) {
-			// (0.7.487) a visible purse on the belt makes a player MARK_PURSE_WEIGHT times likelier to be picked
+			// (0.7.497) a visible purse on the belt makes a player MARK_PURSE_WEIGHT times likelier to be picked
 			int total = 0;
 			for (ServerPlayer p : players) {
 				total += PowersCompat.belt(p).is(MoneyItems.COIN_PURSE) ? MARK_PURSE_WEIGHT : 1;
@@ -668,12 +667,12 @@ public final class Crooks {
 		}
 		if (mark instanceof ServerPlayer player) {
 			if (random.nextFloat() < BLOW_LIFTS) {
-				// (0.7.487) a handful of coins, owed back as coin stacks
+				// (0.7.497) a handful of coins (of whatever they carry), owed back as coin stacks in the land's coin
 				// creative players have no coins to lose; chargeUpTo would mint some
-				long n = player.hasInfiniteMaterials() ? 0L : Money.chargeUpTo(player, Money.silver(1 + random.nextInt(PICK_SILVER)));
+				long n = player.hasInfiniteMaterials() ? 0L : Money.chargeUpTo(player, Money.worth(1 + random.nextInt(PICK_SILVER)));
 				if (n > 0L) {
-					owe(crook, player.getUUID(), Money.stacks(n), now);
-					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.crook.mugged", crook.getDisplayName(), Money.text(n))
+					owe(crook, player.getUUID(), Money.stacks(player.level(), player.blockPosition(), n), now);
+					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.crook.mugged", crook.getDisplayName(), Money.textPaid(player, n))
 						.withStyle(ChatFormatting.RED));
 				}
 			}
@@ -718,7 +717,7 @@ public final class Crooks {
 
 	/**
 	 * Something from {@code mark}'s pack or pockets (a villager's goods; a player's worn coin purse, or a handful of
-	 * coins, or half a stack), or a little purse. (0.7.487) The purse on a player's belt goes whole, at
+	 * coins, or half a stack), or a little purse. (0.7.497) The purse on a player's belt goes whole, at
 	 * {@link #PURSE_LIFT_CHANCE}.
 	 */
 	private static List<ItemStack> lift(LivingEntity mark, RandomSource random) {
@@ -732,9 +731,9 @@ public final class Crooks {
 					return List.of(purse);
 				}
 			}
-			long cp = player.hasInfiniteMaterials() ? 0L : Money.chargeUpTo(player, Money.silver(1 + random.nextInt(PICK_SILVER)));
+			long cp = player.hasInfiniteMaterials() ? 0L : Money.chargeUpTo(player, Money.worth(1 + random.nextInt(PICK_SILVER)));
 			if (cp > 0L) {
-				return Money.stacks(cp);
+				return Money.stacks(player.level(), player.blockPosition(), cp);
 			}
 			List<ItemStack> stacks = new ArrayList<>();
 			ItemStack held = player.getMainHandItem();
@@ -764,10 +763,11 @@ public final class Crooks {
 				return List.of(taken);
 			}
 		}
-		return List.of(PurseContents.filled(Money.silver(PURSE_MIN + random.nextInt(PURSE_MAX - PURSE_MIN + 1))));
+		// (0.7.497) a little purse in the coin of the land
+		return List.of(PurseContents.filled(Currencies.at(mark.level(), mark.blockPosition()), Money.worth(PURSE_MIN + random.nextInt(PURSE_MAX - PURSE_MIN + 1))));
 	}
 
-	/** (0.7.487) Night, or a crowd about {@code player}: the best time to lift a purse. */
+	/** (0.7.497) Night, or a crowd about {@code player}: the best time to lift a purse. */
 	private static boolean busy(ServerPlayer player) {
 		ServerLevel level = player.level();
 		if (night(level)) {
@@ -778,26 +778,28 @@ public final class Crooks {
 		return near >= CROWD_MIN;
 	}
 
-	/** (0.7.487) "7 s 3 c" for lifted coins, else "2 Bread" for goods. */
+	/** (0.7.497) "12 Realm Silver, 3 Copper Bit" for lifted coins (a lifted purse as what it holds), else "2 Bread" for goods. */
 	private static Component describe(List<ItemStack> taken) {
-		long cp = 0L;
-		boolean coins = true;
+		java.util.EnumMap<Currency, Integer> coins = new java.util.EnumMap<>(Currency.class);
 		for (ItemStack stack : taken) {
-			long v = Coin.valueOf(stack);
-			cp += v;
-			coins &= v > 0L;
+			Currency c = Currency.byItem(stack.getItem());
+			if (stack.is(MoneyItems.COIN_PURSE)) {
+				PurseContents.of(stack).held().forEach((k, n) -> coins.merge(k, n, Integer::sum));
+			} else if (c != null && c.money()) {
+				coins.merge(c, stack.getCount(), Integer::sum);
+			} else {
+				coins.clear();
+				break;
+			}
 		}
-		if (coins) {
-			return Money.text(cp);
+		if (!coins.isEmpty()) {
+			return new PurseContents(coins).list();
 		}
 		ItemStack first = taken.get(0);
 		return Component.translatable("message.jaymoskingdoms.crook.goods", first.getCount(), first.getHoverName());
 	}
 
-	/** (0.7.487) Old debts can still be in emeralds (a save from before coins): they are paid back as silver coins, one for one. */
-	private static ItemStack settle(ItemStack goods) {
-		return goods.is(Items.EMERALD) ? Coin.SILVER.stack(goods.getCount()) : goods;
-	}
+	// (0.7.497) Old debts can still be in emeralds (a save from before coins): they are paid back as the emeralds taken.
 
 	/** {@code crook} is behind {@code player}: the player's look and the line to the crook are well apart. */
 	private static boolean behind(ServerPlayer player, LivingEntity crook) {
@@ -1010,7 +1012,7 @@ public final class Crooks {
 	private static void spill(ServerLevel level, Villager crook, Pockets p) {
 		for (Owed o : p.owed) {
 			ServerPlayer owner = o.owner() == null ? null : level.getServer().getPlayerList().getPlayer(o.owner());
-			ItemStack goods = settle(o.goods().copy());
+			ItemStack goods = o.goods().copy();
 			if (owner != null && owner.level() == level && owner.distanceTo(crook) <= RETURN_RANGE) {
 				owner.sendSystemMessage(Component.translatable("message.jaymoskingdoms.crook.recovered",
 					Component.translatable("message.jaymoskingdoms.crook.goods", goods.getCount(), goods.getHoverName())).withStyle(ChatFormatting.GREEN));
@@ -1063,7 +1065,7 @@ public final class Crooks {
 				POCKETS.remove(crook.getUUID());
 			}
 			for (Owed o : mine) {
-				give(player, settle(o.goods().copy()));
+				give(player, o.goods().copy());
 			}
 			crook.getLookControl().setLookAt(player, 30.0F, 30.0F);
 			Speech.tell(level, crook, player, line("give_back", random), Speech.YELLOW);

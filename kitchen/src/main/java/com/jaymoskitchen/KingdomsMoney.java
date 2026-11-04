@@ -16,27 +16,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (0.5.54) Money, when Jaymo's Kingdoms is loaded: a bridge (MethodHandles, so Kitchen never compiles against it) to
- * {@code com.jaymoskingdoms.money.Money}, which counts coins, coin stacks, purses (the worn belt purse too) and bundles
- * in copper pieces. Prices are given in silver ({@link #silver}: a silver coin is what an emerald used to be, 10 cp). Without
- * Kingdoms it falls back to emeralds one for one, so the butcher still works.
- * The coin's icon is looked up by id ({@code jaymoskingdoms:silver_coin}), so no Kingdoms item is named in code.
+ * (0.5.56) Money, when Jaymo's Kingdoms is loaded: a bridge (MethodHandles, so Kitchen never compiles against it) to
+ * {@code com.jaymoskingdoms.money.Money}, which counts the culture coins (realm silver, hacksilver, dinars, shells, mon,
+ * and the copper bit), the coin purses (the worn belt purse too) and bundles. Amounts are in milli, thousandths of an
+ * emerald's worth ({@link #worth}: a price of "N emeralds" is {@code worth(N)}), and are paid and asked in the coin of the
+ * land where the player stands. Without Kingdoms it falls back to emeralds one for one, so the butcher still works.
+ * The coin's icon is looked up by id ({@code jaymoskingdoms:realm_silver}), so no Kingdoms item is named in code.
  */
 public final class KingdomsMoney {
 	private static final Logger LOGGER = LoggerFactory.getLogger("Jaymo's Kitchen");
-	/** Copper pieces in a silver coin. */
-	public static final long SILVER = 10L;
-	private static final Identifier SILVER_COIN = Identifier.fromNamespaceAndPath("jaymoskingdoms", "silver_coin");
+	/** Milli in one emerald's worth (what "1" in an old price meant). */
+	public static final long UNIT = 1000L;
+	private static final Identifier SILVER_COIN = Identifier.fromNamespaceAndPath("jaymoskingdoms", "realm_silver");
 
 	private static boolean looked;
-	private static @Nullable MethodHandle count, charge, pay, canPay, text;
+	private static @Nullable MethodHandle count, charge, pay, canPay, text, textAt, coin;
 
 	private KingdomsMoney() {
 	}
 
-	/** {@code n} silver, in copper pieces (what a price of "N emeralds" is now). */
-	public static long silver(long n) {
-		return n * SILVER;
+	/** {@code n} emeralds' worth, in milli (what a price of "N emeralds" is now). */
+	public static long worth(long n) {
+		return n * UNIT;
 	}
 
 	/** Whether Kingdoms' money is here (else emeralds stand in). */
@@ -61,6 +62,8 @@ public final class KingdomsMoney {
 			pay = lookup.findStatic(money, "pay", MethodType.methodType(void.class, ServerPlayer.class, long.class));
 			canPay = lookup.findStatic(money, "canPay", MethodType.methodType(boolean.class, ServerPlayer.class, long.class));
 			text = lookup.findStatic(money, "text", MethodType.methodType(Component.class, long.class));
+			textAt = lookup.findStatic(money, "text", MethodType.methodType(Component.class, ServerPlayer.class, long.class));
+			coin = lookup.findStatic(money, "coin", MethodType.methodType(ItemStack.class, ServerPlayer.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
 			LOGGER.warn("Couldn't find Jaymo's Kingdoms' money (older Kingdoms?): paying in emeralds", e);
 			count = null;
@@ -68,10 +71,12 @@ public final class KingdomsMoney {
 			pay = null;
 			canPay = null;
 			text = null;
+			textAt = null;
+			coin = null;
 		}
 	}
 
-	/** Everything {@code player} carries, in copper pieces. */
+	/** Everything {@code player} carries that is money, at standard worth, in milli. */
 	public static long count(ServerPlayer player) {
 		look();
 		if (count != null) {
@@ -81,36 +86,36 @@ public final class KingdomsMoney {
 				LOGGER.warn("Money.count failed", e);
 			}
 		}
-		return emeralds(player) * SILVER;
+		return emeralds(player) * UNIT;
 	}
 
-	/** Whether {@code player} can pay {@code cp} (a creative player always can). */
-	public static boolean canPay(ServerPlayer player, long cp) {
+	/** Whether {@code player} can pay {@code milli} (a creative player always can). */
+	public static boolean canPay(ServerPlayer player, long milli) {
 		look();
 		if (canPay != null) {
 			try {
-				return (boolean)canPay.invoke(player, cp);
+				return (boolean)canPay.invoke(player, milli);
 			} catch (Throwable e) {
 				LOGGER.warn("Money.canPay failed", e);
 			}
 		}
-		return cp <= 0L || player.hasInfiniteMaterials() || emeralds(player) * SILVER >= cp;
+		return milli <= 0L || player.hasInfiniteMaterials() || emeralds(player) * UNIT >= milli;
 	}
 
-	/** Takes {@code cp} from {@code player}, all or nothing; true if it was paid. */
-	public static boolean charge(ServerPlayer player, long cp) {
+	/** Takes {@code milli} from {@code player}, all or nothing; true if it was paid. */
+	public static boolean charge(ServerPlayer player, long milli) {
 		look();
 		if (charge != null) {
 			try {
-				return (boolean)charge.invoke(player, cp);
+				return (boolean)charge.invoke(player, milli);
 			} catch (Throwable e) {
 				LOGGER.warn("Money.charge failed", e);
 			}
 		}
-		if (cp <= 0L || player.hasInfiniteMaterials()) {
+		if (milli <= 0L || player.hasInfiniteMaterials()) {
 			return true;
 		}
-		int need = (int)((cp + SILVER - 1) / SILVER);
+		int need = (int)((milli + UNIT - 1) / UNIT);
 		if (emeralds(player) < need) {
 			return false;
 		}
@@ -126,21 +131,21 @@ public final class KingdomsMoney {
 		return true;
 	}
 
-	/** Gives {@code cp} to {@code player} (into the worn purse, else the inventory, else the ground); without Kingdoms, emeralds. */
-	public static void pay(ServerPlayer player, long cp) {
-		if (cp <= 0L) {
+	/** Gives {@code milli} to {@code player} as the coin of the land (into the worn purse, else the inventory, else the ground); without Kingdoms, emeralds. */
+	public static void pay(ServerPlayer player, long milli) {
+		if (milli <= 0L) {
 			return;
 		}
 		look();
 		if (pay != null) {
 			try {
-				pay.invoke(player, cp);
+				pay.invoke(player, milli);
 				return;
 			} catch (Throwable e) {
 				LOGGER.warn("Money.pay failed", e);
 			}
 		}
-		int n = (int)((cp + SILVER - 1) / SILVER);
+		int n = (int)((milli + UNIT - 1) / UNIT);
 		while (n > 0) {
 			int k = Math.min(n, 64);
 			ItemStack stack = new ItemStack(Items.EMERALD, k);
@@ -152,20 +157,46 @@ public final class KingdomsMoney {
 		}
 	}
 
-	/** {@code cp} as words: "3 g 4 s" with Kingdoms, "N emeralds" without. */
-	public static Component text(long cp) {
+	/** {@code milli} as words in realm silver ("12 Realm Silver, 3 Copper Bit") with Kingdoms, "N emeralds" without. */
+	public static Component text(long milli) {
 		look();
 		if (text != null) {
 			try {
-				return (Component)text.invoke(cp);
+				return (Component)text.invoke(milli);
 			} catch (Throwable e) {
 				LOGGER.warn("Money.text failed", e);
 			}
 		}
-		return Component.translatable("money.jaymoskitchen.emeralds", (cp + SILVER - 1) / SILVER);
+		return Component.translatable("money.jaymoskitchen.emeralds", (milli + UNIT - 1) / UNIT);
 	}
 
-	/** The silver coin to draw beside a price (an emerald without Kingdoms). */
+	/** {@code milli} as words in the coin of the land where {@code player} stands (see {@link #text(long)}). */
+	public static Component text(ServerPlayer player, long milli) {
+		look();
+		if (textAt != null) {
+			try {
+				return (Component)textAt.invoke(player, milli);
+			} catch (Throwable e) {
+				LOGGER.warn("Money.text failed", e);
+			}
+		}
+		return text(milli);
+	}
+
+	/** (0.5.56) One coin of the land where {@code player} stands, to draw beside a price (realm silver if Kingdoms can't say, an emerald without it). */
+	public static ItemStack icon(ServerPlayer player) {
+		look();
+		if (coin != null) {
+			try {
+				return (ItemStack)coin.invoke(player);
+			} catch (Throwable e) {
+				LOGGER.warn("Money.coin failed", e);
+			}
+		}
+		return icon();
+	}
+
+	/** The realm silver coin to draw beside a price (an emerald without Kingdoms). */
 	public static ItemStack icon() {
 		Item coin = BuiltInRegistries.ITEM.getOptional(SILVER_COIN).orElse(Items.EMERALD);
 		return new ItemStack(coin);

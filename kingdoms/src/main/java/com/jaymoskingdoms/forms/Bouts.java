@@ -201,7 +201,7 @@ public final class Bouts {
 		for (int i = 0; i < names.size(); i++) {
 			list = list.copy().append(i == 0 ? Component.empty() : Component.literal(", ")).append(names.get(i));
 		}
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.bracket", f.name(), foes.size(), list));
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.bracket", f.name(), foes.size(), list));
 	}
 
 	// ---- the bracket -------------------------------------------------------------------------------------------------
@@ -260,7 +260,7 @@ public final class Bouts {
 			return;
 		}
 		boolean last = round == run.foes.size() - 1;
-		Post.tidings(player.getUUID(), Component.translatable(last ? "tidings.jaymoskingdoms.bout.final" : "tidings.jaymoskingdoms.bout.round",
+		Post.aside(player.getUUID(), Component.translatable(last ? "tidings.jaymoskingdoms.bout.final" : "tidings.jaymoskingdoms.bout.round",
 			round + 1, run.foes.size(), foe.getDisplayName()));
 	}
 
@@ -272,7 +272,7 @@ public final class Bouts {
 			return;
 		}
 		School mine = Duels.schoolFor(player, school(level, run));
-		Money.pay(player, Money.silver(ROUND_SILVER));
+		Money.pay(player, Money.worth(ROUND_SILVER));
 		boolean joined = Schools.joined(player).contains(mine);
 		if (joined) {
 			Schools.addStanding(player, mine, ROUND_STANDING);
@@ -281,18 +281,18 @@ public final class Bouts {
 		if (run.round < run.foes.size()) {
 			player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, TEND_TICKS, 1, true, false));
 			run.nextRound = level.getGameTime() + BREAK_TICKS;
-			Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.advance", round + 1, run.foes.size()));
+			Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.advance", round + 1, run.foes.size()));
 			return;
 		}
 		RUNS.remove(run.player);
-		Money.pay(player, Money.silver(FINAL_SILVER));
+		Money.pay(player, Money.worth(FINAL_SILVER));
 		give(player, new ItemStack(Items.GOLDEN_APPLE));
 		if (joined) {
 			Schools.addStanding(player, mine, FINAL_STANDING);
 		}
 		Reputation.change(player, f, FINAL_REP);
 		level.sendParticles(ParticleTypes.FIREWORK, player.getX(), player.getY() + 1.5, player.getZ(), 30, 0.6, 0.6, 0.6, 0.15);
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.won", f.name(), Rivals.name(mine)));
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.won", f.name(), Rivals.name(mine)));
 		if (level.getEntity(run.foes.get(run.foes.size() - 1)) instanceof PathfinderMob master) {
 			say(level, master, player, "bout.jaymoskingdoms.won");
 		}
@@ -314,7 +314,7 @@ public final class Bouts {
 	/** The bout is over for {@code player}: out of the bracket, with {@code tidings}. */
 	private static void out(ServerLevel level, ServerPlayer player, Run run, String tidings) {
 		RUNS.remove(run.player);
-		Post.tidings(player.getUUID(), Component.translatable(tidings));
+		Post.aside(player.getUUID(), Component.translatable(tidings));
 		if (level.getEntity(run.foes.get(Math.min(run.round, run.foes.size() - 1))) instanceof PathfinderMob foe && foe.isAlive()) {
 			say(level, foe, player, "bout.jaymoskingdoms.out");
 		}

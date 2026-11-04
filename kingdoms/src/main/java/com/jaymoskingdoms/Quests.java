@@ -503,7 +503,7 @@ public final class Quests {
 		remove(player, q.id());
 		// (0.7.0) a priest's hunt: the rite, there and then
 		Cures.rite(level, player, giver, q);
-		Money.pay(player, q.reward().cp());
+		Money.pay(player, Factions.get(level.getServer(), q.giver().faction()), q.reward().milli());
 		for (ItemStack stack : goods(level, q)) {
 			give(player, stack);
 		}
@@ -615,13 +615,13 @@ public final class Quests {
 	static List<ItemStack> rewards(ServerLevel level, Quest q) {
 		List<ItemStack> out = new ArrayList<>();
 		Quest.Reward r = q.reward();
-		// (0.7.487) the coins (silver, and any copper) are struck as coins now
-		out.addAll(Money.stacks(r.cp()));
+		// (0.7.497) the coins (the worth, and any copper bits) are struck in the giver's realm coin
+		out.addAll(Money.stacks(level.getServer(), Factions.get(level.getServer(), q.giver().faction()), r.milli()));
 		out.addAll(goods(level, q));
 		return out;
 	}
 
-	/** (0.7.487) What {@code q} pays besides coins: goods, a book, a relic. */
+	/** (0.7.497) What {@code q} pays besides coins: goods, a book, a relic. */
 	private static List<ItemStack> goods(ServerLevel level, Quest q) {
 		List<ItemStack> out = new ArrayList<>();
 		Quest.Reward r = q.reward();

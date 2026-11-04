@@ -33,6 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Coinage;
 import com.jaymoskingdoms.money.Money;
 
 /**
@@ -315,13 +316,13 @@ public final class StoryHard {
 		}
 		int fine = fine(jail.until() - level.getGameTime());
 		ItemStack held = player.getMainHandItem();
-		if (Approaches.isMoney(held)) {
-			// (0.7.487) the fine is silver from everything carried, not just the coin in hand
-			if (!Money.canPay(player, Money.silver(fine))) {
+		if (Coinage.isMoney(held)) {
+			// (0.7.497) the fine is silver from everything carried, not just the coin in hand
+			if (!Money.canPay(player, Money.worth(fine))) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hard.cell.short", fine).withStyle(ChatFormatting.RED));
 				return;
 			}
-			Money.charge(player, Money.silver(fine));
+			Money.charge(player, Money.worth(fine));
 			player.removeAttached(Busts.JAILED);
 			let(level, player, f);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.paid", fine).withStyle(ChatFormatting.YELLOW));

@@ -2,7 +2,6 @@ package com.jaymoskingdoms.nether;
 
 import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.money.Coinage;
-import com.jaymoskingdoms.money.Coin;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Mana;
@@ -77,7 +76,7 @@ import org.jspecify.annotations.Nullable;
  * piece coming back Cinder-forged (fire protection, unbreaking) for blaze rods.</li>
  * <li><b>Finding him:</b> smiths in the Overworld (armourers, weaponsmiths, toolsmiths) now and then pass on the rumour as
  * you talk to them, in a speech bubble, never in chat ({@link #RUMOURS}); one who has told you sells a Charred
- * Wayfinder for {@link #WAYFINDER_PRICE} silver coins (0.7.486, once emeralds; sneak and use them with coins or a purse in hand). The wayfinder is a
+ * Wayfinder for {@link #WAYFINDER_PRICE} emeralds' worth in coin (0.7.497; sneak and use them with coins or a purse in hand). The wayfinder is a
  * compass: in the Overworld it points where a portal should go (the forge's spot times eight), in the Nether at the
  * forge itself. The first time you set foot in the Nether, your next Tidings carries word of it too.</li>
  * </ul>
@@ -91,7 +90,7 @@ public final class CinderForge {
 	static final double BUILD_RANGE = 96.0;
 	/** Ticks between his restocks (a week), and before he comes back if he's gone (a day). */
 	static final long RESTOCK_TICKS = 24000L * 7L, RETURN_TICKS = 24000L;
-	/** The Writ: silver coins ((0.7.487) once emeralds) and netherite scrap. */
+	/** The Writ: emeralds (set in coin when the trade opens, (0.7.497): {@link com.jaymoskingdoms.Currencies#localize}) and netherite scrap. */
 	static final int WRIT_EMERALDS = 40, WRIT_SCRAP = 2;
 	/** Reforging a piece: blaze rods, and what it comes back with. */
 	static final int REFORGE_RODS = 4, REFORGE_FIRE_PROTECTION = 3, REFORGE_UNBREAKING = 2, REFORGE_USES = 2;
@@ -191,9 +190,9 @@ public final class CinderForge {
 				wayfinders(player, nether);
 			}
 			if (player.level() == nether && !player.entityTags().contains(TIDINGS_TAG)) {
-				// the first time in the Nether: word of the forge in their next Tidings
+				// the first time in the Nether: word of the forge ((0.7.494) over the hotbar, not in the Tidings)
 				player.addTag(TIDINGS_TAG);
-				Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.cinder_forge"));
+				Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.cinder_forge"));
 			}
 		}
 		if (nether == null || server.getTickCount() % 100 != 0) {
@@ -236,6 +235,15 @@ public final class CinderForge {
 	private static void watch(ServerLevel nether, Forge forge) {
 		if (!nether.isLoaded(forge.site())) {
 			return;
+		}
+		// (a chunk's blocks load before its entities: until they're in, Ignis would look gone and a second be made)
+		int cx = forge.site().getX() >> 4, cz = forge.site().getZ() >> 4;
+		for (int dx = -3; dx <= 3; dx++) {
+			for (int dz = -3; dz <= 3; dz++) {
+				if (!nether.areEntitiesLoaded(net.minecraft.world.level.ChunkPos.pack(cx + dx, cz + dz))) {
+					return;
+				}
+			}
 		}
 		List<Villager> there = nether.getEntitiesOfClass(Villager.class, new net.minecraft.world.phys.AABB(forge.site()).inflate(48.0), CinderForge::ignis);
 		long now = nether.getGameTime();
@@ -308,7 +316,7 @@ public final class CinderForge {
 		MerchantOffers offers = v.getOffers();
 		offers.clear();
 		if (Classes.WRIT != null) {
-			offers.add(new MerchantOffer(new ItemCost(Coin.SILVER.item(), WRIT_EMERALDS), Optional.of(new ItemCost(Items.NETHERITE_SCRAP, WRIT_SCRAP)),
+			offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, WRIT_EMERALDS), Optional.of(new ItemCost(Items.NETHERITE_SCRAP, WRIT_SCRAP)),
 				new ItemStack(Classes.WRIT), 1, 0, 0.0F));
 		}
 		for (Item piece : new Item[] {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS,
@@ -333,13 +341,13 @@ public final class CinderForge {
 
 	// ---- the Overworld's smiths ----------------------------------------------------------------------------------------
 
-	/** Talking to a smith: a rumour now and then; sneaking with coins once they've told you, a wayfinder. */
+	/** Talking to a smith: a rumour now and then; sneaking with coins (or a purse) once they've told you, a wayfinder. */
 	private static InteractionResult useSmith(ServerPlayer player, Villager v) {
 		ServerLevel level = (ServerLevel)v.level();
 		ItemStack held = player.getMainHandItem();
 		if (player.isShiftKeyDown() && Coinage.held(held) > 0L && player.entityTags().contains(HEARD_TAG)) {
-			if (!Money.charge(player, Money.silver(WAYFINDER_PRICE))) {
-				Speech.tell(level, v, player, Component.translatable("speech.jaymoskingdoms.wayfinder.price", WAYFINDER_PRICE), Speech.WHITE);
+			if (!Money.charge(player, Money.worth(WAYFINDER_PRICE))) {
+				Speech.tell(level, v, player, Component.translatable("speech.jaymoskingdoms.wayfinder.price", Money.text(player, Money.worth(WAYFINDER_PRICE))), Speech.WHITE);
 				return InteractionResult.SUCCESS;
 			}
 			ServerLevel nether = level.getServer().getLevel(Level.NETHER);
@@ -351,7 +359,8 @@ public final class CinderForge {
 		}
 		long now = level.getGameTime();
 		Long last = LAST_RUMOUR.get(player.getUUID());
-		if (last != null && now - last < RUMOUR_COOLDOWN || level.getRandom().nextFloat() >= RUMOUR_CHANCE) {
+		// (a time from another world's clock, ahead of this one, counts as long ago)
+		if (last != null && now >= last && now - last < RUMOUR_COOLDOWN || level.getRandom().nextFloat() >= RUMOUR_CHANCE) {
 			return InteractionResult.PASS;
 		}
 		LAST_RUMOUR.put(player.getUUID(), now);

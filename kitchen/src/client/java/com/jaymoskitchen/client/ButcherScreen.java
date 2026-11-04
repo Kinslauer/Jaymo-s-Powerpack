@@ -1,6 +1,5 @@
 package com.jaymoskitchen.client;
 
-import com.jaymoskitchen.KingdomsMoney;
 import com.jaymoskitchen.net.Payloads;
 import com.jaymoskitchen.net.Payloads.OpenButcher;
 import java.util.List;
@@ -46,15 +45,15 @@ public class ButcherScreen extends Screen {
 		if (this.minecraft.player == null) {
 			return false;
 		}
-		// (0.5.54) the server counted what you carry (coins, purses, bundles) when it opened this; it checks again on the deal
-		return this.minecraft.player.hasInfiniteMaterials() || offer.have() >= KingdomsMoney.silver(offer.price());
+		// (0.5.56) the server counted the price and what you carry (coins, purses, bundles) when it opened this; it checks again on the deal
+		return this.minecraft.player.hasInfiniteMaterials() || offer.have() >= offer.cost();
 	}
 
 	@Override
 	protected void init() {
 		int cx = this.width / 2;
 		int by = top() + PANEL_H - 28;
-		Button deal = Button.builder(Component.translatable("screen.jaymoskitchen.butcher.deal", KingdomsMoney.text(KingdomsMoney.silver(offer.price()))), b -> {
+		Button deal = Button.builder(Component.translatable("screen.jaymoskitchen.butcher.deal", offer.price()), b -> {
 				ClientPlayNetworking.send(new Payloads.ButcherDeal(offer.villager()));
 				onClose();
 			})
@@ -96,8 +95,8 @@ public class ButcherScreen extends Screen {
 		ry += ROW_H;
 		boolean pay = canPay();
 		KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + ROW_H - 1, 0, false);
-		graphics.item(KingdomsMoney.icon(), x + 8, ry + 1);
-		Component price = Component.translatable("screen.jaymoskitchen.butcher.price", KingdomsMoney.text(KingdomsMoney.silver(offer.price())));
+		graphics.item(offer.coin(), x + 8, ry + 1);
+		Component price = Component.translatable("screen.jaymoskitchen.butcher.price", offer.price());
 		KitchenUi.line(graphics, this.font, price, x + 28, ry + 5, textW - 19, pay ? KitchenUi.TEXT : KitchenUi.BAD);
 		if (!pay) {
 			int used = 28 + this.font.width(price) + 8;

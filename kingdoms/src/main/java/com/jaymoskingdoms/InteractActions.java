@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * be talk-menu answers that do something rather than say something are buttons on MCA's Interact page now, each shown
  * only when it applies: seek an audience (a ruler, or a realm's guard who walks you there, {@link Audiences}), a
  * pedlar's wares and tribute to a tribe ({@link Pedlars}, {@link Tribes}), and a sworn captain sent spying or raiding
- * ({@link SwornCaptains}). (0.7.487) Ask about Money ({@link MoneyTalk}). Ask the Way ({@link Directions}) has its own page.
+ * ({@link SwornCaptains}). (0.7.497) Ask about Money ({@link MoneyTalk}). Ask the Way ({@link Directions}) has its own page.
  * <p>Which apply is worked out here as you right-click a villager and sent ahead of MCA's screen ({@link Offered}); the
  * client hides the rest ({@code McaActionButtonsMixin}). A button pressed comes back as MCA command {@code act.<action>}
  * ({@code McaCommandMixin}), checked again here before it's done.
@@ -32,7 +32,7 @@ public final class InteractActions {
 	/** MCA's command prefix, and the actions in the order their buttons stand. */
 	public static final String COMMAND = "act.";
 	public static final String AUDIENCE = "audience", WARES = "wares", TRIBUTE = "tribute", SPY = "spy", RAID = "raid";
-	/** (0.7.487) Ask about Money: emeralds or coin ({@link MoneyTalk}). */
+	/** (0.7.497) Ask about Money: emeralds or coin ({@link MoneyTalk}). */
 	public static final String MONEY = "money";
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY);
 
@@ -78,7 +78,7 @@ public final class InteractActions {
 	static boolean offers(ServerPlayer player, LivingEntity v, String action) {
 		return switch (action) {
 			case AUDIENCE -> Rulers.is(v) || Audiences.canAsk(v);
-			case WARES -> Pedlars.pedlar(v) || com.jaymoskingdoms.nether.CinderForge.ignis(v);
+			case WARES -> Pedlars.pedlar(v) || com.jaymoskingdoms.nether.CinderForge.ignis(v) || GreenMarket.merchant(v);
 			case TRIBUTE -> Tribes.takesTribute(player, v);
 			case SPY, RAID -> SwornCaptains.takesOrders(player, v);
 			case MONEY -> v instanceof Villager villager && Directions.offers(villager);
@@ -107,6 +107,11 @@ public final class InteractActions {
 				if (com.jaymoskingdoms.nether.CinderForge.ignis(v) && v instanceof Villager villager) {
 					// (0.7.478) Ignis Vael's wares
 					com.jaymoskingdoms.nether.CinderForge.trade(player, villager);
+					return null;
+				}
+				if (GreenMarket.merchant(v)) {
+					// (0.7.490) a greenskin camp's market stall, priced in bent ingots
+					GreenMarket.trade(player, v);
 					return null;
 				}
 				Pedlars.trade(player, v);

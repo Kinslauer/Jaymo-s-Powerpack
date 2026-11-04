@@ -639,16 +639,16 @@ final class ZFighterTournaments {
 		lastBoard = board;
 	}
 
-	/** A Z Fighter is paid in TP; anyone else in silver coins (a Z Fighter gets the coins too). (0.19.74) Was emeralds; 1 silver = 1 old emerald. */
+	/** A Z Fighter is paid in TP; anyone else in silver coins (a Z Fighter gets the coins too). (0.19.87) Was emeralds; 1 silver = 1 old emerald. */
 	static void pay(ServerPlayer player, int tp, int emeralds) {
-		Component money = KingdomsMoney.text(KingdomsMoney.silver(emeralds));
+		Component money = KingdomsMoney.text(player, KingdomsMoney.worth(emeralds));
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(player, tp);
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize_tp", tp, money).withStyle(ChatFormatting.GOLD));
 		} else {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize", money).withStyle(ChatFormatting.GOLD));
 		}
-		KingdomsMoney.pay(player, KingdomsMoney.silver(emeralds));
+		KingdomsMoney.pay(player, KingdomsMoney.worth(emeralds));
 	}
 
 	private static boolean inRing(Tourney t, Vec3 pos) {

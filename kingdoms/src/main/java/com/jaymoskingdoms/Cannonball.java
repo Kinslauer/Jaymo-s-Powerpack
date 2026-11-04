@@ -118,12 +118,27 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			return;
 		}
 		if (hit.getType() != HitResult.Type.MISS) {
+			// (0.7.490) it scuffs the soil where it lands (a field gun's ball is no shell: loose ground and growth only),
+			// but never on its own side's land or in a standing faction's buildings: a wall gun keeps its streets whole
+			net.minecraft.core.BlockPos struck = ((BlockHitResult) hit).getBlockPos();
+			if (!ownGround(level, (Worker) gunner, struck)) {
+				com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(struck), com.jaymoskingdoms.sailing.Bombardment.FIELD, gunner);
+			}
 			this.burst(level, gunner, ((BlockHitResult) hit).getLocation(), null);
 			return;
 		}
 		this.setPos(next);
 		this.setDeltaMovement(move.add(0.0, -GRAVITY, 0.0));
 		level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(), this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
+	}
+
+	/** (0.7.490) {@code pos} lies on land the gunner's own faction claims, or in a building some standing faction holds. */
+	private static boolean ownGround(ServerLevel level, Worker gunner, net.minecraft.core.BlockPos pos) {
+		Faction own = Factions.get(level.getServer(), gunner.factionId());
+		if (own != null && own.claims(net.minecraft.world.level.ChunkPos.containing(pos))) {
+			return true;
+		}
+		return Holds.guarded(level.getServer(), pos);
 	}
 
 	private void burst(ServerLevel level, PathfinderMob gunner, Vec3 at, @Nullable Entity direct) {

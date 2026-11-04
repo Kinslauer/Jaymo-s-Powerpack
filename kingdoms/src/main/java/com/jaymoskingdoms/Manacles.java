@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Money;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +31,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.414) Manacles, a watch recruit's iron: the Sworn road ({@link LifeStory.Start#SWORN}) comes with {@link #RECRUIT_PAIRS}
  * of them. Used on an outlaw ({@link Outlaws#is}) who is down (Powers' downed state, {@link Downed#isDowned}, or helpless), they
- * arrest them for the realm whose land it is, and the player is paid a bounty in silver coins ({@link #BOUNTY}) with a little goodwill
+ * arrest them for the realm whose land it is, and the player is paid a bounty in emeralds ({@link #BOUNTY}) with a little goodwill
  * from the realm.
  * <ul>
  * <li>A downed looter with one of the realm's free guards within {@link #GUARD_SEARCH} is handed over ({@link Arrests#handOver}):
@@ -45,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * Not craftable: a recruit is issued them.
  */
 public final class Manacles {
-	/** The pairs a sworn recruit is issued, how far a guard of the realm is looked for (blocks), the bounty (silver coins) and the realm's goodwill for it. */
+	/** The pairs a sworn recruit is issued, how far a guard of the realm is looked for (blocks), the bounty (emeralds) and the realm's goodwill for it. */
 	static final int RECRUIT_PAIRS = 2, BOUNTY = 6, BOUNTY_REPUTATION = 4;
 	static final double GUARD_SEARCH = 48.0;
 	/** How notorious a manacled looter is held to be at judgement. */
@@ -165,11 +164,13 @@ public final class Manacles {
 		return role != Folk.CHIEF && role != Pirates.CAPTAIN && role != Goblins.KING && role != Orcs.WARCHIEF;
 	}
 
-	/** The realm's bounty for a manacled outlaw: silver coins in {@code player}'s purse or pack (the floor if it's full) and a little goodwill. */
+	/** The realm's bounty for a manacled outlaw: emeralds in {@code player}'s pack (the floor if it's full) and a little goodwill. */
 	private static void pay(ServerPlayer player, Faction law) {
-		// (0.7.487) paid in silver coins, into the belt purse if there is room
-		Money.pay(player, Money.silver(BOUNTY));
+		// (0.7.490) in the realm's own coin
+		Currency money = Currencies.of(player.level().getServer(), law);
+		Currencies.Pay coins = Currencies.payEmeralds(money, BOUNTY);
+		Currencies.give(player, coins);
 		Reputation.change(player, law, BOUNTY_REPUTATION);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.manacles.bounty", BOUNTY, law.name()).withStyle(ChatFormatting.GOLD));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.manacles.bounty", Currencies.amount(coins), law.name()).withStyle(ChatFormatting.GOLD));
 	}
 }

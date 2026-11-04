@@ -520,9 +520,9 @@ public final class Skills {
 		int price = respecPrice(player);
 		RESPEC_OFFERS.put(player.getUUID(), wizard.getId());
 		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(),
-			Component.translatable("talk.jaymoskingdoms.wizard.respec", price),
-			List.of(Component.translatable("talk.jaymoskingdoms.wizard.respec.yes", price), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
-			List.of(Money.canPay(player, Money.silver(price)), true)));
+			Component.translatable("talk.jaymoskingdoms.wizard.respec", Money.text(player, Money.worth(price))),
+			List.of(Component.translatable("talk.jaymoskingdoms.wizard.respec.yes", Money.text(player, Money.worth(price))), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
+			List.of(Money.canPay(player, Money.worth(price)), true)));
 	}
 
 	/** An answer to the wizard's offer; false when it wasn't one (it's some other talk). */
@@ -536,10 +536,10 @@ public final class Skills {
 			return true;
 		}
 		int price = respecPrice(player);
-		if (!Money.canPay(player, Money.silver(price))) {
+		if (!Money.canPay(player, Money.worth(price))) {
 			return true;
 		}
-		Money.charge(player, Money.silver(price)); // (0.7.487) silver coins, not emeralds
+		Money.charge(player, Money.worth(price)); // (0.7.497) silver coins, not emeralds
 		respec(player);
 		ServerLevel level = (ServerLevel) player.level();
 		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.respec.done"), Speech.GOLD);
@@ -654,6 +654,11 @@ public final class Skills {
 		Perk perk = perks[ordinal];
 		Progress p = of(player);
 		if (p.blocked(perk) != null) {
+			return;
+		}
+		if (Knowledge.lockedPerk(player, perk)) {
+			// (0.7.492) a higher technique: Knowledge 4
+			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
 			return;
 		}
 		Map<String, Integer> ranks = new HashMap<>(p.ranks());

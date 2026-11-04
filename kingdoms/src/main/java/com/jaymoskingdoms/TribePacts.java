@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Coin;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * non-human's grudge with a tribe rises at {@link #NONHUMAN_SHARE} of the usual: the tribes smell their own kind of
  * outcast, mask or no.</li>
  * <li><b>Calling on a tribe.</b> A grudge lowered below nothing is the tribe's favour ({@link #FAVOUR_MOST} at most): gifts
- * to its chief or pedlar once the grudge is paid off ({@link #GIFT_EMERALDS} for {@link #GIFT_FAVOUR}), and killing its
+ * to its chief or pedlar once the grudge is paid off ({@link #GIFT_BENT} for {@link #GIFT_FAVOUR}), and killing its
  * rival brood's folk. It fades slowly ({@link #FAVOUR_DAILY} a day). At {@link #ALLY_AT} or better, when raiders fall on
  * the realm or haven you're sworn to, the tribe's king sends a war band ({@link #called}) that fights the raiders and goes
  * home once they're gone. Good standing with an orc tribe ({@link #FRIEND_AT}) opens the greenskin road of the life story
@@ -55,14 +54,16 @@ public final class TribePacts {
 	// Tuning
 	/** A tribe's favour: its most (as a negative grudge), what calls a war band, what opens the greenskin road, how fast it fades (a day). */
 	public static final int FAVOUR_MOST = 60, ALLY_AT = -30, FRIEND_AT = -20, FAVOUR_DAILY = 1;
-	/** A gift to a chief or pedlar once the grudge is paid off: silver (the constant keeps its name; Tribes reads it), and the favour it wins. */
-	public static final int GIFT_EMERALDS = 6, GIFT_FAVOUR = 10;
+	/** A gift to a chief or pedlar once the grudge is paid off: bent worth (0.7.490), and the favour it wins. */
+	public static final int GIFT_BENT = 12, GIFT_FAVOUR = 10;
+	/** (0.7.490) A haven's emerald treasury pays in bent worth at this rate (the tribes take only bent ingots). */
+	static final int BENT_PER_EMERALD = 2;
 	/** A non-human's grudge rises at this share of the usual (at least 1). */
 	static final float NONHUMAN_SHARE = 0.5F;
-	/** Havens' tribute to the tribes: silver a day to each tribe whose nearest camp is this near; spared this many days after paying. */
+	/** Havens' tribute to the tribes: emeralds a day to each tribe whose nearest camp is this near; spared this many days after paying. */
 	static final int HAVEN_TRIBUTE = 4, PAID_DAYS = 2;
 	static final double TRIBUTE_REACH = 1200.0;
-	/** An Ogre King's tribute from the nearest haven this near his hold: silver a day. */
+	/** An Ogre King's tribute from the nearest haven this near his hold: emeralds a day. */
 	static final int OGRE_TRIBUTE = 3;
 	static final double OGRE_REACH = 1200.0;
 	/** A called war band: from a tribe camp this near the raided seat; its size (a base, one more per so much favour, the most). */
@@ -212,7 +213,8 @@ public final class TribePacts {
 				if (pay(server, haven.id(), HAVEN_TRIBUTE)) {
 					Faction seat = Tribes.seat(server, tribe);
 					if (seat != null) {
-						Factions.update(server, seat.id(), x -> x.withTreasury(x.treasury() + HAVEN_TRIBUTE));
+						// ((0.7.490) the tribe is paid in bent ingots, into its seat's hoard)
+						HordeEconomy.deposit(server, seat.id(), (long)HAVEN_TRIBUTE * BENT_PER_EMERALD);
 					}
 					paid.put(haven.id() + "|" + tribe, day);
 				}
@@ -233,19 +235,18 @@ public final class TribePacts {
 		level.setAttached(PAID, Map.copyOf(paid));
 	}
 
-	/** Takes {@code silver} from settlement {@code id}'s treasury; false (and nothing taken) if it hasn't them. */
-	private static boolean pay(MinecraftServer server, int id, int silver) {
+	/** Takes {@code emeralds} from settlement {@code id}'s treasury; false (and nothing taken) if it hasn't them. */
+	private static boolean pay(MinecraftServer server, int id, int emeralds) {
 		Faction f = Factions.get(server, id);
-		if (f == null || f.treasury() < silver) {
+		if (f == null || f.treasury() < emeralds) {
 			return false;
 		}
-		Factions.update(server, id, x -> x.withTreasury(Math.max(0L, x.treasury() - silver)));
+		Factions.update(server, id, x -> x.withTreasury(Math.max(0L, x.treasury() - emeralds)));
 		return true;
 	}
 
-	/** The tribute goes into a chest of the king's hold, if it's loaded. */
-	private static void hoard(ServerLevel level, BlockPos at, int silver) {
-		net.minecraft.world.item.Item coin = Coin.SILVER.item();
+	/** The tribute goes into a chest of the king's hold, if it's loaded ((0.7.490) as bent copper, so many to the emerald). */
+	private static void hoard(ServerLevel level, BlockPos at, int emeralds) {
 		if (!level.isLoaded(at)) {
 			return;
 		}
@@ -254,9 +255,8 @@ public final class TribePacts {
 			if (level.getBlockEntity(pos) instanceof ChestBlockEntity chest) {
 				for (int slot = 0; slot < chest.getContainerSize(); slot++) {
 					ItemStack s = chest.getItem(slot);
-					// (0.7.487) the hoard is silver coins now; they top up a stack of coins or take an empty slot
-					if (s.isEmpty() || s.is(coin) && s.getCount() + silver <= s.getMaxStackSize()) {
-						chest.setItem(slot, new ItemStack(coin, s.getCount() + silver));
+					if (s.isEmpty() || s.is(BentIngots.BENT_COPPER) && s.getCount() + emeralds * BENT_PER_EMERALD <= s.getMaxStackSize()) {
+						chest.setItem(slot, new ItemStack(BentIngots.BENT_COPPER, s.getCount() + emeralds * BENT_PER_EMERALD));
 						chest.setChanged();
 						return;
 					}
@@ -388,7 +388,7 @@ public final class TribePacts {
 		Entity first = level.getEntity(members.getFirst());
 		if (first != null) {
 			level.playSound(null, first.getX(), first.getY(), first.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.NEUTRAL, 1.6F, goblins ? 1.5F : 0.8F);
-			Speech.say(level, first, Component.translatable("talk.jaymoskingdoms.tribe.called." + random.nextInt(CALLED_LINES), Identities.shownName(caller),
+			Speech.say(level, first, Dialects.tr(first, "talk.jaymoskingdoms.tribe.called." + random.nextInt(CALLED_LINES), Identities.shownName(caller),
 				Tribes.name(tribe)), Speech.GOLD, 32.0);
 		}
 		JaymosKingdoms.LOGGER.info("{} answers {}'s call: {} to {}", Tribes.name(tribe).getString(), caller.getName().getString(), members.size(), target.name());
@@ -484,7 +484,7 @@ public final class TribePacts {
 			}
 		}
 		if (mob.tickCount % 240 == 0 && mob.getRandom().nextInt(4) == 0) {
-			Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.tribe.ally." + mob.getRandom().nextInt(ALLY_LINES)), Speech.GOLD, 20.0);
+			Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.tribe.ally." + mob.getRandom().nextInt(ALLY_LINES)), Speech.GOLD, 20.0);
 		}
 		return true;
 	}

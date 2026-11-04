@@ -69,14 +69,17 @@ public final class RungJournal extends Item {
 	/**
 	 * Per tier (Hearth to Legend), its lines in the order they're written; line {@code n} of tier {@code t} is the lang key
 	 * {@code journal.jaymoskingdoms.<tier>.<n>}. The step into Wildlands carries the Aether test; the pod and the wreck come
-	 * with Dread and Legend.
+	 * with Dread and Legend. (0.7.492) The {@link com.jaymoskingdoms.Knowledge} bosses come last on each page.
 	 */
 	private static final Line[][] PAGES = {
 		{Line.hint(), Line.hint(), Line.hint()},
-		{Line.foes(), Line.feat(WorldTiers.Progress.FORGED), Line.hint()},
-		{Line.foes(), Line.feat(WorldTiers.Progress.NETHER), Line.feat(WorldTiers.Progress.AETHER_TROPHY), Line.hint()},
-		{Line.foes(), Line.feat(WorldTiers.Progress.WITHER), Line.feat(WorldTiers.Progress.POD_FLIGHT), Line.hint()},
-		{Line.foes(), Line.feat(WorldTiers.Progress.DRAGON), Line.feat(WorldTiers.Progress.MAW_SALVAGE), Line.hint()}};
+		{Line.foes(), Line.feat(WorldTiers.Progress.FORGED), Line.hint(), Line.feat(WorldTiers.Progress.KNOW_1)},
+		{Line.foes(), Line.feat(WorldTiers.Progress.NETHER), Line.feat(WorldTiers.Progress.AETHER_TROPHY), Line.hint(),
+			Line.feat(WorldTiers.Progress.KNOW_2)},
+		{Line.foes(), Line.feat(WorldTiers.Progress.WITHER), Line.feat(WorldTiers.Progress.POD_FLIGHT), Line.hint(),
+			Line.feat(WorldTiers.Progress.KNOW_3), Line.feat(WorldTiers.Progress.KNOW_4)},
+		{Line.foes(), Line.feat(WorldTiers.Progress.DRAGON), Line.feat(WorldTiers.Progress.MAW_SALVAGE), Line.hint(),
+			Line.feat(WorldTiers.Progress.KNOW_5)}};
 
 	public static Item ITEM;
 	/** Whether a player has been given their journal (so a lost one is not replaced by every tier change). Saved, kept through death. */

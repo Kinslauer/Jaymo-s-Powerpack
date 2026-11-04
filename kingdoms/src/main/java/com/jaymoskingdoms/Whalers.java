@@ -808,8 +808,8 @@ public final class Whalers {
 				// (0.7.270) by their berth: a harpooner's lay is the bigger
 				String berth = berth(v, p);
 				int lay = lay(worth, berth);
-				// (0.7.487) the lay in silver: into the worn purse if it has room, else the pack, else the deck
-				Money.pay(p, Money.silver(lay));
+				// (0.7.497) the lay in silver: into the worn purse if it has room, else the pack, else the deck
+				Money.pay(p, Money.worth(lay));
 				give(p, new ItemStack(Whaling.WHALE_OIL, LAY_OIL));
 				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.whaler.lay", lay, crew.name, berthName(berth)).withStyle(ChatFormatting.GOLD));
 			}

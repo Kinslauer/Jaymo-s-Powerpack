@@ -2,7 +2,6 @@ package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.money.Coinage;
-import com.jaymoskingdoms.money.Coin;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -44,6 +43,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
@@ -91,7 +91,7 @@ public final class Underworld {
 	static final int START_HEAT = 0, HEAT_PER_SALE = 1, HEAT_PER_DAY = 2, HEAT_PER_BUST = -8, DICE_HEAT = 10, KNOWN_HEAT = 40, MAX_HEAT = 100;
 	/** One dice game in this many warms the city a point. */
 	static final int GAMES_PER_HEAT = 4;
-	/** The fence's prices in silver coins (once emeralds) (the den's own make, the other city's), and how many a day: Pmeh. */
+	/** The fence's prices in emeralds (the den's own make, the other city's), and how many a day: Pmeh. (0.7.497) Set in the town's coin when a trade opens ({@link Currencies#localize}). */
 	static final int PMEH_SELL_HOME = 3, PMEH_SELL_AWAY = 12, PMEH_BUY_HOME = 2, PMEH_BUY_AWAY = 8;
 	/** The same for a Shash brick. */
 	static final int SHASH_SELL_HOME = 7, SHASH_SELL_AWAY = 24, SHASH_BUY_HOME = 4, SHASH_BUY_AWAY = 16;
@@ -271,7 +271,7 @@ public final class Underworld {
 				// (between bouts the champion will talk)
 				return InteractionResult.SUCCESS;
 			}
-			if (v.entityTags().contains(DICER_TAG) && Coinage.held(sp.getMainHandItem()) >= Money.SILVER) {
+			if (v.entityTags().contains(DICER_TAG) && Coinage.held(sp.getMainHandItem()) >= Money.UNIT) {
 				dice(level, sp, v);
 				return InteractionResult.SUCCESS;
 			}
@@ -818,9 +818,8 @@ public final class Underworld {
 		offers.add(buy(SHASH_BRICK, STREET_SHASH, STREET_STOCK));
 	}
 
-	/** (0.7.487) {@code item} for {@code silver} silver coins (the old price in emeralds, one for one). */
-	private static MerchantOffer sell(Item item, int silver, int uses) {
-		return new MerchantOffer(new ItemCost(Coin.SILVER.item(), silver), new ItemStack(item), uses, XP, PRICE_MULTIPLIER);
+	private static MerchantOffer sell(Item item, int emeralds, int uses) {
+		return new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), new ItemStack(item), uses, XP, PRICE_MULTIPLIER);
 	}
 
 	/** Villager → the day they were last offered contraband (once a day each). */
@@ -876,7 +875,7 @@ public final class Underworld {
 				return;
 			}
 			stack.consume(1, player);
-			Money.pay(player, Money.silver(price));
+			Money.pay(player, f, Money.worth(price));
 			Speech.tell(level, v, player, Component.translatable("underworld.jaymoskingdoms.pitch.yes." + level.getRandom().nextInt(LINES)), Speech.GOLD);
 			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.6F, 1.0F);
 			if (realm) {
@@ -904,31 +903,31 @@ public final class Underworld {
 	}
 
 	/** Prime Pmeh for sale (plain, if Kitchen doesn't grade). */
-	private static MerchantOffer sellPrime(Item pmeh, int silver, int uses) {
+	private static MerchantOffer sellPrime(Item pmeh, int emeralds, int uses) {
 		ItemStack stack = new ItemStack(pmeh);
 		DataComponentType<Integer> grade = grade();
 		if (grade != null) {
 			stack.set(grade, PRIME);
 		}
-		return new MerchantOffer(new ItemCost(Coin.SILVER.item(), silver), stack, uses, XP, PRICE_MULTIPLIER);
+		return new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), stack, uses, XP, PRICE_MULTIPLIER);
 	}
 
-	/** Buys fine Pmeh at {@code silver} silver coins and prime for more; nothing worse (any Pmeh if Kitchen doesn't grade). */
-	private static void buyGraded(MerchantOffers offers, Item pmeh, int silver, int uses) {
+	/** Buys fine Pmeh at {@code emeralds} and prime for more; nothing worse (any Pmeh if Kitchen doesn't grade). */
+	private static void buyGraded(MerchantOffers offers, Item pmeh, int emeralds, int uses) {
 		DataComponentType<Integer> grade = grade();
 		if (grade == null) {
-			offers.add(buy(pmeh, silver, uses));
+			offers.add(buy(pmeh, emeralds, uses));
 			return;
 		}
 		for (int g : new int[] {FINE, PRIME}) {
-			int pay = g == PRIME ? Math.round(silver * PRIME_BONUS) : silver;
+			int pay = g == PRIME ? Math.round(emeralds * PRIME_BONUS) : emeralds;
 			ItemCost cost = new ItemCost(pmeh.builtInRegistryHolder(), 1, DataComponentExactPredicate.expect(grade, g));
-			offers.add(new MerchantOffer(cost, Coin.SILVER.stack(pay), uses, XP, PRICE_MULTIPLIER));
+			offers.add(new MerchantOffer(cost, new ItemStack(Items.EMERALD, pay), uses, XP, PRICE_MULTIPLIER));
 		}
 	}
 
-	private static MerchantOffer buy(Item item, int silver, int uses) {
-		return new MerchantOffer(new ItemCost(item, 1), Coin.SILVER.stack(silver), uses, XP, PRICE_MULTIPLIER);
+	private static MerchantOffer buy(Item item, int emeralds, int uses) {
+		return new MerchantOffer(new ItemCost(item, 1), new ItemStack(Items.EMERALD, emeralds), uses, XP, PRICE_MULTIPLIER);
 	}
 
 	/** A den's fence takes no toll for the realm (it never sees the coin). */
@@ -977,9 +976,10 @@ public final class Underworld {
 			return;
 		}
 		DICE_NEXT.put(player.getUUID(), now + DICE_COOLDOWN);
-		// (0.7.487) the stake is silver out of the coins or purse in hand (or the pack, behind them), up to MOST_WAGER
-		int wager = (int)Math.min(Coinage.held(player.getMainHandItem()) / Money.SILVER, MOST_WAGER);
-		if (wager < 1 || !Money.charge(player, Money.silver(wager))) {
+		// (0.7.497) the stake is coin out of the coins or purse in hand (or the pack, behind them), up to MOST_WAGER, in emeralds' worth
+		// (no more than the player can really pay here: foreign coins count for less)
+		int wager = (int)Math.min(Math.min(Coinage.held(player.getMainHandItem()), Money.count(player, (Faction)null)) / Money.UNIT, MOST_WAGER);
+		if (wager < 1 || !Money.charge(player, Money.worth(wager))) {
 			return;
 		}
 		RandomSource random = level.getRandom();
@@ -992,7 +992,7 @@ public final class Underworld {
 			yours > theirs ? Speech.GOLD : yours < theirs ? Speech.RED : Speech.WHITE);
 		int back = yours > theirs ? wager * 2 : yours == theirs ? wager : 0;
 		if (back > 0) {
-			Money.pay(player, Money.silver(back));
+			Money.pay(player, Money.worth(back));
 		}
 		if (++games % GAMES_PER_HEAT == 0) {
 			Faction f = Theft.lawAt(level, dicer.blockPosition());

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -223,7 +224,7 @@ public final class Temperaments {
 			case KINDHEARTED -> true;
 			case DEVOUT -> wild || rep > Reputation.HOSTILE;
 			case CHEERFUL -> wild || rep > CHEERFUL_FORGIVES && !wanted;
-			case GREEDY -> welcome || (wild || rep > Reputation.HOSTILE) && Approaches.canPay(player, GREEDY_FEE);
+			case GREEDY -> welcome || (wild || rep > Reputation.HOSTILE) && Money.canPay(player, f, Money.worth(GREEDY_FEE));
 			case PROUD -> !wild && rep > PROUD_REP && !wanted;
 			case SUSPICIOUS -> welcome && Introductions.knows(player, helper);
 			case TIMID -> welcome && !danger(level, player);
@@ -279,7 +280,8 @@ public final class Temperaments {
 	static void comes(ServerLevel level, LivingEntity helper, ServerPlayer player) {
 		Temperament t = of(helper);
 		if (t != null) {
-			Speech.sayTo(level, helper, player, Component.translatable("temperament.jaymoskingdoms." + t.key() + ".help." + level.getRandom().nextInt(LINES)),
+			// (0.7.490) an orc or goblin helper speaks in its own dialect
+			Speech.sayTo(level, helper, player, Dialects.trShared(helper, "temperament.jaymoskingdoms." + t.key() + ".help." + level.getRandom().nextInt(LINES)),
 				Speech.WHITE);
 		}
 	}
@@ -289,10 +291,11 @@ public final class Temperaments {
 		if (!is(helper, Temperament.GREEDY)) {
 			return;
 		}
-		// (0.7.487) silver from coins, purses and bundles alike (the old loose-emerald counter is gone)
-		int took = Approaches.payUpTo(player, GREEDY_FEE);
-		if (took > 0) {
-			Speech.sayTo(level, helper, player, Component.translatable("temperament.jaymoskingdoms.greedy.fee." + level.getRandom().nextInt(LINES), took),
+		// (0.7.497) the fee in coin, from coins, purses and bundles alike (the coin of the land, else what they carry)
+		long took = Money.chargeUpTo(player, Money.worth(GREEDY_FEE));
+		if (took > 0L) {
+			// (0.7.490) in dialect for an orc or goblin
+			Speech.sayTo(level, helper, player, Dialects.trShared(helper, "temperament.jaymoskingdoms.greedy.fee." + level.getRandom().nextInt(LINES), Money.textPaid(player, took)),
 				Speech.GOLD);
 		}
 	}
@@ -305,7 +308,8 @@ public final class Temperaments {
 		level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(JEER_RANGE),
 				e -> e.isAlive() && !e.isBaby() && !Downed.isDowned(e) && is(e, Temperament.SPITEFUL) && e.hasLineOfSight(player)).stream()
 			.min(Comparator.comparingDouble(player::distanceToSqr))
-			.ifPresent(e -> Speech.sayTo(level, e, player, Component.translatable("temperament.jaymoskingdoms.spiteful.jeer." + level.getRandom().nextInt(LINES)),
+			// (0.7.490) an orc or goblin jeers in its own dialect
+			.ifPresent(e -> Speech.sayTo(level, e, player, Dialects.trShared(e, "temperament.jaymoskingdoms.spiteful.jeer." + level.getRandom().nextInt(LINES)),
 				Speech.RED));
 	}
 

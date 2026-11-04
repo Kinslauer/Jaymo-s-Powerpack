@@ -284,7 +284,7 @@ public final class Schools {
 				give(p, blueprint);
 			}
 		}
-		Post.tidings(p.getUUID(), Component.translatable("tidings.jaymoskingdoms.school.mastered", s.displayName()));
+		Post.aside(p.getUUID(), Component.translatable("tidings.jaymoskingdoms.school.mastered", s.displayName()));
 	}
 
 	/** The school a realm near {@code pos} teaches (the nearest standing realm's, within {@value #REALM_RANGE} blocks), or null. */
@@ -416,7 +416,7 @@ public final class Schools {
 			if (join(player, s)) {
 				say(level, master, player, "school.jaymoskingdoms.welcome", player.getDisplayName(), s.displayName());
 				say(level, master, player, "school.jaymoskingdoms." + s.key() + ".welcome");
-				Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.school.joined", master.getDisplayName(), s.displayName()));
+				Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.school.joined", master.getDisplayName(), s.displayName()));
 			} else {
 				say(level, master, player, "school.jaymoskingdoms.one_house", player.getDisplayName());
 			}
@@ -494,6 +494,8 @@ public final class Schools {
 			pages.add(Filterable.passThrough(Component.translatable("book.jaymoskingdoms.school." + s.key() + "." + i)));
 		}
 		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough(title(s)), author(s), 0, pages, true));
+		// ((0.7.490) the Lore Codex files it, one of each)
+		com.jaymoskingdoms.LoreBooks.tag(book, "manual:" + s.key());
 		return book;
 	}
 

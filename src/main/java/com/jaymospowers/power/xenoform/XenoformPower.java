@@ -1456,7 +1456,8 @@ public final class XenoformPower implements Power {
 
 	/**
 	 * (0.19.62) What the four-legged aliens' bodies show for everyone ({@link XenoformState#ACT}): Tusk's Charge and
-	 * Gorger's Horn Charge ("charge"), Gorger or Gyre rolled up ("roll"), Gyre's Shell Spin ("spin").
+	 * Gorger's Horn Charge ("charge"), Gorger or Gyre rolled up ("roll"), Gyre's Shell Spin ("spin"), Keen hanging
+	 * from a ceiling ("hang").
 	 */
 	private static void syncAct(ServerPlayer player, Live live) {
 		String act = null;
@@ -1465,6 +1466,11 @@ public final class XenoformPower implements Power {
 				case "tusk" -> act = live.rush > 0 ? "charge" : null;
 				case "gorger" -> act = live.rolled ? "roll" : live.horn > 0 ? "charge" : null;
 				case "gyre" -> act = live.spin > 0 ? "spin" : live.rolled ? "roll" : null;
+				// (0.19.75) Keen hanging from a ceiling by its feet
+				case "keen" -> act = live.perched ? "hang" : null;
+				// (0.19.82) Prism rooted in crystal while Reflect is held; Gnasher's death roll
+				case "prism" -> act = live.reflecting ? "root" : null;
+				case "gnasher" -> act = live.rolls > 0 ? "roll" : null;
 				default -> act = null;
 			}
 		}

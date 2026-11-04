@@ -46,8 +46,8 @@ final class Grudges {
 	/** Blows a beating takes; the chance a grudge is a beating (else a lure). */
 	static final int BLOWS = 3;
 	static final float BEAT_SHARE = 0.5F;
-	/** What it pays: silver coins (and a few more), MCA hearts with the giver. */
-	static final int SILVER = 6, SILVER_MORE = 7, HEARTS = 6;
+	/** What it pays: emeralds (and a few more), MCA hearts with the giver. */
+	static final int EMERALDS = 6, EMERALDS_MORE = 7, HEARTS = 6;
 	/** The lure: how near you have to come to the enemy to draw them along; how far behind they'll follow; how long; their pace. */
 	static final double DRAW = 3.0, FOLLOW = 18.0;  // (DRAW: without MCA only)
 	static final int LURE_TICKS = 20 * 60 * 4;
@@ -121,7 +121,7 @@ final class Grudges {
 		Optional<BlockPos> spot = beating ? Optional.empty() : Optional.of(spot(level, f.seat(), random));
 		Quest.Objective o = new Quest.Objective("grudge", beating ? BLOWS : 1, 0, spot, Optional.of(enemy.getUUID()), enemy.getName().getString(),
 			f.name(), false);
-		Quest.Reward r = new Quest.Reward(SILVER + random.nextInt(SILVER_MORE), List.of(), Optional.empty(), Optional.empty(), HEARTS, 0, 0);
+		Quest.Reward r = new Quest.Reward(EMERALDS + random.nextInt(EMERALDS_MORE), List.of(), Optional.empty(), Optional.empty(), HEARTS, 0, 0);
 		String template = "grudge." + (beating ? "beat" : "lure") + "." + random.nextInt(STORIES);
 		Quests.offerNow(level, hater, new Quest(UUID.randomUUID().toString(), Quest.GRUDGE, template, who, o, r, 0L));
 		Neighbours.say(level, hater, "grudge", Speech.YELLOW, enemy);

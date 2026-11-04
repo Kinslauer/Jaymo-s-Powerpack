@@ -539,8 +539,8 @@ public final class Crewmen {
 			Vec3 at = Vec3.atBottomCenterOf(ground != null ? ground : shore);
 			mob.snapTo(at.x, at.y, at.z, mob.getYRot(), 0.0F);
 			mob.getNavigation().stop();
-			// (0.7.487) their lay is silver coins now (stowed in the pack; what won't fit drops at their feet)
-			for (ItemStack coins : Money.stacks(Money.silver(lay))) {
+			// (0.7.497) their lay is silver coins now (stowed in the pack; what won't fit drops at their feet)
+			for (ItemStack coins : Money.stacks(Money.worth(lay))) {
 				ItemStack pay = McaCompat.stow(mob, coins);
 				if (!pay.isEmpty()) {
 					mob.spawnAtLocation(level, pay);

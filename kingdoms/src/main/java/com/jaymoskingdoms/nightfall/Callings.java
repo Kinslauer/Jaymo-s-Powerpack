@@ -34,9 +34,9 @@ import org.jspecify.annotations.Nullable;
  * Sneaking passes, so the villager's own screen is still there.
  */
 final class Callings {
-	/** What a calling sells for (silver coins, (0.7.487) once emeralds), and how many it gives. */
+	/** What a calling sells for (emeralds' worth in coin, (0.7.497)), and how many it gives. */
 	static final int IMMUNITY_PRICE = 6, DRIED_MEAT_PRICE = 2, DRIED_MEAT_COUNT = 3, CARD_PRICE = 12, LUTE_PRICE = 10;
-	/** What it pays (silver coins): the Slaughter for this many red foods, the Chronicler for a book, the Bard for a disc. */
+	/** What it pays (emeralds' worth in coin): the Slaughter for this many red foods, the Chronicler for a book, the Bard for a disc. */
 	static final int RED_FOOD_PER_EMERALD = 4, BOOK_PAYS = 1, DISC_PAYS = 3;
 
 	enum Calling {
@@ -120,7 +120,7 @@ final class Callings {
 		return buy(level, player, mob, calling, held);
 	}
 
-	/** Its special ware, for silver coins out of the coins and purses carried. */
+	/** Its special ware, for coin out of the coins and purses carried. */
 	private static boolean sell(ServerLevel level, ServerPlayer player, PathfinderMob mob, Calling calling) {
 		int price;
 		ItemStack ware;
@@ -142,8 +142,8 @@ final class Callings {
 				ware = new ItemStack(Nightfall.LUTE);
 			}
 		}
-		if (!Money.charge(player, Money.silver(price))) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightfall.price", mob.getDisplayName(), price, ware.getHoverName()));
+		if (!Money.charge(player, Money.worth(price))) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightfall.price", mob.getDisplayName(), Money.text(player, Money.worth(price)), ware.getHoverName()));
 			return true;
 		}
 		player.getInventory().placeItemBackInInventory(ware, Prediction.SERVER_ONLY);
@@ -182,7 +182,7 @@ final class Callings {
 			}
 		}
 		held.consume(take, player);
-		Money.pay(player, Money.silver(pay));
+		Money.pay(player, Money.worth(pay));
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.75F);
 		return true;
 	}

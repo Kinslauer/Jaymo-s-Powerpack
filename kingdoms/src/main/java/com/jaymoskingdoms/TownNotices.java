@@ -49,7 +49,7 @@ final class TownNotices {
 	static final float CHANCE = 0.35F;
 	/** A town notice comes down after this long (ticks). */
 	static final long LIFE = 24000L * 2;
-	/** What an errand pays: silver coins, MCA hearts with the poster, reputation with the village. */
+	/** What an errand pays: emeralds, MCA hearts with the poster, reputation with the village. */
 	static final int HEARTS = 4, REPUTATION = 6;
 	/** (0.7.220) The chance a notice is Help wanted, when the poster's town is short of hands. */
 	static final float HELP_CHANCE = 0.3F;
@@ -63,13 +63,13 @@ final class TownNotices {
 	static Item ITEM;
 
 	/** One notice: its words ({@code quest.jaymoskingdoms.town.<key>}); for an errand, the quest kind, what, how many, pay. */
-	private record N(String key, int kind, String target, int min, int max, int silver) {
-		static N gather(String key, String item, int min, int max, int silver) {
-			return new N(key, Quest.GATHER, item, min, max, silver);
+	private record N(String key, int kind, String target, int min, int max, int emeralds) {
+		static N gather(String key, String item, int min, int max, int emeralds) {
+			return new N(key, Quest.GATHER, item, min, max, emeralds);
 		}
 
-		static N lead(String key, String animal, int min, int max, int silver) {
-			return new N(key, Quest.LEAD, animal, min, max, silver);
+		static N lead(String key, String animal, int min, int max, int emeralds) {
+			return new N(key, Quest.LEAD, animal, min, max, emeralds);
 		}
 
 		static N news(String key) {
@@ -320,7 +320,7 @@ final class TownNotices {
 		Quest q = new Quest(UUID.randomUUID().toString(), n.kind(), "town." + n.key(),
 			new Quest.Giver(giver.getUUID(), giver.getName().getString(), f.id(), false, job),
 			new Quest.Objective(n.target(), count, 0, Optional.empty(), Optional.empty(), "", f.name(), false),
-			new Quest.Reward(n.silver() + random.nextInt(3), List.of(), Optional.empty(), Optional.empty(), HEARTS, REPUTATION, 0), 0L);
+			new Quest.Reward(n.emeralds() + random.nextInt(3), List.of(), Optional.empty(), Optional.empty(), HEARTS, REPUTATION, 0), 0L);
 		return Quests.takeFromBoard(level, player, q);
 	}
 }

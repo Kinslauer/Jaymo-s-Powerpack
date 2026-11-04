@@ -189,8 +189,8 @@ final class TreasureWrecks {
 		List<ItemStack> loot = new ArrayList<>();
 		loot.add(new ItemStack(Items.GOLD_INGOT, 6 + random.nextInt(11)));
 		loot.add(new ItemStack(Items.GOLD_NUGGET, 12 + random.nextInt(25)));
-		// (0.7.487) silver coins, as many as the emeralds were
-		loot.addAll(Money.stacks(Money.silver(8 + random.nextInt(17))));
+		// (0.7.497) silver coins, as many as the emeralds were
+		loot.addAll(Money.stacks(Money.worth(8 + random.nextInt(17))));
 		loot.add(new ItemStack(Items.GUNPOWDER, 3 + random.nextInt(6)));
 		loot.add(new ItemStack(Sailing.ROUND_SHOT, 3 + random.nextInt(5)));
 		if (random.nextFloat() < 0.5F) {

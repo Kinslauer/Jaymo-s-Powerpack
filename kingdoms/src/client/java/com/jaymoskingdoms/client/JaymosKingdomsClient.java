@@ -93,6 +93,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
+		// (0.7.490) Hordes, Orc war journals: the Lore Codex screen
+		LoreCodexClient.register();
 		// 0.7.55: the wardrobe (MCA's editor, clothes only) from the inventory
 		Wardrobe.register();
 		// 0.5.52: the skill tree (K)
@@ -145,6 +147,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ScentClient.register();
 		WolfTells.register();
 		ClothesColourClient.register();
+		MasonScreen.register();
+		PlanGhosts.register();
 		// 0.7.332: the victim's memory of the biter, and kin heard in each other
 		VictimClient.register();
 		KinshipClient.register();
@@ -191,12 +195,14 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.BarrageClient.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
+		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
+		BeastParts.register();
+		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
+		SeaParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		GreenskinLooks.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
-		// (0.7.487) the Coin Press's screen
-		com.jaymoskingdoms.client.money.MoneyClient.register();
 		// 0.7.137: the wind dragons (Notus: its model, flight, breath key, trust and stamina HUD)
 		com.jaymoskingdoms.client.dragons.DragonsClient.register();
 		// 0.6.12: storm clouds, tornado funnels and the rain under a storm

@@ -519,7 +519,34 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return true;
 		}
 		net.minecraft.server.MinecraftServer server = this.level().getServer();
-		return server != null && Relations.between(server, this.factionId(), other.factionId()) == Relation.ALLIED;
+		// ((0.7.490) camps at war in a raid are not allies just now, Brutality)
+		return server != null && Relations.between(server, this.factionId(), other.factionId()) == Relation.ALLIED
+			&& !Brutality.atWar(server, this.factionId(), other.factionId());
+	}
+
+	/**
+	 * (0.7.490) It takes on another role of its faction in place (an orc made warchief by a challenge, a warchief brought
+	 * low): its gear, name and mettle those of the new role, its size and toughness back to a man's first, its bar and
+	 * second wind new.
+	 */
+	void changeRole(ServerLevel level, int role, Faction faction, float healthShare) {
+		this.entityData.set(ROLE, role);
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			this.setItemSlot(slot, ItemStack.EMPTY);
+		}
+		this.getAttribute(Attributes.SCALE).setBaseValue(1.0);
+		this.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(0.0);
+		this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.0);
+		ROLES.getOrDefault(role, ROLES.get(GUARD)).outfit().accept(this, faction);
+		if (this.bossBar != null) {
+			this.bossBar.removeAllPlayers();
+			this.bossBar = null;
+		}
+		this.rallied = false;
+		this.setHealth(Math.max(1.0F, this.getMaxHealth() * healthShare));
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			this.setDropChance(slot, 0.0F);
+		}
 	}
 
 	/** Asleep, it lies still (its goals wait too). */
@@ -545,6 +572,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		if (this.role() == Assassins.ASSASSIN) {
 			// (0.5.59) an assassin about his business, and nothing else
 			Assassins.act(level, this);
+			return;
+		}
+		if (this.role() == Slaves.SLAVE) {
+			// (0.7.490) a goblin slave in an orc camp: its chain, its hauling, its running off, a toss (Slaves)
+			Slaves.tick(level, this);
 			return;
 		}
 		if (this.outfit < Outfits.VERSION) {
@@ -619,7 +651,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.5.19) his bar: only for the players who've hit him, while they stay near
 			BossBars.show(level, this, this.bar());
 		}
-		if (this.leader() && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
+		// ((0.7.490) not in a camp brawl: a chief challenge's blows aren't a fight to call his camp to)
+		if (this.leader() && !this.rallied && !Brutality.fighting(this) && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in
 			this.rallied = true;
 			this.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 20 * 60, 1));

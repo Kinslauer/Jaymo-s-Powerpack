@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Coin;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -88,7 +87,7 @@ public final class Camps {
 	static final int DAY_HIDES = 8, DAY_DARK_HIDES = 4, DAY_PAINTED = 2, DAY_FENCES = 6, DAY_PLANKS = 8, DAY_LADDERS = 3, DAY_GATES = 1,
 		DAY_HAY = 2, DAY_BONE = 1, DAY_MEAT = 6, DAY_LEATHER = 2;
 	/** The loot pile a new camp starts with. */
-	static final int START_LOGS = 32, START_HIDES = 16, START_MEAT = 16, START_SILVER = 3;
+	static final int START_LOGS = 32, START_HIDES = 16, START_MEAT = 16, START_EMERALDS = 3;
 	/** Clearing a camp: reputation with every settlement for the one who killed its chief, and for those who fought beside them. */
 	static final int REP_CLEAR = 100, REP_CLEAR_HELPER = 40;
 	static final double HELPER_RANGE = 48.0;
@@ -198,14 +197,21 @@ public final class Camps {
 		Goblins.init();
 		// 0.5.45: orc war camps
 		Orcs.init();
+		// (0.7.490) goblin slaves in the orc camps
+		Slaves.init();
 		// 0.7.42: pirate coves and the sailors of the kingdoms
 		Pirates.init();
 		CampBuildings.registerCatalogue();
 		// (0.7.475) greenskin camps grow in tiers
 		Hordes.register();
+		// (0.7.490) villages and Blossom villages grow into walled towns
+		JaymosKingdoms.LOGGER.debug("walled town attachment: {}", WalledTowns.TOWNS);
+		WalledTowns.register();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Raids.clear();
+			OgreRaids.clear();
+			OgreGrowth.clear();
 			IllagerCamps.clear();
 			GoblinVillages.clear();
 			OrcCamps.clear();
@@ -319,7 +325,7 @@ public final class Camps {
 		return Factions.get(server, id);
 	}
 
-	/** What a new camp's storage starts with (its land's logs, hides, meat, a few silver coins). */
+	/** What a new camp's storage starts with (its land's logs, hides, meat, a few emeralds). */
 	static void stock(ServerLevel level, @Nullable Faction camp) {
 		if (camp == null || camp.holdings().storage().isEmpty()) {
 			return;
@@ -328,7 +334,7 @@ public final class Camps {
 		Storage.put(level, camp, p.log().getBlock().asItem(), START_LOGS);
 		Storage.put(level, camp, hide(camp), START_HIDES);
 		Storage.put(level, camp, Items.COOKED_MUTTON, START_MEAT);
-		Storage.put(level, camp, Coin.SILVER.item(), START_SILVER);
+		Storage.put(level, camp, Items.EMERALD, START_EMERALDS);
 	}
 
 	/** Camps of a kind stand together (barbarians help barbarians, illagers illagers), and the two kinds are at war. */
@@ -466,6 +472,8 @@ public final class Camps {
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		Raids.tick(server);
+		// (0.7.490) ogre raids are driven
+		OgreRaids.tick(server);
 		long now = level.getGameTime();
 		if (now % SPAWN_CHECK_TICKS == 0) {
 			spawnCamps(server, level);
@@ -670,8 +678,9 @@ public final class Camps {
 		}
 		// (0.7.475) a greenskin realm's vassals are free
 		Hordes.fell(server, camp.id());
+		// (0.7.490) its slaves stay: Slaves.tick sees the camp gone and sends them running
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, new AABB(camp.seat()).inflate(SCATTER_RANGE),
-			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f))) {
+			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f) && f.role() != Slaves.SLAVE)) {
 			if (folk.isCarrying()) {
 				folk.spawnAtLocation(level, folk.takeCarried());
 			}

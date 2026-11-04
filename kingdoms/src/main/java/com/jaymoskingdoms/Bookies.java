@@ -142,7 +142,7 @@ final class Bookies {
 		}
 		// (Andy: "Sure add that") a place on the card for yourself
 		if (here != null && FightPit.pit(server, here.id()) != null && (bout == null || bout.phase == FightPit.Phase.BETTING && !bout.player[0] && !bout.player[1])) {
-			player.sendSystemMessage(Component.literal("  ").append(click(Component.translatable("bookie.jaymoskingdoms.fight", FightPit.ENTRY), "/bookie fight")));
+			player.sendSystemMessage(Component.literal("  ").append(click(Component.translatable("bookie.jaymoskingdoms.fight", Money.text(player, Money.worth(FightPit.ENTRY))), "/bookie fight")));
 			lines++;
 		}
 		for (War war : WarData.wars(server)) {
@@ -159,7 +159,7 @@ final class Bookies {
 			lines++;
 		}
 		player.sendSystemMessage(Component.translatable(lines == 0 ? "bookie.jaymoskingdoms.nothing" : "bookie.jaymoskingdoms.how",
-			Math.max(GreatWars.WAGER_MOST, FightPit.MOST_STAKE)).withStyle(ChatFormatting.DARK_GRAY));
+			Money.text(player, Money.worth(Math.max(GreatWars.WAGER_MOST, FightPit.MOST_STAKE)))).withStyle(ChatFormatting.DARK_GRAY));
 	}
 
 	static MutableComponent click(Component text, String command) {
@@ -179,16 +179,17 @@ final class Bookies {
 	}
 
 	/**
-	 * (0.7.487) The silver coins' worth in {@code player}'s hand, whole silver (coins, a coin stack or a coin purse, read
-	 * with {@link Coinage#held}); null, with a word, if there is none. It was the emeralds in the hand.
+	 * (0.7.497) The worth, in whole emeralds' worth ({@link Money#UNIT}), of the coins or coin purse in {@code player}'s hand
+	 * ({@link Coinage#held}), no more than the player can really pay here ({@link Money#count}: foreign coins count for less);
+	 * null, with a word, if there is none. It was the emeralds in the hand.
 	 */
 	private static @Nullable Integer stake(CommandContext<CommandSourceStack> c, ServerPlayer player) {
-		long silver = Coinage.held(player.getMainHandItem()) / Money.SILVER;
-		if (silver < 1L) {
+		long worth = Math.min(Coinage.held(player.getMainHandItem()), Money.count(player, (Faction)null)) / Money.UNIT;
+		if (worth < 1L) {
 			c.getSource().sendFailure(Component.translatable("bookie.jaymoskingdoms.hold"));
 			return null;
 		}
-		return (int)Math.min(Integer.MAX_VALUE, silver);
+		return (int)Math.min(Integer.MAX_VALUE, worth);
 	}
 
 	private static int betWar(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
@@ -241,7 +242,7 @@ final class Bookies {
 			return 0;
 		}
 		if (held < FightPit.ENTRY) {
-			c.getSource().sendFailure(Component.translatable("fightpit.jaymoskingdoms.enter.fee", FightPit.ENTRY));
+			c.getSource().sendFailure(Component.translatable("fightpit.jaymoskingdoms.enter.fee", Money.text(player, Money.worth(FightPit.ENTRY))));
 			return 0;
 		}
 		return settle(player, bookie, FightPit.enter(player.level(), player, here));
@@ -258,7 +259,7 @@ final class Bookies {
 	private static int settle(ServerPlayer player, Villager bookie, GreatWars.Taken taken) {
 		ServerLevel level = player.level();
 		if (taken.kept() > 0) {
-			Money.charge(player, Money.silver(taken.kept()));
+			Money.charge(player, Money.worth(taken.kept()));
 			level.playSound(null, bookie.getX(), bookie.getY(), bookie.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.0F);
 		}
 		Speech.tell(level, bookie, player, taken.said(), taken.kept() > 0 ? Speech.GOLD : Speech.WHITE);

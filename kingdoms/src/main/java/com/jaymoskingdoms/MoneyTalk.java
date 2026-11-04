@@ -1,8 +1,8 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Changer;
-import com.jaymoskingdoms.money.Coinage;
+import com.jaymoskingdoms.money.MoneyItems;
 import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.money.PurseContents;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +19,17 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
-import net.minecraft.world.entity.npc.villager.VillagerProfession;
-import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.487) Andy, on the traders who still deal in emeralds ({@link Coinage#keepsEmeralds}): "they must speak about this
- * and answer you if asked". So:
+ * (0.7.497) Andy, on the traders who still deal in emeralds ({@link Currencies#keeper}): "they must speak about this
+ * and answer you if asked". (0.7.497) Coins are the culture coins now ("Combine: culture coins replace emeralds"): coin folk
+ * say which coin their town uses and why (its land, or the trading hub whose coin it took), a foreign coin is sent to the
+ * money changer, and the changer quotes the emerald in the town's coin. So:
  * <ul>
  * <li>Interact's Ask about Money ({@link InteractActions#MONEY}): one who keeps emeralds says so; the money changer gives his
  * rates; anyone else says it's coin and, if they know one, points you to a neighbour who still takes emeralds, or to the
@@ -67,23 +69,32 @@ public final class MoneyTalk {
 
 	/** {@code e} is a grown trader who still deals in emeralds (never the money changer, who deals in both). */
 	public static boolean keeper(@Nullable Entity e) {
-		return e instanceof AbstractVillager t && t.isAlive() && !t.isBaby() && trades(t) && !changer(t) && Coinage.keepsEmeralds(t);
+		return e instanceof AbstractVillager t && t.isAlive() && Currencies.keeper(t);
 	}
 
 	/** {@code e} is a money changer. */
 	public static boolean changer(@Nullable Entity e) {
-		return e instanceof Villager v && Changer.PROFESSION != null && Changer.is(v);
+		return e instanceof Villager v && Currencies.changer(v);
 	}
 
 	/** {@code t} has a trade to deal in (a wandering trader, or a villager with a job that trades). */
 	static boolean trades(AbstractVillager t) {
-		if (t instanceof WanderingTrader) {
-			return true;
+		return Currencies.trades(t);
+	}
+
+	/** (0.7.497) The coin {@code t} trades in: its settlement's, or the land round it, else the realm silver (never the emerald or the bit). */
+	static Currency coinOf(AbstractVillager t) {
+		if (!(t.level() instanceof ServerLevel level)) {
+			return Currency.SILVER;
 		}
-		// (a pedlar's and Ignis Vael's wares are always priced in coin; MCA's guards, archers and our workers don't trade)
-		return t instanceof Villager v && !v.getVillagerData().profession().is(VillagerProfession.NONE)
-			&& !v.getVillagerData().profession().is(VillagerProfession.NITWIT) && !(McaCompat.LOADED && McaBridge.cannotTrade(v))
-			&& !Pedlars.pedlar(v) && !com.jaymoskingdoms.nether.CinderForge.ignis(v);
+		Faction f = Quests.settlement(level, t);
+		Currency c = f != null ? Currencies.of(level.getServer(), f) : Currencies.at(level, t.blockPosition());
+		return c == Currency.EMERALD || c == Currency.BIT ? Currency.SILVER : c;
+	}
+
+	/** (0.7.497) The name of the trading hub whose coin {@code t}'s town took, if it took one; else null. */
+	static @Nullable String hubOf(AbstractVillager t) {
+		return t.level() instanceof ServerLevel level && Quests.settlement(level, t) instanceof Faction f ? Currencies.hubName(level.getServer(), f) : null;
 	}
 
 	/** The nearest grown trader to {@code v} (themselves first) that {@code which} picks, or null. */
@@ -115,25 +126,39 @@ public final class MoneyTalk {
 			return Component.translatable(line("child", random));
 		}
 		if (changer(v)) {
-			return Component.translatable(line("changer", random), Changer.EMERALD_CP);
+			return Component.translatable(line("changer", random), emeraldQuote(coinOf(v)));
 		}
 		if (keeper(v)) {
 			return Component.translatable(line("keeper", random));
 		}
+		// (0.7.497) coin folk say which coin the town uses and why, then where to take emeralds or foreign coin
+		Component here = here(v, random);
 		if (v.level() instanceof ServerLevel level) {
 			AbstractVillager other = nearest(level, v, o -> o != v && keeper(o));
 			if (other != null) {
-				return told(v, other, "coin_keeper", random);
+				return here.copy().append(" ").append(told(v, other, "coin_keeper", random));
 			}
 			AbstractVillager changer = nearest(level, v, o -> o != v && changer(o));
 			if (changer != null) {
-				return told(v, changer, "coin_changer", random);
+				return here.copy().append(" ").append(told(v, changer, "coin_changer", random));
 			}
 		}
-		return Component.translatable(line("coin", random));
+		return here;
 	}
 
-	/** "... %1$s still takes emeralds, %2$s to the %3$s." */
+	/** (0.7.497) "Realm Silver here, as is the custom of the land" or "... the coin of Kingdom X, whose merchants..." */
+	private static Component here(Villager v, RandomSource random) {
+		Component coin = Component.translatable(coinOf(v).key());
+		String hub = hubOf(v);
+		return hub == null ? Component.translatable(line("coin", random), coin) : Component.translatable(line("coin_hub", random), coin, hub);
+	}
+
+	/** (0.7.497) What a changer pays for an emerald in {@code local} coin, about, as shown ("1 Realm Silver, 4 Copper Bit"). */
+	private static Component emeraldQuote(Currency local) {
+		return Currencies.amount(Currencies.pay(local, (long)(Currency.EMERALD.base * Currencies.EMERALD_BUY)));
+	}
+
+	/** "... %1$s still takes emeralds, %2$s to the %3$s." (or the changer who changes them) */
 	private static Component told(Villager v, AbstractVillager who, String kind, RandomSource random) {
 		double far = Math.sqrt(who.distanceToSqr(v));
 		return Component.translatable(line(kind, random), who.getName(), Directions.distance(far), Directions.heading(v.position(), who.position()));
@@ -144,10 +169,15 @@ public final class MoneyTalk {
 		if (villager.isBaby()) {
 			return "";
 		}
-		StringBuilder sb = new StringBuilder("Money: coins are the money now, copper pieces, silver (ten copper) and gold (ten silver).");
+		Currency local = coinOf(villager);
+		String hub = hubOf(villager);
+		StringBuilder sb = new StringBuilder("Money: coin is the money now, not emeralds. Your town uses ").append(words(local));
+		sb.append(hub == null ? ", the coin of this land" : ", the coin of " + hub + ", the rich trading hub whose merchants your town follows");
+		sb.append(". Copper bits are the small change every town takes. Other realms' coins are foreign here: only a money changer swaps them cleanly.");
 		if (changer(villager)) {
-			sb.append(" You are the money changer: you change coins for free and buy emeralds at ").append(Changer.EMERALD_CP)
-				.append(" copper each, as gems.");
+			sb.append(" You are the money changer: you swap one realm's coin for another's at the going rate less a small cut, change copper bits for ")
+				.append(words(local)).append(" at par, and buy emeralds (and diamonds) as gems for ").append(words(local))
+				.append(", about ").append(quoteWords(local)).append(" for an emerald.");
 		} else if (keeper(villager)) {
 			sb.append(" But you still trade only in emeralds, as folk always did, and you distrust the new coin. Coin folk look down on you as an outdated fool; you know it and don't care. Say so if money comes up.");
 		} else {
@@ -157,9 +187,35 @@ public final class MoneyTalk {
 				if (other != null) {
 					sb.append(" ").append(other.getName().getString()).append(" nearby still trades in emeralds, the old fool.");
 				}
+				AbstractVillager changer = nearest(level, villager, o -> o != villager && changer(o));
+				if (changer != null) {
+					sb.append(" ").append(changer.getName().getString()).append(" nearby is the money changer.");
+				}
 			}
 		}
 		return sb.toString();
+	}
+
+	/** (0.7.497) {@code c} as plain English, for the chat prompt (the server has no mod lang to name an item with). */
+	private static String words(Currency c) {
+		return switch (c) {
+			case SILVER -> "realm silver";
+			case HACKSILVER -> "hacksilver";
+			case DINAR -> "gold dinars";
+			case SHELLS -> "strings of shells";
+			case MON -> "mon";
+			case BENT -> "bent copper";
+			case GOLD -> "gold";
+			case BIT -> "copper bits";
+			case EMERALD -> "emeralds";
+		};
+	}
+
+	/** (0.7.497) What a changer pays for an emerald in {@code local}, in plain English ("1 realm silver and 4 copper bits"). */
+	private static String quoteWords(Currency local) {
+		Currencies.Pay p = Currencies.pay(local, (long)(Currency.EMERALD.base * Currencies.EMERALD_BUY));
+		String out = p.coins() > 0L ? p.coins() + " " + words(p.coin()) : "";
+		return p.bits() <= 0L ? out : (out.isEmpty() ? "" : out + " and ") + p.bits() + " copper bits";
 	}
 
 	// ---- said unasked ---------------------------------------------------------------------------------------------------
@@ -173,7 +229,47 @@ public final class MoneyTalk {
 			remark(level, trader, player, "trade");
 		} else if (trades(trader) && player.getInventory().countItem(Items.EMERALD) > 0 && Money.count(player) <= 0) {
 			remark(level, trader, player, "no_emeralds");
+		} else if (trades(trader)) {
+			foreign(level, trader, player);
 		}
+	}
+
+	/**
+	 * (0.7.497) A coin trader, opened to a player who carries another realm's coin and none of the town's (a trade screen
+	 * takes the exact coin only): "that's not our coin, see the money changer", and where he is if there is one near.
+	 */
+	private static void foreign(ServerLevel level, AbstractVillager trader, ServerPlayer player) {
+		Currency local = coinOf(trader);
+		if (!local.coin() || carried(player, local) > 0) {
+			return;
+		}
+		boolean foreign = false;
+		for (Currency c : Currency.values()) {
+			foreign |= c.coin() && c != local && carried(player, c) > 0;
+		}
+		if (!foreign) {
+			return;
+		}
+		AbstractVillager changer = nearest(level, trader, o -> o != trader && changer(o));
+		if (changer == null) {
+			remark(level, trader, player, "foreign_far", Component.translatable(local.key()));
+			return;
+		}
+		double far = Math.sqrt(changer.distanceToSqr(trader));
+		remark(level, trader, player, "foreign", Component.translatable(local.key()), changer.getName(), Directions.distance(far),
+			Directions.heading(trader.position(), changer.position()));
+	}
+
+	/** How many of {@code c} {@code player} has loose, in a purse in the pack, or in the worn one. */
+	private static int carried(ServerPlayer player, Currency c) {
+		Inventory inv = player.getInventory();
+		ItemStack belt = PowersCompat.belt(player);
+		int n = inv.countItem(c.item()) + (belt.is(MoneyItems.COIN_PURSE) ? PurseContents.of(belt).count(c) : 0);
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			ItemStack stack = inv.getItem(i);
+			n += stack.is(MoneyItems.COIN_PURSE) && stack != belt ? PurseContents.of(stack).count(c) : 0;
+		}
+		return n;
 	}
 
 	/** Every {@link #SPOT_EVERY} ticks: one who keeps emeralds, near and in sight of emeralds in your hand, calls out. */
@@ -198,7 +294,7 @@ public final class MoneyTalk {
 	}
 
 	/** {@code t} says a {@code kind} line to {@code player} unless they spoke of money to them lately; whether they did. */
-	private static boolean remark(ServerLevel level, AbstractVillager t, ServerPlayer player, String kind) {
+	private static boolean remark(ServerLevel level, AbstractVillager t, ServerPlayer player, String kind, Object... args) {
 		long now = level.getGameTime();
 		Map<UUID, Long> said = REMARKED.computeIfAbsent(t, k -> new HashMap<>());
 		Long last = said.get(player.getUUID());
@@ -207,7 +303,7 @@ public final class MoneyTalk {
 		}
 		said.put(player.getUUID(), now);
 		t.getLookControl().setLookAt(player, 30.0F, 30.0F);
-		Speech.sayTo(level, t, player, Component.translatable(line(kind, level.getRandom())), Speech.WHITE);
+		Speech.sayTo(level, t, player, Component.translatable(line(kind, level.getRandom()), args), Speech.WHITE);
 		return true;
 	}
 

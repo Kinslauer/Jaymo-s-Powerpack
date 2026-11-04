@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Coin;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,7 +22,6 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.phys.Vec3;
@@ -56,8 +54,8 @@ public final class Pedlars {
 	static final double ARRIVE = 20.0, STOP_FOR = 6.0;
 	/** Walking pace (his and his guards'), and how far his guards let him get. */
 	static final double PACE = 0.55, GUARD_PACE = 0.7, GUARD_SLACK = 5.0;
-	/** Prices (silver coins, once emeralds): his odd wares (each), the mask, a seat map, the bestiary. */
-	static final int WARES = 3, WARE_PRICE_MIN = 1, WARE_PRICE_MAX = 4, MASK_PRICE = 10, MAP_PRICE = 8, BESTIARY_PRICE = 6;
+	/** Prices ((0.7.490) in bent worth, BentIngots): his odd wares (each), the mask, a seat map, the bestiary. */
+	static final int WARES = 3, WARE_PRICE_MIN = 2, WARE_PRICE_MAX = 8, MASK_PRICE = 20, MAP_PRICE = 16, BESTIARY_PRICE = 12;
 	// ================================================================================================================
 
 	/** MCA's talk answers: his wares, the tribe's mood (the pedlar's), tribute (a chief's or the pedlar's). */
@@ -272,9 +270,8 @@ public final class Pedlars {
 		}
 	}
 
-	/** (0.7.487) A ware for {@code silver} silver coins (the old price in emeralds, one for one). */
-	private static MerchantOffer sell(ItemStack what, int silver, int uses) {
-		return new MerchantOffer(new ItemCost(Coin.SILVER.item(), silver), what, uses, 0, 0.05F);
+	private static MerchantOffer sell(ItemStack what, int bent, int uses) {
+		return BentIngots.offer(bent, what, uses, 0, 0.05F);
 	}
 
 	private static List<PathfinderMob> members(ServerLevel level, Party p) {
@@ -352,6 +349,12 @@ public final class Pedlars {
 	/** (From MCA's menu, "Show me your wares") his trading screen. */
 	public static void trade(ServerPlayer player, LivingEntity pedlar) {
 		if (pedlar instanceof Villager v && v.getTradingPlayer() == null) {
+			// ((0.7.490) what he's paid goes into his tribe's seat's hoard when the trading ends)
+			String tribe = Tribes.of(pedlar);
+			Faction keeper = tribe == null ? null : HordeEconomy.treasury(player.level().getServer(), tribe);
+			if (keeper != null) {
+				GreenMarket.watch(v, keeper.id(), false);
+			}
 			v.setTradingPlayer(player);
 			v.openTradingScreen(player, v.getDisplayName(), 1);
 		}

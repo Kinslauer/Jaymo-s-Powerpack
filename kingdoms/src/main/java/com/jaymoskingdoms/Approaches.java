@@ -44,9 +44,7 @@ import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
-import com.jaymoskingdoms.money.Coin;
 import com.jaymoskingdoms.money.Money;
-import com.jaymoskingdoms.money.MoneyItems;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
@@ -268,7 +266,7 @@ public final class Approaches {
 
 	/** Small gifts a friend brings. */
 	private static final List<Supplier<Item>> GIFTS = List.of(() -> Items.POPPY, () -> Items.DANDELION, () -> Items.CORNFLOWER, () -> Items.BREAD,
-		() -> Items.APPLE, () -> Items.COOKIE, () -> Items.PUMPKIN_PIE, () -> Coin.SILVER.item() /* (0.7.487) a coin, not a gem */, () -> Items.HONEY_BOTTLE,
+		() -> Items.APPLE, () -> Items.COOKIE, () -> Items.PUMPKIN_PIE, () -> Items.EMERALD, () -> Items.HONEY_BOTTLE,
 		() -> Items.CAKE);
 
 	/** Food nobody hands over to the hungry (it's bad for them, or too dear). */
@@ -894,8 +892,10 @@ public final class Approaches {
 		Faction ruler = f == null ? null : ruler(level.getServer(), f);
 		Object[] args = switch (a.topic) {
 			// (0.7.130) and the blood: yours, then the purist king's
-			case SEARCH, TOLL, BOUT, LOYALTY -> new Object[] {a.price, Purists.name(Heritage.of(player)), ruler == null ? "?" : Purists.bloodName(ruler)};
-			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
+			// (0.7.490) a toll is asked in the town's own coin; (0.7.497) so are a bribe and a wager
+			case SEARCH, TOLL, BOUT, LOYALTY -> new Object[] {a.topic == LOYALTY ? a.price : asked(player, a, a.price), Purists.name(Heritage.of(player)),
+				ruler == null ? "?" : Purists.bloodName(ruler)};
+			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), asked(player, a, a.price)};
 			case WAR -> new Object[] {a.enemy};
 			case HALT, UNMASK -> new Object[] {realm};
 			case GREET -> new Object[] {Identities.nameTo(player, a.faction)};
@@ -978,8 +978,9 @@ public final class Approaches {
 		if (a.foreign) {
 			// (0.7.20) the words are lost on you, but not what they mean by them
 			a.gesture = Component.translatable("language.jaymoskingdoms.gesture." + TOPICS[a.topic], switch (a.topic) {
-				case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
-				case TOLL, BOUT -> new Object[] {a.price};
+				case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), asked(player, a, a.price)};
+				case TOLL -> new Object[] {asked(player, a, a.price)};
+				case BOUT -> new Object[] {asked(player, a, a.price)};
 				default -> new Object[0];
 			}).withStyle(ChatFormatting.ITALIC);
 		}
@@ -1100,7 +1101,7 @@ public final class Approaches {
 	private static List<Option> options(ServerPlayer player, Approach a) {
 		String k = key(a) + ".answer.";
 		return switch (a.topic) {
-			case ACCUSE -> List.of(new Option(Component.translatable(k + "confess", FINE), canPay(player, FINE)),
+			case ACCUSE -> List.of(new Option(Component.translatable(k + "confess", asked(player, a, FINE)), canPay(player, a, FINE)),
 				new Option(Component.translatable(k + "deny"), true), new Option(Component.translatable(k + "threaten"), true));
 			case HALT -> List.of(new Option(Component.translatable(k + "trade"), true), new Option(Component.translatable(k + "work"), true),
 				new Option(Component.translatable(k + "rude"), true));
@@ -1108,16 +1109,16 @@ public final class Approaches {
 				new Option(Component.translatable("talk.jaymoskingdoms.question." + a.variant + ".plain"), true),
 				new Option(Component.translatable("talk.jaymoskingdoms.question." + a.variant + ".rude"), true));
 			case HUNGRY -> List.of(new Option(Component.translatable(k + "give"), !food(player).isEmpty()), new Option(Component.translatable(k + "refuse"), true));
-			case BARGAIN -> List.of(new Option(Component.translatable(k + "buy", a.price), canPay(player, a.price)),
+			case BARGAIN -> List.of(new Option(Component.translatable(k + "buy", asked(player, a, a.price)), canPay(player, a, a.price)),
 				new Option(Component.translatable(k + "refuse"), true));
 			case WAR -> List.of(new Option(Component.translatable(k + "stand"), true), new Option(Component.translatable(k + "refuse"), true));
 			case CHILD -> List.of(new Option(Component.translatable("talk.jaymoskingdoms.child." + a.variant + ".yes"), true),
 				new Option(Component.translatable("talk.jaymoskingdoms.child.answer.no"), true));
 			case SEARCH -> List.of(new Option(Component.translatable(k + "allow"), true), new Option(Component.translatable(k + "refuse"), true),
-				new Option(Component.translatable(k + "bribe", a.price), canPay(player, a.price)));
-			case TOLL -> List.of(new Option(Component.translatable(k + "pay", a.price), canPay(player, a.price)),
-				new Option(Component.translatable(k + "haggle"), canPay(player, 1)), new Option(Component.translatable(k + "refuse"), true));
-			case BOUT -> List.of(new Option(Component.translatable(k + "accept", a.price), canPay(player, a.price)),
+				new Option(Component.translatable(k + "bribe", asked(player, a, a.price)), canPay(player, a, a.price)));
+			case TOLL -> List.of(new Option(Component.translatable(k + "pay", asked(player, a, a.price)), canPay(player, a, a.price)),
+				new Option(Component.translatable(k + "haggle"), canPay(player, a, 1)), new Option(Component.translatable(k + "refuse"), true));
+			case BOUT -> List.of(new Option(Component.translatable(k + "accept", asked(player, a, a.price)), canPay(player, a, a.price)),
 				new Option(Component.translatable(k + "decline"), true), new Option(Component.translatable(k + "insult"), true));
 			case LOYALTY -> List.of(new Option(Component.translatable(k + "praise"), true), new Option(Component.translatable(k + "silent"), true),
 				new Option(Component.translatable(k + "ill"), true));
@@ -1203,7 +1204,8 @@ public final class Approaches {
 		switch (a.topic) {
 			case ACCUSE -> {
 				if (option == 0) {
-					payUpTo(player, FINE);
+					// (0.7.490) in the town's coin first, then emeralds
+					Currencies.fine(level.getServer(), player, f, FINE);
 					Reputation.change(player, f, CONFESS_REP);
 					clearSuspicion(player, f.id());
 					reply(level, a, k + "confess", Speech.WHITE);
@@ -1263,12 +1265,13 @@ public final class Approaches {
 				}
 			}
 			case BARGAIN -> {
-				if (option == 0 && canPay(player, a.price) && a.scam && a.mob instanceof Villager crook) {
+				if (option == 0 && canPay(player, a, a.price) && a.scam && a.mob instanceof Villager crook) {
 					// (0.7.126) paid for goods that will never come
-					payUpTo(player, a.price);
+					// (0.7.497) in the town's coin, then bits
+					Currencies.fine(level.getServer(), player, f, a.price);
 					Crooks.scammed(level, crook, player, f.id(), a.price);
-				} else if (option == 0 && canPay(player, a.price)) {
-					payUpTo(player, a.price);
+				} else if (option == 0 && canPay(player, a, a.price)) {
+					Currencies.fine(level.getServer(), player, f, a.price);
 					ItemStack goods = a.goods.copy();
 					if (!player.getInventory().add(goods)) {
 						player.drop(goods, false, Prediction.SERVER_ONLY);
@@ -1326,12 +1329,12 @@ public final class Approaches {
 			}
 		} else if (option == 1) {
 			if (suspected(player, f.id(), now)) {
-				int fine = Math.min(FINE, silver(player));
-				payUpTo(player, fine);
+				// (0.7.490) in the town's coin first, then emeralds
+				int fine = Currencies.fine(level.getServer(), player, f, FINE);
 				toTreasury(level, f, fine);
 				clearSuspicion(player, f.id());
 				Reputation.change(player, f, SEARCH_FOUND_REP);
-				reply(level, a, k + "search_found", Speech.RED, fine);
+				reply(level, a, k + "search_found", Speech.RED, Currencies.asked(level.getServer(), f, fine));
 				Theft.arrest(player, level, f, ARREST_TICKS);
 			} else {
 				Reputation.change(player, f, Identities.SEARCH_CLEAN_REP);
@@ -1359,22 +1362,21 @@ public final class Approaches {
 				if (option == 0) {
 					if (suspected(player, f.id(), now)) {
 						// (what was taken turns up: it goes back, with a fine)
-						int fine = Math.min(FINE, silver(player));
-						payUpTo(player, fine);
+						// (0.7.490) in the town's coin first, then emeralds
+						int fine = Currencies.fine(level.getServer(), player, f, FINE);
 						toTreasury(level, f, fine);
 						clearSuspicion(player, f.id());
 						Reputation.change(player, f, SEARCH_FOUND_REP);
-						reply(level, a, k + "found." + temper, Speech.RED, fine);
+						reply(level, a, k + "found." + temper, Speech.RED, Currencies.asked(level.getServer(), f, fine));
 						if (fine < FINE && (tv == TYRANT || tv == PARANOID)) {
 							// (and they can't pay it)
 							Theft.arrest(player, level, f, ARREST_TICKS);
 						}
 					} else {
 						Reputation.change(player, f, SEARCH_CLEAN_REP[tv]);
-						if (tv == TYRANT && canPay(player, 1)) {
-							// (a fee for the trouble of searching you)
-							payUpTo(player, 1);
-							toTreasury(level, f, 1);
+						if (tv == TYRANT && canPay(player, a, 1)) {
+							// (a fee for the trouble of searching you, a coin's worth)
+							toTreasury(level, f, Currencies.fine(level.getServer(), player, f, 1));
 						}
 						reply(level, a, k + "clean." + temper, Speech.WHITE);
 					}
@@ -1389,7 +1391,8 @@ public final class Approaches {
 					}
 				} else if (tv == TYRANT || tv == REVELER || tv == PLAIN || tv == PURIST_KIN) {
 					// (a bribe they'll take: whatever you carry, they never saw it)
-					payUpTo(player, a.price);
+					// (0.7.497) in the town's coin, then bits
+					Currencies.fine(level.getServer(), player, f, a.price);
 					clearSuspicion(player, f.id());
 					reply(level, a, k + "bribe." + temper, Speech.WHITE);
 				} else {
@@ -1401,9 +1404,9 @@ public final class Approaches {
 				}
 			}
 			case TOLL -> {
-				if (option == 0 && canPay(player, a.price)) {
-					payUpTo(player, a.price);
-					toTreasury(level, f, a.price);
+				if (option == 0 && canPay(player, a, a.price)) {
+					// (0.7.490) paid in the town's coin first, then emeralds
+					toTreasury(level, f, Currencies.fine(level.getServer(), player, f, a.price));
 					Reputation.change(player, f, tv == REVELER ? REVELER_TOLL_REP : TOLL_PAID_REP);
 					if (tv == REVELER) {
 						give(player, random.nextBoolean() ? new ItemStack(Items.COOKIE, 3) : new ItemStack(Items.HONEY_BOTTLE));
@@ -1411,16 +1414,12 @@ public final class Approaches {
 					reply(level, a, k + "paid." + temper, Speech.GOLD);
 				} else if (option == 1) {
 					if (random.nextFloat() < HAGGLE_CHANCE[tv]) {
-						int half = Math.max(1, a.price / 2);
-						half = Math.min(half, silver(player));
-						payUpTo(player, half);
+						int half = Currencies.fine(level.getServer(), player, f, Math.max(1, a.price / 2));
 						toTreasury(level, f, half);
-						reply(level, a, k + "haggled." + temper, Speech.WHITE, half);
+						reply(level, a, k + "haggled." + temper, Speech.WHITE, Currencies.asked(level.getServer(), f, half));
 					} else if (tv == TYRANT) {
 						// (no haggling with the king's men: they take it, and a slap for asking)
-						int all = Math.min(a.price, silver(player));
-						payUpTo(player, all);
-						toTreasury(level, f, all);
+						toTreasury(level, f, Currencies.fine(level.getServer(), player, f, a.price));
 						slap(level, a.mob, player);
 						reply(level, a, k + "haggle_failed." + temper, Speech.RED);
 					} else {
@@ -1442,22 +1441,23 @@ public final class Approaches {
 				}
 			}
 			case BOUT -> {
-				if (option == 0 && canPay(player, a.price)) {
+				if (option == 0 && canPay(player, a, a.price)) {
 					float chance = BOUT_BASE + player.getArmorValue() * BOUT_ARMOUR + (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * BOUT_ATTACK;
 					a.mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 					level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 1.0F);
 					if (random.nextFloat() < Math.clamp(chance, BOUT_MIN, BOUT_MAX)) {
-						Money.pay(player, Money.silver(a.price));
+						// (0.7.497) the winnings in the town's coin
+						Money.pay(player, f, Money.worth(a.price));
 						Reputation.change(player, f, BOUT_WON_REP[tv]);
-						reply(level, a, k + "won." + temper, Speech.GOLD, a.price);
+						reply(level, a, k + "won." + temper, Speech.GOLD, asked(player, a, a.price));
 					} else {
-						payUpTo(player, a.price);
+						Currencies.fine(level.getServer(), player, f, a.price);
 						slap(level, a.mob, player);
 						if (tv == WARLORD) {
 							// (he respects anyone who'd step up)
 							Reputation.change(player, f, 1);
 						}
-						reply(level, a, k + "lost." + temper, Speech.WHITE, a.price);
+						reply(level, a, k + "lost." + temper, Speech.WHITE, asked(player, a, a.price));
 					}
 				} else if (option == 1) {
 					if (tv == WARLORD) {
@@ -1586,42 +1586,16 @@ public final class Approaches {
 
 	// ---- the player's pack ---------------------------------------------------------------------------------------------
 
-	/** (0.7.487) Whole silver coins' worth the player carries: coins, coin stacks, purses, bundles and the worn purse ({@link Money}). */
-	static int silver(ServerPlayer player) {
-		return (int)Math.min(Integer.MAX_VALUE, Money.count(player) / Money.SILVER);
+	/** (0.7.490) {@code player} carries {@code emeralds} of worth that the realm of {@code a} takes: its coin, and emeralds. */
+	private static boolean canPay(ServerPlayer player, Approach a, long emeralds) {
+		MinecraftServer server = player.level().getServer();
+		return Currencies.canPay(server, player, Factions.get(server, a.faction), emeralds);
 	}
 
-	/** (0.7.487) Whether the player can pay {@code silver} (a price that used to be "N emeralds"); creative always can. */
-	static boolean canPay(ServerPlayer player, int silver) {
-		return Money.canPay(player, Money.silver(silver));
-	}
-
-	/** (0.7.487) Takes up to {@code silver} whole silver coins' worth from the player; how much was taken (change is made, never a part-coin lost). */
-	static int payUpTo(ServerPlayer player, int silver) {
-		if (player.hasInfiniteMaterials()) {
-			return Math.max(0, silver);
-		}
-		int n = Math.min(Math.max(0, silver), silver(player));
-		return n > 0 && Money.charge(player, Money.silver(n)) ? n : 0;
-	}
-
-	/** (0.7.487) Whether {@code stack} is money held out in a hand: a coin, a coin stack or a coin purse. */
-	static boolean isMoney(ItemStack stack) {
-		return Coin.valueOf(stack) > 0L || stack.is(MoneyItems.COIN_PURSE);
-	}
-
-	/** (0.7.487) Old name, kept for callers in other files that still say emeralds: it is the silver the player carries. */
-	static int emeralds(ServerPlayer player) {
-		return silver(player);
-	}
-
-	/** (0.7.487) Old name: for {@code EMERALD}, takes that much silver; any other item is taken as before ({@link Purse}). */
-	static void take(ServerPlayer player, Item item, int n) {
-		if (item == Items.EMERALD) {
-			payUpTo(player, n);
-		} else {
-			Purse.take(player, item, n);
-		}
+	/** (0.7.490) {@code emeralds} of worth as the realm of {@code a} asks it, in its own coin ("6 Realm Silver"). */
+	private static Component asked(ServerPlayer player, Approach a, long emeralds) {
+		MinecraftServer server = player.level().getServer();
+		return Currencies.asked(server, Factions.get(server, a.faction), emeralds);
 	}
 
 	/** Something the player could hand a hungry villager (the first plain food in their pack), or empty. */

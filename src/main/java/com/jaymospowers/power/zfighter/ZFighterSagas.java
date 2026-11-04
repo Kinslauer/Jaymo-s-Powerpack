@@ -483,9 +483,9 @@ public final class ZFighterSagas {
 		return items;
 	}
 
-	/** (0.19.74) Pays {@code silver} silver (what that many emeralds used to be) through {@link KingdomsMoney}: coins, into the worn purse if any. */
+	/** (0.19.87) Pays {@code silver} silver (what that many emeralds used to be) through {@link KingdomsMoney}: coins, into the worn purse if any. */
 	static void paySilver(ServerPlayer player, int silver) {
-		KingdomsMoney.pay(player, KingdomsMoney.silver(silver));
+		KingdomsMoney.pay(player, KingdomsMoney.worth(silver));
 	}
 
 	static void give(ServerPlayer player, ItemStack stack) {

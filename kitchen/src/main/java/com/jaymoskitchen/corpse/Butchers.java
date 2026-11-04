@@ -353,8 +353,13 @@ public final class Butchers {
 		EntityType<?> type = body.sourceType();
 		Component what = type != null ? type.getDescription() : Component.translatable("message.jaymoskitchen.butcher.carcass");
 		// how good they are stays hidden until you've heard (or seen)
-		ServerPlayNetworking.send((ServerPlayer) player, new Payloads.OpenButcher(butcher.getId(), butcher.getDisplayName(), what,
-			known ? skill : 0.0F, known ? tier(skill) : -1, price(butcher, body.isBigCarcass()), KingdomsMoney.count((ServerPlayer) player)));
+		// (0.5.56) the price is made here, in the coin of the land, with one of that coin to draw beside it
+		ServerPlayer payer = (ServerPlayer) player;
+		long cost = KingdomsMoney.worth(price(butcher, body.isBigCarcass()));
+		ServerPlayNetworking.send(payer, new Payloads.OpenButcher(butcher.getId(), butcher.getDisplayName(), what,
+			known ? skill : 0.0F, known ? tier(skill) : -1, KingdomsMoney.text(payer, cost), KingdomsMoney.icon(payer), cost,
+			// (0.5.56) 'have' is the cost when the same rule the charge uses would take it (foreign coin at the going rate), else nothing
+			KingdomsMoney.canPay(payer, cost) ? cost : 0L));
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
@@ -391,11 +396,11 @@ public final class Butchers {
 		}
 		float skill = skill(butcher);
 		int price = price(butcher, body.isBigCarcass());
-		// (0.5.54) paid in silver coins through Jaymo's Kingdoms' money (purses and bundles count; emeralds without Kingdoms)
-		long cost = KingdomsMoney.silver(price);
+		// (0.5.56) paid in the coin of the land through Jaymo's Kingdoms' money (purses and bundles count; emeralds without Kingdoms)
+		long cost = KingdomsMoney.worth(price);
 		if (!KingdomsMoney.charge(player, cost)) {
 			butcher.playSound(SoundEvents.VILLAGER_NO);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.cant_pay", KingdomsMoney.text(cost)));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.cant_pay", KingdomsMoney.text(player, cost)));
 			return;
 		}
 

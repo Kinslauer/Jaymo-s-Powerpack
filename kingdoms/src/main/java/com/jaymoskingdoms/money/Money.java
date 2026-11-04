@@ -2,176 +2,381 @@ package com.jaymoskingdoms.money;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
+import org.apache.commons.lang3.math.Fraction;
+import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.Currencies;
+import com.jaymoskingdoms.Currency;
+import com.jaymoskingdoms.Faction;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
 
 /**
- * (0.7.487) The kingdoms' money, counted in copper pieces (cp; a silver coin is 10, a gold coin 100). Server side, and
- * aware of everywhere a player keeps coins: loose coins and coin stacks in the inventory, coin purses in it, coins in
- * bundles, and the purse worn in Jaymo's Powers' belt slot. Every price in the mod goes through here, so no site counts
- * emeralds, handles creative or forgets a bundle on its own. Emeralds are gems now and never count.
+ * (0.7.497) The kingdoms' money over {@link Currencies}. Every price is in milli (thousandths of an emerald, the unit
+ * every settlement's treasury is kept in): {@link #UNIT} is what an emerald was worth, and an old price of "N emeralds"
+ * is {@code worth(N)}. Server side, and aware of everywhere a player keeps coins: loose coins in the inventory, coin
+ * purses in it, coins in bundles, and the purse worn in Jaymo's Powers' belt slot. Emeralds are a gem now and never pay.
  *
- * <p>Order of spending: loose coins, the worn belt purse, purses in the pack, bundles. Exact change is used up before a
- * coin is broken (smallest coins first); the change from a broken coin goes back into the purse it came from, else the
- * inventory, else the ground. Old prices that said "N emeralds" are {@code silver(N)}.
+ * <p>What a payer takes: the settlement's own coin at par, copper bits at par, and any other realm's coin at the going
+ * rate less {@link Currencies#FOREIGN_CUT} (switch {@link Currencies#FOREIGN_TAKEN}). Order of spending: the local coin, bits, then foreign
+ * coins smallest first; within a coin, loose ones, the worn purse, the pack's purses, bundles. If the last coin is too big,
+ * the smallest that covers the rest is broken and the change ({@link Currencies#pay} in the local coin, with bits) goes
+ * back into the place it came from, else the pack, else the ground.
+ *
+ * <p>Which coin: given a faction, {@link Currencies#of}; given none, the coin of the land around the player or the place
+ * ({@link Currencies#at}); and when that is emeralds, silver.
  */
 public final class Money {
-	/** Copper pieces in a silver coin, and a gold coin. */
-	public static final int SILVER = Coin.SILVER.value(), GOLD = Coin.GOLD.value();
+	/** (0.7.497) A milli price of one emerald's worth: what "1" in an old price meant. */
+	public static final int UNIT = 1000;
+	/** The most coins one stack of loose coins holds. */
+	private static final int STACK = 64;
+
+	/** The running server, for the faction-only overloads (set while a world is open). */
+	private static @Nullable MinecraftServer server;
 
 	private Money() {
 	}
 
-	/** {@code n} silver coins' worth (what a price of "N emeralds" is now). */
-	public static long silver(long n) {
-		return n * SILVER;
+	public static void register() {
+		ServerLifecycleEvents.SERVER_STARTED.register(s -> server = s);
+		ServerLifecycleEvents.SERVER_STOPPED.register(s -> server = null);
 	}
 
-	/** {@code n} gold coins' worth. */
-	public static long gold(long n) {
-		return n * GOLD;
+	/** {@code n} emeralds' worth (what an old price of "N emeralds" is now), in milli. */
+	public static long worth(long n) {
+		return n * UNIT;
 	}
 
-	/** Everything {@code player} carries, in cp. */
+	// ---- which coin ------------------------------------------------------------------------------------------------------
+
+	/** Emeralds and nothing are not a coin to pay in: those become silver. */
+	private static Currency fix(@Nullable Currency c) {
+		return c == null || c == Currency.EMERALD ? Currency.SILVER : c;
+	}
+
+	private static Currency local(@Nullable MinecraftServer server, @Nullable Faction f) {
+		return server == null || f == null ? Currency.SILVER : fix(Currencies.of(server, f));
+	}
+
+	private static Currency local(ServerLevel level, BlockPos pos) {
+		return fix(Currencies.at(level, pos));
+	}
+
+	private static Currency local(ServerPlayer player) {
+		return local(player.level(), player.blockPosition());
+	}
+
+	private static Currency local(ServerPlayer player, @Nullable Faction f) {
+		return f == null ? local(player) : local(player.level().getServer(), f);
+	}
+
+	/** One {@code c} coin's worth to a payer whose own coin is {@code local}, in milli (0: not taken). */
+	private static long each(@Nullable MinecraftServer server, Currency local, Currency c) {
+		if (c == local || c == Currency.BIT) {
+			return c.base;
+		}
+		if (!Currencies.FOREIGN_TAKEN || server == null || !c.coin()) {
+			return 0L;
+		}
+		return (long)(Currencies.rate(server, c) * (1.0 - Currencies.FOREIGN_CUT));
+	}
+
+	/** The coins a payer in {@code local} spends, in order: the local coin, bits, then the others smallest first. */
+	private static List<Currency> order(@Nullable MinecraftServer server, Currency local) {
+		List<Currency> out = new ArrayList<>();
+		out.add(local);
+		if (local != Currency.BIT) {
+			out.add(Currency.BIT);
+		}
+		List<Currency> foreign = new ArrayList<>();
+		for (Currency c : Currency.values()) {
+			if (c.money() && !out.contains(c) && each(server, local, c) > 0L) {
+				foreign.add(c);
+			}
+		}
+		foreign.sort((a, b) -> Long.compare(each(server, local, a), each(server, local, b)));
+		out.addAll(foreign);
+		return out;
+	}
+
+	// ---- counting --------------------------------------------------------------------------------------------------------
+
+	/** Everything {@code player} carries that a purse can hold, at standard worth, in milli (for display). */
 	public static long count(ServerPlayer player) {
+		List<Source> sources = sources(player);
 		long total = 0L;
-		for (Source s : sources(player)) {
-			total += s.value();
+		for (Currency c : Currency.values()) {
+			if (c.money()) {
+				total += have(sources, c) * c.base;
+			}
 		}
 		return total;
 	}
 
-	/** Whether {@code player} can pay {@code cp} (a creative player always can). */
-	public static boolean canPay(ServerPlayer player, long cp) {
-		return cp <= 0L || player.hasInfiniteMaterials() || count(player) >= cp;
+	/** What {@code f} takes of what {@code player} carries, in milli (see the class comment). */
+	public static long count(ServerPlayer player, @Nullable Faction f) {
+		return count(player, local(player, f));
 	}
 
-	/** Takes {@code cp} from {@code player}, all or nothing; true if it was paid (a creative player pays nothing). */
-	public static boolean charge(ServerPlayer player, long cp) {
-		if (cp <= 0L || player.hasInfiniteMaterials()) {
-			return true;
-		}
+	private static long count(ServerPlayer player, Currency local) {
+		MinecraftServer server = player.level().getServer();
 		List<Source> sources = sources(player);
 		long total = 0L;
-		for (Source s : sources) {
-			total += s.value();
+		for (Currency c : order(server, local)) {
+			total += have(sources, c) * each(server, local, c);
 		}
-		if (total < cp) {
+		return total;
+	}
+
+	/** Whether {@code player} can pay {@code milli} where they stand (a creative player always can). */
+	public static boolean canPay(ServerPlayer player, long milli) {
+		return milli <= 0L || player.hasInfiniteMaterials() || count(player, local(player)) >= milli;
+	}
+
+	/** Whether {@code player} can pay {@code f} {@code milli} (a creative player always can). */
+	public static boolean canPay(ServerPlayer player, @Nullable Faction f, long milli) {
+		return milli <= 0L || player.hasInfiniteMaterials() || count(player, local(player, f)) >= milli;
+	}
+
+	// ---- paying ----------------------------------------------------------------------------------------------------------
+
+	/** Takes {@code milli} from {@code player} where they stand, all or nothing; true if it was paid (a creative player pays nothing). */
+	public static boolean charge(ServerPlayer player, long milli) {
+		return charge(player, local(player), milli);
+	}
+
+	/** Takes {@code milli} from {@code player} for {@code f}, all or nothing; true if it was paid (a creative player pays nothing). */
+	public static boolean charge(ServerPlayer player, @Nullable Faction f, long milli) {
+		return charge(player, local(player, f), milli);
+	}
+
+	private static boolean charge(ServerPlayer player, Currency local, long milli) {
+		if (milli <= 0L || player.hasInfiniteMaterials()) {
+			return true;
+		}
+		MinecraftServer server = player.level().getServer();
+		List<Source> sources = sources(player);
+		List<Currency> order = order(server, local);
+		long total = 0L;
+		for (Currency c : order) {
+			total += have(sources, c) * each(server, local, c);
+		}
+		if (total < milli) {
 			return false;
 		}
-		long need = cp;
-		// exact change first, smallest coins first, so no coin is broken while the small ones can pay
-		for (Coin c : Coin.values()) {
-			long units = need / c.value();
-			for (Source s : sources) {
-				if (units <= 0) {
-					break;
-				}
-				int n = (int)Math.min(units, s.count(c));
-				if (n > 0) {
-					s.take(c, n);
-					units -= n;
-					need -= (long)n * c.value();
-				}
+		long need = milli;
+		// whole coins that fit, the local coin first, so no coin is broken while smaller ones can pay
+		for (Currency c : order) {
+			long each = each(server, local, c);
+			if (each <= 0L || need < each) {
+				continue;
 			}
+			int n = take(sources, c, (int)Math.min(need / each, Integer.MAX_VALUE));
+			need -= n * each;
 		}
 		// still short of a whole coin: break the smallest coin that covers it
 		Source broke = null;
 		long change = 0L;
 		if (need > 0L) {
-			search:
-			for (Coin c : Coin.values()) {
-				if (c.value() < need) {
-					continue;
+			Currency pick = null;
+			long pickEach = Long.MAX_VALUE;
+			for (Currency c : order) {
+				long each = each(server, local, c);
+				if (each >= need && each < pickEach && have(sources, c) > 0L) {
+					pick = c;
+					pickEach = each;
 				}
+			}
+			if (pick != null) {
 				for (Source s : sources) {
-					if (s.count(c) > 0) {
-						s.take(c, 1);
-						change = c.value() - need;
-						need = 0L;
+					if (s.count(pick) > 0) {
+						s.take(pick, 1);
 						broke = s;
-						break search;
+						break;
 					}
 				}
+				change = pickEach - need;
+				need = 0L;
 			}
 		}
 		if (need > 0L) {
-			JaymosKingdoms.LOGGER.warn("Money.charge: {} cp short after counting enough for {}", need, cp);
+			JaymosKingdoms.LOGGER.warn("Money.charge: {} milli short after counting enough for {}", need, milli);
 		}
-		long left = change;
-		if (broke != null && change > 0L) {
-			left = broke.add(change);
+		// the change goes back where the broken coin came from; what doesn't fit there goes to the pack
+		Currency changeCoin = local;
+		int coinsLeft = 0, bitsLeft = 0;
+		if (change > 0L) {
+			Currencies.Pay back = Currencies.pay(local, change);
+			changeCoin = back.coin();
+			coinsLeft = (int)Math.min(Integer.MAX_VALUE, back.coins());
+			bitsLeft = (int)Math.min(Integer.MAX_VALUE, back.bits());
+			if (broke != null) {
+				coinsLeft = broke.add(changeCoin, coinsLeft);
+				bitsLeft = broke.add(Currency.BIT, bitsLeft);
+			}
 		}
 		for (Source s : sources) {
 			s.commit(player);
 		}
-		if (left > 0L) {
-			give(player, Coin.coins(left));
+		giveCoins(player, changeCoin, coinsLeft);
+		giveCoins(player, Currency.BIT, bitsLeft);
+		return true;
+	}
+
+	/** Takes up to {@code milli} from {@code player} where they stand; how much was taken. */
+	public static long chargeUpTo(ServerPlayer player, long milli) {
+		return chargeUpTo(player, local(player), milli);
+	}
+
+	/** Takes up to {@code milli} from {@code player} for {@code f}; how much was taken. */
+	public static long chargeUpTo(ServerPlayer player, @Nullable Faction f, long milli) {
+		return chargeUpTo(player, local(player, f), milli);
+	}
+
+	private static long chargeUpTo(ServerPlayer player, Currency local, long milli) {
+		if (milli <= 0L) {
+			return 0L;
+		}
+		if (player.hasInfiniteMaterials()) {
+			return milli;
+		}
+		long take = Math.min(milli, count(player, local));
+		return take > 0L && charge(player, local, take) ? take : 0L;
+	}
+
+	/** Takes exactly {@code n} of {@code c} from {@code player} (loose, purses and bundles), all or nothing; true if it was taken. */
+	public static boolean chargeCoin(ServerPlayer player, Currency c, long n) {
+		if (n <= 0L || player.hasInfiniteMaterials()) {
+			return true;
+		}
+		if (n > Integer.MAX_VALUE) {
+			return false;
+		}
+		List<Source> sources = sources(player);
+		if (have(sources, c) < n) {
+			return false;
+		}
+		take(sources, c, (int)n);
+		for (Source s : sources) {
+			s.commit(player);
 		}
 		return true;
 	}
 
-	/** Takes up to {@code cp} from {@code player}; how much was taken. */
-	public static long chargeUpTo(ServerPlayer player, long cp) {
-		if (cp <= 0L) {
-			return 0L;
-		}
-		if (player.hasInfiniteMaterials()) {
-			return cp;
-		}
-		long take = Math.min(cp, count(player));
-		return take > 0L && charge(player, take) ? take : 0L;
+	/** Gives {@code player} {@code milli} where they stand, as coins: into the worn purse if it has room, else the inventory, else the ground. */
+	public static void pay(ServerPlayer player, long milli) {
+		deposit(player, stacks(local(player), milli));
 	}
 
-	/** Gives {@code cp} to {@code player}: into the worn purse if it has room, else the inventory, else the ground. */
-	public static void pay(ServerPlayer player, long cp) {
-		if (cp <= 0L) {
+	/** Gives {@code player} {@code milli} in {@code f}'s coin (see {@link #pay(ServerPlayer, long)}). */
+	public static void pay(ServerPlayer player, @Nullable Faction f, long milli) {
+		deposit(player, stacks(local(player, f), milli));
+	}
+
+	// ---- coins as items --------------------------------------------------------------------------------------------------
+
+	/** {@code milli} as coins in {@code f}'s coin, for loot, chests and storehouses. */
+	public static List<ItemStack> stacks(@Nullable Faction f, long milli) {
+		return stacks(local(server, f), milli);
+	}
+
+	public static List<ItemStack> stacks(@Nullable MinecraftServer server, @Nullable Faction f, long milli) {
+		return stacks(local(server, f), milli);
+	}
+
+	/** {@code milli} as the coins of the land around {@code pos}. */
+	public static List<ItemStack> stacks(ServerLevel level, BlockPos pos, long milli) {
+		return stacks(local(level, pos), milli);
+	}
+
+	/** {@code milli} as silver, for a place with no settlement or position to ask. */
+	public static List<ItemStack> stacks(long milli) {
+		return stacks(Currency.SILVER, milli);
+	}
+
+	private static List<ItemStack> stacks(Currency coin, long milli) {
+		return milli <= 0L ? List.of() : Currencies.pay(coin, milli).stacks();
+	}
+
+	/** (0.7.497) One coin of the land where {@code player} stands, to draw beside a price (Kitchen's butcher, over the bridge). */
+	public static ItemStack coin(ServerPlayer player) {
+		return new ItemStack(local(player).item());
+	}
+
+	/** A price of {@code milli} as asked in {@code f}'s coin ("12 Realm Silver, 3 Copper Bit"). */
+	public static Component text(@Nullable Faction f, long milli) {
+		return Currencies.amount(Currencies.owe(local(server, f), milli));
+	}
+
+	public static Component text(ServerLevel level, BlockPos pos, long milli) {
+		return Currencies.amount(Currencies.owe(local(level, pos), milli));
+	}
+
+	public static Component text(ServerPlayer player, long milli) {
+		return Currencies.amount(Currencies.owe(local(player), milli));
+	}
+
+	/** A price of {@code milli} in silver, for a place with no settlement or position to ask. */
+	public static Component text(long milli) {
+		return Currencies.amount(Currencies.owe(Currency.SILVER, milli));
+	}
+
+	/** A payout of {@code milli} as given in {@code f}'s coin (never more than the worth). */
+	public static Component textPaid(@Nullable Faction f, long milli) {
+		return Currencies.amount(Currencies.pay(local(server, f), milli));
+	}
+
+	public static Component textPaid(ServerPlayer player, long milli) {
+		return Currencies.amount(Currencies.pay(local(player), milli));
+	}
+
+	/** Hands {@code stacks} to {@code player}: into the worn purse where they fit, then the inventory, the rest onto the ground. */
+	public static void deposit(ServerPlayer player, List<ItemStack> stacks) {
+		for (ItemStack stack : stacks) {
+			deposit(player, stack);
+		}
+	}
+
+	/**
+	 * Hands {@code stack} to {@code player}: a coin a purse can hold goes into the worn purse first (as far as it has room),
+	 * the rest into the inventory, and what doesn't fit onto the ground. The greenskins' and pirates' coins go straight to the pack.
+	 */
+	public static void deposit(ServerPlayer player, ItemStack stack) {
+		if (stack.isEmpty()) {
 			return;
 		}
-		ItemStack belt = PowersCompat.belt(player);
+		ItemStack rest = stack.copy();
+		Currency c = Currency.byItem(rest.getItem());
+		ItemStack belt = c != null && c.money() ? PowersCompat.belt(player) : ItemStack.EMPTY;
 		if (belt.is(MoneyItems.COIN_PURSE)) {
-			PurseContents.Added added = PurseContents.of(belt).plus(cp);
-			if (added.contents().value() != PurseContents.of(belt).value()) {
-				PurseContents.set(belt, added.contents());
+			PurseContents before = PurseContents.of(belt);
+			PurseContents after = before.with(c, rest.getCount());
+			int put = after.count(c) - before.count(c);
+			if (put > 0) {
+				PurseContents.set(belt, after);
 				PowersCompat.setBelt(player, belt);
+				rest.shrink(put);
 			}
-			cp = added.left();
 		}
-		if (cp > 0L) {
-			give(player, Coin.coins(cp));
-		}
+		give(player, rest);
 	}
 
-	/** {@code cp} as loose coins, for loot, chests and storehouses. */
-	public static List<ItemStack> stacks(long cp) {
-		return Coin.coins(cp);
-	}
-
-	/** "3 g 4 s 2 c" (only the parts that aren't nothing; "0 c" for none). */
-	public static Component text(long cp) {
-		long gold = cp / GOLD, silver = cp % GOLD / SILVER, copper = cp % SILVER;
-		MutableComponent out = Component.empty();
-		boolean any = false;
-		if (gold > 0L) {
-			out.append(Component.translatable("money.jaymoskingdoms.gold", gold));
-			any = true;
+	/** {@code n} of {@code c}'s coins, deposited. */
+	private static void giveCoins(ServerPlayer player, Currency c, long n) {
+		for (long left = n; left > 0L; left -= STACK) {
+			deposit(player, new ItemStack(c.item(), (int)Math.min(STACK, left)));
 		}
-		if (silver > 0L) {
-			out.append(any ? Component.literal(" ") : Component.empty()).append(Component.translatable("money.jaymoskingdoms.silver", silver));
-			any = true;
-		}
-		if (copper > 0L || !any) {
-			out.append(any ? Component.literal(" ") : Component.empty()).append(Component.translatable("money.jaymoskingdoms.copper", copper));
-		}
-		return out;
 	}
 
 	/** Hands {@code stacks} to {@code player}: into the inventory as far as it goes, the rest onto the ground. */
@@ -193,6 +398,34 @@ public final class Money {
 
 	// ---- where coins are kept ----------------------------------------------------------------------------------------
 
+	private static long have(List<Source> sources, Currency c) {
+		long n = 0L;
+		for (Source s : sources) {
+			n += s.count(c);
+		}
+		return n;
+	}
+
+	/** Takes up to {@code n} of {@code c} across {@code sources} in order; how many were taken. */
+	private static int take(List<Source> sources, Currency c, int n) {
+		int left = n;
+		for (Source s : sources) {
+			if (left <= 0) {
+				break;
+			}
+			int k = Math.min(left, s.count(c));
+			if (k > 0) {
+				s.take(c, k);
+				left -= k;
+			}
+		}
+		return n - left;
+	}
+
+	private static boolean isCoin(ItemStack stack) {
+		return !stack.isEmpty() && Currency.byItem(stack.getItem()) != null;
+	}
+
 	/** Spending order: loose coins, the belt purse, the pack's purses, bundles. */
 	private static List<Source> sources(ServerPlayer player) {
 		List<Source> out = new ArrayList<>();
@@ -211,7 +444,7 @@ public final class Money {
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			ItemStack stack = inv.getItem(i);
 			BundleContents bundle = stack.get(DataComponents.BUNDLE_CONTENTS);
-			if (bundle != null && bundle.itemCopies().anyMatch(s -> Coin.valueOf(s) > 0L)) {
+			if (bundle != null && bundle.itemCopies().anyMatch(Money::isCoin)) {
 				out.add(new BundleSource(stack, bundle));
 			}
 		}
@@ -220,46 +453,36 @@ public final class Money {
 
 	/** One place coins are kept: counted, taken from, added to, and written back. */
 	private abstract static class Source {
-		abstract int count(Coin coin);
+		abstract int count(Currency coin);
 
-		abstract void take(Coin coin, int n);
+		abstract void take(Currency coin, int n);
 
-		/** Adds {@code cp} as coins; returns what didn't fit (in cp). */
-		abstract long add(long cp);
+		/** Adds {@code n} coins; returns how many didn't fit. */
+		abstract int add(Currency coin, int n);
 
 		abstract void commit(ServerPlayer player);
-
-		final long value() {
-			long v = 0L;
-			for (Coin c : Coin.values()) {
-				v += (long)count(c) * c.value();
-			}
-			return v;
-		}
 	}
 
-	/** Loose coins and coin stacks in a list of stacks (the inventory's own, or a bundle's contents). */
+	/** Loose coins in a list of stacks (the inventory's own, or a bundle's contents). */
 	private abstract static class Loose extends Source {
 		abstract List<ItemStack> stacks();
 
-		/** Puts {@code stack} somewhere in the list; what is left over is returned. */
-		abstract ItemStack put(ItemStack stack);
+		/** Puts {@code stack} somewhere in the list. */
+		abstract void put(ItemStack stack);
 
 		@Override
-		int count(Coin coin) {
+		int count(Currency coin) {
 			int n = 0;
 			for (ItemStack stack : stacks()) {
 				if (stack.is(coin.item())) {
 					n += stack.getCount();
-				} else if (stack.is(coin.stackItem())) {
-					n += stack.getCount() * Coin.STACK_COINS;
 				}
 			}
 			return n;
 		}
 
 		@Override
-		void take(Coin coin, int n) {
+		void take(Currency coin, int n) {
 			for (ItemStack stack : stacks()) {
 				if (n > 0 && stack.is(coin.item())) {
 					int k = Math.min(n, stack.getCount());
@@ -267,27 +490,14 @@ public final class Money {
 					n -= k;
 				}
 			}
-			for (ItemStack stack : stacks()) {
-				if (n > 0 && stack.is(coin.stackItem())) {
-					int k = Math.min((n + Coin.STACK_COINS - 1) / Coin.STACK_COINS, stack.getCount());
-					stack.shrink(k);
-					n -= k * Coin.STACK_COINS;
-				}
-			}
-			// a stack broken for part of its coins: the rest of its ten comes back loose
-			if (n < 0) {
-				put(coin.stack(-n));
-			}
 		}
 
 		@Override
-		long add(long cp) {
-			long left = 0L;
-			for (ItemStack stack : Coin.coins(cp)) {
-				ItemStack rest = put(stack);
-				left += Coin.valueOf(rest);
+		int add(Currency coin, int n) {
+			for (int left = n; left > 0; left -= STACK) {
+				put(new ItemStack(coin.item(), Math.min(STACK, left)));
 			}
-			return left;
+			return 0;
 		}
 	}
 
@@ -306,7 +516,7 @@ public final class Money {
 			List<ItemStack> out = new ArrayList<>();
 			for (int i = 0; i < this.inv.getContainerSize(); i++) {
 				ItemStack stack = this.inv.getItem(i);
-				if (!stack.isEmpty() && (Coin.of(stack) != null || Coin.ofStack(stack) != null)) {
+				if (isCoin(stack)) {
 					out.add(stack);
 				}
 			}
@@ -314,9 +524,8 @@ public final class Money {
 		}
 
 		@Override
-		ItemStack put(ItemStack stack) {
+		void put(ItemStack stack) {
 			give(this.player, stack);
-			return ItemStack.EMPTY;
 		}
 
 		@Override
@@ -329,6 +538,7 @@ public final class Money {
 	private static final class BundleSource extends Loose {
 		private final ItemStack bundle;
 		private final List<ItemStack> inside = new ArrayList<>();
+		private boolean changed;
 
 		BundleSource(ItemStack bundle, BundleContents contents) {
 			this.bundle = bundle;
@@ -341,22 +551,49 @@ public final class Money {
 		}
 
 		@Override
-		ItemStack put(ItemStack stack) {
-			this.inside.add(stack.copy());
-			stack.setCount(0);
-			return stack;
+		void take(Currency coin, int n) {
+			this.changed = true;
+			super.take(coin, n);
+		}
+
+		@Override
+		void put(ItemStack stack) {
+			this.changed = true;
+			this.inside.add(stack);
+		}
+
+		/** (0.7.497) Adds only as many coins as the bundle's weight still holds; the rest is returned so it goes to the pack. */
+		@Override
+		int add(Currency coin, int n) {
+			int put = Math.min(n, this.room(coin));
+			if (put > 0) {
+				super.add(coin, put);
+			}
+			return n - put;
+		}
+
+		/** How many more of {@code coin} the bundle holds, by its weight (copyWithContents drops what doesn't fit). */
+		private int room(Currency coin) {
+			BundleContents old = this.bundle.get(DataComponents.BUNDLE_CONTENTS);
+			if (old == null) {
+				return 0;
+			}
+			BundleContents now = old.copyWithContents(this.inside.stream().filter(s -> !s.isEmpty()).map(ItemStack::copy));
+			Fraction weight = now.weight().result().orElse(Fraction.ONE);
+			Fraction each = Fraction.getFraction(1, new ItemStack(coin.item()).getMaxStackSize());
+			return Math.max(0, Fraction.ONE.subtract(weight).divideBy(each).intValue());
 		}
 
 		@Override
 		void commit(ServerPlayer player) {
 			BundleContents old = this.bundle.get(DataComponents.BUNDLE_CONTENTS);
-			if (old != null) {
+			if (this.changed && old != null) {
 				this.bundle.set(DataComponents.BUNDLE_CONTENTS, old.copyWithContents(this.inside.stream().filter(s -> !s.isEmpty())));
 			}
 		}
 	}
 
-	/** A purse, worn or in the pack. */
+	/** A purse, worn or in the pack. It holds only the coins a purse can (see {@link Currency#money}). */
 	private static final class PurseSource extends Source {
 		private final ItemStack purse;
 		private final boolean worn;
@@ -369,20 +606,23 @@ public final class Money {
 		}
 
 		@Override
-		int count(Coin coin) {
+		int count(Currency coin) {
 			return this.now.count(coin);
 		}
 
 		@Override
-		void take(Coin coin, int n) {
+		void take(Currency coin, int n) {
 			this.now = this.now.with(coin, -n);
 		}
 
 		@Override
-		long add(long cp) {
-			PurseContents.Added added = this.now.plus(cp);
-			this.now = added.contents();
-			return added.left();
+		int add(Currency coin, int n) {
+			if (!coin.money() || n <= 0) {
+				return Math.max(0, n);
+			}
+			int before = this.now.count(coin);
+			this.now = this.now.with(coin, n);
+			return n - (this.now.count(coin) - before);
 		}
 
 		@Override

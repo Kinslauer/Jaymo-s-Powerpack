@@ -1358,9 +1358,35 @@ Item and block textures are graded toward Excalibur's darker, earthier palette b
 Every texture graded in 0.5.52 is back to its original. The graded copies live only in the pack's optional,
 off-by-default `excalibur_style` built-in pack (`/excalibur on`).
 
-## 0.5.54: butchers take coins (pack 0.19.74, Kingdoms 0.7.487)
-Part of Kingdoms' "coins replace emeralds" (`docs/Coins-Plan.md`). A butcher villager's price is now in silver coins
-(one silver is what an emerald used to be). `KingdomsMoney` is a MethodHandles bridge to `com.jaymoskingdoms.money.Money`,
-so loose coins, coin stacks, a purse (the worn belt purse too) and bundles all count, and change comes back as coins.
-The butcher screen shows what you carry, counted by the server. Without Kingdoms the price falls back to emeralds one
-for one.
+## 0.5.54: thrown bodies keep their ragdoll, risen zombies keep their face (pack 0.19.76)
+Andy: "thrown mobs should stop snapping to a pose, and instead keep the ragdoll, so they fall how they fall".
+- Letting go of a carried body (dropped, thrown, tossed into a fire by a guard, its carrier gone, sliding off a horse)
+  used to start its physics from `lyingBody`: sprawled flat, limbs splayed, a fresh random way up. So it snapped into
+  that pose in mid-air. Now `RagdollBody.held` starts it in the pose it was drawn held in (`CorpseRenderer`): a
+  humanoid on its back across the arms, head to the carrier's right, arms hanging and legs back; an animal belly down,
+  legs hanging, head drooping; a small body hanging by the neck from one hand. It keeps the speed it was thrown with
+  and falls however it falls from there.
+- Carried humanoids' legs and heads (client `Limp`) hang as far back as the leg and head cones allow
+  (`RagdollRig.HELD_LEG_HANG`, `HELD_HEAD_BACK`), so the physics never has to swing them on the first tick.
+- The released body's points are sent at once, and clients forget a held body's old points, so it is never drawn for a
+  frame where it lay before it was picked up.
+- `tools/ragdoll_sim` checks a player, cow, chicken, snake and giant let go of in each hold: no point off by more
+  than a hair on the first tick, bones their length, lands and settles out of the ground. All pass.
+- A zombie (or skeleton) body that gets back up came back with a fresh random id. Excalibur picks each zombie's look
+  (its people: hair, clothes) from that id, so it rose wearing someone else's face, or the plain zombie skin, and died
+  again that way (Andy: "the zombie died and changed skins"). It now gets up with the id it had alive, unless
+  something in the world already has it.
+- Compile-checked; not played.
+
+## 0.5.55: one HUD layout (pack 0.19.79, Kingdoms 0.7.487)
+The stomach slots and the body-heat thermometer moved into the left dock beside the hotbar (`client/hud/HudZones`, a
+copy of Powers'; see `docs/HUD-Layout.md` in the pack). The stomach no longer sits where the power chips and the
+attack indicator are; the thermometer no longer covers the XP number.
+## 0.5.56: butchers take coins (pack 0.19.87, Kingdoms 0.7.497)
+Part of Kingdoms' "coins replace emeralds" (`docs/Coins-Plan.md`). A butcher villager's price is now asked in the coin of
+the land where you stand (one emerald's worth in the old price is `KingdomsMoney.worth(1)`, paid in the town's coin and
+copper bits). `KingdomsMoney` is a MethodHandles bridge to `com.jaymoskingdoms.money.Money`, so loose coins, a purse
+(the worn belt purse too) and bundles all count, and change comes back as coins. The butcher screen is sent the price as
+a server-made line ("6 Realm Silver"), one of that coin to draw beside it, the cost and what you carry (`OpenButcher`
+now carries a Component and an ItemStack instead of a silver count). Without Kingdoms the price falls back to emeralds
+one for one.

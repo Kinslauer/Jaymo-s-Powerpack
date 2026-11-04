@@ -243,6 +243,11 @@ final class Staredowns {
 			tell(sp, "thrown", seen);
 			return true;
 		}
+		if (HavenGrowth.sworn(seen)) {
+			// (0.7.490) a haven's sworn neither drops its weapon nor runs
+			holds(level, sp, seen, "sworn");
+			return true;
+		}
 		if ((Bandits.wears(seen) || Bounties.wanted(level.getServer(), seen)) && PowersCompat.knockOut(level, seen, KNEEL_TICKS)) {
 			seen.setTarget(null);
 			say(level, seen, "outlaw");
@@ -308,8 +313,8 @@ final class Staredowns {
 		long paid = pay;
 		TRIBUTE_READY.put(f.id(), now + TRIBUTE_TICKS);
 		Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - paid)));
-		// (0.7.487) the tribute is silver coins (the treasury counts silver)
-		Money.pay(sp, Money.silver(paid));
+		// (0.7.497) the tribute is silver coins (the treasury counts silver)
+		Money.pay(sp, Money.worth(paid));
 		Reputation.change(sp, f, REP_TRIBUTE);
 		say(level, ruler, "tribute");
 		sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stare.tribute", ruler.getDisplayName(), paid, f.name()).withStyle(ChatFormatting.GOLD));

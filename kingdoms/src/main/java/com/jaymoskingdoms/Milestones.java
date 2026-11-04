@@ -431,8 +431,8 @@ public final class Milestones {
 		if (player.isCreative()) {
 			return true;
 		}
-		if (!Money.charge(player, Money.silver(fare))) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
+		if (!Money.charge(player, Money.worth(fare))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", Money.text(player, Money.worth(fare))).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		return true;

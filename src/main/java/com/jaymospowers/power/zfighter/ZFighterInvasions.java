@@ -325,7 +325,7 @@ public final class ZFighterInvasions {
 		List<Component> lines = new ArrayList<>();
 		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_rules", (int)BOUNDARY, LEAVE_GRACE / 20).withStyle(ChatFormatting.GOLD));
 		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_prize_tp", TOTAL_TP, TOTAL_XP).withStyle(ChatFormatting.YELLOW));
-		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_prize_items", KingdomsMoney.text(KingdomsMoney.silver(TOTAL_EMERALDS)), inv.theme.itemCount,
+		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_prize_items", KingdomsMoney.text(KingdomsMoney.worth(TOTAL_EMERALDS)), inv.theme.itemCount,
 			new ItemStack(inv.theme.item).getHoverName(), BEANS).withStyle(ChatFormatting.YELLOW));
 		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_prize_earrings",
 			Math.round(ZFighterFusionItems.TYRANT_DROP_CHANCE * 100.0F)).withStyle(ChatFormatting.LIGHT_PURPLE));
@@ -732,8 +732,8 @@ public final class ZFighterInvasions {
 			}
 			paid++;
 			int emeralds = Math.max(MIN_EMERALDS, Math.round(TOTAL_EMERALDS * share));
-			KingdomsMoney.pay(player, KingdomsMoney.silver(emeralds)); // (0.19.74) silver coins
-			Component money = KingdomsMoney.text(KingdomsMoney.silver(emeralds));
+			KingdomsMoney.pay(player, KingdomsMoney.worth(emeralds)); // (0.19.87) silver coins
+			Component money = KingdomsMoney.text(player, KingdomsMoney.worth(emeralds));
 			give(player, new ItemStack(inv.theme.item, inv.theme.itemCount));
 			if (ZFighterItems.HERMIT_BEAN != null) {
 				give(player, new ItemStack(ZFighterItems.HERMIT_BEAN, BEANS));

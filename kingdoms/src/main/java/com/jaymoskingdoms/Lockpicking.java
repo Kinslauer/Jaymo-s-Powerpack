@@ -1,7 +1,6 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Coin;
-import com.jaymoskingdoms.money.PurseContents;
+import com.jaymoskingdoms.money.Coinage;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.lang.reflect.Method;
@@ -480,14 +479,14 @@ public final class Lockpicking {
 				worth += ENCHANTED;
 			}
 			worth += PIECE.getOrDefault(stack.getItem(), 0.0F) * stack.getCount();
-			// (0.7.487) coins, coin stacks and what a coin purse holds: a silver coin is worth what an emerald was
-			worth += (Coin.valueOf(stack) + PurseContents.of(stack).value()) * COPPER_PIECE;
+			// (0.7.497) coins and what a coin purse holds, by their worth at the standard rate (an emerald's worth is the 1.5 it was)
+			worth += Coinage.held(stack) * MILLI_PIECE;
 		}
 		return worth;
 	}
 
-	/** (0.7.487) What a copper piece of loot is worth (a silver coin, 10 cp, is the 1.5 an emerald was). */
-	private static final float COPPER_PIECE = 0.15F;
+	/** (0.7.497) What a milli of coin in loot is worth (1000 milli, an emerald's worth, is the 1.5 an emerald was). */
+	private static final float MILLI_PIECE = 0.0015F;
 
 	/** The valuables, by the piece. */
 	private static final Map<Item, Float> PIECE = Map.ofEntries(

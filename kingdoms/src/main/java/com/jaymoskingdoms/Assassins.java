@@ -936,8 +936,8 @@ final class Assassins {
 			int reward = (int)Math.min(CURE_REWARD, f.treasury());
 			if (reward > 0) {
 				Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() - reward));
-				// (0.7.487) the thanks come as silver coins
-				Money.pay(player, Money.silver(reward));
+				// (0.7.497) the thanks come as silver coins
+				Money.pay(player, Money.worth(reward));
 			}
 		}
 		Speech.say(level, ruler, Component.translatable("assassin.jaymoskingdoms.cured.says", Identities.shownName(player)), Speech.GOLD, WITNESS_RANGE);
@@ -960,8 +960,8 @@ final class Assassins {
 		Faction hirer = c.hirer() >= 0 ? Factions.get(server, c.hirer()) : null;
 		Component victimName = c.realm() >= 0 ? realmRuler(level, c.realm()) : playerName(server, c.player());
 		a.spawnAtLocation(level, sealedContract(victimName, hirer, c));
-		// (0.7.487) the blade's fee, in silver coins
-		for (ItemStack coins : Money.stacks(Money.silver(c.fee()))) {
+		// (0.7.497) the blade's fee, in silver coins
+		for (ItemStack coins : Money.stacks(Money.worth(c.fee()))) {
 			a.spawnAtLocation(level, coins);
 		}
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer sp ? sp : null;

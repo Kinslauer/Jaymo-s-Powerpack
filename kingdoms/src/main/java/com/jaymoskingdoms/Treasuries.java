@@ -1,13 +1,11 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.money.Changer;
-import com.jaymoskingdoms.money.Coin;
-import com.jaymoskingdoms.money.Money;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
-import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ChunkPos;
 
@@ -24,11 +22,11 @@ import net.minecraft.world.level.ChunkPos;
  * Daily taxes and the tyrant's tithe still come in ({@link Production}, {@link Tempers}).
  */
 public final class Treasuries {
-	/** A new kingdom's purse (silver coins, (0.7.487) once emeralds, inclusive). */
+	/** A new kingdom's purse (emeralds, inclusive). */
 	static final int START_MIN = 10, START_MAX = 700;
-	/** A trade's toll: this share (percent) of the silver coins' worth in it, and at least this much. */
+	/** A trade's toll: this share (percent) of the emeralds in it, and at least this much. */
 	static final int TOLL_PERCENT = 25, TOLL_LEAST = 1;
-	/** A caravan's market dues: one silver coin for every this many goods delivered. */
+	/** A caravan's market dues: one emerald for every this many goods delivered. */
 	static final int DUES_PER = 32;
 	/** A soldier's wage for one march (emeralds). */
 	static final int WAGE = 2;
@@ -52,8 +50,8 @@ public final class Treasuries {
 			// (0.7.211) a den's fence pays no toll
 			return;
 		}
-		if (Changer.own(offer) || villager instanceof Villager v && Changer.is(v)) {
-			// (0.7.487) the money changer swaps coins and pays no toll (else swapping back and forth would mint silver)
+		if (villager instanceof net.minecraft.world.entity.npc.villager.Villager v && Currencies.changer(v)) {
+			// (0.7.490) a money-changer only swaps one coin for another: nothing is earned, so no toll
 			return;
 		}
 		MinecraftServer server = level.getServer();
@@ -61,17 +59,14 @@ public final class Treasuries {
 		if (owner == null || owner.fallen() || !owner.type().isRealm()) {
 			return;
 		}
-		// (0.7.487) the coins in the offer's price and result (a copper piece is a tenth of the treasury's silver)
-		long cp = Coin.valueOf(offer.getCostA()) + Coin.valueOf(offer.getCostB()) + Coin.valueOf(offer.getResult())
-			// an old-coin trader's emeralds count as silver
-			+ emeraldCp(offer.getCostA()) + emeraldCp(offer.getCostB()) + emeraldCp(offer.getResult());
-		long toll = Math.max(TOLL_LEAST, cp / Money.SILVER * TOLL_PERCENT / 100);
+		// (0.7.490) the treasury is still kept in emeralds: a trade in the realm's own coin counts at its worth
+		long emeralds = worth(offer.getCostA()) + worth(offer.getCostB()) + worth(offer.getResult());
+		long toll = Math.max(TOLL_LEAST, emeralds * TOLL_PERCENT / 100);
 		Factions.update(server, owner.id(), f -> f.withTreasury(f.treasury() + toll));
 	}
 
-	/** (0.7.487) An emerald stack's worth in copper pieces (an emerald is a silver coin's worth). */
-	private static long emeraldCp(net.minecraft.world.item.ItemStack stack) {
-		return stack.is(net.minecraft.world.item.Items.EMERALD) ? (long)stack.getCount() * Money.SILVER : 0L;
+	private static long worth(ItemStack stack) {
+		return stack.is(Items.EMERALD_BLOCK) ? stack.getCount() * 9L : Currencies.worthOf(stack);
 	}
 
 	/** A caravan has delivered {@code goods} to {@code lord}: its market dues. */

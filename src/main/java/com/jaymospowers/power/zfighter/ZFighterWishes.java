@@ -390,8 +390,8 @@ public final class ZFighterWishes {
 			case POWER -> power(player, zfighter);
 			case REVIVE -> revive(player);
 			case RICHES -> {
-				// (0.19.74) three stacks' worth of silver (192), as coins into the purse
-				KingdomsMoney.pay(player, KingdomsMoney.silver(RICHES_STACKS * 64L));
+				// (0.19.87) three stacks' worth of silver (192), as coins into the purse
+				KingdomsMoney.pay(player, KingdomsMoney.worth(RICHES_STACKS * 64L));
 				yield true;
 			}
 			case AWAKEN -> awaken(player, zfighter);

@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
 public final class DisasterRelief {
 	/** A settlement this much further than a disaster's own reach still counts as struck. */
 	static final double STRUCK_MARGIN = 24.0;
-	/** What repairs cost the treasury, by disaster (silver coins, times the quake's magnitude); a noble king's share more. */
+	/** What repairs cost the treasury, by disaster (emeralds, times the quake's magnitude); a noble king's share more. */
 	static final int COST_STORM = 10, COST_FIRE = 25, COST_FLOOD = 20, COST_QUAKE = 25;
 	static final float NOBLE_PAYS = 1.5F;
 	/** A tyrant's storm tax: this many times the repairs, wrung from the folk. */
@@ -43,12 +43,12 @@ public final class DisasterRelief {
 	static final int ASKERS = 2;
 	static final double ASK_RANGE = 48.0;
 	/** Rubble: how many blocks to clear (min, more), how far from the seat they count, the pay. */
-	static final int RUBBLE_MIN = 24, RUBBLE_MORE = 24, RUBBLE_SILVER = 6, RUBBLE_REPUTATION = 25;
+	static final int RUBBLE_MIN = 24, RUBBLE_MORE = 24, RUBBLE_EMERALDS = 6, RUBBLE_REPUTATION = 25;
 	static final double RUBBLE_RANGE = 96.0;
 	/** Food: what's asked for (item, least, more), the pay. */
 	static final String[] FOOD = {"minecraft:bread", "minecraft:baked_potato", "minecraft:cooked_beef", "minecraft:cooked_cod"};
 	static final int[] FOOD_MIN = {12, 16, 8, 12}, FOOD_MORE = {8, 8, 6, 8};
-	static final int FOOD_SILVER = 5, FOOD_REPUTATION = 25;
+	static final int FOOD_EMERALDS = 5, FOOD_REPUTATION = 25;
 	/** Players hear of a village's trouble within this distance of it. */
 	static final double LOCAL_NEWS = 300.0;
 
@@ -155,12 +155,12 @@ public final class DisasterRelief {
 				int k = random.nextInt(FOOD.length);
 				int count = FOOD_MIN[k] + random.nextInt(FOOD_MORE[k] + 1);
 				Quest.Objective o = new Quest.Objective(FOOD[k], count, 0, Optional.empty(), Optional.empty(), "", f.name(), false);
-				Quest.Reward r = new Quest.Reward(FOOD_SILVER, List.of(), Optional.empty(), Optional.empty(), 2, FOOD_REPUTATION, 10);
+				Quest.Reward r = new Quest.Reward(FOOD_EMERALDS, List.of(), Optional.empty(), Optional.empty(), 2, FOOD_REPUTATION, 10);
 				q = new Quest(UUID.randomUUID().toString(), Quest.GATHER, "relief.food." + kind, who, o, r, 0L);
 			} else {
 				int count = RUBBLE_MIN + random.nextInt(RUBBLE_MORE + 1);
 				Quest.Objective o = new Quest.Objective("rubble", count, 0, Optional.of(f.seat()), Optional.empty(), "", f.name(), false);
-				Quest.Reward r = new Quest.Reward(RUBBLE_SILVER, List.of(), Optional.empty(), Optional.empty(), 2, RUBBLE_REPUTATION, 10);
+				Quest.Reward r = new Quest.Reward(RUBBLE_EMERALDS, List.of(), Optional.empty(), Optional.empty(), 2, RUBBLE_REPUTATION, 10);
 				q = new Quest(UUID.randomUUID().toString(), Quest.RELIEF, "relief.rubble." + kind, who, o, r, 0L);
 			}
 			Quests.offerNow(level, v, q);

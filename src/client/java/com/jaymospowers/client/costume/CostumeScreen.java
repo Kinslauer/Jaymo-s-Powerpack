@@ -54,10 +54,12 @@ public class CostumeScreen extends Screen {
 
 	/** The table, or null for a tailor's order. */
 	private final @Nullable BlockPos pos;
-	/** A tailor's price in silver coins, or -1 at a table. */
+	/** A tailor's price in emeralds' worth, or -1 at a table. */
 	private final int price;
-	/** (0.19.74) What the player carried when the tailor's order opened, in copper pieces (the server counts it: a purse is hidden from the client). */
-	private final long have;
+	/** (0.19.87) The tailor's price as the server wrote it in the coin of the land, one of that coin, and whether the player can pay it (the server counts: a purse is hidden from the client). */
+	private final Component cost;
+	private final ItemStack coin;
+	private final boolean affordable;
 	/** Kept between openings (so a closed screen doesn't lose a half-done design). */
 	private static CostumeDesign design = CostumeDesign.DEFAULT;
 	private static float yaw = 20.0F;
@@ -70,19 +72,21 @@ public class CostumeScreen extends Screen {
 	private Button cut, mask, cape, sew, takeOff, maskToggle;
 
 	public CostumeScreen(BlockPos pos) {
-		this(pos, -1, 0L);
+		this(pos, -1, Component.empty(), ItemStack.EMPTY, true);
 	}
 
-	private CostumeScreen(@Nullable BlockPos pos, int price, long have) {
+	private CostumeScreen(@Nullable BlockPos pos, int price, Component cost, ItemStack coin, boolean affordable) {
 		super(Component.translatable(price >= 0 ? "screen.jaymospowers.costume.tailor_title" : "screen.jaymospowers.costume.title"));
 		this.pos = pos;
 		this.price = price;
-		this.have = have;
+		this.cost = cost;
+		this.coin = coin;
+		this.affordable = affordable;
 	}
 
-	/** (0.11.78) The designer for a tailor's order, at {@code price} silver ({@code have} cp carried). */
-	static CostumeScreen tailored(int price, long have) {
-		return new CostumeScreen(null, Math.max(0, price), have);
+	/** (0.11.78) The designer for a tailor's order, at {@code price} emeralds' worth, shown as {@code cost} in the coin of the land. */
+	static CostumeScreen tailored(int price, Component cost, ItemStack coin, boolean affordable) {
+		return new CostumeScreen(null, Math.max(0, price), cost, coin, affordable);
 	}
 
 	private boolean tailoring() {
@@ -447,12 +451,11 @@ public class CostumeScreen extends Screen {
 		boolean creative = player.isCreative();
 		boolean enough = true;
 		if (tailoring()) {
-			// (0.11.78) the tailor's price; (0.19.74) in silver coins (purses and bundles count), the silver coin's icon
-			long have = this.have / KingdomsMoney.SILVER;
-			boolean ok = creative || this.have >= KingdomsMoney.silver(this.price);
+			// (0.11.78) the tailor's price; (0.19.87) in coin (purses and bundles count), by worth, with the realm silver coin's icon
+			boolean ok = creative || this.affordable;
 			enough = ok;
-			graphics.item(KingdomsMoney.icon(), x, iy);
-			String text = creative ? "×" + this.price : Math.min(have, 999) + "/" + this.price;
+			graphics.item(this.coin.isEmpty() ? KingdomsMoney.icon() : this.coin, x, iy);
+			Component text = creative ? Component.literal("×" + this.price) : this.cost;
 			graphics.text(this.font, text, x + 17, iy + 4, ok ? OK : SHORT);
 			x += 17 + this.font.width(text) + 6;
 		}

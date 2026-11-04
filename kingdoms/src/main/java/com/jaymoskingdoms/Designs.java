@@ -45,8 +45,13 @@ public final class Designs {
 	public static final String PREFIX = "design.";
 	/** The folder in the world's save that holds them. */
 	static final String FOLDER = "jaymoskingdoms_designs";
-	/** The largest a design may be: across (either way), high, and blocks in all. */
+	/** The largest a design a settlement's builders put up may be: across (either way), high, and blocks in all. */
 	static final int MAX_SIDE = Plots.MAX_SIDE, MAX_HEIGHT = 48, MAX_BLOCKS = 16000;
+	/**
+	 * (0.7.488) The largest any design may be (a {@link MasonTable} builds these): across, high, blocks. Bigger files are
+	 * refused when uploaded and left unread in the folder.
+	 */
+	static final int PLAN_SIDE = 96, PLAN_HEIGHT = 128, PLAN_BLOCKS = 120000;
 	/** The smallest: across. */
 	static final int MIN_SIDE = 2;
 	/** How many designs one player may keep (creative players any number). */
@@ -56,6 +61,8 @@ public final class Designs {
 
 	/** Read designs by name (an empty one: none, or it can't be read). Cleared when one is saved or deleted. */
 	private static final Map<String, Optional<Blueprint>> CACHE = new HashMap<>();
+	/** Who made each design: the Mason's Table screen asks for every design on each refresh, so the files aren't reread. */
+	private static final Map<String, String> AUTHORS = new HashMap<>();
 
 	/** The server running (designs are read from its world's save). */
 	private static @Nullable MinecraftServer server;
@@ -67,6 +74,7 @@ public final class Designs {
 		ServerLifecycleEvents.SERVER_STARTED.register(s -> server = s);
 		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
 			CACHE.clear();
+			AUTHORS.clear();
 			server = null;
 		});
 	}
@@ -75,8 +83,20 @@ public final class Designs {
 		return server.getWorldPath(LevelResource.ROOT).normalize().resolve(FOLDER);
 	}
 
+	/** Design {@code name}'s file: whichever of the formats it's in ({@link SchematicFiles#EXTENSIONS}), else where a new one goes. */
 	static Path file(MinecraftServer server, String name) {
+		for (String ext : SchematicFiles.EXTENSIONS) {
+			Path p = folder(server).resolve(name + ext);
+			if (Files.isRegularFile(p)) {
+				return p;
+			}
+		}
 		return folder(server).resolve(name + ".nbt");
+	}
+
+	/** (0.7.488) A design small enough for a settlement's builders (else only a {@link MasonTable} puts it up). */
+	static boolean forCrews(Blueprint bp) {
+		return bp.width() <= MAX_SIDE && bp.depth() <= MAX_SIDE && bp.height() <= MAX_HEIGHT && bp.blocks().size() <= MAX_BLOCKS;
 	}
 
 	/** {@code id} is a design's building id. */
@@ -92,7 +112,7 @@ public final class Designs {
 		}
 		String name = id.substring(PREFIX.length());
 		Blueprint bp = blueprint(server, name);
-		if (bp == null) {
+		if (bp == null || !forCrews(bp)) {
 			return null;
 		}
 		// (never in a growth order: only put up where a lord asks for it)
@@ -113,9 +133,11 @@ public final class Designs {
 			return null;
 		}
 		try {
-			Blueprint bp = Blueprint.fromTemplate(PREFIX + name, NbtIo.readCompressed(file, NbtAccounter.unlimitedHeap()));
-			if (bp == null || bp.width() > MAX_SIDE || bp.depth() > MAX_SIDE || bp.height() > MAX_HEIGHT || bp.blocks().size() > MAX_BLOCKS) {
-				JaymosKingdoms.LOGGER.warn("Design {} is empty or too big for builders", name);
+			// (0.7.488) .schem and .litematic files too, brought up to date
+			CompoundTag template = SchematicFiles.toTemplate(NbtIo.readCompressed(file, NbtAccounter.unlimitedHeap()), server.getFixerUpper());
+			Blueprint bp = template == null ? null : Blueprint.fromTemplate(PREFIX + name, template);
+			if (bp == null || !fits(bp)) {
+				JaymosKingdoms.LOGGER.warn("Design {} is empty, not a schematic we read, or too big", name);
 				return null;
 			}
 			return bp;
@@ -132,8 +154,8 @@ public final class Designs {
 			return List.of();
 		}
 		try (Stream<Path> files = Files.list(dir)) {
-			return files.map(p -> p.getFileName().toString()).filter(n -> n.endsWith(".nbt")).map(n -> n.substring(0, n.length() - 4))
-				.filter(n -> n.matches(NAME_PATTERN)).sorted().toList();
+			return files.map(p -> p.getFileName().toString()).filter(n -> SchematicFiles.extension(n) != null)
+				.map(n -> n.substring(0, n.length() - SchematicFiles.extension(n).length())).filter(n -> n.matches(NAME_PATTERN)).distinct().sorted().toList();
 		} catch (IOException e) {
 			return List.of();
 		}
@@ -141,16 +163,31 @@ public final class Designs {
 
 	/** Who saved design {@code name} (the template's author), or "". */
 	static String author(MinecraftServer server, String name) {
+		return AUTHORS.computeIfAbsent(name, n -> readAuthor(server, n));
+	}
+
+	private static String readAuthor(MinecraftServer server, String name) {
 		try {
-			return NbtIo.readCompressed(file(server, name), NbtAccounter.unlimitedHeap()).getStringOr("author", "");
+			CompoundTag tag = NbtIo.readCompressed(file(server, name), NbtAccounter.unlimitedHeap());
+			String by = tag.getStringOr("author", "");
+			// (a .schem or .litematic names its author in its metadata)
+			return by.isEmpty() ? tag.getCompoundOrEmpty("Metadata").getStringOr("Author", "") : by;
 		} catch (IOException | RuntimeException e) {
 			return "";
 		}
 	}
 
+	/** Within the largest a design may be at all. */
+	static boolean fits(Blueprint bp) {
+		return bp.width() <= PLAN_SIDE && bp.depth() <= PLAN_SIDE && bp.height() <= PLAN_HEIGHT && bp.blocks().size() <= PLAN_BLOCKS;
+	}
+
 	/** A project or plot of any faction is using design {@code name} (so it may not be changed under them). */
 	static boolean inUse(MinecraftServer server, String name) {
 		String id = PREFIX + name;
+		if (Commissions.wanted(server, id)) {
+			return true;
+		}
 		for (Works.Site site : Works.all(server).values()) {
 			if (site.projects().stream().anyMatch(p -> p.entry().equals(id))
 				|| site.plots().stream().anyMatch(p -> !p.done() && p.building().filter(id::equals).isPresent())) {
@@ -168,26 +205,26 @@ public final class Designs {
 		BlockPos min = Surveyor.min(a, b), max = Surveyor.max(a, b);
 		Vec3i size = new Vec3i(max.getX() - min.getX() + 1, max.getY() - min.getY() + 1, max.getZ() - min.getZ() + 1);
 		if (!name.matches(NAME_PATTERN)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.bad_name").withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.bad_name").withStyle(ChatFormatting.RED));
 			return false;
 		}
-		if (size.getX() > MAX_SIDE || size.getZ() > MAX_SIDE || size.getY() > MAX_HEIGHT || size.getX() < MIN_SIDE || size.getZ() < MIN_SIDE) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.size", size.getX(), size.getZ(), size.getY(), MAX_SIDE, MAX_HEIGHT)
+		if (size.getX() > PLAN_SIDE || size.getZ() > PLAN_SIDE || size.getY() > PLAN_HEIGHT || size.getX() < MIN_SIDE || size.getZ() < MIN_SIDE) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.size", size.getX(), size.getZ(), size.getY(), PLAN_SIDE, PLAN_HEIGHT)
 				.withStyle(ChatFormatting.RED));
 			return false;
 		}
 		boolean creative = player.isCreative();
 		boolean exists = Files.isRegularFile(file(server, name));
 		if (exists && !creative && !author(server, name).equals(player.getGameProfile().name())) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.taken", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.taken", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (exists && inUse(server, name)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (!exists && !creative && names(server).stream().filter(n -> author(server, n).equals(player.getGameProfile().name())).count() >= PER_PLAYER) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.too_many", PER_PLAYER).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.too_many", PER_PLAYER).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		StructureTemplate template = new StructureTemplate();
@@ -195,48 +232,121 @@ public final class Designs {
 		CompoundTag tag = template.save(new CompoundTag());
 		tag.putString("author", player.getGameProfile().name());
 		Blueprint bp = Blueprint.fromTemplate(PREFIX + name, tag);
-		if (bp == null || bp.blocks().size() > MAX_BLOCKS) {
-			player.sendSystemMessage(Component.translatable(bp == null ? "message.jaymoskingdoms.design.empty" : "message.jaymoskingdoms.design.too_many_blocks",
-				MAX_BLOCKS).withStyle(ChatFormatting.RED));
+		if (bp == null || bp.blocks().size() > PLAN_BLOCKS) {
+			MasonTable.tell(player, Component.translatable(bp == null ? "message.jaymoskingdoms.design.empty" : "message.jaymoskingdoms.design.too_many_blocks",
+				PLAN_BLOCKS).withStyle(ChatFormatting.RED));
 			return false;
 		}
+		if (!store(server, name, tag)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
+			return false;
+		}
+		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.saved", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
+			PREFIX + name).withStyle(ChatFormatting.GREEN));
+		if (!forCrews(bp)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.table_only", MAX_SIDE, MAX_HEIGHT, MAX_BLOCKS)
+				.withStyle(ChatFormatting.GRAY));
+		}
+		return true;
+	}
+
+	/** Writes design {@code name} as a structure file (any older file of it in another format goes). */
+	static boolean store(MinecraftServer server, String name, CompoundTag tag) {
 		try {
 			Files.createDirectories(folder(server));
-			NbtIo.writeCompressed(tag, file(server, name));
+			for (String ext : SchematicFiles.EXTENSIONS) {
+				Files.deleteIfExists(folder(server).resolve(name + ext));
+			}
+			NbtIo.writeCompressed(tag, folder(server).resolve(name + ".nbt"));
 		} catch (IOException e) {
 			JaymosKingdoms.LOGGER.warn("Design {} couldn't be saved: {}", name, e.toString());
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		CACHE.remove(name);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.saved", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
-			PREFIX + name).withStyle(ChatFormatting.GREEN));
+		AUTHORS.remove(name);
 		return true;
+	}
+
+	/**
+	 * (0.7.488) A schematic file {@code player} sent from their own computer ({@link DesignUploads}): read, checked like a
+	 * design saved in the world, and kept as design {@code name}, theirs (or the next free name). The name it's kept as, or null.
+	 */
+	static @Nullable String saveUploaded(ServerPlayer player, String name, CompoundTag root) {
+		MinecraftServer server = player.level().getServer();
+		if (!name.matches(NAME_PATTERN)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.bad_name").withStyle(ChatFormatting.RED));
+			return null;
+		}
+		boolean creative = player.isCreative();
+		// (0.7.488) a name someone else has: the next free one (house_2, house_3...)
+		String base = name;
+		for (int n = 2; Files.isRegularFile(file(server, name)) && !author(server, name).equals(player.getGameProfile().name()) && n < 100; n++) {
+			String suffix = "_" + n;
+			name = (base.length() + suffix.length() > 32 ? base.substring(0, 32 - suffix.length()) : base) + suffix;
+		}
+		boolean exists = Files.isRegularFile(file(server, name));
+		if (exists && !creative && !author(server, name).equals(player.getGameProfile().name())) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.taken", name).withStyle(ChatFormatting.RED));
+			return null;
+		}
+		if (exists && inUse(server, name)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
+			return null;
+		}
+		if (!exists && !creative && names(server).stream().filter(n -> author(server, n).equals(player.getGameProfile().name())).count() >= PER_PLAYER) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.too_many", PER_PLAYER).withStyle(ChatFormatting.RED));
+			return null;
+		}
+		CompoundTag tag = SchematicFiles.toTemplate(root, server.getFixerUpper());
+		Blueprint bp = tag == null ? null : Blueprint.fromTemplate(PREFIX + name, tag);
+		if (tag == null || bp == null) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.unreadable").withStyle(ChatFormatting.RED));
+			return null;
+		}
+		if (!fits(bp)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.too_big", bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
+				PLAN_SIDE, PLAN_HEIGHT, PLAN_BLOCKS).withStyle(ChatFormatting.RED));
+			return null;
+		}
+		// (whoever drew it first, the design on this world is the uploader's)
+		tag.putString("author", player.getGameProfile().name());
+		if (!store(server, name, tag)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
+			return null;
+		}
+		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.uploaded", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size(), name)
+			.withStyle(ChatFormatting.GREEN));
+		if (!forCrews(bp)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.table_only", MAX_SIDE, MAX_HEIGHT, MAX_BLOCKS)
+				.withStyle(ChatFormatting.GRAY));
+		}
+		return name;
 	}
 
 	static boolean delete(ServerPlayer player, String name) {
 		MinecraftServer server = player.level().getServer();
 		boolean creative = player.isCreative();
 		if (!name.matches(NAME_PATTERN) || !Files.isRegularFile(file(server, name))) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (!creative && !author(server, name).equals(player.getGameProfile().name())) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.not_yours", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.not_yours", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (inUse(server, name)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		try {
 			Files.deleteIfExists(file(server, name));
 		} catch (IOException e) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		CACHE.remove(name);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.deleted", name).withStyle(ChatFormatting.YELLOW));
+		AUTHORS.remove(name);
+		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.deleted", name).withStyle(ChatFormatting.YELLOW));
 		return true;
 	}
 
@@ -259,6 +369,7 @@ public final class Designs {
 		return Commands.literal("design")
 			.then(Commands.literal("save").then(Commands.argument("name", StringArgumentType.word()).suggests(NAMES).executes(Designs::saveCommand)))
 			.then(Commands.literal("list").executes(Designs::list))
+
 			.then(Commands.literal("delete").then(Commands.argument("name", StringArgumentType.word()).suggests(NAMES)
 				.executes(c -> delete(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "name")) ? 1 : 0)));
 	}
@@ -267,7 +378,7 @@ public final class Designs {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		Surveyor.Selection sel = Surveyor.selection(player);
 		if (sel == null || sel.a() == null || sel.b() == null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.no_selection").withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.no_selection").withStyle(ChatFormatting.RED));
 			return 0;
 		}
 		return save(player, sel.a(), sel.b(), StringArgumentType.getString(c, "name").toLowerCase(java.util.Locale.ROOT)) ? 1 : 0;
@@ -285,6 +396,8 @@ public final class Designs {
 			String by = author(server, n);
 			c.getSource().sendSuccess(() -> bp == null
 				? Component.translatable("message.jaymoskingdoms.design.line_bad", n).withStyle(ChatFormatting.DARK_GRAY)
+				: !forCrews(bp) ? Component.translatable("message.jaymoskingdoms.design.line_table", n, bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
+					by.isEmpty() ? "?" : by).withStyle(ChatFormatting.GRAY)
 				: Component.translatable("message.jaymoskingdoms.design.line", PREFIX + n, bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
 					by.isEmpty() ? "?" : by).withStyle(ChatFormatting.GRAY), false);
 		}

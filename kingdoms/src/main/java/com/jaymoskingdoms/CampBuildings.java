@@ -562,7 +562,7 @@ final class CampBuildings {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;
 		}
-		List<ItemStack> hoard = new java.util.ArrayList<>(Money.stacks(Money.silver(6 + random.nextInt(9))));
+		List<ItemStack> hoard = new java.util.ArrayList<>(Money.stacks(Money.worth(6 + random.nextInt(9))));
 		hoard.addAll(List.of(new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(7)),
 			new ItemStack(Items.IRON_INGOT, 6 + random.nextInt(11)), new ItemStack(Items.SADDLE), new ItemStack(Items.GOLDEN_APPLE),
 			new ItemStack(Items.COOKED_BEEF, 8 + random.nextInt(9)), new ItemStack(Items.LEATHER, 4 + random.nextInt(6))));
