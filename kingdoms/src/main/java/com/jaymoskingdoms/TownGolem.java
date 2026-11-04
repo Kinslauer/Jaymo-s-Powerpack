@@ -3,6 +3,8 @@ package com.jaymoskingdoms;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -89,14 +91,20 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link Kind#VERDANT} the <b>mender</b>: knits the hurt of those it looks after, and once in a while keeps one from
  * dying ({@link Golemworks#sparedByMender}).</li>
  * <li>{@link Kind#DIAMOND} the <b>throne golem</b>: a big, slow guard that on its maker's word kneels and folds itself into
- * a great throne (its back the chest and head, its arms the armrests, its legs the seat). Whoever sits in it is kept by it:
- * every blow they take, the throne takes instead ({@link #shieldSitter}). Andy: "I want the diamond one to be a throne, that
- * takes the damage from the seat holder ... it just needs to transform into a giant throne".</li>
+ * a great throne (its back the chest and head, its arms the armrests, its legs the seat). Andy: "I want the diamond one to be
+ * a throne, that takes the damage from the seat holder ... it just needs to transform into a giant throne", then: "this
+ * should only answer to the realm's king, so noone else can use it. and it will always absorb the damage from the king or
+ * queen, not just while they sit. If it takes more than 20 damage, it will transform into the guard mode, and attack
+ * whoever was attacking the royal." So it serves its realm's ruler alone ({@link #ruler}): only they bid it kneel or rise,
+ * sit in it, or fold it up; every blow the ruler takes within {@link #GUARD_RANGE} of it, the golem takes instead
+ * ({@link #shieldRuler}); and once it has taken more than {@link #RISE_AT} so, it rises out of its throne and goes for whoever
+ * struck, kneeling back into its throne at home once the fight is done.</li>
  * </ul>
  * An attuned realm keeps its own ({@link Golemworks}); anyone who knows Golemancy can make one on the infusion altar and set
- * it down where it should work. Its maker, with an empty hand: use it to make a throne golem kneel into its throne (sneak and
- * use the throne to have it stand again), or sneak and use a standing golem to fold it back into its item. Anyone it looks
- * after uses a throne to sit in it; sneak to get up.
+ * it down where it should work (a throne golem serves the realm its maker rules, else the realm it's set down in, and stands
+ * up nowhere else). Its maker sneaks and uses a lamp warden or mender with an empty hand to fold it back into its item; a
+ * throne golem, only its ruler: use it to have it kneel into its throne, use the throne to sit (sneak to get up), sneak and
+ * use the throne to have it stand, sneak and use it standing to fold it up.
  */
 public class TownGolem extends AbstractGolem {
 	public static EntityType<TownGolem> TYPE;
@@ -148,6 +156,13 @@ public class TownGolem extends AbstractGolem {
 	static final int FOLD_TICKS = 30;
 	/** Where a sitter sits, in the throne's own blocks before its scale: above its feet, and forward of its middle. */
 	static final double SEAT_Y = 0.32, SEAT_Z = 0.25;
+	/** Throne golem: it shields its ruler this near; rises to fight once it has taken more than this for them; the tally
+	 * clears after this long with no blow (ticks); and with nothing to fight this long it goes home and kneels again. */
+	static final double GUARD_RANGE = 48.0;
+	static final float RISE_AT = 20.0F;
+	static final int TALLY_CLEARS = 600, CALM_TICKS = 200;
+	/** Rulers kept by a throne golem (entity id → game time a golem last vouched for them), so a blow is checked quickly. */
+	private static final Map<UUID, Long> GUARDED = new HashMap<>();
 
 	private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(TownGolem.class, EntityDataSerializers.INT);
 	/** Synced: a lamp warden's light is up (night). */
@@ -181,7 +196,7 @@ public class TownGolem extends AbstractGolem {
 				output.accept(kind.item);
 			}
 		});
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register(TownGolem::shieldSitter);
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(TownGolem::shieldRuler);
 	}
 
 	public static AttributeSupplier.Builder createGolemAttributes() {
@@ -323,7 +338,7 @@ public class TownGolem extends AbstractGolem {
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return this.throne() && this.getPassengers().isEmpty() && passenger instanceof LivingEntity;
+		return this.throne() && this.getPassengers().isEmpty() && this.isRuler(passenger);
 	}
 
 	@Override
@@ -331,17 +346,69 @@ public class TownGolem extends AbstractGolem {
 		return new Vec3(0.0, SEAT_Y * scale, SEAT_Z * scale).yRot(-this.yBodyRot * Mth.DEG_TO_RAD);
 	}
 
-	/** One sat in a throne: a blow meant for them goes to the throne instead. */
-	private static boolean shieldSitter(LivingEntity victim, DamageSource source, float amount) {
-		if (!(victim.getVehicle() instanceof TownGolem throne) || !throne.throne() || !throne.isAlive() || amount <= 0.0F
-			|| source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || source.is(DamageTypes.STARVE) || source.is(DamageTypes.DROWN)
-			|| !(victim.level() instanceof ServerLevel level)) {
+	/** The ruler this throne golem serves: its realm's king or queen (null if it has none now). Looked up now and then. */
+	@Nullable UUID ruler() {
+		if (this.faction < 0 || !(this.level() instanceof ServerLevel level)) {
+			return null;
+		}
+		if (this.rulerCheckedAt == 0 || this.tickCount - this.rulerCheckedAt >= 100) {
+			this.rulerCheckedAt = this.tickCount;
+			Faction f = Factions.get(level.getServer(), this.faction);
+			this.cachedRuler = f == null || f.fallen() ? null : f.leader().orElse(null);
+		}
+		return this.cachedRuler;
+	}
+
+	private @Nullable UUID cachedRuler;
+	private int rulerCheckedAt;
+	/** What it has taken for its ruler lately, when it last took a blow, whether it rose from its throne to fight, how long calm. */
+	private float tally;
+	private long lastBlow;
+	private boolean roseToFight;
+	private int calm;
+
+	boolean isRuler(@Nullable Entity e) {
+		UUID r = this.ruler();
+		return e != null && r != null && r.equals(e.getUUID());
+	}
+
+	/** A blow meant for a ruler with a throne golem near: the golem takes it, and past {@link #RISE_AT} rises to fight. */
+	private static boolean shieldRuler(LivingEntity victim, DamageSource source, float amount) {
+		if (GUARDED.isEmpty() || !GUARDED.containsKey(victim.getUUID()) || amount <= 0.0F || !(victim.level() instanceof ServerLevel level)
+			|| source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || source.is(DamageTypes.STARVE) || source.is(DamageTypes.DROWN)) {
 			return true;
 		}
-		throne.hurtServer(level, source, amount);
-		level.sendParticles(new DustParticleOptions(0x7FEFE0, 1.2F), victim.getX(), victim.getY() + 0.8, victim.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
-		level.playSound(null, throne.blockPosition(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.NEUTRAL, 1.0F, 0.6F);
+		TownGolem guard = level.getEntitiesOfClass(TownGolem.class, victim.getBoundingBox().inflate(GUARD_RANGE),
+				g -> g.isAlive() && g.kind() == Kind.DIAMOND && g.isRuler(victim))
+			.stream().min(java.util.Comparator.comparingDouble(g -> g.distanceToSqr(victim))).orElse(null);
+		if (guard == null) {
+			return true;
+		}
+		guard.takeFor(level, victim, source, amount);
 		return false;
+	}
+
+	private void takeFor(ServerLevel level, LivingEntity ruler, DamageSource source, float amount) {
+		long now = level.getGameTime();
+		if (now - this.lastBlow > TALLY_CLEARS) {
+			this.tally = 0.0F;
+		}
+		this.lastBlow = now;
+		this.tally += amount;
+		this.hurtServer(level, source, amount);
+		this.beam(level, ruler, new DustParticleOptions(0x7FEFE0, 1.2F));
+		level.playSound(null, ruler.blockPosition(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.NEUTRAL, 1.0F, 0.6F);
+		LivingEntity by = source.getEntity() instanceof LivingEntity l && l != ruler && l != this ? l : null;
+		if (this.tally > RISE_AT && this.isAlive()) {
+			if (this.throne()) {
+				this.roseToFight = true;
+				this.setThrone(false);
+			}
+			if (by != null) {
+				this.setTarget(by);
+			}
+			this.calm = 0;
+		}
 	}
 
 	@Override
@@ -368,12 +435,41 @@ public class TownGolem extends AbstractGolem {
 				this.lamp(level);
 			}
 			case VERDANT -> this.mender(level);
-			case DIAMOND -> {
-				if (this.throne()) {
-					this.getNavigation().stop();
-				}
-			}
+			case DIAMOND -> this.guard(level);
 		}
+	}
+
+	private void guard(ServerLevel level) {
+		UUID r = this.ruler();
+		if (r != null && this.tickCount % 20 == 0) {
+			GUARDED.put(r, level.getGameTime());
+		}
+		if (this.tickCount % 200 == 0) {
+			long now = level.getGameTime();
+			GUARDED.values().removeIf(t -> now - t > 200);
+		}
+		if (this.throne()) {
+			this.getNavigation().stop();
+			return;
+		}
+		// risen to fight: once it's over, home and kneel again
+		if (!this.roseToFight || this.getTarget() != null && this.getTarget().isAlive()) {
+			this.calm = 0;
+			return;
+		}
+		if (++this.calm < CALM_TICKS) {
+			return;
+		}
+		BlockPos home = this.hasHome() ? this.getHomePosition() : this.blockPosition();
+		if (this.distanceToSqr(Vec3.atBottomCenterOf(home)) > 16.0) {
+			if (this.tickCount % 20 == 0) {
+				this.getNavigation().moveTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 1.0);
+			}
+			return;
+		}
+		this.roseToFight = false;
+		this.tally = 0.0F;
+		this.setThrone(true);
 	}
 
 	private void lamp(ServerLevel level) {
@@ -462,43 +558,66 @@ public class TownGolem extends AbstractGolem {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return InteractionResult.SUCCESS;
 		}
+		if (this.kind() == Kind.DIAMOND) {
+			return this.throneInteract(level, player, stack, hand);
+		}
 		boolean maker = this.owner != null && this.owner.equals(player.getUUID());
 		if (stack.isEmpty() && maker && player.isShiftKeyDown()) {
-			if (this.throne()) {
-				// its maker bids it stand
-				this.setThrone(false);
-				return InteractionResult.SUCCESS;
-			}
-			// its maker folds it back up
-			ItemStack item = new ItemStack(this.kind().item);
-			if (!player.getInventory().add(item)) {
-				this.spawnAtLocation(level, item);
-			}
-			level.playSound(null, this.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 0.8F);
-			this.discard();
+			this.foldUp(level, player);
 			return InteractionResult.SUCCESS;
 		}
-		if (stack.is(this.kind().mend()) && this.getHealth() < this.getMaxHealth()) {
-			this.heal((float)(this.kind().health / 8.0));
-			stack.consume(1, player);
-			this.playSound(SoundEvents.AMETHYST_BLOCK_HIT, 1.0F, 1.2F);
+		if (this.mend(player, stack)) {
 			return InteractionResult.SUCCESS;
-		}
-		if (this.kind() == Kind.DIAMOND && stack.isEmpty() && !player.isShiftKeyDown()) {
-			if (!this.throne()) {
-				if (maker) {
-					// its maker bids it kneel
-					this.setThrone(true);
-					return InteractionResult.SUCCESS;
-				}
-				return InteractionResult.PASS;
-			}
-			if (this.getPassengers().isEmpty() && this.watches(player) && this.sinceKnelt() >= FOLD_TICKS) {
-				player.startRiding(this);
-				return InteractionResult.SUCCESS;
-			}
 		}
 		return super.mobInteract(player, hand);
+	}
+
+	/** A throne golem answers its ruler alone; anyone may mend it. */
+	private InteractionResult throneInteract(ServerLevel level, Player player, ItemStack stack, InteractionHand hand) {
+		if (this.mend(player, stack)) {
+			return InteractionResult.SUCCESS;
+		}
+		if (!stack.isEmpty()) {
+			return InteractionResult.PASS;
+		}
+		if (!this.isRuler(player)) {
+			if (player instanceof ServerPlayer sp) {
+				sp.sendSystemMessage(Component.translatable("golem.jaymoskingdoms.throne.not_yours"), true);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (player.isShiftKeyDown()) {
+			if (this.throne()) {
+				this.setThrone(false);
+			} else {
+				this.foldUp(level, player);
+			}
+		} else if (!this.throne()) {
+			this.roseToFight = false;
+			this.setThrone(true);
+		} else if (this.getPassengers().isEmpty() && this.sinceKnelt() >= FOLD_TICKS) {
+			player.startRiding(this);
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	private void foldUp(ServerLevel level, Player player) {
+		ItemStack item = new ItemStack(this.kind().item);
+		if (!player.getInventory().add(item)) {
+			this.spawnAtLocation(level, item);
+		}
+		level.playSound(null, this.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 0.8F);
+		this.discard();
+	}
+
+	private boolean mend(Player player, ItemStack stack) {
+		if (!stack.is(this.kind().mend()) || this.getHealth() >= this.getMaxHealth()) {
+			return false;
+		}
+		this.heal((float)(this.kind().health / 8.0));
+		stack.consume(1, player);
+		this.playSound(SoundEvents.AMETHYST_BLOCK_HIT, 1.0F, 1.2F);
+		return true;
 	}
 
 	/** (Server) ticks since it knelt; it can be sat in once it's down. */
@@ -592,7 +711,20 @@ public class TownGolem extends AbstractGolem {
 			}
 			BlockPos at = context.getClickedPos().relative(context.getClickedFace());
 			Player player = context.getPlayer();
-			TownGolem golem = make(level, this.kind, at, -1, player != null ? player.getUUID() : null);
+			int realm = -1;
+			if (this.kind == Kind.DIAMOND) {
+				// it serves a crown: the realm its maker rules, else the realm it's set down in
+				realm = throneRealm(level, player, at);
+				if (realm < 0) {
+					if (player != null) {
+						if (player instanceof ServerPlayer sp) {
+							sp.sendSystemMessage(Component.translatable("golem.jaymoskingdoms.throne.no_crown"), true);
+						}
+					}
+					return InteractionResult.FAIL;
+				}
+			}
+			TownGolem golem = make(level, this.kind, at, realm, player != null ? player.getUUID() : null);
 			if (golem == null) {
 				return InteractionResult.FAIL;
 			}
@@ -608,6 +740,18 @@ public class TownGolem extends AbstractGolem {
 			level.sendParticles(ParticleTypes.ENCHANT, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 30, 0.4, 0.8, 0.4, 0.5);
 			context.getItemInHand().consume(1, player);
 			return InteractionResult.SUCCESS;
+		}
+
+		private static int throneRealm(ServerLevel level, @Nullable Player player, BlockPos at) {
+			if (player != null) {
+				for (Faction f : Factions.all(level.getServer())) {
+					if (f.type().isRealm() && !f.fallen() && f.leader().map(player.getUUID()::equals).orElse(false)) {
+						return f.id();
+					}
+				}
+			}
+			Faction here = Factions.around(level.getServer(), level, at, Golemworks.COUNT_RANGE);
+			return here != null && here.type().isRealm() && !here.fallen() ? here.id() : -1;
 		}
 	}
 }

@@ -4929,5 +4929,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
   wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.
 - **0.19.57, Kingdoms 0.7.477, Golemworks:** Some realms are magically attuned and keep golems: gilt lamp wardens and
-  verdant menders alongside iron golems, and a throne golem that folds into a giant throne and takes every blow meant for
-  whoever sits in it. Anyone with Golemancy can make them. See Kingdoms' MODLOG 0.7.477.
+  verdant menders alongside iron golems, and a throne golem that serves only the realm's king or queen: it folds into a
+  giant throne for them, takes every blow meant for them, and rises to fight once it has taken more than 20. Anyone with Golemancy can make them. See Kingdoms' MODLOG 0.7.477.

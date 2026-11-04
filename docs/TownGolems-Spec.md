@@ -11,7 +11,7 @@ is read off its public description and gallery images only, then our own design.
 | Snow | 4 HP, rain-proof with pumpkin, 1-damage snowballs | not remade (vanilla snow golems) |
 | Iron | 100 HP, follows its maker, runs at targets | not remade (vanilla iron golems) |
 | Gold | 200 HP, slow, long laser, more harm to undead | **Gilt Lamp Warden**: night glow, beam, double on undead + ignites |
-| Diamond | castle-tower golem, 500 HP; on its owner's word it sits, folding into a throne (body = back, arms = armrests, legs = seat), and takes damage for allies | **Throne Golem**: our rune golem in diamond-set stone; kneels into a throne on its maker's word; whoever sits in it has every blow taken by the throne |
+| Diamond | castle-tower golem, 500 HP; on its owner's word it sits, folding into a throne (body = back, arms = armrests, legs = seat), and takes damage for allies | **Throne Golem**: our rune golem in diamond-set stone; serves its realm's ruler only; kneels into a throne on their word; takes every blow aimed at the ruler within 48 blocks; past 20 taken, rises and attacks the attacker |
 | Emerald | three parts: head watches an ally so they won't die, chest heals, legs re-form | **Verdant Mender**: heals and keeps one from dying, one body |
 | Lapis | stationary laser, engraves enchantment upgrades | not remade (Andy) |
 | Redstone | unfinished | not remade |
@@ -24,4 +24,4 @@ UNKNOWN: exact ranges, cooldowns, summoning shapes (sources disagree); all numbe
 
 ## Differences from the original (deliberate)
 No summoning by block shape (altar only), no Laslem's Pumpkin, no armour/weapons on clay golems, no following iron golem,
-no three-part emerald golem, the throne shields only its sitter (not allies round it), all numbers our own.
+no three-part emerald golem, the throne shields only its ruler (not allies round it), all numbers our own.

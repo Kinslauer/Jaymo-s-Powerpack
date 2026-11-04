@@ -8233,12 +8233,20 @@ throne. LIKE THE MOD". Ideas from Special Golems (custom licence, files not used
     within 16 for 6 (undead 12 and set alight).
   - **Verdant Mender**: Regeneration II on hurt folk it looks after (each at most every 20 s), and keeps one of them from
     dying (left at 4 health, a moment's Regeneration and Resistance; each at most every 5 minutes).
-  - **Throne Golem** (biggest, 300 health, armour 14, hits for 14 and throws up): dark stone set with diamond. Standing, it
-    guards like an iron golem. Its maker uses it (empty hand) and it kneels and folds into a giant throne over 1.5 s: its
-    body sinks as the back, its arms come forward as the armrests, its legs fold flat as the seat. Anyone it looks after
-    uses the throne to sit in it (sneak to get up). **Every blow the sitter takes goes to the throne instead** (not void or
-    /kill, hunger or drowning). Its maker sneaks and uses the throne to have it stand again. A realm's throne golem stays a
-    throne by its seat.
+  - **Throne Golem** (biggest, 300 health, armour 14, hits for 14 and throws up): dark stone set with diamond. It serves
+    its realm's king or queen alone (Andy: "this should only answer to the realm's king, so noone else can use it. and it
+    will always absorb the damage from the king or queen, not just while they sit. If it takes more than 20 damage, it will
+    transform into the guard mode, and attack whoever was attacking the royal.").
+    - Only the ruler commands it: use it (empty hand) and it kneels and folds into a giant throne over 1.5 s (body sinks
+      as the back, arms forward as the armrests, legs flat as the seat); use the throne to sit (sneak to get up); sneak and
+      use the throne to have it stand; sneak and use it standing to fold it into its item. Anyone else is told it answers
+      only to its king or queen (anyone may still mend it with diamonds).
+    - **Every blow the ruler takes within 48 blocks of it goes to the golem instead**, sitting or not (not void, /kill,
+      hunger or drowning). Once it has taken more than 20 for them (the tally clears after 30 s with no blow), it rises out
+      of its throne (throwing the ruler off if they sat in it) and goes for whoever struck; 10 s after the fight it walks
+      home and kneels into its throne again.
+    - A realm's throne golem kneels as a throne by the seat. One made on the altar serves the realm its maker rules, else
+      the realm it's set down in; outside any realm it won't stand up.
   - Who they look after: the town's folk and villagers, golems, the maker with their party and pets, players in good
     standing with the realm. Mended with gold ingots, emeralds or diamonds.
   - Anyone who knows **Golemancy** makes them on the infusion altar (gold, emerald or diamond block at the centre, with
