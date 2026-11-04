@@ -401,13 +401,13 @@ public final class InBalming {
 		}
 		MinecraftServer server = level.getServer();
 		if (Tribes.grudge(server, keeper.getUUID(), tribe) >= Tribes.HUNT_AT) {
-			Post.tidings(keeper.getUUID(), Component.translatable("tidings.jaymoskingdoms.inbalm.thessaly.hunt", Tribes.name(tribe)));
+			Post.report(keeper.getUUID(), Component.translatable("tidings.jaymoskingdoms.inbalm.thessaly.hunt", Tribes.name(tribe)));
 			return;
 		}
 		Map.Entry<Captains.Captain, Captains.Trait> e = Captains.unknown(keeper, tribe, w(mob), java.util.EnumSet.allOf(Captains.Sort.class), level.getRandom());
 		if (e != null) {
 			Captains.learn(keeper, e.getKey().id(), e.getValue());
-			Post.tidings(keeper.getUUID(), Component.translatable("tidings.jaymoskingdoms.inbalm.thessaly.saw", Captains.told(e.getKey(), e.getValue(), Dialects.ofTribe(tribe))));
+			Post.report(keeper.getUUID(), Component.translatable("tidings.jaymoskingdoms.inbalm.thessaly.saw", Captains.told(e.getKey(), e.getValue(), Dialects.ofTribe(tribe))));
 		}
 	}
 

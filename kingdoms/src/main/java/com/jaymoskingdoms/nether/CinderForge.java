@@ -188,9 +188,9 @@ public final class CinderForge {
 				wayfinders(player, nether);
 			}
 			if (player.level() == nether && !player.entityTags().contains(TIDINGS_TAG)) {
-				// the first time in the Nether: word of the forge in their next Tidings
+				// the first time in the Nether: word of the forge ((0.7.494) over the hotbar, not in the Tidings)
 				player.addTag(TIDINGS_TAG);
-				Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.cinder_forge"));
+				Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.cinder_forge"));
 			}
 		}
 		if (nether == null || server.getTickCount() % 100 != 0) {

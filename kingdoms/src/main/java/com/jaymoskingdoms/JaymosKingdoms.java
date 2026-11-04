@@ -391,6 +391,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		BedRest.register();
 		// (0.7.462) more healing: the infirmary cot, the shrine, and a healer's full treatment (and the shrine's attachment)
 		Healing.register();
+		Roost.register();
 		// (0.7.17) placed torches burn down and go out (our own take on Realistic Torches)
 		Torches.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)

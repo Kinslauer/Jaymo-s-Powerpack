@@ -541,11 +541,11 @@ public final class SwornCaptains {
 				break;
 			}
 			Captains.learn(lord, e.getKey().id(), e.getValue());
-			Post.tidings(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied", c.name(), Captains.told(e.getKey(), e.getValue(), Dialects.ofTribe(c.tribe()))));
+			Post.report(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied", c.name(), Captains.told(e.getKey(), e.getValue(), Dialects.ofTribe(c.tribe()))));
 			told++;
 		}
 		if (told == 0) {
-			Post.tidings(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied.nothing", c.name()));
+			Post.report(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied.nothing", c.name()));
 		}
 		put(server, c.id(), b.doing("guard", -1L, -1));
 	}
@@ -642,7 +642,7 @@ public final class SwornCaptains {
 			hold(server, c.tribe(), null);
 		}
 		if (lordId != null) {
-			Post.tidings(lordId, Component.translatable("tidings.jaymoskingdoms.captain.sworn_fell", c.name()));
+			Post.report(lordId, Component.translatable("tidings.jaymoskingdoms.captain.sworn_fell", c.name()));
 		}
 		return true;
 	}
