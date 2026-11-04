@@ -806,7 +806,7 @@ public final class Approaches {
 	}
 
 	/** The realms {@code f}'s side is at war with (by name). */
-	private static List<String> war(MinecraftServer server, Faction f) {
+	static List<String> war(MinecraftServer server, Faction f) {
 		List<String> enemies = new ArrayList<>();
 		for (WarData.War war : Wars.warsOf(server, f.id())) {
 			int side = Wars.sideOf(server, war, f.id());
@@ -846,7 +846,9 @@ public final class Approaches {
 				a.scam = Crooks.scams(a.mob, rep, random);
 				// (0.7.126) a scam looks like the best deal you'll get all week
 				a.goods = new ItemStack(deal.item(), a.scam ? Math.min(deal.item().getDefaultMaxStackSize(), deal.count() * 3 / 2) : deal.count());
+				// (0.7.523) and a villager who is fond of you counts you a friend
 				boolean friend = McaCompat.isMca(a.mob) ? hearts(a.mob, player) >= GREET_HEARTS : rep >= GREET_REP;
+				friend = friend || Bearings.fond(a.mob, player);
 				a.price = Math.max(1, deal.price() - (friend || a.scam ? FRIEND_DISCOUNT : 0));
 				a.variant = random.nextInt(OPENINGS[BARGAIN]);
 			}
@@ -1134,6 +1136,10 @@ public final class Approaches {
 	}
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
+		if (Talks.answer(player, answer)) {
+			// (0.7.523) a talk that matters: their answer to your reply
+			return;
+		}
 		if (com.jaymoskingdoms.dragons.Disguises.answer(player, answer)) {
 			// (0.7.141) a villager who isn't one, questioning you
 			return;

@@ -117,6 +117,10 @@ abstract class McaAnswersMixin {
 			// (0.7.449) only one who came over to you lately
 			cir.getReturnValue().remove(com.jaymoskingdoms.ComingOver.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Talks.canOffer(player, villager)) {
+			// (0.7.523) only when they have something to talk of
+			cir.getReturnValue().remove(com.jaymoskingdoms.Talks.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.Captives.canSpeakOf(player, villager)) {
 			// (0.7.340) only a guard of a town that owes you for one you brought home
 			cir.getReturnValue().remove(com.jaymoskingdoms.Captives.ANSWER);

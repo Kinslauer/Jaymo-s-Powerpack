@@ -182,6 +182,23 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.Talks.ANSWER.equals(answer)) {
+			// (0.7.523) "Have a word": a short talk on the talk screen, or nothing much to say today
+			villager.getInteractions().stopInteracting();
+			if (!com.jaymoskingdoms.Talks.open(player, villager, false)) {
+				villager.sendChatMessage(com.jaymoskingdoms.Talks.nothing(player, villager), player);
+			}
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && "chat".equals(answer) && com.jaymoskingdoms.Talks.canChatTalk(player, villager)) {
+			// (0.7.523) now and then a chat turns into a talk (close MCA's screen first, then open ours)
+			villager.getInteractions().stopInteracting();
+			if (com.jaymoskingdoms.Talks.openFromChat(player, villager)) {
+				ci.cancel();
+				return;
+			}
+		}
 		if ("main".equals(question) && "hug".equals(answer)) {
 			// (0.7.102) an Emberborn is too hot to hold without fire resistance (either of you)
 			LivingEntity burned = EmberHugs.burned(player, villager);

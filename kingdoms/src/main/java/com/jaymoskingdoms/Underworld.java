@@ -880,7 +880,7 @@ public final class Underworld {
 			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.6F, 1.0F);
 			if (realm) {
 				warm(level.getServer(), f, HEAT_PER_SALE);
-				List<LivingEntity> seen = new ArrayList<>(Theft.witnesses(level, f, player));
+				List<LivingEntity> seen = new ArrayList<>(Theft.crimeWitnesses(level, f, player));
 				seen.removeIf(e -> e == v || Crooks.isCrook(e));
 				if (!seen.isEmpty()) {
 					Theft.commit(player, level, f, Theft.Crime.DEALING, null, false, seen);
@@ -957,7 +957,7 @@ public final class Underworld {
 		if (v.entityTags().contains(FENCE_TAG) && d != null && Speakeasy.room(d.hatch()).inflate(1.0).contains(v.position())) {
 			return;
 		}
-		List<LivingEntity> seen = new ArrayList<>(Theft.witnesses(level, f, player));
+		List<LivingEntity> seen = new ArrayList<>(Theft.crimeWitnesses(level, f, player));
 		seen.removeIf(e -> e == v || Crooks.isCrook(e));
 		if (seen.isEmpty()) {
 			return;

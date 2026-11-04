@@ -524,3 +524,37 @@ and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
   R is the beam.
 - `/kingdom dragon stegonaut|atroxiia|varasuchus|ignivorus|aetherion [tame]` (operators).
 - Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.
+
+## 0.7.523: talks that matter (pack 0.20.25)
+Our own take on the idea of MCA: Conversations (none of its code). Plan: `docs/Talks-Plan.md`.
+- **Trust, respect and warmth** (`Bearings`): every villager now holds three hidden feelings about each player, kept
+  on their memory of you (`Recollections.Person.bearing`; a masked stranger's go to the costume). Everything they
+  already remember moves them (gifts, trades, help, rescues, crimes seen, blows, bouts, quests, apologies, promises),
+  word passed on moves them half as much, and they fade slowly. MCA hearts and realm reputation colour them. They're
+  never shown: you see them in how villagers act. Fond ones charge less and sour ones more (up to a fifth), the
+  trusting gossip more and tell you secrets, the wary say nothing, a guard who trusts and respects you comes to your
+  side when a monster hits you (others shout a warning), one who's fond of you looks away from your crimes, and one
+  who can't stand you won't talk at all. The chat AI is told in words.
+- **Have a word** (MCA talk menu, and now and then Chat): a short talk on the talk screen with two or three replies.
+  52 talks about their work, family, blood, faith, realm, the weather and what you've done. Each reply has their
+  answer and shifts how they feel. Some lead to a promise, a favour, a rumour or a secret, a loan, or a quarrel (no
+  more talk until tomorrow). An opening line hints at how they look at you.
+- **Promises** (`Promises`, kept with the player): bring something by a day, come back, look in on a child for two
+  days, walk a wandering child home, speak for them to the ruler (an audience does it), keep the peace in their
+  town, pay back a loan (in coin). They're listed in the journal's Quests page. Keep Your Word on the Interact page hands over
+  what you brought. On the due day they may come over to remind you. Kept: trust and warmth up a lot, hearts and
+  reputation, their family hears, a deed of The Truth (and of the Hearthkeeper for a child). Broken: trust drops
+  hard, hearts and reputation down, they remember and bring it up, and their kin and friends cool too. Saying
+  honestly that you can't costs much less. Apologise covers a broken promise.
+- Loading hints 94-95. Not played; compile-checked with `kingdoms/gradlew build`.
+
+### Fixes to Talks, Bearings, Promises and Theft
+- If the one you promised to escort a child for dies, the child stops following you.
+- A quarrel now lasts the full number of days, so the villager keeps sulking tomorrow too.
+- Trust, respect and warmth now fade by calendar periods, so meeting a villager often no longer stops the fade.
+- Talks that are told only once are never forgotten when old talks are trimmed.
+- Letting go of a loan counts as a broken word. The coin is not free any more.
+- Looking away is only for crimes. Renown, brawls and disguises see everyone again.
+- A villager you already know now comes over on the due day to remind you of a promise.
+- A chat that turns into a talk no longer closes the talk screen at once.
+- Promises to come back aren't kept by the villager walking over to remind you; babies don't get the war, loan or bloodline talks; a ruler can't promise to speak to themself.
