@@ -26,7 +26,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.84) The Lapidary Wheel: lay a gem on it, choose a cut, then cut in time with the bar. Use it again to take the
+ * (0.19.85) The Lapidary Wheel: lay a gem on it, choose a cut, then cut in time with the bar. Use it again to take the
  * cut gem. The wheel stands along the way it faces.
  */
 public class LapidaryWheelBlock extends HorizontalDirectionalBlock implements EntityBlock {

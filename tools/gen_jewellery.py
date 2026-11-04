@@ -1,4 +1,4 @@
-"""Draws the jewellery (0.19.84, Jewellery patch 4): frames, gem overlays, loose cut gems, the lapidary wheel and the
+"""Draws the jewellery (0.19.85, Jewellery patch 4): frames, gem overlays, loose cut gems, the lapidary wheel and the
 jeweller's bench, with their models, item definitions and blockstates. Everything is our own art. The gem overlays are
 greyscale: the game tints them with the gem's colour (custom_model_data colour 0). Run it from the root:
 

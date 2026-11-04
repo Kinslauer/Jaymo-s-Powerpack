@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.19.84) The cuts on offer for the gem on the wheel: a striped row per cut (the gem cut that way, its name, its
+ * (0.19.85) The cuts on offer for the gem on the wheel: a striped row per cut (the gem cut that way, its name, its
  * strokes and its bonus factor). Click one to start cutting; Esc leaves.
  */
 public class CutScreen extends Screen {

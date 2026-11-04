@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
-/** (0.19.84) The lapidary wheel's packets: the cuts on offer, the choice, the cutting game's state and each stroke. */
+/** (0.19.85) The lapidary wheel's packets: the cuts on offer, the choice, the cutting game's state and each stroke. */
 public final class JewelleryNet {
 	/** How far a cutter may stand from the wheel (blocks, squared) for a packet to count. */
 	static final double REACH_SQ = 8 * 8;

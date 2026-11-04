@@ -1,7 +1,7 @@
 package com.jaymospowers.jewellery;
 
 /**
- * (0.19.84) The numbers of the lapidary wheel's timing game. The bar and its zones are the Smithing Anvil's
+ * (0.19.85) The numbers of the lapidary wheel's timing game. The bar and its zones are the Smithing Anvil's
  * ({@code Forging.perfectHalf/goodHalf/speed/judge}); what is new is the wheel's spin-up between strokes. Tune here.
  */
 public final class GemCutting {

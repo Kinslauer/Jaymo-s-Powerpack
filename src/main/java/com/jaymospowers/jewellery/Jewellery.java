@@ -36,7 +36,7 @@ import net.minecraft.world.level.material.MapColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.84) Jewellery (docs/Jewellery-Plan.md): cut a gem on the Lapidary Wheel, hammer a gold, silver or copper frame
+ * (0.19.85) Jewellery (docs/Jewellery-Plan.md): cut a gem on the Lapidary Wheel, hammer a gold, silver or copper frame
  * on the Smithing Anvil, set one in the other at the Jeweller's Bench. The piece is graded like forged gear (the lower
  * of the frame's and the gem's grade) and gives a small bonus from its gem while worn as a bauble.
  */

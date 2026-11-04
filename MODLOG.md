@@ -5157,7 +5157,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and Modrinth's 26.3 list the pack adds, unchanged: Dungeons and Taverns (roadside taverns, dungeons, overhauled
   strongholds, mansions, outposts and mineshafts), Structory and Structory: Towers (ruins, camps, shrines, watchtowers),
   and Homesteads (lone farmsteads). CurseForge ids still to look up from home (`packModsNoCf`).
-- **0.19.84, Kingdoms 0.7.493, jewellery (Patch 4)** (`jewellery/`, plan `docs/Jewellery-Plan.md`): Andy picked the
+- **0.19.85, Kingdoms 0.7.495, jewellery (Patch 4)** (`jewellery/`, plan `docs/Jewellery-Plan.md`): Andy picked the
   idea of the Immersive Jewelry mod; this is our own version (none of its code or art).
   - A **Lapidary Wheel** cuts gems: lay one on it and choose one of four cuts: Cabochon (3 strokes), Table (4), Rose
     (5) or Brilliant (6). Then cut in time with the smithing bar. The wheel needs 0.8 s to spin back up after each

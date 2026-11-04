@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * they're in the pack), found as {@code /locate} finds them.
  */
 final class QuestBoard {
-	/** (0.7.493) What a smith's jewellery order pays (emeralds, by the floor grade Poor to Masterwork), and its random spread. Coin change will convert these. */
+	/** (0.7.495) What a smith's jewellery order pays (emeralds, by the floor grade Poor to Masterwork), and its random spread. Coin change will convert these. */
 	static final int[] JEWEL_ORDER_EMERALDS = {6, 10, 16, 24, 40};
 	static final int JEWEL_ORDER_SPREAD = 4;
 	/** (0.5.56) What a beast quest pays at least (emeralds; up to 6 more). */
@@ -391,7 +391,7 @@ final class QuestBoard {
 			}
 			objective = new Quest.Objective(t.target(), count, 0, Optional.empty(), Optional.empty(), "", "", false);
 		}
-		// (0.7.493) a jewellery order (a grade floor in the target) pays by that grade
+		// (0.7.495) a jewellery order (a grade floor in the target) pays by that grade
 		int floor = t.kind() == Quest.GATHER ? Quests.minGrade(t.target()) : -1;
 		int emeralds = floor >= 0 ? JEWEL_ORDER_EMERALDS[floor] + random.nextInt(JEWEL_ORDER_SPREAD + 1) : switch (t.kind()) {
 			case Quest.FETCH -> 8 + random.nextInt(7);

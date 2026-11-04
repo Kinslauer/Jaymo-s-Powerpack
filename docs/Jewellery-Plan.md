@@ -1,7 +1,7 @@
 # Jewellery (Patch 4): implementation spec
 
-Powers **0.19.84** (`gradle.properties`), Kingdoms **0.7.493** (`kingdoms/gradle.properties`). Worktree `/home/user/jewel`,
-branch `jewellery-work` (base `eb3ef5b6`). Tag new code comments `(0.19.84)` in Powers and `(0.7.493)` in Kingdoms.
+Powers **0.19.85** (`gradle.properties`), Kingdoms **0.7.495** (`kingdoms/gradle.properties`). Worktree `/home/user/jewel`,
+branch `jewellery-work` (base `eb3ef5b6`). Tag new code comments `(0.19.85)` in Powers and `(0.7.495)` in Kingdoms.
 
 Andy's approved plan: *"A jeweller's bench and a lapidary wheel: cut a gem (four cuts, chipping if you rush), set it in
 a forged ring, amulet, bracelet or circlet frame, graded Poorly to Masterwork like forged gear. Town smiths take
@@ -133,7 +133,7 @@ Four blueprints at **12 emeralds** each (`jewel/ring_frame`, `jewel/amulet_frame
 
 ## 3. Powers: new files
 
-All in `src/main/java/com/jaymospowers/jewellery/` unless stated. Class docs start `(0.19.84) ...`.
+All in `src/main/java/com/jaymospowers/jewellery/` unless stated. Class docs start `(0.19.85) ...`.
 
 ### 3.1 `Jewellery.java`: registration and the piece rules
 ```java
@@ -392,7 +392,7 @@ ItemCombinerMenuSlotDefinition)`, abstract `createResult()`, `onTake(Player, Ite
 ### 4.1 Baubles (`src/main/java/com/jaymospowers/baubles/`)
 - `Baubles.Kind`: add `WRIST("wrist")` **at the end** (tag `jaymospowers:baubles/wrist`).
 - `Baubles.SLOTS`: append `Kind.WRIST`, giving `{AMULET, RING, RING, BELT, HEAD, BODY, CHARM, WRIST}` and `SIZE` 8.
-  Update the class doc ("eight slots ... and a wrist (0.19.84)").
+  Update the class doc ("eight slots ... and a wrist (0.19.85)").
 - `refresh`: `bauble.bonuses()` becomes `bauble.bonuses(worn.get(slot))`. The modifier ids keep the `bauble_<slot>_<i>`
   scheme (slot 7 is new).
 - New `public static void touch(Holder<Attribute> attribute) { TOUCHED.add(attribute); }` so jewellery bonuses come
@@ -413,14 +413,14 @@ ItemCombinerMenuSlotDefinition)`, abstract `createResult()`, `onTake(Player, Ite
 
 ### 4.3 Entrypoints
 - `JaymosPowers.java`: add `com.jaymospowers.jewellery.Jewellery.init();` after `com.jaymospowers.aether.Aether.init();`
-  with the comment `// (0.19.84) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles`.
+  with the comment `// (0.19.85) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles`.
   `registerAttachments()` is **unchanged** (no AttachmentType).
 - `client/JaymosPowersClient.java`: add `com.jaymospowers.client.jewellery.JewelleryClient.init();` after `BaublesClient.init();`.
 
 ### 4.4 Docs
 - `docs/Smithing.md`: new section `## Jewellery (code: jewellery/, docs/Jewellery-Plan.md)` with the rules in §1.
 - `MODLOG.md`: the entry in §8.
-- `gradle.properties`: `version=0.19.84`.
+- `gradle.properties`: `version=0.19.85`.
 
 ---
 
@@ -549,7 +549,7 @@ The hot-frame refusal reuses `message.jaymospowers.smithing.quench_first` throug
 
 ---
 
-## 6. Kingdoms (0.7.493): smith jewellery orders
+## 6. Kingdoms (0.7.495): smith jewellery orders
 
 Kingdoms never compiles against Powers. Items are looked up by id string and the grade through the
 `jaymospowers:forging_grade` component id, as `GradedTrades` already does.
@@ -598,7 +598,7 @@ Kingdoms never compiles against Powers. Items are looked up by id string and the
 ```
 
 ### 6.5 Kingdoms version and log
-`kingdoms/gradle.properties` `version=0.7.493`, and the `kingdoms/MODLOG.md` entry in §8.
+`kingdoms/gradle.properties` `version=0.7.495`, and the `kingdoms/MODLOG.md` entry in §8.
 
 ---
 
@@ -626,7 +626,7 @@ Kingdoms never compiles against Powers. Items are looked up by id string and the
 ## 8. MODLOG text
 
 **`MODLOG.md`** (end of the log):
-> - **0.19.84, Kingdoms 0.7.493, jewellery (Patch 4)** (`jewellery/`, plan `docs/Jewellery-Plan.md`): Andy picked the
+> - **0.19.85, Kingdoms 0.7.495, jewellery (Patch 4)** (`jewellery/`, plan `docs/Jewellery-Plan.md`): Andy picked the
 >   idea of the Immersive Jewelry mod; this is our own version (none of its code or art).
 >   - A **Lapidary Wheel** cuts gems: lay one on it and choose one of four cuts: Cabochon (3 strokes), Table (4), Rose
 >     (5) or Brilliant (6). Then cut in time with the smithing bar. The wheel needs 0.8 s to spin back up after each
@@ -647,7 +647,7 @@ Kingdoms never compiles against Powers. Items are looked up by id string and the
 >     emeralds than their usual errands. Compile-checked; not played.
 
 **`kingdoms/MODLOG.md`**:
-> ## 0.7.493: jewellery orders from town smiths (pack 0.19.84)
+> ## 0.7.495: jewellery orders from town smiths (pack 0.19.85)
 > - Armourers ask for a gem amulet (Well Forged or better), weaponsmiths for one or two gem rings (Expertly Forged or
 >   better), toolsmiths for a gem bracelet (Well Forged or better), made with Powers' lapidary wheel, anvil and
 >   jeweller's bench. They pay 10 to 20 emeralds (`QuestBoard.JEWEL_ORDER_EMERALDS`), to become coin with the coin

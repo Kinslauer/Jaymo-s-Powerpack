@@ -42,7 +42,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 /**
  * (0.17.184) Baubles (Andy: "need this", the CurseForge Baubles mod). Baubles itself is a 1.12 Forge mod and no
  * accessory-slot mod (Trinkets, Accessories, Curios) has a Fabric 26.3 build, so this is our own, laid out as Baubles
- * was: seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm, and a wrist (0.19.84) for bracelets.
+ * was: seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm, and a wrist (0.19.85) for bracelets.
  * <ul>
  * <li>The slots have their own screen, opened from a tab on the inventory's left edge (or the unbound Baubles key).</li>
  * <li>What fits each slot is an item tag ({@code jaymospowers:baubles/<slot>}), so any item can be made wearable by
@@ -55,7 +55,7 @@ public final class Baubles {
 	/** The eight slots, in the order they sit (and are saved). */
 	public enum Kind {
 		AMULET("amulet"), RING("ring"), BELT("belt"), HEAD("head"), BODY("body"), CHARM("charm"),
-		/** (0.19.84) Bracelets. Added last so saved lists of seven still load. */
+		/** (0.19.85) Bracelets. Added last so saved lists of seven still load. */
 		WRIST("wrist");
 
 		public final String id;
@@ -94,7 +94,7 @@ public final class Baubles {
 	/** Every attribute any bauble touches, so stale bonuses can be taken off. */
 	private static final Set<Holder<Attribute>> TOUCHED = new LinkedHashSet<>();
 	private static final List<Item> ITEMS = new ArrayList<>();
-	/** (0.19.84) Slot pictures for kinds that have no bauble of the seven (the wrist's bracelet). */
+	/** (0.19.85) Slot pictures for kinds that have no bauble of the seven (the wrist's bracelet). */
 	private static final Map<Kind, Item> PICTURES = new EnumMap<>(Kind.class);
 
 	private Baubles() {
@@ -306,12 +306,12 @@ public final class Baubles {
 		return picture != null ? picture : HEARTSTONE_AMULET;
 	}
 
-	/** (0.19.84) Sets the picture an empty slot of this kind shows when no bauble of the seven has that kind. */
+	/** (0.19.85) Sets the picture an empty slot of this kind shows when no bauble of the seven has that kind. */
 	public static void picture(Kind kind, Item item) {
 		PICTURES.put(kind, item);
 	}
 
-	/** (0.19.84) Lets bonuses on this attribute be taken off again when the piece comes off (jewellery). */
+	/** (0.19.85) Lets bonuses on this attribute be taken off again when the piece comes off (jewellery). */
 	public static void touch(Holder<Attribute> attribute) {
 		TOUCHED.add(attribute);
 	}

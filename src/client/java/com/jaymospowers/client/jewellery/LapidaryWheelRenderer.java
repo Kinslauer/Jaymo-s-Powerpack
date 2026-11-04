@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-/** (0.19.84) The raw gem, or the cut gem, lying on the lapidary wheel's rest. */
+/** (0.19.85) The raw gem, or the cut gem, lying on the lapidary wheel's rest. */
 public class LapidaryWheelRenderer implements BlockEntityRenderer<LapidaryWheelEntity, LapidaryWheelRenderer.State> {
 	public static class State extends BlockEntityRenderState {
 		final ItemStackRenderState item = new ItemStackRenderState();

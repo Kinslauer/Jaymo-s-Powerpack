@@ -9,7 +9,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The bauble slots' screen: the amulet, two rings and the belt down the left of the player, the head, body, charm and wrist (0.19.84) down
+ * The bauble slots' screen: the amulet, two rings and the belt down the left of the player, the head, body, charm and wrist (0.19.85) down
  * the right, the player's inventory below. Drawn by the client's BaublesScreen.
  */
 public class BaublesMenu extends AbstractContainerMenu {

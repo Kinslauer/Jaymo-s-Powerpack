@@ -106,7 +106,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
-		// (0.19.84) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles
+		// (0.19.85) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles
 		com.jaymospowers.jewellery.Jewellery.init();
 		// (0.17.115) the 26.4 snapshots' ice: Freezing and its potion, ice balls, the Frostbite, icicles and the ice blocks
 		com.jaymospowers.frost.Frost.init();

@@ -8464,7 +8464,7 @@ hall, land and vassals:
   action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
   tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.
 
-## 0.7.493: jewellery orders from town smiths (pack 0.19.84)
+## 0.7.495: jewellery orders from town smiths (pack 0.19.85)
 - Armourers ask for a gem amulet (Well Forged or better), weaponsmiths for one or two gem rings (Expertly Forged or
   better), toolsmiths for a gem bracelet (Well Forged or better), made with Powers' lapidary wheel, anvil and
   jeweller's bench. They pay 10 to 20 emeralds (`QuestBoard.JEWEL_ORDER_EMERALDS`), to become coin with the coin
