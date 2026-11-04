@@ -609,10 +609,9 @@ public final class WorldTiers {
 		if (!p.has(feat)) {
 			update(player, new Progress(p.foes(), p.feats() | feat, p.unlocked()));
 			if (feat >= Progress.FORGED && (feat & Knowledge.ALL) == 0) {
-				// (0.7.383) a deed of the ladder: a murmur, and a line in the next Tidings (hints, never a statement)
+				// (0.7.383) a deed of the ladder: a murmur (hints, never a statement); (0.7.494) no longer a line in the Tidings
 				String key = Progress.featKey(feat);
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.deed." + key).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-				Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.deed." + key));
 			}
 		}
 	}

@@ -610,7 +610,7 @@ public final class GuardDrills {
 		if (known.isEmpty()) {
 			for (String id : Forms.STARTER_FORMS) {
 				if (!Forms.knows(player, id) && Forms.teach(player, id)) {
-					Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.taught", guard.getDisplayName(), formName(id)));
+					Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.taught", guard.getDisplayName(), formName(id)));
 					return;
 				}
 			}
@@ -623,7 +623,7 @@ public final class GuardDrills {
 			}
 		}
 		Forms.practice(player, pick, PRACTICE);
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.practiced", guard.getDisplayName(), formName(pick)));
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.practiced", guard.getDisplayName(), formName(pick)));
 	}
 
 	private static Component formName(String id) {
