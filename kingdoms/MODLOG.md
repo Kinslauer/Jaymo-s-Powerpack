@@ -8989,3 +8989,9 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
     notched and the locked part dark; the idle box gives your cap and every tier's.
   - Lang: story/heritage/flaw/Zenkai texts show the new point sizes.
   Compiled (`compileClientJava`); not played.
+
+## 0.7.541: the Skeleton Lord faces the way he walks (pack 0.20.49)
+- Andy: "his head is facing the complete wrong way". The Skeleton Lord's Workshop model is built facing the other way
+  from our other Blockbench mobs, so he was drawn back to front: face and chest on his back, ponytail and cape in front.
+  `SkeletonLordRenderer.scale` now gives the model a half turn about the vertical. Animations, the head's look and the
+  sleeping statue all turn with him.
