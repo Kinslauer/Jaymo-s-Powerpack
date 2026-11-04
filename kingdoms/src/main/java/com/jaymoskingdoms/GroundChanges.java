@@ -120,11 +120,21 @@ public final class GroundChanges {
 		}
 		ChunkPos pos = chunk.getPos();
 		boolean laid = false;
+		// (0.7.526) a One Dimension world: the Overworld's chunks hold the stacked Nether's band too, which gets its own veins
+		boolean nether = table == OVERWORLD && Stacked.joined(level.getServer(), Level.NETHER);
+		int shift = nether ? Stacked.shift(level.getServer(), Level.NETHER) : 0;
 		for (int t = done + 1; t <= tier && t < table.size(); t++) {
 			RandomSource random = RandomSource.create(Mth.getSeed(pos.x(), t * 7919, pos.z()) ^ level.getSeed());
 			for (Vein vein : table.get(t)) {
 				for (int p = 0; p < vein.pockets(); p++) {
-					laid |= pocket(level, chunk, vein, random);
+					laid |= pocket(level, chunk, vein, random, 0);
+				}
+			}
+			if (nether && t < NETHER.size()) {
+				for (Vein vein : NETHER.get(t)) {
+					for (int p = 0; p < vein.pockets(); p++) {
+						laid |= pocket(level, chunk, vein, random, shift);
+					}
 				}
 			}
 		}
@@ -133,9 +143,9 @@ public final class GroundChanges {
 		return laid;
 	}
 
-	/** One pocket: a short random walk from a point in the chunk, turning each replaceable stone block it meets into ore. */
-	private static boolean pocket(ServerLevel level, LevelChunk chunk, Vein vein, RandomSource random) {
-		int minY = Math.max(vein.minY(), level.getMinY() + 1), maxY = Math.min(vein.maxY(), level.getMaxY() - 2);
+	/** One pocket ({@code shift}: added to the vein's heights, for a stacked band): a short random walk from a point in the chunk, turning each replaceable stone block it meets into ore. */
+	private static boolean pocket(ServerLevel level, LevelChunk chunk, Vein vein, RandomSource random, int shift) {
+		int minY = Math.max(vein.minY() + shift, level.getMinY() + 1), maxY = Math.min(vein.maxY() + shift, level.getMaxY() - 2);
 		if (maxY < minY) {
 			return false;
 		}

@@ -242,6 +242,17 @@ def packMods = [
 	// unless someone picks a Lost Cities profile when making a world. Needs Forge Config API Port (above). McJty's own
 	// 26.3 Fabric build, 26.3-12.0.0-fabric (Modrinth version xuEuPjKk).
 	[dep: "maven.modrinth:the-lost-cities:xuEuPjKk", cf: [269024, 9277225]],
+	// One Dimension (CodxIO; the jars say CC0-1.0, CurseForge says CC BY-NC 3.0: free pack, shipped unchanged) with its
+	// libraries CustomChunks (CC0 in the jar, CurseForge says all rights reserved; closed source) and Planeshift (CC0, source
+	// github.com/Codx-org/Planeshift) and CodxLib (MIT): new worlds stack the Aether over the Overworld over the Nether in one
+	// level, so you fly up into the islands and dig down into the Nether's sky with no portal and no loading screen, seeing
+	// the next world through the seam (0.20.28, Andy). The pack's default order is written by compat/OneDimensionDefaults;
+	// our code asks which layer you're in through compat/Stacked (and Kingdoms'/Kitchen's own Stacked). Worlds made before,
+	// or with it turned off on the create-world screen, stay as they were. CurseForge only. Kept out of the dev game.
+	[dep: "curse.maven:one-dimension-1633224:9101534", cf: [1633224, 9101534], dev: false],
+	[dep: "curse.maven:customchunks-1727847:9101536", cf: [1727847, 9101536], dev: false],
+	[dep: "curse.maven:planeshift-1714620:9083764", cf: [1714620, 9083764], dev: false],
+	[dep: "curse.maven:codxlib-1633207:8893340", cf: [1633207, 8893340], dev: false],
 	// Voice (0.17.157; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
 	// by id, never copied or taken apart): proximity voice, push-to-talk or voice activation (V opens its menu). Client
 	// and server; the server listens on UDP 24454, so the Deck's playit tunnel needs a UDP tunnel to it (deck/README.md).

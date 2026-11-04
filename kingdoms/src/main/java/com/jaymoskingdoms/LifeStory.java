@@ -702,6 +702,7 @@ public final class LifeStory {
 		});
 		StoryStasis.register();
 		net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(LifeStory::leftWorld);
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(LifeStory::leftBand);
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Live.TYPE, Live.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Live.TYPE, (payload, context) -> live(context.player(), payload));
@@ -1559,7 +1560,8 @@ public final class LifeStory {
 					} else {
 						ServerLevel there = player.level();
 						home(player, there, player.blockPosition());
-						player.setAttached(STRANDED, there.dimension().identifier().toString());
+						// (0.7.526) the realm by height: in a One Dimension world the Nether or Aether is a band of the Overworld
+						player.setAttached(STRANDED, Stacked.realm(player).identifier().toString());
 					}
 					return start;
 				}
@@ -1645,6 +1647,33 @@ public final class LifeStory {
 		ServerPlayer.RespawnConfig respawn = player.getRespawnConfig();
 		if (respawn != null && respawn.respawnData().dimension() == from.dimension()) {
 			player.setRespawnPosition(null, false);
+		}
+	}
+
+	/**
+	 * (0.7.526) The same for a One Dimension world, where the Nether (or the Aether) is a band of the stacked Overworld and
+	 * climbing out of it changes no level: once a second, a player set down in a band who now stands in another has left it.
+	 */
+	private static void leftBand(net.minecraft.server.MinecraftServer server) {
+		if (server.getTickCount() % 20 != 0) {
+			return;
+		}
+		ServerLevel overworld = server.overworld();
+		for (ServerPlayer player : overworld.players()) {
+			String stranded = player.getAttached(STRANDED);
+			if (stranded == null || stranded.equals(overworld.dimension().identifier().toString())) {
+				continue;
+			}
+			net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> realm = Stacked.realm(player);
+			if (!Stacked.joined(server, realm) && realm != net.minecraft.world.level.Level.OVERWORLD || realm.identifier().toString().equals(stranded)) {
+				continue;
+			}
+			player.removeAttached(STRANDED);
+			ServerPlayer.RespawnConfig respawn = player.getRespawnConfig();
+			if (respawn != null && respawn.respawnData().dimension() == overworld.dimension()
+				&& Stacked.realm(overworld, respawn.respawnData().pos().getY()).identifier().toString().equals(stranded)) {
+				player.setRespawnPosition(null, false);
+			}
 		}
 	}
 

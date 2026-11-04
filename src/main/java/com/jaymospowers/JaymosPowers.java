@@ -108,6 +108,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
 		// (RPG Series) Spell Engine's spell books, scrolls and quivers work worn in bauble slots
 		com.jaymospowers.compat.SpellEngineCompat.init();
+		// (0.20.28) One Dimension's default stack: the Aether over the Overworld over the Nether (compat.Stacked)
+		com.jaymospowers.compat.OneDimensionDefaults.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
 		// (0.19.87) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles

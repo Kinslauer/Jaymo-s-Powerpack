@@ -46,18 +46,26 @@ final class TempleSites {
 	}
 
 	static boolean aether(ServerLevel level) {
-		return level.dimension().identifier().toString().equals("jaymospowers:aether");
+		return aether(level.dimension());
 	}
 
-	/** The kind of site {@code p} takes in this world, or null if it has none here. */
+	static boolean aether(net.minecraft.resources.ResourceKey<Level> realm) {
+		return realm.identifier().toString().equals("jaymospowers:aether");
+	}
+
+	/**
+	 * The kind of site {@code p} takes in this world, or null if it has none here. (0.7.526) By the realm at the player's height,
+	 * so a One Dimension world's stacked Nether and Aether bands count ({@link Stacked}).
+	 */
 	static @Nullable Spot spot(ServerLevel level, Patron p, BlockPos playerPos, boolean anywhere) {
-		if (level.dimension() == Level.NETHER) {
+		net.minecraft.resources.ResourceKey<Level> realm = Stacked.realm(level, playerPos.getY());
+		if (realm == Level.NETHER) {
 			return p == Patron.ANVIL_FATHER || p == Patron.LANTERN_WARDEN || p == Patron.ASH_WHISPERER ? Spot.NETHER : null;
 		}
-		if (aether(level)) {
+		if (aether(realm)) {
 			return p == Patron.CROWNED_SUN ? Spot.AETHER : null;
 		}
-		if (level.dimension() != Level.OVERWORLD) {
+		if (realm != Level.OVERWORLD) {
 			return null;
 		}
 		return switch (p) {

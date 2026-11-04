@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.Speech;
+import com.jaymoskingdoms.Stacked;
 import com.jaymoskingdoms.VillagerHeritage;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
@@ -257,7 +258,7 @@ public final class AvatarCamps {
 	// ---- each tick -----------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
-		ServerLevel nether = server.getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		if (nether == null) {
 			return;
 		}
@@ -268,7 +269,7 @@ public final class AvatarCamps {
 					keep(nether, mob);
 				}
 			}
-			for (ServerPlayer player : nether.players()) {
+			for (ServerPlayer player : Stacked.players(nether.getServer(), Level.NETHER)) {
 				if (!player.isSpectator() && player.isAlive() && Heritage.is(player, Heritage.Kind.EMBERBORN)) {
 					kin(nether, player);
 				}
@@ -280,7 +281,7 @@ public final class AvatarCamps {
 			}
 		}
 		if (now % FOUND_EVERY == 0) {
-			for (ServerPlayer player : nether.players()) {
+			for (ServerPlayer player : Stacked.players(nether.getServer(), Level.NETHER)) {
 				float chance = Heritage.is(player, Heritage.Kind.EMBERBORN) ? EMBERBORN_FOUND_CHANCE : FOUND_CHANCE;
 				if (!player.isSpectator() && nether.getRandom().nextFloat() < chance) {
 					tryFound(nether, player);
@@ -385,7 +386,7 @@ public final class AvatarCamps {
 	/** Every 10 s for each camp: recruits and war bands while a player is near; a band on the march walks on. */
 	private static void tend(ServerLevel nether, Camp camp, long now) {
 		boolean near = false;
-		for (ServerPlayer p : nether.players()) {
+		for (ServerPlayer p : Stacked.players(nether.getServer(), Level.NETHER)) {
 			if (!p.isSpectator() && p.blockPosition().closerThan(camp.center(), ACTIVE_RANGE)) {
 				near = true;
 				break;
@@ -526,7 +527,7 @@ public final class AvatarCamps {
 
 	private static int foundHere(CommandContext<CommandSourceStack> c) {
 		ServerLevel level = c.getSource().getLevel();
-		if (level.dimension() != Level.NETHER) {
+		if (!Stacked.at(level, BlockPos.containing(c.getSource().getPosition()), Level.NETHER)) {
 			c.getSource().sendFailure(Component.literal("Avatar camps rise in the Nether."));
 			return 0;
 		}
@@ -542,7 +543,7 @@ public final class AvatarCamps {
 	}
 
 	private static int info(CommandContext<CommandSourceStack> c) {
-		ServerLevel nether = c.getSource().getServer().getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(c.getSource().getServer(), Level.NETHER);
 		if (nether == null) {
 			return 0;
 		}

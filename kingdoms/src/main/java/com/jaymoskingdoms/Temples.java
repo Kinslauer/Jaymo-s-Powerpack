@@ -191,46 +191,53 @@ public final class Temples {
 		}
 	}
 
-	private static boolean worldOk(ServerLevel level) {
-		return level.dimension() == Level.OVERWORLD || level.dimension() == Level.NETHER || TempleSites.aether(level);
+	/** (0.7.526) By the realm the player stands in, so a One Dimension world's stacked Nether and Aether bands count ({@link Stacked}). */
+	private static boolean worldOk(ServerPlayer sp) {
+		ResourceKey<Level> realm = Stacked.realm(sp);
+		return realm == Level.OVERWORLD || realm == Level.NETHER || TempleSites.aether(realm);
 	}
 
 	private static void rise(MinecraftServer server) {
 		for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
-			if (sp.isSpectator() || sp.isCreative() || !(sp.level() instanceof ServerLevel level) || !worldOk(level)
+			if (sp.isSpectator() || sp.isCreative() || !(sp.level() instanceof ServerLevel level) || !worldOk(sp)
 				|| WorldTiers.of(sp).ordinal() < RISE_TIER || level.getRandom().nextFloat() >= RISE_CHANCE) {
 				continue;
 			}
-			String world = level.dimension().identifier().toString();
-			boolean crowded = false;
-			for (Temple t : all(server)) {
-				if (t.world().equals(world) && t.center().closerThan(sp.blockPosition(), TEMPLE_AREA)) {
-					crowded = true;
-					break;
-				}
+			// (0.7.526) in the band the player stands in: an Aether temple looks for the islands' ground, not the Overworld's
+			Stacked.within(level, sp.getBlockY(), () -> riseNear(server, sp, level));
+		}
+	}
+
+	private static void riseNear(MinecraftServer server, ServerPlayer sp, ServerLevel level) {
+		String world = level.dimension().identifier().toString();
+		boolean crowded = false;
+		for (Temple t : all(server)) {
+			if (t.world().equals(world) && t.center().closerThan(sp.blockPosition(), TEMPLE_AREA)) {
+				crowded = true;
+				break;
 			}
-			if (crowded) {
+		}
+		if (crowded) {
+			return;
+		}
+		for (int i = 0; i < SITE_TRIES; i++) {
+			double a = level.getRandom().nextDouble() * Math.PI * 2.0;
+			double d = SITE_MIN + level.getRandom().nextDouble() * (SITE_MAX - SITE_MIN);
+			int x = (int)(sp.getX() + Math.cos(a) * d), z = (int)(sp.getZ() + Math.sin(a) * d);
+			if (!level.isLoaded(new BlockPos(x, level.getSeaLevel(), z))) {
 				continue;
 			}
-			for (int i = 0; i < SITE_TRIES; i++) {
-				double a = level.getRandom().nextDouble() * Math.PI * 2.0;
-				double d = SITE_MIN + level.getRandom().nextDouble() * (SITE_MAX - SITE_MIN);
-				int x = (int)(sp.getX() + Math.cos(a) * d), z = (int)(sp.getZ() + Math.sin(a) * d);
-				if (!level.isLoaded(new BlockPos(x, level.getSeaLevel(), z))) {
-					continue;
-				}
-				int y = level.dimension() == Level.OVERWORLD ? level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z)
-					: sp.getBlockY();
-				BlockPos spot = new BlockPos(x, y, z);
-				Patron p = draw(server, level, spot, sp.blockPosition(), world);
-				if (p == null) {
-					continue;
-				}
-				BlockPos site = TempleSites.find(level, p, spot, sp.blockPosition(), false);
-				if (site != null) {
-					found(level, p, site);
-					break;
-				}
+			int y = Stacked.in(sp, Level.OVERWORLD) ? level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z)
+				: sp.getBlockY();
+			BlockPos spot = new BlockPos(x, y, z);
+			Patron p = draw(server, level, spot, sp.blockPosition(), world);
+			if (p == null) {
+				continue;
+			}
+			BlockPos site = TempleSites.find(level, p, spot, sp.blockPosition(), false);
+			if (site != null) {
+				found(level, p, site);
+				break;
 			}
 		}
 	}

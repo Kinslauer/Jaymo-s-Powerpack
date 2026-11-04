@@ -522,11 +522,14 @@ final class QuestBoard {
 
 	/** (0.7.147) A bounty on the warlord of the standing Nether fort nearest the realm (by Nether reckoning); null with none. */
 	static @Nullable Quest netherBounty(ServerLevel level, Faction f, Quest.Giver who, RandomSource random) {
-		ServerLevel nether = level.getServer().getLevel(net.minecraft.world.level.Level.NETHER);
+		ServerLevel nether = Stacked.level(level.getServer(), net.minecraft.world.level.Level.NETHER);
 		if (nether == null) {
 			return null;
 		}
-		BlockPos under = new BlockPos(f.seat().getX() / 8, f.seat().getY(), f.seat().getZ() / 8);
+		// (0.7.526) in a One Dimension world the Nether is a band straight under the realm (Stacked), not an eighth as far
+		int scale = nether.dimension() == net.minecraft.world.level.Level.NETHER ? 8 : 1;
+		BlockPos under = new BlockPos(f.seat().getX() / scale, f.seat().getY() + Stacked.shift(level.getServer(), net.minecraft.world.level.Level.NETHER),
+			f.seat().getZ() / scale);
 		com.jaymoskingdoms.nether.NetherForts.Fort best = com.jaymoskingdoms.nether.NetherForts.standing(nether).stream()
 			.min(java.util.Comparator.comparingDouble(fort -> fort.center().distSqr(under))).orElse(null);
 		if (best == null) {

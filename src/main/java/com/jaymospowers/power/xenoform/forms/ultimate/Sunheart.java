@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -533,7 +534,7 @@ public final class Sunheart extends XenoUltimate {
 					boolean snow = state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.POWDER_SNOW);
 					boolean ice = state.is(Blocks.ICE) || state.is(Blocks.FROSTED_ICE);
 					if ((snow || ice) && level.mayInteract(player, pos) && player.mayBuild()) {
-						level.setBlock(pos, ice && level.dimension() != Level.NETHER ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(),
+						level.setBlock(pos, ice && !Stacked.at(level, pos, Level.NETHER) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(),
 							Block.UPDATE_ALL);
 						if (level.getRandom().nextInt(3) == 0) {
 							level.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.02);

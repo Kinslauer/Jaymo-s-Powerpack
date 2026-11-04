@@ -508,7 +508,8 @@ public final class PatronChampions {
 				|| HUNTERS.containsKey(sp.getUUID()) || NEXT_HUNT.getOrDefault(sp.getUUID(), 0L) > now || !(sp.level() instanceof ServerLevel level)) {
 				continue;
 			}
-			if (level.dimension() != Level.OVERWORLD && level.dimension() != Level.NETHER && !level.dimension().identifier().toString().equals("jaymospowers:aether")) {
+			ResourceKey<Level> realm = Stacked.realm(sp);
+			if (realm != Level.OVERWORLD && realm != Level.NETHER && !realm.identifier().toString().equals("jaymospowers:aether")) {
 				continue;
 			}
 			if (Factions.at(server, level, sp.blockPosition()) != null) {
