@@ -504,6 +504,22 @@ public final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * (0.20.47) Andy: "player corpses dont spawn in the otherworld". Kitchen leaves no body (player's or mob's) in the Other
+	 * World ({@link com.jaymospowers.power.zfighter.ZFighterAfterlife#inOtherWorld}), and one already there never gets up.
+	 */
+	public static void registerNoCorpseZone() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<net.minecraft.world.entity.Entity> heaven = com.jaymospowers.power.zfighter.ZFighterAfterlife::inOtherWorld;
+			Class.forName("com.jaymoskitchen.corpse.Corpses").getMethod("addNoCorpseZone", java.util.function.Predicate.class).invoke(null, heaven);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen: bodies are left there as anywhere
+		}
+	}
+
 	/** (0.17.203) A Z Fighter's hauling brawn. */
 	static final int ZFIGHTER_BRAWN = 2;
 

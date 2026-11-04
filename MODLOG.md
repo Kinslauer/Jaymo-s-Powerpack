@@ -352,6 +352,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   heaven". At the Other World (`ZFighterAfterlife.inOtherWorld`: within 64 blocks of the Judge's platform in the Aether,
   which covers the hall, road, pavilion, ring and tent) Kitchen's body heat is held neutral (`KitchenCompat.registerTemperate`
   hooks Kitchen's `BodyHeat.addTemperate`). The rest of the Aether keeps its height cold.
-- **0.20.47, Kingdoms 0.7.540, attributes 0-100 by world tier + character screen layout:** Andy (2026-11-04): "UI needs a
+- **0.20.47, Kitchen 0.5.61, no corpses in heaven:** Andy: "player corpses dont spawn in the otherworld (heaven) not
+  the aether, I died and a zombie tried attacking the judge". At the Other World (`ZFighterAfterlife.inOtherWorld`) nobody
+  leaves a body: `KitchenCompat.registerNoCorpseZone` hooks Kitchen's `Corpses.addNoCorpseZone`, so a player who dies there
+  drops their hotbar with the rest, and a body already lying there fades (dropping what it held) instead of getting up as a
+  zombie. Monsters are still allowed there (Andy: "monsters are fine, since users can train here").
+- **0.20.48, Kingdoms 0.7.540, attributes 0-100 by world tier + character screen layout:** Andy (2026-11-04): "UI needs a
   rework, the text is overlapping. And character level points should scale way further, making stats go from 0/100 and
   scale accordingly, giving users a reason to world tier up." See the Kingdoms MODLOG.

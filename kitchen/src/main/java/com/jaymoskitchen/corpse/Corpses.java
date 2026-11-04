@@ -163,6 +163,29 @@ public final class Corpses {
 	 * vanish (Jaymo's Powers' Darktide shades and risen shadows).
 	 */
 	public static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
+	/**
+	 * (0.5.61) Places other mods say no body is left in (Powers' Other World, where the Judge stands: Andy, "player corpses
+	 * dont spawn in the otherworld"). Whoever dies there, player or mob, leaves no corpse (a player's hotbar drops with the
+	 * rest), and a body already lying there never gets up.
+	 */
+	private static final java.util.List<java.util.function.Predicate<net.minecraft.world.entity.Entity>> NO_BODIES =
+		new java.util.concurrent.CopyOnWriteArrayList<>();
+
+	/** For other mods (by reflection): where {@code entity} is, no corpse is left and none rises. */
+	public static void addNoCorpseZone(java.util.function.Predicate<net.minecraft.world.entity.Entity> zone) {
+		NO_BODIES.add(zone);
+	}
+
+	/** Whether {@code entity} stands where no body is left ({@link #addNoCorpseZone}). */
+	public static boolean inNoCorpseZone(net.minecraft.world.entity.Entity entity) {
+		for (java.util.function.Predicate<net.minecraft.world.entity.Entity> zone : NO_BODIES) {
+			if (zone.test(entity)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** (0.4.37) Prefix of the tags marking parts a body has lost ({@code head}, {@code right_arm}, ...; Jaymo's Powers sets them). */
 	public static final String MISSING_TAG = "jaymoskitchen.missing.";
 	/**
