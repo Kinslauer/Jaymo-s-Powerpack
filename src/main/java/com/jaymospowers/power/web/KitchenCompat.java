@@ -487,6 +487,23 @@ public final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * (0.20.46, Andy: "you should not freeze or overheat in heaven") Kitchen's body heat is held neutral at the Other World
+	 * (the Judge's hall, road, pavilion and ring: {@link com.jaymospowers.power.zfighter.ZFighterAfterlife#inOtherWorld}), however
+	 * high the platform stands; the rest of the Aether keeps its weather.
+	 */
+	public static void registerTemperate() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<Player> heaven = com.jaymospowers.power.zfighter.ZFighterAfterlife::inOtherWorld;
+			Class.forName("com.jaymoskitchen.climate.BodyHeat").getMethod("addTemperate", java.util.function.Predicate.class).invoke(null, heaven);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen: the Other World has the Aether's weather
+		}
+	}
+
 	/** (0.17.203) A Z Fighter's hauling brawn. */
 	static final int ZFIGHTER_BRAWN = 2;
 

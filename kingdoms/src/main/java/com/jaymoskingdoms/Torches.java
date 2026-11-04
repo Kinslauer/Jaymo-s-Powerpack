@@ -164,7 +164,7 @@ public final class Torches {
 		remember(level, pos);
 	}
 
-	/** The burnt torch (or, 0.7.538, burnt lantern) at {@code pos} goes on the lamplighters' list. */
+	/** The burnt torch (or, 0.7.540, burnt lantern) at {@code pos} goes on the lamplighters' list. */
 	static void remember(ServerLevel level, BlockPos pos) {
 		LevelChunk chunk = level.getChunkAt(pos);
 		List<Long> burntHere = new ArrayList<>(chunk.getAttachedOrElse(BURNT, List.of()));
@@ -251,7 +251,7 @@ public final class Torches {
 			lighter.getLookControl().setLookAt(at);
 			// (0.7.206) a town with whale oil in store puts up an oil lamp in its place
 			if (state.is(Lanterns.BURNT_LANTERN)) {
-				Lanterns.relight(level, pos, state); // (0.7.538) filled with a coal's worth from the town's stores
+				Lanterns.relight(level, pos, state); // (0.7.540) filled with a coal's worth from the town's stores
 			} else if (state.is(BURNT_TORCH) && com.jaymoskingdoms.whaling.Lamplighters.upgrade(level, pos)) {
 				forget(level, pos);
 			} else {

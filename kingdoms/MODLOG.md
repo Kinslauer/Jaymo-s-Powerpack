@@ -8958,12 +8958,26 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
   own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
   Cube Animals is loaded. Its loot-chest copies are untouched. Not compiled or played yet.
-- **0.7.538, lanterns burn on fuel and go out** (Andy, 2026-11-04: "lanterns should be fueled with coal or ambergris and
-  go out like torches", "ambergris lasts longer"): `Lanterns` + `LanternBlockMixin` (trees mixins) give lanterns and soul
-  lanterns random ticks. Each burns until its fuel runs out (end time kept per chunk in the `lantern_fuel` attachment),
-  then becomes a dark `burnt_lantern` (standing or hung, remembers if it was a soul lantern; drops itself). A lantern never
-  fuelled starts with one coal's worth (3 days). Use coal or charcoal (`#minecraft:coals`) on a lantern, lit or burnt, for
-  +3 days, ambergris for +15 days, up to 30; the action bar says how many days are left. Burnt lantern + coal crafts a
-  lantern. Villagers relight burnt lanterns as they do burnt torches (shared `burnt_torches` list); camps' burnt lanterns
-  rot away with the rest. Copper lanterns and oil lamps are left alone. No rain douse (behind glass). Texture: vanilla
-  lantern with the flame painted out to soot. Compiled; not played yet.
+- **0.7.538, opening a chest can wake sleepers** (Andy, 2026-11-04: "opening chests makes noise that can wake sleeping
+  villagers or guards"): `ChestNoise`. Opening a chest, barrel, shulker box or another mod's chest/barrel/crate/coffer
+  rolls for every sleeper but a player within 12 blocks: 85% at 2 blocks or closer, falling off evenly to 0 at 12, x0.4
+  through a wall, x0.5 if you open it sneaking (less again with Soft Step and the stealthy heritages, through
+  `Skills.sneakFactor`). Whoever wakes mutters a line, turns to you, walks over to the chest and stays up 15 s (put back
+  to bed if their brain tries). Awake, they count as witnesses (`Theft.witnesses` skips sleepers), so a guard you woke
+  sees you take from a realm's chest and it is a theft seen. Light Fingers (Andy: "the sound lowers with thief skill in
+  light fingers") takes 15% per rank off both the wake chance and the creak itself, so rank 5 opens at a quarter volume:
+  `ContainerOpenersHushMixin` marks who is opening around `ContainerOpenersCounter.incrementOpeners`, and
+  `ChestCreakVolumeMixin` scales `ServerLevel.playSeededSound`'s BLOCKS volume meanwhile (chests and barrels; shulker
+  boxes and modded chests with their own sound code keep full volume). Compiled (Gradle `compileJava`), not played yet.
+- **0.7.540, lanterns burn on fuel and go out** (Andy, 2026-11-04: "lanterns should be fueled with coal or ambergris and
+  go out like torches", "ambergris lasts longer", "it shouldnt tell you how many days are left anywhere, but it can have a
+  durability bar, and soul lanterns should not go out"): `Lanterns` + `LanternBlockMixin` (trees mixins) give lanterns
+  random ticks. Each burns until its fuel runs out (end time and last fill kept per chunk in the `lantern_fuel`
+  attachment), then becomes a dark `burnt_lantern` (standing or hung; drops itself). A lantern never fuelled starts with
+  one coal's worth (3 days). Use coal or charcoal (`#minecraft:coals`) on a lantern, lit or burnt, for +3 days, ambergris
+  for +15 days, up to 30; no message says how much is left. Broken lanterns drop with their fuel left in the
+  `lantern_fuel` item component and burn on it when set down again; `LanternItemBarMixin` draws a durability-style bar
+  (green to red, share of its last fill) once some is burnt. Burnt lantern + coal crafts a lantern. Villagers relight
+  burnt lanterns as they do burnt torches (shared `burnt_torches` list); camps' burnt lanterns rot away with the rest.
+  Soul lanterns never go out; copper lanterns and oil lamps are left alone. No rain douse (behind glass). Texture: vanilla
+  lantern with the flame painted out to soot. Compiled (Gradle `compileJava processResources`); not played yet.

@@ -142,6 +142,8 @@ public final class BodyHeat {
 	/** Other mods' weather on a player, in body heat (summed into {@link #ambient}); Kingdoms adds by reflection. */
 	public static final List<ToDoubleFunction<ServerPlayer>> WEATHER = new CopyOnWriteArrayList<>();
 	private static Predicate<Player> heatProof = player -> false;
+	/** (0.5.60) Places other mods say the weather never reaches (Powers' Other World): body heat held neutral there. */
+	private static final List<Predicate<Player>> TEMPERATE = new CopyOnWriteArrayList<>();
 
 	private static final Map<UUID, Long> WET_UNTIL = new HashMap<>();
 	private static final Map<UUID, Integer> STATE = new HashMap<>();
@@ -157,6 +159,23 @@ public final class BodyHeat {
 	/** For other mods (by reflection): more weather on players, in body heat. */
 	public static void addWeather(ToDoubleFunction<ServerPlayer> weather) {
 		WEATHER.add(weather);
+	}
+
+	/**
+	 * (0.5.60) For other mods (by reflection): where {@code player} is, no cold or heat reaches the body (Andy: "you should
+	 * not freeze or overheat in heaven"). Body heat goes straight back to neutral there and stays.
+	 */
+	public static void addTemperate(Predicate<Player> temperate) {
+		TEMPERATE.add(temperate);
+	}
+
+	static boolean temperate(Player player) {
+		for (Predicate<Player> t : TEMPERATE) {
+			if (t.test(player)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static Heat heat(Player player) {
@@ -214,7 +233,7 @@ public final class BodyHeat {
 			WET_UNTIL.put(player.getUUID(), now + WET_TICKS);
 		}
 		float body = body(player);
-		if (body <= FREEZING) {
+		if (body <= FREEZING && !temperate(player)) {
 			// the game's own freezing (frosted screen, slowed steps), held short of fully frozen: the hurt is ours
 			int cap = player.getTicksRequiredToFreeze() - 1;
 			int frost = Math.round(Mth.clamp((FREEZING - body) / (FREEZING - MIN), 0.0F, 1.0F) * cap);
@@ -228,6 +247,12 @@ public final class BodyHeat {
 
 	static void second(ServerPlayer player, long seconds) {
 		ServerLevel level = player.level();
+		if (temperate(player)) {
+			// (0.5.60) heaven and the like: neither cold nor heat, whatever the height or the sky says
+			set(player, Heat.NEUTRAL);
+			announce(player, 0.0F);
+			return;
+		}
 		float ambient = ambient(player);
 		Heat heat = heat(player);
 		float body = heat.body();
