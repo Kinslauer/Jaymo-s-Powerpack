@@ -95,9 +95,10 @@ public final class XenoformClient {
 			return;
 		}
 		if (player != null && XenoformState.lowBox(player) || "skitter".equals(form) && player != null && SkitterCeiling.spiderOrRising(player)
-			&& (state.getData(SkitterCeiling.CRAWL_KEY) != null || state.swimAmount > 0.0F)) {
+			&& (state.getData(SkitterCeiling.CRAWL_KEY) != null || state.swimAmount > 0.0F) || "gnasher".equals(form)) {
 			// (0.19.34) the cloud's low box is the swimming pose's, but it isn't swimming: draw it level (0.19.62, and
-			// Skitter's spider, prone, and the swim tilt still easing out once it stands)
+			// Skitter's spider, prone, and the swim tilt still easing out once it stands; 0.19.76, and Gnasher's shark,
+			// whose body is already level: it swims and crawls on its own, so the swim tilt would stand it on its nose)
 			state.swimAmount = 0.0F;
 			state.isVisuallySwimming = false;
 			if (state.pose == net.minecraft.world.entity.Pose.SWIMMING) {

@@ -37,19 +37,20 @@ Talon (a bird: perches upright, wings spread in the air), Keen (a bat, hangs fro
 four legs with the wings it has), Lumen (an orb of light with trailing motes). Wisp keeps its hooded legless ghost.
 Keen's hang is synced as the "hang" act; Lumen is drawn a second time fullbright.
 
-## Patch 5: floaters and blobs
-Ooze and Magma Ooze (a cube that squashes and bounces as it moves), Pyre (a blaze: a head over a ring of spinning
-rods of fire), Prism (a crystal cluster that walks on shards), Cortex (a guardian-like eye fish, floats), Murk (a
+## Patch 5 (done, 0.19.76): floaters and blobs
+Ooze and Magma Ooze (a cube that squashes and bounces as it moves; both take the low box), Prism (a crystal cluster that walks on shards), Cortex (a guardian-like eye fish, floats), Murk (a
 squid, tentacles trailing), Gnasher (a shark, swims level, drags itself on land), Blight (three heads over a spine,
-floating).
+floating). Pyre stays humanoid (Andy: "pyre should still be fairly humanoid"). Prism's Reflect is synced
+as the "root" act, Gnasher's Death Roll as "roll"; Cortex's Claw Snap is now Spine Snap.
 
 ## Patch 6: non-human bipeds
 Bulwark (Andy: the four arms emphasised, a thinner body, the arms held out in an idle stance that keeps swapping which pair is raised), Knell (a hunched horned beast), Rime (a stooped ice brute), Shade (a thin
 crawling shadow that unfolds tall), Thornwild (a treant with root feet), Lurk (on all fours when stalking, tall when
 it stands), Rivet (a living-metal blob that stands up when it fights), Nadir and Dud (shapeless).
 
-## Kept humanoid (6 of 41)
-Marrow, Swathe, Mirage, Polestar, Towerback (the Giants' kin) and Duplex (a golem's build already).
+## Kept humanoid (7 of 41)
+Marrow, Swathe, Mirage, Polestar, Towerback (the Giants' kin), Duplex (a golem's build already) and Pyre (Andy,
+2026-11-03).
 
 ## Open questions
 1. ~~Should small bodies get a small box too?~~ Andy (2026-11-01): yes. Ooze, Magma Ooze and Croaker get a low box
