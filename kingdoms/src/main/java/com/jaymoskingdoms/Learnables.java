@@ -89,6 +89,9 @@ public final class Learnables {
 
 	/** The classes that may learn {@code perk}, or null when anyone may. */
 	public static @Nullable Set<PlayerClass> classesFor(Perk perk) {
+		if (perk == Perk.ENCHANTED_STORAGE) {
+			return Set.of(PlayerClass.MAGE);
+		}
 		String spell = SPELLS.get(perk);
 		return spell == null ? null : RpgSeriesGate.casters(Identifier.parse(spell));
 	}

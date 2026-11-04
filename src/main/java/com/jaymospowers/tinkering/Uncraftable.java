@@ -42,6 +42,10 @@ public final class Uncraftable {
 
 	private static Set<String> rpgSeries() {
 		Set<String> ids = new java.util.HashSet<>();
+		// Bag of Holding: only a Mage's Enchanted Storage makes them (Kingdoms' StorageEnchanting)
+		for (String bag : List.of("leather", "iron", "golden")) {
+			ids.add("bagofholding:" + bag + "_bag_of_holding");
+		}
 		for (String weapon : List.of("dagger", "sickle", "double_axe", "glaive")) {
 			for (String metal : List.of("iron", "golden", "diamond")) {
 				ids.add("rogues:" + metal + "_" + weapon);

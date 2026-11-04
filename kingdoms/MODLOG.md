@@ -8796,3 +8796,15 @@ is our own take on the idea (none of its code or art).
   Tier 0-1 weapon spells (Arcane Bolt, Fireball, Frost Shard and so on) stay free with the weapon.
 - **Trainers:** veteran drills (`GuardDrills`) and wizard trials (`WizardTrials`, Mage only) teach the next perk free
   (`@taught` rank: no points, survives a respec). Spell books and the binding table teach nothing. Not played.
+
+## 0.7.517: Brute rage and Enchanted Storage (pack 0.20.16)
+- **Brute rage** (`BruteRage`, Andy; idea from Warrior Rage, all rights reserved, nothing taken): melee blows given (+8%)
+  and taken (+10%) and kills (+25%) fill a meter shown as a thin bar right of the hotbar (`client/BruteRageHud`); it drains
+  5 s after the fight. Full, the Brute roars and rages 12 s: blows +25% and set foes alight 2 s, +0.5 knockback resistance,
+  flames round them; each kill adds 3 s (20 s at most). Then they are spent: Slowness and Mining Fatigue 6 s. The class
+  card lists "Rage +25%".
+- **Enchanted Storage** (`StorageEnchanting`, Andy: wizards enchant storage high on the tree and gain a bag of holding): a
+  3-rank Mage perk atop Spellcraft's arcane column (tier 18, after Arcane Evocation). Sneak-use an enchanting table holding
+  a chest (rank 1: leather Bag of Holding, 3 levels + 2 lapis), a leather bag (rank 2: iron, 6 + 4) or an iron bag
+  (rank 3: golden, 10 + 6); bags keep their contents. Bag of Holding (Fuzs, MPL-2.0) ships in Powers' packMods with its
+  grid recipes dropped. Not played.

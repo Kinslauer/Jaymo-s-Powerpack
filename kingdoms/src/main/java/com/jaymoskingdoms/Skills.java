@@ -318,7 +318,10 @@ public final class Skills {
 		FERAL_POUNCE(Pillar.STRENGTH, 1, 2, 8, 23, 1, RENDING_CLAW),
 		SPEAR_LUNGE(Pillar.STRENGTH, 1, 1, 2, 20, 2),
 		COUCHED_LANCE(Pillar.STRENGTH, 1, 1, 4, 21, 2, SPEAR_LUNGE),
-		PINNING_THROW(Pillar.STRENGTH, 1, 2, 8, 22, 2, COUCHED_LANCE);
+		PINNING_THROW(Pillar.STRENGTH, 1, 2, 8, 22, 2, COUCHED_LANCE),
+		// (0.7.517) Spellcraft's crown, Enchanted Storage (Mage; Andy): enchant a chest into a Bag of Holding, then up a tier
+		// a rank ({@link StorageEnchanting})
+		ENCHANTED_STORAGE(Pillar.SURVIVAL, 3, 2, 15, 18, 0, ARCANE_EVOCATION);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

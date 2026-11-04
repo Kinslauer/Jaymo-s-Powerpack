@@ -146,6 +146,9 @@ def packMods = [
 	[dep: "maven.modrinth:wizards:KQuYpfVP", cf: [734325, 9062861]],
 	[dep: "maven.modrinth:archers:SXwTz6Sf", cf: [932359, 9062864]],
 	[dep: "maven.modrinth:rogues-and-warriors:vMFN5Fd1", cf: [1048409, 9110999]],
+	// Bag of Holding 26.3.5 (MPL-2.0, Fuzs): leather/iron/golden bags (Item Interactions bundled inside; needs Puzzles Lib
+	// and Forge Config API Port, both above). Grid recipes dropped (Uncraftable): Kingdoms' Mages enchant them (0.7.517).
+	[dep: "maven.modrinth:bag-of-holding:Kz2iNqzF", cf: [593996, 9201657]],
 	// Spell Engine (GPL-3.0; the RPG Series' casting, spell hotbar and spell books) and Spell Power Attributes (LGPL-3.0)
 	[dep: "maven.modrinth:spell-engine:kgVsejrW", cf: [807653, 9012032]],
 	[dep: "maven.modrinth:spell-power:YdRPWTj8", cf: [771265, 9004379]],

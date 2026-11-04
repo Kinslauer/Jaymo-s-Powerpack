@@ -609,6 +609,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.332: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
 		// room, the morning after, torn cloth as evidence, and what the curse asks for
 		MoonPull.register();
+		BruteRage.register();
+		StorageEnchanting.register();
 		ScentTrails.register();
 		HiddenChange.register();
 		Caging.register();
