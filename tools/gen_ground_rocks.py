@@ -22,6 +22,10 @@ VARIANTS = [
     ('tuff', 'tuff', 'tuff'),
     ('sandstone', 'sandstone_top', 'sandstone'),
     ('red_sandstone', 'red_sandstone_top', 'red_sandstone'),
+    # (0.20.2) the Nether's (NetherRocksFeature)
+    ('netherrack', 'netherrack', 'netherrack'),
+    ('blackstone', 'blackstone', 'blackstone'),
+    ('basalt', 'basalt_side', 'basalt'),
 ]
 FLINT_TEXTURE = 'minecraft:block/smooth_basalt'
 # (0.16.24) rocks lying in water are salt crystals; picked up, they're Kitchen's salt
@@ -138,7 +142,7 @@ def main():
     loot('salt_crystals', 'jaymoskitchen:salt', 'rocks', len(ROCKS))
 
     # worldgen: the features pick the stone and the pile size themselves (GroundRocksFeature)
-    for fid in ('loose_rocks', 'loose_flint'):
+    for fid in ('loose_rocks', 'loose_flint', 'nether_rocks'):
         write(os.path.join(DATA, 'worldgen', 'feature', f'{fid}.json'), {'type': f'{NS}:{fid}'})
     surface = [{'type': 'minecraft:in_square'},
                {'type': 'minecraft:heightmap', 'heightmap': 'OCEAN_FLOOR_WG'},
@@ -150,6 +154,13 @@ def main():
     write(os.path.join(DATA, 'worldgen', 'placed_feature', 'loose_flint.json'), {
         'feature': f'{NS}:loose_flint',
         'placement': [{'type': 'minecraft:count', 'count': 2}] + surface,
+    })
+    # (0.20.2) the Nether: a cluster in about one chunk in three; the feature finds a floor in its column itself
+    write(os.path.join(DATA, 'worldgen', 'placed_feature', 'nether_rocks.json'), {
+        'feature': f'{NS}:nether_rocks',
+        'placement': [{'type': 'minecraft:rarity_filter', 'chance': 3},
+                      {'type': 'minecraft:in_square'},
+                      {'type': 'minecraft:biome'}],
     })
     write(os.path.join(DATA, 'worldgen', 'placed_feature', 'loose_rocks_cave.json'), {
         'feature': f'{NS}:loose_rocks',
@@ -269,7 +280,10 @@ def first_tools():
         {'id': '#c:tools/knife', 'required': False}]})
     write(os.path.join(DATA, 'tags', 'block', 'fiber_plants.json'), {'values': [
         'minecraft:short_grass', 'minecraft:tall_grass', 'minecraft:fern', 'minecraft:large_fern',
-        'minecraft:short_dry_grass', 'minecraft:tall_dry_grass', 'minecraft:bush']})
+        'minecraft:short_dry_grass', 'minecraft:tall_dry_grass', 'minecraft:bush',
+        # (0.20.2) the Nether's, so a start there can twist string too
+        'minecraft:crimson_roots', 'minecraft:warped_roots', 'minecraft:nether_sprouts',
+        'minecraft:weeping_vines', 'minecraft:weeping_vines_plant', 'minecraft:twisting_vines', 'minecraft:twisting_vines_plant']})
 
 
 if __name__ == '__main__':
