@@ -177,6 +177,8 @@ public abstract class WindDragon extends AbstractHorse {
 	// ---- the client's smoothed animation (see the model) ----
 	public float flyAnim, flyAnimO, breathAnim, breathAnimO, landAnim, landAnimO, sitAnim, sitAnimO, crashAnim, crashAnimO;
 	public float flapPhase, flapPhaseO, glideAnim, glideAnimO, pitchAnim, pitchAnimO, swimAnim, swimAnimO;
+	/** (0.7.511) The move the model is playing ({@link #action}) and how many ticks it has been playing it. */
+	public int actionSeen, actionAge;
 
 	protected WindDragon(EntityType<? extends WindDragon> type, Level level) {
 		super(type, level);
@@ -356,6 +358,49 @@ public abstract class WindDragon extends AbstractHorse {
 		return BossEvent.BossBarColor.RED;
 	}
 
+	/**
+	 * (0.7.511) Whether it flies (the wind dragons all do). A walker ({@code docs/SaintsDragons-Plan.md}, the lesser dragons
+	 * on their feet: Stegonaut) never takes off: wild it grazes about its home and fights on the ground, ridden it is
+	 * steered like a horse (vanilla's mount travel), and R sends its own move ({@link #riderBreath}).
+	 */
+	protected boolean flies() {
+		return true;
+	}
+
+	/** (0.7.511) Whether it goes for players who come near (a grazing walker only fights whoever hurts it). */
+	protected boolean aggressive() {
+		return true;
+	}
+
+	/** (0.7.511) Whether a wild one shows a boss bar (the wind dragons are minibosses; the lesser dragons are beasts). */
+	protected boolean bossBar() {
+		return true;
+	}
+
+	/** (0.7.511) Whether killing one counts toward Eurus and Aeolus's disguises ({@link DragonRecords}): only the wind dragons do. */
+	protected boolean windDragon() {
+		return true;
+	}
+
+	/** (0.7.511) What everyone near is told when it's worn down, and when it bolts (a walker sinks and lumbers off). */
+	protected String crashKey() {
+		return flies() ? "message.jaymoskingdoms.dragon.crashed" : "message.jaymoskingdoms.dragon.crashed_walker";
+	}
+
+	protected String boltKey() {
+		return flies() ? "message.jaymoskingdoms.dragon.bolted" : "message.jaymoskingdoms.dragon.bolted_walker";
+	}
+
+	/** (0.7.511) Called every tick a wild walker is fighting {@code target} on its feet (a species adds its own moves). */
+	protected void walkerFight(ServerLevel level, LivingEntity target) {
+		groundFight(level, target, true);
+	}
+
+	/** (0.7.511) The move it is making now, for its model (0 none; a species' own numbers, synced by the species). */
+	public int action() {
+		return 0;
+	}
+
 	/** Whether it can be worn down and tamed (Aeolus can't: it fights to the end). */
 	protected boolean tameable() {
 		return true;
@@ -428,7 +473,7 @@ public abstract class WindDragon extends AbstractHorse {
 		LivingEntity rider = this.getControllingPassenger();
 		boolean ridden = rider instanceof Player;
 		this.flying = false;
-		this.setNoGravity(ridden && !grounded() && saddled());
+		this.setNoGravity(ridden && !grounded() && saddled() && flies());
 		for (Entity passenger : this.getPassengers()) {
 			passenger.resetFallDistance();
 		}
@@ -481,7 +526,9 @@ public abstract class WindDragon extends AbstractHorse {
 			}
 			return;
 		}
-		boss(level);
+		if (bossBar()) {
+			boss(level);
+		}
 		if (grounded()) {
 			groundedAi(level);
 			return;
@@ -502,6 +549,10 @@ public abstract class WindDragon extends AbstractHorse {
 			this.home = this.position();
 		}
 		this.wildTicks++;
+		if (!flies()) {
+			walk(level);
+			return;
+		}
 		switch (this.wild) {
 			case PERCH_GO -> {
 				if (this.perch == null) {
@@ -557,6 +608,41 @@ public abstract class WindDragon extends AbstractHorse {
 					this.perch = findPerch(level);
 					this.wild = this.perch == null ? Wild.CIRCLE : Wild.PERCH_GO;
 					this.wildTicks = 0;
+				}
+			}
+		}
+	}
+
+	/** (0.7.511) How far a walker strolls from its home, how often it sets off (1 in this many ticks), how fast it runs off. */
+	static final int WANDER_RADIUS = 14, WANDER_EVERY = 120;
+	static final double WANDER_SPEED = 0.6, FLEE_SPEED = 1.4;
+
+	/** (0.7.511) A walker about its home: it strolls and grazes, and bolting it lumbers away from whoever's near. */
+	private void walk(ServerLevel level) {
+		if (this.wild == Wild.FLEE) {
+			Player near = level.getNearestPlayer(this, LOSE_RANGE);
+			if (near != null && this.getNavigation().isDone()) {
+				Vec3 away = this.position().subtract(near.position()).multiply(1.0, 0.0, 1.0);
+				away = away.lengthSqr() < 0.01 ? this.getLookAngle() : away.normalize();
+				Vec3 to = this.position().add(away.scale(16.0));
+				this.getNavigation().moveTo(to.x, this.getY(), to.z, FLEE_SPEED);
+			}
+			if (this.wildTicks > FLEE_TICKS) {
+				this.home = this.position();
+				this.wild = Wild.CIRCLE;
+				this.wildTicks = 0;
+			}
+			return;
+		}
+		this.wild = Wild.CIRCLE;
+		perchedTick(level);
+		if (this.getNavigation().isDone() && this.random.nextInt(WANDER_EVERY) == 0 && this.home != null) {
+			int x = Mth.floor(this.home.x) + this.random.nextInt(WANDER_RADIUS * 2 + 1) - WANDER_RADIUS;
+			int z = Mth.floor(this.home.z) + this.random.nextInt(WANDER_RADIUS * 2 + 1) - WANDER_RADIUS;
+			if (level.isLoaded(new BlockPos(x, 0, z))) {
+				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+				if (Math.abs(top.getY() - this.getBlockY()) < 8 && level.getFluidState(top.below()).isEmpty()) {
+					this.getNavigation().moveTo(x + 0.5, top.getY(), z + 0.5, WANDER_SPEED);
 				}
 			}
 		}
@@ -627,7 +713,7 @@ public abstract class WindDragon extends AbstractHorse {
 		LivingEntity target = this.foe != null ? this.foe : this.getTarget();
 		if (!valid(target)) {
 			target = null;
-			Player near = level.getNearestPlayer(this, AGGRO_RANGE);
+			Player near = aggressive() ? level.getNearestPlayer(this, AGGRO_RANGE) : null;
 			if (valid(near)) {
 				target = near;
 				level.playSound(null, this.blockPosition(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 3.0F, 0.7F);
@@ -650,6 +736,12 @@ public abstract class WindDragon extends AbstractHorse {
 
 	protected void fight(ServerLevel level, LivingEntity target) {
 		this.wildTicks++;
+		if (!flies()) {
+			// (0.7.511) a walker stands its ground where it was
+			this.wild = Wild.GROUND;
+			walkerFight(level, target);
+			return;
+		}
 		this.home = target.position();
 		switch (this.wild) {
 			case SWOOP_RISE -> {
@@ -818,11 +910,16 @@ public abstract class WindDragon extends AbstractHorse {
 	// ---- flight -------------------------------------------------------------------------------------------------------
 
 	protected void setFlying(boolean on) {
+		on &= flies();
 		this.flying = on;
 		this.setNoGravity(on);
 	}
 
 	protected void takeOff() {
+		if (!flies()) {
+			this.getNavigation().stop();
+			return;
+		}
 		setFlying(true);
 		this.getNavigation().stop();
 		this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.7, 0.0));
@@ -910,7 +1007,7 @@ public abstract class WindDragon extends AbstractHorse {
 		this.tamer = null;
 		this.wild = Wild.CIRCLE;
 		level.playSound(null, this.blockPosition(), SoundEvents.ENDER_DRAGON_HURT, SoundSource.HOSTILE, 4.0F, 0.5F);
-		tell(level, "message.jaymoskingdoms.dragon.crashed", ChatFormatting.GOLD);
+		tell(level, crashKey(), ChatFormatting.GOLD);
 	}
 
 	private void groundedAi(ServerLevel level) {
@@ -1014,7 +1111,7 @@ public abstract class WindDragon extends AbstractHorse {
 		takeOff();
 		this.wild = Wild.FLEE;
 		this.wildTicks = 0;
-		tell(level, "message.jaymoskingdoms.dragon.bolted", ChatFormatting.GOLD);
+		tell(level, boltKey(), ChatFormatting.GOLD);
 	}
 
 	private void tame(ServerLevel level, Player player) {
@@ -1214,6 +1311,13 @@ public abstract class WindDragon extends AbstractHorse {
 		float pitch = air ? (float)Mth.clamp(-v.y * 1.2, -0.6, 0.6) : 0.0F;
 		this.pitchAnim += (pitch - this.pitchAnim) * 0.2F;
 		this.swimAnim = Mth.approach(this.swimAnim, this.isInWater() && !air ? 1.0F : 0.0F, 0.1F);
+		int action = action();
+		if (action != this.actionSeen) {
+			this.actionSeen = action;
+			this.actionAge = 0;
+		} else {
+			this.actionAge++;
+		}
 	}
 
 	// ---- the rest -------------------------------------------------------------------------------------------------------
@@ -1258,7 +1362,7 @@ public abstract class WindDragon extends AbstractHorse {
 		if (this.bar != null) {
 			this.bar.removeAllPlayers();
 		}
-		if (!this.isTamed() && this.level() instanceof ServerLevel level) {
+		if (!this.isTamed() && windDragon() && this.level() instanceof ServerLevel level) {
 			// Andy: only kills count as beating a dragon: its killer and whoever fought it (still near) beat it
 			// (the killer however far off: a bow shot at a high flier counts)
 			Player killer = credited(level, source);

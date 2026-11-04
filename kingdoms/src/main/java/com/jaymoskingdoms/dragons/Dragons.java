@@ -4,6 +4,8 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -30,6 +32,9 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -37,6 +42,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -57,6 +63,11 @@ public final class Dragons {
 	/** The species' bodies (width, height in blocks). */
 	static final float NOTUS_WIDTH = 3.0F, NOTUS_HEIGHT = 2.4F, BOREAS_WIDTH = 2.6F, BOREAS_HEIGHT = 2.0F, ZEPHYRUS_WIDTH = 2.6F,
 		ZEPHYRUS_HEIGHT = 1.8F, EURUS_WIDTH = 2.4F, EURUS_HEIGHT = 1.8F, AEOLUS_WIDTH = 6.0F, AEOLUS_HEIGHT = 5.0F;
+	/** (0.7.511) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's body. */
+	static final float STEGONAUT_WIDTH = 2.4F, STEGONAUT_HEIGHT = 2.0F;
+	/** (0.7.511) Stegonaut grazes in the jungles and plains (tag {@code has_stegonaut_dragon}): its spawn weight and herd. */
+	static final int STEGONAUT_WEIGHT = 2, STEGONAUT_MIN = 1, STEGONAUT_MAX = 2;
+	public static final TagKey<Biome> HAS_STEGONAUT = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_stegonaut_dragon"));
 
 	public static final TagKey<Biome> HAS_NOTUS = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_notus_dragon"));
 
@@ -65,7 +76,9 @@ public final class Dragons {
 	public static EntityType<ZephyrusDragon> ZEPHYRUS_DRAGON;
 	public static EntityType<EurusDragon> EURUS_DRAGON;
 	public static EntityType<AeolusDragon> AEOLUS_DRAGON;
-	public static Item NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG, EURUS_DRAGON_SPAWN_EGG, AEOLUS_DRAGON_SPAWN_EGG;
+	public static EntityType<StegonautDragon> STEGONAUT_DRAGON;
+	public static Item NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG, EURUS_DRAGON_SPAWN_EGG, AEOLUS_DRAGON_SPAWN_EGG,
+		STEGONAUT_DRAGON_SPAWN_EGG;
 	/** By name, for the op command. */
 	private static final Map<String, EntityType<? extends WindDragon>> BY_NAME = new LinkedHashMap<>();
 
@@ -100,6 +113,13 @@ public final class Dragons {
 		ZEPHYRUS_DRAGON_SPAWN_EGG = egg(ZEPHYRUS_DRAGON);
 		EURUS_DRAGON_SPAWN_EGG = egg(EURUS_DRAGON);
 		AEOLUS_DRAGON_SPAWN_EGG = egg(AEOLUS_DRAGON);
+		// (0.7.511) the lesser dragons, after Saint's Dragons (its code is MIT; the art is our own): Stegonaut, a walker that
+		// grazes in the jungles and plains and spawns with the herds
+		STEGONAUT_DRAGON = dragon("stegonaut", StegonautDragon::new, STEGONAUT_WIDTH, STEGONAUT_HEIGHT, false, StegonautDragon.createAttributes());
+		STEGONAUT_DRAGON_SPAWN_EGG = egg(STEGONAUT_DRAGON);
+		SpawnPlacements.register(STEGONAUT_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules);
+		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_STEGONAUT), MobCategory.CREATURE, STEGONAUT_DRAGON, STEGONAUT_WEIGHT, STEGONAUT_MIN,
+			STEGONAUT_MAX);
 		JaymosKingdoms.LOGGER.debug("dragon records: {} {}", DragonRecords.SLAIN, DragonRecords.TAMER);
 		Disguises.register();
 		DragonEggs.register();
@@ -113,7 +133,7 @@ public final class Dragons {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dragons::nether);
-		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus] [tame]: a wild one (Notus unless named), or a
+		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus|stegonaut] [tame]: a wild one (Notus unless named), or a
 		// tamed, saddled one, at your side
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
 			LiteralArgumentBuilder<CommandSourceStack> dragon = Commands.literal("dragon").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))

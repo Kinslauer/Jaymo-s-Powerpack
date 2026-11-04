@@ -5286,3 +5286,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Titan:** Bulwark's Ultimate, a plated four-armed stone giant (2x, +15 hearts): Quake Combo, Wallbreaker Clap, Boulder Hurl, Meteor Slam, and Earthsplitter on C. Model `client/.../ultimate/UltimateTitan`, skin from `tools/gen_xeno_ultimates.py`.
   - Debug: `/powerdebug xenoform ultimate on|off|break`. Compile-checked (no new errors against master); not played.
 - **0.20.10**: no Powers change; pack bump for Kingdoms 0.7.510 (chopped logs crack deeper instead of thinning, chop meter).
+- **0.20.11, Kingdoms 0.7.511, Stegonaut:** the first of the lesser dragons rebuilt from Saint's Dragons (its MIT code;
+  our own art), a plated walker of the jungles and plains (Kingdoms' MODLOG has the rest).

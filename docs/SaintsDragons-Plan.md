@@ -19,8 +19,8 @@ Andy, 2026-11-04: "we NEED these dragons" (Saint's Dragons, CurseForge 1358098, 
 Our five wind dragons (`docs/Dragons-Plan.md`) are the great dragons of the four winds and their keeper. These eight
 are the **lesser dragons**: beasts of a single land, not of the winds. They tame and ride the same way as the wind
 dragons (trust meter, saddle, momentum flight, own stamina, piggyback rider) so players learn one system.
-- Built on the same base: `WindDragon` becomes `KingdomDragon` with a `Gait` (FLYER, WALKER, SWIMMER, FLOATER).
-  Walkers and swimmers reuse the WarElephant ground riding; floaters reuse flight with no landing.
+- Built on the same base, `WindDragon`, with hooks: `flies()` false makes a walker (grazes, fights on its feet, ridden
+  like a horse with R for its own move); swimmers and the floater get their own hooks in their patches.
 - Ids keep "dragon" in them (`jaymoskingdoms:raevyx_dragon` etc.) so Dragonblood wakes for them too.
 - Every one rolls a subtle look like the heritages (`DragonLook`): hide shade, horns, spikes, marking glow.
 - **Wild ones are monsters, not bosses**, except Ignivorus and Nulljaw. They count as monsters for world tier like
@@ -51,7 +51,7 @@ listed in the taming tooltip only once you've seen the species, never as a lore 
 
 ## Patches (each its own PR, merged in order; versions set to master + 1 right before merging)
 0. This plan.
-1. `KingdomDragon` base with gaits; wind dragons moved onto it unchanged. Stegonaut (walker) end to end as the proof:
+1. Walker hooks on `WindDragon` (the wind dragons unchanged). Stegonaut (walker) end to end as the proof:
    model, look rolls, spawning, taming, riding, moves.
 2. Atroxiia + Varasuchus (walker/swimmer, the roost structure, tailguard on our parry).
 3. Raevyx + Cindervane (flyers, storm spawning).

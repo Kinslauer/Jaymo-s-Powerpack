@@ -31,6 +31,9 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		DragonLook look = DragonLook.decode(0);
 		float fly, breath, land, sit, crash, flap, glide, pitch, swim;
 		boolean saddled;
+		/** (0.7.511) The move it's making ({@link WindDragon#action}) and how long it has been at it (ticks, smoothed). */
+		int action;
+		float actionAge;
 	}
 
 	private final String species;
@@ -84,6 +87,8 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		state.pitch = Mth.lerp(partialTicks, dragon.pitchAnimO, dragon.pitchAnim);
 		state.swim = Mth.lerp(partialTicks, dragon.swimAnimO, dragon.swimAnim);
 		state.saddled = dragon.saddled();
+		state.action = dragon.actionSeen;
+		state.actionAge = dragon.actionAge + partialTicks;
 	}
 
 	@Override

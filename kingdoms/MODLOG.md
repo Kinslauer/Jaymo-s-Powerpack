@@ -8710,3 +8710,27 @@ is our own take on the idea (none of its code or art).
 - Felling, the fall, the crack and crush, Aether Giants, the Great Ape and Towerback trampling trees, and tornadoes are
   unchanged (none of them go through `Trees.chop`).
 - Not played; compile not checked against the game jars.
+## 0.7.511: Stegonaut, the first of the lesser dragons (pack 0.20.11)
+Andy: "we NEED these dragons" (Saint's Dragons). It is a 1.20.1 mod whose code is MIT and whose art is All Rights
+Reserved, so its eight dragons are rebuilt here with our own models and paint (`docs/SaintsDragons-Plan.md`, patch 1 of
+5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
+- **Walkers** (`WindDragon.flies`): a dragon that never takes off. Wild it strolls and grazes about its home, fights on
+  its feet where it stands, and bolting it lumbers off; tamed and saddled it's ridden like a horse, and R sends its own
+  move. New hooks for the lesser dragons: `aggressive` (a grazer fights only whoever hurts it), `bossBar` (beasts, not
+  minibosses), `windDragon` (killing one doesn't count toward Eurus and Aeolus's disguises), `crashKey`/`boltKey`,
+  `walkerFight`, and `action` (the move its model is playing, with `actionSeen`/`actionAge` on the client).
+- **Stegonaut** (`StegonautDragon`, `jaymoskingdoms:stegonaut_dragon`): a low, broad, plated dragon of the jungles and
+  plains (`has_stegonaut_dragon`), spawning with the herds in ones and twos and staying put like cattle. 100 health,
+  armour 15. Besides the bite and the tail sweep: a **chin slam** (8, a throw up), a **ground slam** (rears, stamps:
+  20 in a ring of 5, then seven earth spikes burst along the ground toward its foe, 10 each), **ground eating** (at 7-24
+  blocks it bites up the earth, chews, and spits a clod in an arc, 10) and, worn down or ridden and hit, a **roar** that
+  hardens its plates (Resistance and Absorption for it, its riders and its owner near it, 10 s). Tamed the usual way
+  (wear it below a third, crouch empty-handed, raw beef its favourite, Stoneborn twice as fast); ridden, R is the ground
+  slam with its spikes running where you look (5 s).
+- **Its look** (`client/dragons/StegonautDragonModel`, `tools/gen_stegonaut.py`, which prints the model's body plan from
+  its own UV table): two staggered rows of horn plates, a bony brow and a shovel jaw, pillar legs, a four-spiked tail;
+  four hides (moss stone, jungle green, sandstone, slate) with moss on its back and four glowing-lichen marking patterns;
+  short/long horns or a nose horn and a broken plate by its DragonLook; drawn 1.3x. It plods, rears and stamps for the
+  slam, noses the ground and chews, and flares its plates to roar.
+- `/kingdom dragon stegonaut [tame]` (operators).
+- Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.
