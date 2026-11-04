@@ -42,7 +42,7 @@ abstract class McaStrangerPageMixin extends Screen {
 	private void jaymoskingdoms$strangerPage(String layout, CallbackInfo ci) {
 		if (!"main".equals(layout) || !((Object)this instanceof InteractScreen) || !(this instanceof McaInteractScreenAccessor interact)
 			|| Introductions.knownHere(interact.jaymoskingdoms$villager().asEntity())
-			// (0.7.538) one of Powers' Z Fighter characters shows only Talk (McaZFighterPageMixin)
+			// (0.7.539) one of Powers' Z Fighter characters shows only Talk (McaZFighterPageMixin)
 			|| interact.jaymoskingdoms$villager().asEntity().getAttached(com.jaymoskingdoms.ZFighterFolk.PART) != null) {
 			return;
 		}

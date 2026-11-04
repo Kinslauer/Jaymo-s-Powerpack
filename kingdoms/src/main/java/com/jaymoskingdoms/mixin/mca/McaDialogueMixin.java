@@ -277,7 +277,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && com.jaymoskingdoms.ZFighterFolk.WORD.equals(answer)) {
-			// (0.7.538) "Have a word" with one of Powers' Z Fighter characters (the Judge's writs, the Keeper's blessing...)
+			// (0.7.539) "Have a word" with one of Powers' Z Fighter characters (the Judge's writs, the Keeper's blessing...)
 			villager.getInteractions().stopInteracting();
 			com.jaymoskingdoms.ZFighterFolk.talk(player, villager);
 			ci.cancel();

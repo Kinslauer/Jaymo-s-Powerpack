@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.538) Andy: "remove all options but talk for the judge ... have a word should be the only option with the judge.
+ * (0.7.539) Andy: "remove all options but talk for the judge ... have a word should be the only option with the judge.
  * but they are still MCA." On one of Powers' Z Fighter characters ({@link ZFighterFolk#PART}: the Judge, the Keeper, the
  * Mad Tinkerer, the demon masters, the star smith...) MCA's main page shows only Talk: no Interact, Trade, Family Tree,
  * Quests or the rest. Talk opens "Have a word" ({@link ZFighterFolk#WORD}, {@code McaAnswersMixin}). They're never shown

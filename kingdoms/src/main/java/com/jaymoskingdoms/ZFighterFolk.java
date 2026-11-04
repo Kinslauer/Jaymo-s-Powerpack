@@ -46,13 +46,13 @@ public final class ZFighterFolk {
 	/** MCA's main menu: "Talk about training", on a town's Z Fighter master. */
 	public static final String TRAINING = "jaymoskingdoms_training";
 	/**
-	 * (0.7.538) Andy: "have a word should be the only option with the judge. but they are still MCA." MCA's main menu on
+	 * (0.7.539) Andy: "have a word should be the only option with the judge. but they are still MCA." MCA's main menu on
 	 * one of them: "Have a word" (their talk, {@link #talk}) in place of "Talk about work", and nothing else of MCA's
 	 * ({@link #keeps}). Their screen shows only Talk ({@code McaZFighterPageMixin}).
 	 */
 	public static final String WORD = "jaymoskingdoms_word";
 	/**
-	 * (0.7.538) Who roams among people rather than keeping a post (an Omen's pilot, a galactic patrolman): they keep MCA's
+	 * (0.7.539) Who roams among people rather than keeping a post (an Omen's pilot, a galactic patrolman): they keep MCA's
 	 * small talk beside "Have a word". No hugs, flirting, kissing, blood or work for anyone here.
 	 */
 	static final Set<String> SMALL_TALKERS = Set.of("omen_pilot", "patrolman");
@@ -198,7 +198,7 @@ public final class ZFighterFolk {
 		return kind == null ? null : PILOT_KIND.equals(kind) ? List.of() : Uniforms.zfighter(kind);
 	}
 
-	/** (0.7.538) Whether MCA's main menu keeps {@code answer} on {@code e}, one of them ({@link #WORD}, {@link #SMALL_TALKERS}). */
+	/** (0.7.539) Whether MCA's main menu keeps {@code answer} on {@code e}, one of them ({@link #WORD}, {@link #SMALL_TALKERS}). */
 	public static boolean keeps(Entity e, String answer) {
 		if (WORD.equals(answer)) {
 			return true;
