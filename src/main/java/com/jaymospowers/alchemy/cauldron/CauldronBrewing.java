@@ -1,6 +1,9 @@
 package com.jaymospowers.alchemy.cauldron;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.alchemy.brewing.BrewGrade;
+import com.jaymospowers.alchemy.brewing.BrewGrades;
+import com.jaymospowers.alchemy.brewing.BrewQuality;
 import com.jaymospowers.tinkering.kiln.Heat;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -24,6 +27,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
@@ -58,8 +62,11 @@ import org.jspecify.annotations.Nullable;
  * redstone or glowstone...).
  * <ul>
  * <li>Each ingredient floats in the pot (the thrown item itself, held there with {@link #FLOATING}) until it's stirred in
- * ({@link #STIR_TURNS} turns with a stick or a shovel, holding use), swirling round with each turn; one thrown in while
- * the last is still unstirred, or one the brew can't take, is spat back out.</li>
+ * stirred in: a timed stir ({@link CauldronStirring}, (0.20.13)) of {@link #STIR_TURNS} turns with a stick or a shovel,
+ * swirling round with each turn; one thrown in while the last is still unstirred, or one the brew can't take, is spat
+ * back out.</li>
+ * <li>(0.20.13) Each ingredient stirred in is a step graded on its grind ({@code Brewing.GROUND}) and its stir; bottles
+ * carry the brew's {@link BrewGrade}.</li>
  * <li>A stirred brew fills three bottles (one per cauldron level). Gunpowder thrown into it makes it splash, dragon's
  * breath lingering (the brewing stand's own recipes).</li>
  * <li>Buckets and more water would spoil it, so they're refused; a brew whose level changes some other way (rain, a
@@ -68,7 +75,7 @@ import org.jspecify.annotations.Nullable;
  * Also here: sneak-use a water bottle to throw it; it splashes like a splash water bottle and puts out fires.
  */
 public final class CauldronBrewing {
-	/** Stirring turns (use clicks, about five a second while held) that work an ingredient in. */
+	/** Stirring turns (judged on the stir bar) that work an ingredient in. */
 	public static final int STIR_TURNS = 6;
 	/** Ticks between the bubbling of a brew over heat. */
 	public static final int BUBBLE_TICKS = 8;
@@ -81,13 +88,53 @@ public final class CauldronBrewing {
 	/** Kitchen's hot blocks (stove, furnaces...); empty when Kitchen isn't loaded. */
 	public static final TagKey<Block> KITCHEN_HEAT = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("jaymoskitchen", "heat_sources"));
 
-	/** A cauldron's brew: the potion one bottle takes, stir turns still owed, and the cauldron level it was left at. */
-	public record Brew(ItemStack potion, int stirs, int fills) {
+	/**
+	 * A cauldron's brew: the potion one bottle takes, stir turns still owed, and the cauldron level it was left at.
+	 * (0.20.13) Also the ingredient being stirred now ({@code stirScore}, {@code perfects}, {@code seed} of its bar and its
+	 * {@code grind} score, -1 for nothing to grind) and the sum of the finished step scores ({@code quality}, {@code steps}).
+	 */
+	public record Brew(ItemStack potion, int stirs, int fills, float stirScore, int perfects, long seed, float grind, float quality, int steps) {
 		public static final Codec<Brew> CODEC = RecordCodecBuilder.create(i -> i.group(
 			ItemStack.CODEC.fieldOf("potion").forGetter(Brew::potion),
 			Codec.INT.fieldOf("stirs").forGetter(Brew::stirs),
-			Codec.INT.fieldOf("fills").forGetter(Brew::fills)
+			Codec.INT.fieldOf("fills").forGetter(Brew::fills),
+			Codec.FLOAT.optionalFieldOf("stir_score", 0.0F).forGetter(Brew::stirScore),
+			Codec.INT.optionalFieldOf("perfects", 0).forGetter(Brew::perfects),
+			Codec.LONG.optionalFieldOf("seed", 0L).forGetter(Brew::seed),
+			Codec.FLOAT.optionalFieldOf("grind", -1.0F).forGetter(Brew::grind),
+			Codec.FLOAT.optionalFieldOf("quality", 0.0F).forGetter(Brew::quality),
+			Codec.INT.optionalFieldOf("steps", 0).forGetter(Brew::steps)
 		).apply(i, Brew::new));
+
+		public Brew withFills(int fills) {
+			return new Brew(potion, stirs, fills, stirScore, perfects, seed, grind, quality, steps);
+		}
+
+		public Brew withSeed(long seed) {
+			return new Brew(potion, stirs, fills, stirScore, perfects, seed, grind, quality, steps);
+		}
+
+		/** A brew saved half-stirred before 0.20.13: the turns already done count as Good. */
+		public Brew withLegacySeed(long seed) {
+			float credit = (STIR_TURNS - stirs) * BrewQuality.score(BrewQuality.GOOD);
+			return new Brew(potion, stirs, fills, stirScore + credit, perfects, seed, grind, quality, steps);
+		}
+
+		/** After a stir turn that landed as {@code result}. */
+		public Brew stroke(int result) {
+			return new Brew(potion, stirs - 1, fills, stirScore + BrewQuality.score(result),
+				perfects + (result == BrewQuality.PERFECT ? 1 : 0), seed, grind, quality, steps);
+		}
+
+		/** After the last turn: the ingredient is a finished step. */
+		public Brew stirred() {
+			return new Brew(potion, 0, fills, 0.0F, 0, seed, -1.0F,
+				quality + BrewQuality.stepScore(stirScore / STIR_TURNS, grind), steps + 1);
+		}
+
+		public BrewGrade grade() {
+			return BrewQuality.grade(quality, steps);
+		}
 	}
 
 	/** The brews in a chunk, by packed block position. */
@@ -112,11 +159,15 @@ public final class CauldronBrewing {
 			ItemStack stack = player.getItemInHand(hand);
 			if (level.isClientSide()) {
 				// the server decides; just don't let the client predict a water bottle out of a brew
-				return stack.is(Items.STICK) || stack.is(ItemTags.SHOVELS) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+				if (stack.is(Items.STICK) || stack.is(ItemTags.SHOVELS)) {
+					CauldronStirring.clientStir.test(player, pos); // (0.20.13) judges and sends a turn when the stir bar is up here
+					return InteractionResult.SUCCESS;
+				}
+				return InteractionResult.PASS;
 			}
 			Brew brew = get(level, pos);
 			if (stack.is(Items.STICK) || stack.is(ItemTags.SHOVELS)) {
-				return stir(player, level, pos, brew);
+				return CauldronStirring.use((ServerPlayer) player, (ServerLevel) level, pos, brew);
 			}
 			if (brew == null) {
 				return InteractionResult.PASS;
@@ -129,8 +180,10 @@ public final class CauldronBrewing {
 				return InteractionResult.FAIL;
 			}
 			if (stack.isEmpty()) {
-				player.sendOverlayMessage(Component.translatable(brew.stirs() > 0 ? "message.jaymospowers.cauldron_brew.unstirred"
-					: "message.jaymospowers.cauldron_brew.holds", brew.potion().getHoverName(), brew.fills()));
+				player.sendOverlayMessage(brew.stirs() > 0
+					? Component.translatable("message.jaymospowers.cauldron_brew.unstirred", brew.potion().getHoverName(), brew.fills())
+					: Component.translatable("message.jaymospowers.cauldron_brew.holds", brew.potion().getHoverName(),
+						brew.grade().displayName(), brew.fills()));
 				// PASS: Kitchen's tanning lifts soaked hides out with an empty hand
 				return InteractionResult.PASS;
 			}
@@ -157,6 +210,7 @@ public final class CauldronBrewing {
 			}
 		});
 		ServerTickEvents.END_LEVEL_TICK.register(CauldronBrewing::bubble);
+		CauldronStirring.init(); // (0.20.13)
 	}
 
 	/** An item in a water cauldron ({@code LayeredCauldronBlockMixin}): over heat, a brewing ingredient goes in or is spat out. */
@@ -198,38 +252,13 @@ public final class CauldronBrewing {
 		floating.setNeverPickUp();
 		floating.setUnlimitedLifetime();
 		swirl(floating, pos, STIR_TURNS);
-		set(level, pos, new Brew(result, STIR_TURNS, state.getValue(LayeredCauldronBlock.LEVEL)));
+		// (0.20.13) the grind of this ingredient, and what the earlier steps scored
+		float grind = BrewQuality.grindScore(reagent);
+		set(level, pos, new Brew(result, STIR_TURNS, state.getValue(LayeredCauldronBlock.LEVEL), 0.0F, 0, level.getRandom().nextLong() | 1L, grind,
+			brew == null ? 0.0F : brew.quality(), brew == null ? 0 : brew.steps()));
 		level.playSound(null, pos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 0.5F, 1.2F);
 		level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.6F, 1.1F);
 		puff(level, pos, result, 10);
-	}
-
-	private static InteractionResult stir(Player player, Level level, BlockPos pos, @Nullable Brew brew) {
-		if (brew == null || brew.stirs() <= 0) {
-			return InteractionResult.PASS;
-		}
-		if (!heated(level, pos)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.cauldron_brew.cold"));
-			return InteractionResult.FAIL;
-		}
-		int stirs = brew.stirs() - 1;
-		set(level, pos, new Brew(brew.potion(), stirs, brew.fills()));
-		ServerLevel server = (ServerLevel) level;
-		server.sendParticles(ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.95, pos.getZ() + 0.5, 4, 0.2, 0.0, 0.2, 0.0);
-		level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_WHIRLPOOL_INSIDE, SoundSource.BLOCKS, 0.4F, 1.4F);
-		for (ItemEntity floating : floating(level, pos)) {
-			if (stirs == 0) {
-				floating.discard();
-			} else {
-				swirl(floating, pos, stirs);
-			}
-		}
-		if (stirs == 0) {
-			level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.8F, 1.0F);
-			puff(server, pos, brew.potion(), 16);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.cauldron_brew.stirred", brew.potion().getHoverName()));
-		}
-		return InteractionResult.SUCCESS;
 	}
 
 	private static InteractionResult bottle(Player player, Level level, BlockPos pos, BlockState state, Brew brew, ItemStack stack,
@@ -238,23 +267,25 @@ public final class CauldronBrewing {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.cauldron_brew.unstirred", brew.potion().getHoverName(), brew.fills()));
 			return InteractionResult.FAIL;
 		}
-		player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, brew.potion().copy()));
+		ItemStack out = brew.potion().copy();
+		BrewGrades.set(out, brew.grade());
+		player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, out));
 		level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
 		int fills = brew.fills() - 1;
-		set(level, pos, fills > 0 ? new Brew(brew.potion(), 0, fills) : null);
+		set(level, pos, fills > 0 ? brew.withFills(fills) : null);
 		LayeredCauldronBlock.lowerFillLevel(state, level, pos);
 		return InteractionResult.SUCCESS;
 	}
 
 	/** Sets a floating ingredient on its spot round the pot for this many stir turns still to go. */
-	private static void swirl(ItemEntity item, BlockPos pos, int stirs) {
+	static void swirl(ItemEntity item, BlockPos pos, int stirs) {
 		double angle = stirs * (Math.PI * 2.0 / STIR_TURNS);
 		item.setPos(pos.getX() + 0.5 + Math.cos(angle) * SWIRL, pos.getY() + FLOAT_HEIGHT, pos.getZ() + 0.5 + Math.sin(angle) * SWIRL);
 		item.setDeltaMovement(0.0, 0.0, 0.0);
 	}
 
 	/** The ingredients floating in the cauldron at {@code pos}. */
-	private static java.util.List<ItemEntity> floating(Level level, BlockPos pos) {
+	static java.util.List<ItemEntity> floating(Level level, BlockPos pos) {
 		return level.getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(pos), e -> e.entityTags().contains(FLOATING));
 	}
 
@@ -279,7 +310,7 @@ public final class CauldronBrewing {
 		}
 	}
 
-	private static void puff(ServerLevel level, BlockPos pos, ItemStack potion, int count) {
+	static void puff(ServerLevel level, BlockPos pos, ItemStack potion, int count) {
 		int colour = potion.getOrDefault(net.minecraft.core.component.DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getColor();
 		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, colour | 0xFF000000), pos.getX() + 0.5, pos.getY() + 1.0,
 			pos.getZ() + 0.5, count, 0.2, 0.15, 0.2, 0.0);
@@ -345,7 +376,7 @@ public final class CauldronBrewing {
 		return brew;
 	}
 
-	private static void set(Level level, BlockPos pos, @Nullable Brew brew) {
+	static void set(Level level, BlockPos pos, @Nullable Brew brew) {
 		if (!(level.getChunk(pos) instanceof LevelChunk chunk)) {
 			return;
 		}
