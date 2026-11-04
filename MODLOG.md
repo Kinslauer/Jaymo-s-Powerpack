@@ -294,3 +294,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (`ZFighterRogue.raider`, `ZFighterRaiders.raider`). Compile-checked against the 26.3 jars; not played.
 - **0.20.37, Kingdoms 0.7.532, story figure tails:** tails on the life story's figure no longer hang down between the
   legs. See the Kingdoms MODLOG.
+- **0.20.38, Kingdoms 0.7.533, gap jumps and dug-out taverns:** villagers and other humanoids jump gaps their path
+  stops short of, and Dungeons and Taverns' taverns (and any surface building saved with voids for rooms) no longer
+  generate packed with earth. See the Kingdoms MODLOG.
