@@ -8424,12 +8424,25 @@ each reviewed with every finding independently verified; compile-checked only, n
   end portal frames, 12 eyes, one generic Souls-like boss entity with poise, kneel and riposte, a model and a renderer.
   None of it compiles on 26.3, and most of it is already in the pack in our own form (world tiers and their great foes,
   the Goblin King, the Ogre King's three phases, the Skeleton Lord, the Cinder Forge's Ignis Vael, Tinkering and the
-  enchanting overhaul, red-glint heavy blows, Powers' guard and riposte). Kept only the part we didn't have:
+  enchanting overhaul, red-glint heavy blows, Powers' guard and riposte). Kept the part we didn't have, and (Andy) the boss ladder:
 - **Boss posture** (`BossPosture`): every boss with a Kingdoms bar, plus the Ogre King, Skeleton Lord and Piglin King,
   has a posture of 20 + 35% of its health. Melee wears it by the damage taken (x1.6 sprinting or falling), arrows and
   thrown weapons at 40%, its own blows caught on a shield or guard at 75%. After 3 quiet seconds it refills over 5.
   Broken, the boss kneels 3 seconds (stopped, head bowed, can't strike; sparks, an anvil's clang); the first melee blow
   then is a riposte at 2.25x and brings it up. Then 8 seconds when posture can't be worn. A thin "Posture" bar shows
   under the boss bar to the players who have that bar, only while it's worn. No chat text. Vanilla bosses untouched.
-- Dropped: the workstation locks and eyes (would break Tinkering's anvil, smithing and enchanting and the world-tier
-  ladder; left for Andy), the generic boss entity, model and renderer (no textures, duplicates of bosses we have).
+- Dropped: the generic boss entity, model and renderer (no textures, duplicates of bosses we have), the 12 eyes.
+- **Knowledge** (`Knowledge`; Andy kept the ladder: "tying combat directly into progression"). Five levels, earned by
+  slaying bosses in order (a level counts once every boss below it has fallen too). Each kill is a world-tier feat, so it
+  is shared by everyone near and by the party:
+  1. Goblin King: anvils (vanilla and the iron Smithing Anvil; the Stone Anvil stays open) and bog iron (also open
+     world-wide once an Ogre King falls, as before).
+  2. An Ogre King: the smithing table, and the heavy arms on the Smithing Anvil (claymore, war scythe, glaive, halberd,
+     broad blade).
+  3. The Skeleton Lord: the enchanting table.
+  4. The Piglin King: learning a spell from a scroll (reading one once still works for anyone), the Storm Arts, and skill
+     perks that want pillar level 15+.
+  5. The Wither: End portal frames take eyes.
+  World tiers want them too: Borderlands 1, Wildlands 2, Dread 4, Legend 5. The Rung Journal ticks each. A refusal is an
+  action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
+  tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.

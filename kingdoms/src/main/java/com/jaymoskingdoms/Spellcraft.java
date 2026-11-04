@@ -211,6 +211,11 @@ public final class Spellcraft {
 		if (!staffCaster(player) || c.spells().contains(spell)) {
 			return false;
 		}
+		if (!Knowledge.has(player, Knowledge.HIGHER_ARTS)) {
+			// (0.7.491) learning a spell for good is a higher art (Knowledge 4): until then the scroll is read once, as anyone's
+			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
+			return false;
+		}
 		List<String> spells = new ArrayList<>(c.spells());
 		spells.add(spell);
 		player.setAttached(Classes.CLASS, new Classes.Chosen(c.cls(), c.option(), List.copyOf(spells), c.selected()));

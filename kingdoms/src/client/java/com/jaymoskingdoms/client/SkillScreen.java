@@ -385,7 +385,7 @@ final class SkillScreen extends Screen {
 		}
 		Skills.Perk perk = perkAt(event.x(), event.y());
 		if (perk != null) {
-			if (progress().blocked(perk) == null) {
+			if (progress().blocked(perk) == null && (this.minecraft.player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(this.minecraft.player, perk))) {
 				ClientPlayNetworking.send(new Skills.Spend(perk.ordinal()));
 				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			}
@@ -432,6 +432,10 @@ final class SkillScreen extends Screen {
 			}
 			text.add(cost.copy().withColor(Ui.DIM));
 			String blocked = shown.blocked(hovered);
+			// (0.7.491) a higher technique wants Knowledge 4
+			if (blocked == null && this.minecraft.player != null && com.jaymoskingdoms.Knowledge.lockedPerk(this.minecraft.player, hovered)) {
+				blocked = "gui.jaymoskingdoms.skills.blocked.knowledge";
+			}
 			if (blocked == null) {
 				text.add(Component.translatable("gui.jaymoskingdoms.skills.learn").withColor(Ui.GOOD));
 			} else {
