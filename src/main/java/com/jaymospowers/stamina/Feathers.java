@@ -77,6 +77,8 @@ public final class Feathers {
 
 	/** A power's golden feathers: how many it gives this player right now (0 for none). */
 	private static final List<ToIntFunction<ServerPlayer>> BONUSES = new ArrayList<>();
+	/** (0.20.24) What holds feathers back for good (half-feathers): drowned lungs ({@code Scars}). */
+	private static final List<ToIntFunction<ServerPlayer>> PENALTIES = new ArrayList<>();
 
 	/** Server: a player's feathers. */
 	private static final class State {
@@ -101,6 +103,11 @@ public final class Feathers {
 		ServerTickEvents.END_SERVER_TICK.register(Feathers::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> STATES.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> STATES.clear());
+	}
+
+	/** (0.20.24) Holds back {@code penalty} (half-feathers) of each player's row, as armour weight does. */
+	public static void addPenalty(ToIntFunction<ServerPlayer> penalty) {
+		PENALTIES.add(penalty);
 	}
 
 	/** Gives players golden feathers on top of their row: {@code bonus} says how many (half-feathers) for each player. */
@@ -230,7 +237,11 @@ public final class Feathers {
 		ServerLevel level = player.level();
 		s.weight = Math.min(MAX, Math.round(player.getArmorValue() * ARMOR_WEIGHT));
 		int heat = level.dimension() == Level.NETHER && !player.hasEffect(MobEffects.FIRE_RESISTANCE) ? NETHER_PENALTY : 0;
-		s.cap = Math.max(0, MAX - s.weight - heat);
+		int held = 0;
+		for (ToIntFunction<ServerPlayer> penalty : PENALTIES) {
+			held += Math.max(0, penalty.applyAsInt(player));
+		}
+		s.cap = Math.max(0, MAX - s.weight - heat - held);
 		int bonusCap = 0;
 		for (ToIntFunction<ServerPlayer> bonus : BONUSES) {
 			bonusCap += Math.max(0, bonus.applyAsInt(player));

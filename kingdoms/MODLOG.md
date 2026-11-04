@@ -425,3 +425,10 @@ Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its co
   haven, of the land's blood or mixed (never a purist's). About one human in 25 standing there stays human
   (`Havens.keptHuman`, by who they are), and says why when asked their name: wed in, cast out of the human towns, a
   foundling, its healer, working off a debt, or a deserter it hid. Compile-checked; not played.
+
+## 0.7.522: death by cause hooks (pack 0.20.24)
+- Powers' death by cause (`Mortality`) now knows Kingdoms' bosses: whatever shows a boss bar (`BossBars.boss`, told through
+  `PowersCompat.tellBosses`), so dying to a king, warlord, champion, wild dragon or Aether Giant is a boss's death (70% final,
+  spared if you're far too weak).
+- Town healers treat what will kill (poisoned blood, water in the lungs, withering: `PowersCompat.afflicted`), for 8 more coins.
+  Compile-checked; not played.

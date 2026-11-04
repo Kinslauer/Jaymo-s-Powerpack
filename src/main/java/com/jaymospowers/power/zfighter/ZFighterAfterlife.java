@@ -234,8 +234,9 @@ public final class ZFighterAfterlife {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				// (0.17.108) and one of the dead dying again wakes among the dead again
+				// ((0.20.24) and anyone whose life ended for good, Mortality: they leave only to be born again)
 				if (ZFighterRealism.afterlife() && !player.isSpectator() && (among(player) || !inOtherWorld(player)
-					&& Powers.has(player, ZFighterPower.INSTANCE))) {
+					&& (Powers.has(player, ZFighterPower.INSTANCE) || com.jaymospowers.core.wounds.Mortality.isFinal(player)))) {
 					PENDING.put(player.getUUID(), player.level().getGameTime());
 				}
 				endGauntlet(player);
@@ -519,6 +520,10 @@ public final class ZFighterAfterlife {
 		to.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 40, 0.4, 0.8, 0.4, 0.05);
 		to.playSound(null, at, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.4F);
 		// (0.19.33) born again: Kingdoms tells the life story anew (back as he was if it can't)
+		if (com.jaymospowers.core.wounds.Mortality.isFinal(player)) {
+			// ((0.20.24) the end of a life: Mortality tells the story anew once he stands in the world)
+			return;
+		}
 		if (after != After.REBORN || !ZFighterKingdoms.reincarnate(player)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_back").withStyle(ChatFormatting.GREEN));
 		}
@@ -531,7 +536,16 @@ public final class ZFighterAfterlife {
 
 	/** Whether {@code player} may be asked to be born again: Kingdoms' life story, and the talk screen, on his side. */
 	static boolean mayBeReborn(ServerPlayer player) {
-		return ZFighterNpcs.canAsk() && ZFighterKingdoms.canReincarnate(player);
+		// ((0.20.24) one whose life ended isn't asked: they will be, Mortality.endLife, the moment they're let go)
+		return ZFighterNpcs.canAsk() && ZFighterKingdoms.canReincarnate(player) && !com.jaymospowers.core.wounds.Mortality.isFinal(player);
+	}
+
+	/**
+	 * (0.20.24) Born again through Kingdoms' life story, told anew with every start unlocked (for Mortality's end of a life).
+	 * False if it can't be (no Kingdoms, or its story screen).
+	 */
+	public static boolean bornAgain(ServerPlayer player) {
+		return ZFighterKingdoms.reincarnate(player);
 	}
 
 	/**

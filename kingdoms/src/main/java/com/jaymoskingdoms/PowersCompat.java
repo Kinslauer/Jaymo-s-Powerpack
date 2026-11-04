@@ -2201,6 +2201,39 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.522) Whether {@code entity} (a player) carries something that will kill them unless a healer clears it: poisoned blood,
+	 * water in the lungs, withering (Powers' {@code Afflictions.any}). False without Powers.
+	 */
+	public static boolean afflicted(net.minecraft.world.entity.LivingEntity entity) {
+		if (!(entity instanceof net.minecraft.world.entity.player.Player player) || !FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return false;
+		}
+		try {
+			return (boolean)Class.forName("com.jaymospowers.core.wounds.Afflictions")
+				.getMethod("any", net.minecraft.world.entity.player.Player.class).invoke(null, player);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * (0.7.522) Tells Powers' death by cause ({@code Mortality.BOSS_TESTS}) what Kingdoms counts as a boss: whatever shows a
+	 * boss bar ({@link BossBars#boss}), so a death to one is a boss's. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellBosses(java.util.function.Predicate<net.minecraft.world.entity.Entity> boss) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("BOSS_TESTS").get(null);
+			((java.util.List<java.util.function.Predicate<net.minecraft.world.entity.Entity>>)list).add(boss);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality (older Powers?)", e);
+		}
+	}
+
 	/** (0.7.462) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
 	public static boolean setBones(net.minecraft.world.entity.LivingEntity entity) {
 		lookForHealing();
