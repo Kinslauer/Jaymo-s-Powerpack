@@ -53,7 +53,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
- * (0.20.11, Andy 2026-11-04: Paxo's Pink Fairy "added as a bauble, super rare, and highly prized possessions among
+ * (0.20.12, Andy 2026-11-04: Paxo's Pink Fairy "added as a bauble, super rare, and highly prized possessions among
  * players and villagers alike"). Paxo's mod is All Rights Reserved and Forge 1.20.1 only, so this is our own:
  * <ul>
  * <li>A {@link PinkFairy} comes, very rarely, to the flowers of a forest (or a meadow or a cherry grove) at night, near
@@ -65,7 +65,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * <li>Worn, she brings luck and a little health, and once turns a death aside: the blow that would have killed you
  * leaves you on {@link #SAVED_HEALTH} with regeneration, the bottle cracks ({@link #CRACKED_BOTTLE}) and she flies
  * free, gone for good. She saves you before you would go down ({@link Downed}), never from the void or /kill.</li>
- * <li>(0.20.11) Andy: "the villagers can wear it too". A villager given one (MCA's gift puts it in their inventory)
+ * <li>(0.20.12) Andy: "the villagers can wear it too". A villager given one (MCA's gift puts it in their inventory)
  * puts her on: she hangs at their chest as at a player's ({@link #WEARS}, drawn by {@code WornFairies}), glows about
  * them, and once saves them the same way.</li>
  * </ul>
@@ -84,12 +84,12 @@ public final class Fairies {
 	static final float SAVED_HEALTH = 6.0F;
 	static final int SAVED_REGEN_TICKS = 200, SAVED_REGEN_LEVEL = 1;
 
-	/** (0.20.11) How often (ticks) wearers are looked at; how near a player villagers are (who may put one on). */
+	/** (0.20.12) How often (ticks) wearers are looked at; how near a player villagers are (who may put one on). */
 	static final int SHOW_EVERY = 20;
 	static final double VILLAGERS_NEAR = 32.0;
 
 	/**
-	 * (0.20.11) On a body: wears a bottled fairy, shown hung on the chest for everyone (synced). On a player it mirrors
+	 * (0.20.12) On a body: wears a bottled fairy, shown hung on the chest for everyone (synced). On a player it mirrors
 	 * their bauble slots; on a villager (given one) it is the fairy itself, kept.
 	 */
 	public static final AttachmentType<Boolean> WEARS = AttachmentRegistry.create(JaymosPowers.id("wears_fairy"),
@@ -97,7 +97,7 @@ public final class Fairies {
 
 	public static EntityType<PinkFairy> PINK_FAIRY;
 	public static Item BOTTLED_FAIRY;
-	/** (0.20.11) What's left once she has saved someone: the bottle, cracked. */
+	/** (0.20.12) What's left once she has saved someone: the bottle, cracked. */
 	public static Item CRACKED_BOTTLE;
 	/** Her sprite only (the renderer draws the fairy as it): not in any creative tab. */
 	public static Item FAIRY_SPRITE;
@@ -197,7 +197,7 @@ public final class Fairies {
 	/** Every {@link #SHOW_EVERY} ticks: who shows a fairy, villagers putting on one they were given, and the wearers' glow. */
 	private static void wearers(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			// ((0.20.11) at the hip, from the belt slot, she is drawn as the coin purse is: WornLanterns, not on the chest)
+			// ((0.20.12) at the hip, from the belt slot, she is drawn as the coin purse is: WornLanterns, not on the chest)
 			int slot = wornSlot(player);
 			boolean wears = slot >= 0 && slot != Baubles.BELT_SLOT;
 			if (wears != player.hasAttached(WEARS)) {
@@ -238,7 +238,7 @@ public final class Fairies {
 		}
 	}
 
-	/** The bauble slot a player wears a fairy in (amulet, charm or (0.20.11) belt, hung at the hip), or -1. */
+	/** The bauble slot a player wears a fairy in (amulet, charm or (0.20.12) belt, hung at the hip), or -1. */
 	static int wornSlot(Player player) {
 		List<ItemStack> worn = Baubles.worn(player);
 		for (int slot = 0; slot < Baubles.SIZE; slot++) {

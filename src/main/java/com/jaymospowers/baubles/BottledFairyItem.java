@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.11) A pink fairy in a corked bottle: worn as an amulet or a charm, she brings luck and, once, turns death
+ * (0.20.12) A pink fairy in a corked bottle: worn as an amulet or a charm, she brings luck and, once, turns death
  * aside ({@link Fairies#saveFromDeath}). Right-click puts her on; sneak and right-click lets her go (for good). Worn,
  * she glows faintly about you, for all to see.
  */
@@ -58,7 +58,7 @@ public class BottledFairyItem extends BaubleItem {
 		}
 	}
 
-	/** She fits the amulet slot (on a cord), the charm slot, or (0.20.11) the belt slot, hung at the hip. */
+	/** She fits the amulet slot (on a cord), the charm slot, or (0.20.12) the belt slot, hung at the hip. */
 	@Override
 	protected Component slotName() {
 		return Component.translatable("item.jaymospowers.bottled_fairy.slots");

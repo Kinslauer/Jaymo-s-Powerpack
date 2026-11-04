@@ -124,7 +124,7 @@ public final class Baubles {
 			new BaubleItem.Bonus(Attributes.LUCK, 1.0, AttributeModifier.Operation.ADD_VALUE));
 		// (Motion patch 4) a lantern on a stick, worn on the back with the lantern hung out over the head
 		LANTERN_POLE = bauble("lantern_pole", Kind.BODY, Rarity.COMMON);
-		// (0.20.11) the pink fairy, caught in a bottle
+		// (0.20.12) the pink fairy, caught in a bottle
 		Fairies.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		BaublesNet.init();
@@ -148,7 +148,7 @@ public final class Baubles {
 		return add(Registry.register(BuiltInRegistries.ITEM, key, new BaubleItem(new Item.Properties().setId(key).stacksTo(1).rarity(rarity), kind, List.of(bonuses))));
 	}
 
-	/** (0.20.11) Lists a registered bauble of ours: its bonuses taken off when it comes off, and in the creative tab. */
+	/** (0.20.12) Lists a registered bauble of ours: its bonuses taken off when it comes off, and in the creative tab. */
 	static <T extends BaubleItem> T add(T item) {
 		for (BaubleItem.Bonus bonus : item.bonuses()) {
 			TOUCHED.add(bonus.attribute());

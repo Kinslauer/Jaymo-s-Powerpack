@@ -32,7 +32,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.11) A pink fairy: a tiny winged mote of rose light that flits over the flowers of a forest at night. Our own
+ * (0.20.12) A pink fairy: a tiny winged mote of rose light that flits over the flowers of a forest at night. Our own
  * take on the idea of Paxo's Pink Fairy (ARR, Forge 1.20.1: nothing of it is used). She is shy: anyone who comes near
  * without sneaking ({@link #SHY_RANGE}) sends her darting off, so she has to be crept up on and caught in an empty glass
  * bottle ({@link Fairies#BOTTLED_FAIRY}). Any blow kills her, and whoever does it is cursed with bad luck. Daylight

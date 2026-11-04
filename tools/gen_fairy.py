@@ -1,5 +1,5 @@
-"""Draws the pink fairy (0.20.11, 2026-11-04): her flying sprite and the Bottled Pink Fairy bauble icon, both 16x16
-animated item textures (her wings flapping; (0.20.11) her flitting about inside the bottle), and the cracked bottle she leaves. Our own art in the pack's vanilla
+"""Draws the pink fairy (0.20.12, 2026-11-04): her flying sprite and the Bottled Pink Fairy bauble icon, both 16x16
+animated item textures (her wings flapping; (0.20.12) her flitting about inside the bottle), and the cracked bottle she leaves. Our own art in the pack's vanilla
 style (gen_baubles.py's outline and three tones lit from the top left); nothing from Paxo's Pink Fairy (ARR).
 Run it from the root:
 
@@ -116,7 +116,7 @@ def fairy(up):
     return img
 
 
-# (0.20.11) Andy: "The fairy should be animated inside the bottle". Where she is in each frame (offset from the
+# (0.20.12) Andy: "The fairy should be animated inside the bottle". Where she is in each frame (offset from the
 # bulb's middle, in pixels) and whether her wings are up: she flits round the inside of the glass in a loop.
 FLIT = [(-2, 0, True), (-1, -1, False), (0, -2, True), (1, -1, False), (2, 0, True), (1, 1, False), (0, 1, True),
         (-1, 1, False)]
@@ -185,7 +185,7 @@ CRACK = (70, 84, 104, 255)
 
 
 def cracked_bottle():
-    """(0.20.11) What's left once she has saved someone: the bottle, empty, cracked through, a chip gone from its side."""
+    """(0.20.12) What's left once she has saved someone: the bottle, empty, cracked through, a chip gone from its side."""
     img = blank()
     cx, cy, r = 7.5, 10.0, 4.6
     glass(img, cx, cy, r)

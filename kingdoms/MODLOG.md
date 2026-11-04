@@ -8710,7 +8710,8 @@ is our own take on the idea (none of its code or art).
 - Felling, the fall, the crack and crush, Aether Giants, the Great Ape and Towerback trampling trees, and tornadoes are
   unchanged (none of them go through `Trees.chop`).
 - Not played; compile not checked against the game jars.
-## 0.7.511: pink fairies are prized (pack 0.20.11)
+
+## 0.7.512: pink fairies are prized (pack 0.20.12)
 - **FairyWonder:** Jaymo's Powers' Bottled Pink Fairy (a super rare bauble) is the rarest thing townsfolk ever see.
   Villagers (vanilla and MCA) within 8 blocks who see a player wearing one (amulet or charm slot, via
   `PowersCompat.baubles`) or holding one stop, stare and say so in a gold bubble (8 grown lines of longing, envy and old

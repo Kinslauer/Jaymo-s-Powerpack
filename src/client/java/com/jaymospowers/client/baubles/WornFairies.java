@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.20.11) A worn bottled fairy, hung on the chest for everyone to see (Andy: "the villagers can wear it too"): any
+ * (0.20.12) A worn bottled fairy, hung on the chest for everyone to see (Andy: "the villagers can wear it too"): any
  * humanoid body that {@link Fairies#wears} one, players (from their amulet or charm slot) and villagers (MCA's too) who
  * were given one. Drawn as the item itself, so the fairy inside flits about as she does in the inventory, and lit full
  * bright, as she glows.

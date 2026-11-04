@@ -22,7 +22,7 @@ public final class BaublesClient {
 
 	public static void init() {
 		MenuScreens.register(Baubles.MENU, BaublesScreen::new);
-		// (0.20.11) the pink fairy: her flat sprite, wings flapping, always fully lit
+		// (0.20.12) the pink fairy: her flat sprite, wings flapping, always fully lit
 		EntityRenderers.register(Fairies.PINK_FAIRY, ctx -> new ThrownItemRenderer<>(ctx, 0.75F, true));
 		WornFairies.init();
 		BaublesTab.init();
