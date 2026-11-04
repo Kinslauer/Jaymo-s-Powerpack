@@ -349,7 +349,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   most). Wounds undone, a final death undone, health (at least 3 hearts), hunger and effects as then; of every item kind
   you keep at most what you carried then (by item, so worn tools still count) and experience never comes back higher,
   while what you lost meanwhile stays lost, so nothing is doubled. Executions (`Downed.execute`: finishers, hostiles', the
-  symbiote's, Z Fighters'; now flagged by `Mortality.executing` until the blow is dealt) and /kill still kill. Writs and
+  symbiote's, Z Fighters'; now flagged by `Mortality.executing` until the blow is dealt) and /kill still kill once the
+  blow lands, but (Andy: "you can still use the R, before the fatal damage like the cancel, and the executioner will be
+  perplexed and react in their own way") R works the whole time an execution is coming or under way: you're rewound out
+  from under it, a hostile executioner stops over the empty ground, turns about and gives voice its own way
+  (`MobExecutions.executioner`, `ChronoCheatDeath.perplexed`), and a player's finisher stops as when anyone is spared. Writs and
   the Judge work as before. Respawn Recap (MIT, DialingSpoon, 1.2.1-26.3, client-only) ships unchanged in packModsOverride
   and is Chrono's alone (`client/mixin/respawnrecap`, @Pseudo): its replay plays only as a rewind (never for a real death,
   and with no respawn at its end), it keeps screenshots only while you're a Chrono, and `client/compat/RespawnRecapPlugin`

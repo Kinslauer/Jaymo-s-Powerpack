@@ -67,8 +67,11 @@ import org.jspecify.annotations.Nullable;
  * there's no waking anywhere.</li>
  * </ul>
  * R takes you back to the oldest checkpoint your power reaches ({@link #window}): one minute at first, up to seven for a
- * Timeless Paragon. An execution (a finisher, a hostile's, the symbiote's or a Z Fighter's, all through
- * {@code Downed.execute}) and /kill still kill, with no window.
+ * Timeless Paragon. An execution's killing blow (a finisher, a hostile's, the symbiote's or a Z Fighter's, all through
+ * {@code Downed.execute}) and /kill still kill, with no window after. But (Andy: "you can still use the R, before the
+ * fatal damage like the cancel, and the executioner will be perplexed and react in their own way") R works all the while
+ * an execution is coming or under way: you're gone from under them, a hostile left staring at the empty ground
+ * ({@link #perplexed}), a player's finisher stopped as when anyone is spared.
  *
  * <p>Rewound, nothing of the death happened: no drops, no corpse, no death counted, no final death or waking in the wild.
  * Body wounds are undone (Time Bloom's healing, run to the end). Whatever you gained since the checkpoint is gone: of every
@@ -174,7 +177,7 @@ public final class ChronoCheatDeath {
 		PayloadTypeRegistry.clientboundPlay().register(Rewound.TYPE, Rewound.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Window.TYPE, Window.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Rewind.TYPE, Rewind.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Rewind.TYPE, (payload, ctx) -> rewind(ctx.player()));
+		ServerPlayNetworking.registerGlobalReceiver(Rewind.TYPE, (payload, ctx) -> pressed(ctx.player()));
 		// after Downed's last word and death by cause's roll, before the killing blow's dismemberment and the symbiote
 		// taking your things
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(JaymosPowers.id("downed_last"), PHASE);
@@ -246,6 +249,10 @@ public final class ChronoCheatDeath {
 					hold(player, held, now);
 				}
 				continue;
+			}
+			if (now % 20 == 0 && has(player) && executed(player)) {
+				// an execution coming or under way: R stays open until it's over (silently)
+				ServerPlayNetworking.send(player, new Window(30));
 			}
 			if (Mortality.waking(player)) {
 				// left for dead: the window opens once, as they go out
@@ -349,6 +356,55 @@ public final class ChronoCheatDeath {
 		if (player.level().dimension() == held.dimension && player.position().distanceToSqr(held.pos) > 0.01) {
 			player.teleportTo(player.level(), held.pos.x, held.pos.y, held.pos.z, Set.of(), player.getYRot(), player.getXRot(), false);
 		}
+	}
+
+	/** Whether someone is coming to execute {@code player}, or doing it (before the killing blow). */
+	static boolean executed(ServerPlayer player) {
+		return Downed.isDowned(player) && (com.jaymospowers.core.wounds.MobExecutions.doomed(player)
+			|| com.jaymospowers.core.finisher.Finishers.targeted(player) || com.jaymospowers.power.web.WebExecutions.targeted(player));
+	}
+
+	/** R from the client: inside a held death or a waking, or under an execution before its blow. */
+	static void pressed(ServerPlayer player) {
+		if (HELD.containsKey(player.getUUID())) {
+			rewind(player);
+			return;
+		}
+		if (!has(player) || !executed(player) || !player.isAlive()) {
+			return;
+		}
+		long now = player.level().getServer().overworld().getGameTime();
+		if (pick(player, now) == null) {
+			return;
+		}
+		net.minecraft.world.entity.Mob mob = com.jaymospowers.core.wounds.MobExecutions.executioner(player);
+		Vec3 was = player.position();
+		HELD.put(player.getUUID(), new Held(player, now, null, true));
+		rewind(player);
+		if (mob != null && mob.isAlive()) {
+			perplexed(mob, was);
+		}
+		JaymosPowers.LOGGER.info("{} slipped an execution", player.getScoreboardName());
+	}
+
+	/**
+	 * A hostile whose victim was gone from under it: it stops dead over the empty ground, looks about and gives voice its
+	 * own way, then goes back to whatever it was doing ({@code MobExecutions} lets it go and won't let it try again soon).
+	 */
+	static void perplexed(net.minecraft.world.entity.Mob mob, Vec3 was) {
+		if (!(mob.level() instanceof ServerLevel level)) {
+			return;
+		}
+		mob.getNavigation().stop();
+		mob.setTarget(null);
+		mob.setAggressive(false);
+		mob.getLookControl().setLookAt(was.x, was.y, was.z);
+		float turn = (mob.getRandom().nextBoolean() ? 1 : -1) * (60.0F + mob.getRandom().nextFloat() * 60.0F);
+		mob.setYRot(mob.getYRot() + turn);
+		mob.setYHeadRot(mob.getYRot());
+		mob.playAmbientSound();
+		level.sendParticles(ParticleTypes.POOF, was.x, was.y + 0.3, was.z, 10, 0.3, 0.1, 0.3, 0.01);
+		level.playSound(null, was.x, was.y, was.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 0.6F, 1.6F);
 	}
 
 	/** Respawn clicked on the death screen inside the window: the death goes ahead now (and the respawn follows it). */
