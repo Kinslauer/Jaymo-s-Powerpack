@@ -70,7 +70,6 @@ public final class Post {
 	static final java.util.Set<String> GREAT = java.util.Set.of(
 		"message.jaymoskingdoms.war.declared", "message.jaymoskingdoms.war.begun", "message.jaymoskingdoms.war.peace",
 		"message.jaymoskingdoms.war.ended_fallen", "message.jaymoskingdoms.war.ended_joined", "message.jaymoskingdoms.war.seat_changes",
-		"message.jaymoskingdoms.war.party_arrives",
 		"message.jaymoskingdoms.great_war.begun", "message.jaymoskingdoms.great_war.rebellion", "message.jaymoskingdoms.great_war.broke",
 		"message.jaymoskingdoms.king_fallen", "message.jaymoskingdoms.lord_fallen", "message.jaymoskingdoms.old_age.king",
 		"message.jaymoskingdoms.fate.ruin", "message.jaymoskingdoms.fate.vassal", "message.jaymoskingdoms.emigrants.ruin",
@@ -215,7 +214,8 @@ public final class Post {
 		if (!(headline.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t)) {
 			return false;
 		}
-		String key = t.getKey();
+		// (a queen's or a lady's line is the king's or lord's key with ".her")
+		String key = t.getKey().endsWith(".her") ? t.getKey().substring(0, t.getKey().length() - 4) : t.getKey();
 		if (GREAT.contains(key)) {
 			return true;
 		}
