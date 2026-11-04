@@ -8480,7 +8480,7 @@ hangs over the drop; rope also hangs under a fence. Rope in hand on it lets more
   Powers no such quest is offered. Compile-checked; not played.
 - Two loading hints (84-85).
 
-## 0.7.497: locks and keys (pack 0.19.88)
+## 0.7.497: locks and keys (pack 0.19.89)
 Andy picked the idea of Locks Reforged; this is our own build of it, nothing copied (`Locks`, `NightLocks`).
 - **Lock and key**: three iron ingots and three nuggets forge a lock. Use it on a door, trapdoor, fence gate, chest or
   barrel to fit it, and its key (a new one, cut to that lock) goes in your pack. Hold a cut key in your off hand while
