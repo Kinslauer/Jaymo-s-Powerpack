@@ -8561,3 +8561,94 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
   doesn't take a coin in the hand for a silver weapon.
 - Emeralds stay a gem: ore, enchanting, tinkering's emerald modifier, trims, beacons and caravan gem goods.
 - Not compile-checked yet at this entry; not played.
+
+## 0.7.500: cold-blooded Serpen don't overheat
+- Andy: "the reptile beastfolk should be cold blooded, therefore not overheating in the sun". Anyone with the
+  `COLD_BLOODED` perk (the Serpen look of the Beastfolk) is heat-proof to Kitchen's body heat, like an Emberborn: the
+  sun, hot lands, armour baking and fires can push them no further than comfortable, so no sweating, overheating or
+  heatstroke (`HeritageKits.coldBlooded`, `KitchenCompat`).
+- The cold stays their flaw as before (15% lighter blows, 20% slower in the cold lands); body heat's chill is unchanged.
+- The perk's card line says so.
+- Not compile-checked yet at this entry; not played.
+
+## 0.7.501: tails with a mind of their own (pack 0.20.1)
+- Andy: "they should pulse and slap like they have their own mind, but they swing violently whenever you walk". Beastfolk
+  tails (`BeastParts.tail`: beastfolk, canine, feline, kitsune, avian, serpen) swayed at `age * (rate + walk speed)`, so any
+  change of walk speed spun the phase and the tail whipped about. Now every wave runs on a fixed clock: a lazy wander of two
+  slow waves, a curl rolling up the far half now and then, and an occasional slap (`slap()`: a slow gate opens for a moment
+  and the tail whips quickly to the side, harder toward the tip). Walking calms all of that by half, lifts the tail a little
+  (`RUN_LIFT` 0.15, was 0.25; `RUN_STRAIGHTEN` 0.2, was 0.3) and adds only a small swing in step with the stride.
+- Feline tails (Andy: "like a cheetah's in sprint and otherwise, like an aileron helping them achieve speed in turning,
+  sticking straight up and moving"): carried straight up with the tip hooked over, still wandering, curling and slapping;
+  at a sprint (the sprint flag, or over 0.2 blocks a tick for villagers) the tail eases down level out behind and its own
+  life fades. Turning swings it: level, sideways like a rudder; upright, leaning across like an aileron. It swings into the
+  turn (`TAIL_RUDDER` -3.5; flip the sign to swing it out). Sprint and turn are eased per entity each frame (`EASED`).
+- Not compile-checked in the cloud; not played.
+
+## 0.7.502: the Flame Avatars take the Emberborn in (pack 0.20.2)
+Andy: "make the flame avatar take you in and amicable to you", with rare Nether rocks and flint in Powers so a Nether start
+isn't stuck stealing piglin axes.
+- **Taken in** (`nether/AvatarCamps`): the first time an Emberborn comes within 32 blocks of an avatar camp, its nearest
+  avatar greets them by speech bubble (`message.jaymoskingdoms.avatar.welcome.0-2`) and every avatar of the camp warms to
+  them by 50 hearts (MCA's follow and hire). Saved per player per camp (`avatar_welcomed`, kept through death).
+- **The gear only when you speak to them** (Andy): the first right click on one of a camp's avatars gives 3 flint, 4 sticks,
+  2 plant string (Powers') and 4 cooked pork with a line (`avatar.gift.0-2`), once per camp (`avatar_gifted`); MCA's menu
+  still opens.
+- **The hearth:** an Emberborn within the camp's home radius who is hurt gets Regeneration I (11 s, renewed every 10 s).
+- **They stand with you:** avatars within 24 blocks of an Emberborn go for any creature hunting them or that hurt them in the
+  last 5 s (`AvatarCamps.guarding`; never other players).
+- Camps rise near an Emberborn in the Nether at 60% per 3-minute roll (others still 25%).
+- **Sticks in the Nether** (`Trees`): wart blocks (nether and warped) torn down by hand give a stick 15% of the time, as
+  leaves do in the overworld.
+- `McaCompat.hearts` is public now (the camp's warmth).
+- Not compile-checked yet at this entry; not played.
+## 0.7.503: sworn starts are known, every start carries meds
+- Andy: "the relevant folk should know you as a sworn start" (his king asked his name like a stranger's). While a Sworn
+  start's player stays a member of the realm they swore to (`StoryTalk.swornRealm`), its king, its lords (and its fiefs'
+  lords) and its guards (`StoryTalk.serves`) know them: within 24 blocks each comes to know them once (`sworn_known`
+  player attachment): you know their name with no introduction, MCA counts you as met, and they start warm (30 hearts for
+  a ruler, 20 for a guard, raised to that, never lowered). Every time you open their menu they greet you as their sworn
+  man or a fellow guard (`story.jaymoskingdoms.sworn.<ruler|guard>.0-2`), not as a stranger, and not only for the first
+  three days. Worlds already played: the Landing a Sworn start saved is enough, so it works there too.
+- Andy: "everyone should start with applicable meds. obviously still none for rock bottom, and a whole medkit for sworn".
+  `StoryMeds` gives each start Jaymo's Powers' medicine (looked up by id) after its kit: Sworn a healer's satchel packed
+  with 4 linen bandages, 2 clean rags, 2 splints, needle and thread, smelling salts, 2 yarrow, 2 knitbone, burn salve,
+  garlic poultice, 2 willow-bark tea and poppy syrup. Nothing for rock bottom, a captive, chained, an android or the
+  afterlife. Others by their road: banished 2 bandages + a rag, cave 2 bandages + yarrow, village 2 bandages + willow tea,
+  whalers 2 bandages + needle, trader 2 bandages + tea + salve, burned 2 salves + a rag, sky fall a splint + 2 rags,
+  snowed-in 2 rags + tea, unarmed 2 clean rags, hideout 2 rags + poppy, greenskin 2 rags + garlic, lab one of each
+  remedy, sentenced/evicted/cast out 1 rag, the rest 2 rags. A Survivalist weaves 2 grass bandages more. The rags flaw
+  still gives nothing.
+
+## 0.7.504: wary folk keep their names; you bow to rulers
+- Andy: "someone who has any distaste toward you would not introduce themselves, i was just on a beastfolk, and the guy
+  said remember this city isnt for you, but still shook my hand, they should be as apprehensive as the old orcs were until
+  you prove yourself". `Introductions.wary`: a villager who minds your blood (`Prejudice.minds`: a haven's folk minding a
+  human, a townsman minding a Tideborn or Beastfolk...), whose realm holds you below welcome, or who remembers you coldly
+  (`Recollections.COLD`). They don't come over to you, don't take your hand (`takesHand`), give a wary line instead of
+  their name (`name_wary.0-4`, orc and goblin dialects too), and at a first meeting step back with that line in place of a
+  wave or a shake (`Handshakes.standOff`), then their menu opens with no name in it. Proven: a warm memory of you
+  (`Recollections.WARM`: a rescue, a kindness), or enough MCA hearts (gifts, talk): 8 per degree they mind, at most 50
+  (`PROVEN_HEARTS_PER_DEGREE`); 20 hearts outweighs a bad name with their realm (`PROVEN_HEARTS_REP`).
+- Andy: "introducing yourself to kings, is no longer a wave or handshake, but you bow, using all the relevant animation in
+  context. (hand on pommel if wielding a sword)". `Handshakes.bowTo`: the first use of a ruler you haven't met, their
+  Introduce, Ask their name and the handshake answer all have you turn to them and bow (`Hand.BOW`, 40 ticks, held still).
+  The ruler inclines their head (`Hand.NOD`) and names themselves with their title; a wary ruler doesn't return it.
+  `HandshakePose.bow`: bent from the waist as a crouch is, head down; empty handed, the hand over the heart and the other
+  swept behind; a sword or light blade in hand, held low at your side with the other hand across on its pommel; anything
+  else, held at your side with the free hand over the heart; an off hand holding something stays at your side. Mirrored
+  for the left-handed; MCA bodies' clothes follow (`McaPullerPose.follow`).
+- Not compile-checked against the game jars (none staged in this cloud session); a source-path javac pass showed no
+  errors in our own symbols. Not played.
+
+## 0.7.505: attack tells are easy to see and hear (pack 0.20.4)
+Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for time flow".
+- `MobCombat.tell` (fighters' and crewmen's swings) and the gunners' aim tell (`MobCombat.aimed`) call Powers' new glint
+  through `PowersCompat.tellGlint`: a full-bright star in the tell's colour (white parry, red heavy) with a white heart, and
+  Time Flow's warning bell (high for parryable, low with a drum for heavy). Without Powers the old dust stays and a bell
+  plays with it. The gun's flint click stays on top.
+
+## 0.7.506: builds again (pack 0.20.5)
+
+- A merge left `client/HandshakePose` with two `NOD` constants (the nod pose and the head tilt while shaking hands), so
+  the client didn't compile. The head tilt is now `SHAKE_NOD`; nothing changes in game.

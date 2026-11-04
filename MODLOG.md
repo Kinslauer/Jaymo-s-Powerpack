@@ -5216,6 +5216,51 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the right hip with the lantern's sway (`WornLanterns`); it gives no light. Web's symbiote grabs coins as valuables.
   - The melting gap log skips coins (realm silver and the like are money, not metal).
   - Not compile-checked yet at this entry; not played.
+- **0.20.1, Kingdoms 0.7.501, tails calm down when walking:** Andy: "they should pulse and slap like they have their own
+  mind, but they swing violently whenever you walk". The cause: the sway wave ran at `age * (rate + walk speed)`, and with
+  the age in the thousands every change of walk speed threw the phase round, so the tail thrashed. Warrior-born tails
+  (`ZFighterTail`) and the Great Ape's tail now run on fixed clocks: a lazy wander of two slow waves, a curl that comes and
+  goes, and now and then a slap (a few quick whips to the side). The walk only calms them by half, lifts them a little and
+  adds a small swing on the stride (`walkAnimationPos`). Beastfolk tails in Kingdoms get the same (see `kingdoms/MODLOG.md`).
+  Not compile-checked in the cloud (pure math on fields already used there); not played.
+- **0.20.2, Kingdoms 0.7.502, a start in the Nether can make its first tools:** Andy: "add rare pebbles and flint to the
+  nether so those starts are possible for emberborn [...] after trying that start you can only advance by stealing axes from
+  pigmen". `ground/NetherRocksFeature` lays a small cluster of loose rocks on one of the Nether's floors in about one chunk in
+  three (demon biomes too): netherrack rocks on netherrack and nylium, blackstone on blackstone, basalt on basalt and soul
+  ground, and 30% of piles are loose flint (75% on gravel). The three rocks are new `GroundRocks.Variant`s (vanilla textures,
+  4 craft into their block, knap like plain stone). Flint now knaps on netherrack (`FirstTools.hard`, `Knapping.hard`), and
+  crimson/warped roots, nether sprouts and weeping/twisting vines give plant fibre to a knife (`fiber_plants` tag). Kingdoms
+  adds the sticks (wart blocks) and the avatar camps' welcome; see `kingdoms/MODLOG.md`.
+  - Not compile-checked yet at this entry; not played.
+- **0.20.3, shield bang:** With a shield raised in the off hand and a weapon in the main hand, left click bangs the
+  weapon on the shield (`combat/ShieldBang`, `client/combat/ShieldBangClient`): a loud clang, the weapon arm swings and
+  a vibration goes out for sculk and wardens. Hostile mobs within 24 blocks that aren't already fighting walk to the
+  noise; wild animals, bats and fish within 16 run from it. Neutral mobs and anything tamed, ridden or leashed ignore it.
+  One bang per click, half a second apart. Left click with the shield down still attacks as before.
+  Holding the click instead charges a **shield bash** (a bar fills over 1.5 s; 2 feathers): let go and you step in and
+  throw the shield forward, striking, shoving and staggering what's in front of you and knocking raised shields aside,
+  harder the longer the charge. A metal weapon banged on a metal shield (metal by name, or the
+  `jaymospowers:clanging_metal` item tag, which holds the iron-rimmed vanilla shield) rings like a bell for the symbiote:
+  hosts within 12 blocks flinch as from a bell (`WebSymbiote.noise`), loose symbiotes run (`WebSymbioteBlob.startle`).
+- **0.20.4, Kingdoms 0.7.505, attack tells are easy to see and hear:** Andy: "the particle effect for attack indicators
+  should be more visible, and a sound should play like for time flow. maybe a star or flash in the respective color". The
+  old tell (a few pale dust specks and sparks) got lost on a face. `combat/AttackTells.glint` now draws our own
+  `jaymospowers:tell_glint` particle (`Glint`: colour + size; client `combat/TellGlintParticle`, sprites
+  `textures/particle/tell/tell_glint_0-1`, dark-rimmed so it reads on pale faces and sky): a full-bright four-point star in the tell's colour (white 0.8 blocks, red 1.1)
+  that pops past full size, settles, turns slowly and holds through the 6-tick wind-up before shrinking away, a small white
+  star at its heart (`tell_glint_core`, no rim), and a ring of dust in the colour. It's sent forced (shows on reduced particles, out to 48 blocks).
+  With it plays Time Flow's warning ping from the mob: a high note-block bell for a parryable blow, a lower bell with a
+  bass drum under it for a heavy one. Every tell uses it: goal- and brain-driven mobs, Burrukai, Bladeshroom Hunters, future
+  gunners, and Kingdoms' fighters, crewmen and gunners (through `PowersCompat.tellGlint`).
+  - Tuning: `GLINT_SIZE`, `HEAVY_GLINT_SIZE`, `CORE_SHARE`, `PING_*`, `DRUM_*`, `GLINT_RANGE` in `AttackTells`; `LIFE`,
+    `OVERSHOOT`, `SPIN` in `TellGlintParticle`.
+  - Compile-checked in the cloud (Gradle `compileClientJava`); not played. Preview:
+    `art-overhaul/attack-tells/tell-glint-preview.png` in the project files.
+- **0.20.5, graded swords no longer crash the server (Kingdoms 0.7.506):** an Expert, Perfect or Master grade multiplied every mining
+  rule on a sword-like item, and the instant-mine rule (bamboo, `Float.MAX_VALUE`) overflowed to Infinity, which the
+  game can't sync or save. The first such item (a graded WeaponMod copper boomerang) crashed the server when its owner
+  moved it in their inventory. `Grades.bake` now caps a scaled speed at `Float.MAX_VALUE`. Kingdoms 0.7.506 builds again:
+  a merge left `HandshakePose` with two `NOD` constants, so the handshake's head tilt is now `SHAKE_NOD`.
 - **0.20.1, Ultimates patch 0: each Ultimate is its own alien (`docs/Ultimates-Plan.md`), starting with Bulwark's Titan** (Andy: "this is how ultimates should work").
   - **Framework:** an Ultimate is a `XenoUltimate` (its own body, stats, R G V B and C, never on the dial), reached through `XenoForm.evolved()`. As the Ultimate, C is its big move and holding C drops you back. It has its own health on top of the base alien's (a thin bar on the HUD shows the base alien's held health): emptied, you fall back to the base alien, stunned, and can't go Ultimate again that change. A fifth HUD chip shows C. Aliens with no evolved Ultimate yet keep the old 0.18.93 buff until their patch.
   - **When:** on an unforged band C doesn't change you; the Ultimate comes on by itself once per change as a last stand, when a great foe (a vanilla boss, anything with a boss bar, `GreatFoes`; Kingdoms' bosses through `KingdomsCompat`) would finish you or take you under a quarter health. A reforged band changes in on C at will too (Andy's pick), burns charge twice as fast as the Ultimate, and still gets the last stand.

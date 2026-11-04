@@ -33,6 +33,39 @@ public final class PowersCompat {
 	private PowersCompat() {
 	}
 
+	/** (0.7.505) Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle tellGlint;
+	private static boolean lookedForGlint;
+
+	/**
+	 * (0.7.505) Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for
+	 * time flow". An attack tell's glint at {@code at} as Jaymo's Powers draws its own (a full-bright star in the tell's
+	 * colour with a white heart, and Time Flow's warning bell). False without Powers, and the caller draws its old dust.
+	 */
+	public static boolean tellGlint(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, boolean heavy) {
+		if (!lookedForGlint) {
+			lookedForGlint = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					tellGlint = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.combat.AttackTells"), "glint",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.phys.Vec3.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' attack tell glint", e);
+				}
+			}
+		}
+		if (tellGlint == null) {
+			return false;
+		}
+		try {
+			tellGlint.invoke(level, at, heavy);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (Andy, 2026-11-01) Powers' {@code ZFighterFakeMoon.shines(ServerLevel, Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle falseMoon;
 	private static boolean lookedForMoon;
@@ -757,6 +790,34 @@ public final class PowersCompat {
 	 */
 	public static boolean androidStart(net.minecraft.server.level.ServerPlayer player) {
 		return callStart("com.jaymospowers.power.zfighter.ZFighterAndroidStart", player);
+	}
+
+	/** (0.7.501) The entity tag of Jaymo's Powers' Mad Tinkerer (its {@code ZFighterAndroid.TAG}): meeting him wakes the Bio-built. */
+	public static final String TINKERER_TAG = "jaymospowers_scientist";
+	private static java.lang.invoke.@Nullable MethodHandle android;
+	private static boolean androidLooked;
+
+	/** (0.7.501) Whether the Mad Tinkerer has made {@code player} an android (Powers' {@code ZFighterAndroid.android}). False without Powers. */
+	public static boolean android(net.minecraft.world.entity.player.Player player) {
+		if (!androidLooked) {
+			androidLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					android = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterAndroid"),
+						"android", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.player.Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' androids (older Powers?)", e);
+				}
+			}
+		}
+		if (android == null) {
+			return false;
+		}
+		try {
+			return (boolean)android.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	/** (0.7.236) Powers' {@code Future.WAITING}: on a lost-in-time player still waiting for the future to be made. */

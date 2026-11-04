@@ -154,8 +154,9 @@ public final class Grades {
 			if (grade == null || grade.mining == 1.0F) {
 				stack.set(DataComponents.TOOL, tool);
 			} else {
+				// (0.20.4) capped: a sword's instant-mine speed is Float.MAX_VALUE, and Infinity can't be synced or saved
 				List<Tool.Rule> rules = tool.rules().stream().map(rule -> new Tool.Rule(rule.blocks(),
-					rule.speed().map(speed -> speed * grade.mining), rule.correctForDrops())).toList();
+					rule.speed().map(speed -> Math.min(speed * grade.mining, Float.MAX_VALUE)), rule.correctForDrops())).toList();
 				stack.set(DataComponents.TOOL, new Tool(rules, tool.defaultMiningSpeed(), tool.damagePerBlock(), tool.canDestroyBlocksInCreative()));
 			}
 		}

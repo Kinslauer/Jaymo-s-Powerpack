@@ -39,14 +39,16 @@ import org.jspecify.annotations.Nullable;
  * when MCA draws it, {@link McaLookModels}).
  * <ul>
  * <li><b>Beastfolk:</b> rounded ears, a tail. <b>Canine:</b> upright pointed ears, a bushy tail. <b>Feline:</b> wide
- * triangular ears, a long thin tail curling up. <b>Kitsune:</b> tall fox ears and one to three fox tails (by UUID).</li>
+ * triangular ears, a long thin tail held straight up, tip hooked
+ * over, that drops level behind at a sprint and steers the turns. <b>Kitsune:</b> tall fox ears and one to three fox tails (by UUID).</li>
  * <li><b>Avian:</b> feathered wings folded on the back that twitch now and then, a small crest, a stub of tail feathers.
  * <b>Arachnid:</b> four thin spider legs folded off the back and sides (the painted extra eyes stay on the skin).
  * <b>Serpen:</b> a long scaled tail trailing behind.</li>
  * <li><b>Sprite, Faerie:</b> translucent gossamer wings, folded back at rest, spreading and fluttering as they move.
  * <b>Dryad:</b> small branch sprigs with leaves on the head.</li>
  * </ul>
- * Tails sway with the walking speed. Ears, crest and sprigs are hidden under a helmet or a hood, tails, wings and legs
+ * Tails wander, curl and slap on their own, only calmed and swung a little by the walk. Ears, crest and sprigs are hidden
+ * under a helmet or a hood, tails, wings and legs
  * stand off the back clear of a chestplate or leggings, and everything is hidden under a Powers costume
  * ({@link PowersCover}, as the Tideborn's fins are) and on the invisible. The local player's own first-person view never
  * draws the avatar's layers, so nothing shows over the camera. Parts are baked lazily like the fins and never mutated (a
@@ -54,10 +56,30 @@ import org.jspecify.annotations.Nullable;
  */
 public final class BeastParts {
 	// ---- tuning
-	/** The tails' sway (radians) and how fast it swings, with the walk speed adding to both. */
-	static final float SWAY_SPEED = 0.1F, SWAY_RUN_SPEED = 0.15F, SWAY_RUN = 1.0F;
+	/**
+	 * (0.7.501, Andy: "they should pulse and slap like they have their own mind") A tail lives on its own clock: a lazy wander
+	 * of two slow waves, a curl that comes and goes, and now and then a slap (a few quick whips to the side). Every wave runs on
+	 * the age at a fixed rate; the walk only adds a small swing on the stride ({@code walkAnimationPos}) and calms the rest.
+	 * (Before, the walk speed sped the wave up: age times a changing rate threw the phase around and the tail thrashed.)
+	 */
+	static final float WANDER_RATE = 0.06F, WANDER_SLOW = 0.023F, WALK_CALM = 0.5F, STRIDE_SWAY = 0.05F;
+	/** The slap: how often its slow gate opens (radians a tick), the share of each beat it stays open, its whip rate and size. */
+	static final float SLAP_GATE = 0.031F, SLAP_OPEN = 0.08F, SLAP_RATE = 0.7F, SLAP = 0.3F;
+	/** The curl: how often it comes (radians a tick) and how far the later segments roll up at its height. */
+	static final float CURL_RATE = 0.04F, CURL = 0.14F;
+	/**
+	 * A tail with a sprint pose (the feline's): how hard a turn swings it (radians per radian a tick the body turns, signed so
+	 * it swings into the turn; flip the sign to swing it out), the most it swings, how fast the sprint pose and the turn ease
+	 * in (a tick), and the speed (blocks a tick) that counts as a sprint for those who never set the sprint flag.
+	 */
+	static final float TAIL_RUDDER = -3.5F, RUDDER_MAX = 0.8F, SPRINT_EASE = 0.2F, TURN_EASE = 0.3F, SPRINT_SPEED = 0.2F;
 	/** How much a run lifts a tail (radians off its first bend), and how much it straightens the rest. */
-	static final float RUN_LIFT = 0.25F, RUN_STRAIGHTEN = 0.3F;
+	static final float RUN_LIFT = 0.15F, RUN_STRAIGHTEN = 0.2F;
+	/**
+	 * (0.7.507) Lying down: the body's tilt where the tail starts to lie along the ground and where it lies flat (cosines of the
+	 * tilt from upright: about 45 and 80 degrees), and how much of its curl is straightened then.
+	 */
+	static final float LIE_START = 0.7F, LIE_FLAT = 0.17F, LIE_FLATTEN = 0.9F;
 	/** Where a tail leaves the body: the small of the back (body space), and how far back it starts clear of armour. */
 	static final float TAIL_Y = 10.5F, TAIL_Z = 1.7F, ARMOUR_Z = 3.3F;
 	/** Wings and legs on the back: how far out they sit, and the added gap under armour. */
@@ -76,7 +98,10 @@ public final class BeastParts {
 	 * A tail: each segment's bend (radians off the one before; the first off the body: negative droops down and back) and its
 	 * thickness in pixels, the length of a segment, how far it sways, and whether it ends in the tip's texture.
 	 */
-	record Tail(float[] bend, float[] thick, float length, float sway, boolean tip) {
+	record Tail(float[] bend, float[] thick, float length, float sway, boolean tip, float @Nullable [] sprint) {
+		Tail(float[] bend, float[] thick, float length, float sway, boolean tip) {
+			this(bend, thick, length, sway, tip, null);
+		}
 	}
 
 	/**
@@ -91,9 +116,11 @@ public final class BeastParts {
 		CANINE("canine", new Ears(true, 0.85F, 1.25F, 0.1F, 2.5F),
 			new Tail(new float[] {-0.55F, -0.12F, -0.05F, 0.0F, 0.05F, 0.1F}, new float[] {2.6F, 3.6F, 4.4F, 4.4F, 3.6F, 2.4F}, 3.2F, 0.2F, true), Wings.NONE,
 			false, false, false, false),
+		// (0.7.501, Andy: "like a cheetah's in sprint and otherwise ... sticking straight up and moving") Carried straight up with
+		// the tip hooked over; at a sprint it drops level out behind and steers the turns (TAIL_RUDDER).
 		FELINE("feline", new Ears(true, 1.1F, 0.9F, 0.3F, 3.0F),
-			new Tail(new float[] {-0.4F, -0.08F, -0.05F, 0.0F, 0.1F, 0.2F, 0.3F, 0.3F}, new float[] {1.8F, 1.7F, 1.7F, 1.6F, 1.6F, 1.5F, 1.5F, 1.5F}, 3.4F, 0.16F,
-				true), Wings.NONE, false, false, false, false),
+			new Tail(new float[] {1.05F, 0.08F, 0.04F, 0.0F, -0.04F, 0.12F, 0.3F, 0.45F}, new float[] {1.8F, 1.7F, 1.7F, 1.6F, 1.6F, 1.5F, 1.5F, 1.5F}, 3.4F,
+				0.16F, true, new float[] {-0.25F, 0.06F, 0.04F, 0.02F, 0.0F, 0.0F, 0.02F, 0.06F}), Wings.NONE, false, false, false, false),
 		KITSUNE("kitsune", new Ears(true, 0.9F, 1.5F, 0.12F, 2.6F),
 			new Tail(new float[] {-0.55F, -0.1F, 0.0F, 0.1F, 0.15F, 0.15F}, new float[] {2.2F, 3.4F, 4.0F, 3.6F, 2.8F, 1.8F}, 3.2F, 0.2F, true), Wings.NONE,
 			false, false, true, false),
@@ -144,8 +171,11 @@ public final class BeastParts {
 	}
 
 	/** On a render state: which design this one wears, and a number from its UUID (a Kitsune's tails, everyone's phase). */
-	record Parts(Design design, int seed) {
+	record Parts(Design design, int seed, float sprint, float turn) {
 	}
+
+	/** Per entity, eased toward the live values each frame: sprint (0..1), turn (radians a tick), and when it was last eased. */
+	private static final java.util.Map<LivingEntity, float[]> EASED = new java.util.WeakHashMap<>();
 
 	static final RenderStateDataKey<Parts> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:beast_parts");
 
@@ -174,7 +204,25 @@ public final class BeastParts {
 				: VillagerHeritage.of(entity) == Heritage.Kind.BEASTFOLK;
 			design = beast ? Design.BEASTFOLK : null;
 		}
-		state.setData(KEY, design == null ? null : new Parts(design, HeritageLooks.variant(entity.getUUID(), 997)));
+		if (design == null) {
+			state.setData(KEY, null);
+			return;
+		}
+		float sprint = 0.0F, turn = 0.0F;
+		if (design.tail != null && design.tail.sprint != null) {
+			// eased so the tail drops and rises smoothly and a turn reads as a steady swing, not a tick-by-tick jump
+			float now = (float)(System.nanoTime() / 5.0E7D);
+			float[] eased = EASED.computeIfAbsent(entity, e -> new float[] {0.0F, 0.0F, now});
+			float dt = Mth.clamp(now - eased[2], 0.0F, 5.0F);
+			eased[2] = now;
+			boolean fast = entity.isSprinting() || Math.hypot(entity.getX() - entity.xo, entity.getZ() - entity.zo) > SPRINT_SPEED;
+			float rate = Mth.wrapDegrees(entity.yBodyRot - entity.yBodyRotO) * Mth.DEG_TO_RAD;
+			eased[0] += ((fast ? 1.0F : 0.0F) - eased[0]) * (1.0F - (float)Math.exp(-dt * SPRINT_EASE));
+			eased[1] += (rate - eased[1]) * (1.0F - (float)Math.exp(-dt * TURN_EASE));
+			sprint = eased[0];
+			turn = eased[1];
+		}
+		state.setData(KEY, new Parts(design, HeritageLooks.variant(entity.getUUID(), 997), sprint, turn));
 	}
 
 	static final class Layer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
@@ -224,7 +272,7 @@ public final class BeastParts {
 				for (int i = 0; i < tails; i++) {
 					// a fan of tails: spread apart, the outer ones lifted a little, each swaying on its own beat
 					float spread = tails == 1 ? 0.0F : (i - (tails - 1) * 0.5F) * 0.55F;
-					tail(ctx, posed, design.tail, armour, state.ageInTicks, run, spread, tails == 1 ? 0.0F : Math.abs(spread) * 0.3F, phase + i * 1.9F);
+					tail(ctx, posed, design.tail, armour, state.ageInTicks, state.walkAnimationPos, run, parts.sprint(), parts.turn(), spread, tails == 1 ? 0.0F : Math.abs(spread) * 0.3F, phase + i * 1.9F);
 				}
 			}
 			if (design.wings == Wings.FOLDED) {
@@ -313,26 +361,71 @@ public final class BeastParts {
 
 	// ---- body: tails, wings, legs (body space: the box is -4..4 x, 0..12 y, -2..2 z; +z is behind)
 
-	private static void tail(Ctx ctx, HumanoidModel<?> model, Tail tail, boolean armour, float age, float run, float yawSpread, float lift, float phase) {
+	private static void tail(Ctx ctx, HumanoidModel<?> model, Tail tail, boolean armour, float age, float walkPos, float run, float sprint, float turn,
+		float yawSpread, float lift, float phase) {
 		ModelPart segment = Geo.tail(), tip = Geo.tip();
+		boolean steers = tail.sprint != null;
+		// a sprint-posed tail is held still and level at speed, so only its own life fades; the walk calms the rest
+		float calm = (1.0F - WALK_CALM * run) * (steers ? 1.0F - 0.75F * sprint : 1.0F);
+		float slap = slap(age, phase) * calm;
+		float curl = 0.5F + 0.5F * Mth.sin(age * CURL_RATE + phase * 1.3F);
+		curl = curl * curl * curl * calm;
 		ctx.ps.pushPose();
 		model.body.translateAndRotate(ctx.ps);
 		ctx.ps.translate(0.0F, TAIL_Y / 16.0F, (armour ? ARMOUR_Z : TAIL_Z) / 16.0F);
-		for (int i = 0; i < tail.bend.length; i++) {
-			float pitch = i == 0 ? tail.bend[0] - lift - RUN_LIFT * run : tail.bend[i] * (1.0F - RUN_STRAIGHTEN * run);
-			pitch += 0.04F * Mth.sin(age * 0.08F + i + phase);
-			float yaw = (i == 0 ? yawSpread : 0.0F) + tail.sway * (1.0F + SWAY_RUN * run) * Mth.sin(age * (SWAY_SPEED + SWAY_RUN_SPEED * run) + phase - i * 0.6F);
+		// (0.7.507) a body lying down (downed, crawling, executed) lays its tail along the ground toward its feet, not
+		// standing up off its back into the air
+		float lie = lying(ctx.ps);
+		if (steers) {
+			// the turn: level at a sprint it swings sideways like a rudder; held up it leans across like an aileron
+			float rudder = Mth.clamp(TAIL_RUDDER * turn, -RUDDER_MAX, RUDDER_MAX);
+			ctx.ps.rotate(Axis.YP, rudder * sprint);
+			ctx.ps.rotate(Axis.ZP, rudder * 0.6F * (1.0F - sprint));
+		}
+		int n = tail.bend.length;
+		for (int i = 0; i < n; i++) {
+			float along = n == 1 ? 1.0F : i / (float)(n - 1);
+			float bend = steers ? Mth.lerp(sprint, tail.bend[i], tail.sprint[i]) : tail.bend[i];
+			float pitch = steers ? bend - (i == 0 ? lift : 0.0F) : i == 0 ? bend - lift - RUN_LIFT * run : bend * (1.0F - RUN_STRAIGHTEN * run);
+			pitch = i == 0 ? Mth.lerp(lie, pitch, -Mth.HALF_PI) : pitch * (1.0F - LIE_FLATTEN * lie);
+			// a slow pulse down the tail, the curl rolling up its far half, a little bob on the stride
+			pitch += 0.04F * Mth.sin(age * 0.08F + i + phase) + CURL * curl * along * (steers ? 1.0F - sprint : 1.0F) + 0.03F * run * Mth.sin(walkPos * 1.3324F - i * 0.5F);
+			float wander = 0.6F * Mth.sin(age * WANDER_RATE + phase - i * 0.5F) + 0.4F * Mth.sin(age * WANDER_SLOW + phase * 1.7F - i * 0.3F);
+			float yaw = (i == 0 ? yawSpread : 0.0F) + tail.sway * calm * wander
+				+ SLAP * slap * Mth.sin(age * SLAP_RATE + phase - i * 0.5F) * (0.4F + 0.6F * along)
+				+ STRIDE_SWAY * run * Mth.sin(walkPos * 0.6662F - i * 0.5F);
 			ctx.ps.rotate(Axis.XP, pitch);
 			ctx.ps.rotate(Axis.YP, yaw);
 			ctx.ps.pushPose();
 			// the box is 3 x 3 x 4: stretch it to this segment's thickness and length
 			float thick = tail.thick[i] / 3.0F;
 			ctx.ps.scale(thick, thick, tail.length / 4.0F);
-			ctx.draw(tail.tip && i == tail.bend.length - 1 ? tip : segment);
+			ctx.draw(tail.tip && i == n - 1 ? tip : segment);
 			ctx.ps.popPose();
 			ctx.ps.translate(0.0F, 0.0F, tail.length / 16.0F);
 		}
 		ctx.ps.popPose();
+	}
+
+	/** How hard a tail is slapping, 0 most of the time: a slow wave's crest opens it for a moment, eased in and out. */
+	static float slap(float age, float phase) {
+		float open = Math.max(0.0F, Mth.sin(age * SLAP_GATE + phase * 2.3F) - (1.0F - SLAP_OPEN)) / SLAP_OPEN;
+		return open * open * (3.0F - 2.0F * open);
+	}
+
+	/**
+	 * (0.7.507) How far the body this pose stack is in lies down, from where the world's down points in it: 0 standing (or
+	 * leaning up to {@link #LIE_START} from upright), 1 flat on the ground. The world's entity pose stack carries no camera
+	 * turn, and a screen's figure stands upright, so this reads the body's own tilt.
+	 */
+	static float lying(PoseStack ps) {
+		org.joml.Matrix3f m = new org.joml.Matrix3f(ps.last().pose());
+		if (Math.abs(m.determinant()) < 1.0E-8F) {
+			return 0.0F;
+		}
+		// the model's own down is +y; how much of the world's down still points that way
+		org.joml.Vector3f down = m.invert().transform(new org.joml.Vector3f(0.0F, -1.0F, 0.0F)).normalize();
+		return Mth.clamp((LIE_START - down.y) / (LIE_START - LIE_FLAT), 0.0F, 1.0F);
 	}
 
 	/**
