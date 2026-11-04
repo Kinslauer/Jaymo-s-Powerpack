@@ -283,6 +283,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		HavenWares.register();
 		// (0.7.484) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
 		BentIngots.register();
+		// (0.7.484) Currencies: the realms' coins and their money-changers
+		Currencies.register();
 		HordeEconomy.register();
 		GreenMarket.register();
 		BorderClashes.register();

@@ -531,6 +531,11 @@ final class Raids {
 		return false;
 	}
 
+	/** (0.7.484) What a raider (or a war's victor) takes first: coin of any realm, anything gold, iron and diamonds. */
+	static boolean valuable(ItemStack s) {
+		return Plunder.valuable(s);
+	}
+
 	/**
 	 * A raider at the settlement takes what he can carry ({@link Plunder#take}): coin now and then, valuables from its
 	 * storage first, then the chests and barrels standing loose on its land, which he breaks into (0.7.484).

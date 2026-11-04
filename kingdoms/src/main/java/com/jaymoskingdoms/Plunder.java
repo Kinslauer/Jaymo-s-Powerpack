@@ -54,7 +54,9 @@ final class Plunder {
 	/** {@code stack} is something a raider takes before anything else. */
 	static boolean valuable(ItemStack stack) {
 		return stack.is(Items.EMERALD) || stack.is(Items.GOLD_INGOT) || stack.is(Items.IRON_INGOT) || stack.is(Items.DIAMOND)
-			|| stack.is(Items.EMERALD_BLOCK) || stack.is(Items.GOLD_BLOCK) || BentIngots.bent(stack);
+			|| stack.is(Items.EMERALD_BLOCK) || stack.is(Items.GOLD_BLOCK) || BentIngots.bent(stack)
+			// ((0.7.484) any realm's coin, and anything gold)
+			|| Currencies.isMoney(stack) || Currencies.gold(stack);
 	}
 
 	/**

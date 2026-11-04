@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +38,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -813,9 +815,50 @@ public final class Careers {
 				continue;
 			}
 			int owed = p.done() * wage(server, f, p.kind(), rank, held) + (apprentice ? APPRENTICE_CUT : 0);
-			int fromStore = Storage.take(store, f, Items.EMERALD, owed).getCount();
-			int fresh = Math.max(0, Math.min(owed - fromStore, p.done() * WAGE_FLOOR - fromStore));
-			int paid = fromStore + fresh;
+			// (0.7.484) wages are paid in the coin of the settlement, out of the same coin in its storehouse
+			Currency money = Currencies.of(server, f);
+			// (0.7.484) the wage as whole coins and emerald change, never worth more than it is (Currencies.pay)
+			Currencies.Pay due = owed > 0 ? Currencies.payEmeralds(money, owed) : new Currencies.Pay(money, 0L, 0L);
+			long owedMilli = due.milli();
+			long floorMilli = p.done() > 0 ? (long)p.done() * WAGE_FLOOR * 1000L : 0L;
+			int fromStore = due.coins() > 0L ? Storage.take(store, f, money.item(), (int)Math.min(Integer.MAX_VALUE, due.coins())).getCount() : 0;
+			long storeMilli = (long)fromStore * money.base;
+			Map<Currency, Integer> others = new LinkedHashMap<>();
+			if (due.emeralds() > 0L) {
+				int got = Storage.take(store, f, Items.EMERALD, (int)Math.min(Integer.MAX_VALUE, due.emeralds())).getCount();
+				if (got > 0) {
+					others.merge(Currency.EMERALD, got, Integer::sum);
+					storeMilli += got * 1000L;
+				}
+			}
+			// (0.7.484) short of the town's coin: the rest out of the storehouse's emeralds, then any other realm's coin at its
+			// standard worth (old saves, earlier orders, a coin the town used before), each paid out as it is
+			if (money.human()) {
+				List<Currency> order = new ArrayList<>();
+				order.add(Currency.EMERALD);
+				for (Currency x : Currency.values()) {
+					if (x.human() && x != Currency.EMERALD) {
+						order.add(x);
+					}
+				}
+				for (Currency x : order) {
+					long want = (owedMilli - storeMilli) / x.base;
+					if (x == money || want <= 0L) {
+						continue;
+					}
+					int got = Storage.take(store, f, x.item(), (int)Math.min(Integer.MAX_VALUE, want)).getCount();
+					if (got > 0) {
+						others.merge(x, got, Integer::sum);
+						storeMilli += (long)got * x.base;
+					}
+				}
+			}
+			// (a poor town's floor wage, made up fresh: as coin and change, never worth more than the floor still owed)
+			Currencies.Pay fresh = Currencies.pay(money, Math.max(0L, Math.min(owedMilli, floorMilli) - storeMilli));
+			int paid = (int)Math.min(Integer.MAX_VALUE, fromStore + fresh.coins());
+			if (fresh.emeralds() > 0L) {
+				others.merge(Currency.EMERALD, (int)Math.min(Integer.MAX_VALUE, fresh.emeralds()), Integer::sum);
+			}
 			if (apprentice && p.kind() != null && !p.kind().goods.isEmpty()) {
 				// their apprentice's day: a stack of the trade's goods into the storehouse
 				Item good = item(p.kind().goods.getFirst());
@@ -824,10 +867,20 @@ public final class Careers {
 				}
 			}
 			if (paid > 0) {
-				give(player, new ItemStack(Items.EMERALD, paid));
+				Currencies.give(player, money, paid);
 			}
-			player.sendSystemMessage(Component.translatable(fromStore < owed ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
-				paid, f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
+			boolean listed = paid > 0 || others.isEmpty();
+			MutableComponent shown = listed ? Currencies.amount(money, paid).copy() : Component.empty();
+			for (Map.Entry<Currency, Integer> e : others.entrySet()) {
+				Currencies.give(player, e.getKey(), e.getValue());
+				if (listed) {
+					shown.append(Component.literal(", "));
+				}
+				shown.append(Currencies.amount(e.getKey(), e.getValue()));
+				listed = true;
+			}
+			player.sendSystemMessage(Component.translatable(storeMilli < owedMilli ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
+				shown, f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
 			edit(player, k -> {
 				Post now = k.post(p.job());
 				return now == null ? k : k.withPost(now.withDone(0));
@@ -891,23 +944,29 @@ public final class Careers {
 		}
 		edit(player, k -> k.withSoldDay(today));
 		if (earned > 0) {
-			ItemStack pay = new ItemStack(Items.EMERALD, earned);
-			for (int slot = 0; slot < box.getContainerSize() && !pay.isEmpty(); slot++) {
-				ItemStack there = box.getItem(slot);
-				if (there.isEmpty()) {
-					box.setItem(slot, pay.copy());
-					pay = ItemStack.EMPTY;
-				} else if (there.is(Items.EMERALD) && there.getCount() < there.getMaxStackSize()) {
-					int n = Math.min(pay.getCount(), there.getMaxStackSize() - there.getCount());
-					there.grow(n);
-					pay.shrink(n);
+			// (0.7.484) the villagers pay in the town's coin
+			Currency money = Currencies.of(server, f);
+			// (0.7.484) whole coins, and the change in emeralds
+			Currencies.Pay coins = Currencies.payEmeralds(money, earned);
+			for (ItemStack each : coins.stacks()) {
+				ItemStack pay = each;
+				for (int slot = 0; slot < box.getContainerSize() && !pay.isEmpty(); slot++) {
+					ItemStack there = box.getItem(slot);
+					if (there.isEmpty()) {
+						box.setItem(slot, pay.copy());
+						pay = ItemStack.EMPTY;
+					} else if (ItemStack.isSameItemSameComponents(there, pay) && there.getCount() < there.getMaxStackSize()) {
+						int n = Math.min(pay.getCount(), there.getMaxStackSize() - there.getCount());
+						there.grow(n);
+						pay.shrink(n);
+					}
+				}
+				if (!pay.isEmpty()) {
+					give(player, pay);
 				}
 			}
-			if (!pay.isEmpty()) {
-				give(player, pay);
-			}
 			box.setChanged();
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.job.stall_sold", earned, f.name()).withStyle(ChatFormatting.GREEN));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.job.stall_sold", Currencies.amount(coins), f.name()).withStyle(ChatFormatting.GREEN));
 		}
 	}
 

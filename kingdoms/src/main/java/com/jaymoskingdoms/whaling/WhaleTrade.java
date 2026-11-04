@@ -96,7 +96,8 @@ final class WhaleTrade {
 
 	private static void offer(MerchantOffers offers, Want w) {
 		for (MerchantOffer offer : offers) {
-			if (offer.getCostA().is(w.item()) && offer.getResult().is(Items.EMERALD)) {
+			// (0.7.484) paid in any coin: the town's coin they were set in counts too (Currencies.localize)
+			if (offer.getCostA().is(w.item()) && com.jaymoskingdoms.Currencies.isMoney(offer.getResult())) {
 				// (they already buy it: their trade's dearer price, added first, stands)
 				return;
 			}
