@@ -215,8 +215,9 @@ final class Raids {
 				continue;
 			}
 			Faction target = warpath != null ? warpath : target(server, level, camp);
+			// ((0.7.530) a wall and a watchtower put raiders off; a horde on the warpath isn't)
 			float chance = warpath != null ? HordeCity.RAID_CHANCE
-				: Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level) * (hungry ? HUNGRY_RAIDS : 1.0F);
+				: Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level) * (hungry ? HUNGRY_RAIDS : 1.0F) * TownProjects.raidFactor(server, target);
 			if (target != null && random.nextFloat() < chance) {
 				start(level, camp, target);
 			}
@@ -297,6 +298,8 @@ final class Raids {
 		Raid raid = new Raid(camp.id(), target.id(), now);
 		ACTIVE.put(camp.id(), raid);
 		RAIDED.put(target.id(), now);
+		// (0.7.530) a watchtower warns players near the town where the party musters
+		TownProjects.watch(level, target, muster);
 		// (0.7.443) a tribe that favours one of the raided realm's own may send them a war band
 		TribePacts.called(level, target, camp);
 		Camps.noteRaid(server, camp.id(), now);
@@ -598,6 +601,8 @@ final class Raids {
 
 	private static void end(ServerLevel level, Raid raid, List<Mob> party, @Nullable Faction camp) {
 		ACTIVE.remove(raid.camp);
+		// (0.7.530) the town is left to pick up the pieces
+		TownTroubles.event(level.getServer(), raid.target, TownTroubles.RAID, Integer.toString(raid.camp));
 		for (Mob raider : party) {
 			goHome(level, camp, raider);
 		}

@@ -320,7 +320,7 @@ public final class Roads {
 		for (Faction f : towns) {
 			towns.stream().filter(g -> g.id() != f.id() && g.seat().closerThan(f.seat(), LINK_RANGE))
 				.sorted(Comparator.comparingDouble(g -> g.seat().distSqr(f.seat())))
-				.limit(LINKS)
+				.limit(LINKS + TownProjects.extraLinks(server, f)) // (0.7.530) a finished bridge project
 				.forEach(g -> links.putIfAbsent(key(f.id(), g.id()), new Faction[] {f, g}));
 			if (f.overlord() >= 0) {
 				Faction lord = Factions.get(server, f.overlord());
