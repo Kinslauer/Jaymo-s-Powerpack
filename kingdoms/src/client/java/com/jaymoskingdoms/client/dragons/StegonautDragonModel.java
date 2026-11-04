@@ -155,12 +155,18 @@ final class StegonautDragonModel extends EntityModel<WindDragonRenderer.State> {
 		return LayerDefinition.create(mesh, 256, 256);
 	}
 
+	/** Smoothstep, clamped: eases a 0..1 share in and out. */
+	static float ease(float x) {
+		x = Mth.clamp(x, 0.0F, 1.0F);
+		return x * x * (3.0F - 2.0F * x);
+	}
+
 	@Override
 	public void setupAnim(WindDragonRenderer.State s) {
 		super.setupAnim(s);
 		float t = s.ageInTicks;
-		float crash = s.crash, swim = s.swim * (1.0F - crash);
-		float sit = s.sit * (1.0F - crash) * (1.0F - swim);
+		float crash = ease(s.crash), swim = ease(s.swim) * (1.0F - crash);
+		float sit = ease(s.sit) * (1.0F - crash) * (1.0F - swim);
 		float walk = Math.min(s.walkAnimationSpeed, 1.0F) * (1.0F - crash) * (1.0F - sit);
 		float step = s.walkAnimationPos * 0.55F;
 		float headYaw = Mth.clamp(s.yRot, -50.0F, 50.0F) * Mth.DEG_TO_RAD;
@@ -172,13 +178,15 @@ final class StegonautDragonModel extends EntityModel<WindDragonRenderer.State> {
 		float slam = s.action == StegonautDragon.GROUND_SLAM ? share : 0.0F;
 		float chew = s.action == StegonautDragon.CHEW ? share : 0.0F;
 		float roar = s.action == StegonautDragon.ROAR ? Mth.sin(share * Mth.PI) : 0.0F;
-		// the slam: rear up through the wind-up (to 0.6), then crash down
-		float rear = slam <= 0.0F ? 0.0F : slam < 0.6F ? Mth.sin(slam / 0.6F * Mth.HALF_PI) : Math.max(0.0F, 1.0F - (slam - 0.6F) * 6.0F);
-		// the chin slam: down, then snapped up
-		float chinDown = chin <= 0.0F ? 0.0F : chin < 0.45F ? chin / 0.45F : Math.max(0.0F, 1.0F - (chin - 0.45F) * 4.0F);
-		float chinUp = chin < 0.45F ? 0.0F : Mth.sin((chin - 0.45F) / 0.55F * Mth.PI);
-		// the ground eating: head down to the earth, then chewing
-		float nose = chew <= 0.0F ? 0.0F : Mth.sin(Math.min(1.0F, chew * 1.4F) * Mth.HALF_PI) * (1.0F - Math.max(0.0F, chew - 0.8F) * 5.0F);
+		// (0.7.511, Andy: "all the joints should move and blend smoothly") every envelope eases in and out (smoothstep) and
+		// ends where it began, so a move flows out of the walk and back into it with no snap
+		// the slam: rear up through the wind-up (to 0.6), then come down hard (but eased, over a quarter of it)
+		float rear = slam <= 0.0F ? 0.0F : slam < 0.6F ? ease(slam / 0.6F) : 1.0F - ease((slam - 0.6F) / 0.25F);
+		// the chin slam: down, then swung up
+		float chinDown = chin <= 0.0F ? 0.0F : chin < 0.45F ? ease(chin / 0.45F) : 1.0F - ease((chin - 0.45F) / 0.3F);
+		float chinUp = chin < 0.45F ? 0.0F : Mth.sin(ease((chin - 0.45F) / 0.55F) * Mth.PI);
+		// the ground eating: head down to the earth, chewing, then back up
+		float nose = chew <= 0.0F ? 0.0F : ease(chew / 0.3F) * (1.0F - ease((chew - 0.75F) / 0.25F));
 
 		// the body: a heavy plod, sunk crashed, settled back sitting, rearing for the slam
 		this.body.y = this.bodyY + crash * CRASH_DROP + sit * SIT_DROP + Math.abs(Mth.sin(step)) * 0.6F * walk + Mth.sin(t * 0.08F) * 0.15F
@@ -188,12 +196,13 @@ final class StegonautDragonModel extends EntityModel<WindDragonRenderer.State> {
 
 		// the neck and head: low and forward, bobbing with the plod
 		// (the neck is held high: lowering it to the ground for the ground eating or the chin slam takes the base down most)
-		float bob = Mth.sin(step * 2.0F) * 0.04F * walk;
 		float[] share4 = {0.4F, 0.25F, 0.2F, 0.15F};
 		float neckDown = nose * 1.5F + chinDown * 1.0F - chinUp * 0.5F - roar * 0.35F + rear * 0.15F + crash * 1.1F + sit * 0.2F;
 		for (int i = 0; i < 4; i++) {
-			this.neck[i].xRot = this.neckRest[i] + neckDown * share4[i] + bob + Mth.sin(t * 0.05F - i * 0.5F) * 0.015F;
-			this.neck[i].yRot = headYaw * 0.22F;
+			// (each segment a beat behind the one before it, so the bob and the sway roll up the neck)
+			this.neck[i].xRot = this.neckRest[i] + neckDown * share4[i] + Mth.sin(step * 2.0F - i * 0.6F) * 0.04F * walk
+				+ Mth.sin(t * 0.05F - i * 0.5F) * 0.015F;
+			this.neck[i].yRot = headYaw * 0.22F + Mth.sin(step - i * 0.6F) * 0.03F * walk;
 		}
 		this.head.xRot = this.headRest + headPitch * 0.4F - neckDown * 0.55F + nose * 0.5F + chinDown * 0.25F - chinUp * 0.35F - roar * 0.25F;
 		this.head.yRot = headYaw * 0.12F;
@@ -218,7 +227,9 @@ final class StegonautDragonModel extends EntityModel<WindDragonRenderer.State> {
 			boolean front = i < 2, left = i % 2 == 0;
 			float phase = front == left ? 0.0F : Mth.PI;
 			float swing = Mth.cos(step + phase) * 0.45F * walk;
-			float knee = Math.max(0.0F, -Mth.sin(step + phase)) * 0.35F * walk;
+			// (the knee folds as the leg swings forward and straightens as it plants: a smooth curve, no kink at the turn)
+			float lift = (1.0F - Mth.sin(step + phase)) * 0.5F;
+			float knee = lift * lift * 0.45F * walk;
 			float up = swing, low = knee;
 			if (front) {
 				up = Mth.lerp(rear, up, -0.7F);

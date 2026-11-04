@@ -8735,5 +8735,8 @@ Reserved, so its eight dragons are rebuilt here with our own models and paint (`
   four hides (moss stone, jungle green, sandstone, slate) with moss on its back and four glowing-lichen marking patterns;
   short/long horns or a nose horn and a broken plate by its DragonLook; drawn 1.3x. It plods, rears and stamps for the
   slam, noses the ground and chews, and flares its plates to roar.
+  Andy: "all the joints should move and blend smoothly": every move's envelope is smoothstep-eased and ends where it
+  began, sitting/crashing/swimming ease in and out, the knees fold on a smooth curve, and the neck's bob and sway roll up
+  it a beat per segment.
 - `/kingdom dragon stegonaut [tame]` (operators).
 - Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.
