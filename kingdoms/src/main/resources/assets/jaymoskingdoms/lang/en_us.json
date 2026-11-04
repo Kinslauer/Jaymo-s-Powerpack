@@ -11313,5 +11313,19 @@
 	"kit.jaymoskingdoms.perk.less_healing": "you mend at three quarters of the rate",
 	"kit.jaymoskingdoms.perk.ravenous": "hunger drains 30% faster",
 	"kit.jaymoskingdoms.perk.hungry": "hunger drains 15% faster",
-	"heritage.jaymoskingdoms.dragonblood.gift_rimewyrm": "Gift: the more gold you carry, the harder you hit (up to 15% with a stack of ingots)"
+	"heritage.jaymoskingdoms.dragonblood.gift_rimewyrm": "Gift: the more gold you carry, the harder you hit (up to 15% with a stack of ingots)",
+	"camp.jaymoskingdoms.tier.village.1": "Village",
+	"camp.jaymoskingdoms.tier.village.2": "Palisaded village",
+	"camp.jaymoskingdoms.tier.village.3": "Walled town",
+	"camp.jaymoskingdoms.tier.village.4": "Fortified town",
+	"camp.jaymoskingdoms.tier.blossom.1": "Blossom village",
+	"camp.jaymoskingdoms.tier.blossom.2": "Fenced blossom village",
+	"camp.jaymoskingdoms.tier.blossom.3": "Walled blossom town",
+	"camp.jaymoskingdoms.tier.blossom.4": "Castle town",
+	"message.jaymoskingdoms.town.village.2": "%1$s has outgrown its fields: a palisade will rise round it, a stretch of it every day.",
+	"message.jaymoskingdoms.town.village.3": "The folk of %1$s have grown their village into a walled town, its gates cut and its roads laid out beyond them.",
+	"message.jaymoskingdoms.town.village.4": "%1$s is now a fortified town, its walls pushed out again and its gates held by iron golems.",
+	"message.jaymoskingdoms.town.blossom.2": "%1$s has outgrown its ring of minka: a fence of timber and plaster will rise round it, a stretch of it every day.",
+	"message.jaymoskingdoms.town.blossom.3": "The folk of %1$s have raised a walled blossom town, white plaster under dark tile all the way round.",
+	"message.jaymoskingdoms.town.blossom.4": "%1$s has become a castle town, its walls pushed out again round shrine and market alike."
 }
