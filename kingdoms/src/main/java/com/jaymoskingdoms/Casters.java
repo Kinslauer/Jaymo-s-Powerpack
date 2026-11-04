@@ -294,6 +294,6 @@ public final class Casters {
 		if (e instanceof Mob m && m.getTarget() != null && (m.getTarget() == mob || ally(w, m.getTarget()))) {
 			return true;
 		}
-		return e instanceof Enemy;
+		return e instanceof Enemy && !PatronChampions.outsideTown(e);
 	}
 }

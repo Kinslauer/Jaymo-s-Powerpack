@@ -190,7 +190,7 @@ public final class Thessaly extends Spirit {
 			}
 		} else if (target instanceof Villager || target instanceof Folk) {
 			did = Pickpocket.liftBySpirit(player, target);
-		} else if (target instanceof Mob mob) {
+		} else if (target instanceof Mob mob && !(mob instanceof com.jaymoskingdoms.PatronChampion)) {
 			ItemStack held = mob.getMainHandItem();
 			did = !held.isEmpty();
 			if (did) {

@@ -260,6 +260,10 @@ public final class CourtWizards {
 	 */
 	static boolean foe(Enlisted w, LivingEntity e) {
 		PathfinderMob mob = w.mob();
+		// (0.8.x) a patron's champion and its adds are never the town's fight
+		if (PatronChampions.outsideTown(e)) {
+			return false;
+		}
 		if (e == mob || !e.isAlive() || e instanceof Player p && (p.isCreative() || p.isSpectator()) || ally(w, e) || Thralls.refuses(mob, e)
 			// (0.7.384) the practice foes of a drill or a trial are the player's to beat, never the wizard's
 			|| com.jaymoskingdoms.forms.WizardTrials.practiceFoe(e)) {

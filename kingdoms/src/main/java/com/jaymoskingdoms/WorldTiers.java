@@ -516,6 +516,10 @@ public final class WorldTiers {
 
 	/** Monsters (not a player's own) and the folk who are always foes: camps' raiders, orcs, goblins, assassins. */
 	static boolean hostile(Mob mob) {
+		// (0.7.515) champions scale themselves, and their adds are not tiered
+		if (mob instanceof PatronChampion || PatronChampions.isAdd(mob)) {
+			return false;
+		}
 		if (mob instanceof Folk folk) {
 			return folk.style() == FactionType.BARBARIAN || Orcs.isOrc(folk) || Goblins.isGoblin(folk) || Assassins.is(folk);
 		}

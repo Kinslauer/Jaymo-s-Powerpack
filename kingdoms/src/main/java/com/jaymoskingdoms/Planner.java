@@ -172,6 +172,10 @@ public final class Planner {
 				// (0.7.441) only a Warrior-born or mixed haven builds a fighting ring
 				continue;
 			}
+			if (e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f)) {
+				// (0.7.515) only the capital of a Faith-creed realm builds the great temple
+				continue;
+			}
 			if (e.id().equals(TAVERN)) {
 				tavern = size >= e.minPopulation() && works.count(e.id()) < e.max() ? e : null;
 				continue;
@@ -197,7 +201,8 @@ public final class Planner {
 		Map<String, Integer> most = new HashMap<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
 			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && !HavenGrowth.isWork(e.id()) && e.minPopulation() < Integer.MAX_VALUE
-				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))) {
+				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))
+				&& !(e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f))) {
 				most.merge(e.id(), Focus.max(server, f, e.id(), e.max()), Math::max);
 			}
 		}
