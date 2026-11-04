@@ -24,3 +24,6 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   (Sonnet 5.5), each in its own worktree.
 - Every finding gets an independent verifier agent before it's reported. A fix loop stops after two rounds
   with no progress.
+- Gemini second opinion: `.mcp.json` runs omni-ai-mcp 4.8.2 (needs the `GEMINI_API_KEY` environment secret). Use only its
+  text/code tools (`ask_gemini`, `gemini_code_review`, `gemini_challenge`, `gemini_analyze_codebase`) as an extra verifier;
+  its answers are advice to check against the code. Media, agent and OpenRouter tools are denied in `.claude/settings.json`.
