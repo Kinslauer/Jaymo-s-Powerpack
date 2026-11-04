@@ -342,6 +342,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		ArrivalGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
+		// 0.7.492: a boss's posture: worn by blows, broken to a kneel and a riposte
+		BossPosture.register();
+		// 0.7.492: knowledge: the boss ladder that opens anvils, smithing, enchanting, the higher arts and the End
+		Knowledge.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		LOGGER.debug("great wars attachment: {}", GreatWars.LEDGER);
