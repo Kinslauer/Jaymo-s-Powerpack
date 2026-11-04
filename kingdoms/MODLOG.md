@@ -8710,3 +8710,10 @@ is our own take on the idea (none of its code or art).
 - Felling, the fall, the crack and crush, Aether Giants, the Great Ape and Towerback trampling trees, and tornadoes are
   unchanged (none of them go through `Trees.chop`).
 - Not played; compile not checked against the game jars.
+## 0.7.511: pink fairies are prized (pack 0.20.11)
+- **FairyWonder:** Jaymo's Powers' Bottled Pink Fairy (a super rare bauble) is the rarest thing townsfolk ever see.
+  Villagers (vanilla and MCA) within 8 blocks who see a player wearing one (amulet or charm slot, via
+  `PowersCompat.baubles`) or holding one stop, stare and say so in a gold bubble (8 grown lines of longing, envy and old
+  tales, 4 for children who beg to hold her), once a day each per player, one at a time; an MCA villager's mood rises 3.
+- **MCA gift:** `data/mca/gifts/fairy.json` makes her the dearest gift there is (60; a nether star is 40), +20 for
+  children, +15 for the married.

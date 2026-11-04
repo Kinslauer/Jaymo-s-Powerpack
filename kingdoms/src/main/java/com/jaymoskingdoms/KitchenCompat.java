@@ -229,7 +229,7 @@ final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for body heat (needs 0.5.25): {}", e.toString());
 		}
-		// (0.7.477) an Emberborn drinks fire and lava, and water only hisses on their tongue
+		// (0.7.511) an Emberborn drinks fire and lava, and water only hisses on their tongue
 		try {
 			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setFireDrinker", java.util.function.Predicate.class)
 				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.EMBERBORN));
