@@ -12,7 +12,7 @@ our own code from the idea (the mods are GPLv3, ARR or CC BY-NC). One PR per pat
 | 4 | Jewellery making (bench, lapidary, graded frames) | Immersive Jewelry | |
 | 5 | Gem sockets in forged gear | Immersive Apotheosis | built in Powers 0.20.7 (docs/Sockets-Plan.md) |
 | 6 | Locks and keys you place | Locks Reforged | |
-| 7 | Brewing quality (mortar, timed stirring, alembic) | Immersive Brewing | |
+| 7 | Brewing quality (mortar, timed stirring, alembic) | Immersive Brewing | built in Powers 0.20.12 (docs/Brewing-Quality-Plan.md) |
 | 8 | Branching talks, hidden trust/respect/warmth, promises | MCA: Conversations | |
 | 9 | Quests to about 260 (~188 templates now), town situations, shared projects | MCA: Quests ("get close" to 260) | |
 | 10 | Diplomacy (treaties, envoys) and elections | MCA: Kingdoms | |
