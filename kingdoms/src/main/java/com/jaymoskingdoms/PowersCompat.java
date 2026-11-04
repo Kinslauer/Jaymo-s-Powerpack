@@ -1618,6 +1618,23 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.509) Adds {@code bonus} to Powers' {@code Forging.ZONE_BONUS}: how much wider the Smithing Anvil's perfect zone is for
+	 * this smith (the Anvil-Father's True Strike). Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void zoneBonus(java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer> bonus) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.tinkering.smithing.Forging").getField("ZONE_BONUS").get(null);
+			((java.util.List<java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>>)list).add(bonus);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Forging.ZONE_BONUS (older Powers?)", e);
+		}
+	}
+
 	/** (0.7.319) Powers' {@code ZFighterNpcs.talk(ServerPlayer, LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle zfighterTalk;
 	private static boolean lookedForZFighterTalk;

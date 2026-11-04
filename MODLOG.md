@@ -5216,6 +5216,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the right hip with the lantern's sway (`WornLanterns`); it gives no light. Web's symbiote grabs coins as valuables.
   - The melting gap log skips coins (realm silver and the like are money, not metal).
   - Not compile-checked yet at this entry; not played.
+
 - **0.20.1, Kingdoms 0.7.501, tails calm down when walking:** Andy: "they should pulse and slap like they have their own
   mind, but they swing violently whenever you walk". The cause: the sway wave ran at `age * (rate + walk speed)`, and with
   the age in the thousands every change of walk speed threw the phase round, so the tail thrashed. Warrior-born tails
@@ -5261,3 +5262,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   game can't sync or save. The first such item (a graded WeaponMod copper boomerang) crashed the server when its owner
   moved it in their inventory. `Grades.bake` now caps a scaled speed at `Float.MAX_VALUE`. Kingdoms 0.7.506 builds again:
   a merge left `HandshakePose` with two `NOD` constants, so the handshake's head tilt is now `SHAKE_NOD`.
+- **0.20.8, Kingdoms 0.7.509, Kitchen 0.5.57, patron gods part (a)** (plan `docs/Patrons-Plan.md`; see `kingdoms/MODLOG.md`):
+  Powers only gets the Hearthkeeper's Gentle Hands: `MedicineSkill.ticks` also reads Kingdoms'
+  `Patrons.blessing(player, "gentle_hands")` by reflection (a fifth off revives and treatments). Not played.

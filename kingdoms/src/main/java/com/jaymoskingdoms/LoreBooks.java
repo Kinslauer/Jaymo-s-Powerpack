@@ -178,6 +178,13 @@ public final class LoreBooks {
 		return !idOf(stack).isEmpty();
 	}
 
+	/** (0.7.509) The lore book {@code path} under this mod's namespace (a patron's, say), or empty if it isn't loaded. */
+	static ItemStack book(String path) {
+		Identifier id = JaymosKingdoms.id(path);
+		Lore lore = books.get(id);
+		return lore == null ? ItemStack.EMPTY : dataBook(id, lore);
+	}
+
 	private static ItemStack dataBook(Identifier id, Lore lore) {
 		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
 		List<Filterable<Component>> pages = new ArrayList<>();

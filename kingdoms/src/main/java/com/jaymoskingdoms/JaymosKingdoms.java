@@ -456,6 +456,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Verdants.register();
 		// villagers born into heritages (MCA's and the settlements' own folk), a Warrior-born's tail wrapped or cut
 		VillagerHeritage.register();
+		// (0.7.509) every villager and townsperson holds a faith (patron gods, patch 11a)
+		LOGGER.debug("faith attachment: {}", Faiths.FAITH);
+		Faiths.register();
 		Quests.register();
 		// 0.5.50: the traveller's journal (book + map): quests, a map, reputations, on M
 		Journal.register();
@@ -493,6 +496,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
 		Temperaments.register();
 		PlayerTemperaments.register();
+		// (0.7.509) the eight patrons, favour and blessings
+		LOGGER.debug("patron attachment: {}", Patrons.STATE);
+		Patrons.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		GiftTales.register();
