@@ -8366,3 +8366,19 @@ minimap. Handshake and spirit-clash films and the story and travel curtains hide
 - **Cinder Forge**: a second Ignis Vael could be made while the forge's chunks had loaded their blocks but not yet their
   entities; the watch now waits for the entities. Smiths' rumours no longer stall in a world whose clock is behind one
   you played before (the cooldown kept the other world's time).
+
+## 0.7.490: boss posture (Gemini's DawnCraft handoff, reviewed)
+- Andy pasted a Gemini handoff (1.21.1 code): a DawnCraft-style boss ladder (Goblin King, Corrupted Ogre, Knight Rober,
+  Nine Tails, Frostmaw, Fire Giant), "Guild Master knowledge" locking the anvil, smithing table, enchanting table and
+  end portal frames, 12 eyes, one generic Souls-like boss entity with poise, kneel and riposte, a model and a renderer.
+  None of it compiles on 26.3, and most of it is already in the pack in our own form (world tiers and their great foes,
+  the Goblin King, the Ogre King's three phases, the Skeleton Lord, the Cinder Forge's Ignis Vael, Tinkering and the
+  enchanting overhaul, red-glint heavy blows, Powers' guard and riposte). Kept only the part we didn't have:
+- **Boss posture** (`BossPosture`): every boss with a Kingdoms bar, plus the Ogre King, Skeleton Lord and Piglin King,
+  has a posture of 20 + 35% of its health. Melee wears it by the damage taken (x1.6 sprinting or falling), arrows and
+  thrown weapons at 40%, its own blows caught on a shield or guard at 75%. After 3 quiet seconds it refills over 5.
+  Broken, the boss kneels 3 seconds (stopped, head bowed, can't strike; sparks, an anvil's clang); the first melee blow
+  then is a riposte at 2.25x and brings it up. Then 8 seconds when posture can't be worn. A thin "Posture" bar shows
+  under the boss bar to the players who have that bar, only while it's worn. No chat text. Vanilla bosses untouched.
+- Dropped: the workstation locks and eyes (would break Tinkering's anvil, smithing and enchanting and the world-tier
+  ladder; left for Andy), the generic boss entity, model and renderer (no textures, duplicates of bosses we have).
