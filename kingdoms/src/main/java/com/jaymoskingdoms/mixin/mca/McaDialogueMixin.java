@@ -276,6 +276,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.ZFighterFolk.WORD.equals(answer)) {
+			// (0.7.539) "Have a word" with one of Powers' Z Fighter characters (the Judge's writs, the Keeper's blessing...)
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.ZFighterFolk.talk(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.ZFighterFolk.TRAINING.equals(answer)) {
 			// (0.7.319) a town's Z Fighter master: lessons, the sagas and their jobs, on the talk screen
 			villager.getInteractions().stopInteracting();
