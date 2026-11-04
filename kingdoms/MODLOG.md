@@ -8497,3 +8497,4 @@ Andy picked the idea of Locks Reforged; this is our own build of it, nothing cop
 - Fixes: a wind charge no longer opens a locked gate; breaking one half of a double chest no longer strips the other half's
   lock; a lock no longer outlives a block that an explosion, mob, piston or lost support removed.
 - Fix: a lock now stays when its block turns into another lockable block (copper doors, trapdoors and chests weathering, waxed or scraped).
+- Two loading hints (82-83).
