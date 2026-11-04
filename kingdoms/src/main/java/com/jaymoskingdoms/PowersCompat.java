@@ -1871,6 +1871,18 @@ public final class PowersCompat {
 
 	/** (0.7.390) A blood stain of {@code colour}, this big, on the ground under (x, from, z), as Powers' blood trail lays them; nothing without Powers. */
 	public static void stain(net.minecraft.server.level.ServerLevel level, int colour, double x, double from, double z, float size) {
+		lookForStain();
+		if (layStain == null) {
+			return;
+		}
+		try {
+			layStain.invoke(level, (java.util.UUID) null, colour, x, from, z, size, 0);
+		} catch (Throwable e) {
+			// no stain
+		}
+	}
+
+	private static void lookForStain() {
 		if (!lookedForStain) {
 			lookedForStain = true;
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
@@ -1884,15 +1896,45 @@ public final class PowersCompat {
 				}
 			}
 		}
-		if (layStain == null) {
+	}
+	/** Powers' {@code BladeBlood.bleeds(LivingEntity)} and {@code BladeBlood.color(LivingEntity)} (0.7.514). */
+	private static java.lang.invoke.@Nullable MethodHandle bleedsHandle, bloodColorHandle;
+	private static boolean lookedForBlood2;
+
+	/**
+	 * (0.7.514) A drop of {@code bleeder}'s own blood on the ground under it, as Powers' blood trail lays them: marked as
+	 * its, so it (and those who hunt by blood) can be tracked. Nothing without Powers, or for what has no blood.
+	 */
+	public static void trailDrop(net.minecraft.server.level.ServerLevel level, LivingEntity bleeder, float size) {
+		if (!lookedForBlood2) {
+			lookedForBlood2 = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> blood = Class.forName("com.jaymospowers.core.BladeBlood");
+					var lookup = java.lang.invoke.MethodHandles.publicLookup();
+					bleedsHandle = lookup.findStatic(blood, "bleeds", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+					bloodColorHandle = lookup.findStatic(blood, "color", java.lang.invoke.MethodType.methodType(int.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blade blood (older Powers?)", e);
+				}
+			}
+		}
+		lookForStain();
+		if (bleedsHandle == null || bloodColorHandle == null || layStain == null) {
 			return;
 		}
 		try {
-			layStain.invoke(level, (java.util.UUID) null, colour, x, from, z, size, 0);
+			if (!(boolean)bleedsHandle.invoke(bleeder)) {
+				return;
+			}
+			int colour = (int)bloodColorHandle.invoke(bleeder);
+			double x = bleeder.getX() + (level.getRandom().nextDouble() - 0.5) * 0.6, z = bleeder.getZ() + (level.getRandom().nextDouble() - 0.5) * 0.6;
+			layStain.invoke(level, bleeder.getUUID(), colour, x, bleeder.getY() + 0.5, z, size, 6);
 		} catch (Throwable e) {
-			// no stain
+			// no drop
 		}
 	}
+
 	/** Powers' {@code BloodTrail.draw(ServerLevel, Vec3, double, float, float, Consumer)} (0.19.62). */
 	private static java.lang.invoke.@Nullable MethodHandle drawStains;
 	private static boolean lookedForDraw;

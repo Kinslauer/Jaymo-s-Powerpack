@@ -619,6 +619,8 @@ public final class Senses {
 		}
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.senses.sneak_attack").withStyle(ChatFormatting.GRAY));
 		Skills.sneakAttack(sp, now);
+		// (0.7.514) Ambusher and Cutthroat
+		Bridges.sneakAttack(sp, target);
 		return unawareBlow(target, amount, amount * mult);
 	}
 }
