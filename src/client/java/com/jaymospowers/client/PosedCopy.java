@@ -14,6 +14,11 @@ import net.minecraft.client.model.HumanoidModel;
  * ours already in it. Every pose of ours that eases through {@link PoseBlend} adds its offsets to whatever model it's
  * handed, so on those layers (and on a costume worn over them, which takes the same copy) it landed twice: the downed
  * body folded, the crawl and the slide overdone. {@link PoseBlend} asks here and leaves such a model as it is.
+ * <p>
+ * (0.20.6) MCA's armour model on those bodies ({@code PlayerArmorExtendedModel}) takes the same copy in its
+ * {@code setupAnim} ({@code HumanoidModelPose.applyTo}), but carries no flag. Andy (2026-11-04): "armor seems broken on the
+ * new races ... it broke during the execution": a downed body's armour took the downed pose twice and lay twisted and
+ * scattered over it, and a crawler's helmet sat off its head. It counts as a copy too.
  */
 public final class PosedCopy {
 	/** A model of ours that may have taken such a copy this draw (a costume over an MCA body). */
@@ -24,6 +29,8 @@ public final class PosedCopy {
 	private static final boolean MCA = FabricLoader.getInstance().isModLoaded("mca");
 	/** MCA's own flag on its layer models: they take the copied pose (PlayerEntityExtendedModel, VillagerEntityBaseModelMCA). */
 	private static final String MCA_FIELD = "receivesDeferredAnimationPose";
+	/** (0.20.6) MCA's armour model on its bodies: it copies the body's captured pose, flag or not (null without MCA). */
+	private static final Class<?> MCA_ARMOUR = MCA ? armourClass() : null;
 	/** Per model class, MCA's flag (null: the class has none). */
 	private static final Map<Class<?>, Field> FIELDS = new HashMap<>();
 	private static boolean broken;
@@ -39,6 +46,9 @@ public final class PosedCopy {
 		if (!MCA || broken) {
 			return false;
 		}
+		if (MCA_ARMOUR != null && MCA_ARMOUR.isInstance(model)) {
+			return true;
+		}
 		try {
 			Class<?> type = model.getClass();
 			Field field = FIELDS.computeIfAbsent(type, PosedCopy::find);
@@ -47,6 +57,15 @@ public final class PosedCopy {
 			broken = true;
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't read MCA's layer models; our poses may show twice on them", e);
 			return false;
+		}
+	}
+
+	private static Class<?> armourClass() {
+		try {
+			return Class.forName("net.conczin.mca.client.model.PlayerArmorExtendedModel", false, PosedCopy.class.getClassLoader());
+		} catch (Throwable e) {
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't find MCA's armour model; our poses may show twice on armour", e);
+			return null;
 		}
 	}
 

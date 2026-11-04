@@ -75,6 +75,11 @@ public final class BeastParts {
 	static final float TAIL_RUDDER = -3.5F, RUDDER_MAX = 0.8F, SPRINT_EASE = 0.2F, TURN_EASE = 0.3F, SPRINT_SPEED = 0.2F;
 	/** How much a run lifts a tail (radians off its first bend), and how much it straightens the rest. */
 	static final float RUN_LIFT = 0.15F, RUN_STRAIGHTEN = 0.2F;
+	/**
+	 * (0.7.507) Lying down: the body's tilt where the tail starts to lie along the ground and where it lies flat (cosines of the
+	 * tilt from upright: about 45 and 80 degrees), and how much of its curl is straightened then.
+	 */
+	static final float LIE_START = 0.7F, LIE_FLAT = 0.17F, LIE_FLATTEN = 0.9F;
 	/** Where a tail leaves the body: the small of the back (body space), and how far back it starts clear of armour. */
 	static final float TAIL_Y = 10.5F, TAIL_Z = 1.7F, ARMOUR_Z = 3.3F;
 	/** Wings and legs on the back: how far out they sit, and the added gap under armour. */
@@ -368,6 +373,9 @@ public final class BeastParts {
 		ctx.ps.pushPose();
 		model.body.translateAndRotate(ctx.ps);
 		ctx.ps.translate(0.0F, TAIL_Y / 16.0F, (armour ? ARMOUR_Z : TAIL_Z) / 16.0F);
+		// (0.7.507) a body lying down (downed, crawling, executed) lays its tail along the ground toward its feet, not
+		// standing up off its back into the air
+		float lie = lying(ctx.ps);
 		if (steers) {
 			// the turn: level at a sprint it swings sideways like a rudder; held up it leans across like an aileron
 			float rudder = Mth.clamp(TAIL_RUDDER * turn, -RUDDER_MAX, RUDDER_MAX);
@@ -379,6 +387,7 @@ public final class BeastParts {
 			float along = n == 1 ? 1.0F : i / (float)(n - 1);
 			float bend = steers ? Mth.lerp(sprint, tail.bend[i], tail.sprint[i]) : tail.bend[i];
 			float pitch = steers ? bend - (i == 0 ? lift : 0.0F) : i == 0 ? bend - lift - RUN_LIFT * run : bend * (1.0F - RUN_STRAIGHTEN * run);
+			pitch = i == 0 ? Mth.lerp(lie, pitch, -Mth.HALF_PI) : pitch * (1.0F - LIE_FLATTEN * lie);
 			// a slow pulse down the tail, the curl rolling up its far half, a little bob on the stride
 			pitch += 0.04F * Mth.sin(age * 0.08F + i + phase) + CURL * curl * along * (steers ? 1.0F - sprint : 1.0F) + 0.03F * run * Mth.sin(walkPos * 1.3324F - i * 0.5F);
 			float wander = 0.6F * Mth.sin(age * WANDER_RATE + phase - i * 0.5F) + 0.4F * Mth.sin(age * WANDER_SLOW + phase * 1.7F - i * 0.3F);
@@ -402,6 +411,21 @@ public final class BeastParts {
 	static float slap(float age, float phase) {
 		float open = Math.max(0.0F, Mth.sin(age * SLAP_GATE + phase * 2.3F) - (1.0F - SLAP_OPEN)) / SLAP_OPEN;
 		return open * open * (3.0F - 2.0F * open);
+	}
+
+	/**
+	 * (0.7.507) How far the body this pose stack is in lies down, from where the world's down points in it: 0 standing (or
+	 * leaning up to {@link #LIE_START} from upright), 1 flat on the ground. The world's entity pose stack carries no camera
+	 * turn, and a screen's figure stands upright, so this reads the body's own tilt.
+	 */
+	static float lying(PoseStack ps) {
+		org.joml.Matrix3f m = new org.joml.Matrix3f(ps.last().pose());
+		if (Math.abs(m.determinant()) < 1.0E-8F) {
+			return 0.0F;
+		}
+		// the model's own down is +y; how much of the world's down still points that way
+		org.joml.Vector3f down = m.invert().transform(new org.joml.Vector3f(0.0F, -1.0F, 0.0F)).normalize();
+		return Mth.clamp((LIE_START - down.y) / (LIE_START - LIE_FLAT), 0.0F, 1.0F);
 	}
 
 	/**
