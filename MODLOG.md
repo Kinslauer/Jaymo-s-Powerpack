@@ -276,3 +276,5 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.35, Kingdoms 0.7.531, Stegonaut moves:** the Stegonaut's poses redrawn after the Bastionodon animation set
   (ground eating in three parts, bite, grazing, grumbles, flinch, doze, gallop, swim stroke, death), none of its files used
   (its rig is Saint's Dragons'). See the Kingdoms MODLOG.
+- **0.20.36, Kingdoms 0.7.532, story figure tails:** tails on the life story's figure no longer hang down between the
+  legs. See the Kingdoms MODLOG.

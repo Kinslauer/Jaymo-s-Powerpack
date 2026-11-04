@@ -8906,3 +8906,6 @@ of its files are used; its motions were redrawn as procedural poses in `Stegonau
   sat (head down and turned aside, slower breaths), a **gallop** at a run (the right pair an eighth of a stride behind,
   longer strides, rocking), a paddling **swim** (forelegs splayed, tail sweeping), and stiff splayed legs as it **dies**.
 Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. Compile-checked; not played.
+- **0.7.532, story figure tails:** Beastfolk, Canine, Feline, Kitsune, Avian and Serpen tails on the life story's figure
+  (and any screen figure) hung down between the legs. 0.7.507's lying-down check read the screen's flipped y as a body
+  lying flat; `BeastParts.lying` now counts only the tilt off the up-down line. Compile-checked; not played.
