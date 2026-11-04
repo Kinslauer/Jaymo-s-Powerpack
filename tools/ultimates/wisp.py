@@ -1,4 +1,4 @@
-"""(0.20.15, Ultimates patch 1) Wisp's Ultimate, Revenant: its skin and glow map, 128x128, for client/.../ultimate/UltimateRevenant.java.
+"""(0.20.21, Ultimates patch 1) Wisp's Ultimate, Revenant: its skin and glow map, 128x128, for client/.../ultimate/UltimateRevenant.java.
 
 Wisp's pale mist (the same folds and frayed hems on the vanilla layout in the top-left 64x64) with a tattered hood, a bone-pale mask
 over the face, bone collar plates, pauldrons and bracers, a few bone spikes, long trailing tendrils off the hem, and thin ice-blue seams

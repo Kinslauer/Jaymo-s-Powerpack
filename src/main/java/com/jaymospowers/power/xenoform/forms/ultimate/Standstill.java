@@ -38,7 +38,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.15) Velox's Ultimate, Standstill: the raptor grown plated and fanged, with a health bar of its own on top of Velox's. Its model is
+ * (0.20.21) Velox's Ultimate, Standstill: the raptor grown plated and fanged, with a health bar of its own on top of Velox's. Its model is
  * {@code UltimateStandstill}.
  * <ul>
  * <li>R, Overdrive: Velocity at {@link #OVERDRIVE_MULT} times its speed; creatures you run into are hit and shouldered aside.</li>
@@ -93,7 +93,7 @@ public final class Standstill extends XenoUltimate {
 	}
 
 	private static final Map<UUID, Work> WORK = new HashMap<>();
-	/** (0.20.15) Each Standstill's live state, kept here so a server stop can let everything go before the players are saved. */
+	/** (0.20.21) Each Standstill's live state, kept here so a server stop can let everything go before the players are saved. */
 	private record Running(Standstill form, XenoformPower.Live live) {}
 
 	private static final Map<UUID, Running> LIVES = new HashMap<>();
@@ -108,7 +108,7 @@ public final class Standstill extends XenoUltimate {
 			}
 			LIVES.clear();
 			WORK.clear();
-			Standstill.HELD_UUIDS.clear(); // (0.20.15)
+			Standstill.HELD_UUIDS.clear(); // (0.20.21)
 		});
 	}
 
@@ -130,7 +130,7 @@ public final class Standstill extends XenoUltimate {
 	@Override
 	public void onEnter(ServerPlayer player, XenoformPower.Live live) {
 		LIVES.put(player.getUUID(), new Running(this, live));
-		// (0.20.15) a change-in mid Rapid Punches, Cyclone or Chain Strike must not carry on as the Ultimate's version
+		// (0.20.21) a change-in mid Rapid Punches, Cyclone or Chain Strike must not carry on as the Ultimate's version
 		live.punches = live.punchTick = 0;
 		live.punchTarget = -1;
 		live.cyclone = 0;
@@ -324,7 +324,7 @@ public final class Standstill extends XenoUltimate {
 		}
 	}
 
-	/** (0.20.15) {@link #around} without the players this one may not hurt (pvp off). */
+	/** (0.20.21) {@link #around} without the players this one may not hurt (pvp off). */
 	private static List<LivingEntity> foes(ServerPlayer player, double radius) {
 		List<LivingEntity> list = new ArrayList<>(around(player, radius));
 		list.removeIf(e -> !canHit(player, e));
@@ -337,7 +337,7 @@ public final class Standstill extends XenoUltimate {
 
 	/** Running into creatures at speed: each takes a hit and is shouldered aside, and is not hit again for {@link #RUN_HIT_GAP} ticks. */
 	private static void shoulder(ServerPlayer player, Work work) {
-		if (player.getKnownMovement().horizontalDistanceSqr() < RUN_MIN_SPEED_SQ) { // (0.20.15) the server-side delta stays ~0 for a running player
+		if (player.getKnownMovement().horizontalDistanceSqr() < RUN_MIN_SPEED_SQ) { // (0.20.21) the server-side delta stays ~0 for a running player
 			return;
 		}
 		ServerLevel level = player.level();
@@ -425,7 +425,7 @@ public final class Standstill extends XenoUltimate {
 			if (held == null) {
 				held = catchProjectile(projectile);
 				if (held == null) {
-					continue; // (0.20.15) someone else already holds it
+					continue; // (0.20.21) someone else already holds it
 				}
 				work.vortexHeld.put(projectile.getId(), held);
 			}
@@ -436,7 +436,7 @@ public final class Standstill extends XenoUltimate {
 		work.vortexHeld.values().removeIf(held -> {
 			Projectile projectile = held.projectile();
 			if (!projectile.isAlive()) {
-				releaseCopy(level.getServer(), held); // (0.20.15) a copy through a portal is let go too
+				releaseCopy(level.getServer(), held); // (0.20.21) a copy through a portal is let go too
 				return true;
 			}
 			if (projectile.level() != level || projectile.distanceToSqr(player) > r2) {
@@ -472,7 +472,7 @@ public final class Standstill extends XenoUltimate {
 			if (projectile.isAlive()) {
 				Vec3 away = projectile.position().subtract(centre).horizontal();
 				away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : away.normalize();
-				HELD_UUIDS.remove(projectile.getUUID()); // (0.20.15) a thrown projectile can be caught again
+				HELD_UUIDS.remove(projectile.getUUID()); // (0.20.21) a thrown projectile can be caught again
 				projectile.setNoGravity(held.caught()[3] > 0.5);
 				projectile.setDeltaMovement(away.x * VORTEX_PROJECTILE_SPEED, 0.1, away.z * VORTEX_PROJECTILE_SPEED);
 				projectile.syncVelocity = true;
@@ -589,7 +589,7 @@ public final class Standstill extends XenoUltimate {
 			if (held == null) {
 				held = catchProjectile(projectile);
 				if (held == null) {
-					continue; // (0.20.15) someone else already holds it
+					continue; // (0.20.21) someone else already holds it
 				}
 				live.held.put(projectile.getId(), held);
 			}
@@ -654,7 +654,7 @@ public final class Standstill extends XenoUltimate {
 	/** Holds {@code projectile}: its velocity and gravity as they were are kept to give back. */
 	private static XenoformPower.Held catchProjectile(Projectile projectile) {
 		if (!HELD_UUIDS.add(projectile.getUUID())) {
-			return null; // (0.20.15) already held by another Standstill or Vortex: its saved values stay the only ones
+			return null; // (0.20.21) already held by another Standstill or Vortex: its saved values stay the only ones
 		}
 		Vec3 v = projectile.getDeltaMovement();
 		XenoformPower.Held held = new XenoformPower.Held(projectile, new double[] {v.x, v.y, v.z, projectile.isNoGravity() ? 1.0 : 0.0});
@@ -675,7 +675,7 @@ public final class Standstill extends XenoUltimate {
 		}
 	}
 
-	/** (0.20.15) Projectiles any Standstill or Vortex holds right now, so a second holder never saves the held (slowed, weightless) state. */
+	/** (0.20.21) Projectiles any Standstill or Vortex holds right now, so a second holder never saves the held (slowed, weightless) state. */
 	private static final java.util.Set<java.util.UUID> HELD_UUIDS = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
 	private static void release(Projectile projectile, double[] caught) {

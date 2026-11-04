@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 
 /**
- * (0.20.15, Ultimates patch 1) Knell's Ultimate, The Tolling: Knell's own build and gait (the hunched beast on its fists and bowed legs,
+ * (0.20.21, Ultimates patch 1) Knell's Ultimate, The Tolling: Knell's own build and gait (the hunched beast on its fists and bowed legs,
  * every foot and fist solved onto the ground, the head slung low on a thick neck, the same stances: "sense", "toll", "burrow") grown
  * heavier. Plates of sculk-black stone sit on the hump and over the forearms, a ridge of sculk spikes runs down the spine, the horns are
  * longer with a third curl, and the rib plates are wider and swing open on every toll. Teal seams run through the hide and between the

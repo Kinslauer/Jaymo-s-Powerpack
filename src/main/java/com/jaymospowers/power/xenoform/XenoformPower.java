@@ -609,10 +609,10 @@ public final class XenoformPower implements Power {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(FallingStars::tick);
-		com.jaymospowers.power.xenoform.forms.ultimate.Swarm.init(); // (0.20.15)
-		com.jaymospowers.power.xenoform.forms.ultimate.Geode.init(); // (0.20.15)
+		com.jaymospowers.power.xenoform.forms.ultimate.Swarm.init(); // (0.20.21)
+		com.jaymospowers.power.xenoform.forms.ultimate.Geode.init(); // (0.20.21)
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-			// (0.20.15) players are disconnected after LIVES is cleared, so an Ultimate's world changes (clones, crystals, a possessed host) are undone here
+			// (0.20.21) players are disconnected after LIVES is cleared, so an Ultimate's world changes (clones, crystals, a possessed host) are undone here
 			for (Map.Entry<UUID, Live> entry : LIVES.entrySet()) {
 				Live live = entry.getValue();
 				ServerPlayer online = server.getPlayerList().getPlayer(entry.getKey());
@@ -1502,7 +1502,7 @@ public final class XenoformPower implements Power {
 			} else if (kind == DropKind.BROKEN) {
 				live.ultHealth = 0.0F;
 				live.ultBroken = true;
-				// (0.20.15) a break fires at zero health: stand up first so onExit sees a living player (Standstill's return)
+				// (0.20.21) a break fires at zero health: stand up first so onExit sees a living player (Standstill's return)
 				player.setHealth(Mth.clamp(live.baseHealth, 1.0F, player.getMaxHealth()));
 			}
 			ult.onExit(player, live);
@@ -1797,7 +1797,7 @@ public final class XenoformPower implements Power {
 		float keptUlt = wasUlt ? player.getHealth() : live.ultHealth;
 		boolean keptBroken = live.ultBroken, keptSpent = live.lastStandSpent || wasUlt;
 		if (live.ult instanceof com.jaymospowers.power.xenoform.forms.ultimate.Tolling) {
-			com.jaymospowers.power.xenoform.forms.ultimate.Tolling.pendingCooldown(player, live); // (0.20.15) a cut-short Tolling's wait is in the snapshot
+			com.jaymospowers.power.xenoform.forms.ultimate.Tolling.pendingCooldown(player, live); // (0.20.21) a cut-short Tolling's wait is in the snapshot
 		}
 		long[] keptUntil = (wasUlt ? live.cooldownUntil : live.ultCooldownUntil).clone();
 		int[] keptLength = (wasUlt ? live.cooldownLength : live.ultCooldownLength).clone();

@@ -45,7 +45,7 @@ import net.minecraft.world.phys.Vec3;
  * or pop a piece of redstone off its block.</li>
  * <li>V, Bite: a nip that steals hunger from the bitten and feeds you.</li>
  * <li>B (hold), Climb: scuttle straight up any wall.</li>
- * <li>C (ascended), Swarm: (0.20.15) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Swarm}.</li>
+ * <li>C (ascended), Swarm: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Swarm}.</li>
  * </ul>
  */
 public final class Gremlin extends XenoForm {
@@ -158,7 +158,7 @@ public final class Gremlin extends XenoForm {
 
 	// ---- Swarm ----
 
-	/** (0.20.15) Swarm is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Swarm}. */
+	/** (0.20.21) Swarm is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Swarm}. */
 	@Override
 	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
 		return swarm;

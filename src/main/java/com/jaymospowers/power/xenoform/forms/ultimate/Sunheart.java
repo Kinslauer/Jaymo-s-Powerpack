@@ -46,7 +46,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.15) Pyre's Ultimate, Sunheart: the living flame grown a quarter bigger, crusted in plates of cooled basalt with white-yellow
+ * (0.20.21) Pyre's Ultimate, Sunheart: the living flame grown a quarter bigger, crusted in plates of cooled basalt with white-yellow
  * cracks, a crown of flame-tipped spikes on the head, and a health bar of its own on top of Pyre's. Its model is {@code UltimateSunheart}.
  * Fire and lava roll off it; water and rain hurt it, as they hurt Pyre.
  * <ul>
@@ -107,14 +107,14 @@ public final class Sunheart extends XenoUltimate {
 	}
 
 	private static final Map<UUID, Work> WORK = new HashMap<>();
-	/** (0.20.15) Each wake magma block's caster, so the block's burn can be held back from anyone the caster may not hurt. */
+	/** (0.20.21) Each wake magma block's caster, so the block's burn can be held back from anyone the caster may not hurt. */
 	private static final Map<net.minecraft.core.GlobalPos, UUID> MAGMA = new HashMap<>();
-	/** (0.20.15) Marks the Corona's fireballs. */
+	/** (0.20.21) Marks the Corona's fireballs. */
 	private static final String CORONA_TAG = "jaymospowers_corona";
 
 	static {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			// (0.20.15) the wake's magma and the Corona's fireballs never hurt pets, teammates or a player the caster may not hurt
+			// (0.20.21) the wake's magma and the Corona's fireballs never hurt pets, teammates or a player the caster may not hurt
 			if (source.is(net.minecraft.world.damagesource.DamageTypes.HOT_FLOOR) && !MAGMA.isEmpty() && entity.level() instanceof ServerLevel level) {
 				UUID owner = MAGMA.get(net.minecraft.core.GlobalPos.of(level.dimension(), entity.blockPosition().below()));
 				ServerPlayer caster = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
@@ -154,9 +154,9 @@ public final class Sunheart extends XenoUltimate {
 
 	@Override
 	public void onEnter(ServerPlayer player, XenoformPower.Live live) {
-		live.trailTicks = 0; // (0.20.15) Pyre's Magma Trail does not carry over as a free Lava Wake
+		live.trailTicks = 0; // (0.20.21) Pyre's Magma Trail does not carry over as a free Lava Wake
 		if (!player.onGround()) {
-			// (0.20.15) a change-in mid-jet must not drop you out of the sky
+			// (0.20.21) a change-in mid-jet must not drop you out of the sky
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, JET_SLOW_FALL_TICKS, 0, false, false));
 		}
 		ServerLevel level = player.level();
@@ -175,7 +175,7 @@ public final class Sunheart extends XenoUltimate {
 		live.trailTicks = 0;
 		player.removeEffect(MobEffects.LEVITATION);
 		if (!player.onGround()) {
-			// (0.20.15) dropping or breaking mid-jet gives a soft landing like ending the jet does
+			// (0.20.21) dropping or breaking mid-jet gives a soft landing like ending the jet does
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, JET_SLOW_FALL_TICKS, 0, false, false));
 		}
 		Work work = WORK.remove(player.getUUID());
@@ -241,7 +241,7 @@ public final class Sunheart extends XenoUltimate {
 		ServerLevel level = player.level();
 		Vec3 centre = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		for (LivingEntity living : around(player, CORONA_RADIUS)) {
-			// (0.20.15) burn and blind only when the hit landed (pvp off or a blocked hit does neither)
+			// (0.20.21) burn and blind only when the hit landed (pvp off or a blocked hit does neither)
 			if (living.hurtServer(level, player.damageSources().playerAttack(player), CORONA_DAMAGE)) {
 				living.igniteForSeconds(CORONA_BURN_SECONDS);
 				if (living instanceof ServerPlayer hit) {
@@ -256,7 +256,7 @@ public final class Sunheart extends XenoUltimate {
 			double a = i / (double)CORONA_FIREBALLS * Math.PI * 2.0;
 			Vec3 out = new Vec3(Math.cos(a), 0.0, Math.sin(a));
 			if (!player.mayBuild() || !level.mayInteract(player, player.blockPosition())) {
-				break; // (0.20.15) no fire-lighting ring in adventure mode or spawn protection
+				break; // (0.20.21) no fire-lighting ring in adventure mode or spawn protection
 			}
 			SmallFireball ball = new SmallFireball(level, player, out.scale(CORONA_FIREBALL_SPEED));
 			ball.addTag(CORONA_TAG);
@@ -407,7 +407,7 @@ public final class Sunheart extends XenoUltimate {
 		if (player.tickCount % BEAM_EVERY == 0) {
 			if (entityHit != null && entityHit.getEntity() instanceof LivingEntity target) {
 				if (target.hurtServer(level, player.damageSources().playerAttack(player), BEAM_DAMAGE)) {
-					target.igniteForSeconds(BEAM_BURN_SECONDS); // (0.20.15) only when the hit landed
+					target.igniteForSeconds(BEAM_BURN_SECONDS); // (0.20.21) only when the hit landed
 				}
 				target.hurtTime = 0;
 			} else if (blockHit.getType() == HitResult.Type.BLOCK) {
@@ -420,7 +420,7 @@ public final class Sunheart extends XenoUltimate {
 		}
 	}
 
-	/** (0.20.15) A player the attacker may not hurt (pvp off) is never set alight. */
+	/** (0.20.21) A player the attacker may not hurt (pvp off) is never set alight. */
 	private static boolean harmable(ServerPlayer player, Entity e) {
 		return !(e instanceof ServerPlayer other) || player.canHarmPlayer(other);
 	}
@@ -428,7 +428,7 @@ public final class Sunheart extends XenoUltimate {
 	/** Sets {@code pos} alight if fire can stand there. */
 	private static void light(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		if (!player.mayBuild() || !level.mayInteract(player, pos)) {
-			return; // (0.20.15) no fire in adventure mode or spawn protection
+			return; // (0.20.21) no fire in adventure mode or spawn protection
 		}
 		if (level.getBlockState(pos).isAir() && BaseFireBlock.canBePlacedAt(level, pos, Direction.NORTH)) {
 			level.setBlock(pos, BaseFireBlock.getState(level, pos), Block.UPDATE_ALL);
@@ -441,7 +441,7 @@ public final class Sunheart extends XenoUltimate {
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, 0.5, 0.0);
 		for (LivingEntity living : around(player, NOVA_RADIUS)) {
-			if (living.hurtServer(level, player.damageSources().playerAttack(player), NOVA_DAMAGE) || !(living instanceof ServerPlayer)) { // (0.20.15) no shove for a player the hit missed (pvp off)
+			if (living.hurtServer(level, player.damageSources().playerAttack(player), NOVA_DAMAGE) || !(living instanceof ServerPlayer)) { // (0.20.21) no shove for a player the hit missed (pvp off)
 				shove(living, player.position(), 0.9, 0.4);
 			}
 		}
@@ -464,7 +464,7 @@ public final class Sunheart extends XenoUltimate {
 		BlockPos below = BlockPos.containing(player.getX(), player.getY() - 0.2, player.getZ());
 		BlockPos above = below.above();
 		BlockState aboveState = level.getBlockState(above);
-		boolean clearAbove = aboveState.isAir() || aboveState.is(BlockTags.FIRE); // (0.20.15) never pop plants off the ground
+		boolean clearAbove = aboveState.isAir() || aboveState.is(BlockTags.FIRE); // (0.20.21) never pop plants off the ground
 		light(player, level, above);
 		level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 0.1, player.getZ(), 1, 0.25, 0.0, 0.25, 0.0);
 		BlockState state = level.getBlockState(below);
@@ -477,7 +477,7 @@ public final class Sunheart extends XenoUltimate {
 		MAGMA.put(net.minecraft.core.GlobalPos.of(level.dimension(), below), player.getUUID());
 	}
 
-	/** (0.20.15) Only plain ground turns to magma: dirt, sand, stone and the like, never ores, metal blocks or anything worth keeping. */
+	/** (0.20.21) Only plain ground turns to magma: dirt, sand, stone and the like, never ores, metal blocks or anything worth keeping. */
 	private static boolean softGround(BlockState state) {
 		return state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD)
 			|| state.is(BlockTags.BASE_STONE_NETHER) || state.is(BlockTags.TERRACOTTA) || state.is(Blocks.GRAVEL) || state.is(Blocks.SANDSTONE)

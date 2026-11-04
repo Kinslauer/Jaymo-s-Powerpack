@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Pose;
 
 /**
- * (0.20.15, Ultimates patch 1) Wisp's Ultimate, Revenant: Wisp's own body (the same humanoid build, no legs, arms that hang and drift,
+ * (0.20.21, Ultimates patch 1) Wisp's Ultimate, Revenant: Wisp's own body (the same humanoid build, no legs, arms that hang and drift,
  * a tattered hood, a hem that sways and drags behind) with a bone-pale mask over the face, bone collar plates, pauldrons and bracers,
  * a crest of bone spikes on the hood and the collar, seven long tendrils trailing off the hem (each on its own sway), and thin ice-blue
  * seams through the cloth (the skin's glow map, drawn fullbright by the layer). It floats a hand's width off the ground and bobs, its
@@ -213,7 +213,7 @@ public final class UltimateRevenant extends XenoFormModels.UltimateModel {
 		}
 	}
 
-	/** (0.20.15) The first-person arm, drawn as the body is: see-through and fullbright, in its ki shells. */
+	/** (0.20.21) The first-person arm, drawn as the body is: see-through and fullbright, in its ki shells. */
 	public void submitArm(boolean right, ModelPart limb, PoseStack poseStack, SubmitNodeCollector collector, float time) {
 		collector.submitModelPart(limb, poseStack, RenderTypes.entityTranslucentEmissive(this.ultimateTexture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null,
 			ARGB.color(SKIN_ALPHA, 255, 255, 255));

@@ -35,7 +35,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.15) Wisp's Ultimate, Revenant: the hooded legless ghost grown a fifth bigger, a bone mask and collar plates on its tattered
+ * (0.20.21) Wisp's Ultimate, Revenant: the hooded legless ghost grown a fifth bigger, a bone mask and collar plates on its tattered
  * cloth, long tendrils trailing off the hem, ice-blue seams in the cloth, and a health bar of its own on top of Wisp's. Its model is
  * {@code UltimateRevenant}. A ghost still: it is never hurt by a fall.
  * <ul>
@@ -80,13 +80,13 @@ public final class Revenant extends XenoUltimate {
 		long since;
 		boolean wasSwinging;
 		long lastStrike;
-		/** (0.20.15) The host's UUID (its id changes through a portal) and whether it was NoAI before the possession. */
+		/** (0.20.21) The host's UUID (its id changes through a portal) and whether it was NoAI before the possession. */
 		UUID hostId;
 		boolean hostWasNoAi;
 	}
 
 	private static final Map<UUID, Work> WORK = new HashMap<>();
-	/** (0.20.15) Players whose Invisibility was added by this form (a drunk potion is never marked, so it is never taken). */
+	/** (0.20.21) Players whose Invisibility was added by this form (a drunk potion is never marked, so it is never taken). */
 	private static final java.util.Set<UUID> OWN_INVIS = new java.util.HashSet<>();
 
 	public Revenant(XenoForm base) {
@@ -120,7 +120,7 @@ public final class Revenant extends XenoUltimate {
 		release(player, live, false);
 		WORK.remove(player.getUUID());
 		unveil(player, live, false);
-		dropOwnInvisibility(player); // (0.20.15)
+		dropOwnInvisibility(player); // (0.20.21)
 		live.glide = false;
 		live.wail = 0;
 	}
@@ -245,8 +245,8 @@ public final class Revenant extends XenoUltimate {
 			for (int drop = 0; drop <= 1; drop++) {
 				Vec3 feet = new Vec3(point.x, point.y - player.getEyeHeight() - drop, point.z);
 				AABB moved = box.move(feet.subtract(player.position()));
-				if (moved.minY >= level.getMinY() && moved.maxY <= level.getMinY() + level.dimensionType().logicalHeight() // (0.20.15) never under the world or on the Nether roof
-					&& level.mayInteract(player, BlockPos.containing(feet)) && level.noCollision(player, moved) && !level.containsAnyLiquid(moved)) { // (0.20.15) never into lava
+				if (moved.minY >= level.getMinY() && moved.maxY <= level.getMinY() + level.dimensionType().logicalHeight() // (0.20.21) never under the world or on the Nether roof
+					&& level.mayInteract(player, BlockPos.containing(feet)) && level.noCollision(player, moved) && !level.containsAnyLiquid(moved)) { // (0.20.21) never into lava
 					Vec3 from = player.position();
 					passThrough(player, from, feet);
 					player.teleportTo(level, feet.x, feet.y, feet.z, Set.of(), player.getYRot(), player.getXRot(), false);
@@ -270,13 +270,13 @@ public final class Revenant extends XenoUltimate {
 		double length2 = Math.max(1.0E-4, line.lengthSqr());
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, sweep,
 			e -> e != player && !e.isPassengerOfSameVehicle(player) && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !spared(player, e)
-				&& !e.entityTags().contains(XenoformState.MINION_TAG))) { // (0.20.15) not the host you wear
+				&& !e.entityTags().contains(XenoformState.MINION_TAG))) { // (0.20.21) not the host you wear
 			Vec3 at = living.position().add(0.0, living.getBbHeight() * 0.5, 0.0);
 			double t = Math.max(0.0, Math.min(1.0, at.subtract(from.add(0.0, 1.0, 0.0)).dot(line) / length2));
 			Vec3 closest = from.add(0.0, 1.0, 0.0).add(line.scale(t));
 			if (closest.distanceTo(at) <= WRAITH_PASS_WIDTH + living.getBbWidth() * 0.5) {
 				if (!living.hurtServer(level, player.damageSources().playerAttack(player), WRAITH_DAMAGE) && living instanceof Player) {
-					continue; // (0.20.15) a player it could not hurt (pvp off) is not slowed either
+					continue; // (0.20.21) a player it could not hurt (pvp off) is not slowed either
 				}
 				living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WRAITH_SLOW_TICKS, WRAITH_SLOW_LEVEL));
 				level.sendParticles(ParticleTypes.SOUL, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 8, 0.3, 0.4, 0.3, 0.03);
@@ -312,14 +312,14 @@ public final class Revenant extends XenoUltimate {
 		}
 	}
 
-	/** (0.20.15) Only the hidden Invisibility this form added goes; a drunk potion's (shown, with an icon) stays. */
+	/** (0.20.21) Only the hidden Invisibility this form added goes; a drunk potion's (shown, with an icon) stays. */
 	private static void dropOwnInvisibility(ServerPlayer player) {
 		if (OWN_INVIS.remove(player.getUUID())) {
 			player.removeEffect(MobEffects.INVISIBILITY);
 		}
 	}
 
-	/** (0.20.15) Adds the hidden Invisibility only when there is none; an existing one (a potion) is left untouched and unmarked. */
+	/** (0.20.21) Adds the hidden Invisibility only when there is none; an existing one (a potion) is left untouched and unmarked. */
 	private static void addOwnInvisibility(ServerPlayer player, int ticks) {
 		if (!player.hasEffect(MobEffects.INVISIBILITY)) {
 			player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, ticks, 0, false, false));
@@ -338,7 +338,7 @@ public final class Revenant extends XenoUltimate {
 				continue;
 			}
 			if (!living.hurtServer(level, player.damageSources().playerAttack(player), WAIL_DAMAGE) && living instanceof Player) {
-				continue; // (0.20.15) a player the wail could not hurt (pvp off, blocked) is not weakened or blinded either
+				continue; // (0.20.21) a player the wail could not hurt (pvp off, blocked) is not weakened or blinded either
 			}
 			living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WAIL_WEAKNESS_TICKS, 0));
 			if (living instanceof Player) {
@@ -404,7 +404,7 @@ public final class Revenant extends XenoUltimate {
 		live.possessed = host.getId();
 		Work work = WORK.computeIfAbsent(player.getUUID(), id -> new Work());
 		work.hostId = host.getUUID();
-		work.hostWasNoAi = host.isNoAi(); // (0.20.15) a mob that was NoAI stays NoAI
+		work.hostWasNoAi = host.isNoAi(); // (0.20.21) a mob that was NoAI stays NoAI
 		host.setNoAi(true);
 		host.setTarget(null);
 		work.since = level.getGameTime();
@@ -418,7 +418,7 @@ public final class Revenant extends XenoUltimate {
 		return true;
 	}
 
-	/** (0.20.15) The host by id, else the vehicle or any level's entity with its UUID (a portal re-creates it with a new id). */
+	/** (0.20.21) The host by id, else the vehicle or any level's entity with its UUID (a portal re-creates it with a new id). */
 	private static Entity findHost(ServerPlayer player, ServerLevel level, int id, Work work) {
 		Entity e = level.getEntity(id);
 		if (e != null || work.hostId == null) {
@@ -474,7 +474,7 @@ public final class Revenant extends XenoUltimate {
 			release(player, live, true);
 			return;
 		}
-		live.possessed = host.getId(); // (0.20.15) follows the host through a portal
+		live.possessed = host.getId(); // (0.20.21) follows the host through a portal
 		// it goes where you look
 		Vec3 look = player.getLookAngle().horizontal();
 		look = look.lengthSqr() < 1.0E-4 ? Vec3.ZERO : look.normalize().scale(POSSESS_SPEED * (player.getXRot() > 60.0F ? 0.0 : 1.0));

@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.15) Gremlin's Ultimate, Swarm: the hunched imp grown from 0.3x to 0.45x (still under a block, so it fits one-block gaps), a
+ * (0.20.21) Gremlin's Ultimate, Swarm: the hunched imp grown from 0.3x to 0.45x (still under a block, so it fits one-block gaps), a
  * plated brow with a crest of small horns, plated knuckles, a barbed tail curled up over its back and green seams glowing along
  * the plates, with a health bar of its own on top of Gremlin's. Its model is {@code UltimateSwarm}.
  * <ul>
@@ -75,7 +75,7 @@ public final class Swarm extends XenoUltimate {
 	/** How long the clones glow (ticks). */
 	public static final int GLOW_TICKS = 20 * 60 * 10;
 
-	/** (0.20.15) Set on a clone once it is in the world: one that loads back from a save carries it, and has no owner left, so it is removed. */
+	/** (0.20.21) Set on a clone once it is in the world: one that loads back from a save carries it, and has no owner left, so it is removed. */
 	private static final java.util.Set<java.util.UUID> AIRBORNE = new java.util.HashSet<>();
 	private static final String CLONE_TAG = "jaymospowers_swarm_clone";
 
@@ -87,7 +87,7 @@ public final class Swarm extends XenoUltimate {
 		});
 	}
 
-	/** (0.20.15) Forces the class to load at mod init so the clone clean-up on entity load is registered before any chunk loads. */
+	/** (0.20.21) Forces the class to load at mod init so the clone clean-up on entity load is registered before any chunk loads. */
 	public static void init() {
 	}
 
@@ -210,7 +210,7 @@ public final class Swarm extends XenoUltimate {
 		if (live.spring > 0) {
 			live.spring++;
 			if (!player.onGround()) {
-				AIRBORNE.add(player.getUUID()); // (0.20.15) the landing only counts once the server has seen the jump
+				AIRBORNE.add(player.getUUID()); // (0.20.21) the landing only counts once the server has seen the jump
 			}
 			if (live.spring > 3 && (player.isInWater() || player.onGround() && AIRBORNE.contains(player.getUUID()))) {
 				live.spring = 0;
@@ -336,7 +336,7 @@ public final class Swarm extends XenoUltimate {
 		ServerLevel level = player.level();
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		if (!target.hurtServer(level, player.damageSources().playerAttack(player), LEECH_DAMAGE)) {
-			return false; // (0.20.15) a refused hit (pvp off, blocked, i-frames, invulnerable): no food, no Hunger, no heal, no clone bites
+			return false; // (0.20.21) a refused hit (pvp off, blocked, i-frames, invulnerable): no food, no Hunger, no heal, no clone bites
 		}
 		int stolen = 0;
 		if (target instanceof Player bitten) {
@@ -436,7 +436,7 @@ public final class Swarm extends XenoUltimate {
 	// ---- C: Swarm ----
 
 	/** Splits off {@link #CLONES} glowing gremlins round you. False if none could be made. */
-	/** (0.20.15) A clone's bite never lands on a player (their Player target goals cannot be stripped from outside, so the hit is refused). */
+	/** (0.20.21) A clone's bite never lands on a player (their Player target goals cannot be stripped from outside, so the hit is refused). */
 	public static boolean bitesPlayer(net.minecraft.world.damagesource.DamageSource source, net.minecraft.world.entity.Entity victim) {
 		return victim instanceof Player && source.getEntity() instanceof Silverfish clone && clone.entityTags().contains(CLONE_TAG);
 	}
@@ -454,8 +454,8 @@ public final class Swarm extends XenoUltimate {
 			clone.setCustomName(player.getDisplayName());
 			clone.setCustomNameVisible(false);
 			clone.addTag(CLONE_TAG);
-			clone.skipDropExperience(); // (0.20.15) killing your own clones is no XP farm
-			// (0.20.15) a clone never hides in stone or wakes infested blocks
+			clone.skipDropExperience(); // (0.20.21) killing your own clones is no XP farm
+			// (0.20.21) a clone never hides in stone or wakes infested blocks
 			clone.removeAllGoals(goal -> goal.getClass().getSimpleName().startsWith("SilverfishMerge") || goal.getClass().getSimpleName().startsWith("SilverfishWakeUp"));
 			live.minions.add(clone.getId());
 		}
@@ -468,7 +468,7 @@ public final class Swarm extends XenoUltimate {
 		return true;
 	}
 
-	/** (0.20.15) A clone left in another dimension (a portal) is removed there; one in an unloaded chunk is removed when it loads. */
+	/** (0.20.21) A clone left in another dimension (a portal) is removed there; one in an unloaded chunk is removed when it loads. */
 	private static void leftBehind(ServerLevel here, int id) {
 		for (ServerLevel other : here.getServer().getAllLevels()) {
 			if (other != here && other.getEntity(id) instanceof Silverfish clone && clone.entityTags().contains(CLONE_TAG)) {

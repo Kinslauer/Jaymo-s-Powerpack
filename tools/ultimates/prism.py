@@ -1,4 +1,4 @@
-"""(0.20.15, Ultimates patch 1) Prism's Ultimate, Geode: its skin and glow map, 128x128, for client/.../ultimate/UltimateGeode.java.
+"""(0.20.21, Ultimates patch 1) Prism's Ultimate, Geode: its skin and glow map, 128x128, for client/.../ultimate/UltimateGeode.java.
 
 Prism's faceted violet crystal grown heavier: a deep core cased in dark amethyst plates whose seams glow violet-white, two front
 facets that glow brightest, taller faceted spires with pale sharp tips, plated hips on six shard legs. The insignia is set in the

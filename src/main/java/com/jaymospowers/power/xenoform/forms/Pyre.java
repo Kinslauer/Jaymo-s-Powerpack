@@ -36,7 +36,7 @@ import net.minecraft.world.phys.Vec3;
  * down. Free. It leaves a comet's tail of flame ({@code PyreComet}).</li>
  * <li>V, Fire Nova: everything within {@link #NOVA_RADIUS} is burnt and set alight.</li>
  * <li>B, Magma Trail: for {@link #TRAIL_TICKS} the ground burns where you step.</li>
- * <li>C (ascended), Sunheart: (0.20.15) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Sunheart}.</li>
+ * <li>C (ascended), Sunheart: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Sunheart}.</li>
  * </ul>
  */
 public final class Pyre extends XenoForm {
@@ -57,7 +57,7 @@ public final class Pyre extends XenoForm {
 	public static final float WET_DAMAGE = 1.0F;
 	public static final int WET_EVERY = 20;
 
-	/** (0.20.15) Sunheart is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Sunheart}. */
+	/** (0.20.21) Sunheart is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Sunheart}. */
 	private final com.jaymospowers.power.xenoform.XenoUltimate sunheart = new com.jaymospowers.power.xenoform.forms.ultimate.Sunheart(this);
 
 	public Pyre() {
@@ -193,7 +193,7 @@ public final class Pyre extends XenoForm {
 
 	// ---- Sunheart ----
 
-	/** (0.20.15) Sunheart is its own evolved form: see {@link com.jaymospowers.power.xenoform.forms.ultimate.Sunheart}. */
+	/** (0.20.21) Sunheart is its own evolved form: see {@link com.jaymospowers.power.xenoform.forms.ultimate.Sunheart}. */
 	@Override
 	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
 		return sunheart;

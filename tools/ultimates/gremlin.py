@@ -1,4 +1,4 @@
-"""(0.20.15, Ultimates patch 1) Gremlin's Ultimate, Swarm: its skin and glow map, 128x128, for client/.../ultimate/UltimateSwarm.java.
+"""(0.20.21, Ultimates patch 1) Gremlin's Ultimate, Swarm: its skin and glow map, 128x128, for client/.../ultimate/UltimateSwarm.java.
 
 Gremlin's grey, warty hide (the same mottling, pale belly, black claws and yellow-eyed grin) with a plated brow and a crest of small
 horns on the skull, plates on the shoulders, forearms, shins and over the knuckles, flank plates and spines down the back, and a

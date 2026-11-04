@@ -54,7 +54,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.15, Ultimates patch 1) Prism's Ultimate, Geode: the crystal golem grown to 1.5x your size in dark amethyst plate, with a
+ * (0.20.21, Ultimates patch 1) Prism's Ultimate, Geode: the crystal golem grown to 1.5x your size in dark amethyst plate, with a
  * health bar of its own on top of Prism's. Its model is {@code UltimateGeode}.
  * <ul>
  * <li>R, Shard Storm: seven shards fan out wide, each cutting up to two creatures in its way.</li>
@@ -99,16 +99,16 @@ public final class Geode extends XenoUltimate {
 	private static final class Forest {
 		final List<BlockPos> clusters = new ArrayList<>();
 		long until;
-		/** (0.20.15) Where it was cast: the clusters cut around here, not around the Geode. */
+		/** (0.20.21) Where it was cast: the clusters cut around here, not around the Geode. */
 		Vec3 centre = Vec3.ZERO;
 	}
 
 	private static final Map<UUID, Forest> FORESTS = new HashMap<>();
-	/** (0.20.15) The level each Geode last built in, so a dimension change takes its blocks down where they stand. */
+	/** (0.20.21) The level each Geode last built in, so a dimension change takes its blocks down where they stand. */
 	private static final Map<UUID, ServerLevel> BUILT_IN = new HashMap<>();
-	/** (0.20.15) The wall's and crystals' blocks while they stand: mining one breaks it without a drop. */
+	/** (0.20.21) The wall's and crystals' blocks while they stand: mining one breaks it without a drop. */
 	private static final Set<GlobalPos> TEMP_BLOCKS = new HashSet<>();
-	/** (0.20.15) Where each Mirror Root began. */
+	/** (0.20.21) Where each Mirror Root began. */
 	private static final Map<UUID, Vec3> ROOT_ANCHOR = new HashMap<>();
 
 	static {
@@ -121,7 +121,7 @@ public final class Geode extends XenoUltimate {
 		});
 	}
 
-	/** (0.20.15) Called from XenoformPower.init so the stop hook is in place before this class is ever used. */
+	/** (0.20.21) Called from XenoformPower.init so the stop hook is in place before this class is ever used. */
 	public static void init() {
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (GlobalPos gp : TEMP_BLOCKS) {
@@ -231,13 +231,13 @@ public final class Geode extends XenoUltimate {
 		long now = level.getGameTime();
 		ServerLevel was = BUILT_IN.put(player.getUUID(), level);
 		if (was != null && was != level) {
-			// (0.20.15) changed dimension: the wall, crystals and clusters come down in the one they were built in
+			// (0.20.21) changed dimension: the wall, crystals and clusters come down in the one they were built in
 			clearWall(was, live);
 			shatter(was, live);
 			clearForest(was, player.getUUID());
 		}
 		if (live.reflecting) {
-			// rooted: no walking while the stance holds (0.20.15: pulled back to where the stance began, since the server never sees a walking player's motion; Slowness would zoom the screen)
+			// rooted: no walking while the stance holds (0.20.21: pulled back to where the stance began, since the server never sees a walking player's motion; Slowness would zoom the screen)
 			Vec3 anchor = ROOT_ANCHOR.computeIfAbsent(player.getUUID(), id -> player.position());
 			if (Math.abs(player.getX() - anchor.x) > 0.05 || Math.abs(player.getZ() - anchor.z) > 0.05) {
 				player.teleportTo(level, anchor.x, player.getY(), anchor.z, Set.of(), player.getYRot(), player.getXRot(), false);
@@ -284,10 +284,10 @@ public final class Geode extends XenoUltimate {
 		if (source.is(DamageTypeTags.IS_PROJECTILE)) {
 			Entity incoming = source.getDirectEntity();
 			if (incoming instanceof Projectile projectile && !projectile.isRemoved()) {
-				// (0.20.15) it is mid-hit: a fresh one goes back instead of turning this one round
+				// (0.20.21) it is mid-hit: a fresh one goes back instead of turning this one round
 				Entity shooter = projectile.getOwner();
 				Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
-				if (!(projectile instanceof ThrownTrident)) { // (0.20.15) a thrown trident is turned aside by the refused hit, never deleted
+				if (!(projectile instanceof ThrownTrident)) { // (0.20.21) a thrown trident is turned aside by the refused hit, never deleted
 					projectile.discard();
 				}
 				if (projectile instanceof AbstractArrow && !(projectile instanceof ThrownTrident)) {
@@ -307,7 +307,7 @@ public final class Geode extends XenoUltimate {
 			return false;
 		}
 		if (source.getEntity() instanceof LivingEntity striker && striker != player && striker.isAlive() && source.getDirectEntity() == striker
-			&& (source.is(DamageTypes.MOB_ATTACK) || source.is(DamageTypes.PLAYER_ATTACK))) { // (0.20.15) melee blows only
+			&& (source.is(DamageTypes.MOB_ATTACK) || source.is(DamageTypes.PLAYER_ATTACK))) { // (0.20.21) melee blows only
 			striker.hurtServer(level, player.damageSources().thorns(player), amount * MELEE_RETURN);
 			Vec3 at = striker.getBoundingBox().getCenter();
 			level.sendParticles(CRYSTAL_DUST, at.x, at.y, at.z, 8, 0.3, 0.3, 0.3, 0.0);
@@ -339,7 +339,7 @@ public final class Geode extends XenoUltimate {
 	private static void sendBack(ServerPlayer player, Projectile projectile) {
 		ServerLevel level = player.level();
 		if (projectile instanceof net.minecraft.world.entity.projectile.ShulkerBullet) {
-			// (0.20.15) a homing bullet keeps steering at its target, so it is broken here instead of coming back
+			// (0.20.21) a homing bullet keeps steering at its target, so it is broken here instead of coming back
 			level.sendParticles(CRYSTAL_DUST, projectile.getX(), projectile.getY(), projectile.getZ(), 10, 0.3, 0.3, 0.3, 0.0);
 			projectile.discard();
 			sound(player, SoundEvents.AMETHYST_CLUSTER_HIT, 1.0F, 1.6F);
@@ -355,7 +355,7 @@ public final class Geode extends XenoUltimate {
 		AbstractArrow.Pickup pickup = projectile instanceof AbstractArrow arrow ? arrow.pickup : null;
 		projectile.setOwner(player);
 		if (pickup != null) {
-			((AbstractArrow)projectile).pickup = pickup; // (0.20.15) setOwner would make a mob's arrow pick-up-able
+			((AbstractArrow)projectile).pickup = pickup; // (0.20.21) setOwner would make a mob's arrow pick-up-able
 		}
 		projectile.shoot(dir.x, dir.y, dir.z, REFLECT_SPEED, 0.0F);
 		projectile.syncVelocity = true;
@@ -441,14 +441,14 @@ public final class Geode extends XenoUltimate {
 		return true;
 	}
 
-	/** (0.20.15) Spawn protection, the border and adventure mode all stop the crystal. */
+	/** (0.20.21) Spawn protection, the border and adventure mode all stop the crystal. */
 	private static boolean canPlace(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		return player.mayBuild() && level.mayInteract(player, pos);
 	}
 
 	private static void clearWall(ServerLevel level, XenoformPower.Live live) {
 		for (BlockPos pos : live.wall) {
-			if (TEMP_BLOCKS.remove(GlobalPos.of(level.dimension(), pos)) && level.getBlockState(pos).is(Blocks.AMETHYST_BLOCK)) { // (0.20.15) only blocks still ours
+			if (TEMP_BLOCKS.remove(GlobalPos.of(level.dimension(), pos)) && level.getBlockState(pos).is(Blocks.AMETHYST_BLOCK)) { // (0.20.21) only blocks still ours
 				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				level.sendParticles(CRYSTAL_DUST, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.0);
 			}
@@ -465,7 +465,7 @@ public final class Geode extends XenoUltimate {
 		ServerLevel level = player.level();
 		for (LivingEntity living : around(player, SPIKE_RADIUS)) {
 			if (!living.hurtServer(level, player.damageSources().playerAttack(player), SPIKE_DAMAGE) && living instanceof Player) {
-				continue; // (0.20.15) a player it could not hurt (pvp off) is not slowed or shoved
+				continue; // (0.20.21) a player it could not hurt (pvp off) is not slowed or shoved
 			}
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SPIKE_SLOW_TICKS, 1));
 			shove(living, player.position(), 0.25, 0.4);
@@ -480,7 +480,7 @@ public final class Geode extends XenoUltimate {
 			double a = player.getRandom().nextDouble() * Math.PI * 2.0;
 			double r = 1.5 + player.getRandom().nextDouble() * (SPIKE_RADIUS - 1.5);
 			BlockPos spot = standAt(level, BlockPos.containing(feet.x + Math.cos(a) * r, feet.y, feet.z + Math.sin(a) * r));
-			if (spot != null && canPlace(player, level, spot) && !live.wall.contains(spot.below()) && !live.crystals.contains(spot.below())) { // (0.20.15) never on the Geode's own temporary blocks
+			if (spot != null && canPlace(player, level, spot) && !live.wall.contains(spot.below()) && !live.crystals.contains(spot.below())) { // (0.20.21) never on the Geode's own temporary blocks
 				level.setBlock(spot, CLUSTER, Block.UPDATE_ALL);
 				forest.clusters.add(spot);
 				TEMP_BLOCKS.add(GlobalPos.of(level.dimension(), spot));
@@ -530,7 +530,7 @@ public final class Geode extends XenoUltimate {
 			return;
 		}
 		for (BlockPos pos : forest.clusters) {
-			if (TEMP_BLOCKS.remove(GlobalPos.of(level.dimension(), pos)) && level.getBlockState(pos).is(Blocks.AMETHYST_CLUSTER)) { // (0.20.15) only blocks still ours
+			if (TEMP_BLOCKS.remove(GlobalPos.of(level.dimension(), pos)) && level.getBlockState(pos).is(Blocks.AMETHYST_CLUSTER)) { // (0.20.21) only blocks still ours
 				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				level.sendParticles(CRYSTAL_DUST, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.0);
 			}
@@ -548,7 +548,7 @@ public final class Geode extends XenoUltimate {
 		shatter(level, live);
 		for (LivingEntity living : around(player, GEODE_RADIUS)) {
 			if (living instanceof ServerPlayer other && !player.canHarmPlayer(other)) {
-				continue; // (0.20.15) no cage for a player pvp protects
+				continue; // (0.20.21) no cage for a player pvp protects
 			}
 			live.frozen.add(living.getId());
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, GEODE_TICKS, 9, false, false));
@@ -570,7 +570,7 @@ public final class Geode extends XenoUltimate {
 		}
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(GEODE_RADIUS),
 			p -> !(p instanceof ThrownTrident) && !(p instanceof FishingHook) && !(p instanceof ThrownEnderpearl) && !(p instanceof net.minecraft.world.entity.projectile.FireworkRocketEntity)
-				&& p.getOwner() != player && (p.getOwner() == null || !spared(player, p.getOwner())))) { // (0.20.15)
+				&& p.getOwner() != player && (p.getOwner() == null || !spared(player, p.getOwner())))) { // (0.20.21)
 			level.sendParticles(CRYSTAL_DUST, projectile.getX(), projectile.getY(), projectile.getZ(), 6, 0.1, 0.1, 0.1, 0.0);
 			projectile.discard();
 		}
@@ -605,7 +605,7 @@ public final class Geode extends XenoUltimate {
 
 	private static void shatter(ServerLevel level, XenoformPower.Live live) {
 		for (BlockPos pos : live.crystals) {
-			if (TEMP_BLOCKS.remove(GlobalPos.of(level.dimension(), pos)) && level.getBlockState(pos).is(Blocks.AMETHYST_BLOCK)) { // (0.20.15) only blocks still ours
+			if (TEMP_BLOCKS.remove(GlobalPos.of(level.dimension(), pos)) && level.getBlockState(pos).is(Blocks.AMETHYST_BLOCK)) { // (0.20.21) only blocks still ours
 				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				level.sendParticles(CRYSTAL_DUST, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.0);
 			}

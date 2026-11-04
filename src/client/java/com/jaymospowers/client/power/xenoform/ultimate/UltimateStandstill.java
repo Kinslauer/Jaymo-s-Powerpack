@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 
 /**
- * (0.20.15, Ultimates patch 1) Velox's Ultimate, Standstill: the same forward-leaning two-legged raptor (the S-neck, tucked clawed
+ * (0.20.21, Ultimates patch 1) Velox's Ultimate, Standstill: the same forward-leaning two-legged raptor (the S-neck, tucked clawed
  * forearms, the long balancing tail, the same digitigrade gait) with blue-black plates down the spine and the tail, the swept-back crest
  * fanned into blade quills, a blade on the tail's end, a plated sliding visor and a sickle claw on each foot. The skin's seams glow the
  * light blue of Velocity's streak (the glow map, drawn fullbright by the layer) and brighten with speed ({@link #submitExtras}). At a run

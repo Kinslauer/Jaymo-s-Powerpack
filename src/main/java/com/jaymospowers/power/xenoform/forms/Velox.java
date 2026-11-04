@@ -38,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>G, Rapid Punches: {@link #PUNCH_HITS} blows on whoever you aim at, one every {@link #PUNCH_SPACING} ticks.</li>
  * <li>V, Cyclone: sweeps everything within {@link #CYCLONE_RADIUS} round you in a tight circle and lifts it.</li>
  * <li>B, Chain Strike: flicker between up to {@link #CHAIN_TARGETS} foes within {@link #CHAIN_RANGE}, striking each.</li>
- * <li>C (ascended), Standstill: (0.20.15) its Ultimate is its own evolved form,
+ * <li>C (ascended), Standstill: (0.20.21) its Ultimate is its own evolved form,
  * {@link com.jaymospowers.power.xenoform.forms.ultimate.Standstill}.</li>
  * </ul>
  */
@@ -312,7 +312,7 @@ public final class Velox extends XenoForm {
 
 	private final XenoUltimate standstill = new Standstill(this);
 
-	/** (0.20.15) Standstill is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Standstill}. */
+	/** (0.20.21) Standstill is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Standstill}. */
 	@Override
 	public XenoUltimate evolved() {
 		return standstill;

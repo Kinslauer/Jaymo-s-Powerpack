@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>G (hold), Tremor Sense: feel everything that moves within {@link #SENSE_RADIUS}; it glows for you.</li>
  * <li>V, Shriek: everything within {@link #SHRIEK_RADIUS} is plunged into darkness and slowed.</li>
  * <li>B, Burrow: sink into the ground and come up where you look, up to {@link #BURROW_RANGE} blocks away.</li>
- * <li>C (ascended), the Tolling: (0.20.15) its Ultimate is its own evolved form,
+ * <li>C (ascended), the Tolling: (0.20.21) its Ultimate is its own evolved form,
  * {@link com.jaymospowers.power.xenoform.forms.ultimate.Tolling}.</li>
  * </ul>
  */
@@ -143,7 +143,7 @@ public final class Knell extends XenoForm {
 
 	// ---- the Tolling ----
 
-	/** (0.20.15) The Tolling is its own evolved form now: the big move, health bar, model and kit are in {@code Tolling}. */
+	/** (0.20.21) The Tolling is its own evolved form now: the big move, health bar, model and kit are in {@code Tolling}. */
 	@Override
 	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
 		return tolling;

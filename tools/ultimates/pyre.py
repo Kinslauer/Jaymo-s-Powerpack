@@ -1,4 +1,4 @@
-"""(0.20.15, Ultimates patch 1) Pyre's Ultimate, Sunheart: its skin and glow map, 128x128, for client/.../ultimate/UltimateSunheart.java.
+"""(0.20.21, Ultimates patch 1) Pyre's Ultimate, Sunheart: its skin and glow map, 128x128, for client/.../ultimate/UltimateSunheart.java.
 
 Pyre's body of living flame (the same fire_body paint on the vanilla layout in the top-left 64x64) with plates of cooled black
 basalt on the shoulders, chest, back, belt, forearms and shins, a basalt crown ringed with flame-tipped spikes, and white-yellow

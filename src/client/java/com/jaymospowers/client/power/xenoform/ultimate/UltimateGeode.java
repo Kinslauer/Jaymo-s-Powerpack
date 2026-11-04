@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 
 /**
- * (0.20.15, Ultimates patch 1) Prism's Ultimate, Geode: Prism's faceted crystal core on six thin shard legs, with the same tripod
+ * (0.20.21, Ultimates patch 1) Prism's Ultimate, Geode: Prism's faceted crystal core on six thin shard legs, with the same tripod
  * crab gait, grown heavier and plated. The core is cased in dark amethyst plates (two side plates, a front and a back plate, two
  * ribs along the top either side of the insignia), spikes stand off its sides and front, the six legs have plated hips, and the ten
  * spires on top are taller, faceted and end in sharp tips. Its skin glows along the plate seams and brightest in the two front

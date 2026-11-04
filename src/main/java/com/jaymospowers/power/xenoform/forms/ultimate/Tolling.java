@@ -31,7 +31,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.15, Ultimates patch 1) Knell's Ultimate, The Tolling: the hunched deep-dark beast grown heavier in sculk-black plate, with a
+ * (0.20.21, Ultimates patch 1) Knell's Ultimate, The Tolling: the hunched deep-dark beast grown heavier in sculk-black plate, with a
  * health bar of its own on top of Knell's. Its model is {@code UltimateTolling}.
  * <ul>
  * <li>R, Sonic Lance: a longer, wider, harder Sonic Boom that still goes through walls.</li>
@@ -45,7 +45,7 @@ import net.minecraft.world.phys.Vec3;
 public final class Tolling extends XenoUltimate {
 	// ---- tuning ----
 	/** Sonic Lance: cooldown, reach, half-width, shove, damage. */
-	/** The Tolling: the Slowness amplifier that plants you for the tolls (0.20.15). */
+	/** The Tolling: the Slowness amplifier that plants you for the tolls (0.20.21). */
 	public static final int PLANT_SLOWNESS = 9;
 	public static final int LANCE_COOLDOWN = 160;
 	public static final double LANCE_RANGE = 24.0, LANCE_WIDTH = 2.5, LANCE_KNOCKBACK = 2.8;
@@ -69,7 +69,7 @@ public final class Tolling extends XenoUltimate {
 	public static final float TOLL_SHAKE = 1.8F, UNDERTOW_SHAKE = 1.2F;
 	public static final double UNDERTOW_SHAKE_RANGE = 14.0;
 
-	/** (0.20.15) The Resistance the player had before the guard (and when it was noted), put back if the guard is dropped (server thread only). */
+	/** (0.20.21) The Resistance the player had before the guard (and when it was noted), put back if the guard is dropped (server thread only). */
 	private record Prior(MobEffectInstance effect, long at) {
 	}
 
@@ -102,10 +102,10 @@ public final class Tolling extends XenoUltimate {
 		Shakes.heavy(player, player.position(), 20.0, 1.4F);
 	}
 
-	/** (0.20.15) Where each planted beast stands, so jumping and sprinting cannot carry it off. */
+	/** (0.20.21) Where each planted beast stands, so jumping and sprinting cannot carry it off. */
 	private static final java.util.Map<java.util.UUID, Vec3> ANCHOR = new java.util.HashMap<>();
 
-	/** (0.20.15) A Tolling cut short still owes its wait on C: starts now, without a move's drain or a mastery use. Also run before a quick change snapshots the cooldowns. */
+	/** (0.20.21) A Tolling cut short still owes its wait on C: starts now, without a move's drain or a mastery use. Also run before a quick change snapshots the cooldowns. */
 	public static void pendingCooldown(ServerPlayer player, XenoformPower.Live live) {
 		if (live.tolls > 0) {
 			live.cooldownUntil[C] = player.level().getGameTime() + TOLL_COOLDOWN;
@@ -118,12 +118,12 @@ public final class Tolling extends XenoUltimate {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		if (live.tolls > 0) {
 			// dropped mid-sequence: the planted guard ends with it (the framework's wait on C covers the next change-in)
-			// (0.20.15) only the guard this planted: a potion's or beacon's Resistance stays, and the 30 s wait starts now
+			// (0.20.21) only the guard this planted: a potion's or beacon's Resistance stays, and the 30 s wait starts now
 			MobEffectInstance guard = player.getEffect(MobEffects.RESISTANCE);
 			if (guard != null && guard.getAmplifier() == 1 && !guard.isAmbient() && !guard.isVisible() && guard.getDuration() <= TOLLS * TOLL_EVERY + 20) {
 				player.removeEffect(MobEffects.RESISTANCE);
 				Prior prior = PRIOR.get(player.getUUID());
-				if (prior != null) { // (0.20.15) the weaker Resistance the guard hid comes back, with the time it ran down meanwhile
+				if (prior != null) { // (0.20.21) the weaker Resistance the guard hid comes back, with the time it ran down meanwhile
 					long elapsed = player.level().getGameTime() - prior.at();
 					MobEffectInstance had = prior.effect();
 					if (had.isInfiniteDuration() || had.getDuration() > elapsed) {
@@ -250,9 +250,9 @@ public final class Tolling extends XenoUltimate {
 	private static void tollTick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		// planted
-		// (0.20.15) Slowness holds a walking player (the server never sees their motion); it runs out a few ticks after the tolls
+		// (0.20.21) Slowness holds a walking player (the server never sees their motion); it runs out a few ticks after the tolls
 		player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 5, PLANT_SLOWNESS, false, false));
-		// (0.20.15) and a hop cannot carry it away: back to where it planted (height is left alone)
+		// (0.20.21) and a hop cannot carry it away: back to where it planted (height is left alone)
 		Vec3 anchor = ANCHOR.computeIfAbsent(player.getUUID(), id -> player.position());
 		if (Math.abs(player.getX() - anchor.x) > 0.05 || Math.abs(player.getZ() - anchor.z) > 0.05) {
 			player.teleportTo(level, anchor.x, player.getY(), anchor.z, java.util.Set.of(), player.getYRot(), player.getXRot(), false);
@@ -326,7 +326,7 @@ public final class Tolling extends XenoUltimate {
 		ServerLevel level = player.level();
 		for (LivingEntity living : around(player, SHRIEK_RADIUS)) {
 			if (!living.hurtServer(level, player.damageSources().playerAttack(player), SHRIEK_DAMAGE) && living instanceof net.minecraft.world.entity.player.Player) {
-				continue; // (0.20.15) a player the shriek could not hurt (pvp off, blocked) is not blinded or slowed either
+				continue; // (0.20.21) a player the shriek could not hurt (pvp off, blocked) is not blinded or slowed either
 			}
 			living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, SHRIEK_DARKNESS_TICKS, 0));
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHRIEK_SLOW_TICKS, 1));

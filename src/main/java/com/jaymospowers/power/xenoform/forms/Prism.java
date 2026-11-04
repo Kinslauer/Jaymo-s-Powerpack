@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
  * projectiles shatter.</li>
  * <li>B, Spike Field: crystal spikes burst from the ground round you, cutting and slowing everything within
  * {@link #SPIKE_RADIUS}.</li>
- * <li>C (ascended), Geode: (0.20.15) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Geode}.</li>
+ * <li>C (ascended), Geode: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Geode}.</li>
  * </ul>
  */
 public final class Prism extends XenoForm {
@@ -176,7 +176,7 @@ public final class Prism extends XenoForm {
 
 	// ---- Geode ----
 
-	/** (0.20.15) Geode is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Geode}. */
+	/** (0.20.21) Geode is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Geode}. */
 	@Override
 	public XenoUltimate evolved() {
 		return geode;

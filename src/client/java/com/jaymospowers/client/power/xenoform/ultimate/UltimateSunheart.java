@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 
 /**
- * (0.20.15, Ultimates patch 1) Pyre's Ultimate, Sunheart: Pyre's own body (the same humanoid build and gait, a body of living flame
+ * (0.20.21, Ultimates patch 1) Pyre's Ultimate, Sunheart: Pyre's own body (the same humanoid build and gait, a body of living flame
  * with hair of fire streaming up off the head and flames licking off the shoulders and forearms) with plates of cooled black basalt
  * on the shoulders, chest, back, belt, forearms and shins, a basalt crown ringed with flame-tipped spikes, spikes on the shoulder
  * blades, elbows and knees, a bigger sun in the chest, and white-yellow cracks glowing in the plates (the skin's glow map, drawn

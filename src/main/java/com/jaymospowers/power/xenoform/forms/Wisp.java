@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>G, Shroud: fade from sight until you strike something.</li>
  * <li>V, Dread Wail: every creature within {@link #WAIL_RADIUS} turns and flees; players are plunged into darkness.</li>
  * <li>B (hold), Glide: fall slowly and drift forward.</li>
- * <li>C (ascended), Revenant: (0.20.15) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}.</li>
+ * <li>C (ascended), Revenant: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}.</li>
  * </ul>
  */
 public final class Wisp extends XenoForm {
@@ -44,7 +44,7 @@ public final class Wisp extends XenoForm {
 	public static final double WAIL_RADIUS = 10.0, WAIL_FLEE = 10.0, WAIL_FLEE_SPEED = 1.5;
 	public static final double GLIDE_FALL = -0.12, GLIDE_PUSH = 0.06, GLIDE_MAX = 0.7;
 
-	/** (0.20.15) Revenant is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Revenant}. */
+	/** (0.20.21) Revenant is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Revenant}. */
 	private final com.jaymospowers.power.xenoform.XenoUltimate revenant = new com.jaymospowers.power.xenoform.forms.ultimate.Revenant(this);
 
 	public Wisp() {
@@ -166,7 +166,7 @@ public final class Wisp extends XenoForm {
 
 	// ---- Revenant ----
 
-	/** (0.20.15) Revenant is its own evolved form: see {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}. */
+	/** (0.20.21) Revenant is its own evolved form: see {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}. */
 	@Override
 	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
 		return revenant;

@@ -1,4 +1,4 @@
-"""(0.20.15) Velox's Ultimate, Standstill: its skin and glow map for client/.../ultimate/UltimateStandstill.java's own model.
+"""(0.20.21) Velox's Ultimate, Standstill: its skin and glow map for client/.../ultimate/UltimateStandstill.java's own model.
 
     python3 tools/ultimates/blur.py            paint textures/entity/xenoform_blur_ultimate.png and xenoform_blur_ultimate_glow.png
     python3 tools/ultimates/blur.py layout     print the UV table (the Java model holds the same one)

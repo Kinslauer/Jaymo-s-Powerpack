@@ -181,7 +181,7 @@ if __name__ == "__main__":
     else:
         for painter in PAINTERS:
             painter()
-        # (0.20.15) the later Ultimates have a painter of their own in tools/ultimates/<id>.py, each with paint()
+        # (0.20.21) the later Ultimates have a painter of their own in tools/ultimates/<id>.py, each with paint()
         import importlib
         sys.path.insert(0, str(Path(__file__).resolve().parent / "ultimates"))
         for name in ("pyre", "blur", "prism", "wisp", "gremlin", "knell"):

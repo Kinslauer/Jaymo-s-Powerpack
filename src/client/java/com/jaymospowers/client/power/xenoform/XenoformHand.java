@@ -27,7 +27,7 @@ public final class XenoformHand {
 			return false;
 		}
 		if (model instanceof com.jaymospowers.client.power.xenoform.ultimate.UltimateGeode) {
-			return true; // (0.20.15) Geode has no arm: its hidden humanoid limb is painted with other boxes' pixels, so nothing is drawn
+			return true; // (0.20.21) Geode has no arm: its hidden humanoid limb is painted with other boxes' pixels, so nothing is drawn
 		}
 		// (0.20.9) an Ultimate's model wears its own skin
 		boolean ultimateModel = model instanceof XenoFormModels.UltimateModel;
@@ -49,13 +49,13 @@ public final class XenoformHand {
 			// (0.20.9) Titan's forearm and fist straightened for the first-person arm
 			titan.handPose();
 		} else if (model instanceof com.jaymospowers.client.power.xenoform.ultimate.UltimateSunheart sun) {
-			// (0.20.15) Sunheart's flame lick upright for the first-person arm
+			// (0.20.21) Sunheart's flame lick upright for the first-person arm
 			sun.handPose();
 		} else if (model instanceof com.jaymospowers.client.power.xenoform.ultimate.UltimateSwarm swarm) {
-			// (0.20.15) Swarm's forearm and fist straightened for the first-person arm
+			// (0.20.21) Swarm's forearm and fist straightened for the first-person arm
 			swarm.handPose();
 		} else if (model instanceof com.jaymospowers.client.power.xenoform.ultimate.UltimateTolling tolling) {
-			// (0.20.15) the Tolling's bent forearm straightened for the first-person arm
+			// (0.20.21) the Tolling's bent forearm straightened for the first-person arm
 			tolling.handPose();
 		} else if (model instanceof XenoFormModels.Bulwark bulwark) {
 			// (0.19.84) its forearm and fist straightened for the first-person arm
@@ -84,7 +84,7 @@ public final class XenoformHand {
 		if (model instanceof XenoFormModels.Wisp wisp) {
 			WispKi.submitArm(wisp, right, limb, poseStack, collector, player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true));
 		} else if (model instanceof com.jaymospowers.client.power.xenoform.ultimate.UltimateRevenant revenant) {
-			// (0.20.15) Revenant's arm is see-through and fullbright, in ki, as the rest of it is
+			// (0.20.21) Revenant's arm is see-through and fullbright, in ki, as the rest of it is
 			revenant.submitArm(right, limb, poseStack, collector, player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true));
 		} else {
 			collector.submitModelPart(limb, poseStack, RenderTypes.entityCutout(skin), light, OverlayTexture.NO_OVERLAY, null);
