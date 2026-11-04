@@ -1,0 +1,26 @@
+{
+  "centre": "minecraft:diamond_block",
+  "components": [
+    "minecraft:diamond",
+    "minecraft:diamond",
+    "minecraft:diamond",
+    "minecraft:diamond",
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "crystal": 16,
+    "spirit": 10,
+    "war": 8,
+    "arcana": 8
+  },
+  "instability": 9,
+  "result": {
+    "item": "jaymoskingdoms:bulwark_diamond",
+    "count": 1
+  },
+  "research": "golemancy",
+  "flux": 6
+}

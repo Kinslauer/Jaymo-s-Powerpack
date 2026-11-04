@@ -1,0 +1,26 @@
+{
+  "centre": "minecraft:gold_block",
+  "components": [
+    "minecraft:gold_ingot",
+    "minecraft:gold_ingot",
+    "minecraft:gold_ingot",
+    "minecraft:gold_ingot",
+    "minecraft:glowstone",
+    "minecraft:glowstone",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "light": 14,
+    "metal": 10,
+    "war": 6,
+    "spirit": 6
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymoskingdoms:gilt_golem",
+    "count": 1
+  },
+  "research": "golemancy",
+  "flux": 4
+}

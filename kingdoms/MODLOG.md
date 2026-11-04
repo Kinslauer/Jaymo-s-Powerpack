@@ -8216,3 +8216,37 @@ beneath it, and flap gently as they hover."
   them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
 - **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
   and sway in the air the way the wind's hover does, for anyone watching.
+
+## 0.7.477: Golemworks (town golems, the Bulwark Diamond) (pack 0.19.57)
+Andy: "I like the idea of a magically attuned kingdom using golems like these for everyday things, i like the diamond
+golem's functionality, but id rather see it be an imbued item rather than a golem since we cant use the files directly".
+Ideas from Special Golems (custom licence, files not used): behaviour spec in `docs/TownGolems-Spec.md`, our own code and art.
+- **Golemworks** (`Golemworks`): 15% of realms (never a purist's or a camp) are drawn as golemworks, once, from who they
+  are. Their folk round the seat are attuned (a faint mana glow to the attuned, power 1-2, "ask about their magic" works),
+  and the realm keeps town golems about its seat: 3 porters, 2 frost tenders, 2 lamp wardens, a mender and a scribe. The
+  whole roster is built when a player first comes near; after that one lost golem is rebuilt every 5 minutes.
+  `/kingdom golemworks on|off` (operators) sets the realm you stand in.
+- **Town golems** (`TownGolem`, one entity, five kinds, drawn by `client/TownGolemRenderer`, textures by
+  `tools/gen_town_golems.py`): our own rune golem, a stone body with a carved core in its chest, eyes and core glowing.
+  - **Clay Porter** (small): picks up anything that has lain a minute about the town (no player within 8 blocks) and puts
+    it in the nearest chest or barrel with room within 20 of home (else sets it down at home); wears a basket.
+  - **Frost Tender** (smallest): puts out fire blocks and burning folk near it, pelts monsters with snowballs.
+  - **Gilt Lamp Warden** (big, slow, 160 health): glows through the night; every 1.5 s a beam at the nearest monster
+    within 16 for 6 (undead 12 and set alight).
+  - **Verdant Mender**: Regeneration II on hurt folk it looks after (each at most every 20 s), and keeps one of them from
+    dying (left at 4 health, a moment's Regeneration and Resistance; each at most every 5 minutes).
+  - **Lapis Scribe**: stands still by the seat, slows and weakens monsters within 12. Use an enchanted item on it with 8
+    lapis in your other hand (and 6 emeralds at a realm's scribe): one of its enchantments goes a level up, past the
+    limit, and it is marked Engraved, never enchanted again (`EnchantmentEvents.ALLOW_ENCHANTING`). A realm's scribe has 3
+    engravings a day; one you set down has 6 and takes a lapis block for each more. Out of ink, its beam only slows.
+  - Who they look after: the town's folk and villagers, golems, its maker with their party and pets, players in good
+    standing with its realm. Each is mended with its own stuff (clay ball, snowball, gold ingot, emerald, lapis).
+  - Anyone who knows **Golemancy** makes them on the infusion altar (clay, snow, gold, emerald or lapis block at the
+    centre, with ichor); set down, one works within 16 of where it stood up. Its maker sneaks and uses it with an empty
+    hand to fold it back into its item.
+- **Bulwark Diamond** (`BulwarkDiamond`, infusion: diamond block, 4 diamonds, 2 amethyst, 2 ichor): the diamond golem's
+  work as a held item. Use it to raise its ward: you are rooted (85% slower) and every blow from something (mob, player,
+  shot, blast) aimed at an ally within 8 blocks (your party, pets, golems, any town's folk) is caught by the diamond
+  instead, draining its 500-point ward (its bar). You are not covered. Dry, the ward breaks; lowered, it refills 1 a second,
+  5 if you're attuned and have mana.
+- Compiled clean with Gradle (`compileClientJava`); not played.

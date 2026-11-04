@@ -1,0 +1,25 @@
+{
+  "centre": "minecraft:snow_block",
+  "components": [
+    "minecraft:snowball",
+    "minecraft:snowball",
+    "minecraft:snowball",
+    "minecraft:snowball",
+    "minecraft:packed_ice",
+    "minecraft:packed_ice",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "frost": 12,
+    "motion": 6,
+    "spirit": 4
+  },
+  "instability": 4,
+  "result": {
+    "item": "jaymoskingdoms:frost_golem",
+    "count": 1
+  },
+  "research": "golemancy",
+  "flux": 3
+}
