@@ -273,6 +273,8 @@ public final class Senses {
 		if (player.isOnFire() || player.hasEffect(MobEffects.GLOWING)) {
 			f *= LIT;
 		}
+		// (0.7.513) the old patron's trial and scar: the dead at night and wild beasts see you farther
+		f *= Turning.sight(player, looker, level);
 		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
 	}
 

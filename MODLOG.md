@@ -5279,6 +5279,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.20.8, Kingdoms 0.7.509, Kitchen 0.5.57, patron gods part (a)** (plan `docs/Patrons-Plan.md`; see `kingdoms/MODLOG.md`):
   Powers only gets the Hearthkeeper's Gentle Hands: `MedicineSkill.ticks` also reads Kingdoms'
   `Patrons.blessing(player, "gentle_hands")` by reflection (a fifth off revives and treatments). Not played.
+
 - **0.20.9, Ultimates patch 0 (PR #909): each Ultimate is its own alien (`docs/Ultimates-Plan.md`), starting with Bulwark's Titan** (Andy: "this is how ultimates should work").
   - **Framework:** an Ultimate is a `XenoUltimate` (its own body, stats, R G V B and C, never on the dial), reached through `XenoForm.evolved()`. As the Ultimate, C is its big move and holding C drops you back. It has its own health on top of the base alien's (a thin bar on the HUD shows the base alien's held health): emptied, you fall back to the base alien, stunned, and can't go Ultimate again that change. A fifth HUD chip shows C. Aliens with no evolved Ultimate yet keep the old 0.18.93 buff until their patch.
   - **When:** on an unforged band C doesn't change you; the Ultimate comes on by itself once per change as a last stand, when a great foe (a vanilla boss, anything with a boss bar, `GreatFoes`; Kingdoms' bosses through `KingdomsCompat`) would finish you or take you under a quarter health. A reforged band changes in on C at will too (Andy's pick), burns charge twice as fast as the Ultimate, and still gets the last stand.
@@ -5321,3 +5322,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Tuning: `BrewQuality` (bars, grind and grade thresholds), `BrewGrade` (multipliers), `MortarEntity`,
     `BrewersAlembicEntity`, `CauldronStirring`. No new attachments, mixins or keys. Kingdoms and Kitchen untouched.
     Built, not played.
+- **0.20.14, Kingdoms 0.7.513, patron gods part (b)** (plan `docs/Patrons-B-Plan.md`; see `kingdoms/MODLOG.md`): Powers only gets
+  `Wounds.healPart` reading Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection (`MedicineSkill.blessing`): the
+  Hearthkeeper's trial and scar on one who turned from it slow every part heal. Not played.

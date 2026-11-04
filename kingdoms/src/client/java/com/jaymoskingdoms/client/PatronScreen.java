@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Patron;
 import com.jaymoskingdoms.Patrons;
+import com.jaymoskingdoms.Turning;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -150,8 +151,14 @@ final class PatronScreen extends Screen {
 		int color = Ui.DIM;
 		if (mine != null) {
 			standing = Component.translatable("gui.jaymoskingdoms.patrons.sworn", mine.named(), s.swornDay() + 1,
-				Component.translatable("patron.jaymoskingdoms.tier." + Math.max(1, s.tier())));
+				Component.translatable("patron.jaymoskingdoms.tier." + s.tier()));
 			color = mine.colour;
+			// (0.7.513) praying towards another patron: your own will mark you
+			Patron to = Patron.byKey(s.streak().patron());
+			if (to != null && to != mine && s.streak().days() > 0 && s.streak().lastDay() >= today() - 1) {
+				standing = Component.translatable("gui.jaymoskingdoms.patrons.turning", to.named(), s.streak().days(), Patrons.SWEAR_DAYS);
+				color = Ui.BAD;
+			}
 		} else if (s.streak().days() > 0) {
 			Patron streaking = Patron.byKey(s.streak().patron());
 			standing = Component.translatable("gui.jaymoskingdoms.patrons.streak", streaking == null ? "" : streaking.named(), s.streak().days(), Patrons.SWEAR_DAYS);
@@ -159,6 +166,31 @@ final class PatronScreen extends Screen {
 			standing = Component.translatable("gui.jaymoskingdoms.patrons.unsworn");
 		}
 		Ui.line(graphics, this.font, standing, px + 8, y + 18, pw - 16, color);
+		long longest = daysLeftMost(s);
+		if (longest > 0L) {
+			Component trials = Component.translatable("gui.jaymoskingdoms.patrons.trials", longest);
+			Ui.lineRight(graphics, this.font, trials, px + pw - 8, y + 7, pw / 2 - 8, Ui.BAD);
+		}
+	}
+
+	/** (0.7.513) The clock's shrine day on this client, or 0 with no world. */
+	private long today() {
+		return this.minecraft.level == null ? 0L : Patrons.day(this.minecraft.level.getOverworldClockTime());
+	}
+
+	private static boolean isTrial(Patrons.Mark m) {
+		return Turning.TRIAL.equals(m.kind()) || Turning.TRIAL_EASED_KIND.equals(m.kind());
+	}
+
+	/** (0.7.513) The most days left of any live trial. */
+	private long daysLeftMost(Patrons.State s) {
+		long today = today(), most = 0L;
+		for (Patrons.Mark m : s.marks()) {
+			if (isTrial(m) && m.day() > today) {
+				most = Math.max(most, m.day() - today);
+			}
+		}
+		return most;
 	}
 
 	/** The eight patrons down the left. */
@@ -175,6 +207,16 @@ final class PatronScreen extends Screen {
 			graphics.fill(x + 4, ry, x + 6, ry + LIST_ROW - 2, p == mine ? Ui.GOLD : known ? p.colour : Ui.HINT);
 			Component name = known ? p.named() : Component.translatable("patron.jaymoskingdoms.unknown");
 			Ui.line(graphics, this.font, name, x + 10, ry + 5, LIST_W - 18, !known ? Ui.HINT : p == mine || picked ? p.colour : p == hover ? Ui.TEXT : Ui.DIM);
+			// (0.7.513) a notch for each scar of this patron (up to 3), and a bar while its trials run
+			if (this.minecraft.player != null) {
+				int scars = Math.min(3, Turning.scars(this.minecraft.player, p));
+				for (int n = 0; n < scars; n++) {
+					graphics.fill(x + LIST_W - 14 - n * 3, ry + 3, x + LIST_W - 12 - n * 3, ry + 5, Ui.BAD);
+				}
+				if (Turning.trial(this.minecraft.player, p) > 0.0F) {
+					graphics.fill(x + LIST_W - 6, ry, x + LIST_W - 4, ry + LIST_ROW - 2, Ui.BAD);
+				}
+			}
 		}
 	}
 
@@ -224,11 +266,51 @@ final class PatronScreen extends Screen {
 		}
 		// rivals
 		y = paragraph(graphics, Component.translatable("gui.jaymoskingdoms.patrons.rivals", rivals(p)), x, y + 4, width, Ui.DIM, clipTop, clipBottom);
+		y = marks(graphics, p, s, x, y, width, clipTop, clipBottom);
+		if (mine != null && p != mine) {
+			y = paragraph(graphics, Component.translatable("gui.jaymoskingdoms.patrons.turn_warning", p.named(), mine.named()), x, y + 4, width, Ui.HINT, clipTop, clipBottom);
+		}
 		if (p == mine) {
 			y = ownPatron(graphics, p, s, x, y + 6, width, clipTop, clipBottom);
 		}
 		this.contentH = y + this.scroll - top;
 		graphics.disableScissor();
+	}
+
+	/** (0.7.513) Your scars and trials of {@code p}, when you have any. */
+	private int marks(GuiGraphicsExtractor graphics, Patron p, Patrons.State s, int x, int y, int width, int clipTop, int clipBottom) {
+		if (s.marks().isEmpty() || this.minecraft.player == null) {
+			return y;
+		}
+		int scars = Turning.scars(this.minecraft.player, p);
+		long today = today(), left = 0L;
+		boolean eased = false, any = false;
+		for (Patrons.Mark m : s.marks()) {
+			if (isTrial(m) && m.day() > today && m.patron().equals(p.key)) {
+				any = true;
+				if (m.day() - today > left) {
+					left = m.day() - today;
+					eased = Turning.TRIAL_EASED_KIND.equals(m.kind());
+				}
+			}
+		}
+		if (scars <= 0 && !any) {
+			return y;
+		}
+		y = paragraph(graphics, Component.translatable("gui.jaymoskingdoms.patrons.marks"), x, y + 4, width, Ui.TEXT, clipTop, clipBottom);
+		if (scars > 0) {
+			y = paragraph(graphics, Component.translatable("gui.jaymoskingdoms.patrons.scarred", scars), x, y, width, Ui.BAD, clipTop, clipBottom);
+			y = paragraph(graphics, Component.translatable("gui.jaymoskingdoms.patrons.scar." + p.key), x + 6, y, width - 6, Ui.DIM, clipTop, clipBottom);
+		}
+		if (any) {
+			y = paragraph(graphics, Component.translatable(eased ? "gui.jaymoskingdoms.patrons.trial.eased" : "gui.jaymoskingdoms.patrons.trial", left), x, y, width, Ui.BAD, clipTop, clipBottom);
+			y = paragraph(graphics, Component.translatable("gui.jaymoskingdoms.patrons.trial." + p.key), x + 6, y, width - 6, Ui.DIM, clipTop, clipBottom);
+			y = paragraph(graphics, Component.translatable("gui.jaymoskingdoms.patrons.trial.shunned", p.named()), x + 6, y, width - 6, Ui.DIM, clipTop, clipBottom);
+			if (!eased) {
+				y = paragraph(graphics, Component.translatable("gui.jaymoskingdoms.patrons.trial.rite_hint"), x, y + 2, width, Ui.HINT, clipTop, clipBottom);
+			}
+		}
+		return y;
 	}
 
 	private static Component rivals(Patron p) {

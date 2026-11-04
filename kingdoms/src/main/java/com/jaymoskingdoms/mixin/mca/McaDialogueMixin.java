@@ -492,7 +492,7 @@ abstract class McaDialogueMixin {
 				gained -= taken;
 			}
 			// (0.7.509) The Truth's flock warm to one of their own sooner
-			int warm = com.jaymoskingdoms.Blessings.flockHearts(villager, player, gained);
+			int warm = com.jaymoskingdoms.Blessings.flockHearts(villager, player, gained) + com.jaymoskingdoms.Faiths.kinHearts(villager, player, gained);
 			if (warm > 0) {
 				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(warm);
 				gained += warm;

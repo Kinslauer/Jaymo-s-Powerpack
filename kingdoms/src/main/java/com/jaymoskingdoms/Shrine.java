@@ -227,6 +227,15 @@ public final class Shrine extends Block {
 	/** The prayer answered: a small heal on every part, festering cleared, a chime and motes. */
 	private static void pray(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, long today) {
 		player.setAttached(PRAYED, today);
+		// (0.7.513) the shrine of a patron whose trials you are under is cold: no heal, but praying your way back still counts
+		Patron owner = state.getValue(DEDICATION).patron();
+		if (owner != null && Turning.trial(player, owner) > 0.0F) {
+			level.playSound(null, pos, SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 0.8F);
+			// cold line first: the turning progress and the turned line matter more, so they go last
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.cold", Patrons.coloured(owner)));
+			Patrons.prayed(player, owner, pos, today);
+			return;
+		}
 		if (PowersCompat.healEveryPart(player, PRAYER_HEAL) < 0.0F) {
 			player.heal(PRAYER_HEAL);
 		}
