@@ -2324,6 +2324,14 @@ public final class WebSymbiote {
 		} else {
 			return;
 		}
+		noise(level, pos, range);
+	}
+
+	/**
+	 * (0.20.3) A loud noise at {@code pos}: every host within {@code range} flinches from it (once per
+	 * {@link #NOISE_GRACE_TICKS}). Metal banged on metal ({@code combat/ShieldBang}) calls it too.
+	 */
+	public static void noise(ServerLevel level, Vec3 pos, double range) {
 		for (ServerPlayer player : level.players()) {
 			if (isBonded(player) && player.isAlive() && !player.isSpectator() && player.position().distanceToSqr(pos) <= range * range) {
 				Live live = live(player);

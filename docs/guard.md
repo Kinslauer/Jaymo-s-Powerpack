@@ -118,3 +118,9 @@ attracting mobs (or repelling sensitive ones...)".
 - Hostiles (`Enemy`, not `NeutralMob`) with no target within `DRAW_RANGE` (24) walk to where you stood; skittish mobs
   (wild `Animal`, `AmbientCreature`, water creatures; not neutral, tamed, ridden or leashed) within `STARTLE_RANGE` (16)
   run `FLEE_DISTANCE` away. Goal mobs get a navigation path, brain mobs a walk target.
+- Held past `BASH_MIN` (6 ticks) the click charges a shield bash instead (bar to `BASH_FULL`, 30 ticks; `BASH_FEATHERS`
+  2, else it's a bang). On release the client steps you forward and the server strikes everything within reach in a
+  50-degree cone: damage, shove, Darktide stun, and a raised shield disabled; all scale with the charge.
+- Metal on metal (`ShieldBang.metal`: metal words in the item id, or the `jaymospowers:clanging_metal` tag) also calls
+  `WebSymbiote.noise` (hosts within 12 flinch) and startles `WebSymbioteBlob`s within 12. Tinkers-built weapons whose
+  ids carry no metal name don't count unless added to the tag.
