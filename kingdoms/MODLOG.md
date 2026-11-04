@@ -8753,6 +8753,22 @@ is our own take on the idea (none of its code or art).
 - Powers 0.20.14: the Hearthkeeper's trial and scar slow every part heal.
 - Built, reviewed, and a dev server boots; not played.
 
+## Patron champion fixes
+- Champions no longer freeze: the cast, turn and sleep timers now run from the entity's own tick, so wind-ups end, phase turns finish, sleeping champions wake near a Wildlands player, and a champion can be killed again. The Skeleton Lord got the same fix.
+- A `/kill` and other invulnerability-bypassing damage now work on a sleeping or turning champion.
+- The patron weapon a champion holds is for show only, so its blow stays the tuned number.
+- A temple champion only counts players inside its leash. An archer beyond it no longer holds off the rest heal and reset.
+- Adds give no experience and no loot.
+- The hunt ends when the quarry dies, even if the player respawns at once.
+- Pulls and pushes now reach the moved player's own client (Undertow, Chain of Truth).
+- The great temple's doorway is on the north side like every blueprint, and the Inquisitor's altar is found at its real height.
+- Temple sites check every chunk under the footprint for a realm's land. The forge-hall tunnel keeps its far wall. The ash-hollow ladders reach down to its floor.
+- Town folk no longer fight, flee or fear a patron's champion, and never count as its foes. A champion no longer turns on its own adds.
+- A reset champion goes back to its champion spot, facing the way out. The ruined cathedral's champion stands before the altar. The deep forge-hall's tunnel now ends in a ladder shaft to the surface.
+- The Forge-Thane's slag cubes no longer split into plain cubes. Summoned and egg champions roll a head too. The smoke double's life and the foe memory are constants.
+- The forge-hall's ladder shaft opens into its tunnel. The forge-hall's tunnel and shaft stay off realm land. A rebuilt great temple keeps its one Inquisitor. Champion wind-ups and turns last their full time. Iron Skin wears a weapon only for blows that land.
+- The town's guards, royals and casters no longer see a sleeping or fighting champion, or its adds, as a foe. Champion max health can now grow past 1024 with the group and tier. Blood Grip and the Unseen Hand leave a champion's weapon alone. Adds that reload from a save are discarded. The smoke double's blind and the foe ranges are constants.
+
 ## 0.7.514: the skill web (pack 0.20.15)
 - Andy: "the skill trees need a redesign, something more akin to skyrim or path of exile, where the tree branches far out,
   and you can easily see where what you pick lands. It should also allow you to more easily branch into other trees for
@@ -8814,7 +8830,77 @@ is our own take on the idea (none of its code or art).
   falling; no bosses), **Guardian Light** (Ambrose, level 5: undead within 12 blocks take 6, burn 4 s, are thrown back),
   **Turn Back** (Thessaly, level 6: 5 s of arrows and bolts flying at you sent back, now yours). Existing poses. Not played.
 
-## 0.7.518: RPG Series kit for starts, guards, archers and wizards (patch 3)
+## 0.7.518: patron gods, part (c): temples, champions, the patrons' weapons (pack 0.20.18)
+`docs/Patrons-C-Plan.md`. Andy: champions are group fights, "only the strongest can fight alone".
+- **Temples** (`Temples`, `TempleSites`, `TempleBuildings`): once a player is in the Wildlands (or higher), now and then
+  a patron's temple rises out of sight in a place that fits it: the Hearthkeeper's hearth-hall in open country, the
+  Anvil-Father's forge-hall carved deep in the stone or in the Nether's wastes, the Deep Mother's tide-court on pillars by
+  the sea, the Green Huntsman's glade in deep forest, the Lantern Warden's graveyard and crypt (or a vault in the soul
+  valleys), the Crowned Sun's sun-court on high ground or in the Aether, the Ash Whisperer's hollow (hidden under dry
+  country, or in the basalt deltas), and the Truth's ruined cathedral. A Faith-creed kingdom's capital builds the Truth's
+  **great temple** (`GreatTemple`). Each altar is the patron's shrine; coming near teaches you the patron.
+- **Champions** (`PatronChampion`, `PatronChampions`, `champions/`): each temple's champion sleeps at its altar as a
+  statue and wakes for a Wildlands player (the great temple's only when struck). Group fights: health and blows grow
+  with every player near (up to six) and with the world tier; a group of three or more brings a fourth phase. Three moves
+  each, opened by the phases, all telegraphed: the Hearth-Warden, the Forge-Thane, the Tide-Bride, the Antlered Hunter,
+  the Grave-Lamp, the Sun-Marshal, the Cinder-Shade and the Inquisitor. A boss bar, the posture bar, great-foe credit. It
+  leashes to its temple, resets when everyone leaves, and stands again three days after it falls.
+- **The patrons' weapons**: a fallen champion drops its patron's iron head for each fighter, at the latest on their
+  third kill (34%, 50%, sure), Perfect (a solo kill's a Masterwork). Put together at the Tool Station (Powers 0.20.18).
+- **The hunt** (part (b)'s mark): after the trials, the patron you left sends its champion once, in a weaker hunting
+  form, outside any town. Kill it (the new patron is pleased) or fall to it, and the hunt is over; outrun it and it comes
+  again.
+- Loading hints 91-92.
+- Built (both mods compile); not played.
+
+## 0.7.519: diplomacy and elections (pack 0.20.19)
+Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its code or art). Plan: `docs/Diplomacy-Plan.md`.
+- **Treaties:** free realms sign four kinds, each for a while and renewable (`Treaties`):
+  - **Recognition** (30 days): tension eases 3 a day, and they don't fall into rivalry. Every other kind needs it.
+  - **Safe passage** (10): the partner's people aren't halted, searched or tolled by the guards, and the ruler's
+    retinue lets them by.
+  - **Trade charter** (15): partner caravans go more often (60% of the wait), take an extra cart and come home 20
+    points fuller, and are preferred. The partner's people get 10% off at traders and pay half the gate toll.
+  - **Aid** (20): when either goes to war, the other is pledged to its side like a great war's ally (its soldiers join
+    the war parties, it shares spoils and reparations). Already at war elsewhere, it sends up to 100 from its treasury.
+  Vassals share their overlord's treaties.
+- **Envoys** (`Envoys`): NPC kingdoms send envoys once a day by creed (Coin wants charters, Conquest aid...). Courts
+  weigh offers by temper, creed, friction, tension, rivalry, a truce, a common foe, blood (purists) and, for a player
+  realm, your reputation. Envoys ride the King's Roads like couriers, with the realm's banner; you can meet them. Kill
+  one and the sender (-200) and the land's realm (-60) remember. Envoys are never drafted as guards or rulers.
+- **Players' realms:** an envoy waits up to two days in your hall and you get a letter. "Hear the Envoy" (MCA Interact
+  page; right-click without MCA) offers Sign, Refuse or Not yet. Seek an audience with your own steward for the Ruler's
+  Desk: the realms in reach, their creed, relation and tension, the treaties in force (Renounce), each kind's odds, and
+  Send an Envoy (20 from the treasury, the rest from your purse).
+- **Breaking faith:** declaring war on a partner, or renouncing, tears treaties up: +25 tension, +8 with the breaker's
+  other partners. A player sovereign loses 150 reputation with the wronged realm and 30 with each other partner. NPC
+  tyrants and warlords may break faith when tension boils over; others hold their hand.
+- **News:** the town boards carry every treaty; the Tidings only aid, a player realm's treaties, great charters,
+  broken faith and war.
+- **Succession** (`Elections`, MCA realms): Coin realms elect, and Warriorborn/Frostborn realms of the Old Blood or
+  Conquest acclaim at a moot. Notables are the grown townsfolk (profession level, guard service, kin to the late
+  ruler, a gift, temper, luck) and sworn players of Knight rank or higher; a player who wins wears the crown with the
+  old steward. In other realms blood inherits, but a child heir gets a regent (the best councillor) until they come of
+  age; then the regent steps down. If the child dies, the regent rules on. A teen is never crowned outright now.
+- **Ruler info** (MCA interact screen): how the realm chooses its rulers, how this one came to the throne, "Regent for
+  ...", and its treaties (hover for the list).
+- Loading hint 93 (89-92 belong to other open PRs and show raw until those merge). Not played; compile-checked with
+  `kingdoms/gradlew build`.
+
+### Fixes: desk, aid coin, wording
+- The Ruler's Desk now stays open: seeking an audience with your own steward no longer opens the quest screen over it
+  (`KingdomEvents.audience` reports that the desk opened; `Rulers.audience` and `Folk` skip `Quests.open`).
+- Renewing a treaty of aid no longer charges an ally's coin again; it is paid once, when the aid is first signed or the
+  war begins.
+- The aid-in-coin board line and the Ruler's Desk treasury and envoy cost now name the realm's coin (the Desk packet
+  carries the worded amounts).
+- Election score: the reputation divisor and cap are now constants (`PLAYER_REP_DIV`, `PLAYER_REP_MOST`).
+- Ruler's Desk: a full road or a closed kind now says so, instead of "your envoy is on the road".
+- Player-crowned realms no longer send envoys or sign treaties on their own in the daily round.
+- A ward who comes of age at the regent's death is now announced on the board.
+- A chartered allied pair no longer loses the trade friction twice.
+
+## 0.7.520: RPG Series kit for starts, guards, archers and wizards (patch 3)
 - `RpgKit` looks up the Wizards, Archers and Rogues & Warriors items (old gear stays without them).
 - **Class starts** (`Classes.gear`): Thief + flint dagger, rogue's tunic and boots; Warlord warrior's chest; Mage the
   wand of their school (warding = frost, mending = novice) and the wizard's hat and robe; Archer a small quiver and

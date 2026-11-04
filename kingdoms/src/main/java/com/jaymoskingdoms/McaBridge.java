@@ -483,7 +483,7 @@ final class McaBridge {
 				// (0.7.141) never a wind dragon in disguise
 				&& v.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) == null
 				// (0.7.299) nor a visitor, here for the day
-				&& !Visitors.is(v));
+				&& !Visitors.is(v) && !Envoys.is(v));
 		if (role == Folk.GUARD && Purists.is(f)) {
 			List<VillagerEntityMCA> kin = all.stream().filter(v -> Purists.kin(f, v)).toList();
 			if (!kin.isEmpty()) {
@@ -507,8 +507,12 @@ final class McaBridge {
 	// ---- rulers and guards (0.7.138) -----------------------------------------------------------------------------------
 
 	/** {@link McaCompat#enlistRuler}. */
-	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house) {
-		VillagerEntityMCA villager = heir(level, f, house);
+	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house, java.util.@Nullable UUID chosen) {
+		// (0.7.519) one the realm chose (an election, a regent, a ward come of age) if they are still about and grown enough
+		VillagerEntityMCA villager = chosen != null && level.getEntity(chosen) instanceof VillagerEntityMCA c && c.isAlive() && teenOrOlder(c) ? c : null;
+		if (villager == null) {
+			villager = heir(level, f, house);
+		}
 		if (villager == null) {
 			// nobody grown in the town: someone moves in to take the throne
 			Castle.Keep keep = Factions.keep(level.getServer(), f.id());
@@ -530,13 +534,66 @@ final class McaBridge {
 	}
 
 	/**
+	 * (0.7.519) The grown villagers of {@code f}'s town who could rule or stand for election: alive, adult (a teen never
+	 * is), townsfolk or guards, not a hermit or an envoy, and not {@code house} (the late ruler).
+	 */
+	private static List<VillagerEntityMCA> candidates(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		return level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			v -> v.isAlive() && v.getAgeState() == AgeState.ADULT && (worker(v).role() < 0 || worker(v).role() == Folk.GUARD) && !Hermits.is(worker(v))
+				&& !Envoys.is(v) && !v.getUUID().equals(house));
+	}
+
+	/** {@link McaCompat#notables}. */
+	static List<Villager> notables(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		return new ArrayList<>(candidates(level, f, house));
+	}
+
+	/** {@link McaCompat#youngKin}: the late ruler's children and teens, the eldest first. */
+	static List<Villager> youngKin(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		if (house == null) {
+			return List.of();
+		}
+		List<VillagerEntityMCA> young = new ArrayList<>(level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			v -> v.isAlive() && v.getAgeState() != AgeState.ADULT && !Envoys.is(v) && kinOf(v, house) == McaCompat.KIN));
+		young.sort((a, b) -> Integer.compare(b.getAgeState().ordinal(), a.getAgeState().ordinal()));
+		return new ArrayList<>(young);
+	}
+
+	/** {@link McaCompat#adult}. */
+	static boolean adult(Villager villager) {
+		return villager instanceof VillagerEntityMCA v && v.getAgeState() == AgeState.ADULT;
+	}
+
+	/** {@link McaCompat#professionLevel}. */
+	static int professionLevel(Villager villager) {
+		return villager.getVillagerData().profession().is(VillagerProfession.NONE) ? 0 : villager.getVillagerData().level();
+	}
+
+	/** {@link McaCompat#discharge}. */
+	static void discharge(PathfinderMob mob) {
+		if (mob instanceof VillagerEntityMCA v) {
+			worker(v).discharge();
+		}
+	}
+
+	/** {@link McaCompat#envoy}: a grown newcomer of no settlement, an envoy of {@code f}'s, at {@code at}. */
+	static @Nullable Villager envoy(ServerLevel level, Faction f, BlockPos at) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0).spawn(EntitySpawnReason.MOB_SUMMONED);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0F, 0.0F);
+		villager.setPersistenceRequired();
+		return villager;
+	}
+
+	/**
 	 * {@code f}'s heir among its grown villagers (its guards too, the townsfolk first): the late ruler's family
 	 * ({@code house}), then their widow or widower, then anyone.
 	 */
 	private static @Nullable VillagerEntityMCA heir(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
-		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
-			v -> v.isAlive() && !v.isBaby() && (worker(v).role() < 0 || worker(v).role() == Folk.GUARD) && !Hermits.is(worker(v))
-				&& !v.getUUID().equals(house));
+		// (0.7.519) grown means adult now: a teen heir gets a regent (Elections), never the crown outright
+		List<VillagerEntityMCA> all = candidates(level, f, house);
 		if (all.isEmpty()) {
 			return null;
 		}

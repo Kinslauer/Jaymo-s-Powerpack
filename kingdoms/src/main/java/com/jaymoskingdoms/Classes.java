@@ -370,7 +370,7 @@ public final class Classes {
 	 */
 	public static List<ItemStack> gear(PlayerClass cls, String option) {
 		return switch (cls) {
-			// (0.7.518) the RPG Series' tier-one kit where it's there (RpgKit): a rogue's flint dagger and rogue's leathers
+			// (0.7.520) the RPG Series' tier-one kit where it's there (RpgKit): a rogue's flint dagger and rogue's leathers
 			case THIEF -> List.of(any(1, "jaymospowers:iron_dagger", "minecraft:iron_sword"), any(1, "rogues:flint_dagger"),
 				RpgKit.or("rogues:rogue_armor_chest", "minecraft:leather_chestplate"), new ItemStack(Items.LEATHER_LEGGINGS),
 				RpgKit.or("rogues:rogue_armor_feet", "minecraft:leather_boots"));

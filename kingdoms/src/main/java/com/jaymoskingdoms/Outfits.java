@@ -294,7 +294,7 @@ public final class Outfits {
 		folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextFloat() < spear ? Items.IRON_SPEAR : Items.IRON_SWORD));
 		folk.setItemSlot(EquipmentSlot.OFFHAND, shield(folk, arms, false));
 		if (rank >= 1.0F - GUARD_VETERAN_SHARE) {
-			// (0.7.518) a veteran may carry a Rogues & Warriors polearm: a glaive (and his shield), or a double axe in both hands
+			// (0.7.520) a veteran may carry a Rogues & Warriors polearm: a glaive (and his shield), or a double axe in both hands
 			float pick = random.nextFloat();
 			if (pick < RpgKit.VETERAN_GLAIVE) {
 				RpgKit.item("rogues:iron_glaive").ifPresent(g -> folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(g)));
@@ -326,7 +326,7 @@ public final class Outfits {
 		}
 		ItemStack tunic = trimmed(folk, dyed(Items.LEATHER_CHESTPLATE, rgb(arms.field())), arms.pattern(), arms.material());
 		if (climate != Climate.DESERT && climate != Climate.BADLANDS && climate != Climate.SNOWY) {
-			// (0.7.518) the Archers' own hood and tunic, now and then, in the temperate lands
+			// (0.7.520) the Archers' own hood and tunic, now and then, in the temperate lands
 			if (random.nextFloat() < RpgKit.ARCHER_HOOD) {
 				head = RpgKit.item("archers:archer_armor_head").map(ItemStack::new).orElse(head);
 			}

@@ -360,6 +360,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		LOGGER.debug("great wars attachment: {}", GreatWars.LEDGER);
 		Wars.register();
+		// (0.7.519) treaties, envoys, the ruler's desk, elections and regencies
+		Treaties.register();
+		Envoys.register();
+		DiplomacyNet.register();
+		Elections.register();
 		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
 		Sandbags.register();
 		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
@@ -504,6 +509,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rites.register();
 		Sermons.register();
 		RealmFaiths.register();
+		// (0.7.518) patron gods, part (c): the champions and their temples
+		PatronChampions.register();
+		Temples.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		GiftTales.register();

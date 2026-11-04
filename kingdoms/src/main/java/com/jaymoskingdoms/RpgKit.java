@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.Optional;
 
 /**
- * (0.7.518) The RPG Series' kit (Wizards, Archers, Rogues & Warriors, shipped unchanged in the pack) where Kingdoms hands gear
+ * (0.7.520) The RPG Series' kit (Wizards, Archers, Rogues & Warriors, shipped unchanged in the pack) where Kingdoms hands gear
  * out: class starts ({@link Classes#gear}), guards and archers ({@link Outfits}), court wizards and hermits. Every id is looked
  * up, so without the mods the old gear stays.
  */

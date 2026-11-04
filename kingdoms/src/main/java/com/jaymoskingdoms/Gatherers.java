@@ -298,6 +298,10 @@ public final class Gatherers {
 	/** A building's just been finished ({@link Construction}): a tree farm gets its woodcutter, a pen its first beasts, a stable its horses, either kind of farm its farmer. */
 	static void built(ServerLevel level, Faction f, String entry, BlockPos min, BlockPos max) {
 		MinecraftServer server = level.getServer();
+		if (entry.equals(Temples.GREAT_TEMPLE)) {
+			// (0.7.518) the Inquisitor sleeps before its altar
+			Temples.greatBuilt(level, f, min, max);
+		}
 		if (entry.equals("tree_farm") && wanted(server, f, Folk.WOODCUTTER)) {
 			hire(level, f, Folk.WOODCUTTER, 1);
 		}

@@ -162,7 +162,7 @@ public final class BossPosture {
 		wear(level, entity, wear);
 	}
 
-	private static void wear(ServerLevel level, LivingEntity boss, float amount) {
+	static void wear(ServerLevel level, LivingEntity boss, float amount) {
 		if (amount <= 0.0F || Downed.isDowned(boss)) {
 			return;
 		}
