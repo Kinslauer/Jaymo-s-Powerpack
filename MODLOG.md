@@ -333,3 +333,5 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   - **Magma blood** (tag `blood/magma`: magma cubes, striders): bright orange, full-bright as it flies, glowing where it
     lands and smoking, then cooling to a dark crust over 45 s (`BloodParticles.MAGMA`).
   Masks and sprites are ours (`tools/blood_textures.py`). Compile-checked against the 26.3 jars; not played.
+- **0.20.42, Kingdoms 0.7.535, Zoological Guide by recipe:** Cube Animals no longer hands out its Zoological Guide on
+  first join; craft it from a book, a feather, an ink sac and a bone (shapeless). See the Kingdoms MODLOG.

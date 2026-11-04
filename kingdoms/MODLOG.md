@@ -8929,3 +8929,8 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   bandana. `Uniforms.POOR` is now six roughspun tunics with a belt and dark breeches, no hat (undyed linen, dun, grey,
   russet, weld green, woad; `tools/gen_nobody_rags.py`, drawn over the deckhands' slops). Nobodies already hired in a
   deckhand's slops change when they load. Not compiled or played yet.
+- **0.7.535, the Zoological Guide is crafted, not given** (Andy, 2026-11-04: "remove the zoo book from player inventory on
+  spawn, and add a recipe for it instead"): Cube Animals put its guide in every new player's inventory with a chat line.
+  `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
+  own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
+  Cube Animals is loaded. Its loot-chest copies are untouched. Not compiled or played yet.
