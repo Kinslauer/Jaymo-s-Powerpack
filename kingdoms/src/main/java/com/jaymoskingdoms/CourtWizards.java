@@ -293,6 +293,10 @@ public final class CourtWizards {
 			if (level.getRandom().nextFloat() < Classes.STAFF_DROP_CHANCE) {
 				w.mob().spawnAtLocation(level, new ItemStack(Arcana.WIZARD_STAFF));
 			}
+			// (0.7.518) and now and then the wand of their school (Wizards)
+			if (level.getRandom().nextFloat() < RpgKit.WIZARD_WAND_DROP) {
+				RpgKit.randomWand(level.getRandom()).ifPresent(wand -> w.mob().spawnAtLocation(level, new ItemStack(wand)));
+			}
 		}
 		FOES.remove(w.mob());
 	}
