@@ -163,7 +163,7 @@ public final class McaCompat {
 	}
 
 	/** (0.5.29) {@code villager} (if MCA's) warms to {@code player} by {@code hearts}: a quest done for them, a letter brought. */
-	static void hearts(LivingEntity villager, ServerPlayer player, int hearts) {
+	public static void hearts(LivingEntity villager, ServerPlayer player, int hearts) {
 		// (0.7.62) not for a masked stranger: they don't know whom they're warming to
 		if (LOADED && villager instanceof Villager v && !Identities.hiddenFrom(player, villager)) {
 			McaBridge.hearts(v, player, hearts);

@@ -30,12 +30,16 @@ import net.minecraft.world.level.material.PushReaction;
  * to 4 in a block like candles; loose flint lies about too, most on gravel and by water. A punch or a right click picks
  * them up; 4 rocks craft into their block (stone rocks into cobblestone). Rocks that lie in water are salt crystals
  * (0.16.24). On grass they lie mostly in rare pebble piles of the biome's rock (0.17.175, PebblePilesFeature).
+ * (0.20.2) Andy: "add rare pebbles and flint to the nether so those starts are possible for emberborn": netherrack,
+ * blackstone and basalt rocks and the odd loose flint lie about the Nether's floors now and then (NetherRocksFeature).
  * Assets: tools/gen_ground_rocks.py.
  */
 public final class GroundRocks {
 	/** The rock kinds. Keep in step with VARIANTS in tools/gen_ground_rocks.py. */
 	public enum Variant {
-		STONE, MOSSY, GRANITE, DIORITE, ANDESITE, DEEPSLATE, TUFF, SANDSTONE, RED_SANDSTONE;
+		STONE, MOSSY, GRANITE, DIORITE, ANDESITE, DEEPSLATE, TUFF, SANDSTONE, RED_SANDSTONE,
+		// (0.20.2) the Nether's
+		NETHERRACK, BLACKSTONE, BASALT;
 
 		public String id() {
 			return this.name().toLowerCase(java.util.Locale.ROOT) + "_rock";
@@ -55,8 +59,7 @@ public final class GroundRocks {
 			ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosPowers.id(variant.id()));
 			ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id(variant.id()));
 			Block block = Registry.register(BuiltInRegistries.BLOCK, key,
-				new LooseStonesBlock.Rocks(stones(variant == Variant.SANDSTONE || variant == Variant.RED_SANDSTONE ? MapColor.SAND : MapColor.STONE)
-					.setId(key), () -> BuiltInRegistries.ITEM.getValue(itemKey)));
+				new LooseStonesBlock.Rocks(stones(colour(variant)).setId(key), () -> BuiltInRegistries.ITEM.getValue(itemKey)));
 			Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
 			ROCKS.put(variant, block);
 		}
@@ -71,6 +74,7 @@ public final class GroundRocks {
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("loose_rocks"), GroundRocksFeature.ROCKS_CODEC);
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("loose_flint"), GroundRocksFeature.FLINT_CODEC);
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("pebble_piles"), PebblePilesFeature.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("nether_rocks"), NetherRocksFeature.CODEC);
 		var land = BiomeSelectors.foundInOverworld()
 			.and(BiomeSelectors.tag(BiomeTags.IS_OCEAN).negate())
 			.and(BiomeSelectors.tag(BiomeTags.IS_DEEP_OCEAN).negate());
@@ -78,12 +82,23 @@ public final class GroundRocks {
 		BiomeModifications.addFeature(land, GenerationStep.Decoration.VEGETAL_DECORATION, placed("loose_flint"));
 		BiomeModifications.addFeature(land, GenerationStep.Decoration.VEGETAL_DECORATION, placed("pebble_piles"));
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_DECORATION, placed("loose_rocks_cave"));
+		// (0.20.2) the Nether's floors, the demon biomes too
+		BiomeModifications.addFeature(BiomeSelectors.foundInTheNether(), GenerationStep.Decoration.VEGETAL_DECORATION, placed("nether_rocks"));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> {
 			for (Block rock : ROCKS.values()) {
 				output.accept(rock);
 			}
 		});
+	}
+
+	private static MapColor colour(Variant variant) {
+		return switch (variant) {
+			case SANDSTONE, RED_SANDSTONE -> MapColor.SAND;
+			case NETHERRACK -> MapColor.NETHER;
+			case BLACKSTONE, BASALT -> MapColor.COLOR_BLACK;
+			default -> MapColor.STONE;
+		};
 	}
 
 	private static BlockBehaviour.Properties stones(MapColor color) {
