@@ -6,7 +6,7 @@ import net.minecraft.world.item.Item;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.7, Ultimates patch 0) An alien's Ultimate: its own evolved body with its own R G V B and a big move on C, on top of its
+ * (0.20.8, Ultimates patch 0) An alien's Ultimate: its own evolved body with its own R G V B and a big move on C, on top of its
  * own health bar. It extends {@link XenoForm} so it carries a body ({@code scale}, {@code health}, {@code damage}, ...) and the
  * move helpers for free, but it is never registered in {@link XenoForms}: it is never on the dial and never counted toward a
  * complete band. It takes the base alien's {@link #id}, so everything keyed on the id (the models, the colour, the lang) finds the

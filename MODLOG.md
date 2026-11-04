@@ -5261,7 +5261,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   game can't sync or save. The first such item (a graded WeaponMod copper boomerang) crashed the server when its owner
   moved it in their inventory. `Grades.bake` now caps a scaled speed at `Float.MAX_VALUE`. Kingdoms 0.7.506 builds again:
   a merge left `HandshakePose` with two `NOD` constants, so the handshake's head tilt is now `SHAKE_NOD`.
-- **0.20.7, Ultimates patch 0: each Ultimate is its own alien (`docs/Ultimates-Plan.md`), starting with Bulwark's Titan** (Andy: "this is how ultimates should work").
+- **0.20.7, gem sockets (Patch 5)** (`jewellery/sockets/`, plan `docs/Sockets-Plan.md`): Andy picked the idea of
+  Immersive Apotheosis; this is our own version (none of its code or art).
+  - Forged weapons and armour get gem sockets by grade: Expertly and Perfectly Forged one, Masterwork two, Poorly and
+    Well Forged none. Tinkering tools and jewellery take no gems.
+  - Socketing: piece in the main hand, a cut gem in the off hand, sneak-use a Smithing Anvil (iron or stone). With
+    tongs in the off hand the last gem comes out whole (tongs wear 8); with an empty off hand it is prised out and
+    shatters (use twice to confirm).
+  - Each gem adds its own bonus (the jewellery gem's attribute) times its grade and cut: full on a weapon in the main
+    hand, half on worn armour. The bonuses are item modifiers baked by `Grades.bake` through the new
+    `Grades.ATTRIBUTE_PASSES` (ids `socket_<slot>_<n>`), so a broken piece loses them until repaired. If a piece's grade
+    drops, gems past its count go dormant.
+  - Tooltip: sockets filled, each gem and its cut grade, empty sockets, dormant gems. One data component
+    (`jaymospowers:gem_sockets`), no attachments, no new items or packets. Kingdoms only gets loading hint 86 (0.7.508).
+  - Sockets: a prise warning now belongs to one piece. Using the anvil on a different socketed piece warns again instead of shattering its gem.
+- **0.20.8, Ultimates patch 0: each Ultimate is its own alien (`docs/Ultimates-Plan.md`), starting with Bulwark's Titan** (Andy: "this is how ultimates should work").
   - **Framework:** an Ultimate is a `XenoUltimate` (its own body, stats, R G V B and C, never on the dial), reached through `XenoForm.evolved()`. As the Ultimate, C is its big move and holding C drops you back. It has its own health on top of the base alien's (a thin bar on the HUD shows the base alien's held health): emptied, you fall back to the base alien, stunned, and can't go Ultimate again that change. A fifth HUD chip shows C. Aliens with no evolved Ultimate yet keep the old 0.18.93 buff until their patch.
   - **When:** on an unforged band C doesn't change you; the Ultimate comes on by itself once per change as a last stand, when a great foe (a vanilla boss, anything with a boss bar, `GreatFoes`; Kingdoms' bosses through `KingdomsCompat`) would finish you or take you under a quarter health. A reforged band changes in on C at will too (Andy's pick), burns charge twice as fast as the Ultimate, and still gets the last stand.
   - **Film:** the new MORPH shot letterboxes and zooms on each changing part as it grows into place, then pulls back. The first time you become a given Ultimate it's the long, exaggerated cut (5 s, crackles and a roar). Players within 32 who aren't fighting see the same film; everyone else just sees the change in the world.

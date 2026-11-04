@@ -4295,7 +4295,7 @@ ULTIMATE_COLORS = {
     "towerback": (200, 240, 255),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
-# (0.20.7) the Ultimates with their own model and skin, painted by gen_xeno_ultimates.py (never recoloured from the base skin here)
+# (0.20.8) the Ultimates with their own model and skin, painted by gen_xeno_ultimates.py (never recoloured from the base skin here)
 OWN_ULTIMATES = ("bulwark",)
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
 PATCH5 = ("gyre", "cortex", "locust", "croaker")

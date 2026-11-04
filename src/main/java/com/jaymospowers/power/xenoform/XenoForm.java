@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * {@code .key.ability_1}-{@code .key.ability_4} (its moves), in {@code lang/parts/xenoform.json}.
  */
 public abstract class XenoForm {
-	/** Cooldown slots, one per key (R G V B, and (0.20.7) C for an Ultimate's big move). */
+	/** Cooldown slots, one per key (R G V B, and (0.20.8) C for an Ultimate's big move). */
 	public static final int R = 0, G = 1, V = 2, B = 3, C = 4;
 
 	public final String id;
@@ -110,7 +110,7 @@ public abstract class XenoForm {
 	}
 
 	/**
-	 * (0.20.7) This alien's evolved form (its Ultimate): its own body and kit, found from the base alien by the server and the
+	 * (0.20.8) This alien's evolved form (its Ultimate): its own body and kit, found from the base alien by the server and the
 	 * client alike (common code). Null where it has none yet: the 0.18.93 buff on the base body is the fallback.
 	 */
 	public @Nullable XenoUltimate evolved() {

@@ -37,7 +37,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.7) Bulwark's Ultimate, Titan: the four-armed brute grown to twice your size in stone plate, with a health bar of its own on
+ * (0.20.8) Bulwark's Ultimate, Titan: the four-armed brute grown to twice your size in stone plate, with a health bar of its own on
  * top of Bulwark's. Its model is {@code UltimateTitan}.
  * <ul>
  * <li>R, Quake Combo: four blows, one per arm, then a double-fisted hammer that launches the target and breaks the block behind it.</li>
@@ -133,7 +133,7 @@ public final class Titan extends XenoUltimate {
 	public void onEnter(ServerPlayer player, XenoformPower.Live live) {
 		live.combo = 0;
 		if (live.leaping || live.leapTicks > 0) {
-			player.resetFallDistance(); // (0.20.7) a leap cut short by a change: the fall it forgave is forgiven
+			player.resetFallDistance(); // (0.20.8) a leap cut short by a change: the fall it forgave is forgiven
 		}
 		live.leaping = false;
 		live.leapTicks = 0;
@@ -151,7 +151,7 @@ public final class Titan extends XenoUltimate {
 		WORK.remove(player.getUUID());
 		live.combo = 0;
 		if (live.leaping || live.leapTicks > 0) {
-			player.resetFallDistance(); // (0.20.7) a leap cut short by a change: the fall it forgave is forgiven
+			player.resetFallDistance(); // (0.20.8) a leap cut short by a change: the fall it forgave is forgiven
 		}
 		live.leaping = false;
 		live.leapTicks = 0;
@@ -231,10 +231,10 @@ public final class Titan extends XenoUltimate {
 			if (live.leapTicks > 3 && (player.onGround() || player.isInWater())) {
 				live.leaping = false;
 				slam(player);
-				live.leapTicks = 0; // (0.20.7) the landing is over: later falls hurt again
+				live.leapTicks = 0; // (0.20.8) the landing is over: later falls hurt again
 			} else if (live.leapTicks > 100) {
 				live.leaping = false;
-				live.leapTicks = 0; // (0.20.7) timed out with no slam: later falls hurt again
+				live.leapTicks = 0; // (0.20.8) timed out with no slam: later falls hurt again
 			}
 		}
 		holdTick(player, live);

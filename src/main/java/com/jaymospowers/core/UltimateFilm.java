@@ -45,7 +45,7 @@ import org.jspecify.annotations.Nullable;
 public final class UltimateFilm {
 	public static final int ZOOM = 0, SKYWARD = 1, CRANE = 2, ORBIT = 3, PROFILE = 4, TRACK = 5, PUSH_IN = 6, CHASE = 7, DUTCH = 8, CUTS = 9;
 	/**
-	 * (0.20.7) {@code MORPH}: letterboxed, it zooms on each changing part of {@code caster} in turn (the {@link Play#parts} list, in
+	 * (0.20.8) {@code MORPH}: letterboxed, it zooms on each changing part of {@code caster} in turn (the {@link Play#parts} list, in
 	 * order), holds while that part grows from the base alien into the Ultimate, then pulls back to the whole new body.
 	 * {@link Play#first} is the long exaggerated cut.
 	 */
@@ -64,7 +64,7 @@ public final class UltimateFilm {
 	 */
 	public record Play(int caster, int shot, int ticks, Vec3 at, int target, boolean witness, boolean afterDeath, List<String> parts, boolean first)
 		implements CustomPacketPayload {
-		/** (0.20.7) {@code parts}: the {@link #MORPH} shot's changing parts in order (empty for every other shot); {@code first}: the long first-time cut. */
+		/** (0.20.8) {@code parts}: the {@link #MORPH} shot's changing parts in order (empty for every other shot); {@code first}: the long first-time cut. */
 		public Play(int caster, int shot, int ticks, Vec3 at, int target, boolean witness, boolean afterDeath) {
 			this(caster, shot, ticks, at, target, witness, afterDeath, List.of(), false);
 		}
@@ -136,12 +136,12 @@ public final class UltimateFilm {
 		}
 	}
 
-	/** (0.20.7) {@link Play#target} value of a MORPH packet that only syncs the in-world morph (no camera, no bars), and how far it is sent (blocks). */
+	/** (0.20.8) {@link Play#target} value of a MORPH packet that only syncs the in-world morph (no camera, no bars), and how far it is sent (blocks). */
 	public static final int MORPH_ONLY = -2;
 	private static final double MORPH_SYNC = 128.0;
 
 	/**
-	 * (0.20.7) The change-in film ({@link #MORPH}): the caster always gets it (with their own camera); every other player within
+	 * (0.20.8) The change-in film ({@link #MORPH}): the caster always gets it (with their own camera); every other player within
 	 * {@code witnessRange} blocks gets the same film with their own camera unless they are in combat (hurt by a mob or hit one in
 	 * the last {@code combatTicks}): those get no film and no bars and just see the body change in the world. {@code parts} are the
 	 * changing parts in order, {@code first} the long first-time cut.
@@ -158,13 +158,13 @@ public final class UltimateFilm {
 			if (witnessRange > 0.0 && d <= witnessRange * witnessRange && !inCombat(other, combatTicks)) {
 				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, -1, false, false, parts, first));
 			} else if (d <= MORPH_SYNC * MORPH_SYNC) {
-				// (0.20.7) in combat or further off: no film, but the in-world morph runs the same length and parts as everyone's
+				// (0.20.8) in combat or further off: no film, but the in-world morph runs the same length and parts as everyone's
 				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, MORPH_ONLY, false, false, parts, first));
 			}
 		}
 	}
 
-	/** (0.20.7) Whether {@code player} was hurt by a mob, or hit one, in the last {@code ticks} (as {@code ZFighterBattle}'s {@code IN_FIGHT_TICKS} reads it). */
+	/** (0.20.8) Whether {@code player} was hurt by a mob, or hit one, in the last {@code ticks} (as {@code ZFighterBattle}'s {@code IN_FIGHT_TICKS} reads it). */
 	public static boolean inCombat(ServerPlayer player, int ticks) {
 		int hit = player.getLastHurtMobTimestamp();
 		return hit > 0 && player.tickCount - hit < ticks

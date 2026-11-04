@@ -104,7 +104,7 @@ final class XenoformHud {
 		XenoForm form = XenoformState.form(player);
 		long now = player.level().getGameTime();
 		if (form != null) {
-			// (0.20.7) the Ultimate's own five chips (R G V B C) while it is on; C also shows through its re-enter cooldown
+			// (0.20.8) the Ultimate's own five chips (R G V B C) while it is on; C also shows through its re-enter cooldown
 			com.jaymospowers.power.xenoform.XenoUltimate ult = XenoformState.ultimate(player);
 			boolean cChip = ult != null || form.evolved() != null && hud.cooldownLeft(XenoForm.C, now) > 0;
 			int chips = cChip ? 5 : 4;
@@ -245,13 +245,13 @@ final class XenoformHud {
 			String seconds = left >= 200 ? String.valueOf(left / 20) : String.format(Locale.ROOT, "%.1f", left / 20.0F);
 			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
 		}
-		// (0.20.7) C is the ultimate key, which PowerKey has no value for
+		// (0.20.8) C is the ultimate key, which PowerKey has no value for
 		net.minecraft.client.KeyMapping mapping = slot < PowerKey.values().length ? JaymosPowersClient.keyMapping(PowerKey.values()[slot]) : JaymosPowersClient.ultimateKey();
 		String label = font.plainSubstrByWidth(mapping.getTranslatedKeyMessage().getString(), CHIP - 2);
 		graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, ready ? 0xFFFFFFFF : 0xFF909090);
 	}
 
-	/** (0.20.7) The thin bar over the chips: the base alien's held health while its Ultimate is on, in its colour, darkened. */
+	/** (0.20.8) The thin bar over the chips: the base alien's held health while its Ultimate is on, in its colour, darkened. */
 	private static void under(GuiGraphicsExtractor graphics, XenoformState.Hud hud, XenoForm form, int x, int y, int width) {
 		float share = Mth.clamp(hud.under() / hud.underMax(), 0.0F, 1.0F);
 		int dim = (form.color >> 16 & 0xFF) * 3 / 4 << 16 | (form.color >> 8 & 0xFF) * 3 / 4 << 8 | (form.color & 0xFF) * 3 / 4;

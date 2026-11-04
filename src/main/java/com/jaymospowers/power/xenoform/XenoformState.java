@@ -123,7 +123,7 @@ public final class XenoformState {
 	 */
 	public record Hud(int formTicks, int formTotal, int recharge, int rechargeTotal, long[] until, int[] length, int scan, int scanTotal, String scanForm,
 		float under, float underMax) {
-		/** (0.20.7) Five slots: R G V B and C. {@code under}/{@code underMax}: the base alien's held health while its Ultimate is on (0: not). */
+		/** (0.20.8) Five slots: R G V B and C. {@code under}/{@code underMax}: the base alien's held health while its Ultimate is on (0: not). */
 		public static final int SLOTS = 5;
 		public static final Hud NONE = new Hud(0, 0, 0, 0, new long[SLOTS], new int[SLOTS], 0, 0, "", 0.0F, 0.0F);
 		public static final StreamCodec<ByteBuf, Hud> STREAM_CODEC = StreamCodec.of((buf, hud) -> {
@@ -267,7 +267,7 @@ public final class XenoformState {
 	}
 
 	/**
-	 * (0.20.7) The Ultimate this player is right now ({@link #ULTIMATE} on and the base alien has an {@link XenoForm#evolved()}),
+	 * (0.20.8) The Ultimate this player is right now ({@link #ULTIMATE} on and the base alien has an {@link XenoForm#evolved()}),
 	 * or null (both sides). The fallback 0.18.93 buff has no Ultimate class, so it is null there.
 	 */
 	public static @Nullable XenoUltimate ultimate(Player player) {

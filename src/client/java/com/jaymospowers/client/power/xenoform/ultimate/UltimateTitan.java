@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 
 /**
- * (0.20.7, Ultimates patch 0) Bulwark's Ultimate, Titan: Bulwark's four-armed, thin-waisted body grown heavier and covered in iron-grey
+ * (0.20.8, Ultimates patch 0) Bulwark's Ultimate, Titan: Bulwark's four-armed, thin-waisted body grown heavier and covered in iron-grey
  * stone plates (shoulders, forearms, shins, a back plate), a ridge of spikes down the spine, spiked knuckles on all four fists,
  * horns and tusks, and molten seams glowing between the plates (the skin's glow map, drawn fullbright by the layer). It is the same rig
  * as {@code XenoFormModels.Bulwark} and moves the same way (the swapping raised-pair guard, a wide walking swing, the carry and the leap),

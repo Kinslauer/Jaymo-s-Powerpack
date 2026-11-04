@@ -228,7 +228,7 @@ final class ChronoEchoFight {
 		if (this.bar == null) {
 			this.bar = new ServerBossEvent(this.echo.getUUID(), this.echo.getDisplayName(), BossEvent.BossBarColor.BLUE,
 				BossEvent.BossBarOverlay.NOTCHED_10);
-			this.echo.addTag(com.jaymospowers.power.xenoform.GreatFoes.TAG); // (0.20.7) it has a boss bar
+			this.echo.addTag(com.jaymospowers.power.xenoform.GreatFoes.TAG); // (0.20.8) it has a boss bar
 		}
 		this.bar.setProgress(this.echo.getHealth() / this.echo.getMaxHealth());
 		if (this.echo.tickCount % 5 == 0) {

@@ -10,7 +10,7 @@ import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.entity.monster.warden.Warden;
 
 /**
- * (0.20.7) What counts as a great foe for the unforged band's last stand ({@link XenoformPower#ULT_LAST_STAND}): a vanilla boss
+ * (0.20.8) What counts as a great foe for the unforged band's last stand ({@link XenoformPower#ULT_LAST_STAND}): a vanilla boss
  * (the Ender Dragon, the Wither, the Elder Guardian, the Warden), anything Jaymo's Kingdoms calls a boss (read through
  * {@link KingdomsCompat}, the same test as its world tiers), or anything carrying {@link #TAG} (for Powers' own bosses to opt in).
  */
@@ -31,7 +31,7 @@ public final class GreatFoes {
 
 	private static final java.util.Map<Class<?>, java.lang.reflect.Field[]> BAR_FIELDS = new java.util.concurrent.ConcurrentHashMap<>();
 
-	/** (0.20.7) Whether the entity itself holds a visible {@link ServerBossEvent} (any mod's boss with a bar, found by its fields). */
+	/** (0.20.8) Whether the entity itself holds a visible {@link ServerBossEvent} (any mod's boss with a bar, found by its fields). */
 	private static boolean hasBossBar(Entity entity) {
 		java.lang.reflect.Field[] fields = BAR_FIELDS.computeIfAbsent(entity.getClass(), type -> {
 			java.util.List<java.lang.reflect.Field> found = new java.util.ArrayList<>();

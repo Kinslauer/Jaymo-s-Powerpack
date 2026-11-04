@@ -8652,3 +8652,7 @@ Andy: "the particle effect for attack indicators should be more visible, and a s
 
 - A merge left `client/HandshakePose` with two `NOD` constants (the nod pose and the head tilt while shaking hands), so
   the client didn't compile. The head tilt is now `SHAKE_NOD`; nothing changes in game.
+
+## 0.7.508: gem sockets loading hint (pack 0.20.7)
+- Loading-screen hint 86 explains gem sockets at the Smithing Anvil.
+- Not played.
