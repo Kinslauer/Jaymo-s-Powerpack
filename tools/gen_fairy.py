@@ -1,5 +1,5 @@
 """Draws the pink fairy (0.20.11, 2026-11-04): her flying sprite and the Bottled Pink Fairy bauble icon, both 16x16
-two-frame animated item textures (wings flapping; the glow in the bottle breathing). Our own art in the pack's vanilla
+animated item textures (her wings flapping; (0.20.11) her flitting about inside the bottle), and the cracked bottle she leaves. Our own art in the pack's vanilla
 style (gen_baubles.py's outline and three tones lit from the top left); nothing from Paxo's Pink Fairy (ARR).
 Run it from the root:
 
@@ -116,11 +116,14 @@ def fairy(up):
     return img
 
 
-def bottle(bright):
-    """A corked glass bottle with a fairy glowing inside (the glow breathes between the frames)."""
-    img = blank()
-    # the bulb (round) and neck
-    cx, cy, r = 7.5, 10.0, 4.6
+# (0.20.11) Andy: "The fairy should be animated inside the bottle". Where she is in each frame (offset from the
+# bulb's middle, in pixels) and whether her wings are up: she flits round the inside of the glass in a loop.
+FLIT = [(-2, 0, True), (-1, -1, False), (0, -2, True), (1, -1, False), (2, 0, True), (1, 1, False), (0, 1, True),
+        (-1, 1, False)]
+
+
+def glass(img, cx, cy, r):
+    """The empty bottle: a round bulb, a neck and a cork, the glass faintly blue."""
     for y in range(16):
         for x in range(16):
             if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
@@ -128,42 +131,72 @@ def bottle(bright):
     for y in range(3, 6):
         for x in range(6, 10):
             put(img, x, y, GLASS[1])
-    # the cork
     for y in range(1, 3):
         for x in range(6, 10):
             put(img, x, y, CORK[0] if x == 6 else (CORK[2] if x == 9 else CORK[1]))
-    # the glow inside: a rose wash, then her, bright at the middle
-    glow = ROSE[0] if bright else ROSE[1]
-    for y in range(7, 14):
-        for x in range(4, 12):
-            d = (x - cx) ** 2 + (y - 10.0) ** 2
-            if d <= (3.6 if bright else 3.0) ** 2:
-                put(img, x, y, (glow[0], glow[1], glow[2], 230 if bright else 190))
-    # her wings and body
-    for x, y in ((5, 8), (6, 8), (6, 9), (10, 8), (9, 8), (9, 9)):
-        put(img, x, y, (255, 255, 255, 255))
-    put(img, 7, 8, HAIR[0])
-    put(img, 8, 8, HAIR[1])
-    put(img, 7, 9, SKIN[0])
-    put(img, 8, 9, SKIN[1])
-    put(img, 7, 10, ROSE[0])
-    put(img, 8, 10, ROSE[1])
-    put(img, 7, 11, ROSE[1])
-    put(img, 8, 11, ROSE[2])
-    if bright:
-        put(img, 7, 10, (255, 255, 255, 255))
-    # glints on the glass, upper left
-    put(img, 4, 8, GLASS[0])
-    put(img, 4, 9, GLASS[0])
-    put(img, 5, 7, GLASS[0])
-    put(img, 6, 4, GLASS[0])
-    # the glass edge, darker at the bottom right
+
+
+def edge(img, cx, cy, r):
+    """Glints upper left, the glass edge darker at the bottom right."""
+    for x, y in ((4, 8), (4, 9), (5, 7), (6, 4)):
+        put(img, x, y, GLASS[0])
     for y in range(16):
         for x in range(16):
-            if img.getpixel((x, y))[3] and img.getpixel((x, y)) == GLASS[1]:
-                inside = (x - cx) ** 2 + (y - cy) ** 2
-                if inside > (r - 1.0) ** 2 and (x - cx) + (y - cy) > 2.0:
+            if img.getpixel((x, y)) == GLASS[1]:
+                if (x - cx) ** 2 + (y - cy) ** 2 > (r - 1.0) ** 2 and (x - cx) + (y - cy) > 2.0:
                     put(img, x, y, GLASS[2])
+
+
+def bottle(frame):
+    """A corked glass bottle with a fairy flitting about inside it, her glow following her."""
+    img = blank()
+    cx, cy, r = 7.5, 10.0, 4.6
+    glass(img, cx, cy, r)
+    dx, dy, up = FLIT[frame % len(FLIT)]
+    fx, fy = 7 + dx, 9 + dy  # her head's left pixel
+    # her glow, a soft rose wash round her
+    for y in range(6, 15):
+        for x in range(3, 13):
+            if (x - cx) ** 2 + (y - cy) ** 2 > (r - 0.8) ** 2:
+                continue
+            d = (x - (fx + 0.5)) ** 2 + (y - (fy + 1.0)) ** 2
+            if d <= 2.2 ** 2:
+                put(img, x, y, (ROSE[0][0], ROSE[0][1], ROSE[0][2], 230))
+            elif d <= 3.3 ** 2:
+                put(img, x, y, (ROSE[1][0], ROSE[1][1], ROSE[1][2], 170))
+    # wings, up or down, then her
+    wy = fy if up else fy + 1
+    for x, y in ((fx - 2, wy), (fx - 1, wy), (fx + 2, wy), (fx + 3, wy), (fx - 1, wy + (1 if up else -1)), (fx + 2, wy + (1 if up else -1))):
+        put(img, x, y, (255, 255, 255, 255))
+    put(img, fx, fy, HAIR[0])
+    put(img, fx + 1, fy, HAIR[1])
+    put(img, fx, fy + 1, SKIN[0])
+    put(img, fx + 1, fy + 1, SKIN[1])
+    put(img, fx, fy + 2, (255, 255, 255, 255))
+    put(img, fx + 1, fy + 2, ROSE[1])
+    put(img, fx, fy + 3, ROSE[1])
+    put(img, fx + 1, fy + 3, ROSE[2])
+    edge(img, cx, cy, r)
+    outline(img)
+    return img
+
+
+CRACK = (70, 84, 104, 255)
+
+
+def cracked_bottle():
+    """(0.20.11) What's left once she has saved someone: the bottle, empty, cracked through, a chip gone from its side."""
+    img = blank()
+    cx, cy, r = 7.5, 10.0, 4.6
+    glass(img, cx, cy, r)
+    # the chip out of the right shoulder
+    for x, y in ((11, 7), (12, 8), (11, 8), (12, 9)):
+        img.putpixel((x, y), (0, 0, 0, 0))
+    edge(img, cx, cy, r)
+    # the cracks: one running down from the chip, one branching off it, one across the neck
+    for x, y in ((10, 8), (9, 9), (9, 10), (8, 11), (8, 12), (7, 13), (10, 11), (11, 12), (7, 5), (8, 4)):
+        put(img, x, y, CRACK)
+    put(img, 6, 11, GLASS[0])
     outline(img)
     return img
 
@@ -186,13 +219,16 @@ def save(name, frames, frametime):
 
 def main():
     fairy_frames = [fairy(True), fairy(False)]
-    bottle_frames = [bottle(False), bottle(True)]
+    bottle_frames = [bottle(i) for i in range(len(FLIT))]
     save("pink_fairy", fairy_frames, 2)
-    save("bottled_fairy", bottle_frames, 12)
+    save("bottled_fairy", bottle_frames, 3)
+    cracked = cracked_bottle()
+    cracked.save(os.path.join(TEXTURES, "cracked_fairy_bottle.png"))
     if len(sys.argv) > 1:
-        scale = 8
-        sheet = Image.new("RGBA", (16 * 4 * scale + 5 * 8, 16 * scale + 16), (52, 60, 44, 255))
-        for i, f in enumerate(fairy_frames + bottle_frames):
+        scale = 6
+        shown = fairy_frames + bottle_frames + [cracked]
+        sheet = Image.new("RGBA", (len(shown) * (16 * scale + 8) + 8, 16 * scale + 16), (52, 60, 44, 255))
+        for i, f in enumerate(shown):
             sheet.alpha_composite(f.resize((16 * scale, 16 * scale), Image.NEAREST), (8 + i * (16 * scale + 8), 8))
         sheet.save(sys.argv[1])
 
