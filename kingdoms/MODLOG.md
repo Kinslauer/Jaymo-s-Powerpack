@@ -8989,3 +8989,15 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
     notched and the locked part dark; the idle box gives your cap and every tier's.
   - Lang: story/heritage/flaw/Zenkai texts show the new point sizes.
   Compiled (`compileClientJava`); not played.
+- **0.7.541, lanterns burn on fuel and go out** (Andy, 2026-11-04: "lanterns should be fueled with coal or ambergris and
+  go out like torches", "ambergris lasts longer", "it shouldnt tell you how many days are left anywhere, but it can have a
+  durability bar, and soul lanterns should not go out"): `Lanterns` + `LanternBlockMixin` (trees mixins) give lanterns
+  random ticks. Each burns until its fuel runs out (end time and last fill kept per chunk in the `lantern_fuel`
+  attachment), then becomes a dark `burnt_lantern` (standing or hung; drops itself). A lantern never fuelled starts with
+  one coal's worth (3 days). Use coal or charcoal (`#minecraft:coals`) on a lantern, lit or burnt, for +3 days, ambergris
+  for +15 days, up to 30; no message says how much is left. Broken lanterns drop with their fuel left in the
+  `lantern_fuel` item component and burn on it when set down again; `LanternItemBarMixin` draws a durability-style bar
+  (green to red, share of its last fill) once some is burnt. Burnt lantern + coal crafts a lantern. Villagers relight
+  burnt lanterns as they do burnt torches (shared `burnt_torches` list); camps' burnt lanterns rot away with the rest.
+  Soul lanterns never go out; copper lanterns and oil lamps are left alone. No rain douse (behind glass). Texture: vanilla
+  lantern with the flame painted out to soot. Compiled (Gradle `compileJava processResources`); not played yet.
