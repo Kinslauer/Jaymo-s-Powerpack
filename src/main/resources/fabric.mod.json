@@ -50,7 +50,8 @@
 		{ "config": "jaymospowers.smoke.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.rig.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.cryo.client.mixins.json", "environment": "client" },
-		"jaymospowers.ember.mixins.json"
+		"jaymospowers.ember.mixins.json",
+		"jaymospowers.carryon.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

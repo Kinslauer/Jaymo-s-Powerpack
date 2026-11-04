@@ -253,6 +253,12 @@ def packMods = [
 	// sorts faster. Middle mouse is also lock-on, but that key only acts with no screen open and ClientSort's only inside
 	// one, so they never clash. Needs Cloth Config and Mod Menu (above). 3.104.1+26.3 (Modrinth version UWMryUad).
 	[dep: "maven.modrinth:clientsort:UWMryUad", cf: [1049891, 8978806]],
+	// Carry On (LGPL-3.0, Tschipp; shipped unchanged, 0.20.16): sneak + right-click a chest, furnace, barrel or any other
+	// block with something in it, empty hands, to lift it with its contents; right-click to set it down. It replaced our
+	// own block lifting; bodies stay ours (core/CarryOnCompat + mixin/carryon keep it off entities, off busy arms and off
+	// the jaymospowers:carry_on_no_lift blocks). Needs Fabric API; Cloth Config (above) gives it a config screen.
+	// 2.12.1 for 26.3 (Modrinth version d0jTyKNs).
+	[dep: "maven.modrinth:carry-on:d0jTyKNs", cf: [274259, 9420425]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge

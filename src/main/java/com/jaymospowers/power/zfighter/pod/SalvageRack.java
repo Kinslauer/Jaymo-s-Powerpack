@@ -214,7 +214,8 @@ public final class SalvageRack {
 					.withStyle(ChatFormatting.GRAY));
 				return InteractionResult.SUCCESS;
 			}
-			if (!carrier.getMainHandItem().isEmpty() || !carrier.getOffhandItem().isEmpty() || Carry.isCarrying(carrier) || Carry.isCarried(carrier)) {
+			if (!carrier.getMainHandItem().isEmpty() || !carrier.getOffhandItem().isEmpty() || Carry.isCarrying(carrier) || Carry.isCarried(carrier)
+				|| com.jaymospowers.core.CarryOnCompat.isCarrying(carrier)) {
 				carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.salvage.hands").withStyle(ChatFormatting.GRAY));
 				return InteractionResult.SUCCESS;
 			}

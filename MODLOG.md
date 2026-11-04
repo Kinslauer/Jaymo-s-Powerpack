@@ -5326,3 +5326,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `Wounds.healPart` reading Kingdoms' `Patrons.blessing(player, "wounds_slow")` by reflection (`MedicineSkill.blessing`): the
   Hearthkeeper's trial and scar on one who turned from it slow every part heal. Not played.
 - **0.20.15**: no Powers change; pack bump for Kingdoms 0.7.514 (the skill web: one radial K screen, six bridge perks).
+- **0.20.16, Carry On carries blocks** (Andy: "We need to swap our block carrying for this"): Carry On 2.12.1 (LGPL-3.0,
+  Tschipp; official Fabric 26.3 build, shipped unchanged, Modrinth `d0jTyKNs`, CurseForge 274259/9420425) is in
+  `packMods`. Sneak + right-click a chest, furnace, barrel or any other block with something in it, empty hands, to lift
+  it with its contents; right-click to set it down (its own config, `config/carryon-common.json`; `pickupAllBlocks` off,
+  so anvils no longer lift; crafting tables still do, since Kitchen gives them a block entity).
+  - Our own block lifting is gone: `CarryBlock.carriable` is now only the space pod's parts (they're set onto a pod or a
+    salvage rack, which Carry On can't do). The placed-block tracking (`CarryBlockItemMixin`, `markPlaced`) is removed;
+    the `carry_placed` chunk attachment stays registered so old chunks load quietly. Duplex's fetch and the Bound Block
+    still use `CarryBlock.liftableAny` / `takeOut` / `place` / `land`.
+  - Bodies stay ours (`core/Carry`). `core/CarryOnCompat` reads Carry On's state by reflection and
+    `mixin/carryon/CarryOnPickupMixin` (`@Pseudo`, optional `jaymospowers.carryon.mixins.json`) makes its
+    `PickupHandler` never lift an entity, never lift while our carry, a Kitchen corpse, being carried, thrown or downed
+    has your arms, and never lift a `#jaymospowers:carry_on_no_lift` block (pod parts, salvage rack, smeltery controller
+    and drain, kiln load, sentry spawner, infusion matrix; optional: Kingdoms' bounty board, pulley and plot stake,
+    Kitchen's windmill and waterwheel). With a block in Carry On's arms you can't pick up a body or a corpse (a
+    `UseEntityCallback` phase ahead of ours), grab a ledge, take a part off a salvage rack, and our first-person arm
+    poses step aside; it counts as carrying for Z Fighter strength training.
+  - Not played.
