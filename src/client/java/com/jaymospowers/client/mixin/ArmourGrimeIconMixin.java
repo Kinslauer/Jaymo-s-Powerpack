@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.19.74) A dirty armour piece's inventory icon wears the same grime splotches as the piece itself
+ * (0.19.74) A dirty armour piece's inventory icon wears the same grime splotches as the piece itself (0.20.41: and any item its blood)
  * ({@link ArmourGrimeTextures#icon}), under the durability bar and count, so dunking it in a cauldron visibly cleans it.
  */
 @Mixin(GuiGraphicsExtractor.class)

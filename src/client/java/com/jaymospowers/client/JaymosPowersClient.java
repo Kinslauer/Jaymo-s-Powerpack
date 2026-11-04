@@ -65,6 +65,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.blood.BloodClient.init();
+		// (0.20.41) blood splashed on bodies
+		com.jaymospowers.client.blood.BloodCoatLayer.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
 		com.jaymospowers.client.wet.WetClient.init();
 		com.jaymospowers.client.wet.ArmourGrimeTextures.init();

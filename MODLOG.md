@@ -309,3 +309,27 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   on again (and kept on the accepted older-format list so the game won't drop it on load);
   `config/jaymospowers-medieval-villagers-off` keeps it off for anyone who'd rather. The Nobodies wear plain rags now,
   not sailors' stripes (see the Kingdoms MODLOG). Not compiled or played yet.
+- **0.20.41, Hematic-style blood (Andy, 2026-11-04):** Hematic (litewer) is a custom licence (no ports, no reuse of its
+  code or art) and Forge/NeoForge only, so these are our own, built on our blood (`core/blood`, `client/blood`):
+  - **Blood on bodies, armour and weapons** (`core/blood/Bloodied`): whoever bleeds gets a coat of their own blood
+    (synced attachment `jaymospowers:blood_coat`, drawn over the skin by `client/blood/BloodCoatLayer` from
+    `textures/blood/body_blood.png`, only where the skin has pixels; a player's outer layer stays clean). Their armour
+    takes some, and the weapon that drew it (a blade, or a heavy blunt blow) and whoever swung it up close get some
+    too (item component `jaymospowers:blood`: amount, colour, when). Armour gets it painted into its texture and icon
+    the way grime is (`ArmourGrimeTextures`, `armour_blood.png`); any bloody item's icon gets it; a flat held, dropped
+    or framed item gets it as one more layer over its own (`BloodItemOverlay` + `BloodItemOverlayMixin`). It darkens
+    as it dries (5 minutes). Water washes it (under water all of it, wading boots and greaves, rain slowly), a coat
+    wears off by itself in a few minutes, and ArmourGrime's hand washes (cauldron scrub, wet sponge, dunking the item)
+    take blood off too.
+  - **Bloody footprints** (`BloodTrail.print`): walking through a fresh pool (under ~3.5 minutes old) wets your feet
+    for 10 prints, a stride apart, left and right, pointing the way you went, fainter as they wear off. They're the
+    walker's, so trackers can follow them. Drawn flat by `BloodPuddle` (`textures/particle/blood/print_*.png`).
+  - **Blood over edges and on walls** (`client/blood/BloodWallMark`): a drop that flies into a wall splats on it (a big
+    one may run down from it); a pool that spreads over the edge of a drop-off pours down the side (up to 2 blocks of
+    wall) and drips off the end a few times. Same life and drying as the pool that fed it.
+  - **Arrows and bullets bleed** (`BladeBlood.shot`): arrows and bolts spit blood back where they go in; bullets
+    (any mod's projectile named bullet, pellet, musket, round, shot) also burst out the far side and on along the path,
+    with stains laid behind. The Void Armory's flintlocks and the future's guns call it themselves.
+  - **Magma blood** (tag `blood/magma`: magma cubes, striders): bright orange, full-bright as it flies, glowing where it
+    lands and smoking, then cooling to a dark crust over 45 s (`BloodParticles.MAGMA`).
+  Masks and sprites are ours (`tools/blood_textures.py`). Compile-checked against the 26.3 jars; not played.

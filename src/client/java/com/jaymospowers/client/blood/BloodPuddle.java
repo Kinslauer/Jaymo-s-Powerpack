@@ -29,6 +29,11 @@ import java.util.TreeSet;
  *
  * <p>(0.17.182) One of the server's lasting stains ({@link BloodTrail}) lies as long as the server says, darkening to a
  * dried brown as it ages (so a trail reads fresh to old), and fades over {@link BloodTrail#FADE}.
+ *
+ * <p>(0.20.41, Hematic's ideas) A pool that spreads over the edge of a drop-off pours down the side
+ * ({@link BloodWallMark#edges}). A bloody footprint ({@link BloodParticles.Puddle#print}) is one sole, turned the way its
+ * walker went and laid flat where it fell. Magma blood ({@link BloodParticles#MAGMA}) glows bright and cools to a dark crust
+ * ({@link #shade}, {@link #glow}), smoking while it's hot.
  */
 public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** Its starting opacity; how long it takes to splat in (ticks); how far down it can lie (blocks). */
@@ -66,6 +71,12 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	private final float zFight;
 	private final TextureAtlasSprite sprite;
 	private float alpha = ALPHA;
+	/** (0.20.41) A footprint: its turn (radians, as yaw) and whether it's a right foot (its sole mirrored); its colour as it is. */
+	private final boolean print;
+	private final float printYaw;
+	private final boolean rightFoot;
+	private final int color;
+	private final boolean magma;
 
 	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life) {
 		this(level, x, y, z, sprites, color, scale, age, life, BloodParticles.Puddle.ROUND);
@@ -87,6 +98,15 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		boolean wet) {
 		super(level, x, y, z, 0.0, 0.0, 0.0);
 		this.wet = wet;
+		this.color = color;
+		this.magma = color == BloodParticles.MAGMA;
+		this.print = BloodParticles.Puddle.print(shape);
+		int printDir = this.print ? (shape - BloodParticles.Puddle.PRINT) % BloodParticles.Puddle.PRINT_RIGHT : 0;
+		this.rightFoot = this.print && shape - BloodParticles.Puddle.PRINT >= BloodParticles.Puddle.PRINT_RIGHT;
+		this.printYaw = printDir * Mth.PI / 8.0F;
+		if (this.print) {
+			shape = BloodParticles.Puddle.ROUND;
+		}
 		this.xd = 0.0;
 		this.yd = 0.0;
 		this.zd = 0.0;
@@ -108,11 +128,44 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			this.lifetime = LIFE + this.random.nextInt(LIFE_SPREAD);
 		}
 		this.gravity = 1.0F;
-		this.sprite = sprites.get(this.random);
+		SpriteSet prints = BloodClient.printSprites();
+		this.sprite = this.print && prints != null ? prints.get(0, 1) : sprites.get(this.random);
 		this.r = red(color);
 		this.g = green(color);
 		this.b = blue(color);
 		this.zFight = this.random.nextFloat();
+		if (!wet && !this.print && round) {
+			// (0.20.41) a pool spread over a ledge pours down its side
+			BloodWallMark.edges(level, x, y, z, this.baseSize, color, this.age, this.lifetime - this.age, this.stain);
+		}
+		if (this.magma && this.age < 40) {
+			level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, x, y + 0.05, z, 0.0, 0.04, 0.0);
+			level.addParticle(net.minecraft.core.particles.ParticleTypes.LAVA, x, y + 0.05, z, 0.0, 0.0, 0.0);
+		}
+	}
+
+	/**
+	 * (0.20.41) The colour blood of {@code color} shows {@code age} ticks after it was spilt: a lasting stain
+	 * ({@code stain}) darkens to dried brown; magma glows its own orange, then cools to a crust.
+	 */
+	static int shade(int color, float age, boolean stain) {
+		if (color == BloodParticles.MAGMA) {
+			float cool = Mth.clamp(age / BloodParticles.MAGMA_COOLS, 0.0F, 1.0F);
+			return ARGB.srgbLerp(cool * cool, BloodParticles.MAGMA, BloodParticles.MAGMA_CRUST) & 0xFFFFFF;
+		}
+		if (!stain) {
+			return color & 0xFFFFFF;
+		}
+		float dried = Mth.lerp(Mth.clamp(age / (BloodTrail.LIFE * DRIED_AT), 0.0F, 1.0F), 1.0F, DRIED);
+		return ARGB.color(0, Math.round(red(color) * dried * 255.0F), Math.round(green(color) * dried * 255.0F), Math.round(blue(color) * dried * 255.0F))
+			& 0xFFFFFF;
+	}
+
+	/** (0.20.41) Hot magma blood lights itself: {@code light} with its block light raised by how hot it still is. */
+	static int glow(int light, float age) {
+		float heat = 1.0F - Mth.clamp(age / BloodParticles.MAGMA_COOLS, 0.0F, 1.0F);
+		int block = Math.max(light >> 4 & 0xF, Math.round(heat * 15.0F));
+		return light & 0xFFFF0000 | block << 4;
 	}
 
 	/** (0.17.182) The server grew this stain (more blood fell on it): its new size, age and the ticks it has left. */
@@ -131,6 +184,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	@Override
 	public void tick() {
 		super.tick();
+		if (this.magma && this.age < BloodParticles.MAGMA_COOLS / 2 && this.random.nextFloat() < 0.03F) {
+			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, this.x + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6,
+				this.y + 0.05, this.z + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6, 0.0, 0.03, 0.0);
+		}
 		if (this.baseSize > this.targetSize) {
 			this.baseSize = Math.max(this.targetSize, this.baseSize - Math.max(DRAWN_EASE * this.baseSize, 0.01F));
 		}
@@ -199,11 +256,45 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		double halfX = size * this.stretchX * 0.5, halfZ = size * this.stretchZ * 0.5;
 		double minX = cx - halfX, maxX = cx + halfX, minZ = cz - halfZ, maxZ = cz + halfZ;
 		int light = this.getLightCoords(partialTick);
+		if (this.magma) {
+			light = glow(light, age);
+		}
+		this.shown = shade(this.color, age, this.stain);
+		if (this.print) {
+			this.printQuad(decals, camera, cx, cy, cz, size, light);
+			return;
+		}
 		int top = Mth.floor(cy + 1.0), bottom = Mth.floor(cy - MAX_DROP);
 		for (int bx = Mth.floor(minX); bx <= Mth.floor(maxX); bx++) {
 			for (int bz = Mth.floor(minZ); bz <= Mth.floor(maxZ); bz++) {
 				this.column(decals, camera, bx, bz, top, bottom, cx, cy, cz, minX, maxX, minZ, maxZ, size, light);
 			}
+		}
+	}
+
+	/** (0.20.41) This frame's colour (RGB): {@link #shade}. */
+	private int shown;
+
+	/** (0.20.41) A footprint: one sole lying flat where it fell, toes the way its walker went. */
+	private void printQuad(BloodDecals.State decals, Camera camera, double cx, double cy, double cz, float size, int light) {
+		float u0 = this.sprite.getU0(), u1 = this.sprite.getU1(), v0 = this.sprite.getV0(), v1 = this.sprite.getV1();
+		if (this.rightFoot) {
+			float swap = u0;
+			u0 = u1;
+			u1 = swap;
+		}
+		Vec3 cam = camera.position();
+		// forward (the toes) and across, from its yaw (0 = south)
+		float fx = -Mth.sin(this.printYaw), fz = Mth.cos(this.printYaw);
+		float rx = Mth.cos(this.printYaw), rz = Mth.sin(this.printYaw);
+		float h = size * 0.5F;
+		float lift = (this.zFight + 0.08F) * 0.02F + 0.004F;
+		int color = ARGB.color(Math.round(this.alpha * 0.85F * 255.0F), this.shown);
+		float[][] corners = {{-h, -h, u0, v1}, {-h, h, u0, v0}, {h, h, u1, v0}, {h, -h, u1, v1}};
+		for (float[] c : corners) {
+			double x = cx + rx * c[0] + fx * c[1], z = cz + rz * c[0] + fz * c[1];
+			decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (x - cam.x), (float) (cy - cam.y) + lift, (float) (z - cam.z), c[2], c[3], color,
+				light);
 		}
 	}
 
@@ -268,8 +359,9 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float cos = Mth.cos(this.yaw), sin = Mth.sin(this.yaw);
 		// (a hair above the block, a little different for each puddle so overlapping ones don't flicker)
 		float lift = (this.zFight + 0.08F) * Math.max(0.05F, this.alpha - 0.3F) * 0.05F;
-		float dried = this.stain ? Mth.lerp(Mth.clamp(this.age / (BloodTrail.LIFE * DRIED_AT), 0.0F, 1.0F), 1.0F, DRIED) : 1.0F;
-		int color = ARGB.colorFromFloat(this.alpha * fade, this.r * dried, this.g * dried, this.b * dried);
+		// (0.20.41) drying darker, or magma cooling: shade()
+		int color = this.wet ? ARGB.colorFromFloat(this.alpha * fade, this.r, this.g, this.b)
+			: ARGB.color(Math.round(this.alpha * fade * 255.0F), this.shown);
 		double[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};
 		for (double[] corner : corners) {
 			float dx = (float) (corner[0] - cx), dz = (float) (corner[1] - cz);

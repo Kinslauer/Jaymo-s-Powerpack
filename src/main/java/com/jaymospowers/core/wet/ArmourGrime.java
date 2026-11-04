@@ -59,6 +59,8 @@ import org.jspecify.annotations.Nullable;
  * armour (a level of water each scrub), sneak + use a wet sponge anywhere, or use a dirty piece on a water cauldron.</li>
  * </ul>
  * Everyone wearing armour near a player is kept, not only players, so guards and villagers come back muddy too.
+ * <p>(0.20.41) The washes by hand take blood off too ({@code Bloodied}): a scrub or a sponge washes your own coat as well,
+ * and dunking any bloody item (a blade too) in a cauldron rinses it.
  */
 public final class ArmourGrime {
 	/** How dirty a piece can get (a whole number, so the component only changes in coarse steps and isn't sent every tick). */
@@ -248,7 +250,7 @@ public final class ArmourGrime {
 	}
 
 	static boolean washAll(LivingEntity body, int amount) {
-		boolean any = false;
+		boolean any = com.jaymospowers.core.blood.Bloodied.cleanCoat(body, amount);
 		for (EquipmentSlot slot : SLOTS) {
 			any |= wash(body, slot, amount);
 		}
@@ -257,9 +259,10 @@ public final class ArmourGrime {
 
 	/** Washes {@code amount} off {@code stack}; true if it had any on it. */
 	public static boolean clean(ItemStack stack, int amount) {
+		boolean bloody = com.jaymospowers.core.blood.Bloodied.clean(stack, amount);
 		Grime was = grime(stack);
 		if (was == null) {
-			return false;
+			return bloody;
 		}
 		int left = was.amount() - amount;
 		if (left <= 0) {
@@ -271,8 +274,11 @@ public final class ArmourGrime {
 	}
 
 	static boolean anyDirt(LivingEntity body) {
+		if (com.jaymospowers.core.blood.Bloodied.coat(body) != null) {
+			return true;
+		}
 		for (EquipmentSlot slot : SLOTS) {
-			if (grime(body.getItemBySlot(slot)) != null) {
+			if (grime(body.getItemBySlot(slot)) != null || com.jaymospowers.core.blood.Bloodied.blood(body.getItemBySlot(slot)) != null) {
 				return true;
 			}
 		}
@@ -303,7 +309,7 @@ public final class ArmourGrime {
 			}
 			return InteractionResult.SUCCESS;
 		}
-		if (grime(held) != null) {
+		if (grime(held) != null || com.jaymospowers.core.blood.Bloodied.blood(held) != null) {
 			// dunk the dirty piece itself: it comes out clean (no water used, like rinsing dye)
 			if (level instanceof ServerLevel server) {
 				clean(held, MAX);
