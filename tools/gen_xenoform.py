@@ -4296,7 +4296,7 @@ ULTIMATE_COLORS = {
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
 # (0.20.9) the Ultimates with their own model and skin, painted by gen_xeno_ultimates.py (never recoloured from the base skin here)
-OWN_ULTIMATES = ("bulwark",)
+OWN_ULTIMATES = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell")  # (0.20.21)
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
 PATCH5 = ("gyre", "cortex", "locust", "croaker")
 SCAN_B = ("rime", "marrow", "swathe", "blight")

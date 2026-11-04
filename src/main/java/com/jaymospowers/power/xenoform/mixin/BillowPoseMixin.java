@@ -20,6 +20,12 @@ abstract class BillowPoseMixin {
 		if (com.jaymospowers.power.xenoform.XenoformState.lowBox(self)) {
 			self.setPose(Pose.SWIMMING);
 			ci.cancel();
+			return;
+		}
+		// (0.20.23) Wisp's and Revenant's float stays upright: sneaking (to sink) mustn't crouch it mid-air
+		if (com.jaymospowers.power.xenoform.XenoformState.flight(self) == com.jaymospowers.power.xenoform.XenoformState.FLY_FLOAT) {
+			self.setPose(Pose.STANDING);
+			ci.cancel();
 		}
 	}
 }

@@ -273,6 +273,8 @@ public final class Senses {
 		if (player.isOnFire() || player.hasEffect(MobEffects.GLOWING)) {
 			f *= LIT;
 		}
+		// (0.7.513) the old patron's trial and scar: the dead at night and wild beasts see you farther
+		f *= Turning.sight(player, looker, level);
 		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
 	}
 
@@ -617,6 +619,8 @@ public final class Senses {
 		}
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.senses.sneak_attack").withStyle(ChatFormatting.GRAY));
 		Skills.sneakAttack(sp, now);
+		// (0.7.514) Ambusher and Cutthroat
+		Bridges.sneakAttack(sp, target);
 		return unawareBlow(target, amount, amount * mult);
 	}
 }

@@ -274,7 +274,7 @@ public final class Spellcraft {
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
 		if (!mage && "wind".equals(PowersCompat.power(player))) {
-			// (0.7.513) a Wind Controller's magic only ever goes out through the wind: a gust carries the spell off the staff
+			// (0.7.477) a Wind Controller's magic only ever goes out through the wind: a gust carries the spell off the staff
 			net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F);
 			for (int i = 1; i <= 4; i++) {
 				level.sendParticles(ParticleTypes.GUST, player.getX() + look.x * i, player.getEyeY() + look.y * i, player.getZ() + look.z * i, 1, 0.1, 0.1, 0.1, 0.0);

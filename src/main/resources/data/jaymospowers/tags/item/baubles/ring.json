@@ -3,6 +3,11 @@
   "values": [
     "jaymospowers:swiftfoot_ring",
     "jaymospowers:delvers_ring",
-    "jaymospowers:gem_ring"
+    "jaymospowers:gem_ring",
+    {
+      "id": "#spell_engine:spell_ring",
+      "required": false
+    },
+    "jaymospowers:gluttons_ring"
   ]
 }

@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Patron;
 import com.jaymoskingdoms.Patrons;
+import com.jaymoskingdoms.Rites;
 import com.jaymoskingdoms.Shrine;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -33,6 +34,7 @@ final class PatronKeys {
 				}
 			}
 		});
+		ClientPlayNetworking.registerGlobalReceiver(Rites.OpenRite.TYPE, (payload, context) -> context.client().gui.setScreen(new RiteScreen(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(Patrons.OpenShrine.TYPE, (payload, context) -> {
 			Patron p = null;
 			if (context.client().level != null) {

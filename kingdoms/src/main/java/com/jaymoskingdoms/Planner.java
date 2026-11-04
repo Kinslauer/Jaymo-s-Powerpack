@@ -172,6 +172,10 @@ public final class Planner {
 				// (0.7.441) only a Warrior-born or mixed haven builds a fighting ring
 				continue;
 			}
+			if (e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f)) {
+				// (0.7.518) only the capital of a Faith-creed realm builds the great temple
+				continue;
+			}
 			if (e.id().equals(TAVERN)) {
 				tavern = size >= e.minPopulation() && works.count(e.id()) < e.max() ? e : null;
 				continue;
@@ -197,7 +201,8 @@ public final class Planner {
 		Map<String, Integer> most = new HashMap<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
 			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && !HavenGrowth.isWork(e.id()) && e.minPopulation() < Integer.MAX_VALUE
-				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))) {
+				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))
+				&& !(e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f))) {
 				most.merge(e.id(), Focus.max(server, f, e.id(), e.max()), Math::max);
 			}
 		}
@@ -308,7 +313,8 @@ public final class Planner {
 		v ^= v >>> 31;
 		v *= 0xBF58476D1CE4E5B9L;
 		v ^= v >>> 29;
-		return v == 0L ? 1L : v;
+		// (0.7.521) a trade's building may be CTOV's (every second try), marked so older ones keep their look
+		return CtovHalls.tag(entry, v == 0L ? 1L : v, attempt);
 	}
 
 	private static Works.Project start(ServerLevel level, Faction f, String entry, Placing at, int plot, long variant) {

@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.513) Varasuchus, our own model (blocks, as the Kingdoms beasts are; nothing of Saint's Dragons' art is used, see
+ * (0.7.522) Varasuchus, our own model (blocks, as the Kingdoms beasts are; nothing of Saint's Dragons' art is used, see
  * {@code docs/SaintsDragons-Plan.md}): a crocodile dragon held high on long sprawling legs (Andy: "longer limbs ... and
  * be taller, to be imposing"). A broad armoured body under two rows of bony scutes (the middle three pairs give way to
  * the saddle), a thick neck, a long-jawed head with its eyes on its crown and horns swept up and back from it (long,
@@ -262,7 +262,7 @@ final class VarasuchusDragonModel extends EntityModel<WindDragonRenderer.State> 
 			float sway = Mth.sin(step - lag) * (0.07F + k * 0.05F) * walk + Mth.sin(t * 0.05F - lag) * 0.04F
 				+ Mth.sin(t * 0.28F - lag) * (0.14F + k * 0.12F) * swim;
 			// the lash at the dash's end and the parry's snap: rolling down the tail
-			// (0.7.513, Andy: "a lot longer so it can realistically wrap around to the front for the parry/attacks") the
+			// (0.7.522, Andy: "a lot longer so it can realistically wrap around to the front for the parry/attacks") the
 			// tailguard curls it round its flank to before its head; the dash's lash and the parry's snap swing it round
 			// to the front and back, rolling down it a beat per segment
 			float whip = (a == VarasuchusDragon.DASH_MOVE ? bell(x, 0.55F + k * 0.15F, 0.85F + k * 0.15F) * 0.8F : 0.0F)

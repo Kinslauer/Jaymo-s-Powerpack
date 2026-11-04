@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.513) Aetherion, the star dragon of the Aether: our own model (blocks; {@code tools/gen_aetherion.py} prints the body
+ * (0.7.522) Aetherion, the star dragon of the Aether: our own model (blocks; {@code tools/gen_aetherion.py} prints the body
  * plan below from its own table, so the UVs match; texture 512x512). Andy sent an Aetherion (a public-domain GeckoLib
  * dragon) and said "the wings and head might need upgrading": its body plan is kept (a four-legged flier, a four-segment
  * neck rising in an S, a seven-segment tail ending in a crossed fan) and its wings and head drawn anew. Each wing is an

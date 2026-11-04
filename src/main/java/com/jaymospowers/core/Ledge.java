@@ -260,7 +260,7 @@ public final class Ledge {
 			|| player.isSleeping() || player.isAutoSpinAttack()) {
 			return false;
 		}
-		if (Carry.isCarried(player) || Carry.isCarrying(player) || Carry.isThrown(player) || KitchenCompat.isCarryingCorpse(player)
+		if (Carry.isCarried(player) || Carry.isCarrying(player) || Carry.isThrown(player) || KitchenCompat.isCarryingCorpse(player) || CarryOnCompat.isCarrying(player)
 			|| Crawl.crawling(player) && !proneClimbing(player) || player.getAttached(Meditate.STATE) != null || KitchenCompat.isLimp(player)) {
 			return false;
 		}

@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.513) Varasuchus, the crocodile dragon of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and
+ * (0.7.522) Varasuchus, the crocodile dragon of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and
  * numbers are ported from Saint's Dragons by Leon Saint (MIT licence; none of its art, models or sounds are used: the
  * model is our own, {@code VarasuchusDragonModel}, painted by {@code tools/gen_varasuchus.py}). A walker and a swimmer
  * ({@link WindDragon#swims}) of the beaches and the swamps, high on long sprawling legs, armoured in bony scutes, with a

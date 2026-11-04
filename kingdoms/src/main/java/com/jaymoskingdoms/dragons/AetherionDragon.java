@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.513) Aetherion, the star dragon of the Aether. Andy sent an Aetherion (a public-domain, CC0 GeckoLib dragon) to
+ * (0.7.522) Aetherion, the star dragon of the Aether. Andy sent an Aetherion (a public-domain, CC0 GeckoLib dragon) to
  * add, with its wings and head upgraded: our own model ({@code AetherionDragonModel}, {@code tools/gen_aetherion.py}) on
  * its body plan, its numbers and moves after it. It flies over the Aether's islands ({@link Dragons}, Andy: "Aether sky
  * dragon, plus Nulljaw", who is the Aether's boss) and leaves players be until one hurts it. Then, besides the swoop, the

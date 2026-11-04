@@ -8,7 +8,7 @@ His markings are those seams glowing: gold, then patched in his four sons' colou
 Zephyrus's acid green, Eurus's storm violet), white-gold, and silver. Eurus is the storm: the hide slate and
 blue-violet in four shades, his seams glowing electric pale cyan.
 
-(0.7.513) Ignivorus, the Nether's fire dragon (docs/SaintsDragons-Plan.md, its moves after Saint's Dragons' Ignivorus,
+(0.7.522) Ignivorus, the Nether's fire dragon (docs/SaintsDragons-Plan.md, its moves after Saint's Dragons' Ignivorus,
 none of that mod's art used), is the same wyvern cooled from lava: obsidian, basalt ash, ember and crimson hides, the
 seams turned to lava cracks glowing orange, magma yellow, white-hot or crimson fire.
 
@@ -92,7 +92,7 @@ def main():
 
 
 def ignivorus_extras():
-	"""(0.7.513) Ignivorus's spawn egg, its item model and its loot."""
+	"""(0.7.522) Ignivorus's spawn egg, its item model and its loot."""
 	import sys
 	sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 	from gen_dragons import rgb, write, entry, egg, DATA, ITEM

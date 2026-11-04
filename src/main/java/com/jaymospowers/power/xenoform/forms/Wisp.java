@@ -31,9 +31,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>R, Phase: slip through a wall up to {@link #PHASE_BLOCKS} thick to the air beyond.</li>
  * <li>G, Shroud: fade from sight until you strike something.</li>
  * <li>V, Dread Wail: every creature within {@link #WAIL_RADIUS} turns and flees; players are plunged into darkness.</li>
- * <li>B (hold), Glide: fall slowly and drift forward.</li>
- * <li>C (ascended), Revenant: slip into the creature you look at (within {@link #POSSESS_REACH}) and wear it for
- * {@link #POSSESS_TICKS}: it goes where you look, jumps for you, and nothing hunts you meanwhile. C again lets go.</li>
+ * <li>B (hold), Float: (0.20.23) float upright where you steer, Jump rising and sneaking sinking; let go and you drop.</li>
+ * <li>C (ascended), Revenant: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}.</li>
  * </ul>
  */
 public final class Wisp extends XenoForm {
@@ -43,10 +42,12 @@ public final class Wisp extends XenoForm {
 	public static final int SHROUD_COOLDOWN = 40;
 	public static final int WAIL_COOLDOWN = 300, WAIL_TICKS = 60, WAIL_DARKNESS_TICKS = 100;
 	public static final double WAIL_RADIUS = 10.0, WAIL_FLEE = 10.0, WAIL_FLEE_SPEED = 1.5;
-	public static final double GLIDE_FALL = -0.12, GLIDE_PUSH = 0.06, GLIDE_MAX = 0.7;
-	/** Revenant: how far you can reach into a creature, how long you wear it, how fast it goes for you, C's cooldown. */
-	public static final double POSSESS_REACH = 8.0, POSSESS_SPEED = 0.32;
-	public static final int POSSESS_TICKS = 200, POSSESS_COOLDOWN = 300;
+	/** (0.20.23, Andy: "it should float upright instead of an angled glide") Float: how fast it drifts where you steer
+	 * (blocks a tick; sprinting faster), how fast Jump lifts and sneaking sinks it, how fast it eases to that (share a tick). */
+	public static final double FLOAT_SPEED = 0.22, FLOAT_SPRINT = 0.3, FLOAT_RISE = 0.12, FLOAT_SINK = 0.12, FLOAT_EASE = 0.25;
+
+	/** (0.20.21) Revenant is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Revenant}. */
+	private final com.jaymospowers.power.xenoform.XenoUltimate revenant = new com.jaymospowers.power.xenoform.forms.ultimate.Revenant(this);
 
 	public Wisp() {
 		super("wisp", 1.0F, 16.0F, 3.0, 0.1, 0.0, 0.0, Items.PHANTOM_MEMBRANE, 0xB8E8F8);
@@ -101,23 +102,14 @@ public final class Wisp extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
-		if (live.glide && !player.onGround() && !player.isInWater()) {
-			Vec3 motion = player.getDeltaMovement();
-			Vec3 push = player.getLookAngle().horizontal();
-			push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(GLIDE_PUSH);
-			Vec3 next = new Vec3(motion.x + push.x, Math.max(motion.y, GLIDE_FALL), motion.z + push.z);
-			if (next.horizontalDistance() > GLIDE_MAX) {
-				Vec3 flat = new Vec3(next.x, 0.0, next.z).normalize().scale(GLIDE_MAX);
-				next = new Vec3(flat.x, next.y, flat.z);
-			}
-			player.setDeltaMovement(next);
-			player.syncVelocity = true;
-			player.resetFallDistance();
+		// (on the ground it walks as usual until Jump lifts it off)
+		if (live.glide && !player.isInWater() && player.getVehicle() == null && (!player.onGround() || player.getLastClientInput().jump())) {
+			floatUpright(player);
 			if (player.tickCount % 3 == 0) {
 				level.sendParticles(ParticleTypes.SCULK_SOUL, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.2, 0.2, 0.2, 0.0);
 			}
-			if (player.tickCount % 16 == 0) {
-				sound(player, SoundEvents.PHANTOM_FLAP, 0.5F, 1.4F);
+			if (player.tickCount % 24 == 0) {
+				sound(player, SoundEvents.PHANTOM_FLAP, 0.4F, 1.4F);
 			}
 		}
 		if (live.shroud) {
@@ -156,149 +148,44 @@ public final class Wisp extends XenoForm {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
-		return live.glide || live.possessed >= 0;
+		return live.glide;
 	}
 
 	@Override
 	public int flight(ServerPlayer player, XenoformPower.Live live) {
 		return live.glide && !player.onGround() && !player.isInWater() && player.getVehicle() == null
-			? XenoformState.FLY_GLIDE : XenoformState.FLY_NONE;
+			? XenoformState.FLY_FLOAT : XenoformState.FLY_NONE;
+	}
+
+	/**
+	 * (0.20.23) Float: no fall, the body upright; WASD steers it (relative to where you face), Jump lifts and sneaking sinks.
+	 * The speed eases toward the steer so it drifts like a ghost rather than snapping.
+	 */
+	private static void floatUpright(ServerPlayer player) {
+		net.minecraft.world.entity.player.Input input = player.getLastClientInput();
+		double forward = (input.forward() ? 1.0 : 0.0) - (input.backward() ? 1.0 : 0.0);
+		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
+		double speed = input.sprint() ? FLOAT_SPRINT : FLOAT_SPEED;
+		Vec3 want = Vec3.ZERO;
+		if (forward != 0.0 || strafe != 0.0) {
+			float yaw = player.getYRot() * net.minecraft.util.Mth.DEG_TO_RAD;
+			double sin = net.minecraft.util.Mth.sin(yaw), cos = net.minecraft.util.Mth.cos(yaw);
+			// facing is (-sin, cos); to its left is (cos, sin)
+			want = new Vec3(-sin * forward + cos * strafe, 0.0, cos * forward + sin * strafe).normalize().scale(speed);
+		}
+		double up = input.jump() ? FLOAT_RISE : input.shift() ? -FLOAT_SINK : 0.0;
+		Vec3 motion = player.getDeltaMovement();
+		player.setDeltaMovement(new Vec3(motion.x + (want.x - motion.x) * FLOAT_EASE, up, motion.z + (want.z - motion.z) * FLOAT_EASE));
+		player.syncVelocity = true;
+		player.resetFallDistance();
 	}
 
 	// ---- Revenant ----
 
+	/** (0.20.21) Revenant is its own evolved form: see {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		return possess(player, live);
-	}
-
-	@Override
-	public boolean ultimateHasMove() {
-		return true;
-	}
-
-	@Override
-	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
-		if (live.possessed >= 0) {
-			release(player, live, true);
-		} else if (ultimateReady(player, live)) {
-			possess(player, live);
-		}
-	}
-
-	@Override
-	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
-		if (live.possessed < 0) {
-			return;
-		}
-		ServerLevel level = player.level();
-		if (!(level.getEntity(live.possessed) instanceof Mob host) || !host.isAlive() || player.getVehicle() != host
-			|| host.tickCount - hostSince(host) > POSSESS_TICKS) {
-			release(player, live, true);
-			return;
-		}
-		// it goes where you look
-		Vec3 look = player.getLookAngle().horizontal();
-		look = look.lengthSqr() < 1.0E-4 ? Vec3.ZERO : look.normalize().scale(POSSESS_SPEED * (player.getXRot() > 60.0F ? 0.0 : 1.0));
-		Vec3 motion = host.getDeltaMovement();
-		double up = motion.y;
-		if (host.horizontalCollision && host.onGround()) {
-			up = 0.42;
-		}
-		if (host.isInWater()) {
-			up = Math.max(up, 0.1);
-		}
-		host.setDeltaMovement(look.x, up, look.z);
-		host.syncVelocity = true;
-		host.setYRot(player.getYRot());
-		host.setYBodyRot(player.getYRot());
-		host.setYHeadRot(player.getYRot());
-		host.setTarget(null);
-		player.resetFallDistance();
-		host.resetFallDistance();
-		if (player.tickCount % 10 == 0) {
-			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(24.0), m -> m.getTarget() == player)) {
-				mob.setTarget(null);
-			}
-			if (!player.hasEffect(MobEffects.INVISIBILITY)) {
-				player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, false, false));
-			}
-		}
-		if (player.tickCount % 4 == 0) {
-			level.sendParticles(ParticleTypes.SCULK_SOUL, host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 1, 0.3, 0.3, 0.3, 0.0);
-		}
-	}
-
-	@Override
-	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
-		release(player, live, false);
-	}
-
-	private static final String SINCE_TAG = "jaymospowers_xenoform_possessed_at:";
-
-	private static int hostSince(Mob host) {
-		for (String tag : host.entityTags()) {
-			if (tag.startsWith(SINCE_TAG)) {
-				try {
-					return Integer.parseInt(tag.substring(SINCE_TAG.length()));
-				} catch (NumberFormatException ignored) {
-					return host.tickCount;
-				}
-			}
-		}
-		return host.tickCount;
-	}
-
-	private static boolean possess(ServerPlayer player, XenoformPower.Live live) {
-		LivingEntity target = aimed(player, POSSESS_REACH, e -> e instanceof Mob && !(e instanceof Player) && !e.entityTags().contains(com.jaymospowers.power.xenoform.XenoformState.MINION_TAG));
-		if (!(target instanceof Mob host) || host.isVehicle()) {
-			return false;
-		}
-		ServerLevel level = player.level();
-		Vec3 from = player.position();
-		if (!player.startRiding(host, true, true)) {
-			return false;
-		}
-		live.possessed = host.getId();
-		host.setNoAi(true);
-		host.setTarget(null);
-		host.addTag(SINCE_TAG + host.tickCount);
-		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, false, false));
-		level.sendParticles(ParticleTypes.SCULK_SOUL, from.x, from.y + 1.0, from.z, 24, 0.3, 0.6, 0.3, 0.05);
-		level.sendParticles(ParticleTypes.SOUL, host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 24, 0.4, 0.5, 0.4, 0.05);
-		sound(player, SoundEvents.PHANTOM_DEATH, 1.0F, 1.5F);
-		sound(player, SoundEvents.WARDEN_HEARTBEAT, 1.0F, 1.2F);
-		ultimateCooldown(player, live, POSSESS_COOLDOWN);
-		return true;
-	}
-
-	/** Out of the creature: it comes to, dazed and marked; you stand beside it. */
-	private static void release(ServerPlayer player, XenoformPower.Live live, boolean fx) {
-		if (live.possessed < 0) {
-			return;
-		}
-		ServerLevel level = player.level();
-		Entity e = level.getEntity(live.possessed);
-		live.possessed = -1;
-		if (player.getVehicle() == e) {
-			player.stopRiding();
-		}
-		if (e instanceof Mob host) {
-			host.setNoAi(false);
-			host.entityTags().removeIf(t -> t.startsWith(SINCE_TAG));
-			if (host.isAlive()) {
-				host.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 1));
-				host.addEffect(new MobEffectInstance(MobEffects.GLOWING, 200, 0));
-				host.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 2));
-			}
-		}
-		if (!live.shroud) {
-			player.removeEffect(MobEffects.INVISIBILITY);
-		}
-		if (fx) {
-			level.sendParticles(ParticleTypes.SOUL, player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.5, 0.3, 0.03);
-			sound(player, SoundEvents.PHANTOM_SWOOP, 1.0F, 0.8F);
-		}
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return revenant;
 	}
 
 	/** Through the wall ahead: the first place beyond it, within {@link #PHASE_BLOCKS} of its face, where you fit. */

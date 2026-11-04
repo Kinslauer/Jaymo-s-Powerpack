@@ -193,6 +193,11 @@ public final class Storms {
 				form(level, target.position(), random.nextFloat() < 0.6F ? Storm.THUNDER : Storm.RAIN, random, false);
 			}
 		}
+		// (0.7.513) the Deep Mother's omens: a thunderstorm finds one who turned from her
+		ServerPlayer bait = com.jaymoskingdoms.Turning.stormBait(level, random, ROLL_TICKS);
+		if (bait != null && !dry(level, bait.blockPosition())) {
+			form(level, bait.position(), Storm.THUNDER, random, true);
+		}
 	}
 
 	private static @Nullable ServerPlayer someone(ServerLevel level, RandomSource random) {
@@ -272,6 +277,11 @@ public final class Storms {
 			return;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, column);
+		// (0.7.513) a bolt may be drawn to one who turned from the Deep Mother
+		BlockPos drawn = com.jaymoskingdoms.Turning.boltDrawn(level, s.x, s.z, s.radius, random);
+		if (drawn != null) {
+			top = drawn;
+		}
 		if (level.getBiome(top).value().getPrecipitationAt(top, level.getSeaLevel()) != Biome.Precipitation.RAIN) {
 			return;
 		}

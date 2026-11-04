@@ -52,23 +52,23 @@ final class Buildings {
 			realm(type, "pen", Buildings::pen, 1, 0);
 			realm(type, "farm", Buildings::farm, 1, 0);
 			realm(type, "house", Buildings::house, 2, 0);
-			realm(type, "smithy", Buildings::smithy, 1, 0);
+			hall(type, "smithy", Buildings::smithy, 1, 0);
 			realm(type, "road", Buildings::road, 2, 0);
 			realm(type, "well", Buildings::well, 1, 0);
 			// (0.7.299) where townsfolk without a stove at home buy their meals ({@link Meals})
 			realm(type, "cookhouse", Buildings::cookhouse, 1, 12);
 			realm(type, "house", Buildings::house, 4, 16);
-			realm(type, "mason", Buildings::mason, 1, 20);
+			hall(type, "mason", Buildings::mason, 1, 20);
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
 			// (0.7.250) the job halls ({@link JobHalls}): where a town's butchers, fishers and hunters work
 			// (0.7.483) earlier now, with the healer's infirmary: every town keeps a butcher and a healer ({@link TownTrades})
-			realm(type, "butcher", JobHalls::butcher, 1, 10);
+			hall(type, "butcher", JobHalls::butcher, 1, 10);
 			realm(type, "infirmary", JobHalls::infirmary, 1, 12);
 			realm(type, "market", Buildings::market, 1, 24);
-			realm(type, "fishery", JobHalls::fishery, 1, 26);
+			hall(type, "fishery", JobHalls::fishery, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
-			realm(type, "hunting_lodge", JobHalls::huntingLodge, 1, 30);
+			hall(type, "hunting_lodge", JobHalls::huntingLodge, 1, 30);
 			realm(type, "farm", Buildings::farm, 2, 28);
 			realm(type, "road", Buildings::road, 4, 28);
 			realm(type, "barracks", Buildings::barracks, 1, 32);
@@ -88,6 +88,8 @@ final class Buildings {
 		// (0.5.27) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
 		Blueprint.register(FactionType.KINGDOM, new Blueprint.Entry("tavern",
 			(level, faction, variant) -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction)), 1, 26));
+		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
+		realm(FactionType.KINGDOM, Temples.GREAT_TEMPLE, GreatTemple::draw, 1, Temples.GREAT_TEMPLE_FROM);
 		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
 		realm(FactionType.VILLAGE, "pen", Buildings::pen, 1, 0);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 1, 0);
@@ -96,16 +98,16 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "cookhouse", Buildings::cookhouse, 1, 8);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 1, 8);
 		realm(FactionType.VILLAGE, "fire_pit", Buildings::firePit, 1, 10);
-		realm(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 6);
+		hall(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 6);
 		realm(FactionType.VILLAGE, "infirmary", JobHalls::infirmary, 1, 8);
-		realm(FactionType.VILLAGE, "hunting_lodge", JobHalls::huntingLodge, 1, 14);
+		hall(FactionType.VILLAGE, "hunting_lodge", JobHalls::huntingLodge, 1, 14);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 2, 14);
 		// (0.5.27) a row stable, its horses bought in when it's done ({@link Gatherers#built})
 		realm(FactionType.VILLAGE, "stable", Buildings::stable, 1, 18);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 2, 16);
-		realm(FactionType.VILLAGE, "fishery", JobHalls::fishery, 1, 16);
+		hall(FactionType.VILLAGE, "fishery", JobHalls::fishery, 1, 16);
 		realm(FactionType.VILLAGE, HavenBuildings.RING, HavenBuildings::ring, 1, 16);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 4, 16);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 6, 20);
@@ -129,6 +131,15 @@ final class Buildings {
 	/** A building whose materials and details are its own. */
 	static void realm(FactionType type, String id, Design design, int max, int minSize) {
 		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> design.draw(Kit.of(level, faction, variant, variant)), max,
+			minSize));
+	}
+
+	/**
+	 * (0.7.521) A trade's own building: CTOV's for the trade and land when its variant is marked for it
+	 * ({@link CtovHalls}), else ours.
+	 */
+	static void hall(FactionType type, String id, Design design, int max, int minSize) {
+		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> CtovHalls.draw(level, faction, variant, id, design), max,
 			minSize));
 	}
 

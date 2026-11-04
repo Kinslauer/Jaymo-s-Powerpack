@@ -566,7 +566,7 @@ public final class Theft {
 			return new ArrayList<>();
 		}
 		// (0.7.102) a hood hides you from farther off, on top of sneaking
-		double range = (player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE) * Identities.hoodSight(player);
+		double range = (player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE) * Identities.hoodSight(player) * Turning.witnessRange(player);
 		List<LivingEntity> out = new ArrayList<>();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range), LivingEntity::isAlive)) {
 			boolean ours = e instanceof Folk folk ? folk.factionId() == f.id() : e instanceof Villager || (e instanceof IronGolem g && !g.isPlayerCreated());

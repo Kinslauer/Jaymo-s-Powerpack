@@ -30,10 +30,10 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 	static final class State extends LivingEntityRenderState {
 		DragonLook look = DragonLook.decode(0);
 		float fly, breath, land, sit, crash, flap, glide, pitch, swim;
-		/** (0.7.513) Risen onto its hind legs (0 to 1). */
+		/** (0.7.522) Risen onto its hind legs (0 to 1). */
 		float stand;
 		boolean saddled;
-		/** (0.7.513) The move it's making ({@link WindDragon#action}) and how long it has been at it (ticks, smoothed). */
+		/** (0.7.522) The move it's making ({@link WindDragon#action}) and how long it has been at it (ticks, smoothed). */
 		int action;
 		float actionAge;
 	}

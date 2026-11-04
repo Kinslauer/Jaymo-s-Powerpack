@@ -1,0 +1,23 @@
+{
+  "wheel.jaymoskingdoms.horse.let_be": "Let be",
+  "wheel.jaymoskingdoms.horse.let_be.info": "Drops its orders and does as horses do.",
+  "wheel.jaymoskingdoms.horse.follow": "Follow",
+  "wheel.jaymoskingdoms.horse.follow.info": "Keeps close to you, and catches up if left behind.",
+  "wheel.jaymoskingdoms.horse.stay": "Stay",
+  "wheel.jaymoskingdoms.horse.stay.info": "Stands where it is and won't stray.",
+  "wheel.jaymoskingdoms.horse.wander": "Wander here",
+  "wheel.jaymoskingdoms.horse.wander.info": "Grazes about this spot, never far from it.",
+  "wheel.jaymoskingdoms.horse.set_home": "Make this home",
+  "wheel.jaymoskingdoms.horse.set_home.info": "Where it stands is its home from now on.",
+  "wheel.jaymoskingdoms.horse.go_home": "Go home",
+  "wheel.jaymoskingdoms.horse.go_home.info": "Makes its own way home and wanders there.",
+  "wheel.jaymoskingdoms.horse.ride_on": "Ride on",
+  "wheel.jaymoskingdoms.horse.ride_on.info": "Keeps going without holding forward (or double-tap forward).",
+  "wheel.jaymoskingdoms.horse.horses": "Your horses",
+  "wheel.jaymoskingdoms.horse.horses.info": "Every horse you own, where it is; call it or send it home.",
+  "wheel.jaymoskingdoms.horse.handbook": "Handbook",
+  "wheel.jaymoskingdoms.horse.handbook.info": "Everything about horses, in one book.",
+  "wheel.jaymoskingdoms.horse.no_horse": "Look at a horse of yours, or ride one.",
+  "wheel.jaymoskingdoms.horse.not_riding": "Only in the saddle.",
+  "wheel.jaymoskingdoms.horse.wary": "It won't take orders until it trusts you (trust %s)."
+}

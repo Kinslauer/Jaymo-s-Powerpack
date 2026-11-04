@@ -1,4 +1,4 @@
-"""(0.7.513) What the lesser dragons' art tools share (tools/gen_<species>.py, docs/SaintsDragons-Plan.md): a body plan
+"""(0.7.522) What the lesser dragons' art tools share (tools/gen_<species>.py, docs/SaintsDragons-Plan.md): a body plan
 (GEOMETRY rows: name, parent, uv part, box (x, y, z, w, h, d), pose (px, py, pz, rx, ry, rz), mirror) packed onto a
 256x256 sheet, painted face by face, printed as the Java of a model's createBodyLayer, and rendered to a preview.
 Model pixels, y down, the ground at 24, -z the front. All our own art: nothing of Saint's Dragons' art is used."""

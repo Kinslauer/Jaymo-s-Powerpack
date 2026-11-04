@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.513) Ignivorus, the Nether's fire dragon ({@code docs/SaintsDragons-Plan.md}): its moves and numbers after Saint's
+ * (0.7.522) Ignivorus, the Nether's fire dragon ({@code docs/SaintsDragons-Plan.md}): its moves and numbers after Saint's
  * Dragons' Ignivorus by Leon Saint (MIT code; none of its art, models or sounds are used). Andy: "put the effects onto
  * Kintsugi's model then put that in the nether", so it's drawn as eanncrod's Kintsugi wyvern (CC BY 4.0, as Eurus and
  * Aeolus) cooled from lava: obsidian, ash, ember or crimson hide, its seams glowing lava cracks

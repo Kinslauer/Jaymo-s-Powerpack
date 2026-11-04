@@ -25,6 +25,8 @@ public final class BaublesClient {
 		// (0.20.12) the pink fairy: her flat sprite, wings flapping, always fully lit
 		EntityRenderers.register(Fairies.PINK_FAIRY, ctx -> new ThrownItemRenderer<>(ctx, 0.75F, true));
 		WornFairies.init();
+		// (Artifacts) the Artifacts baubles' moves
+		ArtifactBaublesClient.init();
 		BaublesTab.init();
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.baubles", InputConstants.UNKNOWN.getType(),
 			InputConstants.UNKNOWN.getValue(), JaymosPowersClient.CATEGORY));

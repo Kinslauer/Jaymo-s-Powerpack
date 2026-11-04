@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.513) Atroxiia, the frost wyrm of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and numbers
+ * (0.7.522) Atroxiia, the frost wyrm of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and numbers
  * are ported from Saint's Dragons by Leon Saint (MIT licence; none of its art, models or sounds are used: the model is
  * our own, {@code AtroxiiaDragonModel}, painted by {@code tools/gen_atroxiia.py}). A walker and a swimmer
  * ({@link WindDragon#swims}) of the snowfields and the cold coasts: a pale serpent with no hind legs, raised on two

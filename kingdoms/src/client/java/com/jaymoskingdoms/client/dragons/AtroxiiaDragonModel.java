@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.513) Atroxiia, our own model (blocks, as the Kingdoms beasts are; nothing of Saint's Dragons' art is used, see
+ * (0.7.522) Atroxiia, our own model (blocks, as the Kingdoms beasts are; nothing of Saint's Dragons' art is used, see
  * {@code docs/SaintsDragons-Plan.md}). Andy: "atroxiia does NOT look right": it is a serpent with two great arms and no
  * hind legs. Its chest is held high on the arms (broad shoulders, long bowed upper arms, long forearms with gold cuffs,
  * three-clawed hands and a thumb), the serpent body runs back down to the ground and along it as a long tail, its

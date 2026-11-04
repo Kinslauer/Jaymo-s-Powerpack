@@ -10,6 +10,14 @@
     {
       "id": "friendsandfoes:totem_of_illusion",
       "required": false
-    }
+    },
+    {
+      "id": "#spell_engine:spell_trinket",
+      "required": false
+    },
+    "jaymospowers:charm_of_sinking",
+    "jaymospowers:charm_of_shrinking",
+    "jaymospowers:chorus_totem",
+    "jaymospowers:crystal_heart"
   ]
 }

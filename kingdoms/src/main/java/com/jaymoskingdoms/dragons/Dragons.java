@@ -65,28 +65,28 @@ public final class Dragons {
 	/** The species' bodies (width, height in blocks). */
 	static final float NOTUS_WIDTH = 3.0F, NOTUS_HEIGHT = 2.4F, BOREAS_WIDTH = 2.6F, BOREAS_HEIGHT = 2.0F, ZEPHYRUS_WIDTH = 2.6F,
 		ZEPHYRUS_HEIGHT = 1.8F, EURUS_WIDTH = 2.4F, EURUS_HEIGHT = 1.8F, AEOLUS_WIDTH = 6.0F, AEOLUS_HEIGHT = 5.0F;
-	/** (0.7.513) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's body. */
+	/** (0.7.522) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's body. */
 	static final float STEGONAUT_WIDTH = 2.8F, STEGONAUT_HEIGHT = 3.4F;
-	/** (0.7.513) Stegonaut grazes in the jungles and plains (tag {@code has_stegonaut_dragon}): its spawn weight and herd. */
+	/** (0.7.522) Stegonaut grazes in the jungles and plains (tag {@code has_stegonaut_dragon}): its spawn weight and herd. */
 	static final int STEGONAUT_WEIGHT = 2, STEGONAUT_MIN = 1, STEGONAUT_MAX = 2;
 	public static final TagKey<Biome> HAS_STEGONAUT = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_stegonaut_dragon"));
-	/** (0.7.513) Atroxiia, the frost wyrm of the snowfields and cold coasts (tag {@code has_atroxiia_dragon}): its body, weight, herd. */
+	/** (0.7.522) Atroxiia, the frost wyrm of the snowfields and cold coasts (tag {@code has_atroxiia_dragon}): its body, weight, herd. */
 	static final float ATROXIIA_WIDTH = 3.0F, ATROXIIA_HEIGHT = 4.3F;
 	static final int ATROXIIA_WEIGHT = 1, ATROXIIA_MIN = 1, ATROXIIA_MAX = 1;
 	public static final TagKey<Biome> HAS_ATROXIIA = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_atroxiia_dragon"));
-	/** (0.7.513) Varasuchus, the crocodile dragon of the beaches and swamps (tag {@code has_varasuchus_dragon}): its body, weight, herd. */
+	/** (0.7.522) Varasuchus, the crocodile dragon of the beaches and swamps (tag {@code has_varasuchus_dragon}): its body, weight, herd. */
 	static final float VARASUCHUS_WIDTH = 4.0F, VARASUCHUS_HEIGHT = 3.3F;
 	static final int VARASUCHUS_WEIGHT = 1, VARASUCHUS_MIN = 1, VARASUCHUS_MAX = 1;
 	public static final TagKey<Biome> HAS_VARASUCHUS = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_varasuchus_dragon"));
 
-	/** (0.7.513) Ignivorus, the Nether's fire dragon: its body; how often each player in the Nether is weighed for one (about once in
+	/** (0.7.522) Ignivorus, the Nether's fire dragon: its body; how often each player in the Nether is weighed for one (about once in
 	 * three hours there), how far off it turns up, and none comes while one is this near already. */
 	static final float IGNIVORUS_WIDTH = 4.4F, IGNIVORUS_HEIGHT = 3.7F;
 	static final float IGNIVORUS_CHANCE = 1.0F / 360.0F;
 	static final int IGNIVORUS_MIN = 40, IGNIVORUS_MAX = 64;
 	static final double IGNIVORUS_CROWD = 160.0;
 
-	/** (0.7.513) Aetherion, the star dragon over the Aether (Powers' {@code jaymospowers:aether}): its body, and how often each player
+	/** (0.7.522) Aetherion, the star dragon over the Aether (Powers' {@code jaymospowers:aether}): its body, and how often each player
 	 * there is weighed for one (about once in two hours), how far off it turns up, and none comes while one is this near already. */
 	static final float AETHERION_WIDTH = 3.2F, AETHERION_HEIGHT = 3.8F;
 	static final float AETHERION_CHANCE = 1.0F / 240.0F;
@@ -141,14 +141,14 @@ public final class Dragons {
 		ZEPHYRUS_DRAGON_SPAWN_EGG = egg(ZEPHYRUS_DRAGON);
 		EURUS_DRAGON_SPAWN_EGG = egg(EURUS_DRAGON);
 		AEOLUS_DRAGON_SPAWN_EGG = egg(AEOLUS_DRAGON);
-		// (0.7.513) the lesser dragons, after Saint's Dragons (its code is MIT; the art is our own): Stegonaut, a walker that
+		// (0.7.522) the lesser dragons, after Saint's Dragons (its code is MIT; the art is our own): Stegonaut, a walker that
 		// grazes in the jungles and plains and spawns with the herds
 		STEGONAUT_DRAGON = dragon("stegonaut", StegonautDragon::new, STEGONAUT_WIDTH, STEGONAUT_HEIGHT, false, StegonautDragon.createAttributes());
 		STEGONAUT_DRAGON_SPAWN_EGG = egg(STEGONAUT_DRAGON);
 		SpawnPlacements.register(STEGONAUT_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_STEGONAUT), MobCategory.CREATURE, STEGONAUT_DRAGON, STEGONAUT_WEIGHT, STEGONAUT_MIN,
 			STEGONAUT_MAX);
-		// (0.7.513) Atroxiia and Varasuchus, walkers that swim: alone, on the snow and the cold shores, and the beaches and swamps
+		// (0.7.522) Atroxiia and Varasuchus, walkers that swim: alone, on the snow and the cold shores, and the beaches and swamps
 		// (any ground they can stand on: snow and sand aren't grass)
 		ATROXIIA_DRAGON = dragon("atroxiia", AtroxiiaDragon::new, ATROXIIA_WIDTH, ATROXIIA_HEIGHT, false, AtroxiiaDragon.createAttributes());
 		ATROXIIA_DRAGON_SPAWN_EGG = egg(ATROXIIA_DRAGON);
@@ -159,10 +159,10 @@ public final class Dragons {
 		SpawnPlacements.register(VARASUCHUS_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_VARASUCHUS), MobCategory.CREATURE, VARASUCHUS_DRAGON, VARASUCHUS_WEIGHT, VARASUCHUS_MIN,
 			VARASUCHUS_MAX);
-		// (0.7.513) Ignivorus, the Nether's fire dragon on the Kintsugi wyvern: it turns up flying about the Nether (nether())
+		// (0.7.522) Ignivorus, the Nether's fire dragon on the Kintsugi wyvern: it turns up flying about the Nether (nether())
 		IGNIVORUS_DRAGON = dragon("ignivorus", IgnivorusDragon::new, IGNIVORUS_WIDTH, IGNIVORUS_HEIGHT, true, IgnivorusDragon.createAttributes());
 		IGNIVORUS_DRAGON_SPAWN_EGG = egg(IGNIVORUS_DRAGON);
-		// (0.7.513) Aetherion, the star dragon: it turns up flying over the Aether (aether())
+		// (0.7.522) Aetherion, the star dragon: it turns up flying over the Aether (aether())
 		AETHERION_DRAGON = dragon("aetherion", AetherionDragon::new, AETHERION_WIDTH, AETHERION_HEIGHT, false, AetherionDragon.createAttributes());
 		AETHERION_DRAGON_SPAWN_EGG = egg(AETHERION_DRAGON);
 		JaymosKingdoms.LOGGER.debug("dragon records: {} {}", DragonRecords.SLAIN, DragonRecords.TAMER);
@@ -263,7 +263,7 @@ public final class Dragons {
 		}
 	}
 
-	/** (0.7.513) Over the Aether, now and then an Aetherion comes flying about some way off from a player (unless one's near already). */
+	/** (0.7.522) Over the Aether, now and then an Aetherion comes flying about some way off from a player (unless one's near already). */
 	private static void aether(MinecraftServer server) {
 		ServerLevel level = server.getLevel(AETHER);
 		if (level == null || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
@@ -278,7 +278,7 @@ public final class Dragons {
 	}
 
 	/**
-	 * (0.7.513) Anywhere in the Nether, now and then an Ignivorus comes flying about some way off from a player (unless
+	 * (0.7.522) Anywhere in the Nether, now and then an Ignivorus comes flying about some way off from a player (unless
 	 * one's near already). It leaves them be unless they hurt it.
 	 */
 	private static void ignivorus(ServerLevel level, ServerPlayer player, RandomSource random) {
@@ -288,7 +288,7 @@ public final class Dragons {
 		aloft(level, player, random, IGNIVORUS_DRAGON, IgnivorusDragon.class);
 	}
 
-	/** (0.7.513) A flier of {@code type} turned up in the air some way off from {@code player}, unless one's near already. */
+	/** (0.7.522) A flier of {@code type} turned up in the air some way off from {@code player}, unless one's near already. */
 	private static <T extends WindDragon> void aloft(ServerLevel level, ServerPlayer player, RandomSource random, EntityType<T> type, Class<T> kind) {
 		if (!level.getEntitiesOfClass(kind, player.getBoundingBox().inflate(IGNIVORUS_CROWD)).isEmpty()) {
 			return;

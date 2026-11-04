@@ -22,7 +22,7 @@ from gen_dragons import rgb, jitter, mix, shade, write, entry, egg, ASSETS, DATA
 PLATE_Z = [-12.0, -5.0, 2.0, 9.0, 15.0]
 PLATE_H = [10, 14, 17, 14, 10]
 PLATE_D = [7, 9, 11, 9, 7]
-# (0.7.513, Andy: "longer limbs and necks, and be taller, to be imposing") high on four long pillar legs, a long neck
+# (0.7.522, Andy: "longer limbs and necks, and be taller, to be imposing") high on four long pillar legs, a long neck
 # raised up and forward in four segments, the head levelled again at its end, a long drooping tail
 NECK = [('neck0', (13, 11, 8), -0.55), ('neck1', (12, 10, 7), -0.25), ('neck2', (11, 9, 7), -0.1), ('neck3', (10, 9, 6), 0.1)]
 HEAD_TILT = 0.75

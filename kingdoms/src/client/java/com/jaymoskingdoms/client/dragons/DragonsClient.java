@@ -67,14 +67,14 @@ public final class DragonsClient {
 	static final float NOTUS_SCALE = 0.53F, BOREAS_SCALE = 0.45F;
 	/** (0.7.329) How big the Kintsugi wyvern is drawn for each (it stands 7.9 blocks, 25 across the wings), and how far it reaches from its middle at full size. */
 	static final float EURUS_SCALE = 0.28F, AEOLUS_SCALE = 0.75F, KINTSUGI_REACH = 13.0F;
-	/** (0.7.513) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's shadow, how big its model is drawn, its reach (head and tail). */
+	/** (0.7.522) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's shadow, how big its model is drawn, its reach (head and tail). */
 	static final float STEGONAUT_SHADOW = 2.0F, STEGONAUT_SCALE = 1.3F, STEGONAUT_REACH = 4.5F;
-	/** (0.7.513) Atroxiia's and Varasuchus's: shadow, drawn size, reach (Atroxiia's neck and tail; Varasuchus's jaws and long tail). */
+	/** (0.7.522) Atroxiia's and Varasuchus's: shadow, drawn size, reach (Atroxiia's neck and tail; Varasuchus's jaws and long tail). */
 	static final float ATROXIIA_SHADOW = 2.0F, ATROXIIA_SCALE = 1.15F, ATROXIIA_REACH = 4.5F;
 	static final float VARASUCHUS_SHADOW = 2.4F, VARASUCHUS_SCALE = 1.3F, VARASUCHUS_REACH = 9.0F;
-	/** (0.7.513) Ignivorus, the Nether's fire dragon on the Kintsugi wyvern: shadow, drawn size. */
+	/** (0.7.522) Ignivorus, the Nether's fire dragon on the Kintsugi wyvern: shadow, drawn size. */
 	static final float IGNIVORUS_SHADOW = 3.6F, IGNIVORUS_SCALE = 0.55F;
-	/** (0.7.513) Aetherion, the star dragon: shadow, drawn size, reach (its wings: about 17 blocks across). */
+	/** (0.7.522) Aetherion, the star dragon: shadow, drawn size, reach (its wings: about 17 blocks across). */
 	static final float AETHERION_SHADOW = 2.8F, AETHERION_SCALE = 1.25F, AETHERION_REACH = 9.0F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
@@ -94,14 +94,14 @@ public final class DragonsClient {
 			KINTSUGI_REACH));
 		EntityRenderers.register(Dragons.AEOLUS_DRAGON, c -> new WindDragonRenderer<>(c, "aeolus", new KintsugiDragonModel(), AEOLUS_SHADOW, AEOLUS_SCALE,
 			KINTSUGI_REACH));
-		// (0.7.513) our own model of Saint's Dragons' Stegonaut (its art isn't used)
+		// (0.7.522) our own model of Saint's Dragons' Stegonaut (its art isn't used)
 		EntityRenderers.register(Dragons.STEGONAUT_DRAGON, c -> new WindDragonRenderer<>(c, "stegonaut", new StegonautDragonModel(StegonautDragonModel
 			.createBodyLayer().bakeRoot()), STEGONAUT_SHADOW, STEGONAUT_SCALE, STEGONAUT_REACH));
 		EntityRenderers.register(Dragons.ATROXIIA_DRAGON, c -> new WindDragonRenderer<>(c, "atroxiia", new AtroxiiaDragonModel(AtroxiiaDragonModel
 			.createBodyLayer().bakeRoot()), ATROXIIA_SHADOW, ATROXIIA_SCALE, ATROXIIA_REACH));
 		EntityRenderers.register(Dragons.VARASUCHUS_DRAGON, c -> new WindDragonRenderer<>(c, "varasuchus", new VarasuchusDragonModel(VarasuchusDragonModel
 			.createBodyLayer().bakeRoot()), VARASUCHUS_SHADOW, VARASUCHUS_SCALE, VARASUCHUS_REACH));
-		// (0.7.513) Ignivorus: the Kintsugi wyvern again, cooled from lava
+		// (0.7.522) Ignivorus: the Kintsugi wyvern again, cooled from lava
 		EntityRenderers.register(Dragons.IGNIVORUS_DRAGON, c -> new WindDragonRenderer<>(c, "ignivorus", new KintsugiDragonModel(), IGNIVORUS_SHADOW,
 			IGNIVORUS_SCALE, KINTSUGI_REACH));
 		EntityRenderers.register(Dragons.AETHERION_DRAGON, c -> new WindDragonRenderer<>(c, "aetherion", new AetherionDragonModel(AetherionDragonModel
@@ -151,7 +151,7 @@ public final class DragonsClient {
 		}
 	}
 
-	/** (0.7.513) Swimming a ridden swimmer (Atroxiia, Varasuchus): W where you look, Space up (and out at a bank), Shift down, S brakes. */
+	/** (0.7.522) Swimming a ridden swimmer (Atroxiia, Varasuchus): W where you look, Space up (and out at a bank), Shift down, S brakes. */
 	static final double SWIM_THRUST = 0.05, SWIM_DRAG = 0.9, SWIM_RISE = 0.05, SWIM_HOP = 0.5;
 
 	private static void swim(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {

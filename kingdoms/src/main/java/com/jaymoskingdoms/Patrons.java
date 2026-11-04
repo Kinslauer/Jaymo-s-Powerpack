@@ -58,6 +58,8 @@ import org.jspecify.annotations.Nullable;
 public final class Patrons {
 	// ---- tuning ----------------------------------------------------------------------------------------------------------
 	/** (0.7.509) Days of prayer at one patron's shrine, running, to be sworn. */
+	/** (0.7.518) The key prefix Powers asks the patron weapons' sworn reading by. */
+	static final String WEAPON_KEY = "patron_weapon/";
 	public static final int SWEAR_DAYS = 3;
 	public static final int FAVOUR_MAX = 100;
 	/** Favour at which tiers 1 to 4 begin. */
@@ -65,6 +67,8 @@ public final class Patrons {
 	/** Favour on swearing, and for a devout life story's start. */
 	static final int FAVOUR_SWORN = 12, FAVOUR_DEVOUT = 20;
 	static final int FAVOUR_PRAYER = 4, FAVOUR_OFFERING = 3;
+	/** (0.7.513) Favour your own patron loses for each day you pray towards another. */
+	static final int FAVOUR_STRAYED = 5;
 	public static final int DEED_SMALL = 1, DEED_MID = 2, DEED_GREAT = 4;
 	/** The most favour deeds give in one day. */
 	static final int DEEDS_DAILY_MOST = 8;
@@ -154,6 +158,10 @@ public final class Patrons {
 			return new State(patron, f, t, swornDay, streak, lastFavour, decay, daily, boonReady, known, marks, seeded);
 		}
 
+		State withMarks(List<Mark> m) {
+			return new State(patron, favour, tier, swornDay, streak, lastFavourDay, decayDay, daily, boonReady, known, List.copyOf(m), seeded);
+		}
+
 		State sworn(Patron p, int f, long today) {
 			return new State(p.key, f, tierFor(f), today, Streak.NONE, today, today, daily, boonReady, known, marks, seeded);
 		}
@@ -195,12 +203,14 @@ public final class Patrons {
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(OpenShrine.TYPE, OpenShrine.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(CallBoon.TYPE, CallBoon.CODEC);
+		Turning.register();
 		ServerPlayNetworking.registerGlobalReceiver(CallBoon.TYPE, (payload, context) -> callBoon(context.player()));
 		ServerTickEvents.END_SERVER_TICK.register(Patrons::tick);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> storyStart(handler.player));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			AT_SEA.remove(handler.player.getUUID());
 			Blessings.forget(handler.player.getUUID());
+			Turning.forget(handler.player.getUUID());
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Patrons::killed);
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
@@ -231,6 +241,7 @@ public final class Patrons {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			AT_SEA.clear();
 			Blessings.clear();
+			Turning.clear();
 		});
 	}
 
@@ -257,8 +268,19 @@ public final class Patrons {
 
 	/** (0.7.509) Read by Jaymo's Powers by reflection (MedicineSkill): a blessing's strength for this player, 0 if they lack it. */
 	public static float blessing(Player player, String key) {
+		// (0.7.518) Jaymo's Powers' patron weapons: 1 sworn to that patron (tier 1 or more), -1 in its trials (turned from it), else 0
+		if (key.startsWith(WEAPON_KEY)) {
+			Patron p = Patron.byKey(key.substring(WEAPON_KEY.length()));
+			if (p == null) {
+				return 0.0F;
+			}
+			return Turning.trial(player, p) > 0.0F ? -1.0F : blessed(player, p, 1) ? 1.0F : 0.0F;
+		}
 		if ("gentle_hands".equals(key)) {
 			return blessed(player, Patron.HEARTHKEEPER, 2) ? Blessings.GENTLE_HANDS : 0.0F;
+		}
+		if ("wounds_slow".equals(key)) {
+			return Turning.healing(player);
 		}
 		return 0.0F;
 	}
@@ -275,7 +297,39 @@ public final class Patrons {
 
 	/** The shrine's day: the overworld clock over a Minecraft day. */
 	static long today(MinecraftServer server) {
-		return Math.floorDiv(server.overworld().getOverworldClockTime(), Shrine.DAY);
+		return day(server.overworld().getOverworldClockTime());
+	}
+
+	/** (0.7.513) The shrine day of an overworld clock time (the client reads it too). */
+	public static long day(long clock) {
+		return Math.floorDiv(clock, Shrine.DAY);
+	}
+
+	/** (0.7.513) Stores new marks on {@code sp}. */
+	static void setMarks(ServerPlayer sp, List<Mark> marks) {
+		set(sp, state(sp).withMarks(marks));
+	}
+
+	/** (0.7.513) For part (c): patrons whose champion has still to hunt this player, oldest first (the "hunted" marks). */
+	public static List<Patron> hunters(Player player) {
+		List<Patron> out = new ArrayList<>();
+		for (Mark m : state(player).marks) {
+			Patron p = Turning.HUNTED.equals(m.kind()) ? Patron.byKey(m.patron()) : null;
+			if (p != null) {
+				out.add(p);
+			}
+		}
+		return out;
+	}
+
+	/** (0.7.513) For part (c): {@code p}'s champion has had its hunt; the mark is kept as "hunted_done". */
+	static void hunted(ServerPlayer sp, Patron p) {
+		long today = today(sp.level().getServer());
+		List<Mark> marks = new ArrayList<>(state(sp).marks);
+		if (marks.removeIf(m -> Turning.HUNTED.equals(m.kind()) && m.patron().equals(p.key))) {
+			marks.add(new Mark(Turning.HUNTED_DONE, p.key, today));
+			setMarks(sp, marks);
+		}
 	}
 
 	/** Which patron an offering belongs to, or null (never a lore book). */
@@ -370,9 +424,41 @@ public final class Patrons {
 		if (shrine.key.equals(s.patron)) {
 			gain(sp, FAVOUR_PRAYER);
 		} else {
+			// (0.7.513) praying your way to another patron: the streak counts toward them, and your own patron notices each day
 			Patron mine = s.patronOf();
-			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.strange", coloured(shrine), mine == null ? "" : coloured(mine)));
+			Streak st = s.streak;
+			int days = st.patron.equals(shrine.key) && st.lastDay == today - 1 ? st.days + 1 : 1;
+			if (st.patron.equals(shrine.key) && st.lastDay == today) {
+				days = st.days;
+			}
+			lose(sp, FAVOUR_STRAYED);
+			if (days >= SWEAR_DAYS && mine != null) {
+				Turning.turn(sp, mine, shrine, today);
+			} else {
+				set(sp, state(sp).withStreak(new Streak(shrine.key, days, today)));
+				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.turning", coloured(shrine), mine == null ? "" : coloured(mine), days, SWEAR_DAYS));
+				// a low bell, to the player
+				sp.level().playSound(null, sp.blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.5F, 0.5F);
+			}
 		}
+	}
+
+	/** (0.7.513) Favour down by {@code n} (not below nothing), the tier following. {@code lastFavourDay} is unchanged. */
+	static void lose(ServerPlayer sp, int n) {
+		State s = state(sp);
+		Patron p = s.patronOf();
+		if (p == null || n <= 0) {
+			return;
+		}
+		retier(sp, s.withFavour(Math.max(0, s.favour - n), s.tier, s.lastFavourDay, s.decayDay), p);
+	}
+
+	/** (0.7.513) Turned to {@code p}: sworn with {@code favour}, the marks in {@code marks}, the old patron's timed boons ended. */
+	static void swornTurned(ServerPlayer sp, Patron p, int favour, long today, List<Mark> marks) {
+		set(sp, state(sp).sworn(p, favour, today).withMarks(marks));
+		learn(sp, p);
+		Blessings.forget(sp.getUUID());
+		Blessings.refresh(sp);
 	}
 
 	/** Sworn to {@code p} from now: {@code favour} to begin with. */
@@ -445,7 +531,7 @@ public final class Patrons {
 		set(sp, new State(next.patron, next.favour, tier, next.swornDay, next.streak, next.lastFavourDay, next.decayDay, next.daily, next.boonReady,
 			next.known, next.marks, next.seeded));
 		if (tier != was) {
-			Component name = Component.translatable("patron.jaymoskingdoms.tier." + Math.max(1, tier));
+			Component name = Component.translatable("patron.jaymoskingdoms.tier." + tier);
 			if (tier > was) {
 				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.patron.tier.up", coloured(p), name).withStyle(ChatFormatting.GOLD));
 				sp.level().playSound(null, sp.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.2F);
@@ -484,6 +570,7 @@ public final class Patrons {
 			}
 		}
 		Blessings.tick(server);
+		Turning.tick(server, today, tick);
 		Faiths.sunrise(server);
 	}
 
@@ -496,8 +583,10 @@ public final class Patrons {
 		long from = Math.max(s.decayDay, s.lastFavourDay + GRACE_DAYS);
 		long days = Math.max(0L, today - from);
 		int perDay = Math.max(DECAY_LEAST, DECAY_PER_DAY - DEVOTION_PER_RANK * Skills.rank(sp, Skills.Perk.DEVOTION));
-		int favour = (int)Math.max((long)TIER_AT[0], s.favour - days * perDay);
-		if (s.favour < TIER_AT[0]) {
+		// (0.7.513) while the old patron's trials run there is no floor
+		int floor = Turning.anyTrial(sp) ? 0 : TIER_AT[0];
+		int favour = (int)Math.max((long)floor, s.favour - days * perDay);
+		if (s.favour < floor) {
 			favour = s.favour;
 		}
 		retier(sp, s.withFavour(favour, s.tier, s.lastFavourDay, today), p);

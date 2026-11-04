@@ -109,6 +109,14 @@ def packMods = [
 	// and ships. No castles of its own, so none of its structures is a grand seat. Needs Cristel Lib (above). Pinned by its
 	// Modrinth version number (1.13.12, the 26.3 build of 2026-09-16; CurseForge file t_and_t-fabric-neoforge-1.13.12.jar).
 	[dep: "maven.modrinth:towns-and-towers:1.13.12", cf: [626761, 8895612]],
+	// ChoiceTheorem's Overhauled Village (CC BY-NC-ND 4.0, by ChoiceTheorem; shipped unchanged, never edited, with credit
+	// and a link: modrinth.com/mod/ct-overhaul-village): 23 kinds of village and 14 of pillager outpost by land (its
+	// villages are tagged as villages, so they join Jaymo's Kingdoms' shared pool, and a settlement founded in one is a
+	// haven: Havens.ctov). Jaymo's Kingdoms reads its trade buildings in the game (ctov:village/<land>/jobsite/<trade>)
+	// for a town's butcher, fishery, hunting lodge, smithy and mason (CtovHalls). The 26.2 Fabric build (4.1.1, says
+	// minecraft >=26.1, no mixins, almost all data); needs Lithostitched (above). Server-side worldgen.
+	// TODO(home PC): its CurseForge [project id, file id] (the cloud can't reach CurseForge).
+	[dep: "maven.modrinth:ct-overhaul-village:DpxVZVuT", cf: null],
 	// William Wythers' Overhauled Overworld (CC BY-NC-ND 4.0; shipped unchanged, downloaded by id) and its library Cristel
 	// Lib (same licence): every vanilla biome redecorated (trees, foliage, rocks, sub-biomes) under its vanilla id, so
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
@@ -137,6 +145,26 @@ def packMods = [
 	// Its key starts on R (a power key): client/KeyConflicts moves it to Caps Lock. Needs Forge Config API Port.
 	// Client and server.
 	[dep: "maven.modrinth:traveler-tool-belt:r5bfVDn1", cf: [1457447, 9070319]],
+	// Zsolt Molnar's RPG Series (2026-11-04, Andy: "upgrade our classes with these"): Wizards (Arcane, Fire and Frost
+	// schools), Archers (bow, crossbow and spear skills) and Rogues & Warriors (dagger, sickle, double axe and glaive
+	// skills). All three are all rights reserved: shipped unchanged, downloaded by id, never copied. Built on Better
+	// Combat (above). Their iron, golden, stone and diamond weapons' grid recipes are dropped (tinkering/Uncraftable) and
+	// the iron, golden and stone ones forged from heads (tinkering/WeaponParts). Spell books, scrolls and quivers are worn
+	// in our bauble slots (compat/SpellEngineCompat), so no Trinkets. Client and server.
+	[dep: "maven.modrinth:wizards:KQuYpfVP", cf: [734325, 9062861]],
+	[dep: "maven.modrinth:archers:SXwTz6Sf", cf: [932359, 9062864]],
+	[dep: "maven.modrinth:rogues-and-warriors:vMFN5Fd1", cf: [1048409, 9110999]],
+	// Bag of Holding 26.3.5 (MPL-2.0, Fuzs): leather/iron/golden bags (Item Interactions bundled inside; needs Puzzles Lib
+	// and Forge Config API Port, both above). Grid recipes dropped (Uncraftable): Kingdoms' Mages enchant them (0.7.517).
+	[dep: "maven.modrinth:bag-of-holding:Kz2iNqzF", cf: [593996, 9201657]],
+	// Spell Engine (GPL-3.0; the RPG Series' casting, spell hotbar and spell books) and Spell Power Attributes (LGPL-3.0)
+	[dep: "maven.modrinth:spell-engine:kgVsejrW", cf: [807653, 9012032]],
+	[dep: "maven.modrinth:spell-power:YdRPWTj8", cf: [771265, 9004379]],
+	// the RPG Series' small libraries (MIT, same author): armour models, bows and crossbows, village structures, quivers
+	[dep: "maven.modrinth:armor-model-api:1smYVF1k", cf: [1659764, 9004390]],
+	[dep: "maven.modrinth:ranged-weapon-api:5ywtfrkS", cf: [962162, 9004410]],
+	[dep: "maven.modrinth:structure-pool-api:Zxs162Py", cf: [927915, 9004387]],
+	[dep: "maven.modrinth:bundle-api:mQ3mo5tp", cf: [1189983, 8990141]],
 	// Fancy World Animations (MIT, by maDU59; "feel free to add this mod in your modpacks"): doors, trapdoors, gates,
 	// levers, buttons, chests, lecterns and more swing smoothly; lanterns and chains sway. Works with Sodium and Iris.
 	// Client-only.
@@ -253,6 +281,12 @@ def packMods = [
 	// sorts faster. Middle mouse is also lock-on, but that key only acts with no screen open and ClientSort's only inside
 	// one, so they never clash. Needs Cloth Config and Mod Menu (above). 3.104.1+26.3 (Modrinth version UWMryUad).
 	[dep: "maven.modrinth:clientsort:UWMryUad", cf: [1049891, 8978806]],
+	// Carry On (LGPL-3.0, Tschipp; shipped unchanged, 0.20.17): sneak + right-click a chest, furnace, barrel or any other
+	// block with something in it, empty hands, to lift it with its contents; right-click to set it down. It replaced our
+	// own block lifting; bodies stay ours (core/CarryOnCompat + mixin/carryon keep it off entities, off busy arms and off
+	// the jaymospowers:carry_on_no_lift blocks). Needs Fabric API; Cloth Config (above) gives it a config screen.
+	// 2.12.1 for 26.3 (Modrinth version d0jTyKNs).
+	[dep: "maven.modrinth:carry-on:d0jTyKNs", cf: [274259, 9420425]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -261,6 +295,9 @@ def packMods = [
 // to each and move both lines into packMods; until then they're in modpack/mods (server, hand-made profile) and the dev
 // game, but not in the CurseForge import zip.
 def packModsNoCf = [
+	// Runes (all rights reserved, Zsolt Molnar; shipped unchanged): the rune reagents Wizards' spells use up, and its
+	// Rune Crafting Altar. TODO(home PC): its CurseForge [project id, file id] (cfwidget doesn't find its page).
+	[dep: "maven.modrinth:runes:PwSpmtFJ", cf: null],
 	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
 	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
 	// EMF Compat: Not Enough Animations (GPL-3.0, STRadaT; shipped unchanged): keeps Not Enough Animations' eating, map
@@ -492,6 +529,8 @@ dependencies {
 	compileOnly "maven.modrinth:jei:wQJNj1C5"
 	// (0.15.47) compiled against to keep its panel off blocks; touched only via client/compat/JadeEntitiesOnly (its jade entrypoint)
 	compileOnly "maven.modrinth:jade:71CTWqdE"
+	// (RPG Series) compiled against to wear spell books, scrolls and quivers in bauble slots; touched only via compat/SpellEngineCompat
+	compileOnly "maven.modrinth:spell-engine:kgVsejrW"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }

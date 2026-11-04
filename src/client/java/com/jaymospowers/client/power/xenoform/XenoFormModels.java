@@ -169,6 +169,12 @@ public final class XenoFormModels {
 			ultimatesFilled = true;
 			// (0.20.9) one line per Ultimate
 			ULTIMATES.put("bulwark", new com.jaymospowers.client.power.xenoform.ultimate.UltimateTitan());
+			ULTIMATES.put("pyre", new com.jaymospowers.client.power.xenoform.ultimate.UltimateSunheart()); // (0.20.21)
+			ULTIMATES.put("blur", new com.jaymospowers.client.power.xenoform.ultimate.UltimateStandstill()); // (0.20.21)
+			ULTIMATES.put("prism", new com.jaymospowers.client.power.xenoform.ultimate.UltimateGeode()); // (0.20.21)
+			ULTIMATES.put("wisp", new com.jaymospowers.client.power.xenoform.ultimate.UltimateRevenant()); // (0.20.21)
+			ULTIMATES.put("gremlin", new com.jaymospowers.client.power.xenoform.ultimate.UltimateSwarm()); // (0.20.21)
+			ULTIMATES.put("knell", new com.jaymospowers.client.power.xenoform.ultimate.UltimateTolling()); // (0.20.21)
 		}
 		return ULTIMATES.get(form);
 	}
@@ -8126,11 +8132,11 @@ public final class XenoFormModels {
 				+ m.land() * 0.3F;
 			this.tatters.zRot = Mth.cos(state.ageInTicks * 0.09F) * 0.1F - m.trail() * 0.35F;
 			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
-			if (flight != null && flight.glide() > 0.001F) {
-				// gliding, the tatters stream out behind and ripple
-				float g = XenoformFlightPose.smooth(flight.glide());
-				this.tatters.xRot = Mth.lerp(g, this.tatters.xRot, 1.15F + Mth.sin(state.ageInTicks * 0.35F) * 0.22F);
-				this.tatters.zRot = Mth.lerp(g, this.tatters.zRot, Mth.sin(state.ageInTicks * 0.23F) * 0.2F);
+			if (flight != null && flight.drift() > 0.001F) {
+				// (0.20.23) floating upright, the tatters hang below and ripple, trailing a little as it drifts
+				float g = XenoformFlightPose.smooth(flight.drift());
+				this.tatters.xRot = Mth.lerp(g, this.tatters.xRot, 0.12F + walk * 0.35F + Mth.sin(state.ageInTicks * 0.2F) * 0.12F);
+				this.tatters.zRot = Mth.lerp(g, this.tatters.zRot, Mth.sin(state.ageInTicks * 0.15F) * 0.12F);
 			}
 		}
 	}

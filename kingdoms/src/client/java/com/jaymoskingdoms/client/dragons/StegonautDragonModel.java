@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.513) Stegonaut, our own model (blocks, as the Kingdoms beasts are; nothing of Saint's Dragons' art is used, see
+ * (0.7.522) Stegonaut, our own model (blocks, as the Kingdoms beasts are; nothing of Saint's Dragons' art is used, see
  * {@code docs/SaintsDragons-Plan.md}): a tall, plated dragon high on four long pillar legs with long shins (Andy: "longer
  * limbs and necks, and be taller, to be imposing", "longer cannons"). A deep body, two staggered rows of tall horn
  * plates down its back (the tallest over its hips), a long neck raised up and forward in four segments, a heavy blunt
@@ -178,7 +178,7 @@ final class StegonautDragonModel extends EntityModel<WindDragonRenderer.State> {
 		float slam = s.action == StegonautDragon.GROUND_SLAM ? share : 0.0F;
 		float chew = s.action == StegonautDragon.CHEW ? share : 0.0F;
 		float roar = s.action == StegonautDragon.ROAR ? Mth.sin(share * Mth.PI) : 0.0F;
-		// (0.7.513, Andy: "all the joints should move and blend smoothly") every envelope eases in and out (smoothstep) and
+		// (0.7.522, Andy: "all the joints should move and blend smoothly") every envelope eases in and out (smoothstep) and
 		// ends where it began, so a move flows out of the walk and back into it with no snap
 		// the slam: rear up through the wind-up (to 0.6), then come down hard (but eased, over a quarter of it)
 		float rear = slam <= 0.0F ? 0.0F : slam < 0.6F ? ease(slam / 0.6F) : 1.0F - ease((slam - 0.6F) / 0.25F);

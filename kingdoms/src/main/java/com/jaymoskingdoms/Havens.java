@@ -105,13 +105,18 @@ public final class Havens {
 
 	/** Whether {@code f} is a haven, and of what (from who it is, so the draw is always the same). */
 	private static String draw(ServerLevel level, Faction f) {
+		return draw(level, f, false);
+	}
+
+	/** ... and {@code always}: a haven whatever the share (a ChoiceTheorem village's, {@link #ctov}). */
+	private static String draw(ServerLevel level, Faction f, boolean always) {
 		if (f.fallen() || f.type() == FactionType.BARBARIAN || Tempers.of(f) == Tempers.Temper.PURIST) {
 			return NONE;
 		}
 		long mix = (f.seat().asLong() * 0x9E3779B97F4A7C15L) ^ ((long)f.id() << 21);
 		mix ^= mix >>> 29;
 		float share = f.type().isRealm() ? REALM_SHARE : VILLAGE_SHARE;
-		if (Math.floorMod(mix, 1000L) >= (long)(share * 1000)) {
+		if (!always && Math.floorMod(mix, 1000L) >= (long)(share * 1000)) {
 			return NONE;
 		}
 		mix = Long.rotateLeft(mix, 17) * 0xBF58476D1CE4E5B9L;
@@ -167,13 +172,69 @@ public final class Havens {
 		}
 		for (LivingEntity x : level.getEntitiesOfClass(LivingEntity.class, new AABB(f.seat()).inflate(LAND_RANGE),
 			x -> x.isAlive() && VillagerHeritage.eligible(x) && (!(x instanceof Folk folk) || folk.factionId() == f.id()))) {
-			if (!fits(server, f, VillagerHeritage.of(x))) {
+			if (!fits(server, f, VillagerHeritage.of(x)) && !keptHuman(server, f, x, VillagerHeritage.of(x))) {
 				Heritage.Kind kind = blood(server, f, x.getRandom());
 				if (kind != null) {
 					VillagerHeritage.born(x, kind, null);
 				}
 			}
 		}
+	}
+
+	/**
+	 * (0.7.521) Andy (2026-11-04), of ChoiceTheorem's Overhauled Village's villages: "those should function like the
+	 * havens, there should rarely be a human there and if there is theres a REASON." A settlement founded in one of its
+	 * villages (structure ids {@code ctov:*}) is a haven always (of the blood its land suits, or mixed, as any haven;
+	 * never a purist's or a barbarian camp), kept as one in {@link #HAVENS} under {@code ctov:<faction id>}. Its people
+	 * standing when it's found take its blood, but for about one human in {@link #KEPT_HUMAN_IN}, who stays and has a
+	 * reason to ({@link #humanReason}), given when asked their name ({@link Introductions#askName}).
+	 */
+	static void ctov(ServerLevel level, Faction f) {
+		MinecraftServer server = level.getServer();
+		ServerLevel store = Factions.level(server);
+		Map<String, String> next = new HashMap<>(store.getAttachedOrElse(HAVENS, Map.of()));
+		next.put(CTOV + f.id(), "1");
+		store.setAttached(HAVENS, Map.copyOf(next));
+		String haven = draw(store, f, true);
+		make(level, f, haven);
+		JaymosKingdoms.LOGGER.info("{} stands in one of ChoiceTheorem's villages: a haven ({})", f.name(), haven.isEmpty() ? "none: purist" : haven);
+	}
+
+	/** (0.7.521) The key prefix of a ChoiceTheorem village's haven in {@link #HAVENS}, and its structures' namespace. */
+	static final String CTOV = "ctov:";
+	/** (0.7.521) About one human in this many in a ChoiceTheorem village's haven stays there, for a reason. */
+	static final int KEPT_HUMAN_IN = 25;
+	/** (0.7.521) Why: wed into it, cast out of the human towns, a foundling raised there, its healer, working off a debt, a deserter it hid. */
+	static final String[] HUMAN_REASONS = {"wed", "outcast", "foundling", "healer", "debt", "deserter"};
+
+	/** (0.7.521) {@code f} was founded in one of ChoiceTheorem's villages ({@link #ctov}). */
+	static boolean ctovHaven(MinecraftServer server, @Nullable Faction f) {
+		return f != null && Factions.level(server).getAttachedOrElse(HAVENS, Map.of()).containsKey(CTOV + f.id()) && is(server, f);
+	}
+
+	/** (0.7.521) {@code who}, human, stays human in ChoiceTheorem haven {@code f} (about one in {@link #KEPT_HUMAN_IN}, by who they are). */
+	static boolean keptHuman(MinecraftServer server, @Nullable Faction f, LivingEntity who, Heritage.@Nullable Kind kind) {
+		if (kind == null || Prejudice.degree(kind) > 0 || kind.brood || !ctovHaven(server, f)) {
+			return false;
+		}
+		return Math.floorMod(lotOf(who), (long)KEPT_HUMAN_IN) == 0L;
+	}
+
+	/** (0.7.521) Why {@code who} is a human living in a ChoiceTheorem haven (a {@link #HUMAN_REASONS} key), or null if they aren't one. */
+	static @Nullable String humanReason(LivingEntity who) {
+		if (!(who.level() instanceof ServerLevel level)) {
+			return null;
+		}
+		Faction f = home(who);
+		if (!keptHuman(level.getServer(), f, who, VillagerHeritage.of(who))) {
+			return null;
+		}
+		return HUMAN_REASONS[(int)Math.floorMod(lotOf(who) >>> 17, (long)HUMAN_REASONS.length)];
+	}
+
+	private static long lotOf(LivingEntity who) {
+		long mix = who.getUUID().getLeastSignificantBits() * 0x9E3779B97F4A7C15L ^ who.getUUID().getMostSignificantBits();
+		return mix ^ (mix >>> 31);
 	}
 
 	/** {@code f} is a haven. */
@@ -246,7 +307,7 @@ public final class Havens {
 	 */
 	static Heritage.@Nullable Kind settle(ServerLevel level, LivingEntity villager, Heritage.@Nullable Kind kind) {
 		Faction f = villager instanceof Folk folk ? Factions.get(level.getServer(), folk.factionId()) : at(level, villager.blockPosition());
-		if (f == null || fits(level.getServer(), f, kind)) {
+		if (f == null || fits(level.getServer(), f, kind) || keptHuman(level.getServer(), f, villager, kind)) {
 			return null;
 		}
 		if (kind != null && kind.brood) {

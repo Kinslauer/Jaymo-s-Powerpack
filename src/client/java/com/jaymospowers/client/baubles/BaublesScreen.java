@@ -56,6 +56,8 @@ public class BaublesScreen extends AbstractContainerScreen<BaublesMenu> {
 		graphics.fill(x + 3, y + h - 3, x + w - 1, y + h - 1, SHADE);
 		graphics.fill(x + w - 3, y + 3, x + w - 1, y + h - 1, SHADE);
 		graphics.fill(x + 3, y + 3, x + w - 3, y + h - 3, PANEL);
+		// (Artifacts) the player box first: the feet slot sits inside it
+		graphics.fill(x + BOX_X0, y + BOX_Y0, x + BOX_X1, y + BOX_Y1, EDGE);
 		for (Slot slot : this.menu.slots) {
 			well(graphics, x + slot.x, y + slot.y);
 		}
@@ -67,7 +69,6 @@ public class BaublesScreen extends AbstractContainerScreen<BaublesMenu> {
 				graphics.fill(sx, sy, sx + 16, sy + 16, GHOST_FADE);
 			}
 		}
-		graphics.fill(x + BOX_X0, y + BOX_Y0, x + BOX_X1, y + BOX_Y1, EDGE);
 		if (this.minecraft.player != null) {
 			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x + BOX_X0, y + BOX_Y0, x + BOX_X1, y + BOX_Y1, 30, 0.0625F,
 				this.xMouse, this.yMouse, this.minecraft.player);

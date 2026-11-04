@@ -17,7 +17,7 @@ from gen_dragons import rgb, jitter, mix, shade, write, entry, egg, ASSETS, DATA
 from lesser_dragon_art import Plan, chain, noise_field, FACE_I
 
 # ---- the body plan -------------------------------------------------------------------------------------------------
-# (0.7.513, Andy: "atroxiia does NOT look right") a serpent with two great arms and no hind legs: its chest held high on
+# (0.7.522, Andy: "atroxiia does NOT look right") a serpent with two great arms and no hind legs: its chest held high on
 # the arms, the serpent body running back down to the ground and along it as a long tail (its third support), rising at
 # the end into a spear of gold-bound ice; a short raised neck and a head under a pharaoh's headdress of hide (two lappets
 # hanging behind it, a band across the brow). Our own design throughout.

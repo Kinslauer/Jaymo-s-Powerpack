@@ -181,9 +181,9 @@ public abstract class WindDragon extends AbstractHorse {
 	// ---- the client's smoothed animation (see the model) ----
 	public float flyAnim, flyAnimO, breathAnim, breathAnimO, landAnim, landAnimO, sitAnim, sitAnimO, crashAnim, crashAnimO;
 	public float flapPhase, flapPhaseO, glideAnim, glideAnimO, pitchAnim, pitchAnimO, swimAnim, swimAnimO;
-	/** (0.7.513) How far it has risen onto its hind legs ({@link #standing}), eased, for its model. */
+	/** (0.7.522) How far it has risen onto its hind legs ({@link #standing}), eased, for its model. */
 	public float standAnim, standAnimO;
-	/** (0.7.513) The move the model is playing ({@link #action}) and how many ticks it has been playing it. */
+	/** (0.7.522) The move the model is playing ({@link #action}) and how many ticks it has been playing it. */
 	public int actionSeen, actionAge;
 
 	protected WindDragon(EntityType<? extends WindDragon> type, Level level) {
@@ -218,7 +218,7 @@ public abstract class WindDragon extends AbstractHorse {
 
 	@Override
 	protected void registerGoals() {
-		// it moves itself (customServerAiStep): no horse goals (no panicking, no bucking); (0.7.513) a swimmer floats by its
+		// it moves itself (customServerAiStep): no horse goals (no panicking, no bucking); (0.7.522) a swimmer floats by its
 		// own travel (the goal's hops would keep it from diving)
 		if (!swims()) {
 			this.goalSelector.addGoal(0, new FloatGoal(this));
@@ -368,7 +368,7 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	/**
-	 * (0.7.513) Whether it flies (the wind dragons all do). A walker ({@code docs/SaintsDragons-Plan.md}, the lesser dragons
+	 * (0.7.522) Whether it flies (the wind dragons all do). A walker ({@code docs/SaintsDragons-Plan.md}, the lesser dragons
 	 * on their feet: Stegonaut) never takes off: wild it grazes about its home and fights on the ground, ridden it is
 	 * steered like a horse (vanilla's mount travel), and R sends its own move ({@link #riderBreath}).
 	 */
@@ -376,22 +376,22 @@ public abstract class WindDragon extends AbstractHorse {
 		return true;
 	}
 
-	/** (0.7.513) Whether it goes for players who come near (a grazing walker only fights whoever hurts it). */
+	/** (0.7.522) Whether it goes for players who come near (a grazing walker only fights whoever hurts it). */
 	protected boolean aggressive() {
 		return true;
 	}
 
-	/** (0.7.513) Whether a wild one shows a boss bar (the wind dragons are minibosses; the lesser dragons are beasts). */
+	/** (0.7.522) Whether a wild one shows a boss bar (the wind dragons are minibosses; the lesser dragons are beasts). */
 	protected boolean bossBar() {
 		return true;
 	}
 
-	/** (0.7.513) Whether killing one counts toward Eurus and Aeolus's disguises ({@link DragonRecords}): only the wind dragons do. */
+	/** (0.7.522) Whether killing one counts toward Eurus and Aeolus's disguises ({@link DragonRecords}): only the wind dragons do. */
 	protected boolean windDragon() {
 		return true;
 	}
 
-	/** (0.7.513) What everyone near is told when it's worn down, and when it bolts (a walker sinks and lumbers off). */
+	/** (0.7.522) What everyone near is told when it's worn down, and when it bolts (a walker sinks and lumbers off). */
 	protected String crashKey() {
 		return flies() ? "message.jaymoskingdoms.dragon.crashed" : "message.jaymoskingdoms.dragon.crashed_walker";
 	}
@@ -400,13 +400,13 @@ public abstract class WindDragon extends AbstractHorse {
 		return flies() ? "message.jaymoskingdoms.dragon.bolted" : "message.jaymoskingdoms.dragon.bolted_walker";
 	}
 
-	/** (0.7.513) Called every tick a wild walker is fighting {@code target} on its feet (a species adds its own moves). */
+	/** (0.7.522) Called every tick a wild walker is fighting {@code target} on its feet (a species adds its own moves). */
 	protected void walkerFight(ServerLevel level, LivingEntity target) {
 		groundFight(level, target, true);
 	}
 
 	/**
-	 * (0.7.513) Whether it swims (a walker of the coasts and the cold waters: Atroxiia, Varasuchus): it breathes under
+	 * (0.7.522) Whether it swims (a walker of the coasts and the cold waters: Atroxiia, Varasuchus): it breathes under
 	 * water and currents don't push it; wild, it dives after whoever it fights there and floats with its back out
 	 * otherwise; ridden in water it swims where the rider looks ({@code DragonsClient}: W ahead, Space up, Shift down) and
 	 * carries its riders' air.
@@ -415,17 +415,17 @@ public abstract class WindDragon extends AbstractHorse {
 		return false;
 	}
 
-	/** (0.7.513) Whether it stands up on its hind legs now (Varasuchus raging); read on the client from what's synced. */
+	/** (0.7.522) Whether it stands up on its hind legs now (Varasuchus raging); read on the client from what's synced. */
 	protected boolean standing() {
 		return false;
 	}
 
-	/** (0.7.513) A swimmer's top speed in water (blocks a tick). */
+	/** (0.7.522) A swimmer's top speed in water (blocks a tick). */
 	public double swimSpeed() {
 		return 0.35;
 	}
 
-	/** (0.7.513) The move it is making now, for its model (0 none; a species' own numbers, synced by the species). */
+	/** (0.7.522) The move it is making now, for its model (0 none; a species' own numbers, synced by the species). */
 	public int action() {
 		return 0;
 	}
@@ -462,7 +462,7 @@ public abstract class WindDragon extends AbstractHorse {
 		return favourite(stack);
 	}
 
-	// ---- swimming (0.7.513) ---------------------------------------------------------------------------------------------
+	// ---- swimming (0.7.522) ---------------------------------------------------------------------------------------------
 
 	/** A swimmer floats with this much of it under (its height's share), and the water lifts it back toward that this hard. */
 	static final double SWIM_FLOAT = 0.7, SWIM_LIFT = 0.06, SWIM_LIFT_MAX = 0.05, SWIM_SINK_MAX = 0.04;
@@ -529,7 +529,7 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	/**
-	 * (0.7.513) Stunned (Atroxiia's precise strike, Gungnir and quake): rooted, its hands heavy, a ring of stars over its
+	 * (0.7.522) Stunned (Atroxiia's precise strike, Gungnir and quake): rooted, its hands heavy, a ring of stars over its
 	 * head; a mob loses its path.
 	 */
 	protected static void stun(ServerLevel level, LivingEntity target, int ticks) {
@@ -542,7 +542,7 @@ public abstract class WindDragon extends AbstractHorse {
 		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getEyeY() + 0.5, target.getZ(), 10, 0.35, 0.1, 0.35, 0.05);
 	}
 
-	// ---- what the lesser dragons' moves share (0.7.513) ---------------------------------------------------------------
+	// ---- what the lesser dragons' moves share (0.7.522) ---------------------------------------------------------------
 
 	/** Whoever its blows may hit: not itself, its riders, its owner, anyone in creative or anyone it spares. */
 	protected boolean spareable(LivingEntity e) {
@@ -602,7 +602,7 @@ public abstract class WindDragon extends AbstractHorse {
 		LivingEntity rider = this.getControllingPassenger();
 		boolean ridden = rider instanceof Player;
 		this.flying = false;
-		// (0.7.513) a swimmer ridden in the water is steered as in the air (it doesn't sink)
+		// (0.7.522) a swimmer ridden in the water is steered as in the air (it doesn't sink)
 		this.setNoGravity(ridden && saddled() && (!grounded() && flies() || swims() && this.isInWater()));
 		for (Entity passenger : this.getPassengers()) {
 			passenger.resetFallDistance();
@@ -746,11 +746,11 @@ public abstract class WindDragon extends AbstractHorse {
 		}
 	}
 
-	/** (0.7.513) How far a walker strolls from its home, how often it sets off (1 in this many ticks), how fast it runs off. */
+	/** (0.7.522) How far a walker strolls from its home, how often it sets off (1 in this many ticks), how fast it runs off. */
 	static final int WANDER_RADIUS = 14, WANDER_EVERY = 120;
 	static final double WANDER_SPEED = 0.6, FLEE_SPEED = 1.4;
 
-	/** (0.7.513) A walker about its home: it strolls and grazes, and bolting it lumbers away from whoever's near. */
+	/** (0.7.522) A walker about its home: it strolls and grazes, and bolting it lumbers away from whoever's near. */
 	private void walk(ServerLevel level) {
 		if (this.wild == Wild.FLEE) {
 			Player near = level.getNearestPlayer(this, LOSE_RANGE);
@@ -870,7 +870,7 @@ public abstract class WindDragon extends AbstractHorse {
 	protected void fight(ServerLevel level, LivingEntity target) {
 		this.wildTicks++;
 		if (!flies()) {
-			// (0.7.513) a walker stands its ground where it was
+			// (0.7.522) a walker stands its ground where it was
 			this.wild = Wild.GROUND;
 			walkerFight(level, target);
 			if (swims() && this.isInWater() && !grounded()) {
