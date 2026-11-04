@@ -30,12 +30,16 @@ abstract class ArmourGrimeMixin {
 	/** The grime of the piece being drawn now, or null (render thread only). */
 	@Unique
 	private static ArmourGrime.@Nullable Grime jaymospowers$grime;
+	/** (0.20.39) And its blood. */
+	@Unique
+	private static com.jaymospowers.core.blood.Bloodied.@Nullable Blood jaymospowers$blood;
 
 	@Inject(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V",
 		at = @At("HEAD"))
 	private void jaymospowers$grime(EquipmentClientInfo.LayerType layer, ResourceKey<EquipmentAsset> asset, Model<?> model, Object state, ItemStack stack,
 		PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, Identifier texture, int outlineColor, int order, CallbackInfo ci) {
 		jaymospowers$grime = ArmourGrime.grime(stack);
+		jaymospowers$blood = com.jaymospowers.core.blood.Bloodied.blood(stack);
 	}
 
 	/** Each of the armour's own layers (not the trim) is drawn from its grimy copy. */
@@ -44,6 +48,7 @@ abstract class ArmourGrimeMixin {
 	private Object jaymospowers$grimyLayer(Function<Object, Object> lookup, Object key, Operation<Object> original) {
 		Object texture = original.call(lookup, key);
 		ArmourGrime.Grime grime = jaymospowers$grime;
-		return grime != null && texture instanceof Identifier id ? ArmourGrimeTextures.armour(id, grime) : texture;
+		var blood = jaymospowers$blood;
+		return (grime != null || blood != null) && texture instanceof Identifier id ? ArmourGrimeTextures.armour(id, grime, blood) : texture;
 	}
 }

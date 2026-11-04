@@ -1,6 +1,8 @@
 package com.jaymospowers.client.wet;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.blood.BloodParticles;
+import com.jaymospowers.core.blood.Bloodied;
 import com.jaymospowers.core.wet.ArmourGrime;
 import com.mojang.blaze3d.platform.NativeImage;
 import java.io.InputStream;
@@ -36,6 +38,10 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * The colours suit the normal textures. With the optional Excalibur pack switched on, the grime takes Excalibur's grade
  * (darker, less saturated; {@code tools/excalibur_style/grade.py} on the default colours).
+ * <p>
+ * (0.20.39) Blood ({@link Bloodied}) is painted the same way over the grime, from its own masks in {@code textures/blood/}
+ * ({@code tools/blood_textures.py}): armour, any item's icon and a held weapon ({@link #icon}, the client's
+ * {@code BloodItemOverlay}), and a bloodied body's skin ({@link #skin}). It darkens to a dried brown as it ages.
  */
 public final class ArmourGrimeTextures {
 	/** Dust and mud colours for the normal textures, and graded for Excalibur. */
@@ -55,6 +61,14 @@ public final class ArmourGrimeTextures {
 	private static final Map<String, Identifier> MADE = new HashMap<>();
 	private static final Set<Identifier> UNREADABLE = new HashSet<>();
 	private static @Nullable Mask armourDust, armourMud, itemDust, itemMud;
+	/** (0.20.39) The blood masks: armour sheet, item icon, body skin. */
+	private static @Nullable Mask armourBlood, itemBlood, bodyBlood;
+	/** (0.20.39) Blood's steps of wetness (fresh to dried), how much of the mask's order soaked blood reaches, and how strong it is. */
+	static final int DRY_STEPS = 2;
+	static final float MOST_BLOOD = 0.85F, BLOOD_EDGE = 0.6F, BLOOD_HEART = 0.95F;
+	/** (0.20.39) Dried blood is this dark a share of the fresh colour, and this much browner. */
+	static final float DRIED = 0.5F;
+	static final int DRIED_TOWARD = 0x3B1E12;
 	private static boolean masksRead;
 	private static boolean excalibur;
 	private static int made;
@@ -78,6 +92,7 @@ public final class ArmourGrimeTextures {
 		UNREADABLE.clear();
 		masksRead = false;
 		armourDust = armourMud = itemDust = itemMud = null;
+		armourBlood = itemBlood = bodyBlood = null;
 		excalibur = false;
 		for (String id : minecraft.getResourcePackRepository().getSelectedIds()) {
 			if (id.toLowerCase(Locale.ROOT).contains("excalibur")) {
@@ -89,21 +104,31 @@ public final class ArmourGrimeTextures {
 
 	/** The worn texture {@code base} with {@code grime} painted in, or {@code base} when it's clean or can't be read. */
 	public static Identifier armour(Identifier base, ArmourGrime.@Nullable Grime grime) {
-		if (grime == null || grime.amount() <= 0) {
+		return armour(base, grime, null);
+	}
+
+	/** (0.20.39) The worn texture {@code base} with {@code grime} and {@code blood} painted in, or {@code base} when it's clean. */
+	public static Identifier armour(Identifier base, ArmourGrime.@Nullable Grime grime, Bloodied.@Nullable Blood blood) {
+		boolean dirty = grime != null && grime.amount() > 0;
+		Smear smear = smear(blood);
+		if (!dirty && smear == null) {
 			return base;
 		}
 		readMasks();
-		if (armourDust == null || armourMud == null) {
+		if (armourDust == null || armourMud == null || armourBlood == null) {
 			return base;
 		}
-		Identifier painted = paint(base, grime, armourDust, armourMud, false);
+		Identifier painted = paint(base, dirty ? grime : null, armourDust, armourMud, smear, armourBlood, false, false);
 		return painted == null ? base : painted;
 	}
 
 	/** Just the grime splotches to lay over {@code stack}'s inventory icon, or null for none. */
 	public static @Nullable Identifier icon(ItemStack stack) {
 		ArmourGrime.Grime grime = ArmourGrime.grime(stack);
-		if (grime == null || grime.amount() <= 0) {
+		boolean dirty = grime != null && grime.amount() > 0;
+		// (0.20.39) and blood, on any item
+		Smear smear = smear(Bloodied.blood(stack));
+		if (!dirty && smear == null) {
 			return null;
 		}
 		Identifier model = stack.get(DataComponents.ITEM_MODEL);
@@ -111,26 +136,81 @@ public final class ArmourGrimeTextures {
 			return null;
 		}
 		readMasks();
-		if (itemDust == null || itemMud == null) {
+		if (itemDust == null || itemMud == null || itemBlood == null) {
 			return null;
 		}
-		return paint(model.withPath("textures/item/" + model.getPath() + ".png"), grime, itemDust, itemMud, true);
+		return paint(model.withPath("textures/item/" + model.getPath() + ".png"), dirty ? grime : null, itemDust, itemMud, smear, itemBlood, true,
+			false);
+	}
+
+	/**
+	 * (0.20.39) Just the blood to lay over a body drawn from the skin {@code base} ({@code BloodCoatLayer}): splotches where
+	 * the skin has pixels, or, for a skin that can't be read (a player's, downloaded), where the mask says, as if the
+	 * skin were whole. Null for none.
+	 */
+	public static @Nullable Identifier skin(Identifier base, Bloodied.@Nullable Coat coat) {
+		if (coat == null || coat.amount() <= 0) {
+			return null;
+		}
+		readMasks();
+		if (bodyBlood == null) {
+			return null;
+		}
+		Smear smear = new Smear(Mth.clamp(Mth.ceil(coat.level() * STAGES), 1, STAGES), coat.color() & 0xFFFFFF);
+		Identifier painted = paint(base, null, null, null, smear, bodyBlood, true, false);
+		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), null, null, null, smear, bodyBlood, true, true);
+	}
+
+	/** (0.20.39) Blood to paint: how soaked (a stage, 1 to {@link #STAGES}) and its colour as it looks now (drying darker). */
+	record Smear(int stage, int colour) {
+	}
+
+	private static @Nullable Smear smear(Bloodied.@Nullable Blood blood) {
+		if (blood == null || blood.amount() <= 0) {
+			return null;
+		}
+		var level = Minecraft.getInstance().level;
+		float dry = level == null ? 0.0F : Bloodied.dryness(blood.laid(), level.getGameTime());
+		dry = Math.round(dry * DRY_STEPS) / (float) DRY_STEPS;
+		int fresh = blood.color() & 0xFFFFFF;
+		if (fresh == BloodParticles.MAGMA) {
+			// magma on a blade cools as it does on the ground
+			fresh = BloodParticles.MAGMA_CRUST;
+		}
+		int darker = lerpRgb(0.5F, scale(fresh, DRIED), DRIED_TOWARD);
+		return new Smear(Mth.clamp(Mth.ceil(blood.level() * STAGES), 1, STAGES), lerpRgb(dry, fresh, darker));
+	}
+
+	private static int scale(int rgb, float k) {
+		return Math.round((rgb >> 16 & 0xFF) * k) << 16 | Math.round((rgb >> 8 & 0xFF) * k) << 8 | Math.round((rgb & 0xFF) * k);
 	}
 
 	// ---- painting -------------------------------------------------------------------------------------------------------
 
-	private static @Nullable Identifier paint(Identifier base, ArmourGrime.Grime grime, Mask dust, Mask mud, boolean overlay) {
+	private static @Nullable Identifier paint(Identifier base, ArmourGrime.@Nullable Grime grime, @Nullable Mask dust, @Nullable Mask mud,
+		@Nullable Smear smear, @Nullable Mask bloodMask, boolean overlay, boolean whole) {
 		if (UNREADABLE.contains(base)) {
 			return null;
 		}
-		int stage = Mth.clamp(Mth.ceil(grime.level() * STAGES), 1, STAGES);
-		int mudStep = Math.round(grime.muddiness() * MUD_STEPS);
-		String key = base + "|" + stage + "|" + mudStep + (overlay ? "|o" : "");
+		int stage = grime == null ? 0 : Mth.clamp(Mth.ceil(grime.level() * STAGES), 1, STAGES);
+		int mudStep = grime == null ? 0 : Math.round(grime.muddiness() * MUD_STEPS);
+		String key = base + "|" + stage + "|" + mudStep + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "");
 		Identifier done = MADE.get(key);
 		if (done != null) {
 			return done;
 		}
-		NativeImage image = read(base);
+		NativeImage image;
+		if (whole && bloodMask != null) {
+			// (0.20.39) a skin we can't read: paint over a whole, plain one the mask's size
+			image = new NativeImage(bloodMask.width(), bloodMask.height(), false);
+			for (int y = 0; y < bloodMask.height(); y++) {
+				for (int x = 0; x < bloodMask.width(); x++) {
+					image.setPixel(x, y, 0xFFFFFFFF);
+				}
+			}
+		} else {
+			image = read(base);
+		}
 		if (image == null) {
 			UNREADABLE.add(base);
 			return null;
@@ -142,6 +222,7 @@ public final class ArmourGrimeTextures {
 		float muddy = mudStep / (float) MUD_STEPS;
 		int colour = lerpRgb(muddy, excalibur ? EXCALIBUR_DUST : DUST, excalibur ? EXCALIBUR_MUD : MUD);
 		float threshold = 1.0F - MOST_COVER * level;
+		float bloodThreshold = smear == null ? 2.0F : 1.0F - MOST_BLOOD * smear.stage() / (float) STAGES;
 		int w = image.getWidth(), h = image.getHeight();
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
@@ -150,7 +231,27 @@ public final class ArmourGrimeTextures {
 				int r = argb >> 16 & 0xFF, g = argb >> 8 & 0xFF, b = argb & 0xFF;
 				float lum = r * 0.3F + g * 0.59F + b * 0.11F;
 				int out = overlay ? 0 : argb;
-				if (a != 0 && lum >= OUTLINE) {
+				if (smear != null && bloodMask != null && a != 0 && (whole || lum >= OUTLINE || bloodMask == bodyBlood)) {
+					// (0.20.39) blood first, so grime over it reads as grime and the blood's own pixels below it as blood
+					int bm = bloodMask.at(x, y, w, h);
+					float order = (bm >>> 24) / 255.0F;
+					if (order > 0.0F && order > bloodThreshold) {
+						float shade = (bm & 0xFF) / 255.0F;
+						float strength = BLOOD_EDGE + (BLOOD_HEART - BLOOD_EDGE) * Math.min(1.0F, (order - bloodThreshold) * 4.0F);
+						float k = shade * (0.75F + 0.25F * lum / 255.0F);
+						int c = smear.colour();
+						int br = Math.round((c >> 16 & 0xFF) * k), bg = Math.round((c >> 8 & 0xFF) * k), bb = Math.round((c & 0xFF) * k);
+						if (overlay) {
+							out = Math.round(strength * a) << 24 | br << 16 | bg << 8 | bb;
+						} else {
+							r = mix(r, br, strength);
+							g = mix(g, bg, strength);
+							b = mix(b, bb, strength);
+							out = a << 24 | r << 16 | g << 8 | b;
+						}
+					}
+				}
+				if (grime != null && dust != null && mud != null && a != 0 && lum >= OUTLINE) {
 					int dm = dust.at(x, y, w, h), mm = mud.at(x, y, w, h);
 					float order = ((1.0F - muddy) * (dm >>> 24) + muddy * (mm >>> 24)) / 255.0F;
 					if (order > 0.0F && order > threshold) {
@@ -160,7 +261,10 @@ public final class ArmourGrimeTextures {
 						float k = shade * (0.7F + 0.3F * lum / 255.0F);
 						int gr = Math.round((colour >> 16 & 0xFF) * k), gg = Math.round((colour >> 8 & 0xFF) * k), gb = Math.round((colour & 0xFF) * k);
 						if (overlay) {
-							out = Math.round(strength * a) << 24 | gr << 16 | gg << 8 | gb;
+							int over = Math.round(strength * a);
+							if ((out >>> 24) < over) {
+								out = over << 24 | gr << 16 | gg << 8 | gb;
+							}
 						} else {
 							out = a << 24 | mix(r, gr, strength) << 16 | mix(g, gg, strength) << 8 | mix(b, gb, strength);
 						}
@@ -192,6 +296,9 @@ public final class ArmourGrimeTextures {
 		armourMud = Mask.read(JaymosPowers.id("textures/grime/armour_mud.png"));
 		itemDust = Mask.read(JaymosPowers.id("textures/grime/item_dust.png"));
 		itemMud = Mask.read(JaymosPowers.id("textures/grime/item_mud.png"));
+		armourBlood = Mask.read(JaymosPowers.id("textures/blood/armour_blood.png"));
+		itemBlood = Mask.read(JaymosPowers.id("textures/blood/item_blood.png"));
+		bodyBlood = Mask.read(JaymosPowers.id("textures/blood/body_blood.png"));
 	}
 
 	private static @Nullable NativeImage read(Identifier texture) {

@@ -18,6 +18,7 @@ import org.joml.Vector3fc;
  * {@code SpriteSheetBloodParticle}, ported): tossed up, falls hard, and where it lands leaves a {@link BloodPuddle}.
  * A sprite sheet ({@code frames} over 1: a spatter, spurt or swipe) plays its frames side by side; a swipe or spurt
  * ({@code directional}) turns to face the way it flies. Under water it drifts, slows, spreads and fades instead.
+ * <p>(0.20.39) One that flies into a wall splats on it ({@link BloodWallMark#splat}). Magma blood glows as it flies.
  */
 final class BloodDrop extends SingleQuadParticle {
 	/** Ticks a sheet's frame shows for. */
@@ -69,9 +70,36 @@ final class BloodDrop extends SingleQuadParticle {
 		}
 	}
 
+	/** (0.20.39) A drop off the end of a run on a wall: no toss, it just falls. */
+	BloodDrop drip() {
+		this.xd = 0.0;
+		this.zd = 0.0;
+		this.yd = -0.02;
+		return this;
+	}
+
+	@Override
+	protected int getLightCoords(float partialTick) {
+		// (0.20.39) magma glows
+		return this.color == BloodParticles.MAGMA ? 0xF000F0 : super.getLightCoords(partialTick);
+	}
+
 	@Override
 	public void tick() {
+		double px = this.x, py = this.y, pz = this.z, pxd = this.xd, pyd = this.yd, pzd = this.zd;
 		super.tick();
+		if (this.stains && !this.underwater && !this.removed && !this.onGround && this.alpha > 0.5F
+			&& (pxd != 0.0 && this.xd == 0.0 || pzd != 0.0 && this.zd == 0.0)) {
+			// (0.20.39) it hit a wall: find the face it hit and splat there
+			Vec3 from = new Vec3(px, py, pz);
+			Vec3 to = from.add(pxd * 2.0 + Math.signum(pxd) * 0.1, pyd, pzd * 2.0 + Math.signum(pzd) * 0.1);
+			var hit = this.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
+			if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && hit.getDirection().getAxis() != net.minecraft.core.Direction.Axis.Y) {
+				BloodWallMark.splat(this.level, hit.getLocation(), hit.getDirection(), this.color, this.getQuadSize(0.0F));
+				this.remove();
+				return;
+			}
+		}
 		if (this.underwater) {
 			this.gravity *= 0.99F;
 		}

@@ -34,6 +34,8 @@ public final class BloodClient {
 	/** (0.17.182) The server's lasting stains lying in {@link #stainsIn}, by their mark id. */
 	private static final Map<Long, BloodPuddle> STAINS = new HashMap<>();
 	private static @Nullable ClientLevel stainsIn;
+	/** (0.20.39) Sprites kept to draw with: the pools', a plain drop's, the footprints' and the runs down walls'. */
+	private static @Nullable SpriteSet puddles, drops, prints, runs;
 
 	private BloodClient() {
 	}
@@ -56,7 +58,19 @@ public final class BloodClient {
 			zd, sprites, options.color(), options.scale()));
 		registry.register(BloodParticles.RED_FLECK, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new BloodFleck(level, x, y, z, xd,
 			yd, zd, sprites, RED, 1.0F));
-		registry.register(BloodParticles.PUDDLE, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> puddle(level, x, y, z, sprites, options));
+		registry.register(BloodParticles.PUDDLE, sprites -> {
+			puddles = sprites;
+			return (options, level, x, y, z, xd, yd, zd, random) -> puddle(level, x, y, z, sprites, options);
+		});
+		// (0.20.39) sprites only: a bare /particle of either lays nothing
+		registry.register(BloodParticles.PRINT_SPRITES, sprites -> {
+			prints = sprites;
+			return (options, level, x, y, z, xd, yd, zd, random) -> null;
+		});
+		registry.register(BloodParticles.RUN_SPRITES, sprites -> {
+			runs = sprites;
+			return (options, level, x, y, z, xd, yd, zd, random) -> null;
+		});
 	}
 
 	/**
@@ -83,9 +97,32 @@ public final class BloodClient {
 		return stain;
 	}
 
+	static @Nullable SpriteSet puddleSprites() {
+		return puddles;
+	}
+
+	static @Nullable SpriteSet printSprites() {
+		return prints;
+	}
+
+	static @Nullable SpriteSet runSprites() {
+		return runs;
+	}
+
+	/** (0.20.39) A drop of {@code color} this big falling straight down from here (off the end of a run on a wall). */
+	static void drip(ClientLevel level, double x, double y, double z, int color, float scale) {
+		if (drops != null) {
+			net.minecraft.client.Minecraft.getInstance().particleEngine.add(new BloodDrop(level, x, y, z, 0.0, 0.0, 0.0, drops, 1, 16, false, color, scale,
+				true).drip());
+		}
+	}
+
 	/** A drop kind: a sheet of {@code frames} frames, each {@code size} pixels, that turns to its flight if {@code directional}. */
 	private static void kind(ParticleProviderRegistry registry, SimpleParticleType type, int frames, int size, boolean directional) {
 		registry.register(type, sprites -> {
+			if (type == BloodParticles.DROP) {
+				drops = sprites;
+			}
 			Kind kind = (level, x, y, z, xd, yd, zd, color, scale, stains) -> make(level, x, y, z, xd, yd, zd, sprites, frames, size,
 				directional, color, scale, stains);
 			KINDS.put(type, kind);
