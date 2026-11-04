@@ -8929,3 +8929,22 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   bandana. `Uniforms.POOR` is now six roughspun tunics with a belt and dark breeches, no hat (undyed linen, dun, grey,
   russet, weld green, woad; `tools/gen_nobody_rags.py`, drawn over the deckhands' slops). Nobodies already hired in a
   deckhand's slops change when they load. Not compiled or played yet.
+- **0.7.535, commandments for every patron** (`Commandments`, Andy 2026-11-04: "all the patrons should have commandments
+  like these, these are all good to keep for Truth, and truth villagers will vehemently refuse if asked/forced to break
+  any of them"). Every patron has ten, in lang part `commandments.json` (`commandment.jaymoskingdoms.<patron>.<0-9>`);
+  The Truth's are his ten as they were. Each commandment is a set of named acts (`Commandments.LAWS`), reported from where
+  they happen (`Commandments.act`): kills and blows (AFTER_DEATH/AFTER_DAMAGE), crimes (`Theft.commit`, seen or not),
+  rude answers (`Recollections.replied`), broken promises, bribes/tolls/searches (`Approaches`), accusing, `/introduce`,
+  lockpicks, blood drinking and turning, raising the dead, deep ore, what's eaten (`CommandmentFoodMixin`), blasts
+  (`CommandmentBlastMixin`), tools breaking (`ItemStackWearMixin`), lights and hearths broken, fires lit, the patron's
+  book thrown away, and every 2 s the Nether, the sky (the Aether, or wings), a night not slept (on at midnight, still up
+  at dawn), the sea, three dry days, the dark without a light, invisibility by day. A sworn player who breaks one of their
+  own patron's loses 6 favour (once a day for each). The book of Commandments (`jaymoskingdoms:commandments`, one item, the
+  patron in custom data) is given on swearing and left at a shrine with the lore book; `client/CommandmentsScreen` shows it
+  as an open book, I-V and VI-X, the broken ones struck through in red and "Broken: n / 10" for your own patron (synced
+  attachment `jaymoskingdoms:commandments`, counted fresh when you swear to another).
+  The Truth's folk keep its law: they never go for the unarmed and innocent (`ThrallTargetMixin`, every mob's
+  `canAttack`), won't follow or ride with you at night, in the Nether or up in the sky and leave you if you go there
+  (`McaCommandMixin`, and a 2 s look at each player's followers), won't take rot as a gift, won't take a bribe whatever
+  their king is like, and their poor don't rob the dead. They say why, hotly (`commandment.jaymoskingdoms.refuse.*`).
+  Compiled; not played.

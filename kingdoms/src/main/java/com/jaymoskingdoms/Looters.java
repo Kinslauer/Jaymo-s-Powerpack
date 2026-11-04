@@ -810,7 +810,8 @@ public final class Looters {
 			v -> v.isAlive() && !v.isBaby() && !v.isSleeping())) {
 			boolean poor = v.getVillagerData().profession().is(VillagerProfession.NONE) || v.getVillagerData().profession().is(VillagerProfession.NITWIT);
 			Faction theirs = Theft.lawAt(level, v.blockPosition());
-			if (!poor || theirs == null || theirs.id() != f.id() || !Bearers.freeVillager(v)) {
+			// (0.7.535) the Truth's folk take nothing that isn't theirs
+			if (!poor || theirs == null || theirs.id() != f.id() || !Bearers.freeVillager(v) || Commandments.truth(v)) {
 				continue;
 			}
 			double d = v.distanceToSqr(body);

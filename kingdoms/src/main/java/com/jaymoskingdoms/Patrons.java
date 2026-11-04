@@ -380,6 +380,8 @@ public final class Patrons {
 			if (!book.isEmpty()) {
 				Block.popResource(level, pos.above(), book);
 			}
+			// (0.7.535) and the book of its commandments
+			Block.popResource(level, pos.above(), Commandments.book(p));
 		}
 	}
 
@@ -457,6 +459,7 @@ public final class Patrons {
 	static void swornTurned(ServerPlayer sp, Patron p, int favour, long today, List<Mark> marks) {
 		set(sp, state(sp).sworn(p, favour, today).withMarks(marks));
 		learn(sp, p);
+		Commandments.sworn(sp, p);
 		Blessings.forget(sp.getUUID());
 		Blessings.refresh(sp);
 	}
@@ -467,6 +470,7 @@ public final class Patrons {
 		State next = s.sworn(p, favour, today);
 		set(sp, next);
 		learn(sp, p);
+		Commandments.sworn(sp, p);
 		Blessings.refresh(sp);
 	}
 
@@ -705,6 +709,7 @@ public final class Patrons {
 		}
 		if (pos.getY() < 0) {
 			deed(sp, Patron.ANVIL_FATHER, DEED_SMALL, "deep_ore");
+			Commandments.act(sp, "deep_ore");
 		}
 		Blessings.richSeam(level, sp, pos, state, be);
 	}
