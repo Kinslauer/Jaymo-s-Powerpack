@@ -8570,3 +8570,17 @@ shell strings, mon, the greenskins' bent copper, pirate gold) are the money ever
 - The cold stays their flaw as before (15% lighter blows, 20% slower in the cold lands); body heat's chill is unchanged.
 - The perk's card line says so.
 - Not compile-checked yet at this entry; not played.
+
+## 0.7.501: tails with a mind of their own (pack 0.20.1)
+- Andy: "they should pulse and slap like they have their own mind, but they swing violently whenever you walk". Beastfolk
+  tails (`BeastParts.tail`: beastfolk, canine, feline, kitsune, avian, serpen) swayed at `age * (rate + walk speed)`, so any
+  change of walk speed spun the phase and the tail whipped about. Now every wave runs on a fixed clock: a lazy wander of two
+  slow waves, a curl rolling up the far half now and then, and an occasional slap (`slap()`: a slow gate opens for a moment
+  and the tail whips quickly to the side, harder toward the tip). Walking calms all of that by half, lifts the tail a little
+  (`RUN_LIFT` 0.15, was 0.25; `RUN_STRAIGHTEN` 0.2, was 0.3) and adds only a small swing in step with the stride.
+- Feline tails (Andy: "like a cheetah's in sprint and otherwise, like an aileron helping them achieve speed in turning,
+  sticking straight up and moving"): carried straight up with the tip hooked over, still wandering, curling and slapping;
+  at a sprint (the sprint flag, or over 0.2 blocks a tick for villagers) the tail eases down level out behind and its own
+  life fades. Turning swings it: level, sideways like a rudder; upright, leaning across like an aileron. It swings into the
+  turn (`TAIL_RUDDER` -3.5; flip the sign to swing it out). Sprint and turn are eased per entity each frame (`EASED`).
+- Not compile-checked in the cloud; not played.
