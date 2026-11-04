@@ -12,7 +12,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
- * (0.7.516) The four payloads of diplomacy ({@link Envoys}, {@link RulersDesk}): an envoy's offer to the sovereign who hears
+ * (0.7.519) The four payloads of diplomacy ({@link Envoys}, {@link RulersDesk}): an envoy's offer to the sovereign who hears
  * it and the answer back, and the ruler's desk and what is done at it. Nothing is decided on the client: the server
  * checks every answer again.
  */

@@ -508,7 +508,7 @@ final class McaBridge {
 
 	/** {@link McaCompat#enlistRuler}. */
 	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house, java.util.@Nullable UUID chosen) {
-		// (0.7.516) one the realm chose (an election, a regent, a ward come of age) if they are still about and grown enough
+		// (0.7.519) one the realm chose (an election, a regent, a ward come of age) if they are still about and grown enough
 		VillagerEntityMCA villager = chosen != null && level.getEntity(chosen) instanceof VillagerEntityMCA c && c.isAlive() && teenOrOlder(c) ? c : null;
 		if (villager == null) {
 			villager = heir(level, f, house);
@@ -534,7 +534,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.516) The grown villagers of {@code f}'s town who could rule or stand for election: alive, adult (a teen never
+	 * (0.7.519) The grown villagers of {@code f}'s town who could rule or stand for election: alive, adult (a teen never
 	 * is), townsfolk or guards, not a hermit or an envoy, and not {@code house} (the late ruler).
 	 */
 	private static List<VillagerEntityMCA> candidates(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
@@ -592,7 +592,7 @@ final class McaBridge {
 	 * ({@code house}), then their widow or widower, then anyone.
 	 */
 	private static @Nullable VillagerEntityMCA heir(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
-		// (0.7.516) grown means adult now: a teen heir gets a regent (Elections), never the crown outright
+		// (0.7.519) grown means adult now: a teen heir gets a regent (Elections), never the crown outright
 		List<VillagerEntityMCA> all = candidates(level, f, house);
 		if (all.isEmpty()) {
 			return null;

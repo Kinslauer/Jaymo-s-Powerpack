@@ -402,37 +402,37 @@ public final class McaCompat {
 		return enlistRuler(level, f, role, house, null);
 	}
 
-	/** (0.7.516) As above, but {@code chosen} (an elected villager, a regent, a ward come of age) first if they are about and grown enough. */
+	/** (0.7.519) As above, but {@code chosen} (an elected villager, a regent, a ward come of age) first if they are about and grown enough. */
 	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house, java.util.@Nullable UUID chosen) {
 		return LOADED ? McaBridge.enlistRuler(level, f, role, house, chosen) : null;
 	}
 
-	/** (0.7.516) {@code f}'s grown villagers who could rule or stand for election (not {@code house}, the late ruler); none without MCA. */
+	/** (0.7.519) {@code f}'s grown villagers who could rule or stand for election (not {@code house}, the late ruler); none without MCA. */
 	static java.util.List<Villager> notables(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
 		return LOADED ? McaBridge.notables(level, f, house) : java.util.List.of();
 	}
 
-	/** (0.7.516) The late ruler's children and teens in {@code f}'s town, the eldest first; none without MCA. */
+	/** (0.7.519) The late ruler's children and teens in {@code f}'s town, the eldest first; none without MCA. */
 	static java.util.List<Villager> youngKin(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
 		return LOADED ? McaBridge.youngKin(level, f, house) : java.util.List.of();
 	}
 
-	/** (0.7.516) {@code v} is a grown villager. */
+	/** (0.7.519) {@code v} is a grown villager. */
 	static boolean adult(Villager v) {
 		return LOADED && McaBridge.adult(v);
 	}
 
-	/** (0.7.516) {@code v}'s trade level, 1 to 5 (0 without a trade). */
+	/** (0.7.519) {@code v}'s trade level, 1 to 5 (0 without a trade). */
 	static int professionLevel(Villager v) {
 		return LOADED ? McaBridge.professionLevel(v) : 0;
 	}
 
-	/** (0.7.516) An envoy's villager: a grown newcomer of no settlement; null without MCA. */
+	/** (0.7.519) An envoy's villager: a grown newcomer of no settlement; null without MCA. */
 	static @Nullable Villager envoy(ServerLevel level, Faction f, net.minecraft.core.BlockPos at) {
 		return LOADED ? McaBridge.envoy(level, f, at) : null;
 	}
 
-	/** (0.7.516) {@code mob} is no longer a worker or a ruler of a realm (their role, home and load put away). */
+	/** (0.7.519) {@code mob} is no longer a worker or a ruler of a realm (their role, home and load put away). */
 	static void discharge(PathfinderMob mob) {
 		if (LOADED) {
 			McaBridge.discharge(mob);

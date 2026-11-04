@@ -30,7 +30,7 @@ import net.minecraft.world.level.ChunkPos;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.516) Treaties between free realms (Otectus pick 10, our own version; plan: {@code docs/Diplomacy-Plan.md}). Four
+ * (0.7.519) Treaties between free realms (Otectus pick 10, our own version; plan: {@code docs/Diplomacy-Plan.md}). Four
  * kinds, each for a while and renewable: recognition (tension eases, no rivalry), safe passage (the guards let the
  * partner's people by), a trade charter (more caravans, better prices, half the gate toll) and aid (the partner joins
  * your wars). They are signed by envoys ({@link Envoys}) or from a sovereign's desk ({@link RulersDesk}), and torn up by
@@ -193,7 +193,7 @@ public final class Treaties {
 		List<Treaty> out = new ArrayList<>();
 		long now = Factions.level(server).getGameTime();
 		for (Treaty t : book(server).treaties().values()) {
-			// (0.7.516) a treaty that has run out no longer counts, though the daily round has not dropped it yet
+			// (0.7.519) a treaty that has run out no longer counts, though the daily round has not dropped it yet
 			if (t.has(id) && t.until() > now) {
 				out.add(t);
 			}
@@ -463,7 +463,7 @@ public final class Treaties {
 			Wars.syncRelations(server);
 			return;
 		}
-		// (0.7.516) the treasury holds whole silver, so the coin is in units; only the board line is in milli
+		// (0.7.519) the treasury holds whole silver, so the coin is in units; only the board line is in milli
 		long coin = Math.min(AID_COIN_MOST, Math.round(ally.treasury() * AID_COIN_SHARE));
 		if (coin < AID_COIN_LEAST) {
 			return;

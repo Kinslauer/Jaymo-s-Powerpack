@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.7.516) The sovereign's desk: seek an audience with your own steward and a screen lists the realms in reach (how they
+ * (0.7.519) The sovereign's desk: seek an audience with your own steward and a screen lists the realms in reach (how they
  * stand with yours, their creed, the tension, the treaties in force and each kind's odds) from which you send an envoy or
  * renounce a treaty. Server side: it builds what the screen shows and checks every act again.
  */
@@ -136,7 +136,7 @@ final class RulersDesk {
 		if (Envoys.full(server)) {
 			return "gui.jaymoskingdoms.desk.envoy_full";
 		}
-		// (0.7.516) the treasury holds whole silver; only the shortfall is turned to milli for the purse
+		// (0.7.519) the treasury holds whole silver; only the shortfall is turned to milli for the purse
 		long cost = Envoys.ENVOY_COST;
 		long fromTreasury = Math.max(0L, Math.min(f.treasury(), cost));
 		long short_ = cost - fromTreasury;

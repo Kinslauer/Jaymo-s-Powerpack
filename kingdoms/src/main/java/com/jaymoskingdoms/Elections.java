@@ -28,7 +28,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.516) Who rules next. With MCA ({@link Rulers#inPlace}) a realm's custom decides: Coin realms elect (the guilds
+ * (0.7.519) Who rules next. With MCA ({@link Rulers#inPlace}) a realm's custom decides: Coin realms elect (the guilds
  * choose the richest and most respected), the Warriorborn's and Frostborn's Old Blood and Conquest realms acclaim one at a
  * moot, and everywhere else blood inherits. When the only heir of the old ruler's family is a child, the best councillor
  * governs as regent until the child comes of age and then steps down. Notables are the realm's grown villagers and its
@@ -171,7 +171,7 @@ final class Elections {
 		if (custom == Custom.HEREDITARY) {
 			for (Villager v : cands) {
 				if (house != null && McaCompat.kinOf(v, house) != McaCompat.STRANGERS) {
-					// (0.7.516) grown kin or the widow: the usual heir; while a regent sits, name the old house's kin so the regent's family is not crowned
+					// (0.7.519) grown kin or the widow: the usual heir; while a regent sits, name the old house's kin so the regent's family is not crowned
 					return regency ? new Choice("heir", v.getUUID(), null, null, null) : Choice.NONE;
 				}
 			}

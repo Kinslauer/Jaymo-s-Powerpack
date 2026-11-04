@@ -338,7 +338,7 @@ public final class Rulers {
 		return crown(level, faction, role, null);
 	}
 
-	/** (0.7.516) As above, with {@code chosen} (an election's winner, a regent, a ward come of age) first if they are about and grown enough. */
+	/** (0.7.519) As above, with {@code chosen} (an election's winner, a regent, a ward come of age) first if they are about and grown enough. */
 	static @Nullable Faction crown(ServerLevel level, Faction faction, int role, @Nullable UUID chosen) {
 		MinecraftServer s = level.getServer();
 		Worker w = McaCompat.enlistRuler(level, faction, role, house(s, faction.id()), chosen);
@@ -380,14 +380,14 @@ public final class Rulers {
 		mob.setPersistenceRequired();
 	}
 
-	/** (0.7.516) {@code mob}, a regent, steps down from {@code f}'s throne: their role, regalia and health go, and the throne is empty. */
+	/** (0.7.519) {@code mob}, a regent, steps down from {@code f}'s throne: their role, regalia and health go, and the throne is empty. */
 	static void stepDown(ServerLevel level, Faction f, PathfinderMob mob) {
 		McaCompat.discharge(mob);
 		unfit(mob);
 		Factions.update(level.getServer(), f.id(), x -> x.withLeader(Optional.empty()));
 	}
 
-	/** (0.7.516) The blood of whoever last ruled {@code f} (a villager crowned), alive or dead, if known. */
+	/** (0.7.519) The blood of whoever last ruled {@code f} (a villager crowned), alive or dead, if known. */
 	static Heritage.@Nullable Kind lastBlood(MinecraftServer server, Faction f) {
 		Reign reign = Factions.level(server).getAttachedOrElse(REIGNS, Map.<String, Reign>of()).get(Integer.toString(f.id()));
 		return reign == null ? null : Heritage.Kind.byKey(reign.blood());
@@ -562,7 +562,7 @@ public final class Rulers {
 			return false;
 		}
 		return !level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(THREAT_RANGE),
-			e -> e.isAlive() && (e instanceof Enemy || e instanceof ServerPlayer p && !p.isCreative() && !p.isSpectator()
+			e -> e.isAlive() && (e instanceof Enemy && !PatronChampions.outsideTown(e) || e instanceof ServerPlayer p && !p.isCreative() && !p.isSpectator()
 				&& Reputation.get(p, f.id()) <= Reputation.HOSTILE)).isEmpty();
 	}
 
@@ -638,7 +638,7 @@ public final class Rulers {
 
 	static boolean foeNear(ServerLevel level, PathfinderMob guard) {
 		return !level.getEntitiesOfClass(LivingEntity.class, guard.getBoundingBox().inflate(ESCORT_THREAT_RANGE),
-			e -> e.isAlive() && e != guard && (e instanceof Enemy || McaCompat.foe(guard, e))).isEmpty();
+			e -> e.isAlive() && e != guard && (e instanceof Enemy && !PatronChampions.outsideTown(e) || McaCompat.foe(guard, e))).isEmpty();
 	}
 
 	/** The guards (folk and villagers) of {@code f} in {@code box}. */

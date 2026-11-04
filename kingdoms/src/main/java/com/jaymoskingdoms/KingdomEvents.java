@@ -96,7 +96,8 @@ public final class KingdomEvents {
 			}
 			ServerPlayer player = source.getEntity() instanceof ServerPlayer p ? p : null;
 			// a monster cut down on a faction's land: they're grateful (members earn standing too)
-			if (entity instanceof Enemy && player != null) {
+			// (0.7.518) a patron champion and its adds earn no thanks
+			if (entity instanceof Enemy && player != null && !PatronChampions.outsideTown(entity)) {
 				Faction faction = Factions.at(level.getServer(), level, entity.blockPosition());
 				if (faction != null) {
 					Reputation.change(player, faction, REP_KILL_MONSTER);
@@ -123,7 +124,7 @@ public final class KingdomEvents {
 			}
 			for (Faction faction : Factions.all(server)) {
 				if (faction.successionAt() >= 0 && now >= faction.successionAt() && !faction.fallen()) {
-					// (0.7.516) the realm's custom decides who: an election, a moot, a regent for a child heir
+					// (0.7.519) the realm's custom decides who: an election, a moot, a regent for a child heir
 					Elections.Choice choice = Elections.choose(overworld, faction);
 					Faction crowned = crown(overworld, faction.withSuccessionAt(-1L), choice.villager());
 					PathfinderMob heir = crowned == null ? null : Rulers.of(overworld, crowned);
@@ -373,7 +374,7 @@ public final class KingdomEvents {
 		return crown(level, faction, null);
 	}
 
-	/** (0.7.516) As above, with {@code chosen} (an election's winner, a regent, a ward come of age) first if they are about and grown enough. */
+	/** (0.7.519) As above, with {@code chosen} (an election's winner, a regent, a ward come of age) first if they are about and grown enough. */
 	static Faction crown(ServerLevel level, Faction faction, java.util.@Nullable UUID chosen) {
 		MinecraftServer server = level.getServer();
 		Factions.put(server, faction);
@@ -624,7 +625,7 @@ public final class KingdomEvents {
 			return;
 		}
 		if (killer != null) {
-			// (0.7.516) whoever slew the ruler does not stand at the election after
+			// (0.7.519) whoever slew the ruler does not stand at the election after
 			Elections.killed(faction.id(), killer.getUUID());
 			Reputation.change(killer, faction, lord ? REP_KILL_LORD : REP_KILL_KING);
 			// the realm's rivals are glad of it (every other standing realm that isn't its vassal or overlord)
@@ -694,7 +695,7 @@ public final class KingdomEvents {
 		if (faction == null || faction.type() == FactionType.BARBARIAN) {
 			return false;
 		}
-		// (0.7.516) a sovereign's own steward opens the ruler's desk (the old audience stays if their game can't show it)
+		// (0.7.519) a sovereign's own steward opens the ruler's desk (the old audience stays if their game can't show it)
 		if (Rulers.is(folk) && Crowns.rules(server, faction, player.getUUID()) && RulersDesk.open(player, faction)) {
 			return true;
 		}

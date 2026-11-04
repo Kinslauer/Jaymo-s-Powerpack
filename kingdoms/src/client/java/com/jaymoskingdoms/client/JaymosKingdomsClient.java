@@ -71,6 +71,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
+		// (0.7.518) the patron champions
+		com.jaymoskingdoms.client.champions.ChampionRenderer.register();
 		// (0.7.206) whaling: great whales, their carcasses, harpoons and their lines
 		com.jaymoskingdoms.client.whaling.GreatWhaleRenderer.register();
 		MobAnimations.register();
@@ -109,7 +111,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.238: black over the world from the story until MCA's creator
 		StoryCurtain.register();
 		LineageScreen.register();
-		// (0.7.516) an envoy's offer, and the sovereign's desk
+		// (0.7.519) an envoy's offer, and the sovereign's desk
 		EnvoyScreen.register();
 		RulersDeskScreen.register();
 		// 0.7.201: letters and messenger pigeons
@@ -156,6 +158,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VictimClient.register();
 		KinshipClient.register();
 		WarriorFury.register();
+		BruteRageHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
 		// (0.7.330) a werewolf's, an ape's or a disguise's voice, through Simple Voice Voice Changer when loaded

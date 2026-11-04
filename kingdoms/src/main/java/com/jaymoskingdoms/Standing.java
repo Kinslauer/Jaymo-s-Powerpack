@@ -98,7 +98,7 @@ public final class Standing {
 			Heritage.Kind blood = Heritage.Kind.byKey(reign.blood());
 			hovers.add(blood == null ? Component.empty() : Component.translatable("standing.jaymoskingdoms.reign.hover", Purists.name(blood)));
 		}
-		// (0.7.516) how the realm chooses its rulers and how this one came to the throne, and its treaties
+		// (0.7.519) how the realm chooses its rulers and how this one came to the throne, and its treaties
 		Lines elections = Elections.lines(level.getServer(), f, mob);
 		lines.addAll(elections.lines());
 		hovers.addAll(elections.hovers());

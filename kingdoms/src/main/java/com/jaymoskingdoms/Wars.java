@@ -332,7 +332,7 @@ public final class Wars {
 			wars.add(war);
 			return b.withWars(wars).withNextId(id + 1);
 		});
-		// (0.7.516) a war on a treaty partner tears the treaties up
+		// (0.7.519) a war on a treaty partner tears the treaties up
 		Treaties.warDeclared(server, a.id(), d.id());
 		// a rivalry at least, from now on
 		if (a.relation(d.id()) == Relation.NEUTRAL) {
@@ -362,7 +362,7 @@ public final class Wars {
 		}
 		// (0.7.224) between two rich realms, a great war
 		GreatWars.begun(server, war);
-		// (0.7.516) and every partner bound to a side by a treaty of aid is called
+		// (0.7.519) and every partner bound to a side by a treaty of aid is called
 		Treaties.warBegun(server, war);
 	}
 

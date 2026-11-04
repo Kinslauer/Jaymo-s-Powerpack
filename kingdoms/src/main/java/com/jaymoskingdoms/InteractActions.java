@@ -37,7 +37,7 @@ public final class InteractActions {
 	public static final String MONEY = "money";
 	/** (0.7.513) The cleric's Leaving Rite ({@link Rites}). */
 	public static final String RITE = "rite";
-	/** (0.7.516) Hear the Envoy: a realm's envoy waiting in a player's hall ({@link Envoys}). */
+	/** (0.7.519) Hear the Envoy: a realm's envoy waiting in a player's hall ({@link Envoys}). */
 	public static final String ENVOY = "envoy";
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY, RITE, ENVOY);
 

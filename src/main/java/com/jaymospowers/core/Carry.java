@@ -339,6 +339,7 @@ public final class Carry {
 		ServerTickEvents.END_SERVER_TICK.register(Carry::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> clear());
 		CarryBlock.init();
+		CarryOnCompat.init();
 	}
 
 	// ---- queries (both sides, from the synced attachments)

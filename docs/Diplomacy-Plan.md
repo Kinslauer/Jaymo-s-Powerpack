@@ -1,4 +1,4 @@
-# Diplomacy and elections plan (Kingdoms 0.7.516)
+# Diplomacy and elections plan (Kingdoms 0.7.519)
 
 Otectus pick 10 (`docs/Otectus-Plan.md` row 10, from MCA: Kingdoms; our own code from the idea, none of that mod's code
 or art). Andy-approved plan text: "Treaties between realms (recognition, safe passage, trade charters, aid) carried by
@@ -6,7 +6,7 @@ envoys, which players' realms can sign too, and succession by election or regenc
 heir."
 
 Scope: Kingdoms only (`kingdoms/`). Powers is not touched, so the root `gradle.properties` stays at 0.20.12 and the root
-`MODLOG.md` gets no entry. Every new comment is tagged `(0.7.516)`. All tuning numbers are `static final` constants at
+`MODLOG.md` gets no entry. Every new comment is tagged `(0.7.519)`. All tuning numbers are `static final` constants at
 the top of their class. Players get no new slash commands: everything they do is on a screen (the envoy's offer, the
 ruler's desk). Players hear about it through Tidings letters (big news only), town boards (`Post.news`), MCA/Post
 letters (`Post.report`), speech bubbles (`Speech.say`) and the MCA interact info lines (`Standing`). Nothing new goes to
@@ -434,7 +434,7 @@ section 6.
 
 | File | Where | Change |
 |---|---|---|
-| `kingdoms/gradle.properties` | `version=0.7.512` | → `version=0.7.516` |
+| `kingdoms/gradle.properties` | `version=0.7.512` | → `version=0.7.519` |
 | `JaymosKingdoms.java` | after `Wars.register();` (:360) | `Treaties.register(); Envoys.register(); DiplomacyNet.register(); Elections.register();` |
 | `GreatWars.java` | `stir` :345-396 | After the base delta: if `Treaties.has(RECOGNITION)`, `delta -= RECOGNITION_EASE`; PASSAGE `-= PASSAGE_EASE`; CHARTER: skip `TRADE_GAIN` and `-= CHARTER_EASE`; AID: `delta = Math.min(delta, -AID_EASE)`. The NEUTRAL→RIVAL step (:381) is skipped while recognised. Before `Wars.declare` (:390): `if (!Treaties.mayBreakForWar(server, from, on, level)) return;`. |
 | `GreatWars.java` | `lean` :514 | `return 0.0` if `Treaties.any(h, foe)`; `lean += Treaties.AID_LEAN` if `Treaties.has(h, friend, AID)`. |
@@ -464,7 +464,7 @@ section 6.
 | `client/JaymosKingdomsClient.java` | near `LineageScreen.register()` :111 | `EnvoyScreen.register(); RulersDeskScreen.register();` |
 | `client/StoryHoldScreen.java` | :35 | `HINTS = 88` → `HINTS = 93` (master is at 88; 89-92 are reserved for other open PRs). |
 | `kingdoms/MODLOG.md` | end | Entry in section 8. |
-| `docs/Otectus-Plan.md` | row 10 status | `built in Kingdoms 0.7.516 (docs/Diplomacy-Plan.md)` |
+| `docs/Otectus-Plan.md` | row 10 status | `built in Kingdoms 0.7.519 (docs/Diplomacy-Plan.md)` |
 
 Not changed: `Faction` (its codec stays as it is; the treaty, mission and seat data are separate attachments),
 `Relation` (no TREATY state; treaties never write ALLIED), `Treasuries` (the trade toll still credits the land's realm
@@ -683,7 +683,7 @@ with a vanilla banner and a courier's horse. There are no new items or recipes.
 ## 8. MODLOG (`kingdoms/MODLOG.md`, appended)
 
 ```markdown
-## 0.7.516: diplomacy and elections
+## 0.7.519: diplomacy and elections
 Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its code or art). Plan: `docs/Diplomacy-Plan.md`.
 - **Treaties:** free realms sign four kinds, each for a while and renewable (`Treaties`):
   - **Recognition** (30 days): tension eases 3 a day, and they don't fall into rivalry. Every other kind needs it.

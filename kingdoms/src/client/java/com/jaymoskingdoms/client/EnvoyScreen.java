@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
 /**
- * (0.7.516) An envoy's offer ({@link DiplomacyNet.EnvoyOffer}): a realm's envoy waiting in your hall asks for a treaty. Sign,
+ * (0.7.519) An envoy's offer ({@link DiplomacyNet.EnvoyOffer}): a realm's envoy waiting in your hall asks for a treaty. Sign,
  * Refuse or Not yet (Esc counts as Not yet), in the Kingdoms screens' look with an envoy's blue.
  */
 final class EnvoyScreen extends Screen {

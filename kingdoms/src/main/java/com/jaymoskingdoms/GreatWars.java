@@ -368,7 +368,7 @@ final class GreatWars {
 			delta = -ALLIED_EASE;
 			tradeGain = false;
 		}
-		// (0.7.516) treaties ease it: recognition most, a charter in place of the trade's friction, aid like an alliance
+		// (0.7.519) treaties ease it: recognition most, a charter in place of the trade's friction, aid like an alliance
 		boolean recognised = Treaties.has(server, a, b, Treaties.Kind.RECOGNITION);
 		if (recognised) {
 			delta -= Treaties.RECOGNITION_EASE;
@@ -414,7 +414,7 @@ final class GreatWars {
 				return;
 			}
 			Faction from = npcA && (!npcB || readyA >= readyB) ? a : b, on = from == a ? b : a;
-			// (0.7.516) a king bound to the other by treaty keeps faith unless he's the breaking sort or tension has boiled over
+			// (0.7.519) a king bound to the other by treaty keeps faith unless he's the breaking sort or tension has boiled over
 			if (!Treaties.mayBreakForWar(server, from, on, level)) {
 				return;
 			}
@@ -436,7 +436,7 @@ final class GreatWars {
 		return great(server, war.id());
 	}
 
-	/** (0.7.516) {@code faction} is pledged to {@code principal}'s side of {@code war} (by a treaty of aid). */
+	/** (0.7.519) {@code faction} is pledged to {@code principal}'s side of {@code war} (by a treaty of aid). */
 	static void pledge(MinecraftServer server, int faction, int war, int principal) {
 		edit(server, l -> withPledges(l, with(l.pledges(), Integer.toString(faction), new Pledge(war, principal))));
 	}
@@ -568,7 +568,7 @@ final class GreatWars {
 		if (WarData.truce(server, h.id(), foe.id(), now) || h.relation(foe.id()) == Relation.ALLIED) {
 			return 0.0;
 		}
-		// (0.7.516) one bound by treaty to the foe stays out; one bound to the friend by aid leans to it
+		// (0.7.519) one bound by treaty to the foe stays out; one bound to the friend by aid leans to it
 		if (Treaties.any(server, h, foe)) {
 			return 0.0;
 		}

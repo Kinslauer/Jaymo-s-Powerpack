@@ -15,7 +15,7 @@ import net.minecraft.util.Util;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.516) A sovereign's desk ({@link DiplomacyNet.Desk}): the realms in reach on the left; for the one picked, its creed,
+ * (0.7.519) A sovereign's desk ({@link DiplomacyNet.Desk}): the realms in reach on the left; for the one picked, its creed,
  * the treaties in force (renounce with a second click), the four kinds and their odds, and Send an Envoy. Nothing is decided
  * here: the server checks every act again, and the screen comes again with what happened written under it.
  */

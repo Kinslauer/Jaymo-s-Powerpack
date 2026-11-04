@@ -202,7 +202,7 @@ public final class Spoils {
 	}
 
 	/** One of Jaymo's Powers' items by id (a king's weapon head), or empty without Powers. */
-	private static ItemStack powers(String id) {
+	static ItemStack powers(String id) {
 		return BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", id)).map(ItemStack::new).orElse(ItemStack.EMPTY);
 	}
 

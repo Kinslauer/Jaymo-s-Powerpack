@@ -50,7 +50,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.516) Envoys carry offers of treaties ({@link Treaties}) between realms. A realm's envoy is a villager with its
+ * (0.7.519) Envoys carry offers of treaties ({@link Treaties}) between realms. A realm's envoy is a villager with its
  * banner who rides the King's Roads like a courier ({@link Couriers}): while nobody is near they go on in a record, and
  * come into the world when a player is, so you may meet one on the road. At an NPC court the offer is weighed by the
  * ruler's temper, the realm's creed, friction, tension and old grievances ({@link #score}); at a player's court the envoy
@@ -540,7 +540,7 @@ final class Envoys {
 	/** The envoy of {@code m} in the world at {@code at}: put back from the record, or made new. Null if it can't be now. */
 	private static @Nullable Villager appear(ServerLevel level, Mission m, BlockPos at) {
 		level.getChunk(at.getX() >> 4, at.getZ() >> 4);
-		// (0.7.516) the hall is under the keep's roof, so a waiting envoy stands in it, not on the heightmap top
+		// (0.7.519) the hall is under the keep's roof, so a waiting envoy stands in it, not on the heightmap top
 		BlockPos ground = m.leg() == WAIT ? Construction.standable(level, at, 3) : level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
 		MinecraftServer server = level.getServer();
 		Faction from = Factions.get(server, m.from());

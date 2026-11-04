@@ -257,7 +257,7 @@ final class TradeRoutes {
 				continue;
 			}
 			Sort gs = g.type() == FactionType.FIEFDOM ? Sort.REALM : sortOf(server, g);
-			// (0.7.516) a trade charter partner counts as nearer, and in reach from farther
+			// (0.7.519) a trade charter partner counts as nearer, and in reach from farther
 			boolean chartered = Treaties.chartered(server, f, g);
 			double reach = sort.reach * (chartered ? Treaties.CHARTER_REACH : 1.0);
 			if (gs == null || !friendly(sort, gs) || Raids.horizontal(f.seat(), g.seat()) > reach * reach) {
@@ -395,7 +395,7 @@ final class TradeRoutes {
 		}
 		Profile p = profile(server, f, sort);
 		if (Treaties.chartered(server, f, to)) {
-			// (0.7.516) and takes an extra cart
+			// (0.7.519) and takes an extra cart
 			p = new Profile(p.rig(), p.carts() + Treaties.CHARTER_CARTS, p.cap(), p.guards(), p.mounted(), p.sells(), p.wants(), p.levy());
 		}
 		if (p.rig() == BOAT && (PirateCoves.cove(server, f.id()) == null || PirateCoves.cove(server, to.id()) == null)) {
@@ -424,7 +424,7 @@ final class TradeRoutes {
 		if (carts.isEmpty()) {
 			carts = List.of(Map.of());
 		}
-		// (0.7.516) a charter partner's caravan goes sooner
+		// (0.7.519) a charter partner's caravan goes sooner
 		long next = Treaties.chartered(server, f, to) ? now + sort.every * Treaties.CHARTER_EVERY_PERCENT / 100 : now + sort.every;
 		Caravans.Caravan c = Caravans.launch(level, f, to, carts, p.guards(), p.mounted(), p.rig(), next);
 		JaymosKingdoms.LOGGER.info("{} sends {} {} ({} goods) to {}", f.name(), carts.size(), p.rig() == HAND ? "handcarts" : p.rig() == BOAT ? "skiffs" : "carts", load,
@@ -499,7 +499,7 @@ final class TradeRoutes {
 		EnumSet<Ware> wants = hs == null ? EnumSet.allOf(Ware.class) : wanted(level, home, profile(server, home, hs));
 		int cap = capOf(c);
 		List<Map<String, Integer>> back = List.of();
-		// (0.7.516) a charter partner's carts come home fuller
+		// (0.7.519) a charter partner's carts come home fuller
 		int share = RETURN_SHARE + (Treaties.chartered(server, home, lord) ? Treaties.CHARTER_RETURN : 0);
 		int most = Math.min(c.carts().size() * cap, Math.max(0, c.load() * share / 100));
 		if (Storage.loaded(level, lord)) {

@@ -248,7 +248,7 @@ public final class Hemomancy {
 		if (target instanceof Player) {
 			target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, (int) (GRIP_WEAKEN * power), 0), player);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, (int) (GRIP_WEAKEN * power), 1), player);
-		} else if (target instanceof Mob mob) {
+		} else if (target instanceof Mob mob && !(mob instanceof PatronChampion)) {
 			ItemStack held = mob.getMainHandItem();
 			if (!held.isEmpty()) {
 				mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);

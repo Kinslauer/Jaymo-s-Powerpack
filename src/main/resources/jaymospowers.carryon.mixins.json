@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.carryon",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"CarryOnPickupMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
