@@ -8776,3 +8776,12 @@ is our own take on the idea (none of its code or art).
   - Survival/Stealth: **Tracker** (Field Dresser or Climber; 1 pt): anything you wound (not players) bleeds 30 s, a drop of its own blood every 0.75 s (Powers' blood trail, marked as its, `PowersCompat.trailDrop`), so you can follow it (Andy: "they just bleed so you can track them"). **Light
     Pack** (Plague Doctor or Bar Swing; 2 pts): sneaking and sprinting cost 40% less hunger.
 - Mock-ups: project files `art-overhaul/skill-web/`. Kingdoms compiled with Gradle (compileClientJava); not played.
+
+## 0.7.515: RPG Series class gates (pack 0.20.16)
+- Andy shipped Zsolt Molnar's Wizards, Archers and Rogues & Warriors (Powers' packMods, PR #919). `RpgSeriesGate` answers
+  Spell Engine's cast check (`SpellEvents.CASTING_ATTEMPT.PRE`, both sides) so only the matching class casts their spells:
+  Wizards = Mage; Archers = Archer and Marksman; the rogue book (Slice and Dice, Shock Powder, Shadow Step, Vanish,
+  Mutilate, Bear Trap) = Thief; the warrior book (Shout, Charge, Last Stand, Mortal Strike, Throw, Throw Net) = Warlord,
+  Brute and Rider; the Survivalist also sets the Bear Trap and throws the net. Creative players cast anything. A refused
+  cast shows "Only a Mage can cast this" on the action bar (every 2 s at most). Weapons and armour stay usable by all.
+  Other mods' spells are untouched. Compiled against Spell Engine (compileOnly), never required. Not played.

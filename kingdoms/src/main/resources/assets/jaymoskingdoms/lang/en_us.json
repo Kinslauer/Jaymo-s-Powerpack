@@ -2432,6 +2432,8 @@
 	"class.jaymoskingdoms.warlord": "Warlord",
 	"class.jaymoskingdoms.warlord.desc": "Two-handed weapons (claymores, war axes, glaives, halberds) hit 35% harder, and each blow cleaves: 40% of it carries to up to three foes beside the one you hit. Heavy armour weighs a quarter as much on you and gives a point more a piece.",
 	"class.jaymoskingdoms.mage": "Mage",
+	"message.jaymoskingdoms.rpg_gate.only": "Only a %s can cast this",
+	"message.jaymoskingdoms.rpg_gate.or": "%s or %s",
 	"class.jaymoskingdoms.mage.desc": "A wizard's staff casts in your hands, 75% harder than a scroll, and you learn every scroll you read. One cast in four echoes and leaves no cooldown. A heart fewer. A court wizard will teach you how a staff is made, or find one. Pick your first spell.",
 	"class.jaymoskingdoms.archer": "Archer",
 	"class.jaymoskingdoms.archer.desc": "Arrows and bolts hit 35% harder and half again as hard at the head; a headshot can take the head off and nail it to the wall behind. A shot in the legs pins them to the ground, and a mighty killing shot nails the body to the wall. You're quicker on your feet. With a bow drawn you jump two blocks and land soft.",
