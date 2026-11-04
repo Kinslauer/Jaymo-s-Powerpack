@@ -8472,3 +8472,4 @@ hall, land and vassals:
 - A gather quest's target may now carry a grade floor (`<item id>@<grade>`): only pieces graded at least that
   count and are taken (`Quests.minGrade`, `GradedTrades.gradeIndex`), and the quest names the grade. Without
   Powers no such quest is offered. Compile-checked; not played.
+- Two loading hints (82-83).
