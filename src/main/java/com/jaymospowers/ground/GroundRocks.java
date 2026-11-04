@@ -30,7 +30,7 @@ import net.minecraft.world.level.material.PushReaction;
  * to 4 in a block like candles; loose flint lies about too, most on gravel and by water. A punch or a right click picks
  * them up; 4 rocks craft into their block (stone rocks into cobblestone). Rocks that lie in water are salt crystals
  * (0.16.24). On grass they lie mostly in rare pebble piles of the biome's rock (0.17.175, PebblePilesFeature).
- * (0.20.1) Andy: "add rare pebbles and flint to the nether so those starts are possible for emberborn": netherrack,
+ * (0.20.2) Andy: "add rare pebbles and flint to the nether so those starts are possible for emberborn": netherrack,
  * blackstone and basalt rocks and the odd loose flint lie about the Nether's floors now and then (NetherRocksFeature).
  * Assets: tools/gen_ground_rocks.py.
  */
@@ -38,7 +38,7 @@ public final class GroundRocks {
 	/** The rock kinds. Keep in step with VARIANTS in tools/gen_ground_rocks.py. */
 	public enum Variant {
 		STONE, MOSSY, GRANITE, DIORITE, ANDESITE, DEEPSLATE, TUFF, SANDSTONE, RED_SANDSTONE,
-		// (0.20.1) the Nether's
+		// (0.20.2) the Nether's
 		NETHERRACK, BLACKSTONE, BASALT;
 
 		public String id() {
@@ -82,7 +82,7 @@ public final class GroundRocks {
 		BiomeModifications.addFeature(land, GenerationStep.Decoration.VEGETAL_DECORATION, placed("loose_flint"));
 		BiomeModifications.addFeature(land, GenerationStep.Decoration.VEGETAL_DECORATION, placed("pebble_piles"));
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_DECORATION, placed("loose_rocks_cave"));
-		// (0.20.1) the Nether's floors, the demon biomes too
+		// (0.20.2) the Nether's floors, the demon biomes too
 		BiomeModifications.addFeature(BiomeSelectors.foundInTheNether(), GenerationStep.Decoration.VEGETAL_DECORATION, placed("nether_rocks"));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> {

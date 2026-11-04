@@ -73,7 +73,7 @@ import org.jspecify.annotations.Nullable;
  * Each camp takes in a new avatar now and then while a player is near, up to {@link #MOST}. Without MCA, the camps
  * rise empty. Ops: {@code /kingdom avatarcamp found | info}.
  *
- * <p>(0.7.499) Andy: "make the flame avatar take you in and amicable to you". An Emberborn is one of their own blood, and a
+ * <p>(0.7.502) Andy: "make the flame avatar take you in and amicable to you". An Emberborn is one of their own blood, and a
  * camp takes them in ({@link #welcome}): the first time one comes within {@link #WELCOME_RANGE} of a camp, its nearest avatar
  * greets them and the whole camp warms to them ({@link #WELCOME_HEARTS} hearts, enough for MCA's follow and hire). Andy:
  * "they will fight and help you but will only give you the gear after you speak to them": the newcomer's start (flint,
@@ -102,17 +102,17 @@ public final class AvatarCamps {
 	static final int HOME_RADIUS = 12;
 	/** An avatar's health (MCA's guards are frail for the Nether). */
 	static final double HEALTH = 40.0;
-	/** (0.7.499) An Emberborn this near a camp is taken in; the camp warms to them by this many hearts. */
+	/** (0.7.502) An Emberborn this near a camp is taken in; the camp warms to them by this many hearts. */
 	public static final double WELCOME_RANGE = 32.0;
 	static final int WELCOME_HEARTS = 50;
-	/** (0.7.499) The newcomer's gifts, given when they first speak to an avatar: flint, sticks, plant string (Jaymo's Powers', if it's there), cooked pork. */
+	/** (0.7.502) The newcomer's gifts, given when they first speak to an avatar: flint, sticks, plant string (Jaymo's Powers', if it's there), cooked pork. */
 	static final int GIFT_FLINT = 3, GIFT_STICKS = 4, GIFT_STRING = 2, GIFT_FOOD = 4;
-	/** (0.7.499) At the hearth (within {@link #HOME_RADIUS}) an Emberborn rests: Regeneration this long, renewed every 10 s. */
+	/** (0.7.502) At the hearth (within {@link #HOME_RADIUS}) an Emberborn rests: Regeneration this long, renewed every 10 s. */
 	static final int HEARTH_REGEN_TICKS = 220;
-	/** (0.7.499) Avatars this near an Emberborn go for what hunts them or hurt them lately (this many ticks ago at most). */
+	/** (0.7.502) Avatars this near an Emberborn go for what hunts them or hurt them lately (this many ticks ago at most). */
 	static final double DEFEND_RANGE = 24.0;
 	static final int DEFEND_HURT_TICKS = 100;
-	/** (0.7.499) The chance a camp rises near an Emberborn (others: {@link #FOUND_CHANCE}). */
+	/** (0.7.502) The chance a camp rises near an Emberborn (others: {@link #FOUND_CHANCE}). */
 	static final float EMBERBORN_FOUND_CHANCE = 0.6F;
 	/** How many greeting lines there are ({@code message.jaymoskingdoms.avatar.welcome.<n>}). */
 	static final int WELCOME_LINES = 3;
@@ -142,10 +142,10 @@ public final class AvatarCamps {
 	/** On every avatar: its camp's id. Saved, seen by all (the look). */
 	public static final AttachmentType<Integer> AVATAR = AttachmentRegistry.create(JaymosKingdoms.id("flame_avatar"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	/** (0.7.499) On a player: the camps whose avatars have given them a start (spoken to). Saved, kept through death. */
+	/** (0.7.502) On a player: the camps whose avatars have given them a start (spoken to). Saved, kept through death. */
 	public static final AttachmentType<List<Integer>> GIFTED = AttachmentRegistry.create(JaymosKingdoms.id("avatar_gifted"),
 		builder -> builder.persistent(Codec.INT.listOf()).copyOnDeath());
-	/** (0.7.499) On a player: the camps that have taken them in. Saved, kept through death. */
+	/** (0.7.502) On a player: the camps that have taken them in. Saved, kept through death. */
 	public static final AttachmentType<List<Integer>> WELCOMED = AttachmentRegistry.create(JaymosKingdoms.id("avatar_welcomed"),
 		builder -> builder.persistent(Codec.INT.listOf()).copyOnDeath());
 
@@ -182,7 +182,7 @@ public final class AvatarCamps {
 	}
 
 	/**
-	 * {@code target} is what {@code avatar} goes for: Hornkin, piglins, anyone not Emberborn near its camp, and (0.7.499) any
+	 * {@code target} is what {@code avatar} goes for: Hornkin, piglins, anyone not Emberborn near its camp, and (0.7.502) any
 	 * creature hunting or lately hurting an Emberborn near it.
 	 */
 	public static boolean prey(LivingEntity avatar, LivingEntity target) {
@@ -201,7 +201,7 @@ public final class AvatarCamps {
 		return camp != null && player.blockPosition().closerThan(camp.center(), GUARD_RANGE);
 	}
 
-	/** (0.7.499) {@code target} hunts, or lately hurt, an Emberborn within {@link #DEFEND_RANGE} of {@code avatar}. */
+	/** (0.7.502) {@code target} hunts, or lately hurt, an Emberborn within {@link #DEFEND_RANGE} of {@code avatar}. */
 	private static boolean guarding(LivingEntity avatar, LivingEntity target) {
 		for (Player p : avatar.level().players()) {
 			if (p.isSpectator() || !p.isAlive() || p.distanceToSqr(avatar) > DEFEND_RANGE * DEFEND_RANGE || !Heritage.is(p, Heritage.Kind.EMBERBORN)) {
@@ -289,7 +289,7 @@ public final class AvatarCamps {
 		}
 	}
 
-	// ---- kin (0.7.499) ---------------------------------------------------------------------------------------------------
+	// ---- kin (0.7.502) ---------------------------------------------------------------------------------------------------
 
 	/** Every 2 s for an Emberborn in the Nether: taken in by a camp they come near, and rested at its hearth. */
 	private static void kin(ServerLevel nether, ServerPlayer player) {

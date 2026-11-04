@@ -264,7 +264,8 @@ public final class Heritage {
 		// (0.7.262, Andy's NOEA picks) three new bloods, picked at the start like the first ten; (0.7.320, Andy) the Divine-born
 		// is earned now: it wakes in one who dies again in the afterlife ({@link #died})
 		DIVINE(true, 0, Items.TOTEM_OF_UNDYING, Stats.Stat.ENDURANCE, Stats.Stat.WITS),
-		BIOBUILT(0, Items.COPPER_INGOT, Stats.Stat.MIGHT, Stats.Stat.GRIT),
+		// (0.7.501, Andy) earned now: it wakes in one who meets the Mad Tinkerer or is made an android ({@link #unlockChecks})
+		BIOBUILT(true, 0, Items.COPPER_INGOT, Stats.Stat.MIGHT, Stats.Stat.GRIT),
 		RUBBERFOLK(0, Items.PINK_PETALS, Stats.Stat.AGILITY, Stats.Stat.ENDURANCE),
 		// (0.7.292) Andy: goblins and orcs as MCA villagers, "still monstrous with their proportions, Orcs are bigger,
 		// goblins smaller, both green and repulsive with variations" ({@link Greenskins}): broods, never a player's
@@ -1044,6 +1045,10 @@ public final class Heritage {
 		if (!kind.earned) {
 			return true;
 		}
+		// (0.7.501) a blood a player already has is theirs (a Bio-built from before it was earned keeps it)
+		if (kind == of(player)) {
+			return true;
+		}
 		List<String> keys = player.getAttached(UNLOCKED);
 		return keys != null && keys.contains(kind.key());
 	}
@@ -1071,6 +1076,13 @@ public final class Heritage {
 			return;
 		}
 		hollowCheck(player);
+		// (0.7.501, Andy) the Bio-built wake in one who meets the Mad Tinkerer (Jaymo's Powers' wandering scientist) or is made an
+		// android by him; the cast-out road opens with it
+		if (!unlocked(player, Kind.BIOBUILT) && (PowersCompat.android(player) || !level.getEntities((Entity)null,
+			player.getBoundingBox().inflate(UNLOCK_NEAR_RANGE), e -> e.entityTags().contains(PowersCompat.TINKERER_TAG)).isEmpty())) {
+			unlock(player, Kind.BIOBUILT);
+			Deeds.done(player, RoadLocks.BIOBUILT_DEED);
+		}
 		// (getDragons() leaves out a dying dragon: its health is already 0)
 		for (EnderDragon dragon : level.getEntities(EntityTypes.ENDER_DRAGON, d -> d.dragonDeathTime > 0)) {
 			if (dragon.distanceTo(player) < UNLOCK_DRAGON_RANGE) {

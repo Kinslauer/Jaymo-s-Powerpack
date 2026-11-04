@@ -135,7 +135,7 @@ public final class FirstTools {
 	}
 
 	/**
-	 * Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft. (0.20.1) Netherrack too, though it
+	 * Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft. (0.20.2) Netherrack too, though it
 	 * breaks quick, so flint can be knapped anywhere in the Nether.
 	 */
 	private static boolean hard(Level level, BlockPos pos, BlockState state) {

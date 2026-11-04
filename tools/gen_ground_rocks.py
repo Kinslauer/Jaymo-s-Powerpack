@@ -22,7 +22,7 @@ VARIANTS = [
     ('tuff', 'tuff', 'tuff'),
     ('sandstone', 'sandstone_top', 'sandstone'),
     ('red_sandstone', 'red_sandstone_top', 'red_sandstone'),
-    # (0.20.1) the Nether's (NetherRocksFeature)
+    # (0.20.2) the Nether's (NetherRocksFeature)
     ('netherrack', 'netherrack', 'netherrack'),
     ('blackstone', 'blackstone', 'blackstone'),
     ('basalt', 'basalt_side', 'basalt'),
@@ -155,7 +155,7 @@ def main():
         'feature': f'{NS}:loose_flint',
         'placement': [{'type': 'minecraft:count', 'count': 2}] + surface,
     })
-    # (0.20.1) the Nether: a cluster in about one chunk in three; the feature finds a floor in its column itself
+    # (0.20.2) the Nether: a cluster in about one chunk in three; the feature finds a floor in its column itself
     write(os.path.join(DATA, 'worldgen', 'placed_feature', 'nether_rocks.json'), {
         'feature': f'{NS}:nether_rocks',
         'placement': [{'type': 'minecraft:rarity_filter', 'chance': 3},
@@ -281,7 +281,7 @@ def first_tools():
     write(os.path.join(DATA, 'tags', 'block', 'fiber_plants.json'), {'values': [
         'minecraft:short_grass', 'minecraft:tall_grass', 'minecraft:fern', 'minecraft:large_fern',
         'minecraft:short_dry_grass', 'minecraft:tall_dry_grass', 'minecraft:bush',
-        # (0.20.1) the Nether's, so a start there can twist string too
+        # (0.20.2) the Nether's, so a start there can twist string too
         'minecraft:crimson_roots', 'minecraft:warped_roots', 'minecraft:nether_sprouts',
         'minecraft:weeping_vines', 'minecraft:weeping_vines_plant', 'minecraft:twisting_vines', 'minecraft:twisting_vines_plant']})
 

@@ -204,11 +204,14 @@ final class KitchenCompat {
 				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Frostborn to shrug off winter: {}", e.toString());
 			}
 		}
-		// (0.7.200) Kitchen's body heat: an Emberborn shrugs off the heat, and blizzards and sandstorms reach the body
+		// (0.7.200) Kitchen's body heat: an Emberborn shrugs off the heat, and blizzards and sandstorms reach the body;
+		// (0.7.500, Andy: "the reptile beastfolk should be cold blooded, therefore not overheating in the sun") so does anyone
+		// cold-blooded (the Serpen): they bask, the sun and heat never build to overheating; the cold slowing them stays their flaw
 		try {
 			Class<?> bodyHeat = Class.forName("com.jaymoskitchen.climate.BodyHeat");
 			bodyHeat.getMethod("setHeatProof", java.util.function.Predicate.class)
-				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.EMBERBORN));
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.EMBERBORN)
+					|| HeritageKits.coldBlooded(player));
 			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Calamities::bodyHeat);
 		} catch (ReflectiveOperationException e) {

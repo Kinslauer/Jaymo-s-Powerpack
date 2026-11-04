@@ -759,6 +759,34 @@ public final class PowersCompat {
 		return callStart("com.jaymospowers.power.zfighter.ZFighterAndroidStart", player);
 	}
 
+	/** (0.7.501) The entity tag of Jaymo's Powers' Mad Tinkerer (its {@code ZFighterAndroid.TAG}): meeting him wakes the Bio-built. */
+	public static final String TINKERER_TAG = "jaymospowers_scientist";
+	private static java.lang.invoke.@Nullable MethodHandle android;
+	private static boolean androidLooked;
+
+	/** (0.7.501) Whether the Mad Tinkerer has made {@code player} an android (Powers' {@code ZFighterAndroid.android}). False without Powers. */
+	public static boolean android(net.minecraft.world.entity.player.Player player) {
+		if (!androidLooked) {
+			androidLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					android = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterAndroid"),
+						"android", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.player.Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' androids (older Powers?)", e);
+				}
+			}
+		}
+		if (android == null) {
+			return false;
+		}
+		try {
+			return (boolean)android.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.236) Powers' {@code Future.WAITING}: on a lost-in-time player still waiting for the future to be made. */
 	private static net.fabricmc.fabric.api.attachment.v1.@Nullable AttachmentType<?> futureWaiting;
 	private static boolean lookedForFutureWaiting;

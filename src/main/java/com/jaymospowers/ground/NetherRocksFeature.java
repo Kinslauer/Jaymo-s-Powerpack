@@ -15,7 +15,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
 /**
- * (0.20.1) Andy: "add rare pebbles and flint to the nether so those starts are possible for emberborn [...] after trying
+ * (0.20.2) Andy: "add rare pebbles and flint to the nether so those starts are possible for emberborn [...] after trying
  * that start you can only advance by stealing axes from pigmen". Now and then a few loose rocks lie on one of the Nether's
  * floors (it has many, under its roof, so the surface heightmap the overworld's rocks use won't do): netherrack rocks on
  * netherrack and nylium, blackstone on blackstone, basalt on basalt and in the soul sand valleys; and some of the piles

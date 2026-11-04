@@ -61,7 +61,7 @@ public final class Knapping {
 		Map.entry(GroundRocks.Variant.DIORITE, 0xFFBDBDBD), Map.entry(GroundRocks.Variant.ANDESITE, 0xFF878787),
 		Map.entry(GroundRocks.Variant.DEEPSLATE, 0xFF4C4C56), Map.entry(GroundRocks.Variant.TUFF, 0xFF6F6F63),
 		Map.entry(GroundRocks.Variant.SANDSTONE, 0xFFD6C68E), Map.entry(GroundRocks.Variant.RED_SANDSTONE, 0xFFB5613B),
-		// (0.20.1) the Nether's
+		// (0.20.2) the Nether's
 		Map.entry(GroundRocks.Variant.NETHERRACK, 0xFF7A3434), Map.entry(GroundRocks.Variant.BLACKSTONE, 0xFF2E2930),
 		Map.entry(GroundRocks.Variant.BASALT, 0xFF545458));
 
