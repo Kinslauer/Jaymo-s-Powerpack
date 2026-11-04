@@ -8808,3 +8808,8 @@ is our own take on the idea (none of its code or art).
   a chest (rank 1: leather Bag of Holding, 3 levels + 2 lapis), a leather bag (rank 2: iron, 6 + 4) or an iron bag
   (rank 3: golden, 10 + 6); bags keep their contents. Bag of Holding (Fuzs, MPL-2.0) ships in Powers' packMods with its
   grid recipes dropped. Not played.
+- **Spirit charms** (`spirits/SpiritCharms`, Andy: The Four Houses' spells as "spellcraft perks or moves for the ki
+  spirits"; MIT, ideas only). Disarming and a shield were already the spirits' (Thessaly's Unseen Hand, Ambrose's Aegis),
+  so three new moves: **Petrify** (the Quiet One, level 4: the foe in sight turns to stone 4 s, rooted and weak, dust
+  falling; no bosses), **Guardian Light** (Ambrose, level 5: undead within 12 blocks take 6, burn 4 s, are thrown back),
+  **Turn Back** (Thessaly, level 6: 5 s of arrows and bolts flying at you sent back, now yours). Existing poses. Not played.
