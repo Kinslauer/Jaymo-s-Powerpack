@@ -8463,3 +8463,9 @@ hall, land and vassals:
   World tiers want them too: Borderlands 1, Wildlands 2, Dread 4, Legend 5. The Rung Journal ticks each. A refusal is an
   action-bar line and a dull sound; a new level a chime, an action-bar line and a Tidings rumour. Players already on a
   tier get the levels it implies, once, on their next join. Ops: `/kingdom tier deed <players> goblin_king|ogre_king|...`.
+
+## 0.7.495: rope ties to fences (pack 0.19.86)
+Andy's Plant Fibers pick: "a climbable rope you tie to a fence". Rope placed against a fence's side with nothing above
+to hang from is tied to the fence (`RopeLift.TIED`) and holds while a fence stands beside it, so at a cliff's edge it
+hangs over the drop; rope also hangs under a fence. Rope in hand on it lets more down as before. With Jaymo's Powers,
+3 plant string in a column make a rope.
