@@ -51,6 +51,12 @@ public final class XenoformHand {
 		} else if (model instanceof XenoFormModels.Lurk lurk) {
 			// (0.19.83) its forearm and hand straightened (on all fours they're bent)
 			lurk.handPose();
+		} else if (model instanceof XenoFormModels.Rime rime) {
+			// (0.19.83) its fists back at their rest curl (a blow drawn last leaves them curled further)
+			rime.handPose();
+		} else if (model instanceof XenoFormModels.Dud dud) {
+			// (0.19.83) its nub hand down where a fist would be (it hangs at the shoulder)
+			dud.handPose(limb);
 		}
 		poseStack.pushPose();
 		// a slim skin's arm is a pixel thinner; the alien's never is, so nudge it in

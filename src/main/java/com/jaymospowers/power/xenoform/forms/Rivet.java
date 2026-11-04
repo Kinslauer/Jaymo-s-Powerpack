@@ -222,6 +222,9 @@ public final class Rivet extends XenoForm {
 				LivingEntity target = ready(player, live, G) ? aimed(player, LASH_REACH, e -> true) : null;
 				if (target != null) {
 					target.hurtServer(level, player.damageSources().playerAttack(player), LASH_DAMAGE);
+					// (0.19.83) a lash is a blow: it stands to fight (the "fight" act reads the last mob hurt) and the arm whips out for everyone
+					player.setLastHurtMob(target);
+					player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 					Vec3 pull = player.position().subtract(target.position()).normalize().scale(LASH_PULL);
 					target.setDeltaMovement(target.getDeltaMovement().add(pull.x, 0.3, pull.z));
 					target.syncVelocity = true;

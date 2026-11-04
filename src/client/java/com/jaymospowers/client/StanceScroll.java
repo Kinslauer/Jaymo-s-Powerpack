@@ -207,7 +207,8 @@ public final class StanceScroll {
 	 * until the wheel takes you up to a sneak or standing (or Jump / a Sneak tap stands you).
 	 */
 	private static void tickKneel(LocalPlayer player) {
-		boolean low = held != null && held == Stance.LOW && Stance.localLow == player.getId() && player.onGround();
+		boolean low = held != null && held == Stance.LOW && Stance.localLow == player.getId() && player.onGround()
+			&& !CrouchPose.ownCrouch(player);
 		double dx = player.getX() - lastX, dz = player.getZ() - lastZ;
 		lastX = player.getX();
 		lastZ = player.getZ();

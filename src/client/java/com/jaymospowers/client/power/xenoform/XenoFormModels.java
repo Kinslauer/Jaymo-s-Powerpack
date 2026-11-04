@@ -37,6 +37,15 @@ public final class XenoFormModels {
 		 * pixels in the body's space, y down) on the front of the chest (z), and its size against the band's 5-pixel face.
 		 */
 		float insigniaY = 7.5F, insigniaZ = -2.0F, insigniaSize = 1.0F;
+		/**
+		 * (0.19.83) Its body solves its own legs and crouch (a non-human build): {@code CrouchPose}'s low crouch, kneel and
+		 * eased bend stay off it, and it raises itself by the renderer's crouch drop itself.
+		 */
+		public boolean ownsCrouch;
+		/** (0.19.83) Its right arm reaches for its own insignia on the change-back tap ({@link XenoformSlap} leaves that arm alone). */
+		public boolean ownsTap;
+		/** (0.19.83) Its legs are solved onto the ground: Cryo's poses leave them alone. */
+		public boolean ownsLegs;
 
 		FormModel(ModelPart root, String id) {
 			super(root);
@@ -140,6 +149,8 @@ public final class XenoFormModels {
 		static final float POOL_RISEN = 0.75F, MOUND_RISEN = 0.6F, LOBE_IN = 0.55F;
 		/** The head: where the dome sits in the puddle (y, z), how far its neck sinks into the torso, how squashed the dome is. */
 		static final float HEAD_Y = 22.5F, HEAD_Z = -5.0F, NECK_SINK = 1.2F, DOME = 0.6F;
+		/** How far a sneaking renderer sinks the model (pixels). */
+		static final float CROUCH_SINK = 2.0F / 0.9375F;
 		/** The lobes' places on the slab (x, z). */
 		private static final float[][] LOBES = {{-6.0F, -6.5F}, {6.0F, -6.0F}, {-6.5F, 5.0F}, {6.5F, 5.5F}};
 		private static final int[] LOBE_U = {0, 16, 32, 48};
@@ -148,9 +159,12 @@ public final class XenoFormModels {
 
 		private final ModelPart pool, mound, wake;
 		private final ModelPart[] lobes = new ModelPart[4];
+		/** Every part on the root (set afresh each frame, so the crouch's raise never adds up). */
+		private final ModelPart[] all;
 
 		Rivet() {
 			super(bake(mesh()), "rivet");
+			this.ownsCrouch = true;
 			ModelPart root = this.root();
 			this.pool = root.getChild("pool");
 			this.mound = root.getChild("mound");
@@ -158,6 +172,8 @@ public final class XenoFormModels {
 			for (int i = 0; i < this.lobes.length; i++) {
 				this.lobes[i] = root.getChild("lobe" + i);
 			}
+			this.all = new ModelPart[] {this.pool, this.mound, this.wake, this.lobes[0], this.lobes[1], this.lobes[2], this.lobes[3], this.head, this.body,
+				this.rightArm, this.leftArm, this.rightLeg, this.leftLeg};
 			// the plate sits on the torso's front (local -z), which faces up while it lies down and forward once it stands
 			this.insigniaY = 4.5F;
 			this.insigniaZ = -2.0F;
@@ -230,7 +246,7 @@ public final class XenoFormModels {
 			float twist = this.body.yRot;
 			float[] ra = {this.rightArm.xRot, this.rightArm.yRot, this.rightArm.zRot};
 			float[] la = {this.leftArm.xRot, this.leftArm.yRot, this.leftArm.zRot};
-			for (ModelPart part : new ModelPart[] {this.head, this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg}) {
+			for (ModelPart part : this.all) {
 				part.resetPose();
 			}
 			this.rightArm.xRot = ra[0];
@@ -293,8 +309,9 @@ public final class XenoFormModels {
 			float lift = FOOT_LIFT * e * Mth.clamp(state.walkAnimationSpeed * 1.4F, 0.0F, 1.0F);
 			float bob = "fight".equals(act) ? Mth.sin(age * 0.3F) * 0.4F * e : 0.0F;
 			// (a swung leg's toe or heel corner dips by its half depth times the swing's sine: the hip rises that much so it never sinks into the floor)
-			float yR = hip + reach * (1.0F - Mth.cos(stepR)) - FOOT_HALF * Math.abs(Mth.sin(stepR)) - Math.max(0.0F, -Mth.sin(ph)) * lift + bob;
-			float yL = hip + reach * (1.0F - Mth.cos(stepL)) - FOOT_HALF * Math.abs(Mth.sin(stepL)) - Math.max(0.0F, Mth.sin(ph)) * lift + bob;
+			// (0.19.83) a foot swings forward (its angle falling) while the other half of the cycle pushes back: it lifts on the swing
+			float yR = hip + reach * (1.0F - Mth.cos(stepR)) - FOOT_HALF * Math.abs(Mth.sin(stepR)) - Math.max(0.0F, Mth.sin(ph)) * lift + bob;
+			float yL = hip + reach * (1.0F - Mth.cos(stepL)) - FOOT_HALF * Math.abs(Mth.sin(stepL)) - Math.max(0.0F, -Mth.sin(ph)) * lift + bob;
 			float legScale = reach / LEG_LEN;
 			this.rightLeg.setPos(-LEG_X, yR, 0.0F);
 			this.leftLeg.setPos(LEG_X, yL, 0.0F);
@@ -337,6 +354,12 @@ public final class XenoFormModels {
 			boolean rightLash = (state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT) != offSwing;
 			this.arm(this.rightArm, -1, sx, sy, sz, tw, armS, rightLash ? swing * LASH_STRETCH * e : 0.0F, wob);
 			this.arm(this.leftArm, 1, sx, sy, sz, tw, armS, rightLash ? 0.0F : swing * LASH_STRETCH * e, -wob);
+			// (0.19.83) a sneaking player is drawn CROUCH_SINK lower: everything raised that much, so the puddle stays on the floor
+			if (state.isCrouching) {
+				for (ModelPart part : this.all) {
+					part.y -= CROUCH_SINK;
+				}
+			}
 		}
 
 		/** One arm at its shoulder, scaled out of the mass, flared a little, stretched by {@code stretch} but never past the floor. */
@@ -943,6 +966,7 @@ public final class XenoFormModels {
 
 		Lurk() {
 			super(bake(mesh()), "lurk");
+			this.ownsCrouch = true;
 			ModelPart root = this.root();
 			this.torso = root.getChild("torso");
 			this.neck = root.getChild("neck");
@@ -2397,11 +2421,14 @@ public final class XenoFormModels {
 		static final float ROLL_FACE_BACK = 2.0F, ROLL_FACE_DOWN = 1.0F, ROLL_NUB_DOWN = 1.0F;
 		/** How far the face turns and nods with your head (radians). */
 		static final float FACE_YAW = 0.6F, FACE_PITCH = 0.3F;
+		/** How far a sneaking renderer sinks the model (pixels); and how far down the arm the nub hand is drawn in first person. */
+		static final float CROUCH_SINK = 2.0F / 0.9375F, HAND_DOWN = 8.0F;
 
 		private final ModelPart face, nubRight, nubLeft;
 
 		Dud() {
 			super(bake(mesh()), "dud");
+			this.ownsCrouch = true;
 			this.face = this.body.getChild("face");
 			this.nubRight = this.body.getChild("right_nub");
 			this.nubLeft = this.body.getChild("left_nub");
@@ -2440,6 +2467,11 @@ public final class XenoFormModels {
 			return mesh;
 		}
 
+		/** (0.19.83) The nub hand drawn down the arm, where a player's fist would be, for the first-person arm (the arm is only the nub). */
+		void handPose(ModelPart limb) {
+			limb.y += HAND_DOWN;
+		}
+
 		/** Puts {@code part} at a point of the ball's own space (x, y, z from its centre), following its tilt and scale. */
 		private void place(ModelPart part, float x, float y, float z) {
 			float xx = x * this.body.xScale, yy = y * this.body.yScale, zz = z * this.body.zScale;
@@ -2468,6 +2500,8 @@ public final class XenoFormModels {
 			XenoMotion.Read m = XenoMotion.read(state);
 			String act = state.getData(XenoformClient.ACT);
 			boolean dead = "dead".equals(act), roll = !dead && "roll".equals(act);
+			// (0.19.83) a sneaking player is drawn CROUCH_SINK lower: the ground that much higher in the model
+			float sink = state.isCrouching ? CROUCH_SINK : 0.0F;
 			float age = state.ageInTicks;
 			float phase = state.walkAnimationPos * WADDLE_RATE;
 			float spd = Mth.clamp(state.walkAnimationSpeed * SPEED_GAIN, 0.0F, 1.0F);
@@ -2488,7 +2522,7 @@ public final class XenoFormModels {
 				this.body.zRot = 0.0F;
 				this.body.yScale = 1.0F + breath;
 				this.body.xScale = this.body.zScale = 1.0F - breath * 0.5F;
-				this.body.y = 24.0F - LYING_RADIUS * this.body.zScale;
+				this.body.y = 24.0F - sink - LYING_RADIUS * this.body.zScale;
 				for (int side = 0; side < 2; side++) {
 					float sign = side == 0 ? -1.0F : 1.0F;
 					ModelPart foot = side == 0 ? this.rightLeg : this.leftLeg;
@@ -2511,7 +2545,7 @@ public final class XenoFormModels {
 				this.body.xRot = state.walkAnimationPos * ROLL_PER_WALK + age * ROLL_PER_TICK;
 				this.body.zRot = 0.0F;
 				this.body.xScale = this.body.yScale = this.body.zScale = ROLL_SCALE;
-				this.body.y = ROLL_Y;
+				this.body.y = ROLL_Y - sink;
 				this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
 				return;
 			}
@@ -2522,7 +2556,7 @@ public final class XenoFormModels {
 			this.body.yScale = height;
 			this.body.xScale = this.body.zScale = width;
 			float bob = Mth.abs(Mth.sin(phase)) * BOB * spd;
-			this.body.y = 24.0F - 1.0F - RADIUS * height - bob;
+			this.body.y = 24.0F - sink - 1.0F - RADIUS * height - bob;
 			this.body.zRot = Mth.sin(phase) * ROCK * spd + Mth.sin(age * 0.09F) * 0.02F;
 			this.body.xRot = swing * 0.25F + spd * 0.06F;
 			for (int side = 0; side < 2; side++) {
@@ -2533,7 +2567,7 @@ public final class XenoFormModels {
 				float s = Mth.sin(phase) * sign * -1.0F;
 				float lift = Math.max(0.0F, s) * LIFT * spd;
 				foot.x = sign * 3.0F;
-				foot.y = FOOT_REST - lift - air * 1.2F;
+				foot.y = FOOT_REST - sink - lift - air * 1.2F;
 				foot.z = -sign * Mth.cos(phase) * STRIDE * spd;
 				this.place(hand, sign * HAND_X, HAND_Y, 0.0F);
 				hand.xRot = -sign * Mth.sin(phase) * HAND_SWING * spd + Mth.sin(age * 0.1F + side * 1.7F) * 0.05F;
@@ -2573,6 +2607,8 @@ public final class XenoFormModels {
 		static final float STRIDE = 3.2F, LIFT = 2.6F, STANCE = 0.6F, GAIT = 0.6662F * 0.75F, SPEED_GAIN = 1.6F;
 		/** The hips sink this far as the feet spread (pixels), crouched and landing. */
 		static final float BOB = 0.5F, CROUCH_DROP = 1.6F, LAND_DROP = 1.2F;
+		/** How far a sneaking renderer sinks the model (pixels): the ground and the hips are raised that much. */
+		static final float CROUCH_SINK = 2.0F / 0.9375F;
 		/** The trunk: how much more it stoops at a run and crouched, how far the shoulders twist and the hips roll with the stride, how much it rocks (radians). */
 		static final float RUN_STOOP = 0.18F, CROUCH_STOOP = 0.35F, TWIST = 0.12F, ROLL = 0.05F, ROCK = 0.04F;
 		/** The arms: rest pitch, how far they swing against the legs, how far they hang out (radians), and the fist's curl. */
@@ -2598,6 +2634,8 @@ public final class XenoFormModels {
 		private final ModelPart[] crown = new ModelPart[CROWN.length];
 		private final ModelPart shardRight, shardLeft, fistRight, fistLeft;
 		private final ModelPart shinRight, shinLeft, footRight, footLeft;
+		/** This frame's crouch sink (pixels). */
+		private float sink;
 		/** This frame's foot (right, left): the ankle's z from the hip, how far it is lifted, the toe's tip (radians). */
 		private final float[] stepRight = new float[3], stepLeft = new float[3];
 		/** Scratch for a turned point. */
@@ -2605,6 +2643,8 @@ public final class XenoFormModels {
 
 		Rime() {
 			super(bake(mesh()), "rime");
+			this.ownsCrouch = true;
+			this.ownsLegs = true;
 			this.trunk = this.body.getChild("trunk");
 			for (int i = 0; i < SPINE_Y.length; i++) {
 				this.spines[i] = this.trunk.getChild("spine" + i);
@@ -2776,7 +2816,9 @@ public final class XenoFormModels {
 
 			// the hips sink as the feet spread, crouched and landing; they hold still in the air
 			float spread = Math.max(Math.abs(this.stepRight[0] - REST_Z), Math.abs(this.stepLeft[0] - REST_Z)) / STRIDE;
-			float hipY = cryo ? HIP_Y : HIP_Y + (BOB * spread + (crouch ? CROUCH_DROP : 0.0F) + m.land() * LAND_DROP) * (1.0F - air);
+			// (0.19.83) a sneaking player is drawn CROUCH_SINK lower: the ground (and so the hips) that much higher in the model
+			this.sink = state.isCrouching ? CROUCH_SINK : 0.0F;
+			float hipY = (cryo ? HIP_Y : HIP_Y + (BOB * spread + (crouch ? CROUCH_DROP : 0.0F) + m.land() * LAND_DROP) * (1.0F - air)) - this.sink;
 			float tuck = air * 2.0F;
 			this.rightLeg.setPos(-HIP_X, hipY, HIP_Z);
 			this.leftLeg.setPos(HIP_X, hipY, HIP_Z);
@@ -2847,9 +2889,15 @@ public final class XenoFormModels {
 			}
 		}
 
+		/** (0.19.83) The fists at their rest curl for the first-person arm (the model is shared, so they hold whoever was drawn last). */
+		void handPose() {
+			this.fistRight.xRot = FIST_CURL;
+			this.fistLeft.xRot = FIST_CURL;
+		}
+
 		/** One leg to its foot's step: the ankle ahead of the hip by the step's z, lifted by its lift (and tucked up in the air). */
 		private void legTo(float hipY, float[] step, ModelPart thigh, ModelPart shin, ModelPart foot, float tuck) {
-			leg(thigh, shin, foot, hipY, ANKLE_Y - step[1] - tuck, HIP_Z + step[0], step[2]);
+			leg(thigh, shin, foot, hipY, ANKLE_Y - this.sink - step[1] - tuck, HIP_Z + step[0], step[2]);
 		}
 	}
 
@@ -5798,6 +5846,8 @@ public final class XenoFormModels {
 		 * it only starts to hang once the unfold is this far along (so it never swings down into the ground).
 		 */
 		static final float HAND_CRAWL = -1.2F, HAND_GROUND = 2.2F, HAND_LIFT_FROM = 0.5F;
+		/** The change-back tap: how far in front of the insignia the wrist stops (the hand's length) and how far further out and up it is poised. */
+		static final float TAP_HAND = 3.0F, TAP_POISE = 5.0F, TAP_POISE_UP = 3.0F;
 		/** A segment's length (a limb has two) and how short of fully stretched a limb is kept (so a straight leg still has a hint of bend). */
 		private static final float SEG = 9.0F, SLACK = 0.4F, MAX_REACH = 2.0F * SEG - SLACK, MIN_REACH = 1.5F;
 		/** The foot's thickness: it hangs under the ankle, so the ankle is solved to this far above the ground (no shin corner sinks in). */
@@ -5815,6 +5865,8 @@ public final class XenoFormModels {
 
 		Shade() {
 			super(bake(mesh()), "shade");
+			this.ownsCrouch = true;
+			this.ownsTap = true;
 			ModelPart root = this.root();
 			this.torso = root.getChild("torso");
 			this.rightForearm = this.rightArm.getChild("forearm");
@@ -5825,6 +5877,9 @@ public final class XenoFormModels {
 			this.leftShin = this.leftLeg.getChild("shin");
 			this.rightFoot = this.rightShin.getChild("foot");
 			this.leftFoot = this.leftShin.getChild("foot");
+			// (0.19.83) the man's body is hidden from the start: the band's hologram and plate draw the root without setupAnim
+			this.body.visible = false;
+			this.hat.visible = false;
 			// the hidden body sits at the torso's middle, turned so the plate lies on its front standing and its back crawling
 			this.insigniaY = 0.0F;
 			this.insigniaZ = -1.5F;
@@ -5972,7 +6027,11 @@ public final class XenoFormModels {
 			if (crouch) {
 				target = 0.0F;
 			}
-			if (holding || staring || swinging || using) {
+			// (0.19.83) the change-back tap: the right hand comes up onto the insignia (XenoformSlap leaves that arm to us); it stands for it
+			XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
+			float tap = slap != null && slap.chest() && !XenoformSlap.ownBody(state) ? slap.raise() : 0.0F;
+			float tapHit = slap != null ? slap.strike() : 0.0F;
+			if (holding || staring || swinging || using || tap > 0.0F) {
 				target = 1.0F;
 			}
 			// in the air or swimming (the renderer lays a swimmer flat) it stays stretched out
@@ -6086,6 +6145,19 @@ public final class XenoFormModels {
 				wristZ = Mth.lerp(hold, wristZ, sz - 0.5F);
 				splay = Mth.lerp(hold, splay, HOLD_SPLAY);
 				bend = Mth.lerp(hold, bend, -1.0F);
+				float tapped = left ? 0.0F : tap * e;
+				if (tapped > 0.0F) {
+					// the insignia on the plate carrier's front (its x turn), the wrist a hand's length in front of it, rolled in across the chest
+					float ix = this.body.x;
+					float iy = this.body.y - this.insigniaZ * Mth.sin(this.body.xRot);
+					float iz = this.body.z + this.insigniaZ * Mth.cos(this.body.xRot);
+					float ty = iy - TAP_POISE_UP * (1.0F - tapHit);
+					float tz = iz - TAP_HAND - TAP_POISE * (1.0F - tapHit);
+					wristY = Mth.lerp(tapped, wristY, ty);
+					wristZ = Mth.lerp(tapped, wristZ, tz);
+					splay = Mth.lerp(tapped, splay, -(float)Math.atan2(ix - sx, Math.max(0.5F, ty - sy)));
+					bend = Mth.lerp(tapped, bend, 1.0F);
+				}
 				this.ik((wristY - sy) / Mth.cos(splay), wristZ - sz, bend);
 				arm.x = sx;
 				arm.y = sy;
@@ -6474,6 +6546,7 @@ public final class XenoFormModels {
 
 		Thornwild() {
 			super(bake(mesh()), "thornwild");
+			this.ownsCrouch = true;
 			// flat on the front of the chest burl, between the shoulders
 			this.insigniaY = 4.5F;
 			this.insigniaZ = -3.0F;
@@ -7081,6 +7154,7 @@ public final class XenoFormModels {
 
 		Bulwark() {
 			super(bake(mesh()), "bulwark");
+			this.ownsCrouch = true;
 			this.arms[0] = this.rightArm;
 			this.arms[1] = this.leftArm;
 			this.arms[2] = this.body.getChild("right_lower_arm");
@@ -7967,7 +8041,7 @@ public final class XenoFormModels {
 		/** The core's height (model pixels, y down: 10 puts its centre ~14 up, the heart of a 32-pixel column), its bob and how far it sinks when sneaking. */
 		static final float HEART = 10.0F, BOB = 0.8F, CROUCH_DROP = 2.5F;
 		/** The ground (model pixels, y down): no fragment's lowest corner goes below it. */
-		static final float GROUND = 24.0F;
+		static final float GROUND = 24.0F, CROUCH_SINK = 2.0F / 0.9375F;
 		/** The core's breath (fraction), its rate, and how much it swells on an attack swing. */
 		static final float BREATH = 0.04F, BREATH_RATE = 0.09F, BURST_CORE = 0.25F;
 		/** How fast the fragments drift (radians a tick), and how far each size drifts (pixels): large, medium, small, tiny. */
@@ -8001,6 +8075,7 @@ public final class XenoFormModels {
 
 		Nadir() {
 			super(bake(mesh()), "nadir");
+			this.ownsCrouch = true;
 			for (int i = 0; i < FRAGS.length; i++) {
 				this.frags[i] = this.root().getChild("frag" + i);
 			}
@@ -8047,7 +8122,10 @@ public final class XenoFormModels {
 			float burst = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
 			boolean crouch = state.isCrouching;
 			float squash = (crouch ? CROUCH_SQUASH : 1.0F) - m.land() * LAND_SQUASH;
-			float cy = HEART + Mth.sin(age * 0.05F) * BOB + (crouch ? CROUCH_DROP : 0.0F);
+			// (0.19.83) a sneaking player is drawn CROUCH_SINK lower: the ground (and the core) that much higher in the model
+			float sink = crouch ? CROUCH_SINK : 0.0F;
+			float ground = GROUND - sink;
+			float cy = HEART + Mth.sin(age * 0.05F) * BOB + (crouch ? CROUCH_DROP : 0.0F) - sink;
 			float rise = Math.max(0.0F, m.fall()) * m.air() * FALL_RISE;
 			// the core: breathing, swelling on a swing, leaning into its way; the insignia rides its front (the plate
 			// is drawn in the core's scaled space, so insigniaZ/insigniaSize stay as set in the constructor)
@@ -8079,7 +8157,7 @@ public final class XenoFormModels {
 				float cx = Mth.cos(p.xRot), sx = Mth.sin(p.xRot), cyr = Mth.cos(p.yRot), syr = Mth.sin(p.yRot);
 				float cz = Mth.cos(p.zRot), sz = Mth.sin(p.zRot);
 				float reach = HALF[size] * s * (Mth.abs(sz * cyr) + Mth.abs(cz * cx + sz * syr * sx) + Mth.abs(sz * syr * cx - cz * sx));
-				p.y = Math.min(p.y, GROUND - reach);
+				p.y = Math.min(p.y, ground - reach);
 			}
 		}
 	}
@@ -8462,6 +8540,8 @@ public final class XenoFormModels {
 		static final float TOLL_TICKS = 40.0F, TOLL_LEAN = 0.35F, TOLL_REAR = 0.25F, TOLL_SQUAT = 2.0F, TOLL_RISE = 6.0F;
 		/** Burrowing: how much lower the back leans, how far the pelvis squats, how fast the fists scoop and how far they reach, how far the head bows. */
 		static final float BURROW_LEAN = 0.4F, BURROW_SQUAT = 4.0F, SCOOP_RATE = 0.7F, SCOOP_REACH = 4.0F, BURROW_BOW = 0.1F;
+		/** The change-back tap: how far in front of the insignia the wrist stops (the fist's length) and how far further out and up it is poised. */
+		static final float TAP_FIST = 4.0F, TAP_POISE = 5.0F, TAP_POISE_UP = 3.0F;
 		private static final float PI = (float)Math.PI;
 
 		private final ModelPart neck, jaw, ribRight, ribLeft;
@@ -8469,10 +8549,12 @@ public final class XenoFormModels {
 		/** Index 0 right, 1 left. */
 		private final ModelPart[] fore = new ModelPart[2], fist = new ModelPart[2], shin = new ModelPart[2], foot = new ModelPart[2];
 		private final ModelPart[] posed;
-		private final float[] at = new float[3], gait = new float[3], bones = new float[2];
+		private final float[] at = new float[3], gait = new float[3], bones = new float[2], tapAt = new float[3];
 
 		Knell() {
 			super(bake(mesh()), "knell");
+			this.ownsCrouch = true;
+			this.ownsTap = true;
 			ModelPart root = this.root();
 			this.neck = root.getChild("neck");
 			this.jaw = this.head.getChild("jaw");
@@ -8653,12 +8735,19 @@ public final class XenoFormModels {
 			float breath = m.breath();
 			float speed = Mth.clamp(state.walkAnimationSpeed * SPEED_GAIN, 0.0F, 1.0F) * (1.0F - air) * (toll ? 0.0F : burrow ? 0.25F : 1.0F);
 			float w = state.walkAnimationPos * GAIT;
-			// the Tolling's beat: the fists rise over the toll and slam down on it (the server tolls when the player's age is a multiple of the interval)
-			float beat = fract(age / TOLL_TICKS);
+			// the Tolling's beat: the fists rise over the toll and slam down on it (the server tolls when the level's game
+			// time is a multiple of the interval; the client's game time follows the server's, an entity's age does not)
+			net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+			float clock = level != null ? (level.getGameTime() % (long)TOLL_TICKS) + fract(age) : age;
+			float beat = fract(clock / TOLL_TICKS);
 			float rise = beat < 0.7F ? Mth.sin(beat / 0.7F * PI * 0.5F) : 1.0F - (float)Math.pow((beat - 0.7F) / 0.3F, 3.0);
 			if (!toll) {
 				rise = 0.0F;
 			}
+			// (0.19.83) the change-back tap: the right fist comes up off the ground onto the insignia (XenoformSlap leaves that arm to us)
+			XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
+			float tap = slap != null && slap.chest() && !XenoformSlap.ownBody(state) ? slap.raise() : 0.0F;
+			float tapHit = slap != null ? slap.strike() : 0.0F;
 
 			// ---- the body: the back leans over the pelvis, rocking over the planted foot ----
 			// (the crouch's own squat and lean only when no ability already has it low)
@@ -8759,17 +8848,29 @@ public final class XenoFormModels {
 					fistAbs = -swing * 0.4F;
 				}
 				// a tipped fist (pitched or rolled with the arm) is lifted so its lowest edge stays where its flat sole would be
-				float fistRoll = -sgn * splay + roll;
-				ty -= FIST * (Mth.cos(fistAbs) - 1.0F) + FIST_HALF * Math.abs(Mth.sin(fistAbs)) + FIST_SIDE * Math.abs(Mth.sin(fistRoll));
-				// the arm stands splayed out, which shortens it by the splay's cosine
-				float flat = Mth.cos(splay);
+				float armRoll = -sgn * splay;
+				ty -= FIST * (Mth.cos(fistAbs) - 1.0F) + FIST_HALF * Math.abs(Mth.sin(fistAbs)) + FIST_SIDE * Math.abs(Mth.sin(armRoll + roll));
+				float tapped = left ? 0.0F : tap;
+				if (tapped > 0.0F) {
+					// the wrist a fist's length in front of the insignia (poised further out and up), the arm rolled in across the chest to it
+					place(0.0F, this.insigniaY - TAP_POISE_UP * (1.0F - tapHit), this.insigniaZ - TAP_FIST - TAP_POISE * (1.0F - tapHit), lean, yaw, roll, px, py, pz,
+						this.tapAt);
+					float inRoll = -(float)Math.atan2(this.tapAt[0] - sx, Math.max(0.5F, this.tapAt[1] - sy));
+					ty = Mth.lerp(tapped, ty, this.tapAt[1]);
+					tz = Mth.lerp(tapped, tz, this.tapAt[2]);
+					armRoll = Mth.lerp(tapped, armRoll, inRoll);
+				}
+				float fistRoll = armRoll + roll;
+				// the arm stands splayed out (or rolled in), which shortens it by the roll's cosine
+				float flat = Mth.cos(armRoll);
 				this.ik(sy, sz, sy + (ty - sy) / flat, tz, UPPER, FORE, 1.0F);
 				arm.setPos(sx, sy, sz);
 				arm.xRot = this.bones[0];
 				arm.yRot = yaw;
 				arm.zRot = fistRoll;
 				this.fore[side].xRot = this.bones[1] - this.bones[0];
-				this.fist[side].xRot = fistAbs - this.bones[1];
+				// (tapping, the fist goes on straight from the forearm, knuckles to the plate)
+				this.fist[side].xRot = Mth.lerp(tapped, fistAbs - this.bones[1], 0.0F);
 			}
 
 			// ---- the neck and head: slung low and forward; a swing throws them out ----
