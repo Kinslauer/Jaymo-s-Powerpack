@@ -39,10 +39,21 @@ public final class DodgeClient {
 	private DodgeClient() {
 	}
 
-	/** The Dodge key is held (Sneak + it zooms, see {@code SneakZoom}). */
+	/**
+	 * The Dodge key is held (Sneak + it zooms, see {@code SneakZoom}). (0.20.79) Read off the keyboard itself as well as the
+	 * key mapping: Andy's Shift + Alt didn't zoom in 0.20.74-0.20.77 though the double tap did, so something between the
+	 * key event and the mapping drops Alt while Shift is down. Left Alt itself always counts, wherever the Dodge key is.
+	 */
 	public static boolean keyDown() {
 		KeyMapping key = dodgeKey;
-		return key != null && key.isDown();
+		if (key == null) {
+			return false;
+		}
+		if (key.isDown() || InputConstants.isKeyDown(InputConstants.KEY_LALT)) {
+			return true;
+		}
+		InputConstants.Key bound = KeyMappingHelper.getBoundKeyOf(key);
+		return bound.getType() == InputConstants.Type.KEYBOARD && bound.getValue() > 0 && InputConstants.isKeyDown(bound.getValue());
 	}
 
 	public static void init() {

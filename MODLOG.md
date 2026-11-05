@@ -630,3 +630,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   "be born again" (`ZFighterAfterlife.talk`) was greyed unless you were one of the dead (`among`) and `mayBeReborn` held
   (not a visitor who came alive, not a life already ended). Now it is always open: the dead are let go and born again as
   they wake; a living visitor is born again on the spot (`reborn`, Kingdoms' `LifeStory.reincarnate`).
+- **0.20.79, Shift + Left Alt zoom, take two** (Andy: "shift + alt doesnt seem to be zooming", while double-tap-and-hold
+  Shift did): `DodgeClient.keyDown()` now also reads Left Alt (and the Dodge key's own key) straight off the keyboard
+  state, so the zoom no longer depends on the Alt key event reaching the key mapping while Shift is down. Built, not played.
