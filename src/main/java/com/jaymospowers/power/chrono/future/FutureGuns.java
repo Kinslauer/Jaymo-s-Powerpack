@@ -97,6 +97,18 @@ public final class FutureGuns {
 		}
 	}
 
+	/**
+	 * (0.20.100) TaCZ's default guns that work their own action between shots (bolt, pump, lever, break-open, single shot):
+	 * their execution is the one shot to the head (core/finisher/Finishers), the rest fire three.
+	 */
+	static final java.util.Set<String> MANUAL_ACTION = java.util.Set.of("tacz:ai_awp", "tacz:db_long", "tacz:db_short", "tacz:kar98",
+		"tacz:lonetrail", "tacz:m700", "tacz:m870", "tacz:m95", "tacz:spas_12", "tacz:springfield1873");
+
+	/** (0.20.100) Whether the TaCZ gun {@code gunId} is worked by hand between shots ({@link #MANUAL_ACTION}). */
+	public static boolean manualAction(String gunId) {
+		return MANUAL_ACTION.contains(gunId);
+	}
+
 	/** Nobody fires at point blank (they'd rather swing). */
 	static final double NEAREST = 2.5;
 	/**
