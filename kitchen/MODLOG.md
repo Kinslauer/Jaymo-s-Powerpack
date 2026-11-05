@@ -1480,3 +1480,12 @@ tools/ragdoll_sim checks a deer dragged off a 2x4 table never ends up inside it 
 ## 0.5.71: dishes count on the pack's advancement tab (pack 0.20.88)
 `Kitchen.award` gives Powers' Home Cooking for any dish cooked and Cooked to Perfection for a perfect one
 (`jaymospowers:pack/cooked`, `pack/perfect_dish`). Nothing happens without Powers. Built, not played.
+
+## 0.5.72: every corpse can be aimed at, all of it
+Andy: "some corpses dont seem to have hitboxes, so they cannot be interacted with, like this skeleton". A corpse's box is
+small and low under its torso (so it drops to the ground and never hangs on a block edge), while the ragdoll lies two
+blocks long. Aiming at a skeleton's skull, arms or legs, or at a body that had slid off its box, hit the ground behind
+it. Now, on the client, the box takes in the whole drawn ragdoll (`CorpseEntity#makeBoundingBox`, from
+`ClientRagdolls.Track#bounds`, refreshed every tick), so the crosshair finds any part of any corpse. It is left as it was
+while the body is held, pinned, slung or in a cart. The server keeps the small box, so physics is unchanged. Built, not
+played.
