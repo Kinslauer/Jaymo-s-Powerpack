@@ -624,3 +624,9 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 
 - Packs Kingdoms 0.7.565: NPCs stop swinging at a werewolf's hidden person and fight the beast; a Quiet One orc is seen
   again once his keeper is gone. Not played.
+
+## 0.20.78 — the Judge always offers rebirth
+- Andy: "you should always be able to reset your character at the Judge, the option shouldnt be greyed." The Judge's
+  "be born again" (`ZFighterAfterlife.talk`) was greyed unless you were one of the dead (`among`) and `mayBeReborn` held
+  (not a visitor who came alive, not a life already ended). Now it is always open: the dead are let go and born again as
+  they wake; a living visitor is born again on the spot (`reborn`, Kingdoms' `LifeStory.reincarnate`).
