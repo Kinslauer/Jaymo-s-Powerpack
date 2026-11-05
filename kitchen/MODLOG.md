@@ -1408,3 +1408,10 @@ Andy: "player corpses dont spawn in the otherworld". `Corpses.addNoCorpseZone(Pr
 lets other mods name places no body is left. Dying there (player or mob) leaves no corpse, a player's hotbar drops with the rest of the
 inventory, and a rising body (zombie, skeleton, player) already there fades and drops what it held instead of getting up.
 Powers adds the Other World (the Judge's hall and the grounds round it) by reflection.
+## 0.5.62: villagers don't get stuck on the wagon
+Andy: "this guy got stuck" (a quest villager up on a wagon's bench, the wagon stood nearly on end on a hillside).
+`CartEntity`: a two-wheeler pitches over the real gap to its puller and never past 30 degrees (`MAX_PITCH`; before, a horse
+up a bank tipped it to ~70 and hoisted the bench rider up at the top). A cart blocked at the foot of a bank its puller went
+up is hauled up a block at a time (`HAUL_UP_RISE`). Mobs that climbed onto the wagon's bench or a coach seat by
+themselves (not tamed pets) step down on the cart's right once it has stood still 30 s (`SIT_STILL_TICKS`); on the move
+they stay aboard, and sneak + right-click still lets everyone out at once.

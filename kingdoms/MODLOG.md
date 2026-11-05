@@ -9011,6 +9011,12 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   "humanoid mobs can say something about it too, 'I was just about to....kill you?!'". `PowersCompat.tellPerplexed` hooks
   Powers' `ChronoCheatDeath.PERPLEXED`: a humanoid executioner (`Temperaments.humanoid`) says one of six lines over its
   head (`lang/parts/perplexed.json`, through `Speech.say`, in its own tongue). Gradle compile only, not played.
+- **0.7.544, carts stand on the ground:** Andy (2026-11-05): "the carts often spawn stuck inside terrain" (clip: a
+  red-roofed carriage sunk in the grass bank beside a road). A `Wagon` was always put at its horse's height (on hitching,
+  when snapped back behind it, and every tick it trailed), so behind a horse on a road along a bank, or at the foot of a
+  rise, it sat inside the hill. `Wagon.ground` finds the top of the block (or water) with room above it, nearest that
+  height (3 up, 4 down), under the cart's middle, and the cart stands there, easing to a new height unless it's over 2
+  blocks off. Gradle compile only, not played.
 - **0.7.545, fallen royals brought home:** Andy (2026-11-05), of a dead king left lying in diamonds outside his walls for a
   player to strip: "the royals should never just be left dead like this, unless there was noone at all left in the kingdom
   to defend, SOMEONE should find the body and get it to safety, remove the armor, and bury or mourn them if not bring them
