@@ -640,3 +640,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   that jar (`buildKitchen`, like Kingdoms); `libs/` is only compiled against and run in the dev game. Powers now logs a
   warning if Kitchen has no Other World rule. Kitchen 0.5.69: a zombie player already standing in the Other World fades
   in souls, dropping what it held and carried. Built, not played.
+- **0.20.81, splinter flint in your hands** (Andy: "you should be able to shift click flint in mid air with a rock off
+  hand to splinter it without causing a fire"): with flint and a rock in your two hands, sneak + use splinters one flint
+  into two shards (as knapping it on a block does), whether you aim at the air or at a block, and never strikes fire; the
+  rock is kept. Plain use on a block still strikes fire as before (`FirstTools.splinter`). And (Andy: "you also should
+  only be able to throw rocks from the offhand, and after a small charge. it no longer places unless you have it in the
+  main hand"): a rock in the main hand only sets down and is never thrown; a rock in the off hand is never set down, and
+  is thrown after holding use for half a second (`ThrownRocks.CHARGE`, 10 ticks), at the air or at a block, with a soft
+  wind-up sound as the hold starts. Built, not played.
