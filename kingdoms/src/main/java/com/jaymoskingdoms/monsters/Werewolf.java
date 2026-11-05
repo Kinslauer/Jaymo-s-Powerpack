@@ -67,7 +67,7 @@ public class Werewolf extends LegendMonster {
 	private static final EntityDataAccessor<Integer> LOOK = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
 	/** (0.7.1) The colour of the clothes it wore (its rags are dyed so). */
 	private static final EntityDataAccessor<Integer> RAGS = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
-	/** (0.7.572) A werewolf player's lean wolf, on all fours (WerewolfPlayers), not the great beast. */
+	/** (0.7.574) A werewolf player's lean wolf, on all fours (WerewolfPlayers), not the great beast. */
 	private static final EntityDataAccessor<Boolean> LEAN = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.BOOLEAN);
 	/** (0.7.1) Its coat's wears, and its rags. */
 	public static final int WEARS = 3, RAG_SETS = 3;
@@ -191,7 +191,7 @@ public class Werewolf extends LegendMonster {
 		return this.entityData.get(LOOK);
 	}
 
-	/** (0.7.572) A werewolf player's lean wolf. */
+	/** (0.7.574) A werewolf player's lean wolf. */
 	public boolean lean() {
 		return this.entityData.get(LEAN);
 	}

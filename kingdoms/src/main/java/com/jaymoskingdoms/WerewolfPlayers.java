@@ -72,7 +72,7 @@ public final class WerewolfPlayers {
 	static final int KILL_FOOD = 6;
 	static final float KILL_SATURATION = 0.8F;
 	/**
-	 * (0.7.572, Andy: "it should be a variation that you can achieve") The lean wolf: once the change comes at will, a
+	 * (0.7.574, Andy: "it should be a variation that you can achieve") The lean wolf: once the change comes at will, a
 	 * werewolf who has kept the curse tame (wildness at most stage {@link #LEAN_MAX_STAGE}) can sneak and change into a
 	 * wolf on all fours instead of the great beast. Quicker and higher-leaping, but no stronger and less tough: Speed,
 	 * Jump Boost (amplifiers) and extra health. The full moon's change is always the great beast.
@@ -103,7 +103,7 @@ public final class WerewolfPlayers {
 		/** (0.7.185) It came on its own on a night that isn't the full moon ({@link FeralCurse}): it lasts till dawn. */
 		boolean wild;
 		boolean leaving;
-		/** (0.7.572) The lean wolf, not the great beast. */
+		/** (0.7.574) The lean wolf, not the great beast. */
 		boolean lean;
 
 		Form(long since, boolean forced) {
@@ -180,7 +180,7 @@ public final class WerewolfPlayers {
 		return FORMS.containsKey(player.getUUID());
 	}
 
-	/** (0.7.572) Whether {@code player} is the lean wolf now (or changing into it). */
+	/** (0.7.574) Whether {@code player} is the lean wolf now (or changing into it). */
 	public static boolean lean(ServerPlayer player) {
 		Form f = FORMS.get(player.getUUID());
 		return f != null && f.lean;
@@ -315,7 +315,7 @@ public final class WerewolfPlayers {
 			return;
 		}
 		if (f == null) {
-			// (0.7.572) sneaking: the lean wolf, if the curse is tame enough to let them run light
+			// (0.7.574) sneaking: the lean wolf, if the curse is tame enough to let them run light
 			boolean lean = player.isShiftKeyDown();
 			if (lean && FeralCurse.stage(player) > LEAN_MAX_STAGE) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.werewolf.lean_wild").withStyle(ChatFormatting.DARK_RED));
@@ -459,7 +459,7 @@ public final class WerewolfPlayers {
 		player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
 		Form f = FORMS.get(player.getUUID());
 		if (f != null && f.lean) {
-			// (0.7.572) the lean wolf: fast and light, no stronger than they are
+			// (0.7.574) the lean wolf: fast and light, no stronger than they are
 			player.addEffect(new MobEffectInstance(MobEffects.SPEED, 60, LEAN_SPEED, true, false, true));
 			player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, LEAN_JUMP, true, false, true));
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 60, 0, true, false, true));

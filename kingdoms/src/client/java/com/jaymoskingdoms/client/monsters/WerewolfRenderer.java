@@ -31,7 +31,7 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 	/** (0.7.1) The cursed ones' coats (coat, then wear: mangy, scarred, patchy) and their rags ({@code tools/gen_cursed_werewolf.py}). */
 	private static final Identifier[][] CURSED = new Identifier[COATS.length][Werewolf.WEARS];
 	private static final Identifier[] RAGS = new Identifier[Werewolf.RAG_SETS];
-	/** (0.7.572) The lean wolf's coats, and the fiery one's frames ({@code tools/gen_lean_wolf.py}). */
+	/** (0.7.574) The lean wolf's coats, and the fiery one's frames ({@code tools/gen_lean_wolf.py}). */
 	private static final Identifier[] LEAN = {LegendRenderer.texture("werewolf_lean_black"), LegendRenderer.texture("werewolf_lean_brown"),
 		LegendRenderer.texture("werewolf_lean_timber")};
 	private static final Identifier[] LEAN_FIRE = {LegendRenderer.texture("werewolf_lean_fire_1"), LegendRenderer.texture("werewolf_lean_fire_2"),

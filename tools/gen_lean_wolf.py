@@ -1,4 +1,4 @@
-"""Paints the lean wolf's coats (Kingdoms 0.7.572): a werewolf player's survivalist form, LeanWolfModel. Our own art,
+"""Paints the lean wolf's coats (Kingdoms 0.7.574): a werewolf player's survivalist form, LeanWolfModel. Our own art,
 drawn from nothing but noise and the model's boxes: one coat for each of the werewolf's coats (black, brown, timber)
 and three flickering frames of the fiery one.
 
