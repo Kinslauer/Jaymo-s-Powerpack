@@ -39,8 +39,9 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.20.52) Andy: "the corpses should stay bloodied, if they were upon death the blood stains should just stay drawn and
  * dry like normal". A body that dies bloodied hands its coat to its corpse (Jaymo's Kitchen's, told through its
- * {@code Corpses.ON_BODY} hook, by name): {@link #CORPSE_BLOOD}, kept with the corpse, never wearing off, darkening as it
- * dries like blood on gear.
+ * {@code Corpses.ON_BODY} hook, by name): {@link #CORPSE_BLOOD}, kept with the corpse, never wearing off by itself,
+ * darkening as it dries like blood on gear. Andy: "rain should wash away blood": rain and water wash a corpse as they do
+ * a living body ({@link #weatherCorpse}).
  */
 public final class Bloodied {
 	/** How bloody a body or item can get (whole steps, so the data only changes now and then). */
@@ -268,6 +269,7 @@ public final class Bloodied {
 		}
 		for (ServerLevel level : server.getAllLevels()) {
 			Set<LivingEntity> seen = new HashSet<>();
+			Set<net.minecraft.world.entity.Entity> seenCorpses = new HashSet<>();
 			for (ServerPlayer player : level.players()) {
 				for (LivingEntity body : level.getEntitiesOfClass(LivingEntity.class, new AABB(player.blockPosition()).inflate(RANGE),
 					body -> body.isAlive() && anyBlood(body))) {
@@ -275,7 +277,28 @@ public final class Bloodied {
 						weather(level, body);
 					}
 				}
+				for (net.minecraft.world.entity.Entity corpse : level.getEntities((net.minecraft.world.entity.Entity) null,
+					new AABB(player.blockPosition()).inflate(RANGE), e -> e.hasAttached(CORPSE_BLOOD))) {
+					if (seenCorpses.add(corpse)) {
+						weatherCorpse(corpse);
+					}
+				}
 			}
+		}
+	}
+
+	/** (0.20.52) A corpse's blood washes off as a living body's coat does in water and rain (it never wears off dry). */
+	private static void weatherCorpse(net.minecraft.world.entity.Entity corpse) {
+		int wash = corpse.isUnderWater() ? UNDER_WATER_WASH : corpse.isInWater() ? WADING_WASH / 2 : corpse.isInWaterOrRain() ? RAIN_WASH : 0;
+		Blood was = corpseBlood(corpse);
+		if (wash <= 0 || was == null) {
+			return;
+		}
+		int left = was.amount() - wash;
+		if (left <= 0) {
+			corpse.removeAttached(CORPSE_BLOOD);
+		} else {
+			corpse.setAttached(CORPSE_BLOOD, new Blood(left, was.color(), was.laid()));
 		}
 	}
 
