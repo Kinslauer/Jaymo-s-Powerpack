@@ -194,7 +194,7 @@ public final class Breath {
 				|| com.jaymospowers.power.xenoform.BandUpgrades.breathes(player)
 				|| com.jaymospowers.baubles.Baubles.wearing(player, com.jaymospowers.baubles.Baubles.SKY_MASK)) {
 				// inside the pod, or (0.18.56) on a far-world meal's breath, or (0.18.123) a band with the Breather fitted, or
-				// (0.20.98, Andy) a Sky Mask in the head bauble slot
+				// (0.20.99, Andy) a Sky Mask in the head bauble slot
 				EXPOSED.remove(id);
 				continue;
 			}

@@ -84,7 +84,7 @@ public final class SkyPockets {
 		return Math.floorMod(mix(seed, Math.floorDiv(x, GAS_CELL), Math.floorDiv(z, GAS_CELL), 0x6A5L), GAS_ONE_IN) == 0;
 	}
 
-	/** (0.20.98) Mobs given a swapped pocket last time, by their level, so they can be let go when it ends. */
+	/** (0.20.99) Mobs given a swapped pocket last time, by their level, so they can be let go when it ends. */
 	private static final Map<UUID, ServerLevel> SWAPPED_MOBS = new HashMap<>();
 
 	private static long cell(int x, int z) {
@@ -92,7 +92,7 @@ public final class SkyPockets {
 	}
 
 	/**
-	 * (0.20.98) Andy: a gravity user stretches his weightlessness over the island he stands on. While his Weightless is
+	 * (0.20.99) Andy: a gravity user stretches his weightlessness over the island he stands on. While his Weightless is
 	 * on and he is in a light or heavy stretch, that stretch turns over (light becomes heavy, heavy light) for every
 	 * player and every mob in it, until he switches it off or leaves.
 	 */

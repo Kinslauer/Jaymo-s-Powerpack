@@ -149,7 +149,7 @@ public final class ZFighterHighSky {
 				return;
 			}
 		}
-		// (0.20.98, Andy) the Sky Mask lets anyone without ki to breathe on breathe up here too
+		// (0.20.99, Andy) the Sky Mask lets anyone without ki to breathe on breathe up here too
 		if (com.jaymospowers.baubles.Baubles.wearing(player, com.jaymospowers.baubles.Baubles.SKY_MASK)) {
 			CHOKING.remove(id);
 			return;

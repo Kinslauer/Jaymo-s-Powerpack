@@ -858,8 +858,11 @@ looking forward the camera stays forward, but the model is drawn moving in whate
   `TakeoverFacingHeadMixin`.)
 - The ape fit (`ApeRage.FIT`) now syncs to everyone, so other players see the ape facing its way too.
 - Kingdoms 0.7.585 does the same for the werewolf beast, blood fever, feral curse and Grue holds. Built, not played.
+- **0.20.98, Shift + Alt zoom lasts while Alt is held** (Andy: "releasing shift shouldnt stop your zoom but alt does"):
+  the Shift + Left Alt zoom no longer ends when Shift is let go, only when Alt is (`SneakZoom`). The double-tap-and-hold
+  Shift zoom still ends with Shift. Built, not played.
 
-## 0.20.98 (2026-11-05): the Sky Mask breathes in space; gravity users turn the sky islands over
+## 0.20.99 (2026-11-05): the Sky Mask breathes in space; gravity users turn the sky islands over
 - Andy: "the sky mask lets non attuned breathe in space as well". A Sky Mask in the head bauble slot now gives you air
   on the airless worlds (the Pale Moon, the Maw; `Breath`) and in the high sky over the Aether (`ZFighterHighSky`), with
   no reserve to run out. In the high sky a Z Fighter with ki still breathes on ki first; the mask covers anyone without
