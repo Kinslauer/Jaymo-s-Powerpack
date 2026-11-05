@@ -339,7 +339,7 @@ def packMods = [
 	// Homesteads (all rights reserved; linked, never edited): lone farmsteads and hamlets out in the wilds, the
 	// countryside between our villages and towns. 3.0.0. Server-side worldgen.
 	[dep: "maven.modrinth:homesteads:xYCdL31w", cf: [1336255, 9234266]],
-	// Seven-mods picks (0.20.83, Andy 2026-11-05, picklist "Seven mods"; all shipped unchanged, never edited):
+	// Seven-mods picks (0.20.84, Andy 2026-11-05, picklist "Seven mods"; all shipped unchanged, never edited):
 	// Better Advancements ("Don't Be a Jerk" licence, way2muchnoise): a bigger, zoomable advancements screen that holds
 	// modded trees. Client-only. 0.6.0.81. Fancy Toasts (MIT, Bivrik): nicer advancement and recipe toasts made to go
 	// with it. Client-only. 1.5.1.
@@ -410,7 +410,7 @@ def packModsNoCf = [
 	// Dungeons and Taverns (all rights reserved, nova_wostra; linked, never edited): roadside taverns, dungeons and
 	// overhauled strongholds, mansions, outposts, mineshafts and temples. 6.1.0. CurseForge project 853794 stops at 6.0.2.
 	[dep: "maven.modrinth:dungeons-and-taverns:hn5CugpP", cf: null],
-	// Seven-mods picks (0.20.83): Moog's Mineshafts Reimagined (GPL-3.0; mineshafts rebuilt with a theme for
+	// Seven-mods picks (0.20.84): Moog's Mineshafts Reimagined (GPL-3.0; mineshafts rebuilt with a theme for
 	// each biome; needs Moog's Structure Lib; 1.1.0) and RightClickHarvest (MIT, JamCoreModding; right-click a ripe crop to
 	// harvest and replant it; needs JamLib; 4.6.2). CurseForge's pages for them show no 26.3 file yet (checked 2026-11-05).
 	[dep: "maven.modrinth:mmr-moogs-mineshafts-reimagined:JJc7pNHb", cf: null],

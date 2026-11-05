@@ -1,6 +1,7 @@
 {
 	"message.jaymospowers.mortality.fading": "Everything goes dark.",
 	"message.jaymospowers.mortality.ended": "That life is over. Another begins.",
+	"deathScreen.jaymospowers.reincarnate": "Reincarnate",
 	"message.jaymospowers.mortality.wake.boss": "You wake to birdsong. Whatever it was, it let you go.",
 	"message.jaymospowers.mortality.wake.zombie": "You wake far from the stench. The bite throbs.",
 	"message.jaymospowers.mortality.wake.skeleton": "You wake with an arrow still in you. The leg won't hold.",
@@ -41,6 +42,7 @@
 	"message.jaymospowers.scar.crushed": "Your ribs knit crooked. Every step pulls.",
 	"message.jaymospowers.mortality.arrow_out": "With the leg held still, you work the arrowhead free.",
 	"message.jaymospowers.mortality.mended": "You've mended. You're no longer living on borrowed time.",
+	"message.jaymospowers.mortality.wake.sheltered": "You wake to low voices and the smell of herbs. Someone found you and carried you in.",
 	"message.jaymospowers.mortality.wake.captured": "You wake in chains. Your things are gone.",
 	"message.jaymospowers.mortality.wake.risen": "You wake cold. Nothing hurts. Your heart isn't beating."
 }

@@ -20,7 +20,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.570) Monsters fear a lit campfire (Andy's pick from the seven-mods picklist, after HearthGuard's idea; our own
+ * (0.7.574) Monsters fear a lit campfire (Andy's pick from the seven-mods picklist, after HearthGuard's idea; our own
  * code): a monster that comes within {@link #WARD} blocks of a lit campfire or soul campfire near a player turns away
  * and backs off, letting go of whoever it was after if they're by the fire, so camping out at night is safer. The fire's
  * own light already keeps monsters from spawning beside it. Bosses and raiders (illagers on a raid, barbarians) aren't

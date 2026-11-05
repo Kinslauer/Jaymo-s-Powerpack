@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Absorption;
 import com.jaymoskingdoms.BloodBlasts;
 import com.jaymoskingdoms.Hemomancy;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -19,6 +20,8 @@ final class ClassKeys {
 	private static KeyMapping imbue;
 	/** (0.7.554) A Blood Sorcerer's J is down (BloodBlasts.Hold sent). */
 	private static boolean bloodHeld;
+	/** (0.7.570) Any other Sorcerer's J is down (Absorption.Hold sent). */
+	private static boolean elementHeld;
 
 	private ClassKeys() {
 	}
@@ -36,6 +39,12 @@ final class ClassKeys {
 							bloodHeld = true;
 							ClientPlayNetworking.send(new BloodBlasts.Hold(true));
 						}
+					} else if (Absorption.absorber(minecraft.player) && !minecraft.player.isShiftKeyDown()) {
+						// (0.7.570) every other element: held to absorb it (fire: the cone), empty-handed to throw it
+						if (!elementHeld) {
+							elementHeld = true;
+							ClientPlayNetworking.send(new Absorption.Hold(true));
+						}
 					} else {
 						ClientPlayNetworking.send(new Spellcraft.Imbue(minecraft.player.isShiftKeyDown()));
 					}
@@ -45,6 +54,12 @@ final class ClassKeys {
 				bloodHeld = false;
 				if (minecraft.getConnection() != null) {
 					ClientPlayNetworking.send(new BloodBlasts.Hold(false));
+				}
+			}
+			if (elementHeld && (!imbue.isDown() || minecraft.player == null || minecraft.gui.screen() != null)) {
+				elementHeld = false;
+				if (minecraft.getConnection() != null) {
+					ClientPlayNetworking.send(new Absorption.Hold(false));
 				}
 			}
 		});

@@ -187,7 +187,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
-		// 0.7.570: monsters keep off a lit campfire near a player
+		// 0.7.574: monsters keep off a lit campfire near a player
 		CampfireWard.register();
 		Clearing.register();
 		Herds.register();
@@ -224,6 +224,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		VillagerHunters.register();
 		Theft.register();
 		Retaliation.register();
+		HeldBack.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
 		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.130: the downed state itself is
 		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
@@ -350,6 +351,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		StoryHard.register();
 		// (0.7.524) left for dead by thinking killers: taken captive, gear worn or buried (Powers' death by cause)
 		Captors.register();
+		// (0.7.573) or taken in by a village that thinks well enough of them
+		Shelter.register();
 		Hollows.register();
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);

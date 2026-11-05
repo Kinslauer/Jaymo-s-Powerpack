@@ -455,7 +455,8 @@ public final class PowersCompat {
 	 * (0.7.459) Powers' executions of the downed (pack 0.19.20, {@code MobExecutions}): Andy: guards "prioritize arresting
 	 * you because unless they are of a certain temperament they try to be righteous and just". A realm's guard or archer
 	 * ({@link Downed#isGuard}) or a village's own iron golem never finishes off a downed player, unless the guard is
-	 * hotheaded or spiteful ({@link Temperaments}); they arrest as before. Nothing without that Powers.
+	 * hotheaded or spiteful ({@link Temperaments}); they arrest as before. (0.7.570) Any of a town's people now, and a
+	 * hothead only alone and only over a real enemy ({@link HeldBack#spares}). Nothing without that Powers.
 	 */
 	@SuppressWarnings("unchecked")
 	static void spareRighteousGuards() {
@@ -464,20 +465,8 @@ public final class PowersCompat {
 		}
 		try {
 			Object list = Class.forName("com.jaymospowers.core.wounds.MobExecutions").getField("SPARE").get(null);
-			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add((mob, victim) -> {
-				if (mob instanceof net.minecraft.world.entity.animal.golem.IronGolem golem) {
-					return !golem.isPlayerCreated();
-				}
-				if (!Downed.isGuard(mob)) {
-					return false;
-				}
-				if (victim instanceof net.minecraft.server.level.ServerPlayer p && Unmasking.awaits(p)) {
-					// (0.7.473) a masked player downed in town: the guards see who it is before anything else
-					return true;
-				}
-				Temperaments.Temperament t = Temperaments.of(mob);
-				return t != Temperaments.Temperament.HOTHEADED && t != Temperaments.Temperament.SPITEFUL;
-			});
+			// (0.7.570) a town's people hold each other to the law: HeldBack
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(HeldBack::spares);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions to spare guards from (older Powers?)", e);
 		}
@@ -2372,6 +2361,25 @@ public final class PowersCompat {
 				net.minecraft.core.GlobalPos>>)list).add(captor);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality captors (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.573) Tells Powers' death by cause ({@code Mortality.SHELTERS}) who takes one left for dead in ({@link Shelter#take}):
+	 * the player and whoever downed them (or null), where they're carried to (or null). Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellShelters(java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.@Nullable Entity,
+		net.minecraft.core.@Nullable GlobalPos> shelter) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("SHELTERS").get(null);
+			((java.util.List<java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,
+				net.minecraft.core.GlobalPos>>)list).add(shelter);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality shelters (older Powers?)", e);
 		}
 	}
 
