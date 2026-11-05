@@ -32,7 +32,7 @@ final class StoryHoldScreen extends Screen {
 	 * continue saying what it does now". So under the title a hint ({@code gui.jaymoskingdoms.story.hint.<1..HINTS>}) shows
 	 * for HINT_MS each, from a random one on. Widest a hint may run.
 	 */
-	private static final int HINTS = 117, HINT_W = 320;
+	private static final int HINTS = 118, HINT_W = 320;
 	private static final long HINT_MS = 7000L;
 
 	/** What the server holds this client for (a lang key), or "" for nothing. */

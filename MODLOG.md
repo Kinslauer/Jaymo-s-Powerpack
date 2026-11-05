@@ -957,3 +957,21 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   thin black bars (6% of the screen each) slide in top and bottom and the water-thirst veins show lightly at the edges,
   throbbing with a 150 bpm heart; wearing off, the bars slide away and the veins come in as at no water (Kitchen's
   DryVeins, every layer), held 3 s and fading over 7 s. Water untouched. Art copied from Kitchen's dry veins (ours).
+
+## 0.20.111 (2026-11-05): passing out from hunger and thirst (Kingdoms 0.7.593)
+- Andy: "players can pass out at low thirst or hunger, their fov slowly closing to implicate something is wrong,
+  increasing as hunger/thirst lowers, eventually they could be doing anything and fall over, the screen slowly
+  letterboxing fully shut, as they collapse over, losing control even as they walk and falling to the floor flat on their
+  face, but ultimately ragdolling in any position. their FOV stays with the head as usual."
+- `core/wounds/Fainting`: food or water (Kitchen's thirst) at 6 or less darkens the screen's edges inward, deeper the
+  emptier you are (`client/wounds/FaintHud`; no FOV modifier, only the edges, so the view stays with the head). At 3 or
+  less each second has a 1-in-240 (at 3) to 1-in-40 (at nothing) chance, doubled sprinting or swimming, that you go:
+  4 s swoon where Adrenaline's letterbox slides fully shut, the darkness closes in, the head droops and sways, and the keys
+  stop answering (`FaintInputMixin`: whatever you were doing goes on, slowing and weaving). Then you tip forward onto your
+  face as Kitchen's ragdoll (held limp through `KitchenCompat.registerRagdollHolds`) and lie as it lands for 13 s, black,
+  first person in the ragdoll's head; a blow wakes you at once. The bars open over 3 s as you get up; no fainting again for
+  60 s. Not while downed, carried, in Chrono's window, left for dead, reborning, on adrenaline, riding, asleep, creative.
+  Fainting players are `OutOfPlay`, so villagers don't walk up to talk. Only a slow heartbeat, no text, no Chrono hint.
+  Tuning at the top of `Fainting` and `FaintHud`. Built, not played.
+- **0.20.112:** `Fainting.thirst(Player)` and `Fainting.bringRound(ServerPlayer)` for Kingdoms 0.7.594's villagers who
+  come to a fainted player.

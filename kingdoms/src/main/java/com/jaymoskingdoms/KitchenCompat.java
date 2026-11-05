@@ -238,6 +238,24 @@ final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * (0.7.594) {@code player} drinks {@code water} of clean water (Kitchen's {@code Thirst.drink}); false without Kitchen,
+	 * or for one who drinks fire, not water (an Emberborn).
+	 */
+	static boolean drink(net.minecraft.server.level.ServerPlayer player, int water) {
+		try {
+			Class<?> thirst = Class.forName("com.jaymoskitchen.climate.Thirst");
+			if ((boolean)thirst.getMethod("fireDrinker", net.minecraft.world.entity.player.Player.class).invoke(null, player)) {
+				return false;
+			}
+			thirst.getMethod("drink", net.minecraft.server.level.ServerPlayer.class, int.class, boolean.class, float.class)
+				.invoke(null, player, water, true, 0.0F);
+			return true;
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** (0.7.312) Any Kitchen corpse. */
 	static boolean isCorpse(Entity entity) {
 		return CORPSE != null && CORPSE.isInstance(entity);

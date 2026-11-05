@@ -11,7 +11,8 @@ import net.minecraft.world.entity.player.Player;
  * (2026-11-05, Andy: "make sure all the new features work with all the old, im thinking specifically of the chat
  * interactions") Someone nobody should walk up to and talk to just now: down or out cold, carried, a player lying left
  * for dead (waking somewhere), black while a new life is made, or held back from a death in Chrono's window (which must
- * look exactly like any death, so nothing may open a screen over it). Kingdoms asks this (by reflection) before a villager
+ * look exactly like any death, so nothing may open a screen over it). (0.20.111) Or fainting from hunger or thirst
+ * ({@link com.jaymospowers.core.wounds.Fainting}). Kingdoms asks this (by reflection) before a villager
  * comes over to ask something or hold out a hand. Server side.
  */
 public final class OutOfPlay {
@@ -19,7 +20,7 @@ public final class OutOfPlay {
 	}
 
 	public static boolean is(Entity entity) {
-		if (Downed.isDowned(entity) || Carry.isCarried(entity)) {
+		if (Downed.isDowned(entity) || Carry.isCarried(entity) || com.jaymospowers.core.wounds.Fainting.is(entity)) {
 			return true;
 		}
 		if (entity instanceof Player player && (Mortality.waking(player) || player.hasAttached(Mortality.REBORNING))) {

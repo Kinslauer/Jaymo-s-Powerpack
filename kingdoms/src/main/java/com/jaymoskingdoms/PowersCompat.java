@@ -313,6 +313,60 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.594) Powers' {@code Fainting}: out(Entity), thirst(Player), bringRound(ServerPlayer). */
+	private static java.lang.invoke.@Nullable MethodHandle faintOut, faintThirst, faintWake;
+	private static boolean lookedForFaint;
+
+	private static void lookForFaint() {
+		if (lookedForFaint) {
+			return;
+		}
+		lookedForFaint = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> c = Class.forName("com.jaymospowers.core.wounds.Fainting");
+			var lookup = java.lang.invoke.MethodHandles.publicLookup();
+			faintOut = lookup.findStatic(c, "out", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+			faintThirst = lookup.findStatic(c, "thirst", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.player.Player.class));
+			faintWake = lookup.findStatic(c, "bringRound", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Fainting (older Powers?)", e);
+			faintOut = faintThirst = faintWake = null;
+		}
+	}
+
+	/** (0.7.594) Whether {@code entity} lies passed out from hunger or thirst (Powers' Fainting); false without Powers. */
+	public static boolean fainted(net.minecraft.world.entity.Entity entity) {
+		lookForFaint();
+		try {
+			return faintOut != null && (boolean)faintOut.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.594) Whether it's thirst more than hunger that has {@code player} fainting. */
+	public static boolean faintedOfThirst(net.minecraft.world.entity.player.Player player) {
+		lookForFaint();
+		try {
+			return faintThirst != null && (boolean)faintThirst.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.594) Shakes a fainted {@code player} awake; whether they were out. */
+	public static boolean bringRound(net.minecraft.server.level.ServerPlayer player) {
+		lookForFaint();
+		try {
+			return faintWake != null && (boolean)faintWake.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.330) Powers' {@code ZFighterLineage.ape(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle ape;
 	private static boolean lookedForApe;

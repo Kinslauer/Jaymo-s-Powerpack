@@ -537,6 +537,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.498) emeralds or coin: asked, and said unasked
 		MoneyTalk.register();
 		Rescues.register();
+		// (0.7.594) villagers come to a player passed out from hunger or thirst
+		FaintWakers.register();
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
 		Temperaments.register();

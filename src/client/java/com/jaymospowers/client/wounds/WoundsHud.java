@@ -53,6 +53,8 @@ public final class WoundsHud {
 		PainHud.init();
 		// (0.20.110) adrenaline's rush and its wearing off
 		AdrenalineHud.init();
+		// (0.20.111) passing out from hunger or thirst
+		FaintHud.init();
 	}
 
 	/** (0.14.5) How whole the local player's part {@code index} was last tick (plan order: 0 head, 1 body). */
