@@ -1090,3 +1090,14 @@ Andy: "you can pick up live animals, but not all of them like it, snakes for exa
 to 0.8 x 1.0 blocks lifts by hand (`CarryTemper`); wild grown ones in the new tags fight free: `bites_when_held` (wolf,
 fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (cat, ocelot), `squirms_when_held`
 (chicken, rabbit, parrot, frog). Tamed ones and the young stay put.
+## 0.21.8 (2026-11-05): gravity's Lift throw winds up and whips through
+- Andy: "gravity users throw the rocks the old way" / "gravity users throw instantly and farther". A left click to throw
+  what Lift holds now draws the main arm back over the shoulder for `GravityPower.HURL_WIND` (7 ticks, about a third of
+  a second), then lets go with the same whip and follow-through as a thrown rock (`ThrownRocks.hurling`/`hurled`, the
+  `MAIN_ARM` flag on `ThrownRocks.THROW`, drawn by `RockThrowPose`). In first person the bare main arm whips through
+  (FirstPersonArms, Kindle's throw keys). The throw keeps its power-throw speed (Andy's pick). Dropping the hold during
+  the wind-up throws nothing. Built, not played.
+- Andy: "when a gravity user throws a rock, it flies faster and further and throws instantly... like a pebble". A gravity
+  user skips the rock charge: the off hand rock goes the moment use is pressed (whip and follow-through only), at 3.0
+  speed instead of 1.5 and straighter (`ThrownRocks.GRAVITY_SPEED`/`GRAVITY_SPREAD`, `ThrownRocks.gravity`). The usual
+  10 tick cooldown still spaces throws.

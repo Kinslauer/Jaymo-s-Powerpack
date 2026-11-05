@@ -369,6 +369,11 @@ public final class FirstPersonArms {
 		pose[YAW] += Mth.clamp(-side * aim[1] * GRIP_FOLLOW, -GRIP_AIM_MAX, GRIP_AIM_MAX);
 		float w = track.weight();
 		mix.add(w, pose);
+		// (0.21.8) the hurl: the arm whips from over the shoulder through (RockThrowPose's timing), as Kindle's throw does
+		float[] hurl = com.jaymospowers.client.armory.RockThrowPose.hurl(partial);
+		if (hurl != null) {
+			mix.add(hurl[1], lerp(hurl[0], KINDLE_WIND, KINDLE_THROUGH));
+		}
 		// straining against it
 		float time = avatar.ageInTicks;
 		mix.shake(w, PITCH, Mth.sin(time * GRIP_STRAIN_BEAT) * GRIP_STRAIN);

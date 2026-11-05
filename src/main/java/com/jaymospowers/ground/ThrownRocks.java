@@ -101,6 +101,8 @@ public final class ThrownRocks {
 	static final float SHRUGGED_DAMAGE = 0.5F;
 	/** How hard it's thrown, and how wide it may stray. */
 	static final float SPEED = 1.5F, SPREAD = 1.0F;
+	/** (0.21.8) A gravity user's rock: weighs no more than a pebble to them, so it goes at once, this hard and this straight. */
+	static final float GRAVITY_SPEED = 3.0F, GRAVITY_SPREAD = 0.3F;
 	/** Ticks between throws. */
 	public static final int COOLDOWN = 10;
 	/** How often a rock lies where it lands rather than breaking. */
@@ -192,6 +194,53 @@ public final class ThrownRocks {
 		return (int) (id & 0xFFFFF) << 8 | (charge & 63) << 2 | stage;
 	}
 
+	/**
+	 * (0.21.8) In a {@link #THROW} value: the main arm throws, not the off hand. Andy: "gravity users throw the rocks the
+	 * old way": a gravity user's Lift hurling what it holds ({@link #hurled}) whips the main arm through the same way.
+	 */
+	public static final int MAIN_ARM = 1 << 28;
+
+	/**
+	 * (0.21.8) A gravity user's Lift draws the main arm back to hurl what it holds, over {@code ticks} (GravityPower lets
+	 * go then, and calls {@link #hurled}). False if a rock in the other hand is winding up (that pose stays).
+	 */
+	public static void hurling(ServerPlayer player, int ticks) {
+		Hold hold = WINDING.get(player.getUUID());
+		if (hold != null && hold.thrown < 0 && !hold.hurl) {
+			return;
+		}
+		holds = holds + 1 & 0xFFFFF;
+		hold = new Hold(player, player.level().getGameTime(), holds, 0);
+		hold.hurl = true;
+		hold.charge = Math.max(1, Math.min(63, ticks));
+		WINDING.put(player.getUUID(), hold);
+		player.setAttached(THROW, value(hold.id, hold.charge, WINDING_UP) | MAIN_ARM);
+	}
+
+	/** (0.21.8) The Lift's hurl let go: the main arm whips through and follows through, for everyone. */
+	public static void hurled(ServerPlayer player) {
+		Hold hold = WINDING.get(player.getUUID());
+		if (hold == null || !hold.hurl || hold.thrown >= 0) {
+			if (hold != null && hold.thrown < 0) {
+				// winding up a rock in the other hand: that pose stays
+				return;
+			}
+			hurling(player, 1);
+			hold = WINDING.get(player.getUUID());
+		}
+		hold.thrown = player.level().getGameTime();
+		player.setAttached(THROW, value(hold.id, hold.charge, THROWING) | MAIN_ARM);
+	}
+
+	/** (0.21.8) The Lift dropped what it held before the hurl: the arm comes back down. */
+	public static void hurlDropped(ServerPlayer player) {
+		Hold hold = WINDING.get(player.getUUID());
+		if (hold != null && hold.hurl && hold.thrown < 0) {
+			WINDING.remove(player.getUUID());
+			player.removeAttached(THROW);
+		}
+	}
+
 	/** (0.20.103) The charge (ticks) in a {@link #value}. */
 	public static int chargeOf(int value) {
 		return value >> 2 & 63;
@@ -218,7 +267,10 @@ public final class ThrownRocks {
 		final Player player;
 		final long start;
 		long thrown = -1, heard;
-		final int id, momentum, charge;
+		final int id, momentum;
+		int charge;
+		/** (0.21.8) A gravity user's Lift hurl (the main arm), not a rock. */
+		boolean hurl;
 
 		Hold(Player player, long now, int id, int momentum) {
 			this.player = player;
@@ -297,6 +349,14 @@ public final class ThrownRocks {
 			int left = momentum == null ? 0 : momentum(Math.toIntExact(momentum[0]), momentum[1], now);
 			hold = new Hold(player, now, holds, left);
 			WINDING.put(player.getUUID(), hold);
+			if (gravity(player)) {
+				// (0.21.8) a gravity user's rock goes at once, and flies harder
+				hold.thrown = now;
+				player.setAttached(THROW, value(hold.id, hold.charge, THROWING));
+				player.getCooldowns().addCooldown(stack, COOLDOWN);
+				release(player, stack, GRAVITY_SPEED, GRAVITY_SPREAD);
+				return;
+			}
 			player.setAttached(THROW, value(hold.id, hold.charge, WINDING_UP));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(),
 				SoundSource.PLAYERS, 0.4F, 0.7F);
@@ -331,10 +391,23 @@ public final class ThrownRocks {
 		// (0.20.103) momentum: the next charge comes sooner
 		MOMENTUM.put(player.getUUID(), new long[] {Math.min(MOMENTUM_MAX, hold.momentum + 1), now});
 		player.getCooldowns().addCooldown(stack, COOLDOWN);
+		release(player, stack, SPEED, SPREAD);
+	}
+
+	/**
+	 * (0.21.8) Andy: "when a gravity user throws a rock, it flies faster and further and throws instantly". A gravity user
+	 * skips the charge: the rock goes the moment use is pressed, at {@link #GRAVITY_SPEED}, straighter.
+	 */
+	public static boolean gravity(Player player) {
+		return com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE);
+	}
+
+	/** The rock leaves the hand where you look. */
+	private static void release(ServerPlayer player, ItemStack stack, float speed, float spread) {
 		ServerLevel server = (ServerLevel) player.level();
 		ItemStack stone = stack.copyWithCount(1);
-		Snowball ball = Projectile.spawnProjectileFromRotation((l, owner, s) -> new Snowball(l, owner, s), server, stone, player, 0.0F, SPEED,
-			SPREAD);
+		Snowball ball = Projectile.spawnProjectileFromRotation((l, owner, s) -> new Snowball(l, owner, s), server, stone, player, 0.0F, speed,
+			spread);
 		FLYING.add(new Rock(ball, stone, player.getAbilities().instabuild));
 		server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.6F,
 			0.5F + server.getRandom().nextFloat() * 0.2F);

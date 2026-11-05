@@ -193,6 +193,8 @@ public final class GravityPower implements Power {
 	 * + {@code THROW_DAMAGE_PER_SPEED} x its speed (x its size). It flies for at most {@code THROW_TICKS}.
 	 */
 	static final double THROW_SPEED = 2.6;
+	/** (0.21.8) The arm drawn back before a hurl lets go (ticks; ThrownRocks' pose). */
+	static final int HURL_WIND = 7;
 	static final float THROW_DAMAGE_BASE = 4.0F, THROW_DAMAGE_PER_SPEED = 5.0F;
 	static final int THROW_TICKS = 60;
 	/** Held, a throwable thing drifts in toward you (blocks a tick) until it hangs this close, for a better throw. */
@@ -376,6 +378,8 @@ public final class GravityPower implements Power {
 	/** Per player, server memory. */
 	private static final class State {
 		int liftTarget = -1;
+		/** (0.21.8) When the hurl being wound up lets go (game time), or -1. */
+		long hurlAt = -1;
 		double liftHold;
 		int liftTicks;
 		long crushFrom = -1;
@@ -834,6 +838,15 @@ public final class GravityPower implements Power {
 			return;
 		}
 		Entity target = entity;
+		if (state.hurlAt >= 0 && player.level().getGameTime() >= state.hurlAt) {
+			// (0.21.8) wound up: let it fly
+			state.hurlAt = -1;
+			if (throwable(entity)) {
+				hurl(player, state, entity);
+				return;
+			}
+			com.jaymospowers.ground.ThrownRocks.hurlDropped(player);
+		}
 		if (state.choking && !(target instanceof LivingEntity)) {
 			state.choking = false;
 		}
@@ -902,6 +915,11 @@ public final class GravityPower implements Power {
 		}
 		Entity entity = player.level().getEntity(state.liftTarget);
 		state.liftTarget = -1;
+		if (state.hurlAt >= 0) {
+			// (0.21.8) let go mid wind-up: no hurl
+			state.hurlAt = -1;
+			com.jaymospowers.ground.ThrownRocks.hurlDropped(player);
+		}
 		state.choking = false;
 		state.chunkHold = false;
 		player.removeAttached(GRIP);
@@ -975,7 +993,11 @@ public final class GravityPower implements Power {
 		Entity entity = player.level().getEntity(state.liftTarget);
 		if (left) {
 			if (entity != null && throwable(entity)) {
-				hurl(player, state, entity);
+				// (0.21.8) Andy: "gravity users throw instantly": the arm draws back first (tickLift lets go)
+				if (state.hurlAt < 0) {
+					state.hurlAt = player.level().getGameTime() + HURL_WIND;
+					com.jaymospowers.ground.ThrownRocks.hurling(player, HURL_WIND);
+				}
 			} else if (entity instanceof LivingEntity living && living.isAlive() && com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_1)) {
 				// the Push: away, far, and through
 				state.choking = false;
@@ -1172,6 +1194,8 @@ public final class GravityPower implements Power {
 	/** Right click on such a thing: let go and hurl it where you look, hard. */
 	private static void hurl(ServerPlayer player, State state, Entity entity) {
 		dropLift(player, state, true);
+		// (0.21.8) the arm whips through with it, as a thrown rock's does (RockThrowPose)
+		com.jaymospowers.ground.ThrownRocks.hurled(player);
 		Vec3 velocity = player.getViewVector(1.0F).scale(THROW_SPEED);
 		entity.setDeltaMovement(velocity);
 		entity.needsSync = true;
@@ -1309,6 +1333,10 @@ public final class GravityPower implements Power {
 	/** Lift ends for a slam: weight back on, cooldown, no Collapse fling. */
 	private static void dropLiftQuietly(ServerPlayer player, State state, Entity target) {
 		state.liftTarget = -1;
+		if (state.hurlAt >= 0) {
+			state.hurlAt = -1;
+			com.jaymospowers.ground.ThrownRocks.hurlDropped(player);
+		}
 		player.removeAttached(GRIP);
 		cool(player, LIFT, LIFT_COOLDOWN);
 		modifier(target, Attributes.GRAVITY, LIFT_ID, 0.0, false);
