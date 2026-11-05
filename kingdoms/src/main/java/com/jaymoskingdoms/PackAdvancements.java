@@ -102,6 +102,14 @@ public final class PackAdvancements {
 		}
 	}
 
+	/** (0.7.605) Gives {@code player} the {@code criterion} of Kingdoms' own advancement {@code jaymoskingdoms:<name>} (nothing if done or missing). */
+	public static void awardOwn(ServerPlayer player, String name, String criterion) {
+		AdvancementHolder holder = player.level().getServer().getAdvancements().get(JaymosKingdoms.id(name));
+		if (holder != null && !player.getAdvancements().getOrStartProgress(holder).isDone()) {
+			player.getAdvancements().award(holder, criterion);
+		}
+	}
+
 	static @Nullable AdvancementHolder get(MinecraftServer server, String name) {
 		return server.getAdvancements().get(Identifier.fromNamespaceAndPath(NAMESPACE, "pack/" + name));
 	}

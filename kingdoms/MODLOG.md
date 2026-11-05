@@ -9632,3 +9632,29 @@ blocks, and only the leaves that impact should break, like when players fall int
   whole from its foot (`rootOf` follows branches back to the trunk), away from the blast, any size. Its leaves then break
   only where they strike, as any falling tree's. Logs in buildings and placed (persistent) leaves still blow apart.
 - Trees near the blast that it didn't reach still fall by chance, as before (`Trees.blast`). Built, not played.
+
+## 0.7.605 (2026-11-05): Family farmhand, Andy's day-one starts, an advancement for every locked start, fate's odds
+Andy, with a screenshot of Moog's Voyager Structures' barn: "This is what I imagine for a starting over in a village
+start, it should instead be family farmhand, and you live with the villager(s) that spawn there. Rock bottom, Heritage
+specifics, and Banished, Shipwreck, Let fate decide (random even from non unlocked! percentage table)", then
+"everything locked should now have its own unlock method and achievment", and on the card "Yes, lock the rest".
+- **Family farmhand** (`FarmhandHome`, the `VILLAGE` road renamed): you wake beside a bed inside the nearest `mvs:barn`,
+  else a Homesteads farmstead (`homesteads:*_home_steads`). A house with fewer than two grown villagers gets a farming
+  couple of your blood, married, with a child half the time; everyone in it starts at 40 hearts with you. Your job is
+  farmer; bread and 4 silver, no bed in the pack (yours is in the house). A party mate's farmhouse is yours too. With
+  neither mod's farmhouse within 100 chunks, the old village start (a haven of your blood) still runs. Villagers' first
+  lines there are a farm family's now.
+- **Day one** (`RoadLocks.OPEN`): Family farmhand, Rock bottom, Banished, Shipwreck, Let fate decide and the heritage
+  starts (Verdant World, demon master, the afterlife, the lab). The capital, the wild, sworn, the cells, the nobodies and
+  the burned village are locked again, each on its own deed: a journeyman rank in any trade (`trade.ranked`), a dawn
+  outdoors 256+ blocks from every settlement (`wild.night`), a raider slain (`raider.slain`), time in a cell
+  (`cells.held`), a merchant's order taken (`orders.taken`), a fire doused (`fire.doused`). The bench (android) no
+  longer shares Rustfall's deed: only finishing the lab's aim opens it. Every locked start now has a deed of its own.
+- **Advancements**: a new tab, Roads of a Life (`jaymoskingdoms:roads/*`), one "Road Opened: <start>" for each of the
+  27 locked starts, earned as soon as your (or your group's) deed opens it (`RoadLocks.look`, every 5 s). The
+  description is the start's oblique hint.
+- **Let fate decide** (`LifeStory.FATE_ODDS`): every start, locked or not, by a percentage table that adds up to 100
+  (Family farmhand 8; city, wild, shipwreck 6; banished 5; sworn 4; ten common starts 3; the hard and heritage starts 2;
+  moon, Rustfall, the Maw 1). Left out for the player: starts their blood can't take, ones whose mod isn't loaded, the
+  afterlife (it remakes your heritage), and realm roads in a world with no realm; the rest share the odds. A realm road
+  picked by fate goes to a random realm. Built, not played.

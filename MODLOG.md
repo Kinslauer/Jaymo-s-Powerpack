@@ -1071,3 +1071,9 @@ carved out of the rock at the Nether's y 64 if there's no floor (`raiseAt`, whic
 - **0.21.5, the Iron Saber's knuckle bow on the right side:** Andy confirmed the bow sat on the wrong side of the fingers;
   `tools/blockbench/iron_saber.py` now passes `flip=True` to `display()` (half round the blade in every hand view, as the
   rapier does). Not seen in game.
+
+## 0.21.6 (2026-11-05): Kingdoms 0.7.605, the Family farmhand start, a day-one start list, and an advancement for every locked start
+The village start is now the Family farmhand: you wake inside a lone farmhouse (Moog's Voyager barn, else a Homesteads
+farmstead) and live with the family there. Day one offers only the Family farmhand, Rock bottom, Banished, Shipwreck,
+the heritage starts and Let fate decide; every other start opens with a deed of its own and a "Road Opened"
+advancement. Fate now picks from every start, locked or not, by a fixed percentage table. See Kingdoms' MODLOG 0.7.605.

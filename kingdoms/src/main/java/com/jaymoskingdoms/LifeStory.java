@@ -260,6 +260,50 @@ public final class LifeStory {
 		TERMS.put(Start.FATE, new Terms(Mark.VARIES, 0));
 	}
 
+	/**
+	 * (0.7.605) Andy: "Let fate decide (random even from non unlocked! percentage table)". Fate's odds for every start, in
+	 * percent (they add up to 100); a start fate can't give this player is left out and the rest share its odds.
+	 */
+	static final java.util.Map<Start, Integer> FATE_ODDS = new java.util.EnumMap<>(Start.class);
+
+	static {
+		FATE_ODDS.put(Start.VILLAGE, 8);
+		FATE_ODDS.put(Start.CITY, 6);
+		FATE_ODDS.put(Start.WILD, 6);
+		FATE_ODDS.put(Start.SHIPWRECK, 6);
+		FATE_ODDS.put(Start.BANISHED, 5);
+		FATE_ODDS.put(Start.SWORN, 4);
+		FATE_ODDS.put(Start.CAVE, 3);
+		FATE_ODDS.put(Start.MONOLITH, 3);
+		FATE_ODDS.put(Start.SKYFALL, 3);
+		FATE_ODDS.put(Start.WHALERS, 3);
+		FATE_ODDS.put(Start.TRADER, 3);
+		FATE_ODDS.put(Start.PUP, 3);
+		FATE_ODDS.put(Start.NOBODIES, 3);
+		FATE_ODDS.put(Start.BURNED, 3);
+		FATE_ODDS.put(Start.SNOWED, 3);
+		FATE_ODDS.put(Start.HEIRLOOM, 3);
+		FATE_ODDS.put(Start.SENTENCED, 2);
+		FATE_ODDS.put(Start.EVICTED, 2);
+		FATE_ODDS.put(Start.HIDEOUT, 2);
+		FATE_ODDS.put(Start.UNARMED, 2);
+		FATE_ODDS.put(Start.ROCK_BOTTOM, 2);
+		FATE_ODDS.put(Start.CAPTIVE, 2);
+		FATE_ODDS.put(Start.CHAINED, 2);
+		FATE_ODDS.put(Start.TIMELOST, 2);
+		FATE_ODDS.put(Start.MOON_CURSED, 2);
+		FATE_ODDS.put(Start.ANDROID, 2);
+		FATE_ODDS.put(Start.LAB, 2);
+		FATE_ODDS.put(Start.GREENSKIN, 2);
+		FATE_ODDS.put(Start.CAST_OUT, 2);
+		FATE_ODDS.put(Start.VERDANT, 2);
+		FATE_ODDS.put(Start.DEMON, 2);
+		FATE_ODDS.put(Start.AFTERLIFE, 2);
+		FATE_ODDS.put(Start.MOON, 1);
+		FATE_ODDS.put(Start.RUSTFALL, 1);
+		FATE_ODDS.put(Start.MAW, 1);
+	}
+
 	/** (0.7.412) {@code start}'s difficulty and purse. */
 	public static Terms terms(Start start) {
 		return TERMS.getOrDefault(start, new Terms(Mark.FAIR, 0));
@@ -1101,6 +1145,8 @@ public final class LifeStory {
 		RandomSource random = player.getRandom();
 		boolean byFate = chosen == Start.FATE;
 		Start road0 = byFate ? fated(server, player, random) : chosen;
+		// (0.7.605) fate may now give a realm's road (banished, sworn, the cells): a realm of its own choosing
+		Faction realmFor = byFate && road0.realm && roadRealm == null ? capital(server, random) : roadRealm;
 		// (0.7.304) whoever they are by the time it's ready: a death on the way makes a new body
 		java.util.function.Consumer<Start> go = start -> {
 			ServerPlayer p = server.getPlayerList().getPlayer(id);
@@ -1114,7 +1160,7 @@ public final class LifeStory {
 			p.removeAttached(ROAD);
 			DEPARTED.remove(id);
 			StoryStasis.release(p);
-			arrive(p, start, roadRealm, bornAs, raised, cls, option, calling, byFate);
+			arrive(p, start, realmFor, bornAs, raised, cls, option, calling, byFate);
 		};
 		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
 		if (road0 == Start.CITY && capital(server, random) == null) {
@@ -1202,15 +1248,35 @@ public final class LifeStory {
 
 	/** "Let fate decide" on the start (0.7.419: among the roads {@code player} can take): any start that needs no realm named (a capital only if there's one). */
 	private static Start fated(MinecraftServer server, ServerPlayer player, RandomSource random) {
-		List<Start> open = new ArrayList<>(List.of(Start.CAVE, Start.SHIPWRECK, Start.VILLAGE, Start.WILD, Start.SKYFALL, Start.BURNED, Start.SNOWED));
-		if (capital(server, random) != null) {
-			open.add(Start.CITY);
+		// (0.7.605) Andy: "Let fate decide (random even from non unlocked! percentage table)": any start, locked or not,
+		// by FATE_ODDS. Only those that can't be: one their blood can't take, one whose mod isn't loaded, one that remakes
+		// their heritage, and a realm's road with no realm in the world.
+		Heritage.Kind kind = Heritage.of(player);
+		boolean realms = capital(server, random) != null;
+		List<Start> starts = new ArrayList<>();
+		List<Integer> odds = new ArrayList<>();
+		int total = 0;
+		for (Answer a : Question.ROAD.answers) {
+			Start s = a.start;
+			int weight = s == null ? 0 : FATE_ODDS.getOrDefault(s, 0);
+			if (weight <= 0 || !a.offered() || !a.fits(kind) || a.makes() != null || s.realm && !realms) {
+				continue;
+			}
+			starts.add(s);
+			odds.add(weight);
+			total += weight;
 		}
-		// (0.7.228: one is raised if the world hasn't any)
-		open.add(Start.MONOLITH);
-		// (0.7.419) only a road this player can take: the locked ones only when a deed or their past has opened them
-		open.removeIf(start -> !RoadLocks.fateMay(server, player, start));
-		return open.get(random.nextInt(open.size()));
+		if (total <= 0) {
+			return Start.WILD;
+		}
+		int roll = random.nextInt(total);
+		for (int i = 0; i < starts.size(); i++) {
+			roll -= odds.get(i);
+			if (roll < 0) {
+				return starts.get(i);
+			}
+		}
+		return starts.get(starts.size() - 1);
 	}
 
 	/** A realm's capital to wake in: a kingdom's if there is one, else any realm's (null with none). */
@@ -1289,6 +1355,14 @@ public final class LifeStory {
 				}
 			}
 			case VILLAGE -> {
+				// (0.7.605, Andy) the Family farmhand: inside a lone farmhouse, taken in by the family there (FarmhandHome).
+				// A party mate's farmhouse is yours too; with no farmhouse in reach, the old village start below.
+				FarmhandHome.House house = FarmhandHome.find(level, mate != null ? mate.pos : spawn, random);
+				if (house != null) {
+					to = house.wake();
+					FarmhandHome.takeIn(player, level, house, heritage);
+					break;
+				}
 				// (0.7.381, Andy) a haven of your own people, else one that takes your blood in; never shunned there (StoryHomes)
 				Faction standing = StoryHomes.standing(server, player, heritage, spawn);
 				Faction mates = mate == null ? null : Factions.around(server, level, mate.pos, StoryHomes.PENDING_RANGE);
@@ -1892,8 +1966,8 @@ public final class LifeStory {
 			give(player, new ItemStack(Items.TORCH, CAVE_TORCHES));
 		}
 		if (landed == Start.VILLAGE) {
-			// (0.7.220) a real job now ({@link Careers}), leaning to who raised you, taken up in the village you wake by
-			String job = Careers.storyLean(raised.key, random);
+			// (0.7.220) a real job now ({@link Careers}); (0.7.605) the Family farmhand's is the farm's
+			String job = Careers.Job.FARMER.key;
 			List<String> story = new ArrayList<>(of(player) == null ? List.of() : of(player));
 			story.add(job);
 			player.setAttached(STORY, List.copyOf(story));
@@ -1902,8 +1976,7 @@ public final class LifeStory {
 				give(player, stack);
 			}
 			Careers.storyJob(player, job);
-			// (0.7.381) the easiest start: a bed of your own, more to eat, a little to spend
-			give(player, new ItemStack(Items.BED.pick(net.minecraft.world.item.DyeColor.WHITE)));
+			// (0.7.381) the easiest start: more to eat, a little to spend (0.7.605: and a bed under the family's roof, not in your pack)
 			give(player, new ItemStack(Items.BREAD, VILLAGE_BREAD));
 			give(player, purse(player, VILLAGE_SILVER));
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.job",

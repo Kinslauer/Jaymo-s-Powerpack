@@ -1,0 +1,33 @@
+{
+  "parent": "jaymoskingdoms:roads/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:bone"
+    },
+    "title": {
+      "translate": "advancements.jaymoskingdoms.roads.opened",
+      "with": [
+        {
+          "translate": "story.jaymoskingdoms.road.pup"
+        }
+      ]
+    },
+    "description": {
+      "translate": "story.jaymoskingdoms.road.pup.hint"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}
