@@ -9156,7 +9156,17 @@ ultimate and beam-clash films came down with it. Not played.
 - Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
   0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.
 
-## 0.7.559 (2026-11-05): haven guards' rally cry shows its words (pack 0.20.71)
+## 0.7.561 (2026-11-05): a downed king's armour no longer multiplies when he's lifted (pack 0.20.72)
+
+- Andy: "the king's armor seems to be duplicating when they carry him ... i found a ton of armor". Lifting a downed ruler
+  in plate is too heavy, so Powers' `Carry.shed` pulls the heaviest piece off and drops it (chest, legs, boots, then the
+  helmet). With the helmet gone `Rulers.step` saw no crown and ran `fit`, which wiped `RoyalDress`'s kept sets and dressed
+  them afresh; the next danger then made a brand-new trimmed plate set. Every lift-and-recover cycle left one more set.
+- Now a ruler missing only their crown gets the crown back (`Regalia.recrown`, same crown as before) and nothing else;
+  the full `fit` is kept for rulers who never had regalia. Nothing re-dresses a downed ruler, and `RoyalDress` doesn't
+  change a downed ruler's outfit. What was shed lies where it fell, once. Built, not played.
+
+## 0.7.562 (2026-11-05): haven guards' rally cry shows its words; orc lines for everyone (pack 0.20.75)
 
 - Andy's screenshot: a haven guard's rally bubble read `dialect.jaymoskingdoms.orc.speech.jaymoskingdoms.haven_guard.rally.1`.
   `HavenGrowth` asked `Dialects.tr` (orc/goblin-only lines) for a human guard's line, and no dialect copy exists; it now

@@ -21,7 +21,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.559) Andy (2026-11-05): "everyone should have orc specific lines when they encounter them, some friendly,
+ * (0.7.562) Andy (2026-11-05): "everyone should have orc specific lines when they encounter them, some friendly,
  * adversarial, and fighting". Anyone who isn't an orc (an MCA villager, a guard or other worker, a goblin) remarks on an
  * orc they see: an orc villager, a camp's orc, or a half-orc player who isn't masked.
  * <ul>

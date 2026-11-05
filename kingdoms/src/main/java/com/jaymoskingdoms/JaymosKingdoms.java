@@ -172,7 +172,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Prejudice.register();
 		Havens.register();
 		Peoples.register();
-		// 0.7.559: everyone has a word for the orcs they meet (friendly, wary, fighting)
+		// 0.7.562: everyone has a word for the orcs they meet (friendly, wary, fighting)
 		OrcSightings.register();
 		LOGGER.debug("peoples attachment: {}", Peoples.MET);
 		Emigrants.register();

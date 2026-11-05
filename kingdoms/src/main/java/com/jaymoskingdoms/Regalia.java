@@ -94,12 +94,10 @@ public final class Regalia {
 	 * dresses them ({@code robed}). The same pieces each time for the same ruler and rank.
 	 */
 	static void dress(PathfinderMob mob, int role, Faction faction, boolean female, boolean robed) {
-		RandomSource random = RandomSource.create(mob.getUUID().getLeastSignificantBits() ^ role * 0x9E3779B97F4A7C15L);
-		char rank = rank(role, female);
-		List<Item> crowns = CROWNS.entrySet().stream().filter(e -> e.getValue().indexOf(rank) >= 0).map(e -> ITEMS.get(e.getKey())).toList();
+		RandomSource random = random(mob, role);
 		Outfits.Heraldry arms = Outfits.heraldry(faction, mob.level().getServer());
 		ResourceKey<TrimMaterial> gem = arms.material() == TrimMaterials.GOLD ? TrimMaterials.DIAMOND : arms.material();
-		put(mob, EquipmentSlot.HEAD, glint(new ItemStack(crowns.get(random.nextInt(crowns.size())))));
+		put(mob, EquipmentSlot.HEAD, crown(random, role, female));
 		int attire = random.nextInt(ATTIRE);
 		DyeColor robe = random.nextBoolean() ? arms.field() : ROYAL_COLOURS.get(random.nextInt(ROYAL_COLOURS.size()));
 		if (robed) {
@@ -129,6 +127,42 @@ public final class Regalia {
 				put(mob, EquipmentSlot.FEET, trimmed(mob, new ItemStack(Items.IRON_BOOTS), arms.pattern(), gem));
 			}
 		}
+	}
+
+	/** The same draws each time for the same ruler and rank (their crown first, then their attire). */
+	private static RandomSource random(PathfinderMob mob, int role) {
+		return RandomSource.create(mob.getUUID().getLeastSignificantBits() ^ role * 0x9E3779B97F4A7C15L);
+	}
+
+	/** The crown {@code random} picks for a {@code role} ruler (the first draw of {@link #random}). */
+	private static ItemStack crown(RandomSource random, int role, boolean female) {
+		char rank = rank(role, female);
+		List<Item> crowns = CROWNS.entrySet().stream().filter(e -> e.getValue().indexOf(rank) >= 0).map(e -> ITEMS.get(e.getKey())).toList();
+		return glint(new ItemStack(crowns.get(random.nextInt(crowns.size()))));
+	}
+
+	/**
+	 * (0.7.561) {@code mob}'s crown, and nothing else, back on their head (it was taken off them: a player lifting the
+	 * downed ruler pulls their heavy armour off first, Powers' Carry#shed). Their armour and attire aren't made afresh:
+	 * what was taken lies where it fell, and a new set each time was the king's armour "duplicating" (Andy, 2026-11-05).
+	 * Whatever else is on their head (a helmet someone gave them) stays.
+	 */
+	static void recrown(PathfinderMob mob, int role, boolean female) {
+		ItemStack head = mob.getItemBySlot(EquipmentSlot.HEAD);
+		if (!head.isEmpty() && !head.is(Items.GOLDEN_HELMET) && !marked(head)) {
+			return;
+		}
+		put(mob, EquipmentSlot.HEAD, crown(random(mob, role), role, female));
+	}
+
+	/** {@code mob} wears any piece of regalia at all (head, chest, legs or feet). */
+	static boolean wearsAny(PathfinderMob mob) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			if (marked(mob.getItemBySlot(slot))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** {@code mob} has their crown on. */
