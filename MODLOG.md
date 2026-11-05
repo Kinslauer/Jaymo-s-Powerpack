@@ -1131,3 +1131,12 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
     is pushed away.
   - The thrown rocks leave the pack and land as items (around the burst, or out at the ring's rim) to be picked up or
     pulled in again; creative keeps them. B+G gathers a new ball from what's left. Built, not played.
+
+## 0.21.12 (2026-11-05): right-click ledge grab
+
+- Andy: "you should be able to grab a ledge that you can see over manually with right click and an empty hand, im
+  stuck right now in the nether". `LedgeClient.clickGrab`: a fresh press of Use with an empty main hand, on the ground
+  or in the air, facing a ledge (`Ledge.find`: edge 1.1 over the feet up to 0.45 over the eyes) catches it and hangs,
+  then Jump climbs as usual. Lower things climb as Sneak + scroll does (`scrollGrab`). The click is left alone when the
+  crosshair is on a mob or a block with a menu or switch (block entities, doors, trapdoors, buttons, gates, levers,
+  beds). Gradle build only, not played.
