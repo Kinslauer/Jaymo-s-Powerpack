@@ -758,3 +758,41 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - Everyone sees the pose (`ThrownRocks.THROW`, drawn by `client/armory/RockThrowPose`). Your arm moves the moment you
   press, and the rock leaves as the arm comes over. Tune it in the constants at the top of `RockThrowPose`.
   Built, not played.
+
+## 0.20.91 (2026-11-05): the Aether sky (seven-mods plan, patch 10)
+- Andy, "go ahead" on the last seven-mods patch. All new code is in `aether/sky` (The Upfall gave the idea; none of its code).
+- **Updraft vents:** holystone vents with a pale grille, set into island tops (about one chunk in 10, the upper islets one
+  in 16). Each breathes an unseen column of rising air up to 110 blocks (`UpdraftBlock`), with cloud motes. It carries you
+  fast up to the next layer; sneak to rise slowly and step off. A block set in the column cuts it there; break it and the
+  column climbs again. Craftable: holystone round a cold aercloud and a zanite gemstone. Mined with a pickaxe.
+- **Light and heavy islands** (`SkyPockets`): the sky is cut into 160-block stretches. About one in 7 is light: you jump
+  45% higher, fall at less than half the pull and take no damage from 8 more blocks, and motes drift up round you. About
+  one in 9 is heavy: a shorter jump, a harder pull, and dust settling. Only on the islands (Aether height 60 up). They're
+  attribute modifiers, so your own movement feels them.
+- **Upfalls:** rare columns of water pouring up into an island's underside, 10 to 25 blocks long. They lift you slowly
+  and put out fire.
+- **Gas caves:** about one 96-block stretch of the Hestveil caverns in 3 hangs with green haze. Without a **Sky Mask** in
+  the head bauble slot it poisons you, and sometimes sickens you. The mask is crafted from leather, two glass panes,
+  string and charcoal.
+- **Four sky biomes**, cut from the edges of the weirdness range (`tools/gen_aether_world.py`, data regenerated):
+  - **Hanging Roots** (highfields woods, low weirdness): cave vines with glow berries, hanging roots and spore blossoms
+    trail from every underside.
+  - **Mistsea** (top of the lowland lakes): thick white fog (2 to 40 blocks), drifting ash, and thin sheets of cold
+    aercloud lying in the open sky.
+  - **Rustworks** (magnetic, low weirdness): heaps of weathered and oxidized copper with grates, chains and bent rods
+    standing out of them, among ferrosite pillars.
+  - **Gilded Ridge** (top of the upper lakes): golden oaks, raw gold and glint ore boulders.
+- **The sky warden** (`SkyWarden`): one floating arena in each 1280-block square of the world, none within 900 of 0, 0. It
+  is a holystone-brick disc 25 across with six pillars and a ceiling 14 up, set 80 blocks over the ground. You reach it by
+  an updraft vent beside it with a landing. The warden is the sentry golem's frame at 2.5x, pale with cyan lights, 260
+  health, with a boss bar. It wakes when you come within 14 blocks. It clubs you, marks a spot that a bolt hits a second
+  later (step off it), and breathes a gust that throws everyone back. Below half health the arena's gravity flips:
+  everyone in it falls up onto the ceiling and fights from there, and the warden flies, quicker with its bolts. When it
+  dies, or you leave the arena, gravity rights itself and you get 10 s of slow falling. With nobody left it goes home and
+  heals. It drops a gravitite block and a lot of experience.
+- **The watched vault** (`VaultHeartEntity`): a small holystone-brick room set into the Hestveil rock, with a vault
+  keystone in its floor, a chest (`chests/watched_vault`: zanite, ambrosium, golden amber, glint, gold, amethyst, now and
+  then an echo shard) and 4 to 6 amethyst clusters. While anyone is near, the chest and the crystals move to another
+  spot in the room whenever nobody is looking at them. An open chest stays put.
+- The world generator's spring feature now writes `jaymospowers:sky_spring`, as the data already said. `check_aether_world.py`
+  knows the new biomes and every Java feature type. Built and checked, not played.

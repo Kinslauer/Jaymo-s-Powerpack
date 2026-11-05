@@ -251,6 +251,20 @@ structures (other tracks), custom sky, weather and cloud renderers.
 `locate biome`); the look from a Wind arrival (big islands, islets above, open sky); trees and ores; caves; lakes; the cloudbed from
 the underside; falling out below y -8 and landing home; day and night; a moa on a highfields island.
 
+## The sky (0.20.91, seven-mods plan patch 10) [aether.sky]
+
+- **Updraft vents** (`UpdraftVentBlock`, `UpdraftBlock`): columns of rising air, 110 blocks at most, from vents on island
+  tops. Placed `updraft_vents` (rarity 10, lowland tops) and `updraft_vents_high` (rarity 16, upper islets).
+- **Pockets and gas** (`SkyPockets`): light and heavy 160-block stretches above Aether height 60; gas in one 96-block stretch
+  of the Hestveil in 3. The Sky Mask (head bauble) keeps the gas out.
+- **Upfalls** (`UpfallBlock`): `upfalls`, rarity 48, hung from lowland undersides.
+- **Biomes**: hanging_roots, mistsea (highfields), rustworks (magnetic), gilded_ridge (highfields, upper depth only). Their
+  boxes and dressing are in the generator (`ROOTS_WEIRD`, `MIST_WEIRD`, `GILDED_WEIRD`).
+- **Sky warden** (`SkyWarden`, arena from `SkyFeature` kind `sky_arena`): one arena per 1280-block square. Flips the arena's
+  gravity below half health.
+- **Watched vault** (`VaultHeartEntity`, `SkyFeature` kind `watched_vault`): rarity 70 at heights 14 to 44, only set into rock.
+- All worldgen is the one feature type `jaymospowers:sky` with a `kind`.
+
 ## What is not in yet
 
 - Aether tools and armour (skyroot, holystone, zanite, gravitite) and Skyroot's double drops, the Holystone tool's

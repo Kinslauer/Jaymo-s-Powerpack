@@ -41,7 +41,9 @@
       "jaymospowers:moss_patch_bryalinn_forest",
       "jaymospowers:quicksoil_shelf"
     ],
-    [],
+    [
+      "jaymospowers:watched_vault"
+    ],
     [],
     [],
     [
@@ -99,7 +101,11 @@
       "jaymospowers:aercloud_green_high",
       "jaymospowers:aercloud_purple_high",
       "jaymospowers:aercloud_storm_high",
-      "jaymospowers:crystal_island"
+      "jaymospowers:crystal_island",
+      "jaymospowers:upfalls",
+      "jaymospowers:updraft_vents",
+      "jaymospowers:updraft_vents_high",
+      "jaymospowers:sky_arena"
     ]
   ],
   "has_precipitation": true,

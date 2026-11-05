@@ -1,0 +1,105 @@
+{
+  "attributes": {
+    "minecraft:gameplay/creature_world_gen_spawn_probability": 0.2,
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/fog_color": "#efe2d6",
+    "minecraft:visual/sky_color": "#d8c9c0",
+    "minecraft:visual/water_fog_color": "#6a6050"
+  },
+  "carvers": [],
+  "downfall": 0.2,
+  "effects": {
+    "water_color": "#8fb3a6",
+    "grass_color": "#c8c89a",
+    "foliage_color": "#c8c89a"
+  },
+  "features": [
+    [
+      "jaymospowers:cloudbed"
+    ],
+    [],
+    [
+      "jaymospowers:disk_ferrosite_sand",
+      "jaymospowers:ferrosite_pillars",
+      "jaymospowers:ferrosite_pillars_high",
+      "jaymospowers:quicksoil_shelf",
+      "jaymospowers:rust_wrecks",
+      "jaymospowers:rust_wrecks_high"
+    ],
+    [
+      "jaymospowers:watched_vault"
+    ],
+    [],
+    [],
+    [
+      "jaymospowers:ore_agiosite",
+      "jaymospowers:ore_agiosite_small",
+      "jaymospowers:ore_ambrosium",
+      "jaymospowers:ore_ambrosium_high",
+      "jaymospowers:ore_arkenium",
+      "jaymospowers:ore_corrobonite",
+      "jaymospowers:ore_glint",
+      "jaymospowers:ore_gravitite",
+      "jaymospowers:ore_gravitite_buried",
+      "jaymospowers:ore_zanite",
+      "jaymospowers:ore_zanite_mountain",
+      "jaymospowers:ore_quartz",
+      "jaymospowers:ore_icestone",
+      "jaymospowers:ore_icestone_small",
+      "jaymospowers:ore_crude_scatterglass",
+      "jaymospowers:ore_ichorite"
+    ],
+    [
+      "jaymospowers:pointed_holystone",
+      "jaymospowers:pointed_holystone_cave"
+    ],
+    [
+      "jaymospowers:spring_water"
+    ],
+    [
+      "jaymospowers:trees_rustworks",
+      "jaymospowers:trees_rustworks_high",
+      "jaymospowers:grass_small",
+      "jaymospowers:magnetic_shrooms",
+      "jaymospowers:holystone_rocks"
+    ],
+    [
+      "jaymospowers:aercloud_cold_surface",
+      "jaymospowers:aercloud_golden_surface",
+      "jaymospowers:aercloud_blue_surface",
+      "jaymospowers:aercloud_green_surface",
+      "jaymospowers:aercloud_purple_surface",
+      "jaymospowers:aercloud_blue_lower",
+      "jaymospowers:aercloud_green_lower",
+      "jaymospowers:aercloud_purple_lower",
+      "jaymospowers:aercloud_storm_lower",
+      "jaymospowers:aercloud_cold_middle",
+      "jaymospowers:aercloud_storm_middle",
+      "jaymospowers:aercloud_green_high",
+      "jaymospowers:aercloud_purple_high",
+      "jaymospowers:aercloud_storm_high",
+      "jaymospowers:crystal_island",
+      "jaymospowers:upfalls",
+      "jaymospowers:updraft_vents",
+      "jaymospowers:updraft_vents_high",
+      "jaymospowers:sky_arena"
+    ]
+  ],
+  "has_precipitation": true,
+  "temperature": 0.7
+}

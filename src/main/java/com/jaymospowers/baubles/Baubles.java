@@ -99,6 +99,8 @@ public final class Baubles {
 
 	public static MenuType<BaublesMenu> MENU;
 	public static Item LANTERN_POLE;
+	/** (0.20.90) A breathing mask for the Hestveil's gas caves (seven-mods plan, patch 10): worn in the head slot. */
+	public static Item SKY_MASK;
 	public static Item HEARTSTONE_AMULET, SWIFTFOOT_RING, DELVERS_RING, BRAWLERS_BELT, DIVERS_CIRCLET, FEATHERFALL_CLOAK, RABBIT_FOOT_CHARM;
 	/** Every attribute any bauble touches, so stale bonuses can be taken off. */
 	private static final Set<Holder<Attribute>> TOUCHED = new LinkedHashSet<>();
@@ -128,6 +130,7 @@ public final class Baubles {
 			new BaubleItem.Bonus(Attributes.LUCK, 1.0, AttributeModifier.Operation.ADD_VALUE));
 		// (Motion patch 4) a lantern on a stick, worn on the back with the lantern hung out over the head
 		LANTERN_POLE = bauble("lantern_pole", Kind.BODY, Rarity.COMMON);
+		SKY_MASK = bauble("sky_mask", Kind.HEAD, Rarity.COMMON);
 		// (0.20.12) the pink fairy, caught in a bottle
 		Fairies.init();
 		// (Artifacts) the Artifacts mod's 45 baubles, ported (MIT), and where they are found
