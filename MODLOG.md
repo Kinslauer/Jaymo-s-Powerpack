@@ -508,3 +508,17 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (`Dismember.SPLIT_TICKS`) and they die (`Dismember.tickSplit`). Kingdoms' swallow swaps it for
   `jaymospowers_rubber_mending`; no one gets up while a leg is still missing (`Dismember.pulledApart`, `Downed.getUp`).
   Beheading still kills. Gradle build only, not played.
+
+## 0.20.63 (2026-11-05): shift-scroll ledge grab
+
+- Andy: "shift scrolling infront of a ledge or single block opening will grab onto it when you get to crouch height,
+  this should prevent the other checks and issues trying to use this feature. this should also let you climb fences,
+  or other blocks that arent quite 2 blocks tall." The crouch grab now comes only from Sneak + a scroll down (the notch
+  down to the crouch, or on from it) while on the ground facing a block 0.7 to 1.95 over your feet
+  (`StanceScroll.scroll` -> `LedgeClient.scrollGrab` -> `Ledge.crouchSpot`); walking into the block, settling into the
+  crouch or pushing forward from the knee no longer grabs. What it does: climbs up onto the top when the crouched body
+  fits there, pulls in on the belly under a one-high gap (as before), or vaults over a fence, wall, gate or bars and
+  lands on the far side (needs ground within `Ledge.VAULT_DROP_MAX` = 3 blocks). The notch is the climb's, so the stance
+  stays as it was. Cactus, magma and barriers are never climbed (`data/jaymospowers/tags/block/ledge_no_vault.json`).
+  `Ledge.Grab` carries a vault flag so the server holds a vault by `Ledge.vaultable` instead of `holdable`. Gradle
+  build only, not played.
