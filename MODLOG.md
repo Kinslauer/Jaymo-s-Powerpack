@@ -682,5 +682,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   have no 26.3 file on CurseForge yet, so they're in `packModsNoCf`.
 - Mutant Monsters, zombies only (Andy: "any zombie but only if they have the model"; the Mutant Zombie is its only
   zombie): Powers' data adds every Overworld, Nether, End and Aether biome to its `without_mutant_creeper/skeleton/
-  enderman_spawns` tags, so only the Mutant Zombie spawns on its own. Chemical X can still turn a mob into its mutant.
+  enderman_spawns` tags, so only the Mutant Zombie spawns on its own. Chemical X can't be had (Andy: "chemical X should
+  not be acquirable"): its four brewing recipes, the only way to make it, are dropped (`Uncraftable.PREFIXES`).
 - Built, not played.

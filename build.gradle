@@ -351,7 +351,8 @@ def packMods = [
 	[dep: "maven.modrinth:it-takes-a-pillage-continuation:ea1YvgAO", cf: [1111063, 9018148]],
 	// Mutant Monsters (AGPL-3.0, Fuzs; unchanged jar): Andy wants the zombies only, so Powers' data turns off the mutant
 	// creeper, skeleton and enderman spawns everywhere (data/mutantmonsters/tags/worldgen/biome/without_mutant_*_spawns).
-	// The Mutant Zombie is its only zombie with a model of its own. Needs Forge Config API Port and Puzzles Lib (above).
+	// The Mutant Zombie is its only zombie with a model of its own. Chemical X is never brewable (Uncraftable.PREFIXES).
+	// Needs Forge Config API Port and Puzzles Lib (above).
 	[dep: "maven.modrinth:mutant-monsters:XNliGY5t", cf: [852665, 9084637]],
 	// Eternal Nether (MIT, Fuzs): new Nether biomes and mobs, room for the demon content that lives in the Nether.
 	[dep: "maven.modrinth:eternal-nether:TIviaC6F", cf: [1252482, 8994588]],
