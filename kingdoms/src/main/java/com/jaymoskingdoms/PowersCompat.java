@@ -1906,6 +1906,17 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.549) Whether {@code player} is locked on with Powers' lock-on, on either side: the server asks Powers, the client
+	 * reads its own lock (only right for the local player). Always false without Powers.
+	 */
+	public static boolean lockedOn(net.minecraft.world.entity.player.Player player) {
+		if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+			return lockTarget(sp) != null;
+		}
+		return player.level().isClientSide() && lockedId() >= 0;
+	}
+
 	// ---- (0.7.390) Lock-on ----------------------------------------------------------------------------------------
 
 	/** Powers' {@code LockOn.target(ServerPlayer)}. */

@@ -9071,6 +9071,7 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   slot. `forms/FormSkills` adds the spell source and a custom delivery that runs `Forms.cast` (the old checks; a form that
   can't go starts no cooldown). `mixin/spellengine/SpellContainerSourceMixin` gives a form weapon with no spell container
   one that takes only the forms (so class skills still need their own weapons) and lets a weapon that has one (a Rogues
-  dagger) take the forms too. No stance or belt picking with a weapon: the Combat Art key is the art again; the stance stays
-  for bare fists (a bare hand on the bar would take right-click from doors and villagers); a Combat Art tap tugs a pinned
+  dagger) take the forms too. No stance or belt picking any more: the Combat Art key is the art again. Bare fists get their
+  forms on the bar only while locked on (Andy: "give it to fists but only when locked on"; right-click is the first fist
+  form then, and stays free for doors and villagers otherwise; `PowersCompat.lockedOn`). A Combat Art tap tugs a pinned
   spear back. Without Spell Engine the stance works as before. Gradle build only, not played.

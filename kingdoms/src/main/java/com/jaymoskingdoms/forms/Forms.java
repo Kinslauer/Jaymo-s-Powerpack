@@ -70,7 +70,7 @@ import org.jspecify.annotations.Nullable;
  * (Charge, War Cry, Shield Throw: {@link CombatArts}).
  * <li>(0.7.549) The skill bar: with Spell Engine in the pack (the RPG Series), a form weapon in hand puts the forms you know
  * for it on Spell Engine's skill bar ({@link FormSkills}), belt order first, on its keys (1, 2, 3...; right-click stays the
- * weapon's guard). No stance, no belt picking. The stance stays for bare fists only.
+ * weapon's guard; bare fists only while locked on, where right-click is the first form). No stance, no belt picking.
  * <li>Practice: a form that lands adds practice ({@link #landed}; a real foe counts {@value #FOE_PRACTICE}, a dummy
  * {@value #DUMMY_PRACTICE}) and ranks it up to {@value #RANKS}; each rank hits a little harder and reaches a little further.
  * <li>Masterstrokes only fire on a fallen foe ({@link #masterTarget}): downed, or K.O.'d by Powers' poise.
@@ -473,8 +473,8 @@ public final class Forms {
 
 	/**
 	 * Whether {@code player} holds a weapon any form they know works with: the stance can be taken. (0.7.549) With Spell
-	 * Engine in the pack a form weapon in hand puts the forms on its skill bar instead ({@link FormSkills}), so the stance
-	 * is only for bare fists (a bare hand on the skill bar would take right-click from doors, chests and villagers).
+	 * Engine in the pack the forms are on its skill bar instead ({@link FormSkills}; bare fists while locked on), so there's
+	 * no stance.
 	 */
 	public static boolean canStance(Player player) {
 		if (SpearForms.pinned(player)) {
@@ -483,7 +483,8 @@ public final class Forms {
 		}
 		Book book = book(player);
 		ItemStack main = player.getMainHandItem();
-		if (!main.isEmpty() && skillBar()) {
+		if (skillBar()) {
+			// (0.7.549) every form is on the skill bar (bare fists while locked on), so there's no stance
 			return false;
 		}
 		for (String id : book.known()) {
@@ -503,11 +504,12 @@ public final class Forms {
 
 	/**
 	 * (0.7.549) The forms {@code player} has on the skill bar with what's in their hand: the known forms that fit it, in belt
-	 * order, then the rest in list order. Empty with a bare hand (fists keep the stance) or no form weapon.
+	 * order, then the rest in list order. A bare hand's fist forms only while locked on (Andy: "give it to fists but only
+	 * when locked on"), so right-click stays free for doors and villagers the rest of the time. Empty with no form weapon.
 	 */
 	public static List<String> barForms(Player player) {
 		ItemStack main = player.getMainHandItem();
-		if (main.isEmpty()) {
+		if (main.isEmpty() && !PowersCompat.lockedOn(player)) {
 			return List.of();
 		}
 		Book book = book(player);

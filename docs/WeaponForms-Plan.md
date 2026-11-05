@@ -41,7 +41,8 @@ wheel swaps targets. Proposal:
 easier to access with less keys"):** with Spell Engine in the pack, a form weapon in hand puts your forms for it on the
 RPG Series skill bar (`forms/FormSkills`), belt order first, on its keys (1, 2, 3...; right-click stays the guard). There's
 no stance or Ctrl + scroll with a weapon any more, and the Combat Art key is only Charge, War Cry and Shield Throw (and
-tugs a pinned spear back). The stance above stays for bare fists only.
+tugs a pinned spear back). Bare fists get their forms on the bar only while locked on (right-click is then the first
+fist form). The stance above is gone while Spell Engine is in the pack.
 
 ## Patch 1: Weapon Forms core + veteran guard drills (Kingdoms)
 - **Form registry** (`forms/Forms`): id, weapon family (item tags, Tinkers kinds and WeaponMod through its

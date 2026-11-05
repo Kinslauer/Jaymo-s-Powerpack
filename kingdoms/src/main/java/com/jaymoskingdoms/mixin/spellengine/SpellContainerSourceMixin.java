@@ -20,8 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.549) Weapon Forms on Spell Engine's skill bar ({@link FormSkills}). Spell Engine only fills the bar when the held
  * item carries a spell container that resolves spells, and only with the spells that container takes.
  * <ul>
- * <li>A form weapon with no such container (a vanilla sword, a spear, a claw), held by someone who knows a form for it, is
- * given one that takes only {@code #jaymoskingdoms:weapon_forms}: their RPG Series class skills still need their own
+ * <li>A form weapon with no such container (a vanilla sword, a spear, a claw; a bare hand while locked on), held by
+ * someone who knows a form for it, is given one that takes only {@code #jaymoskingdoms:weapon_forms}: their RPG Series class skills still need their own
  * weapons.</li>
  * <li>Any resolving container takes the form spells too, so a Rogues dagger shows its class skills and its forms; the
  * forms source only ever offers forms that fit the hand.</li>
@@ -33,7 +33,7 @@ abstract class SpellContainerSourceMixin {
 	@ModifyExpressionValue(method = "update", at = @At(value = "INVOKE",
 		target = "Lnet/spell_engine/api/spell/container/SpellContainerHelper;containerFromItemStack(Lnet/minecraft/world/item/ItemStack;)Lnet/spell_engine/api/spell/container/SpellContainer;"))
 	private static SpellContainer jaymoskingdoms$formWeapon(SpellContainer held, @Local(argsOnly = true) Player player) {
-		if (player == null || held != null && held.isResolver() || !Forms.formWeapon(player.getMainHandItem()) || Forms.barForms(player).isEmpty()) {
+		if (player == null || held != null && held.isResolver() || Forms.barForms(player).isEmpty()) {
 			return held;
 		}
 		return new SpellContainer(SpellContainer.ContentType.TAG, FormSkills.TAG, "", "", 0, List.of(), 0);
