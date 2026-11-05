@@ -9425,3 +9425,13 @@ can be sawed through similarly."
   a rope saws through in 16 strokes of something sharp (flint, shard, blade, shears), each seen by a watching captor at
   30%. Through, they're free and hunted as from a picked lock. The stake can't be pulled up while tied to it.
 - Hint 113. Built, not played.
+
+## 0.7.585 (2026-11-05): taken-over bodies face the way they walk (Powers 0.20.97)
+Andy: "takeovers need to face your character toward its walking direction ... this was a problem for symbiotes and i just
+saw it with the werewolf players."
+- A werewolf player's beast (and lean wolf) turns to the way it runs on every screen. Before, it copied its player's
+  camera, so it slid sideways and walked backwards. Its head turns toward where they look, up to 60 degrees.
+  (`Werewolf.tickHeadTurn`, `WerewolfRenderer`, `TakeoverFacing`.)
+- A player held by the blood fever, the feral curse or the Grue is drawn the same way. `Seizures.SEIZED` (synced to
+  everyone) tells other screens a hold has them. (`TakeoverFacingMixin`, `TakeoverFacingHeadMixin`,
+  `SeizureClient.drivenBody`.) The camera is unchanged. Built, not played.

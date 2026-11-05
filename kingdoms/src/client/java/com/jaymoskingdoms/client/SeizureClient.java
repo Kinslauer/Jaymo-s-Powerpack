@@ -95,6 +95,15 @@ public final class SeizureClient {
 		return target >= 0 && ticks > 0;
 	}
 
+	/**
+	 * (2026-11-05) Something drives this player's body now (the fever, the curse, the Grue): your own the moment it comes,
+	 * anyone's as the server syncs it. Their body is drawn facing the way it goes (TakeoverFacingMixin).
+	 */
+	public static boolean drivenBody(net.minecraft.world.entity.player.Player player) {
+		return player.hasAttached(Seizures.SEIZED) || com.jaymoskingdoms.spirits.Grue.taken(player)
+			|| player == Minecraft.getInstance().player && locked();
+	}
+
 	/** You may give in now ({@code U}). */
 	static boolean canGiveIn() {
 		return locked() && canGiveIn;

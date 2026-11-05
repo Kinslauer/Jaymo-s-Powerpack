@@ -848,3 +848,13 @@ Andy: "I also didnt bleed out after being cleaved in two, that should happen wit
   spot in the room whenever nobody is looking at them. An open chest stays put.
 - The world generator's spring feature now writes `jaymospowers:sky_spring`, as the data already said. `check_aether_world.py`
   knows the new biomes and every Java feature type. Built and checked, not played.
+
+## 0.20.97 (2026-11-05): taken-over bodies face the way they walk (Kingdoms 0.7.585)
+Andy: "takeovers need to face your character toward its walking direction, kind of like how free rein works, if you are
+looking forward the camera stays forward, but the model is drawn moving in whatever direction".
+- While a symbiote takeover, the Great Ape's fit or the wild ape has you, your body turns to the way it is being carried on
+  every screen, instead of strafing or walking backwards after your camera. The head still turns toward where you look,
+  up to 60 degrees. The camera and aim are unchanged. (`client/TakeoverFacing`, `TakeoverFacingMixin`,
+  `TakeoverFacingHeadMixin`.)
+- The ape fit (`ApeRage.FIT`) now syncs to everyone, so other players see the ape facing its way too.
+- Kingdoms 0.7.585 does the same for the werewolf beast, blood fever, feral curse and Grue holds. Built, not played.

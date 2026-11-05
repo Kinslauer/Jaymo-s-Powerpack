@@ -178,6 +178,19 @@ public class Werewolf extends LegendMonster {
 		this.setPersistenceRequired();
 	}
 
+	/**
+	 * (2026-11-05) A werewolf player's beast (no mind of its own: it's moved where they are each tick) turns to the way it
+	 * runs on every screen, not after its player's camera (TakeoverFacing): no more sliding sideways or walking backwards.
+	 */
+	@Override
+	protected void tickHeadTurn(float yBodyRotT) {
+		if (this.level().isClientSide() && this.isNoAi()) {
+			com.jaymoskingdoms.TakeoverFacing.turn(this);
+			return;
+		}
+		super.tickHeadTurn(yBodyRotT);
+	}
+
 	public java.util.@Nullable UUID host() {
 		return this.host;
 	}
