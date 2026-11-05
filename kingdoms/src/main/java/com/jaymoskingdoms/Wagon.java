@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
@@ -34,10 +35,12 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -123,7 +126,8 @@ public final class Wagon extends Entity {
 		w.caravan = caravan;
 		w.slot = slot;
 		Vec3 back = Vec3.directionFromRotation(0.0F, horse.getYRot()).scale(-w.hitch());
-		w.snapTo(horse.getX() + back.x, horse.getY(), horse.getZ() + back.z, horse.getYRot(), 0.0F);
+		double x = horse.getX() + back.x, z = horse.getZ() + back.z;
+		w.snapTo(x, ground(level, x, horse.getY(), z), z, horse.getYRot(), 0.0F);
 		level.addFreshEntity(w);
 		return w;
 	}
@@ -390,12 +394,16 @@ public final class Wagon extends Entity {
 		if (len > 8.0) {
 			// (left behind: set down behind its horse)
 			Vec3 back = Vec3.directionFromRotation(0.0F, horse.getYRot()).scale(-this.hitch());
-			this.snapTo(to.x + back.x, to.y, to.z + back.z, horse.getYRot(), 0.0F);
+			this.snapTo(to.x + back.x, ground(this.level(), to.x + back.x, to.y, to.z + back.z), to.z + back.z, horse.getYRot(), 0.0F);
 			return;
 		}
 		if (len > 1.0E-3) {
 			Vec3 dir = flat.scale(1.0 / len);
-			Vec3 at = new Vec3(to.x - dir.x * this.hitch(), Mth.lerp(0.35, here.y, to.y), to.z - dir.z * this.hitch());
+			double x = to.x - dir.x * this.hitch(), z = to.z - dir.z * this.hitch();
+			// (0.7.544) on the ground where it stands, not at its horse's height: a cart behind a horse on a road along a
+			// bank was drawn sunk into the bank, and one set down at the foot of a rise spawned inside it
+			double y = ground(this.level(), x, Mth.lerp(0.35, here.y, to.y), z);
+			Vec3 at = new Vec3(x, Math.abs(y - here.y) > 2.0 ? y : Mth.lerp(0.5, here.y, y), z);
 			float yaw = (float)(Mth.atan2(dir.z, dir.x) * Mth.RAD_TO_DEG) - 90.0F;
 			this.setPos(at.x, at.y, at.z);
 			this.setYRot(yaw);
@@ -406,6 +414,40 @@ public final class Wagon extends Entity {
 				living.setYBodyRot(this.getYRot());
 			}
 		}
+	}
+
+	/** (0.7.544) How far up and down from where it would be (blocks) a wagon looks for the ground to stand on. */
+	static final int GROUND_UP = 3, GROUND_DOWN = 4;
+
+	/**
+	 * (0.7.544) The height of the ground under {@code (x, z)} nearest {@code y}: the top of a block (or water) with room
+	 * above it, within {@link #GROUND_UP} above and {@link #GROUND_DOWN} below. Nothing there (or not loaded): {@code y}.
+	 */
+	static double ground(Level level, double x, double y, double z) {
+		int bx = Mth.floor(x), bz = Mth.floor(z), by = Mth.floor(y);
+		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(bx, by, bz);
+		if (!level.isLoaded(p)) {
+			return y;
+		}
+		double best = y, bestGap = Double.MAX_VALUE;
+		boolean roomAbove = false;
+		for (int iy = by + GROUND_UP + 1; iy >= by - GROUND_DOWN; iy--) {
+			p.set(bx, iy, bz);
+			BlockState state = level.getBlockState(p);
+			VoxelShape shape = state.getCollisionShape(level, p);
+			boolean water = !state.getFluidState().isEmpty();
+			boolean solid = !shape.isEmpty() || water;
+			if (solid && roomAbove && iy <= by + GROUND_UP) {
+				double top = shape.isEmpty() ? iy + 0.85 : iy + shape.max(Direction.Axis.Y);
+				double gap = Math.abs(top - y);
+				if (gap < bestGap) {
+					best = top;
+					bestGap = gap;
+				}
+			}
+			roomAbove = !solid;
+		}
+		return best;
 	}
 
 	// ---- its passenger (the king in his carriage) ---------------------------------------------------------------------
