@@ -171,10 +171,12 @@ public final class FinisherPose {
 			k(20, 0.02F, 10, 0, -1.75F, -0.05F, 0.05F, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.5F, 0),
 			k(24, 0.03F, 12, 0, -1.3F, -0.05F, 0, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.55F, 0),
 			rest(30, 0)});
-		// (0.20.98) a future gun's, one-handed: Head Shot's one round, Three Shots on semi a beat apart, on full auto at once
+		// (0.20.100) a future gun's, one-handed: Head Shot's one round, Three Shots on semi a beat apart, on full auto at once
 		KEYS.put(Finishers.Kind.FUTURE_SHOT, oneHanded(Finishers.Kind.FUTURE_SHOT));
 		KEYS.put(Finishers.Kind.FUTURE_BURST, oneHanded(Finishers.Kind.FUTURE_BURST));
 		KEYS.put(Finishers.Kind.FUTURE_AUTO, oneHanded(Finishers.Kind.FUTURE_AUTO));
+		// (0.20.100) the untrained snap shot, without Executioner
+		KEYS.put(Finishers.Kind.FUTURE_WILD, oneHanded(Finishers.Kind.FUTURE_WILD));
 		// Bare hands: down on a knee, the head taken in both hands; (0.15.114) Andy: "neck break should take 5s to finish":
 		// held, it's wrenched one way and fought back twice (40, 70), a wind back, and the snap at 100
 		KEYS.put(Finishers.Kind.FIST, new Key[] {
@@ -369,7 +371,7 @@ public final class FinisherPose {
 
 	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */
 	/**
-	 * (0.20.98) A one-handed blast for {@code kind}'s beats: the gun swung up in the gun hand, the arm straight down at them,
+	 * (0.20.100) A one-handed blast for {@code kind}'s beats: the gun swung up in the gun hand, the arm straight down at them,
 	 * the off hand hanging at the side, the muzzle kicking up on each shot (less, on full auto) and settling between, and
 	 * lowered after the last. The body leans a little into it.
 	 */
@@ -470,10 +472,10 @@ public final class FinisherPose {
 		Entity body = entity.level().getEntity(finish.target());
 		if (body != null) {
 			// (0.15.146) the neck snap kneels to the head, not the middle; (0.17.181) so does the rock
-			// (0.20.98) and a future gun's shots stand over it
+			// (0.20.100) and a future gun's shots stand over it
 			net.minecraft.world.phys.Vec3 at = (kind == Finishers.Kind.FIST || kind == Finishers.Kind.ROCK || kind == Finishers.Kind.Q_BLADE
 				|| kind == Finishers.Kind.Q_GRIP || kind == Finishers.Kind.FUTURE_SHOT || kind == Finishers.Kind.FUTURE_BURST
-				|| kind == Finishers.Kind.FUTURE_AUTO) && body instanceof net.minecraft.world.entity.LivingEntity living
+				|| kind == Finishers.Kind.FUTURE_AUTO || kind == Finishers.Kind.FUTURE_WILD) && body instanceof net.minecraft.world.entity.LivingEntity living
 				? Finishers.headAt(living) : body.position();
 			double dx = at.x - entity.getX(), dz = at.z - entity.getZ();
 			float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;

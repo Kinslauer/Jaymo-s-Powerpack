@@ -158,10 +158,13 @@ public final class Finishers {
 	static final double AROUND_RANGE = 10.0;
 	/** (0.15.114) How far the point-blank shot is heard through TaCZ (blocks), and its shake for those around. */
 	static final int SHOT_HEARD = 64;
-	/** (0.20.98) Rounds a future gun needs in it for the three shots (fewer, and it's the one to the head). */
+	/** (0.20.100) Rounds a future gun needs in it for the three shots (fewer, and it's the one to the head). */
 	static final int BURST_ROUNDS = 3;
+	/** (0.20.100) How often an untrained one-handed shot ({@link Kind#FUTURE_WILD}) misses, and how far off it goes (blocks). */
+	static final float WILD_MISS = 0.4F;
+	static final double WILD_OFF = 0.45;
 	/**
-	 * (0.20.98) Where a future gun's one-handed muzzle is: this far from the eyes toward the shot (blocks, at most), this far
+	 * (0.20.100) Where a future gun's one-handed muzzle is: this far from the eyes toward the shot (blocks, at most), this far
 	 * out to the gun hand's side, and this far below the eyes (the arm's straight out from the shoulder).
 	 */
 	static final double ONE_HAND_REACH = 0.95, ONE_HAND_SIDE = 0.35, ONE_HAND_DROP = 0.3;
@@ -224,16 +227,22 @@ public final class Finishers {
 		/** (0.15.114) Point Blank: the gun brought up, cocked, aimed down at the head at arm's length, and fired. Spends a round. */
 		GUN(30, new int[] {20}, Strike.BLAST),
 		/**
-		 * (0.20.98) Andy: "future guns should all have an execution, choosing from a single point blank shot to the head, or
+		 * (0.20.100) Andy: "future guns should all have an execution, choosing from a single point blank shot to the head, or
 		 * three shots with a semi or full auto weapon. it should use ammunition accurately and animate a one handed blast".
 		 * Head Shot, a future gun's that works its own action (bolt, pump, break, single shot), or one with under three
 		 * rounds left: stood over their head, the gun swung up in one hand, the arm straight down at it, one round, the kick.
 		 */
 		FUTURE_SHOT(28, new int[] {16}, Strike.BLAST),
-		/** (0.20.98) Three Shots, a self-loading future gun's on semi: one-handed, two into the chest and one into the head, a beat apart. */
+		/** (0.20.100) Three Shots, a self-loading future gun's on semi: one-handed, two into the chest and one into the head, a beat apart. */
 		FUTURE_BURST(34, new int[] {14, 18, 22}, Strike.BLAST),
-		/** (0.20.98) Three Shots, a future gun's set to full auto (or burst): one-handed, the three ripped off on the trigger at once. */
+		/** (0.20.100) Three Shots, a future gun's set to full auto (or burst): one-handed, the three ripped off on the trigger at once. */
 		FUTURE_AUTO(30, new int[] {14, 16, 18}, Strike.BLAST),
+		/**
+		 * (0.20.100) Andy: "an empty gun fires once and can miss ... not empty, someone without executioner". Snap Shot, a
+		 * loaded future gun's without the Executioner perk: one-handed, one round, and {@link #WILD_MISS} of the time it goes
+		 * into the ground beside their head and they live.
+		 */
+		FUTURE_WILD(26, new int[] {14}, Strike.BLAST),
 		/**
 		 * Bare hands: kneel, take the head in both hands, and twist. (0.15.114) Andy: "neck break should take 5s to finish":
 		 * a hold that strains twice against them before the snap at 5 s.
@@ -671,7 +680,8 @@ public final class Finishers {
 			return kind;
 		}
 		if (!weaponsUnlocked(player)) {
-			return basic(kind);
+			// (0.20.100) a loaded future gun fires once anyway, and may miss
+			return kind == Kind.GUN && TaczGuns.isModern(stack) && loaded(player, stack, kind) ? Kind.FUTURE_WILD : basic(kind);
 		}
 		if (kind == Kind.GUN && !loaded(player, stack, kind)) {
 			return Kind.SWORD;
@@ -684,7 +694,7 @@ public final class Finishers {
 	}
 
 	/**
-	 * (0.20.98) A loaded gun's move: a future gun's (TaCZ's own) one-handed {@link Kind#FUTURE_SHOT}, or three shots when
+	 * (0.20.100) A loaded gun's move: a future gun's (TaCZ's own) one-handed {@link Kind#FUTURE_SHOT}, or three shots when
 	 * it loads itself and has {@link #BURST_ROUNDS} in it ({@link Kind#FUTURE_AUTO} on full auto or burst, else
 	 * {@link Kind#FUTURE_BURST}); any other gun's Point Blank.
 	 */
@@ -699,9 +709,9 @@ public final class Finishers {
 		return "AUTO".equals(mode) || "BURST".equals(mode) ? Kind.FUTURE_AUTO : Kind.FUTURE_BURST;
 	}
 
-	/** (0.20.98) A future gun's three shots: one of these shot kinds. */
+	/** (0.20.100) A future gun's three shots: one of these shot kinds. */
 	static boolean futureGun(Kind kind) {
-		return kind == Kind.FUTURE_SHOT || kind == Kind.FUTURE_BURST || kind == Kind.FUTURE_AUTO;
+		return kind == Kind.FUTURE_SHOT || kind == Kind.FUTURE_BURST || kind == Kind.FUTURE_AUTO || kind == Kind.FUTURE_WILD;
 	}
 
 	/** (0.15.146) Everyone's move with a weapon of {@code kind}: a blade stabs through, the rest (axes too) slam. */
@@ -775,7 +785,7 @@ public final class Finishers {
 	/** (0.15.114) The shot's spent: the gun's round, the crossbow's bolt, or an arrow (Infinity and creative keep theirs). */
 	static void spend(ServerLevel level, Player player, ItemStack stack, Kind kind) {
 		switch (kind) {
-			case GUN, FUTURE_SHOT, FUTURE_BURST, FUTURE_AUTO -> {
+			case GUN, FUTURE_SHOT, FUTURE_BURST, FUTURE_AUTO, FUTURE_WILD -> {
 				if (!TaczGuns.spendRound(stack) && ArsenalFlintlock.FLINTLOCK != null && stack.is(ArsenalFlintlock.FLINTLOCK)) {
 					stack.set(ArsenalFlintlock.SPENT, true);
 				}
@@ -1096,7 +1106,7 @@ public final class Finishers {
 			return Kind.Q_GRIP;
 		}
 		return switch (kind(stack)) {
-			case BOW, CROSSBOW, GUN, FUTURE_SHOT, FUTURE_BURST, FUTURE_AUTO -> Kind.Q_AIM;
+			case BOW, CROSSBOW, GUN, FUTURE_SHOT, FUTURE_BURST, FUTURE_AUTO, FUTURE_WILD -> Kind.Q_AIM;
 			case SWORD, GREATSWORD, DAGGER, AXE, SPEAR, POLEARM -> Kind.Q_BLADE;
 			default -> stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) ? Kind.Q_BLADE : Kind.Q_BLUNT;
 		};
@@ -1299,7 +1309,7 @@ public final class Finishers {
 			case BLAST -> {
 				ItemStack gun = player.getMainHandItem();
 				if (futureGun(kind)) {
-					// (0.20.98) a future gun's: a real round a shot, one-handed
+					// (0.20.100) a future gun's: a real round a shot, one-handed
 					if (!futureShot(level, player, body, gun, kind, kill)) {
 						return;
 					}
@@ -1385,7 +1395,7 @@ public final class Finishers {
 	}
 
 	/**
-	 * (0.20.98) One of a future gun's shots, one-handed: a round out of the gun (none left, and it only clicks: false), TaCZ's
+	 * (0.20.100) One of a future gun's shots, one-handed: a round out of the gun (none left, and it only clicks: false), TaCZ's
 	 * report for that gun, its muzzle flash, the bullet's smoke line into them, blood. The burst's first two go into the
 	 * chest, the last (and the Head Shot's one) into the head.
 	 */
@@ -1399,6 +1409,12 @@ public final class Finishers {
 			return kill;
 		}
 		Vec3 hit = kill ? headAt(body) : body.position().add(0.0, Downed.isDowned(body) ? 0.25 : body.getBbHeight() * 0.6, 0.0);
+		// (0.20.100) an untrained snap shot can go wide: into the ground beside the head, and they live
+		boolean missed = kind == Kind.FUTURE_WILD && random.nextFloat() < WILD_MISS;
+		if (missed) {
+			double turn = random.nextFloat() * Math.PI * 2.0;
+			hit = new Vec3(hit.x + Math.cos(turn) * WILD_OFF, body.getY() + 0.02, hit.z + Math.sin(turn) * WILD_OFF);
+		}
 		Vec3 eye = player.getEyePosition();
 		Vec3 dir = hit.subtract(eye).normalize();
 		Vec3 right = dir.cross(new Vec3(0.0, 1.0, 0.0));
@@ -1413,10 +1429,19 @@ public final class Finishers {
 			Vec3 at = muzzle.add(along.scale(d));
 			level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
-		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, kill ? 14 : 8, 0.12, 0.12, 0.12, 0.3);
 		if (!TaczGuns.gunSound(player, id, "shoot_3p", SHOT_HEARD, 1.0F, 0.95F + random.nextFloat() * 0.1F)) {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.9F);
 		}
+		if (missed) {
+			// the round in the dirt: a spray of it, a ricochet's whine, and they're spared
+			net.minecraft.world.level.block.state.BlockState ground = body.getBlockStateOn().isAir() ? Blocks.DIRT.defaultBlockState() : body.getBlockStateOn();
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), hit.x, hit.y, hit.z, 16, 0.08, 0.02, 0.08, 0.15);
+			level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.ARROW_HIT, SoundSource.PLAYERS, 0.9F, 1.6F);
+			Shakes.around(level, muzzle, AROUND_RANGE, SHOT_AROUND_SHAKE * 0.5F);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.missed", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, kill ? 14 : 8, 0.12, 0.12, 0.12, 0.3);
 		if (!TaczGuns.gunSound(body, id, "flesh_hit", 16, 1.0F, 0.9F + random.nextFloat() * 0.1F)) {
 			level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.8F);
 		}

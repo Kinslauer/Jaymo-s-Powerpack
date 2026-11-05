@@ -5,6 +5,10 @@ import com.jaymospowers.baubles.Baubles;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.power.wind.aether.WindAether;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import com.jaymospowers.power.gravity.GravityPower;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -16,10 +20,13 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.phys.AABB;
 
 /**
  * (0.20.96) Andy (seven-mods plan, patch 10): the Aether's light and heavy islands, and its gas caves.
@@ -77,18 +84,46 @@ public final class SkyPockets {
 		return Math.floorMod(mix(seed, Math.floorDiv(x, GAS_CELL), Math.floorDiv(z, GAS_CELL), 0x6A5L), GAS_ONE_IN) == 0;
 	}
 
+	/** (0.20.99) Mobs given a swapped pocket last time, by their level, so they can be let go when it ends. */
+	private static final Map<UUID, ServerLevel> SWAPPED_MOBS = new HashMap<>();
+
+	private static long cell(int x, int z) {
+		return ((long) Math.floorDiv(x, CELL) << 32) ^ (Math.floorDiv(z, CELL) & 0xFFFFFFFFL);
+	}
+
+	/**
+	 * (0.20.99) Andy: a gravity user stretches his weightlessness over the island he stands on. While his Weightless is
+	 * on and he is in a light or heavy stretch, that stretch turns over (light becomes heavy, heavy light) for every
+	 * player and every mob in it, until he switches it off or leaves.
+	 */
+	public static Pocket swap(Pocket pocket) {
+		return pocket == Pocket.LIGHT ? Pocket.HEAVY : pocket == Pocket.HEAVY ? Pocket.LIGHT : Pocket.NONE;
+	}
+
 	private static void tick(MinecraftServer server) {
 		if (server.getTickCount() % EVERY != 0) {
 			return;
 		}
 		long seed = server.overworld().getSeed();
+		int shift = Stacked.shift(server, WindAether.AETHER);
+		// the stretches a weightless gravity user is turning over, and one of them standing in each
+		Map<Long, ServerPlayer> swapped = new HashMap<>();
+		for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
+			if (sp.isAlive() && !sp.isSpectator() && sp.getAttached(GravityPower.WEIGHTLESS_ON) != null && Stacked.in(sp, WindAether.AETHER)
+				&& (int) Math.floor(sp.getY()) - shift >= ISLAND_FROM && pocket(seed, sp.getBlockX(), sp.getBlockZ()) != Pocket.NONE) {
+				swapped.putIfAbsent(cell(sp.getBlockX(), sp.getBlockZ()), sp);
+			}
+		}
 		for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
 			Pocket pocket = Pocket.NONE;
 			if (sp.isAlive() && !sp.isSpectator() && Stacked.in(sp, WindAether.AETHER)) {
 				ServerLevel level = sp.level();
-				int localY = (int) Math.floor(sp.getY()) - Stacked.shift(server, WindAether.AETHER);
+				int localY = (int) Math.floor(sp.getY()) - shift;
 				if (localY >= ISLAND_FROM) {
 					pocket = pocket(seed, sp.getBlockX(), sp.getBlockZ());
+					if (swapped.containsKey(cell(sp.getBlockX(), sp.getBlockZ()))) {
+						pocket = swap(pocket);
+					}
 				} else if (localY >= GAS_FROM && localY <= GAS_TO && gassy(seed, sp.getBlockX(), sp.getBlockZ())
 					&& level.getBiome(sp.blockPosition()).unwrapKey().map(k -> k.identifier().getPath().equals("hestveil_caverns")).orElse(false)) {
 					gas(sp, level);
@@ -97,9 +132,29 @@ public final class SkyPockets {
 			}
 			apply(sp, pocket);
 		}
+		// the mobs in a turned-over stretch feel it too; the rest let go
+		Map<UUID, ServerLevel> now = new HashMap<>();
+		for (Map.Entry<Long, ServerPlayer> e : swapped.entrySet()) {
+			ServerPlayer user = e.getValue();
+			ServerLevel level = user.level();
+			Pocket turned = swap(pocket(seed, user.getBlockX(), user.getBlockZ()));
+			int x0 = Math.floorDiv(user.getBlockX(), CELL) * CELL, z0 = Math.floorDiv(user.getBlockZ(), CELL) * CELL;
+			AABB box = new AABB(x0, shift + ISLAND_FROM, z0, x0 + CELL, level.getMaxY(), z0 + CELL);
+			for (Mob mob : level.getEntitiesOfClass(Mob.class, box, Mob::isAlive)) {
+				apply(mob, turned);
+				now.put(mob.getUUID(), level);
+			}
+		}
+		for (Map.Entry<UUID, ServerLevel> e : SWAPPED_MOBS.entrySet()) {
+			if (!now.containsKey(e.getKey()) && e.getValue().getEntity(e.getKey()) instanceof LivingEntity mob) {
+				apply(mob, Pocket.NONE);
+			}
+		}
+		SWAPPED_MOBS.clear();
+		SWAPPED_MOBS.putAll(now);
 	}
 
-	private static void apply(ServerPlayer sp, Pocket pocket) {
+	private static void apply(LivingEntity sp, Pocket pocket) {
 		set(sp, Attributes.GRAVITY, GRAVITY_ID, pocket == Pocket.LIGHT ? LIGHT_GRAVITY : pocket == Pocket.HEAVY ? HEAVY_GRAVITY : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(sp, Attributes.JUMP_STRENGTH, JUMP_ID, pocket == Pocket.LIGHT ? LIGHT_JUMP : pocket == Pocket.HEAVY ? HEAVY_JUMP : 0.0,
@@ -109,7 +164,7 @@ public final class SkyPockets {
 	}
 
 	/** Puts the modifier {@code id} on (or, at 0, takes it off). */
-	static void set(ServerPlayer sp, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation op) {
+	static void set(LivingEntity sp, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation op) {
 		AttributeInstance inst = sp.getAttribute(attribute);
 		if (inst == null) {
 			return;

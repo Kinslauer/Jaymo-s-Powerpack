@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
  * there) nor until {@link #CLING_SETTLE} ticks after, none from Web's double-Sneak yank, and none in a slide (a held
  * Sneak in a fast run is the slide's).
  * <p>(0.20.74) Andy: "shift + left alt should make you zoom". Holding Sneak and the Dodge key (Left Alt) together zooms
- * as well, until either is let go; {@code DodgeClient} doesn't dodge on Alt while Sneak is down. Alt alone still rolls.
+ * as well, until Alt is let go (0.20.98: letting go of Shift first keeps it); {@code DodgeClient} doesn't dodge on Alt while Sneak is down. Alt alone still rolls.
  */
 public final class SneakZoom {
 	/** The most ticks between the first Sneak press and the second for a double tap. */
@@ -83,7 +83,9 @@ public final class SneakZoom {
 		held = sneak ? held + 1 : 0;
 		boolean alt = com.jaymospowers.client.stamina.DodgeClient.keyDown();
 		if (zooming) {
-			if (!sneak || byAlt && !alt) {
+			// (0.20.98) Andy: "releasing shift shouldnt stop your zoom but alt does": Shift + Alt's zoom lasts while Alt is
+			// held, Shift or not; the double tap's while Sneak is
+			if (byAlt ? !alt : !sneak) {
 				setZoom(minecraft, false);
 			}
 		} else if (sneak && alt) {

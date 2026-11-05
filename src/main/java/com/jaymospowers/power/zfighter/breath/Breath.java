@@ -191,8 +191,10 @@ public final class Breath {
 				continue;
 			}
 			if (player.getVehicle() instanceof PodEntity || com.jaymospowers.power.zfighter.backhome.FarFood.breathing(player)
-				|| com.jaymospowers.power.xenoform.BandUpgrades.breathes(player)) {
-				// inside the pod, or (0.18.56) on a far-world meal's breath, or (0.18.123) a band with the Breather fitted
+				|| com.jaymospowers.power.xenoform.BandUpgrades.breathes(player)
+				|| com.jaymospowers.baubles.Baubles.wearing(player, com.jaymospowers.baubles.Baubles.SKY_MASK)) {
+				// inside the pod, or (0.18.56) on a far-world meal's breath, or (0.18.123) a band with the Breather fitted, or
+				// (0.20.99, Andy) a Sky Mask in the head bauble slot
 				EXPOSED.remove(id);
 				continue;
 			}
