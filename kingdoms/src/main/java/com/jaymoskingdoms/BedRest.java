@@ -120,7 +120,7 @@ public final class BedRest {
 	}
 
 	/**
-	 * (0.7.571) Lays {@code player} in the bed at {@code pos} (its head) to rest, without vanilla's checks or a new spawn
+	 * (0.7.573) Lays {@code player} in the bed at {@code pos} (its head) to rest, without vanilla's checks or a new spawn
 	 * point: one carried in by a village ({@link Shelter}), coming round. False if they can't lie there.
 	 */
 	static boolean lay(ServerPlayer player, BlockPos pos) {

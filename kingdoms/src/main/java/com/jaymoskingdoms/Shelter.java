@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.571) Taken in. Andy, on being left for dead: "what about the other possibilities? kidnapped, taken in by a village or
+ * (0.7.573) Taken in. Andy, on being left for dead: "what about the other possibilities? kidnapped, taken in by a village or
  * nearby villagers", then "yes add this" to waking in a bed in the nearest friendly village, bandaged. Called by Jaymo's
  * Powers' death by cause ({@code Mortality.SHELTERS}, after its captors had their say): when a village, fiefdom or kingdom
  * that thinks well enough of them ({@link #FRIENDLY}) has its seat within {@link #RANGE} of where they fell, it may

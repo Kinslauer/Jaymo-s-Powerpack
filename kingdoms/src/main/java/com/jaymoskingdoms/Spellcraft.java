@@ -140,6 +140,8 @@ public final class Spellcraft {
 		Restoration.register();
 		Necromancy.register();
 		Hemomancy.register();
+		// (0.7.570) every other element absorbed and thrown as the blood is
+		Absorption.register();
 		// the Mage's staff (0.7.212: and an attuned caster's)
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);

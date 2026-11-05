@@ -667,7 +667,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   `Mortality.wipe` takes every Powers/Kingdoms/Kitchen attachment off the player as the new life starts (skills, trees,
   levels, quests, reputation, world tier and knowledge, class, heritage, story, patron, curses, mastery, affinity, the
   Z Fighter's training, missing limbs...). Kept: the roads and heritages their deeds unlocked, and what holds items
-  (backpack, baubles, stashes, worn costume, post, crew) (`Mortality.OUTLIVES`). Then Kingdoms 0.7.571 opens MCA's creator
+  (backpack, baubles, stashes, worn costume, post, crew) (`Mortality.OUTLIVES`). Then Kingdoms 0.7.573 opens MCA's creator
   anew and retells the life story (`LifeStory.reincarnateAnew`). The Judge's rebirth is unchanged.
 - Andy: "what about the other possibilities? kidnapped, taken in by a village or nearby villagers", then "yes add this":
   a new wake, taken in (`Mortality.SHELTERS`, asked after the captors; Kingdoms fills it). They wake on a bed in the

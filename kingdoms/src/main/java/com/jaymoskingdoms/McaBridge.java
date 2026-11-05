@@ -2058,7 +2058,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.571) A new life (Jaymo's Powers' third death, {@link LifeStory#reincarnateAnew}): MCA's own player reset (single
+	 * (0.7.573) A new life (Jaymo's Powers' third death, {@link LifeStory#reincarnateAnew}): MCA's own player reset (single
 	 * again, as its admin command does), their look unset, and its creator sent anew, as on a first join. False if MCA's
 	 * creator is off.
 	 */

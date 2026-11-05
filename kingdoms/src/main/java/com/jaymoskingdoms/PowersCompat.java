@@ -2365,7 +2365,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.571) Tells Powers' death by cause ({@code Mortality.SHELTERS}) who takes one left for dead in ({@link Shelter#take}):
+	 * (0.7.573) Tells Powers' death by cause ({@code Mortality.SHELTERS}) who takes one left for dead in ({@link Shelter#take}):
 	 * the player and whoever downed them (or null), where they're carried to (or null). Nothing without Powers (or an older one).
 	 */
 	@SuppressWarnings("unchecked")
