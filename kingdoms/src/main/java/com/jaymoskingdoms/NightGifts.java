@@ -376,7 +376,8 @@ public final class NightGifts {
 	private static void second(MinecraftServer server, ServerPlayer player, boolean night) {
 		int kind = kindOf(player);
 		Gift old = player.getAttached(GIFT);
-		boolean beast = WerewolfPlayers.beast(player);
+		// (2026-11-05) torn out, not doubled over: the client hides their body by this (BeastHidesPlayerMixin)
+		boolean beast = WerewolfPlayers.tornOut(player);
 		int wings = old == null || !old.blood() ? WINGS_MAX : old.wings();
 		if (kind == VAMPIRE || kind == DHAMPIR) {
 			if (onBatWings(player)) {

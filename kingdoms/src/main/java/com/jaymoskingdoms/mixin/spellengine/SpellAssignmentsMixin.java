@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.600) Every melee weapon gets an RPG Series weapon skill ({@link WeaponSkills}). Spell Engine fills its item
+ * (0.7.601) Every melee weapon gets an RPG Series weapon skill ({@link WeaponSkills}). Spell Engine fills its item
  * assignments as the server starts (data, then its own id-matching fallback) and then encodes them for the clients; just
  * before that, the weapons still without a skill (no entry, or an empty one) get theirs. Server side; clients get it
  * through Spell Engine's own sync.

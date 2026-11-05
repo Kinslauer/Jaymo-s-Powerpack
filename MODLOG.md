@@ -986,7 +986,36 @@ for a demon biome with a 3D search over the level's whole height, which in a One
 (about 1,400 blocks), on the server thread while you wait (you stood at world spawn meanwhile). It now sweeps once at the
 Nether's own y 64 (`ZFighterStarts.demonBiome`) and logs how long it took and what it found, beside 0.20.104's fallback warnings.
 
-## 0.20.115 (2026-11-05): every melee weapon parries; Kingdoms 0.7.600 gives each a weapon skill
+## 0.20.115 (2026-11-05): Chrono leaves a wake running on water
+- Andy: "chrono should leave a wake when they run on water"
+- `ChronoSpeed.wake`: sprinting across water under Overclock (and Velox's Velocity, which runs on the same code) kicks
+  spray back and up off your heels and lays a V of foam behind you like a boat's. Each tick foam is put down along the
+  stretch you just ran and pushed out to both sides, so older foam sits further out and the V opens behind you, with a
+  churned line down the middle; it's vanilla's wake particle (the fish-to-bobber one), which rides the surface and
+  shrinks away by itself in 0.4 to 2 s. A soft splash every 6 ticks. Corrupted/ascended fates mark one foam point and
+  one spray drop a tick (clones, glass), not all of them. Lava keeps its own sparks and smoke. Tuning: `WAKE_*` at the
+  top of `ChronoSpeed`. Built, not played.
+
+## 0.20.116 (2026-11-05): Kingdoms 0.7.600, wolves stalk you; fewer wolves and walruses
+- Ships Kingdoms 0.7.600: wild wolves (the game's at night or when you're hurt, our feral ones always) smell players out
+  (wind, sneaking, rain, your footstep trail), shadow them silently from cover, freeze and back off when looked at, and
+  rush as a pack with one growl from behind or from hiding. Wolves spawn at a quarter (feral a fifth) and walruses at a
+  fifth of their old rate, in smaller groups. See kingdoms/MODLOG.md.
+
+## 0.20.117 (2026-11-05): Chrono's cheat death never ends in a new life, and never rises where it fell
+- Andy: "chrono used the cheat death revive, but it didnt respawn, it instead reincarnated. they should revert as far
+  back as possible everytime, and if not, at least 12 blocks away."
+- The bug: a death decided final was held for R, but death by cause's own tick saw a living player marked final inside
+  the 4 s window and began the rebirth (the black screen, then the life ends 2 s later), so the R's replay ran and the
+  life story came after it anyway. `Mortality` now starts and finishes no rebirth while `ChronoCheatDeath.held`, and
+  `undoFinal` lifts the rebirth's black too. Every rewind (a held death, a waking, or slipping a downing or an
+  execution) undoes a final death, not only a held one: a second death while out cold could be decided final under
+  the waking's window.
+- Where you come back: the oldest checkpoint your power reaches, as before. If that checkpoint (or the "as you are now"
+  fallback when there is none) is within 12 blocks of where you fell, you're stood on safe loaded ground 12-20 blocks
+  away instead, facing away from whoever was executing you when there was one (`ChronoCheatDeath.away`,
+  `Mortality.ground` made public). Built, not played.
+## 0.20.118 (2026-11-05): every melee weapon parries; Kingdoms 0.7.601 gives each a weapon skill
 Andy: "is battleaxe supposed to not parry? and it also has no moves, neither does the ninjato, they should all integrate
 with the weapon arts". Not meant to: WeaponMod's melee weapons have their own right click, so the weapon guard skipped
 them, and the katana and battleaxe raised a block pose that blocked nothing.
@@ -997,4 +1026,4 @@ them, and the katana and battleaxe raised a block pose that blocked nothing.
 - Deliberately still no guard, because right click is their own move: the warhammer (its smash; it guards while that
   cools down), the flail (whirl), the rapier (lunge), the boomerang and throwing weapons, vanilla spears (charge),
   the tridents, Tidecaller / Sunbrand / Ashfang (their gifts), and the Arsenal's relic and stone swords.
-- Pairs with Kingdoms 0.7.600: every melee weapon gets an RPG Series weapon skill on the skill bar. Built, not played.
+- Pairs with Kingdoms 0.7.601: every melee weapon gets an RPG Series weapon skill on the skill bar. Built, not played.

@@ -63,7 +63,7 @@ public class PatronWeaponItem extends Item {
 		ItemStack stack = player.getItemInHand(hand);
 		boolean active = this.active();
 		if (!active) {
-			// (0.20.115) the ones struck with raise the weapon guard (combat/Guard), as any weapon does
+			// (0.20.118) the ones struck with raise the weapon guard (combat/Guard), as any weapon does
 			return super.use(level, player, hand);
 		}
 		float s = PatronWeapons.sworn(player, this.kind);

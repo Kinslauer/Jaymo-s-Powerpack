@@ -365,6 +365,10 @@ public final class Encounters {
 	}
 
 	private static void after(Mob mob, ServerPlayer player) {
+		// (0.7.600) wolves stalk them from cover first
+		if (com.jaymoskingdoms.wild.WolfStalkers.hunt(mob, player)) {
+			return;
+		}
 		mob.setTarget(player);
 		if (mob instanceof NeutralMob neutral) {
 			neutral.setPersistentAngerTarget(EntityReference.<LivingEntity>of(player));

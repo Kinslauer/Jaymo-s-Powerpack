@@ -9558,8 +9558,46 @@ off course then those should break upon contact".
   its chunks' structure references) and seats in it like any town; only if it won't generate or would stand mostly on
   water does the castle go up as before. The story's capital search looks at Epic towns only.
 - Kingdoms already founded keep their seats; this applies to new ones (a new map shows it). Built, not played.
+- **0.7.599, werewolf players can be hurt:** Andy: "jungxvv seemed to be invulnerable after becoming a werewolf". Two
+  causes. The beast's player wore Invisibility to hide their body, and monsters all but ignore an invisible player, so
+  nothing fought them; now no Invisibility (`WerewolfPlayers.buffs`): their body and first-person arm are hidden by
+  `BeastHidesPlayerMixin`/`BeastHidesHandMixin` once the beast has torn out (`NightGifts.Gift#beast` now means torn out,
+  `WerewolfPlayers.tornOut`). And blows to a player's beast took the wild werewolf's thick hide (x0.25 unless gold or
+  silver) before reaching the player, on top of Resistance and 5 extra hearts; now only silver's x2 applies
+  (`Werewolf.hurtServer`). Not played.
 
-## 0.7.600 (2026-11-05): every melee weapon gets a weapon skill
+## 0.7.600: wolves stalk you (pack 0.20.116)
+Andy: "wolves should stalk you, letting you think you're safe and attacking from cover and concealment, similar to creepers
+but more of a hunter. they can smell you out."
+- **Who** (`wild/WolfStalkers`): our feral wolves always; the game's wild wolves at night, or by day when you're under
+  half health, and never while you hold a bone (taming still works). Tamed wolves, pups and leashed wolves never stalk;
+  nothing stalks on Peaceful or a creative or spectator player. Feral wolves no longer charge players on sight (only one
+  that walks within 4 blocks of an unstalked wolf, or hits it); the encounters' feral wolf packs start stalking too.
+- **The nose**: a wolf smells you from 36 blocks in still air; 0.6 of that while you sneak, half in the rain, 1.5x when
+  you're under half health. Out under the sky the wind (slowly turning through the day) carries it: a wolf downwind
+  smells you from up to 1.6x as far, one upwind from only 0.4x. Past that, a footstep of yours from the last minute
+  within 12 blocks of it (the werewolves' scent trail, `ScentTrails.freshest`) puts it on your trail, and it follows the
+  trail in. One wolf taking up a scent brings its pack (same kind, 16 blocks).
+- **Shadowing**: a stalking wolf goes silent and keeps to a ring round you, 18 blocks out, creeping 2.5 blocks closer
+  each hop you don't see it (no closer than 7). It picks spots out of your sight (behind blocks and trunks, in grass,
+  ferns, bushes and leaves), toward your back, downwind of you, and not far to go; a pack fans out round you, each wolf
+  on its own side. Losing your scent for 20 s it gives up (and rests a minute before it will stalk again).
+- **Hanging back**: look right at a stalking wolf you can see (in undergrowth or the dark you only see it within 6
+  blocks) and it freezes, then slinks back out of sight and starts again from farther off. Spot one within 6 blocks
+  and it commits.
+- **The rush**: within 10 blocks, while you aren't looking at it, and your back is turned, your hands are busy (eating,
+  drinking, drawing a bow, a shield up) or it is hidden from you (or after two minutes of stalking), it breaks cover with
+  one low growl (the tell, like a creeper's hiss) and the whole pack within 32 blocks comes at once, with a burst of
+  speed for 4 s. Hit a stalker and the pack comes in then. Lose them after and they fall back to stalking. A stalking
+  wolf doesn't fill the stealth gauge and can't be sneak-attacked by the one it stalks.
+- **Fewer wolves and walruses** (Andy: "they also spawn way too much ... we were flooded with walrus and wolves";
+  `wild/Thinning`): after every mod adds its spawns, the game's wolves keep a quarter of their spawn weight, feral wolves
+  and Cube Animals' walruses a fifth, in every biome; wolves come at most 3 together, walruses 2. New spawns only: the
+  ones already out in explored land stay.
+- Tuning: the constants at the top of `WolfStalkers`. Stalks aren't saved: a reload forgets the hunt (and gives back a
+  hushed wolf's voice). Compile-checked (Gradle `compileJava`, 0 errors); not played.
+
+## 0.7.601 (2026-11-05): every melee weapon gets a weapon skill
 Andy: "it also has no moves, neither does the ninjato, they should all integrate with the weapon arts". The skill bar's
 weapon skills (Swift Strikes, Whirlwind, Cleave, Smash, Ground Slam, Flurry, Thrust, Impale, Swipe, Fan of Knives) come
 from Spell Engine, which hands them out by matching item ids against a short list and only to items with the vanilla

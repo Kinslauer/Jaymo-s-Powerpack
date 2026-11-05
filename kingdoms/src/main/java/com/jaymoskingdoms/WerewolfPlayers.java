@@ -180,6 +180,12 @@ public final class WerewolfPlayers {
 		return FORMS.containsKey(player.getUUID());
 	}
 
+	/** (2026-11-05) Whether the beast has torn out of {@code player} (not while doubled over): their body isn't drawn. */
+	public static boolean tornOut(ServerPlayer player) {
+		Form f = FORMS.get(player.getUUID());
+		return f != null && f.beast != null;
+	}
+
 	/** (0.7.574) Whether {@code player} is the lean wolf now (or changing into it). */
 	public static boolean lean(ServerPlayer player) {
 		Form f = FORMS.get(player.getUUID());
@@ -455,7 +461,8 @@ public final class WerewolfPlayers {
 	}
 
 	private static void buffs(ServerPlayer player) {
-		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, true, false, false));
+		// (2026-11-05: Jung "seemed to be invulnerable") no more Invisibility to hide their body: monsters all but ignore an
+		// invisible player, so nothing fought them. BeastHidesPlayerMixin hides the body on every screen instead.
 		player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
 		Form f = FORMS.get(player.getUUID());
 		if (f != null && f.lean) {

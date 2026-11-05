@@ -255,7 +255,7 @@ public final class Guard {
 	 */
 	private static boolean guardable(Item item) {
 		if (item instanceof PatronWeaponItem patron) {
-			// (0.20.115) a patron weapon struck with (not one whose right click is its gift) guards like any other
+			// (0.20.118) a patron weapon struck with (not one whose right click is its gift) guards like any other
 			return !patron.active();
 		}
 		if (item instanceof TinkerTool tool) {
@@ -286,7 +286,7 @@ public final class Guard {
 	 * guard.
 	 */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand) {
-		// (0.20.115) every guarding WeaponMod weapon (knife, katana, battleaxe, halberd, spear) goes through KnifeGuard
+		// (0.20.118) every guarding WeaponMod weapon (knife, katana, battleaxe, halberd, spear) goes through KnifeGuard
 		boolean knife = hand == InteractionHand.MAIN_HAND && !player.isSpectator() && KnifeGuard.guards(player.getMainHandItem().getItem());
 		if (!knife && (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()
 			|| HammerSlam.isWarhammer(player.getMainHandItem().getItem()))) {
@@ -297,7 +297,7 @@ public final class Guard {
 			return InteractionResult.PASS;
 		}
 		if (knife && player.isShiftKeyDown() && KnifeGuard.ownUse(player.getMainHandItem().getItem())) {
-			// (0.18.64) sneak + use throws a WeaponMod knife, as it always did ({@link KnifeGuard#use}); (0.20.115) a spear
+			// (0.18.64) sneak + use throws a WeaponMod knife, as it always did ({@link KnifeGuard#use}); (0.20.118) a spear
 			// too, and switches a halberd's reach
 			return KnifeGuard.use(player, hand);
 		}

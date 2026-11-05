@@ -14,7 +14,7 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.600) Andy: "is battleaxe supposed to not parry? and it also has no moves, neither does the ninjato, they should
+ * (0.7.601) Andy: "is battleaxe supposed to not parry? and it also has no moves, neither does the ninjato, they should
  * all integrate with the weapon arts". The RPG Series' weapon skills (Swift Strikes, Whirlwind, Cleave, Smash...) sit on
  * Spell Engine's skill bar beside the Weapon Forms ({@link FormSkills}), but Spell Engine hands them out by matching item
  * ids against a short list (sword|blade, war_axe, spear, dagger|knife...), and only to items that carry the vanilla weapon
