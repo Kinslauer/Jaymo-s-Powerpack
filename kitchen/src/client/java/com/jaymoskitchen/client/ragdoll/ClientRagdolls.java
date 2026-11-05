@@ -1,5 +1,6 @@
 package com.jaymoskitchen.client.ragdoll;
 
+import com.jaymoskitchen.corpse.CorpseEntity;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollNet;
 import com.jaymoskitchen.ragdoll.RagdollRig;
@@ -29,6 +30,8 @@ public final class ClientRagdolls {
 	 */
 	private static final double SIDE_SPEED = 0.06;
 	private static final float SIDE_EASE = 0.12F;
+	/** (0.5.72) Added around each part for the crosshair: the drawn limbs are a little thicker than the physics'. */
+	private static final double BOUNDS_PAD = 0.08;
 
 	/** One body: its rig, and its points a tick ago and now (x, y, z each). */
 	public static final class Track {
@@ -64,6 +67,21 @@ public final class ClientRagdolls {
 
 		public boolean asleep() {
 			return asleep;
+		}
+
+		/** (0.5.72) The box the body fills now, its parts' thickness and a little more: min x y z, max x y z. */
+		public double[] bounds() {
+			double[] out = {Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE,
+				-Double.MAX_VALUE};
+			for (int i = 0; i < rig.count; i++) {
+				double r = rig.radius[i] + BOUNDS_PAD;
+				for (int k = 0; k < 3; k++) {
+					double v = now[i * 3 + k];
+					out[k] = Math.min(out[k], v - r);
+					out[k + 3] = Math.max(out[k + 3], v + r);
+				}
+			}
+			return out;
 		}
 
 		/** (0.5.16) How far onto its side a four-legged body is drawn, between the last two ticks. */
@@ -132,6 +150,15 @@ public final class ClientRagdolls {
 	public static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(RagdollNet.Pose.TYPE, (payload, ctx) -> put(payload.entity(), payload.snapshot()));
 		ClientTickEvents.START_CLIENT_TICK.register(ClientRagdolls::tick);
+		// (0.5.72) a corpse's box takes in its whole drawn body, so the crosshair can find any part of it
+		CorpseEntity.drawnBounds = corpse -> {
+			// only while it's drawn from its points (see CorpseRenderer#extractRenderState): not held, pinned, slung or in a cart
+			if (corpse.carrier() != null || corpse.pinned() >= 0 || corpse.isPassenger() || corpse.slungOn() != null) {
+				return null;
+			}
+			Track track = TRACKS.get(corpse.getId());
+			return track == null ? null : track.bounds();
+		};
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> TRACKS.clear());
 	}
 
@@ -226,6 +253,11 @@ public final class ClientRagdolls {
 				}
 			}
 			track.fresh = false;
+		}
+		for (Int2ObjectMap.Entry<Track> entry : TRACKS.int2ObjectEntrySet()) {
+			if (minecraft.level.getEntity(entry.getIntKey()) instanceof CorpseEntity corpse) {
+				corpse.refreshDrawnBox();
+			}
 		}
 	}
 }

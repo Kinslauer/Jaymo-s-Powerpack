@@ -52,6 +52,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -2517,6 +2518,43 @@ public class CorpseEntity extends Entity {
 	@Override
 	public boolean fireImmune() {
 		return !burns() || super.fireImmune();
+	}
+
+	/**
+	 * (0.5.72) Client: the box the drawn body fills (min x y z, max x y z, in the world), or null if it isn't drawn as a
+	 * ragdoll. Set by the client from the ragdoll it draws.
+	 */
+	public static java.util.function.Function<CorpseEntity, double @Nullable []> drawnBounds = corpse -> null;
+	/** A drawn body further than this (blocks) from the entity is stale (just moved) and left out. */
+	private static final double DRAWN_REACH = 3.0;
+
+	/**
+	 * (0.5.72) Andy: "some corpses dont seem to have hitboxes, so they cannot be interacted with, like this skeleton".
+	 * The box is small and low under the torso so the body drops to the ground (see {@link #getDimensions}), while the
+	 * ragdoll lies two blocks long: aiming at a skeleton's skull, legs or arms, or at a body that had slid off the box,
+	 * hit the ground behind it. On the client the box also takes in the whole drawn body, so the crosshair finds any
+	 * part of it. The server keeps the small one, so physics and collisions are as they were.
+	 */
+	@Override
+	protected AABB makeBoundingBox(Vec3 pos) {
+		AABB own = super.makeBoundingBox(pos);
+		if (!level().isClientSide() || this.entityData.get(CARRIER) >= 0) {
+			return own;
+		}
+		double[] b = drawnBounds.apply(this);
+		if (b == null) {
+			return own;
+		}
+		AABB drawn = new AABB(b[0], b[1], b[2], b[3], b[4], b[5]);
+		if (drawn.getCenter().distanceToSqr(own.getCenter()) > DRAWN_REACH * DRAWN_REACH) {
+			return own;
+		}
+		return own.minmax(drawn);
+	}
+
+	/** (0.5.72) Client: the box follows the drawn body as it moves or settles, even while the entity stands still. */
+	public void refreshDrawnBox() {
+		setBoundingBox(makeBoundingBox(position()));
 	}
 
 	@Override
