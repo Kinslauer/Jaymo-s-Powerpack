@@ -1101,3 +1101,16 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   user skips the rock charge: the off hand rock goes the moment use is pressed (whip and follow-through only), at 3.0
   speed instead of 1.5 and straighter (`ThrownRocks.GRAVITY_SPEED`/`GRAVITY_SPREAD`, `ThrownRocks.gravity`). The usual
   10 tick cooldown still spaces throws.
+## 0.21.9 (2026-11-05): gravity users harness the rocks they carry (B+G)
+- Andy: "a gravity user should utilize rocks and pebbles for more interactions with its kit". Carrying more than 8 loose
+  rocks (any kind, anywhere in the inventory), B+G (hold B, tap G) gathers them into a rock ball over your right
+  shoulder, bigger the more you carry (counted up to `GravityRocks.ROCK_CAP`, 32). B+G again splits it into a ring of up
+  to 16 rocks orbiting your waist; once more and they go back in the pack. No rock is used up. Drop below 9 rocks, go
+  down, or lose the power and they fall back. The held B never lands its Crush or Wave.
+- Ball: 2.5 s (`BALL_DELAY`) after you hurt something, if you're still within 10 blocks, the ball flies at it and back
+  and lands one lump of 0.2 per rock (6.4 at 32 rocks).
+- Orbit: after you hurt something, up to 8 rocks (`VOLLEY`) peel off one by one, 3 ticks apart, each hitting for 0.2 and
+  a bleed tick (`Bleeding.BLEED_DAMAGE`, 0.5, to the body; nothing bloodless bleeds). Foes that come within the ring
+  (monsters, anything after you, whoever you're fighting) are clipped for the same, at most once a second each.
+- One follow-up at a time: hits while the ball or a volley is out send nothing more. Every rock of the ball and ring is
+  the rock item's own model, the kind you carry most of (`client/power/gravity/GravityRocksLayer`). Built, not played.

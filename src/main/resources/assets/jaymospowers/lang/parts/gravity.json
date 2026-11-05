@@ -3,7 +3,7 @@
 	"power.jaymospowers.gravity.desc": "Take the weight out of things, or pile it on. Lift creatures, float yourself, pull and crush.",
 	"power.jaymospowers.gravity.key.ability_1": "Hold: Lift a creature, or tear a chunk from a block. Right click: choke, then slam. Left click: push or throw. Sneak as you let go: it falls sideways, the way you look",
 	"power.jaymospowers.gravity.key.ability_1.name": "Lift",
-	"power.jaymospowers.gravity.key.ability_2": "Gravity Well: a bubble of pressure bursts out around you; everything that touches it is weighed down, to its knees. Sneak: everything around falls sideways, out into the walls",
+	"power.jaymospowers.gravity.key.ability_2": "Gravity Well: a bubble of pressure bursts out around you; everything that touches it is weighed down, to its knees. Sneak: everything around falls sideways, out into the walls. Holding %4$s, carrying more than 8 rocks: they gather into a rock ball by your shoulder (bigger the more you carry) that slams whatever you hurt a few seconds later, if you stay close; again, the ball splits into rocks orbiting you that clip foes who come near and pelt what you hurt one by one, each drawing blood; once more, they go back in your pack",
 	"power.jaymospowers.gravity.key.ability_2.name": "Gravity Well",
 	"power.jaymospowers.gravity.key.ability_3": "Tap: Weightless (jump high, fall slow, no fall damage). Hold: ride a slab of rock while it's held; fully mastered, it stays up until %3$s again (on it again: the same board). Sneak while Weightless: fall forward, the way you look",
 	"power.jaymospowers.gravity.key.ability_3.name": "Weightless / Earthboard",
@@ -42,5 +42,6 @@
 	"message.jaymospowers.gravity.field_spar": "Shadowboxing beside a partner under your own weight: you train faster.",
 	"message.jaymospowers.gravity.field_starved": "Too hungry to hold the Immense Field.",
 	"message.jaymospowers.gravity_ram.wait": "Comet Ram: %ss",
-	"message.jaymospowers.gravity_ram.hungry": "Too hungry to ram."
+	"message.jaymospowers.gravity_ram.hungry": "Too hungry to ram.",
+	"message.jaymospowers.gravity_rocks_few": "Carry more than %s rocks to harness them."
 }
