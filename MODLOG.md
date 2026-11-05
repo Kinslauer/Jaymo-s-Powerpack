@@ -917,7 +917,17 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   start found no demon village spot and fell back without a word. In a stacked world the search now starts straight
   under spawn (the Nether band isn't an eighth as far), and if no demon biome or village spot can be found the master's
   hall goes up on the nearest Nether floor instead of giving up; each fallback is logged (`ZFighterStarts.demon`).
-- **0.20.105, giants grab and throw trees (Kingdoms 0.7.588):** Andy: "giants should also be able to grab and throw the
+## 0.20.105 (2026-11-05): Ore pebbles instead of rocky dirt
+
+- Andy: "right now it isnt a scrying eye that could tell theres something there, ANYONE could tell, it should instead be
+  a chance that a pebble spawns where these blocks would have". Rocky dirt no longer generates. Where a column's dirt or
+  grass sits 2-12 blocks over a coal, copper, iron or gold vein, there's now a 40% chance (`OreTells.PEBBLE_CHANCE`) of
+  a lone pebble on top: half faintly stained the ore's colour (Andy: "they should all be faint"; gives a plain rock), half
+  a plain-looking rock that gives a nugget when picked up (`NUGGET_SHARE`; one coal for coal). All are named "Rock".
+  Other ores show nothing on the surface. Seamed stone underground is unchanged.
+- Rocky dirt already in the world turns back into dirt on a random tick, and it's out of the creative tab.
+- New chunks only for the pebbles. Built, not played.
+- **0.20.106, giants grab and throw trees (Kingdoms 0.7.588):** Andy: "giants should also be able to grab and throw the
   trees with their grabs". The Great Ape's grab (held punch) and Towerback's R, with no one in reach, close on a tree
   within the hand's reach instead (`GiantTrees`, which calls Kingdoms' `FallingTree.treeNear/take/hold/hurl` by
   reflection): a fallen tree, or a standing one torn out whole, up to 4 logs per block of the giant's height. It comes up
