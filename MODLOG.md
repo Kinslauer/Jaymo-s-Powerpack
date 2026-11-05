@@ -534,3 +534,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   Left Alt (and C) once per install (`KeyConflicts` v7), so Alt was zooming and dodging at once before this. No zoom
   while clinging, bar-hanging, sliding or from Web's double-Sneak yank; a fast run's held Sneak is still the slide.
   Built, not played.
+- **0.20.66, blood on bodies sat under the skin; stains looked like they splattered:** Andy's clip (2026-11-04) showed
+  blood on a player only through the gaps in their sleeves and jacket. `BloodCoatLayer` painted the base layer only, and a
+  player's downloaded skin couldn't be read at all, so it got a plain whole-skin mask. `ArmourGrimeTextures` now reads a
+  downloaded skin from its `DynamicTexture`, and for a body in the player's layout (`PlayerModel`: players, MCA folk)
+  paints each outer-layer pixel (hat, jacket, sleeves, trousers) with the blood of the body pixel under it (`under`), so it
+  lies on top of the clothes. The "splattering" stains were the viewer's own cut dripping from chest height past the
+  first-person camera, landing in view right on the trail ahead: `BloodDrop` no longer draws a drop falling within
+  0.45 blocks (sideways) under a first-person camera. Its stain still lands; others still see the drips. Built.
