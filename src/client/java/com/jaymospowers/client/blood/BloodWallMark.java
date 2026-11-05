@@ -56,7 +56,7 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	/** Where it starts on the face (its top: the splat's middle, or the edge a run pours over). */
 	private final double ax, ay, az;
 	private int drips;
-	/** (0.20.53) When the rain started washing it off (it fades from then), or -1. */
+	/** (0.20.54) When the rain started washing it off (it fades from then), or -1. */
 	private int washFrom = -1;
 
 	private BloodWallMark(ClientLevel level, double x, double y, double z, Direction face, float splat, float run, float runWidth, int color,
@@ -92,7 +92,7 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 			this.remove();
 			return;
 		}
-		// (0.20.53) rain running down the wall washes it away (stain's runs too, as the server washes the stain)
+		// (0.20.54) rain running down the wall washes it away (stain's runs too, as the server washes the stain)
 		if (this.age % BloodPuddle.RAIN_CHECK == 0 && this.lifetime - this.age > BloodPuddle.RAIN_WASH
 			&& BloodPuddle.rainedOn(this.level, this.x, this.y, this.z)) {
 			this.lifetime = this.age + BloodPuddle.RAIN_WASH;

@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * gather into little puddles under them that dry up, leaving a trail of wet spots behind whoever walks off.</li>
  * <li><b>Rain puddles:</b> while it rains, water pools on the ground under trees (where the leaves drip) and beside their
  * trunks, and less often in hollows in the open. A puddle grows while the rain keeps falling on it and dries up after.
- * (0.20.53) Andy: "rain doesn't seem to be pooling water". In the open only two-sided hollows ever got one, a fifth of the
+ * (0.20.54) Andy: "rain doesn't seem to be pooling water". In the open only two-sided hollows ever got one, a fifth of the
  * time, and a puddle grew only when a random try happened to land on its block again, so out in a field there were next
  * to none and those few stayed small. Now flat open ground pools too (never a ledge water would run off, nor sand), hollows
  * more surely, and every puddle the rain still falls on is fed each {@link #RAIN_FEED_EVERY} ticks, so it grows full.</li>
@@ -68,7 +68,7 @@ public final class WetClient {
 	/** The most rain puddles kept; how far from a trunk counts as beside it; the chance an open hollow gets one. */
 	static final int MAX_RAIN_PUDDLES = 160, TRUNK_REACH = 3;
 	static final float HOLLOW_CHANCE = 0.6F;
-	/** (0.20.53) The chance a flat open spot gets one, and how often every rained-on puddle is fed (ticks). */
+	/** (0.20.54) The chance a flat open spot gets one, and how often every rained-on puddle is fed (ticks). */
 	static final float FLAT_CHANCE = 0.1F;
 	static final int RAIN_FEED_EVERY = 100;
 	/** Light shafts: how often one is tried (ticks), how far out (blocks), how many at once, how long they last (ticks). */
@@ -258,7 +258,7 @@ public final class WetClient {
 	}
 
 	/**
-	 * (0.20.53) Whether rain pools on this open spot: never on sand (it soaks in) or a ledge (any side lower: it runs off);
+	 * (0.20.54) Whether rain pools on this open spot: never on sand (it soaks in) or a ledge (any side lower: it runs off);
 	 * a hollow by {@link #HOLLOW_CHANCE}, flat ground by {@link #FLAT_CHANCE}.
 	 */
 	private static boolean open(ClientLevel level, BlockState floor, int x, int ground, int z, RandomSource random) {
@@ -273,7 +273,7 @@ public final class WetClient {
 		return random.nextFloat() < (hollow(level, x, ground, z) ? HOLLOW_CHANCE : FLAT_CHANCE);
 	}
 
-	/** (0.20.53) Every rain puddle the rain still falls on (or drips on, under the leaves) grows and keeps. */
+	/** (0.20.54) Every rain puddle the rain still falls on (or drips on, under the leaves) grows and keeps. */
 	private static void feedRain(ClientLevel level) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (Long2ObjectMap.Entry<BloodPuddle> entry : RAIN.long2ObjectEntrySet()) {

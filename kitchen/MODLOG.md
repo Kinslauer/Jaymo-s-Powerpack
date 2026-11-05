@@ -1420,3 +1420,9 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
   as well. it does not ever resemble blood." Corpse cuts, gibs, scavengers, the chopper, hangings and blood grates sent
   redstone-block crumbs or red dust; `KitchenBlood.send` sends Powers' red blood instead (nothing without Powers).
   Gradle build only, not played.
+
+- **0.5.64 (Powers 0.20.53), tall animals die as animals:** Andy (2026-11-05): "downed animals should fall to their side".
+  `RagdollShapes` guessed any untagged mob 1.6x taller than wide a person, so Cube Animals' deer, moose, antelope and
+  elephant (and Kingdoms' moose) died with a man's ragdoll. A wild creature (creature, ambient or water category) guessed a
+  person gets the four-legged ragdoll instead (a box if under 0.6 blocks), and ragdoll_quadruped lists Cube Animals' big
+  beasts. Not played.
