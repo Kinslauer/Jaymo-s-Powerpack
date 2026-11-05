@@ -9199,3 +9199,12 @@ ultimate and beam-clash films came down with it. Not played.
   taken for a foe (`Lycans.hidden`, `ThrallTargetMixin`), and whoever was fighting him within 32 blocks turns on the
   beast (`Lycans.unTarget`). The Quiet One's In-balmed orc wears a 5 s veil topped up only at his keeper's side, instead
   of an hour's invisibility that outlasted his keeper logging off (`InBalming.SHADOW_VEIL`). Not played.
+
+## 0.7.566 (2026-11-05): strays indoors get shooed out
+- Andy: "villagers should react to animals being somewhere they shouldnt, like deer in the speakeasy". A wild animal
+  indoors in a settlement (a built floor under a roof that isn't a tree, or anywhere in a realm's speakeasy) is noticed
+  by a villager who sees it (speech bubble + grumble), and the nearest guard, else worker, else that villager walks up
+  and shoos it with swats toward the nearest reachable open-sky spot, opening a closed wooden door and shutting it after.
+  After 30 s a guard, den hand or butcher puts it down; anyone else calls a guard. Skipped: the settlement's own
+  stables/barns/pens, ridden/leashed/tamed/named/owned animals, house animals (tag `jaymoskingdoms:house_animals`:
+  cats, parrots, bees, axolotls, frogs, allays). `Strays`, lang part strays.json (12 lines per family), hint 104. Not played.
