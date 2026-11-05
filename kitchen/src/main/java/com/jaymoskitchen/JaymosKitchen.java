@@ -117,8 +117,15 @@ public class JaymosKitchen implements ModInitializer {
 						com.jaymoskitchen.corpse.Hanging.hang(carried, player, clicked);
 						return InteractionResult.SUCCESS;
 					}
+					BlockState clickedState = level.getBlockState(clicked);
+					if (clickedState.is(net.minecraft.tags.BlockTags.CAMPFIRES) && carried.oneHanded()) {
+						// (0.5.77) a small animal laid on the campfire to roast whole (see CorpseEntity#roast)
+						carried.putDown(Vec3.atBottomCenterOf(clicked).add(0.0, clickedState.getShape(level, clicked).max(net.minecraft.core.Direction.Axis.Y), 0.0),
+							player.getYRot() + 90.0F);
+						return InteractionResult.SUCCESS;
+					}
 					Vec3 at;
-					if (Corpses.isButcherBlock(level.getBlockState(clicked))) {
+					if (Corpses.isButcherBlock(clickedState)) {
 						at = CorpseEntity.tableSpot(level, clicked, hit.getLocation(), carried.isBigCarcass());
 						if (at == null) {
 							player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.big_table"));

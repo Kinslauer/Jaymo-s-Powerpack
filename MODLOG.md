@@ -976,7 +976,11 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
 - **0.20.112:** `Fainting.thirst(Player)` and `Fainting.bringRound(ServerPlayer)` for Kingdoms 0.7.594's villagers who
   come to a fainted player.
 
-## 0.20.113 (2026-11-05): the demon master start's search no longer stalls the load
+## 0.20.113 (2026-11-05): Kitchen 0.5.77, small animals cracked with a rock and roasted on a campfire
+- Ships Kitchen 0.5.77: a loose rock cracks open a small animal's body (crab, chicken, rabbit...), and one laid on a lit
+  campfire roasts whole into cooked meat. See kitchen/MODLOG.md.
+
+## 0.20.114 (2026-11-05): the demon master start's search no longer stalls the load
 Andy: "there is still a long black screen on load, and the game cant seem to spawn me in the nether". The start looked
 for a demon biome with a 3D search over the level's whole height, which in a One Dimension world is every band stacked
 (about 1,400 blocks), on the server thread while you wait (you stood at world spawn meanwhile). It now sweeps once at the

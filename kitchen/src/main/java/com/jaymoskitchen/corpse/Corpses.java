@@ -66,6 +66,13 @@ public final class Corpses {
 	/** (0.5.24) What butchers an animal's corpse: any axe, and Jaymo's Powers' primitive and bone knives. */
 	public static final TagKey<Item> BUTCHERING_TOOLS = TagKey.create(Registries.ITEM, JaymosKitchen.id("butchering_tools"));
 	/**
+	 * (0.5.77) Andy: "i need a way to cook and eat this crab with just a fire and a rock, the most primitive barebones
+	 * survival with small mobs should be possible". A loose rock (Jaymo's Powers' ground rocks) cracks open any small
+	 * animal's body, one you could carry in one hand (a crab, a chicken, a rabbit, a frog...): a rough job, never on a
+	 * butcher block's terms. See {@code CorpseEntity#crack}.
+	 */
+	public static final TagKey<Item> CRACKING_ROCKS = TagKey.create(Registries.ITEM, JaymosKitchen.id("cracking_rocks"));
+	/**
 	 * Fish, vanilla and modded (Alex's Mobs' flying fish, catfish...), on top of anything built on vanilla's fish class:
 	 * looted in one click and gone (see {@link CorpseKind#FISH}).
 	 */

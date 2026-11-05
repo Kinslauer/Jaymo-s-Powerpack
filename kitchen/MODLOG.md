@@ -1520,3 +1520,18 @@ fall, etc like it does for decapitations".
 - `CorpseEntity.toss`: a thrown body goes along your look (up, level or down) at `TOSS_SPEED` with `TOSS_LIFT`, further the
   smaller the dead one stood (`tossLightness`, 0.5x to 1.8x of a person's) and +20% per point of `Hauling.brawn` (up to 5).
   Andy: "throwing held items and mobs should follow the cursor ... smaller things can be flung further w/ higher strength stat".
+
+## 0.5.77: small animals cracked with a rock and roasted on a campfire (pack 0.20.113)
+Andy: "i need a way to cook and eat this crab with just a fire and a rock, the most primitive barebones survival with small
+mobs should be possible".
+- A loose rock (any of Powers' ground rocks, item tag `jaymoskitchen:cracking_rocks`) in the main hand cracks open any
+  small animal's body, one carried in one hand (`fitsInPocket`: a crab, chicken, rabbit, frog, baby...): `CHOPS` (3) blows,
+  always a rough job, the rock isn't used up (`CorpseEntity.crack`). Before this only an axe or a flint/bone knife could.
+- A rough job (rock, or an axe off the block) that would leave nothing now keeps one of the body's food, so a crab's single
+  meat isn't lost to the halving.
+- A small animal's body laid on a lit campfire (carry it and right-click the campfire, or drop/throw it on) roasts whole
+  instead of burning away: smoke and crackle for 30 s (`ROAST_TICKS`), then its loot drops cooked by the campfire's own
+  recipes (crab meat -> cooked crab meat); what won't cook drops as it is (`CorpseEntity.roast`). Flint and steel, open
+  fire and lava still burn bodies to nothing. Raw meat still cooks on the campfire as in vanilla.
+- Bats and other small non-animals were already searched by hand, and tiny critters loot in one click (0.5.66).
+  Gradle compile clean; not played.

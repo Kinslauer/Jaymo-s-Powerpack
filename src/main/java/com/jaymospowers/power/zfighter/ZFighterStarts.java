@@ -531,7 +531,7 @@ public final class ZFighterStarts {
 		boolean stacked = nether.dimension() != Level.NETHER;
 		int scale = stacked ? 1 : 8;
 		BlockPos from = new BlockPos(spawn.getX() / scale, 64 + Stacked.shift(server, Level.NETHER), spawn.getZ() / scale);
-		// (0.20.113) Andy: "there is still a long black screen on load". A 3D search runs the whole height of the level, which
+		// (0.20.114) Andy: "there is still a long black screen on load". A 3D search runs the whole height of the level, which
 		// in a One Dimension world is every band stacked (about 1,400 blocks), on the server thread while the player waits.
 		// The Nether's biomes barely change with height, so one sweep at the Nether's y 64 finds the same places far faster.
 		BlockPos gloam = demonBiome(nether, from, b -> b.is(ZFighterDemonRealm.BIOMES.get(0)));
@@ -566,7 +566,7 @@ public final class ZFighterStarts {
 		return true;
 	}
 
-	/** (0.20.113) The nearest spot round {@code from}, at its height, whose biome {@code want}s; null if none within {@link #DEMON_SEARCH}. */
+	/** (0.20.114) The nearest spot round {@code from}, at its height, whose biome {@code want}s; null if none within {@link #DEMON_SEARCH}. */
 	private static @Nullable BlockPos demonBiome(ServerLevel nether, BlockPos from,
 		java.util.function.Predicate<net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> want) {
 		long started = System.nanoTime();
