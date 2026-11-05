@@ -86,6 +86,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		HandshakePose.register();
 		// (0.7.290) a Rubber-folk swallowing: the rubber over the foe, the swell after
 		RubberEngulf.register();
+		ShackleTether.register();
 		BioTailEngulf.register();
 		RubberStomachView.register();
 		HandshakeCinematic.register();

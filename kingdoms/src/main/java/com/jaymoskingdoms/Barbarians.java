@@ -205,7 +205,7 @@ public final class Barbarians {
 		}
 		if (target instanceof ServerPlayer player) {
 			// (0.7.412) nor one still in a camp's shackles ({@link StoryHard}), among its other captives
-			return !player.isCreative() && !player.isSpectator() && !spares(player, camp) && !StoryHard.shackled(player);
+			return !player.isCreative() && !player.isSpectator() && !spares(player, camp) && !CaptiveConduct.behaving(player);
 		}
 		if (target instanceof Folk other) {
 			return !isBarbarian(other);

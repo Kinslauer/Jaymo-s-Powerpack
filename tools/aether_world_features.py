@@ -328,7 +328,7 @@ TREE_BIOMES = {
     'glistening_swamp': ('skybirch_tree', [('wisptop_tree', 0.3), ('amberoot_sparse_tree', 0.01)], {'rarity': 10}),
     'battleground_wastes': ('irradiated_skyroot_tree', IRR_ALTS, {'rarity': 3}),
     'contaminated_jungle': ('irradiated_skyroot_tree', IRR_ALTS, {'count': [(12, 1), (13, 1)]}),
-    # (0.20.95) the sky biomes
+    # (0.20.96) the sky biomes
     'hanging_roots': ('skyroot_tree', [('large_skyroot_tree', 0.5), ('wisproot_tree', 0.15), ('amberoot_dense_tree', 0.05), FALLEN], {'count': [(8, 1), (10, 1)]}),
     'mistsea': ('short_skyroot_ferns_tree', [('skyroot_ferns_tree', 0.3)], {'rarity': 12}),
     'rustworks': ('skybirch_tree', [('wisptop_tree', 0.2)], {'rarity': 6}),
@@ -591,7 +591,7 @@ def build_misc():
 
 
 def build_sky():
-    """(0.20.95) The Aether sky (seven-mods plan, patch 10): updraft vents, upfalls, the sky warden's arena, the watched
+    """(0.20.96) The Aether sky (seven-mods plan, patch 10): updraft vents, upfalls, the sky warden's arena, the watched
     vault, and the dressing of the four sky biomes. All one Java feature type, jaymospowers:sky, told its kind."""
     for kind in ('updraft_vent', 'upfall', 'hanging_roots', 'mist_sheet', 'rust_wreck', 'sky_arena', 'watched_vault'):
         feature(kind, {'type': NS + ':sky', 'kind': kind})
@@ -636,7 +636,7 @@ VEGETAL = [
     'magnetic_shrooms', 'magnetic_shrooms_swamp', 'rotshrooms', 'holystone_rocks', 'holystone_twigs',
     'arilum_short', 'arilum', 'arilum_blooming', 'hanging_roots',
 ]
-# (0.20.95) after the clouds, so the vents' columns and the arena are not built over
+# (0.20.96) after the clouds, so the vents' columns and the arena are not built over
 SKY_TOP = ['mist_sheets', 'upfalls', 'updraft_vents', 'updraft_vents_high', 'sky_arena']
 
 
@@ -675,7 +675,7 @@ PLAN = {
     'battleground_wastes': ['lake_water', 'disk_quicksoil', 'boulder_holystone', 'TREES', 'TREES_HIGH', 'grass_irradiated', 'blueberry_irradiated', 'holystone_twigs', 'orange_trees_irradiated'],
     'contaminated_jungle': ['lake_water', 'moss_patch_ambrelinn', 'boulder_holystone', 'TREES', 'TREES_HIGH', 'grass_irradiated', 'fern_patch', 'blueberry_irradiated',
                             'orange_trees_irradiated', 'holystone_twigs'],
-    # (0.20.95) the sky biomes
+    # (0.20.96) the sky biomes
     'hanging_roots': ['lake_water', 'moss_patch_bryalinn_forest', 'boulder_mossy', 'TREES', 'TREES_HIGH', 'grass_medium', 'fern_patch', 'flowers_highfields',
                       'blueberry_common', 'holystone_twigs', 'hanging_roots'],
     'mistsea': ['lake_basin', 'disk_silt', 'TREES', 'TREES_HIGH', 'grass_small', 'fern_patch', 'arilum_short', 'arilum', 'mist_sheets'],

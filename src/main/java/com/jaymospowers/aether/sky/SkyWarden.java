@@ -47,7 +47,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.95) Andy (seven-mods plan, patch 10): the sky warden, a great holystone sentry standing guard on a floating arena
+ * (0.20.96) Andy (seven-mods plan, patch 10): the sky warden, a great holystone sentry standing guard on a floating arena
  * high over the islands ({@link SkyArenaFeature}). It stands still until someone comes within {@link #WAKE_RANGE}.
  * <p>
  * <b>First phase:</b> it walks at its foe and clubs them, calls down a bolt on a marked spot (step off it), and now and

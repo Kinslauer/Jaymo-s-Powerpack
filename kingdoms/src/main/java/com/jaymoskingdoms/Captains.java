@@ -95,7 +95,7 @@ public final class Captains {
 	/** His build: size, health (times his kind's) and blows, each with more for every rank. */
 	static final double SCALE_BASE = 1.1, SCALE_PER_RANK = 0.03, HEALTH_BASE = 1.6, HEALTH_PER_RANK = 0.3, DAMAGE_PER_RANK = 1.5;
 	/**
-	 * Meetings: how near he sees you, how long until it counts as another meeting (ticks), the first meeting's film. (0.7.582)
+	 * Meetings: how near he sees you, how long until it counts as another meeting (ticks), the first meeting's film. (0.7.584)
 	 * Andy: "you dont get enough time or visibility on the orc cutscenes to view what they say": the film is Powers' speaker shot
 	 * (in on his face, then up to his words) and runs about as long as his bubble stays (a first line is some 70-90 letters).
 	 */
@@ -103,7 +103,7 @@ public final class Captains {
 	static final long MEET_GAP = 6000L;
 	static final int FILM_TICKS = 135;
 	/**
-	 * (0.7.582) Andy: "you should become invulnerable for the duration, and the orc should stop for a second when it is in
+	 * (0.7.584) Andy: "you should become invulnerable for the duration, and the orc should stop for a second when it is in
 	 * view, so that you can read, before it would keep advancing on you and get a free hit". For the first meeting's film the
 	 * player takes no harm and he stands where he is, eyes on them; both end early once the player strikes a blow.
 	 */
@@ -129,7 +129,7 @@ public final class Captains {
 	/** The pedlar's rumour of a captain ((0.7.490) in bent worth). */
 	static final int RUMOUR_PRICE = 4;
 	/**
-	 * (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). (0.7.582) Longer, so his
+	 * (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). (0.7.584) Longer, so his
 	 * gloat and his line on being raised can both be read, on the speaker shot (FILM_TICKS).
 	 */
 	static final int SCENE_TICKS = 150, SCENE_RAISED = 70;
@@ -359,7 +359,7 @@ public final class Captains {
 	/** A killer in his scene over a player's body: until when (game time), and where the body lies. */
 	private static final Map<UUID, Long> SCENE = new HashMap<>();
 	private static final Map<UUID, Vec3> SCENE_AT = new HashMap<>();
-	/** (0.7.582) A player in a captain's first-meeting film: until when (game time) no harm comes to them. */
+	/** (0.7.584) A player in a captain's first-meeting film: until when (game time) no harm comes to them. */
 	private static final Map<UUID, Long> FILMED = new HashMap<>();
 
 	/** Something to do a few ticks on (server tick count), kept in memory. */
@@ -1074,7 +1074,7 @@ public final class Captains {
 			if (m == null) {
 				PowersCompat.film(mob, p, PowersCompat.FILM_SPEAKER, FILM_TICKS, mob.getEyePosition(), mob, FILM_WITNESSES);
 				if (FILM_SAFE) {
-					// (0.7.582) he stops to name himself, and no one gets a free hit on the player while they read
+					// (0.7.584) he stops to name himself, and no one gets a free hit on the player while they read
 					FILMED.put(p.getUUID(), now + FILM_TICKS);
 					SCENE.put(mob.getUUID(), now + FILM_TICKS);
 					SCENE_AT.put(mob.getUUID(), p.getEyePosition());
@@ -1093,7 +1093,7 @@ public final class Captains {
 	}
 
 	/**
-	 * (0.7.582) No harm to a player in a captain's first-meeting film. A blow they strike ends it, and the pause of whoever they
+	 * (0.7.584) No harm to a player in a captain's first-meeting film. A blow they strike ends it, and the pause of whoever they
 	 * hit, so the captain doesn't stand there taking free hits either.
 	 */
 	private static boolean filmHarm(LivingEntity victim, net.minecraft.world.damagesource.DamageSource source, float amount) {

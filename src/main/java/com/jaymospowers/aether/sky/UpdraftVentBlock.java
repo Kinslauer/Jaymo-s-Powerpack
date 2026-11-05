@@ -12,7 +12,7 @@ import net.minecraft.world.level.redstone.Orientation;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.95) An updraft vent: holystone breathing a column of rising air ({@link UpdraftBlock}) straight up from it, as far
+ * (0.20.96) An updraft vent: holystone breathing a column of rising air ({@link UpdraftBlock}) straight up from it, as far
  * as {@link #HEIGHT} blocks or the first thing in the way. Breaking what blocks it lets the column climb again.
  */
 public class UpdraftVentBlock extends Block {

@@ -13,7 +13,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 
-/** (0.20.95) The Aether sky's mob: the sky warden (seven-mods plan, patch 10). */
+/** (0.20.96) The Aether sky's mob: the sky warden (seven-mods plan, patch 10). */
 public final class SkyMobs {
 	public static EntityType<SkyWarden> SKY_WARDEN;
 	public static Item SKY_WARDEN_SPAWN_EGG;

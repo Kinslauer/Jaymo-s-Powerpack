@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.20.95) Andy (seven-mods plan, patch 10): the air over an updraft vent ({@link UpdraftVentBlock}), a column that
+ * (0.20.96) Andy (seven-mods plan, patch 10): the air over an updraft vent ({@link UpdraftVentBlock}), a column that
  * carries whatever is in it up between the island layers. Unseen and untouchable, it shows only as cloud motes; it lifts
  * fast, slower for anyone sneaking (to hover and step off), and forgets a fall. It holds while every block under it down to
  * the vent is updraft; a block set in the column cuts it there.

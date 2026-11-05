@@ -804,7 +804,14 @@ sacrificing the view of the character near the end to get high enough to view th
   out in the wild by cause...; `Mortality.WAKE_LINE`), and the world comes back slowly (`DownedHud.WAKE_OUT_TICKS`, 4 s).
   A new life's black says "That life is over. Another begins." Built, not played.
 
-## 0.20.95 (2026-11-05): the Aether sky (seven-mods plan, patch 10)
+## 0.20.95 (2026-11-05): cut in two, you bleed out (Kingdoms 0.7.584)
+Andy: "I also didnt bleed out after being cleaved in two, that should happen within 10s".
+- A halving that left health over (the chop wasn't the killing blow) just took both legs and you lived on. Now anyone cut
+  in two bleeds out within 8 s (`Dismember.HALVE_BLEED_OUT_TICKS`), pouring blood meanwhile, and dies of it through
+  `Downed.letDie` (so the death rolls on its cause as usual). A killing halving still kills at once.
+- Rubber-folk (who mend with a swallow) and zombies (whose upper half crawls on) are left out, as before. Built, not played.
+
+## 0.20.96 (2026-11-05): the Aether sky (seven-mods plan, patch 10)
 - Andy, "go ahead" on the last seven-mods patch. All new code is in `aether/sky` (The Upfall gave the idea; none of its code).
 - **Updraft vents:** holystone vents with a pale grille, set into island tops (about one chunk in 10, the upper islets one
   in 16). Each breathes an unseen column of rising air up to 110 blocks (`UpdraftBlock`), with cloud motes. It carries you

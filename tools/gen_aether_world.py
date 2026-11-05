@@ -287,7 +287,7 @@ IRRADIATED = ['battleground_wastes', 'contaminated_jungle']
 ARCTIC_MAX_T, IRRADIATED_MIN_T, MAGNETIC_MIN_E = -0.4, 0.65, 0.485
 LAKE_WEIRD = 0.3                  # weirdness at or above this picks the lake variants
 DRY_MAX, WET_MIN = -0.35, 0.45    # humidity bands inside a zone
-# (0.20.95) the sky biomes (seven-mods plan, patch 10), cut from the edges of the weirdness range:
+# (0.20.96) the sky biomes (seven-mods plan, patch 10), cut from the edges of the weirdness range:
 # hanging roots and rustworks from the low end of the woods, mistsea from the top of the lowland lakes, gilded ridge from the
 # top of the upper lakes
 ROOTS_WEIRD, MIST_WEIRD, GILDED_WEIRD = -0.55, 0.75, 0.55
@@ -398,7 +398,7 @@ BIOME_DATA = {
     'turquoise_forest': (0.7, 0.8, MAG_COL, '#a8ece0'), 'glistening_swamp': (0.8, 0.9, MAG_COL, '#98d8c4'),
     'battleground_wastes': (1.0, 0.3, IRR_COL, '#d8e69a'), 'contaminated_jungle': (1.0, 0.3, IRR_COL, '#c8dc84'),
     'hestveil_caverns': (0.5, 0.5, HIGH_COL, '#b1ffcb'), 'expanse': (0.5, 0.5, HIGH_COL, '#b5ffd0'),
-    # (0.20.95) the sky biomes
+    # (0.20.96) the sky biomes
     'hanging_roots': (0.6, 0.9, HIGH_COL, '#8fdcaa'), 'mistsea': (0.4, 0.9, MIST_COL, '#c2f2dc'),
     'rustworks': (0.7, 0.2, RUST_COL, '#c8c89a'), 'gilded_ridge': (0.8, 0.3, GILD_COL, '#d8f0a0'),
 }
