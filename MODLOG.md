@@ -603,3 +603,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.74, Shift + Left Alt zooms** (Andy: "shift + left alt should make you zoom"): holding Sneak and the Dodge key
   together zooms with OK Zoomer until either is let go (`SneakZoom`), beside the double-tap-and-hold Sneak. Alt pressed
   while Sneak is down no longer dodges (`DodgeClient`); Alt alone still rolls. Built, not played.
+
+## 0.20.75 (2026-11-05): NPC speech bubble fix, orc lines
+- Pack bump for Kingdoms 0.7.562: haven guards' rally cry showed a raw lang key instead of the line; villagers, guards
+  and goblins now greet, warn off or shout at the orcs they meet (OrcSightings). Not played.
