@@ -9099,3 +9099,9 @@ ultimate and beam-clash films came down with it. Not played.
   `jaymospowers_rubber_split` tag into `jaymospowers_rubber_mending` (`RubberFolk.absorb`). That swallow doesn't regrow a
   limb at once: the legs come back on the usual 20 s clock, one at a time, and they stay down until both are back. No
   regrowth while still waiting on the swallow. Lang in `lang/parts/message-rubber.json`. Gradle build only, not played.
+- **0.7.553 (pack 0.20.62), server freeze from structure scans:** the Deck's server froze and its watchdog stopped it
+  (crash 2026-11-04 20:16) with the server thread in `GrimSites.scan` waiting on `Level.getChunk` while C2ME was still
+  generating chunks (two stuck 1.5 min at structure_starts). `hasChunk` then `getChunk` isn't a safe "only if loaded"
+  under C2ME's chunk system, so every such scan now reads `getChunkSource().getChunkNow` and skips a chunk that isn't
+  ready: `GrimSites`, `remnants/AncientRemnantsCompat`, `Ruins.pieces`, `Clearing.sites`, `GolemLairs.look`,
+  `QuestFoes.bury`. Nothing else changes. Types checked against the 26.3 jar; not built here.

@@ -193,10 +193,10 @@ public final class GolemLairs {
 			}
 			for (long ref : e.getValue()) {
 				ChunkPos from = ChunkPos.unpack(ref);
-				if (!level.hasChunk(from.x(), from.z())) {
+				LevelChunk origin = level.getChunkSource().getChunkNow(from.x(), from.z());
+				if (origin == null) {
 					continue;
 				}
-				LevelChunk origin = level.getChunk(from.x(), from.z());
 				StructureStart start = origin.getStartForStructure(e.getKey());
 				if (start == null || !start.isValid() || start.getPieces().stream().noneMatch(p -> p.getBoundingBox().isInside(pos))) {
 					continue;

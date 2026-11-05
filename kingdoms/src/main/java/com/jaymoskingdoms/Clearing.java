@@ -114,10 +114,10 @@ final class Clearing {
 		for (int dx = -reach; dx <= reach; dx++) {
 			for (int dz = -reach; dz <= reach; dz++) {
 				int cx = middle.x() + dx, cz = middle.z() + dz;
-				if (!level.hasChunk(cx, cz)) {
+				ChunkAccess chunk = level.getChunkSource().getChunkNow(cx, cz);
+				if (chunk == null) {
 					continue;
 				}
-				ChunkAccess chunk = level.getChunk(cx, cz);
 				for (Map.Entry<Structure, LongSet> e : chunk.getAllReferences().entrySet()) {
 					Structure structure = e.getKey();
 					Holder<Structure> holder = registry.wrapAsHolder(structure);
@@ -130,10 +130,11 @@ final class Clearing {
 							continue;
 						}
 						ChunkPos from = ChunkPos.unpack(ref);
-						if (!level.hasChunk(from.x(), from.z())) {
+						ChunkAccess startChunk = level.getChunkSource().getChunkNow(from.x(), from.z());
+						if (startChunk == null) {
 							continue;
 						}
-						StructureStart start = level.getChunk(from.x(), from.z()).getStartForStructure(structure);
+						StructureStart start = startChunk.getStartForStructure(structure);
 						if (start == null || !start.isValid() || !start.getBoundingBox().intersects(watched)) {
 							continue;
 						}

@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BrushableBlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -286,8 +287,9 @@ final class QuestFoes {
 		BlockPos found = null;
 		Identifier id = Identifier.tryParse(q.objective().target());
 		Structure structure = id == null ? null : level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(id);
-		if (structure != null && level.hasChunk(located.getX() >> 4, located.getZ() >> 4)) {
-			StructureStart start = level.structureManager().getStartForStructure(structure, level.getChunk(located.getX() >> 4, located.getZ() >> 4));
+		ChunkAccess locatedChunk = level.getChunkSource().getChunkNow(located.getX() >> 4, located.getZ() >> 4);
+		if (structure != null && locatedChunk != null) {
+			StructureStart start = level.structureManager().getStartForStructure(structure, locatedChunk);
 			if (start != null && start.isValid()) {
 				BlockPos middle = start.getBoundingBox().getCenter();
 				double best = Double.MAX_VALUE;
