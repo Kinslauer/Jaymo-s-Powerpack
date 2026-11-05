@@ -9623,3 +9623,12 @@ weapon component: the battleaxe, ninjato, saber, machete, katana, halberd, rapie
   `PowersCompat.tellIncoming`, which shows Jaymo's Powers' incoming-blow cue round that player's crosshair (the side it
   comes from, closing as it lands, red when heavy, gold in the perfect-parry window). Nothing without Powers. Built, not
   played.
+
+## 0.7.604 (2026-11-05): blasts topple trees whole instead of holing them
+Andy: "when an explosion hits a tree that would break the block it should break and topple instead of breaking the
+blocks, and only the leaves that impact should break, like when players fall into it at speed".
+- `TreeBlastMixin` filters the blocks a blast is about to break (`ServerExplosion.interactWithBlocks`) through
+  `Trees.blastStruck`: a living tree's logs and leaves are spared, and every tree whose wood the blast reached comes down
+  whole from its foot (`rootOf` follows branches back to the trunk), away from the blast, any size. Its leaves then break
+  only where they strike, as any falling tree's. Logs in buildings and placed (persistent) leaves still blow apart.
+- Trees near the blast that it didn't reach still fall by chance, as before (`Trees.blast`). Built, not played.
