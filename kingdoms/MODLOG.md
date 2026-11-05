@@ -9192,3 +9192,10 @@ ultimate and beam-clash films came down with it. Not played.
   villagers, monsters; not herd animals themselves, whose kin already panic) makes every `jaymoskingdoms:skittish` animal
   within 16 blocks that sees it, or within 6 out of sight, run from the killer (or the body) for 4 s (`Herds.killing`,
   `KILL_SEEN`, `KILL_HEARD`). Ridden and tamed animals stay calm; leashed ones pull at the rope. Hint 103. Not played.
+## 0.7.565 (2026-11-05): no fighting the unseen (pack 0.20.77)
+
+- Andy: an orc "was invulnerable, and invisible", and "i could only see other npcs attacking it". No log covered it, so
+  two ways an orc goes unseen are fixed. A cursed orc hidden inside his werewolf (invisible, frozen, unhurtable) is never
+  taken for a foe (`Lycans.hidden`, `ThrallTargetMixin`), and whoever was fighting him within 32 blocks turns on the
+  beast (`Lycans.unTarget`). The Quiet One's In-balmed orc wears a 5 s veil topped up only at his keeper's side, instead
+  of an hour's invisibility that outlasted his keeper logging off (`InBalming.SHADOW_VEIL`). Not played.

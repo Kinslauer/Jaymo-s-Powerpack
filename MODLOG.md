@@ -620,3 +620,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
     `Guard.guardable` skipped, and `ToolStats` stripped it. They get it now (also keeps right click off the skill bar's
     first form for them); ones already made pick it up when carried. A Tool Station dual-wield dagger in the off hand still
     swings on right click. Broken ones don't guard. Not played.
+## 0.20.77 (2026-11-05): Kingdoms 0.7.565, no fighting the unseen
+
+- Packs Kingdoms 0.7.565: NPCs stop swinging at a werewolf's hidden person and fight the beast; a Quiet One orc is seen
+  again once his keeper is gone. Not played.
