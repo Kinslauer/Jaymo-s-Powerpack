@@ -62,7 +62,7 @@ final class TalkBook {
 	/** What a reply sets going. */
 	enum Out {
 		NONE, BRING, BRING_JOB, COME_BACK, WATCH_CHILD, ESCORT_CHILD, SPEAK_FOR, KEEP_PEACE, LOAN, FAVOUR, RUMOUR, SECRET, QUARREL, GIVE, PAY,
-		BRIBE, LIE, KIND, KEEP, RELEASE
+		BRIBE, LIE, KIND, KEEP, RELEASE, RIDDLE
 	}
 
 	/** An outcome, with another to follow it if there is one. */
@@ -230,6 +230,11 @@ final class TalkBook {
 		&& Bearings.warmth(c.v(), c.player()) >= Bearings.LEND_WARMTH
 		&& !com.jaymoskingdoms.money.Money.canPay(c.player(), com.jaymoskingdoms.money.Money.worth(Talks.LOAN_POOR))
 		&& Promises.of(c.player()).stream().noneMatch(p -> p.open() && p.type() == Promises.Kind.REPAY);
+	// (0.7.547) the heavens overhead (Heavens): a knower, a seeker, the Aether's stones in your pack
+	private static final Gate KNOWS = c -> Heavens.knows(c.v());
+	private static final Gate SEEKS = c -> Heavens.seeks(c.v());
+	private static final Gate CLEAR_NIGHT = c -> Vampires.night(c.clock()) && !c.level().isRaining() && c.level().canSeeSky(c.v().blockPosition().above());
+	private static final Gate POCKETS = c -> Heavens.carriesAether(c.player());
 	private static final Gate CROOK_NEAR = c -> Bearings.trust(c.v(), c.player()) >= Bearings.SECRET_TRUST && Talks.crookNear(c.v()) != null;
 
 	private static Gate mem(Recollections.Kind... kinds) {
@@ -507,6 +512,17 @@ final class TalkBook {
 			r("a", 0, 0, 2, Outcome.of(Out.FAVOUR)), r("b", 0, 0, 1), r("c", 0, 0, -3)));
 		t.add(recent("recent_rude", mem(Recollections.Kind.RUDE, Recollections.Kind.REBUFFED), NO_ARGS,
 			r("a", 1, 0, 2), r("b", -1, 0, -4, Outcome.of(Out.QUARREL)), r("c", -1, 0, -2)));
+		// ---- the heavens overhead (0.7.547, Heavens): hints and riddles, never said outright
+		t.add(life("heavens_stars", KNOWS.and(CLEAR_NIGHT), NO_ARGS,
+			r("a", 1, 0, 2, Outcome.of(Out.RIDDLE)), r("b", 0, 0, 0), r("c", 0, -1, -2)));
+		t.add(lifeOnce("heavens_giants", KNOWS, NO_ARGS,
+			r("a", 1, 0, 2, Outcome.of(Out.RIDDLE)), r("b", 0, 0, -1), r("c", 0, 1, 2)));
+		t.add(life("heavens_rain", KNOWS.and(RAIN), NO_ARGS,
+			r("a", 1, 0, 1, Outcome.of(Out.RIDDLE)), r("b", 0, 0, 1), r("c", 0, 0, -1)));
+		t.add(recent("heavens_pockets", KNOWS.and(POCKETS), NO_ARGS,
+			r("a", -1, 0, 0), r("b", 3, 1, 2, Outcome.of(Out.RIDDLE)), r("c", 1, 0, 1, Outcome.of(Out.RIDDLE))));
+		t.add(life("heavens_tower", SEEKS, c -> new Object[] {8, name(Items.SCAFFOLDING)},
+			r("a", 2, 0, 4, bring(Items.SCAFFOLDING, 8, 3)), r("b", 0, 0, 1, Outcome.of(Out.RIDDLE)), r("c", 0, -1, -3)));
 		// ---- trust
 		t.add(talk("money_loan", LENDER, c -> new Object[] {com.jaymoskingdoms.money.Money.text(c.player(), com.jaymoskingdoms.money.Money.worth(Talks.LOAN_EMERALDS))}, Talks.WEIGHT_LENDER, false, false,
 			r("a", 1, 0, 1, Outcome.of(Out.LOAN)), r("b", 0, 1, 0), r("c", 0, 0, -2)));
