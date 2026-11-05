@@ -231,6 +231,7 @@ public final class MobCombat {
 		swing.move = move;
 		swing.plain = false;
 		swing.hitAt = now + Math.min(upswing, length - 1);
+		PowersCompat.tellIncoming(mob, target, (int) (swing.hitAt - now), heavy(moves, move));
 		swing.endsAt = now + length;
 		swing.lastSwing = now;
 		swing.combo++;
@@ -284,6 +285,7 @@ public final class MobCombat {
 		swing.move = null;
 		swing.plain = true;
 		swing.hitAt = now + Math.min(upswing, length - 1);
+		PowersCompat.tellIncoming(mob, target, (int) (swing.hitAt - now), plainHeavy(mob));
 		swing.endsAt = now + length;
 		swing.lastSwing = now;
 		String animation = mob.getMainHandItem().isEmpty() ? (swing.combo % 3 == 2 ? UPPERCUT : PUNCH) : CUT;
@@ -365,6 +367,7 @@ public final class MobCombat {
 		}
 		AIMS.put(mob, now + GUN_WINDUP);
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		PowersCompat.tellIncoming(mob, foe, GUN_WINDUP, true);
 		Vec3 to = foe.getEyePosition().subtract(mob.getEyePosition());
 		Vec3 at = mob.getEyePosition().add(to.lengthSqr() > 1.0E-4 ? to.normalize().scale(0.8) : Vec3.ZERO).add(0.0, -0.25, 0.0);
 		// (0.7.505) Powers' red star and warning bell when it's loaded

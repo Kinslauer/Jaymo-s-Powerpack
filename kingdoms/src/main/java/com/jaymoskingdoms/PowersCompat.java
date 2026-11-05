@@ -66,6 +66,37 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (PvP indicator) Powers' {@code IncomingBlows.aimed(LivingEntity, LivingEntity, int, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle incoming;
+	private static boolean lookedForIncoming;
+
+	/**
+	 * (PvP indicator) Andy: "is it possible to add an indicator for pvp? as of right now it is hard to parry or defend at
+	 * all". A fighter's swing or a gunner's aim at a player shows Powers' incoming-blow cue round that player's crosshair:
+	 * from the side it comes, closing as it lands in {@code ticks}, red when {@code heavy}. Nothing without Powers.
+	 */
+	public static void tellIncoming(LivingEntity attacker, LivingEntity target, int ticks, boolean heavy) {
+		if (!lookedForIncoming) {
+			lookedForIncoming = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					incoming = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.combat.IncomingBlows"), "aimed",
+						java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, LivingEntity.class, int.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' incoming-blow cue", e);
+				}
+			}
+		}
+		if (incoming == null) {
+			return;
+		}
+		try {
+			incoming.invoke(attacker, target, ticks, heavy);
+		} catch (Throwable ignored) {
+			// the cue is only a nicety
+		}
+	}
+
 	/** (Andy, 2026-11-01) Powers' {@code ZFighterFakeMoon.shines(ServerLevel, Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle falseMoon;
 	private static boolean lookedForMoon;
