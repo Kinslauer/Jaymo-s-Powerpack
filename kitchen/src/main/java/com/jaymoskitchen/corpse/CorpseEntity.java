@@ -2889,16 +2889,49 @@ public class CorpseEntity extends Entity {
 		lieDown(getDeltaMovement(), false);
 	}
 
-	/** Server: thrown a short way ahead of the carrier, tumbling; it lands on the ground or in a cart it hits. */
+	/**
+	 * Server: thrown a short way ahead of the carrier, tumbling; it lands on the ground or in a cart it hits. (0.5.76) Andy:
+	 * "throwing held items and mobs should follow the cursor, if you look high the trajectory is higher, and smaller things
+	 * can be flung further w/ higher strength stat". It goes along your look ({@link #TOSS_SPEED}, {@link #TOSS_LIFT} up so
+	 * a level throw still arcs), further the smaller the body was ({@link #tossLightness}) and the more brawn you have
+	 * ({@link Hauling#brawn}: {@link #TOSS_BRAWN} more a point, up to {@link #TOSS_BRAWN_MAX}).
+	 */
 	public void toss(Player player) {
 		boolean oneHand = oneHanded();
+		float[] size = standingSize();
 		letGo(player);
-		Vec3 ahead = player.getViewVector(1.0F).multiply(1.0, 0.0, 1.0).normalize();
-		setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(ahead.x * 0.42, 0.28, ahead.z * 0.42));
+		double fast = TOSS_SPEED * tossLightness(size[0], size[1]) * (1.0 + TOSS_BRAWN * Math.min(TOSS_BRAWN_MAX, Hauling.brawn(player)));
+		Vec3 look = player.getViewVector(1.0F);
+		setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(look.scale(fast)).add(0.0, TOSS_LIFT, 0.0));
 		fallFromHold(getDeltaMovement(), oneHand);
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F);
 		}
+	}
+
+	/** (0.5.76) A tossed body's speed along the look (b/t) and its lift; brawn's share; a person's bulk (w x w x h). */
+	static final double TOSS_SPEED = 0.5, TOSS_LIFT = 0.14, TOSS_BRAWN = 0.2, PERSON_BULK = 0.6 * 0.6 * 1.8;
+	static final int TOSS_BRAWN_MAX = 5;
+	/** (0.5.76) How much further the smallest body flies than a person's, and how much shorter the biggest. */
+	static final double TOSS_LIGHTEST = 1.8, TOSS_HEAVIEST = 0.5;
+
+	/** (0.5.76) How far a body of this standing size flies against a person's ({@link #TOSS_HEAVIEST} to {@link #TOSS_LIGHTEST}). */
+	static double tossLightness(double width, double height) {
+		double bulk = Math.max(1.0E-3, width * width * height);
+		return Math.clamp(Math.cbrt(PERSON_BULK / bulk), TOSS_HEAVIEST, TOSS_LIGHTEST);
+	}
+
+	/** (0.5.76) The dead one's standing size {width, height}: its rig's, else its type's, else a person's. */
+	private float[] standingSize() {
+		if (rigWidth > 0.0F && rigHeight > 0.0F) {
+			return new float[] {rigWidth, rigHeight};
+		}
+		EntityType<?> type = isPlayerCorpse() ? null : sourceType();
+		if (type == null) {
+			return new float[] {0.6F, 1.8F};
+		}
+		EntityDimensions standing = type.getDimensions();
+		return new float[] {standing.width(), standing.height()};
 	}
 
 	/**

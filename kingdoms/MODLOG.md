@@ -9452,3 +9452,7 @@ player input, (explosions / heavy impacts can fell trees too.)"
 - A tree left standing on nothing comes down by itself: blown out from under by a blast, or its last trunk log broken
   whole (sneaking or in creative), it falls to its heavier side (`Trees.unsupported`).
 - Hint 114. Built, not played.
+
+## 0.7.587 (2026-11-05): hint 105 tells of holding a charged rock (Powers 0.20.103)
+- The off hand rock is held drawn back at full charge and thrown on release, charging faster with each throw close after
+  the last (Powers `ThrownRocks`); hint 105 says so.
