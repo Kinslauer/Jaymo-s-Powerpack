@@ -9262,3 +9262,9 @@ ultimate and beam-clash films came down with it. Not played.
   claws' items went back into the selected slot when it was the first free one, so the knife never left; now they go
   anywhere else or drop. (`BeastHidesPlayerMixin`) a player who is the beast (invisible, torn out) isn't drawn at all, so
   held items, Powers suits/costumes and worn weapons no longer float on the beast. Not played.
+  Also in 0.7.572, Andy: "it should be a variation that you can achieve" (after Werewolves: Become a Beast's three
+  paths; its art is Vampirism-only, so nothing of it is used). (`WerewolfPlayers` LEAN_*, `LeanWolfModel`,
+  `tools/gen_lean_wolf.py`) once the change comes at will (3 moons) and the wildness is at most stage 1, sneak+U changes
+  into a lean wolf on all fours (our own boxes and coats, one per werewolf coat, the fiery one flickering): Speed III,
+  Jump Boost III, +2 hearts, no Strength or Resistance. Too wild: an overlay line says so. Full moons are always the
+  great beast; the mostly-human path stays the wolfblood (ritual off the full moon). Hint 108. Not played.

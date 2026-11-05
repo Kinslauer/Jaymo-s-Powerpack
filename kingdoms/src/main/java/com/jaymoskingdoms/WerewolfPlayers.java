@@ -71,6 +71,14 @@ public final class WerewolfPlayers {
 	/** What a kill feeds the beast (food, saturation). */
 	static final int KILL_FOOD = 6;
 	static final float KILL_SATURATION = 0.8F;
+	/**
+	 * (0.7.572, Andy: "it should be a variation that you can achieve") The lean wolf: once the change comes at will, a
+	 * werewolf who has kept the curse tame (wildness at most stage {@link #LEAN_MAX_STAGE}) can sneak and change into a
+	 * wolf on all fours instead of the great beast. Quicker and higher-leaping, but no stronger and less tough: Speed,
+	 * Jump Boost (amplifiers) and extra health. The full moon's change is always the great beast.
+	 */
+	static final int LEAN_MAX_STAGE = 1, LEAN_SPEED = 2, LEAN_JUMP = 2;
+	static final double LEAN_HEALTH = 4.0;
 	/** After changing back: sick and shaking this long (ticks). */
 	static final int AFTER_TICKS = 600;
 
@@ -95,6 +103,8 @@ public final class WerewolfPlayers {
 		/** (0.7.185) It came on its own on a night that isn't the full moon ({@link FeralCurse}): it lasts till dawn. */
 		boolean wild;
 		boolean leaving;
+		/** (0.7.572) The lean wolf, not the great beast. */
+		boolean lean;
 
 		Form(long since, boolean forced) {
 			this.since = since;
@@ -168,6 +178,12 @@ public final class WerewolfPlayers {
 	/** Whether {@code player} is the beast now (or changing into it). */
 	public static boolean beast(ServerPlayer player) {
 		return FORMS.containsKey(player.getUUID());
+	}
+
+	/** (0.7.572) Whether {@code player} is the lean wolf now (or changing into it). */
+	public static boolean lean(ServerPlayer player) {
+		Form f = FORMS.get(player.getUUID());
+		return f != null && f.lean;
 	}
 
 	/** (0.7.185) Whether {@code player} is the beast in full now (not doubling over, not shrinking back). */
@@ -299,7 +315,14 @@ public final class WerewolfPlayers {
 			return;
 		}
 		if (f == null) {
+			// (0.7.572) sneaking: the lean wolf, if the curse is tame enough to let them run light
+			boolean lean = player.isShiftKeyDown();
+			if (lean && FeralCurse.stage(player) > LEAN_MAX_STAGE) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.werewolf.lean_wild").withStyle(ChatFormatting.DARK_RED));
+				return;
+			}
 			begin(player, overworld.getGameTime(), false);
+			FORMS.get(player.getUUID()).lean = lean;
 		} else if (f.beast != null && !f.leaving) {
 			if (f.wild && Vampires.night(clock) || FeralCurse.refuses(player)) {
 				// (0.7.185) the wolf won't let go: a change that came on its own lasts the night, and a wild one can refuse
@@ -361,6 +384,7 @@ public final class WerewolfPlayers {
 					continue;
 				}
 				f.beast.setNoAi(true);
+				f.beast.setLean(f.lean);
 				level.addFreshEntity(f.beast);
 				w = f.beast;
 			}
@@ -393,6 +417,7 @@ public final class WerewolfPlayers {
 			return;
 		}
 		w.setNoAi(true);
+		w.setLean(f.lean);
 		w.setCustomName(player.getDisplayName());
 		w.setCustomNameVisible(false);
 		f.beast = w;
@@ -411,7 +436,7 @@ public final class WerewolfPlayers {
 		Suspicion.witnessed(level, player, Suspicion.WOLF, Suspicion.ADD_CHANGE, Suspicion.CHANGE_RANGE, false);
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null && health.getModifier(HEALTH) == null) {
-			health.addTransientModifier(new AttributeModifier(HEALTH, BEAST_HEALTH, AttributeModifier.Operation.ADD_VALUE));
+			health.addTransientModifier(new AttributeModifier(HEALTH, f.lean ? LEAN_HEALTH : BEAST_HEALTH, AttributeModifier.Operation.ADD_VALUE));
 		}
 		buffs(player);
 		strip(player, true);
@@ -432,6 +457,14 @@ public final class WerewolfPlayers {
 	private static void buffs(ServerPlayer player) {
 		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, true, false, false));
 		player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
+		Form f = FORMS.get(player.getUUID());
+		if (f != null && f.lean) {
+			// (0.7.572) the lean wolf: fast and light, no stronger than they are
+			player.addEffect(new MobEffectInstance(MobEffects.SPEED, 60, LEAN_SPEED, true, false, true));
+			player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, LEAN_JUMP, true, false, true));
+			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 60, 0, true, false, true));
+			return;
+		}
 		player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 60, BEAST_STRENGTH, true, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, 60, BEAST_SPEED, true, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, BEAST_JUMP, true, false, true));
