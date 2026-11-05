@@ -459,3 +459,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   they come at you. `/shake <0-200>` or `/shake off` sets each player's own shake strength (kept in
   `config/jaymospowers-client.properties`). Bodies blown apart (Kitchen gibs) give a small shake of their own.
   Compile-checked; not played.
+
+- **0.20.57, Kitchen 0.5.66, small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
+  work like fish, if they drop an item the corpse disappears." Crickets, mice, snails, butterflies, bees and any other
+  creature kind under 0.5 blocks both ways (or in Kitchen's new `small_corpses` tag) are looted in one click and gone,
+  like fish. Rabbits, chickens, frogs and babies still leave a body. Not played.

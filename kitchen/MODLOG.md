@@ -1430,3 +1430,12 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
   or player's corpse is added, and `CorpseDressing.BODY` (corpse, body state) as a non-plain body's state is made each
   frame, both for other mods by reflection. Powers uses them to keep the blood a body died with on its corpse, drying
   darker. Gradle build only, not played.
+
+- **0.5.66 (Powers 0.20.57), small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
+  work like fish, if they drop an item the corpse disappears." A small critter's body is a fish's now (`CorpseKind.FISH`):
+  one click spills its loot and it's gone, nothing to carry or butcher. `Corpses.isSmallCritter` counts the new
+  `small_corpses` tag (Cube Animals' cricket, mouse, snail, chameleon; Naturalist's butterfly, caterpillar, firefly,
+  dragonfly, snail; Alex's Mobs' bugs and hummingbird; vanilla tadpole, bee, silverfish, endermite) and, without a tag,
+  any non-monster kind under 0.5 blocks both ways (`SMALL_CRITTER_SIZE`), so future small mobs are covered. It goes by
+  the kind's size, so babies and rabbits, chickens and frogs still leave a body. Old critter bodies already lying around
+  count too. On dry land they puff instead of splashing. Not played.
