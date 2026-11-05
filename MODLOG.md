@@ -985,3 +985,13 @@ Andy: "there is still a long black screen on load, and the game cant seem to spa
 for a demon biome with a 3D search over the level's whole height, which in a One Dimension world is every band stacked
 (about 1,400 blocks), on the server thread while you wait (you stood at world spawn meanwhile). It now sweeps once at the
 Nether's own y 64 (`ZFighterStarts.demonBiome`) and logs how long it took and what it found, beside 0.20.104's fallback warnings.
+
+## 0.20.115 (2026-11-05): Chrono leaves a wake running on water
+- Andy: "chrono should leave a wake when they run on water"
+- `ChronoSpeed.wake`: sprinting across water under Overclock (and Velox's Velocity, which runs on the same code) kicks
+  spray back and up off your heels and lays a V of foam behind you like a boat's. Each tick foam is put down along the
+  stretch you just ran and pushed out to both sides, so older foam sits further out and the V opens behind you, with a
+  churned line down the middle; it's vanilla's wake particle (the fish-to-bobber one), which rides the surface and
+  shrinks away by itself in 0.4 to 2 s. A soft splash every 6 ticks. Corrupted/ascended fates mark one foam point and
+  one spray drop a tick (clones, glass), not all of them. Lava keeps its own sparks and smoke. Tuning: `WAKE_*` at the
+  top of `ChronoSpeed`. Built, not played.
