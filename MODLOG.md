@@ -566,3 +566,9 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - Andy, of royals being gibbed: "noone but stoneborn are exempt". Stoneborn (Kingdoms tag
   `jaymoskingdoms_heritage_stoneborn`) are never gibbed (`BlastGore.stone`); they can still lose limbs. Everyone else,
   royals included, can be.
+
+## 0.20.68 (2026-11-05): rocks barely hurt zombies and Hornkin
+- Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". A thrown rock hits every zombie (the game's `Zombie`
+  family: husks, drowned, zombie villagers, zombified piglins, plus MCA's and Kitchen's zombies) and every Hornkin
+  (`jaymoskingdoms:hornkin*`, `zombified_hornkin`) for 0.5 instead of 3 (`ThrownRocks.SHRUGGED_DAMAGE`, `shrugsOff`), and
+  never knocks them out. Kingdoms' NPC rocks follow the same rule (Kingdoms 0.7.557). Not played.
