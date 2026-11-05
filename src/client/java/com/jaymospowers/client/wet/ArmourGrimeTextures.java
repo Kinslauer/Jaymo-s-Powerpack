@@ -161,6 +161,23 @@ public final class ArmourGrimeTextures {
 		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), null, null, null, smear, bodyBlood, true, true);
 	}
 
+	/**
+	 * (0.20.55) The same for a corpse's blood ({@link Bloodied#CORPSE_BLOOD}): it stays, and darkens as it dries, as blood
+	 * on gear does.
+	 */
+	public static @Nullable Identifier skin(Identifier base, Bloodied.@Nullable Blood blood) {
+		Smear smear = smear(blood);
+		if (smear == null) {
+			return null;
+		}
+		readMasks();
+		if (bodyBlood == null) {
+			return null;
+		}
+		Identifier painted = paint(base, null, null, null, smear, bodyBlood, true, false);
+		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), null, null, null, smear, bodyBlood, true, true);
+	}
+
 	/** (0.20.41) Blood to paint: how soaked (a stage, 1 to {@link #STAGES}) and its colour as it looks now (drying darker). */
 	record Smear(int stage, int colour) {
 	}

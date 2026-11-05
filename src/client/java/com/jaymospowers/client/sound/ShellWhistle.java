@@ -20,7 +20,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.55) After Create Big Cannons' flying shells (ideas only; our own code and sound): a cannonball, a bomb, a
+ * (0.20.56) After Create Big Cannons' flying shells (ideas only; our own code and sound): a cannonball, a bomb, a
  * meteor or anything shell-like flying fast whines as it goes by ({@code blast.whistle}). The whine trails a little
  * behind it (the air it tore), grows with its speed, rises in pitch while it comes at you and drops once it's past, and
  * fades out when it lands or flies off.

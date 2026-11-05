@@ -9060,7 +9060,7 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   they walk to a downed monster and execute it (hotheaded or spiteful ones anyone they fight); `Temperaments.spares` no
   longer spares monsters. Sharks and the great whale bleed Powers' blood, not red dust. Gradle build only, not played.
 
-## 0.7.549: Big Cannons booms (pack 0.20.55)
+## 0.7.549: Big Cannons booms (pack 0.20.56)
 Andy: "i really like the screen shake and sound effects from [Create Big Cannons] what can we add from it?" Ideas only,
 our own code; the delayed, muffled booms and whistling shells live in Powers (`client/sound/Blasts`, `ShellWhistle`).
 - **Cannons** fire with Powers' own report (`PowersCompat.cannonReport`, vanilla's explosion without Powers) and jolt

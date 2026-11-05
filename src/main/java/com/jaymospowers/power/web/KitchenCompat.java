@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class KitchenCompat {
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("jaymoskitchen");
-	/** (0.20.55) A body blown apart: the shake it gives everyone this near (degrees at its peak, blocks). */
+	/** (0.20.56) A body blown apart: the shake it gives everyone this near (degrees at its peak, blocks). */
 	static final float GIB_SHAKE = 0.7F;
 	static final double GIB_SHAKE_RANGE = 14.0;
 
@@ -585,7 +585,7 @@ public final class KitchenCompat {
 					if (type != null) {
 						com.jaymospowers.core.BladeBlood.blownApart(body, type);
 					}
-					// (0.20.55) the wet thump of a body coming apart, felt by those close by (on top of the blast's own)
+					// (0.20.56) the wet thump of a body coming apart, felt by those close by (on top of the blast's own)
 					if (body.level() instanceof net.minecraft.server.level.ServerLevel level) {
 						com.jaymospowers.core.Shakes.around(level, body.position(), GIB_SHAKE_RANGE, GIB_SHAKE);
 					}

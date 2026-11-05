@@ -1426,3 +1426,7 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
   elephant (and Kingdoms' moose) died with a man's ragdoll. A wild creature (creature, ambient or water category) guessed a
   person gets the four-legged ragdoll instead (a box if under 0.6 blocks), and ragdoll_quadruped lists Cube Animals' big
   beasts. Not played.
+- **0.5.65 (Powers 0.20.55), corpses stay bloodied:** `Corpses.ON_BODY` (dead body, new corpse) runs just before a mob's
+  or player's corpse is added, and `CorpseDressing.BODY` (corpse, body state) as a non-plain body's state is made each
+  frame, both for other mods by reflection. Powers uses them to keep the blood a body died with on its corpse, drying
+  darker. Gradle build only, not played.
