@@ -1015,3 +1015,17 @@ Nether's own y 64 (`ZFighterStarts.demonBiome`) and logs how long it took and wh
   fallback when there is none) is within 12 blocks of where you fell, you're stood on safe loaded ground 12-20 blocks
   away instead, facing away from whoever was executing you when there was one (`ChronoCheatDeath.away`,
   `Mortality.ground` made public). Built, not played.
+
+## 0.20.118 (2026-11-05): Kingdoms 0.7.601, an incoming-blow cue for PvP (and every foe)
+- Andy: "is it possible to add an indicator for pvp? as of right now it is hard to parry or defend at all"
+- `combat/IncomingBlows` (+ `compat/mixin/IncomingSwingMixin`, `client/combat/IncomingBlowsClient`): a player's Better
+  Combat swing now warns the one it's aimed at (the swinger's lock-on, or anyone in the weapon's reach + 1.5 inside 50°
+  of their look): the white star at the swinger's weapon hand and the warning bell, for that player only (no PvE spam).
+  The warhammer slam warns the same way.
+- Every blow coming at you, a player's or a mob's (Powers' wind-ups, Kingdoms' fighters and gunners), also draws an arc
+  of five dots round the crosshair on the side it comes from (top: ahead, bottom: behind), closing on the crosshair as
+  the blow comes in. White: parry it. Red: too heavy, block or dodge. Gold for the last `Guard.PERFECT_TICKS` (+2 locked
+  on): raise the guard while it's gold for a perfect parry; any time before that is still a parry. The close is brought
+  forward by your own ping (up to 4 ticks). It flashes as the blow lands.
+- No chat text, no FOV change. Tuning: constants at the top of `IncomingBlows` and `IncomingBlowsClient`. Built, not
+  played.

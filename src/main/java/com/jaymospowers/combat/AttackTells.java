@@ -61,7 +61,7 @@ public final class AttackTells {
 	/** (0.20.4) The star's size (1 = about a block across), a heavy blow's, and its white heart's share. */
 	public static final float GLINT_SIZE = 0.8F, HEAVY_GLINT_SIZE = 1.1F, CORE_SHARE = 0.45F;
 	/** (0.20.4) The warning ping: Time Flow's bell (volume, pitch), and a heavy blow's lower bell and drum. */
-	static final float PING_VOLUME = 0.9F, PING_PITCH = 1.9F, HEAVY_PING_PITCH = 1.1F, DRUM_VOLUME = 0.8F, DRUM_PITCH = 0.7F;
+	public static final float PING_VOLUME = 0.9F, PING_PITCH = 1.9F, HEAVY_PING_PITCH = 1.1F, DRUM_VOLUME = 0.8F, DRUM_PITCH = 0.7F;
 	/** (0.20.4) Players further than this (blocks) don't get the star (the vanilla particle range). */
 	static final double GLINT_RANGE = 48.0;
 	/** Reach slack (blocks) for a target that stepped a little since the wind-up began. */
@@ -114,7 +114,9 @@ public final class AttackTells {
 		if (PENDING.containsKey(mob)) {
 			return false;
 		}
-		tell(level, mob, heavy(mob));
+		boolean heavy = heavy(mob);
+		tell(level, mob, heavy);
+		IncomingBlows.aimed(mob, living, WINDUP, heavy);
 		PENDING.put(mob, new Pending(living, level.getGameTime() + WINDUP));
 		return false;
 	}

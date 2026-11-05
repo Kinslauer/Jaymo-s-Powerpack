@@ -9596,3 +9596,10 @@ but more of a hunter. they can smell you out."
   ones already out in explored land stay.
 - Tuning: the constants at the top of `WolfStalkers`. Stalks aren't saved: a reload forgets the hunt (and gives back a
   hushed wolf's voice). Compile-checked (Gradle `compileJava`, 0 errors); not played.
+
+## 0.7.601 (2026-11-05): fighters' and gunners' blows show Powers' incoming-blow cue
+- Andy: "is it possible to add an indicator for pvp? as of right now it is hard to parry or defend at all"
+- `MobCombat`: a fighter's swing (Better Combat moves and plain blows) and a gunner's aim at a player call
+  `PowersCompat.tellIncoming`, which shows Jaymo's Powers' incoming-blow cue round that player's crosshair (the side it
+  comes from, closing as it lands, red when heavy, gold in the perfect-parry window). Nothing without Powers. Built, not
+  played.
