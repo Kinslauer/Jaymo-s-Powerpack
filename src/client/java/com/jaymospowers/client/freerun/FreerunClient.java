@@ -104,7 +104,7 @@ public final class FreerunClient {
 			|| kind == Freerun.SLIDE;
 	}
 
-	/** Clinging to a wall, hanging from a bar or from a pole (Sneak lets go: no dodge from it, see DodgeClient). */
+	/** Clinging to a wall, hanging from a bar or from a pole (Sneak lets go: no zoom from it, see SneakZoom). */
 	public static boolean holding() {
 		return kind == Freerun.CLING || kind == Freerun.BAR || kind == Freerun.POLE;
 	}
@@ -485,7 +485,7 @@ public final class FreerunClient {
 	// ---- fast run slide -----------------------------------------------------------------------------------------------
 
 	/**
-	 * In a fast run (or, 0.18.85, a plain sprint), Sneak held {@link Slide#HOLD_TICKS} ticks (a tap is the dodge's): drop into
+	 * In a fast run (or, 0.18.85, a plain sprint), Sneak held {@link Slide#HOLD_TICKS} ticks (a tap is the zoom's): drop into
 	 * a slide. Out of a fast run it's a head-first dive onto the belly, out of a plain sprint feet first on the back.
 	 */
 	private static boolean trySlide(LocalPlayer player, Input input) {
