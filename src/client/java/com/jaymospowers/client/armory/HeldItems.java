@@ -77,6 +77,7 @@ public final class HeldItems {
 
 	public static void init() {
 		ClientTickEvents.END_CLIENT_TICK.register(HeldItems::tick);
+		RockThrowPose.init();
 	}
 
 	static boolean reads(ItemStack stack) {
@@ -93,6 +94,8 @@ public final class HeldItems {
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		state.setData(KEY, entity instanceof Player player && state instanceof AvatarRenderState ? held(player, state, partialTicks) : null);
+		// (0.20.90) the off hand rock throw
+		RockThrowPose.extract(entity, state, partialTicks);
 	}
 
 	private static @Nullable Held held(Player player, LivingEntityRenderState state, float partialTicks) {
@@ -128,6 +131,12 @@ public final class HeldItems {
 
 	/** After the model animates: the arms for each hold. */
 	public static void applyModel(Model<?> model, Object state) {
+		applyHolds(model, state);
+		// (0.20.90) the off hand rock throw, over the holds
+		RockThrowPose.applyModel(model, state);
+	}
+
+	private static void applyHolds(Model<?> model, Object state) {
 		if (!(state instanceof LivingEntityRenderState living) || !(model instanceof HumanoidModel<?> h) || living.deathTime > 0.0F) {
 			return;
 		}
@@ -196,6 +205,8 @@ public final class HeldItems {
 		if (player == null || stack.isEmpty()) {
 			return;
 		}
+		// (0.20.90) the off hand rock drawn back and thrown
+		RockThrowPose.firstPerson(poseStack, arm, stack);
 		float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		float side = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 		float swing = player.isSwinging() ? player.getSwingAnimation(partialTicks) : 0.0F;
