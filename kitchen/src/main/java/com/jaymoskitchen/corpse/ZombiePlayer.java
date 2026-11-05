@@ -157,6 +157,12 @@ public class ZombiePlayer extends Zombie {
 	@Override
 	public void tick() {
 		super.tick();
+		if (level() instanceof ServerLevel level && tickCount % 20 == 0 && Corpses.inNoCorpseZone(this)) {
+			// (0.5.69) Andy: "the zombie players still reanimate in heaven, theyre supposed to disappear". One already up
+			// there (risen before the Other World kept bodies down, or carried in) fades the way a body there does
+			fade(level);
+			return;
+		}
 		if (!level().isClientSide()) {
 			chase();
 		}
@@ -172,6 +178,24 @@ public class ZombiePlayer extends Zombie {
 				setCustomName(null);
 			}
 		}
+	}
+
+	/** Gone in a wisp of souls, leaving what it held and carried. */
+	private void fade(ServerLevel level) {
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.SOUL, getX(), getY() + 1.0, getZ(), 12, 0.3, 0.6, 0.3, 0.02);
+		level.playSound(null, getX(), getY(), getZ(), SoundEvents.SOUL_ESCAPE.value(), net.minecraft.sounds.SoundSource.HOSTILE, 1.0F, 0.8F);
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			ItemStack worn = getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				spawnAtLocation(level, worn.copy());
+				setItemSlot(slot, ItemStack.EMPTY);
+			}
+		}
+		for (ItemStack stack : carried) {
+			spawnAtLocation(level, stack);
+		}
+		carried.clear();
+		discard();
 	}
 
 	@Override
