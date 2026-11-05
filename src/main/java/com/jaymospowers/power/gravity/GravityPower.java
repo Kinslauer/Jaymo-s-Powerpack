@@ -482,7 +482,7 @@ public final class GravityPower implements Power {
 		GravityTrainingField.init();
 		// (0.17.3) what a gifted villager does with Gravity
 		GravityGift.init();
-		// (0.21.9) the rock ball and the orbiting rocks (B+G)
+		// (0.21.10) the rock ball and the orbiting rocks (B+G)
 		GravityRocks.init();
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
@@ -666,7 +666,7 @@ public final class GravityPower implements Power {
 			}
 			case ABILITY_2 -> {
 				if (down && PowerInput.isDown(player, PowerKey.ABILITY_4)) {
-					// (0.21.9) B+G (B held, G tapped): the rocks you carry, gathered into a ball, split to orbit you, or put away;
+					// (0.21.10) B+G (B held, G tapped): the rocks you carry, gathered into a ball, split to orbit you, or put away;
 					// the B held for it never lands its Crush or Wave
 					state.crushFrom = -1;
 					GravityRocks.cycle(player);

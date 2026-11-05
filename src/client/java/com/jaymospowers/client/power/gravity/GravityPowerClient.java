@@ -50,7 +50,7 @@ public final class GravityPowerClient implements PowerClient {
 		PowerClients.register(GravityPower.ID, INSTANCE);
 		GravityHeldClient.init();
 		GravityMeteorFx.init();
-		// (0.21.9) the rock ball and the orbiting rocks, on every client
+		// (0.21.10) the rock ball and the orbiting rocks, on every client
 		GravityRocksLayer.init();
 		// every gravity user's aura, on every client
 		ClientTickEvents.END_CLIENT_TICK.register(GravityPowerClient::auras);
@@ -101,7 +101,7 @@ public final class GravityPowerClient implements PowerClient {
 		long now = player.level().getGameTime();
 		GravityCooldowns cooldowns = cooldowns(player);
 		if (key == PowerKey.ABILITY_2 && down && crushFrom >= 0) {
-			// (0.21.9) B+G: the rocks, not a Crush (the held B lands nothing)
+			// (0.21.10) B+G: the rocks, not a Crush (the held B lands nothing)
 			crushFrom = -1;
 		} else if (key == PowerKey.ABILITY_4) {
 			crushFrom = down && now >= cooldowns.crush() ? now : -1;

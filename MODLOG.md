@@ -1101,7 +1101,13 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   user skips the rock charge: the off hand rock goes the moment use is pressed (whip and follow-through only), at 3.0
   speed instead of 1.5 and straighter (`ThrownRocks.GRAVITY_SPEED`/`GRAVITY_SPREAD`, `ThrownRocks.gravity`). The usual
   10 tick cooldown still spaces throws.
-## 0.21.9 (2026-11-05): gravity users harness the rocks they carry (B+G)
+- **0.21.9, worldgen threads looping forever (server froze twice):** the 2026-11-04 20:16 and 2026-11-05 15:00 watchdog
+  crashes had every C2ME worker spinning in `Object2ObjectOpenHashMap.get` inside
+  `ChunkGeneratorStructureState.generatePositions`, chunks stuck at structure_starts for minutes. Vanilla fills a
+  generator's structure positions once, on first use, with an unlocked check-fill-flag; One Dimension's per-layer
+  generators fill lazily, so C2ME's workers filled the same map together and corrupted it. New `StructureStateLockMixin`
+  does vanilla's same steps inside a lock. Checked against the 26.3 jar; not built here.
+## 0.21.10 (2026-11-05): gravity users harness the rocks they carry (B+G) and throw them (sneak+R)
 - Andy: "a gravity user should utilize rocks and pebbles for more interactions with its kit". Carrying more than 8 loose
   rocks (any kind, anywhere in the inventory), B+G (hold B, tap G) gathers them into a rock ball over your right
   shoulder, bigger the more you carry (counted up to `GravityRocks.ROCK_CAP`, 32). B+G again splits it into a ring of up
@@ -1114,7 +1120,6 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   (monsters, anything after you, whoever you're fighting) are clipped for the same, at most once a second each.
 - One follow-up at a time: hits while the ball or a volley is out send nothing more. Every rock of the ball and ring is
   the rock item's own model, the kind you carry most of (`client/power/gravity/GravityRocksLayer`). Built, not played.
-## 0.21.10 (2026-11-05): throwing the harnessed rocks (sneak+R)
 - Andy: "you should be able to throw the rocks with shift R, a radial pulse from the orbit and a directional throw with the
   ball, that explodes in pebble debris on impact breaking things like leaves and glass". With rocks out (B+G), sneak+R
   throws them instead of starting Lift:

@@ -41,7 +41,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.21.9) Andy: "a gravity user should utilize rocks and pebbles for more interactions with its kit". Carrying more than
+ * (0.21.10) Andy: "a gravity user should utilize rocks and pebbles for more interactions with its kit". Carrying more than
  * {@link #MIN_ROCKS - 1} loose rocks ({@link FirstTools#rock}), B+G (hold B, tap G) gathers them out of your pack into a
  * <b>rock ball</b> that hangs by your shoulder, bigger the more rocks you carry. B+G again splits it into a ring of
  * rocks <b>orbiting</b> you; once more and they go back in the pack. Nothing is used up: the rocks stay in your inventory.

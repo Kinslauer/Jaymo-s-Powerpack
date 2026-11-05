@@ -9658,3 +9658,16 @@ specifics, and Banished, Shipwreck, Let fate decide (random even from non unlock
   moon, Rustfall, the Maw 1). Left out for the player: starts their blood can't take, ones whose mod isn't loaded, the
   afterlife (it remakes your heritage), and realm roads in a world with no realm; the rest share the odds. A realm road
   picked by fate goes to a random realm. Built, not played.
+
+## 0.7.606 (2026-11-05): the afterlife start is earned
+Andy: "divine born start should be an unlock". "Back from the afterlife" (the start that makes you Divine-born) is no
+longer open on day one (`RoadLocks.OPEN`). It opens the way the blood itself is earned: dying again while one of the
+dead in the Other World (`Heritage.died` now also records the deed `afterlife.died`, `RoadLocks.DIVINE_DEED`). Anyone
+who already has the Divine-born blood counts (`RoadLocks.look`), and like every road deed it opens for your group too.
+No secret past opens it. Its advancement is "Road Opened: Back from the afterlife" (`roads/afterlife`), hint "Someone has
+to have died twice over first." Ops can still `/kingdom roads unlock afterlife`. Fate already never picks it. Built, not
+played.
+- **0.7.607 (pack 0.21.9), a road's search for ground held the server:** `LifeStory.ground` (and `cave`, `beside`) made
+  every chunk it tried, up to 64 brand-new ones in one tick while the server waited (part of the 2026-11-05 15:00 crash).
+  New `reach`: a chunk already made is used freely, and at most `NEW_CHUNKS` (6) new ones per search; past that, spots
+  in unmade chunks are skipped. Not built here.

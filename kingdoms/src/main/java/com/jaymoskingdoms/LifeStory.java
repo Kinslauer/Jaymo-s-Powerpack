@@ -99,6 +99,8 @@ public final class LifeStory {
 	static final int ARRIVAL_GRACE_TICKS = 100;
 	/** Spots tried for a dry, open place to stand before giving up on one. */
 	static final int GROUND_TRIES = 16;
+	/** (0.7.607) New chunks one search for a place to stand may make (see {@link #reach}); made ones are free. */
+	static final int NEW_CHUNKS = 6;
 	/** (0.7.584) How far under a roof (blocks) a spot to stand indoors is looked for. */
 	static final int INDOOR_DEPTH = 8;
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
@@ -1814,12 +1816,15 @@ public final class LifeStory {
 
 	/** A dry, open place to stand {@code min}-{@code max} blocks from {@code center} (horizontally), or null. */
 	static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random) {
+		int[] made = {NEW_CHUNKS};
 		// (0.7.584) Andy, woken in chains on a camp hut's roof: open ground first (earth, sand, stone), then anywhere to stand
 		for (int i = 0; i < GROUND_TRIES * 2; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = min + random.nextInt(Math.max(1, max - min + 1));
 			int x = center.getX() + Mth.floor(Math.cos(angle) * d), z = center.getZ() + Mth.floor(Math.sin(angle) * d);
-			level.getChunk(x >> 4, z >> 4);
+			if (!reach(level, x, z, made)) {
+				continue;
+			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
 			if (standable(level, top) && openGround(level.getBlockState(top.below()))) {
 				return top;
@@ -1830,7 +1835,9 @@ public final class LifeStory {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = min + random.nextInt(Math.max(1, max - min + 1));
 			int x = center.getX() + Mth.floor(Math.cos(angle) * d), z = center.getZ() + Mth.floor(Math.sin(angle) * d);
-			level.getChunk(x >> 4, z >> 4);
+			if (!reach(level, x, z, made)) {
+				continue;
+			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
 			for (int y = top.getY() - 2; y >= top.getY() - INDOOR_DEPTH; y--) {
 				BlockPos in = new BlockPos(x, y, z);
@@ -1843,7 +1850,9 @@ public final class LifeStory {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = min + random.nextInt(Math.max(1, max - min + 1));
 			int x = center.getX() + Mth.floor(Math.cos(angle) * d), z = center.getZ() + Mth.floor(Math.sin(angle) * d);
-			level.getChunk(x >> 4, z >> 4);
+			if (!reach(level, x, z, made)) {
+				continue;
+			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
 			if (standable(level, top)) {
 				return top;
@@ -1852,11 +1861,32 @@ public final class LifeStory {
 		return null;
 	}
 
+	/**
+	 * (0.7.607) Whether {@code (x, z)}'s chunk is there to look at. One already made always is; one that isn't is made now
+	 * only while {@code made[0]} lasts ({@link #NEW_CHUNKS} per search). Making one stops the whole server till it's done,
+	 * which on this pack can be seconds a chunk: a search that made dozens (ground() tried up to 64 spots) held the server
+	 * past its watchdog (crash 2026-11-05 15:00, a road being set out on).
+	 */
+	private static boolean reach(ServerLevel level, int x, int z, int[] made) {
+		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) != null) {
+			return true;
+		}
+		if (made[0] <= 0) {
+			return false;
+		}
+		made[0]--;
+		level.getChunk(x >> 4, z >> 4);
+		return true;
+	}
+
 	/** A hollow underground near {@code center}, deep and roofed, with room to stand; or null. */
 	private static @Nullable BlockPos cave(ServerLevel level, BlockPos center, RandomSource random) {
+		int[] made = {NEW_CHUNKS};
 		for (int i = 0; i < CAVE_TRIES; i++) {
 			int x = center.getX() + random.nextInt(CAVE_RADIUS * 2 + 1) - CAVE_RADIUS, z = center.getZ() + random.nextInt(CAVE_RADIUS * 2 + 1) - CAVE_RADIUS;
-			level.getChunk(x >> 4, z >> 4);
+			if (!reach(level, x, z, made)) {
+				continue;
+			}
 			int top = Math.min(CAVE_MAX_Y, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 12);
 			for (int y = top; y > level.getMinY() + 8; y--) {
 				BlockPos pos = new BlockPos(x, y, z);
@@ -2216,11 +2246,14 @@ public final class LifeStory {
 	 * up and down from their spot, so a cave or a cell works as well as open ground); null if none.
 	 */
 	private static @Nullable BlockPos beside(ServerLevel level, BlockPos at, RandomSource random) {
+		int[] made = {NEW_CHUNKS};
 		for (int i = 0; i < TOGETHER_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = TOGETHER_MIN + random.nextInt(TOGETHER_MAX - TOGETHER_MIN + 1);
 			int x = at.getX() + Mth.floor(Math.cos(angle) * d), z = at.getZ() + Mth.floor(Math.sin(angle) * d);
-			level.getChunk(x >> 4, z >> 4);
+			if (!reach(level, x, z, made)) {
+				continue;
+			}
 			for (int dy = 2; dy >= -3; dy--) {
 				BlockPos feet = new BlockPos(x, at.getY() + dy, z);
 				if (standable(level, feet)) {

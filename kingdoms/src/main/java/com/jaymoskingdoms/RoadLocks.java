@@ -58,15 +58,25 @@ public final class RoadLocks {
 	 * the Family farmhand (the village road), and "everything locked should now have its own unlock method and
 	 * achievment". The capital, the wild, sworn, the cells, the nobodies and the burned village are locked again, each on
 	 * a deed of its own; every locked road's deed earns its advancement ({@link #ADVANCEMENT}).
+	 * <p>
+	 * (0.7.606, Andy: "divine born start should be an unlock") the afterlife is locked too: it opens with the Divine-born
+	 * blood ({@link #DIVINE_DEED}).
 	 */
 	static final Set<Start> OPEN = Collections.unmodifiableSet(EnumSet.of(Start.VILLAGE, Start.ROCK_BOTTOM, Start.BANISHED, Start.SHIPWRECK,
-		Start.FATE, Start.VERDANT, Start.AFTERLIFE, Start.DEMON, Start.LAB));
+		Start.FATE, Start.VERDANT, Start.DEMON, Start.LAB));
 
 	/**
 	 * (0.7.501, Andy: "Biobuilt start and heritage should be locked ... only unlocked after meeting the tinkerer or becoming an
 	 * android") The deed that opens the cast-out road, done with the Bio-built blood's waking ({@link Heritage#unlockChecks}).
 	 */
 	static final String BIOBUILT_DEED = "tinkerer.met";
+
+	/**
+	 * (0.7.606) The deed that opens the afterlife's road (the one that makes you Divine-born): the Divine-born blood woken,
+	 * by dying again while one of the dead in the Other World ({@link Heritage#died}), as the blood itself is earned.
+	 * Anyone who has that blood already counts ({@link #look}).
+	 */
+	static final String DIVINE_DEED = "afterlife.died";
 
 	/** (0.7.605) The capital's deed: a journeyman's rank in any trade. The wild's: a night out far from any settlement. Sworn's: a raider slain. */
 	static final String TRADE_DEED = "trade.ranked", WILD_DEED = "wild.night", RAIDER_DEED = "raider.slain";
@@ -150,6 +160,8 @@ public final class RoadLocks {
 		lock(Start.MOON, p -> is(p, Question.CHILDHOOD, "roofs") && is(p, Question.TURN, "fall"), "world.moon");
 		lock(Start.RUSTFALL, p -> is(p, Question.RAISED, "smiths") && is(p, Question.CHILDHOOD, "fire"), "world.rustfall");
 		lock(Start.MAW, p -> is(p, Question.CHILDHOOD, "caves") && is(p, Question.TURN, "bite"), "world.maw");
+		// (0.7.606) the afterlife's road opens with the Divine-born blood; no secret past
+		lock(Start.AFTERLIFE, p -> false, DIVINE_DEED);
 	}
 
 	private RoadLocks() {
@@ -194,6 +206,10 @@ public final class RoadLocks {
 				Deeds.done(player, TRADE_DEED);
 				break;
 			}
+		}
+		// (0.7.606) a Divine-born blood woken before the afterlife's road was locked still opens it
+		if (Heritage.unlocked(player, Heritage.Kind.DIVINE)) {
+			Deeds.done(player, DIVINE_DEED);
 		}
 		net.minecraft.server.level.ServerLevel level = player.level();
 		long time = level.getOverworldClockTime() % 24000L;

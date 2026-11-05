@@ -26,7 +26,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.21.9) A gravity user's harnessed rocks (GravityRocks), drawn for everyone: the rock ball hanging over the shoulder,
+ * (0.21.10) A gravity user's harnessed rocks (GravityRocks), drawn for everyone: the rock ball hanging over the shoulder,
  * a sphere of the rocks they carry (bigger with more), that flies at the foe and back when it strikes; or the ring of
  * rocks orbiting at the waist, rocks peeling off one by one to pelt the foe and coming back to their place.
  * Each rock is the rock item's own model, so the ball is made of the stone you picked up.
