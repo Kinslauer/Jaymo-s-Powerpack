@@ -186,7 +186,7 @@ public final class Carry {
 	/** Overhead, it's let go this much further ahead per block of its width, so it clears you. */
 	static final double OVERHEAD_RELEASE_PER_WIDTH = 0.5;
 	/**
-	 * (0.20.102) Andy: "throwing held items and mobs should follow the cursor, if you look high the trajectory is higher,
+	 * (0.20.103) Andy: "throwing held items and mobs should follow the cursor, if you look high the trajectory is higher,
 	 * and smaller things can be flung further w/ higher strength stat". A throw goes along your look (up, level or down) at
 	 * {@link #THROW_SPEED} (overhead {@link #HEAVE_SPEED}), with {@link #THROW_LIFT} up so a level throw still arcs; times
 	 * how light it is for its size ({@link #lightness}) and how strong you are ({@link #BRAWN_THROW} more per point of
@@ -195,9 +195,9 @@ public final class Carry {
 	static final double THROW_SPEED = 0.55, HEAVE_SPEED = 0.42, THROW_LIFT = 0.14;
 	public static final double BRAWN_THROW = 0.2;
 	public static final int BRAWN_THROW_MAX = 5;
-	/** (0.20.102) A person's bulk (width x width x height); something this bulky flies as far as a person, a lighter one further. */
+	/** (0.20.103) A person's bulk (width x width x height); something this bulky flies as far as a person, a lighter one further. */
 	public static final double PERSON_BULK = 0.6 * 0.6 * 1.8;
-	/** (0.20.102) How much further the lightest thing flies, and how much shorter the heaviest. */
+	/** (0.20.103) How much further the lightest thing flies, and how much shorter the heaviest. */
 	public static final double LIGHTEST = 1.8, HEAVIEST = 0.5;
 	static final Identifier WEIGHT_ID = JaymosPowers.id("carry_weight");
 
@@ -939,7 +939,7 @@ public final class Carry {
 	}
 
 	/** Ends a carry: forgets it, lifts the weight, and puts the body down the way it was let go. */
-	/** (0.20.102) A throw's own speed (b/t): along {@code thrower}'s look, a little up, by its lightness and their brawn. */
+	/** (0.20.103) A throw's own speed (b/t): along {@code thrower}'s look, a little up, by its lightness and their brawn. */
 	static Vec3 fling(Player thrower, Entity thrown, double speed) {
 		int brawn = Math.min(BRAWN_THROW_MAX, KitchenCompat.brawn(thrower));
 		// (a carried block is a display, with no real size of its own: it flies as a block)
@@ -948,7 +948,7 @@ public final class Carry {
 		return thrower.getViewVector(1.0F).scale(fast).add(0.0, THROW_LIFT, 0.0);
 	}
 
-	/** (0.20.102) How far something of this size flies against a person ({@link #HEAVIEST} to {@link #LIGHTEST}). */
+	/** (0.20.103) How far something of this size flies against a person ({@link #HEAVIEST} to {@link #LIGHTEST}). */
 	public static double lightness(double width, double height) {
 		double bulk = Math.max(1.0E-3, width * width * height);
 		return Math.clamp(Math.cbrt(PERSON_BULK / bulk), HEAVIEST, LIGHTEST);
@@ -990,7 +990,7 @@ public final class Carry {
 			}
 			velocity = switch (how) {
 				case DROP -> momentum.add(ahead.scale(DROP_AHEAD)).add(0.0, DROP_UP, 0.0);
-				// (0.20.102) along the look, further the lighter it is and the stronger you are
+				// (0.20.103) along the look, further the lighter it is and the stronger you are
 				case THROW -> momentum.multiply(1.0, 0.0, 1.0).add(fling(carrier, carried, entry.hold == OVERHEAD ? HEAVE_SPEED : THROW_SPEED));
 				case ESCAPE -> momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(-ESCAPE_BACK)).add(0.0, ESCAPE_UP, 0.0);
 				default -> Vec3.ZERO;

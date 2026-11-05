@@ -39,7 +39,7 @@ import org.jspecify.annotations.Nullable;
  * own is counted on your client ({@link ThrownRocks#windUpHere}), which tells the server when the rock goes
  * ({@link ThrownRocks.Charge}), so it starts the moment you press and the rock leaves as the arm comes over.
  * <p>
- * (0.20.102) A full charge is held drawn back ({@link ThrownRocks#READY}) until use is let go, and the rock goes then.
+ * (0.20.103) A full charge is held drawn back ({@link ThrownRocks#READY}) until use is let go, and the rock goes then.
  * The wind-up is drawn at its own pace (a charge sped up by momentum winds up faster).
  */
 public final class RockThrowPose {
@@ -85,11 +85,11 @@ public final class RockThrowPose {
 	private static long ticks;
 	/** Your own hold, as the server counts it: begun, last seen, and when its rock went (-1: not yet; begun -1: none). */
 	private static long ownStart = -1, ownLast = -1, ownThrown = -1;
-	/** (0.20.102) Your own hold: how long its charge takes, whether it's full, when the server was last told so. */
+	/** (0.20.103) Your own hold: how long its charge takes, whether it's full, when the server was last told so. */
 	private static int ownCharge = ThrownRocks.CHARGE;
 	private static boolean ownReady;
 	private static long ownHeard = -1;
-	/** (0.20.102) Your own momentum (as the server counts it): throws in a row, the one it began with, the last (client ticks). */
+	/** (0.20.103) Your own momentum (as the server counts it): throws in a row, the one it began with, the last (client ticks). */
 	private static int ownStreak, ownMomentum;
 	private static long ownLastThrow = -1;
 
@@ -124,7 +124,7 @@ public final class RockThrowPose {
 		}
 		ownLast = now;
 		if (!ownReady && now - ownStart >= ownCharge || ownReady && now - ownHeard >= ThrownRocks.KEEPALIVE) {
-			// (0.20.102) full: held drawn back until use is let go
+			// (0.20.103) full: held drawn back until use is let go
 			ownReady = true;
 			ownHeard = now;
 			ClientPlayNetworking.send(new ThrownRocks.Charge(ThrownRocks.READY));
@@ -149,7 +149,7 @@ public final class RockThrowPose {
 				return ownReady ? ThrownRocks.READY : ThrownRocks.WINDING_UP;
 			}
 			if (!lost && ownReady) {
-				// (0.20.102) a full charge let go: the rock goes, and the next charge comes sooner
+				// (0.20.103) a full charge let go: the rock goes, and the next charge comes sooner
 				ownThrown = ticks;
 				ownLastThrow = ticks;
 				ownStreak = Math.min(ThrownRocks.MOMENTUM_MAX, ownMomentum + 1);
@@ -174,7 +174,7 @@ public final class RockThrowPose {
 		}
 		if (minecraft.isPaused()) {
 			if (ownStart >= 0 && ownThrown < 0 && minecraft.getConnection() != null) {
-				// (0.20.102) paused mid-hold: the hold is let down, not thrown on the way back
+				// (0.20.103) paused mid-hold: the hold is let down, not thrown on the way back
 				ClientPlayNetworking.send(new ThrownRocks.Charge(0));
 				ownStart = -1;
 				ownReady = false;
@@ -261,7 +261,7 @@ public final class RockThrowPose {
 			float out = smooth((t - WHIP_TICKS) / Math.max(1.0F, ThrownRocks.FOLLOW_TICKS - WHIP_TICKS));
 			return new float[] {k * k, (1.0F - out) * pose.amount(), 1.0F};
 		}
-		// (0.20.102) held at full charge: drawn right back
+		// (0.20.103) held at full charge: drawn right back
 		return new float[] {0.0F, pose.amount(), pose.stage() == ThrownRocks.READY ? 1.0F : smooth(t / pose.charge())};
 	}
 

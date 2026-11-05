@@ -890,7 +890,7 @@ semi or full auto weapon. it should use ammunition accurately and animate a one 
   (`Finishers.WILD_MISS`) the shot goes into the ground beside their head and they live. Unloaded, it's still the Wild Slam.
 - Built (compileClientJava), not played.
 
-## 0.20.102 (2026-11-05): hold a charged rock; momentum; throws follow your aim (Kitchen 0.5.76, Kingdoms 0.7.587)
+## 0.20.103 (2026-11-05): hold a charged rock; momentum; throws follow your aim (Kitchen 0.5.76, Kingdoms 0.7.587)
 - **Rock throw, held** (`ThrownRocks`, `RockThrowPose`), Andy: "you can hold a full charged rock before you throw, and each
   you charge afterward is faster to charge due to momentum". A full charge no longer throws by itself: the arm stays drawn
   back (`READY`, trembling) while use is held, and the rock goes the moment you let go. Let go early, open a screen or pause,

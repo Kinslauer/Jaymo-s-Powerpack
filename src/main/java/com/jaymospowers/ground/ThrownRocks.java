@@ -88,7 +88,7 @@ import org.jspecify.annotations.Nullable;
  * client counts the charge ({@link #windUpHere}) and tells the server when the rock goes ({@link Charge}), so your arm
  * moves the moment you press and the rock leaves as it comes over.
  * <p>
- * (0.20.102) Andy: "you can hold a full charged rock before you throw, and each you charge afterward is faster to charge
+ * (0.20.103) Andy: "you can hold a full charged rock before you throw, and each you charge afterward is faster to charge
  * due to momentum". A full charge no longer throws by itself: the arm stays drawn back ({@link #READY}, trembling) for as
  * long as use is held, and the rock goes when you let go. Let go before the charge is full and nothing is thrown. Each
  * throw builds momentum ({@link #MOMENTUM_STEP} ticks off the next charge, up to {@link #MOMENTUM_MAX} throws: 1.5 s down
@@ -113,11 +113,11 @@ public final class ThrownRocks {
 	static final int STALE_TICKS = 60;
 	/** (0.20.81) A hold broken for longer than this (ticks; a held use repeats every 4) starts the charge again. */
 	public static final int CHARGE_GAP = 6;
-	/** (0.20.102) Momentum: each throw takes this many ticks off the next charge, for up to this many throws in a row. */
+	/** (0.20.103) Momentum: each throw takes this many ticks off the next charge, for up to this many throws in a row. */
 	public static final int MOMENTUM_STEP = 5, MOMENTUM_MAX = 4;
-	/** (0.20.102) Momentum loses one throw's worth for every this many ticks from a throw to the next wind-up. */
+	/** (0.20.103) Momentum loses one throw's worth for every this many ticks from a throw to the next wind-up. */
 	public static final int MOMENTUM_FADE = 40;
-	/** (0.20.102) While a full charge is held, the client says so this often (ticks), so the server keeps the hold. */
+	/** (0.20.103) While a full charge is held, the client says so this often (ticks), so the server keeps the hold. */
 	public static final int KEEPALIVE = 20;
 	/** A rock still flying after this long is no longer watched. */
 	static final int LIFE = 200;
@@ -169,7 +169,7 @@ public final class ThrownRocks {
 	private static final List<Rock> FLYING = new ArrayList<>();
 	/** (0.20.81) Players winding up an off hand throw (0.20.90: and following one through). */
 	private static final Map<UUID, Hold> WINDING = new HashMap<>();
-	/** (0.20.102) Each player's momentum: {throws in a row, game time of the last}. Not saved. */
+	/** (0.20.103) Each player's momentum: {throws in a row, game time of the last}. Not saved. */
 	private static final Map<UUID, long[]> MOMENTUM = new HashMap<>();
 
 	/** (0.20.90) The arm's follow-through after the rock goes (ticks). */
@@ -187,17 +187,17 @@ public final class ThrownRocks {
 	};
 	private static int holds;
 
-	/** (0.20.102) A throw's synced value: the hold's number, its charge (ticks, so the wind-up is drawn at its pace), the stage. */
+	/** (0.20.103) A throw's synced value: the hold's number, its charge (ticks, so the wind-up is drawn at its pace), the stage. */
 	public static int value(long id, int charge, int stage) {
 		return (int) (id & 0xFFFFF) << 8 | (charge & 63) << 2 | stage;
 	}
 
-	/** (0.20.102) The charge (ticks) in a {@link #value}. */
+	/** (0.20.103) The charge (ticks) in a {@link #value}. */
 	public static int chargeOf(int value) {
 		return value >> 2 & 63;
 	}
 
-	/** (0.20.102) Momentum left at {@code now}: {@code streak} throws in a row, the last at {@code last} (-1: none), faded since. */
+	/** (0.20.103) Momentum left at {@code now}: {@code streak} throws in a row, the last at {@code last} (-1: none), faded since. */
 	public static int momentum(int streak, long last, long now) {
 		if (last < 0 || now < last) {
 			return 0;
@@ -205,13 +205,13 @@ public final class ThrownRocks {
 		return (int) Math.max(0L, streak - (now - last) / MOMENTUM_FADE);
 	}
 
-	/** (0.20.102) How long a charge takes (ticks) with {@code momentum} throws behind it. */
+	/** (0.20.103) How long a charge takes (ticks) with {@code momentum} throws behind it. */
 	public static int charge(int momentum) {
 		return CHARGE - MOMENTUM_STEP * Math.clamp(momentum, 0, MOMENTUM_MAX);
 	}
 
 	/**
-	 * (0.20.90) A hold winding up: when it began (game ticks), and when its rock went, or -1; (0.20.102) the momentum it
+	 * (0.20.90) A hold winding up: when it began (game ticks), and when its rock went, or -1; (0.20.103) the momentum it
 	 * began with, how long its charge takes, and when its client last spoke.
 	 */
 	private static final class Hold {
@@ -266,7 +266,7 @@ public final class ThrownRocks {
 
 	/**
 	 * (0.20.90) From your client as you hold use with a rock in the off hand: {@link #WINDING_UP} as the hold begins,
-	 * {@link #THROWING} once it has been held {@link #CHARGE} ticks, 0 if it was let go early. (0.20.102) {@link #READY}
+	 * {@link #THROWING} once it has been held {@link #CHARGE} ticks, 0 if it was let go early. (0.20.103) {@link #READY}
 	 * once the charge is full (and every {@link #KEEPALIVE} ticks it's held), {@link #THROWING} when use is let go. (The server used to count
 	 * the held use itself, but at the air the client never tells it of a use that does nothing on its side, so the charge
 	 * only ran when the use landed on a block.)
@@ -306,7 +306,7 @@ public final class ThrownRocks {
 			return;
 		}
 		if (stage == READY && able) {
-			// (0.20.102) the full charge held: drawn right back, waiting to be let go
+			// (0.20.103) the full charge held: drawn right back, waiting to be let go
 			hold.heard = now;
 			if (now - hold.start >= hold.charge - CHARGE_SLACK) {
 				player.setAttached(THROW, value(hold.id, hold.charge, READY));
@@ -328,7 +328,7 @@ public final class ThrownRocks {
 		// let go: the arm whips through, and follows through (tick clears it)
 		hold.thrown = now;
 		player.setAttached(THROW, value(hold.id, hold.charge, THROWING));
-		// (0.20.102) momentum: the next charge comes sooner
+		// (0.20.103) momentum: the next charge comes sooner
 		MOMENTUM.put(player.getUUID(), new long[] {Math.min(MOMENTUM_MAX, hold.momentum + 1), now});
 		player.getCooldowns().addCooldown(stack, COOLDOWN);
 		ServerLevel server = (ServerLevel) player.level();
