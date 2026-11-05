@@ -3,6 +3,7 @@ package com.jaymospowers.client.wet;
 import com.jaymospowers.client.blood.BloodPuddle;
 import com.jaymospowers.core.wet.ArmourGrime;
 import com.jaymospowers.core.wet.WetParticles;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,11 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Drips:</b> anyone who's been in water or rain stays wet for a while after; out of it they drip, and the drops
  * gather into little puddles under them that dry up, leaving a trail of wet spots behind whoever walks off.</li>
  * <li><b>Rain puddles:</b> while it rains, water pools on the ground under trees (where the leaves drip) and beside their
- * trunks, and less often in hollows in the open. A puddle grows while the rain keeps falling on it and dries up after.</li>
+ * trunks, and less often in hollows in the open. A puddle grows while the rain keeps falling on it and dries up after.
+ * (0.20.54) Andy: "rain doesn't seem to be pooling water". In the open only two-sided hollows ever got one, a fifth of the
+ * time, and a puddle grew only when a random try happened to land on its block again, so out in a field there were next
+ * to none and those few stayed small. Now flat open ground pools too (never a ledge water would run off, nor sand), hollows
+ * more surely, and every puddle the rain still falls on is fed each {@link #RAIN_FEED_EVERY} ticks, so it grows full.</li>
  * <li><b>Light shafts:</b> under water by day, beams of sunlight hang down from the surface overhead
  * ({@link LightShaft}).</li>
  * </ul>
@@ -62,7 +67,10 @@ public final class WetClient {
 	static final float RAIN_SCALE = 0.45F, RAIN_GROW = 0.12F;
 	/** The most rain puddles kept; how far from a trunk counts as beside it; the chance an open hollow gets one. */
 	static final int MAX_RAIN_PUDDLES = 160, TRUNK_REACH = 3;
-	static final float HOLLOW_CHANCE = 0.2F;
+	static final float HOLLOW_CHANCE = 0.6F;
+	/** (0.20.54) The chance a flat open spot gets one, and how often every rained-on puddle is fed (ticks). */
+	static final float FLAT_CHANCE = 0.1F;
+	static final int RAIN_FEED_EVERY = 100;
 	/** Light shafts: how often one is tried (ticks), how far out (blocks), how many at once, how long they last (ticks). */
 	static final int SHAFT_EVERY = 3, SHAFT_RANGE = 14, MAX_SHAFTS = 36, SHAFT_LIFE = 90, SHAFT_LIFE_SPREAD = 80;
 	/** How deep (blocks) the surface may be above the camera, and how bright a shaft is at noon. */
@@ -126,6 +134,9 @@ public final class WetClient {
 			drips(minecraft, level, eye);
 			if (level.getGameTime() % RAIN_EVERY == 0 && level.getRainLevel(1.0F) > 0.2F) {
 				rain(minecraft, level, eye);
+			}
+			if (level.getGameTime() % RAIN_FEED_EVERY == 0 && level.getRainLevel(1.0F) > 0.2F) {
+				feedRain(level);
 			}
 		}
 		if (shaftSprites != null && level.getGameTime() % SHAFT_EVERY == 0 && camera.getFluidInCamera() == FogType.WATER) {
@@ -211,7 +222,7 @@ public final class WetClient {
 				continue;
 			}
 			boolean underLeaves = canopy > ground && level.getBlockState(new BlockPos(x, canopy - 1, z)).is(BlockTags.LEAVES);
-			if (!underLeaves && !besideTrunk(level, at) && !(hollow(level, x, ground, z) && random.nextFloat() < HOLLOW_CHANCE)) {
+			if (!underLeaves && !besideTrunk(level, at) && !open(level, floor, x, ground, z, random)) {
 				continue;
 			}
 			long key = at.asLong();
@@ -244,6 +255,40 @@ public final class WetClient {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * (0.20.54) Whether rain pools on this open spot: never on sand (it soaks in) or a ledge (any side lower: it runs off);
+	 * a hollow by {@link #HOLLOW_CHANCE}, flat ground by {@link #FLAT_CHANCE}.
+	 */
+	private static boolean open(ClientLevel level, BlockState floor, int x, int ground, int z, RandomSource random) {
+		if (floor.is(BlockTags.SAND)) {
+			return false;
+		}
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			if (level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + side.getStepX(), z + side.getStepZ()) < ground) {
+				return false;
+			}
+		}
+		return random.nextFloat() < (hollow(level, x, ground, z) ? HOLLOW_CHANCE : FLAT_CHANCE);
+	}
+
+	/** (0.20.54) Every rain puddle the rain still falls on (or drips on, under the leaves) grows and keeps. */
+	private static void feedRain(ClientLevel level) {
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (Long2ObjectMap.Entry<BloodPuddle> entry : RAIN.long2ObjectEntrySet()) {
+			BloodPuddle puddle = entry.getValue();
+			pos.set(entry.getLongKey());
+			int ground = pos.getY(), canopy = level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
+			if (!puddle.isAlive() || canopy > ground && !level.getBlockState(pos.setY(canopy - 1)).is(BlockTags.LEAVES)) {
+				// (roofed over since: it dries)
+				continue;
+			}
+			pos.setY(Math.max(ground, canopy));
+			if (level.getBiome(pos).value().getPrecipitationAt(pos, level.getSeaLevel()) == Biome.Precipitation.RAIN) {
+				puddle.feed(RAIN_LIFE, RAIN_GROW);
+			}
+		}
 	}
 
 	/** Whether the ground here is lower than at least two of its four neighbours (water runs into it). */

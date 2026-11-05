@@ -20,7 +20,7 @@ import net.spell_engine.internals.container.SpellContainerSource;
  * The slots' tags take Spell Engine's own item tags. The worn list is synced to its wearer, so the client sees it too.
  * Spells themselves are learned on Jaymo's Kingdoms' skill web or from a trainer, never from books (its Learnables), so
  * there's no slot for spell books.
- * <p>(0.20.53) Impale throws the spear itself, which lands to be picked up again ({@link SpellThrows}).
+ * <p>(0.20.55) Impale throws the spear itself, which lands to be picked up again ({@link SpellThrows}).
  */
 public final class SpellEngineCompat {
 	private static final String MOD_ID = "spell_engine";
