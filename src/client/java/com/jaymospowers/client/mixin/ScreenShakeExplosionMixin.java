@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Every explosion near you (a creeper, TNT, a ki blast) shakes your screen from where it went off (see ScreenShake).
- * (0.20.52) Its size is told to Blasts before its sound plays, so the boom and the shake reach you together.
+ * (0.20.53) Its size is told to Blasts before its sound plays, so the boom and the shake reach you together.
  */
 @Mixin(ClientPacketListener.class)
 abstract class ScreenShakeExplosionMixin {

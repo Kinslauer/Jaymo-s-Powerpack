@@ -228,6 +228,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
+		// (0.20.52) the stacked Aether hidden from under the clouds
+		com.jaymospowers.client.aether.AetherVeil.init();
 		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
 		com.jaymospowers.client.power.cryo.CryoPowerClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's

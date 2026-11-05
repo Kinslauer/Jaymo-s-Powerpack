@@ -254,7 +254,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   - Compile-checked; not played. Things to watch: anything else that asks `getMaxY()` for the top of the Overworld now gets the Aether's top; SwordStone's Laevateinn (worldgen) may not pick the Nether band; under the Nether's floor is void.
 - **0.20.31, Kingdoms 0.7.529, Golemworks:** Some realms are magically attuned and keep golems: gilt lamp wardens and
   verdant menders alongside iron golems, and a throne golem that serves only the realm's king or queen: it folds into a
-  giant throne for them, takes every blow meant for them, and rises to fight once it has taken more than 20. Anyone with Golemancy can make them. See Kingdoms' MODLOG 0.7.549.
+  giant throne for them, takes every blow meant for them, and rises to fight once it has taken more than 20. Anyone with Golemancy can make them. See Kingdoms' MODLOG 0.7.477.
 - **0.20.32, server start fix and CurseForge ids:** ChoiceTheorem's Overhauled Village (4.1.1, a 26.2 build) stopped the
   26.3 server loading: 105 of its structures use `minecraft:simple_state_provider`/`weighted_state_provider` (gone in 26.3)
   and `lithostitched:limited` (not in Lithostitched 2.0.6). It's out of the pack (its line is commented out in build.gradle)
@@ -410,7 +410,19 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   damage taken), switched off by `compat/SubtleEffectsCompat` (its two public fields, at server start and every 10 s on
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
-- **0.20.52, Kingdoms 0.7.549, Big Cannons booms:** Andy liked Create Big Cannons' screen shake and sounds. Its code is MIT
+
+- **0.20.52, the Aether hidden until you're past the clouds:** Andy (2026-11-05), on a clip looking up from a hillside:
+  "The aether should NOT be visible so easy from ground level especially, maybe it only reveals once you are past the
+  cloud layer?" In a One Dimension world the Aether band is ordinary terrain over the Overworld's sky, so its islands'
+  undersides showed from anywhere. `client/aether/AetherVeil` reads the Aether band's floor and the Overworld band's
+  shift from CustomChunks' synced `StackLayout`, and while the camera is under the Overworld's clouds (192.33 + shift;
+  it hides below the clouds' bottom and shows above their top, so it flips inside the cloud) nothing at or above that
+  floor is drawn: Sodium's culling frustum gets the floor as a ceiling (`client/mixin/sodium/AetherVeilViewportMixin`
+  wraps every `Viewport`'s frustum in `SodiumVeil`, Iris' shadow pass included, and asks Sodium to cull again when it
+  flips), and the game's `Frustum.isVisible` leaves out anything whose box starts at or above it (mobs, aerwhales,
+  item drops). Ordinary worlds and the separate Aether dimension are untouched. Sodium is now `compileOnly`, behind an
+  optional mixin config. Gradle compile only, not played.
+- **0.20.53, Kingdoms 0.7.549, Big Cannons booms:** Andy liked Create Big Cannons' screen shake and sounds. Its code is MIT
   and its sound files carry no licence, so these are our own code and our own sounds (synthesised by
   `tools/gen_blast_sounds.py`). `client/sound/Blasts` (hooked at `SoundEngine.play` by `BlastSoundEngineMixin`): every
   blast sound (the explosion sound from any mod, the dragon fireball, our cannon report) reaches you at 17 blocks a tick,
