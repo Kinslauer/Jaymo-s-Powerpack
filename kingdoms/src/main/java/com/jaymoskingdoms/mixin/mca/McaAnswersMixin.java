@@ -41,6 +41,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * ({@link com.jaymoskingdoms.InteractActions}): never in the talk menu now.
  * (0.7.449) "Ask what's going on" ({@link com.jaymoskingdoms.ComingOver#ANSWER}) shows only on one who came over to you lately.
  * (0.7.449) "Accuse them of theft" ({@link com.jaymoskingdoms.Crooks#ACCUSE_ANSWER}) shows only after you've found you were robbed.
+ * (0.7.555) On one of Powers' Z Fighter characters ({@link com.jaymoskingdoms.ZFighterFolk#keeps}) only their own menu, training,
+ * a chat (and for a pilot or patrolman a joke and a story).
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -184,6 +186,10 @@ abstract class McaAnswersMixin {
 			// (0.7.454) on the Interact page now (InteractActions): an audience, a pedlar's wares, tribute, a captain's orders
 			cir.getReturnValue().removeAll(List.of(Rulers.ANSWER, com.jaymoskingdoms.Pedlars.WARES_ANSWER, com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER,
 				com.jaymoskingdoms.SwornCaptains.SPY_ANSWER, com.jaymoskingdoms.SwornCaptains.RAID_ANSWER));
+		}
+		if ("main".equals(name) && com.jaymoskingdoms.ZFighterFolk.is(villager)) {
+			// (0.7.555) Andy: "no reason to tell rumors or hug them": their own menu, training, a chat
+			cir.getReturnValue().removeIf(answer -> !com.jaymoskingdoms.ZFighterFolk.keeps(villager, answer));
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say

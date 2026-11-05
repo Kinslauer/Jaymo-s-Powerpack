@@ -41,7 +41,9 @@ abstract class McaStrangerPageMixin extends Screen {
 	@Inject(method = "setLayout", at = @At("TAIL"))
 	private void jaymoskingdoms$strangerPage(String layout, CallbackInfo ci) {
 		if (!"main".equals(layout) || !((Object)this instanceof InteractScreen) || !(this instanceof McaInteractScreenAccessor interact)
-			|| Introductions.knownHere(interact.jaymoskingdoms$villager().asEntity())) {
+			|| Introductions.knownHere(interact.jaymoskingdoms$villager().asEntity())
+			// (0.7.555) one of Powers' Z Fighter characters has its own trimmed page (McaZFighterPageMixin)
+			|| interact.jaymoskingdoms$villager().asEntity().getAttached(com.jaymoskingdoms.ZFighterFolk.PART) != null) {
 			return;
 		}
 		AbstractWidget talk = null, second = null;

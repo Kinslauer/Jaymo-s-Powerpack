@@ -359,7 +359,7 @@ public final class Spellcraft {
 		return stack.is(ItemTags.SWORDS) || stack.is(ClassPerks.LIGHT_BLADES) || stack.is(ClassPerks.TWO_HANDED);
 	}
 
-	private static void imbue(ServerPlayer player, boolean bolt) {
+	static void imbue(ServerPlayer player, boolean bolt) {
 		String element = element(player);
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return;

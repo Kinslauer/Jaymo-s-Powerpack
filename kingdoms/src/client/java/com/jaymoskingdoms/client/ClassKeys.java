@@ -1,5 +1,7 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.BloodBlasts;
+import com.jaymoskingdoms.Hemomancy;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Spellcraft;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -15,6 +17,8 @@ import net.minecraft.network.chat.Component;
 /** (0.6.0) The classes' key: {@code J} imbues a Sorcerer's blade ({@link Spellcraft}); sneak and {@code J} throws the bolt. */
 final class ClassKeys {
 	private static KeyMapping imbue;
+	/** (0.7.554) A Blood Sorcerer's J is down (BloodBlasts.Hold sent). */
+	private static boolean bloodHeld;
 
 	private ClassKeys() {
 	}
@@ -25,7 +29,22 @@ final class ClassKeys {
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (imbue.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null) {
-					ClientPlayNetworking.send(new Spellcraft.Imbue(minecraft.player.isShiftKeyDown()));
+					// (0.7.554) a Blood Sorcerer's J is held, not pressed: gather the blood near, empty-handed throw it
+					// (BloodBlasts; a tap is still the Imbue, decided on the server when it's let go)
+					if (Hemomancy.bloodMage(minecraft.player) && !minecraft.player.isShiftKeyDown()) {
+						if (!bloodHeld) {
+							bloodHeld = true;
+							ClientPlayNetworking.send(new BloodBlasts.Hold(true));
+						}
+					} else {
+						ClientPlayNetworking.send(new Spellcraft.Imbue(minecraft.player.isShiftKeyDown()));
+					}
+				}
+			}
+			if (bloodHeld && (!imbue.isDown() || minecraft.player == null || minecraft.gui.screen() != null)) {
+				bloodHeld = false;
+				if (minecraft.getConnection() != null) {
+					ClientPlayNetworking.send(new BloodBlasts.Hold(false));
 				}
 			}
 		});

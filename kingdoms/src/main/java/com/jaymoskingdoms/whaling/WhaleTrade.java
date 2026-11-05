@@ -25,7 +25,7 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * dearly, by their trade: fishermen and butchers the meat and blubber, clerics the oil for their lamps and ambergris for
  * their incense, librarians and cartographers oil to read and draw by, leatherworkers blubber to dress hides, armourers and
  * weaponsmiths oil against rust, toolsmiths and fletchers bone, masons bone and oil.
- * (0.7.554) Andy: "not everyone should strictly trade for whale products." Only those trades buy whale goods now; the rest
+ * (0.7.555) Andy: "not everyone should strictly trade for whale products." Only those trades buy whale goods now; the rest
  * want something of their own ({@code OwnWants}), and a whale purchase put on someone outside those trades before is taken off. A sale on a realm's land pays the realm its toll like any
  * other trade ({@code Treasuries.traded}), so a whaling crew's haul fills its kingdom's purse.
  * <p>
@@ -96,7 +96,7 @@ final class WhaleTrade {
 				}
 			}
 		}
-		// (0.7.554) everyone used to buy cooked meat, oil and ambergris: off again on those whose trade doesn't
+		// (0.7.555) everyone used to buy cooked meat, oil and ambergris: off again on those whose trade doesn't
 		offers.removeIf(o -> whale.contains(o.getCostA().getItem()) && !theirs.contains(o.getCostA().getItem())
 			&& com.jaymoskingdoms.Currencies.isMoney(o.getResult()));
 	}

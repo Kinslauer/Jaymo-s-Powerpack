@@ -18,10 +18,12 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 /**
- * (0.7.554) Andy: "not everyone should strictly trade for whale products. they should all have some separate thing THEY want
+ * (0.7.555) Andy: "not everyone should strictly trade for whale products. they should all have some separate thing THEY want
  * specifically." Every grown villager has one thing of their own they'd pay well for, picked once from who they are (their
- * UUID, so it never changes): a few things that fit their trade, or one of the small pleasures anyone might want (honey, a
- * rabbit's foot, a music disc...). It goes on their trades as a purchase when a player right-clicks them, like the whale goods
+ * UUID, so it never changes). (0.7.555, Andy: "every villager should want something different, it could relate to their
+ * temperament or personality") Mostly it comes from their MCA personality ({@link #byNature}: the greedy want gold, the gloomy
+ * candles, the flirty flowers, the athletic a hearty meal...), sometimes from their trade, now and then a small pleasure
+ * anyone might want; several things per personality, so two of a kind needn't want the same. It goes on their trades as a purchase when a player right-clicks them, like the whale goods
  * ({@code whaling.WhaleTrade}), which now go only to the trades that use them. Not on Powers' Z Fighter characters.
  */
 final class OwnWants {
@@ -32,11 +34,12 @@ final class OwnWants {
 	/** Trading experience per purchase, and how the price shifts with demand (the game's own use 0.05). */
 	static final int XP = 4;
 	static final float PRICE_MULTIPLIER = 0.05F;
-	/** The chance (out of 1) the want comes from their trade's list rather than everyone's. */
-	static final float TRADE_SHARE = 0.6F;
+	/** The chances (out of 1) the want comes from their personality's list, else their trade's; the rest, everyone's. */
+	static final float NATURE_SHARE = 0.6F, TRADE_SHARE = 0.6F;
 
 	private static Map<ResourceKey<VillagerProfession>, List<Want>> byTrade;
 	private static List<Want> anyone;
+	private static Map<String, List<Want>> byNature;
 
 	private OwnWants() {
 	}
@@ -83,6 +86,28 @@ final class OwnWants {
 				new Want(Items.AMETHYST_SHARD, 4, 5, 8))),
 			Map.entry(VillagerProfession.SHEPHERD, List.of(new Want(Items.WHEAT, 16, 2, 16), new Want(Items.SHEARS, 1, 4, 4),
 				new Want(Items.COCOA_BEANS, 8, 3, 10))));
+		byNature = Map.ofEntries(
+			Map.entry("greedy", List.of(new Want(Items.GOLD_NUGGET, 18, 3, 10), new Want(Items.RAW_GOLD, 2, 5, 8), new Want(Items.DIAMOND, 1, 14, 2))),
+			Map.entry("gloomy", List.of(new Want(Items.CANDLE, 4, 3, 10), new Want(Items.WITHER_ROSE, 1, 10, 2), new Want(Items.MUSIC_DISC_11, 1, 14, 1))),
+			Map.entry("crabby", List.of(new Want(Items.COOKED_BEEF, 4, 3, 10), new Want(Items.PUFFERFISH, 1, 6, 4), new Want(Items.SPIDER_EYE, 3, 3, 8))),
+			Map.entry("grumpy", List.of(new Want(Items.COOKED_MUTTON, 4, 3, 10), new Want(Items.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE), 4, 3, 8), new Want(Items.PUFFERFISH, 1, 6, 4))),
+			Map.entry("stubborn", List.of(new Want(Items.IRON_INGOT, 3, 4, 8), new Want(Items.OBSIDIAN, 2, 5, 6), new Want(Items.FLINT, 10, 2, 10))),
+			Map.entry("friendly", List.of(new Want(Items.COOKIE, 8, 3, 10), new Want(Items.CAKE, 1, 6, 3), new Want(Items.POPPY, 6, 2, 10))),
+			Map.entry("upbeat", List.of(new Want(Items.SUNFLOWER, 4, 3, 8), new Want(Items.FIREWORK_ROCKET, 3, 4, 8), new Want(Items.GLOW_BERRIES, 8, 3, 10))),
+			Map.entry("peaceful", List.of(new Want(Items.LILY_OF_THE_VALLEY, 4, 3, 8), new Want(Items.HONEY_BOTTLE, 2, 4, 8), new Want(Items.BAMBOO, 16, 2, 12))),
+			Map.entry("relaxed", List.of(new Want(Items.HONEY_BOTTLE, 2, 4, 8), new Want(Items.MUSIC_DISC_CAT, 1, 14, 1), new Want(Items.MELON_SLICE, 12, 2, 12))),
+			Map.entry("lazy", List.of(new Want(Items.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE), 6, 3, 10), new Want(Items.PUMPKIN_PIE, 2, 4, 8), new Want(Items.BREAD, 6, 2, 12))),
+			Map.entry("anxious", List.of(new Want(Items.TORCH, 16, 2, 12), new Want(Items.RABBIT_FOOT, 1, 8, 3), new Want(Items.IRON_DOOR, 1, 5, 3))),
+			Map.entry("sensitive", List.of(new Want(Items.ALLIUM, 4, 3, 8), new Want(Items.PAINTING, 1, 4, 4), new Want(Items.PINK_PETALS, 8, 3, 8))),
+			Map.entry("shy", List.of(new Want(Items.BOOK, 2, 4, 8), new Want(Items.WRITABLE_BOOK, 1, 5, 4), new Want(Items.LANTERN, 1, 4, 6))),
+			Map.entry("introverted", List.of(new Want(Items.BOOK, 2, 4, 8), new Want(Items.FLOWER_POT, 2, 2, 8), new Want(Items.CANDLE, 4, 3, 10))),
+			Map.entry("extroverted", List.of(new Want(Items.FIREWORK_ROCKET, 4, 4, 8), new Want(Items.NOTE_BLOCK, 1, 4, 4), new Want(Items.CAKE, 1, 6, 3))),
+			Map.entry("flirty", List.of(new Want(Items.ROSE_BUSH, 2, 4, 8), new Want(Items.PINK_TULIP, 4, 3, 8), new Want(Items.AMETHYST_SHARD, 3, 5, 8))),
+			Map.entry("witty", List.of(new Want(Items.BOOK, 2, 4, 8), new Want(Items.GOAT_HORN, 1, 10, 2), new Want(Items.GLOW_INK_SAC, 2, 6, 6))),
+			Map.entry("playful", List.of(new Want(Items.SLIME_BALL, 3, 4, 8), new Want(Items.SNOWBALL, 16, 2, 12), new Want(Items.SWEET_BERRIES, 12, 2, 12))),
+			Map.entry("odd", List.of(new Want(Items.FERMENTED_SPIDER_EYE, 1, 5, 4), new Want(Items.PHANTOM_MEMBRANE, 1, 8, 3), new Want(Items.ECHO_SHARD, 1, 16, 1))),
+			Map.entry("athletic", List.of(new Want(Items.COOKED_PORKCHOP, 4, 3, 10), new Want(Items.GOLDEN_CARROT, 3, 5, 8), new Want(Items.LEATHER, 4, 3, 10))),
+			Map.entry("confident", List.of(new Want(Items.GOLD_INGOT, 2, 5, 8), new Want(Items.SHIELD, 1, 5, 3), new Want(Items.SPYGLASS, 1, 12, 2))));
 		anyone = List.of(
 			new Want(Items.HONEY_BOTTLE, 2, 4, 8), new Want(Items.SWEET_BERRIES, 12, 2, 12), new Want(Items.RABBIT_FOOT, 1, 8, 3),
 			new Want(Items.CAKE, 1, 6, 3), new Want(Items.COOKIE, 8, 3, 10), new Want(Items.PUMPKIN_PIE, 2, 4, 8),
@@ -104,8 +129,9 @@ final class OwnWants {
 				fromTrade.addAll(entry.getValue());
 			}
 		}
-		boolean trade = !fromTrade.isEmpty() && pick.nextFloat() < TRADE_SHARE;
-		List<Want> from = trade ? fromTrade : anyone;
+		List<Want> nature = byNature.getOrDefault(McaCompat.personality(v), List.of());
+		List<Want> from = !nature.isEmpty() && pick.nextFloat() < NATURE_SHARE ? nature
+			: !fromTrade.isEmpty() && pick.nextFloat() < TRADE_SHARE ? fromTrade : anyone;
 		return from.get(pick.nextInt(from.size()));
 	}
 
