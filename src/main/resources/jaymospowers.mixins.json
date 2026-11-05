@@ -39,6 +39,7 @@
 		"DownedHealMixin",
 		"DownedLimboMixin",
 		"FistGuardInventoryMixin",
+		"GuardOverTalkMixin",
 		"GuardRiposteMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",

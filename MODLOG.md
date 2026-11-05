@@ -590,7 +590,37 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (`jaymoskingdoms:hornkin*`, `zombified_hornkin`) for 0.5 instead of 3 (`ThrownRocks.SHRUGGED_DAMAGE`, `shrugsOff`); an
   unsuspecting one can still be knocked out. Kingdoms' NPC rocks follow the same rule (Kingdoms 0.7.558). Not played.
 
-## 0.20.72 (2026-11-05): Kingdoms 0.7.561, no fighting the unseen
+## 0.20.72 (2026-11-05): pack bump for Kingdoms 0.7.561
 
-- Packs Kingdoms 0.7.561: NPCs stop swinging at a werewolf's hidden person and fight the beast; a Quiet One orc is seen
+- Kingdoms 0.7.561: a downed king lifted by a player no longer gets a fresh set of plate each time his armour is shed
+  (the "duplicating" royal armour). No Powers code changed.
+
+## 0.20.73 (2026-11-05): one tool or weapon on the body at a time
+- Andy: "only one tool or weapon should show at a time, in whatever slot". YDM's Weapon Master hung every hotbar item on
+  the back and belt at once. `client/mixin/weaponmaster/WeaponMasterOneItemMixin` (optional, skipped without it) lets
+  each body's pass of its layer draw only the first item it reaches, the lowest hotbar slot not in hand, for your own
+  body and other players'. Its quiver still shows. `MAX_SHOWN` at the top. Gradle build only, not played.
+- **0.20.74, Shift + Left Alt zooms** (Andy: "shift + left alt should make you zoom"): holding Sneak and the Dodge key
+  together zooms with OK Zoomer until either is let go (`SneakZoom`), beside the double-tap-and-hold Sneak. Alt pressed
+  while Sneak is down no longer dodges (`DodgeClient`); Alt alone still rolls. Built, not played.
+
+## 0.20.75 (2026-11-05): NPC speech bubble fix, orc lines
+- Pack bump for Kingdoms 0.7.562: haven guards' rally cry showed a raw lang key instead of the line; villagers, guards
+  and goblins now greet, warn off or shout at the orcs they meet (OrcSightings). Not played.
+
+## 0.20.76 (2026-11-05): weapons parry again
+- Andy: "parry doesnt seem possible with weapons anymore, is that because of the weapon arts?". Not the arts (the skill
+  bar leaves right click on a guarding weapon). Two other holes:
+  - Right click on a foe in reach opened MCA's chat (orcs, guards, bandits are MCA villagers), so the guard never went
+    up. With a guarding weapon in the main hand, right click on a foe (a monster, a mob that's swinging at you, the one
+    you're locked onto) now raises the guard; sneak + right click still talks (`Guard.guardsAgainst`, `GuardOverTalkMixin`
+    on `Player.interactOn`). Fabric's right-click-on-someone handlers run before it, so executions, reviving, paying off
+    and the rest come first.
+  - Tool Station weapons (swords, weapons, tools) never had the guard: their item class has its own right click, which
+    `Guard.guardable` skipped, and `ToolStats` stripped it. They get it now (also keeps right click off the skill bar's
+    first form for them); ones already made pick it up when carried. A Tool Station dual-wield dagger in the off hand still
+    swings on right click. Broken ones don't guard. Not played.
+## 0.20.77 (2026-11-05): Kingdoms 0.7.565, no fighting the unseen
+
+- Packs Kingdoms 0.7.565: NPCs stop swinging at a werewolf's hidden person and fight the beast; a Quiet One orc is seen
   again once his keeper is gone. Not played.

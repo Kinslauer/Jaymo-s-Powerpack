@@ -9156,7 +9156,43 @@ ultimate and beam-clash films came down with it. Not played.
 - Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
   0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.
 
-## 0.7.561 (2026-11-05): no fighting the unseen (pack 0.20.72)
+## 0.7.561 (2026-11-05): a downed king's armour no longer multiplies when he's lifted (pack 0.20.72)
+
+- Andy: "the king's armor seems to be duplicating when they carry him ... i found a ton of armor". Lifting a downed ruler
+  in plate is too heavy, so Powers' `Carry.shed` pulls the heaviest piece off and drops it (chest, legs, boots, then the
+  helmet). With the helmet gone `Rulers.step` saw no crown and ran `fit`, which wiped `RoyalDress`'s kept sets and dressed
+  them afresh; the next danger then made a brand-new trimmed plate set. Every lift-and-recover cycle left one more set.
+- Now a ruler missing only their crown gets the crown back (`Regalia.recrown`, same crown as before) and nothing else;
+  the full `fit` is kept for rulers who never had regalia. Nothing re-dresses a downed ruler, and `RoyalDress` doesn't
+  change a downed ruler's outfit. What was shed lies where it fell, once. Built, not played.
+
+## 0.7.562 (2026-11-05): haven guards' rally cry shows its words; orc lines for everyone (pack 0.20.75)
+
+- Andy's screenshot: a haven guard's rally bubble read `dialect.jaymoskingdoms.orc.speech.jaymoskingdoms.haven_guard.rally.1`.
+  `HavenGrowth` asked `Dialects.tr` (orc/goblin-only lines) for a human guard's line, and no dialect copy exists; it now
+  uses the plain `speech.jaymoskingdoms.haven_guard.rally.N` lines. A scan of every Dialects call and literal lang key in
+  Powers, Kingdoms and Kitchen against the lang files (including numbered line ranges) found no other missing speech key.
+- Andy: "everyone should have orc specific lines when they encounter them, some friendly, adversarial, and fighting".
+  New `OrcSightings`: any grown MCA villager, guard or worker who sees an orc (orc villager, camp orc, unmasked
+  half-orc player) within 10 blocks says an orc line: friendly (gold) when they don't mind orcs (tolerant, greenskin
+  haven, ruler's edicts, or fond of that half-orc player), wary (yellow) for another tribe's orc or when they mind its
+  blood, fighting (red) when they're at blows. Goblins say theirs in goblin dialect. 10 lines per mood (8 goblin) in
+  `lang/parts/orc-sightings.json`; once per pair per 10 minutes, fight shouts every 10 s at most. Hint 102. Not played.
+
+## 0.7.563 (2026-11-05): a warband captain's first kill no longer crashes the server
+
+- Andy's crash report (2026-11-05 02:10): an orc downed and finished him, and the server died in `Captains.slew` with
+  `UnsupportedOperationException`. When the killer had no captain yet, the new captain has no fight list, and
+  `FIGHTS.getOrDefault(id, Map.of()).remove(...)` tried to remove from the immutable empty map. Now it only removes from a
+  fight list that exists. Every first kill by a greenskin with no captain crashed the server before this.
+
+## 0.7.564 (2026-11-05): herd animals flee killings
+
+- Andy: "passive animals should run when someone is killed near them". Any death, downing, or blow on the downed (people,
+  villagers, monsters; not herd animals themselves, whose kin already panic) makes every `jaymoskingdoms:skittish` animal
+  within 16 blocks that sees it, or within 6 out of sight, run from the killer (or the body) for 4 s (`Herds.killing`,
+  `KILL_SEEN`, `KILL_HEARD`). Ridden and tamed animals stay calm; leashed ones pull at the rope. Hint 103. Not played.
+## 0.7.565 (2026-11-05): no fighting the unseen (pack 0.20.77)
 
 - Andy: an orc "was invulnerable, and invisible", and "i could only see other npcs attacking it". No log covered it, so
   two ways an orc goes unseen are fixed. A cursed orc hidden inside his werewolf (invisible, frozen, unhurtable) is never
