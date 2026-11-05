@@ -254,6 +254,11 @@ public final class Mana {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.hushed").withStyle(ChatFormatting.DARK_AQUA));
 			return false;
 		}
+		// (0.7.570) a Sorcerer's keys are paid from the reserve of their element first, when it holds enough (Absorption)
+		if (Absorption.payKey(player, cost(what) * DivineBorn.spellCost(player, what))) {
+			ripple(player, intent(what));
+			return true;
+		}
 		// (0.7.262) healing magic is cheaper for the Divine-born
 		if (!spend(player, cost(what) * DivineBorn.spellCost(player, what))) {
 			return false;
