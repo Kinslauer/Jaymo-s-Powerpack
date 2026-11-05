@@ -27,8 +27,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.18.113, Scan E) Skitter, the eight-legged: a squat black-brown body, a round hairy abdomen, four long jointed legs
- * down each side and a cluster of red eyes. A body, not a suit like the Web power. 22 health, fists of 4. It runs up
- * walls by walking into them (sneak to stop), and with jump held under a ceiling it clings there upside down and
+ * down each side and a cluster of red eyes. A body, not a suit like the Web power. 22 health, fists of 4. It climbs
+ * walls like a spider ({@code SkitterClimbMixin}: walk into one to climb, sneak to hold still), and with jump held under a ceiling it clings there upside down and
  * crawls along: drawn upside down for everyone, its own view turned over too ({@code SkitterCeiling}).
  * (0.19.62) Standing it keeps its upright shape; prone (the stance wheel's crawl) it drops into a spider that scuttles
  * at {@link #SPIDER_PACE} times a crawl and sticks to whatever it crawls onto, up walls ({@link XenoformState#CLIMB})
@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class Skitter extends XenoForm {
 	// ---- tuning ----
-	public static final double CLIMB_SPEED = 0.2, CEILING_GRIP = 0.08, CEILING_CRAWL = 0.12;
+	public static final double CEILING_GRIP = 0.08, CEILING_CRAWL = 0.12;
 	public static final double LINE_REACH = 32.0, LINE_PULL = 0.15, LINE_REEL = 0.985;
 	public static final int LINE_COOLDOWN = 20;
 	public static final double TIE_REACH = 12.0;
@@ -228,14 +228,12 @@ public final class Skitter extends XenoForm {
 			player.setDeltaMovement(player.getDeltaMovement().x, CEILING_GRIP, player.getDeltaMovement().z);
 			player.syncVelocity = true;
 			sound(player, SoundEvents.SPIDER_STEP, 0.8F, 1.2F);
-		} else if (player.horizontalCollision && !player.isShiftKeyDown() && !player.isInWater()) {
-			// up the wall it walks into
+		} else if (!player.onGround() && player.onClimbable() && !player.isInWater()) {
+			// (0.20.57) on a wall: the climb itself is a spider's, a ladder on both sides ({@code SkitterClimbMixin}),
+			// so the client's own movement climbs (the server pushing it up here was overruled by the client)
 			climbing = prone ? wall(player) : null;
-			Vec3 m = player.getDeltaMovement();
-			player.setDeltaMovement(m.x, CLIMB_SPEED, m.z);
-			player.syncVelocity = true;
 			player.resetFallDistance();
-			if (player.tickCount % 5 == 0) {
+			if (player.tickCount % 5 == 0 && player.getDeltaMovement().y > 0.05) {
 				sound(player, SoundEvents.SPIDER_STEP, 0.5F, 1.3F);
 			}
 		}
@@ -333,7 +331,7 @@ public final class Skitter extends XenoForm {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
-		return live.perched || live.anchor != null || player.horizontalCollision;
+		return live.perched || live.anchor != null || player.horizontalCollision || player.onClimbable();
 	}
 
 	@Override

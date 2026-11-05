@@ -459,3 +459,13 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   they come at you. `/shake <0-200>` or `/shake off` sets each player's own shake strength (kept in
   `config/jaymospowers-client.properties`). Bodies blown apart (Kitchen gibs) give a small shake of their own.
   Compile-checked; not played.
+
+- **0.20.57, Skitter's spider legs and wall climbing:** Andy (2026-11-05): "skitter and the spiders need the same legs,
+  and you also cant climb any surfaces in spider mode". Skitter's spider shape now has the pack's spider legs (Kingdoms'
+  `SpiderLegsMixin` on the game's `SpiderModel`): the game's leg rest poses and step (both sides on the same beat,
+  mirrored, gait 0.6662), each leg kneed (8-long thigh + child shin, `KNEE_LIFT` 0.45, `SHIN_BEND` 1.0, `STEP_BEND`
+  0.9), the same idle twitch and abdomen breathe/sway; Skitter keeps its sneak crouch, bite rear and wall-climb leg
+  run. Climbing: the server used to push it up a wall, which the client's own movement overruled, so nothing climbed.
+  New `SkitterClimbMixin` makes `onClimbable` true on both sides for a Skitter pressing into a wall (or in the air
+  beside one), like a spider: walk in or hold jump to climb, sneak to hold still, let go to slide slowly down. The
+  server keeps the wall pose (`XenoformState.CLIMB`), the ceiling cling and the step sounds. Gradle build only, not played.
