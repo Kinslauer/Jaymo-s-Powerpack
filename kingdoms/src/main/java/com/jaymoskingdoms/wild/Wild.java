@@ -9,19 +9,32 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 
 /**
  * (0.5.55) The wild beasts rebuilt after Better Animals Plus (its models and art are CC BY-NC-SA 4.0, by cybercat5555,
  * itsmeowdev and Wolverbyte; credited in {@code assets/jaymoskingdoms/textures/entity/wild/CREDITS.txt}, and this
  * package and its client side are under that licence too): feral wolves, coyotes, tarantulas and moose. (0.7.526) They
  * spawn on their own where they roam ({@code Encounters}, biome tags {@code jaymoskingdoms:has_<beast>}), no longer as
- * wilderness encounters.
+ * wilderness encounters. (0.7.610) And the grizzly ({@link Grizzly}), our own mini-boss bear, drawn after Bear Minimum's
+ * brown bear (Apache-2.0; see {@code textures/entity/wild/CREDITS.txt}).
  */
 public final class Wild {
 	public static EntityType<FeralWolf> FERAL_WOLF;
 	public static EntityType<Coyote> COYOTE;
 	public static EntityType<Tarantula> TARANTULA;
 	public static EntityType<Moose> MOOSE;
+	/** (0.7.610) The grizzly mini-boss, with its spawn egg. */
+	public static EntityType<Grizzly> GRIZZLY;
+	/** Where grizzlies roam, and their natural spawn weight (rare: one in a wide stretch, see {@link Grizzly#checkSpawn}). */
+	static final TagKey<Biome> HAS_GRIZZLY = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_grizzly"));
+	static final int GRIZZLY_WEIGHT = 3;
 
 	private Wild() {
 	}
@@ -35,6 +48,10 @@ public final class Wild {
 		FabricDefaultAttributeRegistry.register(COYOTE, Coyote.createAttributes());
 		FabricDefaultAttributeRegistry.register(TARANTULA, Tarantula.createAttributes());
 		FabricDefaultAttributeRegistry.register(MOOSE, Moose.createAttributes());
+		GRIZZLY = com.jaymoskingdoms.beasts.Beasts.type("grizzly", EntityType.Builder.of(Grizzly::new, MobCategory.CREATURE).sized(2.0F, 1.9F)
+			.clientTrackingRange(10), Grizzly.createAttributes());
+		SpawnPlacements.register(GRIZZLY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Grizzly::checkSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_GRIZZLY), MobCategory.CREATURE, GRIZZLY, GRIZZLY_WEIGHT, 1, 1);
 	}
 
 	private static <T extends Entity> EntityType<T> type(String name, EntityType.Builder<T> builder) {

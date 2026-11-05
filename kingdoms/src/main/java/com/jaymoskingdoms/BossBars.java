@@ -58,7 +58,9 @@ public final class BossBars {
 			// (0.7.145) the Aether Giants
 			|| com.jaymoskingdoms.remnants.Monoliths.giant(entity)
 			// (0.7.518) a patron's champion
-			|| entity instanceof PatronChampion champion && !champion.decoy();
+			|| entity instanceof PatronChampion champion && !champion.decoy()
+			// (0.7.610) the grizzly mini-boss
+			|| entity instanceof com.jaymoskingdoms.wild.Grizzly;
 	}
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */

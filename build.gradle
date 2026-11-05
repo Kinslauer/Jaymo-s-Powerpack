@@ -197,6 +197,12 @@ def packMods = [
 	// out of natural spawning (komodo dragon, moose, piranha, snail, tiger); its rattlesnake, shark, elephant, (0.20.29)
 	// red and roe deer, crocodile and black bear spawn as other breeds beside Naturalist's and Kingdoms' (Andy, 0.20.28)
 	[dep: "curse.maven:cube-animals-1550917:9411257", cf: [1550917, 9411257]],
+	// Bear Minimum 1.0.5 (Apache-2.0, by Startraveler / scientistknight1; needs only Fabric API): black bears (shy: they
+	// keep away from people unless they or their cubs are threatened, and a goat horn scares them off) and brown bears
+	// (warier, they go for anyone who comes within 4 blocks) that forage crops, berries and prey; bear meat; polar bears
+	// made bigger and tougher. Shipped unchanged. Kingdoms' grizzly mini-boss (wild/Grizzly) is drawn after its brown
+	// bear (2026-11-05, Andy). Client and server.
+	[dep: "maven.modrinth:bear-minimum:L6rn1t3T", cf: [1240239, 9379925]],
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium.
 	// Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
