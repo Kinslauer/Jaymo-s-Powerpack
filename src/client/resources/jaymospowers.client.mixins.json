@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"WetCoatTintMixin",
+		"AetherVeilFrustumMixin",
 		"AimCrosshairHudMixin",
 		"PetWakeSoundMixin",
 		"GlowingTrimMixin",
@@ -83,6 +84,8 @@
 		"PoseTakeoverLivingEntityRendererMixin",
 		"ScreenShakeMixin",
 		"ScreenShakeExplosionMixin",
+		"BlastSoundEngineMixin",
+		"ChannelSourceAccessor",
 		"TerrainAheadMixin",
 		"FallingLeavesInvoker",
 		"MinecraftAttackInvoker",

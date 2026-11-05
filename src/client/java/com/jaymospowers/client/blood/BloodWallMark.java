@@ -56,6 +56,8 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	/** Where it starts on the face (its top: the splat's middle, or the edge a run pours over). */
 	private final double ax, ay, az;
 	private int drips;
+	/** (0.20.54) When the rain started washing it off (it fades from then), or -1. */
+	private int washFrom = -1;
 
 	private BloodWallMark(ClientLevel level, double x, double y, double z, Direction face, float splat, float run, float runWidth, int color,
 		int age, int life, boolean stain) {
@@ -89,6 +91,12 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 		if (this.age++ >= this.lifetime) {
 			this.remove();
 			return;
+		}
+		// (0.20.54) rain running down the wall washes it away (stain's runs too, as the server washes the stain)
+		if (this.age % BloodPuddle.RAIN_CHECK == 0 && this.lifetime - this.age > BloodPuddle.RAIN_WASH
+			&& BloodPuddle.rainedOn(this.level, this.x, this.y, this.z)) {
+			this.lifetime = this.age + BloodPuddle.RAIN_WASH;
+			this.washFrom = this.age;
 		}
 		// the run, grown to its length, drips off its end for a while
 		if (this.drips > 0 && this.age >= RUN_TICKS && this.age < RUN_TICKS + DRIP_EVERY * DRIPS * 2 && this.age % DRIP_EVERY == 0
@@ -125,7 +133,7 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	public void emit(BloodDecals.State decals, Camera camera, float partialTick) {
 		float age = this.age + partialTick;
 		float alpha = ALPHA;
-		int fadeFrom = this.lifetime - (this.stain ? BloodTrail.FADE : FADE);
+		int fadeFrom = this.washFrom >= 0 ? this.washFrom : this.lifetime - (this.stain ? BloodTrail.FADE : FADE);
 		if (age > fadeFrom) {
 			alpha *= 1.0F - Mth.clamp((age - fadeFrom) / (this.lifetime - fadeFrom), 0.0F, 1.0F);
 		}

@@ -1421,7 +1421,17 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
   redstone-block crumbs or red dust; `KitchenBlood.send` sends Powers' red blood instead (nothing without Powers).
   Gradle build only, not played.
 
-- **0.5.64 (Powers 0.20.52), small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
+- **0.5.64 (Powers 0.20.53), tall animals die as animals:** Andy (2026-11-05): "downed animals should fall to their side".
+  `RagdollShapes` guessed any untagged mob 1.6x taller than wide a person, so Cube Animals' deer, moose, antelope and
+  elephant (and Kingdoms' moose) died with a man's ragdoll. A wild creature (creature, ambient or water category) guessed a
+  person gets the four-legged ragdoll instead (a box if under 0.6 blocks), and ragdoll_quadruped lists Cube Animals' big
+  beasts. Not played.
+- **0.5.65 (Powers 0.20.55), corpses stay bloodied:** `Corpses.ON_BODY` (dead body, new corpse) runs just before a mob's
+  or player's corpse is added, and `CorpseDressing.BODY` (corpse, body state) as a non-plain body's state is made each
+  frame, both for other mods by reflection. Powers uses them to keep the blood a body died with on its corpse, drying
+  darker. Gradle build only, not played.
+
+- **0.5.66 (Powers 0.20.57), small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
   work like fish, if they drop an item the corpse disappears." A small critter's body is a fish's now (`CorpseKind.FISH`):
   one click spills its loot and it's gone, nothing to carry or butcher. `Corpses.isSmallCritter` counts the new
   `small_corpses` tag (Cube Animals' cricket, mouse, snail, chameleon; Naturalist's butterfly, caterpillar, firefly,

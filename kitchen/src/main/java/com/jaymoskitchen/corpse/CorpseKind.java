@@ -17,7 +17,7 @@ public enum CorpseKind {
 	/** A dead player: right-click for their hotbar back; burn it, or it gets up as a zombie wearing their face. */
 	PLAYER,
 	/**
-	 * (0.4.29) A fish: one click and its loot spills out and the body's gone, nothing to carry or butcher. (0.5.64) Small
+	 * (0.4.29) A fish: one click and its loot spills out and the body's gone, nothing to carry or butcher. (0.5.66) Small
 	 * critters too (crickets, mice, snails, butterflies...: {@link Corpses#isSmallCritter}).
 	 */
 	FISH;

@@ -1,14 +1,21 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.client.power.zfighter.ZFighterClientConfig;
 import com.jaymospowers.core.Shakes;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -20,8 +27,10 @@ import org.jspecify.annotations.Nullable;
  * dies away over its own length. Applied with the hurt bob ({@code ScreenShakeMixin}), so the player's aim never moves.
  */
 public final class ScreenShake {
-	/** Overall strength (1 = as sent). */
-	static final float INTENSITY = 1.0F;
+	/** (0.20.56) Overall strength (1 = as sent), each player's own: {@code /shake <0-200>} (percent) or {@code /shake off}. */
+	static final String KEY_STRENGTH = "shake.strength";
+	static final int STRENGTH_MAX = 200;
+	private static float intensity = 1.0F;
 	/** At most this many shakes at once (the weakest gives way), and never more than this many degrees in all. */
 	static final int MAX_ACTIVE = 8;
 	static final float MAX_DEGREES = 7.0F;
@@ -68,8 +77,35 @@ public final class ScreenShake {
 	}
 
 	static void init() {
-		ClientPlayNetworking.registerGlobalReceiver(Shakes.Shake.TYPE, (payload, context) -> add(payload.strength(), payload.ticks(), payload.from()));
+		// (0.20.56) one from far off waits for its sound to arrive (see Blasts)
+		ClientPlayNetworking.registerGlobalReceiver(Shakes.Shake.TYPE, (payload, context) -> com.jaymospowers.client.sound.Blasts.later(
+			com.jaymospowers.client.sound.Blasts.shakeDelay(payload.from()), () -> add(payload.strength(), payload.ticks(), payload.from())));
 		ClientTickEvents.END_CLIENT_TICK.register(ScreenShake::tick);
+		intensity = percent() / 100.0F;
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(ClientCommands.literal("shake")
+			.executes(c -> {
+				c.getSource().sendFeedback(Component.translatable("message.jaymospowers.shake.now", percent()));
+				return Command.SINGLE_SUCCESS;
+			})
+			.then(ClientCommands.literal("off").executes(c -> setPercent(c.getSource(), 0)))
+			.then(ClientCommands.argument("percent", IntegerArgumentType.integer(0, STRENGTH_MAX))
+				.executes(c -> setPercent(c.getSource(), IntegerArgumentType.getInteger(c, "percent"))))));
+	}
+
+	private static int percent() {
+		try {
+			return Math.clamp(Integer.parseInt(ZFighterClientConfig.get(KEY_STRENGTH, "100").trim()), 0, STRENGTH_MAX);
+		} catch (NumberFormatException e) {
+			return 100;
+		}
+	}
+
+	private static int setPercent(FabricClientCommandSource source, int percent) {
+		ZFighterClientConfig.set(KEY_STRENGTH, Integer.toString(percent));
+		intensity = percent / 100.0F;
+		source.sendFeedback(percent == 0 ? Component.translatable("message.jaymospowers.shake.off")
+			: Component.translatable("message.jaymospowers.shake.set", percent));
+		return Command.SINGLE_SUCCESS;
 	}
 
 	/** A shake from nowhere in particular, {@code degrees} at its peak, over the usual length. */
@@ -79,7 +115,7 @@ public final class ScreenShake {
 
 	/** A shake of {@code degrees} at its peak over {@code ticks}, kicked away from {@code from} (null: no direction). */
 	public static void add(float degrees, int ticks, @Nullable Vec3 from) {
-		if (degrees <= 0.02F) {
+		if (degrees <= 0.02F || intensity <= 0.0F) {
 			return;
 		}
 		ticks = Math.clamp(ticks, 1, Shakes.MAX_TICKS);
@@ -150,7 +186,7 @@ public final class ScreenShake {
 			if (t >= 1.0F) {
 				continue;
 			}
-			float s = a.strength * (1.0F - t) * (1.0F - t) * Math.min(1.0F, age / ATTACK_TICKS) * INTENSITY;
+			float s = a.strength * (1.0F - t) * (1.0F - t) * Math.min(1.0F, age / ATTACK_TICKS) * intensity;
 			float rattle = a.from == null ? s : s * DIRECTED_RATTLE;
 			float p = now * RATTLE_SPEED + a.seed;
 			pitch += rattle * (0.6F * Mth.sin(p * 1.17F) + 0.4F * Mth.sin(p * 2.03F + 1.3F));
@@ -171,15 +207,16 @@ public final class ScreenShake {
 					up = d.y;
 				}
 				// a quick swing away from it that settles back
-				float kick = a.strength * KICK * INTENSITY * (float)Math.exp(-KICK_SETTLE * age) * Mth.sin(Math.min(age * KICK_SWING, Mth.PI * 1.5F));
+				float kick = a.strength * KICK * intensity * (float)Math.exp(-KICK_SETTLE * age) * Mth.sin(Math.min(age * KICK_SWING, Mth.PI * 1.5F));
 				pitch += kick * (float)(-ahead - up);
 				roll += kick * (float)left;
 				yaw += kick * 0.3F * (float)left;
 			}
 		}
 		float total = Math.abs(pitch) + Math.abs(yaw) + Math.abs(roll);
-		if (total > MAX_DEGREES) {
-			float scale = MAX_DEGREES / total;
+		float most = MAX_DEGREES * Math.max(1.0F, intensity);
+		if (total > most) {
+			float scale = most / total;
 			pitch *= scale;
 			yaw *= scale;
 			roll *= scale;

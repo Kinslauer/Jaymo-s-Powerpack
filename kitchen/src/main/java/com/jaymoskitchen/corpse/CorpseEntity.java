@@ -2190,7 +2190,7 @@ public class CorpseEntity extends Entity {
 		EntityType<?> type = sourceType();
 		if (type != null && !type.builtInRegistryHolder().is(Corpses.FISH_CORPSES) && Corpses.isSmallCritter(type)
 			&& !isInWater()) {
-			// (0.5.64) a critter on dry land: a little puff, not a splash
+			// (0.5.66) a critter on dry land: a little puff, not a splash
 			level.sendParticles(ParticleTypes.POOF, getX(), getY() + 0.15, getZ(), 4, 0.1, 0.05, 0.1, 0.01);
 		} else {
 			level.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.2, getZ(), 12, 0.25, 0.1, 0.25, 0.05);
@@ -2208,7 +2208,7 @@ public class CorpseEntity extends Entity {
 		if (kind == CorpseKind.FISH) {
 			return true;
 		}
-		// (0.5.64) and small critters left from before as an animal's or a thing's body
+		// (0.5.66) and small critters left from before as an animal's or a thing's body
 		EntityType<?> type = kind == CorpseKind.OTHER || kind == CorpseKind.ANIMAL ? sourceType() : null;
 		return type != null && (type.builtInRegistryHolder().is(Corpses.FISH_CORPSES) || Corpses.isSmallCritter(type));
 	}
