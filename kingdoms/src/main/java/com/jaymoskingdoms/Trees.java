@@ -43,6 +43,8 @@ import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
@@ -94,6 +96,15 @@ public final class Trees {
 	/** (0.7.502) Nether wart blocks (the huge fungi's caps) broken by hand: the chance of a stick, so a Nether start can make its first tools. */
 	static final float WART_STICK_CHANCE = 0.15F;
 
+	/**
+	 * (0.7.586) Andy: "explosions / heavy impacts can fell trees too". A blast of at least this radius fells trees within
+	 * {@link #BLAST_REACH} times its radius (at most {@link #BLAST_REACH_MOST} blocks): one at its heart nearly always
+	 * ({@link #BLAST_FELL}), less often further off, away from the blast; at most {@link #BLAST_MOST} trees, each of no more
+	 * than {@link #BLAST_LOGS} logs per block of radius. A tree it leaves standing on nothing always falls.
+	 */
+	static final float BLAST_SMALLEST = 2.0F, BLAST_REACH = 2.0F, BLAST_REACH_MOST = 12.0F, BLAST_FELL = 0.9F;
+	static final int BLAST_MOST = 6, BLAST_LOGS = 8;
+
 	/** A growing tree: its foot, its sapling, its step, when it next grows. */
 	record Growing(BlockPos pos, String sapling, int stage, long next) {
 		static final Codec<Growing> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -124,6 +135,10 @@ public final class Trees {
 			return InteractionResult.PASS;
 		});
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
+			// (0.7.586) the trunk's last log out from under a tree (broken whole, not chopped): it comes down by itself
+			if (level instanceof ServerLevel server && state.is(BlockTags.LOGS)) {
+				unsupported(server, pos, state);
+			}
 			if (level instanceof ServerLevel server && !player.isCreative() && state.getBlock() instanceof LeavesBlock
 				&& !state.getValue(LeavesBlock.PERSISTENT) && player.getMainHandItem().isEmpty()
 				&& server.getRandom().nextFloat() < LEAF_STICK_CHANCE) {
@@ -653,6 +668,106 @@ public final class Trees {
 			return null;
 		}
 		return FallingTree.fling(level, foot, logs, leavesOf(level, logs), velocity, heading, tumble);
+	}
+
+	/**
+	 * (0.7.586) Something struck the standing tree whose log is {@code struck} (another falling tree): it goes over toward
+	 * {@code heading} (radians, along a compass line), whole from its foot, its wood where it lands. Nothing if it isn't a
+	 * natural tree or has more than {@code mostLogs} logs. Returns how many logs came down.
+	 */
+	public static int knock(ServerLevel level, BlockPos struck, float heading, @Nullable Entity by, int mostLogs) {
+		BlockState state = level.getBlockState(struck);
+		if (!state.is(BlockTags.LOGS) || fallen(level, struck, state)) {
+			return 0;
+		}
+		BlockPos foot = foot(level, struck);
+		List<BlockPos> logs = trunk(level, foot);
+		if (logs.isEmpty() || logs.size() > mostLogs || logs.stream().noneMatch(p -> natural(level, p))) {
+			return 0;
+		}
+		List<BlockPos> leaves = leavesOf(level, logs);
+		logs.sort(Comparator.comparingInt(BlockPos::getY));
+		leaves.addAll(FallingTree.hives(level, logs, by));
+		FallingTree.topple(level, foot, logs, leaves, heading, by, ItemStack.EMPTY, null);
+		return logs.size();
+	}
+
+	/** The lowest log of the upright run {@code log} is in. */
+	private static BlockPos foot(ServerLevel level, BlockPos log) {
+		BlockPos p = log;
+		while (log.getY() - p.getY() < FELL_SPREAD * 4 && level.getBlockState(p.below()).is(BlockTags.LOGS)) {
+			p = p.below();
+		}
+		return p;
+	}
+
+	/** Whether the log at {@code foot} stands on something: the ground, or wood below it (beside it too, for a wide trunk). */
+	private static boolean held(ServerLevel level, BlockPos foot) {
+		if (level.getBlockState(foot.below()).isFaceSturdy(level, foot.below(), Direction.UP)) {
+			return true;
+		}
+		for (BlockPos q : BlockPos.betweenClosed(foot.offset(-1, -1, -1), foot.offset(1, 0, 1))) {
+			if (!q.equals(foot) && level.getBlockState(q).is(BlockTags.LOGS)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * (0.7.586) The upright log {@code gone} is gone from under a tree (broken whole, or blown away): if the log above it now
+	 * stands on nothing, that tree comes down by itself, to its heavier side.
+	 */
+	static void unsupported(ServerLevel level, BlockPos gone, BlockState was) {
+		if (!was.hasProperty(BlockStateProperties.AXIS) || was.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+			return;
+		}
+		BlockPos above = gone.above();
+		BlockState state = level.getBlockState(above);
+		if (!state.is(BlockTags.LOGS) || !state.hasProperty(BlockStateProperties.AXIS) || state.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y
+			|| held(level, above)) {
+			return;
+		}
+		fell(level, above, null, ItemStack.EMPTY, null, false);
+	}
+
+	/**
+	 * (0.7.586) A blast of {@code radius} at {@code center} fells the trees round it ({@link #BLAST_FELL}), away from it;
+	 * any it leaves standing on nothing come down as well.
+	 */
+	public static void blast(ServerLevel level, Vec3 center, float radius) {
+		if (radius < BLAST_SMALLEST) {
+			return;
+		}
+		double reach = Math.min(BLAST_REACH_MOST, radius * BLAST_REACH);
+		int r = Mth.ceil(reach);
+		BlockPos c = BlockPos.containing(center);
+		Set<BlockPos> feet = new HashSet<>();
+		int felled = 0;
+		for (BlockPos n : BlockPos.betweenClosed(c.offset(-r, -r, -r), c.offset(r, r, r))) {
+			if (felled >= BLAST_MOST) {
+				return;
+			}
+			BlockState state = level.getBlockState(n);
+			if (!state.is(BlockTags.LOGS) || !state.hasProperty(BlockStateProperties.AXIS) || state.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+				continue;
+			}
+			BlockPos foot = foot(level, n.immutable());
+			if (!feet.add(foot)) {
+				continue;
+			}
+			double d = Math.sqrt(foot.distToCenterSqr(center));
+			boolean loose = !held(level, foot);
+			if (!loose && (d > reach || level.getRandom().nextFloat() >= BLAST_FELL * (1.0 - d / reach))) {
+				continue;
+			}
+			double dx = foot.getX() + 0.5 - center.x, dz = foot.getZ() + 0.5 - center.z;
+			float away = dx * dx + dz * dz < 1.0E-4 ? level.getRandom().nextFloat() * Mth.TWO_PI : (float)Math.atan2(dz, dx);
+			float heading = Math.round(away / Mth.HALF_PI) * Mth.HALF_PI;
+			if (knock(level, foot, heading, null, loose ? FELL_MOST : Math.max(1, Math.round(radius * BLAST_LOGS))) > 0) {
+				felled++;
+			}
+		}
 	}
 
 	/**
