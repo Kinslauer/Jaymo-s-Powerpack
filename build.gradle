@@ -562,6 +562,9 @@ dependencies {
 	compileOnly "maven.modrinth:jade:71CTWqdE"
 	// (RPG Series) compiled against to wear spell books, scrolls and quivers in bauble slots; touched only via compat/SpellEngineCompat
 	compileOnly "maven.modrinth:spell-engine:kgVsejrW"
+	// (0.20.52) compiled against to keep the Aether out of its chunk culling from under the clouds; touched only via
+	// client/aether/SodiumVeil and client/mixin/sodium (an optional mixin config)
+	compileOnly "maven.modrinth:sodium:bAZQdGpg"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
