@@ -162,7 +162,7 @@ public final class ArmourGrimeTextures {
 	}
 
 	/**
-	 * (0.20.54) The same for a corpse's blood ({@link Bloodied#CORPSE_BLOOD}): it stays, and darkens as it dries, as blood
+	 * (0.20.55) The same for a corpse's blood ({@link Bloodied#CORPSE_BLOOD}): it stays, and darkens as it dries, as blood
 	 * on gear does.
 	 */
 	public static @Nullable Identifier skin(Identifier base, Bloodied.@Nullable Blood blood) {
