@@ -82,6 +82,11 @@ public final class InBalming {
 	static final float SHADOW_AT = 0.3F;
 	static final double SHADOW_REACH = 16.0;
 	static final long SHADOW_AGAIN = 2400L;
+	/**
+	 * The Quiet One's veil (ticks), topped up while he walks at his keeper's side: short, so a shadow whose keeper is gone
+	 * (logged off, another world) is seen again within seconds instead of walking unseen and unhittable for an hour.
+	 */
+	static final int SHADOW_VEIL = 100, SHADOW_TOP_UP = 40;
 	static final double SAY_RANGE = 24.0;
 	static final int LINES = 3;
 
@@ -334,6 +339,9 @@ public final class InBalming {
 				// Ambrose's and the Quiet One's: at your side
 				if (here) {
 					follow(level, mob, keeper, m.spirit());
+				} else if (m.spirit() == Spirits.QUIET) {
+					// (his keeper's gone: no one to walk unseen for)
+					mob.removeEffect(MobEffects.INVISIBILITY);
 				}
 				return false;
 			}
@@ -438,8 +446,9 @@ public final class InBalming {
 
 	/** The Quiet One's shadow: unseen; out of nothing to end a foe of yours near death, and gone. */
 	private static void shadow(ServerLevel level, PathfinderMob mob, ServerPlayer keeper) {
-		if (!mob.hasEffect(MobEffects.INVISIBILITY)) {
-			mob.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20 * 60 * 60, 0, false, false));
+		MobEffectInstance veil = mob.getEffect(MobEffects.INVISIBILITY);
+		if (veil == null || veil.getDuration() < SHADOW_TOP_UP) {
+			mob.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, SHADOW_VEIL, 0, false, false));
 		}
 		long now = level.getGameTime();
 		if (mob.tickCount % 10 != 0 || now - LAST.getOrDefault(mob.getUUID(), -SHADOW_AGAIN) < SHADOW_AGAIN) {
