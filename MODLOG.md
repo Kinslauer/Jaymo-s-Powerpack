@@ -1101,3 +1101,9 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   user skips the rock charge: the off hand rock goes the moment use is pressed (whip and follow-through only), at 3.0
   speed instead of 1.5 and straighter (`ThrownRocks.GRAVITY_SPEED`/`GRAVITY_SPREAD`, `ThrownRocks.gravity`). The usual
   10 tick cooldown still spaces throws.
+- **0.21.9, worldgen threads looping forever (server froze twice):** the 2026-11-04 20:16 and 2026-11-05 15:00 watchdog
+  crashes had every C2ME worker spinning in `Object2ObjectOpenHashMap.get` inside
+  `ChunkGeneratorStructureState.generatePositions`, chunks stuck at structure_starts for minutes. Vanilla fills a
+  generator's structure positions once, on first use, with an unlocked check-fill-flag; One Dimension's per-layer
+  generators fill lazily, so C2ME's workers filled the same map together and corrupted it. New `StructureStateLockMixin`
+  does vanilla's same steps inside a lock. Checked against the 26.3 jar; not built here.

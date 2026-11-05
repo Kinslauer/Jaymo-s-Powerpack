@@ -60,7 +60,8 @@
 		"HammerChargeBlockMixin",
 		"WoundsHurtMixin",
 		"WoundsPlayerHurtMixin",
-		"WoundsRegenMixin"
+		"WoundsRegenMixin",
+		"StructureStateLockMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

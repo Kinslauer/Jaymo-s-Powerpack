@@ -9667,3 +9667,7 @@ who already has the Divine-born blood counts (`RoadLocks.look`), and like every 
 No secret past opens it. Its advancement is "Road Opened: Back from the afterlife" (`roads/afterlife`), hint "Someone has
 to have died twice over first." Ops can still `/kingdom roads unlock afterlife`. Fate already never picks it. Built, not
 played.
+- **0.7.607 (pack 0.21.9), a road's search for ground held the server:** `LifeStory.ground` (and `cave`, `beside`) made
+  every chunk it tried, up to 64 brand-new ones in one tick while the server waited (part of the 2026-11-05 15:00 crash).
+  New `reach`: a chunk already made is used freely, and at most `NEW_CHUNKS` (6) new ones per search; past that, spots
+  in unmade chunks are skipped. Not built here.
