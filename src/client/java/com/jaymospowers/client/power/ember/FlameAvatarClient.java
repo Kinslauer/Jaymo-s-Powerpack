@@ -201,14 +201,15 @@ public final class FlameAvatarClient {
 			if (flame == null || state.isInvisible || BodyCover.body(state)) {
 				return;
 			}
-			PlayerModel model = this.getParentModel();
+			// (0.21.13) on MCA's body and pose when MCA draws the player (McaLooks)
+			PlayerModel model = com.jaymospowers.client.McaLooks.skinBody(this.getParentModel());
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityTranslucent(CHAR), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
 			// the veins dim as the flame gutters
 			float glow = VEIN_LOW + (1.0F - VEIN_LOW) * Mth.clamp(flame, 0.0F, 1.0F);
 			int shade = (int)(glow * 255.0F);
 			int color = 0xFF000000 | shade << 16 | shade << 8 | shade;
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(VEINS), lightCoords, OverlayTexture.NO_OVERLAY, color, null,
+			collector.order(2).submitModel(com.jaymospowers.client.McaLooks.glowBody(this.getParentModel()), state, poseStack, RenderTypes.eyes(VEINS), lightCoords, OverlayTexture.NO_OVERLAY, color, null,
 				state.outlineColor);
 		}
 	}

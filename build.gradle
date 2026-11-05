@@ -610,6 +610,8 @@ dependencies {
 	localRuntime mcaJar
 	// compiled against (for its corpses); required at runtime since 0.8 (fabric.mod.json), touched only via power/web/KitchenCompat
 	compileOnly kitchenJar
+	// (0.21.13) compiled against to draw skin-deep looks on MCA's own body and face; touched only via client/McaSkin (behind McaLooks)
+	compileOnly mcaJar
 	// compiled against to read Better Combat's attack swings while flying; touched only via client/power/wind/PalAccess
 	compileOnly "maven.modrinth:player-animation-library:xJ30QmpE"
 	// compiled against to make its swings hit bodies, not boxes; touched only via client/compat/mixin/LimbSwingMixin

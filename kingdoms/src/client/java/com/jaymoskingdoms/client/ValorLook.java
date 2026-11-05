@@ -149,9 +149,10 @@ public final class ValorLook {
 			}
 			this.shells.submit(poseStack, collector, lightCoords, state, coat, state.skin.model() == PlayerModelType.SLIM);
 			if (coat.hunter() && !PowersCover.face(state)) {
-				Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), HUNTER_EYES, EmberLook.EYES, "valor_hunter_eyes/",
-					HUNTER_EYES_BY_SKIN);
-				collector.order(2).submitModel(this.getParentModel(), state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1,
+				// (0.7.609) on MCA's face and pose when MCA draws the player (VampireLooks#faceEyes)
+				Identifier eyes = VampireLooks.faceEyes(state, this.getParentModel(), HUNTER_EYES, () -> VampireLooks.glowingEyes(
+					state.skin.body().texturePath(), HUNTER_EYES, EmberLook.EYES, "valor_hunter_eyes/", HUNTER_EYES_BY_SKIN));
+				collector.order(2).submitModel(VampireLooks.glowBody(this.getParentModel()), state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1,
 					null, state.outlineColor);
 			}
 		}

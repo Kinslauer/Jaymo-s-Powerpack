@@ -9686,7 +9686,9 @@ played.
   Now they ride MCA's skin body in MCA's pose (`VampireLooks.skinBody`/`glowBody`, the way `HeritageLooks` does since
   0.7.219), and the glowing eyes light MCA's own eye pixels (`VampireLooks.faceEyes`, via `McaEyes`). The same for the
   werewolf's hidden-change tells (`WolfTells`), the Emberborn's eyes (`EmberLook`) and every heritage's lit eyes
-  (`HeritageLooks`). Players MCA doesn't draw keep the old way.
+  (`HeritageLooks`), and (Andy: "is anything else drawn on the player model instead of where it needs to be?") a Valor
+  Hunter's eyes (`ValorLook`). Players MCA doesn't draw keep the old way. Powers 0.21.13 does the same for Wind's storm
+  eyes and the Flame Avatar's char.
 - Wings: the bat wings were the elytra's two slabs in leather at 1.35x, which from behind hid the whole player like a
   pair of grey boards. New `BatWings`: a real bat wing per side (arm bone, hand bone with a thumb claw, a thin membrane
   hung from both, scalloped between finger bones; `tools/gen_bat_wings.py`), worn as a `WornModel` so it follows MCA's,
