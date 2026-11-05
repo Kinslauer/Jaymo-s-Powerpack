@@ -431,3 +431,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   kinds are tagged too (quadruped, flyer for eagle/barn owl/toucan, arthropod for the cricket, simple for its fish and
   snail). Kitchen's `RagdollShapes` makes the same call for corpses (four-legged ragdoll, or a box if slight), and its
   ragdoll_quadruped tag lists Cube Animals' big beasts. Not played.
+- **0.20.54, rain puddles that show, rain washes blood:** Andy: "rain doesn't seem to be pooling water" and "rain should
+  wash away blood". `client/wet/WetClient`'s rain puddles (0.19.63) only pooled under trees, beside trunks, or a fifth of
+  the time in two-sided hollows, and grew only when a random try landed on the same block again, so an open field had next
+  to none. Now flat open ground pools too (`FLAT_CHANCE` 0.1, never a ledge or sand), hollows at 0.6, and every puddle the
+  rain still reaches is fed every 5 s (`feedRain`) so it grows full and stays until the rain stops. Blood: the server's
+  stains shrink by `BloodTrail.RAIN_WASH` (0.03 a half-second) under open rain (`BloodTrail.wash`; a big pool goes in
+  about half a minute, prints in a second or two), and passing pools and wall runs (`BloodPuddle`, `BloodWallMark`) fade
+  over 5 s once rain falls on them. Bodies already washed in rain (`Bloodied.RAIN_WASH`).
