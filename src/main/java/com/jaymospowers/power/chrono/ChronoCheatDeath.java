@@ -256,13 +256,13 @@ public final class ChronoCheatDeath {
 				}
 				continue;
 			}
-			if (now % 20 == 0 && has(player) && executed(player)) {
-				// an execution coming or under way: R stays open until it's over (silently)
+			if (now % 20 == 0 && has(player) && downedOpen(player)) {
+				// an execution coming or under way, or down where Rewind itself can't answer: R stays open (silently)
 				ServerPlayNetworking.send(player, new Window(30));
 			}
 			if (Mortality.waking(player)) {
 				// left for dead: the window opens once, as they go out
-				if (has(player) && WAKES_OFFERED.add(player.getUUID()) && pick(player, now) != null) {
+				if (has(player) && WAKES_OFFERED.add(player.getUUID())) {
 					HELD.put(player.getUUID(), new Held(player, now, null, true));
 					ServerPlayNetworking.send(player, new Window(WINDOW_TICKS));
 				}
@@ -287,11 +287,16 @@ public final class ChronoCheatDeath {
 		}
 	}
 
-	/** Somewhere worth coming back to: alive and well, on your feet on solid ground (or swimming), nothing burning or falling. */
+	/**
+	 * Somewhere worth coming back to: alive and up, on your feet on solid ground (or swimming), nothing burning or falling.
+	 * (0.20.92) However hurt: a long fight below three hearts (or with wounds keeping your most health low) left no
+	 * checkpoint at all, so a death had nothing to go back to and went ahead; the rewind gives back at least
+	 * {@link #MIN_HEALTH} anyway.
+	 */
 	private static boolean safe(ServerPlayer player) {
 		return player.isAlive() && !player.isSpectator() && !player.isCreative() && !Downed.isDowned(player)
 			&& (player.onGround() || player.isInWater() && player.getAirSupply() >= player.getMaxAirSupply())
-			&& !player.isInLava() && !player.isOnFire() && player.fallDistance < 3.0 && player.getHealth() >= MIN_HEALTH
+			&& !player.isInLava() && !player.isOnFire() && player.fallDistance < 3.0
 			&& !player.level().getBlockState(player.blockPosition()).is(net.minecraft.world.level.block.Blocks.POWDER_SNOW);
 	}
 
@@ -323,8 +328,7 @@ public final class ChronoCheatDeath {
 			player.setHealth(1.0F);
 			return false;
 		}
-		if (!has(player) || player.isCreative() || player.isSpectator() || ZFighterAfterlife.among(player)
-			|| pick(player, player.level().getServer().overworld().getGameTime()) == null) {
+		if (!has(player) || player.isCreative() || player.isSpectator() || ZFighterAfterlife.among(player)) {
 			return true;
 		}
 		// (an open chest or bag closes, what was on the cursor back into your pockets)
@@ -370,24 +374,31 @@ public final class ChronoCheatDeath {
 			|| com.jaymospowers.core.finisher.Finishers.targeted(player) || com.jaymospowers.power.web.WebExecutions.targeted(player));
 	}
 
-	/** R from the client: inside a held death or a waking, or under an execution before its blow. */
+	/**
+	 * (0.20.92) Down, R goes to cheating death whenever Rewind itself can't answer it: out cold, on its cooldown, or
+	 * someone coming to finish you. Andy spammed R lying down and out cold and nothing happened, then died for good.
+	 * (Down with Rewind ready and awake, R is Rewind's own, as since 0.15.83.)
+	 */
+	static boolean downedOpen(ServerPlayer player) {
+		return Downed.isDowned(player) && (Downed.passedOut(player) || executed(player) || !ChronoPower.rewindReady(player));
+	}
+
+	/** R from the client: inside a held death or a waking, or down where Rewind can't answer (out cold, an execution). */
 	static void pressed(ServerPlayer player) {
 		if (HELD.containsKey(player.getUUID())) {
 			rewind(player);
 			return;
 		}
-		if (!has(player) || !executed(player) || !player.isAlive()) {
+		if (!has(player) || !downedOpen(player) || !player.isAlive()) {
 			return;
 		}
 		long now = player.level().getServer().overworld().getGameTime();
-		if (pick(player, now) == null) {
-			return;
-		}
+		boolean execution = executed(player);
 		net.minecraft.world.entity.Mob mob = com.jaymospowers.core.wounds.MobExecutions.executioner(player);
 		Vec3 was = player.position();
 		HELD.put(player.getUUID(), new Held(player, now, null, true));
 		rewind(player);
-		if (mob != null && mob.isAlive()) {
+		if (execution && mob != null && mob.isAlive()) {
 			perplexed(mob, was);
 			for (java.util.function.BiConsumer<net.minecraft.world.entity.Mob, ServerPlayer> say : PERPLEXED) {
 				try {
@@ -397,7 +408,7 @@ public final class ChronoCheatDeath {
 				}
 			}
 		}
-		JaymosPowers.LOGGER.info("{} slipped an execution", player.getScoreboardName());
+		JaymosPowers.LOGGER.info("{} slipped {}", player.getScoreboardName(), execution ? "an execution" : "being down");
 	}
 
 	/**
@@ -460,22 +471,25 @@ public final class ChronoCheatDeath {
 		if (points == null || points.isEmpty()) {
 			return null;
 		}
-		MinecraftServer server = player.level().getServer();
 		int window = window(player);
 		for (Checkpoint point : points) {
-			if (died - point.time() > window) {
-				continue;
+			if (died - point.time() <= window && fits(player, point)) {
+				return point;
 			}
-			ServerLevel level = server.getLevel(point.dimension());
-			if (level == null) {
-				continue;
-			}
-			AABB box = player.getDimensions(net.minecraft.world.entity.Pose.STANDING).makeBoundingBox(point.pos());
-			if (level.noCollision(player, box)) {
+		}
+		// (0.20.92) none inside the window: the newest one older than it, rather than none
+		for (java.util.Iterator<Checkpoint> it = points.descendingIterator(); it.hasNext();) {
+			Checkpoint point = it.next();
+			if (fits(player, point)) {
 				return point;
 			}
 		}
 		return null;
+	}
+
+	private static boolean fits(ServerPlayer player, Checkpoint point) {
+		ServerLevel level = player.level().getServer().getLevel(point.dimension());
+		return level != null && level.noCollision(player, player.getDimensions(net.minecraft.world.entity.Pose.STANDING).makeBoundingBox(point.pos()));
 	}
 
 	/** R: back to the checkpoint, as if none of it happened. */
@@ -495,7 +509,7 @@ public final class ChronoCheatDeath {
 		WAKES_OFFERED.remove(player.getUUID());
 		Checkpoint point = pick(player, held.since);
 		if (point == null) {
-			// (every place you'd go back to is built over now: you rise where you fell)
+			// (no checkpoint yet, or every place you'd go back to is built over now: you rise where you fell, mended)
 			point = checkpoint(player, held.since);
 		}
 		ServerLevel from = player.level();
