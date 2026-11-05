@@ -9518,3 +9518,6 @@ off course then those should break upon contact".
 
 ## 0.7.592
 - Hint 117 for Powers 0.20.110's adrenaline (`lang/parts/adrenaline.json`).
+
+## 0.7.593
+- Hint 118 for Powers 0.20.111's fainting from hunger and thirst (`lang/parts/fainting.json`).

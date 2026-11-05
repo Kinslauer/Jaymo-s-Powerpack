@@ -463,8 +463,9 @@ public final class KitchenCompat {
 			return;
 		}
 		try {
+			// (0.20.111) and someone passed out from hunger or thirst lies where they fell till they come round
 			java.util.function.Predicate<Player> adrift = player -> com.jaymospowers.core.wounds.Downed.isDowned(player)
-				&& com.jaymospowers.core.wounds.Downed.adrift(player);
+				&& com.jaymospowers.core.wounds.Downed.adrift(player) || com.jaymospowers.core.wounds.Fainting.heldDown(player);
 			Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("addHold", java.util.function.Predicate.class)
 				.invoke(null, adrift);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {

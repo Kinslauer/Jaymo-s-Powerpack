@@ -95,11 +95,7 @@ public final class AdrenalineHud {
 		float partial = delta.getGameTimeDeltaPartialTick(false);
 		int w = graphics.guiWidth(), h = graphics.guiHeight();
 		float b = Mth.lerp(partial, lastBars, bars);
-		if (b > 0.0F) {
-			int bar = Math.round(h * BAR * b);
-			graphics.fill(0, 0, w, bar, 0xFF000000);
-			graphics.fill(0, h - bar, w, h, 0xFF000000);
-		}
+		letterbox(graphics, BAR * b);
 		float crashLook = crash < 0 ? 0.0F : crash <= CRASH_HOLD ? 1.0F : 1.0F - (crash - CRASH_HOLD + partial) / CRASH_FADE;
 		crashLook = Mth.clamp(crashLook, 0.0F, 1.0F);
 		float r = Mth.lerp(partial, lastRush, rush);
@@ -111,6 +107,20 @@ public final class AdrenalineHud {
 			float beat = (float) Math.pow(1.0F - (t - (float) Math.floor(t)), 3.0);
 			veins(graphics, w, h, RUSH_REACH * r, RUSH_ALPHA * r * (1.0F - RUSH_THROB + RUSH_THROB * beat), 1.0F);
 		}
+	}
+
+	/**
+	 * The letterbox: a black bar at the top and the bottom, each {@code share} of the screen's height (0.5 meets in the
+	 * middle: shut). (0.20.111) Fainting's ({@code FaintHud}) too.
+	 */
+	static void letterbox(GuiGraphicsExtractor graphics, float share) {
+		if (share <= 0.0F) {
+			return;
+		}
+		int w = graphics.guiWidth(), h = graphics.guiHeight();
+		int bar = share >= 0.5F ? (h + 1) / 2 + 1 : Math.round(h * share);
+		graphics.fill(0, 0, w, bar, 0xFF000000);
+		graphics.fill(0, h - bar, w, h, 0xFF000000);
 	}
 
 	/** The veins, reaching {@code reach} layers in, at {@code alpha}. */
