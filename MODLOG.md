@@ -589,3 +589,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   family: husks, drowned, zombie villagers, zombified piglins, plus MCA's and Kitchen's zombies) and every Hornkin
   (`jaymoskingdoms:hornkin*`, `zombified_hornkin`) for 0.5 instead of 3 (`ThrownRocks.SHRUGGED_DAMAGE`, `shrugsOff`); an
   unsuspecting one can still be knocked out. Kingdoms' NPC rocks follow the same rule (Kingdoms 0.7.558). Not played.
+
+## 0.20.72 (2026-11-05): Kingdoms 0.7.561, no fighting the unseen
+
+- Packs Kingdoms 0.7.561: NPCs stop swinging at a werewolf's hidden person and fight the beast; a Quiet One orc is seen
+  again once his keeper is gone. Not played.

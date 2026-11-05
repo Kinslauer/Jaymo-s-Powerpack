@@ -9155,3 +9155,11 @@ ultimate and beam-clash films came down with it. Not played.
 
 - Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
   0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.
+
+## 0.7.561 (2026-11-05): no fighting the unseen (pack 0.20.72)
+
+- Andy: an orc "was invulnerable, and invisible", and "i could only see other npcs attacking it". No log covered it, so
+  two ways an orc goes unseen are fixed. A cursed orc hidden inside his werewolf (invisible, frozen, unhurtable) is never
+  taken for a foe (`Lycans.hidden`, `ThrallTargetMixin`), and whoever was fighting him within 32 blocks turns on the
+  beast (`Lycans.unTarget`). The Quiet One's In-balmed orc wears a 5 s veil topped up only at his keeper's side, instead
+  of an hour's invisibility that outlasted his keeper logging off (`InBalming.SHADOW_VEIL`). Not played.
