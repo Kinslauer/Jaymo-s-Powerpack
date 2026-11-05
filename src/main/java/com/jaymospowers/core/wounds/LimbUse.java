@@ -118,7 +118,8 @@ public final class LimbUse {
 			// (0.18.82) a wooden or iron limb stands in for it, weaker (0 when there's none)
 			return com.jaymospowers.core.Prosthetics.strength(entity, Breaks.limb(part));
 		}
-		if (!Breaks.isBroken(entity, part)) {
+		if (!Breaks.isBroken(entity, part) || Adrenaline.active(entity)) {
+			// (0.20.110) on adrenaline a broken limb works as a sound one
 			return SOUND;
 		}
 		if ((Breaks.splinted(entity) & Breaks.bit(part)) != 0) {

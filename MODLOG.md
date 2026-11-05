@@ -942,3 +942,18 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   is made (`Mortality.REBORNING`), or held in Chrono's death window. Kingdoms reads it by reflection before anyone walks
   up to talk. The Chrono window stays exactly like any death: before this a villager's question could open its screen
   over the death screen there. Built, not played.
+- **0.20.110, adrenaline at low health (Kingdoms 0.7.592):** Andy: "adrenaline should kick in if you are low health and
+  fighting or running ... damaged beyond repair on your limbs, (not head or Torso) and still sprint, and attack, and stand
+  yourself up, but only for 10s after being hit below half health. or within 40% of whatever death threshold."
+  `core/wounds/Adrenaline`: a player hit by an attack (not fire, falls, hunger) who is left at half health or less, with
+  head or body at 40% or less (the parts that down or kill at zero), or downed, has adrenaline for 10 s from that hit;
+  going down's own first 10 s rush counts too. While it lasts broken arms, legs and feet hinder nothing: sprinting, two
+  broken legs stand instead of crawling, broken arms swing/dig/shield/draw at full strength, powers use the limb as sound,
+  and a downed player's broken or red arms don't stop the sneak rise (a rise started on it is finished on it). Head and
+  body still count; severed limbs are still gone. One heartbeat only the player hears as it kicks in, no text. When it
+  ends the breaks come back (crawl again on two broken legs). Tuning at the top of `Adrenaline`. Built, not played.
+- 0.20.110 adrenaline's screen (Andy: "when it wears off you get the max thirst effect screen effects, (not max thirst)
+  and a lessened vein and slight letterbox while the adrenaline is rushing"), `client/wounds/AdrenalineHud`: rushing,
+  thin black bars (6% of the screen each) slide in top and bottom and the water-thirst veins show lightly at the edges,
+  throbbing with a 150 bpm heart; wearing off, the bars slide away and the veins come in as at no water (Kitchen's
+  DryVeins, every layer), held 3 s and fading over 7 s. Water untouched. Art copied from Kitchen's dry veins (ours).

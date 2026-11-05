@@ -51,6 +51,8 @@ public final class WoundsHud {
 		ClientTickEvents.END_CLIENT_TICK.register(WoundsHud::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("wounds_hud"), WoundsHud::render);
 		PainHud.init();
+		// (0.20.110) adrenaline's rush and its wearing off
+		AdrenalineHud.init();
 	}
 
 	/** (0.14.5) How whole the local player's part {@code index} was last tick (plan order: 0 head, 1 body). */

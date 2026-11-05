@@ -9515,3 +9515,6 @@ off course then those should break upon contact".
   ore pebble chance as a vein that was always there (40%, half hidden nuggets; `GroundChanges.tell`), so the pebbles
   from Powers 0.20.105 work over the new ground too. Pebbles still only ever sit over ore that's really there, so they
   never show anything ahead of your tier. Built, not played.
+
+## 0.7.592
+- Hint 117 for Powers 0.20.110's adrenaline (`lang/parts/adrenaline.json`).
