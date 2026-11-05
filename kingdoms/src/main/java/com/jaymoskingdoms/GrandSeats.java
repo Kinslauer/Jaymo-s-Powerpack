@@ -60,18 +60,14 @@ final class GrandSeats {
 		new Choice("repurposed_structures:fortress_jungle", Palette.JUNGLE),
 		// ATi Structures, Vanilla Edition (ARR, "feel free to add to any modpack")
 		new Choice("ati_structures:marble_chateau", Palette.PLAINS),
-		new Choice("ati_structures:woodland_keep", Palette.TAIGA, Palette.SWAMP),
+		new Choice("ati_structures:woodland_keep", Palette.TAIGA, Palette.SWAMP, Palette.SNOWY),
 		new Choice("ati_structures:catalonian_castle", Palette.DESERT, Palette.BADLANDS, Palette.SAVANNA),
 		new Choice("ati_structures:granite_fort", Palette.DESERT, Palette.BADLANDS, Palette.SAVANNA),
 		new Choice("ati_structures:fortified_temple", Palette.CHERRY, Palette.JUNGLE),
-		new Choice("ati_structures:dojo", Palette.CHERRY),
-		// Grim Kingdoms, Vanilla Edition (ARR, "feel free to add to any modpack")
-		new Choice("grim_kingdoms:grain_sack_keep", Palette.PLAINS, Palette.SWAMP),
-		new Choice("grim_kingdoms:glimmervault_fortress_plains", Palette.PLAINS),
-		new Choice("grim_kingdoms:winterhold_citadel_taiga", Palette.TAIGA),
-		new Choice("grim_kingdoms:whitewarden_keep", Palette.SNOWY),
-		new Choice("grim_kingdoms:winterhold_citadel", Palette.SNOWY),
-		new Choice("grim_kingdoms:snowgrave_citadel", Palette.SNOWY));
+		new Choice("ati_structures:dojo", Palette.CHERRY));
+	// (0.7.598) Grim Kingdoms' keeps and citadels (Winterhold, Whitewarden, Snowgrave, Grain Sack, Glimmervault) are no
+	// longer kingdom seats. Andy: "this would never pass a kingdom's structure": they are fiefdoms' holds only
+	// (GrimSites#HOLDS), and a kingdom raised from nothing gets an Epic town first (EpicTowns).
 
 	/** The site: this much clear land round the castle's middle, at least this far (past its own half) from the bell, and as far again. */
 	static final int SITE_MARGIN = 2, SITE_CLEARANCE = 18, SITE_REACH = 48;
@@ -182,7 +178,7 @@ final class GrandSeats {
 	}
 
 	/** The structure as {@code /place structure} would start it at {@code chunk} (in any biome), or null if it won't. */
-	private static @Nullable StructureStart generate(ServerLevel level, Holder.Reference<Structure> holder, ChunkPos chunk) {
+	static @Nullable StructureStart generate(ServerLevel level, Holder.Reference<Structure> holder, ChunkPos chunk) {
 		ChunkGenerator generator = level.getChunkSource().getGenerator();
 		var randomState = level.getChunkSource().randomState();
 		try {

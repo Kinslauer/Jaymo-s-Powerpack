@@ -9543,3 +9543,18 @@ off course then those should break upon contact".
 - Speech bubbles: words still showing aren't stacked again under themselves (they stay up longer), and like name tags a
   faint copy shows through blocks, so a wall between you and the speaker no longer cuts lines off mid-word.
   Built, not played.
+
+## 0.7.598 (2026-11-05): kingdoms only in Epic towns; Grim castles are fiefs only
+- Andy, of a Winterhold citadel standing as a kingdom's seat on open snow: "these structures should only spawn as fiefs
+  or smaller villages allied to larger kingdoms that are always from epic villages, this would never pass a kingdom's
+  structure".
+- `GrandSeats` no longer offers Grim Kingdoms' keeps and citadels (Winterhold, Whitewarden, Snowgrave, Grain Sack,
+  Glimmervault): they stay fiefdom holds only (`GrimSites.HOLDS`). Snowy land takes ATi's woodland keep instead.
+- Only an Epic town (vanilla's `minecraft:village_*` ids, which Epic Structures: Villages redraws; `Seats.epic`) founds
+  a kingdom. Any other mod's village (ChoiceTheorem's, the shared pool's others) is always a village, and a new village
+  now sides with the nearest standing kingdom within 1000 blocks (`Villages.ally`, allied both ways).
+- A kingdom made where no village stands (the story start's capital, a trader's second town, a whaler's shore realm)
+  now raises an Epic town of the land's kind there first (`EpicTowns`: generated as `/place structure` does, entered in
+  its chunks' structure references) and seats in it like any town; only if it won't generate or would stand mostly on
+  water does the castle go up as before. The story's capital search looks at Epic towns only.
+- Kingdoms already founded keep their seats; this applies to new ones (a new map shows it). Built, not played.
