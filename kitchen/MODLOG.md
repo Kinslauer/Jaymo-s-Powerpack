@@ -1496,3 +1496,17 @@ if you no longer have the nourishment, so you wont heal back to the same amount"
 still have filled stay as leftover health (`Stomach.LEFTOVER`, saved, emptied on death); the ones already empty are gone.
 Every point of health you lose afterwards comes off the leftover hearts first, so your max health shrinks with each hit
 down to what your stomach still holds, and nothing heals them back. Built, not played.
+
+## 0.5.74: bodies fall where they stand; first person rides in the head
+Andy: "the knockback ragdoll is still too strong, i know i wasnt killed by a knockback ability, you should just fall
+where you stand or a bit further if knocked back" and "the first person POV should follow the head too, falling as you
+fall, etc like it does for decapitations".
+- A big hit (8+ damage) that knocks a player limp no longer adds its own 0.8-1.4 blocks/tick fling on top of the blow's
+  knockback: the server sends only a topple (`LivingRagdolls.HIT_FLING` 0.1, lift 0.04), and the client carries on 70% of
+  the speed the player already had, the real knockback included (`LimpController.KNOCK_CARRY`). A knockback ability
+  still throws you; an ordinary blow drops you about where you stood.
+- A mob or player who dies (not already limp) keeps 60% of its speed and none of vanilla's knockback hop
+  (`Corpses.DEATH_CARRY`, `DEATH_LIFT` 0.05).
+- Limp no longer flips first person to third person. In first person the view sits just in front of the ragdoll's face
+  and turns and falls with the head (`client/ragdoll/HeadCam`, `RagdollHeadCamMixin`), while limp and, once dead, from
+  your own corpse until you respawn. Third person is left as it is. Built, not played.
