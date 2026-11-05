@@ -419,4 +419,9 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   Grim Hand and Rubber-folk. `Dismember.halve`: an axe or greatsword blow of 16+ to the torso (a player's aim, a mob's by
   chance) that kills or downs may cut the body in half at the waist, both legs off at once, at 20% (zombies 50%); a halved
   body dies instead of going down (`Downed`, as a beheading). A zombie can be halved by any such blow and crawls on.
-  Tuning at the top of `Dismember` (CLEAVE_*, HALVE_*). Gradle build only, not played.
+  Tuning at the top of `Dismember` (CLEAVE_*, HALVE_*). Andy (01:02Z): "rubber folk can survive any of these
+  dismemberments ... as long as they absorb within 10s of a torso chop, they will start to regenerate. it is slow": a
+  halved Rubber-folk goes down instead (`Downed`), tagged `jaymospowers_rubber_split`; no swallow within 10 s
+  (`Dismember.SPLIT_TICKS`) and they die (`Dismember.tickSplit`). Kingdoms' swallow swaps it for
+  `jaymospowers_rubber_mending`; no one gets up while a leg is still missing (`Dismember.pulledApart`, `Downed.getUp`).
+  Beheading still kills. Gradle build only, not played.

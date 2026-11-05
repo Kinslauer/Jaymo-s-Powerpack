@@ -32,5 +32,6 @@
   "message.jaymoskingdoms.rubber.organ.heart": "%s pummels your heart. It skips and stutters!",
   "message.jaymoskingdoms.rubber.organ.left_lung": "%s knocks the breath out of a lung!",
   "message.jaymoskingdoms.rubber.organ.right_lung": "%s knocks the breath out of a lung!",
-  "message.jaymoskingdoms.rubber.organ.stomach": "%s churns your stomach. You feel sick!"
+  "message.jaymoskingdoms.rubber.organ.stomach": "%s churns your stomach. You feel sick!",
+  "message.jaymoskingdoms.rubber.mending": "You start stretching back together. It will take a while"
 }

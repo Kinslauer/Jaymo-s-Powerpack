@@ -309,7 +309,13 @@ public final class Downed {
 			}
 			// (0.20.52) cut in half at the waist: nothing left to get up, as with a beheading
 			if (Dismember.halve(entity, source, amount, null)) {
-				return true;
+				if (!Dismember.rubber(entity)) {
+					return true;
+				}
+				// (Andy: Rubber-folk survive it, if they swallow something in time)
+				goDown(level, entity, source, false);
+				Dismember.split(entity);
+				return false;
 			}
 			goDown(level, entity, source, false);
 			return false;
@@ -641,6 +647,10 @@ public final class Downed {
 		// (0.17.183) Kingdoms' Will: No Getting Up while a player with it stands near ({@link WillSkill#heldDown})
 		DamageSource felled = FELLED_BY.get(entity);
 		if (battered && WillSkill.heldDown(level, entity, felled == null ? null : felled.getEntity())) {
+			return;
+		}
+		// (0.20.52) a Rubber-folk cut in half stays down till their legs have grown back
+		if (battered && Dismember.pulledApart(entity)) {
 			return;
 		}
 		if (Carry.carrierOf(entity) instanceof ServerPlayer carrier) {
