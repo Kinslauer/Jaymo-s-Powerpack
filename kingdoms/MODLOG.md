@@ -9128,3 +9128,19 @@ ultimate and beam-clash films came down with it. Not played.
   else stains within 1.75 of the block you look at, or a Kitchen grate there), it gathers for the whole hold and never
   fires; otherwise, empty-handed, it's a barrage. A full reservoir draws nothing, so it fires.
 - Built in the cloud; not played.
+## 0.7.555 — the Judge's menu back; villagers want their own things
+- Andy: "i messed up ... it should instead be whatever is proper". 0.7.539's "only Have a word" on Powers' Z Fighter
+  characters is undone (`McaZFighterPageMixin` gone, the `ZFighterFolk.WORD`/`keeps` filter gone). It had also reused
+  `jaymoskingdoms_word`, the villagers' own "Have a word" (`Talks`), so on the Judge it opened a villager small talk (or
+  nothing) instead of his menu with "be born again", and every other villager lost "Have a word". The Judge, the Keeper,
+  the masters and the rest have their full MCA screen again, and "Talk about work" opens their own menu as before.
+- Andy: "not everyone should strictly trade for whale products. they should all have some separate thing THEY want".
+  `WhaleTrade` no longer gives every villager cooked whale meat, oil and ambergris purchases; only the trades that use whale
+  goods buy them, and such offers already put on anyone else are taken off. New `OwnWants`: each grown villager has one
+  thing of their own they pay well for (60% from their trade's list, else small pleasures anyone might want), picked from
+  their UUID so it never changes. Neither touches Z Fighter characters.
+- (follow-up) Andy: "every villager should want something different, it could relate to their temperament or personality.
+  the judge, keeper and masters dont need the FULL screen". `OwnWants` now draws mostly from the villager's MCA personality
+  (`byNature`, three things each), then their trade, then small pleasures. Z Fighter characters get a trimmed MCA screen
+  again (`McaZFighterPageMixin`: Talk and Trade only) and a trimmed talk menu (`ZFighterFolk.keeps`: Talk about work, Talk
+  about training on a master, Chat; joke and story for pilots and patrolmen). No hugs, rumours, flirting or Have a word.
