@@ -411,7 +411,18 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
 
-- **0.20.52 (Kitchen 0.5.64), corpses stay bloodied:** Andy (2026-11-05): "the corpses should stay bloodied, if they were
+- **0.20.52, the Aether hidden until you're past the clouds:** Andy (2026-11-05), on a clip looking up from a hillside:
+  "The aether should NOT be visible so easy from ground level especially, maybe it only reveals once you are past the
+  cloud layer?" In a One Dimension world the Aether band is ordinary terrain over the Overworld's sky, so its islands'
+  undersides showed from anywhere. `client/aether/AetherVeil` reads the Aether band's floor and the Overworld band's
+  shift from CustomChunks' synced `StackLayout`, and while the camera is under the Overworld's clouds (192.33 + shift;
+  it hides below the clouds' bottom and shows above their top, so it flips inside the cloud) nothing at or above that
+  floor is drawn: Sodium's culling frustum gets the floor as a ceiling (`client/mixin/sodium/AetherVeilViewportMixin`
+  wraps every `Viewport`'s frustum in `SodiumVeil`, Iris' shadow pass included, and asks Sodium to cull again when it
+  flips), and the game's `Frustum.isVisible` leaves out anything whose box starts at or above it (mobs, aerwhales,
+  item drops). Ordinary worlds and the separate Aether dimension are untouched. Sodium is now `compileOnly`, behind an
+  optional mixin config. Gradle compile only, not played.
+- **0.20.53 (Kitchen 0.5.64), corpses stay bloodied:** Andy (2026-11-05): "the corpses should stay bloodied, if they were
   upon death the blood stains should just stay drawn and dry like normal". Kitchen's new `Corpses.ON_BODY` hook hands
   each new body (mob or player) to Powers, which copies the dead body's blood coat onto the corpse as
   `Bloodied.CORPSE_BLOOD` (amount, colour, laid now; saved with the corpse, synced). It never wears off and darkens over

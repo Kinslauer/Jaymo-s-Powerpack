@@ -29,13 +29,13 @@ import net.minecraft.world.entity.LivingEntity;
  * bloodier, laid only where the skin has pixels ({@link ArmourGrimeTextures#skin}), in its own blood's colour. A
  * player's outer skin layer stays clean, so nothing floats off the body. It wears off by itself and washes off in water.
  * <p>
- * (0.20.52) A corpse keeps the blood it died in ({@link Bloodied#CORPSE_BLOOD}), drying darker: Jaymo's Kitchen hands
+ * (0.20.53) A corpse keeps the blood it died in ({@link Bloodied#CORPSE_BLOOD}), drying darker: Jaymo's Kitchen hands
  * each body's state to {@link #corpseBody} as it's drawn (its {@code CorpseDressing.BODY} hook, by name), and a dead
  * player drawn in their plain skin gets it through {@code EXTRACT} and {@code SUBMIT}.
  */
 public final class BloodCoatLayer {
 	static final RenderStateDataKey<Bloodied.Coat> KEY = RenderStateDataKey.create(() -> "jaymospowers:blood_coat");
-	/** (0.20.52) A corpse's blood, drawn in place of a coat. */
+	/** (0.20.53) A corpse's blood, drawn in place of a coat. */
 	static final RenderStateDataKey<Bloodied.Blood> CORPSE = RenderStateDataKey.create(() -> "jaymospowers:corpse_blood");
 	private static final String DRESSING = "com.jaymoskitchen.client.corpse.CorpseDressing";
 
@@ -48,7 +48,7 @@ public final class BloodCoatLayer {
 		hookCorpses();
 	}
 
-	/** (0.20.52) Kitchen's corpse drawing hooks; an older Kitchen just draws bodies clean. */
+	/** (0.20.53) Kitchen's corpse drawing hooks; an older Kitchen just draws bodies clean. */
 	@SuppressWarnings("unchecked")
 	private static void hookCorpses() {
 		if (!FabricLoader.getInstance().isModLoaded("jaymoskitchen")) {
@@ -64,13 +64,13 @@ public final class BloodCoatLayer {
 		}
 	}
 
-	/** (0.20.52) The body {@code corpse} is drawn as: its own blood, not whatever coat the stand-in body has. */
+	/** (0.20.53) The body {@code corpse} is drawn as: its own blood, not whatever coat the stand-in body has. */
 	private static void corpseBody(Entity corpse, EntityRenderState state) {
 		state.setData(KEY, null);
 		state.setData(CORPSE, Bloodied.corpseBlood(corpse));
 	}
 
-	/** (0.20.52) Just after a dead player's plain body: its blood over it, in its pose. */
+	/** (0.20.53) Just after a dead player's plain body: its blood over it, in its pose. */
 	private static void submitPlayerCorpse(AvatarRenderState avatar, Object[] args) {
 		Bloodied.Blood blood = avatar.getData(CORPSE);
 		if (blood == null || args.length < 4 || !(args[0] instanceof PlayerModel body) || !(args[1] instanceof PoseStack poseStack)
