@@ -1445,3 +1445,17 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
 - `Gibs.blownApart` follows Jaymo's Powers' roll by blast proximity (`BlastGore`): tag `jaymoskitchen.gib` blows the body
   apart, `jaymoskitchen.no_gib` leaves it whole. Without either (no Powers), the old 12-damage rule stays. Creepers
   still always burst. Not played.
+
+## 0.5.68 (2026-11-05): modded animals' corpses fold their legs and shut their eyes
+
+- Andy: "the deer also fell with their bodies clipping into the ground as corpses, they should flop". The ragdoll drove
+  only legs with vanilla's names (`right_front_leg`...). Cube Animals' legs are "frontleg", "BackLegL", "FrontLeg1",
+  inside a legs group and a wrapper turned a quarter round, so they only hung loose (barely swinging, as parts on a
+  group) and went through the ground. `RagdollPose.stands`: on a four-legged body without vanilla's legs, the outermost
+  four parts named *leg* that draw something (front pair the two furthest forward, right on -x) and the shallowest part
+  named head in any case are turned with the ragdoll like vanilla limbs, whatever their parents' turn (`Stand.turn`).
+- Andy: "all the new mobs need a corpse texture pass cause they dont close their eyes". `ClosedEyes.headFaces` read the
+  head's faces in the cube's own space, so a head built sideways (Cube Animals') had one side and its back painted, not
+  both sides; and it only knew a part called exactly "head" or "real_head", its first box. Now: the shallowest head in
+  any case, every part on it except ears, horns, mouths, necks and the like (each by its biggest box, so snouts and
+  horns on the head's own part are left alone), faces judged in the model's space. Not played.

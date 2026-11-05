@@ -9185,3 +9185,10 @@ ultimate and beam-clash films came down with it. Not played.
   `UnsupportedOperationException`. When the killer had no captain yet, the new captain has no fight list, and
   `FIGHTS.getOrDefault(id, Map.of()).remove(...)` tried to remove from the immutable empty map. Now it only removes from a
   fight list that exists. Every first kill by a greenskin with no captain crashed the server before this.
+
+## 0.7.564 (2026-11-05): herd animals flee killings
+
+- Andy: "passive animals should run when someone is killed near them". Any death, downing, or blow on the downed (people,
+  villagers, monsters; not herd animals themselves, whose kin already panic) makes every `jaymoskingdoms:skittish` animal
+  within 16 blocks that sees it, or within 6 out of sight, run from the killer (or the body) for 4 s (`Herds.killing`,
+  `KILL_SEEN`, `KILL_HEARD`). Ridden and tamed animals stay calm; leashed ones pull at the rope. Hint 103. Not played.
