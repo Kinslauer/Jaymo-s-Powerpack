@@ -654,3 +654,15 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   inside the leg. It now hangs at 4.9 (a pixel further over leggings or a chestplate), and swings out freely but only a
   little in toward the leg (`WornLanterns.PURSE_X`, `PURSE_OVER_ARMOUR`, `PURSE_ROLL_IN`). Kingdoms 0.7.568 goes with it.
   Built, not played.
+
+## 0.20.83 (2026-11-05): seven-mods picks, wave 1
+- Andy's picks from the "Seven mods" picklist (Better Advancements, Worldbound and others), all shipped unchanged:
+  Better Advancements and Fancy Toasts, It Takes a Pillage, Mutant Monsters, Eternal Nether, Moog's Nether Structures
+  and Moog's Mineshafts Reimagined, Epic Structures: Witch Huts, Hopo Better Ruined Portals, Particle Rain, Biome Blends,
+  Crops Love Rain, Macaw's Doors, Diagonal Windows, Beautify: Refabricated, Lanterns Belong on Walls, Simply Tents,
+  Critter Armory, Kaffee's Dual Ride and RightClickHarvest (with JamLib). Mineshafts Reimagined and RightClickHarvest
+  have no 26.3 file on CurseForge yet, so they're in `packModsNoCf`.
+- Mutant Monsters, zombies only (Andy: "any zombie but only if they have the model"; the Mutant Zombie is its only
+  zombie): Powers' data adds every Overworld, Nether, End and Aether biome to its `without_mutant_creeper/skeleton/
+  enderman_spawns` tags, so only the Mutant Zombie spawns on its own. Chemical X can still turn a mob into its mutant.
+- Built, not played.
