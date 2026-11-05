@@ -439,7 +439,32 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   stains shrink by `BloodTrail.RAIN_WASH` (0.03 a half-second) under open rain (`BloodTrail.wash`; a big pool goes in
   about half a minute, prints in a second or two), and passing pools and wall runs (`BloodPuddle`, `BloodWallMark`) fade
   over 5 s once rain falls on them. Bodies already washed in rain (`Bloodied.RAIN_WASH`).
-- **0.20.55, Impale throws the spear itself:** Andy (2026-11-05), on the Iron Spear's Impale (RPG Series): "using this
+- **0.20.55 (Kitchen 0.5.65), corpses stay bloodied:** Andy (2026-11-05): "the corpses should stay bloodied, if they were
+  upon death the blood stains should just stay drawn and dry like normal". Kitchen's new `Corpses.ON_BODY` hook hands
+  each new body (mob or player) to Powers, which copies the dead body's blood coat onto the corpse as
+  `Bloodied.CORPSE_BLOOD` (amount, colour, laid now; saved with the corpse, synced). It never wears off and darkens over
+  `DRIES_IN` (5 min) like blood on gear. Drawn through Kitchen's new `CorpseDressing.BODY` hook (mob bodies and MCA
+  looks, by the usual `BloodCoatLayer`) and `EXTRACT`/`SUBMIT` (a dead player in plain skin). Rain and water wash a
+  corpse's blood off at the living body's rates (Andy: "rain should wash away blood"). Gradle build only, not played.
+- **0.20.56, Kingdoms 0.7.549, Big Cannons booms:** Andy liked Create Big Cannons' screen shake and sounds. Its code is MIT
+  and its sound files carry no licence, so these are our own code and our own sounds (synthesised by
+  `tools/gen_blast_sounds.py`). `client/sound/Blasts` (hooked at `SoundEngine.play` by `BlastSoundEngineMixin`): every
+  blast sound (the explosion sound from any mod, the dragon fireball, our cannon report) reaches you at 17 blocks a tick,
+  so a far blast flashes first and its boom and shake come a beat later. OpenAL air absorption dulls its high end with
+  distance; past 20 blocks a long low rumble (`blast.far`) rolls in, heard up to 150 blocks (260 for the biggest), and
+  within 40 a sharp crack with a patter of debris (`blast.crack`) sits on top. An explosion shakes by its size, any
+  other blast sound by how loud it was played, both when the sound arrives; server shakes from beyond 24 blocks wait for
+  it too. `client/sound/ShellWhistle`: cannonballs, the Arsenal cannonball, demolition bombs and anything whose id says
+  cannonball, shell, mortar, bomb, meteor or boulder whine as they fly past, louder the faster, rising in pitch as
+  they come at you. `/shake <0-200>` or `/shake off` sets each player's own shake strength (kept in
+  `config/jaymospowers-client.properties`). Bodies blown apart (Kitchen gibs) give a small shake of their own.
+  Compile-checked; not played.
+
+- **0.20.57, Kitchen 0.5.66, small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
+  work like fish, if they drop an item the corpse disappears." Crickets, mice, snails, butterflies, bees and any other
+  creature kind under 0.5 blocks both ways (or in Kitchen's new `small_corpses` tag) are looted in one click and gone,
+  like fish. Rabbits, chickens, frogs and babies still leave a body. Not played.
+- **0.20.58, Impale throws the spear itself:** Andy (2026-11-05), on the Iron Spear's Impale (RPG Series): "using this
   should actually throw your spear". The spear now leaves your main hand when Impale flies (`compat/SpellThrows`,
   through `SpellEngineCompat`; Spell Engine's own projectile still does the charged damage and knockback). Where the
   spell ends the spear carries on as a real `ThrownWeapon`: it sticks in a block it hits, glances off a creature and

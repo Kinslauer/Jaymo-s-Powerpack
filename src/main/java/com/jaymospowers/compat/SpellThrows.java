@@ -24,7 +24,7 @@ import net.spell_engine.entity.SpellProjectile;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.55) Andy, on the Iron Spear's Impale (RPG Series): "using this should actually throw your spear". Spell Engine's
+ * (0.20.58) Andy, on the Iron Spear's Impale (RPG Series): "using this should actually throw your spear". Spell Engine's
  * Impale only flies a picture of the held weapon and leaves it in your hand. Now the spear itself goes: it leaves the
  * main hand as the spell flies (the spell still does its own damage and knockback, scaled by the charge), and where the
  * spell ends the spear carries on as a real thrown weapon ({@link ThrownWeapon}) that lies where it lands for its
