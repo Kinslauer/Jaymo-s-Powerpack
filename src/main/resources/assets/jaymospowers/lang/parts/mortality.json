@@ -1,5 +1,11 @@
 {
 	"message.jaymospowers.mortality.fading": "Everything goes dark.",
+	"message.jaymospowers.mortality.lying": "You lie where you fell, left for dead. Someone might still find you.",
+	"message.jaymospowers.mortality.carried": "You're being carried. Somewhere safe, they can bring you round.",
+	"message.jaymospowers.mortality.come_to": "Hold sneak to come to on your own %s",
+	"message.jaymospowers.mortality.come_to_carried": "Being carried. Hold sneak to come to on your own %s",
+	"message.jaymospowers.mortality.not_safe": "Not here. %s needs somewhere safe first.",
+	"message.jaymospowers.mortality.brought_round": "Someone brought you round. You're alive, but it left its mark.",
 	"message.jaymospowers.mortality.ended": "That life is over. Another begins.",
 	"deathScreen.jaymospowers.reincarnate": "Reincarnate",
 	"message.jaymospowers.mortality.wake.boss": "You wake to birdsong. Whatever it was, it let you go.",
