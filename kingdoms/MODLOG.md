@@ -9543,3 +9543,10 @@ off course then those should break upon contact".
 - Speech bubbles: words still showing aren't stacked again under themselves (they stay up longer), and like name tags a
   faint copy shows through blocks, so a wall between you and the speaker no longer cuts lines off mid-word.
   Built, not played.
+- **0.7.598, werewolf players can be hurt:** Andy: "jungxvv seemed to be invulnerable after becoming a werewolf". Two
+  causes. The beast's player wore Invisibility to hide their body, and monsters all but ignore an invisible player, so
+  nothing fought them; now no Invisibility (`WerewolfPlayers.buffs`): their body and first-person arm are hidden by
+  `BeastHidesPlayerMixin`/`BeastHidesHandMixin` once the beast has torn out (`NightGifts.Gift#beast` now means torn out,
+  `WerewolfPlayers.tornOut`). And blows to a player's beast took the wild werewolf's thick hide (x0.25 unless gold or
+  silver) before reaching the player, on top of Resistance and 5 extra hearts; now only silver's x2 applies
+  (`Werewolf.hurtServer`). Not played.
