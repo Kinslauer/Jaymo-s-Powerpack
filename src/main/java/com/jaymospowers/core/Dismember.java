@@ -107,6 +107,13 @@ public final class Dismember {
 	/** (0.18.87) Kingdoms' Rubber-folk heritage tag: a blade severs their limbs this many times as often. */
 	static final String RUBBER_TAG = "jaymoskingdoms_heritage_rubberfolk";
 	static final float RUBBER_SEVER_SCALE = 2.0F;
+	/**
+	 * (0.20.52) A double leg cleave ({@link #cleave}): an axe or greatsword blow of at least this much damage that cuts off one
+	 * leg takes the other too at this chance (zombies at the zombie one).
+	 */
+	public static final float CLEAVE_DAMAGE = 10.0F, CLEAVE_CHANCE = 0.25F, ZOMBIE_CLEAVE_CHANCE = 0.6F;
+	/** (0.20.52) Cut in half at the waist ({@link #halve}): an axe or greatsword blow to the torso this hard, at this chance. */
+	public static final float HALVE_DAMAGE = 16.0F, HALVE_CHANCE = 0.2F, ZOMBIE_HALVE_CHANCE = 0.5F;
 	public static final AttachmentType<Integer> MISSING = AttachmentRegistry.create(JaymosPowers.id("missing_parts"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
@@ -339,6 +346,14 @@ public final class Dismember {
 	 * True if it came off.
 	 */
 	public static boolean severOnOverkill(LivingEntity target, int part, DamageSource source) {
+		return severOnOverkill(target, part, source, 0.0F);
+	}
+
+	/**
+	 * (0.20.52) As {@link #severOnOverkill(LivingEntity, int, DamageSource)}, with the blow's damage ({@code taken}): a leg
+	 * cut off by a heavy chop may take the other leg with it ({@link #cleave}).
+	 */
+	public static boolean severOnOverkill(LivingEntity target, int part, DamageSource source, float taken) {
 		if (!(target.level() instanceof ServerLevel) || !canLoseParts(target) || target instanceof Player p && (p.isCreative() || p.isSpectator())
 			|| (missing(target) & part) != 0) {
 			return false;
@@ -370,7 +385,72 @@ public final class Dismember {
 		if (severed && cut != null && cut.target == target) {
 			cut.severed = true;
 		}
+		if (severed && (part == RIGHT_LEG || part == LEFT_LEG)) {
+			cleave(target, part, attacker, taken, scale / scale(target, BLADE_CHANCE));
+		}
 		return severed;
+	}
+
+	/**
+	 * (0.20.52) Andy: "cleave both legs off once I'm strong enough", "more often on zombie humanoids than anyone else". A
+	 * leg just cut off by an axe or a greatsword blow of at least {@link #CLEAVE_DAMAGE} goes through to the other leg at
+	 * {@link #CLEAVE_CHANCE} ({@link #ZOMBIE_CLEAVE_CHANCE} on zombies), times {@code extra} (Grim Hand, Rubber-folk; the
+	 * cut's own scale over a plain blade's), at most certain.
+	 */
+	private static void cleave(LivingEntity target, int part, @Nullable LivingEntity attacker, float taken, float extra) {
+		int other = part == RIGHT_LEG ? LEFT_LEG : RIGHT_LEG;
+		if (attacker == null || taken < CLEAVE_DAMAGE || (missing(target) & other) != 0) {
+			return;
+		}
+		com.jaymospowers.core.finisher.Finishers.Kind kind = com.jaymospowers.core.finisher.Finishers.kind(attacker.getMainHandItem());
+		if (kind != com.jaymospowers.core.finisher.Finishers.Kind.AXE && kind != com.jaymospowers.core.finisher.Finishers.Kind.GREATSWORD) {
+			return;
+		}
+		float chance = zombie(target) ? ZOMBIE_CLEAVE_CHANCE : CLEAVE_CHANCE;
+		if (target.getRandom().nextFloat() < Math.min(1.0F, chance * Math.max(1.0F, extra))) {
+			sever(target, other, attacker);
+		}
+	}
+
+	/**
+	 * (0.20.52) Andy: "why not splitting a torso clean off too". A heavy axe or greatsword blow (at least
+	 * {@link #HALVE_DAMAGE}) that lands on the torso ({@code torso}; null: worked out from a player's aim, a mob's lands
+	 * there by chance) may cut the body in half at the waist: both legs come off at once and the upper half is left. At
+	 * {@link #HALVE_CHANCE}, zombies at {@link #ZOMBIE_HALVE_CHANCE}, times Grim Hand and Rubber-folk. Called on a blow that
+	 * kills or downs (Downed lets a halved body die, as a beheaded one does) and, for zombies only, on any blow (the upper
+	 * half crawls on). True if it happened.
+	 */
+	public static boolean halve(LivingEntity target, DamageSource source, float amount, @Nullable Boolean torso) {
+		if (!(target.level() instanceof ServerLevel) || !canLoseParts(target) || amount < HALVE_DAMAGE
+			|| target instanceof Player p && (p.isCreative() || p.isSpectator()) || (missing(target) & (RIGHT_LEG | LEFT_LEG)) != 0
+			|| !(source.getDirectEntity() instanceof LivingEntity striker) || source.getEntity() != striker || striker == target) {
+			return false;
+		}
+		com.jaymospowers.core.finisher.Finishers.Kind kind = com.jaymospowers.core.finisher.Finishers.kind(striker.getMainHandItem());
+		if (kind != com.jaymospowers.core.finisher.Finishers.Kind.AXE && kind != com.jaymospowers.core.finisher.Finishers.Kind.GREATSWORD) {
+			return false;
+		}
+		if (torso == null) {
+			torso = !(striker instanceof Player)
+				|| Integer.valueOf(LimbBoxes.TORSO).equals(LimbBoxes.aimedPart(target, striker.getEyePosition(), striker.getLookAngle()));
+		}
+		if (!torso) {
+			return false;
+		}
+		float extra = target.entityTags().contains(RUBBER_TAG) ? RUBBER_SEVER_SCALE : 1.0F;
+		extra *= com.jaymospowers.core.wounds.WillSkill.severScale(striker, target);
+		float chance = zombie(target) ? ZOMBIE_HALVE_CHANCE : HALVE_CHANCE;
+		if (target.getRandom().nextFloat() >= Math.min(1.0F, chance * extra)) {
+			return false;
+		}
+		boolean right = sever(target, RIGHT_LEG, striker);
+		boolean left = sever(target, LEFT_LEG, striker);
+		return right || left;
+	}
+
+	/** (0.20.52) Whether {@code target} is a zombie (cleaves and halvings come more often, and its upper half fights on). */
+	public static boolean zombie(LivingEntity target) {
+		return target.getType().builtInRegistryHolder().is(EntityTypeTags.ZOMBIES);
 	}
 
 	/**

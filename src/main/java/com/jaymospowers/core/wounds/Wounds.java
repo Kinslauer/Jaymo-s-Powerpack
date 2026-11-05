@@ -404,7 +404,7 @@ public final class Wounds {
 		boolean overkill = landed == BodyPart.HEAD
 			? was[index] > EPS && now[index] <= EPS && loss - was[index] > most
 			: !landed.vital() && Breaks.isBroken(victim, landed) && loss > most;
-		return overkill && Dismember.severOnOverkill(victim, limb, source);
+		return overkill && Dismember.severOnOverkill(victim, limb, source, taken);
 	}
 
 	/**
@@ -430,6 +430,10 @@ public final class Wounds {
 			landed = aimed;
 		} else {
 			landed = HitRouting.route(victim, plan, blow.source(), points, victim.getMaxHealth(), loss);
+		}
+		// (0.20.52) a heavy chop to the torso may cut the body in half (Downed already tried it on the downable)
+		if (Dismember.halve(victim, blow.source(), loss, landed == BodyPart.BODY)) {
+			return;
 		}
 		sever(victim, plan, blow.source(), landed, was, points, loss, victim.getMaxHealth(), loss);
 	}
@@ -657,6 +661,10 @@ public final class Wounds {
 			victim.setHealth(Math.max(0.01F, hearts(points, plan, max)));
 		}
 		Entity by = source.getEntity();
+		// (0.20.52) a zombie cut in half at the waist by a heavy chop crawls on as its upper half
+		if (!blocked && Dismember.zombie(victim) && Dismember.halve(victim, source, loss, landed == BodyPart.BODY)) {
+			return;
+		}
 		// (0.14.2) overkill: a blade on a limb already broken, or past the head's zero, may cut it off
 		if (!blocked && sever(victim, plan, source, landed, was, points, loss, max, loss)
 			&& (landed == BodyPart.HEAD || !victim.isAlive())) {

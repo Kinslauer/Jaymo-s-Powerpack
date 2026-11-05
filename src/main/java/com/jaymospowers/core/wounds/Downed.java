@@ -307,6 +307,10 @@ public final class Downed {
 			if (!downable(entity) || !spared(entity, source)) {
 				return true;
 			}
+			// (0.20.52) cut in half at the waist: nothing left to get up, as with a beheading
+			if (Dismember.halve(entity, source, amount, null)) {
+				return true;
+			}
 			goDown(level, entity, source, false);
 			return false;
 		});

@@ -410,3 +410,13 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   damage taken), switched off by `compat/SubtleEffectsCompat` (its two public fields, at server start and every 10 s on
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
+
+## 0.20.52 (2026-11-05): leg cleaves and waist cuts
+
+- Andy: "is it possible to cleave both legs off once I'm strong enough? ... it should proc more often on zombie humanoids
+  than anyone else", then "why not splitting a torso clean off too". `Dismember.cleave`: when an axe or greatsword blow
+  of 10+ damage cuts off one leg (the usual overkill), it goes through the other leg too at 25% (zombies 60%), times
+  Grim Hand and Rubber-folk. `Dismember.halve`: an axe or greatsword blow of 16+ to the torso (a player's aim, a mob's by
+  chance) that kills or downs may cut the body in half at the waist, both legs off at once, at 20% (zombies 50%); a halved
+  body dies instead of going down (`Downed`, as a beheading). A zombie can be halved by any such blow and crawls on.
+  Tuning at the top of `Dismember` (CLEAVE_*, HALVE_*). Gradle build only, not played.
