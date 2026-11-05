@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.BioBuilt;
 import com.jaymoskingdoms.EarthlingSurge;
+import com.jaymoskingdoms.Faiths;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -297,13 +298,9 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		return look.glow() != 0 ? 2 : 1;
 	}
 
-	/**
-	 * (0.7.544) The bloods that are human, whose eyes never glow (Andy: Endborn, Dragonblood, Deepborn, Divine-born,
-	 * Rubberfolk, Emberborn and Frostborn "are actually all not human"); every other blood keeps its eyes.
-	 */
+	/** (0.7.544) The bloods that are human ({@link Faiths#human}: Heartlander, Nightborn, Earthling, Stormborn, Dawnborn): their eyes never glow. */
 	static boolean human(Heritage.@Nullable Kind kind) {
-		return kind == Heritage.Kind.HEARTLANDER || kind == Heritage.Kind.NIGHTBORN || kind == Heritage.Kind.EARTHLING
-			|| kind == Heritage.Kind.STORMBORN || kind == Heritage.Kind.DAWNBORN;
+		return kind != null && Faiths.human(kind);
 	}
 
 	/** Whether {@code kind}'s eyes glow on {@code entity} now (a player's or a villager's). */

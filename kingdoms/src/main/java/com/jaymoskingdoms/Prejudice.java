@@ -26,7 +26,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.221) Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone
  * knows it. the tide born, stone, warrior and sylvan fall into this". Each heritage is some way from human
- * ({@link #degree}): Tideborn the furthest, then Stoneborn, Warrior-born and Sylvan; the rest pass for human. The
+ * ({@link #degree}): Tideborn the furthest, then Stoneborn, Warrior-born and Sylvan; (0.7.544) only the Heartlander, Nightborn, Earthling,
+ * Stormborn and Dawnborn pass for human. The
  * heritage screen says so on the card.
  * <p>
  * Most townsfolk ({@link #minds}) hold it against a player (and against a neighbour) of such blood, the further from
@@ -61,6 +62,11 @@ public final class Prejudice {
 	static final int BEASTFOLK = 2, HOLLOW = 4;
 	/** (0.7.357) The Bio-built: made, not born, and plainly so; worse than any. */
 	static final int BIOBUILT = 6;
+	/**
+	 * (0.7.544) Andy (2026-11-05): Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, Emberborn and Frostborn "are
+	 * actually all not human": the near-human looking ones a little, the ones with scales, void or sculk in them more.
+	 */
+	static final int EMBERBORN = 1, FROSTBORN = 1, RUBBERFOLK = 1, DIVINE = 1, ENDBORN = 2, DEEPBORN = 2, DRAGONBLOOD = 2;
 	/** (0.7.357) A human who minds no other blood still minds the Bio-built's this much (a share of the full degree). */
 	static final float BIO_TOLERANT = 0.5F;
 	/**
@@ -135,6 +141,13 @@ public final class Prejudice {
 			case BIOBUILT -> BIOBUILT;
 			case BEASTFOLK -> BEASTFOLK;
 			case HOLLOW -> HOLLOW;
+			case EMBERBORN -> EMBERBORN;
+			case FROSTBORN -> FROSTBORN;
+			case RUBBERFOLK -> RUBBERFOLK;
+			case DIVINE -> DIVINE;
+			case ENDBORN -> ENDBORN;
+			case DEEPBORN -> DEEPBORN;
+			case DRAGONBLOOD -> DRAGONBLOOD;
 			default -> 0;
 		};
 	}

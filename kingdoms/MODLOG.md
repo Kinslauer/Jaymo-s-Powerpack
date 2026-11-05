@@ -9016,5 +9016,9 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   human". `HeritageLooks.human` = Heartlander, Nightborn, Earthling, Stormborn, Dawnborn (and their variants): their eyes
   never light, players and villagers alike (`HeritageLooks.extract`, `VillagerLooks.extract`). Marks and other glows stay;
   every other blood keeps its eyes. Vampire red eyes, a Nightborn vampire's red-silver eyes at night, werewolf flashes,
-  Valor hunter eyes and power eyes are states, not bloods, and stay. Faith and prejudice still use their own "human"
-  (`Faiths.human`, `Prejudice.degree`), unchanged. Gradle compile only, not played.
+  Valor hunter eyes and power eyes are states, not bloods, and stay. Andy "change that too": faith and prejudice follow.
+  `Prejudice.degree` now 1 for Emberborn, Frostborn, Rubberfolk, Divine-born and 2 for Endborn, Deepborn, Dragonblood, so
+  `Faiths.human` (which the eyes read too) is just those five. The seven now start with a patron of the seven (`Faiths.lean`:
+  Emberborn Ash Whisperer, Frostborn Green Huntsman, Endborn Lantern Warden, Deepborn Anvil-Father, Dragonblood Crowned
+  Sun, Divine-born and Rubberfolk Hearthkeeper), are muttered at, can live in havens and mind humans. Faiths already
+  stored on villagers stay. Gradle compile only, not played.
