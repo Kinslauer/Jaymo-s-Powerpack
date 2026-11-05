@@ -889,3 +889,11 @@ semi or full auto weapon. it should use ammunition accurately and animate a one 
   Without the Executioner perk a loaded future gun no longer slams: it fires one round one-handed, and 40% of the time
   (`Finishers.WILD_MISS`) the shot goes into the ground beside their head and they live. Unloaded, it's still the Wild Slam.
 - Built (compileClientJava), not played.
+
+## 0.20.102 (2026-11-05): Homesteads' workstation advancements no longer come free
+Andy, on a new character: "i got all these achievements but did not do them yet".
+- Homesteads' five workstation advancements (Nice Tan!, A bouquet for you!, Honey, I placed a thing, Got wood?, Your
+  prospects are looking up) used a placed_block field 26.3 no longer reads, so the first block anyone placed earned all
+  five. An always-on pack (`resourcepacks/homesteads_fixes`) gives each 26.3's location match on its own workstation
+  (`compat/HomesteadsCompat`); Homesteads' jar is untouched.
+- Anyone who already has them from the bug has them taken back once, on their next join.

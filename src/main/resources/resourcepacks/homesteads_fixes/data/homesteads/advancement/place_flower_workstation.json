@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "place_flower_workstation": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "homesteads:forager_bench"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.place_flower_workstation.descr"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:red_tulip"
+    },
+    "title": {
+      "translate": "advancements.place_flower_workstation.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_flower_workstation"
+    ]
+  ]
+}

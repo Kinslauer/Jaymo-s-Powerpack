@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "place_bee_keeper_work_station": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "homesteads:honey_bottling_station"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.place_bee_keeper_work_station.descr"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:honey_bottle"
+    },
+    "title": {
+      "translate": "advancements.place_bee_keeper_work_station.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_bee_keeper_work_station"
+    ]
+  ]
+}
