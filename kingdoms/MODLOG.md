@@ -9155,3 +9155,10 @@ ultimate and beam-clash films came down with it. Not played.
 
 - Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
   0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.
+
+## 0.7.561 (2026-11-05): a warband captain's first kill no longer crashes the server
+
+- Andy's crash report (2026-11-05 02:10): an orc downed and finished him, and the server died in `Captains.slew` with
+  `UnsupportedOperationException`. When the killer had no captain yet, the new captain has no fight list, and
+  `FIGHTS.getOrDefault(id, Map.of()).remove(...)` tried to remove from the immutable empty map. Now it only removes from a
+  fight list that exists. Every first kill by a greenskin with no captain crashed the server before this.
