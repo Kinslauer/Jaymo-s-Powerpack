@@ -1028,7 +1028,11 @@ them, and the katana and battleaxe raised a block pose that blocked nothing.
   the tridents, Tidecaller / Sunbrand / Ashfang (their gifts), and the Arsenal's relic and stone swords.
 - Pairs with Kingdoms 0.7.601: every melee weapon gets an RPG Series weapon skill on the skill bar. Built, not played.
 
-## 0.20.119 (2026-11-05): Kingdoms 0.7.602, an incoming-blow cue for PvP (and every foe)
+## 0.21.0 (2026-11-05): Kingdoms 0.7.602, no taking a mounted villager's reins
+- Ships Kingdoms 0.7.602: players can't climb onto a horse (or any living mount) a villager, guard or carter is riding;
+  bring the rider down or throw them first. See kingdoms/MODLOG.md.
+
+## 0.21.1 (2026-11-05): Kingdoms 0.7.603, an incoming-blow cue for PvP (and every foe)
 - Andy: "is it possible to add an indicator for pvp? as of right now it is hard to parry or defend at all"
 - `combat/IncomingBlows` (+ `compat/mixin/IncomingSwingMixin`, `client/combat/IncomingBlowsClient`): a player's Better
   Combat swing now warns the one it's aimed at (the swinger's lock-on, or anyone in the weapon's reach + 1.5 inside 50°
