@@ -181,10 +181,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.quickFade = life < QUICK_FADE_UNDER ? Math.max(1, life) : 0;
 	}
 
-	/** (0.20.52) How often a passing pool checks for rain on it (ticks), and how long it then takes to wash away. */
+	/** (0.20.53) How often a passing pool checks for rain on it (ticks), and how long it then takes to wash away. */
 	static final int RAIN_CHECK = 20, RAIN_WASH = 100;
 
-	/** (0.20.52) Whether rain falls on this spot (a client-side check, for the blood that's only for show). */
+	/** (0.20.53) Whether rain falls on this spot (a client-side check, for the blood that's only for show). */
 	static boolean rainedOn(ClientLevel level, double x, double y, double z) {
 		if (!level.isRaining()) {
 			return false;
@@ -196,7 +196,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	@Override
 	public void tick() {
 		super.tick();
-		// (0.20.52) rain washes a passing pool away (a lasting stain is washed by the server, BloodTrail.wash)
+		// (0.20.53) rain washes a passing pool away (a lasting stain is washed by the server, BloodTrail.wash)
 		if (!this.wet && !this.stain && this.age % RAIN_CHECK == 0 && this.lifetime - this.age > RAIN_WASH
 			&& rainedOn(this.level, this.x, this.y + 0.5, this.z)) {
 			this.lifetime = this.age + RAIN_WASH;

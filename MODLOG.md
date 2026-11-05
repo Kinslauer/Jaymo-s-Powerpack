@@ -410,7 +410,19 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   damage taken), switched off by `compat/SubtleEffectsCompat` (its two public fields, at server start and every 10 s on
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
-- **0.20.52, rain puddles that show, rain washes blood:** Andy: "rain doesn't seem to be pooling water" and "rain should
+
+- **0.20.52, the Aether hidden until you're past the clouds:** Andy (2026-11-05), on a clip looking up from a hillside:
+  "The aether should NOT be visible so easy from ground level especially, maybe it only reveals once you are past the
+  cloud layer?" In a One Dimension world the Aether band is ordinary terrain over the Overworld's sky, so its islands'
+  undersides showed from anywhere. `client/aether/AetherVeil` reads the Aether band's floor and the Overworld band's
+  shift from CustomChunks' synced `StackLayout`, and while the camera is under the Overworld's clouds (192.33 + shift;
+  it hides below the clouds' bottom and shows above their top, so it flips inside the cloud) nothing at or above that
+  floor is drawn: Sodium's culling frustum gets the floor as a ceiling (`client/mixin/sodium/AetherVeilViewportMixin`
+  wraps every `Viewport`'s frustum in `SodiumVeil`, Iris' shadow pass included, and asks Sodium to cull again when it
+  flips), and the game's `Frustum.isVisible` leaves out anything whose box starts at or above it (mobs, aerwhales,
+  item drops). Ordinary worlds and the separate Aether dimension are untouched. Sodium is now `compileOnly`, behind an
+  optional mixin config. Gradle compile only, not played.
+- **0.20.53, rain puddles that show, rain washes blood:** Andy: "rain doesn't seem to be pooling water" and "rain should
   wash away blood". `client/wet/WetClient`'s rain puddles (0.19.63) only pooled under trees, beside trunks, or a fifth of
   the time in two-sided hollows, and grew only when a random try landed on the same block again, so an open field had next
   to none. Now flat open ground pools too (`FLAT_CHANCE` 0.1, never a ledge or sand), hollows at 0.6, and every puddle the
