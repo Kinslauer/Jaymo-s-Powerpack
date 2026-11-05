@@ -51,8 +51,21 @@ public final class BladeBlood {
 	static final double ENTRY_SPEED = 0.12, EXIT_SPEED = 0.45, EXIT_SPREAD = 0.18, EXIT_REACH = 3.0;
 	static final float EXIT_STAIN = 0.3F;
 	/** Drops a blow sprays: this many, plus this many per point of damage, at most this many. */
-	static final int HIT_DROPS = 1, HIT_DROPS_MAX = 14;
-	static final float DROPS_PER_DAMAGE = 0.35F;
+	static final int HIT_DROPS = 1, HIT_DROPS_MAX = 10;
+	static final float DROPS_PER_DAMAGE = 0.3F;
+	/**
+	 * (0.20.51) Andy (2026-11-05): "the blood effects can be toned down, maybe emitting more as the enemy is lower on health".
+	 * A blow's and a shot's blood is this many times the above on someone at full health, rising to this many times at none
+	 * (downed or dying counts as none), along a curve this steep (1 = straight; more holds it low until they're well hurt).
+	 */
+	static final float FULL_HEALTH_BLOOD = 0.3F, NO_HEALTH_BLOOD = 1.2F, HEALTH_CURVE = 1.5F;
+	/**
+	 * (0.20.51) The badly hurt bleed as they go: under this share of their health, someone near a player drips now and then
+	 * (checked every {@link #WOUNDED_EVERY} ticks, at most this chance, rising as they near none), from this far up them.
+	 */
+	static final float WOUNDED_HEALTH = 0.4F, WOUNDED_DRIP_CHANCE = 0.7F;
+	static final int WOUNDED_EVERY = 20;
+	static final double WOUNDED_RANGE = 32.0, WOUNDED_DRIP_FROM = 0.55;
 	/** How fast the drops fly: this, plus this much for each drop in the spray. */
 	static final double SPRAY_SPEED = 0.09, SPEED_PER_DROP = 0.005;
 	/** Crushed to death: this many drops this fast, a pool this big, and this many flecks of gore thrown out, this fast. */
@@ -109,6 +122,45 @@ public final class BladeBlood {
 			hit(target, source, damage);
 			return true;
 		});
+		// (0.20.51) the badly hurt drip as they go
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % WOUNDED_EVERY == 0) {
+				for (ServerLevel level : server.getAllLevels()) {
+					wounded(level);
+				}
+			}
+		});
+	}
+
+	/**
+	 * (0.20.51) How much blood a blow on {@code target} spills against a full one ({@link #FULL_HEALTH_BLOOD} at full
+	 * health up to {@link #NO_HEALTH_BLOOD} at none), so how hurt they are shows in it.
+	 */
+	static float hurtShare(LivingEntity target) {
+		float left = target.isDeadOrDying() || com.jaymospowers.core.wounds.Downed.isDowned(target) ? 0.0F
+			: Mth.clamp(target.getHealth() / Math.max(target.getMaxHealth(), 1.0F), 0.0F, 1.0F);
+		float hurt = 1.0F - (float)Math.pow(left, 1.0 / HEALTH_CURVE);
+		return FULL_HEALTH_BLOOD + (NO_HEALTH_BLOOD - FULL_HEALTH_BLOOD) * hurt;
+	}
+
+	/** (0.20.51) Those near a player and under {@link #WOUNDED_HEALTH} drip, more often the nearer they are to none. */
+	private static void wounded(ServerLevel level) {
+		if (level.players().isEmpty()) {
+			return;
+		}
+		java.util.Set<LivingEntity> seen = new java.util.HashSet<>();
+		for (net.minecraft.server.level.ServerPlayer player : level.players()) {
+			for (LivingEntity body : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WOUNDED_RANGE), LivingEntity::isAlive)) {
+				if (!seen.add(body) || !bleeds(body) || body.isInWater() || com.jaymospowers.core.wounds.Downed.isDowned(body)
+					|| body instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator())) {
+					continue;
+				}
+				float left = body.getHealth() / Math.max(body.getMaxHealth(), 1.0F);
+				if (left < WOUNDED_HEALTH && level.getRandom().nextFloat() < WOUNDED_DRIP_CHANCE * (1.0F - left / WOUNDED_HEALTH)) {
+					drip(level, body, WOUNDED_DRIP_FROM, false);
+				}
+			}
+		}
 	}
 
 	private static TagKey<EntityType<?>> tag(String path) {
@@ -189,7 +241,7 @@ public final class BladeBlood {
 		float size = size(target);
 		Vec3 centre = target.getBoundingBox().getCenter().add(0.0, target.getBbHeight() * 0.15, 0.0);
 		double half = target.getBbWidth() * 0.5;
-		int drops = Math.min(SHOT_DROPS_MAX, Mth.floor(SHOT_DROPS + damage * SHOT_DROPS_PER_DAMAGE));
+		int drops = Math.max(1, Math.min(SHOT_DROPS_MAX, Mth.floor((SHOT_DROPS + damage * SHOT_DROPS_PER_DAMAGE) * hurtShare(target))));
 		Vec3 entry = centre.subtract(along.scale(half));
 		BloodParticles.Spray spray = new BloodParticles.Spray(color, size * 0.8F);
 		for (int i = 0; i < drops; i++) {
@@ -203,7 +255,6 @@ public final class BladeBlood {
 				Vec3 v = along.scale(EXIT_SPEED * (0.6 + level.getRandom().nextDouble() * 0.6)).add(jitter(level, EXIT_SPREAD));
 				level.sendParticles(spray, true, true, exit.x, exit.y, exit.z, 0, v.x, v.y, v.z, 1.0);
 			}
-			level.sendParticles(BloodParticles.fleck(color, 1.2F), exit.x, exit.y, exit.z, 6, 0.05, 0.05, 0.05, 0.2);
 			// the path behind: a stain or two along it where the drops come down
 			for (double d = 1.0; d <= EXIT_REACH; d += 1.0 + level.getRandom().nextDouble()) {
 				Vec3 at = exit.add(along.scale(d));
@@ -293,7 +344,7 @@ public final class BladeBlood {
 		if (last != null && last == now) {
 			return false;
 		}
-		int drops = Math.min(HIT_DROPS_MAX, Mth.floor((HIT_DROPS + damage * DROPS_PER_DAMAGE) * more));
+		int drops = Math.max(1, Math.min(HIT_DROPS_MAX, Mth.floor((HIT_DROPS + damage * DROPS_PER_DAMAGE) * more * hurtShare(target))));
 		Vec3 at = target.getBoundingBox().getCenter();
 		double w = Math.max(target.getBbWidth() * 0.5 - 0.5, 0.0) + 0.05;
 		level.sendParticles(new BloodParticles.Spray(color(target), size(target)), true, true, at.x, at.y + target.getBbHeight() * 0.25, at.z,

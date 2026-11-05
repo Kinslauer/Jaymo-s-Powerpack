@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -72,9 +71,6 @@ public final class Hanging {
 	public static void addOnDone(BiConsumer<Player, Entity> done) {
 		ON_DONE.add(done);
 	}
-	/** Kitchen's own drop, without Jaymo's Powers' blood. */
-	static final DustParticleOptions DROP = new DustParticleOptions(0x6A0A0C, 0.7F);
-
 	/** (Jaymo's Powers) A drop of the carcass's blood falls from here. */
 	private static @Nullable BiConsumer<Entity, Vec3> onDrip;
 	/** (Jaymo's Powers) Blood with nowhere to go pools on the ground under here. */
@@ -182,7 +178,7 @@ public final class Hanging {
 			if (onDrip != null) {
 				onDrip.accept(corpse, from);
 			} else {
-				level.sendParticles(DROP, from.x, from.y - 0.1, from.z, 1, 0.03, 0.0, 0.03, 0.0);
+				com.jaymoskitchen.KitchenBlood.send(level, from.x, from.y - 0.1, from.z, 1, 0.03, 0.0, 0.03, 0.0);
 			}
 		}
 		// the blood that's come out by now, in grate levels, against what's been put somewhere already

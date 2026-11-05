@@ -103,6 +103,7 @@ public final class Downed {
 	static void register() {
 		// (0.7.459) righteous guards arrest the downed rather than execute them (Powers' MobExecutions)
 		PowersCompat.spareRighteousGuards();
+		PowersCompat.guardsFinishMonsters();
 		// (0.7.543) and an executioner left with no one under it says so
 		PowersCompat.tellPerplexed();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.addPhaseOrdering(EARLY, Event.DEFAULT_PHASE);

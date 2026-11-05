@@ -9042,3 +9042,10 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   death whatever fighting is about, drops its own fight (target and MCA attack memory cleared each step) and runs it home
   (speed 1.25, villager guard 0.85); townsfolk still wait for no foe within 8 blocks.
   Gradle build only, not played.
+
+- **0.7.548 (Powers 0.20.51), guards finish downed monsters and keep their weapon:** Andy (2026-11-05): "it seemed as
+  though this guard couldnt execute, and he kept losing he weapon." `Rearm` skips MCA villagers (MCA hands its guards a
+  weapon each fight and stows it between, so the empty hand cried "My weapon!" over and over and walked them off to
+  weapons on the ground). `PowersCompat.guardsFinishMonsters` adds guards and archers to Powers' `MobExecutions.FINISHES`:
+  they walk to a downed monster and execute it (hotheaded or spiteful ones anyone they fight); `Temperaments.spares` no
+  longer spares monsters. Sharks and the great whale bleed Powers' blood, not red dust. Gradle build only, not played.

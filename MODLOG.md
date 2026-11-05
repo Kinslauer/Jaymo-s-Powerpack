@@ -389,3 +389,20 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   and is Chrono's alone (`client/mixin/respawnrecap`, @Pseudo): its replay plays only as a rewind (never for a real death,
   and with no respawn at its end), it keeps screenshots only while you're a Chrono, and `client/compat/RespawnRecapPlugin`
   gates its Gui handler so the death screen opens as normal otherwise. Gradle compile only, not played.
+
+- **0.20.51, Kingdoms 0.7.548, Kitchen 0.5.63, guards finish the downed; less blood, more when hurt; no redstone blood:**
+  Andy (2026-11-05), on a clip of a guard over a downed zombie: "it seemed as though this guard couldnt execute, and he
+  kept losing he weapon. also the blood effects can be toned down, maybe emitting more as the enemy is lower on health
+  ... the redstone like particle effect needs to go as well. it does not ever resemble blood." Executions of downed mobs:
+  `MobExecutions.FINISHES` names who walks over to a downed mob (after `MOB_GRACE_TICKS`) and kills it with the same
+  wind-up and blow as a hostile's on a player, minus the film and shakes; Kingdoms (`PowersCompat.guardsFinishMonsters`)
+  sends its guards and archers to downed monsters (and a hotheaded or spiteful one to anyone it's fighting). Kind and
+  devout guards no longer spare downed monsters (`Temperaments.spares`). The weapon: Kingdoms' `Rearm` no longer watches
+  MCA villagers, whose weapon MCA itself hands out each fight (often a fresh one, not from the pack) and puts away between,
+  so every pause cried "My weapon!" and sent the guard off after swords on the ground. Blood: a blow's or shot's drops are
+  0.3x on someone at full health rising to 1.2x at none (`BladeBlood.hurtShare`, downed counts as none), the cap 10, and
+  under 40% health anyone near a player drips now and then, leaving a trail. The plain drop sprite and the still fleck
+  (both a scatter of single pixels, i.e. redstone dust) are gone: sprays pick only spatters, spurts and swipes, and a fleck
+  comes as a small spatter for three in ten (`BloodClient.FLECK_KEEP`); `BloodFleck` removed. Kitchen's redstone-block and
+  red-dust blood (corpse cuts, gibs, scavengers, the chopper, hangings, grates) is Powers' blood through `KitchenBlood`,
+  and Kingdoms' sharks and great whale and the Aerwhale bleed the same. Gradle build only, not played.

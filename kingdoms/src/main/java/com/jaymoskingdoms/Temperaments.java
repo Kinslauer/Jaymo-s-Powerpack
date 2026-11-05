@@ -313,9 +313,13 @@ public final class Temperaments {
 				Speech.RED));
 	}
 
-	/** {@code attacker} lets downed {@code body} be: the kindhearted and the devout don't strike someone who's down. */
+	/**
+	 * {@code attacker} lets downed {@code body} be: the kindhearted and the devout don't strike someone who's down.
+	 * (0.7.548) A downed monster isn't someone: a kind guard stood over a downed zombie unable to strike it (and so never
+	 * finished it, Andy's clip), so monsters get no mercy.
+	 */
 	public static boolean spares(Mob attacker, LivingEntity body) {
-		return is(attacker, Temperament.KINDHEARTED) || is(attacker, Temperament.DEVOUT);
+		return !(body instanceof net.minecraft.world.entity.monster.Enemy) && (is(attacker, Temperament.KINDHEARTED) || is(attacker, Temperament.DEVOUT));
 	}
 
 	// ---- fear and fights ------------------------------------------------------------------------------------------------
