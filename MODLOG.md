@@ -1107,3 +1107,27 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   generator's structure positions once, on first use, with an unlocked check-fill-flag; One Dimension's per-layer
   generators fill lazily, so C2ME's workers filled the same map together and corrupted it. New `StructureStateLockMixin`
   does vanilla's same steps inside a lock. Checked against the 26.3 jar; not built here.
+## 0.21.10 (2026-11-05): gravity users harness the rocks they carry (B+G) and throw them (sneak+R)
+- Andy: "a gravity user should utilize rocks and pebbles for more interactions with its kit". Carrying more than 8 loose
+  rocks (any kind, anywhere in the inventory), B+G (hold B, tap G) gathers them into a rock ball over your right
+  shoulder, bigger the more you carry (counted up to `GravityRocks.ROCK_CAP`, 32). B+G again splits it into a ring of up
+  to 16 rocks orbiting your waist; once more and they go back in the pack. No rock is used up. Drop below 9 rocks, go
+  down, or lose the power and they fall back. The held B never lands its Crush or Wave.
+- Ball: 2.5 s (`BALL_DELAY`) after you hurt something, if you're still within 10 blocks, the ball flies at it and back
+  and lands one lump of 0.2 per rock (6.4 at 32 rocks).
+- Orbit: after you hurt something, up to 8 rocks (`VOLLEY`) peel off one by one, 3 ticks apart, each hitting for 0.2 and
+  a bleed tick (`Bleeding.BLEED_DAMAGE`, 0.5, to the body; nothing bloodless bleeds). Foes that come within the ring
+  (monsters, anything after you, whoever you're fighting) are clipped for the same, at most once a second each.
+- One follow-up at a time: hits while the ball or a volley is out send nothing more. Every rock of the ball and ring is
+  the rock item's own model, the kind you carry most of (`client/power/gravity/GravityRocksLayer`). Built, not played.
+- Andy: "you should be able to throw the rocks with shift R, a radial pulse from the orbit and a directional throw with the
+  ball, that explodes in pebble debris on impact breaking things like leaves and glass". With rocks out (B+G), sneak+R
+  throws them instead of starting Lift:
+  - Ball: flies where you look (`GravityRocks.THROW_SPEED` 1.6, a slight drop) with the main arm's whip, and bursts on
+    the first block or creature it meets: 0.3 per rock to what it hit, half that to everyone else within 2.5 blocks, a
+    bleed tick each, and a shove. Leaves and glass (panes, stained, tinted) within 2 blocks smash (`shatters`), where
+    you're allowed to build.
+  - Orbit: the ring flies outward to 7 blocks over 7 ticks; every foe it passes takes 0.2 per rock and a bleed tick and
+    is pushed away.
+  - The thrown rocks leave the pack and land as items (around the burst, or out at the ring's rim) to be picked up or
+    pulled in again; creative keeps them. B+G gathers a new ball from what's left. Built, not played.

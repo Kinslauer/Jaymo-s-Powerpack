@@ -77,6 +77,8 @@ import org.jspecify.annotations.Nullable;
  * slowing what it passes and carving up the ground ({@link GravityWave}). A tap is still the force kneel around you.
  * B while Lift holds a creature (R+B): Inversion, yanked in for a gut punch that bleeds it inside
  * ({@link GravityGutPunch}).</li>
+ * <li>B+G (hold B, tap G), carrying more than 8 rocks: the rock ball, then the orbiting rocks, then put away
+ * ({@link GravityRocks}).</li>
  * </ul>
  * 0.2.0 fate: creatures that die to the weight you gave them (falls after Lift, Crush, the Singularity) count toward
  * <b>ascension</b> (Event Horizon: unmovable, projectiles bend away; C is the {@code Singularity}); the same deaths, and
@@ -480,6 +482,8 @@ public final class GravityPower implements Power {
 		GravityTrainingField.init();
 		// (0.17.3) what a gifted villager does with Gravity
 		GravityGift.init();
+		// (0.21.10) the rock ball and the orbiting rocks (B+G)
+		GravityRocks.init();
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
 		// surviving a hard fall is a step toward ascension, like a kill by weight
@@ -593,6 +597,7 @@ public final class GravityPower implements Power {
 		GravityRockFlight.stop(player);
 		GravityForward.stop(player);
 		GravityCometRam.stop(player);
+		GravityRocks.dismiss(player, true);
 	}
 
 	@Override
@@ -604,6 +609,7 @@ public final class GravityPower implements Power {
 		setWeightless(player, false);
 		GravityForward.forget(player);
 		GravityCometRam.forget(player);
+		GravityRocks.forget(player);
 		GravityWalk.stop(player);
 		modifier(player, Attributes.GRAVITY, COLLAPSE_ID, 0.0, false);
 		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, COLLAPSE_FALL_ID, 0.0, false);
@@ -640,6 +646,8 @@ public final class GravityPower implements Power {
 					if (state.chunkHold && state.liftTarget >= 0) {
 						// R again drops a chunk held on its own
 						dropLift(player, state, true);
+					} else if (player.isShiftKeyDown() && state.liftTarget < 0 && GravityRocks.throwRocks(player)) {
+						// (0.21.10) sneak+R with rocks out (B+G): the ball thrown where you look, or the orbit flung outward
 					} else {
 						startLift(player, state);
 					}
@@ -657,7 +665,12 @@ public final class GravityPower implements Power {
 				}
 			}
 			case ABILITY_2 -> {
-				if (down) {
+				if (down && PowerInput.isDown(player, PowerKey.ABILITY_4)) {
+					// (0.21.10) B+G (B held, G tapped): the rocks you carry, gathered into a ball, split to orbit you, or put away;
+					// the B held for it never lands its Crush or Wave
+					state.crushFrom = -1;
+					GravityRocks.cycle(player);
+				} else if (down) {
 					well(player);
 				}
 			}
@@ -2353,7 +2366,7 @@ public final class GravityPower implements Power {
 		return type.getNamespace().equals("jaymoskitchen") && type.getPath().contains("corpse");
 	}
 
-	private static void fizzle(ServerPlayer player) {
+	static void fizzle(ServerPlayer player) {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHULKER_BULLET_HIT, SoundSource.PLAYERS, 0.4F, 1.6F);
 	}
 }
