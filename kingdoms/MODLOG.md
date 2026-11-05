@@ -9678,3 +9678,20 @@ played.
   new-chunk deer spawns now never happen in a Nether biome or the Nether, and elsewhere only 30% of them still do
   (`mixin/tweaks/DeerSpawnMixin`, on `SpawnPlacements.checkSpawnRules`). Eggs, spawners and commands are untouched.
 - Built, not played.
+
+## 0.7.609 (2026-11-05): a vampire's eyes on MCA's face, and real bat wings (Powers 0.21.13)
+- Andy's clip (Nether start, a vampire gliding): "the eyes are not synced and whatever wings those are look awful".
+- Eyes: the vampire's pallor, fangs, bite marks and red eyes were drawn on the plain player model, posed on their own,
+  and the red eyes sat where the player's Mojang skin has eyes, while MCA draws its own body and face over the player.
+  Now they ride MCA's skin body in MCA's pose (`VampireLooks.skinBody`/`glowBody`, the way `HeritageLooks` does since
+  0.7.219), and the glowing eyes light MCA's own eye pixels (`VampireLooks.faceEyes`, via `McaEyes`). The same for the
+  werewolf's hidden-change tells (`WolfTells`), the Emberborn's eyes (`EmberLook`) and every heritage's lit eyes
+  (`HeritageLooks`), and (Andy: "is anything else drawn on the player model instead of where it needs to be?") a Valor
+  Hunter's eyes (`ValorLook`). Players MCA doesn't draw keep the old way. Powers 0.21.13 does the same for Wind's storm
+  eyes and the Flame Avatar's char.
+- Wings: the bat wings were the elytra's two slabs in leather at 1.35x, which from behind hid the whole player like a
+  pair of grey boards. New `BatWings`: a real bat wing per side (arm bone, hand bone with a thumb claw, a thin membrane
+  hung from both, scalloped between finger bones; `tools/gen_bat_wings.py`), worn as a `WornModel` so it follows MCA's,
+  Fresh Animations' and our own poses. They unfold out of the back as the glide starts, ripple as it goes and sweep back
+  at speed. Shape and pose numbers are constants at the top of `BatWings`.
+- Built, not played.

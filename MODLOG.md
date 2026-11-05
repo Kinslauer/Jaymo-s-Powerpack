@@ -1140,3 +1140,11 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   then Jump climbs as usual. Lower things climb as Sneak + scroll does (`scrollGrab`). The click is left alone when the
   crosshair is on a mob or a block with a menu or switch (block entities, doors, trapdoors, buttons, gates, levers,
   beds). Gradle build only, not played.
+
+## 0.21.13 (2026-11-05): looks over the skin on MCA's body (Kingdoms 0.7.609)
+- Andy: "is anything else drawn on the player model instead of where it needs to be?" (after the vampire's eyes). With
+  MCA a player is drawn as MCA's villager body; two Powers looks were still drawn on the renderer's plain model, posed
+  on their own, the eyes where the Mojang skin's eyes are. Now, through `client/McaLooks` (MCA's classes only in
+  `McaSkin`; Powers compiles against the MCA jar for it): Wind's Thunderhead white eyes (`WindStormEyes`) light MCA's
+  own eyes on MCA's face body, and Ember's Flame Avatar char and veins (`FlameAvatarClient.Look`) ride MCA's skin body
+  and pose. Without MCA, nothing changes. Built, not played.

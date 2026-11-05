@@ -114,6 +114,11 @@ final class McaLookModels {
 		return pose(player, playerGlow);
 	}
 
+	/** (0.7.609) Whether MCA draws this player (its body is MCA's), so their face, eyes and all, is MCA's. */
+	static boolean drawsPlayer(PlayerModel parent) {
+		return parent instanceof PlayerEntityExtendedModel<?>;
+	}
+
 	private static PlayerEntityExtendedModel<?> createPlayer(float inflate) {
 		// as MCA builds a player's skin layer body: wide arms, the 64x64 skin, no wear parts
 		PlayerEntityExtendedModel<?> model = new PlayerEntityExtendedModel<>(
