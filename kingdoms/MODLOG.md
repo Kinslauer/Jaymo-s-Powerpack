@@ -9435,3 +9435,20 @@ saw it with the werewolf players."
 - A player held by the blood fever, the feral curse or the Grue is drawn the same way. `Seizures.SEIZED` (synced to
   everyone) tells other screens a hold has them. (`TakeoverFacingMixin`, `TakeoverFacingHeadMixin`,
   `SeizureClient.drivenBody`.) The camera is unchanged. Built, not played.
+
+## 0.7.586 (2026-11-05): falling trees knock others over, smash weak blocks; blasts fell trees
+Andy: "the trees that fall should knock each other over, break blocks that are weaker as they fall, and fall without
+player input, (explosions / heavy impacts can fell trees too.)"
+- A falling tree whose wood strikes a standing tree at 0.25 blocks a tick or faster knocks it over the same way, whole
+  from its foot (`FallingTree.knock`, `Trees.knock`), unless that tree has more than 1.5x its logs. Each tree knocks at
+  most 2, and those can knock on, so a stand of trees can go down like dominoes.
+- Its wood smashes through blocks both softer and less blast-proof than the log itself (`FallingTree.weaker`): glass,
+  panes, wool, crops, pumpkins, ice, ladders, sandstone and the like, dropping what they would. Planks, stone, earth (anything dug
+  with a shovel), water and blocks that hold something (chests, signs, beds) still stop it. At most 12 a tick; a tree
+  thrown by a tornado smashes the same way once clear of its hole.
+- Blasts that break blocks (`TreeBlastMixin` on `ServerExplosion.explode`) fell trees within twice their radius (at most 12
+  blocks), likelier the closer (90% at the heart), away from the blast, up to 6 trees of at most 8 logs per block of
+  radius (creeper 24, TNT 32). Radius under 2 (wind charges) fells nothing.
+- A tree left standing on nothing comes down by itself: blown out from under by a blast, or its last trunk log broken
+  whole (sneaking or in creative), it falls to its heavier side (`Trees.unsupported`).
+- Hint 114. Built, not played.

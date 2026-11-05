@@ -77,6 +77,9 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.7.456) Felled into another tree, it never stands back up: struck before it's half over, it glances off to the side
  * ({@link #glance}) and falls on; with no way down at all it leans there a moment and breaks apart.
+ * <p>
+ * (0.7.586) It knocks over standing trees it strikes hard enough ({@link #knock}) and smashes through blocks weaker than
+ * its wood ({@link #smash}).
  */
 public final class FallingTree extends Entity {
 	/** Its first push (degrees a tick), a steady nudge, and the pull of its own weight (scaled by how far it leans). */
@@ -108,6 +111,15 @@ public final class FallingTree extends Entity {
 	/** (0.7.456) Under this lean (degrees) it isn't lying yet: struck there it glances off sideways, at most this many times. */
 	static final float LYING = 45.0F;
 	static final int GLANCES = 2;
+	/**
+	 * (0.7.586) Andy: "the trees that fall should knock each other over". Its wood moving at least this fast (blocks a
+	 * tick) where it strikes a standing tree knocks that tree over its way, if that tree has no more than
+	 * {@link #KNOCK_SIZE} times its own logs; it knocks over at most {@link #KNOCKS_MOST} (each of those can knock on).
+	 */
+	static final float KNOCK_SLOWEST = 0.25F, KNOCK_SIZE = 1.5F;
+	static final int KNOCKS_MOST = 2;
+	/** (0.7.586) The most blocks weaker than its wood ({@link #weaker}) it smashes through in a tick. */
+	static final int SMASH_MOST = 12;
 
 	/** One block of the tree: its state, and where it stood relative to the cut. */
 	public record Piece(int state, int x, int y, int z) {
@@ -149,6 +161,8 @@ public final class FallingTree extends Entity {
 	/** (0.7.456) How often it has glanced off something in its way, and whether it came to rest still half standing. */
 	private int glanced;
 	private boolean propped;
+	/** (0.7.586) How many standing trees it has knocked over. */
+	private int knocks;
 
 	public FallingTree(EntityType<? extends FallingTree> type, Level level) {
 		super(type, level);
@@ -368,6 +382,9 @@ public final class FallingTree extends Entity {
 		float lean = this.lean();
 		this.speed += NUDGE + WEIGHT * Mth.sin(lean * Mth.DEG_TO_RAD) / this.reach;
 		float next = Math.min(FLAT, lean + this.speed);
+		// (0.7.586) what's weaker than its wood breaks, and a standing tree in its way goes over with it
+		this.smash(level, pieces, next, 0.0F, this.speed * Mth.DEG_TO_RAD);
+		this.knock(level, pieces, next);
 		boolean blocked = this.strikes(level, pieces, next, 2);
 		if (blocked && lean < LYING && this.glance(level, pieces, lean, next)) {
 			blocked = false;
@@ -430,6 +447,9 @@ public final class FallingTree extends Entity {
 			return;
 		}
 		float lean = this.lean(), next = lean + this.tumble;
+		if (this.flown > FLY_CLEAR) {
+			this.smash(level, pieces, next, (float)v.length(), this.tumble * Mth.DEG_TO_RAD);
+		}
 		if (this.flown > FLY_CLEAR && (this.flown > FLY_LONGEST || this.strikes(level, pieces, next, Integer.MIN_VALUE))) {
 			this.flying = false;
 			this.hit(level, pieces, lean, Integer.MIN_VALUE, (float)v.length(), this.tumble * Mth.DEG_TO_RAD);
@@ -449,6 +469,77 @@ public final class FallingTree extends Entity {
 	/** Whether this tree has been torn up by a tornado and is still flying, and for how long (ticks). */
 	public int flown() {
 		return this.flying ? this.flown : -1;
+	}
+
+	/**
+	 * (0.7.586) Its wood, leaning {@code lean}, smashes through blocks weaker than itself ({@link #weaker}) where it's moving
+	 * at least {@link #HIT_SLOWEST} ({@code flat} blocks a tick, plus {@code turning} for every block from where it turns),
+	 * dropping what they would: glass, wool, crops, ladders, pumpkins, ice and the like. Planks, stone and earth stop it.
+	 */
+	private void smash(ServerLevel level, List<Piece> pieces, float lean, float flat, float turning) {
+		Quaternionf turn = turn(lean, this.heading());
+		int broken = 0;
+		for (Piece p : pieces) {
+			if (broken >= SMASH_MOST) {
+				return;
+			}
+			if (p.y() < 1 || !p.blockState().is(BlockTags.LOGS) || flat + turning * Math.abs(p.y() + 0.5F) < HIT_SLOWEST) {
+				continue;
+			}
+			BlockPos at = this.cell(this.where(p, turn));
+			if (weaker(level, at, level.getBlockState(at), p.blockState()) && level.destroyBlock(at, true, this)) {
+				broken++;
+			}
+		}
+	}
+
+	/**
+	 * (0.7.586) A block a falling log breaks through: both softer and less sturdy than the {@code wood} itself. Never what
+	 * it would simply lie over (grass, snow), the ground (anything dug with a shovel), wood, water, or a block holding
+	 * something (chests, signs, beds).
+	 */
+	static boolean weaker(ServerLevel level, BlockPos pos, BlockState there, BlockState wood) {
+		if (there.isAir() || there.canBeReplaced() || there.is(BlockTags.LOGS) || there.hasBlockEntity() || !there.getFluidState().isEmpty()
+			|| there.is(BlockTags.MINEABLE_WITH_SHOVEL)) {
+			return false;
+		}
+		float hardness = there.getDestroySpeed(level, pos);
+		return hardness >= 0.0F && hardness < wood.getDestroySpeed(level, pos)
+			&& there.getBlock().getExplosionResistance() < wood.getBlock().getExplosionResistance();
+	}
+
+	/**
+	 * (0.7.586) Its wood, leaning {@code lean}, strikes a standing tree hard enough ({@link #KNOCK_SLOWEST}): that tree is
+	 * knocked over the same way ({@link Trees#knock}), unless it's much bigger than this one.
+	 */
+	private void knock(ServerLevel level, List<Piece> pieces, float lean) {
+		if (this.knocks >= KNOCKS_MOST) {
+			return;
+		}
+		Quaternionf turn = turn(lean, this.heading());
+		float turning = this.speed * Mth.DEG_TO_RAD;
+		int logs = 0;
+		for (Piece p : pieces) {
+			if (p.blockState().is(BlockTags.LOGS)) {
+				logs++;
+			}
+		}
+		for (Piece p : pieces) {
+			if (p.y() < 2 || !p.blockState().is(BlockTags.LOGS) || turning * Math.abs(p.y() + 0.5F) < KNOCK_SLOWEST) {
+				continue;
+			}
+			BlockPos at = this.cell(this.where(p, turn));
+			BlockState there = level.getBlockState(at);
+			if (!there.is(BlockTags.LOGS) || !there.hasProperty(BlockStateProperties.AXIS) || there.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+				continue;
+			}
+			if (Trees.knock(level, at, this.heading(), this, Math.max(1, Math.round(logs * KNOCK_SIZE))) > 0) {
+				this.knocks++;
+				level.playSound(null, at, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.4F, 0.5F);
+				level.playSound(null, at, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
+				return;
+			}
+		}
 	}
 
 	/** Whether its wood (from {@code fromY} above its origin up), leaning {@code lean}, runs into anything solid. */
