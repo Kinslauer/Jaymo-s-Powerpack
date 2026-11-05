@@ -897,3 +897,7 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   five. An always-on pack (`resourcepacks/homesteads_fixes`) gives each 26.3's location match on its own workstation
   (`compat/HomesteadsCompat`); Homesteads' jar is untouched.
 - Anyone who already has them from the bug has them taken back once, on their next join.
+- Andy also chose "Raised by a demon master" (Emberborn) in the One Dimension world and woke in the overworld wild: the
+  start found no demon village spot and fell back without a word. In a stacked world the search now starts straight
+  under spawn (the Nether band isn't an eighth as far), and if no demon biome or village spot can be found the master's
+  hall goes up on the nearest Nether floor instead of giving up; each fallback is logged (`ZFighterStarts.demon`).
