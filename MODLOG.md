@@ -861,3 +861,14 @@ looking forward the camera stays forward, but the model is drawn moving in whate
 - **0.20.98, Shift + Alt zoom lasts while Alt is held** (Andy: "releasing shift shouldnt stop your zoom but alt does"):
   the Shift + Left Alt zoom no longer ends when Shift is let go, only when Alt is (`SneakZoom`). The double-tap-and-hold
   Shift zoom still ends with Shift. Built, not played.
+
+## 0.20.99 (2026-11-05): the Sky Mask breathes in space; gravity users turn the sky islands over
+- Andy: "the sky mask lets non attuned breathe in space as well". A Sky Mask in the head bauble slot now gives you air
+  on the airless worlds (the Pale Moon, the Maw; `Breath`) and in the high sky over the Aether (`ZFighterHighSky`), with
+  no reserve to run out. In the high sky a Z Fighter with ki still breathes on ki first; the mask covers anyone without
+  it, or a fighter run dry. Its tooltip says so.
+- Andy: "gravity users can stretch their weightlessness to these islands, swapping the gravity with his toggle for all
+  players and mobs while he is there". While a gravity user's Weightless (V) is on and he stands on a light or heavy
+  stretch of the Aether sky, the stretch turns over: light becomes heavy and heavy becomes light, for every player and
+  every mob in that 160-block stretch (mobs only feel the stretches while he turns them). When he switches it off or
+  leaves, it rights itself within a second (`SkyPockets.swap`). Built, not played.
