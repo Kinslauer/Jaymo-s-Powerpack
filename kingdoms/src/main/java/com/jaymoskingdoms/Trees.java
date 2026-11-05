@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -389,7 +390,35 @@ public final class Trees {
 		return null;
 	}
 
+	/**
+	 * (0.7.588) A chopped log the chopper's screen guessed broken: once the server's "no, it stands" reaches it, the
+	 * screen puts back a bare chopped log that has forgotten which wood it was, and drew it as oak (Andy: "this tree
+	 * turned into oak when i started breaking it"). So which log it was is sent again a tick after the chop.
+	 */
+	private record Resend(ServerPlayer player, BlockPos pos, int at) {
+	}
+
+	private static final List<Resend> RESEND = new ArrayList<>();
+
+	private static void resend(MinecraftServer server) {
+		int now = server.getTickCount();
+		for (Iterator<Resend> it = RESEND.iterator(); it.hasNext();) {
+			Resend r = it.next();
+			if (now < r.at()) {
+				continue;
+			}
+			it.remove();
+			if (!r.player().hasDisconnected() && r.player().level().getBlockEntity(r.pos()) instanceof ChoppedLog.Entity log) {
+				var packet = log.getUpdatePacket();
+				if (packet != null) {
+					r.player().connection.send(packet);
+				}
+			}
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
+		resend(server);
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
 		if (now % CHECK_TICKS == 0) {
@@ -495,6 +524,9 @@ public final class Trees {
 		int felled = chop(server, pos, player, tool, null);
 		if (felled < 0) {
 			return true;
+		}
+		if (felled == 0 && player instanceof ServerPlayer sp) {
+			RESEND.add(new Resend(sp, pos.immutable(), server.getServer().getTickCount() + 2));
 		}
 		if (felled > 0 && player instanceof net.minecraft.server.level.ServerPlayer sp) {
 			// (0.7.220) a woodcutter's felling, for their orders
@@ -768,6 +800,23 @@ public final class Trees {
 				felled++;
 			}
 		}
+	}
+
+	/**
+	 * (0.7.588) A giant's hand closes on the standing tree whose log is {@code log}: it's torn out whole from its foot
+	 * ({@link FallingTree#fling}, not moving yet), if it's a natural tree of no more than {@code mostLogs} logs. Null otherwise.
+	 */
+	static @Nullable FallingTree pluck(ServerLevel level, BlockPos log, int mostLogs) {
+		BlockState state = level.getBlockState(log);
+		if (!state.is(BlockTags.LOGS) || fallen(level, log, state)) {
+			return null;
+		}
+		BlockPos foot = foot(level, log);
+		List<BlockPos> logs = trunk(level, foot);
+		if (logs.isEmpty() || logs.size() > mostLogs || logs.stream().noneMatch(p -> natural(level, p))) {
+			return null;
+		}
+		return FallingTree.fling(level, foot, logs, leavesOf(level, logs), Vec3.ZERO, 0.0F, 0.0F);
 	}
 
 	/**

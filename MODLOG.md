@@ -927,3 +927,10 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   Other ores show nothing on the surface. Seamed stone underground is unchanged.
 - Rocky dirt already in the world turns back into dirt on a random tick, and it's out of the creative tab.
 - New chunks only for the pebbles. Built, not played.
+- **0.20.106, giants grab and throw trees (Kingdoms 0.7.588):** Andy: "giants should also be able to grab and throw the
+  trees with their grabs". The Great Ape's grab (held punch) and Towerback's R, with no one in reach, close on a tree
+  within the hand's reach instead (`GiantTrees`, which calls Kingdoms' `FallingTree.treeNear/take/hold/hurl` by
+  reflection): a fallen tree, or a standing one torn out whole, up to 4 logs per block of the giant's height. It comes up
+  to the hand over the hold, then where the grab would slam its catch down it's thrown along the giant's aim (0.4 b/t
+  times the root of its height in people, more with brawn as carried throws, at most 2.5), tumbling, striking what it
+  flies through, and landing as a fallen tree. Player giants only where they may build, as their trampling. Built, not played.

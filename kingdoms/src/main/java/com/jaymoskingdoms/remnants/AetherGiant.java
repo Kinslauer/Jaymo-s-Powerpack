@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.remnants;
 
+import com.jaymoskingdoms.FallingTree;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -161,6 +162,9 @@ public class AetherGiant extends Monster {
 	public static final int GRAB_TOTAL = GRAB_WINDUP + GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM + GRAB_RECOVER;
 	static final int GRAB_TICKS = 400, SQUEEZE_EVERY = 10;
 	static final double GRAB_TRIGGER = 9.0, GRAB_REACH = 9.0, GRAB_CLIMB = 6.0, SLAM_THROW = 1.2, FILM_RANGE = 48.0;
+	/** (0.7.588) Out of its grab's reach but within this (blocks), it throws a tree of up to {@link #TREE_LOGS} logs, at this speed (b/t). */
+	static final double TREE_THROW_RANGE = 40.0, TREE_THROW_SPEED = 1.4;
+	static final int TREE_LOGS = 120;
 	static final float SQUEEZE_DAMAGE = 4.0F, SLAM_DAMAGE = 40.0F;
 	/** (0.7.549) The shake of each footfall and of its grab's slam: how far it's felt (blocks), how hard (degrees). */
 	static final double STEP_SHAKE_RANGE = 28.0, SLAM_SHAKE_RANGE = 36.0;
@@ -185,6 +189,9 @@ public class AetherGiant extends Monster {
 	/** (0.7.268) Ticks before it may grab again, where its hand closed, and where its catch is slammed down. */
 	private int grabCooldown = GRAB_TICKS;
 	private @Nullable Vec3 snatchAt, slamAt;
+	/** (0.7.588) The tree in its hand (entity id, -1: none) and where it was taken from. */
+	private int heldTree = -1;
+	private @Nullable Vec3 treeFrom;
 	private boolean raging;
 	/** (Client) how far each arm's swing has run. */
 	private int leftCounter, rightCounter;
@@ -367,6 +374,11 @@ public class AetherGiant extends Monster {
 			&& this.distanceToSqr(prey) < Mth.square(this.getBbWidth() / 2.0 + GRAB_TRIGGER)) {
 			this.beginGrab(level, prey);
 			return;
+		} else if (fighting && this.distanceToSqr(target) < TREE_THROW_RANGE * TREE_THROW_RANGE && level.getGameRules().get(GameRules.MOB_GRIEFING)
+			&& FallingTree.treeNear(level, this.hand(0.0), this.treeReach(), TREE_LOGS)) {
+			// (0.7.588) too far to grab: a tree is torn up and thrown at them
+			this.beginGrab(level, target);
+			return;
 		}
 		if (fighting && this.getNavigation().isDone()
 			&& this.distanceToSqr(target) > Mth.square(this.getBbWidth() / 2.0 + STAMP_TRIGGER / 2.0)) {
@@ -465,6 +477,9 @@ public class AetherGiant extends Monster {
 			}
 			return;
 		}
+		if (prey == null && this.treeTick(level, t - GRAB_WINDUP - GRAB_SNATCH)) {
+			return;
+		}
 		if (prey == null) {
 			// its hand closed on nothing (or its catch is gone): it straightens up
 			if (t < GRAB_WINDUP + GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM) {
@@ -515,6 +530,14 @@ public class AetherGiant extends Monster {
 	/** Its hand closes: on its target if it's still within reach of the hand, else on nothing. */
 	private void snatch(ServerLevel level, @Nullable LivingEntity target) {
 		if (target == null || !this.canGrab(target) || !this.inHandsReach(target)) {
+			if (level.getGameRules().get(GameRules.MOB_GRIEFING)) {
+				Entity tree = FallingTree.take(level, this.hand(0.0), this.treeReach(), this, TREE_LOGS);
+				if (tree != null) {
+					this.heldTree = tree.getId();
+					this.treeFrom = tree.position();
+					return;
+				}
+			}
 			this.playSound(SoundEvents.RAVAGER_STEP, 2.0F, 0.5F);
 			Vec3 miss = this.position().add(Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(this.getBbWidth() * 0.5 + GRAB_REACH * 0.5));
 			level.sendParticles(ParticleTypes.POOF, miss.x, miss.y + 0.5, miss.z, 20, 2.0, 0.3, 2.0, 0.05);
@@ -530,6 +553,52 @@ public class AetherGiant extends Monster {
 		// the film: its catch (a player) sees the Giant's face come down on them; everyone near gets the bars
 		com.jaymoskingdoms.PowersCompat.film(this, target instanceof net.minecraft.server.level.ServerPlayer sp ? sp : null, com.jaymoskingdoms.PowersCompat.FILM_PUSH_IN,
 			GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM, this.position(), this, FILM_RANGE);
+	}
+
+	/**
+	 * (0.7.588) Andy: "giants should also be able to grab and throw the trees with their grabs". A tree in its hand,
+	 * {@code held} ticks into the hold: lifted to its hand, then at the end of the hold thrown at its target (lobbed to
+	 * land on them), or ahead if it has none. True while it still holds it.
+	 */
+	private boolean treeTick(ServerLevel level, int held) {
+		if (this.heldTree < 0) {
+			return false;
+		}
+		Entity tree = level.getEntity(this.heldTree);
+		if (tree == null || tree.isRemoved()) {
+			this.heldTree = -1;
+			return false;
+		}
+		Vec3 hand = this.hand(0.0);
+		if (held < GRAB_HOLD) {
+			double lift = Mth.clamp(held / (double)LIFT_TICKS, 0.0, 1.0);
+			lift = lift * lift * (3.0 - 2.0 * lift);
+			Vec3 from = this.treeFrom != null ? this.treeFrom : tree.position();
+			LivingEntity target = this.getTarget();
+			if (target != null) {
+				this.getLookControl().setLookAt(target, 30.0F, 30.0F);
+				this.yBodyRot = this.yHeadRot;
+			}
+			FallingTree.hold(tree, from.lerp(hand, lift), this.yBodyRot);
+			return true;
+		}
+		this.heldTree = -1;
+		LivingEntity target = this.getTarget();
+		Vec3 to = target != null && target.isAlive() ? target.position() : this.position().add(Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(20.0));
+		Vec3 flat = new Vec3(to.x - hand.x, 0.0, to.z - hand.z);
+		double distance = flat.length();
+		double flight = Math.max(8.0, distance / TREE_THROW_SPEED);
+		// (lobbed: up enough to come down on them, the tree's own fall pulling it back)
+		double up = (to.y - hand.y) / flight + 0.5 * FallingTree.FLY_GRAVITY * flight;
+		Vec3 v = distance < 1.0E-3 ? new Vec3(0.0, up, 0.0) : flat.normalize().scale(distance / flight).add(0.0, up, 0.0);
+		FallingTree.hurl(tree, v, FallingTree.THROWN_TUMBLE, this);
+		this.playSound(SoundEvents.RAVAGER_ROAR, 2.5F, 0.5F);
+		return false;
+	}
+
+	/** (0.7.588) How far round its hand it reaches for a tree. */
+	private double treeReach() {
+		return this.getBbWidth() / 2.0 + GRAB_REACH;
 	}
 
 	/** Whether {@code prey} stands within its hand's reach: round its body, near its own level. */
@@ -808,6 +877,7 @@ public class AetherGiant extends Monster {
 		super.die(source);
 		this.entityData.set(GRAB_START, Long.MIN_VALUE);
 		this.entityData.set(GRAB_HELD, -1);
+		this.heldTree = -1;
 	}
 
 	private void rage() {
