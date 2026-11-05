@@ -9558,3 +9558,10 @@ off course then those should break upon contact".
   its chunks' structure references) and seats in it like any town; only if it won't generate or would stand mostly on
   water does the castle go up as before. The story's capital search looks at Epic towns only.
 - Kingdoms already founded keep their seats; this applies to new ones (a new map shows it). Built, not played.
+- **0.7.599, werewolf players can be hurt:** Andy: "jungxvv seemed to be invulnerable after becoming a werewolf". Two
+  causes. The beast's player wore Invisibility to hide their body, and monsters all but ignore an invisible player, so
+  nothing fought them; now no Invisibility (`WerewolfPlayers.buffs`): their body and first-person arm are hidden by
+  `BeastHidesPlayerMixin`/`BeastHidesHandMixin` once the beast has torn out (`NightGifts.Gift#beast` now means torn out,
+  `WerewolfPlayers.tornOut`). And blows to a player's beast took the wild werewolf's thick hide (x0.25 unless gold or
+  silver) before reaching the player, on top of Resistance and 5 extra hearts; now only silver's x2 applies
+  (`Werewolf.hurtServer`). Not played.
