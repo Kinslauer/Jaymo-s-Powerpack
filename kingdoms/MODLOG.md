@@ -9597,7 +9597,19 @@ but more of a hunter. they can smell you out."
 - Tuning: the constants at the top of `WolfStalkers`. Stalks aren't saved: a reload forgets the hunt (and gives back a
   hushed wolf's voice). Compile-checked (Gradle `compileJava`, 0 errors); not played.
 
-## 0.7.601 (2026-11-05): fighters' and gunners' blows show Powers' incoming-blow cue
+## 0.7.601 (2026-11-05): every melee weapon gets a weapon skill
+Andy: "it also has no moves, neither does the ninjato, they should all integrate with the weapon arts". The skill bar's
+weapon skills (Swift Strikes, Whirlwind, Cleave, Smash, Ground Slam, Flurry, Thrust, Impale, Swipe, Fan of Knives) come
+from Spell Engine, which hands them out by matching item ids against a short list and only to items with the vanilla
+weapon component: the battleaxe, ninjato, saber, machete, katana, halberd, rapier, scythes, cleavers and more got none.
+- As the server starts, every melee weapon still without one gets the skill its kind fits (`forms/WeaponSkills`, applied
+  by `mixin/spellengine/SpellAssignmentsMixin`): battleaxe Whirlwind, ninjato / katana / saber / machete Swift Strikes,
+  halberd / rapier / skewer Thrust, scythes / kama Swipe, cleavers Cleave, cudgels / staves Smash, and so on. Tools,
+  ranged and thrown-only weapons and items with their own spells are left alone. The log says how many it gave.
+- WeaponMod's halberd joins the spear Weapon Forms (`form_spears`). Axes, maces and hammers still have no Weapon Forms
+  family of their own. Built, not played.
+
+## 0.7.602 (2026-11-05): fighters' and gunners' blows show Powers' incoming-blow cue
 - Andy: "is it possible to add an indicator for pvp? as of right now it is hard to parry or defend at all"
 - `MobCombat`: a fighter's swing (Better Combat moves and plain blows) and a gunner's aim at a player call
   `PowersCompat.tellIncoming`, which shows Jaymo's Powers' incoming-blow cue round that player's crosshair (the side it
