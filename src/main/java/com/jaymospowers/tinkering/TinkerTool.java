@@ -26,7 +26,7 @@ public interface TinkerTool {
 	static void tick(ItemStack stack, ServerLevel level) {
 		CustomModelData look = stack.get(DataComponents.CUSTOM_MODEL_DATA);
 		boolean shownBroken = look != null && !look.flags().isEmpty() && look.flags().getFirst();
-		// (0.20.72) one forged before melee kinds had the weapon guard gets it the first time it's carried
+		// (0.20.76) one forged before melee kinds had the weapon guard gets it the first time it's carried
 		boolean unguarded = !stack.has(DataComponents.BLOCKS_ATTACKS) && stack.getItem().components().has(DataComponents.BLOCKS_ATTACKS)
 			&& !ToolStats.isBroken(stack);
 		if (look == null || !stack.has(Tinkering.TOOL_MATERIALS) || shownBroken != ToolStats.isBroken(stack) || unguarded) {

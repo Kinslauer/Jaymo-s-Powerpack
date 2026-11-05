@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.20.72) Right click on a foe with a guarding weapon raises the guard instead of opening the foe's chat (MCA's orcs,
+ * (0.20.76) Right click on a foe with a guarding weapon raises the guard instead of opening the foe's chat (MCA's orcs,
  * guards and bandits override {@code interact} themselves) or trades: the click on them passes, so it falls through to
  * the weapon (see Guard#guardsAgainst). Fabric's right-click-on-someone callbacks run before this, so they still come
  * first.

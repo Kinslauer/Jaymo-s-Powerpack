@@ -331,7 +331,7 @@ public final class ToolStats {
 				BLOCK_ANGLE, Optional.empty(), 0.0F, BLOCK_SHARE)), BlocksAttacks.ItemDamageFunction.DEFAULT, Optional.empty(), Optional.empty(),
 				Optional.empty()));
 		} else if (!broken && stack.getItem().components().has(DataComponents.BLOCKS_ATTACKS)) {
-			// (0.20.72) a melee one carries the weapon guard and its parry, as every other weapon (combat/Guard)
+			// (0.20.76) a melee one carries the weapon guard and its parry, as every other weapon (combat/Guard)
 			stack.set(DataComponents.BLOCKS_ATTACKS, stack.getItem().components().get(DataComponents.BLOCKS_ATTACKS));
 		} else {
 			stack.remove(DataComponents.BLOCKS_ATTACKS);

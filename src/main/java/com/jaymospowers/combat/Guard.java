@@ -99,7 +99,7 @@ import org.jspecify.annotations.Nullable;
  * own parry (one window, a cooldown after a parry, red blows parried too), but show the same timing bar
  * ({@link #showPower}, {@link #SHOWN}) and the same flash ({@link #cue}). Every parry, any kind, fires {@link #PARRIED}.
  * <p>
- * (0.20.72) Andy: "parry doesnt seem possible with weapons anymore". Two holes, both closed:
+ * (0.20.76) Andy: "parry doesnt seem possible with weapons anymore". Two holes, both closed:
  * <ul>
  * <li>Right click on a foe in reach talked to it instead: orcs, guards and bandits are MCA villagers now, and MCA opens
  * its chat on right click before the item gets its turn. With a guarding weapon in hand, right click on a foe (a
@@ -254,7 +254,7 @@ public final class Guard {
 	 */
 	private static boolean guardable(Item item) {
 		if (item instanceof TinkerTool tool) {
-			// (0.20.72) a Tool Station sword, weapon or tool: its own right click is only for the off hand or a throw
+			// (0.20.76) a Tool Station sword, weapon or tool: its own right click is only for the off hand or a throw
 			ToolType.Style style = tool.type().style;
 			return style == ToolType.Style.SWORD || style == ToolType.Style.WEAPON || style == ToolType.Style.TOOL;
 		}
@@ -299,7 +299,7 @@ public final class Guard {
 			return InteractionResult.FAIL;
 		}
 		if (off.getItem() instanceof TinkerToolItem dagger && dagger.type.traits.containsKey(Trait.OFFHAND)) {
-			// (0.20.72) a Tool Station dagger in the off hand swings on right click (Dual Wield), as before
+			// (0.20.76) a Tool Station dagger in the off hand swings on right click (Dual Wield), as before
 			return InteractionResult.FAIL;
 		}
 		if (DarktidePower.has(player) && DarktideWeapons.canGuard(player)) {
@@ -313,7 +313,7 @@ public final class Guard {
 	}
 
 	/**
-	 * (0.20.72) Right click on {@code mob} (both sides) should raise {@code player}'s guard rather than reach the mob
+	 * (0.20.76) Right click on {@code mob} (both sides) should raise {@code player}'s guard rather than reach the mob
 	 * (MCA's chat, a trade): a guarding weapon in the main hand and a foe under the crosshair. Sneaking talks as before.
 	 */
 	public static boolean guardsAgainst(Player player, Mob mob) {
@@ -326,7 +326,7 @@ public final class Guard {
 	}
 
 	/**
-	 * (0.20.72) Someone {@code player} is fighting, judged only by what both sides know alike (so the client and server
+	 * (0.20.76) Someone {@code player} is fighting, judged only by what both sides know alike (so the client and server
 	 * agree): a monster, a mob mid-fight (its synced aggressive flag: Kingdoms raises it on every swing), the locked foe.
 	 */
 	private static boolean foe(Player player, Mob mob) {

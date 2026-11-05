@@ -469,9 +469,15 @@ public final class Rulers {
 		if (w.role() != role) {
 			w.enlist(role, f.id());
 			fit(mob, role, f);
-		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob) && !RoyalDress.nightwear(mob)) {
-			// (0.7.171) crowned before the regalia (or it was taken off them): they're dressed for the throne
-			fit(mob, role, f);
+		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob) && !RoyalDress.nightwear(mob) && !Downed.isDowned(mob)) {
+			if (Regalia.wearsAny(mob) || mob.getAttached(RoyalDress.WEAR) != null) {
+				// (0.7.561) it was taken off them (a player lifting them when they were down sheds their heaviest armour,
+				// helmet and all): the crown goes back on, and nothing else is made afresh, or each lift left a new set
+				Regalia.recrown(mob, role, McaCompat.female(mob));
+			} else {
+				// (0.7.171) crowned before the regalia: they're dressed for the throne
+				fit(mob, role, f);
+			}
 			if (f.leader().map(mob.getUUID()::equals).orElse(false)) {
 				// (and whether she's a queen is written down)
 				reign(s, f.id(), mob);
