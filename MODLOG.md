@@ -4928,3 +4928,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Compile-checked (0 errors against the 26.3 jars); not played.
 - **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
   wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.
+- **0.19.57, Kingdoms 0.7.477, wolves stalk you:** Wild wolves (the game's at night or when you're hurt, our feral ones
+  always) smell players out (wind, sneaking, rain, your footstep trail), shadow them silently from cover, freeze and
+  back off when looked at, and rush as a pack with one growl from behind or from hiding. Kingdoms only; see its MODLOG.

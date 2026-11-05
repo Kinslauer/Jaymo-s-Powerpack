@@ -8216,3 +8216,30 @@ beneath it, and flap gently as they hover."
   them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
 - **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
   and sway in the air the way the wind's hover does, for anyone watching.
+
+## 0.7.477: wolves stalk you (pack 0.19.57)
+Andy: "wolves should stalk you, letting you think you're safe and attacking from cover and concealment, similar to creepers
+but more of a hunter. they can smell you out."
+- **Who** (`wild/WolfStalkers`): our feral wolves always; the game's wild wolves at night, or by day when you're under
+  half health, and never while you hold a bone (taming still works). Tamed wolves, pups and leashed wolves never stalk;
+  nothing stalks on Peaceful or a creative or spectator player. Feral wolves no longer charge players on sight (only one
+  that walks within 4 blocks of an unstalked wolf, or hits it); the encounters' feral wolf packs start stalking too.
+- **The nose**: a wolf smells you from 36 blocks in still air; 0.6 of that while you sneak, half in the rain, 1.5x when
+  you're under half health. Out under the sky the wind (slowly turning through the day) carries it: a wolf downwind
+  smells you from up to 1.6x as far, one upwind from only 0.4x. Past that, a footstep of yours from the last minute
+  within 12 blocks of it (the werewolves' scent trail, `ScentTrails.freshest`) puts it on your trail, and it follows the
+  trail in. One wolf taking up a scent brings its pack (same kind, 16 blocks).
+- **Shadowing**: a stalking wolf goes silent and keeps to a ring round you, 18 blocks out, creeping 2.5 blocks closer
+  each hop you don't see it (no closer than 7). It picks spots out of your sight (behind blocks and trunks, in grass,
+  ferns, bushes and leaves), toward your back, downwind of you, and not far to go; a pack fans out round you, each wolf
+  on its own side. Losing your scent for 20 s it gives up (and rests a minute before it will stalk again).
+- **Hanging back**: look right at a stalking wolf you can see (in undergrowth or the dark you only see it within 6
+  blocks) and it freezes, then slinks back out of sight and starts again from farther off. Spot one within 6 blocks
+  and it commits.
+- **The rush**: within 10 blocks, while you aren't looking at it, and your back is turned, your hands are busy (eating,
+  drinking, drawing a bow, a shield up) or it is hidden from you (or after two minutes of stalking), it breaks cover with
+  one low growl (the tell, like a creeper's hiss) and the whole pack within 32 blocks comes at once, with a burst of
+  speed for 4 s. Hit a stalker and the pack comes in then. Lose them after and they fall back to stalking. A stalking
+  wolf doesn't fill the stealth gauge and can't be sneak-attacked by the one it stalks.
+- Tuning: the constants at the top of `WolfStalkers`. Stalks aren't saved: a reload forgets the hunt (and gives back a
+  hushed wolf's voice). Compile-checked (Gradle `compileJava`, 0 errors); not played.

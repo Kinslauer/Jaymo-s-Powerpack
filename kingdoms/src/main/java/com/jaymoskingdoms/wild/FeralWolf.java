@@ -19,7 +19,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 /**
  * (0.5.55) The feral wolf (after Better Animals Plus): a big, lean grey wolf that hunts in packs of 3-5, goes for
  * players on sight and runs down sheep and rabbits. Six coats: black, snowy, timber, arctic, brown, red (the snowy and
- * arctic ones in the cold).
+ * arctic ones in the cold). (0.7.477) It stalks players from cover before it rushes them ({@link WolfStalkers}).
  */
 public class FeralWolf extends WildBeast {
 	public static final String[] COATS = {"black", "snowy", "timber", "arctic", "brown", "red"};
@@ -39,6 +39,12 @@ public class FeralWolf extends WildBeast {
 		super.registerGoals();
 		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Sheep.class, false));
 		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Rabbit.class, false));
+	}
+
+	/** (0.7.477) Players it stalks rather than charging on sight ({@link WolfStalkers}); villagers as before. */
+	@Override
+	protected boolean hunting(net.minecraft.world.entity.LivingEntity target) {
+		return !(target instanceof net.minecraft.world.entity.player.Player player) || WolfStalkers.strikes(this, player);
 	}
 
 	@Override
