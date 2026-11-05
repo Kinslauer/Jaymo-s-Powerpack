@@ -23,7 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.582) A captive who keeps their place is left alone. Andy (2026-11-05), woken in chains at a camp and set on at once:
+ * (0.7.584) A captive who keeps their place is left alone. Andy (2026-11-05), woken in chains at a camp and set on at once:
  * "they shouldnt do that until you try to escape or steal or do something slaves are not allowed".
  * <p>
  * A player in a camp's shackle ({@link StoryHard#shackled}) is spared by their captors (anyone who takes captives,

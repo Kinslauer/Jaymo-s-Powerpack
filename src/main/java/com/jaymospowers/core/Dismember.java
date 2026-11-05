@@ -126,7 +126,7 @@ public final class Dismember {
 	 */
 	public static final int SPLIT_TICKS = 200;
 	/**
-	 * (0.20.91) Andy: "I also didnt bleed out after being cleaved in two, that should happen within 10s". A halving that
+	 * (0.20.95) Andy: "I also didnt bleed out after being cleaved in two, that should happen within 10s". A halving that
 	 * doesn't kill outright (the blow left health over) bleeds the body out within this long (ticks); Rubber-folk and zombies
 	 * are spared it (they mend, or crawl on).
 	 */
@@ -155,7 +155,7 @@ public final class Dismember {
 	private static final Map<LivingEntity, Long> BLEEDING = new HashMap<>();
 	/** (0.20.61) A Rubber-folk cut in half → the game time their swallow must come by ({@link #SPLIT_TICKS}). */
 	private static final Map<LivingEntity, Long> SPLIT = new java.util.WeakHashMap<>();
-	/** (0.20.91) Cut in half and not yet dead: the creature → the game time it bleeds out, and who cut it. */
+	/** (0.20.95) Cut in half and not yet dead: the creature → the game time it bleeds out, and who cut it. */
 	private static final Map<LivingEntity, Object[]> HALVED = new java.util.WeakHashMap<>();
 	/** Players missing an arm (their hand is kept empty). */
 	private static final List<ServerPlayer> ONE_ARMED = new ArrayList<>();
@@ -475,7 +475,7 @@ public final class Dismember {
 		boolean right = sever(target, RIGHT_LEG, striker);
 		boolean left = sever(target, LEFT_LEG, striker);
 		if ((right || left) && !rubber(target) && !zombie(target) && target.isAlive()) {
-			// (0.20.91) nobody lives long cut in two: dead within the bleed-out, whatever the blow left (a killing one ends it now)
+			// (0.20.95) nobody lives long cut in two: dead within the bleed-out, whatever the blow left (a killing one ends it now)
 			HALVED.put(target, new Object[] {target.level().getGameTime() + HALVE_BLEED_OUT_TICKS, striker});
 			if (target instanceof ServerPlayer player) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.halved").withStyle(ChatFormatting.DARK_RED));

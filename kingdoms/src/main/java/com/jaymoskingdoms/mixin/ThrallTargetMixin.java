@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Blood Moon go for a Nightborn vampire ({@link NightbornBlood#spares}). (0.7.186) Nor does a kindhearted or devout mob
  * go for someone who's down ({@link Temperaments#spares}). (0.7.535) Nor does one of The Truth's folk go for the unarmed
  * and innocent ({@link com.jaymoskingdoms.Commandments#spares}). Nor anyone at someone hidden inside their werewolf
- * ({@link com.jaymoskingdoms.Lycans#hidden}). (0.7.582) Nor a captor at a captive keeping their place
+ * ({@link com.jaymoskingdoms.Lycans#hidden}). (0.7.584) Nor a captor at a captive keeping their place
  * ({@link com.jaymoskingdoms.CaptiveConduct#spares}).
  */
 @Mixin(LivingEntity.class)

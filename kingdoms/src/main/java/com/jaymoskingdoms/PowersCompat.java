@@ -409,6 +409,8 @@ public final class PowersCompat {
 	public static final int FILM_ORBIT = 3, FILM_PUSH_IN = 6;
 	/** (0.7.382) Powers' tilted (rolled) shot and its hard-cut shot between three angles (Powers 0.18.46; an older Powers shows nothing for them). */
 	public static final int FILM_DUTCH = 8, FILM_CUTS = 9;
+	/** (0.7.584) Powers' speaker shot: in on the speaker's face, then up to the words over their head (Powers 0.20.93). */
+	public static final int FILM_SPEAKER = 11;
 
 	private static void films() {
 		if (lookedForFilm) {

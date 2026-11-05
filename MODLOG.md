@@ -759,7 +759,52 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   press, and the rock leaves as the arm comes over. Tune it in the constants at the top of `RockThrowPose`.
   Built, not played.
 
-## 0.20.91 (2026-11-05): cut in two, you bleed out (Kingdoms 0.7.582)
+## Powers 0.20.92: Chrono cheat death works when hurt, downed or out cold
+Andy: "chrono cheat death did not work. i was spamming R at the get up screen" (clip: downed, out cold, left for dead,
+then a final death, R pressed throughout).
+- Checkpoints needed three hearts or more, so after a long fight at low health (or with wounds holding your most health
+  down) there was nothing to go back to, and every death and waking silently went ahead. Checkpoints now ignore health
+  (the rewind still gives back at least three hearts). With none inside the window it takes the newest older one, and
+  with none at all you rise where you fell, mended.
+- Downed, R now cheats death whenever Rewind itself can't answer: out cold, on its cooldown, or an execution coming.
+  Awake with Rewind ready, R is still the plain downed Rewind. (`ChronoCheatDeath.downedOpen`, `ChronoPower.rewindReady`.)
+- Still no prompt anywhere (Andy's rule); R is read straight off the keyboard, so it works under any death or black screen.
+
+## 0.20.93 (2026-11-05): orc cutscenes you can read (Kingdoms 0.7.582)
+Andy: "you dont get enough time or visibility on the orc cutscenes to view what they say, remove any FOV modifiers for
+the cutscene duration, (I was an overclocked chrono and it was way zoomed out) and pan into the text box and character,
+sacrificing the view of the character near the end to get high enough to view the whole chat bubble."
+- New film shot, `UltimateFilm.SPEAKER` (drawn in `UltimateCinematic.speaker`): from over your shoulder in to the
+  speaker's face, seen from your side; a slow push framed between their face and the words over their head; then, from
+  62% of the way through, up level with the words so the whole bubble is in frame and the face drops out of the bottom.
+  Tune it with the `SPEAKER_*` constants at the top of `UltimateCinematic`.
+- While your own film runs the field of view is your plain FOV setting (`mixin/UltimateCinematicFovMixin`): no
+  Overclock/Speed/sprint widening, zoom or under-water squeeze. It applies to every film, not only the orcs'.
+- A film may now run up to 10 s (`UltimateFilm.MAX_TICKS` 100 to 200) so a spoken line can be read through.
+  Built, not played.
+## 0.20.94 (2026-11-05): reincarnation fixes: no wall, nothing kept, black till ready, one Judge
+- Andy: "the judges keep multiplying for some reason, and reincarnating just spawned me in a wall, it should wipe
+  absoluteley everything on your character, and black screen until it's ready". From his clip: a final death still went
+  to the Other World; the Judge's "born again" sent him home to a spot inside a wall while his life was still over, he
+  suffocated, died for good again and was sent back to the hall, round and round.
+- A final death no longer goes to the Other World (`ZFighterAfterlife` AFTER_DEATH/AFTER_RESPAWN): Reincarnate respawns
+  you and the new life starts. Going home from the hall never puts you inside blocks any more (`Mortality.safe`).
+- Black until it's ready: from the respawn until Kingdoms says the new character is made (story, MCA's creator,
+  heritage, class: `LifeStory.making`), the screen is black (`Mortality.REBORNING`, drawn by `DownedHud`; 10 min at most).
+- Everything goes: every Powers/Kingdoms/Kitchen attachment with no exceptions (unlocked roads and heritages, backpack,
+  baubles, stashes, costume are no longer kept), plus inventory, ender chest, experience, effects and spawn point.
+- The Judges: the hall looked for its people as soon as the chunk's blocks were in, before its creatures loaded, so a new
+  Judge (and master, teller) was made at every arrival. Now only once the creatures are loaded, and extras are sent away.
+  Kingdoms 0.7.583 goes with it.
+- Andy: "the red overlay on the respawn screen should be black as well, the screen should cut to black whenever you
+  die, and the slow entry of either the reincarnate screen or the scenario will load, this will give you a chance to
+  read what happened as it should say if you were kidnapped or in the wilderness". The death screen is black, not red,
+  and its words and buttons come up slowly out of the black (`DeathScreenBlackMixin`, 2.5 s). A death turned away goes
+  black at once and says what happened large in the middle (going dark, then the wake's own line: in chains, taken in,
+  out in the wild by cause...; `Mortality.WAKE_LINE`), and the world comes back slowly (`DownedHud.WAKE_OUT_TICKS`, 4 s).
+  A new life's black says "That life is over. Another begins." Built, not played.
+
+## 0.20.95 (2026-11-05): cut in two, you bleed out (Kingdoms 0.7.584)
 Andy: "I also didnt bleed out after being cleaved in two, that should happen within 10s".
 - A halving that left health over (the chop wasn't the killing blow) just took both legs and you lived on. Now anyone cut
   in two bleeds out within 8 s (`Dismember.HALVE_BLEED_OUT_TICKS`), pouring blood meanwhile, and dies of it through

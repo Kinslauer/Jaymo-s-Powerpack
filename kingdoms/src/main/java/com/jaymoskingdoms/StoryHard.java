@@ -125,7 +125,7 @@ public final class StoryHard {
 			if (shackle == null) {
 				return InteractionResult.PASS;
 			}
-			// (0.7.582) working at the shackle where a captor can see is trying to escape: the camp turns on them
+			// (0.7.584) working at the shackle where a captor can see is trying to escape: the camp turns on them
 			if (CaptiveConduct.watched(sp)) {
 				CaptiveConduct.actUp(sp, "pick");
 			}
@@ -207,7 +207,7 @@ public final class StoryHard {
 	/** {@code player} woke in chains at {@code at}, held by camp {@code camp}. */
 	static void shackle(ServerPlayer player, BlockPos at, int camp) {
 		player.setAttached(SHACKLE, new Shackle(at, camp));
-		// (0.7.582) collared and tied to a stake beside them, for all to see (Shackles)
+		// (0.7.584) collared and tied to a stake beside them, for all to see (Shackles)
 		Shackles.tie(player, at, player.getRandom());
 	}
 
@@ -258,7 +258,7 @@ public final class StoryHard {
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hard.chains.slipping", held * 100 / SLIP_TICKS).withStyle(ChatFormatting.GRAY));
 	}
 
-	/** The shackle comes off ({@code how}: "picked", "slipped", (0.7.582) "cut" or "broken", {@link Shackles}): the camp hunts them from now, for the day. */
+	/** The shackle comes off ({@code how}: "picked", "slipped", (0.7.584) "cut" or "broken", {@link Shackles}): the camp hunts them from now, for the day. */
 	static void free(ServerPlayer player, String how) {
 		Shackle shackle = player.getAttached(SHACKLE);
 		if (shackle == null) {

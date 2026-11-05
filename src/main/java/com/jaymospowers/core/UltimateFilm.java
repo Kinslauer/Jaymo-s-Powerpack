@@ -40,18 +40,29 @@ import org.jspecify.annotations.Nullable;
  * back as it leans in (a masterstroke, a reveal).</li>
  * <li>(0.18.46) {@link #CUTS}: hard cuts between three angles round {@code target} or {@code at}: close and low, wide and
  * tilted from the side, high behind (a flurry of blows).</li>
+ * <li>(0.20.93) {@link #SPEAKER}: Andy: "pan into the text box and character, sacrificing the view of the character near the
+ * end to get high enough to view the whole chat bubble". From over your shoulder in to {@code target}'s face from your side,
+ * a slow push while they talk, then up level with the words over their head, so the whole speech bubble is in frame (an
+ * orc captain naming himself, his gloat over your body).</li>
  * </ul>
+ * (0.20.93) Andy: "remove any FOV modifiers for the cutscene duration": while your film runs the camera keeps your plain FOV
+ * setting (no sprint, speed, Overclock or zoom widening), {@code UltimateCinematicFovMixin}.
  */
 public final class UltimateFilm {
 	public static final int ZOOM = 0, SKYWARD = 1, CRANE = 2, ORBIT = 3, PROFILE = 4, TRACK = 5, PUSH_IN = 6, CHASE = 7, DUTCH = 8, CUTS = 9;
+	/** (0.20.93) In on a speaker, rising to the words over their head (see the list above). */
+	public static final int SPEAKER = 11;
 	/**
 	 * (0.20.9) {@code MORPH}: letterboxed, it zooms on each changing part of {@code caster} in turn (the {@link Play#parts} list, in
 	 * order), holds while that part grows from the base alien into the Ultimate, then pulls back to the whole new body.
 	 * {@link Play#first} is the long exaggerated cut.
 	 */
 	public static final int MORPH = 10;
-	/** The shortest and longest a film may run (ticks), whatever a move asks for. */
-	public static final int MIN_TICKS = 10, MAX_TICKS = 100;
+	/**
+	 * The shortest and longest a film may run (ticks), whatever a move asks for. (0.20.93) Up from 100 so a spoken line can be
+	 * read through ({@link #SPEAKER}); moves still ask for their own lengths.
+	 */
+	public static final int MIN_TICKS = 10, MAX_TICKS = 200;
 
 	private static final List<Later> LATER = new ArrayList<>();
 

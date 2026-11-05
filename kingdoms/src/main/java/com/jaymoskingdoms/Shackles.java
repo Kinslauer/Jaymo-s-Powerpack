@@ -37,7 +37,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.7.582) What holds a captive, seen. Andy (2026-11-05): "there should be some kind of visible chain or yoke around the
+ * (0.7.584) What holds a captive, seen. Andy (2026-11-05): "there should be some kind of visible chain or yoke around the
  * slaves/ prisoners necks that stops them from going too far. chans can be broken with rocks or flint and repeatedly
  * slamming, and the rope can be sawed through similarly."
  * <p>

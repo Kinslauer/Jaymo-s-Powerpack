@@ -99,7 +99,7 @@ public final class LifeStory {
 	static final int ARRIVAL_GRACE_TICKS = 100;
 	/** Spots tried for a dry, open place to stand before giving up on one. */
 	static final int GROUND_TRIES = 16;
-	/** (0.7.582) How far under a roof (blocks) a spot to stand indoors is looked for. */
+	/** (0.7.584) How far under a roof (blocks) a spot to stand indoors is looked for. */
 	static final int INDOOR_DEPTH = 8;
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
 	static final float FATE_LEANS = 0.5F;
@@ -1740,7 +1740,7 @@ public final class LifeStory {
 
 	/** A dry, open place to stand {@code min}-{@code max} blocks from {@code center} (horizontally), or null. */
 	static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random) {
-		// (0.7.582) Andy, woken in chains on a camp hut's roof: open ground first (earth, sand, stone), then anywhere to stand
+		// (0.7.584) Andy, woken in chains on a camp hut's roof: open ground first (earth, sand, stone), then anywhere to stand
 		for (int i = 0; i < GROUND_TRIES * 2; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = min + random.nextInt(Math.max(1, max - min + 1));
@@ -1751,7 +1751,7 @@ public final class LifeStory {
 				return top;
 			}
 		}
-		// (0.7.582, Andy: "spawning inside is fine too, as long as they have room") then a floor under a roof, room to stand
+		// (0.7.584, Andy: "spawning inside is fine too, as long as they have room") then a floor under a roof, room to stand
 		for (int i = 0; i < GROUND_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = min + random.nextInt(Math.max(1, max - min + 1));
@@ -1794,7 +1794,7 @@ public final class LifeStory {
 		return null;
 	}
 
-	/** (0.7.582) A floor that's the land itself, not something built (a roof, a deck, a wall's top). */
+	/** (0.7.584) A floor that's the land itself, not something built (a roof, a deck, a wall's top). */
 	private static boolean openGround(BlockState floor) {
 		return floor.is(net.minecraft.tags.BlockTags.DIRT) || floor.is(net.minecraft.tags.BlockTags.SAND)
 			|| floor.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) || floor.is(net.minecraft.world.level.block.Blocks.GRAVEL)
@@ -2304,6 +2304,14 @@ public final class LifeStory {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.reborn").withStyle(ChatFormatting.LIGHT_PURPLE));
 		Classes.next(player);
 		return true;
+	}
+
+	/**
+	 * (0.7.583) Whether {@code player} is still making their character: the story, MCA's creator, the heritage or the class
+	 * still to choose, or still held in stasis. Called by Jaymo's Powers (reflection) to keep a new life's screen black.
+	 */
+	public static boolean making(ServerPlayer player) {
+		return StoryStasis.owed(player) || StoryStasis.holding(player) || Classes.unmade(player);
 	}
 
 	/**

@@ -17,7 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.582) A captive's collar and tether as everyone sees it ({@link Shackles#TETHER}): an iron collar with a chain of
+ * (0.7.584) A captive's collar and tether as everyone sees it ({@link Shackles#TETHER}): an iron collar with a chain of
  * links, or a rope noose with a rope, sagging from the neck to the stake beside them. In your own first person only the
  * line is drawn, falling away from under your chin.
  */
