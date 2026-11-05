@@ -47,6 +47,8 @@ public final class LedgeClient {
 	/** (0.15.108) The climb under way is the prone one, onto the belly into a low gap. */
 	private static boolean prone;
 	private static int cooldown;
+	/** (0.21.12) Use was down last tick (a fresh right-click grabs). */
+	private static boolean useWas;
 	/** The server has the hold (its synced copy arrived). */
 	private static boolean confirmed;
 	/** Jump was let go since the grab: the next press climbs. */
@@ -114,6 +116,13 @@ public final class LedgeClient {
 
 	/** Both hands are on the edge: no swings, no item use (vanilla's and Better Combat's both start from these clicks). */
 	private static void swallowClicks(Minecraft minecraft) {
+		// (0.21.12) a fresh right-click with an empty hand at a ledge you can see over takes hold of it
+		boolean use = minecraft.options.keyUse.isDown();
+		boolean freshUse = use && !useWas;
+		useWas = use;
+		if (freshUse && phase == Phase.NONE && minecraft.player != null && minecraft.gui.screen() == null) {
+			clickGrab(minecraft, minecraft.player);
+		}
 		// (0.14.3) and while both hands hold a wall or a bar (freerunning)
 		if (phase == Phase.NONE && !com.jaymospowers.client.freerun.FreerunClient.holding()) {
 			return;
@@ -152,6 +161,46 @@ public final class LedgeClient {
 	 * belly under a one-high gap, or over a fence or wall. Returns whether it did (the notch is the climb's, not the
 	 * stance's). Not mid-sprint (that's a slide) or while freerunning.
 	 */
+	/**
+	 * (0.21.12) Andy: "you should be able to grab a ledge that you can see over manually with right click and an empty
+	 * hand, im stuck right now in the nether". A fresh press of Use with nothing in the main hand, on the ground or in the
+	 * air, facing a ledge ({@link Ledge#find}: its edge 1.1 blocks over the feet up to a little over the eyes) catches it
+	 * and hangs there, as a jump would; then Jump climbs as usual. Lower than that, the same press climbs what Sneak +
+	 * scroll would ({@link Ledge#crouchSpot}, on the ground). Not when the crosshair is on a mob or on something a click
+	 * works (a door, a chest, a button...), which keeps the click.
+	 */
+	private static void clickGrab(Minecraft minecraft, LocalPlayer player) {
+		if (cooldown > 0 || !player.getMainHandItem().isEmpty()
+			|| !Ledge.canHang(player) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active() || clickTaken(minecraft, player)) {
+			return;
+		}
+		Ledge.Spot found = Ledge.find(player);
+		if (found != null) {
+			grab(player, found);
+		} else if (!scrollGrab(player)) {
+			return;
+		}
+		while (minecraft.options.keyUse.consumeClick()) {
+			// (the click was the grab's)
+		}
+	}
+
+	/** (0.21.12) The crosshair is on something a right-click is for: a mob, or a block with a menu or a switch. */
+	private static boolean clickTaken(Minecraft minecraft, LocalPlayer player) {
+		net.minecraft.world.phys.HitResult hit = minecraft.hitResult;
+		if (hit instanceof net.minecraft.world.phys.EntityHitResult) {
+			return true;
+		}
+		if (hit instanceof net.minecraft.world.phys.BlockHitResult block && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+			net.minecraft.world.level.block.state.BlockState state = player.level().getBlockState(block.getBlockPos());
+			return state.hasBlockEntity() || state.is(net.minecraft.tags.BlockTags.DOORS) || state.is(net.minecraft.tags.BlockTags.TRAPDOORS)
+				|| state.is(net.minecraft.tags.BlockTags.BUTTONS) || state.is(net.minecraft.tags.BlockTags.FENCE_GATES)
+				|| state.getBlock() instanceof net.minecraft.world.level.block.LeverBlock
+				|| state.getBlock() instanceof net.minecraft.world.level.block.BedBlock;
+		}
+		return false;
+	}
+
 	public static boolean scrollGrab(LocalPlayer player) {
 		if (phase != Phase.NONE || cooldown > 0 || !player.onGround() || player.isSprinting() || !Ledge.canHang(player)
 			|| !Crawl.canCrawl(player) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active()) {
