@@ -41,10 +41,15 @@ import org.jspecify.annotations.Nullable;
  * <p>(0.20.41, Hematic's idea) Whoever walks through a fresh pool carries it on their feet for a few steps
  * ({@link #print}): a line of footprints, left and right, pointing the way they went, fainter as it wears off. The prints
  * are the walker's (tracked like their blood).
+ * <p>(0.20.52) Andy: "rain should wash away blood". A stain out in the rain shrinks by {@link #RAIN_WASH} each sync
+ * ({@link #wash}), so a big pool is gone in about half a minute, a drip's in a few seconds; under a roof or the trees it
+ * stays. A washed stain stops being a trail to follow.
  */
 public final class BloodTrail {
 	/** How long a stain lies (ticks), the last {@link #FADE} of them fading away. */
 	public static final int LIFE = 12000, FADE = 1200;
+	/** (0.20.52) How much of a stain's size the rain washes away each {@link #SYNC_TICKS}. */
+	static final float RAIN_WASH = 0.03F;
 	/** How often players are sent the stains near them (ticks), and how near (blocks). */
 	static final int SYNC_TICKS = 10;
 	static final double SYNC_RANGE = 64.0;
@@ -276,6 +281,9 @@ public final class BloodTrail {
 				continue;
 			}
 			long now = level.getGameTime();
+			if (level.isRaining()) {
+				wash(level, marks, now);
+			}
 			List<Long> gone = new ArrayList<>();
 			for (Mark mark : marks.order) {
 				if (mark.expires <= now) {
@@ -402,6 +410,29 @@ public final class BloodTrail {
 		}
 		feet.carry = dist - (d - STRIDE);
 		feet.last = at;
+	}
+
+	/**
+	 * (0.20.52) The rain washes every stain it falls on (loaded ground only) smaller; one washed down past
+	 * {@link #DRAWN_DRY} is gone in a moment, as when blood magic draws one dry. Players near are sent it smaller.
+	 */
+	private static void wash(ServerLevel level, Marks marks, long now) {
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (Mark mark : marks.order) {
+			if (mark.scale <= 0.0F || now < mark.showFrom) {
+				continue;
+			}
+			pos.set(mark.x, mark.y + 0.5, mark.z);
+			if (!level.isLoaded(pos) || !level.isRainingAt(pos)) {
+				continue;
+			}
+			mark.scale -= RAIN_WASH;
+			if (mark.scale < DRAWN_DRY) {
+				mark.scale = 0.0F;
+				mark.expires = Math.min(mark.expires, now + DRAWN_GONE);
+			}
+			mark.version++;
+		}
 	}
 
 	/** Sends {@code player} the stains near it it hasn't seen yet (or seen smaller). */

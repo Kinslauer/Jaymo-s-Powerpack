@@ -181,9 +181,27 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.quickFade = life < QUICK_FADE_UNDER ? Math.max(1, life) : 0;
 	}
 
+	/** (0.20.52) How often a passing pool checks for rain on it (ticks), and how long it then takes to wash away. */
+	static final int RAIN_CHECK = 20, RAIN_WASH = 100;
+
+	/** (0.20.52) Whether rain falls on this spot (a client-side check, for the blood that's only for show). */
+	static boolean rainedOn(ClientLevel level, double x, double y, double z) {
+		if (!level.isRaining()) {
+			return false;
+		}
+		net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x, y, z);
+		return level.hasChunkAt(pos) && level.isRainingAt(pos);
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
+		// (0.20.52) rain washes a passing pool away (a lasting stain is washed by the server, BloodTrail.wash)
+		if (!this.wet && !this.stain && this.age % RAIN_CHECK == 0 && this.lifetime - this.age > RAIN_WASH
+			&& rainedOn(this.level, this.x, this.y + 0.5, this.z)) {
+			this.lifetime = this.age + RAIN_WASH;
+			this.quickFade = RAIN_WASH;
+		}
 		if (this.magma && this.age < BloodParticles.MAGMA_COOLS / 2 && this.random.nextFloat() < 0.03F) {
 			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, this.x + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6,
 				this.y + 0.05, this.z + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6, 0.0, 0.03, 0.0);
