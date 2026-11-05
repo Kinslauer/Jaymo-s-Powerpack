@@ -975,3 +975,7 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   Tuning at the top of `Fainting` and `FaintHud`. Built, not played.
 - **0.20.112:** `Fainting.thirst(Player)` and `Fainting.bringRound(ServerPlayer)` for Kingdoms 0.7.594's villagers who
   come to a fainted player.
+
+## 0.20.113 (2026-11-05): Kitchen 0.5.77, small animals cracked with a rock and roasted on a campfire
+- Ships Kitchen 0.5.77: a loose rock cracks open a small animal's body (crab, chicken, rabbit...), and one laid on a lit
+  campfire roasts whole into cooked meat. See kitchen/MODLOG.md.

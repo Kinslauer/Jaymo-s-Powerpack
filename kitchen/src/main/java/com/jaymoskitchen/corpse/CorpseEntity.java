@@ -1392,6 +1392,63 @@ public class CorpseEntity extends Entity {
 	/** How often a corpse looks for a flame it's lying in or on (lava, fire, a lit campfire). */
 	private static final int FLAME_CHECK_TICKS = 10;
 
+	/**
+	 * (0.5.77) A small animal's body (one you carry in one hand: a crab, a chicken, a rabbit...) laid on a lit campfire
+	 * roasts whole: after {@link #ROAST_TICKS} on the fire, out comes its loot cooked as the campfire would cook it
+	 * (raw crab meat comes out cooked crab meat). Whatever won't cook (feathers, a shell) drops as it is. Lit with flint
+	 * and steel instead, or dropped in open fire or lava, it still burns away as before.
+	 */
+	private static final int ROAST_TICKS = 600;
+	private int roastTicks;
+
+	/** (0.5.77) Roasts whole on a campfire (see {@link #ROAST_TICKS}). */
+	private boolean roasts() {
+		return kind == CorpseKind.ANIMAL && burns() && carrier() == null && dragger() == null && fitsInPocket();
+	}
+
+	/** (0.5.77) Lying on (or in) a lit campfire. */
+	private boolean onLitCampfire(ServerLevel level) {
+		net.minecraft.world.phys.AABB box = getBoundingBox().inflate(0.0, 0.1, 0.0).move(0.0, -0.1, 0.0);
+		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+			if (state.is(net.minecraft.tags.BlockTags.CAMPFIRES) && state.getValueOrElse(net.minecraft.world.level.block.CampfireBlock.LIT, false)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** (0.5.77) One flame check's worth of roasting; true once it's done and the body is gone. */
+	private boolean roast(ServerLevel level) {
+		roastTicks += FLAME_CHECK_TICKS;
+		level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.3, getZ(), 3, 0.15, 0.05, 0.15, 0.01);
+		if (roastTicks % 40 == 0) {
+			level.playSound(null, getX(), getY(), getZ(), SoundEvents.CAMPFIRE_CRACKLE, SoundSource.NEUTRAL, 0.8F, 1.3F);
+		}
+		if (roastTicks < ROAST_TICKS) {
+			return false;
+		}
+		List<ItemStack> cooked = new ArrayList<>();
+		for (ItemStack stack : loot) {
+			if (stack.isEmpty()) {
+				continue;
+			}
+			ItemStack one = stack.copyWithCount(1);
+			cooked.add(level.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING,
+					new net.minecraft.world.item.crafting.SingleRecipeInput(one), level)
+				.map(recipe -> recipe.value().assemble(new net.minecraft.world.item.crafting.SingleRecipeInput(one)))
+				.filter(result -> !result.isEmpty())
+				.map(result -> result.copyWithCount(Math.min(result.getMaxStackSize(), result.getCount() * stack.getCount())))
+				.orElse(stack.copy()));
+		}
+		loot = cooked;
+		dropLoot(level);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.3, getZ(), 8, 0.2, 0.1, 0.2, 0.02);
+		level.playSound(null, getX(), getY(), getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.NEUTRAL, 0.5F, 1.6F);
+		discard();
+		return true;
+	}
+
 	/** In or on lava, fire, or a lit campfire. */
 	private boolean touchesFlame(ServerLevel level) {
 		net.minecraft.world.phys.AABB box = getBoundingBox().inflate(0.0, 0.1, 0.0).move(0.0, -0.1, 0.0);
@@ -1407,7 +1464,12 @@ public class CorpseEntity extends Entity {
 
 	private void serverTick(ServerLevel level) {
 		age++;
-		if (burns() && !isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && touchesFlame(level)) {
+		if (!isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && roasts() && onLitCampfire(level)) {
+			// (0.5.77) a small animal laid on a campfire roasts instead of burning away
+			if (roast(level)) {
+				return;
+			}
+		} else if (burns() && !isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && touchesFlame(level)) {
 			igniteForSeconds(8.0F);
 		}
 		if (kind == CorpseKind.ZOMBIE && carrier() == null && tickCount % 20 == 0 && inSunlight(level)) {
@@ -1649,6 +1711,10 @@ public class CorpseEntity extends Entity {
 		if (step != null) {
 			return step;
 		}
+		// (0.5.77) a small one (a crab, a chicken, a rabbit) is cracked open with a loose rock, no tools needed
+		if (held.is(Corpses.CRACKING_ROCKS) && fitsInPocket()) {
+			return crack(level, player);
+		}
 		// (0.5.31) too big to carry anywhere: cut up where it lies, a piece at a time
 		if (held.is(Corpses.BUTCHERING_TOOLS) && tooBigToLift() && !onButcherBlock()) {
 			return cutUp(level, player, held);
@@ -1676,6 +1742,22 @@ public class CorpseEntity extends Entity {
 		}
 		// (0.5.39) too big for one hand: an empty hand held on it takes it by the legs and drags it
 		return fitsInPocket() ? carry(level, player) : grab(level, player, true);
+	}
+
+	/**
+	 * (0.5.77) A loose rock on a small animal's body: {@link #CHOPS} blows crack it open where it lies, always a rough job
+	 * (see {@link #butcher}), however good the spot. The rock isn't used up.
+	 */
+	private InteractionResult crack(ServerLevel level, Player player) {
+		chops++;
+		jolt(true);
+		play(level, SoundEvents.STONE_HIT, 0.7F + chops * 0.1F);
+		level.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.2, getZ(), 6, 0.2, 0.1, 0.2, 0.1);
+		if (chops >= CHOPS) {
+			butcher(level, false);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.cracked"));
+		}
+		return InteractionResult.SUCCESS_SERVER;
 	}
 
 	/**
@@ -2066,6 +2148,11 @@ public class CorpseEntity extends Entity {
 				if (count > 0) {
 					rough.add(stack.copyWithCount(count));
 				}
+			}
+			if (rough.isEmpty()) {
+				// (0.5.77) a small animal (a crab's one or two bits of meat) never comes away with nothing: its meal at least
+				loot.stream().filter(stack -> stack.has(DataComponents.FOOD)).findFirst()
+					.ifPresent(food -> rough.add(food.copyWithCount(1)));
 			}
 			loot = rough;
 		}
