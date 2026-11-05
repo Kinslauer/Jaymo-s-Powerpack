@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
  * (0.7.554) A Blood Sorcerer's reservoir ({@link Hemomancy#RESERVOIR}, gathered and thrown by {@code BloodBlasts}): a
  * thin upright bar just right of the hotbar (where a Brute's rage meter sits; a player is only one class), deep crimson,
  * brightening as it fills and throbbing like a heartbeat when it's full. Hidden while empty.
- * (0.7.567) Every other Sorcerer's reserve of their element ({@link Absorption#RESERVE}) shows in the same place, in the
+ * (0.7.570) Every other Sorcerer's reserve of their element ({@link Absorption#RESERVE}) shows in the same place, in the
  * element's colour, glowing slowly when it's full.
  */
 public final class BloodReservoirHud {

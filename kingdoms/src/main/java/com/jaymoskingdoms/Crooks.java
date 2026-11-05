@@ -122,6 +122,11 @@ public final class Crooks {
 	 * It is owed back like anything else: it returns if the crook dies or is downed within RETURN_RANGE.
 	 */
 	static final float PURSE_LIFT_CHANCE = 0.35F, PURSE_LIFT_BUSY = 1.5F;
+	/**
+	 * (0.7.568) Andy: "the pick pocket animation should reach for it". A crook picking a player's pocket reaches in for this
+	 * long (ticks) before the lift, at the purse on their hip if they wear one, and draws the hand back this long after.
+	 */
+	static final int PICK_REACH_TICKS = 25, PICK_REACH_AFTER = 8;
 	static final int CROWD_MIN = 3;
 	static final double CROWD_RANGE = 8.0;
 	/** (0.7.498) How much likelier a crook is to pick a player who wears a visible purse than one who doesn't (weight against 1). */
@@ -194,6 +199,9 @@ public final class Crooks {
 	}
 
 	/** A crook at work: on whom (or where), for which settlement, until when; a mugging's blows so far. */
+	/** (0.7.568) Crooks with a hand out for a pocket now, and till when (game time); drawn back when it passes or the job ends. */
+	private static final Map<Villager, Long> REACHES = new java.util.HashMap<>();
+
 	private static final class Job {
 		final Villager crook;
 		final Kind kind;
@@ -204,6 +212,8 @@ public final class Crooks {
 		int blows;
 		long nextBlow;
 		boolean spoken;
+		/** (0.7.568) When the crook's hand went for the player's pocket or purse (0: not yet). */
+		long reachAt;
 
 		Job(Villager crook, Kind kind, int faction, @Nullable LivingEntity mark, @Nullable BlockPos spot, long until) {
 			this.crook = crook;
@@ -375,6 +385,18 @@ public final class Crooks {
 			for (Iterator<Job> it = JOBS.values().iterator(); it.hasNext();) {
 				Job job = it.next();
 				if (!work(level, job, now)) {
+					it.remove();
+				}
+			}
+		}
+		if (!REACHES.isEmpty()) {
+			for (Iterator<Map.Entry<Villager, Long>> it = REACHES.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<Villager, Long> e = it.next();
+				Job job = JOBS.get(e.getKey().getUUID());
+				// (still reaching in, not yet lifted: drawn back at once if the job ended or they turned round)
+				boolean reaching = e.getValue() > now + PICK_REACH_AFTER;
+				if (now >= e.getValue() || e.getKey().isRemoved() || reaching && (job == null || job.reachAt == 0L)) {
+					Pickpocket.reach(e.getKey(), -1, false);
 					it.remove();
 				}
 			}
@@ -606,10 +628,24 @@ public final class Crooks {
 			return true;
 		}
 		if (!behind(mark, crook)) {
-			// (they're facing this way: wait for them to turn, a little off)
+			// (they're facing this way: wait for them to turn, a little off; a hand already out comes back)
 			crook.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+			job.reachAt = 0L;
 			return true;
 		}
+		// (0.7.568) the hand goes in first, at the purse on their hip if they wear one, for everyone to see
+		if (job.reachAt == 0L) {
+			job.reachAt = now;
+			ItemStack belt = PowersCompat.belt(mark);
+			Pickpocket.reach(crook, mark.getId(), belt.is(MoneyItems.COIN_PURSE) && !PurseContents.of(belt).isEmpty());
+			REACHES.put(crook, now + PICK_REACH_TICKS + PICK_REACH_AFTER);
+		}
+		if (now - job.reachAt < PICK_REACH_TICKS) {
+			crook.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+			crook.getLookControl().setLookAt(mark);
+			return true;
+		}
+		REACHES.put(crook, now + PICK_REACH_AFTER);
 		RandomSource random = level.getRandom();
 		List<ItemStack> taken = lift(mark, random);
 		if (taken.isEmpty()) {

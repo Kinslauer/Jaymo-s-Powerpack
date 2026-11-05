@@ -20,7 +20,7 @@ final class ClassKeys {
 	private static KeyMapping imbue;
 	/** (0.7.554) A Blood Sorcerer's J is down (BloodBlasts.Hold sent). */
 	private static boolean bloodHeld;
-	/** (0.7.567) Any other Sorcerer's J is down (Absorption.Hold sent). */
+	/** (0.7.570) Any other Sorcerer's J is down (Absorption.Hold sent). */
 	private static boolean elementHeld;
 
 	private ClassKeys() {
@@ -40,7 +40,7 @@ final class ClassKeys {
 							ClientPlayNetworking.send(new BloodBlasts.Hold(true));
 						}
 					} else if (Absorption.absorber(minecraft.player) && !minecraft.player.isShiftKeyDown()) {
-						// (0.7.567) every other element: held to absorb it (fire: the cone), empty-handed to throw it
+						// (0.7.570) every other element: held to absorb it (fire: the cone), empty-handed to throw it
 						if (!elementHeld) {
 							elementHeld = true;
 							ClientPlayNetworking.send(new Absorption.Hold(true));

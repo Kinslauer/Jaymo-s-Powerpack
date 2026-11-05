@@ -9208,8 +9208,32 @@ ultimate and beam-clash films came down with it. Not played.
   After 30 s a guard, den hand or butcher puts it down; anyone else calls a guard. Skipped: the settlement's own
   stables/barns/pens, ridden/leashed/tamed/named/owned animals, house animals (tag `jaymoskingdoms:house_animals`:
   cats, parrots, bees, axolotls, frogs, allays). `Strays`, lang part strays.json (12 lines per family), hint 104. Not played.
+- **0.7.567, hint 105** (Powers 0.20.81): a loading-screen hint for rocks by hand (main hand sets down, off hand throws
+  after a short hold, sneak + use with flint and a rock splinters the flint). Lang part rock_hands.json. Merged ahead of
+  the purse PR (#993), which then takes hint 106. Not played.
 
-## 0.7.567 (2026-11-05): every Sorcerer absorbs their element
+## 0.7.568 (2026-11-05): coin purses fill up visibly and work like bundles
+- Andy: "coin purses dont animate correctly, you should also be able to remove the coins like bundles, and add them to
+  other purses". The purse's icon picked its look from how full it was out of 640 coins, so anything under 160 coins
+  looked the same. It now reads the coin count itself (item model property `jaymoskingdoms:purse_coins`, `PurseCoins`):
+  coins showing from 1, bigger at 24, 96 and 320. The same model hangs on the hip in Powers. A gold bar under the icon
+  shows how full it is (red when full), as on a bundle.
+- Like a bundle (`CoinPurseItem`): right click a purse in a slot with an empty cursor to take out one stack of its biggest
+  coin; right click an empty slot with a purse on the cursor to put one down; drop coins on a purse (either button) to
+  fill it; drop one purse on another (either button) to pour it in, as far as there's room. Bundle sounds on each.
+  An empty purse still picks up and swaps as usual. Lang part coin_purse.json, hint 106. Not played.
+- Andy: "the pick pocket animation should reach for it if they have one". A crook picking a player's pocket used to
+  just swing an arm and take. Now they stop behind you and reach in for 25 ticks first (the same arm-in-the-pocket pose a
+  player pickpocket uses, `PickpocketPose`), aimed at the coin purse on your hip if you wear one
+  (`Pickpocket.Reach.purse`, `PickpocketPose.aim`), then lift and draw the hand back. Turn round mid-reach and the hand
+  comes back out and they wait. `Crooks.PICK_REACH_TICKS`. Powers 0.20.82 moves the purse out of the leg to match.
+- **0.7.569, villager voices quieter and one at a time:** Andy: "voice lines from npcs are too loud and layer like the old
+  intro did." (`VoiceGate`, `Languages.voice`/`farewell`) a villager says no new line until its last one has finished
+  (our tongue clips measured from the .ogg, MCA's taken as 3 s) plus 4 s; a player hears one villager's line at a time
+  (a line that starts while another is playing to them isn't sent to them). Lines in a tongue play at 40% volume, MCA's
+  words and the grunts at 70%. Pain cries and snores are left alone. Not played.
+
+## 0.7.570 (2026-11-05): every Sorcerer absorbs their element
 - Andy: "sorcerers should all be able to absorb their elements like the blood sorcerer. i especially want a cone of
   absorption in front of fire sorcerers that can put out flames and feed their reserve". `Absorption` gives every element
   but blood (which keeps `Hemomancy`/`BloodBlasts`) the blood Sorcerer's loop: a reserve (`Absorption.RESERVE`, 20,
@@ -9226,4 +9250,4 @@ ultimate and beam-clash films came down with it. Not played.
   lightning (a storm's sky, lightning rods, redstone blocks), restoration (flowers, leaves, saplings, crops, amethyst;
   its blasts heal the living and sear only monsters/undead), death (undead drained, the downed/dying, bodies, soul sand,
   bone, skulls; every death within 12 blocks gives 2). A slow trickle (0.25/s, earth 0.1) while standing in the element.
-  Hints 105-106. Gradle compileClientJava clean, not played.
+  Hints 107-108. Gradle compileClientJava clean, not played.
