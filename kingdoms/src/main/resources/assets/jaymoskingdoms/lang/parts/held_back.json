@@ -1,0 +1,11 @@
+{
+  "held_back.jaymoskingdoms.fine.0": "Enough! Up you get. You'll pay for that blow, and that's the end of it.",
+  "held_back.jaymoskingdoms.fine.1": "Put it away, all of you. The law settles this, not a blade.",
+  "held_back.jaymoskingdoms.fine.2": "We're not butchers here. Pay the fine and mind your aim.",
+  "held_back.jaymoskingdoms.warning.0": "Not a coin on you? Then get up and count yourself lucky.",
+  "held_back.jaymoskingdoms.warning.1": "Back off, the lot of you. This one's had their lesson.",
+  "held_back.jaymoskingdoms.warning.2": "On your feet. Strike one of ours again and it'll be the cells.",
+  "message.jaymoskingdoms.held_back.fined": "%s's guard takes you in: you're fined %s for the blow, and the fight's called off.",
+  "message.jaymoskingdoms.held_back.warned": "%s's guard takes you in: you can't pay the fine, so you're let off with a warning.",
+  "gui.jaymoskingdoms.story.hint.107": "A town's people keep each other honest: with others watching, its guards take a downed troublemaker in for a fine instead of cutting them down. Only a hothead alone would kill an enemy of the town."
+}
