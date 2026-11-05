@@ -464,3 +464,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   work like fish, if they drop an item the corpse disappears." Crickets, mice, snails, butterflies, bees and any other
   creature kind under 0.5 blocks both ways (or in Kitchen's new `small_corpses` tag) are looted in one click and gone,
   like fish. Rabbits, chickens, frogs and babies still leave a body. Not played.
+- **0.20.58, Impale throws the spear itself:** Andy (2026-11-05), on the Iron Spear's Impale (RPG Series): "using this
+  should actually throw your spear". The spear now leaves your main hand when Impale flies (`compat/SpellThrows`,
+  through `SpellEngineCompat`; Spell Engine's own projectile still does the charged damage and knockback). Where the
+  spell ends the spear carries on as a real `ThrownWeapon`: it sticks in a block it hits, glances off a creature and
+  drops at its feet (no second hit), or arcs down after its full range, and lies there for its thrower to pick up like
+  a trident (1 durability per throw). Never lost or doubled: if the spell ends somewhere unloaded it goes back to your
+  pack (or your feet); on server stop it's put down where it was. In creative it stays in hand and the thrown one is
+  creative-only pickup. Gradle build only, not played.
