@@ -11,5 +11,7 @@
   "message.jaymoskingdoms.held_back.fined": "%s's guard takes you in: you're fined %s for the blow, and the fight's called off.",
   "message.jaymoskingdoms.held_back.warned": "%s's guard takes you in: you can't pay the fine, so you're let off with a warning.",
   "gui.jaymoskingdoms.story.hint.107": "A town's people keep each other honest: with others watching, its guards take a downed troublemaker to the cells (or fine them) instead of cutting them down. Only a hothead alone would kill an enemy of the town.",
-  "message.jaymoskingdoms.held_back.jailed": "%s's guard takes you in for the blow: you're locked in the cells for %s minutes, and the fight's called off."
+  "message.jaymoskingdoms.held_back.jailed": "%s's guard takes you in for the blow: you're locked in the cells for %s minutes, and the fight's called off.",
+  "message.jaymoskingdoms.hard.cell.open": "The cell door stands open. The jailer's stair beyond it climbs to a hatch in town: mind who's watching when you come up.",
+  "gui.jaymoskingdoms.story.hint.112": "A picked or opened cell door is walked out of: the passage beyond climbs to a hatch in town. Break out and you're hunted to be taken back, not shot on sight."
 }

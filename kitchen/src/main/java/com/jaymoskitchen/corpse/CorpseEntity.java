@@ -994,6 +994,42 @@ public class CorpseEntity extends Entity {
 		return position().add(0.0, getBbHeight() * 0.5, 0.0);
 	}
 
+	/**
+	 * (0.5.70) Where a carcass bled where it lies bleeds from: just past its head or snout, out from its middle, so the
+	 * drops fall and pool beside the body (off the edge of a table if the head hangs over it). It used to bleed from inside
+	 * its middle, so every drop and stain was hidden under the body and it never looked like it was draining.
+	 */
+	Vec3 throatPoint() {
+		if (ragdoll != null) {
+			RagdollBody body = ragdoll.body;
+			int head = switch (body.rig.shape) {
+				case QUADRUPED -> RagdollRig.SNOUT;
+				case HUMANOID -> RagdollRig.HEAD;
+				default -> -1;
+			};
+			if (head >= 0) {
+				double[] m = body.middle();
+				double dx = body.x[head] - m[0], dz = body.z[head] - m[2];
+				double len = Math.sqrt(dx * dx + dz * dz);
+				double out = body.rig.radius[head] + THROAT_OUT;
+				if (len > 1.0E-3) {
+					dx = dx / len * out;
+					dz = dz / len * out;
+				} else {
+					dx = dz = 0.0;
+				}
+				return new Vec3(body.x[head] + dx, body.y[head], body.z[head] + dz);
+			}
+		}
+		// no head to bleed from (a box, a snake): from its side, facing its way
+		float yaw = getYRot() * Mth.DEG_TO_RAD;
+		double out = getBbWidth() * 0.5 + THROAT_OUT;
+		return position().add(-Mth.sin(yaw) * out, 0.3, Mth.cos(yaw) * out);
+	}
+
+	/** (0.5.70) How far past the head's edge the blood comes out (blocks). */
+	private static final double THROAT_OUT = 0.08;
+
 	CorpseKind kind() {
 		return kind;
 	}

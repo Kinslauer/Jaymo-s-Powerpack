@@ -283,6 +283,46 @@ public final class RagdollSimCheck {
 			}
 		}
 
+		System.out.println("A deer on a 2x4 table of butcher blocks never ends up inside it (0.5.70)");
+		{
+			RagdollRig deer = RagdollRig.of(RagdollRig.Shape.QUADRUPED, 0.9F, 1.5F);
+			int inside = 0, tries = 0;
+			for (int yaw = 0; yaw < 360; yaw += 45) {
+				for (int seed = 0; seed < 4; seed++) {
+					for (int dir = 0; dir < 4; dir++) {
+						tries++;
+						World w = ground();
+						for (int bx = 0; bx < 2; bx++) {
+							for (int bz = 0; bz < 4; bz++) {
+								w.add(bx, 64, bz, bx + 1, 65, bz + 1);
+							}
+						}
+						// set down pinned (as tableUnder would: 3 blocks long at most), then dragged off a side by a hind foot
+						RagdollBody b = RagdollBody.lying(deer, 1, 65, 2, yaw, seed % 2 == 0, seed);
+						b.stop();
+						b.pin(0, 1, 2, 4);
+						run(b, w, 100);
+						int p = RagdollRig.BR_FOOT;
+						double hx = b.x[p], hz = b.z[p];
+						double dx = dir == 0 ? 1 : dir == 1 ? -1 : 0, dz = dir == 2 ? 1 : dir == 3 ? -1 : 0;
+						for (int t = 0; t < 80; t++) {
+							hx += dx * 0.06;
+							hz += dz * 0.06;
+							b.grip(0, p, hx, 64.9, hz);
+							b.step(w);
+						}
+						b.release();
+						b.wake();
+						run(b, w, 300);
+						if (worstDepth(b, w) > 0.15) {
+							inside++;
+						}
+					}
+				}
+			}
+			check("dragged off a pinned table", inside == 0, inside + "/" + tries + " left inside the table");
+		}
+
 		System.out.println("A snake goes limp (0.5.47)");
 		{
 			RagdollRig snake = RagdollRig.of(RagdollRig.Shape.CHAIN, 0.6F, 0.7F);

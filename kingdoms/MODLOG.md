@@ -9282,3 +9282,34 @@ ultimate and beam-clash films came down with it. Not played.
   fell, there's a 45% chance its folk carry you in. You wake on one of its free beds (any of the near ones, picked by
   distance), or on the ground by its seat if it has none. Once you come round you're laid in that bed resting
   (`BedRest.lay`). Captors still come first. Tuning is at the top of `Shelter`. Not played.
+- **0.7.574, werewolf bites curse players; the beast hides the player:** Andy: "it should spread to players as well".
+  (`Lycans.bite`, `WerewolfPlayers.bitten`) a cursed beast's bite (a cursed villager's, or a player's beast's melee hit)
+  that a player lives through curses them at the same `BITE_CHANCE` (40% a hit) as villagers; a wolfblood's half curse is
+  finished. No text, only a far howl they alone hear; the first change waits for the next full moon. Vampires, creative
+  and spectators can't take it. A player's beast now spreads it to villagers too. Wild werewolves still pass on nothing.
+  Andy: Jung's beast "was still holding a knife, nothing should animate like the suits and costumes". (`strip`/`stow`) the
+  claws' items went back into the selected slot when it was the first free one, so the knife never left; now they go
+  anywhere else or drop. (`BeastHidesPlayerMixin`) a player who is the beast (invisible, torn out) isn't drawn at all, so
+  held items, Powers suits/costumes and worn weapons no longer float on the beast. Not played.
+  Also in 0.7.574, Andy: "it should be a variation that you can achieve" (after Werewolves: Become a Beast's three
+  paths; its art is Vampirism-only, so nothing of it is used). (`WerewolfPlayers` LEAN_*, `LeanWolfModel`,
+  `tools/gen_lean_wolf.py`) once the change comes at will (3 moons) and the wildness is at most stage 1, sneak+U changes
+  into a lean wolf on all fours (our own boxes and coats, one per werewolf coat, the fiery one flickering): Speed III,
+  Jump Boost III, +2 hearts, no Strength or Resistance. Too wild: an overlay line says so. Full moons are always the
+  great beast; the mostly-human path stays the wolfblood (ritual off the full moon). Hint 111. Not played.
+
+## 0.7.575 (2026-11-05): break out of the cells on foot; an escape is hunted, not shot on sight
+- Andy's clip (Sentenced start): he picked the cell door, was teleported to the street by Eldhollow's seat, told the realm
+  "now counts you an enemy", downed and shot dead where he lay. "you should not just teleport out of the jail cell upon
+  lockpicking like this, if there is no jail in the city, there needs to be a more realistic alternative".
+- The cells have a way out (`Speakeasy.passage`, dug with the cell door, `cellDoor`): a walled passage 3 blocks east
+  from the iron door, then a laddered shaft up to a shut spruce hatch in the first floor at the seat's level (caves on
+  the way are walled off; blocks with block entities are left alone). Every way out opens the door (`Speakeasy.openDoor`)
+  and you walk up: picking it, paying the fine, or serving the sentence (`Busts.serve`). No more teleport to the seat.
+  Busts' contraband cells and HeldBack's assault cells get the door and stair too.
+- A broken-out prisoner is hunted (wanted for 6 minutes, `Theft.HUNT_TICKS * 3`) to be taken back (`Busts` "escape"
+  charge), not outlawed for two days. The broken life aim's reputation hit (`LifeAims.betray`) no longer drops a realm
+  below hostile, so its guards don't attack on sight. The story's forced respawn by the seat is dropped on escape, so a
+  death doesn't put you back among the guards hunting you.
+- Downed players aren't shot or cut at by townspeople who'd spare them (`HeldBack.standDown`): they drop the target and
+  guards walk over to take them in. Hint 112 (lang part held_back.json). Not played.
