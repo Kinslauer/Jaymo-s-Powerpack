@@ -985,3 +985,16 @@ Andy: "there is still a long black screen on load, and the game cant seem to spa
 for a demon biome with a 3D search over the level's whole height, which in a One Dimension world is every band stacked
 (about 1,400 blocks), on the server thread while you wait (you stood at world spawn meanwhile). It now sweeps once at the
 Nether's own y 64 (`ZFighterStarts.demonBiome`) and logs how long it took and what it found, beside 0.20.104's fallback warnings.
+
+## 0.20.115 (2026-11-05): every melee weapon parries; Kingdoms 0.7.600 gives each a weapon skill
+Andy: "is battleaxe supposed to not parry? and it also has no moves, neither does the ninjato, they should all integrate
+with the weapon arts". Not meant to: WeaponMod's melee weapons have their own right click, so the weapon guard skipped
+them, and the katana and battleaxe raised a block pose that blocked nothing.
+- The battleaxe and katana now guard and parry on right click like any weapon. The halberd and spear do too, and sneak +
+  right click does what right click did (the halberd's reach switch, the spear's throw), as the knife's throw already
+  works (`KnifeGuard.guards` / `ownUse`, `WeaponModMeleeUseMixin`, the guard poses). The patron weapons you strike with
+  (Hearthguard, Anvil-Father's Hammer, Huntsman's Spear, Gravelight, Plain Word) guard too (`PatronWeaponItem.active`).
+- Deliberately still no guard, because right click is their own move: the warhammer (its smash; it guards while that
+  cools down), the flail (whirl), the rapier (lunge), the boomerang and throwing weapons, vanilla spears (charge),
+  the tridents, Tidecaller / Sunbrand / Ashfang (their gifts), and the Arsenal's relic and stone swords.
+- Pairs with Kingdoms 0.7.600: every melee weapon gets an RPG Series weapon skill on the skill bar. Built, not played.

@@ -3,6 +3,7 @@ package com.jaymospowers.combat;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.armory.HammerSlam;
 import com.jaymospowers.armory.KnifeGuard;
+import com.jaymospowers.armory.PatronWeaponItem;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.darktide.DarktidePower;
@@ -216,7 +217,7 @@ public final class Guard {
 
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Parried.TYPE, Parried.CODEC);
-		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item) || KnifeGuard.isKnife(item) || item instanceof SorasDagger, (builder, lookup, item) ->
+		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item) || KnifeGuard.guards(item) || item instanceof SorasDagger, (builder, lookup, item) ->
 			builder.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(0.0F, 1.0F,
 				List.of(new BlocksAttacks.DamageReduction(GUARD_ANGLE, Optional.empty(), 0.0F, GUARD_SHARE)),
 				new BlocksAttacks.ItemDamageFunction(3.0F, 0.0F, 0.5F),
@@ -253,6 +254,10 @@ public final class Guard {
 	 * click: no block of its own, no eating, no spear's charge, no {@code use} of its own class (tridents, bows, staves).
 	 */
 	private static boolean guardable(Item item) {
+		if (item instanceof PatronWeaponItem patron) {
+			// (0.20.115) a patron weapon struck with (not one whose right click is its gift) guards like any other
+			return !patron.active();
+		}
 		if (item instanceof TinkerTool tool) {
 			// (0.20.76) a Tool Station sword, weapon or tool: its own right click is only for the off hand or a throw
 			ToolType.Style style = tool.type().style;
@@ -281,7 +286,8 @@ public final class Guard {
 	 * guard.
 	 */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand) {
-		boolean knife = hand == InteractionHand.MAIN_HAND && !player.isSpectator() && KnifeGuard.isKnife(player.getMainHandItem().getItem());
+		// (0.20.115) every guarding WeaponMod weapon (knife, katana, battleaxe, halberd, spear) goes through KnifeGuard
+		boolean knife = hand == InteractionHand.MAIN_HAND && !player.isSpectator() && KnifeGuard.guards(player.getMainHandItem().getItem());
 		if (!knife && (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()
 			|| HammerSlam.isWarhammer(player.getMainHandItem().getItem()))) {
 			return InteractionResult.PASS;
@@ -290,8 +296,9 @@ public final class Guard {
 			// (0.17.186) sneak + use turns Sora's Dagger in the hand, whatever's in the other ({@link SorasDagger#use})
 			return InteractionResult.PASS;
 		}
-		if (knife && player.isShiftKeyDown()) {
-			// (0.18.64) sneak + use throws a WeaponMod knife, as it always did ({@link KnifeGuard#use})
+		if (knife && player.isShiftKeyDown() && KnifeGuard.ownUse(player.getMainHandItem().getItem())) {
+			// (0.18.64) sneak + use throws a WeaponMod knife, as it always did ({@link KnifeGuard#use}); (0.20.115) a spear
+			// too, and switches a halberd's reach
 			return KnifeGuard.use(player, hand);
 		}
 		ItemStack off = player.getOffhandItem();
@@ -321,7 +328,7 @@ public final class Guard {
 			return false;
 		}
 		ItemStack main = player.getMainHandItem();
-		boolean guards = KnifeGuard.isKnife(main.getItem()) || weaponGuard(main) && !HammerSlam.isWarhammer(main.getItem());
+		boolean guards = KnifeGuard.guards(main.getItem()) || weaponGuard(main) && !HammerSlam.isWarhammer(main.getItem());
 		return guards && foe(player, mob);
 	}
 

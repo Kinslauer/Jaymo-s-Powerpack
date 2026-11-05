@@ -2,6 +2,7 @@ package com.jaymospowers.armory;
 
 import com.jaymospowers.JaymosPowers;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -32,6 +33,13 @@ import org.jspecify.annotations.Nullable;
  * <li>The knife and the Armory dagger of each tier swap their held damage: the parrying knife hits as the dagger did, the
  * thrown dagger as the knife did. Throws keep their own damage.</li>
  * </ul>
+ * (0.20.115) Andy: "is battleaxe supposed to not parry?" It wasn't meant not to: WeaponMod's melee weapons have their own
+ * right click, so the weapon guard skipped them, and the katana and battleaxe raised a block pose that blocked nothing.
+ * Every WeaponMod melee weapon that isn't thrown or whirled now guards like the knife ({@link #guards}): the katana and
+ * battleaxe on right click; the halberd and spear on right click too, with sneak + right click doing what it always did
+ * (the halberd's reach switch, the spear's throw; {@link #ownUse}). The flail (whirled), the warhammer (its smash, which
+ * guards while it cools down) and the boomerang (thrown) keep their own right click.
+ * <p>
  * WeaponMod is optional and found by registry id: without it nothing here does anything. Hooked in by combat/Guard (the
  * raise), mixin/WeaponModMeleeUseMixin (duration, pose, release) and client HammerPoseMixin/HammerFirstPersonMixin.
  */
@@ -53,6 +61,9 @@ public final class KnifeGuard {
 		// the weapon guard is for weapons (combat/Guard.weaponGuard): make sure WeaponMod's knife counts as one
 		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> isKnife(item) && !item.components().has(DataComponents.WEAPON),
 			(builder, lookup, item) -> builder.set(DataComponents.WEAPON, new Weapon(1, 0.0F))));
+		// (0.20.115) the rest of the guarding WeaponMod weapons count as weapons too; no wear from it (WeaponMod wears them itself)
+		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guards(item) && !isKnife(item) && !item.components().has(DataComponents.WEAPON),
+			(builder, lookup, item) -> builder.set(DataComponents.WEAPON, new Weapon(0, 0.0F))));
 		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> swapped(item) != null, (builder, lookup, item) -> {
 			Item other = swapped(item);
 			Map<Item, Double> damage = originals();
@@ -78,12 +89,45 @@ public final class KnifeGuard {
 		return id.getNamespace().equals("weaponmod") && id.getPath().startsWith("knife.");
 	}
 
+	/** WeaponMod's guarding weapons, by the start of their id: {@code katana.iron}, {@code battleaxe.diamond}... */
+	private static final List<String> GUARDING = List.of("knife.", "katana.", "battleaxe.", "halberd.", "spear.");
+	/** Of those, the ones whose own right click (thrown knife and spear, the halberd's reach) moves to sneak + right click. */
+	private static final List<String> OWN_USE = List.of("knife.", "halberd.", "spear.");
+
+	/** (0.20.115) A WeaponMod weapon that raises the weapon guard on right click (knife, katana, battleaxe, halberd, spear). */
+	public static boolean guards(Item item) {
+		return startsWithAny(item, GUARDING);
+	}
+
+	/** (0.20.115) A guarding WeaponMod weapon whose own right click is still there on sneak + right click. */
+	public static boolean ownUse(Item item) {
+		return startsWithAny(item, OWN_USE);
+	}
+
+	/** (0.20.115) The WeaponMod spear: WeaponMod draws it with no use pose at all, which the guard needs. */
+	public static boolean isSpear(Item item) {
+		return startsWithAny(item, List.of("spear."));
+	}
+
+	private static boolean startsWithAny(Item item, List<String> starts) {
+		Identifier id = BuiltInRegistries.ITEM.getKey(item);
+		if (!id.getNamespace().equals("weaponmod")) {
+			return false;
+		}
+		for (String start : starts) {
+			if (id.getPath().startsWith(start)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Right click with a knife in the main hand (both sides, from combat/Guard before the item's own use): sneaking, it's
 	 * WeaponMod's throw ({@link InteractionResult#PASS}); otherwise the guard goes up.
 	 */
 	public static InteractionResult use(Player player, InteractionHand hand) {
-		boolean thrown = player.isShiftKeyDown();
+		boolean thrown = player.isShiftKeyDown() && ownUse(player.getItemInHand(hand).getItem());
 		player.setAttached(THROW, thrown);
 		if (thrown) {
 			return InteractionResult.PASS;
@@ -94,7 +138,7 @@ public final class KnifeGuard {
 
 	/** {@code entity} holds a knife up as a guard (not drawn back for WeaponMod's throw). */
 	public static boolean guarding(LivingEntity entity) {
-		return entity.isUsingItem() && isKnife(entity.getUseItem().getItem()) && raisedAsGuard(entity);
+		return entity.isUsingItem() && guards(entity.getUseItem().getItem()) && raisedAsGuard(entity);
 	}
 
 	/** A knife {@code entity} is using (or starting to) is up as the guard: a player who wasn't sneaking as it went up. */

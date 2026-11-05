@@ -9558,3 +9558,15 @@ off course then those should break upon contact".
   its chunks' structure references) and seats in it like any town; only if it won't generate or would stand mostly on
   water does the castle go up as before. The story's capital search looks at Epic towns only.
 - Kingdoms already founded keep their seats; this applies to new ones (a new map shows it). Built, not played.
+
+## 0.7.600 (2026-11-05): every melee weapon gets a weapon skill
+Andy: "it also has no moves, neither does the ninjato, they should all integrate with the weapon arts". The skill bar's
+weapon skills (Swift Strikes, Whirlwind, Cleave, Smash, Ground Slam, Flurry, Thrust, Impale, Swipe, Fan of Knives) come
+from Spell Engine, which hands them out by matching item ids against a short list and only to items with the vanilla
+weapon component: the battleaxe, ninjato, saber, machete, katana, halberd, rapier, scythes, cleavers and more got none.
+- As the server starts, every melee weapon still without one gets the skill its kind fits (`forms/WeaponSkills`, applied
+  by `mixin/spellengine/SpellAssignmentsMixin`): battleaxe Whirlwind, ninjato / katana / saber / machete Swift Strikes,
+  halberd / rapier / skewer Thrust, scythes / kama Swipe, cleavers Cleave, cudgels / staves Smash, and so on. Tools,
+  ranged and thrown-only weapons and items with their own spells are left alone. The log says how many it gave.
+- WeaponMod's halberd joins the spear Weapon Forms (`form_spears`). Axes, maces and hammers still have no Weapon Forms
+  family of their own. Built, not played.
