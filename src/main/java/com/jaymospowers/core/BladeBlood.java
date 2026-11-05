@@ -86,7 +86,7 @@ public final class BladeBlood {
 	/** (0.15.93) An open cut's drip: this many drops (a stump's more), this small. */
 	static final int DRIP_DROPS = 1, STUMP_DRIP_DROPS = 2;
 	static final float DRIP_SCALE = 0.5F;
-	/** (0.20.84) How far outside the body's box a drip leaves from (blocks). */
+	/** (0.20.85) How far outside the body's box a drip leaves from (blocks). */
 	static final double DRIP_OUT = 0.04;
 	/**
 	 * (0.17.182) The lasting stains ({@link BloodTrail}): a drip's (grows where a body keeps bleeding), a blow's (one for
@@ -414,7 +414,7 @@ public final class BladeBlood {
 		double w = body.getBbWidth() * 0.3;
 		int drops = stump ? STUMP_DRIP_DROPS : DRIP_DROPS;
 		// (0.17.182) the drops fly as before but leave no passing splash: each lands as a lasting stain (BloodTrail)
-		// (0.20.84) each drop leaves from the body's side, not from inside it (Jung's clip: drips spawned in the chest
+		// (0.20.85) each drop leaves from the body's side, not from inside it (Jung's clip: drips spawned in the chest
 		// read as blood clipping out of the model)
 		BloodParticles.Spray spray = new BloodParticles.Spray(color(body), size(body) * DRIP_SCALE, false);
 		double out = body.getBbWidth() * 0.5 + DRIP_OUT;

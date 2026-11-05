@@ -680,3 +680,16 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   Kitchen 0.5.70 bleeds a carcass on the ground or a table from its throat, beside the body, instead of from under it,
   so the drops and Powers' pooled stains show. The deer clipping was the stale Kitchen 0.5.57 the pack shipped before
   0.20.80 (deer got a man's ragdoll, fixed in Kitchen 0.5.64 and 0.5.68). Built, not played.
+
+## 0.20.85: a guard whiffing at a foe out of reach; cut drips out of the chest (Kingdoms 0.7.576)
+
+- Jung's clip, Andy: "the blood was clipping and not following the model", then "the NPC was trying to attack, it kept
+  swinging and activating the hit sound ... not dealing any damage nor did the skeleton take any". The white burst at
+  the villager's chest was its attack tell glint (`AttackTells`, 0.20.4), bloomed by his shaders, once per swing. MCA's
+  melee task asked for a blow from further off than a blow reaches, and `MobCombat.plainBlow` (a weapon Better Combat
+  doesn't know, or fists) started the swing anyway, so a guard after someone past a nearer body (it was shouting
+  "Trespasser!") glinted and whiffed (`PLAYER_ATTACK_NODAMAGE`) over and over. `plainBlow` now starts only at a foe in
+  reach and sight, as `attackTick` already did (Kingdoms 0.7.576).
+- A cut's drip (`BladeBlood.drip`) left from inside the body and, since 0.20.51, opened into a spatter star there. A drip
+  now leaves from just outside the body's box (`DRIP_OUT`) and the client draws a no-stain spray as one small falling drop
+  (`BloodClient#DRIP_DROP`, `BloodDrop.drip` held on its sheet's first frame). Built, not played.
