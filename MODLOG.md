@@ -1148,3 +1148,8 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   `McaSkin`; Powers compiles against the MCA jar for it): Wind's Thunderhead white eyes (`WindStormEyes`) light MCA's
   own eyes on MCA's face body, and Ember's Flame Avatar char and veins (`FlameAvatarClient.Look`) ride MCA's skin body
   and pose. Without MCA, nothing changes. Built, not played.
+
+## 0.21.14 (2026-11-05): Bear Minimum, and the grizzly mini-boss (Kingdoms 0.7.610)
+- Bear Minimum 1.0.5 (Apache-2.0) in packMods, unchanged: shy black bears, warier brown bears, bear meat, tougher polar
+  bears. Kingdoms adds the grizzly mini-boss, drawn after its brown bear (see Kingdoms 0.7.610).
+- The grizzly and Bear Minimum's bears are in `blood_trackers`, `furry` and `body/quadruped`.

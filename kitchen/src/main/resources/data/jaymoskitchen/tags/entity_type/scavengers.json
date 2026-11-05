@@ -22,6 +22,9 @@
 		{ "id": "naturalist:vulture", "required": false },
 		{ "id": "naturalist:black_bear", "required": false },
 		{ "id": "naturalist:tiger", "required": false },
-		{ "id": "naturalist:komodo_dragon", "required": false }
+		{ "id": "naturalist:komodo_dragon", "required": false },
+		{"id": "jaymoskingdoms:grizzly", "required": false},
+		{"id": "bearminimum:brown_bear", "required": false},
+		{"id": "bearminimum:black_bear", "required": false}
 	]
 }

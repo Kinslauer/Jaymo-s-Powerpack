@@ -1535,3 +1535,7 @@ mobs should be possible".
   fire and lava still burn bodies to nothing. Raw meat still cooks on the campfire as in vanilla.
 - Bats and other small non-animals were already searched by hand, and tiny critters loot in one click (0.5.66).
   Gradle compile clean; not played.
+
+## 0.5.78: grizzly and Bear Minimum bears as big carcasses (pack 0.21.14)
+- `jaymoskingdoms:grizzly`, `bearminimum:brown_bear` and `bearminimum:black_bear` in `big_carcasses`, `ragdoll_quadruped`
+  and `scavengers`.

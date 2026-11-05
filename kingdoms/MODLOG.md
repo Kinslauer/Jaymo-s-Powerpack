@@ -9695,3 +9695,27 @@ played.
   Fresh Animations' and our own poses. They unfold out of the back as the glide starts, ripple as it goes and sweep back
   at speed. Shape and pose numbers are constants at the top of `BatWings`.
 - Built, not played.
+
+## 0.7.610 (2026-11-05): the grizzly, a mini-boss bear (pack 0.21.14, Kitchen 0.5.78)
+Andy: "can this be an agressive mini boss grizzly bear? maintaining or less agressive black bear to be realistic and add
+a real early threat." The spectacled bear mod he linked (Animal Garden) is all rights reserved, so ideas only; Bear
+Minimum (Apache-2.0, 26.3 Fabric build) is now in the pack unchanged, and our grizzly is drawn after its brown bear.
+- **Grizzly** (`wild/Grizzly`, `jaymoskingdoms:grizzly`, spawn egg): 120 health, 6 armour, 9 a swipe, hard to knock
+  back, a boss bar for whoever hits it (`BossBars`). Rare: weight 3 in `has_grizzly` (taiga, old growth taiga,
+  windswept forest and hills, meadow, grove), half its tries fail, none within 128 blocks of another or 160 of a
+  settlement (once the land is made). It keeps a 40-block territory round where it was born and goes back to it.
+- It notices a player within 24 blocks (12 sneaking), villagers within 12. A new quarry first gets its warning: it
+  rears up and roars. Then: paw swipes left or right up close; a charge from 5 to 18 blocks (11 damage, knocked flying;
+  a wall stops it staggered); a maul after a charge hit (60%): its victim pinned under it and bitten three times, then
+  flung off; rearing up again close in, its forepaws come down in a slam (10 in 3.5 blocks, thrown up). Below 35%
+  health it roars (players within 10 slowed and weakened 3 s) and fights faster with shorter cooldowns.
+- Out of a maul: hit it for 8 and it lets go, staggered; or play dead (hold sneak, don't hit it) for 1.5 s and, unless
+  enraged, it wanders off and leaves people be for a minute. Hurting it ends that calm.
+- Drawn by `client/wild/GrizzlyModel` (Bear Minimum's brown bear boxes plus a shoulder hump, 1.15x) with its own poses:
+  rear, swipes, bounding charge, maul bites, roar, stagger. Coat and egg painted by `tools/gen_grizzly.py` from Bear
+  Minimum's (silver-tipped hump and back, pale muzzle, dark legs, black claws, scars). Credits and the Apache licence in
+  `textures/entity/wild/`.
+- Drops 3-5 beef, 4-7 leather, 1-3 bones; Kitchen butchers it as a big carcass.
+- Black bears stay as they were: Cube Animals' (neutral, defends its cubs, tameable) and Bear Minimum's (keeps away from
+  people). Naturalist's bear unchanged.
+- Gradle compile clean; not played.

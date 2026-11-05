@@ -19,6 +19,9 @@
     "jaymospowers:sheepuff",
     "jaymospowers:kirrid",
     "jaymospowers:burrukai",
-    "jaymospowers:taegore"
+    "jaymospowers:taegore",
+    {"id": "jaymoskingdoms:grizzly", "required": false},
+    {"id": "bearminimum:brown_bear", "required": false},
+    {"id": "bearminimum:black_bear", "required": false}
   ]
 }
