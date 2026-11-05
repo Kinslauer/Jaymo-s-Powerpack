@@ -9042,6 +9042,16 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   death whatever fighting is about, drops its own fight (target and MCA attack memory cleared each step) and runs it home
   (speed 1.25, villager guard 0.85); townsfolk still wait for no foe within 8 blocks.
   Gradle build only, not played.
+- **0.7.547, the heavens overhead:** Andy (2026-11-05): "some villagers know about the heavens overhead, but they never
+  explicitly tell you", then "some of them try to get there". `Heavens`: one grown MCA villager in 8 knows (fixed from their
+  UUID; never hermits), and never names the Aether: 18 riddles, plus lines about the Aether's stones in your pack and, for
+  seekers, their tower. They hint in MCA's chat (25%, before pit-fight/emigrant talk), in five talks (`heavens_stars` on clear
+  nights, `heavens_giants` once, `heavens_rain`, `heavens_pockets` when you carry ambrosium/zanite/gravitite/holystone and
+  the like, `heavens_tower` for seekers, who ask you to bring 8 scaffolding); replies may draw a riddle (`TalkBook.Out.RIDDLE`).
+  On a clear night a knower near you may stop, look straight up and mutter (seekers always, others 1 night in 4). One knower
+  in 3 (never guards) is a seeker: by day, near home, they build a scaffolding tower beside it (about 1-2 blocks a day, to
+  24 high); once it's as high as it goes they sooner or later take it down (no drops) with a sigh and start again after 3
+  days. Words go over their heads only. Lines in `lang/parts/heavens.json`; loading hint 98 (HINTS=98). Not played.
 
 - **0.7.548 (Powers 0.20.51), guards finish downed monsters and keep their weapon:** Andy (2026-11-05): "it seemed as
   though this guard couldnt execute, and he kept losing he weapon." `Rearm` skips MCA villagers (MCA hands its guards a

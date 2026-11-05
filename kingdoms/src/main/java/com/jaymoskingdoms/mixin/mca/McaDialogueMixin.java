@@ -461,6 +461,14 @@ abstract class McaDialogueMixin {
 				return;
 			}
 		}
+		// (0.7.547) one who knows of the heavens overhead hints at them, and never says it outright
+		Component heavens = com.jaymoskingdoms.Heavens.chat(villager, player);
+		if (heavens != null) {
+			villager.sendChatMessage(heavens, player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		// (0.7.224) a pit fighter with wins to his name (a champion, a retired one) brags of them
 		Component bout = FightPit.tell(villager, player);
 		if (bout != null) {
