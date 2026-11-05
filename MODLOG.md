@@ -522,3 +522,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   stays as it was. Cactus, magma and barriers are never climbed (`data/jaymospowers/tags/block/ledge_no_vault.json`).
   `Ledge.Grab` carries a vault flag so the server holds a vault by `Ledge.vaultable` instead of `holdable`. Gradle
   build only, not played.
+- **0.20.64, explosions disconnected you:** every explosion sound threw a NullPointerException in `Blasts.onPlay`
+  (0.20.56), which runs at the head of `SoundEngine.play` and called `getVolume()` before the engine resolves the sound
+  (`getVolume` reads the resolved `Sound`). Thrown inside `handleExplosion`, it dropped the client with "Network Protocol
+  Error" whenever a creeper or TNT went off nearby. `onPlay` now calls `getOrResolve` first (cached, so the engine plays
+  the same variant). Checked against the 26.3 client jar; not built here.
