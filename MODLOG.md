@@ -759,7 +759,18 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   press, and the rock leaves as the arm comes over. Tune it in the constants at the top of `RockThrowPose`.
   Built, not played.
 
-## 0.20.91 (2026-11-05): orc cutscenes you can read (Kingdoms 0.7.582)
+## Powers 0.20.92: Chrono cheat death works when hurt, downed or out cold
+Andy: "chrono cheat death did not work. i was spamming R at the get up screen" (clip: downed, out cold, left for dead,
+then a final death, R pressed throughout).
+- Checkpoints needed three hearts or more, so after a long fight at low health (or with wounds holding your most health
+  down) there was nothing to go back to, and every death and waking silently went ahead. Checkpoints now ignore health
+  (the rewind still gives back at least three hearts). With none inside the window it takes the newest older one, and
+  with none at all you rise where you fell, mended.
+- Downed, R now cheats death whenever Rewind itself can't answer: out cold, on its cooldown, or an execution coming.
+  Awake with Rewind ready, R is still the plain downed Rewind. (`ChronoCheatDeath.downedOpen`, `ChronoPower.rewindReady`.)
+- Still no prompt anywhere (Andy's rule); R is read straight off the keyboard, so it works under any death or black screen.
+
+## 0.20.93 (2026-11-05): orc cutscenes you can read (Kingdoms 0.7.582)
 Andy: "you dont get enough time or visibility on the orc cutscenes to view what they say, remove any FOV modifiers for
 the cutscene duration, (I was an overclocked chrono and it was way zoomed out) and pan into the text box and character,
 sacrificing the view of the character near the end to get high enough to view the whole chat bubble."

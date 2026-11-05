@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.20.91) Andy: "remove any FOV modifiers for the cutscene duration, (I was an overclocked chrono and it was way zoomed
+ * (0.20.93) Andy: "remove any FOV modifiers for the cutscene duration, (I was an overclocked chrono and it was way zoomed
  * out)". While your own film runs ({@link UltimateCinematic#filming}) the camera's field of view is your plain FOV setting:
  * no sprint or speed widening (Overclock, Speed, a road's pace), no zoom, no under-water or dying squeeze. The modifier
  * itself keeps easing underneath, so the view is back as it was when the film ends. A late priority, after other mods' FOV.

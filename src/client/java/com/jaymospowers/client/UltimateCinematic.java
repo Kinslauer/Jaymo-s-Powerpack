@@ -72,7 +72,7 @@ public final class UltimateCinematic {
 	static final double MORPH_FRAME = 2.0, MORPH_FRAME_FIRST = 2.4, MORPH_LIFT = 0.08, MORPH_SHAKE = 0.05;
 	static final float MORPH_ROLL_FIRST = 3.0F;
 	/**
-	 * (0.20.91) {@link UltimateFilm#SPEAKER}: the shares of the film spent coming in from your shoulder and (from) where it starts to
+	 * (0.20.93) {@link UltimateFilm#SPEAKER}: the shares of the film spent coming in from your shoulder and (from) where it starts to
 	 * rise to the words; how far off the speaker's face it holds (blocks, times their size, before and after the slow push), how far
 	 * round to the side (degrees), how high over the top of their head the middle of a speech bubble sits (blocks; Kingdoms' bubbles
 	 * float over the name tag spot), and how far below the words the camera ends (blocks, so it looks a touch up at them).
@@ -346,7 +346,7 @@ public final class UltimateCinematic {
 	}
 
 	/**
-	 * (0.20.91) {@link UltimateFilm#SPEAKER}: Andy: "pan into the text box and character, sacrificing the view of the character near
+	 * (0.20.93) {@link UltimateFilm#SPEAKER}: Andy: "pan into the text box and character, sacrificing the view of the character near
 	 * the end to get high enough to view the whole chat bubble". In from over your shoulder to the speaker's face, seen from your side
 	 * and a little round; a slow push while they talk, framed between their face and the words over them; then up, level with the
 	 * words, so the whole bubble is in the frame and their face drops out of the bottom. Not brought down as other shots are.
