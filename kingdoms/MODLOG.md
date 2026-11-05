@@ -9165,3 +9165,16 @@ ultimate and beam-clash films came down with it. Not played.
 - Now a ruler missing only their crown gets the crown back (`Regalia.recrown`, same crown as before) and nothing else;
   the full `fit` is kept for rulers who never had regalia. Nothing re-dresses a downed ruler, and `RoyalDress` doesn't
   change a downed ruler's outfit. What was shed lies where it fell, once. Built, not played.
+
+## 0.7.562 (2026-11-05): haven guards' rally cry shows its words; orc lines for everyone (pack 0.20.75)
+
+- Andy's screenshot: a haven guard's rally bubble read `dialect.jaymoskingdoms.orc.speech.jaymoskingdoms.haven_guard.rally.1`.
+  `HavenGrowth` asked `Dialects.tr` (orc/goblin-only lines) for a human guard's line, and no dialect copy exists; it now
+  uses the plain `speech.jaymoskingdoms.haven_guard.rally.N` lines. A scan of every Dialects call and literal lang key in
+  Powers, Kingdoms and Kitchen against the lang files (including numbered line ranges) found no other missing speech key.
+- Andy: "everyone should have orc specific lines when they encounter them, some friendly, adversarial, and fighting".
+  New `OrcSightings`: any grown MCA villager, guard or worker who sees an orc (orc villager, camp orc, unmasked
+  half-orc player) within 10 blocks says an orc line: friendly (gold) when they don't mind orcs (tolerant, greenskin
+  haven, ruler's edicts, or fond of that half-orc player), wary (yellow) for another tribe's orc or when they mind its
+  blood, fighting (red) when they're at blows. Goblins say theirs in goblin dialect. 10 lines per mood (8 goblin) in
+  `lang/parts/orc-sightings.json`; once per pair per 10 minutes, fight shouts every 10 s at most. Hint 102. Not played.
