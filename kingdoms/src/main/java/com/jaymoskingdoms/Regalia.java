@@ -142,7 +142,7 @@ public final class Regalia {
 	}
 
 	/**
-	 * (0.7.559) {@code mob}'s crown, and nothing else, back on their head (it was taken off them: a player lifting the
+	 * (0.7.561) {@code mob}'s crown, and nothing else, back on their head (it was taken off them: a player lifting the
 	 * downed ruler pulls their heavy armour off first, Powers' Carry#shed). Their armour and attire aren't made afresh:
 	 * what was taken lies where it fell, and a new set each time was the king's armour "duplicating" (Andy, 2026-11-05).
 	 * Whatever else is on their head (a helmet someone gave them) stays.

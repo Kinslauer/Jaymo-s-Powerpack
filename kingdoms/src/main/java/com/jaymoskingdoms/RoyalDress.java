@@ -203,7 +203,7 @@ final class RoyalDress {
 	 */
 	static void tick(ServerLevel level, Faction f, Tempers.@Nullable Temper temper, @Nullable PathfinderMob ruler, long now) {
 		if (ruler == null || !ruler.isAlive() || Carriages.riding(ruler) || Downed.isDowned(ruler)) {
-			// (0.7.559) nobody changes clothes lying on the ground, or slung over a shoulder
+			// (0.7.561) nobody changes clothes lying on the ground, or slung over a shoulder
 			return;
 		}
 		long t = Royals.timeOfDay(level);

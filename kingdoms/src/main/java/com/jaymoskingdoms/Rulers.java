@@ -471,7 +471,7 @@ public final class Rulers {
 			fit(mob, role, f);
 		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob) && !RoyalDress.nightwear(mob) && !Downed.isDowned(mob)) {
 			if (Regalia.wearsAny(mob) || mob.getAttached(RoyalDress.WEAR) != null) {
-				// (0.7.559) it was taken off them (a player lifting them when they were down sheds their heaviest armour,
+				// (0.7.561) it was taken off them (a player lifting them when they were down sheds their heaviest armour,
 				// helmet and all): the crown goes back on, and nothing else is made afresh, or each lift left a new set
 				Regalia.recrown(mob, role, McaCompat.female(mob));
 			} else {
