@@ -2375,6 +2375,25 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.571) Tells Powers' death by cause ({@code Mortality.SHELTERS}) who takes one left for dead in ({@link Shelter#take}):
+	 * the player and whoever downed them (or null), where they're carried to (or null). Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellShelters(java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.@Nullable Entity,
+		net.minecraft.core.@Nullable GlobalPos> shelter) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("SHELTERS").get(null);
+			((java.util.List<java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,
+				net.minecraft.core.GlobalPos>>)list).add(shelter);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality shelters (older Powers?)", e);
+		}
+	}
+
 	/** (0.7.525) Hands Powers' death by cause what a kill may turn one into ({@link Hollows}); nothing without Powers (or an older one). */
 	@SuppressWarnings("unchecked")
 	static void tellTurnings(java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,

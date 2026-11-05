@@ -348,6 +348,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		StoryHard.register();
 		// (0.7.524) left for dead by thinking killers: taken captive, gear worn or buried (Powers' death by cause)
 		Captors.register();
+		// (0.7.571) or taken in by a village that thinks well enough of them
+		Shelter.register();
 		Hollows.register();
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);

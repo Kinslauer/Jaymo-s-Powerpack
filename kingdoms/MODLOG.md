@@ -9235,4 +9235,9 @@ ultimate and beam-clash films came down with it. Not played.
 - **0.7.571, reincarnation from nothing:** Andy: "you should get reprompted completely, like with a new character
   creator". `LifeStory.reincarnateAnew` (called by Powers 0.20.83 after a final death, once it has wiped the old life):
   MCA's own player reset (single again), their look unset and its creator sent anew (`McaBridge.newDestiny`), then the
-  whole life story as `reincarnate` does. Loading screen hint 107 tells of the two sure wakes. Not played.
+  whole life story as `reincarnate` does. Loading screen hint 107 tells of the two sure wakes.
+- **0.7.571, taken in:** Andy: "taken in by a village or nearby villagers". `Shelter` (Powers' `Mortality.SHELTERS`):
+  when a village, fiefdom or kingdom not set against you (reputation 0 or more) has its seat within 320 blocks of where you
+  fell, there's a 45% chance its folk carry you in. You wake on one of its free beds (any of the near ones, picked by
+  distance), or on the ground by its seat if it has none. Once you come round you're laid in that bed resting
+  (`BedRest.lay`). Captors still come first. Tuning is at the top of `Shelter`. Not played.

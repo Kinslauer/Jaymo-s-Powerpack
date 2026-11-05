@@ -171,6 +171,13 @@ public final class Mortality {
 	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.@Nullable GlobalPos>> CAPTORS = new ArrayList<>();
 
 	/**
+	 * (0.20.83) Who takes one left for dead in (Kingdoms: a friendly village, fiefdom or kingdom near where they fell; Andy:
+	 * "taken in by a village or nearby villagers"), asked after {@link #CAPTORS}. Given the player and whoever downed them (or
+	 * null); the first to name a place has them carried there, their wounds dressed and their breaks splinted.
+	 */
+	public static final List<java.util.function.BiFunction<ServerPlayer, @Nullable Entity, net.minecraft.core.@Nullable GlobalPos>> SHELTERS = new ArrayList<>();
+
+	/**
 	 * (0.20.27) Deaths that turn one instead of ending them (Kingdoms: the Hollow; Andy: "the death method that killed them turns
 	 * them into one of those specific hollows, like enthralled by a vampire, or maybe zombified by a witch"). Given the player and
 	 * whoever killed them, each may roll and hand back what to do to them as they rise; the first to hand one back has them. A
@@ -651,6 +658,23 @@ public final class Mortality {
 				}
 			}
 		}
+		// (0.20.83) or carried in by folk who think well enough of them
+		if (wake.turn == null && wake.tries == 0 && wake.far == null && wake.cause != Cause.BOSS) {
+			for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> shelter : SHELTERS) {
+				net.minecraft.core.GlobalPos into;
+				try {
+					into = shelter.apply(player, wake.by);
+				} catch (RuntimeException e) {
+					JaymosPowers.LOGGER.warn("A shelter failed to take {} in", player.getScoreboardName(), e);
+					into = null;
+				}
+				ServerLevel to = into == null ? null : server.getLevel(into.dimension());
+				if (to != null) {
+					wakeAt(player, to, into.pos(), wake, "sheltered");
+					return true;
+				}
+			}
+		}
 		if (wake.cause == Cause.FALL) {
 			// (they wake where they landed)
 			at = wake.fell;
@@ -794,6 +818,10 @@ public final class Mortality {
 		if (wake.turn == null) {
 			injure(player, wake.cause, wake.sub);
 			player.setAttached(SURVIVOR, true);
+			if ("sheltered".equals(line)) {
+				// (0.20.83) those who took them in bound their wounds and splinted what was broken
+				Treatment.tendAll(player, false);
+			}
 		}
 		// (out cold a while more, wherever they are now: then they come round, still hurt)
 		if (Downed.isDowned(player)) {
