@@ -119,6 +119,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.132: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
 		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
 		Bearers.register();
+		RoyalRemains.register();
 		Looters.register();
 		DevCommands.register();
 		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
