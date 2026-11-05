@@ -220,7 +220,7 @@ counts are the notes' per-chunk counts as attempts. The upper islets get `HIGH_S
 - **Ores** (all of N1's): agiosite, ambrosium, arkenium, corrobonite, glint, gravitite, zanite, holystone quartz, icestone, crude
   scatterglass, with the notes' sizes and counts, in holystone and undershale (`aether_stone_ore_replaceables`,
   `aether_undershale_ore_replaceables`), plus ichorite pockets in the undershale.
-- **Water**: vanilla `lake` ponds (plain, arctic with packed ice rims, swamp with ferrosite mud), springs (`aether.world.SkySpringFeature`: in a One Dimension world a spring whose water would fall out of the bottom of the Aether onto the Overworld is not placed, except in a rare heavenfall chunk at least 3000 blocks from spawn), arilum on the water, arctic
+- **Water**: vanilla `lake` ponds (plain, arctic with packed ice rims, swamp with ferrosite mud), springs (`aether.world.SkySpringFeature`: in a One Dimension world a spring whose water would fall out of the bottom of the Aether onto the Overworld is not placed, except in a rare heavenfall chunk at least 3000 blocks from spawn, and only once a player has reached the Dread world tier), arilum on the water, arctic
   ice sheets over cold lakes (an `arctic_ice` disk, since there is no freeze step).
 - **Plants and ground**: grass, ferns, bushes, flower fields per zone, blueberries, orange trees, valkyrie sprouts, brettl, holystone
   rocks and twigs, magnetic shrooms and huge magnetic shrooms (vanilla `huge_red_mushroom` with our blocks), rotshrooms (plants only),
