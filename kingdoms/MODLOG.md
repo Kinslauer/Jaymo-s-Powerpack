@@ -9105,3 +9105,22 @@ ultimate and beam-clash films came down with it. Not played.
   under C2ME's chunk system, so every such scan now reads `getChunkSource().getChunkNow` and skips a chunk that isn't
   ready: `GrimSites`, `remnants/AncientRemnantsCompat`, `Ruins.pieces`, `Clearing.sites`, `GolemLairs.look`,
   `QuestFoes.bury`. Nothing else changes. Types checked against the 26.3 jar; not built here.
+
+## 0.7.554: Blood Sorcerers gather spilt blood and throw it as blood blasts
+
+- Andy (2026-11-05): "blood Sorcerers should also be able to conjure small blasts of their blood by holding J when near it
+  to gather, and they build a reservoir of that blood, that fire like z fighter ki blasts after holding j with an empty
+  hand." New `BloodBlasts`. A Blood Sorcerer's J (not sneaking) is now sent as down/up (`BloodBlasts.Hold`, client
+  `ClassKeys`): a tap (under 6 ticks) is still the Imbue, decided on release; sneak and J are the old keys.
+- Hold J: every 5 ticks the blood near (8 blocks: bleeding cuts, Powers' stains via `PowersCompat.drawStains`, Kitchen
+  grates once a second) rises in threads of red to the hands, up to 1.5 a pulse (about 6 a second, vs the passive 2), into
+  the reservoir. The passive drinking pauses while J is held.
+- Empty-handed, after a 12-tick windup (blood motes swell in both palms), a blood blast every 5 ticks, hands taking turns
+  (swing animation), for as long as J is held: 1 reservoir each (a vampire 0.75), never paid from health; 4 damage (a
+  vampire's x1.5), a cut, a little knockback, a splash and a small stain where it bursts; falls slightly, 30 ticks of life.
+  A barrage counts as one forbidden cast (`Spellcraft.afterCast`: corruption, Grue, crime where seen); the Grue can stay
+  the hand; a vampire's fever is stoked once per barrage; thralls aren't hit (`Thralls.refuses`).
+- The reservoir (`Hemomancy.RESERVOIR`, was a server-only map) is now a synced attachment shown by
+  `client/BloodReservoirHud`: a crimson bar right of the hotbar (the Brute's spot), easing as it fills or drains,
+  throbbing when full. Loading hint 99; class description and key name updated (`lang/parts/blood-blasts.json`).
+- Built in the cloud; not played.
