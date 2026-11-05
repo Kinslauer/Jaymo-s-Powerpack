@@ -769,4 +769,16 @@ then a final death, R pressed throughout).
 - Downed, R now cheats death whenever Rewind itself can't answer: out cold, on its cooldown, or an execution coming.
   Awake with Rewind ready, R is still the plain downed Rewind. (`ChronoCheatDeath.downedOpen`, `ChronoPower.rewindReady`.)
 - Still no prompt anywhere (Andy's rule); R is read straight off the keyboard, so it works under any death or black screen.
+
+## 0.20.93 (2026-11-05): orc cutscenes you can read (Kingdoms 0.7.582)
+Andy: "you dont get enough time or visibility on the orc cutscenes to view what they say, remove any FOV modifiers for
+the cutscene duration, (I was an overclocked chrono and it was way zoomed out) and pan into the text box and character,
+sacrificing the view of the character near the end to get high enough to view the whole chat bubble."
+- New film shot, `UltimateFilm.SPEAKER` (drawn in `UltimateCinematic.speaker`): from over your shoulder in to the
+  speaker's face, seen from your side; a slow push framed between their face and the words over their head; then, from
+  62% of the way through, up level with the words so the whole bubble is in frame and the face drops out of the bottom.
+  Tune it with the `SPEAKER_*` constants at the top of `UltimateCinematic`.
+- While your own film runs the field of view is your plain FOV setting (`mixin/UltimateCinematicFovMixin`): no
+  Overclock/Speed/sprint widening, zoom or under-water squeeze. It applies to every film, not only the orcs'.
+- A film may now run up to 10 s (`UltimateFilm.MAX_TICKS` 100 to 200) so a spoken line can be read through.
   Built, not played.
