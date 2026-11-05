@@ -1045,3 +1045,16 @@ them, and the katana and battleaxe raised a block pose that blocked nothing.
   forward by your own ping (up to 4 ticks). It flashes as the blow lands.
 - No chat text, no FOV change. Tuning: constants at the top of `IncomingBlows` and `IncomingBlowsClient`. Built, not
   played.
+
+## 0.21.2 (2026-11-05): the minimap maps the layer you're in, and the Aether veil says what it read
+- Andy: "the minimap shows the aether instead of the overworld". In a One Dimension world the Aether's islands are the top
+  blocks of the Overworld level, and Xaero's Minimap reads each column from its top block down, so under an island it drew
+  the island. `client/mixin/xaero/XaeroMinimapBandMixin` (optional config `jaymospowers.xaero.client.mixins.json`) gives
+  its writer the band you stand in as the world's top and floor (`AetherVeil.mapTop`/`mapBottom`, from CustomChunks'
+  synced layout): columns are read from your band's top down to its floor, and auto cave mode only counts a roof in your
+  own band (islands overhead no longer flip it on). Up in the Aether the map is the Aether's, with void between islands.
+  Checked against Xaero's Minimap 26.6.1 (the pack's) and 26.6.2 bytecode.
+- Andy: "players can still look up and see the aether". The veil (0.20.60) was checked against CustomChunks 1.0.1's
+  client layout (`StackLayout.of`, `Layer.minY/shift`), Sodium's `Viewport` and the 26.3 `Frustum`, and nothing wrong
+  turned up from the code alone. It now logs what it read once per world ("Aether veil: band floors ..., veil on/off",
+  or that no layout reached the client), so `logs/latest.log` shows why if it still shows. Built, not played.

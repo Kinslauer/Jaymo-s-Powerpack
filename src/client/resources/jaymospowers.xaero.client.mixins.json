@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.xaero",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"XaeroMinimapBandMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

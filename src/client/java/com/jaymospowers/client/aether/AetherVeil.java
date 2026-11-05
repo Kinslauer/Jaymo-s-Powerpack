@@ -36,7 +36,16 @@ public final class AetherVeil {
 	/** Whether the camera is under the clouds (kept between the clouds' bottom and top, so it only flips when through them). */
 	private static boolean below = true;
 
+	/** The top (exclusive) of the band the player stands in, for the minimap ({@link #mapTop}); MAX_VALUE: the level's own. */
+	private static volatile int mapTop = Integer.MAX_VALUE;
+	/** The floor of the band the player stands in, for the minimap ({@link #mapBottom}); MIN_VALUE: the level's own. */
+	private static volatile int mapBottom = Integer.MIN_VALUE;
+	/** Every band's floor in this level, lowest first (empty: not a stacked level). */
+	private static int[] floors = new int[0];
+
 	private static ClientLevel layoutOf;
+	/** Whether "no layout yet" was logged for this level. */
+	private static boolean logged;
 	private static int retry;
 	/** This level's Aether floor, and its Overworld's cloud heights; floor {@link #NONE} when it has no Aether band. */
 	private static double floor = NONE, cloudBottom, cloudTop;
@@ -60,6 +69,21 @@ public final class AetherVeil {
 		return ceiling;
 	}
 
+	/**
+	 * (0.21.2, Andy: "the minimap shows the aether instead of the overworld") The highest block the minimap may draw, plus
+	 * one: the top of the band the player is in, so Xaero's Minimap (which starts at a column's top block) maps the Overworld
+	 * under the Aether's islands, and the Aether once you're up in it ({@code client/mixin/xaero/XaeroMinimapBandMixin}).
+	 * Integer.MAX_VALUE outside a stacked world.
+	 */
+	public static int mapTop() {
+		return mapTop;
+	}
+
+	/** The lowest block the minimap may draw: the floor of the band the player is in (Integer.MIN_VALUE outside a stack). */
+	public static int mapBottom() {
+		return mapBottom;
+	}
+
 	/** Whether a box with this bottom is hidden. */
 	public static boolean hides(double bottom) {
 		return bottom >= ceiling;
@@ -70,14 +94,22 @@ public final class AetherVeil {
 		if (level == null || level.dimension() != Level.OVERWORLD) {
 			set(NONE);
 			layoutOf = null;
+			mapTop = Integer.MAX_VALUE;
+			mapBottom = Integer.MIN_VALUE;
 			return;
 		}
 		if (layoutOf != level || floor == NONE && --retry <= 0) {
+			if (layoutOf != level) {
+				logged = false;
+			}
 			layoutOf = level;
 			retry = RETRY_TICKS;
 			read(level);
 			below = true;
 		}
+		double feet = minecraft.player == null ? Double.NaN : minecraft.player.getY();
+		mapTop = Double.isNaN(feet) ? Integer.MAX_VALUE : topAbove(feet);
+		mapBottom = Double.isNaN(feet) ? Integer.MIN_VALUE : floorUnder(feet);
 		if (floor == NONE) {
 			set(NONE);
 			return;
@@ -89,6 +121,27 @@ public final class AetherVeil {
 			below = true;
 		}
 		set(below ? floor : NONE);
+	}
+
+	/** The lowest band floor above height y (the top of y's band), or MAX_VALUE. */
+	private static int topAbove(double y) {
+		for (int band : floors) {
+			if (band > y) {
+				return band;
+			}
+		}
+		return Integer.MAX_VALUE;
+	}
+
+	/** The highest band floor at or under height y (the floor of y's band), or MIN_VALUE. */
+	private static int floorUnder(double y) {
+		int under = Integer.MIN_VALUE;
+		for (int band : floors) {
+			if (band <= y) {
+				under = band;
+			}
+		}
+		return under;
 	}
 
 	private static void set(double value) {
@@ -104,17 +157,26 @@ public final class AetherVeil {
 	/** This level's Aether floor and its Overworld's cloud heights, from CustomChunks' stack layout (synced to the client). */
 	private static void read(LevelHeightAccessor level) {
 		floor = NONE;
+		floors = new int[0];
 		if (!api()) {
 			return;
 		}
 		try {
 			Object layout = layoutOfLevel.invoke(null, level);
 			if (layout == null) {
+				if (!logged) {
+					logged = true;
+					com.jaymospowers.JaymosPowers.LOGGER.info("Aether veil: no stack layout on the client yet (still looking every {} ticks)", RETRY_TICKS);
+				}
 				return;
 			}
 			double aether = NONE;
 			int overworldShift = 0;
-			for (Object layer : (List<?>) layers.invoke(layout)) {
+			List<?> all = (List<?>) layers.invoke(layout);
+			int[] bands = new int[all.size()];
+			int n = 0;
+			for (Object layer : all) {
+				bands[n++] = (Integer) minY.invoke(layer);
 				String id = String.valueOf(source.invoke(layer));
 				if (AETHER.equals(id)) {
 					aether = (Integer) minY.invoke(layer);
@@ -122,12 +184,19 @@ public final class AetherVeil {
 					overworldShift = (Integer) shift.invoke(layer);
 				}
 			}
+			java.util.Arrays.sort(bands);
+			floors = bands;
 			cloudBottom = CLOUD_BOTTOM + overworldShift;
 			cloudTop = CLOUD_TOP + overworldShift;
 			// only when the Aether sits over the clouds (a stack in another order is left alone)
 			floor = aether > cloudTop ? aether : NONE;
+			// (0.21.2) Andy still saw the Aether from the ground: say what was read, so latest.log shows why
+			com.jaymospowers.JaymosPowers.LOGGER.info("Aether veil: band floors {}, Aether floor {}, Overworld clouds {} to {}, veil {}",
+				java.util.Arrays.toString(bands), aether, cloudBottom, cloudTop, floor == NONE ? "off (the Aether isn't over the clouds)" : "on");
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			floor = NONE;
+			floors = new int[0];
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Aether veil: couldn't read the stack layout", e);
 		}
 	}
 
