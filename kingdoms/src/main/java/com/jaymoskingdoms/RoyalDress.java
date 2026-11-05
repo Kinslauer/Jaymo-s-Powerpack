@@ -202,7 +202,8 @@ final class RoyalDress {
 	 * From {@link Tempers}' tick: {@code ruler} of {@code f} thinks what to wear, and changes if it isn't what they have on.
 	 */
 	static void tick(ServerLevel level, Faction f, Tempers.@Nullable Temper temper, @Nullable PathfinderMob ruler, long now) {
-		if (ruler == null || !ruler.isAlive() || Carriages.riding(ruler)) {
+		if (ruler == null || !ruler.isAlive() || Carriages.riding(ruler) || Downed.isDowned(ruler)) {
+			// (0.7.561) nobody changes clothes lying on the ground, or slung over a shoulder
 			return;
 		}
 		long t = Royals.timeOfDay(level);
