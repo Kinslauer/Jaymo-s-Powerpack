@@ -1476,3 +1476,7 @@ middle), so the drops fall and pool beside it, or run off the table's edge when 
 from the bottom of its lowest part, not its middle. The clipping was the old 0.5.57 jar the pack shipped until 0.5.69:
 Cube Animals' deer got a man's ragdoll and its legs hung loose through whatever it lay on, fixed in 0.5.64 and 0.5.68.
 tools/ragdoll_sim checks a deer dragged off a 2x4 table never ends up inside it (0/128). Built, not played.
+
+## 0.5.71: dishes count on the pack's advancement tab (pack 0.20.88)
+`Kitchen.award` gives Powers' Home Cooking for any dish cooked and Cooked to Perfection for a perfect one
+(`jaymospowers:pack/cooked`, `pack/perfect_dish`). Nothing happens without Powers. Built, not played.

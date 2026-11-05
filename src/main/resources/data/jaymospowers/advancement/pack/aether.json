@@ -1,0 +1,31 @@
+{
+  "parent": "jaymospowers:pack/giant",
+  "display": {
+    "icon": {
+      "id": "minecraft:white_wool"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.aether.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.aether.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "aether": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "jaymospowers:aether"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "aether"
+    ]
+  ]
+}

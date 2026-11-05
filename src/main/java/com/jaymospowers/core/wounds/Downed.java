@@ -842,6 +842,9 @@ public final class Downed {
 			return;
 		}
 		FELLED_BY.put(entity, level.damageSources().playerAttack(by));
+		if (by instanceof net.minecraft.server.level.ServerPlayer sp) {
+			com.jaymospowers.core.PackAdvancements.award(sp, "executioner");
+		}
 		// ((0.20.26) Andy: an execution is final when a player does it)
 		Mortality.executed(entity, true);
 		try {

@@ -253,7 +253,7 @@ public final class ThrownRocks {
 	 * (0.18.84) Whether {@code victim} never saw the rock coming: asleep; or not in a fight (no target, nobody's hurt them
 	 * in {@link #WARY_TICKS}) and the thrower out of their sight (behind them, off to the side, or round a corner).
 	 */
-	static boolean unsuspecting(LivingEntity victim, @Nullable Entity thrower) {
+	public static boolean unsuspecting(LivingEntity victim, @Nullable Entity thrower) {
 		if (victim.isSleeping()) {
 			return true;
 		}

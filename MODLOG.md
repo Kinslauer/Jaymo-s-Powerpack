@@ -708,3 +708,37 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.87, GeckoLib for Simply Tents:** the Deck's server refused to start ("Incompatible mods found": Simply Tents 3.5
   needs GeckoLib 5.5.6 or later, and 0.20.83 shipped it without). Added GeckoLib 5.5.7 for Fabric 26.3 (Modrinth
   kSxHvs99, CurseForge 388172/8945630, same file) to packMods. Not built here.
+
+## 0.20.88 (2026-11-05): the "Jaymo's Powerpack" advancement tab (Kingdoms 0.7.579, Kitchen 0.5.71)
+- Seven-mods plan, patch 3. Andy's note: all of our advancements on one screen, and a line made for the pack. Until now
+  our mods had only recipe unlocks. There's now one tab, `data/jaymospowers/advancement/pack`, which lays out on Better
+  Advancements' big map.
+- The main line follows a playthrough: A Life Begun (life story told) > Journeyman (a job's first rank) > Sworn (a
+  patron) > Remnant (within 48 blocks of a monolith) > Giant-felled > Above the Clouds (entering `jaymospowers:aether`)
+  > Not the Last (two kinds of Giant) > The Last Giant (all four kinds; Better Advancements shows the count).
+- Side branches: Awakened (a power), Home Cooking and Cooked to Perfection (Kitchen), Cast Off (aboard a ship) and Thar
+  She Blows (a great whale), First Insight (alchemy research), Forged (a Tinkers tool in hand), Executioner (a finisher).
+- Titles are plain and descriptions only hint; no lore is stated. Most criteria are `minecraft:impossible`, awarded from
+  code by id: `core/PackAdvancements` (power, research, tools; `Downed.execute` for executions), Kingdoms'
+  `PackAdvancements` (story, rank, patron, monolith, ship, whale and Giant deaths; at a Giant's fall everyone within 96
+  blocks gets it), and `Kitchen.award` for dishes.
+- The tab's background is a dark tile in our panels' colours (`textures/gui/advancements/backgrounds/pack.png`), with
+  an Excalibur-graded copy (grade.py's new `EXTRA` list keeps it on rebuilds). The vanilla frames are left alone so the
+  other tabs don't change. Built, not played.
+
+## 0.20.89 (2026-11-05): underground bits: ore tells and arrow heads (Kingdoms 0.7.580)
+- Seven-mods plan, patch 4. These are Caverns & Chasms' ideas (Abnormals licence, so ideas only), built with our own code
+  and art.
+- **Ore tells** (`ground/OreTells`, `worldgen/placed_feature/ore_tells.json`): once a chunk, stone touching an ore vein
+  is often Seamed Stone (Seamed Deepslate in deepslate and tuff), cracked with rusty veins. Where a vein lies 2 to 12
+  blocks under dirt or grass, the ground over it turns to Rocky Dirt. They drop cobblestone, cobbled deepslate and dirt;
+  silk touch keeps the block. Excalibur-graded copies are made.
+- **Arrow heads** (`tinkering/ranged/ArrowHeads`): there are no new arrow items (Andy's note). A Tinkers arrow's head
+  decides:
+  - **Blunt** (a wood or rock head): it deals half its damage and never the last of someone's health. It knocks back,
+    dazes (Slowness II and Nausea) and bounces off. Like a thrown rock, it can knock out someone who didn't see it
+    coming (40% on the head, 12% elsewhere, 10 to 30 s).
+  - **Large** (a pig iron, steel or star metal head on a bone or blaze rod shaft): it hits 1.4x as hard and leaves the
+    bow at 0.75x speed, so it drops sooner.
+  - The arrow's tooltip says which it is. `ThrownRocks.unsuspecting` is now public.
+- Kingdoms 0.7.580 adds the mice and the mime. Built, not played.
