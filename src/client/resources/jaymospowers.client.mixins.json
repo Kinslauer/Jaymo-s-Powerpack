@@ -68,6 +68,7 @@
 		"GiantPickMixin",
 		"BeamCinematicCameraMixin",
 		"UltimateCinematicCameraMixin",
+		"UltimateCinematicFovMixin",
 		"CarryFirstPersonMixin",
 		"MusketSightsMixin",
 		"PowerArmsFirstPersonMixin",

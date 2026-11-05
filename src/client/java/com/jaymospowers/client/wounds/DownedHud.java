@@ -46,12 +46,12 @@ public final class DownedHud {
 	/** (0.18.84) Knocked out: how long the black takes to come over the screen, and to lift as they come round (ticks). */
 	static final float BLACK_IN_TICKS = 6.0F, BLACK_OUT_TICKS = 30.0F;
 	/**
-	 * (0.20.91) A death turned away (Mortality.WAKE_LINE): the black lifts this slowly, the line on it this big, and wrapped
+	 * (0.20.94) A death turned away (Mortality.WAKE_LINE): the black lifts this slowly, the line on it this big, and wrapped
 	 * at this share of the screen's width.
 	 */
 	static final float WAKE_OUT_TICKS = 80.0F, LINE_SCALE = 1.5F, LINE_WIDTH = 0.6F;
 
-	/** (0.20.91) The line on the black now (a lang key), kept while the black lifts. */
+	/** (0.20.94) The line on the black now (a lang key), kept while the black lifts. */
 	private static @org.jspecify.annotations.Nullable String line;
 
 	private static int downTicks;
@@ -73,7 +73,7 @@ public final class DownedHud {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		blackBefore = black;
-		// ((0.20.91) and black while a life that ended waits for the new character: Mortality.REBORNING)
+		// ((0.20.94) and black while a life that ended waits for the new character: Mortality.REBORNING)
 		boolean reborning = player != null && player.isAlive() && player.hasAttached(com.jaymospowers.core.wounds.Mortality.REBORNING);
 		boolean knocked = player != null && (player.hasAttached(Downed.KNOCKED) || reborning);
 		String said = player == null ? null : reborning ? "message.jaymospowers.mortality.ended"
@@ -160,7 +160,7 @@ public final class DownedHud {
 		if (dark > 0.0F) {
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), Math.round(dark * 255.0F) << 24);
 		}
-		// (0.20.91) what happened, large in the middle of it, to be read before the world comes back
+		// (0.20.94) what happened, large in the middle of it, to be read before the world comes back
 		int alpha = Math.round(dark * 255.0F);
 		if (line != null && alpha > 8) {
 			net.minecraft.client.gui.Font font = Minecraft.getInstance().font;

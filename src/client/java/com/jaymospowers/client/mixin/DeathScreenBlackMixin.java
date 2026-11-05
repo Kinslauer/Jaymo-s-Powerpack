@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.20.91) Andy: "the red overlay on the respawn screen should be black as well, the screen should cut to black whenever
+ * (0.20.94) Andy: "the red overlay on the respawn screen should be black as well, the screen should cut to black whenever
  * you die, and the slow entry of either the reincarnate screen or the scenario will load". The death screen's red is black,
  * and what's on it (the cause, the buttons) comes slowly up out of the black over {@link #FADE_TICKS}.
  */

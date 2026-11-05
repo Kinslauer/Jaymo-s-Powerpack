@@ -588,7 +588,7 @@ public final class Mortality {
 				}
 				if (isFinal(player) && player.isAlive() && !ZFighterAfterlife.among(player) && !REBIRTHS.containsKey(player.getUUID())) {
 					REBIRTHS.put(player.getUUID(), server.getTickCount() + REBIRTH_DELAY);
-					// ((0.20.91) and black until the new character is made)
+					// ((0.20.94) and black until the new character is made)
 					player.setAttached(REBORNING, (long)server.getTickCount());
 				}
 				if (player.isAlive()) {
@@ -930,7 +930,7 @@ public final class Mortality {
 		// (a new life's power awakens in its own time)
 		player.removeAttached(Powers.AWAKEN_IN);
 		// (0.20.83) Andy: "EVERYTHING resets": every other mark the old life left on them goes too
-		// ((0.20.91) "it should wipe absolutely everything on your character": all they carry, their ender chest, their
+		// ((0.20.94) "it should wipe absolutely everything on your character": all they carry, their ender chest, their
 		// experience, their spawn point and every effect too)
 		long dark = player.getAttachedOrElse(REBORNING, (long)player.level().getServer().getTickCount());
 		wipe(player);
@@ -952,7 +952,7 @@ public final class Mortality {
 	 * (0.20.83) Andy, on the third death: "you should get reprompted completely, like with a new character creator, new
 	 * quests skills, etc. EVERYTHING resets." Takes every attachment our three mods keep on {@code player} (skills and their
 	 * trees, levels, quests, reputation, world tier and knowledge, class, heritage, story, patron, curses, mastery, affinity,
-	 * the Z Fighter's training, missing limbs...). (0.20.91) Andy: "it should wipe absolutely everything on your character":
+	 * the Z Fighter's training, missing limbs...). (0.20.94) Andy: "it should wipe absolutely everything on your character":
 	 * nothing is kept any more, not the roads their deeds opened, nor a backpack, baubles or a stash.
 	 */
 	static void wipe(ServerPlayer player) {
@@ -978,7 +978,7 @@ public final class Mortality {
 	private static final Set<String> OURS = Set.of(JaymosPowers.MOD_ID, "jaymoskingdoms", "jaymoskitchen");
 
 	/**
-	 * (0.20.91) Andy: "black screen until it's ready". While this is on a player (from the moment a final death has them back
+	 * (0.20.94) Andy: "black screen until it's ready". While this is on a player (from the moment a final death has them back
 	 * on their feet until their new character is made: Kingdoms' story, MCA's creator, heritage and class), their screen is
 	 * black. Synced to them; lifted by {@link #tick} once nothing is still to choose ({@link #DARK_MAX} at most).
 	 */
@@ -987,7 +987,7 @@ public final class Mortality {
 			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
 
 	/**
-	 * (0.20.91) Andy: "this will give you a chance to read what happened as it should say if you were kidnapped or in the
+	 * (0.20.94) Andy: "this will give you a chance to read what happened as it should say if you were kidnapped or in the
 	 * wilderness". What the black of a death turned away says, read large on it (its lang key; synced to them): going dark,
 	 * then where and how they wake. Gone once they're up.
 	 */
@@ -995,11 +995,11 @@ public final class Mortality {
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8,
 			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
 
-	/** (0.20.91) The least and most (ticks) the black of a new life lasts. */
+	/** (0.20.94) The least and most (ticks) the black of a new life lasts. */
 	static final long DARK_MIN = 40L, DARK_MAX = 20L * 60 * 10;
 
 	/**
-	 * (0.20.91) Lifts {@link #REBORNING} once {@code player}'s new character is made (nothing more to choose), or after
+	 * (0.20.94) Lifts {@link #REBORNING} once {@code player}'s new character is made (nothing more to choose), or after
 	 * {@link #DARK_MAX}.
 	 */
 	private static void lighten(MinecraftServer server, ServerPlayer player) {
@@ -1014,7 +1014,7 @@ public final class Mortality {
 	}
 
 	/**
-	 * (0.20.91) A safe place to stand at or near {@code at} in {@code level}: Andy, "reincarnating just spawned me in a wall".
+	 * (0.20.94) A safe place to stand at or near {@code at} in {@code level}: Andy, "reincarnating just spawned me in a wall".
 	 * The spot itself if they fit there, else the nearest that fits a few blocks round (up first), else the ground at the top
 	 * of the column, else {@code at} as it was.
 	 */

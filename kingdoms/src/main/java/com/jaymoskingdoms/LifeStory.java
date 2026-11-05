@@ -2272,7 +2272,7 @@ public final class LifeStory {
 	}
 
 	/**
-	 * (0.7.582) Whether {@code player} is still making their character: the story, MCA's creator, the heritage or the class
+	 * (0.7.583) Whether {@code player} is still making their character: the story, MCA's creator, the heritage or the class
 	 * still to choose, or still held in stasis. Called by Jaymo's Powers (reflection) to keep a new life's screen black.
 	 */
 	public static boolean making(ServerPlayer player) {

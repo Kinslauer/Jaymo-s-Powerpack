@@ -404,6 +404,12 @@ public final class ChronoPower implements Power {
 		sync(player, state, now);
 	}
 
+	/** (0.20.92) Whether Rewind is off its cooldown for {@code player} (server side). */
+	static boolean rewindReady(ServerPlayer player) {
+		ChronoState state = STATES.get(player.getUUID());
+		return state == null || state.cooldownLeft(REWIND, now(player)) <= 0;
+	}
+
 	/** Whether Overclock is running for {@code player} (server side). */
 	static boolean overclocked(ServerPlayer player) {
 		ChronoState state = STATES.get(player.getUUID());

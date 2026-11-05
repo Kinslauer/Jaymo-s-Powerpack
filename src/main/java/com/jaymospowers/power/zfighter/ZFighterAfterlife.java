@@ -235,7 +235,7 @@ public final class ZFighterAfterlife {
 			if (entity instanceof ServerPlayer player) {
 				// (0.17.108) and one of the dead dying again wakes among the dead again
 				// ((0.20.26) and anyone whose life ended for good, Mortality: they leave only to be born again)
-				// ((0.20.91) no more: Andy wants a life that ended to go black and straight on to the new one, not by the hall,
+				// ((0.20.94) no more: Andy wants a life that ended to go black and straight on to the new one, not by the hall,
 				// where the Judge's rebirth put him back in the world still dead, in a wall, to die and come back again)
 				if (ZFighterRealism.afterlife() && !player.isSpectator() && !com.jaymospowers.core.wounds.Mortality.isFinal(player)
 					&& (among(player) || !inOtherWorld(player) && Powers.has(player, ZFighterPower.INSTANCE))) {
@@ -251,7 +251,7 @@ public final class ZFighterAfterlife {
 			}
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
-			// (0.20.91) a life that ended among the dead leaves them for good: no stay to hold it there
+			// (0.20.94) a life that ended among the dead leaves them for good: no stay to hold it there
 			if (com.jaymospowers.core.wounds.Mortality.isFinal(newPlayer)) {
 				newPlayer.removeAttached(STAY);
 				newPlayer.removeAttached(HOME);
@@ -515,7 +515,7 @@ public final class ZFighterAfterlife {
 	/** The move itself, once the spot is loaded (the sync load stays for an odd failed load: the old way, a stall at worst). */
 	private static void wake(ServerPlayer player, ServerLevel to, BlockPos at, After after) {
 		to.getChunk(at);
-		// (0.20.91) Andy: "reincarnating just spawned me in a wall": never into anything solid
+		// (0.20.94) Andy: "reincarnating just spawned me in a wall": never into anything solid
 		at = com.jaymospowers.core.wounds.Mortality.safe(to, at);
 		player.removeAttached(STAY);
 		player.removeAttached(TAUGHT);
@@ -557,7 +557,7 @@ public final class ZFighterAfterlife {
 		return ZFighterKingdoms.reincarnate(player);
 	}
 
-	/** (0.20.91) Whether {@code player} is still making their character (Kingdoms' story, MCA's creator, heritage, class). */
+	/** (0.20.94) Whether {@code player} is still making their character (Kingdoms' story, MCA's creator, heritage, class). */
 	public static boolean making(ServerPlayer player) {
 		return ZFighterKingdoms.making(player);
 	}
@@ -939,7 +939,7 @@ public final class ZFighterAfterlife {
 	private static void ensureNpcs(ServerLevel world) {
 		for (Npc npc : npcs()) {
 			BlockPos spot = BlockPos.containing(npc.at());
-			// (0.20.91) Andy: "the judges keep multiplying": a chunk's blocks load before its creatures, so one looked for too
+			// (0.20.94) Andy: "the judges keep multiplying": a chunk's blocks load before its creatures, so one looked for too
 			// soon was never there and another was made each time someone arrived. Only once its creatures are in; and any
 			// second one is sent away.
 			if (!world.areEntitiesLoaded(ChunkPos.containing(spot).pack())) {
