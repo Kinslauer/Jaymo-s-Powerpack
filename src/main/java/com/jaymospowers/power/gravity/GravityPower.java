@@ -646,6 +646,8 @@ public final class GravityPower implements Power {
 					if (state.chunkHold && state.liftTarget >= 0) {
 						// R again drops a chunk held on its own
 						dropLift(player, state, true);
+					} else if (player.isShiftKeyDown() && state.liftTarget < 0 && GravityRocks.throwRocks(player)) {
+						// (0.21.10) sneak+R with rocks out (B+G): the ball thrown where you look, or the orbit flung outward
 					} else {
 						startLift(player, state);
 					}

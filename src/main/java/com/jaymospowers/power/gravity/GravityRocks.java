@@ -76,6 +76,17 @@ public final class GravityRocks {
 	static final int GRAZE_EVERY = 20;
 	/** How often the pack is counted again (ticks). */
 	static final int RECOUNT = 10;
+	/** (0.21.10) Sneak+R, the ball thrown: how fast (blocks a tick), how hard it falls, the longest it flies. */
+	public static final double THROW_SPEED = 1.6, THROW_GRAVITY = 0.03;
+	static final int THROW_TICKS = 60;
+	/** Its burst: what the one it hits takes per rock, the reach of the debris (half that, each), and of the breaking. */
+	static final float BURST_PER_ROCK = 0.3F;
+	static final double BURST_RADIUS = 2.5, BREAK_RADIUS = 2.0;
+	/** Sneak+R, the orbit thrown: the rocks fly out this far over this long, hitting foes as they pass (per rock). */
+	public static final double PULSE_RADIUS = 7.0;
+	public static final int PULSE_TICKS = 7;
+	static final float PULSE_PER_ROCK = 0.2F;
+	static final double PULSE_PUSH = 0.7;
 	// ================================================================================================================
 
 	public static final int NONE = 0, BALL = 1, ORBIT = 2;
@@ -104,6 +115,36 @@ public final class GravityRocks {
 		}
 	}
 
+	/**
+	 * (0.21.10) Rocks thrown with sneak+R, for everyone to draw: the ball ({@link #BALL}, from {@code start} along
+	 * {@code velocity} falling by {@link #THROW_GRAVITY}) or the orbit's pulse ({@link #ORBIT}, flying out from
+	 * {@code start}), since {@code from}. Gone once it lands.
+	 */
+	public record Throw(int kind, int count, int item, Vec3 start, Vec3 velocity, long from) {
+		public static final StreamCodec<io.netty.buffer.ByteBuf, Throw> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Throw::kind, ByteBufCodecs.VAR_INT, Throw::count, ByteBufCodecs.VAR_INT, Throw::item,
+			Vec3.STREAM_CODEC, Throw::start, Vec3.STREAM_CODEC, Throw::velocity, ByteBufCodecs.VAR_LONG, Throw::from, Throw::new);
+
+		/** Where the thrown ball is {@code t} ticks after it left. */
+		public Vec3 at(double t) {
+			return this.start.add(this.velocity.scale(t)).add(0.0, -0.5 * THROW_GRAVITY * t * t, 0.0);
+		}
+
+		public ItemStack stack() {
+			return new ItemStack(BuiltInRegistries.ITEM.byId(this.item));
+		}
+	}
+
+	public static final AttachmentType<Throw> THROWN = AttachmentRegistry.create(JaymosPowers.id("gravity_rocks_thrown"),
+		builder -> builder.syncWith(Throw.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/** A throw under way, server side: who, what it is, the rocks it took from the pack (they land as items). */
+	private record Flying(UUID owner, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension, Throw thrown,
+		java.util.List<ItemStack> stones, java.util.Set<Integer> struck) {
+	}
+
+	private static final java.util.List<Flying> FLYING = new java.util.ArrayList<>();
+
 	public static final AttachmentType<Rocks> ROCKS = AttachmentRegistry.create(JaymosPowers.id("gravity_rocks"),
 		builder -> builder.syncWith(Rocks.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
@@ -121,13 +162,14 @@ public final class GravityRocks {
 	}
 
 	static void init() {
-		JaymosPowers.LOGGER.debug("gravity rocks attachment: {}", ROCKS);
+		JaymosPowers.LOGGER.debug("gravity rocks attachments: {} {}", ROCKS, THROWN);
 		ServerTickEvents.END_SERVER_TICK.register(GravityRocks::tick);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(GravityRocks::afterDamage);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			PENDING.clear();
 			GRAZED.clear();
+			FLYING.clear();
 		});
 	}
 
@@ -232,7 +274,218 @@ public final class GravityRocks {
 		}
 	}
 
+	// ---------------------------------------------------------------- sneak+R: throwing them
+
+	/**
+	 * (0.21.10) Andy: "you should be able to throw the rocks with shift R, a radial pulse from the orbit and a directional
+	 * throw with the ball, that explodes in pebble debris on impact breaking things like leaves and glass". Sneak+R with
+	 * rocks out throws them (false if none are out, so R is Lift as ever). The rocks leave the pack and land as items where
+	 * they come down, to be picked up (or pulled in) again; B+G gathers a new ball from what's left.
+	 */
+	static boolean throwRocks(ServerPlayer player) {
+		Rocks rocks = player.getAttached(ROCKS);
+		if (rocks == null || player.getAttached(THROWN) != null) {
+			return rocks != null;
+		}
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		java.util.List<ItemStack> stones = take(player, rocks.count());
+		dismiss(player, false);
+		Throw thrown;
+		if (rocks.form() == BALL) {
+			float yaw = player.yBodyRot * net.minecraft.util.Mth.DEG_TO_RAD;
+			Vec3 right = new Vec3(-net.minecraft.util.Mth.cos(yaw), 0.0, -net.minecraft.util.Mth.sin(yaw));
+			Vec3 start = player.position().add(right.scale(0.85)).add(0.0, player.getBbHeight() * 1.1, 0.0);
+			thrown = new Throw(BALL, rocks.count(), rocks.item(), start, player.getLookAngle().scale(THROW_SPEED), now);
+			com.jaymospowers.ground.ThrownRocks.hurled(player);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1.0F, 0.5F);
+		} else {
+			Vec3 middle = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
+			thrown = new Throw(ORBIT, rocks.count(), rocks.item(), middle, Vec3.ZERO, now);
+			player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.STONE_BREAK, SoundSource.PLAYERS, 1.0F, 0.7F);
+		}
+		player.setAttached(THROWN, thrown);
+		FLYING.add(new Flying(player.getUUID(), level.dimension(), thrown, stones, new java.util.HashSet<>()));
+		return true;
+	}
+
+	/** Up to {@code count} rocks out of the pack (copies only, in creative). */
+	private static java.util.List<ItemStack> take(ServerPlayer player, int count) {
+		java.util.List<ItemStack> taken = new java.util.ArrayList<>();
+		var inventory = player.getInventory();
+		boolean creative = player.getAbilities().instabuild;
+		for (int i = 0; i < inventory.getContainerSize() && count > 0; i++) {
+			ItemStack stack = inventory.getItem(i);
+			if (FirstTools.rock(stack)) {
+				int n = Math.min(count, stack.getCount());
+				taken.add(stack.copyWithCount(n));
+				if (!creative) {
+					stack.shrink(n);
+				}
+				count -= n;
+			}
+		}
+		return taken;
+	}
+
+	private static void tickThrows(MinecraftServer server) {
+		for (Iterator<Flying> it = FLYING.iterator(); it.hasNext(); ) {
+			Flying flying = it.next();
+			ServerLevel level = server.getLevel(flying.dimension());
+			ServerPlayer owner = server.getPlayerList().getPlayer(flying.owner());
+			Throw thrown = flying.thrown();
+			if (level == null) {
+				it.remove();
+				continue;
+			}
+			long t = level.getGameTime() - thrown.from();
+			boolean done = thrown.kind() == BALL ? tickBall(level, owner, flying, t) : tickPulse(level, owner, flying, t);
+			if (done) {
+				it.remove();
+				if (owner != null && thrown.equals(owner.getAttached(THROWN))) {
+					owner.removeAttached(THROWN);
+				}
+			}
+		}
+	}
+
+	/** The thrown ball, a tick on: true once it has burst. */
+	private static boolean tickBall(ServerLevel level, @Nullable ServerPlayer owner, Flying flying, long t) {
+		Throw thrown = flying.thrown();
+		Vec3 from = thrown.at(Math.max(0, t - 1)), to = thrown.at(t);
+		if (!level.hasChunkAt(net.minecraft.core.BlockPos.containing(to)) || t > THROW_TICKS) {
+			burst(level, owner, flying, from, null);
+			return true;
+		}
+		net.minecraft.world.phys.BlockHitResult block = level.clip(new net.minecraft.world.level.ClipContext(from, to,
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE,
+			owner == null ? net.minecraft.world.phys.shapes.CollisionContext.empty() : net.minecraft.world.phys.shapes.CollisionContext.of(owner)));
+		Vec3 end = block.getType() == net.minecraft.world.phys.HitResult.Type.MISS ? to : block.getLocation();
+		double size = 0.2 + 0.016 * thrown.count();
+		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(level, owner, from,
+			end, new net.minecraft.world.phys.AABB(from, end).inflate(size + 0.5), e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator()
+				&& e != owner && (owner == null || !e.isAlliedTo(owner)), (float)size);
+		if (hit != null || block.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+			burst(level, owner, flying, hit != null ? hit.getLocation() : end, hit == null ? null : (LivingEntity)hit.getEntity());
+			return true;
+		}
+		if (t % 2 == 0) {
+			level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, thrown.stack().getItem()), to.x, to.y, to.z, 2, 0.1, 0.1, 0.1, 0.01);
+		}
+		return false;
+	}
+
+	/** The ball comes apart in a spray of pebbles: it hurts what it hit and what's near, and smashes leaves and glass. */
+	private static void burst(ServerLevel level, @Nullable ServerPlayer owner, Flying flying, Vec3 at, @Nullable LivingEntity struck) {
+		Throw thrown = flying.thrown();
+		if (owner != null) {
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(at, at).inflate(BURST_RADIUS),
+				e -> e.isAlive() && !e.isSpectator() && e != owner && !e.isAlliedTo(owner) && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
+				if (near != struck && near.getBoundingBox().distanceToSqr(at) > BURST_RADIUS * BURST_RADIUS) {
+					continue;
+				}
+				if (near instanceof Player other && (other.isCreative() || !owner.canHarmPlayer(other))) {
+					continue;
+				}
+				float damage = BURST_PER_ROCK * thrown.count() * (near == struck ? 1.0F : 0.5F);
+				hit(owner, level, near, damage, true);
+				Vec3 push = near.position().subtract(at).multiply(1.0, 0.0, 1.0);
+				if (push.lengthSqr() > 1.0E-4) {
+					near.push(push.normalize().scale(0.5).add(0.0, 0.2, 0.0));
+					near.needsSync = true;
+				}
+			}
+			// leaves and glass in the way go
+			net.minecraft.core.BlockPos centre = net.minecraft.core.BlockPos.containing(at);
+			int r = (int)Math.ceil(BREAK_RADIUS);
+			for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(centre.offset(-r, -r, -r), centre.offset(r, r, r))) {
+				if (pos.distToCenterSqr(at) > BREAK_RADIUS * BREAK_RADIUS) {
+					continue;
+				}
+				net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+				if (shatters(state) && level.mayInteract(owner, pos) && owner.mayBuild()) {
+					level.destroyBlock(pos.immutable(), true, owner);
+				}
+			}
+		}
+		ItemStack stone = thrown.stack();
+		if (!stone.isEmpty()) {
+			level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, stone.getItem()), at.x, at.y, at.z, 30 + thrown.count(), 0.4, 0.4, 0.4, 0.25);
+		}
+		level.sendParticles(ParticleTypes.POOF, at.x, at.y, at.z, 6, 0.4, 0.4, 0.4, 0.05);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.0F, 0.9F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.STONE_BREAK, SoundSource.PLAYERS, 1.2F, 0.6F);
+		scatter(level, flying.stones(), at, 0.35);
+	}
+
+	/** Leaves and glass (panes, stained and tinted too): what a burst of pebbles smashes. */
+	static boolean shatters(net.minecraft.world.level.block.state.BlockState state) {
+		if (state.isAir() || state.hasBlockEntity()) {
+			return false;
+		}
+		return state.is(net.minecraft.tags.BlockTags.LEAVES) || state.is(net.minecraft.tags.BlockTags.IMPERMEABLE)
+			|| BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().contains("glass");
+	}
+
+	/** The orbit flung outward, a tick on: what the ring passes this tick is hit. True once it's out as far as it goes. */
+	private static boolean tickPulse(ServerLevel level, @Nullable ServerPlayer owner, Flying flying, long t) {
+		Throw thrown = flying.thrown();
+		double reach = ORBIT_RADIUS + (PULSE_RADIUS - ORBIT_RADIUS) * Math.min(1.0, t / (double)PULSE_TICKS);
+		Vec3 middle = thrown.start();
+		if (owner != null) {
+			for (LivingEntity foe : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(middle, middle).inflate(reach, 2.0, reach),
+				e -> !flying.struck().contains(e.getId()) && foe(owner, e))) {
+				double dx = foe.getX() - middle.x, dz = foe.getZ() - middle.z;
+				if (Math.sqrt(dx * dx + dz * dz) - foe.getBbWidth() * 0.5 > reach) {
+					continue;
+				}
+				flying.struck().add(foe.getId());
+				hit(owner, level, foe, PULSE_PER_ROCK * thrown.count(), true);
+				Vec3 push = new Vec3(dx, 0.0, dz);
+				if (push.lengthSqr() > 1.0E-4) {
+					foe.push(push.normalize().scale(PULSE_PUSH).add(0.0, 0.25, 0.0));
+					foe.needsSync = true;
+				}
+				level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.STONE_HIT, SoundSource.PLAYERS, 1.0F, 0.8F);
+				puff(level, thrown.stack(), foe.position().add(0.0, foe.getBbHeight() * 0.5, 0.0), 6);
+			}
+		}
+		if (t < PULSE_TICKS) {
+			return false;
+		}
+		// they come down all around, out at the rim
+		java.util.List<ItemStack> stones = flying.stones();
+		int i = 0, n = Math.max(1, stones.size());
+		for (ItemStack stack : stones) {
+			double angle = Math.PI * 2.0 * i++ / n;
+			Vec3 at = middle.add(Math.cos(angle) * PULSE_RADIUS * 0.8, 0.0, Math.sin(angle) * PULSE_RADIUS * 0.8);
+			scatter(level, java.util.List.of(stack), at, 0.1);
+		}
+		return true;
+	}
+
+	/** The thrown rocks land as items, to be picked up again. */
+	private static void scatter(ServerLevel level, java.util.List<ItemStack> stones, Vec3 at, double spread) {
+		for (ItemStack stack : stones) {
+			for (int left = stack.getCount(); left > 0; ) {
+				int n = Math.min(left, 1 + level.getRandom().nextInt(3));
+				left -= n;
+				net.minecraft.world.entity.item.ItemEntity item = new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.2, at.z,
+					stack.copyWithCount(n));
+				item.setDeltaMovement((level.getRandom().nextDouble() - 0.5) * spread * 2.0, 0.15 + level.getRandom().nextDouble() * 0.2,
+					(level.getRandom().nextDouble() - 0.5) * spread * 2.0);
+				item.setPickUpDelay(20);
+				level.addFreshEntity(item);
+			}
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
+		if (!FLYING.isEmpty()) {
+			tickThrows(server);
+		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Rocks rocks = player.getAttached(ROCKS);
 			if (rocks == null) {
@@ -366,7 +619,10 @@ public final class GravityRocks {
 
 	/** Grit thrown off the rocks. */
 	private static void puff(ServerLevel level, Rocks rocks, Vec3 at, int count) {
-		ItemStack stone = rocks.stack();
+		puff(level, rocks.stack(), at, count);
+	}
+
+	private static void puff(ServerLevel level, ItemStack stone, Vec3 at, int count) {
 		if (stone.isEmpty()) {
 			level.sendParticles(ParticleTypes.POOF, at.x, at.y, at.z, count / 2 + 1, 0.3, 0.3, 0.3, 0.02);
 			return;

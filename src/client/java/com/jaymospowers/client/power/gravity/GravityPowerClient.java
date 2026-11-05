@@ -106,7 +106,9 @@ public final class GravityPowerClient implements PowerClient {
 		} else if (key == PowerKey.ABILITY_4) {
 			crushFrom = down && now >= cooldowns.crush() ? now : -1;
 		} else if (key == PowerKey.ABILITY_1) {
-			liftFrom = down && now >= cooldowns.lift() ? now : -1;
+			// (0.21.10) sneak+R with rocks out throws them, no lift
+			boolean throwsRocks = player.isShiftKeyDown() && player.getAttached(com.jaymospowers.power.gravity.GravityRocks.ROCKS) != null;
+			liftFrom = down && !throwsRocks && now >= cooldowns.lift() ? now : -1;
 		}
 	}
 

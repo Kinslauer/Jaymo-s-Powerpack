@@ -47,6 +47,8 @@ public final class GravityRocksLayer {
 	// ================================================================================================================
 
 	static final RenderStateDataKey<Drawn> KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_rocks");
+	/** (0.21.10) Rocks thrown with sneak+R, still in the air. */
+	static final RenderStateDataKey<Drawn> THROWN_KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_rocks_thrown");
 
 	/** One rock to draw: where (blocks from the feet, world axes), how big, how turned. */
 	record Rock(float x, float y, float z, float size, float yaw, float pitch) {
@@ -73,6 +75,7 @@ public final class GravityRocksLayer {
 
 	/** From every living renderer's extractRenderState: the rocks, if this is a gravity user with them out. */
 	public static void extract(LivingEntity entity, EntityRenderState state, float partial) {
+		extractThrown(entity, state, partial);
 		GravityRocks.Rocks rocks = entity instanceof Player ? entity.getAttached(GravityRocks.ROCKS) : null;
 		if (rocks == null || rocks.count() <= 0 || !(state instanceof LivingEntityRenderState living)) {
 			state.setData(KEY, null);
@@ -102,21 +105,7 @@ public final class GravityRocksLayer {
 			Vec3 right = new Vec3(-Mth.cos(yaw), 0.0, -Mth.sin(yaw));
 			Vec3 home = right.scale(BALL_SIDE).add(0.0, height * BALL_UP + BALL_BOB * Mth.sin(time * 0.1F), 0.0);
 			Vec3 at = flight(entity, rocks, home, feet, time, partial, rocks.from(), GravityRocks.BALL_FLIGHT);
-			float radius = BALL_RADIUS + BALL_RADIUS_PER_ROCK * rocks.count();
-			int n = rocks.count();
-			drawn = new Rock[n + 1];
-			float each = 3.9F * radius / Mth.sqrt(n);
-			float spin = time * BALL_SPIN;
-			for (int i = 0; i < n; i++) {
-				// spread evenly over the sphere (a golden-angle spiral), turning
-				float y = 1.0F - 2.0F * (i + 0.5F) / n;
-				float r = Mth.sqrt(Math.max(0.0F, 1.0F - y * y));
-				float phi = i * 2.39996F + spin;
-				drawn[i] = new Rock((float)at.x + radius * r * Mth.cos(phi), (float)at.y + radius * y, (float)at.z + radius * r * Mth.sin(phi), each,
-					phi * Mth.RAD_TO_DEG + i * 53.0F, i * 71.0F);
-			}
-			// a core, so it isn't hollow
-			drawn[n] = new Rock((float)at.x, (float)at.y, (float)at.z, radius * 1.5F, spin * Mth.RAD_TO_DEG, 20.0F);
+			drawn = sphere(at, rocks.count(), time * BALL_SPIN);
 		} else {
 			int n = Math.min(rocks.count(), ORBIT_DRAWN);
 			drawn = new Rock[n];
@@ -141,6 +130,68 @@ public final class GravityRocksLayer {
 			}
 		}
 		state.setData(KEY, new Drawn(item, box.getCenter(), modelSize, bodyRot, drawn));
+	}
+
+	/** (0.21.10) The rocks thrown with sneak+R: the ball along its arc, or the orbit flying out in a widening ring. */
+	private static void extractThrown(LivingEntity entity, EntityRenderState state, float partial) {
+		GravityRocks.Throw thrown = entity instanceof Player ? entity.getAttached(GravityRocks.THROWN) : null;
+		ItemStack stack = thrown == null ? ItemStack.EMPTY : thrown.stack();
+		if (stack.isEmpty() || !(state instanceof LivingEntityRenderState living)) {
+			state.setData(THROWN_KEY, null);
+			return;
+		}
+		ItemStackRenderState item = new ItemStackRenderState();
+		Minecraft.getInstance().getItemModelResolver().updateForLiving(item, stack, ItemDisplayContext.NONE, entity);
+		if (item.isEmpty()) {
+			state.setData(THROWN_KEY, null);
+			return;
+		}
+		AABB box = item.getModelBoundingBox();
+		float modelSize = (float)Math.max(0.05, Math.max(box.getXsize(), Math.max(box.getYsize(), box.getZsize())));
+		float time = entity.level().getGameTime() + partial;
+		float t = Math.max(0.0F, time - thrown.from());
+		Vec3 feet = entity.getPosition(partial);
+		Rock[] drawn;
+		if (thrown.kind() == GravityRocks.BALL) {
+			if (t > 80.0F) {
+				state.setData(THROWN_KEY, null);
+				return;
+			}
+			Vec3 at = thrown.at(t).subtract(feet);
+			drawn = sphere(at, thrown.count(), time * BALL_SPIN * 4.0F);
+		} else {
+			if (t > GravityRocks.PULSE_TICKS + 1) {
+				state.setData(THROWN_KEY, null);
+				return;
+			}
+			int n = Math.min(thrown.count(), ORBIT_DRAWN * 2);
+			float k = Math.min(1.0F, t / GravityRocks.PULSE_TICKS);
+			double reach = GravityRocks.ORBIT_RADIUS + (GravityRocks.PULSE_RADIUS - GravityRocks.ORBIT_RADIUS) * (1.0F - (1.0F - k) * (1.0F - k));
+			Vec3 middle = thrown.start().subtract(feet);
+			drawn = new Rock[n];
+			for (int i = 0; i < n; i++) {
+				float angle = Mth.TWO_PI * i / n + thrown.from() * ORBIT_SPIN;
+				drawn[i] = new Rock((float)(middle.x + reach * Mth.cos(angle)), (float)(middle.y - 0.6F * k * k + 0.15F * Mth.sin(i * 1.7F)),
+					(float)(middle.z + reach * Mth.sin(angle)), ORBIT_ROCK, angle * Mth.RAD_TO_DEG + i * 41.0F, time * 12.0F + i * 67.0F);
+			}
+		}
+		state.setData(THROWN_KEY, new Drawn(item, box.getCenter(), modelSize, living.bodyRot, drawn));
+	}
+
+	/** A ball of {@code n} rocks round {@code at}, turned by {@code spin}, with a core so it isn't hollow. */
+	private static Rock[] sphere(Vec3 at, int n, float spin) {
+		float radius = BALL_RADIUS + BALL_RADIUS_PER_ROCK * n;
+		Rock[] drawn = new Rock[n + 1];
+		float each = 3.9F * radius / Mth.sqrt(n);
+		for (int i = 0; i < n; i++) {
+			float y = 1.0F - 2.0F * (i + 0.5F) / n;
+			float r = Mth.sqrt(Math.max(0.0F, 1.0F - y * y));
+			float phi = i * 2.39996F + spin;
+			drawn[i] = new Rock((float)at.x + radius * r * Mth.cos(phi), (float)at.y + radius * y, (float)at.z + radius * r * Mth.sin(phi), each,
+				phi * Mth.RAD_TO_DEG + i * 53.0F, i * 71.0F);
+		}
+		drawn[n] = new Rock((float)at.x, (float)at.y, (float)at.z, radius * 1.5F, spin * Mth.RAD_TO_DEG, 20.0F);
+		return drawn;
 	}
 
 	/**
@@ -171,8 +222,15 @@ public final class GravityRocksLayer {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-			Drawn drawn = state.getData(KEY);
-			if (drawn == null || state.isInvisible) {
+			if (state.isInvisible) {
+				return;
+			}
+			draw(poseStack, collector, lightCoords, state, state.getData(KEY));
+			draw(poseStack, collector, lightCoords, state, state.getData(THROWN_KEY));
+		}
+
+		private static void draw(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, HumanoidRenderState state, Drawn drawn) {
+			if (drawn == null) {
 				return;
 			}
 			poseStack.pushPose();
