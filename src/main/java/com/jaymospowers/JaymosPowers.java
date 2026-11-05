@@ -110,6 +110,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.compat.SpellEngineCompat.init();
 		// (0.20.30) One Dimension's default stack: the Aether over the Overworld over the Nether (compat.Stacked)
 		com.jaymospowers.compat.OneDimensionDefaults.init();
+		// (0.20.51) Subtle Effects' bone sprites on hurt skeletons off; our splinters instead
+		com.jaymospowers.compat.SubtleEffectsCompat.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
 		// (0.19.87) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles

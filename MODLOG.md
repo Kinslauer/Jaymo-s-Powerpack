@@ -405,4 +405,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (both a scatter of single pixels, i.e. redstone dust) are gone: sprays pick only spatters, spurts and swipes, and a fleck
   comes as a small spatter for three in ten (`BloodClient.FLECK_KEEP`); `BloodFleck` removed. Kitchen's redstone-block and
   red-dust blood (corpse cuts, gibs, scavengers, the chopper, hangings, grates) is Powers' blood through `KitchenBlood`,
-  and Kingdoms' sharks and great whale and the Aerwhale bleed the same. Gradle build only, not played.
+  and Kingdoms' sharks and great whale and the Aerwhale bleed the same. Andy (00:23Z): "skeletons currently drop bone
+  pngs when hit, they should be debris splinter particles if anything": those were Subtle Effects' (entities config,
+  damage taken), switched off by `compat/SubtleEffectsCompat` (its two public fields, at server start and every 10 s on
+  the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
+  instead (`BladeBlood.splinters`). Gradle build only, not played.

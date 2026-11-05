@@ -133,6 +133,29 @@ public final class BladeBlood {
 	}
 
 	/**
+	 * (0.20.51) Andy: "skeletons currently drop bone pngs when hit, they should be debris splinter particles if anything".
+	 * A skeleton (or skeleton horse) struck throws chips of bone (the bone block's crumbs): this many, plus this many per
+	 * point of damage, at most this many, this fast. Subtle Effects' bone sprites are off ({@code SubtleEffectsCompat}).
+	 */
+	static final int SPLINTERS = 2, SPLINTERS_MAX = 10;
+	static final float SPLINTERS_PER_DAMAGE = 0.6F;
+	static final double SPLINTER_SPEED = 0.12;
+
+	/** (0.20.51) {@code target}, if it's bones, splinters under a blow of {@code damage}. */
+	static void splinters(LivingEntity target, float damage) {
+		if (!(target.level() instanceof ServerLevel level) || !(target.getType().builtInRegistryHolder().is(net.minecraft.tags.EntityTypeTags.SKELETONS)
+			|| target instanceof net.minecraft.world.entity.animal.equine.SkeletonHorse)) {
+			return;
+		}
+		int count = Math.min(SPLINTERS_MAX, Mth.floor(SPLINTERS + damage * SPLINTERS_PER_DAMAGE));
+		Vec3 at = target.getBoundingBox().getCenter();
+		double w = target.getBbWidth() * 0.3;
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+			net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y + target.getBbHeight() * 0.1, at.z, count, w,
+			target.getBbHeight() * 0.2, w, SPLINTER_SPEED);
+	}
+
+	/**
 	 * (0.20.51) How much blood a blow on {@code target} spills against a full one ({@link #FULL_HEALTH_BLOOD} at full
 	 * health up to {@link #NO_HEALTH_BLOOD} at none), so how hurt they are shows in it.
 	 */
@@ -177,6 +200,8 @@ public final class BladeBlood {
 		if (damage <= 0.0F || source.getEntity() == target) {
 			return;
 		}
+		// (0.20.51) bones splinter
+		splinters(target, damage);
 		if (heavyBlunt(source, damage)) {
 			// (0.15.117) a killing one crushes a spider (Kitchen)
 			Crushing.mark(target);
