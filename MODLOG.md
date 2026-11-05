@@ -1058,3 +1058,9 @@ them, and the katana and battleaxe raised a block pose that blocked nothing.
   client layout (`StackLayout.of`, `Layer.minY/shift`), Sodium's `Viewport` and the 26.3 `Frustum`, and nothing wrong
   turned up from the code alone. It now logs what it read once per world ("Aether veil: band floors ..., veil on/off",
   or that no layout reached the client), so `logs/latest.log` shows why if it still shows. Built, not played.
+
+## 0.21.3 (2026-11-05): the demon master start always wakes you in the Nether
+Andy (singleplayer, One Dimension): "it didnt work". His log: a demon biome was found at once, but no village spot near
+it had a floor, and the wider fallback searches generated chunk after chunk for minutes while he waited. Now only the
+nearest few spots are tried (`ZFighterDemonRealm.FLOOR_TRIES`), then the hall goes up right where the biome was found,
+carved out of the rock at the Nether's y 64 if there's no floor (`raiseAt`, which logs the column it found).
