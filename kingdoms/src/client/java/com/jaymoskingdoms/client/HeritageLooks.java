@@ -393,16 +393,18 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		if (look.eyesLit() && !look.blood() && style != null && style.stockEyes() != null) {
 			// (0.7.214) a variant's own eyes
-			Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), style.eyeColor(), style.stockEyes(), style.eyesPrefix(),
-				style.eyesBySkin());
+			Identifier eyes = VampireLooks.faceEyes(state, model, style.eyeColor(), () -> VampireLooks.glowingEyes(state.skin.body().texturePath(),
+				style.eyeColor(), style.stockEyes(), style.eyesPrefix(), style.eyesBySkin()));
 			collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		} else if (look.eyesLit() && kind != null && kind.stockEyes != null) {
 			Integer vampire = state.getData(VampireLooks.LOOK);
 			boolean redSilver = look.blood() && vampire != null && vampire == 2;
-			Identifier eyes = redSilver ? VampireLooks.glowingEyes(state.skin.body().texturePath(), BLOOD_EYE_COLOR, BLOOD_EYES, "nightborn_blood_eyes/",
-				BLOOD_EYES_BY_SKIN) : VampireLooks.glowingEyes(state.skin.body().texturePath(), kind.eyeColor, kind.stockEyes,
-				kind.name().toLowerCase(java.util.Locale.ROOT) + "_eyes/", kind.eyesBySkin);
+			// (0.7.609) on a player MCA draws, MCA's own eyes lit (VampireLooks#faceEyes)
+			Identifier eyes = VampireLooks.faceEyes(state, model, redSilver ? BLOOD_EYE_COLOR : kind.eyeColor, () -> redSilver
+				? VampireLooks.glowingEyes(state.skin.body().texturePath(), BLOOD_EYE_COLOR, BLOOD_EYES, "nightborn_blood_eyes/", BLOOD_EYES_BY_SKIN)
+				: VampireLooks.glowingEyes(state.skin.body().texturePath(), kind.eyeColor, kind.stockEyes,
+					kind.name().toLowerCase(java.util.Locale.ROOT) + "_eyes/", kind.eyesBySkin));
 			collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		}

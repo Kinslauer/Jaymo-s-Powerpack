@@ -5,7 +5,6 @@ import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.NightGifts;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,23 +21,12 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.object.equipment.ElytraModel;
-import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 /**
  * (0.7.66) The client half of {@link NightGifts}: the two keys ({@code O}: Blood Dash or Leap; {@code P}: Groundpound or
@@ -107,7 +95,7 @@ public final class NightGiftsClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKingdoms.id("kin_sense"), NightGiftsClient::compass);
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
-				helper.register(new BatWings(avatar, new ElytraModel(context.bakeLayer(ModelLayers.ELYTRA))));
+				helper.register(new BatWings(avatar));
 			}
 		});
 	}
@@ -210,37 +198,5 @@ public final class NightGiftsClient {
 			line.append(arrow).append(' ').append(about).append(distances.get(i)).append(" m");
 		}
 		return line.toString();
-	}
-
-	/** A vampire's bat wings: the elytra's shape in leather, spread only while it glides with no elytra on. */
-	static final class BatWings extends RenderLayer<AvatarRenderState, PlayerModel> {
-		static final RenderStateDataKey<Boolean> SPREAD = RenderStateDataKey.create(() -> "jaymoskingdoms:bat_wings");
-		private static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/vampire/bat_wings.png");
-		/** How much bigger than an elytra. */
-		static final float SCALE = 1.35F;
-		private final ElytraModel model;
-
-		BatWings(RenderLayerParent<AvatarRenderState, PlayerModel> renderer, ElytraModel model) {
-			super(renderer);
-			this.model = model;
-		}
-
-		/** Called from the render-state mixin. */
-		static Boolean spread(LivingEntity entity) {
-			return entity instanceof Player p && NightGifts.onBatWings(p) ? Boolean.TRUE : null;
-		}
-
-		@Override
-		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-			if (!Boolean.TRUE.equals(state.getData(SPREAD)) || state.isInvisible) {
-				return;
-			}
-			poseStack.pushPose();
-			poseStack.translate(0.0F, -0.05F, 0.125F);
-			poseStack.scale(SCALE, SCALE, SCALE);
-			collector.order(1).submitModel(this.model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
-				state.outlineColor);
-			poseStack.popPose();
-		}
 	}
 }

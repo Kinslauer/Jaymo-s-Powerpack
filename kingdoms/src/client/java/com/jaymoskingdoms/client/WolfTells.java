@@ -61,14 +61,16 @@ public final class WolfTells extends RenderLayer<AvatarRenderState, PlayerModel>
 			// (nothing to show, or under a mask or the symbiote's suit)
 			return;
 		}
-		PlayerModel model = this.getParentModel();
+		// (0.7.609) on MCA's body and pose when MCA draws the player (VampireLooks#skinBody)
+		PlayerModel model = VampireLooks.skinBody(this.getParentModel());
 		if ((tells & HiddenChange.HAIRY_HANDS) != 0) {
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(HANDS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
 		}
 		if ((tells & HiddenChange.FLASHING_EYES) != 0 && flashing(state)) {
-			Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), EYE_GLOW, EYES, "wolf_eyes/", EYES_BY_SKIN);
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+			Identifier eyes = VampireLooks.faceEyes(state, this.getParentModel(), EYE_GLOW,
+				() -> VampireLooks.glowingEyes(state.skin.body().texturePath(), EYE_GLOW, EYES, "wolf_eyes/", EYES_BY_SKIN));
+			collector.order(2).submitModel(VampireLooks.glowBody(this.getParentModel()), state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
 		}
 	}
