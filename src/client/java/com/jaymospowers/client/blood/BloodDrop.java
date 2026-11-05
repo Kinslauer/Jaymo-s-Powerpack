@@ -128,7 +128,7 @@ final class BloodDrop extends SingleQuadParticle {
 	}
 
 	/**
-	 * (0.20.65) A drop this close (blocks, sideways) under a first-person camera isn't drawn: it is the viewer's own
+	 * (0.20.66) A drop this close (blocks, sideways) under a first-person camera isn't drawn: it is the viewer's own
 	 * bleeding, falling past their eyes, and drawn there it looked like the stains ahead splattering by themselves (Andy:
 	 * "the stains on the ground were splattering when it should have been static"). Its stain still lands.
 	 */
@@ -161,7 +161,7 @@ final class BloodDrop extends SingleQuadParticle {
 		super.extract(state, camera, partialTick);
 	}
 
-	/** (0.20.65) Whether it falls right past a first-person viewer's eyes ({@link #OWN_DRIP_REACH}). */
+	/** (0.20.66) Whether it falls right past a first-person viewer's eyes ({@link #OWN_DRIP_REACH}). */
 	private boolean ownDrip(Camera camera, float partialTick) {
 		if (camera.isDetached()) {
 			return false;

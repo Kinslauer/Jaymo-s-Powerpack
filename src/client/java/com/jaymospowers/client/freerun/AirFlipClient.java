@@ -11,11 +11,11 @@ import net.minecraft.world.entity.player.Input;
 
 /**
  * (Motion patch 0) The air flip on this side ({@link AirFlip}): one tap of Sneak in the air, high enough off the ground,
- * flips you. A second tap within {@link #DOUBLE_TAP_TICKS} makes it the dodge or landing roll instead
- * ({@code DodgeClient}), so the flip waits out that window before it goes; a held Sneak is never a tap.
+ * flips you. A second tap within {@link #DOUBLE_TAP_TICKS} is the zoom instead ({@code SneakZoom}; it was the dodge's
+ * before 0.20.65), so the flip waits out that window before it goes; a held Sneak is never a tap.
  */
 public final class AirFlipClient {
-	/** The same double-tap window and tap length as {@code DodgeClient}'s. */
+	/** The same double-tap window and tap length as {@code SneakZoom}'s. */
 	static final int DOUBLE_TAP_TICKS = 6, TAP_HOLD_TICKS = 3;
 
 	private static boolean sneakWasDown;
@@ -41,7 +41,7 @@ public final class AirFlipClient {
 		sneakWasDown = sneak;
 		held = sneak ? held + 1 : 0;
 		if (pressed) {
-			// a second tap inside the window is the dodge's, not ours
+			// a second tap inside the window is the zoom's, not ours
 			waiting = waiting > 0 ? 0 : DOUBLE_TAP_TICKS + 1;
 		}
 		if (held > TAP_HOLD_TICKS) {

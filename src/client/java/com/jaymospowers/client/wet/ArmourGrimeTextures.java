@@ -153,7 +153,7 @@ public final class ArmourGrimeTextures {
 	}
 
 	/**
-	 * (0.20.65) The same, for a body drawn in a skin with an outer layer ({@code layered}: a humanoid's hat, jacket,
+	 * (0.20.66) The same, for a body drawn in a skin with an outer layer ({@code layered}: a humanoid's hat, jacket,
 	 * sleeves and trousers): the blood is painted on the outer layer too, wherever that layer has pixels, so it sits on top
 	 * of the clothes and hair instead of showing only through their gaps (Andy: it "seemed to be under the skin").
 	 */
@@ -178,7 +178,7 @@ public final class ArmourGrimeTextures {
 		return skin(base, blood, false);
 	}
 
-	/** (0.20.65) A corpse's blood over a layered skin ({@link #skin(Identifier, Bloodied.Coat, boolean)}). */
+	/** (0.20.66) A corpse's blood over a layered skin ({@link #skin(Identifier, Bloodied.Coat, boolean)}). */
 	public static @Nullable Identifier skin(Identifier base, Bloodied.@Nullable Blood blood, boolean layered) {
 		Smear smear = smear(blood);
 		if (smear == null) {
@@ -224,7 +224,7 @@ public final class ArmourGrimeTextures {
 	}
 
 	/**
-	 * {@code layered} (0.20.65): {@code base} is a humanoid skin (64 by 64 in the player's layout, at any size) whose
+	 * {@code layered} (0.20.66): {@code base} is a humanoid skin (64 by 64 in the player's layout, at any size) whose
 	 * outer layer is drawn over its body, so each outer pixel the skin has takes the blood of the body pixel under it.
 	 */
 	private static @Nullable Identifier paint(Identifier base, ArmourGrime.@Nullable Grime grime, @Nullable Mask dust, @Nullable Mask mud,
@@ -264,7 +264,7 @@ public final class ArmourGrimeTextures {
 		float threshold = 1.0F - MOST_COVER * level;
 		float bloodThreshold = smear == null ? 2.0F : 1.0F - MOST_BLOOD * smear.stage() / (float) STAGES;
 		int w = image.getWidth(), h = image.getHeight();
-		// (0.20.65) only a square skin has the outer layer's layout (an old 64 by 32 one is made square before it's drawn)
+		// (0.20.66) only a square skin has the outer layer's layout (an old 64 by 32 one is made square before it's drawn)
 		boolean outer = layered && !whole && w == h && w >= 64;
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
@@ -322,7 +322,7 @@ public final class ArmourGrimeTextures {
 	}
 
 	/**
-	 * (0.20.65) The body pixel under the skin pixel ({@code x}, {@code y}) of a square skin {@code w} across, packed as
+	 * (0.20.66) The body pixel under the skin pixel ({@code x}, {@code y}) of a square skin {@code w} across, packed as
 	 * {@code y * w + x}: an outer-layer pixel's own body pixel (the hat over the head, the jacket over the body, each sleeve
 	 * and trouser leg over its limb), any other pixel itself.
 	 */
@@ -381,7 +381,7 @@ public final class ArmourGrimeTextures {
 	}
 
 	/**
-	 * (0.20.65) A copy of a texture made in the game, not a resource: a player's downloaded skin (the skin downloader keeps
+	 * (0.20.66) A copy of a texture made in the game, not a resource: a player's downloaded skin (the skin downloader keeps
 	 * it as a {@link DynamicTexture}, already squared to the 64 by 64 layout). Null for anything else.
 	 */
 	private static @Nullable NativeImage downloaded(Identifier texture) {
@@ -419,7 +419,7 @@ public final class ArmourGrimeTextures {
 			}
 		}
 
-		/** (0.20.65) At a packed pixel ({@code y * w + x}). */
+		/** (0.20.66) At a packed pixel ({@code y * w + x}). */
 		int at(int packed, int w, int h) {
 			return this.at(packed % w, packed / w, w, h);
 		}

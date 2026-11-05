@@ -29,7 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
  * bloodier, laid only where the skin has pixels ({@link ArmourGrimeTextures#skin}), in its own blood's colour. It wears
  * off by itself and washes off in water.
  * <p>
- * (0.20.65) Andy: the blood "seemed to be under the skin". A body in the player's layout (players, MCA folk) has it on
+ * (0.20.66) Andy: the blood "seemed to be under the skin". A body in the player's layout (players, MCA folk) has it on
  * its outer layer too (hat, jacket, sleeves, trousers), wherever that layer has pixels, so it lies on top of the clothes;
  * a player's downloaded skin is read for this (before, it was painted as a plain whole skin, base layer only).
  * <p>
@@ -120,7 +120,7 @@ public final class BloodCoatLayer {
 			} catch (RuntimeException e) {
 				return;
 			}
-			// (0.20.65) a body in the player's layout wears the blood over its outer layer too
+			// (0.20.66) a body in the player's layout wears the blood over its outer layer too
 			boolean layered = this.getParentModel() instanceof PlayerModel;
 			Identifier painted = skin == null ? null
 				: dead != null ? ArmourGrimeTextures.skin(skin, dead, layered) : ArmourGrimeTextures.skin(skin, coat, layered);
