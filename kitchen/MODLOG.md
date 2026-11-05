@@ -1466,3 +1466,13 @@ Andy: "the zombie players still reanimate in heaven, theyre supposed to disappea
 `Corpses.inNoCorpseZone` once a second; one standing there (risen before the rule, or brought in) fades in souls and drops
 what it held and carried. Bodies there already never rose since 0.5.61; the pack had been shipping 0.5.57 (Powers 0.20.80
 now ships Kitchen built from source). Built, not played.
+
+## 0.5.70: a carcass bled where it lies drains where you can see it (pack 0.20.84)
+
+Andy, on Jung's clip of a deer on a butcher table: "the deer was clipping through the butcher table, i didnt see any blood
+draining either". A carcass bled on the ground or a table dripped from inside its own middle, so every drop and the pool
+it left were hidden under the body. `CorpseEntity.throatPoint`: it bleeds from just past its head or snout (out from its
+middle), so the drops fall and pool beside it, or run off the table's edge when the head hangs over. A hung carcass drips
+from the bottom of its lowest part, not its middle. The clipping was the old 0.5.57 jar the pack shipped until 0.5.69:
+Cube Animals' deer got a man's ragdoll and its legs hung loose through whatever it lay on, fixed in 0.5.64 and 0.5.68.
+tools/ragdoll_sim checks a deer dragged off a 2x4 table never ends up inside it (0/128). Built, not played.
