@@ -858,3 +858,6 @@ looking forward the camera stays forward, but the model is drawn moving in whate
   `TakeoverFacingHeadMixin`.)
 - The ape fit (`ApeRage.FIT`) now syncs to everyone, so other players see the ape facing its way too.
 - Kingdoms 0.7.585 does the same for the werewolf beast, blood fever, feral curse and Grue holds. Built, not played.
+- **0.20.98, Shift + Alt zoom lasts while Alt is held** (Andy: "releasing shift shouldnt stop your zoom but alt does"):
+  the Shift + Left Alt zoom no longer ends when Shift is let go, only when Alt is (`SneakZoom`). The double-tap-and-hold
+  Shift zoom still ends with Shift. Built, not played.
