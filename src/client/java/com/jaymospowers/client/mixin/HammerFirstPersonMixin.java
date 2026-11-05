@@ -18,7 +18,7 @@ abstract class HammerFirstPersonMixin {
 	@WrapOperation(method = "submitArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/ItemUseAnimation;"))
 	private ItemUseAnimation jaymospowers$hammerPose(ItemStack stack, Operation<ItemUseAnimation> original) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player != null && KnifeGuard.isKnife(stack.getItem()) && KnifeGuard.pose(player) != null) {
+		if (player != null && KnifeGuard.guards(stack.getItem()) && KnifeGuard.pose(player) != null) {
 			// (0.18.64) your WeaponMod knife held up as a guard
 			return ItemUseAnimation.BLOCK;
 		}

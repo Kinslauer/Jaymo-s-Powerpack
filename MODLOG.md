@@ -1015,3 +1015,15 @@ Nether's own y 64 (`ZFighterStarts.demonBiome`) and logs how long it took and wh
   fallback when there is none) is within 12 blocks of where you fell, you're stood on safe loaded ground 12-20 blocks
   away instead, facing away from whoever was executing you when there was one (`ChronoCheatDeath.away`,
   `Mortality.ground` made public). Built, not played.
+## 0.20.118 (2026-11-05): every melee weapon parries; Kingdoms 0.7.601 gives each a weapon skill
+Andy: "is battleaxe supposed to not parry? and it also has no moves, neither does the ninjato, they should all integrate
+with the weapon arts". Not meant to: WeaponMod's melee weapons have their own right click, so the weapon guard skipped
+them, and the katana and battleaxe raised a block pose that blocked nothing.
+- The battleaxe and katana now guard and parry on right click like any weapon. The halberd and spear do too, and sneak +
+  right click does what right click did (the halberd's reach switch, the spear's throw), as the knife's throw already
+  works (`KnifeGuard.guards` / `ownUse`, `WeaponModMeleeUseMixin`, the guard poses). The patron weapons you strike with
+  (Hearthguard, Anvil-Father's Hammer, Huntsman's Spear, Gravelight, Plain Word) guard too (`PatronWeaponItem.active`).
+- Deliberately still no guard, because right click is their own move: the warhammer (its smash; it guards while that
+  cools down), the flail (whirl), the rapier (lunge), the boomerang and throwing weapons, vanilla spears (charge),
+  the tridents, Tidecaller / Sunbrand / Ashfang (their gifts), and the Arsenal's relic and stone swords.
+- Pairs with Kingdoms 0.7.601: every melee weapon gets an RPG Series weapon skill on the skill bar. Built, not played.
