@@ -257,6 +257,10 @@ public final class StoryGround {
 			ChunkPos origin = ChunkPos.containing(spawn);
 			int reach = CAPITAL_VILLAGE_SEARCH * CAPITAL_VILLAGE_SEARCH;
 			for (Holder<Structure> village : villages.get()) {
+				// (0.7.595) a capital only in an Epic town
+				if (!Seats.epic(village)) {
+					continue;
+				}
 				for (StructurePlacement placement : state.getPlacementsForStructure(village)) {
 					if (!(placement instanceof RandomSpreadStructurePlacement spread)) {
 						continue;
@@ -355,7 +359,7 @@ public final class StoryGround {
 		if (bell.isEmpty()) {
 			return false;
 		}
-		Seats.Found found = Seats.structureAt(level, bell.get(), Seats::village);
+		Seats.Found found = Seats.structureAt(level, bell.get(), Seats::epic);
 		if (found.status() != Seats.Status.FOUND || found.start() == null) {
 			return false;
 		}
@@ -372,14 +376,14 @@ public final class StoryGround {
 		return true;
 	}
 
-	/** A kingdom's citadel on open ground near {@code near} (no village would do). */
+	/** A kingdom on open ground near {@code near} (no village would do): an Epic town raised there, else its castle. */
 	private static @Nullable Faction citadel(ServerLevel level, BlockPos near) {
 		if (!realmless(level.getServer())) {
 			return null;
 		}
 		BlockPos ground = LifeStory.ground(level, near, 0, LifeStory.STRUCTURE_NEAR * 4, level.getRandom());
 		BlockPos at = ground != null ? ground : level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, near);
-		return KingdomEvents.found(level, at, Castle.Kind.CITADEL);
+		return KingdomEvents.foundTown(level, at);
 	}
 
 	// ---- camps and monoliths (made at once) --------------------------------------------------------------------------
@@ -506,14 +510,14 @@ public final class StoryGround {
 		ROADWAYS.put(id, job);
 	}
 
-	/** A second kingdom's citadel a few hundred blocks from the first town's seat (so a road can join them). */
+	/** A second kingdom (its town, else its castle) a few hundred blocks from the first town's seat (so a road can join them). */
 	private static void secondTown(ServerLevel level, BlockPos spawn) {
 		List<Faction> towns = Roads.towns(level.getServer());
 		BlockPos from = towns.isEmpty() ? spawn : towns.getFirst().seat();
 		BlockPos ground = LifeStory.ground(level, from, SECOND_TOWN_MIN, SECOND_TOWN_MAX, level.getRandom());
 		if (ground != null) {
 			JaymosKingdoms.LOGGER.info("No second town for a trader's road: raising one at {}", ground);
-			KingdomEvents.found(level, ground, Castle.Kind.CITADEL);
+			KingdomEvents.foundTown(level, ground);
 		}
 	}
 
@@ -548,7 +552,7 @@ public final class StoryGround {
 			if (f == null && !founded) {
 				founded = true;
 				BlockPos seat = shore(level, spawn);
-				f = seat == null ? null : KingdomEvents.found(level, seat, Castle.Kind.CITADEL);
+				f = seat == null ? null : KingdomEvents.foundTown(level, seat);
 			}
 			return f == null ? -1 : f.id();
 		}
