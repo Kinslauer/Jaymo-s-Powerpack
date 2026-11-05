@@ -26,7 +26,10 @@ public interface TinkerTool {
 	static void tick(ItemStack stack, ServerLevel level) {
 		CustomModelData look = stack.get(DataComponents.CUSTOM_MODEL_DATA);
 		boolean shownBroken = look != null && !look.flags().isEmpty() && look.flags().getFirst();
-		if (look == null || !stack.has(Tinkering.TOOL_MATERIALS) || shownBroken != ToolStats.isBroken(stack)) {
+		// (0.20.76) one forged before melee kinds had the weapon guard gets it the first time it's carried
+		boolean unguarded = !stack.has(DataComponents.BLOCKS_ATTACKS) && stack.getItem().components().has(DataComponents.BLOCKS_ATTACKS)
+			&& !ToolStats.isBroken(stack);
+		if (look == null || !stack.has(Tinkering.TOOL_MATERIALS) || shownBroken != ToolStats.isBroken(stack) || unguarded) {
 			ToolStats.apply(stack);
 			Modifier.enchant(stack, level.registryAccess());
 		}

@@ -607,3 +607,16 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 ## 0.20.75 (2026-11-05): NPC speech bubble fix, orc lines
 - Pack bump for Kingdoms 0.7.562: haven guards' rally cry showed a raw lang key instead of the line; villagers, guards
   and goblins now greet, warn off or shout at the orcs they meet (OrcSightings). Not played.
+
+## 0.20.76 (2026-11-05): weapons parry again
+- Andy: "parry doesnt seem possible with weapons anymore, is that because of the weapon arts?". Not the arts (the skill
+  bar leaves right click on a guarding weapon). Two other holes:
+  - Right click on a foe in reach opened MCA's chat (orcs, guards, bandits are MCA villagers), so the guard never went
+    up. With a guarding weapon in the main hand, right click on a foe (a monster, a mob that's swinging at you, the one
+    you're locked onto) now raises the guard; sneak + right click still talks (`Guard.guardsAgainst`, `GuardOverTalkMixin`
+    on `Player.interactOn`). Fabric's right-click-on-someone handlers run before it, so executions, reviving, paying off
+    and the rest come first.
+  - Tool Station weapons (swords, weapons, tools) never had the guard: their item class has its own right click, which
+    `Guard.guardable` skipped, and `ToolStats` stripped it. They get it now (also keeps right click off the skill bar's
+    first form for them); ones already made pick it up when carried. A Tool Station dual-wield dagger in the off hand still
+    swings on right click. Broken ones don't guard. Not played.
