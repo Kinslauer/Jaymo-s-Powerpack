@@ -48,6 +48,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.combat.ShieldBang.init();
 		com.jaymospowers.combat.AttackTells.init();
 		com.jaymospowers.core.HiddenArmor.init();
+		// (0.20.68) armour wears fast, absorbs more, breaks without vanishing
+		com.jaymospowers.core.ArmourWear.init();
 		com.jaymospowers.core.Dismember.init();
 		com.jaymospowers.core.wounds.Wounds.init();
 		com.jaymospowers.core.Oddities.init();

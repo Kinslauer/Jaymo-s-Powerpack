@@ -566,3 +566,20 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - Andy, of royals being gibbed: "noone but stoneborn are exempt". Stoneborn (Kingdoms tag
   `jaymoskingdoms_heritage_stoneborn`) are never gibbed (`BlastGore.stone`); they can still lose limbs. Everyone else,
   royals included, can be.
+
+## 0.20.68 (2026-11-05; Kingdoms 0.7.557, hint 101): armour wears fast, absorbs more, breaks without vanishing
+
+- Andy: "armor should have far less durability across the board, absorbing more damage from attacks, but when it does
+  break it doesnt disappear, it remains repairable but you start taking full damage ... players and npc alike. axes and
+  other weapons like maces deal more armor damage ... repairs are not possible on the battlefield."
+- `core/ArmourWear` (tuning at the top): every humanoid armour piece (any mod's, not elytra) keeps 30% of its durability
+  (`DefaultItemComponentEvents`); worn armour counts 1.4x armour and 1.25x toughness against a hit (vanilla's 80% cap
+  stays); axes, maces and `Fractures.blunt` weapons wear it 2.5x faster.
+- At 0 a piece stays at full damage (`ArmourWearStackMixin`): vanilla already skips a broken stack's attributes, and
+  `ArmourWearEnchantMixin` quiets its enchantments. Tooltip says "Broken: repair it". Forged (graded) pieces keep
+  `Wear`'s own Broken rule.
+- NPCs' armour now wears too (vanilla `LivingEntity#hurtArmor` is empty; `ArmourWearLivingMixin`). With no anvil, a
+  mob mends 10% a piece every 5 s once 30 s out of a fight with no target (`ArmourWearMobMixin`).
+- In a fight (hurt or hitting within 10 s, or a hostile mob after you within 16 blocks): the anvil won't hand over a
+  repaired armour piece, and Mending takes no XP. Grindstone and crafting-grid combining are not blocked.
+- Old worlds: forged pieces baked before this keep their old maximum until re-baked. Gradle build only, not played.

@@ -3,6 +3,12 @@
 	"package": "com.jaymospowers.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"ArmourWearStackMixin",
+		"ArmourWearLivingMixin",
+		"ArmourWearMobMixin",
+		"ArmourWearEnchantMixin",
+		"ArmourWearRepairMixin",
+		"ArmourWearMendingMixin",
 		"AfflictionCureMixin",
 		"StackedHeightMixin",
 		"DroppedArmsDeathMixin",
