@@ -65,7 +65,9 @@ public final class DownedHud {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		blackBefore = black;
-		boolean knocked = player != null && player.hasAttached(Downed.KNOCKED);
+		// ((0.20.91) and black while a life that ended waits for the new character: Mortality.REBORNING)
+		boolean knocked = player != null && (player.hasAttached(Downed.KNOCKED)
+			|| player.isAlive() && player.hasAttached(com.jaymospowers.core.wounds.Mortality.REBORNING));
 		black = knocked ? Math.min(1.0F, black + 1.0F / BLACK_IN_TICKS) : Math.max(0.0F, black - 1.0F / BLACK_OUT_TICKS);
 		beatSwellBefore = beatSwell;
 		if (player == null || !Downed.isDowned(player)) {

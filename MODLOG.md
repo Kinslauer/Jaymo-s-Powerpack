@@ -758,3 +758,18 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - Everyone sees the pose (`ThrownRocks.THROW`, drawn by `client/armory/RockThrowPose`). Your arm moves the moment you
   press, and the rock leaves as the arm comes over. Tune it in the constants at the top of `RockThrowPose`.
   Built, not played.
+
+## 0.20.91 (2026-11-05): reincarnation fixes: no wall, nothing kept, black till ready, one Judge
+- Andy: "the judges keep multiplying for some reason, and reincarnating just spawned me in a wall, it should wipe
+  absoluteley everything on your character, and black screen until it's ready". From his clip: a final death still went
+  to the Other World; the Judge's "born again" sent him home to a spot inside a wall while his life was still over, he
+  suffocated, died for good again and was sent back to the hall, round and round.
+- A final death no longer goes to the Other World (`ZFighterAfterlife` AFTER_DEATH/AFTER_RESPAWN): Reincarnate respawns
+  you and the new life starts. Going home from the hall never puts you inside blocks any more (`Mortality.safe`).
+- Black until it's ready: from the respawn until Kingdoms says the new character is made (story, MCA's creator,
+  heritage, class: `LifeStory.making`), the screen is black (`Mortality.REBORNING`, drawn by `DownedHud`; 10 min at most).
+- Everything goes: every Powers/Kingdoms/Kitchen attachment with no exceptions (unlocked roads and heritages, backpack,
+  baubles, stashes, costume are no longer kept), plus inventory, ender chest, experience, effects and spawn point.
+- The Judges: the hall looked for its people as soon as the chunk's blocks were in, before its creatures loaded, so a new
+  Judge (and master, teller) was made at every arrival. Now only once the creatures are loaded, and extras are sent away.
+  Kingdoms 0.7.582 goes with it. Built, not played.

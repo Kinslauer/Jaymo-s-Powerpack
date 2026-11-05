@@ -9391,3 +9391,5 @@ ultimate and beam-clash films came down with it. Not played.
   foot (old ones carved when a player comes near); a book and quill used on them copies a row of runes as a page (one
   a day from each), and the more rows a book holds the more its copier makes out under each: the next standing Giant's
   kind, its heading, how far, whether it stirs. Not played.
+- **0.7.582, a new life's black screen:** `LifeStory.making` (story, MCA's creator, heritage or class still to choose, or
+  held in stasis), read by Powers 0.20.91 to keep a reincarnated player's screen black until their character is made.
