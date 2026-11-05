@@ -2187,22 +2187,30 @@ public class CorpseEntity extends Entity {
 	/** (0.4.29) A fish corpse: its loot drops and it's gone, in one click. */
 	private InteractionResult lootFish(ServerLevel level) {
 		dropLoot(level);
-		level.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.2, getZ(), 12, 0.25, 0.1, 0.25, 0.05);
+		EntityType<?> type = sourceType();
+		if (type != null && !type.builtInRegistryHolder().is(Corpses.FISH_CORPSES) && Corpses.isSmallCritter(type)
+			&& !isInWater()) {
+			// (0.5.64) a critter on dry land: a little puff, not a splash
+			level.sendParticles(ParticleTypes.POOF, getX(), getY() + 0.15, getZ(), 4, 0.1, 0.05, 0.1, 0.01);
+		} else {
+			level.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.2, getZ(), 12, 0.25, 0.1, 0.25, 0.05);
+		}
 		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
 		discard();
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
 	/**
-	 * A fish (see {@link CorpseKind#FISH}). Fish corpses left from before 0.4.29 were saved as {@link CorpseKind#OTHER},
-	 * so those count by their type too.
+	 * A fish or a small critter (see {@link CorpseKind#FISH}). Fish corpses left from before 0.4.29 were saved as
+	 * {@link CorpseKind#OTHER}, so those count by their type too.
 	 */
 	public boolean isFish() {
 		if (kind == CorpseKind.FISH) {
 			return true;
 		}
-		EntityType<?> type = kind == CorpseKind.OTHER ? sourceType() : null;
-		return type != null && type.builtInRegistryHolder().is(Corpses.FISH_CORPSES);
+		// (0.5.64) and small critters left from before as an animal's or a thing's body
+		EntityType<?> type = kind == CorpseKind.OTHER || kind == CorpseKind.ANIMAL ? sourceType() : null;
+		return type != null && (type.builtInRegistryHolder().is(Corpses.FISH_CORPSES) || Corpses.isSmallCritter(type));
 	}
 
 	/** (0.5.20) How big the mob was against its kind (a scaled one's scale), 1 if it can't be told. */

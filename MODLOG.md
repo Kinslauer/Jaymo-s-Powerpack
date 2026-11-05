@@ -410,3 +410,8 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   damage taken), switched off by `compat/SubtleEffectsCompat` (its two public fields, at server start and every 10 s on
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
+
+- **0.20.52, Kitchen 0.5.64, small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
+  work like fish, if they drop an item the corpse disappears." Crickets, mice, snails, butterflies, bees and any other
+  creature kind under 0.5 blocks both ways (or in Kitchen's new `small_corpses` tag) are looted in one click and gone,
+  like fish. Rabbits, chickens, frogs and babies still leave a body. Not played.

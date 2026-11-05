@@ -1420,3 +1420,12 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
   as well. it does not ever resemble blood." Corpse cuts, gibs, scavengers, the chopper, hangings and blood grates sent
   redstone-block crumbs or red dust; `KitchenBlood.send` sends Powers' red blood instead (nothing without Powers).
   Gradle build only, not played.
+
+- **0.5.64 (Powers 0.20.52), small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
+  work like fish, if they drop an item the corpse disappears." A small critter's body is a fish's now (`CorpseKind.FISH`):
+  one click spills its loot and it's gone, nothing to carry or butcher. `Corpses.isSmallCritter` counts the new
+  `small_corpses` tag (Cube Animals' cricket, mouse, snail, chameleon; Naturalist's butterfly, caterpillar, firefly,
+  dragonfly, snail; Alex's Mobs' bugs and hummingbird; vanilla tadpole, bee, silverfish, endermite) and, without a tag,
+  any non-monster kind under 0.5 blocks both ways (`SMALL_CRITTER_SIZE`), so future small mobs are covered. It goes by
+  the kind's size, so babies and rabbits, chickens and frogs still leave a body. Old critter bodies already lying around
+  count too. On dry land they puff instead of splashing. Not played.
