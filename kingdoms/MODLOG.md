@@ -9128,6 +9128,7 @@ ultimate and beam-clash films came down with it. Not played.
   else stains within 1.75 of the block you look at, or a Kitchen grate there), it gathers for the whole hold and never
   fires; otherwise, empty-handed, it's a barrage. A full reservoir draws nothing, so it fires.
 - Built in the cloud; not played.
+
 ## 0.7.555 — the Judge's menu back; villagers want their own things
 - Andy: "i messed up ... it should instead be whatever is proper". 0.7.539's "only Have a word" on Powers' Z Fighter
   characters is undone (`McaZFighterPageMixin` gone, the `ZFighterFolk.WORD`/`keeps` filter gone). It had also reused
@@ -9144,3 +9145,8 @@ ultimate and beam-clash films came down with it. Not played.
   (`byNature`, three things each), then their trade, then small pleasures. Z Fighter characters get a trimmed MCA screen
   again (`McaZFighterPageMixin`: Talk and Trade only) and a trimmed talk menu (`ZFighterFolk.keeps`: Talk about work, Talk
   about training on a master, Chat; joke and story for pilots and patrolmen). No hugs, rumours, flirting or Have a word.
+
+## 0.7.556 (2026-11-05): blast hint (pack 0.20.67)
+
+- Loading-screen hint 100 (`lang/parts/blast-gore.json`, HINTS 100) for Powers' blasts blowing bodies apart and taking
+  limbs off survivors. Not played.

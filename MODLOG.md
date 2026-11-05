@@ -527,6 +527,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (`getVolume` reads the resolved `Sound`). Thrown inside `handleExplosion`, it dropped the client with "Network Protocol
   Error" whenever a creeper or TNT went off nearby. `onPlay` now calls `getOrResolve` first (cached, so the engine plays
   the same variant). Checked against the 26.3 client jar; not built here.
+
 - **0.20.65, zoom on Sneak, dodge on Alt** (Andy: "double tap and hold shift should be default zoom, and alt should be
   roll"): tap Sneak, press it again within 6 ticks and keep holding, and OK Zoomer zooms until you let go
   (`client/SneakZoom` holds OK Zoomer's Zoom key down by name, so its smooth zoom, scroll steps and settings still
@@ -542,3 +543,26 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   lies on top of the clothes. The "splattering" stains were the viewer's own cut dripping from chest height past the
   first-person camera, landing in view right on the trail ahead: `BloodDrop` no longer draws a drop falling within
   0.45 blocks (sideways) under a first-person camera. Its stain still lands; others still see the drips. Built.
+
+## 0.20.67 (2026-11-05): blasts blow bodies apart
+
+- Andy: "explosions (dependent on proximity) have a higher chance to gib mobs and players on death and dismember
+  survivors." New `core/BlastGore`: while a vanilla blast hurts things (`BlastGoreMixin` on `ServerExplosion.explode`)
+  it knows the centre and radius, and each body's closeness is 1 minus its distance over twice the radius (vanilla's
+  reach), times the root of radius/4 (TNT counts in full, a ghast fireball about half). Other mods' blast damage with no
+  vanilla explosion uses damage/40 instead.
+- **Killed by it:** gibbed at 0 below closeness 0.25, rising to 95% at the centre (`GIB_FROM`, `GIB_MAX`). A person's head
+  and every limb fly off from the blast (`Dismember.blastOff`, quiet blood: 6 flecks a part, no extra sounds; skeletons
+  shatter instead), and Kitchen bursts the mob's body into chunks (tag `jaymoskitchen.gib`; `jaymoskitchen.no_gib` keeps
+  it whole, replacing Kitchen's flat 12-damage rule). A gibbed player leaves just a torso corpse and respawns with only
+  the parts they had lost before the blast (`Dismember.restore`). Not gibbed: 60% of the survivor chance to lose a limb
+  onto the corpse.
+- **Downed rules kept:** a humanoid the blast would kill still goes down unless it gibs them (`Downed`, checked before
+  the halving). A gibbed Rubber-folk loses all four limbs but keeps the head and goes down split, mending with a swallow
+  within 10 s as after a halving (`Dismember.split`). Beheading still kills them.
+- **Survivors** (standing or just downed, 3+ damage): lose a random arm or leg at 0 below closeness 0.3 rising to 50%
+  (`LIMB_FROM`, `LIMB_MAX`), a second at 40% of that; never the head. Rubber-folk x2, Will's Grim Hand for whoever is
+  behind the blast. Tuning at the top of `BlastGore`. Gradle build only, not played.
+- Andy, of royals being gibbed: "noone but stoneborn are exempt". Stoneborn (Kingdoms tag
+  `jaymoskingdoms_heritage_stoneborn`) are never gibbed (`BlastGore.stone`); they can still lose limbs. Everyone else,
+  royals included, can be.
