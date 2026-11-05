@@ -106,6 +106,12 @@ public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.Sta
 		} else if (state.kind == Wagon.RICKSHAW) {
 			rickshaw(boxes, wheels, state.load, state.color);
 			wheelWood = block("spruce_planks");
+		} else if (state.kind == Wagon.HANDCART) {
+			handcart(boxes, wheels, state.load, state.color);
+			wheelWood = block("oak_planks");
+		} else if (state.kind == Wagon.SKIFF) {
+			skiff(boxes, state.load, state.color);
+			wheelWood = block("spruce_planks");
 		} else {
 			cart(boxes, wheels, state.load, state.color);
 			wheelWood = block("spruce_planks");
@@ -200,6 +206,96 @@ public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.Sta
 				box(b, block("barrel"), 0.05F, 0.8F, -1.05F, 0.75F, 1.5F, -0.35F);
 				box(b, block("barrel"), -0.4F, 1.5F, -1.0F, 0.3F, 2.1F, -0.4F);
 				box(b, block(dye(color) + "_wool"), -0.75F, 0.8F, -0.25F, 0.75F, 1.25F, 0.95F);
+			}
+			default -> {
+			}
+		}
+	}
+
+	/**
+	 * (0.7.490) A poor settlement's handcart: two tall thin wheels either side of a shallow plank tray, its end-boards and side-rails low, a
+	 * prop post under the back so it stands, and two long handles out in front for the carter's hands. The load shows heaped in the tray under a
+	 * cloth in the settlement's colour, tied down with cord. Original, no other mod's model.
+	 */
+	private static void handcart(List<Box> b, List<Wheel> wheels, int load, int color) {
+		BlockState plank = block("oak_planks"), dark = block("dark_oak_planks"), pole = block("stripped_oak_log");
+		BlockState cloth = block(dye(color) + "_wool");
+		wheels.add(new Wheel(-0.62F, 0.45F, -0.05F, 0.45F));
+		wheels.add(new Wheel(0.62F, 0.45F, -0.05F, 0.45F));
+		// the axle, and the tray over it
+		box(b, dark, -0.6F, 0.4F, -0.1F, 0.6F, 0.5F, 0.0F);
+		box(b, plank, -0.5F, 0.5F, -0.85F, 0.5F, 0.6F, 0.65F);
+		// its low rails and end-boards
+		box(b, dark, -0.55F, 0.6F, -0.85F, -0.47F, 0.9F, 0.65F);
+		box(b, dark, 0.47F, 0.6F, -0.85F, 0.55F, 0.9F, 0.65F);
+		box(b, dark, -0.5F, 0.6F, -0.9F, 0.5F, 0.95F, -0.82F);
+		box(b, dark, -0.5F, 0.6F, 0.62F, 0.5F, 0.8F, 0.68F);
+		// the prop under the back
+		box(b, dark, -0.1F, 0.0F, -0.8F, 0.1F, 0.5F, -0.7F);
+		// the handles, out past the front board to the carter's hands, with a crossbar between
+		box(b, pole, -0.4F, 0.62F, 0.65F, -0.33F, 0.69F, 1.75F);
+		box(b, pole, 0.33F, 0.62F, 0.65F, 0.4F, 0.69F, 1.75F);
+		box(b, pole, -0.4F, 0.62F, 1.7F, 0.4F, 0.69F, 1.77F);
+		switch (load) {
+			case Wagon.STONE -> {
+				box(b, block("cobblestone"), -0.42F, 0.6F, -0.8F, 0.0F, 1.05F, -0.2F);
+				box(b, block("coal_ore"), 0.02F, 0.6F, -0.78F, 0.42F, 0.98F, -0.25F);
+				box(b, block("iron_ore"), -0.35F, 0.6F, -0.1F, 0.3F, 0.95F, 0.5F);
+			}
+			case Wagon.FOOD -> {
+				box(b, block("hay_block"), -0.42F, 0.6F, -0.8F, 0.4F, 1.1F, -0.15F);
+				box(b, block("pumpkin"), -0.4F, 0.6F, -0.05F, 0.05F, 1.0F, 0.45F);
+				box(b, block("barrel"), 0.08F, 0.6F, -0.05F, 0.44F, 1.0F, 0.5F);
+			}
+			case Wagon.GOODS -> {
+				box(b, block("barrel"), -0.42F, 0.6F, -0.8F, 0.02F, 1.1F, -0.3F);
+				box(b, cloth, -0.44F, 0.6F, -0.25F, 0.44F, 1.05F, 0.55F);
+				// (the cord over it)
+				box(b, dark, -0.46F, 0.95F, 0.1F, 0.46F, 1.07F, 0.16F);
+			}
+			default -> {
+			}
+		}
+	}
+
+	/**
+	 * (0.7.490) A cove's trade skiff: a narrow plank hull, pointed at the bow and square at the stern, low gunwales, a short mast with a sail in
+	 * the cove's colour and a pennant, a tiller aft, and the cargo in barrels amidships. Original, no other mod's model.
+	 */
+	private static void skiff(List<Box> b, int load, int color) {
+		BlockState plank = block("spruce_planks"), dark = block("dark_oak_planks"), pole = block("stripped_spruce_log");
+		BlockState sail = block(dye(color) + "_wool");
+		// the keel and the hull's floor, the sides stepping in toward the bow
+		box(b, dark, -0.12F, 0.0F, -1.2F, 0.12F, 0.12F, 1.5F);
+		box(b, plank, -0.5F, 0.1F, -1.1F, 0.5F, 0.2F, 0.9F);
+		box(b, plank, -0.35F, 0.1F, 0.9F, 0.35F, 0.2F, 1.3F);
+		box(b, plank, -0.2F, 0.1F, 1.3F, 0.2F, 0.2F, 1.6F);
+		box(b, dark, -0.6F, 0.2F, -1.1F, -0.5F, 0.6F, 0.9F);
+		box(b, dark, 0.5F, 0.2F, -1.1F, 0.6F, 0.6F, 0.9F);
+		box(b, dark, -0.45F, 0.2F, 0.9F, -0.35F, 0.6F, 1.3F);
+		box(b, dark, 0.35F, 0.2F, 0.9F, 0.45F, 0.6F, 1.3F);
+		box(b, dark, -0.15F, 0.2F, 1.3F, 0.15F, 0.7F, 1.6F);
+		// the transom, and the thwart a deckhand sits on
+		box(b, dark, -0.6F, 0.2F, -1.2F, 0.6F, 0.65F, -1.1F);
+		box(b, plank, -0.5F, 0.35F, -0.6F, 0.5F, 0.42F, -0.4F);
+		// the tiller
+		box(b, pole, -0.04F, 0.5F, -1.6F, 0.04F, 0.58F, -1.1F);
+		// the mast, the sail and its pennant
+		box(b, pole, -0.06F, 0.2F, 0.3F, 0.06F, 2.4F, 0.42F);
+		box(b, pole, -0.5F, 1.9F, 0.3F, 0.5F, 1.96F, 0.42F);
+		box(b, sail, -0.48F, 0.85F, 0.33F, 0.48F, 1.9F, 0.4F);
+		box(b, block("black_wool"), -0.02F, 2.4F, 0.3F, 0.02F, 2.6F, 0.8F);
+		switch (load) {
+			case Wagon.STONE -> {
+				box(b, block("cobblestone"), -0.4F, 0.2F, -0.3F, 0.0F, 0.6F, 0.2F);
+				box(b, block("iron_ore"), 0.05F, 0.2F, -0.3F, 0.4F, 0.55F, 0.2F);
+			}
+			case Wagon.FOOD -> {
+				box(b, block("hay_block"), -0.4F, 0.2F, -0.3F, 0.4F, 0.6F, 0.2F);
+			}
+			case Wagon.GOODS -> {
+				box(b, block("barrel"), -0.42F, 0.2F, -0.3F, -0.02F, 0.65F, 0.2F);
+				box(b, block("barrel"), 0.02F, 0.2F, -0.3F, 0.42F, 0.6F, 0.2F);
 			}
 			default -> {
 			}

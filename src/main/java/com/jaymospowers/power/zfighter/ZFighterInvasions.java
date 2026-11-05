@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.wounds.Downed;
 import java.util.ArrayList;
@@ -324,7 +325,7 @@ public final class ZFighterInvasions {
 		List<Component> lines = new ArrayList<>();
 		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_rules", (int)BOUNDARY, LEAVE_GRACE / 20).withStyle(ChatFormatting.GOLD));
 		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_prize_tp", TOTAL_TP, TOTAL_XP).withStyle(ChatFormatting.YELLOW));
-		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_prize_items", TOTAL_EMERALDS, inv.theme.itemCount,
+		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_prize_items", KingdomsMoney.text(KingdomsMoney.worth(TOTAL_EMERALDS)), inv.theme.itemCount,
 			new ItemStack(inv.theme.item).getHoverName(), BEANS).withStyle(ChatFormatting.YELLOW));
 		lines.add(Component.translatable("message.jaymospowers.zfighter_invasion_prize_earrings",
 			Math.round(ZFighterFusionItems.TYRANT_DROP_CHANCE * 100.0F)).withStyle(ChatFormatting.LIGHT_PURPLE));
@@ -621,6 +622,7 @@ public final class ZFighterInvasions {
 		tyrant.kingdom = inv.kingdom;
 		tyrant.getAttribute(Attributes.SCALE).setBaseValue(inv.theme.bossScale);
 		tyrant.addTag(TAG);
+		tyrant.addTag(com.jaymospowers.power.xenoform.GreatFoes.TAG); // (0.20.9) the invasion's bar
 		inv.boss = tyrant.getUUID();
 		inv.invaders.add(tyrant.getUUID());
 		inv.level.addFreshEntity(tyrant);
@@ -731,7 +733,8 @@ public final class ZFighterInvasions {
 			}
 			paid++;
 			int emeralds = Math.max(MIN_EMERALDS, Math.round(TOTAL_EMERALDS * share));
-			give(player, new ItemStack(Items.EMERALD, emeralds));
+			KingdomsMoney.pay(player, KingdomsMoney.worth(emeralds)); // (0.20.0) silver coins
+			Component money = KingdomsMoney.text(player, KingdomsMoney.worth(emeralds));
 			give(player, new ItemStack(inv.theme.item, inv.theme.itemCount));
 			if (ZFighterItems.HERMIT_BEAN != null) {
 				give(player, new ItemStack(ZFighterItems.HERMIT_BEAN, BEANS));
@@ -739,12 +742,12 @@ public final class ZFighterInvasions {
 			if (Powers.has(player, ZFighterPower.INSTANCE)) {
 				int tp = Math.max(MIN_TP, Math.round(TOTAL_TP * share));
 				ZFighterTraining.grant(player, tp);
-				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_invasion_paid_tp", tp, emeralds, inv.theme.itemCount,
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_invasion_paid_tp", tp, money, inv.theme.itemCount,
 					new ItemStack(inv.theme.item).getHoverName(), BEANS).withStyle(ChatFormatting.GOLD));
 			} else {
 				int levels = Math.max(MIN_XP, Math.round(TOTAL_XP * share));
 				player.giveExperienceLevels(levels);
-				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_invasion_paid", levels, emeralds, inv.theme.itemCount,
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_invasion_paid", levels, money, inv.theme.itemCount,
 					new ItemStack(inv.theme.item).getHoverName(), BEANS).withStyle(ChatFormatting.GOLD));
 			}
 		}

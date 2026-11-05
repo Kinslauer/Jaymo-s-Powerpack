@@ -5,6 +5,7 @@ import com.jaymospowers.tinkering.TinkerTool;
 import com.jaymospowers.tinkering.ToolStats;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
@@ -35,6 +36,9 @@ public final class Grades {
 	public static final List<Function<ItemStack, @Nullable Grade>> ASSEMBLY_CAPS = new ArrayList<>();
 	/** Something else that moves from a head onto the tool made from it (the maker's mark): (head, made). */
 	public static final List<java.util.function.BiConsumer<ItemStack, ItemStack>> CARRIERS = new ArrayList<>();
+
+	/** (0.20.7) More item modifiers baked over the grade's (gem sockets): (stack, modifiers so far) -> modifiers. */
+	public static final List<BiFunction<ItemStack, ItemAttributeModifiers, ItemAttributeModifiers>> ATTRIBUTE_PASSES = new ArrayList<>();
 
 	private Grades() {
 	}
@@ -109,6 +113,23 @@ public final class Grades {
 			scaled.attack(), scaled.attackSpeed(), scaled.tier(), scaled.traits());
 	}
 
+	/** (0.20.7) The slot a forged piece's numbers sit in (MAINHAND for melee, the armour slot for armour), or null. Same test as {@link #bake}. */
+	public static @Nullable EquipmentSlotGroup gearSlot(ItemStack stack) {
+		DataComponentMap proto = stack.getPrototype();
+		ItemAttributeModifiers base = proto.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+		EquipmentSlotGroup armorSlot = null;
+		for (ItemAttributeModifiers.Entry entry : base.modifiers()) {
+			if (entry.attribute().equals(Attributes.ARMOR)) {
+				armorSlot = entry.slot();
+			}
+		}
+		if (armorSlot != null) {
+			return armorSlot;
+		}
+		boolean melee = proto.has(DataComponents.WEAPON) || base.modifiers().stream().anyMatch(e -> e.attribute().equals(Attributes.ATTACK_DAMAGE));
+		return melee ? EquipmentSlotGroup.MAINHAND : null;
+	}
+
 	/** Puts the grade into a forged item's durability, damage, swing speed, mining speed and armour. */
 	public static void bake(ItemStack stack) {
 		if (stack.getItem() instanceof TinkerTool) {
@@ -147,6 +168,9 @@ public final class Grades {
 					AttributeModifier.Operation.ADD_VALUE), armorSlot);
 			}
 		}
+		for (BiFunction<ItemStack, ItemAttributeModifiers, ItemAttributeModifiers> pass : ATTRIBUTE_PASSES) {
+			attributes = pass.apply(stack, attributes);
+		}
 		// (setting a component to its item's own value drops it from the stack's changes)
 		stack.set(DataComponents.ATTRIBUTE_MODIFIERS, attributes);
 		Tool tool = proto.get(DataComponents.TOOL);
@@ -154,8 +178,9 @@ public final class Grades {
 			if (grade == null || grade.mining == 1.0F) {
 				stack.set(DataComponents.TOOL, tool);
 			} else {
+				// (0.20.4) capped: a sword's instant-mine speed is Float.MAX_VALUE, and Infinity can't be synced or saved
 				List<Tool.Rule> rules = tool.rules().stream().map(rule -> new Tool.Rule(rule.blocks(),
-					rule.speed().map(speed -> speed * grade.mining), rule.correctForDrops())).toList();
+					rule.speed().map(speed -> Math.min(speed * grade.mining, Float.MAX_VALUE)), rule.correctForDrops())).toList();
 				stack.set(DataComponents.TOOL, new Tool(rules, tool.defaultMiningSpeed(), tool.damagePerBlock(), tool.canDestroyBlocksInCreative()));
 			}
 		}

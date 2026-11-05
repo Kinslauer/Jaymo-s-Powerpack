@@ -39,6 +39,8 @@ public final class Dud extends XenoForm {
 	public static final int BOING_COOLDOWN = 20;
 	public static final int PLAY_DEAD_TICKS = 60, PLAY_DEAD_COOLDOWN = 200;
 	public static final double ROLL_SPEED = 1.1;
+	/** (0.19.84) How long a roll is drawn as a tucked ball (ticks), synced as the "roll" act. */
+	public static final int ROLL_TICKS = 15;
 	public static final int ROLL_COOLDOWN = 40;
 
 	public Dud() {
@@ -58,6 +60,7 @@ public final class Dud extends XenoForm {
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.horn = 0;
+		live.rolls = 0;
 	}
 
 	@Override
@@ -115,6 +118,7 @@ public final class Dud extends XenoForm {
 				if (ready(player, live, B)) {
 					Vec3 look = player.getLookAngle().horizontal().normalize();
 					player.setDeltaMovement(look.x * ROLL_SPEED, 0.2, look.z * ROLL_SPEED);
+					live.rolls = ROLL_TICKS;
 					player.syncVelocity = true;
 					sound(player, SoundEvents.SLIME_SQUISH_SMALL, 1.0F, 1.2F);
 					cooldown(player, live, B, ROLL_COOLDOWN);
@@ -140,6 +144,9 @@ public final class Dud extends XenoForm {
 
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
+		if (live.rolls > 0) {
+			live.rolls--;
+		}
 		if (live.horn > 0) {
 			// playing dead: flat on its back, nothing comes
 			live.horn--;

@@ -10,6 +10,10 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
@@ -23,17 +27,29 @@ import org.joml.Vector3f;
  * The basic one ends in a high kick with the body tipped over at the hip, then next time round in a side kick (turned
  * side-on, leaning away); six more combos come with unlocked abilities. Under heavy gravity the stance sinks lower and
  * every blow trembles.
+ *
+ * <p>(0.19.67) Sitting has {@link Meditate#POSES} ways each, on the ground (cross-legged, knees up, leaning back on the
+ * hands) and on a seat (upright, legs crossed, slouched), changed with the Sit key. On a seat the body keeps the seat's
+ * way and the head turns within {@link #SEAT_LOOK}. What's in the main hand changes the arms: a book held open to read,
+ * a cup (anything drunk) raised, a sword across the lap.
  */
 public final class MeditatePose {
 	/** How long sitting down (or settling into the stance) takes, in ticks. */
 	static final float SETTLE = 12.0F;
 	/** Sitting: how far the body sinks (blocks), so the hips rest on the ground. */
 	static final float SIT_SINK = 0.62F;
+	/** (0.19.67) On a seat, how far the head may turn from the seat's way (degrees). */
+	static final float SEAT_LOOK = 80.0F;
+	/** (0.19.67) What's in the main hand while sitting. */
+	static final int EMPTY = 0, BOOK = 1, CUP = 2, BLADE = 3;
 	/** Shadowboxing: the heavy stance's sink. */
 	static final float HEAVY_SINK = 0.12F;
 
-	/** {@code time}: ticks since they began; {@code kind}: {@link Meditate#MEDITATING}...; {@code frame}: the shadowboxing pose. */
-	public record State(float time, int kind, float[] frame) {
+	/**
+	 * {@code time}: ticks since they began; {@code kind}: {@link Meditate#MEDITATING}...; {@code frame}: the shadowboxing pose;
+	 * (0.19.67) {@code pose}: which way they sit; {@code seated}: on a seat; {@code held}: {@link #EMPTY}, {@link #BOOK}...
+	 */
+	public record State(float time, int kind, float[] frame, int pose, boolean seated, int held) {
 	}
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:meditate");
@@ -144,7 +160,30 @@ public final class MeditatePose {
 				state.yRot += turn * frame[HOLD];
 			}
 		}
-		state.setData(KEY, new State(time, meditating.kind(), frame));
+		int held = EMPTY;
+		if (meditating.kind() == Meditate.MEDITATING) {
+			held = held(entity.getMainHandItem());
+			if (meditating.seated()) {
+				// the body keeps the seat's way; the head looks about within reason
+				float head = state.bodyRot + state.yRot;
+				state.bodyRot = meditating.seatYaw();
+				state.yRot = Mth.clamp(Mth.wrapDegrees(head - meditating.seatYaw()), -SEAT_LOOK, SEAT_LOOK);
+			}
+		}
+		state.setData(KEY, new State(time, meditating.kind(), frame, meditating.pose(), meditating.seated(), held));
+	}
+
+	private static int held(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return EMPTY;
+		}
+		if (stack.is(ItemTags.BOOKSHELF_BOOKS)) {
+			return BOOK;
+		}
+		if (stack.getUseAnimation() == ItemUseAnimation.DRINK) {
+			return CUP;
+		}
+		return stack.is(ItemTags.SWORDS) ? BLADE : EMPTY;
 	}
 
 	/** Stance, wound up, struck, held, back to the stance; between combos, just the stance. */
@@ -207,22 +246,124 @@ public final class MeditatePose {
 		}
 		float in = settle(m.time());
 		if (m.kind() == Meditate.MEDITATING) {
-			sit(h, m.time(), in);
+			sit(h, m, state.mainArm == HumanoidArm.RIGHT, in);
 		} else {
 			box(h, m.frame(), m.time(), in, m.kind() == Meditate.SHADOWBOXING_HEAVY);
 		}
 	}
 
-	/** Cross-legged on the ground, hands on the knees, slow breaths. */
-	private static void sit(HumanoidModel<?> h, float time, float in) {
-		float breath = Mth.sin(time * 0.12F);
-		blend(h.rightLeg, -1.45F, 0.95F, 0.1F, in);
-		blend(h.leftLeg, -1.45F, -0.95F, -0.1F, in);
-		blend(h.rightArm, -0.75F, 0.25F, 0.2F, in);
-		blend(h.leftArm, -0.75F, -0.25F, -0.2F, in);
+	/**
+	 * Sitting, slow breaths. On the ground: cross-legged with the hands on the knees, knees up with the arms round them,
+	 * or leaning back on the hands. On a seat: upright, legs crossed, or slouched. Then the main hand's item.
+	 */
+	private static void sit(HumanoidModel<?> h, State m, boolean rightHanded, float in) {
+		float breath = Mth.sin(m.time() * 0.12F);
+		float lean = 0.0F;
+		float headX = 0.25F;
+		int pose = Math.floorMod(m.pose(), Meditate.POSES);
+		if (!m.seated()) {
+			if (pose == 0) {
+				// thighs out to the sides along the ground; the shins fold back across in front (bendKnees)
+				blend(h.rightLeg, -1.5F, 0.9F, 0.0F, in);
+				blend(h.leftLeg, -1.5F, -0.9F, 0.0F, in);
+				blend(h.rightArm, -0.75F, 0.25F, 0.2F, in);
+				blend(h.leftArm, -0.75F, -0.25F, -0.2F, in);
+			} else if (pose == 1) {
+				// knees drawn up together, the shins back down to the feet flat in front (bendKnees)
+				blend(h.rightLeg, -2.3F, 0.08F, 0.0F, in);
+				blend(h.leftLeg, -2.3F, -0.08F, 0.0F, in);
+				blend(h.rightArm, -1.0F, -0.35F, 0.0F, in);
+				blend(h.leftArm, -1.0F, 0.35F, 0.0F, in);
+				headX = 0.35F;
+			} else {
+				blend(h.rightLeg, -1.5F, 0.12F, 0.0F, in);
+				blend(h.leftLeg, -1.5F, -0.12F, 0.0F, in);
+				blend(h.rightArm, 0.55F, 0.0F, 0.25F, in);
+				blend(h.leftArm, 0.55F, 0.0F, -0.25F, in);
+				lean = -0.35F;
+				headX = -0.1F;
+			}
+		} else if (pose == 0) {
+			// thighs along the seat, knees together, shins hanging down (bendKnees)
+			blend(h.rightLeg, -1.5F, 0.04F, 0.0F, in);
+			blend(h.leftLeg, -1.5F, -0.04F, 0.0F, in);
+			blend(h.rightArm, -0.55F, 0.05F, 0.05F, in);
+			blend(h.leftArm, -0.55F, -0.05F, -0.05F, in);
+			headX = 0.05F;
+		} else if (pose == 1) {
+			// the right leg over the left
+			blend(h.rightLeg, -1.95F, -0.35F, 0.0F, in);
+			blend(h.leftLeg, -1.5F, 0.0F, 0.0F, in);
+			blend(h.rightArm, -0.75F, -0.25F, 0.0F, in);
+			blend(h.leftArm, -0.45F, 0.35F, 0.0F, in);
+			headX = 0.05F;
+		} else {
+			blend(h.rightLeg, -1.4F, 0.2F, 0.0F, in);
+			blend(h.leftLeg, -1.4F, -0.2F, 0.0F, in);
+			blend(h.rightArm, -0.15F, 0.0F, 0.2F, in);
+			blend(h.leftArm, -0.15F, 0.0F, -0.2F, in);
+			lean = -0.25F;
+			headX = 0.1F;
+		}
+		ModelPart main = rightHanded ? h.rightArm : h.leftArm;
+		ModelPart other = rightHanded ? h.leftArm : h.rightArm;
+		switch (m.held()) {
+			case BOOK -> {
+				// held open before the chest, head bowed to read
+				arm(main, -1.05F, 0.3F, 0.0F, rightHanded, in);
+				arm(other, -1.05F, 0.3F, 0.0F, !rightHanded, in);
+				headX = 0.5F;
+			}
+			case CUP -> arm(main, -1.35F, 0.35F, 0.0F, rightHanded, in);
+			case BLADE -> {
+				// the blade laid across the lap, the other hand resting on it
+				arm(main, -0.35F, 1.2F, 0.0F, rightHanded, in);
+				arm(other, -0.4F, 0.6F, 0.0F, !rightHanded, in);
+			}
+			default -> {
+			}
+		}
 		blend(h.body, 0.04F * breath, 0.0F, 0.0F, in);
-		h.head.xRot = Mth.lerp(in, h.head.xRot, 0.25F + 0.03F * breath);
-		h.head.yRot = Mth.lerp(in, h.head.yRot, 0.0F);
+		h.head.xRot = Mth.lerp(in, h.head.xRot, headX + 0.03F * breath);
+		if (!m.seated()) {
+			h.head.yRot = Mth.lerp(in, h.head.yRot, 0.0F);
+		}
+		tip(h, lean * in, 0.0F);
+	}
+
+	/**
+	 * (0.20.38) The knees, bent for each way of sitting (radians: right, left; Andy: "the knees should bend"): {@code
+	 * [seated ? 1 : 0][pose]}. On the ground cross-legged the shins fold sideways, back across in front; knees up and on
+	 * a seat they fold down at the knee. Leaning back on the hands keeps the legs straight.
+	 */
+	private static final float[][][] KNEES = {
+		{{-2.6F, 2.6F}, {2.05F, 2.05F}, {0.0F, 0.0F}},
+		{{1.45F, 1.45F}, {1.35F, 1.55F}, {0.9F, 0.9F}}};
+
+	/**
+	 * (0.20.38) Right before the model is drawn (after {@link #applyModel}): a sitter's knees bent for this one draw
+	 * ({@link KneeBend#restore} once it's drawn).
+	 */
+	public static void bendKnees(Model<?> model, Object renderState) {
+		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h) || state.deathTime > 0.0F) {
+			return;
+		}
+		State m = state.getData(KEY);
+		if (m == null || m.kind() != Meditate.MEDITATING) {
+			return;
+		}
+		float in = settle(m.time());
+		int pose = Math.floorMod(m.pose(), Meditate.POSES);
+		float[] knees = KNEES[m.seated() ? 1 : 0][pose];
+		// cross-legged folds across (the right shin toward the left, the left toward the right); the rest at the knee
+		boolean sideways = !m.seated() && pose == 0;
+		KneeBend.bend(h.rightLeg, knees[0] * in, KneeBend.KNEE, sideways);
+		KneeBend.bend(h.leftLeg, knees[1] * in, KneeBend.KNEE, sideways);
+	}
+
+	/** An arm's pose with its turn toward the middle of the body ({@code inward}) and out to the side ({@code out}), either arm. */
+	private static void arm(ModelPart arm, float x, float inward, float out, boolean right, float in) {
+		blend(arm, x, right ? -inward : inward, right ? out : -out, in);
 	}
 
 	/** The frame's blow; heavy gravity sinks the stance and shakes every blow. */

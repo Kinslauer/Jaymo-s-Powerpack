@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/bushy/tinted_fringe",
+  "textures": {
+    "all": "minecraft:block/oak_leaves"
+  }
+}

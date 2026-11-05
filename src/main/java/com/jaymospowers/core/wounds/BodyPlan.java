@@ -9,6 +9,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -30,7 +31,10 @@ public enum BodyPlan {
 	private static final TagKey<EntityType<?>> ARTHROPOD_TAG = tag("body/arthropod");
 	private static final TagKey<EntityType<?>> FLYER_TAG = tag("body/flyer");
 	private static final TagKey<EntityType<?>> SIMPLE_TAG = tag("body/simple");
-	/** A creature of no tag, taller than this many times its width, is built like a person; anything else like an animal. */
+	/**
+	 * A creature of no tag, taller than this many times its width, is built like a person; anything else like an animal.
+	 * (0.20.53) Never a wild creature (see {@link #wild}): a tall deer or elephant is still an animal.
+	 */
 	private static final double TALL = 1.3;
 	private static final Map<EntityType<?>, BodyPlan> CACHE = new ConcurrentHashMap<>();
 
@@ -123,6 +127,17 @@ public enum BodyPlan {
 		if (type.is(SIMPLE_TAG)) {
 			return SIMPLE;
 		}
-		return entity.getBbHeight() > entity.getBbWidth() * TALL ? HUMANOID : QUADRUPED;
+		return !wild(entity.getType().getCategory()) && entity.getBbHeight() > entity.getBbWidth() * TALL ? HUMANOID : QUADRUPED;
+	}
+
+	/**
+	 * (0.20.53) Andy (2026-11-05): "downed animals should fall to their side, i think they're trying to animate like
+	 * humanoids". Cube Animals' roe deer (0.9 by 1.5) was taller than wide, so it was taken for a person: it went down on
+	 * its back, propped up like one, and was hurt in arms and feet. Whatever spawns as wildlife (animals, ambient things,
+	 * sea life) isn't a person unless it's tagged one (the wandering trader is).
+	 */
+	public static boolean wild(MobCategory category) {
+		return category == MobCategory.CREATURE || category == MobCategory.AMBIENT || category == MobCategory.WATER_CREATURE
+			|| category == MobCategory.WATER_AMBIENT || category == MobCategory.UNDERGROUND_WATER_CREATURE || category == MobCategory.AXOLOTLS;
 	}
 }

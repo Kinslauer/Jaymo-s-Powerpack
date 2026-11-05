@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskingdoms:round_shot",
+    "minecraft:gunpowder",
+    "minecraft:gunpowder",
+    "minecraft:gunpowder"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:explosive_shell",
+    "count": 1
+  }
+}

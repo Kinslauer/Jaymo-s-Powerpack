@@ -222,6 +222,11 @@ public final class Downed {
 	/** Going down is the last say on a death (every other mod's save comes first), and on a right-click on the downed. */
 	static final Identifier LAST = JaymosPowers.id("downed_last");
 
+	/** (0.20.67) The death event's phase Downed decides in (others that must see its verdict order after it). */
+	public static Identifier lastPhase() {
+		return LAST;
+	}
+
 	/**
 	 * What a tamed animal is brought round with, by its type's name: its own taming and breeding food. Anything tamed not
 	 * here takes any food.
@@ -299,11 +304,33 @@ public final class Downed {
 			}
 			if (isDowned(entity)) {
 				// (a mob, fire, a fall, the void: they die as anyone would, body and all; no second downing)
+				// ((0.20.26) what downed them is the cause the death is rolled on, Mortality)
+				Mortality.felled(entity, FELLED_BY.get(entity));
 				forget(entity);
 				return true;
 			}
 			if (!downable(entity) || !spared(entity, source)) {
 				return true;
+			}
+			// (0.20.67) blown apart by a blast, by how close it was: nothing left to get up either
+			if (com.jaymospowers.core.BlastGore.gibs(entity, source, amount)) {
+				if (!Dismember.rubber(entity) || !com.jaymospowers.core.BlastGore.tearLimbs(entity, source)) {
+					return true;
+				}
+				// (Rubber-folk: every limb gone but the head kept; they mend as from a halving, with a swallow in time)
+				goDown(level, entity, source, false);
+				Dismember.split(entity);
+				return false;
+			}
+			// (0.20.61) cut in half at the waist: nothing left to get up, as with a beheading
+			if (Dismember.halve(entity, source, amount, null)) {
+				if (!Dismember.rubber(entity)) {
+					return true;
+				}
+				// (Andy: Rubber-folk survive it, if they swallow something in time)
+				goDown(level, entity, source, false);
+				Dismember.split(entity);
+				return false;
 			}
 			goDown(level, entity, source, false);
 			return false;
@@ -480,9 +507,11 @@ public final class Downed {
 		if (plan == null || plan == BodyPlan.SIMPLE) {
 			return null;
 		}
+		// (0.20.110) on adrenaline only the head and body hold them down
+		boolean arms = !Adrenaline.active(entity);
 		for (int i = 0; i < plan.size(); i++) {
 			BodyPart part = plan.part(i);
-			boolean counts = part.vital() || part == BodyPart.LEFT_ARM || part == BodyPart.RIGHT_ARM;
+			boolean counts = part.vital() || arms && (part == BodyPart.LEFT_ARM || part == BodyPart.RIGHT_ARM);
 			if (counts && (Wounds.isBroken(entity, part) || Wounds.fraction(entity, part) <= TOO_HURT_FRACTION)) {
 				return part;
 			}
@@ -531,6 +560,10 @@ public final class Downed {
 
 	/** Down they go; {@code source}: what felled them (null: nothing did, a knock-out); {@code keepHealth}: (0.14.4) a knock-out takes none. */
 	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
+		goDown(level, entity, source, keepHealth, true);
+	}
+
+	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth, boolean dropArms) {
 		// ((0.19.32) a machine never crawls: it shorts out where it fell, Malfunction)
 		boolean crawler = !(entity instanceof Player) && !Malfunction.is(entity)
 			&& level.getRandom().nextFloat() < (BodyPlan.of(entity) == BodyPlan.HUMANOID ? PERSON_CRAWLER_CHANCE : CRAWLER_CHANCE);
@@ -553,7 +586,9 @@ public final class Downed {
 		Wounds.settle(entity);
 		entity.stopUsingItem();
 		// (0.18.118) most let go of their weapons as they fall
-		DroppedArms.fell(level, entity);
+		if (dropArms) {
+			DroppedArms.fell(level, entity);
+		}
 		if (entity.isSleeping()) {
 			entity.stopSleeping();
 		}
@@ -629,6 +664,10 @@ public final class Downed {
 		// (0.17.183) Kingdoms' Will: No Getting Up while a player with it stands near ({@link WillSkill#heldDown})
 		DamageSource felled = FELLED_BY.get(entity);
 		if (battered && WillSkill.heldDown(level, entity, felled == null ? null : felled.getEntity())) {
+			return;
+		}
+		// (0.20.61) a Rubber-folk cut in half stays down till their legs have grown back
+		if (battered && Dismember.pulledApart(entity)) {
 			return;
 		}
 		if (Carry.carrierOf(entity) instanceof ServerPlayer carrier) {
@@ -716,12 +755,17 @@ public final class Downed {
 	 * knocked out is told.
 	 */
 	public static boolean knockOut(ServerLevel level, LivingEntity entity, int ticks, boolean anyBody, String message) {
+		return knockOut(level, entity, ticks, anyBody, message, true);
+	}
+
+	/** (0.20.26) {@code dropArms}: false, they keep hold of what they carry (one left for dead, laid out again where they wake). */
+	static boolean knockOut(ServerLevel level, LivingEntity entity, int ticks, boolean anyBody, String message, boolean dropArms) {
 		boolean was = isDowned(entity);
 		if (!was && !downable(entity) && !(anyBody && stunnable(entity))) {
 			return false;
 		}
 		if (!was) {
-			goDown(level, entity, null, true);
+			goDown(level, entity, null, true, dropArms);
 		}
 		// (out cold: no crawling away)
 		entity.setAttached(DOWNED, since(entity) << 1);
@@ -775,6 +819,8 @@ public final class Downed {
 		}
 		DamageSource felled = FELLED_BY.get(entity);
 		Entity by = felled == null ? null : felled.getEntity();
+		// ((0.20.26) and what downed it is the cause its death is rolled on, Mortality)
+		Mortality.felled(entity, felled);
 		forget(entity);
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(Wounds.WOUNDS_DAMAGE), by);
 		FINISHING.add(entity);
@@ -798,7 +844,16 @@ public final class Downed {
 			return;
 		}
 		FELLED_BY.put(entity, level.damageSources().playerAttack(by));
-		finish(level, entity);
+		if (by instanceof net.minecraft.server.level.ServerPlayer sp) {
+			com.jaymospowers.core.PackAdvancements.award(sp, "executioner");
+		}
+		// ((0.20.26) Andy: an execution is final when a player does it)
+		Mortality.executed(entity, true);
+		try {
+			finish(level, entity);
+		} finally {
+			Mortality.doneExecuting(entity);
+		}
 	}
 
 	/**
@@ -809,7 +864,34 @@ public final class Downed {
 			return;
 		}
 		FELLED_BY.put(entity, level.damageSources().mobAttack(by));
+		// ((0.20.26) and when a boss does; any other mob's is rolled on as what it is)
+		Mortality.executed(entity, Mortality.boss(by));
+		try {
+			finish(level, entity);
+		} finally {
+			Mortality.doneExecuting(entity);
+		}
+	}
+
+	/** (0.20.26) A timer ran out ({@link Afflictions}): their death now, by their wounds, with no going down first. */
+	static void succumb(ServerLevel level, LivingEntity entity) {
 		finish(level, entity);
+	}
+
+	/**
+	 * (0.20.50) A death held back a moment (Chrono's, unanswered) goes ahead now, as it was coming: by its wounds, credited
+	 * to whoever dealt {@code felled}, with no going down first; death by cause rolls on {@code felled}.
+	 */
+	public static void letDie(ServerLevel level, LivingEntity entity, @Nullable DamageSource felled) {
+		if (felled != null) {
+			FELLED_BY.put(entity, felled);
+		}
+		finish(level, entity);
+	}
+
+	/** (0.20.26) No longer down, quietly (Mortality moves one left for dead before laying them out again where they wake). */
+	static void forgetQuietly(LivingEntity entity) {
+		forget(entity);
 	}
 
 	/** A player hit a downed one: one more wound; the {@link #MAX_WOUNDS}th is its death. */

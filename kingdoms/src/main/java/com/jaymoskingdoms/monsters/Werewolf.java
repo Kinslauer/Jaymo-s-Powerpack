@@ -67,6 +67,8 @@ public class Werewolf extends LegendMonster {
 	private static final EntityDataAccessor<Integer> LOOK = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
 	/** (0.7.1) The colour of the clothes it wore (its rags are dyed so). */
 	private static final EntityDataAccessor<Integer> RAGS = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
+	/** (0.7.574) A werewolf player's lean wolf, on all fours (WerewolfPlayers), not the great beast. */
+	private static final EntityDataAccessor<Boolean> LEAN = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.BOOLEAN);
 	/** (0.7.1) Its coat's wears, and its rags. */
 	public static final int WEARS = 3, RAG_SETS = 3;
 	/** (0.7.0) How long a cursed one's change takes, each way (ticks). */
@@ -143,6 +145,7 @@ public class Werewolf extends LegendMonster {
 		entityData.define(BUILD, 1);
 		entityData.define(LOOK, 0);
 		entityData.define(RAGS, 0);
+		entityData.define(LEAN, false);
 	}
 
 	public boolean isHuman() {
@@ -175,6 +178,19 @@ public class Werewolf extends LegendMonster {
 		this.setPersistenceRequired();
 	}
 
+	/**
+	 * (2026-11-05) A werewolf player's beast (no mind of its own: it's moved where they are each tick) turns to the way it
+	 * runs on every screen, not after its player's camera (TakeoverFacing): no more sliding sideways or walking backwards.
+	 */
+	@Override
+	protected void tickHeadTurn(float yBodyRotT) {
+		if (this.level().isClientSide() && this.isNoAi()) {
+			com.jaymoskingdoms.TakeoverFacing.turn(this);
+			return;
+		}
+		super.tickHeadTurn(yBodyRotT);
+	}
+
 	public java.util.@Nullable UUID host() {
 		return this.host;
 	}
@@ -186,6 +202,15 @@ public class Werewolf extends LegendMonster {
 	/** (0.7.1) 0 for a wild one; else 1 + wear * 3 + rags. */
 	public int look() {
 		return this.entityData.get(LOOK);
+	}
+
+	/** (0.7.574) A werewolf player's lean wolf. */
+	public boolean lean() {
+		return this.entityData.get(LEAN);
+	}
+
+	public void setLean(boolean lean) {
+		this.entityData.set(LEAN, lean);
 	}
 
 	/** (0.7.1) Its rags' colour (RGB). */
@@ -277,7 +302,9 @@ public class Werewolf extends LegendMonster {
 		if (materials != null && weapon.get(materials) instanceof List<?> parts && !parts.isEmpty()) {
 			return String.valueOf(parts.getFirst());
 		}
-		return BuiltInRegistries.ITEM.getKey(weapon.getItem()).getPath();
+		// (0.7.498) a coin is money, not the metal its name says (realm silver, gold dinars, bent copper)
+		Identifier id = BuiltInRegistries.ITEM.getKey(weapon.getItem());
+		return id.getNamespace().equals(com.jaymoskingdoms.JaymosKingdoms.MOD_ID) && com.jaymoskingdoms.Currency.byItem(weapon.getItem()) != null ? "" : id.getPath();
 	}
 
 	@Override

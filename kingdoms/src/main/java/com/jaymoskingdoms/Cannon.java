@@ -45,6 +45,9 @@ public final class Cannon extends Entity {
 	static final float TRAVERSE = 6.0F, ON_MARK = 8.0F;
 	/** How wide a shot may stray (blocks per block flown). */
 	static final double SPREAD = 0.03;
+	/** (0.7.549) Firing jolts everyone this near (blocks) this hard (degrees), on top of the report's own shake. */
+	static final double FIRE_SHAKE_RANGE = 10.0;
+	static final float FIRE_SHAKE = 1.2F;
 	/** The barrel's pivot above the ground, and its muzzle's distance out from that (blocks). (0.7.326) Its trunnions sit
 	 * this low on the Canon model's carriage. */
 	public static final double PIVOT = 0.75, MUZZLE = 1.35;
@@ -57,8 +60,8 @@ public final class Cannon extends Entity {
 	static final double CREW_REACH = 3.5;
 	/** The entity event that kicks its barrel back on the client. */
 	static final byte FIRED = 60;
-	/** How long the barrel's kick lasts (ticks). */
-	public static final int RECOIL_TICKS = 8;
+	/** How long the barrel's kick lasts (ticks). (0.7.490) The gun runs back fast and is hauled up again slowly. */
+	public static final int RECOIL_TICKS = 16;
 
 	public static EntityType<Cannon> TYPE;
 
@@ -236,10 +239,15 @@ public final class Cannon extends Entity {
 		Vec3 muzzle = pivot.add(dir.scale(MUZZLE));
 		Cannonball.fire(level, gunner, muzzle, dir);
 		level.sendParticles(ParticleTypes.EXPLOSION, muzzle.x, muzzle.y, muzzle.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 14, 0.25, 0.25, 0.25, 0.03);
-		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 4, 0.1, 0.1, 0.1, 0.02);
-		level.playSound(null, muzzle.x, muzzle.y, muzzle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 3.0F,
-			0.6F + level.getRandom().nextFloat() * 0.15F);
+		// (0.7.490) the flash at the muzzle, a bank of smoke rolling out, a little off the vent
+		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFE9A8), muzzle.x, muzzle.y, muzzle.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 20, 0.3, 0.3, 0.3, 0.05);
+		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, muzzle.x + dir.x, muzzle.y + dir.y, muzzle.z + dir.z, 3, 0.2, 0.15, 0.2, 0.01);
+		level.sendParticles(ParticleTypes.SMOKE, pivot.x - dir.x * 0.6, pivot.y + 0.2, pivot.z - dir.z * 0.6, 5, 0.15, 0.1, 0.15, 0.02);
+		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 6, 0.12, 0.12, 0.12, 0.05);
+		// (0.7.549) its own report with Powers: it carries far, muffles with distance, and jolts everyone near
+		PowersCompat.cannonReport(level, muzzle, 3.0F, 0.85F + level.getRandom().nextFloat() * 0.15F);
+		PowersCompat.shakeAround(level, muzzle, FIRE_SHAKE_RANGE, FIRE_SHAKE);
 		level.broadcastEntityEvent(this, FIRED);
 	}
 

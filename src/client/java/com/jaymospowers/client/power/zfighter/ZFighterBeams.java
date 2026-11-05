@@ -47,9 +47,10 @@ public final class ZFighterBeams {
 	private static final class Travel {
 		Vec3 from, head, lastFrom, lastHead;
 		float radius;
-		int color, style, age, quiet;
+		int id, color, style, age, quiet;
 
 		Travel(ZFighterNet.BeamHead fx) {
+			this.id = fx.id();
 			this.from = this.lastFrom = new Vec3(fx.fx(), fx.fy(), fx.fz());
 			this.head = this.lastHead = this.from;
 			this.update(fx);
@@ -129,6 +130,11 @@ public final class ZFighterBeams {
 		for (Travel travel : TRAVELLING.values()) {
 			// the head eased between the last two ticks, so it's seen coming, not stepping
 			Vec3 from = travel.lastFrom.lerp(travel.from, partial);
+			// (0.19.60) rooted in the pushed-out hands as they're drawn (ZFighterHandsPose), first person too
+			Vec3 root = ZFighterHandsPose.beamRoot(travel.id, partial);
+			if (root != null) {
+				from = root;
+			}
 			Vec3 head = travel.lastHead.lerp(travel.head, partial);
 			float radius = travel.radius * Mth.clamp((travel.age + partial) / TRAVEL_SWELL, 0.15F, 1.0F);
 			draw(context, from.subtract(camera), head.subtract(camera), radius, travel.color, travel.style, time, 1.0F, HEAD_ORB);

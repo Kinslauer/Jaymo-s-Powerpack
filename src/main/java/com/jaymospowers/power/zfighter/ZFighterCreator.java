@@ -26,10 +26,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -310,7 +308,8 @@ public final class ZFighterCreator {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.8F, 1.4F);
 			}
 		}
-		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		// (0.19.60) thrown out of the palm with a thrust (ZFighterHands)
+		ZFighterHands.thrust(player, ZFighterHands.hand(player, true), ZFighterHands.JAB);
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(0.1F * p);
 		}

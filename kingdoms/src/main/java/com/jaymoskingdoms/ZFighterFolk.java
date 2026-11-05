@@ -45,6 +45,15 @@ public final class ZFighterFolk {
 	public static final int ROLE = 95;
 	/** MCA's main menu: "Talk about training", on a town's Z Fighter master. */
 	public static final String TRAINING = "jaymoskingdoms_training";
+	/**
+	 * (0.7.555) Andy: "the judge, keeper and masters dont need the FULL screen, no reason to tell rumors or hug them". MCA's talk
+	 * menu on one of them keeps only {@link #KEPT}: "Talk about work" (their own menu: the Judge's rebirth and writs, the
+	 * Keeper's blessing...), "Talk about training" on a master, and a chat. Those who roam among people rather than keep a post
+	 * ({@link #SMALL_TALKERS}: an Omen's pilot, a galactic patrolman) keep a joke and a story too ({@link #keeps}).
+	 */
+	static final Set<String> KEPT = Set.of(Careers.ANSWER, TRAINING, "chat");
+	static final Set<String> SMALL_TALKERS = Set.of("omen_pilot", "patrolman");
+	static final Set<String> SMALL_TALK = Set.of("joke", "story");
 	/** How far they may be pushed from their post before they step back (blocks), and how far they look for someone to face. */
 	static final double POST_SLACK = 1.5, LOOK_RANGE = 8.0;
 
@@ -185,7 +194,16 @@ public final class ZFighterFolk {
 		return kind == null ? null : PILOT_KIND.equals(kind) ? List.of() : Uniforms.zfighter(kind);
 	}
 
-	/** "Talk about work" with one of them: Powers' talk. */
+	/** (0.7.555) Whether MCA's talk menu keeps {@code answer} on {@code e}, one of them ({@link #KEPT}, {@link #SMALL_TALKERS}). */
+	public static boolean keeps(Entity e, String answer) {
+		if (KEPT.contains(answer)) {
+			return true;
+		}
+		String kind = kind(e);
+		return kind != null && SMALL_TALKERS.contains(kind) && SMALL_TALK.contains(answer);
+	}
+
+	/** "Talk about work" with one of them: Powers' talk (the Judge's rebirth and writs, the Keeper's blessing...). */
 	public static void talk(ServerPlayer player, LivingEntity speaker) {
 		if (!PowersCompat.zfighterTalk(player, speaker)) {
 			Speech.tell(player.level(), speaker, player, Component.translatable("talk.jaymoskingdoms.zfighter.nothing"), Speech.WHITE);

@@ -29,12 +29,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Coinage;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.7.412) The hard roads of the life story ({@link LifeStory.Start#CHAINED}, {@link LifeStory.Start#SENTENCED},
@@ -49,7 +49,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Sentenced</b>: woken in a realm's cells ({@link Busts#JAILED}, {@link Speakeasy#cell}) with
  * {@link #SENTENCE_DAYS} days to serve. The cell has an iron door in its east wall: the sentence runs out and it opens
  * ({@link Busts} lets them out); a pick used on it breaks out (the realm then hunts them as an escaped prisoner); or
- * emeralds in hand pay the jailer's fine, {@link #FINE_PER_DAY} for every day left, and they walk out clean.</li>
+ * coins (or a purse) in hand pay the jailer's fine, {@link #FINE_PER_DAY} for every day left, and they walk out clean.</li>
  * <li><b>Evicted</b>: between dusk and dawn, inside the realm's land and under a guard's eye, a player who sleeps or stands
  * about is warned ({@link #WARN_AFTER}), then taken in for the night ({@link #EVICT_JAIL_TICKS}, the same cells). It stops
  * the moment they hold a {@link Careers} job or have a bed of their own (a spawn bed they slept in) within the realm's land.
@@ -67,7 +67,7 @@ public final class StoryHard {
 	static final int SHACKLE_LEVEL = 2, CHAIN_PICKS = 2;
 	/** Slipping the shackle: how long perfectly still and sneaking at night it takes (ticks), checked this often. */
 	static final int SLIP_TICKS = 100, SLIP_CHECK = 5;
-	/** Sentenced: the days to serve, the fine for each day left (emeralds), the cell door's lock, and the picks they have. */
+	/** Sentenced: the days to serve, the fine for each day left (silver coins), the cell door's lock, and the picks they have. */
 	static final int SENTENCE_DAYS = 2, FINE_PER_DAY = 3, CELL_LEVEL = 3, CELL_PICKS = 1;
 	static final long DAY_TICKS = 24000L;
 	/** Evicted: how often it is looked at (ticks), how far a realm's streets reach from its seat (blocks), how far a guard sees (blocks). */
@@ -125,6 +125,10 @@ public final class StoryHard {
 			if (shackle == null) {
 				return InteractionResult.PASS;
 			}
+			// (0.7.584) working at the shackle where a captor can see is trying to escape: the camp turns on them
+			if (CaptiveConduct.watched(sp)) {
+				CaptiveConduct.actUp(sp, "pick");
+			}
 			if (!Lockpicking.pickVirtual(sp, shackle.at(), SHACKLE_LEVEL, shackle.at().asLong() ^ 0x5DEECE66DL, () -> {
 				ServerPlayer again = sp.level().getServer().getPlayerList().getPlayer(sp.getUUID());
 				if (again != null) {
@@ -172,6 +176,7 @@ public final class StoryHard {
 	/** The /kingdom story reset: none of it any more. */
 	static void clear(ServerPlayer player) {
 		player.removeAttached(SHACKLE);
+		Shackles.untie(player);
 		player.removeAttached(EVICTED);
 		player.removeAttached(CAST_OUT);
 		forget(player.getUUID());
@@ -202,6 +207,8 @@ public final class StoryHard {
 	/** {@code player} woke in chains at {@code at}, held by camp {@code camp}. */
 	static void shackle(ServerPlayer player, BlockPos at, int camp) {
 		player.setAttached(SHACKLE, new Shackle(at, camp));
+		// (0.7.584) collared and tied to a stake beside them, for all to see (Shackles)
+		Shackles.tie(player, at, player.getRandom());
 	}
 
 	/** {@code e} is a player still in a shackle: a camp's raiders let them be. */
@@ -219,8 +226,8 @@ public final class StoryHard {
 		if (!player.isAlive() || player.isSpectator()) {
 			return;
 		}
-		if (now % 20L == 0L) {
-			// (nothing in the camp harms a captive while they're bound)
+		if (now % 20L == 0L && CaptiveConduct.behaving(player)) {
+			// (nothing in the camp harms a captive while they're bound and keep their place, CaptiveConduct)
 			player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4, false, false));
 		}
 		Vec3 anchor = Vec3.atBottomCenterOf(shackle.at());
@@ -251,13 +258,14 @@ public final class StoryHard {
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hard.chains.slipping", held * 100 / SLIP_TICKS).withStyle(ChatFormatting.GRAY));
 	}
 
-	/** The shackle comes off ({@code how}: "picked" or "slipped"): the camp hunts them from now, for the day. */
-	private static void free(ServerPlayer player, String how) {
+	/** The shackle comes off ({@code how}: "picked", "slipped", (0.7.584) "cut" or "broken", {@link Shackles}): the camp hunts them from now, for the day. */
+	static void free(ServerPlayer player, String how) {
 		Shackle shackle = player.getAttached(SHACKLE);
 		if (shackle == null) {
 			return;
 		}
 		player.removeAttached(SHACKLE);
+		Shackles.untie(player);
 		SLIPPING.remove(player.getUUID());
 		STOOD.remove(player.getUUID());
 		ServerLevel level = player.level();
@@ -302,12 +310,12 @@ public final class StoryHard {
 		return at;
 	}
 
-	/** The fine (emeralds) for a sentence with {@code left} ticks to run. */
+	/** The fine (silver coins) for a sentence with {@code left} ticks to run. */
 	static int fine(long left) {
 		return (int)Math.max(1L, (left + DAY_TICKS - 1L) / DAY_TICKS) * FINE_PER_DAY;
 	}
 
-	/** A prisoner tries the cell door: emeralds in hand pay the fine, a lockpick in hand picks it, bare hands find it locked. */
+	/** A prisoner tries the cell door: coins or a purse in hand pay the fine, a lockpick in hand picks it, bare hands find it locked. */
 	private static void cellDoor(ServerPlayer player, Busts.Jail jail) {
 		ServerLevel level = player.level();
 		Faction f = Factions.get(level.getServer(), jail.realm());
@@ -316,15 +324,15 @@ public final class StoryHard {
 		}
 		int fine = fine(jail.until() - level.getGameTime());
 		ItemStack held = player.getMainHandItem();
-		if (held.is(Items.EMERALD)) {
-			Inventory inventory = player.getInventory();
-			if (inventory.countItem(Items.EMERALD) < fine) {
+		if (Coinage.isMoney(held)) {
+			// (0.7.498) the fine is silver from everything carried, not just the coin in hand
+			if (!Money.canPay(player, Money.worth(fine))) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hard.cell.short", fine).withStyle(ChatFormatting.RED));
 				return;
 			}
-			take(inventory, fine);
+			Money.charge(player, Money.worth(fine));
 			player.removeAttached(Busts.JAILED);
-			let(level, player, f);
+			let(level, player, jail);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.paid", fine).withStyle(ChatFormatting.YELLOW));
 			return;
 		}
@@ -345,34 +353,41 @@ public final class StoryHard {
 	/** The cell door is picked: out, but a fugitive of {@code f} now, as any other prisoner who escapes ({@link Busts}). */
 	private static void breakOut(ServerPlayer player, Faction f, long jailUntil) {
 		ServerLevel level = Factions.level(player.level().getServer());
+		Busts.Jail jail = player.getAttached(Busts.JAILED);
 		player.removeAttached(Busts.JAILED);
 		// (0.7.419) a road deed: a cell door picked
 		Deeds.done(player, "cells.broke");
-		let(level, player, f);
+		if (jail != null) {
+			let(level, player, jail);
+		}
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.picked", f.name()).withStyle(ChatFormatting.DARK_RED));
 		Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.escaped", Post.nameOf(player), f.name()));
-		Theft.arrest(player, level, f, Theft.OUTLAW_TICKS);
+		// (0.7.571) hunted to be taken back, not marked for killing on sight: an outlaw's term made them shot down in the street
+		Theft.arrest(player, level, f, Theft.HUNT_TICKS * 3);
+		// (0.7.571) and they don't wake by the seat among the guards hunting them (the story's respawn there is dropped)
+		forgetSeatRespawn(player, level, f);
 		Busts.charge(player, f, "escape");
 		// (0.7.418) a life's aim: out of the cells instead of serving
 		LifeAims.brokeOut(player, jailUntil);
 	}
 
-	/** Puts a prisoner out by the seat. */
-	private static void let(ServerLevel level, ServerPlayer player, Faction f) {
-		Vec3 out = Speakeasy.release(level, f);
-		player.teleportTo(level, out.x, out.y, out.z, Set.<net.minecraft.world.entity.Relative>of(), player.getYRot(), 0.0F, false);
-		level.playSound(null, out.x, out.y, out.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.NEUTRAL, 1.0F, 0.9F);
+	/**
+	 * (0.7.571) The cell door swings open and the prisoner walks out up the jailer's stair ({@link Speakeasy#passage});
+	 * they used to be set down by the seat, in front of the guards.
+	 */
+	private static void let(ServerLevel level, ServerPlayer player, Busts.Jail jail) {
+		Speakeasy.openDoor(level, jail.cell());
+		BlockPos door = Speakeasy.doorAt(jail.cell());
+		level.playSound(null, door, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.9F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.open").withStyle(ChatFormatting.GRAY));
 	}
 
-	private static void take(Inventory inventory, int n) {
-		int left = n;
-		for (int i = 0; i < inventory.getContainerSize() && left > 0; i++) {
-			ItemStack stack = inventory.getItem(i);
-			if (stack.is(Items.EMERALD)) {
-				int used = Math.min(left, stack.getCount());
-				stack.shrink(used);
-				left -= used;
-			}
+	/** (0.7.571) A respawn the story set by {@code f}'s seat (forced, within a few blocks of where prisoners were let out) goes back to the world's. */
+	private static void forgetSeatRespawn(ServerPlayer player, ServerLevel level, Faction f) {
+		ServerPlayer.RespawnConfig respawn = player.getRespawnConfig();
+		if (respawn != null && respawn.forced() && respawn.respawnData().dimension() == level.dimension()
+			&& respawn.respawnData().pos().distSqr(BlockPos.containing(Speakeasy.release(level, f))) <= 16.0) {
+			player.setRespawnPosition(null, false);
 		}
 	}
 

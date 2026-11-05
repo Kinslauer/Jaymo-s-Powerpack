@@ -145,9 +145,19 @@ public final class Barbarians {
 		return folk.style() == FactionType.BARBARIAN || folk.role() == Folk.BARBARIAN || folk.role() == Folk.CHIEF;
 	}
 
-	/** (0.7.148) An MCA villager of a camp (not a folk): a barbarian camp's raider, a pirate cove's deckhand; (0.7.291) its casters. */
+	/** (0.7.148) An MCA villager of a camp (not a folk): a barbarian camp's raider, a pirate cove's deckhand; (0.7.291) its casters; (0.7.481) its builders and workers. */
 	public static boolean isCampVillager(Entity e) {
-		return !(e instanceof Folk) && e instanceof Worker w && villagerRole(w.role()) || Casters.campCaster(e);
+		return !(e instanceof Folk) && e instanceof Worker w && villagerRole(w.role()) || Casters.campCaster(e) || campWorker(e);
+	}
+
+	/** (0.7.481) A camp's builder (or other worker) who's an MCA villager: one of the camp's own, as its folk builders were ({@link #isBarbarian}). */
+	static boolean campWorker(Entity e) {
+		if (e instanceof Folk || !(e instanceof Worker w) || !Worker.isWork(w.role())) {
+			return false;
+		}
+		MinecraftServer server = e.level().getServer();
+		Faction f = server == null ? null : Factions.get(server, w.factionId());
+		return f != null && f.type() == FactionType.BARBARIAN;
 	}
 
 	/**
@@ -195,7 +205,7 @@ public final class Barbarians {
 		}
 		if (target instanceof ServerPlayer player) {
 			// (0.7.412) nor one still in a camp's shackles ({@link StoryHard}), among its other captives
-			return !player.isCreative() && !player.isSpectator() && !spares(player, camp) && !StoryHard.shackled(player);
+			return !player.isCreative() && !player.isSpectator() && !spares(player, camp) && !CaptiveConduct.behaving(player);
 		}
 		if (target instanceof Folk other) {
 			return !isBarbarian(other);

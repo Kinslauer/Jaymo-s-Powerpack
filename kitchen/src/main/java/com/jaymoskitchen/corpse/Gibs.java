@@ -50,6 +50,9 @@ public final class Gibs {
 	/** How long a chunk lies about (ticks; 20 to 45 seconds). */
 	static final int LIFE_MIN = 400, LIFE_MAX = 900;
 
+	/** (0.5.67) Tags Jaymo's Powers puts on a body dying of a blast: blown apart, or left whole (by how close it was). */
+	public static final String GIB_TAG = "jaymoskitchen.gib", NO_GIB_TAG = "jaymoskitchen.no_gib";
+
 	public static EntityType<Gib> GIB;
 
 	/** Told of each body blown apart (a corpse, or a creature dying), with the blast and its damage; see {@link #addOnBurst}. */
@@ -84,7 +87,17 @@ public final class Gibs {
 		if (last == null || !last.is(DamageTypeTags.IS_EXPLOSION)) {
 			return false;
 		}
-		return mob instanceof Creeper || damage >= SHRED_DAMAGE;
+		if (mob instanceof Creeper) {
+			return true;
+		}
+		// (0.5.67) Jaymo's Powers rolls it by how close the blast was (its BlastGore): its word goes; without it, the blast's damage
+		if (mob.entityTags().contains(GIB_TAG)) {
+			return true;
+		}
+		if (mob.entityTags().contains(NO_GIB_TAG)) {
+			return false;
+		}
+		return damage >= SHRED_DAMAGE;
 	}
 
 	/** {@code mob} is blown apart as it dies: chunks of it fly, its loot (and gear) drops loose, and it leaves no corpse. */
@@ -172,8 +185,7 @@ public final class Gibs {
 		}
 		if (ON_BURST.isEmpty() || source == null) {
 			// no Jaymo's Powers to bleed it: a spray of red
-			BlockParticleOption blood = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState());
-			level.sendParticles(blood, at.x, at.y + 0.4, at.z, 40, width * 0.4, 0.3, width * 0.4, 0.3);
+			com.jaymoskitchen.KitchenBlood.send(level, at.x, at.y + 0.4, at.z, 40, width * 0.4, 0.3, width * 0.4, 0.3);
 		} else {
 			Map.Entry<DamageSource, Float> blast = Map.entry(source, damage);
 			for (var hook : ON_BURST) {

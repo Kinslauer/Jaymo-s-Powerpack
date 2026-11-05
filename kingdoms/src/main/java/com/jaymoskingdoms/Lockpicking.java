@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coinage;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.lang.reflect.Method;
@@ -9,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -68,6 +69,8 @@ import org.jspecify.annotations.Nullable;
  * snaps the pick uses one up. Stealth helps: each level of practice and each rank of Lockpicking Prowess (the perk that
  * took Slip Away's place) widens the sweet spots and eases the strain on the pick; from rank 2 the pick feels the
  * binding pin or the gate, and at rank 3 the first slip of each try is forgiven.
+ *
+ * <p>(0.7.497) A locked loot chest is slow to break, not unbreakable ({@link Locks}), and picking one in town is burglary.
  */
 public final class Lockpicking {
 	/** What a chest's loot must be worth to be locked, and the worth each lock level from 2 up starts at. */
@@ -101,10 +104,15 @@ public final class Lockpicking {
 			Codec.INT.optionalFieldOf("level", 0).forGetter(Lock::level),
 			Codec.LONG.optionalFieldOf("seed", 0L).forGetter(Lock::seed)
 		).apply(i, Lock::new));
+		/** (0.7.497) Synced to the clients, so the crack speed and the use prediction match the server's. */
+		static final StreamCodec<io.netty.buffer.ByteBuf, Lock> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.BOOL, Lock::locked, ByteBufCodecs.VAR_INT, Lock::kind, ByteBufCodecs.VAR_INT, Lock::level,
+			ByteBufCodecs.VAR_LONG, Lock::seed, Lock::new);
 	}
 
 	/** On a loot container's block entity once it's been read. Saved with the chest. */
-	static final AttachmentType<Lock> LOCK = AttachmentRegistry.create(JaymosKingdoms.id("lock"), builder -> builder.persistent(Lock.CODEC));
+	static final AttachmentType<Lock> LOCK = AttachmentRegistry.create(JaymosKingdoms.id("lock"),
+		builder -> builder.persistent(Lock.CODEC).syncWith(Lock.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	public static Item LOCKPICK;
 
@@ -151,7 +159,11 @@ public final class Lockpicking {
 	/** Player → the lock they're picking. */
 	private static final Map<UUID, BlockPos> PICKING = new HashMap<>();
 	/** (0.7.412) Player → what happens when the lock they're picking is no container's but a story's (a shackle, a cell door): see {@link #pickVirtual}. */
-	private static final Map<UUID, Runnable> VIRTUAL = new HashMap<>();
+	private static final Map<UUID, Pending> VIRTUAL = new HashMap<>();
+
+	/** (0.7.497) What a story's lock does when picked, and its level (for the practice it earns). */
+	private record Pending(Runnable picked, int level) {
+	}
 
 	private Lockpicking() {
 	}
@@ -172,16 +184,6 @@ public final class Lockpicking {
 			VIRTUAL.clear();
 		});
 		UseBlockCallback.EVENT.register(Lockpicking::use);
-		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
-			if (level.isClientSide() || player.isCreative() || !(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp)) {
-				return true;
-			}
-			if (!locked(server, pos)) {
-				return true;
-			}
-			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.unbreakable").withStyle(ChatFormatting.GRAY));
-			return false;
-		});
 	}
 
 	/** A player went to open a container: a locked one (read now if it never was) opens the lockpicking game instead. */
@@ -220,7 +222,7 @@ public final class Lockpicking {
 		PICKING.put(sp.getUUID(), lockPos);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
-		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess);
+		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp);
 		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess);
 		ServerPlayNetworking.send(sp, new Open(lockPos, lock.kind(), lock.level(), lock.seed(), width, strain, prowess >= PROWESS_FEEL,
 			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
@@ -239,7 +241,7 @@ public final class Lockpicking {
 			VIRTUAL.remove(player.getUUID());
 			return;
 		}
-		Runnable virtual = VIRTUAL.get(player.getUUID());
+		Pending virtual = VIRTUAL.get(player.getUUID());
 		if (virtual != null) {
 			virtualResult(player, result, pos, virtual);
 			return;
@@ -251,6 +253,7 @@ public final class Lockpicking {
 		}
 		switch (result.outcome()) {
 			case Result.SNAPPED -> {
+				Commandments.act(player, "lock_failed");
 				if (!usePick(player)) {
 					PICKING.remove(player.getUUID());
 				}
@@ -268,8 +271,12 @@ public final class Lockpicking {
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
-				// and in they go
+				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
+				Commandments.act(player, "lockpick");
 				BlockState state = level.getBlockState(pos);
+				// (0.7.497) picking a loot chest in town, seen, is burglary
+				Theft.burgled(player, level, pos, state);
+				// and in they go
 				state.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false));
 			}
 			default -> PICKING.remove(player.getUUID());
@@ -282,26 +289,36 @@ public final class Lockpicking {
 	 * lockpick (or can't play it): nothing opens.
 	 */
 	public static boolean pickVirtual(ServerPlayer sp, BlockPos at, int level, long seed, Runnable picked) {
+		return pickLock(sp, at, Kind.PIN, level, seed, picked);
+	}
+
+	/**
+	 * (0.7.497) {@link #pickVirtual} for a lock of any {@code kind} and {@code level}, with its own {@code seed} (a fitted
+	 * lock's, {@link Locks}): the game runs on the lock at {@code at}, and {@code picked} runs once it is won. False if they
+	 * have no lockpick (or can't play it).
+	 */
+	public static boolean pickLock(ServerPlayer sp, BlockPos at, Kind kind, int level, long seed, Runnable picked) {
 		int picks = sp.getInventory().countItem(LOCKPICK);
 		if (picks == 0 || !ServerPlayNetworking.canSend(sp, Open.TYPE)) {
 			return false;
 		}
-		VIRTUAL.put(sp.getUUID(), picked);
+		VIRTUAL.put(sp.getUUID(), new Pending(picked, level));
 		PICKING.put(sp.getUUID(), at);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
-		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess);
+		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp);
 		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess);
-		ServerPlayNetworking.send(sp, new Open(at, Kind.PIN.ordinal(), level, seed, width, strain, prowess >= PROWESS_FEEL,
+		ServerPlayNetworking.send(sp, new Open(at, kind.ordinal(), level, seed, width, strain, prowess >= PROWESS_FEEL,
 			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
 		return true;
 	}
 
 	/** (0.7.412) How a try at a story's lock went: a snapped pick is used up, a won game runs {@code picked}. */
-	private static void virtualResult(ServerPlayer player, Result result, BlockPos pos, Runnable picked) {
+	private static void virtualResult(ServerPlayer player, Result result, BlockPos pos, Pending pending) {
 		ServerLevel level = player.level();
 		switch (result.outcome()) {
 			case Result.SNAPPED -> {
+				Commandments.act(player, "lock_failed");
 				if (!usePick(player)) {
 					PICKING.remove(player.getUUID());
 					VIRTUAL.remove(player.getUUID());
@@ -312,8 +329,10 @@ public final class Lockpicking {
 				PICKING.remove(player.getUUID());
 				VIRTUAL.remove(player.getUUID());
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
-				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL);
-				picked.run();
+				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * pending.level());
+				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
+				Commandments.act(player, "lockpick");
+				pending.picked().run();
 			}
 			default -> {
 				PICKING.remove(player.getUUID());
@@ -351,6 +370,8 @@ public final class Lockpicking {
 		level.playSound(null, at, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 		Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
+		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
+		Commandments.act(player, "lockpick");
 		return true;
 	}
 
@@ -386,7 +407,7 @@ public final class Lockpicking {
 	}
 
 	/** The container at {@code pos} and, for a double chest, its other half. */
-	private static List<BlockPos> halves(ServerLevel level, BlockPos pos) {
+	static List<BlockPos> halves(Level level, BlockPos pos) {
 		List<BlockPos> out = new ArrayList<>(2);
 		out.add(pos);
 		BlockState state = level.getBlockState(pos);
@@ -394,6 +415,27 @@ public final class Lockpicking {
 			out.add(ChestBlock.getConnectedBlockPos(pos, state));
 		}
 		return out;
+	}
+
+	/**
+	 * (0.7.497) Whether the container at {@code pos} (either half) is locked against a hopper or a golem: a loot lock that
+	 * is locked, read now if it never was (a hopper under an unread dungeon chest must not drain it).
+	 */
+	static boolean sealed(ServerLevel level, BlockPos pos) {
+		for (BlockPos half : halves(level, pos)) {
+			BlockEntity be = level.getBlockEntity(half);
+			if (be == null) {
+				continue;
+			}
+			Lock lock = be.getAttached(LOCK);
+			if (lock == null && be instanceof RandomizableContainer container && container.getLootTable() != null && !Lootr.is(be)) {
+				lock = lockOf(level, half);
+			}
+			if (lock != null && lock.locked()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** The lock on the container at {@code pos}: read now if it never was; null when it isn't a loot container. */
@@ -478,9 +520,14 @@ public final class Lockpicking {
 				worth += ENCHANTED;
 			}
 			worth += PIECE.getOrDefault(stack.getItem(), 0.0F) * stack.getCount();
+			// (0.7.498) coins and what a coin purse holds, by their worth at the standard rate (an emerald's worth is the 1.5 it was)
+			worth += Coinage.held(stack) * MILLI_PIECE;
 		}
 		return worth;
 	}
+
+	/** (0.7.498) What a milli of coin in loot is worth (1000 milli, an emerald's worth, is the 1.5 an emerald was). */
+	private static final float MILLI_PIECE = 0.0015F;
 
 	/** The valuables, by the piece. */
 	private static final Map<Item, Float> PIECE = Map.ofEntries(

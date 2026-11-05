@@ -32,7 +32,6 @@ import net.minecraft.world.item.Items;
 final class XenoformHud {
 	private static final int CHIP = 20;
 	private static final int CHIP_GAP = 2;
-	private static final int BAR_WIDTH = 4 * CHIP + 3 * CHIP_GAP;
 	private static final int WARN_COLOR = 0xFF4040;
 	/** Each move's icon, per alien (R G V B). */
 	private static final Map<String, Item[]> ICONS = Map.ofEntries(
@@ -105,13 +104,26 @@ final class XenoformHud {
 		XenoForm form = XenoformState.form(player);
 		long now = player.level().getGameTime();
 		if (form != null) {
-			int[] at = chipsOrigin(width, height, 4);
+			// (0.20.9) the Ultimate's own five chips (R G V B C) while it is on; C also shows through its re-enter cooldown
+			com.jaymospowers.power.xenoform.XenoUltimate ult = XenoformState.ultimate(player);
+			boolean cChip = ult != null || form.evolved() != null && hud.cooldownLeft(XenoForm.C, now) > 0;
+			int chips = cChip ? 5 : 4;
+			int[] at = chipsOrigin(width, height, chips);
 			String shell = player.getAttached(XenoformState.SHELL);
-			Item[] icons = ICONS.getOrDefault(shell != null ? form.id + "_" + shell : form.id, ICONS.getOrDefault(form.id, NO_ICONS));
-			for (int i = 0; i < 4; i++) {
-				moveChip(graphics, font, hud, form, i, icons[i], at[0] + i * (CHIP + CHIP_GAP), at[1], now, time);
+			Item[] icons = ult != null ? ult.icons() : ICONS.getOrDefault(shell != null ? form.id + "_" + shell : form.id, ICONS.getOrDefault(form.id, NO_ICONS));
+			for (int i = 0; i < chips; i++) {
+				Item icon = i < icons.length ? icons[i] : form.icon;
+				if (i == XenoForm.C && ult == null) {
+					// (the base alien's C chip, waiting out the re-enter cooldown: the Ultimate's icon)
+					Item[] evolved = form.evolved().icons();
+					icon = evolved.length > i ? evolved[i] : form.icon;
+				}
+				moveChip(graphics, font, hud, form, i, icon, at[0] + i * (CHIP + CHIP_GAP), at[1], now, time);
 			}
-			timer(graphics, font, hud, form, at[0], at[1] - 14, time);
+			if (hud.underMax() > 0.0F) {
+				under(graphics, hud, form, at[0], at[1] - 2, chipsWidth(chips));
+			}
+			timer(graphics, font, hud, ult != null ? ult : form, at[0], at[1] - 14, time, chipsWidth(chips));
 			return;
 		}
 		int[] at = chipsOrigin(width, height, 2);
@@ -233,22 +245,31 @@ final class XenoformHud {
 			String seconds = left >= 200 ? String.valueOf(left / 20) : String.format(Locale.ROOT, "%.1f", left / 20.0F);
 			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
 		}
-		PowerKey key = PowerKey.values()[slot];
-		String label = font.plainSubstrByWidth(JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage().getString(), CHIP - 2);
+		// (0.20.9) C is the ultimate key, which PowerKey has no value for
+		net.minecraft.client.KeyMapping mapping = slot < PowerKey.values().length ? JaymosPowersClient.keyMapping(PowerKey.values()[slot]) : JaymosPowersClient.ultimateKey();
+		String label = font.plainSubstrByWidth(mapping.getTranslatedKeyMessage().getString(), CHIP - 2);
 		graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, ready ? 0xFFFFFFFF : 0xFF909090);
 	}
 
+	/** (0.20.9) The thin bar over the chips: the base alien's held health while its Ultimate is on, in its colour, darkened. */
+	private static void under(GuiGraphicsExtractor graphics, XenoformState.Hud hud, XenoForm form, int x, int y, int width) {
+		float share = Mth.clamp(hud.under() / hud.underMax(), 0.0F, 1.0F);
+		int dim = (form.color >> 16 & 0xFF) * 3 / 4 << 16 | (form.color >> 8 & 0xFF) * 3 / 4 << 8 | (form.color & 0xFF) * 3 / 4;
+		graphics.fill(x, y, x + width, y + 2, 0x90000000);
+		graphics.fill(x, y, x + Mth.ceil(width * share), y + 2, 0xFF000000 | dim);
+	}
+
 	/** The form's clock: a bar in its colour, red and pulsing through the beeps, and the seconds. */
-	private static void timer(GuiGraphicsExtractor graphics, Font font, XenoformState.Hud hud, XenoForm form, int x, int y, float time) {
+	private static void timer(GuiGraphicsExtractor graphics, Font font, XenoformState.Hud hud, XenoForm form, int x, int y, float time, int barWidth) {
 		float share = Mth.clamp(hud.formTicks() / (float)Math.max(1, hud.formTotal()), 0.0F, 1.0F);
 		boolean warn = hud.formTicks() <= XenoformPower.BEEP_TICKS;
 		int color = warn ? pulse(WARN_COLOR, 0xFFFFFF, time * 1.2F) : form.color;
-		graphics.fill(x, y + 8, x + BAR_WIDTH, y + 11, 0x90000000);
-		graphics.fill(x, y + 8, x + Mth.ceil(BAR_WIDTH * share), y + 11, 0xFF000000 | color);
+		graphics.fill(x, y + 8, x + barWidth, y + 11, 0x90000000);
+		graphics.fill(x, y + 8, x + Mth.ceil(barWidth * share), y + 11, 0xFF000000 | color);
 		Component name = form == com.jaymospowers.power.xenoform.XenoForms.DUPLEX ? com.jaymospowers.power.xenoform.forms.Duplex.title(1 + doubles()) : form.name();
 		graphics.text(font, name.getString(), x, y - 2, 0xFF000000 | form.color);
 		String seconds = String.valueOf(Mth.ceil(hud.formTicks() / 20.0F));
-		graphics.text(font, seconds, x + BAR_WIDTH - font.width(seconds), y - 2, warn ? 0xFF000000 | color : 0xFFFFFFFF);
+		graphics.text(font, seconds, x + barWidth - font.width(seconds), y - 2, warn ? 0xFF000000 | color : 0xFFFFFFFF);
 	}
 
 	/** How many of Duplex's doubles of yours this client can see. */
@@ -272,12 +293,10 @@ final class XenoformHud {
 
 	private static int[] chipsOrigin(int width, int height, int count) {
 		int cx = width / 2;
-		int x = cx + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + chipsWidth(count) > width - 2) {
-			x = cx + 91 - chipsWidth(count);
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		return new int[] {x, y};
 	}
 

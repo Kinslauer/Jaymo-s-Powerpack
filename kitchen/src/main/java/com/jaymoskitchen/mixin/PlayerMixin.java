@@ -49,7 +49,8 @@ abstract class PlayerMixin implements PlayerCorpses.Holder {
 	private void jaymoskitchen$keepHotbarOnBody(ServerLevel level, CallbackInfo ci) {
 		Player self = (Player) (Object) this;
 		if (level.getGameRules().get(GameRules.KEEP_INVENTORY) || self.isSpectator()
-			|| self.entityTags().contains(com.jaymoskitchen.corpse.Corpses.NO_CORPSE_TAG)) {
+			|| self.entityTags().contains(com.jaymoskitchen.corpse.Corpses.NO_CORPSE_TAG)
+			|| com.jaymoskitchen.corpse.Corpses.inNoCorpseZone(self)) {
 			// (no body to keep it: a tagged player's hotbar drops with everything else)
 			return;
 		}

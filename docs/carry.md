@@ -134,6 +134,41 @@ Each pickup rolls a hold (synced in the carrier's `jaymospowers:carry_carrying` 
 - Injection order: the carry's render hooks run at priority 2000 so they come last; another mod's pose code that runs
   later could still move a carried body's limbs.
 
+# Blocks: Carry On (0.20.17)
+
+Blocks are carried by **Carry On** (LGPL-3.0, Tschipp; shipped unchanged in `packMods`): sneak + right-click a chest,
+furnace, barrel or any other block with something in it, empty hands, to lift it with everything inside; right-click to
+set it down. Its own settings are in `config/carryon-common.json` / `carryon-client.json`. It replaced our own block
+lifting (crafting tables, anvils and single chests, 0.13.11 to 0.20.15).
+
+What's still ours:
+- **Pod parts** (`CarryBlock.carriable` = `PodParts.partOf`): lifted with our carry (hold `Carry.BLOCK`), since they go
+  onto a pod or a salvage rack (`PodParts.tryAttach`).
+- **Duplex's fetch** and the **Bound Block** use `CarryBlock.liftableAny` / `takeOut` / `place` / `land`.
+- **Bodies**: everything above. Carry On never lifts an entity.
+
+How the two get along (`core/CarryOnCompat`, `mixin/carryon/CarryOnPickupMixin` on Carry On's `PickupHandler`, optional):
+- Carry On's `tryPickupEntity` always says no; its `canCarryGeneral` and `tryPickUpBlock` say no while our carry, a
+  Kitchen corpse, being carried, a throw's tumble or being downed has your arms, and for any block in
+  `#jaymospowers:carry_on_no_lift` (pod parts, salvage rack, smeltery controller and drain, kiln load, sentry spawner,
+  infusion matrix, Kingdoms' bounty board, pulley and plot stake, Kitchen's windmill and waterwheel).
+- With a block in Carry On's arms (`CarryOnCompat.isCarrying`, read by reflection from its synced data, both sides): no
+  picking up a body or a corpse (a `UseEntityCallback` phase that runs first), no ledge grab, no taking a part off a
+  salvage rack, and `FirstPersonArms` leaves the hands to Carry On. It counts as carrying for Z Fighter training.
+- While our carry has your arms, the right-click lets go (`CarryUseMixin`), so Carry On never sees it.
+
+## Testing (blocks)
+1. Empty hands, sneak + right-click a chest with items in it: it's lifted in Carry On's hold; set it down elsewhere and
+   the items are still in it. A furnace mid-smelt, a barrel, Kitchen's cabinet: the same.
+2. A crafting table lifts too (Kitchen gives it a block entity, with its grid). An anvil or stone: nothing lifts (Carry
+   On only takes blocks with a block entity).
+3. Pod parts: sneak + right-click a part, it goes into our hold; set it onto a pod. Carry On never takes one, nor a
+   salvage rack, a smeltery controller, a bounty board.
+4. Carry a player, then sneak + right-click a chest: you let the player go (no chest lifted). Carry a Kitchen corpse:
+   sneak + right-click a chest lifts no chest.
+5. With a chest in Carry On's arms: sneak + right-click a player, an animal, a corpse: nothing. Jump at a wall: no ledge grab.
+6. Sneak + right-click a cow, a villager, a player, a baby animal: our own carry (never Carry On's).
+
 # Ledge grab and climb-over (0.13.18, everyone)
 
 Everyone's own movement, alongside carrying and crawling: catch the edge of a wall about two blocks high and pull

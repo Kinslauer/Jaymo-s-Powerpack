@@ -40,6 +40,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.5.52) The skill tree: three pillars, Survival, Stealth and Strength. Each pillar has its own experience, earned by
@@ -52,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * to pin. Survival ({@link SurvivalSkill}) grows as you live off the land and through the night; Strength
  * ({@link StrengthSkill}) as you fight, mine and fell. The plan: {@code docs/Skills-Plan.md}.
  *
- * <p>Points come back for reinvesting ({@link #respec}) from a kingdom's court wizard, for emeralds, or by drinking a
+ * <p>Points come back for reinvesting ({@link #respec}) from a kingdom's court wizard, for silver, or by drinking a
  * bottle o' enchanting (sneak and use it). A pillar you've made your own shows over your head as your alignment, and
  * word of it gets round the villages ({@link Renown}).
  */
@@ -132,8 +133,8 @@ public final class Skills {
 	 */
 	static final double QUICK_HANDS_COS = 0.35, QUICK_HANDS_TURN_COS = 0.6;
 
-	/** Respec: a court wizard asks this many emeralds, and this many more per rank you've learned. */
-	static final int RESPEC_EMERALDS = 5, RESPEC_PER_RANK = 1;
+	/** Respec: a court wizard asks this much silver, and this many more per rank you've learned. */
+	static final int RESPEC_SILVER = 5, RESPEC_PER_RANK = 1;
 
 	/** The three pillars of the tree. Only the open ones have perks yet. */
 	public enum Pillar {
@@ -248,23 +249,128 @@ public final class Skills {
 		// (0.7.424) Andy: "it should be early on the tree, and available in stealth and strength as well": the same choice,
 		// each with its own edge ({@link Questioning})
 		ROUGH_QUESTIONS(Pillar.STRENGTH, 1, 1, 0, 1, 1, HEAVY_BLOWS),
-		QUIET_WORD(Pillar.STEALTH, 1, 1, 0, 1, 1, LIGHT_FINGERS);
+		QUIET_WORD(Pillar.STEALTH, 1, 1, 0, 1, 1, LIGHT_FINGERS),
+		// (0.7.509) the patrons' favour slips more slowly (Patrons); last, so no ordinal moves
+		DEVOTION(Pillar.SURVIVAL, 3, 1, 3, 0, 2),
+		// (0.7.514) bridge perks on the borders between two pillars ({@link Bridges}): each opens from a rank in any one
+		// of the perks it names, on either side, and is paid from whichever side has more points; last, so no ordinal moves
+		AMBUSHER(Pillar.STEALTH, Pillar.STRENGTH, 1, 1, SNEAK_ATTACK, GRIM_HAND),
+		CUTTHROAT(Pillar.STEALTH, Pillar.STRENGTH, 1, 2, ASSASSINATE, LAST_LOOK),
+		IRON_HIDE(Pillar.STRENGTH, Pillar.SURVIVAL, 1, 1, BULLDOZER, SECOND_WIND),
+		BEAST_OF_BURDEN(Pillar.STRENGTH, Pillar.SURVIVAL, 1, 2, PACKHORSE, IRON_STOMACH),
+		TRACKER(Pillar.SURVIVAL, Pillar.STEALTH, 1, 1, FIELD_DRESSER, CLIMBER),
+		LIGHT_PACK(Pillar.SURVIVAL, Pillar.STEALTH, 1, 2, PLAGUE_DOCTOR, BAR_SWING),
+		// (0.7.516, RPG Series patch 2) Andy: the class skills of Zsolt Molnar's Wizards, Archers and Rogues & Warriors and
+		// the Weapon Forms are learned here (or taught by a trainer's drill, free: {@link Learnables}); a spell's perk is
+		// for its class only (RpgSeriesGate). Last, so no ordinal moves.
+		// Survival's third page, Archery (Archer, Marksman)
+		POWER_SHOT(Pillar.SURVIVAL, 1, 1, 5, 8, 0),
+		ENTANGLING_ROOTS(Pillar.SURVIVAL, 1, 1, 5, 8, 2),
+		BARRAGE(Pillar.SURVIVAL, 1, 2, 9, 9, 0, POWER_SHOT),
+		SPIRIT_WOLF(Pillar.SURVIVAL, 1, 2, 9, 9, 2, ENTANGLING_ROOTS),
+		MAGIC_ARROW(Pillar.SURVIVAL, 1, 2, 13, 10, 0, BARRAGE),
+		RAIN_OF_ARROWS(Pillar.SURVIVAL, 1, 2, 13, 10, 2, SPIRIT_WOLF),
+		// Survival's fourth and fifth pages, Spellcraft (Mage; Andy chose Survival for it): Arcane, Fire and Frost, a column each
+		ARCANE_MISSILE(Pillar.SURVIVAL, 1, 1, 5, 12, 0),
+		ARCANE_EXPLOSION(Pillar.SURVIVAL, 1, 1, 5, 13, 0, ARCANE_MISSILE),
+		ARCANE_BEAM(Pillar.SURVIVAL, 1, 2, 9, 14, 0, ARCANE_EXPLOSION),
+		ARCANE_BARRAGE(Pillar.SURVIVAL, 1, 2, 9, 15, 0, ARCANE_BEAM),
+		ARCANE_BLINK(Pillar.SURVIVAL, 1, 2, 13, 16, 0, ARCANE_BARRAGE),
+		ARCANE_EVOCATION(Pillar.SURVIVAL, 1, 2, 13, 17, 0, ARCANE_BLINK),
+		FIRE_BREATH(Pillar.SURVIVAL, 1, 1, 5, 12, 1),
+		FIRE_SLASH(Pillar.SURVIVAL, 1, 1, 5, 13, 1, FIRE_BREATH),
+		FIRE_METEOR(Pillar.SURVIVAL, 1, 2, 9, 14, 1, FIRE_SLASH),
+		FIRE_STORM(Pillar.SURVIVAL, 1, 2, 9, 15, 1, FIRE_METEOR),
+		FIRE_WALL(Pillar.SURVIVAL, 1, 2, 13, 16, 1, FIRE_STORM),
+		FIRE_HYDRA(Pillar.SURVIVAL, 1, 2, 13, 17, 1, FIRE_WALL),
+		FROST_NOVA(Pillar.SURVIVAL, 1, 1, 5, 12, 2),
+		FROST_SPIKES(Pillar.SURVIVAL, 1, 1, 5, 13, 2, FROST_NOVA),
+		FROST_SHIELD(Pillar.SURVIVAL, 1, 2, 9, 14, 2, FROST_SPIKES),
+		FROST_LANCE(Pillar.SURVIVAL, 1, 2, 9, 15, 2, FROST_SHIELD),
+		FROST_BLIZZARD(Pillar.SURVIVAL, 1, 2, 13, 16, 2, FROST_LANCE),
+		FROST_ELEMENTAL(Pillar.SURVIVAL, 1, 2, 13, 17, 2, FROST_BLIZZARD),
+		// Stealth's fourth page, the Rogue's Arts (Thief; the Bear Trap the Survivalist's too)
+		SLICE_AND_DICE(Pillar.STEALTH, 1, 1, 5, 12, 0),
+		SHOCK_POWDER(Pillar.STEALTH, 1, 1, 5, 12, 2),
+		MUTILATE(Pillar.STEALTH, 1, 2, 13, 13, 0, SLICE_AND_DICE),
+		BEAR_TRAP(Pillar.STEALTH, 1, 2, 9, 13, 1, SLICE_AND_DICE, SHOCK_POWDER),
+		SHADOW_STEP(Pillar.STEALTH, 1, 2, 9, 13, 2, SHOCK_POWDER),
+		VANISH(Pillar.STEALTH, 1, 2, 13, 14, 1, MUTILATE, SHADOW_STEP),
+		// Stealth's fifth page, Knife Arts (Weapon Forms of the knife family, anyone)
+		MARKED_QUARRY(Pillar.STEALTH, 1, 1, 2, 16, 0),
+		TANGLE_CORD(Pillar.STEALTH, 1, 1, 2, 16, 2),
+		CAST_OFF_CLOAK(Pillar.STEALTH, 1, 2, 6, 17, 1, MARKED_QUARRY, TANGLE_CORD),
+		// Strength's fifth page, Warfare (Warlord, Brute, Rider; the net the Survivalist's too). Shown as "Warrior's Charge"
+		// and "Warrior's Last Stand": Combat Arts' Charge and Survival's Last Stand keep their names
+		THROW(Pillar.STRENGTH, 1, 1, 5, 16, 0),
+		SHOUT(Pillar.STRENGTH, 1, 1, 5, 16, 2),
+		THROW_NET(Pillar.STRENGTH, 1, 1, 5, 17, 0, THROW),
+		WARRIOR_CHARGE(Pillar.STRENGTH, 1, 2, 9, 17, 1, THROW, SHOUT),
+		WARRIOR_LAST_STAND(Pillar.STRENGTH, 1, 2, 13, 17, 2, SHOUT),
+		MORTAL_STRIKE(Pillar.STRENGTH, 1, 2, 13, 18, 1, WARRIOR_CHARGE),
+		// Strength's sixth page, Weapon Forms (blade, fist and claw, spear: a column each, anyone)
+		SHEATH_DRAW(Pillar.STRENGTH, 1, 1, 2, 20, 0),
+		CRESCENT_SWEEP(Pillar.STRENGTH, 1, 1, 4, 21, 0, SHEATH_DRAW),
+		RAIN_OF_CUTS(Pillar.STRENGTH, 1, 2, 8, 22, 0, CRESCENT_SWEEP),
+		GROUND_STOMP(Pillar.STRENGTH, 1, 1, 2, 20, 1),
+		FALLING_FIST(Pillar.STRENGTH, 1, 1, 4, 21, 1, GROUND_STOMP),
+		RENDING_CLAW(Pillar.STRENGTH, 1, 1, 6, 22, 1, FALLING_FIST),
+		FERAL_POUNCE(Pillar.STRENGTH, 1, 2, 8, 23, 1, RENDING_CLAW),
+		SPEAR_LUNGE(Pillar.STRENGTH, 1, 1, 2, 20, 2),
+		COUCHED_LANCE(Pillar.STRENGTH, 1, 1, 4, 21, 2, SPEAR_LUNGE),
+		PINNING_THROW(Pillar.STRENGTH, 1, 2, 8, 22, 2, COUCHED_LANCE),
+		// (0.7.517) Spellcraft's crown, Enchanted Storage (Mage; Andy): enchant a chest into a Bag of Holding, then up a tier
+		// a rank ({@link StorageEnchanting})
+		ENCHANTED_STORAGE(Pillar.SURVIVAL, 3, 2, 15, 18, 0, ARCANE_EVOCATION);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
 
 		public final Pillar pillar;
+		/**
+		 * (0.7.514) A bridge perk's second pillar (null for every other perk): it sits on the border between
+		 * {@link #pillar} and this one, needs a rank in any one of {@link #requires} (not all), and is paid from either side.
+		 */
+		public final @Nullable Pillar other;
 		public final int maxRank, cost, minLevel, tier, column;
 		public List<Perk> requires;
 
 		Perk(Pillar pillar, int maxRank, int cost, int minLevel, int tier, int column, Perk... requires) {
 			this.pillar = pillar;
+			this.other = null;
 			this.maxRank = maxRank;
 			this.cost = cost;
 			this.minLevel = minLevel;
 			this.tier = tier;
 			this.column = column;
 			this.requires = List.of(requires);
+		}
+
+		/** A bridge perk between {@code pillar} and {@code other}, opened by a rank in any one of {@code anyOf}. */
+		Perk(Pillar pillar, Pillar other, int maxRank, int cost, Perk... anyOf) {
+			this.pillar = pillar;
+			this.other = other;
+			this.maxRank = maxRank;
+			this.cost = cost;
+			this.minLevel = 0;
+			this.tier = -1;
+			this.column = -1;
+			this.requires = List.of(anyOf);
+		}
+
+		/** Whether this is a bridge perk, on the border between two pillars. */
+		public boolean bridge() {
+			return other != null;
+		}
+
+		/** Whether this perk belongs to {@code p} (a bridge belongs to both its sides). */
+		public boolean in(Pillar p) {
+			return pillar == p || other == p;
+		}
+
+		/** The key a bridge's rank paid from {@code p} is saved under. */
+		public String paidKey(Pillar p) {
+			return key() + "@" + p.key();
 		}
 
 		static {
@@ -303,7 +409,8 @@ public final class Skills {
 
 		/** How many ranks are learned, in all pillars, and (0.7.57) attribute points spent ({@link Stats}). */
 		public int spent() {
-			int n = Stats.spent(this);
+			// (0.7.540) attribute points are tenths now (0-100): ten count as one rank
+			int n = (Stats.spent(this) + Stats.STEP - 1) / Stats.STEP;
 			for (Perk perk : Perk.values()) {
 				n += rank(perk);
 			}
@@ -314,8 +421,14 @@ public final class Skills {
 		public int points(Pillar pillar) {
 			int spent = 0;
 			for (Perk perk : Perk.values()) {
-				if (perk.pillar == pillar) {
-					spent += rank(perk) * perk.cost;
+				if (perk.bridge()) {
+					// (0.7.514) a bridge's ranks count against the side each was paid from
+					if (perk.in(pillar)) {
+						spent += ranks.getOrDefault(perk.paidKey(pillar), 0) * perk.cost;
+					}
+				} else if (perk.pillar == pillar) {
+					// (0.7.516) a rank a trainer taught costs nothing (Learnables)
+					spent += (rank(perk) - ranks.getOrDefault(Learnables.taughtKey(perk), 0)) * perk.cost;
 				}
 			}
 			// (0.7.464) and a bonus point at every milestone level
@@ -336,6 +449,13 @@ public final class Skills {
 			if (level(perk.pillar) < perk.minLevel) {
 				return "gui.jaymoskingdoms.skills.blocked.level";
 			}
+			if (perk.bridge()) {
+				// (0.7.514) any one of the perks it names will do, on either side; paid from either side
+				if (perk.requires.stream().noneMatch(need -> rank(need) > 0)) {
+					return "gui.jaymoskingdoms.skills.blocked.requires_any";
+				}
+				return payer(perk) == null ? "gui.jaymoskingdoms.skills.blocked.points_either" : null;
+			}
 			for (Perk need : perk.requires) {
 				if (rank(need) == 0) {
 					return "gui.jaymoskingdoms.skills.blocked.requires";
@@ -345,6 +465,13 @@ public final class Skills {
 				return "gui.jaymoskingdoms.skills.blocked.points";
 			}
 			return null;
+		}
+
+		/** (0.7.514) The side a rank of bridge {@code perk} is paid from: the one with more points, if it has enough. */
+		public @Nullable Pillar payer(Perk perk) {
+			Pillar a = perk.pillar, b = perk.other == null ? perk.pillar : perk.other;
+			Pillar richer = points(b) > points(a) ? b : a;
+			return points(richer) >= perk.cost ? richer : null;
 		}
 	}
 
@@ -426,7 +553,7 @@ public final class Skills {
 			}
 			return InteractionResult.SUCCESS;
 		});
-		// (0.5.53) an MCA villager who is a court wizard: sneak and use them (their own menu opens as ever without sneaking;
+		// (0.5.54) an MCA villager who is a court wizard: sneak and use them (their own menu opens as ever without sneaking;
 		// from behind with an empty hand it's a pickpocket, which is registered first)
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !sp.isShiftKeyDown()
@@ -461,14 +588,21 @@ public final class Skills {
 		ValorFolk.register();
 		ValorKings.register();
 		ShieldThrow.register();
+		// (0.7.514) the bridge perks
+		Bridges.register();
 		Renown.register();
 		KitchenCompat.skills();
 	}
 
 	/** Puts {@code player}'s attribute perks on them as they stand, and their alignment over their head. */
 	static void refresh(ServerPlayer player) {
+		// (0.7.516) forms known from before the web had them show as taught
+		Learnables.sync(player);
 		SurvivalSkill.attributes(player);
 		StrengthSkill.attributes(player);
+		Bridges.attributes(player);
+		// (0.7.540) old saves' attribute points onto the 0-100 scale, once
+		Stats.migrate(player);
 		Stats.attributes(player);
 		Heritage.attributes(player);
 		// (0.7.96) a Survivalist's hearts grow with their level
@@ -495,12 +629,37 @@ public final class Skills {
 	 * (0.7.57) Endurance ({@link Stats}) and their heritage ({@link Heritage}) where they stand.
 	 */
 	public static float exhaustion(ServerPlayer player) {
-		return SurvivalSkill.exhaustion(player) * StrengthSkill.exhaustion(player) * Stats.exhaustion(player) * Heritage.exhaustion(player);
+		return SurvivalSkill.exhaustion(player) * StrengthSkill.exhaustion(player) * Bridges.exhaustion(player) * Stats.exhaustion(player)
+			* Heritage.exhaustion(player);
+	}
+
+	/**
+	 * (0.7.514) Takes every perk of {@code pillar} out of {@code ranks}, and every bridge rank paid from it (a bridge
+	 * paid from its other side stays).
+	 */
+	static void forget(Map<String, Integer> ranks, Pillar pillar) {
+		for (Perk perk : Perk.values()) {
+			if (perk.bridge()) {
+				int paid = ranks.getOrDefault(perk.paidKey(pillar), 0);
+				ranks.remove(perk.paidKey(pillar));
+				int left = ranks.getOrDefault(perk.key(), 0) - paid;
+				if (left > 0) {
+					ranks.put(perk.key(), left);
+				} else {
+					ranks.remove(perk.key());
+				}
+			} else if (perk.pillar == pillar && !ranks.containsKey(Learnables.taughtKey(perk))) {
+				// (0.7.516) what a trainer taught stays
+				ranks.remove(perk.key());
+			}
+		}
 	}
 
 	/** Every point {@code player} spent comes back to spend again; their experience and levels stay. */
 	static void respec(ServerPlayer player) {
-		player.setAttached(PROGRESS, new Progress(of(player).xp(), Map.of()));
+		// (0.7.516) forms bought with points are unlearned with them; what a trainer taught stays
+		Learnables.unlearnBought(player);
+		player.setAttached(PROGRESS, new Progress(of(player).xp(), Learnables.taughtOnly(of(player).ranks())));
 		refresh(player);
 	}
 
@@ -508,7 +667,7 @@ public final class Skills {
 
 	/** What a court wizard asks to unmake what {@code player} has learned. */
 	static int respecPrice(Player player) {
-		return RESPEC_EMERALDS + RESPEC_PER_RANK * of(player).spent();
+		return RESPEC_SILVER + RESPEC_PER_RANK * of(player).spent();
 	}
 
 	/** A player spoke to a court wizard: if they've learned anything, the wizard offers to unmake it, for a price. */
@@ -519,9 +678,9 @@ public final class Skills {
 		int price = respecPrice(player);
 		RESPEC_OFFERS.put(player.getUUID(), wizard.getId());
 		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(),
-			Component.translatable("talk.jaymoskingdoms.wizard.respec", price),
-			List.of(Component.translatable("talk.jaymoskingdoms.wizard.respec.yes", price), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
-			List.of(Approaches.emeralds(player) >= price, true)));
+			Component.translatable("talk.jaymoskingdoms.wizard.respec", Money.text(player, Money.worth(price))),
+			List.of(Component.translatable("talk.jaymoskingdoms.wizard.respec.yes", Money.text(player, Money.worth(price))), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
+			List.of(Money.canPay(player, Money.worth(price)), true)));
 	}
 
 	/** An answer to the wizard's offer; false when it wasn't one (it's some other talk). */
@@ -535,10 +694,10 @@ public final class Skills {
 			return true;
 		}
 		int price = respecPrice(player);
-		if (Approaches.emeralds(player) < price) {
+		if (!Money.canPay(player, Money.worth(price))) {
 			return true;
 		}
-		Approaches.take(player, Items.EMERALD, price);
+		Money.charge(player, Money.worth(price)); // (0.7.498) silver coins, not emeralds
 		respec(player);
 		ServerLevel level = (ServerLevel) player.level();
 		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.respec.done"), Speech.GOLD);
@@ -655,9 +814,28 @@ public final class Skills {
 		if (p.blocked(perk) != null) {
 			return;
 		}
+		if (Knowledge.lockedPerk(player, perk)) {
+			// (0.7.492) a higher technique: Knowledge 4
+			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
+			return;
+		}
+		if (Learnables.classLocked(player, perk)) {
+			// (0.7.516) a class skill of another class
+			return;
+		}
 		Map<String, Integer> ranks = new HashMap<>(p.ranks());
 		ranks.merge(perk.key(), 1, Integer::sum);
+		if (perk.bridge()) {
+			// (0.7.514) note which side paid, so that side's points count it
+			Pillar payer = p.payer(perk);
+			if (payer == null) {
+				return;
+			}
+			ranks.merge(perk.paidKey(payer), 1, Integer::sum);
+		}
 		player.setAttached(PROGRESS, new Progress(p.xp(), Map.copyOf(ranks)));
+		// (0.7.516) a form's perk teaches the form
+		Learnables.spent(player, perk);
 		refresh(player);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.5F, 1.4F);
 	}
@@ -674,6 +852,8 @@ public final class Skills {
 			xp *= XP_ASLEEP;
 		}
 		int amount = Math.max(1, Math.round(xp));
+		// (0.7.509) a clean pickpocket pleases the Ash Whisperer
+		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "pickpocket");
 		if (of(player).xp(Pillar.STEALTH) >= total(Pillar.STEALTH.maxLevel)) {
 			return 0;
 		}
@@ -687,6 +867,8 @@ public final class Skills {
 			return;
 		}
 		NEXT_THEFT_XP.put(player.getUUID(), now + THEFT_XP_TICKS);
+		// (0.7.509) a theft nobody saw pleases the Ash Whisperer
+		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "unseen_theft");
 		grant(player, Pillar.STEALTH, XP_THEFT);
 	}
 
@@ -731,7 +913,9 @@ public final class Skills {
 	static float holdTicks(Player player, float ticks) {
 		Progress p = of(player);
 		// (0.7.102) practice counts the first page's 15 levels only: the levels past it pay for freerunning
-		return ticks * (1.0F - PRACTICE_PER_LEVEL * Math.min(MAX_LEVEL, p.level(Pillar.STEALTH))) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS));
+		// (0.7.509) and the Ash Whisperer's Quick Fingers
+		return ticks * (1.0F - PRACTICE_PER_LEVEL * Math.min(MAX_LEVEL, p.level(Pillar.STEALTH))) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS))
+			* Blessings.pickHold(player);
 	}
 
 	/** Ghost: a guard takes no longer to rob than anyone else, and a theft nobody saw is never missed. */
@@ -751,7 +935,7 @@ public final class Skills {
 
 	/** The share of their sight sneaking hides {@code player} by (Soft Step). */
 	static double sneakFactor(Player player, double base) {
-		return Math.max(0.1, base - SOFT_STEP_PER_RANK * rank(player, Perk.SOFT_STEP) - Heritage.sneak(player));
+		return Math.max(0.1, base - SOFT_STEP_PER_RANK * rank(player, Perk.SOFT_STEP) - Heritage.sneak(player) - Blessings.sneak(player));
 	}
 
 	/** How far round the mark {@code player} may stand and still reach in (Quick Hands: the side will do). */

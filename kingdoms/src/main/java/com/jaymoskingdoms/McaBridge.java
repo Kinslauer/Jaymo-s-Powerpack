@@ -259,6 +259,9 @@ final class McaBridge {
 			// (at the contract's end MCA keeps a mercenary only if nextInt(requirement) < hearts)
 			v.getVillagerBrain().getMemoriesForPlayer(player).setHearts(Math.max(Strangers.TRUSTED_HEARTS, Config.getInstance().marriageHeartsRequirement));
 			v.getVillagerBrain().setMoveState(net.conczin.mca.entity.ai.MoveState.FOLLOW, player);
+			// (0.7.510, Andy: "the nobodies ... you do know each other") old companions, not strangers: names known both ways
+			Introductions.learn(player, v);
+			met(v, player);
 			made++;
 		}
 		return made;
@@ -418,6 +421,13 @@ final class McaBridge {
 		}
 		// (0.7.299) a cook keeps the work (and trades: Meals sets its wares)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
+		// (0.7.490) and a money-changer (Currencies sets its offers)
+		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
+	}
+
+	/** (0.7.498) {@code v}'s job is one MCA keeps from trading (guards, archers, outlaws, mercenaries, our workers). */
+	static boolean cannotTrade(Villager v) {
+		return v.getVillagerData().profession().unwrapKey().map(ProfessionsMCA.CAN_NOT_TRADE::contains).orElse(false);
 	}
 
 	private static Enlisted worker(VillagerEntityMCA villager) {
@@ -430,7 +440,10 @@ final class McaBridge {
 		if (job == null) {
 			return null;
 		}
-		VillagerEntityMCA villager = chosen != null ? chosen : candidate(level, f, role);
+		// (0.7.481) a camp never takes on someone else's spare villager: a newcomer of its own moves in
+		boolean camp = f.type() == FactionType.BARBARIAN;
+		VillagerEntityMCA villager = chosen != null ? chosen : camp ? null : candidate(level, f, role);
+		boolean newcomer = villager == null;
 		if (villager == null) {
 			// nobody to spare: someone new moves in to take the work
 			// (0.7.84) on open ground by {@code at}, not shut in wherever it is (a seat can be indoors)
@@ -439,6 +452,10 @@ final class McaBridge {
 		}
 		if (villager.getProfession() != job) {
 			villager.setProfession(job);
+		}
+		if (camp && Worker.isWork(role)) {
+			// (0.7.481) dressed as the camp dresses its builders (and, if new, born to the blood its folk would have)
+			campDress(level, f, role, villager, home, radius, newcomer);
 		}
 		Enlisted w = worker(villager);
 		w.enlist(role, f.id());
@@ -466,7 +483,7 @@ final class McaBridge {
 				// (0.7.141) never a wind dragon in disguise
 				&& v.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) == null
 				// (0.7.299) nor a visitor, here for the day
-				&& !Visitors.is(v));
+				&& !Visitors.is(v) && !Envoys.is(v));
 		if (role == Folk.GUARD && Purists.is(f)) {
 			List<VillagerEntityMCA> kin = all.stream().filter(v -> Purists.kin(f, v)).toList();
 			if (!kin.isEmpty()) {
@@ -490,8 +507,12 @@ final class McaBridge {
 	// ---- rulers and guards (0.7.138) -----------------------------------------------------------------------------------
 
 	/** {@link McaCompat#enlistRuler}. */
-	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house) {
-		VillagerEntityMCA villager = heir(level, f, house);
+	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house, java.util.@Nullable UUID chosen) {
+		// (0.7.519) one the realm chose (an election, a regent, a ward come of age) if they are still about and grown enough
+		VillagerEntityMCA villager = chosen != null && level.getEntity(chosen) instanceof VillagerEntityMCA c && c.isAlive() && teenOrOlder(c) ? c : null;
+		if (villager == null) {
+			villager = heir(level, f, house);
+		}
 		if (villager == null) {
 			// nobody grown in the town: someone moves in to take the throne
 			Castle.Keep keep = Factions.keep(level.getServer(), f.id());
@@ -513,13 +534,66 @@ final class McaBridge {
 	}
 
 	/**
+	 * (0.7.519) The grown villagers of {@code f}'s town who could rule or stand for election: alive, adult (a teen never
+	 * is), townsfolk or guards, not a hermit or an envoy, and not {@code house} (the late ruler).
+	 */
+	private static List<VillagerEntityMCA> candidates(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		return level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			v -> v.isAlive() && v.getAgeState() == AgeState.ADULT && (worker(v).role() < 0 || worker(v).role() == Folk.GUARD) && !Hermits.is(worker(v))
+				&& !Envoys.is(v) && !v.getUUID().equals(house));
+	}
+
+	/** {@link McaCompat#notables}. */
+	static List<Villager> notables(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		return new ArrayList<>(candidates(level, f, house));
+	}
+
+	/** {@link McaCompat#youngKin}: the late ruler's children and teens, the eldest first. */
+	static List<Villager> youngKin(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		if (house == null) {
+			return List.of();
+		}
+		List<VillagerEntityMCA> young = new ArrayList<>(level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			v -> v.isAlive() && v.getAgeState() != AgeState.ADULT && !Envoys.is(v) && kinOf(v, house) == McaCompat.KIN));
+		young.sort((a, b) -> Integer.compare(b.getAgeState().ordinal(), a.getAgeState().ordinal()));
+		return new ArrayList<>(young);
+	}
+
+	/** {@link McaCompat#adult}. */
+	static boolean adult(Villager villager) {
+		return villager instanceof VillagerEntityMCA v && v.getAgeState() == AgeState.ADULT;
+	}
+
+	/** {@link McaCompat#professionLevel}. */
+	static int professionLevel(Villager villager) {
+		return villager.getVillagerData().profession().is(VillagerProfession.NONE) ? 0 : villager.getVillagerData().level();
+	}
+
+	/** {@link McaCompat#discharge}. */
+	static void discharge(PathfinderMob mob) {
+		if (mob instanceof VillagerEntityMCA v) {
+			worker(v).discharge();
+		}
+	}
+
+	/** {@link McaCompat#envoy}: a grown newcomer of no settlement, an envoy of {@code f}'s, at {@code at}. */
+	static @Nullable Villager envoy(ServerLevel level, Faction f, BlockPos at) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0).spawn(EntitySpawnReason.MOB_SUMMONED);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0F, 0.0F);
+		villager.setPersistenceRequired();
+		return villager;
+	}
+
+	/**
 	 * {@code f}'s heir among its grown villagers (its guards too, the townsfolk first): the late ruler's family
 	 * ({@code house}), then their widow or widower, then anyone.
 	 */
 	private static @Nullable VillagerEntityMCA heir(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
-		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
-			v -> v.isAlive() && !v.isBaby() && (worker(v).role() < 0 || worker(v).role() == Folk.GUARD) && !Hermits.is(worker(v))
-				&& !v.getUUID().equals(house));
+		// (0.7.519) grown means adult now: a teen heir gets a regent (Elections), never the crown outright
+		List<VillagerEntityMCA> all = candidates(level, f, house);
 		if (all.isEmpty()) {
 			return null;
 		}
@@ -867,6 +941,34 @@ final class McaBridge {
 		}
 	}
 
+	/** (0.7.490) {@link McaCompat#reranked}. */
+	static void reranked(PathfinderMob mob, Heritage.Kind kind, boolean chief) {
+		if (!(mob instanceof VillagerEntityMCA villager)) {
+			return;
+		}
+		// the old rank's armour and weapons out of the pack, the new rank's worn gear in (MCA's guards dress from what they carry)
+		var pack = villager.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			net.minecraft.world.item.ItemStack held = pack.getItem(i);
+			var equippable = held.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+			boolean armour = equippable != null && equippable.slot().getType() == EquipmentSlot.Type.HUMANOID_ARMOR;
+			if (armour || held.is(net.minecraft.tags.ItemTags.AXES) || held.is(net.minecraft.tags.ItemTags.SWORDS)) {
+				pack.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
+			}
+		}
+		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
+			net.minecraft.world.item.ItemStack worn = villager.getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				pack.addItem(worn.copy());
+			}
+		}
+		// a chief the biggest and broadest of his brood (as broodBorn); one unmade drawn anew within it
+		BodySizes.Body body = BodySizes.of(kind);
+		var genes = villager.getGenetics();
+		genes.setGene(Genetics.SIZE, chief ? body.maxSize() : BodySizes.spread(villager.getRandom().nextFloat(), body.minSize(), body.maxSize()));
+		genes.setGene(Genetics.WIDTH, chief ? body.maxWidth() : BodySizes.spread(villager.getRandom().nextFloat(), body.minWidth(), body.maxWidth()));
+	}
+
 	/**
 	 * (0.7.242) {@link McaCompat#crewman}: a new grown MCA villager in {@code folk}'s place (a ship's crewman set up for
 	 * their role, {@code Crewmen}), in the world: the same blood, gear and toughness, a guard (or {@code sailor}: a
@@ -968,7 +1070,7 @@ final class McaBridge {
 		}
 		met(villager, player);
 		memory.remember(told);
-		if (StoryTalk.shipmate((ServerLevel) villager.level(), player, villager)) {
+		if (StoryTalk.shipmate((ServerLevel) villager.level(), player, villager) || StoryTalk.swornFellow(player, villager)) {
 			Introductions.learn(player, villager);
 		}
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
@@ -990,7 +1092,8 @@ final class McaBridge {
 			return false;
 		}
 		Component line = Languages.understands(player, villager)
-			? Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
+			// (0.7.490) an orc or goblin opens in its own dialect
+			? Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
 			: Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening.wordless");
 		met(villager, player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
@@ -1093,6 +1196,43 @@ final class McaBridge {
 		met(villager, player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/** (0.7.486) {@link SeaBodies}: drops the {@code slot} armour in an MCA villager's pack at their feet; whether there was any. */
+	static boolean shedPacked(net.minecraft.world.entity.Mob mob, EquipmentSlot slot, ServerLevel level) {
+		if (!(mob instanceof VillagerEntityMCA villager)) {
+			return false;
+		}
+		boolean any = false;
+		var pack = villager.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			var stack = pack.getItem(i);
+			var held = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+			if (held != null && held.slot() == slot && SeaBodies.armour(stack, slot)) {
+				pack.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
+				villager.spawnAtLocation(level, stack);
+				any = true;
+			}
+		}
+		return any;
+	}
+
+	/** (0.7.486) {@link SeaBodies}: an MCA guard (not yet an archer) made an archer, a bow and arrows packed if they carry none. */
+	static boolean toBow(net.minecraft.world.entity.Mob mob) {
+		if (!(mob instanceof VillagerEntityMCA villager) || villager.isBaby() || villager.getProfession() != ProfessionsMCA.GUARD) {
+			return false;
+		}
+		villager.setProfession(ProfessionsMCA.ARCHER);
+		var pack = villager.getInventory();
+		boolean bow = villager.getMainHandItem().getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+		for (int i = 0; i < pack.getContainerSize() && !bow; i++) {
+			bow = pack.getItem(i).getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+		}
+		if (!bow) {
+			pack.addItem(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BOW));
+			pack.addItem(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ARROW, 32));
+		}
 		return true;
 	}
 
@@ -1214,7 +1354,7 @@ final class McaBridge {
 			return false;
 		}
 		if (Sorcery.isCaster(job)) {
-			// (0.5.53) a wizard's robe on someone who isn't one (the villager editor, say): only a kingdom makes a court wizard
+			// (0.5.54) a wizard's robe on someone who isn't one (the villager editor, say): only a kingdom makes a court wizard
 			// ((0.7.291) and only a court or a camp a necromancer, shaman or blood witch)
 			noTrade(villager);
 			return false;
@@ -1288,7 +1428,7 @@ final class McaBridge {
 		return true;
 	}
 
-	// ---- court wizards (0.5.53) -------------------------------------------------------------------------------------
+	// ---- court wizards (0.5.54) -------------------------------------------------------------------------------------
 
 	static @Nullable Worker enlistWizard(ServerLevel level, Faction f, @Nullable PathfinderMob chosen) {
 		VillagerEntityMCA villager = chosen instanceof VillagerEntityMCA v ? v : eldest(level, f);
@@ -1317,6 +1457,7 @@ final class McaBridge {
 		Factions.update(server, f.id(), x -> x.withHoldings(x.holdings().adjust(Sorcery.WIZARD, 1)));
 		// (0.7.291) in our robes in their realm's colour
 		Uniforms.fit(villager);
+		RpgKit.robe(villager);
 		level.sendParticles(ParticleTypes.ENCHANT, villager.getX(), villager.getY() + 1.2, villager.getZ(), 40, 0.4, 0.8, 0.4, 0.6);
 		level.playSound(null, villager.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.NEUTRAL, 0.8F, 1.2F);
 		JaymosKingdoms.LOGGER.debug("{} made {} its court wizard", f.name(), villager.getName().getString());
@@ -1425,6 +1566,7 @@ final class McaBridge {
 		e.enlist(Sorcery.WIZARD, Hermits.FACTION);
 		villager.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(Arcana.WIZARD_STAFF));
 		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		RpgKit.robe(villager);
 		villager.setHomeTo(villager.blockPosition(), Hermits.HOME_RADIUS);
 		Hermits.settled(level, villager);
 	}
@@ -1539,6 +1681,12 @@ final class McaBridge {
 		}
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
 			.spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return false;
+		}
+		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		// (0.7.481) the same blood, and (a camp's) the same hides
+		wearLike(folk, villager, true, f.type() == FactionType.BARBARIAN);
 		Enlisted w = worker(villager);
 		w.enlist(folk.role(), f.id());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
@@ -1548,6 +1696,41 @@ final class McaBridge {
 		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 		folk.discard();
 		return true;
+	}
+
+	/**
+	 * (0.7.481) Andy: "Foremen and builders are not villagers". A camp's worker is one of MCA's villagers too: {@code villager}
+	 * is dressed as a folk of {@code role} in {@code f} would be (its hides and caps), and if it's a newcomer, born to the blood
+	 * that folk would have had.
+	 */
+	private static void campDress(ServerLevel level, Faction f, int role, VillagerEntityMCA villager, BlockPos home, int radius, boolean newcomer) {
+		Folk model = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+		if (model == null) {
+			return;
+		}
+		model.snapTo(villager.getX(), villager.getY(), villager.getZ(), villager.getYRot(), 0.0F);
+		model.setup(role, f, home, radius);
+		wearLike(model, villager, newcomer, true);
+		model.discard();
+	}
+
+	/** (0.7.481) {@code villager} takes {@code folk}'s heritage ({@code blood}) and its worn gear, head to feet ({@code clothes}). */
+	private static void wearLike(Folk folk, VillagerEntityMCA villager, boolean blood, boolean clothes) {
+		Heritage.Kind kind = VillagerHeritage.of(folk);
+		if (blood && kind != null) {
+			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+		}
+		if (!clothes) {
+			return;
+		}
+		for (EquipmentSlot slot : List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
+			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				villager.setItemSlot(slot, worn.copy());
+				villager.setDropChance(slot, 0.0F);
+			}
+		}
 	}
 
 	/** (0.7.187) A new grown MCA guard at {@code at}, in the world, for no settlement ({@code nether.AvatarCamps}); null if it failed. */
@@ -1618,6 +1801,41 @@ final class McaBridge {
 		}
 		level.sendParticles(ParticleTypes.HEART, toddler.getX(), toddler.getY() + 1.0, toddler.getZ(), 5, 0.3, 0.3, 0.3, 0.0);
 		return 2;
+	}
+
+	/** (0.7.490) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
+	static void leaveHome(Villager villager) {
+		if (villager instanceof VillagerEntityMCA v) {
+			v.getResidency().getHome().ifPresent(home -> {
+				// ((0.7.490) invalidateHome only forgets the bed: free its POI ticket first (while HOME still names it), then
+				// drop the village's record of it, so MCA has to look for another bed and the old one is free for anyone)
+				v.releasePoi(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+				v.getResidency().invalidateHome(home);
+				v.getResidency().getHomeVillage().ifPresent(village -> village.removeResident(v));
+			});
+		}
+	}
+
+	/** (0.7.490) {@link McaCompat#knows}: {@code villager} already has MCA memories of {@code player} (read, never made). */
+	static boolean knows(Villager villager, ServerPlayer player) {
+		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getMemories().get(player.getUUID()) != null;
+	}
+
+	/** Trades a settler may take ({@link Settlers}): a pedlar, a tinker, a bruiser. */
+	static final int TRADER = 0, TINKER = 1, BRUISER = 2;
+
+	/** (0.7.490) {@link McaCompat#settler}: a grown MCA villager of the brood, in the trade, new to the village. */
+	static @Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, Vec3 at, int trade) {
+		VillagerProfession job = trade == BRUISER ? ProfessionsMCA.GUARD
+			: BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(trade == TINKER ? VillagerProfession.TOOLSMITH : VillagerProfession.CARTOGRAPHER).value();
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(level.getRandom().nextFloat() < 0.8F ? Gender.MALE : Gender.FEMALE)
+			.withName(name).withPosition(at).withAge(0).withProfession(job).spawn(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		broodBorn(villager, kind, false);
+		villager.setPersistenceRequired();
+		return villager;
 	}
 
 	/** (0.6.9) Where {@code villager} lives (their bed), if MCA knows. */
@@ -1837,5 +2055,21 @@ final class McaBridge {
 
 	static boolean destinyPending(ServerPlayer player) {
 		return Config.getInstance().launchIntoDestiny && !PlayerSaveData.get(player).isEntityDataSet();
+	}
+
+	/**
+	 * (0.7.573) A new life (Jaymo's Powers' third death, {@link LifeStory#reincarnateAnew}): MCA's own player reset (single
+	 * again, as its admin command does), their look unset, and its creator sent anew, as on a first join. False if MCA's
+	 * creator is off.
+	 */
+	static boolean newDestiny(ServerPlayer player) {
+		if (!Config.getInstance().launchIntoDestiny) {
+			return false;
+		}
+		PlayerSaveData save = PlayerSaveData.get(player);
+		save.reset();
+		save.setEntityDataSet(false);
+		net.conczin.mca.server.ServerInteractionManager.launchDestiny(player);
+		return true;
 	}
 }

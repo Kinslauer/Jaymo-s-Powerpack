@@ -4,14 +4,22 @@ import com.jaymoskingdoms.sailing.Crew;
 import com.jaymoskingdoms.sailing.Ship;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
+import net.minecraft.core.UUIDUtil;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.ChunkPos;
 import org.jspecify.annotations.Nullable;
 
@@ -26,6 +34,10 @@ import org.jspecify.annotations.Nullable;
  * MCA's stranger's greeting ("Are you an adventurer?"); each once.</li>
  * <li>Your shipmates ({@link #shipmate}: the crew of the whaler you signed on to) know you from the start: you know
  * their names, they never greet you as a stranger, and they call you by your berth ({@link #berth}).</li>
+ * <li>(0.7.503) Andy: "the relevant folk should know you as a sworn start". The king, the lords and the guards of the
+ * realm a Sworn start swore you to ({@link #swornRealm}) know you from the start, for as long as you stay its member:
+ * you know their names (no introduction), they've met you, they start warm to you ({@link #SWORN_HEARTS}), and they
+ * open their menu as your lord or your fellow guard ({@code story.jaymoskingdoms.sworn.<ruler|guard>.N}).</li>
  * </ul>
  */
 public final class StoryTalk {
@@ -39,6 +51,13 @@ public final class StoryTalk {
 	static final int MATE_LINES = 5;
 	/** Below this scale you're the ship's boy: everyone calls you powder monkey. */
 	static final float SMALL = 0.85F;
+	/** (0.7.503) How often (ticks) a sworn player's own realm's rulers and guards about them come to know them, and how near (blocks). */
+	static final int SWORN_TICKS = 40;
+	static final double SWORN_RANGE = 24.0;
+	/** (0.7.503) Hearts a sworn player starts with: with their ruler (a king or a lord), with a fellow guard. */
+	static final int SWORN_HEARTS_RULER = 30, SWORN_HEARTS = 20;
+	/** (0.7.503) Lines a sworn player's ruler and fellow guards open with ({@code story.jaymoskingdoms.sworn.<ruler|guard>.0-2}). */
+	static final int SWORN_LINES = 3;
 
 	/** Where a story set a player down. */
 	record Landing(String start, BlockPos at, int realm, long time, String dimension) {
@@ -54,11 +73,89 @@ public final class StoryTalk {
 	public static final AttachmentType<Landing> LANDING = AttachmentRegistry.create(JaymosKingdoms.id("story_landing"),
 		builder -> builder.persistent(Landing.CODEC).copyOnDeath());
 
+	/** (0.7.503) On a sworn player: the rulers and guards of their realm who've come to know them (each once). Saved, kept through death. */
+	static final AttachmentType<Set<UUID>> SWORN_KNOWN = AttachmentRegistry.create(JaymosKingdoms.id("sworn_known"),
+		builder -> builder.persistent(UUIDUtil.CODEC_SET).copyOnDeath());
+
 	private StoryTalk() {
 	}
 
 	static void register() {
-		JaymosKingdoms.LOGGER.debug("story talk attachment: {}", LANDING);
+		JaymosKingdoms.LOGGER.debug("story talk attachments: {} {}", LANDING, SWORN_KNOWN);
+		ServerTickEvents.END_SERVER_TICK.register(StoryTalk::tick);
+	}
+
+	/** (0.7.503) Sworn players' own rulers and guards about them come to know them (once each: name, met, hearts). */
+	private static void tick(MinecraftServer server) {
+		if (server.getTickCount() % SWORN_TICKS != 0) {
+			return;
+		}
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			ServerLevel level = (ServerLevel) player.level();
+			Faction realm = swornRealm(level, player);
+			if (realm == null) {
+				continue;
+			}
+			for (Worker w : Workers.near(level, player.getBoundingBox().inflate(SWORN_RANGE), x -> serves(server, x.mob(), realm))) {
+				LivingEntity mob = w.mob();
+				Set<UUID> known = player.getAttachedOrElse(SWORN_KNOWN, Set.of());
+				if (known.contains(mob.getUUID())) {
+					// they know you already: what they think of you since is yours to keep
+					continue;
+				}
+				Set<UUID> next = new HashSet<>(known);
+				next.add(mob.getUUID());
+				player.setAttached(SWORN_KNOWN, next);
+				Introductions.learn(player, mob);
+				McaCompat.met(mob, player);
+				if (mob instanceof Villager v) {
+					int want = Rulers.is(mob) ? SWORN_HEARTS_RULER : SWORN_HEARTS;
+					int now = McaCompat.heartsOf(v, player);
+					if (now < want) {
+						McaCompat.hearts(v, player, want - now);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * (0.7.503) The realm a Sworn start swore {@code player} to, while they're still one of its members and it stands;
+	 * null otherwise (another start, or they've left it or it's fallen).
+	 */
+	static @Nullable Faction swornRealm(ServerLevel level, ServerPlayer player) {
+		Landing l = player.getAttached(LANDING);
+		if (l == null || l.realm() < 0 || !l.start().equals(LifeStory.Start.SWORN.name().toLowerCase(Locale.ROOT))) {
+			return null;
+		}
+		Faction f = Factions.get(level.getServer(), l.realm());
+		return f != null && !f.fallen() && f.member(player.getUUID()) != null ? f : null;
+	}
+
+	/** (0.7.503) {@code e} is a ruler (king, lord) or a guard of {@code realm}, or of one of its fiefs. */
+	static boolean serves(MinecraftServer server, @Nullable Entity e, Faction realm) {
+		if (!(e instanceof Worker w) || !e.isAlive()) {
+			return false;
+		}
+		int role = w.role();
+		if (role != Folk.KING && role != Folk.LORD && role != Folk.GUARD) {
+			return false;
+		}
+		int id = w.factionId();
+		if (id == realm.id()) {
+			return true;
+		}
+		Faction f = id < 0 ? null : Factions.get(server, id);
+		return f != null && f.overlord() == realm.id();
+	}
+
+	/** (0.7.503) {@code villager} is one of the rulers or guards of the realm {@code player} is sworn to. */
+	public static boolean swornFellow(ServerPlayer player, LivingEntity villager) {
+		if (!(villager.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		Faction realm = swornRealm(level, player);
+		return realm != null && serves(level.getServer(), villager, realm);
 	}
 
 	/**
@@ -88,6 +185,13 @@ public final class StoryTalk {
 		if (shipmate(level, player, villager)) {
 			return Component.translatable("story.jaymoskingdoms.mate." + villager.getRandom().nextInt(MATE_LINES), berth(player, villager));
 		}
+		Faction sworn = swornRealm(level, player);
+		if (sworn != null && serves(level.getServer(), villager, sworn)) {
+			// (0.7.503) your own lord, or a fellow guard: every time, as one of theirs
+			String who = Rulers.is(villager) ? "ruler" : "guard";
+			return Component.translatable("story.jaymoskingdoms.sworn." + who + "." + villager.getRandom().nextInt(SWORN_LINES),
+				player.getDisplayName(), Component.literal(sworn.name()));
+		}
 		if (told) {
 			return null;
 		}
@@ -105,7 +209,7 @@ public final class StoryTalk {
 		if (!(villager.level() instanceof ServerLevel level)) {
 			return false;
 		}
-		if (shipmate(level, player, villager)) {
+		if (shipmate(level, player, villager) || swornFellow(player, villager)) {
 			return true;
 		}
 		Landing l = player.getAttached(LANDING);

@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
+import com.jaymospowers.power.xenoform.XenoformState;
 
 /**
  * (0.17.7) Andy: "shift should now animate a crouch, the players gets low, hands out to the side, swaying as they move, ready
@@ -111,6 +112,12 @@ public final class CrouchPose {
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+		if (ownCrouch(entity)) {
+			// (0.19.84) an alien that poses its own crouch: vanilla's drop only, none of the low crouch, kneel or eased bend
+			TRACKS.remove(entity.getId());
+			state.setData(KEY, null);
+			return;
+		}
 		Track track = TRACKS.get(entity.getId());
 		boolean crouched = entity.isCrouching() && entity.onGround() && !entity.isPassenger() && !entity.isSwimming() && !entity.isFallFlying()
 			&& !entity.isSpectator() && !otherwise(entity);
@@ -148,6 +155,15 @@ public final class CrouchPose {
 		}
 		state.setData(KEY, new Crouch(smooth(track.ready), smooth(track.kneel), state.walkAnimationPos, state.walkAnimationSpeed,
 			smooth(track.low), smooth(track.bend)));
+	}
+
+	/**
+	 * (0.19.84) {@code entity} is an alien whose body solves its own legs and crouch (Bulwark, Knell, Rime, Shade, ...):
+	 * the low crouch's thighs, the kneel's vanilla places and the eased bend would pull it apart, so they stay off it
+	 * (the low stance's height still holds; it just doesn't settle onto a knee).
+	 */
+	public static boolean ownCrouch(net.minecraft.world.entity.Entity entity) {
+		return entity instanceof Player player && XenoformState.ownCrouch(player);
 	}
 
 	/** Another full-body pose has them: tending, a finisher, carrying or being carried, crawling, downed. */
@@ -307,7 +323,9 @@ public final class CrouchPose {
 	private static boolean otherPose(AvatarRenderState state) {
 		return state.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null
 			|| state.getData(com.jaymospowers.client.finisher.FinisherPose.KEY) != null || state.getData(CarryPose.CARRIER_KEY) != null
-			|| state.getData(CrawlPose.KEY) != null;
+			|| state.getData(CrawlPose.KEY) != null
+			// (0.20.38) sitting down while still holding Sneak: the sit's own legs, not the crouch's
+			|| state.getData(MeditatePose.KEY) != null;
 	}
 
 	/** An arm with nothing to do (empty, or just holding something), free to be held out or rested. */

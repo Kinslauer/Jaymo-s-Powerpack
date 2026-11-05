@@ -367,6 +367,7 @@ public final class Questioning {
 		Object[] all = new Object[args.length + 1];
 		all[0] = Recollections.nameTo(player, body);
 		System.arraycopy(args, 0, all, 1, args.length);
-		return Component.translatable("dialogue.chat.jaymoskingdoms.question." + what + "." + body.getRandom().nextInt(LINES), all);
+		// (0.7.490) an orc or a goblin answers in its own dialect
+		return Dialects.trShared(body, "dialogue.chat.jaymoskingdoms.question." + what + "." + body.getRandom().nextInt(LINES), all);
 	}
 }

@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "place_wood_work_log": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "homesteads:wood_work_log"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.place_wood_work_log.descr"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:oak_log"
+    },
+    "title": {
+      "translate": "advancements.place_wood_work_log.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_wood_work_log"
+    ]
+  ]
+}

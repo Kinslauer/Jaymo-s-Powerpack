@@ -1,0 +1,10 @@
+{
+  "tooltip.jaymoskingdoms.imbued": "Imbued with %s by %s (%ss)",
+  "tooltip.jaymoskingdoms.lock.fresh": "Comes with its key. Use it on a door, trapdoor, fence gate, chest or barrel to fit it.",
+  "tooltip.jaymoskingdoms.lock.share": "Hold a cut key in your off hand to fit it to that key instead.",
+  "tooltip.jaymoskingdoms.lock.cut": "Cut to key %s.",
+  "tooltip.jaymoskingdoms.key.cut": "Opens lock %s.",
+  "tooltip.jaymoskingdoms.key.how": "Works from your hand, your pack or a key ring. Sneak-use it on its lock to lock or unlock it; sneak-use an unlocked lock empty-handed to take it off.",
+  "tooltip.jaymoskingdoms.blank_key": "Craft it with a cut key to copy that key.",
+  "tooltip.jaymoskingdoms.key_ring": "Holds up to 16 keys: click a key onto it. Opens their locks from your pack or worn in your belt bauble slot."
+}

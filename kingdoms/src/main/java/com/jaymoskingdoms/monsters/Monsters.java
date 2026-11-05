@@ -48,8 +48,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.5.56) The monsters of legend, after Fangs 'n Claws' list: the werewolf, the ogres (green, cave, fire), the wraiths
  * (and the flame wraith), the silver skeleton (after DrZhark's Mo' Creatures, GPL-3, see {@code licenses/mocreatures};
- * this package and its client side are under that licence too), and Kingdoms' own mud golem and chest mimic. They come
- * as wilderness encounters ({@code Encounters}), the fire ogre and the flame wraith also in the Nether, and the mimic
+ * this package and its client side are under that licence too), and Kingdoms' own mud golem and chest mimic. (0.7.526)
+ * They spawn on their own, rarely, out where they roam ({@code Encounters}; no longer as wilderness encounters), the fire ogre and the flame wraith also in the Nether, and the mimic
  * from loot chests out in the wild. The silver sword (from silver skeletons) bites deep into werewolves and the undead.
  */
 public final class Monsters {
@@ -73,6 +73,9 @@ public final class Monsters {
 	public static EntityType<SilverSkeleton> SILVER_SKELETON;
 	public static EntityType<MudGolem> MUD_GOLEM;
 	public static EntityType<Mimic> MIMIC;
+	/** (0.7.580) the mime, deep in the caves ({@link Mime}). */
+	public static EntityType<Mime> MIME;
+	static final int MIME_WEIGHT = 3;
 	public static Item SILVER_SWORD;
 
 	private Monsters() {
@@ -112,6 +115,10 @@ public final class Monsters {
 		FabricDefaultAttributeRegistry.register(SILVER_SKELETON, SilverSkeleton.createAttributes());
 		FabricDefaultAttributeRegistry.register(MUD_GOLEM, MudGolem.createAttributes());
 		FabricDefaultAttributeRegistry.register(MIMIC, Mimic.createAttributes());
+		MIME = type("mime", EntityType.Builder.of(Mime::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(MIME, Mime.createAttributes());
+		SpawnPlacements.register(MIME, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mime::checkSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, MIME, MIME_WEIGHT, 1, 1);
 
 		// the Nether's own: fire ogres and flame wraiths among its monsters
 		SpawnPlacements.register(FIRE_OGRE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);

@@ -19,6 +19,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>{@code /powerdebug xenoform star}: a star falls where you're looking (about 30 blocks off);</li>
  * <li>{@code /powerdebug xenoform unlock <alien|all>}: the band takes in that alien;</li>
  * <li>{@code /powerdebug xenoform form <alien>}: become it now, recharge or not; {@code revert}: back to yourself;</li>
+ * <li>{@code /powerdebug xenoform ultimate <on|off|break>}: change into the alien's Ultimate now, drop back, or break it (0.20.9);</li>
  * <li>{@code /powerdebug xenoform ready}: clears the recharge and every cooldown.</li>
  * </ul>
  */
@@ -123,6 +124,23 @@ final class XenoformDebugCommand {
 						c.getSource().sendSuccess(() -> Component.literal("Yourself again."), false);
 						return 1;
 					}))
+				.then(Commands.literal("ultimate")
+					.then(Commands.argument("mode", StringArgumentType.word())
+						.suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.of("on", "off", "break"), b))
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							if (!XenoformPower.has(player)) {
+								c.getSource().sendFailure(Component.literal("You don't have Xenoform."));
+								return 0;
+							}
+							String failed = XenoformPower.debugUltimate(player, StringArgumentType.getString(c, "mode"));
+							if (failed != null) {
+								c.getSource().sendFailure(Component.literal(failed));
+								return 0;
+							}
+							c.getSource().sendSuccess(() -> Component.literal("Done."), false);
+							return 1;
+						})))
 				.then(Commands.literal("ready")
 					.executes(c -> {
 						ServerPlayer player = c.getSource().getPlayerOrException();

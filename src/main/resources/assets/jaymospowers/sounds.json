@@ -1405,5 +1405,69 @@
 				"name": "jaymospowers:voice/symbiote/say_white_tug_3"
 			}
 		]
+	},
+	"guard.parry": {
+		"sounds": [
+			{
+				"name": "jaymospowers:guard/parry_1"
+			},
+			{
+				"name": "jaymospowers:guard/parry_2"
+			}
+		]
+	},
+	"artifacts.fart": {
+		"subtitle": "subtitles.jaymospowers.artifacts.fart",
+		"sounds": [
+			"jaymospowers:artifacts/fart1",
+			"jaymospowers:artifacts/fart2"
+		]
+	},
+	"blast.crack": {
+		"subtitle": "subtitles.jaymospowers.blast.crack",
+		"sounds": [
+			{
+				"name": "jaymospowers:blast/crack_1"
+			},
+			{
+				"name": "jaymospowers:blast/crack_2"
+			},
+			{
+				"name": "jaymospowers:blast/crack_3"
+			}
+		]
+	},
+	"blast.far": {
+		"subtitle": "subtitles.jaymospowers.blast.far",
+		"sounds": [
+			{
+				"name": "jaymospowers:blast/far_1"
+			},
+			{
+				"name": "jaymospowers:blast/far_2"
+			},
+			{
+				"name": "jaymospowers:blast/far_3"
+			}
+		]
+	},
+	"blast.report": {
+		"subtitle": "subtitles.jaymospowers.blast.report",
+		"sounds": [
+			{
+				"name": "jaymospowers:blast/report_1"
+			},
+			{
+				"name": "jaymospowers:blast/report_2"
+			}
+		]
+	},
+	"blast.whistle": {
+		"subtitle": "subtitles.jaymospowers.blast.whistle",
+		"sounds": [
+			{
+				"name": "jaymospowers:blast/whistle"
+			}
+		]
 	}
 }

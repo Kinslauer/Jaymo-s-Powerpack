@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:leather_scraps",
+    "jaymoskitchen:leather_scraps",
+    "jaymoskitchen:leather_scraps",
+    "jaymoskitchen:leather_scraps",
+    "jaymoskitchen:resin"
+  ],
+  "result": {
+    "id": "minecraft:leather"
+  }
+}

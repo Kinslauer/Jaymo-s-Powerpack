@@ -1,0 +1,14 @@
+{
+  "screen.jaymoskingdoms.horse_wheel": "Horse commands",
+  "screen.jaymoskingdoms.horse_wheel.hint": "Point at a command and let go",
+  "screen.jaymoskingdoms.horse_wheel.no_horse": "No horse",
+  "screen.jaymoskingdoms.roster": "Your horses",
+  "screen.jaymoskingdoms.roster.refresh": "Refresh",
+  "screen.jaymoskingdoms.roster.call": "Call",
+  "screen.jaymoskingdoms.roster.home": "Home",
+  "screen.jaymoskingdoms.roster.asking": "Asking after your horses...",
+  "screen.jaymoskingdoms.roster.none": "You don't own any horses yet. Tame one and it'll be listed here.",
+  "screen.jaymoskingdoms.roster.elsewhere": "In %s",
+  "screen.jaymoskingdoms.roster.far": "%s blocks (%s, %s)",
+  "screen.jaymoskingdoms.roster.away": "last seen"
+}

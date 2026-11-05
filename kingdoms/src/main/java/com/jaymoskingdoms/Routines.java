@@ -210,7 +210,7 @@ final class Routines {
 	 * ({@link Meals} asks this of a meal, which a trade breaks off for).
 	 */
 	static boolean idle(Villager v) {
-		return !(Neighbours.meeting(v) || Couriers.carrying(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
+		return !(Neighbours.meeting(v) || Couriers.carrying(v) || Envoys.is(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
 			|| Theft.rioting(v) || Approaches.talking(v) || Quests.listening(v) || Tag.playing(v) || Trespass.watching(v) || McaCompat.busy(v)
 			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v) || WarAlert.carrying(v) || Downed.helping(v)
 			// (0.7.454) walking someone to where they asked, or pointing the way

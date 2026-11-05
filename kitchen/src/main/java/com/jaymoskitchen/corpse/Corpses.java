@@ -66,10 +66,28 @@ public final class Corpses {
 	/** (0.5.24) What butchers an animal's corpse: any axe, and Jaymo's Powers' primitive and bone knives. */
 	public static final TagKey<Item> BUTCHERING_TOOLS = TagKey.create(Registries.ITEM, JaymosKitchen.id("butchering_tools"));
 	/**
+	 * (0.5.77) Andy: "i need a way to cook and eat this crab with just a fire and a rock, the most primitive barebones
+	 * survival with small mobs should be possible". A loose rock (Jaymo's Powers' ground rocks) cracks open any small
+	 * animal's body, one you could carry in one hand (a crab, a chicken, a rabbit, a frog...): a rough job, never on a
+	 * butcher block's terms. See {@code CorpseEntity#crack}.
+	 */
+	public static final TagKey<Item> CRACKING_ROCKS = TagKey.create(Registries.ITEM, JaymosKitchen.id("cracking_rocks"));
+	/**
 	 * Fish, vanilla and modded (Alex's Mobs' flying fish, catfish...), on top of anything built on vanilla's fish class:
 	 * looted in one click and gone (see {@link CorpseKind#FISH}).
 	 */
 	public static final TagKey<EntityType<?>> FISH_CORPSES = tag("fish_corpses");
+	/**
+	 * (0.5.66) Small critters, looted in one click and gone like a fish (crickets, mice, snails, butterflies...). Any
+	 * creature whose kind is under {@link #SMALL_CRITTER_SIZE} both ways counts without being listed (see
+	 * {@link #isSmallCritter}).
+	 */
+	public static final TagKey<EntityType<?>> SMALL_CORPSES = tag("small_corpses");
+	/**
+	 * (0.5.66) A kind narrower and shorter than this (in blocks) is a small critter. Just under a rabbit (0.4 by 0.5), so
+	 * rabbits, chickens and frogs still leave a body to butcher.
+	 */
+	public static final float SMALL_CRITTER_SIZE = 0.5F;
 	/** (0.5.5) Villagers, whose bodies zombies go for first and whose graves (MCA's) a zombie's meal empties ({@link Scavengers}). */
 	public static final TagKey<EntityType<?>> VILLAGERS = tag("villagers");
 
@@ -163,6 +181,29 @@ public final class Corpses {
 	 * vanish (Jaymo's Powers' Darktide shades and risen shadows).
 	 */
 	public static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
+	/**
+	 * (0.5.61) Places other mods say no body is left in (Powers' Other World, where the Judge stands: Andy, "player corpses
+	 * dont spawn in the otherworld"). Whoever dies there, player or mob, leaves no corpse (a player's hotbar drops with the
+	 * rest), and a body already lying there never gets up.
+	 */
+	private static final java.util.List<java.util.function.Predicate<net.minecraft.world.entity.Entity>> NO_BODIES =
+		new java.util.concurrent.CopyOnWriteArrayList<>();
+
+	/** For other mods (by reflection): where {@code entity} is, no corpse is left and none rises. */
+	public static void addNoCorpseZone(java.util.function.Predicate<net.minecraft.world.entity.Entity> zone) {
+		NO_BODIES.add(zone);
+	}
+
+	/** Whether {@code entity} stands where no body is left ({@link #addNoCorpseZone}). */
+	public static boolean inNoCorpseZone(net.minecraft.world.entity.Entity entity) {
+		for (java.util.function.Predicate<net.minecraft.world.entity.Entity> zone : NO_BODIES) {
+			if (zone.test(entity)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** (0.4.37) Prefix of the tags marking parts a body has lost ({@code head}, {@code right_arm}, ...; Jaymo's Powers sets them). */
 	public static final String MISSING_TAG = "jaymoskitchen.missing.";
 	/**
@@ -202,10 +243,50 @@ public final class Corpses {
 		return type != null && (type.builtInRegistryHolder().is(MACHINE_CORPSES) || type.builtInRegistryHolder().is(HEAVY_CORPSES));
 	}
 
+	/**
+	 * (0.5.66) A small critter's body: {@link #SMALL_CORPSES}, or any wild kind (not a monster, a machine, a zombie or a
+	 * skeleton) under {@link #SMALL_CRITTER_SIZE} both ways. It goes by the kind's size, so a baby or a shrunk mob of a
+	 * bigger kind still leaves a body.
+	 */
+	public static boolean isSmallCritter(@org.jspecify.annotations.Nullable EntityType<?> type) {
+		if (type == null) {
+			return false;
+		}
+		var holder = type.builtInRegistryHolder();
+		if (holder.is(SMALL_CORPSES)) {
+			return true;
+		}
+		if (type.getCategory() == MobCategory.MONSTER || type.getCategory() == MobCategory.MISC || isMachine(type)
+			|| holder.is(ZOMBIE_CORPSES) || holder.is(SKELETON_CORPSES) || holder.is(BIG_CARCASSES)) {
+			return false;
+		}
+		var size = type.getDimensions();
+		return size.width() < SMALL_CRITTER_SIZE && size.height() < SMALL_CRITTER_SIZE;
+	}
+
 	/** Whether this entity leaves a corpse when it dies (players, listed mobs and tagged ones don't). */
 	public static boolean leavesCorpse(LivingEntity entity) {
 		return entity instanceof Mob && !(entity instanceof Player) && !entity.is(NO_CORPSE) && !entity.entityTags().contains(NO_CORPSE_TAG)
 			&& entity.level() instanceof ServerLevel;
+	}
+
+	/**
+	 * (0.5.65) For other mods (by reflection, only plain Java and Minecraft types): told (the one who died, its new body)
+	 * just before the body is added to the world, so they can carry onto it what the living body had. Jaymo's Powers: the
+	 * blood it was covered in (Andy: "the corpses should stay bloodied").
+	 */
+	public static final java.util.List<java.util.function.BiConsumer<LivingEntity, net.minecraft.world.entity.Entity>> ON_BODY =
+		new java.util.concurrent.CopyOnWriteArrayList<>();
+
+	/** Runs the {@link #ON_BODY} hooks; one failing never stops the body appearing. */
+	static void tellBody(LivingEntity dead, CorpseEntity corpse) {
+		for (java.util.function.BiConsumer<LivingEntity, net.minecraft.world.entity.Entity> hook : ON_BODY) {
+			try {
+				hook.accept(dead, corpse);
+			} catch (RuntimeException e) {
+				// another mod's hook
+			}
+		}
 	}
 
 	/** Replaces a mob that has finished dying with its corpse, holding the loot it would have dropped. */
@@ -239,12 +320,15 @@ public final class Corpses {
 		corpse.markJustDied();
 		corpse.startRagdoll(deathBody(mob));
 		pinFrom(mob, corpse);
+		tellBody(mob, corpse);
 		level.addFreshEntity(corpse);
 	}
 
 	/** (0.5.1) A topple this hard (blocks a tick) at the head, and how much of it the rest of the body takes. */
 	private static final double TOPPLE_MIN = 0.08, TOPPLE_MAX = 0.14;
 	private static final float TOPPLE_SHARE = 0.3F;
+	/** (0.5.74) The share of a dying mob's speed (its killing knockback in it) its body keeps, and the most it rises (blocks a tick). */
+	private static final double DEATH_CARRY = 0.6, DEATH_LIFT = 0.05;
 
 	/**
 	 * (0.5.1) The ragdoll a dying mob (or player) starts as: standing as it stood, moving as it was moving, then toppled
@@ -263,7 +347,9 @@ public final class Corpses {
 		} else {
 			body = RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot);
 		}
-		body.setSpeed(v.x, v.y, v.z);
+		// (0.5.74) Andy: "you should just fall where you stand or a bit further if knocked back": the killing blow's
+		// knockback carries the body only partway, and its hop (vanilla lifts anyone it knocks back) is left out
+		body.setSpeed(v.x * DEATH_CARRY, Math.min(v.y, DEATH_LIFT), v.z * DEATH_CARRY);
 		if (!down) {
 			double dx = v.x, dz = v.z;
 			double length = Math.sqrt(dx * dx + dz * dz);

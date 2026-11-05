@@ -30,6 +30,11 @@ import org.jspecify.annotations.Nullable;
  * (0.19.51) Andy: "i want a gap like this accessible from crouch, not sneak". It comes from the crouch stance (the wheel's
  * low crouch) only, never a press of Sneak or the wheel's plain sneak: crouched, walk into the block (or drop into the
  * crouch facing it, or press forward from the knee) and you pull up and in on your belly.
+ *
+ * <p>(0.20.63) Andy: "shift scrolling infront of a ledge or single block opening will grab onto it when you get to crouch
+ * height". The crouch grab is the wheel's alone now ({@link #scrollGrab}): Sneak + a scroll down facing the block. Walking
+ * into it, settling into the crouch or pushing forward from the knee no longer does it. It also climbs anything short of
+ * two blocks: up onto it, or over a fence or wall.
  */
 public final class LedgeClient {
 	private enum Phase { NONE, HANG, CLIMB }
@@ -54,8 +59,6 @@ public final class LedgeClient {
 	private static final int DROP_TICKS = 10;
 	private static final double DROP_MAX = 3.2;
 	private static int dropLeft;
-	/** (0.19.51) The local player was in the low crouch last tick (dropping into it facing a gap takes the gap). */
-	private static boolean lowWas;
 	private static double dropTop;
 
 	private LedgeClient() {
@@ -133,43 +136,34 @@ public final class LedgeClient {
 			cooldown--;
 		}
 		Input input = player.input.keyPresses;
-		boolean low = com.jaymospowers.core.Stance.localLow == player.getId();
-		boolean freshLow = low && !lowWas;
-		lowWas = low;
-		// (the raw key: on the knee the walking keys are dropped from the input, but pressing on still climbs in)
-		boolean pushing = minecraft.gui.screen() == null && minecraft.options.keyUp.isDown();
 		if (dropLeft > 0) {
 			tickDrop(player);
 		}
 		switch (phase) {
-			case NONE -> {
-				if (low && (freshLow || pushing)) {
-					tryCrouchGrab(player);
-				}
-				if (phase == Phase.NONE) {
-					tryGrab(player, input);
-				}
-			}
+			case NONE -> tryGrab(player, input);
 			case HANG -> tickHang(player, input);
 			case CLIMB -> tickClimb(player);
 		}
 	}
 
 	/**
-	 * (0.19.40) In the low crouch on the ground at a single block with a one-high gap over it: take its edge and pull in
-	 * onto the belly at once. Not mid-sprint (that's a slide) or while freerunning.
+	 * (0.20.63) From {@code StanceScroll}: Sneak + a scroll down to (or on from) the crouch, on the ground facing a block
+	 * 0.7 to just under 2 blocks high ({@link Ledge#crouchSpot}): take its edge and climb at once, up onto it, in on the
+	 * belly under a one-high gap, or over a fence or wall. Returns whether it did (the notch is the climb's, not the
+	 * stance's). Not mid-sprint (that's a slide) or while freerunning.
 	 */
-	private static void tryCrouchGrab(LocalPlayer player) {
-		if (cooldown > 0 || !player.onGround() || player.isSprinting() || !Ledge.canHang(player) || !Crawl.canCrawl(player)
-			|| CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active()) {
-			return;
+	public static boolean scrollGrab(LocalPlayer player) {
+		if (phase != Phase.NONE || cooldown > 0 || !player.onGround() || player.isSprinting() || !Ledge.canHang(player)
+			|| !Crawl.canCrawl(player) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active()) {
+			return false;
 		}
 		Ledge.Spot found = Ledge.crouchSpot(player);
-		if (found == null || found.onBelly() == null) {
-			return;
+		if (found == null || !found.stand() && found.onBelly() == null) {
+			return false;
 		}
 		grab(player, found);
-		startClimb(player, found, true);
+		startClimb(player, found, !found.stand());
+		return true;
 	}
 
 	private static void tryGrab(LocalPlayer player, Input input) {
@@ -245,7 +239,7 @@ public final class LedgeClient {
 		player.resetFallDistance();
 		Ledge.localId = player.getId();
 		Ledge.localHold = new Ledge.Hold(found.face().get2DDataValue(), player.level().getGameTime(), false);
-		ClientPlayNetworking.send(new Ledge.Grab(found.pos(), found.face().get2DDataValue()));
+		ClientPlayNetworking.send(new Ledge.Grab(found.pos(), found.face().get2DDataValue(), found.vault()));
 	}
 
 	private static void tickHang(LocalPlayer player, Input input) {
@@ -403,7 +397,6 @@ public final class LedgeClient {
 	private static void reset() {
 		end();
 		dropLeft = 0;
-		lowWas = false;
 		cooldown = 0;
 		confirmed = false;
 	}

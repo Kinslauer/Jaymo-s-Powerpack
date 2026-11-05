@@ -65,7 +65,7 @@ public final class GiantTrample {
 		}
 	}
 
-	private static boolean mayFell(LivingEntity giant, ServerLevel level) {
+	static boolean mayFell(LivingEntity giant, ServerLevel level) {
 		if (giant instanceof ServerPlayer player) {
 			return player.mayBuild() && !player.isSpectator();
 		}

@@ -271,6 +271,12 @@ public final class MobCombat {
 		if (now - swing.endsAt > COMBO_RESET_TICKS) {
 			swing.combo = 0;
 		}
+		// (0.7.577) only at a foe in reach and sight, as a Better Combat swing starts (attackTick): MCA's melee task asks
+		// from further off, so a guard after someone beyond a nearer body (Jung's clip: "Trespasser!" at him past a
+		// skeleton) swung at the air over and over, glinting and whiffing, and never landed a blow
+		if (gap(mob, target) > BASE_REACH * START_REACH_SHARE && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
+			return;
+		}
 		int length = swingTicks(mob);
 		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * PLAIN_UPSWING));
 		tell(level, mob, plainHeavy(mob));
@@ -332,9 +338,14 @@ public final class MobCombat {
 		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
 		Vec3 side = new Vec3(-facing.z, 0.0, facing.x).scale(mob.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? -0.35 : 0.35);
 		Vec3 at = mob.getEyePosition().add(facing.scale(0.4)).add(side).add(0.0, -0.2, 0.0);
+		// (0.7.505) Powers' star and warning bell; the old dust and a bell without it
+		if (PowersCompat.tellGlint(level, at, heavy)) {
+			return;
+		}
 		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(heavy ? HEAVY_TELL_COLOR : TELL_COLOR, TELL_SIZE),
 			at.x, at.y, at.z, heavy ? 8 : 5, 0.08, 0.08, 0.08, 0.0);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.05);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.HOSTILE, 0.9F, heavy ? 1.1F : 1.9F);
 	}
 
 	/**
@@ -356,8 +367,11 @@ public final class MobCombat {
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		Vec3 to = foe.getEyePosition().subtract(mob.getEyePosition());
 		Vec3 at = mob.getEyePosition().add(to.lengthSqr() > 1.0E-4 ? to.normalize().scale(0.8) : Vec3.ZERO).add(0.0, -0.25, 0.0);
-		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(HEAVY_TELL_COLOR, TELL_SIZE), at.x, at.y, at.z, 8, 0.06, 0.06, 0.06, 0.0);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.04, 0.04, 0.04, 0.05);
+		// (0.7.505) Powers' red star and warning bell when it's loaded
+		if (!PowersCompat.tellGlint(level, at, true)) {
+			level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(HEAVY_TELL_COLOR, TELL_SIZE), at.x, at.y, at.z, 8, 0.06, 0.06, 0.06, 0.0);
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.04, 0.04, 0.04, 0.05);
+		}
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.FLINTANDSTEEL_USE, SoundSource.HOSTILE, 0.7F, 1.4F);
 		return false;
 	}

@@ -52,6 +52,11 @@ import org.jspecify.annotations.Nullable;
  * only from what's in your stomach, and only once you haven't been hurt for a while ({@link #REGEN_DELAY}). Kitchen
  * dishes count for more than plain food ({@link #DISH_BONUS}), Perfect ones more still. Other mods add slots through
  * {@link #EXTRA_SLOTS} (Jaymo's Powers: a Z Fighter eats like three men).
+ * <p>
+ * (0.5.73) When a meal wears off its hearts don't vanish: the ones still full stay as {@link #LEFTOVER} health, but
+ * they never heal back. Every point of health you lose comes off them first, so your hearts shrink as you take damage
+ * until you're down to what your stomach still holds. Andy: "now they just shouldnt come back if you no longer have
+ * the nourishment, so you wont heal back to the same amount".
  */
 public final class Stomach {
 	/** Health (half-hearts) with an empty stomach. */
@@ -159,7 +164,16 @@ public final class Stomach {
 	public static final AttachmentType<List<Meal>> MEALS = AttachmentRegistry.create(JaymosKitchen.id("stomach"),
 		builder -> builder.persistent(Meal.CODEC.listOf()).syncWith(Meal.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.targetOnly()));
 
+	/**
+	 * (0.5.73) Health left over from meals that wore off: it stays only while it's full and is lost as you lose
+	 * health, never healed back (emptied when you die).
+	 */
+	public static final AttachmentType<Float> LEFTOVER = AttachmentRegistry.create(JaymosKitchen.id("stomach_leftover"),
+		builder -> builder.persistent(Codec.FLOAT));
+
 	private static final Map<UUID, Long> LAST_HURT = new HashMap<>();
+	/** Health at the end of the last tick, to see how much was lost since (for {@link #LEFTOVER}). */
+	private static final Map<UUID, Float> LAST_HEALTH = new HashMap<>();
 	private static final Map<UUID, Float> REGEN_PROGRESS = new HashMap<>();
 
 	private Stomach() {
@@ -175,6 +189,7 @@ public final class Stomach {
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			LAST_HURT.remove(handler.player.getUUID());
+			LAST_HEALTH.remove(handler.player.getUUID());
 			REGEN_PROGRESS.remove(handler.player.getUUID());
 		});
 	}
@@ -327,6 +342,13 @@ public final class Stomach {
 			}
 			List<Meal> meals = meals(player);
 			long now = player.level().getGameTime();
+			// (0.5.73) health lost comes off the leftover hearts first, and they don't come back
+			Float lastHealth = LAST_HEALTH.get(player.getUUID());
+			float leftover = leftover(player);
+			if (lastHealth != null && leftover > 0.0F && player.getHealth() < lastHealth) {
+				setLeftover(player, leftover - (lastHealth - player.getHealth()));
+				apply(player, meals);
+			}
 			if (now % 20L == 0L) {
 				// (0.5.28) Nourishment: your meals don't wear off while it lasts
 				if (!meals.isEmpty() && !player.hasEffect(com.jaymoskitchen.delight.Delight.NOURISHMENT)) {
@@ -335,6 +357,13 @@ public final class Stomach {
 						if (meal.left() > 20) {
 							next.add(meal.withLeft(meal.left() - 20));
 						}
+					}
+					if (next.size() < meals.size()) {
+						// (0.5.73) a meal wore off: its hearts that are still full stay, the empty ones are gone
+						float cap = foodCap(player);
+						float lost = Math.min(foodHealth(meals), cap) - Math.min(foodHealth(next), cap);
+						float stomachMax = STARTING_HEALTH + Math.min(foodHealth(next), cap);
+						setLeftover(player, Math.min(leftover(player) + lost, player.getHealth() - stomachMax));
 					}
 					meals = List.copyOf(next);
 					if (meals.isEmpty()) {
@@ -346,6 +375,7 @@ public final class Stomach {
 				apply(player, meals);
 			}
 			regen(player, meals, now);
+			LAST_HEALTH.put(player.getUUID(), player.getHealth());
 		}
 	}
 
@@ -353,7 +383,7 @@ public final class Stomach {
 	private static void apply(ServerPlayer player, List<Meal> meals) {
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
-			double bonus = STARTING_HEALTH - 20.0F + Math.min(foodHealth(meals), MAX_FOOD_HEALTH + MAX_PER_EXTRA_SLOT * (slots(player) - BASE_SLOTS));
+			double bonus = STARTING_HEALTH - 20.0F + Math.min(foodHealth(meals) + leftover(player), foodCap(player));
 			AttributeModifier current = health.getModifier(HEALTH_ID);
 			if (current == null || current.amount() != bonus) {
 				health.addOrUpdateTransientModifier(new AttributeModifier(HEALTH_ID, bonus, AttributeModifier.Operation.ADD_VALUE));
@@ -370,6 +400,24 @@ public final class Stomach {
 			} else if (!full && speed.hasModifier(SPEED_ID)) {
 				speed.removeModifier(SPEED_ID);
 			}
+		}
+	}
+
+	/** Most health meals (and their leftovers) can add for this player. */
+	static float foodCap(Player player) {
+		return MAX_FOOD_HEALTH + MAX_PER_EXTRA_SLOT * (slots(player) - BASE_SLOTS);
+	}
+
+	/** (0.5.73) Health kept from meals that wore off (see {@link #LEFTOVER}). */
+	public static float leftover(Player player) {
+		return player.getAttachedOrElse(LEFTOVER, 0.0F);
+	}
+
+	private static void setLeftover(Player player, float amount) {
+		if (amount <= 0.0F) {
+			player.removeAttached(LEFTOVER);
+		} else {
+			player.setAttached(LEFTOVER, Math.min(amount, foodCap(player)));
 		}
 	}
 

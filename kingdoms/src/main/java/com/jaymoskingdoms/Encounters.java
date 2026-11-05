@@ -2,10 +2,8 @@ package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.monsters.Monsters;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -13,12 +11,10 @@ import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -26,47 +22,61 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.55) Wilderness encounters with Naturalist's predators. Naturalist's bears, lions, tigers, alligators, komodo
- * dragons, rhinos and scorpions don't spawn on their own (nor its elephants and mammoths: Kingdoms has its own); instead,
- * now and then ({@link #CHANCE} every {@link #CHECK_TICKS}, no more than once per {@link #COOLDOWN_TICKS}), a player out
- * in the wild, on the surface and well away from every settlement ({@link #SETTLEMENT_CLEARANCE}), is found by whatever
- * hunts that biome (Naturalist's own biome tags: lions in savanna, alligators in swamps...). They come from
- * {@link #MIN_DISTANCE}-{@link #MAX_DISTANCE} blocks off, after that player, for {@link #HUNT_TICKS}; then they're
- * ordinary animals, gone if no one is near. Boars and snakes keep spawning as Naturalist has them and can be encounters
- * too. Kingdoms' own wild beasts (feral wolves, coyotes at night, tarantulas, moose; {@code wild/Wild}) come the same
- * way, and (0.5.56) the monsters of legend ({@code monsters/Monsters}), each a sighting folk talk about ({@link Sightings}).
- * Naturalist's are by id, so without it only Kingdoms' own come.
+ * (0.5.55) Wilderness encounters with Naturalist's predators, and (0.7.526) no longer: Andy, "remove the encounters, its
+ * better when the predators can naturally spawn". Nothing comes hunting a player out of nowhere any more. Naturalist's
+ * bears, lions, tigers, alligators, komodo dragons, rhinos, scorpions and elephants spawn as Naturalist has them, and every
+ * Kingdoms beast in {@link #TABLE} (feral wolves, coyotes, tarantulas, moose, the monsters of legend, the wind dragons)
+ * spawns on its own in its biome tag ({@code jaymoskingdoms:has_<beast>}) by the table's weight: on the surface (the cave
+ * ogre anywhere dark), the night ones only in the dark, the monsters of legend only {@link #LEGEND_CHANCE} of the times they
+ * could and never on or near a settlement's land ({@link #SETTLEMENT_CLEARANCE}), as are the wind dragons.
+ * The table still names where each roams for the talk of them ({@link Sightings}) and the quests that send one after you
+ * ({@link #send}). Cube Animals (0.7.526) is let in beside them, with its kinds that Naturalist or Kingdoms already have
+ * kept out of natural spawning ({@link #CUBE_DUPLICATES}); its rattlesnake, shark, elephant, (0.7.527) red and roe deer,
+ * crocodile and black bear stay as other breeds.
  */
 public final class Encounters {
 	static final String MOD = "naturalist";
 	/** Keep Naturalist's other animals in natural spawning (false: its mobs only ever come as encounters). */
 	static final boolean WILDLIFE = true;
-	/** Naturalist mobs kept out of natural spawning: the encounter beasts, and the elephants, mammoths and whales Kingdoms has. */
-	static final List<String> NO_NATURAL_SPAWNS = List.of("bear", "lion", "tiger", "alligator", "komodo_dragon", "rhino",
-		"desert_scorpion", "jungle_scorpion", "elephant", "mammoth",
+	/**
+	 * Naturalist mobs kept out of natural spawning: the mammoths and whales Kingdoms has. (0.7.526) Its predators and its
+	 * elephants spawn again (Andy: elephants as another breed beside Kingdoms' own).
+	 */
+	static final List<String> NO_NATURAL_SPAWNS = List.of("mammoth",
 		// (0.7.206) its whales: Kingdoms' great whales take their place (whaling)
 		"whale",
 		// (0.7.329) its boar: Kingdoms' wild boar takes its place (beasts/WildBoar)
 		"boar");
-	/** How often the players' surroundings are weighed (ticks). */
-	static final int CHECK_TICKS = 400;
-	/** The chance, at each check, that something finds a player out in the wild (about once in 15 minutes there). */
-	static final float CHANCE = 1.0F / 45.0F;
-	/** A player's quiet spell after an encounter, and after joining (ticks; 20 minutes). */
-	static final int COOLDOWN_TICKS = 24000;
-	/** No encounter this close to a settlement's seat (blocks), nor on any settlement's land. */
+	/**
+	 * (0.7.526) Cube Animals: its kinds that Naturalist or Kingdoms already have, kept out of natural spawning (komodo dragon,
+	 * moose, piranha, snail, tiger). Its rattlesnake, shark and elephant, and (0.7.527) its red and roe deer, crocodile and
+	 * black bear, spawn as other breeds beside Naturalist's and Kingdoms' (Andy).
+	 */
+	static final String CUBE = "cubeanimals";
+	static final List<String> CUBE_DUPLICATES = List.of("komododragon", "moose", "piranha", "snail", "tiger");
+	/** Of the times a monster of legend could spawn on its own, how many it does (they stay rare). */
+	static final float LEGEND_CHANCE = 0.1F;
+	/** Of the times a monster that walks by day (ogre, tarantula, minotaur, mud golem) could spawn in daylight, how many it does. */
+	static final float DAY_MONSTER_CHANCE = 0.03F;
+	/** No monster of legend or wind dragon spawns this close to a settlement's seat (blocks), nor on any settlement's land. */
 	static final double SETTLEMENT_CLEARANCE = 256.0;
 	/** How far off they come from (blocks). */
 	static final int MIN_DISTANCE = 20, MAX_DISTANCE = 32;
@@ -136,8 +146,6 @@ public final class Encounters {
 	private record Hunt(Mob mob, UUID player, long until) {
 	}
 
-	/** When each player can next be found (game time). */
-	private static final Map<UUID, Long> NEXT = new HashMap<>();
 	private static final List<Hunt> HUNTS = new ArrayList<>();
 
 	private Encounters() {
@@ -145,10 +153,18 @@ public final class Encounters {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Encounters::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			NEXT.clear();
-			HUNTS.clear();
-		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> HUNTS.clear());
+		wildSpawns();
+		if (FabricLoader.getInstance().isModLoaded(CUBE)) {
+			BiomeModifications.create(JaymosKingdoms.id("cube_animals_duplicates")).add(ModificationPhase.REMOVALS, BiomeSelectors.all(), context -> {
+				for (String name : CUBE_DUPLICATES) {
+					EntityType<?> type = type(CUBE + ":" + name);
+					if (type != null) {
+						context.getMobSpawnSettings().removeSpawnsOfEntityType(type);
+					}
+				}
+			});
+		}
 		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
 			return;
 		}
@@ -176,15 +192,68 @@ public final class Encounters {
 		if (now % HUNT_CHECK_TICKS == 0 && !HUNTS.isEmpty()) {
 			hunts(server, now);
 		}
-		if (now % CHECK_TICKS != 0) {
-			return;
-		}
-		for (ServerPlayer player : level.players()) {
-			long next = NEXT.computeIfAbsent(player.getUUID(), id -> now + COOLDOWN_TICKS);
-			if (now >= next && inTheWild(server, level, player) && level.getRandom().nextFloat() < CHANCE && encounter(server, level, player)) {
-				NEXT.put(player.getUUID(), now + COOLDOWN_TICKS);
+	}
+
+	/**
+	 * (0.7.526) Every Kingdoms beast in {@link #TABLE} spawns on its own where it roams (its biome tag), by its weight and
+	 * pack size, in its own category (creatures among the animals, monsters among the monsters). The wild boar has its own
+	 * spawns already ({@code beasts/Beasts}).
+	 */
+	private static void wildSpawns() {
+		for (Encounter e : TABLE) {
+			Identifier id = Identifier.parse(e.mob());
+			if (!JaymosKingdoms.MOD_ID.equals(id.getNamespace()) || "wild_boar".equals(id.getPath())) {
+				continue;
 			}
+			EntityType<?> type = type(e.mob());
+			if (type == null) {
+				continue;
+			}
+			boolean legend = Monsters.legend(type), dragon = id.getPath().endsWith("_dragon"), cave = "cave_ogre".equals(id.getPath());
+			placement(type, e.night(), cave, legend, dragon);
+			BiomeModifications.addSpawn(BiomeSelectors.tag(TagKey.create(Registries.BIOME, Identifier.parse(e.biomes()))), type.getCategory(), type,
+				e.weight(), e.min(), e.max());
 		}
+	}
+
+	/** Where and when a beast of {@link #TABLE} may spawn on its own (kept if its kind has its own rules already). */
+	@SuppressWarnings("unchecked")
+	private static void placement(EntityType<?> type, boolean night, boolean cave, boolean legend, boolean dragon) {
+		try {
+			SpawnPlacements.register((EntityType<Mob>) type, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+				(t, level, reason, pos, random) -> wildSpawn(t, level, reason, pos, random, night, cave, legend, dragon));
+		} catch (IllegalStateException already) {
+			// the fire ogre and the flame wraith keep the Nether's monster rules (monsters/Monsters)
+		}
+	}
+
+	private static boolean wildSpawn(EntityType<? extends Mob> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos,
+		RandomSource random, boolean night, boolean cave, boolean legend, boolean dragon) {
+		if (!Mob.checkMobSpawnRules(type, level, reason, pos, random)) {
+			return false;
+		}
+		boolean monster = type.getCategory() == MobCategory.MONSTER;
+		if (monster && level.getDifficulty() == Difficulty.PEACEFUL) {
+			return false;
+		}
+		if (!cave && !level.canSeeSky(pos)) {
+			return false;
+		}
+		if ((night || cave) && !Monster.isDarkEnoughToSpawn(level, pos, random)) {
+			return false;
+		}
+		if (legend && random.nextFloat() >= LEGEND_CHANCE || monster && !night && !cave && random.nextFloat() >= DAY_MONSTER_CHANCE) {
+			return false;
+		}
+		if (legend || dragon) {
+			// not while the land is first made (off the server thread): they come later, among the living
+			if (reason == EntitySpawnReason.CHUNK_GENERATION) {
+				return false;
+			}
+			ServerLevel server = level.getLevel();
+			return Factions.around(server.getServer(), server, pos, SETTLEMENT_CLEARANCE) == null;
+		}
+		return true;
 	}
 
 	/** Out on the surface, playing, and well away from every settlement. */
@@ -197,36 +266,6 @@ public final class Encounters {
 			return false;
 		}
 		return Factions.around(server, level, at, SETTLEMENT_CLEARANCE) == null;
-	}
-
-	/** Sends whatever hunts there after {@code player}; false if nothing could come. */
-	static boolean encounter(MinecraftServer server, ServerLevel level, ServerPlayer player) {
-		RandomSource random = level.getRandom();
-		for (int i = 0; i < SPOT_TRIES; i++) {
-			BlockPos spot = spot(level, player, random);
-			if (spot == null || Factions.around(server, level, spot, SETTLEMENT_CLEARANCE) != null) {
-				continue;
-			}
-			Encounter e = pick(level.getBiome(spot), level.isDarkOutside(), random);
-			EntityType<?> type = e == null ? null : type(e.mob());
-			if (type == null) {
-				continue;
-			}
-			int count = Mth.nextInt(random, e.min(), e.max()), came = 0;
-			for (int n = 0; n < count; n++) {
-				BlockPos at = n == 0 ? spot : near(level, spot, random);
-				if (at != null && spawn(level, type, at, player, HUNT_TICKS) != null) {
-					came++;
-				}
-			}
-			if (came > 0) {
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.encounter." + e.name()).withStyle(ChatFormatting.GOLD));
-				Sightings.seen(level, type, spot);
-				JaymosKingdoms.LOGGER.debug("{} {} came after {} at {}", came, e.mob(), player.getName().getString(), spot);
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -326,7 +365,7 @@ public final class Encounters {
 	}
 
 	private static void after(Mob mob, ServerPlayer player) {
-		// (0.7.477) wolves stalk them from cover first
+		// (0.7.595) wolves stalk them from cover first
 		if (com.jaymoskingdoms.wild.WolfStalkers.hunt(mob, player)) {
 			return;
 		}

@@ -1,0 +1,14 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.respawnrecap",
+	"plugin": "com.jaymospowers.client.compat.RespawnRecapPlugin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"RecapControllerMixin",
+		"RecapGuiMarkerMixin",
+		"ReplayRecorderMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

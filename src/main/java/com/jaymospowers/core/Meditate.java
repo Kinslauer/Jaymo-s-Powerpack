@@ -19,6 +19,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -53,6 +54,11 @@ import org.jspecify.annotations.Nullable;
  * letting go of Sneak, until they move, jump or are hurt. With the Meditation perk that sitting is meditating (the
  * mastery comes as it always did); without it, it's only a rest. The Meditate key (I) is the shadowboxers' now (a Z
  * Fighter or a Gravity user, still opened by the Meditation perk); anyone else pressing it is told how to sit.
+ *
+ * <p>(0.19.67) <b>Seats and the Sit key</b> ({@link Sitting}): right-click a stair, a bottom slab or a block in
+ * {@code #jaymospowers:seats} with an empty hand, or press the Sit key, and you sit at once (on the seat you look at,
+ * else on the ground). Pressing it again while sat changes how you sit ({@link #POSES} of each); pressing Sneak gets you
+ * up. Sitting on a seat counts as meditating just like the ground.
  */
 public final class Meditate {
 	/** Ticks of stillness before it starts counting (sitting down, finding the rhythm). */
@@ -71,17 +77,32 @@ public final class Meditate {
 	public static final int SIT_TICKS = 100;
 
 	public static final int MEDITATING = 0, SHADOWBOXING = 1, SHADOWBOXING_HEAVY = 2;
+	/** (0.19.67) How many ways there are to sit, on the ground and on a seat each (the Sit key goes round them). */
+	public static final int POSES = 3;
 
 	/**
 	 * On a meditating player: since when (game time), how ({@link #MEDITATING}, {@link #SHADOWBOXING}...) and how many
-	 * shadowboxing combos he has ({@link Shadowbox#combos}). Synced to everyone.
+	 * shadowboxing combos he has ({@link Shadowbox#combos}). Synced to everyone. (0.19.67) Sitting also carries which
+	 * way they sit ({@code pose}, 0 to {@link #POSES} - 1) and, on a seat, the way the seat faces ({@code seatYaw},
+	 * degrees; NaN on the ground).
 	 */
-	public record State(long since, int kind, int combos) {
+	public record State(long since, int kind, int combos, int pose, float seatYaw) {
 		public static final StreamCodec<ByteBuf, State> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, State::since,
 			ByteBufCodecs.VAR_INT, State::kind,
 			ByteBufCodecs.VAR_INT, State::combos,
+			ByteBufCodecs.VAR_INT, State::pose,
+			ByteBufCodecs.FLOAT, State::seatYaw,
 			State::new);
+
+		/** Whether they sit on a seat (not on the ground). */
+		public boolean seated() {
+			return !Float.isNaN(seatYaw);
+		}
+	}
+
+	/** (0.19.67) A seat someone sits on: the block, and where and which way they sit. */
+	record Seat(BlockPos pos, Vec3 at, float yaw) {
 	}
 
 	public static final AttachmentType<State> STATE = AttachmentRegistry.create(JaymosPowers.id("meditating"),
@@ -105,6 +126,11 @@ public final class Meditate {
 	private static final Map<UUID, Integer> LOOKING_DOWN = new HashMap<>();
 	private static final Map<UUID, Vec3> LAST = new HashMap<>();
 	private static final Map<UUID, Long> BROKEN_UNTIL = new HashMap<>();
+	/** (0.19.67) Who sits on a seat, and on which; whether each sitter was sneaking last tick; the last way each sat. */
+	private static final Map<UUID, Seat> SEATED = new HashMap<>();
+	private static final Map<UUID, Boolean> SNEAKING = new HashMap<>();
+	private static final Map<UUID, Integer> GROUND_POSE = new HashMap<>();
+	private static final Map<UUID, Integer> SEAT_POSE = new HashMap<>();
 
 	private static final Method KINGDOMS_RANK;
 
@@ -132,6 +158,7 @@ public final class Meditate {
 				LOOKING_DOWN.remove(player.getUUID());
 				if (HELD.contains(player.getUUID()) || SITTING.remove(player.getUUID())) {
 					BROKEN_UNTIL.put(player.getUUID(), player.level().getGameTime() + HURT_BREAK);
+					SEATED.remove(player.getUUID());
 					stop(player);
 				}
 			}
@@ -143,6 +170,10 @@ public final class Meditate {
 			BROKEN_UNTIL.clear();
 			SITTING.clear();
 			LOOKING_DOWN.clear();
+			SEATED.clear();
+			SNEAKING.clear();
+			GROUND_POSE.clear();
+			SEAT_POSE.clear();
 		});
 	}
 
@@ -185,6 +216,58 @@ public final class Meditate {
 		BROKEN_UNTIL.remove(id);
 		SITTING.remove(id);
 		LOOKING_DOWN.remove(id);
+		SEATED.remove(id);
+		SNEAKING.remove(id);
+		GROUND_POSE.remove(id);
+		SEAT_POSE.remove(id);
+	}
+
+	/** (0.19.67) Whether this player sits (on the ground or a seat), not counting a held shadowbox. */
+	static boolean sitting(ServerPlayer player) {
+		return SITTING.contains(player.getUUID());
+	}
+
+	/** (0.19.67) Whether someone already sits on this block. */
+	static boolean taken(ServerLevel level, BlockPos pos) {
+		for (Map.Entry<UUID, Seat> e : SEATED.entrySet()) {
+			if (e.getValue().pos().equals(pos)) {
+				ServerPlayer other = level.getServer().getPlayerList().getPlayer(e.getKey());
+				if (other != null && other.level() == level) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/** (0.19.67) Whether this player could sit down right now (on the ground; a seat checks its own ground). */
+	static boolean canSit(ServerPlayer player) {
+		return !HELD.contains(player.getUUID()) && !SITTING.contains(player.getUUID()) && canMeditate(player)
+			&& BROKEN_UNTIL.getOrDefault(player.getUUID(), 0L) <= player.level().getGameTime();
+	}
+
+	/** (0.19.67) Sits this player down at once: on {@code seat} (moved onto it, facing its way), or on the ground. */
+	static void sitDown(ServerPlayer player, @Nullable Seat seat) {
+		UUID id = player.getUUID();
+		LOOKING_DOWN.remove(id);
+		if (seat != null) {
+			player.connection.teleport(seat.at().x, seat.at().y, seat.at().z, seat.yaw(), player.getXRot());
+			SEATED.put(id, seat);
+		}
+		LAST.put(id, player.position());
+		SNEAKING.put(id, player.isShiftKeyDown());
+		SITTING.add(id);
+	}
+
+	/** (0.19.67) The Sit key while sat: the next way of sitting (kept for next time). */
+	static void nextPose(ServerPlayer player) {
+		UUID id = player.getUUID();
+		Map<UUID, Integer> poses = SEATED.containsKey(id) ? SEAT_POSE : GROUND_POSE;
+		poses.merge(id, 1, (a, b) -> (a + b) % POSES);
+		State state = player.getAttached(STATE);
+		if (state != null) {
+			player.setAttached(STATE, new State(state.since(), state.kind(), state.combos(), poses.get(id), state.seatYaw()));
+		}
 	}
 
 	private static void stop(ServerPlayer player) {
@@ -229,8 +312,7 @@ public final class Meditate {
 				continue;
 			}
 			if (LOOKING_DOWN.merge(id, 1, Integer::sum) >= SIT_TICKS) {
-				LOOKING_DOWN.remove(id);
-				SITTING.add(id);
+				sitDown(player, null);
 			}
 		}
 	}
@@ -254,23 +336,39 @@ public final class Meditate {
 			Vec3 at = player.position();
 			Vec3 was = LAST.put(id, at);
 			boolean still = was != null && at.distanceToSqr(was) < STILL;
-			if (!still || !canMeditate(player) || BROKEN_UNTIL.getOrDefault(id, 0L) > now) {
-				// moved, jumped or hit: a held key settles in again once still; a sit is over until you sit again
+			// (0.19.67) a sitter gets up on pressing Sneak (not by still holding the Sneak they sat down with)
+			boolean sneak = player.isShiftKeyDown();
+			boolean stoodUp = sat && sneak && !SNEAKING.getOrDefault(id, sneak);
+			if (sat) {
+				SNEAKING.put(id, sneak);
+			}
+			Seat seat = sat ? SEATED.get(id) : null;
+			if (!still || !canMeditate(player) || BROKEN_UNTIL.getOrDefault(id, 0L) > now || stoodUp
+				|| seat != null && Sitting.seat(level, seat.pos(), player) == null) {
+				// moved, jumped, hit, stood up or the seat went: a held key settles in again once still; a sit is over until you sit again
 				SITTING.remove(id);
+				SEATED.remove(id);
+				SNEAKING.remove(id);
 				stop(player);
 				continue;
 			}
 			State state = player.getAttached(STATE);
-			// sat down by looking down: always the cross-legged sit, shadowboxers too
+			// sat down: always the sit (any of its poses), shadowboxers too
 			int kind = sat ? MEDITATING : kind(player);
 			int combos = Shadowbox.combos(Mastery.unlocked(player));
+			int pose = sat ? (seat != null ? SEAT_POSE : GROUND_POSE).getOrDefault(id, 0) : 0;
+			float seatYaw = seat != null ? seat.yaw() : Float.NaN;
 			if (state == null) {
-				state = new State(now, kind, combos);
+				state = new State(now, kind, combos, pose, seatYaw);
 				player.setAttached(STATE, state);
 			} else if (state.kind() != kind || state.combos() != combos) {
 				// stepping into (or out of) a field, or a new combo learned: the same session, a different rhythm
-				state = new State(state.since(), kind, combos);
+				state = new State(state.since(), kind, combos, state.pose(), state.seatYaw());
 				player.setAttached(STATE, state);
+			}
+			long satFor = now - state.since();
+			if (sat && satFor >= SETTLE) {
+				Sitting.rest(player, satFor - SETTLE);
 			}
 			long time = now - state.since();
 			if (time < SETTLE) {

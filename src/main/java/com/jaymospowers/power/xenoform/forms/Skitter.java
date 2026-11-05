@@ -27,9 +27,12 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.18.113, Scan E) Skitter, the eight-legged: a squat black-brown body, a round hairy abdomen, four long jointed legs
- * down each side and a cluster of red eyes. A body, not a suit like the Web power. 22 health, fists of 4. It runs up
- * walls by walking into them (sneak to stop), and with jump held under a ceiling it clings there upside down and
+ * down each side and a cluster of red eyes. A body, not a suit like the Web power. 22 health, fists of 4. It climbs
+ * walls like a spider ({@code SkitterClimbMixin}: walk into one to climb, sneak to hold still), and with jump held under a ceiling it clings there upside down and
  * crawls along: drawn upside down for everyone, its own view turned over too ({@code SkitterCeiling}).
+ * (0.19.62) Standing it keeps its upright shape; prone (the stance wheel's crawl) it drops into a spider that scuttles
+ * at {@link #SPIDER_PACE} times a crawl and sticks to whatever it crawls onto, up walls ({@link XenoformState#CLIMB})
+ * and along ceilings with no jump held (a jump press lets go of a ceiling); standing up turns it back.
  * Scanned from a spider or cave spider, or Kingdoms' tarantula ({@code XenoDna}).
  * <ul>
  * <li>R, Web Line: a line shot to the block you look at to swing on; R again lets go (keeping the swing).</li>
@@ -40,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class Skitter extends XenoForm {
 	// ---- tuning ----
-	public static final double CLIMB_SPEED = 0.2, CEILING_GRIP = 0.08, CEILING_CRAWL = 0.12;
+	public static final double CEILING_GRIP = 0.08, CEILING_CRAWL = 0.12;
 	public static final double LINE_REACH = 32.0, LINE_PULL = 0.15, LINE_REEL = 0.985;
 	public static final int LINE_COOLDOWN = 20;
 	public static final double TIE_REACH = 12.0;
@@ -66,6 +69,8 @@ public final class Skitter extends XenoForm {
 		live.perched = false;
 		live.brood = 0;
 		player.removeAttached(XenoformState.CEILING);
+		player.removeAttached(XenoformState.CLIMB);
+		LET_GO.remove(player.getUUID());
 		dismiss(player.level(), live.minions);
 	}
 
@@ -152,8 +157,41 @@ public final class Skitter extends XenoForm {
 		}
 	}
 
+	/** (0.19.62) Prone, the spider's pace against a man's crawl (the crawl moves at about 0.3 of a walk). */
+	public static final float SPIDER_PACE = 2.6F;
+
+	/** (0.19.62) Spiders that let go of a ceiling with jump: they don't grab it again until they've landed. */
+	private static final java.util.Set<java.util.UUID> LET_GO = new java.util.HashSet<>();
+
+	/**
+	 * (0.19.62) Prone (the stance wheel's crawl): a spider, not a man. Not the downed state's crawl or two broken legs',
+	 * which hold it flat as a man.
+	 */
+	public static boolean crawling(Player player) {
+		return player.getAttached(com.jaymospowers.core.Crawl.CRAWLING) != null && !com.jaymospowers.core.wounds.Downed.isDowned(player)
+			&& !com.jaymospowers.core.wounds.Breaks.crawlOnly(player);
+	}
+
+	/** (0.19.62) The side of the wall it's pressed against, the one nearest where it faces; null if none. */
+	private static @org.jspecify.annotations.Nullable Direction wall(ServerPlayer player) {
+		AABB box = player.getBoundingBox();
+		Direction best = null;
+		float bestTurn = Float.MAX_VALUE;
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			if (player.level().noCollision(player, box.move(side.getStepX() * 0.05, 0.0, side.getStepZ() * 0.05))) {
+				continue;
+			}
+			float turn = Math.abs(net.minecraft.util.Mth.wrapDegrees(side.toYRot() - player.getYRot()));
+			if (turn < bestTurn) {
+				bestTurn = turn;
+				best = side;
+			}
+		}
+		return best;
+	}
+
 	/** A solid underside right over its head. */
-	private static boolean ceiling(ServerPlayer player) {
+	public static boolean ceiling(Player player) {
 		AABB box = player.getBoundingBox();
 		BlockPos above = BlockPos.containing(player.getX(), box.maxY + 0.3, player.getZ());
 		return player.level().getBlockState(above).isFaceSturdy(player.level(), above, Direction.DOWN);
@@ -162,33 +200,46 @@ public final class Skitter extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
-		boolean jump = player.getLastClientInput().jump();
+		// (0.19.62) prone, it's a spider: it keeps to any surface it crawls onto, ceilings too, with no jump held; a jump
+		// press lets go of a ceiling (standing needs room it hasn't got up there), and it won't grab one again until it lands
+		boolean prone = crawling(player);
+		boolean pressed = player.getLastClientInput().jump();
+		if (player.onGround() || !prone) {
+			LET_GO.remove(player.getUUID());
+		} else if (prone && live.perched && pressed) {
+			LET_GO.add(player.getUUID());
+		}
+		boolean jump = prone ? !LET_GO.contains(player.getUUID()) : pressed;
+		Direction climbing = null;
 		// clinging to a ceiling: hold jump under one; let go of jump to drop
 		if (live.perched) {
 			if (!jump || !ceiling(player) || player.isInWater()) {
 				live.perched = false;
 			} else {
-				Vec3 m = player.getDeltaMovement();
-				Vec3 crawl = m.horizontal().lengthSqr() > CEILING_CRAWL * CEILING_CRAWL ? m.horizontal().normalize().scale(CEILING_CRAWL) : m.horizontal();
-				player.setDeltaMovement(crawl.x, CEILING_GRIP, crawl.z);
-				player.syncVelocity = true;
+				// (0.20.59) the hold itself is the client's (SkitterCling), so its own movement sticks; this keeps the
+				// state everyone draws
 				player.resetFallDistance();
 			}
 		} else if (jump && !player.onGround() && !player.isInWater() && ceiling(player)) {
 			live.perched = true;
 			live.anchor = null;
-			player.setDeltaMovement(player.getDeltaMovement().x, CEILING_GRIP, player.getDeltaMovement().z);
-			player.syncVelocity = true;
 			sound(player, SoundEvents.SPIDER_STEP, 0.8F, 1.2F);
-		} else if (player.horizontalCollision && !player.isShiftKeyDown() && !player.isInWater()) {
-			// up the wall it walks into
-			Vec3 m = player.getDeltaMovement();
-			player.setDeltaMovement(m.x, CLIMB_SPEED, m.z);
-			player.syncVelocity = true;
+		} else if (!player.onGround() && player.onClimbable() && !player.isInWater()) {
+			// (0.20.59) on a wall: the climb itself is a spider's, a ladder on both sides ({@code SkitterClimbMixin}),
+			// so the client's own movement climbs (the server pushing it up here was overruled by the client)
+			climbing = prone ? wall(player) : null;
 			player.resetFallDistance();
-			if (player.tickCount % 5 == 0) {
+			if (player.tickCount % 5 == 0 && player.getDeltaMovement().y > 0.05) {
 				sound(player, SoundEvents.SPIDER_STEP, 0.5F, 1.3F);
 			}
+		}
+		// (0.19.62) every client draws the crawling spider on the wall while it climbs one
+		Integer side = climbing != null ? climbing.get2DDataValue() : null;
+		Integer was = player.getAttached(XenoformState.CLIMB);
+		if (side != null && !side.equals(was)) {
+			player.setAttached(XenoformState.CLIMB, side);
+		} else if (side == null && was != null && (player.onGround() || live.perched || !prone || !player.horizontalCollision)) {
+			player.removeAttached(XenoformState.CLIMB);
 		}
 		// every client draws it upside down while it clings (and its own camera turns over)
 		if (live.perched != Boolean.TRUE.equals(player.getAttached(XenoformState.CEILING))) {
@@ -276,7 +327,7 @@ public final class Skitter extends XenoForm {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
-		return live.perched || live.anchor != null || player.horizontalCollision;
+		return live.perched || live.anchor != null || player.horizontalCollision || player.onClimbable();
 	}
 
 	@Override

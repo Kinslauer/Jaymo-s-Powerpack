@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.lithostitched",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"LithostitchedBandsMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

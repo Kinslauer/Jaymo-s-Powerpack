@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SSS",
+    "FFF"
+  ],
+  "key": {
+    "S": "jaymospowers:plant_string",
+    "F": "jaymospowers:plant_fiber"
+  },
+  "result": {
+    "id": "jaymospowers:grass_bed",
+    "count": 1
+  }
+}

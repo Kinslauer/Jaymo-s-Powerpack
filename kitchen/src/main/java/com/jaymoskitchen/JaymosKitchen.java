@@ -83,6 +83,8 @@ public class JaymosKitchen implements ModInitializer {
 		// fat, tallow, bark and tanning (its SOAKS attachment is class-loaded here)
 		com.jaymoskitchen.tanning.Tanning.register();
 		com.jaymoskitchen.tanning.Hides.register();
+		// (0.5.51) meat hooks, blood grates and bottled blood (corpse/Hanging does the butchering)
+		com.jaymoskitchen.butchery.Butchery.register();
 		com.jaymoskitchen.farm.Manure.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
@@ -110,8 +112,20 @@ public class JaymosKitchen implements ModInitializer {
 			if (carried != null) {
 				if (!level.isClientSide()) {
 					BlockPos clicked = hit.getBlockPos();
+					if (com.jaymoskitchen.butchery.Butchery.isHook(level.getBlockState(clicked))) {
+						// (0.5.51) hung up on a meat hook by its hind legs
+						com.jaymoskitchen.corpse.Hanging.hang(carried, player, clicked);
+						return InteractionResult.SUCCESS;
+					}
+					BlockState clickedState = level.getBlockState(clicked);
+					if (clickedState.is(net.minecraft.tags.BlockTags.CAMPFIRES) && carried.oneHanded()) {
+						// (0.5.77) a small animal laid on the campfire to roast whole (see CorpseEntity#roast)
+						carried.putDown(Vec3.atBottomCenterOf(clicked).add(0.0, clickedState.getShape(level, clicked).max(net.minecraft.core.Direction.Axis.Y), 0.0),
+							player.getYRot() + 90.0F);
+						return InteractionResult.SUCCESS;
+					}
 					Vec3 at;
-					if (Corpses.isButcherBlock(level.getBlockState(clicked))) {
+					if (Corpses.isButcherBlock(clickedState)) {
 						at = CorpseEntity.tableSpot(level, clicked, hit.getLocation(), carried.isBigCarcass());
 						if (at == null) {
 							player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.big_table"));

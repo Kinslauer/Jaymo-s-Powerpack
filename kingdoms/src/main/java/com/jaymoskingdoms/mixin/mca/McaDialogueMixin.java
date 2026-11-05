@@ -156,7 +156,10 @@ abstract class McaDialogueMixin {
 		if ("main".equals(question) && Introductions.INTRODUCE.equals(answer)) {
 			// (0.7.230) the stranger page's Introduce: their name if you share a tongue, else a hand held out (the screen stays
 			// open, and fills in once you know them)
-			if (Languages.understands(player, villager)) {
+			if (Rulers.is(villager) && !Introductions.knows(player, villager) && Handshakes.bowTo(player, villager, true)) {
+				// (0.7.504) to a ruler you bow (a bow needs no words): the screen closes for it and opens again after
+				villager.getInteractions().stopInteracting();
+			} else if (Languages.understands(player, villager)) {
 				villager.sendChatMessage(Introductions.askName(player, villager), player);
 			} else {
 				Handshakes.offerTo(player, villager);
@@ -178,6 +181,23 @@ abstract class McaDialogueMixin {
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Talks.ANSWER.equals(answer)) {
+			// (0.7.523) "Have a word": a short talk on the talk screen, or nothing much to say today
+			villager.getInteractions().stopInteracting();
+			if (!com.jaymoskingdoms.Talks.open(player, villager, false)) {
+				villager.sendChatMessage(com.jaymoskingdoms.Talks.nothing(player, villager), player);
+			}
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && "chat".equals(answer) && com.jaymoskingdoms.Talks.canChatTalk(player, villager)) {
+			// (0.7.523) now and then a chat turns into a talk (close MCA's screen first, then open ours)
+			villager.getInteractions().stopInteracting();
+			if (com.jaymoskingdoms.Talks.openFromChat(player, villager)) {
+				ci.cancel();
+				return;
+			}
 		}
 		if ("main".equals(question) && "hug".equals(answer)) {
 			// (0.7.102) an Emberborn is too hot to hold without fire resistance (either of you)
@@ -383,7 +403,10 @@ abstract class McaDialogueMixin {
 		}
 		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
 			// (0.7.180) asked their name: they say it, and you know it from now on
-			villager.sendChatMessage(Introductions.askName(player, villager), player);
+			// ((0.7.504) a ruler you've not met you bow to first, and they name themselves after: Handshakes#bowTo)
+			if (!Rulers.is(villager) || Introductions.knows(player, villager) || !Handshakes.bowTo(player, villager, false)) {
+				villager.sendChatMessage(Introductions.askName(player, villager), player);
+			}
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
@@ -430,6 +453,14 @@ abstract class McaDialogueMixin {
 				ci.cancel();
 				return;
 			}
+		}
+		// (0.7.547) one who knows of the heavens overhead hints at them, and never says it outright
+		Component heavens = com.jaymoskingdoms.Heavens.chat(villager, player);
+		if (heavens != null) {
+			villager.sendChatMessage(heavens, player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
 		}
 		// (0.7.224) a pit fighter with wins to his name (a champion, a retired one) brags of them
 		Component bout = FightPit.tell(villager, player);
@@ -480,10 +511,16 @@ abstract class McaDialogueMixin {
 		if (before != null) {
 			int gained = villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before;
 			// (0.7.221) one who looks down on your blood warms to you slower
-			int taken = Prejudice.hearts(villager, player, gained);
+			int taken = Prejudice.hearts(villager, player, gained) + com.jaymoskingdoms.Faiths.hearts(villager, player, gained);
 			if (taken > 0) {
 				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(-taken);
 				gained -= taken;
+			}
+			// (0.7.509) The Truth's flock warm to one of their own sooner
+			int warm = com.jaymoskingdoms.Blessings.flockHearts(villager, player, gained) + com.jaymoskingdoms.Faiths.kinHearts(villager, player, gained);
+			if (warm > 0) {
+				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(warm);
+				gained += warm;
 			}
 			Recollections.socialised(villager, player, question, gained);
 		}

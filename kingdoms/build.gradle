@@ -68,16 +68,38 @@ dependencies {
 	// Jade (CC BY-NC-SA 4.0, Snownee; in Powers' pack): client/compat/JadeIntroductions keeps strangers' names, trades and
 	// health off its panel. Compiled against (the same version as Powers' pack), never required.
 	compileOnly "maven.modrinth:jade:71CTWqdE"
+	// Spell Engine (GPL-3.0; in Powers' pack with Zsolt Molnar's RPG Series): RpgSeriesGate lets only the matching class cast
+	// their spells. Compiled against, never required.
+	compileOnly "maven.modrinth:spell-engine:kgVsejrW"
 	// Simple Voice Voice Changer (CC BY-NC-SA 4.0, sawiq; in Powers' pack): client/VoiceChangerCompat turns a player's
 	// voice for a werewolf, a Great Ape or a disguise (VoiceMasks) through its API. Compiled against, never required.
 	compileOnly "maven.modrinth:simple-voice-voice-changer:acFxvUQp"
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 }
 
+// lang lives in small part files, lang/parts/*.json (tools/lang_split.py made them); they're merged into en_us.json here
+def langParts = file("src/main/resources/assets/jaymoskingdoms/lang/parts")
 processResources {
 	def version = project.version
 	inputs.property "version", version
+	inputs.dir langParts
 	filesMatching("fabric.mod.json") { expand "version": version }
+	exclude "assets/jaymoskingdoms/lang/parts/**"
+	doLast {
+		def merged = new TreeMap()
+		langParts.listFiles().findAll { it.name.endsWith(".json") }.sort { it.name }.each { part ->
+			def entries = new groovy.json.JsonSlurper().parse(part, "UTF-8")
+			entries.each { k, v ->
+				if (merged.containsKey(k) && merged[k] != v) {
+					throw new GradleException("lang key ${k} is defined twice (again in ${part.name})")
+				}
+				merged[k] = v
+			}
+		}
+		def out = new File(destinationDir, "assets/jaymoskingdoms/lang/en_us.json")
+		out.parentFile.mkdirs()
+		out.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(merged)), "UTF-8")
+	}
 }
 
 tasks.withType(JavaCompile).configureEach { it.options.release = 25 }

@@ -37,15 +37,17 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.462) More ways to heal (Healing-Plan 9 to 11): the town healer's full treatment for emeralds, the infirmary cot
+ * (0.7.462) More ways to heal (Healing-Plan 9 to 11): the town healer's full treatment for silver coins, the infirmary cot
  * ({@link InfirmaryCot}) and the shrine ({@link Shrine}). All of them reach the body's parts through Jaymo's Powers' wounds
  * ({@link PowersCompat}); without Powers they heal the hearts. This class holds what they share: the treatment itself, its
  * price, what makes a place an infirmary, and the blocks' registration.
  */
 public final class Healing {
-	// ---- the healer's price (emeralds) ----
+	// ---- the healer's price (silver coins, (0.7.498) was emeralds) ----
 	/** (0.7.462) A full treatment: a base, then so much for each break, each open cut, each festering part, and for every quarter of health lost. */
 	static final int TREATMENT_BASE = 4, PER_BREAK = 5, PER_CUT = 1, PER_FESTER = 3, PER_QUARTER_LOST = 2;
+	/** (0.7.524) And for drawing out what will kill (poisoned blood, water in the lungs, withering: Powers' afflictions). */
+	static final int PER_AFFLICTION = 8;
 	/** (0.7.462) The most a treatment ever costs. */
 	static final int TREATMENT_MAX = 48;
 
@@ -81,7 +83,7 @@ public final class Healing {
 			output.insertAfter(COT_ITEM, SHRINE_ITEM);
 		});
 		// (the shrine's attachment loads with its class)
-		JaymosKingdoms.LOGGER.debug("shrine attachment: {}", Shrine.PRAYED);
+		JaymosKingdoms.LOGGER.debug("shrine attachment: {} {} {}", Shrine.PRAYED, Patrons.STATE, Faiths.FAITH);
 		ServerTickEvents.END_SERVER_TICK.register(Healing::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -100,15 +102,16 @@ public final class Healing {
 
 	/** Whether {@code body} has anything a healer could treat: a break, a cut, festering, or lost health. */
 	static boolean needsTreatment(LivingEntity body) {
-		return PowersCompat.injuries(body).any() || body.getHealth() < body.getMaxHealth() - 0.01F;
+		return PowersCompat.injuries(body).any() || body.getHealth() < body.getMaxHealth() - 0.01F || PowersCompat.afflicted(body);
 	}
 
-	/** What a full treatment of {@code body} costs, in emeralds (see the constants above). */
+	/** What a full treatment of {@code body} costs, in silver coins (see the constants above). */
 	static int treatmentPrice(LivingEntity body) {
 		PowersCompat.Injuries hurt = PowersCompat.injuries(body);
 		float lost = Math.max(0.0F, 1.0F - body.getHealth() / body.getMaxHealth());
 		int price = TREATMENT_BASE + PER_BREAK * Integer.bitCount(hurt.broken()) + PER_CUT * Integer.bitCount(hurt.bleeding())
-			+ PER_FESTER * Integer.bitCount(hurt.festering()) + PER_QUARTER_LOST * (int)Math.ceil(lost * 4.0F - 0.01F);
+			+ PER_FESTER * Integer.bitCount(hurt.festering()) + PER_QUARTER_LOST * (int)Math.ceil(lost * 4.0F - 0.01F)
+			+ (PowersCompat.afflicted(body) ? PER_AFFLICTION : 0);
 		return Math.min(TREATMENT_MAX, price);
 	}
 

@@ -268,7 +268,7 @@ public final class AimCrosshair {
 	private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
-		if (player == null || showing <= 0 || BeamCinematic.running() || !takesOver(minecraft)) {
+		if (player == null || showing <= 0 || BeamCinematic.running() || UltimateCinematic.filming() || !takesOver(minecraft)) {
 			return;
 		}
 		int x = graphics.guiWidth() / 2, y = graphics.guiHeight() / 2;

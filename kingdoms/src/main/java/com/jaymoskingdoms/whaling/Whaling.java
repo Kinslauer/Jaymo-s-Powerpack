@@ -93,6 +93,7 @@ public final class Whaling {
 		TRYWORKS_ITEM = Registry.register(BuiltInRegistries.ITEM, worksItem, new BlockItem(TRYWORKS, new Item.Properties().setId(worksItem).useBlockDescriptionPrefix()));
 		WHALE_OIL = item("whale_oil", Item::new, new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE));
 		WhaleTrade.register();
+		SharkWake.register();
 
 		OIL_LAMP = block("oil_lamp", OilLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).forceSolidOn().strength(3.5F)
 			.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED)

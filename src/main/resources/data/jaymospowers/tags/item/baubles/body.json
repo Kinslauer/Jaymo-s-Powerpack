@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     "jaymospowers:featherfall_cloak",
-    "jaymospowers:lantern_pole"
+    "jaymospowers:lantern_pole",
+    {
+      "id": "#spell_engine:spell_quiver",
+      "required": false
+    }
   ]
 }

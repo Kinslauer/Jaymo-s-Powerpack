@@ -46,8 +46,12 @@ public final class LivingRagdolls {
 	private static final float BIG_HIT = 8.0F;
 	/** A landing that really hurt this much (damage taken, half-hearts) knocks them limp. */
 	private static final float HARD_LANDING = 6.0F;
-	/** A hit's fling away from where it came from (blocks a tick): this much, more per point of damage, at most this. */
-	private static final double HIT_FLING = 0.45, HIT_FLING_PER_DAMAGE = 0.04, HIT_FLING_MAX = 1.4, HIT_LIFT = 0.3;
+	/**
+	 * (0.5.74) A hit's own push away from where it came from (blocks a tick), and its lift: only a topple, so they fall
+	 * where they stand. Andy: "you should just fall where you stand or a bit further if knocked back". Any real knockback
+	 * (the blow's, a blast's, a power's) is already in their speed on their client, which adds it (LimpController).
+	 */
+	private static final double HIT_FLING = 0.1, HIT_LIFT = 0.04;
 	/** A hard landing tips them forward this fast (their own speed is added on their client). */
 	private static final double LANDING_TIP = 0.2;
 
@@ -213,11 +217,10 @@ public final class LivingRagdolls {
 		}
 		double dx = from == null ? 0.0 : player.getX() - from.x, dz = from == null ? 0.0 : player.getZ() - from.z;
 		double flat = Math.hypot(dx, dz);
-		double speed = Math.min(HIT_FLING_MAX, HIT_FLING + HIT_FLING_PER_DAMAGE * baseDamage);
 		if (flat < 1.0E-4) {
-			knock(player, 0.0, speed, 0.0);
+			knock(player, 0.0, HIT_LIFT, 0.0);
 		} else {
-			knock(player, dx / flat * speed, HIT_LIFT, dz / flat * speed);
+			knock(player, dx / flat * HIT_FLING, HIT_LIFT, dz / flat * HIT_FLING);
 		}
 	}
 

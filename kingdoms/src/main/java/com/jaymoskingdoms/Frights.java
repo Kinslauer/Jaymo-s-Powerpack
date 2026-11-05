@@ -121,7 +121,7 @@ final class Frights {
 			// (0.7.292) a camp's orc, an MCA villager now; (0.7.293) a barbarian chief
 			return true;
 		}
-		return m instanceof Enemy || Vampires.exposed(m);
+		return m instanceof Enemy && !(m instanceof PatronChampion) || Vampires.exposed(m);
 	}
 
 	/** (0.6.11) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */
@@ -133,6 +133,31 @@ final class Frights {
 		Fright fright = new Fright(away(level, v, at), null, now + HIDE_TICKS);
 		FRIGHTS.put(v.getUUID(), fright);
 		flee(level, v, fright);
+	}
+
+	/**
+	 * (0.7.576) A blast went off at {@code at} (Andy: "all villager mobs and non guards should react by running away if
+	 * they hear explosions (within 40 blocks)"): every villager within {@link BlastFright#HEAR} of it (the brave from
+	 * nearer, the timid from farther: {@link Temperaments#frightRange}) runs from the spot and hides a while, unless it
+	 * stands its ground ({@link BlastFright#standsGround}).
+	 */
+	static void blast(ServerLevel level, Vec3 at) {
+		long now = level.getGameTime();
+		double most = BlastFright.HEAR * 1.5;
+		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(at, at).inflate(most), Villager::isAlive)) {
+			double range = Temperaments.frightRange(v, BlastFright.HEAR);
+			if (v.distanceToSqr(at) > range * range || BlastFright.standsGround(v)) {
+				continue;
+			}
+			Fright had = FRIGHTS.get(v.getUUID());
+			if (had == null) {
+				level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
+			}
+			Fright fright = new Fright(away(level, v, at), had != null ? had.child() : null,
+				Math.max(had != null ? had.until() : 0L, now + Temperaments.hideTicks(v, HIDE_TICKS)));
+			FRIGHTS.put(v.getUUID(), fright);
+			flee(level, v, fright);
+		}
 	}
 
 	/** (0.7.65) It hides at {@code to} (its home) until {@code until}, as from a monster: a war party is coming ({@link WarAlert}). */

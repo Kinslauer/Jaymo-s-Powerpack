@@ -1,0 +1,8 @@
+{
+  "feature": "jaymospowers:ore_tells",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

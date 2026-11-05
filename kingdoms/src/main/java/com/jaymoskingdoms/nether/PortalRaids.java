@@ -4,6 +4,8 @@ import com.jaymoskingdoms.Faction;
 import com.jaymoskingdoms.FactionType;
 import com.jaymoskingdoms.Factions;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Stacked;
+import com.jaymoskingdoms.TownTroubles;
 import com.jaymoskingdoms.WorldTiers;
 import com.mojang.brigadier.context.CommandContext;
 import java.util.ArrayList;
@@ -83,7 +85,7 @@ public final class PortalRaids {
 
 	private static void consider(MinecraftServer server) {
 		ServerLevel overworld = Factions.level(server);
-		ServerLevel nether = server.getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		if (overworld == null || nether == null || overworld.getDifficulty() == Difficulty.PEACEFUL) {
 			return;
 		}
@@ -148,6 +150,8 @@ public final class PortalRaids {
 		level.playSound(null, out, SoundEvents.PORTAL_TRIGGER, SoundSource.HOSTILE, 1.0F, 0.7F);
 		level.playSound(null, out, SoundEvents.HOGLIN_ANGRY, SoundSource.HOSTILE, 2.0F, 0.6F);
 		news(level, seat, Component.translatable("message.jaymoskingdoms.portal_raid", from.name(), town).withStyle(ChatFormatting.RED));
+		// (0.7.530) the town has a portal raid to recover from
+		TownTroubles.portalRaid(level, seat);
 		JaymosKingdoms.LOGGER.info("{} Hornkin from {} came through the portal at {} to raid {}", sent, from.name(), portal.get(), town);
 		return true;
 	}
@@ -200,7 +204,7 @@ public final class PortalRaids {
 			c.getSource().sendFailure(Component.literal("Portal raids are on the towns of the Overworld"));
 			return 0;
 		}
-		ServerLevel nether = server.getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		NetherForts.Fort from = nether == null ? null : standingFort(nether, level.getRandom());
 		if (from == null) {
 			c.getSource().sendFailure(Component.literal("No Hornkin fort stands in the Nether to raid from (/kingdom netherfort found there first)"));

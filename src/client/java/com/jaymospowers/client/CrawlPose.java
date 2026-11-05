@@ -204,6 +204,14 @@ public final class CrawlPose {
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+		// (0.19.62) Skitter crawls as its spider, not as a man on its belly (see XenoFormModels.Skitter)
+		if (entity instanceof Player skitter && "skitter".equals(skitter.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM))
+			&& com.jaymospowers.client.power.xenoform.SkitterCeiling.spiderOrRising(skitter)) {
+			state.setData(ProneTransition.KEY, null);
+			state.setData(KEY, null);
+			state.setData(RISEN_KEY, null);
+			return;
+		}
 		// (0.19.9) going down into the crawl or getting up from it
 		if (entity instanceof Player p) {
 			ProneTransition.extract(p, state, partialTicks);

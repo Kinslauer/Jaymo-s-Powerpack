@@ -144,6 +144,8 @@
   "item.jaymospowers.leather_whip": "Leather Whip",
   "item.jaymospowers.leather_whip.hint": "Right-click: crack it. Hold to wrap what it hits, let go to haul it over your head (or off its feet)",
   "item.jaymospowers.flail.whirl": "Hold right-click to whirl the ball overhead; let go to bring it down where you look",
+  "death.attack.jaymospowers.lash_wrap": "%1$s was struck round their guard",
+  "death.attack.jaymospowers.lash_wrap.player": "%1$s was struck round their guard by %2$s",
   "item.jaymospowers.fang_gauntlets": "Fang Gauntlets",
   "item.jaymospowers.gutting_hook": "Gutting Hook",
   "item.jaymospowers.warchief_cleaver": "Warchief's Cleaver",

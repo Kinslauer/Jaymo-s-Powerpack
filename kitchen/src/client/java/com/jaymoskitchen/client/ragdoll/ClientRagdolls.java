@@ -1,5 +1,6 @@
 package com.jaymoskitchen.client.ragdoll;
 
+import com.jaymoskitchen.corpse.CorpseEntity;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollNet;
 import com.jaymoskitchen.ragdoll.RagdollRig;
@@ -29,6 +30,8 @@ public final class ClientRagdolls {
 	 */
 	private static final double SIDE_SPEED = 0.06;
 	private static final float SIDE_EASE = 0.12F;
+	/** (0.5.72) Added around each part for the crosshair: the drawn limbs are a little thicker than the physics'. */
+	private static final double BOUNDS_PAD = 0.08;
 
 	/** One body: its rig, and its points a tick ago and now (x, y, z each). */
 	public static final class Track {
@@ -66,6 +69,21 @@ public final class ClientRagdolls {
 			return asleep;
 		}
 
+		/** (0.5.72) The box the body fills now, its parts' thickness and a little more: min x y z, max x y z. */
+		public double[] bounds() {
+			double[] out = {Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE,
+				-Double.MAX_VALUE};
+			for (int i = 0; i < rig.count; i++) {
+				double r = rig.radius[i] + BOUNDS_PAD;
+				for (int k = 0; k < 3; k++) {
+					double v = now[i * 3 + k];
+					out[k] = Math.min(out[k], v - r);
+					out[k + 3] = Math.max(out[k + 3], v + r);
+				}
+			}
+			return out;
+		}
+
 		/** (0.5.16) How far onto its side a four-legged body is drawn, between the last two ticks. */
 		public float side(float partialTicks) {
 			return sideBefore + (side - sideBefore) * partialTicks;
@@ -97,8 +115,13 @@ public final class ClientRagdolls {
 			sideUp = frame[1] >= 0.0F ? 1 : -1;
 		}
 
-		/** Eases a four-legged body toward its side while it's (nearly) still, back to the physics while it moves. */
-		void settle() {
+		/**
+		 * Eases a four-legged body toward its side while it's (nearly) still, back to the physics while it moves.
+		 * (0.5.49) Never while it's held ({@code held}: dragged): a slow drag (you're slowed hauling it) read as lying
+		 * still, so the body was drawn flat on its side on the ground and the leg left your hand. Andy: "dragging isnt
+		 * tethered hand to animal, it still floats in space oddly".
+		 */
+		void settle(boolean held) {
 			sideBefore = side;
 			if (rig.shape == RagdollRig.Shape.HUMANOID) {
 				return;
@@ -108,7 +131,7 @@ public final class ClientRagdolls {
 				double dx = now[i * 3] - before[i * 3], dy = now[i * 3 + 1] - before[i * 3 + 1], dz = now[i * 3 + 2] - before[i * 3 + 2];
 				fastest = Math.max(fastest, dx * dx + dy * dy + dz * dz);
 			}
-			boolean still = Math.sqrt(fastest) < SIDE_SPEED;
+			boolean still = !held && Math.sqrt(fastest) < SIDE_SPEED;
 			if (still && sideUp == 0) {
 				pickSide();
 			}
@@ -127,6 +150,15 @@ public final class ClientRagdolls {
 	public static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(RagdollNet.Pose.TYPE, (payload, ctx) -> put(payload.entity(), payload.snapshot()));
 		ClientTickEvents.START_CLIENT_TICK.register(ClientRagdolls::tick);
+		// (0.5.72) a corpse's box takes in its whole drawn body, so the crosshair can find any part of it
+		CorpseEntity.drawnBounds = corpse -> {
+			// only while it's drawn from its points (see CorpseRenderer#extractRenderState): not held, pinned, slung or in a cart
+			if (corpse.carrier() != null || corpse.pinned() >= 0 || corpse.isPassenger() || corpse.slungOn() != null) {
+				return null;
+			}
+			Track track = TRACKS.get(corpse.getId());
+			return track == null ? null : track.bounds();
+		};
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> TRACKS.clear());
 	}
 
@@ -213,7 +245,7 @@ public final class ClientRagdolls {
 		while (it.hasNext()) {
 			Int2ObjectMap.Entry<Track> entry = it.next();
 			Track track = entry.getValue();
-			track.settle();
+			track.settle(DragSim.active(entry.getIntKey()));
 			if (!track.fresh) {
 				System.arraycopy(track.now, 0, track.before, 0, track.now.length);
 				if (++track.unseen > FORGET_TICKS && minecraft.level.getEntity(entry.getIntKey()) == null) {
@@ -221,6 +253,11 @@ public final class ClientRagdolls {
 				}
 			}
 			track.fresh = false;
+		}
+		for (Int2ObjectMap.Entry<Track> entry : TRACKS.int2ObjectEntrySet()) {
+			if (minecraft.level.getEntity(entry.getIntKey()) instanceof CorpseEntity corpse) {
+				corpse.refreshDrawnBox();
+			}
 		}
 	}
 }

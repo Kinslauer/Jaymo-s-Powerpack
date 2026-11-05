@@ -56,7 +56,7 @@ final class CampChiefs {
 		});
 	}
 
-	private static void dropBar(UUID id) {
+	static void dropBar(UUID id) {
 		ServerBossEvent bar = BARS.remove(id);
 		if (bar != null) {
 			bar.removeAllPlayers();
@@ -93,7 +93,8 @@ final class CampChiefs {
 			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
 			BossBars.show(level, mob, bar);
 		}
-		if (mob.getHealth() <= mob.getMaxHealth() * Folk.RALLY_AT && RALLIED.add(mob.getUUID())) {
+		// ((0.7.490) not in a camp brawl: a chief challenge's blows aren't a fight to call his camp to)
+		if (!Brutality.fighting(mob) && mob.getHealth() <= mob.getMaxHealth() * Folk.RALLY_AT && RALLIED.add(mob.getUUID())) {
 			rally(level, mob, w.factionId());
 		}
 	}

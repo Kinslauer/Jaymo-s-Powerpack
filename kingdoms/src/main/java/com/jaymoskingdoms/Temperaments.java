@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -30,8 +31,6 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -57,7 +56,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Proud</b> (pride): helps only those of real standing ({@link #PROUD_REP}); won't take a bribe to end a
  * brawl.</li>
  * <li><b>Greedy</b> (avarice): helps anyone not an enemy, anywhere, if they've the coin, and takes
- * {@link #GREEDY_FEE} emeralds for it; takes a bribe even from an enemy.</li>
+ * {@link #GREEDY_FEE} silver for it; takes a bribe even from an enemy.</li>
  * <li><b>Suspicious</b> (distrust): helps only those who've introduced themselves ({@link Introductions}), and then
  * as the settlement would.</li>
  * <li><b>Timid</b> (fear): helps as the settlement would, only with no monster near; frightened from farther and hides
@@ -117,7 +116,7 @@ public final class Temperaments {
 	static final int CHEERFUL_FORGIVES = -50;
 	/** A proud one helps only someone whose name with the place is above this. */
 	static final int PROUD_REP = 100;
-	/** What a greedy one asks for getting you up (emeralds); they help for coin only if you have this much. */
+	/** What a greedy one asks for getting you up (silver coins); they help for coin only if you have this much. */
 	static final int GREEDY_FEE = 3;
 	/** A timid one won't come over with a monster this near the downed. */
 	static final double TIMID_DANGER = 16.0;
@@ -225,7 +224,7 @@ public final class Temperaments {
 			case KINDHEARTED -> true;
 			case DEVOUT -> wild || rep > Reputation.HOSTILE;
 			case CHEERFUL -> wild || rep > CHEERFUL_FORGIVES && !wanted;
-			case GREEDY -> welcome || (wild || rep > Reputation.HOSTILE) && emeralds(player) >= GREEDY_FEE;
+			case GREEDY -> welcome || (wild || rep > Reputation.HOSTILE) && Money.canPay(player, f, Money.worth(GREEDY_FEE));
 			case PROUD -> !wild && rep > PROUD_REP && !wanted;
 			case SUSPICIOUS -> welcome && Introductions.knows(player, helper);
 			case TIMID -> welcome && !danger(level, player);
@@ -281,7 +280,8 @@ public final class Temperaments {
 	static void comes(ServerLevel level, LivingEntity helper, ServerPlayer player) {
 		Temperament t = of(helper);
 		if (t != null) {
-			Speech.sayTo(level, helper, player, Component.translatable("temperament.jaymoskingdoms." + t.key() + ".help." + level.getRandom().nextInt(LINES)),
+			// (0.7.490) an orc or goblin helper speaks in its own dialect
+			Speech.sayTo(level, helper, player, Dialects.trShared(helper, "temperament.jaymoskingdoms." + t.key() + ".help." + level.getRandom().nextInt(LINES)),
 				Speech.WHITE);
 		}
 	}
@@ -291,17 +291,11 @@ public final class Temperaments {
 		if (!is(helper, Temperament.GREEDY)) {
 			return;
 		}
-		int took = 0;
-		for (int i = 0; i < player.getInventory().getContainerSize() && took < GREEDY_FEE; i++) {
-			ItemStack stack = player.getInventory().getItem(i);
-			if (stack.is(Items.EMERALD)) {
-				int n = Math.min(stack.getCount(), GREEDY_FEE - took);
-				stack.shrink(n);
-				took += n;
-			}
-		}
-		if (took > 0) {
-			Speech.sayTo(level, helper, player, Component.translatable("temperament.jaymoskingdoms.greedy.fee." + level.getRandom().nextInt(LINES), took),
+		// (0.7.498) the fee in coin, from coins, purses and bundles alike (the coin of the land, else what they carry)
+		long took = Money.chargeUpTo(player, Money.worth(GREEDY_FEE));
+		if (took > 0L) {
+			// (0.7.490) in dialect for an orc or goblin
+			Speech.sayTo(level, helper, player, Dialects.trShared(helper, "temperament.jaymoskingdoms.greedy.fee." + level.getRandom().nextInt(LINES), Money.textPaid(player, took)),
 				Speech.GOLD);
 		}
 	}
@@ -314,13 +308,18 @@ public final class Temperaments {
 		level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(JEER_RANGE),
 				e -> e.isAlive() && !e.isBaby() && !Downed.isDowned(e) && is(e, Temperament.SPITEFUL) && e.hasLineOfSight(player)).stream()
 			.min(Comparator.comparingDouble(player::distanceToSqr))
-			.ifPresent(e -> Speech.sayTo(level, e, player, Component.translatable("temperament.jaymoskingdoms.spiteful.jeer." + level.getRandom().nextInt(LINES)),
+			// (0.7.490) an orc or goblin jeers in its own dialect
+			.ifPresent(e -> Speech.sayTo(level, e, player, Dialects.trShared(e, "temperament.jaymoskingdoms.spiteful.jeer." + level.getRandom().nextInt(LINES)),
 				Speech.RED));
 	}
 
-	/** {@code attacker} lets downed {@code body} be: the kindhearted and the devout don't strike someone who's down. */
+	/**
+	 * {@code attacker} lets downed {@code body} be: the kindhearted and the devout don't strike someone who's down.
+	 * (0.7.548) A downed monster isn't someone: a kind guard stood over a downed zombie unable to strike it (and so never
+	 * finished it, Andy's clip), so monsters get no mercy.
+	 */
 	public static boolean spares(Mob attacker, LivingEntity body) {
-		return is(attacker, Temperament.KINDHEARTED) || is(attacker, Temperament.DEVOUT);
+		return !(body instanceof net.minecraft.world.entity.monster.Enemy) && (is(attacker, Temperament.KINDHEARTED) || is(attacker, Temperament.DEVOUT));
 	}
 
 	// ---- fear and fights ------------------------------------------------------------------------------------------------
@@ -375,17 +374,6 @@ public final class Temperaments {
 	static String prompt(LivingEntity e) {
 		Temperament t = of(e);
 		return t == null ? "" : "Your temperament: " + t.prompt + ".";
-	}
-
-	private static int emeralds(ServerPlayer player) {
-		int n = 0;
-		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-			ItemStack stack = player.getInventory().getItem(i);
-			if (stack.is(Items.EMERALD)) {
-				n += stack.getCount();
-			}
-		}
-		return n;
 	}
 
 	// ---- the test command ------------------------------------------------------------------------------------------------

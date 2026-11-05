@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/jewellers_bench"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/jewellers_bench",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/jewellers_bench",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/jewellers_bench",
+      "y": 270
+    }
+  }
+}

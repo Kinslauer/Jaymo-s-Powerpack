@@ -45,6 +45,14 @@ public final class DownedHud {
 
 	/** (0.18.84) Knocked out: how long the black takes to come over the screen, and to lift as they come round (ticks). */
 	static final float BLACK_IN_TICKS = 6.0F, BLACK_OUT_TICKS = 30.0F;
+	/**
+	 * (0.20.94) A death turned away (Mortality.WAKE_LINE): the black lifts this slowly, the line on it this big, and wrapped
+	 * at this share of the screen's width.
+	 */
+	static final float WAKE_OUT_TICKS = 80.0F, LINE_SCALE = 1.5F, LINE_WIDTH = 0.6F;
+
+	/** (0.20.94) The line on the black now (a lang key), kept while the black lifts. */
+	private static @org.jspecify.annotations.Nullable String line;
 
 	private static int downTicks;
 	/** (0.19.55) Ticks since the last heartbeat, and how far through the beat's swell the ring is (0-1). */
@@ -65,8 +73,19 @@ public final class DownedHud {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		blackBefore = black;
-		boolean knocked = player != null && player.hasAttached(Downed.KNOCKED);
-		black = knocked ? Math.min(1.0F, black + 1.0F / BLACK_IN_TICKS) : Math.max(0.0F, black - 1.0F / BLACK_OUT_TICKS);
+		// ((0.20.94) and black while a life that ended waits for the new character: Mortality.REBORNING)
+		boolean reborning = player != null && player.isAlive() && player.hasAttached(com.jaymospowers.core.wounds.Mortality.REBORNING);
+		boolean knocked = player != null && (player.hasAttached(Downed.KNOCKED) || reborning);
+		String said = player == null ? null : reborning ? "message.jaymospowers.mortality.ended"
+			: player.getAttached(com.jaymospowers.core.wounds.Mortality.WAKE_LINE);
+		if (said != null) {
+			line = said;
+		}
+		black = knocked ? Math.min(1.0F, black + 1.0F / BLACK_IN_TICKS)
+			: Math.max(0.0F, black - 1.0F / (line != null ? WAKE_OUT_TICKS : BLACK_OUT_TICKS));
+		if (black <= 0.0F) {
+			line = null;
+		}
 		beatSwellBefore = beatSwell;
 		if (player == null || !Downed.isDowned(player)) {
 			downTicks = 0;
@@ -140,6 +159,20 @@ public final class DownedHud {
 		float dark = blackBefore + (black - blackBefore) * delta.getGameTimeDeltaPartialTick(false);
 		if (dark > 0.0F) {
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), Math.round(dark * 255.0F) << 24);
+		}
+		// (0.20.94) what happened, large in the middle of it, to be read before the world comes back
+		int alpha = Math.round(dark * 255.0F);
+		if (line != null && alpha > 8) {
+			net.minecraft.client.gui.Font font = Minecraft.getInstance().font;
+			int width = Math.round(graphics.guiWidth() * LINE_WIDTH / LINE_SCALE);
+			java.util.List<net.minecraft.util.FormattedCharSequence> rows = font.split(net.minecraft.network.chat.Component.translatable(line), width);
+			graphics.pose().pushMatrix();
+			graphics.pose().translate(graphics.guiWidth() / 2.0F, graphics.guiHeight() / 2.0F - rows.size() * font.lineHeight * LINE_SCALE / 2.0F);
+			graphics.pose().scale(LINE_SCALE, LINE_SCALE);
+			for (int i = 0; i < rows.size(); i++) {
+				graphics.centeredText(font, rows.get(i), 0, i * font.lineHeight, alpha << 24 | 0xD8D8D8);
+			}
+			graphics.pose().popMatrix();
 		}
 	}
 }

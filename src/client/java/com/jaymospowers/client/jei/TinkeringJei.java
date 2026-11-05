@@ -136,6 +136,13 @@ public final class TinkeringJei implements IModPlugin {
 				registration.addItemStackInfo(WeaponParts.heads(kind).getFirst(), Component.translatable("jei.jaymospowers.king_head." + part));
 			}
 		}
+		// (0.20.18) the patrons' weapon heads: which champion drops each
+		for (String part : WeaponParts.PATRONS) {
+			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);
+			if (kind != null && kind.loaded()) {
+				registration.addItemStackInfo(WeaponParts.heads(kind).getFirst(), Component.translatable("jei.jaymospowers.patron_head." + part));
+			}
+		}
 	}
 
 	/** A pattern and enough of a material: each part of each material that's shaped here (metal parts are cast). */

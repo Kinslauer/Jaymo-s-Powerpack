@@ -28,6 +28,8 @@ final class QuestScreen extends Screen {
 
 	/** The quest last shown, by id, so it stays shown when the screen comes again after a choice. */
 	private static String lastShown = "";
+	/** (0.7.530) The actions on the town works screen ({@link QuestNet#GIVE_GOODS} and the rest). */
+	private static final int GIVE_GOODS = QuestNet.GIVE_GOODS, GIVE_COIN = QuestNet.GIVE_COIN, GIVE_COINS = QuestNet.GIVE_COINS;
 
 	private final QuestNet.Open open;
 	private int shown, scroll;
@@ -71,7 +73,17 @@ final class QuestScreen extends Screen {
 	protected void init() {
 		int x = left(), y = top() + panelH() - FOOTER + 4;
 		QuestNet.View v = view();
-		if (v != null && orders()) {
+		if (v != null && projects()) {
+			// (0.7.530) a board's town works: give goods or coin to a project still open; a finished one has no buttons
+			if (v.state() == QuestNet.OFFER) {
+				addRenderableWidget(Button.builder(Component.translatable("project.jaymoskingdoms.button.goods"), b -> act(v, GIVE_GOODS))
+					.bounds(x + 6, y, 90, 16).build());
+				addRenderableWidget(Button.builder(Component.translatable("project.jaymoskingdoms.button.coin"), b -> act(v, GIVE_COIN))
+					.bounds(x + 100, y, 70, 16).build());
+				addRenderableWidget(Button.builder(Component.translatable("project.jaymoskingdoms.button.coins"), b -> act(v, GIVE_COINS))
+					.bounds(x + 174, y, 70, 16).build());
+			}
+		} else if (v != null && orders()) {
 			// (0.7.256) a board's merchant orders: order a ware (not one sold out to you today), or cancel an order not yet sent
 			if (v.state() == QuestNet.OFFER) {
 				Button order = Button.builder(Component.translatable("orders.jaymoskingdoms.button.order"), b -> act(v, QuestNet.ACCEPT))
@@ -120,6 +132,11 @@ final class QuestScreen extends Screen {
 		return open.entityId() == QuestNet.ORDERS;
 	}
 
+	/** (0.7.530) A board's town works: the same rows, a shared project each. */
+	private boolean projects() {
+		return open.entityId() == QuestNet.PROJECTS;
+	}
+
 	private int rowAt(int mouseX, int mouseY) {
 		int x = left(), top = top() + HEADER;
 		for (int i = scroll; i < Math.min(open.views().size(), scroll + rows()); i++) {
@@ -155,6 +172,9 @@ final class QuestScreen extends Screen {
 	}
 
 	private Component label(QuestNet.View v) {
+		if (projects()) {
+			return Component.translatable(v.state() == QuestNet.OFFER ? "project.jaymoskingdoms.label.open" : "project.jaymoskingdoms.label.done");
+		}
 		if (orders()) {
 			return Component.translatable(v.state() != QuestNet.OFFER ? "orders.jaymoskingdoms.label.ordered"
 				: v.royal() ? "orders.jaymoskingdoms.label.sold_out" : "orders.jaymoskingdoms.label.ware");
@@ -172,7 +192,7 @@ final class QuestScreen extends Screen {
 		int x = left(), y = top(), h = panelH();
 		Ui.panel(graphics, x, y, PANEL_W, h, COLOR_GOLD);
 		Ui.line(graphics, this.font, this.title, x + 9, y + 7, PANEL_W - 18, COLOR_GOLD);
-		Ui.line(graphics, this.font, orders() ? open.note() : Component.translatable(board() ? "bounty.jaymoskingdoms.screen.sub" : "quest.jaymoskingdoms.screen.sub", open.views().size()), x + 9, y + 18, PANEL_W - 18, COLOR_DIM);
+		Ui.line(graphics, this.font, projects() ? Component.empty() : orders() ? open.note() : Component.translatable(board() ? "bounty.jaymoskingdoms.screen.sub" : "quest.jaymoskingdoms.screen.sub", open.views().size()), x + 9, y + 18, PANEL_W - 18, COLOR_DIM);
 		Ui.rule(graphics, x + 6, x + PANEL_W - 6, y + HEADER - 4);
 		List<QuestNet.View> views = open.views();
 		if (views.isEmpty()) {
@@ -208,7 +228,7 @@ final class QuestScreen extends Screen {
 		text.add(v.text());
 		text.add(v.objective().copy().withColor(v.state() == QuestNet.READY ? COLOR_DONE : COLOR_DIM));
 		Ui.detail(graphics, this.font, x, detailY, PANEL_W, lines, v.title(), color(v), text);
-		graphics.text(this.font, Component.translatable(orders() ? "orders.jaymoskingdoms.label.goods"
+		graphics.text(this.font, Component.translatable(projects() ? "project.jaymoskingdoms.label.needs" : orders() ? "orders.jaymoskingdoms.label.goods"
 			: board() ? "bounty.jaymoskingdoms.label.reward" : "quest.jaymoskingdoms.label.rewards"), x + 9, rewardsY - 10, COLOR_DIM);
 		ItemStack hovered = ItemStack.EMPTY;
 		int ix = x + 9;

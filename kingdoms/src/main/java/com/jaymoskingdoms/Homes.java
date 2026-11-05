@@ -203,7 +203,8 @@ final class Homes {
 		AABB around = new AABB(f.seat()).inflate(Economy.POPULATION_RANGE);
 		int villagers = level.getEntitiesOfClass(Villager.class, around, Villager::isAlive).size();
 		long beds = level.getPoiManager().getInRange(type -> type.is(PoiTypes.HOME), f.seat(), (int)Economy.POPULATION_RANGE, PoiManager.Occupancy.ANY).count();
-		if (villagers >= beds) {
+		// (0.7.490) nor past a walled town's folk cap for its tier
+		if (villagers >= beds || WalledTowns.full(level, f)) {
 			return;
 		}
 		BlockPos mid = new BlockPos((min.getX() + max.getX()) / 2, min.getY() + 1, (min.getZ() + max.getZ()) / 2);

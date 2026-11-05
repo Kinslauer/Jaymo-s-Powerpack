@@ -332,6 +332,8 @@ public final class Wars {
 			wars.add(war);
 			return b.withWars(wars).withNextId(id + 1);
 		});
+		// (0.7.519) a war on a treaty partner tears the treaties up
+		Treaties.warDeclared(server, a.id(), d.id());
 		// a rivalry at least, from now on
 		if (a.relation(d.id()) == Relation.NEUTRAL) {
 			Relations.set(server, a.id(), d.id(), Relation.RIVAL);
@@ -360,6 +362,8 @@ public final class Wars {
 		}
 		// (0.7.224) between two rich realms, a great war
 		GreatWars.begun(server, war);
+		// (0.7.519) and every partner bound to a side by a treaty of aid is called
+		Treaties.warBegun(server, war);
 	}
 
 	/** (0.7.224) The score that wins {@code war}, and how long it may last (ticks): more for a great war. */
@@ -529,7 +533,8 @@ public final class Wars {
 		for (int i = 0; i < heads.size(); i++) {
 			for (int j = i + 1; j < heads.size(); j++) {
 				Faction a = heads.get(i), b = heads.get(j);
-				if (a.relation(b.id()) != Relation.NEUTRAL || Raids.horizontal(a.seat(), b.seat()) > RIVALRY_RANGE * RIVALRY_RANGE
+				if (a.relation(b.id()) != Relation.NEUTRAL || Treaties.has(server, a, b, Treaties.Kind.RECOGNITION)
+					|| Raids.horizontal(a.seat(), b.seat()) > RIVALRY_RANGE * RIVALRY_RANGE
 					|| WarData.truce(server, a.id(), b.id(), now) || level.getRandom().nextFloat() >= RIVALRY_CHANCE) {
 					continue;
 				}
@@ -565,7 +570,7 @@ public final class Wars {
 		Faction best = null;
 		int bestArmy = Integer.MAX_VALUE;
 		for (Faction other : heads(server)) {
-			if (other.id() == king.id() || king.relation(other.id()) != Relation.RIVAL || !warsOf(server, other.id()).isEmpty()
+			if (other.id() == king.id() || king.relation(other.id()) != Relation.RIVAL || Treaties.any(server, king, other) || !warsOf(server, other.id()).isEmpty()
 				|| Raids.horizontal(king.seat(), other.seat()) > DECLARE_RANGE * DECLARE_RANGE || WarData.truce(server, king.id(), other.id(), now)) {
 				continue;
 			}
@@ -902,8 +907,8 @@ public final class Wars {
 				if (contents.isEmpty()) {
 					break;
 				}
-				List<ItemStack> valuables = contents.stream()
-					.filter(s -> s.is(Items.EMERALD) || s.is(Items.GOLD_INGOT) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND)).toList();
+				// (0.7.490) any realm's coin, and anything gold, among the valuables
+				List<ItemStack> valuables = contents.stream().filter(Raids::valuable).toList();
 				ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
 					: contents.get(random.nextInt(contents.size()));
 				ItemStack taken = Storage.take(level, loser, s -> ItemStack.isSameItemSameComponents(s, pick), TRIBUTE_LOAD_MAX);
@@ -923,7 +928,8 @@ public final class Wars {
 		long paid = emeralds;
 		Factions.update(server, loser.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - paid)));
 		Factions.update(server, winner.id(), f -> f.withTreasury(f.treasury() + paid));
-		return Component.translatable(Terms.TRIBUTE.key(), loser.name(), winner.name(), paid, goods);
+		// (0.7.490) shown in the payer's own coin
+		return Component.translatable(Terms.TRIBUTE.key(), loser.name(), winner.name(), Currencies.amount(Currencies.payEmeralds(Currencies.of(server, loser), paid)), goods);
 	}
 
 	/** {@code loser} cedes land to {@code winner}: the chunks nearest the winner's seat, never those round its own seat. */

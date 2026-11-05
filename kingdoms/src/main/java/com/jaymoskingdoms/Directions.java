@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * you need a doctor, or a butcher"; "move some of these options to the interact menu". MCA's Interact page has Ask the Way,
  * which opens a page of places (client {@code McaScreensMixin}/{@code McaWayPageMixin}; each sends {@link #COMMAND}):
  * a healer (a cleric), a butcher, a smith (armourer, weaponsmith or toolsmith), a tailor (a grown shepherd), the tavern,
- * the stables, and whoever rules here. The villager finds the nearest in their town and:
+ * the stables, and whoever rules here. (0.7.498) And a money changer, or someone who still takes emeralds. The villager finds the nearest in their town and:
  * <ul>
  * <li>turns to face it and tells you who and where ("about 40 paces to the north-east"), and if the one you want is abed;</li>
  * <li>or, if they think well of you ({@link #GUIDE_HEARTS}) or they're a child, and it isn't far ({@link #GUIDE_RANGE}),
@@ -78,7 +78,10 @@ public final class Directions {
 		TAILOR("tailor", VillagerProfession.SHEPHERD),
 		TAVERN("tavern"),
 		STABLES("stables"),
-		RULER("ruler");
+		RULER("ruler"),
+		/** (0.7.498) a money changer, and someone who still takes emeralds ({@link MoneyTalk}) */
+		CHANGER("changer"),
+		EMERALDS("emeralds");
 
 		final String key;
 		final List<ResourceKey<VillagerProfession>> jobs;
@@ -238,6 +241,16 @@ public final class Directions {
 				}
 				// (away from home: their seat, then)
 				return new Found(f.seat(), null, Component.translatable("directions.jaymoskingdoms.the.seat"));
+			}
+			case CHANGER, EMERALDS -> {
+				// (0.7.498) wandering traders count too
+				net.minecraft.world.entity.npc.villager.AbstractVillager best = MoneyTalk.nearest(level, v,
+					place == Place.CHANGER ? MoneyTalk::changer : MoneyTalk::keeper);
+				if (best == null) {
+					return null;
+				}
+				Component name = Component.translatable("directions.jaymoskingdoms.who." + place.key, best.getName());
+				return new Found(best instanceof Villager o ? workplace(level, o) : best.blockPosition(), best, name);
 			}
 			default -> {
 				AABB box = v.getBoundingBox().inflate(FIND_RANGE, 32.0, FIND_RANGE);

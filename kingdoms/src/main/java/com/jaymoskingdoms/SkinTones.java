@@ -56,7 +56,9 @@ public final class SkinTones {
 		// (0.7.262) the divine are pale, the made are anyone's shade (the plating takes over), rubber starts pale to take its pink
 		DIVINE_SKIN = {0.0F, 0.35F}, BIOBUILT_SKIN = {0.0F, 1.0F}, RUBBERFOLK_SKIN = {0.0F, 0.4F},
 		// (0.7.292) a goblin's or an orc's green is its own (Greenskins.skin): MCA's melanin isn't drawn on them
-		BROOD_SKIN = {0.0F, 1.0F};
+		BROOD_SKIN = {0.0F, 1.0F},
+		// (0.7.490) the beastfolk are anyone's shade (their fur and scales are the look); the Hollow are drained pale
+		BEASTFOLK_SKIN = {0.0F, 1.0F}, HOLLOW_SKIN = {0.0F, 0.3F};
 
 	/** (0.7.236) {@code kind}'s melanin range, least and most. */
 	public static float[] skinRange(Heritage.Kind kind) {
@@ -80,6 +82,8 @@ public final class SkinTones {
 			case BIOBUILT -> BIOBUILT_SKIN;
 			case RUBBERFOLK -> RUBBERFOLK_SKIN;
 			case GOBLIN, ORC -> BROOD_SKIN;
+			case BEASTFOLK -> BEASTFOLK_SKIN;
+			case HOLLOW -> HOLLOW_SKIN;
 		};
 	}
 

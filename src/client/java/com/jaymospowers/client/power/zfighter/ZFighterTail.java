@@ -24,7 +24,9 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * A Warrior-born's tail ({@code textures/entity/zfighter_tail.png}): a chain of furry segments from the small of the back
- * that droops, curls up at the tip and sways (more when he runs); wrapped, a band of fur round the waist. Each segment is
+ * that droops, curls up at the tip and sways on its own (0.20.1: a lazy wander, a curl that comes and goes and now and then a
+ * slap, on fixed clocks; the walk only calms it and adds a small swing on the stride, where the walk speed once sped the wave
+ * up and threw it about); wrapped, a band of fur round the waist. Each segment is
  * the same box drawn at its own place on the pose stack, so nothing shared is ever re-posed. (0.16.36) Every character's
  * tail is its own ({@link WarriorLooks#tail}): length, thickness, droop, curl, sway and fur shade.
  */
@@ -110,13 +112,22 @@ public final class ZFighterTail {
 			float length = style == null ? LENGTH : style.length(), thick = style == null ? 1.0F : style.thickness();
 			float droop = style == null ? DROOP : style.droop(), curl = style == null ? CURL : style.curl();
 			float sway = style == null ? SWAY : style.sway(), speed = style == null ? 1.0F : style.swaySpeed(), phase = style == null ? 0.0F : style.phase();
+			float walkPos = state.walkAnimationPos, calm = 1.0F - 0.5F * run;
+			float open = Math.max(0.0F, Mth.sin(time * 0.031F * speed + phase * 2.3F) - 0.92F) / 0.08F;
+			float slap = open * open * (3.0F - 2.0F * open) * calm;
+			float roll = 0.5F + 0.5F * Mth.sin(time * 0.04F * speed + phase * 1.3F);
+			roll = roll * roll * roll * calm;
 			for (int i = 0; i < segments; i++) {
-				float pitch = (i == 0 ? droop - 0.35F * run : curl * (1.0F - 0.5F * run)) + 0.05F * Mth.sin(time * 0.08F + i);
+				float along = segments == 1 ? 1.0F : i / (float)(segments - 1);
+				float pitch = (i == 0 ? droop - 0.2F * run : curl * (1.0F - 0.3F * run)) + 0.05F * Mth.sin(time * 0.08F + i)
+					+ 0.14F * roll * along + 0.03F * run * Mth.sin(walkPos * 1.3324F - i * 0.5F);
 				if (style != null && i == style.kink()) {
 					// an old break, bent hard
 					pitch += 0.6F;
 				}
-				float yaw = sway * (1.0F + run) * Mth.sin(time * (0.1F + 0.15F * run) * speed + phase - i * 0.6F);
+				float wander = 0.6F * Mth.sin(time * 0.06F * speed + phase - i * 0.5F) + 0.4F * Mth.sin(time * 0.023F * speed + phase * 1.7F - i * 0.3F);
+				float yaw = sway * calm * wander + 0.3F * slap * Mth.sin(time * 0.7F + phase - i * 0.5F) * (0.4F + 0.6F * along)
+					+ 0.05F * run * Mth.sin(walkPos * 0.6662F - i * 0.5F);
 				poseStack.rotate(Axis.XP, pitch);
 				poseStack.rotate(Axis.YP, yaw);
 				poseStack.pushPose();

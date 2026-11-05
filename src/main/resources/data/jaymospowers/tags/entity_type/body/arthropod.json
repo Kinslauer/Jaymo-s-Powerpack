@@ -5,6 +5,10 @@
 		"minecraft:cave_spider",
 		"minecraft:silverfish",
 		"minecraft:endermite",
-		"minecraft:bee"
+		"minecraft:bee",
+		{
+			"id": "cubeanimals:cricket",
+			"required": false
+		}
 	]
 }

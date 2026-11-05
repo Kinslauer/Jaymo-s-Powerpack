@@ -273,6 +273,8 @@ public final class Senses {
 		if (player.isOnFire() || player.hasEffect(MobEffects.GLOWING)) {
 			f *= LIT;
 		}
+		// (0.7.513) the old patron's trial and scar: the dead at night and wild beasts see you farther
+		f *= Turning.sight(player, looker, level);
 		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
 	}
 
@@ -540,7 +542,7 @@ public final class Senses {
 	/** 0 if {@code mob} takes no notice of {@code player}; else 1 to {@link #FILL_STEPS}, as they come from where it could just see them to where it would spot them. */
 	private static int noticing(ServerLevel level, Mob mob, ServerPlayer player) {
 		double follow = mob.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE) ? mob.getAttributeValue(Attributes.FOLLOW_RANGE) : 16.0;
-		// (0.7.477) a stalking wolf keeps its interest to itself
+		// (0.7.595) a stalking wolf keeps its interest to itself
 		if (mob.getTarget() != null || mob.distanceTo(player) >= follow || !mob.hasLineOfSight(player) || com.jaymoskingdoms.wild.WolfStalkers.stalking(mob)) {
 			return 0;
 		}
@@ -618,6 +620,8 @@ public final class Senses {
 		}
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.senses.sneak_attack").withStyle(ChatFormatting.GRAY));
 		Skills.sneakAttack(sp, now);
+		// (0.7.514) Ambusher and Cutthroat
+		Bridges.sneakAttack(sp, target);
 		return unawareBlow(target, amount, amount * mult);
 	}
 }

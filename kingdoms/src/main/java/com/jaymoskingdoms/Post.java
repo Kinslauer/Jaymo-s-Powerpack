@@ -33,6 +33,13 @@ import org.jspecify.annotations.Nullable;
  * not hear of some news." The world's news is kept ({@link #POSTED}) and pinned up on town boards by the townsfolk
  * ({@link #postable}), not every town hearing every piece ({@link #HEARD_CHANCE}); a bird or a courier brings a piece
  * straight to you only when it names you or your realm ({@link #concerns}).
+ * <p>(0.7.494) Andy: "tidings should now only come to you if you have a roost built for recieving messenger pigeons, and
+ * even then it will be rare, and of large happeneings, nothing small and insignificant." The town boards keep all the
+ * news as before; a Tidings letter comes only to a player with a {@link Roost} the birds can find, carries only the world's
+ * great happenings ({@link #great}: wars, fallen crowns and realms, hordes on the warpath, giants and kings felled) that
+ * reach that far ({@link #REACH_CHANCE}, always when it names you or your realm), and comes at most once in
+ * {@link #TIDINGS_GAP}. What someone sends you word of on purpose (a captain's spying, a parcel waylaid, a captive home)
+ * comes as plain "Word" ({@link #report}), roost or not; the small lines that used to fill the Tidings are gone.
  */
 public final class Post {
 	/** How often the post is seen to (ticks); news is held this long before it's written up, at most this many lines a letter. */
@@ -51,6 +58,29 @@ public final class Post {
 	static final float HEARD_CHANCE = 0.7F;
 	/** (0.7.424) Characters to a line on a posted piece of news. */
 	static final int POSTED_WIDTH = 38;
+	/** (0.7.494) Tidings come at most this often (ticks: two days), with at most this many lines, the oldest going. */
+	static final long TIDINGS_GAP = 24000L * 2;
+	static final int TIDINGS_LINES = 5;
+	/** (0.7.494) The chance a great happening that doesn't name you reaches your roost at all. */
+	static final float REACH_CHANCE = 0.5F;
+	/**
+	 * (0.7.494) The world's great happenings: a headline whose translation key is one of these (or starts with one ending in
+	 * '.') goes in the Tidings. Everything else stays on the town boards.
+	 */
+	static final java.util.Set<String> GREAT = java.util.Set.of(
+		"message.jaymoskingdoms.war.declared", "message.jaymoskingdoms.war.begun", "message.jaymoskingdoms.war.peace",
+		"message.jaymoskingdoms.war.ended_fallen", "message.jaymoskingdoms.war.ended_joined", "message.jaymoskingdoms.war.seat_changes",
+		"message.jaymoskingdoms.great_war.begun", "message.jaymoskingdoms.great_war.rebellion", "message.jaymoskingdoms.great_war.broke",
+		"message.jaymoskingdoms.king_fallen", "message.jaymoskingdoms.lord_fallen", "message.jaymoskingdoms.old_age.king",
+		"message.jaymoskingdoms.fate.ruin", "message.jaymoskingdoms.fate.vassal", "message.jaymoskingdoms.emigrants.ruin",
+		"message.jaymoskingdoms.crown.usurped", "message.jaymoskingdoms.crown.fell_in_war", "message.jaymoskingdoms.crown.conquered",
+		"message.jaymoskingdoms.crown.founded",
+		"message.jaymoskingdoms.horde.orc.4", "message.jaymoskingdoms.horde.goblin.4", "message.jaymoskingdoms.warpath.",
+		"message.jaymoskingdoms.giant.first_fallen", "assassin.jaymoskingdoms.news.murdered.",
+		"news.jaymoskingdoms.ogre_king.", "news.jaymoskingdoms.captain.betrayed.king",
+		// (0.7.519) great treaties, broken faith, a treaty of aid joining a war, and a ruler's death where successors are chosen
+		"message.jaymoskingdoms.treaty.great.", "message.jaymoskingdoms.treaty.great_broken", "message.jaymoskingdoms.treaty.great_war",
+		"message.jaymoskingdoms.treaty.great_aid", "message.jaymoskingdoms.old_age.king.elect");
 
 	/** On the Overworld: every player's character name as last seen, by their id. Saved. */
 	static final AttachmentType<Map<String, String>> NAMES = AttachmentRegistry.create(JaymosKingdoms.id("post_names"),
@@ -71,7 +101,13 @@ public final class Post {
 	/** (0.7.424) On the Overworld: the news kept for the town boards, oldest first. Saved. */
 	static final AttachmentType<List<Posted>> POSTED = AttachmentRegistry.create(JaymosKingdoms.id("post_posted"),
 		builder -> builder.persistent(Posted.CODEC.listOf()));
-	/** (0.7.256) News for one player only (their merchant orders), and when the first of it came. */
+	/** (0.7.494) On the Overworld: the lines waiting for each roost-keeper's next Tidings, by their id. Saved. */
+	static final AttachmentType<Map<String, List<Component>>> PENDING = AttachmentRegistry.create(JaymosKingdoms.id("post_tidings_pending"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, net.minecraft.network.chat.ComponentSerialization.CODEC.listOf())));
+	/** (0.7.494) On the Overworld: when each player's last Tidings was written, by their id. Saved. */
+	static final AttachmentType<Map<String, Long>> LAST_TIDINGS = AttachmentRegistry.create(JaymosKingdoms.id("post_tidings_last"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
+	/** (0.7.256) Word for one player only, and when the first of it came. (0.7.494) Only what was sent them on purpose. */
 	private static final Map<UUID, List<Component>> MINE = new HashMap<>();
 	private static final Map<UUID, Long> MINE_SINCE = new HashMap<>();
 	/** When each player's last messenger was sent. */
@@ -141,8 +177,8 @@ public final class Post {
 	// ---- news and mail ------------------------------------------------------------------------------------------------
 
 	/**
-	 * A piece of the world's news (once everyone's chat): (0.7.424) kept for the town boards ({@link #POSTED}), and in
-	 * the next Tidings only of those it names or whose realm it names ({@link #concerns}).
+	 * A piece of the world's news (once everyone's chat): (0.7.424) kept for the town boards ({@link #POSTED}). (0.7.494) A
+	 * great happening ({@link #great}) also goes in the next Tidings of each roost-keeper it reaches.
 	 */
 	public static void news(MinecraftServer server, Component headline) {
 		JaymosKingdoms.LOGGER.info("[news] {}", headline.getString());
@@ -166,11 +202,32 @@ public final class Post {
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			told.add(p.getUUID());
 		}
+		if (!great(headline)) {
+			return;
+		}
 		for (UUID id : told) {
-			if (concerns(server, id, headline)) {
+			if (concerns(server, id, headline) || overworld.getRandom().nextFloat() < REACH_CHANCE) {
 				tidings(id, headline);
 			}
 		}
+	}
+
+	/** (0.7.494) {@code headline} is one of the world's great happenings ({@link #GREAT}). */
+	static boolean great(Component headline) {
+		if (!(headline.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t)) {
+			return false;
+		}
+		// (a queen's or a lady's line is the king's or lord's key with ".her")
+		String key = t.getKey().endsWith(".her") ? t.getKey().substring(0, t.getKey().length() - 4) : t.getKey();
+		if (GREAT.contains(key)) {
+			return true;
+		}
+		for (String g : GREAT) {
+			if (g.endsWith(".") && key.startsWith(g)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** (0.7.424) {@code headline} names the player {@code id} (by the name they go by) or the realm they belong to. */
@@ -247,8 +304,41 @@ public final class Post {
 		return out;
 	}
 
-	/** (0.7.256) A line in {@code to}'s own next Tidings. */
+	/**
+	 * (0.7.256) A line in {@code to}'s own next Tidings. (0.7.494) Only for something great, and only if they keep a
+	 * {@link Roost}: without one it goes nowhere.
+	 */
 	public static void tidings(UUID to, Component line) {
+		if (current == null || !Roost.has(current, to)) {
+			return;
+		}
+		ServerLevel overworld = Factions.level(current);
+		Map<String, List<Component>> all = new HashMap<>(overworld.getAttachedOrElse(PENDING, Map.of()));
+		List<Component> mine = new ArrayList<>(all.getOrDefault(to.toString(), List.of()));
+		mine.add(line);
+		while (mine.size() > TIDINGS_LINES) {
+			mine.removeFirst();
+		}
+		all.put(to.toString(), List.copyOf(mine));
+		overworld.setAttached(PENDING, Map.copyOf(all));
+	}
+
+	/**
+	 * (0.7.494) Something small that just happened to {@code to} (a drill, a duel, a round of a bout): once a line in the
+	 * Tidings, now a line over the hotbar while they're on, and nothing if they're not.
+	 */
+	public static void aside(UUID to, Component line) {
+		ServerPlayer p = current == null ? null : current.getPlayerList().getPlayer(to);
+		if (p != null) {
+			p.sendOverlayMessage(line);
+		}
+	}
+
+	/**
+	 * (0.7.494) Word sent to {@code to} on purpose (a captain's report, a parcel waylaid, a captive home): gathered for
+	 * {@link #NEWS_DELAY} and brought as a letter, roost or not.
+	 */
+	public static void report(UUID to, Component line) {
 		if (current == null) {
 			return;
 		}
@@ -309,16 +399,33 @@ public final class Post {
 		if (fresh != null) {
 			overworld.setAttached(NAMES, Map.copyOf(fresh));
 		}
-		// ((0.7.256) each one's own lines; (0.7.424) the world's news goes on the town boards, and only what concerns you comes here)
+		// ((0.7.494) word sent you on purpose)
 		for (ServerPlayer p : players) {
-			List<Component> lines = new ArrayList<>();
 			List<Component> mine = MINE.get(p.getUUID());
 			if (mine != null && !mine.isEmpty() && now - MINE_SINCE.getOrDefault(p.getUUID(), now) >= NEWS_DELAY) {
-				lines.addAll(mine);
 				MINE.remove(p.getUUID());
 				MINE_SINCE.remove(p.getUUID());
+				later(p.getUUID(), Letters.sealed(new Letters.Letter(nameOf(p).getString(), Component.translatable("letter.jaymoskingdoms.word.from"),
+					List.copyOf(mine), Optional.of(Component.translatable("letter.jaymoskingdoms.word")))));
 			}
-			if (!lines.isEmpty()) {
+		}
+		// ((0.7.494) the Tidings: only to a roost-keeper, and rarely)
+		Map<String, List<Component>> pending = overworld.getAttachedOrElse(PENDING, Map.of());
+		if (!pending.isEmpty()) {
+			Map<String, Long> lastTidings = overworld.getAttachedOrElse(LAST_TIDINGS, Map.of());
+			for (ServerPlayer p : players) {
+				String id = p.getUUID().toString();
+				List<Component> lines = pending.get(id);
+				Long last = lastTidings.get(id);
+				if (lines == null || lines.isEmpty() || last != null && now - last < TIDINGS_GAP || !Roost.has(server, p.getUUID())) {
+					continue;
+				}
+				Map<String, List<Component>> rest = new HashMap<>(overworld.getAttachedOrElse(PENDING, Map.of()));
+				rest.remove(id);
+				overworld.setAttached(PENDING, Map.copyOf(rest));
+				Map<String, Long> stamped = new HashMap<>(overworld.getAttachedOrElse(LAST_TIDINGS, Map.of()));
+				stamped.put(id, now);
+				overworld.setAttached(LAST_TIDINGS, Map.copyOf(stamped));
 				later(p.getUUID(), Letters.sealed(new Letters.Letter(nameOf(p).getString(), Component.translatable("letter.jaymoskingdoms.tidings.from"),
 					List.copyOf(lines), Optional.of(Component.translatable("letter.jaymoskingdoms.tidings")))));
 			}

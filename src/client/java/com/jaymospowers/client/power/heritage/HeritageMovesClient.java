@@ -26,8 +26,8 @@ import net.minecraft.world.entity.player.Player;
 public final class HeritageMovesClient {
 	/** Ticks held before the charge starts (a quick click stays a punch), and how often a held button says so again. */
 	static final int CHARGE_HOLD = 4, REFRESH = 5;
-	/** The bar's width (pixels), how far over the crosshair, and its colours. */
-	static final int BAR_WIDTH = 52, BAR_UP = 33;
+	/** The bar's width (pixels) and its colours. (HUD rework) Where it goes is the ABOVE zone's. */
+	static final int BAR_WIDTH = 52;
 	static final int STORM_COLOR = 0x8FD3FF, DAWN_COLOR = 0xFFD45A, FULL_COLOR = 0xFFFFFF;
 	/** The pose's blood on everyone charging ({@link HeritageMoves#STORM} or {@link HeritageMoves#DAWN}), or null. */
 	static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymospowers:heritage_charge");
@@ -81,14 +81,14 @@ public final class HeritageMovesClient {
 		boolean storm = HeritageMoves.blood(player) == HeritageMoves.STORM;
 		boolean full = charge >= 1.0F;
 		int color = full ? FULL_COLOR : storm ? STORM_COLOR : DAWN_COLOR;
-		int cx = graphics.guiWidth() / 2;
-		int y = graphics.guiHeight() / 2 - BAR_UP;
-		int x0 = cx - BAR_WIDTH / 2;
-		graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 4, 0x90000000);
-		graphics.fill(x0, y, x0 + Mth.ceil(BAR_WIDTH * Mth.clamp(charge, 0.0F, 1.0F)), y + 3, 0xFF000000 | color);
+		// (HUD rework) charge bar: ABOVE zone, row 31
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:heritage_charge", 31, BAR_WIDTH, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
+		if (at == null) {
+			return;
+		}
 		String move = storm ? "thunderclap" : "sunflare";
 		Component label = Component.translatable("hud.jaymospowers.heritage." + move + (full ? ".full" : ""));
-		graphics.centeredText(minecraft.font, label.copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
+		com.jaymospowers.client.hud.HudStyle.labelledBar(graphics, minecraft.font, label.copy().withColor(color), at[0], at[1], BAR_WIDTH, Mth.clamp(charge, 0.0F, 1.0F), color);
 	}
 
 	/** From the avatar renderer's extractRenderState (everyone): which blood's pose, if they're charging. */

@@ -29,8 +29,13 @@ import java.util.TreeSet;
  *
  * <p>(0.17.182) One of the server's lasting stains ({@link BloodTrail}) lies as long as the server says, darkening to a
  * dried brown as it ages (so a trail reads fresh to old), and fades over {@link BloodTrail#FADE}.
+ *
+ * <p>(0.20.41, Hematic's ideas) A pool that spreads over the edge of a drop-off pours down the side
+ * ({@link BloodWallMark#edges}). A bloody footprint ({@link BloodParticles.Puddle#print}) is one sole, turned the way its
+ * walker went and laid flat where it fell. Magma blood ({@link BloodParticles#MAGMA}) glows bright and cools to a dark crust
+ * ({@link #shade}, {@link #glow}), smoking while it's hot.
  */
-final class BloodPuddle extends Particle {
+public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** Its starting opacity; how long it takes to splat in (ticks); how far down it can lie (blocks). */
 	static final float ALPHA = 0.7F, SPLAT_IN = 1.5F, MAX_DROP = 2.0F;
 	/** How long it lasts (ticks: at least this, up to this many more), the last {@link #FADE} of them fading. */
@@ -41,11 +46,24 @@ final class BloodPuddle extends Particle {
 	static final float SIZE = 1.5F;
 	/** (0.19.55) A smear ({@code BloodTrail.smear}) is this many times as long as a puddle across, and this many times as narrow. */
 	static final float SMEAR_LONG = 1.9F, SMEAR_NARROW = 0.5F;
+	/** (0.19.62) A stain drawn smaller by blood magic eases down this share of its size a tick; one restained with fewer than this many ticks left (drawn dry) fades over them. */
+	static final float DRAWN_EASE = 0.12F;
+	static final int QUICK_FADE_UNDER = 100;
 	private static final double SAME_HEIGHT = 1.0E-4;
+	/** (0.19.63) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
+	static final float WET_ALPHA = 0.5F;
+	static final int WATER = 0x8EA4B6;
+	static final int WET_FADE = 400;
+	static final float WET_MAX_SCALE = 1.6F;
 
 	private float baseSize;
+	/** (0.19.62) The size it's easing to (blood magic drawing it down), and how long its last fade takes once drawn dry (ticks; 0: the usual). */
+	private float targetSize;
+	private int quickFade;
 	/** (0.17.182) Whether it's one of the server's lasting stains (darkens as it dries, fades slowly). */
 	private final boolean stain;
+	/** (0.19.63) Whether it's water (rain or drips: never darkens, dries up slowly). */
+	private final boolean wet;
 	private final float yaw;
 	/** (0.19.55) Its stretch east-west and north-south (1 and 1 round; a smear long one way and narrow the other). */
 	private final float stretchX, stretchZ;
@@ -53,42 +71,163 @@ final class BloodPuddle extends Particle {
 	private final float zFight;
 	private final TextureAtlasSprite sprite;
 	private float alpha = ALPHA;
+	/** (0.20.41) A footprint: its turn (radians, as yaw) and whether it's a right foot (its sole mirrored); its colour as it is. */
+	private final boolean print;
+	private final float printYaw;
+	private final boolean rightFoot;
+	private final int color;
+	private final boolean magma;
 
 	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life) {
 		this(level, x, y, z, sprites, color, scale, age, life, BloodParticles.Puddle.ROUND);
 	}
 
 	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life, int shape) {
+		this(level, x, y, z, sprites, color, scale, age, life, shape, false);
+	}
+
+	/**
+	 * (0.19.63) A puddle of water (rain pooling, drips off a wet body) this big, lying {@code life} ticks before it starts to
+	 * dry up; {@link #feed} keeps it (and grows it) while more water falls on it.
+	 */
+	public static BloodPuddle water(ClientLevel level, double x, double y, double z, SpriteSet sprites, float scale, int life) {
+		return new BloodPuddle(level, x, y, z, sprites, WATER, scale, 0, life, BloodParticles.Puddle.ROUND, true);
+	}
+
+	private BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life, int shape,
+		boolean wet) {
 		super(level, x, y, z, 0.0, 0.0, 0.0);
+		this.wet = wet;
+		this.color = color;
+		this.magma = color == BloodParticles.MAGMA;
+		this.print = BloodParticles.Puddle.print(shape);
+		int printDir = this.print ? (shape - BloodParticles.Puddle.PRINT) % BloodParticles.Puddle.PRINT_RIGHT : 0;
+		this.rightFoot = this.print && shape - BloodParticles.Puddle.PRINT >= BloodParticles.Puddle.PRINT_RIGHT;
+		this.printYaw = printDir * Mth.PI / 8.0F;
+		if (this.print) {
+			shape = BloodParticles.Puddle.ROUND;
+		}
 		this.xd = 0.0;
 		this.yd = 0.0;
 		this.zd = 0.0;
 		this.baseSize = SIZE * scale;
+		this.targetSize = this.baseSize;
 		boolean round = shape == BloodParticles.Puddle.ROUND;
 		// (0.19.55) a smear is only ever turned end for end, so its sprite stays drawn out along its length
 		this.yaw = (round ? this.random.nextInt(4) : this.random.nextInt(2) * 2) * Mth.HALF_PI;
 		this.stretchX = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_X ? SMEAR_LONG : SMEAR_NARROW;
 		this.stretchZ = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_Z ? SMEAR_LONG : SMEAR_NARROW;
-		this.stain = life > 0;
-		if (this.stain) {
+		this.stain = !wet && life > 0;
+		if (wet) {
+			this.lifetime = life + WET_FADE;
+			this.alpha = WET_ALPHA;
+		} else if (this.stain) {
 			this.age = age;
 			this.lifetime = age + life;
 		} else {
 			this.lifetime = LIFE + this.random.nextInt(LIFE_SPREAD);
 		}
 		this.gravity = 1.0F;
-		this.sprite = sprites.get(this.random);
+		SpriteSet prints = BloodClient.printSprites();
+		this.sprite = this.print && prints != null ? prints.get(0, 1) : sprites.get(this.random);
 		this.r = red(color);
 		this.g = green(color);
 		this.b = blue(color);
 		this.zFight = this.random.nextFloat();
+		if (!wet && !this.print && round) {
+			// (0.20.41) a pool spread over a ledge pours down its side
+			BloodWallMark.edges(level, x, y, z, this.baseSize, color, this.age, this.lifetime - this.age, this.stain);
+		}
+		if (this.magma && this.age < 40) {
+			level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, x, y + 0.05, z, 0.0, 0.04, 0.0);
+			level.addParticle(net.minecraft.core.particles.ParticleTypes.LAVA, x, y + 0.05, z, 0.0, 0.0, 0.0);
+		}
+	}
+
+	/**
+	 * (0.20.41) The colour blood of {@code color} shows {@code age} ticks after it was spilt: a lasting stain
+	 * ({@code stain}) darkens to dried brown; magma glows its own orange, then cools to a crust.
+	 */
+	static int shade(int color, float age, boolean stain) {
+		if (color == BloodParticles.MAGMA) {
+			float cool = Mth.clamp(age / BloodParticles.MAGMA_COOLS, 0.0F, 1.0F);
+			return ARGB.srgbLerp(cool * cool, BloodParticles.MAGMA, BloodParticles.MAGMA_CRUST) & 0xFFFFFF;
+		}
+		if (!stain) {
+			return color & 0xFFFFFF;
+		}
+		float dried = Mth.lerp(Mth.clamp(age / (BloodTrail.LIFE * DRIED_AT), 0.0F, 1.0F), 1.0F, DRIED);
+		return ARGB.color(0, Math.round(red(color) * dried * 255.0F), Math.round(green(color) * dried * 255.0F), Math.round(blue(color) * dried * 255.0F))
+			& 0xFFFFFF;
+	}
+
+	/** (0.20.41) Hot magma blood lights itself: {@code light} with its block light raised by how hot it still is. */
+	static int glow(int light, float age) {
+		float heat = 1.0F - Mth.clamp(age / BloodParticles.MAGMA_COOLS, 0.0F, 1.0F);
+		int block = Math.max(light >> 4 & 0xF, Math.round(heat * 15.0F));
+		return light & 0xFFFF0000 | block << 4;
 	}
 
 	/** (0.17.182) The server grew this stain (more blood fell on it): its new size, age and the ticks it has left. */
 	void restain(float scale, int age, int life) {
-		this.baseSize = SIZE * scale;
+		this.targetSize = SIZE * scale;
+		if (this.targetSize > this.baseSize) {
+			// (grown: at once; drawn smaller by blood magic: it eases down, tick)
+			this.baseSize = this.targetSize;
+		}
 		this.age = Math.max(this.age, age);
 		this.lifetime = this.age + life;
+		// (0.19.62) drawn dry: it fades over the little time it has left, not all at once (fresh blood on it: as before)
+		this.quickFade = life < QUICK_FADE_UNDER ? Math.max(1, life) : 0;
+	}
+
+	/** (0.20.54) How often a passing pool checks for rain on it (ticks), and how long it then takes to wash away. */
+	static final int RAIN_CHECK = 20, RAIN_WASH = 100;
+
+	/** (0.20.54) Whether rain falls on this spot (a client-side check, for the blood that's only for show). */
+	static boolean rainedOn(ClientLevel level, double x, double y, double z) {
+		if (!level.isRaining()) {
+			return false;
+		}
+		net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x, y, z);
+		return level.hasChunkAt(pos) && level.isRainingAt(pos);
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		// (0.20.54) rain washes a passing pool away (a lasting stain is washed by the server, BloodTrail.wash)
+		if (!this.wet && !this.stain && this.age % RAIN_CHECK == 0 && this.lifetime - this.age > RAIN_WASH
+			&& rainedOn(this.level, this.x, this.y + 0.5, this.z)) {
+			this.lifetime = this.age + RAIN_WASH;
+			this.quickFade = RAIN_WASH;
+		}
+		if (this.magma && this.age < BloodParticles.MAGMA_COOLS / 2 && this.random.nextFloat() < 0.03F) {
+			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, this.x + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6,
+				this.y + 0.05, this.z + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6, 0.0, 0.03, 0.0);
+		}
+		if (this.baseSize > this.targetSize) {
+			this.baseSize = Math.max(this.targetSize, this.baseSize - Math.max(DRAWN_EASE * this.baseSize, 0.01F));
+		}
+	}
+
+	/** (0.19.63) More water fell on this puddle: it lasts at least {@code life} more ticks and grows by {@code grow} (scale). */
+	public void feed(int life, float grow) {
+		if (!this.wet) {
+			return;
+		}
+		this.lifetime = Math.max(this.lifetime, this.age + life + WET_FADE);
+		this.baseSize = Math.min(SIZE * WET_MAX_SCALE, this.baseSize + SIZE * grow);
+	}
+
+	/** (0.19.63) Where it lies. */
+	public Vec3 position() {
+		return new Vec3(this.x, this.y, this.z);
+	}
+
+	/** (0.19.63) Its size now (blocks across). */
+	public float size() {
+		return this.baseSize;
 	}
 
 	static float red(int color) {
@@ -109,22 +248,25 @@ final class BloodPuddle extends Particle {
 	}
 
 	/** Whether the camera could see where it lies. */
-	boolean visible(net.minecraft.client.renderer.culling.Frustum frustum) {
+	@Override
+	public boolean visible(net.minecraft.client.renderer.culling.Frustum frustum) {
 		return frustum.pointInFrustum(this.x, this.y, this.z);
 	}
 
 	/** Lays its pieces into {@code decals} for this frame. */
-	void emit(BloodDecals.State decals, Camera camera, float partialTick) {
+	@Override
+	public void emit(BloodDecals.State decals, Camera camera, float partialTick) {
 		float size = this.baseSize;
 		float age = this.age + partialTick;
 		if (age <= SPLAT_IN) {
 			size *= age / (SPLAT_IN * 2.0F) + 0.5F;
 		}
-		int fade = this.stain ? BloodTrail.FADE : FADE;
+		int fade = this.quickFade > 0 ? this.quickFade : this.wet ? WET_FADE : this.stain ? BloodTrail.FADE : FADE;
 		int fadeFrom = this.lifetime - fade;
 		if (age > fadeFrom) {
 			size *= Mth.smoothstep(1.0F - Math.max(age - fadeFrom - 60.0F, 0.0F) / fade);
-			this.alpha = 1.0F - Mth.clamp((age - fadeFrom) / fade, 1.0F - ALPHA, 1.0F);
+			float start = this.wet ? WET_ALPHA : ALPHA;
+			this.alpha = 1.0F - Mth.clamp((age - fadeFrom) / fade, 1.0F - start, 1.0F);
 		}
 		double cx = Mth.lerp(partialTick, this.xo, this.x);
 		double cy = Mth.lerp(partialTick, this.yo, this.y);
@@ -132,11 +274,45 @@ final class BloodPuddle extends Particle {
 		double halfX = size * this.stretchX * 0.5, halfZ = size * this.stretchZ * 0.5;
 		double minX = cx - halfX, maxX = cx + halfX, minZ = cz - halfZ, maxZ = cz + halfZ;
 		int light = this.getLightCoords(partialTick);
+		if (this.magma) {
+			light = glow(light, age);
+		}
+		this.shown = shade(this.color, age, this.stain);
+		if (this.print) {
+			this.printQuad(decals, camera, cx, cy, cz, size, light);
+			return;
+		}
 		int top = Mth.floor(cy + 1.0), bottom = Mth.floor(cy - MAX_DROP);
 		for (int bx = Mth.floor(minX); bx <= Mth.floor(maxX); bx++) {
 			for (int bz = Mth.floor(minZ); bz <= Mth.floor(maxZ); bz++) {
 				this.column(decals, camera, bx, bz, top, bottom, cx, cy, cz, minX, maxX, minZ, maxZ, size, light);
 			}
+		}
+	}
+
+	/** (0.20.41) This frame's colour (RGB): {@link #shade}. */
+	private int shown;
+
+	/** (0.20.41) A footprint: one sole lying flat where it fell, toes the way its walker went. */
+	private void printQuad(BloodDecals.State decals, Camera camera, double cx, double cy, double cz, float size, int light) {
+		float u0 = this.sprite.getU0(), u1 = this.sprite.getU1(), v0 = this.sprite.getV0(), v1 = this.sprite.getV1();
+		if (this.rightFoot) {
+			float swap = u0;
+			u0 = u1;
+			u1 = swap;
+		}
+		Vec3 cam = camera.position();
+		// forward (the toes) and across, from its yaw (0 = south)
+		float fx = -Mth.sin(this.printYaw), fz = Mth.cos(this.printYaw);
+		float rx = Mth.cos(this.printYaw), rz = Mth.sin(this.printYaw);
+		float h = size * 0.5F;
+		float lift = (this.zFight + 0.08F) * 0.02F + 0.004F;
+		int color = ARGB.color(Math.round(this.alpha * 0.85F * 255.0F), this.shown);
+		float[][] corners = {{-h, -h, u0, v1}, {-h, h, u0, v0}, {h, h, u1, v0}, {h, -h, u1, v1}};
+		for (float[] c : corners) {
+			double x = cx + rx * c[0] + fx * c[1], z = cz + rz * c[0] + fz * c[1];
+			decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (x - cam.x), (float) (cy - cam.y) + lift, (float) (z - cam.z), c[2], c[3], color,
+				light);
 		}
 	}
 
@@ -201,8 +377,9 @@ final class BloodPuddle extends Particle {
 		float cos = Mth.cos(this.yaw), sin = Mth.sin(this.yaw);
 		// (a hair above the block, a little different for each puddle so overlapping ones don't flicker)
 		float lift = (this.zFight + 0.08F) * Math.max(0.05F, this.alpha - 0.3F) * 0.05F;
-		float dried = this.stain ? Mth.lerp(Mth.clamp(this.age / (BloodTrail.LIFE * DRIED_AT), 0.0F, 1.0F), 1.0F, DRIED) : 1.0F;
-		int color = ARGB.colorFromFloat(this.alpha * fade, this.r * dried, this.g * dried, this.b * dried);
+		// (0.20.41) drying darker, or magma cooling: shade()
+		int color = this.wet ? ARGB.colorFromFloat(this.alpha * fade, this.r, this.g, this.b)
+			: ARGB.color(Math.round(this.alpha * fade * 255.0F), this.shown);
 		double[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};
 		for (double[] corner : corners) {
 			float dx = (float) (corner[0] - cx), dz = (float) (corner[1] - cz);

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": "minecraft:glass",
+    "B": "minecraft:glass_bottle",
+    "C": "minecraft:copper_ingot"
+  },
+  "pattern": [
+    " G ",
+    "CBC",
+    "CCC"
+  ],
+  "result": {
+    "id": "jaymospowers:brewers_alembic",
+    "count": 1
+  }
+}

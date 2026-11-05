@@ -61,6 +61,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -120,6 +121,21 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 	private static final float ARM_SPEED = 0.06F;
 	/** NiftyCarts' carts rest tipped this far forward (degrees) with nothing pulling them. */
 	private static final float RESTING_PITCH = 25.0F;
+	/**
+	 * (0.5.62) The furthest a two-wheeler pitches toward its puller (degrees). Before, a horse up a bank from its cart
+	 * stood the cart nearly on end (up to ~70 degrees) with whoever sat on the bench hoisted up at the top of it.
+	 */
+	private static final float MAX_PITCH = 30.0F;
+	/** (0.5.62) Its puller this much higher (blocks) and the cart blocked: it's hauled up a block, as up a bank. */
+	private static final double HAUL_UP_RISE = 1.0;
+	/**
+	 * (0.5.62) A mob that climbed onto the wagon's bench or a coach seat by itself (not a tamed pet) climbs off again once
+	 * the cart has stood still this long (ticks), so a villager that bumped into a parked or stuck cart isn't kept
+	 * there for good. While the cart's on the move they stay aboard.
+	 */
+	private static final int SIT_STILL_TICKS = 600;
+	/** (0.5.62) Moved less than this (blocks a tick, squared) counts as standing still. */
+	private static final double STILL_SQR = 0.0004;
 
 	private static final Identifier TOWING = JaymosKitchen.id("towing");
 	/** Hits to break it (with anything; creative breaks it at once). */
@@ -154,6 +170,8 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 	private int hits;
 	/** Server: the game time before which a wagon or coach takes in no more mobs (they were just let out). */
 	private long noLoadUntil;
+	/** Server (0.5.62): ticks the cart has stood still with mobs aboard (see {@link #SIT_STILL_TICKS}). */
+	private int stillTicks;
 	/** Server: the inventory changed, so what's shown on board needs working out again. */
 	private boolean shownDirty = true;
 	/** Client: wheel spin, and the plow's arms, for drawing. */
@@ -320,6 +338,7 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		if (kind() == CartKind.ANIMAL_CART && !level().isClientSide()) {
 			loadAnimals();
 		} else if ((kind() == CartKind.WAGON || kind() == CartKind.COACH) && !level().isClientSide()) {
+			climbOffWhenStill();
 			loadMobs();
 		}
 		if (level().isClientSide()) {
@@ -426,6 +445,36 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 					return;
 				}
 			}
+		}
+	}
+
+	/**
+	 * (0.5.62) Mobs that climbed aboard by themselves (not tamed pets, which wait for their owner) get down again once the
+	 * cart has stood still for {@link #SIT_STILL_TICKS}, by the same way out as a sneak + right-click (see {@link #tip}),
+	 * so the cart rolls over and they step off on its right and it takes nobody in again for a while.
+	 */
+	private void climbOffWhenStill() {
+		boolean wanderers = getPassengers().stream().anyMatch(p -> p instanceof Mob
+			&& !(p instanceof TamableAnimal tamable && tamable.isTame()));
+		double dx = getX() - xo, dz = getZ() - zo;
+		if (!wanderers || dx * dx + dz * dz > STILL_SQR || this.entityData.get(TIP) > 0) {
+			stillTicks = 0;
+			return;
+		}
+		if (++stillTicks >= SIT_STILL_TICKS && level() instanceof ServerLevel level) {
+			stillTicks = 0;
+			for (Entity passenger : List.copyOf(getPassengers())) {
+				if (passenger instanceof Mob && !(passenger instanceof TamableAnimal tamable && tamable.isTame())) {
+					// (the pets and players stay put; only the strays are set down, on the cart's right)
+					float yaw = getYRot() * Mth.DEG_TO_RAD;
+					Vec3 right = new Vec3(-Mth.cos(yaw), 0.0, -Mth.sin(yaw));
+					passenger.stopRiding();
+					passenger.setPos(getX() + right.x * (getBbWidth() * 0.5 + 0.7), getY() + 0.5,
+						getZ() + right.z * (getBbWidth() * 0.5 + 0.7));
+				}
+			}
+			noLoadUntil = level.getGameTime() + RELOAD_DELAY;
+			play(level, SoundEvents.WOOD_HIT, 1.1F);
 		}
 	}
 
@@ -578,10 +627,22 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		double targetZ = hitch.z - nz * poleLength(puller);
 		double fall = onGround() ? -0.08 : getDeltaMovement().y - 0.08;
 		move(MoverType.SELF, new Vec3(targetX - getX(), fall, targetZ - getZ()));
+		if (horizontalCollision && hitch.y - getY() > HAUL_UP_RISE) {
+			// (0.5.62) stuck at the foot of a bank its puller went up: hauled up a block (if there's room), then on
+			AABB lifted = getBoundingBox().move(0.0, 1.0, 0.0);
+			if (level().noCollision(this, lifted)) {
+				setPos(getX(), getY() + 1.0, getZ());
+				move(MoverType.SELF, new Vec3(targetX - getX(), 0.0, targetZ - getZ()));
+			}
+		}
 		setDeltaMovement(0.0, onGround() ? 0.0 : Math.max(fall, -2.0), 0.0);
 		setYRot((float) (Mth.atan2(-nx, nz) * Mth.RAD_TO_DEG));
 		if (kind().tilts) {
-			setXRot((float) (-Mth.atan2(hitch.y - getY(), poleLength(puller)) * Mth.RAD_TO_DEG));
+			// (0.5.62) over the real gap to the puller (never less than the pole), and no steeper than MAX_PITCH
+			double gap = Math.max(poleLength(puller), Math.sqrt((hitch.x - getX()) * (hitch.x - getX())
+				+ (hitch.z - getZ()) * (hitch.z - getZ())));
+			float pitch = (float) (-Mth.atan2(hitch.y - getY(), gap) * Mth.RAD_TO_DEG);
+			setXRot(Mth.clamp(pitch, -MAX_PITCH, MAX_PITCH));
 		}
 	}
 

@@ -26,7 +26,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.221) Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone
  * knows it. the tide born, stone, warrior and sylvan fall into this". Each heritage is some way from human
- * ({@link #degree}): Tideborn the furthest, then Stoneborn, Warrior-born and Sylvan; the rest pass for human. The
+ * ({@link #degree}): Tideborn the furthest, then Stoneborn, Warrior-born and Sylvan; (0.7.545) only the Heartlander, Nightborn, Earthling,
+ * Stormborn and Dawnborn pass for human. The
  * heritage screen says so on the card.
  * <p>
  * Most townsfolk ({@link #minds}) hold it against a player (and against a neighbour) of such blood, the further from
@@ -57,8 +58,15 @@ import org.jspecify.annotations.Nullable;
 public final class Prejudice {
 	/** How far from human each heritage is, by {@link Heritage.Kind} (0: passes for human). Andy's order: Tideborn, Stoneborn, Warrior-born, Sylvan. */
 	static final int TIDEBORN = 4, STONEBORN = 3, WARRIORBORN = 2, SYLVAN = 1;
+	/** (0.7.490) The beastfolk's ears and tails show; the Hollow are the dead walking, the furthest folk shun. */
+	static final int BEASTFOLK = 2, HOLLOW = 4;
 	/** (0.7.357) The Bio-built: made, not born, and plainly so; worse than any. */
 	static final int BIOBUILT = 6;
+	/**
+	 * (0.7.545) Andy (2026-11-05): Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, Emberborn and Frostborn "are
+	 * actually all not human": the near-human looking ones a little, the ones with scales, void or sculk in them more.
+	 */
+	static final int EMBERBORN = 1, FROSTBORN = 1, RUBBERFOLK = 1, DIVINE = 1, ENDBORN = 2, DEEPBORN = 2, DRAGONBLOOD = 2;
 	/** (0.7.357) A human who minds no other blood still minds the Bio-built's this much (a share of the full degree). */
 	static final float BIO_TOLERANT = 0.5F;
 	/**
@@ -131,6 +139,15 @@ public final class Prejudice {
 			case WARRIORBORN -> WARRIORBORN;
 			case SYLVAN -> SYLVAN;
 			case BIOBUILT -> BIOBUILT;
+			case BEASTFOLK -> BEASTFOLK;
+			case HOLLOW -> HOLLOW;
+			case EMBERBORN -> EMBERBORN;
+			case FROSTBORN -> FROSTBORN;
+			case RUBBERFOLK -> RUBBERFOLK;
+			case DIVINE -> DIVINE;
+			case ENDBORN -> ENDBORN;
+			case DEEPBORN -> DEEPBORN;
+			case DRAGONBLOOD -> DRAGONBLOOD;
 			default -> 0;
 		};
 	}
@@ -186,7 +203,15 @@ public final class Prejudice {
 		Faction f = faction(who);
 		boolean purist = Purists.is(f) && Purists.kin(f, who);
 		// ((0.7.221) less where the ruler has decreed tolerance: Reforms)
-		float edict = who.level() instanceof ServerLevel sl ? Reforms.tolerated(sl.getServer(), Emigrants.ruler(sl.getServer(), f)) : 1.0F;
+		float edict = edict(who, f);
+		if (Peoples.greenskin(mine, theirs)) {
+			// ((0.7.490) a goblin or an orc on either side: the distaste between peoples, Peoples; none in a haven that lives alongside the tribes)
+			if (!mine.brood && who.level() instanceof ServerLevel hl && Havens.greenskin(hl.getServer(), Havens.home(who))) {
+				return 0.0F;
+			}
+			float m = Peoples.minds(who, mine, theirs, mine.brood ? 1.0F : edict);
+			return purist && !mine.brood ? m * PURIST_HARSH : m;
+		}
 		if (d == 0) {
 			// (the rivalry, Havens) a non-human minds a human: hard in a haven, a little anywhere else
 			if (degree(mine) == 0) {
@@ -201,6 +226,15 @@ public final class Prejudice {
 		}
 		// (a purist's own: always, and harder; (0.7.357) the tolerant still mind the Bio-built, if less)
 		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? (theirs == Heritage.Kind.BIOBUILT ? d * BIO_TOLERANT : 0.0F) : d);
+	}
+
+	/** (0.7.490) The share of their distaste {@code who} keeps under their ruler's tolerance edicts (1: none decreed; {@link Reforms}). */
+	static float edict(LivingEntity who) {
+		return edict(who, faction(who));
+	}
+
+	private static float edict(LivingEntity who, @Nullable Faction f) {
+		return who.level() instanceof ServerLevel sl ? Reforms.tolerated(sl.getServer(), Emigrants.ruler(sl.getServer(), f)) : 1.0F;
 	}
 
 	/** {@code who} doesn't mind blood at all, by nature: kindhearted, cheerful or devout, or the luck of who they are. */

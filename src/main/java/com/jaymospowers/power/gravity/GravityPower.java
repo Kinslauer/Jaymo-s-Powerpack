@@ -3,6 +3,7 @@ package com.jaymospowers.power.gravity;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.PowerInput;
 import com.jaymospowers.core.Powers;
@@ -1814,7 +1815,7 @@ public final class GravityPower implements Power {
 			GravityOrbit.drop(player);
 		}
 		// the Nether's weight takes hold of the power: corrupted on arrival
-		if (player.level().dimension() == Level.NETHER && Fate.canCorrupt(player) && !player.isCreative()) {
+		if (Stacked.in(player, Level.NETHER) && Fate.canCorrupt(player) && !player.isCreative()) {
 			Fate.corrupt(player);
 		}
 		if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3) && PowerInput.isDown(player, PowerKey.ABILITY_3)) {

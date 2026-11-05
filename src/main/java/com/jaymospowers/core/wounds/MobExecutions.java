@@ -68,6 +68,10 @@ import org.jspecify.annotations.Nullable;
  * turns on whoever hit it and won't try again for {@link #SHAKEN_TICKS}. It also stops if the victim is brought round,
  * rises, is carried off or crawls away (it follows), or the executioner is downed or dies. While it walks over and stands
  * there, its own AI is set aside ({@code DownedMobMixin} calls {@link #step}), so it does nothing else.
+ * <p>
+ * (0.20.51) Andy (2026-11-05), on a guard standing over a downed zombie swinging and never finishing it: downed mobs are
+ * executed too, by whoever {@link #FINISHES} says (Kingdoms: its guards, of downed monsters), after {@link #MOB_GRACE_TICKS}.
+ * The same walk over, wind-up and blow, without the film or the shakes (those are a player's).
  */
 public final class MobExecutions {
 	/** How long a player lies downed before hostiles come to finish them (ticks). */
@@ -95,6 +99,15 @@ public final class MobExecutions {
 	public static final int GRUDGE_TICKS = 400;
 	/** Smaller than this (width and height) is too small to do it (silverfish, endermites). */
 	static final float MIN_SIZE = 0.5F;
+	/** (0.20.51) How long a downed mob lies before someone {@link #FINISHES} says comes to finish it (ticks), and how often they're looked for. */
+	public static final int MOB_GRACE_TICKS = 30;
+	static final int MOB_SCAN_EVERY = 20;
+
+	/**
+	 * (0.20.51) Who executes a downed mob ({@code victim}, never a player): Kingdoms' guards, a downed monster. Asked only
+	 * of mobs fit to ({@link #fit}). Plain JDK and vanilla types, so another mod can add to it by reflection.
+	 */
+	public static final List<java.util.function.BiPredicate<Mob, LivingEntity>> FINISHES = new ArrayList<>();
 
 	/**
 	 * More mobs that may execute a downed player (Kingdoms' raiders, a mod's monsters), asked of mobs that aren't
@@ -130,16 +143,21 @@ public final class MobExecutions {
 		STAMP
 	}
 
-	/** One execution under way. {@code at}: when the scene began (0 while it's still walking over). */
+	/**
+	 * One execution under way. {@code at}: when the scene began (0 while it's still walking over). {@code body}: (0.20.51)
+	 * a downed mob's own body (a player is looked up by {@code victim} each tick instead).
+	 */
 	private static final class Execution {
 		final UUID victim;
+		final @Nullable LivingEntity body;
 		final Mob mob;
 		final Move move;
 		final long claimed;
 		long at;
 
-		Execution(UUID victim, Mob mob, Move move, long claimed) {
+		Execution(UUID victim, @Nullable LivingEntity body, Mob mob, Move move, long claimed) {
 			this.victim = victim;
+			this.body = body;
 			this.mob = mob;
 			this.move = move;
 			this.claimed = claimed;
@@ -187,22 +205,19 @@ public final class MobExecutions {
 		return BY_VICTIM.containsKey(player.getUUID());
 	}
 
+	/** (0.20.50) The mob coming to execute {@code player}, or standing over them; null if none. */
+	public static @Nullable Mob executioner(ServerPlayer player) {
+		Execution e = BY_VICTIM.get(player.getUUID());
+		return e == null ? null : e.mob;
+	}
+
 	/**
 	 * Whether {@code mob} may execute {@code victim}: on its feet, big enough, and walking (no creepers, fliers, slimes,
 	 * water mobs or bosses), not ridden or riding; and (0.19.20, Andy: "everyone") either a hostile ({@link Enemy}, or one
 	 * {@link #EXECUTIONERS} names) or anyone at all who is fighting them: a bandit, a barbarian, a guard, a golem, a wolf.
 	 */
 	public static boolean able(Mob mob, LivingEntity victim) {
-		if (!mob.isAlive() || mob.isNoAi() || Downed.isDowned(mob) || mob.isPassenger() || mob.isVehicle() && !(mob instanceof Spider)
-			|| Carry.isCarried(mob) || mob.isSleeping() || mob.isBaby() && !(mob instanceof Enemy)) {
-			return false;
-		}
-		if (mob instanceof Creeper || mob instanceof Slime || mob instanceof Ghast || mob instanceof Phantom || mob instanceof Vex
-			|| mob instanceof Blaze || mob instanceof Breeze || mob instanceof Shulker || mob instanceof Guardian || mob instanceof WitherBoss
-			|| mob instanceof EnderDragon) {
-			return false;
-		}
-		if (mob.getBbWidth() < MIN_SIZE && mob.getBbHeight() < MIN_SIZE) {
+		if (!fit(mob)) {
 			return false;
 		}
 		for (java.util.function.BiPredicate<Mob, LivingEntity> spare : SPARE) {
@@ -219,6 +234,23 @@ public final class MobExecutions {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * (0.20.51) Whether {@code mob} is fit to execute anyone: on its feet, big enough, and walking (no creepers, fliers,
+	 * slimes, water mobs or bosses), not ridden or riding.
+	 */
+	public static boolean fit(Mob mob) {
+		if (!mob.isAlive() || mob.isNoAi() || Downed.isDowned(mob) || mob.isPassenger() || mob.isVehicle() && !(mob instanceof Spider)
+			|| Carry.isCarried(mob) || mob.isSleeping() || mob.isBaby() && !(mob instanceof Enemy)) {
+			return false;
+		}
+		if (mob instanceof Creeper || mob instanceof Slime || mob instanceof Ghast || mob instanceof Phantom || mob instanceof Vex
+			|| mob instanceof Blaze || mob instanceof Breeze || mob instanceof Shulker || mob instanceof Guardian || mob instanceof WitherBoss
+			|| mob instanceof EnderDragon) {
+			return false;
+		}
+		return mob.getBbWidth() >= MIN_SIZE || mob.getBbHeight() >= MIN_SIZE;
 	}
 
 	/**
@@ -273,8 +305,8 @@ public final class MobExecutions {
 		// the ones under way
 		for (Iterator<Execution> it = new ArrayList<>(BY_VICTIM.values()).iterator(); it.hasNext();) {
 			Execution e = it.next();
-			ServerPlayer victim = server.getPlayerList().getPlayer(e.victim);
-			if (victim == null || !(victim.level() instanceof ServerLevel level) || e.mob.level() != level || !e.mob.isAlive()
+			LivingEntity victim = e.body != null ? e.body : server.getPlayerList().getPlayer(e.victim);
+			if (victim == null || victim.isRemoved() || !(victim.level() instanceof ServerLevel level) || e.mob.level() != level || !e.mob.isAlive()
 				|| Downed.isDowned(e.mob) || !Downed.isDowned(victim) || !victim.isAlive() || Carry.isCarried(victim) || victim.isPassenger()
 				|| victim.hasAttached(Downed.RISING)) {
 				stop(e, true);
@@ -293,13 +325,62 @@ public final class MobExecutions {
 			}
 			Mob mob = seek(level, player);
 			if (mob != null) {
-				Execution e = new Execution(player.getUUID(), mob, moveOf(mob), level.getGameTime());
-				BY_VICTIM.put(e.victim, e);
-				BY_MOB.put(mob, e);
-				mob.setTarget(null);
-				mob.setAggressive(false);
+				claim(new Execution(player.getUUID(), null, mob, moveOf(mob), level.getGameTime()));
 			}
 		}
+		if (!FINISHES.isEmpty() && server.getTickCount() % MOB_SCAN_EVERY == 0) {
+			for (ServerLevel level : server.getAllLevels()) {
+				scanMobs(level);
+			}
+		}
+	}
+
+	private static void claim(Execution e) {
+		BY_VICTIM.put(e.victim, e);
+		BY_MOB.put(e.mob, e);
+		e.mob.setTarget(null);
+		e.mob.setAggressive(false);
+	}
+
+	/** (0.20.51) Downed mobs lying long enough: the nearest who {@link #FINISHES} them comes over. */
+	private static void scanMobs(ServerLevel level) {
+		long now = level.getGameTime();
+		List<LivingEntity> downed = new ArrayList<>();
+		for (net.minecraft.world.entity.Entity entity : level.getAllEntities()) {
+			if (entity instanceof LivingEntity body && !(entity instanceof net.minecraft.world.entity.player.Player) && body.isAlive()
+				&& Downed.isDowned(body) && !BY_VICTIM.containsKey(body.getUUID()) && !Carry.isCarried(body) && !body.isPassenger()
+				&& now - Downed.since(body) >= MOB_GRACE_TICKS) {
+				downed.add(body);
+			}
+		}
+		for (LivingEntity body : downed) {
+			Mob best = null;
+			double bestDistance = Double.MAX_VALUE;
+			for (Mob mob : level.getEntitiesOfClass(Mob.class, body.getBoundingBox().inflate(SEEK_RANGE), Mob::isAlive)) {
+				Long shaken = SHAKEN.get(mob);
+				if (mob == body || shaken != null && now < shaken || BY_MOB.containsKey(mob) || Finishers.busy(mob) || !fit(mob)
+					|| !finishes(mob, body)) {
+					continue;
+				}
+				double d = mob.distanceToSqr(body);
+				if (d < bestDistance && d <= SEEK_RANGE * SEEK_RANGE && mob.hasLineOfSight(body)) {
+					best = mob;
+					bestDistance = d;
+				}
+			}
+			if (best != null) {
+				claim(new Execution(body.getUUID(), body, best, moveOf(best), now));
+			}
+		}
+	}
+
+	private static boolean finishes(Mob mob, LivingEntity body) {
+		for (java.util.function.BiPredicate<Mob, LivingEntity> p : FINISHES) {
+			if (p.test(mob, body)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** The nearest hostile that may do it, sees them and is free; null if none. */
@@ -322,7 +403,7 @@ public final class MobExecutions {
 	}
 
 	/** One tick of an execution: walking over, then the scene. */
-	private static void advance(ServerLevel level, Execution e, ServerPlayer victim) {
+	private static void advance(ServerLevel level, Execution e, LivingEntity victim) {
 		Mob mob = e.mob;
 		long now = level.getGameTime();
 		double flat = Math.sqrt(Mth.square(mob.getX() - victim.getX()) + Mth.square(mob.getZ() - victim.getZ()));
@@ -362,18 +443,20 @@ public final class MobExecutions {
 	}
 
 	/** It's there: the scene begins, and the victim's film. */
-	private static void begin(ServerLevel level, Execution e, ServerPlayer victim) {
+	private static void begin(ServerLevel level, Execution e, LivingEntity victim) {
 		Mob mob = e.mob;
 		e.at = level.getGameTime();
 		mob.getNavigation().stop();
 		face(mob, victim);
 		mob.playAmbientSound();
-		UltimateFilm.play(victim, UltimateFilm.DUTCH, SCENE_TICKS, mob.getEyePosition(), mob, 0.0);
-		UltimateFilm.witnessed(mob, UltimateFilm.DUTCH, SCENE_TICKS, mob.getEyePosition(), mob, WITNESSES);
+		if (victim instanceof ServerPlayer player) {
+			UltimateFilm.play(player, UltimateFilm.DUTCH, SCENE_TICKS, mob.getEyePosition(), mob, 0.0);
+			UltimateFilm.witnessed(mob, UltimateFilm.DUTCH, SCENE_TICKS, mob.getEyePosition(), mob, WITNESSES);
+		}
 	}
 
 	/** The weapon raised: a sound of what's coming. */
-	private static void windup(ServerLevel level, Execution e, ServerPlayer victim) {
+	private static void windup(ServerLevel level, Execution e, LivingEntity victim) {
 		Mob mob = e.mob;
 		SoundEvent sound = switch (e.move) {
 			case CHOP -> mob instanceof Raider raider ? raider.getCelebrateSound() : SoundEvents.PLAYER_ATTACK_SWEEP;
@@ -388,11 +471,13 @@ public final class MobExecutions {
 		if (e.move == Move.FANGS) {
 			level.sendParticles(ParticleTypes.ENCHANT, mob.getX(), mob.getY() + mob.getBbHeight() + 0.3, mob.getZ(), 30, 0.4, 0.4, 0.4, 0.5);
 		}
-		Shakes.send(victim, WINDUP_SHAKE, mob.position());
+		if (victim instanceof ServerPlayer player) {
+			Shakes.send(player, WINDUP_SHAKE, mob.position());
+		}
 	}
 
 	/** The killing blow: the sound, blood, the body jolting, the film after, and their death credited to it. */
-	private static void strike(ServerLevel level, Execution e, ServerPlayer victim) {
+	private static void strike(ServerLevel level, Execution e, LivingEntity victim) {
 		Mob mob = e.mob;
 		double x = victim.getX(), y = victim.getY() + 0.3, z = victim.getZ();
 		float pitch = 0.85F + mob.getRandom().nextFloat() * 0.3F;
@@ -440,10 +525,12 @@ public final class MobExecutions {
 			}
 		}
 		level.broadcastDamageEvent(victim, level.damageSources().mobAttack(mob));
-		Shakes.send(victim, KILL_SHAKE, mob.position());
-		// the film after: round the killer over the body, before the death screen (a Kingdoms captain's own scene, from the
-		// death, takes its place)
-		UltimateFilm.afterDeath(victim, UltimateFilm.CUTS, AFTER_TICKS, mob.getBoundingBox().getCenter(), mob);
+		if (victim instanceof ServerPlayer player) {
+			Shakes.send(player, KILL_SHAKE, mob.position());
+			// the film after: round the killer over the body, before the death screen (a Kingdoms captain's own scene, from the
+			// death, takes its place)
+			UltimateFilm.afterDeath(player, UltimateFilm.CUTS, AFTER_TICKS, mob.getBoundingBox().getCenter(), mob);
+		}
 		if (e.move == Move.CHOP && Dismember.canLoseParts(victim)) {
 			Dismember.sever(victim, Dismember.HEAD, mob);
 		}
@@ -454,12 +541,14 @@ public final class MobExecutions {
 	}
 
 	/** A zombie's or spider's bite: wet, and bloody. */
-	private static void bite(ServerLevel level, ServerPlayer victim, float loud) {
+	private static void bite(ServerLevel level, LivingEntity victim, float loud) {
 		double x = victim.getX(), y = victim.getY() + 0.3, z = victim.getZ();
 		level.playSound(null, x, y, z, SoundEvents.GENERIC_EAT.value(), SoundSource.HOSTILE, loud, 0.6F + level.getRandom().nextFloat() * 0.2F);
 		level.playSound(null, x, y, z, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, loud * 0.7F, 0.8F);
 		BladeBlood.splash(victim, 6.0F * loud);
-		Shakes.send(victim, WINDUP_SHAKE, victim.position());
+		if (victim instanceof ServerPlayer player) {
+			Shakes.send(player, WINDUP_SHAKE, victim.position());
+		}
 	}
 
 	/** Turned to look down at them. */

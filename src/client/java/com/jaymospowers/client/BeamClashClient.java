@@ -253,7 +253,7 @@ public final class BeamClashClient {
 		return found;
 	}
 
-	/** Bottom right, above the chip row: who's winning, the time left, and both pushes. */
+	/** In the right dock, over the power's chips: who's winning, the time left, and both pushes. */
 	private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
@@ -262,16 +262,13 @@ public final class BeamClashClient {
 			// (0.15.143) in the film, the panel sits in the bottom bar (BeamCinematic)
 			return;
 		}
-		int width = graphics.guiWidth();
-		int height = graphics.guiHeight();
-		int x = width / 2 + 91 + 30;
-		int chipY = height - CHIP - 1;
-		if (x + PANEL_W > width - 2) {
-			// no room right of the hotbar: over the chips moved above it
-			x = width - 2 - PANEL_W;
-			chipY = height - 22 - 30 - CHIP;
+		// (HUD rework) a row of the right dock, over the power's block (the zone keeps it off the chips and the Rig panel)
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.DOCK_RIGHT, "jaymospowers:beam_clash", 30,
+			PANEL_W, PANEL_H);
+		if (at == null) {
+			return;
 		}
-		panel(graphics, delta, x, chipY - 17 - PANEL_H);
+		panel(graphics, delta, at[0], at[1]);
 	}
 
 	/** The panel itself, its top left at {@code x, y}. */
@@ -294,10 +291,10 @@ public final class BeamClashClient {
 		boolean ki = state.kind() == BeamClash.KIND_KI;
 		KeyMapping mapping = key(minecraft, ki ? KI_KEY_NAME : KEY_NAME);
 		String keyLabel = mapping == null ? (ki ? "V" : "X") : mapping.getTranslatedKeyMessage().getString();
-		graphics.text(font, Component.translatable("hud.jaymospowers.beam_clash.title"), x + 3, y + 3, 0xFFFFFFFF);
+		graphics.text(font, Component.translatable("hud.jaymospowers.beam_clash.title"), x + 3, y + 3, 0xFFFFFFFF, true);
 		Component mash = Component.translatable("hud.jaymospowers.beam_clash.mash", keyLabel);
 		int mashColor = (int)(time * 0.5F) % 2 == 0 ? 0xFFFFE070 : 0xFFFFFFFF;
-		graphics.text(font, mash, x + PANEL_W - 3 - font.width(mash), y + 3, mashColor);
+		graphics.text(font, mash, x + PANEL_W - 3 - font.width(mash), y + 3, mashColor, true);
 		// the struggle: yours from the left, theirs from the right, meeting at the knot
 		int barX = x + 3, barY = y + 13, barW = PANEL_W - 6;
 		int split = barX + Math.round(barW * (1.0F + state.balance()) * 0.5F);

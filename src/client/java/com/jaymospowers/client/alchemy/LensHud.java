@@ -66,8 +66,13 @@ final class LensHud {
 		}
 		int lines = Math.max(1, rows.size());
 		int height = 6 + 10 + 4 + lines * ROW;
-		int x = graphics.guiWidth() / 2 + GAP;
-		int y = graphics.guiHeight() / 2 - height / 2;
+		// (HUD rework) right of the crosshair, in the inspect column (under a combo count, over the scouter)
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.INSPECT, "jaymospowers:lens", 20, width, height);
+		if (at == null) {
+			return;
+		}
+		int x = at[0];
+		int y = at[1];
 		graphics.fill(x, y, x + width, y + height, PANEL);
 		graphics.fill(x, y, x + 2, y + height, ACCENT);
 		UiStyle.line(graphics, font, now.name(), x + 6, y + 4, width - 10, UiStyle.TEXT);

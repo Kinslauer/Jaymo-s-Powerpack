@@ -106,19 +106,22 @@ public final class BandUpgrades {
 	}
 
 	/** The band's upgrades: reforged or not, modules learned, modules fitted, skills bought (a skill once per rank). */
-	public record Upgrades(boolean reforged, List<String> known, List<String> fitted, List<String> skills) {
-		public static final Upgrades NONE = new Upgrades(false, List.of(), List.of(), List.of());
+	public record Upgrades(boolean reforged, List<String> known, List<String> fitted, List<String> skills, List<String> seen) {
+		public static final Upgrades NONE = new Upgrades(false, List.of(), List.of(), List.of(), List.of());
 		public static final Codec<Upgrades> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.BOOL.optionalFieldOf("reforged", false).forGetter(Upgrades::reforged),
 				Codec.STRING.listOf().optionalFieldOf("known", List.of()).forGetter(Upgrades::known),
 				Codec.STRING.listOf().optionalFieldOf("fitted", List.of()).forGetter(Upgrades::fitted),
-				Codec.STRING.listOf().optionalFieldOf("skills", List.of()).forGetter(Upgrades::skills))
+				Codec.STRING.listOf().optionalFieldOf("skills", List.of()).forGetter(Upgrades::skills),
+				// (0.20.9) old saves have no "seen": none seen yet
+				Codec.STRING.listOf().optionalFieldOf("seen", List.of()).forGetter(Upgrades::seen))
 			.apply(i, Upgrades::new));
 		public static final StreamCodec<ByteBuf, Upgrades> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.BOOL, Upgrades::reforged,
 			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Upgrades::known,
 			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Upgrades::fitted,
 			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Upgrades::skills,
+			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Upgrades::seen,
 			Upgrades::new);
 
 		public boolean knows(Module m) {
@@ -149,19 +152,28 @@ public final class BandUpgrades {
 		}
 
 		Upgrades reforge() {
-			return new Upgrades(true, known, fitted, skills);
+			return new Upgrades(true, known, fitted, skills, seen);
 		}
 
 		Upgrades learn(Module m) {
-			return knows(m) ? this : new Upgrades(reforged, plus(known, m.id), fitted, skills);
+			return knows(m) ? this : new Upgrades(reforged, plus(known, m.id), fitted, skills, seen);
 		}
 
 		Upgrades fitted(List<String> list) {
-			return new Upgrades(reforged, known, List.copyOf(list), skills);
+			return new Upgrades(reforged, known, List.copyOf(list), skills, seen);
 		}
 
 		Upgrades buy(Skill s) {
-			return new Upgrades(reforged, known, fitted, plus(skills, s.id));
+			return new Upgrades(reforged, known, fitted, plus(skills, s.id), seen);
+		}
+
+		/** (0.20.9) Whether the wearer has already become this Ultimate (an alien's id): the film is the short cut after the first. */
+		public boolean saw(String ultimate) {
+			return seen.contains(ultimate);
+		}
+
+		Upgrades sawUltimate(String ultimate) {
+			return saw(ultimate) ? this : new Upgrades(reforged, known, fitted, skills, plus(seen, ultimate));
 		}
 
 		private static List<String> plus(List<String> list, String id) {
@@ -263,6 +275,19 @@ public final class BandUpgrades {
 	public static Upgrades get(Player player) {
 		Upgrades up = player.getAttached(UPGRADES);
 		return up == null ? Upgrades.NONE : up;
+	}
+
+	/** (0.20.9) Whether {@code player} has become the Ultimate of the alien {@code id} before. */
+	public static boolean seenUltimate(Player player, String id) {
+		return get(player).saw(id);
+	}
+
+	/** (0.20.9) Remembers that {@code player} has become the Ultimate of the alien {@code id} (saved with the band). */
+	public static void markUltimateSeen(ServerPlayer player, String id) {
+		Upgrades up = get(player);
+		if (!up.saw(id)) {
+			player.setAttached(UPGRADES, up.sawUltimate(id));
+		}
 	}
 
 	public static boolean fits(Player player, Module m) {

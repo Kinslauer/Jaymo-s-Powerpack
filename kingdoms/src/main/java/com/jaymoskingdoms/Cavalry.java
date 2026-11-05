@@ -223,7 +223,9 @@ final class Cavalry {
 					&& Rulers.target(x.mob()) == null && !escorting(x) && !Downed.helping(x.mob()) && !soldier(x) && x.task().isEmpty() && level.canSeeSky(x.blockPosition())
 					&& !x.mob().isSleeping() && (keep == null || !x.mob().getHomePosition().closerThan(keep.gate(), POST_ON_FOOT)
 						&& !x.mob().getHomePosition().closerThan(keep.throne(), POST_ON_FOOT))).map(Worker::mob).toList());
-				walkers.sort(Comparator.comparingDouble(x -> x.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(f.seat()))));
+				// (0.7.486) those whose shape takes no helmet or chestplate first (SeaBodies: archery and the saddle)
+				walkers.sort(Comparator.comparing((PathfinderMob x) -> !SeaBodies.unarmoured(HeritageVariants.of(x)))
+					.thenComparingDouble(x -> x.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(f.seat()))));
 				if (!walkers.isEmpty()) {
 					PathfinderMob rider = walkers.getFirst();
 					// a horse whose rider fell first, else a new one bought

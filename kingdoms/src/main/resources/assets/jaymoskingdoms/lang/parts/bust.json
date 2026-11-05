@@ -1,0 +1,21 @@
+{
+  "bust.jaymoskingdoms.verdict.flog.0": "The lash for you, peddler.",
+  "bust.jaymoskingdoms.verdict.flog.1": "Five strokes, and be glad it's not the cells.",
+  "bust.jaymoskingdoms.verdict.flog.2": "Hold still. This'll teach you to deal in our streets.",
+  "bust.jaymoskingdoms.verdict.jail.0": "Take them below. The cells will cool your trade.",
+  "bust.jaymoskingdoms.verdict.jail.1": "Into the pit with you, trafficker.",
+  "bust.jaymoskingdoms.verdict.jail.2": "You'll sit in the dark and think on it.",
+  "bust.jaymoskingdoms.verdict.execute.0": "The realm's had enough of you. Kneel.",
+  "bust.jaymoskingdoms.verdict.execute.1": "Trafficker, again? Then it's the block.",
+  "bust.jaymoskingdoms.verdict.execute.2": "By the crown's word: death. Kneel.",
+  "bust.jaymoskingdoms.flogged.0": "There. Off with you, and stay clean.",
+  "bust.jaymoskingdoms.flogged.1": "Next time it's the cells.",
+  "bust.jaymoskingdoms.flogged.2": "Let that be a lesson to the rest of them.",
+  "bust.jaymoskingdoms.crime.dealing": "trafficking",
+  "bust.jaymoskingdoms.crime.contraband": "carrying contraband",
+  "bust.jaymoskingdoms.crime.escape": "breaking out of the cells",
+  "bust.jaymoskingdoms.sentence.flog": "a flogging",
+  "bust.jaymoskingdoms.sentence.jail": "the cells",
+  "bust.jaymoskingdoms.sentence.execute": "death",
+  "bust.jaymoskingdoms.crime.rival_band": "wearing the red band"
+}

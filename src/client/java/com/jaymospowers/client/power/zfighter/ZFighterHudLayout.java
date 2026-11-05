@@ -127,7 +127,8 @@ public final class ZFighterHudLayout {
 			case CHIPS -> new Rect(chips[0], chips[1], chips[2], CHIP, 0.0F);
 			case CHARGE -> new Rect(cx - 26, cy - 39, 52, 16, 0.5F);
 			case SPIRIT -> new Rect(cx - 40, cy - 51, 80, 16, 0.5F);
-			case APE_RAGE -> new Rect(cx - ApeRageClient.BAR_W / 2, gh - ApeRageClient.BAR_UP - 11, ApeRageClient.BAR_W, 17, 0.5F);
+			// (the bar now sits in the shared FOCUS zone; this is its usual spot when nothing else is stacked under it)
+			case APE_RAGE -> new Rect(cx - ApeRageClient.BAR_W / 2, gh - com.jaymospowers.client.hud.HudZones.FOCUS_BOTTOM - 17, ApeRageClient.BAR_W, 17, 0.5F);
 			case SCOUTER -> new Rect(cx + 14, cy - 12, 90, 22, 0.0F);
 		};
 	}

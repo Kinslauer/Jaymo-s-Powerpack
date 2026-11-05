@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "SCS",
+    "S S"
+  ],
+  "key": {
+    "P": "minecraft:paper",
+    "S": "minecraft:stone_bricks",
+    "C": "minecraft:crafting_table"
+  },
+  "result": {
+    "id": "jaymoskingdoms:mason_table",
+    "count": 1
+  }
+}

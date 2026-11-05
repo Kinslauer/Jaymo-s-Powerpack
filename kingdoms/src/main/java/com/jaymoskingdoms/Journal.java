@@ -182,6 +182,8 @@ public final class Journal {
 		entries.addAll(Careers.journal(player));
 		// (0.7.431) your sworn foes among the tribes' captains, and the captains you know something of
 		entries.addAll(Captains.journal(player));
+		// (0.7.523) your promises to villagers
+		entries.addAll(Promises.journal(player));
 		// (0.7.31) the weather foretold, first
 		Component weather = DisasterRelief.journal(level, player);
 		if (weather != null) {

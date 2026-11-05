@@ -808,7 +808,9 @@ public final class Will {
 	/** A foe stared down: it often drops its weapon, and it runs. */
 	static void cowed(ServerLevel level, ServerPlayer sp, Mob seen, long now) {
 		ItemStack weapon = seen.getMainHandItem();
-		if (!weapon.isEmpty() && level.getRandom().nextFloat() < STARE_DROP_CHANCE) {
+		// (0.7.518) a patron champion and its adds drop nothing
+		boolean patron = seen instanceof PatronChampion || PatronChampions.isAdd(seen);
+		if (!patron && !weapon.isEmpty() && level.getRandom().nextFloat() < STARE_DROP_CHANCE) {
 			seen.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 			ItemEntity dropped = new ItemEntity(level, seen.getX(), seen.getY(0.6), seen.getZ(), weapon.copy());
 			dropped.setPickUpDelay(20);
@@ -918,6 +920,10 @@ public final class Will {
 
 	/** {@code mob} runs from {@code from} for {@code ticks}. */
 	static void flee(Mob mob, Player from, long now, int ticks) {
+		if (HavenGrowth.sworn(mob)) {
+			// (0.7.490) a haven's sworn never run: they stand their ground
+			return;
+		}
 		Flee was = FLEEING.get(mob);
 		if (was == null || was.until() < now + ticks) {
 			FLEEING.put(mob, new Flee(from.getUUID(), now + ticks));

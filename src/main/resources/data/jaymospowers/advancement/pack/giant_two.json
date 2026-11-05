@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/aether",
+  "display": {
+    "icon": {
+      "id": "minecraft:wither_skeleton_skull"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.giant_two.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.giant_two.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

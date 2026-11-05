@@ -283,6 +283,46 @@ public final class RagdollSimCheck {
 			}
 		}
 
+		System.out.println("A deer on a 2x4 table of butcher blocks never ends up inside it (0.5.70)");
+		{
+			RagdollRig deer = RagdollRig.of(RagdollRig.Shape.QUADRUPED, 0.9F, 1.5F);
+			int inside = 0, tries = 0;
+			for (int yaw = 0; yaw < 360; yaw += 45) {
+				for (int seed = 0; seed < 4; seed++) {
+					for (int dir = 0; dir < 4; dir++) {
+						tries++;
+						World w = ground();
+						for (int bx = 0; bx < 2; bx++) {
+							for (int bz = 0; bz < 4; bz++) {
+								w.add(bx, 64, bz, bx + 1, 65, bz + 1);
+							}
+						}
+						// set down pinned (as tableUnder would: 3 blocks long at most), then dragged off a side by a hind foot
+						RagdollBody b = RagdollBody.lying(deer, 1, 65, 2, yaw, seed % 2 == 0, seed);
+						b.stop();
+						b.pin(0, 1, 2, 4);
+						run(b, w, 100);
+						int p = RagdollRig.BR_FOOT;
+						double hx = b.x[p], hz = b.z[p];
+						double dx = dir == 0 ? 1 : dir == 1 ? -1 : 0, dz = dir == 2 ? 1 : dir == 3 ? -1 : 0;
+						for (int t = 0; t < 80; t++) {
+							hx += dx * 0.06;
+							hz += dz * 0.06;
+							b.grip(0, p, hx, 64.9, hz);
+							b.step(w);
+						}
+						b.release();
+						b.wake();
+						run(b, w, 300);
+						if (worstDepth(b, w) > 0.15) {
+							inside++;
+						}
+					}
+				}
+			}
+			check("dragged off a pinned table", inside == 0, inside + "/" + tries + " left inside the table");
+		}
+
 		System.out.println("A snake goes limp (0.5.47)");
 		{
 			RagdollRig snake = RagdollRig.of(RagdollRig.Shape.CHAIN, 0.6F, 0.7F);
@@ -322,6 +362,51 @@ public final class RagdollSimCheck {
 				worst = Math.max(worst, snake.strutMin[s] - Math.sqrt(dx * dx + dy * dy + dz * dz));
 			}
 			check("snake joints bend no further than they can", worst < 0.03, "over by " + f(worst));
+		}
+
+		System.out.println("(0.5.53) Let go of while held: falls from the pose it was held in, no snap");
+		{
+			RagdollRig held = RagdollRig.of(RagdollRig.Shape.CHAIN, 0.6F, 0.7F);
+			Object[][] cases = {{"player across the arms", player, false}, {"cow across the arms", cow, false},
+				{"chicken across the arms", chicken, false}, {"chicken in one hand", chicken, true},
+				{"snake in one hand", held, true}, {"giant across the arms", giant, false}};
+			for (Object[] c : cases) {
+				RagdollRig rig = (RagdollRig) c[1];
+				boolean hand = (Boolean) c[2];
+				World w = ground();
+				// held so its lowest point is a little off the ground (in the game a snake's tail trails on it)
+				RagdollBody probe = RagdollBody.held(rig, 0.5, 100, 0.5, 30.0F, hand, 0.45F, 0.75F);
+				double low = Double.MAX_VALUE;
+				for (int i = 0; i < rig.count; i++) {
+					low = Math.min(low, probe.y[i] - rig.radius[i]);
+				}
+				double hy = 100 - low + 64.3;
+				RagdollBody b = RagdollBody.held(rig, 0.5, hy, 0.5, 30.0F, hand, 0.45F, 0.75F);
+				b.setSpeed(0.25, 0.28, 0.1);
+				double[] x0 = b.x.clone(), y0 = b.y.clone(), z0 = b.z.clone();
+				b.step(w);
+				// how far any point moved, against the body's average move: the snap into another pose
+				double mx = 0, my = 0, mz = 0;
+				for (int i = 0; i < rig.count; i++) {
+					mx += b.x[i] - x0[i];
+					my += b.y[i] - y0[i];
+					mz += b.z[i] - z0[i];
+				}
+				mx /= rig.count;
+				my /= rig.count;
+				mz /= rig.count;
+				double snap = 0;
+				for (int i = 0; i < rig.count; i++) {
+					snap = Math.max(snap, Math.sqrt(Math.pow(b.x[i] - x0[i] - mx, 2) + Math.pow(b.y[i] - y0[i] - my, 2)
+						+ Math.pow(b.z[i] - z0[i] - mz, 2)));
+				}
+				String name = c[0].toString();
+				check(name + ": no snap on the first tick", snap < 0.03 * Math.max(1.0, rig.height / 1.8), "worst point off " + f(snap));
+				check(name + ": starts with bones their length", worstStretch(b) < 0.05, "stretch " + f(worstStretch(b)));
+				int t = run(b, w, 800);
+				check(name + ": lands and settles", t >= 0 && t < 800, "ticks " + t);
+				check(name + ": nothing in the ground", worstDepth(b, w) < 0.05, "depth " + f(worstDepth(b, w)));
+			}
 		}
 
 		System.out.println(failures == 0 ? "All good." : failures + " failed.");

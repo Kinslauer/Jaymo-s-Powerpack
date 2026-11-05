@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:short_skyroot_ferns_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.3,
+      "feature": {
+        "feature": "jaymospowers:skyroot_ferns_tree",
+        "placement": []
+      }
+    }
+  ]
+}

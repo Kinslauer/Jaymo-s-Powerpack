@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/lapidary_wheel",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:lapidary_wheel"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ]
+}

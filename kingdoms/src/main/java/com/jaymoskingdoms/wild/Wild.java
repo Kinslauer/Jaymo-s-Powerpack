@@ -13,8 +13,9 @@ import net.minecraft.world.entity.MobCategory;
 /**
  * (0.5.55) The wild beasts rebuilt after Better Animals Plus (its models and art are CC BY-NC-SA 4.0, by cybercat5555,
  * itsmeowdev and Wolverbyte; credited in {@code assets/jaymoskingdoms/textures/entity/wild/CREDITS.txt}, and this
- * package and its client side are under that licence too): feral wolves, coyotes, tarantulas and moose. They never spawn
- * on their own; they come as wilderness encounters ({@code Encounters}, biome tags {@code jaymoskingdoms:has_<beast>}).
+ * package and its client side are under that licence too): feral wolves, coyotes, tarantulas and moose. (0.7.526) They
+ * spawn on their own where they roam ({@code Encounters}, biome tags {@code jaymoskingdoms:has_<beast>}), no longer as
+ * wilderness encounters.
  */
 public final class Wild {
 	public static EntityType<FeralWolf> FERAL_WOLF;

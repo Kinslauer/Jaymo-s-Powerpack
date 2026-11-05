@@ -64,6 +64,27 @@ public final class GradedTrades {
 			|| profession.is(VillagerProfession.TOOLSMITH);
 	}
 
+	/** (0.7.496) The index in the grades of this stack's forging grade, or -1 if ungraded or Powers is missing. */
+	static int gradeIndex(ItemStack stack) {
+		DataComponentType<String> type = component();
+		return type == null ? -1 : gradeIndex(stack.get(type));
+	}
+
+	/** (0.7.496) The index of a grade id (poor to master), or -1. */
+	static int gradeIndex(@Nullable String id) {
+		for (int i = 0; i < GRADES.length; i++) {
+			if (GRADES[i].equals(id)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/** (0.7.496) The grade id at this index. */
+	static String gradeId(int index) {
+		return GRADES[index];
+	}
+
 	private static @Nullable DataComponentType<String> component() {
 		if (!looked) {
 			looked = true;

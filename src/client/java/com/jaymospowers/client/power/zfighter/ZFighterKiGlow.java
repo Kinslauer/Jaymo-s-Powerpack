@@ -56,7 +56,8 @@ public final class ZFighterKiGlow {
 	}
 
 	static void extract(Avatar entity, AvatarRenderState state) {
-		state.setData(KEY, entity instanceof Player player ? glow(player) : null);
+		// (0.19.70) only the attuned see ki (KiSight)
+		state.setData(KEY, entity instanceof Player player && KiSight.sees(player) ? glow(player) : null);
 	}
 
 	private static float @Nullable [] glow(Player player) {

@@ -2,7 +2,6 @@ package com.jaymoskingdoms.whaling;
 
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -39,7 +38,6 @@ public final class Sharks {
 	/** (0.7.437) Out on a whaler's far grounds ({@link WhaleCarcass#wildness}): this many more sharks at most for each step out, and this much likelier to come. */
 	static final float MORE_PER_WILD = 0.5F, CHANCE_PER_WILD = 0.08F;
 
-	private static final DustParticleOptions BLOOD = new DustParticleOptions(0x8A1010, 1.6F);
 
 	private Sharks() {
 	}
@@ -73,7 +71,7 @@ public final class Sharks {
 				shark.getNavigation().moveTo(carcass.getX(), carcass.getY() - 0.5, carcass.getZ(), SWIM);
 			}
 			if (e.distanceToSqr(carcass) <= reach * reach && carcass.getRandom().nextFloat() < BITE_CHANCE && carcass.bitten(level)) {
-				level.sendParticles(BLOOD, e.getX(), e.getY() + 0.5, e.getZ(), 16, 0.6, 0.4, 0.6, 0.0);
+				level.sendParticles(com.jaymoskingdoms.PowersCompat.blood(0x8A1010, 1.6F), e.getX(), e.getY() + 0.5, e.getZ(), 16, 0.6, 0.4, 0.6, 0.0);
 				level.sendParticles(ParticleTypes.SPLASH, e.getX(), carcass.getY() + 1.0, e.getZ(), 12, 0.6, 0.1, 0.6, 0.1);
 				level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.HOSTILE, 1.2F, 0.6F);
 			}

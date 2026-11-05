@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.spirits;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.spirits.SpiritBarrage;
@@ -45,8 +46,8 @@ public final class ClashCinematic {
 	static final float BAR_SHARE = 0.12F, BAR_EASE = 0.25F;
 	/** Viewers this near (blocks) to a clash get the bars. */
 	static final double VIEW_RANGE = 24.0;
-	/** The camera: how far out to the side (blocks), how high over the pair's feet, how far it sways (degrees). */
-	static final double CAM_OUT = 3.4, CAM_UP = 1.5, CAM_SWAY = 14.0;
+	/** The camera: how far out to the side (blocks), how high over the pair's feet (0.7.551, lower: 1.5 hid the pair), how far it sways (degrees). */
+	static final double CAM_OUT = 3.4, CAM_UP = 0.9, CAM_SWAY = 14.0;
 	/** The look-at height over the pair's feet (blocks). */
 	static final double LOOK_UP = 1.3;
 	/** The camera's shake, in blocks, at no lead and at the full lead. */
@@ -260,6 +261,10 @@ public final class ClashCinematic {
 		float partial = delta.getGameTimeDeltaPartialTick(false);
 		float shown = Mth.lerp(partial, barsO, bars);
 		if (shown > 0.0F) {
+			if (running) {
+				// (HUD rework) the film is up for this player (vanilla HUD hidden): hide the zoned HUD too
+				HudZones.hideFor(100);
+			}
 			int bar = Math.round(height * BAR_SHARE * shown);
 			graphics.fill(0, 0, width, bar, 0xFF000000);
 			graphics.fill(0, height - bar, width, height, 0xFF000000);

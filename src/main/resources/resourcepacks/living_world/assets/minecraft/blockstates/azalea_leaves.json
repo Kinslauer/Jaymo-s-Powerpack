@@ -1,0 +1,14 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "minecraft:block/azalea_leaves"
+      }
+    },
+    {
+      "apply": {
+        "model": "jaymospowers:block/bushy/azalea_leaves"
+      }
+    }
+  ]
+}

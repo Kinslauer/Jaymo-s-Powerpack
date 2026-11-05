@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
 
 /**
@@ -20,12 +21,16 @@ import net.minecraft.world.entity.Entity;
  * the state (the skin-layer flags are reset to shown just before);</li>
  * <li>{@link #SUBMIT}: just after the body is submitted, in its pose: (the body's state, {@code {PlayerModel body,
  * PoseStack, SubmitNodeCollector, Integer light}}).</li>
+ * <li>{@link #BODY} (0.5.65): any other body (a mob's, or a dead player's MCA look), as its state is made each frame:
+ * (corpse, the body's state), to put on the state what the body's own renderer layers draw from it (Jaymo's Powers: its
+ * blood).</li>
  * </ul>
  */
 public final class CorpseDressing {
 	public static final List<Predicate<Entity>> PLAIN = new CopyOnWriteArrayList<>();
 	public static final List<BiConsumer<Entity, AvatarRenderState>> EXTRACT = new CopyOnWriteArrayList<>();
 	public static final List<BiConsumer<AvatarRenderState, Object[]>> SUBMIT = new CopyOnWriteArrayList<>();
+	public static final List<BiConsumer<Entity, EntityRenderState>> BODY = new CopyOnWriteArrayList<>();
 
 	private CorpseDressing() {
 	}
@@ -49,6 +54,16 @@ public final class CorpseDressing {
 		for (BiConsumer<Entity, AvatarRenderState> c : EXTRACT) {
 			try {
 				c.accept(corpse, avatar);
+			} catch (RuntimeException e) {
+				// as above
+			}
+		}
+	}
+
+	static void body(Entity corpse, EntityRenderState state) {
+		for (BiConsumer<Entity, EntityRenderState> c : BODY) {
+			try {
+				c.accept(corpse, state);
 			} catch (RuntimeException e) {
 				// as above
 			}

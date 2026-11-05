@@ -1,6 +1,7 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.power.xenoform.XenoMorph;
 import com.jaymospowers.core.UltimateFilm;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -34,6 +35,8 @@ import org.jspecify.annotations.Nullable;
 public final class UltimateCinematic {
 	/** Each bar's height, as a share of the screen's; how much of the way they slide a tick. */
 	static final float BAR_SHARE = 0.11F, BAR_EASE = 0.3F;
+	/** (0.20.60) How far every shot is brought down (blocks, times the caster's size), and the lowest it goes over their feet. */
+	static final double SHOT_DROP = 0.6, SHOT_FLOOR = 0.5;
 	/** Kept this far off a wall the camera would otherwise sink into (blocks). */
 	static final double WALL_MARGIN = 0.3;
 	/** {@link UltimateFilm#ZOOM}: how far back it goes (blocks), and the share of the film spent going out. */
@@ -42,7 +45,7 @@ public final class UltimateCinematic {
 	/** {@link UltimateFilm#SKYWARD}: how far behind (blocks), and how high it ends up looking. */
 	static final double SKY_BACK = 4.0, SKY_LOOK_UP = 14.0;
 	/** {@link UltimateFilm#CRANE}: its reach out (from, to) and its rise (from, to), and how far it circles (degrees). */
-	static final double CRANE_FROM = 5.0, CRANE_TO = 9.0, CRANE_LOW = 1.5, CRANE_HIGH = 9.0, CRANE_TURN = 80.0;
+	static final double CRANE_FROM = 5.0, CRANE_TO = 9.0, CRANE_LOW = 1.5, CRANE_HIGH = 7.0, CRANE_TURN = 80.0;
 	/** {@link UltimateFilm#ORBIT}: how far out (blocks) and how far it sweeps (degrees). */
 	static final double ORBIT_OUT = 2.6, ORBIT_TURN = 100.0;
 	/** {@link UltimateFilm#PROFILE}: how far to the side of the line (blocks). */
@@ -59,6 +62,23 @@ public final class UltimateCinematic {
 	static final double CUT_CLOSE = 2.2, CUT_WIDE = 5.5, CUT_HIGH = 3.2;
 	/** (0.18.46) {@link UltimateFilm#CUTS}: the tilt of the sideways cut (degrees). */
 	static final float CUT_ROLL = 11.0F;
+	/**
+	 * (0.20.9) {@link UltimateFilm#MORPH}: the share of a part's beat the camera takes to zoom in (the part grows while it holds), how
+	 * far it keeps pushing in over the hold, how far out it starts and ends (times the body's height), and how far to the side (degrees).
+	 * {@code *_FIRST} are the first-time cut's: bigger zooms, a slower push, and a shake on the last beat.
+	 */
+	static final float MORPH_ZOOM = 0.4F, MORPH_ZOOM_FIRST = 0.5F, MORPH_PUSH = 0.1F, MORPH_PUSH_FIRST = 0.18F, MORPH_BLEND = 0.3F;
+	static final double MORPH_WIDE = 2.2, MORPH_WIDE_FIRST = 2.8, MORPH_CLOSE = 0.8, MORPH_CLOSE_FIRST = 0.55, MORPH_MIN_CLOSE = 0.7;
+	static final double MORPH_FRAME = 2.0, MORPH_FRAME_FIRST = 2.4, MORPH_LIFT = 0.08, MORPH_SHAKE = 0.05;
+	static final float MORPH_ROLL_FIRST = 3.0F;
+	/**
+	 * (0.20.93) {@link UltimateFilm#SPEAKER}: the shares of the film spent coming in from your shoulder and (from) where it starts to
+	 * rise to the words; how far off the speaker's face it holds (blocks, times their size, before and after the slow push), how far
+	 * round to the side (degrees), how high over the top of their head the middle of a speech bubble sits (blocks; Kingdoms' bubbles
+	 * float over the name tag spot), and how far below the words the camera ends (blocks, so it looks a touch up at them).
+	 */
+	static final float SPEAKER_IN = 0.3F, SPEAKER_RISE = 0.62F;
+	static final double SPEAKER_HOLD = 3.4, SPEAKER_PUSH = 3.0, SPEAKER_TURN = 18.0, SPEAKER_WORDS_UP = 1.0, SPEAKER_BELOW_WORDS = 0.15;
 	/** The vanilla HUD hidden while your own film runs. */
 	private static final Identifier[] HIDDEN = {VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR, VanillaHudElements.ARMOR_BAR,
 		VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR, VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH,
@@ -71,6 +91,10 @@ public final class UltimateCinematic {
 	private static boolean afterDeath;
 	private static @Nullable CameraType viewBefore;
 	private static int shot, length, age, target = -1, hurtBefore;
+	/** (0.20.9) {@link UltimateFilm#MORPH}: whose body changes, the parts in order, whether it is the long first-time cut. */
+	private static int casterId = -1;
+	private static java.util.List<String> parts = java.util.List.of();
+	private static boolean first;
 	/** Whether attack or use was held last tick: only a fresh press skips (one held through the cast doesn't). */
 	private static boolean handsBefore;
 	private static float side = 1.0F, bars, barsO;
@@ -92,6 +116,9 @@ public final class UltimateCinematic {
 			HudElementRegistry.replaceElement(id, old -> (graphics, delta) -> {
 				if (!running || witness) {
 					old.extractRenderState(graphics, delta);
+				} else {
+					// (HUD rework) and every zoned piece of ours with it (the badge, chips, bars, docks)
+					com.jaymospowers.client.hud.HudZones.hideFor(100L);
 				}
 			});
 		}
@@ -111,7 +138,14 @@ public final class UltimateCinematic {
 
 	private static void start(Minecraft minecraft, UltimateFilm.Play play) {
 		LocalPlayer self = minecraft.player;
-		if (self == null || BeamCinematic.running() || filming() && play.witness()) {
+		if (play.shot() == UltimateFilm.MORPH) {
+			// (0.20.9) everyone's world shows the body changing, film or not
+			XenoMorph.film(minecraft, play.caster(), play.ticks(), play.parts(), play.first());
+			if (play.target() == UltimateFilm.MORPH_ONLY) {
+				return;
+			}
+		}
+		if (self == null || BeamCinematic.running() || filming() && (play.witness() || play.shot() == UltimateFilm.MORPH && play.caster() != self.getId())) {
 			// a beam battle keeps its own film, and your own isn't cut short by someone else's
 			return;
 		}
@@ -125,6 +159,9 @@ public final class UltimateCinematic {
 		length = play.ticks();
 		age = 0;
 		target = play.target();
+		casterId = play.caster();
+		parts = play.parts();
+		first = play.first();
 		at = play.at();
 		side = self.getRandom().nextBoolean() ? 1.0F : -1.0F;
 		Vec3 look = Vec3.directionFromRotation(0.0F, self.getYRot());
@@ -295,11 +332,158 @@ public final class UltimateCinematic {
 				}
 				look = on;
 			}
+			case UltimateFilm.MORPH -> {
+				return morph(self, partialTicks, t);
+			}
+			case UltimateFilm.SPEAKER -> {
+				return speaker(self, subject, partialTicks, t, eyes);
+			}
 			default -> {
 				return null;
 			}
 		}
-		return aimed(clipped(self, look, pos), look, roll);
+		return aimed(clipped(self, look, lowered(self, pos, feet)), look, roll);
+	}
+
+	/**
+	 * (0.20.93) {@link UltimateFilm#SPEAKER}: Andy: "pan into the text box and character, sacrificing the view of the character near
+	 * the end to get high enough to view the whole chat bubble". In from over your shoulder to the speaker's face, seen from your side
+	 * and a little round; a slow push while they talk, framed between their face and the words over them; then up, level with the
+	 * words, so the whole bubble is in the frame and their face drops out of the bottom. Not brought down as other shots are.
+	 */
+	private static double[] speaker(LocalPlayer self, @Nullable Entity subject, float partialTicks, float t, Vec3 eyes) {
+		double size = subject instanceof net.minecraft.world.entity.LivingEntity l ? Math.max(1.0, l.getScale()) : 1.0;
+		Vec3 face = subject != null ? subject.getEyePosition(partialTicks) : at;
+		// the middle of the words: over the top of their head (the bubble's own height above the name tag spot)
+		double crown = subject != null ? subject.getBbHeight() - subject.getEyeHeight() : 0.3;
+		Vec3 words = face.add(0.0, crown + SPEAKER_WORDS_UP, 0.0);
+		Vec3 toward = eyes.subtract(face).horizontal();
+		toward = toward.lengthSqr() < 1.0E-4 ? facing.reverse() : toward.normalize();
+		double turn = Math.toRadians(side * SPEAKER_TURN);
+		Vec3 out = new Vec3(toward.x * Math.cos(turn) - toward.z * Math.sin(turn), 0.0, toward.x * Math.sin(turn) + toward.z * Math.cos(turn));
+		// framed between the face and the words while they talk
+		Vec3 between = face.lerp(words, 0.45);
+		Vec3 pos;
+		Vec3 look;
+		if (t < SPEAKER_IN) {
+			// from over your shoulder, in to them
+			float k = smooth(t / SPEAKER_IN);
+			Vec3 shoulder = eyes.add(new Vec3(-toward.z, 0.0, toward.x).scale(side * 0.8)).add(toward.scale(1.5)).add(0.0, 0.4, 0.0);
+			Vec3 held = between.add(out.scale(SPEAKER_HOLD * size)).add(0.0, -0.1, 0.0);
+			pos = shoulder.lerp(held, k);
+			look = face.lerp(between, k);
+		} else if (t < SPEAKER_RISE) {
+			// the slow push while they talk
+			float k = smooth((t - SPEAKER_IN) / (SPEAKER_RISE - SPEAKER_IN));
+			pos = between.add(out.scale(Mth.lerp(k, SPEAKER_HOLD, SPEAKER_PUSH) * size)).add(0.0, -0.1, 0.0);
+			look = between;
+		} else {
+			// up level with the words: the whole bubble in frame, their face going out of the bottom
+			float k = smooth((t - SPEAKER_RISE) / (1.0F - SPEAKER_RISE));
+			Vec3 from = between.add(out.scale(SPEAKER_PUSH * size)).add(0.0, -0.1, 0.0);
+			Vec3 to = words.add(out.scale(SPEAKER_PUSH * size)).add(0.0, -SPEAKER_BELOW_WORDS, 0.0);
+			pos = from.lerp(to, k);
+			look = between.lerp(words, k);
+		}
+		return aimed(clipped(self, look, pos), look, 0.0F);
+	}
+
+	/**
+	 * (0.20.60) A shot brought down {@link #SHOT_DROP} (times the caster's size), so the caster is seen better (Andy: "all the cutscenes
+	 * should be a little lower. you cant see the user well"); never below {@link #SHOT_FLOOR} over their feet unless it was already.
+	 */
+	static Vec3 lowered(Entity self, Vec3 pos, Vec3 feet) {
+		double size = Math.max(1.0, self instanceof net.minecraft.world.entity.LivingEntity l ? l.getScale() : 1.0);
+		double floor = Math.min(pos.y, feet.y + SHOT_FLOOR * size);
+		return new Vec3(pos.x, Math.max(floor, pos.y - SHOT_DROP * size), pos.z);
+	}
+
+	/**
+	 * (0.20.9) {@link UltimateFilm#MORPH}: wide on the whole body, then in turn on each changing part (a pleasing angle, alternating
+	 * sides, zooming in while it grows, holding with a slow push), then a pull back to frame the whole new body. The beats are
+	 * {@link XenoMorph#windowStart}'s, the same the body grows by. First time: wider start, closer zooms, a shake on the last beat.
+	 * Whoever's body it is (a witness's film is the caster's), the camera is the viewer's own.
+	 */
+	private static double @Nullable [] morph(LocalPlayer self, float partialTicks, float t) {
+		Entity who = casterId == self.getId() ? self : self.level().getEntity(casterId);
+		if (who == null) {
+			who = self;
+		}
+		net.minecraft.world.entity.LivingEntity living = who instanceof net.minecraft.world.entity.LivingEntity l ? l : null;
+		float yaw = living != null ? Mth.rotLerp(partialTicks, living.yBodyRotO, living.yBodyRot) : who.getYRot();
+		double scale = living != null ? living.getScale() : 1.0;
+		Vec3 feet = who.getPosition(partialTicks);
+		double h = Math.max(1.0, who.getBbHeight());
+		Vec3 whole = feet.add(0.0, h * 0.55, 0.0);
+		Vec3 forward = Vec3.directionFromRotation(0.0F, yaw);
+		String form = who instanceof net.minecraft.world.entity.player.Player p ? p.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM) : null;
+		com.jaymospowers.client.power.xenoform.XenoFormModels.FormModel model = com.jaymospowers.client.power.xenoform.XenoFormModels.ultimate(form);
+		com.jaymospowers.client.power.xenoform.XenoFormModels.UltimateModel ult = model instanceof
+			com.jaymospowers.client.power.xenoform.XenoFormModels.UltimateModel u ? u : null;
+		int n = parts.size();
+		float zoom = first ? MORPH_ZOOM_FIRST : MORPH_ZOOM;
+		double wide = (first ? MORPH_WIDE_FIRST : MORPH_WIDE) * h;
+		double close = Math.max(MORPH_MIN_CLOSE, (first ? MORPH_CLOSE_FIRST : MORPH_CLOSE) * h);
+		double frame = (first ? MORPH_FRAME_FIRST : MORPH_FRAME) * h;
+		float tail = 1.0F - XenoMorph.OUTRO;
+		Vec3[] from;
+		float roll = 0.0F;
+		if (t < XenoMorph.INTRO && n > 0 || n == 0 && t < tail) {
+			// the establishing shot: the whole body from a little to one side, easing in
+			float u = n == 0 ? t / tail : t / XenoMorph.INTRO;
+			from = shot(whole, forward, side * 35.0, wide * (1.0 - 0.12 * smooth(u)), h * MORPH_LIFT);
+		} else if (t < tail) {
+			float slot = XenoMorph.slot(n);
+			int j = Math.min(n - 1, (int)((t - XenoMorph.INTRO) / slot));
+			float u = Mth.clamp((t - XenoMorph.windowStart(j, n)) / slot, 0.0F, 1.0F);
+			from = part(ult, parts.get(j), j, u, feet, yaw, scale, whole, forward, h, wide, close, zoom);
+			if (u < MORPH_BLEND) {
+				// carry on from where the last beat left the camera
+				Vec3[] before = j == 0 ? shot(whole, forward, side * 35.0, wide * 0.88, h * MORPH_LIFT)
+					: part(ult, parts.get(j - 1), j - 1, 1.0F, feet, yaw, scale, whole, forward, h, wide, close, zoom);
+				float k = smooth(u / MORPH_BLEND);
+				from = new Vec3[] {before[0].lerp(from[0], k), before[1].lerp(from[1], k)};
+			}
+		} else {
+			// the pull back to the whole body
+			float v = (t - tail) / XenoMorph.OUTRO;
+			Vec3[] before = n == 0 ? shot(whole, forward, side * 35.0, wide * 0.88, h * MORPH_LIFT)
+				: part(ult, parts.get(n - 1), n - 1, 1.0F, feet, yaw, scale, whole, forward, h, wide, close, zoom);
+			Vec3[] end = shot(whole, forward, side * 12.0, frame, h * MORPH_LIFT * 1.5);
+			float k = smooth(v);
+			from = new Vec3[] {before[0].lerp(end[0], k), before[1].lerp(end[1], k)};
+			if (first) {
+				// the last beat lands with a shake and a tilt that settle
+				float shake = Mth.sin(v * Mth.PI) * (1.0F - v);
+				double time = (age + partialTicks) * 1.7;
+				from[0] = from[0].add(Math.sin(time * 2.3) * MORPH_SHAKE * h * shake, Math.sin(time * 3.1) * MORPH_SHAKE * h * shake, 0.0);
+				roll = (float)Math.sin(time * 1.9) * MORPH_ROLL_FIRST * shake;
+			}
+		}
+		return aimed(clipped(self, from[1], from[0]), from[1], roll);
+	}
+
+	/** The camera on part {@code name} (beat {@code j}, {@code u} of the way through it): {position, look}. */
+	private static Vec3[] part(com.jaymospowers.client.power.xenoform.XenoFormModels.@Nullable UltimateModel model, String name, int j, float u, Vec3 feet,
+		float yaw, double scale, Vec3 whole, Vec3 forward, double h, double wide, double close, float zoom) {
+		Vec3 focus = whole;
+		float[] c = model != null ? model.centre(name) : null;
+		if (c != null) {
+			// the model's frame (right, up, back) turned the way the body faces, at the body's size
+			double a = Math.toRadians(180.0 - yaw);
+			focus = feet.add((c[0] * Math.cos(a) + c[2] * Math.sin(a)) * scale, c[1] * scale, (-c[0] * Math.sin(a) + c[2] * Math.cos(a)) * scale);
+		}
+		float k = smooth(Math.min(1.0F, u / zoom));
+		double hold = (first ? MORPH_PUSH_FIRST : MORPH_PUSH) * Math.max(0.0F, u - zoom) / (1.0F - zoom);
+		double dist = Mth.lerp(k, wide, close) * (1.0 - hold);
+		double angle = side * (j % 2 == 0 ? 1.0 : -1.0) * (28.0 + 12.0 * (j % 3));
+		return shot(focus, forward, angle, dist, h * MORPH_LIFT);
+	}
+
+	/** A camera {@code dist} from {@code focus}, out in front of the body turned {@code degrees} to one side, lifted: {position, look}. */
+	private static Vec3[] shot(Vec3 focus, Vec3 forward, double degrees, double dist, double lift) {
+		double angle = Math.atan2(forward.z, forward.x) + Math.toRadians(degrees);
+		return new Vec3[] {focus.add(Math.cos(angle) * dist, lift, Math.sin(angle) * dist), focus};
 	}
 
 	private static double[] aimed(Vec3 pos, Vec3 look, float roll) {

@@ -18,6 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -59,6 +60,12 @@ final class Javelins {
 	/** (0.5.28) A kingdom with fewer emeralds than this is poor: its guards throw rocks. A rock hits for this much. */
 	static final long POOR_TREASURY = 50L;
 	static final float ROCK_DAMAGE = 3.0F;
+	/**
+	 * (0.7.558) Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". Every zombie (the game's {@code Zombie}
+	 * family: husks, drowned, zombie villagers, zombified piglins, and MCA's and Kitchen's zombies) and every Hornkin take
+	 * only this much from a rock (Powers' player rocks too: {@code ThrownRocks.shrugsOff}).
+	 */
+	static final float SHRUGGED_ROCK_DAMAGE = 0.5F;
 
 	/** Balkon's WeaponMod: Legacy, whose javelins they throw. */
 	static final String WEAPONMOD = "weaponmod";
@@ -226,17 +233,23 @@ final class Javelins {
 			return true;
 		}
 		boolean allowed = harms(thrower, victim);
-		if (allowed && !redealing && javelin instanceof Snowball && amount < ROCK_DAMAGE && victim.level() instanceof ServerLevel level) {
+		float rock = rockDamage(victim);
+		if (allowed && !redealing && javelin instanceof Snowball && amount < rock && victim.level() instanceof ServerLevel level) {
 			// a snowball does no harm: the rock's blow, dealt again with its weight (once: some mobs, like MCA's
 			// villagers, soften a blow before it gets here)
 			redealing = true;
 			try {
-				victim.hurtServer(level, source, ROCK_DAMAGE);
+				victim.hurtServer(level, source, rock);
 			} finally {
 				redealing = false;
 			}
 			return false;
 		}
 		return allowed;
+	}
+
+	/** (0.7.558) What a rock hits {@code victim} for: {@link #SHRUGGED_ROCK_DAMAGE} on a zombie or Hornkin, else {@link #ROCK_DAMAGE}. */
+	static float rockDamage(LivingEntity victim) {
+		return victim instanceof Zombie || victim instanceof com.jaymoskingdoms.nether.Hornkin ? SHRUGGED_ROCK_DAMAGE : ROCK_DAMAGE;
 	}
 }

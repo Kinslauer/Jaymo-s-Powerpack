@@ -176,7 +176,12 @@ public final class Orcs {
 	 * ({@link Barbarians#addGoals}: an orc camp is a camp).
 	 */
 	static void addGoals(Folk folk, GoalSelector goals, GoalSelector targets) {
-		targets.addGoal(2, new NearestAttackableTargetGoal<>(folk, LivingEntity.class, true, (target, level) -> isOrc(folk) && prey(target)));
+		targets.addGoal(2, new NearestAttackableTargetGoal<>(folk, LivingEntity.class, true, (target, level) -> isOrc(folk) && prey(folk.factionId(), target)));
+	}
+
+	/** (0.7.490) What an orc of camp {@code camp} attacks on sight: {@link #prey(LivingEntity)}, and the folk of a camp it is raiding or being raided by. */
+	static boolean prey(int camp, LivingEntity target) {
+		return prey(target) || Brutality.foe(camp, target);
 	}
 
 	/** What an orc attacks on sight. */
@@ -209,13 +214,17 @@ public final class Orcs {
 			folk.addEffect(new MobEffectInstance(MobEffects.SPEED, RAGE_TICKS, 0));
 			level.sendParticles(ParticleTypes.ANGRY_VILLAGER, folk.getX(), folk.getY() + 2.0, folk.getZ(), 3, 0.3, 0.2, 0.3, 0.0);
 			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PIGLIN_BRUTE_ANGRY, SoundSource.HOSTILE, 1.2F, 0.6F);
-			Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.orc.rage_" + level.getRandom().nextInt(3)), Speech.RED, 20.0);
+			Speech.say(level, folk, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.rage_" + level.getRandom().nextInt(3)), Speech.RED, 20.0);
 		}
 		if (role == GRUNT && fighting && level.getRandom().nextInt(CRY_ONE_IN / 10) == 0) {
 			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PIGLIN_BRUTE_ANGRY, SoundSource.HOSTILE, 1.0F, 0.7F);
-			Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.orc.cry_" + level.getRandom().nextInt(6)), Speech.RED, 20.0);
+			Speech.say(level, folk, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.cry_" + level.getRandom().nextInt(6)), Speech.RED, 20.0);
 		}
-		if (role == WARCHIEF && fighting && folk.distanceTo(target) <= SLAM_TRIGGER
+		if (role == GRUNT && fighting && !Brutality.fighting(folk)) {
+			// (0.7.490) in a fight an orc grabs a goblin slave and throws it at his foe
+			Slaves.toss(level, folk, camp, target);
+		}
+		if (role == WARCHIEF && fighting && folk.distanceTo(target) <= SLAM_TRIGGER && !Brutality.fighting(folk)
 			&& level.getGameTime() >= SLAM_READY.getOrDefault(folk.getUUID(), 0L)) {
 			slam(level, folk, camp);
 		}
@@ -244,6 +253,31 @@ public final class Orcs {
 		level.sendParticles(ParticleTypes.EXPLOSION, chief.getX(), chief.getY() + 0.3, chief.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, chief.getX(), chief.getY(), chief.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0F, 0.6F);
 		level.playSound(null, chief.getX(), chief.getY(), chief.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.5F, 0.8F);
+	}
+
+	/**
+	 * (0.7.490) {@code mob} (an MCA villager's body) takes the build of {@code role} (a grunt or the warchief) after a
+	 * challenge: health, blows, pace, size, steadiness and gear. A folk is made over by {@link Folk#changeRole}.
+	 */
+	static void rank(PathfinderMob mob, int role, int camp) {
+		boolean chief = role == WARCHIEF;
+		mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(chief ? WARCHIEF_HEALTH : GRUNT_HEALTH);
+		mob.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(chief ? WARCHIEF_DAMAGE : GRUNT_DAMAGE);
+		mob.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(chief ? WARCHIEF_SPEED : GRUNT_SPEED);
+		mob.getAttribute(Attributes.SCALE).setBaseValue(chief ? WARCHIEF_SCALE : 1.0);
+		mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(chief ? WARCHIEF_KNOCKBACK_RESIST : GRUNT_KNOCKBACK_RESIST);
+		mob.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(chief ? WARCHIEF_TOUGHNESS : 0.0);
+		mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(chief ? Items.NETHERITE_AXE : Items.IRON_AXE));
+		mob.setItemSlot(EquipmentSlot.HEAD, chief ? new ItemStack(Items.IRON_HELMET) : ItemStack.EMPTY);
+		mob.setItemSlot(EquipmentSlot.CHEST, chief ? new ItemStack(Items.CHAINMAIL_CHESTPLATE) : dyed(Items.LEATHER_CHESTPLATE, BLACK_HIDE));
+		mob.setItemSlot(EquipmentSlot.FEET, chief ? new ItemStack(Items.IRON_BOOTS) : ItemStack.EMPTY);
+		// (0.7.490) MCA's own villager name (a name tag of our own would sit over it)
+		McaCompat.rename(mob, chief ? warchiefName(mob.getUUID().getLeastSignificantBits() ^ camp) : commonName(mob.getUUID().getLeastSignificantBits()));
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			mob.setDropChance(slot, 0.0F);
+		}
+		// (0.7.490) MCA's guards dress from what they carry, and a warchief is born the biggest: his pack and build go with the title
+		McaCompat.reranked(mob, Heritage.Kind.ORC, chief);
 	}
 
 	static void clear() {

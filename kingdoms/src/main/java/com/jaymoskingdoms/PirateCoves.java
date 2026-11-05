@@ -26,6 +26,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -60,8 +62,28 @@ final class PirateCoves {
 	static final int JETTY_MOST = 24;
 	/** The flagpole's height. */
 	static final int POLE = 7;
-	/** A new cove: deckhands ashore, and the hoard it starts with. */
-	static final int START_HANDS = 3, MAX_HANDS = 6, DAYS_PER_HAND = 2;
+	/** A new cove: deckhands ashore, and the hoard it starts with (the caps follow). */
+	static final int START_HANDS = 3, DAYS_PER_HAND = 2;
+	/** (0.7.490) Its own caps: the most deckhands ashore, the most bombardiers, the most growth stages (its ground runs out), the most a ship's hold takes in a haul (stacks). */
+	static final int HANDS_MOST = 16, BOMBARDIERS_MOST = 4, MAX_STAGE = 36, HAUL_MOST = 96;
+	/** (0.7.490) A new hand eats this much cooked fish out of the stores; a stage waits this long (ticks) after the last, and is given up after this many tries at a place. */
+	static final int HAND_RATION = 2;
+	static final long STAGE_GAP = 6000L;
+	static final int STAGE_TRIES = 3;
+	/** (0.7.490) A stage costs this many dark oak planks and gold nuggets to begin with, more for each stage so far (at most), and powder every fourth. */
+	static final int COST_PLANKS = 12, COST_PLANKS_PER = 2, COST_PLANKS_MOST = 64, COST_NUGGETS = 9, COST_NUGGETS_PER = 1, COST_NUGGETS_MOST = 45, COST_POWDER = 6;
+	/** (0.7.490) Stages ring the cove on its landward side: the first this far from its fire, a ring further every few, no further than the most; and its tower's height. */
+	static final int RING_START = RADIUS + 5, RING_STEP = 4, STAGES_PER_RING = 4, RING_MOST = RADIUS + 30, TOWER_HEIGHT = 8;
+	/** (0.7.490) Nothing is built with a player this near. */
+	static final double STAGE_HIDE = 24.0;
+	/** (0.7.490) A rover that sinks a ship takes: her coin (at most this many emeralds), and a share of her generated hold; the haul is unloaded when her ship is back this near the mooring. */
+	static final int PRIZE_COIN = 48;
+	static final double UNLOAD_REACH = 36.0;
+	/** (0.7.490) What a new cove starts with, and takes in each day, in planks. */
+	static final int START_PLANKS = 32, DAY_PLANKS = 6;
+	/** (0.7.490) Each stage raises a bigger prize: a ship is a galleon this much likelier for each stage, at most; and carries one more hand for every this many stages. */
+	static final float GALLEON_PER_STAGE = 0.04F, GALLEON_MOST = 0.9F;
+	static final int STAGES_PER_CREW = 4, CREW_MOST = 4;
 	/** (0.7.107) Its bombardiers ashore (off its roster): one, a second once it has grown this many days; one lost comes back with the next day's growth. */
 	static final int BOMBARDIERS = 1, MAX_BOMBARDIERS = 2, DAYS_TO_SECOND_BOMBARDIER = 4;
 	static final int START_GOLD = 8, START_EMERALDS = 6, START_GUNPOWDER = 12, START_SHOT = 12, START_RUM = 4;
@@ -83,17 +105,23 @@ final class PirateCoves {
 	private static final String[] NAME_SECOND = {"Cove", "Bay", "Inlet", "Haven", "Hole", "Reach", "Landing", "Creek"};
 
 	/** What's known of a cove beyond its camp data: its mooring, which way the sea is, its ship, where she was last seen, when she was lost. */
-	record Cove(BlockPos mooring, Direction seaward, Optional<UUID> ship, Optional<BlockPos> seen, long lostAt) {
+	record Cove(BlockPos mooring, Direction seaward, Optional<UUID> ship, Optional<BlockPos> seen, long lostAt, List<ItemStack> haul) {
 		static final Codec<Cove> CODEC = RecordCodecBuilder.create(i -> i.group(
 				BlockPos.CODEC.fieldOf("mooring").forGetter(Cove::mooring),
 				Direction.CODEC.fieldOf("seaward").forGetter(Cove::seaward),
 				UUIDUtil.CODEC.optionalFieldOf("ship").forGetter(Cove::ship),
 				BlockPos.CODEC.optionalFieldOf("seen").forGetter(Cove::seen),
-				Codec.LONG.optionalFieldOf("lost_at", -1L).forGetter(Cove::lostAt))
+				Codec.LONG.optionalFieldOf("lost_at", -1L).forGetter(Cove::lostAt),
+				ItemStack.OPTIONAL_CODEC.listOf().optionalFieldOf("haul", List.of()).forGetter(Cove::haul))
 			.apply(i, Cove::new));
 
 		Cove withShip(@Nullable UUID ship, @Nullable BlockPos seen, long lostAt) {
-			return new Cove(this.mooring, this.seaward, Optional.ofNullable(ship), Optional.ofNullable(seen), lostAt);
+			return new Cove(this.mooring, this.seaward, Optional.ofNullable(ship), Optional.ofNullable(seen), lostAt, this.haul);
+		}
+
+		/** (0.7.490) With the prizes her ship carries home. */
+		Cove withHaul(List<ItemStack> haul) {
+			return new Cove(this.mooring, this.seaward, this.ship, this.seen, this.lostAt, List.copyOf(haul));
 		}
 	}
 
@@ -194,15 +222,17 @@ final class PirateCoves {
 		int id = camp.id();
 		long now = level.getGameTime();
 		Camps.putData(server, id, new Camps.CampData(fire, seaward, now, now, Production.day(server), -1L, List.of(), 0L, Map.of(), KIND, 0, 0));
-		putCove(server, id, new Cove(water, seaward, Optional.empty(), Optional.empty(), -1L));
+		putCove(server, id, new Cove(water, seaward, Optional.empty(), Optional.empty(), -1L, List.of()));
 		Layout layout = build(level, fire, seaward);
 		Storage.register(server, id, layout.storage(), layout.depot());
 		Faction stocked = Factions.get(server, id);
 		Storage.put(level, stocked, Items.GOLD_INGOT, START_GOLD);
-		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
+		// (0.7.490) pirates take anything gold: what they have taken off ships is dinars, not emeralds
+		Storage.put(level, stocked, Currencies.GOLD_DINAR, START_EMERALDS);
 		Storage.put(level, stocked, Items.GUNPOWDER, START_GUNPOWDER);
 		Storage.put(level, stocked, com.jaymoskingdoms.sailing.Sailing.ROUND_SHOT, START_SHOT);
 		Storage.put(level, stocked, Items.HONEY_BOTTLE, START_RUM);
+		Storage.put(level, stocked, Items.DARK_OAK_PLANKS, START_PLANKS);
 		Camps.takeSides(server, id, KIND);
 		for (int i = 0; i < START_HANDS; i++) {
 			spawn(level, id, Pirates.DECKHAND, spot(level, fire, random), fire, RADIUS);
@@ -416,7 +446,11 @@ final class PirateCoves {
 			return null;
 		}
 		RandomSource random = level.getRandom();
-		boolean brig = random.nextFloat() < 0.45F;
+		// ((0.7.490) a cove that has grown puts out bigger ships with bigger crews)
+		Camps.CampData grown = Camps.data(server, camp.id());
+		int stages = grown == null ? 0 : grown.built();
+		int extra = Math.min(CREW_MOST, stages / STAGES_PER_CREW);
+		boolean brig = random.nextFloat() < Math.min(GALLEON_MOST, 0.45F + GALLEON_PER_STAGE * stages);
 		Crew crew = new Crew(Crew.Side.PIRATE, camp.id(), Pirates.pirateShip(random), cove.mooring());
 		Fleet.Look look = new Fleet.Look(Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE, Blocks.DARK_OAK_LOG, Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.BLACK), Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE));
 		Direction bow = cove.seaward().getClockWise();
@@ -427,7 +461,7 @@ final class PirateCoves {
 			BlockPos water = tries == 0 ? cove.mooring() : Fleet.openSea(level, cove.mooring(), 24, 4, random);
 			if (water != null) {
 				ship = Corsairs.launch(level, rig, look, water, bow, crew, camp,
-					new Corsairs.Complement(Pirates.CAPTAIN, Pirates.GUNNER, Pirates.DECKHAND, brig ? BRIG_HANDS : SLOOP_HANDS, BOYS));
+					new Corsairs.Complement(Pirates.CAPTAIN, Pirates.GUNNER, Pirates.DECKHAND, (brig ? BRIG_HANDS : SLOOP_HANDS) + extra, BOYS));
 			}
 		}
 		if (ship == null) {
@@ -453,6 +487,9 @@ final class PirateCoves {
 			return;
 		}
 		long now = level.getGameTime();
+		// ((0.7.490) the cove grows as its stores allow, and unloads the prizes her ship brings home)
+		stage(level, camp, data, force);
+		cove = unload(level, camp, cove);
 		if (cove.ship().isPresent()) {
 			Entity ship = level.getEntity(cove.ship().get());
 			if (ship instanceof Ship s && !s.isRemoved()) {
@@ -477,14 +514,17 @@ final class PirateCoves {
 		launch(level, camp);
 	}
 
-	/** Its hands ashore, one more every few days up to a most. */
+	/**
+	 * Its hands ashore, one more every few days and every stage it has grown, up to its own most ({@link #HANDS_MOST}); each
+	 * new one eats a ration out of the stores ((0.7.490) so a cove that is plundered, or has lost its fish, stops taking men on).
+	 */
 	private static void grownHands(ServerLevel level, Faction camp, Camps.CampData data) {
-		int cap = Math.min(MAX_HANDS, START_HANDS + data.grown() / DAYS_PER_HAND);
+		int cap = (int)Math.min(HANDS_MOST, START_HANDS + data.grown() / DAYS_PER_HAND + data.built());
 		int hands = camp.holdings().count(Pirates.DECKHAND) + camp.holdings().vacancies().getOrDefault(Folk.roleName(Pirates.DECKHAND), 0);
-		if (hands < cap) {
+		if (hands < cap && Storage.loaded(level, camp) && !Storage.take(level, camp, Items.COOKED_COD, HAND_RATION).isEmpty()) {
 			spawn(level, camp.id(), Pirates.DECKHAND, spot(level, data.center(), level.getRandom()), data.center(), RADIUS);
 		}
-		int bombers = data.grown() >= DAYS_TO_SECOND_BOMBARDIER ? MAX_BOMBARDIERS : BOMBARDIERS;
+		int bombers = Math.min(BOMBARDIERS_MOST, (data.grown() >= DAYS_TO_SECOND_BOMBARDIER ? MAX_BOMBARDIERS : BOMBARDIERS) + data.built() / 4);
 		BlockPos center = data.center();
 		// ((0.7.296) folk or villagers: they were counted only as folk, so a cove whose bombardiers had become villagers kept sending more)
 		int around = Workers.near(level, new net.minecraft.world.phys.AABB(center).inflate(RADIUS * 4),
@@ -512,9 +552,10 @@ final class PirateCoves {
 	static void grow(ServerLevel level, Faction camp, int days) {
 		if (Storage.loaded(level, camp)) {
 			Storage.put(level, camp, Items.GOLD_NUGGET, DAY_GOLD * 9 * days);
-			Storage.put(level, camp, Items.EMERALD, DAY_EMERALDS * days);
+			Storage.put(level, camp, Currencies.GOLD_DINAR, DAY_EMERALDS * days);
 			Storage.put(level, camp, Items.GUNPOWDER, DAY_GUNPOWDER * days);
 			Storage.put(level, camp, Items.COOKED_COD, DAY_FISH * days);
+			Storage.put(level, camp, Items.DARK_OAK_PLANKS, DAY_PLANKS * days);
 		}
 		Camps.updateData(level.getServer(), camp.id(), d -> d.withGrown(d.grown() + days));
 		Camps.CampData data = Camps.data(level.getServer(), camp.id());
@@ -527,6 +568,228 @@ final class PirateCoves {
 	/** Its deckhands ashore (and on their way back), its war band for a raid. */
 	static int fighters(Faction camp) {
 		return camp.holdings().count(Pirates.DECKHAND) + camp.holdings().vacancies().getOrDefault(Folk.roleName(Pirates.DECKHAND), 0);
+	}
+
+	// ---- (0.7.490) growing by its stores ---------------------------------------------------------------------------
+
+	/** Camp id → game time its last stage was tried; and how many times in a row the stage now due found no place. */
+	private static final Map<Integer, Long> STAGED = new HashMap<>();
+	private static final Map<Integer, Integer> TRIES = new HashMap<>();
+
+	/** What stage {@code n} costs: planks and gold nuggets, more with each stage, and powder for every fourth. */
+	static Map<Item, Integer> stageCost(int n) {
+		Map<Item, Integer> cost = new java.util.LinkedHashMap<>();
+		cost.put(Items.DARK_OAK_PLANKS, Math.min(COST_PLANKS_MOST, COST_PLANKS + COST_PLANKS_PER * n));
+		cost.put(Items.GOLD_NUGGET, Math.min(COST_NUGGETS_MOST, COST_NUGGETS + COST_NUGGETS_PER * n));
+		if (n % 4 == 2) {
+			cost.put(Items.GUNPOWDER, COST_POWDER);
+		}
+		return cost;
+	}
+
+	/**
+	 * The cove's next stage, when its stores can pay for it and no player is by: in turn a bunkhouse, a stores shed, a
+	 * watchtower and a side pier, round its landward side (the stage count is kept in its camp data, {@code built}). More
+	 * stages mean more deckhands, more bombardiers, bigger ships and crews ({@link #launch}), up to {@link #MAX_STAGE}.
+	 */
+	private static void stage(ServerLevel level, Faction camp, Camps.CampData data, boolean force) {
+		MinecraftServer server = level.getServer();
+		int n = data.built();
+		long now = level.getGameTime();
+		if (n >= MAX_STAGE || !Storage.loaded(level, camp) || !level.isPositionEntityTicking(data.center())
+			|| !force && now - STAGED.getOrDefault(camp.id(), 0L) < STAGE_GAP) {
+			return;
+		}
+		Map<Item, Integer> cost = stageCost(n);
+		Cove cove = cove(server, camp.id());
+		if (cove == null || !Storage.has(level, camp, cost)) {
+			return;
+		}
+		int kind = n % 4;
+		int half = kind == 0 ? 2 : 1, height = kind == 0 ? 6 : kind == 1 ? 4 : TOWER_HEIGHT + 2;
+		double back = Math.atan2(cove.seaward().getOpposite().getStepZ(), cove.seaward().getOpposite().getStepX());
+		double angle = back + (n * Outbuild.GOLDEN) % 2.4 - 1.2;
+		int ring = Outbuild.ring(n, RING_START, RING_STEP, STAGES_PER_RING, RING_MOST);
+		BlockPos floor = kind == 3 ? null : Outbuild.find(level, data.center(), angle, 6, ring, half, height, data.center().getY(), 2, 4, camp.id());
+		if (!force && Raids.playerNear(level, floor != null ? floor : data.center(), STAGE_HIDE)) {
+			return;
+		}
+		STAGED.put(camp.id(), now);
+		boolean built;
+		if (kind == 3) {
+			Direction side = cove.seaward().getClockWise();
+			int offset = (n / 4 % 2 == 0 ? 1 : -1) * (4 + 3 * (n / 8));
+			BlockPos start = data.center().relative(cove.seaward(), RADIUS - 1).relative(side, offset);
+			built = level.isLoaded(start);
+			if (built) {
+				jetty(level, start, cove.seaward(), side);
+			}
+		} else if (floor == null) {
+			built = false;
+		} else {
+			built = switch (kind) {
+				case 0 -> bunkhouse(level, floor, data.center());
+				case 1 -> shed(level, camp, floor);
+				default -> tower(level, floor);
+			};
+		}
+		if (!built) {
+			// (no good ground this time: a few tries, then that stage is let go, unpaid)
+			if (TRIES.merge(camp.id(), 1, Integer::sum) >= STAGE_TRIES) {
+				TRIES.remove(camp.id());
+				Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
+			}
+			return;
+		}
+		TRIES.remove(camp.id());
+		for (var e : cost.entrySet()) {
+			Storage.take(level, camp, e.getKey(), e.getValue());
+		}
+		Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
+		JaymosKingdoms.LOGGER.debug("{} grew to stage {}", camp.name(), n + 1);
+	}
+
+	/** A bunkhouse of planks and logs, its door toward the fire, two barrels and a lantern inside. */
+	private static boolean bunkhouse(ServerLevel level, BlockPos floor, BlockPos fire) {
+		double dx = fire.getX() - floor.getX(), dz = fire.getZ() - floor.getZ();
+		Direction door = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? Direction.EAST : Direction.WEST) : (dz > 0 ? Direction.SOUTH : Direction.NORTH);
+		BlockState planks = Blocks.DARK_OAK_PLANKS.defaultBlockState(), log = Blocks.SPRUCE_LOG.defaultBlockState();
+		for (int x = -2; x <= 2; x++) {
+			for (int z = -2; z <= 2; z++) {
+				Outbuild.set(level, floor.offset(x, -1, z), planks);
+				boolean wall = Math.abs(x) == 2 || Math.abs(z) == 2, corner = Math.abs(x) == 2 && Math.abs(z) == 2;
+				int across = x * door.getStepX() + z * door.getStepZ(), along = x * door.getStepZ() - z * door.getStepX();
+				boolean doorway = across == 2 && along == 0;
+				for (int y = 0; y < 3; y++) {
+					boolean open = !wall || doorway && y < 2;
+					Outbuild.set(level, floor.offset(x, y, z), open ? Blocks.AIR.defaultBlockState() : corner ? log : planks);
+				}
+				Outbuild.set(level, floor.offset(x, 3, z), Blocks.DARK_OAK_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
+			}
+		}
+		Outbuild.set(level, floor.relative(door.getOpposite(), 1).relative(door.getClockWise(), 1), Blocks.BARREL.defaultBlockState());
+		Outbuild.set(level, floor.relative(door.getOpposite(), 1).relative(door.getCounterClockWise(), 1), Blocks.BARREL.defaultBlockState());
+		Outbuild.set(level, floor.above(2), Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
+		return true;
+	}
+
+	/** An open shed on four posts with a barrel under it, which joins the cove's stores. */
+	private static boolean shed(ServerLevel level, Faction camp, BlockPos floor) {
+		BlockState post = Blocks.DARK_OAK_FENCE.defaultBlockState();
+		for (int x = -1; x <= 1; x += 2) {
+			for (int z = -1; z <= 1; z += 2) {
+				for (int y = 0; y < 3; y++) {
+					Outbuild.set(level, floor.offset(x, y, z), post);
+				}
+			}
+		}
+		for (int x = -1; x <= 1; x++) {
+			for (int z = -1; z <= 1; z++) {
+				Outbuild.set(level, floor.offset(x, 3, z), Blocks.DARK_OAK_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
+			}
+		}
+		Outbuild.set(level, floor, Blocks.BARREL.defaultBlockState());
+		Storage.add(level.getServer(), camp.id(), List.of(floor.immutable()));
+		return true;
+	}
+
+	/** A watchtower of spruce on a hollow 3 by 3 footing, a railed deck and a lantern at the top. */
+	private static boolean tower(ServerLevel level, BlockPos floor) {
+		BlockState log = Blocks.SPRUCE_LOG.defaultBlockState(), planks = Blocks.DARK_OAK_PLANKS.defaultBlockState();
+		for (int y = 0; y < TOWER_HEIGHT; y++) {
+			for (int x = -1; x <= 1; x++) {
+				for (int z = -1; z <= 1; z++) {
+					boolean edge = Math.abs(x) == 1 || Math.abs(z) == 1;
+					boolean corner = Math.abs(x) == 1 && Math.abs(z) == 1;
+					Outbuild.set(level, floor.offset(x, y, z), !edge ? Blocks.AIR.defaultBlockState() : corner ? log : y % 3 == 1 ? Blocks.SPRUCE_FENCE.defaultBlockState() : planks);
+				}
+			}
+		}
+		for (int x = -1; x <= 1; x++) {
+			for (int z = -1; z <= 1; z++) {
+				Outbuild.set(level, floor.offset(x, TOWER_HEIGHT, z), planks);
+				if (Math.abs(x) == 1 || Math.abs(z) == 1) {
+					Outbuild.set(level, floor.offset(x, TOWER_HEIGHT + 1, z), Blocks.DARK_OAK_FENCE.defaultBlockState());
+				}
+			}
+		}
+		Outbuild.set(level, floor.offset(0, TOWER_HEIGHT + 1, 0), Blocks.LANTERN.defaultBlockState());
+		return true;
+	}
+
+	// ---- (0.7.490) prizes --------------------------------------------------------------------------------------------
+
+	/**
+	 * {@code ship} (of {@code crew}, not a pirate's) was sunk by a gunner of a cove's: the cove's ship takes what she
+	 * carried (everything in her chests and barrels, a share of her hold, and a little of her realm's coin) and carries it
+	 * home. It is kept in the cove ({@link Cove#haul}) until she is back at the mooring, and spilled if she is lost first.
+	 */
+	static void captured(ServerLevel level, Ship ship, Crew crew, @Nullable Entity by) {
+		MinecraftServer server = level.getServer();
+		if (!(by instanceof Worker gunner) || !is(server, gunner.factionId()) || gunner.factionId() == crew.faction) {
+			return;
+		}
+		Cove cove = cove(server, gunner.factionId());
+		Faction camp = Factions.get(server, gunner.factionId());
+		if (cove == null || camp == null || camp.fallen()) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		List<ItemStack> prize = new ArrayList<>(ship.takeCargo(HAUL_MOST));
+		List<ItemStack> share = new ArrayList<>(java.util.Collections.nCopies(Corsairs.SHARE, ItemStack.EMPTY));
+		Corsairs.stock(level, crew, share, random);
+		for (ItemStack stack : share) {
+			if (!stack.isEmpty()) {
+				prize.add(stack);
+			}
+		}
+		Faction owner = Factions.get(server, crew.faction);
+		if (owner != null && owner.type().isRealm() && owner.treasury() > 0L) {
+			long coin = Math.min(owner.treasury(), PRIZE_COIN);
+			Factions.update(server, owner.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - coin)));
+			// (0.7.498) the prize is struck in the owner realm's coin, not emeralds
+			prize.addAll(com.jaymoskingdoms.money.Money.stacks(server, owner, com.jaymoskingdoms.money.Money.worth(coin)));
+		}
+		List<ItemStack> haul = new ArrayList<>();
+		for (ItemStack stack : cove.haul()) {
+			addTo(haul, stack.copy());
+		}
+		for (ItemStack stack : prize) {
+			addTo(haul, stack);
+		}
+		putCove(server, camp.id(), cove.withHaul(haul));
+		Raids.tell(level, ship.blockPosition(), net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.pirate.prize", camp.name(), crew.name)
+			.withStyle(net.minecraft.ChatFormatting.GOLD));
+		JaymosKingdoms.LOGGER.info("{} took the cargo of {} ({} stacks)", camp.name(), crew.name, prize.size());
+	}
+
+	/** Adds {@code stack} to {@code haul}: topping up like stacks, else a new one if the hold has room. */
+	private static void addTo(List<ItemStack> haul, ItemStack stack) {
+		for (ItemStack there : haul) {
+			if (ItemStack.isSameItemSameComponents(there, stack)) {
+				int n = Math.min(there.getMaxStackSize() - there.getCount(), stack.getCount());
+				if (n > 0) {
+					there.grow(n);
+					stack.shrink(n);
+				}
+			}
+		}
+		if (!stack.isEmpty() && haul.size() < HAUL_MOST) {
+			haul.add(stack);
+		}
+	}
+
+	/** Her ship is home at the mooring with a haul: it goes into the cove's stores. Returns the cove as it now stands. */
+	private static Cove unload(ServerLevel level, Faction camp, Cove cove) {
+		if (cove.haul().isEmpty() || cove.ship().isEmpty() || !(level.getEntity(cove.ship().get()) instanceof Ship ship) || ship.isRemoved()
+			|| ship.position().distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(cove.mooring())) > UNLOAD_REACH * UNLOAD_REACH
+			|| !Storage.loaded(level, camp) || Raids.raiding(camp.id())) {
+			return cove;
+		}
+		Plunder.depositAll(level, camp, cove.haul());
+		Cove emptied = cove.withHaul(List.of());
+		putCove(level.getServer(), camp.id(), emptied);
+		return emptied;
 	}
 
 	// ---- raids and losses ------------------------------------------------------------------------------------------
@@ -570,11 +833,23 @@ final class PirateCoves {
 		return null;
 	}
 
-	/** {@code crew}'s ship went down (sunk by {@code player}, or anyone): her cove builds another in a while, if it still stands. */
-	static void shipLost(ServerLevel level, Crew crew, @Nullable ServerPlayer player) {
+	/**
+	 * {@code crew}'s ship went down (sunk by {@code player}, or anyone): her cove builds another in a while, if it still
+	 * stands. ((0.7.490) the prizes she was carrying spill where {@code ship} founders; with no ship, where she was last
+	 * seen; if that's not loaded, they stay in the cove's record and the next ship home brings them.)
+	 */
+	static void shipLost(ServerLevel level, Crew crew, @Nullable Ship ship, @Nullable ServerPlayer player) {
 		MinecraftServer server = level.getServer();
 		Cove cove = cove(server, crew.faction);
 		if (cove != null) {
+			if (!cove.haul().isEmpty()) {
+				net.minecraft.world.phys.Vec3 at = ship != null ? ship.position()
+					: net.minecraft.world.phys.Vec3.atCenterOf(cove.seen().orElse(cove.mooring()));
+				if (level.isLoaded(BlockPos.containing(at))) {
+					Plunder.spill(level, at.add(0.0, 1.0, 0.0), cove.haul());
+					cove = cove.withHaul(List.of());
+				}
+			}
 			putCove(server, crew.faction, cove.withShip(null, null, level.getGameTime()));
 		}
 	}
@@ -582,5 +857,7 @@ final class PirateCoves {
 	static void clear() {
 		MISSING.clear();
 		COAST.clear();
+		STAGED.clear();
+		TRIES.clear();
 	}
 }

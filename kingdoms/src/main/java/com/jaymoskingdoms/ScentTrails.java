@@ -213,7 +213,7 @@ public final class ScentTrails {
 	}
 
 	/**
-	 * (0.7.477) For the wild wolves ({@code wild.WolfStalkers}): the freshest footstep {@code player} left in {@code level}
+	 * (0.7.595) For the wild wolves ({@code wild.WolfStalkers}): the freshest footstep {@code player} left in {@code level}
 	 * within {@code range} blocks of {@code from}, no older than {@code maxAge} ticks; null if none.
 	 */
 	public static @Nullable Vec3 freshest(UUID player, net.minecraft.world.level.Level level, Vec3 from, double range, int maxAge) {

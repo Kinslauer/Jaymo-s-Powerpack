@@ -44,13 +44,20 @@
 		{ "config": "jaymospowers.nea.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.tnm.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.shouldersurfing.client.mixins.json", "environment": "client" },
+		{ "config": "jaymospowers.respawnrecap.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.tacz.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.ldl.client.mixins.json", "environment": "client" },
+		{ "config": "jaymospowers.weaponmaster.client.mixins.json", "environment": "client" },
+		{ "config": "jaymospowers.sodium.client.mixins.json", "environment": "client" },
 		"jaymospowers.smoke.mixins.json",
 		{ "config": "jaymospowers.smoke.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.rig.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.cryo.client.mixins.json", "environment": "client" },
-		"jaymospowers.ember.mixins.json"
+		"jaymospowers.ember.mixins.json",
+		"jaymospowers.carryon.mixins.json",
+		"jaymospowers.lithostitched.mixins.json",
+		"jaymospowers.artifacts.mixins.json",
+		{ "config": "jaymospowers.artifacts.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

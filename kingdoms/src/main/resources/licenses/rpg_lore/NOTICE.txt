@@ -1,0 +1,9 @@
+The war journals, the data-driven lore books (data/<namespace>/lore/*.json) and the Lore Codex in Jaymo's Kingdoms follow an
+idea from RPG Lore (lore books dropped by mobs and kept in a collection, with books added as data and given drop filters),
+a mod licensed under the MIT License.
+
+Only the idea is used. No code, text, texture or data file of RPG Lore is copied: the book builder, the drop filters, the
+codex, its screen, every page of every journal and all the art here are written and drawn for Jaymo's Kingdoms.
+
+RPG Lore is Copyright (c) its authors, MIT License (https://opensource.org/licenses/MIT). The MIT permission and warranty
+notice applies to that mod and is credited here as its licence asks.

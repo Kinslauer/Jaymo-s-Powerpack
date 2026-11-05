@@ -47,6 +47,8 @@ public final class ZFighterRealism {
 	static final String SETTING = "realistic_mode";
 	/** (0.17.62) {@code afterlife=true} (the default): a Z Fighter who dies wakes in the Other World ({@link ZFighterAfterlife}). */
 	static final String AFTERLIFE_SETTING = "afterlife";
+	/** (0.20.26) {@code death_by_cause=true} (the default): a player's death is rolled on its cause (Mortality); and {@code final_odds}, a scale on those odds. */
+	static final String DEATH_SETTING = "death_by_cause", ODDS_SETTING = "final_odds";
 
 	/** What a ki attack and any other blow do (multiplied). */
 	static final float KI_DAMAGE = 2.0F;
@@ -66,6 +68,8 @@ public final class ZFighterRealism {
 
 	private static boolean realistic;
 	private static boolean afterlife = true;
+	private static boolean deathByCause = true;
+	private static float finalOdds = 1.0F;
 	private static final Map<UUID, Float> LAST_HEALTH = new HashMap<>();
 
 	private ZFighterRealism() {
@@ -99,6 +103,16 @@ public final class ZFighterRealism {
 	/** (0.17.62) Whether a Z Fighter's death takes him to the Other World ({@code afterlife} in the server properties; on by default). */
 	public static boolean afterlife() {
 		return afterlife;
+	}
+
+	/** (0.20.26) Whether deaths are rolled on their cause ({@code death_by_cause}, on by default; {@code Mortality}). */
+	public static boolean deathByCause() {
+		return deathByCause;
+	}
+
+	/** (0.20.26) The scale on every cause's chance of a final death ({@code final_odds}, 1 by default; certain ones stay certain). */
+	public static float finalOdds() {
+		return finalOdds;
 	}
 
 	/** Turns it on or off for the running server and saves the setting. */
@@ -184,12 +198,21 @@ public final class ZFighterRealism {
 				}
 				realistic = "true".equalsIgnoreCase(properties.getProperty(SETTING, "false").trim());
 				afterlife = !"false".equalsIgnoreCase(properties.getProperty(AFTERLIFE_SETTING, "true").trim());
-				if (properties.getProperty(AFTERLIFE_SETTING) == null) {
+				deathByCause = !"false".equalsIgnoreCase(properties.getProperty(DEATH_SETTING, "true").trim());
+				try {
+					finalOdds = Math.max(0.0F, Float.parseFloat(properties.getProperty(ODDS_SETTING, "1.0").trim()));
+				} catch (NumberFormatException e) {
+					finalOdds = 1.0F;
+				}
+				if (properties.getProperty(AFTERLIFE_SETTING) == null || properties.getProperty(DEATH_SETTING) == null
+					|| properties.getProperty(ODDS_SETTING) == null) {
 					save();
 				}
 			} else {
 				realistic = false;
 				afterlife = true;
+				deathByCause = true;
+				finalOdds = 1.0F;
 				save();
 			}
 		} catch (IOException e) {
@@ -202,13 +225,17 @@ public final class ZFighterRealism {
 		Properties properties = new Properties();
 		properties.setProperty(SETTING, Boolean.toString(realistic));
 		properties.setProperty(AFTERLIFE_SETTING, Boolean.toString(afterlife));
+		properties.setProperty(DEATH_SETTING, Boolean.toString(deathByCause));
+		properties.setProperty(ODDS_SETTING, Float.toString(finalOdds));
 		try {
 			Files.createDirectories(file.getParent());
 			try (Writer writer = Files.newBufferedWriter(file)) {
 				properties.store(writer, "Jaymo's Powers, server settings. realistic_mode=true makes Z Fighter fights harsher: ki x"
 					+ KI_DAMAGE + " and blows x" + BLOW_DAMAGE + " damage to both sides, ki regen x" + KI_REGEN + ", flight ki x" + FLIGHT_COST
 					+ ", natural healing x" + HEALTH_REGEN + " in a fight, and hard blows may break limbs (docs/Abilities.md, Realistic mode). "
-					+ "afterlife=false stops a Z Fighter who dies from waking in the Other World (default true).");
+					+ "afterlife=false stops a Z Fighter who dies from waking in the Other World (default true). "
+					+ "death_by_cause=false turns off death by cause (a death's chance to be final, else waking left for dead; default true), "
+					+ "final_odds scales those chances (default 1.0).");
 			}
 		} catch (IOException e) {
 			JaymosPowers.LOGGER.warn("Couldn't write {}", file, e);

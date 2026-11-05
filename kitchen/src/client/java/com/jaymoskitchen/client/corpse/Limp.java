@@ -44,14 +44,16 @@ public record Limp(float back, float left) {
 		Limp limp = this;
 		// humanoids: arms and legs straight down (a quarter turn back from the body), each swinging a little its own way
 		if (root.hasChild("right_arm")) {
-			hang(root, "right_arm", limp, 1.0F, 0.06F);
-			hang(root, "left_arm", limp, 0.9F, -0.06F);
-			hang(root, "right_leg", limp, 0.7F, 0.03F);
-			hang(root, "left_leg", limp, 0.75F, -0.03F);
+			hang(root, "right_arm", limp, Mth.HALF_PI, 1.0F, 0.06F);
+			hang(root, "left_arm", limp, Mth.HALF_PI, 0.9F, -0.06F);
+			// (0.5.53) the legs and head only as far back as the physics lets them (RagdollRig#HELD_LEG_HANG), so a body let
+			// go of falls from just this pose, without its legs snapping forward
+			hang(root, "right_leg", limp, LEG_HANG, 0.7F, 0.03F);
+			hang(root, "left_leg", limp, LEG_HANG, 0.75F, -0.03F);
 			if (root.hasChild("head")) {
 				// head thrown back, rolling with the swing
 				ModelPart head = root.getChild("head");
-				head.xRot = -1.0F - limp.left() * 0.3F;
+				head.xRot = -HEAD_BACK - limp.left() * 0.3F;
 				head.yRot = limp.back() * 0.4F;
 				head.zRot = 0.0F;
 			}
@@ -70,11 +72,18 @@ public record Limp(float back, float left) {
 		}
 	}
 
-	/** A humanoid limb hanging straight down from the body lying on its back, swung by the carrier's movement. */
-	private static void hang(ModelPart root, String name, Limp limp, float give, float spread) {
+	/** (0.5.53) How far back a carried humanoid's legs hang, and its head is thrown back (radians). */
+	private static final float LEG_HANG = com.jaymoskitchen.ragdoll.RagdollRig.HELD_LEG_HANG,
+		HEAD_BACK = com.jaymoskitchen.ragdoll.RagdollRig.HELD_HEAD_BACK;
+
+	/**
+	 * A humanoid limb hanging down from the body lying on its back ({@code back} radians back from along the body: a
+	 * quarter turn is straight down), swung by the carrier's movement.
+	 */
+	private static void hang(ModelPart root, String name, Limp limp, float back, float give, float spread) {
 		if (root.hasChild(name)) {
 			ModelPart limb = root.getChild(name);
-			limb.xRot = Mth.HALF_PI - limp.left() * give;
+			limb.xRot = back - limp.left() * give;
 			limb.yRot = 0.0F;
 			limb.zRot = spread + limp.back() * give;
 		}

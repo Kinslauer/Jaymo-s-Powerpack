@@ -184,15 +184,22 @@ final class WindHud {
 		}
 		int color = Fate.isCorrupted(player) ? STORMBOUND_COLOR : CYCLONE_COLOR;
 		int barWidth = 52;
-		int x0 = cx - barWidth / 2;
-		int y = cy - 20;
+		Component name = WindCycloneClient.label().copy().withColor(color);
+		int boxW = Math.max(barWidth, font.width(name));
+		// (HUD rework) Cyclone name + swirling band: ABOVE zone, row 21
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:wind_cyclone", 21, boxW, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
+		if (at == null) {
+			return;
+		}
+		int x0 = at[0] + (boxW - barWidth) / 2;
+		int y = at[1] + 11;
 		graphics.fill(x0 - 1, y - 1, x0 + barWidth + 1, y + 4, 0x90000000);
 		// a bright band running round and round
 		int band = 14;
-		int at = (int)(time * 3.0F) % (barWidth + band) - band;
+		int sweep = (int)(time * 3.0F) % (barWidth + band) - band;
 		graphics.fill(x0, y, x0 + barWidth, y + 3, 0x80000000 | color);
-		graphics.fill(Math.max(x0, x0 + at), y, Math.min(x0 + barWidth, x0 + at + band), y + 3, 0xFFFFFFFF);
-		graphics.centeredText(font, WindCycloneClient.label().copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
+		graphics.fill(Math.max(x0, x0 + sweep), y, Math.min(x0 + barWidth, x0 + sweep + band), y + 3, 0xFFFFFFFF);
+		graphics.text(font, name, at[0] + boxW / 2 - font.width(name) / 2, at[1], 0xFFFFFFFF, true);
 	}
 
 	/** Cyclone Lance (ascended): its chip, with the ultimate key and the cooldown. */
@@ -217,12 +224,10 @@ final class WindHud {
 	/** Top-left of the chip row: right of the hotbar, past the off-hand slot / attack indicator; above the hunger bar on narrow screens. */
 	private static int[] chipsOrigin(int width, int height, int count) {
 		int cx = width / 2;
-		int x = cx + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + chipsWidth(count) > width - 2) {
-			x = cx + 91 - chipsWidth(count);
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		return new int[] {x, y};
 	}
 
@@ -289,17 +294,23 @@ final class WindHud {
 		}
 		float charge = Mth.clamp(client.channelTicks() / (float)client.channelMax(), 0.0F, 1.0F);
 		int barWidth = 52;
-		int x0 = cx - barWidth / 2;
-		int y = cy - 20;
-		graphics.fill(x0 - 1, y - 1, x0 + barWidth + 1, y + 4, 0x90000000);
 		int color = charge >= 1.0F ? pulse(0xFFFFFF, ability.color, time * 0.6F) : ability.color;
-		graphics.fill(x0, y, x0 + Mth.ceil(barWidth * charge), y + 3, 0xFF000000 | color);
 		MutableComponent label = Component.translatable(ability.langKey()).withColor(ability.color);
 		if (cold) {
 			// so it's clear why the charge crawls
 			label.append(Component.literal("  ")).append(Component.translatable("hud.jaymospowers.wind.cold").withColor(FROST_COLOR));
 		}
-		graphics.centeredText(font, label, cx, y - 11, 0xFFFFFFFF);
+		int boxW = Math.max(barWidth, font.width(label));
+		// (HUD rework) channel bar: ABOVE zone, row 20
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:wind_channel", 20, boxW, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
+		if (at == null) {
+			return;
+		}
+		int x0 = at[0] + (boxW - barWidth) / 2;
+		int y = at[1] + 11;
+		graphics.fill(x0 - 1, y - 1, x0 + barWidth + 1, y + 4, 0x90000000);
+		graphics.fill(x0, y, x0 + Mth.ceil(barWidth * charge), y + 3, 0xFF000000 | color);
+		graphics.text(font, label, at[0] + boxW / 2 - font.width(label) / 2, at[1], 0xFFFFFFFF, true);
 	}
 
 	private static void chips(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, int x, int y, float time) {

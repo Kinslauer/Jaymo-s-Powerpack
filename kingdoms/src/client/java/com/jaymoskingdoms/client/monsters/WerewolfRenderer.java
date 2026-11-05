@@ -31,6 +31,11 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 	/** (0.7.1) The cursed ones' coats (coat, then wear: mangy, scarred, patchy) and their rags ({@code tools/gen_cursed_werewolf.py}). */
 	private static final Identifier[][] CURSED = new Identifier[COATS.length][Werewolf.WEARS];
 	private static final Identifier[] RAGS = new Identifier[Werewolf.RAG_SETS];
+	/** (0.7.574) The lean wolf's coats, and the fiery one's frames ({@code tools/gen_lean_wolf.py}). */
+	private static final Identifier[] LEAN = {LegendRenderer.texture("werewolf_lean_black"), LegendRenderer.texture("werewolf_lean_brown"),
+		LegendRenderer.texture("werewolf_lean_timber")};
+	private static final Identifier[] LEAN_FIRE = {LegendRenderer.texture("werewolf_lean_fire_1"), LegendRenderer.texture("werewolf_lean_fire_2"),
+		LegendRenderer.texture("werewolf_lean_fire_3")};
 
 	static {
 		String[] coats = {"black", "brown", "timber"}, wears = {"mangy", "scarred", "patchy"};
@@ -49,11 +54,13 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 
 	private final EntityModel<LegendState> beast;
 	private final HumanoidModel<LegendState> human;
+	private final EntityModel<LegendState> lean;
 
 	private WerewolfRenderer(EntityRendererProvider.Context context) {
 		super(context, new WerewolfModel(WerewolfModel.createBodyLayer().bakeRoot()), 0.5F, 1.0F, state -> FACES[0], false);
 		this.beast = this.model;
 		this.human = new HumanoidModel<>(LayerDefinition.create(HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F), 64, 32).bakeRoot());
+		this.lean = new LeanWolfModel(LeanWolfModel.createBodyLayer().bakeRoot());
 		this.addLayer(new RagsLayer(this));
 	}
 
@@ -69,11 +76,16 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 		state.build = werewolf.build();
 		state.look = werewolf.look();
 		state.rags = werewolf.rags();
+		state.lean = werewolf.lean();
+		if (werewolf.isNoAi()) {
+			// (a player's beast faces the way it runs: its head only turns toward where they look as far as a neck can)
+			state.yRot = com.jaymoskingdoms.TakeoverFacing.head(state.yRot);
+		}
 	}
 
 	@Override
 	public void submit(LegendState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-		this.model = state.shut ? this.human : this.beast;
+		this.model = state.shut ? this.human : state.lean ? this.lean : this.beast;
 		super.submit(state, poseStack, collector, camera);
 	}
 
@@ -93,7 +105,7 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 	protected void scale(LegendState state, PoseStack poseStack) {
 		super.scale(state, poseStack);
 		float grow = 0.65F + 0.35F * state.beast;
-		float wide = state.build == 0 ? 0.85F : state.build == 2 ? 1.2F : 1.0F;
+		float wide = state.lean ? 1.0F : state.build == 0 ? 0.85F : state.build == 2 ? 1.2F : 1.0F;
 		if (grow != 1.0F || wide != 1.0F) {
 			poseStack.scale(grow * wide, grow, grow * wide);
 		}
@@ -105,6 +117,9 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 			return FACES[Math.floorMod(state.variant / Werewolf.COATS, FACES.length)];
 		}
 		int coat = Math.floorMod(state.variant, Werewolf.COATS);
+		if (state.lean) {
+			return coat == Werewolf.FIRE_COAT ? LEAN_FIRE[(int) (state.ageInTicks / FLICKER_TICKS) % LEAN_FIRE.length] : LEAN[coat];
+		}
 		if (coat == Werewolf.FIRE_COAT) {
 			return FIRE[(int) (state.ageInTicks / FLICKER_TICKS) % FIRE.length];
 		}
@@ -119,7 +134,7 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, LegendState state, float yRot, float xRot) {
-			if (state.look <= 0 || state.shut || state.isInvisible) {
+			if (state.look <= 0 || state.shut || state.lean || state.isInvisible) {
 				return;
 			}
 			Identifier rags = RAGS[(state.look - 1) % Werewolf.RAG_SETS];

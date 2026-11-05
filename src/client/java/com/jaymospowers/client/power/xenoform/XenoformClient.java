@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /** What everyone's client does with a transformed player: hides them, so {@link XenoformLayer} can draw the alien. */
 public final class XenoformClient {
@@ -41,8 +42,28 @@ public final class XenoformClient {
 	 * legs keep to the ground it covers. Null: not Towerback.
 	 */
 	public static final RenderStateDataKey<Float> TOWER_STRIDE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_stride");
+	/** (0.19.62) A four-legged alien's ability pose from {@code XenoformState.ACT}: "charge", "roll", "spin" or null. */
+	public static final RenderStateDataKey<String> ACT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_act");
+	/** (0.19.66) A low-box alien (Croaker) holding sneak, which its pose can't show. */
+	public static final RenderStateDataKey<Boolean> SNEAK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_sneak");
+	/** (0.20.9) The change-in morph this player is in ({@link XenoMorph}), or null. */
+	public static final RenderStateDataKey<XenoMorph.Morph> MORPH = RenderStateDataKey.create(() -> "jaymospowers:xenoform_morph");
+	/**
+	 * (0.20.60) Which of Bulwark's four arms throws the swing now (0 upper right, 1 upper left, 2 lower right, 3 lower
+	 * left; null: not Bulwark). Each new swing goes on to the next arm, so its attacks and its Fist Combo go round all four
+	 * (Andy: "attacking with bulwark should alternate between all arms").
+	 */
+	public static final RenderStateDataKey<Integer> BULWARK_ARM = RenderStateDataKey.create(() -> "jaymospowers:xenoform_bulwark_arm");
 	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
 	private static final double STRIDE_CATCH_UP = 0.3;
+
+	/** One Bulwark's swings on this client: how many it has thrown, and how far into the swing it was when last drawn. */
+	private static final class Swings {
+		int count;
+		float last;
+	}
+
+	private static final java.util.Map<Player, Swings> SWINGS = new java.util.WeakHashMap<>();
 
 	/** One Towerback's walk on this client: its stride now and last tick, when it was last moved on, the error left to take up, its footfalls. */
 	private static final class Stride {
@@ -54,6 +75,20 @@ public final class XenoformClient {
 	private static final java.util.Map<Player, Stride> STRIDES = new java.util.WeakHashMap<>();
 
 	private XenoformClient() {
+	}
+
+	/**
+	 * (0.20.9) The model a player wearing {@code form} is drawn with: the Ultimate's ({@link XenoFormModels#ultimate}) while their Ultimate is
+	 * on and that alien has one, else the alien's own ({@link XenoFormModels#of}). Null: not transformed.
+	 */
+	public static XenoFormModels.@Nullable FormModel model(@Nullable String form, boolean ultimate) {
+		if (ultimate) {
+			XenoFormModels.FormModel evolved = XenoFormModels.ultimate(form);
+			if (evolved != null) {
+				return evolved;
+			}
+		}
+		return XenoFormModels.of(form);
 	}
 
 	/** From the avatar renderer's extractRenderState, last. */
@@ -78,17 +113,25 @@ public final class XenoformClient {
 			state.setData(SPIKES, false);
 		}
 		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
+		state.setData(MORPH, form != null && player != null ? XenoMorph.get(player, partialTicks) : null);
 		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
 		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);
 		state.setData(TOWER_SWAT, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.swatPhase(player, partialTicks) : -1.0F);
+		state.setData(ACT, form != null ? player.getAttached(XenoformState.ACT) : null);
+		// (0.19.66) a low-box alien's pose never crouches, so its sneak is read off the key (Croaker's flat crouch)
+		state.setData(SNEAK, form != null && XenoformState.lowBox(player) && player.isShiftKeyDown() && !player.isInWater());
 		state.setData(TOWER_STRIDE, "towerback".equals(form) ? stride(player, partialTicks) : null);
+		state.setData(BULWARK_ARM, "bulwark".equals(form) ? bulwarkArm(player, state.swingAnimation) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;
 		}
-		if ("billow".equals(form)) {
-			// (0.19.34) the cloud's low box is the swimming pose's, but it isn't swimming: draw it level
+		if (player != null && XenoformState.lowBox(player) || "skitter".equals(form) && player != null && SkitterCeiling.spiderOrRising(player)
+			&& (state.getData(SkitterCeiling.CRAWL_KEY) != null || state.swimAmount > 0.0F) || "gnasher".equals(form)) {
+			// (0.19.34) the cloud's low box is the swimming pose's, but it isn't swimming: draw it level (0.19.62, and
+			// Skitter's spider, prone, and the swim tilt still easing out once it stands; 0.19.82, and Gnasher's shark,
+			// whose body is already level: it swims and crawls on its own, so the swim tilt would stand it on its nose)
 			state.swimAmount = 0.0F;
 			state.isVisuallySwimming = false;
 			if (state.pose == net.minecraft.world.entity.Pose.SWIMMING) {
@@ -96,6 +139,19 @@ public final class XenoformClient {
 			}
 		}
 		hideBody(state);
+	}
+
+	/**
+	 * (0.20.60) The arm Bulwark's swing is thrown with: a swing that starts (from rest, or over one still going, as the
+	 * combo's do) moves it on to the next of the four, in turn upper right, upper left, lower right, lower left.
+	 */
+	private static int bulwarkArm(Player player, float swing) {
+		Swings s = SWINGS.computeIfAbsent(player, p -> new Swings());
+		if (swing > 0.0F && (s.last <= 0.0F || swing < s.last - 0.1F)) {
+			s.count = (s.count + 1) & 3;
+		}
+		s.last = swing;
+		return s.count;
 	}
 
 	/**
@@ -140,7 +196,7 @@ public final class XenoformClient {
 	 * their own shape.
 	 */
 	public static boolean submitGhost(AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int light, int tint) {
-		XenoFormModels.FormModel model = XenoFormModels.of(state.getData(FORM));
+		XenoFormModels.FormModel model = model(state.getData(FORM), Boolean.TRUE.equals(state.getData(ULTIMATE)));
 		if (model == null) {
 			return false;
 		}
@@ -151,7 +207,7 @@ public final class XenoformClient {
 			poseStack.scale(model.renderScale, model.renderScale, model.renderScale);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
 		}
-		collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(model.texture), light, OverlayTexture.NO_OVERLAY, tint, null,
+		collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(model instanceof XenoFormModels.UltimateModel ? model.ultimateTexture : model.texture), light, OverlayTexture.NO_OVERLAY, tint, null,
 			EntityRenderState.NO_OUTLINE);
 		poseStack.popPose();
 		return true;

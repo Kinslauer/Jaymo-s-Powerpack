@@ -1,0 +1,138 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "frame": "jaymospowers:block/jewellery/lapidary_wheel_frame",
+    "stone": "jaymospowers:block/jewellery/lapidary_wheel_stone",
+    "particle": "jaymospowers:block/jewellery/lapidary_wheel_frame"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        4
+      ],
+      "to": [
+        15,
+        3,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#frame"
+        },
+        "east": {
+          "texture": "#frame"
+        },
+        "south": {
+          "texture": "#frame"
+        },
+        "west": {
+          "texture": "#frame"
+        },
+        "up": {
+          "texture": "#frame"
+        },
+        "down": {
+          "texture": "#frame"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        3,
+        6
+      ],
+      "to": [
+        4,
+        12,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#frame"
+        },
+        "east": {
+          "texture": "#frame"
+        },
+        "south": {
+          "texture": "#frame"
+        },
+        "west": {
+          "texture": "#frame"
+        },
+        "up": {
+          "texture": "#frame"
+        },
+        "down": {
+          "texture": "#frame"
+        }
+      }
+    },
+    {
+      "from": [
+        12,
+        3,
+        6
+      ],
+      "to": [
+        14,
+        12,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#frame"
+        },
+        "east": {
+          "texture": "#frame"
+        },
+        "south": {
+          "texture": "#frame"
+        },
+        "west": {
+          "texture": "#frame"
+        },
+        "up": {
+          "texture": "#frame"
+        },
+        "down": {
+          "texture": "#frame"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        4,
+        7
+      ],
+      "to": [
+        12,
+        12,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    }
+  ]
+}

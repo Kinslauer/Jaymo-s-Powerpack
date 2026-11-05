@@ -9,7 +9,12 @@ import com.jaymospowers.power.darktide.DarktidePower;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import com.jaymospowers.power.darktide.DarktideWeapons;
 import com.jaymospowers.power.wind.SorasDagger;
+import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.stamina.Feathers;
+import com.jaymospowers.tinkering.TinkerTool;
+import com.jaymospowers.tinkering.TinkerToolItem;
+import com.jaymospowers.tinkering.ToolType;
+import com.jaymospowers.tinkering.Trait;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +44,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -50,6 +57,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
@@ -89,6 +98,18 @@ import org.jspecify.annotations.Nullable;
  * darktide", then "keep [their own windows] but give a bar that represents their timings". The powers' guards keep their
  * own parry (one window, a cooldown after a parry, red blows parried too), but show the same timing bar
  * ({@link #showPower}, {@link #SHOWN}) and the same flash ({@link #cue}). Every parry, any kind, fires {@link #PARRIED}.
+ * <p>
+ * (0.20.76) Andy: "parry doesnt seem possible with weapons anymore". Two holes, both closed:
+ * <ul>
+ * <li>Right click on a foe in reach talked to it instead: orcs, guards and bandits are MCA villagers now, and MCA opens
+ * its chat on right click before the item gets its turn. With a guarding weapon in hand, right click on a foe (a
+ * monster, a mob that's swinging at you, the one you're locked onto) raises the guard ({@link #guardsAgainst},
+ * {@code GuardOverTalkMixin}); sneak to talk to them anyway. Only the mob's own answer (MCA's chat, a trade) stands
+ * aside: everyone's right-click-on-someone handlers (executions, reviving, paying off) still come first.</li>
+ * <li>Weapons forged at the Tool Station never had the guard (their item has its own right click, for the dual-wield
+ * dagger and thrown blades). Their melee kinds get it now ({@link #guardable}, {@code ToolStats}); a dual-wield dagger
+ * in the off hand still swings on right click.</li>
+ * </ul>
  */
 public final class Guard {
 	/** A blow in the first this-many ticks of a raise is a perfect parry; up to the second, a parry. */
@@ -232,6 +253,11 @@ public final class Guard {
 	 * click: no block of its own, no eating, no spear's charge, no {@code use} of its own class (tridents, bows, staves).
 	 */
 	private static boolean guardable(Item item) {
+		if (item instanceof TinkerTool tool) {
+			// (0.20.76) a Tool Station sword, weapon or tool: its own right click is only for the off hand or a throw
+			ToolType.Style style = tool.type().style;
+			return style == ToolType.Style.SWORD || style == ToolType.Style.WEAPON || style == ToolType.Style.TOOL;
+		}
 		DataComponentMap components = item.components();
 		if (!components.has(DataComponents.WEAPON) || components.has(DataComponents.BLOCKS_ATTACKS) || components.has(DataComponents.CONSUMABLE)
 			|| components.has(DataComponents.KINETIC_WEAPON) || components.has(DataComponents.EQUIPPABLE)) {
@@ -272,6 +298,10 @@ public final class Guard {
 		if (!off.isEmpty() && !off.has(DataComponents.WEAPON)) {
 			return InteractionResult.FAIL;
 		}
+		if (off.getItem() instanceof TinkerToolItem dagger && dagger.type.traits.containsKey(Trait.OFFHAND)) {
+			// (0.20.76) a Tool Station dagger in the off hand swings on right click (Dual Wield), as before
+			return InteractionResult.FAIL;
+		}
 		if (DarktidePower.has(player) && DarktideWeapons.canGuard(player)) {
 			return InteractionResult.FAIL;
 		}
@@ -280,6 +310,27 @@ public final class Guard {
 			return KnifeGuard.use(player, hand);
 		}
 		return InteractionResult.PASS;
+	}
+
+	/**
+	 * (0.20.76) Right click on {@code mob} (both sides) should raise {@code player}'s guard rather than reach the mob
+	 * (MCA's chat, a trade): a guarding weapon in the main hand and a foe under the crosshair. Sneaking talks as before.
+	 */
+	public static boolean guardsAgainst(Player player, Mob mob) {
+		if (player.isSpectator() || player.isShiftKeyDown() || !mob.isAlive() || Downed.isDowned(mob)) {
+			return false;
+		}
+		ItemStack main = player.getMainHandItem();
+		boolean guards = KnifeGuard.isKnife(main.getItem()) || weaponGuard(main) && !HammerSlam.isWarhammer(main.getItem());
+		return guards && foe(player, mob);
+	}
+
+	/**
+	 * (0.20.76) Someone {@code player} is fighting, judged only by what both sides know alike (so the client and server
+	 * agree): a monster, a mob mid-fight (its synced aggressive flag: Kingdoms raises it on every swing), the locked foe.
+	 */
+	private static boolean foe(Player player, Mob mob) {
+		return mob instanceof Enemy || mob.isAggressive() || LockOn.target(player) == mob;
 	}
 
 	/** Whether {@code player} holds anything up that blocks (a shield or a weapon's guard; not a warhammer's smash charge). */
@@ -388,6 +439,8 @@ public final class Guard {
 		return flat.normalize().dot(look) >= Math.cos(Math.toRadians(degrees));
 	}
 
+	private static final Holder<SoundEvent> PARRY_SOUND = Holder.direct(SoundEvent.createVariableRangeEvent(JaymosPowers.id("guard.parry")));
+
 	/**
 	 * (0.18.24, public) A parry landed, by any guard: the sparks and ring, the cue on the bar, a perfect one's feathers back,
 	 * and the attacker (null for an arrow) shoved, staggered, a player's weapon knocked out of rhythm on a perfect one,
@@ -402,8 +455,9 @@ public final class Guard {
 		Vec3 at = player.getEyePosition().add(from.subtract(player.getEyePosition()).normalize().scale(0.7)).add(0.0, -0.3, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, perfect ? 18 : 10, 0.15, 0.15, 0.15, 0.45);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, perfect ? 14 : 6, 0.1, 0.1, 0.1, 0.25);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, perfect ? 0.45F : 0.25F, perfect ? 2.0F : 1.7F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, perfect ? 1.5F : 1.2F);
+		// Steel ring: "Updated Parry Sound" (MIT), from Eelke's CC0 freesound 523521.
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), PARRY_SOUND, SoundSource.PLAYERS, perfect ? 1.0F : 0.8F, (perfect ? 1.1F : 0.95F) + (player.getRandom().nextFloat() - 0.5F) * 0.1F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.35F, perfect ? 1.5F : 1.2F);
 		cue(player, attacker, perfect);
 		Shakes.send(player, perfect ? 1.2F : 0.6F, from);
 		if (perfect) {

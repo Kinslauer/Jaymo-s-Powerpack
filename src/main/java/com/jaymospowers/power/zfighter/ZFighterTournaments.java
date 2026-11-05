@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -30,8 +31,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -640,18 +639,16 @@ final class ZFighterTournaments {
 		lastBoard = board;
 	}
 
-	/** A Z Fighter is paid in TP; anyone else in emeralds (a Z Fighter gets the emeralds too). */
+	/** A Z Fighter is paid in TP; anyone else in silver coins (a Z Fighter gets the coins too). (0.20.0) Was emeralds; 1 silver = 1 old emerald. */
 	static void pay(ServerPlayer player, int tp, int emeralds) {
+		Component money = KingdomsMoney.text(player, KingdomsMoney.worth(emeralds));
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(player, tp);
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize_tp", tp, emeralds).withStyle(ChatFormatting.GOLD));
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize_tp", tp, money).withStyle(ChatFormatting.GOLD));
 		} else {
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize", emeralds).withStyle(ChatFormatting.GOLD));
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize", money).withStyle(ChatFormatting.GOLD));
 		}
-		ItemStack stack = new ItemStack(Items.EMERALD, emeralds);
-		if (!player.getInventory().add(stack)) {
-			player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
-		}
+		KingdomsMoney.pay(player, KingdomsMoney.worth(emeralds));
 	}
 
 	private static boolean inRing(Tourney t, Vec3 pos) {

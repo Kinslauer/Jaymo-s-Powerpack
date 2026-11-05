@@ -18,6 +18,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -34,6 +35,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -69,6 +71,14 @@ public final class WerewolfPlayers {
 	/** What a kill feeds the beast (food, saturation). */
 	static final int KILL_FOOD = 6;
 	static final float KILL_SATURATION = 0.8F;
+	/**
+	 * (0.7.574, Andy: "it should be a variation that you can achieve") The lean wolf: once the change comes at will, a
+	 * werewolf who has kept the curse tame (wildness at most stage {@link #LEAN_MAX_STAGE}) can sneak and change into a
+	 * wolf on all fours instead of the great beast. Quicker and higher-leaping, but no stronger and less tough: Speed,
+	 * Jump Boost (amplifiers) and extra health. The full moon's change is always the great beast.
+	 */
+	static final int LEAN_MAX_STAGE = 1, LEAN_SPEED = 2, LEAN_JUMP = 2;
+	static final double LEAN_HEALTH = 4.0;
 	/** After changing back: sick and shaking this long (ticks). */
 	static final int AFTER_TICKS = 600;
 
@@ -93,6 +103,8 @@ public final class WerewolfPlayers {
 		/** (0.7.185) It came on its own on a night that isn't the full moon ({@link FeralCurse}): it lasts till dawn. */
 		boolean wild;
 		boolean leaving;
+		/** (0.7.574) The lean wolf, not the great beast. */
+		boolean lean;
 
 		Form(long since, boolean forced) {
 			this.since = since;
@@ -130,6 +142,13 @@ public final class WerewolfPlayers {
 			}
 			return false;
 		});
+		// (Andy, 2026-11-05) a player's beast bites as a cursed villager's does: the curse may go to whoever lives through it
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			if (!blocked && taken > 0.0F && entity.isAlive() && source.getEntity() instanceof ServerPlayer biter && source.getDirectEntity() == biter
+				&& entity != biter && beastUp(biter) && entity.level() instanceof ServerLevel level) {
+				Lycans.bite(level, entity);
+			}
+		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				end(player, false);
@@ -159,6 +178,12 @@ public final class WerewolfPlayers {
 	/** Whether {@code player} is the beast now (or changing into it). */
 	public static boolean beast(ServerPlayer player) {
 		return FORMS.containsKey(player.getUUID());
+	}
+
+	/** (0.7.574) Whether {@code player} is the lean wolf now (or changing into it). */
+	public static boolean lean(ServerPlayer player) {
+		Form f = FORMS.get(player.getUUID());
+		return f != null && f.lean;
 	}
 
 	/** (0.7.185) Whether {@code player} is the beast in full now (not doubling over, not shrinking back). */
@@ -204,6 +229,27 @@ public final class WerewolfPlayers {
 	static void cure(ServerPlayer player) {
 		end(player, false);
 		player.removeAttached(Lycans.CURSE);
+	}
+
+	// ---- the bite ------------------------------------------------------------------------------------------------------
+
+	/**
+	 * (Andy, 2026-11-05: "it should spread to players as well") A cursed beast's bite that {@code player} lived through: the
+	 * curse is theirs (a wolfblood's is finished). Nothing tells them but a far howl only they hear; the first change comes
+	 * with the next full moon, not tonight's.
+	 */
+	static void bitten(ServerPlayer player) {
+		Lycans.Curse had = player.getAttached(Lycans.CURSE);
+		if (!player.isAlive() || player.isCreative() || player.isSpectator() || Vampires.isVampire(player) || had != null && !had.half()
+			|| !(player.level() instanceof ServerLevel level)) {
+			return;
+		}
+		long nightNo = Vampires.nightIndex(level.getServer().overworld().getOverworldClockTime());
+		Lycans.Curse curse = had != null ? had : Lycans.roll(level, player);
+		player.setAttached(Lycans.CURSE, new Lycans.Curse(curse.coat(), curse.scale(), curse.build(), nightNo, curse.moons(), false));
+		player.removeAttached(Vampires.BITTEN);
+		player.connection.send(new ClientboundSoundPacket(SoundEvents.WOLF_SOUNDS.get(WolfSoundVariants.SoundSet.BIG).adultSounds().ambientSound(),
+			SoundSource.AMBIENT, player.getX() + 40.0, player.getEyeY(), player.getZ(), 0.6F, 0.5F, player.getRandom().nextLong()));
 	}
 
 	// ---- the ritual ----------------------------------------------------------------------------------------------------
@@ -269,7 +315,14 @@ public final class WerewolfPlayers {
 			return;
 		}
 		if (f == null) {
+			// (0.7.574) sneaking: the lean wolf, if the curse is tame enough to let them run light
+			boolean lean = player.isShiftKeyDown();
+			if (lean && FeralCurse.stage(player) > LEAN_MAX_STAGE) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.werewolf.lean_wild").withStyle(ChatFormatting.DARK_RED));
+				return;
+			}
 			begin(player, overworld.getGameTime(), false);
+			FORMS.get(player.getUUID()).lean = lean;
 		} else if (f.beast != null && !f.leaving) {
 			if (f.wild && Vampires.night(clock) || FeralCurse.refuses(player)) {
 				// (0.7.185) the wolf won't let go: a change that came on its own lasts the night, and a wild one can refuse
@@ -331,6 +384,7 @@ public final class WerewolfPlayers {
 					continue;
 				}
 				f.beast.setNoAi(true);
+				f.beast.setLean(f.lean);
 				level.addFreshEntity(f.beast);
 				w = f.beast;
 			}
@@ -363,6 +417,7 @@ public final class WerewolfPlayers {
 			return;
 		}
 		w.setNoAi(true);
+		w.setLean(f.lean);
 		w.setCustomName(player.getDisplayName());
 		w.setCustomNameVisible(false);
 		f.beast = w;
@@ -381,7 +436,7 @@ public final class WerewolfPlayers {
 		Suspicion.witnessed(level, player, Suspicion.WOLF, Suspicion.ADD_CHANGE, Suspicion.CHANGE_RANGE, false);
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null && health.getModifier(HEALTH) == null) {
-			health.addTransientModifier(new AttributeModifier(HEALTH, BEAST_HEALTH, AttributeModifier.Operation.ADD_VALUE));
+			health.addTransientModifier(new AttributeModifier(HEALTH, f.lean ? LEAN_HEALTH : BEAST_HEALTH, AttributeModifier.Operation.ADD_VALUE));
 		}
 		buffs(player);
 		strip(player, true);
@@ -402,6 +457,14 @@ public final class WerewolfPlayers {
 	private static void buffs(ServerPlayer player) {
 		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, true, false, false));
 		player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
+		Form f = FORMS.get(player.getUUID());
+		if (f != null && f.lean) {
+			// (0.7.574) the lean wolf: fast and light, no stronger than they are
+			player.addEffect(new MobEffectInstance(MobEffects.SPEED, 60, LEAN_SPEED, true, false, true));
+			player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, LEAN_JUMP, true, false, true));
+			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 60, 0, true, false, true));
+			return;
+		}
 		player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 60, BEAST_STRENGTH, true, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, 60, BEAST_SPEED, true, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, BEAST_JUMP, true, false, true));
@@ -419,7 +482,9 @@ public final class WerewolfPlayers {
 			ItemStack stack = player.getItemBySlot(slot);
 			if (!stack.isEmpty()) {
 				player.setItemSlot(slot, ItemStack.EMPTY);
-				player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
+				// (2026-11-05: Jung's beast kept its knife) the first free slot can be the very one in their hand, so the
+				// stack went straight back into it every tick: put it anywhere but the selected slot, or at their feet
+				stow(player, stack);
 			}
 		}
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
@@ -436,6 +501,29 @@ public final class WerewolfPlayers {
 				}
 				stack.setDamageValue(damage);
 			}
+			player.drop(stack, true, Prediction.SERVER_ONLY);
+		}
+	}
+
+	/** {@code stack} out of the claws: into the inventory, never the slot in hand, or dropped if there's no room. */
+	private static void stow(ServerPlayer player, ItemStack stack) {
+		Inventory inventory = player.getInventory();
+		int held = inventory.getSelectedSlot();
+		for (int i = 0; i < Inventory.INVENTORY_SIZE && !stack.isEmpty(); i++) {
+			if (i == held) {
+				continue;
+			}
+			ItemStack there = inventory.getItem(i);
+			if (there.isEmpty()) {
+				inventory.setItem(i, stack);
+				stack = ItemStack.EMPTY;
+			} else if (ItemStack.isSameItemSameComponents(there, stack) && there.getCount() < there.getMaxStackSize()) {
+				int moved = Math.min(stack.getCount(), there.getMaxStackSize() - there.getCount());
+				there.grow(moved);
+				stack.shrink(moved);
+			}
+		}
+		if (!stack.isEmpty()) {
 			player.drop(stack, true, Prediction.SERVER_ONLY);
 		}
 	}

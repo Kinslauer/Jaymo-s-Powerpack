@@ -220,6 +220,7 @@ public final class ClassPerks {
 				lines.add(line("bludgeons", pct(BRUTE_DAMAGE)));
 				lines.add(line("weight", "x" + (int) BRUTE_WEIGHT));
 				lines.add(line("stagger", "+"));
+				lines.add(line("rage", pct(BruteRage.RAGE_DAMAGE)));
 			}
 			case MARKSMAN -> {
 				lines.add(line("guns", pct(MARKSMAN_DAMAGE)));

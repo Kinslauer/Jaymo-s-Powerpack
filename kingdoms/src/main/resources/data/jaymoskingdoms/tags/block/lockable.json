@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:doors",
+    "#minecraft:trapdoors",
+    "#minecraft:fence_gates",
+    "minecraft:chest",
+    "minecraft:trapped_chest",
+    "minecraft:barrel",
+    "#minecraft:copper_chests",
+    {
+      "id": "lootr:lootr_chest",
+      "required": false
+    },
+    {
+      "id": "lootr:lootr_trapped_chest",
+      "required": false
+    },
+    {
+      "id": "lootr:lootr_barrel",
+      "required": false
+    }
+  ]
+}

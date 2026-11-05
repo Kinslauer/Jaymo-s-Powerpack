@@ -39,6 +39,11 @@ final class McaLookModels {
 		if (!(state instanceof net.conczin.mca.client.render.VillagerStateHolder holder) || holder.mca$getHumanoidModelPose() == null) {
 			return false;
 		}
+		if (model instanceof net.conczin.mca.client.model.PlayerArmorExtendedModel<?>) {
+			// (0.7.507) MCA's armour on its bodies copies that pose too in its setupAnim, with no flag of its own (Andy: "armor
+			// seems broken on the new races"): a Bio-built's hunch went on its armour twice
+			return true;
+		}
 		java.lang.reflect.Field flag = DEFERRED.computeIfAbsent(model.getClass(), McaLookModels::deferredFlag).orElse(null);
 		try {
 			return flag != null && flag.getBoolean(model);

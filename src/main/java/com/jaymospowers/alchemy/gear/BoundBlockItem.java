@@ -31,8 +31,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 /**
  * A bound block: what the Lift focus turns a block into. The block and everything inside it (a chest's items, a furnace's
  * fire) are bound into this one item, kept in the {@link AlchemyGear#BOUND} component; using the item on a face sets the block back down
- * where it fits, exactly as it was. Unlike {@link CarryBlock}, which only lifts a few kinds of block and carries them in the
- * arms, this takes any block with a body, and the binding is an item that can sit in a pocket or a chest.
+ * where it fits, exactly as it was. Unlike carrying a block in the arms (Carry On, which lifts only blocks with something
+ * in them), this takes any block with a body, and the binding is an item that can sit in a pocket or a chest.
  * If the item is lost the block is lost with it, so it is never destroyed by anything but the usual ways items go.
  */
 public class BoundBlockItem extends Item {
@@ -106,7 +106,6 @@ public class BoundBlockItem extends Item {
 					server.setBlockEntity(loaded);
 				}
 			}
-			CarryBlock.markPlaced(server, pos);
 			server.playSound(null, pos, state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1.0F, 0.8F);
 			if (!player.isCreative()) {
 				stack.shrink(1);

@@ -16,6 +16,22 @@
 		"minecraft:creeper",
 		"minecraft:guardian",
 		"minecraft:elder_guardian",
-		"minecraft:shulker"
+		"minecraft:shulker",
+		{
+			"id": "cubeanimals:shark",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:piranha",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:sawfish",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:snail",
+			"required": false
+		}
 	]
 }

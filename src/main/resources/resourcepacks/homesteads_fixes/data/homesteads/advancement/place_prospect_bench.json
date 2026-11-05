@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "place_prospect_bench": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "homesteads:prospectors_bench"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.place_prospect_bench.descr"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:iron_pickaxe"
+    },
+    "title": {
+      "translate": "advancements.place_prospect_bench.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_prospect_bench"
+    ]
+  ]
+}

@@ -129,8 +129,8 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		}
 	}
 
-	/** (0.18.118) It strikes nothing more: a blade left standing in a body (Lodged). */
-	void spent() {
+	/** (0.18.118) It strikes nothing more: a blade left standing in a body (Lodged), a spear that glanced off (SpellThrows). */
+	public void spent() {
 		this.dealtDamage = true;
 	}
 

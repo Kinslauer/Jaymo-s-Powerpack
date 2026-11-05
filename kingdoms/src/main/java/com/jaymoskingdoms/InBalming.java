@@ -82,6 +82,11 @@ public final class InBalming {
 	static final float SHADOW_AT = 0.3F;
 	static final double SHADOW_REACH = 16.0;
 	static final long SHADOW_AGAIN = 2400L;
+	/**
+	 * The Quiet One's veil (ticks), topped up while he walks at his keeper's side: short, so a shadow whose keeper is gone
+	 * (logged off, another world) is seen again within seconds instead of walking unseen and unhittable for an hour.
+	 */
+	static final int SHADOW_VEIL = 100, SHADOW_TOP_UP = 40;
 	static final double SAY_RANGE = 24.0;
 	static final int LINES = 3;
 
@@ -221,7 +226,7 @@ public final class InBalming {
 		level.sendParticles(ParticleTypes.ENCHANT, e.getX(), e.getY(0.6), e.getZ(), 30, 0.4, 0.6, 0.4, 0.6);
 		level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 0.7F + kind * 0.1F);
 		if (kind != Spirits.QUIET) {
-			Speech.say(level, e, Component.translatable("talk.jaymoskingdoms.inbalm." + key(kind) + "." + random.nextInt(LINES), player.getDisplayName()),
+			Speech.say(level, e, Dialects.trShared(e, "talk.jaymoskingdoms.inbalm." + key(kind) + "." + random.nextInt(LINES), player.getDisplayName()),
 				Speech.RED, SAY_RANGE);
 		}
 		SpiritVoiceHook.say(player, kind);
@@ -334,6 +339,9 @@ public final class InBalming {
 				// Ambrose's and the Quiet One's: at your side
 				if (here) {
 					follow(level, mob, keeper, m.spirit());
+				} else if (m.spirit() == Spirits.QUIET) {
+					// (his keeper's gone: no one to walk unseen for)
+					mob.removeEffect(MobEffects.INVISIBILITY);
 				}
 				return false;
 			}
@@ -377,7 +385,7 @@ public final class InBalming {
 			mob.teleportTo(at.x, at.y, at.z);
 		}
 		PowersCompat.film(mob, keeper, PowersCompat.FILM_PUSH_IN, JOIN_FILM, mob.getEyePosition(), mob, FILM_WITNESSES);
-		Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.inbalm.varro.cry", keeper.getDisplayName()), Speech.RED, SAY_RANGE);
+		Speech.say(level, mob, Dialects.trShared(mob, "talk.jaymoskingdoms.inbalm.varro.cry", keeper.getDisplayName()), Speech.RED, SAY_RANGE);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 2.0F, 1.3F);
 		Rulers.charge(mob, foe);
 	}
@@ -401,13 +409,13 @@ public final class InBalming {
 		}
 		MinecraftServer server = level.getServer();
 		if (Tribes.grudge(server, keeper.getUUID(), tribe) >= Tribes.HUNT_AT) {
-			Post.tidings(keeper.getUUID(), Component.translatable("tidings.jaymoskingdoms.inbalm.thessaly.hunt", Tribes.name(tribe)));
+			Post.report(keeper.getUUID(), Component.translatable("tidings.jaymoskingdoms.inbalm.thessaly.hunt", Tribes.name(tribe)));
 			return;
 		}
 		Map.Entry<Captains.Captain, Captains.Trait> e = Captains.unknown(keeper, tribe, w(mob), java.util.EnumSet.allOf(Captains.Sort.class), level.getRandom());
 		if (e != null) {
 			Captains.learn(keeper, e.getKey().id(), e.getValue());
-			Post.tidings(keeper.getUUID(), Component.translatable("tidings.jaymoskingdoms.inbalm.thessaly.saw", Captains.told(e.getKey(), e.getValue())));
+			Post.report(keeper.getUUID(), Component.translatable("tidings.jaymoskingdoms.inbalm.thessaly.saw", Captains.told(e.getKey(), e.getValue(), Dialects.ofTribe(tribe))));
 		}
 	}
 
@@ -438,8 +446,9 @@ public final class InBalming {
 
 	/** The Quiet One's shadow: unseen; out of nothing to end a foe of yours near death, and gone. */
 	private static void shadow(ServerLevel level, PathfinderMob mob, ServerPlayer keeper) {
-		if (!mob.hasEffect(MobEffects.INVISIBILITY)) {
-			mob.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20 * 60 * 60, 0, false, false));
+		MobEffectInstance veil = mob.getEffect(MobEffects.INVISIBILITY);
+		if (veil == null || veil.getDuration() < SHADOW_TOP_UP) {
+			mob.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, SHADOW_VEIL, 0, false, false));
 		}
 		long now = level.getGameTime();
 		if (mob.tickCount % 10 != 0 || now - LAST.getOrDefault(mob.getUUID(), -SHADOW_AGAIN) < SHADOW_AGAIN) {

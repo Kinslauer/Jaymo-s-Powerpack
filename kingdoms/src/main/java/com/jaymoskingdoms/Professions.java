@@ -24,12 +24,14 @@ public final class Professions {
 	public static final List<String> JOBS = List.of("builder", "farmer", "miner", "woodcutter", "puller", "stablehand", "farrier");
 
 	public static VillagerProfession BUILDER, FARMER, MINER, WOODCUTTER, PULLER, STABLEHAND, FARRIER;
-	/** (0.5.53) A kingdom's court wizard: one of its elders, never a player's pick ({@link CourtWizards}). */
+	/** (0.5.54) A kingdom's court wizard: one of its elders, never a player's pick ({@link CourtWizards}). */
 	public static VillagerProfession WIZARD;
 	/** (0.7.291) A court's necromancer, a camp's shaman and blood witch: villagers in the office ({@link Casters}), never a player's pick. */
 	public static VillagerProfession NECROMANCER, SHAMAN, BLOOD_WITCH;
 	/** (0.7.299) A town's cook, at its cookhouse or tavern ({@link Meals}): taken on by the town, never a player's pick. Trades meals. */
 	public static VillagerProfession COOK;
+	/** (0.7.490) A town's money-changer ({@link Currencies}): taken on by the town, never a player's pick. Trades coin for coin. */
+	public static VillagerProfession CHANGER;
 
 	private Professions() {
 	}
@@ -44,7 +46,7 @@ public final class Professions {
 		// (0.5.47)
 		STABLEHAND = register("stablehand", SoundEvents.VILLAGER_WORK_SHEPHERD);
 		FARRIER = register("farrier", SoundEvents.VILLAGER_WORK_ARMORER);
-		// (0.5.53)
+		// (0.5.54)
 		WIZARD = register("wizard", SoundEvents.VILLAGER_WORK_CLERIC);
 		// (0.7.291)
 		NECROMANCER = register("necromancer", SoundEvents.VILLAGER_WORK_CLERIC);
@@ -52,6 +54,8 @@ public final class Professions {
 		BLOOD_WITCH = register("blood_witch", SoundEvents.VILLAGER_WORK_CLERIC);
 		// (0.7.299)
 		COOK = register("cook", SoundEvents.VILLAGER_WORK_BUTCHER);
+		// (0.7.490)
+		CHANGER = register("changer", SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskingdoms:round_shot",
+    "jaymoskingdoms:round_shot",
+    "minecraft:iron_ingot",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:chain_shot",
+    "count": 2
+  }
+}

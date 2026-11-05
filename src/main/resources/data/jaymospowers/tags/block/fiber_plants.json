@@ -6,6 +6,13 @@
     "minecraft:large_fern",
     "minecraft:short_dry_grass",
     "minecraft:tall_dry_grass",
-    "minecraft:bush"
+    "minecraft:bush",
+    "minecraft:crimson_roots",
+    "minecraft:warped_roots",
+    "minecraft:nether_sprouts",
+    "minecraft:weeping_vines",
+    "minecraft:weeping_vines_plant",
+    "minecraft:twisting_vines",
+    "minecraft:twisting_vines_plant"
   ]
 }

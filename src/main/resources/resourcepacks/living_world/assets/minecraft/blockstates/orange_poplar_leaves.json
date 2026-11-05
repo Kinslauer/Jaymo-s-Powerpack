@@ -1,0 +1,14 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "minecraft:block/orange_poplar_leaves"
+      }
+    },
+    {
+      "apply": {
+        "model": "jaymospowers:block/bushy/orange_poplar_leaves"
+      }
+    }
+  ]
+}

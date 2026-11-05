@@ -2,6 +2,7 @@ package com.jaymoskingdoms.nether;
 
 import com.jaymoskingdoms.BossBars;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Stacked;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -235,7 +236,7 @@ public final class NetherForts {
 	}
 
 	private static @Nullable ServerLevel nether(MinecraftServer server) {
-		return server.getLevel(Level.NETHER);
+		return Stacked.level(server, Level.NETHER);
 	}
 
 	static List<Fort> forts(ServerLevel nether) {
@@ -301,7 +302,7 @@ public final class NetherForts {
 			}
 		}
 		if (now % FOUND_EVERY == 0) {
-			for (ServerPlayer player : nether.players()) {
+			for (ServerPlayer player : Stacked.players(nether.getServer(), Level.NETHER)) {
 				if (!player.isSpectator() && nether.getRandom().nextFloat() < FOUND_CHANCE) {
 					tryFound(nether, player);
 				}
@@ -354,7 +355,7 @@ public final class NetherForts {
 	}
 
 	private static boolean playerNear(ServerLevel nether, Fort a, Fort b) {
-		for (ServerPlayer p : nether.players()) {
+		for (ServerPlayer p : Stacked.players(nether.getServer(), Level.NETHER)) {
 			if (!p.isSpectator() && (p.blockPosition().closerThan(a.center(), HOST_RANGE) || p.blockPosition().closerThan(b.center(), HOST_RANGE))) {
 				return true;
 			}
@@ -653,7 +654,7 @@ public final class NetherForts {
 			}
 		}
 		if (!anywhere) {
-			for (ServerPlayer p : nether.players()) {
+			for (ServerPlayer p : Stacked.players(nether.getServer(), Level.NETHER)) {
 				if (p.blockPosition().closerThan(probe, HIDE_RANGE)) {
 					return null;
 				}
@@ -786,7 +787,7 @@ public final class NetherForts {
 	/** Founds a pair just ahead of whoever runs it (a player, or {@code execute in the_nether positioned ...}). */
 	private static int foundHere(CommandContext<CommandSourceStack> c) {
 		ServerLevel level = c.getSource().getLevel();
-		if (level.dimension() != Level.NETHER) {
+		if (!Stacked.at(level, BlockPos.containing(c.getSource().getPosition()), Level.NETHER)) {
 			c.getSource().sendFailure(Component.literal("Nether forts are only in the Nether"));
 			return 0;
 		}
@@ -806,7 +807,7 @@ public final class NetherForts {
 
 	private static int hostNow(CommandContext<CommandSourceStack> c) {
 		ServerLevel level = c.getSource().getLevel();
-		if (level.dimension() != Level.NETHER) {
+		if (!Stacked.at(level, BlockPos.containing(c.getSource().getPosition()), Level.NETHER)) {
 			c.getSource().sendFailure(Component.literal("Nether forts are only in the Nether"));
 			return 0;
 		}

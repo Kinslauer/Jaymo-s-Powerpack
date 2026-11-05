@@ -39,6 +39,11 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 			cir.setReturnValue(true);
 			return;
 		}
+		if (com.jaymoskingdoms.Commandments.refusesCommand(this.entity, player, command)) {
+			// (0.7.535) one of The Truth's folk won't follow at night, into the Nether or the sky, nor take rot
+			cir.setReturnValue(true);
+			return;
+		}
 		if (!Languages.SIMPLE_COMMANDS.contains(command) && !Languages.understands(player, this.entity)) {
 			// (0.7.20) asking that of them takes words you don't share
 			Languages.shrug(player, this.entity);

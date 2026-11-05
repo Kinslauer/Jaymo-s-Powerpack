@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
@@ -32,6 +33,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -62,12 +64,24 @@ public final class WornLanterns {
 	static final float POLE_X = -1.5F, POLE_Y = 11.0F, POLE_Z = 2.8F, POLE_LENGTH = 30.0F, POLE_LEAN = -0.15F, POLE_HOOK = 1.5F;
 	/** The pole lantern's size (blocks); the pole sits this much further out over a chestplate, and over a backpack. */
 	static final float POLE_SIZE = 0.55F, OVER_ARMOUR = 1.0F, OVER_BACKPACK = 6.0F;
+	/**
+	 * (0.20.0) A hip item that isn't a lantern (Jaymo's Kingdoms' coin purse, in {@code #jaymospowers:hip_shown}) hangs at the
+	 * right hip, by its hook (the top of the sprite), at {@code PURSE_SIZE} blocks across. Its model is the item's own, so the
+	 * purse shows how full it is (custom_model_data). {@code FIXED_SCALE}: the scale the fixed display transform applies already.
+	 */
+	static final float PURSE_X = 4.9F, PURSE_Y = 10.0F, PURSE_Z = -0.5F, PURSE_SIZE = 0.35F, FIXED_SCALE = 0.5F;
+	/**
+	 * (0.20.82) Andy: "they dont hang, ON the hip they are inside". It hung at 3.4 pixels out, inside the leg (which reaches
+	 * 4, and its trouser layer past that); now it hangs outside the hip, and this much further out over leggings or a
+	 * chestplate.
+	 */
+	static final float PURSE_OVER_ARMOUR = 1.0F, PURSE_ROLL_IN = 0.1F;
 	/** The pole's wood. */
 	static final Identifier POLE_TEXTURE = Identifier.withDefaultNamespace("textures/block/stripped_spruce_log.png");
 	// ================================================================================================================
 
 	/** What a player wears hung on them, as drawn this frame. */
-	record Worn(@Nullable BlockState hip, @Nullable BlockState pole, float hipSwing, float hipRoll, float poleSwing, float poleRoll,
+	record Worn(@Nullable BlockState hip, @Nullable ItemStackRenderState purse, @Nullable BlockState pole, float hipSwing, float hipRoll, float poleSwing, float poleRoll,
 		boolean backpack) {
 	}
 
@@ -108,9 +122,19 @@ public final class WornLanterns {
 			state.setData(KEY, null);
 			return;
 		}
-		BlockState hip = hanging(Baubles.shown(player, 0));
+		ItemStack hipStack = Baubles.shown(player, 0);
+		BlockState hip = Baubles.hipLantern(hipStack) ? hanging(hipStack) : null;
+		// (0.20.0) a hip item that is no lantern (a coin purse) is drawn with the item renderer
+		ItemStackRenderState purse = null;
+		if (hip == null && !hipStack.isEmpty() && Baubles.hipItem(hipStack)) {
+			purse = new ItemStackRenderState();
+			Minecraft.getInstance().getItemModelResolver().updateForLiving(purse, hipStack, ItemDisplayContext.FIXED, player);
+			if (purse.isEmpty()) {
+				purse = null;
+			}
+		}
 		BlockState onPole = Baubles.shown(player, 1).isEmpty() ? null : Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true);
-		if (hip == null && onPole == null) {
+		if (hip == null && purse == null && onPole == null) {
 			state.setData(KEY, null);
 			synchronized (SWINGS) {
 				SWINGS.remove(entity);
@@ -127,7 +151,7 @@ public final class WornLanterns {
 		for (Swing swing : swings) {
 			swing.update(now, yaw, state.ageInTicks);
 		}
-		state.setData(KEY, new Worn(hip, onPole,
+		state.setData(KEY, new Worn(hip, purse, onPole,
 			swings[0].swing, swings[0].roll + Swing.STEP_ROLL * Mth.sin(step) * stride,
 			swings[1].swing, swings[1].roll + Swing.STEP_ROLL * 0.6F * Mth.sin(step) * stride,
 			com.jaymospowers.client.backpack.BackpackClient.worn(state)));
@@ -230,6 +254,23 @@ public final class WornLanterns {
 				poseStack.translate(side * HIP_X / 16.0F, HIP_Y / 16.0F, HIP_Z / 16.0F);
 				hang(poseStack, collector, level, state, worn.hip(), HIP_SIZE, -body.body.xRot, worn.hipSwing() + Math.min(0.0F, leg.xRot) * LEG_NUDGE,
 					worn.hipRoll());
+				poseStack.popPose();
+			}
+			if (worn.purse() != null) {
+				// the right hip (the model's -x), swinging with the same sway as a lantern, nudged out of the leg's way
+				poseStack.pushPose();
+				boolean armoured = !state.chestEquipment.isEmpty() || !state.legsEquipment.isEmpty();
+				poseStack.translate(-(PURSE_X + (armoured ? PURSE_OVER_ARMOUR : 0.0F)) / 16.0F, PURSE_Y / 16.0F, PURSE_Z / 16.0F);
+				poseStack.rotateDegrees(Axis.XP, (-body.body.xRot + worn.hipSwing() + Math.min(0.0F, body.rightLeg.xRot) * LEG_NUDGE) * Mth.RAD_TO_DEG);
+				// ((0.20.82) it swings out from the leg freely, but only a little in toward it)
+				poseStack.rotateDegrees(Axis.ZP, Math.max(-PURSE_ROLL_IN, worn.hipRoll()) * Mth.RAD_TO_DEG);
+				// the layer's space is the model's (y down, x flipped): flipped upright, the sprite's top (its hook) at the origin
+				float scale = PURSE_SIZE / FIXED_SCALE;
+				poseStack.scale(-scale, -scale, scale);
+				poseStack.translate(0.0F, -FIXED_SCALE, 0.0F);
+				// flat against the hip, its face turned out to the side
+				poseStack.rotateDegrees(Axis.YP, -90.0F);
+				worn.purse().submit(poseStack, collector, lightCoords, OverlayTexture.NO_OVERLAY, 0);
 				poseStack.popPose();
 			}
 			if (worn.pole() != null) {

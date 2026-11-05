@@ -129,6 +129,14 @@ import org.jspecify.annotations.Nullable;
  * frostborn should use the beam". A Z Fighter's empty hands play one of the {@code Z_*} kinds ({@link Strike#KI}) instead
  * of the neck snap, as the suit's play its own: no Executioner, anywhere round the body. What they pick, cost and look like
  * is {@code ZFighterExecutions}'; the hold, roots and poses are the same as every finisher's.
+ * <p>
+ * (0.19.78) Andy: "executions need a button, or a better indicator. it should be 3 bars that fill ... maybe we try a double
+ * left click as the override? im trying to stay away from buttons". The hold's the same 1.5 s, drawn as {@link #HOLD_BARS}
+ * bars under the crosshair ({@link Charge}) in place of the action-bar dots; the third filled, it plays. Sneak + a double
+ * click on them fills it at once ({@link Rush}): the same checks, only no wait, and the kill (questioning still takes the hold).
+ * Andy: "you must sneak and double click + hold, now releasing the hold before the execution kills, will cancel it": the
+ * double click's execution goes on only while its second press is held ({@link Playing#held}); let go before the killing
+ * blow and it's off, the body spared.
  */
 public final class Finishers {
 	/** (0.17.7) How long attack is held on the downed before a finisher begins (ticks; Andy's 1.5 s), and when its bar shows (a click is just a blow). */
@@ -139,13 +147,27 @@ public final class Finishers {
 	static final String UNLOCK_PERK = "executioner";
 	/** How far they may be from you for it to go on (blocks, past your reach for the use). */
 	static final double SLACK = 1.0, MAX_DISTANCE = 4.0;
-	/** The hold's bar length. */
-	static final int HOLD_BAR = 8;
+	/**
+	 * (0.19.78) Andy: "it should be 3 bars that fill, and once the third is filled the execution plays, it should take about
+	 * the same time as before, just gives more certainty". The hold's {@link #HOLD_TICKS} drawn as this many bars under the
+	 * crosshair ({@link Charge}, {@code FinisherClient}), each a third of it.
+	 */
+	public static final int HOLD_BARS = 3;
 	/** Screen shake on a blow for you and the one being finished, and the last blow's for both and those around. */
 	static final float BEAT_SHAKE = 0.6F, KILL_SHAKE = 1.4F, AROUND_SHAKE = 0.8F;
 	static final double AROUND_RANGE = 10.0;
 	/** (0.15.114) How far the point-blank shot is heard through TaCZ (blocks), and its shake for those around. */
 	static final int SHOT_HEARD = 64;
+	/** (0.20.100) Rounds a future gun needs in it for the three shots (fewer, and it's the one to the head). */
+	static final int BURST_ROUNDS = 3;
+	/** (0.20.100) How often an untrained one-handed shot ({@link Kind#FUTURE_WILD}) misses, and how far off it goes (blocks). */
+	static final float WILD_MISS = 0.4F;
+	static final double WILD_OFF = 0.45;
+	/**
+	 * (0.20.100) Where a future gun's one-handed muzzle is: this far from the eyes toward the shot (blocks, at most), this far
+	 * out to the gun hand's side, and this far below the eyes (the arm's straight out from the shoulder).
+	 */
+	static final double ONE_HAND_REACH = 0.95, ONE_HAND_SIDE = 0.35, ONE_HAND_DROP = 0.3;
 	static final float SHOT_AROUND_SHAKE = 0.5F;
 	/**
 	 * (0.15.146) The neck snap: how near their head your feet must be (blocks, across the ground), and where the head of
@@ -204,6 +226,23 @@ public final class Finishers {
 		CROSSBOW(26, new int[] {13}, Strike.BOLT),
 		/** (0.15.114) Point Blank: the gun brought up, cocked, aimed down at the head at arm's length, and fired. Spends a round. */
 		GUN(30, new int[] {20}, Strike.BLAST),
+		/**
+		 * (0.20.100) Andy: "future guns should all have an execution, choosing from a single point blank shot to the head, or
+		 * three shots with a semi or full auto weapon. it should use ammunition accurately and animate a one handed blast".
+		 * Head Shot, a future gun's that works its own action (bolt, pump, break, single shot), or one with under three
+		 * rounds left: stood over their head, the gun swung up in one hand, the arm straight down at it, one round, the kick.
+		 */
+		FUTURE_SHOT(28, new int[] {16}, Strike.BLAST),
+		/** (0.20.100) Three Shots, a self-loading future gun's on semi: one-handed, two into the chest and one into the head, a beat apart. */
+		FUTURE_BURST(34, new int[] {14, 18, 22}, Strike.BLAST),
+		/** (0.20.100) Three Shots, a future gun's set to full auto (or burst): one-handed, the three ripped off on the trigger at once. */
+		FUTURE_AUTO(30, new int[] {14, 16, 18}, Strike.BLAST),
+		/**
+		 * (0.20.100) Andy: "an empty gun fires once and can miss ... not empty, someone without executioner". Snap Shot, a
+		 * loaded future gun's without the Executioner perk: one-handed, one round, and {@link #WILD_MISS} of the time it goes
+		 * into the ground beside their head and they live.
+		 */
+		FUTURE_WILD(26, new int[] {14}, Strike.BLAST),
 		/**
 		 * Bare hands: kneel, take the head in both hands, and twist. (0.15.114) Andy: "neck break should take 5s to finish":
 		 * a hold that strains twice against them before the snap at 5 s.
@@ -339,6 +378,8 @@ public final class Finishers {
 		long start;
 		/** (0.18.97) When the choice (question or kill) was put to them, or -1 while the hold still fills. */
 		long choosing = -1L;
+		/** (0.19.78) A double click filled it at once: it stands though attack is let go, and ends if it can't go on. */
+		boolean rushed;
 
 		Hold(LivingEntity body, long start) {
 			this.body = body;
@@ -353,6 +394,35 @@ public final class Finishers {
 
 		@Override
 		public Type<Execute> type() {
+			return TYPE;
+		}
+	}
+
+	/**
+	 * (0.19.78) Client → server: attack was double-clicked on this entity (its id): fill the hold at once. -1: the double
+	 * click's press was let go (before the kill, that calls the execution off).
+	 */
+	public record Rush(int target) implements CustomPacketPayload {
+		public static final Type<Rush> TYPE = new Type<>(JaymosPowers.id("finisher_rush"));
+		public static final StreamCodec<ByteBuf, Rush> CODEC = ByteBufCodecs.VAR_INT.map(Rush::new, Rush::target);
+
+		@Override
+		public Type<Rush> type() {
+			return TYPE;
+		}
+	}
+
+	/**
+	 * (0.19.78) Server → client: the hold on this body (entity id) has run this many ticks of {@link #HOLD_TICKS}, sent each
+	 * tick it fills; the client draws it as {@link #HOLD_BARS} bars. A choke hold is {@code choke}.
+	 */
+	public record Charge(int target, int held, boolean choke) implements CustomPacketPayload {
+		public static final Type<Charge> TYPE = new Type<>(JaymosPowers.id("finisher_charge"));
+		public static final StreamCodec<ByteBuf, Charge> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Charge::target,
+			ByteBufCodecs.VAR_INT, Charge::held, ByteBufCodecs.BOOL, Charge::choke, Charge::new);
+
+		@Override
+		public Type<Charge> type() {
 			return TYPE;
 		}
 	}
@@ -396,7 +466,32 @@ public final class Finishers {
 	}
 
 	/** A finisher playing: who, on whom. */
-	private record Playing(ServerPlayer player, LivingEntity body, boolean downed) {
+	/** A finisher playing; (0.19.78) {@code held}: begun by a double click, and only goes on while that click is held. */
+	private static final class Playing {
+		final ServerPlayer player;
+		final LivingEntity body;
+		final boolean downed;
+		boolean held;
+		/** (0.19.78) The double click's press was let go before the kill. */
+		boolean released;
+
+		Playing(ServerPlayer player, LivingEntity body, boolean downed) {
+			this.player = player;
+			this.body = body;
+			this.downed = downed;
+		}
+
+		ServerPlayer player() {
+			return this.player;
+		}
+
+		LivingEntity body() {
+			return this.body;
+		}
+
+		boolean downed() {
+			return this.downed;
+		}
 	}
 
 	private static final Map<UUID, Hold> HOLDING = new HashMap<>();
@@ -415,6 +510,10 @@ public final class Finishers {
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> attackHeld(ctx.player(), payload.target()));
+		// (0.19.78) the three bars, and the double click that fills them at once
+		PayloadTypeRegistry.serverboundPlay().register(Rush.TYPE, Rush.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Rush.TYPE, (payload, ctx) -> rushed(ctx.player(), payload.target()));
+		PayloadTypeRegistry.clientboundPlay().register(Charge.TYPE, Charge.CODEC);
 		// (0.18.97) question or kill
 		PayloadTypeRegistry.clientboundPlay().register(Choose.TYPE, Choose.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Pick.TYPE, Pick.CODEC);
@@ -581,13 +680,38 @@ public final class Finishers {
 			return kind;
 		}
 		if (!weaponsUnlocked(player)) {
-			return basic(kind);
+			// (0.20.100) a loaded future gun fires once anyway, and may miss
+			return kind == Kind.GUN && TaczGuns.isModern(stack) && loaded(player, stack, kind) ? Kind.FUTURE_WILD : basic(kind);
 		}
 		if (kind == Kind.GUN && !loaded(player, stack, kind)) {
 			return Kind.SWORD;
 		}
+		if (kind == Kind.GUN) {
+			return gunMove(stack);
+		}
 		// (0.15.146) a bow with no arrow is only something to hit them with
 		return (kind == Kind.BOW || kind == Kind.CROSSBOW) && !loaded(player, stack, kind) ? Kind.SLAM : kind;
+	}
+
+	/**
+	 * (0.20.100) A loaded gun's move: a future gun's (TaCZ's own) one-handed {@link Kind#FUTURE_SHOT}, or three shots when
+	 * it loads itself and has {@link #BURST_ROUNDS} in it ({@link Kind#FUTURE_AUTO} on full auto or burst, else
+	 * {@link Kind#FUTURE_BURST}); any other gun's Point Blank.
+	 */
+	static Kind gunMove(ItemStack stack) {
+		if (!TaczGuns.isModern(stack)) {
+			return Kind.GUN;
+		}
+		if (com.jaymospowers.power.chrono.future.FutureGuns.manualAction(TaczGuns.gunId(stack)) || TaczGuns.ammo(stack) < BURST_ROUNDS) {
+			return Kind.FUTURE_SHOT;
+		}
+		String mode = TaczGuns.fireMode(stack);
+		return "AUTO".equals(mode) || "BURST".equals(mode) ? Kind.FUTURE_AUTO : Kind.FUTURE_BURST;
+	}
+
+	/** (0.20.100) A future gun's three shots: one of these shot kinds. */
+	static boolean futureGun(Kind kind) {
+		return kind == Kind.FUTURE_SHOT || kind == Kind.FUTURE_BURST || kind == Kind.FUTURE_AUTO || kind == Kind.FUTURE_WILD;
 	}
 
 	/** (0.15.146) Everyone's move with a weapon of {@code kind}: a blade stabs through, the rest (axes too) slam. */
@@ -661,7 +785,7 @@ public final class Finishers {
 	/** (0.15.114) The shot's spent: the gun's round, the crossbow's bolt, or an arrow (Infinity and creative keep theirs). */
 	static void spend(ServerLevel level, Player player, ItemStack stack, Kind kind) {
 		switch (kind) {
-			case GUN -> {
+			case GUN, FUTURE_SHOT, FUTURE_BURST, FUTURE_AUTO, FUTURE_WILD -> {
 				if (!TaczGuns.spendRound(stack) && ArsenalFlintlock.FLINTLOCK != null && stack.is(ArsenalFlintlock.FLINTLOCK)) {
 					stack.set(ArsenalFlintlock.SPENT, true);
 				}
@@ -741,10 +865,47 @@ public final class Finishers {
 		if (held != null && held.body.getId() == id) {
 			return;
 		}
+		if (id < 0 && held != null && held.rushed) {
+			// (0.19.78) the double click's second press may already be let go: the rushed hold goes on regardless
+			return;
+		}
 		if (player.level().getEntity(id) instanceof LivingEntity body && body != player) {
 			HOLDING.put(player.getUUID(), new Hold(body, player.level().getGameTime()));
 		} else {
 			HOLDING.remove(player.getUUID());
+		}
+	}
+
+	/**
+	 * (0.19.78) Andy: "maybe we try a double left click as the override". Sneak + a double click on someone you could finish
+	 * fills the hold at once: the same checks as a full hold (in reach, sneaking, at the head for the neck snap, the choice
+	 * to question), only no wait.
+	 */
+	private static void rushed(ServerPlayer player, int id) {
+		if (id < 0) {
+			// (0.19.78) Andy: "you must sneak and double click + hold, now releasing the hold before the execution kills, will cancel it"
+			Hold waiting = HOLDING.get(player.getUUID());
+			if (waiting != null && waiting.rushed) {
+				HOLDING.remove(player.getUUID());
+			}
+			Playing playing = PLAYING.get(player.getUUID());
+			if (playing != null && playing.held) {
+				playing.released = true;
+			}
+			return;
+		}
+		if (player.isSpectator() || Downed.isDowned(player) || busy(player)
+			|| !(player.level().getEntity(id) instanceof LivingEntity body) || body == player) {
+			return;
+		}
+		Hold held = HOLDING.get(player.getUUID());
+		if (held == null || held.body != body) {
+			held = new Hold(body, 0L);
+			HOLDING.put(player.getUUID(), held);
+		}
+		if (held.choosing < 0L) {
+			held.start = player.level().getGameTime() - HOLD_TICKS;
+			held.rushed = true;
 		}
 	}
 
@@ -766,6 +927,11 @@ public final class Finishers {
 			boolean choke = !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
 			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
 				// (still on their feet, or not yet in reach: it counts from when they're down in front of you)
+				if (hold.rushed) {
+					// ((0.19.78) a double click that came to nothing: no hold left to count)
+					it.remove();
+					continue;
+				}
 				hold.start = now;
 				continue;
 			}
@@ -773,10 +939,8 @@ public final class Finishers {
 				if (now - hold.start >= HOLD_TICKS) {
 					it.remove();
 					begin(level, player, hold.body, Kind.Q_CHOKE);
-				} else if (now - hold.start >= BAR_AFTER) {
-					int filled = Math.round(HOLD_BAR * (now - hold.start) / (float) HOLD_TICKS);
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.holding", hold.body.getDisplayName(),
-						"|".repeat(filled) + ".".repeat(HOLD_BAR - filled)).withStyle(ChatFormatting.DARK_GRAY));
+				} else {
+					ServerPlayNetworking.send(player, new Charge(hold.body.getId(), (int) (now - hold.start), true));
 				}
 				continue;
 			}
@@ -788,7 +952,18 @@ public final class Finishers {
 			boolean bare = stack.isEmpty() && !suit && !fighter;
 			if (!suit && move(player, stack) == null) {
 				// (0.15.110) a torch or a loaf finishes nobody
+				if (hold.rushed) {
+					it.remove();
+					continue;
+				}
 				hold.start = now;
+				continue;
+			}
+			if (hold.rushed && bare && (com.jaymospowers.core.wounds.Malfunction.is(hold.body) || !atHead(player, hold.body))) {
+				// ((0.19.78) a double click in the wrong place: the reminder, and no hold left over)
+				it.remove();
+				player.sendOverlayMessage(Component.translatable(com.jaymospowers.core.wounds.Malfunction.is(hold.body)
+					? "message.jaymospowers.finisher.machine" : "message.jaymospowers.finisher.head", hold.body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
 			}
 			if (bare && com.jaymospowers.core.wounds.Malfunction.is(hold.body)) {
@@ -806,7 +981,8 @@ public final class Finishers {
 				continue;
 			}
 			long held = now - hold.start;
-			if (held >= HOLD_TICKS && hold.choosing < 0L && mayQuestion(player, hold.body)) {
+			// ((0.19.78) a double click is the kill: questioning takes the full hold, and the turn to choose)
+			if (held >= HOLD_TICKS && hold.choosing < 0L && !hold.rushed && mayQuestion(player, hold.body)) {
 				// (0.18.97) Andy: "holding right click for the execution now has you select either question or kill dragging
 				// either left or right": the hold's full; the client shows the choice and says which way you turned
 				hold.choosing = now;
@@ -824,13 +1000,15 @@ public final class Finishers {
 			if (held >= HOLD_TICKS) {
 				it.remove();
 				kill(level, player, hold.body);
+				Playing playing = PLAYING.get(player.getUUID());
+				if (hold.rushed && playing != null && playing.body == hold.body) {
+					// (0.19.78) the double click's: it plays only while that click is held
+					playing.held = true;
+				}
 				continue;
 			}
-			if (held >= BAR_AFTER) {
-				int filled = Math.round(HOLD_BAR * held / (float) HOLD_TICKS);
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.holding", hold.body.getDisplayName(),
-					"|".repeat(filled) + ".".repeat(HOLD_BAR - filled)).withStyle(ChatFormatting.DARK_RED));
-			}
+			// (0.19.78) the three bars, from the first tick: the client draws them
+			ServerPlayNetworking.send(player, new Charge(hold.body.getId(), (int) held, false));
 		}
 	}
 
@@ -928,7 +1106,7 @@ public final class Finishers {
 			return Kind.Q_GRIP;
 		}
 		return switch (kind(stack)) {
-			case BOW, CROSSBOW, GUN -> Kind.Q_AIM;
+			case BOW, CROSSBOW, GUN, FUTURE_SHOT, FUTURE_BURST, FUTURE_AUTO, FUTURE_WILD -> Kind.Q_AIM;
 			case SWORD, GREATSWORD, DAGGER, AXE, SPEAR, POLEARM -> Kind.Q_BLADE;
 			default -> stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) ? Kind.Q_BLADE : Kind.Q_BLUNT;
 		};
@@ -981,7 +1159,7 @@ public final class Finishers {
 			com.jaymospowers.power.zfighter.ZFighterExecutions.begin(level, player, body, kind);
 			return;
 		}
-		if (kind == Kind.GUN && TaczGuns.gunSound(player, TaczGuns.gunId(player.getMainHandItem()), "fire_select", 16, 1.0F, 1.0F)) {
+		if ((kind == Kind.GUN || futureGun(kind)) && TaczGuns.gunSound(player, TaczGuns.gunId(player.getMainHandItem()), "fire_select", 16, 1.0F, 1.0F)) {
 			// (0.15.114) the gun's own cock
 			return;
 		}
@@ -1009,6 +1187,13 @@ public final class Finishers {
 			// (0.15.114) a crippled one stays held till it's over; a downed one that gets up is spared
 			boolean present = body.isAlive() && !body.isRemoved() && body.level() == level && (!p.downed() || Downed.isDowned(body)) && !Carry.isCarried(body)
 				&& player.distanceTo(body) <= MAX_DISTANCE;
+			if (p.released && t < kind.kill() && !kind.questioning()) {
+				// (0.19.78) the double click let go before the kill: called off, they're spared
+				it.remove();
+				end(player, body);
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.called_off", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				continue;
+			}
 			if (t < kind.kill() && !present) {
 				// (up, carried off or gone: spared)
 				it.remove();
@@ -1123,6 +1308,13 @@ public final class Finishers {
 			}
 			case BLAST -> {
 				ItemStack gun = player.getMainHandItem();
+				if (futureGun(kind)) {
+					// (0.20.100) a future gun's: a real round a shot, one-handed
+					if (!futureShot(level, player, body, gun, kind, kill)) {
+						return;
+					}
+					break;
+				}
 				spend(level, player, gun, kind);
 				// the muzzle at arm's length toward their head, the ball's smoke into them
 				Vec3 eye = player.getEyePosition();
@@ -1200,6 +1392,62 @@ public final class Finishers {
 			// (0.15.117) a spider under it is crushed flat: legs, no body (Kitchen); a greatsword is heavy enough too (Andy)
 			com.jaymospowers.core.Crushing.mark(body);
 		}
+	}
+
+	/**
+	 * (0.20.100) One of a future gun's shots, one-handed: a round out of the gun (none left, and it only clicks: false), TaCZ's
+	 * report for that gun, its muzzle flash, the bullet's smoke line into them, blood. The burst's first two go into the
+	 * chest, the last (and the Head Shot's one) into the head.
+	 */
+	private static boolean futureShot(ServerLevel level, ServerPlayer player, LivingEntity body, ItemStack gun, Kind kind, boolean kill) {
+		String id = TaczGuns.gunId(gun);
+		var random = level.getRandom();
+		if (!TaczGuns.spendRound(gun)) {
+			if (!TaczGuns.gunSound(player, id, "dry_fire", 16, 1.0F, 1.0F)) {
+				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.8F, 1.6F);
+			}
+			return kill;
+		}
+		Vec3 hit = kill ? headAt(body) : body.position().add(0.0, Downed.isDowned(body) ? 0.25 : body.getBbHeight() * 0.6, 0.0);
+		// (0.20.100) an untrained snap shot can go wide: into the ground beside the head, and they live
+		boolean missed = kind == Kind.FUTURE_WILD && random.nextFloat() < WILD_MISS;
+		if (missed) {
+			double turn = random.nextFloat() * Math.PI * 2.0;
+			hit = new Vec3(hit.x + Math.cos(turn) * WILD_OFF, body.getY() + 0.02, hit.z + Math.sin(turn) * WILD_OFF);
+		}
+		Vec3 eye = player.getEyePosition();
+		Vec3 dir = hit.subtract(eye).normalize();
+		Vec3 right = dir.cross(new Vec3(0.0, 1.0, 0.0));
+		right = right.lengthSqr() < 1.0E-4 ? Vec3.ZERO : right.normalize();
+		double side = (player.getMainArm() == net.minecraft.world.entity.HumanoidArm.LEFT ? -ONE_HAND_SIDE : ONE_HAND_SIDE) * player.getScale();
+		Vec3 muzzle = eye.add(dir.scale(Math.min(ONE_HAND_REACH * player.getScale(), eye.distanceTo(hit) * 0.7))).add(right.scale(side))
+			.add(0.0, -ONE_HAND_DROP * player.getScale(), 0.0);
+		Vec3 line = hit.subtract(muzzle);
+		Vec3 along = line.normalize();
+		com.jaymospowers.power.chrono.future.MuzzleFlash.execution(level, gun, muzzle, along);
+		for (double d = 0.0, len = line.length(); d < len; d += 0.3) {
+			Vec3 at = muzzle.add(along.scale(d));
+			level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		if (!TaczGuns.gunSound(player, id, "shoot_3p", SHOT_HEARD, 1.0F, 0.95F + random.nextFloat() * 0.1F)) {
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.9F);
+		}
+		if (missed) {
+			// the round in the dirt: a spray of it, a ricochet's whine, and they're spared
+			net.minecraft.world.level.block.state.BlockState ground = body.getBlockStateOn().isAir() ? Blocks.DIRT.defaultBlockState() : body.getBlockStateOn();
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), hit.x, hit.y, hit.z, 16, 0.08, 0.02, 0.08, 0.15);
+			level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.ARROW_HIT, SoundSource.PLAYERS, 0.9F, 1.6F);
+			Shakes.around(level, muzzle, AROUND_RANGE, SHOT_AROUND_SHAKE * 0.5F);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.missed", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, kill ? 14 : 8, 0.12, 0.12, 0.12, 0.3);
+		if (!TaczGuns.gunSound(body, id, "flesh_hit", 16, 1.0F, 0.9F + random.nextFloat() * 0.1F)) {
+			level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.8F);
+		}
+		BladeBlood.splash(body, kill ? 10.0F : 5.0F);
+		Shakes.around(level, muzzle, AROUND_RANGE, kill ? SHOT_AROUND_SHAKE : SHOT_AROUND_SHAKE * 0.5F);
+		return true;
 	}
 
 	/**

@@ -1,0 +1,46 @@
+{
+  "parent": "jaymospowers:pack/giant_two",
+  "display": {
+    "icon": {
+      "id": "minecraft:dragon_head"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.giant_all.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.giant_all.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "highfield": {
+      "trigger": "minecraft:impossible"
+    },
+    "magnetic": {
+      "trigger": "minecraft:impossible"
+    },
+    "arctic": {
+      "trigger": "minecraft:impossible"
+    },
+    "irradiated": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "highfield"
+    ],
+    [
+      "magnetic"
+    ],
+    [
+      "arctic"
+    ],
+    [
+      "irradiated"
+    ]
+  ]
+}

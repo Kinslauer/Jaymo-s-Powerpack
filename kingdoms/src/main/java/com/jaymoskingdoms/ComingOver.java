@@ -62,6 +62,8 @@ public final class ComingOver {
 		GEAR("gear", 2),
 		BEAST("beast", 3),
 		MISTAKEN("mistaken", 1),
+		/** (0.7.523) A promise to them falls due today. */
+		PROMISE("promise", 9),
 		/** Approaches' business (a question, a quest, gossip...): what more they had to say. */
 		APPROACH("approach", 0);
 
@@ -145,6 +147,11 @@ public final class ComingOver {
 		if (t == Temperaments.Temperament.CHEERFUL || t == Temperaments.Temperament.GLOOMY || t == Temperaments.Temperament.KINDHEARTED) {
 			picks.add(new Pick(Reason.MISTAKEN, new Object[0], null));
 		}
+		Promises.Promise due = Promises.dueToday(player, v);
+		if (due != null) {
+			// (0.7.523) they hold you to your word
+			picks.add(new Pick(Reason.PROMISE, new Object[] {Promises.what(due)}, null));
+		}
 		int total = 0;
 		Pick best = null;
 		for (Pick p : picks) {
@@ -154,6 +161,12 @@ public final class ComingOver {
 			}
 		}
 		return best;
+	}
+
+	/** (0.7.523) The promise reminder alone, for a villager you already know. Null if nothing is due. */
+	static @Nullable Pick promise(ServerPlayer player, Villager v) {
+		Promises.Promise due = Promises.dueToday(player, v);
+		return due == null ? null : new Pick(Reason.PROMISE, new Object[] {Promises.what(due)}, null);
 	}
 
 	/** How much keener {@code pick} makes them to come over (the urgent reasons outweigh the idle ones). */

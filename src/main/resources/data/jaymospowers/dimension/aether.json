@@ -146,6 +146,36 @@
             ],
             "weirdness": [
               0.3,
+              0.75
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:mistsea",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              0.75,
               2.0
             ],
             "depth": [
@@ -205,7 +235,7 @@
               0.485
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
             ],
             "depth": [
@@ -235,8 +265,38 @@
               0.485
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:hanging_roots",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              -0.35,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              -0.55
             ],
             "depth": [
               -1.0,
@@ -355,7 +415,7 @@
               2.0
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
             ],
             "depth": [
@@ -385,7 +445,7 @@
               2.0
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
             ],
             "depth": [
@@ -415,8 +475,38 @@
               2.0
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:rustworks",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              -0.55
             ],
             "depth": [
               -1.0,
@@ -506,6 +596,36 @@
             ],
             "weirdness": [
               0.3,
+              0.55
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:gilded_ridge",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              0.55,
               2.0
             ],
             "depth": [
@@ -565,7 +685,7 @@
               0.485
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
             ],
             "depth": [
@@ -595,8 +715,38 @@
               0.485
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:hanging_roots",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              -0.35,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              -0.55
             ],
             "depth": [
               0.3,
@@ -715,7 +865,7 @@
               2.0
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
             ],
             "depth": [
@@ -745,7 +895,7 @@
               2.0
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
             ],
             "depth": [
@@ -775,8 +925,38 @@
               2.0
             ],
             "weirdness": [
-              -2.0,
+              -0.55,
               0.3
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:rustworks",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              -0.55
             ],
             "depth": [
               0.3,

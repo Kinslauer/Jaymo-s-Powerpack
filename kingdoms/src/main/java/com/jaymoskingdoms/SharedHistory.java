@@ -71,7 +71,9 @@ public final class SharedHistory {
 		// (0.7.424)
 		Recollections.Kind.QUESTIONED,
 		// (0.7.449) a theft laid at their door wrongly
-		Recollections.Kind.ACCUSED);
+		Recollections.Kind.ACCUSED,
+		// (0.7.523) a promise you broke
+		Recollections.Kind.BROKE_WORD);
 	/** What they did to you, to have out with them. */
 	static final Set<Recollections.Kind> ROUGH = Set.of(Recollections.Kind.SHOVED_YOU, Recollections.Kind.SEARCHED_YOU, Recollections.Kind.HALTED_YOU);
 	/** What you did for them, to ask after. */
@@ -362,7 +364,7 @@ public final class SharedHistory {
 		cheer(who);
 		if (first && random.nextFloat() < KEEPSAKE_CHANCE) {
 			ItemStack gift = switch (random.nextInt(3)) {
-				case 0 -> new ItemStack(Items.EMERALD, 1 + random.nextInt(2));
+				case 0 -> new ItemStack(Currencies.at(who.level(), who.blockPosition()).item(), 1 + random.nextInt(2)); // (0.7.498) a coin or two of the town's
 				case 1 -> new ItemStack(Items.BREAD, 3);
 				default -> new ItemStack(Items.COOKED_MUTTON, 2);
 			};

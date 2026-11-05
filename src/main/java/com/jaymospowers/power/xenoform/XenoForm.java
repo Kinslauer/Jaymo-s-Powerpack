@@ -32,8 +32,8 @@ import org.jspecify.annotations.Nullable;
  * {@code .key.ability_1}-{@code .key.ability_4} (its moves), in {@code lang/parts/xenoform.json}.
  */
 public abstract class XenoForm {
-	/** Cooldown slots, one per key (R G V B). */
-	public static final int R = 0, G = 1, V = 2, B = 3;
+	/** Cooldown slots, one per key (R G V B, and (0.20.9) C for an Ultimate's big move). */
+	public static final int R = 0, G = 1, V = 2, B = 3, C = 4;
 
 	public final String id;
 	/** Drawn and hit this many times the player's size ({@code Attributes.SCALE}). */
@@ -107,6 +107,14 @@ public abstract class XenoForm {
 	}
 
 	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
+	}
+
+	/**
+	 * (0.20.9) This alien's evolved form (its Ultimate): its own body and kit, found from the base alien by the server and the
+	 * client alike (common code). Null where it has none yet: the 0.18.93 buff on the base body is the fallback.
+	 */
+	public @Nullable XenoUltimate evolved() {
+		return null;
 	}
 
 	// ---- the Ultimate (stage 3): C, once the power has ascended ---------------------------------------------------------
@@ -225,8 +233,8 @@ public abstract class XenoForm {
 
 	/** Starts {@code slot}'s cooldown, and counts the use toward mastery. */
 	protected static void cooldown(ServerPlayer player, XenoformPower.Live live, int slot, int ticks) {
-		if (live.ultimate) {
-			// (0.18.93) the Ultimate's stronger kit: every move comes back sooner
+		if (live.ultimate && live.ult == null) {
+			// (0.18.93) the fallback Ultimate's stronger kit: every move comes back sooner (an evolved Ultimate sets its own)
 			ticks = Math.max(1, Math.round(ticks * XenoformPower.ULT_COOLDOWN));
 		}
 		live.cooldownUntil[slot] = player.level().getGameTime() + ticks;

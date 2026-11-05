@@ -251,5 +251,7 @@
 	"screen.jaymospowers.wounds.look_help": "Hover a part to see how whole it is, and whether it's broken, bleeding or festering.",
 	"button.jaymospowers.wounds.body": "Your wounds",
 	"message.jaymospowers.limbs.gone": "%s gone: you can't do that without it",
-	"message.jaymospowers.limbs.no_arms": "No arms left to do that with"
+	"message.jaymospowers.limbs.no_arms": "No arms left to do that with",
+	"message.jaymospowers.halved": "Cut in two. You're bleeding out...",
+	"message.jaymospowers.rubber_split": "Cut in half! Swallow something within 10 seconds or you won't pull yourself together"
 }

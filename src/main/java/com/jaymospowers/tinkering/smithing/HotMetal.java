@@ -17,6 +17,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -60,6 +62,16 @@ public final class HotMetal {
 		for (var entry : Tinkering.ALLOY_INGOTS.entrySet()) {
 			if (entry.getValue() == item) {
 				return entry.getKey();
+			}
+		}
+		// (0.19.81) Kingdoms' greenskin bent ingots: superheated on the hearth they come off straight Hot Ingots
+		Identifier id = BuiltInRegistries.ITEM.getKey(item);
+		if ("jaymoskingdoms".equals(id.getNamespace())) {
+			if (id.getPath().equals("bent_iron")) {
+				return Molten.IRON;
+			}
+			if (id.getPath().equals("bent_copper")) {
+				return Molten.COPPER;
 			}
 		}
 		return null;

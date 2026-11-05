@@ -48,9 +48,21 @@ import org.jspecify.annotations.Nullable;
  * and the same past table over the answers picked so far.
  */
 public final class RoadLocks {
-	/** The roads open from the start: the basic ones (a realm's capital, a village, the wild, sworn, banished, shipwrecked, fate) and the heritage-locked ones. */
+	/**
+	 * The roads open from the start: the basic ones (a realm's capital, a village, the wild, sworn, banished, shipwrecked, fate) and the
+	 * heritage-locked ones. (0.7.501, Andy: "these starts should be available from the start") rock bottom, the cells, the nobodies and
+	 * the burned village too. The Bio-built's own road (cast out) is no longer here: it opens with the Bio-built blood
+	 * ({@link #BIOBUILT_DEED}).
+	 */
 	static final Set<Start> OPEN = Collections.unmodifiableSet(EnumSet.of(Start.CITY, Start.VILLAGE, Start.WILD, Start.SWORN, Start.BANISHED,
-		Start.SHIPWRECK, Start.FATE, Start.VERDANT, Start.AFTERLIFE, Start.DEMON, Start.LAB, Start.CAST_OUT));
+		Start.SHIPWRECK, Start.FATE, Start.VERDANT, Start.AFTERLIFE, Start.DEMON, Start.LAB, Start.ROCK_BOTTOM, Start.SENTENCED, Start.NOBODIES,
+		Start.BURNED));
+
+	/**
+	 * (0.7.501, Andy: "Biobuilt start and heritage should be locked ... only unlocked after meeting the tinkerer or becoming an
+	 * android") The deed that opens the cast-out road, done with the Bio-built blood's waking ({@link Heritage#unlockChecks}).
+	 */
+	static final String BIOBUILT_DEED = "tinkerer.met";
 
 	/** The prefix of the deed ids ops use to force a road open or shut. */
 	static final String FORCE_OPEN = "open.", FORCE_SHUT = "shut.";
@@ -95,24 +107,22 @@ public final class RoadLocks {
 		lock(Start.MONOLITH, p -> is(p, Question.BORN, "scholars") && is(p, Question.CHILDHOOD, "books"), "aim.done");
 		lock(Start.SKYFALL, p -> is(p, Question.CHILDHOOD, "storms") && is(p, Question.TURN, "storm"), "star.fell");
 		lock(Start.TIMELOST, p -> is(p, Question.CHILDHOOD, "books") && is(p, Question.TURN, "clock"), "world.time_chamber");
-		lock(Start.BURNED, p -> is(p, Question.RAISED, "farmers") && is(p, Question.CHILDHOOD, "fire"), "fire.doused");
 		lock(Start.SNOWED, p -> is(p, Question.BORN, "north") && is(p, Question.CHILDHOOD, "snow") || is(p, Question.CHILDHOOD, "snow") && is(p, Question.YOUTH, "winter"), "kill.stray");
 		lock(Start.WHALERS, p -> is(p, Question.RAISED, "fisherfolk") && is(p, Question.CHILDHOOD, "swimming"), "whalers.signed", "whale.taken");
 		lock(Start.UNARMED, p -> is(p, Question.CHILDHOOD, "fights") && is(p, Question.YOUTH, "pits"), "pit.won");
 		// the hard roads
 		lock(Start.CAPTIVE, p -> is(p, Question.RAISED, "nobles") && is(p, Question.YOUTH, "hunted"), "captive.freed");
 		lock(Start.CHAINED, p -> is(p, Question.RAISED, "soldiers") && is(p, Question.YOUTH, "levy"), "rise.captive");
-		lock(Start.ROCK_BOTTOM, p -> is(p, Question.RAISED, "healers") && is(p, Question.CHILDHOOD, "caves"), "rise.chained");
-		lock(Start.SENTENCED, p -> is(p, Question.RAISED, "merchants") && is(p, Question.YOUTH, "cutpurses"), "cells.held");
 		lock(Start.EVICTED, p -> is(p, Question.RAISED, "farmers") && is(p, Question.YOUTH, "winter"), "cells.served");
 		// (0.7.443, Havens patch 7b) Andy: "unlockable by reaching good rep with the orcs" (TribePacts); no secret past opens it
 		lock(Start.GREENSKIN, p -> false, TribePacts.FRIEND_DEED);
+		// (0.7.501) the Bio-built's own road opens with their blood: the Mad Tinkerer met, or an android made; no secret past
+		lock(Start.CAST_OUT, p -> false, BIOBUILT_DEED);
 		lock(Start.HIDEOUT, p -> is(p, Question.RAISED, "outlaws") && is(p, Question.YOUTH, "cutpurses"), "market.black", "cells.broke");
 		// the kit roads
 		lock(Start.HEIRLOOM, p -> is(p, Question.RAISED, "nobles") && is(p, Question.YOUTH, "levy"), "assassin.killed");
 		lock(Start.TRADER, p -> is(p, Question.RAISED, "merchants") && is(p, Question.YOUTH, "messenger"), "orders.sent");
 		lock(Start.PUP, p -> is(p, Question.RAISED, "hunters") && is(p, Question.YOUTH, "winter"), "life.saved");
-		lock(Start.NOBODIES, p -> is(p, Question.RAISED, "foundling") && is(p, Question.YOUTH, "levy"), "orders.taken");
 		// the powered roads
 		lock(Start.ANDROID, p -> is(p, Question.RAISED, "smiths") && is(p, Question.YOUTH, "gunsmith"), "rise.lab", "world.rustfall");
 		lock(Start.MOON_CURSED, p -> is(p, Question.BORN, "moors"), "moon.blood");

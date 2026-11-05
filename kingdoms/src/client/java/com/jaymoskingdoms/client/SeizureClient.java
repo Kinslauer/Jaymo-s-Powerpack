@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Seizures;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -92,6 +93,15 @@ public final class SeizureClient {
 	/** Something has you: no key does what it would. */
 	public static boolean locked() {
 		return target >= 0 && ticks > 0;
+	}
+
+	/**
+	 * (2026-11-05) Something drives this player's body now (the fever, the curse, the Grue): your own the moment it comes,
+	 * anyone's as the server syncs it. Their body is drawn facing the way it goes (TakeoverFacingMixin).
+	 */
+	public static boolean drivenBody(net.minecraft.world.entity.player.Player player) {
+		return player.hasAttached(Seizures.SEIZED) || com.jaymoskingdoms.spirits.Grue.taken(player)
+			|| player == Minecraft.getInstance().player && locked();
 	}
 
 	/** You may give in now ({@code U}). */
@@ -235,8 +245,13 @@ public final class SeizureClient {
 		if (!locked() || needed <= 0) {
 			return;
 		}
-		int x = (graphics.guiWidth() - BAR_W) / 2;
-		int y = graphics.guiHeight() - BAR_UP;
+		// (HUD rework) focus band, row 10: the text on top, the bar under it, one piece (text 9 + gap 2 + bar with frame)
+		int[] at = HudZones.place(HudZones.FOCUS, "jaymoskingdoms:struggle", 10, BAR_W + 2, 11 + BAR_H + 2);
+		if (at == null) {
+			return;
+		}
+		int x = at[0] + 1;
+		int y = at[1] + 11 + 1;
 		int fill = Math.round(BAR_W * share());
 		int colour = kind == Seizures.Kind.FEVER ? 0xFFB01010 : 0xFFC08020;
 		graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + BAR_H + 1, 0xA0000000);

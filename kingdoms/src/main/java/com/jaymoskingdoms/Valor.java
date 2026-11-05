@@ -851,6 +851,8 @@ public final class Valor {
 		if (holder instanceof Player p && PowersCompat.power(p) != null) {
 			worth *= POWERED_GROWTH;
 		}
+		// (0.7.509) the Crowned Sun's Valour's Light
+		worth *= Blessings.valorGrowth(holder);
 		Data next = data.withFeat(key, data.exp());
 		grow(holder, next, data.exp() + worth);
 	}

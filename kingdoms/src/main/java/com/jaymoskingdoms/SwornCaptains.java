@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.Captains.Captain;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -69,7 +70,7 @@ public final class SwornCaptains {
 	static final double FOLLOW_FAR = 48.0;
 	/** Spying: days away, and how many of the tribe's secrets he brings back at most. */
 	static final int SPY_DAYS = 2, SPY_TELLS = 2;
-	/** A raid's odds (even ranks), and how much each rank of difference moves them; its loot (emeralds). */
+	/** A raid's odds (even ranks), and how much each rank of difference moves them; its loot (silver). */
 	static final float RAID_WINS = 0.55F, RAID_PER_RANK = 0.1F;
 	static final int RAID_LOOT = 6, RAID_GRUDGE = 8;
 	/** A king's share of each blow while his captains stand; how often he says so (ticks). */
@@ -300,7 +301,7 @@ public final class SwornCaptains {
 		RandomSource random = level.getRandom();
 		if (c.has(Captains.Trait.DEATHLESS) || c.rank() > valor + VALOR_REACH) {
 			String why = c.has(Captains.Trait.DEATHLESS) ? "deathless" : "unbent";
-			Speech.say(level, seen, Component.translatable("talk.jaymoskingdoms.captain.refuses." + why + "." + random.nextInt(LINES),
+			Speech.say(level, seen, Dialects.tr(seen, "talk.jaymoskingdoms.captain.refuses." + why + "." + random.nextInt(LINES),
 				Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
 			level.playSound(null, seen.getX(), seen.getY(), seen.getZ(), SoundEvents.VILLAGER_NO, SoundSource.HOSTILE, 1.2F, 0.6F);
 			return true;
@@ -355,7 +356,7 @@ public final class SwornCaptains {
 			level.sendParticles(ParticleTypes.ENCHANTED_HIT, body.getX(), body.getY(0.6), body.getZ(), 20, 0.4, 0.6, 0.4, 0.2);
 			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 0.6F);
 		}
-		Speech.say(level, body, Component.translatable("talk.jaymoskingdoms.captain.sworn." + how + "." + random.nextInt(LINES),
+		Speech.say(level, body, Dialects.tr(body, "talk.jaymoskingdoms.captain.sworn." + how + "." + random.nextInt(LINES),
 			Recollections.nameTo(sp, body)), Speech.RED, SAY_RANGE);
 		Tribes.add(server, sp.getUUID(), c.tribe(), TURN_GRUDGE);
 		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.sworn", c.name(), Tribes.name(c.tribe()), sp.getDisplayName()));
@@ -414,23 +415,23 @@ public final class SwornCaptains {
 		Bond b = c == null ? null : bond(server, c.id());
 		RandomSource random = level.getRandom();
 		if (c == null || b == null) {
-			return Component.translatable("talk.jaymoskingdoms.captain.order.no");
+			return Dialects.tr(villager, "talk.jaymoskingdoms.captain.order.no");
 		}
 		long now = level.getGameTime();
 		if (RAID_ANSWER.equals(answer)) {
 			Faction camp = nearestCamp(server, c.tribe(), villager.position());
 			if (camp == null) {
-				return Component.translatable("talk.jaymoskingdoms.captain.order.nothing", Recollections.nameTo(player, villager));
+				return Dialects.tr(villager, "talk.jaymoskingdoms.captain.order.nothing", Recollections.nameTo(player, villager));
 			}
 			put(server, c.id(), b.doing("raid", (now / 24000L + 1) * 24000L, camp.id()));
 			Post.news(server, Component.translatable("news.jaymoskingdoms.captain.raid.set", c.name(), Component.literal(camp.name()), player.getDisplayName()));
 			leave(level, c, villager);
-			return Component.translatable("talk.jaymoskingdoms.captain.order.raid." + random.nextInt(LINES), Recollections.nameTo(player, villager),
+			return Dialects.tr(villager, "talk.jaymoskingdoms.captain.order.raid." + random.nextInt(LINES), Recollections.nameTo(player, villager),
 				Component.literal(camp.name()));
 		}
 		put(server, c.id(), b.doing("spy", now + 24000L * SPY_DAYS, -1));
 		leave(level, c, villager);
-		return Component.translatable("talk.jaymoskingdoms.captain.order.spy." + random.nextInt(LINES), Recollections.nameTo(player, villager));
+		return Dialects.tr(villager, "talk.jaymoskingdoms.captain.order.spy." + random.nextInt(LINES), Recollections.nameTo(player, villager));
 	}
 
 	/** He's off: his body gone from the world till he's back. */
@@ -491,7 +492,7 @@ public final class SwornCaptains {
 		}
 		mob.addTag(TAG);
 		Captains.bind(level, c, mob);
-		Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.captain.order.back." + level.getRandom().nextInt(LINES), Recollections.nameTo(lord, mob)),
+		Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.order.back." + level.getRandom().nextInt(LINES), Recollections.nameTo(lord, mob)),
 			Speech.RED, SAY_RANGE);
 	}
 
@@ -541,11 +542,11 @@ public final class SwornCaptains {
 				break;
 			}
 			Captains.learn(lord, e.getKey().id(), e.getValue());
-			Post.tidings(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied", c.name(), Captains.told(e.getKey(), e.getValue())));
+			Post.report(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied", c.name(), Captains.told(e.getKey(), e.getValue(), Dialects.ofTribe(c.tribe()))));
 			told++;
 		}
 		if (told == 0) {
-			Post.tidings(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied.nothing", c.name()));
+			Post.report(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied.nothing", c.name()));
 		}
 		put(server, c.id(), b.doing("guard", -1L, -1));
 	}
@@ -571,7 +572,10 @@ public final class SwornCaptains {
 			}
 			Captains.raise(level, c, random);
 			if (lordId != null) {
-				Post.later(lordId, new ItemStack(Items.EMERALD, RAID_LOOT + random.nextInt(RAID_LOOT)));
+				// (0.7.498) the lord's share of the loot comes in silver coins
+				for (ItemStack coins : Money.stacks(Money.worth(RAID_LOOT + random.nextInt(RAID_LOOT)))) {
+					Post.later(lordId, coins);
+				}
 				Tribes.add(server, lordId, c.tribe(), RAID_GRUDGE);
 			}
 			put(server, c.id(), b.doing("guard", -1L, -1));
@@ -603,7 +607,7 @@ public final class SwornCaptains {
 			hold(server, c.tribe(), null);
 		} else {
 			if (body instanceof LivingEntity living && living.isAlive()) {
-				Speech.say(level, living, Component.translatable("talk.jaymoskingdoms.captain.betrays." + level.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
+				Speech.say(level, living, Dialects.tr(living, "talk.jaymoskingdoms.captain.betrays." + level.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
 				level.sendParticles(ParticleTypes.POOF, living.getX(), living.getY() + 1.0, living.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 				living.discard();
 			}
@@ -642,7 +646,7 @@ public final class SwornCaptains {
 			hold(server, c.tribe(), null);
 		}
 		if (lordId != null) {
-			Post.tidings(lordId, Component.translatable("tidings.jaymoskingdoms.captain.sworn_fell", c.name()));
+			Post.report(lordId, Component.translatable("tidings.jaymoskingdoms.captain.sworn_fell", c.name()));
 		}
 		return true;
 	}
@@ -651,7 +655,7 @@ public final class SwornCaptains {
 
 	/** {@code c}'s death threat for {@code who}, nailed up for the town boards (and in their own Tidings). */
 	static void threat(MinecraftServer server, Captain c, Component who) {
-		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.threat." + Factions.level(server).getRandom().nextInt(LINES),
+		Post.news(server, Dialects.trTribe(c.tribe(), "news.jaymoskingdoms.captain.threat." + Factions.level(server).getRandom().nextInt(LINES),
 			c.name(), Tribes.name(c.tribe()), who));
 	}
 
@@ -758,7 +762,7 @@ public final class SwornCaptains {
 				Entity body = c.body().map(level::getEntity).orElse(null);
 				if (p != null && p.level() == level && p.position().closerThan(center, CHALLENGE_NEAR) && body instanceof PathfinderMob mob && mob.isAlive()) {
 					Rulers.charge(mob, p);
-					Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.captain.challenge.answer." + level.getRandom().nextInt(LINES),
+					Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.challenge.answer." + level.getRandom().nextInt(LINES),
 						Recollections.nameTo(p, mob)), Speech.RED, SAY_RANGE);
 					level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 2.0F, 1.2F);
 					kept.add(new Challenge(ch.captain(), ch.player(), ch.camp(), ch.until(), true));
@@ -898,7 +902,7 @@ public final class SwornCaptains {
 		long now = level.getGameTime();
 		if (now - KING_SAID.getOrDefault(self.getUUID(), -KING_SAYS) >= KING_SAYS) {
 			KING_SAID.put(self.getUUID(), now);
-			Speech.say(level, self, Component.translatable("talk.jaymoskingdoms.captain.king_guarded." + level.getRandom().nextInt(LINES), standing),
+			Speech.say(level, self, Dialects.tr(self, "talk.jaymoskingdoms.captain.king_guarded." + level.getRandom().nextInt(LINES), standing),
 				Speech.RED, SAY_RANGE);
 		}
 		level.sendParticles(ParticleTypes.CRIT, self.getX(), self.getY(0.6), self.getZ(), 4, 0.3, 0.3, 0.3, 0.1);

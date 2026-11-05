@@ -51,6 +51,8 @@ final class Speakeasy {
 	static final int ROOF_CHECK = 24;
 	/** The cells: this far under the seat, tried again this much deeper if the ground there is taken (so many times). */
 	static final int CELL_DEPTH = 12, CELL_STEP = 6, CELL_TRIES = 3;
+	/** (0.7.571) How far the passage runs east from the cell door before the shaft goes up (blocks). */
+	static final int PASSAGE_RUN = 3;
 	/** The share of a wall's stones that are mossy, and cracked. */
 	static final float MOSSY = 0.2F, CRACKED = 0.12F;
 
@@ -457,15 +459,104 @@ final class Speakeasy {
 		return cell.offset(2, 0, 0);
 	}
 
-	/** (0.7.412) Sets an iron door in the east wall of the cell at {@code cell} (once; locked, a prisoner picks it or pays at it). */
+	/**
+	 * (0.7.412) Sets an iron door in the east wall of the cell at {@code cell}, shut (locked: a prisoner picks it or pays at
+	 * it). (0.7.571) Andy: "you should not just teleport out of the jail cell upon lockpicking": behind the door the cells
+	 * now have a way up ({@link #passage}), dug the first time, so a door that opens is walked out of.
+	 */
 	static void cellDoor(ServerLevel level, BlockPos cell) {
 		BlockPos low = doorAt(cell);
-		if (level.getBlockState(low).is(Blocks.IRON_DOOR)) {
-			return;
-		}
+		passage(level, cell);
 		BlockState door = Blocks.IRON_DOOR.defaultBlockState().setValue(DoorBlock.FACING, Direction.WEST).setValue(DoorBlock.OPEN, false);
 		set(level, low.getX(), low.getY(), low.getZ(), door.setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER));
 		set(level, low.getX(), low.getY() + 1, low.getZ(), door.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER));
+	}
+
+	/** (0.7.571) The cell door at {@code cell} swings open (picked, paid, or the sentence served): the prisoner walks out. */
+	static void openDoor(ServerLevel level, BlockPos cell) {
+		BlockPos low = doorAt(cell);
+		if (!level.getBlockState(low).is(Blocks.IRON_DOOR)) {
+			cellDoor(level, cell);
+		}
+		for (BlockPos p : new BlockPos[] {low, low.above()}) {
+			BlockState state = level.getBlockState(p);
+			if (state.is(Blocks.IRON_DOOR)) {
+				level.setBlock(p, state.setValue(DoorBlock.OPEN, true), Block.UPDATE_CLIENTS);
+			}
+		}
+	}
+
+	/**
+	 * (0.7.571) The jailer's way down to the cells at {@code cell} (dug once): a passage on from the door
+	 * ({@link #PASSAGE_RUN} blocks east), then a laddered shaft up to a trapdoor in the first floor above the cells, by the
+	 * seat. Anything with a block entity is left be.
+	 */
+	static void passage(ServerLevel level, BlockPos cell) {
+		int cx = cell.getX(), cy = cell.getY(), cz = cell.getZ();
+		int sx = cx + 2 + PASSAGE_RUN;
+		if (level.getBlockState(new BlockPos(sx, cy, cz)).is(Blocks.LADDER)) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		// the passage: two high, walled, on a cobbled floor
+		for (int x = cx + 3; x <= sx; x++) {
+			wall(level, x, cy - 1, cz, Blocks.COBBLESTONE.defaultBlockState());
+			wall(level, x, cy + 2, cz, stone(random));
+			for (int y = cy; y <= cy + 1; y++) {
+				clear(level, x, y, cz);
+				shore(level, x, y, cz - 1, random);
+				shore(level, x, y, cz + 1, random);
+			}
+		}
+		// the shaft: from the passage up to the first open floor above the cells (no higher than a little over the seat)
+		// (the cells lie at least CELL_DEPTH under the seat: a cave nearer the cells than the seat's floor doesn't count)
+		int highest = Math.max(cy + 4, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sx, cz));
+		int top = highest;
+		for (int y = Math.min(highest, cy + CELL_DEPTH - 3); y <= highest; y++) {
+			BlockPos p = new BlockPos(sx, y, cz);
+			if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && level.getFluidState(p).isEmpty()) {
+				top = y;
+				break;
+			}
+		}
+		shore(level, sx + 1, cy - 1, cz, random);
+		for (int y = cy; y < top; y++) {
+			shore(level, sx + 1, y, cz, random);
+			if (y > cy + 1) {
+				shore(level, sx - 1, y, cz, random);
+				shore(level, sx, y, cz - 1, random);
+				shore(level, sx, y, cz + 1, random);
+			}
+			if (y < top - 1 && level.getBlockEntity(new BlockPos(sx, y, cz)) == null) {
+				set(level, sx, y, cz, Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.WEST));
+			}
+		}
+		// the hatch, shut, in the floor it comes up through
+		if (level.getBlockEntity(new BlockPos(sx, top - 1, cz)) == null) {
+			set(level, sx, top - 1, cz, Blocks.SPRUCE_TRAPDOOR.defaultBlockState().setValue(TrapDoorBlock.HALF, Half.TOP)
+				.setValue(TrapDoorBlock.FACING, Direction.WEST).setValue(TrapDoorBlock.OPEN, false));
+		}
+	}
+
+	private static void clear(ServerLevel level, int x, int y, int z) {
+		if (level.getBlockEntity(new BlockPos(x, y, z)) == null) {
+			set(level, x, y, z, Blocks.AIR.defaultBlockState());
+		}
+	}
+
+	private static void wall(ServerLevel level, int x, int y, int z, BlockState state) {
+		if (level.getBlockEntity(new BlockPos(x, y, z)) == null) {
+			set(level, x, y, z, state);
+		}
+	}
+
+	/** A wall stone where there's air or water (a cave, an aquifer): the passage stays sealed. */
+	private static void shore(ServerLevel level, int x, int y, int z, RandomSource random) {
+		BlockPos p = new BlockPos(x, y, z);
+		BlockState state = level.getBlockState(p);
+		if (level.getBlockEntity(p) == null && (state.isAir() || !level.getFluidState(p).isEmpty() || state.canBeReplaced())) {
+			set(level, x, y, z, stone(random));
+		}
 	}
 
 	/** Where a prisoner is let out: open ground by the seat. */

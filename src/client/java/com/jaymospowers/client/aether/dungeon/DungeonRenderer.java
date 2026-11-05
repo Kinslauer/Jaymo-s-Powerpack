@@ -132,4 +132,18 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 			}
 		};
 	}
+
+	static Look<com.jaymospowers.aether.sky.SkyWarden> skyWarden() {
+		return new Look<>() {
+			@Override
+			public void extract(com.jaymospowers.aether.sky.SkyWarden mob, State state, float partialTicks) {
+				state.awake = mob.awake();
+			}
+
+			@Override
+			public String skin(State state) {
+				return "sky_warden";
+			}
+		};
+	}
 }

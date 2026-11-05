@@ -78,6 +78,7 @@ public final class PlayerCorpses {
 		RagdollBody limp = LivingRagdolls.lastBody(player);
 		corpse.startRagdoll(limp != null ? limp : Corpses.deathBody(player));
 		Corpses.pinFrom(player, corpse);
+		Corpses.tellBody(player, corpse);
 		level.addFreshEntity(corpse);
 	}
 

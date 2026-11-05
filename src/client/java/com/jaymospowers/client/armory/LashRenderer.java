@@ -68,8 +68,6 @@ public final class LashRenderer {
 	private static final double BALL = 0.075, SPIKE = 0.06;
 	/** (0.15.148) Garrotte: how wide the lash's turn round the neck is. */
 	private static final double NECK_LOOP = 0.13;
-	/** (0.16.2) How far the wrist turns (radians) as the ball goes round. */
-	private static final float WRIST = 0.12F;
 	/** (0.16.2) Ball and Chain: the arm straight up (raise, out) while it whirls, and the ball's circle round that hand. */
 	private static final float EXEC_RAISE = 3.0F, EXEC_OUT = 0.35F;
 	private static final double EXEC_RADIUS = 1.1, EXEC_DROOP = 0.1;
@@ -92,6 +90,9 @@ public final class LashRenderer {
 	/** (0.16.2) Whirls this client has started drawing before the server's word came: per player, the whirl as guessed. */
 	private static final Map<Player, Lash.State> GUESSED = new WeakHashMap<>();
 	private static final Map<Player, Rope> ROPES = new WeakHashMap<>();
+	/** (0.19.73) Your own look over the last ticks (yaw, pitch), newest first: how the mouse was moving as you swing. */
+	private static final int TURN_TICKS = 3;
+	private static final float[][] LOOKS = new float[TURN_TICKS + 1][];
 
 	private LashRenderer() {
 	}
@@ -107,7 +108,20 @@ public final class LashRenderer {
 			if (!minecraft.isPaused()) {
 				climb(minecraft.player);
 				tick(minecraft, minecraft.level);
+				System.arraycopy(LOOKS, 0, LOOKS, 1, TURN_TICKS);
+				LOOKS[0] = new float[] {minecraft.player.getYRot(), minecraft.player.getXRot()};
 			}
+		});
+		// (0.19.73) every swing starts from where the head really is, and goes the way the mouse was moving
+		Lash.clientPress = (player, kind) -> press(player, kind == Lash.FLAIL);
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+			if (clicks > 0 && !player.isUsingItem() && holding(player) != 0) {
+				Lash.State state = player.getAttached(Lash.STATE);
+				if (state == null || state.phase() == Lash.RETURN) {
+					aim(player, holding(player) == 1);
+				}
+			}
+			return false;
 		});
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			if (Lash.isFlail(stack)) {
@@ -127,19 +141,43 @@ public final class LashRenderer {
 		Lash.State state = player.getAttached(Lash.STATE);
 		boolean whirling = player.isUsingItem() && Lash.isFlail(player.getUseItem());
 		Lash.State guess = GUESSED.get(player);
-		if (guess == null && whirling && state == null) {
-			guess = new Lash.State(Lash.FLAIL, Lash.WHIRL, gameTime - player.getTicksUsingItem(), -1, Vec3.ZERO,
-				new Vec3(Lash.startAngle(player), 0.0, 0.0));
-			GUESSED.put(player, guess);
-		}
 		if (guess == null) {
 			return state;
 		}
-		if (state != null && state.phase() != Lash.WHIRL || state == null && !whirling) {
+		// (0.19.73) a whirl the server stopped (a guard, something heavy) and wound up again is the server's from then on
+		if (state != null && (state.phase() != Lash.WHIRL || state.shape().z != guess.shape().z) || state == null && !whirling) {
 			GUESSED.remove(player);
 			return state;
 		}
 		return guess;
+	}
+
+	/**
+	 * (0.19.73) Your flail or whip pressed: the server's told where its head is and how the mouse was moving (before the
+	 * press itself goes), and a flail's whirl is drawn at once, set off from there just as the server will.
+	 */
+	private static void press(Player player, boolean flail) {
+		Lash.Aim aim = aim(player, flail);
+		if (flail && aim != null) {
+			GUESSED.put(player, Lash.whirlStart(player, player.level().getGameTime(), player.position().add(aim.head()), aim.turnYaw()));
+		}
+	}
+
+	/** (0.19.73) Sends the server where your flail's or whip's head is and how the mouse has turned; what was sent. */
+	private static Lash.@Nullable Aim aim(Player player, boolean flail) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (player != minecraft.player) {
+			return null;
+		}
+		Rope rope = ROPES.get(player);
+		Vec3 head = rope != null && rope.flail == flail ? rope.now[rope.count] : null;
+		if (head == null) {
+			head = Lash.hand(player, 1.0F).add(0.0, -(flail ? CHAIN_IDLE : WHIP_IDLE * 0.7) * player.getScale(), 0.0);
+		}
+		float[] then = LOOKS[TURN_TICKS] != null ? LOOKS[TURN_TICKS] : new float[] {player.getYRot(), player.getXRot()};
+		Lash.Aim aim = new Lash.Aim(head.subtract(player.position()), Mth.wrapDegrees(player.getYRot() - then[0]), player.getXRot() - then[1]);
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(aim);
+		return aim;
 	}
 
 	/**
@@ -156,14 +194,8 @@ public final class LashRenderer {
 			return null;
 		}
 		double t = Math.max(0.0, time - state.since());
-		float raise = Lash.armRaise(state, t), out = Lash.ARM_OUT;
-		if (state.phase() == Lash.WHIRL) {
-			double angle = state.aim().x + Lash.spinAngle(t);
-			float turn = WRIST * Mth.clamp((float)(t / Lash.PAY_OUT), 0.0F, 1.0F);
-			raise += turn * (float)Math.cos(angle);
-			out += turn * (float)Math.sin(angle);
-		}
-		return new float[] {raise, out};
+		// (0.19.73) the whirling arm works up overhead and dips in front as the ball comes round
+		return state.phase() == Lash.WHIRL ? Lash.whirlArm(state, t) : new float[] {Lash.armRaise(state, t), Lash.ARM_OUT};
 	}
 
 	/** (0.16.11) A flail or whip out: where its head is held (null: free, the physics has it), and how long the line is. */

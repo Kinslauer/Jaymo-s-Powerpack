@@ -276,6 +276,12 @@ public final class BandForge {
 		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.6, at.z, 12, 0.3, 0.2, 0.3, 0.0);
 		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.6, 0.4, 0.1);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.band.reforged", BandUpgrades.SLOTS).withStyle(ChatFormatting.GREEN));
+		// (0.19.85) the reforged band holds a charge now (it was a random timer), full to start, with no recharge left
+		XenoformPower.Live live = XenoformPower.live(player);
+		live.charge = XenoformPower.capacity(player);
+		live.recharge = live.rechargeTotal = 0;
+		live.hudDirty = true;
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.band.reforged_charge").withStyle(ChatFormatting.GREEN));
 		return true;
 	}
 

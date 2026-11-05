@@ -18,7 +18,7 @@ final class WiderSmithingClient {
 			if (lines.isEmpty()) {
 				return;
 			}
-			if (Wear.broken(stack)) {
+			if (Wear.broken(stack) || com.jaymospowers.core.ArmourWear.broken(stack)) {
 				lines.add(1, Component.translatable("tooltip.jaymospowers.broken").withStyle(ChatFormatting.RED));
 			}
 			// (0.18.56) a Cold or Hot Edge from a quench

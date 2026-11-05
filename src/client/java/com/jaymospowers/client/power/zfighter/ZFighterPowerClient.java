@@ -79,6 +79,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
 		ZFighterOrbs.init();
+		ZFighterHandsPose.init();
 		ZFighterSwayPose.init();
 		ZFighterApeSteps.init();
 		ZFighterFakeMoonSky.init();
@@ -92,6 +93,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterStarMapScreen.register();
 		// (0.18.53) star charts' book page, and the worlds read as lights in the night sky
 		com.jaymospowers.client.power.zfighter.sky.SkyPlanets.init();
+		com.jaymospowers.client.power.zfighter.sky.HighSkyClient.init();
 		ZFighterFlightScreen.register();
 		// (0.17.60) the tournament bracket
 		ZFighterBracketScreen.register();
@@ -231,6 +233,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterFlightPose.applyModel(model, state);
 		ZFighterChargePose.applyModel(model, state);
 		ZFighterGuardPose.applyModel(model, state);
+		ZFighterHandsPose.applyModel(model, state);
 		ZFighterFiringPose.applyModel(model, state);
 		ZFighterDancePose.applyModel(model, state);
 		ZFighterComboPose.applyModel(model, state);
@@ -241,6 +244,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		com.jaymospowers.client.power.ember.EmberKindleClient.applyModel(model, state);
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.applyModel(model, state);
 		ZFighterStretchPose.applyModel(model, state);
+		// (0.19.60) last: where the hands ended up, for the ki drawn in them
+		ZFighterHandsPose.capture(model, state);
 	}
 
 	@Override
@@ -268,12 +273,10 @@ public final class ZFighterPowerClient implements PowerClient {
 		boolean ultimate = Fate.isAscended(player);
 		int count = 5 + (flight ? 1 : 0) + (ultimate ? 1 : 0);
 		int total = CHIP * count + CHIP_GAP * (count - 1);
-		int x = width / 2 + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + total > width - 2) {
-			x = width / 2 + 91 - total;
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		return new int[] {x, y, total};
 	}
 
@@ -284,10 +287,16 @@ public final class ZFighterPowerClient implements PowerClient {
 		}
 		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.SPIRIT, Minecraft.getInstance().player);
 		float fill = Mth.clamp(state.bomb() / 100.0F, 0.0F, 1.0F);
-		int cx = graphics.guiWidth() / 2;
 		int width = 80;
-		int x0 = cx - width / 2;
-		int y = graphics.guiHeight() / 2 - 40;
+		// (HUD rework) Spirit Bomb bar (kept 80 wide): ABOVE zone, row 21
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:zfighter_spirit", 21, width, 16);
+		if (at == null) {
+			ZFighterHudLayout.end(graphics);
+			return;
+		}
+		int cx = at[0] + width / 2;
+		int x0 = at[0];
+		int y = at[1] + 11;
 		graphics.fill(x0 - 1, y - 1, x0 + width + 1, y + 5, 0x90000000);
 		graphics.fill(x0, y, x0 + Mth.ceil(width * fill), y + 4, 0xFF000000 | (fill >= 1.0F ? pulse(0xFFFFFF, SPIRIT_COLOR, time * 0.5F) : SPIRIT_COLOR));
 		graphics.centeredText(font, Component.translatable("hud.jaymospowers.zfighter.spirit").copy().withColor(SPIRIT_COLOR), cx, y - 11, 0xFFFFFFFF);
@@ -316,16 +325,15 @@ public final class ZFighterPowerClient implements PowerClient {
 		// (0.13.27) his own ki colour in base form
 		Integer ki = Minecraft.getInstance().player == null ? null : Minecraft.getInstance().player.getAttached(ZFighterPower.KI_COLOR);
 		int color = state.has(ZFighterState.SUPER) ? SUPER_COLOR : ki != null ? ki : WAVE_COLOR;
-		int cx = graphics.guiWidth() / 2;
-		int cy = graphics.guiHeight() / 2;
-		int width = 52;
-		int x0 = cx - width / 2;
-		int y = cy - 28;
-		graphics.fill(x0 - 1, y - 1, x0 + width + 1, y + 4, 0x90000000);
-		graphics.fill(x0, y, x0 + Mth.ceil(width * fill), y + 3, 0xFF000000 | (fill >= 1.0F ? pulse(0xFFFFFF, color, time * 0.6F) : color));
+		// (HUD rework) Ki Wave charge: ABOVE zone, row 20
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:zfighter_wave", 20, com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
+		if (at == null) {
+			ZFighterHudLayout.end(graphics);
+			return;
+		}
 		// (0.13.31) named for what's on V: the lineage's own wave (Crimson Cannon, Spiral Lance, Frost Needle) or the Ki Bomb
 		Component name = ZFighterLineage.techniqueName(player, ZFighterTraining.of(player).charged());
-		graphics.centeredText(font, name.copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
+		com.jaymospowers.client.hud.HudStyle.labelledBar(graphics, font, name.copy().withColor(color), at[0], at[1], com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, fill, fill >= 1.0F ? pulse(0xFFFFFF, color, time * 0.6F) : color);
 		ZFighterHudLayout.end(graphics);
 	}
 

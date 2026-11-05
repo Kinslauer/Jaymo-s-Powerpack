@@ -2,6 +2,7 @@ package com.jaymospowers.power.wind.aether;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.WindPower;
@@ -49,7 +50,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>The way home is the old Aether's: anyone (Wind or not) who falls below {@link #FALL_OUT_Y} lands back in the
  * Overworld, {@link #ARRIVE_ABOVE_GROUND} blocks above the ground at the same x/z, floating down on Slow Falling.</li>
  * </ul>
- * Dying takes you home as usual (your own spawn).
+ * Dying takes you home as usual (your own spawn). (0.20.30) In a One Dimension world with the Aether stacked on top
+ * ({@link Stacked}) none of the jumps happen: see {@link #stackedTick}.
  */
 public final class WindAether {
 	public static final ResourceKey<Level> AETHER = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("aether"));
@@ -88,7 +90,10 @@ public final class WindAether {
 	/** Called from {@code WindPower.init}. */
 	public static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(WindAether::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> READY_AT.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			READY_AT.clear();
+			LAST_REALM.clear();
+		});
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -97,10 +102,15 @@ public final class WindAether {
 		if (aether == null) {
 			return;
 		}
+		// (0.20.30) in a stacked world this is the old, separate Aether (only the afterlife's hall is still there)
 		for (ServerPlayer player : new ArrayList<>(aether.players())) {
 			if (player.isAlive() && player.getY() < FALL_OUT_Y) {
 				fallHome(player, server);
 			}
+		}
+		if (Stacked.joined(server, AETHER)) {
+			stackedTick(server);
+			return;
 		}
 		if (now % 2 != 0) {
 			return;
@@ -111,6 +121,39 @@ public final class WindAether {
 				rise(player, aether);
 				READY_AT.put(player.getUUID(), now + ASCEND_COOLDOWN);
 			}
+		}
+	}
+
+	/** Where each player was last tick, in a stacked world (see {@link #stackedTick}). */
+	private static final Map<UUID, ResourceKey<Level>> LAST_REALM = new HashMap<>();
+
+	/**
+	 * (0.20.30) A One Dimension world with the Aether stacked over the Overworld ({@link Stacked}): nobody rises or falls home
+	 * by a jump any more, they fly or climb up into the islands and fall out of them into the Overworld's sky. What the jumps
+	 * gave stays: the first time in, the Aether's lore; falling out, Slow Falling, so the drop home is not a death.
+	 */
+	private static void stackedTick(MinecraftServer server) {
+		for (ServerPlayer player : server.overworld().players()) {
+			ResourceKey<Level> now = Stacked.realm(player);
+			ResourceKey<Level> was = LAST_REALM.put(player.getUUID(), now);
+			if (was == null || was == now || !player.isAlive() || player.isSpectator()) {
+				continue;
+			}
+			if (now == AETHER) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.aether.arrived").withStyle(ChatFormatting.AQUA));
+				if (!Boolean.TRUE.equals(player.getAttached(VISITED))) {
+					player.setAttached(VISITED, true);
+					player.sendSystemMessage(Component.translatable("message.jaymospowers.aether.lore").withStyle(ChatFormatting.GRAY));
+				}
+			} else if (was == AETHER && now == Level.OVERWORLD && player.getDeltaMovement().y < 0.0 && !player.getAbilities().flying) {
+				player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SLOW_FALL_TICKS, 0, false, false));
+				player.resetFallDistance();
+				burst(server.overworld(), player.position());
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.aether.home").withStyle(ChatFormatting.AQUA));
+			}
+		}
+		if (server.getTickCount() % 1200 == 0) {
+			LAST_REALM.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
 		}
 	}
 

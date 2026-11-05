@@ -173,6 +173,7 @@ public final class VampirePlayers {
 
 	/** They wake changed (vaguely told: they find out the rest), in a crypt where there's room for one. */
 	private static void turn(ServerPlayer player, long nightNo) {
+		Commandments.act(player, "turned");
 		player.removeAttached(Vampires.BITTEN);
 		boolean half = Boolean.TRUE.equals(player.removeAttached(HALF_TURN));
 		Vampires.Kind kind = half ? Vampires.Kind.DHAMPIR : Vampires.Kind.PLAYER;
@@ -243,6 +244,7 @@ public final class VampirePlayers {
 			BloodThralls.drank(player, victim, nightNo);
 		}
 		BloodRequests.fed(player, target);
+		Commandments.act(player, "blood");
 		VampireMask.fed(player);
 		// (0.7.332) villagers who saw it suspect them by name ({@link Suspicion}); a player bitten remembers the biter ({@link VictimMemory})
 		Suspicion.witnessed(level, player, Suspicion.VAMPIRE, Suspicion.ADD_FEEDING, player.isShiftKeyDown() ? Suspicion.FEED_RANGE * Suspicion.SNEAK_SHARE : Suspicion.FEED_RANGE, false);

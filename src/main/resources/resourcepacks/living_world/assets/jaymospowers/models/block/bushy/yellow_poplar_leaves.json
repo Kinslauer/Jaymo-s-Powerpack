@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/bushy/fringe",
+  "textures": {
+    "all": "minecraft:block/yellow_poplar_leaves"
+  }
+}

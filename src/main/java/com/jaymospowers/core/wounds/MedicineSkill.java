@@ -24,6 +24,8 @@ import org.jspecify.annotations.Nullable;
  * put on draw out the bad blood: the plague ({@link #ATROPHY}) and poison. Andy: "you can also use leeches for benefits,
  * when noone else can".</li>
  * <li><b>Second Wind</b>: eat while downed to rise, once a day ({@link SelfRevive}).</li>
+ * <li>(0.20.8) The Hearthkeeper's Gentle Hands (Kingdoms' patrons): a fifth off every treatment and revive, read by reflection
+ * from {@code com.jaymoskingdoms.Patrons.blessing(Player, String)}.</li>
  * <li><b>Lifesaver</b>: someone you bring round gets up with {@link #LIFESAVER_HEALTH} of their health and their bleeding
  * stopped; your smelling salts always rouse a player who has passed out.</li>
  * </ul>
@@ -44,17 +46,26 @@ public final class MedicineSkill {
 	public static final String XP_TAG = "jaymospowers_treated";
 
 	private static final @Nullable Method KINGDOMS_RANK;
+	/** (0.20.8) Kingdoms' {@code Patrons.blessing(Player, String)}: null without Kingdoms or on an older one. */
+	private static final @Nullable Method KINGDOMS_BLESSING;
 
 	static {
 		Method rank = null;
+		Method blessing = null;
 		if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
 			try {
 				rank = Class.forName("com.jaymoskingdoms.Skills").getMethod("rank", Player.class, String.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				rank = null;
 			}
+			try {
+				blessing = Class.forName("com.jaymoskingdoms.Patrons").getMethod("blessing", Player.class, String.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				blessing = null;
+			}
 		}
 		KINGDOMS_RANK = rank;
+		KINGDOMS_BLESSING = blessing;
 	}
 
 	private MedicineSkill() {
@@ -72,9 +83,21 @@ public final class MedicineSkill {
 		}
 	}
 
-	/** How long {@code healer} takes over what takes {@code ticks} (Steady Hands), at least a tick. */
+	/** (0.20.8) A blessing's strength for {@code healer} (a share, 0 to 1): 0 for anything but a player, or on any failure. */
+	static float blessing(@Nullable LivingEntity healer, String key) {
+		if (KINGDOMS_BLESSING == null || !(healer instanceof Player player)) {
+			return 0.0F;
+		}
+		try {
+			return (float) KINGDOMS_BLESSING.invoke(null, player, key);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return 0.0F;
+		}
+	}
+
+	/** How long {@code healer} takes over what takes {@code ticks} (Steady Hands, and (0.20.8) the Hearthkeeper's Gentle Hands), at least a tick. */
 	static int ticks(@Nullable LivingEntity healer, int ticks) {
-		return Math.max(1, Math.round(ticks * (1.0F - STEADY_HANDS_PER_RANK * rank(healer, "steady_hands"))));
+		return Math.max(1, Math.round(ticks * (1.0F - STEADY_HANDS_PER_RANK * rank(healer, "steady_hands")) * (1.0F - blessing(healer, "gentle_hands"))));
 	}
 
 	/** A bandage's or a rag's {@code heal}, tied by {@code healer} (Field Dresser). */

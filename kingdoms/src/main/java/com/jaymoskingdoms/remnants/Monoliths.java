@@ -3,6 +3,7 @@ package com.jaymoskingdoms.remnants;
 import com.jaymoskingdoms.Encounters;
 import com.jaymoskingdoms.Factions;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Stacked;
 import com.jaymoskingdoms.WorldTiers;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Codec;
@@ -194,6 +195,8 @@ public final class Monoliths {
 			}
 		});
 		AncientRemnantsCompat.register();
+		// (0.7.581) the glyphs round their feet
+		MonolithGlyphs.register();
 	}
 
 	/** Whether {@code entity} is one of the Aether's Giants. */
@@ -472,8 +475,9 @@ public final class Monoliths {
 	 */
 	public static Monolith raise(ServerLevel level, BlockPos foot, Element element, RandomSource random) {
 		int height = PILLAR_LEAST + random.nextInt(PILLAR_MOST - PILLAR_LEAST + 1);
-		// never into the world's ceiling: the crown, the gap and the heart's swing all fit under it
-		int room = (level.getMaxY() - CEILING_ROOM - foot.getY()) / SCALE - CORE_GAP - 3;
+		// never into the world's ceiling: the crown, the gap and the heart's swing all fit under it ((0.7.528) the Overworld's
+		// own, not a One Dimension world's Aether band over it)
+		int room = (Stacked.maxY(level.getServer(), Stacked.realm(level, foot.getY())) - CEILING_ROOM - foot.getY()) / SCALE - CORE_GAP - 3;
 		height = Math.max(8, Math.min(height, room));
 		BlockState stone = element.stone().defaultBlockState(), band = element.band().defaultBlockState();
 		// the ground round its foot, its own
@@ -528,6 +532,7 @@ public final class Monoliths {
 		Monolith m = new Monolith(foot.immutable(), element, AWAKE, true, heart);
 		remember(level, m);
 		MonolithHeart.raise(level, m);
+		MonolithGlyphs.carve(level, m);
 		JaymosKingdoms.LOGGER.info("A {} monolith rose at {}", element.key(), foot);
 		return m;
 	}
@@ -557,7 +562,7 @@ public final class Monoliths {
 			return true;
 		}
 		for (Monolith m : all(server)) {
-			if (m.ours() && part(m.pos(), pos) && m.element().builtOf(state)) {
+			if (m.ours() && part(m.pos(), pos) && (m.element().builtOf(state) || state.is(MonolithGlyphs.glyph(m.element())))) {
 				if (highTinkers(player.getMainHandItem())) {
 					return true;
 				}

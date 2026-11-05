@@ -46,6 +46,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
 		// (0.7.326) the clockwork golem
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
+		// (0.7.529) town golems
+		EntityRenderers.register(com.jaymoskingdoms.TownGolem.TYPE, TownGolemRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.SkeletonLord.TYPE, SkeletonLordRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
@@ -66,11 +68,14 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		com.jaymoskingdoms.client.wild.WildRenderer.register();
 		com.jaymoskingdoms.client.monsters.LegendRenderer.register();
+		com.jaymoskingdoms.client.monsters.MimeRenderer.register();
 		// (0.7.145) the Aether's Giants
 		com.jaymoskingdoms.client.remnants.GiantRenderer.register();
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
+		// (0.7.518) the patron champions
+		com.jaymoskingdoms.client.champions.ChampionRenderer.register();
 		// (0.7.206) whaling: great whales, their carcasses, harpoons and their lines
 		com.jaymoskingdoms.client.whaling.GreatWhaleRenderer.register();
 		MobAnimations.register();
@@ -81,6 +86,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		HandshakePose.register();
 		// (0.7.290) a Rubber-folk swallowing: the rubber over the foe, the swell after
 		RubberEngulf.register();
+		ShackleTether.register();
 		BioTailEngulf.register();
 		RubberStomachView.register();
 		HandshakeCinematic.register();
@@ -93,6 +99,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
+		// (0.7.490) Hordes, Orc war journals: the Lore Codex screen
+		LoreCodexClient.register();
 		// 0.7.55: the wardrobe (MCA's editor, clothes only) from the inventory
 		Wardrobe.register();
 		// 0.5.52: the skill tree (K)
@@ -107,8 +115,13 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.238: black over the world from the story until MCA's creator
 		StoryCurtain.register();
 		LineageScreen.register();
+		// (0.7.519) an envoy's offer, and the sovereign's desk
+		EnvoyScreen.register();
+		RulersDeskScreen.register();
 		// 0.7.201: letters and messenger pigeons
 		LetterScreen.register();
+		// (0.7.535) a patron's book of commandments
+		CommandmentsScreen.register();
 		// (0.7.234) the Pin and Rotary lockpicking games
 		LockpickScreen.register();
 		// (0.7.266) the road screen a ride to another settlement goes by on
@@ -120,12 +133,15 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
 		com.jaymoskingdoms.client.forms.FormsClient.register();
+		// (0.7.550) Spell Engine's skill bar placed as the left dock's lowest row, under the body row
+		com.jaymoskingdoms.client.hud.SkillBarDock.register();
 		// (0.7.361) Valor: the N key, the pool's bar, Senses
 		ValorClient.register();
 		// (0.7.383) the Knife school's marked quarry and thrown bolas
 		com.jaymoskingdoms.client.forms.KnifeClient.register();
 		// the spell tomes left click (press and release go to the server)
 		TomeClient.register();
+		PurseCoins.register();
 		TomeFloat.register();
 		WerewolfKey.register();
 		FrostPrisonKey.register();
@@ -145,10 +161,14 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ScentClient.register();
 		WolfTells.register();
 		ClothesColourClient.register();
+		MasonScreen.register();
+		PlanGhosts.register();
 		// 0.7.332: the victim's memory of the biter, and kin heard in each other
 		VictimClient.register();
 		KinshipClient.register();
 		WarriorFury.register();
+		BruteRageHud.register();
+		BloodReservoirHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
 		// (0.7.330) a werewolf's, an ape's or a disguise's voice, through Simple Voice Voice Changer when loaded
@@ -164,6 +184,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
 		ArmoryLayer.register();
+		// (0.7.478) the suit leggings bring with them when nothing covers the chest
+		UnderArmourLayer.register();
 		// (0.7.326) the Reverent Warplate
 		ReverentLayer.register();
 		// (Andy, 2026-10-29) the Mad Tinkerer's sanguine outfit (an MCA villager's)
@@ -189,6 +211,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.BarrageClient.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
+		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
+		BeastParts.register();
+		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
+		SeaParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		GreenskinLooks.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
@@ -199,6 +225,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.disasters.StormsClient.register();
 		// 0.7.31: sandstorms, blizzards and hail (stage 2)
 		com.jaymoskingdoms.client.disasters.CalamitiesClient.register();
+		// 0.7.509: the patrons screen, the boon menu and the boon key
+		PatronKeys.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;

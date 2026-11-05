@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.gifted.Gifted;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
@@ -796,7 +797,7 @@ public final class ZFighterPatrol {
 		WARRANTS.add(new Warrant(player.getUUID(), criminal.getUUID(), level.dimension(), planet));
 		int rank = rank(player, player.getAttached(MEMBER).arrests());
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.warrant", criminal.getDisplayName(),
-			Component.translatable("space.jaymospowers.dest." + dest.key()), bounty(rank)).withStyle(ChatFormatting.GOLD));
+			Component.translatable("space.jaymospowers.dest." + dest.key()), KingdomsMoney.text(player, KingdomsMoney.worth(bounty(rank)))).withStyle(ChatFormatting.GOLD));
 	}
 
 	private static int bounty(int rank) {
@@ -884,12 +885,12 @@ public final class ZFighterPatrol {
 		int was = rank(owner, member.arrests());
 		Member now = new Member(member.arrests() + 1, member.fuelled());
 		owner.setAttached(MEMBER, now);
-		ZFighterSagas.give(owner, new ItemStack(Items.EMERALD, bounty(was)));
+		ZFighterSagas.paySilver(owner, bounty(was)); // (0.20.0) the bounty is silver coins
 		int tp = (int)Math.round(BOUNTY_TP * (1.0 + RANK_PAYS * was));
 		if (Powers.has(owner, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(owner, tp);
 		}
-		owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.arrest", dead.getDisplayName(), bounty(was), now.arrests())
+		owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.arrest", dead.getDisplayName(), KingdomsMoney.text(owner, KingdomsMoney.worth(bounty(was))), now.arrests())
 			.withStyle(ChatFormatting.AQUA));
 		int rank = rank(owner, now.arrests());
 		if (rank(now.arrests()) > rank(member.arrests()) && rank <= was) {

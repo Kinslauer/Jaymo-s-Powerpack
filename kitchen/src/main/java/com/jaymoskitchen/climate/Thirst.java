@@ -2,6 +2,7 @@ package com.jaymoskitchen.climate;
 
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.ModItems;
+import com.jaymoskitchen.Stacked;
 import com.jaymoskitchen.brewing.Brewing;
 import com.jaymoskitchen.cooking.Dish;
 import com.jaymoskitchen.kitchen.KitchenBlocks;
@@ -9,6 +10,7 @@ import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -37,6 +39,9 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -50,6 +55,11 @@ import net.minecraft.world.phys.HitResult;
  * water) may turn your stomach ({@link #SICK_CHANCE}). Boiled over a lit campfire it's Clean Water, which also cools
  * you down; rain caught on the tongue (sneak, look up, use an empty hand) is clean too. A {@link WaterskinItem} carries
  * several drinks. Milk, Kitchen's brews, stews and juicy fruit all count a little; strong spirits take water away.
+ * <p>
+ * (0.5.48) <b>Fire drinkers</b> (Kingdoms' Emberborn, set by {@link #setFireDrinker}) keep a thermal core instead: water
+ * only hisses to steam on their tongue and gives them nothing. Sneaking with an empty hand they drink from a fire or a
+ * lit campfire ({@link #FIRE_DRINK}; a loose fire goes out, a campfire keeps burning) or gulp straight from lava
+ * ({@link #LAVA_DRINK}), and soaking in lava fills them slowly ({@link #LAVA_SOAK_EVERY}). The Nether doesn't dry them.
  */
 public final class Thirst {
 	public static final int MAX = 20;
@@ -74,6 +84,14 @@ public final class Thirst {
 	static final int STEW = 3, MELON = 2, FRUIT = 1;
 	/** Clean water and a fresh sip cool you this much (body heat points). */
 	static final float CLEAN_COOL = 12.0F;
+	/** (0.5.48) A fire drinker: water from a fire or campfire, from a gulp of lava; ticks before the next gulp. */
+	static final int FIRE_DRINK = 4, LAVA_DRINK = 12, FIRE_COOLDOWN = 20, LAVA_COOLDOWN = 60;
+	/** A gulp of lava warms the core: regeneration this long (ticks), at this amplifier. */
+	static final int LAVA_REGEN_TICKS = 160, LAVA_REGEN_LEVEL = 0;
+	/** Soaking in lava: a point of water every this many seconds. */
+	static final int LAVA_SOAK_EVERY = 3;
+	/** Water hisses away: ticks before the hiss sounds again. */
+	static final int HISS_COOLDOWN = 20;
 
 	/** Water you carry (absent = full). Synced to you for the HUD; filled back up when you die. */
 	public static final AttachmentType<Integer> WATER = AttachmentRegistry.create(JaymosKitchen.id("thirst"),
@@ -83,8 +101,20 @@ public final class Thirst {
 
 	private static final Map<UUID, Float> DRAINED = new HashMap<>();
 	private static final Map<UUID, Long> LAST_SIP = new HashMap<>();
+	private static final Map<UUID, Long> LAST_HISS = new HashMap<>();
+	private static Predicate<Player> fireDrinker = player -> false;
 
 	private Thirst() {
+	}
+
+	/** (0.5.48) For other mods (by reflection): who drinks fire and lava, not water (Kingdoms' Emberborn). */
+	public static void setFireDrinker(Predicate<Player> drinker) {
+		fireDrinker = drinker;
+	}
+
+	/** (0.5.48) Whether {@code player} drinks fire and lava instead of water. Both sides. */
+	public static boolean fireDrinker(Player player) {
+		return fireDrinker.test(player);
 	}
 
 	public static int water(Player player) {
@@ -103,6 +133,7 @@ public final class Thirst {
 	static void forget(UUID id) {
 		DRAINED.remove(id);
 		LAST_SIP.remove(id);
+		LAST_HISS.remove(id);
 	}
 
 	// ---- every second ----
@@ -124,8 +155,13 @@ public final class Thirst {
 		if (player.isSwimming()) {
 			rate += SWIM_DRAIN;
 		}
-		if (level.dimension() == Level.NETHER) {
+		boolean fire = fireDrinker(player);
+		if (Stacked.in(player, Level.NETHER) && !fire) {
 			rate += NETHER_DRAIN;
+		}
+		if (fire && player.isInLava() && seconds % LAVA_SOAK_EVERY == 0L) {
+			// (0.5.48) the core soaks it up
+			set(player, water(player) + 1);
 		}
 		rate *= BodyHeat.thirstFactor(player);
 		float drained = DRAINED.getOrDefault(id, 0.0F) + DRAIN * rate;
@@ -170,9 +206,16 @@ public final class Thirst {
 			PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
 			if (contents != null && contents.is(Potions.WATER)) {
 				drink(player, DIRTY_BOTTLE, false, SICK_CHANCE);
+			} else if (fireDrinker(player)) {
+				// (a potion's magic still goes down; only water turns to steam)
+				set(player, water(player) + POTION);
 			} else {
 				drink(player, POTION, true, 0.0F);
 			}
+			return;
+		}
+		if (stack.is(Climate.CLEAN_WATER) && fireDrinker(player)) {
+			hiss(player);
 			return;
 		}
 		if (stack.is(Climate.CLEAN_WATER)) {
@@ -216,9 +259,22 @@ public final class Thirst {
 		return dish != null && dish.bowlFood() ? STEW : 0;
 	}
 
+	/**
+	 * (0.5.58) Told of every drink of water a player takes (a sip, a bottle, a cup): Jaymo's Powers' water in the lungs may
+	 * send it down the wrong pipe. Filled by reflection.
+	 */
+	public static final java.util.List<java.util.function.Consumer<ServerPlayer>> DRANK = new java.util.concurrent.CopyOnWriteArrayList<>();
+
 	/** A drink of water: {@code clean} or with {@code sickChance} of a turned stomach. */
 	public static void drink(ServerPlayer player, int water, boolean clean, float sickChance) {
+		if (fireDrinker(player)) {
+			hiss(player);
+			return;
+		}
 		set(player, water(player) + water);
+		for (java.util.function.Consumer<ServerPlayer> listener : DRANK) {
+			listener.accept(player);
+		}
 		if (!clean && player.getRandom().nextFloat() < sickChance) {
 			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SICK_NAUSEA, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, SICK_HUNGER, 0));
@@ -233,6 +289,9 @@ public final class Thirst {
 	public static boolean trySip(ServerPlayer player) {
 		if (!player.isShiftKeyDown() || !player.getMainHandItem().isEmpty() || player.isSpectator()) {
 			return false;
+		}
+		if (fireDrinker(player)) {
+			return tryFireSip(player);
 		}
 		long now = player.level().getGameTime();
 		Long last = LAST_SIP.get(player.getUUID());
@@ -255,6 +314,83 @@ public final class Thirst {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS,
 			0.5F, 0.9F + player.getRandom().nextFloat() * 0.2F);
 		return true;
+	}
+
+	// ---- (0.5.48) fire drinkers ----
+
+	/** Water on a fire drinker's tongue: it hisses to steam and gives nothing. */
+	static void hiss(ServerPlayer player) {
+		long now = player.level().getGameTime();
+		Long last = LAST_HISS.get(player.getUUID());
+		if (last != null && now - last < HISS_COOLDOWN) {
+			return;
+		}
+		LAST_HISS.put(player.getUUID(), now);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.6F, 1.6F);
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, player.getX(), player.getEyeY() - 0.2, player.getZ(), 6, 0.15, 0.1, 0.15, 0.02);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.thirst.steam").withStyle(ChatFormatting.GRAY));
+	}
+
+	/** A fire drinker sneaking with an empty hand: a gulp of the lava, fire or campfire they look at; water only hisses. */
+	static boolean tryFireSip(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		BlockPos fire = fireLookedAt(player);
+		boolean lava = fire == null && lookingAtLava(player);
+		if (fire == null && !lava) {
+			if (lookingAtWater(player) || inRainLookingUp(player)) {
+				hiss(player);
+				return true;
+			}
+			return false;
+		}
+		Long last = LAST_SIP.get(player.getUUID());
+		if (last != null && now - last < (lava ? LAVA_COOLDOWN : FIRE_COOLDOWN)) {
+			return true;
+		}
+		if (water(player) >= MAX) {
+			return true;
+		}
+		LAST_SIP.put(player.getUUID(), now);
+		set(player, water(player) + (lava ? LAVA_DRINK : FIRE_DRINK));
+		if (lava) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LAVA_POP, SoundSource.PLAYERS, 0.8F, 0.8F);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA, player.getX(), player.getEyeY() - 0.2, player.getZ(), 6, 0.2, 0.1, 0.2, 0.0);
+			player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, LAVA_REGEN_TICKS, LAVA_REGEN_LEVEL, false, false, true));
+		} else {
+			BlockState state = level.getBlockState(fire);
+			if (state.getBlock() instanceof BaseFireBlock) {
+				// a loose fire is drunk down to nothing; a campfire is a hearth and keeps burning
+				level.removeBlock(fire, false);
+			}
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6F, 1.3F);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, player.getX(), player.getEyeY() - 0.2, player.getZ(), 8, 0.15, 0.1, 0.15, 0.02);
+		}
+		return true;
+	}
+
+	/** The fire or lit campfire {@code player} looks at in reach, or null. Both sides. */
+	static @org.jspecify.annotations.Nullable BlockPos fireLookedAt(Player player) {
+		HitResult hit = player.pick(player.blockInteractionRange(), 0.0F, false);
+		if (!(hit instanceof BlockHitResult block) || hit.getType() != HitResult.Type.BLOCK) {
+			return null;
+		}
+		BlockPos pos = block.getBlockPos();
+		for (BlockPos at : new BlockPos[] {pos, pos.relative(block.getDirection())}) {
+			BlockState state = player.level().getBlockState(at);
+			if (state.getBlock() instanceof BaseFireBlock || CampfireBlock.isLitCampfire(state)) {
+				return at.immutable();
+			}
+		}
+		return null;
+	}
+
+	static boolean lookingAtLava(Player player) {
+		HitResult hit = player.pick(player.blockInteractionRange(), 0.0F, true);
+		return hit instanceof BlockHitResult block && hit.getType() == HitResult.Type.BLOCK
+			&& player.level().getFluidState(block.getBlockPos()).is(FluidTags.LAVA);
 	}
 
 	static boolean lookingAtWater(Player player) {

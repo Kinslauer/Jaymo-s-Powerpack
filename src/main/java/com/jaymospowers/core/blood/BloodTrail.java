@@ -38,10 +38,18 @@ import org.jspecify.annotations.Nullable;
  * {@link #LIFE}, darkening as it dries, for anyone who comes by later; a body that keeps bleeding on one spot grows the
  * stain there instead of stacking new ones. Hunting mobs ({@link #TRACKERS}) follow a living bleeder's stains from the
  * oldest to the freshest ({@link BloodTracking}).
+ * <p>(0.20.41, Hematic's idea) Whoever walks through a fresh pool carries it on their feet for a few steps
+ * ({@link #print}): a line of footprints, left and right, pointing the way they went, fainter as it wears off. The prints
+ * are the walker's (tracked like their blood).
+ * <p>(0.20.54) Andy: "rain should wash away blood". A stain out in the rain shrinks by {@link #RAIN_WASH} each sync
+ * ({@link #wash}), so a big pool is gone in about half a minute, a drip's in a few seconds; under a roof or the trees it
+ * stays. A washed stain stops being a trail to follow.
  */
 public final class BloodTrail {
 	/** How long a stain lies (ticks), the last {@link #FADE} of them fading away. */
 	public static final int LIFE = 12000, FADE = 1200;
+	/** (0.20.54) How much of a stain's size the rain washes away each {@link #SYNC_TICKS}. */
+	static final float RAIN_WASH = 0.03F;
 	/** How often players are sent the stains near them (ticks), and how near (blocks). */
 	static final int SYNC_TICKS = 10;
 	static final double SYNC_RANGE = 64.0;
@@ -52,6 +60,18 @@ public final class BloodTrail {
 	static final double FALL = 6.0;
 	/** The most stains a level keeps (the oldest go first). */
 	static final int MAX_MARKS = 6000;
+	/** (0.19.62) Blood magic ({@link #draw}): a stain drawn smaller than this dries away, gone this many ticks later. */
+	static final float DRAWN_DRY = 0.08F;
+	static final int DRAWN_GONE = 20;
+
+	/**
+	 * (0.20.41) Footprints: how often walkers are checked (ticks); a pool this big or more, spilt less than this many ticks
+	 * ago, wets the feet for this many prints, one every this far (blocks), this big (a man's; scaled by width), set this
+	 * far either side of the path.
+	 */
+	static final int PRINT_TICKS = 4, FRESH_FOR = 4200, PRINTS = 10;
+	static final float MIN_POOL = 0.3F, PRINT_SCALE = 0.26F;
+	static final double STRIDE = 0.8, PRINT_SIDE = 0.12, WALKERS_RANGE = 40.0;
 
 	/** (0.17.182) Mobs that follow blood trails to whoever left them. */
 	public static final TagKey<EntityType<?>> TRACKERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("blood_trackers"));
@@ -115,6 +135,21 @@ public final class BloodTrail {
 
 	private static final Map<ServerLevel, Marks> LEVELS = new WeakHashMap<>();
 	private static final Map<ServerPlayer, Sent> SENT = new WeakHashMap<>();
+
+	/** (0.20.41) Bloody feet: prints left to lay, their colour, where the last one fell, how far along the next is, which foot. */
+	private static final class Feet {
+		int left;
+		int color;
+		Vec3 last;
+		double carry;
+		boolean right;
+
+		Feet(Vec3 at) {
+			this.last = at;
+		}
+	}
+
+	private static final Map<LivingEntity, Feet> FEET = new WeakHashMap<>();
 
 	private BloodTrail() {
 	}
@@ -231,6 +266,12 @@ public final class BloodTrail {
 	// ---- every tick -------------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
+		if (server.getTickCount() % PRINT_TICKS == 0) {
+			FEET.keySet().removeIf(body -> !body.isAlive());
+			for (ServerLevel level : server.getAllLevels()) {
+				walk(level);
+			}
+		}
 		if (server.getTickCount() % SYNC_TICKS != 0) {
 			return;
 		}
@@ -240,6 +281,9 @@ public final class BloodTrail {
 				continue;
 			}
 			long now = level.getGameTime();
+			if (level.isRaining()) {
+				wash(level, marks, now);
+			}
 			List<Long> gone = new ArrayList<>();
 			for (Mark mark : marks.order) {
 				if (mark.expires <= now) {
@@ -263,6 +307,131 @@ public final class BloodTrail {
 			for (ServerPlayer player : level.players()) {
 				send(level, player, now);
 			}
+		}
+	}
+
+	// ---- footprints (0.20.41) ------------------------------------------------------------------------------------------
+
+	/** Everyone walking near a player: feet wet in a pool, and bloody feet leaving prints. */
+	private static void walk(ServerLevel level) {
+		Marks marks = LEVELS.get(level);
+		boolean anyFeet = false;
+		for (LivingEntity body : FEET.keySet()) {
+			if (body.level() == level) {
+				anyFeet = true;
+				break;
+			}
+		}
+		if (marks == null && !anyFeet) {
+			return;
+		}
+		java.util.Set<LivingEntity> seen = new java.util.HashSet<>();
+		for (ServerPlayer player : level.players()) {
+			if (player.isSpectator()) {
+				continue;
+			}
+			for (LivingEntity body : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WALKERS_RANGE), BloodTrail::walker)) {
+				if (seen.add(body)) {
+					step(level, body);
+				}
+			}
+		}
+	}
+
+	/** Something with feet, on its feet on dry ground. */
+	private static boolean walker(LivingEntity body) {
+		return body.isAlive() && body.onGround() && !body.isInWater() && !body.isSpectator()
+			&& !(body instanceof net.minecraft.world.entity.monster.cubemob.Slime) && body.getBbWidth() <= 3.0F;
+	}
+
+	private static void step(ServerLevel level, LivingEntity body) {
+		Vec3 at = body.position();
+		long now = level.getGameTime();
+		Feet feet = FEET.get(body);
+		if (feet != null && feet.left > 0) {
+			print(level, body, feet, at);
+		}
+		// a fresh pool underfoot wets the feet again
+		Mark pool = null;
+		for (Mark mark : near(level, at, 0.75 * MAX_SCALE * 1.5 + 0.2, mark -> mark.shape == BloodParticles.Puddle.ROUND && mark.scale >= MIN_POOL
+			&& now - mark.laid < FRESH_FOR && Math.abs(mark.y - at.y) < 0.6
+			&& Math.hypot(mark.x - at.x, mark.z - at.z) < 0.75 * mark.scale + 0.15)) {
+			pool = mark;
+			break;
+		}
+		if (pool != null) {
+			if (feet == null) {
+				feet = new Feet(at);
+				FEET.put(body, feet);
+			} else if (feet.left <= 0) {
+				feet.last = at;
+				feet.carry = 0.0;
+			}
+			feet.left = PRINTS;
+			feet.color = pool.color;
+		} else if (feet != null && feet.left <= 0) {
+			FEET.remove(body);
+		}
+	}
+
+	/**
+	 * (0.20.41) Andy liked Hematic's stains that "smear and transfer on contact". Lays {@code body}'s bloody footprints
+	 * along the ground it has walked since the last one, a stride apart, left and right of its path, pointing the way it
+	 * went.
+	 */
+	private static void print(ServerLevel level, LivingEntity body, Feet feet, Vec3 at) {
+		double dx = at.x - feet.last.x, dz = at.z - feet.last.z;
+		double dist = Math.sqrt(dx * dx + dz * dz);
+		if (dist > STRIDE * 6.0) {
+			// a jump, a teleport, a fall: start again from here
+			feet.last = at;
+			feet.carry = 0.0;
+			return;
+		}
+		if (dist < 1.0E-3) {
+			return;
+		}
+		double ux = dx / dist, uz = dz / dist;
+		// the way it points, in sixteenths of a turn (0 = south, as yaw)
+		int dir = Math.floorMod(Math.round((float) Math.toDegrees(Math.atan2(-ux, uz)) / 22.5F), 16);
+		float size = PRINT_SCALE * Mth.clamp(body.getBbWidth() / 0.6F, 0.7F, 2.5F);
+		UUID by = body.getUUID();
+		double d = STRIDE - feet.carry;
+		while (d <= dist && feet.left > 0) {
+			double side = (feet.right ? -1.0 : 1.0) * PRINT_SIDE;
+			double x = feet.last.x + ux * d + uz * side, z = feet.last.z + uz * d - ux * side;
+			int shape = BloodParticles.Puddle.PRINT + dir + (feet.right ? BloodParticles.Puddle.PRINT_RIGHT : 0);
+			// fainter (smaller) as the blood wears off the soles
+			float scale = size * (0.65F + 0.35F * feet.left / (float) PRINTS);
+			lay(level, by, feet.color, x, at.y + 0.5, z, scale, 0, shape);
+			feet.left--;
+			feet.right = !feet.right;
+			d += STRIDE;
+		}
+		feet.carry = dist - (d - STRIDE);
+		feet.last = at;
+	}
+
+	/**
+	 * (0.20.54) The rain washes every stain it falls on (loaded ground only) smaller; one washed down past
+	 * {@link #DRAWN_DRY} is gone in a moment, as when blood magic draws one dry. Players near are sent it smaller.
+	 */
+	private static void wash(ServerLevel level, Marks marks, long now) {
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (Mark mark : marks.order) {
+			if (mark.scale <= 0.0F || now < mark.showFrom) {
+				continue;
+			}
+			pos.set(mark.x, mark.y + 0.5, mark.z);
+			if (!level.isLoaded(pos) || !level.isRainingAt(pos)) {
+				continue;
+			}
+			mark.scale -= RAIN_WASH;
+			if (mark.scale < DRAWN_DRY) {
+				mark.scale = 0.0F;
+				mark.expires = Math.min(mark.expires, now + DRAWN_GONE);
+			}
+			mark.version++;
 		}
 	}
 
@@ -322,6 +491,43 @@ public final class BloodTrail {
 			}
 		}
 		return found == null || found.by == null ? null : new Object[] {found.position(), found.by, found.laid};
+	}
+
+	/**
+	 * (0.19.62) Andy: "Blood magic should draw from stains on ground". Draws the blood out of the stains within
+	 * {@code range} of {@code at}, the nearest first: each gives up to {@code each} of its size, until {@code most} is
+	 * drawn in all. A drawn stain shrinks (each player near is sent it smaller, and it eases down), and one drawn down
+	 * past {@link #DRAWN_DRY} dries away. {@code drawn} hears where each one lay, for the blood's path to whoever drew
+	 * it. Returns how much was drawn, in stain size (a drip's stain is about 0.2, a pool 1 to 3). Plain types only:
+	 * Jaymo's Kingdoms' blood magic calls it by reflection.
+	 */
+	public static float draw(ServerLevel level, Vec3 at, double range, float each, float most, java.util.function.@Nullable Consumer<Vec3> drawn) {
+		if (each <= 0.0F || most <= 0.0F) {
+			return 0.0F;
+		}
+		List<Mark> found = near(level, at, range, mark -> mark.scale > 0.0F);
+		found.sort(java.util.Comparator.comparingDouble(mark -> at.distanceToSqr(mark.x, mark.y, mark.z)));
+		long now = level.getGameTime();
+		float total = 0.0F;
+		for (Mark mark : found) {
+			float take = Math.min(Math.min(each, mark.scale), most - total);
+			if (take <= 0.0F) {
+				break;
+			}
+			mark.scale -= take;
+			if (mark.scale < DRAWN_DRY) {
+				// drawn dry: gone in a moment (the last of it, too little to hold the eye, counts as drawn)
+				take += mark.scale;
+				mark.scale = 0.0F;
+				mark.expires = Math.min(mark.expires, now + DRAWN_GONE);
+			}
+			mark.version++;
+			total += take;
+			if (drawn != null) {
+				drawn.accept(mark.position());
+			}
+		}
+		return total;
 	}
 
 	/** Whether {@code entity} is in this level and alive. */

@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
  * on a bare sine. Kept per entity between frames and stepped by its age, so a second draw in the same frame (the
  * inventory doll, first-person passes) changes nothing.
  */
-final class XenoMotion {
+public final class XenoMotion {
 	/** Springs: how hard each follower pulls toward its target, and how much of its speed is left after a tick. */
 	static final float TURN_PULL = 0.35F, TURN_KEEP = 0.55F, FALL_PULL = 0.3F, FALL_KEEP = 0.6F, SWAY_PULL = 0.18F, SWAY_KEEP = 0.8F;
 	/** A turn of this many degrees a tick reads as a full swing of the trailing parts. */
@@ -26,7 +26,7 @@ final class XenoMotion {
 	static final float BREATH_RATE = 0.09F, FORGET_TICKS = 100.0F;
 
 	/** What a part reads: each about -1..1 (turn: + to the body's left), smoothed. */
-	record Read(float turn, float trail, float fall, float air, float land, float breath, float speed, boolean crouching) {
+	public record Read(float turn, float trail, float fall, float air, float land, float breath, float speed, boolean crouching) {
 		static final Read STILL = new Read(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, false);
 	}
 
@@ -42,7 +42,7 @@ final class XenoMotion {
 	private XenoMotion() {
 	}
 
-	static Read read(AvatarRenderState state) {
+	public static Read read(AvatarRenderState state) {
 		Minecraft minecraft = Minecraft.getInstance();
 		Entity entity = minecraft.level == null ? null : minecraft.level.getEntity(state.id);
 		if (entity == null) {

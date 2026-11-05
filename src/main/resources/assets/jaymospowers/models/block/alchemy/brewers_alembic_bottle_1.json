@@ -1,0 +1,40 @@
+{
+  "textures": {
+    "particle": "jaymospowers:block/alchemy/alembic_glass",
+    "glass": "jaymospowers:block/alchemy/alembic_glass"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        1,
+        0.5
+      ],
+      "to": [
+        5,
+        6,
+        3.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#glass"
+        },
+        "south": {
+          "texture": "#glass"
+        },
+        "east": {
+          "texture": "#glass"
+        },
+        "west": {
+          "texture": "#glass"
+        },
+        "up": {
+          "texture": "#glass"
+        },
+        "down": {
+          "texture": "#glass"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "minecraft:block/spruce_leaves"
+      }
+    },
+    {
+      "apply": {
+        "model": "jaymospowers:block/bushy/spruce_leaves"
+      }
+    }
+  ]
+}

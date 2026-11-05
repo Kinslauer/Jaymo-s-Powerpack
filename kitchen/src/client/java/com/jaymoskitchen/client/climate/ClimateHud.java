@@ -1,5 +1,6 @@
 package com.jaymoskitchen.client.climate;
 
+import com.jaymoskitchen.client.hud.HudZones;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.climate.BodyHeat;
 import com.jaymoskitchen.climate.Climate;
@@ -87,7 +88,10 @@ public final class ClimateHud {
 		boolean water = hit.getType() == HitResult.Type.BLOCK
 			&& player.level().getFluidState(((net.minecraft.world.phys.BlockHitResult) hit).getBlockPos()).is(FluidTags.WATER);
 		boolean rain = player.getXRot() < -60.0F && player.level().isRainingAt(player.blockPosition().above());
-		if (water || rain) {
+		// (0.5.48) a fire drinker gulps from open lava too (the server decides who that is)
+		boolean lava = hit.getType() == HitResult.Type.BLOCK
+			&& player.level().getFluidState(((net.minecraft.world.phys.BlockHitResult) hit).getBlockPos()).is(FluidTags.LAVA);
+		if (water || rain || lava) {
 			ClientPlayNetworking.send(new Payloads.Sip());
 			sipWait = SIP_EVERY;
 		}
@@ -167,8 +171,14 @@ public final class ClimateHud {
 
 	/** Between the hearts and the hunger bar: a tube that fills from blue to red, and which way it's going. */
 	private static void thermometer(GuiGraphicsExtractor graphics, float body, float ambient) {
-		int cx = graphics.guiWidth() / 2;
-		int bottom = graphics.guiHeight() - 30;
+		// (HUD rework) left dock, row 30 (the body row): a 12 wide box, tube centre 3 px in, bulb at the bottom, arrow out to +9
+		int boxH = TUBE + 6;
+		int[] at = HudZones.place(HudZones.DOCK_LEFT, "jaymoskitchen:body_heat", 30, 12, boxH);
+		if (at == null) {
+			return;
+		}
+		int cx = at[0] + 3;
+		int bottom = at[1] + boxH;
 		int top = bottom - 5 - TUBE;
 		int colour = colour(body);
 		// glass

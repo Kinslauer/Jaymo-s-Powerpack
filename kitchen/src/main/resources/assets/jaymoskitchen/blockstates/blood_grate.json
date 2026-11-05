@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "level=0": {
+      "model": "jaymoskitchen:block/blood_grate"
+    },
+    "level=1": {
+      "model": "jaymoskitchen:block/blood_grate_level1"
+    },
+    "level=2": {
+      "model": "jaymoskitchen:block/blood_grate_level2"
+    },
+    "level=3": {
+      "model": "jaymoskitchen:block/blood_grate_level3"
+    },
+    "level=4": {
+      "model": "jaymoskitchen:block/blood_grate_level4"
+    },
+    "level=5": {
+      "model": "jaymoskitchen:block/blood_grate_level5"
+    },
+    "level=6": {
+      "model": "jaymoskitchen:block/blood_grate_level6"
+    },
+    "level=7": {
+      "model": "jaymoskitchen:block/blood_grate_level7"
+    },
+    "level=8": {
+      "model": "jaymoskitchen:block/blood_grate_level8"
+    }
+  }
+}

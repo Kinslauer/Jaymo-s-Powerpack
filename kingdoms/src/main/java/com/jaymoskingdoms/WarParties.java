@@ -26,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import com.jaymoskingdoms.money.Money;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -80,7 +81,7 @@ final class WarParties {
 	static final long JOINED_MARCH_TICKS = 20 * 60 * 8, JOINED_MAX_TICKS = 20 * 60 * 40;
 	/** The spoils: this share of the enemy's treasury, and up to this many stacks of goods from its storehouse. */
 	static final float SPOILS_SHARE = 0.3F;
-	/** Without a cart, the emeralds each soldier can carry home from a sack. */
+	/** Without a cart, the silver each soldier can carry home from a sack. */
 	static final int SOLDIER_CARRIES = 8;
 	static final int SPOILS_STACKS = 9;
 	/** Its spoils cart keeps this far behind the party's lead on the march, and this far back from the siege. */
@@ -88,7 +89,7 @@ final class WarParties {
 	/** Marching soldiers wait for their cart when they're this far ahead of it; it's steered this far ahead at a time. */
 	static final double CART_WAIT = 20.0, CART_WAYPOINT = 18.0;
 	static final String CART_TAG = "jaymoskingdoms.war_cart";
-	/** The players' cut of the spoils' emeralds (percent, shared among them), and the reputation each gains. */
+	/** The players' cut of the spoils' silver (percent, shared among them), and the reputation each gains. */
 	static final int PLAYERS_CUT = 25, SPOILS_REPUTATION = 15;
 
 	enum Phase {
@@ -106,17 +107,19 @@ final class WarParties {
 		/** (0.5.28) The players marching with it, and what it carries home. */
 		final Set<UUID> players = new HashSet<>();
 		final List<ItemStack> spoils = new ArrayList<>();
-		long spoilsEmeralds;
+		long spoilsSilver;
 		@Nullable BlockPos lastAt, rally;
 		/** Its spoils cart: carter, horse and wagon; and whether it was broken open. */
 		@Nullable UUID carter, horse, wagon;
 		boolean cartBroken;
+		/** Set when the siege took the enemy's riches; the Crowned Sun's deed is paid once for it. */
+		boolean sacked;
 		/** Where its cart last got on, and when (to help it over what stops it). */
 		@Nullable Vec3 cartMark;
 		long cartMarkAt;
 
 		boolean laden() {
-			return !this.spoils.isEmpty() || this.spoilsEmeralds > 0;
+			return !this.spoils.isEmpty() || this.spoilsSilver > 0;
 		}
 
 		Party(int war, int side, int faction, int target, long now) {
@@ -218,11 +221,11 @@ final class WarParties {
 		if (target == null || ACTIVE.containsKey(key(war.id(), side))) {
 			return null;
 		}
-		return start(level, war, side, from, target, null) != null ? target : null;
+		return start(level, war, side, from, target, null, 0) != null ? target : null;
 	}
 
 	/** Sends {@code from}'s party against {@code target}: from {@code muster} (its own seat, for a party a player calls), else on the enemy's frontier. */
-	private static @Nullable Party start(ServerLevel level, War war, int side, Faction from, Faction target, @Nullable BlockPos musterAt) {
+	private static @Nullable Party start(ServerLevel level, War war, int side, Faction from, Faction target, @Nullable BlockPos musterAt, int extra) {
 		MinecraftServer server = level.getServer();
 		RandomSource random = level.getRandom();
 		BlockPos muster = musterAt != null ? musterAt : muster(level, side, Wars.otherSide(war, side), from, target);
@@ -236,7 +239,7 @@ final class WarParties {
 		int army = from.holdings().count(Folk.GUARD) + from.holdings().count(Folk.ARCHER);
 		// (0.7.224) a great war's parties are bigger, and take sellswords from the war chest
 		boolean great = GreatWars.great(server, war);
-		int size = Math.min(great ? GreatWars.PARTY_MAX : PARTY_MAX, PARTY_BASE + army / PARTY_PER) + Tempers.warExtra(from);
+		int size = Math.min(great ? GreatWars.PARTY_MAX : PARTY_MAX, PARTY_BASE + army / PARTY_PER) + Tempers.warExtra(from) + extra;
 		if (great) {
 			size += GreatWars.draftMercs(server, war, side, GreatWars.MERCS_PER_PARTY);
 		}
@@ -366,7 +369,8 @@ final class WarParties {
 				continue;
 			}
 			BlockPos muster = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition());
-			Party party = start(level, war, side, mine, target, muster);
+			// (0.7.509) the Crowned Sun's Banner-Bearer musters more
+			Party party = start(level, war, side, mine, target, muster, Blessings.partyExtra(player));
 			if (party == null) {
 				continue;
 			}
@@ -378,14 +382,15 @@ final class WarParties {
 
 	/** Its siege over, a party with players in it takes the enemy's riches: a share of its treasury and goods from its storehouse. */
 	private static void seize(ServerLevel level, Party party, Faction target) {
+		party.sacked = true;
 		MinecraftServer server = level.getServer();
 		boolean cart = cart(level, party) != null;
 		long share = Math.round(target.treasury() * SPOILS_SHARE);
 		// (no cart to haul it: only what the soldiers can carry, and no goods)
-		long emeralds = cart ? share : Math.min(share, (long)party.soldiers.size() * SOLDIER_CARRIES);
-		if (emeralds > 0) {
-			Factions.update(server, target.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - emeralds)));
-			party.spoilsEmeralds += emeralds;
+		long silver = cart ? share : Math.min(share, (long)party.soldiers.size() * SOLDIER_CARRIES);
+		if (silver > 0) {
+			Factions.update(server, target.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - silver)));
+			party.spoilsSilver += silver;
 		}
 		int goods = 0;
 		if (cart && Storage.loaded(level, target)) {
@@ -403,7 +408,9 @@ final class WarParties {
 			}
 		}
 		tellPlayers(level, party, Component.translatable(cart ? "message.jaymoskingdoms.war.seized" : "message.jaymoskingdoms.war.seized_no_cart",
-			target.name(), emeralds, goods).withStyle(ChatFormatting.GOLD));
+			target.name(), silver, goods).withStyle(ChatFormatting.GOLD));
+		// (0.7.530) the sacked town is in trouble
+		TownTroubles.event(server, target.id(), TownTroubles.WAR, Integer.toString(party.faction));
 		// (0.5.29) a warlord's war-party decree done
 		for (UUID id : party.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(id);
@@ -413,9 +420,19 @@ final class WarParties {
 		}
 	}
 
-	/** The spoils are home: goods into the storehouse (what won't fit, at the seat), emeralds into the treasury; the players their cut. */
+	/** The spoils are home: goods into the storehouse (what won't fit, at the seat), silver into the treasury; the players their cut, paid in coins. */
 	private static void deliver(ServerLevel level, Party party, @Nullable Faction from) {
-		if (from == null || party.spoils.isEmpty() && party.spoilsEmeralds == 0) {
+		// (0.7.509) marching home from a won siege pleases the Crowned Sun (once per party)
+		if (party.sacked) {
+			party.sacked = false;
+			for (java.util.UUID id : party.players) {
+				ServerPlayer p = level.getServer().getPlayerList().getPlayer(id);
+				if (p != null) {
+					Patrons.deed(p, Patron.CROWNED_SUN, Patrons.DEED_GREAT, "siege");
+				}
+			}
+		}
+		if (from == null || party.spoils.isEmpty() && party.spoilsSilver == 0) {
 			return;
 		}
 		MinecraftServer server = level.getServer();
@@ -435,22 +452,20 @@ final class WarParties {
 			}
 		}
 		List<ServerPlayer> marched = party.players.stream().map(id -> server.getPlayerList().getPlayer(id)).filter(p -> p != null).toList();
-		long cut = marched.isEmpty() ? 0 : party.spoilsEmeralds * PLAYERS_CUT / 100;
-		long toTreasury = party.spoilsEmeralds - cut + inCoin;
+		long cut = marched.isEmpty() ? 0 : party.spoilsSilver * PLAYERS_CUT / 100;
+		long toTreasury = party.spoilsSilver - cut + inCoin;
 		Factions.update(server, from.id(), f -> f.withTreasury(f.treasury() + toTreasury));
 		for (ServerPlayer p : marched) {
 			int each = (int)(cut / marched.size());
 			if (each > 0) {
-				ItemStack pay = new ItemStack(net.minecraft.world.item.Items.EMERALD, each);
-				if (!p.getInventory().add(pay)) {
-					p.drop(pay, false, net.minecraft.util.Prediction.SERVER_ONLY);
-				}
+				// (0.7.498) their cut in silver: the worn purse first, then the pack, then the ground
+				Money.pay(p, Money.worth(each));
 			}
 			Reputation.change(p, from, SPOILS_REPUTATION);
 			p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.war.spoils_home", from.name(), toTreasury, each).withStyle(ChatFormatting.GOLD));
 		}
 		party.spoils.clear();
-		party.spoilsEmeralds = 0;
+		party.spoilsSilver = 0;
 	}
 
 	// ---- the spoils cart ---------------------------------------------------------------------------------------------
@@ -588,16 +603,14 @@ final class WarParties {
 		for (ItemStack stack : party.spoils) {
 			net.minecraft.world.level.block.Block.popResource(level, at, stack);
 		}
-		long emeralds = party.spoilsEmeralds;
-		while (emeralds > 0) {
-			int n = (int)Math.min(64, emeralds);
-			net.minecraft.world.level.block.Block.popResource(level, at, new ItemStack(net.minecraft.world.item.Items.EMERALD, n));
-			emeralds -= n;
+		// (0.7.498) the silver spills as coins (the treasury counts in silver)
+		for (ItemStack coins : Money.stacks(Money.worth(party.spoilsSilver))) {
+			net.minecraft.world.level.block.Block.popResource(level, at, coins);
 		}
 		tellPlayers(level, party, Component.translatable(party.laden() ? "message.jaymoskingdoms.war.spoils_spilled" : "message.jaymoskingdoms.war.cart_lost",
 			at.getX(), at.getZ()).withStyle(ChatFormatting.RED));
 		party.spoils.clear();
-		party.spoilsEmeralds = 0;
+		party.spoilsSilver = 0;
 		party.carter = party.horse = party.wagon = null;
 	}
 
@@ -609,7 +622,7 @@ final class WarParties {
 			return Component.translatable("message.jaymoskingdoms.war.cart_empty", whose);
 		}
 		int goods = party.spoils.stream().mapToInt(ItemStack::getCount).sum();
-		return Component.translatable("message.jaymoskingdoms.war.cart", whose, party.spoilsEmeralds, goods);
+		return Component.translatable("message.jaymoskingdoms.war.cart", whose, party.spoilsSilver, goods);
 	}
 
 	private static void tellPlayers(ServerLevel level, Party party, Component message) {

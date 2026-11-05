@@ -181,10 +181,10 @@ public final class Rulers {
 		if (!is(ruler)) {
 			return;
 		}
-		KingdomEvents.audience(player, ruler, faction(ruler));
+		boolean desk = KingdomEvents.audience(player, ruler, faction(ruler));
 		// (0.7.180) the court names who you stand before
 		Introductions.learn(player, ruler);
-		if (role(ruler) == Folk.KING) {
+		if (!desk && role(ruler) == Folk.KING) {
 			Quests.open(player, ruler);
 		}
 	}
@@ -335,8 +335,13 @@ public final class Rulers {
 	 * first. Returns the faction as stored, with them on it; null if no villager could be had (without MCA).
 	 */
 	static @Nullable Faction crown(ServerLevel level, Faction faction, int role) {
+		return crown(level, faction, role, null);
+	}
+
+	/** (0.7.519) As above, with {@code chosen} (an election's winner, a regent, a ward come of age) first if they are about and grown enough. */
+	static @Nullable Faction crown(ServerLevel level, Faction faction, int role, @Nullable UUID chosen) {
 		MinecraftServer s = level.getServer();
-		Worker w = McaCompat.enlistRuler(level, faction, role, house(s, faction.id()));
+		Worker w = McaCompat.enlistRuler(level, faction, role, house(s, faction.id()), chosen);
 		if (w == null) {
 			return null;
 		}
@@ -373,6 +378,19 @@ public final class Rulers {
 			mob.setHealth(mob.getMaxHealth());
 		}
 		mob.setPersistenceRequired();
+	}
+
+	/** (0.7.519) {@code mob}, a regent, steps down from {@code f}'s throne: their role, regalia and health go, and the throne is empty. */
+	static void stepDown(ServerLevel level, Faction f, PathfinderMob mob) {
+		McaCompat.discharge(mob);
+		unfit(mob);
+		Factions.update(level.getServer(), f.id(), x -> x.withLeader(Optional.empty()));
+	}
+
+	/** (0.7.519) The blood of whoever last ruled {@code f} (a villager crowned), alive or dead, if known. */
+	static Heritage.@Nullable Kind lastBlood(MinecraftServer server, Faction f) {
+		Reign reign = Factions.level(server).getAttachedOrElse(REIGNS, Map.<String, Reign>of()).get(Integer.toString(f.id()));
+		return reign == null ? null : Heritage.Kind.byKey(reign.blood());
 	}
 
 	/** Off the throne (it fell, or went to another; their role already gone): the regalia, royal clothes and health go. */
@@ -451,9 +469,15 @@ public final class Rulers {
 		if (w.role() != role) {
 			w.enlist(role, f.id());
 			fit(mob, role, f);
-		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob) && !RoyalDress.nightwear(mob)) {
-			// (0.7.171) crowned before the regalia (or it was taken off them): they're dressed for the throne
-			fit(mob, role, f);
+		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob) && !RoyalDress.nightwear(mob) && !Downed.isDowned(mob)) {
+			if (Regalia.wearsAny(mob) || mob.getAttached(RoyalDress.WEAR) != null) {
+				// (0.7.561) it was taken off them (a player lifting them when they were down sheds their heaviest armour,
+				// helmet and all): the crown goes back on, and nothing else is made afresh, or each lift left a new set
+				Regalia.recrown(mob, role, McaCompat.female(mob));
+			} else {
+				// (0.7.171) crowned before the regalia: they're dressed for the throne
+				fit(mob, role, f);
+			}
 			if (f.leader().map(mob.getUUID()::equals).orElse(false)) {
 				// (and whether she's a queen is written down)
 				reign(s, f.id(), mob);
@@ -544,7 +568,7 @@ public final class Rulers {
 			return false;
 		}
 		return !level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(THREAT_RANGE),
-			e -> e.isAlive() && (e instanceof Enemy || e instanceof ServerPlayer p && !p.isCreative() && !p.isSpectator()
+			e -> e.isAlive() && (e instanceof Enemy && !PatronChampions.outsideTown(e) || e instanceof ServerPlayer p && !p.isCreative() && !p.isSpectator()
 				&& Reputation.get(p, f.id()) <= Reputation.HOSTILE)).isEmpty();
 	}
 
@@ -620,7 +644,7 @@ public final class Rulers {
 
 	static boolean foeNear(ServerLevel level, PathfinderMob guard) {
 		return !level.getEntitiesOfClass(LivingEntity.class, guard.getBoundingBox().inflate(ESCORT_THREAT_RANGE),
-			e -> e.isAlive() && e != guard && (e instanceof Enemy || McaCompat.foe(guard, e))).isEmpty();
+			e -> e.isAlive() && e != guard && (e instanceof Enemy && !PatronChampions.outsideTown(e) || McaCompat.foe(guard, e))).isEmpty();
 	}
 
 	/** The guards (folk and villagers) of {@code f} in {@code box}. */

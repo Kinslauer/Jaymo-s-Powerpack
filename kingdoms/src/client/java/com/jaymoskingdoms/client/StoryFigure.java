@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.McaCompat;
+import com.jaymoskingdoms.Currency;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,13 +101,14 @@ final class StoryFigure {
 	}
 
 	static {
+		// (0.7.498) the merchant, the evicted and the trader hold a coin (realm silver) now, not an emerald
 		Item lh = Items.LEATHER_HELMET, lc = Items.LEATHER_CHESTPLATE, ll = Items.LEATHER_LEGGINGS, lb = Items.LEATHER_BOOTS;
 		// raised by
 		scene("raised.farmers", Act.WORK, Items.IRON_HOE, null, null, null, ll, lb);
 		scene("raised.smiths", Act.WORK, Items.IRON_PICKAXE, null, null, lc, null, null);
 		scene("raised.fisherfolk", Act.LOOK_DOWN, Items.FISHING_ROD, null, null, null, null, lb);
 		scene("raised.hunters", Act.USE, Items.BOW, null, lh, lc, null, null);
-		scene("raised.merchants", Act.STAND, Items.EMERALD, Items.BOOK, null, lc, null, null);
+		scene("raised.merchants", Act.STAND, Currency.SILVER.item(), Items.BOOK, null, lc, null, null);
 		scene("raised.soldiers", Act.SWING, Items.IRON_SWORD, Items.SHIELD, Items.IRON_HELMET, Items.CHAINMAIL_CHESTPLATE, null, null);
 		scene("raised.healers", Act.USE, Items.POTION);
 		scene("raised.wizard", Act.LOOK_DOWN, Items.ENCHANTED_BOOK);
@@ -172,14 +174,14 @@ final class StoryFigure {
 		SCENES.put("road.chained", new Scene(Act.LOOK_DOWN, null, null, null, null, null, null, true, 0));
 		SCENES.put("road.rock_bottom", new Scene(Act.STAND, null, null, null, null, null, null, false, LEFT_ARM));
 		scene("road.sentenced", Act.STAND, Items.IRON_BARS);
-		scene("road.evicted", Act.WALK, Items.EMERALD, Items.BUNDLE, null, null, null, null);
+		scene("road.evicted", Act.WALK, Currency.SILVER.item(), Items.BUNDLE, null, null, null, null);
 		scene("road.hideout", Act.STAND, Items.STONE_SWORD, null, lh, null, null, null);
 		scene("road.cast_out", Act.WALK, null);
 		// (0.7.443) raised by the camps: a stone axe in hand
 		scene("road.greenskin", Act.STAND, Items.STONE_AXE);
 		// (0.7.414) the kit roads: the family blade held out, a trader with a coin and a bundle, a pup's bone, the nobodies' wooden sword and rags
 		scene("road.heirloom", Act.STAND, Items.IRON_SWORD);
-		scene("road.trader", Act.WALK, Items.EMERALD, Items.BUNDLE, null, lc, null, lb);
+		scene("road.trader", Act.WALK, Currency.SILVER.item(), Items.BUNDLE, null, lc, null, lb);
 		scene("road.pup", Act.LOOK_DOWN, Items.BONE);
 		scene("road.nobodies", Act.WALK, Items.WOODEN_SWORD);
 		// (0.7.417) the powered roads: a test subject with a flask in hand, an android with an iron ingot, the cursed looking up at the moon

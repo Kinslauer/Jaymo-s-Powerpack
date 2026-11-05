@@ -55,10 +55,10 @@ final class AncientRemnantsCompat {
 			for (int dx = -SCAN_CHUNKS; dx <= SCAN_CHUNKS; dx++) {
 				for (int dz = -SCAN_CHUNKS; dz <= SCAN_CHUNKS; dz++) {
 					int cx = middle.x() + dx, cz = middle.z() + dz;
-					if (!level.hasChunk(cx, cz)) {
+					ChunkAccess chunk = level.getChunkSource().getChunkNow(cx, cz);
+					if (chunk == null) {
 						continue;
 					}
-					ChunkAccess chunk = level.getChunk(cx, cz);
 					for (Map.Entry<Structure, LongSet> e : chunk.getAllReferences().entrySet()) {
 						Identifier id = registry.getKey(e.getKey());
 						if (id == null || !id.getNamespace().equals(MOD) || !id.getPath().endsWith(MONOLITH_SUFFIX)) {
@@ -66,10 +66,11 @@ final class AncientRemnantsCompat {
 						}
 						for (long ref : e.getValue()) {
 							ChunkPos from = ChunkPos.unpack(ref);
-							if (!level.hasChunk(from.x(), from.z())) {
+							ChunkAccess startChunk = level.getChunkSource().getChunkNow(from.x(), from.z());
+							if (startChunk == null) {
 								continue;
 							}
-							StructureStart start = level.getChunk(from.x(), from.z()).getStartForStructure(e.getKey());
+							StructureStart start = startChunk.getStartForStructure(e.getKey());
 							if (start != null && start.isValid()) {
 								found(level, start);
 							}

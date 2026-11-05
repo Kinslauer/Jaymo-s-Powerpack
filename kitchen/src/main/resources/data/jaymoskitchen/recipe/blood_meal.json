@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:blood_bottle",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "jaymoskitchen:blood_meal",
+    "count": 3
+  }
+}

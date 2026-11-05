@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.List;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -55,7 +56,7 @@ import net.minecraft.world.phys.Vec3;
  * amethyst in a dungeon ({@link GolemLairs}: {@link #LAIR_SHARE} of the Overworld's rogue golem lairs hold him instead),
  * hard to hurt and standing still, until a player comes near or strikes him. Then the crystals burst off him and he
  * laughs, and fights: blows of his staff, and every so often a spell that throws everything round him back and hurts it.
- * A purple boss bar once he and a player have traded blows. Drops bones, amethyst and emeralds. Ops can hatch one from
+ * A purple boss bar once he and a player have traded blows. Drops bones, amethyst and silver coins. Ops can hatch one from
  * its spawn egg (it wakes at once).
  */
 public class SkeletonLord extends Monster {
@@ -75,8 +76,8 @@ public class SkeletonLord extends Monster {
 	static final int SPELL_COOLDOWN = 120, CAST_TICKS = 19, CAST_LANDS = 10;
 	static final double SPELL_RANGE = 7.0, SPELL_RADIUS = 6.0, SPELL_PUSH = 2.2, SPELL_LIFT = 0.55;
 	static final float SPELL_DAMAGE = 6.0F;
-	/** What he drops: bones, amethyst shards, emeralds (min, max of each). */
-	static final int BONES_MIN = 6, BONES_MAX = 10, AMETHYST_MIN = 4, AMETHYST_MAX = 8, EMERALDS_MIN = 3, EMERALDS_MAX = 6;
+	/** What he drops: bones, amethyst shards, silver coins (0.7.486; once emeralds), (min, max of each). */
+	static final int BONES_MIN = 6, BONES_MAX = 10, AMETHYST_MIN = 4, AMETHYST_MAX = 8, SILVER_MIN = 3, SILVER_MAX = 6;
 	public static final byte WAKE = 96, CAST = 97;
 
 	private static final EntityDataAccessor<Boolean> DORMANT = SynchedEntityData.defineId(SkeletonLord.class, EntityDataSerializers.BOOLEAN);
@@ -150,6 +151,7 @@ public class SkeletonLord extends Monster {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		this.stepTick = this.tickCount;
 		if (this.dormant()) {
 			Player near = level.getNearestPlayer(this, WAKE_RANGE);
 			if (near != null && !near.isSpectator() && !near.isCreative() && this.hasLineOfSight(near)) {
@@ -226,6 +228,18 @@ public class SkeletonLord extends Monster {
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 0.8F, 1.4F);
 	}
 
+	/** The tick the AI step last ran, so the immobile fallback in aiStep does not run it twice. */
+	private int stepTick = -1;
+
+	/** Being immobile skips the server AI step, so the timers that end those states run here instead. */
+	@Override
+	public void aiStep() {
+		super.aiStep();
+		if (this.level() instanceof ServerLevel level && this.isAlive() && this.isImmobile() && this.stepTick != this.tickCount) {
+			this.customServerAiStep(level);
+		}
+	}
+
 	/** Asleep, laughing or casting, he stands where he is. */
 	@Override
 	protected boolean isImmobile() {
@@ -270,7 +284,9 @@ public class SkeletonLord extends Monster {
 		super.dropCustomDeathLoot(level, source, killedByPlayer);
 		this.spawnAtLocation(level, new ItemStack(Items.BONE, BONES_MIN + this.random.nextInt(BONES_MAX - BONES_MIN + 1)));
 		this.spawnAtLocation(level, new ItemStack(Items.AMETHYST_SHARD, AMETHYST_MIN + this.random.nextInt(AMETHYST_MAX - AMETHYST_MIN + 1)));
-		this.spawnAtLocation(level, new ItemStack(Items.EMERALD, EMERALDS_MIN + this.random.nextInt(EMERALDS_MAX - EMERALDS_MIN + 1)));
+		for (ItemStack coins : Money.stacks(Money.worth(SILVER_MIN + this.random.nextInt(SILVER_MAX - SILVER_MIN + 1)))) {
+			this.spawnAtLocation(level, coins);
+		}
 	}
 
 	@Override

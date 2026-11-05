@@ -1,6 +1,7 @@
 package com.jaymoskitchen.corpse;
 
 import com.jaymoskitchen.JaymosKitchen;
+import com.jaymoskitchen.KingdomsMoney;
 import com.jaymoskitchen.net.Payloads;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -33,7 +34,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Prediction;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -45,7 +45,6 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
@@ -65,7 +64,7 @@ public final class Butchers {
 	/** A butcher's skill, fixed for each one: anywhere between these, evenly spread. */
 	private static final float MIN_SKILL = 1.0F, MAX_SKILL = 3.0F;
 	/**
-	 * Emeralds per job for a small body and for a big carcass (a cow, a horse), times what this butcher thinks they're
+	 * Silver coins per job (before 0.5.53: emeralds, one for one) for a small body and for a big carcass (a cow, a horse), times what this butcher thinks they're
 	 * worth (1x to {@code MAX_ASKING}x, their own, unrelated to how good they are).
 	 */
 	private static final float PRICE_SMALL = 1.0F, PRICE_BIG = 2.0F;
@@ -87,6 +86,8 @@ public final class Butchers {
 	/** The chopping: this long, a cleaver stroke every so often. */
 	private static final int CHOP_TICKS = 100;
 	private static final int CHOP_EVERY = 16;
+	/** (0.5.51) Worked on a meat hook: it's bled out first, so it takes this long. */
+	private static final int HOOK_CHOP_TICKS = 300;
 	/** Coming back: hands them over this close; gives up following after this long and waits for you to come by. */
 	private static final double HAND_OVER_SQ = 2.5 * 2.5;
 	private static final int BACK_TICKS = 900;
@@ -352,8 +353,13 @@ public final class Butchers {
 		EntityType<?> type = body.sourceType();
 		Component what = type != null ? type.getDescription() : Component.translatable("message.jaymoskitchen.butcher.carcass");
 		// how good they are stays hidden until you've heard (or seen)
-		ServerPlayNetworking.send((ServerPlayer) player, new Payloads.OpenButcher(butcher.getId(), butcher.getDisplayName(), what,
-			known ? skill : 0.0F, known ? tier(skill) : -1, price(butcher, body.isBigCarcass())));
+		// (0.5.56) the price is made here, in the coin of the land, with one of that coin to draw beside it
+		ServerPlayer payer = (ServerPlayer) player;
+		long cost = KingdomsMoney.worth(price(butcher, body.isBigCarcass()));
+		ServerPlayNetworking.send(payer, new Payloads.OpenButcher(butcher.getId(), butcher.getDisplayName(), what,
+			known ? skill : 0.0F, known ? tier(skill) : -1, KingdomsMoney.text(payer, cost), KingdomsMoney.icon(payer), cost,
+			// (0.5.56) 'have' is the cost when the same rule the charge uses would take it (foreign coin at the going rate), else nothing
+			KingdomsMoney.canPay(payer, cost) ? cost : 0L));
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
@@ -376,7 +382,7 @@ public final class Butchers {
 		return body;
 	}
 
-	/** The player said yes on the screen: check it all again, take the emeralds and the body, and send him out back. */
+	/** The player said yes on the screen: check it all again, take the coins and the body, and send him out back. */
 	private static void deal(ServerPlayer player, int villagerId) {
 		ServerLevel level = player.level();
 		if (!(level.getEntity(villagerId) instanceof Villager butcher) || !isButcher(butcher) || !butcher.isAlive()
@@ -390,13 +396,12 @@ public final class Butchers {
 		}
 		float skill = skill(butcher);
 		int price = price(butcher, body.isBigCarcass());
-		if (!player.hasInfiniteMaterials()) {
-			if (ContainerHelper.clearOrCountMatchingItems(player.getInventory(), s -> s.is(Items.EMERALD), price, true) < price) {
-				butcher.playSound(SoundEvents.VILLAGER_NO);
-				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.cant_pay", price));
-				return;
-			}
-			ContainerHelper.clearOrCountMatchingItems(player.getInventory(), s -> s.is(Items.EMERALD), price, false);
+		// (0.5.56) paid in the coin of the land through Jaymo's Kingdoms' money (purses and bundles count; emeralds without Kingdoms)
+		long cost = KingdomsMoney.worth(price);
+		if (!KingdomsMoney.charge(player, cost)) {
+			butcher.playSound(SoundEvents.VILLAGER_NO);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.cant_pay", KingdomsMoney.text(player, cost)));
+			return;
 		}
 
 		// the body changes hands: from your arms to his, or out of the bag and into his arms
@@ -436,6 +441,19 @@ public final class Butchers {
 	 */
 	private static BlockPos outBack(ServerLevel level, Villager butcher, Player player) {
 		BlockPos home = butcher.blockPosition();
+		// (0.5.51) a meat hook near his shop first: he hangs it there and works it (and its blood runs into the grate)
+		BlockPos hookSpot = null;
+		for (BlockPos pos : BlockPos.betweenClosed(home.offset(-BLOCK_SEARCH, -4, -BLOCK_SEARCH), home.offset(BLOCK_SEARCH, 4, BLOCK_SEARCH))) {
+			if (com.jaymoskitchen.butchery.Butchery.isHook(level.getBlockState(pos))) {
+				BlockPos stand = beside(level, pos);
+				if (stand != null && (hookSpot == null || stand.distSqr(home) < hookSpot.distSqr(home)) && reachable(butcher, stand, 1)) {
+					hookSpot = stand;
+				}
+			}
+		}
+		if (hookSpot != null) {
+			return hookSpot;
+		}
 		BlockPos block = null;
 		for (BlockPos pos : BlockPos.betweenClosed(home.offset(-BLOCK_SEARCH, -4, -BLOCK_SEARCH), home.offset(BLOCK_SEARCH, 4, BLOCK_SEARCH))) {
 			if (Corpses.isButcherBlock(level.getBlockState(pos)) && (block == null || pos.distSqr(home) < block.distSqr(home))) {
@@ -468,6 +486,29 @@ public final class Butchers {
 			}
 		}
 		return home;
+	}
+
+	/** (0.5.51) A spot to stand at a meat hook to work what hangs on it: beside where it hangs, on the ground. */
+	private static @Nullable BlockPos beside(ServerLevel level, BlockPos hook) {
+		for (int down = 1; down <= 3; down++) {
+			for (Direction side : Direction.Plane.HORIZONTAL) {
+				BlockPos spot = hook.below(down).relative(side);
+				if (standable(level, spot)) {
+					return spot;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** (0.5.51) The meat hook he stands by at {@code spot}, if he chose one. */
+	private static @Nullable BlockPos hookBy(ServerLevel level, BlockPos spot) {
+		for (BlockPos pos : BlockPos.betweenClosed(spot.offset(-1, 0, -1), spot.offset(1, 3, 1))) {
+			if (com.jaymoskitchen.butchery.Butchery.isHook(level.getBlockState(pos))) {
+				return pos.immutable();
+			}
+		}
+		return null;
 	}
 
 	private static boolean standable(ServerLevel level, BlockPos pos) {
@@ -511,13 +552,23 @@ public final class Butchers {
 				walkTo(butcher, new WalkTarget(job.spot(), WALK_SPEED, ARRIVED));
 				if (butcher.blockPosition().closerThan(job.spot(), ARRIVED + 1.0) || job.ticks() > OUT_TICKS) {
 					job = job.next(CHOP);
+					BlockPos hook = body != null ? hookBy(level, job.spot()) : null;
+					if (hook != null && Hanging.hangable(body)) {
+						// (0.5.51) up on the hook, bled as he works it
+						body.hangOn(hook);
+						body.startBleeding(HOOK_CHOP_TICKS);
+					}
 				}
 			}
 			case CHOP -> {
 				butcher.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 				butcher.getNavigation().stop();
-				if (body != null && body.carrier() != butcher) {
+				boolean hung = body != null && body.hook() != null;
+				if (body != null && !hung && body.carrier() != butcher) {
 					body.handTo(butcher);
+				}
+				if (hung) {
+					butcher.getLookControl().setLookAt(body);
 				}
 				if (job.ticks() % CHOP_EVERY == 0) {
 					butcher.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
@@ -529,7 +580,7 @@ public final class Butchers {
 						body.jolt(true);
 					}
 				}
-				if (job.ticks() >= CHOP_TICKS) {
+				if (job.ticks() >= (hung ? HOOK_CHOP_TICKS : CHOP_TICKS)) {
 					Vec3 at = body != null ? body.position() : butcher.position();
 					level.sendParticles(ParticleTypes.CRIT, at.x, at.y + 0.3, at.z, 20, 0.4, 0.2, 0.4, 0.2);
 					play(level, at, SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F);

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.26) A rich realm's hired carriage ({@link Wagon#CAB}): a driver in the saddle of a horse that draws a plain
- * carriage in the realm's colour. While its treasury holds more than {@link #RICH} emeralds a realm keeps one waiting
+ * carriage in the realm's colour. While its treasury holds more than {@link #RICH} silver coins a realm keeps one waiting
  * beside its rickshaw rank, and it, not the rickshaws, takes players to other settlements, for the same fares and faster.
  * Its pullers on foot ({@link Rickshaws}) see to everything else. When the treasury runs down the cab is let go (once it's
  * back and empty).
@@ -316,8 +317,8 @@ public final class Cabs {
 			return 0;
 		}
 		int fare = Rickshaws.fare(cab.position(), to);
-		if (!player.isCreative() && player.getInventory().countItem(net.minecraft.world.item.Items.EMERALD) < fare) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
+		if (!Money.canPay(player, Money.worth(fare))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", Money.text(player, Money.worth(fare))).withStyle(ChatFormatting.RED));
 			return 0;
 		}
 		if (!player.startRiding(cab)) {
@@ -328,7 +329,7 @@ public final class Cabs {
 		Job job = JOBS.computeIfAbsent(cab.getUUID(), u -> new Job());
 		start(job, HIRED, Construction.standable(level, to.seat(), 6), level.getGameTime());
 		level.playSound(null, cab.blockPosition(), SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.NEUTRAL, 0.8F, 1.1F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cab.off", driver.mob().getName(), to.name(), fare).withStyle(ChatFormatting.GOLD));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cab.off", driver.mob().getName(), to.name(), Money.text(player, Money.worth(fare))).withStyle(ChatFormatting.GOLD));
 		Journeys.begin(level, player, cab, Component.literal(to.name()), job.goal, Journeys.blocks(cab.position(), job.goal), fare, f.id(), RIDE);
 		return 1;
 	}

@@ -30,16 +30,17 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Coinage;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.7.413) Drifters for hire. Now and then a down-and-out stranger turns up in a settlement's tavern, or on the road a
- * short way out of it: an MCA villager in the poorest clothes MCA has (the nitwit's), who'll fight for a few emeralds.
- * Hold {@link #HIRE_COST} emeralds and use them on one (MCA's own Hire is 5 or 10) and they're a hired mercenary (MCA's,
+ * short way out of it: an MCA villager in the poorest clothes MCA has (the nitwit's), who'll fight for a few coins.
+ * Hold a coin or a purse with {@link #HIRE_COST} emeralds' worth in it and use it on one (MCA's own Hire is 5 or 10) and they're a hired mercenary (MCA's,
  * as if hired the usual way: they follow, stay, and are the player's to command), for {@link #HIRED_TICKS}. But they
  * start weak ({@link #HEALTH} health, {@link #DAMAGE} damage), so they're worth it for what {@link Learners} makes of them.
  * <p>
@@ -59,7 +60,7 @@ public final class Drifters {
 	static final float TAVERN_CHANCE = 0.6F;
 	/** On a road: how many route points from the settlement's end they stand (at least, and up to this much more). */
 	static final int ROAD_MIN = 24, ROAD_MORE = 40;
-	/** Emeralds to hire one (MCA's is 5 for a short contract), how long they're hired for (ticks; MCA's long contract), the least hearts they take to you ({@link #keptHearts} raises it to what MCA needs to keep them). */
+	/** (0.7.498) Emeralds' worth in coin to hire one (MCA's is 5 for a short contract), how long they're hired for (ticks; MCA's long contract), the least hearts they take to you ({@link #keptHearts} raises it to what MCA needs to keep them). */
 	static final int HIRE_COST = 2, HIRED_TICKS = 168000, HIRE_HEARTS = 30;
 	/** What they start with (a villager's is 20 and 1). */
 	static final double HEALTH = 8.0, DAMAGE = 1.0;
@@ -235,18 +236,18 @@ public final class Drifters {
 		}
 	}
 
-	/** Emeralds in the main hand, used on an unhired drifter, hire them. */
+	/** (0.7.498) A coin or a coin purse in the main hand, used on an unhired drifter, hires them (the coin comes from everything carried). */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, Entity entity, net.minecraft.world.phys.@Nullable EntityHitResult hit) {
 		if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND || sp.isSpectator()
-			|| !unhired(entity) || !sp.getMainHandItem().is(Items.EMERALD)) {
+			|| !unhired(entity) || !Coinage.isMoney(sp.getMainHandItem())) {
 			return InteractionResult.PASS;
 		}
 		VillagerEntityMCA v = (VillagerEntityMCA)entity;
-		if (!v.isAlive() || Purse.count(sp, Items.EMERALD) < HIRE_COST) {
-			Speech.sayTo(server, v, sp, Component.translatable("speech.jaymoskingdoms.drifter.short", HIRE_COST), Speech.WHITE);
+		if (!v.isAlive() || !Money.canPay(sp, Money.worth(HIRE_COST))) {
+			Speech.sayTo(server, v, sp, Component.translatable("speech.jaymoskingdoms.drifter.short", Money.text(sp, Money.worth(HIRE_COST))), Speech.WHITE);
 			return InteractionResult.SUCCESS;
 		}
-		Purse.take(sp, Items.EMERALD, HIRE_COST);
+		Money.charge(sp, Money.worth(HIRE_COST));
 		String rags = v.getClothes();
 		v.makeMercenary();
 		// (making them a mercenary dresses them again, and so does the contract's end: keep their rags)

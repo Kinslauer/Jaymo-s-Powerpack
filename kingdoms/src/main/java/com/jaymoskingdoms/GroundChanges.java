@@ -41,6 +41,9 @@ public final class GroundChanges {
 	static final int SCAN_TICKS = 4, LOOKS_PER_WALK = 12, SEEDS_PER_WALK = 2;
 	/** How far round a player (in chunks) the walk reaches. */
 	static final int RADIUS = 8;
+	/** (0.7.591) A grown vein's pebble: how deep under the ground its top may be, the chance of one, and how many are hidden nuggets (as Powers' OreTells). */
+	static final int TELL_MIN = 2, TELL_MOST = 12;
+	static final float TELL_CHANCE = 0.4F, TELL_NUGGET_SHARE = 0.5F;
 
 	/**
 	 * A kind of vein: the ore laid over stone and over deepslate (deepslate null: Nether stone), how many pockets a chunk gets,
@@ -120,11 +123,21 @@ public final class GroundChanges {
 		}
 		ChunkPos pos = chunk.getPos();
 		boolean laid = false;
+		// (0.7.528) a One Dimension world: the Overworld's chunks hold the stacked Nether's band too, which gets its own veins
+		boolean nether = table == OVERWORLD && Stacked.joined(level.getServer(), Level.NETHER);
+		int shift = nether ? Stacked.shift(level.getServer(), Level.NETHER) : 0;
 		for (int t = done + 1; t <= tier && t < table.size(); t++) {
 			RandomSource random = RandomSource.create(Mth.getSeed(pos.x(), t * 7919, pos.z()) ^ level.getSeed());
 			for (Vein vein : table.get(t)) {
 				for (int p = 0; p < vein.pockets(); p++) {
-					laid |= pocket(level, chunk, vein, random);
+					laid |= pocket(level, chunk, vein, random, 0);
+				}
+			}
+			if (nether && t < NETHER.size()) {
+				for (Vein vein : NETHER.get(t)) {
+					for (int p = 0; p < vein.pockets(); p++) {
+						laid |= pocket(level, chunk, vein, random, shift);
+					}
 				}
 			}
 		}
@@ -133,9 +146,9 @@ public final class GroundChanges {
 		return laid;
 	}
 
-	/** One pocket: a short random walk from a point in the chunk, turning each replaceable stone block it meets into ore. */
-	private static boolean pocket(ServerLevel level, LevelChunk chunk, Vein vein, RandomSource random) {
-		int minY = Math.max(vein.minY(), level.getMinY() + 1), maxY = Math.min(vein.maxY(), level.getMaxY() - 2);
+	/** One pocket ({@code shift}: added to the vein's heights, for a stacked band): a short random walk from a point in the chunk, turning each replaceable stone block it meets into ore. */
+	private static boolean pocket(ServerLevel level, LevelChunk chunk, Vein vein, RandomSource random, int shift) {
+		int minY = Math.max(vein.minY() + shift, level.getMinY() + 1), maxY = Math.min(vein.maxY() + shift, level.getMaxY() - 2);
 		if (maxY < minY) {
 			return false;
 		}
@@ -144,6 +157,7 @@ public final class GroundChanges {
 		int x = x0 + random.nextInt(16), y = minY + random.nextInt(maxY - minY + 1), z = z0 + random.nextInt(16);
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		boolean laid = false;
+		int topX = 0, topY = Integer.MIN_VALUE, topZ = 0;
 		for (int i = 0; i < vein.size(); i++) {
 			pos.set(x, y, z);
 			BlockState state = chunk.getBlockState(pos);
@@ -156,6 +170,11 @@ public final class GroundChanges {
 			if (ore != null && !(vein.buried() && exposed(chunk, pos))) {
 				level.setBlock(pos, ore.defaultBlockState(), Block.UPDATE_CLIENTS);
 				laid = true;
+				if (y > topY) {
+					topX = x;
+					topY = y;
+					topZ = z;
+				}
 			}
 			switch (random.nextInt(6)) {
 				case 0 -> x = Mth.clamp(x + 1, x0, x0 + 15);
@@ -166,7 +185,35 @@ public final class GroundChanges {
 				default -> z = Mth.clamp(z - 1, z0, z0 + 15);
 			}
 		}
+		if (laid && shift == 0) {
+			tell(level, vein.stone(), topX, topY, topZ, random);
+		}
 		return laid;
+	}
+
+	/**
+	 * (0.7.591) A vein the ground grew just under the surface shows the same faint tell as one that was always there (Jaymo's
+	 * Powers' ore pebbles, {@code OreTells}): sometimes a lone pebble on the dirt over it, stained the ore's colour or a plain
+	 * rock that is really a nugget. Only for the ores Powers has pebbles for; nothing without Powers.
+	 */
+	private static void tell(ServerLevel level, Block ore, int x, int y, int z, RandomSource random) {
+		String kind = ore == Blocks.IRON_ORE ? "iron" : ore == Blocks.COPPER_ORE ? "copper" : ore == Blocks.GOLD_ORE ? "gold" : null;
+		if (kind == null) {
+			return;
+		}
+		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+		if (top - y < TELL_MIN || top - y > TELL_MOST || random.nextFloat() >= TELL_CHANCE) {
+			return;
+		}
+		BlockPos ground = new BlockPos(x, top, z), above = ground.above();
+		BlockState state = level.getBlockState(ground);
+		if (!(state.is(Blocks.DIRT) || state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.COARSE_DIRT) || state.is(Blocks.PODZOL))
+			|| !(level.getBlockState(above).isAir() || level.getBlockState(above).canBeReplaced() && level.getFluidState(above).isEmpty()) || !Block.canSupportCenter(level, ground, net.minecraft.core.Direction.UP)) {
+			return;
+		}
+		String name = kind + (random.nextFloat() < TELL_NUGGET_SHARE ? "_nugget_pebble" : "_pebble");
+		net.minecraft.core.registries.BuiltInRegistries.BLOCK.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", name))
+			.ifPresent(pebble -> level.setBlock(above, pebble.defaultBlockState(), Block.UPDATE_ALL));
 	}
 
 	/** Whether a block of {@code chunk} touches air or a liquid (only the neighbours inside the chunk are looked at). */

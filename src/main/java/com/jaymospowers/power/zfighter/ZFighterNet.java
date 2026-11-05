@@ -261,9 +261,30 @@ public final class ZFighterNet {
 		}
 	}
 
+	/**
+	 * (0.19.60) Server → client: {@code entity} drives an arm forward ({@code hand}: ZFighterHands.RIGHT, LEFT or BOTH) with a
+	 * ki throw ({@code kind}: ZFighterHands.THROW, JAB or PUSH); ZFighterHandsPose plays it, third and first person.
+	 */
+	public record HandThrow(int entity, int hand, int kind) implements CustomPacketPayload {
+		public static final Type<HandThrow> TYPE = new Type<>(JaymosPowers.id("zfighter_hand_throw"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, HandThrow> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.entity);
+				buf.writeVarInt(p.hand);
+				buf.writeVarInt(p.kind);
+			},
+			buf -> new HandThrow(buf.readVarInt(), buf.readVarInt(), buf.readVarInt()));
+
+		@Override
+		public Type<HandThrow> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(KiOrbs.TYPE, KiOrbs.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ApeStep.TYPE, ApeStep.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(HandThrow.TYPE, HandThrow.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenWish.TYPE, OpenWish.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wish.TYPE, Wish.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Wish.TYPE, (payload, ctx) -> ZFighterWishes.wish(ctx.player(), payload.wish()));

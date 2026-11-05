@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/sworn",
+  "display": {
+    "icon": {
+      "id": "minecraft:lodestone"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.monolith.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.monolith.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

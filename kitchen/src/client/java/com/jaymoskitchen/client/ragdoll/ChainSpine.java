@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -30,11 +31,23 @@ public final class ChainSpine {
 		boolean placed) {
 	}
 
-	private record Spine(List<Segment> segments, float length, Set<String> names) {
+	/** {@code restAt}: arc lengths (pixels from the head's tip) of the points of {@code rest} (x, y, z each, model space standing). */
+	private record Spine(List<Segment> segments, float length, Set<String> names, float[] restAt, float[] rest) {
 	}
 
+	/**
+	 * (0.5.50) Draped over the arms: how far either side of the middle lies flat on them, the radius it rolls over their
+	 * edge with (blocks), how much more each block further down swings, and how many points the drape is drawn through.
+	 */
+	private static final float DRAPE_REST = 0.12F, DRAPE_BEND = 0.12F, DRAPE_LAG = 0.6F;
+	private static final int DRAPE_POINTS = 24;
+	/**
+	 * (0.5.50) Held in one hand: how far behind the snout it's gripped (pixels of model), and how far above the ground the
+	 * lowest of it stays (blocks, at scale 1) before it lies along it.
+	 */
+	private static final float HOLD_BEHIND = 6.0F, HANG_CLEAR = 0.1F;
 	private static final Map<ModelPart, Spine> SPINES = new WeakHashMap<>();
-	private static final Spine NONE = new Spine(List.of(), 0.0F, Set.of());
+	private static final Spine NONE = new Spine(List.of(), 0.0F, Set.of(), new float[0], new float[0]);
 
 	private ChainSpine() {
 	}
@@ -102,6 +115,130 @@ public final class ChainSpine {
 			part.zRot = euler.z;
 		}
 		return spine.names;
+	}
+
+	/**
+	 * (0.5.50) A carried (or slung, or falling) snake: no physics runs, so its spine is laid over the carrier's arms by
+	 * hand, the middle across them ({@code across}: that way, the carrier's left, as a Minecraft yaw in degrees) and both
+	 * ends hanging down off either side, swung {@code swingBack} and {@code swingLeft} (radians, as Limp has them) the
+	 * further the lower. {@code body} and {@code scale} place the model as {@link #apply} has them. Returns what
+	 * {@link #apply} does; null for a model with no spine.
+	 */
+	static Set<String> drape(ModelPart root, Matrix4f body, float scale, float across, float swingBack, float swingLeft) {
+		Spine spine = SPINES.computeIfAbsent(root, ChainSpine::find);
+		if (spine.segments.isEmpty() || spine.restAt.length < 2) {
+			return null;
+		}
+		Matrix4f toWorld = new Matrix4f(body).scale(scale).scale(1.0F, -1.0F, -1.0F).translate(0.0F, -1.501F, 0.0F)
+			.scale(1.0F / 16.0F);
+		int n = spine.restAt.length;
+		float[] wx = new float[n], wy = new float[n], wz = new float[n];
+		Vector3f v = new Vector3f();
+		for (int i = 0; i < n; i++) {
+			toWorld.transformPosition(v.set(spine.rest[i * 3], spine.rest[i * 3 + 1], spine.rest[i * 3 + 2]));
+			wx[i] = v.x;
+			wy[i] = v.y;
+			wz[i] = v.z;
+		}
+		// the middle stays where the body is drawn now; the head goes off whichever side of the arms it already lies
+		Vector3f middle = new Vector3f();
+		float half = spine.length * 0.5F;
+		point(wx, wy, wz, spine.restAt, half, middle);
+		float yaw = across * Mth.DEG_TO_RAD;
+		float dx = Mth.cos(yaw), dz = Mth.sin(yaw);
+		if ((wx[0] - wx[n - 1]) * dx + (wz[0] - wz[n - 1]) * dz < 0.0F) {
+			dx = -dx;
+			dz = -dz;
+		}
+		// square to it, level: the carrier's front and back
+		float fx = -dz, fz = dx;
+		float blocks = scale / 16.0F;
+		int samples = DRAPE_POINTS;
+		float[] out = new float[samples * 3];
+		for (int i = 0; i < samples; i++) {
+			float s = spine.length * i / (samples - 1);
+			// signed distance from the middle (blocks): + toward the head
+			float u = (half - s) * blocks;
+			float side = u >= 0.0F ? 1.0F : -1.0F;
+			float a = Math.abs(u);
+			float along, down;
+			float bend = DRAPE_BEND * (float) (Math.PI * 0.5);
+			float ox = 0.0F, oz = 0.0F;
+			if (a <= DRAPE_REST) {
+				along = a;
+				down = 0.0F;
+			} else if (a <= DRAPE_REST + bend) {
+				// rolling over the edge of the arm
+				float t = (a - DRAPE_REST) / DRAPE_BEND;
+				along = DRAPE_REST + DRAPE_BEND * Mth.sin(t);
+				down = DRAPE_BEND * (1.0F - Mth.cos(t));
+			} else {
+				// hanging, swung the further the lower it hangs
+				float h = a - DRAPE_REST - bend;
+				float lag = 1.0F + h * DRAPE_LAG;
+				float out1 = Mth.clamp(swingLeft * side * lag, -1.2F, 1.2F), back = Mth.clamp(swingBack * lag, -1.2F, 1.2F);
+				along = DRAPE_REST + DRAPE_BEND + Mth.sin(out1) * h;
+				down = DRAPE_BEND + Mth.cos(out1) * Mth.cos(back) * h;
+				ox = fx * Mth.sin(back) * h;
+				oz = fz * Mth.sin(back) * h;
+			}
+			out[i * 3] = middle.x + dx * side * along + ox;
+			out[i * 3 + 1] = middle.y - down;
+			out[i * 3 + 2] = middle.z + dz * side * along + oz;
+		}
+		return apply(root, body, scale, out);
+	}
+
+	/**
+	 * (0.5.50) A snake held in one hand, just behind its head ({@link #HOLD_BEHIND} along from its snout), the hand at
+	 * {@code handX, handY, handZ} in the placement's frame and {@code hand} blocks above the ground: the head sticks up out of the fist, the body hangs
+	 * straight down (swung {@code swingBack} and {@code swingLeft}, more the lower), and whatever reaches the ground
+	 * trails along it behind the carrier ({@code facing}, a yaw in degrees). Returns as {@link #apply}.
+	 */
+	static Set<String> hang(ModelPart root, Matrix4f body, float scale, float facing, float swingBack, float swingLeft,
+		float hand, float handX, float handY, float handZ) {
+		Spine spine = SPINES.computeIfAbsent(root, ChainSpine::find);
+		if (spine.segments.isEmpty()) {
+			return null;
+		}
+		float blocks = scale / 16.0F;
+		float yaw = facing * Mth.DEG_TO_RAD;
+		// the carrier's back and right, level
+		float bx = Mth.sin(yaw), bz = -Mth.cos(yaw), rx = -Mth.cos(yaw), rz = -Mth.sin(yaw);
+		float hold = Math.min(HOLD_BEHIND, spine.length * 0.5F) * blocks;
+		float drop = Math.max(hand - HANG_CLEAR * scale, 0.05F);
+		float back = Mth.clamp(swingBack, -0.8F, 0.8F), side = Mth.clamp(swingLeft, -0.8F, 0.8F);
+		int samples = DRAPE_POINTS;
+		float[] out = new float[samples * 3];
+		for (int i = 0; i < samples; i++) {
+			float u = spine.length * blocks * i / (samples - 1) - hold;
+			float x, y, z;
+			if (u <= 0.0F) {
+				// the head, up out of the fist
+				x = 0.0F;
+				y = -u;
+				z = 0.0F;
+			} else {
+				// hanging, swung the more the lower, down to the ground
+				float h = Math.min(u, drop);
+				float lag = 1.0F + h * DRAPE_LAG;
+				float b = back * lag, l = side * lag;
+				x = (bx * Mth.sin(b) + rx * Mth.sin(l)) * h;
+				z = (bz * Mth.sin(b) + rz * Mth.sin(l)) * h;
+				y = -Mth.cos(b) * Mth.cos(l) * h;
+				if (u > drop) {
+					// on the ground: trailing behind
+					float t = u - drop;
+					x += bx * t;
+					z += bz * t;
+					y = -drop;
+				}
+			}
+			out[i * 3] = handX + x;
+			out[i * 3 + 1] = handY + y;
+			out[i * 3 + 2] = handZ + z;
+		}
+		return apply(root, body, scale, out);
 	}
 
 	/** The point {@code s} along the chain (pixels from the head's tip), into {@code out}. */
@@ -294,7 +431,32 @@ public final class ChainSpine {
 				names.add(e.getKey());
 			}
 		}
-		return new Spine(segments, s, names);
+		// (0.5.50) the spine standing, as points along it: every hinge and far end, head's tip first
+		java.util.TreeMap<Float, float[]> line = new java.util.TreeMap<>();
+		for (Segment g : segments) {
+			float hx = 0.0F, hy = 0.0F, hz = 0.0F;
+			for (ModelPart a : g.chain) {
+				PartPose pose = a.getInitialPose();
+				hx += pose.x();
+				hy += pose.y();
+				hz += pose.z();
+			}
+			PartPose own = g.part.getInitialPose();
+			hx += own.x();
+			hy += own.y();
+			hz += own.z();
+			float len = Math.abs(g.farAt - g.hingeAt);
+			line.putIfAbsent(g.hingeAt, new float[] {hx, hy, hz});
+			line.putIfAbsent(g.farAt, new float[] {hx + g.dirX * len, hy + g.dirY * len, hz + g.dirZ * len});
+		}
+		float[] restAt = new float[line.size()], rest = new float[line.size() * 3];
+		int k = 0;
+		for (Map.Entry<Float, float[]> e : line.entrySet()) {
+			restAt[k] = e.getKey();
+			System.arraycopy(e.getValue(), 0, rest, k * 3, 3);
+			k++;
+		}
+		return new Spine(segments, s, names, restAt, rest);
 	}
 
 	/** Unit direction and distance to a child's hinge: x, y, z, length. */

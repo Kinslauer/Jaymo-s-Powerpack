@@ -88,6 +88,16 @@ import org.jspecify.annotations.Nullable;
  * routine for that unless there was a good reason". Only someone with a reason to ({@link ComingOver}: you're hurt, a
  * monster's at your back, a storm, thanks they owe you...) comes over: they call it out as they set off, tell you on
  * arriving, and give their name in passing. "Ask what's going on" in their menu has them explain.
+ * <p>
+ * (0.7.504) Andy: "someone who has any distaste toward you would not introduce themselves ... they should be as
+ * apprehensive as the old orcs were until you prove yourself". A villager {@linkplain Introductions#wary wary} of you
+ * never comes over, and steps back from your hand with a cold word in place of a wave or a name.
+ * <p>
+ * (0.7.504) Andy: "introducing yourself to kings, is no longer a wave or handshake, but you bow, using all the relevant
+ * animation in context. (hand on pommel if wielding a sword)". Meeting a ruler you don't know ({@link #bowTo}: the first
+ * use of them, Introduce, Ask their name or the handshake) you bow from the waist ({@link Hand#BOW}; how you hold your
+ * hands goes by what's in them, {@code client/HandshakePose}); the ruler inclines their head ({@link Hand#NOD}) and
+ * names themselves with their title, or, wary of you, doesn't return it.
  */
 public final class Handshakes {
 	/** An offered hand waits this long (ticks) to be taken. */
@@ -106,6 +116,8 @@ public final class Handshakes {
 	static final float CHIME_VOLUME = 0.7F, CHIME_PITCH = 1.4F;
 	/** (0.7.289) A villager's wave at a first meeting (ticks); their menu opens after it. */
 	public static final int WAVE_TICKS = 30;
+	/** (0.7.504) How hard a wary villager steps back from your hand (blocks a tick). */
+	static final double STEP_BACK = 0.25;
 	/** (0.7.289) Andy: "women usually wave": the chance a woman shakes your hand at a first meeting, when she'd take it at all. */
 	static final float WOMAN_SHAKES = 0.2F;
 	/** (0.7.337) How often (ticks) players are looked at for a villager to come over, how far off they may be (blocks), and the chance a look brings one. */
@@ -130,6 +142,9 @@ public final class Handshakes {
 	static final int COME_PLAIN = 2, COME_WARM = 2;
 	/** (0.7.337) How far their hail on setting off carries (blocks); (0.7.449) what they call depends on why they come ({@link ComingOver}). */
 	static final double HAIL_RANGE = 16.0;
+
+	/** (0.7.504) A bow to a ruler (ticks): they incline their head at {@link #NOD_AT}, the bow comes up at {@link #BOW_RELEASE} and is over at {@link #BOW_TICKS}. */
+	public static final int NOD_AT = 12, NOD_TICKS = 16, BOW_RELEASE = 30, BOW_TICKS = 40;
 
 	/** (0.7.289) On a player: the villagers who've greeted them, whose menu opens straight away from then (saved, kept through death). */
 	static final AttachmentType<Set<UUID>> GREETED = AttachmentRegistry.create(JaymosKingdoms.id("greeted"),
@@ -161,6 +176,12 @@ public final class Handshakes {
 	private static final Map<UUID, Long> COME_NEXT = new HashMap<>();
 	/** (0.7.337) "villager/player" → the day that villager last came over to that player. */
 	private static final Map<String, Long> CAME = new HashMap<>();
+	/** (0.7.504) Players bowing to a ruler. */
+	private static final List<Bow> BOWS = new ArrayList<>();
+
+	/** (0.7.504) {@code player} bows to {@code ruler} from {@code start} (game time); the ruler's menu {@code opens} after. */
+	private record Bow(UUID player, Villager ruler, long start, boolean opens) {
+	}
 
 	/** (0.7.289) Your hand is out to {@code villager}, who answers at {@code decide} (game time): {@code takes} it, or waves. */
 	private record Greeting(Villager villager, long decide, boolean takes) {
@@ -222,10 +243,11 @@ public final class Handshakes {
 	/**
 	 * Server → everyone who can see {@code playerId}: their hand toward {@code partnerId}: {@link #DOWN}, {@link #OFFERED}
 	 * (held out), {@link #SHAKING} (the handshake starts now), {@link #DAP} (the quick one starts now), or (0.7.289)
-	 * {@link #WAVE} (a wave starts now), or {@link #PLAIN} (the handshake starts now, not on film).
+	 * {@link #WAVE} (a wave starts now), or {@link #PLAIN} (the handshake starts now, not on film); (0.7.504)
+	 * {@link #BOW} (a bow to a ruler starts now) or {@link #NOD} (the ruler inclines their head).
 	 */
 	public record Hand(int playerId, int partnerId, int state) implements CustomPacketPayload {
-		public static final int DOWN = 0, OFFERED = 1, SHAKING = 2, DAP = 3, WAVE = 4, PLAIN = 5;
+		public static final int DOWN = 0, OFFERED = 1, SHAKING = 2, DAP = 3, WAVE = 4, PLAIN = 5, BOW = 6, NOD = 7;
 		public static final Type<Hand> TYPE = new Type<>(JaymosKingdoms.id("handshake"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Hand> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -285,6 +307,7 @@ public final class Handshakes {
 			COMERS.clear();
 			COME_NEXT.clear();
 			CAME.clear();
+			BOWS.clear();
 		});
 	}
 
@@ -303,7 +326,9 @@ public final class Handshakes {
 
 	/** {@code player} could shake hands just now: up, about, not a spectator. */
 	private static boolean can(Player player) {
-		return player.isAlive() && !player.isSpectator() && !player.isSleeping() && !Downed.isDowned(player);
+		// ((0.7.591) nor carried, left for dead, black for a new life, in Chrono's death window or a captain's film)
+		return player.isAlive() && !player.isSpectator() && !player.isSleeping() && !Downed.isDowned(player)
+			&& !(player instanceof ServerPlayer sp && Approaches.unreachable(sp));
 	}
 
 	/** {@code player} used {@code other}: they take {@code other}'s hand if it's held out to them, else hold out their own. */
@@ -353,7 +378,10 @@ public final class Handshakes {
 			return;
 		}
 		if (Rulers.is(villager)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.ruler").withStyle(ChatFormatting.GRAY), true);
+			// (0.7.504) one you've not met yet you bow to
+			if (Introductions.knows(player, villager) || !bowTo(player, villager, false)) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.ruler").withStyle(ChatFormatting.GRAY), true);
+			}
 			return;
 		}
 		Long down = TURNED_DOWN.get(villager.getUUID() + "/" + player.getUUID());
@@ -396,6 +424,11 @@ public final class Handshakes {
 				return true;
 			}
 		}
+		for (Bow b : BOWS) {
+			if (b.ruler == villager) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -416,6 +449,11 @@ public final class Handshakes {
 		if (!a.takes) {
 			TURNED_DOWN.put(villager.getUUID() + "/" + player.getUUID(), Deeds.today(level.getServer()));
 			send(player, -1, Hand.DOWN);
+			if (Introductions.wary(player, villager)) {
+				// (0.7.504) one who minds you steps back from it
+				standOff(player, villager);
+				return;
+			}
 			Speech.say(level, villager, Component.translatable("handshake.jaymoskingdoms.refused"), Speech.WHITE, 12.0);
 			level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 1.0F);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.refused").withStyle(ChatFormatting.GRAY), true);
@@ -497,6 +535,13 @@ public final class Handshakes {
 			if (w.villager == villager) {
 				it.remove();
 				endWave(server, w);
+			}
+		}
+		for (Iterator<Bow> it = BOWS.iterator(); it.hasNext(); ) {
+			Bow b = it.next();
+			if (b.ruler == villager) {
+				it.remove();
+				endBow(server, b);
 			}
 		}
 		for (Iterator<VillagerShake> it = VILLAGER_SHAKES.iterator(); it.hasNext(); ) {
@@ -591,6 +636,13 @@ public final class Handshakes {
 		if (GREETINGS.remove(player.getUUID()) != null) {
 			send(player, -1, Hand.DOWN);
 		}
+		for (Iterator<Bow> it = BOWS.iterator(); it.hasNext(); ) {
+			Bow b = it.next();
+			if (b.player.equals(player.getUUID())) {
+				it.remove();
+				endBow(server, b);
+			}
+		}
 		for (Iterator<Wave> it = WAVES.iterator(); it.hasNext(); ) {
 			Wave w = it.next();
 			if (w.player.equals(player.getUUID())) {
@@ -633,7 +685,7 @@ public final class Handshakes {
 			}
 		}
 		tickComers(server);
-		if (OFFERS.isEmpty() && SHAKES.isEmpty() && ASKED.isEmpty() && VILLAGER_SHAKES.isEmpty() && GREETINGS.isEmpty() && WAVES.isEmpty()) {
+		if (OFFERS.isEmpty() && SHAKES.isEmpty() && ASKED.isEmpty() && VILLAGER_SHAKES.isEmpty() && GREETINGS.isEmpty() && WAVES.isEmpty() && BOWS.isEmpty()) {
 			return;
 		}
 		long now = server.overworld().getGameTime();
@@ -717,6 +769,7 @@ public final class Handshakes {
 			}
 		}
 		tickGreetings(server, now);
+		tickBows(server, now);
 	}
 
 	// ---- (0.7.289) a first meeting ----------------------------------------------------------------------------------
@@ -736,12 +789,17 @@ public final class Handshakes {
 			|| shaking(player.getUUID()) || busy(villager) || Identities.masked(player) || Recollections.refuses(villager, player)) {
 			return false;
 		}
+		if (Rulers.is(villager) && !Introductions.knows(player, villager)) {
+			// (0.7.504) a ruler you've not met: you bow, and their menu opens after
+			greeted(player, villager);
+			return bowTo(player, villager, true);
+		}
 		if (Introductions.knows(player, villager) || Rulers.is(villager) || Outlaws.is(villager) || ZFighterFolk.is(villager)) {
 			// ((0.7.397) an outlaw doesn't greet you: their menu opens as it is; (0.7.405) nor does a Z Fighter character)
 			greeted(player, villager);
 			return false;
 		}
-		boolean takes = Introductions.takesHand(player, villager) && (!McaCompat.female(villager) || villager.getRandom().nextFloat() < WOMAN_SHAKES);
+		boolean takes = !Introductions.knows(player, villager) && Introductions.takesHand(player, villager) && (!McaCompat.female(villager) || villager.getRandom().nextFloat() < WOMAN_SHAKES);
 		GREETINGS.put(player.getUUID(), new Greeting(villager, player.level().getGameTime() + VILLAGER_THINK, takes));
 		villager.getNavigation().stop();
 		villager.getLookControl().setLookAt(player);
@@ -775,6 +833,12 @@ public final class Handshakes {
 			return;
 		}
 		send(player, -1, Hand.DOWN);
+		if (Introductions.wary(player, villager)) {
+			// (0.7.504) no wave from one who minds you: a step back and a cold word, then their menu (no name in it)
+			standOff(player, villager);
+			menu(player, villager);
+			return;
+		}
 		send(villager, player.getId(), Hand.WAVE);
 		WAVES.add(new Wave(player.getUUID(), villager, now, true));
 		player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 1.0F);
@@ -825,6 +889,110 @@ public final class Handshakes {
 		}
 	}
 
+	/** (0.7.504) {@code villager}, wary of {@code player}, steps back from them with a cold word in place of their name. */
+	private static void standOff(ServerPlayer player, Villager villager) {
+		ServerLevel level = player.level();
+		Vec3 away = new Vec3(villager.getX() - player.getX(), 0.0, villager.getZ() - player.getZ());
+		if (away.lengthSqr() > 1.0E-4) {
+			villager.push(away.normalize().scale(STEP_BACK));
+		}
+		villager.getLookControl().setLookAt(player);
+		Speech.say(level, villager, Introductions.waryLine(villager), Speech.WHITE, 12.0);
+		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.9F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.wary").withStyle(ChatFormatting.GRAY), true);
+	}
+
+	// ---- (0.7.504) a bow to a ruler -----------------------------------------------------------------------------------
+
+	/**
+	 * (0.7.504) {@code player} bows to {@code ruler}, whom they've not met: turned to face them and held still while
+	 * they bow, the ruler stopping to watch. {@code opens}: their menu opens once it's done (a first use). False if it
+	 * can't be done now.
+	 */
+	public static boolean bowTo(ServerPlayer player, Villager ruler, boolean opens) {
+		if (!can(player) || shaking(player.getUUID()) || bowing(player.getUUID()) || busy(ruler) || !ruler.isAlive()
+			|| GREETINGS.containsKey(player.getUUID()) || Identities.masked(player)) {
+			return false;
+		}
+		Vec3 to = new Vec3(ruler.getX() - player.getX(), 0.0, ruler.getZ() - player.getZ());
+		if (to.lengthSqr() > 1.0E-4) {
+			place(player, player.position(), to.normalize());
+		}
+		hold(player, true);
+		ruler.getNavigation().stop();
+		ruler.getLookControl().setLookAt(player);
+		BOWS.add(new Bow(player.getUUID(), ruler, player.level().getGameTime(), opens));
+		send(player, ruler.getId(), Hand.BOW);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.5F, 0.8F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bow.bowed").withStyle(ChatFormatting.GRAY), true);
+		return true;
+	}
+
+	/** (0.7.504) {@code id} is bowing to a ruler. */
+	private static boolean bowing(UUID id) {
+		for (Bow b : BOWS) {
+			if (b.player.equals(id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** (0.7.504) Bows kept going: the ruler's nod, then their answer, and their menu if it was a first use. */
+	private static void tickBows(MinecraftServer server, long now) {
+		for (Iterator<Bow> it = BOWS.iterator(); it.hasNext(); ) {
+			Bow b = it.next();
+			ServerPlayer p = server.getPlayerList().getPlayer(b.player);
+			if (p == null || !can(p) || gone(p, b.ruler)) {
+				it.remove();
+				endBow(server, b);
+				continue;
+			}
+			b.ruler.getNavigation().stop();
+			b.ruler.getLookControl().setLookAt(p);
+			long t = now - b.start;
+			if (t == NOD_AT && !Introductions.wary(p, b.ruler) && !Recollections.refuses(b.ruler, p)) {
+				send(b.ruler, p.getId(), Hand.NOD);
+			}
+			if (t >= BOW_TICKS) {
+				it.remove();
+				endBow(server, b);
+				answerBow(p, b.ruler);
+				if (b.opens) {
+					menu(p, b.ruler);
+				}
+			}
+		}
+	}
+
+	/** (0.7.504) The ruler answers a bow: their title and name (Introductions#askName), or, wary of you, nothing of the kind. */
+	private static void answerBow(ServerPlayer player, Villager ruler) {
+		ServerLevel level = player.level();
+		boolean knew = Introductions.knows(player, ruler);
+		Component words = Introductions.askName(player, ruler);
+		boolean met = !knew && Introductions.knows(player, ruler);
+		Component name = Component.literal(ruler.getName().getString());
+		if (Languages.understands(player, ruler)) {
+			Speech.say(level, ruler, words, Speech.WHITE, 12.0);
+		}
+		if (met) {
+			player.sendSystemMessage(Component.translatable(Languages.understands(player, ruler) ? "message.jaymoskingdoms.bow.known"
+				: "message.jaymoskingdoms.bow.foreign", name).withStyle(ChatFormatting.GREEN), true);
+		} else if (!knew) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bow.cold").withStyle(ChatFormatting.GRAY), true);
+		}
+	}
+
+	/** (0.7.504) The bow's over: you're free to move, and both stand easy. */
+	private static void endBow(MinecraftServer server, Bow b) {
+		ServerPlayer p = server.getPlayerList().getPlayer(b.player);
+		if (p != null) {
+			hold(p, false);
+			send(p, -1, Hand.DOWN);
+		}
+		send(b.ruler, -1, Hand.DOWN);
+	}
+
 	// ---- (0.7.337) they come to you -----------------------------------------------------------------------------------
 
 	/** (0.7.337) Maybe a villager near {@code player} who doesn't know them comes over to introduce themselves. */
@@ -847,12 +1015,14 @@ public final class Handshakes {
 		ComingOver.Pick bestWhy = null;
 		int total = 0;
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(COME_RANGE))) {
-			int w = comeWeight(level, player, v, today);
+			boolean known = Introductions.knows(player, v);
+			int w = comeWeight(level, player, v, today, known);
 			if (w <= 0) {
 				continue;
 			}
 			// (0.7.449) Andy: "people wouldnt usually break routine for that unless there was a good reason": no reason, they stay put
-			ComingOver.Pick why = ComingOver.reason(level, player, v, Approaches.home(level, v), today);
+			// (a villager you already know only comes over to hold you to a promise)
+			ComingOver.Pick why = known ? ComingOver.promise(player, v) : ComingOver.reason(level, player, v, Approaches.home(level, v), today);
 			if (why == null) {
 				continue;
 			}
@@ -870,10 +1040,12 @@ public final class Handshakes {
 	}
 
 	/** (0.7.337) How keen {@code v} is to come over and introduce themselves to {@code player} (0: they won't). */
-	private static int comeWeight(ServerLevel level, ServerPlayer player, Villager v, long today) {
+	private static int comeWeight(ServerLevel level, ServerPlayer player, Villager v, long today, boolean known) {
 		if (!McaCompat.isMca(v) || v.isBaby() || v.isTrading() || McaCompat.panicking(v) || busy(v) || !Approaches.free(v)
-			|| Introductions.knows(player, v) || greetedBy(player, v) || Rulers.is(v) || Recollections.refuses(v, player) || Outlaws.is(v) || ZFighterFolk.is(v)) {
-			// ((0.7.397) looters, bandits and raiders never come over to introduce themselves; (0.7.405) nor Z Fighter characters)
+			|| known && Promises.dueToday(player, v) == null || !known && (Introductions.knows(player, v) || greetedBy(player, v)) || Rulers.is(v) || Recollections.refuses(v, player) || Outlaws.is(v) || ZFighterFolk.is(v)
+			|| Introductions.wary(player, v)) {
+			// ((0.7.397) looters, bandits and raiders never come over to introduce themselves; (0.7.405) nor Z Fighter characters;
+			// (0.7.504) nor anyone who minds you)
 			return 0;
 		}
 		Long came = CAME.get(v.getUUID() + "/" + player.getUUID());
@@ -954,6 +1126,12 @@ public final class Handshakes {
 		stand(villager, player);
 		// (0.7.449) first, what they came to say
 		ComingOver.arrived(player, villager, c.why);
+		if (Introductions.knows(player, villager)) {
+			// (someone you know came only to remind you: no hand, no name)
+			send(villager, player.getId(), Hand.WAVE);
+			WAVES.add(new Wave(player.getUUID(), villager, now, false));
+			return true;
+		}
 		if (c.takes) {
 			c.offering = true;
 			c.until = now + COME_OFFER_TICKS;

@@ -26,15 +26,17 @@ import net.minecraft.world.phys.Vec3;
  * <li>Pyre, Wyrm and Nadir cruise like Wind: {@link WindPose} leans, banks and stretches them out once they're moving
  * ({@link #cruising}).</li>
  * <li>Wyrm's wings beat hard while it flies and fold back along its body as it picks up speed (read in its model).</li>
- * <li>Wisp's glide is a ghost's drift: tipped forward, arms reaching out limp and swaying, the tatters streaming back,
- * the whole body rolling and bobbing slowly.</li>
+ * <li>Keen's and Talon's glide: tipped forward, rolling and bobbing slowly.</li>
+ * <li>(0.20.23) Wisp's (and Revenant's) float: upright, as a ghost hangs in the air (Andy: "it should float upright instead of
+ * an angled glide"). The body stays upright and sways a little (its own bob, {@code WispKi}, carries on), the arms hang
+ * loose at its sides and drift, the head stays level; sneaking to sink doesn't crouch it ({@code BillowPoseMixin}).</li>
  * <li>Pyre flies on fire: its arms stay swept back as jets (no fist out ahead), and small flames spurt from its hands
  * and feet while it hovers ({@link #tick}); at speed its comet's tail takes over ({@link PyreComet}).</li>
  * </ul>
  */
 public final class XenoformFlightPose {
 	/** One player's flight this frame: the glide's amount, the wings' (flying, folded back), Pyre's jet, and the time. */
-	public record Flight(float glide, float wings, float fold, float jet, float time) {
+	public record Flight(float glide, float wings, float fold, float jet, float time, float drift) {
 	}
 
 	public static final RenderStateDataKey<Flight> KEY = RenderStateDataKey.create(() -> "jaymospowers:xenoform_flight");
@@ -47,6 +49,8 @@ public final class XenoformFlightPose {
 	static final float EASE = 0.15F;
 	/** The glide's forward tip (degrees), its slow roll (degrees) and bob (blocks). */
 	static final float GLIDE_LEAN = 38.0F, GLIDE_ROLL = 9.0F, GLIDE_BOB = 0.07F;
+	/** (0.20.23) The float's slow side-to-side sway (degrees). */
+	static final float FLOAT_SWAY = 3.0F;
 	/** Pyre's foot flames: particles per foot a tick, and their push out behind; only while cruising less than this much. */
 	static final int FOOT_FLAMES = 1;
 	static final float JETS_UNTIL = 0.5F;
@@ -57,7 +61,7 @@ public final class XenoformFlightPose {
 	/** Pyre's jet arms: swept back this far (radians) and out from the body this far. */
 	static final float JET_ARM_BACK = 0.35F, JET_ARM_OUT = 0.3F;
 
-	/** entity id → {glide, glide before, wings, wings before, fold, fold before, jet, jet before}. */
+	/** entity id → {glide, glide before, wings, wings before, fold, fold before, jet, jet before, float, float before}. */
 	private static final Map<Integer, float[]> AMOUNTS = new HashMap<>();
 
 	private XenoformFlightPose() {
@@ -103,13 +107,15 @@ public final class XenoformFlightPose {
 				if (kind == XenoformState.FLY_NONE) {
 					continue;
 				}
-				a = new float[8];
+				a = new float[10];
 				AMOUNTS.put(player.getId(), a);
 			}
 			a[1] = a[0];
 			a[3] = a[2];
 			a[5] = a[4];
 			a[7] = a[6];
+			a[9] = a[8];
+			a[8] = ease(a[8], kind == XenoformState.FLY_FLOAT);
 			a[6] = ease(a[6], XenoformState.jet(kind));
 			a[0] = ease(a[0], kind == XenoformState.FLY_GLIDE);
 			a[2] = ease(a[2], kind == XenoformState.FLY_WINGS);
@@ -123,6 +129,7 @@ public final class XenoformFlightPose {
 		AMOUNTS.entrySet().removeIf(entry -> {
 			float[] a = entry.getValue();
 			return a[0] <= 0.0F && a[1] <= 0.0F && a[2] <= 0.0F && a[3] <= 0.0F && a[4] <= 0.001F && a[6] <= 0.0F && a[7] <= 0.0F
+				&& a[8] <= 0.0F && a[9] <= 0.0F
 				|| level.getEntity(entry.getKey()) == null;
 		});
 	}
@@ -183,13 +190,24 @@ public final class XenoformFlightPose {
 			return;
 		}
 		state.setData(KEY, new Flight(Mth.lerp(partialTicks, a[1], a[0]), Mth.lerp(partialTicks, a[3], a[2]), Mth.lerp(partialTicks, a[5], a[4]),
-			Mth.lerp(partialTicks, a[7], a[6]), entity.tickCount + partialTicks));
+			Mth.lerp(partialTicks, a[7], a[6]), entity.tickCount + partialTicks, Mth.lerp(partialTicks, a[9], a[8])));
 	}
 
 	/** After the body's turned to face its way: the glide tips it forward, rolling and bobbing slowly. */
 	public static void rotate(AvatarRenderState state, PoseStack poseStack, float entityScale) {
 		Flight flight = state.getData(KEY);
-		if (flight == null || flight.glide() <= 0.001F || state.deathTime > 0.0F) {
+		if (flight == null || state.deathTime > 0.0F) {
+			return;
+		}
+		if (flight.drift() > 0.001F) {
+			// (0.20.23) the float: upright, only a slow sway (the forms bob on their own)
+			float f = smooth(flight.drift()), t = flight.time();
+			float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
+			poseStack.translate(0.0F, middle, 0.0F);
+			poseStack.rotateDegrees(Axis.ZP, Mth.sin(t * 0.07F) * FLOAT_SWAY * f);
+			poseStack.translate(0.0F, -middle, 0.0F);
+		}
+		if (flight.glide() <= 0.001F) {
 			return;
 		}
 		float g = smooth(flight.glide()), t = flight.time();
@@ -215,6 +233,17 @@ public final class XenoformFlightPose {
 			float j = smooth(flight.jet()), t = flight.time(), shake = Mth.sin(t * 1.7F) * 0.04F;
 			pose(h.rightArm, JET_ARM_BACK + shake, 0.0F, JET_ARM_OUT, j);
 			pose(h.leftArm, JET_ARM_BACK - shake, 0.0F, -JET_ARM_OUT, j);
+		}
+		if (flight.drift() > 0.001F) {
+			// (0.20.23) the float: arms hanging loose at the sides, a little forward and out, drifting out of step
+			float f = smooth(flight.drift()), t = flight.time();
+			pose(h.rightArm, -0.2F + Mth.sin(t * 0.09F) * 0.12F, 0.0F, 0.18F + Mth.sin(t * 0.07F) * 0.06F, f);
+			pose(h.leftArm, -0.2F + Mth.sin(t * 0.09F + 1.9F) * 0.12F, 0.0F, -0.18F - Mth.sin(t * 0.07F + 1.3F) * 0.06F, f);
+			// the head level, turning to look as it likes
+			pose(h.head, h.head.xRot * 0.5F + Mth.sin(t * 0.05F) * 0.04F, h.head.yRot, Mth.sin(t * 0.06F) * 0.05F, f);
+			// the legs (when there are any) hang straight down, swaying a little
+			pose(h.rightLeg, 0.08F + Mth.sin(t * 0.08F) * 0.06F, 0.0F, 0.03F, f);
+			pose(h.leftLeg, 0.08F + Mth.sin(t * 0.08F + 2.2F) * 0.06F, 0.0F, -0.03F, f);
 		}
 		if (flight.glide() <= 0.001F) {
 			return;

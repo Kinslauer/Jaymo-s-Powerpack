@@ -33,14 +33,13 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.25) A log a few axe strokes into a tree, the way HT's TreeChop has them (our own code): it stands where the log
- * stood, thinner with every chop ({@link #CHOPS}), drawn as the log it was ({@code ChoppedLogRenderer}), and gives that
- * log's wood when it comes down with the tree or is broken. It's one of the game's logs (the {@code logs} tag), so leaves
+ * (0.5.25) A log a few axe strokes into a tree (our own code): it stands where the log stood, drawn as the log it was
+ * ({@code ChoppedLogRenderer}), and gives that log's wood when it comes down with the tree or is broken. (0.7.510) Andy,
+ * after Timber Tales: it no longer thins; it keeps the whole log's size and its cracks run deeper with every chop
+ * ({@link #CHOPS}), while the chopper sees how far the tree is from coming down ({@link Trees#chop}). It's one of the game's logs (the {@code logs} tag), so leaves
  * keep to it and the tree is still a tree. See {@link Trees#chop}.
  */
 public final class ChoppedLog extends BaseEntityBlock {
@@ -51,18 +50,6 @@ public final class ChoppedLog extends BaseEntityBlock {
 
 	public static ChoppedLog BLOCK;
 	public static BlockEntityType<Entity> ENTITY;
-
-	/** Each chop's shape: the log narrowed by two pixels a side per chop, about its axis. */
-	private static final VoxelShape[][] SHAPES = new VoxelShape[3][MOST + 1];
-
-	static {
-		for (int c = 1; c <= MOST; c++) {
-			double lo = c, hi = 16 - c;
-			SHAPES[Direction.Axis.Y.ordinal()][c] = Block.box(lo, 0, lo, hi, 16, hi);
-			SHAPES[Direction.Axis.X.ordinal()][c] = Block.box(0, lo, lo, 16, hi, hi);
-			SHAPES[Direction.Axis.Z.ordinal()][c] = Block.box(lo, lo, 0, hi, hi, 16);
-		}
-	}
 
 	public ChoppedLog(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -109,11 +96,6 @@ public final class ChoppedLog extends BaseEntityBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(CHOPS, AXIS);
-	}
-
-	@Override
-	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		return SHAPES[state.getValue(AXIS).ordinal()][state.getValue(CHOPS)];
 	}
 
 	@Override

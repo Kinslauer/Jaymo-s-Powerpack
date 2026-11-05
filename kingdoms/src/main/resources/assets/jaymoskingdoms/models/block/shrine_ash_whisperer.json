@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/shrine_dedicated",
+  "textures": {
+    "glyph": "jaymoskingdoms:block/shrine_glyph_ash_whisperer"
+  }
+}

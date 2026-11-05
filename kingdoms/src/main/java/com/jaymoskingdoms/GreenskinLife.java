@@ -136,12 +136,23 @@ public final class GreenskinLife {
 		if (!(whom instanceof Player p) || !raised(p) || !halfOrc(p) && Prejudice.masked(p)) {
 			return -1.0F;
 		}
-		if (Greenskins.of(who) != null || Havens.home(who) != null || Prejudice.degree(VillagerHeritage.of(who)) > 0) {
-			// (their own kind, the havens, and anyone not plainly human: no worse than any)
-			return 0.0F;
-		}
 		if (!(who.level() instanceof ServerLevel level)) {
 			return 0.0F;
+		}
+		Heritage.Kind raisedAs = halfOrc(p) ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN;
+		Heritage.Kind brood = Greenskins.of(who);
+		if (brood != null) {
+			// (their own kind; (0.7.490) the other brood minds them as it minds its own kind of greenskin: Peoples)
+			return brood == raisedAs ? 0.0F : Peoples.minds(who, brood, raisedAs, 1.0F);
+		}
+		Faction haven = Havens.home(who);
+		if (Havens.greenskin(level.getServer(), haven)) {
+			// ((0.7.490) a haven that lives alongside the tribes minds no one for being raised among them)
+			return 0.0F;
+		}
+		if (haven != null || Prejudice.degree(VillagerHeritage.of(who)) > 0) {
+			// ((0.7.490) the havens and anyone not plainly human mind a half-orc or a goblin-raised one as they'd mind an orc or a goblin: Peoples)
+			return Peoples.minds(who, VillagerHeritage.of(who), raisedAs, Prejudice.edict(who));
 		}
 		Faction f = Banners.owner(level.getServer(), net.minecraft.world.level.ChunkPos.containing(who.blockPosition()));
 		if (Purists.is(f)) {

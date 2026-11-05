@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.spirits;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.SeizureClient;
 import com.jaymoskingdoms.spirits.Grue;
@@ -175,8 +176,12 @@ public final class GrueClient {
 			}
 		}
 		if (taken && minecraft.gui.screen() == null) {
-			graphics.centeredText(minecraft.font, Component.translatable("hud.jaymoskingdoms.grue.taken"), graphics.guiWidth() / 2,
-				graphics.guiHeight() - 72, 0xFFB04050);
+			Component takenLine = Component.translatable("hud.jaymoskingdoms.grue.taken");
+			// (HUD rework) focus band, row 11 (just over the struggle bars)
+			int[] at = HudZones.place(HudZones.FOCUS, "jaymoskingdoms:grue_taken", 11, minecraft.font.width(takenLine), 9);
+			if (at != null) {
+				graphics.text(minecraft.font, takenLine, at[0], at[1], 0xFFB04050, true);
+			}
 		}
 	}
 }

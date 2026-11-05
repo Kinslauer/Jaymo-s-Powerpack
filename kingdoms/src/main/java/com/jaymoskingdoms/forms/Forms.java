@@ -25,6 +25,7 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -67,6 +68,9 @@ import org.jspecify.annotations.Nullable;
  * weapon away or switch to something that doesn't match to leave. In stance a tap fires the selected slot's form
  * ({@link #fire}), sneak and tap the next slot's; Ctrl and scroll picks the slot. Out of stance the key keeps doing what it did
  * (Charge, War Cry, Shield Throw: {@link CombatArts}).
+ * <li>(0.7.550) The skill bar: with Spell Engine in the pack (the RPG Series), a form weapon in hand puts the forms you know
+ * for it on Spell Engine's skill bar ({@link FormSkills}), belt order first, on its keys (1, 2, 3...; right-click stays the
+ * weapon's guard; bare fists only while locked on, where right-click is the first form). No stance, no belt picking.
  * <li>Practice: a form that lands adds practice ({@link #landed}; a real foe counts {@value #FOE_PRACTICE}, a dummy
  * {@value #DUMMY_PRACTICE}) and ranks it up to {@value #RANKS}; each rank hits a little harder and reaches a little further.
  * <li>Masterstrokes only fire on a fallen foe ({@link #masterTarget}): downed, or K.O.'d by Powers' poise.
@@ -313,8 +317,8 @@ public final class Forms {
 		}
 	}
 
-	/** A form still winding up. */
-	private record Windup(UUID who, Form form, long at) {
+	/** A form still winding up; {@code bar}: cast from the skill bar (no stance to hold), not the stance. */
+	private record Windup(UUID who, Form form, long at, boolean bar) {
 	}
 
 	/** Player → game time each form is ready again. */
@@ -426,6 +430,8 @@ public final class Forms {
 		player.sendOverlayMessage(Component.translatable(first ? "message.jaymoskingdoms.form.first" : "message.jaymoskingdoms.form.learned",
 			form.name()).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.4F);
+		// (0.7.516) taught by anyone but its own perk: the perk on the skill web is marked taught, free
+		com.jaymoskingdoms.Learnables.formTaught(player, formId);
 		return true;
 	}
 
@@ -465,7 +471,11 @@ public final class Forms {
 		}
 	}
 
-	/** Whether {@code player} holds a weapon any form they know works with: the stance can be taken. */
+	/**
+	 * Whether {@code player} holds a weapon any form they know works with: the stance can be taken. (0.7.550) With Spell
+	 * Engine in the pack the forms are on its skill bar instead ({@link FormSkills}; bare fists while locked on), so there's
+	 * no stance.
+	 */
 	public static boolean canStance(Player player) {
 		if (SpearForms.pinned(player)) {
 			// (0.7.382) a Pinning Throw has the spear out of the hand: the stance holds until it is tugged back
@@ -473,8 +483,58 @@ public final class Forms {
 		}
 		Book book = book(player);
 		ItemStack main = player.getMainHandItem();
+		if (skillBar()) {
+			// (0.7.550) every form is on the skill bar (bare fists while locked on), so there's no stance
+			return false;
+		}
 		for (String id : book.known()) {
 			if (FORMS.get(id).family().holds(main)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** (0.7.550) Whether Spell Engine (the RPG Series' skill bar) is in the pack: forms with a weapon in hand go on its bar. */
+	public static boolean skillBar() {
+		return SKILL_BAR;
+	}
+
+	private static final boolean SKILL_BAR = FabricLoader.getInstance().isModLoaded("spell_engine");
+
+	/**
+	 * (0.7.550) The forms {@code player} has on the skill bar with what's in their hand: the known forms that fit it, in belt
+	 * order, then the rest in list order. A bare hand's fist forms only while locked on (Andy: "give it to fists but only
+	 * when locked on"), so right-click stays free for doors and villagers the rest of the time. Empty with no form weapon.
+	 */
+	public static List<String> barForms(Player player) {
+		ItemStack main = player.getMainHandItem();
+		if (main.isEmpty() && !PowersCompat.lockedOn(player)) {
+			return List.of();
+		}
+		Book book = book(player);
+		List<String> out = new ArrayList<>();
+		for (String id : book.belt()) {
+			Form form = FORMS.get(id);
+			if (form != null && book.knows(id) && form.family().holds(main) && !out.contains(id)) {
+				out.add(id);
+			}
+		}
+		for (String id : book.known()) {
+			if (FORMS.get(id).family().holds(main) && !out.contains(id)) {
+				out.add(id);
+			}
+		}
+		return out;
+	}
+
+	/** (0.7.550) Whether {@code main} is a weapon some form family takes (a bare hand isn't, here). */
+	public static boolean formWeapon(ItemStack main) {
+		if (main.isEmpty()) {
+			return false;
+		}
+		for (Family family : Family.values()) {
+			if (family.holds(main)) {
 				return true;
 			}
 		}
@@ -645,57 +705,83 @@ public final class Forms {
 	// ---- firing --------------------------------------------------------------------------------------------------------
 
 	private static void fire(ServerPlayer player, boolean sneaking) {
-		Book book = book(player);
-		if (!book.stance() || !(player.level() instanceof ServerLevel level) || !player.isAlive() || player.isSpectator()) {
-			return;
-		}
-		// (0.7.382) a spear thrown to pin a foe: any press tugs it back
+		// (0.7.382) a spear thrown to pin a foe: any press tugs it back (0.7.550: in stance or not, since the spear's forms
+		// are on the skill bar and the hand is empty while it's out)
 		if (SpearForms.tug(player)) {
 			return;
+		}
+		Book book = book(player);
+		if (!book.stance()) {
+			return;
+		}
+		String id = book.belt().get(sneaking ? Math.floorMod(book.slot() + 1, BELT_SLOTS) : book.slot());
+		tryForm(player, id, false);
+	}
+
+	/**
+	 * (0.7.550) A form cast from Spell Engine's skill bar ({@link FormSkills}): the same checks and the same form as a
+	 * stance tap, with no stance needed. True if it went off (or began winding up), so the bar's cooldown starts; false
+	 * leaves the bar's cooldown untouched (and says why on the action bar).
+	 */
+	public static boolean cast(ServerPlayer player, String formId) {
+		if (SpearForms.tug(player)) {
+			return false;
+		}
+		return tryForm(player, formId, true);
+	}
+
+	/** (0.7.550) Tugs back a spear a Pinning Throw left in a foe. True if there was one. */
+	public static boolean tug(ServerPlayer player) {
+		return SpearForms.tug(player);
+	}
+
+	private static boolean tryForm(ServerPlayer player, String id, boolean bar) {
+		Book book = book(player);
+		if (!(player.level() instanceof ServerLevel level) || !player.isAlive() || player.isSpectator()) {
+			return false;
 		}
 		// (0.7.386) inside a Divine-born's Eight-Sign Circle no form can be used
 		if (PowersCompat.sealed(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.sealed").withStyle(ChatFormatting.GOLD));
-			return;
+			return false;
 		}
 		// (0.7.406) two broken arms can't swing a weapon, so they can't do a form either
 		if (PowersCompat.armless(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.armless").withStyle(ChatFormatting.GRAY));
-			return;
+			return false;
 		}
-		String id = book.belt().get(sneaking ? Math.floorMod(book.slot() + 1, BELT_SLOTS) : book.slot());
 		Form form = FORMS.get(id);
 		if (form == null || !book.knows(id)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.bare").withStyle(ChatFormatting.GRAY));
-			return;
+			return false;
 		}
 		if (!form.family().holds(player.getMainHandItem())) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.weapon", form.name()).withStyle(ChatFormatting.GRAY));
-			return;
+			return false;
 		}
 		long now = level.getGameTime();
 		long left = READY.computeIfAbsent(player.getUUID(), u -> new HashMap<>()).getOrDefault(id, 0L) - now;
 		if (left > 0) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.wait", form.name(), (left + 19) / 20).withStyle(ChatFormatting.GRAY));
-			return;
+			return false;
 		}
 		if (form.kind() == Kind.MASTERSTROKE && masterTarget(player) == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.masterstroke").withStyle(ChatFormatting.GRAY));
-			return;
+			return false;
 		}
 		if (!player.isCreative() && player.getFoodData().getFoodLevel() < MIN_FOOD) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.hungry").withStyle(ChatFormatting.GRAY));
-			return;
+			return false;
 		}
 		// (0.7.382) Couched Lance is the one form that wants a mount; the others can't be done from a saddle
 		if (form == SpearForms.COUCHED_LANCE ? !SpearForms.mounted(player) : player.isPassenger()) {
 			if (form == SpearForms.COUCHED_LANCE) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.mounted").withStyle(ChatFormatting.GRAY));
 			}
-			return;
+			return false;
 		}
 		if (player.isFallFlying()) {
-			return;
+			return false;
 		}
 		// the cooldown is set now (no second press during the wind-up); the food is spent when the form goes off
 		READY.get(player.getUUID()).put(id, now + form.cooldown());
@@ -706,10 +792,11 @@ public final class Forms {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.cancel", form.name()).withStyle(ChatFormatting.GOLD));
 			}
 			perform(player, form);
-			return;
+			return true;
 		}
-		WINDUPS.add(new Windup(player.getUUID(), form, now + form.windUp()));
+		WINDUPS.add(new Windup(player.getUUID(), form, now + form.windUp(), bar));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.6F, 1.8F);
+		return true;
 	}
 
 	private static void perform(ServerPlayer player, Form form) {
@@ -749,7 +836,8 @@ public final class Forms {
 		for (Iterator<Windup> it = WINDUPS.iterator(); it.hasNext(); ) {
 			Windup w = it.next();
 			ServerPlayer player = server.getPlayerList().getPlayer(w.who());
-			if (player == null || !player.isAlive() || !book(player).stance()) {
+			// (0.7.550) a stance form ends with the stance; a skill-bar form with its weapon out of the hand
+			if (player == null || !player.isAlive() || !(w.bar() ? w.form().family().holds(player.getMainHandItem()) : book(player).stance())) {
 				it.remove();
 				// a wind-up cut short by the stance ending gives its cooldown back
 				Map<String, Long> ready = player == null ? null : READY.get(w.who());

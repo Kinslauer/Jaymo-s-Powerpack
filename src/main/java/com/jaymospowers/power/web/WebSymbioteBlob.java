@@ -652,6 +652,11 @@ public class WebSymbioteBlob extends PathfinderMob {
 		level.sendParticles(ParticleTypes.SQUID_INK, from.x, from.y, from.z, 12, 0.3, 0.15, 0.3, 0.08);
 	}
 
+	/** (0.20.3) A loud clang of metal at {@code from} ({@code combat/ShieldBang}): it runs from it, as from fire. */
+	public void startle(Vec3 from) {
+		this.flee(from);
+	}
+
 	/** Runs from {@code threat} (again, if it was already running). */
 	private void flee(Vec3 threat) {
 		if (this.fleeFrom == null) {

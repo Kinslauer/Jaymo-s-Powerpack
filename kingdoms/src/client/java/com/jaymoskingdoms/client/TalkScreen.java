@@ -9,7 +9,7 @@ import net.minecraft.util.FormattedCharSequence;
 
 /**
  * (0.5.39) Answering someone who came over to ask you something ({@code Approaches}): what they said, and a button per
- * answer (greyed out when you can't: no emeralds for the fine, no food to give). The server does the rest; their reply
+ * answer (greyed out when you can't: no coin for the fine, no food to give). The server does the rest; their reply
  * floats over their head. (0.7.44) Drawn like the H screen.
  */
 final class TalkScreen extends Screen {
@@ -23,8 +23,36 @@ final class TalkScreen extends Screen {
 		this.ask = ask;
 	}
 
+	/**
+	 * (0.7.591) A question that came while another screen was up (the death screen, a new life's story, MCA's own chat,
+	 * the journal...): it waits for that screen to close rather than knocking it away, and lapses after {@link #WAIT_TICKS}.
+	 */
+	static final int WAIT_TICKS = 20 * 20;
+	private static TalkNet.@org.jspecify.annotations.Nullable Ask waiting;
+	private static int waited;
+
 	static void register() {
-		ClientPlayNetworking.registerGlobalReceiver(TalkNet.Ask.TYPE, (payload, context) -> context.client().gui.setScreen(new TalkScreen(payload)));
+		ClientPlayNetworking.registerGlobalReceiver(TalkNet.Ask.TYPE, (payload, context) -> {
+			Screen open = context.client().gui.screen();
+			if (open == null || open instanceof TalkScreen) {
+				context.client().gui.setScreen(new TalkScreen(payload));
+			} else {
+				waiting = payload;
+				waited = 0;
+			}
+		});
+		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (waiting == null) {
+				return;
+			}
+			if (client.player == null || ++waited > WAIT_TICKS) {
+				waiting = null;
+			} else if (client.gui.screen() == null && client.player.isAlive()) {
+				TalkNet.Ask ask = waiting;
+				waiting = null;
+				client.gui.setScreen(new TalkScreen(ask));
+			}
+		});
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.LifeStory;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -68,6 +69,8 @@ final class StoryCurtain {
 
 	private static void draw(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		if (up) {
+			// (HUD rework) the curtain is up: hide the zoned HUD
+			HudZones.hideFor(100);
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), BLACK);
 		}
 	}

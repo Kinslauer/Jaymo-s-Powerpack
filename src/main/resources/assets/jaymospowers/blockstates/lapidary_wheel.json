@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/lapidary_wheel"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/lapidary_wheel",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/lapidary_wheel",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/lapidary_wheel",
+      "y": 270
+    }
+  }
+}

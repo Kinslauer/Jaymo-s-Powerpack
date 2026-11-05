@@ -13,7 +13,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -30,8 +29,8 @@ import org.jspecify.annotations.Nullable;
  * crosshair's line within {@link #AIM_MAGNET} blocks (less its own size), in sight, in reach. A moving enemy no longer
  * has to be hit dead centre, and a near miss no longer strings a webline behind it.</li>
  * <li><b>Enemies stay on:</b> a mob's own attacks and arm swings don't snap the lead (a caught <i>player</i> still
- * breaks free by fighting it, as before). An enemy burning in daylight doesn't burn it through (fire and lava along the
- * line, or anything else alight, still do). A mob knocked past the break length only snaps it if it stays there for
+ * breaks free by fighting it, as before). (0.19.71, Andy: "any flammable means flammable") anything alight burns it
+ * through, the undead burning in daylight too, as do fire and lava along the line. A mob knocked past the break length only snaps it if it stays there for
  * {@link #MOB_SNAP_TICKS} ticks.</li>
  * <li><b>Up terrain:</b> while held, its step height is raised by {@link #STEP_BOOST} (so a full block steps up like a
  * slab, for a mob's walk and a player's own client alike); pulled at a taller face (up to {@link #CLIMB_HEIGHT}) with
@@ -124,14 +123,6 @@ public final class WebLead {
 	/** Whether the catch's own attacks and swings break the lead: only a player's (a mob's never do). */
 	static boolean fightsFree(Entity target) {
 		return target instanceof Player;
-	}
-
-	/**
-	 * What the lead's burn check treats as the burning catch: an enemy alight on dry land (the undead in daylight, as
-	 * often as not) doesn't burn the lead through; anything else alight does, and so does fire or lava along the line.
-	 */
-	static @Nullable Entity burnTarget(Entity target) {
-		return target instanceof Enemy && !target.isInLava() ? null : target;
 	}
 
 	// ---- up terrain --------------------------------------------------------------------------------------------------
