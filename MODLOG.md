@@ -1085,3 +1085,7 @@ advancement. Fate now picks from every start, locked or not, by a fixed percenta
   `MAIN_ARM` flag on `ThrownRocks.THROW`, drawn by `RockThrowPose`). In first person the bare main arm whips through
   (FirstPersonArms, Kindle's throw keys). The throw keeps its power-throw speed (Andy's pick). Dropping the hold during
   the wind-up throws nothing. Built, not played.
+- Andy: "when a gravity user throws a rock, it flies faster and further and throws instantly... like a pebble". A gravity
+  user skips the rock charge: the off hand rock goes the moment use is pressed (whip and follow-through only), at 3.0
+  speed instead of 1.5 and straighter (`ThrownRocks.GRAVITY_SPEED`/`GRAVITY_SPREAD`, `ThrownRocks.gravity`). The usual
+  10 tick cooldown still spaces throws.
