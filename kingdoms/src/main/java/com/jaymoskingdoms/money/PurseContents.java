@@ -24,7 +24,7 @@ import com.jaymoskingdoms.Currency;
  * (0.7.498) What a coin purse holds: loose coins by kind ({@code jaymoskingdoms:coins}), only the coins a purse can hold
  * ({@link Currency#money}; the greenskins' and pirates' coins and emeralds stay in the pack). At most {@value #PURSE_MOST}
  * in all. Whenever it changes, {@link #set} also writes how full the purse is into {@code custom_model_data} (float 0),
- * (0.7.567: the item model now reads the coin count itself, {@code jaymoskingdoms:purse_coins}; the model data stays for older readers).
+ * (0.7.568: the item model now reads the coin count itself, {@code jaymoskingdoms:purse_coins}; the model data stays for older readers).
  *
  * <p>Saved as a map of coin id ({@link Currency#id}) to count, like {@code {"silver": 3, "bit": 12}}. The dev format of
  * 0.7.498 ({@code copper}, {@code silver} and {@code gold} as three counts) still loads, as 1 bit, 2 silver and 5 dinars

@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.567) The item model property {@code jaymoskingdoms:purse_coins} that {@code items/coin_purse.json} dispatches on: how
+ * (0.7.568) The item model property {@code jaymoskingdoms:purse_coins} that {@code items/coin_purse.json} dispatches on: how
  * many coins the purse holds, read straight from its {@code jaymoskingdoms:coins} component. (It used to read the purse's
  * fullness out of 640 from custom_model_data, so a purse of a few dozen coins never looked any fuller.) Powers draws the
  * purse on the hip with the same model, so it bulges there too.

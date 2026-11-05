@@ -30,7 +30,7 @@ import com.jaymoskingdoms.Currency;
  * greenskins' or pirates' coins). Worn in Jaymo's Powers' belt slot it hangs on the hip (and a pickpocket can lift
  * the whole thing); in a pack it is safer but pays second. Use it to pour every loose coin you carry into it; sneak
  * and use to tip it out again. Drop coins on it in an inventory screen to fill it; click it on a pile of coins to scoop
- * them up. (0.7.567) Like a bundle, right click it with an empty hand in a slot to take out a stack of its biggest coin, and
+ * them up. (0.7.568) Like a bundle, right click it with an empty hand in a slot to take out a stack of its biggest coin, and
  * drop one purse on another to pour it in. {@link Money} spends from it like any other coins.
  */
 public class CoinPurseItem extends Item {
@@ -108,7 +108,7 @@ public class CoinPurseItem extends Item {
 	}
 
 	/**
-	 * (0.7.567) Clicks on the purse in a slot, like a bundle's: coins on the cursor go in (either button); another purse on
+	 * (0.7.568) Clicks on the purse in a slot, like a bundle's: coins on the cursor go in (either button); another purse on
 	 * the cursor is poured in ({@link #overrideStackedOnOther}); right click with nothing on the cursor takes out one stack
 	 * of its biggest coin.
 	 */
@@ -145,7 +145,7 @@ public class CoinPurseItem extends Item {
 	}
 
 	/**
-	 * (0.7.567) The purse on the cursor, clicked onto a slot, like a bundle: right click on coins scoops them up; right click
+	 * (0.7.568) The purse on the cursor, clicked onto a slot, like a bundle: right click on coins scoops them up; right click
 	 * on an empty slot puts out one stack of its biggest coin; either click on another purse pours this one into it, as far
 	 * as it has room.
 	 */
@@ -240,7 +240,7 @@ public class CoinPurseItem extends Item {
 		player.playSound(sound, 0.8F, 0.8F + player.getRandom().nextFloat() * 0.4F);
 	}
 
-	/** (0.7.567) A gold bar under the icon, like a bundle's, showing how full it is. */
+	/** (0.7.568) A gold bar under the icon, like a bundle's, showing how full it is. */
 	@Override
 	public boolean isBarVisible(ItemStack stack) {
 		return !PurseContents.of(stack).isEmpty();

@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * goes forward and down into it, the fingers working, the other arm drawn in. Laid over the player's model right after
  * it's posed, like {@link PullerPose}.
  * <p>
- * (0.7.567) A crook villager picking a player's pocket reaches the same way, and a hand going for a coin purse worn on the
+ * (0.7.568) A crook villager picking a player's pocket reaches the same way, and a hand going for a coin purse worn on the
  * mark's hip ({@link Pickpocket.Reach#purse}) is aimed at it.
  * <p>
  * (0.7.133) Eased: the hand goes in on a soft spring (a little high first, then slipping down into the pocket), the body
@@ -55,10 +55,10 @@ public final class PickpocketPose {
 
 	/** Player entity id → the mark's entity id. */
 	private static final Int2IntMap REACHING = new Int2IntOpenHashMap();
-	/** (0.7.567) Those of them going for a coin purse on the mark's hip. */
+	/** (0.7.568) Those of them going for a coin purse on the mark's hip. */
 	private static final IntSet FOR_PURSE = new IntOpenHashSet();
 	/**
-	 * (0.7.567) Where a worn purse hangs on the mark: this far out to their right and up from their feet, as parts of their
+	 * (0.7.568) Where a worn purse hangs on the mark: this far out to their right and up from their feet, as parts of their
 	 * height (Powers' {@code WornLanterns} hangs it at the right hip); the reaching shoulder, as parts of the thief's height.
 	 */
 	static final float PURSE_OUT = 0.17F, PURSE_UP = 0.42F, SHOULDER_UP = 0.75F, SHOULDER_OUT = 0.17F;
@@ -88,7 +88,7 @@ public final class PickpocketPose {
 
 	/** Render-state extraction: a reaching player's pose for this frame. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		// ((0.7.567) a crook villager reaches too, at a player)
+		// ((0.7.568) a crook villager reaches too, at a player)
 		int id = entity.getId();
 		if (!(entity instanceof Avatar) && !REACHING.containsKey(id) && !EASES.containsKey(id)) {
 			return;
@@ -138,11 +138,11 @@ public final class PickpocketPose {
 			: new float[] {state.ageInTicks, ease[0], (now - times[1]) / 1.0E9F, aim[0], aim[1]});
 	}
 
-	/** (0.7.567) Entity id → the last aim at a purse {xRot, yRot}, so the hand comes back out from there. */
+	/** (0.7.568) Entity id → the last aim at a purse {xRot, yRot}, so the hand comes back out from there. */
 	private static final Map<Integer, float[]> LAST_AIM = new HashMap<>();
 
 	/**
-	 * (0.7.567) The reaching arm's {xRot, yRot} to point at the purse on {@code markId}'s right hip, from the thief's main
+	 * (0.7.568) The reaching arm's {xRot, yRot} to point at the purse on {@code markId}'s right hip, from the thief's main
 	 * shoulder; null if the mark isn't in sight.
 	 */
 	static float @Nullable [] aim(LivingEntity thief, int markId, float partialTicks) {
@@ -184,7 +184,7 @@ public final class PickpocketPose {
 		in = in * in * (3.0F - 2.0F * in);
 		float work = Mth.sin(pose[0] * 0.9F) * WORK * in;
 		if (pose.length >= 5) {
-			// (0.7.567) at the purse on their hip
+			// (0.7.568) at the purse on their hip
 			set(reach, pose[3] + SLIP * (1.0F - in) + work, pose[4], 0.0F, w);
 		} else {
 			set(reach, REACH + SLIP * (1.0F - in) + work, REACH_IN * side, 0.0F, w);

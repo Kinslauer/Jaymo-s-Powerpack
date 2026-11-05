@@ -71,7 +71,7 @@ public final class WornLanterns {
 	 */
 	static final float PURSE_X = 4.9F, PURSE_Y = 10.0F, PURSE_Z = -0.5F, PURSE_SIZE = 0.35F, FIXED_SCALE = 0.5F;
 	/**
-	 * (0.20.81) Andy: "they dont hang, ON the hip they are inside". It hung at 3.4 pixels out, inside the leg (which reaches
+	 * (0.20.82) Andy: "they dont hang, ON the hip they are inside". It hung at 3.4 pixels out, inside the leg (which reaches
 	 * 4, and its trouser layer past that); now it hangs outside the hip, and this much further out over leggings or a
 	 * chestplate.
 	 */
@@ -262,7 +262,7 @@ public final class WornLanterns {
 				boolean armoured = !state.chestEquipment.isEmpty() || !state.legsEquipment.isEmpty();
 				poseStack.translate(-(PURSE_X + (armoured ? PURSE_OVER_ARMOUR : 0.0F)) / 16.0F, PURSE_Y / 16.0F, PURSE_Z / 16.0F);
 				poseStack.rotateDegrees(Axis.XP, (-body.body.xRot + worn.hipSwing() + Math.min(0.0F, body.rightLeg.xRot) * LEG_NUDGE) * Mth.RAD_TO_DEG);
-				// ((0.20.81) it swings out from the leg freely, but only a little in toward it)
+				// ((0.20.82) it swings out from the leg freely, but only a little in toward it)
 				poseStack.rotateDegrees(Axis.ZP, Math.max(-PURSE_ROLL_IN, worn.hipRoll()) * Mth.RAD_TO_DEG);
 				// the layer's space is the model's (y down, x flipped): flipped upright, the sprite's top (its hook) at the origin
 				float scale = PURSE_SIZE / FIXED_SCALE;

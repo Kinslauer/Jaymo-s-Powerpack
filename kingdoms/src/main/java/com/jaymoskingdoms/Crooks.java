@@ -123,7 +123,7 @@ public final class Crooks {
 	 */
 	static final float PURSE_LIFT_CHANCE = 0.35F, PURSE_LIFT_BUSY = 1.5F;
 	/**
-	 * (0.7.567) Andy: "the pick pocket animation should reach for it". A crook picking a player's pocket reaches in for this
+	 * (0.7.568) Andy: "the pick pocket animation should reach for it". A crook picking a player's pocket reaches in for this
 	 * long (ticks) before the lift, at the purse on their hip if they wear one, and draws the hand back this long after.
 	 */
 	static final int PICK_REACH_TICKS = 25, PICK_REACH_AFTER = 8;
@@ -199,7 +199,7 @@ public final class Crooks {
 	}
 
 	/** A crook at work: on whom (or where), for which settlement, until when; a mugging's blows so far. */
-	/** (0.7.567) Crooks with a hand out for a pocket now, and till when (game time); drawn back when it passes or the job ends. */
+	/** (0.7.568) Crooks with a hand out for a pocket now, and till when (game time); drawn back when it passes or the job ends. */
 	private static final Map<Villager, Long> REACHES = new java.util.HashMap<>();
 
 	private static final class Job {
@@ -212,7 +212,7 @@ public final class Crooks {
 		int blows;
 		long nextBlow;
 		boolean spoken;
-		/** (0.7.567) When the crook's hand went for the player's pocket or purse (0: not yet). */
+		/** (0.7.568) When the crook's hand went for the player's pocket or purse (0: not yet). */
 		long reachAt;
 
 		Job(Villager crook, Kind kind, int faction, @Nullable LivingEntity mark, @Nullable BlockPos spot, long until) {
@@ -633,7 +633,7 @@ public final class Crooks {
 			job.reachAt = 0L;
 			return true;
 		}
-		// (0.7.567) the hand goes in first, at the purse on their hip if they wear one, for everyone to see
+		// (0.7.568) the hand goes in first, at the purse on their hip if they wear one, for everyone to see
 		if (job.reachAt == 0L) {
 			job.reachAt = now;
 			ItemStack belt = PowersCompat.belt(mark);

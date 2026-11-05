@@ -113,7 +113,7 @@ public final class Pickpocket {
 
 	/**
 	 * Server → players who can see them: {@code playerId}'s hand is in {@code markId}'s pocket (-1: drawn back).
-	 * {@code playerId} may be a crook villager's ({@code Crooks}). (0.7.567) {@code purse}: the mark wears a coin purse on
+	 * {@code playerId} may be a crook villager's ({@code Crooks}). (0.7.568) {@code purse}: the mark wears a coin purse on
 	 * the hip, so the hand goes for that.
 	 */
 	public record Reach(int playerId, int markId, boolean purse) implements CustomPacketPayload {
@@ -259,7 +259,7 @@ public final class Pickpocket {
 	}
 
 	/**
-	 * (0.7.567) Tells everyone who can see {@code who} (a player, or a crook) where their hand is ({@code markId}, or -1:
+	 * (0.7.568) Tells everyone who can see {@code who} (a player, or a crook) where their hand is ({@code markId}, or -1:
 	 * drawn back), and whether it goes for a purse on the mark's hip.
 	 */
 	public static void reach(Entity who, int markId, boolean purse) {
