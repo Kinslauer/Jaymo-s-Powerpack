@@ -9232,3 +9232,12 @@ ultimate and beam-clash films came down with it. Not played.
   (our tongue clips measured from the .ogg, MCA's taken as 3 s) plus 4 s; a player hears one villager's line at a time
   (a line that starts while another is playing to them isn't sent to them). Lines in a tongue play at 40% volume, MCA's
   words and the grunts at 70%. Pain cries and snores are left alone. Not played.
+- **0.7.570, werewolf bites curse players; the beast hides the player:** Andy: "it should spread to players as well".
+  (`Lycans.bite`, `WerewolfPlayers.bitten`) a cursed beast's bite (a cursed villager's, or a player's beast's melee hit)
+  that a player lives through curses them at the same `BITE_CHANCE` (40% a hit) as villagers; a wolfblood's half curse is
+  finished. No text, only a far howl they alone hear; the first change waits for the next full moon. Vampires, creative
+  and spectators can't take it. A player's beast now spreads it to villagers too. Wild werewolves still pass on nothing.
+  Andy: Jung's beast "was still holding a knife, nothing should animate like the suits and costumes". (`strip`/`stow`) the
+  claws' items went back into the selected slot when it was the first free one, so the knife never left; now they go
+  anywhere else or drop. (`BeastHidesPlayerMixin`) a player who is the beast (invisible, torn out) isn't drawn at all, so
+  held items, Powers suits/costumes and worn weapons no longer float on the beast. Not played.

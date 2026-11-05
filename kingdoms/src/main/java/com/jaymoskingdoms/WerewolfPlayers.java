@@ -18,6 +18,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -34,6 +35,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -130,6 +132,13 @@ public final class WerewolfPlayers {
 			}
 			return false;
 		});
+		// (Andy, 2026-11-05) a player's beast bites as a cursed villager's does: the curse may go to whoever lives through it
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			if (!blocked && taken > 0.0F && entity.isAlive() && source.getEntity() instanceof ServerPlayer biter && source.getDirectEntity() == biter
+				&& entity != biter && beastUp(biter) && entity.level() instanceof ServerLevel level) {
+				Lycans.bite(level, entity);
+			}
+		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				end(player, false);
@@ -204,6 +213,27 @@ public final class WerewolfPlayers {
 	static void cure(ServerPlayer player) {
 		end(player, false);
 		player.removeAttached(Lycans.CURSE);
+	}
+
+	// ---- the bite ------------------------------------------------------------------------------------------------------
+
+	/**
+	 * (Andy, 2026-11-05: "it should spread to players as well") A cursed beast's bite that {@code player} lived through: the
+	 * curse is theirs (a wolfblood's is finished). Nothing tells them but a far howl only they hear; the first change comes
+	 * with the next full moon, not tonight's.
+	 */
+	static void bitten(ServerPlayer player) {
+		Lycans.Curse had = player.getAttached(Lycans.CURSE);
+		if (!player.isAlive() || player.isCreative() || player.isSpectator() || Vampires.isVampire(player) || had != null && !had.half()
+			|| !(player.level() instanceof ServerLevel level)) {
+			return;
+		}
+		long nightNo = Vampires.nightIndex(level.getServer().overworld().getOverworldClockTime());
+		Lycans.Curse curse = had != null ? had : Lycans.roll(level, player);
+		player.setAttached(Lycans.CURSE, new Lycans.Curse(curse.coat(), curse.scale(), curse.build(), nightNo, curse.moons(), false));
+		player.removeAttached(Vampires.BITTEN);
+		player.connection.send(new ClientboundSoundPacket(SoundEvents.WOLF_SOUNDS.get(WolfSoundVariants.SoundSet.BIG).adultSounds().ambientSound(),
+			SoundSource.AMBIENT, player.getX() + 40.0, player.getEyeY(), player.getZ(), 0.6F, 0.5F, player.getRandom().nextLong()));
 	}
 
 	// ---- the ritual ----------------------------------------------------------------------------------------------------
@@ -419,7 +449,9 @@ public final class WerewolfPlayers {
 			ItemStack stack = player.getItemBySlot(slot);
 			if (!stack.isEmpty()) {
 				player.setItemSlot(slot, ItemStack.EMPTY);
-				player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
+				// (2026-11-05: Jung's beast kept its knife) the first free slot can be the very one in their hand, so the
+				// stack went straight back into it every tick: put it anywhere but the selected slot, or at their feet
+				stow(player, stack);
 			}
 		}
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
@@ -436,6 +468,29 @@ public final class WerewolfPlayers {
 				}
 				stack.setDamageValue(damage);
 			}
+			player.drop(stack, true, Prediction.SERVER_ONLY);
+		}
+	}
+
+	/** {@code stack} out of the claws: into the inventory, never the slot in hand, or dropped if there's no room. */
+	private static void stow(ServerPlayer player, ItemStack stack) {
+		Inventory inventory = player.getInventory();
+		int held = inventory.getSelectedSlot();
+		for (int i = 0; i < Inventory.INVENTORY_SIZE && !stack.isEmpty(); i++) {
+			if (i == held) {
+				continue;
+			}
+			ItemStack there = inventory.getItem(i);
+			if (there.isEmpty()) {
+				inventory.setItem(i, stack);
+				stack = ItemStack.EMPTY;
+			} else if (ItemStack.isSameItemSameComponents(there, stack) && there.getCount() < there.getMaxStackSize()) {
+				int moved = Math.min(stack.getCount(), there.getMaxStackSize() - there.getCount());
+				there.grow(moved);
+				stack.shrink(moved);
+			}
+		}
+		if (!stack.isEmpty()) {
 			player.drop(stack, true, Prediction.SERVER_ONLY);
 		}
 	}

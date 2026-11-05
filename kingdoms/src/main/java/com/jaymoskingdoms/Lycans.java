@@ -24,6 +24,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -264,6 +265,18 @@ public final class Lycans {
 
 	/** (Werewolf) a cursed beast bit {@code target}: if they live through it, the curse may be theirs too. */
 	public static void bite(ServerLevel level, Werewolf beast, Entity target) {
+		bite(level, target);
+	}
+
+	/** A cursed beast's bite (a villager's, or a player's beast's claws) landed on {@code target}. */
+	static void bite(ServerLevel level, Entity target) {
+		// (Andy, 2026-11-05) "it should spread to players as well"
+		if (target instanceof ServerPlayer player) {
+			if (level.getRandom().nextFloat() < BITE_CHANCE) {
+				WerewolfPlayers.bitten(player);
+			}
+			return;
+		}
 		if (target instanceof PathfinderMob mob && mob.isAlive() && !mob.isBaby() && (mob instanceof Villager || mob instanceof Folk)
 			&& !cursed(mob) && !Vampires.isVampire(mob) && level.getRandom().nextFloat() < BITE_CHANCE) {
 			curse(level, mob);
