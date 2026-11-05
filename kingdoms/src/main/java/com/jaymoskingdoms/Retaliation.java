@@ -189,6 +189,8 @@ final class Retaliation {
 				all.addFirst(victim);
 			}
 			Theft.commit(player, level, f, Theft.Crime.ASSAULT, null, false, all);
+			// (0.7.570) downed in the fight, they're taken in for it, not cut down
+			HeldBack.assaulted(player, f, now);
 		}
 	}
 
