@@ -9233,7 +9233,28 @@ ultimate and beam-clash films came down with it. Not played.
   (a line that starts while another is playing to them isn't sent to them). Lines in a tongue play at 40% volume, MCA's
   words and the grunts at 70%. Pain cries and snores are left alone. Not played.
 
-## 0.7.570 (2026-11-05): every Sorcerer absorbs their element
+## 0.7.570 (2026-11-05): a town's people hold each other to the law; no more catapulting blows
+- Andy's clip: a thrown rock hit one of Thalshire's people by accident, the town rallied, one blow flung him about 14
+  blocks and downed him, and a rallied townsman executed him at once. "if that many guards are there they will force one
+  another to do the just thing, so as not to attract bad attention."
+- Held to the law (`HeldBack.spares`, through `PowersCompat.spareRighteousGuards`): every one of a town's people (guards
+  and archers, haven sworn, grown villagers including MCA's, settled folk; not orcs, goblins, barbarians or rulers) now
+  spares a downed player, not only guards. Only a hotheaded or spiteful one may execute, and only with none of the town's
+  people on their feet within 16 blocks (`WATCHED`), and only over a real enemy of the town (outlaw there, reputation at
+  or under hostile, or at war). Village iron golems never, as before.
+- Taken in, not cut down (`HeldBack.assaulted`, from `Retaliation.struck`): within 2 minutes of a seen blow on one of a
+  realm's people, a downed player with one of its guards or sworn within 6 blocks is taken in: everyone near is called
+  off and they're got up (revive + bandage tags). Andy: "if they have a jail, you go there": a kingdom or fiefdom locks
+  them in its cells under the seat (Busts' pit, dug if needed; same release and break-out rules) for 2 minutes
+  (`JAIL_TICKS`); a village or haven fines 6 emeralds' worth of coin, or lets them off with a warning if they can't pay.
+  Lang part held_back.json, hint 107.
+- No catapults (`HeldBack.cap`): the throw from a blow by a town person or a folk fighter (not orcs or rulers) is capped
+  at the end of the tick at 0.6 blocks/tick along the ground and 0.4 up (0.25 / 0.2 if downed), whatever pushes stacked
+  in that tick. The exact push couldn't be pinned from the clip: several guards' blows plus their weapon-form pushes
+  (`SchooledGuards`, which add to the knockback rather than replace it) landing together is the likely cause; the cap
+  covers them all. Not played.
+
+## 0.7.571 (2026-11-05): every Sorcerer absorbs their element
 - Andy: "sorcerers should all be able to absorb their elements like the blood sorcerer. i especially want a cone of
   absorption in front of fire sorcerers that can put out flames and feed their reserve". `Absorption` gives every element
   but blood (which keeps `Hemomancy`/`BloodBlasts`) the blood Sorcerer's loop: a reserve (`Absorption.RESERVE`, 20,
@@ -9251,4 +9272,4 @@ ultimate and beam-clash films came down with it. Not played.
   lightning (a storm's sky, lightning rods, redstone blocks), restoration (flowers, leaves, saplings, crops, amethyst;
   its blasts heal the living and sear only monsters/undead), death (undead drained, the downed/dying, bodies, soul sand,
   bone, skulls; every death within 12 blocks gives 2). A slow trickle (0.25/s, earth 0.1) while standing in the element.
-  Hints 107-108. Gradle compileClientJava clean, not played.
+  Hints 108-109. Gradle compileClientJava clean, not played.

@@ -66,7 +66,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.570) Andy: "sorcerers should all be able to absorb their elements like the blood sorcerer. i especially want a
+ * (0.7.571) Andy: "sorcerers should all be able to absorb their elements like the blood sorcerer. i especially want a
  * cone of absorption in front of fire sorcerers that can put out flames and feed their reserve". Every Sorcerer element
  * but blood (which has {@link Hemomancy} and {@link BloodBlasts}) now does what the Blood Sorcerer does with its blood:
  * <ul>
