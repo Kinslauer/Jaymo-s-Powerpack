@@ -1068,3 +1068,6 @@ carved out of the rock at the Nether's y 64 if there's no floor (`raiseAt`, whic
   0.20.45 now get their sky springs only while a player on the server has reached the Kingdoms world tier Dread
   (`SkySpringFeature.dreadReached`, checked once a second); before that no Aether spring may pour onto the Overworld at all.
   A heavenfall chunk made before Dread stays dry; they are 3000+ blocks from spawn, so nearly all are made later. New chunks only.
+- **0.21.5, the Iron Saber's knuckle bow on the right side:** Andy confirmed the bow sat on the wrong side of the fingers;
+  `tools/blockbench/iron_saber.py` now passes `flip=True` to `display()` (half round the blade in every hand view, as the
+  rapier does). Not seen in game.
