@@ -9502,6 +9502,19 @@ off course then those should break upon contact".
   more come, at most 10. When the pack breaks up, sharks out of sight go back into the deep. Hint 116.
 - The 02:10 crash (`Captains.slew` removing from `Map.of()`) was on 0.7.558; fixed since 0.7.561.
 - Built, not played.
+## 0.7.591 (2026-11-05): new features checked against villager talk and the world tiers (Powers 0.20.109)
+- Andy: "make sure all the new features work wth all the old, im thinking specifically of the chat interactions and
+  sevtech style world generating as you progress".
+- Villagers no longer come over to ask you something (Approaches) or hold out a hand (Handshakes) while you're downed or
+  out cold, carried, lying left for dead, black while a new character is made after Reincarnate, inside Chrono's death
+  window, tethered as a captive, or in a captain's first-meeting film (`Approaches.unreachable`, Powers' `OutOfPlay`).
+  One already on the way gives up if any of that starts. Nobody downed, carried off or in chains comes over either.
+- Their question no longer knocks away whatever screen you have open (the death screen, the story and character
+  screens, MCA's chat, the journal): it waits for that screen to close, up to 20 s (`TalkScreen.WAIT_TICKS`).
+- The Ground Changes: an iron, copper or gold vein grown under the surface when a tier opens now gets the same faint
+  ore pebble chance as a vein that was always there (40%, half hidden nuggets; `GroundChanges.tell`), so the pebbles
+  from Powers 0.20.105 work over the new ground too. Pebbles still only ever sit over ore that's really there, so they
+  never show anything ahead of your tier. Built, not played.
 
-## 0.7.590
-- Hint 117 for Powers 0.20.108's adrenaline (`lang/parts/adrenaline.json`).
+## 0.7.592
+- Hint 117 for Powers 0.20.110's adrenaline (`lang/parts/adrenaline.json`).

@@ -15,7 +15,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 /**
- * (0.20.108) Adrenaline ({@link Adrenaline}) on your own screen. Andy (2026-11-05): "when it wears off you get the max
+ * (0.20.110) Adrenaline ({@link Adrenaline}) on your own screen. Andy (2026-11-05): "when it wears off you get the max
  * thirst effect screen effects, (not max thirst) and a lessened vein and slight letterbox while the adrenaline is
  * rushing".
  * <ul>

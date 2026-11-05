@@ -51,7 +51,7 @@ public final class WoundsHud {
 		ClientTickEvents.END_CLIENT_TICK.register(WoundsHud::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("wounds_hud"), WoundsHud::render);
 		PainHud.init();
-		// (0.20.108) adrenaline's rush and its wearing off
+		// (0.20.110) adrenaline's rush and its wearing off
 		AdrenalineHud.init();
 	}
 
