@@ -980,7 +980,8 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
 - Ships Kitchen 0.5.77: a loose rock cracks open a small animal's body (crab, chicken, rabbit...), and one laid on a lit
   campfire roasts whole into cooked meat. See kitchen/MODLOG.md.
 
-## 0.20.114 (2026-11-05): Kingdoms 0.7.595, wolves stalk you
+## 0.20.114 (2026-11-05): Kingdoms 0.7.595, wolves stalk you; fewer wolves and walruses
 - Ships Kingdoms 0.7.595: wild wolves (the game's at night or when you're hurt, our feral ones always) smell players out
   (wind, sneaking, rain, your footstep trail), shadow them silently from cover, freeze and back off when looked at, and
-  rush as a pack with one growl from behind or from hiding. See kingdoms/MODLOG.md.
+  rush as a pack with one growl from behind or from hiding. Wolves spawn at a quarter (feral a fifth) and walruses at a
+  fifth of their old rate, in smaller groups. See kingdoms/MODLOG.md.

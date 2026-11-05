@@ -9555,5 +9555,9 @@ but more of a hunter. they can smell you out."
   one low growl (the tell, like a creeper's hiss) and the whole pack within 32 blocks comes at once, with a burst of
   speed for 4 s. Hit a stalker and the pack comes in then. Lose them after and they fall back to stalking. A stalking
   wolf doesn't fill the stealth gauge and can't be sneak-attacked by the one it stalks.
+- **Fewer wolves and walruses** (Andy: "they also spawn way too much ... we were flooded with walrus and wolves";
+  `wild/Thinning`): after every mod adds its spawns, the game's wolves keep a quarter of their spawn weight, feral wolves
+  and Cube Animals' walruses a fifth, in every biome; wolves come at most 3 together, walruses 2. New spawns only: the
+  ones already out in explored land stay.
 - Tuning: the constants at the top of `WolfStalkers`. Stalks aren't saved: a reload forgets the hunt (and gives back a
   hushed wolf's voice). Compile-checked (Gradle `compileJava`, 0 errors); not played.
