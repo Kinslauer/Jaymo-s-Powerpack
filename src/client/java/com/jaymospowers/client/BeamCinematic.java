@@ -186,7 +186,7 @@ public final class BeamCinematic {
 				look = focus;
 			}
 		}
-		// (0.20.58) a little lower, as every film is, so the fighters are seen better
+		// (0.20.60) a little lower, as every film is, so the fighters are seen better
 		pos = clipped(self, look, UltimateCinematic.lowered(self, pos, self.getPosition(partialTicks)));
 		Vec3 dir = look.subtract(pos);
 		if (dir.lengthSqr() < 1.0E-6) {

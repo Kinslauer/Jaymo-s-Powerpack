@@ -49,7 +49,7 @@ public final class XenoformClient {
 	/** (0.20.9) The change-in morph this player is in ({@link XenoMorph}), or null. */
 	public static final RenderStateDataKey<XenoMorph.Morph> MORPH = RenderStateDataKey.create(() -> "jaymospowers:xenoform_morph");
 	/**
-	 * (0.20.58) Which of Bulwark's four arms throws the swing now (0 upper right, 1 upper left, 2 lower right, 3 lower
+	 * (0.20.60) Which of Bulwark's four arms throws the swing now (0 upper right, 1 upper left, 2 lower right, 3 lower
 	 * left; null: not Bulwark). Each new swing goes on to the next arm, so its attacks and its Fist Combo go round all four
 	 * (Andy: "attacking with bulwark should alternate between all arms").
 	 */
@@ -142,7 +142,7 @@ public final class XenoformClient {
 	}
 
 	/**
-	 * (0.20.58) The arm Bulwark's swing is thrown with: a swing that starts (from rest, or over one still going, as the
+	 * (0.20.60) The arm Bulwark's swing is thrown with: a swing that starts (from rest, or over one still going, as the
 	 * combo's do) moves it on to the next of the four, in turn upper right, upper left, lower right, lower left.
 	 */
 	private static int bulwarkArm(Player player, float swing) {

@@ -46,7 +46,7 @@ public final class ClashCinematic {
 	static final float BAR_SHARE = 0.12F, BAR_EASE = 0.25F;
 	/** Viewers this near (blocks) to a clash get the bars. */
 	static final double VIEW_RANGE = 24.0;
-	/** The camera: how far out to the side (blocks), how high over the pair's feet (0.7.550, lower: 1.5 hid the pair), how far it sways (degrees). */
+	/** The camera: how far out to the side (blocks), how high over the pair's feet (0.7.551, lower: 1.5 hid the pair), how far it sways (degrees). */
 	static final double CAM_OUT = 3.4, CAM_UP = 0.9, CAM_SWAY = 14.0;
 	/** The look-at height over the pair's feet (blocks). */
 	static final double LOOK_UP = 1.3;

@@ -152,7 +152,7 @@ public final class Bulwark extends XenoForm {
 	}
 
 	private static void punch(ServerPlayer player, boolean last, int left) {
-		// (0.20.58) the hands take turns (in first person too); every client throws each blow with the next of the four arms
+		// (0.20.60) the hands take turns (in first person too); every client throws each blow with the next of the four arms
 		player.swing(left % 2 == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
 		LivingEntity target = aimed(player, COMBO_REACH, e -> true);
 		if (target == null) {

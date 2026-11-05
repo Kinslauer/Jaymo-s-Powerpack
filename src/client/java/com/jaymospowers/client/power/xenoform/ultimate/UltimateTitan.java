@@ -275,7 +275,7 @@ public final class UltimateTitan extends XenoFormModels.UltimateModel {
 				this.fz[i] = 0.2F;
 			}
 		}
-		// a punch: (0.20.58) each swing is thrown by the next of the four arms in turn (XenoformClient.BULWARK_ARM);
+		// a punch: (0.20.60) each swing is thrown by the next of the four arms in turn (XenoformClient.BULWARK_ARM);
 		// without that, the main hand throws the upper arm on its side, the off hand the lower arm on the other side
 		float sa = Mth.clamp(state.swingAnimation, 0.0F, 1.0F);
 		if (state.currentSwing != null && sa > 0.0F && !carry) {
