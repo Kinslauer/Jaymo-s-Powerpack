@@ -75,6 +75,12 @@ public final class StanceScroll {
 		wheel -= step;
 		int from = current(player);
 		int to = Mth.clamp(from + step, Stance.PRONE, Stance.STAND);
+		// (0.20.63) a notch down to the crouch (or on from it) facing a ledge, a one-high gap, a fence or anything short of
+		// two blocks takes hold of it and climbs (LedgeClient#scrollGrab); the stance stays as it was
+		if (step < 0 && (from == Stance.SNEAK || from == Stance.LOW) && LedgeClient.scrollGrab(player)) {
+			wheel = 0.0;
+			return true;
+		}
 		if (from == Stance.PRONE && step < 0) {
 			// (0.19.9) Andy: "sliding into prone and scrolling down doesnt lock you into the prone toggle like it should".
 			// Already down from a slide with Sneak held, a turn down locks it: letting go of Sneak no longer gets you up
