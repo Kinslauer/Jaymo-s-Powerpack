@@ -705,3 +705,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - A cut's drip (`BladeBlood.drip`) left from inside the body and, since 0.20.51, opened into a spatter star there. A drip
   now leaves from just outside the body's box (`DRIP_OUT`) and the client draws a no-stain spray as one small falling drop
   (`BloodClient#DRIP_DROP`, `BloodDrop.drip` held on its sheet's first frame). Built, not played.
+- **0.20.87, GeckoLib for Simply Tents:** the Deck's server refused to start ("Incompatible mods found": Simply Tents 3.5
+  needs GeckoLib 5.5.6 or later, and 0.20.83 shipped it without). Added GeckoLib 5.5.7 for Fabric 26.3 (Modrinth
+  kSxHvs99, CurseForge 388172/8945630, same file) to packMods. Not built here.
