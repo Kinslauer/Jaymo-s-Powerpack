@@ -9156,7 +9156,17 @@ ultimate and beam-clash films came down with it. Not played.
 - Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
   0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.
 
-## 0.7.561 (2026-11-05): a warband captain's first kill no longer crashes the server
+## 0.7.561 (2026-11-05): a downed king's armour no longer multiplies when he's lifted (pack 0.20.72)
+
+- Andy: "the king's armor seems to be duplicating when they carry him ... i found a ton of armor". Lifting a downed ruler
+  in plate is too heavy, so Powers' `Carry.shed` pulls the heaviest piece off and drops it (chest, legs, boots, then the
+  helmet). With the helmet gone `Rulers.step` saw no crown and ran `fit`, which wiped `RoyalDress`'s kept sets and dressed
+  them afresh; the next danger then made a brand-new trimmed plate set. Every lift-and-recover cycle left one more set.
+- Now a ruler missing only their crown gets the crown back (`Regalia.recrown`, same crown as before) and nothing else;
+  the full `fit` is kept for rulers who never had regalia. Nothing re-dresses a downed ruler, and `RoyalDress` doesn't
+  change a downed ruler's outfit. What was shed lies where it fell, once. Built, not played.
+
+## 0.7.562 (2026-11-05): a warband captain's first kill no longer crashes the server
 
 - Andy's crash report (2026-11-05 02:10): an orc downed and finished him, and the server died in `Captains.slew` with
   `UnsupportedOperationException`. When the killer had no captain yet, the new captain has no fight list, and
