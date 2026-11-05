@@ -1064,3 +1064,9 @@ Andy (singleplayer, One Dimension): "it didnt work". His log: a demon biome was 
 it had a floor, and the wider fallback searches generated chunk after chunk for minutes while he waited. Now only the
 nearest few spots are tried (`ZFighterDemonRealm.FLOOR_TRIES`), then the hall goes up right where the biome was found,
 carved out of the rock at the Nether's y 64 if there's no floor (`raiseAt`, which logs the column it found).
+
+## 0.21.4 (2026-11-05): Kingdoms 0.7.605, the Family farmhand start, a day-one start list, and an advancement for every locked start
+The village start is now the Family farmhand: you wake inside a lone farmhouse (Moog's Voyager barn, else a Homesteads
+farmstead) and live with the family there. Day one offers only the Family farmhand, Rock bottom, Banished, Shipwreck,
+the heritage starts and Let fate decide; every other start opens with a deed of its own and a "Road Opened"
+advancement. Fate now picks from every start, locked or not, by a fixed percentage table. See Kingdoms' MODLOG 0.7.605.

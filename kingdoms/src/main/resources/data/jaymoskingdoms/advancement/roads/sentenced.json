@@ -1,0 +1,33 @@
+{
+  "parent": "jaymoskingdoms:roads/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:iron_bars"
+    },
+    "title": {
+      "translate": "advancements.jaymoskingdoms.roads.opened",
+      "with": [
+        {
+          "translate": "story.jaymoskingdoms.road.sentenced"
+        }
+      ]
+    },
+    "description": {
+      "translate": "story.jaymoskingdoms.road.sentenced.hint"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}
