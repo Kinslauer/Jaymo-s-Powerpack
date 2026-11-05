@@ -927,3 +927,20 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   Other ores show nothing on the surface. Seamed stone underground is unchanged.
 - Rocky dirt already in the world turns back into dirt on a random tick, and it's out of the creative tab.
 - New chunks only for the pebbles. Built, not played.
+- **0.20.106, giants grab and throw trees (Kingdoms 0.7.588):** Andy: "giants should also be able to grab and throw the
+  trees with their grabs". The Great Ape's grab (held punch) and Towerback's R, with no one in reach, close on a tree
+  within the hand's reach instead (`GiantTrees`, which calls Kingdoms' `FallingTree.treeNear/take/hold/hurl` by
+  reflection): a fallen tree, or a standing one torn out whole, up to 4 logs per block of the giant's height. It comes up
+  to the hand over the hold, then where the grab would slam its catch down it's thrown along the giant's aim (0.4 b/t
+  times the root of its height in people, more with brawn as carried throws, at most 2.5), tumbling, striking what it
+  flies through, and landing as a fallen tree. Player giants only where they may build, as their trampling. Built, not played.
+- **0.20.108, adrenaline at low health (Kingdoms 0.7.590):** Andy: "adrenaline should kick in if you are low health and
+  fighting or running ... damaged beyond repair on your limbs, (not head or Torso) and still sprint, and attack, and stand
+  yourself up, but only for 10s after being hit below half health. or within 40% of whatever death threshold."
+  `core/wounds/Adrenaline`: a player hit by an attack (not fire, falls, hunger) who is left at half health or less, with
+  head or body at 40% or less (the parts that down or kill at zero), or downed, has adrenaline for 10 s from that hit;
+  going down's own first 10 s rush counts too. While it lasts broken arms, legs and feet hinder nothing: sprinting, two
+  broken legs stand instead of crawling, broken arms swing/dig/shield/draw at full strength, powers use the limb as sound,
+  and a downed player's broken or red arms don't stop the sneak rise (a rise started on it is finished on it). Head and
+  body still count; severed limbs are still gone. One heartbeat only the player hears as it kicks in, no text. When it
+  ends the breaks come back (crawl again on two broken legs). Tuning at the top of `Adrenaline`. Built, not played.

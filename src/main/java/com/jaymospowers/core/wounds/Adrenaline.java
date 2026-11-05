@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * (0.20.107) Andy (2026-11-05): "adrenaline should kick in if you are low health and fighting or running, meaning you can
+ * (0.20.108) Andy (2026-11-05): "adrenaline should kick in if you are low health and fighting or running, meaning you can
  * be damaged beyond repair on your limbs, (not head or Torso) and still sprint, and attack, and stand yourself up, but
  * only for 10s after being hit below half health. or within 40% of whatever death threshold."
  * <p>

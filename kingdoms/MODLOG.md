@@ -9456,3 +9456,38 @@ player input, (explosions / heavy impacts can fell trees too.)"
 ## 0.7.587 (2026-11-05): hint 105 tells of holding a charged rock (Powers 0.20.103)
 - The off hand rock is held drawn back at full charge and thrown on release, charging faster with each throw close after
   the last (Powers `ThrownRocks`); hint 105 says so.
+
+## 0.7.588 (2026-11-05): felled trees stay as fallen trees until chopped; no more trunk pushing
+Andy: "I dont like the tree pushing, can you keep the trees as physics items until they are broken by the player?
+meaning a leaning tree broken in the middle will break into two?" Then, from a clip: "this tree turned into oak when i
+started breaking it ... it also took an unexpected swapped trajectory and hit me ... if the trees are what knocked it
+off course then those should break upon contact".
+- A felled tree never turns back into blocks. Down, `FallingTree` stays an entity, saved with the world (pieces by block
+  state, lean, heading, whether it's down, leaning or falling). Lying, it's lifted half a block so its wood rests on the
+  ground rather than half sunk in it.
+- Chopping it: strike it (attack) and the piece you aim at takes the stroke (`skipAttackInteraction`, a ray through its
+  pieces). A log takes 3 axe strokes (`LOG_CHOPS`), a point of axe wear each, and needs an axe as standing wood does; a
+  leaf breaks at once. Broken out, it drops what it would and the tree splits into the parts that still touch
+  (`split`, corners count); each leaf goes with the nearest part within 3 blocks, or falls. Lying, the parts lie where
+  they are as separate trees. Leaning, the part still on its stump falls on if it now can, and the rest drops free
+  (flying, tumbling 3 degrees a tick) and lands as a fallen tree.
+- Its box covers its wood as it lies (`makeBoundingBox`), so you can aim at it; arrows pass through.
+- Its leaves drop off as it lies (2 every half second, giving saplings, sticks, apples), and the ones that snapped as it
+  landed drop at once. A tree caught leaning checks every second whether what held it is gone, and falls on if so.
+- No more glancing sideways (the "swapped trajectory"): wood it strikes while moving at all knocks that tree over its way
+  (`KNOCK_SIZE` 2x its logs, up to 4 trees each). A tree too big to knock over holds it leaning.
+- `FallenTrunks` (pushing and rolling lying logs) is gone. Logs already lying as blocks stay as blocks.
+- Chopped logs no longer draw as oak mid-chop: a chop the client guessed as a break got the block put back without its
+  wood, so `Trees` sends the chopped log's data again two ticks after each chop.
+- A woodcutter's tree still breaks up into his bag.
+- Giants grab and throw trees (Andy: "giants should also be able to grab and throw the trees with their grabs").
+  `FallingTree.treeNear/take/hold/hurl`: a giant's hand takes a fallen tree, or tears a standing one out whole; held, it
+  lies along the giant's facing; thrown, it flies tumbling, strikes what it passes through (never its thrower) and lands
+  as a fallen tree. Aether Giants (mob griefing on) tear one up and lob it at a target out of grab reach but within 40
+  blocks (up to 120 logs). Powers 0.20.106's Great Ape and Towerback grabs do it when no one is in reach (`GiantTrees`).
+- Mob griefing is always on (Andy: "it should be on by default in this pack and always on the server"): `PackRules`
+  sets it on as the server starts and puts it back every 10 seconds if it's turned off.
+- Hint 115. Built, not played, not booted.
+
+## 0.7.590
+- Hint 117 for Powers 0.20.108's adrenaline (`lang/parts/adrenaline.json`). Hint 116 is #1025's.

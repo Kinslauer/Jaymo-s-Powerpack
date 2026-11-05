@@ -119,7 +119,7 @@ public final class LimbUse {
 			return com.jaymospowers.core.Prosthetics.strength(entity, Breaks.limb(part));
 		}
 		if (!Breaks.isBroken(entity, part) || Adrenaline.active(entity)) {
-			// (0.20.107) on adrenaline a broken limb works as a sound one
+			// (0.20.108) on adrenaline a broken limb works as a sound one
 			return SOUND;
 		}
 		if ((Breaks.splinted(entity) & Breaks.bit(part)) != 0) {
