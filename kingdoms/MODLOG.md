@@ -9178,3 +9178,10 @@ ultimate and beam-clash films came down with it. Not played.
   haven, ruler's edicts, or fond of that half-orc player), wary (yellow) for another tribe's orc or when they mind its
   blood, fighting (red) when they're at blows. Goblins say theirs in goblin dialect. 10 lines per mood (8 goblin) in
   `lang/parts/orc-sightings.json`; once per pair per 10 minutes, fight shouts every 10 s at most. Hint 102. Not played.
+
+## 0.7.563 (2026-11-05): a warband captain's first kill no longer crashes the server
+
+- Andy's crash report (2026-11-05 02:10): an orc downed and finished him, and the server died in `Captains.slew` with
+  `UnsupportedOperationException`. When the killer had no captain yet, the new captain has no fight list, and
+  `FIGHTS.getOrDefault(id, Map.of()).remove(...)` tried to remove from the immutable empty map. Now it only removes from a
+  fight list that exists. Every first kill by a greenskin with no captain crashed the server before this.
