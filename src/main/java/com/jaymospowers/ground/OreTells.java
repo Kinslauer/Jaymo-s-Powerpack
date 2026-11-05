@@ -39,7 +39,7 @@ import net.minecraft.world.level.material.PushReaction;
  * our own blocks). Stone touching an ore vein is often <b>seamed</b> (cracked, rusty-veined stone; seamed deepslate in
  * the deep), and where a vein lies just under the ground the dirt over it turns <b>rocky</b>. They mine like what they
  * are and drop cobblestone, cobbled deepslate and dirt. Placement: worldgen/placed_feature/ore_tells.json.
- * (0.20.104) Andy: "right now it isnt a scrying eye that could tell theres something there, ANYONE could tell, it should
+ * (0.20.105) Andy: "right now it isnt a scrying eye that could tell theres something there, ANYONE could tell, it should
  * instead be a chance that a pebble spawns where these blocks would have, and it is either colored copper or brown like
  * iron, or will drop you a nugget from that ore type". The rocky dirt is gone: over a shallow copper or iron vein there's
  * now sometimes a lone pebble on the ground, either stained the ore's colour or a plain-looking rock that's really a
@@ -47,7 +47,7 @@ import net.minecraft.world.level.material.PushReaction;
  */
 public final class OreTells {
 	public static Block SEAMED_STONE, SEAMED_DEEPSLATE, ROCKY_DIRT;
-	/** (0.20.104) The pebbles over shallow veins: stained (gives a plain rock) and hidden (looks plain, gives a nugget). */
+	/** (0.20.105) The pebbles over shallow veins: stained (gives a plain rock) and hidden (looks plain, gives a nugget). */
 	public static Block COPPER_PEBBLE, IRON_PEBBLE, COPPER_NUGGET_PEBBLE, IRON_NUGGET_PEBBLE;
 	/** Ore looked for underground in each chunk; seams round each found; columns looked down for a shallow vein. */
 	static final int TRIES = 28, SURFACE_TRIES = 8;
@@ -63,7 +63,7 @@ public final class OreTells {
 		SEAMED_STONE = block("seamed_stone", BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F));
 		SEAMED_DEEPSLATE = block("seamed_deepslate", BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).requiresCorrectToolForDrops()
 			.strength(3.0F, 6.0F).sound(SoundType.DEEPSLATE));
-		// (0.20.104) no longer laid down; what's in the world already slowly turns back into dirt
+		// (0.20.105) no longer laid down; what's in the world already slowly turns back into dirt
 		ROCKY_DIRT = block("rocky_dirt", BlockBehaviour.Properties.of().mapColor(MapColor.DIRT).strength(0.6F).sound(SoundType.GRAVEL).randomTicks(),
 			FadingDirt::new);
 		Supplier<Item> rock = () -> GroundRocks.ROCKS.get(GroundRocks.Variant.STONE).asItem();
@@ -100,7 +100,7 @@ public final class OreTells {
 			.setId(key), gives));
 	}
 
-	/** (0.20.104) Rocky dirt left over from before: a random tick turns it back into dirt (grass spreads back over it). */
+	/** (0.20.105) Rocky dirt left over from before: a random tick turns it back into dirt (grass spreads back over it). */
 	static final class FadingDirt extends Block {
 		FadingDirt(BlockBehaviour.Properties properties) {
 			super(properties);

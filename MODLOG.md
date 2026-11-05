@@ -905,7 +905,7 @@ semi or full auto weapon. it should use ammunition accurately and animate a one 
   of brawn (Kitchen's `Hauling`: Strength effect, size, Kingdoms' Might/Packhorse...; up to 5). Kitchen's corpse toss
   (`CorpseEntity.toss`) does the same. Kingdoms: hint 105 tells of the hold and release.
 - Built, not played.
-## 0.20.104 (2026-11-05): Ore pebbles instead of rocky dirt
+## 0.20.105 (2026-11-05): Ore pebbles instead of rocky dirt
 
 - Andy: "right now it isnt a scrying eye that could tell theres something there, ANYONE could tell, it should instead be
   a chance that a pebble spawns where these blocks would have". Rocky dirt no longer generates. Where a column's dirt or
