@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "place_tanning_rack": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "homesteads:tanning_rack"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.place_tanning_rack.descr"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:leather"
+    },
+    "title": {
+      "translate": "advancements.place_tanning_rack.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_tanning_rack"
+    ]
+  ]
+}
