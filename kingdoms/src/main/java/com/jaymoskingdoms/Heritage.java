@@ -1149,6 +1149,8 @@ public final class Heritage {
 		}
 		if (entity instanceof ServerPlayer dead && PowersCompat.amongTheDead(dead)) {
 			unlock(dead, Kind.DIVINE);
+			// (0.7.606) and the afterlife's road with it
+			Deeds.done(dead, RoadLocks.DIVINE_DEED);
 		}
 		if (!(source.getEntity() instanceof ServerPlayer player)) {
 			return;
