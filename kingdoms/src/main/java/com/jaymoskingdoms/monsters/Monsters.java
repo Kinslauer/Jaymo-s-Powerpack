@@ -73,6 +73,9 @@ public final class Monsters {
 	public static EntityType<SilverSkeleton> SILVER_SKELETON;
 	public static EntityType<MudGolem> MUD_GOLEM;
 	public static EntityType<Mimic> MIMIC;
+	/** (0.7.580) the mime, deep in the caves ({@link Mime}). */
+	public static EntityType<Mime> MIME;
+	static final int MIME_WEIGHT = 3;
 	public static Item SILVER_SWORD;
 
 	private Monsters() {
@@ -112,6 +115,10 @@ public final class Monsters {
 		FabricDefaultAttributeRegistry.register(SILVER_SKELETON, SilverSkeleton.createAttributes());
 		FabricDefaultAttributeRegistry.register(MUD_GOLEM, MudGolem.createAttributes());
 		FabricDefaultAttributeRegistry.register(MIMIC, Mimic.createAttributes());
+		MIME = type("mime", EntityType.Builder.of(Mime::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(MIME, Mime.createAttributes());
+		SpawnPlacements.register(MIME, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mime::checkSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, MIME, MIME_WEIGHT, 1, 1);
 
 		// the Nether's own: fire ogres and flame wraiths among its monsters
 		SpawnPlacements.register(FIRE_OGRE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);

@@ -102,6 +102,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cafe.register();
 		// (0.7.579) our part of the "Jaymo's Powerpack" advancement tab
 		PackAdvancements.register();
+		// (0.7.580) mice that raid pantries, chased by cats
+		Mice.register();
 		Commissions.register();
 		PlanSites.register();
 		Armory.register();

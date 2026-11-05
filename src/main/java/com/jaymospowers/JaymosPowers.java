@@ -60,6 +60,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Soundscape.register();
 		// (0.20.87) the "Jaymo's Powerpack" advancement tab
 		com.jaymospowers.core.PackAdvancements.init();
+		// (0.20.88) blunt and large arrow heads
+		com.jaymospowers.tinkering.ranged.ArrowHeads.init();
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();
@@ -88,6 +90,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.tinkering.Tinkering.init();
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
+		// (0.20.88) seamed stone and rocky dirt round ore veins
+		com.jaymospowers.ground.OreTells.init();
 		com.jaymospowers.ground.FirstTools.init();
 		// (0.17.14) players throw rocks, as Kingdoms' poor guards and barbarians do
 		com.jaymospowers.ground.ThrownRocks.init();

@@ -141,6 +141,8 @@
     "jaymospowers:stone_anvil",
     "jaymospowers:star_metal_ore",
     "jaymospowers:field_anvil",
-    "jaymospowers:veiled_ore"
+    "jaymospowers:veiled_ore",
+    "jaymospowers:seamed_stone",
+    "jaymospowers:seamed_deepslate"
   ]
 }

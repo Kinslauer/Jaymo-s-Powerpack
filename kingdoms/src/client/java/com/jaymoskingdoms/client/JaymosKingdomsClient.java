@@ -68,6 +68,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		com.jaymoskingdoms.client.wild.WildRenderer.register();
 		com.jaymoskingdoms.client.monsters.LegendRenderer.register();
+		com.jaymoskingdoms.client.monsters.MimeRenderer.register();
 		// (0.7.145) the Aether's Giants
 		com.jaymoskingdoms.client.remnants.GiantRenderer.register();
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
