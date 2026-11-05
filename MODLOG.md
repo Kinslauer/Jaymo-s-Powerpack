@@ -600,3 +600,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   the back and belt at once. `client/mixin/weaponmaster/WeaponMasterOneItemMixin` (optional, skipped without it) lets
   each body's pass of its layer draw only the first item it reaches, the lowest hotbar slot not in hand, for your own
   body and other players'. Its quiver still shows. `MAX_SHOWN` at the top. Gradle build only, not played.
+- **0.20.74, Shift + Left Alt zooms** (Andy: "shift + left alt should make you zoom"): holding Sneak and the Dodge key
+  together zooms with OK Zoomer until either is let go (`SneakZoom`), beside the double-tap-and-hold Sneak. Alt pressed
+  while Sneak is down no longer dodges (`DodgeClient`); Alt alone still rolls. Built, not played.
