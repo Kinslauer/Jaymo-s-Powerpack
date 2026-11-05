@@ -897,7 +897,7 @@ public final class Handshakes {
 			villager.push(away.normalize().scale(STEP_BACK));
 		}
 		villager.getLookControl().setLookAt(player);
-		Speech.say(level, villager, Introductions.waryLine(villager), Speech.WHITE, 12.0);
+		Speech.say(level, villager, Introductions.waryLine(villager, player), Speech.WHITE, 12.0);
 		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.9F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.wary").withStyle(ChatFormatting.GRAY), true);
 	}
