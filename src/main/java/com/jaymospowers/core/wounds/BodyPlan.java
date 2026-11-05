@@ -33,7 +33,7 @@ public enum BodyPlan {
 	private static final TagKey<EntityType<?>> SIMPLE_TAG = tag("body/simple");
 	/**
 	 * A creature of no tag, taller than this many times its width, is built like a person; anything else like an animal.
-	 * (0.20.52) Never a wild creature (see {@link #wild}): a tall deer or elephant is still an animal.
+	 * (0.20.53) Never a wild creature (see {@link #wild}): a tall deer or elephant is still an animal.
 	 */
 	private static final double TALL = 1.3;
 	private static final Map<EntityType<?>, BodyPlan> CACHE = new ConcurrentHashMap<>();
@@ -131,7 +131,7 @@ public enum BodyPlan {
 	}
 
 	/**
-	 * (0.20.52) Andy (2026-11-05): "downed animals should fall to their side, i think they're trying to animate like
+	 * (0.20.53) Andy (2026-11-05): "downed animals should fall to their side, i think they're trying to animate like
 	 * humanoids". Cube Animals' roe deer (0.9 by 1.5) was taller than wide, so it was taken for a person: it went down on
 	 * its back, propped up like one, and was hurt in arms and feet. Whatever spawns as wildlife (animals, ambient things,
 	 * sea life) isn't a person unless it's tagged one (the wandering trader is).
