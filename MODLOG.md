@@ -591,4 +591,5 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   unsuspecting one can still be knocked out. Kingdoms' NPC rocks follow the same rule (Kingdoms 0.7.558). Not played.
 
 ## 0.20.71 (2026-11-05): NPC speech bubble fix
-- Pack bump for Kingdoms 0.7.559: haven guards' rally cry showed a raw lang key instead of the line. Not played.
+- Pack bump for Kingdoms 0.7.559: haven guards' rally cry showed a raw lang key instead of the line; villagers, guards
+  and goblins now greet, warn off or shout at the orcs they meet (OrcSightings). Not played.
