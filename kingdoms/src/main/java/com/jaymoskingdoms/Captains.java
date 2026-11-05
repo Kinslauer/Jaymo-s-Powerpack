@@ -1366,7 +1366,11 @@ public final class Captains {
 		}
 		bind(level, c, killer, false);
 		scene(level, killer, player, c.id(), risen);
-		FIGHTS.getOrDefault(c.id(), Map.of()).remove(player.getUUID());
+		// (a captain who has just risen has no fights yet: Map.of() would throw on remove and take the server down)
+		Map<UUID, Fight> fights = FIGHTS.get(c.id());
+		if (fights != null) {
+			fights.remove(player.getUUID());
+		}
 		List<String> sworn = new ArrayList<>(player.getAttachedOrElse(SWORN, List.of()));
 		if (!sworn.contains(c.id())) {
 			sworn.add(c.id());
