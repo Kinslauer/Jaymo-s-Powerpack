@@ -697,7 +697,10 @@ public final class LifeAims {
 		player.setAttached(LIFE_AIM, life.asBroken(SCORN_LINES));
 		Faction realm = life.realm() >= 0 ? Factions.get(server, life.realm()) : null;
 		if (realm != null && !realm.fallen()) {
-			Reputation.change(player, realm, -BETRAY_REP);
+			// (0.7.571) thought less of, not made an enemy: a broken-out prisoner was shot on sight the moment they surfaced
+			int now = Reputation.get(player, realm.id());
+			int floor = Math.min(now, Reputation.HOSTILE + 1);
+			Reputation.change(player, realm, Math.max(-BETRAY_REP, floor - now));
 		}
 		Post.aside(player.getUUID(), Component.translatable("aim.jaymoskingdoms.tidings.broken"));
 	}

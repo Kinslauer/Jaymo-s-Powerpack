@@ -6,7 +6,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.574) Villagers run from explosions they hear (Andy, 2026-11-05, seven-mods picklist): within {@link #HEAR}
+ * (0.7.576) Villagers run from explosions they hear (Andy, 2026-11-05, seven-mods picklist): within {@link #HEAR}
  * blocks every villager who isn't a fighter runs from the blast and hides, as from a monster ({@link Frights#blast}).
  * Guards, archers, soldiers out with a war party, MCA's own guards and anyone already fighting stand their ground.
  * Called from {@code mixin/equestrian/ServerExplosionMixin}, where horses shy at the same blast.

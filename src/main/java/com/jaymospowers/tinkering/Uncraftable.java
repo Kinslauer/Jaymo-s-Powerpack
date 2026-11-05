@@ -94,7 +94,7 @@ public final class Uncraftable {
 	 * (0.15.118) Andy didn't like our flintlocks, so they're gone and the gun smith table with them.
 	 */
 	static final List<String> PREFIXES = List.of("tacz:gun/", "tacz:ammo/", "tacz:attachments/", "tacz:misc/",
-		// (0.20.84) Andy: "chemical X should not be acquirable": Mutant Monsters' four brewing recipes for it (the
+		// (0.20.85) Andy: "chemical X should not be acquirable": Mutant Monsters' four brewing recipes for it (the
 		// only way to get it; it's in no loot table), so no mob can be turned into a mutant
 		"mutantmonsters:brewing/");
 	static final Set<String> TACZ = Set.of("tacz:attachment_workbench", "tacz:ammo_workbench", "tacz:iron_ammo_box",

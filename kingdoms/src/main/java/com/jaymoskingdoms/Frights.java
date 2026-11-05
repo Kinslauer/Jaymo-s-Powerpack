@@ -136,7 +136,7 @@ final class Frights {
 	}
 
 	/**
-	 * (0.7.574) A blast went off at {@code at} (Andy: "all villager mobs and non guards should react by running away if
+	 * (0.7.576) A blast went off at {@code at} (Andy: "all villager mobs and non guards should react by running away if
 	 * they hear explosions (within 40 blocks)"): every villager within {@link BlastFright#HEAR} of it (the brave from
 	 * nearer, the timid from farther: {@link Temperaments#frightRange}) runs from the spot and hides a while, unless it
 	 * stands its ground ({@link BlastFright#standsGround}).

@@ -187,7 +187,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
-		// 0.7.574: monsters keep off a lit campfire near a player
+		// 0.7.576: monsters keep off a lit campfire near a player
 		CampfireWard.register();
 		Clearing.register();
 		Herds.register();

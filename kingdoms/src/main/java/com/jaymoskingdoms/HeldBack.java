@@ -182,12 +182,17 @@ final class HeldBack {
 			}
 			STRUCK.clear();
 		}
-		if (ASSAULTS.isEmpty()) {
-			return;
-		}
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
 		if (now % CHECK != 0) {
+			return;
+		}
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (player.level() == level && player.isAlive() && Downed.isDowned(player)) {
+				standDown(level, player);
+			}
+		}
+		if (ASSAULTS.isEmpty()) {
 			return;
 		}
 		for (Iterator<Map.Entry<UUID, long[]>> it = ASSAULTS.entrySet().iterator(); it.hasNext();) {
@@ -205,6 +210,28 @@ final class HeldBack {
 			if (guard != null) {
 				it.remove();
 				takeIn(level, player, f, guard);
+			}
+		}
+	}
+
+	/**
+	 * (0.7.571) A downed player is not shot or cut at by the town's people who'd spare them ({@link #spares}): they stop,
+	 * and its guards walk over to take them ({@link Busts}, {@link #assaulted}). Andy, broken out of the cells: downed in
+	 * the street, then shot dead where he lay.
+	 */
+	private static void standDown(ServerLevel level, ServerPlayer player) {
+		for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(CALL_OFF), m -> m.isAlive() && townsperson(m))) {
+			boolean after = m.getTarget() == player || m.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+				&& m.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) == player;
+			if (!after || !spares(m, player)) {
+				continue;
+			}
+			m.setTarget(null);
+			if (m.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
+				m.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+			}
+			if (Downed.isGuard(m) && m.distanceTo(player) > 2.5) {
+				m.getNavigation().moveTo(player, 1.0);
 			}
 		}
 	}
@@ -247,6 +274,7 @@ final class HeldBack {
 			if (d != null) {
 				Underworld.putCell(level.getServer(), d, cell);
 			}
+			Speakeasy.cellDoor(level, cell);
 			long now = level.getGameTime();
 			player.setAttached(Busts.JAILED, new Busts.Jail(f.id(), cell, now + JAIL_TICKS));
 			Speech.say(level, guard, Component.translatable("held_back.jaymoskingdoms.cells." + level.getRandom().nextInt(LINES)), Speech.RED, SPEECH);

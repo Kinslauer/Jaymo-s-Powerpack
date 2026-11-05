@@ -324,7 +324,7 @@ public final class StoryHard {
 			}
 			Money.charge(player, Money.worth(fine));
 			player.removeAttached(Busts.JAILED);
-			let(level, player, f);
+			let(level, player, jail);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.paid", fine).withStyle(ChatFormatting.YELLOW));
 			return;
 		}
@@ -345,23 +345,42 @@ public final class StoryHard {
 	/** The cell door is picked: out, but a fugitive of {@code f} now, as any other prisoner who escapes ({@link Busts}). */
 	private static void breakOut(ServerPlayer player, Faction f, long jailUntil) {
 		ServerLevel level = Factions.level(player.level().getServer());
+		Busts.Jail jail = player.getAttached(Busts.JAILED);
 		player.removeAttached(Busts.JAILED);
 		// (0.7.419) a road deed: a cell door picked
 		Deeds.done(player, "cells.broke");
-		let(level, player, f);
+		if (jail != null) {
+			let(level, player, jail);
+		}
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.picked", f.name()).withStyle(ChatFormatting.DARK_RED));
 		Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.escaped", Post.nameOf(player), f.name()));
-		Theft.arrest(player, level, f, Theft.OUTLAW_TICKS);
+		// (0.7.571) hunted to be taken back, not marked for killing on sight: an outlaw's term made them shot down in the street
+		Theft.arrest(player, level, f, Theft.HUNT_TICKS * 3);
+		// (0.7.571) and they don't wake by the seat among the guards hunting them (the story's respawn there is dropped)
+		forgetSeatRespawn(player, level, f);
 		Busts.charge(player, f, "escape");
 		// (0.7.418) a life's aim: out of the cells instead of serving
 		LifeAims.brokeOut(player, jailUntil);
 	}
 
-	/** Puts a prisoner out by the seat. */
-	private static void let(ServerLevel level, ServerPlayer player, Faction f) {
-		Vec3 out = Speakeasy.release(level, f);
-		player.teleportTo(level, out.x, out.y, out.z, Set.<net.minecraft.world.entity.Relative>of(), player.getYRot(), 0.0F, false);
-		level.playSound(null, out.x, out.y, out.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.NEUTRAL, 1.0F, 0.9F);
+	/**
+	 * (0.7.571) The cell door swings open and the prisoner walks out up the jailer's stair ({@link Speakeasy#passage});
+	 * they used to be set down by the seat, in front of the guards.
+	 */
+	private static void let(ServerLevel level, ServerPlayer player, Busts.Jail jail) {
+		Speakeasy.openDoor(level, jail.cell());
+		BlockPos door = Speakeasy.doorAt(jail.cell());
+		level.playSound(null, door, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.9F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.open").withStyle(ChatFormatting.GRAY));
+	}
+
+	/** (0.7.571) A respawn the story set by {@code f}'s seat (forced, within a few blocks of where prisoners were let out) goes back to the world's. */
+	private static void forgetSeatRespawn(ServerPlayer player, ServerLevel level, Faction f) {
+		ServerPlayer.RespawnConfig respawn = player.getRespawnConfig();
+		if (respawn != null && respawn.forced() && respawn.respawnData().dimension() == level.dimension()
+			&& respawn.respawnData().pos().distSqr(BlockPos.containing(Speakeasy.release(level, f))) <= 16.0) {
+			player.setRespawnPosition(null, false);
+		}
 	}
 
 	// ---- evicted -------------------------------------------------------------------------------------------------------
