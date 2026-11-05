@@ -71,6 +71,14 @@ public final class UltimateCinematic {
 	static final double MORPH_WIDE = 2.2, MORPH_WIDE_FIRST = 2.8, MORPH_CLOSE = 0.8, MORPH_CLOSE_FIRST = 0.55, MORPH_MIN_CLOSE = 0.7;
 	static final double MORPH_FRAME = 2.0, MORPH_FRAME_FIRST = 2.4, MORPH_LIFT = 0.08, MORPH_SHAKE = 0.05;
 	static final float MORPH_ROLL_FIRST = 3.0F;
+	/**
+	 * (0.20.91) {@link UltimateFilm#SPEAKER}: the shares of the film spent coming in from your shoulder and (from) where it starts to
+	 * rise to the words; how far off the speaker's face it holds (blocks, times their size, before and after the slow push), how far
+	 * round to the side (degrees), how high over the top of their head the middle of a speech bubble sits (blocks; Kingdoms' bubbles
+	 * float over the name tag spot), and how far below the words the camera ends (blocks, so it looks a touch up at them).
+	 */
+	static final float SPEAKER_IN = 0.3F, SPEAKER_RISE = 0.62F;
+	static final double SPEAKER_HOLD = 3.4, SPEAKER_PUSH = 3.0, SPEAKER_TURN = 18.0, SPEAKER_WORDS_UP = 1.0, SPEAKER_BELOW_WORDS = 0.15;
 	/** The vanilla HUD hidden while your own film runs. */
 	private static final Identifier[] HIDDEN = {VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR, VanillaHudElements.ARMOR_BAR,
 		VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR, VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH,
@@ -327,11 +335,57 @@ public final class UltimateCinematic {
 			case UltimateFilm.MORPH -> {
 				return morph(self, partialTicks, t);
 			}
+			case UltimateFilm.SPEAKER -> {
+				return speaker(self, subject, partialTicks, t, eyes);
+			}
 			default -> {
 				return null;
 			}
 		}
 		return aimed(clipped(self, look, lowered(self, pos, feet)), look, roll);
+	}
+
+	/**
+	 * (0.20.91) {@link UltimateFilm#SPEAKER}: Andy: "pan into the text box and character, sacrificing the view of the character near
+	 * the end to get high enough to view the whole chat bubble". In from over your shoulder to the speaker's face, seen from your side
+	 * and a little round; a slow push while they talk, framed between their face and the words over them; then up, level with the
+	 * words, so the whole bubble is in the frame and their face drops out of the bottom. Not brought down as other shots are.
+	 */
+	private static double[] speaker(LocalPlayer self, @Nullable Entity subject, float partialTicks, float t, Vec3 eyes) {
+		double size = subject instanceof net.minecraft.world.entity.LivingEntity l ? Math.max(1.0, l.getScale()) : 1.0;
+		Vec3 face = subject != null ? subject.getEyePosition(partialTicks) : at;
+		// the middle of the words: over the top of their head (the bubble's own height above the name tag spot)
+		double crown = subject != null ? subject.getBbHeight() - subject.getEyeHeight() : 0.3;
+		Vec3 words = face.add(0.0, crown + SPEAKER_WORDS_UP, 0.0);
+		Vec3 toward = eyes.subtract(face).horizontal();
+		toward = toward.lengthSqr() < 1.0E-4 ? facing.reverse() : toward.normalize();
+		double turn = Math.toRadians(side * SPEAKER_TURN);
+		Vec3 out = new Vec3(toward.x * Math.cos(turn) - toward.z * Math.sin(turn), 0.0, toward.x * Math.sin(turn) + toward.z * Math.cos(turn));
+		// framed between the face and the words while they talk
+		Vec3 between = face.lerp(words, 0.45);
+		Vec3 pos;
+		Vec3 look;
+		if (t < SPEAKER_IN) {
+			// from over your shoulder, in to them
+			float k = smooth(t / SPEAKER_IN);
+			Vec3 shoulder = eyes.add(new Vec3(-toward.z, 0.0, toward.x).scale(side * 0.8)).add(toward.scale(1.5)).add(0.0, 0.4, 0.0);
+			Vec3 held = between.add(out.scale(SPEAKER_HOLD * size)).add(0.0, -0.1, 0.0);
+			pos = shoulder.lerp(held, k);
+			look = face.lerp(between, k);
+		} else if (t < SPEAKER_RISE) {
+			// the slow push while they talk
+			float k = smooth((t - SPEAKER_IN) / (SPEAKER_RISE - SPEAKER_IN));
+			pos = between.add(out.scale(Mth.lerp(k, SPEAKER_HOLD, SPEAKER_PUSH) * size)).add(0.0, -0.1, 0.0);
+			look = between;
+		} else {
+			// up level with the words: the whole bubble in frame, their face going out of the bottom
+			float k = smooth((t - SPEAKER_RISE) / (1.0F - SPEAKER_RISE));
+			Vec3 from = between.add(out.scale(SPEAKER_PUSH * size)).add(0.0, -0.1, 0.0);
+			Vec3 to = words.add(out.scale(SPEAKER_PUSH * size)).add(0.0, -SPEAKER_BELOW_WORDS, 0.0);
+			pos = from.lerp(to, k);
+			look = between.lerp(words, k);
+		}
+		return aimed(clipped(self, look, pos), look, 0.0F);
 	}
 
 	/**

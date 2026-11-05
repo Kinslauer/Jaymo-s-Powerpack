@@ -94,10 +94,14 @@ public final class Captains {
 	static final int HOME_RADIUS = 20;
 	/** His build: size, health (times his kind's) and blows, each with more for every rank. */
 	static final double SCALE_BASE = 1.1, SCALE_PER_RANK = 0.03, HEALTH_BASE = 1.6, HEALTH_PER_RANK = 0.3, DAMAGE_PER_RANK = 1.5;
-	/** Meetings: how near he sees you, how long until it counts as another meeting (ticks), the first meeting's film. */
+	/**
+	 * Meetings: how near he sees you, how long until it counts as another meeting (ticks), the first meeting's film. (0.7.582)
+	 * Andy: "you dont get enough time or visibility on the orc cutscenes to view what they say": the film is Powers' speaker shot
+	 * (in on his face, then up to his words) and runs about as long as his bubble stays (a first line is some 70-90 letters).
+	 */
 	static final double MEET_RANGE = 14.0, SAY_RANGE = 24.0;
 	static final long MEET_GAP = 6000L;
-	static final int FILM_TICKS = 50;
+	static final int FILM_TICKS = 135;
 	static final double FILM_WITNESSES = 20.0;
 	/** A fight with him is over this long after the last blow (ticks); further off than this, you ran. */
 	static final long FIGHT_COOLS = 200L, FIGHT_FORGOTTEN = 6000L;
@@ -118,8 +122,11 @@ public final class Captains {
 	static final float BLOOD_AT = 0.75F;
 	/** The pedlar's rumour of a captain ((0.7.490) in bent worth). */
 	static final int RUMOUR_PRICE = 4;
-	/** (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). */
-	static final int SCENE_TICKS = 90, SCENE_RAISED = 45;
+	/**
+	 * (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). (0.7.582) Longer, so his
+	 * gloat and his line on being raised can both be read, on the speaker shot (FILM_TICKS).
+	 */
+	static final int SCENE_TICKS = 150, SCENE_RAISED = 70;
 	static final double CHEER_RANGE = 20.0;
 	/** (Patch 4) A fallen captain not finished or burned comes back at this chance, after this many days. */
 	static final float RETURN_CHANCE = 0.75F;
@@ -1055,7 +1062,7 @@ public final class Captains {
 			}
 			Component line;
 			if (m == null) {
-				PowersCompat.film(mob, p, PowersCompat.FILM_PUSH_IN, FILM_TICKS, mob.getEyePosition(), mob, FILM_WITNESSES);
+				PowersCompat.film(mob, p, PowersCompat.FILM_SPEAKER, FILM_TICKS, mob.getEyePosition(), mob, FILM_WITNESSES);
 				line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.first." + mob.getRandom().nextInt(LINES), Recollections.nameTo(p, mob),
 					Component.literal(c.name()), Tribes.name(c.tribe()));
 			} else {
@@ -1390,7 +1397,7 @@ public final class Captains {
 		long now = level.getGameTime();
 		SCENE.put(killer.getUUID(), now + SCENE_TICKS);
 		SCENE_AT.put(killer.getUUID(), player.position());
-		PowersCompat.deathFilm(player, PowersCompat.FILM_CUTS, SCENE_TICKS, killer);
+		PowersCompat.deathFilm(player, PowersCompat.FILM_SPEAKER, SCENE_TICKS, killer);
 		int due = level.getServer().getTickCount() + SCENE_RAISED;
 		UUID killerId = killer.getUUID();
 		LATER.add(new Later(due, () -> raised(level, killerId, id, risen)));
