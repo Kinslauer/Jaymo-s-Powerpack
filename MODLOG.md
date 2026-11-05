@@ -973,3 +973,5 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   60 s. Not while downed, carried, in Chrono's window, left for dead, reborning, on adrenaline, riding, asleep, creative.
   Fainting players are `OutOfPlay`, so villagers don't walk up to talk. Only a slow heartbeat, no text, no Chrono hint.
   Tuning at the top of `Fainting` and `FaintHud`. Built, not played.
+- **0.20.112:** `Fainting.thirst(Player)` and `Fainting.bringRound(ServerPlayer)` for Kingdoms 0.7.594's villagers who
+  come to a fainted player.

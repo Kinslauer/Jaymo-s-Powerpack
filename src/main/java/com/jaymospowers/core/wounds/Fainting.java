@@ -84,7 +84,7 @@ public final class Fainting {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (entity instanceof ServerPlayer player && !blocked && damageTaken > 0.0F && out(player) && Downed.attack(source)) {
 				// a blow brings them round
-				player.setAttached(FAINT, player.level().getGameTime() - SWOON - OUT);
+				bringRound(player);
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -97,6 +97,23 @@ public final class Fainting {
 	public static float weakness(Player player) {
 		int least = Math.min(player.getFoodData().getFoodLevel(), water(player));
 		return Mth.clamp((LIGHTHEADED - least) / (float) LIGHTHEADED, 0.0F, 1.0F);
+	}
+
+	/** (0.20.112) Whether it's thirst more than hunger that has {@code player} fainting (their water is the lower). Both sides. */
+	public static boolean thirst(Player player) {
+		return water(player) < player.getFoodData().getFoodLevel();
+	}
+
+	/**
+	 * (0.20.112) Someone shakes {@code player} awake (Kingdoms' villagers, {@code FaintWakers}): lying out, they come round
+	 * now, the letterbox opening as after any faint. Returns whether they were out.
+	 */
+	public static boolean bringRound(ServerPlayer player) {
+		if (!out(player)) {
+			return false;
+		}
+		player.setAttached(FAINT, player.level().getGameTime() - SWOON - OUT);
+		return true;
 	}
 
 	/** Water left (Kitchen's thirst), or full without it. */

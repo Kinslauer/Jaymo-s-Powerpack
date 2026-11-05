@@ -9521,3 +9521,12 @@ off course then those should break upon contact".
 
 ## 0.7.593
 - Hint 118 for Powers 0.20.111's fainting from hunger and thirst (`lang/parts/fainting.json`).
+
+## 0.7.594
+- Andy: "Villagers near you can wake you and either hint at what happened, outright tell you and give you a drink from
+  theirs, or just steal from you". `FaintWakers`: a player passed out (Powers 0.20.112's Fainting) draws the nearest
+  villager or settlement folk within 16 blocks who can see them. By temperament they shake you awake and, as the black
+  lifts, hint at it ("when did you last eat?"), or tell you straight and give you a drink of clean water from their
+  waterskin (Kitchen thirst +6) or a bite of food (+4) for hunger, or (villagers only, mostly greedy or spiteful ones)
+  don't wake you at all: they take a stack from your pack (half of a big one) into their own inventory, where a
+  pickpocket can win it back. Speech bubbles only (`lang/parts/fainting.json`, 36 lines). Built, not played.
