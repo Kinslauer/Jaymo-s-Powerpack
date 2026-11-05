@@ -47,6 +47,8 @@ public final class SpeechBubbles {
 	static final double LIFT = 0.75;
 	/** Background behind the words: black at this opacity (0-255), faded with the words. */
 	static final int BACKGROUND_ALPHA = 0x60;
+	/** (0.7.597) How strongly the words show through a block in the way (of their full opacity). */
+	static final float SEE_THROUGH_ALPHA = 0.5F;
 
 	private record Line(String said, List<FormattedCharSequence> rows, int color, long shownAt, long until) {
 	}
@@ -85,10 +87,18 @@ public final class SpeechBubbles {
 		long lasts = Math.min(MAX_MS, BASE_MS + PER_CHAR_MS * text.getString().length());
 		Deque<Line> lines = SAID.computeIfAbsent(entityId, id -> new ArrayDeque<>());
 		// (0.7.51) the same words twice at once (said to you and overheard, or one line sent to several of us) show once
+		// (0.7.597) and words still showing aren't stacked again under themselves: they just stay up longer
 		String said = text.getString();
-		Line last = lines.peekLast();
-		if (last != null && now - last.shownAt < REPEAT_MS && last.said.equals(said)) {
-			return;
+		for (java.util.Iterator<Line> it = lines.iterator(); it.hasNext(); ) {
+			Line old = it.next();
+			if (old.said.equals(said) && (now - old.shownAt < REPEAT_MS || old.until - FADE_MS > now)) {
+				if (now - old.shownAt < REPEAT_MS) {
+					return;
+				}
+				it.remove();
+				lines.addLast(new Line(said, old.rows, color, old.shownAt, Math.max(old.until, now + lasts)));
+				return;
+			}
 		}
 		lines.addLast(new Line(said, font.split(text, WRAP_WIDTH), color, now, now + lasts));
 		while (lines.size() > MAX_LINES) {
@@ -149,7 +159,11 @@ public final class SpeechBubbles {
 			int background = ARGB.color((int)(ARGB.alpha(color) / 255.0F * BACKGROUND_ALPHA), 0);
 			float x = -font.width(row) / 2.0F;
 			float y = (i - n + 1) * (font.lineHeight + 1);
-			collector.submitText(poseStack, x, y, row, false, Font.DisplayMode.NORMAL, 0xF000F0, color, background, 0);
+			// (0.7.597) Andy's clip showed words cut off where a wall stood between them and the camera: like a name tag, a
+			// faint copy shows through blocks, and the full words wherever nothing is in the way
+			int faint = ARGB.color((int)(ARGB.alpha(color) * SEE_THROUGH_ALPHA), color);
+			collector.submitText(poseStack, x, y, row, false, Font.DisplayMode.SEE_THROUGH, 0xF000F0, faint, background, 0);
+			collector.submitText(poseStack, x, y, row, false, Font.DisplayMode.NORMAL, 0xF000F0, color, 0, 0);
 		}
 		poseStack.popPose();
 	}

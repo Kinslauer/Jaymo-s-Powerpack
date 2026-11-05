@@ -1177,6 +1177,30 @@ final class McaBridge {
 	}
 
 	/**
+	 * (0.7.597) Andy: "this villager talked to me then acted this way when i introduced myself, the interactions should be
+	 * consistent". MCA's menu opening on {@code villager} ("root") when they're {@linkplain Introductions#wary wary} of
+	 * you (they mind your blood, their people think ill of you, or they remember you coldly): the same cold word they'd
+	 * give you for your name or your hand ({@link Introductions#waryLine}), or a guarded look if you share no tongue, and
+	 * on to the main menu; never MCA's friendly stranger's welcome first and the cold shoulder after. True if so.
+	 */
+	static boolean waryOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || villager.isBaby() || Outlaws.is(villager) || ZFighterFolk.is(villager)
+			|| !Introductions.wary(player, villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line = Languages.understands(player, villager) ? Introductions.waryLine(villager, player)
+			: Component.translatable("dialogue.chat.jaymoskingdoms.wary_opening.wordless");
+		met(villager, player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
 	 * (0.7.380) MCA's menu opening on {@code villager} ("root") just after something passed between you (you carried them
 	 * out, got them up, drew a monster off them, struck them...): they open with that ({@link Recollections#opening}) and
 	 * go to the main menu, whose history option is about the same thing ({@link SharedHistory#current}); true if so.
