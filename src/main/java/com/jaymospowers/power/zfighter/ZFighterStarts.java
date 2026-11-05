@@ -523,23 +523,33 @@ public final class ZFighterStarts {
 	private static boolean demon(MinecraftServer server, ServerPlayer player, RandomSource random) {
 		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		if (nether == null) {
+			JaymosPowers.LOGGER.warn("Demon master start for {}: no Nether level", player.getGameProfile().name());
 			return false;
 		}
 		BlockPos spawn = server.overworld().getRespawnData().pos();
-		BlockPos from = new BlockPos(spawn.getX() / 8, 64 + Stacked.shift(server, Level.NETHER), spawn.getZ() / 8);
+		// (0.20.104) a Nether band of a One Dimension world lies under the Overworld block for block, not at an eighth of it
+		boolean stacked = nether.dimension() != Level.NETHER;
+		int scale = stacked ? 1 : 8;
+		BlockPos from = new BlockPos(spawn.getX() / scale, 64 + Stacked.shift(server, Level.NETHER), spawn.getZ() / scale);
 		com.mojang.datafixers.util.Pair<BlockPos, net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> gloam = nether.findClosestBiome3d(
 			b -> b.is(ZFighterDemonRealm.BIOMES.get(0)), from, DEMON_SEARCH, DEMON_STEP, DEMON_VERTICAL_STEP);
 		if (gloam == null) {
 			gloam = nether.findClosestBiome3d(b -> ZFighterDemonRealm.BIOMES.stream().anyMatch(b::is), from, DEMON_SEARCH, DEMON_STEP, DEMON_VERTICAL_STEP);
 		}
-		if (gloam == null) {
-			return false;
-		}
-		BlockPos village = ZFighterDemonRealm.raiseHome(nether, gloam.getFirst(), DEMON_CELLS);
-		if (village == null) {
-			village = ZFighterDemonRealm.raiseHome(nether, gloam.getFirst(), DEMON_CELLS_FAR);
+		BlockPos near = gloam != null ? gloam.getFirst() : from;
+		BlockPos village = gloam == null ? null : ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS, false);
+		if (village == null && gloam != null) {
+			village = ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS_FAR, false);
 		}
 		if (village == null) {
+			// (0.20.104) Andy picked this road and woke in the overworld (a One Dimension world): no demon biome or no
+			// village spot that could stand was found. The master's hall goes up on the nearest Nether floor instead.
+			JaymosPowers.LOGGER.warn("Demon master start for {}: {} near {} (stacked: {}); raising the hall on any Nether floor",
+				player.getGameProfile().name(), gloam == null ? "no demon biome" : "no village spot", near, stacked);
+			village = ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS_FAR, true);
+		}
+		if (village == null) {
+			JaymosPowers.LOGGER.warn("Demon master start for {}: no Nether floor near {}", player.getGameProfile().name(), near);
 			return false;
 		}
 		// before the master's door, the fire at your back
