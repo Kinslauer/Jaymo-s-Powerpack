@@ -162,6 +162,9 @@ public class AetherGiant extends Monster {
 	static final int GRAB_TICKS = 400, SQUEEZE_EVERY = 10;
 	static final double GRAB_TRIGGER = 9.0, GRAB_REACH = 9.0, GRAB_CLIMB = 6.0, SLAM_THROW = 1.2, FILM_RANGE = 48.0;
 	static final float SQUEEZE_DAMAGE = 4.0F, SLAM_DAMAGE = 40.0F;
+	/** (0.7.477) The shake of each footfall and of its grab's slam: how far it's felt (blocks), how hard (degrees). */
+	static final double STEP_SHAKE_RANGE = 28.0, SLAM_SHAKE_RANGE = 36.0;
+	static final float STEP_SHAKE = 1.1F, SLAM_SHAKE = 3.0F;
 	/** Where its hand holds its catch: ahead and to its right of its middle (shares of its width), this high (share of its height). */
 	static final double HAND_AHEAD = 0.55, HAND_SIDE = 0.45, HAND_UP = 0.55;
 	/** The hand's lift into the hold and its drop into the slam run over this many ticks of each. */
@@ -551,6 +554,8 @@ public class AetherGiant extends Monster {
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.5, at.z, 2, 1.0, 0.2, 1.0, 0.0);
 		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 2.5F, 0.5F);
+		// (0.7.477) its catch hits the ground like a shell
+		com.jaymoskingdoms.PowersCompat.shakeAround(level, at, SLAM_SHAKE_RANGE, SLAM_SHAKE);
 		this.crack(level, BlockPos.containing(at.x, at.y - 0.5, at.z));
 	}
 
@@ -643,6 +648,8 @@ public class AetherGiant extends Monster {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.RAVAGER_STEP, this.getSoundSource(), 3.0F, 0.35F + this.random.nextFloat() * 0.1F);
 		level.playSound(null, at.x, at.y, at.z, ground.getSoundType().getBreakSound(), this.getSoundSource(), 2.0F, 0.5F);
 		this.crack(level, under);
+		// (0.7.477) every footfall shakes the ground under everyone near
+		com.jaymoskingdoms.PowersCompat.shakeAround(level, at, STEP_SHAKE_RANGE, STEP_SHAKE);
 		if (level.getGameRules().get(GameRules.MOB_GRIEFING)) {
 			// (0.7.470) Andy: "all giants should get this damaging effect": the trees round its feet go down with every step
 			this.trampleTrees(level, STEP_TREE_REACH);

@@ -8216,3 +8216,12 @@ beneath it, and flap gently as they hover."
   them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
 - **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
   and sway in the air the way the wind's hover does, for anyone watching.
+
+## 0.7.477: Big Cannons booms (pack 0.19.57)
+Andy: "i really like the screen shake and sound effects from [Create Big Cannons] what can we add from it?" Ideas only,
+our own code; the delayed, muffled booms and whistling shells live in Powers (`client/sound/Blasts`, `ShellWhistle`).
+- **Cannons** fire with Powers' own report (`PowersCompat.cannonReport`, vanilla's explosion without Powers) and jolt
+  everyone within 10 blocks. Cannonball hits and dynamite already play the explosion sound, so they now shake and boom
+  with distance through Powers.
+- **Shakes from a place** (`PowersCompat.shakeAround`, Powers' `Shakes.around`): every Aether Giant footfall (28 blocks,
+  1.1) and its grab's slam (36, 3.0), an ogre's ground smash (18, 1.8), a wind dragon landing (22, 1.4 times its size).

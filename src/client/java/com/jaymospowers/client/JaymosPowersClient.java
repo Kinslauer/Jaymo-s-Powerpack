@@ -145,6 +145,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
 		ScreenShake.init();
+		com.jaymospowers.client.sound.Blasts.init();
+		com.jaymospowers.client.sound.ShellWhistle.init();
 		PanicCam.init();
 		com.jaymospowers.client.water.BoatWakes.init();
 		BeamClashClient.init();

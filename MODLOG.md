@@ -4928,3 +4928,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Compile-checked (0 errors against the 26.3 jars); not played.
 - **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
   wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.
+- **0.19.57, Kingdoms 0.7.477, Big Cannons booms:** Andy liked Create Big Cannons' screen shake and sounds. Its code is MIT
+  and its sound files carry no licence, so these are our own code and our own sounds (synthesised by
+  `tools/gen_blast_sounds.py`). `client/sound/Blasts` (hooked at `SoundEngine.play` by `BlastSoundEngineMixin`): every
+  blast sound (the explosion sound from any mod, the dragon fireball, our cannon report) reaches you at 17 blocks a tick,
+  so a far blast flashes first and its boom and shake come a beat later. OpenAL air absorption dulls its high end with
+  distance; past 20 blocks a long low rumble (`blast.far`) rolls in, heard up to 150 blocks (260 for the biggest), and
+  within 40 a sharp crack with a patter of debris (`blast.crack`) sits on top. An explosion shakes by its size, any
+  other blast sound by how loud it was played, both when the sound arrives; server shakes from beyond 24 blocks wait for
+  it too. `client/sound/ShellWhistle`: cannonballs, the Arsenal cannonball, demolition bombs and anything whose id says
+  cannonball, shell, mortar, bomb, meteor or boulder whine as they fly past, louder the faster, rising in pitch as
+  they come at you. `/shake <0-200>` or `/shake off` sets each player's own shake strength (kept in
+  `config/jaymospowers-client.properties`). Bodies blown apart (Kitchen gibs) give a small shake of their own.
+  Compile-checked; not played.

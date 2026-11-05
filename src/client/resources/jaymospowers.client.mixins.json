@@ -78,6 +78,8 @@
 		"PoseTakeoverLivingEntityRendererMixin",
 		"ScreenShakeMixin",
 		"ScreenShakeExplosionMixin",
+		"BlastSoundEngineMixin",
+		"ChannelSourceAccessor",
 		"TerrainAheadMixin",
 		"FallingLeavesInvoker",
 		"MinecraftAttackInvoker",
