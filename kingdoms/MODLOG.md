@@ -9232,3 +9232,15 @@ ultimate and beam-clash films came down with it. Not played.
   (our tongue clips measured from the .ogg, MCA's taken as 3 s) plus 4 s; a player hears one villager's line at a time
   (a line that starts while another is playing to them isn't sent to them). Lines in a tongue play at 40% volume, MCA's
   words and the grunts at 70%. Pain cries and snores are left alone. Not played.
+
+## 0.7.570 (2026-11-05): villagers run from blasts, monsters fear campfires
+- Andy (seven-mods picklist): "all villager mobs and non guards should react by running away if they hear explosions
+  (within 40 blocks)". Every villager (MCA's too) within 40 blocks of an explosion runs from it and hides, as from a
+  monster. The brave hear it from nearer and the timid from farther (`Temperaments.frightRange`), and the timid hide
+  longer. Guards, archers, war-party soldiers, MCA's guards and anyone already fighting stand their ground
+  (`BlastFright`, `Frights.blast`, hooked in `ServerExplosionMixin` next to the horses' shying). A chain of blasts close
+  together, like TNT or a meteor's ring, counts as one.
+- Monsters fear a lit campfire (Andy's pick, after HearthGuard's idea, our own code): within 8 blocks of a lit campfire
+  or soul campfire near a player, a monster backs off about 12 blocks and lets go of whoever is by the fire. Bosses,
+  raiders, barbarians and patron champions aren't held back (`CampfireWard`).
+- Built, not played.
