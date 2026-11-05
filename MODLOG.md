@@ -410,3 +410,15 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   damage taken), switched off by `compat/SubtleEffectsCompat` (its two public fields, at server start and every 10 s on
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
+
+- **0.20.52, the Aether hidden until you're past the clouds:** Andy (2026-11-05), on a clip looking up from a hillside:
+  "The aether should NOT be visible so easy from ground level especially, maybe it only reveals once you are past the
+  cloud layer?" In a One Dimension world the Aether band is ordinary terrain over the Overworld's sky, so its islands'
+  undersides showed from anywhere. `client/aether/AetherVeil` reads the Aether band's floor and the Overworld band's
+  shift from CustomChunks' synced `StackLayout`, and while the camera is under the Overworld's clouds (192.33 + shift;
+  it hides below the clouds' bottom and shows above their top, so it flips inside the cloud) nothing at or above that
+  floor is drawn: Sodium's culling frustum gets the floor as a ceiling (`client/mixin/sodium/AetherVeilViewportMixin`
+  wraps every `Viewport`'s frustum in `SodiumVeil`, Iris' shadow pass included, and asks Sodium to cull again when it
+  flips), and the game's `Frustum.isVisible` leaves out anything whose box starts at or above it (mobs, aerwhales,
+  item drops). Ordinary worlds and the separate Aether dimension are untouched. Sodium is now `compileOnly`, behind an
+  optional mixin config. Gradle compile only, not played.
