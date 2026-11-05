@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:coal"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/coal_nugget_pebble"
+}

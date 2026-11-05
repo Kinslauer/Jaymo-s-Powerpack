@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:stone_rock"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/gold_pebble"
+}
