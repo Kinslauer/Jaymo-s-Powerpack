@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:is_overworld",
+    "#minecraft:is_nether",
+    "#minecraft:is_end",
+    {"id": "#c:is_overworld", "required": false},
+    {"id": "#c:is_nether", "required": false},
+    {"id": "#c:is_end", "required": false},
+    {"id": "#jaymospowers:is_aether", "required": false}
+  ]
+}
