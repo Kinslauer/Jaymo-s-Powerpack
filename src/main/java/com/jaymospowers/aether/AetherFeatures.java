@@ -54,6 +54,7 @@ public final class AetherFeatures {
 		register("moa_nest", MoaNestFeature.CODEC);
 		register("pointed_holystone", PointedHolystoneFeature.CODEC);
 		register("sky_spring", SkySpringFeature.CODEC);
+		SkySpringFeature.init();
 	}
 
 	private static void register(String id, MapCodec<? extends Feature> codec) {
