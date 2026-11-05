@@ -265,6 +265,8 @@ public final class Mortality {
 	public static void undoFinal(Player player) {
 		player.removeAttached(FINAL);
 		REBIRTHS.remove(player.getUUID());
+		// ((0.20.117) and the black of a new life, if it had begun)
+		player.removeAttached(REBORNING);
 	}
 
 	/** (0.20.50) Whether {@code player} lies left for dead, waiting to wake somewhere. */
@@ -586,7 +588,10 @@ public final class Mortality {
 				if (player.hasAttached(SURVIVOR) && player.isAlive()) {
 					mending(player);
 				}
-				if (isFinal(player) && player.isAlive() && !ZFighterAfterlife.among(player) && !REBIRTHS.containsKey(player.getUUID())) {
+				// ((0.20.117) not while a Chrono is held back from the death for R: the rewind undoes it. Andy's Chrono pressed R
+				// and was born again anyway: the rebirth had started inside the window)
+				if (isFinal(player) && player.isAlive() && !ZFighterAfterlife.among(player) && !REBIRTHS.containsKey(player.getUUID())
+					&& !com.jaymospowers.power.chrono.ChronoCheatDeath.held(player)) {
 					REBIRTHS.put(player.getUUID(), server.getTickCount() + REBIRTH_DELAY);
 					// ((0.20.94) and black until the new character is made)
 					player.setAttached(REBORNING, (long)server.getTickCount());
@@ -605,8 +610,11 @@ public final class Mortality {
 				if (entry.getValue() > server.getTickCount()) {
 					continue;
 				}
-				it.remove();
 				ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+				if (player != null && com.jaymospowers.power.chrono.ChronoCheatDeath.held(player)) {
+					continue; // ((0.20.117) a Chrono may still rewind it)
+				}
+				it.remove();
 				if (player != null && player.isAlive() && isFinal(player) && !ZFighterAfterlife.among(player)) {
 					endLife(player);
 				}
@@ -772,7 +780,7 @@ public final class Mortality {
 	 * Where someone could lie at column {@code x}, {@code z} (its chunk loaded): on solid ground, out of any liquid and anything
 	 * that burns or pricks, with room to stand; {@code awayFromTowns}: and no villager near. Null if not.
 	 */
-	static @Nullable BlockPos ground(ServerLevel level, int x, int z, boolean awayFromTowns) {
+	public static @Nullable BlockPos ground(ServerLevel level, int x, int z, boolean awayFromTowns) {
 		if (!level.getChunkSource().hasChunk(x >> 4, z >> 4)) {
 			return null;
 		}

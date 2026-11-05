@@ -1002,6 +1002,20 @@ Nether's own y 64 (`ZFighterStarts.demonBiome`) and logs how long it took and wh
   rush as a pack with one growl from behind or from hiding. Wolves spawn at a quarter (feral a fifth) and walruses at a
   fifth of their old rate, in smaller groups. See kingdoms/MODLOG.md.
 
-## 0.20.117 (2026-11-05): Kingdoms 0.7.601, no taking a mounted villager's reins
+## 0.20.117 (2026-11-05): Chrono's cheat death never ends in a new life, and never rises where it fell
+- Andy: "chrono used the cheat death revive, but it didnt respawn, it instead reincarnated. they should revert as far
+  back as possible everytime, and if not, at least 12 blocks away."
+- The bug: a death decided final was held for R, but death by cause's own tick saw a living player marked final inside
+  the 4 s window and began the rebirth (the black screen, then the life ends 2 s later), so the R's replay ran and the
+  life story came after it anyway. `Mortality` now starts and finishes no rebirth while `ChronoCheatDeath.held`, and
+  `undoFinal` lifts the rebirth's black too. Every rewind (a held death, a waking, or slipping a downing or an
+  execution) undoes a final death, not only a held one: a second death while out cold could be decided final under
+  the waking's window.
+- Where you come back: the oldest checkpoint your power reaches, as before. If that checkpoint (or the "as you are now"
+  fallback when there is none) is within 12 blocks of where you fell, you're stood on safe loaded ground 12-20 blocks
+  away instead, facing away from whoever was executing you when there was one (`ChronoCheatDeath.away`,
+  `Mortality.ground` made public). Built, not played.
+
+## 0.20.118 (2026-11-05): Kingdoms 0.7.601, no taking a mounted villager's reins
 - Ships Kingdoms 0.7.601: players can't climb onto a horse (or any living mount) a villager, guard or carter is riding;
   bring the rider down or throw them first. See kingdoms/MODLOG.md.
