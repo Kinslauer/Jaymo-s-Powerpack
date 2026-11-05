@@ -9208,3 +9208,22 @@ ultimate and beam-clash films came down with it. Not played.
   After 30 s a guard, den hand or butcher puts it down; anyone else calls a guard. Skipped: the settlement's own
   stables/barns/pens, ridden/leashed/tamed/named/owned animals, house animals (tag `jaymoskingdoms:house_animals`:
   cats, parrots, bees, axolotls, frogs, allays). `Strays`, lang part strays.json (12 lines per family), hint 104. Not played.
+
+## 0.7.567 (2026-11-05): every Sorcerer absorbs their element
+- Andy: "sorcerers should all be able to absorb their elements like the blood sorcerer. i especially want a cone of
+  absorption in front of fire sorcerers that can put out flames and feed their reserve". `Absorption` gives every element
+  but blood (which keeps `Hemomancy`/`BloodBlasts`) the blood Sorcerer's loop: a reserve (`Absorption.RESERVE`, 20,
+  synced, shown in the blood bar's spot in the element's colour), J held looking at a source absorbs it (a gathering hold
+  never fires), J held empty-handed throws it as a barrage of element blasts (4 damage, a touch of the element, one in 3
+  a full `Spellcraft.strike`), a tap is still the Imbue/Mend/Storm Ring. The reserve pays for J keys before mana
+  (`Mana.cast` → `Absorption.payKey`, a point = 2.5 mana).
+- **Fire's cone** (8 blocks, 35° half-width, nearest 8 sources a pulse): fire blocks go out, lit campfires and candles
+  are snuffed, burning creatures and the Sorcerer stop burning, fireballs in flight are swallowed, blazes and magma cubes
+  are drained (1 damage), lava gives heat but stays lava. Flames stream to the hands; it keeps putting fires out even when
+  the reserve is full.
+- Other sources: water (water, cauldrons lowered, rain), ice (ice/packed/blue thawed a step, snow taken, the frozen
+  thawed), earth (natural stone, dirt, sand, gravel, clay), air (looking up into open sky, richer higher; breezes),
+  lightning (a storm's sky, lightning rods, redstone blocks), restoration (flowers, leaves, saplings, crops, amethyst;
+  its blasts heal the living and sear only monsters/undead), death (undead drained, the downed/dying, bodies, soul sand,
+  bone, skulls; every death within 12 blocks gives 2). A slow trickle (0.25/s, earth 0.1) while standing in the element.
+  Hints 105-106. Gradle compileClientJava clean, not played.
