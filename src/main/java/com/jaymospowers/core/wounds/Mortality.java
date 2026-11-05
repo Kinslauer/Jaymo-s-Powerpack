@@ -111,6 +111,12 @@ public final class Mortality {
 	static final long REBIRTH_DELAY = 40L;
 	/** A blast's chance to take a limb off outright. */
 	static final float BLAST_SEVER = 0.25F;
+	/**
+	 * (0.20.83) Andy: "you should always get a black screen wake up roll for your first two deaths". How many times a life is
+	 * always left for dead (or turned) before the cause's roll ({@link Cause#chance}) can end it. Only losing your head, the
+	 * void, or an execution by a player or a boss ends it sooner.
+	 */
+	static final int SURE_WAKES = 2;
 
 	/** What put a player down, and its chance (0 to 1) that the death is final. */
 	public enum Cause {
@@ -133,7 +139,16 @@ public final class Mortality {
 	 * again ({@link #endLife}). The value is the cause's key.
 	 */
 	public static final AttachmentType<String> FINAL = AttachmentRegistry.create(JaymosPowers.id("mortality_final"),
-		builder -> builder.persistent(Codec.STRING).copyOnDeath());
+		// ((0.20.83) told to its player too: their death screen offers to "Reincarnate", not to respawn)
+		builder -> builder.persistent(Codec.STRING).copyOnDeath()
+			.syncWith(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
+
+	/**
+	 * (0.20.83) How many times this life has been left for dead (or turned): the first {@link #SURE_WAKES} always are. Kept
+	 * through anything but the end of the life ({@link #endLife}).
+	 */
+	public static final AttachmentType<Integer> WOKEN = AttachmentRegistry.create(JaymosPowers.id("mortality_woken"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
 	/**
 	 * Left for dead and not mended yet: while this lasts and an injury is still open ({@link #openInjury}), the next defeat is
@@ -254,6 +269,8 @@ public final class Mortality {
 	public static void cancelWake(ServerPlayer player) {
 		Wake wake = WAKES.remove(player.getUUID());
 		if (wake != null) {
+			// ((0.20.83) a death undone doesn't use up one of the sure wakes)
+			player.setAttached(WOKEN, Math.max(0, player.getAttachedOrElse(WOKEN, 0) - 1));
 			release(player.level().getServer().getLevel(wake.dimension), wake);
 		}
 	}
@@ -356,6 +373,9 @@ public final class Mortality {
 		// (0.20.27) the dead, a witch, a vampire may make one of their own of them instead
 		Runnable turn = Boolean.TRUE.equals(executed) || by == null || cause == Cause.LAVA || cause == Cause.VOID || cause == Cause.BEHEADED
 			? null : turning(player, by);
+		// (0.20.83) the first deaths of a life always wake (no head, the void, or a deliberate execution aside)
+		int woken = player.getAttachedOrElse(WOKEN, 0);
+		boolean sure = woken < SURE_WAKES && cause != Cause.BEHEADED && cause != Cause.VOID && !Boolean.TRUE.equals(executed);
 		if (turn != null) {
 			JaymosPowers.LOGGER.info("{} fell to {} ({}): turned", player.getScoreboardName(), cause.key(), source.getMsgId());
 			leftForDead(player, cause, sub(source, felled), by, turn);
@@ -367,9 +387,9 @@ public final class Mortality {
 		} else if (chance < 1.0F && chance > 0.0F) {
 			chance = Math.min(1.0F, chance * ZFighterRealism.finalOdds());
 		}
-		boolean ends = Boolean.TRUE.equals(executed) || openInjury(player) || chance > 0.0F && player.getRandom().nextFloat() < chance;
-		JaymosPowers.LOGGER.info("{} fell to {} ({}): {}", player.getScoreboardName(), cause.key(), source.getMsgId(),
-			ends ? "final" : "left for dead");
+		boolean ends = !sure && (Boolean.TRUE.equals(executed) || openInjury(player) || chance > 0.0F && player.getRandom().nextFloat() < chance);
+		JaymosPowers.LOGGER.info("{} fell to {} ({}): {}{}", player.getScoreboardName(), cause.key(), source.getMsgId(),
+			ends ? "final" : "left for dead", sure ? " (sure wake " + (woken + 1) + " of " + SURE_WAKES + ")" : "");
 		if (ends) {
 			player.setAttached(FINAL, cause.key());
 			return true;
@@ -516,6 +536,7 @@ public final class Mortality {
 	 */
 	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn) {
 		ServerLevel level = player.level();
+		player.setAttached(WOKEN, player.getAttachedOrElse(WOKEN, 0) + 1);
 		player.setHealth(Math.max(1.0F, player.getMaxHealth() * WAKE_HEALTH));
 		player.clearFire();
 		player.setAirSupply(player.getMaxAirSupply());
@@ -870,11 +891,52 @@ public final class Mortality {
 		}
 		// (a new life's power awakens in its own time)
 		player.removeAttached(Powers.AWAKEN_IN);
+		// (0.20.83) Andy: "EVERYTHING resets": every other mark the old life left on them goes too
+		wipe(player);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.mortality.ended").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-		if (!ZFighterAfterlife.bornAgain(player)) {
+		if (!ZFighterAfterlife.bornAnew(player)) {
 			JaymosPowers.LOGGER.info("{}'s life ended, but no life story could be told anew (no Kingdoms, or its screen)", player.getScoreboardName());
 		}
 	}
+
+	/**
+	 * (0.20.83) Andy, on the third death: "you should get reprompted completely, like with a new character creator, new
+	 * quests skills, etc. EVERYTHING resets." Takes every attachment our three mods keep on {@code player} (skills and their
+	 * trees, levels, quests, reputation, world tier and knowledge, class, heritage, story, patron, curses, mastery, affinity,
+	 * the Z Fighter's training, missing limbs...), except {@link #OUTLIVES}: what isn't the character's own (the roads their
+	 * deeds opened) or holds items (a backpack, a stash), which would be lost with nothing to show for it.
+	 */
+	static void wipe(ServerPlayer player) {
+		if (!(player instanceof net.fabricmc.fabric.impl.attachment.AttachmentTargetImpl target)) {
+			return;
+		}
+		Map<net.fabricmc.fabric.api.attachment.v1.AttachmentType<?>, ?> held = target.fabric_getAttachments();
+		if (held == null || held.isEmpty()) {
+			return;
+		}
+		int n = 0;
+		for (AttachmentType<?> type : List.copyOf(held.keySet())) {
+			Identifier id = type.identifier();
+			if (OURS.contains(id.getNamespace()) && !OUTLIVES.contains(id.toString())) {
+				player.removeAttached(type);
+				n++;
+			}
+		}
+		JaymosPowers.LOGGER.info("{}'s life ended: {} marks of it wiped", player.getScoreboardName(), n);
+	}
+
+	/** (0.20.83) The mods whose attachments a new life wipes ({@link #wipe}). */
+	private static final Set<String> OURS = Set.of(JaymosPowers.MOD_ID, "jaymoskingdoms", "jaymoskitchen");
+
+	/** (0.20.83) What outlives a life ({@link #wipe}): the starts their deeds opened, and whatever holds their things. */
+	private static final Set<String> OUTLIVES = Set.of(
+		// the roads (starts) they have opened, and heritages earned: every start stays unlocked (Andy's answer)
+		"jaymoskingdoms:roads_taken", "jaymoskingdoms:heritage_unlocked",
+		// things held for them, never to be lost
+		"jaymospowers:worn_backpack", "jaymospowers:backpack_shown", "jaymospowers:baubles", "jaymospowers:baubles_shown",
+		"jaymospowers:rig_parked", "jaymospowers:arsenal_stash", "jaymospowers:arsenal_relics", "jaymospowers:nadir_stash",
+		"jaymospowers:worn_costume", "jaymospowers:costume_unmasked", "jaymospowers:hidden_armor", "jaymospowers:web_shooters",
+		"jaymoskingdoms:hidden_blades", "jaymoskingdoms:pit_held", "jaymoskingdoms:crew_stowed", "jaymoskingdoms:post_waiting");
 
 	/** Every player whose life ended, waiting to be born again ({@code /wounds} and tests). */
 	static Set<UUID> waiting() {

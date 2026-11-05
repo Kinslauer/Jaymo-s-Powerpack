@@ -47,6 +47,8 @@ final class ZFighterKingdoms {
 	private static Method DEED;
 	/** (0.19.33) Kingdoms' LifeStory.canReincarnate(ServerPlayer) and reincarnate(ServerPlayer): being born again. */
 	private static Method CAN_REBORN, REBORN;
+	/** (0.20.83) Kingdoms' LifeStory.reincarnateAnew(ServerPlayer): born again with MCA's creator too (the third death). */
+	private static Method REBORN_ANEW;
 	/** (0.18.54) Kingdoms' WorldTiers.open(Player, Tier) and the Tier constants: whether a tier is open to a player (their deeds). */
 	private static Method TIER_OPEN;
 	private static Object[] TIERS;
@@ -126,6 +128,11 @@ final class ZFighterKingdoms {
 				Class<?> story = Class.forName("com.jaymoskingdoms.LifeStory");
 				CAN_REBORN = story.getMethod("canReincarnate", ServerPlayer.class);
 				REBORN = story.getMethod("reincarnate", ServerPlayer.class);
+				try {
+					REBORN_ANEW = story.getMethod("reincarnateAnew", ServerPlayer.class);
+				} catch (NoSuchMethodException e) {
+					REBORN_ANEW = null;
+				}
 			} catch (ReflectiveOperationException | LinkageError e) {
 				CAN_REBORN = null;
 				REBORN = null;
@@ -219,6 +226,19 @@ final class ZFighterKingdoms {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			CAN_REBORN = null;
 			return false;
+		}
+	}
+
+	/** (0.20.83) Born again from nothing: Kingdoms' reincarnateAnew (MCA's creator too), or {@link #reincarnate} before it had one. */
+	static boolean reincarnateAnew(ServerPlayer player) {
+		if (REBORN_ANEW == null) {
+			return reincarnate(player);
+		}
+		try {
+			return Boolean.TRUE.equals(REBORN_ANEW.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			REBORN_ANEW = null;
+			return reincarnate(player);
 		}
 	}
 

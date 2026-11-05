@@ -548,6 +548,11 @@ public final class ZFighterAfterlife {
 		return ZFighterKingdoms.reincarnate(player);
 	}
 
+	/** (0.20.83) Born again from nothing (Mortality's end of a life): MCA's creator too, then the whole life story. */
+	public static boolean bornAnew(ServerPlayer player) {
+		return ZFighterKingdoms.reincarnateAnew(player);
+	}
+
 	/**
 	 * He chose to be born again: among the dead, he is let go and, once he wakes in the world, Kingdoms tells his life story
 	 * anew ({@link #wake}); already back among the living, it is told now.

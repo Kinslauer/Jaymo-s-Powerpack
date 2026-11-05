@@ -9232,3 +9232,7 @@ ultimate and beam-clash films came down with it. Not played.
   (our tongue clips measured from the .ogg, MCA's taken as 3 s) plus 4 s; a player hears one villager's line at a time
   (a line that starts while another is playing to them isn't sent to them). Lines in a tongue play at 40% volume, MCA's
   words and the grunts at 70%. Pain cries and snores are left alone. Not played.
+- **0.7.571, reincarnation from nothing:** Andy: "you should get reprompted completely, like with a new character
+  creator". `LifeStory.reincarnateAnew` (called by Powers 0.20.83 after a final death, once it has wiped the old life):
+  MCA's own player reset (single again), their look unset and its creator sent anew (`McaBridge.newDestiny`), then the
+  whole life story as `reincarnate` does. Loading screen hint 107 tells of the two sure wakes. Not played.

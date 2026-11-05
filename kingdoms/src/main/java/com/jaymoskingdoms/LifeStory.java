@@ -2271,6 +2271,21 @@ public final class LifeStory {
 		return true;
 	}
 
+	/**
+	 * (0.7.571) Andy, on the third death: "you should get reprompted completely, like with a new character creator, new
+	 * quests skills, etc. EVERYTHING resets." Jaymo's Powers has already wiped the old life's progress (skills, quests,
+	 * reputation, tiers...); here MCA's creator is owed anew (a new look and name, single again) and the whole life story is
+	 * told again, as {@link #reincarnate} does. False if their client has no story screen.
+	 */
+	public static boolean reincarnateAnew(ServerPlayer player) {
+		if (!canReincarnate(player)) {
+			return false;
+		}
+		Skills.refresh(player);
+		McaCompat.newDestiny(player);
+		return reincarnate(player);
+	}
+
 	/** {@code /kingdom story reset <players>} (ops): unmakes their heritage, class and story, and asks for their story again. */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("story").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
