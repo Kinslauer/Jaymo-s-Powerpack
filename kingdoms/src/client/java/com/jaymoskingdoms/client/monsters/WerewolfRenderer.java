@@ -77,6 +77,10 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 		state.look = werewolf.look();
 		state.rags = werewolf.rags();
 		state.lean = werewolf.lean();
+		if (werewolf.isNoAi()) {
+			// (a player's beast faces the way it runs: its head only turns toward where they look as far as a neck can)
+			state.yRot = com.jaymoskingdoms.TakeoverFacing.head(state.yRot);
+		}
 	}
 
 	@Override
