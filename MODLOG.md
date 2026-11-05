@@ -680,8 +680,20 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   Kitchen 0.5.70 bleeds a carcass on the ground or a table from its throat, beside the body, instead of from under it,
   so the drops and Powers' pooled stains show. The deer clipping was the stale Kitchen 0.5.57 the pack shipped before
   0.20.80 (deer got a man's ragdoll, fixed in Kitchen 0.5.64 and 0.5.68). Built, not played.
+## 0.20.85 (2026-11-05): seven-mods picks, wave 1
+- Andy's picks from the "Seven mods" picklist (Better Advancements, Worldbound and others), all shipped unchanged:
+  Better Advancements and Fancy Toasts, It Takes a Pillage, Mutant Monsters, Eternal Nether, Moog's Nether Structures
+  and Moog's Mineshafts Reimagined, Epic Structures: Witch Huts, Hopo Better Ruined Portals, Particle Rain, Biome Blends,
+  Crops Love Rain, Macaw's Doors, Diagonal Windows, Beautify: Refabricated, Lanterns Belong on Walls, Simply Tents,
+  Critter Armory, Kaffee's Dual Ride and RightClickHarvest (with JamLib). Mineshafts Reimagined and RightClickHarvest
+  have no 26.3 file on CurseForge yet, so they're in `packModsNoCf`.
+- Mutant Monsters, zombies only (Andy: "any zombie but only if they have the model"; the Mutant Zombie is its only
+  zombie): Powers' data adds every Overworld, Nether, End and Aether biome to its `without_mutant_creeper/skeleton/
+  enderman_spawns` tags, so only the Mutant Zombie spawns on its own. Chemical X can't be had (Andy: "chemical X should
+  not be acquirable"): its four brewing recipes, the only way to make it, are dropped (`Uncraftable.PREFIXES`).
+- Built, not played.
 
-## 0.20.85: a guard whiffing at a foe out of reach; cut drips out of the chest (Kingdoms 0.7.576)
+## 0.20.86: a guard whiffing at a foe out of reach; cut drips out of the chest (Kingdoms 0.7.577)
 
 - Jung's clip, Andy: "the blood was clipping and not following the model", then "the NPC was trying to attack, it kept
   swinging and activating the hit sound ... not dealing any damage nor did the skeleton take any". The white burst at
@@ -689,7 +701,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   melee task asked for a blow from further off than a blow reaches, and `MobCombat.plainBlow` (a weapon Better Combat
   doesn't know, or fists) started the swing anyway, so a guard after someone past a nearer body (it was shouting
   "Trespasser!") glinted and whiffed (`PLAYER_ATTACK_NODAMAGE`) over and over. `plainBlow` now starts only at a foe in
-  reach and sight, as `attackTick` already did (Kingdoms 0.7.576).
+  reach and sight, as `attackTick` already did (Kingdoms 0.7.577).
 - A cut's drip (`BladeBlood.drip`) left from inside the body and, since 0.20.51, opened into a spatter star there. A drip
   now leaves from just outside the body's box (`DRIP_OUT`) and the client draws a no-stain spray as one small falling drop
   (`BloodClient#DRIP_DROP`, `BloodDrop.drip` held on its sheet's first frame). Built, not played.

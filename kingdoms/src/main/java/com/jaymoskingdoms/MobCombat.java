@@ -271,7 +271,7 @@ public final class MobCombat {
 		if (now - swing.endsAt > COMBO_RESET_TICKS) {
 			swing.combo = 0;
 		}
-		// (0.7.576) only at a foe in reach and sight, as a Better Combat swing starts (attackTick): MCA's melee task asks
+		// (0.7.577) only at a foe in reach and sight, as a Better Combat swing starts (attackTick): MCA's melee task asks
 		// from further off, so a guard after someone beyond a nearer body (Jung's clip: "Trespasser!" at him past a
 		// skeleton) swung at the air over and over, glinting and whiffing, and never landed a blow
 		if (gap(mob, target) > BASE_REACH * START_REACH_SHARE && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {

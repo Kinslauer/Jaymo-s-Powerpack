@@ -39,7 +39,7 @@ final class BloodDrop extends SingleQuadParticle {
 	/** (0.17.182) Whether it leaves its own splash where it lands (a cut's drip doesn't: the server lays its stain). */
 	private final boolean stains;
 	private boolean mirrored;
-	/** (0.20.85) A drip: drawn on its sheet's first frame only. */
+	/** (0.20.86) A drip: drawn on its sheet's first frame only. */
 	private boolean still;
 
 	BloodDrop(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites, int frames,
@@ -74,7 +74,7 @@ final class BloodDrop extends SingleQuadParticle {
 
 	/** (0.20.41) A drop off the end of a run on a wall: no toss, it just falls. */
 	BloodDrop drip() {
-		// (0.20.85) it stays a drop the whole way down (its sheet's first frame), never opening into the star
+		// (0.20.86) it stays a drop the whole way down (its sheet's first frame), never opening into the star
 		this.still = true;
 		this.xd = 0.0;
 		this.zd = 0.0;

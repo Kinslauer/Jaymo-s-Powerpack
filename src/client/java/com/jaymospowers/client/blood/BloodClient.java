@@ -47,7 +47,7 @@ public final class BloodClient {
 	private BloodClient() {
 	}
 
-	/** (0.20.85) A cut's drip is drawn this many times its spray's size. */
+	/** (0.20.86) A cut's drip is drawn this many times its spray's size. */
 	static final float DRIP_DROP = 0.5F;
 
 	public static void init() {
@@ -61,7 +61,7 @@ public final class BloodClient {
 		kind(registry, BloodParticles.SWIPE_2, 8, 32, true);
 		registry.register(BloodParticles.SPRAY, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> {
 			if (!options.stains() && drops != null) {
-				// (0.20.85) a cut's drip (the server lays its stain) is one small drop falling, not a splatter: drawn as a
+				// (0.20.86) a cut's drip (the server lays its stain) is one small drop falling, not a splatter: drawn as a
 				// spatter's star, at a spray's size, it burst out of the body like blood clipping through it (Jung's clip)
 				return new BloodDrop(level, x, y, z, 0.0, 0.0, 0.0, drops, 4, 32, false, options.color(), options.scale() * DRIP_DROP, false).drip();
 			}

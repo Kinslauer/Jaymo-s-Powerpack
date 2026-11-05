@@ -9313,3 +9313,12 @@ ultimate and beam-clash films came down with it. Not played.
   death doesn't put you back among the guards hunting you.
 - Downed players aren't shot or cut at by townspeople who'd spare them (`HeldBack.standDown`): they drop the target and
   guards walk over to take them in. Hint 112 (lang part held_back.json). Not played.
+- **0.7.576, villagers run from blasts, monsters fear campfires:** Andy (seven-mods picklist): "all villager mobs and non
+  guards should react by running away if they hear explosions (within 40 blocks)". Every villager (MCA's too) within 40
+  blocks of an explosion runs from it and hides, as from a monster. The brave hear it from nearer and the timid from
+  farther (`Temperaments.frightRange`), and the timid hide longer. Guards, archers, war-party soldiers, MCA's guards and
+  anyone already fighting stand their ground (`BlastFright`, `Frights.blast`, hooked in `ServerExplosionMixin` next to
+  the horses' shying). A chain of blasts close together, like TNT or a meteor's ring, counts as one. And monsters fear a
+  lit campfire (after HearthGuard's idea, our own code): within 8 blocks of a lit campfire or soul campfire near a
+  player, a monster backs off about 12 blocks and lets go of whoever is by the fire; bosses, raiders, barbarians and
+  patron champions aren't held back (`CampfireWard`). Not played.
