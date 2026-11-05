@@ -483,3 +483,13 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   server keeps the wall pose (`XenoformState.CLIMB`) and the step sounds. Ceilings had the same fault (Andy: "they
   didnt work"): the cling is now held by the clinging player's own client (`SkitterCling`, before each move), same rules
   as before; the server keeps the `CEILING` state everyone draws. Gradle build only, not played.
+
+- **0.20.60, Kingdoms 0.7.551, Bulwark's four arms take turns, lower cutscene cameras:** Andy (2026-11-05): "attacking
+  with bulwark should alternate between all arms, same with the combo attack. and all the cutscenes should be a little
+  lower. you cant see the user well." Every client counts each Bulwark's swings (`XenoformClient.BULWARK_ARM`), and each
+  new swing (a plain attack, a Fist Combo blow, the clap, a throw) is thrown by the next arm in turn: upper right, upper
+  left, lower right, lower left; Titan the same. The combo's blows also alternate hands in first person instead of
+  picking at random. Every `UltimateCinematic` shot (abilities and ultimates; not the change-in morph film, already at
+  body height) and every beam-clash shot sits `SHOT_DROP` (0.6 blocks, times the caster's size) lower, never under
+  `SHOT_FLOOR` (0.5) over the caster's feet; the crane rises to 7 blocks, not 9. Kingdoms' spirit-clash camera sits at
+  0.9 over the pair's feet (was 1.5) and the handshake's wide shot 0.2 over the hands (was 0.5). Not played.

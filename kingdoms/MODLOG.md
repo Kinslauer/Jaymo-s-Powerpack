@@ -9084,3 +9084,7 @@ our own code; the delayed, muffled booms and whistling shells live in Powers (`c
   forms on the bar only while locked on (Andy: "give it to fists but only when locked on"; right-click is the first fist
   form then, and stays free for doors and villagers otherwise; `PowersCompat.lockedOn`). A Combat Art tap tugs a pinned
   spear back. Without Spell Engine the stance works as before. Gradle build only, not played.
+## 0.7.551: lower cutscene cameras (pack 0.20.60)
+Andy: "all the cutscenes should be a little lower. you cant see the user well." The spirit-clash film's camera sits 0.9
+blocks over the pair's feet (was 1.5), and the handshake film's wide shot 0.2 over the hands (was 0.5). Powers' ability,
+ultimate and beam-clash films came down with it. Not played.

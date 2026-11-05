@@ -48,8 +48,22 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<Boolean> SNEAK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_sneak");
 	/** (0.20.9) The change-in morph this player is in ({@link XenoMorph}), or null. */
 	public static final RenderStateDataKey<XenoMorph.Morph> MORPH = RenderStateDataKey.create(() -> "jaymospowers:xenoform_morph");
+	/**
+	 * (0.20.60) Which of Bulwark's four arms throws the swing now (0 upper right, 1 upper left, 2 lower right, 3 lower
+	 * left; null: not Bulwark). Each new swing goes on to the next arm, so its attacks and its Fist Combo go round all four
+	 * (Andy: "attacking with bulwark should alternate between all arms").
+	 */
+	public static final RenderStateDataKey<Integer> BULWARK_ARM = RenderStateDataKey.create(() -> "jaymospowers:xenoform_bulwark_arm");
 	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
 	private static final double STRIDE_CATCH_UP = 0.3;
+
+	/** One Bulwark's swings on this client: how many it has thrown, and how far into the swing it was when last drawn. */
+	private static final class Swings {
+		int count;
+		float last;
+	}
+
+	private static final java.util.Map<Player, Swings> SWINGS = new java.util.WeakHashMap<>();
 
 	/** One Towerback's walk on this client: its stride now and last tick, when it was last moved on, the error left to take up, its footfalls. */
 	private static final class Stride {
@@ -107,6 +121,7 @@ public final class XenoformClient {
 		// (0.19.66) a low-box alien's pose never crouches, so its sneak is read off the key (Croaker's flat crouch)
 		state.setData(SNEAK, form != null && XenoformState.lowBox(player) && player.isShiftKeyDown() && !player.isInWater());
 		state.setData(TOWER_STRIDE, "towerback".equals(form) ? stride(player, partialTicks) : null);
+		state.setData(BULWARK_ARM, "bulwark".equals(form) ? bulwarkArm(player, state.swingAnimation) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);
 		if (form == null) {
@@ -124,6 +139,19 @@ public final class XenoformClient {
 			}
 		}
 		hideBody(state);
+	}
+
+	/**
+	 * (0.20.60) The arm Bulwark's swing is thrown with: a swing that starts (from rest, or over one still going, as the
+	 * combo's do) moves it on to the next of the four, in turn upper right, upper left, lower right, lower left.
+	 */
+	private static int bulwarkArm(Player player, float swing) {
+		Swings s = SWINGS.computeIfAbsent(player, p -> new Swings());
+		if (swing > 0.0F && (s.last <= 0.0F || swing < s.last - 0.1F)) {
+			s.count = (s.count + 1) & 3;
+		}
+		s.last = swing;
+		return s.count;
 	}
 
 	/**
