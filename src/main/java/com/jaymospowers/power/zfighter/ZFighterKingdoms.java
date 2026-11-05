@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
  * name, seat, wealth), their people, a player's reputation with one, whether he walks the Rogue's path, and how long an
  * elder has been grown. Without Kingdoms every answer is empty and the masters, tournaments and raids don't happen.
  */
-final class ZFighterKingdoms {
+public final class ZFighterKingdoms {
 	/** A settlement: its id, kind (KINGDOM, FIEFDOM, VILLAGE, BARBARIAN), name, seat and treasury, and Kingdoms' own record. */
 	record Settlement(int id, String type, String name, BlockPos seat, long treasury, Object handle) {
 		boolean realm() {
@@ -408,7 +408,7 @@ final class ZFighterKingdoms {
 	}
 
 	/** (0.15.61) His Kingdoms world tier, from 0 (Hearth, the first), or -1 if it can't be read. */
-	static int worldTier(net.minecraft.world.entity.player.Player player) {
+	public static int worldTier(net.minecraft.world.entity.player.Player player) {
 		if (TIER_OF == null) {
 			return -1;
 		}
@@ -422,7 +422,7 @@ final class ZFighterKingdoms {
 	private ZFighterKingdoms() {
 	}
 
-	static boolean present() {
+	public static boolean present() {
 		return ALL != null;
 	}
 

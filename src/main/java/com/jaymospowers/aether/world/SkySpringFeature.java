@@ -1,12 +1,16 @@
 package com.jaymospowers.aether.world;
 
 import com.jaymospowers.compat.Stacked;
+import com.jaymospowers.power.zfighter.ZFighterKingdoms;
 import com.jaymospowers.power.wind.aether.WindAether;
 import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import java.util.ArrayDeque;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -26,6 +30,10 @@ import net.minecraft.world.level.levelgen.feature.SpringFeature;
  * <b>heavenfall</b>: one chunk in some of the {@link #CELL}-block squares of the world, never within {@link #FAR_FROM_SPAWN}
  * blocks of the world spawn (or of 0, 0). There the springs are left alone and the waterfall from heaven stays.
  * <p>
+ * (0.21.4, Andy: "remove skyfalls until dread") Not even a heavenfall before then: its springs are placed only while a player
+ * on the server has reached the Kingdoms world tier Dread ({@link #DREAD_TIER}). A heavenfall chunk made before that has
+ * none, for good; they are far from spawn, so nearly all are made later.
+ * <p>
  * Springs that fall onto a lower island, or into a cave, are untouched, and so is the Aether as a dimension of its own.
  * Only new chunks change; water already flowing in a world stays.
  */
@@ -41,8 +49,34 @@ public record SkySpringFeature(SpringFeature spring) implements Feature {
 	public static final int FAR_FROM_SPAWN = 3000;
 	/** A heavenfall sits at least this many chunks inside its square, so two never meet across an edge. */
 	private static final int MARGIN_CHUNKS = 16;
+	/** Kingdoms' WorldTiers.Tier.DREAD, by its place in the list (Hearth 0, Borderlands, Wildlands, Dread, Legend). */
+	public static final int DREAD_TIER = 3;
+	/** Whether a player online has reached Dread; read by worldgen threads, set on the server thread every second or so. */
+	private static volatile boolean dreadReached;
 	/** Blocks the flow check may look at before it gives up and calls the spring a leak. */
 	private static final int BUDGET = 6000;
+
+	/** Called from {@code AetherFeatures.init}: keeps {@link #dreadReached} up to date. */
+	public static void init() {
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % 20 == 0) {
+				dreadReached = dreadReached(server);
+			}
+		});
+	}
+
+	private static boolean dreadReached(MinecraftServer server) {
+		if (!ZFighterKingdoms.present()) {
+			// no world tiers to wait for
+			return true;
+		}
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (ZFighterKingdoms.worldTier(player) >= DREAD_TIER) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public MapCodec<SkySpringFeature> codec() {
@@ -139,6 +173,9 @@ public record SkySpringFeature(SpringFeature spring) implements Feature {
 
 	/** Whether {@code pos} is in this world's heavenfall chunk for its square (if the square has one, far from spawn). */
 	static boolean heavenfall(WorldGenLevel level, BlockPos pos) {
+		if (!dreadReached) {
+			return false;
+		}
 		int cellX = Math.floorDiv(pos.getX(), CELL), cellZ = Math.floorDiv(pos.getZ(), CELL);
 		long hash = mix(level.getSeed() ^ 0x5EAF_A11L ^ cellX * 0x9E3779B97F4A7C15L ^ cellZ * 0xC2B2AE3D27D4EB4FL);
 		if (Math.floorMod(hash, ONE_IN) != 0) {

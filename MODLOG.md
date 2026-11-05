@@ -1064,3 +1064,7 @@ Andy (singleplayer, One Dimension): "it didnt work". His log: a demon biome was 
 it had a floor, and the wider fallback searches generated chunk after chunk for minutes while he waited. Now only the
 nearest few spots are tried (`ZFighterDemonRealm.FLOOR_TRIES`), then the hall goes up right where the biome was found,
 carved out of the rock at the Nether's y 64 if there's no floor (`raiseAt`, which logs the column it found).
+- **0.21.4, no skyfalls before Dread (Andy, 2026-11-05):** "okay, remove skyfalls until dread". The heavenfall chunks of
+  0.20.45 now get their sky springs only while a player on the server has reached the Kingdoms world tier Dread
+  (`SkySpringFeature.dreadReached`, checked once a second); before that no Aether spring may pour onto the Overworld at all.
+  A heavenfall chunk made before Dread stays dry; they are 3000+ blocks from spawn, so nearly all are made later. New chunks only.
