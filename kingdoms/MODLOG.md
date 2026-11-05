@@ -9011,3 +9011,14 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   "humanoid mobs can say something about it too, 'I was just about to....kill you?!'". `PowersCompat.tellPerplexed` hooks
   Powers' `ChronoCheatDeath.PERPLEXED`: a humanoid executioner (`Temperaments.humanoid`) says one of six lines over its
   head (`lang/parts/perplexed.json`, through `Speech.say`, in its own tongue). Gradle compile only, not played.
+- **0.7.545, fallen royals brought home:** Andy (2026-11-05), of a dead king left lying in diamonds outside his walls for a
+  player to strip: "the royals should never just be left dead like this, unless there was noone at all left in the kingdom
+  to defend, SOMEONE should find the body and get it to safety, remove the armor, and bury or mourn them if not bring them
+  to the cleric". New `RoyalRemains`: a realm's ruler's body (role KING/LORD, or recorded by `KingdomEvents.rulerDied`) is
+  fetched 5 s after death once no foe is within 8 blocks, by the nearest free guard (folk or MCA) else any grown townsperson
+  within 96 (a realm in ruin: any villager about). Carried to the town's cleric (else the seat), laid down, stripped
+  (`KitchenCompat.robBy`) into the realm's stores (overflow dropped at the seat), the cleric says the rites (6 s, bell, lines),
+  then `Bearers.entrustRoyal` buries it in the graveyard with a lit candle on the headstone and up to 8 mourners (family,
+  3 guards standing, townsfolk). No grave ground: it lies in state at the seat and is mourned there. Bearers now skip their
+  own ruler's body; `Bearers.Dead.realm` also reads a villager's settlement. Lines in `lang/parts/royal-remains.json`.
+  Gradle build only, not played.
