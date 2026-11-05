@@ -99,6 +99,8 @@ public final class LifeStory {
 	static final int ARRIVAL_GRACE_TICKS = 100;
 	/** Spots tried for a dry, open place to stand before giving up on one. */
 	static final int GROUND_TRIES = 16;
+	/** (0.7.582) How far under a roof (blocks) a spot to stand indoors is looked for. */
+	static final int INDOOR_DEPTH = 8;
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
 	static final float FATE_LEANS = 0.5F;
 	/** Every start's kit: bread; a capital's few coins; a merchant's child's purse; a caver's torches. */
@@ -1747,6 +1749,20 @@ public final class LifeStory {
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
 			if (standable(level, top) && openGround(level.getBlockState(top.below()))) {
 				return top;
+			}
+		}
+		// (0.7.582, Andy: "spawning inside is fine too, as long as they have room") then a floor under a roof, room to stand
+		for (int i = 0; i < GROUND_TRIES; i++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int d = min + random.nextInt(Math.max(1, max - min + 1));
+			int x = center.getX() + Mth.floor(Math.cos(angle) * d), z = center.getZ() + Mth.floor(Math.sin(angle) * d);
+			level.getChunk(x >> 4, z >> 4);
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+			for (int y = top.getY() - 2; y >= top.getY() - INDOOR_DEPTH; y--) {
+				BlockPos in = new BlockPos(x, y, z);
+				if (standable(level, in)) {
+					return in;
+				}
 			}
 		}
 		for (int i = 0; i < GROUND_TRIES; i++) {

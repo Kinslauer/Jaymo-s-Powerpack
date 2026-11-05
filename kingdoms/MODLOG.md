@@ -9402,8 +9402,8 @@ can be sawed through similarly."
   goblins, pirates, ogres and illagers attacked a fresh captive. Striking anyone, breaking a block, opening a container,
   picking the shackle where a captor sees, or being caught at the tether turns the camp on them for a minute
   (`UNRULY_TICKS`), and the chains' Resistance is off meanwhile.
-- `LifeStory.ground` (used by the kidnap wake and the "still in chains" start) prefers open ground (earth, sand, stone)
-  before anywhere to stand, so nobody wakes chained on a hut roof.
+- `LifeStory.ground` (used by the kidnap wake and the "still in chains" start) prefers open ground (earth, sand, stone), then a floor indoors with room to stand,
+  before a roof as the last resort, so nobody wakes chained on a hut roof.
 - `Shackles`: a captive is collared and tied to a stake beside them (iron collar and chain to a cobblestone wall post, or
   a rope to a spruce fence, 40% rope). Synced (`TETHER`) and drawn for everyone by `client/ShackleTether`. A chain breaks
   under 24 slams of a rock (flint, flint shard, cobble/stone), loud, each heard by any captor within 14 blocks at 15%;
