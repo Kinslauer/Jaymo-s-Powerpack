@@ -61,7 +61,7 @@ import org.jspecify.annotations.Nullable;
  * villagers, MCA's and Kitchen's zombies), zombified piglins and every Hornkin take {@link #SHRUGGED_DAMAGE} from a rock
  * ({@link #shrugsOff}). An unsuspecting one can still be knocked out as before.
  * <p>
- * (0.20.81) Andy: "you also should only be able to throw rocks from the offhand, and after a small charge. it no longer
+ * (0.20.82) Andy: "you also should only be able to throw rocks from the offhand, and after a small charge. it no longer
  * places unless you have it in the main hand". A rock in the main hand only sets down (it is never thrown); a rock in the
  * off hand is never set down, and is thrown once use has been held for {@link #CHARGE} ticks, at the air or at a block
  * ({@link #charge}).
@@ -77,9 +77,9 @@ public final class ThrownRocks {
 	static final int COOLDOWN = 10;
 	/** How often a rock lies where it lands rather than breaking. */
 	static final float KEEP_CHANCE = 0.5F;
-	/** (0.20.81) How long use is held with a rock in the off hand before it's thrown (ticks). */
+	/** (0.20.82) How long use is held with a rock in the off hand before it's thrown (ticks). */
 	static final int CHARGE = 10;
-	/** (0.20.81) A hold broken for longer than this (ticks; a held use repeats every 4) starts the charge again. */
+	/** (0.20.82) A hold broken for longer than this (ticks; a held use repeats every 4) starts the charge again. */
 	static final int CHARGE_GAP = 6;
 	/** A rock still flying after this long is no longer watched. */
 	static final int LIFE = 200;
@@ -129,7 +129,7 @@ public final class ThrownRocks {
 	}
 
 	private static final List<Rock> FLYING = new ArrayList<>();
-	/** (0.20.81) Players winding up an off hand throw: the tick the hold began, and the tick it was last seen. */
+	/** (0.20.82) Players winding up an off hand throw: the tick the hold began, and the tick it was last seen. */
 	private static final java.util.Map<java.util.UUID, long[]> WINDING = new java.util.HashMap<>();
 	/** While a rock's blow is being dealt again (so it isn't again and again). */
 	private static boolean redealing;
@@ -172,7 +172,7 @@ public final class ThrownRocks {
 	}
 
 	/**
-	 * (0.20.81) A held use winding up an off hand throw: whether it has been held {@link #CHARGE} ticks now. The server
+	 * (0.20.82) A held use winding up an off hand throw: whether it has been held {@link #CHARGE} ticks now. The server
 	 * keeps the count (the client only says when to throw by going on holding); the client always waits.
 	 */
 	private static boolean charge(Player player, Level level) {

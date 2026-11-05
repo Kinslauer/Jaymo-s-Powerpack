@@ -9208,6 +9208,6 @@ ultimate and beam-clash films came down with it. Not played.
   After 30 s a guard, den hand or butcher puts it down; anyone else calls a guard. Skipped: the settlement's own
   stables/barns/pens, ridden/leashed/tamed/named/owned animals, house animals (tag `jaymoskingdoms:house_animals`:
   cats, parrots, bees, axolotls, frogs, allays). `Strays`, lang part strays.json (12 lines per family), hint 104. Not played.
-- **0.7.569, hint 106** (Powers 0.20.81): a loading-screen hint for rocks by hand (main hand sets down, off hand throws
+- **0.7.569, hint 106** (Powers 0.20.82): a loading-screen hint for rocks by hand (main hand sets down, off hand throws
   after a short hold, sneak + use with flint and a rock splinters the flint). Lang part rock_hands.json. Hint 105 is the
   purse PR's (#993); `HINTS = 106` assumes it lands first. Not played.

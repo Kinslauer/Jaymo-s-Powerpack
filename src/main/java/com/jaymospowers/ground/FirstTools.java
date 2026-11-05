@@ -45,7 +45,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * other, it chips the flint and breaks the rock": right click a block with flint and a rock in your two hands. A strike
  * catches {@link #STRIKE_CHANCE} of the time; when it does the rock breaks, and the flint chips down to a shard
  * {@link #FLINT_CHIP_CHANCE} of the time. Eight plant fibres in a ring make string (a data recipe).
- * (0.20.81) Andy: "you should be able to shift click flint in mid air with a rock off hand to splinter it without causing
+ * (0.20.82) Andy: "you should be able to shift click flint in mid air with a rock off hand to splinter it without causing
  * a fire": sneak + use with flint and a rock in your two hands splinters the flint into shards, as knapping it on a block
  * does, at the air or at any block, and never strikes fire (the rock is kept).
  */
