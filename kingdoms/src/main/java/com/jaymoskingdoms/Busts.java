@@ -289,6 +289,8 @@ public final class Busts {
 				if (d != null) {
 					Underworld.putCell(level.getServer(), d, cell);
 				}
+				// (0.7.571) a door and a stair up, so the way out is walked
+				Speakeasy.cellDoor(level, cell);
 				long until = now + JAIL_TICKS + offences * JAIL_PER_OFFENCE;
 				player.setAttached(JAILED, new Jail(f.id(), cell, until));
 				// (0.7.419) a road deed: someone locked in a realm's cells
@@ -368,8 +370,9 @@ public final class Busts {
 				Deeds.done(player, "cells.served");
 			}
 			if (f != null && player.isAlive()) {
-				Vec3 out = Speakeasy.release(level, f);
-				player.teleportTo(level, out.x, out.y, out.z, Set.of(), player.getYRot(), 0.0F, false);
+				// (0.7.571) the door's opened and they walk out up the jailer's stair (they were set down by the seat)
+				Speakeasy.openDoor(level, jail.cell());
+				level.playSound(null, Speakeasy.doorAt(jail.cell()), SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.9F);
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bust.released", f.name()).withStyle(ChatFormatting.YELLOW));
 			}
 			return;

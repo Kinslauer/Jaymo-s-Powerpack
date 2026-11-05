@@ -9297,3 +9297,19 @@ ultimate and beam-clash films came down with it. Not played.
   into a lean wolf on all fours (our own boxes and coats, one per werewolf coat, the fiery one flickering): Speed III,
   Jump Boost III, +2 hearts, no Strength or Resistance. Too wild: an overlay line says so. Full moons are always the
   great beast; the mostly-human path stays the wolfblood (ritual off the full moon). Hint 111. Not played.
+
+## 0.7.575 (2026-11-05): break out of the cells on foot; an escape is hunted, not shot on sight
+- Andy's clip (Sentenced start): he picked the cell door, was teleported to the street by Eldhollow's seat, told the realm
+  "now counts you an enemy", downed and shot dead where he lay. "you should not just teleport out of the jail cell upon
+  lockpicking like this, if there is no jail in the city, there needs to be a more realistic alternative".
+- The cells have a way out (`Speakeasy.passage`, dug with the cell door, `cellDoor`): a walled passage 3 blocks east
+  from the iron door, then a laddered shaft up to a shut spruce hatch in the first floor at the seat's level (caves on
+  the way are walled off; blocks with block entities are left alone). Every way out opens the door (`Speakeasy.openDoor`)
+  and you walk up: picking it, paying the fine, or serving the sentence (`Busts.serve`). No more teleport to the seat.
+  Busts' contraband cells and HeldBack's assault cells get the door and stair too.
+- A broken-out prisoner is hunted (wanted for 6 minutes, `Theft.HUNT_TICKS * 3`) to be taken back (`Busts` "escape"
+  charge), not outlawed for two days. The broken life aim's reputation hit (`LifeAims.betray`) no longer drops a realm
+  below hostile, so its guards don't attack on sight. The story's forced respawn by the seat is dropped on escape, so a
+  death doesn't put you back among the guards hunting you.
+- Downed players aren't shot or cut at by townspeople who'd spare them (`HeldBack.standDown`): they drop the target and
+  guards walk over to take them in. Hint 112 (lang part held_back.json). Not played.
