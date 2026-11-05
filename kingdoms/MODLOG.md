@@ -9485,4 +9485,6 @@ off course then those should break upon contact".
   lies along the giant's facing; thrown, it flies tumbling, strikes what it passes through (never its thrower) and lands
   as a fallen tree. Aether Giants (mob griefing on) tear one up and lob it at a target out of grab reach but within 40
   blocks (up to 120 logs). Powers 0.20.106's Great Ape and Towerback grabs do it when no one is in reach (`GiantTrees`).
+- Mob griefing is always on (Andy: "it should be on by default in this pack and always on the server"): `PackRules`
+  sets it on as the server starts and puts it back every 10 seconds if it's turned off.
 - Hint 115. Built, not played, not booted.
