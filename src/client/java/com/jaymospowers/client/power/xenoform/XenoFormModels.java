@@ -5740,7 +5740,7 @@ public final class XenoFormModels {
 	 * (0.18.113, Scan E; 0.19.62 upright, a spider when prone) Skitter: standing, the shape it always had, a man with
 	 * four thin spider legs off its back and a small abdomen behind. Prone (the stance wheel's crawl) it drops into a
 	 * spider ({@link SkitterCeiling#CRAWL_KEY}): a small thorax, a head with fangs that turns where it looks, a big round
-	 * abdomen behind (the insignia on top) and eight legs. (0.20.57) The legs are the pack's spiders' own (Kingdoms'
+	 * abdomen behind (the insignia on top) and eight legs. (0.20.59) The legs are the pack's spiders' own (Kingdoms'
 	 * {@code SpiderLegsMixin} on the game's {@code SpiderModel}): the game's leg poses and step, each leg kneed (two
 	 * 8-long halves, the lower a child "shin") and held high with the foot planted, the shin bending more as the foot
 	 * lifts, idle legs twitching; the abdomen breathes and sways as theirs does. Its own on top: it crouches flat when sneaking, a bite lunges the head and rears the front legs, and up a
@@ -5751,11 +5751,11 @@ public final class XenoFormModels {
 		// ---- tuning ----
 		/** The spider's body height off the ground (model y, a spider's), how far it drops when sneaking. */
 		static final float BODY_Y = 15.0F, CROUCH_DROP = 3.0F;
-		/** (0.20.57) A spider's step, the game's: gait against the walk, swing and lift. */
+		/** (0.20.59) A spider's step, the game's: gait against the walk, swing and lift. */
 		static final float GAIT = 0.6662F, SWING = 0.4F, LIFT = 0.4F;
-		/** (0.20.57) The spiders' knee: each thigh raised this far, its shin bent down this far, more per unit of step lift. */
+		/** (0.20.59) The spiders' knee: each thigh raised this far, its shin bent down this far, more per unit of step lift. */
 		static final float KNEE_LIFT = 0.45F, SHIN_BEND = 1.0F, STEP_BEND = 0.9F;
-		/** (0.20.57) How much more each thigh rises and shin bends when it crouches flat. */
+		/** (0.20.59) How much more each thigh rises and shin bends when it crouches flat. */
 		static final float CROUCH_SPLAY = 0.35F;
 		/** (0.19.62) Up a wall, the legs step this much faster (the walk barely moves while climbing). */
 		static final float CLIMB_GAIT = 0.35F;

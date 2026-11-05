@@ -216,7 +216,7 @@ public final class Skitter extends XenoForm {
 			if (!jump || !ceiling(player) || player.isInWater()) {
 				live.perched = false;
 			} else {
-				// (0.20.57) the hold itself is the client's (SkitterCling), so its own movement sticks; this keeps the
+				// (0.20.59) the hold itself is the client's (SkitterCling), so its own movement sticks; this keeps the
 				// state everyone draws
 				player.resetFallDistance();
 			}
@@ -225,7 +225,7 @@ public final class Skitter extends XenoForm {
 			live.anchor = null;
 			sound(player, SoundEvents.SPIDER_STEP, 0.8F, 1.2F);
 		} else if (!player.onGround() && player.onClimbable() && !player.isInWater()) {
-			// (0.20.57) on a wall: the climb itself is a spider's, a ladder on both sides ({@code SkitterClimbMixin}),
+			// (0.20.59) on a wall: the climb itself is a spider's, a ladder on both sides ({@code SkitterClimbMixin}),
 			// so the client's own movement climbs (the server pushing it up here was overruled by the client)
 			climbing = prone ? wall(player) : null;
 			player.resetFallDistance();

@@ -460,7 +460,19 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   `config/jaymospowers-client.properties`). Bodies blown apart (Kitchen gibs) give a small shake of their own.
   Compile-checked; not played.
 
-- **0.20.57, Skitter's spider legs and wall climbing:** Andy (2026-11-05): "skitter and the spiders need the same legs,
+- **0.20.57, Kitchen 0.5.66, small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
+  work like fish, if they drop an item the corpse disappears." Crickets, mice, snails, butterflies, bees and any other
+  creature kind under 0.5 blocks both ways (or in Kitchen's new `small_corpses` tag) are looted in one click and gone,
+  like fish. Rabbits, chickens, frogs and babies still leave a body. Not played.
+- **0.20.58, Impale throws the spear itself:** Andy (2026-11-05), on the Iron Spear's Impale (RPG Series): "using this
+  should actually throw your spear". The spear now leaves your main hand when Impale flies (`compat/SpellThrows`,
+  through `SpellEngineCompat`; Spell Engine's own projectile still does the charged damage and knockback). Where the
+  spell ends the spear carries on as a real `ThrownWeapon`: it sticks in a block it hits, glances off a creature and
+  drops at its feet (no second hit), or arcs down after its full range, and lies there for its thrower to pick up like
+  a trident (1 durability per throw). Never lost or doubled: if the spell ends somewhere unloaded it goes back to your
+  pack (or your feet); on server stop it's put down where it was. In creative it stays in hand and the thrown one is
+  creative-only pickup. Gradle build only, not played.
+- **0.20.59, Skitter's spider legs and wall climbing:** Andy (2026-11-05): "skitter and the spiders need the same legs,
   and you also cant climb any surfaces in spider mode". Skitter's spider shape now has the pack's spider legs (Kingdoms'
   `SpiderLegsMixin` on the game's `SpiderModel`): the game's leg rest poses and step (both sides on the same beat,
   mirrored, gait 0.6662), each leg kneed (8-long thigh + child shin, `KNEE_LIFT` 0.45, `SHIN_BEND` 1.0, `STEP_BEND`

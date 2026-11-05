@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.20.57) Skitter's ceiling cling, held before the player's own move ({@link SkitterCling}). */
+/** (0.20.59) Skitter's ceiling cling, held before the player's own move ({@link SkitterCling}). */
 @Mixin(LocalPlayer.class)
 abstract class SkitterClingMixin {
 	@Inject(method = "aiStep", at = @At("HEAD"))

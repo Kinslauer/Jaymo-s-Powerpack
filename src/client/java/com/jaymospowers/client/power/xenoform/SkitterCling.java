@@ -6,7 +6,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.57) Skitter's ceiling cling, held by the clinging player's own client: the server pushing it up into the
+ * (0.20.59) Skitter's ceiling cling, held by the clinging player's own client: the server pushing it up into the
  * ceiling was overruled by the client's own movement, so it never stuck. The same rules as the server's
  * ({@code Skitter.tick}, which keeps the {@link XenoformState#CEILING} state everyone draws): standing, hold jump under
  * a ceiling to cling and let go to drop; prone (the spider) it clings with nothing held, and a jump press lets go until

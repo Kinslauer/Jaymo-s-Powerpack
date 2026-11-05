@@ -70,6 +70,17 @@ public final class Corpses {
 	 * looted in one click and gone (see {@link CorpseKind#FISH}).
 	 */
 	public static final TagKey<EntityType<?>> FISH_CORPSES = tag("fish_corpses");
+	/**
+	 * (0.5.66) Small critters, looted in one click and gone like a fish (crickets, mice, snails, butterflies...). Any
+	 * creature whose kind is under {@link #SMALL_CRITTER_SIZE} both ways counts without being listed (see
+	 * {@link #isSmallCritter}).
+	 */
+	public static final TagKey<EntityType<?>> SMALL_CORPSES = tag("small_corpses");
+	/**
+	 * (0.5.66) A kind narrower and shorter than this (in blocks) is a small critter. Just under a rabbit (0.4 by 0.5), so
+	 * rabbits, chickens and frogs still leave a body to butcher.
+	 */
+	public static final float SMALL_CRITTER_SIZE = 0.5F;
 	/** (0.5.5) Villagers, whose bodies zombies go for first and whose graves (MCA's) a zombie's meal empties ({@link Scavengers}). */
 	public static final TagKey<EntityType<?>> VILLAGERS = tag("villagers");
 
@@ -223,6 +234,27 @@ public final class Corpses {
 	/** (0.5.42) A robot or golem ({@link #MACHINE_CORPSES}, heavy corpses included). */
 	public static boolean isMachine(@org.jspecify.annotations.Nullable EntityType<?> type) {
 		return type != null && (type.builtInRegistryHolder().is(MACHINE_CORPSES) || type.builtInRegistryHolder().is(HEAVY_CORPSES));
+	}
+
+	/**
+	 * (0.5.66) A small critter's body: {@link #SMALL_CORPSES}, or any wild kind (not a monster, a machine, a zombie or a
+	 * skeleton) under {@link #SMALL_CRITTER_SIZE} both ways. It goes by the kind's size, so a baby or a shrunk mob of a
+	 * bigger kind still leaves a body.
+	 */
+	public static boolean isSmallCritter(@org.jspecify.annotations.Nullable EntityType<?> type) {
+		if (type == null) {
+			return false;
+		}
+		var holder = type.builtInRegistryHolder();
+		if (holder.is(SMALL_CORPSES)) {
+			return true;
+		}
+		if (type.getCategory() == MobCategory.MONSTER || type.getCategory() == MobCategory.MISC || isMachine(type)
+			|| holder.is(ZOMBIE_CORPSES) || holder.is(SKELETON_CORPSES) || holder.is(BIG_CARCASSES)) {
+			return false;
+		}
+		var size = type.getDimensions();
+		return size.width() < SMALL_CRITTER_SIZE && size.height() < SMALL_CRITTER_SIZE;
 	}
 
 	/** Whether this entity leaves a corpse when it dies (players, listed mobs and tagged ones don't). */

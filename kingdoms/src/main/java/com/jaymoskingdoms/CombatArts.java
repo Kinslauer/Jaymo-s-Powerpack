@@ -358,6 +358,10 @@ public final class CombatArts {
 		if (!(sp.level() instanceof ServerLevel level) || sp.isSpectator() || !sp.isAlive()) {
 			return;
 		}
+		// (0.7.550) a spear out pinning a foe: the tap tugs it back (its forms are on the skill bar, so there's no stance to tap in)
+		if (com.jaymoskingdoms.forms.Forms.tug(sp)) {
+			return;
+		}
 		boolean charge = Skills.rank(sp, Skills.Perk.CHARGE) > 0, cry = Skills.rank(sp, Skills.Perk.WAR_CRY) > 0;
 		// with a shield in hand, Y throws it (sneak still roars)
 		if (ShieldThrow.wanted(sp) && !(sneaking && cry)) {

@@ -23,7 +23,7 @@ curtains, film bars) is placed by one of seven zones. Previews: project files `a
 | Zone | Anchor | Rows |
 |---|---|---|
 | `DOCK_RIGHT` | right of the hotbar from cx+121, stacks up, left-aligned | 10 power block · 20 Flame Avatar · 30 beam-clash panel · 40 riding · 41 dragon · 50 Rig panel |
-| `DOCK_LEFT` | left of the hotbar ending at cx-122, stacks up, right-aligned | 10 stomach · 15 valor · 20 symbiote arm · 30 body row: stance, wounds doll, body heat |
+| `DOCK_LEFT` | left of the hotbar ending at cx-122, stacks up, right-aligned | 5 Spell Engine's skill bar (RPG Series class skills and Weapon Forms, Kingdoms `SkillBarDock`) · 10 stomach · 15 valor · 20 symbiote arm · 30 body row: stance, wounds doll, body heat |
 | `FOCUS` | centred, bottom at H-76 (over the action-bar line), stacks up | 10 struggles (seizure, symbiote) · 11 Grue line · 15 ape rage · 20 forms belt · 30 spirit line · 40 clash timing |
 | `ABOVE` | centred, bottom at cy-12, stacks up | 10 awareness eye · 20 the power's charge bar · 21 a second power bar · 25 Chrono combo · 30 Ember heat · 31 Heritage charge |
 | `BELOW` | centred, top at cy+10 (cy+20 while vanilla's attack indicator shows there), stacks down | 10 guard · 20 finisher bars · 30 Chrono roll pips · 40 horse tag / wild stats · 50 smithing · gem cutting · mortar / stir bar (only one shows at a time) |

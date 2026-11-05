@@ -16,7 +16,10 @@ public enum CorpseKind {
 	OTHER,
 	/** A dead player: right-click for their hotbar back; burn it, or it gets up as a zombie wearing their face. */
 	PLAYER,
-	/** (0.4.29) A fish: one click and its loot spills out and the body's gone, nothing to carry or butcher. */
+	/**
+	 * (0.4.29) A fish: one click and its loot spills out and the body's gone, nothing to carry or butcher. (0.5.66) Small
+	 * critters too (crickets, mice, snails, butterflies...: {@link Corpses#isSmallCritter}).
+	 */
 	FISH;
 
 	public static CorpseKind of(LivingEntity mob) {
@@ -28,6 +31,9 @@ public enum CorpseKind {
 		}
 		if (mob.is(Corpses.SKELETON_CORPSES)) {
 			return SKELETON;
+		}
+		if (Corpses.isSmallCritter(mob.getType())) {
+			return FISH;
 		}
 		return mob instanceof Animal ? ANIMAL : OTHER;
 	}
