@@ -934,3 +934,11 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   to the hand over the hold, then where the grab would slam its catch down it's thrown along the giant's aim (0.4 b/t
   times the root of its height in people, more with brawn as carried throws, at most 2.5), tumbling, striking what it
   flies through, and landing as a fallen tree. Player giants only where they may build, as their trampling. Built, not played.
+
+## 0.20.108 (2026-11-05): nobody talks to you while you're down, dead or reborning (Kingdoms 0.7.590)
+- Andy: "make sure all the new features work wth all the old, im thinking specifically of the chat interactions and
+  sevtech style world generating as you progress". Audit of the recent merges against villager talk and the world tiers.
+- New `core/OutOfPlay.is(Entity)`: down or out cold, carried, left for dead (waking somewhere), black while a new life
+  is made (`Mortality.REBORNING`), or held in Chrono's death window. Kingdoms reads it by reflection before anyone walks
+  up to talk. The Chrono window stays exactly like any death: before this a villager's question could open its screen
+  over the death screen there. Built, not played.

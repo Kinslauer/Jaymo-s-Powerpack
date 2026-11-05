@@ -9488,3 +9488,17 @@ off course then those should break upon contact".
 - Mob griefing is always on (Andy: "it should be on by default in this pack and always on the server"): `PackRules`
   sets it on as the server starts and puts it back every 10 seconds if it's turned off.
 - Hint 115. Built, not played, not booted.
+
+## 0.7.590 (2026-11-05): new features checked against villager talk and the world tiers (Powers 0.20.108)
+- Andy: "make sure all the new features work wth all the old, im thinking specifically of the chat interactions and
+  sevtech style world generating as you progress".
+- Villagers no longer come over to ask you something (Approaches) or hold out a hand (Handshakes) while you're downed or
+  out cold, carried, lying left for dead, black while a new character is made after Reincarnate, inside Chrono's death
+  window, tethered as a captive, or in a captain's first-meeting film (`Approaches.unreachable`, Powers' `OutOfPlay`).
+  One already on the way gives up if any of that starts. Nobody downed, carried off or in chains comes over either.
+- Their question no longer knocks away whatever screen you have open (the death screen, the story and character
+  screens, MCA's chat, the journal): it waits for that screen to close, up to 20 s (`TalkScreen.WAIT_TICKS`).
+- The Ground Changes: an iron, copper or gold vein grown under the surface when a tier opens now gets the same faint
+  ore pebble chance as a vein that was always there (40%, half hidden nuggets; `GroundChanges.tell`), so the pebbles
+  from Powers 0.20.105 work over the new ground too. Pebbles still only ever sit over ore that's really there, so they
+  never show anything ahead of your tier. Built, not played.
