@@ -4,11 +4,7 @@ by cybercat5555, itsmeowdev and Wolverbyte (https://github.com/itsmeow/betterani
 kingdoms/src/client/java/com/jaymoskingdoms/client/wild/*Model.java; those adapted models and these textures are shared
 under the same licence (non-commercial, share alike, with this credit). The textures are unchanged.
 
-Grizzly (0.7.610): grizzly.png and textures/item/grizzly_spawn_egg.png are changed copies of Bear Minimum 1.0.5's
-brown_bear.png and brown_bear_spawn_egg.png, and the model in kingdoms/src/client/java/com/jaymoskingdoms/client/wild/
-GrizzlyModel.java is built from its BrownBearModel's boxes. Bear Minimum is by Startraveler (scientistknight1),
-https://github.com/Thomas1034/bear-minimum, licensed Apache-2.0 (full text in LICENSE-bear-minimum-apache-2.0.txt
-beside this file). Changes: coat darkened and silver-tipped along the hump, back and crown, pale muzzle, dark legs and
-claws, scars, a shoulder hump box (painted in the old palette corner of the sheet), the egg re-tinted, the model drawn
-1.15x with its own poses (rear, swipes, charge, maul, roar). Made by tools/gen_grizzly.py. Not under the CC BY-NC-SA
+Grizzly (0.7.611): grizzly.png, textures/item/grizzly_spawn_egg.png and the model in
+kingdoms/src/client/java/com/jaymoskingdoms/client/wild/GrizzlyModel.java are our own, built from
+docs/Grizzly-Model-Spec.md and painted by tools/gen_grizzly.py. No other mod's boxes or pixels. Not under the CC BY-NC-SA
 terms above.

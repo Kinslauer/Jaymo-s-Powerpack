@@ -57,8 +57,8 @@ import org.jspecify.annotations.Nullable;
  * play dead (crouch and stop fighting) and, while it isn't enraged, it sniffs you over and wanders off, leaving you
  * alone for a while ({@link #CALM_TICKS}).
  *
- * <p>Drawn after Bear Minimum's brown bear (Apache-2.0, by Startraveler): its model's boxes, with a shoulder hump, and its
- * coat repainted ({@code tools/gen_grizzly.py}).
+ * <p>(0.7.611) Its model and coat are our own, built from {@code docs/Grizzly-Model-Spec.md} by the REA method (Andy: "Can
+ * you use rea for models"): the client's {@code GrizzlyModel}, the coat painted by {@code tools/gen_grizzly.py}.
  */
 public class Grizzly extends WildBeast implements Acting {
 	static final double HEALTH = 120.0, ARMOR = 6.0, DAMAGE = 9.0, SPEED = 0.3, KNOCKBACK_RESISTANCE = 0.75;

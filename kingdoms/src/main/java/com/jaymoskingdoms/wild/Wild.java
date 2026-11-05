@@ -22,8 +22,8 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
  * itsmeowdev and Wolverbyte; credited in {@code assets/jaymoskingdoms/textures/entity/wild/CREDITS.txt}, and this
  * package and its client side are under that licence too): feral wolves, coyotes, tarantulas and moose. (0.7.526) They
  * spawn on their own where they roam ({@code Encounters}, biome tags {@code jaymoskingdoms:has_<beast>}), no longer as
- * wilderness encounters. (0.7.610) And the grizzly ({@link Grizzly}), our own mini-boss bear, drawn after Bear Minimum's
- * brown bear (Apache-2.0; see {@code textures/entity/wild/CREDITS.txt}).
+ * wilderness encounters. (0.7.610) And the grizzly ({@link Grizzly}), our own mini-boss bear ((0.7.611) its model and
+ * coat our own, from {@code docs/Grizzly-Model-Spec.md}).
  */
 public final class Wild {
 	public static EntityType<FeralWolf> FERAL_WOLF;
