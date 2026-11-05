@@ -45,6 +45,9 @@ public final class Cannon extends Entity {
 	static final float TRAVERSE = 6.0F, ON_MARK = 8.0F;
 	/** How wide a shot may stray (blocks per block flown). */
 	static final double SPREAD = 0.03;
+	/** (0.7.549) Firing jolts everyone this near (blocks) this hard (degrees), on top of the report's own shake. */
+	static final double FIRE_SHAKE_RANGE = 10.0;
+	static final float FIRE_SHAKE = 1.2F;
 	/** The barrel's pivot above the ground, and its muzzle's distance out from that (blocks). (0.7.326) Its trunnions sit
 	 * this low on the Canon model's carriage. */
 	public static final double PIVOT = 0.75, MUZZLE = 1.35;
@@ -242,8 +245,9 @@ public final class Cannon extends Entity {
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, muzzle.x + dir.x, muzzle.y + dir.y, muzzle.z + dir.z, 3, 0.2, 0.15, 0.2, 0.01);
 		level.sendParticles(ParticleTypes.SMOKE, pivot.x - dir.x * 0.6, pivot.y + 0.2, pivot.z - dir.z * 0.6, 5, 0.15, 0.1, 0.15, 0.02);
 		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 6, 0.12, 0.12, 0.12, 0.05);
-		level.playSound(null, muzzle.x, muzzle.y, muzzle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 3.0F,
-			0.6F + level.getRandom().nextFloat() * 0.15F);
+		// (0.7.549) its own report with Powers: it carries far, muffles with distance, and jolts everyone near
+		PowersCompat.cannonReport(level, muzzle, 3.0F, 0.85F + level.getRandom().nextFloat() * 0.15F);
+		PowersCompat.shakeAround(level, muzzle, FIRE_SHAKE_RANGE, FIRE_SHAKE);
 		level.broadcastEntityEvent(this, FIRED);
 	}
 

@@ -87,6 +87,9 @@ public abstract class WindDragon extends AbstractHorse {
 	// ---- wild ----
 	/** Players this near are attacked (blocks); one further than {@link #LOSE_RANGE} is let go. */
 	static final double AGGRO_RANGE = 22.0, LOSE_RANGE = 64.0;
+	/** (0.7.549) Its landing's shake: felt this far (blocks), this hard (degrees, times its size). */
+	static final double LAND_SHAKE_RANGE = 22.0;
+	static final float LAND_SHAKE = 1.4F;
 	/** Circling: how high over the ground, how wide, how fast; how long it circles before it looks for a perch. */
 	static final double CRUISE_HEIGHT = 22.0, NETHER_CRUISE_HEIGHT = 12.0, CIRCLE_RADIUS = 28.0, CRUISE_SPEED = 0.55;
 	static final int CIRCLE_MIN = 500, CIRCLE_MAX = 1000;
@@ -1072,6 +1075,10 @@ public abstract class WindDragon extends AbstractHorse {
 		setFlying(false);
 		this.setDeltaMovement(this.getDeltaMovement().multiply(0.3, 1.0, 0.3));
 		this.playSound(SoundEvents.RAVAGER_STEP, 2.0F, 0.5F);
+		// (0.7.549) a dragon coming down shakes the ground, harder the bigger it's grown
+		if (this.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			com.jaymoskingdoms.PowersCompat.shakeAround(level, this.position(), LAND_SHAKE_RANGE, LAND_SHAKE * Math.max(0.5F, this.getScale()));
+		}
 	}
 
 	/** Eases its velocity toward {@code point} at {@code speed}, keeping clear of the ground unless {@code landing}. */

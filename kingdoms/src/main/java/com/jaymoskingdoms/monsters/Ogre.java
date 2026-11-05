@@ -40,6 +40,9 @@ public class Ogre extends LegendMonster {
 	static final int SMASH_TICKS = 140;
 	static final double SMASH_TRIGGER = 4.0, SMASH_RANGE = 5.0, SMASH_THROW = 1.2;
 	static final float SMASH_DAMAGE = 7.0F;
+	/** (0.7.549) Its smash's shake: felt this far (blocks), this hard (degrees). */
+	static final double SMASH_SHAKE_RANGE = 18.0;
+	static final float SMASH_SHAKE = 1.8F;
 	/** How long its fists take to come down in a smash (ticks). */
 	static final int SMASH_WINDUP = 8;
 	/** One ogre in this many has two heads (and a club). */
@@ -141,6 +144,8 @@ public class Ogre extends LegendMonster {
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.2, at.z, 2, 0.6, 0.1, 0.6, 0.0);
 		level.sendParticles(this.kind == FIRE ? ParticleTypes.FLAME : ParticleTypes.CLOUD, at.x, at.y + 0.2, at.z, 30, SMASH_RANGE / 3, 0.1, SMASH_RANGE / 3, 0.05);
 		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 0.6F);
+		// (0.7.549) the ground jumps under everyone near
+		com.jaymoskingdoms.PowersCompat.shakeAround(level, at, SMASH_SHAKE_RANGE, SMASH_SHAKE);
 		for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(SMASH_RANGE),
 			e -> e != this && !(e instanceof Ogre) && e.isAlive() && e.distanceToSqr(at) < SMASH_RANGE * SMASH_RANGE
 				// ((0.7.474) the greenskins about it are spared the blow, so a fight in an orc camp doesn't turn them on each other)
