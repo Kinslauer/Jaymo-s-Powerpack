@@ -425,6 +425,16 @@ if (kitchenChosen.name != kitchenWanted) {
 		"(${kitchenSourceProps.version}). Build kitchen/ and replace the jar in libs/.")
 }
 def kitchenJar = files(kitchenChosen)
+// (0.20.78) What the pack ships is Kitchen built from kitchen/ at its source version, like Kingdoms, never the jar in libs/
+// (that one is only compiled against and run in the dev game). libs/ held Kitchen 0.5.57 while kitchen/ was at 0.5.68, so a
+// pack built without swapping it by hand shipped a Kitchen without the Other World's no-bodies rule (0.5.61): player bodies
+// still rose there as zombies.
+tasks.register("buildKitchen", GradleBuild) {
+	dir = file("kitchen")
+	tasks = ["build"]
+}
+def kitchenLibs = file(file("E:/").exists() ? "E:/jaymos-kitchen-build/libs" : "kitchen/build/libs")
+def kitchenShipJar = fileTree(kitchenLibs) { include kitchenWanted }.builtBy("buildKitchen")
 // Minecraft Comes Alive (GPL-3.0, by Luke100000 and team): human villagers to befriend, marry and raise children with,
 // village ranks up to monarch. Its newest CurseForge/Modrinth file is for 26.2, so until a 26.3 one comes out the pack
 // ships a jar built from the authors' own 26.3 branch (github.com/Luke100000/minecraft-comes-alive, dev/26.3 at
@@ -578,7 +588,7 @@ def packDir = file("modpack")
 tasks.register("modpackMods", Sync) {
 	from configurations.packJars
 	from tasks.named("jar")
-	from kitchenJar
+	from kitchenShipJar
 	from mcaJar
 	from kingdomsJar
 	from trmtJar
@@ -610,7 +620,7 @@ tasks.register("curseforgePack", Zip) {
 	into("overrides/mods") {
 		from configurations.packOverrideJars
 		from tasks.named("jar")
-		from kitchenJar
+		from kitchenShipJar
 		from mcaJar
 		from kingdomsJar
 		from trmtJar
@@ -639,7 +649,7 @@ tasks.register("serverMods", Sync) {
 	}
 	from configurations.packJars
 	from tasks.named("jar")
-	from kitchenJar
+	from kitchenShipJar
 	from mcaJar
 	from kingdomsJar
 	from trmtJar
@@ -651,11 +661,11 @@ tasks.register("serverMods", Sync) {
 // running (its jars are locked).
 def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
-	dependsOn "jar", "buildKingdoms", "buildTrmt"
+	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt"
 	onlyIf { profileMods.isDirectory() }
 	doLast {
 		def wanted = [[jar: tasks.named("jar").get().archiveFile.get().asFile, prefix: "jaymos-powers-"]]
-		kitchenJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
+		kitchenShipJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
 		mcaJar.files.each { wanted << [jar: it, prefix: "mca-fabric-"] }
 		kingdomsJar.files.each { wanted << [jar: it, prefix: "jaymos-kingdoms-"] }
 		trmtJar.files.each { wanted << [jar: it, prefix: "trmt-"] }

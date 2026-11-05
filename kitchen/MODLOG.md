@@ -1459,3 +1459,10 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
   both sides; and it only knew a part called exactly "head" or "real_head", its first box. Now: the shallowest head in
   any case, every part on it except ears, horns, mouths, necks and the like (each by its biggest box, so snouts and
   horns on the head's own part are left alone), faces judged in the model's space. Not played.
+
+## 0.5.69: zombie players fade in the Other World
+
+Andy: "the zombie players still reanimate in heaven, theyre supposed to disappear". `ZombiePlayer.tick` checks
+`Corpses.inNoCorpseZone` once a second; one standing there (risen before the rule, or brought in) fades in souls and drops
+what it held and carried. Bodies there already never rose since 0.5.61; the pack had been shipping 0.5.57 (Powers 0.20.80
+now ships Kitchen built from source). Built, not played.

@@ -633,3 +633,10 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **0.20.79, Shift + Left Alt zoom, take two** (Andy: "shift + alt doesnt seem to be zooming", while double-tap-and-hold
   Shift did): `DodgeClient.keyDown()` now also reads Left Alt (and the Dodge key's own key) straight off the keyboard
   state, so the zoom no longer depends on the Alt key event reaching the key mapping while Shift is down. Built, not played.
+- **0.20.80, Kitchen 0.5.69, no zombie players in heaven, take two** (Andy: "the zombie players still reanimate in heaven,
+  theyre supposed to disappear"): the pack shipped `libs/jaymos-kitchen-0.5.57.jar`, older than Kitchen 0.5.61's Other
+  World rule, so any pack built without swapping that jar by hand had bodies lying and rising at the Judge's hall. The
+  pack tasks (`modpackMods`, `curseforgePack`, `serverMods`, `profileMods`) now build Kitchen from `kitchen/` and ship
+  that jar (`buildKitchen`, like Kingdoms); `libs/` is only compiled against and run in the dev game. Powers now logs a
+  warning if Kitchen has no Other World rule. Kitchen 0.5.69: a zombie player already standing in the Other World fades
+  in souls, dropping what it held and carried. Built, not played.

@@ -519,7 +519,9 @@ public final class KitchenCompat {
 			java.util.function.Predicate<net.minecraft.world.entity.Entity> heaven = com.jaymospowers.power.zfighter.ZFighterAfterlife::inOtherWorld;
 			Class.forName("com.jaymoskitchen.corpse.Corpses").getMethod("addNoCorpseZone", java.util.function.Predicate.class).invoke(null, heaven);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
-			// an older Kitchen: bodies are left there as anywhere
+			// an older Kitchen (before 0.5.61): bodies are left there as anywhere, and rise. (0.20.78) Said aloud now: a pack
+			// that shipped the stale Kitchen in libs/ had player zombies rising in heaven with nothing in the log
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Jaymo's Kitchen has no Other World rule (Kitchen 0.5.61+ needed): bodies there will rise", e);
 		}
 	}
 
