@@ -404,7 +404,7 @@ public final class Approaches {
 	private static boolean step(MinecraftServer server, ServerLevel level, Approach a, long now) {
 		ServerPlayer player = server.getPlayerList().getPlayer(a.player);
 		if (player == null || !a.mob.isAlive() || a.mob.isRemoved() || player.level() != level || !player.isAlive() || player.isSpectator()
-			|| a.mob.getTarget() != null) {
+			|| a.mob.getTarget() != null || unreachable(player) || PowersCompat.outOfPlay(a.mob) || Captives.bound(a.mob)) {
 			return false;
 		}
 		double d = a.mob.distanceTo(player);
@@ -433,6 +433,16 @@ public final class Approaches {
 		}
 		hold(a.mob, player);
 		return true;
+	}
+
+	/**
+	 * (0.7.591) Andy: "make sure all the new features work with all the old, im thinking specifically of the chat
+	 * interactions". Nobody comes over to ask {@code player} anything while they're down, carried, left for dead, black
+	 * while a new life is made, inside Chrono's death window (it must look like any death: no screen may open over it), a
+	 * captive on a tether, or watching a captain's first-meeting film.
+	 */
+	static boolean unreachable(ServerPlayer player) {
+		return PowersCompat.outOfPlay(player) || player.hasAttached(Shackles.TETHER) || Captains.filming(player);
 	}
 
 	static boolean fighting(ServerPlayer player) {
@@ -478,7 +488,7 @@ public final class Approaches {
 		UUID id = player.getUUID();
 		// (0.7.337) not while a villager's coming over to introduce themselves (Handshakes)
 		if (ACTIVE.containsKey(id) || Handshakes.awaited(player) || !player.isAlive() || player.isSpectator() || player.isSleeping() || fighting(player)
-			|| (!forced && player.containerMenu != player.inventoryMenu)) {
+			|| (!forced && player.containerMenu != player.inventoryMenu) || unreachable(player)) {
 			return false;
 		}
 		if (!forced) {
@@ -553,6 +563,8 @@ public final class Approaches {
 	/** Whether {@code mob} is free to come over: awake, not working, fighting, riding, or already talking to someone. */
 	static boolean free(Mob mob) {
 		if (!mob.isAlive() || mob.isSleeping() || mob.isPassenger() || mob.isVehicle() || mob.getTarget() != null || mob.isNoAi()
+			// (0.7.591) nor someone down, carried off or in chains
+			|| PowersCompat.outOfPlay(mob) || Captives.bound(mob)
 			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob) || Handshakes.engaged(mob)
 			// (0.7.141) a wind dragon in disguise keeps its own counsel
 			|| mob.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null) {

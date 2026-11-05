@@ -283,6 +283,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.591) Powers' {@code OutOfPlay.is(Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle outOfPlay;
+	private static boolean lookedForOutOfPlay;
+
+	/**
+	 * (0.7.591) Whether nobody should walk up and talk to {@code entity} just now by Jaymo's Powers' reckoning: down or out
+	 * cold, carried, left for dead, black while a new life is made, or held in Chrono's death window. False without Powers.
+	 */
+	public static boolean outOfPlay(net.minecraft.world.entity.Entity entity) {
+		if (!lookedForOutOfPlay) {
+			lookedForOutOfPlay = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					outOfPlay = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.OutOfPlay"),
+						"is", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' OutOfPlay (older Powers?)", e);
+				}
+			}
+		}
+		if (outOfPlay == null) {
+			return Downed.isDowned(entity);
+		}
+		try {
+			return (boolean)outOfPlay.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.330) Powers' {@code ZFighterLineage.ape(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle ape;
 	private static boolean lookedForApe;

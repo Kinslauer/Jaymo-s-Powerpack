@@ -1092,6 +1092,12 @@ public final class Captains {
 		}
 	}
 
+	/** (0.7.591) Whether {@code player} is in a captain's first-meeting film just now (nobody else walks up to talk then). */
+	static boolean filming(net.minecraft.world.entity.player.Player player) {
+		Long until = FILMED.get(player.getUUID());
+		return until != null && player.level().getGameTime() < until;
+	}
+
 	/**
 	 * (0.7.584) No harm to a player in a captain's first-meeting film. A blow they strike ends it, and the pause of whoever they
 	 * hit, so the captain doesn't stand there taking free hits either.
