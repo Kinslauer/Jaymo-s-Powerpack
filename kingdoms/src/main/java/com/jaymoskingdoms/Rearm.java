@@ -93,12 +93,18 @@ public final class Rearm {
 		});
 	}
 
-	/** One who fights with a weapon in hand: a folk fighter (not a caster), or a villager guard or archer. */
+	/**
+	 * One who fights with a weapon in hand: a folk fighter (not a caster), or a villager guard or archer. (0.7.548) Not
+	 * an MCA villager: MCA hands its guards their weapon for each fight (from their pack, or a fresh one of their rank's
+	 * when the pack has none) and takes it away again between, so an empty hand there is never a lost weapon. Watching
+	 * them had a guard cry "My weapon!" every time a fight ended or paused (Andy's clip: over a downed zombie, again and
+	 * again) and walk off after weapons on the ground mid-fight instead of finishing the foe.
+	 */
 	static boolean fighter(Mob mob) {
 		if (mob instanceof Folk folk) {
 			return folk.combatant() && !Sorcery.isCaster(folk.role()) && !folk.isCarrying();
 		}
-		return mob instanceof Villager && Downed.isGuard(mob);
+		return mob instanceof Villager && Downed.isGuard(mob) && !McaCompat.isMca(mob);
 	}
 
 	/** Whether {@code stack} is something to fight with: a blade, axe, spear, mace, trident, bow or crossbow. */

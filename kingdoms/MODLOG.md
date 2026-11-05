@@ -9052,3 +9052,10 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   in 3 (never guards) is a seeker: by day, near home, they build a scaffolding tower beside it (about 1-2 blocks a day, to
   24 high); once it's as high as it goes they sooner or later take it down (no drops) with a sigh and start again after 3
   days. Words go over their heads only. Lines in `lang/parts/heavens.json`; loading hint 98 (HINTS=98). Not played.
+
+- **0.7.548 (Powers 0.20.51), guards finish downed monsters and keep their weapon:** Andy (2026-11-05): "it seemed as
+  though this guard couldnt execute, and he kept losing he weapon." `Rearm` skips MCA villagers (MCA hands its guards a
+  weapon each fight and stows it between, so the empty hand cried "My weapon!" over and over and walked them off to
+  weapons on the ground). `PowersCompat.guardsFinishMonsters` adds guards and archers to Powers' `MobExecutions.FINISHES`:
+  they walk to a downed monster and execute it (hotheaded or spiteful ones anyone they fight); `Temperaments.spares` no
+  longer spares monsters. Sharks and the great whale bleed Powers' blood, not red dust. Gradle build only, not played.

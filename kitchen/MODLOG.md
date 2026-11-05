@@ -1415,3 +1415,8 @@ up a bank tipped it to ~70 and hoisted the bench rider up at the top). A cart bl
 up is hauled up a block at a time (`HAUL_UP_RISE`). Mobs that climbed onto the wagon's bench or a coach seat by
 themselves (not tamed pets) step down on the cart's right once it has stood still 30 s (`SIT_STILL_TICKS`); on the move
 they stay aboard, and sneak + right-click still lets everyone out at once.
+
+- **0.5.63 (Powers 0.20.51), no more redstone blood:** Andy (2026-11-05): "the redstone like particle effect needs to go
+  as well. it does not ever resemble blood." Corpse cuts, gibs, scavengers, the chopper, hangings and blood grates sent
+  redstone-block crumbs or red dust; `KitchenBlood.send` sends Powers' red blood instead (nothing without Powers).
+  Gradle build only, not played.

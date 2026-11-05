@@ -483,6 +483,44 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.548) Powers' executions of downed mobs ({@code MobExecutions.FINISHES}). Andy (2026-11-05): "it seemed as though
+	 * this guard couldnt execute": a realm's guard or archer ({@link Downed#isGuard}) walks over to a downed monster and
+	 * finishes it with its weapon, instead of standing over it swinging. A downed person is left for arrest as before
+	 * (unless a hotheaded or spiteful guard is fighting them). Nothing without that Powers.
+	 */
+	@SuppressWarnings("unchecked")
+	static void guardsFinishMonsters() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> executions = Class.forName("com.jaymospowers.core.wounds.MobExecutions");
+			java.lang.invoke.MethodHandle fighting = java.lang.invoke.MethodHandles.publicLookup().findStatic(executions, "fighting",
+				java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Mob.class, LivingEntity.class));
+			Object list = executions.getField("FINISHES").get(null);
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add((mob, body) -> {
+				if (!Downed.isGuard(mob) || !mob.canAttack(body)) {
+					return false;
+				}
+				if (body instanceof net.minecraft.world.entity.monster.Enemy) {
+					return true;
+				}
+				Temperaments.Temperament t = Temperaments.of(mob);
+				if (t != Temperaments.Temperament.HOTHEADED && t != Temperaments.Temperament.SPITEFUL) {
+					return false;
+				}
+				try {
+					return (boolean) fighting.invokeExact(mob, body);
+				} catch (Throwable e) {
+					return false;
+				}
+			});
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions of downed mobs (older Powers?)", e);
+		}
+	}
+
 	/** (0.7.543) Lines a humanoid says when the one it was executing is gone from under it (Chrono's rewind). */
 	static final int PERPLEXED_LINES = 6;
 

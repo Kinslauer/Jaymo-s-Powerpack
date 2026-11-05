@@ -1860,8 +1860,7 @@ public class CorpseEntity extends Entity {
 		jolt(true);
 		play(level, SoundEvents.AXE_STRIP.value(), 0.7F + random.nextFloat() * 0.2F);
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL, 0.6F, 0.7F);
-		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.REDSTONE_BLOCK.defaultBlockState()),
-			getX(), getY() + 0.3, getZ(), 10, 0.3, 0.1, 0.3, 0.1);
+		com.jaymoskitchen.KitchenBlood.send(level, getX(), getY() + 0.3, getZ(), 10, 0.3, 0.1, 0.3, 0.1);
 		ItemStack piece = nextPiece();
 		if (!piece.isEmpty()) {
 			if (butcherStage < Hanging.DRAINED) {

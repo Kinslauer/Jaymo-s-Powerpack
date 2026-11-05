@@ -65,6 +65,14 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.blood.BloodClient.init();
+		// (0.20.51) Subtle Effects' skeleton bone sprites off, and again now and then (the server's config syncs on join)
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("subtle_effects")) {
+			net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+				if (client.level != null && client.level.getGameTime() % 200L == 0L) {
+					com.jaymospowers.compat.SubtleEffectsCompat.noBones();
+				}
+			});
+		}
 		// (0.20.41) blood splashed on bodies
 		com.jaymospowers.client.blood.BloodCoatLayer.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip

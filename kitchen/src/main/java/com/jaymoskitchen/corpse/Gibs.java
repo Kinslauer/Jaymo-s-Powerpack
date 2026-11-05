@@ -172,8 +172,7 @@ public final class Gibs {
 		}
 		if (ON_BURST.isEmpty() || source == null) {
 			// no Jaymo's Powers to bleed it: a spray of red
-			BlockParticleOption blood = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState());
-			level.sendParticles(blood, at.x, at.y + 0.4, at.z, 40, width * 0.4, 0.3, width * 0.4, 0.3);
+			com.jaymoskitchen.KitchenBlood.send(level, at.x, at.y + 0.4, at.z, 40, width * 0.4, 0.3, width * 0.4, 0.3);
 		} else {
 			Map.Entry<DamageSource, Float> blast = Map.entry(source, damage);
 			for (var hook : ON_BURST) {

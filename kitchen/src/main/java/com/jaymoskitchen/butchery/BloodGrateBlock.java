@@ -2,7 +2,6 @@ package com.jaymoskitchen.butchery;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -33,7 +32,6 @@ public class BloodGrateBlock extends Block {
 	public static final int MAX = 8;
 	public static final IntegerProperty LEVEL = IntegerProperty.create("level", 0, MAX);
 	private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
-	static final DustParticleOptions BLOOD = new DustParticleOptions(0x6A0A0C, 0.9F);
 
 	public BloodGrateBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -64,7 +62,7 @@ public class BloodGrateBlock extends Block {
 			player.setItemInHand(hand, ItemUtils.createFilledResult(held, player, new ItemStack(Butchery.BLOOD_BOTTLE)));
 			server.setBlockAndUpdate(pos, state.setValue(LEVEL, now - 1));
 			server.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 0.7F);
-			server.sendParticles(BLOOD, pos.getX() + 0.5, pos.getY() + 0.35, pos.getZ() + 0.5, 4, 0.2, 0.05, 0.2, 0.0);
+			com.jaymoskitchen.KitchenBlood.send(server, pos.getX() + 0.5, pos.getY() + 0.35, pos.getZ() + 0.5, 4, 0.2, 0.05, 0.2, 0.0);
 		}
 		return InteractionResult.SUCCESS;
 	}
