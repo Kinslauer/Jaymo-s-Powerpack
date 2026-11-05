@@ -112,7 +112,7 @@ public final class Bulwark extends XenoForm {
 		if (live.combo > 0 && now >= live.comboNext) {
 			live.combo--;
 			live.comboNext = now + COMBO_SPACING;
-			punch(player, live.combo == 0);
+			punch(player, live.combo == 0, live.combo);
 		}
 		if (live.leaping) {
 			live.leapTicks++;
@@ -151,8 +151,9 @@ public final class Bulwark extends XenoForm {
 		return titan;
 	}
 
-	private static void punch(ServerPlayer player, boolean last) {
-		player.swing(player.getRandom().nextBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
+	private static void punch(ServerPlayer player, boolean last, int left) {
+		// (0.20.60) the hands take turns (in first person too); every client throws each blow with the next of the four arms
+		player.swing(left % 2 == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
 		LivingEntity target = aimed(player, COMBO_REACH, e -> true);
 		if (target == null) {
 			sound(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 0.7F);

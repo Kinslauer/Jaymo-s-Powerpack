@@ -68,7 +68,7 @@ public final class RubberFolk {
 	static final float BOUNCE = 0.6F;
 	/** A lost limb grows back this often (ticks), one at a time. */
 	static final int REGROW_EVERY = 400;
-	/** (0.7.551) Jaymo's Powers' tags on one cut in half: waiting on a swallow, and mending after it (Dismember.SPLIT_TAG...). */
+	/** (0.7.552) Jaymo's Powers' tags on one cut in half: waiting on a swallow, and mending after it (Dismember.SPLIT_TAG...). */
 	static final String SPLIT_TAG = "jaymospowers_rubber_split", MENDING_TAG = "jaymospowers_rubber_mending";
 	/**
 	 * Absorbing: how far the foe may be (blocks), how long it takes (ticks), the share of its health they take back, at
@@ -249,7 +249,7 @@ public final class RubberFolk {
 				gifts(player, adopted);
 			}
 			// a lost limb grows back, one at a time
-			// ((0.7.551) not while cut in half and waiting on a swallow: that one has to come first)
+			// ((0.7.552) not while cut in half and waiting on a swallow: that one has to come first)
 			if (server.getTickCount() % REGROW_EVERY == 0 && player.isAlive() && !player.entityTags().contains(SPLIT_TAG) && PowersCompat.regrow(player, false) && player.level() instanceof ServerLevel level) {
 				level.sendParticles(PINK, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
@@ -345,7 +345,7 @@ public final class RubberFolk {
 		level.sendParticles(PINK, foe.getX(), foe.getY(0.5), foe.getZ(), 20, 0.3, 0.4, 0.3, 0.03);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
 		player.heal(heal);
-		// (0.7.551) Andy: cut in half, a swallow within 10 s saves them (Jaymo's Powers' Dismember.SPLIT_TICKS), and they
+		// (0.7.552) Andy: cut in half, a swallow within 10 s saves them (Jaymo's Powers' Dismember.SPLIT_TICKS), and they
 		// start to mend: slowly, one limb at a time on the usual clock, down and open to a finishing blow till the legs are back
 		if (player.entityTags().contains(SPLIT_TAG)) {
 			player.removeTag(SPLIT_TAG);

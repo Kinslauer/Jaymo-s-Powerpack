@@ -275,12 +275,14 @@ public final class UltimateTitan extends XenoFormModels.UltimateModel {
 				this.fz[i] = 0.2F;
 			}
 		}
-		// a punch: the main hand throws the upper arm on its side, the off hand the lower arm on the other side
+		// a punch: (0.20.60) each swing is thrown by the next of the four arms in turn (XenoformClient.BULWARK_ARM);
+		// without that, the main hand throws the upper arm on its side, the off hand the lower arm on the other side
 		float sa = Mth.clamp(state.swingAnimation, 0.0F, 1.0F);
 		if (state.currentSwing != null && sa > 0.0F && !carry) {
+			Integer turn = state.getData(com.jaymospowers.client.power.xenoform.XenoformClient.BULWARK_ARM);
 			boolean off = state.currentSwing.hand() == net.minecraft.world.InteractionHand.OFF_HAND;
 			boolean right = (state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT) != off;
-			int punch = (off ? 2 : 0) + (right ? 0 : 1);
+			int punch = turn != null ? turn : (off ? 2 : 0) + (right ? 0 : 1);
 			int other = punch ^ 1;
 			float pk = Mth.sin(sa * Mth.PI);
 			this.ax[punch] = Mth.lerp(pk, this.ax[punch], PUNCH_X);

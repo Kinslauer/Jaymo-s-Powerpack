@@ -103,7 +103,7 @@ public final class HeritageHold {
 	}
 
 	/**
-	 * (0.7.551) Whether being down keeps {@code player} from absorbing: it does, except for Rubber-folk (Andy: "they can
+	 * (0.7.552) Whether being down keeps {@code player} from absorbing: it does, except for Rubber-folk (Andy: "they can
 	 * absorb from downed as well").
 	 */
 	static boolean downedStill(ServerPlayer player) {

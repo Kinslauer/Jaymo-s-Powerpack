@@ -307,7 +307,7 @@ public final class Downed {
 			if (!downable(entity) || !spared(entity, source)) {
 				return true;
 			}
-			// (0.20.60) cut in half at the waist: nothing left to get up, as with a beheading
+			// (0.20.61) cut in half at the waist: nothing left to get up, as with a beheading
 			if (Dismember.halve(entity, source, amount, null)) {
 				if (!Dismember.rubber(entity)) {
 					return true;
@@ -649,7 +649,7 @@ public final class Downed {
 		if (battered && WillSkill.heldDown(level, entity, felled == null ? null : felled.getEntity())) {
 			return;
 		}
-		// (0.20.60) a Rubber-folk cut in half stays down till their legs have grown back
+		// (0.20.61) a Rubber-folk cut in half stays down till their legs have grown back
 		if (battered && Dismember.pulledApart(entity)) {
 			return;
 		}

@@ -431,7 +431,7 @@ public final class Wounds {
 		} else {
 			landed = HitRouting.route(victim, plan, blow.source(), points, victim.getMaxHealth(), loss);
 		}
-		// (0.20.60) a heavy chop to the torso may cut the body in half (Downed already tried it on the downable)
+		// (0.20.61) a heavy chop to the torso may cut the body in half (Downed already tried it on the downable)
 		if (Dismember.halve(victim, blow.source(), loss, landed == BodyPart.BODY)) {
 			return;
 		}
@@ -661,7 +661,7 @@ public final class Wounds {
 			victim.setHealth(Math.max(0.01F, hearts(points, plan, max)));
 		}
 		Entity by = source.getEntity();
-		// (0.20.60) a zombie cut in half at the waist by a heavy chop crawls on as its upper half
+		// (0.20.61) a zombie cut in half at the waist by a heavy chop crawls on as its upper half
 		if (!blocked && Dismember.zombie(victim) && Dismember.halve(victim, source, loss, landed == BodyPart.BODY)) {
 			return;
 		}
