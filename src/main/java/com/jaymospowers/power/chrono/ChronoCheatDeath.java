@@ -98,6 +98,10 @@ public final class ChronoCheatDeath {
 	static final int MAX_WINDOW = BASE_WINDOW + PER_ABILITY * (Mastery.ALL - 1) + PER_RANK * 5 + TIMELESS_BONUS;
 	/** How long a death (or a waking) stays open to R: 4 s (Andy). */
 	static final int WINDOW_TICKS = 80;
+	/** (0.20.117) Never back within this many blocks of where you fell (Andy: "at least 12 blocks away")... */
+	static final double AWAY = 12.0;
+	/** ...and no further than this, when no checkpoint is far enough. */
+	static final double AWAY_MAX = 20.0;
 	/** Back from a rewind with at least this much health. */
 	static final float MIN_HEALTH = 6.0F;
 
@@ -487,6 +491,38 @@ public final class ChronoCheatDeath {
 		return null;
 	}
 
+	/**
+	 * (0.20.117) Somewhere to stand {@link #AWAY} to {@link #AWAY_MAX} blocks from {@code fell}, on loaded ground, away from
+	 * whatever was on them if it can be; null if nowhere fits.
+	 */
+	static @Nullable Vec3 away(ServerLevel level, Vec3 fell, ServerPlayer player) {
+		net.minecraft.util.RandomSource random = player.getRandom();
+		net.minecraft.world.entity.Mob mob = com.jaymospowers.core.wounds.MobExecutions.executioner(player);
+		// (first facing away from the one on them, then anywhere)
+		double from = mob != null ? Math.atan2(fell.z - mob.getZ(), fell.x - mob.getX()) : random.nextDouble() * Math.PI * 2;
+		for (int i = 0; i < 48; i++) {
+			double spread = i < 16 ? Math.PI / 2 : Math.PI;
+			double angle = from + (random.nextDouble() * 2 - 1) * spread;
+			double r = AWAY + random.nextDouble() * (AWAY_MAX - AWAY);
+			int x = net.minecraft.util.Mth.floor(fell.x + Math.cos(angle) * r);
+			int z = net.minecraft.util.Mth.floor(fell.z + Math.sin(angle) * r);
+			net.minecraft.core.BlockPos feet = Mortality.ground(level, x, z, false);
+			if (feet == null || Math.abs(feet.getY() - fell.y) > 24) {
+				continue;
+			}
+			Vec3 at = new Vec3(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5);
+			if (at.distanceToSqr(fell) >= AWAY * AWAY
+				&& level.noCollision(player, player.getDimensions(net.minecraft.world.entity.Pose.STANDING).makeBoundingBox(at))) {
+				return at;
+			}
+		}
+		// (last: straight out the given way, made safe)
+		Vec3 out = fell.add(Math.cos(from) * AWAY, 0, Math.sin(from) * AWAY);
+		net.minecraft.core.BlockPos safe = Mortality.safe(level, net.minecraft.core.BlockPos.containing(out));
+		Vec3 at = new Vec3(safe.getX() + 0.5, safe.getY(), safe.getZ() + 0.5);
+		return at.distanceToSqr(fell) >= (AWAY - 2) * (AWAY - 2) ? at : null;
+	}
+
 	private static boolean fits(ServerPlayer player, Checkpoint point) {
 		ServerLevel level = player.level().getServer().getLevel(point.dimension());
 		return level != null && level.noCollision(player, player.getDimensions(net.minecraft.world.entity.Pose.STANDING).makeBoundingBox(point.pos()));
@@ -503,19 +539,29 @@ public final class ChronoCheatDeath {
 			Mortality.cancelWake(player);
 		} else {
 			player.setInvisible(held.wasInvisible);
-			// (a death decided final is undone with the rest)
-			Mortality.undoFinal(player);
 		}
+		// (a death decided final is undone with the rest, however it came: (0.20.117) a second death while out cold was
+		// decided final under the waking's window, and its rebirth went ahead after the R)
+		Mortality.undoFinal(player);
 		WAKES_OFFERED.remove(player.getUUID());
 		Checkpoint point = pick(player, held.since);
 		if (point == null) {
-			// (no checkpoint yet, or every place you'd go back to is built over now: you rise where you fell, mended)
+			// (no checkpoint yet, or every place you'd go back to is built over now: mended, as now)
 			point = checkpoint(player, held.since);
 		}
 		ServerLevel from = player.level();
 		ServerLevel to = from.getServer().getLevel(point.dimension());
 		if (to == null) {
 			to = from;
+		}
+		// (0.20.117) Andy: "they should revert as far back as possible everytime, and if not, at least 12 blocks away":
+		// never back up where they fell
+		if (to.dimension() == held.dimension && point.pos().distanceToSqr(held.pos) < AWAY * AWAY) {
+			Vec3 away = away(to, held.pos, player);
+			if (away != null) {
+				point = new Checkpoint(point.time(), point.dimension(), away, point.yRot(), point.xRot(), point.health(), point.food(),
+					point.saturation(), point.xpLevel(), point.xpProgress(), point.xpTotal(), point.effects(), point.slots());
+			}
 		}
 		from.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
 		ChronoFx.particles(from, player, ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.3, 0.6, 0.3, 0.05);
