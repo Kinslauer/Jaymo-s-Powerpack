@@ -251,7 +251,7 @@ structures (other tracks), custom sky, weather and cloud renderers.
 `locate biome`); the look from a Wind arrival (big islands, islets above, open sky); trees and ores; caves; lakes; the cloudbed from
 the underside; falling out below y -8 and landing home; day and night; a moa on a highfields island.
 
-## The sky (0.20.91, seven-mods plan patch 10) [aether.sky]
+## The sky (0.20.95, seven-mods plan patch 10) [aether.sky]
 
 - **Updraft vents** (`UpdraftVentBlock`, `UpdraftBlock`): columns of rising air, 110 blocks at most, from vents on island
   tops. Placed `updraft_vents` (rarity 10, lowland tops) and `updraft_vents_high` (rarity 16, upper islets).

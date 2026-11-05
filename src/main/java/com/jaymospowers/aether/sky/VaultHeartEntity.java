@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.91) Andy (seven-mods plan, patch 10): the watched vault. Its chest and its crystals stay put while anyone looks at
+ * (0.20.95) Andy (seven-mods plan, patch 10): the watched vault. Its chest and its crystals stay put while anyone looks at
  * them; the moment nobody near does, now and then, one is somewhere else in the room. An open chest stays where it is.
  */
 public class VaultHeartEntity extends BlockEntity {

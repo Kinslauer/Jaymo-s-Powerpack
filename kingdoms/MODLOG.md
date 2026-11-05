@@ -9391,3 +9391,18 @@ ultimate and beam-clash films came down with it. Not played.
   foot (old ones carved when a player comes near); a book and quill used on them copies a row of runes as a page (one
   a day from each), and the more rows a book holds the more its copier makes out under each: the next standing Giant's
   kind, its heading, how far, whether it stirs. Not played.
+
+## 0.7.582 (2026-11-05): orc cutscenes you can read (Powers 0.20.93)
+Andy: "you dont get enough time or visibility on the orc cutscenes to view what they say ... pan into the text box and
+character, sacrificing the view of the character near the end to get high enough to view the whole chat bubble."
+- A goblin or orc captain's first meeting film is now Powers' speaker shot (in on his face, then up to his words) and
+  runs 6.75 s instead of 2.5 s (`Captains.FILM_TICKS` 50 to 135), about as long as his line's bubble stays.
+- His scene over your body before you respawn uses the same shot and runs 7.5 s (`SCENE_TICKS` 90 to 150); he's raised
+  at 3.5 s (`SCENE_RAISED` 45 to 70) so the gloat and the line after can both be read.
+- Powers' FOV is held at your plain setting during these films (see Powers 0.20.93). Built, not played.
+- Andy: "you should become invulnerable for the duration, and the orc should stop for a second when it is in view, so
+  that you can read". During a captain's first-meeting film the player takes no harm from anything, and he stands
+  still facing them (`Captains.FILMED`, `filmHarm`, his pause rides the death scene's `SCENE` hold). If the player
+  strikes a blow, both end early, so he doesn't stand there taking free hits. Turn it off with `Captains.FILM_SAFE`.
+- **0.7.583, a new life's black screen:** `LifeStory.making` (story, MCA's creator, heritage or class still to choose, or
+  held in stasis), read by Powers 0.20.94 to keep a reincarnated player's screen black until their character is made.

@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
-/** (0.20.91) The Aether sky's blocks (seven-mods plan, patch 10): updraft vents and their air, upfalls, a watched vault's heart. */
+/** (0.20.95) The Aether sky's blocks (seven-mods plan, patch 10): updraft vents and their air, upfalls, a watched vault's heart. */
 public final class SkyBlocks {
 	public static Block UPDRAFT_VENT, UPDRAFT, UPFALL, VAULT_HEART;
 	public static BlockEntityType<VaultHeartEntity> VAULT_HEART_ENTITY;

@@ -22,7 +22,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
- * (0.20.91) Andy (seven-mods plan, patch 10): the Aether's light and heavy islands, and its gas caves.
+ * (0.20.95) Andy (seven-mods plan, patch 10): the Aether's light and heavy islands, and its gas caves.
  * <ul>
  * <li><b>Gravity pockets:</b> the sky is cut into stretches {@link #CELL} blocks across; about one in {@link #LIGHT_ONE_IN}
  * is light (you jump far and fall slowly, and motes drift up round you) and about one in {@link #HEAVY_ONE_IN} is heavy

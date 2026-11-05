@@ -28,7 +28,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.91) The Aether sky's worldgen (seven-mods plan, patch 10), one feature type with a {@code kind}:
+ * (0.20.95) The Aether sky's worldgen (seven-mods plan, patch 10), one feature type with a {@code kind}:
  * <ul>
  * <li>{@code updraft_vent}: a vent set into the ground at the origin (the air over an island top), breathing its column up.</li>
  * <li>{@code upfall}: a column of water pouring up into an island's underside, found looking up a random column.</li>

@@ -21,7 +21,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.20.91) An upfall: water pouring up off an island's underside, a rare kin of the heavenfalls (The Upfall's idea, our
+ * (0.20.95) An upfall: water pouring up off an island's underside, a rare kin of the heavenfalls (The Upfall's idea, our
  * own blocks). A column hangs from the underside; its water runs upward into the rock, and it carries anything in it up
  * with it, slowly, putting out fire. It holds while the block over it is more upfall or the island it pours into.
  */

@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
-/** (0.20.91) The keystone set in a watched vault's floor: what moves its chest and crystals when nobody looks ({@link VaultHeartEntity}). */
+/** (0.20.95) The keystone set in a watched vault's floor: what moves its chest and crystals when nobody looks ({@link VaultHeartEntity}). */
 public class VaultHeartBlock extends BaseEntityBlock {
 	public VaultHeartBlock(Properties properties) {
 		super(properties);

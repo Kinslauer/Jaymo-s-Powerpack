@@ -556,6 +556,7 @@ public final class Mortality {
 			mob.setTarget(null);
 		}
 		Downed.knockOut(level, player, OUT_BEFORE + OUT_AFTER + 20 * 60, false, "message.jaymospowers.mortality.fading", false);
+		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.fading");
 		WAKES.put(player.getUUID(), new Wake(cause, sub, level.dimension(), player.blockPosition(), level.getServer().getTickCount() + OUT_BEFORE,
 			by, turn));
 	}
@@ -587,6 +588,14 @@ public final class Mortality {
 				}
 				if (isFinal(player) && player.isAlive() && !ZFighterAfterlife.among(player) && !REBIRTHS.containsKey(player.getUUID())) {
 					REBIRTHS.put(player.getUUID(), server.getTickCount() + REBIRTH_DELAY);
+					// ((0.20.94) and black until the new character is made)
+					player.setAttached(REBORNING, (long)server.getTickCount());
+				}
+				if (player.isAlive()) {
+					lighten(server, player);
+				}
+				if (player.hasAttached(WAKE_LINE) && !WAKES.containsKey(player.getUUID()) && !Downed.isDowned(player)) {
+					player.removeAttached(WAKE_LINE);
 				}
 			}
 		}
@@ -828,6 +837,7 @@ public final class Mortality {
 			Downed.forgetQuietly(player);
 		}
 		Downed.knockOut(level, player, OUT_AFTER, false, "message.jaymospowers.mortality.wake." + (wake.turn != null ? "risen" : line), false);
+		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.wake." + (wake.turn != null ? "risen" : line));
 		level.playSound(null, at, wake.turn != null ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F,
 			wake.turn != null ? 0.6F : 0.8F);
 		if (wake.turn != null) {
@@ -920,7 +930,18 @@ public final class Mortality {
 		// (a new life's power awakens in its own time)
 		player.removeAttached(Powers.AWAKEN_IN);
 		// (0.20.83) Andy: "EVERYTHING resets": every other mark the old life left on them goes too
+		// ((0.20.94) "it should wipe absolutely everything on your character": all they carry, their ender chest, their
+		// experience, their spawn point and every effect too)
+		long dark = player.getAttachedOrElse(REBORNING, (long)player.level().getServer().getTickCount());
 		wipe(player);
+		player.setAttached(REBORNING, dark);
+		player.getInventory().clearContent();
+		player.getEnderChestInventory().clearContent();
+		player.setExperienceLevels(0);
+		player.setExperiencePoints(0);
+		player.removeAllEffects();
+		player.setRespawnPosition(null, false);
+		player.inventoryMenu.broadcastChanges();
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.mortality.ended").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 		if (!ZFighterAfterlife.bornAnew(player)) {
 			JaymosPowers.LOGGER.info("{}'s life ended, but no life story could be told anew (no Kingdoms, or its screen)", player.getScoreboardName());
@@ -931,8 +952,8 @@ public final class Mortality {
 	 * (0.20.83) Andy, on the third death: "you should get reprompted completely, like with a new character creator, new
 	 * quests skills, etc. EVERYTHING resets." Takes every attachment our three mods keep on {@code player} (skills and their
 	 * trees, levels, quests, reputation, world tier and knowledge, class, heritage, story, patron, curses, mastery, affinity,
-	 * the Z Fighter's training, missing limbs...), except {@link #OUTLIVES}: what isn't the character's own (the roads their
-	 * deeds opened) or holds items (a backpack, a stash), which would be lost with nothing to show for it.
+	 * the Z Fighter's training, missing limbs...). (0.20.94) Andy: "it should wipe absolutely everything on your character":
+	 * nothing is kept any more, not the roads their deeds opened, nor a backpack, baubles or a stash.
 	 */
 	static void wipe(ServerPlayer player) {
 		if (!(player instanceof net.fabricmc.fabric.impl.attachment.AttachmentTargetImpl target)) {
@@ -945,7 +966,7 @@ public final class Mortality {
 		int n = 0;
 		for (AttachmentType<?> type : List.copyOf(held.keySet())) {
 			Identifier id = type.identifier();
-			if (OURS.contains(id.getNamespace()) && !OUTLIVES.contains(id.toString())) {
+			if (OURS.contains(id.getNamespace())) {
 				player.removeAttached(type);
 				n++;
 			}
@@ -956,15 +977,72 @@ public final class Mortality {
 	/** (0.20.83) The mods whose attachments a new life wipes ({@link #wipe}). */
 	private static final Set<String> OURS = Set.of(JaymosPowers.MOD_ID, "jaymoskingdoms", "jaymoskitchen");
 
-	/** (0.20.83) What outlives a life ({@link #wipe}): the starts their deeds opened, and whatever holds their things. */
-	private static final Set<String> OUTLIVES = Set.of(
-		// the roads (starts) they have opened, and heritages earned: every start stays unlocked (Andy's answer)
-		"jaymoskingdoms:roads_taken", "jaymoskingdoms:heritage_unlocked",
-		// things held for them, never to be lost
-		"jaymospowers:worn_backpack", "jaymospowers:backpack_shown", "jaymospowers:baubles", "jaymospowers:baubles_shown",
-		"jaymospowers:rig_parked", "jaymospowers:arsenal_stash", "jaymospowers:arsenal_relics", "jaymospowers:nadir_stash",
-		"jaymospowers:worn_costume", "jaymospowers:costume_unmasked", "jaymospowers:hidden_armor", "jaymospowers:web_shooters",
-		"jaymoskingdoms:hidden_blades", "jaymoskingdoms:pit_held", "jaymoskingdoms:crew_stowed", "jaymoskingdoms:post_waiting");
+	/**
+	 * (0.20.94) Andy: "black screen until it's ready". While this is on a player (from the moment a final death has them back
+	 * on their feet until their new character is made: Kingdoms' story, MCA's creator, heritage and class), their screen is
+	 * black. Synced to them; lifted by {@link #tick} once nothing is still to choose ({@link #DARK_MAX} at most).
+	 */
+	public static final AttachmentType<Long> REBORNING = AttachmentRegistry.create(JaymosPowers.id("mortality_reborning"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG,
+			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
+
+	/**
+	 * (0.20.94) Andy: "this will give you a chance to read what happened as it should say if you were kidnapped or in the
+	 * wilderness". What the black of a death turned away says, read large on it (its lang key; synced to them): going dark,
+	 * then where and how they wake. Gone once they're up.
+	 */
+	public static final AttachmentType<String> WAKE_LINE = AttachmentRegistry.create(JaymosPowers.id("mortality_wake_line"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8,
+			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
+
+	/** (0.20.94) The least and most (ticks) the black of a new life lasts. */
+	static final long DARK_MIN = 40L, DARK_MAX = 20L * 60 * 10;
+
+	/**
+	 * (0.20.94) Lifts {@link #REBORNING} once {@code player}'s new character is made (nothing more to choose), or after
+	 * {@link #DARK_MAX}.
+	 */
+	private static void lighten(MinecraftServer server, ServerPlayer player) {
+		Long since = player.getAttached(REBORNING);
+		if (since == null || isFinal(player) || REBIRTHS.containsKey(player.getUUID())) {
+			return;
+		}
+		long held = server.getTickCount() - since;
+		if (held >= DARK_MAX || held >= DARK_MIN && !com.jaymospowers.power.zfighter.ZFighterAfterlife.making(player)) {
+			player.removeAttached(REBORNING);
+		}
+	}
+
+	/**
+	 * (0.20.94) A safe place to stand at or near {@code at} in {@code level}: Andy, "reincarnating just spawned me in a wall".
+	 * The spot itself if they fit there, else the nearest that fits a few blocks round (up first), else the ground at the top
+	 * of the column, else {@code at} as it was.
+	 */
+	public static BlockPos safe(ServerLevel level, BlockPos at) {
+		level.getChunk(at);
+		if (standable(level, at)) {
+			return at;
+		}
+		for (int r = 0; r <= 4; r++) {
+			for (int dy = 0; dy <= 8; dy++) {
+				for (int sign : new int[] {1, -1}) {
+					for (int dx = -r; dx <= r; dx++) {
+						for (int dz = -r; dz <= r; dz++) {
+							if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+								continue;
+							}
+							BlockPos p = at.offset(dx, dy * sign, dz);
+							if (level.isInWorldBounds(p) && standable(level, p)) {
+								return p;
+							}
+						}
+					}
+				}
+			}
+		}
+		BlockPos top = ground(level, at.getX(), at.getZ(), false);
+		return top != null ? top : at;
+	}
 
 	/** Every player whose life ended, waiting to be born again ({@code /wounds} and tests). */
 	static Set<UUID> waiting() {
