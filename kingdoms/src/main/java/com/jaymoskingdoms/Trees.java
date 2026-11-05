@@ -391,7 +391,7 @@ public final class Trees {
 	}
 
 	/**
-	 * (0.7.587) A chopped log the chopper's screen guessed broken: once the server's "no, it stands" reaches it, the
+	 * (0.7.588) A chopped log the chopper's screen guessed broken: once the server's "no, it stands" reaches it, the
 	 * screen puts back a bare chopped log that has forgotten which wood it was, and drew it as oak (Andy: "this tree
 	 * turned into oak when i started breaking it"). So which log it was is sent again a tick after the chop.
 	 */

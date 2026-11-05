@@ -82,13 +82,13 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.7.232) From Tree Physics' ideas (ARR, none of its code): coming down, its wood breaks through other trees' leaves
  * in its way ({@link #sweep}); landing, some of its own leaves snap off, more the harder they struck ({@link #snaps});
- * and lying, its logs were a fallen trunk you could push or roll (0.7.587: no more; it stays a fallen tree, see below).
+ * and lying, its logs were a fallen trunk you could push or roll (0.7.588: no more; it stays a fallen tree, see below).
  * <p>
- * (0.7.456) Felled into another tree, it never stands back up. (0.7.587) A tree it strikes is knocked over with it
+ * (0.7.456) Felled into another tree, it never stands back up. (0.7.588) A tree it strikes is knocked over with it
  * ({@link #knock}); one too big to knock over holds it leaning there (no more glancing off to the side, Andy: it
  * "took an unexpected swapped trajectory and hit me").
  * <p>
- * (0.7.587) Down, it stays as it is (never blocks again) until it's chopped up: an axe breaks out the log it strikes,
+ * (0.7.588) Down, it stays as it is (never blocks again) until it's chopped up: an axe breaks out the log it strikes,
  * and a tree broken through comes apart in two, the part no longer held falling free ({@link #skipAttackInteraction}).
  * Its leaves drop off as it lies. It's kept with the world.
  * <p>
@@ -108,15 +108,15 @@ public final class FallingTree extends Entity {
 	/** (0.7.11) How it picks its side: a log weighs this, a leaf 1; its weight this far (blocks) off the trunk tips it. */
 	static final float LOG_WEIGHT = 3.0F, TIPS = 0.35F;
 	/**
-	 * (0.7.587) Andy: "keep the trees as physics items until they are broken by the player ... a leaning tree broken in
+	 * (0.7.588) Andy: "keep the trees as physics items until they are broken by the player ... a leaning tree broken in
 	 * the middle will break into two". Down, it stays this (never blocks): an axe takes {@link #LOG_CHOPS} strokes at a
 	 * log to break it out, a leaf one. Its leaves drop off as it lies, up to {@link #LEAF_FALL} every
 	 * {@link #LEAF_FALL_TICKS}; a leaf further than {@link #LEAF_HOLD} from any of its wood falls at once.
 	 */
 	static final int LOG_CHOPS = 3, LEAF_FALL = 2, LEAF_FALL_TICKS = 10, LEAF_HOLD = 3;
-	/** (0.7.587) A tree caught leaning looks again this often (ticks) whether what held it is gone, and falls on if so. */
+	/** (0.7.588) A tree caught leaning looks again this often (ticks) whether what held it is gone, and falls on if so. */
 	static final int PROP_CHECK = 20;
-	/** (0.7.587) A part broken off a leaning tree falls free, turning this many degrees a tick. */
+	/** (0.7.588) A part broken off a leaning tree falls free, turning this many degrees a tick. */
 	static final float SPLIT_TUMBLE = 3.0F;
 	/** (0.7.11) Bees round a nest in it (this far) go for a woodcutter who fells it. */
 	static final double BEES_RANGE = 24.0;
@@ -165,7 +165,7 @@ public final class FallingTree extends Entity {
 	/** Client side: the lean last tick, to draw it smoothly between ticks. */
 	public float leanO;
 	private float speed = START_SPEED;
-	/** (0.7.587) Down and at rest, and since when. */
+	/** (0.7.588) Down and at rest, and since when. */
 	private boolean down;
 	private int downAt = -1;
 	private float reach = 2.0F;
@@ -184,9 +184,9 @@ public final class FallingTree extends Entity {
 	private boolean propped;
 	/** (0.7.586) How many standing trees it has knocked over. */
 	private int knocks;
-	/** (0.7.587) Axe strokes each of its logs has taken. */
+	/** (0.7.588) Axe strokes each of its logs has taken. */
 	private final Map<Piece, Integer> chops = new HashMap<>();
-	/** (0.7.587) What its bounding box was last worked out from. */
+	/** (0.7.588) What its bounding box was last worked out from. */
 	private @Nullable List<Piece> boxPieces;
 	private float boxLean = Float.NaN, boxHeading = Float.NaN;
 
@@ -426,16 +426,16 @@ public final class FallingTree extends Entity {
 		}
 		this.landTurning = this.speed * Mth.DEG_TO_RAD;
 		this.land(level, pieces, at);
-		// (0.7.456) caught half standing, it stays leaning there (0.7.587: until what holds it goes, or it's chopped)
+		// (0.7.456) caught half standing, it stays leaning there (0.7.588: until what holds it goes, or it's chopped)
 		this.propped = at < LYING;
 		if (!this.propped) {
-			// (0.7.587) lying, its wood rests on the ground, not half sunk in it (it turned about the foot of its cut)
+			// (0.7.588) lying, its wood rests on the ground, not half sunk in it (it turned about the foot of its cut)
 			this.setPos(this.getX(), this.getY() + 0.5 * Mth.sin(at * Mth.DEG_TO_RAD), this.getZ());
 		}
 		this.comeDown(level);
 	}
 
-	/** (0.7.587) It's down: it rests from now on, losing the leaves that snapped off as it struck. */
+	/** (0.7.588) It's down: it rests from now on, losing the leaves that snapped off as it struck. */
 	private void comeDown(ServerLevel level) {
 		this.down = true;
 		this.downAt = this.tickCount;
@@ -445,7 +445,7 @@ public final class FallingTree extends Entity {
 	}
 
 	/**
-	 * (0.7.587) At rest: its leaves drop off a few at a time, and caught leaning, it falls on once what held it is gone.
+	 * (0.7.588) At rest: its leaves drop off a few at a time, and caught leaning, it falls on once what held it is gone.
 	 * It stays until it's chopped up ({@link #skipAttackInteraction}).
 	 */
 	private void rest(ServerLevel level, List<Piece> pieces) {
@@ -458,7 +458,7 @@ public final class FallingTree extends Entity {
 		}
 	}
 
-	/** (0.7.587) Down no longer: it starts over from where it leans. */
+	/** (0.7.588) Down no longer: it starts over from where it leans. */
 	private void fallOn() {
 		this.down = false;
 		this.propped = false;
@@ -711,7 +711,7 @@ public final class FallingTree extends Entity {
 		return BlockPos.containing(at.x - 0.01 * Mth.cos(heading), at.y + 0.01, at.z - 0.01 * Mth.sin(heading));
 	}
 
-	// ---- (0.7.587) at rest: chopped up, split, its leaves dropping -------------------------------------------------------
+	// ---- (0.7.588) at rest: chopped up, split, its leaves dropping -------------------------------------------------------
 
 	/** Its leaves that snapped off as it struck the ground fall now, likelier the harder they struck ({@link #snaps}). */
 	private void snapLeaves(ServerLevel level) {
@@ -1053,7 +1053,7 @@ public final class FallingTree extends Entity {
 		entityData.define(LEAN, 0.0F);
 	}
 
-	/** (0.7.587) Kept with the world: its pieces (by block, not number), lean, heading, and whether it's down or flying. */
+	/** (0.7.588) Kept with the world: its pieces (by block, not number), lean, heading, and whether it's down or flying. */
 	static final Codec<Piece> PIECE_CODEC = RecordCodecBuilder.create(i -> i.group(
 		BlockState.CODEC.fieldOf("state").forGetter(Piece::blockState),
 		Codec.INT.fieldOf("x").forGetter(Piece::x),
