@@ -944,3 +944,8 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   and a downed player's broken or red arms don't stop the sneak rise (a rise started on it is finished on it). Head and
   body still count; severed limbs are still gone. One heartbeat only the player hears as it kicks in, no text. When it
   ends the breaks come back (crawl again on two broken legs). Tuning at the top of `Adrenaline`. Built, not played.
+- 0.20.108 adrenaline's screen (Andy: "when it wears off you get the max thirst effect screen effects, (not max thirst)
+  and a lessened vein and slight letterbox while the adrenaline is rushing"), `client/wounds/AdrenalineHud`: rushing,
+  thin black bars (6% of the screen each) slide in top and bottom and the water-thirst veins show lightly at the edges,
+  throbbing with a 150 bpm heart; wearing off, the bars slide away and the veins come in as at no water (Kitchen's
+  DryVeins, every layer), held 3 s and fading over 7 s. Water untouched. Art copied from Kitchen's dry veins (ours).
