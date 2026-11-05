@@ -86,6 +86,8 @@ public final class BladeBlood {
 	/** (0.15.93) An open cut's drip: this many drops (a stump's more), this small. */
 	static final int DRIP_DROPS = 1, STUMP_DRIP_DROPS = 2;
 	static final float DRIP_SCALE = 0.5F;
+	/** (0.20.86) How far outside the body's box a drip leaves from (blocks). */
+	static final double DRIP_OUT = 0.04;
 	/**
 	 * (0.17.182) The lasting stains ({@link BloodTrail}): a drip's (grows where a body keeps bleeding), a blow's (one for
 	 * every this many drops, at most this many), and how long a drop takes to reach the ground before its stain shows (ticks).
@@ -412,8 +414,16 @@ public final class BladeBlood {
 		double w = body.getBbWidth() * 0.3;
 		int drops = stump ? STUMP_DRIP_DROPS : DRIP_DROPS;
 		// (0.17.182) the drops fly as before but leave no passing splash: each lands as a lasting stain (BloodTrail)
-		level.sendParticles(new BloodParticles.Spray(color(body), size(body) * DRIP_SCALE, false), true, false, body.getX(),
-			body.getY() + body.getBbHeight() * up, body.getZ(), drops, w, 0.05, w, 0.01);
+		// (0.20.86) each drop leaves from the body's side, not from inside it (Jung's clip: drips spawned in the chest
+		// read as blood clipping out of the model)
+		BloodParticles.Spray spray = new BloodParticles.Spray(color(body), size(body) * DRIP_SCALE, false);
+		double out = body.getBbWidth() * 0.5 + DRIP_OUT;
+		for (int i = 0; i < drops; i++) {
+			double turn = level.getRandom().nextDouble() * Math.PI * 2.0;
+			double y = body.getY() + body.getBbHeight() * up + (level.getRandom().nextDouble() - 0.5) * 0.1;
+			level.sendParticles(spray, true, false, body.getX() + Math.cos(turn) * out, y, body.getZ() + Math.sin(turn) * out, 1, 0.0, 0.0, 0.0,
+				0.0);
+		}
 		BloodTrail.bleed(level, body, color(body), drops, w, DRIP_STAIN * size(body), FALL_TICKS);
 	}
 
