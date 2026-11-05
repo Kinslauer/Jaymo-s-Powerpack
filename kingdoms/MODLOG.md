@@ -9155,3 +9155,10 @@ ultimate and beam-clash films came down with it. Not played.
 
 - Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
   0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.
+
+## 0.7.560 (2026-11-05): herd animals flee killings
+
+- Andy: "passive animals should run when someone is killed near them". Any death, downing, or blow on the downed (people,
+  villagers, monsters; not herd animals themselves, whose kin already panic) makes every `jaymoskingdoms:skittish` animal
+  within 16 blocks that sees it, or within 6 out of sight, run from the killer (or the body) for 4 s (`Herds.killing`,
+  `KILL_SEEN`, `KILL_HEARD`). Ridden and tamed animals stay calm; leashed ones pull at the rope. Hint 102. Not played.
