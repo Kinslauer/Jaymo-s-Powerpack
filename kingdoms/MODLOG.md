@@ -9404,3 +9404,5 @@ character, sacrificing the view of the character near the end to get high enough
   that you can read". During a captain's first-meeting film the player takes no harm from anything, and he stands
   still facing them (`Captains.FILMED`, `filmHarm`, his pause rides the death scene's `SCENE` hold). If the player
   strikes a blow, both end early, so he doesn't stand there taking free hits. Turn it off with `Captains.FILM_SAFE`.
+- **0.7.583, a new life's black screen:** `LifeStory.making` (story, MCA's creator, heritage or class still to choose, or
+  held in stasis), read by Powers 0.20.94 to keep a reincarnated player's screen black until their character is made.

@@ -782,3 +782,24 @@ sacrificing the view of the character near the end to get high enough to view th
   Overclock/Speed/sprint widening, zoom or under-water squeeze. It applies to every film, not only the orcs'.
 - A film may now run up to 10 s (`UltimateFilm.MAX_TICKS` 100 to 200) so a spoken line can be read through.
   Built, not played.
+## 0.20.94 (2026-11-05): reincarnation fixes: no wall, nothing kept, black till ready, one Judge
+- Andy: "the judges keep multiplying for some reason, and reincarnating just spawned me in a wall, it should wipe
+  absoluteley everything on your character, and black screen until it's ready". From his clip: a final death still went
+  to the Other World; the Judge's "born again" sent him home to a spot inside a wall while his life was still over, he
+  suffocated, died for good again and was sent back to the hall, round and round.
+- A final death no longer goes to the Other World (`ZFighterAfterlife` AFTER_DEATH/AFTER_RESPAWN): Reincarnate respawns
+  you and the new life starts. Going home from the hall never puts you inside blocks any more (`Mortality.safe`).
+- Black until it's ready: from the respawn until Kingdoms says the new character is made (story, MCA's creator,
+  heritage, class: `LifeStory.making`), the screen is black (`Mortality.REBORNING`, drawn by `DownedHud`; 10 min at most).
+- Everything goes: every Powers/Kingdoms/Kitchen attachment with no exceptions (unlocked roads and heritages, backpack,
+  baubles, stashes, costume are no longer kept), plus inventory, ender chest, experience, effects and spawn point.
+- The Judges: the hall looked for its people as soon as the chunk's blocks were in, before its creatures loaded, so a new
+  Judge (and master, teller) was made at every arrival. Now only once the creatures are loaded, and extras are sent away.
+  Kingdoms 0.7.583 goes with it.
+- Andy: "the red overlay on the respawn screen should be black as well, the screen should cut to black whenever you
+  die, and the slow entry of either the reincarnate screen or the scenario will load, this will give you a chance to
+  read what happened as it should say if you were kidnapped or in the wilderness". The death screen is black, not red,
+  and its words and buttons come up slowly out of the black (`DeathScreenBlackMixin`, 2.5 s). A death turned away goes
+  black at once and says what happened large in the middle (going dark, then the wake's own line: in chains, taken in,
+  out in the wild by cause...; `Mortality.WAKE_LINE`), and the world comes back slowly (`DownedHud.WAKE_OUT_TICKS`, 4 s).
+  A new life's black says "That life is over. Another begins." Built, not played.

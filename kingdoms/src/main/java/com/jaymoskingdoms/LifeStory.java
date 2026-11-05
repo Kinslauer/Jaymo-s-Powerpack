@@ -2272,6 +2272,14 @@ public final class LifeStory {
 	}
 
 	/**
+	 * (0.7.583) Whether {@code player} is still making their character: the story, MCA's creator, the heritage or the class
+	 * still to choose, or still held in stasis. Called by Jaymo's Powers (reflection) to keep a new life's screen black.
+	 */
+	public static boolean making(ServerPlayer player) {
+		return StoryStasis.owed(player) || StoryStasis.holding(player) || Classes.unmade(player);
+	}
+
+	/**
 	 * (0.7.573) Andy, on the third death: "you should get reprompted completely, like with a new character creator, new
 	 * quests skills, etc. EVERYTHING resets." Jaymo's Powers has already wiped the old life's progress (skills, quests,
 	 * reputation, tiers...); here MCA's creator is owed anew (a new look and name, single again) and the whole life story is
