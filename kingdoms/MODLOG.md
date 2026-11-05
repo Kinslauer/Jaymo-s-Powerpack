@@ -9155,3 +9155,10 @@ ultimate and beam-clash films came down with it. Not played.
 
 - Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
   0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.
+
+## 0.7.559 (2026-11-05): haven guards' rally cry shows its words (pack 0.20.70)
+
+- Andy's screenshot: a haven guard's rally bubble read `dialect.jaymoskingdoms.orc.speech.jaymoskingdoms.haven_guard.rally.1`.
+  `HavenGrowth` asked `Dialects.tr` (orc/goblin-only lines) for a human guard's line, and no dialect copy exists; it now
+  uses the plain `speech.jaymoskingdoms.haven_guard.rally.N` lines. A scan of every Dialects call and literal lang key in
+  Powers, Kingdoms and Kitchen against the lang files (including numbered line ranges) found no other missing speech key.
