@@ -19,7 +19,7 @@ import org.jspecify.annotations.Nullable;
  * only now. Kept from that gesture: no zoom from Sneak while clinging to a wall or hanging from a bar (Sneak lets go
  * there) nor until {@link #CLING_SETTLE} ticks after, none from Web's double-Sneak yank, and none in a slide (a held
  * Sneak in a fast run is the slide's).
- * <p>(0.20.73) Andy: "shift + left alt should make you zoom". Holding Sneak and the Dodge key (Left Alt) together zooms
+ * <p>(0.20.74) Andy: "shift + left alt should make you zoom". Holding Sneak and the Dodge key (Left Alt) together zooms
  * as well, until either is let go; {@code DodgeClient} doesn't dodge on Alt while Sneak is down. Alt alone still rolls.
  */
 public final class SneakZoom {
@@ -87,7 +87,7 @@ public final class SneakZoom {
 				setZoom(minecraft, false);
 			}
 		} else if (sneak && alt) {
-			// (0.20.73) Shift + Left Alt zooms too, for as long as both are held (Alt with Shift down doesn't dodge)
+			// (0.20.74) Shift + Left Alt zooms too, for as long as both are held (Alt with Shift down doesn't dodge)
 			sinceLastTap = Integer.MAX_VALUE;
 			setZoom(minecraft, true);
 			byAlt = true;

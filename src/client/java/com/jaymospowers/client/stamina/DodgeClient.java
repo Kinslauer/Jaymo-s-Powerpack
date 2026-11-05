@@ -65,7 +65,7 @@ public final class DodgeClient {
 		boolean wanted = false;
 		KeyMapping key = dodgeKey;
 		while (key != null && key.consumeClick()) {
-			// (0.20.73) Sneak + Alt is the zoom (SneakZoom), not a dodge
+			// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
 			wanted = !minecraft.options.keyShift.isDown();
 		}
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
