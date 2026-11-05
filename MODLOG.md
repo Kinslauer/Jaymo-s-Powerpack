@@ -673,3 +673,10 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   a new wake, taken in (`Mortality.SHELTERS`, asked after the captors; Kingdoms fills it). They wake on a bed in the
   friendly settlement, with every wound bandaged and every break splinted (`Treatment.tendAll`), line "You wake to low
   voices and the smell of herbs." Built, not played.
+
+## 0.20.84: carcasses drain where you can see them (Kitchen 0.5.70)
+
+- Andy, on Jung's deer clip: "the deer was clipping through the butcher table, i didnt see any blood draining either".
+  Kitchen 0.5.70 bleeds a carcass on the ground or a table from its throat, beside the body, instead of from under it,
+  so the drops and Powers' pooled stains show. The deer clipping was the stale Kitchen 0.5.57 the pack shipped before
+  0.20.80 (deer got a man's ragdoll, fixed in Kitchen 0.5.64 and 0.5.68). Built, not played.

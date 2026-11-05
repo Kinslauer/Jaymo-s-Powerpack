@@ -151,22 +151,28 @@ public final class Hanging {
 		}
 	}
 
-	/** Server, each tick a carcass too big to hang is bled where it lies. */
+	/**
+	 * Server, each tick a carcass too big to hang is bled where it lies. (0.5.70) From its throat, beside the body: it
+	 * bled from inside its middle, so the drops and the pool were all hidden under it.
+	 */
 	static void tickGround(CorpseEntity corpse, ServerLevel level) {
 		if (corpse.butcherStage() == BLEEDING) {
-			bleed(corpse, level, corpse.position().add(0.0, 0.3, 0.0));
+			bleed(corpse, level, corpse.throatPoint());
 		}
 	}
 
-	/** Its lowest point (its head, hanging): where the blood drips from. */
+	/**
+	 * Its lowest point (its head, hanging): where the blood drips from. (0.5.70) The bottom of that part, not its middle,
+	 * so the drops start outside the body.
+	 */
 	private static Vec3 lowest(RagdollBody body) {
 		int low = 0;
 		for (int i = 1; i < body.y.length; i++) {
-			if (body.y[i] < body.y[low]) {
+			if (body.y[i] - body.rig.radius[i] < body.y[low] - body.rig.radius[low]) {
 				low = i;
 			}
 		}
-		return new Vec3(body.x[low], body.y[low], body.z[low]);
+		return new Vec3(body.x[low], body.y[low] - body.rig.radius[low], body.z[low]);
 	}
 
 	/** One tick of bleeding: drops, the blood into a grate or onto the ground, and done when it's drained. */
