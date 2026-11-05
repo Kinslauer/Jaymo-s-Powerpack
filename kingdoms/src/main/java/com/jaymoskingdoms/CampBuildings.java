@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -556,14 +557,15 @@ final class CampBuildings {
 		}
 	}
 
-	/** The chief's hoard: emeralds, gold, iron, a saddle, a golden apple, meat. */
+	/** The chief's hoard: silver coins (0.7.486; once emeralds), gold, iron, a saddle, a golden apple, meat. */
 	private static void stockChiefChest(ServerLevel level, BlockPos chest, RandomSource random) {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;
 		}
-		List<ItemStack> hoard = List.of(new ItemStack(Items.EMERALD, 6 + random.nextInt(9)), new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(7)),
+		List<ItemStack> hoard = new java.util.ArrayList<>(Money.stacks(Money.worth(6 + random.nextInt(9))));
+		hoard.addAll(List.of(new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(7)),
 			new ItemStack(Items.IRON_INGOT, 6 + random.nextInt(11)), new ItemStack(Items.SADDLE), new ItemStack(Items.GOLDEN_APPLE),
-			new ItemStack(Items.COOKED_BEEF, 8 + random.nextInt(9)), new ItemStack(Items.LEATHER, 4 + random.nextInt(6)));
+			new ItemStack(Items.COOKED_BEEF, 8 + random.nextInt(9)), new ItemStack(Items.LEATHER, 4 + random.nextInt(6))));
 		for (ItemStack stack : hoard) {
 			for (int tries = 0; tries < 10; tries++) {
 				int slot = random.nextInt(c.getContainerSize());
@@ -579,7 +581,7 @@ final class CampBuildings {
 	/** What rots away once a camp is cleared: its wool, carpets, hay, fences, skulls, lanterns, ladders, banners, targets and fire. */
 	static boolean perishable(BlockState state) {
 		return state.is(BlockTags.WOOL) || state.is(BlockTags.WOOL_CARPETS) || state.is(Blocks.HAY_BLOCK) || state.is(BlockTags.FENCES)
-			|| state.is(BlockTags.FENCE_GATES) || state.is(Blocks.SKELETON_SKULL) || state.is(Blocks.LANTERN) || state.is(Blocks.LADDER)
+			|| state.is(BlockTags.FENCE_GATES) || state.is(Blocks.SKELETON_SKULL) || state.is(Blocks.LANTERN) || state.is(Lanterns.BURNT_LANTERN) || state.is(Blocks.LADDER)
 			|| state.is(Blocks.CAMPFIRE) || state.is(BlockTags.WOODEN_SLABS) || state.is(BlockTags.BANNERS) || state.is(Blocks.TARGET);
 	}
 }

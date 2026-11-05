@@ -163,6 +163,8 @@ public final class Wounds {
 		// (0.15.99) kneeling at someone's side to treat them
 		Tending.register();
 		SelfRevive.register();
+		// (0.20.26) death by cause: final, or left for dead with an injury that fits (after the downed state, which it follows)
+		Mortality.register();
 		// (0.19.20) hostiles walk up and finish a downed player off, filmed for them
 		MobExecutions.register();
 		// (0.15.82) up from the downed, but battered
@@ -267,8 +269,20 @@ public final class Wounds {
 	 * no further than the part may heal ({@link Breaks#caps}). Returns what it took.
 	 */
 	public static float healPart(LivingEntity entity, BodyPart part, float amount) {
+		return healPart(entity, part, amount, true);
+	}
+
+	/** As {@link #healPart(LivingEntity, BodyPart, float)}; {@code slow} false when the caller already applied the cut once (Mending). */
+	static float healPart(LivingEntity entity, BodyPart part, float amount, boolean slow) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null || !(entity.level() instanceof ServerLevel) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
+			return 0.0F;
+		}
+		// (0.20.14) the Hearthkeeper's trial and scar on one who turned from it (Jaymo's Kingdoms): every part heal is slower
+		if (slow) {
+			amount *= 1.0F - MedicineSkill.blessing(entity, "wounds_slow");
+		}
+		if (amount <= 0.0F) {
 			return 0.0F;
 		}
 		if (plan == BodyPlan.SIMPLE) {
@@ -462,6 +476,14 @@ public final class Wounds {
 			|| player.getHealth() < player.getMaxHealth()) {
 			healAll(player);
 		}
+	}
+
+	/**
+	 * (0.20.50) Every wound undone, as creative mode heals (Chrono's rewind out of death): breaks, cuts, fevers, severed
+	 * limbs, a bolas trip. Health is the caller's to set after.
+	 */
+	public static void undoAll(ServerPlayer player) {
+		creativeHeal(player);
 	}
 
 	/** Brings the parts in line with the health (healing fills the most hurt part, an unrouted loss comes off the limbs first). */

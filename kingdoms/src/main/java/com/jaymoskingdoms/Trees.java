@@ -58,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Felling</b>: cut a log of a tree (a trunk under living leaves, not a building's logs) and everything above the
  * cut comes down, logs and the leaves they held, and (0.5.9) it topples over whole, away from the
  * cutter, breaking apart where it lands and giving its wood there ({@link FallingTree}). (0.5.25) As in HT's TreeChop,
- * it takes chops, not one break: each stroke at a log narrows it ({@link ChoppedLog}), and the tree comes down on the
+ * it takes chops, not one break: each stroke at a log cracks it deeper ({@link ChoppedLog}), and the tree comes down on the
  * chop that makes up what its size needs ({@link #needed}); the axe takes a point of wear per chop. Sneak to break one
  * log only. Woodcutters chop and fell the same way ({@link Gatherers}). (0.7.11) As in Physical Falling Trees, it falls
  * to its heavier side (or away from the cutter if it's even), strikes what's in its way as hard as it's moving, angers
@@ -91,6 +91,8 @@ public final class Trees {
 	static final double CHOP_SCALE = 10.0;
 	/** (0.5.59) Leaves broken by hand: the chance of a stick, for the first hand axe (3 flint and a stick). */
 	static final float LEAF_STICK_CHANCE = 0.12F;
+	/** (0.7.502) Nether wart blocks (the huge fungi's caps) broken by hand: the chance of a stick, so a Nether start can make its first tools. */
+	static final float WART_STICK_CHANCE = 0.15F;
 
 	/** A growing tree: its foot, its sapling, its step, when it next grows. */
 	record Growing(BlockPos pos, String sapling, int stage, long next) {
@@ -126,6 +128,11 @@ public final class Trees {
 				&& !state.getValue(LeavesBlock.PERSISTENT) && player.getMainHandItem().isEmpty()
 				&& server.getRandom().nextFloat() < LEAF_STICK_CHANCE) {
 				Block.popResource(server, pos, new ItemStack(Items.STICK));
+			} else if (level instanceof ServerLevel wart && !player.isCreative() && (state.is(Blocks.NETHER_WART_BLOCK) || state.is(Blocks.WARPED_WART_BLOCK))
+				&& player.getMainHandItem().isEmpty() && wart.getRandom().nextFloat() < WART_STICK_CHANCE) {
+				// (0.7.502) Andy: a start in the Nether could only go on by stealing a piglin's axe. The huge fungi's wart
+				// caps are its leaves: torn by hand they give a dry stalk now and then, the stick a flint knife wants.
+				Block.popResource(wart, pos, new ItemStack(Items.STICK));
 			}
 		});
 	}
@@ -458,7 +465,7 @@ public final class Trees {
 
 	/**
 	 * (0.5.25) A player's axe stroke at a tree's log is a chop, not a break (unless they're sneaking or in creative, or it
-	 * isn't a tree): the log narrows ({@link ChoppedLog}), and the tree comes down whole on the chop that makes up
+	 * isn't a tree): the log cracks deeper ({@link ChoppedLog}), and the tree comes down whole on the chop that makes up
 	 * {@link #needed} for its size. False keeps the block (the chop was done here instead).
 	 */
 	private static boolean breaking(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.@Nullable BlockEntity be) {
@@ -505,8 +512,8 @@ public final class Trees {
 	}
 
 	/**
-	 * (0.5.25) One chop at the tree whose log is {@code cut}, the way HT's TreeChop fells them: the log narrows (once it's
-	 * as thin as it goes, the chop goes into the next whole-enough log up the trunk), and once the tree has taken
+	 * (0.5.25) One chop at the tree whose log is {@code cut}, the way HT's TreeChop fells them: the log cracks deeper (once
+	 * it's as cracked as it goes, the chop goes into the next whole-enough log up the trunk), and once the tree has taken
 	 * {@link #needed} chops for its size it comes down from {@code cut} ({@link #fell}). Returns -1 if it isn't a tree
 	 * (break it as ever), 0 for a chop that left it standing, or how many logs came down.
 	 */
@@ -548,7 +555,43 @@ public final class Trees {
 		}
 		BlockState there = level.getBlockState(at);
 		ChoppedLog.set(level, at, there, ChoppedLog.chops(there) + 1);
+		chips(level, cut, real, cutter);
+		if (cutter instanceof ServerPlayer player) {
+			// (0.7.510) as in Timber Tales: the chopper sees how near the tree is to coming down; full, the next stroke fells it
+			int need = needed(logs.size());
+			showChops(player, Math.min(need, taken + 1 + Careers.chop(cutter)), need);
+		}
 		return 0;
+	}
+
+	/** (0.7.510) The most marks the chop meter draws; bigger trees fill it a mark per few chops. */
+	static final int METER = 12;
+
+	/**
+	 * (0.7.510) The chop meter on the action bar: {@code done} of {@code need} chops, as filled and empty squares (never the
+	 * {@code |...} charge bar, which would hold the mouse and stop the next swing).
+	 */
+	private static void showChops(ServerPlayer player, int done, int need) {
+		int marks = Math.min(METER, need);
+		int filled = need <= 0 ? marks : Math.round(marks * (float)done / need);
+		Component bar = Component.literal("\u25A0".repeat(filled)).withStyle(filled >= marks ? ChatFormatting.RED : ChatFormatting.GOLD)
+			.append(Component.literal("\u25A1".repeat(marks - filled)).withStyle(ChatFormatting.DARK_GRAY));
+		player.sendOverlayMessage(bar);
+	}
+
+	/** (0.7.510) Wood chips flying off the face of {@code cut} toward whoever's chopping. */
+	private static void chips(ServerLevel level, BlockPos cut, BlockState log, @Nullable Entity cutter) {
+		double x = cut.getX() + 0.5, y = cut.getY() + 0.5, z = cut.getZ() + 0.5;
+		if (cutter != null) {
+			double dx = cutter.getX() - x, dz = cutter.getZ() - z, len = Math.sqrt(dx * dx + dz * dz);
+			if (len > 0.01) {
+				x += dx / len * 0.55;
+				z += dz / len * 0.55;
+			}
+			y = Math.max(cut.getY() + 0.2, Math.min(cut.getY() + 0.8, cutter.getEyeY() - 0.4));
+		}
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, log),
+			x, y, z, 10, 0.12, 0.12, 0.12, 0.12);
 	}
 
 	/**

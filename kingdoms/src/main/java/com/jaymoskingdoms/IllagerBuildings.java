@@ -1,8 +1,10 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
@@ -336,6 +338,86 @@ final class IllagerBuildings {
 		new Spot("illager_banner_pole", IllagerBuildings::bannerPole, 15, -5, 0, 1),
 		new Spot("illager_tent", IllagerBuildings::tent, -3, -9, 1, 5));
 
+	/** (0.7.490) Outlying buildings stand outside the palisade: the first this far from the fire, a ring further every few, no further than the most. */
+	static final int OUT_START = RING_RADIUS + 6, OUT_STEP = 7, OUT_PER_RING = 8, OUT_MOST = RING_RADIUS + 40;
+	/** (0.7.490) How far (blocks, up or down) an outlying building's ground may be off the camp's floor. */
+	static final int OUT_FLOOR_SLACK = 1;
+
+	/**
+	 * (0.7.490) Outlying building number {@code k} (counted from the end of {@link #GROWTH}): a tent, a banner pole, a
+	 * watchtower or a practice range in turn, outside the palisade, a turn of the golden angle round the camp from the last,
+	 * its front toward the fire. Null if the ground there is more than {@link #OUT_FLOOR_SLACK} off the camp's floor, is
+	 * wet, or is another settlement's. The caller checks {@link #outlyingLoaded} first (an unloaded spot is no answer
+	 * yet), builds it from {@link Outlying#base} (the fire's column at that ground's height), and still checks the
+	 * footprint ({@link #clear}).
+	 */
+	static @Nullable Outlying outlying(ServerLevel level, BlockPos fire, Direction gate, int campId, int k) {
+		BlockPos at = outlyingColumn(fire, gate, k);
+		int ring = Math.min(OUT_MOST, OUT_START + k / OUT_PER_RING * OUT_STEP);
+		double angle = k * Outbuild.GOLDEN;
+		int x = (int)Math.round(Math.cos(angle) * ring), z = (int)Math.round(Math.sin(angle) * ring);
+		if (!level.isLoaded(at)) {
+			return null;
+		}
+		BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
+		// ((0.7.490) a block up or down from the fire's floor will do: it's built on the ground where it stands)
+		if (Math.abs(top.getY() - fire.getY()) > OUT_FLOOR_SLACK || !level.getFluidState(top.below()).isEmpty()
+			|| !level.getBlockState(top.below()).isSolid()) {
+			return null;
+		}
+		Faction owner = Banners.owner(level.getServer(), net.minecraft.world.level.ChunkPos.containing(top));
+		if (owner != null && owner.id() != campId) {
+			return null;
+		}
+		// the turn that has its front toward the fire
+		int best = 0;
+		double bestDot = -Double.MAX_VALUE;
+		Direction facing = gate;
+		for (int t = 0; t < 4; t++) {
+			double dot = facing.getStepX() * (fire.getX() - at.getX()) + facing.getStepZ() * (fire.getZ() - at.getZ());
+			if (dot > bestDot) {
+				bestDot = dot;
+				best = t;
+			}
+			facing = facing.getClockWise();
+		}
+		Spot spot = switch (k % 4) {
+			case 0 -> new Spot("illager_tent", IllagerBuildings::tent, x, z, best, 5);
+			case 1 -> new Spot("illager_banner_pole", IllagerBuildings::bannerPole, x, z, 0, 1);
+			case 2 -> new Spot("illager_watchtower", IllagerBuildings::watchtower, x, z, best, 5);
+			default -> new Spot("illager_practice_range", IllagerBuildings::practiceRange, x, z, best, 5);
+		};
+		return new Outlying(spot, fire.atY(top.getY()));
+	}
+
+	/** (0.7.490) An outlying building, and the point it's built from: the fire's column at the height of its own ground. */
+	record Outlying(Spot spot, BlockPos base) {
+	}
+
+	/** (0.7.490) The ground column at the middle of outlying building number {@code k}. */
+	static BlockPos outlyingColumn(BlockPos fire, Direction gate, int k) {
+		int ring = Math.min(OUT_MOST, OUT_START + k / OUT_PER_RING * OUT_STEP);
+		double angle = k * Outbuild.GOLDEN;
+		int x = (int)Math.round(Math.cos(angle) * ring), z = (int)Math.round(Math.sin(angle) * ring);
+		return new CampBuildings.Placer(fire, gate, 0).at(x, 0, z);
+	}
+
+	/** (0.7.490) Outlying building number {@code k}'s ground is loaded, so {@link #outlying} can say whether it will do. */
+	static boolean outlyingLoaded(ServerLevel level, BlockPos fire, Direction gate, int k) {
+		return level.isLoaded(outlyingColumn(fire, gate, k));
+	}
+
+	/** (0.7.490) Every block of {@code spot}'s footprint is loaded (so a failed {@link #clear} means something's really in the way). */
+	static boolean footprintLoaded(ServerLevel level, Spot spot, BlockPos fire, Direction gate) {
+		CampBuildings.Placer placer = spot.placer(fire, gate);
+		for (Blueprint.Placement p : spot.design().get().blocks()) {
+			if (!level.isLoaded(placer.at(p.offset()))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** What a new camp's founding built: its fire (the seat), the loot pile's containers and depot, the warlord's spot, the cage, the sentry's post. */
 	record Layout(BlockPos fire, List<BlockPos> storage, BlockPos depot, BlockPos warlordSpot, BlockPos cage, BlockPos sentry) {
 	}
@@ -517,14 +599,15 @@ final class IllagerBuildings {
 		}
 	}
 
-	/** The warlord's hoard: emeralds, iron, a crossbow, arrows, an enchanted book's worth of lapis, a golden apple. */
+	/** The warlord's hoard: silver coins (0.7.486; once emeralds), iron, a crossbow, arrows, an enchanted book's worth of lapis, a golden apple. */
 	private static void stockHoard(ServerLevel level, BlockPos chest, RandomSource random) {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;
 		}
-		List<ItemStack> hoard = List.of(new ItemStack(Items.EMERALD, 8 + random.nextInt(9)), new ItemStack(Items.IRON_INGOT, 6 + random.nextInt(9)),
+		List<ItemStack> hoard = new java.util.ArrayList<>(Money.stacks(Money.worth(8 + random.nextInt(9))));
+		hoard.addAll(List.of(new ItemStack(Items.IRON_INGOT, 6 + random.nextInt(9)),
 			new ItemStack(Items.CROSSBOW), new ItemStack(Items.ARROW, 16 + random.nextInt(17)), new ItemStack(Items.LAPIS_LAZULI, 6 + random.nextInt(10)),
-			new ItemStack(Items.GOLDEN_APPLE), new ItemStack(Items.DARK_OAK_LOG, 8 + random.nextInt(9)), new ItemStack(Items.BREAD, 4 + random.nextInt(6)));
+			new ItemStack(Items.GOLDEN_APPLE), new ItemStack(Items.DARK_OAK_LOG, 8 + random.nextInt(9)), new ItemStack(Items.BREAD, 4 + random.nextInt(6))));
 		for (ItemStack stack : hoard) {
 			for (int tries = 0; tries < 10; tries++) {
 				int slot = random.nextInt(c.getContainerSize());

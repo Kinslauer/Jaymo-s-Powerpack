@@ -161,6 +161,11 @@ public final class Torches {
 		level.setBlockAndUpdate(pos, burnt);
 		level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4F, 1.6F);
 		level.sendParticles(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 6, 0.05, 0.05, 0.05, 0.01);
+		remember(level, pos);
+	}
+
+	/** The burnt torch (or, 0.7.541, burnt lantern) at {@code pos} goes on the lamplighters' list. */
+	static void remember(ServerLevel level, BlockPos pos) {
 		LevelChunk chunk = level.getChunkAt(pos);
 		List<Long> burntHere = new ArrayList<>(chunk.getAttachedOrElse(BURNT, List.of()));
 		if (!burntHere.contains(pos.asLong())) {
@@ -178,7 +183,7 @@ public final class Torches {
 		forget(level, pos);
 	}
 
-	private static void forget(ServerLevel level, BlockPos pos) {
+	static void forget(ServerLevel level, BlockPos pos) {
 		LevelChunk chunk = level.getChunkAt(pos);
 		List<Long> burntHere = chunk.getAttached(BURNT);
 		if (burntHere != null && burntHere.contains(pos.asLong())) {
@@ -222,7 +227,7 @@ public final class Torches {
 	/** The nearest free, awake grown villager goes to the burnt torch at {@code pos}, and relights it once there. */
 	private static void tend(ServerLevel level, BlockPos pos, Set<Villager> busy) {
 		BlockState state = level.getBlockState(pos);
-		if (!state.is(BURNT_TORCH) && !state.is(BURNT_WALL_TORCH)) {
+		if (!state.is(BURNT_TORCH) && !state.is(BURNT_WALL_TORCH) && !state.is(Lanterns.BURNT_LANTERN)) {
 			forget(level, pos);
 			return;
 		}
@@ -245,7 +250,9 @@ public final class Torches {
 			lighter.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			lighter.getLookControl().setLookAt(at);
 			// (0.7.206) a town with whale oil in store puts up an oil lamp in its place
-			if (state.is(BURNT_TORCH) && com.jaymoskingdoms.whaling.Lamplighters.upgrade(level, pos)) {
+			if (state.is(Lanterns.BURNT_LANTERN)) {
+				Lanterns.relight(level, pos, state); // (0.7.541) filled with a coal's worth from the town's stores
+			} else if (state.is(BURNT_TORCH) && com.jaymoskingdoms.whaling.Lamplighters.upgrade(level, pos)) {
 				forget(level, pos);
 			} else {
 				relight(level, pos, state);

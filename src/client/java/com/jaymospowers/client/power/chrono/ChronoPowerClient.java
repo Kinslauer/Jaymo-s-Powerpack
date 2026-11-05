@@ -98,6 +98,7 @@ public final class ChronoPowerClient implements PowerClient {
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.WORKY, WorkyRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
+		ChronoCheatDeathClient.init();
 		ChronoStreak.init();
 		MuzzleFlashParticle.register();
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ChronoSpaceCue::render);
@@ -222,12 +223,10 @@ public final class ChronoPowerClient implements PowerClient {
 		boolean ascended = Fate.isAscended(player);
 		int chips = ChronoSync.ABILITIES + (ascended ? 1 : 0);
 		int total = chips * FACE + (chips - 1) * GAP;
-		int x0 = width / 2 + 91 + 30;
-		int top = height - FACE - 1;
-		if (x0 + total > width - 2) {
-			x0 = width / 2 + 91 - total;
-			top = height - 22 - 30 - FACE;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(FACE);
+		int x0 = dock[0];
+		int top = dock[1];
 		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
 			drawClock(graphics, font, i, x0 + i * (FACE + GAP), top, partial);
 		}

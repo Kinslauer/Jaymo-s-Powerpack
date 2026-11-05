@@ -50,18 +50,23 @@ public final class Treasuries {
 			// (0.7.211) a den's fence pays no toll
 			return;
 		}
+		if (villager instanceof net.minecraft.world.entity.npc.villager.Villager v && Currencies.changer(v)) {
+			// (0.7.490) a money-changer only swaps one coin for another: nothing is earned, so no toll
+			return;
+		}
 		MinecraftServer server = level.getServer();
 		Faction owner = Banners.owner(server, ChunkPos.containing(villager.blockPosition()));
 		if (owner == null || owner.fallen() || !owner.type().isRealm()) {
 			return;
 		}
-		int emeralds = emeralds(offer.getCostA()) + emeralds(offer.getCostB()) + emeralds(offer.getResult());
+		// (0.7.490) the treasury is still kept in emeralds: a trade in the realm's own coin counts at its worth
+		long emeralds = worth(offer.getCostA()) + worth(offer.getCostB()) + worth(offer.getResult());
 		long toll = Math.max(TOLL_LEAST, emeralds * TOLL_PERCENT / 100);
 		Factions.update(server, owner.id(), f -> f.withTreasury(f.treasury() + toll));
 	}
 
-	private static int emeralds(ItemStack stack) {
-		return stack.is(Items.EMERALD) ? stack.getCount() : stack.is(Items.EMERALD_BLOCK) ? stack.getCount() * 9 : 0;
+	private static long worth(ItemStack stack) {
+		return stack.is(Items.EMERALD_BLOCK) ? stack.getCount() * 9L : Currencies.worthOf(stack);
 	}
 
 	/** A caravan has delivered {@code goods} to {@code lord}: its market dues. */

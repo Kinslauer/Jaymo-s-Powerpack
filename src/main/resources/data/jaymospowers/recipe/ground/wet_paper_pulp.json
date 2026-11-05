@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:plant_mesh",
+    "jaymospowers:plant_mesh",
+    "jaymospowers:plant_mesh",
+    "minecraft:water_bucket"
+  ],
+  "result": {
+    "id": "jaymospowers:wet_paper_pulp",
+    "count": 3
+  }
+}

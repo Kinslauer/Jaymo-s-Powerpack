@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "W": "minecraft:wheat_seeds"
+  },
+  "pattern": [
+    "PPP",
+    "PWP",
+    " S "
+  ],
+  "result": {
+    "id": "jaymoskingdoms:pigeon_roost",
+    "count": 1
+  }
+}

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.forms;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.CombatArts;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
@@ -199,8 +200,14 @@ public final class FormsClient {
 		Font font = minecraft.font;
 		boolean named = graphics.guiWidth() >= Forms.BELT_SLOTS * (SLOT_W + SLOT_GAP) + 8;
 		int w = named ? SLOT_W : 14;
-		int x0 = (graphics.guiWidth() - (Forms.BELT_SLOTS * w + (Forms.BELT_SLOTS - 1) * SLOT_GAP)) / 2;
-		int y = graphics.guiHeight() - STRIP_ABOVE;
+		int beltW = Forms.BELT_SLOTS * w + (Forms.BELT_SLOTS - 1) * SLOT_GAP;
+		// (HUD rework) focus band, row 20 (the slots plus their 1 px outline)
+		int[] at = HudZones.place(HudZones.FOCUS, "jaymoskingdoms:belt", 20, beltW + 2, SLOT_H + 2);
+		if (at == null) {
+			return;
+		}
+		int x0 = at[0] + 1;
+		int y = at[1] + 1;
 		for (int i = 0; i < Forms.BELT_SLOTS; i++) {
 			int x = x0 + i * (w + SLOT_GAP);
 			boolean picked = i == book.slot();
@@ -230,6 +237,11 @@ public final class FormsClient {
 		int color = links >= RELENTLESS ? RELENTLESS_COLOR : links >= FIERCE ? FIERCE_COLOR : GOOD_COLOR;
 		Component text = grade == null ? Component.translatable("hud.jaymoskingdoms.chain", links)
 			: Component.translatable("hud.jaymoskingdoms.chain.graded", links, Component.translatable("hud.jaymoskingdoms.chain." + grade));
-		graphics.text(minecraft.font, text, graphics.guiWidth() / 2 + COUNTER_GAP, graphics.guiHeight() / 2 - 4, alpha << 24 | color & 0xFFFFFF);
+		// (HUD rework) right of the crosshair, INSPECT row 10
+		int[] at = HudZones.place(HudZones.INSPECT, "jaymoskingdoms:chain", 10, minecraft.font.width(text), 9);
+		if (at == null) {
+			return;
+		}
+		graphics.text(minecraft.font, text, at[0], at[1], alpha << 24 | color & 0xFFFFFF);
 	}
 }

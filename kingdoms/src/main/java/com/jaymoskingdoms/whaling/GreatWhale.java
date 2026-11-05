@@ -4,7 +4,6 @@ import com.jaymoskingdoms.sailing.Ship;
 import com.jaymoskingdoms.sailing.Ships;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -221,7 +220,7 @@ public class GreatWhale extends WaterAnimal {
 			this.bleeding = true;
 			this.hurtServer(level, this.damageSources().generic(), BLEED * Math.min(this.irons, MOST_BLEEDING));
 			this.bleeding = false;
-			level.sendParticles(new DustParticleOptions(0x7A0A0A, 2.5F), this.getX(), this.getY() + HEIGHT * 0.5, this.getZ(), 8 * this.irons,
+			level.sendParticles(com.jaymoskingdoms.PowersCompat.blood(0x7A0A0A, 2.5F), this.getX(), this.getY() + HEIGHT * 0.5, this.getZ(), 8 * this.irons,
 				WIDTH * 0.4, HEIGHT * 0.4, WIDTH * 0.4, 0.0);
 		}
 
@@ -382,7 +381,7 @@ public class GreatWhale extends WaterAnimal {
 		level.sendParticles(ParticleTypes.SPLASH, x, y + 1.5, z, 60, 0.4, 1.5, 0.4, 0.3);
 		level.sendParticles(ParticleTypes.FALLING_WATER, x, y + 4.0, z, 40, 1.2, 1.0, 1.2, 0.0);
 		if (blood) {
-			level.sendParticles(new DustParticleOptions(0x8A0303, 3.0F), x, y + 2.0, z, 40, 0.5, 2.0, 0.5, 0.0);
+			level.sendParticles(com.jaymoskingdoms.PowersCompat.blood(0x8A0303, 3.0F), x, y + 2.0, z, 40, 0.5, 2.0, 0.5, 0.0);
 		}
 		level.playSound(null, x, y, z, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 3.0F, 0.5F);
 		level.playSound(null, x, y, z, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.NEUTRAL, 2.0F, 0.6F);

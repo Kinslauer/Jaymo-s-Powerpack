@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.forms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.Downed;
 import com.jaymoskingdoms.Faction;
 import com.jaymoskingdoms.Festivals;
@@ -39,8 +40,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * The bout is a short bracket of up to {@link #ROUNDS} honour duels ({@link Duels}, unranked: no day spent, no standing or
  * reputation per duel) against students of the realm, the last against the bout master. {@link #BREAK_TICKS} pass between
- * rounds, with a little tending. Lose, draw or call off a round and you are out. Each round won pays {@link #ROUND_EMERALDS}
- * emeralds and {@link #ROUND_STANDING} standing in your school; the final also pays {@link #FINAL_EMERALDS} emeralds, a golden
+ * rounds, with a little tending. Lose, draw or call off a round and you are out. Each round won pays {@link #ROUND_SILVER}
+ * silver coins and {@link #ROUND_STANDING} standing in your school; the final also pays {@link #FINAL_SILVER} silver coins, a golden
  * apple, {@link #FINAL_STANDING} standing and {@link #FINAL_REP} reputation with the realm.
  * <p>
  * <b>The bracket is told in the Tidings, not on a screen</b>: Jaymo's Powers has a Z Fighter bracket screen
@@ -58,8 +59,8 @@ public final class Bouts {
 	static final int BREAK_TICKS = 100, TEND_TICKS = 80;
 	/** A bracket not finished this long after it was drawn (ticks) is called off between rounds. */
 	static final long GIVE_UP = 12000L;
-	/** Emeralds for each round won, and for the final on top; the final's standing, reputation; each round's standing. */
-	static final int ROUND_EMERALDS = 2, FINAL_EMERALDS = 6, FINAL_STANDING = 4, FINAL_REP = 12, ROUND_STANDING = 1;
+	/** Silver coins for each round won, and for the final on top; the final's standing, reputation; each round's standing. */
+	static final int ROUND_SILVER = 2, FINAL_SILVER = 6, FINAL_STANDING = 4, FINAL_REP = 12, ROUND_STANDING = 1;
 	/** The MCA {@code main} menu answer (our dialogue data): "Enter the festival bout". */
 	public static final String ANSWER = "jaymoskingdoms_bout";
 	static final int LINES = 2;
@@ -200,7 +201,7 @@ public final class Bouts {
 		for (int i = 0; i < names.size(); i++) {
 			list = list.copy().append(i == 0 ? Component.empty() : Component.literal(", ")).append(names.get(i));
 		}
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.bracket", f.name(), foes.size(), list));
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.bracket", f.name(), foes.size(), list));
 	}
 
 	// ---- the bracket -------------------------------------------------------------------------------------------------
@@ -259,7 +260,7 @@ public final class Bouts {
 			return;
 		}
 		boolean last = round == run.foes.size() - 1;
-		Post.tidings(player.getUUID(), Component.translatable(last ? "tidings.jaymoskingdoms.bout.final" : "tidings.jaymoskingdoms.bout.round",
+		Post.aside(player.getUUID(), Component.translatable(last ? "tidings.jaymoskingdoms.bout.final" : "tidings.jaymoskingdoms.bout.round",
 			round + 1, run.foes.size(), foe.getDisplayName()));
 	}
 
@@ -271,7 +272,7 @@ public final class Bouts {
 			return;
 		}
 		School mine = Duels.schoolFor(player, school(level, run));
-		give(player, new ItemStack(Items.EMERALD, ROUND_EMERALDS));
+		Money.pay(player, Money.worth(ROUND_SILVER));
 		boolean joined = Schools.joined(player).contains(mine);
 		if (joined) {
 			Schools.addStanding(player, mine, ROUND_STANDING);
@@ -280,18 +281,18 @@ public final class Bouts {
 		if (run.round < run.foes.size()) {
 			player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, TEND_TICKS, 1, true, false));
 			run.nextRound = level.getGameTime() + BREAK_TICKS;
-			Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.advance", round + 1, run.foes.size()));
+			Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.advance", round + 1, run.foes.size()));
 			return;
 		}
 		RUNS.remove(run.player);
-		give(player, new ItemStack(Items.EMERALD, FINAL_EMERALDS));
+		Money.pay(player, Money.worth(FINAL_SILVER));
 		give(player, new ItemStack(Items.GOLDEN_APPLE));
 		if (joined) {
 			Schools.addStanding(player, mine, FINAL_STANDING);
 		}
 		Reputation.change(player, f, FINAL_REP);
 		level.sendParticles(ParticleTypes.FIREWORK, player.getX(), player.getY() + 1.5, player.getZ(), 30, 0.6, 0.6, 0.6, 0.15);
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.won", f.name(), Rivals.name(mine)));
+		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.bout.won", f.name(), Rivals.name(mine)));
 		if (level.getEntity(run.foes.get(run.foes.size() - 1)) instanceof PathfinderMob master) {
 			say(level, master, player, "bout.jaymoskingdoms.won");
 		}
@@ -313,7 +314,7 @@ public final class Bouts {
 	/** The bout is over for {@code player}: out of the bracket, with {@code tidings}. */
 	private static void out(ServerLevel level, ServerPlayer player, Run run, String tidings) {
 		RUNS.remove(run.player);
-		Post.tidings(player.getUUID(), Component.translatable(tidings));
+		Post.aside(player.getUUID(), Component.translatable(tidings));
 		if (level.getEntity(run.foes.get(Math.min(run.round, run.foes.size() - 1))) instanceof PathfinderMob foe && foe.isAlive()) {
 			say(level, foe, player, "bout.jaymoskingdoms.out");
 		}

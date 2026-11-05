@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:leather",
+    "minecraft:string",
+    "jaymoskingdoms:copper_coin"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:coin_purse",
+    "count": 1
+  }
+}

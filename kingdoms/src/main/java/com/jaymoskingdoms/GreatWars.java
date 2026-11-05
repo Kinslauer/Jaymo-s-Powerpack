@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.WarData.War;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -20,10 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -55,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Rebellions.</b> In a great war, a fiefdom of another creed whose overlord is losing may rise, crown its lord
  * king and go over to the other side.</li>
  * <li><b>Wagers.</b> (Andy: "War wagers can only be done with bookie npcs in speakeasies.") While a war is mustering or
- * young, a speakeasy's bookie takes emeralds on a side at his odds ({@link Bookies}): paid at the odds if it wins, the
+ * young, a speakeasy's bookie takes silver coins on a side at his odds ({@link Bookies}): paid at the odds if it wins, the
  * stake back on a white peace.</li>
  * </ul>
  */
@@ -153,7 +151,7 @@ final class GreatWars {
 	static final float REBEL_CHANCE = 0.15F;
 	/** A rebel and its old overlord start from this tension. */
 	static final float REBEL_TENSION = 60.0F;
-	/** Wagers: open until the war is this old (ticks), at most this many emeralds a player a war. */
+	/** Wagers: open until the war is this old (ticks), at most this many silver coins a player a war. */
 	static final long WAGER_OPEN_TICKS = 24000L;
 	static final int WAGER_MOST = 128;
 	/** What a wager saved before odds were given pays (times the stake). */
@@ -357,14 +355,35 @@ final class GreatWars {
 			delta += RIVAL_GAIN;
 		}
 		Creed ca = creed(server, a), cb = creed(server, b);
-		if (worthA >= TRADE_WORTH && worthB >= TRADE_WORTH && (ca == Creed.COIN || cb == Creed.COIN)) {
+		boolean tradeGain = worthA >= TRADE_WORTH && worthB >= TRADE_WORTH && (ca == Creed.COIN || cb == Creed.COIN);
+		if (tradeGain) {
 			delta += TRADE_GAIN;
 		}
+		// (0.7.513) faiths at odds: holy-war friction (Andy: humans are in a constant battle with the other ideologies)
+		delta += RealmFaiths.holyTension(server, a, b);
 		if (friction == 0) {
 			delta -= KINDRED_EASE;
 		}
 		if (relation == Relation.ALLIED) {
 			delta = -ALLIED_EASE;
+			tradeGain = false;
+		}
+		// (0.7.519) treaties ease it: recognition most, a charter in place of the trade's friction, aid like an alliance
+		boolean recognised = Treaties.has(server, a, b, Treaties.Kind.RECOGNITION);
+		if (recognised) {
+			delta -= Treaties.RECOGNITION_EASE;
+		}
+		if (Treaties.has(server, a, b, Treaties.Kind.PASSAGE)) {
+			delta -= Treaties.PASSAGE_EASE;
+		}
+		if (Treaties.has(server, a, b, Treaties.Kind.CHARTER)) {
+			delta -= Treaties.CHARTER_EASE;
+			if (tradeGain) {
+				delta -= TRADE_GAIN;
+			}
+		}
+		if (Treaties.has(server, a, b, Treaties.Kind.AID)) {
+			delta = Math.min(delta, -Treaties.AID_EASE);
 		}
 		boolean truce = WarData.truce(server, a.id(), b.id(), now);
 		if (truce) {
@@ -376,10 +395,16 @@ final class GreatWars {
 		if (truce || relation == Relation.ALLIED || Wars.between(server, a.id(), b.id()) != null) {
 			return;
 		}
-		if (relation == Relation.NEUTRAL && t >= RIVAL_AT) {
+		if (relation == Relation.NEUTRAL && t >= RIVAL_AT && !recognised) {
 			Relations.set(server, a.id(), b.id(), Relation.RIVAL);
-			KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.creed.rivals", a.name(), ca.named(), b.name(), cb.named())
-				.withStyle(ChatFormatting.GOLD));
+			if (RealmFaiths.holy(server, a, b) > 0) {
+				// (0.7.513) the faiths, not the creeds, set them at odds
+				KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.holy.rivals", a.name(), RealmFaiths.patron(server, a).named(),
+					b.name(), RealmFaiths.patron(server, b).named()).withStyle(ChatFormatting.GOLD));
+			} else {
+				KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.creed.rivals", a.name(), ca.named(), b.name(), cb.named())
+					.withStyle(ChatFormatting.GOLD));
+			}
 		}
 		if (t >= WAR_AT && Wars.warsOf(server, a.id()).isEmpty() && Wars.warsOf(server, b.id()).isEmpty()) {
 			// the richer and readier declares, whatever the armies say (a players' realm declares only by its lords' word)
@@ -389,6 +414,10 @@ final class GreatWars {
 				return;
 			}
 			Faction from = npcA && (!npcB || readyA >= readyB) ? a : b, on = from == a ? b : a;
+			// (0.7.519) a king bound to the other by treaty keeps faith unless he's the breaking sort or tension has boiled over
+			if (!Treaties.mayBreakForWar(server, from, on, level)) {
+				return;
+			}
 			KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.creed.inevitable", from.name(), creed(server, from).named(),
 				on.name(), creed(server, on).named()).withStyle(ChatFormatting.RED));
 			if (Wars.declare(server, from, on, false) == null) {
@@ -405,6 +434,11 @@ final class GreatWars {
 
 	static boolean great(MinecraftServer server, War war) {
 		return great(server, war.id());
+	}
+
+	/** (0.7.519) {@code faction} is pledged to {@code principal}'s side of {@code war} (by a treaty of aid). */
+	static void pledge(MinecraftServer server, int faction, int war, int principal) {
+		edit(server, l -> withPledges(l, with(l.pledges(), Integer.toString(faction), new Pledge(war, principal))));
 	}
 
 	/** The principal {@code faction} (a realm at the head of its own side) is pledged to, or -1. */
@@ -460,16 +494,26 @@ final class GreatWars {
 			return;
 		}
 		long wa = Wealth.worth(server, a), wd = Wealth.worth(server, d);
-		if (!(wa >= GREAT_WORTH && wd >= GREAT_WORTH) && wa + wd < GREAT_TOGETHER) {
+		// (0.7.513) a holy war is always a great war
+		boolean holy = RealmFaiths.holy(server, a, d) > 0;
+		if (!holy && !(wa >= GREAT_WORTH && wd >= GREAT_WORTH) && wa + wd < GREAT_TOGETHER) {
 			return;
+		}
+		if (holy) {
+			RealmFaiths.markHoly(server, war.id());
 		}
 		edit(server, l -> {
 			List<Integer> great = new ArrayList<>(l.great());
 			great.add(war.id());
 			return withGreat(l, great);
 		});
-		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.great_war.begun", a.name(), creed(server, a).named(),
-			d.name(), creed(server, d).named()).withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
+		if (holy) {
+			KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.holy_war.begun", a.name(), RealmFaiths.patron(server, a).named(),
+				d.name(), RealmFaiths.patron(server, d).named()).withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
+		} else {
+			KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.great_war.begun", a.name(), creed(server, a).named(),
+				d.name(), creed(server, d).named()).withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
+		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 1.0F, 0.5F);
 		}
@@ -500,7 +544,9 @@ final class GreatWars {
 			if (h.id() == a.id() || h.id() == d.id() || Tempers.of(h) == null || !Wars.warsOf(server, h.id()).isEmpty()) {
 				continue;
 			}
-			double lean = lean(server, h, a, d, now), leanD = lean(server, h, d, a, now);
+			boolean holy = RealmFaiths.holyWar(server, war.id());
+			double lean = lean(server, h, a, d, now, holy ? RealmFaiths.rally(server, h, a, d) : 0.0);
+			double leanD = lean(server, h, d, a, now, holy ? RealmFaiths.rally(server, h, d, a) : 0.0);
 			Faction side = lean > leanD && lean > 0 ? a : leanD > lean && leanD > 0 ? d : null;
 			if (side == null) {
 				continue;
@@ -518,11 +564,18 @@ final class GreatWars {
 	}
 
 	/** How much {@code h} leans to {@code friend}'s side against {@code foe} (0 or less: not at all). */
-	private static double lean(MinecraftServer server, Faction h, Faction friend, Faction foe, long now) {
+	private static double lean(MinecraftServer server, Faction h, Faction friend, Faction foe, long now, double extra) {
 		if (WarData.truce(server, h.id(), foe.id(), now) || h.relation(foe.id()) == Relation.ALLIED) {
 			return 0.0;
 		}
+		// (0.7.519) one bound by treaty to the foe stays out; one bound to the friend by aid leans to it
+		if (Treaties.any(server, h, foe)) {
+			return 0.0;
+		}
 		double lean = friction(server, h, foe) - friction(server, h, friend);
+		if (Treaties.has(server, h, friend, Treaties.Kind.AID)) {
+			lean += Treaties.AID_LEAN;
+		}
 		if (h.relation(friend.id()) == Relation.ALLIED) {
 			lean += 3.0;
 		}
@@ -530,6 +583,7 @@ final class GreatWars {
 			lean += 1.0;
 		}
 		lean += tension(server, h.id(), foe.id()) / RIVAL_AT - tension(server, h.id(), friend.id()) / RIVAL_AT;
+		lean += extra;
 		return lean >= 2.0 ? lean : 0.0;
 	}
 
@@ -539,6 +593,8 @@ final class GreatWars {
 		for (War war : WarData.wars(server)) {
 			live.add(war.id());
 		}
+		// (0.7.513) holy marks of wars that are gone
+		RealmFaiths.forgetEnded(server, live);
 		Ledger l = ledger(server);
 		boolean stale = l.great().stream().anyMatch(id -> !live.contains(id)) || l.pledges().values().stream().anyMatch(p -> !live.contains(p.war()))
 			|| l.mercs().keySet().stream().anyMatch(k -> !live.contains(Integer.parseInt(k.substring(0, k.indexOf('|')))))
@@ -646,6 +702,7 @@ final class GreatWars {
 	 * war chests and wagers are settled; the tension between the two eases.
 	 */
 	static void ended(MinecraftServer server, War war, int winner, Wars.@Nullable Terms terms) {
+		RealmFaiths.unmarkHoly(server, war.id());
 		int loser = winner < 0 ? -1 : Wars.otherSide(war, winner);
 		Faction w = winner < 0 ? null : Factions.get(server, winner), l = loser < 0 ? null : Factions.get(server, loser);
 		if (w != null && l != null && terms != null && terms != Wars.Terms.WHITE) {
@@ -700,7 +757,7 @@ final class GreatWars {
 	}
 
 	/**
-	 * (From a speakeasy's {@link Bookies bookie}) {@code player} stakes {@code stake} emeralds, already taken from them, on
+	 * (From a speakeasy's {@link Bookies bookie}) {@code player} stakes {@code stake} silver coins, already taken from them, on
 	 * {@code side} of {@code war} at {@code odds}. Returns what the bookie says, and how much he kept (the rest goes back).
 	 */
 	record Taken(Component said, int kept) {
@@ -722,7 +779,7 @@ final class GreatWars {
 		}
 		int amount = Math.min(stake, WAGER_MOST - already);
 		if (amount <= 0) {
-			return new Taken(Component.translatable("message.jaymoskingdoms.wager.most", WAGER_MOST), 0);
+			return new Taken(Component.translatable("message.jaymoskingdoms.wager.most", Money.text(player, Money.worth(WAGER_MOST))), 0);
 		}
 		Wager made = new Wager(player.getUUID(), war.id(), side, amount, odds);
 		edit(server, l -> {
@@ -730,7 +787,7 @@ final class GreatWars {
 			wagers.add(made);
 			return withWagers(l, wagers, l.owed());
 		});
-		return new Taken(Component.translatable("message.jaymoskingdoms.wager.made", amount, Wars.name(server, side), (int)Math.floor(amount * odds)), amount);
+		return new Taken(Component.translatable("message.jaymoskingdoms.wager.made", Money.text(player, Money.worth(amount)), Wars.name(server, side), Money.text(player, Money.worth((int)Math.floor(amount * odds)))), amount);
 	}
 
 	/** Winnings (or a stake back) owed to {@code player}: paid now if they're on, else when they're next on. */
@@ -778,16 +835,9 @@ final class GreatWars {
 			if (player == null) {
 				continue;
 			}
-			int n = e.getValue();
-			while (n > 0) {
-				int stack = Math.min(64, n);
-				ItemStack coins = new ItemStack(Items.EMERALD, stack);
-				if (!player.getInventory().add(coins)) {
-					player.drop(coins, false, Prediction.SERVER_ONLY);
-				}
-				n -= stack;
-			}
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.wager.paid", e.getValue()).withStyle(ChatFormatting.GOLD));
+			// (0.7.498) the winnings are silver coins, into the worn purse if there's room
+			Money.pay(player, Money.worth(e.getValue()));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.wager.paid", Money.text(player, Money.worth(e.getValue()))).withStyle(ChatFormatting.GOLD));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.6F, 0.8F);
 			left.remove(e.getKey());
 		}

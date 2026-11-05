@@ -29,8 +29,8 @@ import net.minecraft.world.phys.Vec3;
  * window in gold, grey while its parry cools down (both from the server's {@link Guard#SHOWN}).
  */
 public final class GuardClient {
-	/** The bar: half its width and its height (pixels), and how far under the crosshair. */
-	static final int BAR_HALF = 13, BAR_HEIGHT = 2, BAR_DROP = 9;
+	/** The bar: half its width and its height (pixels). (HUD rework) Where it goes is the BELOW zone's. */
+	static final int BAR_HALF = 13, BAR_HEIGHT = 2;
 	/** The bar stays this many ticks past the parry window, then goes. */
 	static final int BAR_LINGER = 6;
 	/** A landed parry's flash (ticks). */
@@ -98,14 +98,28 @@ public final class GuardClient {
 		lungeWait = LUNGE_COOLDOWN;
 	}
 
+	/**
+	 * (HUD rework) The bar's box: first under the crosshair (and under vanilla's attack indicator while that shows), above the
+	 * finisher bars, roll pips, horse tag and smithing bar.
+	 */
+	private static int @org.jspecify.annotations.Nullable [] slot() {
+		return com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.BELOW, "jaymospowers:guard", 10,
+			BAR_HALF * 2 + 2, BAR_HEIGHT + 4);
+	}
+
 	private static void bar(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		if (player == null) {
 			return;
 		}
-		int cx = graphics.guiWidth() / 2, y = graphics.guiHeight() / 2 + BAR_DROP;
+		int cx = graphics.guiWidth() / 2, y;
 		if (flash > 0) {
+			int[] at = slot();
+			if (at == null) {
+				return;
+			}
+			y = at[1] + 2;
 			int alpha = Math.round(255.0F * flash / FLASH_TICKS);
 			int color = (alpha << 24) | ((flashPerfect ? PERFECT_COLOR : PARRY_COLOR) & 0xFFFFFF);
 			int grow = FLASH_TICKS - flash;
@@ -138,6 +152,11 @@ public final class GuardClient {
 		if (held < 0.0F || held > span) {
 			return;
 		}
+		int[] at = slot();
+		if (at == null) {
+			return;
+		}
+		y = at[1] + 2;
 		int left = cx - BAR_HALF, width = BAR_HALF * 2;
 		int perfectX = left + width * perfect / span, fromX = left + width * from / span, parryX = left + width * Math.max(from, parry) / span;
 		graphics.fill(left - 1, y - 1, left + width + 1, y + BAR_HEIGHT + 1, 0x80000000);

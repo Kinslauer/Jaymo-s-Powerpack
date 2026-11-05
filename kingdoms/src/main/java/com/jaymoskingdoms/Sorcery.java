@@ -54,7 +54,7 @@ import org.jspecify.annotations.Nullable;
  * as zombie villagers, horses as zombie horses, men as zombies. His thralls crumble when he falls.</li>
  * <li>A kingdom's <b>court wizard</b> ({@link #WIZARD}; a wealthy kingdom keeps two): arcane bolts (twice as hard on the
  * undead), a ward on the guards fighting near him, mending, a blast that throws back anyone too close, and he banishes
- * enemy thralls to dust. A tyrant king keeps a <b>court necromancer</b> instead. (0.5.53) With Minecraft Comes Alive the
+ * enemy thralls to dust. A tyrant king keeps a <b>court necromancer</b> instead. (0.5.54) With Minecraft Comes Alive the
  * court wizard is one of the kingdom's own elders, taking the office in old age ({@link CourtWizards}).</li>
  * <li>(0.7.231) A camp's <b>blood witch</b> ({@link #BLOOD_WITCH}, once a camp is a few days old): bolts that cut, a grip
  * that drags you to her, hemorrhages that burst every cut near, and she drinks the bleeding to heal ({@link Hemomancy}).</li>
@@ -345,7 +345,7 @@ public final class Sorcery {
 	}
 
 	/**
-	 * A caster taken on: a court's in its hall, a camp's by its fire. (0.5.53) With MCA a kingdom's wizard is one of its
+	 * A caster taken on: a court's in its hall, a camp's by its fire. (0.5.54) With MCA a kingdom's wizard is one of its
 	 * elders instead, or nobody yet if it has none to spare.
 	 */
 	static @Nullable Worker spawn(ServerLevel level, Faction faction, int role) {
@@ -376,7 +376,7 @@ public final class Sorcery {
 			return 0;
 		}
 		if (CourtWizards.inPlace(f, role)) {
-			// (0.5.53) with MCA: the grown villager nearest you is made its court wizard, old or not
+			// (0.5.54) with MCA: the grown villager nearest you is made its court wizard, old or not
 			Worker w = CourtWizards.summon(level, f, player);
 			if (w == null) {
 				source.sendFailure(Component.translatable("message.jaymoskingdoms.wizard_none"));
@@ -728,7 +728,7 @@ public final class Sorcery {
 		}
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, 3.0F, 0.6F);
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 0.6F, 1.4F);
-		Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.chant_" + level.getRandom().nextInt(4)), Speech.RED, 24.0);
+		Speech.say(level, folk, Dialects.trShared(folk, "speech.jaymoskingdoms.chant_" + level.getRandom().nextInt(4)), Speech.RED, 24.0);
 	}
 
 	/** Mending: the worst hurt of {@code side} (the caster's own, near him) is healed. */

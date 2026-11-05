@@ -162,7 +162,7 @@ public final class Fuse extends XenoForm {
 		level.explode(player, player.getX(), player.getY() + 0.5, player.getZ(), CHARGE_POWER, Level.ExplosionInteraction.MOB);
 		live.blasts = RING_BLASTS;
 		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, REFORM_TICKS, 0, false, false));
-		XenoformPower.drain(player, live, CHARGE_COST);
+		XenoformPower.spend(player, live, CHARGE_COST);
 		cooldown(player, live, V, CHARGE_COOLDOWN);
 	}
 

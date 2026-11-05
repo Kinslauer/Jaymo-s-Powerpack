@@ -193,6 +193,8 @@ final class Neighbours {
 		r += TEMPER_STEP * (Temperaments.warmth(a) + Temperaments.warmth(b));
 		// ((0.7.221) and cooler where one looks down on the other's blood)
 		r -= Prejudice.neighbourLean(a, b);
+		// ((0.7.509) and where their faiths clash)
+		r -= Faiths.neighbourLean(a, b);
 		int kin = McaCompat.kin(a, b);
 		if (kin == McaCompat.PARTNER) {
 			r = Math.max(r, PARTNER_START);
@@ -295,6 +297,10 @@ final class Neighbours {
 		int kin = McaCompat.kin(a, b);
 		boolean courting = McaCompat.courtable(a, b);
 		boolean lunch = t >= Routines.LUNCH_FROM && t < Routines.LUNCH_TO;
+		if (r <= DISLIKE && Peoples.brawls(a, b, random)) {
+			// ((0.7.490) peoples that despise each other come to blows sooner: Peoples)
+			return Kind.FIGHT;
+		}
 		List<Kind> deck = new ArrayList<>();
 		if (r <= HATE) {
 			add(deck, Kind.FIGHT, 3, Kind.ARGUE, 4, Kind.SHOVE, 3, Kind.SNUB, 2, Kind.MAKEUP, 1);
@@ -455,7 +461,7 @@ final class Neighbours {
 			case GIFT -> {
 				if (opener) {
 					m.a.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-					Item gift = List.of(Items.POPPY, Items.DANDELION, Items.CORNFLOWER, Items.BREAD, Items.APPLE, Items.COOKIE, Items.EMERALD, Items.CAKE)
+					Item gift = List.of(Items.POPPY, Items.DANDELION, Items.CORNFLOWER, Items.BREAD, Items.APPLE, Items.COOKIE, Currencies.at(level, m.a.blockPosition()).item(), Items.CAKE)
 						.get(random.nextInt(8));
 					Vec3 mid = m.a.position().add(m.b.position()).scale(0.5);
 					level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, gift), mid.x, m.a.getEyeY() - 0.4, mid.z, 6, 0.15, 0.1, 0.15, 0.03);

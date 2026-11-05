@@ -285,6 +285,10 @@ public final class FutureGuns {
 				// (0.17.67) a bullet: nobody parries it (the guard reads the tag while it lands)
 				boolean tagged = mob.addTag(com.jaymospowers.combat.Guard.UNPARRYABLE_TAG);
 				hit.getEntity().hurtServer(level, level.damageSources().mobProjectile(mob, mob), kind.damage);
+				// (0.20.41) a bullet's blood, in and out the far side
+				if (hit.getEntity() instanceof LivingEntity shot) {
+					com.jaymospowers.core.BladeBlood.shot(shot, mob, kind.damage);
+				}
 				if (tagged) {
 					mob.removeTag(com.jaymospowers.combat.Guard.UNPARRYABLE_TAG);
 				}

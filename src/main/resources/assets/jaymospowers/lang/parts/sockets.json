@@ -1,0 +1,14 @@
+{
+  "tooltip.jaymospowers.sockets.count": "Gem sockets: %s of %s set",
+  "tooltip.jaymospowers.sockets.gem": "◆ %1$s %2$s (%3$s)",
+  "tooltip.jaymospowers.sockets.empty": "◇ Empty socket",
+  "tooltip.jaymospowers.sockets.dormant": "◆ %1$s %2$s (dormant: too few sockets for its grade)",
+  "tooltip.jaymospowers.sockets.hint": "Sneak-use a Smithing Anvil with a cut gem in your off hand",
+  "message.jaymospowers.sockets.socketed": "%1$s set in %2$s",
+  "message.jaymospowers.sockets.no_sockets": "%s has no sockets: only Expertly Forged or better takes a gem",
+  "message.jaymospowers.sockets.full": "Every socket in %s is set",
+  "message.jaymospowers.sockets.broken": "%s is broken: repair it first",
+  "message.jaymospowers.sockets.pulled": "Pulled the %s out whole",
+  "message.jaymospowers.sockets.prise_confirm": "Use again to prise out the %s: it will shatter. Tongs in your off hand save it.",
+  "message.jaymospowers.sockets.shattered": "The %s shattered"
+}

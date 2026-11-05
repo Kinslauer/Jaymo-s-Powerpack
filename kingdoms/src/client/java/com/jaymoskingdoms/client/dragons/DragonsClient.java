@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client.dragons;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.equestrian.FreeReinClient;
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.dragons.DragonBreath;
 import com.jaymoskingdoms.dragons.Dragons;
 import com.jaymoskingdoms.dragons.WindDragon;
@@ -66,6 +67,15 @@ public final class DragonsClient {
 	static final float NOTUS_SCALE = 0.53F, BOREAS_SCALE = 0.45F;
 	/** (0.7.329) How big the Kintsugi wyvern is drawn for each (it stands 7.9 blocks, 25 across the wings), and how far it reaches from its middle at full size. */
 	static final float EURUS_SCALE = 0.28F, AEOLUS_SCALE = 0.75F, KINTSUGI_REACH = 13.0F;
+	/** (0.7.522) The lesser dragons ({@code docs/SaintsDragons-Plan.md}): Stegonaut's shadow, how big its model is drawn, its reach (head and tail). */
+	static final float STEGONAUT_SHADOW = 2.0F, STEGONAUT_SCALE = 1.3F, STEGONAUT_REACH = 4.5F;
+	/** (0.7.522) Atroxiia's and Varasuchus's: shadow, drawn size, reach (Atroxiia's neck and tail; Varasuchus's jaws and long tail). */
+	static final float ATROXIIA_SHADOW = 2.0F, ATROXIIA_SCALE = 1.15F, ATROXIIA_REACH = 4.5F;
+	static final float VARASUCHUS_SHADOW = 2.4F, VARASUCHUS_SCALE = 1.3F, VARASUCHUS_REACH = 9.0F;
+	/** (0.7.522) Ignivorus, the Nether's fire dragon on the Kintsugi wyvern: shadow, drawn size. */
+	static final float IGNIVORUS_SHADOW = 3.6F, IGNIVORUS_SCALE = 0.55F;
+	/** (0.7.522) Aetherion, the star dragon: shadow, drawn size, reach (its wings: about 17 blocks across). */
+	static final float AETHERION_SHADOW = 2.8F, AETHERION_SCALE = 1.25F, AETHERION_REACH = 9.0F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
 	private static @Nullable KeyMapping breathKey;
@@ -84,6 +94,18 @@ public final class DragonsClient {
 			KINTSUGI_REACH));
 		EntityRenderers.register(Dragons.AEOLUS_DRAGON, c -> new WindDragonRenderer<>(c, "aeolus", new KintsugiDragonModel(), AEOLUS_SHADOW, AEOLUS_SCALE,
 			KINTSUGI_REACH));
+		// (0.7.522) our own model of Saint's Dragons' Stegonaut (its art isn't used)
+		EntityRenderers.register(Dragons.STEGONAUT_DRAGON, c -> new WindDragonRenderer<>(c, "stegonaut", new StegonautDragonModel(StegonautDragonModel
+			.createBodyLayer().bakeRoot()), STEGONAUT_SHADOW, STEGONAUT_SCALE, STEGONAUT_REACH));
+		EntityRenderers.register(Dragons.ATROXIIA_DRAGON, c -> new WindDragonRenderer<>(c, "atroxiia", new AtroxiiaDragonModel(AtroxiiaDragonModel
+			.createBodyLayer().bakeRoot()), ATROXIIA_SHADOW, ATROXIIA_SCALE, ATROXIIA_REACH));
+		EntityRenderers.register(Dragons.VARASUCHUS_DRAGON, c -> new WindDragonRenderer<>(c, "varasuchus", new VarasuchusDragonModel(VarasuchusDragonModel
+			.createBodyLayer().bakeRoot()), VARASUCHUS_SHADOW, VARASUCHUS_SCALE, VARASUCHUS_REACH));
+		// (0.7.522) Ignivorus: the Kintsugi wyvern again, cooled from lava
+		EntityRenderers.register(Dragons.IGNIVORUS_DRAGON, c -> new WindDragonRenderer<>(c, "ignivorus", new KintsugiDragonModel(), IGNIVORUS_SHADOW,
+			IGNIVORUS_SCALE, KINTSUGI_REACH));
+		EntityRenderers.register(Dragons.AETHERION_DRAGON, c -> new WindDragonRenderer<>(c, "aetherion", new AetherionDragonModel(AetherionDragonModel
+			.createBodyLayer().bakeRoot()), AETHERION_SHADOW, AETHERION_SCALE, AETHERION_REACH));
 		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,
 			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
 		ClientTickEvents.END_CLIENT_TICK.register(DragonsClient::tick);
@@ -122,9 +144,56 @@ public final class DragonsClient {
 		if (dragon.isTamed() && breathHeld(minecraft) && player.tickCount % 2 == 0 && ClientPlayNetworking.canSend(Dragons.Breathe.TYPE)) {
 			ClientPlayNetworking.send(new Dragons.Breathe(yaw, pitch));
 		}
-		if (dragon.isNoGravity()) {
+		if (dragon.swims() && dragon.isInWater() && dragon.isNoGravity()) {
+			swim(minecraft, dragon, yaw, pitch);
+		} else if (dragon.isNoGravity()) {
 			fly(minecraft, dragon, yaw, pitch);
 		}
+	}
+
+	/** (0.7.522) Swimming a ridden swimmer (Atroxiia, Varasuchus): W where you look, Space up (and out at a bank), Shift down, S brakes. */
+	static final double SWIM_THRUST = 0.05, SWIM_DRAG = 0.9, SWIM_RISE = 0.05, SWIM_HOP = 0.5;
+
+	private static void swim(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {
+		boolean up = minecraft.options.keyJump.isDown();
+		boolean forward = minecraft.options.keyUp.isDown();
+		boolean brake = minecraft.options.keyDown.isDown();
+		boolean dive = minecraft.options.keyShift.isDown();
+		double top = dragon.swimSpeed() * (dragon.exhausted() ? 0.5 : 1.0);
+		Vec3 m = dragon.getDeltaMovement();
+		// (undo the drag its own travel put on it this tick: it keeps its way)
+		double x = m.x / AIR_DRAG, y = m.y / AIR_DRAG_Y, z = m.z / AIR_DRAG;
+		if (forward) {
+			Vec3 look = DragonBreath.aim(yaw, pitch);
+			x += look.x * SWIM_THRUST;
+			y += look.y * SWIM_THRUST;
+			z += look.z * SWIM_THRUST;
+		} else {
+			x *= SWIM_DRAG;
+			y *= SWIM_DRAG;
+			z *= SWIM_DRAG;
+		}
+		if (up) {
+			y = Math.min(y + SWIM_RISE, top);
+		} else if (dive) {
+			y = Math.max(y - SWIM_RISE, -top);
+		}
+		if (brake) {
+			x *= BRAKE;
+			y *= BRAKE;
+			z *= BRAKE;
+		}
+		double speed = Math.sqrt(x * x + y * y + z * z);
+		if (speed > top) {
+			x *= top / speed;
+			y *= top / speed;
+			z *= top / speed;
+		}
+		if (up && dragon.horizontalCollision) {
+			// heaving itself out onto the bank
+			y = SWIM_HOP;
+		}
+		dragon.setDeltaMovement(x, y, z);
 	}
 
 	private static void fly(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {
@@ -212,22 +281,22 @@ public final class DragonsClient {
 
 	/** A bar in Equestrian's place (right of the hotbar, over the powers' chips), with its label over it. */
 	private static void bar(GuiGraphicsExtractor graphics, Font font, float share, int color, Component label, float mark) {
-		int width = graphics.guiWidth(), height = graphics.guiHeight();
-		int cx = width / 2;
-		int x0 = cx + 91 + 30;
-		int y = height - CHIP - 1 - 6;
-		if (x0 + BAR_WIDTH > width - 2) {
-			x0 = cx + 91 - BAR_WIDTH;
-			y = height - 22 - 30 - CHIP - 6;
+		// (HUD rework) right dock, row 41 (under the riding bar's row 40 in the stack's order); label above the bar
+		int boxW = Math.max(BAR_WIDTH, font.width(label));
+		int[] at = HudZones.place(HudZones.DOCK_RIGHT, "jaymoskingdoms:dragon", 41, boxW, 15);
+		if (at == null) {
+			return;
 		}
+		int x0 = at[0];
+		int y = at[1] + 12;
 		share = Mth.clamp(share, 0.0F, 1.0F);
 		graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 3, 0x90000000);
 		graphics.fill(x0, y, x0 + Mth.ceil(BAR_WIDTH * share), y + 2, 0xFF000000 | color);
 		if (mark > 0.0F) {
-			int at = x0 + Math.round(BAR_WIDTH * mark);
-			graphics.fill(at, y - 1, at + 1, y + 3, 0xFF606060);
+			int markX = x0 + Math.round(BAR_WIDTH * mark);
+			graphics.fill(markX, y - 1, markX + 1, y + 3, 0xFF606060);
 		}
-		graphics.text(font, label, x0 + BAR_WIDTH - font.width(label), y - 11, 0xE0FFFFFF);
+		graphics.text(font, label, x0, y - 11, 0xE0FFFFFF);
 	}
 
 	private static int pulse(int a, int b, float t) {

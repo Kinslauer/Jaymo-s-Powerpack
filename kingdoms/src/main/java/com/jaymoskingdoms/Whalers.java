@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.sailing.Crew;
 import com.jaymoskingdoms.sailing.Deck;
 import com.jaymoskingdoms.sailing.Fleet;
@@ -131,7 +132,7 @@ public final class Whalers {
 	static final int HANDS = 5;
 	/** A whaler not seen (out of any player's reach) this long has made her voyage unseen; given up for lost after this long out. */
 	static final long UNSEEN = 48000L, FORGET = 24000L * 6;
-	/** A catch's worth to her realm (emeralds): each bottle of oil, lump of ambergris, bone, and stack of meat. */
+	/** A catch's worth to her realm (silver): each bottle of oil, lump of ambergris, bone, and stack of meat. */
 	static final int OIL_WORTH = 3, AMBERGRIS_WORTH = 40, BONE_WORTH = 2, MEAT_WORTH = 1;
 	/** A hand's lay: this share of the catch's worth (at least {@link #LEAST_LAY}), and bottles of oil. */
 	static final float LAY = 0.1F;
@@ -522,7 +523,7 @@ public final class Whalers {
 		JaymosKingdoms.LOGGER.info("{}'s whaler came home unseen with {} whales", f.name(), whales);
 	}
 
-	/** What {@code v}'s hold is worth to her realm (emeralds), as it stands. */
+	/** What {@code v}'s hold is worth to her realm (silver), as it stands. */
 	static int worth(Voyage v) {
 		return v.get("oil") * OIL_WORTH + v.get("blubber") / TRY_BLUBBER * OIL_WORTH + v.get("ambergris") * AMBERGRIS_WORTH
 			+ v.get("bone") * BONE_WORTH + v.get("meat") * MEAT_WORTH;
@@ -807,14 +808,15 @@ public final class Whalers {
 				// (0.7.270) by their berth: a harpooner's lay is the bigger
 				String berth = berth(v, p);
 				int lay = lay(worth, berth);
-				give(p, new ItemStack(Items.EMERALD, lay));
+				// (0.7.498) the lay in silver: into the worn purse if it has room, else the pack, else the deck
+				Money.pay(p, Money.worth(lay));
 				give(p, new ItemStack(Whaling.WHALE_OIL, LAY_OIL));
 				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.whaler.lay", lay, crew.name, berthName(berth)).withStyle(ChatFormatting.GOLD));
 			}
 		}
 		Raids.tell(level, ship.blockPosition(), Component.translatable("message.jaymoskingdoms.whaler.home", crew.name, v.whales, v.get("oil"))
 			.withStyle(ChatFormatting.AQUA));
-		JaymosKingdoms.LOGGER.info("{}'s whaler {} came home with {} whales ({} emeralds)", f.name(), crew.name, v.whales, worth);
+		JaymosKingdoms.LOGGER.info("{}'s whaler {} came home with {} whales ({} silver)", f.name(), crew.name, v.whales, worth);
 		put(level.getServer(), f.id(), null);
 		FarGrounds.homeWithWhales(level, f, v, ship.blockPosition());
 		stow(ship, List.of());

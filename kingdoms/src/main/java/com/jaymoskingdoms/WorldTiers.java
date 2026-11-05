@@ -95,10 +95,12 @@ public final class WorldTiers {
 	/**
 	 * (0.7.383) Per tier, the feats (bits, all of them) it also needs: Borderlands your first forged iron tool, Wildlands the
 	 * Nether and a trophy from the Aether's guardians, Dread the Wither and a pod flown home, Legend the Dragon and a part set
-	 * salvaged from a Maw wreck.
+	 * salvaged from a Maw wreck. (0.7.492) And the {@link Knowledge} levels: Borderlands 1, Wildlands 2, Dread 4, Legend 5.
 	 */
-	static final int[] FEAT_NEEDED = {0, Progress.FORGED, Progress.NETHER | Progress.AETHER_TROPHY, Progress.WITHER | Progress.POD_FLIGHT,
-		Progress.DRAGON | Progress.MAW_SALVAGE};
+	static final int[] FEAT_NEEDED = {0, Progress.FORGED | Progress.KNOW_1,
+		Progress.NETHER | Progress.AETHER_TROPHY | Progress.KNOW_1 | Progress.KNOW_2,
+		Progress.WITHER | Progress.POD_FLIGHT | Progress.KNOW_1 | Progress.KNOW_2 | Progress.KNOW_3 | Progress.KNOW_4,
+		Progress.DRAGON | Progress.MAW_SALVAGE | Progress.KNOW_1 | Progress.KNOW_2 | Progress.KNOW_3 | Progress.KNOW_4 | Progress.KNOW_5};
 	/** (0.7.383) The tag of items only the Aether's guardians give (their trophies). */
 	static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> TROPHIES = net.minecraft.tags.TagKey.create(
 		net.minecraft.core.registries.Registries.ITEM, JaymosKingdoms.id("aether_trophies"));
@@ -160,8 +162,11 @@ public final class WorldTiers {
 				return Component.translatable("tier.jaymoskingdoms.need.none");
 			}
 			Component text = Component.translatable(FOES_NEEDED[i] == 1 ? "tier.jaymoskingdoms.need.foe" : "tier.jaymoskingdoms.need.foes", FOES_NEEDED[i]);
+			// (0.7.492) of the knowledge bits, only the highest is named (it wants the ones below)
+			int knowledge = FEAT_NEEDED[i] & Knowledge.ALL;
+			int top = Integer.highestOneBit(knowledge);
 			for (int bit : Progress.BITS) {
-				if ((FEAT_NEEDED[i] & bit) != 0) {
+				if ((FEAT_NEEDED[i] & bit) != 0 && ((bit & Knowledge.ALL) == 0 || bit == top)) {
 					text = Component.translatable("tier.jaymoskingdoms.need.and", text, Component.translatable("tier.jaymoskingdoms.feat." + Progress.featKey(bit)));
 				}
 			}
@@ -182,8 +187,10 @@ public final class WorldTiers {
 		public static final int NETHER = 1, WITHER = 2, DRAGON = 4;
 		/** (0.7.383) The ladder's exit deeds: a first forged iron tool, a trophy home from the Aether, a pod flown and landed home, a Maw wreck salvaged. */
 		public static final int FORGED = 8, AETHER_TROPHY = 16, POD_FLIGHT = 32, MAW_SALVAGE = 64;
+		/** (0.7.492) The {@link Knowledge} bosses slain: the Goblin King, the Ogre King, the Skeleton Lord, the Piglin King, the Wither. */
+		public static final int KNOW_1 = 128, KNOW_2 = 256, KNOW_3 = 512, KNOW_4 = 1024, KNOW_5 = 2048;
 		/** Every feat bit, in the order they're listed. */
-		static final int[] BITS = {NETHER, WITHER, DRAGON, FORGED, AETHER_TROPHY, POD_FLIGHT, MAW_SALVAGE};
+		static final int[] BITS = {KNOW_1, KNOW_2, KNOW_3, KNOW_4, KNOW_5, NETHER, WITHER, DRAGON, FORGED, AETHER_TROPHY, POD_FLIGHT, MAW_SALVAGE};
 		public static final Progress NONE = new Progress(0, 0, 0);
 		static final Codec<Progress> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.optionalFieldOf("foes", 0).forGetter(Progress::foes),
@@ -209,8 +216,14 @@ public final class WorldTiers {
 
 		/** The highest tier open to it: earned in order, or opened by an op. */
 		public int open() {
+			return openIgnoring(0);
+		}
+
+		/** (0.7.492) As {@link #open}, as if the tiers didn't want the feats in {@code ignored} (what it was before knowledge). */
+		public int openIgnoring(int ignored) {
 			int top = 0;
-			while (top + 1 < FOES_NEEDED.length && earned(top + 1)) {
+			while (top + 1 < FOES_NEEDED.length && this.foes >= FOES_NEEDED[top + 1]
+				&& (this.feats & FEAT_NEEDED[top + 1] & ~ignored) == (FEAT_NEEDED[top + 1] & ~ignored)) {
 				top++;
 			}
 			return Math.max(top, this.unlocked);
@@ -224,6 +237,11 @@ public final class WorldTiers {
 				case FORGED -> "forged";
 				case AETHER_TROPHY -> "aether_trophy";
 				case POD_FLIGHT -> "pod_flight";
+				case KNOW_1 -> "goblin_king";
+				case KNOW_2 -> "ogre_king";
+				case KNOW_3 -> "skeleton_lord";
+				case KNOW_4 -> "piglin_king";
+				case KNOW_5 -> "knowledge_wither";
 				default -> "maw_salvage";
 			};
 		}
@@ -478,11 +496,11 @@ public final class WorldTiers {
 			if (player.isSpectator()) {
 				continue;
 			}
-			if (player.level().dimension() == Level.NETHER) {
+			if (Stacked.in(player, Level.NETHER)) {
 				feat(player, Progress.NETHER);
 			}
 			// (0.7.383) back in the Overworld with a trophy from the Aether's guardians
-			if (player.level().dimension() == Level.OVERWORLD && !progress(player).has(Progress.AETHER_TROPHY) && carriesTrophy(player)) {
+			if (Stacked.in(player, Level.OVERWORLD) && !progress(player).has(Progress.AETHER_TROPHY) && carriesTrophy(player)) {
 				feat(player, Progress.AETHER_TROPHY);
 			}
 			int tier = of(player).ordinal();
@@ -498,6 +516,10 @@ public final class WorldTiers {
 
 	/** Monsters (not a player's own) and the folk who are always foes: camps' raiders, orcs, goblins, assassins. */
 	static boolean hostile(Mob mob) {
+		// (0.7.518) champions scale themselves, and their adds are not tiered
+		if (mob instanceof PatronChampion || PatronChampions.isAdd(mob)) {
+			return false;
+		}
 		if (mob instanceof Folk folk) {
 			return folk.style() == FactionType.BARBARIAN || Orcs.isOrc(folk) || Goblins.isGoblin(folk) || Assassins.is(folk);
 		}
@@ -560,7 +582,9 @@ public final class WorldTiers {
 		}
 		EntityType<?> type = entity.getType();
 		boolean dragon = type == EntityTypes.ENDER_DRAGON, wither = type == EntityTypes.WITHER;
-		if (!(dragon || wither || type == EntityTypes.ELDER_GUARDIAN || type == EntityTypes.WARDEN || BossBars.boss(entity))) {
+		// (0.7.492) and the knowledge bosses: they earn their level besides
+		int knowledge = Knowledge.bitFor(entity);
+		if (!(dragon || wither || type == EntityTypes.ELDER_GUARDIAN || type == EntityTypes.WARDEN || BossBars.boss(entity) || knowledge != 0)) {
 			return;
 		}
 		// a great foe: everyone near shares the kill
@@ -572,21 +596,26 @@ public final class WorldTiers {
 				continue;
 			}
 			Progress p = progress(player);
-			int feats = p.feats() | (dragon ? Progress.DRAGON : 0) | (wither ? Progress.WITHER : 0);
+			int feats = p.feats() | (dragon ? Progress.DRAGON : 0) | (wither ? Progress.WITHER : 0) | knowledge;
 			credit.put(player, new Progress(p.foes() + 1, feats, p.unlocked()));
 		}
 		credit.forEach(WorldTiers::update);
+	}
+
+	/** (0.7.492) Adds the feat bits {@code bits} to {@code player}'s progress (and their party's), quietly but for what it opens. */
+	static void grant(ServerPlayer player, int bits) {
+		Progress p = progress(player);
+		update(player, new Progress(p.foes(), p.feats() | bits, p.unlocked()));
 	}
 
 	private static void feat(ServerPlayer player, int feat) {
 		Progress p = progress(player);
 		if (!p.has(feat)) {
 			update(player, new Progress(p.foes(), p.feats() | feat, p.unlocked()));
-			if (feat >= Progress.FORGED) {
-				// (0.7.383) a deed of the ladder: a murmur, and a line in the next Tidings (hints, never a statement)
+			if (feat >= Progress.FORGED && (feat & Knowledge.ALL) == 0) {
+				// (0.7.383) a deed of the ladder: a murmur (hints, never a statement); (0.7.494) no longer a line in the Tidings
 				String key = Progress.featKey(feat);
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.deed." + key).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-				Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.deed." + key));
 			}
 		}
 	}
@@ -642,7 +671,14 @@ public final class WorldTiers {
 	/** Saves {@code player}'s own progress, and tells them of any tier it opens. */
 	private static void apply(ServerPlayer player, Progress now) {
 		int before = progress(player).open();
+		int knew = Knowledge.level(progress(player).feats());
 		player.setAttached(PROGRESS, now);
+		// (0.7.540) a newly opened tier lifts the attribute caps: put them on as they stand now
+		if (now.open() > before) {
+			Stats.attributes(player);
+		}
+		// (0.7.492) a new knowledge level: a chime, a line on the action bar
+		Knowledge.risen(player, knew, Knowledge.level(now.feats()));
 		for (int i = before + 1; i <= now.open(); i++) {
 			Tier tier = Tier.byOrdinal(i);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.tier.unlocked", tier.title().copy().withColor(tier.color))

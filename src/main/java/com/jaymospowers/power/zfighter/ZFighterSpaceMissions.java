@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -632,7 +633,7 @@ public final class ZFighterSpaceMissions {
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(player, tp);
 		} else {
-			ZFighterSagas.give(player, new ItemStack(Items.EMERALD, tp / 20));
+			ZFighterSagas.paySilver(player, tp / 20); // (0.20.0) silver coins (the Glacia loot at 105/639 stays a gem)
 		}
 		float ore = free ? 1.0F : CONQUER_ORE;
 		for (int i = 0; i < info.items().length; i++) {

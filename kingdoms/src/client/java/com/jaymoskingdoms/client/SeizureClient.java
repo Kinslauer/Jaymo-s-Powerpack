@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Seizures;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -235,8 +236,13 @@ public final class SeizureClient {
 		if (!locked() || needed <= 0) {
 			return;
 		}
-		int x = (graphics.guiWidth() - BAR_W) / 2;
-		int y = graphics.guiHeight() - BAR_UP;
+		// (HUD rework) focus band, row 10: the text on top, the bar under it, one piece (text 9 + gap 2 + bar with frame)
+		int[] at = HudZones.place(HudZones.FOCUS, "jaymoskingdoms:struggle", 10, BAR_W + 2, 11 + BAR_H + 2);
+		if (at == null) {
+			return;
+		}
+		int x = at[0] + 1;
+		int y = at[1] + 11 + 1;
 		int fill = Math.round(BAR_W * share());
 		int colour = kind == Seizures.Kind.FEVER ? 0xFFB01010 : 0xFFC08020;
 		graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + BAR_H + 1, 0xA0000000);

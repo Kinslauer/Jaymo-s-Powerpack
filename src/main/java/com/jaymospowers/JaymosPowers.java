@@ -36,6 +36,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();
 		com.jaymospowers.core.Meditate.init();
+		com.jaymospowers.core.Sitting.init();
 		// (0.19.29) training gear and the Mastery ranks
 		com.jaymospowers.core.Training.init();
 		com.jaymospowers.core.SwallowedPower.init();
@@ -43,6 +44,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.LockOn.init();
 		// (0.17.67) the guard and the parry, for everyone
 		com.jaymospowers.combat.Guard.init();
+		// (0.20.3) a weapon banged on a raised shield: hostiles come, animals bolt
+		com.jaymospowers.combat.ShieldBang.init();
 		com.jaymospowers.combat.AttackTells.init();
 		com.jaymospowers.core.HiddenArmor.init();
 		com.jaymospowers.core.Dismember.init();
@@ -103,8 +106,16 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.baubles.Baubles.init();
 		// (0.17.188) Friends & Foes' totems work from the charm slot
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
+		// (RPG Series) Spell Engine's spell books, scrolls and quivers work worn in bauble slots
+		com.jaymospowers.compat.SpellEngineCompat.init();
+		// (0.20.30) One Dimension's default stack: the Aether over the Overworld over the Nether (compat.Stacked)
+		com.jaymospowers.compat.OneDimensionDefaults.init();
+		// (0.20.51) Subtle Effects' bone sprites on hurt skeletons off; our splinters instead
+		com.jaymospowers.compat.SubtleEffectsCompat.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
+		// (0.19.87) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles
+		com.jaymospowers.jewellery.Jewellery.init();
 		// (0.17.115) the 26.4 snapshots' ice: Freezing and its potion, ice balls, the Frostbite, icicles and the ice blocks
 		com.jaymospowers.frost.Frost.init();
 		// (0.17.116) snow-style layer blocks of every wooden and stone block, cut with the saw or at the stonecutter
@@ -114,10 +125,15 @@ public class JaymosPowers implements ModInitializer {
 		// (0.18.118) weapons stuck in bodies: zombies rising with one, thrown daggers, a finisher's blade left in
 		com.jaymospowers.armory.Lodged.init();
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
+		// (0.19.63) armour gets dirty and washes clean; wet weather's puddles and underwater light (client/wet)
+		com.jaymospowers.core.wet.WetParticles.init();
+		com.jaymospowers.core.wet.ArmourGrime.init();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollHolds();
 		com.jaymospowers.power.web.KitchenCompat.registerCorpseBlood();
 		com.jaymospowers.power.web.KitchenCompat.registerBrawn();
+		com.jaymospowers.power.web.KitchenCompat.registerTemperate();
+		com.jaymospowers.power.web.KitchenCompat.registerNoCorpseZone();
 		registerAttachments();
 	}
 
@@ -128,7 +144,7 @@ public class JaymosPowers implements ModInitializer {
 	 */
 	private static void registerAttachments() {
 		String[] holders = {
-			"core.Affinity", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.LockOn", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Breaks", "core.wounds.Bleeding", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.Tending", "core.finisher.Finishers", "core.gifted.Gifted", "combat.Guard",
+			"core.Affinity", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.LockOn", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Mortality", "core.wounds.Afflictions", "core.wounds.Scars", "core.wounds.Breaks", "core.wounds.Bleeding", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.Tending", "core.blood.Bloodied", "core.finisher.Finishers", "core.gifted.Gifted", "combat.Guard",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalChains", "power.arsenal.ArsenalPlaces", "power.arsenal.ArsenalStanding",
@@ -142,7 +158,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
 			"power.darktide.DarktideState",
 			"power.xenoform.XenoformState", "power.xenoform.XenoBands", "power.xenoform.StarReaders", "power.xenoform.BandUpgrades", "power.xenoform.BandForge", "power.xenoform.RivalHunter", "power.xenoform.BandStyle", "power.xenoform.nadir.NadirRules", "power.xenoform.nadir.NadirStash",
-			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam",
+			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
 			"power.zfighter.ZFighterTeleport",
 			"power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
@@ -155,7 +171,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.heritage.HeritageMoves",
 			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "baubles.Baubles", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "baubles.Baubles", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape",
 		};
 		for (String holder : holders) {

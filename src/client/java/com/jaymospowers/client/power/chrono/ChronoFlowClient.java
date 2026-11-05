@@ -416,10 +416,11 @@ public final class ChronoFlowClient {
 		ChronoSpaceCue.renderHud(graphics, player);
 		Integer charges = player.getAttached(ChronoFlow.CHARGES);
 		if (charges != null && ChronoFlow.on(player)) {
-			int cx = graphics.guiWidth() / 2;
-			int y = graphics.guiHeight() / 2 + 14;
-			for (int i = 0; i < ChronoFlow.ROLL_CHARGES; i++) {
-				int x = cx + (i - 1) * 8;
+			// (HUD rework) roll-charge pips: BELOW zone, row 30
+			int[] pips = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.BELOW, "jaymospowers:chrono_pips", 30, 8 * (ChronoFlow.ROLL_CHARGES - 1) + 5, 5);
+			int y = pips == null ? 0 : pips[1] + 2;
+			for (int i = 0; pips != null && i < ChronoFlow.ROLL_CHARGES; i++) {
+				int x = pips[0] + 2 + i * 8;
 				boolean full = i < charges;
 				graphics.fill(x - 2, y - 2, x + 3, y + 3, full ? 0xC0F2C14E : 0x50000000);
 				graphics.fill(x - 1, y - 1, x + 2, y + 2, full ? 0xFFFFE08A : 0x60FFFFFF);
@@ -431,8 +432,11 @@ public final class ChronoFlowClient {
 		}
 		Font font = Minecraft.getInstance().font;
 		Component text = Component.translatable("hud.jaymospowers.chrono_flow_combo", combo);
-		int x = graphics.guiWidth() / 2 - font.width(text) / 2;
-		int y = graphics.guiHeight() / 2 - 30;
-		graphics.text(font, text, x, y, combo >= 10 ? 0xFFFFE08A : 0xFFF2C14E);
+		// (HUD rework) combo count: ABOVE zone, row 25
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:chrono_combo", 25, font.width(text), 9);
+		if (at == null) {
+			return;
+		}
+		graphics.text(font, text, at[0], at[1], combo >= 10 ? 0xFFFFE08A : 0xFFF2C14E, true);
 	}
 }

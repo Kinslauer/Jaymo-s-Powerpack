@@ -1,5 +1,8 @@
 # Vanilla style for every modded item
 
+> 2026-11-03: Excalibur's look is optional and off by default (`docs/Excalibur-Style.md`, `/excalibur on`). These
+> redraws are the default look; their graded copies are in the built-in `excalibur_style` pack.
+
 Goal: every item in the pack looks like Mojang drew it. Delivered as the built-in resource pack
 `src/main/resources/resourcepacks/vanilla_style` (on by default; switch it off under Resource Packs to compare).
 Workflow adapted from the game-assets-enhancer skill (audit, style guide, one anchor, reuse over regenerate); its

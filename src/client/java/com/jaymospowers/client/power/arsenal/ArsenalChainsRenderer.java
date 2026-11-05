@@ -23,7 +23,8 @@ import org.joml.Quaternionf;
  */
 final class ArsenalChainsRenderer {
 	private static final ItemStackRenderState ITEM = new ItemStackRenderState();
-	private static final ItemStack CHAIN = new ItemStack(Items.IRON_CHAIN);
+	/** Built on first draw: an ItemStack made while the class loads can crash 26.3 before item components are bound. */
+	private static ItemStack chain;
 	/** One link every this many blocks, drawn at this scale (an item sprite is half a block across, fixed). */
 	private static final double LINK = 0.33;
 	private static final float LINK_SCALE = 0.66F;
@@ -86,7 +87,7 @@ final class ArsenalChainsRenderer {
 		}
 		Vec3 dir = span.scale(1.0 / length);
 		Quaternionf along = new Quaternionf().rotationTo(0.0F, 1.0F, 0.0F, (float) dir.x, (float) dir.y, (float) dir.z);
-		minecraft.getItemModelResolver().updateForTopItem(ITEM, CHAIN, ItemDisplayContext.FIXED, minecraft.level, null, 0);
+		minecraft.getItemModelResolver().updateForTopItem(ITEM, chain == null ? (chain = new ItemStack(Items.IRON_CHAIN)) : chain, ItemDisplayContext.FIXED, minecraft.level, null, 0);
 		PoseStack poseStack = context.poseStack();
 		int links = Math.max(1, (int) Math.ceil(length / LINK));
 		for (int i = 0; i < links; i++) {

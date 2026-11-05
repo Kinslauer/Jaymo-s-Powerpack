@@ -132,11 +132,10 @@ public class ChopperEntity extends BlockEntity implements ShaftDriven {
 			.intersect(block).expandTowards(facing.getStepX() * BLADE_REACH, facing.getStepY() * BLADE_REACH, facing.getStepZ() * BLADE_REACH);
 		boolean any = false;
 		DamageSource source = level.damageSources().source(CHOPPER);
-		BlockParticleOption blood = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState());
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, blade, LivingEntity::isAlive)) {
 			if (victim.hurtServer(level, source, CHOPPER_DAMAGE)) {
 				any = true;
-				level.sendParticles(blood, victim.getX(), victim.getY() + victim.getBbHeight() * 0.5, victim.getZ(), 14, 0.2, 0.25, 0.2, 0.1);
+				com.jaymoskitchen.KitchenBlood.send(level, victim.getX(), victim.getY() + victim.getBbHeight() * 0.5, victim.getZ(), 14, 0.2, 0.25, 0.2, 0.1);
 			}
 		}
 		return any;

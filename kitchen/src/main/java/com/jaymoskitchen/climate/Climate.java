@@ -93,7 +93,9 @@ public final class Climate {
 			}
 			// sneaking empty-handed at water over a block (a shallow pond): drink, rather than whatever the block does
 			if (player.isShiftKeyDown() && player.getMainHandItem().isEmpty()
-				&& (Thirst.lookingAtWater(player) || Thirst.inRainLookingUp(player))) {
+				&& (Thirst.lookingAtWater(player) || Thirst.inRainLookingUp(player)
+					// (0.5.48) a fire drinker at a fire, a lit campfire or lava
+					|| Thirst.fireDrinker(player) && (Thirst.fireLookedAt(player) != null || Thirst.lookingAtLava(player)))) {
 				if (player instanceof ServerPlayer server && server.level().getGameRules().get(THIRST)) {
 					Thirst.trySip(server);
 				}

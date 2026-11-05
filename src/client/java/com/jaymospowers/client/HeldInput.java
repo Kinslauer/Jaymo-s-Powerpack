@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.client.combat.ShieldBangClient;
 import com.jaymospowers.client.finisher.FinisherClient;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,9 +70,12 @@ public final class HeldInput {
 		return ticks - barAt <= BAR_LINGER;
 	}
 
-	/** Whether a hold has the attack key: no click, held swing (Better Combat's too) or digging. */
+	/**
+	 * Whether a hold has the attack key: no click, held swing (Better Combat's too) or digging. (0.20.3) Also while a
+	 * shield is up with a weapon out, where a click bangs the shield ({@link ShieldBangClient}).
+	 */
 	public static boolean locksAttack(Minecraft minecraft) {
-		return locked || FinisherClient.holdsAttack(minecraft);
+		return locked || FinisherClient.holdsAttack(minecraft) || ShieldBangClient.holdsAttack(minecraft);
 	}
 
 	/** Whether a hold has the use key: its repeats still go to the server, but don't swing the arm. */

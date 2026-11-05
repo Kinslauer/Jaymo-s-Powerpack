@@ -80,27 +80,73 @@ public final class WebCut {
 		if (distanceToSegment(eye, cut.a(), cut.b()) > REACH + 1.5) {
 			return;
 		}
+		// (0.19.71) fire in the fist (a torch, a flint, a fire charge, a blaze rod, lava, a hot or Fire Aspect blade, or
+		// you alight) goes through at once: a plain web burns, a symbiote's cord recoils
+		boolean fiery = fiery(player);
+		Vec3 hit = closestPoint(eye, cut.a(), cut.b());
+		if (fiery) {
+			if (dark(level, cut)) {
+				WebHeft.recoilFx(level, hit);
+			} else {
+				WebHeft.burnFx(level, hit);
+			}
+		}
 		// it may hold for a punch or three first
-		if (!giveWay(level, cut)) {
+		if (!fiery && !giveWay(level, cut)) {
 			Vec3 at = closestPoint(eye, cut.a(), cut.b());
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 0.8F, 0.6F);
 			level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 4, 0.1, 0.1, 0.1, 0.02);
 			return;
 		}
+		// it parts where it was hit: two broken halves
 		boolean done = switch (cut.kind()) {
-			case SWING -> level.getEntity(cut.entity()) instanceof ServerPlayer owner && WebPower.cutLine(owner, cut.b());
+			case SWING -> level.getEntity(cut.entity()) instanceof ServerPlayer owner && WebPower.cutLine(owner, cut.b(), hit);
 			case HITCH -> {
 				Entity tied = level.getEntity(cut.entity());
-				yield tied != null && WebHitches.cut(level, tied, cut.b());
+				yield tied != null && WebHitches.cut(level, tied, cut.b(), hit);
 			}
 			case BRIDGE -> WebBridges.cut(level, cut.a(), cut.b());
 			default -> false;
 		};
 		if (done) {
-			Vec3 at = closestPoint(eye, cut.a(), cut.b());
+			Vec3 at = hit;
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.2F);
 			level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 10, 0.15, 0.15, 0.15, 0.05);
 		}
+	}
+
+	/** What's in the punching hand (or on the puncher) sets a web line alight. */
+	static boolean fiery(ServerPlayer player) {
+		net.minecraft.world.item.ItemStack stack = player.getMainHandItem();
+		return player.isOnFire() || stack.is(net.minecraft.world.item.Items.TORCH) || stack.is(net.minecraft.world.item.Items.SOUL_TORCH)
+			|| stack.is(net.minecraft.world.item.Items.FLINT_AND_STEEL) || stack.is(net.minecraft.world.item.Items.FIRE_CHARGE)
+			|| stack.is(net.minecraft.world.item.Items.BLAZE_ROD) || stack.is(net.minecraft.world.item.Items.LAVA_BUCKET)
+			|| com.jaymospowers.core.wounds.Treatment.hot(stack, player.level()) || fireAspect(player, stack);
+	}
+
+	private static boolean fireAspect(ServerPlayer player, net.minecraft.world.item.ItemStack stack) {
+		net.minecraft.world.item.enchantment.ItemEnchantments on = stack.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS,
+			net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+		return player.level().registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+			.get(net.minecraft.world.item.enchantment.Enchantments.FIRE_ASPECT).map(holder -> on.getLevel(holder) > 0).orElse(false);
+	}
+
+	/** The punched line is a symbiote's living cord (it recoils from fire rather than burning). */
+	private static boolean dark(ServerLevel level, Cut cut) {
+		return switch (cut.kind()) {
+			case SWING -> level.getEntity(cut.entity()) instanceof ServerPlayer owner && WebSymbiote.suitShown(owner);
+			case HITCH -> {
+				Entity tied = level.getEntity(cut.entity());
+				java.util.List<WebHitches.Line> lines = tied == null ? null : tied.getAttached(WebPower.HITCH);
+				yield lines != null && lines.stream().filter(l -> l.anchor().distanceTo(cut.b()) < 2.5).anyMatch(WebHitches.Line::dark);
+			}
+			case BRIDGE -> {
+				java.util.List<WebBridges.Span> spans = level.getAttached(WebBridges.SPANS);
+				yield spans != null && spans.stream().anyMatch(sp -> sp.style() != WebBridgeBlock.WEB
+					&& (sp.from().distanceTo(cut.a()) < 1.0 && sp.to().distanceTo(cut.b()) < 1.0 || sp.from().distanceTo(cut.b()) < 1.0 && sp.to().distanceTo(cut.a()) < 1.0));
+			}
+			default -> false;
+		};
 	}
 
 	/** Counts a punch on the line: true once it has taken as many as it can (and then it's forgotten). */

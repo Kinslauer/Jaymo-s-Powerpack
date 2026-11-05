@@ -320,13 +320,22 @@ public final class Roads {
 		for (Faction f : towns) {
 			towns.stream().filter(g -> g.id() != f.id() && g.seat().closerThan(f.seat(), LINK_RANGE))
 				.sorted(Comparator.comparingDouble(g -> g.seat().distSqr(f.seat())))
-				.limit(LINKS)
+				.limit(LINKS + TownProjects.extraLinks(server, f)) // (0.7.530) a finished bridge project
 				.forEach(g -> links.putIfAbsent(key(f.id(), g.id()), new Faction[] {f, g}));
 			if (f.overlord() >= 0) {
 				Faction lord = Factions.get(server, f.overlord());
 				if (lord != null && !lord.fallen() && lord.seat().closerThan(f.seat(), LINK_RANGE * 1.5)) {
 					links.putIfAbsent(key(f.id(), lord.id()), new Faction[] {f, lord});
 				}
+			}
+		}
+		// ((0.7.490) greenskin camps are joined to the nearest other camp of their tribe, for their carts: Caravans.startGreen)
+		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
+			String tribe = f.fallen() || !Hordes.greenskin(server, f.id()) ? null : Tribes.of(server, f.id());
+			if (tribe != null) {
+				Tribes.camps(server, tribe).stream().filter(g -> g.id() != f.id() && !g.fallen() && g.seat().closerThan(f.seat(), Caravans.GREEN_REACH))
+					.min(Comparator.comparingDouble(g -> g.seat().distSqr(f.seat())))
+					.ifPresent(g -> links.putIfAbsent(key(f.id(), g.id()), new Faction[] {f, g}));
 			}
 		}
 		List<Faction[]> out = new ArrayList<>(links.values());

@@ -64,7 +64,8 @@ public final class StormArts {
 	 * Sneak and {@code J} for a lightning Sorcerer: Bolt Step if no one is in sight, else false (let the bolt go).
 	 */
 	static boolean stepKey(ServerPlayer player, ServerLevel level) {
-		if (Arcana.sighted(player) != null) {
+		// (0.7.492) a higher art: Knowledge 4 (else the plain bolt goes)
+		if (Arcana.sighted(player) != null || !Knowledge.has(player, Knowledge.HIGHER_ARTS)) {
 			return false;
 		}
 		long now = level.getGameTime();
@@ -133,6 +134,11 @@ public final class StormArts {
 	 * "hold a blade" word is for the other elements).
 	 */
 	static boolean ring(ServerPlayer player, ServerLevel level) {
+		if (!Knowledge.has(player, Knowledge.HIGHER_ARTS)) {
+			// (0.7.492) a higher art: Knowledge 4
+			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
+			return true;
+		}
 		long now = level.getGameTime();
 		if (RING_READY.getOrDefault(player.getUUID(), 0L) > now) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.storm.ring_wait", (RING_READY.get(player.getUUID()) - now + 19) / 20));

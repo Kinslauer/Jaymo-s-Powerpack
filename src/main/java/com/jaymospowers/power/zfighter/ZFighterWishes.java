@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -390,9 +390,8 @@ public final class ZFighterWishes {
 			case POWER -> power(player, zfighter);
 			case REVIVE -> revive(player);
 			case RICHES -> {
-				for (int i = 0; i < RICHES_STACKS; i++) {
-					give(player, new ItemStack(Items.EMERALD, 64));
-				}
+				// (0.20.0) three stacks' worth of silver (192), as coins into the purse
+				KingdomsMoney.pay(player, KingdomsMoney.worth(RICHES_STACKS * 64L));
 				yield true;
 			}
 			case AWAKEN -> awaken(player, zfighter);

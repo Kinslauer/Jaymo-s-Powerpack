@@ -9,7 +9,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -46,8 +45,8 @@ public class ButcherScreen extends Screen {
 		if (this.minecraft.player == null) {
 			return false;
 		}
-		return this.minecraft.player.hasInfiniteMaterials() || ContainerHelper.clearOrCountMatchingItems(
-			this.minecraft.player.getInventory(), s -> s.is(Items.EMERALD), offer.price(), true) >= offer.price();
+		// (0.5.56) the server counted the price and what you carry (coins, purses, bundles) when it opened this; it checks again on the deal
+		return this.minecraft.player.hasInfiniteMaterials() || offer.have() >= offer.cost();
 	}
 
 	@Override
@@ -84,7 +83,7 @@ public class ButcherScreen extends Screen {
 
 		int ry = y + KitchenUi.HEADER;
 		int textW = PANEL_W - 18;
-		// what he'd get out of it, the body, and the price (with an emerald, in red if you can't cover it)
+		// what he'd get out of it, the body, and the price (with a silver coin, in red if you can't cover it)
 		KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + ROW_H - 1, 0, false);
 		KitchenUi.line(graphics, this.font, known ? Component.translatable("screen.jaymoskitchen.butcher.yield",
 				String.format(Locale.ROOT, "%.1f", offer.skill())) : Component.translatable("screen.jaymoskitchen.butcher.unheard"),
@@ -96,7 +95,7 @@ public class ButcherScreen extends Screen {
 		ry += ROW_H;
 		boolean pay = canPay();
 		KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + ROW_H - 1, 0, false);
-		graphics.item(new ItemStack(Items.EMERALD), x + 8, ry + 1);
+		graphics.item(offer.coin(), x + 8, ry + 1);
 		Component price = Component.translatable("screen.jaymoskitchen.butcher.price", offer.price());
 		KitchenUi.line(graphics, this.font, price, x + 28, ry + 5, textW - 19, pay ? KitchenUi.TEXT : KitchenUi.BAD);
 		if (!pay) {

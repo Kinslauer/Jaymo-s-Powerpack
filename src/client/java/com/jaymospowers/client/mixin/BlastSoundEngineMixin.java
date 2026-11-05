@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.19.57) Blasts take time to reach you and are dulled by distance (see Blasts). */
+/** (0.20.52) Blasts take time to reach you and are dulled by distance (see Blasts). */
 @Mixin(SoundEngine.class)
 abstract class BlastSoundEngineMixin {
 	@Inject(method = "play", at = @At("HEAD"), cancellable = true)

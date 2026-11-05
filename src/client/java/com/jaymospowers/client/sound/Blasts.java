@@ -21,7 +21,7 @@ import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.EXTEfx;
 
 /**
- * (0.19.57) Andy: "i really like the screen shake and sound effects from [Create Big Cannons]". Its ideas, our own code
+ * (0.20.52) Andy: "i really like the screen shake and sound effects from [Create Big Cannons]". Its ideas, our own code
  * and sounds (its code is MIT, its sound files aren't licensed for reuse). Every blast you hear (any explosion, a cannon's
  * report, anything that plays the explosion sound, from any mod):
  * <ul>

@@ -3,6 +3,8 @@
 	"package": "com.jaymospowers.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"AfflictionCureMixin",
+		"StackedHeightMixin",
 		"DroppedArmsDeathMixin",
 		"YoungLivingMixin",
 		"YoungSpawnMixin",
@@ -10,7 +12,6 @@
 		"AttackTellGoalMixin",
 		"BackpackExplosionMixin",
 		"WillPushMixin",
-		"CarryBlockItemMixin",
 		"CauldronBrewItemMixin",
 		"CarryLivingEntityMixin",
 		"CarryPacketListenerMixin",

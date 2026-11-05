@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * (0.18.57) The low crouch walks slower than a sneak ({@link Stance#LOW_SPEED}). (0.19.30) Prone on the back, shuffling on
- * the hips is slower than crawling on the belly ({@link Crawl#SUPINE_SPEED}).
+ * the hips is slower than crawling on the belly ({@link Crawl#SUPINE_SPEED}). (0.19.62) Skitter prone is a spider: it
+ * scuttles much faster than a man crawls ({@code Skitter.SPIDER_PACE}).
  */
 @Mixin(LocalPlayer.class)
 abstract class StanceSpeedMixin {
@@ -24,6 +25,10 @@ abstract class StanceSpeedMixin {
 		}
 		if (Crawl.supine(self) && Crawl.canCrawl(self) && !Downed.isDowned(self)) {
 			cir.setReturnValue(cir.getReturnValue().scale(Crawl.SUPINE_SPEED));
+		}
+		if ("skitter".equals(self.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM))
+			&& com.jaymospowers.power.xenoform.forms.Skitter.crawling(self) && !Downed.isDowned(self)) {
+			cir.setReturnValue(cir.getReturnValue().scale(com.jaymospowers.power.xenoform.forms.Skitter.SPIDER_PACE));
 		}
 	}
 }
