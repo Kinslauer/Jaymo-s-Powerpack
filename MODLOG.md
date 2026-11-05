@@ -410,3 +410,12 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   damage taken), switched off by `compat/SubtleEffectsCompat` (its two public fields, at server start and every 10 s on
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
+
+- **0.20.52, Kitchen 0.5.64, downed animals fall on their side:** Andy (2026-11-05): "downed animals should fall to their
+  side, i think they're trying to animate like humanoids". `BodyPlan` took any untagged mob taller than 1.3x its width for a
+  person, so Cube Animals' roe deer (0.9 by 1.5), red deer, reindeer, moose, antelope and elephant, Kingdoms' moose and the
+  Moa went down on their backs like a man and were hurt in arms and feet. Wildlife (creature, ambient and water categories,
+  `BodyPlan.wild`) is never guessed a person now; tagged humanoids such as the wandering trader still are. Cube Animals'
+  kinds are tagged too (quadruped, flyer for eagle/barn owl/toucan, arthropod for the cricket, simple for its fish and
+  snail). Kitchen's `RagdollShapes` makes the same call for corpses (four-legged ragdoll, or a box if slight), and its
+  ragdoll_quadruped tag lists Cube Animals' big beasts. Not played.
