@@ -33,7 +33,7 @@ ROOTS = [
     'src/main/resources/resourcepacks/vanilla_style/assets/jaymoskitchen/textures',
 ]
 KINDS = ('item', 'block', 'entity', 'clothing')
-# (0.20.87) single GUI textures graded too: the advancement tab's background
+# (0.20.88) single GUI textures graded too: the advancement tab's background
 EXTRA = ['src/main/resources/assets/jaymospowers/textures/gui/advancements/backgrounds/pack.png']
 # light, magic and effects keep their own colours: a file is skipped when a word of its name (split on _ - .) is one
 # of these. 'fire' only counts for an entity's fire layer (ogre_fire); fire tomes, firebombs and fire_dragon are graded.

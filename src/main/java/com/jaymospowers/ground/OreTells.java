@@ -30,7 +30,7 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.material.MapColor;
 
 /**
- * (0.20.88) Andy (seven-mods plan, patch 4): ore tells, so a sharp eye can spot where to dig (Caverns &amp; Chasms' idea,
+ * (0.20.89) Andy (seven-mods plan, patch 4): ore tells, so a sharp eye can spot where to dig (Caverns &amp; Chasms' idea,
  * our own blocks). Stone touching an ore vein is often <b>seamed</b> (cracked, rusty-veined stone; seamed deepslate in
  * the deep), and where a vein lies just under the ground the dirt over it turns <b>rocky</b>. They mine like what they
  * are and drop cobblestone, cobbled deepslate and dirt. Placement: worldgen/placed_feature/ore_tells.json.

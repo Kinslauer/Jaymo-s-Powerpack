@@ -18,7 +18,7 @@ import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.20.88) Andy (seven-mods plan, patch 4): "no new arrow items: our arrows already have a choice of heads", so the
+ * (0.20.89) Andy (seven-mods plan, patch 4): "no new arrow items: our arrows already have a choice of heads", so the
  * head of a Tinkers arrow gives the effect (Caverns &amp; Chasms' blunt and large arrows, our own take).
  * <ul>
  * <li><b>Blunt</b>, a wood or rock head: it doesn't wound. It knocks back, dazes (Slowness and Nausea) and deals

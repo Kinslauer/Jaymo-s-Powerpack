@@ -67,7 +67,7 @@ public class TinkerArrowItem extends ArrowItem implements TinkerTool {
 		if (materials.size() > SHAFT) {
 			arrow.addTag(SALVAGE_TAG + materials.get(SHAFT).shaftStrength());
 		}
-		// (0.20.88) a blunt or a large head
+		// (0.20.89) a blunt or a large head
 		ArrowHeads.mark(arrow, materials, ToolStats.ranged(type, materials).damage());
 		return arrow;
 	}
@@ -77,7 +77,7 @@ public class TinkerArrowItem extends ArrowItem implements TinkerTool {
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
 		TooltipFlag flag) {
 		TinkerTool.tooltip(stack, type, builder);
-		// (0.20.88) what its head does
+		// (0.20.89) what its head does
 		java.util.List<com.jaymospowers.tinkering.TinkerMaterial> materials = ToolStats.materials(stack);
 		if (!materials.isEmpty()) {
 			if (ArrowHeads.blunt(materials.get(0))) {

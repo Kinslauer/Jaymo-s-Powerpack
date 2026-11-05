@@ -705,8 +705,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - A cut's drip (`BladeBlood.drip`) left from inside the body and, since 0.20.51, opened into a spatter star there. A drip
   now leaves from just outside the body's box (`DRIP_OUT`) and the client draws a no-stain spray as one small falling drop
   (`BloodClient#DRIP_DROP`, `BloodDrop.drip` held on its sheet's first frame). Built, not played.
+- **0.20.87, GeckoLib for Simply Tents:** the Deck's server refused to start ("Incompatible mods found": Simply Tents 3.5
+  needs GeckoLib 5.5.6 or later, and 0.20.83 shipped it without). Added GeckoLib 5.5.7 for Fabric 26.3 (Modrinth
+  kSxHvs99, CurseForge 388172/8945630, same file) to packMods. Not built here.
 
-## 0.20.87 (2026-11-05): the "Jaymo's Powerpack" advancement tab (Kingdoms 0.7.579, Kitchen 0.5.71)
+## 0.20.88 (2026-11-05): the "Jaymo's Powerpack" advancement tab (Kingdoms 0.7.579, Kitchen 0.5.71)
 - Seven-mods plan, patch 3. Andy's note: all of our advancements on one screen, and a line made for the pack. Until now
   our mods had only recipe unlocks. There's now one tab, `data/jaymospowers/advancement/pack`, which lays out on Better
   Advancements' big map.
@@ -723,7 +726,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   an Excalibur-graded copy (grade.py's new `EXTRA` list keeps it on rebuilds). The vanilla frames are left alone so the
   other tabs don't change. Built, not played.
 
-## 0.20.88 (2026-11-05): underground bits: ore tells and arrow heads (Kingdoms 0.7.580)
+## 0.20.89 (2026-11-05): underground bits: ore tells and arrow heads (Kingdoms 0.7.580)
 - Seven-mods plan, patch 4. These are Caverns & Chasms' ideas (Abnormals licence, so ideas only), built with our own code
   and art.
 - **Ore tells** (`ground/OreTells`, `worldgen/placed_feature/ore_tells.json`): once a chunk, stone touching an ore vein

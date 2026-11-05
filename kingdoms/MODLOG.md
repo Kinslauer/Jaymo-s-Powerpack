@@ -9356,7 +9356,7 @@ ultimate and beam-clash films came down with it. Not played.
     tavern's fare (vanilla and Kitchen dishes and brews, whichever exist) and, while a cook (or failing that some
     townsfolk who isn't on guard) is within 12 blocks, sells anyone a hot meal: click a dish to buy one, priced by the
     town's food index, up to 24 a day, the coin going to the town's till. Taverns already built don't get one. Not played.
-- **0.7.579, our part of the advancement tab:** `PackAdvancements` awards Powers' `jaymospowers:pack/*` advancements for the life story, a job's first rank, a sworn patron, a monolith seen, a ship taken out, a great whale killed and each kind of Giant felled (Powers 0.20.87). Not played.
+- **0.7.579, our part of the advancement tab:** `PackAdvancements` awards Powers' `jaymospowers:pack/*` advancements for the life story, a job's first rank, a sworn patron, a monolith seen, a ship taken out, a great whale killed and each kind of Giant felled (Powers 0.20.88). Not played.
 - **0.7.580, mice raid pantries; the mime (seven-mods patch 4):** Caverns & Chasms' ideas, our own code. **Mice**
   (`Mice`): Andy's note was "rat behaviour on Cube Animals mice", so `cubeanimals:mouse` and `cubeanimals:rat` (if the
   build has it) get it, with no new mob. Every second, a wild mouse near a player may (8%, at most every 2 minutes) creep

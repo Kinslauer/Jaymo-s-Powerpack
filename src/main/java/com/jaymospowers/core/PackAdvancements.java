@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.20.87) Andy (seven-mods plan, patch 3): the "Jaymo's Powerpack" advancement tab ({@code data/jaymospowers/advancement/pack}),
+ * (0.20.88) Andy (seven-mods plan, patch 3): the "Jaymo's Powerpack" advancement tab ({@code data/jaymospowers/advancement/pack}),
  * one screen laid out on Better Advancements' map: a main line through a playthrough (the life story, a job's rank, a
  * patron, a monolith, the Giants, the Aether) and side branches. Powers awards its own part: a power awakened, the first
  * alchemy research, a forged Tinkers tool in hand, an execution. Kingdoms and Kitchen award theirs by the same ids.

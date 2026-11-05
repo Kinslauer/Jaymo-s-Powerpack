@@ -374,6 +374,9 @@ def packMods = [
 	[dep: "maven.modrinth:diagonal-windows:orlnUKLD", cf: [891328, 8953012]],
 	[dep: "maven.modrinth:beautify-refabricated:Ac7Roc6F", cf: [809311, 9419457]],
 	[dep: "maven.modrinth:lanterns-bow:az9lailz", cf: [596474, 9379625]],
+	// GeckoLib (MIT, Tslat and contributors): the animation library Simply Tents 3.5 needs (5.5.6+; without it the
+	// server refused to start, "Incompatible mods found"). 5.5.7 for Fabric 26.3.
+	[dep: "maven.modrinth:geckolib:kSxHvs99", cf: [388172, 8945630]],
 	// Simply Tents (all rights reserved; linked, never edited): tents to pitch and sleep in on the road. 3.5.
 	[dep: "maven.modrinth:simply-tents:wvIeMmbl", cf: [1152882, 8937407]],
 	// Critter Armory (all rights reserved; linked, never edited): armour for wolves, cats and other pets. 0.6.5.
