@@ -102,6 +102,14 @@ public final class HeritageHold {
 		return e instanceof Enemy || e instanceof Mob m && m.getTarget() == player;
 	}
 
+	/**
+	 * (0.7.552) Whether being down keeps {@code player} from absorbing: it does, except for Rubber-folk (Andy: "they can
+	 * absorb from downed as well").
+	 */
+	static boolean downedStill(ServerPlayer player) {
+		return Downed.isDowned(player) && !Heritage.is(player, Heritage.Kind.RUBBERFOLK);
+	}
+
 	/** The channel {@code player} has running, or null. */
 	static @Nullable Channel channel(ServerPlayer player) {
 		return CHANNELS.get(player.getUUID());
@@ -116,7 +124,7 @@ public final class HeritageHold {
 			stop(player, "message.jaymoskingdoms.absorb_stopped");
 			return true;
 		}
-		if (!player.isAlive() || player.isSpectator() || Downed.isDowned(player)) {
+		if (!player.isAlive() || player.isSpectator() || downedStill(player)) {
 			return false;
 		}
 		LivingEntity sighted = Arcana.sighted(player);
@@ -162,7 +170,7 @@ public final class HeritageHold {
 			return null;
 		}
 		LivingEntity foe = channel.target;
-		if (!player.isAlive() || player.isSpectator() || Downed.isDowned(player) || !foe.isAlive() || foe.isRemoved() || foe.level() != level
+		if (!player.isAlive() || player.isSpectator() || downedStill(player) || !foe.isAlive() || foe.isRemoved() || foe.level() != level
 			|| !still.test(foe) || player.distanceTo(foe) > reach + SLACK) {
 			stop(player, "message.jaymoskingdoms.absorb_lost");
 			return null;

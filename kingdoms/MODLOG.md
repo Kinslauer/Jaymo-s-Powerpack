@@ -9088,3 +9088,14 @@ our own code; the delayed, muffled booms and whistling shells live in Powers (`c
 Andy: "all the cutscenes should be a little lower. you cant see the user well." The spirit-clash film's camera sits 0.9
 blocks over the pair's feet (was 1.5), and the handshake film's wide shot 0.2 over the hands (was 0.5). Powers' ability,
 ultimate and beam-clash films came down with it. Not played.
+
+
+## 0.7.552 (2026-11-05): Rubber-folk pull themselves together
+
+- Andy: "rubber folk can survive any of these dismemberments, and they can absorb from downed as well, as long as they
+  absorb within 10s of a torso chop, they will start to regenerate. it is slow, so it takes them out of the fight as they
+  are still vulnerable until their limbs regrow". Rubber-folk can swallow while downed (`HeritageHold.downedStill`). Cut in
+  half (Powers 0.20.61's waist cut, which puts them down instead of killing them), a swallow within 10 s turns Powers'
+  `jaymospowers_rubber_split` tag into `jaymospowers_rubber_mending` (`RubberFolk.absorb`). That swallow doesn't regrow a
+  limb at once: the legs come back on the usual 20 s clock, one at a time, and they stay down until both are back. No
+  regrowth while still waiting on the swallow. Lang in `lang/parts/message-rubber.json`. Gradle build only, not played.

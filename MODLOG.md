@@ -411,7 +411,7 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
 
-- **0.20.52, the Aether hidden until you're past the clouds:** Andy (2026-11-05), on a clip looking up from a hillside:
+- **0.20.60, the Aether hidden until you're past the clouds:** Andy (2026-11-05), on a clip looking up from a hillside:
   "The aether should NOT be visible so easy from ground level especially, maybe it only reveals once you are past the
   cloud layer?" In a One Dimension world the Aether band is ordinary terrain over the Overworld's sky, so its islands'
   undersides showed from anywhere. `client/aether/AetherVeil` reads the Aether band's floor and the Overworld band's
@@ -493,3 +493,18 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   body height) and every beam-clash shot sits `SHOT_DROP` (0.6 blocks, times the caster's size) lower, never under
   `SHOT_FLOOR` (0.5) over the caster's feet; the crane rises to 7 blocks, not 9. Kingdoms' spirit-clash camera sits at
   0.9 over the pair's feet (was 1.5) and the handshake's wide shot 0.2 over the hands (was 0.5). Not played.
+
+## 0.20.61 (2026-11-05): leg cleaves and waist cuts
+
+- Andy: "is it possible to cleave both legs off once I'm strong enough? ... it should proc more often on zombie humanoids
+  than anyone else", then "why not splitting a torso clean off too". `Dismember.cleave`: when an axe or greatsword blow
+  of 10+ damage cuts off one leg (the usual overkill), it goes through the other leg too at 25% (zombies 60%), times
+  Grim Hand and Rubber-folk. `Dismember.halve`: an axe or greatsword blow of 16+ to the torso (a player's aim, a mob's by
+  chance) that kills or downs may cut the body in half at the waist, both legs off at once, at 20% (zombies 50%); a halved
+  body dies instead of going down (`Downed`, as a beheading). A zombie can be halved by any such blow and crawls on.
+  Tuning at the top of `Dismember` (CLEAVE_*, HALVE_*). Andy (01:02Z): "rubber folk can survive any of these
+  dismemberments ... as long as they absorb within 10s of a torso chop, they will start to regenerate. it is slow": a
+  halved Rubber-folk goes down instead (`Downed`), tagged `jaymospowers_rubber_split`; no swallow within 10 s
+  (`Dismember.SPLIT_TICKS`) and they die (`Dismember.tickSplit`). Kingdoms' swallow swaps it for
+  `jaymospowers_rubber_mending`; no one gets up while a leg is still missing (`Dismember.pulledApart`, `Downed.getUp`).
+  Beheading still kills. Gradle build only, not played.
