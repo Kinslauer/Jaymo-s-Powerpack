@@ -9238,7 +9238,8 @@ ultimate and beam-clash films came down with it. Not played.
   absorption in front of fire sorcerers that can put out flames and feed their reserve". `Absorption` gives every element
   but blood (which keeps `Hemomancy`/`BloodBlasts`) the blood Sorcerer's loop: a reserve (`Absorption.RESERVE`, 20,
   synced, shown in the blood bar's spot in the element's colour), J held looking at a source absorbs it (a gathering hold
-  never fires), J held empty-handed throws it as a barrage of element blasts (4 damage, a touch of the element, one in 3
+  never fires), J held empty-handed for 3 s (nothing shown till then) or double tapped and held (at once; an empty hand's
+  tap waits 8 ticks before its Imbue/Mend) throws it as a barrage of element blasts (4 damage, a touch of the element, one in 3
   a full `Spellcraft.strike`), a tap is still the Imbue/Mend/Storm Ring. The reserve pays for J keys before mana
   (`Mana.cast` → `Absorption.payKey`, a point = 2.5 mana).
 - **Fire's cone** (8 blocks, 35° half-width, nearest 8 sources a pulse): fire blocks go out, lit campfires and candles

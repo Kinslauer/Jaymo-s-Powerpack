@@ -82,7 +82,8 @@ import org.jspecify.annotations.Nullable;
  * up into (richer the higher), and breezes. Lightning: a storm's sky, lightning rods, redstone blocks. Restoration:
  * flowers, leaves, saplings, crops and amethyst. Death: the undead (drained), the downed, bodies, soul sand and bone,
  * and every death near them sends its soul to them.</li>
- * <li><b>Element blasts:</b> {@code J} held empty-handed looking at anything else, after a short windup: the reserve is
+ * <li><b>Element blasts:</b> {@code J} held empty-handed looking at anything else, for three seconds (or at once after
+ * a double tap, {@link #HOLD_TICKS}): the reserve is
  * thrown as a barrage of small blasts of the element, hands taking turns, as the blood barrage. Each hurts and carries
  * a touch of the element; one in {@link #ELEMENT_ONE_IN} bursts with it in full ({@link Spellcraft#strike}).
  * Restoration's blasts heal the living they hit instead and sear only monsters and the undead.</li>
@@ -116,8 +117,14 @@ public final class Absorption {
 	static final float DEATH_SOUL = 2.0F;
 	static final double DEATH_RANGE = 12.0;
 
-	/** The barrage: the windup (ticks), a blast every so many ticks, what each costs from the reserve. */
-	static final int WINDUP = 12, EVERY = 5;
+	/** The barrage: a blast every so many ticks, what each costs from the reserve. */
+	static final int EVERY = 5;
+	/**
+	 * (Andy: "this requires a 3s hold with no indicator, or double tap and hold to be instant") A plain hold empty-handed
+	 * throws only after {@code HOLD_TICKS}, with nothing shown till then; a tap and a press again within
+	 * {@code DOUBLE_TAP} ticks, held, throws at once. (An empty hand's tap waits out that window before it Imbues/Mends.)
+	 */
+	static final int HOLD_TICKS = 60, DOUBLE_TAP = 8;
 	static final float BLAST_COST = 1.0F;
 	/** A blast: its damage, speed (blocks a tick), life (ticks), spread, knockback; restoration's heal. */
 	static final float BLAST_DAMAGE = 4.0F, BLAST_HEAL = 2.0F;
@@ -146,9 +153,12 @@ public final class Absorption {
 		final long from;
 		int fired;
 		boolean counted, dry, gathering;
+		/** Begun with a double tap: throws at once, never gathers. */
+		final boolean quick;
 
-		Holding(long from) {
+		Holding(long from, boolean quick) {
 			this.from = from;
+			this.quick = quick;
 		}
 	}
 
@@ -173,6 +183,8 @@ public final class Absorption {
 
 	private static final Map<UUID, Holding> HOLDING = new HashMap<>();
 	private static final List<Blast> BLASTS = new ArrayList<>();
+	/** An empty hand's tap, by player: when it was let go (its Imbue waits to see if a second press makes it a double tap). */
+	private static final Map<UUID, Long> TAPPED = new HashMap<>();
 
 	private Absorption() {
 	}
@@ -184,6 +196,7 @@ public final class Absorption {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			HOLDING.clear();
 			BLASTS.clear();
+			TAPPED.clear();
 		});
 		// death: every soul let go near a Death Sorcerer goes to them
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -263,21 +276,43 @@ public final class Absorption {
 		long now = player.level().getGameTime();
 		if (down) {
 			if (absorber(player) && player.isAlive()) {
-				HOLDING.put(player.getUUID(), new Holding(now));
+				Long tapped = TAPPED.remove(player.getUUID());
+				boolean quick = tapped != null && now - tapped <= DOUBLE_TAP && player.getMainHandItem().isEmpty();
+				if (tapped != null && !quick) {
+					Spellcraft.imbue(player, false);
+				}
+				HOLDING.put(player.getUUID(), new Holding(now, quick));
 			} else {
 				Spellcraft.imbue(player, false);
 			}
 			return;
 		}
 		Holding h = HOLDING.remove(player.getUUID());
-		if (h != null && now - h.from < TAP_TICKS) {
-			Spellcraft.imbue(player, false);
+		if (h != null && !h.quick && now - h.from < TAP_TICKS) {
+			if (player.getMainHandItem().isEmpty()) {
+				// it may be the first of a double tap: the Imbue waits for the window to close (tick)
+				TAPPED.put(player.getUUID(), now);
+			} else {
+				Spellcraft.imbue(player, false);
+			}
 		} else if (h != null && h.fired > 0 && player.level() instanceof ServerLevel level) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.3F, 1.6F);
 		}
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (!TAPPED.isEmpty()) {
+			for (Iterator<Map.Entry<UUID, Long>> it = TAPPED.entrySet().iterator(); it.hasNext(); ) {
+				Map.Entry<UUID, Long> e = it.next();
+				ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+				if (player == null) {
+					it.remove();
+				} else if (player.level().getGameTime() - e.getValue() > DOUBLE_TAP) {
+					it.remove();
+					Spellcraft.imbue(player, false);
+				}
+			}
+		}
 		for (Iterator<Map.Entry<UUID, Holding>> it = HOLDING.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<UUID, Holding> e = it.next();
 			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
@@ -306,11 +341,18 @@ public final class Absorption {
 
 	private static void tickHold(ServerLevel level, ServerPlayer player, Holding h) {
 		long held = level.getGameTime() - h.from;
+		String element = element(player);
+		Vec3 look = player.getLookAngle();
+		if (h.quick) {
+			// a double tap: straight to the throwing
+			if (player.getMainHandItem().isEmpty()) {
+				fire(level, player, h, element, look, held);
+			}
+			return;
+		}
 		if (held < TAP_TICKS) {
 			return;
 		}
-		String element = element(player);
-		Vec3 look = player.getLookAngle();
 		if (held == TAP_TICKS) {
 			// as the blood: what the hold is for is settled as it begins (looking at a source: it absorbs, and never fires)
 			h.gathering = gather(level, player, element, look);
@@ -327,24 +369,17 @@ public final class Absorption {
 			}
 			return;
 		}
-		if (!player.getMainHandItem().isEmpty()) {
+		if (!player.getMainHandItem().isEmpty() || held < HOLD_TICKS) {
+			// a plain hold throws only after three seconds, with nothing shown till then
 			return;
 		}
+		fire(level, player, h, element, look, held - HOLD_TICKS);
+	}
+
+	/** The barrage, {@code firing} ticks into it: the hands take turns, a blast every {@link #EVERY} ticks. */
+	private static void fire(ServerLevel level, ServerPlayer player, Holding h, String element, Vec3 look, long firing) {
 		float reserve = reserve(player);
 		ParticleOptions mote = Spellcraft.particle(element);
-		if (held < WINDUP) {
-			if (reserve >= BLAST_COST || player.isCreative()) {
-				for (boolean left : new boolean[] {false, true}) {
-					Vec3 p = palm(player, look, left);
-					level.sendParticles(mote, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
-				}
-				if (held == TAP_TICKS) {
-					level.playSound(null, player.getX(), player.getY(), player.getZ(), Spellcraft.sound(element), SoundSource.PLAYERS, 0.4F, 1.6F);
-				}
-			}
-			return;
-		}
-		long firing = held - WINDUP;
 		boolean next = (firing / EVERY) % 2 == 0;
 		Vec3 forming = palm(player, look, next);
 		level.sendParticles(mote, forming.x, forming.y, forming.z, 1, 0.04, 0.04, 0.04, 0.0);
