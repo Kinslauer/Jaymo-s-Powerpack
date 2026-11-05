@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
  * dies away over its own length. Applied with the hurt bob ({@code ScreenShakeMixin}), so the player's aim never moves.
  */
 public final class ScreenShake {
-	/** (0.20.54) Overall strength (1 = as sent), each player's own: {@code /shake <0-200>} (percent) or {@code /shake off}. */
+	/** (0.20.55) Overall strength (1 = as sent), each player's own: {@code /shake <0-200>} (percent) or {@code /shake off}. */
 	static final String KEY_STRENGTH = "shake.strength";
 	static final int STRENGTH_MAX = 200;
 	private static float intensity = 1.0F;
@@ -77,7 +77,7 @@ public final class ScreenShake {
 	}
 
 	static void init() {
-		// (0.20.54) one from far off waits for its sound to arrive (see Blasts)
+		// (0.20.55) one from far off waits for its sound to arrive (see Blasts)
 		ClientPlayNetworking.registerGlobalReceiver(Shakes.Shake.TYPE, (payload, context) -> com.jaymospowers.client.sound.Blasts.later(
 			com.jaymospowers.client.sound.Blasts.shakeDelay(payload.from()), () -> add(payload.strength(), payload.ticks(), payload.from())));
 		ClientTickEvents.END_CLIENT_TICK.register(ScreenShake::tick);

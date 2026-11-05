@@ -1,4 +1,4 @@
-"""(0.20.54) Our own blast and shell sounds, synthesised from noise and tones (nothing sampled, nothing borrowed).
+"""(0.20.55) Our own blast and shell sounds, synthesised from noise and tones (nothing sampled, nothing borrowed).
 
     python3 tools/gen_blast_sounds.py      (needs numpy and ffmpeg with libvorbis)
 
