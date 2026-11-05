@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * take blood off as they take grime. A body's own coat also wears off by itself over a few minutes; the blood on gear
  * stays until washed.
  * <p>
- * (0.20.53) Andy: "the corpses should stay bloodied, if they were upon death the blood stains should just stay drawn and
+ * (0.20.54) Andy: "the corpses should stay bloodied, if they were upon death the blood stains should just stay drawn and
  * dry like normal". A body that dies bloodied hands its coat to its corpse (Jaymo's Kitchen's, told through its
  * {@code Corpses.ON_BODY} hook, by name): {@link #CORPSE_BLOOD}, kept with the corpse, never wearing off by itself,
  * darkening as it dries like blood on gear. Andy: "rain should wash away blood": rain and water wash a corpse as they do
@@ -104,7 +104,7 @@ public final class Bloodied {
 		builder -> builder.syncWith(Coat.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/**
-	 * (0.20.53) The blood on a corpse: its coat when it died, laid then, so it dries from that moment. Saved with the corpse
+	 * (0.20.54) The blood on a corpse: its coat when it died, laid then, so it dries from that moment. Saved with the corpse
 	 * and synced to everyone near it.
 	 */
 	public static final AttachmentType<Blood> CORPSE_BLOOD = AttachmentRegistry.create(JaymosPowers.id("corpse_blood"),
@@ -120,7 +120,7 @@ public final class Bloodied {
 		hookCorpses();
 	}
 
-	/** (0.20.53) Kitchen tells us of each new body; an older Kitchen (no hook) just leaves bodies clean. */
+	/** (0.20.54) Kitchen tells us of each new body; an older Kitchen (no hook) just leaves bodies clean. */
 	@SuppressWarnings("unchecked")
 	private static void hookCorpses() {
 		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskitchen")) {
@@ -134,7 +134,7 @@ public final class Bloodied {
 		}
 	}
 
-	/** (0.20.53) {@code dead}'s blood stays on its new body {@code corpse}, drying from now. */
+	/** (0.20.54) {@code dead}'s blood stays on its new body {@code corpse}, drying from now. */
 	private static void toCorpse(LivingEntity dead, net.minecraft.world.entity.Entity corpse) {
 		Coat coat = coat(dead);
 		if (coat != null && coat.amount() > 0) {
@@ -142,7 +142,7 @@ public final class Bloodied {
 		}
 	}
 
-	/** (0.20.53) The blood on a corpse, or null (either side). */
+	/** (0.20.54) The blood on a corpse, or null (either side). */
 	public static @Nullable Blood corpseBlood(net.minecraft.world.entity.Entity corpse) {
 		return corpse.getAttached(CORPSE_BLOOD);
 	}
@@ -287,7 +287,7 @@ public final class Bloodied {
 		}
 	}
 
-	/** (0.20.53) A corpse's blood washes off as a living body's coat does in water and rain (it never wears off dry). */
+	/** (0.20.54) A corpse's blood washes off as a living body's coat does in water and rain (it never wears off dry). */
 	private static void weatherCorpse(net.minecraft.world.entity.Entity corpse) {
 		int wash = corpse.isUnderWater() ? UNDER_WATER_WASH : corpse.isInWater() ? WADING_WASH / 2 : corpse.isInWaterOrRain() ? RAIN_WASH : 0;
 		Blood was = corpseBlood(corpse);

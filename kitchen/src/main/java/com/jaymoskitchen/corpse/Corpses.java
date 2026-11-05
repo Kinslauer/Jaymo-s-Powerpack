@@ -232,7 +232,7 @@ public final class Corpses {
 	}
 
 	/**
-	 * (0.5.64) For other mods (by reflection, only plain Java and Minecraft types): told (the one who died, its new body)
+	 * (0.5.65) For other mods (by reflection, only plain Java and Minecraft types): told (the one who died, its new body)
 	 * just before the body is added to the world, so they can carry onto it what the living body had. Jaymo's Powers: the
 	 * blood it was covered in (Andy: "the corpses should stay bloodied").
 	 */

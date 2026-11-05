@@ -21,7 +21,7 @@ import net.minecraft.world.entity.Entity;
  * the state (the skin-layer flags are reset to shown just before);</li>
  * <li>{@link #SUBMIT}: just after the body is submitted, in its pose: (the body's state, {@code {PlayerModel body,
  * PoseStack, SubmitNodeCollector, Integer light}}).</li>
- * <li>{@link #BODY} (0.5.64): any other body (a mob's, or a dead player's MCA look), as its state is made each frame:
+ * <li>{@link #BODY} (0.5.65): any other body (a mob's, or a dead player's MCA look), as its state is made each frame:
  * (corpse, the body's state), to put on the state what the body's own renderer layers draw from it (Jaymo's Powers: its
  * blood).</li>
  * </ul>
