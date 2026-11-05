@@ -17,6 +17,7 @@
 		"TerrainParticleWaterMixin",
 		"DeathScreenFilmMixin",
 		"DeathScreenReincarnateMixin",
+		"DeathScreenBlackMixin",
 		"GuardFirstPersonMixin",
 		"HammerFirstPersonMixin",
 		"HammerPoseMixin",

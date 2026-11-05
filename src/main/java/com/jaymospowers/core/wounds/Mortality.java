@@ -556,6 +556,7 @@ public final class Mortality {
 			mob.setTarget(null);
 		}
 		Downed.knockOut(level, player, OUT_BEFORE + OUT_AFTER + 20 * 60, false, "message.jaymospowers.mortality.fading", false);
+		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.fading");
 		WAKES.put(player.getUUID(), new Wake(cause, sub, level.dimension(), player.blockPosition(), level.getServer().getTickCount() + OUT_BEFORE,
 			by, turn));
 	}
@@ -592,6 +593,9 @@ public final class Mortality {
 				}
 				if (player.isAlive()) {
 					lighten(server, player);
+				}
+				if (player.hasAttached(WAKE_LINE) && !WAKES.containsKey(player.getUUID()) && !Downed.isDowned(player)) {
+					player.removeAttached(WAKE_LINE);
 				}
 			}
 		}
@@ -833,6 +837,7 @@ public final class Mortality {
 			Downed.forgetQuietly(player);
 		}
 		Downed.knockOut(level, player, OUT_AFTER, false, "message.jaymospowers.mortality.wake." + (wake.turn != null ? "risen" : line), false);
+		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.wake." + (wake.turn != null ? "risen" : line));
 		level.playSound(null, at, wake.turn != null ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F,
 			wake.turn != null ? 0.6F : 0.8F);
 		if (wake.turn != null) {
@@ -979,6 +984,15 @@ public final class Mortality {
 	 */
 	public static final AttachmentType<Long> REBORNING = AttachmentRegistry.create(JaymosPowers.id("mortality_reborning"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG,
+			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
+
+	/**
+	 * (0.20.91) Andy: "this will give you a chance to read what happened as it should say if you were kidnapped or in the
+	 * wilderness". What the black of a death turned away says, read large on it (its lang key; synced to them): going dark,
+	 * then where and how they wake. Gone once they're up.
+	 */
+	public static final AttachmentType<String> WAKE_LINE = AttachmentRegistry.create(JaymosPowers.id("mortality_wake_line"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8,
 			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
 
 	/** (0.20.91) The least and most (ticks) the black of a new life lasts. */

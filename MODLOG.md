@@ -772,4 +772,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   baubles, stashes, costume are no longer kept), plus inventory, ender chest, experience, effects and spawn point.
 - The Judges: the hall looked for its people as soon as the chunk's blocks were in, before its creatures loaded, so a new
   Judge (and master, teller) was made at every arrival. Now only once the creatures are loaded, and extras are sent away.
-  Kingdoms 0.7.582 goes with it. Built, not played.
+  Kingdoms 0.7.582 goes with it.
+- Andy: "the red overlay on the respawn screen should be black as well, the screen should cut to black whenever you
+  die, and the slow entry of either the reincarnate screen or the scenario will load, this will give you a chance to
+  read what happened as it should say if you were kidnapped or in the wilderness". The death screen is black, not red,
+  and its words and buttons come up slowly out of the black (`DeathScreenBlackMixin`, 2.5 s). A death turned away goes
+  black at once and says what happened large in the middle (going dark, then the wake's own line: in chains, taken in,
+  out in the wild by cause...; `Mortality.WAKE_LINE`), and the world comes back slowly (`DownedHud.WAKE_OUT_TICKS`, 4 s).
+  A new life's black says "That life is over. Another begins." Built, not played.
