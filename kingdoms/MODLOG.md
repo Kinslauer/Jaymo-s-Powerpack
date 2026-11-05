@@ -9105,3 +9105,15 @@ ultimate and beam-clash films came down with it. Not played.
   under C2ME's chunk system, so every such scan now reads `getChunkSource().getChunkNow` and skips a chunk that isn't
   ready: `GrimSites`, `remnants/AncientRemnantsCompat`, `Ruins.pieces`, `Clearing.sites`, `GolemLairs.look`,
   `QuestFoes.bury`. Nothing else changes. Types checked against the 26.3 jar; not built here.
+
+## 0.7.554 — the Judge's menu back; villagers want their own things
+- Andy: "i messed up ... it should instead be whatever is proper". 0.7.539's "only Have a word" on Powers' Z Fighter
+  characters is undone (`McaZFighterPageMixin` gone, the `ZFighterFolk.WORD`/`keeps` filter gone). It had also reused
+  `jaymoskingdoms_word`, the villagers' own "Have a word" (`Talks`), so on the Judge it opened a villager small talk (or
+  nothing) instead of his menu with "be born again", and every other villager lost "Have a word". The Judge, the Keeper,
+  the masters and the rest have their full MCA screen again, and "Talk about work" opens their own menu as before.
+- Andy: "not everyone should strictly trade for whale products. they should all have some separate thing THEY want".
+  `WhaleTrade` no longer gives every villager cooked whale meat, oil and ambergris purchases; only the trades that use whale
+  goods buy them, and such offers already put on anyone else are taken off. New `OwnWants`: each grown villager has one
+  thing of their own they pay well for (60% from their trade's list, else small pleasures anyone might want), picked from
+  their UUID so it never changes. Neither touches Z Fighter characters.

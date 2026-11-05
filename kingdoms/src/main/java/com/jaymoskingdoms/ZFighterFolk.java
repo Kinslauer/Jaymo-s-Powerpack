@@ -45,19 +45,6 @@ public final class ZFighterFolk {
 	public static final int ROLE = 95;
 	/** MCA's main menu: "Talk about training", on a town's Z Fighter master. */
 	public static final String TRAINING = "jaymoskingdoms_training";
-	/**
-	 * (0.7.539) Andy: "have a word should be the only option with the judge. but they are still MCA." MCA's main menu on
-	 * one of them: "Have a word" (their talk, {@link #talk}) in place of "Talk about work", and nothing else of MCA's
-	 * ({@link #keeps}). Their screen shows only Talk ({@code McaZFighterPageMixin}).
-	 */
-	public static final String WORD = "jaymoskingdoms_word";
-	/**
-	 * (0.7.539) Who roams among people rather than keeping a post (an Omen's pilot, a galactic patrolman): they keep MCA's
-	 * small talk beside "Have a word". No hugs, flirting, kissing, blood or work for anyone here.
-	 */
-	static final Set<String> SMALL_TALKERS = Set.of("omen_pilot", "patrolman");
-	/** MCA's small talk ("Chat", "Tell joke", "Tell story"). */
-	static final Set<String> SMALL_TALK = Set.of("chat", "joke", "story");
 	/** How far they may be pushed from their post before they step back (blocks), and how far they look for someone to face. */
 	static final double POST_SLACK = 1.5, LOOK_RANGE = 8.0;
 
@@ -198,16 +185,7 @@ public final class ZFighterFolk {
 		return kind == null ? null : PILOT_KIND.equals(kind) ? List.of() : Uniforms.zfighter(kind);
 	}
 
-	/** (0.7.539) Whether MCA's main menu keeps {@code answer} on {@code e}, one of them ({@link #WORD}, {@link #SMALL_TALKERS}). */
-	public static boolean keeps(Entity e, String answer) {
-		if (WORD.equals(answer)) {
-			return true;
-		}
-		String kind = kind(e);
-		return kind != null && SMALL_TALKERS.contains(kind) && SMALL_TALK.contains(answer);
-	}
-
-	/** "Talk about work" (now "Have a word") with one of them: Powers' talk. */
+	/** "Talk about work" with one of them: Powers' talk (the Judge's rebirth and writs, the Keeper's blessing...). */
 	public static void talk(ServerPlayer player, LivingEntity speaker) {
 		if (!PowersCompat.zfighterTalk(player, speaker)) {
 			Speech.tell(player.level(), speaker, player, Component.translatable("talk.jaymoskingdoms.zfighter.nothing"), Speech.WHITE);
