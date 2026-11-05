@@ -2,7 +2,6 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.BioBuilt;
 import com.jaymoskingdoms.EarthlingSurge;
-import com.jaymoskingdoms.Faiths;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -91,8 +90,8 @@ import org.jspecify.annotations.Nullable;
  * variant of theirs, like the Sylvan's new fae and elves, draws its own marks over these ({@link VariantLooks}).</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
- * <p>(0.7.544) Andy: "remove glowing eyes from all heritages/ races considered humans": a blood that passes for
- * human ({@code Faiths#human}) keeps its marks, but its eyes never light.
+ * <p>(0.7.544) Andy: "remove glowing eyes from all heritages/ races considered humans": a human blood
+ * ({@link #human}) keeps its marks, but its eyes never light.
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/**
@@ -255,15 +254,15 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		if (kind == null) {
 			// (0.7.214) a Heartlander's, a Warrior-born's or an Emberborn's variant: its own marks and eyes, lit in full
-			// ((0.7.544) Andy: no glowing eyes on any blood counted human, the Heartlander's and Emberborn's variants included)
-			boolean variantLit = style.eyes() != null && eyesLit(style.eyes(), entity) && !Faiths.human(Heritage.of((Player)entity));
+			// ((0.7.544) Andy: no glowing eyes on any blood counted human, the Heartlander's variants included)
+			boolean variantLit = style.eyes() != null && eyesLit(style.eyes(), entity) && !human(Heritage.of((Player)entity));
 			state.setData(KEY, new Look(null, 0, variantLit, -1, false, style));
 			return;
 		}
 		boolean blood = kind == Kind.NIGHTBORN && NightbornBlood.starlit(entity);
-		// ((0.7.544) Andy: "remove glowing eyes from all heritages/ races considered humans" (Faiths#human); a Nightborn
+		// ((0.7.544) Andy: "remove glowing eyes from all heritages/ races considered humans" (#human); a Nightborn
 		// vampire's red-silver eyes at night are the vampire's, so they stay)
-		boolean lit = blood || eyesLit(kind, entity, style) && !Faiths.human(kind.heritage);
+		boolean lit = blood || eyesLit(kind, entity, style) && !human(kind.heritage);
 		int glow = mood(kind, entity);
 		int flags = entity.getAttachedOrElse(Heritage.LOOK, 0);
 		if (kind == Kind.TIDEBORN) {
@@ -296,6 +295,15 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			return 0;
 		}
 		return look.glow() != 0 ? 2 : 1;
+	}
+
+	/**
+	 * (0.7.544) The bloods that are human, whose eyes never glow (Andy: Endborn, Dragonblood, Deepborn, Divine-born,
+	 * Rubberfolk, Emberborn and Frostborn "are actually all not human"); every other blood keeps its eyes.
+	 */
+	static boolean human(Heritage.@Nullable Kind kind) {
+		return kind == Heritage.Kind.HEARTLANDER || kind == Heritage.Kind.NIGHTBORN || kind == Heritage.Kind.EARTHLING
+			|| kind == Heritage.Kind.STORMBORN || kind == Heritage.Kind.DAWNBORN;
 	}
 
 	/** Whether {@code kind}'s eyes glow on {@code entity} now (a player's or a villager's). */

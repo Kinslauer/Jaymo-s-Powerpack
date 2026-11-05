@@ -69,7 +69,7 @@ public final class Faiths {
 	}
 
 	/** {@code kind} passes for human here: no blood, or a blood no further from human than a Heartlander, but not the Verdants or the broods. */
-	public static boolean human(Heritage.@Nullable Kind kind) {
+	static boolean human(Heritage.@Nullable Kind kind) {
 		return kind == null || Prejudice.degree(kind) == 0 && kind != Heritage.Kind.VERDANT && !kind.brood;
 	}
 

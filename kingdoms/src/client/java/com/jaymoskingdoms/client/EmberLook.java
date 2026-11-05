@@ -4,6 +4,8 @@ import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.HashMap;
+import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -42,6 +44,8 @@ public final class EmberLook extends RenderLayer<AvatarRenderState, PlayerModel>
 	static final int EYE_GLOW = 0xFFFFB43C;
 	/** One flame off a hand in this many ticks, and a wisp of smoke with one in this many of those. */
 	static final int FLAME_EVERY = 12, SMOKE_ONE_IN = 3;
+	/** Per skin texture: its own ember eyes (or the stock ones). */
+	private static final Map<Identifier, Identifier> EYES_BY_SKIN = new HashMap<>();
 
 	private EmberLook(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
@@ -72,8 +76,9 @@ public final class EmberLook extends RenderLayer<AvatarRenderState, PlayerModel>
 		PlayerModel model = this.getParentModel();
 		collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(MARKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 			state.outlineColor);
-		// ((0.7.544) Andy: no glowing eyes on bloods counted human, and the Emberborn passes for human, Faiths#human: the
-		// embers in the arms stay, the ember-gold eyes are gone; EYES is still Valor's hunter eyes' stock)
+		Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), EYE_GLOW, EYES, "ember_eyes/", EYES_BY_SKIN);
+		collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+			state.outlineColor);
 	}
 
 	/** Every client tick: now and then a small flame off an Emberborn's hand, drifting up. */

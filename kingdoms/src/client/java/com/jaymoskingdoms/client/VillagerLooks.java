@@ -1,7 +1,6 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.EarthlingSurge;
-import com.jaymoskingdoms.Faiths;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
@@ -97,9 +96,9 @@ public final class VillagerLooks {
 		}
 		HeritageLooks.Kind kind = HeritageLooks.Kind.of(heritage);
 		boolean lit = kind != null ? HeritageLooks.eyesLit(kind, entity, style)
-			: style != null && style.eyes() != null && HeritageLooks.eyesLit(style.eyes(), entity);
-		// ((0.7.544) Andy: no glowing eyes on any blood counted human, Faiths#human)
-		lit &= !Faiths.human(heritage);
+			: style != null ? style.eyes() != null && HeritageLooks.eyesLit(style.eyes(), entity) : heritage == Heritage.Kind.EMBERBORN;
+		// ((0.7.544) Andy: no glowing eyes on the human bloods, HeritageLooks#human)
+		lit &= !HeritageLooks.human(heritage);
 		int glow = kind == null ? -1 : HeritageLooks.mood(kind, entity);
 		if (heritage == Heritage.Kind.TIDEBORN) {
 			// lit under water, and in the rain or wet at night
@@ -160,11 +159,9 @@ public final class VillagerLooks {
 			if (look.heritage() == Heritage.Kind.EMBERBORN && look.style() == null) {
 				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(EmberLook.MARKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 					state.outlineColor);
-				if (look.eyesLit()) {
-					Identifier eyes = eyes(state, EmberLook.EYE_GLOW, EmberLook.EYES);
-					collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
-						state.outlineColor);
-				}
+				Identifier eyes = eyes(state, EmberLook.EYE_GLOW, EmberLook.EYES);
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+					state.outlineColor);
 				return;
 			}
 			if (look.heritage() == Heritage.Kind.WARRIORBORN) {

@@ -9012,10 +9012,9 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   Powers' `ChronoCheatDeath.PERPLEXED`: a humanoid executioner (`Temperaments.humanoid`) says one of six lines over its
   head (`lang/parts/perplexed.json`, through `Speech.say`, in its own tongue). Gradle compile only, not played.
 - **0.7.544, no glowing eyes on human bloods:** Andy (2026-11-04): "remove glowing eyes from all heritages/ races considered
-  humans". "Human" is `Faiths.human` (now public): no blood, or Prejudice degree 0, not Verdant, not a brood, so Heartlander,
-  Emberborn, Frostborn, Nightborn, Earthling, Stormborn, Dawnborn, Endborn, Dragonblood, Deepborn, Divine-born and
-  Rubberfolk (and their variants) lose their glowing eyes, players and villagers alike (`HeritageLooks.extract`,
-  `VillagerLooks.extract`, `EmberLook`). Marks, halos and other glows stay. Non-human bloods (Stoneborn, Tideborn, Sylvan,
-  Warrior-born, Bio-built, Beastfolk, Hollow, goblins, orcs) keep theirs. Vampire red eyes, a Nightborn vampire's
-  red-silver eyes at night, werewolf flashes, Valor hunter eyes and power eyes are states, not bloods, and stay.
-  Gradle compile only, not played.
+  humans", then: Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, Emberborn and Frostborn "are actually all not
+  human". `HeritageLooks.human` = Heartlander, Nightborn, Earthling, Stormborn, Dawnborn (and their variants): their eyes
+  never light, players and villagers alike (`HeritageLooks.extract`, `VillagerLooks.extract`). Marks and other glows stay;
+  every other blood keeps its eyes. Vampire red eyes, a Nightborn vampire's red-silver eyes at night, werewolf flashes,
+  Valor hunter eyes and power eyes are states, not bloods, and stay. Faith and prejudice still use their own "human"
+  (`Faiths.human`, `Prejudice.degree`), unchanged. Gradle compile only, not played.
