@@ -654,3 +654,22 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   inside the leg. It now hangs at 4.9 (a pixel further over leggings or a chestplate), and swings out freely but only a
   little in toward the leg (`WornLanterns.PURSE_X`, `PURSE_OVER_ARMOUR`, `PURSE_ROLL_IN`). Kingdoms 0.7.568 goes with it.
   Built, not played.
+
+## 0.20.83 (2026-11-05): two sure wakes, then Reincarnate starts a new life
+- Andy: "you should always get a black screen wake up roll for your first two deaths ... when jung was shot he instantly
+  got the respawn screen". That was the death-by-cause roll: shot by a skeleton while downed, 50% final, and it lost. Now a
+  life's first two deaths (`Mortality.SURE_WAKES`, counted in `Mortality.WOKEN`) are always left for dead (or turned):
+  the black screen, then waking out in the wild hurt. Only losing your head, the void, or an execution by a player or a
+  boss can end it sooner. From the third death on the cause rolls as before. A Chrono rewind of a wake gives it back.
+- "can you change that button to say reincarnate instead of Respawn": a final death's button reads Reincarnate
+  (`DeathScreenReincarnateMixin`; `Mortality.FINAL` is now synced to its player).
+- "you should get reprompted completely, like with a new character creator, new quests skills, etc. EVERYTHING resets":
+  `Mortality.wipe` takes every Powers/Kingdoms/Kitchen attachment off the player as the new life starts (skills, trees,
+  levels, quests, reputation, world tier and knowledge, class, heritage, story, patron, curses, mastery, affinity, the
+  Z Fighter's training, missing limbs...). Kept: the roads and heritages their deeds unlocked, and what holds items
+  (backpack, baubles, stashes, worn costume, post, crew) (`Mortality.OUTLIVES`). Then Kingdoms 0.7.573 opens MCA's creator
+  anew and retells the life story (`LifeStory.reincarnateAnew`). The Judge's rebirth is unchanged.
+- Andy: "what about the other possibilities? kidnapped, taken in by a village or nearby villagers", then "yes add this":
+  a new wake, taken in (`Mortality.SHELTERS`, asked after the captors; Kingdoms fills it). They wake on a bed in the
+  friendly settlement, with every wound bandaged and every break splinted (`Treatment.tendAll`), line "You wake to low
+  voices and the smell of herbs." Built, not played.
