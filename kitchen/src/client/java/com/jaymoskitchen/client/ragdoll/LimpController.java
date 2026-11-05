@@ -11,7 +11,6 @@ import com.jaymoskitchen.ragdoll.RagdollSnapshot;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -34,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * alone no longer counts: dashes, zips and launches from powers did that. Movement is the client's, so the ragdoll is
  * simulated here: the player
  * is moved after the body each tick (so the server still sees the fall and the crash), the pose goes out to everyone
- * (see {@link LivingRagdolls}), and the camera pulls back to third person until they're up again.
+ * (see {@link LivingRagdolls}), and (0.5.74) in first person the view rides in the body's head (HeadCam) until they're up.
  */
 public final class LimpController {
 	/** Crash: gliding on an elytra at least this fast (blocks a tick) at the start of a tick and losing this much of it against a wall. */
@@ -60,6 +59,8 @@ public final class LimpController {
 	/** A topple: the impact's share the head takes, and the share the rest of the body feels. */
 	private static final double TOPPLE = 0.35;
 	private static final float TOPPLE_SHARE = 0.15F;
+	/** (0.5.74) Knocked limp by a hit: this share of the speed they had (the blow's knockback in it) carries the body on. */
+	private static final double KNOCK_CARRY = 0.7;
 	/** How long (ticks) before the server's word that they're not limp (a power took hold) counts. */
 	private static final int SYNC_GRACE = 10;
 
@@ -67,7 +68,6 @@ public final class LimpController {
 	private static @Nullable ClientLevel level;
 	private static @Nullable RagdollBody body;
 	private static int ticks, still, cooldown;
-	private static @Nullable CameraType restoreCamera;
 	/** The velocity at the start of this tick, and at the end of the last. */
 	private static Vec3 startVelocity = Vec3.ZERO, lastEndVelocity = Vec3.ZERO;
 	/** The player object seen last tick (a new one after joining, respawning or a portal). */
@@ -186,8 +186,8 @@ public final class LimpController {
 			return;
 		}
 		if (sent != null) {
-			// the server's fling, plus the way they were already going along the ground
-			begin(minecraft, player, sent.add(end.x, 0.0, end.z));
+			// the server's topple, plus the way they were already going along the ground (the blow's real knockback in it)
+			begin(minecraft, player, sent.add(end.x * KNOCK_CARRY, 0.0, end.z * KNOCK_CARRY));
 			return;
 		}
 		if (player.isInWater() || player.isSwimming()) {
@@ -261,10 +261,7 @@ public final class LimpController {
 			minecraft.gameMode.releaseUsingItem(player);
 		}
 		player.setPose(Pose.SWIMMING);
-		if (minecraft.options.getCameraType().isFirstPerson()) {
-			restoreCamera = minecraft.options.getCameraType();
-			minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-		}
+		// (0.5.74) first person stays first person: the view rides in the body's head (HeadCam)
 		ClientPlayNetworking.send(new RagdollNet.Limp(true));
 		publish(player);
 	}
@@ -324,10 +321,6 @@ public final class LimpController {
 		if (body != null && tell) {
 			ClientPlayNetworking.send(new RagdollNet.Limp(false));
 		}
-		if (restoreCamera != null && minecraft != null && minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK) {
-			minecraft.options.setCameraType(restoreCamera);
-		}
-		restoreCamera = null;
 		if (owner != null) {
 			ClientRagdolls.forget(owner.getId());
 		}

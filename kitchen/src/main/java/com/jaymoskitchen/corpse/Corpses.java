@@ -320,6 +320,8 @@ public final class Corpses {
 	/** (0.5.1) A topple this hard (blocks a tick) at the head, and how much of it the rest of the body takes. */
 	private static final double TOPPLE_MIN = 0.08, TOPPLE_MAX = 0.14;
 	private static final float TOPPLE_SHARE = 0.3F;
+	/** (0.5.74) The share of a dying mob's speed (its killing knockback in it) its body keeps, and the most it rises (blocks a tick). */
+	private static final double DEATH_CARRY = 0.6, DEATH_LIFT = 0.05;
 
 	/**
 	 * (0.5.1) The ragdoll a dying mob (or player) starts as: standing as it stood, moving as it was moving, then toppled
@@ -338,7 +340,9 @@ public final class Corpses {
 		} else {
 			body = RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot);
 		}
-		body.setSpeed(v.x, v.y, v.z);
+		// (0.5.74) Andy: "you should just fall where you stand or a bit further if knocked back": the killing blow's
+		// knockback carries the body only partway, and its hop (vanilla lifts anyone it knocks back) is left out
+		body.setSpeed(v.x * DEATH_CARRY, Math.min(v.y, DEATH_LIFT), v.z * DEATH_CARRY);
 		if (!down) {
 			double dx = v.x, dz = v.z;
 			double length = Math.sqrt(dx * dx + dz * dz);
