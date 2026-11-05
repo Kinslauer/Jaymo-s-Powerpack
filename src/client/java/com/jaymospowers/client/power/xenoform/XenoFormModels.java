@@ -5740,30 +5740,36 @@ public final class XenoFormModels {
 	 * (0.18.113, Scan E; 0.19.62 upright, a spider when prone) Skitter: standing, the shape it always had, a man with
 	 * four thin spider legs off its back and a small abdomen behind. Prone (the stance wheel's crawl) it drops into a
 	 * spider ({@link SkitterCeiling#CRAWL_KEY}): a small thorax, a head with fangs that turns where it looks, a big round
-	 * abdomen behind (the insignia on top) and eight long legs stepping in a spider's alternating fours, the body bobbing
-	 * and the abdomen swaying; it crouches flat when sneaking, a bite lunges the head and rears the front legs, and up a
+	 * abdomen behind (the insignia on top) and eight legs. (0.20.59) The legs are the pack's spiders' own (Kingdoms'
+	 * {@code SpiderLegsMixin} on the game's {@code SpiderModel}): the game's leg poses and step, each leg kneed (two
+	 * 8-long halves, the lower a child "shin") and held high with the foot planted, the shin bending more as the foot
+	 * lifts, idle legs twitching; the abdomen breathes and sways as theirs does. Its own on top: it crouches flat when sneaking, a bite lunges the head and rears the front legs, and up a
 	 * wall (tipped head-up by SkitterCeiling) the legs keep climbing. Standing back up turns it back. In the spider the
 	 * man's parts are hidden and the body is laid on the abdomen, so the insignia sits on its back.
 	 */
 	static final class Skitter extends FormModel {
 		// ---- tuning ----
-		/** The spider's body height off the ground (model y), how far it drops when sneaking, how much it bobs a step. */
-		static final float BODY_Y = 15.0F, CROUCH_DROP = 3.0F, BOB = 0.8F;
-		/** How fast the legs step against the walk, how far they swing and lift. */
-		static final float GAIT = 0.6662F * 1.4F, SWING = 0.4F, LIFT = 0.45F;
+		/** The spider's body height off the ground (model y, a spider's), how far it drops when sneaking. */
+		static final float BODY_Y = 15.0F, CROUCH_DROP = 3.0F;
+		/** (0.20.59) A spider's step, the game's: gait against the walk, swing and lift. */
+		static final float GAIT = 0.6662F, SWING = 0.4F, LIFT = 0.4F;
+		/** (0.20.59) The spiders' knee: each thigh raised this far, its shin bent down this far, more per unit of step lift. */
+		static final float KNEE_LIFT = 0.45F, SHIN_BEND = 1.0F, STEP_BEND = 0.9F;
+		/** (0.20.59) How much more each thigh rises and shin bends when it crouches flat. */
+		static final float CROUCH_SPLAY = 0.35F;
 		/** (0.19.62) Up a wall, the legs step this much faster (the walk barely moves while climbing). */
 		static final float CLIMB_GAIT = 0.35F;
-		/** Rest: each leg pair's yaw (hind to front, the right side's; the left mirrors) and droop. */
-		private static final float[] REST_YAW = {0.785F, 0.39F, -0.39F, -0.785F};
-		private static final float[] REST_DROOP = {0.785F, 0.58F, 0.58F, 0.785F};
-		/** Each pair's step phase (hind to front): the spider's alternating fours. */
+		/** Rest: each leg pair's yaw (hind to front, the right side's; the left mirrors) and droop, the game's spider's. */
+		private static final float[] REST_YAW = {(float)(Math.PI / 4), (float)(Math.PI / 8), (float)(-Math.PI / 8), (float)(-Math.PI / 4)};
+		private static final float[] REST_DROOP = {(float)(Math.PI / 4), 0.58119464F, 0.58119464F, (float)(Math.PI / 4)};
+		/** Each pair's step phase (hind to front), the game's spider's; both sides on the same beat, mirrored. */
 		private static final float[] PHASE = {0.0F, (float)Math.PI, (float)Math.PI * 0.5F, (float)Math.PI * 1.5F};
 		/** (0.19.62) Past this far into the crawl it's drawn as the spider. */
 		static final float SPIDER_AT = 0.5F;
 
 		private final ModelPart thorax, spiderHead, abdomen;
-		/** Hind to front: 0-3 right, 4-7 left. */
-		private final ModelPart[] legs = new ModelPart[8];
+		/** Hind to front: 0-3 right, 4-7 left; and each one's shin. */
+		private final ModelPart[] legs = new ModelPart[8], shins = new ModelPart[8];
 		/** (0.19.62) Upright: the four thin legs off its back, and the small abdomen behind. */
 		private final ModelPart[] backLegs = new ModelPart[4];
 		private final ModelPart backAbdomen;
@@ -5776,6 +5782,7 @@ public final class XenoFormModels {
 			this.abdomen = root.getChild("abdomen");
 			for (int i = 0; i < 8; i++) {
 				this.legs[i] = root.getChild("leg" + i);
+				this.shins[i] = this.legs[i].getChild("shin");
 			}
 			this.backAbdomen = this.body.getChild("back_abdomen");
 			for (int i = 0; i < 4; i++) {
@@ -5812,15 +5819,20 @@ public final class XenoFormModels {
 			head.addOrReplaceChild("left_fang", CubeListBuilder.create().texOffs(44, 78).mirror().addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
 				PartPose.offsetAndRotation(1.5F, 3.5F, -7.0F, -0.3F, 0.0F, -0.15F));
 			root.addOrReplaceChild("abdomen", CubeListBuilder.create().texOffs(0, 78).addBox(-5.0F, -4.0F, -6.0F, 10.0F, 8.0F, 12.0F),
-				PartPose.offset(0.0F, BODY_Y - 1.0F, 9.0F));
-			// hind to front along the thorax, right side then left
+				PartPose.offset(0.0F, BODY_Y, 9.0F));
+			// hind to front along the thorax, right side then left, kneed like the spiders' (thigh and shin both take the
+			// leg strip's first 8, as the spiders' two halves share their one leg strip)
 			for (int i = 0; i < 8; i++) {
 				boolean left = i >= 4;
 				float z = 2.0F - (i % 4);
-				CubeListBuilder leg = left
-					? CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-1.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F)
-					: CubeListBuilder.create().texOffs(0, 114).addBox(-15.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F);
-				root.addOrReplaceChild("leg" + i, leg, PartPose.offset(left ? 4.0F : -4.0F, BODY_Y, z));
+				CubeListBuilder thigh = left
+					? CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-1.0F, -1.0F, -1.0F, 8.0F, 2.0F, 2.0F)
+					: CubeListBuilder.create().texOffs(0, 114).addBox(-7.0F, -1.0F, -1.0F, 8.0F, 2.0F, 2.0F);
+				CubeListBuilder shin = left
+					? CubeListBuilder.create().texOffs(0, 118).mirror().addBox(0.0F, -1.0F, -1.0F, 8.0F, 2.0F, 2.0F)
+					: CubeListBuilder.create().texOffs(0, 114).addBox(-8.0F, -1.0F, -1.0F, 8.0F, 2.0F, 2.0F);
+				PartDefinition leg = root.addOrReplaceChild("leg" + i, thigh, PartPose.offset(left ? 4.0F : -4.0F, BODY_Y, z));
+				leg.addOrReplaceChild("shin", shin, PartPose.offset(left ? 7.0F : -7.0F, 0.0F, 0.0F));
 			}
 			return mesh;
 		}
@@ -5870,9 +5882,9 @@ public final class XenoFormModels {
 			// up a wall the walk hardly moves, so the legs run on the clock instead
 			float walk = climbing ? state.ageInTicks * CLIMB_GAIT : state.walkAnimationPos * GAIT;
 			float speed = climbing ? 1.0F : Math.min(1.0F, state.walkAnimationSpeed);
-			float drop = state.isCrouching && !climbing ? CROUCH_DROP : 0.0F;
-			float bob = Mth.abs(Mth.sin(walk)) * BOB * speed;
-			float y = BODY_Y + drop - bob;
+			float crouch = state.isCrouching && !climbing ? 1.0F : 0.0F;
+			float y = BODY_Y + CROUCH_DROP * crouch;
+			float age = state.ageInTicks;
 			// a bite: the head lunges and the fangs open, the front legs rear
 			float bite = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
 			this.thorax.y = y;
@@ -5880,27 +5892,27 @@ public final class XenoFormModels {
 			this.spiderHead.z = -3.0F - bite * 2.0F;
 			this.spiderHead.yRot = climbing ? 0.0F : state.yRot * Mth.DEG_TO_RAD;
 			this.spiderHead.xRot = (climbing ? 0.0F : state.xRot * Mth.DEG_TO_RAD) - bite * 0.3F;
-			this.abdomen.y = y - 1.0F + Mth.sin(walk + 0.8F) * 0.4F * speed;
-			this.abdomen.yRot = Mth.sin(walk * 0.5F) * 0.12F * speed;
-			this.abdomen.xRot = -0.1F + Mth.sin(state.ageInTicks * 0.1F) * 0.03F;
-			float breathe = 1.0F + Mth.sin(state.ageInTicks * 0.1F) * 0.02F;
-			this.abdomen.xScale = this.abdomen.yScale = this.abdomen.zScale = breathe;
+			// the abdomen breathes, and sways as it walks (as the spiders' does)
+			this.abdomen.y = y + Mth.sin(age * 0.08F) * 0.35F;
+			this.abdomen.xRot = Mth.sin(age * 0.08F) * 0.04F;
+			this.abdomen.yRot = Mth.sin(walk) * 0.12F * speed;
 			for (int i = 0; i < 8; i++) {
 				int pair = i % 4;
 				float side = i >= 4 ? -1.0F : 1.0F;
 				ModelPart leg = this.legs[i];
 				leg.y = y;
-				// the right side's step; the left's runs half a cycle out (alternating fours), mirrored
-				float phase = PHASE[pair] + (i >= 4 ? (float)Math.PI : 0.0F);
-				float swing = -Mth.cos(walk * 2.0F + phase) * SWING * speed;
-				float lift = Mth.abs(Mth.sin(walk + phase)) * LIFT * speed;
-				// idle: the odd leg twitches
-				float twitch = Mth.sin(state.ageInTicks * 0.13F + i * 1.9F) * 0.03F;
-				leg.yRot = side * (REST_YAW[pair] + swing + twitch);
-				leg.zRot = side * (-REST_DROOP[pair] + lift + (drop > 0.0F ? 0.35F : 0.0F));
+				// the game's spider step: both sides on the same beat, mirrored
+				float swing = -Mth.cos(walk * 2.0F + PHASE[pair]) * SWING * speed;
+				float step = Math.abs(Mth.sin(walk + PHASE[pair]) * LIFT) * speed;
+				// idle: a slow twitch, each leg on its own beat, fading out as it walks (the spiders' own)
+				float twitch = Mth.sin(age * 0.13F + i * 1.7F) * 0.04F * (1.0F - Math.min(1.0F, speed * 2.0F));
+				leg.yRot = side * (REST_YAW[pair] + swing);
+				leg.zRot = side * (-REST_DROOP[pair] + step + KNEE_LIFT + twitch + CROUCH_SPLAY * crouch);
 				if (pair == 3) {
+					// the front pair rears on a bite
 					leg.zRot += side * bite * 0.6F;
 				}
+				this.shins[i].zRot = -side * (SHIN_BEND + step * STEP_BEND + CROUCH_SPLAY * crouch);
 			}
 			this.body.x = 0.0F;
 			this.body.y = this.abdomen.y;
