@@ -2,5 +2,9 @@
   "block.jaymospowers.copper_pebble": "Rock",
   "block.jaymospowers.iron_pebble": "Rock",
   "block.jaymospowers.copper_nugget_pebble": "Rock",
-  "block.jaymospowers.iron_nugget_pebble": "Rock"
+  "block.jaymospowers.iron_nugget_pebble": "Rock",
+  "block.jaymospowers.coal_pebble": "Rock",
+  "block.jaymospowers.gold_pebble": "Rock",
+  "block.jaymospowers.coal_nugget_pebble": "Rock",
+  "block.jaymospowers.gold_nugget_pebble": "Rock"
 }

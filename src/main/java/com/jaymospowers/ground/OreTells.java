@@ -41,7 +41,7 @@ import net.minecraft.world.level.material.PushReaction;
  * are and drop cobblestone, cobbled deepslate and dirt. Placement: worldgen/placed_feature/ore_tells.json.
  * (0.20.105) Andy: "right now it isnt a scrying eye that could tell theres something there, ANYONE could tell, it should
  * instead be a chance that a pebble spawns where these blocks would have, and it is either colored copper or brown like
- * iron, or will drop you a nugget from that ore type". The rocky dirt is gone: over a shallow copper or iron vein there's
+ * iron, or will drop you a nugget from that ore type". The rocky dirt is gone: over a shallow copper or iron vein (coal and gold too, 0.20.105) there's
  * now sometimes a lone pebble on the ground, either stained the ore's colour or a plain-looking rock that's really a
  * nugget ({@link OrePebbleBlock}). Rocky dirt already in the world turns back into plain dirt on its own.
  */
@@ -49,11 +49,13 @@ public final class OreTells {
 	public static Block SEAMED_STONE, SEAMED_DEEPSLATE, ROCKY_DIRT;
 	/** (0.20.105) The pebbles over shallow veins: stained (gives a plain rock) and hidden (looks plain, gives a nugget). */
 	public static Block COPPER_PEBBLE, IRON_PEBBLE, COPPER_NUGGET_PEBBLE, IRON_NUGGET_PEBBLE;
+	/** (0.20.105) Andy: "you can represent coal and gold too, but they should all be faint". */
+	public static Block COAL_PEBBLE, GOLD_PEBBLE, COAL_NUGGET_PEBBLE, GOLD_NUGGET_PEBBLE;
 	/** Ore looked for underground in each chunk; seams round each found; columns looked down for a shallow vein. */
 	static final int TRIES = 28, SURFACE_TRIES = 8;
 	static final float SEAM_CHANCE = 0.55F, FAR_SEAM_CHANCE = 0.25F;
 	static final int SHALLOW_MIN = 2, SHALLOW_MOST = 12;
-	/** How often a shallow copper or iron vein shows a pebble at all, and how many of those are hidden nuggets. */
+	/** How often a shallow coal, copper, iron or gold vein shows a pebble at all, and how many of those are hidden nuggets. */
 	static final float PEBBLE_CHANCE = 0.4F, NUGGET_SHARE = 0.5F;
 
 	private OreTells() {
@@ -71,6 +73,10 @@ public final class OreTells {
 		IRON_PEBBLE = pebble("iron_pebble", rock);
 		COPPER_NUGGET_PEBBLE = pebble("copper_nugget_pebble", () -> Items.COPPER_NUGGET);
 		IRON_NUGGET_PEBBLE = pebble("iron_nugget_pebble", () -> Items.IRON_NUGGET);
+		COAL_PEBBLE = pebble("coal_pebble", rock);
+		GOLD_PEBBLE = pebble("gold_pebble", rock);
+		COAL_NUGGET_PEBBLE = pebble("coal_nugget_pebble", () -> Items.COAL);
+		GOLD_NUGGET_PEBBLE = pebble("gold_nugget_pebble", () -> Items.GOLD_NUGGET);
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("ore_tells"), Tells.CODEC);
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_DECORATION,
 			ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_tells")));
@@ -161,11 +167,12 @@ public final class OreTells {
 				}
 				for (int dy = SHALLOW_MIN; dy <= SHALLOW_MOST; dy++) {
 					BlockState ore = level.getBlockState(p.below(dy));
-					boolean copper = ore.is(ConventionalBlockTags.COPPER_ORES), iron = ore.is(ConventionalBlockTags.IRON_ORES);
-					if (copper || iron) {
+					Block stained = ore.is(ConventionalBlockTags.COPPER_ORES) ? COPPER_PEBBLE : ore.is(ConventionalBlockTags.IRON_ORES) ? IRON_PEBBLE
+						: ore.is(ConventionalBlockTags.GOLD_ORES) ? GOLD_PEBBLE : ore.is(ConventionalBlockTags.COAL_ORES) ? COAL_PEBBLE : null;
+					if (stained != null) {
 						if (random.nextFloat() < PEBBLE_CHANCE) {
-							boolean nugget = random.nextFloat() < NUGGET_SHARE;
-							Block pebble = copper ? (nugget ? COPPER_NUGGET_PEBBLE : COPPER_PEBBLE) : (nugget ? IRON_NUGGET_PEBBLE : IRON_PEBBLE);
+							Block pebble = random.nextFloat() >= NUGGET_SHARE ? stained : stained == COPPER_PEBBLE ? COPPER_NUGGET_PEBBLE
+								: stained == IRON_PEBBLE ? IRON_NUGGET_PEBBLE : stained == GOLD_PEBBLE ? GOLD_NUGGET_PEBBLE : COAL_NUGGET_PEBBLE;
 							level.setBlock(above, pebble.defaultBlockState(), Block.UPDATE_CLIENTS);
 							placed = true;
 						}
