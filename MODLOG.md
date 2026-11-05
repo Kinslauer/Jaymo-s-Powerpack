@@ -889,3 +889,14 @@ semi or full auto weapon. it should use ammunition accurately and animate a one 
   Without the Executioner perk a loaded future gun no longer slams: it fires one round one-handed, and 40% of the time
   (`Finishers.WILD_MISS`) the shot goes into the ground beside their head and they live. Unloaded, it's still the Wild Slam.
 - Built (compileClientJava), not played.
+
+## 0.20.102: Ore pebbles instead of rocky dirt
+
+- Andy: "right now it isnt a scrying eye that could tell theres something there, ANYONE could tell, it should instead be
+  a chance that a pebble spawns where these blocks would have". Rocky dirt no longer generates. Where a column's dirt or
+  grass sits 2-12 blocks over a copper or iron vein, there's now a 40% chance (`OreTells.PEBBLE_CHANCE`) of a lone pebble
+  on top: half stained the ore's colour (copper-orange or iron-brown, gives a plain rock), half a plain-looking rock that
+  gives a copper or iron nugget when picked up (`NUGGET_SHARE`). All four are named "Rock". Other ores show nothing on
+  the surface. Seamed stone underground is unchanged.
+- Rocky dirt already in the world turns back into dirt on a random tick, and it's out of the creative tab.
+- New chunks only for the pebbles. Built, not played.
