@@ -9208,3 +9208,8 @@ ultimate and beam-clash films came down with it. Not played.
   After 30 s a guard, den hand or butcher puts it down; anyone else calls a guard. Skipped: the settlement's own
   stables/barns/pens, ridden/leashed/tamed/named/owned animals, house animals (tag `jaymoskingdoms:house_animals`:
   cats, parrots, bees, axolotls, frogs, allays). `Strays`, lang part strays.json (12 lines per family), hint 104. Not played.
+- **0.7.568, villager voices quieter and one at a time:** Andy: "voice lines from npcs are too loud and layer like the old
+  intro did." (`VoiceGate`, `Languages.voice`/`farewell`) a villager says no new line until its last one has finished
+  (our tongue clips measured from the .ogg, MCA's taken as 3 s) plus 4 s; a player hears one villager's line at a time
+  (a line that starts while another is playing to them isn't sent to them). Lines in a tongue play at 40% volume, MCA's
+  words and the grunts at 70%. Pain cries and snores are left alone. Not played.
