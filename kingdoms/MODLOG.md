@@ -9480,4 +9480,9 @@ off course then those should break upon contact".
 - Chopped logs no longer draw as oak mid-chop: a chop the client guessed as a break got the block put back without its
   wood, so `Trees` sends the chopped log's data again two ticks after each chop.
 - A woodcutter's tree still breaks up into his bag.
+- Giants grab and throw trees (Andy: "giants should also be able to grab and throw the trees with their grabs").
+  `FallingTree.treeNear/take/hold/hurl`: a giant's hand takes a fallen tree, or tears a standing one out whole; held, it
+  lies along the giant's facing; thrown, it flies tumbling, strikes what it passes through (never its thrower) and lands
+  as a fallen tree. Aether Giants (mob griefing on) tear one up and lob it at a target out of grab reach but within 40
+  blocks (up to 120 logs). Powers 0.20.105's Great Ape and Towerback grabs do it when no one is in reach (`GiantTrees`).
 - Hint 115. Built, not played, not booted.

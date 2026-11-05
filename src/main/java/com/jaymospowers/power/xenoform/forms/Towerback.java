@@ -275,7 +275,7 @@ public final class Towerback extends XenoForm {
 					return;
 				}
 				LivingEntity target = aimed(player, handReach(player) + GRAB_AIM, e -> e instanceof LivingEntity l && canGrab(player, l));
-				// (0.20.104) no one to grab: a tree in reach will do, to be thrown (GiantTrees)
+				// (0.20.105) no one to grab: a tree in reach will do, to be thrown (GiantTrees)
 				if (target == null && !GiantTrees.treeNear(level, player, hand(player, 0.0), handReach(player))) {
 					return;
 				}
@@ -565,7 +565,7 @@ public final class Towerback extends XenoForm {
 			return;
 		}
 		if (prey == null && GiantTrees.tick(level, player, t - WINDUP - SNATCH, HOLD, hand(player, 0.0))) {
-			// (0.20.104) a tree in its hand, lifted, then thrown where it looks
+			// (0.20.105) a tree in its hand, lifted, then thrown where it looks
 			return;
 		}
 		if (prey == null) {

@@ -138,7 +138,7 @@ public final class ApeGrab {
 		if (target == null) {
 			target = ahead(ape, live, level);
 		}
-		// (0.20.104) no one in reach: a tree will do, to be thrown (GiantTrees)
+		// (0.20.105) no one in reach: a tree will do, to be thrown (GiantTrees)
 		boolean tree = target == null && GiantTrees.treeNear(level, ape, hand(ape, 0.0), treeReach(ape, live));
 		if (!tree && (target == null || !canGrab(ape, target))) {
 			return false;
@@ -196,7 +196,7 @@ public final class ApeGrab {
 			return true;
 		}
 		if (prey == null && GiantTrees.tick(level, ape, t - WINDUP - SNATCH, HOLD, hand(ape, 0.0))) {
-			// (0.20.104) a tree in his hand, lifted, then thrown where he looks
+			// (0.20.105) a tree in his hand, lifted, then thrown where he looks
 			return true;
 		}
 		if (prey == null) {
@@ -358,7 +358,7 @@ public final class ApeGrab {
 		return ape instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE;
 	}
 
-	/** (0.20.104) How far round his hand he can reach for a tree. */
+	/** (0.20.105) How far round his hand he can reach for a tree. */
 	private static double treeReach(LivingEntity ape, ZFighterPower.Live live) {
 		return ape.getBbWidth() * 0.5 + ZFighterLineage.BERSERK_REACH * REACH_FACTOR * Math.max(0.25F, live.apeSize);
 	}

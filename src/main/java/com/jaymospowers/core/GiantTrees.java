@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.104) Andy: "giants should also be able to grab and throw the trees with their grabs". A giant's grab (the Great
+ * (0.20.105) Andy: "giants should also be able to grab and throw the trees with their grabs". A giant's grab (the Great
  * Ape's, Towerback's) with no one in reach closes on a tree instead: a fallen one, or a standing one torn out whole. It's
  * lifted to the giant's hand while the grab holds, and where the grab would slam its catch down, the tree is thrown along
  * the giant's aim instead, faster the bigger and stronger the giant ({@link #THROW_SPEED}), striking what it flies
