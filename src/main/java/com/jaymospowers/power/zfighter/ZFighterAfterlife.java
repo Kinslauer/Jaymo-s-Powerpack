@@ -709,13 +709,11 @@ public final class ZFighterAfterlife {
 					Component.translatable(Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.judge.ring_won" : "talk.jaymospowers.judge.ring_how", ROUNDS),
 					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))),
 				// (0.19.33) Andy: "make the judge offer it in his interactions menu": one of the dead may ask to be born again
-				ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn", among(player) && mayBeReborn(player), () -> ZFighterNpcs.ask(player, npc,
+				// (0.20.78) Andy: "you should always be able to reset your character at the Judge, the option shouldnt be greyed":
+				// never greyed, for the dead and for a living visitor alike (born again on the spot)
+				ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn", true, () -> ZFighterNpcs.ask(player, npc,
 					Component.translatable("talk.jaymospowers.judge.reborn_ask"), List.of(
-						ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn_yes", true, () -> {
-							if (among(player)) {
-								reborn(player);
-							}
-						}),
+						ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn_yes", true, () -> reborn(player)),
 						ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))))));
 			case MASTER_TAG -> {
 				boolean taught = Boolean.TRUE.equals(player.getAttached(TAUGHT)) && !player.isCreative();
