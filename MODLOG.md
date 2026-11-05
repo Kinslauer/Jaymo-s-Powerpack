@@ -410,3 +410,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   damage taken), switched off by `compat/SubtleEffectsCompat` (its two public fields, at server start and every 10 s on
   the client since the server's config syncs on join); a struck skeleton or skeleton horse throws bone-block chips
   instead (`BladeBlood.splinters`). Gradle build only, not played.
+
+- **0.20.52 (Kitchen 0.5.64), corpses stay bloodied:** Andy (2026-11-05): "the corpses should stay bloodied, if they were
+  upon death the blood stains should just stay drawn and dry like normal". Kitchen's new `Corpses.ON_BODY` hook hands
+  each new body (mob or player) to Powers, which copies the dead body's blood coat onto the corpse as
+  `Bloodied.CORPSE_BLOOD` (amount, colour, laid now; saved with the corpse, synced). It never wears off and darkens over
+  `DRIES_IN` (5 min) like blood on gear. Drawn through Kitchen's new `CorpseDressing.BODY` hook (mob bodies and MCA
+  looks, by the usual `BloodCoatLayer`) and `EXTRACT`/`SUBMIT` (a dead player in plain skin). Corpses don't wash in
+  water. Gradle build only, not played.

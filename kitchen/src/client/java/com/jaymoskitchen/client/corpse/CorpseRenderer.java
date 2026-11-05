@@ -309,6 +309,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		// no name over a body (a zombie player's, say)
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		CorpseDressing.body(corpse, bodyState);
 		ClosedEyes.mark(bodyState);
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
@@ -369,6 +370,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		CorpseDressing.body(corpse, bodyState);
 		bodyState.setData(Pinned.KEY, Pinned.HANGING);
 		ClosedEyes.mark(bodyState);
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
@@ -464,6 +466,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		CorpseDressing.body(corpse, bodyState);
 		ClosedEyes.mark(bodyState);
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		// (0.5.40) whatever the ragdoll doesn't drive (a vulture's wings and neck, a modded mob's legs) hangs loose

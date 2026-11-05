@@ -36,6 +36,11 @@ import org.jspecify.annotations.Nullable;
  * greaves), rain slowly, and the hand washes of {@code ArmourGrime} (a cauldron scrub, a wet sponge, dunking the item)
  * take blood off as they take grime. A body's own coat also wears off by itself over a few minutes; the blood on gear
  * stays until washed.
+ * <p>
+ * (0.20.52) Andy: "the corpses should stay bloodied, if they were upon death the blood stains should just stay drawn and
+ * dry like normal". A body that dies bloodied hands its coat to its corpse (Jaymo's Kitchen's, told through its
+ * {@code Corpses.ON_BODY} hook, by name): {@link #CORPSE_BLOOD}, kept with the corpse, never wearing off, darkening as it
+ * dries like blood on gear.
  */
 public final class Bloodied {
 	/** How bloody a body or item can get (whole steps, so the data only changes now and then). */
@@ -97,6 +102,13 @@ public final class Bloodied {
 	public static final AttachmentType<Coat> COAT = AttachmentRegistry.create(JaymosPowers.id("blood_coat"),
 		builder -> builder.syncWith(Coat.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
+	/**
+	 * (0.20.52) The blood on a corpse: its coat when it died, laid then, so it dries from that moment. Saved with the corpse
+	 * and synced to everyone near it.
+	 */
+	public static final AttachmentType<Blood> CORPSE_BLOOD = AttachmentRegistry.create(JaymosPowers.id("corpse_blood"),
+		builder -> builder.persistent(Blood.CODEC).syncWith(Blood.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
 	private Bloodied() {
 	}
 
@@ -104,6 +116,34 @@ public final class Bloodied {
 		BLOOD = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("blood"),
 			DataComponentType.<Blood>builder().persistent(Blood.CODEC).networkSynchronized(Blood.STREAM_CODEC).build());
 		ServerTickEvents.END_SERVER_TICK.register(Bloodied::tick);
+		hookCorpses();
+	}
+
+	/** (0.20.52) Kitchen tells us of each new body; an older Kitchen (no hook) just leaves bodies clean. */
+	@SuppressWarnings("unchecked")
+	private static void hookCorpses() {
+		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskitchen")) {
+			return;
+		}
+		try {
+			((java.util.List<java.util.function.BiConsumer<LivingEntity, net.minecraft.world.entity.Entity>>) Class
+				.forName("com.jaymoskitchen.corpse.Corpses").getField("ON_BODY").get(null)).add(Bloodied::toCorpse);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosPowers.LOGGER.warn("Jaymo's Kitchen has no body hook (older Kitchen?): corpses won't keep their blood", e);
+		}
+	}
+
+	/** (0.20.52) {@code dead}'s blood stays on its new body {@code corpse}, drying from now. */
+	private static void toCorpse(LivingEntity dead, net.minecraft.world.entity.Entity corpse) {
+		Coat coat = coat(dead);
+		if (coat != null && coat.amount() > 0) {
+			corpse.setAttached(CORPSE_BLOOD, new Blood(coat.amount(), coat.color(), dead.level().getGameTime()));
+		}
+	}
+
+	/** (0.20.52) The blood on a corpse, or null (either side). */
+	public static @Nullable Blood corpseBlood(net.minecraft.world.entity.Entity corpse) {
+		return corpse.getAttached(CORPSE_BLOOD);
 	}
 
 	/** The blood on {@code stack}, or null if it's clean. */

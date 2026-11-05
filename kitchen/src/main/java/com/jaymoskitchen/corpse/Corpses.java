@@ -231,6 +231,25 @@ public final class Corpses {
 			&& entity.level() instanceof ServerLevel;
 	}
 
+	/**
+	 * (0.5.64) For other mods (by reflection, only plain Java and Minecraft types): told (the one who died, its new body)
+	 * just before the body is added to the world, so they can carry onto it what the living body had. Jaymo's Powers: the
+	 * blood it was covered in (Andy: "the corpses should stay bloodied").
+	 */
+	public static final java.util.List<java.util.function.BiConsumer<LivingEntity, net.minecraft.world.entity.Entity>> ON_BODY =
+		new java.util.concurrent.CopyOnWriteArrayList<>();
+
+	/** Runs the {@link #ON_BODY} hooks; one failing never stops the body appearing. */
+	static void tellBody(LivingEntity dead, CorpseEntity corpse) {
+		for (java.util.function.BiConsumer<LivingEntity, net.minecraft.world.entity.Entity> hook : ON_BODY) {
+			try {
+				hook.accept(dead, corpse);
+			} catch (RuntimeException e) {
+				// another mod's hook
+			}
+		}
+	}
+
 	/** Replaces a mob that has finished dying with its corpse, holding the loot it would have dropped. */
 	public static void spawnCorpse(LivingEntity mob, List<ItemStack> loot) {
 		if (!(mob.level() instanceof ServerLevel level)) {
@@ -262,6 +281,7 @@ public final class Corpses {
 		corpse.markJustDied();
 		corpse.startRagdoll(deathBody(mob));
 		pinFrom(mob, corpse);
+		tellBody(mob, corpse);
 		level.addFreshEntity(corpse);
 	}
 

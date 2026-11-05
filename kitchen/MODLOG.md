@@ -1420,3 +1420,8 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
   as well. it does not ever resemble blood." Corpse cuts, gibs, scavengers, the chopper, hangings and blood grates sent
   redstone-block crumbs or red dust; `KitchenBlood.send` sends Powers' red blood instead (nothing without Powers).
   Gradle build only, not played.
+
+- **0.5.64 (Powers 0.20.52), corpses stay bloodied:** `Corpses.ON_BODY` (dead body, new corpse) runs just before a mob's
+  or player's corpse is added, and `CorpseDressing.BODY` (corpse, body state) as a non-plain body's state is made each
+  frame, both for other mods by reflection. Powers uses them to keep the blood a body died with on its corpse, drying
+  darker. Gradle build only, not played.
