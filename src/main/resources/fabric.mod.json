@@ -49,6 +49,7 @@
 		{ "config": "jaymospowers.ldl.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.weaponmaster.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.sodium.client.mixins.json", "environment": "client" },
+		{ "config": "jaymospowers.xaero.client.mixins.json", "environment": "client" },
 		"jaymospowers.smoke.mixins.json",
 		{ "config": "jaymospowers.smoke.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.rig.client.mixins.json", "environment": "client" },
