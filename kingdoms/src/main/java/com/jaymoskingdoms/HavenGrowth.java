@@ -731,7 +731,7 @@ public final class HavenGrowth {
 		}
 		level.playSound(null, at.getX(), at.getY(), at.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.NEUTRAL, 1.4F, 1.0F);
 		if (nearest != null) {
-			Speech.say(level, nearest, Dialects.tr(nearest, "speech.jaymoskingdoms.haven_guard.rally." + nearest.getRandom().nextInt(LINES)), Speech.RED, 32.0);
+			Speech.say(level, nearest, Component.translatable("speech.jaymoskingdoms.haven_guard.rally." + nearest.getRandom().nextInt(LINES)), Speech.RED, 32.0);
 		}
 		if (foe instanceof ServerPlayer player) {
 			Reputation.change(player, haven, RALLY_REP);
