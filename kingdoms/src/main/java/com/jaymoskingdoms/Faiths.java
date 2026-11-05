@@ -70,7 +70,7 @@ public final class Faiths {
 
 	/**
 	 * {@code kind} passes for human here: no blood, or a blood no further from human than a Heartlander, but not the Verdants or
-	 * the broods. (0.7.544) That is the Heartlander, Nightborn, Earthling, Stormborn and Dawnborn (Andy: the rest "are
+	 * the broods. (0.7.545) That is the Heartlander, Nightborn, Earthling, Stormborn and Dawnborn (Andy: the rest "are
 	 * actually all not human"); HeritageLooks reads it too, for whose eyes never glow.
 	 */
 	public static boolean human(Heritage.@Nullable Kind kind) {
@@ -89,7 +89,7 @@ public final class Faiths {
 			case VERDANT -> Patron.HEARTHKEEPER;
 			case WARRIORBORN -> Patron.CROWNED_SUN;
 			case HOLLOW, ENDBORN -> Patron.LANTERN_WARDEN;
-			// ((0.7.544) the bloods Andy said aren't human: fire to the Ash Whisperer, the cold wilds to the Huntsman, the
+			// ((0.7.545) the bloods Andy said aren't human: fire to the Ash Whisperer, the cold wilds to the Huntsman, the
 			// deep stone to the Anvil-Father, a dragon's to the war god, the Divine-born and the Rubberfolk to the Hearthkeeper)
 			case EMBERBORN -> Patron.ASH_WHISPERER;
 			case FROSTBORN -> Patron.GREEN_HUNTSMAN;

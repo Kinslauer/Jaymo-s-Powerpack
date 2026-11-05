@@ -91,7 +91,7 @@ import org.jspecify.annotations.Nullable;
  * variant of theirs, like the Sylvan's new fae and elves, draws its own marks over these ({@link VariantLooks}).</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
- * <p>(0.7.544) Andy: "remove glowing eyes from all heritages/ races considered humans": a human blood
+ * <p>(0.7.545) Andy: "remove glowing eyes from all heritages/ races considered humans": a human blood
  * ({@link #human}) keeps its marks, but its eyes never light.
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -255,13 +255,13 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		if (kind == null) {
 			// (0.7.214) a Heartlander's, a Warrior-born's or an Emberborn's variant: its own marks and eyes, lit in full
-			// ((0.7.544) Andy: no glowing eyes on any blood counted human, the Heartlander's variants included)
+			// ((0.7.545) Andy: no glowing eyes on any blood counted human, the Heartlander's variants included)
 			boolean variantLit = style.eyes() != null && eyesLit(style.eyes(), entity) && !human(Heritage.of((Player)entity));
 			state.setData(KEY, new Look(null, 0, variantLit, -1, false, style));
 			return;
 		}
 		boolean blood = kind == Kind.NIGHTBORN && NightbornBlood.starlit(entity);
-		// ((0.7.544) Andy: "remove glowing eyes from all heritages/ races considered humans" (#human); a Nightborn
+		// ((0.7.545) Andy: "remove glowing eyes from all heritages/ races considered humans" (#human); a Nightborn
 		// vampire's red-silver eyes at night are the vampire's, so they stay)
 		boolean lit = blood || eyesLit(kind, entity, style) && !human(kind.heritage);
 		int glow = mood(kind, entity);
@@ -298,7 +298,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		return look.glow() != 0 ? 2 : 1;
 	}
 
-	/** (0.7.544) The bloods that are human ({@link Faiths#human}: Heartlander, Nightborn, Earthling, Stormborn, Dawnborn): their eyes never glow. */
+	/** (0.7.545) The bloods that are human ({@link Faiths#human}: Heartlander, Nightborn, Earthling, Stormborn, Dawnborn): their eyes never glow. */
 	static boolean human(Heritage.@Nullable Kind kind) {
 		return kind != null && Faiths.human(kind);
 	}
