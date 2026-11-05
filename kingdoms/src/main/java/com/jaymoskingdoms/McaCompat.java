@@ -641,6 +641,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.outlawOpening(villager, player);
 	}
 
+	/** (0.7.597) A wary villager's cold opening, never MCA's friendly stranger's welcome ({@link McaBridge#waryOpening}). */
+	public static boolean waryOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.waryOpening(villager, player);
+	}
+
 	/** (0.7.424) The opening of one held down for questioning ({@link McaBridge#questioningOpening}). */
 	public static boolean questioningOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.questioningOpening(villager, player);

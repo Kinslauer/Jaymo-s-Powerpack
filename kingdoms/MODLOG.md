@@ -9531,7 +9531,42 @@ off course then those should break upon contact".
   don't wake you at all: they take a stack from your pack (half of a big one) into their own inventory, where a
   pickpocket can win it back. Speech bubbles only (`lang/parts/fainting.json`, 36 lines). Built, not played.
 
-## 0.7.595: wolves stalk you (pack 0.20.114)
+## 0.7.597
+- Villagers keep one attitude toward you (Andy: "this villager talked to me then acted this way when i introduced myself,
+  the interactions should be consistent"). One who is wary of you (`Introductions.wary`: minds your blood, their realm
+  thinks ill of you, or remembers you coldly) now shows it from the first moment: opening their menu gets the same cold
+  word they'd give for your name or your hand (`McaBridge.waryOpening`) instead of MCA's friendly stranger's welcome,
+  and they no longer come over to chat, ask after you, beg, bargain, gossip or bring gifts (`Approaches.pick`; only an
+  accusation or checking on a quest they gave you). The cold line is the same one all day for that villager and player
+  (`Introductions.waryLine`), so a step back from your hand and "ask their name" don't say two different things.
+  A villager who isn't wary of you never turns cold on the introduction.
+- Speech bubbles: words still showing aren't stacked again under themselves (they stay up longer), and like name tags a
+  faint copy shows through blocks, so a wall between you and the speaker no longer cuts lines off mid-word.
+  Built, not played.
+
+## 0.7.598 (2026-11-05): kingdoms only in Epic towns; Grim castles are fiefs only
+- Andy, of a Winterhold citadel standing as a kingdom's seat on open snow: "these structures should only spawn as fiefs
+  or smaller villages allied to larger kingdoms that are always from epic villages, this would never pass a kingdom's
+  structure".
+- `GrandSeats` no longer offers Grim Kingdoms' keeps and citadels (Winterhold, Whitewarden, Snowgrave, Grain Sack,
+  Glimmervault): they stay fiefdom holds only (`GrimSites.HOLDS`). Snowy land takes ATi's woodland keep instead.
+- Only an Epic town (vanilla's `minecraft:village_*` ids, which Epic Structures: Villages redraws; `Seats.epic`) founds
+  a kingdom. Any other mod's village (ChoiceTheorem's, the shared pool's others) is always a village, and a new village
+  now sides with the nearest standing kingdom within 1000 blocks (`Villages.ally`, allied both ways).
+- A kingdom made where no village stands (the story start's capital, a trader's second town, a whaler's shore realm)
+  now raises an Epic town of the land's kind there first (`EpicTowns`: generated as `/place structure` does, entered in
+  its chunks' structure references) and seats in it like any town; only if it won't generate or would stand mostly on
+  water does the castle go up as before. The story's capital search looks at Epic towns only.
+- Kingdoms already founded keep their seats; this applies to new ones (a new map shows it). Built, not played.
+- **0.7.599, werewolf players can be hurt:** Andy: "jungxvv seemed to be invulnerable after becoming a werewolf". Two
+  causes. The beast's player wore Invisibility to hide their body, and monsters all but ignore an invisible player, so
+  nothing fought them; now no Invisibility (`WerewolfPlayers.buffs`): their body and first-person arm are hidden by
+  `BeastHidesPlayerMixin`/`BeastHidesHandMixin` once the beast has torn out (`NightGifts.Gift#beast` now means torn out,
+  `WerewolfPlayers.tornOut`). And blows to a player's beast took the wild werewolf's thick hide (x0.25 unless gold or
+  silver) before reaching the player, on top of Resistance and 5 extra hearts; now only silver's x2 applies
+  (`Werewolf.hurtServer`). Not played.
+
+## 0.7.600: wolves stalk you (pack 0.20.116)
 Andy: "wolves should stalk you, letting you think you're safe and attacking from cover and concealment, similar to creepers
 but more of a hunter. they can smell you out."
 - **Who** (`wild/WolfStalkers`): our feral wolves always; the game's wild wolves at night, or by day when you're under

@@ -15,7 +15,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 
 /**
- * (0.7.595) Fewer wolves and walruses. Andy: "they also spawn way too much ... the spawns need to be way reduced we were
+ * (0.7.600) Fewer wolves and walruses. Andy: "they also spawn way too much ... the spawns need to be way reduced we were
  * flooded with walrus and wolves". After every mod has added its spawns, each kind here keeps only {@link Thin#share} of
  * its weight in every biome (never below 1) and comes in smaller groups (at most {@link Thin#most}). This only changes new
  * spawns: animals already out in explored land stay.

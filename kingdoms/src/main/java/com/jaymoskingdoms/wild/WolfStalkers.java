@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.595) Wild wolves hunt players the way a wolf would: by nose first, then from cover. Andy: "wolves should stalk
+ * (0.7.600) Wild wolves hunt players the way a wolf would: by nose first, then from cover. Andy: "wolves should stalk
  * you, letting you think you're safe and attacking from cover and concealment, similar to creepers but more of a
  * hunter. they can smell you out."
  * <ul>

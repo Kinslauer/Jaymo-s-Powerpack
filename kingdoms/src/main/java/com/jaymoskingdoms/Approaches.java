@@ -737,6 +737,16 @@ public final class Approaches {
 			if (Recollections.hasRemark(mob, player)) {
 				w[GREET] = Math.max(w[GREET], REMARK_WEIGHT);
 			}
+			if (only < 0 && mob instanceof Villager v && Introductions.wary(player, v)) {
+				// (0.7.597) Andy: "this villager talked to me then acted this way when i introduced myself, the interactions
+				// should be consistent". One who keeps you at arm's length (Introductions#wary) doesn't come over to chat, ask
+				// after you, beg, bargain or bring a gift: only what they can't leave be (an accusation, the quest they gave you)
+				for (int t = 0; t < w.length; t++) {
+					if (t != ACCUSE && t != QUEST_CHECK) {
+						w[t] = 0;
+					}
+				}
+			}
 		}
 		if (!Languages.understands(player, mob)) {
 			// (0.7.20) you don't speak their tongue: only what hands and faces can say

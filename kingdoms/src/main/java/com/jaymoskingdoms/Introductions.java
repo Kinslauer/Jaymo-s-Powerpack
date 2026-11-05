@@ -254,9 +254,16 @@ public final class Introductions {
 		return f != null && Reputation.get(player, f.id()) < Reputation.WELCOME && hearts < PROVEN_HEARTS_REP;
 	}
 
-	/** (0.7.504) What a {@linkplain #wary wary} villager says in place of their name (a greenskin in its own dialect). */
-	public static Component waryLine(Villager villager) {
-		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_wary." + villager.getRandom().nextInt(WARY_LINES));
+	/**
+	 * (0.7.504) What a {@linkplain #wary wary} villager says in place of their name (a greenskin in its own dialect).
+	 * (0.7.597) Andy: "this villager talked to me then acted this way when i introduced myself, the interactions should be
+	 * consistent". The same line to the same player all day, so a step back from your hand, their menu opening and
+	 * asking their name don't each draw a different cold word (and the bubbles showing it at once show it once).
+	 */
+	public static Component waryLine(Villager villager, ServerPlayer player) {
+		long day = Deeds.today(player.level().getServer());
+		int variant = Math.floorMod(java.util.Objects.hash(villager.getUUID(), player.getUUID(), day), WARY_LINES);
+		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_wary." + variant);
 	}
 
 	/** {@code player} asked {@code villager}'s name (MCA's menu): what they answer, and {@code player} knows it from then. */
@@ -267,7 +274,7 @@ public final class Introductions {
 		}
 		if (!Outlaws.is(villager) && !ZFighterFolk.is(villager) && wary(player, villager)) {
 			// (0.7.504) one who minds you keeps their name until you've proven yourself
-			return waryLine(villager);
+			return waryLine(villager, player);
 		}
 		if (Outlaws.is(villager)) {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves

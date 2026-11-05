@@ -206,14 +206,16 @@ public final class KingdomEvents {
 			return;
 		}
 		Faction founded;
-		if (Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
+		// (0.7.598) only an Epic town becomes a capital; any other mod's village is a village, allied to the nearest kingdom
+		if (Seats.epic(village.id()) && Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
 			founded = foundIn(level, bell.get(), village.start());
 			if (founded == null) {
-				// (0.5.1) no building there fit for a king: the kingdom raises its citadel beside the village
+				// (0.5.1) no building there fit for a king: the kingdom raises its castle beside the village
 				founded = found(level, bell.get(), Castle.Kind.CITADEL);
 			}
 		} else {
 			founded = Villages.found(level, bell.get());
+			Villages.ally(server, founded);
 		}
 		// (0.7.521) one of ChoiceTheorem's villages is a haven (Havens#ctov)
 		if (founded != null && village.id().startsWith(Havens.CTOV)) {
@@ -241,6 +243,15 @@ public final class KingdomEvents {
 			}
 		}
 		return claims;
+	}
+
+	/**
+	 * (0.7.598) A kingdom where no village stands: an Epic town is raised there for it ({@link EpicTowns}), and only if
+	 * none will do, its castle on open ground.
+	 */
+	static Faction foundTown(ServerLevel level, BlockPos at) {
+		Faction town = EpicTowns.found(level, at);
+		return town != null ? town : found(level, at, Castle.Kind.CITADEL);
 	}
 
 	/** A new kingdom at {@code capital}: named, coloured, its land claimed, its banner raised, its king and guards. */

@@ -288,7 +288,10 @@ public class Werewolf extends LegendMonster {
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
 		if (!this.isHuman() && source.getEntity() instanceof LivingEntity attacker) {
 			String weapon = source.getDirectEntity() == attacker ? metal(attacker.getMainHandItem()) : "";
-			damage *= weapon.contains("silver") ? SILVER : weapon.contains("gold") ? 1.0F : HIDE;
+			// (2026-11-05: Jung "seemed to be invulnerable") a player's beast passes the blow to them, who already have Resistance
+			// and extra hearts: no thick hide on top, only silver's bite
+			boolean player = this.host != null && this.isNoAi();
+			damage *= weapon.contains("silver") ? SILVER : weapon.contains("gold") || player ? 1.0F : HIDE;
 		}
 		return super.hurtServer(level, source, damage);
 	}
