@@ -9106,7 +9106,30 @@ ultimate and beam-clash films came down with it. Not played.
   ready: `GrimSites`, `remnants/AncientRemnantsCompat`, `Ruins.pieces`, `Clearing.sites`, `GolemLairs.look`,
   `QuestFoes.bury`. Nothing else changes. Types checked against the 26.3 jar; not built here.
 
-## 0.7.554 (2026-11-05): blast hint (pack 0.20.65)
+## 0.7.554: Blood Sorcerers gather spilt blood and throw it as blood blasts
 
-- Loading-screen hint 99 (`lang/parts/blast-gore.json`, HINTS 99) for Powers' blasts blowing bodies apart and taking
+- Andy (2026-11-05): "blood Sorcerers should also be able to conjure small blasts of their blood by holding J when near it
+  to gather, and they build a reservoir of that blood, that fire like z fighter ki blasts after holding j with an empty
+  hand." New `BloodBlasts`. A Blood Sorcerer's J (not sneaking) is now sent as down/up (`BloodBlasts.Hold`, client
+  `ClassKeys`): a tap (under 6 ticks) is still the Imbue, decided on release; sneak and J are the old keys.
+- Hold J: every 5 ticks the blood near (8 blocks: bleeding cuts, Powers' stains via `PowersCompat.drawStains`, Kitchen
+  grates once a second) rises in threads of red to the hands, up to 1.5 a pulse (about 6 a second, vs the passive 2), into
+  the reservoir. The passive drinking pauses while J is held.
+- Empty-handed, after a 12-tick windup (blood motes swell in both palms), a blood blast every 5 ticks, hands taking turns
+  (swing animation), for as long as J is held: 1 reservoir each (a vampire 0.75), never paid from health; 4 damage (a
+  vampire's x1.5), a cut, a little knockback, a splash and a small stain where it bursts; falls slightly, 30 ticks of life.
+  A barrage counts as one forbidden cast (`Spellcraft.afterCast`: corruption, Grue, crime where seen); the Grue can stay
+  the hand; a vampire's fever is stoked once per barrage; thralls aren't hit (`Thralls.refuses`).
+- The reservoir (`Hemomancy.RESERVOIR`, was a server-only map) is now a synced attachment shown by
+  `client/BloodReservoirHud`: a crimson bar right of the hotbar (the Brute's spot), easing as it fills or drains,
+  throbbing when full. Loading hint 99; class description and key name updated (`lang/parts/blood-blasts.json`).
+- Andy (same day): "J only collects when looking at a blood source, and when collecting you dont fire." A hold's purpose is
+  settled as it begins (tick 6): if a gather pulse at what you look at draws anything (a bleeding creature in sight within 8,
+  else stains within 1.75 of the block you look at, or a Kitchen grate there), it gathers for the whole hold and never
+  fires; otherwise, empty-handed, it's a barrage. A full reservoir draws nothing, so it fires.
+- Built in the cloud; not played.
+
+## 0.7.555 (2026-11-05): blast hint (pack 0.20.67)
+
+- Loading-screen hint 100 (`lang/parts/blast-gore.json`, HINTS 100) for Powers' blasts blowing bodies apart and taking
   limbs off survivors. Not played.

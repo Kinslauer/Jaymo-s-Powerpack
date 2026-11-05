@@ -224,7 +224,7 @@ public final class Dismember {
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dismember::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Dismember::tickSplit);
-		// (0.20.65) blasts blow bodies apart and take limbs off survivors (after the respawn hook above: it fixes up after it)
+		// (0.20.67) blasts blow bodies apart and take limbs off survivors (after the respawn hook above: it fixes up after it)
 		BlastGore.init();
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STAGGERING.clear();
@@ -550,7 +550,7 @@ public final class Dismember {
 	}
 
 	/**
-	 * (0.20.65) A blast takes {@code part} off ({@link BlastGore}): it flies away from {@code from} (the blast's centre), and a
+	 * (0.20.67) A blast takes {@code part} off ({@link BlastGore}): it flies away from {@code from} (the blast's centre), and a
 	 * skeleton's shatters instead. {@code quiet}: one of several parts going at once (a body blown apart), so each bleeds
 	 * only a little (Andy, #961: blood toned down). True if it came off.
 	 */
@@ -560,7 +560,7 @@ public final class Dismember {
 	}
 
 	/**
-	 * (0.20.65) Sets the parts {@code target} is missing to exactly {@code mask}, quietly: what isn't in it grows back with
+	 * (0.20.67) Sets the parts {@code target} is missing to exactly {@code mask}, quietly: what isn't in it grows back with
 	 * no show (a player blown apart comes back with only the parts they'd lost before the blast, {@link BlastGore}).
 	 */
 	static void restore(LivingEntity target, int mask) {
@@ -655,7 +655,7 @@ public final class Dismember {
 			Vec3 from = blast != null ? blast : by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
 			SeveredPart.spawn(level, target, part, from);
 			if (quiet) {
-				// (0.20.65) one of a blown-apart body's parts: a fleck or two, no sounds of its own (the blast is loud enough)
+				// (0.20.67) one of a blown-apart body's parts: a fleck or two, no sounds of its own (the blast is loud enough)
 				Vec3 at = stump(target, part);
 				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(target), 1.4F), at.x, at.y, at.z, 6,
 					0.15, 0.15, 0.15, 0.1);

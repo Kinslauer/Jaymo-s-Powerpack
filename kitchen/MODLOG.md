@@ -1440,7 +1440,7 @@ they stay aboard, and sneak + right-click still lets everyone out at once.
   the kind's size, so babies and rabbits, chickens and frogs still leave a body. Old critter bodies already lying around
   count too. On dry land they puff instead of splashing. Not played.
 
-## 0.5.67 (2026-11-05): Powers decides which blasts blow bodies apart (pack 0.20.65)
+## 0.5.67 (2026-11-05): Powers decides which blasts blow bodies apart (pack 0.20.67)
 
 - `Gibs.blownApart` follows Jaymo's Powers' roll by blast proximity (`BlastGore`): tag `jaymoskitchen.gib` blows the body
   apart, `jaymoskitchen.no_gib` leaves it whole. Without either (no Powers), the old 12-damage rule stays. Creepers

@@ -528,7 +528,23 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   Error" whenever a creeper or TNT went off nearby. `onPlay` now calls `getOrResolve` first (cached, so the engine plays
   the same variant). Checked against the 26.3 client jar; not built here.
 
-## 0.20.65 (2026-11-05): blasts blow bodies apart
+- **0.20.65, zoom on Sneak, dodge on Alt** (Andy: "double tap and hold shift should be default zoom, and alt should be
+  roll"): tap Sneak, press it again within 6 ticks and keep holding, and OK Zoomer zooms until you let go
+  (`client/SneakZoom` holds OK Zoomer's Zoom key down by name, so its smooth zoom, scroll steps and settings still
+  apply). The double tap no longer dodges; the dodge is Left Alt only (`DodgeClient`). OK Zoomer's own key came off
+  Left Alt (and C) once per install (`KeyConflicts` v7), so Alt was zooming and dodging at once before this. No zoom
+  while clinging, bar-hanging, sliding or from Web's double-Sneak yank; a fast run's held Sneak is still the slide.
+  Built, not played.
+- **0.20.66, blood on bodies sat under the skin; stains looked like they splattered:** Andy's clip (2026-11-04) showed
+  blood on a player only through the gaps in their sleeves and jacket. `BloodCoatLayer` painted the base layer only, and a
+  player's downloaded skin couldn't be read at all, so it got a plain whole-skin mask. `ArmourGrimeTextures` now reads a
+  downloaded skin from its `DynamicTexture`, and for a body in the player's layout (`PlayerModel`: players, MCA folk)
+  paints each outer-layer pixel (hat, jacket, sleeves, trousers) with the blood of the body pixel under it (`under`), so it
+  lies on top of the clothes. The "splattering" stains were the viewer's own cut dripping from chest height past the
+  first-person camera, landing in view right on the trail ahead: `BloodDrop` no longer draws a drop falling within
+  0.45 blocks (sideways) under a first-person camera. Its stain still lands; others still see the drips. Built.
+
+## 0.20.67 (2026-11-05): blasts blow bodies apart
 
 - Andy: "explosions (dependent on proximity) have a higher chance to gib mobs and players on death and dismember
   survivors." New `core/BlastGore`: while a vanilla blast hurts things (`BlastGoreMixin` on `ServerExplosion.explode`)
@@ -547,3 +563,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - **Survivors** (standing or just downed, 3+ damage): lose a random arm or leg at 0 below closeness 0.3 rising to 50%
   (`LIMB_FROM`, `LIMB_MAX`), a second at 40% of that; never the head. Rubber-folk x2, Will's Grim Hand for whoever is
   behind the blast. Tuning at the top of `BlastGore`. Gradle build only, not played.
+- Andy, of royals being gibbed: "noone but stoneborn are exempt". Stoneborn (Kingdoms tag
+  `jaymoskingdoms_heritage_stoneborn`) are never gibbed (`BlastGore.stone`); they can still lose limbs. Everyone else,
+  royals included, can be.

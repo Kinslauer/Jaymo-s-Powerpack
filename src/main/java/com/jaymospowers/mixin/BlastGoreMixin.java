@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.20.65) While a vanilla blast hurts things, BlastGore knows where it went off and how big it is (how close each body was). */
+/** (0.20.67) While a vanilla blast hurts things, BlastGore knows where it went off and how big it is (how close each body was). */
 @Mixin(ServerExplosion.class)
 abstract class BlastGoreMixin {
 	@Inject(method = "explode", at = @At("HEAD"))

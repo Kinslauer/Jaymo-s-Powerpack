@@ -149,6 +149,15 @@ public final class ArmourGrimeTextures {
 	 * skin were whole. Null for none.
 	 */
 	public static @Nullable Identifier skin(Identifier base, Bloodied.@Nullable Coat coat) {
+		return skin(base, coat, false);
+	}
+
+	/**
+	 * (0.20.66) The same, for a body drawn in a skin with an outer layer ({@code layered}: a humanoid's hat, jacket,
+	 * sleeves and trousers): the blood is painted on the outer layer too, wherever that layer has pixels, so it sits on top
+	 * of the clothes and hair instead of showing only through their gaps (Andy: it "seemed to be under the skin").
+	 */
+	public static @Nullable Identifier skin(Identifier base, Bloodied.@Nullable Coat coat, boolean layered) {
 		if (coat == null || coat.amount() <= 0) {
 			return null;
 		}
@@ -157,7 +166,7 @@ public final class ArmourGrimeTextures {
 			return null;
 		}
 		Smear smear = new Smear(Mth.clamp(Mth.ceil(coat.level() * STAGES), 1, STAGES), coat.color() & 0xFFFFFF);
-		Identifier painted = paint(base, null, null, null, smear, bodyBlood, true, false);
+		Identifier painted = paint(base, null, null, null, smear, bodyBlood, true, false, layered);
 		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), null, null, null, smear, bodyBlood, true, true);
 	}
 
@@ -166,6 +175,11 @@ public final class ArmourGrimeTextures {
 	 * on gear does.
 	 */
 	public static @Nullable Identifier skin(Identifier base, Bloodied.@Nullable Blood blood) {
+		return skin(base, blood, false);
+	}
+
+	/** (0.20.66) A corpse's blood over a layered skin ({@link #skin(Identifier, Bloodied.Coat, boolean)}). */
+	public static @Nullable Identifier skin(Identifier base, Bloodied.@Nullable Blood blood, boolean layered) {
 		Smear smear = smear(blood);
 		if (smear == null) {
 			return null;
@@ -174,7 +188,7 @@ public final class ArmourGrimeTextures {
 		if (bodyBlood == null) {
 			return null;
 		}
-		Identifier painted = paint(base, null, null, null, smear, bodyBlood, true, false);
+		Identifier painted = paint(base, null, null, null, smear, bodyBlood, true, false, layered);
 		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), null, null, null, smear, bodyBlood, true, true);
 	}
 
@@ -206,12 +220,21 @@ public final class ArmourGrimeTextures {
 
 	private static @Nullable Identifier paint(Identifier base, ArmourGrime.@Nullable Grime grime, @Nullable Mask dust, @Nullable Mask mud,
 		@Nullable Smear smear, @Nullable Mask bloodMask, boolean overlay, boolean whole) {
+		return paint(base, grime, dust, mud, smear, bloodMask, overlay, whole, false);
+	}
+
+	/**
+	 * {@code layered} (0.20.66): {@code base} is a humanoid skin (64 by 64 in the player's layout, at any size) whose
+	 * outer layer is drawn over its body, so each outer pixel the skin has takes the blood of the body pixel under it.
+	 */
+	private static @Nullable Identifier paint(Identifier base, ArmourGrime.@Nullable Grime grime, @Nullable Mask dust, @Nullable Mask mud,
+		@Nullable Smear smear, @Nullable Mask bloodMask, boolean overlay, boolean whole, boolean layered) {
 		if (UNREADABLE.contains(base)) {
 			return null;
 		}
 		int stage = grime == null ? 0 : Mth.clamp(Mth.ceil(grime.level() * STAGES), 1, STAGES);
 		int mudStep = grime == null ? 0 : Math.round(grime.muddiness() * MUD_STEPS);
-		String key = base + "|" + stage + "|" + mudStep + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "");
+		String key = base + "|" + stage + "|" + mudStep + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "");
 		Identifier done = MADE.get(key);
 		if (done != null) {
 			return done;
@@ -241,6 +264,8 @@ public final class ArmourGrimeTextures {
 		float threshold = 1.0F - MOST_COVER * level;
 		float bloodThreshold = smear == null ? 2.0F : 1.0F - MOST_BLOOD * smear.stage() / (float) STAGES;
 		int w = image.getWidth(), h = image.getHeight();
+		// (0.20.66) only a square skin has the outer layer's layout (an old 64 by 32 one is made square before it's drawn)
+		boolean outer = layered && !whole && w == h && w >= 64;
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
 				int argb = image.getPixel(x, y);
@@ -250,7 +275,7 @@ public final class ArmourGrimeTextures {
 				int out = overlay ? 0 : argb;
 				if (smear != null && bloodMask != null && a != 0 && (whole || lum >= OUTLINE || bloodMask == bodyBlood)) {
 					// (0.20.41) blood first, so grime over it reads as grime and the blood's own pixels below it as blood
-					int bm = bloodMask.at(x, y, w, h);
+					int bm = outer ? bloodMask.at(under(x, y, w), w, h) : bloodMask.at(x, y, w, h);
 					float order = (bm >>> 24) / 255.0F;
 					if (order > 0.0F && order > bloodThreshold) {
 						float shade = (bm & 0xFF) / 255.0F;
@@ -296,6 +321,31 @@ public final class ArmourGrimeTextures {
 		return id;
 	}
 
+	/**
+	 * (0.20.66) The body pixel under the skin pixel ({@code x}, {@code y}) of a square skin {@code w} across, packed as
+	 * {@code y * w + x}: an outer-layer pixel's own body pixel (the hat over the head, the jacket over the body, each sleeve
+	 * and trouser leg over its limb), any other pixel itself.
+	 */
+	static int under(int x, int y, int w) {
+		int u = w / 64;
+		int px = x / u, py = y / u;
+		int dx = 0, dy = 0;
+		if (py < 16 && px >= 32) {
+			// hat over head
+			dx = -32;
+		} else if (py >= 32 && py < 48 && px < 56) {
+			// right trouser leg, jacket, right sleeve over right leg, body, right arm
+			dy = -16;
+		} else if (py >= 48 && px < 16) {
+			// left trouser leg over left leg
+			dx = 16;
+		} else if (py >= 48 && px >= 48) {
+			// left sleeve over left arm
+			dx = -16;
+		}
+		return (y + dy * u) * w + x + dx * u;
+	}
+
 	private static int mix(int from, int to, float t) {
 		return Mth.clamp(Math.round(from + (to - from) * t), 0, 255);
 	}
@@ -321,13 +371,33 @@ public final class ArmourGrimeTextures {
 	private static @Nullable NativeImage read(Identifier texture) {
 		Resource resource = Minecraft.getInstance().getResourceManager().getResource(texture).orElse(null);
 		if (resource == null) {
-			return null;
+			return downloaded(texture);
 		}
 		try (InputStream in = resource.open()) {
 			return NativeImage.read(in);
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	/**
+	 * (0.20.66) A copy of a texture made in the game, not a resource: a player's downloaded skin (the skin downloader keeps
+	 * it as a {@link DynamicTexture}, already squared to the 64 by 64 layout). Null for anything else.
+	 */
+	private static @Nullable NativeImage downloaded(Identifier texture) {
+		try {
+			if (Minecraft.getInstance().getTextureManager().getTexture(texture) instanceof DynamicTexture dynamic) {
+				NativeImage pixels = dynamic.getPixels();
+				if (pixels != null) {
+					NativeImage copy = new NativeImage(pixels.getWidth(), pixels.getHeight(), false);
+					copy.copyFrom(pixels);
+					return copy;
+				}
+			}
+		} catch (RuntimeException e) {
+			// unreadable: painted as a whole plain skin instead
+		}
+		return null;
 	}
 
 	/** A grime mask's pixels (ARGB: alpha = order, blue = shade), sampled at the same spot of any size of texture. */
@@ -347,6 +417,11 @@ public final class ArmourGrimeTextures {
 				}
 				return new Mask(w, h, pixels);
 			}
+		}
+
+		/** (0.20.66) At a packed pixel ({@code y * w + x}). */
+		int at(int packed, int w, int h) {
+			return this.at(packed % w, packed / w, w, h);
 		}
 
 		int at(int x, int y, int w, int h) {

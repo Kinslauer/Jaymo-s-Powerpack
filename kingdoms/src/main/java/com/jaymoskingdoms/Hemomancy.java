@@ -5,12 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,7 +57,7 @@ public final class Hemomancy {
 	/** Below this share of health, a cast opens a cut on you. */
 	static final float CUT_BELOW = 0.5F;
 	/** The pool: the most it holds; what each bleeding cut near feeds it a second (and the most a second); how near. */
-	static final float POOL_MAX = 20.0F, DRINK_PER_CUT = 0.25F, DRINK_MOST = 2.0F;
+	public static final float POOL_MAX = 20.0F, DRINK_PER_CUT = 0.25F, DRINK_MOST = 2.0F;
 	static final double DRINK_RANGE = 8.0;
 	/**
 	 * (0.7.481) Drawing from the stains on the ground: how near; how much of each stain a second (stain size: a drip's is
@@ -90,8 +94,12 @@ public final class Hemomancy {
 	static final int CRIMSON = 0x8A0F14, DARK = 0x4A0508;
 	static final DustParticleOptions BLOOD_MOTE = new DustParticleOptions(CRIMSON, 1.0F), DARK_MOTE = new DustParticleOptions(DARK, 1.2F);
 
-	/** The blood a Sorcerer has drunk, by player. */
-	private static final Map<UUID, Float> POOL = new HashMap<>();
+	/**
+	 * The blood a Sorcerer has drunk, their reservoir (0.7.554: kept on the player and shown on their own screen,
+	 * client/BloodReservoirHud; {@link BloodBlasts} gathers it by the handful and throws it). Not kept over a restart.
+	 */
+	public static final AttachmentType<Float> RESERVOIR = AttachmentRegistry.create(JaymosKingdoms.id("blood_reservoir"),
+		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.targetOnly()));
 	/** Frenzied until (game time), by player. */
 	private static final Map<UUID, Long> FRENZY = new HashMap<>();
 
@@ -100,8 +108,8 @@ public final class Hemomancy {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Hemomancy::serverTick);
+		BloodBlasts.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			POOL.clear();
 			FRENZY.clear();
 		});
 		// Frenzy: your blows heal you
@@ -118,12 +126,22 @@ public final class Hemomancy {
 	// ---- who and what it costs -----------------------------------------------------------------------------------------
 
 	/** A Blood Sorcerer. */
-	static boolean bloodMage(Player player) {
+	public static boolean bloodMage(Player player) {
 		return Classes.is(player, PlayerClass.SORCERER) && "blood".equals(Classes.of(player).option());
 	}
 
-	static float pool(Player player) {
-		return POOL.getOrDefault(player.getUUID(), 0.0F);
+	/** The reservoir, on either side. */
+	public static float pool(Player player) {
+		Float f = player.getAttached(RESERVOIR);
+		return f == null ? 0.0F : f;
+	}
+
+	static void setPool(Player player, float pool) {
+		if (pool <= 0.0F) {
+			player.removeAttached(RESERVOIR);
+		} else {
+			player.setAttached(RESERVOIR, Math.min(POOL_MAX, pool));
+		}
 	}
 
 	static float cost(String what) {
@@ -154,7 +172,7 @@ public final class Hemomancy {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood.too_little").withStyle(ChatFormatting.DARK_RED));
 			return false;
 		}
-		POOL.put(player.getUUID(), pool - fromPool);
+		setPool(player, pool - fromPool);
 		if (rest > 0.0F) {
 			player.setHealth(player.getHealth() - rest);
 			if (player.getHealth() < player.getMaxHealth() * CUT_BELOW && PowersCompat.cut(player)) {
@@ -360,7 +378,8 @@ public final class Hemomancy {
 		}
 		FRENZY.values().removeIf(until -> until < Factions.level(server).getGameTime());
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (!bloodMage(player) || !player.isAlive() || !(player.level() instanceof ServerLevel level)) {
+			// ((0.7.554) one holding J gathers it faster, BloodBlasts)
+			if (!bloodMage(player) || !player.isAlive() || !(player.level() instanceof ServerLevel level) || BloodBlasts.holding(player)) {
 				continue;
 			}
 			float pool = pool(player);
@@ -392,7 +411,7 @@ public final class Hemomancy {
 					at -> rise(level, at, player));
 			}
 			if (drank > 0.0F) {
-				POOL.put(player.getUUID(), Math.min(POOL_MAX, pool + drank));
+				setPool(player, pool + drank);
 			}
 		}
 	}
@@ -407,7 +426,7 @@ public final class Hemomancy {
 			used = true;
 		}
 		if (bloodMage(player)) {
-			POOL.put(player.getUUID(), Math.min(POOL_MAX, pool(player) + BOTTLE_POOL));
+			setPool(player, pool(player) + BOTTLE_POOL);
 			splash((ServerLevel) player.level(), player, 6);
 			used = true;
 		}
@@ -415,8 +434,12 @@ public final class Hemomancy {
 	}
 
 	/** (0.7.481) Blood drawn up out of a stain at {@code from}: a thread of red motes rising from the ground to {@code to}. */
-	private static void rise(ServerLevel level, Vec3 from, LivingEntity to) {
-		Vec3 end = to.getBoundingBox().getCenter();
+	static void rise(ServerLevel level, Vec3 from, LivingEntity to) {
+		rise(level, from, to.getBoundingBox().getCenter());
+	}
+
+	/** (0.7.554) The same thread of red, rising to a point (a Blood Sorcerer's hands, {@link BloodBlasts}). */
+	static void rise(ServerLevel level, Vec3 from, Vec3 end) {
 		Vec3 step = end.subtract(from);
 		int n = Math.max(2, (int) (step.length() * 2.0));
 		for (int i = 0; i <= n; i += 2) {

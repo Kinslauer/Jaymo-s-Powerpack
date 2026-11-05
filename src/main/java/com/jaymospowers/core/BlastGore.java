@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.65) Andy: "explosions (dependent on proximity) have a higher chance to gib mobs and players on death and
+ * (0.20.67) Andy: "explosions (dependent on proximity) have a higher chance to gib mobs and players on death and
  * dismember survivors." How close a body was to a blast ({@link #closeness}: 1 at its centre, 0 at the edge of its reach,
  * weighed by how big the blast is, a TNT's or more counting in full) sets two chances:
  * <ul>
@@ -53,6 +53,8 @@ public final class BlastGore {
 	public static final float CORPSE_LIMB = 0.6F;
 	/** With no blast to measure from (another mod's blast damage), this much damage counts as point-blank. */
 	public static final float FALLBACK_FULL_DAMAGE = 40.0F;
+	/** Kingdoms' Stoneborn heritage tag: Andy, "noone but stoneborn are exempt" (from being blown apart; they still lose limbs). */
+	public static final String STONE_TAG = "jaymoskingdoms_heritage_stoneborn";
 	/** The scoreboard tags Jaymo's Kitchen reads on a body dying of a blast: blown apart, or left whole. */
 	public static final String GIB_TAG = "jaymoskitchen.gib", NO_GIB_TAG = "jaymoskitchen.no_gib";
 
@@ -161,7 +163,7 @@ public final class BlastGore {
 	 * gibbed die rather than go down; then the death itself). Creative and spectating players never are.
 	 */
 	public static boolean gibs(LivingEntity entity, DamageSource source, float amount) {
-		if (!blast(source) || entity instanceof Player p && (p.isCreative() || p.isSpectator())) {
+		if (!blast(source) || entity instanceof Player p && (p.isCreative() || p.isSpectator()) || stone(entity)) {
 			return false;
 		}
 		long now = entity.level().getGameTime();
@@ -187,6 +189,11 @@ public final class BlastGore {
 			any |= Dismember.blastOff(entity, limb, by, from, true);
 		}
 		return any;
+	}
+
+	/** Whether {@code entity} is Stoneborn (never blown apart). */
+	public static boolean stone(LivingEntity entity) {
+		return entity.entityTags().contains(STONE_TAG);
 	}
 
 	/** A body just died of a blast: blown apart if it was rolled to be, else maybe a limb off onto the corpse. */

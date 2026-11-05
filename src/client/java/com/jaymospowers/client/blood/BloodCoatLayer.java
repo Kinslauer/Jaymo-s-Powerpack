@@ -26,8 +26,12 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * (0.20.41) Andy liked Hematic's blood on creatures (ideas only). A body splashed with blood ({@link Bloodied#COAT}) is
  * drawn with it over its skin: splotches from our own mask ({@code textures/blood/body_blood.png}), more as it gets
- * bloodier, laid only where the skin has pixels ({@link ArmourGrimeTextures#skin}), in its own blood's colour. A
- * player's outer skin layer stays clean, so nothing floats off the body. It wears off by itself and washes off in water.
+ * bloodier, laid only where the skin has pixels ({@link ArmourGrimeTextures#skin}), in its own blood's colour. It wears
+ * off by itself and washes off in water.
+ * <p>
+ * (0.20.66) Andy: the blood "seemed to be under the skin". A body in the player's layout (players, MCA folk) has it on
+ * its outer layer too (hat, jacket, sleeves, trousers), wherever that layer has pixels, so it lies on top of the clothes;
+ * a player's downloaded skin is read for this (before, it was painted as a plain whole skin, base layer only).
  * <p>
  * (0.20.55) A corpse keeps the blood it died in ({@link Bloodied#CORPSE_BLOOD}), drying darker: Jaymo's Kitchen hands
  * each body's state to {@link #corpseBody} as it's drawn (its {@code CorpseDressing.BODY} hook, by name), and a dead
@@ -77,7 +81,7 @@ public final class BloodCoatLayer {
 			|| !(args[2] instanceof SubmitNodeCollector collector) || !(args[3] instanceof Integer light) || avatar.skin == null) {
 			return;
 		}
-		Identifier painted = ArmourGrimeTextures.skin(avatar.skin.body().texturePath(), blood);
+		Identifier painted = ArmourGrimeTextures.skin(avatar.skin.body().texturePath(), blood, true);
 		if (painted != null) {
 			collector.order(1).submitModel(body, avatar, poseStack, RenderTypes.entityCutout(painted), light, OverlayTexture.NO_OVERLAY,
 				avatar.outlineColor);
@@ -116,7 +120,10 @@ public final class BloodCoatLayer {
 			} catch (RuntimeException e) {
 				return;
 			}
-			Identifier painted = skin == null ? null : dead != null ? ArmourGrimeTextures.skin(skin, dead) : ArmourGrimeTextures.skin(skin, coat);
+			// (0.20.66) a body in the player's layout wears the blood over its outer layer too
+			boolean layered = this.getParentModel() instanceof PlayerModel;
+			Identifier painted = skin == null ? null
+				: dead != null ? ArmourGrimeTextures.skin(skin, dead, layered) : ArmourGrimeTextures.skin(skin, coat, layered);
 			if (painted != null) {
 				renderColoredCutoutModel(this.getParentModel(), painted, poseStack, collector, lightCoords, state, -1, 1);
 			}
