@@ -122,7 +122,7 @@ public final class RockThrowPose {
 			ClientPlayNetworking.send(new ThrownRocks.Charge(ThrownRocks.WINDING_UP));
 			LocalPlayer self = Minecraft.getInstance().player;
 			if (self != null && ThrownRocks.gravity(self)) {
-				// (0.21.7) a gravity user's rock goes at once (the server throws it on the wind-up's word)
+				// (0.21.8) a gravity user's rock goes at once (the server throws it on the wind-up's word)
 				ownThrown = now;
 				ownLastThrow = now;
 			}
@@ -196,7 +196,7 @@ public final class RockThrowPose {
 				value = stage == 0 ? 0 : ThrownRocks.value(ownStart, ownCharge, stage);
 				Integer synced = player.getAttached(ThrownRocks.THROW);
 				if (stage == 0 && synced != null && (synced & ThrownRocks.MAIN_ARM) != 0) {
-					// (0.21.7) your Lift's hurl, which the server starts
+					// (0.21.8) your Lift's hurl, which the server starts
 					value = synced;
 				}
 			} else {
@@ -327,7 +327,7 @@ public final class RockThrowPose {
 	}
 
 	/**
-	 * (0.21.7) Your own Lift's hurl in first person (FirstPersonArms, the empty main arm): {through (0 drawn back, 1 thrown
+	 * (0.21.8) Your own Lift's hurl in first person (FirstPersonArms, the empty main arm): {through (0 drawn back, 1 thrown
 	 * through), weight}, or null.
 	 */
 	public static float @Nullable [] hurl(float partialTicks) {

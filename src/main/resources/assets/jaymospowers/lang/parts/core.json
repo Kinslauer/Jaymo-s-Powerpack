@@ -141,5 +141,8 @@
 	"screen.jaymospowers.mastery.done": "Mastered",
 	"screen.jaymospowers.mastery.at": "Comes at %s mastery",
 	"screen.jaymospowers.mastery.creative": "Mastery grows as you use your power in survival.",
-	"screen.jaymospowers.mastery.skill_tree": "Your skill tree is on K."
+	"screen.jaymospowers.mastery.skill_tree": "Your skill tree is on K.",
+	"message.jaymospowers.carry.temper.bites": "%s bites you and twists free.",
+	"message.jaymospowers.carry.temper.scratches": "%s scratches you and leaps from your arms.",
+	"message.jaymospowers.carry.temper.squirms": "%s squirms out of your arms."
 }

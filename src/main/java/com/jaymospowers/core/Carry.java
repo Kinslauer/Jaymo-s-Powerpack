@@ -452,7 +452,9 @@ public final class Carry {
 		if (!(entity instanceof LivingEntity) || tooBig(entity)) {
 			return false;
 		}
-		if (entity.getType().builtInRegistryHolder().is(CARRYABLE) || entity instanceof Animal animal && animal.isBaby()) {
+		if (entity.getType().builtInRegistryHolder().is(CARRYABLE) || entity instanceof Animal animal && animal.isBaby()
+			// ((0.21.7) Andy: "you can pick up live animals, but not all of them like it": any small one, CarryTemper)
+			|| CarryTemper.liftable(entity)) {
 			return true;
 		}
 		return Downed.isDowned(entity) && !(entity instanceof Animal);
@@ -1101,6 +1103,11 @@ public final class Carry {
 				// taken off into the air, or they're up again: let go
 				end(carrier, entry, Let.SET_DOWN);
 			}
+			return;
+		}
+		// (0.21.7) a wild animal that won't stand being held bites, scratches or squirms its way free
+		if (CarryTemper.tick(carrier, carried)) {
+			end(carrier, entry, Let.DROP);
 			return;
 		}
 		if (!(carried instanceof Player) && !(carried instanceof SeveredPart)) {

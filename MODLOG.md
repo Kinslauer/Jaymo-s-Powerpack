@@ -1078,7 +1078,19 @@ farmstead) and live with the family there. Day one offers only the Family farmha
 the heritage starts and Let fate decide; every other start opens with a deed of its own and a "Road Opened"
 advancement. Fate now picks from every start, locked or not, by a fixed percentage table. See Kingdoms' MODLOG 0.7.605.
 
-## 0.21.7 (2026-11-05): gravity's Lift throw winds up and whips through
+## 0.21.7 (2026-11-05): carry the left for dead to safety; live animals in your arms
+Andy: "your body should persist in the world until come to, that way players can pick each other up and carry each other
+to safety. if you do not press anything, you will not get the respawn roll". A death turned away (`Mortality`) no longer
+moves you to your wake spot after 3 s: your body lies where it fell, out cold, until you hold sneak 2 s to come to
+(`COME_TO_TICKS`, the wake roll as before: wild, captured, sheltered) or someone brings you round. Carried, the black
+says "You're being carried"; put down somewhere with no hostile within 12 blocks (`SAFE_RANGE`), a plain held use
+revives you (as for the downed, food and all): no roll, but the cause's injury and borrowed time all the same. Mobs lose
+interest in a lying body and none executes it. Logging out while lying: you come to where you lie.
+Andy: "you can pick up live animals, but not all of them like it, snakes for example will bite you". Any live animal up
+to 0.8 x 1.0 blocks lifts by hand (`CarryTemper`); wild grown ones in the new tags fight free: `bites_when_held` (wolf,
+fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (cat, ocelot), `squirms_when_held`
+(chicken, rabbit, parrot, frog). Tamed ones and the young stay put.
+## 0.21.8 (2026-11-05): gravity's Lift throw winds up and whips through
 - Andy: "gravity users throw the rocks the old way" / "gravity users throw instantly and farther". A left click to throw
   what Lift holds now draws the main arm back over the shoulder for `GravityPower.HURL_WIND` (7 ticks, about a third of
   a second), then lets go with the same whip and follow-through as a thrown rock (`ThrownRocks.hurling`/`hurled`, the

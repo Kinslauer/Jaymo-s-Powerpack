@@ -1025,6 +1025,12 @@ public final class Downed {
 		if (knocked != null) {
 			// (0.14.4) knocked out, not dying: nothing to give up, they'll come round
 			GIVING_UP.remove(player.getUUID());
+			if (Mortality.lying(player)) {
+				// (0.21.7) left for dead where they fell: sneak held is coming to by themselves, not mashing
+				MASH_HELD.remove(player.getUUID());
+				Mortality.lie(player, now);
+				return;
+			}
 			// (0.18.84) and mashing sneak brings them round sooner
 			boolean press = player.isShiftKeyDown() && MASH_HELD.add(player.getUUID());
 			if (!player.isShiftKeyDown()) {
@@ -1258,6 +1264,13 @@ public final class Downed {
 			}
 			if (!r.begun) {
 				r.begun = true;
+				// (0.21.7) one left for dead is brought round only once they're somewhere safe: no hostile near
+				if (body instanceof Player lying && Mortality.lying(lying) && Mortality.unsafe(body)) {
+					r.over = true;
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortality.not_safe", body.getDisplayName())
+						.withStyle(ChatFormatting.GRAY));
+					continue;
+				}
 				if (cost(player, body) < 0) {
 					r.over = true;
 					player.sendOverlayMessage(Component.translatable(tamed(body) ? "message.jaymospowers.downed.no_treat" : "message.jaymospowers.downed.no_food",
