@@ -542,7 +542,8 @@ public final class Senses {
 	/** 0 if {@code mob} takes no notice of {@code player}; else 1 to {@link #FILL_STEPS}, as they come from where it could just see them to where it would spot them. */
 	private static int noticing(ServerLevel level, Mob mob, ServerPlayer player) {
 		double follow = mob.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE) ? mob.getAttributeValue(Attributes.FOLLOW_RANGE) : 16.0;
-		if (mob.getTarget() != null || mob.distanceTo(player) >= follow || !mob.hasLineOfSight(player)) {
+		// (0.7.600) a stalking wolf keeps its interest to itself
+		if (mob.getTarget() != null || mob.distanceTo(player) >= follow || !mob.hasLineOfSight(player) || com.jaymoskingdoms.wild.WolfStalkers.stalking(mob)) {
 			return 0;
 		}
 		double spot = Math.max(2.0, follow * player.getVisibilityPercent(level, mob));
@@ -563,7 +564,7 @@ public final class Senses {
 	 */
 	public static boolean unaware(LivingEntity target, ServerPlayer player) {
 		if (!(target instanceof Mob mob) || !sensing(mob) || mob instanceof TamableAnimal tame && tame.isOwnedBy(player) || !mob.isAlive()
-			|| mob.getTarget() == player || boss(mob) && mob.getTarget() != null
+			|| mob.getTarget() == player || com.jaymoskingdoms.wild.WolfStalkers.stalking(mob, player) || boss(mob) && mob.getTarget() != null
 			|| mob instanceof EnderDragon dragon && !(dragon.getPhaseManager().getCurrentPhase() instanceof AbstractDragonSittingPhase)) {
 			return false;
 		}

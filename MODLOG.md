@@ -995,3 +995,9 @@ Nether's own y 64 (`ZFighterStarts.demonBiome`) and logs how long it took and wh
   shrinks away by itself in 0.4 to 2 s. A soft splash every 6 ticks. Corrupted/ascended fates mark one foam point and
   one spray drop a tick (clones, glass), not all of them. Lava keeps its own sparks and smoke. Tuning: `WAKE_*` at the
   top of `ChronoSpeed`. Built, not played.
+
+## 0.20.116 (2026-11-05): Kingdoms 0.7.600, wolves stalk you; fewer wolves and walruses
+- Ships Kingdoms 0.7.600: wild wolves (the game's at night or when you're hurt, our feral ones always) smell players out
+  (wind, sneaking, rain, your footstep trail), shadow them silently from cover, freeze and back off when looked at, and
+  rush as a pack with one growl from behind or from hiding. Wolves spawn at a quarter (feral a fifth) and walruses at a
+  fifth of their old rate, in smaller groups. See kingdoms/MODLOG.md.
