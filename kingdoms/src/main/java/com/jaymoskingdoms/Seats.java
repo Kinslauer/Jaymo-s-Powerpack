@@ -93,6 +93,21 @@ final class Seats {
 	}
 
 	/**
+	 * (0.7.598) A village a kingdom may rise in: vanilla's own village ids ({@code minecraft:village_*}), which Epic
+	 * Structures: Villages redraws into its sprawling towns. Every other mod's village (ChoiceTheorem's, Towns and
+	 * Towers', any other the shared pool draws) is only ever a village, allied to the nearest kingdom (Andy: kingdoms
+	 * "are always from epic villages").
+	 */
+	static boolean epic(Holder<Structure> holder) {
+		return holder.unwrapKey().map(k -> epic(k.identifier().toString())).orElse(false);
+	}
+
+	/** {@link #epic(Holder)} by structure id. */
+	static boolean epic(String id) {
+		return id.startsWith("minecraft:village_");
+	}
+
+	/**
 	 * The structure {@code which} accepts with a piece at {@code pos} (within {@link #BELL_SLACK}), read only from loaded
 	 * chunks: {@link Status#UNREADY} if one might be there but its start chunk isn't loaded.
 	 */

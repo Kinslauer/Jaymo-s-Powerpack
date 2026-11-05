@@ -64,7 +64,7 @@ public final class ChronoSpeed {
 	static final int PHASE_GAP = 20;
 	/** The streak's colours ({@link #FLASH}'s value): Chrono's gold, and Velox's light blue. */
 	public static final int GOLD = 0, SKY = 1;
-	/** (0.20.113) The water wake: how fast the foam spreads out sideways (blocks a tick), how many foam points a tick at most,
+	/** (0.20.115) The water wake: how fast the foam spreads out sideways (blocks a tick), how many foam points a tick at most,
 	 *  spray drops off the heels each tick, and a soft splash every this many ticks at this volume. */
 	static final double WAKE_SPREAD = 0.09;
 	static final int WAKE_STEPS = 4, WAKE_SPRAY = 3, WAKE_SOUND_EVERY = 6;
@@ -209,7 +209,7 @@ public final class ChronoSpeed {
 	}
 
 	/**
-	 * (0.20.113) Running on water leaves a wake: spray kicked up off your heels, and a V of foam opening out behind you
+	 * (0.20.115) Running on water leaves a wake: spray kicked up off your heels, and a V of foam opening out behind you
 	 * like a boat's, which fades as it spreads. Every tick foam is laid at your heels along the stretch you just ran,
 	 * pushed out sideways ({@link #WAKE_SPREAD}), so the older foam is further out: the V. Vanilla's wake particle (the
 	 * one a fish leaves coming to your bobber) sits on the water and shrinks away on its own. Velox's Velocity too.
