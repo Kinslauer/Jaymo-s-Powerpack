@@ -154,7 +154,7 @@ public final class Captors {
 		bury(level, camp.seat(), hidden, random);
 	}
 
-	private static boolean ofCamp(Mob mob, Faction camp) {
+	static boolean ofCamp(Mob mob, Faction camp) {
 		if (mob instanceof Worker w && w.factionId() == camp.id()) {
 			return true;
 		}
