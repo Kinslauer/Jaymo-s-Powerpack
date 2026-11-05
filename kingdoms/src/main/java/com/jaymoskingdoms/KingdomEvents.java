@@ -206,7 +206,7 @@ public final class KingdomEvents {
 			return;
 		}
 		Faction founded;
-		// (0.7.595) only an Epic town becomes a capital; any other mod's village is a village, allied to the nearest kingdom
+		// (0.7.598) only an Epic town becomes a capital; any other mod's village is a village, allied to the nearest kingdom
 		if (Seats.epic(village.id()) && Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
 			founded = foundIn(level, bell.get(), village.start());
 			if (founded == null) {
@@ -246,7 +246,7 @@ public final class KingdomEvents {
 	}
 
 	/**
-	 * (0.7.595) A kingdom where no village stands: an Epic town is raised there for it ({@link EpicTowns}), and only if
+	 * (0.7.598) A kingdom where no village stands: an Epic town is raised there for it ({@link EpicTowns}), and only if
 	 * none will do, its castle on open ground.
 	 */
 	static Faction foundTown(ServerLevel level, BlockPos at) {

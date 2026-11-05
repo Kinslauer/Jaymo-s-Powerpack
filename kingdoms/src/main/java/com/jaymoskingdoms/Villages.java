@@ -27,7 +27,7 @@ public final class Villages {
 	static final double VILLAGE_RADIUS = 48.0;
 	/** Land claimed round a village's bell (chunks out each way; only chunks nobody holds). */
 	static final int CLAIM_RADIUS = 2;
-	/** (0.7.595) A new village sides with the nearest kingdom this near its bell (blocks). */
+	/** (0.7.598) A new village sides with the nearest kingdom this near its bell (blocks). */
 	static final int ALLY_REACH = 1000;
 	/** How often golems look for the village's enemies, and how far (ticks, blocks). */
 	static final int GOLEM_CHECK_TICKS = 40;
@@ -53,7 +53,7 @@ public final class Villages {
 	}
 
 	/**
-	 * (0.7.595) A new village sides with the nearest standing kingdom within {@link #ALLY_REACH} of its bell (Andy: the
+	 * (0.7.598) A new village sides with the nearest standing kingdom within {@link #ALLY_REACH} of its bell (Andy: the
 	 * smaller villages are "allied to larger kingdoms"). None that near: it stands alone, as before.
 	 */
 	static void ally(MinecraftServer server, @Nullable Faction village) {

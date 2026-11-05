@@ -257,7 +257,7 @@ public final class StoryGround {
 			ChunkPos origin = ChunkPos.containing(spawn);
 			int reach = CAPITAL_VILLAGE_SEARCH * CAPITAL_VILLAGE_SEARCH;
 			for (Holder<Structure> village : villages.get()) {
-				// (0.7.595) a capital only in an Epic town
+				// (0.7.598) a capital only in an Epic town
 				if (!Seats.epic(village)) {
 					continue;
 				}

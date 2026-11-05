@@ -65,7 +65,7 @@ final class GrandSeats {
 		new Choice("ati_structures:granite_fort", Palette.DESERT, Palette.BADLANDS, Palette.SAVANNA),
 		new Choice("ati_structures:fortified_temple", Palette.CHERRY, Palette.JUNGLE),
 		new Choice("ati_structures:dojo", Palette.CHERRY));
-	// (0.7.595) Grim Kingdoms' keeps and citadels (Winterhold, Whitewarden, Snowgrave, Grain Sack, Glimmervault) are no
+	// (0.7.598) Grim Kingdoms' keeps and citadels (Winterhold, Whitewarden, Snowgrave, Grain Sack, Glimmervault) are no
 	// longer kingdom seats. Andy: "this would never pass a kingdom's structure": they are fiefdoms' holds only
 	// (GrimSites#HOLDS), and a kingdom raised from nothing gets an Epic town first (EpicTowns).
 

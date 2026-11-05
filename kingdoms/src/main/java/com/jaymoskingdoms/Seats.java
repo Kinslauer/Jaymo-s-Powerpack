@@ -93,7 +93,7 @@ final class Seats {
 	}
 
 	/**
-	 * (0.7.595) A village a kingdom may rise in: vanilla's own village ids ({@code minecraft:village_*}), which Epic
+	 * (0.7.598) A village a kingdom may rise in: vanilla's own village ids ({@code minecraft:village_*}), which Epic
 	 * Structures: Villages redraws into its sprawling towns. Every other mod's village (ChoiceTheorem's, Towns and
 	 * Towers', any other the shared pool draws) is only ever a village, allied to the nearest kingdom (Andy: kingdoms
 	 * "are always from epic villages").

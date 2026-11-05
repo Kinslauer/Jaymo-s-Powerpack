@@ -9531,7 +9531,20 @@ off course then those should break upon contact".
   don't wake you at all: they take a stack from your pack (half of a big one) into their own inventory, where a
   pickpocket can win it back. Speech bubbles only (`lang/parts/fainting.json`, 36 lines). Built, not played.
 
-## 0.7.595 (2026-11-05): kingdoms only in Epic towns; Grim castles are fiefs only
+## 0.7.597
+- Villagers keep one attitude toward you (Andy: "this villager talked to me then acted this way when i introduced myself,
+  the interactions should be consistent"). One who is wary of you (`Introductions.wary`: minds your blood, their realm
+  thinks ill of you, or remembers you coldly) now shows it from the first moment: opening their menu gets the same cold
+  word they'd give for your name or your hand (`McaBridge.waryOpening`) instead of MCA's friendly stranger's welcome,
+  and they no longer come over to chat, ask after you, beg, bargain, gossip or bring gifts (`Approaches.pick`; only an
+  accusation or checking on a quest they gave you). The cold line is the same one all day for that villager and player
+  (`Introductions.waryLine`), so a step back from your hand and "ask their name" don't say two different things.
+  A villager who isn't wary of you never turns cold on the introduction.
+- Speech bubbles: words still showing aren't stacked again under themselves (they stay up longer), and like name tags a
+  faint copy shows through blocks, so a wall between you and the speaker no longer cuts lines off mid-word.
+  Built, not played.
+
+## 0.7.598 (2026-11-05): kingdoms only in Epic towns; Grim castles are fiefs only
 - Andy, of a Winterhold citadel standing as a kingdom's seat on open snow: "these structures should only spawn as fiefs
   or smaller villages allied to larger kingdoms that are always from epic villages, this would never pass a kingdom's
   structure".

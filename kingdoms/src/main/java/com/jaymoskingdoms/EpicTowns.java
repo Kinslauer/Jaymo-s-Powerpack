@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Epic towns for kingdoms raised from nothing (0.7.595). Andy, of a Grim Kingdoms citadel standing as a kingdom's seat
+ * Epic towns for kingdoms raised from nothing (0.7.598). Andy, of a Grim Kingdoms citadel standing as a kingdom's seat
  * on open snow: "these structures should only spawn as fiefs or smaller villages allied to larger kingdoms that are
  * always from epic villages". So a kingdom the story start (or a whaler's shore, or a trader's second town) has to
  * make where no village stands no longer raises a lone castle: a village of the land's kind (vanilla's id, which Epic
