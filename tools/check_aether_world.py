@@ -13,10 +13,12 @@ DATA = os.path.join(ROOT, 'src/main/resources/data/jaymospowers')
 ASSETS = os.path.join(ROOT, 'src/main/resources/assets/jaymospowers')
 NS = 'jaymospowers:'
 JAVA_FEATURES = {'golden_oak', 'crystal_island', 'aercloud', 'quicksoil_shelf', 'cloudbed', 'ice_spike', 'ferrosite_spire', 'moa_nest', 'pointed_holystone',
-                'sword_stone', 'sword_stone_deep', 'sword_stone_end', 'sword_stone_frost', 'sword_stone_nether', 'web_crater', 'web_red_crater'}  # the last seven belong to other powers
+                'sword_stone', 'sword_stone_deep', 'sword_stone_end', 'sword_stone_frost', 'sword_stone_nether', 'web_crater', 'web_red_crater', 'sky', 'sky_spring',
+                'nether_rocks', 'hot_spring', 'pebble_piles', 'ore_tells', 'frozen_cave_patch', 'loose_flint', 'thin_ice', 'loose_rocks'}  # from sword_stone on, other powers' and the overworld ground's
 SAPLINGS = ['skyplane', 'skybirch', 'skypine', 'wisproot', 'wisptop', 'greatroot', 'greatoak', 'greatboa', 'amberoot']
 BIOMES = ['frozen_lakes', 'sheer_tundra', 'enduring_woodland', 'frigid_sierra', 'shimmering_basin', 'flourishing_field', 'verdant_woods', 'shrouded_forest',
-          'violet_highwoods', 'turquoise_forest', 'glistening_swamp', 'magnetic_scar', 'battleground_wastes', 'contaminated_jungle', 'hestveil_caverns', 'expanse']
+          'violet_highwoods', 'turquoise_forest', 'glistening_swamp', 'magnetic_scar', 'battleground_wastes', 'contaminated_jungle', 'hestveil_caverns', 'expanse',
+          'hanging_roots', 'mistsea', 'rustworks', 'gilded_ridge']
 problems = []
 
 
@@ -127,7 +129,8 @@ for p in glob.glob(os.path.join(DATA, 'worldgen/biome/skyroot_*.json')):
     bad('old biome file ' + p)
 if 'worldgen/biome' and not set(BIOMES) <= biomes:
     bad('biomes missing')
-for tag, members in {'is_aether': BIOMES, 'is_aether_highfields': BIOMES[4:8], 'is_aether_magnetic': BIOMES[8:12], 'is_aether_arctic': BIOMES[0:4],
+for tag, members in {'is_aether': BIOMES, 'is_aether_highfields': BIOMES[4:8] + ['hanging_roots', 'mistsea', 'gilded_ridge'],
+                     'is_aether_magnetic': BIOMES[8:12] + ['rustworks'], 'is_aether_arctic': BIOMES[0:4],
                      'is_aether_irradiated': BIOMES[12:14]}.items():
     path = os.path.join(DATA, 'tags/worldgen/biome/%s.json' % tag)
     if not os.path.exists(path):

@@ -1,0 +1,24 @@
+{
+  "feature": "jaymospowers:watched_vault",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 70
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "absolute": 14
+        },
+        "max_inclusive": {
+          "absolute": 44
+        }
+      }
+    }
+  ]
+}

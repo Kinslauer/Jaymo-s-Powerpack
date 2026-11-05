@@ -280,13 +280,17 @@ def build_dimension_type():
 
 
 ARCTIC = ['frozen_lakes', 'sheer_tundra', 'enduring_woodland', 'frigid_sierra']
-MAGNETIC = ['violet_highwoods', 'turquoise_forest', 'glistening_swamp', 'magnetic_scar']
-HIGHFIELDS = ['shimmering_basin', 'flourishing_field', 'verdant_woods', 'shrouded_forest']
+MAGNETIC = ['violet_highwoods', 'turquoise_forest', 'glistening_swamp', 'magnetic_scar', 'rustworks']
+HIGHFIELDS = ['shimmering_basin', 'flourishing_field', 'verdant_woods', 'shrouded_forest', 'hanging_roots', 'mistsea', 'gilded_ridge']
 IRRADIATED = ['battleground_wastes', 'contaminated_jungle']
 
 ARCTIC_MAX_T, IRRADIATED_MIN_T, MAGNETIC_MIN_E = -0.4, 0.65, 0.485
 LAKE_WEIRD = 0.3                  # weirdness at or above this picks the lake variants
 DRY_MAX, WET_MIN = -0.35, 0.45    # humidity bands inside a zone
+# (0.20.96) the sky biomes (seven-mods plan, patch 10), cut from the edges of the weirdness range:
+# hanging roots and rustworks from the low end of the woods, mistsea from the top of the lowland lakes, gilded ridge from the
+# top of the upper lakes
+ROOTS_WEIRD, MIST_WEIRD, GILDED_WEIRD = -0.55, 0.75, 0.55
 
 
 def build_dimension():
@@ -312,10 +316,13 @@ def build_dimension():
             box('enduring_woodland', t, (DRY_MAX, 2.0), non_mag_e, (-2.0, LAKE_WEIRD), d)
         # highfields
         t = (ARCTIC_MAX_T, IRRADIATED_MIN_T)
-        box('shimmering_basin', t, ANY, non_mag_e, (LAKE_WEIRD, 2.0), d)
+        top = GILDED_WEIRD if mid else MIST_WEIRD
+        box('shimmering_basin', t, ANY, non_mag_e, (LAKE_WEIRD, top), d)
+        box('gilded_ridge' if mid else 'mistsea', t, ANY, non_mag_e, (top, 2.0), d)
         box('flourishing_field', t, (-2.0, DRY_MAX), non_mag_e, (-2.0, LAKE_WEIRD), d)
-        box('verdant_woods', t, (DRY_MAX, WET_MIN), non_mag_e, (-2.0, LAKE_WEIRD), d)
-        box('shrouded_forest', t, (WET_MIN, 2.0), non_mag_e, (-2.0, LAKE_WEIRD), d)
+        box('verdant_woods', t, (DRY_MAX, WET_MIN), non_mag_e, (ROOTS_WEIRD, LAKE_WEIRD), d)
+        box('shrouded_forest', t, (WET_MIN, 2.0), non_mag_e, (ROOTS_WEIRD, LAKE_WEIRD), d)
+        box('hanging_roots', t, (DRY_MAX, 2.0), non_mag_e, (-2.0, ROOTS_WEIRD), d)
         # irradiated
         t = (IRRADIATED_MIN_T, 2.0)
         box('battleground_wastes', t, (-2.0, 0.2), non_mag_e, ANY, d)
@@ -323,9 +330,10 @@ def build_dimension():
         # magnetic: every temperature below the irradiated band; the irradiated band's high erosion is magnetic scar
         t = (-2.0, IRRADIATED_MIN_T)
         box('magnetic_scar', t, ANY, mag_e, (LAKE_WEIRD, 2.0), d)
-        box('violet_highwoods', t, (-2.0, DRY_MAX), mag_e, (-2.0, LAKE_WEIRD), d)
-        box('turquoise_forest', t, (DRY_MAX, WET_MIN), mag_e, (-2.0, LAKE_WEIRD), d)
-        box('glistening_swamp', t, (WET_MIN, 2.0), mag_e, (-2.0, LAKE_WEIRD), d)
+        box('violet_highwoods', t, (-2.0, DRY_MAX), mag_e, (ROOTS_WEIRD, LAKE_WEIRD), d)
+        box('turquoise_forest', t, (DRY_MAX, WET_MIN), mag_e, (ROOTS_WEIRD, LAKE_WEIRD), d)
+        box('glistening_swamp', t, (WET_MIN, 2.0), mag_e, (ROOTS_WEIRD, LAKE_WEIRD), d)
+        box('rustworks', t, ANY, mag_e, (-2.0, ROOTS_WEIRD), d)
         box('magnetic_scar', (IRRADIATED_MIN_T, 2.0), ANY, mag_e, ANY, d)
     write('dimension/aether', {
         'type': NS + ':aether',
@@ -378,6 +386,9 @@ HIGH_COL = ('#ecebfc', '#c9d1ff', '#55708a', '#a2d5f2')
 MAG_COL = ('#edeef5', '#c5cbeb', '#607496', '#abbdd9')
 ARC_COL = ('#f3f0ff', '#e7e3fc', '#3e5082', '#637aa8')
 IRR_COL = ('#f0e8be', '#fcebc5', '#bccc81', '#aed4bf')
+MIST_COL = ('#f4f6fb', '#dfe6f2', '#6c8299', '#b9d6e6')
+RUST_COL = ('#efe2d6', '#d8c9c0', '#6a6050', '#8fb3a6')
+GILD_COL = ('#fbf3d6', '#d6dcff', '#55708a', '#a2d5f2')
 BIOME_DATA = {
     'frozen_lakes': (-0.2, 0.5, ARC_COL, '#c4f0ec'), 'sheer_tundra': (-0.4, 0.5, ARC_COL, '#c4f0ec'),
     'enduring_woodland': (-0.3, 0.4, ARC_COL, '#b8e8dc'), 'frigid_sierra': (-0.5, 0.9, ARC_COL, '#c4f0ec'),
@@ -387,7 +398,12 @@ BIOME_DATA = {
     'turquoise_forest': (0.7, 0.8, MAG_COL, '#a8ece0'), 'glistening_swamp': (0.8, 0.9, MAG_COL, '#98d8c4'),
     'battleground_wastes': (1.0, 0.3, IRR_COL, '#d8e69a'), 'contaminated_jungle': (1.0, 0.3, IRR_COL, '#c8dc84'),
     'hestveil_caverns': (0.5, 0.5, HIGH_COL, '#b1ffcb'), 'expanse': (0.5, 0.5, HIGH_COL, '#b5ffd0'),
+    # (0.20.96) the sky biomes
+    'hanging_roots': (0.6, 0.9, HIGH_COL, '#8fdcaa'), 'mistsea': (0.4, 0.9, MIST_COL, '#c2f2dc'),
+    'rustworks': (0.7, 0.2, RUST_COL, '#c8c89a'), 'gilded_ridge': (0.8, 0.3, GILD_COL, '#d8f0a0'),
 }
+MIST_FOG = (2.0, 40.0)            # Mistsea: fog from this near to this far (blocks)
+MIST_PARTICLE_CHANCE = 0.012
 CREATURE_PROBABILITY = 0.2
 IRRADIATED_PARTICLE_CHANCE = 0.00625
 
@@ -404,6 +420,11 @@ def build_biomes(features):
             'minecraft:visual/sky_color': sky,
             'minecraft:visual/water_fog_color': water_fog,
         }
+        if name == 'mistsea':
+            attrs['minecraft:visual/fog_start_distance'] = MIST_FOG[0]
+            attrs['minecraft:visual/fog_end_distance'] = MIST_FOG[1]
+            attrs['minecraft:visual/ambient_particles'] = {
+                'argument': [{'particle': {'type': 'minecraft:white_ash'}, 'probability': MIST_PARTICLE_CHANCE}], 'modifier': 'append'}
         if name in IRRADIATED:
             attrs['minecraft:visual/ambient_particles'] = {
                 'argument': [{'particle': {'type': 'minecraft:end_rod'}, 'probability': IRRADIATED_PARTICLE_CHANCE}], 'modifier': 'append'}
@@ -434,6 +455,7 @@ NAMES = {
     'shrouded_forest': 'Shrouded Forest', 'violet_highwoods': 'Violet Highwoods', 'turquoise_forest': 'Turquoise Forest',
     'glistening_swamp': 'Glistening Swamp', 'magnetic_scar': 'Magnetic Scar', 'battleground_wastes': 'Battleground Wastes',
     'contaminated_jungle': 'Contaminated Jungle', 'hestveil_caverns': 'Hestveil Caverns', 'expanse': 'Expanse',
+    'hanging_roots': 'Hanging Roots', 'mistsea': 'Mistsea', 'rustworks': 'Rustworks', 'gilded_ridge': 'Gilded Ridge',
 }
 
 

@@ -52,6 +52,8 @@ public final class Aether {
 		com.jaymospowers.aether.guardian.GuardianMobs.init();
 		// the other Aether II structures: outposts, camps, towers, dens, Veradexian works, Brexallen, the mineshaft, remnants, the guardian tree
 		com.jaymospowers.aether.structure.Structures.init();
+		// (0.20.96) the sky: updraft vents, light and heavy pockets, gas caves, upfalls, the sky warden, the watched vault
+		com.jaymospowers.aether.sky.Sky.init();
 		// Aether II gear: tools, hammers, armour sets, gliders, the altar
 		com.jaymospowers.aether.gear.AetherGear.init();
 		if (HIDDEN_IN_CREATIVE) {

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "H": "jaymospowers:holystone",
+    "A": "jaymospowers:cold_aercloud",
+    "Z": "jaymospowers:zanite_gemstone"
+  },
+  "pattern": [
+    "HAH",
+    "HZH",
+    "HHH"
+  ],
+  "result": {
+    "id": "jaymospowers:updraft_vent",
+    "count": 1
+  }
+}

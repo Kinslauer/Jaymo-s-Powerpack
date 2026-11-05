@@ -328,6 +328,11 @@ TREE_BIOMES = {
     'glistening_swamp': ('skybirch_tree', [('wisptop_tree', 0.3), ('amberoot_sparse_tree', 0.01)], {'rarity': 10}),
     'battleground_wastes': ('irradiated_skyroot_tree', IRR_ALTS, {'rarity': 3}),
     'contaminated_jungle': ('irradiated_skyroot_tree', IRR_ALTS, {'count': [(12, 1), (13, 1)]}),
+    # (0.20.96) the sky biomes
+    'hanging_roots': ('skyroot_tree', [('large_skyroot_tree', 0.5), ('wisproot_tree', 0.15), ('amberoot_dense_tree', 0.05), FALLEN], {'count': [(8, 1), (10, 1)]}),
+    'mistsea': ('short_skyroot_ferns_tree', [('skyroot_ferns_tree', 0.3)], {'rarity': 12}),
+    'rustworks': ('skybirch_tree', [('wisptop_tree', 0.2)], {'rarity': 6}),
+    'gilded_ridge': ('golden_oak_tree', [('skyroot_tree', 0.4), ('large_skyroot_tree', 0.1)], {'count': [(3, 1)]}),
 }
 
 
@@ -542,7 +547,7 @@ def build_misc():
     disk('arctic_ice_sheet', 'arctic_ice', (5, 8), [], half_height=0, chance=1, target_pred=WATER, up=False)
     PLACED['arctic_ice_sheet']['placement'] = [IN_SQ] + surface('low', target=WATER, up=False) + [BIOME]
     # springs
-    feature('spring_water', {'type': 'minecraft:spring_feature', 'state': {'id': 'minecraft:water', 'properties': {'falling': 'true'}},
+    feature('spring_water', {'type': NS + ':sky_spring', 'state': {'id': 'minecraft:water', 'properties': {'falling': 'true'}},
                              'valid_blocks': [B('holystone'), B('aether_dirt'), B('undershale'), B('ferrosite')]})
     placed('spring_water', 'spring_water', [count(15), IN_SQ, hr_uniform(32, 256), BIOME])
     placed('spring_water_swamp', 'spring_water', [count(20), IN_SQ, hr_uniform(128, 200), BIOME])
@@ -585,6 +590,25 @@ def build_misc():
     # stored for the crude scatterglass etc: nothing else
 
 
+def build_sky():
+    """(0.20.96) The Aether sky (seven-mods plan, patch 10): updraft vents, upfalls, the sky warden's arena, the watched
+    vault, and the dressing of the four sky biomes. All one Java feature type, jaymospowers:sky, told its kind."""
+    for kind in ('updraft_vent', 'upfall', 'hanging_roots', 'mist_sheet', 'rust_wreck', 'sky_arena', 'watched_vault'):
+        feature(kind, {'type': NS + ':sky', 'kind': kind})
+    placed('updraft_vents', 'updraft_vent', [rarity(10), IN_SQ] + surface('low') + [BIOME])
+    placed('updraft_vents_high', 'updraft_vent', [rarity(16), IN_SQ] + surface('high') + [BIOME])
+    placed('upfalls', 'upfall', [rarity(48)])
+    placed('sky_arena', 'sky_arena', [])
+    placed('watched_vault', 'watched_vault', [rarity(70), IN_SQ, hr_uniform(14, 44)])
+    placed('hanging_roots', 'hanging_roots', [IN_SQ, hr_uniform(100, 130), BIOME])
+    placed('mist_sheets', 'mist_sheet', [count(2), IN_SQ, hr_uniform(96, 150), BIOME])
+    placed('rust_wrecks', 'rust_wreck', [rarity(3), IN_SQ] + surface('low', up=False) + [BIOME])
+    placed('rust_wrecks_high', 'rust_wreck', [rarity(6), IN_SQ] + surface('high', up=False) + [BIOME])
+    for nm, block, chance in (('boulder_gilded_gold', 'minecraft:raw_gold_block', 9), ('boulder_gilded_glint', 'glint_ore', 6)):
+        feature(nm, {'type': 'minecraft:block_blob', 'can_place_on': tag(NS + ':aether_boulder_can_place_on'), 'state': state(block)})
+        placed(nm, nm, [rarity(chance), IN_SQ] + surface('high', up=False) + [BIOME])
+
+
 # biome name -> placed features by decoration step, built from the lists below
 STEP_NAMES = ['raw_generation', 'lakes', 'local_modifications', 'underground_structures', 'surface_structures', 'strongholds',
               'underground_ores', 'underground_decoration', 'fluid_springs', 'vegetal_decoration', 'top_layer_modification']
@@ -596,7 +620,8 @@ MASTER = {
     2: ['disk_coarse_dirt', 'disk_silt', 'disk_ferrosite_sand', 'disk_quicksoil', 'disk_packed_ice', 'arctic_ice_sheet', 'boulder_mossy', 'boulder_icestone',
         'boulder_icestone_tundra', 'boulder_holystone', 'moss_patch_bryalinn', 'moss_patch_bryalinn_forest', 'moss_patch_shayelinn', 'moss_patch_shayelinn_swamp',
         'moss_patch_ambrelinn', 'ice_spikes', 'ice_spike_clusters', 'ice_spikes_coast', 'ferrosite_spikes', 'ferrosite_spikes_scar', 'ferrosite_pillars',
-        'ferrosite_pillars_high', 'quicksoil_shelf'],
+        'ferrosite_pillars_high', 'quicksoil_shelf', 'rust_wrecks', 'rust_wrecks_high', 'boulder_gilded_gold', 'boulder_gilded_glint'],
+    3: ['watched_vault'],
     6: ORES,
     7: ['pointed_holystone', 'pointed_holystone_cave'],
     8: ['spring_water', 'spring_water_swamp'],
@@ -609,15 +634,18 @@ VEGETAL = [
     'blueberry_common', 'blueberry_rare', 'blueberry_irradiated', 'orange_trees', 'orange_trees_irradiated',
     'flowers_field', 'flowers_highfields', 'flowers_arctic', 'flowers_magnetic', 'valkyrie_sprouts', 'brettl_patch',
     'magnetic_shrooms', 'magnetic_shrooms_swamp', 'rotshrooms', 'holystone_rocks', 'holystone_twigs',
-    'arilum_short', 'arilum', 'arilum_blooming',
+    'arilum_short', 'arilum', 'arilum_blooming', 'hanging_roots',
 ]
+# (0.20.96) after the clouds, so the vents' columns and the arena are not built over
+SKY_TOP = ['mist_sheets', 'upfalls', 'updraft_vents', 'updraft_vents_high', 'sky_arena']
 
 
 # ---------------------------------------------------------------- the biomes' lists
 
 # in every biome (including the cave layer): anything whose placement is decided by height rather than by the surface,
 # because the biome at that height is whichever the depth router picks there
-COMMON = ['cloudbed', 'quicksoil_shelf', 'pointed_holystone_cave', 'spring_water', 'crystal_island'] + ORES + [
+COMMON = ['cloudbed', 'quicksoil_shelf', 'pointed_holystone_cave', 'spring_water', 'crystal_island', 'upfalls', 'sky_arena', 'watched_vault',
+          'updraft_vents', 'updraft_vents_high'] + ORES + [
     n for (k, b, c, h) in CLOUD_PLACEMENTS for n in ['aercloud_%s_%s' % (k, b)]]
 SURFACE_COMMON = ['pointed_holystone', 'holystone_rocks']
 
@@ -647,6 +675,14 @@ PLAN = {
     'battleground_wastes': ['lake_water', 'disk_quicksoil', 'boulder_holystone', 'TREES', 'TREES_HIGH', 'grass_irradiated', 'blueberry_irradiated', 'holystone_twigs', 'orange_trees_irradiated'],
     'contaminated_jungle': ['lake_water', 'moss_patch_ambrelinn', 'boulder_holystone', 'TREES', 'TREES_HIGH', 'grass_irradiated', 'fern_patch', 'blueberry_irradiated',
                             'orange_trees_irradiated', 'holystone_twigs'],
+    # (0.20.96) the sky biomes
+    'hanging_roots': ['lake_water', 'moss_patch_bryalinn_forest', 'boulder_mossy', 'TREES', 'TREES_HIGH', 'grass_medium', 'fern_patch', 'flowers_highfields',
+                      'blueberry_common', 'holystone_twigs', 'hanging_roots'],
+    'mistsea': ['lake_basin', 'disk_silt', 'TREES', 'TREES_HIGH', 'grass_small', 'fern_patch', 'arilum_short', 'arilum', 'mist_sheets'],
+    'rustworks': ['disk_ferrosite_sand', 'ferrosite_pillars', 'ferrosite_pillars_high', 'rust_wrecks', 'rust_wrecks_high', 'TREES', 'TREES_HIGH', 'grass_small',
+                  'magnetic_shrooms'],
+    'gilded_ridge': ['boulder_gilded_gold', 'boulder_gilded_glint', 'boulder_holystone', 'TREES', 'TREES_HIGH', 'grass_small', 'flowers_highfields',
+                     'holystone_twigs', 'moa_nests'],
 }
 BIOMES = list(PLAN)
 
@@ -658,6 +694,7 @@ def build_all():
     build_clouds()
     build_plants()
     build_misc()
+    build_sky()
 
 
 def lists_for(biome):
@@ -673,5 +710,5 @@ def lists_for(biome):
         vegetal.append('trees_' + biome if n == 'TREES' else 'trees_' + biome + '_high' if n == 'TREES_HIGH' else n)
     orders = {i: MASTER.get(i, []) for i in range(11)}
     orders[9] = vegetal
-    orders[10] = cloud_names + ['crystal_island']
+    orders[10] = cloud_names + ['crystal_island'] + SKY_TOP
     return [[NS + ':' + n for n in orders[i] if n in plan] for i in range(11)]
