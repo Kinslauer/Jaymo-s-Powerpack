@@ -858,3 +858,18 @@ looking forward the camera stays forward, but the model is drawn moving in whate
   `TakeoverFacingHeadMixin`.)
 - The ape fit (`ApeRage.FIT`) now syncs to everyone, so other players see the ape facing its way too.
 - Kingdoms 0.7.585 does the same for the werewolf beast, blood fever, feral curse and Grue holds. Built, not played.
+
+## 0.20.98 (2026-11-05): future guns' own executions
+Andy: "future guns should all have an execution, choosing from a single point blank shot to the head, or three shots with a
+semi or full auto weapon. it should use ammunition accurately and animate a one handed blast."
+- A future gun (TaCZ's own modern guns) no longer plays the flintlocks' two-handed Point Blank. Its execution is drawn one-handed:
+  the gun swung up in the gun hand, the arm straight down at them, the off hand at the side, the muzzle kicking up on each shot.
+- **Head Shot** (`Finishers.Kind.FUTURE_SHOT`): one round into the head. Guns worked by hand between shots (bolt, pump,
+  break-open and single-shot: AWP, Kar98, M700, M95, Springfield 1873, Lonetrail, M870, SPAS-12 and both double barrels,
+  `FutureGuns.MANUAL_ACTION`) always do this, and so does any gun with fewer than 3 rounds left.
+- **Three Shots**: a self-loading gun with 3+ rounds puts two into the chest and the last into the head. On semi
+  (`FUTURE_BURST`) they come a beat apart; set to full auto or burst (`FUTURE_AUTO`) they're ripped off at once.
+- Every shot takes one real round out of the gun (the chambered one first), plays TaCZ's own report and hit sound for that gun
+  and its muzzle flash (none with a suppressor). An empty gun still runs them through with the bayonet, and without the
+  Executioner perk it's still the Wild Slam, as before.
+- Built (compileClientJava), not played.

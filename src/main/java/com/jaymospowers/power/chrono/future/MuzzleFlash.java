@@ -116,6 +116,15 @@ public final class MuzzleFlash {
 		flash(level, muzzle(who, aim, PLAYER_AHEAD, PLAYER_SIDE, PLAYER_DOWN), aim, known == null ? UNKNOWN : size(known.kind()));
 	}
 
+	/** (0.20.98) An execution's shot from {@code gun} ({@code core/finisher/Finishers}), its muzzle at {@code at}: the burst, for everyone. */
+	public static void execution(ServerLevel level, ItemStack gun, Vec3 at, Vec3 aim) {
+		if (silenced(gun)) {
+			return;
+		}
+		FutureGuns.Gun known = FutureGuns.BY_ID.get(TaczGuns.gunId(gun));
+		flash(level, at, aim, known == null ? UNKNOWN : size(known.kind()));
+	}
+
 	/** A gunner's (or mech's) shot along {@code aim}: the burst, for everyone. */
 	static void mobShot(ServerLevel level, LivingEntity mob, Vec3 aim, FutureGuns.Kind kind) {
 		flash(level, muzzle(mob, aim, MOB_AHEAD, MOB_SIDE, MOB_DOWN), aim, size(kind));
