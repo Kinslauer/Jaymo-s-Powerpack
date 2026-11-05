@@ -803,6 +803,62 @@ public final class Trees {
 	}
 
 	/**
+	 * (0.7.604) Andy: "when an explosion hits a tree that would break the block it should break and topple instead of
+	 * breaking the blocks, and only the leaves that impact should break". Of the blocks a blast is about to break
+	 * ({@code blown}), a living tree's wood and leaves are spared: every tree the blast reached comes down whole instead,
+	 * away from it (its leaves break only where they strike, as any falling tree's). Returns what the blast still breaks.
+	 */
+	public static List<BlockPos> blastStruck(ServerLevel level, Vec3 center, List<BlockPos> blown) {
+		List<BlockPos> rest = new ArrayList<>(blown.size());
+		List<BlockPos> struck = new ArrayList<>();
+		for (BlockPos pos : blown) {
+			BlockState state = level.getBlockState(pos);
+			if (state.getBlock() instanceof LeavesBlock && !state.getValue(LeavesBlock.PERSISTENT)) {
+				continue;
+			}
+			if (state.is(BlockTags.LOGS) && !fallen(level, pos, state) && natural(level, pos)) {
+				struck.add(pos);
+				continue;
+			}
+			rest.add(pos);
+		}
+		Set<BlockPos> feet = new HashSet<>();
+		for (BlockPos log : struck) {
+			BlockPos foot = rootOf(level, log);
+			if (!feet.add(foot) || !level.getBlockState(foot).is(BlockTags.LOGS)) {
+				continue;
+			}
+			double dx = foot.getX() + 0.5 - center.x, dz = foot.getZ() + 0.5 - center.z;
+			float away = dx * dx + dz * dz < 1.0E-4 ? level.getRandom().nextFloat() * Mth.TWO_PI : (float)Math.atan2(dz, dx);
+			knock(level, foot, Math.round(away / Mth.HALF_PI) * Mth.HALF_PI, null, FELL_MOST);
+		}
+		return rest;
+	}
+
+	/** (0.7.604) The lowest log of the wood {@code log} is joined to (branches lead back to the trunk's foot). */
+	private static BlockPos rootOf(ServerLevel level, BlockPos log) {
+		BlockPos lowest = log;
+		Set<BlockPos> seen = new HashSet<>();
+		Deque<BlockPos> open = new ArrayDeque<>();
+		open.add(log);
+		seen.add(log);
+		while (!open.isEmpty() && seen.size() < FELL_MOST) {
+			BlockPos at = open.poll();
+			if (at.getY() < lowest.getY()) {
+				lowest = at;
+			}
+			for (BlockPos n : BlockPos.betweenClosed(at.offset(-1, -1, -1), at.offset(1, 0, 1))) {
+				BlockPos q = n.immutable();
+				if (Math.abs(q.getX() - log.getX()) <= FELL_SPREAD && Math.abs(q.getZ() - log.getZ()) <= FELL_SPREAD && seen.add(q)
+					&& level.getBlockState(q).is(BlockTags.LOGS)) {
+					open.add(q);
+				}
+			}
+		}
+		return foot(level, lowest);
+	}
+
+	/**
 	 * (0.7.588) A giant's hand closes on the standing tree whose log is {@code log}: it's torn out whole from its foot
 	 * ({@link FallingTree#fling}, not moving yet), if it's a natural tree of no more than {@code mostLogs} logs. Null otherwise.
 	 */
