@@ -1,0 +1,19 @@
+{
+  "message.jaymoskingdoms.patron.strict.on": "You keep strict faith: a broken commandment costs twice, and neglect has no floor. /patron strict false to ease it.",
+  "message.jaymoskingdoms.patron.strict.off": "Your faith is not strict. /patron strict true to keep it strictly: a broken commandment costs twice, and neglect has no floor.",
+  "message.jaymoskingdoms.patron.strict.server": "Strict faith holds for everyone on this server.",
+  "message.jaymoskingdoms.cast_out": "%s casts you out.",
+  "speech.jaymoskingdoms.blasphemy.cry.0": "Blasphemer! %s saw that!",
+  "speech.jaymoskingdoms.blasphemy.cry.1": "You spit on %s before my eyes? Out!",
+  "speech.jaymoskingdoms.blasphemy.cry.2": "Blasphemy! I'll not know you again, not before %s.",
+  "speech.jaymoskingdoms.cast_out.refuse.0": "You're cast out. I've nothing to say to you.",
+  "speech.jaymoskingdoms.cast_out.refuse.1": "Away from me.",
+  "speech.jaymoskingdoms.cast_out.refuse.2": "Not a word. Not a coin. Go.",
+  "speech.jaymoskingdoms.cleanse.cry.0": "Abomination! It walks among us!",
+  "speech.jaymoskingdoms.cleanse.cry.1": "Unclean! The Truth will see you cleansed!",
+  "speech.jaymoskingdoms.cleanse.cry.2": "I know what you are! To arms, all of you!",
+  "speech.jaymoskingdoms.cleanse.hunt.0": "There it is! Don't let it go!",
+  "speech.jaymoskingdoms.cleanse.hunt.1": "Cleanse it!",
+  "speech.jaymoskingdoms.cleanse.hunt.2": "Unclean thing! Out of our streets!",
+  "gamerule.jaymoskingdoms.patron_strict_faith": "Everyone keeps strict faith (broken commandments cost twice, neglect has no floor)"
+}

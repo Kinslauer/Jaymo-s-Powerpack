@@ -9366,3 +9366,28 @@ ultimate and beam-clash films came down with it. Not played.
   nothing. **The mime** (`monsters/Mime`, `MimeRenderer`): a pale figure on the slim player model, rare (weight 3)
   and only below y 0. The first time it sees its target player, it takes copies of what they hold and wear and fights
   with them. Its copies never drop. It isn't a monster of legend. Not played.
+- **0.7.581, patron wrath and grace, the cast-out, monolith glyphs (seven-mods plan, patches 5 and 6):** Andy: "ok do
+  5 and 6, and the devout villagers even if you have high reputation will cast you out for blasphemy against their
+  patron, and the Truth's followers will cast out and are sworn to cleanse evil". New `PatronWrath`: beasts killed
+  past the meat you've eaten (3 free, one forgiven a day) cost the Huntsman (fish the Deep Mother) and the
+  Hearthkeeper favour, a tame beast slain costs the Hearthkeeper 4, a monster cleared is a small deed for any patron
+  (1 in 4). The wrath ladder under favour 10 (only sin gets you there; neglect stops at 10): omens (a far bell, a
+  howl, a snuffed flame, a cold breath, sent to that player alone), wilting crops, beasts bolting, lightning near, and
+  at 0 a smiting (lightning on you, or underground a blow from the earth) once a day. The watcher: under favour 5,
+  looking up under open sky, now and then (once a day at most) a vast hooded figure stands in the clouds for 7 s, a
+  display entity sent to that player alone (item model `jaymoskingdoms:watcher`). Grace: tier 4 players have a 1 in 4
+  chance at dawn of a gift of their patron's kind at their feet. Thirteen happenings, two or so per patron (fires
+  kindle, hens lay, ore glints, an anvil rings below, fish rain, the water hums, beasts turn to watch, howls, the dead
+  stand still, a soul-flame ring, a halo, a whisper behind you, torches gutter, bells ring, books rustle), at most one
+  a day. Strict faith: gamerule `jaymoskingdoms:patron_strict_faith` or `/patron strict true|false`: commandments cost
+  double and neglect has no floor. New `CastOut`: a devout villager (a priest, or the devout temperament) who sees you
+  break their patron's commandment (an act done in sight) cries blasphemy and casts you out with every devout of that
+  patron in earshot: no trade or talk with them again whatever your reputation, and a realm holding that patron
+  outlaws you on the spot (`Theft.castOut`). A Truth follower who sees a forbidden spell cast, or comes to suspect
+  (rightly) a vampire or werewolf (`Suspicion`), turns on you at once with every Truth follower in earshot: guards
+  take you as a foe, the rest come at you with fists or what they hold; a Truth realm outlaws you. Kept per villager
+  by the name they know you by, so a mask still fools them. New `remnants/MonolithGlyphs`: rows of carved stone
+  (holystone keystone, chiseled deepslate, chiseled packed ice bricks, faded holystone keystone) round each monolith's
+  foot (old ones carved when a player comes near); a book and quill used on them copies a row of runes as a page (one
+  a day from each), and the more rows a book holds the more its copier makes out under each: the next standing Giant's
+  kind, its heading, how far, whether it stirs. Not played.

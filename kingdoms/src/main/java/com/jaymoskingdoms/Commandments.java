@@ -266,6 +266,8 @@ public final class Commandments {
 		if (!(player instanceof ServerPlayer sp) || sp.isSpectator() || sp.isCreative()) {
 			return;
 		}
+		// (0.7.581) the devout who see it, of whatever patron it offends, cast them out
+		CastOut.blasphemy(sp, act);
 		Patron p = Patrons.of(sp);
 		if (p == null) {
 			return;
@@ -291,7 +293,8 @@ public final class Commandments {
 			return;
 		}
 		sp.setAttached(KEPT, new Kept(k.patron, k.broken | 1 << n, today, todays | 1 << n, k.wet, k.night));
-		Patrons.lose(sp, FAVOUR_BROKEN);
+		// (0.7.581) strict faith: twice over
+		Patrons.lose(sp, PatronWrath.strict(sp) ? FAVOUR_BROKEN * 2 : FAVOUR_BROKEN);
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.commandment.broken", Patrons.coloured(p), text(p, n))
 			.withStyle(ChatFormatting.GRAY));
 		sp.level().playSound(null, sp.blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.6F, 0.45F);
@@ -354,6 +357,8 @@ public final class Commandments {
 			if (raw(stack)) {
 				act(sp, "eat_raw");
 			}
+			// (0.7.581) meat eaten pays for a beast killed
+			PatronWrath.ate(sp, stack);
 		}
 	}
 
