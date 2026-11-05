@@ -522,3 +522,23 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   stays as it was. Cactus, magma and barriers are never climbed (`data/jaymospowers/tags/block/ledge_no_vault.json`).
   `Ledge.Grab` carries a vault flag so the server holds a vault by `Ledge.vaultable` instead of `holdable`. Gradle
   build only, not played.
+- **0.20.64, explosions disconnected you:** every explosion sound threw a NullPointerException in `Blasts.onPlay`
+  (0.20.56), which runs at the head of `SoundEngine.play` and called `getVolume()` before the engine resolves the sound
+  (`getVolume` reads the resolved `Sound`). Thrown inside `handleExplosion`, it dropped the client with "Network Protocol
+  Error" whenever a creeper or TNT went off nearby. `onPlay` now calls `getOrResolve` first (cached, so the engine plays
+  the same variant). Checked against the 26.3 client jar; not built here.
+- **0.20.65, zoom on Sneak, dodge on Alt** (Andy: "double tap and hold shift should be default zoom, and alt should be
+  roll"): tap Sneak, press it again within 6 ticks and keep holding, and OK Zoomer zooms until you let go
+  (`client/SneakZoom` holds OK Zoomer's Zoom key down by name, so its smooth zoom, scroll steps and settings still
+  apply). The double tap no longer dodges; the dodge is Left Alt only (`DodgeClient`). OK Zoomer's own key came off
+  Left Alt (and C) once per install (`KeyConflicts` v7), so Alt was zooming and dodging at once before this. No zoom
+  while clinging, bar-hanging, sliding or from Web's double-Sneak yank; a fast run's held Sneak is still the slide.
+  Built, not played.
+- **0.20.66, blood on bodies sat under the skin; stains looked like they splattered:** Andy's clip (2026-11-04) showed
+  blood on a player only through the gaps in their sleeves and jacket. `BloodCoatLayer` painted the base layer only, and a
+  player's downloaded skin couldn't be read at all, so it got a plain whole-skin mask. `ArmourGrimeTextures` now reads a
+  downloaded skin from its `DynamicTexture`, and for a body in the player's layout (`PlayerModel`: players, MCA folk)
+  paints each outer-layer pixel (hat, jacket, sleeves, trousers) with the blood of the body pixel under it (`under`), so it
+  lies on top of the clothes. The "splattering" stains were the viewer's own cut dripping from chest height past the
+  first-person camera, landing in view right on the trail ahead: `BloodDrop` no longer draws a drop falling within
+  0.45 blocks (sideways) under a first-person camera. Its stain still lands; others still see the drips. Built.

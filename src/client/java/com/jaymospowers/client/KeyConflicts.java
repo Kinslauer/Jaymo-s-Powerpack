@@ -25,9 +25,10 @@ final class KeyConflicts {
 	 * P, so swap shoulder goes on to the full stop (from U or O) and the social interactions screen comes off P. v5 (0.17.46):
 	 * Y holds the Z Fighter technique wheel, so Kingdoms' Combat Art key goes on mouse side button 1. v6 (RPG Series):
 	 * Spell Engine's "use the item, not the spell" key starts on Left Alt (OK Zoomer's zoom), so it goes on mouse side
-	 * button 2.
+	 * button 2. v7 (0.20.65): OK Zoomer's zoom comes off Left Alt (Andy: "alt should be roll"); double-tap-and-hold Sneak
+	 * zooms instead ({@code SneakZoom}).
 	 */
-	private static final String MARKER = "jaymospowers-keys-v6";
+	private static final String MARKER = "jaymospowers-keys-v7";
 
 	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from} (or one of several, split by |). */
 	private record Move(String from, String to) {
@@ -37,7 +38,7 @@ final class KeyConflicts {
 		Map.entry("gui.xaero_new_waypoint", new Move("key.keyboard.b", "key.keyboard.n")),
 		Map.entry("gui.xaero_enlarge_map", new Move("key.keyboard.z", "key.keyboard.m")),
 		Map.entry("key.pantryforblockheads.your_key", new Move("key.keyboard.b", "key.keyboard.k")),
-		Map.entry("key.ok_zoomer.zoom", new Move("key.keyboard.c", "key.keyboard.left.alt")),
+		Map.entry("key.ok_zoomer.zoom", new Move("key.keyboard.c|key.keyboard.left.alt", "key.keyboard.unknown")),
 		Map.entry("key.quickActions", new Move("key.keyboard.g", "key.keyboard.j")),
 		Map.entry("key.saveToolbarActivator", new Move("key.keyboard.c", "key.keyboard.unknown")),
 		Map.entry("key.loadToolbarActivator", new Move("key.keyboard.x", "key.keyboard.unknown")),

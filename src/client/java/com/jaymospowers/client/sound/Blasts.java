@@ -171,7 +171,10 @@ public final class Blasts {
 			return false;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.level == null) {
+		// (0.20.64) resolved first, as the engine does: getVolume() reads the resolved Sound, and this runs before the
+		// engine resolves it, so every explosion sound threw and disconnected you ("Failed to handle packet
+		// ClientboundExplodePacket"). getOrResolve keeps the variant it picks, so the engine plays the same one.
+		if (minecraft.level == null || sound.getOrResolve(minecraft.getSoundManager()) == null) {
 			return false;
 		}
 		Vec3 at = new Vec3(sound.getX(), sound.getY(), sound.getZ());
