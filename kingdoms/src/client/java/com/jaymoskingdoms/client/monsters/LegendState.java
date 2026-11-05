@@ -16,6 +16,8 @@ public final class LegendState extends HumanoidRenderState {
 	int build = 1;
 	/** (0.7.1) A cursed werewolf's look (0 wild; else 1 + wear * 3 + rags) and its rags' colour. */
 	int look, rags;
+	/** (0.7.574) A werewolf player's lean wolf (LeanWolfModel). */
+	boolean lean;
 	/** (0.7.326) A silver skeleton: how long since it last took a blow on its buckler, and since its guard was broken (ticks). */
 	float sinceBlocked = 1000.0F, sinceGuardBroken = 1000.0F;
 }

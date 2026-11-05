@@ -9282,3 +9282,18 @@ ultimate and beam-clash films came down with it. Not played.
   fell, there's a 45% chance its folk carry you in. You wake on one of its free beds (any of the near ones, picked by
   distance), or on the ground by its seat if it has none. Once you come round you're laid in that bed resting
   (`BedRest.lay`). Captors still come first. Tuning is at the top of `Shelter`. Not played.
+- **0.7.574, werewolf bites curse players; the beast hides the player:** Andy: "it should spread to players as well".
+  (`Lycans.bite`, `WerewolfPlayers.bitten`) a cursed beast's bite (a cursed villager's, or a player's beast's melee hit)
+  that a player lives through curses them at the same `BITE_CHANCE` (40% a hit) as villagers; a wolfblood's half curse is
+  finished. No text, only a far howl they alone hear; the first change waits for the next full moon. Vampires, creative
+  and spectators can't take it. A player's beast now spreads it to villagers too. Wild werewolves still pass on nothing.
+  Andy: Jung's beast "was still holding a knife, nothing should animate like the suits and costumes". (`strip`/`stow`) the
+  claws' items went back into the selected slot when it was the first free one, so the knife never left; now they go
+  anywhere else or drop. (`BeastHidesPlayerMixin`) a player who is the beast (invisible, torn out) isn't drawn at all, so
+  held items, Powers suits/costumes and worn weapons no longer float on the beast. Not played.
+  Also in 0.7.574, Andy: "it should be a variation that you can achieve" (after Werewolves: Become a Beast's three
+  paths; its art is Vampirism-only, so nothing of it is used). (`WerewolfPlayers` LEAN_*, `LeanWolfModel`,
+  `tools/gen_lean_wolf.py`) once the change comes at will (3 moons) and the wildness is at most stage 1, sneak+U changes
+  into a lean wolf on all fours (our own boxes and coats, one per werewolf coat, the fiery one flickering): Speed III,
+  Jump Boost III, +2 hearts, no Strength or Resistance. Too wild: an overlay line says so. Full moons are always the
+  great beast; the mostly-human path stays the wolfblood (ritual off the full moon). Hint 111. Not played.
