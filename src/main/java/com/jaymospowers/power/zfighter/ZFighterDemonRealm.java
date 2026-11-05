@@ -333,7 +333,7 @@ public final class ZFighterDemonRealm {
 	/**
 	 * (0.17.198) A life story's "raised by a demon master" start: the demon village nearest {@code near} (the cells round it,
 	 * out to {@code cells} away), built now if it isn't yet, with its master at his post. Returns its middle (y is the yard's
-	 * floor), or null if no cell that near holds one that can stand. (0.20.102) {@code anyGround}: one that isn't in a demon
+	 * floor), or null if no cell that near holds one that can stand. (0.20.104) {@code anyGround}: one that isn't in a demon
 	 * biome stands too (as the first layer's), so long as it has a floor: the start's last resort before the overworld.
 	 */
 	static @Nullable BlockPos raiseHome(ServerLevel level, BlockPos near, int cells, boolean anyGround) {

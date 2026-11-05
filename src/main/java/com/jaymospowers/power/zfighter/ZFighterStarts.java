@@ -527,7 +527,7 @@ public final class ZFighterStarts {
 			return false;
 		}
 		BlockPos spawn = server.overworld().getRespawnData().pos();
-		// (0.20.102) a Nether band of a One Dimension world lies under the Overworld block for block, not at an eighth of it
+		// (0.20.104) a Nether band of a One Dimension world lies under the Overworld block for block, not at an eighth of it
 		boolean stacked = nether.dimension() != Level.NETHER;
 		int scale = stacked ? 1 : 8;
 		BlockPos from = new BlockPos(spawn.getX() / scale, 64 + Stacked.shift(server, Level.NETHER), spawn.getZ() / scale);
@@ -542,7 +542,7 @@ public final class ZFighterStarts {
 			village = ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS_FAR, false);
 		}
 		if (village == null) {
-			// (0.20.102) Andy picked this road and woke in the overworld (a One Dimension world): no demon biome or no
+			// (0.20.104) Andy picked this road and woke in the overworld (a One Dimension world): no demon biome or no
 			// village spot that could stand was found. The master's hall goes up on the nearest Nether floor instead.
 			JaymosPowers.LOGGER.warn("Demon master start for {}: {} near {} (stacked: {}); raising the hall on any Nether floor",
 				player.getGameProfile().name(), gloam == null ? "no demon biome" : "no village spot", near, stacked);

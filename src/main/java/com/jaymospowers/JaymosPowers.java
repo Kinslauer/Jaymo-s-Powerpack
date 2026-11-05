@@ -120,7 +120,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.compat.OneDimensionDefaults.init();
 		// (0.20.51) Subtle Effects' bone sprites on hurt skeletons off; our splinters instead
 		com.jaymospowers.compat.SubtleEffectsCompat.init();
-		// (0.20.102) Homesteads' workstation advancements only for placing the workstation (not any block)
+		// (0.20.104) Homesteads' workstation advancements only for placing the workstation (not any block)
 		com.jaymospowers.compat.HomesteadsCompat.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();

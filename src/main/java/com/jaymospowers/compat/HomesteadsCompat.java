@@ -17,7 +17,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.20.102) Andy (2026-11-05, a new Emberborn on "Alone in the wild"): "i got all these achievements but did not do
+ * (0.20.104) Andy (2026-11-05, a new Emberborn on "Raised by a demon master"): "i got all these achievements but did not do
  * them yet". Homesteads' five workstation advancements (Nice Tan!, A bouquet for you!, Honey, I placed a thing, Got
  * wood?, Your prospects are looking up) give their placed_block trigger an old {@code "block"} field that 26.3 no
  * longer reads, so each has no condition at all and the first block a player places earns all five. An always-on pack
