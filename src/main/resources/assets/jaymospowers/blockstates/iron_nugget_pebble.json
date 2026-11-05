@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymospowers:block/ground/stone_rock_1"
+      },
+      {
+        "model": "jaymospowers:block/ground/stone_rock_1",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/stone_rock_1",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/stone_rock_1",
+        "y": 270
+      }
+    ]
+  }
+}
