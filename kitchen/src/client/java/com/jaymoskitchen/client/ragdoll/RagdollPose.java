@@ -2,6 +2,8 @@ package com.jaymoskitchen.client.ragdoll;
 
 import com.jaymoskitchen.ragdoll.RagdollRig;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -315,9 +317,18 @@ public final class RagdollPose {
 				body.resetPose();
 			}
 		}
+		// (0.5.68) a modded four-legged body's own legs and head, by what they are rather than vanilla's names
+		// (only on models without vanilla's legs: a horse's head inside its "head_parts" stays loose as before)
+		Stand[] stands = limbs == QUADRUPED && find(root, "right_front_leg") == null && find(root, "right_hind_leg") == null
+			? STANDS.computeIfAbsent(root, RagdollPose::stands) : null;
+		java.util.Set<String> driven = new java.util.HashSet<>();
 		for (int l = 0; l < limbs.length; l++) {
 			ModelPart part = find(root, limbs[l].part);
 			if (part == null) {
+				if (stands != null && stands[l] != null) {
+					stands[l].turn(angles[l * 3], angles[l * 3 + 1], angles[l * 3 + 2]);
+					driven.add(stands[l].name);
+				}
 				continue;
 			}
 			if (shape == RagdollRig.Shape.HUMANOID) {
@@ -341,6 +352,7 @@ public final class RagdollPose {
 			for (Limb limb : limbs) {
 				skip.add(limb.part);
 			}
+			skip.addAll(driven);
 			if (curl > 0.0F) {
 				java.util.Collections.addAll(skip, SPIDER_LEGS);
 			}
@@ -369,6 +381,101 @@ public final class RagdollPose {
 			part.yRot = rest.yRot() * (1.0F - (1.0F - CURL_GATHER) * curl);
 			part.xRot = rest.xRot();
 		}
+	}
+
+	/**
+	 * (0.5.68) Andy: "the deer also fell with their bodies clipping into the ground as corpses, they should flop".
+	 * Cube Animals' (and other modded) four-legged models call their legs "frontleg", "BackLegL" or "FrontLeg1", often
+	 * inside a group and a wrapper turned a quarter round, so the ragdoll never moved them: they hung loose from a body
+	 * lying on the ground and went straight through it. A part the ragdoll drives this way, found by what it is.
+	 */
+	private record Stand(String name, ModelPart part, ModelPart[] chain) {
+		/**
+		 * Turns it as a vanilla limb would be turned ({@code x, y, z}: that limb's rotation from standing, in the
+		 * model's space), from however it stood, whatever its parents' turn.
+		 */
+		void turn(float x, float y, float z) {
+			Quaternionf standingChain = new Quaternionf(), nowChain = new Quaternionf(), q = new Quaternionf();
+			for (ModelPart p : chain) {
+				PartPose rest = p.getInitialPose();
+				standingChain.mul(q.rotationZYX(rest.zRot(), rest.yRot(), rest.xRot()));
+				nowChain.mul(q.rotationZYX(p.zRot, p.yRot, p.xRot));
+			}
+			PartPose rest = part.getInitialPose();
+			Quaternionf standing = new Quaternionf(standingChain).mul(q.rotationZYX(rest.zRot(), rest.yRot(), rest.xRot()));
+			Quaternionf target = new Quaternionf().rotationZYX(z, y, x).mul(standing);
+			Quaternionf local = nowChain.conjugate().mul(target);
+			org.joml.Vector3f euler = local.getEulerAnglesZYX(new org.joml.Vector3f());
+			part.xRot = euler.x;
+			part.yRot = euler.y;
+			part.zRot = euler.z;
+		}
+	}
+
+	private static final java.util.Map<ModelPart, Stand[]> STANDS = new java.util.WeakHashMap<>();
+
+	/**
+	 * A four-legged model's head and legs in {@link #QUADRUPED}'s order (null where not found): the shallowest part called
+	 * "head"; the legs are the outermost parts with "leg" in their names that draw something, if there are just four:
+	 * the two furthest forward (toward -z, as the model stands) the front ones, each pair's right one on -x.
+	 */
+	private static Stand[] stands(ModelPart root) {
+		Stand[] out = new Stand[QUADRUPED.length];
+		List<Stand> legs = new ArrayList<>();
+		List<Stand> heads = new ArrayList<>();
+		collect(root, new ModelPart[0], legs, heads);
+		if (!heads.isEmpty()) {
+			heads.sort(java.util.Comparator.comparingInt(h -> h.chain.length));
+			out[0] = heads.get(0);
+		}
+		if (legs.size() == 4) {
+			float[][] at = new float[4][];
+			for (int i = 0; i < 4; i++) {
+				at[i] = pivot(legs.get(i));
+			}
+			Integer[] order = {0, 1, 2, 3};
+			java.util.Arrays.sort(order, (a, b) -> Float.compare(at[a][2], at[b][2]));
+			int[] front = {order[0], order[1]}, hind = {order[2], order[3]};
+			boolean frontSwap = at[front[0]][0] > at[front[1]][0], hindSwap = at[hind[0]][0] > at[hind[1]][0];
+			out[1] = legs.get(frontSwap ? front[1] : front[0]);
+			out[2] = legs.get(frontSwap ? front[0] : front[1]);
+			out[3] = legs.get(hindSwap ? hind[1] : hind[0]);
+			out[4] = legs.get(hindSwap ? hind[0] : hind[1]);
+		}
+		return out;
+	}
+
+	private static void collect(ModelPart part, ModelPart[] chain, List<Stand> legs, List<Stand> heads) {
+		ModelPart[] next = java.util.Arrays.copyOf(chain, chain.length + 1);
+		next[chain.length] = part;
+		for (java.util.Map.Entry<String, ModelPart> e : ((com.jaymoskitchen.client.mixin.ModelPartAccessor) (Object) part)
+			.jaymoskitchen$children().entrySet()) {
+			String name = e.getKey();
+			String lower = name.toLowerCase(java.util.Locale.ROOT);
+			ModelPart child = e.getValue();
+			if (lower.equals("head")) {
+				heads.add(new Stand(name, child, next));
+				continue;
+			}
+			if (lower.contains("leg") && !((com.jaymoskitchen.client.mixin.ModelPartAccessor) (Object) child).jaymoskitchen$cubes().isEmpty()) {
+				legs.add(new Stand(name, child, next));
+				continue;
+			}
+			collect(child, next, legs, heads);
+		}
+	}
+
+	/** Where a part hinges, as the model stands (pixels, the model's space). */
+	private static float[] pivot(Stand stand) {
+		Matrix4f m = new Matrix4f();
+		Quaternionf q = new Quaternionf();
+		for (ModelPart p : stand.chain) {
+			PartPose rest = p.getInitialPose();
+			m.translate(rest.x(), rest.y(), rest.z()).rotate(q.rotationZYX(rest.zRot(), rest.yRot(), rest.xRot()));
+		}
+		PartPose rest = stand.part.getInitialPose();
+		org.joml.Vector3f at = m.transformPosition(new org.joml.Vector3f(rest.x(), rest.y(), rest.z()));
+		return new float[] {at.x, at.y, at.z};
 	}
 
 	/** A part on the model's root, or on its body (some models hang their legs from the body). */

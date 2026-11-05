@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.ARGB;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -105,19 +106,45 @@ public final class ClosedEyes {
 	}
 
 	/**
-	 * The texture rectangles (u0, v0, u1, v1, as shares of the texture) of the upper halves of the front and side
-	 * faces of the head's main box: the first box of the part named "head" (a horse's sits in "head_parts", a wolf's is
-	 * its "real_head").
+	 * The texture rectangles (u0, v0, u1, v1, as shares of the texture) of the upper halves of the head's faces that
+	 * look out to the front and the sides. (0.5.68) Andy: "all the new mobs need a corpse texture pass cause they dont
+	 * close their eyes". The head is the shallowest part called "head" or "real_head" in any case (Cube Animals' are
+	 * "Head", some inside a wrapper turned a quarter round); every part on it but ears, horns, mouths and the like
+	 * counts (their eyes can sit on a "Face" or "Hed2" under it), each by its biggest box. Which way a face looks is
+	 * read in the model's own space, so a head built sideways still has both its sides done, not its back.
 	 */
 	private static List<float[]> headFaces(ModelPart root) {
-		List<float[]> faces = new ArrayList<>();
+		String[] head = {null};
 		root.visit(new PoseStack(), (pose, path, index, cube) -> {
-			if (index != 0 || !(path.endsWith("/head") || path.endsWith("/real_head"))) {
+			String at = headPath(path);
+			if (at != null && (head[0] == null || at.length() < head[0].length())) {
+				head[0] = at;
+			}
+		});
+		List<float[]> faces = new ArrayList<>();
+		if (head[0] == null) {
+			return faces;
+		}
+		// each part's biggest box under the head (a snout or a horn on the same part is left alone)
+		Map<String, ModelPart.Cube> biggest = new HashMap<>();
+		Map<String, PoseStack.Pose> poses = new HashMap<>();
+		root.visit(new PoseStack(), (pose, path, index, cube) -> {
+			if (!(path.equals(head[0]) || path.startsWith(head[0] + "/")) || skipped(path.substring(head[0].length()))) {
 				return;
 			}
-			for (ModelPart.Polygon polygon : cube.polygons) {
-				if (Math.abs(polygon.normal().y()) > 0.5F || polygon.normal().z() > 0.5F) {
-					// not the top or bottom, nor the back of the head
+			ModelPart.Cube best = biggest.get(path);
+			if (best == null || volume(cube) > volume(best)) {
+				biggest.put(path, cube);
+				poses.put(path, pose.copy());
+			}
+		});
+		Vector3f normal = new Vector3f();
+		for (Map.Entry<String, ModelPart.Cube> e : biggest.entrySet()) {
+			PoseStack.Pose pose = poses.get(e.getKey());
+			for (ModelPart.Polygon polygon : e.getValue().polygons) {
+				pose.transformNormal(polygon.normal(), normal);
+				if (Math.abs(normal.y()) > 0.5F || normal.z() > 0.5F) {
+					// not the top or bottom, nor the back of the head (the model looks toward -z)
 					continue;
 				}
 				float u0 = Float.MAX_VALUE, v0 = Float.MAX_VALUE, u1 = -Float.MAX_VALUE, v1 = -Float.MAX_VALUE;
@@ -129,8 +156,46 @@ public final class ClosedEyes {
 				}
 				faces.add(new float[] {u0, v0, u1, (v0 + v1) * 0.5F});
 			}
-		});
+		}
 		return faces;
+	}
+
+	/** Parts on a head that never hold its eyes. */
+	private static final String[] NOT_EYES = {"ear", "horn", "antler", "altner", "nose", "beard", "tooth", "teeth", "tusk",
+		"jaw", "mouth", "tongue", "jezyk", "rogi", "fur", "mane", "crown", "tine", "neck", "beak", "bill", "hair", "collar",
+		"saddle", "trunk", "hat", "snout", "muzzle", "whisker", "fluff"};
+
+	/** The path up to the first part called "head" (or "real_head"), whatever its case; null if there's none. */
+	private static String headPath(String path) {
+		int from = 0;
+		while (from <= path.length()) {
+			int slash = path.indexOf('/', from);
+			int to = slash < 0 ? path.length() : slash;
+			String name = path.substring(from, to);
+			if (name.equalsIgnoreCase("head") || name.equalsIgnoreCase("real_head")) {
+				return path.substring(0, to);
+			}
+			if (slash < 0) {
+				return null;
+			}
+			from = slash + 1;
+		}
+		return null;
+	}
+
+	/** Whether a part below the head ({@code below}: its path from there) is one that never holds the eyes. */
+	private static boolean skipped(String below) {
+		String lower = below.toLowerCase(java.util.Locale.ROOT);
+		for (String not : NOT_EYES) {
+			if (lower.contains(not)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static float volume(ModelPart.Cube cube) {
+		return (cube.maxX - cube.minX) * (cube.maxY - cube.minY) * (cube.maxZ - cube.minZ);
 	}
 
 	/** Paints over the eyes in one face's rectangle; true if any were found. */
