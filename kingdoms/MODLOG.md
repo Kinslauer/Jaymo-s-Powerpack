@@ -9227,3 +9227,8 @@ ultimate and beam-clash films came down with it. Not played.
   player pickpocket uses, `PickpocketPose`), aimed at the coin purse on your hip if you wear one
   (`Pickpocket.Reach.purse`, `PickpocketPose.aim`), then lift and draw the hand back. Turn round mid-reach and the hand
   comes back out and they wait. `Crooks.PICK_REACH_TICKS`. Powers 0.20.82 moves the purse out of the leg to match.
+- **0.7.569, villager voices quieter and one at a time:** Andy: "voice lines from npcs are too loud and layer like the old
+  intro did." (`VoiceGate`, `Languages.voice`/`farewell`) a villager says no new line until its last one has finished
+  (our tongue clips measured from the .ogg, MCA's taken as 3 s) plus 4 s; a player hears one villager's line at a time
+  (a line that starts while another is playing to them isn't sent to them). Lines in a tongue play at 40% volume, MCA's
+  words and the grunts at 70%. Pain cries and snores are left alone. Not played.
