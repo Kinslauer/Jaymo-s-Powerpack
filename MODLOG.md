@@ -422,3 +422,11 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   flips), and the game's `Frustum.isVisible` leaves out anything whose box starts at or above it (mobs, aerwhales,
   item drops). Ordinary worlds and the separate Aether dimension are untouched. Sodium is now `compileOnly`, behind an
   optional mixin config. Gradle compile only, not played.
+- **0.20.53, Impale throws the spear itself:** Andy (2026-11-05), on the Iron Spear's Impale (RPG Series): "using this
+  should actually throw your spear". The spear now leaves your main hand when Impale flies (`compat/SpellThrows`,
+  through `SpellEngineCompat`; Spell Engine's own projectile still does the charged damage and knockback). Where the
+  spell ends the spear carries on as a real `ThrownWeapon`: it sticks in a block it hits, glances off a creature and
+  drops at its feet (no second hit), or arcs down after its full range, and lies there for its thrower to pick up like
+  a trident (1 durability per throw). Never lost or doubled: if the spell ends somewhere unloaded it goes back to your
+  pack (or your feet); on server stop it's put down where it was. In creative it stays in hand and the thrown one is
+  creative-only pickup. Gradle build only, not played.
