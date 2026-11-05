@@ -70,7 +70,7 @@ public final class AetherVeil {
 	}
 
 	/**
-	 * (0.20.119, Andy: "the minimap shows the aether instead of the overworld") The highest block the minimap may draw, plus
+	 * (0.21.2, Andy: "the minimap shows the aether instead of the overworld") The highest block the minimap may draw, plus
 	 * one: the top of the band the player is in, so Xaero's Minimap (which starts at a column's top block) maps the Overworld
 	 * under the Aether's islands, and the Aether once you're up in it ({@code client/mixin/xaero/XaeroMinimapBandMixin}).
 	 * Integer.MAX_VALUE outside a stacked world.
@@ -190,7 +190,7 @@ public final class AetherVeil {
 			cloudTop = CLOUD_TOP + overworldShift;
 			// only when the Aether sits over the clouds (a stack in another order is left alone)
 			floor = aether > cloudTop ? aether : NONE;
-			// (0.20.119) Andy still saw the Aether from the ground: say what was read, so latest.log shows why
+			// (0.21.2) Andy still saw the Aether from the ground: say what was read, so latest.log shows why
 			com.jaymospowers.JaymosPowers.LOGGER.info("Aether veil: band floors {}, Aether floor {}, Overworld clouds {} to {}, veil {}",
 				java.util.Arrays.toString(bands), aether, cloudBottom, cloudTop, floor == NONE ? "off (the Aether isn't over the clouds)" : "on");
 		} catch (ReflectiveOperationException | RuntimeException e) {

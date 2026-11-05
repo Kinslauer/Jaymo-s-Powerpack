@@ -13,6 +13,7 @@ final class HammerSlamBc {
 
 	/** Everyone who can see {@code player} watches the slam (the swinger plays it themselves, client-side). */
 	static void broadcast(ServerPlayer player) {
+		com.jaymospowers.combat.IncomingBlows.swing(player, HammerSlam.IMPACT, 0.0);
 		Packets.AttackAnimation packet = new Packets.AttackAnimation(player.getId(), AnimatedHand.TWO_HANDED, HammerSlam.ANIMATION,
 			HammerSlam.LENGTH, HammerSlam.UPSWING, 0.0F, HammerSlam.IMPACT, Packets.SwingParticles.EMPTY);
 		for (ServerPlayer viewer : PlayerLookup.tracking(player)) {

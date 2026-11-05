@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * (0.20.119, Andy: "the minimap shows the aether instead of the overworld") In a One Dimension world the Aether's islands
+ * (0.21.2, Andy: "the minimap shows the aether instead of the overworld") In a One Dimension world the Aether's islands
  * are the top blocks of the Overworld level, and Xaero's Minimap draws each column from its top block (or from the top of
  * the world) down, so under the Aether it mapped the islands. Here its world is the band you're in ({@link AetherVeil#mapTop},
  * {@link AetherVeil#mapBottom}): a column is read from that band's top down to its floor, and the automatic cave mode only
