@@ -151,6 +151,8 @@ public final class Wounds {
 		WillSkill.register();
 		// (0.14.2) phase 3: broken limbs
 		Breaks.register();
+		// (0.20.107) low and hit: broken limbs don't hold you back for a while
+		Adrenaline.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
 		// (0.17.54) the Potion of Cleansing: festering cured

@@ -507,9 +507,11 @@ public final class Downed {
 		if (plan == null || plan == BodyPlan.SIMPLE) {
 			return null;
 		}
+		// (0.20.107) on adrenaline only the head and body hold them down
+		boolean arms = !Adrenaline.active(entity);
 		for (int i = 0; i < plan.size(); i++) {
 			BodyPart part = plan.part(i);
-			boolean counts = part.vital() || part == BodyPart.LEFT_ARM || part == BodyPart.RIGHT_ARM;
+			boolean counts = part.vital() || arms && (part == BodyPart.LEFT_ARM || part == BodyPart.RIGHT_ARM);
 			if (counts && (Wounds.isBroken(entity, part) || Wounds.fraction(entity, part) <= TOO_HURT_FRACTION)) {
 				return part;
 			}

@@ -217,7 +217,7 @@ public final class WebSymbioteRescue {
 	private static void getUp(ServerPlayer player, WebSymbioteState state, float health) {
 		Downed.rouse(player.level(), player, player.getMaxHealth() * health);
 		// (0.17.164) up means up: legs that won't carry you are bound whole
-		if (Breaks.crawlOnly(player)) {
+		if (Breaks.bothLegsBroken(player)) {
 			Wounds.knitBones(player);
 		}
 		player.setHealth(Math.max(player.getHealth(), player.getMaxHealth() * health));
@@ -394,7 +394,7 @@ public final class WebSymbioteRescue {
 	 * them whole. Returns the state, its hunger spent if it did.
 	 */
 	static WebSymbioteState knit(ServerPlayer player, WebSymbioteState state, long now) {
-		if (now % KNIT_TICKS != 0 || player.isCreative() || Downed.isDowned(player) || !Breaks.crawlOnly(player)
+		if (now % KNIT_TICKS != 0 || player.isCreative() || Downed.isDowned(player) || !Breaks.bothLegsBroken(player)
 			|| state.satiety() <= WebSymbiote.STARVING && state.bond() < LOW_BOND) {
 			return state;
 		}
