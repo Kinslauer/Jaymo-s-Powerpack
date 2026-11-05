@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.20.72) Only one tool or weapon is carried on the body at a time (Andy: "only one tool or weapon should show at a
+ * (0.20.73) Only one tool or weapon is carried on the body at a time (Andy: "only one tool or weapon should show at a
  * time, in whatever slot"). YDM's Weapon Master (optional; CC0, nothing of it copied) hangs every hotbar item on the
  * player's back and belt at once. Each player's pass of its layer now draws the first item it reaches (the lowest
  * hotbar slot that isn't in hand) and skips the rest. Every item it draws, for your own body and for other players',

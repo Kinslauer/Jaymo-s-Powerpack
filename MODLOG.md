@@ -590,7 +590,12 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   (`jaymoskingdoms:hornkin*`, `zombified_hornkin`) for 0.5 instead of 3 (`ThrownRocks.SHRUGGED_DAMAGE`, `shrugsOff`); an
   unsuspecting one can still be knocked out. Kingdoms' NPC rocks follow the same rule (Kingdoms 0.7.558). Not played.
 
-## 0.20.72 (2026-11-05): one tool or weapon on the body at a time
+## 0.20.72 (2026-11-05): pack bump for Kingdoms 0.7.561
+
+- Kingdoms 0.7.561: a downed king lifted by a player no longer gets a fresh set of plate each time his armour is shed
+  (the "duplicating" royal armour). No Powers code changed.
+
+## 0.20.73 (2026-11-05): one tool or weapon on the body at a time
 - Andy: "only one tool or weapon should show at a time, in whatever slot". YDM's Weapon Master hung every hotbar item on
   the back and belt at once. `client/mixin/weaponmaster/WeaponMasterOneItemMixin` (optional, skipped without it) lets
   each body's pass of its layer draw only the first item it reaches, the lowest hotbar slot not in hand, for your own
