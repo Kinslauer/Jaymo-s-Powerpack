@@ -1,0 +1,8 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.mixin.spellengine",
+	"plugin": "com.jaymoskingdoms.mixin.spellengine.SpellEngineMixinPlugin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": ["SpellContainerSourceMixin"],
+	"injectors": { "defaultRequire": 1 }
+}
