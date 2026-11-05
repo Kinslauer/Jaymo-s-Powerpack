@@ -1027,3 +1027,7 @@ them, and the katana and battleaxe raised a block pose that blocked nothing.
   cools down), the flail (whirl), the rapier (lunge), the boomerang and throwing weapons, vanilla spears (charge),
   the tridents, Tidecaller / Sunbrand / Ashfang (their gifts), and the Arsenal's relic and stone swords.
 - Pairs with Kingdoms 0.7.601: every melee weapon gets an RPG Series weapon skill on the skill bar. Built, not played.
+
+## 0.21.0 (2026-11-05): Kingdoms 0.7.602, no taking a mounted villager's reins
+- Ships Kingdoms 0.7.602: players can't climb onto a horse (or any living mount) a villager, guard or carter is riding;
+  bring the rider down or throw them first. See kingdoms/MODLOG.md.

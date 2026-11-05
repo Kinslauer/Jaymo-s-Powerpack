@@ -9608,3 +9608,11 @@ weapon component: the battleaxe, ninjato, saber, machete, katana, halberd, rapie
   ranged and thrown-only weapons and items with their own spells are left alone. The log says how many it gave.
 - WeaponMod's halberd joins the spear Weapon Forms (`form_spears`). Axes, maces and hammers still have no Weapon Forms
   family of their own. Built, not played.
+
+## 0.7.602 (2026-11-05): no taking a mounted villager's reins
+- Andy: "mounted mca shouldnt just let you take the reins." A player can no longer climb onto a living mount (horse,
+  elephant, camel, dragon...) that someone other than a player is riding: a mounted MCA villager, guard, carter or
+  courier keeps their horse, and you can't ride behind them or in their place either. Throw or bring the rider down
+  first (a downed rider is pulled off by Powers anyway) and the horse is free. Carts, carriages, rickshaws, cannons and
+  ships aren't mounts and keep their passenger seats. The check sits on the rider's side of every way onto a mount
+  (`EntityMountMixin` on `Entity.startRiding`, `Mounted.npcRidden`), server side, forced or not. Built, not played.
