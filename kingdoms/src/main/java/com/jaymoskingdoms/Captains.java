@@ -102,6 +102,12 @@ public final class Captains {
 	static final double MEET_RANGE = 14.0, SAY_RANGE = 24.0;
 	static final long MEET_GAP = 6000L;
 	static final int FILM_TICKS = 135;
+	/**
+	 * (0.7.582) Andy: "you should become invulnerable for the duration, and the orc should stop for a second when it is in
+	 * view, so that you can read, before it would keep advancing on you and get a free hit". For the first meeting's film the
+	 * player takes no harm and he stands where he is, eyes on them; both end early once the player strikes a blow.
+	 */
+	static final boolean FILM_SAFE = true;
 	static final double FILM_WITNESSES = 20.0;
 	/** A fight with him is over this long after the last blow (ticks); further off than this, you ran. */
 	static final long FIGHT_COOLS = 200L, FIGHT_FORGOTTEN = 6000L;
@@ -353,6 +359,8 @@ public final class Captains {
 	/** A killer in his scene over a player's body: until when (game time), and where the body lies. */
 	private static final Map<UUID, Long> SCENE = new HashMap<>();
 	private static final Map<UUID, Vec3> SCENE_AT = new HashMap<>();
+	/** (0.7.582) A player in a captain's first-meeting film: until when (game time) no harm comes to them. */
+	private static final Map<UUID, Long> FILMED = new HashMap<>();
 
 	/** Something to do a few ticks on (server tick count), kept in memory. */
 	private record Later(int due, Runnable what) {
@@ -383,6 +391,7 @@ public final class Captains {
 			FIGHTS.clear();
 			SCENE.clear();
 			SCENE_AT.clear();
+			FILMED.clear();
 			LATER.clear();
 			FEARED.clear();
 			FEAR_READY.clear();
@@ -417,6 +426,7 @@ public final class Captains {
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Captains::died);
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Captains::filmHarm);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> hurt(victim, source, taken, blocked));
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack held = player.getItemInHand(hand);
@@ -1063,6 +1073,12 @@ public final class Captains {
 			Component line;
 			if (m == null) {
 				PowersCompat.film(mob, p, PowersCompat.FILM_SPEAKER, FILM_TICKS, mob.getEyePosition(), mob, FILM_WITNESSES);
+				if (FILM_SAFE) {
+					// (0.7.582) he stops to name himself, and no one gets a free hit on the player while they read
+					FILMED.put(p.getUUID(), now + FILM_TICKS);
+					SCENE.put(mob.getUUID(), now + FILM_TICKS);
+					SCENE_AT.put(mob.getUUID(), p.getEyePosition());
+				}
 				line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.first." + mob.getRandom().nextInt(LINES), Recollections.nameTo(p, mob),
 					Component.literal(c.name()), Tribes.name(c.tribe()));
 			} else {
@@ -1074,6 +1090,30 @@ public final class Captains {
 			c = c.met(p.getUUID(), new Meeting(m == null ? 1 : m.times() + 1, m == null ? "met" : m.last(), now));
 			put(level.getServer(), c);
 		}
+	}
+
+	/**
+	 * (0.7.582) No harm to a player in a captain's first-meeting film. A blow they strike ends it, and the pause of whoever they
+	 * hit, so the captain doesn't stand there taking free hits either.
+	 */
+	private static boolean filmHarm(LivingEntity victim, net.minecraft.world.damagesource.DamageSource source, float amount) {
+		if (FILMED.isEmpty() && SCENE.isEmpty()) {
+			return true;
+		}
+		long now = victim.level().getGameTime();
+		if (source.getEntity() instanceof ServerPlayer striker && FILMED.remove(striker.getUUID()) != null) {
+			SCENE.remove(victim.getUUID());
+			SCENE_AT.remove(victim.getUUID());
+			return true;
+		}
+		Long until = FILMED.get(victim.getUUID());
+		if (until != null) {
+			if (now < until) {
+				return false;
+			}
+			FILMED.remove(victim.getUUID());
+		}
+		return true;
 	}
 
 	/** Fights over: a player who got away ran, or beat him and left him. */

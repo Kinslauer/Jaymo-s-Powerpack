@@ -9400,3 +9400,7 @@ character, sacrificing the view of the character near the end to get high enough
 - His scene over your body before you respawn uses the same shot and runs 7.5 s (`SCENE_TICKS` 90 to 150); he's raised
   at 3.5 s (`SCENE_RAISED` 45 to 70) so the gloat and the line after can both be read.
 - Powers' FOV is held at your plain setting during these films (see Powers 0.20.91). Built, not played.
+- Andy: "you should become invulnerable for the duration, and the orc should stop for a second when it is in view, so
+  that you can read". During a captain's first-meeting film the player takes no harm from anything, and he stands
+  still facing them (`Captains.FILMED`, `filmHarm`, his pause rides the death scene's `SCENE` hold). If the player
+  strikes a blow, both end early, so he doesn't stand there taking free hits. Turn it off with `Captains.FILM_SAFE`.
