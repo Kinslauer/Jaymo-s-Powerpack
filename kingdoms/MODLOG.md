@@ -9671,3 +9671,10 @@ played.
   every chunk it tried, up to 64 brand-new ones in one tick while the server waited (part of the 2026-11-05 15:00 crash).
   New `reach`: a chunk already made is used freely, and at most `NEW_CHUNKS` (6) new ones per search; past that, spots
   in unmade chunks are skipped. Not built here.
+
+## 0.7.608 (2026-11-05): fewer deer, and none in the Nether (Powers 0.21.11)
+- Andy: "why are there deer in the nether? they clearly overspawn up in the overworld too" (a deer at 385 -121 719, in
+  the stacked world's Nether band). Nothing of ours spawns deer; they're Naturalist's natural spawns. Natural and
+  new-chunk deer spawns now never happen in a Nether biome or the Nether, and elsewhere only 30% of them still do
+  (`mixin/tweaks/DeerSpawnMixin`, on `SpawnPlacements.checkSpawnRules`). Eggs, spawners and commands are untouched.
+- Built, not played.
