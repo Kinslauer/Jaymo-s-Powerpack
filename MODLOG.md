@@ -889,3 +889,19 @@ semi or full auto weapon. it should use ammunition accurately and animate a one 
   Without the Executioner perk a loaded future gun no longer slams: it fires one round one-handed, and 40% of the time
   (`Finishers.WILD_MISS`) the shot goes into the ground beside their head and they live. Unloaded, it's still the Wild Slam.
 - Built (compileClientJava), not played.
+
+## 0.20.102 (2026-11-05): hold a charged rock; momentum; throws follow your aim (Kitchen 0.5.76, Kingdoms 0.7.587)
+- **Rock throw, held** (`ThrownRocks`, `RockThrowPose`), Andy: "you can hold a full charged rock before you throw, and each
+  you charge afterward is faster to charge due to momentum". A full charge no longer throws by itself: the arm stays drawn
+  back (`READY`, trembling) while use is held, and the rock goes the moment you let go. Let go early, open a screen or pause,
+  and nothing is thrown. Each throw takes `MOMENTUM_STEP` (5) ticks off the next charge, up to `MOMENTUM_MAX` (4) in a row,
+  so 1.5 s comes down to 0.5 s; one throw's worth fades for every `MOMENTUM_FADE` (40) ticks between a throw and the next
+  wind-up. The server keeps its own count (the client says `READY` every `KEEPALIVE` ticks while held). Others see the
+  wind-up at its real pace (the charge rides in the synced value).
+- **Aimed throws** (`Carry.fling`), Andy: "throwing held items and mobs should follow the cursor, if you look high the
+  trajectory is higher, and smaller things can be flung further w/ higher strength stat". Sneak + right-click throws of
+  anything carried (people, animals, mobs, blocks, severed parts; overhead heaves too) go along your look at `THROW_SPEED`
+  (heave `HEAVE_SPEED`) with a little lift, times `lightness` (by bulk against a person's: 0.5x to 1.8x) and +20% per point
+  of brawn (Kitchen's `Hauling`: Strength effect, size, Kingdoms' Might/Packhorse...; up to 5). Kitchen's corpse toss
+  (`CorpseEntity.toss`) does the same. Kingdoms: hint 105 tells of the hold and release.
+- Built, not played.

@@ -1515,3 +1515,8 @@ fall, etc like it does for decapitations".
   (and its box made) before its id is set, in the constructor and again in `recreateFromPacket`: "Tried to access entity ID
   before ID assignment", and the client dropped with "Network Protocol Error". The corpse now notes its id (`setId`
   override) and keeps its own box until then. Checked against the 26.3 jar; not built here.
+
+## 0.5.76: tossed bodies follow your aim (Powers 0.20.102)
+- `CorpseEntity.toss`: a thrown body goes along your look (up, level or down) at `TOSS_SPEED` with `TOSS_LIFT`, further the
+  smaller the dead one stood (`tossLightness`, 0.5x to 1.8x of a person's) and +20% per point of `Hauling.brawn` (up to 5).
+  Andy: "throwing held items and mobs should follow the cursor ... smaller things can be flung further w/ higher strength stat".

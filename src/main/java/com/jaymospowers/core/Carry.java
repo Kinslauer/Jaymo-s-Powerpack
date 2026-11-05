@@ -159,8 +159,8 @@ public final class Carry {
 	public static final int FREE_ARMOUR = 12, ARMOUR_PER_BRAWN = 6;
 	/** After being let go, how long before the same one can be picked up again (ticks). */
 	static final int REGRAB_TICKS = 20;
-	/** Let go: a drop carries on with the carrier's momentum, nudged ahead; a throw goes this fast ahead and up (b/t). */
-	static final double DROP_AHEAD = 0.12, DROP_UP = 0.08, THROW_AHEAD = 0.5, THROW_UP = 0.32;
+	/** Let go: a drop carries on with the carrier's momentum, nudged ahead (b/t); a throw, see {@link #THROW_SPEED}. */
+	static final double DROP_AHEAD = 0.12, DROP_UP = 0.08;
 	/** (0.19.62) How far a carried head reaches a wall to be mounted on it, and how far out from the face it hangs. */
 	static final double TROPHY_REACH = 3.0, TROPHY_OFF_WALL = 0.18;
 	/** One jump frees a carried player: they spring off up and back (b/t). */
@@ -185,8 +185,20 @@ public final class Carry {
 	};
 	/** Overhead, it's let go this much further ahead per block of its width, so it clears you. */
 	static final double OVERHEAD_RELEASE_PER_WIDTH = 0.5;
-	/** Thrown from overhead it's heavy: it goes this fast ahead and up (b/t), a short, low heave. */
-	static final double HEAVE_AHEAD = 0.38, HEAVE_UP = 0.18;
+	/**
+	 * (0.20.102) Andy: "throwing held items and mobs should follow the cursor, if you look high the trajectory is higher,
+	 * and smaller things can be flung further w/ higher strength stat". A throw goes along your look (up, level or down) at
+	 * {@link #THROW_SPEED} (overhead {@link #HEAVE_SPEED}), with {@link #THROW_LIFT} up so a level throw still arcs; times
+	 * how light it is for its size ({@link #lightness}) and how strong you are ({@link #BRAWN_THROW} more per point of
+	 * brawn, Kitchen's {@code Hauling}: Strength, size, Might, Packhorse; up to {@link #BRAWN_THROW_MAX} points).
+	 */
+	static final double THROW_SPEED = 0.55, HEAVE_SPEED = 0.42, THROW_LIFT = 0.14;
+	public static final double BRAWN_THROW = 0.2;
+	public static final int BRAWN_THROW_MAX = 5;
+	/** (0.20.102) A person's bulk (width x width x height); something this bulky flies as far as a person, a lighter one further. */
+	public static final double PERSON_BULK = 0.6 * 0.6 * 1.8;
+	/** (0.20.102) How much further the lightest thing flies, and how much shorter the heaviest. */
+	public static final double LIGHTEST = 1.8, HEAVIEST = 0.5;
 	static final Identifier WEIGHT_ID = JaymosPowers.id("carry_weight");
 
 	/** Small animals anyone can pick up (wolves, cats, chickens...). Babies of any animal count too. */
@@ -927,6 +939,21 @@ public final class Carry {
 	}
 
 	/** Ends a carry: forgets it, lifts the weight, and puts the body down the way it was let go. */
+	/** (0.20.102) A throw's own speed (b/t): along {@code thrower}'s look, a little up, by its lightness and their brawn. */
+	static Vec3 fling(Player thrower, Entity thrown, double speed) {
+		int brawn = Math.min(BRAWN_THROW_MAX, KitchenCompat.brawn(thrower));
+		// (a carried block is a display, with no real size of its own: it flies as a block)
+		double light = CarryBlock.is(thrown) ? lightness(1.0, 1.0) : lightness(thrown.getBbWidth(), thrown.getBbHeight());
+		double fast = speed * light * (1.0 + BRAWN_THROW * brawn);
+		return thrower.getViewVector(1.0F).scale(fast).add(0.0, THROW_LIFT, 0.0);
+	}
+
+	/** (0.20.102) How far something of this size flies against a person ({@link #HEAVIEST} to {@link #LIGHTEST}). */
+	public static double lightness(double width, double height) {
+		double bulk = Math.max(1.0E-3, width * width * height);
+		return Math.clamp(Math.cbrt(PERSON_BULK / bulk), HEAVIEST, LIGHTEST);
+	}
+
 	private static void end(@Nullable ServerPlayer carrier, Entry entry, Let how) {
 		CARRIES.remove(entry.carrier);
 		Entity carried = entry.carried;
@@ -963,9 +990,8 @@ public final class Carry {
 			}
 			velocity = switch (how) {
 				case DROP -> momentum.add(ahead.scale(DROP_AHEAD)).add(0.0, DROP_UP, 0.0);
-				case THROW -> entry.hold == OVERHEAD
-					? momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(HEAVE_AHEAD)).add(0.0, HEAVE_UP, 0.0)
-					: momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(THROW_AHEAD)).add(0.0, THROW_UP, 0.0);
+				// (0.20.102) along the look, further the lighter it is and the stronger you are
+				case THROW -> momentum.multiply(1.0, 0.0, 1.0).add(fling(carrier, carried, entry.hold == OVERHEAD ? HEAVE_SPEED : THROW_SPEED));
 				case ESCAPE -> momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(-ESCAPE_BACK)).add(0.0, ESCAPE_UP, 0.0);
 				default -> Vec3.ZERO;
 			};
