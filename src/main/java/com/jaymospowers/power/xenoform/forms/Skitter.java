@@ -191,7 +191,7 @@ public final class Skitter extends XenoForm {
 	}
 
 	/** A solid underside right over its head. */
-	private static boolean ceiling(ServerPlayer player) {
+	public static boolean ceiling(Player player) {
 		AABB box = player.getBoundingBox();
 		BlockPos above = BlockPos.containing(player.getX(), box.maxY + 0.3, player.getZ());
 		return player.level().getBlockState(above).isFaceSturdy(player.level(), above, Direction.DOWN);
@@ -216,17 +216,13 @@ public final class Skitter extends XenoForm {
 			if (!jump || !ceiling(player) || player.isInWater()) {
 				live.perched = false;
 			} else {
-				Vec3 m = player.getDeltaMovement();
-				Vec3 crawl = m.horizontal().lengthSqr() > CEILING_CRAWL * CEILING_CRAWL ? m.horizontal().normalize().scale(CEILING_CRAWL) : m.horizontal();
-				player.setDeltaMovement(crawl.x, CEILING_GRIP, crawl.z);
-				player.syncVelocity = true;
+				// (0.20.57) the hold itself is the client's (SkitterCling), so its own movement sticks; this keeps the
+				// state everyone draws
 				player.resetFallDistance();
 			}
 		} else if (jump && !player.onGround() && !player.isInWater() && ceiling(player)) {
 			live.perched = true;
 			live.anchor = null;
-			player.setDeltaMovement(player.getDeltaMovement().x, CEILING_GRIP, player.getDeltaMovement().z);
-			player.syncVelocity = true;
 			sound(player, SoundEvents.SPIDER_STEP, 0.8F, 1.2F);
 		} else if (!player.onGround() && player.onClimbable() && !player.isInWater()) {
 			// (0.20.57) on a wall: the climb itself is a spider's, a ladder on both sides ({@code SkitterClimbMixin}),

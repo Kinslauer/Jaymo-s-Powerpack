@@ -468,4 +468,6 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   run. Climbing: the server used to push it up a wall, which the client's own movement overruled, so nothing climbed.
   New `SkitterClimbMixin` makes `onClimbable` true on both sides for a Skitter pressing into a wall (or in the air
   beside one), like a spider: walk in or hold jump to climb, sneak to hold still, let go to slide slowly down. The
-  server keeps the wall pose (`XenoformState.CLIMB`), the ceiling cling and the step sounds. Gradle build only, not played.
+  server keeps the wall pose (`XenoformState.CLIMB`) and the step sounds. Ceilings had the same fault (Andy: "they
+  didnt work"): the cling is now held by the clinging player's own client (`SkitterCling`, before each move), same rules
+  as before; the server keeps the `CEILING` state everyone draws. Gradle build only, not played.
