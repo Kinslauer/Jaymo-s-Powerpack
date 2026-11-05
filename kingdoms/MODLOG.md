@@ -9456,3 +9456,17 @@ player input, (explosions / heavy impacts can fell trees too.)"
 ## 0.7.587 (2026-11-05): hint 105 tells of holding a charged rock (Powers 0.20.103)
 - The off hand rock is held drawn back at full charge and thrown on release, charging faster with each throw close after
   the last (Powers `ThrownRocks`); hint 105 says so.
+
+## 0.7.589 (2026-11-05): fewer hostiles, sharks in a ship's wake (Powers 0.20.107)
+- Andy: "mobs are overspawning, reduce the rates by a ton. especially for the hostile mobs", then (after his clip of a
+  seabed packed with sharks) "i kind of like the idea of a feeding frenzy like that ... maybe add an event or a group that
+  often follows ships", and chose to cut only the hostiles. The monster cap is halved (70 to 35; every mod's natural
+  monster spawns count against it, `mixin/tweaks/MonsterCapMixin`). Sea life, animals and the pack's own spawners are
+  unchanged.
+- Shark wake (`whaling/SharkWake`): out on open ocean (ocean biome, 8+ blocks of water under her), a ship, boat or
+  anything a player rides under way has a 30% chance every 30 s of picking up 3-5 Naturalist great whites that trail
+  her wake for about 5 minutes. Anything hurt or killed in the water near them sets off a 15 s feeding frenzy: they go
+  for the bleeding thing, then anything else swimming near (players overboard too), the water churns red and up to 3
+  more come, at most 10. When the pack breaks up, sharks out of sight go back into the deep. Hint 115.
+- The 02:10 crash (`Captains.slew` removing from `Map.of()`) was on 0.7.558; fixed since 0.7.561.
+- Built, not played.
