@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -20,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -35,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>Running into a wall holding forward, you run straight up it (the client drives it: {@code ChronoSpeedClient}).
  * Since 0.11.40 for as long as you hold forward, with no sideways drift, a hop onto the top, and the body turned onto
  * the wall, legs running, the way Gravity's wall walk stands on it ({@link #WALL_RUN}, drawn by {@code GravityWalkPose}).</li>
- * <li>Sprinting, water holds you up: you run across it (see {@code ChronoWaterRunMixin}).</li>
+ * <li>Sprinting, water holds you up: you run across it (see {@code ChronoWaterRunMixin}), leaving a wake ({@link #wake}).</li>
  * <li>(0.11.40) Holding Shift you walk at your normal speed (no Speed V, no sneaking slowdown): fine control.</li>
  * <li>V again, facing a wall: you vibrate through it, up to {@link #PHASE_DEPTH} blocks thick, to the first space you
  * fit on the other side. Every {@link #PHASE_GAP} ticks at most.</li>
@@ -62,6 +64,11 @@ public final class ChronoSpeed {
 	static final int PHASE_GAP = 20;
 	/** The streak's colours ({@link #FLASH}'s value): Chrono's gold, and Velox's light blue. */
 	public static final int GOLD = 0, SKY = 1;
+	/** (0.20.113) The water wake: how fast the foam spreads out sideways (blocks a tick), how many foam points a tick at most,
+	 *  spray drops off the heels each tick, and a soft splash every this many ticks at this volume. */
+	static final double WAKE_SPREAD = 0.09;
+	static final int WAKE_STEPS = 4, WAKE_SPRAY = 3, WAKE_SOUND_EVERY = 6;
+	static final float WAKE_VOLUME = 0.25F;
 	/** Velox's streak behind you (server particles): a light blue dust. */
 	public static final DustParticleOptions SKY_DUST = new DustParticleOptions(0x8FD8FF, 1.2F);
 
@@ -186,6 +193,8 @@ public final class ChronoSpeed {
 				// lava spits behind your heels
 				ChronoFx.particles(level, player, ParticleTypes.LAVA, player.getX(), player.getY() + 0.1, player.getZ(), 1, 0.3, 0.0, 0.3, 0.0);
 				ChronoFx.particles(level, player, ParticleTypes.SMOKE, player.getX(), player.getY() + 0.1, player.getZ(), 3, 0.3, 0.0, 0.3, 0.02);
+			} else if (player.onGround() && under.is(FluidTags.WATER)) {
+				wake(player, level, was, moved, player.blockPosition().below(), under);
 			} else if (player.isInWater() || player.onGround() && !under.isEmpty()) {
 				ChronoFx.particles(level, player, ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 6, 0.3, 0.0, 0.3, 0.1);
 			}
@@ -196,6 +205,53 @@ public final class ChronoSpeed {
 		}
 		if (!overclocked && player.getAttached(WALL_RUN) != null) {
 			player.removeAttached(WALL_RUN);
+		}
+	}
+
+	/**
+	 * (0.20.113) Running on water leaves a wake: spray kicked up off your heels, and a V of foam opening out behind you
+	 * like a boat's, which fades as it spreads. Every tick foam is laid at your heels along the stretch you just ran,
+	 * pushed out sideways ({@link #WAKE_SPREAD}), so the older foam is further out: the V. Vanilla's wake particle (the
+	 * one a fish leaves coming to your bobber) sits on the water and shrinks away on its own. Velox's Velocity too.
+	 */
+	private static void wake(ServerPlayer player, ServerLevel level, Vec3 was, Vec3 moved, BlockPos water, FluidState fluid) {
+		Vec3 flat = new Vec3(moved.x, 0.0, moved.z);
+		if (flat.lengthSqr() < 1.0E-4) {
+			return;
+		}
+		Vec3 ahead = flat.normalize();
+		Vec3 side = new Vec3(-ahead.z, 0.0, ahead.x);
+		double surface = water.getY() + fluid.getHeight(level, water) + 0.02;
+		RandomSource random = level.getRandom();
+		double run = flat.length();
+		int steps = Math.max(1, Math.min(WAKE_STEPS, (int) Math.ceil(run / 0.35)));
+		for (int i = 0; i < steps; i++) {
+			// along the stretch just run, a little behind the heels
+			Vec3 at = was.add(flat.scale((i + random.nextDouble()) / steps)).subtract(ahead.scale(0.3));
+			for (int arm = -1; arm <= 1; arm += 2) {
+				double out = WAKE_SPREAD * (0.75 + random.nextDouble() * 0.5);
+				double x = at.x + side.x * arm * 0.3, z = at.z + side.z * arm * 0.3;
+				double vx = side.x * arm * out - ahead.x * 0.02, vz = side.z * arm * out - ahead.z * 0.02;
+				// one in each tick's foam takes the power's fate (black clones, glass); the rest stay plain
+				ChronoFx.particles(level, i == 0 && arm < 0 ? ChronoFx.style(player) : ChronoFx.PLAIN, ParticleTypes.FISHING,
+					x, surface, z, 0, vx, 0.0, vz, 1.0);
+			}
+			// the churned line down the middle
+			ChronoFx.particles(level, ChronoFx.PLAIN, ParticleTypes.FISHING, at.x, surface, at.z, 0,
+				(random.nextDouble() - 0.5) * 0.02, 0.0, (random.nextDouble() - 0.5) * 0.02, 1.0);
+		}
+		// spray off the heels: thrown back and up, fanned out to both sides
+		Vec3 heel = player.position().subtract(ahead.scale(0.25));
+		for (int i = 0; i < WAKE_SPRAY; i++) {
+			double fan = (random.nextDouble() - 0.5) * 0.5;
+			double back = 0.12 + random.nextDouble() * 0.12;
+			ChronoFx.particles(level, i == 0 ? ChronoFx.style(player) : ChronoFx.PLAIN, ParticleTypes.SPLASH, heel.x, surface + 0.05, heel.z, 0,
+				-ahead.x * back + side.x * fan, 0.25 + random.nextDouble() * 0.2, -ahead.z * back + side.z * fan, 1.0);
+		}
+		ChronoFx.particles(level, ChronoFx.PLAIN, ParticleTypes.SPLASH, heel.x, surface + 0.05, heel.z, 4, 0.25, 0.0, 0.25, 0.1);
+		if (player.tickCount % WAKE_SOUND_EVERY == 0) {
+			level.playSound(null, player.getX(), surface, player.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS,
+				WAKE_VOLUME, 1.3F + random.nextFloat() * 0.3F);
 		}
 	}
 

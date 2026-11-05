@@ -975,3 +975,13 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   Tuning at the top of `Fainting` and `FaintHud`. Built, not played.
 - **0.20.112:** `Fainting.thirst(Player)` and `Fainting.bringRound(ServerPlayer)` for Kingdoms 0.7.594's villagers who
   come to a fainted player.
+
+## 0.20.113 (2026-11-05): Chrono leaves a wake running on water
+- Andy: "chrono should leave a wake when they run on water"
+- `ChronoSpeed.wake`: sprinting across water under Overclock (and Velox's Velocity, which runs on the same code) kicks
+  spray back and up off your heels and lays a V of foam behind you like a boat's. Each tick foam is put down along the
+  stretch you just ran and pushed out to both sides, so older foam sits further out and the V opens behind you, with a
+  churned line down the middle; it's vanilla's wake particle (the fish-to-bobber one), which rides the surface and
+  shrinks away by itself in 0.4 to 2 s. A soft splash every 6 ticks. Corrupted/ascended fates mark one foam point and
+  one spray drop a tick (clones, glass), not all of them. Lava keeps its own sparks and smoke. Tuning: `WAKE_*` at the
+  top of `ChronoSpeed`. Built, not played.
