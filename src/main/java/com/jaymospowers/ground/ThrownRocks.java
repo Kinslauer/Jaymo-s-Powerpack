@@ -87,6 +87,12 @@ import org.jspecify.annotations.Nullable;
  * arm back down. Everyone sees it ({@link #THROW}, drawn by {@code RockThrowPose}, first and third person); your own
  * client counts the charge ({@link #windUpHere}) and tells the server when the rock goes ({@link Charge}), so your arm
  * moves the moment you press and the rock leaves as it comes over.
+ * <p>
+ * (0.20.103) Andy: "you can hold a full charged rock before you throw, and each you charge afterward is faster to charge
+ * due to momentum". A full charge no longer throws by itself: the arm stays drawn back ({@link #READY}, trembling) for as
+ * long as use is held, and the rock goes when you let go. Let go before the charge is full and nothing is thrown. Each
+ * throw builds momentum ({@link #MOMENTUM_STEP} ticks off the next charge, up to {@link #MOMENTUM_MAX} throws: 1.5 s down
+ * to 0.5 s), and it fades a throw's worth for every {@link #MOMENTUM_FADE} ticks between one throw and the next wind-up.
  */
 public final class ThrownRocks {
 	/** A rock hits for this much. */
@@ -107,6 +113,12 @@ public final class ThrownRocks {
 	static final int STALE_TICKS = 60;
 	/** (0.20.81) A hold broken for longer than this (ticks; a held use repeats every 4) starts the charge again. */
 	public static final int CHARGE_GAP = 6;
+	/** (0.20.103) Momentum: each throw takes this many ticks off the next charge, for up to this many throws in a row. */
+	public static final int MOMENTUM_STEP = 5, MOMENTUM_MAX = 4;
+	/** (0.20.103) Momentum loses one throw's worth for every this many ticks from a throw to the next wind-up. */
+	public static final int MOMENTUM_FADE = 40;
+	/** (0.20.103) While a full charge is held, the client says so this often (ticks), so the server keeps the hold. */
+	public static final int KEEPALIVE = 20;
 	/** A rock still flying after this long is no longer watched. */
 	static final int LIFE = 200;
 	/** (0.18.84) The chance a rock knocks out someone unsuspecting: hit on the head (near eye height), and anywhere else. */
@@ -157,14 +169,16 @@ public final class ThrownRocks {
 	private static final List<Rock> FLYING = new ArrayList<>();
 	/** (0.20.81) Players winding up an off hand throw (0.20.90: and following one through). */
 	private static final Map<UUID, Hold> WINDING = new HashMap<>();
+	/** (0.20.103) Each player's momentum: {throws in a row, game time of the last}. Not saved. */
+	private static final Map<UUID, long[]> MOMENTUM = new HashMap<>();
 
 	/** (0.20.90) The arm's follow-through after the rock goes (ticks). */
 	public static final int FOLLOW_TICKS = 6;
-	/** (0.20.90) Stages in {@link #THROW} (its low two bits). */
-	public static final int WINDING_UP = 1, THROWING = 2;
+	/** (0.20.90) Stages in {@link #THROW} (its low two bits; 0.20.102: {@link #READY}, the full charge held). */
+	public static final int WINDING_UP = 1, THROWING = 2, READY = 3;
 	/**
-	 * (0.20.90) A player throwing a rock, for everyone's client (the pose): {@code holds << 2 | stage}, a new number for
-	 * each hold so one straight after another starts afresh; absent otherwise. Not saved.
+	 * (0.20.90) A player throwing a rock, for everyone's client (the pose): {@link #value}, a new number for each hold so
+	 * one straight after another starts afresh; absent otherwise. Not saved.
 	 */
 	public static final AttachmentType<Integer> THROW = AttachmentRegistry.create(JaymosPowers.id("rock_throw"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
@@ -173,17 +187,46 @@ public final class ThrownRocks {
 	};
 	private static int holds;
 
-	/** (0.20.90) A hold winding up: when it began (game ticks), and when its rock went, or -1. */
+	/** (0.20.103) A throw's synced value: the hold's number, its charge (ticks, so the wind-up is drawn at its pace), the stage. */
+	public static int value(long id, int charge, int stage) {
+		return (int) (id & 0xFFFFF) << 8 | (charge & 63) << 2 | stage;
+	}
+
+	/** (0.20.103) The charge (ticks) in a {@link #value}. */
+	public static int chargeOf(int value) {
+		return value >> 2 & 63;
+	}
+
+	/** (0.20.103) Momentum left at {@code now}: {@code streak} throws in a row, the last at {@code last} (-1: none), faded since. */
+	public static int momentum(int streak, long last, long now) {
+		if (last < 0 || now < last) {
+			return 0;
+		}
+		return (int) Math.max(0L, streak - (now - last) / MOMENTUM_FADE);
+	}
+
+	/** (0.20.103) How long a charge takes (ticks) with {@code momentum} throws behind it. */
+	public static int charge(int momentum) {
+		return CHARGE - MOMENTUM_STEP * Math.clamp(momentum, 0, MOMENTUM_MAX);
+	}
+
+	/**
+	 * (0.20.90) A hold winding up: when it began (game ticks), and when its rock went, or -1; (0.20.103) the momentum it
+	 * began with, how long its charge takes, and when its client last spoke.
+	 */
 	private static final class Hold {
 		final Player player;
 		final long start;
-		long thrown = -1;
-		final int id;
+		long thrown = -1, heard;
+		final int id, momentum, charge;
 
-		Hold(Player player, long now, int id) {
+		Hold(Player player, long now, int id, int momentum) {
 			this.player = player;
 			this.start = now;
+			this.heard = now;
 			this.id = id;
+			this.momentum = momentum;
+			this.charge = ThrownRocks.charge(momentum);
 		}
 	}
 	/** While a rock's blow is being dealt again (so it isn't again and again). */
@@ -204,6 +247,7 @@ public final class ThrownRocks {
 			FLYING.clear();
 			CRACKS.clear();
 			WINDING.clear();
+			MOMENTUM.clear();
 		});
 	}
 
@@ -222,7 +266,8 @@ public final class ThrownRocks {
 
 	/**
 	 * (0.20.90) From your client as you hold use with a rock in the off hand: {@link #WINDING_UP} as the hold begins,
-	 * {@link #THROWING} once it has been held {@link #CHARGE} ticks, 0 if it was let go early. (The server used to count
+	 * {@link #THROWING} once it has been held {@link #CHARGE} ticks, 0 if it was let go early. (0.20.103) {@link #READY}
+	 * once the charge is full (and every {@link #KEEPALIVE} ticks it's held), {@link #THROWING} when use is let go. (The server used to count
 	 * the held use itself, but at the air the client never tells it of a use that does nothing on its side, so the charge
 	 * only ran when the use landed on a block.)
 	 */
@@ -244,17 +289,28 @@ public final class ThrownRocks {
 		boolean able = !player.isSpectator() && player.isAlive() && !player.isSleeping() && !Downed.passedOut(player) && FirstTools.rock(stack)
 			&& !FirstTools.striking(player) && !player.getCooldowns().isOnCooldown(stack);
 		if (stage == WINDING_UP) {
-			if (!able || hold != null && hold.thrown < 0 && now >= hold.start && now - hold.start <= CHARGE) {
+			if (!able) {
 				return;
 			}
-			holds = holds + 1 & 0xFFFFFFF;
-			WINDING.put(player.getUUID(), new Hold(player, now, holds));
-			player.setAttached(THROW, holds << 2 | WINDING_UP);
+			holds = holds + 1 & 0xFFFFF;
+			long[] momentum = MOMENTUM.get(player.getUUID());
+			int left = momentum == null ? 0 : momentum(Math.toIntExact(momentum[0]), momentum[1], now);
+			hold = new Hold(player, now, holds, left);
+			WINDING.put(player.getUUID(), hold);
+			player.setAttached(THROW, value(hold.id, hold.charge, WINDING_UP));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(),
 				SoundSource.PLAYERS, 0.4F, 0.7F);
 			return;
 		}
 		if (hold == null || hold.thrown >= 0) {
+			return;
+		}
+		if (stage == READY && able) {
+			// (0.20.103) the full charge held: drawn right back, waiting to be let go
+			hold.heard = now;
+			if (now - hold.start >= hold.charge - CHARGE_SLACK) {
+				player.setAttached(THROW, value(hold.id, hold.charge, READY));
+			}
 			return;
 		}
 		if (stage != THROWING || !able) {
@@ -263,7 +319,7 @@ public final class ThrownRocks {
 			player.removeAttached(THROW);
 			return;
 		}
-		if (now - hold.start < CHARGE - CHARGE_SLACK) {
+		if (now - hold.start < hold.charge - CHARGE_SLACK) {
 			// too soon by the server's count: not thrown, and the hold is over
 			WINDING.remove(player.getUUID());
 			player.removeAttached(THROW);
@@ -271,7 +327,9 @@ public final class ThrownRocks {
 		}
 		// let go: the arm whips through, and follows through (tick clears it)
 		hold.thrown = now;
-		player.setAttached(THROW, hold.id << 2 | THROWING);
+		player.setAttached(THROW, value(hold.id, hold.charge, THROWING));
+		// (0.20.103) momentum: the next charge comes sooner
+		MOMENTUM.put(player.getUUID(), new long[] {Math.min(MOMENTUM_MAX, hold.momentum + 1), now});
 		player.getCooldowns().addCooldown(stack, COOLDOWN);
 		ServerLevel server = (ServerLevel) player.level();
 		ItemStack stone = stack.copyWithCount(1);
@@ -290,7 +348,8 @@ public final class ThrownRocks {
 			return true;
 		}
 		long now = player.level().getGameTime();
-		boolean over = now < hold.start || (hold.thrown >= 0 ? now - hold.thrown >= FOLLOW_TICKS : now - hold.start > CHARGE + STALE_TICKS);
+		boolean over = now < hold.start
+			|| (hold.thrown >= 0 ? now - hold.thrown >= FOLLOW_TICKS : now - Math.max(hold.heard, hold.start + hold.charge) > STALE_TICKS);
 		if (over) {
 			player.removeAttached(THROW);
 		}

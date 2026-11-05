@@ -25,7 +25,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.20.102) A lone pebble over a shallow ore vein (OreTells): either stained the ore's colour, or a plain-looking rock
+ * (0.20.104) A lone pebble over a shallow ore vein (OreTells): either stained the ore's colour, or a plain-looking rock
  * that turns out to be a nugget of the ore when picked up. Like a loose rock: walk-through, gone with a punch (its loot
  * table), a right click picks it up, pops off when its ground goes.
  */

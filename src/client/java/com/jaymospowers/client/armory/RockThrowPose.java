@@ -38,6 +38,9 @@ import org.jspecify.annotations.Nullable;
  * comes back up (with the next rock, if there is one). Other players' throws come from {@link ThrownRocks#THROW}; your
  * own is counted on your client ({@link ThrownRocks#windUpHere}), which tells the server when the rock goes
  * ({@link ThrownRocks.Charge}), so it starts the moment you press and the rock leaves as the arm comes over.
+ * <p>
+ * (0.20.103) A full charge is held drawn back ({@link ThrownRocks#READY}) until use is let go, and the rock goes then.
+ * The wind-up is drawn at its own pace (a charge sped up by momentum winds up faster).
  */
 public final class RockThrowPose {
 	// ===== the knobs ================================================================================================
@@ -65,7 +68,7 @@ public final class RockThrowPose {
 	// ================================================================================================================
 
 	/** {@code arm}: the throwing arm; {@code ticks}: into its stage; {@code amount}: how much of the pose shows (0-1). */
-	public record Pose(int stage, HumanoidArm arm, float ticks, float amount, boolean ownView) {
+	public record Pose(int stage, HumanoidArm arm, float ticks, float amount, boolean ownView, int charge) {
 	}
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:rock_throw");
@@ -73,7 +76,7 @@ public final class RockThrowPose {
 	/** One player's throw as drawn: how much shows (now and a tick before), its stage and ticks in it, the value last seen. */
 	private static final class Throw {
 		float amount, amountBefore, ticks, ticksBefore;
-		int stage, value;
+		int stage, value, lastValue;
 	}
 
 	/** Per entity id. */
@@ -82,6 +85,13 @@ public final class RockThrowPose {
 	private static long ticks;
 	/** Your own hold, as the server counts it: begun, last seen, and when its rock went (-1: not yet; begun -1: none). */
 	private static long ownStart = -1, ownLast = -1, ownThrown = -1;
+	/** (0.20.103) Your own hold: how long its charge takes, whether it's full, when the server was last told so. */
+	private static int ownCharge = ThrownRocks.CHARGE;
+	private static boolean ownReady;
+	private static long ownHeard = -1;
+	/** (0.20.103) Your own momentum (as the server counts it): throws in a row, the one it began with, the last (client ticks). */
+	private static int ownStreak, ownMomentum;
+	private static long ownLastThrow = -1;
 
 	private RockThrowPose() {
 	}
@@ -98,21 +108,26 @@ public final class RockThrowPose {
 	/** A held use on your own client (one every 4 ticks while use is held): the charge counted, the server told. */
 	private static void held() {
 		long now = ticks;
-		if (ownThrown >= 0 && now - ownThrown < ThrownRocks.COOLDOWN) {
-			// still cooling down on the server (its word may not be here yet)
+		if (ownLastThrow >= 0 && now >= ownLastThrow && now - ownLastThrow < ThrownRocks.COOLDOWN || ownThrown >= 0) {
+			// still cooling down on the server (its word may not be here yet), or following through
 			return;
 		}
-		if (ownStart < 0 || ownThrown >= 0 || now - ownLast > ThrownRocks.CHARGE_GAP || now < ownLast) {
+		if (ownStart < 0 || now - ownLast > ThrownRocks.CHARGE_GAP || now < ownLast) {
 			ownStart = now;
 			ownLast = now;
 			ownThrown = -1;
+			ownReady = false;
+			ownMomentum = ThrownRocks.momentum(ownStreak, ownLastThrow, now);
+			ownCharge = ThrownRocks.charge(ownMomentum);
 			ClientPlayNetworking.send(new ThrownRocks.Charge(ThrownRocks.WINDING_UP));
 			return;
 		}
 		ownLast = now;
-		if (now - ownStart >= ThrownRocks.CHARGE) {
-			ownThrown = now;
-			ClientPlayNetworking.send(new ThrownRocks.Charge(ThrownRocks.THROWING));
+		if (!ownReady && now - ownStart >= ownCharge || ownReady && now - ownHeard >= ThrownRocks.KEEPALIVE) {
+			// (0.20.103) full: held drawn back until use is let go
+			ownReady = true;
+			ownHeard = now;
+			ClientPlayNetworking.send(new ThrownRocks.Charge(ThrownRocks.READY));
 		}
 	}
 
@@ -121,19 +136,32 @@ public final class RockThrowPose {
 		if (ownStart < 0) {
 			return 0;
 		}
+		Minecraft minecraft = Minecraft.getInstance();
 		if (ownThrown >= 0) {
 			if (ticks - ownThrown < ThrownRocks.FOLLOW_TICKS) {
 				return ThrownRocks.THROWING;
 			}
-		} else if (ticks - ownLast <= ThrownRocks.CHARGE_GAP) {
-			return ThrownRocks.WINDING_UP;
-		}
-		if (ownThrown < 0 && Minecraft.getInstance().getConnection() != null) {
-			// let go before it was thrown
+		} else if (minecraft.getConnection() != null) {
+			LocalPlayer player = minecraft.player;
+			boolean lost = player == null || minecraft.gui.screen() != null || !FirstTools.rock(player.getOffhandItem());
+			boolean letGo = !minecraft.options.keyUse.isDown() || ticks - ownLast > ThrownRocks.CHARGE_GAP;
+			if (!lost && !letGo) {
+				return ownReady ? ThrownRocks.READY : ThrownRocks.WINDING_UP;
+			}
+			if (!lost && ownReady) {
+				// (0.20.103) a full charge let go: the rock goes, and the next charge comes sooner
+				ownThrown = ticks;
+				ownLastThrow = ticks;
+				ownStreak = Math.min(ThrownRocks.MOMENTUM_MAX, ownMomentum + 1);
+				ClientPlayNetworking.send(new ThrownRocks.Charge(ThrownRocks.THROWING));
+				return ThrownRocks.THROWING;
+			}
+			// let go before it was full (or the rock's gone, or a screen opened)
 			ClientPlayNetworking.send(new ThrownRocks.Charge(0));
 		}
 		ownStart = -1;
 		ownThrown = -1;
+		ownReady = false;
 		return 0;
 	}
 
@@ -145,6 +173,12 @@ public final class RockThrowPose {
 			return;
 		}
 		if (minecraft.isPaused()) {
+			if (ownStart >= 0 && ownThrown < 0 && minecraft.getConnection() != null) {
+				// (0.20.103) paused mid-hold: the hold is let down, not thrown on the way back
+				ClientPlayNetworking.send(new ThrownRocks.Charge(0));
+				ownStart = -1;
+				ownReady = false;
+			}
 			return;
 		}
 		ticks++;
@@ -153,7 +187,7 @@ public final class RockThrowPose {
 			if (player == minecraft.player) {
 				int stage = ownStage();
 				// each hold its own number: begun on a new tick
-				value = stage == 0 ? 0 : (int)(ownStart & 0xFFFFFFF) << 2 | stage;
+				value = stage == 0 ? 0 : ThrownRocks.value(ownStart, ownCharge, stage);
 			} else {
 				Integer synced = player.getAttached(ThrownRocks.THROW);
 				value = synced == null ? 0 : synced;
@@ -175,6 +209,7 @@ public final class RockThrowPose {
 					s.ticks = 0.0F;
 					s.ticksBefore = 0.0F;
 					s.value = value;
+					s.lastValue = value;
 				} else {
 					s.ticks++;
 				}
@@ -200,7 +235,8 @@ public final class RockThrowPose {
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
-		return new Pose(s.stage, player.getMainArm().getOpposite(), Mth.lerp(partialTicks, s.ticksBefore, s.ticks), amount, ownView);
+		return new Pose(s.stage, player.getMainArm().getOpposite(), Mth.lerp(partialTicks, s.ticksBefore, s.ticks), amount, ownView,
+			Math.max(1, ThrownRocks.chargeOf(s.value != 0 ? s.value : s.lastValue)));
 	}
 
 	/** From HeldItems.extract (LivingEntityRenderer.extractRenderState). */
@@ -225,7 +261,8 @@ public final class RockThrowPose {
 			float out = smooth((t - WHIP_TICKS) / Math.max(1.0F, ThrownRocks.FOLLOW_TICKS - WHIP_TICKS));
 			return new float[] {k * k, (1.0F - out) * pose.amount(), 1.0F};
 		}
-		return new float[] {0.0F, pose.amount(), smooth(t / ThrownRocks.CHARGE)};
+		// (0.20.103) held at full charge: drawn right back
+		return new float[] {0.0F, pose.amount(), pose.stage() == ThrownRocks.READY ? 1.0F : smooth(t / pose.charge())};
 	}
 
 	/** After the model animates (HeldItems.applyModel): the arms and the body's turn. */
@@ -245,7 +282,7 @@ public final class RockThrowPose {
 		boolean right = pose.arm() == HumanoidArm.RIGHT;
 		float side = right ? 1.0F : -1.0F;
 		ModelPart arm = right ? h.rightArm : h.leftArm, other = right ? h.leftArm : h.rightArm;
-		float shake = pose.stage() == ThrownRocks.WINDING_UP ? SHAKE * drawn * drawn * Mth.sin(pose.ticks() * SHAKE_BEAT) : 0.0F;
+		float shake = pose.stage() != ThrownRocks.THROWING ? SHAKE * drawn * drawn * Mth.sin(pose.ticks() * SHAKE_BEAT) : 0.0F;
 		// the wind-up comes up from wherever the arm was; the throw goes from drawn back to through
 		float w = weight * drawn;
 		set(arm, Mth.lerp(through, COCK_X, THROUGH_X) + shake, Mth.lerp(through, COCK_Y, THROUGH_Y) * side,
@@ -292,7 +329,7 @@ public final class RockThrowPose {
 			return;
 		}
 		float side = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
-		float shake = pose.stage() == ThrownRocks.WINDING_UP ? FP_SHAKE * p[2] * Mth.sin(pose.ticks() * SHAKE_BEAT) : 0.0F;
+		float shake = pose.stage() != ThrownRocks.THROWING ? FP_SHAKE * p[2] * Mth.sin(pose.ticks() * SHAKE_BEAT) : 0.0F;
 		// after the throw the hand dips out of view and comes back up as the pose eases out
 		float dip = pose.stage() == ThrownRocks.THROWING && pose.ticks() > WHIP_TICKS ? Mth.sin((1.0F - p[1]) * Mth.PI) * FP_DIP : 0.0F;
 		poseStack.translate(Mth.lerp(through, FP_COCK_X, FP_THROUGH_X) * side * weight + shake,
