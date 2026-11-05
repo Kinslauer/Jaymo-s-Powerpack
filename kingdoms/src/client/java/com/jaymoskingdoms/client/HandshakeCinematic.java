@@ -39,8 +39,8 @@ public final class HandshakeCinematic {
 	static final float BAR_SHARE = 0.11F, BAR_EASE = 0.25F;
 	/** Kept this far off a wall the camera would otherwise sink into (blocks). */
 	static final double WALL_MARGIN = 0.3;
-	/** The wide shot: how far out to the side it starts and ends (blocks), and how high over the hands. */
-	static final double WIDE_FROM = 2.6, WIDE_TO = 3.8, WIDE_UP = 0.5;
+	/** The wide shot: how far out to the side it starts and ends (blocks), and how high over the hands (0.7.550, lower: was 0.5). */
+	static final double WIDE_FROM = 2.6, WIDE_TO = 3.8, WIDE_UP = 0.2;
 	/** The hands' shot: how far out to the side (blocks), easing in to {@link #HANDS_IN}, how low under them, how far it drifts round (degrees). */
 	static final double HANDS_OUT = 1.6, HANDS_IN = 1.25, HANDS_LOW = 0.1, HANDS_TURN = 12.0;
 	/**

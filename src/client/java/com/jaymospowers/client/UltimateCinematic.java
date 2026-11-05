@@ -35,6 +35,8 @@ import org.jspecify.annotations.Nullable;
 public final class UltimateCinematic {
 	/** Each bar's height, as a share of the screen's; how much of the way they slide a tick. */
 	static final float BAR_SHARE = 0.11F, BAR_EASE = 0.3F;
+	/** (0.20.58) How far every shot is brought down (blocks, times the caster's size), and the lowest it goes over their feet. */
+	static final double SHOT_DROP = 0.6, SHOT_FLOOR = 0.5;
 	/** Kept this far off a wall the camera would otherwise sink into (blocks). */
 	static final double WALL_MARGIN = 0.3;
 	/** {@link UltimateFilm#ZOOM}: how far back it goes (blocks), and the share of the film spent going out. */
@@ -43,7 +45,7 @@ public final class UltimateCinematic {
 	/** {@link UltimateFilm#SKYWARD}: how far behind (blocks), and how high it ends up looking. */
 	static final double SKY_BACK = 4.0, SKY_LOOK_UP = 14.0;
 	/** {@link UltimateFilm#CRANE}: its reach out (from, to) and its rise (from, to), and how far it circles (degrees). */
-	static final double CRANE_FROM = 5.0, CRANE_TO = 9.0, CRANE_LOW = 1.5, CRANE_HIGH = 9.0, CRANE_TURN = 80.0;
+	static final double CRANE_FROM = 5.0, CRANE_TO = 9.0, CRANE_LOW = 1.5, CRANE_HIGH = 7.0, CRANE_TURN = 80.0;
 	/** {@link UltimateFilm#ORBIT}: how far out (blocks) and how far it sweeps (degrees). */
 	static final double ORBIT_OUT = 2.6, ORBIT_TURN = 100.0;
 	/** {@link UltimateFilm#PROFILE}: how far to the side of the line (blocks). */
@@ -329,7 +331,17 @@ public final class UltimateCinematic {
 				return null;
 			}
 		}
-		return aimed(clipped(self, look, pos), look, roll);
+		return aimed(clipped(self, look, lowered(self, pos, feet)), look, roll);
+	}
+
+	/**
+	 * (0.20.58) A shot brought down {@link #SHOT_DROP} (times the caster's size), so the caster is seen better (Andy: "all the cutscenes
+	 * should be a little lower. you cant see the user well"); never below {@link #SHOT_FLOOR} over their feet unless it was already.
+	 */
+	static Vec3 lowered(Entity self, Vec3 pos, Vec3 feet) {
+		double size = Math.max(1.0, self instanceof net.minecraft.world.entity.LivingEntity l ? l.getScale() : 1.0);
+		double floor = Math.min(pos.y, feet.y + SHOT_FLOOR * size);
+		return new Vec3(pos.x, Math.max(floor, pos.y - SHOT_DROP * size), pos.z);
 	}
 
 	/**

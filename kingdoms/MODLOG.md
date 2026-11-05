@@ -9068,3 +9068,8 @@ our own code; the delayed, muffled booms and whistling shells live in Powers (`c
   with distance through Powers.
 - **Shakes from a place** (`PowersCompat.shakeAround`, Powers' `Shakes.around`): every Aether Giant footfall (28 blocks,
   1.1) and its grab's slam (36, 3.0), an ogre's ground smash (18, 1.8), a wind dragon landing (22, 1.4 times its size).
+
+## 0.7.550: lower cutscene cameras (pack 0.20.58)
+Andy: "all the cutscenes should be a little lower. you cant see the user well." The spirit-clash film's camera sits 0.9
+blocks over the pair's feet (was 1.5), and the handshake film's wide shot 0.2 over the hands (was 0.5). Powers' ability,
+ultimate and beam-clash films came down with it. Not played.
