@@ -2,6 +2,7 @@ package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.armory.Lodged;
+import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ZFighterAfterlife;
@@ -117,6 +118,20 @@ public final class Mortality {
 	 * void, or an execution by a player or a boss ends it sooner.
 	 */
 	static final int SURE_WAKES = 2;
+	/**
+	 * (0.21.7) Andy: "your body should persist in the world until come to, that way players can pick each other up and carry
+	 * each other to safety. if you do not press anything, you will not get the respawn roll". One left for dead lies where
+	 * they fell until they hold sneak this long (ticks) to come to by themselves (the wake roll), or someone brings them round.
+	 */
+	static final int COME_TO_TICKS = 40;
+	/** (0.21.7) How long the body lies before the wake roll once they've chosen to come to (ticks), and the bar's length. */
+	static final int COME_TO_AFTER = 20, COME_TO_BAR = 12;
+	/** (0.21.7) How long one left for dead is held out cold at most while lying (ticks): long enough never to end by itself. */
+	static final int LIE_TICKS = 20 * 60 * 60 * 24;
+	/** (0.21.7) No hostile this near (blocks) the body: safe enough to bring one left for dead round. */
+	static final double SAFE_RANGE = 12.0;
+	/** (0.21.7) How far round a lying body (blocks) mobs are made to lose interest in it, and how often (ticks). */
+	static final double IGNORE_RANGE = 32.0;
 
 	/** What put a player down, and its chance (0 to 1) that the death is final. */
 	public enum Cause {
@@ -203,6 +218,12 @@ public final class Mortality {
 		/** (0.20.27) What they rise as (see {@link #TURNINGS}), or null for a plain wake. */
 		final @Nullable Runnable turn;
 		int tries;
+		/** (0.21.7) Whether they've chosen to come to (the roll goes ahead), and how long they've held sneak towards it. */
+		boolean chosen;
+		int held;
+		/** (0.21.7) Told they're being carried (true) or lying (false), last; null: nothing told yet. */
+		@Nullable Boolean carried;
+		long moveAtChosen;
 		@Nullable BlockPos far;
 		@Nullable CompletableFuture<?> loading;
 
@@ -231,7 +252,22 @@ public final class Mortality {
 		ServerLivingEntityEvents.ALLOW_DEATH.register(PHASE, (entity, source, amount) ->
 			!(entity instanceof ServerPlayer player) || decide(player, source));
 		ServerTickEvents.END_SERVER_TICK.register(Mortality::tick);
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> REBIRTHS.remove(handler.player.getUUID()));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			REBIRTHS.remove(handler.player.getUUID());
+			// (0.21.7) logging out while lying left for dead: they come to where they lie
+			cameToWhereLying(handler.player);
+		});
+		// (0.21.7) one who left (or the server stopped) while lying isn't held out cold for a day once back
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			ServerPlayer player = handler.player;
+			Long knocked = player.getAttached(Downed.KNOCKED);
+			long now = player.level().getGameTime();
+			if (knocked != null && !WAKES.containsKey(player.getUUID()) && (knocked >> 1) - now > LIE_TICKS / 2) {
+				player.setAttached(Downed.KNOCKED, (now + OUT_AFTER) << 1 | (knocked & 1L));
+			}
+		});
+		// (0.21.7) a body left for dead is dead as far as mobs can tell: none finishes it off
+		MobExecutions.SPARE.add((mob, victim) -> victim instanceof Player player && lying(player));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WAKES.clear();
 			REBIRTHS.clear();
@@ -272,6 +308,97 @@ public final class Mortality {
 	/** (0.20.50) Whether {@code player} lies left for dead, waiting to wake somewhere. */
 	public static boolean waking(Player player) {
 		return WAKES.containsKey(player.getUUID());
+	}
+
+	/**
+	 * (0.21.7) Whether {@code player} lies left for dead where they fell, not yet come to: their body can be carried, and
+	 * brought round once somewhere safe ({@link #unsafe}).
+	 */
+	public static boolean lying(Player player) {
+		Wake wake = WAKES.get(player.getUUID());
+		return wake != null && !wake.chosen;
+	}
+
+	/** (0.21.7) A hostile is near enough {@code body} that bringing it round here would only get it killed again. */
+	public static boolean unsafe(LivingEntity body) {
+		return !body.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, body.getBoundingBox().inflate(SAFE_RANGE),
+			mob -> mob instanceof net.minecraft.world.entity.monster.Enemy && mob.isAlive() && !Downed.isDowned(mob)
+				&& !mob.isNoAi()).isEmpty();
+	}
+
+	/**
+	 * (0.21.7) A lying body's tick, in place of a knock-out's mashing ({@link Downed}): sneak held fills the bar and, full, they
+	 * come to by themselves (the wake roll); carried, they're told so. Nothing to do once the roll goes ahead.
+	 */
+	static void lie(ServerPlayer player, long now) {
+		Wake wake = WAKES.get(player.getUUID());
+		if (wake == null || wake.chosen) {
+			return;
+		}
+		boolean dark = now < wake.moveAt;
+		boolean carried = Carry.isCarried(player);
+		if (!dark && (wake.carried == null || wake.carried != carried)) {
+			wake.carried = carried;
+			player.setAttached(WAKE_LINE, carried ? "message.jaymospowers.mortality.carried" : "message.jaymospowers.mortality.lying");
+		}
+		wake.held = player.isShiftKeyDown() && !dark ? wake.held + 1 : 0;
+		if (wake.held >= COME_TO_TICKS) {
+			comeTo(player, wake);
+			return;
+		}
+		if (!dark && (wake.held > 0 ? wake.held % 2 == 0 : now % 20 == 0)) {
+			int filled = Math.round(COME_TO_BAR * wake.held / (float) COME_TO_TICKS);
+			String bar = "|".repeat(filled) + ".".repeat(COME_TO_BAR - filled);
+			player.sendOverlayMessage(Component.translatable(carried ? "message.jaymospowers.mortality.come_to_carried"
+				: "message.jaymospowers.mortality.come_to", bar).withStyle(wake.held > 0 ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+		}
+	}
+
+	/** (0.21.7) They chose to come to by themselves: out of any arms, and the wake roll goes ahead a moment later. */
+	private static void comeTo(ServerPlayer player, Wake wake) {
+		wake.chosen = true;
+		wake.moveAtChosen = player.level().getServer().getTickCount() + COME_TO_AFTER;
+		if (Carry.carrierOf(player) instanceof ServerPlayer carrier) {
+			Carry.slip(carrier);
+		}
+		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.fading");
+	}
+
+	/**
+	 * (0.21.7) Brought round where they lay (or wherever they were carried): no wake roll, but the cause's injury all the
+	 * same, and living on borrowed time until it's mended.
+	 */
+	private static void broughtRound(ServerPlayer player, Wake wake) {
+		injure(player, wake.cause, wake.sub);
+		player.setAttached(SURVIVOR, true);
+		player.removeAttached(WAKE_LINE);
+		JaymosPowers.LOGGER.info("{} was brought round where they lay ({})", player.getScoreboardName(), wake.cause.key());
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.mortality.brought_round").withStyle(ChatFormatting.GRAY,
+			ChatFormatting.ITALIC));
+	}
+
+	/** (0.21.7) Left while lying: they come to where they lie (out cold a moment more once back), hurt as the cause left them. */
+	private static void cameToWhereLying(ServerPlayer player) {
+		Wake wake = WAKES.get(player.getUUID());
+		if (wake == null || wake.chosen) {
+			return;
+		}
+		WAKES.remove(player.getUUID());
+		release(player.level().getServer().getLevel(wake.dimension), wake);
+		if (Carry.carrierOf(player) instanceof ServerPlayer carrier) {
+			Carry.slip(carrier);
+		}
+		injure(player, wake.cause, wake.sub);
+		player.setAttached(SURVIVOR, true);
+		player.setAttached(Downed.KNOCKED, (player.level().getGameTime() + OUT_AFTER) << 1);
+	}
+
+	/** (0.21.7) Mobs near a lying body lose interest in it: as far as they can tell, it's dead. */
+	private static void ignored(ServerPlayer player) {
+		for (net.minecraft.world.entity.Mob mob : player.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+			player.getBoundingBox().inflate(IGNORE_RANGE), mob -> mob.getTarget() == player)) {
+			mob.setTarget(null);
+		}
 	}
 
 	/** (0.20.50) Chrono rewound a left-for-dead: they won't wake anywhere (the caller stands them up). */
@@ -557,10 +684,16 @@ public final class Mortality {
 		if (by instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player) {
 			mob.setTarget(null);
 		}
-		Downed.knockOut(level, player, OUT_BEFORE + OUT_AFTER + 20 * 60, false, "message.jaymospowers.mortality.fading", false);
+		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round)
+		Downed.knockOut(level, player, turn != null ? OUT_BEFORE + OUT_AFTER + 20 * 60 : LIE_TICKS, false, "message.jaymospowers.mortality.fading", false);
 		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.fading");
-		WAKES.put(player.getUUID(), new Wake(cause, sub, level.dimension(), player.blockPosition(), level.getServer().getTickCount() + OUT_BEFORE,
-			by, turn));
+		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(), level.getServer().getTickCount() + OUT_BEFORE, by, turn);
+		// ((0.21.7) the turned rise as they rise: nothing to carry them away from)
+		if (turn != null) {
+			wake.chosen = true;
+			wake.moveAtChosen = wake.moveAt;
+		}
+		WAKES.put(player.getUUID(), wake);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -576,7 +709,18 @@ public final class Mortality {
 					release(level, wake);
 					continue;
 				}
-				if (now < wake.moveAt || !place(server, player, level, wake)) {
+				if (!wake.chosen) {
+					// (0.21.7) lying where they fell: brought round by someone (no longer down), or still waiting
+					if (!Downed.isDowned(player)) {
+						it.remove();
+						release(level, wake);
+						broughtRound(player, wake);
+					} else if (now % 20 == 0) {
+						ignored(player);
+					}
+					continue;
+				}
+				if (now < Math.max(wake.moveAt, wake.moveAtChosen) || !place(server, player, level, wake)) {
 					continue;
 				}
 				it.remove();
