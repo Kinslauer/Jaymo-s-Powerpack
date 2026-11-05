@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SPS",
+    "SCS",
+    "S S"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "C": "minecraft:charcoal"
+  },
+  "result": {
+    "id": "jaymoskingdoms:menu_board",
+    "count": 1
+  }
+}

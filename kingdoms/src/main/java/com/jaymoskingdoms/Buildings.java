@@ -1043,6 +1043,8 @@ final class Buildings {
 		}
 		s.set(1, 2, 7, Blocks.BARREL.defaultBlockState());
 		s.set(2, 2, 7, Blocks.BARREL.defaultBlockState());
+		// (0.7.578) the menu board on the bar ({@link CafeBoard}): a hot meal for anyone passing
+		s.set(4, 2, 5, Sketch.facing(CafeBoard.BOARD, Direction.NORTH));
 		table(s, k, 3, 1, 2, true);
 		table(s, k, 7, 1, 2, true);
 		table(s, k, 7, 1, 5, true);
@@ -1113,6 +1115,7 @@ final class Buildings {
 			s.set(11, 1, z, Blocks.BARREL.defaultBlockState());
 			s.set(11, 2, z, Blocks.BARREL.defaultBlockState());
 		}
+		s.set(9, 2, 5, Sketch.facing(CafeBoard.BOARD, Direction.WEST));
 		s.set(1, 1, 6, p.wall());
 		s.set(1, 1, 8, p.wall());
 		s.set(1, 1, 7, Sketch.facing(Blocks.SMOKER, Direction.EAST));
@@ -1169,6 +1172,7 @@ final class Buildings {
 			s.set(x, 1, 9, Blocks.BARREL.defaultBlockState());
 		}
 		s.set(1, 2, 9, Blocks.BARREL.defaultBlockState());
+		s.set(4, 2, 7, Sketch.facing(CafeBoard.BOARD, Direction.NORTH));
 		table(s, k, 2, 1, 3, false);
 		table(s, k, 6, 1, 3, false);
 		s.set(1, 1, 5, Sketch.facing(Blocks.SMOKER, Direction.EAST));

@@ -62,5 +62,10 @@
   "job.jaymoskingdoms.prospector.title": "Prospector",
   "job.jaymoskingdoms.prospector.desc": "Be the first to find each ore on a far world, and the first to knap its metal.",
   "job.jaymoskingdoms.prospector.perk.1": "Each first find pays two silver coins at once.",
-  "job.jaymoskingdoms.prospector.perk.2": "Each first find pays five silver coins at once."
+  "job.jaymoskingdoms.prospector.perk.2": "Each first find pays five silver coins at once.",
+  "job.jaymoskingdoms.innkeeper": "Innkeeper",
+  "job.jaymoskingdoms.innkeeper.title": "Innkeeper",
+  "job.jaymoskingdoms.innkeeper.desc": "Run a cafe off a menu board: seat customers, serve what they ask for, and keep the storehouse in food.",
+  "job.jaymoskingdoms.innkeeper.perk.1": "Your customers wait half again as long.",
+  "job.jaymoskingdoms.innkeeper.perk.2": "Your tips are doubled, and your apprentice serves from the chests by your menu board."
 }
