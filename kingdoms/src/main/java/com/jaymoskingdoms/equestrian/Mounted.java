@@ -98,7 +98,7 @@ public final class Mounted {
 	}
 
 	/**
-	 * (0.7.601, from {@code EntityMountMixin}) a living mount (a horse, a camel, an elephant, a dragon...) with someone
+	 * (0.7.602, from {@code EntityMountMixin}) a living mount (a horse, a camel, an elephant, a dragon...) with someone
 	 * other than a player on it: a mounted villager, guard or carter. No player climbs on, behind them or in their place;
 	 * throw them off or bring them down first. Carts, carriages, rickshaws and ships aren't mounts and keep their seats.
 	 */

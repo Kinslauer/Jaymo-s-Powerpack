@@ -53,10 +53,19 @@ public class PatronWeaponItem extends Item {
 		}
 	}
 
+	/** Whether right click is this weapon's gift (Undertow, Judgement, Smokestep) rather than the weapon guard. */
+	public boolean active() {
+		return this.kind == PatronWeapons.Kind.TIDECALLER || this.kind == PatronWeapons.Kind.SUNBRAND || this.kind == PatronWeapons.Kind.ASHFANG;
+	}
+
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		boolean active = this.kind == PatronWeapons.Kind.TIDECALLER || this.kind == PatronWeapons.Kind.SUNBRAND || this.kind == PatronWeapons.Kind.ASHFANG;
+		boolean active = this.active();
+		if (!active) {
+			// (0.20.118) the ones struck with raise the weapon guard (combat/Guard), as any weapon does
+			return super.use(level, player, hand);
+		}
 		float s = PatronWeapons.sworn(player, this.kind);
 		if (!active || hand != InteractionHand.MAIN_HAND || s < 0.0F || player.getCooldowns().isOnCooldown(stack) || player.isPassenger()) {
 			return InteractionResult.PASS;

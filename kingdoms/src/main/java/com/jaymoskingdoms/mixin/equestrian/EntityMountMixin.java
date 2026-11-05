@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * (0.7.305) Our horses take a second rider, and swim with their riders instead of throwing them in deep water ({@link Mounted}).
- * (0.7.601) No player climbs onto a mount someone else is riding: a villager's, a guard's, a carter's ({@link Mounted#npcRidden}).
+ * (0.7.602) No player climbs onto a mount someone else is riding: a villager's, a guard's, a carter's ({@link Mounted#npcRidden}).
  */
 @Mixin(Entity.class)
 abstract class EntityMountMixin {

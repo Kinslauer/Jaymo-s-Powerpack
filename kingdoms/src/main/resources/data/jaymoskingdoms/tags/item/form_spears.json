@@ -66,6 +66,34 @@
     {
       "id": "jaymospowers:netherite_lance",
       "required": false
+    },
+    {
+      "id": "weaponmod:halberd.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.copper",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.netherite",
+      "required": false
     }
   ]
 }
