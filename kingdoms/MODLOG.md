@@ -9151,7 +9151,7 @@ ultimate and beam-clash films came down with it. Not played.
 - Loading-screen hint 100 (`lang/parts/blast-gore.json`, HINTS 100) for Powers' blasts blowing bodies apart and taking
   limbs off survivors. Not played.
 
-## 0.7.557 (2026-11-05): rocks barely hurt zombies and Hornkin (pack 0.20.68)
+## 0.7.558 (2026-11-05): rocks barely hurt zombies and Hornkin (pack 0.20.69)
 
 - Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
   0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.

@@ -61,7 +61,7 @@ final class Javelins {
 	static final long POOR_TREASURY = 50L;
 	static final float ROCK_DAMAGE = 3.0F;
 	/**
-	 * (0.7.557) Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". Every zombie (the game's {@code Zombie}
+	 * (0.7.558) Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". Every zombie (the game's {@code Zombie}
 	 * family: husks, drowned, zombie villagers, zombified piglins, and MCA's and Kitchen's zombies) and every Hornkin take
 	 * only this much from a rock (Powers' player rocks too: {@code ThrownRocks.shrugsOff}).
 	 */
@@ -248,7 +248,7 @@ final class Javelins {
 		return allowed;
 	}
 
-	/** (0.7.557) What a rock hits {@code victim} for: {@link #SHRUGGED_ROCK_DAMAGE} on a zombie or Hornkin, else {@link #ROCK_DAMAGE}. */
+	/** (0.7.558) What a rock hits {@code victim} for: {@link #SHRUGGED_ROCK_DAMAGE} on a zombie or Hornkin, else {@link #ROCK_DAMAGE}. */
 	static float rockDamage(LivingEntity victim) {
 		return victim instanceof Zombie || victim instanceof com.jaymoskingdoms.nether.Hornkin ? SHRUGGED_ROCK_DAMAGE : ROCK_DAMAGE;
 	}

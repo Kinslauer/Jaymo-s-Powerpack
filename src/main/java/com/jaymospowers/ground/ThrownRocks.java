@@ -57,14 +57,14 @@ import org.jspecify.annotations.Nullable;
  * the snowball's burst ({@code RockSnowballMixin}): one that breaks cracks the block it hit ({@link #CRACK_STAGE},
  * fading) and throws {@link #SPECKS} specks of stone that fall and settle as grit; one that lies there sheds a few.
  * <p>
- * (0.20.68) Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". Every zombie (husks, drowned, zombie
+ * (0.20.69) Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". Every zombie (husks, drowned, zombie
  * villagers, MCA's and Kitchen's zombies), zombified piglins and every Hornkin take {@link #SHRUGGED_DAMAGE} from a rock
  * ({@link #shrugsOff}). An unsuspecting one can still be knocked out as before.
  */
 public final class ThrownRocks {
 	/** A rock hits for this much. */
 	static final float DAMAGE = 3.0F;
-	/** (0.20.68) Zombies, zombified piglins and the Hornkin shrug a rock off: it hits them for only this much. */
+	/** (0.20.69) Zombies, zombified piglins and the Hornkin shrug a rock off: it hits them for only this much. */
 	static final float SHRUGGED_DAMAGE = 0.5F;
 	/** How hard it's thrown, and how wide it may stray. */
 	static final float SPEED = 1.5F, SPREAD = 1.0F;
@@ -195,7 +195,7 @@ public final class ThrownRocks {
 	}
 
 	/**
-	 * (0.20.68) Whether a rock barely troubles {@code victim}: any zombie (the game's {@code Zombie} family, which takes in
+	 * (0.20.69) Whether a rock barely troubles {@code victim}: any zombie (the game's {@code Zombie} family, which takes in
 	 * husks, drowned, zombie villagers and zombified piglins, and the modded zombies built on it) or one of Kingdoms'
 	 * Hornkin ({@code jaymoskingdoms:hornkin*}, {@code jaymoskingdoms:zombified_hornkin}). Kingdoms' guards' rocks use the
 	 * same rule ({@code Javelins.rockDamage}).
