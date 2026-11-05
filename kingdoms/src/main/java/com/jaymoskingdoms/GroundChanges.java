@@ -41,7 +41,7 @@ public final class GroundChanges {
 	static final int SCAN_TICKS = 4, LOOKS_PER_WALK = 12, SEEDS_PER_WALK = 2;
 	/** How far round a player (in chunks) the walk reaches. */
 	static final int RADIUS = 8;
-	/** (0.7.590) A grown vein's pebble: how deep under the ground its top may be, the chance of one, and how many are hidden nuggets (as Powers' OreTells). */
+	/** (0.7.591) A grown vein's pebble: how deep under the ground its top may be, the chance of one, and how many are hidden nuggets (as Powers' OreTells). */
 	static final int TELL_MIN = 2, TELL_MOST = 12;
 	static final float TELL_CHANCE = 0.4F, TELL_NUGGET_SHARE = 0.5F;
 
@@ -192,7 +192,7 @@ public final class GroundChanges {
 	}
 
 	/**
-	 * (0.7.590) A vein the ground grew just under the surface shows the same faint tell as one that was always there (Jaymo's
+	 * (0.7.591) A vein the ground grew just under the surface shows the same faint tell as one that was always there (Jaymo's
 	 * Powers' ore pebbles, {@code OreTells}): sometimes a lone pebble on the dirt over it, stained the ore's colour or a plain
 	 * rock that is really a nugget. Only for the ores Powers has pebbles for; nothing without Powers.
 	 */
@@ -201,14 +201,14 @@ public final class GroundChanges {
 		if (kind == null) {
 			return;
 		}
-		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z) - 1;
+		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
 		if (top - y < TELL_MIN || top - y > TELL_MOST || random.nextFloat() >= TELL_CHANCE) {
 			return;
 		}
 		BlockPos ground = new BlockPos(x, top, z), above = ground.above();
 		BlockState state = level.getBlockState(ground);
 		if (!(state.is(Blocks.DIRT) || state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.COARSE_DIRT) || state.is(Blocks.PODZOL))
-			|| !level.getBlockState(above).isAir() || !Block.canSupportCenter(level, ground, net.minecraft.core.Direction.UP)) {
+			|| !(level.getBlockState(above).isAir() || level.getBlockState(above).canBeReplaced() && level.getFluidState(above).isEmpty()) || !Block.canSupportCenter(level, ground, net.minecraft.core.Direction.UP)) {
 			return;
 		}
 		String name = kind + (random.nextFloat() < TELL_NUGGET_SHARE ? "_nugget_pebble" : "_pebble");

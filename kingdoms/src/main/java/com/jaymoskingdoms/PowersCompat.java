@@ -283,12 +283,12 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.590) Powers' {@code OutOfPlay.is(Entity)}. */
+	/** (0.7.591) Powers' {@code OutOfPlay.is(Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle outOfPlay;
 	private static boolean lookedForOutOfPlay;
 
 	/**
-	 * (0.7.590) Whether nobody should walk up and talk to {@code entity} just now by Jaymo's Powers' reckoning: down or out
+	 * (0.7.591) Whether nobody should walk up and talk to {@code entity} just now by Jaymo's Powers' reckoning: down or out
 	 * cold, carried, left for dead, black while a new life is made, or held in Chrono's death window. False without Powers.
 	 */
 	public static boolean outOfPlay(net.minecraft.world.entity.Entity entity) {

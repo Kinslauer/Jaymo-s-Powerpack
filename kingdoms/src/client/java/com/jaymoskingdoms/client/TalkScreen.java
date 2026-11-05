@@ -24,7 +24,7 @@ final class TalkScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.590) A question that came while another screen was up (the death screen, a new life's story, MCA's own chat,
+	 * (0.7.591) A question that came while another screen was up (the death screen, a new life's story, MCA's own chat,
 	 * the journal...): it waits for that screen to close rather than knocking it away, and lapses after {@link #WAIT_TICKS}.
 	 */
 	static final int WAIT_TICKS = 20 * 20;

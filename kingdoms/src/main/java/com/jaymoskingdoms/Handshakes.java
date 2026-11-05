@@ -326,7 +326,7 @@ public final class Handshakes {
 
 	/** {@code player} could shake hands just now: up, about, not a spectator. */
 	private static boolean can(Player player) {
-		// ((0.7.590) nor carried, left for dead, black for a new life, in Chrono's death window or a captain's film)
+		// ((0.7.591) nor carried, left for dead, black for a new life, in Chrono's death window or a captain's film)
 		return player.isAlive() && !player.isSpectator() && !player.isSleeping() && !Downed.isDowned(player)
 			&& !(player instanceof ServerPlayer sp && Approaches.unreachable(sp));
 	}

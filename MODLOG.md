@@ -935,7 +935,7 @@ Andy, on a new character: "i got all these achievements but did not do them yet"
   times the root of its height in people, more with brawn as carried throws, at most 2.5), tumbling, striking what it
   flies through, and landing as a fallen tree. Player giants only where they may build, as their trampling. Built, not played.
 
-## 0.20.108 (2026-11-05): nobody talks to you while you're down, dead or reborning (Kingdoms 0.7.590)
+## 0.20.109 (2026-11-05): nobody talks to you while you're down, dead or reborning (Kingdoms 0.7.591)
 - Andy: "make sure all the new features work wth all the old, im thinking specifically of the chat interactions and
   sevtech style world generating as you progress". Audit of the recent merges against villager talk and the world tiers.
 - New `core/OutOfPlay.is(Entity)`: down or out cold, carried, left for dead (waking somewhere), black while a new life

@@ -1092,7 +1092,7 @@ public final class Captains {
 		}
 	}
 
-	/** (0.7.590) Whether {@code player} is in a captain's first-meeting film just now (nobody else walks up to talk then). */
+	/** (0.7.591) Whether {@code player} is in a captain's first-meeting film just now (nobody else walks up to talk then). */
 	static boolean filming(net.minecraft.world.entity.player.Player player) {
 		Long until = FILMED.get(player.getUUID());
 		return until != null && player.level().getGameTime() < until;

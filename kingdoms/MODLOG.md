@@ -9502,7 +9502,7 @@ off course then those should break upon contact".
   more come, at most 10. When the pack breaks up, sharks out of sight go back into the deep. Hint 116.
 - The 02:10 crash (`Captains.slew` removing from `Map.of()`) was on 0.7.558; fixed since 0.7.561.
 - Built, not played.
-## 0.7.590 (2026-11-05): new features checked against villager talk and the world tiers (Powers 0.20.108)
+## 0.7.591 (2026-11-05): new features checked against villager talk and the world tiers (Powers 0.20.109)
 - Andy: "make sure all the new features work wth all the old, im thinking specifically of the chat interactions and
   sevtech style world generating as you progress".
 - Villagers no longer come over to ask you something (Approaches) or hold out a hand (Handshakes) while you're downed or

@@ -436,7 +436,7 @@ public final class Approaches {
 	}
 
 	/**
-	 * (0.7.590) Andy: "make sure all the new features work with all the old, im thinking specifically of the chat
+	 * (0.7.591) Andy: "make sure all the new features work with all the old, im thinking specifically of the chat
 	 * interactions". Nobody comes over to ask {@code player} anything while they're down, carried, left for dead, black
 	 * while a new life is made, inside Chrono's death window (it must look like any death: no screen may open over it), a
 	 * captive on a tether, or watching a captain's first-meeting film.
@@ -563,7 +563,7 @@ public final class Approaches {
 	/** Whether {@code mob} is free to come over: awake, not working, fighting, riding, or already talking to someone. */
 	static boolean free(Mob mob) {
 		if (!mob.isAlive() || mob.isSleeping() || mob.isPassenger() || mob.isVehicle() || mob.getTarget() != null || mob.isNoAi()
-			// (0.7.590) nor someone down, carried off or in chains
+			// (0.7.591) nor someone down, carried off or in chains
 			|| PowersCompat.outOfPlay(mob) || Captives.bound(mob)
 			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob) || Handshakes.engaged(mob)
 			// (0.7.141) a wind dragon in disguise keeps its own counsel
