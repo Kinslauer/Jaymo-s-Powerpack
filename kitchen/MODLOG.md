@@ -1510,3 +1510,8 @@ fall, etc like it does for decapitations".
 - Limp no longer flips first person to third person. In first person the view sits just in front of the ragdoll's face
   and turns and falls with the head (`client/ragdoll/HeadCam`, `RagdollHeadCamMixin`), while limp and, once dead, from
   your own corpse until you respawn. Third person is left as it is. Built, not played.
+- **0.5.75 (pack 0.20.101), joining near a corpse disconnected you:** 0.5.72's drawn-body box (`CorpseEntity.makeBoundingBox`
+  -> `drawnBounds` -> `ClientRagdolls`) looked the ragdoll up by `getId()`, but a corpse sent to a joining client is placed
+  (and its box made) before its id is set, in the constructor and again in `recreateFromPacket`: "Tried to access entity ID
+  before ID assignment", and the client dropped with "Network Protocol Error". The corpse now notes its id (`setId`
+  override) and keeps its own box until then. Checked against the 26.3 jar; not built here.

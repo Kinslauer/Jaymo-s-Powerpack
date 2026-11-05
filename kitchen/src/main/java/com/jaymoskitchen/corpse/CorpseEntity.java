@@ -2527,6 +2527,18 @@ public class CorpseEntity extends Entity {
 	public static java.util.function.Function<CorpseEntity, double @Nullable []> drawnBounds = corpse -> null;
 	/** A drawn body further than this (blocks) from the entity is stale (just moved) and left out. */
 	private static final double DRAWN_REACH = 3.0;
+	/**
+	 * Whether this corpse has its entity id yet. A corpse sent to a joining client is placed (which makes its box) before
+	 * its id is set, inside the constructor and again in recreateFromPacket, and drawnBounds looks the ragdoll up by id:
+	 * getId() then threw and the client disconnected ("Network Protocol Error") on joining near a corpse (Kitchen 0.5.75).
+	 */
+	private boolean hasId;
+
+	@Override
+	public void setId(int id) {
+		super.setId(id);
+		hasId = true;
+	}
 
 	/**
 	 * (0.5.72) Andy: "some corpses dont seem to have hitboxes, so they cannot be interacted with, like this skeleton".
@@ -2538,7 +2550,7 @@ public class CorpseEntity extends Entity {
 	@Override
 	protected AABB makeBoundingBox(Vec3 pos) {
 		AABB own = super.makeBoundingBox(pos);
-		if (!level().isClientSide() || this.entityData.get(CARRIER) >= 0) {
+		if (!hasId || !level().isClientSide() || this.entityData.get(CARRIER) >= 0) {
 			return own;
 		}
 		double[] b = drawnBounds.apply(this);
