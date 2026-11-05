@@ -39,6 +39,12 @@ public final class DodgeClient {
 	private DodgeClient() {
 	}
 
+	/** The Dodge key is held (Sneak + it zooms, see {@code SneakZoom}). */
+	public static boolean keyDown() {
+		KeyMapping key = dodgeKey;
+		return key != null && key.isDown();
+	}
+
 	public static void init() {
 		dodgeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.dodge", InputConstants.KEY_LALT, JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(DodgeClient::tick);
@@ -59,7 +65,8 @@ public final class DodgeClient {
 		boolean wanted = false;
 		KeyMapping key = dodgeKey;
 		while (key != null && key.consumeClick()) {
-			wanted = true;
+			// (0.20.70) Sneak + Alt is the zoom (SneakZoom), not a dodge
+			wanted = !minecraft.options.keyShift.isDown();
 		}
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
 			// falling: held until you land

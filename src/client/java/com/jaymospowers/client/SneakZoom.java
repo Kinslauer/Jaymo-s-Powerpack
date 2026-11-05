@@ -19,6 +19,8 @@ import org.jspecify.annotations.Nullable;
  * only now. Kept from that gesture: no zoom from Sneak while clinging to a wall or hanging from a bar (Sneak lets go
  * there) nor until {@link #CLING_SETTLE} ticks after, none from Web's double-Sneak yank, and none in a slide (a held
  * Sneak in a fast run is the slide's).
+ * <p>(0.20.70) Andy: "shift + left alt should make you zoom". Holding Sneak and the Dodge key (Left Alt) together zooms
+ * as well, until either is let go; {@code DodgeClient} doesn't dodge on Alt while Sneak is down. Alt alone still rolls.
  */
 public final class SneakZoom {
 	/** The most ticks between the first Sneak press and the second for a double tap. */
@@ -36,6 +38,8 @@ public final class SneakZoom {
 	private static int groundedAfterCling;
 	/** The second press is still held: zooming. */
 	private static boolean zooming;
+	/** This zoom is Shift + Alt's: it ends when either is let go. */
+	private static boolean byAlt;
 	private static @Nullable KeyMapping zoomKey;
 	private static boolean looked;
 
@@ -77,10 +81,16 @@ public final class SneakZoom {
 			return;
 		}
 		held = sneak ? held + 1 : 0;
+		boolean alt = com.jaymospowers.client.stamina.DodgeClient.keyDown();
 		if (zooming) {
-			if (!sneak) {
+			if (!sneak || byAlt && !alt) {
 				setZoom(minecraft, false);
 			}
+		} else if (sneak && alt) {
+			// (0.20.70) Shift + Left Alt zooms too, for as long as both are held (Alt with Shift down doesn't dodge)
+			sinceLastTap = Integer.MAX_VALUE;
+			setZoom(minecraft, true);
+			byAlt = true;
 		} else if (sneak && !sneakWasDown) {
 			if (sinceLastTap <= DOUBLE_TAP_TICKS) {
 				sinceLastTap = Integer.MAX_VALUE;
@@ -107,6 +117,7 @@ public final class SneakZoom {
 			return;
 		}
 		zooming = on;
+		byAlt = false;
 		KeyMapping key = zoomKey(minecraft);
 		if (key != null) {
 			key.setDown(on);
