@@ -9060,12 +9060,37 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   they walk to a downed monster and execute it (hotheaded or spiteful ones anyone they fight); `Temperaments.spares` no
   longer spares monsters. Sharks and the great whale bleed Powers' blood, not red dust. Gradle build only, not played.
 
-## 0.7.549 (2026-11-05): Rubber-folk pull themselves together
+## 0.7.549: Big Cannons booms (pack 0.20.56)
+Andy: "i really like the screen shake and sound effects from [Create Big Cannons] what can we add from it?" Ideas only,
+our own code; the delayed, muffled booms and whistling shells live in Powers (`client/sound/Blasts`, `ShellWhistle`).
+- **Cannons** fire with Powers' own report (`PowersCompat.cannonReport`, vanilla's explosion without Powers) and jolt
+  everyone within 10 blocks. Cannonball hits and dynamite already play the explosion sound, so they now shake and boom
+  with distance through Powers.
+- **Shakes from a place** (`PowersCompat.shakeAround`, Powers' `Shakes.around`): every Aether Giant footfall (28 blocks,
+  1.1) and its grab's slam (36, 3.0), an ogre's ground smash (18, 1.8), a wind dragon landing (22, 1.4 times its size).
+
+- **0.7.550, Weapon Forms on the RPG skill bar; the skill bar no longer overlaps the body row:** Andy (2026-11-05): "more
+  UI overlap with the rpg skills. weapon form skills should move to that system too. makes the moves easier to access with
+  less keys". The "RPG skills" are Spell Engine's skill bar (Zsolt's RPG Series). Its bar sat at a fixed spot left of the
+  hotbar, on top of our left dock's body row. `client/hud/SkillBarDock` makes it the left dock's lowest row (5, under the
+  stomach, valor, symbiote arm and body row) each frame through `HudZones`, and hides it during films; Spell Engine's HUD
+  editor can no longer move it. Every Weapon Form is now also a Spell Engine spell (`data/jaymoskingdoms/spell/form_*.json`,
+  tag `#jaymoskingdoms:weapon_forms`, 13 icons in `textures/spell/`): with a form weapon in hand the forms you know for it
+  are on the bar (belt order first) and fire on its keys (1, 2, 3..., right-click stays the guard), with the cooldown on the
+  slot. `forms/FormSkills` adds the spell source and a custom delivery that runs `Forms.cast` (the old checks; a form that
+  can't go starts no cooldown). `mixin/spellengine/SpellContainerSourceMixin` gives a form weapon with no spell container
+  one that takes only the forms (so class skills still need their own weapons) and lets a weapon that has one (a Rogues
+  dagger) take the forms too. No stance or belt picking any more: the Combat Art key is the art again. Bare fists get their
+  forms on the bar only while locked on (Andy: "give it to fists but only when locked on"; right-click is the first fist
+  form then, and stays free for doors and villagers otherwise; `PowersCompat.lockedOn`). A Combat Art tap tugs a pinned
+  spear back. Without Spell Engine the stance works as before. Gradle build only, not played.
+
+## 0.7.551 (2026-11-05): Rubber-folk pull themselves together
 
 - Andy: "rubber folk can survive any of these dismemberments, and they can absorb from downed as well, as long as they
   absorb within 10s of a torso chop, they will start to regenerate. it is slow, so it takes them out of the fight as they
   are still vulnerable until their limbs regrow". Rubber-folk can swallow while downed (`HeritageHold.downedStill`). Cut in
-  half (Powers 0.20.52's waist cut, which puts them down instead of killing them), a swallow within 10 s turns Powers'
+  half (Powers 0.20.60's waist cut, which puts them down instead of killing them), a swallow within 10 s turns Powers'
   `jaymospowers_rubber_split` tag into `jaymospowers_rubber_mending` (`RubberFolk.absorb`). That swallow doesn't regrow a
   limb at once: the legs come back on the usual 20 s clock, one at a time, and they stay down until both are back. No
   regrowth while still waiting on the swallow. Lang in `lang/parts/message-rubber.json`. Gradle build only, not played.

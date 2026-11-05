@@ -1585,6 +1585,49 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- (0.7.549) felt from a place: stomps, smashes, landings; and a cannon's report ----------------------------------
+
+	private static boolean lookedForAround;
+	private static java.lang.invoke.@Nullable MethodHandle shakeAround;
+	/** Powers' own cannon report (its sound file is Powers'); played only with Powers there. */
+	private static final Identifier REPORT = Identifier.fromNamespaceAndPath("jaymospowers", "blast.report");
+
+	/**
+	 * Everyone within {@code range} of {@code at} feels a shake (about 1 a blow, 3 a big blast), weaker with distance and
+	 * kicked away from {@code at}: Powers' {@code Shakes.around}; nothing without Powers.
+	 */
+	public static void shakeAround(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double range, float strength) {
+		if (!lookedForAround) {
+			lookedForAround = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					shakeAround = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Shakes"), "around",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.phys.Vec3.class, double.class, float.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no shakes from a place (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			if (shakeAround != null) {
+				shakeAround.invoke(level, at, range, strength);
+			}
+		} catch (Throwable ignored) {
+		}
+	}
+
+	/**
+	 * A cannon goes off at {@code at}: with Powers, its own report (a hard thump that carries, muffles and shakes with
+	 * distance); without, vanilla's explosion sound as before.
+	 */
+	public static void cannonReport(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, float volume, float pitch) {
+		net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> sound = FabricLoader.getInstance().isModLoaded("jaymospowers")
+			? net.minecraft.core.Holder.direct(net.minecraft.sounds.SoundEvent.createVariableRangeEvent(REPORT))
+			: net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE;
+		level.playSound(null, at.x, at.y, at.z, sound, net.minecraft.sounds.SoundSource.HOSTILE, volume, pitch);
+	}
+
 	/** (0.7.297) Powers' {@code SwallowedPower.take(ServerPlayer, LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle takePower;
 	private static boolean lookedForTake;
@@ -1904,6 +1947,17 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return -1;
 		}
+	}
+
+	/**
+	 * (0.7.550) Whether {@code player} is locked on with Powers' lock-on, on either side: the server asks Powers, the client
+	 * reads its own lock (only right for the local player). Always false without Powers.
+	 */
+	public static boolean lockedOn(net.minecraft.world.entity.player.Player player) {
+		if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+			return lockTarget(sp) != null;
+		}
+		return player.level().isClientSide() && lockedId() >= 0;
 	}
 
 	// ---- (0.7.390) Lock-on ----------------------------------------------------------------------------------------

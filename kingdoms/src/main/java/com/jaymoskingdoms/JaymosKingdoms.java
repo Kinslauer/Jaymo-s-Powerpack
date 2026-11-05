@@ -270,6 +270,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Classes.register();
 		// (RPG Series patch 1) Wizards', Archers' and Rogues & Warriors' spells only for their classes
 		RpgSeriesGate.init();
+		// (0.7.550) Weapon Forms on the RPG Series skill bar
+		com.jaymoskingdoms.forms.FormSkills.init();
 		LOGGER.debug("class attachments: {} {}", Classes.CLASS, Classes.WRIT_BOUGHT);
 		// 0.7.57: heritage (Origins remade: picked between MCA's destiny and the class) and its attachment
 		Heritage.register();

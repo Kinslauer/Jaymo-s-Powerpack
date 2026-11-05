@@ -6,6 +6,18 @@
 		"minecraft:bat",
 		"minecraft:phantom",
 		"minecraft:vex",
-		"minecraft:allay"
+		"minecraft:allay",
+		{
+			"id": "cubeanimals:eagle",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:barnowl",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:toucan",
+			"required": false
+		}
 	]
 }

@@ -112,14 +112,14 @@ public final class Dismember {
 	static final String RUBBER_TAG = "jaymoskingdoms_heritage_rubberfolk";
 	static final float RUBBER_SEVER_SCALE = 2.0F;
 	/**
-	 * (0.20.52) A double leg cleave ({@link #cleave}): an axe or greatsword blow of at least this much damage that cuts off one
+	 * (0.20.60) A double leg cleave ({@link #cleave}): an axe or greatsword blow of at least this much damage that cuts off one
 	 * leg takes the other too at this chance (zombies at the zombie one).
 	 */
 	public static final float CLEAVE_DAMAGE = 10.0F, CLEAVE_CHANCE = 0.25F, ZOMBIE_CLEAVE_CHANCE = 0.6F;
-	/** (0.20.52) Cut in half at the waist ({@link #halve}): an axe or greatsword blow to the torso this hard, at this chance. */
+	/** (0.20.60) Cut in half at the waist ({@link #halve}): an axe or greatsword blow to the torso this hard, at this chance. */
 	public static final float HALVE_DAMAGE = 16.0F, HALVE_CHANCE = 0.2F, ZOMBIE_HALVE_CHANCE = 0.5F;
 	/**
-	 * (0.20.52) Andy: "rubber folk can survive any of these dismemberments ... as long as they absorb within 10s of a torso
+	 * (0.20.60) Andy: "rubber folk can survive any of these dismemberments ... as long as they absorb within 10s of a torso
 	 * chop, they will start to regenerate. it is slow, so it takes them out of the fight". Cut in half, Rubber-folk go down
 	 * instead of dying, tagged {@link #SPLIT_TAG}: a swallow within this long (Kingdoms' RubberFolk swaps it for
 	 * {@link #MENDING_TAG}) and they mend, staying down till both legs are back; none, and they die.
@@ -147,7 +147,7 @@ public final class Dismember {
 	private static final Map<LivingEntity, long[]> STAGGERING = new HashMap<>();
 	/** Fresh stumps bleeding: the creature, until when. */
 	private static final Map<LivingEntity, Long> BLEEDING = new HashMap<>();
-	/** (0.20.52) A Rubber-folk cut in half → the game time their swallow must come by ({@link #SPLIT_TICKS}). */
+	/** (0.20.60) A Rubber-folk cut in half → the game time their swallow must come by ({@link #SPLIT_TICKS}). */
 	private static final Map<LivingEntity, Long> SPLIT = new java.util.WeakHashMap<>();
 	/** Players missing an arm (their hand is kept empty). */
 	private static final List<ServerPlayer> ONE_ARMED = new ArrayList<>();
@@ -193,7 +193,7 @@ public final class Dismember {
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			// (Andy: lost limbs don't grow back on death) the stumps come along; only a lost head is back
-			// (0.20.52) a halving's hold ends with the life it was in
+			// (0.20.60) a halving's hold ends with the life it was in
 			newPlayer.removeTag(SPLIT_TAG);
 			newPlayer.removeTag(MENDING_TAG);
 			int mask = missing(newPlayer) & ~HEAD;
@@ -368,7 +368,7 @@ public final class Dismember {
 	}
 
 	/**
-	 * (0.20.52) As {@link #severOnOverkill(LivingEntity, int, DamageSource)}, with the blow's damage ({@code taken}): a leg
+	 * (0.20.60) As {@link #severOnOverkill(LivingEntity, int, DamageSource)}, with the blow's damage ({@code taken}): a leg
 	 * cut off by a heavy chop may take the other leg with it ({@link #cleave}).
 	 */
 	public static boolean severOnOverkill(LivingEntity target, int part, DamageSource source, float taken) {
@@ -410,7 +410,7 @@ public final class Dismember {
 	}
 
 	/**
-	 * (0.20.52) Andy: "cleave both legs off once I'm strong enough", "more often on zombie humanoids than anyone else". A
+	 * (0.20.60) Andy: "cleave both legs off once I'm strong enough", "more often on zombie humanoids than anyone else". A
 	 * leg just cut off by an axe or a greatsword blow of at least {@link #CLEAVE_DAMAGE} goes through to the other leg at
 	 * {@link #CLEAVE_CHANCE} ({@link #ZOMBIE_CLEAVE_CHANCE} on zombies), times {@code extra} (Grim Hand, Rubber-folk; the
 	 * cut's own scale over a plain blade's), at most certain.
@@ -431,7 +431,7 @@ public final class Dismember {
 	}
 
 	/**
-	 * (0.20.52) Andy: "why not splitting a torso clean off too". A heavy axe or greatsword blow (at least
+	 * (0.20.60) Andy: "why not splitting a torso clean off too". A heavy axe or greatsword blow (at least
 	 * {@link #HALVE_DAMAGE}) that lands on the torso ({@code torso}; null: worked out from a player's aim, a mob's lands
 	 * there by chance) may cut the body in half at the waist: both legs come off at once and the upper half is left. At
 	 * {@link #HALVE_CHANCE}, zombies at {@link #ZOMBIE_HALVE_CHANCE}, times Grim Hand and Rubber-folk. Called on a blow that
@@ -466,12 +466,12 @@ public final class Dismember {
 		return right || left;
 	}
 
-	/** (0.20.52) Whether {@code target} is Rubber-folk (Kingdoms' heritage tag). */
+	/** (0.20.60) Whether {@code target} is Rubber-folk (Kingdoms' heritage tag). */
 	public static boolean rubber(LivingEntity target) {
 		return target.entityTags().contains(RUBBER_TAG);
 	}
 
-	/** (0.20.52) A Rubber-folk just cut in half ({@link Downed} has put them down): the clock on their swallow starts. */
+	/** (0.20.60) A Rubber-folk just cut in half ({@link Downed} has put them down): the clock on their swallow starts. */
 	public static void split(LivingEntity target) {
 		target.removeTag(MENDING_TAG);
 		target.addTag(SPLIT_TAG);
@@ -482,7 +482,7 @@ public final class Dismember {
 	}
 
 	/**
-	 * (0.20.52) Whether a Rubber-folk cut in half is still being held down by it: waiting on a swallow, or mending with a
+	 * (0.20.60) Whether a Rubber-folk cut in half is still being held down by it: waiting on a swallow, or mending with a
 	 * leg still to grow back. {@link Downed} lets no one up while it holds.
 	 */
 	public static boolean pulledApart(LivingEntity target) {
@@ -490,7 +490,7 @@ public final class Dismember {
 		return tags.contains(SPLIT_TAG) || tags.contains(MENDING_TAG) && (missing(target) & (RIGHT_LEG | LEFT_LEG)) != 0;
 	}
 
-	/** (0.20.52) Each tick: a halved Rubber-folk with no swallow in time dies of it; one whose legs are back is let up. */
+	/** (0.20.60) Each tick: a halved Rubber-folk with no swallow in time dies of it; one whose legs are back is let up. */
 	private static void tickSplit(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Set<String> tags = player.entityTags();
@@ -521,7 +521,7 @@ public final class Dismember {
 		}
 	}
 
-	/** (0.20.52) Whether {@code target} is a zombie (cleaves and halvings come more often, and its upper half fights on). */
+	/** (0.20.60) Whether {@code target} is a zombie (cleaves and halvings come more often, and its upper half fights on). */
 	public static boolean zombie(LivingEntity target) {
 		return target.getType().builtInRegistryHolder().is(EntityTypeTags.ZOMBIES);
 	}

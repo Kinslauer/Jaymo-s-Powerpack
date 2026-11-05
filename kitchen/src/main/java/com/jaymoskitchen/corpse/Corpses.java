@@ -70,6 +70,17 @@ public final class Corpses {
 	 * looted in one click and gone (see {@link CorpseKind#FISH}).
 	 */
 	public static final TagKey<EntityType<?>> FISH_CORPSES = tag("fish_corpses");
+	/**
+	 * (0.5.66) Small critters, looted in one click and gone like a fish (crickets, mice, snails, butterflies...). Any
+	 * creature whose kind is under {@link #SMALL_CRITTER_SIZE} both ways counts without being listed (see
+	 * {@link #isSmallCritter}).
+	 */
+	public static final TagKey<EntityType<?>> SMALL_CORPSES = tag("small_corpses");
+	/**
+	 * (0.5.66) A kind narrower and shorter than this (in blocks) is a small critter. Just under a rabbit (0.4 by 0.5), so
+	 * rabbits, chickens and frogs still leave a body to butcher.
+	 */
+	public static final float SMALL_CRITTER_SIZE = 0.5F;
 	/** (0.5.5) Villagers, whose bodies zombies go for first and whose graves (MCA's) a zombie's meal empties ({@link Scavengers}). */
 	public static final TagKey<EntityType<?>> VILLAGERS = tag("villagers");
 
@@ -225,10 +236,50 @@ public final class Corpses {
 		return type != null && (type.builtInRegistryHolder().is(MACHINE_CORPSES) || type.builtInRegistryHolder().is(HEAVY_CORPSES));
 	}
 
+	/**
+	 * (0.5.66) A small critter's body: {@link #SMALL_CORPSES}, or any wild kind (not a monster, a machine, a zombie or a
+	 * skeleton) under {@link #SMALL_CRITTER_SIZE} both ways. It goes by the kind's size, so a baby or a shrunk mob of a
+	 * bigger kind still leaves a body.
+	 */
+	public static boolean isSmallCritter(@org.jspecify.annotations.Nullable EntityType<?> type) {
+		if (type == null) {
+			return false;
+		}
+		var holder = type.builtInRegistryHolder();
+		if (holder.is(SMALL_CORPSES)) {
+			return true;
+		}
+		if (type.getCategory() == MobCategory.MONSTER || type.getCategory() == MobCategory.MISC || isMachine(type)
+			|| holder.is(ZOMBIE_CORPSES) || holder.is(SKELETON_CORPSES) || holder.is(BIG_CARCASSES)) {
+			return false;
+		}
+		var size = type.getDimensions();
+		return size.width() < SMALL_CRITTER_SIZE && size.height() < SMALL_CRITTER_SIZE;
+	}
+
 	/** Whether this entity leaves a corpse when it dies (players, listed mobs and tagged ones don't). */
 	public static boolean leavesCorpse(LivingEntity entity) {
 		return entity instanceof Mob && !(entity instanceof Player) && !entity.is(NO_CORPSE) && !entity.entityTags().contains(NO_CORPSE_TAG)
 			&& entity.level() instanceof ServerLevel;
+	}
+
+	/**
+	 * (0.5.65) For other mods (by reflection, only plain Java and Minecraft types): told (the one who died, its new body)
+	 * just before the body is added to the world, so they can carry onto it what the living body had. Jaymo's Powers: the
+	 * blood it was covered in (Andy: "the corpses should stay bloodied").
+	 */
+	public static final java.util.List<java.util.function.BiConsumer<LivingEntity, net.minecraft.world.entity.Entity>> ON_BODY =
+		new java.util.concurrent.CopyOnWriteArrayList<>();
+
+	/** Runs the {@link #ON_BODY} hooks; one failing never stops the body appearing. */
+	static void tellBody(LivingEntity dead, CorpseEntity corpse) {
+		for (java.util.function.BiConsumer<LivingEntity, net.minecraft.world.entity.Entity> hook : ON_BODY) {
+			try {
+				hook.accept(dead, corpse);
+			} catch (RuntimeException e) {
+				// another mod's hook
+			}
+		}
 	}
 
 	/** Replaces a mob that has finished dying with its corpse, holding the loot it would have dropped. */
@@ -262,6 +313,7 @@ public final class Corpses {
 		corpse.markJustDied();
 		corpse.startRagdoll(deathBody(mob));
 		pinFrom(mob, corpse);
+		tellBody(mob, corpse);
 		level.addFreshEntity(corpse);
 	}
 
