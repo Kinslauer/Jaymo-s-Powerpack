@@ -9123,4 +9123,8 @@ ultimate and beam-clash films came down with it. Not played.
 - The reservoir (`Hemomancy.RESERVOIR`, was a server-only map) is now a synced attachment shown by
   `client/BloodReservoirHud`: a crimson bar right of the hotbar (the Brute's spot), easing as it fills or drains,
   throbbing when full. Loading hint 99; class description and key name updated (`lang/parts/blood-blasts.json`).
+- Andy (same day): "J only collects when looking at a blood source, and when collecting you dont fire." A hold's purpose is
+  settled as it begins (tick 6): if a gather pulse at what you look at draws anything (a bleeding creature in sight within 8,
+  else stains within 1.75 of the block you look at, or a Kitchen grate there), it gathers for the whole hold and never
+  fires; otherwise, empty-handed, it's a barrage. A full reservoir draws nothing, so it fires.
 - Built in the cloud; not played.

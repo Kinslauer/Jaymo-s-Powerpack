@@ -39,10 +39,11 @@ import net.minecraft.world.phys.Vec3;
  * to gather, and they build a reservoir of that blood, that fire like z fighter ki blasts after holding j with an empty
  * hand." A Blood Sorcerer's {@code J}, held (not sneaking):
  * <ul>
- * <li><b>Gather:</b> the spilt blood round them (the stains on the ground, anything bleeding, Kitchen's blood grates) is
- * drawn up to their hands in threads of red, far faster than the pool's own slow drinking, into their reservoir
- * ({@link Hemomancy#RESERVOIR}, the bar by the hotbar). With anything in hand, that's all a hold does.</li>
- * <li><b>Blood blasts:</b> empty-handed, after a short windup (a ball of blood swells in each palm) the reservoir is
+ * <li><b>Gather</b> (begun looking at a blood source: a bleeding creature, the stains on the ground, Kitchen's blood
+ * grates; Andy: "J only collects when looking at a blood source, and when collecting you dont fire"): what they look at
+ * is drawn up to their hands in threads of red, far faster than the pool's own slow drinking, into their reservoir
+ * ({@link Hemomancy#RESERVOIR}, the bar by the hotbar). A gathering hold never fires.</li>
+ * <li><b>Blood blasts:</b> begun looking at anything else, empty-handed, after a short windup (a ball of blood swells in each palm) the reservoir is
  * thrown as a barrage of small blood blasts, the hands taking turns like a Z Fighter's Ki Barrage, for as long as J is
  * held and the reservoir lasts. Each hurts, opens a cut (more blood to gather) and splashes a stain where it bursts. Paid
  * only from the reservoir, never the body. Still forbidden magic: a barrage counts as one cast (corruption, the Grue,
@@ -53,9 +54,9 @@ import net.minecraft.world.phys.Vec3;
 public final class BloodBlasts {
 	/** Let go before this (ticks) and it was a tap: the Imbue. */
 	static final int TAP_TICKS = 6;
-	/** Gathering: how often (ticks); how near; how much of each stain a pulse; what each cut on a bleeder near gives; the most a pulse. */
+	/** Gathering: how often (ticks); how far you look; how far round the spot looked at; how much of each stain a pulse; what each cut on a bleeder near gives; the most a pulse. */
 	static final int GATHER_EVERY = 5;
-	static final double GATHER_RANGE = 8.0;
+	static final double GATHER_RANGE = 8.0, GATHER_SPOT = 1.75;
 	static final float GATHER_STAIN_EACH = 0.2F, GATHER_PER_CUT = 0.35F, GATHER_MOST = 1.5F;
 	/** A blood grate's level a second at most while gathering (Kitchen). */
 	static final int GATHER_GRATE_EVERY = 20;
@@ -85,7 +86,7 @@ public final class BloodBlasts {
 	private static final class Holding {
 		final long from;
 		int fired;
-		boolean counted, dry;
+		boolean counted, dry, gathering;
 
 		Holding(long from) {
 			this.from = from;
@@ -175,8 +176,19 @@ public final class BloodBlasts {
 			return;
 		}
 		Vec3 look = player.getLookAngle();
-		if (held % GATHER_EVERY == 0) {
-			gather(level, player, look, held);
+		if (held == TAP_TICKS) {
+			// (Andy: "J only collects when looking at a blood source, and when collecting you dont fire") what the hold
+			// is for is settled as it begins: looking at blood it can draw, it gathers for as long as it's held, and never fires
+			h.gathering = gather(level, player, look, true);
+			if (!h.gathering && !player.getMainHandItem().isEmpty()) {
+				return;
+			}
+		}
+		if (h.gathering) {
+			if ((held - TAP_TICKS) % GATHER_EVERY == 0 && held > TAP_TICKS) {
+				gather(level, player, look, (held - TAP_TICKS) % GATHER_GRATE_EVERY == 0);
+			}
+			return;
 		}
 		if (!player.getMainHandItem().isEmpty()) {
 			return;
@@ -242,38 +254,45 @@ public final class BloodBlasts {
 		return BLAST_COST * (VampirePlayers.vampire(player) ? Hemomancy.VAMPIRE_COST : 1.0F);
 	}
 
-	/** One pulse of gathering: the bleeding near, then the stains, then the grates, each thread rising to the hands. */
-	private static void gather(ServerLevel level, ServerPlayer player, Vec3 look, long held) {
+	/**
+	 * One pulse of gathering from the blood source {@code player} looks at, its thread rising to the hands: a bleeding
+	 * creature in sight, else the stains (and Kitchen's grates, when {@code grates}) round the spot on the ground they
+	 * look at, within {@link #GATHER_RANGE}. True if there was blood there to draw (the reservoir had room for it).
+	 */
+	private static boolean gather(ServerLevel level, ServerPlayer player, Vec3 look, boolean grates) {
 		float pool = Hemomancy.pool(player);
-		float room = Hemomancy.POOL_MAX - pool;
+		float room = Math.min(GATHER_MOST, Hemomancy.POOL_MAX - pool);
 		if (room <= 0.0F) {
-			return;
+			return false;
 		}
 		Vec3 hands = player.getEyePosition().add(look.scale(0.5)).add(0.0, -0.45, 0.0);
 		float drawn = 0.0F;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(GATHER_RANGE), e -> e != player && e.isAlive())) {
-			int cuts = PowersCompat.cuts(e);
-			if (cuts > 0 && drawn < GATHER_MOST) {
-				drawn += cuts * GATHER_PER_CUT;
-				Hemomancy.rise(level, e.getBoundingBox().getCenter(), hands);
+		LivingEntity sighted = Arcana.sighted(player);
+		int cuts = sighted == null || player.distanceTo(sighted) > GATHER_RANGE ? 0 : PowersCompat.cuts(sighted);
+		if (cuts > 0) {
+			drawn = Math.min(room, cuts * GATHER_PER_CUT);
+			Hemomancy.rise(level, sighted.getBoundingBox().getCenter(), hands);
+		} else {
+			Vec3 eye = player.getEyePosition();
+			BlockHitResult ground = level.clip(new ClipContext(eye, eye.add(look.scale(GATHER_RANGE)), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+			if (ground.getType() == HitResult.Type.MISS) {
+				return false;
+			}
+			Vec3 at = ground.getLocation();
+			drawn = Hemomancy.STAIN_BLOOD * PowersCompat.drawStains(level, at, GATHER_SPOT, GATHER_STAIN_EACH, room / Hemomancy.STAIN_BLOOD,
+				from -> Hemomancy.rise(level, from, hands));
+			if (grates && Hemomancy.POOL_MAX - pool - drawn >= Hemomancy.GRATE_BLOOD) {
+				drawn += Hemomancy.GRATE_BLOOD * KitchenCompat.drawGrates(level, at, 1, 1, from -> Hemomancy.rise(level, from, hands));
 			}
 		}
-		drawn = Math.min(Math.min(GATHER_MOST, room), drawn);
-		float left = Math.min(GATHER_MOST - drawn, room - drawn);
-		if (left > 0.0F) {
-			drawn += Hemomancy.STAIN_BLOOD * PowersCompat.drawStains(level, player.position(), GATHER_RANGE, GATHER_STAIN_EACH, left / Hemomancy.STAIN_BLOOD,
-				at -> Hemomancy.rise(level, at, hands));
+		if (drawn <= 0.0F) {
+			return false;
 		}
-		left = room - drawn;
-		if (held % GATHER_GRATE_EVERY == 0 && left >= Hemomancy.GRATE_BLOOD) {
-			drawn += Hemomancy.GRATE_BLOOD * KitchenCompat.drawGrates(level, player.position(), (int) GATHER_RANGE, 1, at -> Hemomancy.rise(level, at, hands));
+		Hemomancy.setPool(player, pool + drawn);
+		if (level.getRandom().nextInt(3) == 0) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_DRINK.value(), SoundSource.PLAYERS, 0.5F, 0.6F);
 		}
-		if (drawn > 0.0F) {
-			Hemomancy.setPool(player, pool + drawn);
-			if (held % (GATHER_EVERY * 3) == 0) {
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_DRINK.value(), SoundSource.PLAYERS, 0.5F, 0.6F);
-			}
-		}
+		return true;
 	}
 
 	/** Where a palm is: in front of the chest, to that side. */
