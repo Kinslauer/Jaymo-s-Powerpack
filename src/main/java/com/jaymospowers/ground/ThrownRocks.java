@@ -1,7 +1,15 @@
 package com.jaymospowers.ground;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.BiConsumer;
+import com.jaymospowers.JaymosPowers;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -12,8 +20,15 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import io.netty.buffer.ByteBuf;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -64,7 +79,14 @@ import org.jspecify.annotations.Nullable;
  * (0.20.81) Andy: "you also should only be able to throw rocks from the offhand, and after a small charge. it no longer
  * places unless you have it in the main hand". A rock in the main hand only sets down (it is never thrown); a rock in the
  * off hand is never set down, and is thrown once use has been held for {@link #CHARGE} ticks, at the air or at a block
- * ({@link #charge}).
+ * ({@link Charge}; 0.20.90: 1.5 s).
+ * <p>
+ * (0.20.90) Andy: "the player's rock throw should have an animated windup and release". While the charge is held the
+ * throwing arm draws back over the shoulder and the body turns that side away; when the rock goes, the arm whips over
+ * and through, the other arm swinging back, and follows through for {@link #FOLLOW_TICKS}. A hold let go early lets the
+ * arm back down. Everyone sees it ({@link #THROW}, drawn by {@code RockThrowPose}, first and third person); your own
+ * client counts the charge ({@link #windUpHere}) and tells the server when the rock goes ({@link Charge}), so your arm
+ * moves the moment you press and the rock leaves as it comes over.
  */
 public final class ThrownRocks {
 	/** A rock hits for this much. */
@@ -74,13 +96,17 @@ public final class ThrownRocks {
 	/** How hard it's thrown, and how wide it may stray. */
 	static final float SPEED = 1.5F, SPREAD = 1.0F;
 	/** Ticks between throws. */
-	static final int COOLDOWN = 10;
+	public static final int COOLDOWN = 10;
 	/** How often a rock lies where it lands rather than breaking. */
 	static final float KEEP_CHANCE = 0.5F;
-	/** (0.20.81) How long use is held with a rock in the off hand before it's thrown (ticks). */
-	static final int CHARGE = 10;
+	/** (0.20.81) How long use is held with a rock in the off hand before it's thrown (ticks; 0.20.90 Andy: 1.5 s, was 10). */
+	public static final int CHARGE = 30;
+	/** (0.20.90) How much sooner than {@link #CHARGE} (ticks) the server takes a client's word that the rock goes (lag). */
+	static final int CHARGE_SLACK = 8;
+	/** (0.20.90) A wind-up whose client says nothing more for this long past the charge (ticks) is let go. */
+	static final int STALE_TICKS = 60;
 	/** (0.20.81) A hold broken for longer than this (ticks; a held use repeats every 4) starts the charge again. */
-	static final int CHARGE_GAP = 6;
+	public static final int CHARGE_GAP = 6;
 	/** A rock still flying after this long is no longer watched. */
 	static final int LIFE = 200;
 	/** (0.18.84) The chance a rock knocks out someone unsuspecting: hit on the head (near eye height), and anywhere else. */
@@ -129,8 +155,37 @@ public final class ThrownRocks {
 	}
 
 	private static final List<Rock> FLYING = new ArrayList<>();
-	/** (0.20.81) Players winding up an off hand throw: the tick the hold began, and the tick it was last seen. */
-	private static final java.util.Map<java.util.UUID, long[]> WINDING = new java.util.HashMap<>();
+	/** (0.20.81) Players winding up an off hand throw (0.20.90: and following one through). */
+	private static final Map<UUID, Hold> WINDING = new HashMap<>();
+
+	/** (0.20.90) The arm's follow-through after the rock goes (ticks). */
+	public static final int FOLLOW_TICKS = 6;
+	/** (0.20.90) Stages in {@link #THROW} (its low two bits). */
+	public static final int WINDING_UP = 1, THROWING = 2;
+	/**
+	 * (0.20.90) A player throwing a rock, for everyone's client (the pose): {@code holds << 2 | stage}, a new number for
+	 * each hold so one straight after another starts afresh; absent otherwise. Not saved.
+	 */
+	public static final AttachmentType<Integer> THROW = AttachmentRegistry.create(JaymosPowers.id("rock_throw"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** (0.20.90) Set by the client: each held use on your own client, which counts the charge and sends {@link Charge}. */
+	public static BiConsumer<Player, InteractionHand> windUpHere = (player, hand) -> {
+	};
+	private static int holds;
+
+	/** (0.20.90) A hold winding up: when it began (game ticks), and when its rock went, or -1. */
+	private static final class Hold {
+		final Player player;
+		final long start;
+		long thrown = -1;
+		final int id;
+
+		Hold(Player player, long now, int id) {
+			this.player = player;
+			this.start = now;
+			this.id = id;
+		}
+	}
 	/** While a rock's blow is being dealt again (so it isn't again and again). */
 	private static boolean redealing;
 
@@ -143,6 +198,8 @@ public final class ThrownRocks {
 		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> use(player, level, hand));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(ThrownRocks::allowDamage);
 		ServerTickEvents.END_SERVER_TICK.register(ThrownRocks::tick);
+		PayloadTypeRegistry.serverboundPlay().register(Charge.TYPE, Charge.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Charge.TYPE, (payload, context) -> charge(context.player(), payload.stage()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLYING.clear();
 			CRACKS.clear();
@@ -155,44 +212,89 @@ public final class ThrownRocks {
 		if (hand != InteractionHand.OFF_HAND || player.isSpectator() || !FirstTools.rock(stack) || FirstTools.striking(player)) {
 			return InteractionResult.PASS;
 		}
-		if (player.getCooldowns().isOnCooldown(stack) || !charge(player, level)) {
-			return InteractionResult.CONSUME;
+		if (level.isClientSide() && !player.getCooldowns().isOnCooldown(stack)) {
+			// (0.20.90) your own client counts the charge and says when the rock goes (Charge)
+			windUpHere.accept(player, hand);
 		}
-		player.getCooldowns().addCooldown(stack, COOLDOWN);
-		if (level instanceof ServerLevel server) {
-			ItemStack stone = stack.copyWithCount(1);
-			Snowball ball = Projectile.spawnProjectileFromRotation((l, owner, s) -> new Snowball(l, owner, s), server, stone, player, 0.0F, SPEED,
-				SPREAD);
-			FLYING.add(new Rock(ball, stone, player.getAbilities().instabuild));
-			server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.6F,
-				0.5F + server.getRandom().nextFloat() * 0.2F);
-			stack.consume(1, player);
-		}
-		return InteractionResult.SUCCESS;
+		// never set down, and no vanilla swing: the throw has its own
+		return InteractionResult.CONSUME;
 	}
 
 	/**
-	 * (0.20.81) A held use winding up an off hand throw: whether it has been held {@link #CHARGE} ticks now. The server
-	 * keeps the count (the client only says when to throw by going on holding); the client always waits.
+	 * (0.20.90) From your client as you hold use with a rock in the off hand: {@link #WINDING_UP} as the hold begins,
+	 * {@link #THROWING} once it has been held {@link #CHARGE} ticks, 0 if it was let go early. (The server used to count
+	 * the held use itself, but at the air the client never tells it of a use that does nothing on its side, so the charge
+	 * only ran when the use landed on a block.)
 	 */
-	private static boolean charge(Player player, Level level) {
-		if (level.isClientSide()) {
-			return false;
+	public record Charge(int stage) implements CustomPacketPayload {
+		public static final Type<Charge> TYPE = new Type<>(JaymosPowers.id("rock_charge"));
+		public static final StreamCodec<ByteBuf, Charge> CODEC = ByteBufCodecs.VAR_INT.map(Charge::new, Charge::stage);
+
+		@Override
+		public Type<Charge> type() {
+			return TYPE;
 		}
-		long now = level.getGameTime();
-		long[] hold = WINDING.get(player.getUUID());
-		if (hold == null || now - hold[1] > CHARGE_GAP || now < hold[1]) {
-			WINDING.put(player.getUUID(), new long[] {now, now});
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 0.4F,
-				0.7F);
-			return false;
+	}
+
+	/** (0.20.90) A player's {@link Charge}: the wind-up begun, the rock let go (checked against the server's own count), or the hold let go. */
+	private static void charge(ServerPlayer player, int stage) {
+		ItemStack stack = player.getOffhandItem();
+		long now = player.level().getGameTime();
+		Hold hold = WINDING.get(player.getUUID());
+		boolean able = !player.isSpectator() && player.isAlive() && !player.isSleeping() && !Downed.passedOut(player) && FirstTools.rock(stack)
+			&& !FirstTools.striking(player) && !player.getCooldowns().isOnCooldown(stack);
+		if (stage == WINDING_UP) {
+			if (!able || hold != null && hold.thrown < 0 && now >= hold.start && now - hold.start <= CHARGE) {
+				return;
+			}
+			holds = holds + 1 & 0xFFFFFFF;
+			WINDING.put(player.getUUID(), new Hold(player, now, holds));
+			player.setAttached(THROW, holds << 2 | WINDING_UP);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(),
+				SoundSource.PLAYERS, 0.4F, 0.7F);
+			return;
 		}
-		hold[1] = now;
-		if (now - hold[0] < CHARGE) {
-			return false;
+		if (hold == null || hold.thrown >= 0) {
+			return;
 		}
-		WINDING.remove(player.getUUID());
-		return true;
+		if (stage != THROWING || !able) {
+			// let go early (or the rock's gone): the arm comes back down
+			WINDING.remove(player.getUUID());
+			player.removeAttached(THROW);
+			return;
+		}
+		if (now - hold.start < CHARGE - CHARGE_SLACK) {
+			// too soon by the server's count: not thrown, and the hold is over
+			WINDING.remove(player.getUUID());
+			player.removeAttached(THROW);
+			return;
+		}
+		// let go: the arm whips through, and follows through (tick clears it)
+		hold.thrown = now;
+		player.setAttached(THROW, hold.id << 2 | THROWING);
+		player.getCooldowns().addCooldown(stack, COOLDOWN);
+		ServerLevel server = (ServerLevel) player.level();
+		ItemStack stone = stack.copyWithCount(1);
+		Snowball ball = Projectile.spawnProjectileFromRotation((l, owner, s) -> new Snowball(l, owner, s), server, stone, player, 0.0F, SPEED,
+			SPREAD);
+		FLYING.add(new Rock(ball, stone, player.getAbilities().instabuild));
+		server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.6F,
+			0.5F + server.getRandom().nextFloat() * 0.2F);
+		stack.consume(1, player);
+	}
+
+	/** (0.20.90) A throw followed through, or a hold never finished (its client gone quiet): the arm comes back down. */
+	private static boolean holdOver(Hold hold) {
+		Player player = hold.player;
+		if (player.isRemoved()) {
+			return true;
+		}
+		long now = player.level().getGameTime();
+		boolean over = now < hold.start || (hold.thrown >= 0 ? now - hold.thrown >= FOLLOW_TICKS : now - hold.start > CHARGE + STALE_TICKS);
+		if (over) {
+			player.removeAttached(THROW);
+		}
+		return over;
 	}
 
 	private static @Nullable Rock rock(Entity entity) {
@@ -317,6 +419,8 @@ public final class ThrownRocks {
 	}
 
 	private static void tick(MinecraftServer server) {
+		// (0.20.90) the wind-up's pose, let go of or thrown
+		WINDING.values().removeIf(ThrownRocks::holdOver);
 		// (0.18.84) where it landed is seen to in landed; gone some other way (unloaded), it's forgotten
 		FLYING.removeIf(rock -> rock.ball.isRemoved() || ++rock.age > LIFE);
 		// (0.18.84) cracks fade a stage at a time, then go

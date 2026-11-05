@@ -742,3 +742,19 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
     bow at 0.75x speed, so it drops sooner.
   - The arrow's tooltip says which it is. `ThrownRocks.unsuspecting` is now public.
 - Kingdoms 0.7.580 adds the mice and the mime. Built, not played.
+
+## 0.20.90 (2026-11-05): the rock throw winds up and lets go
+- Andy: "the player's rock throw should have an animated windup and release". While you hold use with a rock in the
+  off hand, the throwing arm draws up and back over the shoulder, the body turns that side away and the other arm
+  reaches out at the mark. It holds there, trembling a little, until the rock goes. Then the arm whips over and through
+  across the body, the other arm swings back, and the pose eases out over a short follow-through. Letting go early
+  lowers the arm again.
+- In first person the rock is drawn back up beside your head and thrown forward out of view. The hand dips and comes
+  back up (with the next rock, if you have one).
+- Andy: "change the 3s charge to 1.5s". The charge is now 1.5 s (`ThrownRocks.CHARGE`, 30 ticks). It was set to half
+  a second, but the server counted it from the client's repeated use, and at the air the client never sends a use that
+  does nothing on its side, so the charge only ran when you aimed at a block and felt much longer. Now your client counts
+  the hold and tells the server when the rock goes (`ThrownRocks.Charge`); the server checks it against its own count.
+- Everyone sees the pose (`ThrownRocks.THROW`, drawn by `client/armory/RockThrowPose`). Your arm moves the moment you
+  press, and the rock leaves as the arm comes over. Tune it in the constants at the top of `RockThrowPose`.
+  Built, not played.
