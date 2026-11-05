@@ -1001,3 +1001,7 @@ Nether's own y 64 (`ZFighterStarts.demonBiome`) and logs how long it took and wh
   (wind, sneaking, rain, your footstep trail), shadow them silently from cover, freeze and back off when looked at, and
   rush as a pack with one growl from behind or from hiding. Wolves spawn at a quarter (feral a fifth) and walruses at a
   fifth of their old rate, in smaller groups. See kingdoms/MODLOG.md.
+
+## 0.20.117 (2026-11-05): Kingdoms 0.7.601, no taking a mounted villager's reins
+- Ships Kingdoms 0.7.601: players can't climb onto a horse (or any living mount) a villager, guard or carter is riding;
+  bring the rider down or throw them first. See kingdoms/MODLOG.md.

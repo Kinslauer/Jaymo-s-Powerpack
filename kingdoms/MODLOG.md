@@ -9596,3 +9596,11 @@ but more of a hunter. they can smell you out."
   ones already out in explored land stay.
 - Tuning: the constants at the top of `WolfStalkers`. Stalks aren't saved: a reload forgets the hunt (and gives back a
   hushed wolf's voice). Compile-checked (Gradle `compileJava`, 0 errors); not played.
+
+## 0.7.601 (2026-11-05): no taking a mounted villager's reins
+- Andy: "mounted mca shouldnt just let you take the reins." A player can no longer climb onto a living mount (horse,
+  elephant, camel, dragon...) that someone other than a player is riding: a mounted MCA villager, guard, carter or
+  courier keeps their horse, and you can't ride behind them or in their place either. Throw or bring the rider down
+  first (a downed rider is pulled off by Powers anyway) and the horse is free. Carts, carriages, rickshaws, cannons and
+  ships aren't mounts and keep their passenger seats. The check sits on the rider's side of every way onto a mount
+  (`EntityMountMixin` on `Entity.startRiding`, `Mounted.npcRidden`), server side, forced or not. Built, not played.

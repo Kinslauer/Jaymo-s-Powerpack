@@ -97,6 +97,24 @@ public final class Mounted {
 			&& horse.getFirstPassenger() instanceof Player;
 	}
 
+	/**
+	 * (0.7.601, from {@code EntityMountMixin}) a living mount (a horse, a camel, an elephant, a dragon...) with someone
+	 * other than a player on it: a mounted villager, guard or carter. No player climbs on, behind them or in their place;
+	 * throw them off or bring them down first. Carts, carriages, rickshaws and ships aren't mounts and keep their seats.
+	 */
+	public static boolean npcRidden(Entity vehicle) {
+		if (!(vehicle instanceof Mob)) {
+			return false;
+		}
+		for (Entity rider : vehicle.getPassengers()) {
+			if (rider instanceof LivingEntity living && !(rider instanceof Player) && living.isAlive()
+				&& !com.jaymoskingdoms.Downed.isDowned(living)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** (From {@code AbstractHorseMixin}) where riders sit: up on our taller horses, and the second behind the first. */
 	public static Vec3 seat(AbstractHorse horse, Entity passenger, Vec3 vanilla, float scale) {
 		// (0.7.322) our horses stand taller than vanilla's (BreedHorseModel.LIFT, 3 px), so every seat is that much higher
