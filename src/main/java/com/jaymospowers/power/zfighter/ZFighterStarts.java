@@ -113,7 +113,7 @@ public final class ZFighterStarts {
 	/** The Maw: the salvager's deck plates. */
 	static final int DECK_PLATES = 48;
 	/** The demon start: how far the Gloam is looked for (blocks, and the steps), how many cells round it a village is looked for, and how far off the old portal stands (blocks). */
-	static final int DEMON_SEARCH = 4096, DEMON_STEP = 32, DEMON_VERTICAL_STEP = 32, DEMON_CELLS = 3, DEMON_CELLS_FAR = 8, PORTAL_MIN = 14, PORTAL_MAX = 24;
+	static final int DEMON_SEARCH = 4096, DEMON_STEP = 32, DEMON_CELLS = 3, DEMON_CELLS_FAR = 8, PORTAL_MIN = 14, PORTAL_MAX = 24;
 	/** Spots tried for the portal. */
 	static final int PORTAL_TRIES = 16;
 
@@ -531,12 +531,14 @@ public final class ZFighterStarts {
 		boolean stacked = nether.dimension() != Level.NETHER;
 		int scale = stacked ? 1 : 8;
 		BlockPos from = new BlockPos(spawn.getX() / scale, 64 + Stacked.shift(server, Level.NETHER), spawn.getZ() / scale);
-		com.mojang.datafixers.util.Pair<BlockPos, net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> gloam = nether.findClosestBiome3d(
-			b -> b.is(ZFighterDemonRealm.BIOMES.get(0)), from, DEMON_SEARCH, DEMON_STEP, DEMON_VERTICAL_STEP);
+		// (0.20.113) Andy: "there is still a long black screen on load". A 3D search runs the whole height of the level, which
+		// in a One Dimension world is every band stacked (about 1,400 blocks), on the server thread while the player waits.
+		// The Nether's biomes barely change with height, so one sweep at the Nether's y 64 finds the same places far faster.
+		BlockPos gloam = demonBiome(nether, from, b -> b.is(ZFighterDemonRealm.BIOMES.get(0)));
 		if (gloam == null) {
-			gloam = nether.findClosestBiome3d(b -> ZFighterDemonRealm.BIOMES.stream().anyMatch(b::is), from, DEMON_SEARCH, DEMON_STEP, DEMON_VERTICAL_STEP);
+			gloam = demonBiome(nether, from, b -> ZFighterDemonRealm.BIOMES.stream().anyMatch(b::is));
 		}
-		BlockPos near = gloam != null ? gloam.getFirst() : from;
+		BlockPos near = gloam != null ? gloam : from;
 		BlockPos village = gloam == null ? null : ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS, false);
 		if (village == null && gloam != null) {
 			village = ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS_FAR, false);
@@ -562,6 +564,18 @@ public final class ZFighterStarts {
 		potion.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.FIRE_RESISTANCE));
 		give(player, potion);
 		return true;
+	}
+
+	/** (0.20.113) The nearest spot round {@code from}, at its height, whose biome {@code want}s; null if none within {@link #DEMON_SEARCH}. */
+	private static @Nullable BlockPos demonBiome(ServerLevel nether, BlockPos from,
+		java.util.function.Predicate<net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> want) {
+		long started = System.nanoTime();
+		com.mojang.datafixers.util.Pair<BlockPos, net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> found =
+			nether.getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(from.getX(), from.getY(), from.getZ(), DEMON_SEARCH,
+				DEMON_STEP, want, nether.getRandom(), true, nether.getChunkSource().randomState());
+		JaymosPowers.LOGGER.info("Demon master start: biome search from {} took {} ms, found {}", from, (System.nanoTime() - started) / 1_000_000L,
+			found == null ? "nothing" : found.getFirst());
+		return found == null ? null : found.getFirst();
 	}
 
 	/** An old portal near the village, still alight: an obsidian frame worn half to crying obsidian, a little blackstone at its foot. */
