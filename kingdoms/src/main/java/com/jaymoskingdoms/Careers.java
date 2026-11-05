@@ -195,6 +195,12 @@ public final class Careers {
 		HUNTER("hunter", 6, List.of("minecraft:leather", "minecraft:feather", "minecraft:rabbit_hide", "minecraft:string"), List.of("slay"), "hunting_lodge"),
 		COURIER("courier", 0, List.of(), List.of("carry"), "stable"),
 		WATCH("watch", 0, List.of(), List.of("night", "slay"), null),
+		/**
+		 * (0.7.578) Runs a cafe off a menu board ({@link Cafe}): orders to serve customers, and food for the storehouse. A
+		 * town with a tavern is always hiring.
+		 */
+		INNKEEPER("innkeeper", 3, List.of("minecraft:bread", "minecraft:baked_potato", "minecraft:cooked_beef", "minecraft:mushroom_stew"),
+			List.of("serve"), "tavern"),
 		/** (0.7.385) Flies pods out of a kingdom's landing yard: paid per trip with a passenger or a parcel aboard. */
 		PILOT("pilot", 0, List.of(), List.of("fly", "ferry"), LandingYard.ENTRY),
 		/** (0.7.385) Works the far worlds for the yard's town: paid per first find (an ore's first reveal on a world, a first metal knapped). */
@@ -772,6 +778,7 @@ public final class Careers {
 			case "smelt" -> Mth.nextInt(random, 16, 32);
 			case "forge" -> Mth.nextInt(random, 3, 6);
 			case "slay" -> job == Job.WATCH ? Mth.nextInt(random, 4, 8) : Mth.nextInt(random, 6, 12);
+			case "serve" -> Mth.nextInt(random, 4, 8);
 			case "night", "find" -> 1;
 			case "fly" -> Mth.nextInt(random, 1, FLY_ORDERS_MOST);
 			default -> {
@@ -1518,6 +1525,7 @@ public final class Careers {
 			case HUNTER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 24));
 			case COURIER -> List.of(new ItemStack(Items.SADDLE), new ItemStack(Items.BREAD, 8));
 			case WATCH -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.SHIELD));
+			case INNKEEPER -> List.of(new ItemStack(CafeBoard.BOARD_ITEM), new ItemStack(Items.BOWL, 8), new ItemStack(Items.BREAD, 8));
 			case PILOT -> List.of(new ItemStack(Items.COMPASS), new ItemStack(Items.CLOCK), new ItemStack(Items.BREAD, 8));
 			case PROSPECTOR -> List.of(new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.TORCH, 16), new ItemStack(Items.COMPASS));
 		};

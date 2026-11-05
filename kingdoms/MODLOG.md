@@ -9322,3 +9322,37 @@ ultimate and beam-clash films came down with it. Not played.
   lit campfire (after HearthGuard's idea, our own code): within 8 blocks of a lit campfire or soul campfire near a
   player, a monster backs off about 12 blocks and lets go of whoever is by the fire; bosses, raiders, barbarians and
   patron champions aren't held back (`CampfireWard`). Not played.
+- **0.7.578, the cafe (seven-mods patches 7 to 9):** Andy (seven-mods plan): "build 7-9". Cozy Cafe's idea (Chakyl, LGPL),
+  our own code and art, nothing copied.
+  - **Menu board** (`CafeBoard`, crafted from sticks, planks and charcoal): a chalkboard on legs that stands on a counter.
+    Whoever sets it down owns it. Its 27 slots hold one sample of each dish or drink on the menu (it stays on the board;
+    you serve from your own stock). Sneak-use with an empty hand cycles its prices: cheap (0.75x), fair, dear (1.5x).
+    Using it shows whether it's open, its name, its seats, its comfort and its prices.
+  - **Customers** (`Cafe`): from morning till dusk (day time 1000 to 12500), while the owner is within 48 blocks and the
+    menu isn't empty, grown townsfolk and visitors (visitors three times as likely) come in. Guards, posted soldiers,
+    rulers, cooks, the frightened, the busy and anyone already at a meal don't. Each walks to a free seat (a bottom
+    slab, bottom stairs, a carpentry bench, or the block tag `jaymoskingdoms:cafe_seats`), sits on a cushion, and asks
+    for one dish off the menu in a speech bubble, reminding you now and then. Use the dish on them to serve it: they
+    pay in coin, eat, thank you and leave. A wrong dish costs a fifth of their patience; when it runs out (90 s, before
+    comfort) they leave cross. The same villager won't come back for 5 minutes.
+  - **Tips:** price is by how filling the dish is (30 milli a hunger point, 20 a point of saturation, at least 100) times
+    the markup. A quick serve earns a tip of up to 30% of it, more in a comfortable room and at cheap prices, less at
+    dear ones.
+  - **Reputation** (0 to 100, kept on the board): +1 a dish served, +1 more if it's Perfect, +1 more if served in the
+    first half of their patience; -1 for a wrong dish, -3 for an angry customer. Each 25 points: one more customer at
+    once, more often, and the room grows (seats count 6 blocks out, a block more each 20 points, to 11). Passing 25,
+    50, 75 and 100 puts word of the place on the town boards (`Post.news`).
+  - **Quality sells:** Kitchen's cooking grade (read off the dish's name) sets the price: Perfect 1.5x, burnt, charred
+    or undercooked 0.5x. Brews have no grade, and dishes have no freshness clock, so neither changes the price.
+  - **Comfort:** cosy blocks round the seats (block tag `jaymoskingdoms:cafe_comfort`: carpets, candles, flower pots,
+    banners, lanterns, bookshelves; any Beautify block; Kitchen's cabinets and rugs), up to 40. At 40 customers wait 60%
+    longer and tip half again as much.
+  - **Innkeeper** (`Careers.Job.INNKEEPER`, the eleventh career job; a town with a tavern is always hiring): orders to
+    serve 4 to 8 customers, and bread, baked potatoes, cooked beef and mushroom stew for the storehouse. Kit: a menu
+    board, bowls and bread. Journeyman: your customers wait half again as long. Master: tips doubled, and your
+    apprentice (within 24 blocks of the board) serves for you, carrying ordered dishes out of chests and barrels within
+    2 blocks of the board, the coin coming to you.
+  - **Town taverns:** all three tavern blueprints set a menu board on the bar. A town board fills itself with the
+    tavern's fare (vanilla and Kitchen dishes and brews, whichever exist) and, while a cook (or failing that some
+    townsfolk who isn't on guard) is within 12 blocks, sells anyone a hot meal: click a dish to buy one, priced by the
+    town's food index, up to 24 a day, the coin going to the town's till. Taverns already built don't get one. Not played.

@@ -97,6 +97,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		DesignUploads.register();
 		MasonNet.register();
 		MasonTable.register();
+		// (0.7.578) the cafe: menu boards, customers, the innkeeper's trade
+		CafeBoard.register();
+		Cafe.register();
 		Commissions.register();
 		PlanSites.register();
 		Armory.register();
