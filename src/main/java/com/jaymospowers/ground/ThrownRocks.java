@@ -59,7 +59,7 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.20.68) Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". Every zombie (husks, drowned, zombie
  * villagers, MCA's and Kitchen's zombies), zombified piglins and every Hornkin take {@link #SHRUGGED_DAMAGE} from a rock
- * ({@link #shrugsOff}), and a rock never knocks them out.
+ * ({@link #shrugsOff}). An unsuspecting one can still be knocked out as before.
  */
 public final class ThrownRocks {
 	/** A rock hits for this much. */
@@ -175,7 +175,7 @@ public final class ThrownRocks {
 		}
 		// (0.18.84) whether they saw it coming, before the blow makes them wary
 		boolean shrugs = shrugsOff(victim);
-		boolean unsuspecting = !shrugs && unsuspecting(victim, source.getEntity());
+		boolean unsuspecting = unsuspecting(victim, source.getEntity());
 		boolean head = ball.getY() >= victim.getEyeY() - HEAD_REACH;
 		boolean hurt;
 		redealing = true;
