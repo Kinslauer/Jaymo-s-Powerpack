@@ -9208,3 +9208,14 @@ ultimate and beam-clash films came down with it. Not played.
   After 30 s a guard, den hand or butcher puts it down; anyone else calls a guard. Skipped: the settlement's own
   stables/barns/pens, ridden/leashed/tamed/named/owned animals, house animals (tag `jaymoskingdoms:house_animals`:
   cats, parrots, bees, axolotls, frogs, allays). `Strays`, lang part strays.json (12 lines per family), hint 104. Not played.
+
+## 0.7.567 (2026-11-05): coin purses fill up visibly and work like bundles
+- Andy: "coin purses dont animate correctly, you should also be able to remove the coins like bundles, and add them to
+  other purses". The purse's icon picked its look from how full it was out of 640 coins, so anything under 160 coins
+  looked the same. It now reads the coin count itself (item model property `jaymoskingdoms:purse_coins`, `PurseCoins`):
+  coins showing from 1, bigger at 24, 96 and 320. The same model hangs on the hip in Powers. A gold bar under the icon
+  shows how full it is (red when full), as on a bundle.
+- Like a bundle (`CoinPurseItem`): right click a purse in a slot with an empty cursor to take out one stack of its biggest
+  coin; right click an empty slot with a purse on the cursor to put one down; drop coins on a purse (either button) to
+  fill it; drop one purse on another (either button) to pour it in, as far as there's room. Bundle sounds on each.
+  An empty purse still picks up and swaps as usual. Lang part coin_purse.json, hint 105. Not played.
