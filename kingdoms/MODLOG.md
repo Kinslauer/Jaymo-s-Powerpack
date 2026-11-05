@@ -9105,3 +9105,8 @@ ultimate and beam-clash films came down with it. Not played.
   under C2ME's chunk system, so every such scan now reads `getChunkSource().getChunkNow` and skips a chunk that isn't
   ready: `GrimSites`, `remnants/AncientRemnantsCompat`, `Ruins.pieces`, `Clearing.sites`, `GolemLairs.look`,
   `QuestFoes.bury`. Nothing else changes. Types checked against the 26.3 jar; not built here.
+
+## 0.7.554 (2026-11-05): blast hint (pack 0.20.65)
+
+- Loading-screen hint 99 (`lang/parts/blast-gore.json`, HINTS 99) for Powers' blasts blowing bodies apart and taking
+  limbs off survivors. Not played.

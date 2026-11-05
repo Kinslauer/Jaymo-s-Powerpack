@@ -224,6 +224,8 @@ public final class Dismember {
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dismember::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Dismember::tickSplit);
+		// (0.20.65) blasts blow bodies apart and take limbs off survivors (after the respawn hook above: it fixes up after it)
+		BlastGore.init();
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STAGGERING.clear();
 			BLEEDING.clear();
@@ -544,7 +546,43 @@ public final class Dismember {
 
 	/** Takes {@code part} off {@code target} (if it still has it), with everything that follows. True if it came off. */
 	public static boolean sever(LivingEntity target, int part, @Nullable LivingEntity by) {
-		return lose(target, part, by, false);
+		return lose(target, part, by, false, null, false);
+	}
+
+	/**
+	 * (0.20.65) A blast takes {@code part} off ({@link BlastGore}): it flies away from {@code from} (the blast's centre), and a
+	 * skeleton's shatters instead. {@code quiet}: one of several parts going at once (a body blown apart), so each bleeds
+	 * only a little (Andy, #961: blood toned down). True if it came off.
+	 */
+	public static boolean blastOff(LivingEntity target, int part, @Nullable LivingEntity by, @Nullable Vec3 from, boolean quiet) {
+		boolean bones = target.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS);
+		return lose(target, part, by, bones, from, quiet);
+	}
+
+	/**
+	 * (0.20.65) Sets the parts {@code target} is missing to exactly {@code mask}, quietly: what isn't in it grows back with
+	 * no show (a player blown apart comes back with only the parts they'd lost before the blast, {@link BlastGore}).
+	 */
+	static void restore(LivingEntity target, int mask) {
+		int before = missing(target);
+		int back = before & ~mask;
+		if (back == 0) {
+			return;
+		}
+		for (int part : PARTS) {
+			if ((back & part) != 0) {
+				target.removeTag(tag(part));
+			}
+		}
+		int now = before & mask;
+		if (now == 0) {
+			target.removeAttached(MISSING);
+		} else {
+			target.setAttached(MISSING, now);
+		}
+		legs(target, now);
+		Prosthetics.sync(target);
+		com.jaymospowers.core.wounds.Breaks.regrown(target, back);
 	}
 
 	/**
@@ -559,7 +597,7 @@ public final class Dismember {
 		SeveredPart.pinNextAt = wall;
 		SeveredPart.pinNextYaw = yaw;
 		try {
-			return lose(target, HEAD, by, false);
+			return lose(target, HEAD, by, false, null, false);
 		} finally {
 			SeveredPart.pinNextAt = null;
 		}
@@ -570,7 +608,7 @@ public final class Dismember {
 	 * off and nothing bleeds, just a shower of bone and a bone or two on the ground. True if it went.
 	 */
 	public static boolean shatter(LivingEntity target, int part, @Nullable LivingEntity by) {
-		return lose(target, part, by, true);
+		return lose(target, part, by, true, null, false);
 	}
 
 	/**
@@ -598,7 +636,8 @@ public final class Dismember {
 		return true;
 	}
 
-	private static boolean lose(LivingEntity target, int part, @Nullable LivingEntity by, boolean shattered) {
+	private static boolean lose(LivingEntity target, int part, @Nullable LivingEntity by, boolean shattered, @Nullable Vec3 blast,
+		boolean quiet) {
 		if (!(target.level() instanceof ServerLevel level) || (missing(target) & part) != 0) {
 			return false;
 		}
@@ -608,15 +647,24 @@ public final class Dismember {
 		if (shattered) {
 			Fractures.crack(level, target, part);
 			Vec3 at = stump(target, part);
-			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z, 30,
-				0.2, 0.2, 0.2, 0.3);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z,
+				quiet ? 10 : 30, 0.2, 0.2, 0.2, 0.3);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.SKELETON_HURT, SoundSource.HOSTILE, 1.0F, 0.6F);
 			drop(level, target, new ItemStack(net.minecraft.world.item.Items.BONE, 1 + target.getRandom().nextInt(2)));
 		} else {
-			Vec3 from = by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
+			Vec3 from = blast != null ? blast : by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
 			SeveredPart.spawn(level, target, part, from);
-			gore(level, target, part);
-			BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
+			if (quiet) {
+				// (0.20.65) one of a blown-apart body's parts: a fleck or two, no sounds of its own (the blast is loud enough)
+				Vec3 at = stump(target, part);
+				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(target), 1.4F), at.x, at.y, at.z, 6,
+					0.15, 0.15, 0.15, 0.1);
+			} else {
+				gore(level, target, part);
+			}
+			if (target.isAlive()) {
+				BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
+			}
 		}
 		track(target);
 		if (part != HEAD) {

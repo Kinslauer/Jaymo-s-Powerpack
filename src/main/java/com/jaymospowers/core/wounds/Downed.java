@@ -222,6 +222,11 @@ public final class Downed {
 	/** Going down is the last say on a death (every other mod's save comes first), and on a right-click on the downed. */
 	static final Identifier LAST = JaymosPowers.id("downed_last");
 
+	/** (0.20.65) The death event's phase Downed decides in (others that must see its verdict order after it). */
+	public static Identifier lastPhase() {
+		return LAST;
+	}
+
 	/**
 	 * What a tamed animal is brought round with, by its type's name: its own taming and breeding food. Anything tamed not
 	 * here takes any food.
@@ -306,6 +311,16 @@ public final class Downed {
 			}
 			if (!downable(entity) || !spared(entity, source)) {
 				return true;
+			}
+			// (0.20.65) blown apart by a blast, by how close it was: nothing left to get up either
+			if (com.jaymospowers.core.BlastGore.gibs(entity, source, amount)) {
+				if (!Dismember.rubber(entity) || !com.jaymospowers.core.BlastGore.tearLimbs(entity, source)) {
+					return true;
+				}
+				// (Rubber-folk: every limb gone but the head kept; they mend as from a halving, with a swallow in time)
+				goDown(level, entity, source, false);
+				Dismember.split(entity);
+				return false;
 			}
 			// (0.20.61) cut in half at the waist: nothing left to get up, as with a beheading
 			if (Dismember.halve(entity, source, amount, null)) {
