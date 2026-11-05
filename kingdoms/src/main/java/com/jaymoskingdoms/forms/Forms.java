@@ -68,7 +68,7 @@ import org.jspecify.annotations.Nullable;
  * weapon away or switch to something that doesn't match to leave. In stance a tap fires the selected slot's form
  * ({@link #fire}), sneak and tap the next slot's; Ctrl and scroll picks the slot. Out of stance the key keeps doing what it did
  * (Charge, War Cry, Shield Throw: {@link CombatArts}).
- * <li>(0.7.549) The skill bar: with Spell Engine in the pack (the RPG Series), a form weapon in hand puts the forms you know
+ * <li>(0.7.550) The skill bar: with Spell Engine in the pack (the RPG Series), a form weapon in hand puts the forms you know
  * for it on Spell Engine's skill bar ({@link FormSkills}), belt order first, on its keys (1, 2, 3...; right-click stays the
  * weapon's guard; bare fists only while locked on, where right-click is the first form). No stance, no belt picking.
  * <li>Practice: a form that lands adds practice ({@link #landed}; a real foe counts {@value #FOE_PRACTICE}, a dummy
@@ -472,7 +472,7 @@ public final class Forms {
 	}
 
 	/**
-	 * Whether {@code player} holds a weapon any form they know works with: the stance can be taken. (0.7.549) With Spell
+	 * Whether {@code player} holds a weapon any form they know works with: the stance can be taken. (0.7.550) With Spell
 	 * Engine in the pack the forms are on its skill bar instead ({@link FormSkills}; bare fists while locked on), so there's
 	 * no stance.
 	 */
@@ -484,7 +484,7 @@ public final class Forms {
 		Book book = book(player);
 		ItemStack main = player.getMainHandItem();
 		if (skillBar()) {
-			// (0.7.549) every form is on the skill bar (bare fists while locked on), so there's no stance
+			// (0.7.550) every form is on the skill bar (bare fists while locked on), so there's no stance
 			return false;
 		}
 		for (String id : book.known()) {
@@ -495,7 +495,7 @@ public final class Forms {
 		return false;
 	}
 
-	/** (0.7.549) Whether Spell Engine (the RPG Series' skill bar) is in the pack: forms with a weapon in hand go on its bar. */
+	/** (0.7.550) Whether Spell Engine (the RPG Series' skill bar) is in the pack: forms with a weapon in hand go on its bar. */
 	public static boolean skillBar() {
 		return SKILL_BAR;
 	}
@@ -503,7 +503,7 @@ public final class Forms {
 	private static final boolean SKILL_BAR = FabricLoader.getInstance().isModLoaded("spell_engine");
 
 	/**
-	 * (0.7.549) The forms {@code player} has on the skill bar with what's in their hand: the known forms that fit it, in belt
+	 * (0.7.550) The forms {@code player} has on the skill bar with what's in their hand: the known forms that fit it, in belt
 	 * order, then the rest in list order. A bare hand's fist forms only while locked on (Andy: "give it to fists but only
 	 * when locked on"), so right-click stays free for doors and villagers the rest of the time. Empty with no form weapon.
 	 */
@@ -528,7 +528,7 @@ public final class Forms {
 		return out;
 	}
 
-	/** (0.7.549) Whether {@code main} is a weapon some form family takes (a bare hand isn't, here). */
+	/** (0.7.550) Whether {@code main} is a weapon some form family takes (a bare hand isn't, here). */
 	public static boolean formWeapon(ItemStack main) {
 		if (main.isEmpty()) {
 			return false;
@@ -705,7 +705,7 @@ public final class Forms {
 	// ---- firing --------------------------------------------------------------------------------------------------------
 
 	private static void fire(ServerPlayer player, boolean sneaking) {
-		// (0.7.382) a spear thrown to pin a foe: any press tugs it back (0.7.549: in stance or not, since the spear's forms
+		// (0.7.382) a spear thrown to pin a foe: any press tugs it back (0.7.550: in stance or not, since the spear's forms
 		// are on the skill bar and the hand is empty while it's out)
 		if (SpearForms.tug(player)) {
 			return;
@@ -719,7 +719,7 @@ public final class Forms {
 	}
 
 	/**
-	 * (0.7.549) A form cast from Spell Engine's skill bar ({@link FormSkills}): the same checks and the same form as a
+	 * (0.7.550) A form cast from Spell Engine's skill bar ({@link FormSkills}): the same checks and the same form as a
 	 * stance tap, with no stance needed. True if it went off (or began winding up), so the bar's cooldown starts; false
 	 * leaves the bar's cooldown untouched (and says why on the action bar).
 	 */
@@ -730,7 +730,7 @@ public final class Forms {
 		return tryForm(player, formId, true);
 	}
 
-	/** (0.7.549) Tugs back a spear a Pinning Throw left in a foe. True if there was one. */
+	/** (0.7.550) Tugs back a spear a Pinning Throw left in a foe. True if there was one. */
 	public static boolean tug(ServerPlayer player) {
 		return SpearForms.tug(player);
 	}
@@ -836,7 +836,7 @@ public final class Forms {
 		for (Iterator<Windup> it = WINDUPS.iterator(); it.hasNext(); ) {
 			Windup w = it.next();
 			ServerPlayer player = server.getPlayerList().getPlayer(w.who());
-			// (0.7.549) a stance form ends with the stance; a skill-bar form with its weapon out of the hand
+			// (0.7.550) a stance form ends with the stance; a skill-bar form with its weapon out of the hand
 			if (player == null || !player.isAlive() || !(w.bar() ? w.form().family().holds(player.getMainHandItem()) : book(player).stance())) {
 				it.remove();
 				// a wind-up cut short by the stance ending gives its cooldown back

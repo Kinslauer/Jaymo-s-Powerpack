@@ -37,7 +37,7 @@ wheel swaps targets. Proposal:
   small strip above the hotbar that fades with Auto HUD.
 - Out of stance, the key keeps its current jobs: Charge, War Cry and Shield Throw.
 
-**Changed in Kingdoms 0.7.549 (Andy, 2026-11-05: "weapon form skills should move to that system too. makes the moves
+**Changed in Kingdoms 0.7.550 (Andy, 2026-11-05: "weapon form skills should move to that system too. makes the moves
 easier to access with less keys"):** with Spell Engine in the pack, a form weapon in hand puts your forms for it on the
 RPG Series skill bar (`forms/FormSkills`), belt order first, on its keys (1, 2, 3...; right-click stays the guard). There's
 no stance or Ctrl + scroll with a weapon any more, and the Combat Art key is only Charge, War Cry and Shield Throw (and

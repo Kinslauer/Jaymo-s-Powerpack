@@ -8,8 +8,8 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
- * (0.7.549) Andy: "more UI overlap with the rpg skills". Spell Engine (the RPG Series' skill bar: class skills and, since
- * 0.7.549, Weapon Forms) draws its bar at a fixed spot left of the hotbar, which is where our left dock stacks the body row
+ * (0.7.550) Andy: "more UI overlap with the rpg skills". Spell Engine (the RPG Series' skill bar: class skills and, since
+ * 0.7.550, Weapon Forms) draws its bar at a fixed spot left of the hotbar, which is where our left dock stacks the body row
  * (stance, wounds doll, body heat), so the two drew over each other. Now the bar is the left dock's lowest row
  * ({@link #ROW}): {@link HudZones} gives it its place each frame (its slots plus the key labels over them) and Spell Engine's
  * HUD setting is pointed there, so the body row and the rest stack above it. During a film it goes off screen with the rest.

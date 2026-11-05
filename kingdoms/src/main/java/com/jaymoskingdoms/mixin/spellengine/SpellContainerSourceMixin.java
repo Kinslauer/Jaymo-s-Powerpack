@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.549) Weapon Forms on Spell Engine's skill bar ({@link FormSkills}). Spell Engine only fills the bar when the held
+ * (0.7.550) Weapon Forms on Spell Engine's skill bar ({@link FormSkills}). Spell Engine only fills the bar when the held
  * item carries a spell container that resolves spells, and only with the spells that container takes.
  * <ul>
  * <li>A form weapon with no such container (a vanilla sword, a spear, a claw; a bare hand while locked on), held by

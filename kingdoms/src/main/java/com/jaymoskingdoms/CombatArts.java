@@ -358,7 +358,7 @@ public final class CombatArts {
 		if (!(sp.level() instanceof ServerLevel level) || sp.isSpectator() || !sp.isAlive()) {
 			return;
 		}
-		// (0.7.549) a spear out pinning a foe: the tap tugs it back (its forms are on the skill bar, so there's no stance to tap in)
+		// (0.7.550) a spear out pinning a foe: the tap tugs it back (its forms are on the skill bar, so there's no stance to tap in)
 		if (com.jaymoskingdoms.forms.Forms.tug(sp)) {
 			return;
 		}

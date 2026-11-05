@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-/** (0.7.549) Applies the Spell Engine mixins only when Spell Engine is loaded (their targets don't exist otherwise). */
+/** (0.7.550) Applies the Spell Engine mixins only when Spell Engine is loaded (their targets don't exist otherwise). */
 public final class SpellEngineMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {

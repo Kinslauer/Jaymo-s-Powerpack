@@ -131,7 +131,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
 		com.jaymoskingdoms.client.forms.FormsClient.register();
-		// (0.7.549) Spell Engine's skill bar placed as the left dock's lowest row, under the body row
+		// (0.7.550) Spell Engine's skill bar placed as the left dock's lowest row, under the body row
 		com.jaymoskingdoms.client.hud.SkillBarDock.register();
 		// (0.7.361) Valor: the N key, the pool's bar, Senses
 		ValorClient.register();

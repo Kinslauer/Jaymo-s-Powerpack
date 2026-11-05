@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.549) Andy: "weapon form skills should move to that system too. makes the moves easier to access with less keys".
+ * (0.7.550) Andy: "weapon form skills should move to that system too. makes the moves easier to access with less keys".
  * Each Weapon Form is also a Spell Engine spell ({@code data/jaymoskingdoms/spell/form_<id>.json}), so the forms you know
  * for the weapon in hand sit on the RPG Series' skill bar beside its class skills and fire on its keys (1, 2, 3...; the
  * use key stays the weapon's own right-click, the guard). Spell Engine shows the cooldown on the slot.

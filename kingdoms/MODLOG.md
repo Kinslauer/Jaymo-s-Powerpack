@@ -9060,7 +9060,16 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   they walk to a downed monster and execute it (hotheaded or spiteful ones anyone they fight); `Temperaments.spares` no
   longer spares monsters. Sharks and the great whale bleed Powers' blood, not red dust. Gradle build only, not played.
 
-- **0.7.549, Weapon Forms on the RPG skill bar; the skill bar no longer overlaps the body row:** Andy (2026-11-05): "more
+## 0.7.549: Big Cannons booms (pack 0.20.56)
+Andy: "i really like the screen shake and sound effects from [Create Big Cannons] what can we add from it?" Ideas only,
+our own code; the delayed, muffled booms and whistling shells live in Powers (`client/sound/Blasts`, `ShellWhistle`).
+- **Cannons** fire with Powers' own report (`PowersCompat.cannonReport`, vanilla's explosion without Powers) and jolt
+  everyone within 10 blocks. Cannonball hits and dynamite already play the explosion sound, so they now shake and boom
+  with distance through Powers.
+- **Shakes from a place** (`PowersCompat.shakeAround`, Powers' `Shakes.around`): every Aether Giant footfall (28 blocks,
+  1.1) and its grab's slam (36, 3.0), an ogre's ground smash (18, 1.8), a wind dragon landing (22, 1.4 times its size).
+
+- **0.7.550, Weapon Forms on the RPG skill bar; the skill bar no longer overlaps the body row:** Andy (2026-11-05): "more
   UI overlap with the rpg skills. weapon form skills should move to that system too. makes the moves easier to access with
   less keys". The "RPG skills" are Spell Engine's skill bar (Zsolt's RPG Series). Its bar sat at a fixed spot left of the
   hotbar, on top of our left dock's body row. `client/hud/SkillBarDock` makes it the left dock's lowest row (5, under the
