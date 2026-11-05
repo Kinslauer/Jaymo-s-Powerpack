@@ -9011,3 +9011,11 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   "humanoid mobs can say something about it too, 'I was just about to....kill you?!'". `PowersCompat.tellPerplexed` hooks
   Powers' `ChronoCheatDeath.PERPLEXED`: a humanoid executioner (`Temperaments.humanoid`) says one of six lines over its
   head (`lang/parts/perplexed.json`, through `Speech.say`, in its own tongue). Gradle compile only, not played.
+- **0.7.544, no glowing eyes on human bloods:** Andy (2026-11-04): "remove glowing eyes from all heritages/ races considered
+  humans". "Human" is `Faiths.human` (now public): no blood, or Prejudice degree 0, not Verdant, not a brood, so Heartlander,
+  Emberborn, Frostborn, Nightborn, Earthling, Stormborn, Dawnborn, Endborn, Dragonblood, Deepborn, Divine-born and
+  Rubberfolk (and their variants) lose their glowing eyes, players and villagers alike (`HeritageLooks.extract`,
+  `VillagerLooks.extract`, `EmberLook`). Marks, halos and other glows stay. Non-human bloods (Stoneborn, Tideborn, Sylvan,
+  Warrior-born, Bio-built, Beastfolk, Hollow, goblins, orcs) keep theirs. Vampire red eyes, a Nightborn vampire's
+  red-silver eyes at night, werewolf flashes, Valor hunter eyes and power eyes are states, not bloods, and stay.
+  Gradle compile only, not played.

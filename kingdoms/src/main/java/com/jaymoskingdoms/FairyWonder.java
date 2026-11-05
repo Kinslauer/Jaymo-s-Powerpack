@@ -20,7 +20,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.512, Andy 2026-11-04: pink fairies "highly prized possessions among players and villagers alike"). Jaymo's
+ * (0.7.544, Andy 2026-11-04: pink fairies "highly prized possessions among players and villagers alike"). Jaymo's
  * Powers' Bottled Pink Fairy is the rarest thing a villager will ever see. Townsfolk (vanilla and MCA villagers) who see
  * a player wearing one (amulet or charm slot) or holding one stop and stare and say so, longing, envious or awed
  * (children beg to see her), once a day each per player, and the sight lifts an MCA villager's mood. Given to an MCA
