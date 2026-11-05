@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -38,8 +39,9 @@ import org.jspecify.annotations.Nullable;
  * finish off someone the town counts a real enemy ({@link #serious}: an outlaw there, hated, or at war with it). A
  * village's own iron golem never does, as before.</li>
  * <li><b>Taken in, not cut down</b> ({@link #assaulted}): a player who struck one of a town's people and lies downed within
- * {@link #TAKE_RANGE} of one of its guards in the next {@link #ASSAULT_TICKS} is taken in: the fight is called off, they
- * are got up, and they pay a fine ({@link #FINE}) or, without the coin, are let off with a warning.</li>
+ * {@link #TAKE_RANGE} of one of its guards in the next {@link #ASSAULT_TICKS} is taken in: the fight is called off and
+ * they are got up. A kingdom or fiefdom (which keeps cells under its seat, {@link Busts}) locks them up for
+ * {@link #JAIL_TICKS}; elsewhere they pay a fine ({@link #FINE}) or, without the coin, are let off with a warning.</li>
  * <li><b>No catapults</b> ({@link #STRUCK}): a blow from one of a town's people (or any villager or folk fighter but an
  * orc or a ruler) throws a player no harder than {@link #THROW_MOST} along the ground and {@link #LIFT_MOST} up (a downed
  * one, {@link #DOWNED_THROW}), however many shoves and form pushes land in that same tick. Several guards' blows, each
@@ -55,7 +57,9 @@ final class HeldBack {
 	static final long ASSAULT_TICKS = 20L * 120;
 	/** How near a guard must be to a downed player to take them in (blocks). */
 	static final double TAKE_RANGE = 6.0;
-	/** The fine for a blow on one of a town's people, in emeralds' worth of coin. */
+	/** A realm with cells locks a downed assailant up this long (ticks): shorter than a contraband sentence. */
+	static final long JAIL_TICKS = 20L * 60 * 2;
+	/** Where there are no cells: the fine for a blow on one of a town's people, in emeralds' worth of coin. */
 	static final long FINE = 6;
 	/** How far everyone's called off the player when they're taken in (blocks). */
 	static final double CALL_OFF = 32.0;
@@ -220,7 +224,7 @@ final class HeldBack {
 		return best;
 	}
 
-	/** The fight's called off, {@code player} is got up, and pays the fine (or is let off with a warning). */
+	/** The fight's called off and {@code player} is got up: to the cells where the realm has them, else a fine (or a warning). */
 	private static void takeIn(ServerLevel level, ServerPlayer player, Faction f, PathfinderMob guard) {
 		for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(CALL_OFF), m -> m.isAlive())) {
 			if (m.getTarget() == player) {
@@ -236,6 +240,23 @@ final class HeldBack {
 		player.addTag(Downed.REVIVE_TAG);
 		player.addTag(Downed.BANDAGED_TAG);
 		guard.getLookControl().setLookAt(player, 30.0F, 30.0F);
+		if (f.type().isRealm() && !Busts.jailed(player)) {
+			// (Andy: "if they have a jail, you go there") a kingdom or fiefdom keeps cells under its seat (Busts'): a short stay
+			Underworld.Den d = Underworld.den(level.getServer(), f.id());
+			BlockPos cell = Speakeasy.cell(level, f, d == null ? null : d.cell().orElse(null));
+			if (d != null) {
+				Underworld.putCell(level.getServer(), d, cell);
+			}
+			long now = level.getGameTime();
+			player.setAttached(Busts.JAILED, new Busts.Jail(f.id(), cell, now + JAIL_TICKS));
+			Speech.say(level, guard, Component.translatable("held_back.jaymoskingdoms.cells." + level.getRandom().nextInt(LINES)), Speech.RED, SPEECH);
+			Vec3 c = Vec3.atBottomCenterOf(cell);
+			player.teleportTo(level, c.x, c.y, c.z, Set.of(), player.getYRot(), 0.0F, false);
+			level.playSound(null, c.x, c.y, c.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.7F);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.held_back.jailed", f.name(), JAIL_TICKS / 1200L)
+				.withStyle(ChatFormatting.GOLD));
+			return;
+		}
 		long fine = Money.worth(FINE);
 		boolean paid = Money.charge(player, f, fine);
 		String key = paid ? "fine" : "warning";

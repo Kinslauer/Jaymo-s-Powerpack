@@ -5,7 +5,11 @@
   "held_back.jaymoskingdoms.warning.0": "Not a coin on you? Then get up and count yourself lucky.",
   "held_back.jaymoskingdoms.warning.1": "Back off, the lot of you. This one's had their lesson.",
   "held_back.jaymoskingdoms.warning.2": "On your feet. Strike one of ours again and it'll be the cells.",
+  "held_back.jaymoskingdoms.cells.0": "Up. You'll cool off in the cells, not in the ground.",
+  "held_back.jaymoskingdoms.cells.1": "Stand down, all of you. This one goes below.",
+  "held_back.jaymoskingdoms.cells.2": "A night's thinking in the cells. That's the law here.",
   "message.jaymoskingdoms.held_back.fined": "%s's guard takes you in: you're fined %s for the blow, and the fight's called off.",
   "message.jaymoskingdoms.held_back.warned": "%s's guard takes you in: you can't pay the fine, so you're let off with a warning.",
-  "gui.jaymoskingdoms.story.hint.107": "A town's people keep each other honest: with others watching, its guards take a downed troublemaker in for a fine instead of cutting them down. Only a hothead alone would kill an enemy of the town."
+  "gui.jaymoskingdoms.story.hint.107": "A town's people keep each other honest: with others watching, its guards take a downed troublemaker to the cells (or fine them) instead of cutting them down. Only a hothead alone would kill an enemy of the town.",
+  "message.jaymoskingdoms.held_back.jailed": "%s's guard takes you in for the blow: you're locked in the cells for %s minutes, and the fight's called off."
 }
