@@ -1489,3 +1489,10 @@ it. Now, on the client, the box takes in the whole drawn ragdoll (`CorpseEntity#
 `ClientRagdolls.Track#bounds`, refreshed every tick), so the crosshair finds any part of any corpse. It is left as it was
 while the body is held, pinned, slung or in a cart. The server keeps the small box, so physics is unchanged. Built, not
 played.
+
+## 0.5.73: hearts from a meal stay after it wears off, but don't heal back
+Andy: "instead of the hearts you gain from eating disappearing after the duration ends, now they just shouldnt come back
+if you no longer have the nourishment, so you wont heal back to the same amount". When a meal wears off, its hearts you
+still have filled stay as leftover health (`Stomach.LEFTOVER`, saved, emptied on death); the ones already empty are gone.
+Every point of health you lose afterwards comes off the leftover hearts first, so your max health shrinks with each hit
+down to what your stomach still holds, and nothing heals them back. Built, not played.
