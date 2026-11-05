@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.545) Andy (2026-11-05), of a dead king left lying in his diamonds outside his own walls for a passing player to
+ * (0.7.546) Andy (2026-11-05), of a dead king left lying in his diamonds outside his own walls for a passing player to
  * strip: "the royals should never just be left dead like this, unless there was noone at all left in the kingdom to
  * defend, SOMEONE should find the body and get it to safety, remove the armor, and bury or mourn them if not bring them
  * to the cleric".

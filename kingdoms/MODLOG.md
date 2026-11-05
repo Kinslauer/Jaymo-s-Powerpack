@@ -9017,7 +9017,18 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   rise, it sat inside the hill. `Wagon.ground` finds the top of the block (or water) with room above it, nearest that
   height (3 up, 4 down), under the cart's middle, and the cart stands there, easing to a new height unless it's over 2
   blocks off. Gradle compile only, not played.
-- **0.7.545, fallen royals brought home:** Andy (2026-11-05), of a dead king left lying in diamonds outside his walls for a
+- **0.7.545, no glowing eyes on human bloods:** Andy (2026-11-04): "remove glowing eyes from all heritages/ races considered
+  humans", then: Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, Emberborn and Frostborn "are actually all not
+  human". `HeritageLooks.human` = Heartlander, Nightborn, Earthling, Stormborn, Dawnborn (and their variants): their eyes
+  never light, players and villagers alike (`HeritageLooks.extract`, `VillagerLooks.extract`). Marks and other glows stay;
+  every other blood keeps its eyes. Vampire red eyes, a Nightborn vampire's red-silver eyes at night, werewolf flashes,
+  Valor hunter eyes and power eyes are states, not bloods, and stay. Andy "change that too": faith and prejudice follow.
+  `Prejudice.degree` now 1 for Emberborn, Frostborn, Rubberfolk, Divine-born and 2 for Endborn, Deepborn, Dragonblood, so
+  `Faiths.human` (which the eyes read too) is just those five. The seven now start with a patron of the seven (`Faiths.lean`:
+  Emberborn Ash Whisperer, Frostborn Green Huntsman, Endborn Lantern Warden, Deepborn Anvil-Father, Dragonblood Crowned
+  Sun, Divine-born and Rubberfolk Hearthkeeper), are muttered at, can live in havens and mind humans. Faiths already
+  stored on villagers stay. Gradle compile only, not played.
+- **0.7.546, fallen royals brought home:** Andy (2026-11-05), of a dead king left lying in diamonds outside his walls for a
   player to strip: "the royals should never just be left dead like this, unless there was noone at all left in the kingdom
   to defend, SOMEONE should find the body and get it to safety, remove the armor, and bury or mourn them if not bring them
   to the cleric". New `RoyalRemains`: a realm's ruler's body (role KING/LORD, or recorded by `KingdomEvents.rulerDied`) is

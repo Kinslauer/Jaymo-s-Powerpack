@@ -605,7 +605,7 @@ public final class KingdomEvents {
 			// (a camp's chief: the barbarians' own business)
 			return;
 		}
-		// (0.7.545) their body is to be brought home, stripped of its armour and buried with the rites (RoyalRemains)
+		// (0.7.546) their body is to be brought home, stripped of its armour and buried with the rites (RoyalRemains)
 		RoyalRemains.fell(ruler.getUUID(), faction.id());
 		// (0.7.225) a player wears its crown: only their steward fell
 		if (wasLeader && Crowns.stewardFell(level, faction)) {

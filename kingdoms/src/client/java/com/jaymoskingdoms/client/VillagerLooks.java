@@ -97,6 +97,8 @@ public final class VillagerLooks {
 		HeritageLooks.Kind kind = HeritageLooks.Kind.of(heritage);
 		boolean lit = kind != null ? HeritageLooks.eyesLit(kind, entity, style)
 			: style != null ? style.eyes() != null && HeritageLooks.eyesLit(style.eyes(), entity) : heritage == Heritage.Kind.EMBERBORN;
+		// ((0.7.545) Andy: no glowing eyes on the human bloods, HeritageLooks#human)
+		lit &= !HeritageLooks.human(heritage);
 		int glow = kind == null ? -1 : HeritageLooks.mood(kind, entity);
 		if (heritage == Heritage.Kind.TIDEBORN) {
 			// lit under water, and in the rain or wet at night

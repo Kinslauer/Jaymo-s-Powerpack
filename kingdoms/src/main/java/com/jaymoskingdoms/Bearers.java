@@ -127,7 +127,7 @@ public final class Bearers {
 	static final long HELP_WINDOW = 2400L;
 	static final int REP_HELP = 3, HELP_DAILY = 3;
 
-	/** (0.7.545) A ruler's burial ({@link RoyalRemains}): this many mourners at most, of them this many guards standing; rite lines. */
+	/** (0.7.546) A ruler's burial ({@link RoyalRemains}): this many mourners at most, of them this many guards standing; rite lines. */
 	static final int ROYAL_MOURNERS = 8, ROYAL_GUARDS = 3, ROYAL_RITE_LINES = 3;
 
 	/** A grave: whose settlement, its headstone, who lies there (their name, their UUID or ""), and the day they were buried. */
@@ -211,7 +211,7 @@ public final class Bearers {
 		final long until;
 		Stage stage = Stage.FETCH;
 		int dug;
-		/** (0.7.545) A ruler's body, brought from {@link RoyalRemains}: a candle on the headstone, and the town mourns. */
+		/** (0.7.546) A ruler's body, brought from {@link RoyalRemains}: a candle on the headstone, and the town mourns. */
 		boolean royal;
 
 		Duty(UUID bearer, UUID corpse, int realm, Kind kind, @Nullable BlockPos to, Dead dead, long until) {
@@ -401,7 +401,7 @@ public final class Bearers {
 				.orElse(type != null ? type.getDescription() : corpse.getName());
 			boolean folk = type == JaymosKingdoms.FOLK;
 			// ((0.7.397) and an MCA villager's job too, so a looter or a camp's raider isn't taken for one of their own)
-			// ((0.7.545) and a villager's settlement too, for a villager ruler's body: RoyalRemains)
+			// ((0.7.546) and a villager's settlement too, for a villager ruler's body: RoyalRemains)
 			dead = new Dead(type, uuid, name, tag.getIntOr(folk ? "kingdom" : "jaymoskingdoms_faction", -1),
 				tag.getIntOr(folk ? "role" : "jaymoskingdoms_role", -1));
 		}
@@ -424,7 +424,7 @@ public final class Bearers {
 			}
 			Dead dead = who(level, corpse);
 			if (!dead.person() || RoyalRemains.ruled(dead) == f.id()) {
-				// ((0.7.545) its own ruler's body is RoyalRemains')
+				// ((0.7.546) its own ruler's body is RoyalRemains')
 				continue;
 			}
 			Faction law = Theft.lawAt(level, corpse.blockPosition());
@@ -659,7 +659,7 @@ public final class Bearers {
 	}
 
 	/**
-	 * (0.7.545) {@code bearer}, holding a ruler's body (stripped, and the rites said: {@link RoyalRemains}), takes it on to
+	 * (0.7.546) {@code bearer}, holding a ruler's body (stripped, and the rites said: {@link RoyalRemains}), takes it on to
 	 * {@code f}'s graveyard to bury it; false if there's no ground for a grave.
 	 */
 	static boolean entrustRoyal(ServerLevel level, Faction f, PathfinderMob bearer, Entity corpse, Dead dead, long now) {
@@ -675,7 +675,7 @@ public final class Bearers {
 		return true;
 	}
 
-	/** (0.7.545) A ruler's body with no ground for a grave lies in state where it was laid ({@code at}), and is mourned there. */
+	/** (0.7.546) A ruler's body with no ground for a grave lies in state where it was laid ({@code at}), and is mourned there. */
 	static void lieInState(ServerLevel level, Faction f, Dead dead, BlockPos at, long now) {
 		// (mourners stand round the "mound" south of a headstone: the body is that mound)
 		callMourners(level, f, dead, at.north(), now, true);
@@ -713,7 +713,7 @@ public final class Bearers {
 		BlockState stone = headstone(level, f, random);
 		level.setBlock(head, Block.updateFromNeighbourShapes(stone, level, head), Block.UPDATE_ALL);
 		if (d.royal && level.getBlockState(head.above()).isAir()) {
-			// (0.7.545) a ruler's grave: a candle kept lit on the stone
+			// (0.7.546) a ruler's grave: a candle kept lit on the stone
 			level.setBlock(head.above(), Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.LIT, true), Block.UPDATE_ALL);
 		}
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COARSE_DIRT.defaultBlockState()),
@@ -970,7 +970,7 @@ public final class Bearers {
 	/** The family (with MCA), else a neighbour or two, else the fallen soldier's comrades, come to the new grave. */
 	private static void callMourners(ServerLevel level, Faction f, Dead dead, BlockPos head, long now, boolean royal) {
 		RandomSource random = level.getRandom();
-		// ((0.7.545) a ruler's: more come, and a few of their guards stand by)
+		// ((0.7.546) a ruler's: more come, and a few of their guards stand by)
 		int most = royal ? ROYAL_MOURNERS : MOST_MOURNERS;
 		List<Mourner> called = new ArrayList<>();
 		AABB box = new AABB(head).inflate(MOURN_REACH, 16.0, MOURN_REACH);
@@ -1030,7 +1030,7 @@ public final class Bearers {
 		}
 	}
 
-	/** (0.7.545) After a ruler's family: a few of the realm's guards to stand by the grave, then townsfolk, up to {@link #ROYAL_MOURNERS}. */
+	/** (0.7.546) After a ruler's family: a few of the realm's guards to stand by the grave, then townsfolk, up to {@link #ROYAL_MOURNERS}. */
 	private static void royalMourners(ServerLevel level, Faction f, Dead dead, BlockPos head, long now, List<Mourner> called) {
 		AABB box = new AABB(head).inflate(MOURN_REACH, 16.0, MOURN_REACH);
 		Vec3 centre = Vec3.atCenterOf(head);
@@ -1072,7 +1072,7 @@ public final class Bearers {
 	/** {@code who} is to grieve at the grave at {@code head}, standing at the {@code n}th place round the mound. */
 	private static Mourner mourner(PathfinderMob who, BlockPos head, Component name, Grief grief, int n, long now) {
 		BlockPos plot = plot(head);
-		// either side of the mound, then at its foot ((0.7.545) and a ruler's crowd further round)
+		// either side of the mound, then at its foot ((0.7.546) and a ruler's crowd further round)
 		BlockPos stand = switch (n % 8) {
 			case 0 -> plot.east();
 			case 1 -> plot.west();
