@@ -101,6 +101,8 @@ public final class ZFighterDemonRealm {
 	static final float VILLAGE_CHANCE = 0.66F;
 	static final double BUILD_NEAR = 56.0;
 	static final int VILLAGE_RADIUS = 11;
+	/** (0.21.3) How many village spots without a floor the life story's start tries before carving one. */
+	static final int FLOOR_TRIES = 4;
 	/** A village's master is put back when a player comes this near (blocks). */
 	static final double NPC_NEAR = 48.0;
 	/** The dark master's lesson: bonus TP over a good master's, the blood it draws and the hardship it adds are the camp masters' own. */
@@ -346,6 +348,7 @@ public final class ZFighterDemonRealm {
 		}
 		spots.sort(java.util.Comparator.comparingDouble(s -> Math.hypot(s[0] - near.getX(), s[1] - near.getZ())));
 		List<BlockPos> known = level.getAttachedOrElse(VILLAGES, List.of());
+		int offBiome = 0, noFloor = 0;
 		for (int[] spot : spots) {
 			int x = spot[0], z = spot[1];
 			for (BlockPos village : known) {
@@ -359,10 +362,15 @@ public final class ZFighterDemonRealm {
 			}
 			int layer = villageLayer(level, x, z);
 			if (layer < 0 && !anyGround) {
+				offBiome++;
 				continue;
 			}
 			int y = floor(level, x, z);
 			if (y < 0) {
+				// (0.21.3) each try makes the chunks there: a few, not dozens, while someone waits on the story
+				if (++noFloor >= FLOOR_TRIES) {
+					break;
+				}
 				continue;
 			}
 			build(level, x, y, z, Math.max(layer, 0));
@@ -372,7 +380,33 @@ public final class ZFighterDemonRealm {
 			level.setAttached(VILLAGES, villages);
 			return village;
 		}
+		com.jaymospowers.JaymosPowers.LOGGER.info("Demon village near {}: {} spots, {} off a demon biome, {} without a floor", near, spots.size(),
+			offBiome, noFloor);
 		return null;
+	}
+
+	/**
+	 * (0.21.3) The life story's last resort: a demon village right at (x, z), on its floor if it has one, else carved out
+	 * of the rock at the Nether's y 64 (the yard clears its own headroom and props its ground). Returns its middle.
+	 */
+	static BlockPos raiseAt(ServerLevel level, int x, int z) {
+		int y = floor(level, x, z);
+		if (y < 0) {
+			StringBuilder column = new StringBuilder();
+			for (int at = FLOOR_MIN; at <= FLOOR_MAX; at += 8) {
+				column.append(at).append('=').append(level.getBlockState(new BlockPos(x, at + dy(level), z)).getBlock().getDescriptionId()).append(' ');
+			}
+			com.jaymospowers.JaymosPowers.LOGGER.info("Demon village at {} {}: no floor, carving one at y 64 (column: {})", x, z, column);
+			y = 64 + dy(level);
+		}
+		int layer = Math.max(layerAt(level, new BlockPos(x, y, z)), 0);
+		build(level, x, y, z, layer);
+		BlockPos village = new BlockPos(x, y, z);
+		List<BlockPos> villages = new ArrayList<>(level.getAttachedOrElse(VILLAGES, List.of()));
+		villages.removeIf(v -> v.getX() == x && v.getZ() == z);
+		villages.add(village);
+		level.setAttached(VILLAGES, villages);
+		return village;
 	}
 
 	/** (0.17.198) Where a village's master stands. */

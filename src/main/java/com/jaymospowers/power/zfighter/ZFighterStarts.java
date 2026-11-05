@@ -113,7 +113,7 @@ public final class ZFighterStarts {
 	/** The Maw: the salvager's deck plates. */
 	static final int DECK_PLATES = 48;
 	/** The demon start: how far the Gloam is looked for (blocks, and the steps), how many cells round it a village is looked for, and how far off the old portal stands (blocks). */
-	static final int DEMON_SEARCH = 4096, DEMON_STEP = 32, DEMON_CELLS = 3, DEMON_CELLS_FAR = 8, PORTAL_MIN = 14, PORTAL_MAX = 24;
+	static final int DEMON_SEARCH = 4096, DEMON_STEP = 32, DEMON_CELLS = 3, PORTAL_MIN = 14, PORTAL_MAX = 24;
 	/** Spots tried for the portal. */
 	static final int PORTAL_TRIES = 16;
 
@@ -540,20 +540,15 @@ public final class ZFighterStarts {
 		}
 		BlockPos near = gloam != null ? gloam : from;
 		BlockPos village = gloam == null ? null : ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS, false);
-		if (village == null && gloam != null) {
-			village = ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS_FAR, false);
-		}
 		if (village == null) {
-			// (0.20.104) Andy picked this road and woke in the overworld (a One Dimension world): no demon biome or no
-			// village spot that could stand was found. The master's hall goes up on the nearest Nether floor instead.
-			JaymosPowers.LOGGER.warn("Demon master start for {}: {} near {} (stacked: {}); raising the hall on any Nether floor",
+			// (0.21.3) Andy's singleplayer log: a demon biome was found, but no village spot near it had a floor, and the wider
+			// searches that followed generated chunk after chunk for minutes while he waited. Now the hall goes up right
+			// where the biome was found (or under spawn without one), carved out of the rock if there's no floor there.
+			JaymosPowers.LOGGER.warn("Demon master start for {}: {} near {} (stacked: {}); raising the hall right there",
 				player.getGameProfile().name(), gloam == null ? "no demon biome" : "no village spot", near, stacked);
-			village = ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS_FAR, true);
+			village = ZFighterDemonRealm.raiseAt(nether, near.getX(), near.getZ());
 		}
-		if (village == null) {
-			JaymosPowers.LOGGER.warn("Demon master start for {}: no Nether floor near {}", player.getGameProfile().name(), near);
-			return false;
-		}
+		JaymosPowers.LOGGER.info("Demon master start for {}: the hall at {}", player.getGameProfile().name(), village);
 		// before the master's door, the fire at your back
 		Vec3 master = ZFighterDemonRealm.masterSpot(village);
 		put(player, nether, BlockPos.containing(master.x + 2.0, village.getY(), master.z));
