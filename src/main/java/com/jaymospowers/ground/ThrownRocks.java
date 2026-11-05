@@ -60,6 +60,11 @@ import org.jspecify.annotations.Nullable;
  * (0.20.69) Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". Every zombie (husks, drowned, zombie
  * villagers, MCA's and Kitchen's zombies), zombified piglins and every Hornkin take {@link #SHRUGGED_DAMAGE} from a rock
  * ({@link #shrugsOff}). An unsuspecting one can still be knocked out as before.
+ * <p>
+ * (0.20.81) Andy: "you also should only be able to throw rocks from the offhand, and after a small charge. it no longer
+ * places unless you have it in the main hand". A rock in the main hand only sets down (it is never thrown); a rock in the
+ * off hand is never set down, and is thrown once use has been held for {@link #CHARGE} ticks, at the air or at a block
+ * ({@link #charge}).
  */
 public final class ThrownRocks {
 	/** A rock hits for this much. */
@@ -72,6 +77,10 @@ public final class ThrownRocks {
 	static final int COOLDOWN = 10;
 	/** How often a rock lies where it lands rather than breaking. */
 	static final float KEEP_CHANCE = 0.5F;
+	/** (0.20.81) How long use is held with a rock in the off hand before it's thrown (ticks). */
+	static final int CHARGE = 10;
+	/** (0.20.81) A hold broken for longer than this (ticks; a held use repeats every 4) starts the charge again. */
+	static final int CHARGE_GAP = 6;
 	/** A rock still flying after this long is no longer watched. */
 	static final int LIFE = 200;
 	/** (0.18.84) The chance a rock knocks out someone unsuspecting: hit on the head (near eye height), and anywhere else. */
@@ -120,6 +129,8 @@ public final class ThrownRocks {
 	}
 
 	private static final List<Rock> FLYING = new ArrayList<>();
+	/** (0.20.81) Players winding up an off hand throw: the tick the hold began, and the tick it was last seen. */
+	private static final java.util.Map<java.util.UUID, long[]> WINDING = new java.util.HashMap<>();
 	/** While a rock's blow is being dealt again (so it isn't again and again). */
 	private static boolean redealing;
 
@@ -128,18 +139,24 @@ public final class ThrownRocks {
 
 	public static void init() {
 		UseItemCallback.EVENT.register(ThrownRocks::use);
+		// an off hand rock is never set down: a use on a block winds up the throw instead
+		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> use(player, level, hand));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(ThrownRocks::allowDamage);
 		ServerTickEvents.END_SERVER_TICK.register(ThrownRocks::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLYING.clear();
 			CRACKS.clear();
+			WINDING.clear();
 		});
 	}
 
 	private static InteractionResult use(Player player, Level level, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		if (player.isSpectator() || !FirstTools.rock(stack) || FirstTools.striking(player) || player.getCooldowns().isOnCooldown(stack)) {
+		if (hand != InteractionHand.OFF_HAND || player.isSpectator() || !FirstTools.rock(stack) || FirstTools.striking(player)) {
 			return InteractionResult.PASS;
+		}
+		if (player.getCooldowns().isOnCooldown(stack) || !charge(player, level)) {
+			return InteractionResult.CONSUME;
 		}
 		player.getCooldowns().addCooldown(stack, COOLDOWN);
 		if (level instanceof ServerLevel server) {
@@ -152,6 +169,30 @@ public final class ThrownRocks {
 			stack.consume(1, player);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * (0.20.81) A held use winding up an off hand throw: whether it has been held {@link #CHARGE} ticks now. The server
+	 * keeps the count (the client only says when to throw by going on holding); the client always waits.
+	 */
+	private static boolean charge(Player player, Level level) {
+		if (level.isClientSide()) {
+			return false;
+		}
+		long now = level.getGameTime();
+		long[] hold = WINDING.get(player.getUUID());
+		if (hold == null || now - hold[1] > CHARGE_GAP || now < hold[1]) {
+			WINDING.put(player.getUUID(), new long[] {now, now});
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 0.4F,
+				0.7F);
+			return false;
+		}
+		hold[1] = now;
+		if (now - hold[0] < CHARGE) {
+			return false;
+		}
+		WINDING.remove(player.getUUID());
+		return true;
 	}
 
 	private static @Nullable Rock rock(Entity entity) {

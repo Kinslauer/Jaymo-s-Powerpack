@@ -15,7 +15,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 
 /**
- * (0.7.568) Andy: "voice lines from npcs are too loud and layer like the old intro did." A villager's spoken lines (MCA's
+ * (0.7.569) Andy: "voice lines from npcs are too loud and layer like the old intro did." A villager's spoken lines (MCA's
  * hello, yes, no, cheer... and our lines in their tongue) now go one at a time: a villager says nothing new until its last
  * line has finished and {@link #SPEAKER_GAP} has passed, and a player hears one villager's line at a time (another that
  * starts while one is still playing to them is not sent to them). Lines are played quieter too ({@link #TONGUE_VOLUME},

@@ -300,7 +300,7 @@ public final class Languages {
 			// (a cry of pain or a snore is not a line: it plays as MCA sends it)
 			return false;
 		}
-		// (0.7.568) one line at a time per villager, and per listener (VoiceGate)
+		// (0.7.569) one line at a time per villager, and per listener (VoiceGate)
 		int now = level.getServer().getTickCount();
 		if (VoiceGate.busy(speaker, now)) {
 			return true;
@@ -333,7 +333,7 @@ public final class Languages {
 		return true;
 	}
 
-	/** (0.7.568) MCA sounds that aren't spoken lines, left out of {@link VoiceGate}. */
+	/** (0.7.569) MCA sounds that aren't spoken lines, left out of {@link VoiceGate}. */
 	static final Set<String> UNGATED = Set.of("hurt", "snore");
 
 	/**
@@ -354,7 +354,7 @@ public final class Languages {
 		if (sound == null || (last != null && now - last < FAREWELL_GAP)) {
 			return;
 		}
-		// (0.7.568) not over another line, and quieter (VoiceGate)
+		// (0.7.569) not over another line, and quieter (VoiceGate)
 		if (VoiceGate.busy(speaker, now) || VoiceGate.hearing(player, now)) {
 			return;
 		}

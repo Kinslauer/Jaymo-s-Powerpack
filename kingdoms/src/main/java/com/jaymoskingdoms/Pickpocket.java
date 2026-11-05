@@ -30,6 +30,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -110,15 +111,20 @@ public final class Pickpocket {
 	/** Out of all the weights plus this, the pocket is empty. */
 	static final int NOTHING_WEIGHT = 3;
 
-	/** Server → players who can see them: {@code playerId}'s hand is in {@code markId}'s pocket (-1: drawn back). */
-	public record Reach(int playerId, int markId) implements CustomPacketPayload {
+	/**
+	 * Server → players who can see them: {@code playerId}'s hand is in {@code markId}'s pocket (-1: drawn back).
+	 * {@code playerId} may be a crook villager's ({@code Crooks}). (0.7.568) {@code purse}: the mark wears a coin purse on
+	 * the hip, so the hand goes for that.
+	 */
+	public record Reach(int playerId, int markId, boolean purse) implements CustomPacketPayload {
 		public static final Type<Reach> TYPE = new Type<>(JaymosKingdoms.id("pickpocket_reach"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Reach> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeVarInt(p.playerId);
 				buf.writeVarInt(p.markId + 1);
+				buf.writeBoolean(p.purse);
 			},
-			buf -> new Reach(buf.readVarInt(), buf.readVarInt() - 1));
+			buf -> new Reach(buf.readVarInt(), buf.readVarInt() - 1, buf.readBoolean()));
 
 		@Override
 		public Type<Reach> type() {
@@ -249,9 +255,19 @@ public final class Pickpocket {
 
 	/** Tells everyone who can see {@code player} where their hand is ({@code markId}, or -1: drawn back). */
 	private static void reach(ServerPlayer player, int markId) {
-		Reach packet = new Reach(player.getId(), markId);
-		List<ServerPlayer> to = new ArrayList<>(PlayerLookup.tracking(player));
-		to.add(player);
+		reach(player, markId, false);
+	}
+
+	/**
+	 * (0.7.568) Tells everyone who can see {@code who} (a player, or a crook) where their hand is ({@code markId}, or -1:
+	 * drawn back), and whether it goes for a purse on the mark's hip.
+	 */
+	public static void reach(Entity who, int markId, boolean purse) {
+		Reach packet = new Reach(who.getId(), markId, purse);
+		List<ServerPlayer> to = new ArrayList<>(PlayerLookup.tracking(who));
+		if (who instanceof ServerPlayer self) {
+			to.add(self);
+		}
 		for (ServerPlayer p : to) {
 			if (ServerPlayNetworking.canSend(p, Reach.TYPE)) {
 				ServerPlayNetworking.send(p, packet);
