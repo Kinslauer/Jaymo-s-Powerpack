@@ -9059,3 +9059,18 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   weapons on the ground). `PowersCompat.guardsFinishMonsters` adds guards and archers to Powers' `MobExecutions.FINISHES`:
   they walk to a downed monster and execute it (hotheaded or spiteful ones anyone they fight); `Temperaments.spares` no
   longer spares monsters. Sharks and the great whale bleed Powers' blood, not red dust. Gradle build only, not played.
+
+- **0.7.549, Weapon Forms on the RPG skill bar; the skill bar no longer overlaps the body row:** Andy (2026-11-05): "more
+  UI overlap with the rpg skills. weapon form skills should move to that system too. makes the moves easier to access with
+  less keys". The "RPG skills" are Spell Engine's skill bar (Zsolt's RPG Series). Its bar sat at a fixed spot left of the
+  hotbar, on top of our left dock's body row. `client/hud/SkillBarDock` makes it the left dock's lowest row (5, under the
+  stomach, valor, symbiote arm and body row) each frame through `HudZones`, and hides it during films; Spell Engine's HUD
+  editor can no longer move it. Every Weapon Form is now also a Spell Engine spell (`data/jaymoskingdoms/spell/form_*.json`,
+  tag `#jaymoskingdoms:weapon_forms`, 13 icons in `textures/spell/`): with a form weapon in hand the forms you know for it
+  are on the bar (belt order first) and fire on its keys (1, 2, 3..., right-click stays the guard), with the cooldown on the
+  slot. `forms/FormSkills` adds the spell source and a custom delivery that runs `Forms.cast` (the old checks; a form that
+  can't go starts no cooldown). `mixin/spellengine/SpellContainerSourceMixin` gives a form weapon with no spell container
+  one that takes only the forms (so class skills still need their own weapons) and lets a weapon that has one (a Rogues
+  dagger) take the forms too. No stance or belt picking with a weapon: the Combat Art key is the art again; the stance stays
+  for bare fists (a bare hand on the bar would take right-click from doors and villagers); a Combat Art tap tugs a pinned
+  spear back. Without Spell Engine the stance works as before. Gradle build only, not played.
