@@ -544,6 +544,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Patrons.register();
 		// (0.7.535) every patron's ten commandments, and the Truth's folk keeping its own
 		Commandments.register();
+		// (0.7.581) patron wrath and grace, the cast-out
+		PatronWrath.register();
+		CastOut.register();
 		Rites.register();
 		Sermons.register();
 		RealmFaiths.register();

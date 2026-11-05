@@ -588,7 +588,8 @@ public final class Patrons {
 		long days = Math.max(0L, today - from);
 		int perDay = Math.max(DECAY_LEAST, DECAY_PER_DAY - DEVOTION_PER_RANK * Skills.rank(sp, Skills.Perk.DEVOTION));
 		// (0.7.513) while the old patron's trials run there is no floor
-		int floor = Turning.anyTrial(sp) ? 0 : TIER_AT[0];
+		// (0.7.581) nor in strict faith
+		int floor = Turning.anyTrial(sp) || PatronWrath.strict(sp) ? 0 : TIER_AT[0];
 		int favour = (int)Math.max((long)floor, s.favour - days * perDay);
 		if (s.favour < floor) {
 			favour = s.favour;
@@ -684,6 +685,8 @@ public final class Patrons {
 		if (!s.sworn()) {
 			return;
 		}
+		// (0.7.581) beasts wasted, the tame slain, monsters cleared
+		PatronWrath.killed(sp, level, victim);
 		if (victim.getType() == com.jaymoskingdoms.whaling.Whaling.GREAT_WHALE) {
 			deed(sp, Patron.DEEP_MOTHER, DEED_GREAT, "great_whale");
 		}

@@ -686,6 +686,22 @@ public final class Theft {
 		pursue(level, f, player);
 	}
 
+	/**
+	 * (0.7.581) {@code f}'s faithful cast {@code player} out ({@link CastOut}): an outlaw there however well liked, no pardon,
+	 * and its guards after them now. Not a realm at war with theirs, nor their own crown's.
+	 */
+	static void castOut(ServerPlayer player, ServerLevel level, Faction f) {
+		if (Wars.enemy(player, f) || Crowns.rules(level.getServer(), f, player.getUUID())) {
+			return;
+		}
+		long until = level.getGameTime() + OUTLAW_TICKS;
+		if (until(player, f.id()) < until) {
+			markWanted(player, f.id(), until);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cast_out", f.name()).withStyle(ChatFormatting.DARK_RED));
+		}
+		pursue(level, f, player);
+	}
+
 	/** Its guards, archers and golems near {@code player} turn on them. */
 	private static void pursue(ServerLevel level, Faction f, ServerPlayer player) {
 		AABB around = player.getBoundingBox().inflate(PURSUIT_RANGE);

@@ -116,6 +116,8 @@ public final class Suspicion {
 			marks.put(key, new Mark(name, kind, old.strength(), now, old.added()));
 		}
 		who.setAttached(MARKS, marks);
+		// (0.7.581) a Truth follower who comes to suspect it, rightly, turns on them
+		CastOut.learned(who, player, false);
 	}
 
 	/** How strongly {@code who} suspects {@code player} now (0 for none). */

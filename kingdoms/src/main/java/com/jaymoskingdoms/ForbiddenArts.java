@@ -60,6 +60,8 @@ public final class ForbiddenArts {
 	static void cast(ServerPlayer player, ServerLevel level, boolean blood, int extra) {
 		PowersCompat.corrupt(player, (blood ? BLOOD_CORRUPTION : DEATH_CORRUPTION) + extra);
 		Theft.forbidden(player, level, player.blockPosition(), blood);
+		// (0.7.581) The Truth's followers who saw it turn on them
+		CastOut.forbiddenSeen(player, level);
 		// (0.7.465) the spirit warns of it; the Grue draws nearer
 		com.jaymoskingdoms.spirits.Grue.darkAct(player);
 	}

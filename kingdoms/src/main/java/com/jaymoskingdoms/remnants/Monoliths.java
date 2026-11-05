@@ -195,6 +195,8 @@ public final class Monoliths {
 			}
 		});
 		AncientRemnantsCompat.register();
+		// (0.7.581) the glyphs round their feet
+		MonolithGlyphs.register();
 	}
 
 	/** Whether {@code entity} is one of the Aether's Giants. */
@@ -530,6 +532,7 @@ public final class Monoliths {
 		Monolith m = new Monolith(foot.immutable(), element, AWAKE, true, heart);
 		remember(level, m);
 		MonolithHeart.raise(level, m);
+		MonolithGlyphs.carve(level, m);
 		JaymosKingdoms.LOGGER.info("A {} monolith rose at {}", element.key(), foot);
 		return m;
 	}
@@ -559,7 +562,7 @@ public final class Monoliths {
 			return true;
 		}
 		for (Monolith m : all(server)) {
-			if (m.ours() && part(m.pos(), pos) && m.element().builtOf(state)) {
+			if (m.ours() && part(m.pos(), pos) && (m.element().builtOf(state) || state.is(MonolithGlyphs.glyph(m.element())))) {
 				if (highTinkers(player.getMainHandItem())) {
 					return true;
 				}
