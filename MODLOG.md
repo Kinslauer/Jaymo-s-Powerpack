@@ -1077,3 +1077,11 @@ The village start is now the Family farmhand: you wake inside a lone farmhouse (
 farmstead) and live with the family there. Day one offers only the Family farmhand, Rock bottom, Banished, Shipwreck,
 the heritage starts and Let fate decide; every other start opens with a deed of its own and a "Road Opened"
 advancement. Fate now picks from every start, locked or not, by a fixed percentage table. See Kingdoms' MODLOG 0.7.605.
+
+## 0.21.7 (2026-11-05): gravity's Lift throw winds up and whips through
+- Andy: "gravity users throw the rocks the old way" / "gravity users throw instantly and farther". A left click to throw
+  what Lift holds now draws the main arm back over the shoulder for `GravityPower.HURL_WIND` (7 ticks, about a third of
+  a second), then lets go with the same whip and follow-through as a thrown rock (`ThrownRocks.hurling`/`hurled`, the
+  `MAIN_ARM` flag on `ThrownRocks.THROW`, drawn by `RockThrowPose`). In first person the bare main arm whips through
+  (FirstPersonArms, Kindle's throw keys). The throw keeps its power-throw speed (Andy's pick). Dropping the hold during
+  the wind-up throws nothing. Built, not played.

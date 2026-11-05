@@ -192,6 +192,53 @@ public final class ThrownRocks {
 		return (int) (id & 0xFFFFF) << 8 | (charge & 63) << 2 | stage;
 	}
 
+	/**
+	 * (0.21.7) In a {@link #THROW} value: the main arm throws, not the off hand. Andy: "gravity users throw the rocks the
+	 * old way": a gravity user's Lift hurling what it holds ({@link #hurled}) whips the main arm through the same way.
+	 */
+	public static final int MAIN_ARM = 1 << 28;
+
+	/**
+	 * (0.21.7) A gravity user's Lift draws the main arm back to hurl what it holds, over {@code ticks} (GravityPower lets
+	 * go then, and calls {@link #hurled}). False if a rock in the other hand is winding up (that pose stays).
+	 */
+	public static void hurling(ServerPlayer player, int ticks) {
+		Hold hold = WINDING.get(player.getUUID());
+		if (hold != null && hold.thrown < 0 && !hold.hurl) {
+			return;
+		}
+		holds = holds + 1 & 0xFFFFF;
+		hold = new Hold(player, player.level().getGameTime(), holds, 0);
+		hold.hurl = true;
+		hold.charge = Math.max(1, Math.min(63, ticks));
+		WINDING.put(player.getUUID(), hold);
+		player.setAttached(THROW, value(hold.id, hold.charge, WINDING_UP) | MAIN_ARM);
+	}
+
+	/** (0.21.7) The Lift's hurl let go: the main arm whips through and follows through, for everyone. */
+	public static void hurled(ServerPlayer player) {
+		Hold hold = WINDING.get(player.getUUID());
+		if (hold == null || !hold.hurl || hold.thrown >= 0) {
+			if (hold != null && hold.thrown < 0) {
+				// winding up a rock in the other hand: that pose stays
+				return;
+			}
+			hurling(player, 1);
+			hold = WINDING.get(player.getUUID());
+		}
+		hold.thrown = player.level().getGameTime();
+		player.setAttached(THROW, value(hold.id, hold.charge, THROWING) | MAIN_ARM);
+	}
+
+	/** (0.21.7) The Lift dropped what it held before the hurl: the arm comes back down. */
+	public static void hurlDropped(ServerPlayer player) {
+		Hold hold = WINDING.get(player.getUUID());
+		if (hold != null && hold.hurl && hold.thrown < 0) {
+			WINDING.remove(player.getUUID());
+			player.removeAttached(THROW);
+		}
+	}
+
 	/** (0.20.103) The charge (ticks) in a {@link #value}. */
 	public static int chargeOf(int value) {
 		return value >> 2 & 63;
@@ -218,7 +265,10 @@ public final class ThrownRocks {
 		final Player player;
 		final long start;
 		long thrown = -1, heard;
-		final int id, momentum, charge;
+		final int id, momentum;
+		int charge;
+		/** (0.21.7) A gravity user's Lift hurl (the main arm), not a rock. */
+		boolean hurl;
 
 		Hold(Player player, long now, int id, int momentum) {
 			this.player = player;

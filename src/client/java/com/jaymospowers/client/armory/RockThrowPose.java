@@ -188,6 +188,11 @@ public final class RockThrowPose {
 				int stage = ownStage();
 				// each hold its own number: begun on a new tick
 				value = stage == 0 ? 0 : ThrownRocks.value(ownStart, ownCharge, stage);
+				Integer synced = player.getAttached(ThrownRocks.THROW);
+				if (stage == 0 && synced != null && (synced & ThrownRocks.MAIN_ARM) != 0) {
+					// (0.21.7) your Lift's hurl, which the server starts
+					value = synced;
+				}
 			} else {
 				Integer synced = player.getAttached(ThrownRocks.THROW);
 				value = synced == null ? 0 : synced;
@@ -235,7 +240,9 @@ public final class RockThrowPose {
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
-		return new Pose(s.stage, player.getMainArm().getOpposite(), Mth.lerp(partialTicks, s.ticksBefore, s.ticks), amount, ownView,
+		int value = s.value != 0 ? s.value : s.lastValue;
+		HumanoidArm arm = (value & ThrownRocks.MAIN_ARM) != 0 ? player.getMainArm() : player.getMainArm().getOpposite();
+		return new Pose(s.stage, arm, Mth.lerp(partialTicks, s.ticksBefore, s.ticks), amount, ownView,
 			Math.max(1, ThrownRocks.chargeOf(s.value != 0 ? s.value : s.lastValue)));
 	}
 
@@ -311,6 +318,20 @@ public final class RockThrowPose {
 		part.xRot = Mth.lerp(amount, part.xRot, x);
 		part.yRot = Mth.lerp(amount, part.yRot, y);
 		part.zRot = Mth.lerp(amount, part.zRot, z);
+	}
+
+	/**
+	 * (0.21.7) Your own Lift's hurl in first person (FirstPersonArms, the empty main arm): {through (0 drawn back, 1 thrown
+	 * through), weight}, or null.
+	 */
+	public static float @Nullable [] hurl(float partialTicks) {
+		LocalPlayer player = Minecraft.getInstance().player;
+		Pose pose = player == null ? null : pose(player, partialTicks);
+		if (pose == null || pose.arm() != player.getMainArm() || pose.stage() != ThrownRocks.THROWING) {
+			return null;
+		}
+		float[] p = phase(pose);
+		return new float[] {p[0], p[1] * p[2]};
 	}
 
 	/** First person, just before the held rock is drawn (HeldItems.firstPerson): drawn back, thrown, the hand dipping after. */
