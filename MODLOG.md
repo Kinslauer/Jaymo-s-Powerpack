@@ -705,3 +705,20 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - A cut's drip (`BladeBlood.drip`) left from inside the body and, since 0.20.51, opened into a spatter star there. A drip
   now leaves from just outside the body's box (`DRIP_OUT`) and the client draws a no-stain spray as one small falling drop
   (`BloodClient#DRIP_DROP`, `BloodDrop.drip` held on its sheet's first frame). Built, not played.
+
+## 0.20.87 (2026-11-05): the "Jaymo's Powerpack" advancement tab (Kingdoms 0.7.579, Kitchen 0.5.71)
+- Seven-mods plan, patch 3. Andy's note: all of our advancements on one screen, and a line made for the pack. Until now
+  our mods had only recipe unlocks. There's now one tab, `data/jaymospowers/advancement/pack`, which lays out on Better
+  Advancements' big map.
+- The main line follows a playthrough: A Life Begun (life story told) > Journeyman (a job's first rank) > Sworn (a
+  patron) > Remnant (within 48 blocks of a monolith) > Giant-felled > Above the Clouds (entering `jaymospowers:aether`)
+  > Not the Last (two kinds of Giant) > The Last Giant (all four kinds; Better Advancements shows the count).
+- Side branches: Awakened (a power), Home Cooking and Cooked to Perfection (Kitchen), Cast Off (aboard a ship) and Thar
+  She Blows (a great whale), First Insight (alchemy research), Forged (a Tinkers tool in hand), Executioner (a finisher).
+- Titles are plain and descriptions only hint; no lore is stated. Most criteria are `minecraft:impossible`, awarded from
+  code by id: `core/PackAdvancements` (power, research, tools; `Downed.execute` for executions), Kingdoms'
+  `PackAdvancements` (story, rank, patron, monolith, ship, whale and Giant deaths; at a Giant's fall everyone within 96
+  blocks gets it), and `Kitchen.award` for dishes.
+- The tab's background is a dark tile in our panels' colours (`textures/gui/advancements/backgrounds/pack.png`), with
+  an Excalibur-graded copy (grade.py's new `EXTRA` list keeps it on rebuilds). The vanilla frames are left alone so the
+  other tabs don't change. Built, not played.

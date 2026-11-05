@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/cast_off",
+  "display": {
+    "icon": {
+      "id": "minecraft:trident"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.whale.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.whale.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

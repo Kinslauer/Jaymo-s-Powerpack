@@ -58,6 +58,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.GroundCracks.register();
 		com.jaymospowers.core.UltimateFilm.register();
 		com.jaymospowers.core.Soundscape.register();
+		// (0.20.87) the "Jaymo's Powerpack" advancement tab
+		com.jaymospowers.core.PackAdvancements.init();
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();

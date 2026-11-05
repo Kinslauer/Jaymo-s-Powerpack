@@ -9356,3 +9356,4 @@ ultimate and beam-clash films came down with it. Not played.
     tavern's fare (vanilla and Kitchen dishes and brews, whichever exist) and, while a cook (or failing that some
     townsfolk who isn't on guard) is within 12 blocks, sells anyone a hot meal: click a dish to buy one, priced by the
     town's food index, up to 24 a day, the coin going to the town's till. Taverns already built don't get one. Not played.
+- **0.7.579, our part of the advancement tab:** `PackAdvancements` awards Powers' `jaymospowers:pack/*` advancements for the life story, a job's first rank, a sworn patron, a monolith seen, a ship taken out, a great whale killed and each kind of Giant felled (Powers 0.20.87). Not played.
