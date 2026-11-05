@@ -18,6 +18,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -51,9 +53,15 @@ public final class RoyalRemains {
 	static final int ASSIGN = 40, STEP = 5;
 	/** A ruler's body this close to their seat is seen to; anyone of theirs this close to the body may come for it. */
 	static final double SWEEP = 112.0, SEARCH = 96.0;
-	/** A foe (or anyone fighting) this close to the body keeps them off it; the wait after death before they come (ticks). */
+	/**
+	 * A foe (or anyone fighting) this close to the body keeps townsfolk off it, but not a guard: Andy, "guards will
+	 * prioritize the body, and flee the fight with it over shoulder". The wait after death before anyone comes (ticks).
+	 */
 	static final double DANGER = 8.0;
-	static final long WAIT = 100L;
+	static final long WAIT = 20L;
+	/** A guard's run with the body (navigation speed; a villager guard's brain speed). */
+	static final double FLEE_SPEED = 1.25;
+	static final float VILLAGER_FLEE_SPEED = 0.85F;
 	/** Close enough to take the body up; to the cleric or the seat to lay it down. */
 	static final double REACH = 2.2, SAFE_REACH = 3.0;
 	/** A cleric this close to the seat (or in the realm's land) is where the body is taken. */
@@ -186,10 +194,15 @@ public final class RoyalRemains {
 				continue;
 			}
 			Faction law = Theft.lawAt(level, corpse.blockPosition());
-			if (law != null && law.id() != f.id() || KitchenCompat.sinceDeath(corpse) < WAIT || danger(level, corpse.blockPosition())) {
+			if (law != null && law.id() != f.id() || KitchenCompat.sinceDeath(corpse) < WAIT) {
 				continue;
 			}
-			PathfinderMob bearer = bearer(level, f, corpse);
+			boolean danger = danger(level, corpse.blockPosition());
+			PathfinderMob bearer = bearer(level, f, corpse, danger);
+			if (bearer == null && danger) {
+				// no guard to brave it: the townsfolk wait for the fighting to move off
+				continue;
+			}
 			if (bearer == null) {
 				// nobody of theirs left near enough to come
 				LEFT.put(id, now + RETRY);
@@ -210,23 +223,27 @@ public final class RoyalRemains {
 		return !level.getEntitiesOfClass(Mob.class, box, m -> m.isAlive() && (m instanceof Enemy || m.getTarget() != null && m.getTarget().isAlive())).isEmpty();
 	}
 
-	/** One of {@code f}'s own to go for the body: the nearest free guard, else the nearest free grown townsperson. */
-	private static @Nullable PathfinderMob bearer(ServerLevel level, Faction f, Entity corpse) {
+	/**
+	 * One of {@code f}'s own to go for the body: the nearest guard (who drops whatever fight they're in for it), else
+	 * (with no fighting over the body) the nearest free grown townsperson.
+	 */
+	private static @Nullable PathfinderMob bearer(ServerLevel level, Faction f, Entity corpse, boolean danger) {
 		AABB box = corpse.getBoundingBox().inflate(SEARCH, 16.0, SEARCH);
 		PathfinderMob guard = null, other = null;
 		double guardD = Double.MAX_VALUE, otherD = Double.MAX_VALUE;
 		for (Villager v : level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && !v.isBaby() && !v.isSleeping())) {
-			if (!Bearers.freeVillager(v) || Rulers.is(v)) {
+			boolean sworn = v instanceof Worker w && w.factionId() == f.id();
+			boolean guarding = sworn && Rulers.role(v) == Folk.GUARD;
+			if (Rulers.is(v) || Downed.isDowned(v) || (guarding ? Bearers.busy(v) || Undertakers.busy(v) || Looters.busy(v) : !Bearers.freeVillager(v))) {
 				continue;
 			}
-			boolean sworn = v instanceof Worker w && w.factionId() == f.id();
 			Faction theirs = Theft.lawAt(level, v.blockPosition());
 			if (!sworn && (theirs != null ? theirs.id() != f.id() : !f.fallen())) {
 				// not one of theirs (in a realm in ruin, anyone living about it is)
 				continue;
 			}
 			double d = v.distanceToSqr(corpse);
-			if (sworn && Rulers.role(v) == Folk.GUARD) {
+			if (guarding) {
 				if (d < guardD) {
 					guardD = d;
 					guard = v;
@@ -238,7 +255,7 @@ public final class RoyalRemains {
 		}
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, box, x -> x.isAlive() && x.factionId() == f.id() && !x.isSleeping() && !x.isBaby())) {
 			int role = folk.role();
-			if (folk.leader() || folk.getTarget() != null || Bearers.busy(folk) || Undertakers.busy(folk) || busy(folk)
+			if (folk.leader() || Downed.isDowned(folk) || !folk.combatant() && folk.getTarget() != null || Bearers.busy(folk) || Undertakers.busy(folk) || busy(folk)
 				|| role == Folk.CARTER || role == Folk.PULLER || role == Folk.STABLEHAND || role == Folk.FARRIER) {
 				continue;
 			}
@@ -253,7 +270,31 @@ public final class RoyalRemains {
 				other = folk;
 			}
 		}
-		return guard != null ? guard : other;
+		return guard != null ? guard : danger ? null : other;
+	}
+
+	/** {@code d}'s bearer is one of the realm's fighters (who doesn't stop for a fight while they bear the body). */
+	private static boolean guard(PathfinderMob bearer) {
+		return bearer instanceof Folk folk ? folk.combatant() : Rulers.role(bearer) == Folk.GUARD;
+	}
+
+	/** A guard drops the fight they're in, for the body. */
+	private static void disengage(PathfinderMob guard) {
+		guard.setTarget(null);
+		if (guard instanceof Villager v) {
+			v.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+		}
+	}
+
+	/** Walks {@code mob} to {@code to}: a guard runs. */
+	private static void go(PathfinderMob mob, BlockPos to) {
+		if (!guard(mob)) {
+			Undertakers.walk(mob, to);
+		} else if (mob instanceof Villager v) {
+			BehaviorUtils.setWalkAndLookTargetMemories(v, to, VILLAGER_FLEE_SPEED, 1);
+		} else {
+			mob.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, FLEE_SPEED);
+		}
 	}
 
 	/** The cleric nearest {@code near} who serves {@code f}'s town (in its land, or close by its seat), or null. */
@@ -291,7 +332,11 @@ public final class RoyalRemains {
 			return false;
 		}
 		boolean holding = KitchenCompat.carrier(corpse) == bearer;
-		if (bearer.getTarget() != null || now > d.until || bearer instanceof Villager v && McaCompat.panicking(v)) {
+		boolean guard = guard(bearer);
+		if (guard && !Downed.isDowned(bearer) && now <= d.until && d.stage.compareTo(Stage.STRIP) <= 0) {
+			// (a guard fetching the body or running it home doesn't stop to fight)
+			disengage(bearer);
+		} else if (bearer.getTarget() != null || Downed.isDowned(bearer) || now > d.until || bearer instanceof Villager v && McaCompat.panicking(v)) {
 			// set upon (or it's taking too long): put down, and fetched again once it's safe
 			if (holding) {
 				KitchenCompat.throwAt(corpse, bearer.position());
@@ -313,7 +358,7 @@ public final class RoyalRemains {
 					return false;
 				}
 				if (bearer.distanceToSqr(corpse) > REACH * REACH) {
-					Undertakers.walk(bearer, corpse.blockPosition());
+					go(bearer, corpse.blockPosition());
 					return true;
 				}
 				if (KitchenCompat.carry(corpse, bearer)) {
@@ -328,7 +373,7 @@ public final class RoyalRemains {
 				Villager cleric = cleric(level, d);
 				BlockPos safe = cleric != null ? cleric.blockPosition() : f.seat();
 				if (Bearers.horizontalDistSqr(bearer, safe) > SAFE_REACH * SAFE_REACH) {
-					Undertakers.walk(bearer, safe);
+					go(bearer, safe);
 					if (cleric != null && bearer.distanceToSqr(cleric) < 24.0 * 24.0) {
 						// the cleric comes to meet them
 						cleric.getNavigation().stop();
@@ -384,7 +429,7 @@ public final class RoyalRemains {
 			case INTER -> {
 				if (!holding) {
 					if (bearer.distanceToSqr(corpse) > REACH * REACH) {
-						Undertakers.walk(bearer, corpse.blockPosition());
+						go(bearer, corpse.blockPosition());
 						return true;
 					}
 					if (!KitchenCompat.carry(corpse, bearer)) {

@@ -9038,4 +9038,7 @@ Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. C
   then `Bearers.entrustRoyal` buries it in the graveyard with a lit candle on the headstone and up to 8 mourners (family,
   3 guards standing, townsfolk). No grave ground: it lies in state at the seat and is mourned there. Bearers now skip their
   own ruler's body; `Bearers.Dead.realm` also reads a villager's settlement. Lines in `lang/parts/royal-remains.json`.
+  Andy (00:12Z): "guards will prioritize the body, and flee the fight with it over shoulder": a guard goes for it 1 s after
+  death whatever fighting is about, drops its own fight (target and MCA attack memory cleared each step) and runs it home
+  (speed 1.25, villager guard 0.85); townsfolk still wait for no foe within 8 blocks.
   Gradle build only, not played.
