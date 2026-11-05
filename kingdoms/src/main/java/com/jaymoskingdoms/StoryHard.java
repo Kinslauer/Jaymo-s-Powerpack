@@ -125,6 +125,10 @@ public final class StoryHard {
 			if (shackle == null) {
 				return InteractionResult.PASS;
 			}
+			// (0.7.582) working at the shackle where a captor can see is trying to escape: the camp turns on them
+			if (CaptiveConduct.watched(sp)) {
+				CaptiveConduct.actUp(sp, "pick");
+			}
 			if (!Lockpicking.pickVirtual(sp, shackle.at(), SHACKLE_LEVEL, shackle.at().asLong() ^ 0x5DEECE66DL, () -> {
 				ServerPlayer again = sp.level().getServer().getPlayerList().getPlayer(sp.getUUID());
 				if (again != null) {
@@ -172,6 +176,7 @@ public final class StoryHard {
 	/** The /kingdom story reset: none of it any more. */
 	static void clear(ServerPlayer player) {
 		player.removeAttached(SHACKLE);
+		Shackles.untie(player);
 		player.removeAttached(EVICTED);
 		player.removeAttached(CAST_OUT);
 		forget(player.getUUID());
@@ -202,6 +207,8 @@ public final class StoryHard {
 	/** {@code player} woke in chains at {@code at}, held by camp {@code camp}. */
 	static void shackle(ServerPlayer player, BlockPos at, int camp) {
 		player.setAttached(SHACKLE, new Shackle(at, camp));
+		// (0.7.582) collared and tied to a stake beside them, for all to see (Shackles)
+		Shackles.tie(player, at, player.getRandom());
 	}
 
 	/** {@code e} is a player still in a shackle: a camp's raiders let them be. */
@@ -219,8 +226,8 @@ public final class StoryHard {
 		if (!player.isAlive() || player.isSpectator()) {
 			return;
 		}
-		if (now % 20L == 0L) {
-			// (nothing in the camp harms a captive while they're bound)
+		if (now % 20L == 0L && CaptiveConduct.behaving(player)) {
+			// (nothing in the camp harms a captive while they're bound and keep their place, CaptiveConduct)
 			player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4, false, false));
 		}
 		Vec3 anchor = Vec3.atBottomCenterOf(shackle.at());
@@ -251,13 +258,14 @@ public final class StoryHard {
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hard.chains.slipping", held * 100 / SLIP_TICKS).withStyle(ChatFormatting.GRAY));
 	}
 
-	/** The shackle comes off ({@code how}: "picked" or "slipped"): the camp hunts them from now, for the day. */
-	private static void free(ServerPlayer player, String how) {
+	/** The shackle comes off ({@code how}: "picked", "slipped", (0.7.582) "cut" or "broken", {@link Shackles}): the camp hunts them from now, for the day. */
+	static void free(ServerPlayer player, String how) {
 		Shackle shackle = player.getAttached(SHACKLE);
 		if (shackle == null) {
 			return;
 		}
 		player.removeAttached(SHACKLE);
+		Shackles.untie(player);
 		SLIPPING.remove(player.getUUID());
 		STOOD.remove(player.getUUID());
 		ServerLevel level = player.level();

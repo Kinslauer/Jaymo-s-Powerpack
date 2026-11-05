@@ -1738,6 +1738,17 @@ public final class LifeStory {
 
 	/** A dry, open place to stand {@code min}-{@code max} blocks from {@code center} (horizontally), or null. */
 	static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random) {
+		// (0.7.582) Andy, woken in chains on a camp hut's roof: open ground first (earth, sand, stone), then anywhere to stand
+		for (int i = 0; i < GROUND_TRIES * 2; i++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int d = min + random.nextInt(Math.max(1, max - min + 1));
+			int x = center.getX() + Mth.floor(Math.cos(angle) * d), z = center.getZ() + Mth.floor(Math.sin(angle) * d);
+			level.getChunk(x >> 4, z >> 4);
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+			if (standable(level, top) && openGround(level.getBlockState(top.below()))) {
+				return top;
+			}
+		}
 		for (int i = 0; i < GROUND_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = min + random.nextInt(Math.max(1, max - min + 1));
@@ -1765,6 +1776,14 @@ public final class LifeStory {
 			}
 		}
 		return null;
+	}
+
+	/** (0.7.582) A floor that's the land itself, not something built (a roof, a deck, a wall's top). */
+	private static boolean openGround(BlockState floor) {
+		return floor.is(net.minecraft.tags.BlockTags.DIRT) || floor.is(net.minecraft.tags.BlockTags.SAND)
+			|| floor.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) || floor.is(net.minecraft.world.level.block.Blocks.GRAVEL)
+			|| floor.is(net.minecraft.world.level.block.Blocks.DIRT_PATH) || floor.is(net.minecraft.world.level.block.Blocks.SNOW_BLOCK)
+			|| floor.is(net.minecraft.world.level.block.Blocks.CLAY) || floor.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK);
 	}
 
 	/** Room to stand at {@code feet}: two clear blocks on a sturdy floor, no water or lava. */

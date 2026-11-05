@@ -9391,3 +9391,22 @@ ultimate and beam-clash films came down with it. Not played.
   foot (old ones carved when a player comes near); a book and quill used on them copies a row of runes as a page (one
   a day from each), and the more rows a book holds the more its copier makes out under each: the next standing Giant's
   kind, its heading, how far, whether it stirs. Not played.
+
+## 0.7.582 (2026-11-05): captives left alone till they act up; collars, tethers, breaking free (Powers 0.20.91)
+Andy, woken in chains at a camp and set on at once: "they shouldnt do that until you try to escape or steal or do something
+slaves are not allowed", then "im shackled to the roof of the building ... there should be some kind of visible chain or
+yoke around the slaves/ prisoners necks ... chans can be broken with rocks or flint and repeatedly slamming, and the rope
+can be sawed through similarly."
+- `CaptiveConduct`: a shackled player is spared by captors (`Captors.sentient`, and the holding camp's own) through
+  `canAttack` (`ThrallTargetMixin`); any already on them let go. Before, only barbarian raiders checked the shackle, so orcs,
+  goblins, pirates, ogres and illagers attacked a fresh captive. Striking anyone, breaking a block, opening a container,
+  picking the shackle where a captor sees, or being caught at the tether turns the camp on them for a minute
+  (`UNRULY_TICKS`), and the chains' Resistance is off meanwhile.
+- `LifeStory.ground` (used by the kidnap wake and the "still in chains" start) prefers open ground (earth, sand, stone)
+  before anywhere to stand, so nobody wakes chained on a hut roof.
+- `Shackles`: a captive is collared and tied to a stake beside them (iron collar and chain to a cobblestone wall post, or
+  a rope to a spruce fence, 40% rope). Synced (`TETHER`) and drawn for everyone by `client/ShackleTether`. A chain breaks
+  under 24 slams of a rock (flint, flint shard, cobble/stone), loud, each heard by any captor within 14 blocks at 15%;
+  a rope saws through in 16 strokes of something sharp (flint, shard, blade, shears), each seen by a watching captor at
+  30%. Through, they're free and hunted as from a picked lock. The stake can't be pulled up while tied to it.
+- Hint 113. Built, not played.

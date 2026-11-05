@@ -125,6 +125,12 @@ public final class Dismember {
 	 * {@link #MENDING_TAG}) and they mend, staying down till both legs are back; none, and they die.
 	 */
 	public static final int SPLIT_TICKS = 200;
+	/**
+	 * (0.20.91) Andy: "I also didnt bleed out after being cleaved in two, that should happen within 10s". A halving that
+	 * doesn't kill outright (the blow left health over) bleeds the body out within this long (ticks); Rubber-folk and zombies
+	 * are spared it (they mend, or crawl on).
+	 */
+	public static final int HALVE_BLEED_OUT_TICKS = 160;
 	public static final String SPLIT_TAG = "jaymospowers_rubber_split", MENDING_TAG = "jaymospowers_rubber_mending";
 	public static final AttachmentType<Integer> MISSING = AttachmentRegistry.create(JaymosPowers.id("missing_parts"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
@@ -149,6 +155,8 @@ public final class Dismember {
 	private static final Map<LivingEntity, Long> BLEEDING = new HashMap<>();
 	/** (0.20.61) A Rubber-folk cut in half → the game time their swallow must come by ({@link #SPLIT_TICKS}). */
 	private static final Map<LivingEntity, Long> SPLIT = new java.util.WeakHashMap<>();
+	/** (0.20.91) Cut in half and not yet dead: the creature → the game time it bleeds out, and who cut it. */
+	private static final Map<LivingEntity, Object[]> HALVED = new java.util.WeakHashMap<>();
 	/** Players missing an arm (their hand is kept empty). */
 	private static final List<ServerPlayer> ONE_ARMED = new ArrayList<>();
 	/** Set while a power deals its own cut ({@link #cut}), so the held weapon's roll doesn't roll it again. */
@@ -229,6 +237,7 @@ public final class Dismember {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STAGGERING.clear();
 			BLEEDING.clear();
+			HALVED.clear();
 			ONE_ARMED.clear();
 		});
 	}
@@ -465,6 +474,13 @@ public final class Dismember {
 		}
 		boolean right = sever(target, RIGHT_LEG, striker);
 		boolean left = sever(target, LEFT_LEG, striker);
+		if ((right || left) && !rubber(target) && !zombie(target) && target.isAlive()) {
+			// (0.20.91) nobody lives long cut in two: dead within the bleed-out, whatever the blow left (a killing one ends it now)
+			HALVED.put(target, new Object[] {target.level().getGameTime() + HALVE_BLEED_OUT_TICKS, striker});
+			if (target instanceof ServerPlayer player) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.halved").withStyle(ChatFormatting.DARK_RED));
+			}
+		}
 		return right || left;
 	}
 
@@ -848,6 +864,25 @@ public final class Dismember {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (!HALVED.isEmpty()) {
+			for (Iterator<Map.Entry<LivingEntity, Object[]>> it = HALVED.entrySet().iterator(); it.hasNext(); ) {
+				Map.Entry<LivingEntity, Object[]> e = it.next();
+				LivingEntity body = e.getKey();
+				if (body.isRemoved() || !body.isAlive() || !(body.level() instanceof ServerLevel level)) {
+					it.remove();
+					continue;
+				}
+				if (level.getGameTime() >= (Long)e.getValue()[0]) {
+					it.remove();
+					DamageSource felled = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+						.getOrThrow(com.jaymospowers.core.wounds.Bleeding.BLEEDING_DAMAGE), (Entity)e.getValue()[1]);
+					com.jaymospowers.core.wounds.Downed.letDie(level, body, felled);
+				} else if (level.getGameTime() % 10L == 0L) {
+					// (it pours out of them meanwhile)
+					BLEEDING.put(body, Math.max(BLEEDING.getOrDefault(body, 0L), (Long)e.getValue()[0]));
+				}
+			}
+		}
 		if (!STAGGERING.isEmpty()) {
 			for (Iterator<Map.Entry<LivingEntity, long[]>> it = STAGGERING.entrySet().iterator(); it.hasNext(); ) {
 				Map.Entry<LivingEntity, long[]> e = it.next();
