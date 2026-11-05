@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.GiantTrees;
 import com.jaymospowers.core.GroundCracks;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.UltimateFilm;
@@ -39,6 +40,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.18.119, Scan G) Towerback, the true giant: a hulk of grey stone, moss on its shoulders and boulders for pauldrons, a
@@ -273,7 +275,8 @@ public final class Towerback extends XenoForm {
 					return;
 				}
 				LivingEntity target = aimed(player, handReach(player) + GRAB_AIM, e -> e instanceof LivingEntity l && canGrab(player, l));
-				if (target == null) {
+				// (0.20.104) no one to grab: a tree in reach will do, to be thrown (GiantTrees)
+				if (target == null && !GiantTrees.treeNear(level, player, hand(player, 0.0), handReach(player))) {
 					return;
 				}
 				beginGrab(player, live, level, target);
@@ -529,10 +532,10 @@ public final class Towerback extends XenoForm {
 	}
 
 	/** It rears back for the grab: a roar, its hand drawn up behind it; everyone sees it coming. */
-	private static void beginGrab(ServerPlayer player, XenoformPower.Live live, ServerLevel level, LivingEntity target) {
+	private static void beginGrab(ServerPlayer player, XenoformPower.Live live, ServerLevel level, @Nullable LivingEntity target) {
 		long now = level.getGameTime();
 		live.grabStart = now;
-		live.grabPrey = target.getId();
+		live.grabPrey = target == null ? -1 : target.getId();
 		live.grabHolding = false;
 		live.grabFrom = null;
 		live.grabTo = null;
@@ -559,6 +562,10 @@ public final class Towerback extends XenoForm {
 			if (t == WINDUP - 1) {
 				snatch(player, live, level);
 			}
+			return;
+		}
+		if (prey == null && GiantTrees.tick(level, player, t - WINDUP - SNATCH, HOLD, hand(player, 0.0))) {
+			// (0.20.104) a tree in its hand, lifted, then thrown where it looks
 			return;
 		}
 		if (prey == null) {
@@ -606,6 +613,9 @@ public final class Towerback extends XenoForm {
 	private static void snatch(ServerPlayer player, XenoformPower.Live live, ServerLevel level) {
 		LivingEntity target = level.getEntity(live.grabPrey) instanceof LivingEntity l ? l : null;
 		if (target == null || !canGrab(player, target) || !inHandsReach(player, target)) {
+			if (GiantTrees.take(level, player, hand(player, 0.0), handReach(player))) {
+				return;
+			}
 			Vec3 miss = hand(player, player.getBbWidth() * 0.3);
 			level.playSound(null, miss.x, miss.y, miss.z, SoundEvents.RAVAGER_STEP, net.minecraft.sounds.SoundSource.PLAYERS, 2.0F, 0.5F);
 			level.sendParticles(ParticleTypes.POOF, miss.x, player.getY() + 0.5, miss.z, 20, 1.5, 0.3, 1.5, 0.05);
@@ -686,6 +696,7 @@ public final class Towerback extends XenoForm {
 
 	/** The grab is over (or the form is): whatever it held is let go. */
 	private static void endGrab(ServerPlayer player, XenoformPower.Live live) {
+		GiantTrees.drop(player);
 		if (live.grabStart >= 0L) {
 			player.removeEffect(MobEffects.SLOWNESS);
 		}

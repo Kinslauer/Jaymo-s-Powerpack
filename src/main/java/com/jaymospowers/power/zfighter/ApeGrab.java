@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.GiantTrees;
 import com.jaymospowers.core.UltimateFilm;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -137,11 +138,13 @@ public final class ApeGrab {
 		if (target == null) {
 			target = ahead(ape, live, level);
 		}
-		if (target == null || !canGrab(ape, target)) {
+		// (0.20.104) no one in reach: a tree will do, to be thrown (GiantTrees)
+		boolean tree = target == null && GiantTrees.treeNear(level, ape, hand(ape, 0.0), treeReach(ape, live));
+		if (!tree && (target == null || !canGrab(ape, target))) {
 			return false;
 		}
 		ape.setAttached(GRAB, new Grab(now, -1));
-		live.grabTarget = target.getId();
+		live.grabTarget = target == null ? -1 : target.getId();
 		live.grabReadyAt = now + TOTAL + WILD_GRAB_EVERY + ape.getRandom().nextInt(WILD_GRAB_EVERY / 2);
 		live.grabSnatchAt = null;
 		live.grabSlamAt = null;
@@ -190,6 +193,10 @@ public final class ApeGrab {
 			if (t == WINDUP - 1) {
 				snatch(ape, live, level, grab, target);
 			}
+			return true;
+		}
+		if (prey == null && GiantTrees.tick(level, ape, t - WINDUP - SNATCH, HOLD, hand(ape, 0.0))) {
+			// (0.20.104) a tree in his hand, lifted, then thrown where he looks
 			return true;
 		}
 		if (prey == null) {
@@ -242,6 +249,9 @@ public final class ApeGrab {
 	/** His hand closes: on his target if it's still within reach of the hand, else on nothing. */
 	private static void snatch(LivingEntity ape, ZFighterPower.Live live, ServerLevel level, Grab grab, @Nullable LivingEntity target) {
 		if (target == null || !canGrab(ape, target) || !inHandsReach(ape, live, target)) {
+			if (GiantTrees.take(level, ape, hand(ape, 0.0), treeReach(ape, live))) {
+				return;
+			}
 			Vec3 miss = hand(ape, ape.getBbWidth() * 0.3);
 			level.playSound(null, miss.x, miss.y, miss.z, SoundEvents.RAVAGER_STEP, source(ape), 2.0F, 0.5F);
 			level.sendParticles(ParticleTypes.POOF, true, false, miss.x, miss.y - ape.getBbHeight() * HAND_UP + 0.5, miss.z, 20, 1.5, 0.3, 1.5, 0.05);
@@ -348,8 +358,14 @@ public final class ApeGrab {
 		return ape instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE;
 	}
 
+	/** (0.20.104) How far round his hand he can reach for a tree. */
+	private static double treeReach(LivingEntity ape, ZFighterPower.Live live) {
+		return ape.getBbWidth() * 0.5 + ZFighterLineage.BERSERK_REACH * REACH_FACTOR * Math.max(0.25F, live.apeSize);
+	}
+
 	/** The grab is over, or the ape is: whatever he held is let go. */
 	static void end(LivingEntity ape, ZFighterPower.Live live) {
+		GiantTrees.drop(ape);
 		if (ape.hasAttached(GRAB)) {
 			ape.removeAttached(GRAB);
 		}

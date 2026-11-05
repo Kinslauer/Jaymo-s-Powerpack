@@ -118,13 +118,21 @@ public final class FallingTree extends Entity {
 	static final int PROP_CHECK = 20;
 	/** (0.7.588) A part broken off a leaning tree falls free, turning this many degrees a tick. */
 	static final float SPLIT_TUMBLE = 3.0F;
+	/**
+	 * (0.7.588) Andy: "giants should also be able to grab and throw the trees with their grabs". Held, it lies this far over
+	 * (degrees) along the giant's facing; let go of for this long (ticks) without a word from its giant, it drops.
+	 */
+	static final float HELD_LEAN = 75.0F;
+	static final int HELD_LONGEST = 5;
+	/** (0.7.588) A thrown tree turns end over end this fast (degrees a tick). */
+	public static final float THROWN_TUMBLE = 6.0F;
 	/** (0.7.11) Bees round a nest in it (this far) go for a woodcutter who fells it. */
 	static final double BEES_RANGE = 24.0;
 	/** Of its blocks, every this-many'th log and leaf breaks with a puff and a sound (the rest only a puff of chips). */
 	static final int LOG_SOUNDS = 3, LEAF_SOUNDS = 9;
 	/** (0.6.12) A torn-up tree in flight: its fall (blocks/tick²), the air's drag, how long before it can strike the ground
 	 * (ticks, to leave its own hole) and the longest it flies. */
-	static final double FLY_GRAVITY = 0.05, FLY_DRAG = 0.985;
+	public static final double FLY_GRAVITY = 0.05, FLY_DRAG = 0.985;
 	static final int FLY_CLEAR = 6, FLY_LONGEST = 600;
 	/** (0.7.232) Its leaves snap off as it lands: this chance at the most, for leaves striking the ground this fast (blocks a tick) or faster. */
 	static final float LEAF_SNAP = 0.5F, LEAF_SNAP_FULL = 1.5F;
@@ -184,6 +192,11 @@ public final class FallingTree extends Entity {
 	private boolean propped;
 	/** (0.7.586) How many standing trees it has knocked over. */
 	private int knocks;
+	/** (0.7.588) Held in a giant's hand (and when it was last held there), and who threw it (never struck by it). */
+	private boolean held;
+	private int heldAt;
+	/** (0.7.588) Thrown by a giant: it strikes what it flies through, not only where it lands. */
+	private boolean hurled;
 	/** (0.7.588) Axe strokes each of its logs has taken. */
 	private final Map<Piece, Integer> chops = new HashMap<>();
 	/** (0.7.588) What its bounding box was last worked out from. */
@@ -390,6 +403,13 @@ public final class FallingTree extends Entity {
 			this.discard();
 			return;
 		}
+		if (this.held) {
+			// (0.7.588) let go of (its giant gone): it falls from where it was held
+			if (this.tickCount - this.heldAt > HELD_LONGEST) {
+				hurl(this, Vec3.ZERO, SPLIT_TUMBLE, null);
+			}
+			return;
+		}
 		if (this.down) {
 			if (this.sink != null) {
 				// a woodcutter's tree breaks up into his bag
@@ -491,6 +511,10 @@ public final class FallingTree extends Entity {
 		}
 		this.entityData.set(LEAN, next);
 		this.sweep(level, pieces, next);
+		if (this.hurled) {
+			// (0.7.588) thrown, it strikes whatever it flies through
+			this.hit(level, pieces, next, Integer.MIN_VALUE, (float)v.length(), this.tumble * Mth.DEG_TO_RAD);
+		}
 		if (this.flown % 8 == 0) {
 			level.playSound(null, this.blockPosition(), SoundEvents.AZALEA_LEAVES_STEP, SoundSource.BLOCKS, 1.2F, 0.6F);
 		}
@@ -709,6 +733,117 @@ public final class FallingTree extends Entity {
 	private BlockPos cell(Vec3 at) {
 		float heading = this.heading();
 		return BlockPos.containing(at.x - 0.01 * Mth.cos(heading), at.y + 0.01, at.z - 0.01 * Mth.sin(heading));
+	}
+
+	// ---- (0.7.588) giants' hands (Powers' GiantTrees calls these by name) ----------------------------------------------
+
+	/** Whether a giant's hand at {@code at} could close on a tree within {@code reach}: a fallen one, or one standing. */
+	public static boolean treeNear(ServerLevel level, Vec3 at, double reach, int mostLogs) {
+		return fallenNear(level, at, reach, mostLogs) != null || standingNear(level, at, reach) != null;
+	}
+
+	/**
+	 * A giant's hand at {@code at} closes on the nearest tree within {@code reach} of no more than {@code mostLogs} logs:
+	 * a fallen (or falling) one, else a standing one torn out whole. It's held now ({@link #hold}); null if there's none.
+	 */
+	public static @Nullable Entity take(ServerLevel level, Vec3 at, double reach, Entity giant, int mostLogs) {
+		FallingTree tree = fallenNear(level, at, reach, mostLogs);
+		if (tree == null) {
+			BlockPos log = standingNear(level, at, reach);
+			tree = log == null ? null : Trees.pluck(level, log, mostLogs);
+		}
+		if (tree == null) {
+			return null;
+		}
+		tree.held = true;
+		tree.heldAt = tree.tickCount;
+		tree.down = false;
+		tree.propped = false;
+		tree.flying = false;
+		tree.hurled = false;
+		tree.cutter = giant;
+		tree.struck.add(giant.getUUID());
+		level.playSound(null, tree.getX(), tree.getY(), tree.getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.BLOCKS, 1.6F, 0.6F);
+		level.playSound(null, tree.getX(), tree.getY(), tree.getZ(), SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
+		return tree;
+	}
+
+	/** Held at {@code at} (where it turns), lying {@link #HELD_LEAN} over the way {@code yaw} faces (the game's yaw, degrees). */
+	public static void hold(Entity entity, Vec3 at, float yaw) {
+		if (!(entity instanceof FallingTree tree)) {
+			return;
+		}
+		tree.held = true;
+		tree.heldAt = tree.tickCount;
+		tree.setPos(at.x, at.y, at.z);
+		tree.setDeltaMovement(Vec3.ZERO);
+		float r = yaw * Mth.DEG_TO_RAD;
+		tree.setAttached(HEADING, (float)Math.atan2(Mth.cos(r), -Mth.sin(r)));
+		tree.entityData.set(LEAN, HELD_LEAN);
+	}
+
+	/** Thrown at {@code velocity} (blocks a tick), turning {@code tumble} degrees a tick: it flies, strikes and lands. */
+	public static void hurl(Entity entity, Vec3 velocity, float tumble, @Nullable Entity thrower) {
+		if (!(entity instanceof FallingTree tree)) {
+			return;
+		}
+		tree.held = false;
+		tree.down = false;
+		tree.propped = false;
+		tree.flying = true;
+		tree.hurled = velocity.lengthSqr() > 1.0E-4;
+		tree.flown = FLY_CLEAR + 1;
+		tree.tumble = tumble;
+		if (thrower != null) {
+			tree.struck.add(thrower.getUUID());
+		}
+		tree.setDeltaMovement(velocity);
+	}
+
+	/** How many logs it has. */
+	public static int logs(Entity entity) {
+		int n = 0;
+		if (entity instanceof FallingTree tree) {
+			for (Piece p : tree.pieces()) {
+				if (p.blockState().is(BlockTags.LOGS)) {
+					n++;
+				}
+			}
+		}
+		return n;
+	}
+
+	private static @Nullable FallingTree fallenNear(ServerLevel level, Vec3 at, double reach, int mostLogs) {
+		FallingTree best = null;
+		double bestD = Double.MAX_VALUE;
+		for (FallingTree t : level.getEntitiesOfClass(FallingTree.class, new AABB(at, at).inflate(reach),
+			t -> t.isAlive() && !t.held && t.sink == null && logs(t) <= mostLogs)) {
+			double d = t.getBoundingBox().distanceToSqr(at);
+			if (d < bestD) {
+				bestD = d;
+				best = t;
+			}
+		}
+		return best;
+	}
+
+	private static @Nullable BlockPos standingNear(ServerLevel level, Vec3 at, double reach) {
+		BlockPos c = BlockPos.containing(at);
+		int r = Mth.ceil(reach);
+		BlockPos best = null;
+		double bestD = Double.MAX_VALUE;
+		for (BlockPos p : BlockPos.betweenClosed(c.offset(-r, -r, -r), c.offset(r, r, r))) {
+			BlockState s = level.getBlockState(p);
+			if (!s.is(BlockTags.LOGS) || !s.hasProperty(BlockStateProperties.AXIS) || s.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+				continue;
+			}
+			double d = p.distToCenterSqr(at);
+			if (d <= reach * reach && d < bestD && Trees.natural(level, p)) {
+				bestD = d;
+				best = p.immutable();
+			}
+		}
+		return best;
 	}
 
 	// ---- (0.7.588) at rest: chopped up, split, its leaves dropping -------------------------------------------------------
@@ -1083,7 +1218,7 @@ public final class FallingTree extends Entity {
 		output.putFloat("lean", this.lean());
 		output.putBoolean("down", this.down);
 		output.putBoolean("propped", this.propped);
-		output.putBoolean("flying", this.flying);
+		output.putBoolean("flying", this.flying || this.held);
 		output.putInt("flown", this.flown);
 		output.putFloat("tumble", this.tumble);
 		output.putFloat("reach", this.reach);

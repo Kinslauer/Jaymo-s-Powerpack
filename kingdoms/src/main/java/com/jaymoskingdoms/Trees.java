@@ -803,6 +803,23 @@ public final class Trees {
 	}
 
 	/**
+	 * (0.7.588) A giant's hand closes on the standing tree whose log is {@code log}: it's torn out whole from its foot
+	 * ({@link FallingTree#fling}, not moving yet), if it's a natural tree of no more than {@code mostLogs} logs. Null otherwise.
+	 */
+	static @Nullable FallingTree pluck(ServerLevel level, BlockPos log, int mostLogs) {
+		BlockState state = level.getBlockState(log);
+		if (!state.is(BlockTags.LOGS) || fallen(level, log, state)) {
+			return null;
+		}
+		BlockPos foot = foot(level, log);
+		List<BlockPos> logs = trunk(level, foot);
+		if (logs.isEmpty() || logs.size() > mostLogs || logs.stream().noneMatch(p -> natural(level, p))) {
+			return null;
+		}
+		return FallingTree.fling(level, foot, logs, leavesOf(level, logs), Vec3.ZERO, 0.0F, 0.0F);
+	}
+
+	/**
 	 * (0.7.11) A log lying on its side on the ground (a felled tree come to rest, {@link FallingTree}) is a fallen trunk,
 	 * not a tree: it's broken log by log, not chopped.
 	 */
