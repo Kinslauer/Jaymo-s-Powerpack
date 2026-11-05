@@ -422,3 +422,12 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   flips), and the game's `Frustum.isVisible` leaves out anything whose box starts at or above it (mobs, aerwhales,
   item drops). Ordinary worlds and the separate Aether dimension are untouched. Sodium is now `compileOnly`, behind an
   optional mixin config. Gradle compile only, not played.
+
+- **0.20.53, Kitchen 0.5.64, downed animals fall on their side:** Andy (2026-11-05): "downed animals should fall to their
+  side, i think they're trying to animate like humanoids". `BodyPlan` took any untagged mob taller than 1.3x its width for a
+  person, so Cube Animals' roe deer (0.9 by 1.5), red deer, reindeer, moose, antelope and elephant, Kingdoms' moose and the
+  Moa went down on their backs like a man and were hurt in arms and feet. Wildlife (creature, ambient and water categories,
+  `BodyPlan.wild`) is never guessed a person now; tagged humanoids such as the wandering trader still are. Cube Animals'
+  kinds are tagged too (quadruped, flyer for eagle/barn owl/toucan, arthropod for the cricket, simple for its fish and
+  snail). Kitchen's `RagdollShapes` makes the same call for corpses (four-legged ragdoll, or a box if slight), and its
+  ragdoll_quadruped tag lists Cube Animals' big beasts. Not played.
