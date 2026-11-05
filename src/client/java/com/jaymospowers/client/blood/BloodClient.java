@@ -47,6 +47,9 @@ public final class BloodClient {
 	private BloodClient() {
 	}
 
+	/** (0.20.84) A cut's drip is drawn this many times its spray's size. */
+	static final float DRIP_DROP = 0.5F;
+
 	public static void init() {
 		ParticleGroupRegistry.register(BloodDecals.TYPE, BloodDecals.Group::new);
 		ParticleProviderRegistry registry = ParticleProviderRegistry.getInstance();
@@ -57,6 +60,11 @@ public final class BloodClient {
 		kind(registry, BloodParticles.SWIPE_1, 7, 32, true);
 		kind(registry, BloodParticles.SWIPE_2, 8, 32, true);
 		registry.register(BloodParticles.SPRAY, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> {
+			if (!options.stains() && drops != null) {
+				// (0.20.84) a cut's drip (the server lays its stain) is one small drop falling, not a splatter: drawn as a
+				// spatter's star, at a spray's size, it burst out of the body like blood clipping through it (Jung's clip)
+				return new BloodDrop(level, x, y, z, 0.0, 0.0, 0.0, drops, 4, 32, false, options.color(), options.scale() * DRIP_DROP, false).drip();
+			}
 			Kind kind = shaped(random);
 			return kind == null ? null : kind.create(level, x, y, z, xd, yd, zd, options.color(), options.scale(), options.stains());
 		});
