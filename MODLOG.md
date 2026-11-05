@@ -583,3 +583,9 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
 - In a fight (hurt or hitting within 10 s, or a hostile mob after you within 16 blocks): the anvil won't hand over a
   repaired armour piece, and Mending takes no XP. Grindstone and crafting-grid combining are not blocked.
 - Old worlds: forged pieces baked before this keep their old maximum until re-baked. Gradle build only, not played.
+
+## 0.20.69 (2026-11-05): rocks barely hurt zombies and Hornkin
+- Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". A thrown rock hits every zombie (the game's `Zombie`
+  family: husks, drowned, zombie villagers, zombified piglins, plus MCA's and Kitchen's zombies) and every Hornkin
+  (`jaymoskingdoms:hornkin*`, `zombified_hornkin`) for 0.5 instead of 3 (`ThrownRocks.SHRUGGED_DAMAGE`, `shrugsOff`); an
+  unsuspecting one can still be knocked out. Kingdoms' NPC rocks follow the same rule (Kingdoms 0.7.558). Not played.

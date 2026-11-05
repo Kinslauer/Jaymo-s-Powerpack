@@ -8,6 +8,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import com.jaymospowers.core.wounds.Downed;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
@@ -21,6 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
@@ -53,10 +56,16 @@ import org.jspecify.annotations.Nullable;
  * break, and little specks of the rocks debris fly out and off into rubble that dissipates". A rock landing never sends
  * the snowball's burst ({@code RockSnowballMixin}): one that breaks cracks the block it hit ({@link #CRACK_STAGE},
  * fading) and throws {@link #SPECKS} specks of stone that fall and settle as grit; one that lies there sheds a few.
+ * <p>
+ * (0.20.69) Andy: "Rocks should deal .5 damage to zombies and pigmen/hornkin". Every zombie (husks, drowned, zombie
+ * villagers, MCA's and Kitchen's zombies), zombified piglins and every Hornkin take {@link #SHRUGGED_DAMAGE} from a rock
+ * ({@link #shrugsOff}). An unsuspecting one can still be knocked out as before.
  */
 public final class ThrownRocks {
 	/** A rock hits for this much. */
 	static final float DAMAGE = 3.0F;
+	/** (0.20.69) Zombies, zombified piglins and the Hornkin shrug a rock off: it hits them for only this much. */
+	static final float SHRUGGED_DAMAGE = 0.5F;
 	/** How hard it's thrown, and how wide it may stray. */
 	static final float SPEED = 1.5F, SPREAD = 1.0F;
 	/** Ticks between throws. */
@@ -165,12 +174,13 @@ public final class ThrownRocks {
 			return true;
 		}
 		// (0.18.84) whether they saw it coming, before the blow makes them wary
+		boolean shrugs = shrugsOff(victim);
 		boolean unsuspecting = unsuspecting(victim, source.getEntity());
 		boolean head = ball.getY() >= victim.getEyeY() - HEAD_REACH;
 		boolean hurt;
 		redealing = true;
 		try {
-			hurt = victim.hurtServer(level, source, DAMAGE);
+			hurt = victim.hurtServer(level, source, shrugs ? SHRUGGED_DAMAGE : DAMAGE);
 		} finally {
 			redealing = false;
 		}
@@ -182,6 +192,20 @@ public final class ThrownRocks {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * (0.20.69) Whether a rock barely troubles {@code victim}: any zombie (the game's {@code Zombie} family, which takes in
+	 * husks, drowned, zombie villagers and zombified piglins, and the modded zombies built on it) or one of Kingdoms'
+	 * Hornkin ({@code jaymoskingdoms:hornkin*}, {@code jaymoskingdoms:zombified_hornkin}). Kingdoms' guards' rocks use the
+	 * same rule ({@code Javelins.rockDamage}).
+	 */
+	public static boolean shrugsOff(LivingEntity victim) {
+		if (victim instanceof Zombie) {
+			return true;
+		}
+		Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(victim.getType());
+		return "jaymoskingdoms".equals(id.getNamespace()) && (id.getPath().startsWith("hornkin") || id.getPath().equals("zombified_hornkin"));
 	}
 
 	/**
