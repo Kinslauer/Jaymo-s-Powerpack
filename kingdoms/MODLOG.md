@@ -9219,3 +9219,8 @@ ultimate and beam-clash films came down with it. Not played.
   coin; right click an empty slot with a purse on the cursor to put one down; drop coins on a purse (either button) to
   fill it; drop one purse on another (either button) to pour it in, as far as there's room. Bundle sounds on each.
   An empty purse still picks up and swaps as usual. Lang part coin_purse.json, hint 105. Not played.
+- Andy: "the pick pocket animation should reach for it if they have one". A crook picking a player's pocket used to
+  just swing an arm and take. Now they stop behind you and reach in for 25 ticks first (the same arm-in-the-pocket pose a
+  player pickpocket uses, `PickpocketPose`), aimed at the coin purse on your hip if you wear one
+  (`Pickpocket.Reach.purse`, `PickpocketPose.aim`), then lift and draw the hand back. Turn round mid-reach and the hand
+  comes back out and they wait. `Crooks.PICK_REACH_TICKS`. Powers 0.20.81 moves the purse out of the leg to match.

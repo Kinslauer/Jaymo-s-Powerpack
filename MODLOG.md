@@ -640,3 +640,9 @@ Entries before 0.20.0 are in `docs/modlog/powers-0.1-to-0.19.md` (grep there for
   that jar (`buildKitchen`, like Kingdoms); `libs/` is only compiled against and run in the dev game. Powers now logs a
   warning if Kitchen has no Other World rule. Kitchen 0.5.69: a zombie player already standing in the Other World fades
   in souls, dropping what it held and carried. Built, not played.
+
+## 0.20.81 (2026-11-05): coin purse hangs outside the hip
+- Andy: "they dont hang, ON the hip they are inside". The worn coin purse hung 3.4 pixels out from the body's middle,
+  inside the leg. It now hangs at 4.9 (a pixel further over leggings or a chestplate), and swings out freely but only a
+  little in toward the leg (`WornLanterns.PURSE_X`, `PURSE_OVER_ARMOUR`, `PURSE_ROLL_IN`). Kingdoms 0.7.567 goes with it.
+  Built, not played.
