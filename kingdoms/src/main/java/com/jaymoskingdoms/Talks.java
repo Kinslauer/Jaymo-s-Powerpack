@@ -414,6 +414,7 @@ public final class Talks {
 			case FAVOUR -> favour(c);
 			case RUMOUR -> rumour(c, false);
 			case SECRET -> rumour(c, true);
+			case RIDDLE -> Speech.tell(level, v, player, Heavens.riddle(v.getRandom()), Heavens.COLOR);
 			case QUARREL -> {
 				long until = c.today() + QUARREL_DAYS;
 				Recollections.bear(v, player, b -> new Recollections.Bearing(b.trust(), b.respect(), b.warmth(), b.settled(), b.talks(), until));
