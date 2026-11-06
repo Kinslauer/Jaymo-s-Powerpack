@@ -10092,3 +10092,8 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Right-click feeding is gone: no sneak+use bite (persons, Nether prey, downed, sleepers) and no double-tap grab
   (`BloodGrabClient` removed; letting go of use no longer throws). Use on someone held still does nothing (keeps
   Powers' revive bar from filling). Lapping pools stays sneak+use on the ground. Hints 120/122 reworded. Built, not played.
+## 0.7.635: traveller's journal as a bauble
+- Andy: "traveler journal should fit as a bauble". The journal (`jaymoskingdoms:journal`) now fits Jaymo's Powers' belt
+  and charm slots (`data/jaymospowers/tags/item/baubles/belt.json`, `charm.json`), and `Journal.carries` also looks at
+  the worn baubles (`PowersCompat.baubles`), so M opens it from a slot (client and server). The "need a journal" line
+  says bauble slots too. Built, not played.
