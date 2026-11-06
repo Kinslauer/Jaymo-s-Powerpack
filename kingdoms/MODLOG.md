@@ -10113,3 +10113,7 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   and charm slots (`data/jaymospowers/tags/item/baubles/belt.json`, `charm.json`), and `Journal.carries` also looks at
   the worn baubles (`PowersCompat.baubles`), so M opens it from a slot (client and server). The "need a journal" line
   says bauble slots too. Built, not played.
+
+## 0.7.637: Iron Stomach drinks dirty water (needs Kitchen 0.5.80)
+- Iron Stomach now also covers water: `KitchenCompat` hands Kitchen's `Thirst.setIronGut` the perk check, so dirty water
+  from anywhere never turns the stomach. The perk's description says so. Gradle compile clean; not played.

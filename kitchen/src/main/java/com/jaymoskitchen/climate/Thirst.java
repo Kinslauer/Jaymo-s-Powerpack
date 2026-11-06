@@ -60,6 +60,10 @@ import net.minecraft.world.phys.HitResult;
  * only hisses to steam on their tongue and gives them nothing. Sneaking with an empty hand they drink from a fire or a
  * lit campfire ({@link #FIRE_DRINK}; a loose fire goes out, a campfire keeps burning) or gulp straight from lava
  * ({@link #LAVA_DRINK}), and soaking in lava fills them slowly ({@link #LAVA_SOAK_EVERY}). The Nether doesn't dry them.
+ * <p>
+ * (0.5.80) <b>Iron guts</b> (Kingdoms' Iron Stomach perk, set by {@link #setIronGut}; Andy: "the rotten meat eating skill
+ * should let you drink water from wherever too"): dirty water never turns their stomach, whatever it came from (a sip
+ * from a river, swamp or puddle, a pond bottle, a dirty waterskin).
  */
 public final class Thirst {
 	public static final int MAX = 20;
@@ -103,6 +107,7 @@ public final class Thirst {
 	private static final Map<UUID, Long> LAST_SIP = new HashMap<>();
 	private static final Map<UUID, Long> LAST_HISS = new HashMap<>();
 	private static Predicate<Player> fireDrinker = player -> false;
+	private static Predicate<Player> ironGut = player -> false;
 
 	private Thirst() {
 	}
@@ -110,6 +115,16 @@ public final class Thirst {
 	/** (0.5.48) For other mods (by reflection): who drinks fire and lava, not water (Kingdoms' Emberborn). */
 	public static void setFireDrinker(Predicate<Player> drinker) {
 		fireDrinker = drinker;
+	}
+
+	/** (0.5.80) For other mods (by reflection): whose stomach dirty water never turns (Kingdoms' Iron Stomach). */
+	public static void setIronGut(Predicate<Player> gut) {
+		ironGut = gut;
+	}
+
+	/** (0.5.80) Whether dirty water is as good as clean to {@code player}'s stomach. */
+	public static boolean ironGut(Player player) {
+		return ironGut.test(player);
 	}
 
 	/** (0.5.48) Whether {@code player} drinks fire and lava instead of water. Both sides. */
@@ -275,7 +290,7 @@ public final class Thirst {
 		for (java.util.function.Consumer<ServerPlayer> listener : DRANK) {
 			listener.accept(player);
 		}
-		if (!clean && player.getRandom().nextFloat() < sickChance) {
+		if (!clean && player.getRandom().nextFloat() < sickChance && !ironGut(player)) {
 			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SICK_NAUSEA, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, SICK_HUNGER, 0));
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.thirst.dirty").withStyle(ChatFormatting.DARK_GREEN));
