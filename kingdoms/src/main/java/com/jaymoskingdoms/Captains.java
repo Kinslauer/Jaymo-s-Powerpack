@@ -143,6 +143,12 @@ public final class Captains {
 	static final float RAISED_CHANCE = 0.06F;
 	static final double DEATHLESS_HEALTH = 1.5, DEATHLESS_DAMAGE = 3.0, DEATHLESS_SCALE = 1.06;
 	static final int RETURN_DAYS_MIN = 1, RETURN_DAYS_MAX = 3;
+	/**
+	 * (0.7.614, Rivals) Temperament: a brave one runs from what he fears only below this share of his health, a proud one below
+	 * this; how long a timid one keeps back once he's called his own (ticks); lines each for what a temper does.
+	 */
+	static final float BRAVE_AT = 0.25F, PROUD_AT = 0.5F;
+	static final int TIMID_BACK = 60, TEMPER_LINES = 2;
 	/** A captain's chance of a blood brother when he rises; without one, the chance another of his tribe avenges him. */
 	static final float BROTHER_CHANCE = 0.25F, AVENGER_CHANCE = 0.3F;
 	/** How far a blood brother comes to his brother's fight. */
@@ -368,10 +374,10 @@ public final class Captains {
 
 	private static final List<Later> LATER = new ArrayList<>();
 
-	private static final String[] ORC_BYNAMES = {"the Cleaver", "Gut-Ripper", "the Hound", "Flesh-Eater", "the Slaver", "Black-Tongue", "the Drowner",
-		"Ear-Taker", "the Lash", "Stone-Fist", "the Mad", "Rot-Breath", "the Tracker", "Neck-Snapper", "the Proud", "Pit-Born"};
-	private static final String[] GOBLIN_BYNAMES = {"the Sneak", "Knife-Licker", "the Rat", "Bone-Picker", "the Twitch", "Snot-Nose", "the Poisoner",
-		"Purse-Cutter", "the Gnawer", "Wobble-Eye", "the Cackler", "Trap-Maker"};
+	/** (0.7.614, Rivals) Timid captains who've already called their own to this fight. */
+	private static final Set<UUID> CALLED = new HashSet<>();
+	/** (0.7.614, Rivals) Spiteful captains' grudges already sworn: captain id → players. */
+	private static final Map<String, Set<UUID>> SPITE = new HashMap<>();
 
 	private Captains() {
 	}
@@ -398,10 +404,17 @@ public final class Captains {
 			FEARED_FROM.clear();
 			RALLIED.clear();
 			GOT_UP.clear();
+			CALLED.clear();
+			SPITE.clear();
 		});
+		// (0.7.614, Rivals) captains who aren't one of a settlement's workers (camp illagers, the risen dead, the Hornkin) take
+		// their step here, as workers take theirs from Workers.step
+		ServerTickEvents.END_LEVEL_TICK.register(Captains::otherSteps);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			String id = idOf(entity);
 			if (id == null) {
+				// (0.7.614, Rivals) a monster that may rise as a captain from the land
+				Rivals.loaded(entity, level);
 				return;
 			}
 			Captain c = get(level.getServer(), id);
@@ -502,10 +515,10 @@ public final class Captains {
 		return out;
 	}
 
-	/** 2 to 4 traits: one or two strengths, one or two weaknesses or fears. */
-	private static List<String> roll(RandomSource random) {
+	/** 2 to 4 traits: one or two strengths (and {@code extra} more), one or two weaknesses or fears. */
+	private static List<String> roll(RandomSource random, int extra) {
 		List<Trait> picked = new ArrayList<>();
-		int strengths = 1 + random.nextInt(2), flaws = 1 + random.nextInt(2);
+		int strengths = 1 + random.nextInt(2) + extra, flaws = 1 + random.nextInt(2);
 		for (int n = 0; n < 40 && (strengths > 0 || flaws > 0); n++) {
 			Trait t = Trait.values()[random.nextInt(Trait.values().length)];
 			boolean strong = t.sort == Sort.STRENGTH;
@@ -522,6 +535,11 @@ public final class Captains {
 		return picked.stream().map(Trait::key).toList();
 	}
 
+	/** (0.7.614, Rivals) A new captain's traits on {@code server}: more strengths as the world's floor rises. */
+	private static List<String> roll(MinecraftServer server, RandomSource random) {
+		return roll(random, Rivals.extraStrengths(server));
+	}
+
 	/** A strength {@code c} hasn't yet (and that doesn't clash with his traits), or null. */
 	static @Nullable Trait newStrength(Captain c, RandomSource random) {
 		List<Trait> have = traits(c), open = new ArrayList<>();
@@ -533,11 +551,9 @@ public final class Captains {
 		return open.isEmpty() ? null : open.get(random.nextInt(open.size()));
 	}
 
-	/** A new captain's name: one of his kind's names and a byname. */
+	/** A new captain's name: one of his kind's names and a byname ({@link Rivals#rollName}). */
 	private static String rollName(String tribe, RandomSource random) {
-		boolean orcs = tribe.startsWith(Tribes.ORC + "@");
-		String[] bynames = orcs ? ORC_BYNAMES : GOBLIN_BYNAMES;
-		return Greenskins.name(orcs ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN, random.nextLong()) + " " + bynames[random.nextInt(bynames.length)];
+		return Rivals.rollName(tribe, random);
 	}
 
 	private static String newId(RandomSource random) {
@@ -552,7 +568,7 @@ public final class Captains {
 		Set<String> tribes = new HashSet<>();
 		for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
 			Camps.CampData data = camp.fallen() ? null : Camps.data(server, camp.id());
-			String tribe = data == null || data.clearedAt() >= 0 ? null : Tribes.of(server, camp.id());
+			String tribe = data == null || data.clearedAt() >= 0 ? null : Rivals.of(server, camp.id());
 			BlockPos center = data == null ? null : data.center();
 			if (tribe == null || level.getNearestPlayer(center.getX(), center.getY(), center.getZ(), POST_NEAR, false) == null) {
 				continue;
@@ -596,18 +612,19 @@ public final class Captains {
 		Map<String, Long> risen = level.getAttachedOrElse(RISEN, Map.of());
 		long now = level.getGameTime();
 		Long last = risen.get(tribe);
-		if (standing.size() >= LADDER || last != null && now - last < RISE_GAP) {
+		int ladder = Rivals.ladder(server);
+		if (standing.size() >= ladder || last != null && now - last < RISE_GAP) {
 			return;
 		}
-		List<Faction> camps = Tribes.camps(server, tribe);
+		List<Faction> camps = Rivals.camps(server, tribe);
 		if (camps.isEmpty()) {
 			return;
 		}
 		RandomSource random = level.getRandom();
-		int count = last == null ? LADDER - standing.size() : 1;
+		int count = last == null ? ladder - standing.size() : 1;
 		for (int i = 0; i < count; i++) {
-			Captain c = Captain.of(newId(random), tribe, rollName(tribe, random), 1 + random.nextInt(3), roll(random), quietest(server, tribe, camps),
-				null, false);
+			Captain c = Captain.of(newId(random), tribe, rollName(tribe, random), Rivals.startRank(server, random), roll(server, random),
+				quietest(server, tribe, camps), null, false);
 			// (patch 4) now and then a blood brother among those already standing
 			List<Captain> free = of(server, tribe).stream().filter(x -> x.brother().isEmpty() && !x.chief()).toList();
 			if (!free.isEmpty() && random.nextFloat() < BROTHER_CHANCE) {
@@ -638,7 +655,7 @@ public final class Captains {
 	}
 
 	private static void repost(MinecraftServer server, Captain c) {
-		List<Faction> camps = Tribes.camps(server, c.tribe());
+		List<Faction> camps = Rivals.camps(server, c.tribe());
 		put(server, camps.isEmpty() ? c.withPost(-1, false).withBody(null) : c.withPost(quietest(server, c.tribe(), camps), false).withBody(null));
 	}
 
@@ -655,12 +672,19 @@ public final class Captains {
 			return;
 		}
 		AABB around = new AABB(center).inflate(96.0);
-		List<Worker> found = c.chief()
-			? Workers.near(level, around, w -> w.factionId() == camp.id() && Greenskins.chief(w.role()) && w.mob().isAlive())
-			: Workers.near(level, around, w -> c.id().equals(idOf(w.mob())) && w.mob().isAlive());
-		if (!found.isEmpty()) {
-			bind(level, c, found.getFirst().mob());
-			return;
+		if (c.chief()) {
+			List<Worker> found = Workers.near(level, around, w -> w.factionId() == camp.id() && Greenskins.chief(w.role()) && w.mob().isAlive());
+			if (!found.isEmpty()) {
+				bind(level, c, found.getFirst().mob());
+				return;
+			}
+		} else {
+			// ((0.7.614) a camp illager is no worker: any body that carries his id)
+			List<Mob> found = level.getEntitiesOfClass(Mob.class, around, m -> m.isAlive() && c.id().equals(idOf(m)));
+			if (!found.isEmpty()) {
+				bind(level, c, found.getFirst());
+				return;
+			}
 		}
 		if (c.chief() || !level.isLoaded(center) || level.getNearestPlayer(center.getX(), center.getY(), center.getZ(), MUSTER_HIDE, false) != null) {
 			return;
@@ -668,23 +692,11 @@ public final class Captains {
 		muster(level, c, camp, center, center, HOME_RADIUS);
 	}
 
-	/** {@code c} as one of {@code camp}'s, at it: a goblin or a grunt as an MCA villager, dressed and built for his rank. */
+	/** {@code c} as one of {@code camp}'s, at it ({@link Rivals#muster}: his side's kind), dressed and built for his rank. */
 	private static void muster(ServerLevel level, Captain c, Faction camp, BlockPos center, BlockPos home, int radius) {
-		boolean orcs = c.tribe().startsWith(Tribes.ORC + "@");
-		RandomSource random = level.getRandom();
-		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, center.offset(random.nextInt(9) - 4, 0, random.nextInt(9) - 4));
-		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
-		if (folk == null) {
-			return;
-		}
-		folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-		folk.setup(orcs ? Orcs.GRUNT : Goblins.GOBLIN, camp, home, radius);
-		gear(folk, c.rank(), orcs);
-		folk.setCustomName(Component.literal(c.name()));
-		level.addFreshEntity(folk);
-		PathfinderMob mob = McaCompat.raider(level, folk);
+		PathfinderMob mob = Rivals.muster(level, c, camp, center, home, radius);
 		if (mob == null) {
-			mob = folk;
+			return;
 		}
 		build(mob, c.rank());
 		if (c.has(Trait.DEATHLESS)) {
@@ -694,31 +706,21 @@ public final class Captains {
 		bind(level, c, mob);
 	}
 
-	/** A captain's gear by rank: a better weapon from 3, mail from 2, iron from 4. */
-	private static void gear(Folk folk, int rank, boolean orcs) {
-		folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(orcs ? rank >= 3 ? Items.IRON_AXE : Items.STONE_AXE : rank >= 3 ? Items.IRON_SWORD : Items.STONE_SWORD));
-		if (rank >= 2) {
-			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(rank >= 4 ? Items.IRON_HELMET : Items.CHAINMAIL_HELMET));
-			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(rank >= 4 ? Items.IRON_CHESTPLATE : Items.CHAINMAIL_CHESTPLATE));
-		}
-		if (rank >= RANK_MAX) {
-			folk.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
-		}
-	}
-
 	/** His build for {@code rank}: bigger, tougher and harder-hitting than his kind. */
 	static void build(PathfinderMob mob, int rank) {
 		AttributeInstance size = mob.getAttribute(Attributes.SCALE);
 		if (size != null) {
 			size.setBaseValue(size.getBaseValue() * (SCALE_BASE + SCALE_PER_RANK * rank));
 		}
+		// ((0.7.614, Rivals) tougher and harder-hitting as the world's floor rises)
+		MinecraftServer server = mob.level().getServer();
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
-			health.setBaseValue(health.getBaseValue() * (HEALTH_BASE + HEALTH_PER_RANK * rank));
+			health.setBaseValue(health.getBaseValue() * (HEALTH_BASE + HEALTH_PER_RANK * rank) * Rivals.tierHealth(server));
 		}
 		AttributeInstance damage = mob.getAttribute(Attributes.ATTACK_DAMAGE);
 		if (damage != null) {
-			damage.setBaseValue(damage.getBaseValue() + DAMAGE_PER_RANK * rank);
+			damage.setBaseValue(damage.getBaseValue() + DAMAGE_PER_RANK * rank + Rivals.tierDamage(server));
 		}
 		mob.setHealth(mob.getMaxHealth());
 	}
@@ -742,6 +744,61 @@ public final class Captains {
 			shove.setBaseValue(Math.max(shove.getBaseValue(), 0.6));
 		}
 		mob.setHealth(mob.getMaxHealth());
+	}
+
+	/** (0.7.614, Rivals) The raised dead fear nothing: their captains are Deathless, every one. */
+	private static Captain raisedDead(Captain c) {
+		List<String> traits = new ArrayList<>(c.traits());
+		traits.removeIf(k -> {
+			Trait t = Trait.parse(k);
+			return t != null && t.sort == Sort.FEAR;
+		});
+		if (!traits.contains(Trait.DEATHLESS.key())) {
+			traits.add(Trait.DEATHLESS.key());
+		}
+		return c.climbed(c.rank(), List.copyOf(traits), c.trophy(), c.slain());
+	}
+
+	/** (0.7.614, Rivals) One of {@code ladder}'s standing, unsworn, with no body: a captain due back in the next of his kind. */
+	static @Nullable Captain waiting(MinecraftServer server, String ladder) {
+		for (Captain c : of(server, ladder)) {
+			if (c.body().isEmpty() && c.post() < 0 && !c.chief()) {
+				return c;
+			}
+		}
+		return null;
+	}
+
+	/** (0.7.614, Rivals) {@code c} in {@code mob} from now on: built, dressed and bound. */
+	static void embodyIn(ServerLevel level, Captain c, PathfinderMob mob) {
+		Rivals.gear(mob, c.rank(), Rivals.side(c.tribe()));
+		build(mob, c.rank());
+		if (c.has(Trait.DEATHLESS)) {
+			deathless(mob);
+		}
+		mob.setPersistenceRequired();
+		bind(level, c, mob);
+	}
+
+	/** (0.7.614, Rivals) A new captain of {@code ladder} rises in {@code mob}, one of the kind that walks its land. */
+	static void riseFrom(ServerLevel level, String ladder, PathfinderMob mob) {
+		MinecraftServer server = level.getServer();
+		Map<String, Long> risen = Factions.level(server).getAttachedOrElse(RISEN, Map.of());
+		long now = Factions.level(server).getGameTime();
+		Long last = risen.get(ladder);
+		if (last != null && now - last < RISE_GAP) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		Captain c = Captain.of(newId(random), ladder, rollName(ladder, random), Rivals.startRank(server, random), roll(server, random), -1, null, false);
+		if (Rivals.side(ladder) == Rivals.Side.RAISED) {
+			c = raisedDead(c);
+		}
+		put(server, c);
+		Map<String, Long> fresh = new HashMap<>(risen);
+		fresh.put(ladder, now);
+		Factions.level(server).setAttached(RISEN, Map.copyOf(fresh));
+		embodyIn(level, c, mob);
 	}
 
 	/** One rank more on {@code mob}'s build. */
@@ -776,6 +833,8 @@ public final class Captains {
 		}
 		mob.addTag(TAG);
 		mob.addTag(ID_TAG + c.id());
+		// ((0.7.614, Rivals) he keeps his temperament whatever body he's in)
+		Rivals.temper(level, c, mob);
 		for (Trait t : traits(c)) {
 			mob.addTag(t.tag());
 		}
@@ -820,14 +879,14 @@ public final class Captains {
 		MinecraftServer server = level.getServer();
 		Set<String> tribes = new HashSet<>();
 		for (Captain c : all(server).values()) {
-			if (!c.fallen()) {
+			if (!c.fallen() && Rivals.tribe(c.tribe())) {
 				tribes.add(c.tribe());
 			}
 		}
 		Map<String, Integer> seats = level.getAttachedOrElse(SEATS, Map.of());
 		Map<String, Integer> fresh = null;
 		for (String tribe : tribes) {
-			Faction seat = Tribes.seat(server, tribe);
+			Faction seat = Rivals.seat(server, tribe);
 			int now = seat == null ? -1 : seat.id();
 			Integer was = seats.get(tribe);
 			if (was != null && was == now) {
@@ -864,7 +923,7 @@ public final class Captains {
 			old.discard();
 		}
 		put(server, heir.withPost(seat.id(), true).withBody(null));
-		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.crowned", heir.name(), Tribes.name(tribe)));
+		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.crowned", heir.name(), Rivals.name(tribe)));
 	}
 
 	/** A chief's orders in every camp's store that hasn't had them: a page giving away one of a captain's traits. */
@@ -873,7 +932,7 @@ public final class Captains {
 		List<Integer> ordered = level.getAttachedOrElse(ORDERED, List.of());
 		Set<Integer> fresh = null;
 		for (Faction camp : near.values()) {
-			String tribe = ordered.contains(camp.id()) ? null : Tribes.of(server, camp.id());
+			String tribe = ordered.contains(camp.id()) ? null : Rivals.of(server, camp.id());
 			List<Captain> captains = tribe == null ? List.of() : of(server, tribe);
 			if (captains.isEmpty() || !Storage.loaded(level, camp)) {
 				continue;
@@ -918,11 +977,35 @@ public final class Captains {
 	 * on a hunting band, the trail. True if this was his step (his brain waits).
 	 */
 	static boolean step(ServerLevel level, Worker w) {
-		PathfinderMob mob = w.mob();
-		Captain c = of(mob);
+		Captain c = of(w.mob());
 		if (c == null || c.fallen()) {
 			return false;
 		}
+		if (stepMob(level, w.mob(), c)) {
+			return true;
+		}
+		return Tribes.hunter(w.mob()) && Tribes.hunterStep(level, w);
+	}
+
+	/** (0.7.614, Rivals) Every so often: the step of each captain whose body isn't one of a settlement's workers. */
+	private static void otherSteps(ServerLevel level) {
+		MinecraftServer server = level.getServer();
+		Map<String, Captain> all = all(server);
+		if (all.isEmpty()) {
+			return;
+		}
+		for (Captain c : List.copyOf(all.values())) {
+			if (c.fallen() || c.body().isEmpty() || SwornCaptains.free(server, c.id())) {
+				continue;
+			}
+			if (level.getEntity(c.body().get()) instanceof PathfinderMob mob && !(mob instanceof Worker) && mob.isAlive()) {
+				stepMob(level, mob, c);
+			}
+		}
+	}
+
+	/** A captain's own step, worker or not. True while it is his (his brain or goals wait). */
+	private static boolean stepMob(ServerLevel level, PathfinderMob mob, Captain c) {
 		if (Downed.isDowned(mob)) {
 			Map<UUID, Fight> fights = FIGHTS.get(c.id());
 			if (fights != null) {
@@ -949,14 +1032,24 @@ public final class Captains {
 			return true;
 		}
 		LivingEntity target = Rulers.target(mob);
+		MinecraftServer server = level.getServer();
 		if (has(mob, Trait.BLOOD_RAGE) && target != null && mob.getHealth() < mob.getMaxHealth() * RAGE_AT && mob.tickCount % 20 == 0) {
 			mob.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 40, 1, false, true));
 			mob.addEffect(new MobEffectInstance(MobEffects.SPEED, 40, 0, false, true));
+		} else if (target != null && mob.tickCount % 20 == 0 && Rivals.is(server, c, Temperaments.Temperament.HOTHEADED)) {
+			// ((0.7.614) a hothead fights in a rage from the first blow, if a lesser one)
+			mob.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 40, 0, false, true));
 		}
 		if (has(mob, Trait.RALLYING) && target != null && RALLIED.add(mob.getUUID())) {
-			rally(level, mob, w.factionId(), target);
+			rally(level, mob, target);
 		} else if (target == null && mob.tickCount % 200 == 0) {
 			RALLIED.remove(mob.getUUID());
+			CALLED.remove(mob.getUUID());
+		}
+		if (target instanceof ServerPlayer && Rivals.is(server, c, Temperaments.Temperament.TIMID) && CALLED.add(mob.getUUID())) {
+			// ((0.7.614) a timid one calls the rest and keeps back a while before he comes on)
+			call(level, mob, target);
+			return true;
 		}
 		if (has(mob, Trait.DEATHLESS) && mob.tickCount % 8 == 0) {
 			// (raised: the corruption that holds him together)
@@ -968,7 +1061,7 @@ public final class Captains {
 			fights(level, c, mob, now);
 			trophy(mob, c);
 		}
-		return Tribes.hunter(mob) && Tribes.hunterStep(level, w);
+		return false;
 	}
 
 	/** Whether {@code mob} runs from what he fears (and does). */
@@ -985,6 +1078,15 @@ public final class Captains {
 		}
 		if (mob.tickCount % 10 != 0 || now < FEAR_READY.getOrDefault(id, 0L)) {
 			return false;
+		}
+		Captain c = of(mob);
+		if (c != null) {
+			// ((0.7.614) a brave one runs only when nearly done; a proud one not while he's above half)
+			MinecraftServer server = level.getServer();
+			float share = mob.getHealth() / mob.getMaxHealth();
+			if (Rivals.is(server, c, Temperaments.Temperament.BRAVE) && share > BRAVE_AT || Rivals.is(server, c, Temperaments.Temperament.PROUD) && share > PROUD_AT) {
+				return false;
+			}
 		}
 		Trait fear = null;
 		Vec3 from = null;
@@ -1050,14 +1152,25 @@ public final class Captains {
 		mob.getNavigation().moveTo(to.x, to.y, to.z, 1.4);
 	}
 
-	/** His own near come to his foe, fighting harder. */
-	private static void rally(ServerLevel level, PathfinderMob mob, int camp, LivingEntity foe) {
-		for (Worker w : Workers.near(level, mob.getBoundingBox().inflate(RALLY_RANGE), x -> x.factionId() == camp && x.mob() != mob && x.mob().isAlive())) {
-			w.mob().setTarget(foe);
-			w.mob().addEffect(new MobEffectInstance(MobEffects.STRENGTH, RALLY_TICKS, 0, false, true));
+	/** His own near ({@link Rivals#allies}) come to his foe, fighting harder. */
+	private static void rally(ServerLevel level, PathfinderMob mob, LivingEntity foe) {
+		for (Mob own : Rivals.allies(level, mob, RALLY_RANGE)) {
+			own.setTarget(foe);
+			own.addEffect(new MobEffectInstance(MobEffects.STRENGTH, RALLY_TICKS, 0, false, true));
 		}
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 1.2F, 1.1F);
 		Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.rally." + mob.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
+	}
+
+	/** (0.7.614, Rivals) A timid captain calls his own near to his foe, and keeps back from it a while. */
+	private static void call(ServerLevel level, PathfinderMob mob, LivingEntity foe) {
+		for (Mob own : Rivals.allies(level, mob, RALLY_RANGE)) {
+			own.setTarget(foe);
+		}
+		Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.timid.calls." + mob.getRandom().nextInt(TEMPER_LINES)), Speech.RED, SAY_RANGE);
+		long now = level.getGameTime();
+		FEARED.put(mob.getUUID(), now + TIMID_BACK);
+		FEARED_FROM.put(mob.getUUID(), foe.position());
 	}
 
 	// ---- meetings ------------------------------------------------------------------------------------------------------
@@ -1079,8 +1192,8 @@ public final class Captains {
 					SCENE.put(mob.getUUID(), now + FILM_TICKS);
 					SCENE_AT.put(mob.getUUID(), p.getEyePosition());
 				}
-				line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.first." + mob.getRandom().nextInt(LINES), Recollections.nameTo(p, mob),
-					Component.literal(c.name()), Tribes.name(c.tribe()));
+				line = Dialects.trTribe(c.tribe(), Rivals.line(level.getServer(), c, "first", mob.getRandom()), Recollections.nameTo(p, mob),
+					Component.literal(c.name()), Rivals.name(c.tribe()));
 			} else {
 				String last = "slain".equals(m.last()) && c.has(Trait.DEATHLESS) ? "raised" : m.last();
 				line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.again." + last + "." + mob.getRandom().nextInt(LINES),
@@ -1142,6 +1255,12 @@ public final class Captains {
 			it.remove();
 			if (p == null || p.isAlive()) {
 				outcome(level.getServer(), c.id(), e.getKey(), f.downed ? "beaten" : "fled", now);
+				if (p != null && Rivals.is(level.getServer(), c, Temperaments.Temperament.SPITEFUL) && SPITE.computeIfAbsent(c.id(), k -> new HashSet<>()).add(p.getUUID())) {
+					// ((0.7.614) a spiteful one holds it against you: he's sworn on you now)
+					swear(p, c.id());
+					Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.spiteful.swears." + mob.getRandom().nextInt(TEMPER_LINES),
+						Recollections.nameTo(p, mob)), Speech.RED, SAY_RANGE);
+				}
 			}
 		}
 		if (fights.isEmpty()) {
@@ -1174,6 +1293,25 @@ public final class Captains {
 			fights.remove(player.getUUID());
 		}
 		outcome(player.level().getServer(), c.id(), player.getUUID(), asked ? "questioned" : "spared", Factions.level(player.level().getServer()).getGameTime());
+		if (Rivals.is(player.level().getServer(), c, Temperaments.Temperament.GREEDY)) {
+			// ((0.7.614) let up, a greedy one buys his life twice over: he sells you one of the others)
+			RandomSource random = body.getRandom();
+			Map.Entry<Captain, Trait> e = unknown(player, c.tribe(), -1, EnumSet.allOf(Sort.class), random);
+			if (e != null && !e.getKey().id().equals(c.id()) && player.level() instanceof ServerLevel level) {
+				learn(player, e.getKey().id(), e.getValue());
+				Speech.say(level, body, Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.greedy.sells." + random.nextInt(TEMPER_LINES),
+					Recollections.nameTo(player, body), told(e.getKey(), e.getValue())), Speech.RED, SAY_RANGE);
+			}
+		}
+	}
+
+	/** (0.7.614) {@code id} is sworn to kill {@code player}. */
+	private static void swear(ServerPlayer player, String id) {
+		List<String> sworn = new ArrayList<>(player.getAttachedOrElse(SWORN, List.of()));
+		if (!sworn.contains(id)) {
+			sworn.add(id);
+			player.setAttached(SWORN, List.copyOf(sworn));
+		}
 	}
 
 	// ---- blows and deaths ------------------------------------------------------------------------------------------------
@@ -1278,7 +1416,7 @@ public final class Captains {
 				return t != null && t.sort == Sort.FEAR;
 			});
 			traits.add(Trait.DEATHLESS.key());
-			c = c.climbed(Math.min(RANK_MAX, c.rank() + 1), List.copyOf(traits), c.trophy(), c.slain());
+			c = c.climbed(Math.min(Rivals.rankMax(server), c.rank() + 1), List.copyOf(traits), c.trophy(), c.slain());
 		}
 		long back = returns ? now + 24000L * (RETURN_DAYS_MIN + random.nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
 		put(server, c.fell(back, lost));
@@ -1312,7 +1450,7 @@ public final class Captains {
 				more.add(c.id());
 				player.setAttached(SWORN, List.copyOf(more));
 			}
-			Post.news(server, Component.translatable("news.jaymoskingdoms.captain.fallen", c.name(), Tribes.name(c.tribe()), player.getDisplayName()));
+			Post.news(server, Component.translatable("news.jaymoskingdoms.captain.fallen", c.name(), Rivals.name(c.tribe()), player.getDisplayName()));
 			avenge(level, c, player);
 		}
 	}
@@ -1334,7 +1472,7 @@ public final class Captains {
 		if (gained != null) {
 			traits.add(gained.key());
 		}
-		int rank = Math.min(RANK_MAX, avenger.rank() + (brother ? 1 : 0));
+		int rank = Math.min(Rivals.rankMax(server), avenger.rank() + (brother ? 1 : 0));
 		Captain after = avenger.climbed(rank, List.copyOf(traits), avenger.trophy(), avenger.slain());
 		after = after.met(player.getUUID(), new Meeting(1, brother ? "avenger_brother" : "avenger", level.getGameTime()));
 		put(server, after);
@@ -1362,17 +1500,21 @@ public final class Captains {
 			if (!c.fallen() || c.back() < 0 || now < c.back()) {
 				continue;
 			}
-			List<Faction> camps = Tribes.camps(server, c.tribe());
-			if (camps.isEmpty()) {
+			List<Faction> camps = Rivals.camps(server, c.tribe());
+			if (!Rivals.side(c.tribe()).camps) {
+				// ((0.7.614, Rivals) the risen dead, the Hornkin: back with no post, in the next of his kind to walk his land)
+				put(server, c.returned(-1));
+			} else if (camps.isEmpty()) {
 				// (his tribe is gone: so is he)
 				put(server, c.fell(-1L, List.of()));
 				continue;
+			} else {
+				put(server, c.returned(quietest(server, c.tribe(), camps)));
 			}
-			put(server, c.returned(quietest(server, c.tribe(), camps)));
 			// (4b) his death threats for whoever killed him
 			SwornCaptains.back(server, c);
 			Post.news(server, Component.translatable(c.has(Trait.DEATHLESS) ? "news.jaymoskingdoms.captain.raised." + level.getRandom().nextInt(2)
-				: "news.jaymoskingdoms.captain.returned", c.name(), Tribes.name(c.tribe())));
+				: "news.jaymoskingdoms.captain.returned", c.name(), Rivals.name(c.tribe())));
 		}
 	}
 
@@ -1387,14 +1529,23 @@ public final class Captains {
 		Captain c = is(killer) ? of(killer) : null;
 		boolean risen = false;
 		if (c == null || c.fallen()) {
-			String tribe = Tribes.of(killer);
-			if (tribe == null || !(killer instanceof Worker w) || of(server, tribe).size() >= LADDER_MAX) {
+			// ((0.7.614, Rivals) one of any side's own: a camp's, or a monster of a side that rises from the land)
+			Rivals.Side roams = Rivals.roamer(killer);
+			String tribe = roams != null ? Rivals.key(roams, killer.blockPosition()) : Rivals.of(killer);
+			int camp = Rivals.faction(killer);
+			if (tribe == null || roams == null && camp < 0 || of(server, tribe).size() >= Rivals.ladderMax(server)) {
 				return;
 			}
-			boolean chief = Greenskins.chief(w.role());
-			String[] bynames = tribe.startsWith(Tribes.ORC + "@") ? ORC_BYNAMES : GOBLIN_BYNAMES;
-			String name = chief ? killer.getName().getString() : killer.getName().getString() + " " + bynames[random.nextInt(bynames.length)];
-			c = Captain.of(newId(random), tribe, name, 1, roll(random), w.factionId(), killer.getUUID(), chief);
+			boolean chief = killer instanceof Worker w && Greenskins.chief(w.role());
+			String own = killer.hasCustomName() || killer instanceof Worker ? killer.getName().getString() : Rivals.rollName(tribe, random);
+			String name = chief || roams != null && !killer.hasCustomName() ? own : own + " " + Rivals.byname(tribe, random);
+			c = Captain.of(newId(random), tribe, name, 1, roll(server, random), roams != null ? -1 : camp, killer.getUUID(), chief);
+			if (roams == Rivals.Side.RAISED) {
+				c = raisedDead(c);
+			}
+			if (killer instanceof Mob m) {
+				m.setPersistenceRequired();
+			}
 			risen = true;
 		} else {
 			List<String> traits = new ArrayList<>(c.traits());
@@ -1402,7 +1553,7 @@ public final class Captains {
 			if (gained != null) {
 				traits.add(gained.key());
 			}
-			int rank = Math.min(RANK_MAX, c.rank() + 1);
+			int rank = Math.min(Rivals.rankMax(server), c.rank() + 1);
 			if (rank > c.rank()) {
 				climb(killer);
 			}
@@ -1429,9 +1580,9 @@ public final class Captains {
 			sworn.add(c.id());
 			player.setAttached(SWORN, List.copyOf(sworn));
 		}
-		Speech.say(level, killer, Dialects.tr(killer, "talk.jaymoskingdoms.captain.gloat." + random.nextInt(LINES), player.getDisplayName()), Speech.RED, SAY_RANGE);
+		Speech.say(level, killer, Dialects.tr(killer, Rivals.line(server, c, "gloat", random), player.getDisplayName()), Speech.RED, SAY_RANGE);
 		Post.news(server, Component.translatable(risen ? "news.jaymoskingdoms.captain.risen" : "news.jaymoskingdoms.captain.slew", c.name(),
-			player.getDisplayName(), Tribes.name(c.tribe())));
+			player.getDisplayName(), Rivals.name(c.tribe())));
 	}
 
 	/**
@@ -1464,13 +1615,12 @@ public final class Captains {
 		}
 		Speech.say(level, killer, Dialects.tr(killer, "talk.jaymoskingdoms.captain." + (risen ? "risen" : "climbed") + "." + killer.getRandom().nextInt(LINES),
 			Component.literal(c.name())), Speech.RED, SAY_RANGE);
-		int faction = killer instanceof Worker w ? w.factionId() : -1;
 		int cheers = 0;
-		for (Worker w : Workers.near(level, killer.getBoundingBox().inflate(CHEER_RANGE), x -> x.factionId() == faction && x.mob() != killer && x.mob().isAlive())) {
+		for (Mob own : killer instanceof Mob m ? Rivals.allies(level, m, CHEER_RANGE) : List.<Mob>of()) {
 			if (cheers++ >= 3) {
 				break;
 			}
-			Speech.say(level, w.mob(), Dialects.tr(w.mob(), "talk.jaymoskingdoms.captain.cheer." + w.mob().getRandom().nextInt(LINES), Component.literal(c.name())),
+			Speech.say(level, own, Dialects.tr(own, "talk.jaymoskingdoms.captain.cheer." + own.getRandom().nextInt(LINES), Component.literal(c.name())),
 				Speech.RED, SAY_RANGE);
 		}
 	}
@@ -1568,7 +1718,7 @@ public final class Captains {
 
 	/** A player is within {@link #DOING_REACH} of {@code tribe}'s king's seat. */
 	private static boolean watched(ServerLevel level, String tribe) {
-		Faction seat = Tribes.seat(level.getServer(), tribe);
+		Faction seat = Rivals.seat(level.getServer(), tribe);
 		if (seat == null) {
 			return false;
 		}
@@ -1627,7 +1777,7 @@ public final class Captains {
 		if (gained != null) {
 			traits.add(gained.key());
 		}
-		int rank = Math.min(RANK_MAX, now.rank() + 1);
+		int rank = Math.min(Rivals.rankMax(level.getServer()), now.rank() + 1);
 		Captain after = now.climbed(rank, List.copyOf(traits), now.trophy(), now.slain());
 		put(level.getServer(), after);
 		if (after.body().map(level::getEntity).orElse(null) instanceof LivingEntity body && body.isAlive()) {
@@ -1711,7 +1861,7 @@ public final class Captains {
 		level.playSound(null, seen.getX(), seen.getY(), seen.getZ(), SoundEvents.VILLAGER_NO, SoundSource.HOSTILE, 1.2F, 0.6F);
 		Speech.say(level, seen, Dialects.tr(seen, "talk.jaymoskingdoms.captain.shamed." + random.nextInt(LINES), Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
 		Will.flee(seen, sp, now, Will.FLEE_TICKS * 2);
-		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.shamed", c.name(), sp.getDisplayName(), Tribes.name(c.tribe())));
+		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.shamed", c.name(), sp.getDisplayName(), Rivals.name(c.tribe())));
 	}
 
 	// ---- what you know of them -------------------------------------------------------------------------------------------
@@ -1776,13 +1926,13 @@ public final class Captains {
 
 	/** (Questioning) {@code body}'s tribe has a captain with something {@code player} doesn't know. */
 	static boolean asks(ServerPlayer player, LivingEntity body) {
-		String tribe = Tribes.of(body);
+		String tribe = Rivals.of(body);
 		return tribe != null && unknown(player, tribe, Rulers.faction(body), EnumSet.allOf(Sort.class), body.getRandom()) != null;
 	}
 
 	/** (Questioning) "What does your captain fear?": a fear or weakness of one of their captains ({@code lies}: one he hasn't). */
 	static Component questioned(ServerPlayer player, LivingEntity body, boolean lies) {
-		String tribe = Tribes.of(body);
+		String tribe = Rivals.of(body);
 		RandomSource random = body.getRandom();
 		Map.Entry<Captain, Trait> e = tribe == null ? null : unknown(player, tribe, Rulers.faction(body), EnumSet.of(Sort.WEAKNESS, Sort.FEAR), random);
 		if (e == null && tribe != null) {
@@ -1875,7 +2025,7 @@ public final class Captains {
 			}
 			out.add(new Journal.Entry(false, false,
 				Component.translatable(foe ? "journal.jaymoskingdoms.captain.sworn" : "journal.jaymoskingdoms.captain.captain", c.name()),
-				Tribes.name(c.tribe()), text, Component.translatable(foe ? "journal.jaymoskingdoms.captain.sworn.objective" : "journal.jaymoskingdoms.captain.objective"),
+				Rivals.name(c.tribe()), text, Component.translatable(foe ? "journal.jaymoskingdoms.captain.sworn.objective" : "journal.jaymoskingdoms.captain.objective"),
 				post == null ? Optional.empty() : Optional.of(post.seat())));
 		}
 		return out;

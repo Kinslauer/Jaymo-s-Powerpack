@@ -42,17 +42,25 @@ public final class Dialects {
 
 	/** The dialect of a tribe key ({@code goblin@x,z}, {@code orc@x,z}). */
 	public static String ofTribe(@Nullable String tribe) {
+		if (tribe != null && !Rivals.tribe(tribe)) {
+			// ((0.7.614) another side's ladder: its own voice, Rivals)
+			return Rivals.side(tribe).key;
+		}
 		return tribe != null && tribe.startsWith(Tribes.GOBLIN + "@") ? GOBLIN : ORC;
 	}
 
 	/** {@code key} in {@code brood}'s dialect. */
 	public static String key(String brood, String key) {
-		return PREFIX + brood + "." + key;
+		return PREFIX + Rivals.dialect(brood, key) + "." + key;
 	}
 
 	/** A line only orcs and goblins say: {@code speaker}'s dialect (orc if it can't be told). */
 	public static MutableComponent tr(@Nullable Entity speaker, String key, Object... args) {
 		String brood = of(speaker);
+		if (brood == null) {
+			// ((0.7.614) one of another side with a ladder of captains: its own voice, or the common tongue; Rivals)
+			brood = Rivals.dialectOf(speaker);
+		}
 		return Component.translatable(key(brood == null ? ORC : brood, key), args);
 	}
 
