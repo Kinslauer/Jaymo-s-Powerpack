@@ -9824,3 +9824,23 @@ tribes had now belong to every side that fights you (ideas from Shadow of War: o
   glint and Powers' incoming warning first, unparryable (a guard still blocks), every 8-12 s. Shouted lines for each.
 - Lines in the common tongue, orc and goblin: `lang/parts/captain-ways.json`. Questioning's lies only name weaknesses
   and fears. Built, not played.
+
+## 0.7.617 (2026-11-06): Rivals patch 2, their schemes and yours
+- **Bodyguards** (`CaptainSchemes`): each dawn a captain of rank 4+ keeps one lesser captain of his ladder (two at the top
+  rank), posted to his camp, news on the boards. A bodyguard stays within 10 of his boss and takes up his boss's fight
+  (within 48). Turn a bodyguard, and the first time you strike his old boss he is set down beside him and stabs him
+  for 35% of his health, with a speaker-shot film (once, then he's an ordinary sworn captain).
+- **Your plants:** a new sworn-captain order on the Interact page, "Plant in Camp": he goes back to his old tribe's
+  nearest camp. Each dawn he sends word (Tidings) of one more trait of its captains; when you strike a captain posted
+  there, he turns on him as a turned bodyguard does, then comes back to your side.
+- **Their plants:** each dawn, at 12%, a captain sworn to have your head (a camp side, posted, not the chief) takes the
+  place of a villager in a town within 64 of you (`captains_plants`). At night with you within 24 he strikes now and
+  then (2% each check), with a film; the villager is gone and he's there in his own body. A Will staredown on that
+  villager unmasks him first: he's revealed slowed and weakened.
+- **Schemes:** sneak and use a spider eye or poisonous potato within 32 of a camp with a feast set: at dawn the captain
+  falls (half the time for good). A gold ingot at a camp with a duel set rigs it: the loser lives and tells you all his
+  traits. Kill a captain within 3 s of your first blow, before he has struck you, and another captain at his camp is
+  blamed and put to death by his own.
+- **Avenge a friend:** a captain who kills a player has a price on his head on the boards. Whoever else kills him gets
+  12 silver and the friend's head (if he wasn't wearing it already, it drops anyway), and the friend hears of it.
+- Lines in the common tongue, orc and goblin: `lang/parts/captain-schemes.json`. Built, not played.

@@ -484,6 +484,7 @@ public final class Captains {
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Captains::died);
 		CaptainWays.register();
+		CaptainSchemes.register();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Captains::filmHarm);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> hurt(victim, source, taken, blocked));
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -627,7 +628,13 @@ public final class Captains {
 		returns(level);
 		days(level);
 		seats(level);
+		// ((0.7.617, Rivals patch 2) bodyguards, plants)
+		CaptainSchemes.tick(level);
 		for (Captain c : List.copyOf(all(server).values())) {
+			if (CaptainSchemes.away(server, c.id())) {
+				// ((0.7.617) planted among a town's folk)
+				continue;
+			}
 			if (SwornCaptains.free(server, c.id())) {
 				// (4b) sworn to a player: at their side, or away on their business
 				continue;
@@ -1100,6 +1107,8 @@ public final class Captains {
 			call(level, mob, target);
 			return true;
 		}
+		// ((0.7.617) a bodyguard keeps by his boss)
+		CaptainSchemes.step(level, mob, c, target);
 		if (CaptainWays.step(level, mob, c, target)) {
 			// ((0.7.616) his move holds him)
 			return true;
@@ -1435,6 +1444,8 @@ public final class Captains {
 			if (c != null && by instanceof ServerPlayer player) {
 				fought(c, player.getUUID(), now);
 				brotherComes(level, c, victim, player);
+				// ((0.7.617) a quick kill timed; a turned bodyguard or your plant turns on him)
+				CaptainSchemes.struck(level, c, victim, player);
 			}
 			if (victim.isAlive() && has(victim, Trait.HARD_TO_KILL) && victim.getHealth() < victim.getMaxHealth() * HARD_AT && GOT_UP.add(victim.getUUID())) {
 				victim.setHealth(victim.getMaxHealth() * HARD_TO);
@@ -1446,6 +1457,7 @@ public final class Captains {
 			Captain c = of(attacker);
 			if (c != null && victim instanceof ServerPlayer player) {
 				fought(c, player.getUUID(), now);
+				CaptainSchemes.struckBack(c, player);
 			}
 			if (!blocked && taken > 0.0F && victim.isAlive() && has(attacker, Trait.VENOMOUS) && source.getDirectEntity() == attacker) {
 				victim.addEffect(new MobEffectInstance(MobEffects.POISON, VENOM_TICKS, 0), attacker);
@@ -1504,6 +1516,8 @@ public final class Captains {
 		}
 		long back = returns ? now + 24000L * (RETURN_DAYS_MIN + random.nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
 		put(server, c.fell(back, lost));
+		// ((0.7.617) a quick kill pinned on another; a price on his head paid)
+		CaptainSchemes.died(level, c, source);
 		FIGHTS.remove(c.id());
 		if (!returns) {
 			// (0.7.435) one who stays dead leaves his tusk to the player who felled him
@@ -1673,6 +1687,8 @@ public final class Captains {
 		Speech.say(level, killer, Dialects.tr(killer, Rivals.line(server, c, "gloat", random), player.getDisplayName()), Speech.RED, SAY_RANGE);
 		Post.news(server, Component.translatable(risen ? "news.jaymoskingdoms.captain.risen" : "news.jaymoskingdoms.captain.slew", c.name(),
 			player.getDisplayName(), Rivals.name(c.tribe())));
+		// ((0.7.617) a price on his head, for the friends of the fallen)
+		CaptainSchemes.priced(server, c, player);
 	}
 
 	/**
@@ -1826,6 +1842,10 @@ public final class Captains {
 		RandomSource random = level.getRandom();
 		Captain a = get(server, d.a()), b = d.b().isEmpty() ? null : get(server, d.b());
 		if (a == null || a.fallen() || !d.b().isEmpty() && (b == null || b.fallen())) {
+			return;
+		}
+		if (CaptainSchemes.settle(level, d, a, b)) {
+			// ((0.7.617) a poisoned feast, a rigged duel)
 			return;
 		}
 		switch (d.kind()) {

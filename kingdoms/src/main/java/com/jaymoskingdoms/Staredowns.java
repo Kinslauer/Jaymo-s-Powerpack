@@ -109,8 +109,8 @@ final class Staredowns {
 		if (refused(sp, mob)) {
 			return false;
 		}
-		if (Captains.starable(mob)) {
-			// (0.7.432) a downed captain: to spare or to shame
+		if (Captains.starable(mob) || CaptainSchemes.planted(mob)) {
+			// (0.7.432) a downed captain: to spare or to shame; ((0.7.617) a plant among a town's folk, to unmask)
 			return true;
 		}
 		return captainOf(mob) != null || ruled(sp, mob) != null;
@@ -204,6 +204,10 @@ final class Staredowns {
 	 * always; a foe aboard, in the saddle, casting or outlawed), false for a plain foe to drop its weapon and run.
 	 */
 	static boolean broke(ServerLevel level, ServerPlayer sp, Mob seen, long now) {
+		if (CaptainSchemes.unmask(level, sp, seen)) {
+			// ((0.7.617) a captain planted among a town's folk, unmasked)
+			return true;
+		}
 		if (Captains.starable(seen)) {
 			// (0.7.432) a downed captain, spared (an empty hand) or shamed
 			Captains.stared(level, sp, seen, now);
