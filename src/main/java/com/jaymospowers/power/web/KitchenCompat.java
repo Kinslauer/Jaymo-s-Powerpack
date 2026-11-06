@@ -105,6 +105,46 @@ public final class KitchenCompat {
 		return LOADED && Kitchen.carried(entity);
 	}
 
+	/**
+	 * (0.21.28) A Kitchen body lying still on the ground: not carried, dragged or hung on a meat hook (those bleed their own
+	 * ways: smears, the hook's drip). False for anything that isn't one.
+	 */
+	public static boolean liesStill(Entity entity) {
+		return LOADED && Kitchen.liesStill(entity);
+	}
+
+	/**
+	 * (0.21.28) Hands {@code each} every piece of armour a Kitchen body still wears (and its slot, 0 boots ... 3 helmet) to
+	 * change in place; the changes stay on the body and come off with the armour. False if it wears none, or Kitchen is
+	 * older than 0.5.79.
+	 */
+	public static boolean reworkArmour(Entity corpse, java.util.function.ObjIntConsumer<net.minecraft.world.item.ItemStack> each) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!reworkLooked) {
+			reworkLooked = true;
+			try {
+				reworkArmour = java.lang.invoke.MethodHandles.publicLookup().findVirtual(Class.forName("com.jaymoskitchen.corpse.CorpseEntity"),
+					"reworkArmour", java.lang.invoke.MethodType.methodType(boolean.class, java.util.function.ObjIntConsumer.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				// an older Kitchen: a body's armour stays as it died
+			}
+		}
+		if (reworkArmour == null || !Kitchen.isCorpse(corpse)) {
+			return false;
+		}
+		try {
+			return (boolean) reworkArmour.invoke(corpse, each);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.21.28) Kitchen 0.5.79's {@code CorpseEntity.reworkArmour}, looked up by name (the Kitchen jar built against may be older). */
+	private static java.lang.invoke.@Nullable MethodHandle reworkArmour;
+	private static boolean reworkLooked;
+
 	/** A player's corpse (it holds their belongings: never eaten). */
 	static boolean isPlayerCorpse(Entity entity) {
 		return LOADED && Kitchen.playerCorpse(entity);
@@ -312,6 +352,15 @@ public final class KitchenCompat {
 
 		static boolean carried(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.carrier() != null;
+		}
+
+		static boolean isCorpse(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity;
+		}
+
+		static boolean liesStill(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.carrier() == null && corpse.dragger() == null
+				&& corpse.hook() == null;
 		}
 
 		static boolean playerCorpse(Entity entity) {

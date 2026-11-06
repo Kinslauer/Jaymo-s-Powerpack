@@ -1,5 +1,6 @@
 package com.jaymospowers.client.wounds;
 
+import com.jaymospowers.client.KneelLegs;
 import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.core.wounds.Tending;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -25,7 +26,7 @@ public final class TendPose {
 	/** Down onto the knee, and back up (ticks). */
 	static final float KNEEL_IN = 7.0F, GET_UP = 8.0F;
 	/** How far the body sinks onto the knee (blocks); the hips over the feet standing (blocks). */
-	static final float SINK = 0.42F, HIP = 0.75F;
+	static final float SINK = com.jaymospowers.client.KneelLegs.SINK, HIP = 0.75F;
 	/** The lean forward from the hips (degrees): over someone lying down, and over someone standing. */
 	static final float LEAN_LOW = 32.0F, LEAN_HIGH = 6.0F;
 	/** The arms' swing forward, relative to the leaning body (radians): reaching down, and reaching ahead. */
@@ -35,8 +36,21 @@ public final class TendPose {
 	/** Under this height (blocks) the one they treat counts as lying down. */
 	static final float LOW_HEIGHT = 1.0F;
 
-	/** {@code down}: 0 standing to 1 on the knee; {@code low}: 0 reaching ahead to 1 reaching down; {@code time}: ticks. */
-	public record Tend(float down, float low, float time) {
+	/**
+	 * (0.21.28) Drinking from the ground ({@link Tending#GROUND_DRINK}): the lean (degrees; leaning this far from knees
+	 * one thigh down puts the shoulders an arm's length up, so the hands rest flat on the ground), the head bowed
+	 * (radians), and the bob of each gulp (how fast, radians a tick; how far, radians).
+	 */
+	static final float LEAN_DRINK = 58.0F, HEAD_DRINK = 0.9F, GULP_RATE = 0.32F, GULP = 0.12F;
+
+	/**
+	 * {@code down}: 0 standing to 1 on the knee; {@code low}: 0 reaching ahead to 1 reaching down; {@code time}: ticks;
+	 * {@code drink}: (0.21.28) down at the ground drinking, not tending.
+	 */
+	public record Tend(float down, float low, float time, boolean drink) {
+		Tend(float down, float low, float time) {
+			this(down, low, time, false);
+		}
 	}
 
 	public static final RenderStateDataKey<Tend> KEY = RenderStateDataKey.create(() -> "jaymospowers:tending");
@@ -47,6 +61,7 @@ public final class TendPose {
 		float low;
 		float releasedAt = -1.0F;
 		float releasedDown;
+		boolean drink;
 	}
 
 	private static final Int2ObjectOpenHashMap<Track> TRACKS = new Int2ObjectOpenHashMap<>();
@@ -69,6 +84,12 @@ public final class TendPose {
 			}
 			track.releasedAt = -1.0F;
 			track.down = smooth((now - tend.since()) / KNEEL_IN);
+			track.drink = tend.target() == Tending.GROUND_DRINK;
+			if (track.drink) {
+				track.low = 1.0F;
+				state.setData(KEY, new Tend(track.down, 1.0F, now, true));
+				return;
+			}
 			Entity target = entity.level().getEntity(tend.target());
 			float low = target instanceof LivingEntity body && (Downed.isDowned(body) || body.getBbHeight() < LOW_HEIGHT) ? 1.0F : 0.0F;
 			track.low = Mth.lerp(0.2F, track.low, low);
@@ -87,7 +108,7 @@ public final class TendPose {
 			return;
 		}
 		track.down = track.releasedDown * (1.0F - smooth(up));
-		state.setData(KEY, new Tend(track.down, track.low, now));
+		state.setData(KEY, new Tend(track.down, track.low, now, track.drink));
 	}
 
 	/** After the body faces its way: sunk onto the knee, leaning in from the hips. */
@@ -113,10 +134,24 @@ public final class TendPose {
 		}
 		float k = Mth.clamp(tend.down(), 0.0F, 1.0F);
 		float pitch = lean(tend) * Mth.DEG_TO_RAD;
-		// the legs as the world sees them, so they stay planted under the lean
-		blend(h.rightLeg, -1.15F - pitch, 0.1F, 0.0F, k);
-		blend(h.leftLeg, 1.35F - pitch, -0.1F, 0.0F, k);
 		blend(h.body, 0.0F, 0.0F, 0.0F, k);
+		if (tend.drink()) {
+			// (0.21.28) on hands and knees: both thighs straight down, both shins flat behind (KneelLegs), hands planted
+			// straight down to the ground either side, head down at it, bobbing with each gulp
+			blend(h.rightLeg, KneelLegs.DOWN_THIGH - pitch, 0.06F, 0.0F, k);
+			blend(h.leftLeg, KneelLegs.DOWN_THIGH - pitch, -0.06F, 0.0F, k);
+			KneelLegs.want(state, KneelLegs.DOWN_KNEE * k, KneelLegs.DOWN_KNEE * k);
+			float gulp = Mth.sin(tend.time() * GULP_RATE) * GULP;
+			blend(h.rightArm, -pitch, -0.1F, 0.12F, k);
+			blend(h.leftArm, -pitch, 0.1F, -0.12F, k);
+			blend(h.head, HEAD_DRINK + gulp, 0.0F, 0.0F, k);
+			return;
+		}
+		// the legs as the world sees them, so they stay planted under the lean: (0.21.28) the right foot planted, the
+		// thigh level and the shin straight down, the left knee on the ground with the shin flat behind (KneelLegs)
+		blend(h.rightLeg, KneelLegs.UP_THIGH - pitch, 0.1F, 0.0F, k);
+		blend(h.leftLeg, KneelLegs.DOWN_THIGH - pitch, -0.1F, 0.0F, k);
+		KneelLegs.want(state, KneelLegs.UP_KNEE * k, KneelLegs.DOWN_KNEE * k);
 		float reach = Mth.lerp(tend.low(), REACH_HIGH, REACH_LOW);
 		float work = Mth.sin(tend.time() * WORK_RATE) * WORK_AMOUNT;
 		// hands together at the wound, one then the other
@@ -125,6 +160,9 @@ public final class TendPose {
 	}
 
 	private static float lean(Tend tend) {
+		if (tend.drink()) {
+			return LEAN_DRINK;
+		}
 		return Mth.lerp(tend.low(), LEAN_HIGH, LEAN_LOW);
 	}
 

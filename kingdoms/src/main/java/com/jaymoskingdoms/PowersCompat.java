@@ -2280,6 +2280,32 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.630) Powers' {@code Tending.drinkAtGround(ServerPlayer)} (0.21.28). */
+	private static java.lang.invoke.@Nullable MethodHandle drinkAtGround;
+	private static boolean lookedForDrinkAtGround;
+
+	/** (0.7.630) {@code player} goes down on hands and knees, mouth to the ground, drinking (Powers' TendPose); nothing without Powers. */
+	public static void drinkAtGround(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForDrinkAtGround) {
+			lookedForDrinkAtGround = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					drinkAtGround = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Tending"),
+						"drinkAtGround", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no drinking pose (older Powers?)", e);
+				}
+			}
+		}
+		if (drinkAtGround != null) {
+			try {
+				drinkAtGround.invoke(player);
+			} catch (Throwable e) {
+				// no pose
+			}
+		}
+	}
+
 	/** Powers' {@code BloodTrail.draw(ServerLevel, Vec3, double, float, float, Consumer)} (0.19.62). */
 	private static java.lang.invoke.@Nullable MethodHandle drawStains;
 	private static boolean lookedForDraw;
