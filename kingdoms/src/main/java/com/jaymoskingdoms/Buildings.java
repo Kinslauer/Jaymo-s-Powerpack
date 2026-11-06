@@ -87,11 +87,11 @@ final class Buildings {
 		}
 		// (0.5.27) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
 		Blueprint.register(FactionType.KINGDOM, new Blueprint.Entry("tavern",
-			// (0.7.627) Dungeons and Taverns' own tavern house when it's installed and the variant's marked ({@link DntBuildings})
+			// (0.7.629) Dungeons and Taverns' own tavern house when it's installed and the variant's marked ({@link DntBuildings})
 			(level, faction, variant) -> DntBuildings.draw(level, faction, variant, "tavern",
 				() -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction))), 1, 26));
 		if (DntBuildings.loaded()) {
-			// (0.7.627) buildings only Dungeons and Taverns draws
+			// (0.7.629) buildings only Dungeons and Taverns draws
 			for (FactionType type : new FactionType[] {FactionType.KINGDOM, FactionType.FIEFDOM}) {
 				dnt(type, "apiary", 1, 26);
 				dnt(type, "sawmill", 1, 30);
@@ -149,7 +149,7 @@ final class Buildings {
 			() -> design.draw(Kit.of(level, faction, variant, variant))), max, minSize));
 	}
 
-	/** (0.7.627) A building only Dungeons and Taverns draws ({@link DntBuildings}); a fire pit if it can't be read. */
+	/** (0.7.629) A building only Dungeons and Taverns draws ({@link DntBuildings}); a fire pit if it can't be read. */
 	private static void dnt(FactionType type, String id, int max, int minSize) {
 		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> DntBuildings.draw(level, faction, variant, id,
 			() -> firePit(Kit.of(level, faction, variant, variant))), max, minSize));

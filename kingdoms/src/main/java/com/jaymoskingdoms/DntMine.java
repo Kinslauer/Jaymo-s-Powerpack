@@ -26,7 +26,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.627) Andy (2026-11-06): "cant they just use the dungeon and taverns structure?" When Dungeons and Taverns (mod id
+ * (0.7.629) Andy (2026-11-06): "cant they just use the dungeon and taverns structure?" When Dungeons and Taverns (mod id
  * {@link #MOD}, All Rights Reserved) is installed, a settlement that isn't poor digs and builds D&T's own miner's pit
  * (its "remnant miner hut": a fenced pit with a cobblestone shed, rails and ladders down to a little rail tunnel), read at
  * run time from the copy the player installed: nothing of theirs is copied into ours. Its two pieces ({@link #TOP}, and

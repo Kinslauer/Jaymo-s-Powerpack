@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.627) Andy (2026-11-06), of Dungeons and Taverns' buildings: "same with the tavern ... do them all". With D&T
+ * (0.7.629) Andy (2026-11-06), of Dungeons and Taverns' buildings: "same with the tavern ... do them all". With D&T
  * installed ({@link DntMine#MOD}, All Rights Reserved; read at run time from the player's own copy, as /place template
  * would: nothing of theirs copied into ours), the builders put up D&T's own buildings, block by block from storage like
  * any design ({@link CtovHalls#convert}):

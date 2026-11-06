@@ -178,7 +178,7 @@ final class CtovHalls {
 		return convert(entry, tag, MAX_SIDE);
 	}
 
-	/** (0.7.627) As {@link #convert(String, CompoundTag)}, up to {@code maxSide} across. */
+	/** (0.7.629) As {@link #convert(String, CompoundTag)}, up to {@code maxSide} across. */
 	static @Nullable Blueprint convert(String entry, CompoundTag tag, int maxSide) {
 		ListTag palette = tag.getList("palette").orElseGet(() -> tag.getListOrEmpty("palettes").getListOrEmpty(0));
 		List<BlockState> states = new ArrayList<>();

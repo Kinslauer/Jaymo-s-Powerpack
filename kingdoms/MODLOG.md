@@ -10004,7 +10004,28 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   alone (it used to fill Powers' revive bar and could get them up in 3 s); a vampire's sneak+use with an empty hand on a
   downed person or piglin/Hornkin bites instead of lifting (carry them with the grab instead). Built, not played.
 
-## 0.7.627 (2026-11-06): builders build Dungeons and Taverns' mine, tavern and more; open-pit mines
+## 0.7.627 (2026-11-06): Web's moves on the skill bar (Powers 0.21.25)
+- Nine more Powers move spells for the skill bar (`move_finish`, `counter`, `fists`, `arm`, `grab`, `tendril`, `spikes`,
+  `consume`, `shroud`), shown for Web with an empty hand while locked on. Icons: `tools/gen_move_icons.py`. Lines:
+  `lang/parts/power_moves.json`. Built, not played.
+## 0.7.628 (2026-11-06): Felled takes the felling stroke (Powers 0.21.26)
+- Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... if this is easier to ship do that instead, otherwise
+  cannibalize it". Felled (Raiiiden) is all rights reserved, so no code of it is copied; it has a Fabric 26.3 build, so the
+  pack ships it unchanged from CurseForge (0.1.5, with its physics library Zarith 0.2.0, Jolt with native libraries).
+- `FelledCompat`: with Felled loaded, a player's chopping still narrows the cut, fills the chop meter and counts for a
+  woodcutter, but the stroke that would fell the tree mends the chopped logs and hands the tree to Felled's
+  `FellingHandler.fellFrom` (by reflection), which brings it down as a rigid body (tips over the stump, rolls, snaps,
+  floats, can be stood on and ridden). Too big for Felled, or it fails: our `FallingTree` as before.
+- Our break handler runs in its own phase ahead of the default one (`Trees.CHOPPING`), so Felled never sees a chop in
+  progress as a log broken whole. Sneak-breaking a single log, creative, and logs we don't chop are left to Felled's own rules.
+- Blasts, giants (grab and throw), tornadoes, gatherers, Grimsby's axe and trunks with nothing under them still use our
+  falling trees. Andy: "so if a player cuts a tree down and a giant tried to grab it it wouldnt work?" It does now: a
+  giant's grab (`FallingTree.treeNear`/`take`, so the Great Ape, Towerback and the Aether Giants) also finds a tree Felled
+  brought down (`FelledCompat.near`, by Zarith's solid bounds) and makes it ours (`FelledCompat.adopt`: its live grid cells
+  as pieces, upright as it stood, heading the way its trunk lay; Felled's entity discarded), then lifts and throws it as
+  before. Assumes Felled's grid keeps the tree's standing frame (not seen in game). Hint 121 (HINTS=121). Built, not played; Felled's own felling not seen in our pack yet.
+
+## 0.7.629 (2026-11-06): builders build Dungeons and Taverns' mine, tavern and more; open-pit mines
 - Andy: "the dungeons and taverns mine here is exactly what i was imagining when i wanted our builders to mine. the
   current one should be for poverty nations only as it is too simple." Then: "cant they just use the dungeon and taverns
   structure?", "same with the tavern and stables if they have em", "do them all".

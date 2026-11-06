@@ -314,7 +314,7 @@ public final class Planner {
 		v *= 0xBF58476D1CE4E5B9L;
 		v ^= v >>> 29;
 		// (0.7.521) a trade's building may be CTOV's (every second try), marked so older ones keep their look
-		// (0.7.627) or Dungeons and Taverns' ({@link DntBuildings})
+		// (0.7.629) or Dungeons and Taverns' ({@link DntBuildings})
 		return DntBuildings.tag(entry, CtovHalls.tag(entry, v == 0L ? 1L : v, attempt), attempt);
 	}
 

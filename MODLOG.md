@@ -1224,3 +1224,16 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   (through Jaymo's Kingdoms' Weapon Forms bar, Spell Engine's keys 1, 2...): in Time Flow, always, Takedown and Shadow
   Blink; with an empty hand and locked on, Web's Takedown (wrap-and-slam, or string-up from a perch). They go at your
   lock-on foe, else the one in your sights. Sneak + attack still works as before. A blink at an unmarked foe says so.
+
+## 0.21.25 (2026-11-06): all of Web's bare-handed moves on the skill bar (Kingdoms 0.7.627)
+- Andy: "can all of web's unarmed moves go to the bar? symbiote included?" `WebBarMoves`: with an empty hand while locked
+  on, Web's bar (fixed order, so a slot keeps its key; nine at most):
+  - Any web slinger: Takedown, Finish (a downed foe: a symbiote execution while suited, else a quick finish with 3+ in the
+    hit streak), Counter (in Spider-Sense's window after a dodge).
+  - Without the symbiote: Webbed Fists.
+  - Bonded: Weapon Arm (forms and strikes), Grab (seize a foe up to a cow's size; holding one, maul it; tendrils full, a
+    combo), Tendril Grab, Spike Burst (a roar in the big suit), Consume, Shroud. The Suit and Wall Crawl stay on X.
+- Each goes at the lock-on foe, else the one in sights, by the same checks as its own key. Every old key still works.
+## 0.21.26 (2026-11-06): Felled in the pack (Kingdoms 0.7.628)
+- Felled (all rights reserved, Raiiiden; CurseForge 1715901 / file 9305152) and Zarith (1720181 / 9284445) join `packMods`
+  (dev: false). Kingdoms hands the felling stroke of a player's chopping to it (`FelledCompat`).

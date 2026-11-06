@@ -282,6 +282,12 @@ def packMods = [
 	// Voice Physics (MIT, Shamanalle; shipped unchanged): voices muffled by walls by material, echo in caves and stone
 	// rooms, weather and water, quieter sneaking; needs Simple Voice Chat. CurseForge only.
 	[dep: "curse.maven:voice-physics-1712556:9251110", cf: [1712556, 9251110], dev: false],
+	// Felled (all rights reserved, by Raiiiden; downloaded by id from CurseForge, never copied or edited) and its physics
+	// library Zarith (Jolt, with Windows/Linux/macOS natives): a felled tree comes down as a real rigid body, tips over
+	// its stump, rolls, snaps on a hard landing, floats, can be stood on. Kingdoms' chopping hands the felling stroke to it
+	// (FelledCompat); blasts, giants, tornadoes and gatherers still use Kingdoms' own falling trees.
+	[dep: "curse.maven:felled-1715901:9305152", cf: [1715901, 9305152], dev: false],
+	[dep: "curse.maven:zarith-1720181:9284445", cf: [1720181, 9284445], dev: false],
 	// Simple Voice Voice Changer (CC BY-NC-SA 4.0, sawiq; shipped unchanged in a free pack): your own voice changed
 	// (man, woman, kid, titan, demon, radio..., J toggles it), and Kingdoms' VoiceMasks turns it for a werewolf, a Great
 	// Ape, a goblin disguise or a full mask through its API. 1.2.5, the newest Fabric 26.3 file on CurseForge.
