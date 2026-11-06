@@ -702,6 +702,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.sailing.Sailing.register();
 		// (0.7.206) whaling: great whales, roped harpoons, carcasses to tow and flense
 		com.jaymoskingdoms.whaling.Whaling.register();
+		// 0.7.633: shy deer (fewer, in herds, bolt from players, keep off a home once scared from it)
+		ShyDeer.register();
 		// 0.7.42: sailing, stage 3: ships with crews of their own (pirates, warships, merchantmen), pirate coves, harbours,
 		// treasure wrecks (and their attachments)
 		Corsairs.register();

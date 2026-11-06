@@ -10073,3 +10073,14 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   lang `parts/vampire-bar.json`, hint 122.
 - Blood Gaze: `NightGifts` tags the vampire `jaymospowers_blood_gaze` (3 s wait); Powers' `FrostBeam` fires the Frost-born
   beam out of both eyes, red, for 20 ticks: same reach, damage, hit pace and wound roll; no freezing water. Built, not played.
+
+## 0.7.633 (2026-11-06): shy deer (Powers 0.21.32)
+- Andy: "the deer are still a nuisance and overspawning, but i like the fact that they are in packs in the overworld, they
+  should just be far more skittish and scare away from your home after the first interaction" (`ShyDeer`).
+- Fewer, still in herds: whether a herd may come is now rolled once per 64-block patch for 5 minutes (15% of patches), so
+  herds come whole instead of thinned; none come once 6 deer are within 96 blocks; still none in the Nether
+  (`DeerSpawnMixin` now asks `ShyDeer.mayGraze`; the old flat 30% per spot is gone).
+- Skittish: a deer bolts 20 blocks from any player within 24 blocks (10 if sneaking).
+- Scared off your home: the first time a deer bolts from a player within 48 blocks of their bed, deer learn that home
+  (kept on the Overworld, up to 128 homes): none spawn within 48 blocks of it again and any that wander in run out.
+- Hint 123. Built, not played.
