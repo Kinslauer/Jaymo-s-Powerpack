@@ -10073,3 +10073,12 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   lang `parts/vampire-bar.json`, hint 122.
 - Blood Gaze: `NightGifts` tags the vampire `jaymospowers_blood_gaze` (3 s wait); Powers' `FrostBeam` fires the Frost-born
   beam out of both eyes, red, for 20 ticks: same reach, damage, hit pace and wound roll; no freezing water. Built, not played.
+
+## 0.7.634: Feed on the skill bar
+- Andy: "put feed on the hotbar too, i cant get it to activate reliably. the current right click ability can move".
+  `FormSkills` adds `night_feed` (NightGifts move 3 -> `BloodGrab.feed`): holding someone, Feed throws them; else it
+  finds prey generously (the crosshair, else the nearest within ~35 degrees of the look and 3 blocks, in sight) and
+  grabs one a hand can hold, bites a sleeper (`SleepingPrey`), or bites anyone else the bite takes. Empty hand needed.
+- Right-click feeding is gone: no sneak+use bite (persons, Nether prey, downed, sleepers) and no double-tap grab
+  (`BloodGrabClient` removed; letting go of use no longer throws). Use on someone held still does nothing (keeps
+  Powers' revive bar from filling). Lapping pools stays sneak+use on the ground. Hints 120/122 reworded. Built, not played.

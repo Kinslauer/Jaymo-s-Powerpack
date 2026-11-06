@@ -38,3 +38,12 @@ d.point([5, 4], fill=(255, 255, 255, 255))
 d.point([10, 4], fill=(255, 255, 255, 255))
 im.save(os.path.join(OUT, "night_gaze.png"))
 print("wrote night_dash, night_pound, night_gaze")
+
+# (0.7.634) night_feed: two fangs over a drop of blood
+im, d = frame()
+d.polygon([(4, 3), (7, 3), (5, 9)], fill=(240, 236, 230, 255))
+d.polygon([(9, 3), (12, 3), (11, 9)], fill=(240, 236, 230, 255))
+d.ellipse([6, 10, 10, 14], fill=(190, 10, 20, 255))
+d.polygon([(8, 8), (6, 11), (10, 11)], fill=(190, 10, 20, 255))
+im.save(os.path.join(OUT, "night_feed.png"))
+print("wrote night_feed")
