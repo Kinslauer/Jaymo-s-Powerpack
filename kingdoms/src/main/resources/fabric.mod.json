@@ -10,7 +10,8 @@
 	"entrypoints": {
 		"main": ["com.jaymoskingdoms.JaymosKingdoms"],
 		"client": ["com.jaymoskingdoms.client.JaymosKingdomsClient"],
-		"jade": ["com.jaymoskingdoms.client.compat.JadeIntroductions"]
+		"jade": ["com.jaymoskingdoms.client.compat.JadeIntroductions"],
+		"jei_mod_plugin": ["com.jaymoskingdoms.client.compat.TierJei"]
 	},
 	"mixins": [
 		"jaymoskingdoms.combat.mixins.json",
@@ -44,6 +45,7 @@
 		{ "config": "jaymoskingdoms.vampires.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.disasters.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.tweaks.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.tierhiding.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.heritage.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.shouldersurfing.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.xaero.client.mixins.json", "environment": "client" },
