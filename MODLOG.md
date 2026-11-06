@@ -1311,3 +1311,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 ## 0.21.33: held by the throat isn't laid down
 - `DownedPose` skips a downed body a Kingdoms vampire holds up by the throat (`KingdomsCompat.grabbed`, reflection on
   `BloodGrab.grabbed`), so it stays in the hand (Kingdoms 0.7.635 poses it hanging there). Built, not played.
+
+## 0.21.34: Kitchen's quiver fits the body bauble slot
+- `baubles/body` tag takes `jaymoskitchen:quiver` (Kitchen 0.5.81 feeds bows from it there and draws every worn quiver,
+  the RPG Series' too, animated on the back). Data only.
