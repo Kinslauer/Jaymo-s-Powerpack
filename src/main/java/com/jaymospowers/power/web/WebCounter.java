@@ -277,7 +277,7 @@ public final class WebCounter {
 	}
 
 	/** Right click: the counter, if the window's open and there's something to hit. */
-	private static void strike(ServerPlayer player) {
+	static void strike(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long ready = player.getAttached(READY);

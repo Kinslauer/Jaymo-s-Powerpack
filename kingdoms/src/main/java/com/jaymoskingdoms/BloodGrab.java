@@ -152,9 +152,9 @@ public final class BloodGrab {
 		return HOLDS.containsKey(player.getUUID());
 	}
 
-	/** Prey a hand can hold up: the bite's people and the Nether's piglins and Hornkin, never a player. */
+	/** Prey a hand can hold up: the bite's people and the Nether's piglins and Hornkin, never a player; (0.7.625) downed ones too, but not one being carried. */
 	static boolean prey(LivingEntity e) {
-		return !(e instanceof net.minecraft.world.entity.player.Player) && (Vampires.person(e) || Vampires.netherPrey(e)) && !Downed.isDowned(e);
+		return !(e instanceof net.minecraft.world.entity.player.Player) && (Vampires.person(e) || Vampires.netherPrey(e)) && !e.isPassenger();
 	}
 
 	static void start(ServerPlayer player, int id) {
@@ -202,7 +202,7 @@ public final class BloodGrab {
 			mob.setNoAi(hold.hadNoAi);
 		}
 		target.setNoGravity(hold.hadNoGravity);
-		if (!toss || !target.isAlive() || target.isRemoved() || Downed.isDowned(target) || !(player.level() instanceof ServerLevel level)) {
+		if (!toss || !target.isAlive() || target.isRemoved() || !(player.level() instanceof ServerLevel level)) {
 			target.setDeltaMovement(player.getDeltaMovement().scale(0.5));
 			target.needsSync = true;
 			return;
@@ -226,7 +226,7 @@ public final class BloodGrab {
 			Hold hold = e.getValue();
 			LivingEntity target = hold.target;
 			boolean gone = player == null || !player.isAlive() || Downed.isDowned(player) || !Vampires.isVampire(player) || !target.isAlive()
-				|| target.isRemoved() || target.level() != player.level() || Downed.isDowned(target) || !player.getMainHandItem().isEmpty()
+				|| target.isRemoved() || target.level() != player.level() || !player.getMainHandItem().isEmpty()
 				|| target.distanceTo(player) > LEASH;
 			if (gone) {
 				it.remove();

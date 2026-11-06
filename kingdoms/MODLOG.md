@@ -9993,8 +9993,23 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - **Takedowns on the skill bar (Powers 0.21.24):** Andy's answer on mapping the Chrono and Web moves: the skill bar shows
   Powers' takedowns (`move_takedown`, `move_blink` spells, `FormSkills`) in Time Flow always, and for bare hands while
   locked on, before any fist forms. Icons: `tools/gen_move_icons.py`. Lines: `lang/parts/power_moves.json`.
-## 0.7.626 (2026-11-06): vampires lap up spilt blood
-- With Powers 0.21.25's bleeding out (the downed and the dead pour a finite pool), a vampire who sneaks and right-clicks
+
+## 0.7.626: drink from the downed, and the grab holds on
+- Andy: "the grab does not work, i tap and hold, and they go down. i should be able to drink from the downed too." The
+  grab's drain downed its prey in about a second and the grab let go of anyone downed; a downed body couldn't be bitten
+  either (Powers' sneak lift took the sneak+use first).
+- `BloodGrab`: downed prey can be grabbed and stay held; the drain on a downed body is a wound each gulp (Powers' 10th
+  wound kills, so about 5 s held), and a downed body can still be thrown. Not one already being carried.
+- `VampirePlayers`: a use phase ahead of Powers' `downed_first`: while holding someone, use held on them is the grab's
+  alone (it used to fill Powers' revive bar and could get them up in 3 s); a vampire's sneak+use with an empty hand on a
+  downed person or piglin/Hornkin bites instead of lifting (carry them with the grab instead). Built, not played.
+
+## 0.7.627 (2026-11-06): Web's moves on the skill bar (Powers 0.21.25)
+- Nine more Powers move spells for the skill bar (`move_finish`, `counter`, `fists`, `arm`, `grab`, `tendril`, `spikes`,
+  `consume`, `shroud`), shown for Web with an empty hand while locked on. Icons: `tools/gen_move_icons.py`. Lines:
+  `lang/parts/power_moves.json`. Built, not played.
+## 0.7.628 (2026-11-06): vampires lap up spilt blood
+- With Powers 0.21.26's bleeding out (the downed and the dead pour a finite pool), a vampire who sneaks and right-clicks
   a pool of blood on the ground with an empty hand laps it up (`VampirePlayers.lap`): up to 0.5 of stain a gulp, once a
   second, 3 health and 4 food per unit (a man's whole pool is about 3), counts as fed and eases the blood fever. Blood
   Sorcerers already draw the same stains (`Hemomancy`), so both now feed on bodies that run dry.

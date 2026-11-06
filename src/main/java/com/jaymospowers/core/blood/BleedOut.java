@@ -21,7 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.21.25) Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and
+ * (0.21.26) Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and
  * vampires have finite resources". Every body holds so much blood ({@link #full}: a man's {@link #MAN}, more for the
  * bigger, less for the small), in stain size, the same measure blood magic draws in ({@link BloodTrail#draw}).
  * <ul>

@@ -156,7 +156,7 @@ public final class BloodTrail {
 
 	public static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(BloodTrail::tick);
-		// (0.21.25) the downed and the dead bleed out into pools
+		// (0.21.26) the downed and the dead bleed out into pools
 		BleedOut.init();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof PathfinderMob mob && entity.getType().builtInRegistryHolder().is(TRACKERS)) {
@@ -228,7 +228,7 @@ public final class BloodTrail {
 	}
 
 	/**
-	 * (0.21.25) Andy: "blood should pool under the downed and corpses until they bleed out". Pours {@code amount} of
+	 * (0.21.26) Andy: "blood should pool under the downed and corpses until they bleed out". Pours {@code amount} of
 	 * {@code by}'s blood (stain size) on the ground under (x, from, z): into the round pool of theirs already lying there
 	 * (it grows by exactly that, up to {@link #MAX_SCALE}), or a new one that small. Returns how much went in: less than
 	 * {@code amount} when the pool there is full, nothing when it's full or there's no dry ground (water, lava, a drop

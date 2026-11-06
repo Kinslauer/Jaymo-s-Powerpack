@@ -106,7 +106,7 @@ public final class KitchenCompat {
 	}
 
 	/**
-	 * (0.21.25) A Kitchen body lying still on the ground: not carried, dragged or hung on a meat hook (those bleed their own
+	 * (0.21.26) A Kitchen body lying still on the ground: not carried, dragged or hung on a meat hook (those bleed their own
 	 * ways: smears, the hook's drip). False for anything that isn't one.
 	 */
 	public static boolean liesStill(Entity entity) {

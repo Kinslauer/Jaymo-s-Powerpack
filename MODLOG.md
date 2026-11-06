@@ -1224,7 +1224,17 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   (through Jaymo's Kingdoms' Weapon Forms bar, Spell Engine's keys 1, 2...): in Time Flow, always, Takedown and Shadow
   Blink; with an empty hand and locked on, Web's Takedown (wrap-and-slam, or string-up from a perch). They go at your
   lock-on foe, else the one in your sights. Sneak + attack still works as before. A blink at an unmarked foe says so.
-## 0.21.25 (2026-11-06): the downed and the dead bleed out (Kingdoms 0.7.626)
+
+## 0.21.25 (2026-11-06): all of Web's bare-handed moves on the skill bar (Kingdoms 0.7.627)
+- Andy: "can all of web's unarmed moves go to the bar? symbiote included?" `WebBarMoves`: with an empty hand while locked
+  on, Web's bar (fixed order, so a slot keeps its key; nine at most):
+  - Any web slinger: Takedown, Finish (a downed foe: a symbiote execution while suited, else a quick finish with 3+ in the
+    hit streak), Counter (in Spider-Sense's window after a dodge).
+  - Without the symbiote: Webbed Fists.
+  - Bonded: Weapon Arm (forms and strikes), Grab (seize a foe up to a cow's size; holding one, maul it; tendrils full, a
+    combo), Tendril Grab, Spike Burst (a roar in the big suit), Consume, Shroud. The Suit and Wall Crawl stay on X.
+- Each goes at the lock-on foe, else the one in sights, by the same checks as its own key. Every old key still works.
+## 0.21.26 (2026-11-06): the downed and the dead bleed out (Kingdoms 0.7.628)
 - Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and vampires
   have finite resources." `core/blood/BleedOut`: every body holds so much blood (a man's 3.0 in stain size, scaled by
   width x height, 0.3 to 12). The downed pour it into a pool under them once a second (`BloodTrail.pour`), 60% of it by

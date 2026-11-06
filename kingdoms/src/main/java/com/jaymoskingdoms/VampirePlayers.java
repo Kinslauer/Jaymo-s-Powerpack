@@ -52,7 +52,7 @@ public final class VampirePlayers {
 	/** A bite: what it takes, what it gives (food, saturation, health), how often (ticks). */
 	static final float DRINK_DAMAGE = 4.0F, DRINK_HEAL = 3.0F, DRINK_SATURATION = 1.5F;
 	static final int DRINK_FOOD = 4, DRINK_EVERY = 20;
-	/** (0.7.626) Lapping a pool on the ground: how near the spot, the most a gulp takes (stain size), what each unit gives. */
+	/** (0.7.628) Lapping a pool on the ground: how near the spot, the most a gulp takes (stain size), what each unit gives. */
 	static final double LAP_RANGE = 1.5;
 	static final float LAP_MOST = 0.5F, LAP_HEAL = 3.0F, LAP_FOOD = 4.0F;
 	/** Nights without blood before they starve. */
@@ -64,11 +64,35 @@ public final class VampirePlayers {
 	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> HALF_TURN = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
 		JaymosKingdoms.id("vampire_half_turn"), builder -> builder.persistent(com.mojang.serialization.Codec.BOOL));
 
+	/** (0.7.625) Our use phase, and Powers' first one (its revive hold and downed handling), which ours runs ahead of. */
+	private static final net.minecraft.resources.Identifier FIRST = JaymosKingdoms.id("vampire_first"),
+		POWERS_DOWNED_FIRST = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "downed_first");
+
 	private VampirePlayers() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(VampirePlayers::tick);
+		// (0.7.625) ahead of Powers' downed handling (its revive hold and its sneak lift): holding someone by the throat, the
+		// use held on them is the grab's alone, never a revive filling up; and a vampire's sneak+use on a downed person or
+		// piglin is the bite, not the lift
+		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, POWERS_DOWNED_FIRST);
+		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
+		UseEntityCallback.EVENT.register(FIRST, (player, level, hand, entity, hit) -> {
+			if (!(player instanceof ServerPlayer sp) || !(entity instanceof LivingEntity target)) {
+				return InteractionResult.PASS;
+			}
+			if (BloodGrab.holding(sp)) {
+				return InteractionResult.SUCCESS;
+			}
+			if (hand == InteractionHand.MAIN_HAND && level instanceof ServerLevel server && Downed.isDowned(target) && Vampires.isVampire(sp)
+				&& sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && !(target instanceof Player)
+				&& (Vampires.person(target) || Vampires.netherPrey(target))) {
+				drink(server, sp, target, false, Vampires.person(target));
+				return InteractionResult.SUCCESS;
+			}
+			return InteractionResult.PASS;
+		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND
 				|| !(entity instanceof LivingEntity target)) {
@@ -94,7 +118,7 @@ public final class VampirePlayers {
 			}
 			return InteractionResult.PASS;
 		});
-		// (0.7.626) sneak and right-click a pool of blood on the ground with an empty hand: lap it up
+		// (0.7.628) sneak and right-click a pool of blood on the ground with an empty hand: lap it up
 		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (level instanceof ServerLevel server && player instanceof ServerPlayer sp && hand == InteractionHand.MAIN_HAND && Vampires.isVampire(sp)
 				&& sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && lap(server, sp, hit.getLocation())) {
@@ -106,7 +130,7 @@ public final class VampirePlayers {
 	}
 
 	/**
-	 * (0.7.626) Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and
+	 * (0.7.628) Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and
 	 * vampires have finite resources". A vampire laps the spilt blood off the ground at {@code at} (Jaymo's Powers' stains,
 	 * the pools the downed and the dead bleed out into): up to {@link #LAP_MOST} a gulp, once a second, a thin meal next to
 	 * a bite ({@link #LAP_FOOD}, {@link #LAP_HEAL} for each unit of stain, a man's whole pool about three), but it counts as
