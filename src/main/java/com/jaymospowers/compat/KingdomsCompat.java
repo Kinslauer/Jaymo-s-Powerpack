@@ -15,6 +15,8 @@ public final class KingdomsCompat {
 	private static boolean looked;
 	private static Method blessing;
 	private static boolean blessingLooked;
+	private static Method grabbed;
+	private static boolean grabbedLooked;
 
 	private KingdomsCompat() {
 	}
@@ -62,6 +64,32 @@ public final class KingdomsCompat {
 			return blessing.invoke(null, player, key) instanceof Number n ? n.floatValue() : 0.0F;
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return 0.0F;
+		}
+	}
+
+	/**
+	 * (0.21.32) Whether a vampire holds {@code entity} up by the throat now (Kingdoms' {@code BloodGrab}), on the client or the
+	 * server: a held body that goes down stays in the hand, not laid on the ground ({@code DownedPose}). False without Kingdoms.
+	 */
+	public static boolean grabbed(Entity entity) {
+		if (!LOADED || entity == null) {
+			return false;
+		}
+		if (!grabbedLooked) {
+			grabbedLooked = true;
+			try {
+				grabbed = Class.forName("com.jaymoskingdoms.BloodGrab").getMethod("grabbed", Entity.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				grabbed = null;
+			}
+		}
+		if (grabbed == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(grabbed.invoke(null, entity));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
 		}
 	}
 }

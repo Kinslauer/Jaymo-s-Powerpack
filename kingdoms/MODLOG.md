@@ -10073,3 +10073,16 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   lang `parts/vampire-bar.json`, hint 122.
 - Blood Gaze: `NightGifts` tags the vampire `jaymospowers_blood_gaze` (3 s wait); Powers' `FrostBeam` fires the Frost-born
   beam out of both eyes, red, for 20 ticks: same reach, damage, hit pace and wound roll; no freezing water. Built, not played.
+
+## 0.7.633: the grab keeps them by the throat, even down
+- Andy: "the grab should animate within the vampire's hand hands at the throat the whole time, even if they go down". A held
+  body that went down was laid on the ground by Powers' `DownedPose` while the hand held air. Now `BloodGrab.grabbed`/`holder`
+  (read off every player's synced `GRABBING`, so the client knows too) tells Powers to leave a held body alone (Powers
+  0.21.32), and it hangs from the hand until it dies or is let go.
+- The throat is put at the hand: `BloodGrab.place` works the hand out from the arm as drawn (shoulder 22/32 of the
+  vampire's height, arm 10/32 long, on the main hand's side) and `BloodGrab.raise` lifts the arm with the look (0.3 rad
+  level, 0.8 of the pitch, -0.25 to 0.9), the same angle `BloodGrabPose` draws, so First-person Model's arm and the
+  third-person view both keep the hand on the throat. Looking up lifts them higher; looking down lowers them a little.
+- The held one is posed (`BloodGrabPose.victim`): head pushed back, both hands clawing at the wrist and legs kicking while
+  it can; once down, limp and swaying, stiller when out cold (`PowersCompat.downedState`, Powers' synced Downed marks).
+  Built, not played.
