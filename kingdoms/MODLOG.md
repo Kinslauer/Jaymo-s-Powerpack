@@ -10132,3 +10132,11 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 ## 0.7.639: the block only beheads the downed
 - `Busts` execution: a player sentenced to the block is killed with their head on unless they're downed (Andy:
   "decapitations should only ever happen to downed players"). Gradle compile clean; not played.
+
+## 0.7.640: wooden skewers stake vampires
+Andy: "wood skewers should do massive damage to vampires". A blow from a held `jaymospowers:wooden_skewer` (Powers' Armory)
+on a vampire, mob or player, lands 5 times over (`Vampires.STAKE_FACTOR`); a dhampir takes 2 times
+(`STAKE_DHAMPIR_FACTOR`). Dark blood and smoke burst from the chest with a low crit sound. `Vampires.staked`, first in
+`LivingEntityHurtMixin`, so the other perks multiply on top. Only the hand's own blow counts (direct attacker, main hand),
+so fire or a spell cast with a skewer held doesn't. The skewer can't be thrown, so there is no thrown stake. An Elder hit
+in bat form passes the blow on with the same source, so it is staked too. Gradle compile clean; not played.
