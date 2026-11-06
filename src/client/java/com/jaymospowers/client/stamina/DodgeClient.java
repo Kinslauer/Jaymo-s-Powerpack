@@ -79,6 +79,10 @@ public final class DodgeClient {
 			// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
 			wanted = !minecraft.options.keyShift.isDown();
 		}
+		if (wanted && vault(player)) {
+			// (0.21.22) in the air over a raised shield: the vault, not a roll
+			wanted = false;
+		}
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
 			// falling: held until you land
 			landingRoll = LandingRoll.EARLY_TICKS;
@@ -95,6 +99,29 @@ public final class DodgeClient {
 				landingRoll--;
 			}
 		}
+	}
+
+	/**
+	 * (0.21.22) Andy: "the input should be jump plus alt key or roll bind in mid air". Dodge pressed in the air with a foe's
+	 * raised shield close ahead vaults him ({@link com.jaymospowers.combat.ShieldVault}): pushed up and over at once, and
+	 * the server told. True if it was a vault (one too big still takes the press, and the server says so).
+	 */
+	private static boolean vault(LocalPlayer player) {
+		if (!com.jaymospowers.combat.ShieldVault.canVault(player)) {
+			return false;
+		}
+		net.minecraft.world.entity.LivingEntity foe = com.jaymospowers.combat.ShieldVault.target(player, 0.0);
+		if (foe == null) {
+			return false;
+		}
+		if (!com.jaymospowers.combat.ShieldVault.tooBig(player, foe)) {
+			Vec3 push = com.jaymospowers.combat.ShieldVault.push(player, foe);
+			player.setDeltaMovement(push);
+			player.setSprinting(false);
+			landingRoll = 0;
+		}
+		ClientPlayNetworking.send(new com.jaymospowers.combat.ShieldVault.Ask(foe.getId()));
+		return true;
 	}
 
 	/** {@code landing}: a landing roll, which goes forward when no movement key is held. */

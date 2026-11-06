@@ -61,6 +61,8 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		state.sprinting = monster.isSprinting();
 		state.aggressive = monster.isAggressive();
 		state.twoHeads = monster instanceof Ogre ogre && ogre.twoHeads();
+		state.shield = monster instanceof Ogre ogre && ogre.shield();
+		state.guard = monster instanceof Ogre ogre && ogre.guarding();
 		state.shut = monster instanceof Mimic mimic && mimic.shut();
 		if (monster instanceof SilverSkeleton skeleton) {
 			state.sinceBlocked = skeleton.sinceBlocked() + partialTicks;
@@ -122,6 +124,13 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		register(Monsters.OGRE, OgreModel::new, OgreModel.createBodyLayer(), 1.2F, 1.0F, one("ogre_green"), false);
 		register(Monsters.CAVE_OGRE, OgreModel::new, OgreModel.createBodyLayer(), 1.2F, 1.0F, one("ogre_cave"), false);
 		register(Monsters.FIRE_OGRE, OgreModel::new, OgreModel.createBodyLayer(), 1.2F, 1.0F, one("ogre_fire"), false);
+		// (0.7.623) the armoured ogre: its skin one of the orcs' tones (its variant), its plate and shield its own
+		Identifier[] armoured = new Identifier[Ogre.ARMOURED_TONES];
+		for (int i = 0; i < armoured.length; i++) {
+			armoured[i] = texture("ogre_armoured_" + i);
+		}
+		register(Monsters.ARMOURED_OGRE, ArmouredOgreModel::new, ArmouredOgreModel.createBodyLayer(), 1.2F, 1.0F,
+			state -> armoured[Math.floorMod(state.variant, armoured.length)], false);
 		register(Monsters.WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("wraith"), true);
 		register(Monsters.FLAME_WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("flame_wraith"), false);
 		EntityRenderers.register(Monsters.SILVER_SKELETON, context -> new LegendRenderer<>(context, new DeadTravelerModel(), 0.6F, 1.0F,

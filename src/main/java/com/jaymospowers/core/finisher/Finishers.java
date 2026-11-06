@@ -923,6 +923,13 @@ public final class Finishers {
 				continue;
 			}
 			long now = level.getGameTime();
+			// (0.21.22) a full hit streak: a quick kill on one still standing, dropped where he stands and finished at once
+			if (player.isShiftKeyDown() && player.isWithinEntityInteractionRange(hold.body, SLACK) && !finishable(player, hold.body)
+				&& quickKillable(player, hold.body) && move(player, player.getMainHandItem()) != null
+				&& com.jaymospowers.combat.HitStreak.fell(level, player, hold.body)) {
+				hold.start = now - HOLD_TICKS;
+				hold.rushed = true;
+			}
 			// (0.18.97) Quiet Word: one on their feet who hasn't noticed you, taken from behind
 			boolean choke = !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
 			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
@@ -1071,6 +1078,17 @@ public final class Finishers {
 		}
 		float toPlayer = (float) (Mth.atan2(player.getZ() - body.getZ(), player.getX() - body.getX()) * Mth.RAD_TO_DEG) - 90.0F;
 		return Math.abs(Mth.wrapDegrees(toPlayer - body.getYHeadRot())) >= BEHIND_DEGREES;
+	}
+
+	/**
+	 * (0.21.22) A quick kill ({@link com.jaymospowers.combat.HitStreak}): {@code player}'s hit streak is full, they have the
+	 * Executioner perk and a weapon in hand, and {@code entity} is one still on his feet, small and frail enough to drop.
+	 * (Also asked on the client, so the hold doesn't swing at them.)
+	 */
+	public static boolean quickKillable(Player player, Entity entity) {
+		return entity instanceof LivingEntity body && body.isAlive() && !helpless(body) && !targeted(body) && !Carry.isCarried(body)
+			&& com.jaymospowers.combat.HitStreak.ready(player) && com.jaymospowers.combat.HitStreak.droppable(body)
+			&& !player.getMainHandItem().isEmpty() && weaponsUnlocked(player);
 	}
 
 	/** (0.18.97) {@code body} hasn't noticed {@code player}: not after them, and not hurt by them lately. */

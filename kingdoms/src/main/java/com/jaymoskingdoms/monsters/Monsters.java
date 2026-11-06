@@ -69,6 +69,8 @@ public final class Monsters {
 
 	public static EntityType<Werewolf> WEREWOLF;
 	public static EntityType<Ogre> OGRE, CAVE_OGRE, FIRE_OGRE;
+	/** (0.7.623) the armoured ogre, of orc camps and ogre holds only ({@link Ogre#ARMOURED}). */
+	public static EntityType<Ogre> ARMOURED_OGRE;
 	public static EntityType<Wraith> WRAITH, FLAME_WRAITH;
 	public static EntityType<SilverSkeleton> SILVER_SKELETON;
 	public static EntityType<MudGolem> MUD_GOLEM;
@@ -99,6 +101,8 @@ public final class Monsters {
 			.clientTrackingRange(10));
 		FIRE_OGRE = type("fire_ogre", EntityType.Builder.<Ogre>of((t, l) -> new Ogre(t, l, Ogre.FIRE), MobCategory.MONSTER).sized(1.6F, 3.4F)
 			.fireImmune().clientTrackingRange(10));
+		ARMOURED_OGRE = type("armoured_ogre", EntityType.Builder.<Ogre>of((t, l) -> new Ogre(t, l, Ogre.ARMOURED), MobCategory.MONSTER).sized(1.6F, 3.4F)
+			.clientTrackingRange(10));
 		WRAITH = type("wraith", EntityType.Builder.<Wraith>of((t, l) -> new Wraith(t, l, false), MobCategory.MONSTER).sized(0.7F, 1.9F)
 			.clientTrackingRange(8));
 		FLAME_WRAITH = type("flame_wraith", EntityType.Builder.<Wraith>of((t, l) -> new Wraith(t, l, true), MobCategory.MONSTER).sized(0.7F, 1.9F)
@@ -110,6 +114,7 @@ public final class Monsters {
 		FabricDefaultAttributeRegistry.register(OGRE, Ogre.createAttributes(Ogre.GREEN));
 		FabricDefaultAttributeRegistry.register(CAVE_OGRE, Ogre.createAttributes(Ogre.CAVE));
 		FabricDefaultAttributeRegistry.register(FIRE_OGRE, Ogre.createAttributes(Ogre.FIRE));
+		FabricDefaultAttributeRegistry.register(ARMOURED_OGRE, Ogre.createAttributes(Ogre.ARMOURED));
 		FabricDefaultAttributeRegistry.register(WRAITH, Wraith.createAttributes(false));
 		FabricDefaultAttributeRegistry.register(FLAME_WRAITH, Wraith.createAttributes(true));
 		FabricDefaultAttributeRegistry.register(SILVER_SKELETON, SilverSkeleton.createAttributes());

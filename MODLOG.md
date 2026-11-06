@@ -1187,3 +1187,15 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   SPIR-V shader compiler rejects ("SPIR-V requires location for user input/output"). Patched that one shader inside
   `libs/mca-fabric-7.8.0-dev.3badc42+26.3.jar` (MCA Reborn is GPL-3) the way vanilla 26.3's `post/box_blur.fsh` does it:
   `GL_ARB_separate_shader_objects` and location 0 on `texCoord` and `fragColor`. Not run here.
+
+## 0.21.22 (2026-11-06): hit streaks and shield vaults (Kingdoms 0.7.623)
+Kingdoms Rivals patch 8, ideas only from the Arkham and Shadow of War games.
+- **Hit streak** (`combat/HitStreak`): blows you land without being hit back count up (shown from 3). At 8, with the
+  Executioner perk and a weapon in hand, sneak and hold attack on a foe still standing: he's dropped where he stands and
+  finished at once. A blow taken, 5 s without landing one, or the quick kill ends the streak. Nothing wider than 2, taller
+  than 3 or with 100+ health is dropped.
+- **Vault a shield** (`combat/ShieldVault`): Andy: "jump plus alt key or roll bind in mid air". Jump, then press Dodge
+  (Left Alt) in the air with a foe's raised shield within 3 blocks ahead, and you go over him (no roll) (Freerun's vault look) and land behind; he reels for a second. Anyone more than a third taller or over
+  twice as wide is "too big to vault".
+- **Shields** (`combat/Shields`): Yank on a mob with a shield tears it away instead of pulling him; a stun (Darktide's,
+  Time Flow's, a parry's) knocks loose Kingdoms' armoured ogres' shields.
