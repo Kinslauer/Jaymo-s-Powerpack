@@ -1,0 +1,5359 @@
+{
+ "jaymospowers:alewife_cap": {
+  "texture": "jaymospowers:textures/entity/worn/alewife_cap.png",
+  "width": 64,
+  "height": 32,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -5.5,
+       -8.6,
+       -5.5
+      ],
+      "size": [
+       11,
+       1,
+       11
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       0,
+       12
+      ],
+      "frm": [
+       -4,
+       -10.5,
+       -4
+      ],
+      "size": [
+       8,
+       2,
+       8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       32,
+       12
+      ],
+      "frm": [
+       -3,
+       -12.5,
+       -3
+      ],
+      "size": [
+       6,
+       2,
+       6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": [
+     {
+      "bone": "head",
+      "pivot": [
+       0,
+       -12.5,
+       0
+      ],
+      "rot": [
+       -0.25,
+       0,
+       0.1
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         22
+        ],
+        "frm": [
+         -2,
+         -2,
+         -2
+        ],
+        "size": [
+         4,
+         2,
+         4
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         16,
+         22
+        ],
+        "frm": [
+         -1,
+         -4,
+         -1
+        ],
+        "size": [
+         2,
+         2,
+         2
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "z",
+       "amp": 0.08,
+       "phase": 0.0,
+       "kind": "hang"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:jester_cap": {
+  "texture": "jaymospowers:textures/entity/worn/jester_cap.png",
+  "width": 64,
+  "height": 32,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4.5,
+       -8.6,
+       -4.5
+      ],
+      "size": [
+       9,
+       2,
+       9
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       36,
+       0
+      ],
+      "frm": [
+       -4,
+       -10.5,
+       -4
+      ],
+      "size": [
+       4,
+       2,
+       8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       0,
+       11
+      ],
+      "frm": [
+       0,
+       -10.5,
+       -4
+      ],
+      "size": [
+       4,
+       2,
+       8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": [
+     {
+      "bone": "head",
+      "pivot": [
+       -2.5,
+       -10,
+       0
+      ],
+      "rot": [
+       0,
+       0,
+       -1.9
+      ],
+      "boxes": [
+       {
+        "uv": [
+         24,
+         11
+        ],
+        "frm": [
+         -1.5,
+         -6,
+         -1.5
+        ],
+        "size": [
+         3,
+         6,
+         3
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         48,
+         11
+        ],
+        "frm": [
+         -1,
+         -7.5,
+         -1
+        ],
+        "size": [
+         2,
+         2,
+         2
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "z",
+       "amp": 0.18,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "head",
+      "pivot": [
+       2.5,
+       -10,
+       0
+      ],
+      "rot": [
+       0,
+       0,
+       1.9
+      ],
+      "boxes": [
+       {
+        "uv": [
+         36,
+         11
+        ],
+        "frm": [
+         -1.5,
+         -6,
+         -1.5
+        ],
+        "size": [
+         3,
+         6,
+         3
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         56,
+         11
+        ],
+        "frm": [
+         -1,
+         -7.5,
+         -1
+        ],
+        "size": [
+         2,
+         2,
+         2
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "z",
+       "amp": 0.18,
+       "phase": 3.141592653589793,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:reed_breather": {
+  "texture": "jaymospowers:textures/entity/worn/reed_breather.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       4,
+       0
+      ],
+      "frm": [
+       -4.5,
+       -6.5,
+       -4.5
+      ],
+      "size": [
+       9,
+       1,
+       9
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       40,
+       0
+      ],
+      "frm": [
+       -3.5,
+       -6.8,
+       -4.9
+      ],
+      "size": [
+       7,
+       2,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       0,
+       11
+      ],
+      "frm": [
+       -1,
+       -3,
+       -5.4
+      ],
+      "size": [
+       6,
+       1,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       4.4,
+       -12,
+       -5.4
+      ],
+      "size": [
+       1,
+       10,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:owl_mask": {
+  "texture": "jaymospowers:textures/entity/worn/owl_mask.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4.5,
+       -8,
+       -4.9
+      ],
+      "size": [
+       9,
+       7,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       20,
+       0
+      ],
+      "frm": [
+       -3.8,
+       -6.5,
+       -5.3
+      ],
+      "size": [
+       3,
+       3,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       28,
+       0
+      ],
+      "frm": [
+       0.8,
+       -6.5,
+       -5.3
+      ],
+      "size": [
+       3,
+       3,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       36,
+       0
+      ],
+      "frm": [
+       -0.5,
+       -4,
+       -5.6
+      ],
+      "size": [
+       1,
+       2,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       40,
+       0
+      ],
+      "frm": [
+       -4.5,
+       -9.5,
+       -4.9
+      ],
+      "size": [
+       2,
+       2,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       46,
+       0
+      ],
+      "frm": [
+       2.5,
+       -9.5,
+       -4.9
+      ],
+      "size": [
+       2,
+       2,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:villager_hat": {
+  "texture": "jaymospowers:textures/entity/worn/villager_hat.png",
+  "width": 64,
+  "height": 32,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -6.5,
+       -8.6,
+       -6.5
+      ],
+      "size": [
+       13,
+       1,
+       13
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       0,
+       14
+      ],
+      "frm": [
+       -4,
+       -11.5,
+       -4
+      ],
+      "size": [
+       8,
+       3,
+       8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       32,
+       14
+      ],
+      "frm": [
+       -4,
+       -9.6,
+       -4
+      ],
+      "size": [
+       8,
+       1,
+       8
+      ],
+      "inflate": 0.1,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:soothsayer_hood": {
+  "texture": "jaymospowers:textures/entity/worn/soothsayer_hood.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4,
+       -8,
+       -4
+      ],
+      "size": [
+       8,
+       8,
+       8
+      ],
+      "inflate": 0.6,
+      "fit": false
+     },
+     {
+      "uv": [
+       50,
+       0
+      ],
+      "frm": [
+       -1,
+       -9.6,
+       0
+      ],
+      "size": [
+       2,
+       1,
+       4
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": []
+   },
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       0,
+       2.4
+      ],
+      "rot": [
+       0.08,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         32,
+         0
+        ],
+        "frm": [
+         -4,
+         0,
+         0
+        ],
+        "size": [
+         8,
+         5,
+         1
+        ],
+        "inflate": 0.3,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.12,
+       "phase": 0.0,
+       "kind": "cape"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:riders_hat": {
+  "texture": "jaymospowers:textures/entity/worn/riders_hat.png",
+  "width": 64,
+  "height": 64,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -7,
+       -8.6,
+       -7
+      ],
+      "size": [
+       14,
+       1,
+       14
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       0,
+       15
+      ],
+      "frm": [
+       -4,
+       -12,
+       -4
+      ],
+      "size": [
+       8,
+       3.5,
+       8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       32,
+       15
+      ],
+      "frm": [
+       -4,
+       -9.6,
+       -4
+      ],
+      "size": [
+       8,
+       1,
+       8
+      ],
+      "inflate": 0.1,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": [
+     {
+      "bone": "head",
+      "pivot": [
+       3.8,
+       -10,
+       1
+      ],
+      "rot": [
+       0.3,
+       0,
+       0.35
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         27
+        ],
+        "frm": [
+         -0.5,
+         -5,
+         -0.5
+        ],
+        "size": [
+         1,
+         5,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.1,
+       "phase": 0.0,
+       "kind": "hang"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:fishers_hat": {
+  "texture": "jaymospowers:textures/entity/worn/fishers_hat.png",
+  "width": 64,
+  "height": 32,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -5.5,
+       -8.6,
+       -5.5
+      ],
+      "size": [
+       11,
+       1,
+       11
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       0,
+       12
+      ],
+      "frm": [
+       -4,
+       -11,
+       -4
+      ],
+      "size": [
+       8,
+       2.5,
+       8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       32,
+       12
+      ],
+      "frm": [
+       -4,
+       -9.6,
+       -4
+      ],
+      "size": [
+       8,
+       1,
+       8
+      ],
+      "inflate": 0.1,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": [
+     {
+      "bone": "head",
+      "pivot": [
+       -3.8,
+       -10,
+       0
+      ],
+      "rot": [
+       0.2,
+       0,
+       -0.4
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         23
+        ],
+        "frm": [
+         -0.5,
+         -4,
+         -0.5
+        ],
+        "size": [
+         1,
+         4,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.1,
+       "phase": 1.0,
+       "kind": "hang"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:sky_mask": {
+  "texture": "jaymospowers:textures/entity/worn/sky_mask.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4.5,
+       -6.5,
+       -4.5
+      ],
+      "size": [
+       9,
+       1,
+       9
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       0,
+       10
+      ],
+      "frm": [
+       -3.6,
+       -6.9,
+       -4.9
+      ],
+      "size": [
+       3,
+       2,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       8,
+       10
+      ],
+      "frm": [
+       0.6,
+       -6.9,
+       -4.9
+      ],
+      "size": [
+       3,
+       2,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       36,
+       0
+      ],
+      "frm": [
+       -2,
+       -3.5,
+       -5.6
+      ],
+      "size": [
+       4,
+       3,
+       2
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       48,
+       0
+      ],
+      "frm": [
+       -2.5,
+       -4,
+       -5.0
+      ],
+      "size": [
+       5,
+       4,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:divers_circlet": {
+  "texture": "jaymospowers:textures/entity/worn/divers_circlet.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "head",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4,
+       -7.2,
+       -4
+      ],
+      "size": [
+       8,
+       1,
+       8
+      ],
+      "inflate": 0.45,
+      "fit": false
+     },
+     {
+      "uv": [
+       32,
+       0
+      ],
+      "frm": [
+       -0.5,
+       -7.8,
+       -4.9
+      ],
+      "size": [
+       1,
+       1,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "head",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:lucky_scarf": {
+  "texture": "jaymospowers:textures/entity/worn/lucky_scarf.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       6,
+       0
+      ],
+      "frm": [
+       -4.5,
+       -0.6,
+       -2.6
+      ],
+      "size": [
+       9,
+       2,
+       5
+      ],
+      "inflate": 0.2,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       2.0,
+       1.2,
+       -2.6
+      ],
+      "rot": [
+       -0.1,
+       0,
+       -0.08
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -1,
+         0,
+         -1
+        ],
+        "size": [
+         2,
+         7,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.22,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       -2.5,
+       1.2,
+       2.6
+      ],
+      "rot": [
+       0.15,
+       0,
+       0.1
+      ],
+      "boxes": [
+       {
+        "uv": [
+         34,
+         0
+        ],
+        "frm": [
+         -1,
+         0,
+         0
+        ],
+        "size": [
+         2,
+         5,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.2,
+       "phase": 3.141592653589793,
+       "kind": "cape"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:scarf_of_invisibility": {
+  "texture": "jaymospowers:textures/entity/worn/scarf_of_invisibility.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       6,
+       0
+      ],
+      "frm": [
+       -4.5,
+       -0.6,
+       -2.6
+      ],
+      "size": [
+       9,
+       2,
+       5
+      ],
+      "inflate": 0.2,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       2.0,
+       1.2,
+       -2.6
+      ],
+      "rot": [
+       -0.1,
+       0,
+       -0.08
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -1,
+         0,
+         -1
+        ],
+        "size": [
+         2,
+         7,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.22,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       -2.5,
+       1.2,
+       2.6
+      ],
+      "rot": [
+       0.15,
+       0,
+       0.1
+      ],
+      "boxes": [
+       {
+        "uv": [
+         34,
+         0
+        ],
+        "frm": [
+         -1,
+         0,
+         0
+        ],
+        "size": [
+         2,
+         5,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.2,
+       "phase": 3.141592653589793,
+       "kind": "cape"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:cross_necklace": {
+  "texture": "jaymospowers:textures/entity/worn/cross_necklace.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       -0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         4,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       4.8,
+       -2.5
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         1,
+         4,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         12,
+         0
+        ],
+        "frm": [
+         -1.5,
+         1,
+         -0.5
+        ],
+        "size": [
+         3,
+         1,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.16,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:panic_necklace": {
+  "texture": "jaymospowers:textures/entity/worn/panic_necklace.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       -0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         4,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       4.8,
+       -2.5
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -1.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         3,
+         2,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         16,
+         0
+        ],
+        "frm": [
+         -0.5,
+         2,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.16,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:shock_pendant": {
+  "texture": "jaymospowers:textures/entity/worn/shock_pendant.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       -0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         4,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       4.8,
+       -2.5
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         14,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -1,
+         1,
+         -0.5
+        ],
+        "size": [
+         2,
+         2,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.16,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:flame_pendant": {
+  "texture": "jaymospowers:textures/entity/worn/flame_pendant.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       -0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         4,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       4.8,
+       -2.5
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         14,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -1,
+         1,
+         -0.5
+        ],
+        "size": [
+         2,
+         2,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.16,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:thorn_pendant": {
+  "texture": "jaymospowers:textures/entity/worn/thorn_pendant.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       -0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         4,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       4.8,
+       -2.5
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         12,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -0.5,
+         1,
+         -0.5
+        ],
+        "size": [
+         1,
+         2,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.16,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:heartstone_amulet": {
+  "texture": "jaymospowers:textures/entity/worn/heartstone_amulet.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       -0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         4,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       4.8,
+       -2.5
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         28,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -1.5,
+         1,
+         -0.6
+        ],
+        "size": [
+         3,
+         2.5,
+         1.2
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         18,
+         0
+        ],
+        "frm": [
+         -1.8,
+         0.8,
+         -0.4
+        ],
+        "size": [
+         3.6,
+         3,
+         0.8
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.16,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:charm_of_sinking": {
+  "texture": "jaymospowers:textures/entity/worn/charm_of_sinking.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.6,
+       10.2,
+       -2.6
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         6,
+         0
+        ],
+        "frm": [
+         -0.25,
+         0,
+         -0.25
+        ],
+        "size": [
+         0.5,
+         1.5,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.22,
+       "phase": 0.4,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": [
+       {
+        "bone": "body",
+        "pivot": [
+         0,
+         1.5,
+         0
+        ],
+        "rot": [
+         0,
+         0,
+         0
+        ],
+        "boxes": [
+         {
+          "uv": [
+           0,
+           0
+          ],
+          "frm": [
+           -1,
+           0,
+           -0.5
+          ],
+          "size": [
+           2,
+           2.5,
+           1
+          ],
+          "inflate": 0.0,
+          "fit": false
+         },
+         {
+          "uv": [
+           10,
+           0
+          ],
+          "frm": [
+           -1.25,
+           -0.2,
+           -0.6
+          ],
+          "size": [
+           2.5,
+           0.6,
+           1.2
+          ],
+          "inflate": 0.0,
+          "fit": false
+         }
+        ],
+        "swing": null,
+        "sides": "right",
+        "armour": null,
+        "children": []
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:charm_of_shrinking": {
+  "texture": "jaymospowers:textures/entity/worn/charm_of_shrinking.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.6,
+       10.2,
+       -2.6
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -0.25,
+         0,
+         -0.25
+        ],
+        "size": [
+         0.5,
+         1.5,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.22,
+       "phase": 0.4,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": [
+       {
+        "bone": "body",
+        "pivot": [
+         0,
+         1.5,
+         0
+        ],
+        "rot": [
+         0,
+         0,
+         0
+        ],
+        "boxes": [
+         {
+          "uv": [
+           4,
+           0
+          ],
+          "frm": [
+           -0.75,
+           0,
+           -0.5
+          ],
+          "size": [
+           1.5,
+           2,
+           1
+          ],
+          "inflate": 0.0,
+          "fit": false
+         },
+         {
+          "uv": [
+           10,
+           0
+          ],
+          "frm": [
+           -1,
+           -0.2,
+           -0.6
+          ],
+          "size": [
+           2,
+           0.6,
+           1.2
+          ],
+          "inflate": 0.0,
+          "fit": false
+         }
+        ],
+        "swing": null,
+        "sides": "right",
+        "armour": null,
+        "children": []
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:chorus_totem": {
+  "texture": "jaymospowers:textures/entity/worn/chorus_totem.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.6,
+       10.2,
+       -2.6
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -0.25,
+         0,
+         -0.25
+        ],
+        "size": [
+         0.5,
+         1.5,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.22,
+       "phase": 0.4,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": [
+       {
+        "bone": "body",
+        "pivot": [
+         0,
+         1.5,
+         0
+        ],
+        "rot": [
+         0,
+         0,
+         0
+        ],
+        "boxes": [
+         {
+          "uv": [
+           0,
+           0
+          ],
+          "frm": [
+           -1,
+           0,
+           -0.75
+          ],
+          "size": [
+           2,
+           3,
+           1.5
+          ],
+          "inflate": 0.0,
+          "fit": false
+         },
+         {
+          "uv": [
+           12,
+           0
+          ],
+          "frm": [
+           -0.6,
+           0.6,
+           -0.9
+          ],
+          "size": [
+           1.2,
+           0.6,
+           0.2
+          ],
+          "inflate": 0.0,
+          "fit": false
+         }
+        ],
+        "swing": null,
+        "sides": "right",
+        "armour": null,
+        "children": []
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:rabbit_foot_charm": {
+  "texture": "jaymospowers:textures/entity/worn/rabbit_foot_charm.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.6,
+       10.2,
+       -2.6
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -0.25,
+         0,
+         -0.25
+        ],
+        "size": [
+         0.5,
+         1.5,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.22,
+       "phase": 0.4,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": [
+       {
+        "bone": "body",
+        "pivot": [
+         0,
+         1.5,
+         0
+        ],
+        "rot": [
+         0,
+         0,
+         0
+        ],
+        "boxes": [
+         {
+          "uv": [
+           0,
+           0
+          ],
+          "frm": [
+           -0.75,
+           0,
+           -0.6
+          ],
+          "size": [
+           1.5,
+           2.5,
+           1.2
+          ],
+          "inflate": 0.0,
+          "fit": false
+         },
+         {
+          "uv": [
+           12,
+           0
+          ],
+          "frm": [
+           -0.6,
+           2.4,
+           -0.8
+          ],
+          "size": [
+           1.2,
+           0.5,
+           1
+          ],
+          "inflate": 0.0,
+          "fit": false
+         }
+        ],
+        "swing": null,
+        "sides": "right",
+        "armour": null,
+        "children": []
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:brawlers_belt": {
+  "texture": "jaymospowers:textures/entity/worn/brawlers_belt.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4,
+       9.2,
+       -2
+      ],
+      "size": [
+       8,
+       2.2,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": false
+     },
+     {
+      "uv": [
+       24,
+       0
+      ],
+      "frm": [
+       -1.5,
+       9.0,
+       -3.0
+      ],
+      "size": [
+       3,
+       2.6,
+       0.7
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       32,
+       0
+      ],
+      "frm": [
+       -0.8,
+       9.6,
+       -3.4
+      ],
+      "size": [
+       1.6,
+       1.4,
+       0.4
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:lodestone_charm": {
+  "texture": "jaymospowers:textures/entity/worn/lodestone_charm.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4,
+       9.6,
+       -2
+      ],
+      "size": [
+       8,
+       1.4,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": false
+     },
+     {
+      "uv": [
+       36,
+       0
+      ],
+      "frm": [
+       -1,
+       9.4,
+       -2.9
+      ],
+      "size": [
+       2,
+       1.8,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -4.9,
+       10.6,
+       0
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         42,
+         0
+        ],
+        "frm": [
+         -0.25,
+         0,
+         -0.25
+        ],
+        "size": [
+         0.5,
+         1.5,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         24,
+         0
+        ],
+        "frm": [
+         -1.25,
+         1.5,
+         -1.25
+        ],
+        "size": [
+         2.5,
+         2.5,
+         2.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.2,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:crystal_heart": {
+  "texture": "jaymospowers:textures/entity/worn/crystal_heart.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4,
+       9.6,
+       -2
+      ],
+      "size": [
+       8,
+       1.4,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": false
+     },
+     {
+      "uv": [
+       34,
+       0
+      ],
+      "frm": [
+       -1,
+       9.4,
+       -2.9
+      ],
+      "size": [
+       2,
+       1.8,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -4.9,
+       10.6,
+       0
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         40,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         24,
+         0
+        ],
+        "frm": [
+         -1.25,
+         1,
+         -0.75
+        ],
+        "size": [
+         2.5,
+         2.2,
+         1.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.2,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:wind_bladder": {
+  "texture": "jaymospowers:textures/entity/worn/wind_bladder.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -4,
+       9.6,
+       -2
+      ],
+      "size": [
+       8,
+       1.4,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": false
+     },
+     {
+      "uv": [
+       40,
+       0
+      ],
+      "frm": [
+       -1,
+       9.4,
+       -2.9
+      ],
+      "size": [
+       2,
+       1.8,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -4.9,
+       10.6,
+       0
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         46,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         1
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -1.75,
+         1,
+         -1.75
+        ],
+        "size": [
+         3.5,
+         3.5,
+         3.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.2,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:ender_pouch": {
+  "texture": "jaymospowers:textures/entity/worn/ender_pouch.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -4,
+       9.6,
+       -2
+      ],
+      "size": [
+       8,
+       1.4,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": false
+     },
+     {
+      "uv": [
+       36,
+       0
+      ],
+      "frm": [
+       -1,
+       9.4,
+       -2.9
+      ],
+      "size": [
+       2,
+       1.8,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "legs",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -4.9,
+       10.6,
+       0
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         24,
+         0
+        ],
+        "frm": [
+         -1.5,
+         0,
+         -1.25
+        ],
+        "size": [
+         3,
+         3,
+         2.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         42,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0.2,
+         -1.6
+        ],
+        "size": [
+         1,
+         1,
+         0.4
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.2,
+       "phase": 0.0,
+       "kind": "stride"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ "jaymospowers:digging_claws": {
+  "texture": "jaymospowers:textures/entity/worn/digging_claws.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       6.2,
+       -2
+      ],
+      "size": [
+       4,
+       3.8,
+       4
+      ],
+      "inflate": 0.3,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       5.4,
+       -2
+      ],
+      "size": [
+       4,
+       1,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": true
+     },
+     {
+      "uv": [
+       32,
+       0
+      ],
+      "frm": [
+       -1.6,
+       9.8,
+       -1.6
+      ],
+      "size": [
+       0.8,
+       2.2,
+       0.8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       36,
+       0
+      ],
+      "frm": [
+       -0.4,
+       9.8,
+       -1.6
+      ],
+      "size": [
+       0.8,
+       2.6,
+       0.8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       40,
+       0
+      ],
+      "frm": [
+       0.8,
+       9.8,
+       -1.6
+      ],
+      "size": [
+       0.8,
+       2.2,
+       0.8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:feral_claws": {
+  "texture": "jaymospowers:textures/entity/worn/feral_claws.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       6.2,
+       -2
+      ],
+      "size": [
+       4,
+       3.8,
+       4
+      ],
+      "inflate": 0.3,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       5.4,
+       -2
+      ],
+      "size": [
+       4,
+       1,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": true
+     },
+     {
+      "uv": [
+       32,
+       0
+      ],
+      "frm": [
+       -1.6,
+       9.8,
+       -1.6
+      ],
+      "size": [
+       0.8,
+       2.2,
+       0.8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       36,
+       0
+      ],
+      "frm": [
+       -0.4,
+       9.8,
+       -1.6
+      ],
+      "size": [
+       0.8,
+       2.6,
+       0.8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       40,
+       0
+      ],
+      "frm": [
+       0.8,
+       9.8,
+       -1.6
+      ],
+      "size": [
+       0.8,
+       2.2,
+       0.8
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:iron_knuckles": {
+  "texture": "jaymospowers:textures/entity/worn/iron_knuckles.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       6.2,
+       -2
+      ],
+      "size": [
+       4,
+       3.8,
+       4
+      ],
+      "inflate": 0.3,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       5.4,
+       -2
+      ],
+      "size": [
+       4,
+       1,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": true
+     },
+     {
+      "uv": [
+       32,
+       0
+      ],
+      "frm": [
+       -2,
+       7.0,
+       -2.7
+      ],
+      "size": [
+       4,
+       1.6,
+       0.8
+      ],
+      "inflate": 0.0,
+      "fit": true
+     },
+     {
+      "uv": [
+       42,
+       0
+      ],
+      "frm": [
+       -2,
+       8.8,
+       -2.6
+      ],
+      "size": [
+       4,
+       0.8,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": true
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:vampiric_glove": {
+  "texture": "jaymospowers:textures/entity/worn/vampiric_glove.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       6.2,
+       -2
+      ],
+      "size": [
+       4,
+       3.8,
+       4
+      ],
+      "inflate": 0.3,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       5.4,
+       -2
+      ],
+      "size": [
+       4,
+       1,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": true
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:fire_gauntlet": {
+  "texture": "jaymospowers:textures/entity/worn/fire_gauntlet.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       6.2,
+       -2
+      ],
+      "size": [
+       4,
+       3.8,
+       4
+      ],
+      "inflate": 0.3,
+      "fit": true
+     },
+     {
+      "uv": [
+       32,
+       0
+      ],
+      "frm": [
+       -2,
+       5.4,
+       -2
+      ],
+      "size": [
+       4,
+       1,
+       4
+      ],
+      "inflate": 0.55,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       4.0,
+       -2
+      ],
+      "size": [
+       4,
+       1.6,
+       4
+      ],
+      "inflate": 0.7,
+      "fit": true
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:golden_hook": {
+  "texture": "jaymospowers:textures/entity/worn/golden_hook.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       6.4,
+       -2
+      ],
+      "size": [
+       4,
+       2.6,
+       4
+      ],
+      "inflate": 0.4,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -0.5,
+       9,
+       -0.5
+      ],
+      "size": [
+       1,
+       2.5,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       20,
+       0
+      ],
+      "frm": [
+       -0.5,
+       11.2,
+       -2.2
+      ],
+      "size": [
+       1,
+       1,
+       2
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       26,
+       0
+      ],
+      "frm": [
+       -0.5,
+       10.2,
+       -2.2
+      ],
+      "size": [
+       1,
+       1,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:ram_bracer": {
+  "texture": "jaymospowers:textures/entity/worn/ram_bracer.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       4.2,
+       -2
+      ],
+      "size": [
+       4,
+       3,
+       4
+      ],
+      "inflate": 0.45,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -1,
+       4.6,
+       -2.75
+      ],
+      "size": [
+       2,
+       2.2,
+       0.5
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "left",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:smelters_bracer": {
+  "texture": "jaymospowers:textures/entity/worn/smelters_bracer.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       4.0,
+       -2
+      ],
+      "size": [
+       4,
+       3.4,
+       4
+      ],
+      "inflate": 0.45,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -1,
+       4.6,
+       -2.75
+      ],
+      "size": [
+       2,
+       2,
+       0.5
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "left",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:withered_bracelet": {
+  "texture": "jaymospowers:textures/entity/worn/withered_bracelet.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       7.2,
+       -2
+      ],
+      "size": [
+       4,
+       1,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": true
+     }
+    ],
+    "swing": null,
+    "sides": "left",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:swiftfoot_ring": {
+  "texture": "jaymospowers:textures/entity/worn/swiftfoot_ring.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       9.0,
+       -2
+      ],
+      "size": [
+       4,
+       0.7,
+       4
+      ],
+      "inflate": 0.12,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -0.5,
+       8.7,
+       -2.5
+      ],
+      "size": [
+       1,
+       1,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "slot",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:delvers_ring": {
+  "texture": "jaymospowers:textures/entity/worn/delvers_ring.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       9.0,
+       -2
+      ],
+      "size": [
+       4,
+       0.7,
+       4
+      ],
+      "inflate": 0.12,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -0.5,
+       8.7,
+       -2.5
+      ],
+      "size": [
+       1,
+       1,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "slot",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:gluttons_ring": {
+  "texture": "jaymospowers:textures/entity/worn/gluttons_ring.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_arm",
+    "pivot": [
+     -1,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       9.0,
+       -2
+      ],
+      "size": [
+       4,
+       0.7,
+       4
+      ],
+      "inflate": 0.12,
+      "fit": true
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -0.5,
+       8.7,
+       -2.5
+      ],
+      "size": [
+       1,
+       1,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "slot",
+    "armour": "chest",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:couriers_boots": {
+  "texture": "jaymospowers:textures/entity/worn/couriers_boots.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       7,
+       -2
+      ],
+      "size": [
+       4,
+       5,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       11.4,
+       -2.4
+      ],
+      "size": [
+       4,
+       0.8,
+       4.4
+      ],
+      "inflate": 0.3,
+      "fit": false
+     },
+     {
+      "uv": [
+       34,
+       0
+      ],
+      "frm": [
+       2.2,
+       8,
+       0
+      ],
+      "size": [
+       0.5,
+       2,
+       2.5
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:waterstrider_boots": {
+  "texture": "jaymospowers:textures/entity/worn/waterstrider_boots.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       8,
+       -2
+      ],
+      "size": [
+       4,
+       4,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       11.4,
+       -2.4
+      ],
+      "size": [
+       4,
+       0.8,
+       4.4
+      ],
+      "inflate": 0.3,
+      "fit": false
+     },
+     {
+      "uv": [
+       34,
+       0
+      ],
+      "frm": [
+       -2,
+       10.2,
+       -2
+      ],
+      "size": [
+       4,
+       0.8,
+       4
+      ],
+      "inflate": 0.45,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:hare_boots": {
+  "texture": "jaymospowers:textures/entity/worn/hare_boots.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       8,
+       -2
+      ],
+      "size": [
+       4,
+       4,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       11.4,
+       -2.4
+      ],
+      "size": [
+       4,
+       0.8,
+       4.4
+      ],
+      "inflate": 0.3,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:kitty_slippers": {
+  "texture": "jaymospowers:textures/entity/worn/kitty_slippers.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       10,
+       -2
+      ],
+      "size": [
+       4,
+       2,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       11.4,
+       -2.4
+      ],
+      "size": [
+       4,
+       0.8,
+       4.4
+      ],
+      "inflate": 0.3,
+      "fit": false
+     },
+     {
+      "uv": [
+       34,
+       0
+      ],
+      "frm": [
+       -1.6,
+       9.4,
+       -2.3
+      ],
+      "size": [
+       1,
+       1,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       38,
+       0
+      ],
+      "frm": [
+       0.6,
+       9.4,
+       -2.3
+      ],
+      "size": [
+       1,
+       1,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       42,
+       0
+      ],
+      "frm": [
+       -1,
+       10.6,
+       -2.7
+      ],
+      "size": [
+       2,
+       1,
+       0.4
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:steadfast_spikes": {
+  "texture": "jaymospowers:textures/entity/worn/steadfast_spikes.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       9,
+       -2
+      ],
+      "size": [
+       4,
+       3,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       11.4,
+       -2.4
+      ],
+      "size": [
+       4,
+       0.8,
+       4.4
+      ],
+      "inflate": 0.3,
+      "fit": false
+     },
+     {
+      "uv": [
+       34,
+       0
+      ],
+      "frm": [
+       -2,
+       11.0,
+       -3.0
+      ],
+      "size": [
+       4,
+       1,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       44,
+       0
+      ],
+      "frm": [
+       -1.5,
+       12.0,
+       -1.5
+      ],
+      "size": [
+       1,
+       0.8,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       48,
+       0
+      ],
+      "frm": [
+       0.5,
+       12.0,
+       0.5
+      ],
+      "size": [
+       1,
+       0.8,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:rooted_boots": {
+  "texture": "jaymospowers:textures/entity/worn/rooted_boots.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       8,
+       -2
+      ],
+      "size": [
+       4,
+       4,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2,
+       11.4,
+       -2.4
+      ],
+      "size": [
+       4,
+       0.8,
+       4.4
+      ],
+      "inflate": 0.3,
+      "fit": false
+     },
+     {
+      "uv": [
+       34,
+       0
+      ],
+      "frm": [
+       -2.5,
+       9,
+       -0.5
+      ],
+      "size": [
+       0.6,
+       3.6,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       38,
+       0
+      ],
+      "frm": [
+       1.9,
+       8.5,
+       0.6
+      ],
+      "size": [
+       0.6,
+       4.0,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       42,
+       0
+      ],
+      "frm": [
+       -0.3,
+       10,
+       2.0
+      ],
+      "size": [
+       0.6,
+       2.6,
+       0.6
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:strider_shoes": {
+  "texture": "jaymospowers:textures/entity/worn/strider_shoes.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       9,
+       -2
+      ],
+      "size": [
+       4,
+       3,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2.5,
+       11.6,
+       -2.8
+      ],
+      "size": [
+       5,
+       1,
+       5.2
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:snowshoes": {
+  "texture": "jaymospowers:textures/entity/worn/snowshoes.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -3,
+       11.6,
+       -4.5
+      ],
+      "size": [
+       6,
+       0.8,
+       9
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       42,
+       0
+      ],
+      "frm": [
+       -3.2,
+       11.4,
+       -4.7
+      ],
+      "size": [
+       6.4,
+       0.6,
+       1
+      ],
+      "inflate": 0.0,
+      "fit": false
+     },
+     {
+      "uv": [
+       30,
+       0
+      ],
+      "frm": [
+       -2,
+       10.4,
+       -1
+      ],
+      "size": [
+       4,
+       1,
+       2
+      ],
+      "inflate": 0.4,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:frogskin_flippers": {
+  "texture": "jaymospowers:textures/entity/worn/frogskin_flippers.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "right_leg",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       0,
+       0
+      ],
+      "frm": [
+       -2,
+       10.6,
+       -2
+      ],
+      "size": [
+       4,
+       1.4,
+       4
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       16,
+       0
+      ],
+      "frm": [
+       -2.5,
+       11.4,
+       -7
+      ],
+      "size": [
+       5,
+       0.6,
+       5
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "both",
+    "armour": "feet",
+    "children": []
+   }
+  ]
+ },
+ "jaymospowers:featherfall_cloak": {
+  "texture": "jaymospowers:textures/entity/worn/featherfall_cloak.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": true,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [
+     {
+      "uv": [
+       20,
+       0
+      ],
+      "frm": [
+       -4.5,
+       -0.4,
+       -2.6
+      ],
+      "size": [
+       9,
+       2,
+       5
+      ],
+      "inflate": 0.35,
+      "fit": false
+     },
+     {
+      "uv": [
+       48,
+       0
+      ],
+      "frm": [
+       -0.5,
+       0.2,
+       -3.3
+      ],
+      "size": [
+       1,
+       1,
+       0.5
+      ],
+      "inflate": 0.0,
+      "fit": false
+     }
+    ],
+    "swing": null,
+    "sides": "right",
+    "armour": "chest",
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       0.6,
+       2.4
+      ],
+      "rot": [
+       0.06,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -4.5,
+         0,
+         0
+        ],
+        "size": [
+         9,
+         14,
+         1
+        ],
+        "inflate": 0.2,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.1,
+       "phase": 0.0,
+       "kind": "cape"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ }
+}

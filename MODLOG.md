@@ -1330,3 +1330,17 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   letting go early just runs on. Held the full 1.5 s, the slide starts as before (belly dive out of a fast run, back slide
   out of a sprint; still held at the end = prone). The server's `Slide.valid` no longer checks Sneak (the client keeps it
   off through the hold). `SPRINT_GRACE_TICKS` stays 8. Compile-checked against the 26.3 jars; not played.
+
+## 0.21.37: every worn bauble shows on the body
+- Andy: "Would this trinkets' system animate any other baubles? If so i want them to be integrated" (picked: Artifacts'
+  ported baubles and our own starters). No other pack mod relied on Trinkets for drawing (scanned all 123 downloaded jars),
+  but our Artifacts port never drew anything on the player. Now 49 baubles do: hats, hoods, masks and the circlet on the
+  head; scarves and pendants at the neck; charms and belt gadgets at the belt; gloves, claws, gauntlets, bracers and rings
+  on the hands (ring slot 1 right hand, slot 2 left); shoes on both feet; the featherfall cloak down the back (hides the cape).
+- `Baubles.LOOKS`: each slot's item id, synced to everyone (`Baubles.looks`). `client/baubles/WornLooks` reads
+  `worn_looks.json`, bakes a player-model layer per look (wide and slim arms, and a left-hand ring variant), and draws each
+  worn look; scarf tails, pendants, charms, hanging pouches, feathers, jester horns and the cloak swing with the stride and
+  idle; parts scale out over the matching armour piece.
+- Our own boxes and textures (REA, docs/Worn-Looks-Spec.md): `tools/gen_worn_looks.py` writes the json and
+  `textures/entity/worn/*.png`. Lanterns, the coin purse, the hip bottles, the lantern pole, fairies and quivers keep their
+  own drawing. Gradle compile clean; not played.
