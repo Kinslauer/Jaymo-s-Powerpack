@@ -94,7 +94,7 @@ public final class Mines {
 			this(entrance, facing, flat, step, state, 0, 0);
 		}
 
-		/** (0.7.624) An open pit ({@link MinePit}) still being dug, before its tunnel. */
+		/** (0.7.625) An open pit ({@link MinePit}) still being dug, before its tunnel. */
 		boolean inPit() {
 			return this.pit > 0 && this.layer < MinePit.DEPTH;
 		}
@@ -263,7 +263,7 @@ public final class Mines {
 	}
 
 	/**
-	 * (0.7.624) The nearest ground fit for an open pit ({@link MinePit}), unless the settlement is poor; else (or if there's
+	 * (0.7.625) The nearest ground fit for an open pit ({@link MinePit}), unless the settlement is poor; else (or if there's
 	 * none) the nearest rock or cliff face round the seat (rings outward), else the nearest open ground fit for a shaft; or null.
 	 */
 	static @Nullable Mine site(ServerLevel level, Faction f) {

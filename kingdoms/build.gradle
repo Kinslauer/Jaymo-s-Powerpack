@@ -68,6 +68,9 @@ dependencies {
 	// Jade (CC BY-NC-SA 4.0, Snownee; in Powers' pack): client/compat/JadeIntroductions keeps strangers' names, trades and
 	// health off its panel. Compiled against (the same version as Powers' pack), never required.
 	compileOnly "maven.modrinth:jade:71CTWqdE"
+	// (TierHiding) JEI, the same version as Powers' pack: what is beyond a player's world tier is taken off its list. Touched
+	// only through client/compat/TierJei (its jei_mod_plugin entrypoint), never required.
+	compileOnly "maven.modrinth:jei:wQJNj1C5"
 	// Spell Engine (GPL-3.0; in Powers' pack with Zsolt Molnar's RPG Series): RpgSeriesGate lets only the matching class cast
 	// their spells. Compiled against, never required.
 	compileOnly "maven.modrinth:spell-engine:kgVsejrW"

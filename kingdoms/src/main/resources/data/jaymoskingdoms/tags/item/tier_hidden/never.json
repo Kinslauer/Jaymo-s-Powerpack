@@ -1,0 +1,129 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "minecraft:command_block",
+      "required": false
+    },
+    {
+      "id": "minecraft:chain_command_block",
+      "required": false
+    },
+    {
+      "id": "minecraft:repeating_command_block",
+      "required": false
+    },
+    {
+      "id": "minecraft:command_block_minecart",
+      "required": false
+    },
+    {
+      "id": "minecraft:structure_block",
+      "required": false
+    },
+    {
+      "id": "minecraft:structure_void",
+      "required": false
+    },
+    {
+      "id": "minecraft:jigsaw",
+      "required": false
+    },
+    {
+      "id": "minecraft:barrier",
+      "required": false
+    },
+    {
+      "id": "minecraft:light",
+      "required": false
+    },
+    {
+      "id": "minecraft:debug_stick",
+      "required": false
+    },
+    {
+      "id": "minecraft:test_block",
+      "required": false
+    },
+    {
+      "id": "minecraft:test_instance_block",
+      "required": false
+    },
+    {
+      "id": "minecraft:bedrock",
+      "required": false
+    },
+    {
+      "id": "minecraft:spawner",
+      "required": false
+    },
+    {
+      "id": "minecraft:trial_spawner",
+      "required": false
+    },
+    {
+      "id": "minecraft:vault",
+      "required": false
+    },
+    {
+      "id": "minecraft:knowledge_book",
+      "required": false
+    },
+    {
+      "id": "minecraft:petrified_oak_slab",
+      "required": false
+    },
+    {
+      "id": "minecraft:budding_amethyst",
+      "required": false
+    },
+    {
+      "id": "minecraft:reinforced_deepslate",
+      "required": false
+    },
+    {
+      "id": "minecraft:end_portal_frame",
+      "required": false
+    },
+    {
+      "id": "minecraft:farmland",
+      "required": false
+    },
+    {
+      "id": "minecraft:dirt_path",
+      "required": false
+    },
+    {
+      "id": "minecraft:frogspawn",
+      "required": false
+    },
+    {
+      "id": "minecraft:infested_stone",
+      "required": false
+    },
+    {
+      "id": "minecraft:infested_cobblestone",
+      "required": false
+    },
+    {
+      "id": "minecraft:infested_stone_bricks",
+      "required": false
+    },
+    {
+      "id": "minecraft:infested_mossy_stone_bricks",
+      "required": false
+    },
+    {
+      "id": "minecraft:infested_cracked_stone_bricks",
+      "required": false
+    },
+    {
+      "id": "minecraft:infested_chiseled_stone_bricks",
+      "required": false
+    },
+    {
+      "id": "minecraft:infested_deepslate",
+      "required": false
+    }
+  ]
+}
