@@ -15,6 +15,15 @@
     "jaymoskingdoms:form_rending_claw",
     "jaymoskingdoms:form_feral_pounce",
     "jaymoskingdoms:move_takedown",
-    "jaymoskingdoms:move_blink"
+    "jaymoskingdoms:move_blink",
+    "jaymoskingdoms:move_finish",
+    "jaymoskingdoms:move_counter",
+    "jaymoskingdoms:move_fists",
+    "jaymoskingdoms:move_arm",
+    "jaymoskingdoms:move_grab",
+    "jaymoskingdoms:move_tendril",
+    "jaymoskingdoms:move_spikes",
+    "jaymoskingdoms:move_consume",
+    "jaymoskingdoms:move_shroud"
   ]
 }

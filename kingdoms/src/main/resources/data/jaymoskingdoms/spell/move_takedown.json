@@ -21,7 +21,7 @@
   "cost": {
     "exhaust": 0.0,
     "cooldown": {
-      "duration": 1.0
+      "duration": 0.5
     }
   }
 }

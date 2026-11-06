@@ -9993,3 +9993,8 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - **Takedowns on the skill bar (Powers 0.21.24):** Andy's answer on mapping the Chrono and Web moves: the skill bar shows
   Powers' takedowns (`move_takedown`, `move_blink` spells, `FormSkills`) in Time Flow always, and for bare hands while
   locked on, before any fist forms. Icons: `tools/gen_move_icons.py`. Lines: `lang/parts/power_moves.json`.
+
+## 0.7.626 (2026-11-06): Web's moves on the skill bar (Powers 0.21.25)
+- Nine more Powers move spells for the skill bar (`move_finish`, `counter`, `fists`, `arm`, `grab`, `tendril`, `spikes`,
+  `consume`, `shroud`), shown for Web with an empty hand while locked on. Icons: `tools/gen_move_icons.py`. Lines:
+  `lang/parts/power_moves.json`. Built, not played.
