@@ -71,6 +71,10 @@ public final class VampirePlayers {
 				|| !(entity instanceof LivingEntity target)) {
 				return InteractionResult.PASS;
 			}
+			// (0.7.614) holding someone up by the throat (BloodGrab), use does nothing else
+			if (BloodGrab.holding(sp)) {
+				return InteractionResult.SUCCESS;
+			}
 			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && Vampires.person(target)) {
 				drink(server, sp, target);
 				return InteractionResult.SUCCESS;
@@ -211,6 +215,12 @@ public final class VampirePlayers {
 			long now = player.level().getGameTime();
 			player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(v.kind(), Vampires.nightIndex(((ServerLevel) player.level()).getOverworldClockTime()), now));
 		}
+	}
+
+	/** (0.7.614) A gulp in the grab-drink ({@link BloodGrab}): the bite, on the grab's own quicker pace instead of the bite's. */
+	static void drinkNow(ServerLevel level, ServerPlayer player, LivingEntity target, boolean infect) {
+		LAST_DRINK.remove(player.getUUID());
+		drink(level, player, target, false, infect);
 	}
 
 	/** A bite from a player who's one of them. */

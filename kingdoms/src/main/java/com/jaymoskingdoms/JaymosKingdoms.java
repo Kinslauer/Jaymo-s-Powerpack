@@ -640,6 +640,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// their attachments)
 		LOGGER.debug("night gift attachments: {} {}", NightGifts.GIFT, VampirePlayers.HALF_TURN);
 		NightGifts.register();
+		LOGGER.debug("blood grab attachment: {}", BloodGrab.GRABBING);
+		BloodGrab.register();
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();
