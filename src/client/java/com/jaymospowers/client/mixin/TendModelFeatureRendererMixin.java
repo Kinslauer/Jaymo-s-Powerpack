@@ -25,7 +25,7 @@ abstract class TendModelFeatureRendererMixin {
 		// (0.19.45) your own body in first person: the top of the torso off, before anything bends what's left
 		com.jaymospowers.client.FirstPersonTrim.apply(submit.model(), submit.state());
 		com.jaymospowers.client.CrouchPose.bendKnee(submit.model(), submit.state());
-		// (0.21.26) and every other kneel's knees (tending, drinking, finishers, executions, Gravity's crush)
+		// (0.21.28) and every other kneel's knees (tending, drinking, finishers, executions, Gravity's crush)
 		com.jaymospowers.client.KneelLegs.bend(submit.model(), submit.state());
 		// (0.19.30) and the crawl's elbows and knees
 		com.jaymospowers.client.CrawlPose.bendLimbs(submit.model(), submit.state());

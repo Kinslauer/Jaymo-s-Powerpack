@@ -125,6 +125,7 @@ public final class WindPower implements Power {
 		WindKick.init();
 		WindThunderDive.register();
 		WindCyclone.init();
+		WindMoves.init();
 		WindJet.init();
 		com.jaymospowers.power.wind.aether.WindAether.init();
 		WindDebug.register();
@@ -236,6 +237,7 @@ public final class WindPower implements Power {
 		WindJet.stop(player);
 		player.removeTag(KINGDOMS_TAG);
 		forgetLance(player);
+		WindMoves.clear(player);
 		State s = this.states.remove(player.getUUID());
 		player.removeAttached(FLIGHT);
 		player.removeAttached(BRAKING);
@@ -291,7 +293,8 @@ public final class WindPower implements Power {
 		WindFumble.onCast(player);
 		WindStorm.onCast(player);
 		WindModes.onCast(player);
-		WindTempest.lance(player, s.weather);
+		// (Jung's revamp) a longer wind-up, then the lance flies (WindMoves)
+		WindMoves.lanceWindup(player, s.weather);
 		// (0.9.26) Jaymo's Kingdoms reads this: a lance fired into a tornado shoves it off course
 		forgetLance(player);
 		player.addTag(LANCE_TAG + player.level().getGameTime());
@@ -517,11 +520,13 @@ public final class WindPower implements Power {
 		}
 		s.weather = WindWeather.tick(player);
 		WindCyclone.tick(player);
+		WindMoves.tick(player, s.channel != null);
 
 		if (!player.isAlive() || player.isSpectator()) {
 			if (s.flight.flying()) {
 				this.setFlight(player, s, WindFlight.NONE, false);
 			}
+			WindMoves.clear(player);
 			if (s.channel != null) {
 				s.channel = null;
 				statusDirty = true;
@@ -742,6 +747,12 @@ public final class WindPower implements Power {
 
 	private void channelEffects(ServerPlayer player, ServerLevel level, State s) {
 		float f = Math.min(1.0F, s.channelTicks / (float)Math.max(1, s.channelMax));
+		// (Jung's revamp) the body: arms wheeling to gather the Gust, flung out for the Gale Barrier
+		if (s.channel == WindAbility.TAILWIND && player.onGround() && !s.flight.flying() && s.gustCooldown <= 0) {
+			WindMoves.gatherTick(player, level, s.channelTicks, f);
+		} else if (s.channel == WindAbility.GALE_BARRIER) {
+			WindMoves.pose(player, WindMoves.ARMS_OUT);
+		}
 		// two wisps spiralling up and in around the body
 		for (int i = 0; i < 2; i++) {
 			double angle = s.channelTicks * 0.45 + i * Math.PI;
@@ -798,7 +809,6 @@ public final class WindPower implements Power {
 		switch (ability) {
 			case TAILWIND -> {
 				if (gust) {
-					this.douseGust(player, level, f);
 					if (stormbound) {
 						WindStorm.strike(player, this.gustImpact(player, f));
 					}
@@ -835,7 +845,8 @@ public final class WindPower implements Power {
 					knockback.addOrUpdateTransientModifier(new AttributeModifier(BARRIER_MODIFIER, 0.5 + 0.5 * f, AttributeModifier.Operation.ADD_VALUE));
 				}
 				this.pushMobs(player, level, f, w * WindStorm.galeMultiplier(player));
-				level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+				// (Jung's revamp) arms out, and a sphere of wind forms round them and fades over 3 s
+				WindMoves.barrier(player);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.2F, 0.8F);
 				com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.7F);
 			}
@@ -848,6 +859,10 @@ public final class WindPower implements Power {
 					break;
 				}
 				WindDouse.douse(level, player.position().add(0.0, 1.0, 0.0), ZEPHYR_RADIUS, player);
+				if (!s.flight.flying() && !player.isPassenger()) {
+					// (Jung's revamp) a spiral of wind lifts the caster two blocks and spins them
+					WindMoves.zephyr(player, level);
+				}
 				int fall = (int)(Mth.lerpInt(f, ZEPHYR_FALL_MIN, ZEPHYR_FALL_MAX) * w);
 				int regen = (int)(Mth.lerpInt(f, ZEPHYR_REGEN_MIN, ZEPHYR_REGEN_MAX) * w);
 				int regenAmp = f >= 1.0F ? 1 : 0;
@@ -886,65 +901,11 @@ public final class WindPower implements Power {
 		// damage grows faster than the charge: most of a full blast's power is in its last second or two
 		float maxDamage = Mth.lerp(f * f, GUST_DAMAGE_MIN, GUST_DAMAGE_MAX) * strength;
 		double knockback = Mth.lerp(f, GUST_KNOCKBACK_MIN, GUST_KNOCKBACK_MAX) * strength;
-		double minDot = Math.cos(Math.toRadians(GUST_HALF_ANGLE));
-		AABB area = player.getBoundingBox().expandTowards(look.scale(range)).inflate(range * 0.6);
-		for (Entity target : level.getEntities(player, area, e -> e.isAlive() && !e.isSpectator() && e != player.getVehicle())) {
-			Vec3 to = target.getBoundingBox().getCenter().subtract(eye);
-			double distance = to.length();
-			if (distance > range || distance < 1.0E-3 || to.scale(1.0 / distance).dot(look) < minDot) {
-				continue;
-			}
-			if (!player.hasLineOfSight(target)) {
-				// walls take the blast
-				continue;
-			}
-			// TNT's falloff: impact 1 point-blank, 0 at the edge; damage follows (impact² + impact) / 2
-			double impact = 1.0 - distance / range;
-			if (target instanceof LivingEntity living) {
-				float damage = (float)(maxDamage * (impact * impact + impact) / 2.0);
-				living.hurtServer(level, full ? player.damageSources().explosion(player, player) : player.damageSources().windCharge(player, player),
-					Math.max(1.0F, damage));
-				double resist = 1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-				if (resist <= 0.0) {
-					continue;
-				}
-				Vec3 dir = to.normalize();
-				Vec3 push = dir.scale(knockback * impact * resist);
-				living.push(push.x, Math.max(push.y, 0.0) + (0.25 + 0.35 * f) * impact * resist, push.z);
-				living.syncVelocity = true;
-			} else if (target instanceof Projectile projectile) {
-				projectile.setDeltaMovement(look.scale(1.0 + f));
-				projectile.syncVelocity = true;
-			}
-		}
-		// the blast itself: gusts rolling out along the cone
-		for (int i = 1; i <= 5; i++) {
-			Vec3 at = eye.add(look.scale(range * i / 5.0));
-			level.sendParticles(f > 0.5F ? ParticleTypes.GUST_EMITTER_SMALL : ParticleTypes.GUST, at.x, at.y - 0.3, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.CLOUD, at.x, at.y - 0.3, at.z, (int)(6 + 14 * f), 0.4 * i / 5.0 * (1 + f), 0.3 * i / 5.0 * (1 + f),
-				0.4 * i / 5.0 * (1 + f), 0.05 + 0.1 * f);
-		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F + f, 0.9F - 0.3F * f);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 0.6F);
+		// (Jung's revamp) a push flowing into an uppercut throws a spiralling gust that runs out and curls upward,
+		// carrying and lifting what it catches (WindMoves)
+		WindMoves.gust(player, level, f, maxDamage, knockback, full, range);
 		if (full) {
-			// a full charge goes off like TNT (without breaking anything)
-			Vec3 at = eye.add(look.scale(3.0));
-			level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 4.0F, 0.8F);
-			com.jaymospowers.core.Shakes.heavy(player, at, 24.0, 1.8F);
-		}
-	}
-
-	/** The ground gust blows out the fire along its cone (before a Stormbound bolt lands at its tip). */
-	private void douseGust(ServerPlayer player, ServerLevel level, float f) {
-		Vec3 eye = player.getEyePosition();
-		Vec3 look = player.getLookAngle();
-		double range = Mth.lerp(f, GUST_RANGE_MIN, GUST_RANGE_MAX);
-		double spread = Math.tan(Math.toRadians(GUST_HALF_ANGLE));
-		for (int i = 0; i <= 6; i++) {
-			double d = range * i / 6.0;
-			WindDouse.douse(level, eye.add(look.scale(d)), 1.0 + d * spread, player);
+			com.jaymospowers.core.Shakes.heavy(player, eye.add(look.scale(3.0)), 24.0, 1.8F);
 		}
 	}
 
@@ -1012,15 +973,7 @@ public final class WindPower implements Power {
 		if (s.barrierTicks % 10 == 0) {
 			WindDouse.douse(level, center, BARRIER_DOUSE_RADIUS, player);
 		}
-		// a faint swirl so everyone can see the barrier is up
-		if (s.barrierTicks % 3 == 0) {
-			double angle = player.tickCount * 0.6;
-			for (int i = 0; i < 3; i++) {
-				double a = angle + i * Math.PI * 2.0 / 3.0;
-				level.sendParticles(ParticleTypes.CLOUD, player.getX() + Math.cos(a) * 1.0, player.getY() + 0.3 + i * 0.6, player.getZ() + Math.sin(a) * 1.0,
-					0, -Math.sin(a) * 0.12, 0.0, Math.cos(a) * 0.12, 1.0);
-			}
-		}
+		// (Jung's revamp: the barrier is seen as the sphere that forms when it goes up, WindMoves; no lingering swirl)
 	}
 
 	private static void removeBarrierModifier(ServerPlayer player) {

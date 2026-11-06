@@ -73,7 +73,7 @@ public final class BloodTrail {
 	static final float MIN_POOL = 0.3F, PRINT_SCALE = 0.26F;
 	static final double STRIDE = 0.8, PRINT_SIDE = 0.12, WALKERS_RANGE = 40.0;
 	/**
-	 * (0.21.26) Walking through a pool: how much of it each foot set in it carries off (stain size, each check; twice that
+	 * (0.21.28) Walking through a pool: how much of it each foot set in it carries off (stain size, each check; twice that
 	 * running), at least how fast it must be moving (blocks a tick), the most a step smears out of what it carries, and a
 	 * skid's size next to a print's.
 	 */
@@ -147,7 +147,7 @@ public final class BloodTrail {
 	private static final class Feet {
 		int left;
 		int color;
-		/** (0.21.26) Blood picked up off a pool walked through, smeared out over the next steps before the prints. */
+		/** (0.21.28) Blood picked up off a pool walked through, smeared out over the next steps before the prints. */
 		float wet;
 		Vec3 last;
 		double carry;
@@ -165,7 +165,7 @@ public final class BloodTrail {
 
 	public static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(BloodTrail::tick);
-		// (0.21.26) the downed and the dead bleed out into pools
+		// (0.21.28) the downed and the dead bleed out into pools
 		BleedOut.init();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof PathfinderMob mob && entity.getType().builtInRegistryHolder().is(TRACKERS)) {
@@ -237,7 +237,7 @@ public final class BloodTrail {
 	}
 
 	/**
-	 * (0.21.26) Andy: "blood should pool under the downed and corpses until they bleed out". Pours {@code amount} of
+	 * (0.21.28) Andy: "blood should pool under the downed and corpses until they bleed out". Pours {@code amount} of
 	 * {@code by}'s blood (stain size) on the ground under (x, from, z): into the round pool of theirs already lying there
 	 * (it grows by exactly that, up to {@link #MAX_SCALE}), or a new one that small. Returns how much went in: less than
 	 * {@code amount} when the pool there is full, nothing when it's full or there's no dry ground (water, lava, a drop
@@ -424,7 +424,7 @@ public final class BloodTrail {
 			}
 			feet.left = PRINTS;
 			feet.color = pool.color;
-			// (0.21.26) a foot through it splashes it on: blood carried off to skid out over the next steps
+			// (0.21.28) a foot through it splashes it on: blood carried off to skid out over the next steps
 			Vec3 v = body.getDeltaMovement();
 			if (v.x * v.x + v.z * v.z > WALK_MOVING * WALK_MOVING) {
 				float soak = WALK_SOAK * (body.isSprinting() ? 2.0F : 1.0F);
@@ -465,7 +465,7 @@ public final class BloodTrail {
 			// fainter (smaller) as the blood wears off the soles
 			float scale = size * (0.65F + 0.35F * feet.left / (float) PRINTS);
 			if (feet.wet > 0.02F) {
-				// (0.21.26) still dripping from the pool: a skid along the way it went, wider for what it carries
+				// (0.21.28) still dripping from the pool: a skid along the way it went, wider for what it carries
 				float spill = Math.min(feet.wet, STEP_SPILL);
 				feet.wet -= spill;
 				shape = Math.abs(ux) >= Math.abs(uz) ? BloodParticles.Puddle.SMEAR_X : BloodParticles.Puddle.SMEAR_Z;
@@ -599,7 +599,7 @@ public final class BloodTrail {
 	}
 
 	/**
-	 * (0.21.26) Andy: "dragging and walking through puddles should smear more than the regular trails". Takes up to
+	 * (0.21.28) Andy: "dragging and walking through puddles should smear more than the regular trails". Takes up to
 	 * {@code most} (stain size) out of the round pools within {@code range} of {@code at} (anyone's, the nearest first),
 	 * the blood a body dragged or a foot set through them carries off to smear further on. A pool taken down past
 	 * {@link #DRAWN_DRY} dries away. {@code color} (if given) hears the colour of the last pool it took from. Returns how

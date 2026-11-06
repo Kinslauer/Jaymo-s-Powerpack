@@ -420,7 +420,7 @@ public final class WebExecutionPose {
 		Key key = run.key();
 		float hip = HIP * Math.max(state.scale, 0.01F);
 		// (after the body's turn, forward is -Z)
-		// (0.21.26) a kneel sinks one thigh's length (KneelLegs)
+		// (0.21.28) a kneel sinks one thigh's length (KneelLegs)
 		float sink = com.jaymospowers.client.KneelLegs.remap(key.sink(), key.rightLeg(), key.leftLeg()).sink();
 		poseStack.translate(0.0F, -sink * w, -(run.step() + key.lunge()) * w);
 		poseStack.translate(0.0F, hip, 0.0F);
@@ -441,7 +441,7 @@ public final class WebExecutionPose {
 		float[] was = WebFeral.snapshot(h);
 		pose(h, avatar, run.key());
 		WebFeral.blend(h, was, run.in());
-		// (0.21.26) a kneel's knees (KneelLegs)
+		// (0.21.28) a kneel's knees (KneelLegs)
 		com.jaymospowers.client.KneelLegs.Legs legs = com.jaymospowers.client.KneelLegs.remap(run.key().sink(), run.key().rightLeg(),
 			run.key().leftLeg());
 		com.jaymospowers.client.KneelLegs.want(avatar, legs.rightKnee() * run.in(), legs.leftKnee() * run.in());
@@ -467,7 +467,7 @@ public final class WebExecutionPose {
 		h.leftArm.zRot = key.laz();
 		// the legs as the world sees them, so they stay planted under the bend
 		float bend = key.pitch() * Mth.DEG_TO_RAD;
-		// (0.21.26) a kneel's thighs as a body really kneels (KneelLegs)
+		// (0.21.28) a kneel's thighs as a body really kneels (KneelLegs)
 		com.jaymospowers.client.KneelLegs.Legs legs = com.jaymospowers.client.KneelLegs.remap(key.sink(), key.rightLeg(), key.leftLeg());
 		h.rightLeg.xRot = legs.right() - bend;
 		h.leftLeg.xRot = legs.left() - bend;

@@ -46,7 +46,7 @@ import com.jaymospowers.power.xenoform.XenoformState;
  * foot on the ground wherever its thigh is ({@link #groundKnee}), the shin leaning forward over the foot as in a real crouch
  * walk; the thighs come further forward, the steps are longer and slower, only the leg coming through lifts, and the upper body leans
  * forward over the knees ({@link #LOW_LEAN}).
- * <p>(0.21.26) Andy: "the kneel we have on crouch right now needs a revamp". The back leg was one straight stick out
+ * <p>(0.21.28) Andy: "the kneel we have on crouch right now needs a revamp". The back leg was one straight stick out
  * behind and the body sat between the legs like a split; now it kneels as every kneel does ({@link KneelLegs}): the
  * left thigh straight down to the knee on the ground and the shin flat behind, the right thigh level and the shin straight
  * down to the planted foot, the hips one thigh's length down.
@@ -306,7 +306,7 @@ public final class CrouchPose {
 		float lift = Mth.sin(c.pos() * STRIDE_BEAT) * LOW_LIFT * stride(c) * low;
 		// (0.19.30) each foot on the ground wherever its thigh is (or lifted, coming through)
 		float right = Mth.lerp(c.kneel(), groundKnee(-h.rightLeg.xRot) * c.low() + Math.max(0.0F, lift), FRONT_KNEE);
-		// (0.21.26) and on the knee, the left shin laid flat behind (KneelLegs)
+		// (0.21.28) and on the knee, the left shin laid flat behind (KneelLegs)
 		float left = groundKnee(-h.leftLeg.xRot) * low + Math.max(0.0F, -lift) + BACK_KNEE * c.kneel();
 		if (right > 0.0F) {
 			KneeBend.bend(h.rightLeg, right);

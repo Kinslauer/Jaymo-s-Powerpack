@@ -32,21 +32,21 @@ public final class BloodSmears {
 	static final float DOWNED_SMEAR = 0.42F, SPENT_SMEAR = 0.24F, CARCASS_SMEAR = 0.3F;
 
 	/**
-	 * (0.21.26) Andy: "dragging and walking through puddles should smear more than the regular trails". A body dragged
+	 * (0.21.28) Andy: "dragging and walking through puddles should smear more than the regular trails". A body dragged
 	 * through a pool soaks up to this much of it each step (stain size) and smears it out after, this much at most a
 	 * step, so its streak runs wide and dark out of the pool and thins as it goes.
 	 */
 	static final float DRAG_SOAK = 0.35F, DRAG_SPILL = 0.3F;
-	/** (0.21.26) A corpse dragged through water: how much of its blood washes off each step. */
+	/** (0.21.28) A corpse dragged through water: how much of its blood washes off each step. */
 	static final int DRAG_WASH = 12;
 	/**
-	 * (0.21.26) Andy: "i'd like players to pull dirty beaten armor off enemies". A dragged corpse's armour (kept on the body,
+	 * (0.21.28) Andy: "i'd like players to pull dirty beaten armor off enemies". A dragged corpse's armour (kept on the body,
 	 * Kitchen) takes the blood, dirt and washing as a living body's does, gathered up and laid on every this many steps
 	 * (rewriting what it wears is costly, and every player near is sent the body's look again).
 	 */
 	static final int CORPSE_GEAR_STEPS = 4;
 
-	/** (0.21.26) What a dragged corpse's armour has been through since it was last laid on. */
+	/** (0.21.28) What a dragged corpse's armour has been through since it was last laid on. */
 	private static final class Gear {
 		int steps;
 		float blood;
@@ -60,7 +60,7 @@ public final class BloodSmears {
 
 	/** Where each body last smeared. */
 	private static final Map<Entity, Vec3> LAST = new WeakHashMap<>();
-	/** (0.21.26) The blood each body has picked up off pools and not yet smeared out, and its colour. */
+	/** (0.21.28) The blood each body has picked up off pools and not yet smeared out, and its colour. */
 	private static final class Wet {
 		float amount;
 		int color;
@@ -114,7 +114,7 @@ public final class BloodSmears {
 		Vec3 last = LAST.get(body);
 		if (last != null && body.level() == level && (body.isInWater() || body.isInLava())
 			&& Math.hypot(now.x - last.x, now.z - last.z) >= STEP) {
-			// (0.21.26) dragged through water: washed, a step at a time
+			// (0.21.28) dragged through water: washed, a step at a time
 			LAST.put(body, now);
 			WET.remove(body);
 			if (body.isInWater()) {
@@ -145,7 +145,7 @@ public final class BloodSmears {
 		if (!nearGround(level, body)) {
 			return;
 		}
-		// (0.21.26) through a pool: soak it up, and smear it on wider
+		// (0.21.28) through a pool: soak it up, and smear it on wider
 		int[] poolColor = {color};
 		float soaked = BloodTrail.soak(level, now, body.getBbWidth() * 0.5 + 0.3, DRAG_SOAK, poolColor);
 		Wet wet = WET.get(body);
@@ -170,7 +170,7 @@ public final class BloodSmears {
 			}
 		}
 		BloodTrail.smear(level, body, color, last, now, scale);
-		// (0.21.26) and what it wears takes it: the pool's blood soaked up, the ground's dirt ground in
+		// (0.21.28) and what it wears takes it: the pool's blood soaked up, the ground's dirt ground in
 		if (soaked > 0.0F) {
 			Bloodied.dragged(body, soaked, poolColor[0]);
 		}
@@ -197,7 +197,7 @@ public final class BloodSmears {
 		return gear;
 	}
 
-	/** (0.21.26) Lays what a corpse's armour has been through on it, every {@link #CORPSE_GEAR_STEPS} steps (or {@code now}). */
+	/** (0.21.28) Lays what a corpse's armour has been through on it, every {@link #CORPSE_GEAR_STEPS} steps (or {@code now}). */
 	private static void flushGear(ServerLevel level, Entity corpse, boolean now) {
 		Gear gear = GEAR.get(corpse);
 		if (gear == null || !now && gear.steps < CORPSE_GEAR_STEPS) {

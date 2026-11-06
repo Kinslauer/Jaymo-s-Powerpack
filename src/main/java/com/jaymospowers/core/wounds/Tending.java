@@ -28,11 +28,11 @@ public final class Tending {
 	static final long LINGER = 2L;
 
 	/**
-	 * (0.21.26) A {@link Tend#target} that isn't anyone: down on hands and knees, mouth to the ground, drinking (a vampire
+	 * (0.21.28) A {@link Tend#target} that isn't anyone: down on hands and knees, mouth to the ground, drinking (a vampire
 	 * lapping up spilt blood, Jaymo's Kingdoms' {@code VampirePlayers.lap}).
 	 */
 	public static final int GROUND_DRINK = -2;
-	/** (0.21.26) How long a drink at the ground holds them down after each call (ticks: a held button repeats every 4). */
+	/** (0.21.28) How long a drink at the ground holds them down after each call (ticks: a held button repeats every 4). */
 	static final long DRINK_HOLD = 10L;
 
 	/** Kneeling by {@code target} (entity id, or {@link #GROUND_DRINK}), since {@code since} (game time). */
@@ -71,7 +71,7 @@ public final class Tending {
 	}
 
 	/**
-	 * (0.21.26) {@code player} is down drinking from the ground ({@link #GROUND_DRINK}), for {@link #DRINK_HOLD} ticks
+	 * (0.21.28) {@code player} is down drinking from the ground ({@link #GROUND_DRINK}), for {@link #DRINK_HOLD} ticks
 	 * more. Plain types only: Jaymo's Kingdoms calls it by reflection.
 	 */
 	public static void drinkAtGround(ServerPlayer player) {

@@ -106,7 +106,7 @@ public final class KitchenCompat {
 	}
 
 	/**
-	 * (0.21.26) A Kitchen body lying still on the ground: not carried, dragged or hung on a meat hook (those bleed their own
+	 * (0.21.28) A Kitchen body lying still on the ground: not carried, dragged or hung on a meat hook (those bleed their own
 	 * ways: smears, the hook's drip). False for anything that isn't one.
 	 */
 	public static boolean liesStill(Entity entity) {
@@ -114,7 +114,7 @@ public final class KitchenCompat {
 	}
 
 	/**
-	 * (0.21.26) Hands {@code each} every piece of armour a Kitchen body still wears (and its slot, 0 boots ... 3 helmet) to
+	 * (0.21.28) Hands {@code each} every piece of armour a Kitchen body still wears (and its slot, 0 boots ... 3 helmet) to
 	 * change in place; the changes stay on the body and come off with the armour. False if it wears none, or Kitchen is
 	 * older than 0.5.79.
 	 */
@@ -141,7 +141,7 @@ public final class KitchenCompat {
 		}
 	}
 
-	/** (0.21.26) Kitchen 0.5.79's {@code CorpseEntity.reworkArmour}, looked up by name (the Kitchen jar built against may be older). */
+	/** (0.21.28) Kitchen 0.5.79's {@code CorpseEntity.reworkArmour}, looked up by name (the Kitchen jar built against may be older). */
 	private static java.lang.invoke.@Nullable MethodHandle reworkArmour;
 	private static boolean reworkLooked;
 

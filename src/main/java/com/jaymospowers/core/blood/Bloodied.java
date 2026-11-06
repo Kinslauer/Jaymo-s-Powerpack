@@ -55,7 +55,7 @@ public final class Bloodied {
 	static final float ARMOUR_PER_DAMAGE = 3.0F;
 	static final float[] ARMOUR_REACH = {0.4F, 0.7F, 1.0F, 0.45F};
 	/**
-	 * (0.21.26) Dragged through a pool: how much blood (coat and armour points) each unit of stain soaked up gives, and its
+	 * (0.21.28) Dragged through a pool: how much blood (coat and armour points) each unit of stain soaked up gives, and its
 	 * share on boots, greaves, chest and helmet (lying on the ground: the chest and legs most).
 	 */
 	static final float DRAG_PER_SOAK = 90.0F;
@@ -200,7 +200,7 @@ public final class Bloodied {
 	}
 
 	/**
-	 * (0.21.26) Andy: "dragging should bloody dirty and clean the armor they wear respectively". {@code body} was dragged
+	 * (0.21.28) Andy: "dragging should bloody dirty and clean the armor they wear respectively". {@code body} was dragged
 	 * (or crawled) through a pool and soaked up {@code soaked} of it (stain size): its own coat and everything it wears
 	 * take it, the chest and legs most (they're what's on the ground), the helmet least. A corpse's blood
 	 * ({@link #CORPSE_BLOOD}) takes it too, freshly laid.
@@ -224,7 +224,7 @@ public final class Bloodied {
 	}
 
 	/**
-	 * (0.21.26) A corpse's armour (Jaymo's Kitchen keeps it on the body), piece {@code index} (0 boots ... 3 helmet), dragged
+	 * (0.21.28) A corpse's armour (Jaymo's Kitchen keeps it on the body), piece {@code index} (0 boots ... 3 helmet), dragged
 	 * through pools that gave up {@code soaked} (stain size): bloodied as a living body's would be.
 	 */
 	public static void dragArmour(ItemStack stack, int index, float soaked, int color, long now, net.minecraft.util.RandomSource random) {
@@ -239,7 +239,7 @@ public final class Bloodied {
 		}
 	}
 
-	/** (0.21.26) A corpse dragged through water: its blood washed off by {@code amount}. */
+	/** (0.21.28) A corpse dragged through water: its blood washed off by {@code amount}. */
 	public static void washCorpse(net.minecraft.world.entity.Entity corpse, int amount) {
 		Blood was = corpse.getAttached(CORPSE_BLOOD);
 		if (was == null) {

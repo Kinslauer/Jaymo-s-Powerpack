@@ -143,7 +143,7 @@ public final class GravityKneelPose {
 		}
 		Shape shape = SHAPES[kneel.style()];
 		float down = Math.min(1.0F, kneel.down());
-		// (0.21.26) knelt as a body really kneels (KneelLegs)
+		// (0.21.28) knelt as a body really kneels (KneelLegs)
 		float sink = com.jaymospowers.client.KneelLegs.remap(shape.sink(), shape.rightLeg(), shape.leftLeg()).sink();
 		poseStack.translate(0.0F, -sink * kneel.down(), 0.0F);
 		poseStack.translate(0.0F, HIP, 0.0F);
@@ -164,7 +164,7 @@ public final class GravityKneelPose {
 		float k = Mth.clamp(kneel.down(), 0.0F, 1.0F);
 		float pitch = shape.pitch() * Mth.DEG_TO_RAD;
 		// the legs, as the world sees them, so they lie back along the ground under the forward bend
-		// (0.21.26) thighs and knees as a body really kneels (KneelLegs)
+		// (0.21.28) thighs and knees as a body really kneels (KneelLegs)
 		com.jaymospowers.client.KneelLegs.Legs legs = com.jaymospowers.client.KneelLegs.remap(shape.sink(), shape.rightLeg(), shape.leftLeg());
 		blend(h.rightLeg, legs.right() - pitch, 0.08F, 0.0F, k);
 		blend(h.leftLeg, legs.left() - pitch, -0.08F, 0.0F, k);

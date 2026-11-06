@@ -2280,11 +2280,11 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.628) Powers' {@code Tending.drinkAtGround(ServerPlayer)} (0.21.26). */
+	/** (0.7.630) Powers' {@code Tending.drinkAtGround(ServerPlayer)} (0.21.28). */
 	private static java.lang.invoke.@Nullable MethodHandle drinkAtGround;
 	private static boolean lookedForDrinkAtGround;
 
-	/** (0.7.628) {@code player} goes down on hands and knees, mouth to the ground, drinking (Powers' TendPose); nothing without Powers. */
+	/** (0.7.630) {@code player} goes down on hands and knees, mouth to the ground, drinking (Powers' TendPose); nothing without Powers. */
 	public static void drinkAtGround(net.minecraft.server.level.ServerPlayer player) {
 		if (!lookedForDrinkAtGround) {
 			lookedForDrinkAtGround = true;

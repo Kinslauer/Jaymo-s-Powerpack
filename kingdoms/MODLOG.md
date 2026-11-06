@@ -10008,8 +10008,42 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Nine more Powers move spells for the skill bar (`move_finish`, `counter`, `fists`, `arm`, `grab`, `tendril`, `spikes`,
   `consume`, `shroud`), shown for Web with an empty hand while locked on. Icons: `tools/gen_move_icons.py`. Lines:
   `lang/parts/power_moves.json`. Built, not played.
-## 0.7.628 (2026-11-06): vampires lap up spilt blood
-- With Powers 0.21.26's bleeding out (the downed and the dead pour a finite pool), a vampire who sneaks and right-clicks
+## 0.7.628 (2026-11-06): Felled takes the felling stroke (Powers 0.21.26)
+- Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... if this is easier to ship do that instead, otherwise
+  cannibalize it". Felled (Raiiiden) is all rights reserved, so no code of it is copied; it has a Fabric 26.3 build, so the
+  pack ships it unchanged from CurseForge (0.1.5, with its physics library Zarith 0.2.0, Jolt with native libraries).
+- `FelledCompat`: with Felled loaded, a player's chopping still narrows the cut, fills the chop meter and counts for a
+  woodcutter, but the stroke that would fell the tree mends the chopped logs and hands the tree to Felled's
+  `FellingHandler.fellFrom` (by reflection), which brings it down as a rigid body (tips over the stump, rolls, snaps,
+  floats, can be stood on and ridden). Too big for Felled, or it fails: our `FallingTree` as before.
+- Our break handler runs in its own phase ahead of the default one (`Trees.CHOPPING`), so Felled never sees a chop in
+  progress as a log broken whole. Sneak-breaking a single log, creative, and logs we don't chop are left to Felled's own rules.
+- Blasts, giants (grab and throw), tornadoes, gatherers, Grimsby's axe and trunks with nothing under them still use our
+  falling trees. Andy: "so if a player cuts a tree down and a giant tried to grab it it wouldnt work?" It does now: a
+  giant's grab (`FallingTree.treeNear`/`take`, so the Great Ape, Towerback and the Aether Giants) also finds a tree Felled
+  brought down (`FelledCompat.near`, by Zarith's solid bounds) and makes it ours (`FelledCompat.adopt`: its live grid cells
+  as pieces, upright as it stood, heading the way its trunk lay; Felled's entity discarded), then lifts and throws it as
+  before. Assumes Felled's grid keeps the tree's standing frame (not seen in game). Hint 121 (HINTS=121). Built, not played; Felled's own felling not seen in our pack yet.
+
+## 0.7.629 (2026-11-06): builders build Dungeons and Taverns' mine, tavern and more; open-pit mines
+- Andy: "the dungeons and taverns mine here is exactly what i was imagining when i wanted our builders to mine. the
+  current one should be for poverty nations only as it is too simple." Then: "cant they just use the dungeon and taverns
+  structure?", "same with the tavern and stables if they have em", "do them all".
+- D&T (mod id `mr_dungeons_andtaverns`, ARR) is read at run time from the player's own copy, like CTOV's halls; nothing
+  of its is copied into ours. Built whole, without its ruins' cobwebs, leaves and weeds.
+- `DntMine`: with D&T installed, a settlement that isn't poor digs D&T's miner's pit (`remnant/wild_ruin_19` and `_b`,
+  joined as D&T joins them): open blocks dug a layer at a time (stone to storage), ladders/rails/floor laid as each layer
+  opens, fence and shed when the last is dug, then the plain tunnel on from its lowest floor into rock.
+- `MinePit` (no D&T): our own stepped open pit 13 across and 5 deep, fenced rim, rails up into a cobblestone shed, then
+  the tunnel. Poor (`MinePit.POOR_WORTH` 80 by `Wealth.worth`; fiefdoms by their overlord) or no level dry ground: the
+  plain cliff tunnel or shaft as before. Saved mines keep their kind.
+- `DntBuildings`: marked variants (`MARK`, like CTOV's) draw D&T's tavern house (13 woods by biome), well (13 woods) and
+  smithy (forest or ruined smith, on the tries CTOV's doesn't take); new D&T-only buildings: sawmill, farmhouse, apiary,
+  firewatch tower (realms), graveyard (kingdoms from 50 people; Andy let its 27 x 37 past the 32 plot cap, D&T-only
+  buildings may be up to `DntBuildings.MAX_SIDE` 40). Older projects keep their look. The dappled town hall is too big;
+  the hamlet is a piglin bunker; D&T has no stable.
+## 0.7.630 (2026-11-06): vampires lap up spilt blood
+- With Powers 0.21.28's bleeding out (the downed and the dead pour a finite pool), a vampire who sneaks and right-clicks
   a pool of blood on the ground with an empty hand laps it up (`VampirePlayers.lap`): up to 0.5 of stain a gulp, once a
   second, 3 health and 4 food per unit (a man's whole pool is about 3), counts as fed and eases the blood fever. Blood
   Sorcerers already draw the same stains (`Hemomancy`), so both now feed on bodies that run dry.

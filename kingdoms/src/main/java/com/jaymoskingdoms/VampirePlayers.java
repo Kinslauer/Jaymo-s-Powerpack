@@ -52,7 +52,7 @@ public final class VampirePlayers {
 	/** A bite: what it takes, what it gives (food, saturation, health), how often (ticks). */
 	static final float DRINK_DAMAGE = 4.0F, DRINK_HEAL = 3.0F, DRINK_SATURATION = 1.5F;
 	static final int DRINK_FOOD = 4, DRINK_EVERY = 20;
-	/** (0.7.628) Lapping a pool on the ground: how near the spot, the most a gulp takes (stain size), what each unit gives. */
+	/** (0.7.630) Lapping a pool on the ground: how near the spot, the most a gulp takes (stain size), what each unit gives. */
 	static final double LAP_RANGE = 1.5;
 	static final float LAP_MOST = 0.5F, LAP_HEAL = 3.0F, LAP_FOOD = 4.0F;
 	/** Nights without blood before they starve. */
@@ -118,7 +118,7 @@ public final class VampirePlayers {
 			}
 			return InteractionResult.PASS;
 		});
-		// (0.7.628) sneak and right-click a pool of blood on the ground with an empty hand: lap it up
+		// (0.7.630) sneak and right-click a pool of blood on the ground with an empty hand: lap it up
 		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (level instanceof ServerLevel server && player instanceof ServerPlayer sp && hand == InteractionHand.MAIN_HAND && Vampires.isVampire(sp)
 				&& sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && lap(server, sp, hit.getLocation())) {
@@ -133,13 +133,13 @@ public final class VampirePlayers {
 	}
 
 	/**
-	 * (0.7.628) Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and
+	 * (0.7.630) Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and
 	 * vampires have finite resources". A vampire laps the spilt blood off the ground at {@code at} (Jaymo's Powers' stains,
 	 * the pools the downed and the dead bleed out into): up to {@link #LAP_MOST} a gulp, once a second, a thin meal next to
 	 * a bite ({@link #LAP_FOOD}, {@link #LAP_HEAL} for each unit of stain, a man's whole pool about three), but it counts as
 	 * fed and eases the fever. What's lapped up is gone: a body's blood runs out. True if there was any to take.
 	 */
-	/** (0.7.628) When each vampire last lapped from the ground (game time), so the pose holds between gulps but not after a bite. */
+	/** (0.7.630) When each vampire last lapped from the ground (game time), so the pose holds between gulps but not after a bite. */
 	private static final Map<UUID, Long> LAPPED = new HashMap<>();
 
 	private static boolean lapping(ServerPlayer player, long now) {
@@ -163,7 +163,7 @@ public final class VampirePlayers {
 		}
 		LAST_DRINK.put(player.getUUID(), now);
 		LAPPED.put(player.getUUID(), now);
-		// (0.7.628) Andy: "is this animated?": down on hands and knees, mouth to the ground, bobbing with each gulp
+		// (0.7.630) Andy: "is this animated?": down on hands and knees, mouth to the ground, bobbing with each gulp
 		PowersCompat.drinkAtGround(player);
 		player.heal(LAP_HEAL * drawn);
 		player.getFoodData().eat(Math.max(1, Math.round(LAP_FOOD * drawn)), 0.4F);

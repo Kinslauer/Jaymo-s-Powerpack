@@ -37,7 +37,7 @@ public final class TendPose {
 	static final float LOW_HEIGHT = 1.0F;
 
 	/**
-	 * (0.21.26) Drinking from the ground ({@link Tending#GROUND_DRINK}): the lean (degrees; leaning this far from knees
+	 * (0.21.28) Drinking from the ground ({@link Tending#GROUND_DRINK}): the lean (degrees; leaning this far from knees
 	 * one thigh down puts the shoulders an arm's length up, so the hands rest flat on the ground), the head bowed
 	 * (radians), and the bob of each gulp (how fast, radians a tick; how far, radians).
 	 */
@@ -45,7 +45,7 @@ public final class TendPose {
 
 	/**
 	 * {@code down}: 0 standing to 1 on the knee; {@code low}: 0 reaching ahead to 1 reaching down; {@code time}: ticks;
-	 * {@code drink}: (0.21.26) down at the ground drinking, not tending.
+	 * {@code drink}: (0.21.28) down at the ground drinking, not tending.
 	 */
 	public record Tend(float down, float low, float time, boolean drink) {
 		Tend(float down, float low, float time) {
@@ -136,7 +136,7 @@ public final class TendPose {
 		float pitch = lean(tend) * Mth.DEG_TO_RAD;
 		blend(h.body, 0.0F, 0.0F, 0.0F, k);
 		if (tend.drink()) {
-			// (0.21.26) on hands and knees: both thighs straight down, both shins flat behind (KneelLegs), hands planted
+			// (0.21.28) on hands and knees: both thighs straight down, both shins flat behind (KneelLegs), hands planted
 			// straight down to the ground either side, head down at it, bobbing with each gulp
 			blend(h.rightLeg, KneelLegs.DOWN_THIGH - pitch, 0.06F, 0.0F, k);
 			blend(h.leftLeg, KneelLegs.DOWN_THIGH - pitch, -0.06F, 0.0F, k);
@@ -147,7 +147,7 @@ public final class TendPose {
 			blend(h.head, HEAD_DRINK + gulp, 0.0F, 0.0F, k);
 			return;
 		}
-		// the legs as the world sees them, so they stay planted under the lean: (0.21.26) the right foot planted, the
+		// the legs as the world sees them, so they stay planted under the lean: (0.21.28) the right foot planted, the
 		// thigh level and the shin straight down, the left knee on the ground with the shin flat behind (KneelLegs)
 		blend(h.rightLeg, KneelLegs.UP_THIGH - pitch, 0.1F, 0.0F, k);
 		blend(h.leftLeg, KneelLegs.DOWN_THIGH - pitch, -0.1F, 0.0F, k);

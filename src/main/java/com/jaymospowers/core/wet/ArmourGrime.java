@@ -79,7 +79,7 @@ public final class ArmourGrime {
 	/** Washed off per check: under water, wading (boots and greaves), in the rain, and one scrub by hand. */
 	static final int UNDER_WATER_WASH = 30, WADING_WASH = 15, RAIN_WASH = 3, SCRUB = 35;
 	/**
-	 * (0.21.26) Dragged a step ({@link #dragged}): through water, this much washed off; over the ground, this many times a
+	 * (0.21.28) Dragged a step ({@link #dragged}): through water, this much washed off; over the ground, this many times a
 	 * walking check's dirt, shared over boots, greaves, chest and helmet like this.
 	 */
 	static final int DRAG_WASH = 12;
@@ -216,7 +216,7 @@ public final class ArmourGrime {
 	}
 
 	/**
-	 * (0.21.26) Andy: "dragging should bloody dirty and clean the armor they wear respectively". {@code body} was just
+	 * (0.21.28) Andy: "dragging should bloody dirty and clean the armor they wear respectively". {@code body} was just
 	 * dragged (or crawled) a step: through water it's washed ({@link #DRAG_WASH}), over dirt, mud or sand everything it
 	 * wears is scraped through it, {@link #DRAG_DIRT} times walking's dust or mud a step (the chest and legs most).
 	 */
@@ -234,11 +234,11 @@ public final class ArmourGrime {
 		}
 	}
 
-	/** (0.21.26) What a body dragged over the ground here is scraped with: so much dirt a step, muddy or dusty. */
+	/** (0.21.28) What a body dragged over the ground here is scraped with: so much dirt a step, muddy or dusty. */
 	public record Dirt(float gain, boolean mud) {
 	}
 
-	/** (0.21.26) The dirt a body dragged a step over the ground under {@code body} picks up (walking's, before {@link #DRAG_DIRT}), or null. */
+	/** (0.21.28) The dirt a body dragged a step over the ground under {@code body} picks up (walking's, before {@link #DRAG_DIRT}), or null. */
 	public static @Nullable Dirt dragDirt(ServerLevel level, net.minecraft.world.entity.Entity body) {
 		BlockPos under = body.getOnPos();
 		BlockState ground = level.getBlockState(under);
@@ -261,14 +261,14 @@ public final class ArmourGrime {
 	}
 
 	/**
-	 * (0.21.26) A corpse's armour (Jaymo's Kitchen keeps it on the body), piece {@code index} (0 boots ... 3 helmet), dragged
+	 * (0.21.28) A corpse's armour (Jaymo's Kitchen keeps it on the body), piece {@code index} (0 boots ... 3 helmet), dragged
 	 * {@code steps} steps over {@code dirt}: scraped dirty as a living body's would be.
 	 */
 	public static void dragArmour(ItemStack stack, int index, Dirt dirt, int steps, net.minecraft.util.RandomSource random) {
 		soilStack(stack, dirt.gain() * DRAG_DIRT * DRAG_REACH[Mth.clamp(index, 0, DRAG_REACH.length - 1)] * steps, dirt.mud(), random);
 	}
 
-	/** (0.21.26) The same, through water: {@code steps} steps' washing. */
+	/** (0.21.28) The same, through water: {@code steps} steps' washing. */
 	public static void washArmour(ItemStack stack, int steps) {
 		clean(stack, DRAG_WASH * steps);
 	}

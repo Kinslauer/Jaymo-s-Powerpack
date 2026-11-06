@@ -125,9 +125,13 @@ public final class Trees {
 	private Trees() {
 	}
 
+	private static final Identifier CHOPPING = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, "chopping");
+
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Trees::tick);
-		PlayerBlockBreakEvents.BEFORE.register(Trees::breaking);
+		// (0.7.628) before anyone else's, so a chop in progress isn't taken for a log broken whole (Felled fells on those)
+		PlayerBlockBreakEvents.BEFORE.register(CHOPPING, Trees::breaking);
+		PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(CHOPPING, net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
 		// (0.5.59) said as soon as a bare hand starts on wood, not after the long, empty punch
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> {
 			if (!level.isClientSide() && needsAxe(player, level.getBlockState(pos))) {
@@ -585,7 +589,7 @@ public final class Trees {
 		level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, cut, Block.getId(real));
 		// (0.7.220) a Woodcutter's chop counts for more
 		if (taken + Careers.chop(cutter) >= needed(logs.size())) {
-			return fell(level, cut, cutter, tool, sink, false);
+			return felling(level, cut, logs, cutter, tool, sink);
 		}
 		// the chop: into the cut, or once that's as thin as it goes, the nearest log up the trunk with wood to spare
 		BlockPos at = cut;
@@ -597,7 +601,7 @@ public final class Trees {
 				}
 			}
 			if (at == null) {
-				return fell(level, cut, cutter, tool, sink, false);
+				return felling(level, cut, logs, cutter, tool, sink);
 			}
 		}
 		BlockState there = level.getBlockState(at);
@@ -609,6 +613,17 @@ public final class Trees {
 			showChops(player, Math.min(need, taken + 1 + Careers.chop(cutter)), need);
 		}
 		return 0;
+	}
+
+	/** The stroke that fells it: a player's goes to Felled when it's in the pack ({@link FelledCompat}), else ours. */
+	private static int felling(ServerLevel level, BlockPos cut, List<BlockPos> logs, @Nullable Entity cutter, ItemStack tool, @Nullable Consumer<ItemStack> sink) {
+		if (sink == null && cutter instanceof ServerPlayer player && FelledCompat.loaded()) {
+			int felled = FelledCompat.fell(level, cut, logs, player);
+			if (felled > 0) {
+				return felled;
+			}
+		}
+		return fell(level, cut, cutter, tool, sink, false);
 	}
 
 	/** (0.7.510) The most marks the chop meter draws; bigger trees fill it a mark per few chops. */

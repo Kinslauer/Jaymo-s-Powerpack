@@ -87,7 +87,22 @@ final class Buildings {
 		}
 		// (0.5.27) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
 		Blueprint.register(FactionType.KINGDOM, new Blueprint.Entry("tavern",
-			(level, faction, variant) -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction)), 1, 26));
+			// (0.7.629) Dungeons and Taverns' own tavern house when it's installed and the variant's marked ({@link DntBuildings})
+			(level, faction, variant) -> DntBuildings.draw(level, faction, variant, "tavern",
+				() -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction))), 1, 26));
+		if (DntBuildings.loaded()) {
+			// (0.7.629) buildings only Dungeons and Taverns draws
+			for (FactionType type : new FactionType[] {FactionType.KINGDOM, FactionType.FIEFDOM}) {
+				dnt(type, "apiary", 1, 26);
+				dnt(type, "sawmill", 1, 30);
+				dnt(type, "farmhouse", 1, 36);
+				dnt(type, "firewatch_tower", 2, 40);
+			}
+			dnt(FactionType.KINGDOM, "graveyard", 1, 50);
+			dnt(FactionType.VILLAGE, "apiary", 1, 12);
+			dnt(FactionType.VILLAGE, "farmhouse", 1, 16);
+			dnt(FactionType.VILLAGE, "sawmill", 1, 20);
+		}
 		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
 		realm(FactionType.KINGDOM, Temples.GREAT_TEMPLE, GreatTemple::draw, 1, Temples.GREAT_TEMPLE_FROM);
 		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
@@ -128,10 +143,16 @@ final class Buildings {
 		Blueprint draw(Kit k);
 	}
 
-	/** A building whose materials and details are its own. */
+	/** A building whose materials and details are its own (the well D&T's own when marked, {@link DntBuildings}). */
 	static void realm(FactionType type, String id, Design design, int max, int minSize) {
-		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> design.draw(Kit.of(level, faction, variant, variant)), max,
-			minSize));
+		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> DntBuildings.draw(level, faction, variant, id,
+			() -> design.draw(Kit.of(level, faction, variant, variant))), max, minSize));
+	}
+
+	/** (0.7.629) A building only Dungeons and Taverns draws ({@link DntBuildings}); a fire pit if it can't be read. */
+	private static void dnt(FactionType type, String id, int max, int minSize) {
+		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> DntBuildings.draw(level, faction, variant, id,
+			() -> firePit(Kit.of(level, faction, variant, variant))), max, minSize));
 	}
 
 	/**
@@ -139,8 +160,8 @@ final class Buildings {
 	 * ({@link CtovHalls}), else ours.
 	 */
 	static void hall(FactionType type, String id, Design design, int max, int minSize) {
-		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> CtovHalls.draw(level, faction, variant, id, design), max,
-			minSize));
+		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> DntBuildings.draw(level, faction, variant, id,
+			() -> CtovHalls.draw(level, faction, variant, id, design)), max, minSize));
 	}
 
 	/** A piece of the town's defences: one look for the whole settlement (so they join up), its own details. */

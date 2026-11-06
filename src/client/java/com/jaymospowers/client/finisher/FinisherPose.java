@@ -520,7 +520,7 @@ public final class FinisherPose {
 		float w = track == null ? 0.0F : track.amount();
 		Key key = pose.key();
 		// (after the body's turn, forward is -Z)
-		// (0.21.26) a kneel sinks one thigh's length (KneelLegs)
+		// (0.21.28) a kneel sinks one thigh's length (KneelLegs)
 		float sink = com.jaymospowers.client.KneelLegs.remap(key.sink(), key.rightLeg(), key.leftLeg()).sink();
 		poseStack.translate(0.0F, -sink * w, -pose.step() * w);
 		poseStack.translate(0.0F, HIP, 0.0F);
@@ -556,7 +556,7 @@ public final class FinisherPose {
 		float bend = key.pitch() * Mth.DEG_TO_RAD;
 		int mainLeg = pose.rightHanded() ? PoseBlend.RIGHT_LEG : PoseBlend.LEFT_LEG;
 		int offLeg = pose.rightHanded() ? PoseBlend.LEFT_LEG : PoseBlend.RIGHT_LEG;
-		// (0.21.26) a kneel's thighs and knees as a body really kneels (KneelLegs)
+		// (0.21.28) a kneel's thighs and knees as a body really kneels (KneelLegs)
 		com.jaymospowers.client.KneelLegs.Legs legs = com.jaymospowers.client.KneelLegs.remap(key.sink(), key.rightLeg(), key.leftLeg());
 		frame.set(mainLeg, legs.right() - bend, 0.08F * m, 0.0F);
 		frame.set(offLeg, legs.left() - bend, -0.08F * m, 0.0F);

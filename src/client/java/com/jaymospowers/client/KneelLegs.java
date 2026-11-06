@@ -7,7 +7,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.util.Mth;
 
 /**
- * (0.21.26) Andy: "the kneel we have on crouch right now needs a revamp too so change them all". Every kneel used to put
+ * (0.21.28) Andy: "the kneel we have on crouch right now needs a revamp too so change them all". Every kneel used to put
  * the leg on the ground as one straight stick: the front one angled half up, the back one stuck out behind, the body sunk
  * between them like a split. Now they all kneel the same, as a body really does, built from the leg's two halves (six
  * pixels each, {@link KneeBend}):
