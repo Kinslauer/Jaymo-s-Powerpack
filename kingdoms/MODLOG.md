@@ -10108,3 +10108,8 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Andy: "the drain isnt restoring my thirst either". Blood now quenches a vampire's Kitchen thirst as well
   (`KitchenCompat.drink`, clean): 3 water a bite or grab gulp (`VampirePlayers.DRINK_WATER`), 4 for each unit lapped from
   a pool (`LAP_WATER`), and 4 for a bottle of blood (`BOTTLE_WATER`, `Hemomancy.drankBottle`). Built, not played.
+## 0.7.636: traveller's journal as a bauble
+- Andy: "traveler journal should fit as a bauble". The journal (`jaymoskingdoms:journal`) now fits Jaymo's Powers' belt
+  and charm slots (`data/jaymospowers/tags/item/baubles/belt.json`, `charm.json`), and `Journal.carries` also looks at
+  the worn baubles (`PowersCompat.baubles`), so M opens it from a slot (client and server). The "need a journal" line
+  says bauble slots too. Built, not played.

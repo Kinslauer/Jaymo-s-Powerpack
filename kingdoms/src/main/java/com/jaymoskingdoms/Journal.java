@@ -157,9 +157,20 @@ public final class Journal {
 		});
 	}
 
-	/** Whether {@code player} has a journal anywhere in their inventory. */
+	/**
+	 * Whether {@code player} has a journal anywhere in their inventory, or (0.7.636) wears one in a Jaymo's Powers bauble
+	 * slot (belt or charm; tags under data/jaymospowers). The worn list syncs to its wearer, so this holds on the client too.
+	 */
 	public static boolean carries(Player player) {
-		return player.getInventory().contains(stack -> stack.is(JOURNAL));
+		if (player.getInventory().contains(stack -> stack.is(JOURNAL))) {
+			return true;
+		}
+		for (var worn : PowersCompat.baubles(player)) {
+			if (worn.is(JOURNAL)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Writes up {@code player}'s journal and sends it to them to open. */
