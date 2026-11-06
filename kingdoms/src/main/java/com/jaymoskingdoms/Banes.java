@@ -71,7 +71,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Friends can help:</b> anyone can fight it and question its band; only its owner may finish it. Struck down by
  * anyone else it leaves, laughing, to wait for them.</li>
  * </ul>
- * Nothing ends it yet: beaten, it comes back in a day or two, having learned from it (patch 6 brings the marks that end it).
+ * Beaten, it comes back in a day or two, having learned from it; only its own marks end it ({@link BaneMarks}). (0.7.621) It
+ * fights with its own element weapon, whose head is yours when it's ended ({@link BaneArms}), and at rank five it raises a
+ * hold to be stormed ({@link BaneHolds}).
  */
 public final class Banes {
 	// ================================================================================================================
@@ -117,6 +119,9 @@ public final class Banes {
 	static final int MEN = 2;
 	/** (0.7.620) Finished with the wrong marks, it's up with this share of its health; sworn, with this. */
 	static final float WRONG_HEALTH = 0.6F, SWORN_HEALTH = 0.5F;
+	/** (0.7.621) At its hold: its band goes for anyone this near, and back home past this far; warded, a killing blow leaves it this much. */
+	static final double HOLD_SEES = 20.0, HOLD_STRAY = 10.0;
+	static final float WARDED_HEALTH = 0.25F;
 	// ================================================================================================================
 
 	/** On a Bane's body. */
@@ -157,12 +162,19 @@ public final class Banes {
 	private static final class Visit {
 		final long at;
 		final boolean men;
+		/** (0.7.621) Where it waits in its hold ({@link BaneHolds}), or null for a visit to a fight. */
+		final @Nullable BlockPos hold;
 		long lastBlow, ownerDead = -1L;
 		boolean downed;
 
 		Visit(long at, boolean men) {
+			this(at, men, null);
+		}
+
+		Visit(long at, boolean men, @Nullable BlockPos hold) {
 			this.at = at;
 			this.men = men;
+			this.hold = hold;
 			this.lastBlow = at + (men ? 0 : ARRIVE_FILM);
 		}
 	}
@@ -212,6 +224,9 @@ public final class Banes {
 		ServerLivingEntityEvents.ALLOW_DEATH.register(Banes::allowDeath);
 		// ((0.7.620) the marks that end it)
 		BaneMarks.register();
+		// ((0.7.621) its element weapon, and its hold at rank five)
+		BaneArms.register();
+		BaneHolds.register();
 		// (a band never harms its own: the knight's dead leave his grave-robbers be)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((victim, source, amount) -> {
 			String mine = VISITS.isEmpty() || source.getEntity() == null ? null : bandOf(victim);
@@ -292,7 +307,7 @@ public final class Banes {
 	}
 
 	/** A kind's short name for its lines: {@code knight}, {@code warlord}, {@code demon}. */
-	private static String kind(Rivals.Side s) {
+	static String kind(Rivals.Side s) {
 		return s.key.substring("bane_".length());
 	}
 
@@ -429,13 +444,19 @@ public final class Banes {
 
 	/** (From {@code Rivals.gear}) Its arms for {@code rank}: a better weapon each rank, and plate for the knight and the warlord. */
 	static void gear(Mob mob, int rank, Rivals.Side s) {
+		gear(mob, null, rank, s);
+	}
+
+	/** (0.7.621) As {@link #gear(Mob, int, Rivals.Side)}, its own element weapon when {@code c} is known ({@link BaneArms}). */
+	static void gear(Mob mob, @Nullable Captain c, int rank, Rivals.Side s) {
 		int r = Math.max(1, Math.min(RANK_MAX, rank)) - 1;
 		Item[] arms = switch (s) {
 			case BANE_WARLORD -> WARLORD_ARMS;
 			case BANE_DEMON -> DEMON_ARMS;
 			default -> KNIGHT_ARMS;
 		};
-		mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(arms[r]));
+		mob.setItemSlot(EquipmentSlot.MAINHAND, c != null && mob.level() instanceof ServerLevel level ? BaneArms.weapon(level, c, r + 1, arms[r])
+			: new ItemStack(arms[r]));
 		if (s == Rivals.Side.BANE_KNIGHT) {
 			mob.setItemSlot(EquipmentSlot.HEAD, new ItemStack(r >= 4 ? Items.NETHERITE_HELMET : Items.IRON_HELMET));
 			mob.setItemSlot(EquipmentSlot.CHEST, new ItemStack(r >= 4 ? Items.NETHERITE_CHESTPLATE : r >= 2 ? Items.IRON_CHESTPLATE : Items.CHAINMAIL_CHESTPLATE));
@@ -463,10 +484,16 @@ public final class Banes {
 		ServerLevel level = (ServerLevel)p.level();
 		Bane b = p.getAttached(BANE);
 		long now = level.getGameTime();
+		if (b != null && c.rank() >= RANK_MAX && b.id().equals(c.id())) {
+			// ((0.7.621) at its top rank it has a hold, or will: one that climbed there before holds were, too)
+			BaneHolds.raise(level.getServer(), c, b.dim(), b.home());
+		}
 		if (b == null || VISITS.containsKey(c.tribe()) || now < b.next() || !fighting(p) || Downed.isDowned(p)) {
 			return;
 		}
-		boolean ground = !c.fallen() && level.dimension().identifier().toString().equals(b.dim()) && p.position().distanceTo(Vec3.atCenterOf(b.home())) <= GROUND;
+		boolean ground = !c.fallen() && level.dimension().identifier().toString().equals(b.dim()) && p.position().distanceTo(Vec3.atCenterOf(b.home())) <= GROUND
+			// ((0.7.621) with its hold standing it waits there: only its men come)
+			&& BaneHolds.heartOf(level.getServer(), c.tribe()) == null;
 		if (!ground) {
 			// ((0.7.620) off its ground, or while it heals: now and then some of its men, who carry its marks)
 			if (level.getRandom().nextFloat() < MEN_CHANCE) {
@@ -690,6 +717,18 @@ public final class Banes {
 				c = x;
 			}
 			Entity body = c == null || c.body().isEmpty() ? null : level.getEntity(c.body().get());
+			if (body == null && v.hold != null && c != null && c.body().isPresent()) {
+				// ((0.7.621) its body at its hold unloaded with the land: the waiting's over till someone comes again)
+				boolean anywhere = false;
+				for (ServerLevel l : server.getAllLevels()) {
+					anywhere |= l.getEntity(c.body().get()) != null;
+				}
+				if (!anywhere) {
+					Captains.put(server, c.withBody(null));
+					end(level, ladder);
+				}
+				continue;
+			}
 			if (body == null) {
 				if (c == null || c.fallen() || c.body().isEmpty()) {
 					// (it fell, or was sent off)
@@ -700,6 +739,22 @@ public final class Banes {
 			}
 			UUID ownerId = owner(ladder);
 			ServerPlayer p = ownerId == null ? null : server.getPlayerList().getPlayer(ownerId);
+			if (v.hold != null) {
+				// ((0.7.621) at its hold: it waits while anyone's near, after whoever comes; quietly gone when all have left)
+				if (!anyNear(level, v.hold, BaneHolds.GARRISON_NEAR + 16.0)) {
+					quiet(level, c, (LivingEntity)body);
+					continue;
+				}
+				for (UUID id : BANDS.getOrDefault(ladder, List.of())) {
+					if (level.getEntity(id) instanceof PathfinderMob m && m.isAlive() && !(m instanceof Worker) && !BaneHolds.sent(id)) {
+						guard(m, p, v.hold);
+					}
+				}
+				if (body instanceof PathfinderMob mob && !(body instanceof Worker) && !Downed.isDowned(mob)) {
+					guard(mob, p, v.hold);
+				}
+				continue;
+			}
 			if (p != null && !p.isAlive() && v.ownerDead < 0) {
 				v.ownerDead = now;
 			}
@@ -789,11 +844,115 @@ public final class Banes {
 		}
 		UUID ownerId = owner(ladder);
 		ServerPlayer p = ownerId == null ? null : level.getServer().getPlayerList().getPlayer(ownerId);
+		if (v.hold != null) {
+			// ((0.7.621) at its hold; one sent to tear a banner down is steered by BaneHolds)
+			if (!BaneHolds.sent(mob.getUUID())) {
+				LivingEntity foe = holdFoe(mob, p, v.hold);
+				if (foe != null) {
+					fight(level, mob, foe);
+				} else if (mob.position().distanceTo(Vec3.atCenterOf(v.hold)) > HOLD_STRAY && mob.getNavigation().isDone()) {
+					mob.getNavigation().moveTo(v.hold.getX() + 0.5, v.hold.getY(), v.hold.getZ() + 0.5, 1.0);
+				}
+			}
+			return true;
+		}
 		LivingEntity foe = foe(mob, p);
 		if (foe != null) {
 			fight(level, mob, foe);
 		}
 		return true;
+	}
+
+	/** (0.7.621) A mob of its hold: after whoever comes, home when there's none. */
+	private static void guard(PathfinderMob mob, @Nullable ServerPlayer owner, BlockPos hold) {
+		LivingEntity foe = holdFoe(mob, owner, hold);
+		if (foe != null) {
+			if (mob.getTarget() != foe) {
+				mob.setTarget(foe);
+			}
+		} else if (mob.position().distanceTo(Vec3.atCenterOf(hold)) > HOLD_STRAY && mob.getNavigation().isDone()) {
+			mob.getNavigation().moveTo(hold.getX() + 0.5, hold.getY(), hold.getZ() + 0.5, 1.0);
+		}
+	}
+
+	/** (0.7.621) Who a mob of its hold goes for: its owner in its hold, else whoever hurt it lately or comes within {@link #HOLD_SEES}. */
+	private static @Nullable LivingEntity holdFoe(PathfinderMob mob, @Nullable ServerPlayer owner, BlockPos hold) {
+		Vec3 heart = Vec3.atCenterOf(hold);
+		if (owner != null && owner.isAlive() && !owner.isSpectator() && !owner.isCreative() && owner.level() == mob.level()
+			&& owner.position().distanceTo(heart) <= BaneHolds.WARD_RANGE) {
+			return owner;
+		}
+		LivingEntity by = mob.getLastHurtByMob();
+		if (by != null && by.isAlive() && mob.tickCount - mob.getLastHurtByMobTimestamp() < 200) {
+			return by;
+		}
+		ServerPlayer near = null;
+		for (ServerPlayer p : ((ServerLevel)mob.level()).players()) {
+			if (p.isAlive() && !p.isSpectator() && !p.isCreative() && p.distanceTo(mob) <= HOLD_SEES && (near == null || p.distanceTo(mob) < near.distanceTo(mob))) {
+				near = p;
+			}
+		}
+		return near;
+	}
+
+	private static boolean anyNear(ServerLevel level, BlockPos at, double range) {
+		Vec3 v = Vec3.atCenterOf(at);
+		for (ServerPlayer p : level.players()) {
+			if (!p.isSpectator() && p.position().distanceTo(v) <= range) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * (0.7.621, from BaneHolds) Someone's near its standing hold: it and its band wait there ({@link BaneHolds#GARRISON}, half
+	 * of them its men, with its marks), unless they already do or it's out.
+	 */
+	static void garrison(ServerLevel level, Captain c, BlockPos heart) {
+		String ladder = c.tribe();
+		if (VISITS.containsKey(ladder) || c.body().isPresent()) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		Rivals.Side kind = Rivals.side(ladder);
+		long now = level.getGameTime();
+		VISITS.put(ladder, new Visit(now - ARRIVE_FILM, false, heart));
+		PathfinderMob body = body(level, kind, Construction.standable(level, heart.offset(0, 0, -2), 2), random);
+		if (body == null) {
+			VISITS.remove(ladder);
+			return;
+		}
+		Captains.embodyIn(level, c, body);
+		List<UUID> band = new ArrayList<>();
+		for (int i = 0; i < BaneHolds.GARRISON; i++) {
+			int half = BaneHolds.HALF - 2;
+			BlockPos at = heart.offset(random.nextInt(2 * half + 1) - half, 0, random.nextInt(2 * half + 1) - half);
+			boolean man = kind == Rivals.Side.BANE_WARLORD || i % 2 == 0;
+			PathfinderMob m = follower(level, kind, man, ladder, Construction.standable(level, at, 2), random);
+			if (m != null && man) {
+				BaneMarks.carry(m, ladder, random);
+			}
+			if (m != null) {
+				band.add(m.getUUID());
+			}
+		}
+		BANDS.put(ladder, band);
+	}
+
+	/** (0.7.621, for BaneHolds) The ids of {@code ladder}'s band here now. */
+	static List<UUID> bandIds(String ladder) {
+		return BANDS.getOrDefault(ladder, List.of());
+	}
+
+	/** (0.7.621) Everyone has left its hold: it and its band are quietly gone till someone comes again. */
+	private static void quiet(ServerLevel level, Captain c, LivingEntity body) {
+		Captain now = Captains.get(level.getServer(), c.id());
+		if (now != null) {
+			Captains.put(level.getServer(), now.withBody(null));
+		}
+		vanish(body);
+		end(level, c.tribe());
 	}
 
 	/** A villager's blade, his own doing. */
@@ -825,6 +984,8 @@ public final class Banes {
 		}
 		vanish(body);
 		end(level, c.tribe());
+		// ((0.7.621) and from its hold a while)
+		BaneHolds.away(c.tribe(), level.getGameTime());
 	}
 
 	/** Its visit is over: its band goes, and it won't come again for a while. */
@@ -917,7 +1078,7 @@ public final class Banes {
 		Captain after = Captains.promote(level, c, body);
 		Rivals.Side kind = Rivals.side(after.tribe());
 		if (body instanceof Mob mob) {
-			gear(mob, after.rank(), kind);
+			gear(mob, after, after.rank(), kind);
 		}
 		Speech.say(level, body, Component.translatable("bane.jaymoskingdoms." + kind(kind) + ".downed." + level.getRandom().nextInt(LINES),
 			Recollections.nameTo(p, body)), Speech.RED, Captains.SAY_RANGE);
@@ -931,7 +1092,7 @@ public final class Banes {
 		}
 		Rivals.Side kind = Rivals.side(c.tribe());
 		if (killer instanceof Mob mob) {
-			gear(mob, c.rank(), kind);
+			gear(mob, c, c.rank(), kind);
 		}
 		if (player.getUUID().equals(owner(c.tribe()))) {
 			climbed(level, null, c, player);
@@ -945,6 +1106,11 @@ public final class Banes {
 			Component.literal(after.name()), after.rank()));
 		if (before == null || after.rank() > before.rank()) {
 			Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.bane.climbed", Component.literal(after.name()), p.getDisplayName(), after.rank()));
+		}
+		// ((0.7.621) at its top rank it raises its hold on its ground)
+		Bane b = p.getAttached(BANE);
+		if (after.rank() >= RANK_MAX && b != null && b.id().equals(after.id())) {
+			BaneHolds.raise(level.getServer(), after, b.dim(), b.home());
 		}
 	}
 
@@ -976,6 +1142,14 @@ public final class Banes {
 	 * No marks, or no finisher: it falls as before. True if it dies.
 	 */
 	private static boolean finished(ServerLevel level, Captain c, LivingEntity body, ServerPlayer p) {
+		if (BaneHolds.warded(body)) {
+			// ((0.7.621) its walls stand: storm them first)
+			body.setHealth(body.getMaxHealth() * WARDED_HEALTH);
+			Speech.say(level, body, Component.translatable("bane.jaymoskingdoms." + kind(Rivals.side(c.tribe())) + ".warded." + level.getRandom().nextInt(LINES)),
+				Speech.RED, Captains.SAY_RANGE);
+			p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bane.warded", c.name()).withStyle(ChatFormatting.DARK_RED));
+			return false;
+		}
 		boolean finisher = Downed.isDowned(body) || body.entityTags().contains(Captains.MISSING_TAG + "head");
 		if (!finisher) {
 			return true;
@@ -991,7 +1165,7 @@ public final class Banes {
 				body.addTag(Downed.REVIVE_TAG);
 				Captain after = Captains.promote(level, c, body);
 				if (body instanceof Mob mob) {
-					gear(mob, after.rank(), kind);
+					gear(mob, after, after.rank(), kind);
 				}
 				p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bane.wrong", Component.literal(after.name())).withStyle(ChatFormatting.DARK_RED));
 				climbed(level, c, after, p);
@@ -1005,8 +1179,8 @@ public final class Banes {
 					return false;
 				}
 				ENDING.add(c.id());
-				// (its weapon is yours)
-				ItemStack arms = body.getMainHandItem().copy();
+				// (its weapon is yours: (0.7.621) its head, element and all, for the Tool Station)
+				ItemStack arms = BaneArms.spoils(c, body.getMainHandItem());
 				if (!arms.isEmpty() && !p.getInventory().add(arms)) {
 					body.spawnAtLocation(level, arms);
 				}
@@ -1046,6 +1220,7 @@ public final class Banes {
 	/** Its key, what's known of it and its tally. */
 	private static void forgetAll(MinecraftServer server, Captain c) {
 		BaneMarks.forget(server, c.id());
+		BaneHolds.forget(server, c.id());
 		ServerLevel world = Factions.level(server);
 		Map<String, Map<String, Float>> tally = new HashMap<>(world.getAttachedOrElse(TALLY, Map.of()));
 		if (tally.remove(c.id()) != null) {
@@ -1105,7 +1280,11 @@ public final class Banes {
 		Rivals.Side kind = Rivals.side(c.tribe());
 		Speech.say(level, entity, Component.translatable("bane.jaymoskingdoms." + kind(kind) + ".not_yours." + level.getRandom().nextInt(LINES),
 			owner == null ? Component.literal("?") : owner.getDisplayName()), Speech.RED, Captains.SAY_RANGE);
-		leave(level, c, entity, "leaves");
+		Visit v = VISITS.get(c.tribe());
+		if (v == null || v.hold == null) {
+			// ((0.7.621) in its hold it stands its ground)
+			leave(level, c, entity, "leaves");
+		}
 		return false;
 	}
 }

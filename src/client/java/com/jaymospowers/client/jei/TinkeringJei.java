@@ -143,6 +143,13 @@ public final class TinkeringJei implements IModPlugin {
 				registration.addItemStackInfo(WeaponParts.heads(kind).getFirst(), Component.translatable("jei.jaymospowers.patron_head." + part));
 			}
 		}
+		// (0.21.19) the Banes' weapon heads: taken from a Bane ended with its marks
+		for (String part : WeaponParts.BANES) {
+			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);
+			if (kind != null && kind.loaded()) {
+				registration.addItemStackInfo(WeaponParts.heads(kind).getFirst(), Component.translatable("jei.jaymospowers.bane_head." + part));
+			}
+		}
 	}
 
 	/** A pattern and enough of a material: each part of each material that's shaped here (metal parts are cast). */

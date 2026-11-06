@@ -828,7 +828,12 @@ public final class Captains {
 
 	/** (0.7.614, Rivals) {@code c} in {@code mob} from now on: built, dressed and bound. */
 	static void embodyIn(ServerLevel level, Captain c, PathfinderMob mob) {
-		Rivals.gear(mob, c.rank(), Rivals.side(c.tribe()));
+		if (Rivals.side(c.tribe()).bane()) {
+			// ((0.7.621) its own element weapon)
+			Banes.gear(mob, c, c.rank(), Rivals.side(c.tribe()));
+		} else {
+			Rivals.gear(mob, c.rank(), Rivals.side(c.tribe()));
+		}
 		build(mob, c.rank());
 		if (c.has(Trait.DEATHLESS)) {
 			deathless(mob);
@@ -1432,8 +1437,8 @@ public final class Captains {
 		if (has(self, Trait.BLIND_SIDE) && source.getEntity() instanceof LivingEntity by && self instanceof Mob mob && Rulers.target(mob) != by) {
 			out *= BLIND_SIDE;
 		}
-		// ((0.7.619) a Bane has learned how its owner fights)
-		return out * Banes.resist(self, source);
+		// ((0.7.619) a Bane has learned how its owner fights; (0.7.621) its hold's walls ward it)
+		return out * Banes.resist(self, source) * BaneHolds.ward(self);
 	}
 
 	/** A blow landed: fights noted, venom, and one hard to kill back on his feet. */

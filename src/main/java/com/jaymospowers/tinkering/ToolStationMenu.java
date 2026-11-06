@@ -338,7 +338,7 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 			others.remove(null);
 		}
 		List<PartType> needed = new ArrayList<>(((WeaponPartItem) inputs.getItem(head).getItem()).kind.assembly().parts);
-		ItemStack out = SorasLineage.carry(inputs.getItem(head), WeaponPartItem.weapon(inputs.getItem(head)));
+		ItemStack out = com.jaymospowers.armory.BaneWeapons.carry(inputs.getItem(head), SorasLineage.carry(inputs.getItem(head), WeaponPartItem.weapon(inputs.getItem(head))));
 		for (PartType part : others) {
 			if (!needed.remove(part)) {
 				return ItemStack.EMPTY;

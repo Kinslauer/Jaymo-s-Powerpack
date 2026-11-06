@@ -165,6 +165,9 @@ public final class WeaponParts {
 		SUNBRAND_BLADE = "sunbrand_blade", ASHFANG_BLADE = "ashfang_blade", PLAIN_WORD_BLADE = "plain_word_blade";
 	public static final Set<String> PATRONS = Set.of(HEARTHGUARD_HEAD, ANVIL_HAMMER_HEAD, TIDECALLER_HEAD, HUNTSMANS_SPEAR_TIP,
 		GRAVELIGHT_BLADE, SUNBRAND_BLADE, ASHFANG_BLADE, PLAIN_WORD_BLADE);
+	/** (0.21.19) A Bane's weapon head, taken when it's ended with its marks (Kingdoms {@code Banes}; {@code armory/BaneWeapons}). */
+	public static final String GRAVESWORN_BLADE = "gravesworn_blade", GRUDGE_HEAD = "grudge_head", HORNSCYTHE_BLADE = "hornscythe_blade";
+	public static final Set<String> BANES = Set.of(GRAVESWORN_BLADE, GRUDGE_HEAD, HORNSCYTHE_BLADE);
 	/** Every kind, by its head's id; costs are the ingots their old crafting recipes took. */
 	public static final Map<String, Kind> KINDS = new LinkedHashMap<>();
 	public static final Map<Kind, Item> PARTS = new LinkedHashMap<>();
@@ -248,15 +251,19 @@ public final class WeaponParts {
 		add(new Kind(SUNBRAND_BLADE, "jaymospowers:sunbrand", Scheme.SINGLE, 3 * INGOT, Assembly.GUARD_ROD, 1));
 		add(new Kind(ASHFANG_BLADE, "jaymospowers:ashfang", Scheme.SINGLE, INGOT, Assembly.ROD_BINDING, 1));
 		add(new Kind(PLAIN_WORD_BLADE, "jaymospowers:plain_word", Scheme.SINGLE, 5 * INGOT, Assembly.GUARD_TOUGH, 1));
+		add(new Kind(GRAVESWORN_BLADE, "jaymospowers:gravesworn", Scheme.SINGLE, 5 * INGOT, Assembly.GUARD_TOUGH, 1));
+		add(new Kind(GRUDGE_HEAD, "jaymospowers:grudge", Scheme.SINGLE, 5 * INGOT, Assembly.TOUGH_BINDING, 1));
+		add(new Kind(HORNSCYTHE_BLADE, "jaymospowers:hornscythe", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_BINDING, 1));
 		java.util.Set<String> found = new java.util.HashSet<>(KINGS);
 		found.addAll(PATRONS);
+		found.addAll(BANES);
 		found.add(SORAS_DAGGER_BLADE);
 		FOUND = Set.copyOf(found);
 	}
 
 	/** (Havens patch 5) A king's weapon head ({@link #KINGS}): taken, never shaped, cast or forged. */
 	public static boolean king(Kind kind) {
-		return KINGS.contains(kind.part()) || PATRONS.contains(kind.part());
+		return KINGS.contains(kind.part()) || PATRONS.contains(kind.part()) || BANES.contains(kind.part());
 	}
 
 	/** (0.18.50) Whether {@code stack} is the plain item some assembly takes beside its head (the Sealed Helm's glass block). */
