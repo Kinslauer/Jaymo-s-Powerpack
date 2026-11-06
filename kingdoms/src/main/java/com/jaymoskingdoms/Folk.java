@@ -153,9 +153,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			folk.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.6);
 			folk.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(2.0);
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
-			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
-			folk.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.DIAMOND_LEGGINGS));
-			folk.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.DIAMOND_BOOTS));
+			// (0.7.631) diamond and netherite are the crown's ({@link Regalia#plate}): a lord wears iron
+			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+			folk.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
+			folk.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
 			// (0.5.9) a fiefdom's ruler is its baron, vassal or lord; a kingdom's lords are lords
 			String title = faction.type() == FactionType.FIEFDOM ? Names.fiefTitle(faction.id() * 0x9E3779B97F4A7C15L) : "lord";
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms." + title + "_of", faction.name()));

@@ -1,4 +1,4 @@
-"""(0.7.630) Skill bar icons for a vampire's moves (FormSkills.NIGHT_MOVES): night_dash (a red streak),
+"""(0.7.632) Skill bar icons for a vampire's moves (FormSkills.NIGHT_MOVES): night_dash (a red streak),
 night_pound (a figure driving down, a burst under it), night_gaze (two red eyes, beams out of them). 16x16, our own.
 Run from the repo root: python3 kingdoms/tools/gen_night_icons.py"""
 import math, os

@@ -48,7 +48,7 @@ import net.minecraft.world.phys.Vec3;
  * Kingdoms keeps the day's charge: a hold on cooldown comes back to us as {@link #BEAM_TAG} (Andy: "will be usable after
  * the single day ice charge"). Without Kingdoms there's no charge, and the hold is always the beam.
  * <p>
- * (0.21.28) Andy: vampires "should also get an eye laser that blasts for a second but otherwise functions exactly like
+ * (0.21.30) Andy: vampires "should also get an eye laser that blasts for a second but otherwise functions exactly like
  * frostborn". Kingdoms' skill bar puts {@link #GAZE_TAG} on a vampire; the same beam then comes out of both eyes, blood red,
  * for {@link #GAZE_TICKS}: the same reach, damage, pace of hits and wound roll. Being no frost, it freezes no water.
  */
@@ -78,9 +78,9 @@ public final class FrostBeam {
 	public static final float WOUND_CHANCE = 0.4F, CRIPPLE_SHARE = 0.5F;
 	/** Kingdoms puts this on a Frost-born whose hold found the ice prison on its daily cooldown; taken off here. */
 	public static final String BEAM_TAG = "jaymospowers_frost_beam";
-	/** (0.21.28) Kingdoms puts this on a vampire who casts the eye laser from the skill bar; taken off here. */
+	/** (0.21.30) Kingdoms puts this on a vampire who casts the eye laser from the skill bar; taken off here. */
 	public static final String GAZE_TAG = "jaymospowers_blood_gaze";
-	/** (0.21.28) How long the eye laser blasts (ticks), its colour, and where the eyes are (out along the look, to each side, blocks). */
+	/** (0.21.30) How long the eye laser blasts (ticks), its colour, and where the eyes are (out along the look, to each side, blocks). */
 	public static final int GAZE_TICKS = 20, GAZE_COLOR = 0xD0101C;
 	public static final double EYE_OUT = 0.3, EYE_SIDE = 0.11;
 
@@ -89,7 +89,7 @@ public final class FrostBeam {
 	private static final Map<UUID, Long> LAST = new HashMap<>();
 	/** Who has the beam out, and until when (game time) unless the client says it's still held. */
 	private static final Map<UUID, Long> ON = new HashMap<>();
-	/** (0.21.28) Whose eye laser is out, and until when (game time). */
+	/** (0.21.30) Whose eye laser is out, and until when (game time). */
 	private static final Map<UUID, Long> GAZING = new HashMap<>();
 
 	/** Client → server: the Frost-born's left mouse is still held (the beam stays out). */
@@ -196,7 +196,7 @@ public final class FrostBeam {
 		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
 		right = right.lengthSqr() < 1.0E-6 ? Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F) : right.normalize();
 		if (gaze) {
-			// (0.21.28) a vampire's: out of both eyes
+			// (0.21.30) a vampire's: out of both eyes
 			Vec3 eyes = eye.add(look.scale(EYE_OUT));
 			show(level, eyes.add(right.scale(EYE_SIDE)), end, GAZE_COLOR);
 			show(level, eyes.add(right.scale(-EYE_SIDE)), end, GAZE_COLOR);

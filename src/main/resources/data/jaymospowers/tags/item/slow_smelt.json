@@ -17,6 +17,10 @@
     "jaymospowers:silver_ore",
     "jaymospowers:deepslate_silver_ore",
     "jaymospowers:raw_silver",
+    "jaymospowers:crushed_silver_ore",
+    "jaymospowers:crushed_gold_ore",
+    "jaymospowers:crushed_copper_ore",
+    "jaymospowers:crushed_iron_ore",
     {
       "id": "#c:ores",
       "required": false

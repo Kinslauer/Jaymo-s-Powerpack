@@ -126,7 +126,7 @@ public final class NightGifts {
 	/** Frenzy after a werewolf's kill (ticks); Strength amplifier in human form and as the beast. */
 	static final int FRENZY_TICKS = 100, FRENZY_STRENGTH = 0, FRENZY_BEAST_STRENGTH = 2;
 	/**
-	 * (0.7.630) Andy: vampires "should also get an eye laser that blasts for a second but otherwise functions exactly like
+	 * (0.7.632) Andy: vampires "should also get an eye laser that blasts for a second but otherwise functions exactly like
 	 * frostborn". Its wait (ticks: a Frost-born's held beam hits once every 3 s, so this hits no faster), and the tag that
 	 * has Jaymo's Powers fire it ({@code FrostBeam.GAZE_TAG}).
 	 */
@@ -489,7 +489,7 @@ public final class NightGifts {
 
 	// ---- the moves -----------------------------------------------------------------------------------------------------
 
-	/** Whether it went: {@code which} 0 ({@code O}), 1 ({@code P}) or (0.7.630) 2, a vampire's eye laser (the skill bar only). */
+	/** Whether it went: {@code which} 0 ({@code O}), 1 ({@code P}) or (0.7.632) 2, a vampire's eye laser (the skill bar only). */
 	public static boolean move(ServerPlayer player, int which) {
 		Gift g = player.getAttached(GIFT);
 		if (g == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping()) {
@@ -509,7 +509,7 @@ public final class NightGifts {
 				ready[1] = now + POUND_COOLDOWN;
 				return true;
 			} else if (which == 2 && net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
-				// (0.7.630) Jaymo's Powers fires it (its FrostBeam, out of the eyes, red, for a second)
+				// (0.7.632) Jaymo's Powers fires it (its FrostBeam, out of the eyes, red, for a second)
 				player.addTag(GAZE_TAG);
 				ready[2] = now + GAZE_COOLDOWN;
 				return true;

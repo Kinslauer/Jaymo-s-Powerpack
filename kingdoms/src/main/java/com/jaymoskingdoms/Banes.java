@@ -466,7 +466,9 @@ public final class Banes {
 				mob.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
 			}
 		} else if (s == Rivals.Side.BANE_WARLORD) {
-			mob.setItemSlot(EquipmentSlot.CHEST, new ItemStack(r >= 4 ? Items.DIAMOND_CHESTPLATE : r >= 2 ? Items.IRON_CHESTPLATE : Items.CHAINMAIL_CHESTPLATE));
+			// (0.7.631) diamond is the crown's ({@link Regalia#plate}): a rank-five warlord wears the Armory's warlord plate
+			Item top = Armory.piece("warlord", net.minecraft.world.item.equipment.ArmorType.CHESTPLATE);
+			mob.setItemSlot(EquipmentSlot.CHEST, new ItemStack(r >= 4 ? (top != null ? top : Items.IRON_CHESTPLATE) : r >= 2 ? Items.IRON_CHESTPLATE : Items.CHAINMAIL_CHESTPLATE));
 			if (r >= 1) {
 				mob.setItemSlot(EquipmentSlot.HEAD, new ItemStack(r >= 3 ? Items.IRON_HELMET : Items.CHAINMAIL_HELMET));
 			}
