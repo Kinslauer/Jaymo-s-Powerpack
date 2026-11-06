@@ -78,7 +78,7 @@ public final class Mines {
 	static final int DIGGING = 0, CAVE = 1, DEEP = 2, FLOODED = 3, BLOCKED = 4;
 
 	/** A mine: its mouth (the floor block one stands in), the way it runs, its steps level before it goes down, the step being dug, its state. */
-	record Mine(BlockPos entrance, Direction facing, int flat, int step, int state, int pit, int layer) {
+	record Mine(BlockPos entrance, Direction facing, int flat, int step, int state, int pit, int layer, BlockPos origin, int turn) {
 		static final Codec<Mine> CODEC = RecordCodecBuilder.create(i -> i.group(
 				BlockPos.CODEC.fieldOf("entrance").forGetter(Mine::entrance),
 				Direction.CODEC.fieldOf("facing").forGetter(Mine::facing),
@@ -86,21 +86,27 @@ public final class Mines {
 				Codec.INT.fieldOf("step").forGetter(Mine::step),
 				Codec.INT.fieldOf("state").forGetter(Mine::state),
 				Codec.INT.optionalFieldOf("pit", 0).forGetter(Mine::pit),
-				Codec.INT.optionalFieldOf("layer", 0).forGetter(Mine::layer))
+				Codec.INT.optionalFieldOf("layer", 0).forGetter(Mine::layer),
+				BlockPos.CODEC.optionalFieldOf("origin", BlockPos.ZERO).forGetter(Mine::origin),
+				Codec.INT.optionalFieldOf("turn", 0).forGetter(Mine::turn))
 			.apply(i, Mine::new));
 
 		/** A plain tunnel or shaft (no pit). */
 		Mine(BlockPos entrance, Direction facing, int flat, int step, int state) {
-			this(entrance, facing, flat, step, state, 0, 0);
+			this(entrance, facing, flat, step, state, 0, 0, BlockPos.ZERO, 0);
 		}
 
-		/** (0.7.625) An open pit ({@link MinePit}) still being dug, before its tunnel. */
+		/**
+		 * (0.7.625) An open pit still being dug, before its tunnel: our own ({@link MinePit}, {@code pit} its half-width)
+		 * or Dungeons and Taverns' miner's pit ({@link DntMine}, {@code pit} minus its layers, placed at {@code origin}
+		 * turned {@code turn} quarters).
+		 */
 		boolean inPit() {
-			return this.pit > 0 && this.layer < MinePit.DEPTH;
+			return this.pit > 0 ? this.layer < MinePit.DEPTH : this.pit < 0 && this.layer < -this.pit;
 		}
 
 		Mine withLayer(int layer) {
-			return new Mine(this.entrance, this.facing, this.flat, this.step, this.state, this.pit, layer);
+			return new Mine(this.entrance, this.facing, this.flat, this.step, this.state, this.pit, layer, this.origin, this.turn);
 		}
 
 		boolean done() {
@@ -108,7 +114,7 @@ public final class Mines {
 		}
 
 		Mine with(int step, int state) {
-			return new Mine(this.entrance, this.facing, this.flat, step, state, this.pit, this.layer);
+			return new Mine(this.entrance, this.facing, this.flat, step, state, this.pit, this.layer, this.origin, this.turn);
 		}
 
 		/** Step {@code i}'s floor height. */
@@ -181,6 +187,8 @@ public final class Mines {
 	}
 
 	static void clear() {
+		DntMine.clear();
+		DntBuildings.clear();
 		DIGS.clear();
 		NEXT_LOOK.clear();
 		DIGGER_SET.clear();
@@ -241,7 +249,7 @@ public final class Mines {
 			}
 			put(server, f.id(), mine);
 			// its mouth (or its pit and shed) is kept among the buildings, so nothing's built on it
-			BlockPos[] box = mine.pit() > 0 ? MinePit.footprint(mine) : null;
+			BlockPos[] box = mine.pit() != 0 ? MinePit.footprint(mine) : null;
 			BlockPos a = box != null ? box[0] : mine.entrance().relative(mine.facing().getOpposite()).relative(mine.side(), -2);
 			BlockPos b = box != null ? box[1] : mine.cell(COVER).relative(mine.side(), 2).atY(mine.entrance().getY() + HIGH + 1);
 			Works.update(server, f.id(), s -> {
@@ -250,7 +258,7 @@ public final class Mines {
 				return s.withBuilt(built);
 			});
 			JaymosKingdoms.LOGGER.info("{} begins a mine at {} facing {} ({})", f.name(), mine.entrance(), mine.facing(),
-				mine.pit() > 0 ? "an open pit" : mine.flat() > 1 ? "into a cliff" : "a shaft");
+				mine.pit() < 0 ? "Dungeons and Taverns' miner's pit" : mine.pit() > 0 ? "an open pit" : mine.flat() > 1 ? "into a cliff" : "a shaft");
 		}
 	}
 
@@ -270,7 +278,12 @@ public final class Mines {
 		BlockPos seat = f.seat();
 		List<int[]> taken = taken(level.getServer());
 		if (!MinePit.poor(level.getServer(), f)) {
-			Mine pit = MinePit.site(level, f, taken, f.type().isRealm() ? SITE_MIN_REALM : SITE_MIN);
+			// Dungeons and Taverns' own miner's pit if it's installed, else ours
+			int least = f.type().isRealm() ? SITE_MIN_REALM : SITE_MIN;
+			Mine pit = DntMine.available(level.getServer()) ? DntMine.site(level, f, taken, least) : null;
+			if (pit == null) {
+				pit = MinePit.site(level, f, taken, least);
+			}
 			if (pit != null) {
 				return pit;
 			}
@@ -594,11 +607,15 @@ public final class Mines {
 		for (int k = 0; k <= i; k++) {
 			tunnel.addAll(m.section(k));
 		}
+		if (m.pit() < 0) {
+			// (D&T's pit and its rooms are the mine's own, not a cave it broke into)
+			tunnel.addAll(DntMine.open(level.getServer(), m));
+		}
 		for (BlockPos q : shell) {
 			if (!level.getFluidState(q).isEmpty()) {
 				wet = true;
 			}
-			if (!cave && i >= Math.max(COVER - 1, m.flat()) && level.getBlockState(q).isAir() && !level.canSeeSky(q) && cave(level, q, tunnel)) {
+			if (!cave && i >= Math.max(COVER - 1, m.flat()) && !tunnel.contains(q) && level.getBlockState(q).isAir() && !level.canSeeSky(q) && cave(level, q, tunnel)) {
 				cave = true;
 			}
 		}

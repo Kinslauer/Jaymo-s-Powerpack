@@ -65,11 +65,14 @@ final class MinePit {
 	/** A pit centred on {@code at} (the air over the ground), its tunnel to go {@code facing} from the floor. */
 	static Mines.Mine plan(BlockPos at, Direction facing) {
 		BlockPos entrance = at.relative(facing, floorHalf() + 1).below(DEPTH);
-		return new Mines.Mine(entrance, facing, FLAT, 0, Mines.DIGGING, HALF, 0);
+		return new Mines.Mine(entrance, facing, FLAT, 0, Mines.DIGGING, HALF, 0, BlockPos.ZERO, 0);
 	}
 
 	/** The pit's middle, in the air over the ground it was dug from. */
 	static BlockPos center(Mines.Mine m) {
+		if (m.pit() < 0) {
+			return DntMine.center(m);
+		}
 		return m.entrance().relative(m.facing(), -(floorHalf() + 1)).above(DEPTH);
 	}
 
@@ -103,7 +106,7 @@ final class MinePit {
 	/** What's left of the layer being dug (nothing unbreakable). */
 	static List<BlockPos> left(ServerLevel level, Mines.Mine m) {
 		List<BlockPos> out = new ArrayList<>();
-		for (BlockPos p : layer(m, m.layer())) {
+		for (BlockPos p : m.pit() < 0 ? DntMine.layer(level.getServer(), m, m.layer()) : layer(m, m.layer())) {
 			if (!Mines.clear(level, p) && level.getBlockState(p).getDestroySpeed(level, p) >= 0) {
 				out.add(p);
 			}
@@ -145,6 +148,9 @@ final class MinePit {
 	 * rim, track and shed, and on to the tunnel.
 	 */
 	static Mines.Mine advance(ServerLevel level, Faction f, Mines.Mine m, boolean quiet) {
+		if (m.pit() < 0) {
+			return DntMine.advance(level, f, m);
+		}
 		int k = m.layer();
 		BlockPos c = center(m);
 		int y0 = c.getY();
@@ -174,6 +180,9 @@ final class MinePit {
 
 	/** The rim, the shed and its overhang, as two corners (for the buildings list and clashes). */
 	static BlockPos[] footprint(Mines.Mine m) {
+		if (m.pit() < 0) {
+			return DntMine.footprint(m);
+		}
 		BlockPos c = center(m);
 		Direction back = m.facing().getOpposite();
 		BlockPos a = c.offset(-HALF - 2, -DEPTH - 1, -HALF - 2);
@@ -194,13 +203,13 @@ final class MinePit {
 	}
 
 	/** Natural ground: soil, rock, sand or gravel (not a road, a floor or a roof). */
-	private static boolean natural(BlockState ground) {
+	static boolean natural(BlockState ground) {
 		return ground.is(BlockTags.SUBSTRATE_OVERWORLD) || ground.is(BlockTags.BASE_STONE_OVERWORLD) || ground.is(BlockTags.SAND)
 			|| ground.is(Blocks.GRAVEL) || ground.is(Blocks.SNOW_BLOCK) || ground.is(Blocks.CLAY);
 	}
 
 	/** The column at {@code x, z} is natural, dry ground within a block of {@code y0}. */
-	private static boolean level(ServerLevel level, int x, int z, int y0) {
+	static boolean level(ServerLevel level, int x, int z, int y0) {
 		BlockPos column = new BlockPos(x, y0, z);
 		if (!level.isLoaded(column)) {
 			return false;
