@@ -170,3 +170,5 @@ Andy picked all 34 rows (2026-11-06).
 - Patch 2 (Kingdoms 0.7.617): bodyguards (turned ones stab their boss), plants both ways (yours via "Plant in Camp",
   theirs hidden as town villagers, unmasked by a Will staredown), poisoned feasts, rigged duels, quick kills framed on
   another captain, and prices on the heads of captains who kill players (`CaptainSchemes`).
+- Patch 3 (Kingdoms 0.7.618): claims round each camp (tolls you can sneak past, caravans robbed), ground in journal
+  entries on the map, and the ladder screen from the journal's Captains button (`CaptainGround`, `Ladders`).

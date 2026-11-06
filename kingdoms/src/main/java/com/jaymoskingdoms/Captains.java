@@ -485,6 +485,8 @@ public final class Captains {
 		ServerLivingEntityEvents.AFTER_DEATH.register(Captains::died);
 		CaptainWays.register();
 		CaptainSchemes.register();
+		CaptainGround.register();
+		Ladders.register();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Captains::filmHarm);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> hurt(victim, source, taken, blocked));
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -630,6 +632,8 @@ public final class Captains {
 		seats(level);
 		// ((0.7.617, Rivals patch 2) bodyguards, plants)
 		CaptainSchemes.tick(level);
+		// ((0.7.618, Rivals patch 3) the ground they hold: tolls, robbed caravans)
+		CaptainGround.tick(level);
 		for (Captain c : List.copyOf(all(server).values())) {
 			if (CaptainSchemes.away(server, c.id())) {
 				// ((0.7.617) planted among a town's folk)
@@ -2133,6 +2137,11 @@ public final class Captains {
 					list.append(Component.translatable("captain.jaymoskingdoms.trait." + known.get(i)));
 				}
 				text.append(" ").append(Component.translatable("journal.jaymoskingdoms.captain.known", list));
+			}
+			int ground = CaptainGround.held(server, c);
+			if (ground > 0) {
+				// ((0.7.618) the ground he holds, marked on the map with him)
+				text.append(" ").append(Component.translatable("journal.jaymoskingdoms.captain.ground", ground));
 			}
 			out.add(new Journal.Entry(false, false,
 				Component.translatable(foe ? "journal.jaymoskingdoms.captain.sworn" : "journal.jaymoskingdoms.captain.captain", c.name()),

@@ -9844,3 +9844,19 @@ tribes had now belong to every side that fights you (ideas from Shadow of War: o
 - **Avenge a friend:** a captain who kills a player has a price on his head on the boards. Whoever else kills him gets
   12 silver and the friend's head (if he wasn't wearing it already, it drops anyway), and the friend hears of it.
 - Lines in the common tongue, orc and goblin: `lang/parts/captain-schemes.json`. Built, not played.
+
+## 0.7.618 (2026-11-06): Rivals patch 3, ground and the ladder screen
+- **Captains hold ground** (`CaptainGround`): each camp's highest-ranked unsworn captain at home claims 80 blocks round
+  its centre, plus 16 a rank. Crossing it outside the camp itself (40 blocks), once a day a claim, you pay his men a
+  toll of 2 emeralds' worth in the local coin, or a tribe's grudge rises by 4 if you can't. Sneak through and they don't
+  see you; a tribe you rule lets you pass. A caravan of another tribe or realm crossing it loses 30% of every cart, once
+  a claim, with news on the boards. Kill or turn him and the next captain there takes it, or it's gone. Patrols are
+  the camp's own men as before.
+- **Map marks:** a captain you know of already shows on the journal's map at his camp; his entry now also says how far
+  his ground runs.
+- **The ladder screen** (`Ladders`, client `LadderScreen`): a "Captains" button on the journal opens it. A tab for each
+  ladder you know something of (met, a trait known, sworn either way), the leader first and the rest by rank. Each row:
+  his name (or "Unknown captain"), his rank, sworn to you or to kill you, whose bodyguard he is, his ground; his traits
+  with a "?" for each you haven't learned; and how many times you've met and how the last went. UiStyle panel, lines
+  slide, rows scroll.
+- Lines: `lang/parts/captain-ground.json`. Built, not played.

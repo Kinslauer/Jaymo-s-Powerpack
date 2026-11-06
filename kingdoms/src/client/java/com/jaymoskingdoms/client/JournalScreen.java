@@ -106,6 +106,8 @@ final class JournalScreen extends Screen {
 			addRenderableWidget(out);
 		}
 		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + panelW() - 66, fy, 60, 16).build());
+		// ((0.7.618, Rivals patch 3) the ladders of captains you know of)
+		addRenderableWidget(Button.builder(Component.translatable("ladder.jaymoskingdoms.button"), b -> LadderScreen.ask()).bounds(left() + 6, fy, 70, 16).build());
 	}
 
 	private void show(int which) {
