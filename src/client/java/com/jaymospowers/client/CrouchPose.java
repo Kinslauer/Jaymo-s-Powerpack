@@ -50,12 +50,20 @@ import com.jaymospowers.power.xenoform.XenoformState;
  * behind and the body sat between the legs like a split; now it kneels as every kneel does ({@link KneelLegs}): the
  * left thigh straight down to the knee on the ground and the shin flat behind, the right thigh level and the shin straight
  * down to the planted foot, the hips one thigh's length down.
+ * <p>(0.21.37) Andy: "the newest kneel has both knees bent in front of the character, it should look more like a
+ * traditional kneel, posing with a weapon in hand like a hand on the sword's pommel, blade in the ground, similar with an
+ * axe, or a low ready with a rifle or bow". A genuflect: the knee on the ground is now well behind the hip ({@link #BACK_LEG}),
+ * the shin flat behind it, the front knee raised a touch above the hip with the shin straight down, the hips sunk to match
+ * ({@link #SINK}). And the hands pose with what's held ({@link Style}): a sword or axe planted point or head down in front
+ * of the knee, both hands stacked on the pommel or haft end; a spear or staff stood upright; a bow or a gun at a low
+ * ready, muzzle or arrow toward the ground ahead. The weapon is turned in the hand for it ({@link #grip}). Worked out on
+ * preview renders of the model ({@code art-overhaul/kneel-climb}).
  */
 public final class CrouchPose {
 	/** Arms out, and down onto the knee or back up (ticks). */
 	static final float READY_IN = 8.0F, KNEEL_IN = 7.0F, GET_UP = 5.0F;
 	/** Moving: how much lower than vanilla's crouch (blocks). On the knee: how far below vanilla's crouch the body sits. */
-	static final float LOW = 0.08F, SINK = KneelLegs.SINK - 0.125F, HIP = 0.75F;
+	static final float LOW = 0.08F, SINK = 6.47F / 16.0F - 0.125F, HIP = 0.75F;
 	/** The arms out from the sides (radians), and a little forward. */
 	static final float ARMS_OUT = 0.55F, ARMS_FORWARD = -0.35F;
 	/** The sway with the stride: the body's twist and roll (radians at full walking speed), and how fast it goes against the stride. */
@@ -66,8 +74,47 @@ public final class CrouchPose {
 	 * On the knee: the front (right) thigh out level from the hip, the knee bent so the shin stands on the ground
 	 * (radians), and the back (left) leg trailing to the knee on the ground. Drawn while aiming and firing too.
 	 */
-	static final float FRONT_THIGH = KneelLegs.UP_THIGH, FRONT_KNEE = KneelLegs.UP_KNEE, BACK_LEG = KneelLegs.DOWN_THIGH,
-		BACK_KNEE = KneelLegs.DOWN_KNEE;
+	static final float FRONT_THIGH = -1.65F, FRONT_KNEE = 1.65F, BACK_LEG = 0.40F, BACK_KNEE = 1.09F;
+	/** (0.21.37) The legs turned a little out (radians): the front one, the back one. */
+	static final float FRONT_OUT = 0.12F, BACK_OUT = -0.08F;
+	/**
+	 * (0.21.37) The arms on the knee for each {@link Style} (radians, xRot / yRot / zRot, the main hand's then the other's,
+	 * for a right-handed body; mirrored for a left-handed one), and how far the weapon is turned in the main hand (degrees,
+	 * + toward the ground). Solved on the model's preview so the blade stands straight with its point on the ground.
+	 */
+	static final float[] EMPTY_MAIN = {-0.25F, 0.0F, 0.12F}, EMPTY_OFF = {-0.75F, 0.25F, -0.05F};
+	static final float[] PLANT_MAIN = {-1.13F, -0.53F, -0.01F}, PLANT_OFF = {-1.85F, 0.55F, 0.0F};
+	static final float[] UPRIGHT_MAIN = {-0.55F, 0.0F, 0.18F};
+	static final float[] BOW_MAIN = {-0.75F, -0.15F, 0.05F}, BOW_OFF = {-0.95F, 0.55F, 0.0F};
+	static final float[] RIFLE_MAIN = {-0.85F, -0.3F, 0.0F}, RIFLE_OFF = {-1.15F, 0.6F, 0.0F};
+	static final float PLANT_GRIP = 151.0F, UPRIGHT_GRIP = -55.0F, BOW_GRIP = 75.0F, RIFLE_GRIP = 85.0F;
+
+	/** (0.21.37) How the hands pose on the knee, by what's in the main hand. */
+	public enum Style {
+		/** Nothing held, or nothing with a pose of its own: the hand by the hip, the other forearm over the knee. */
+		EMPTY,
+		/** A sword, greatsword, axe, hammer or club: planted point (or head) down ahead of the knee, hands on the pommel. */
+		PLANT,
+		/** A spear, polearm or staff: stood upright beside the raised knee. */
+		UPRIGHT,
+		/** A bow: low ready, the arrow toward the ground ahead, the other hand at the string. */
+		BOW,
+		/** A gun or crossbow: low ready, muzzle down ahead, the other hand under the barrel. */
+		RIFLE;
+
+		static Style of(net.minecraft.world.item.ItemStack stack) {
+			if (stack.isEmpty()) {
+				return EMPTY;
+			}
+			return switch (Finishers.kind(stack)) {
+				case SWORD, GREATSWORD, AXE, BLUNT -> PLANT;
+				case SPEAR, POLEARM, STAFF -> UPRIGHT;
+				case BOW -> BOW;
+				case CROSSBOW, GUN -> RIFLE;
+				default -> EMPTY;
+			};
+		}
+	}
 	/**
 	 * The low crouch: both thighs this far forward (radians), and the body sunk this much more (blocks). (0.19.30) Thighs further forward;
 	 * the knees bend to reach the ground from there ({@link #groundKnee}).
@@ -97,7 +144,7 @@ public final class CrouchPose {
 	 * {@code ready}: 0 to 1, arms out; {@code kneel}: 0 to 1, on the knee; {@code pos}, {@code speed}: the stride's;
 	 * {@code low}: 0 to 1, in the low crouch; {@code bend}: 0 to 1, how far into vanilla's crouch the body is drawn.
 	 */
-	public record Crouch(float ready, float kneel, float pos, float speed, float low, float bend) {
+	public record Crouch(float ready, float kneel, float pos, float speed, float low, float bend, Style style, boolean offFree) {
 	}
 
 	public static final RenderStateDataKey<Crouch> KEY = RenderStateDataKey.create(() -> "jaymospowers:crouch");
@@ -158,8 +205,10 @@ public final class CrouchPose {
 			state.setData(KEY, null);
 			return;
 		}
+		// (0.21.37) the hands' pose on the knee, by what's held (only looked up while kneeling)
+		Style style = track.kneel > 0.0F ? Style.of(entity.getMainHandItem()) : Style.EMPTY;
 		state.setData(KEY, new Crouch(smooth(track.ready), smooth(track.kneel), state.walkAnimationPos, state.walkAnimationSpeed,
-			smooth(track.low), smooth(track.bend)));
+			smooth(track.low), smooth(track.bend), style, entity.getOffhandItem().isEmpty()));
 	}
 
 	/**
@@ -248,13 +297,32 @@ public final class CrouchPose {
 		h.leftLeg.y = Mth.lerp(k, h.leftLeg.y, 12.0F);
 		h.rightLeg.z = Mth.lerp(k, h.rightLeg.z, 0.0F);
 		h.leftLeg.z = Mth.lerp(k, h.leftLeg.z, 0.0F);
-		// right thigh out ahead, bent at the knee (KneeBend) down to the planted foot; left knee down
-		blend(h.rightLeg, FRONT_THIGH - pitch, 0.1F, 0.0F, k);
-		blend(h.leftLeg, BACK_LEG - pitch, -0.1F, 0.0F, k);
+		// right thigh out ahead (a touch above level), bent at the knee (KneeBend) down to the planted foot; the left knee
+		// down behind the hip, its shin flat along the ground (0.21.37)
+		blend(h.rightLeg, FRONT_THIGH - pitch, FRONT_OUT, 0.0F, k);
+		blend(h.leftLeg, BACK_LEG - pitch, BACK_OUT, 0.0F, k);
 		if (armsFree) {
-			// right hand by the hip, ready to draw; left forearm over the raised knee
-			blend(h.rightArm, -0.25F, 0.0F, 0.12F, k);
-			blend(h.leftArm, -0.75F, 0.25F, -0.05F, k);
+			// (0.21.37) posed with what's held: by the hip and over the knee empty-handed, a sword planted, a gun at a low ready
+			boolean right = state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT;
+			ModelPart main = right ? h.rightArm : h.leftArm, off = right ? h.leftArm : h.rightArm;
+			float side = right ? 1.0F : -1.0F;
+			float[] mainPose = switch (c.style()) {
+				case PLANT -> PLANT_MAIN;
+				case UPRIGHT -> UPRIGHT_MAIN;
+				case BOW -> BOW_MAIN;
+				case RIFLE -> RIFLE_MAIN;
+				default -> EMPTY_MAIN;
+			};
+			float[] offPose = !c.offFree() ? EMPTY_OFF : switch (c.style()) {
+				case PLANT -> PLANT_OFF;
+				case BOW -> BOW_OFF;
+				case RIFLE -> RIFLE_OFF;
+				default -> EMPTY_OFF;
+			};
+			// (held weapons are laid out upright, so the lean is taken back off the arms)
+			float lean = c.style() == Style.EMPTY ? 0.0F : pitch;
+			blend(main, mainPose[0] - lean, mainPose[1] * side, mainPose[2] * side, k);
+			blend(off, offPose[0] - lean, offPose[1] * side, offPose[2] * side, k);
 		} else {
 			// (aiming or swinging from the knee: the arms are vanilla's, only no longer crouched)
 			h.rightArm.xRot -= 0.4F * k;
@@ -314,6 +382,31 @@ public final class CrouchPose {
 		if (left > 0.0F) {
 			KneeBend.bend(h.leftLeg, left);
 		}
+	}
+
+	/**
+	 * (0.21.37) From the held-item layer, just before the main hand's item is drawn (the pose stack at the grip): on the
+	 * knee, the weapon turned in the hand for its {@link Style} (a sword point down into the ground, a gun's muzzle down).
+	 * Not while the arms are busy (aiming, drawing, swinging), when they're vanilla's.
+	 */
+	public static void grip(Object renderState, net.minecraft.world.entity.HumanoidArm arm, PoseStack poseStack) {
+		if (!(renderState instanceof AvatarRenderState state) || arm != state.mainArm || !state.isCrouching || state.deathTime > 0.0F) {
+			return;
+		}
+		Crouch c = state.getData(KEY);
+		if (c == null || c.kneel() <= 0.0F || c.style() == Style.EMPTY || otherPose(state) || state.isUsingItem || state.swingAnimation > 0.0F
+			|| !free(state.rightArmPose) || !free(state.leftArmPose)) {
+			return;
+		}
+		float degrees = switch (c.style()) {
+			case PLANT -> PLANT_GRIP;
+			case UPRIGHT -> UPRIGHT_GRIP;
+			case BOW -> BOW_GRIP;
+			case RIFLE -> RIFLE_GRIP;
+			default -> 0.0F;
+		};
+		// (about the hand's own side-to-side axis, as FinisherPose turns a weapon)
+		poseStack.rotateDegrees(Axis.XP, -degrees * c.kneel());
 	}
 
 	/** The crouch to lay over this model, or null when it isn't a crouching body or another full-body pose has it. */
