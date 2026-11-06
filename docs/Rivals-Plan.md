@@ -162,4 +162,5 @@ What's missing, and what this patch adds:
 Andy picked all 34 rows (2026-11-06).
 
 ## Done
-(nothing yet)
+- Patch 0 (Kingdoms 0.7.614): `Rivals` core; ladders for barbarian warbands, illager hosts and pirate coves (camps), the
+  risen dead and the Hornkin (rising from the land); world-tier growth; temperament lines and choices.

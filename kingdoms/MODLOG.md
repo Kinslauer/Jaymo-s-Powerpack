@@ -9758,4 +9758,26 @@ Andy: "it needs to be extremely rare, and hostile toward hostile mobs, so you ca
   `/kingdom dragon atroxiia` are unaffected.
 - A wild Atroxiia hunts the nearest hostile mob it can see within 22 blocks (`WindDragon.huntsMonsters()`), so you come
   on it mid-fight. It still leaves players alone unless they hurt it, and tamed ones don't hunt on their own.
+## 0.7.614 (2026-11-06): Rivals patch 0, captains for every side
+Andy picked all 34 rows of the rivals pick list (docs/Rivals-Plan.md). Patch 0: the captain ladders the goblin and orc
+tribes had now belong to every side that fights you (ideas from Shadow of War: our own names, code and lines).
+- **A shared core, `Rivals`:** sides, ladder keys (`<side>@<region>`), camps, seats, names, bodies and gear. The tribes'
+  ladders are untouched (same keys, same saves).
+- **Sides with camps:** barbarian warbands, illager hosts and pirate coves keep a ladder per region and post their
+  captains to their camps, as the tribes do: daily risers, posted bodies (MCA barbarians and deckhands, vindicators for
+  the illagers), orders in the camp store, duels, feasts and ambushes, returns, blood brothers and avengers.
+- **Sides without:** the risen dead of the Overworld (zombies and skeletons, every captain Deathless) and the Hornkin of
+  the Nether. A fitting one near a player may rise as a captain while the region's ladder is short (3%, one a day); a
+  fallen one due back takes the next of his kind. No new realm.
+- **Anyone who kills you** can climb: a camp's own, the dead, the Hornkin (was only goblins and orcs).
+- **The world's tier:** every two floors, one more captain a ladder, one rank higher at most and at the start, one more
+  strength; each floor adds 20% health and +1 damage.
+- **Temperament:** a captain keeps the temperament of his first body (`captain_tempers`). Half his first meetings and
+  gloats are his temper's own line. Brave ones run only when nearly done, proud ones not above half health, hotheads rage
+  from the first blow, timid ones call their own and keep back, spiteful ones swear on whoever beat them or ran, greedy
+  ones let up sell you a trait of another captain.
+- **Lines:** a common tongue for the new sides plus each side's own voice for first meetings, gloats, rallies, cheers,
+  climbs and death threats; temper lines for orcs, goblins and the common tongue (`lang/parts/rivals.json`, 339 lines).
+- Turning (Valor, In-balming) works on barbarians and pirates (sworn back as men); illagers, the raised and the Hornkin
+  refuse. Questioning anyone of a side asks after its captains.
 - Gradle compile clean; not played.
