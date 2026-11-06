@@ -9975,7 +9975,35 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Server log at start: "Tier hiding: N items wait for a tier, M for knowledge". JEI is compile-only (`client/compat/TierJei`,
   its `jei_mod_plugin` entrypoint); the recipe book through `ClientRecipeBookMixin`. Built, not played.
 
-## 0.7.625 (2026-11-06): Felled takes the felling stroke (Powers 0.21.24)
+## 0.7.625 (2026-11-06): Rivals patch 5, it takes from you
+- **The cut (`BaneCut`):** while your Bane lives, 15% of your job wages, bounty rewards, stall sales and merchant-order
+  sales goes to it (5% more for each place it holds, at most 40%), with a line saying how much. About once a day it also
+  takes a coin's worth from your purse. All of it is counted: end it or swear it and you get it all back with half again
+  more, in the coin of wherever you stand.
+- **Its claims:** three days after it first takes from you, and every three days after, it claims the nearest town or
+  village to you that no Bane holds (at most five; never a barbarian camp). The place and the roads out of it (128 blocks
+  from its seat) are its: now and then two of its men come at you there. Kill three of its men there (anyone can) and the
+  place is free. Every claim, freeing and letting go goes on the town boards.
+- **Its hounds:** two branded feral wolves (three from rank three). When you've bled in the last five minutes, are alone
+  (no other player within 48 blocks) and outside any town's land, they come up your blood trail from 24-32 blocks off and
+  stalk you as wild wolves do (`WolfStalkers`). A hunt ends after three minutes or if you get 96 blocks away. Each one
+  killed puts its next claim off a day; kill them all and it has new ones three days later. Only you see the brand's wisp.
+  Without Powers (no blood trails) they come when you're under half health instead.
+- Lines: `lang/parts/bane.json`. Built, not played.
+- **Takedowns on the skill bar (Powers 0.21.24):** Andy's answer on mapping the Chrono and Web moves: the skill bar shows
+  Powers' takedowns (`move_takedown`, `move_blink` spells, `FormSkills`) in Time Flow always, and for bare hands while
+  locked on, before any fist forms. Icons: `tools/gen_move_icons.py`. Lines: `lang/parts/power_moves.json`.
+
+## 0.7.626: drink from the downed, and the grab holds on
+- Andy: "the grab does not work, i tap and hold, and they go down. i should be able to drink from the downed too." The
+  grab's drain downed its prey in about a second and the grab let go of anyone downed; a downed body couldn't be bitten
+  either (Powers' sneak lift took the sneak+use first).
+- `BloodGrab`: downed prey can be grabbed and stay held; the drain on a downed body is a wound each gulp (Powers' 10th
+  wound kills, so about 5 s held), and a downed body can still be thrown. Not one already being carried.
+- `VampirePlayers`: a use phase ahead of Powers' `downed_first`: while holding someone, use held on them is the grab's
+  alone (it used to fill Powers' revive bar and could get them up in 3 s); a vampire's sneak+use with an empty hand on a
+  downed person or piglin/Hornkin bites instead of lifting (carry them with the grab instead). Built, not played.
+## 0.7.627 (2026-11-06): Felled takes the felling stroke (Powers 0.21.25)
 - Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... if this is easier to ship do that instead, otherwise
   cannibalize it". Felled (Raiiiden) is all rights reserved, so no code of it is copied; it has a Fabric 26.3 build, so the
   pack ships it unchanged from CurseForge (0.1.5, with its physics library Zarith 0.2.0, Jolt with native libraries).

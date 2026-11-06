@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.625) Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... it captures what i wanted for our trees". Felled
+ * (0.7.627) Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... it captures what i wanted for our trees". Felled
  * (Raiiiden, all rights reserved, shipped unchanged from CurseForge with its Zarith physics library) brings a tree down as
  * a real rigid body: it tips over its stump, rolls, snaps on a hard landing, floats, and can be stood on. When it's in the
  * pack, a player's chopping still goes through ours (the cut narrows, the chop meter, a woodcutter's credit), but the

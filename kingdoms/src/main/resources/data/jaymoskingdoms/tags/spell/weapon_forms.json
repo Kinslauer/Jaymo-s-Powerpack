@@ -13,6 +13,8 @@
     "jaymoskingdoms:form_cast_off_cloak",
     "jaymoskingdoms:form_tangle_cord",
     "jaymoskingdoms:form_rending_claw",
-    "jaymoskingdoms:form_feral_pounce"
+    "jaymoskingdoms:form_feral_pounce",
+    "jaymoskingdoms:move_takedown",
+    "jaymoskingdoms:move_blink"
   ]
 }
