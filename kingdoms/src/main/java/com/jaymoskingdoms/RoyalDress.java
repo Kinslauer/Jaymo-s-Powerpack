@@ -206,6 +206,7 @@ final class RoyalDress {
 			// (0.7.561) nobody changes clothes lying on the ground, or slung over a shoulder
 			return;
 		}
+		conform(ruler, f);
 		long t = Royals.timeOfDay(level);
 		Outfit want = choose(level, ruler, f, temper, t, now);
 		Outfit have = worn(ruler);
@@ -227,6 +228,37 @@ final class RoyalDress {
 		}
 		change(level, f, ruler, have, want, hurried);
 		CHANGED.put(ruler.getUUID(), now);
+	}
+
+	/**
+	 * (0.7.630) Top-tier armour {@code ruler} may not wear, on them or put by, becomes what they may ({@link Regalia#conform}):
+	 * a lord's diamond iron, a queen's diamond gold once her realm is no longer rich, a poorer queen's gold diamond again
+	 * once it is.
+	 */
+	private static void conform(PathfinderMob ruler, Faction f) {
+		int role = ruler instanceof Worker w ? w.role() : Folk.KING;
+		boolean female = McaCompat.female(ruler);
+		Regalia.conform(ruler, role, f, female);
+		Wear wear = ruler.getAttached(WEAR);
+		if (wear == null) {
+			return;
+		}
+		boolean changed = false;
+		Map<String, List<ItemStack>> kept = new HashMap<>();
+		for (Map.Entry<String, List<ItemStack>> e : wear.kept().entrySet()) {
+			List<ItemStack> set = new ArrayList<>(e.getValue());
+			for (int i = 0; i < set.size() && i < SLOTS.length; i++) {
+				ItemStack fit = Regalia.conform(ruler, role, f, female, SLOTS[i], set.get(i));
+				if (fit != set.get(i)) {
+					set.set(i, fit);
+					changed = true;
+				}
+			}
+			kept.put(e.getKey(), List.copyOf(set));
+		}
+		if (changed) {
+			ruler.setAttached(WEAR, new Wear(wear.worn(), Map.copyOf(kept)));
+		}
 	}
 
 	/** What {@code ruler} has on: their saved state, or by what kind of ruler they are (a folk king wears plate from the start). */
@@ -285,13 +317,12 @@ final class RoyalDress {
 			}
 			case ROBES -> Regalia.dress(ruler, role, f, McaCompat.female(ruler), false);
 			case PLATE -> {
-				Tempers.Temper temper = Tempers.of(f);
-				boolean grand = role == Folk.KING && (temper == Tempers.Temper.WARLORD || temper == Tempers.Temper.TYRANT);
-				ItemStack[] set = grand
-					? new ItemStack[] {new ItemStack(Items.NETHERITE_HELMET), new ItemStack(Items.NETHERITE_CHESTPLATE), new ItemStack(Items.NETHERITE_LEGGINGS), new ItemStack(Items.NETHERITE_BOOTS)}
-					: role == Folk.LORD
-						? new ItemStack[] {new ItemStack(Items.IRON_HELMET), new ItemStack(Items.DIAMOND_CHESTPLATE), new ItemStack(Items.DIAMOND_LEGGINGS), new ItemStack(Items.IRON_BOOTS)}
-						: new ItemStack[] {new ItemStack(Items.DIAMOND_HELMET), new ItemStack(Items.DIAMOND_CHESTPLATE), new ItemStack(Items.DIAMOND_LEGGINGS), new ItemStack(Items.DIAMOND_BOOTS)};
+				// (0.7.630) netherite for a king, diamond for a rich realm's queen, gold for a poorer one's, iron for lords and ladies
+				boolean female = McaCompat.female(ruler);
+				ItemStack[] set = new ItemStack[SLOTS.length];
+				for (int i = 0; i < SLOTS.length; i++) {
+					set[i] = new ItemStack(Regalia.plate(ruler, role, f, female, SLOTS[i]));
+				}
 				Outfits.Heraldry arms = Outfits.heraldry(f, ruler.level().getServer());
 				for (int i = 0; i < SLOTS.length; i++) {
 					Regalia.put(ruler, SLOTS[i], Regalia.trimmed(ruler, set[i], arms.pattern(), TrimMaterials.GOLD));

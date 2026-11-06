@@ -13,6 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
 import net.minecraft.world.item.equipment.trim.TrimMaterials;
 import net.minecraft.world.item.equipment.trim.TrimPattern;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.171) Andy (2026-10-22): rulers "should all have some random variable of different crowns, and or some kind of
@@ -52,7 +54,10 @@ public final class Regalia {
 		CROWNS.put("circlet", "LA");
 		CROWNS.put("coronet", "LA");
 	}
-	/** The attire a ruler without royal clothes wears: gilded plate, a robe of their colour, trimmed diamond. */
+	/**
+	 * The attire a ruler without royal clothes wears: gilded plate, a robe of their colour, a trimmed breastplate. (0.7.630)
+	 * The plate is of their rank ({@link #plate}): only a king wears netherite, only a rich realm's queen diamond.
+	 */
 	static final int GILDED = 0, ROBED = 1, DIAMOND = 2, ATTIRE = 3;
 	/** Royal colours for robes (one realm in two wears its own instead). */
 	static final List<DyeColor> ROYAL_COLOURS = List.of(DyeColor.PURPLE, DyeColor.RED, DyeColor.BLUE, DyeColor.MAGENTA);
@@ -112,8 +117,9 @@ public final class Regalia {
 		}
 		switch (attire) {
 			case GILDED -> {
-				put(mob, EquipmentSlot.CHEST, trimmed(mob, new ItemStack(Items.NETHERITE_CHESTPLATE), arms.pattern(), TrimMaterials.GOLD));
-				put(mob, EquipmentSlot.LEGS, trimmed(mob, new ItemStack(Items.NETHERITE_LEGGINGS), arms.pattern(), TrimMaterials.GOLD));
+				// (0.7.630) netherite for a king, diamond for a rich realm's queen, gold for a poorer one's, iron below ({@link #plate})
+				put(mob, EquipmentSlot.CHEST, trimmed(mob, new ItemStack(plate(mob, role, faction, female, EquipmentSlot.CHEST)), arms.pattern(), TrimMaterials.GOLD));
+				put(mob, EquipmentSlot.LEGS, trimmed(mob, new ItemStack(plate(mob, role, faction, female, EquipmentSlot.LEGS)), arms.pattern(), TrimMaterials.GOLD));
 				put(mob, EquipmentSlot.FEET, trimmed(mob, new ItemStack(Items.GOLDEN_BOOTS), arms.pattern(), gem));
 			}
 			case ROBED -> {
@@ -122,7 +128,7 @@ public final class Regalia {
 				put(mob, EquipmentSlot.FEET, trimmed(mob, new ItemStack(Items.GOLDEN_BOOTS), arms.pattern(), gem));
 			}
 			default -> {
-				put(mob, EquipmentSlot.CHEST, trimmed(mob, new ItemStack(Items.DIAMOND_CHESTPLATE), arms.pattern(), TrimMaterials.GOLD));
+				put(mob, EquipmentSlot.CHEST, trimmed(mob, new ItemStack(plate(mob, role, faction, female, EquipmentSlot.CHEST)), arms.pattern(), TrimMaterials.GOLD));
 				put(mob, EquipmentSlot.LEGS, trimmed(mob, Outfits.dyed(Items.LEATHER_LEGGINGS, Outfits.rgb(robe)), arms.pattern(), TrimMaterials.GOLD));
 				put(mob, EquipmentSlot.FEET, trimmed(mob, new ItemStack(Items.IRON_BOOTS), arms.pattern(), gem));
 			}
@@ -204,5 +210,77 @@ public final class Regalia {
 			stack.set(DataComponents.TRIM, new ArmorTrim(m.get(), p.get()));
 		}
 		return stack;
+	}
+
+	// ---- (0.7.630) the top tiers of armour are the crown's ------------------------------------------------------------
+
+	/*
+	 * Andy (2026-11-06): "only queens of rich kingdoms should ever wear the diamond armor w/ trim, the kings should wear
+	 * netherite, and any below can wear whatever else, just not those tiers."
+	 */
+
+	private static final EquipmentSlot[] ARMOUR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+	private static final Map<EquipmentSlot, Item> NETHERITE = Map.of(EquipmentSlot.HEAD, Items.NETHERITE_HELMET,
+		EquipmentSlot.CHEST, Items.NETHERITE_CHESTPLATE, EquipmentSlot.LEGS, Items.NETHERITE_LEGGINGS, EquipmentSlot.FEET, Items.NETHERITE_BOOTS);
+	private static final Map<EquipmentSlot, Item> DIAMOND_PLATE = Map.of(EquipmentSlot.HEAD, Items.DIAMOND_HELMET,
+		EquipmentSlot.CHEST, Items.DIAMOND_CHESTPLATE, EquipmentSlot.LEGS, Items.DIAMOND_LEGGINGS, EquipmentSlot.FEET, Items.DIAMOND_BOOTS);
+	private static final Map<EquipmentSlot, Item> GOLD = Map.of(EquipmentSlot.HEAD, Items.GOLDEN_HELMET,
+		EquipmentSlot.CHEST, Items.GOLDEN_CHESTPLATE, EquipmentSlot.LEGS, Items.GOLDEN_LEGGINGS, EquipmentSlot.FEET, Items.GOLDEN_BOOTS);
+	private static final Map<EquipmentSlot, Item> IRON = Map.of(EquipmentSlot.HEAD, Items.IRON_HELMET,
+		EquipmentSlot.CHEST, Items.IRON_CHESTPLATE, EquipmentSlot.LEGS, Items.IRON_LEGGINGS, EquipmentSlot.FEET, Items.IRON_BOOTS);
+
+	/** {@code stack} is netherite or diamond armour: a king's, or a rich queen's. */
+	public static boolean reserved(ItemStack stack) {
+		return !stack.isEmpty() && (NETHERITE.containsValue(stack.getItem()) || DIAMOND_PLATE.containsValue(stack.getItem()));
+	}
+
+	/** {@code f} is a rich kingdom ({@link Wealth.Tier#WEALTHY}): its queen may wear diamond. */
+	static boolean rich(PathfinderMob mob, @Nullable Faction f) {
+		MinecraftServer server = mob.level().getServer();
+		return f != null && server != null && Wealth.of(server, f) == Wealth.Tier.WEALTHY;
+	}
+
+	/**
+	 * A ruler's plate for {@code slot}: netherite for a king, diamond for the queen of a rich kingdom, gold for a poorer
+	 * one's, iron for a lord or lady.
+	 */
+	static Item plate(PathfinderMob mob, int role, @Nullable Faction f, boolean female, EquipmentSlot slot) {
+		if (role != Folk.KING) {
+			return IRON.get(slot);
+		}
+		if (!female) {
+			return NETHERITE.get(slot);
+		}
+		return rich(mob, f) ? DIAMOND_PLATE.get(slot) : GOLD.get(slot);
+	}
+
+	/** {@code stack} (top-tier armour) as iron for {@code slot}, keeping its trim and marks; anything else as it is. */
+	public static ItemStack lesser(ItemStack stack, EquipmentSlot slot) {
+		Item iron = IRON.get(slot);
+		return iron == null || !reserved(stack) ? stack : stack.transmuteCopy(iron);
+	}
+
+	/**
+	 * {@code stack}, worn by a {@code role} ruler of {@code f} in {@code slot}: top-tier armour they may not wear becomes
+	 * the plate they may ({@link #plate}), trim and marks kept. A king's netherite stays; a queen whose realm has grown poor
+	 * changes her diamond for gold; a lord's diamond becomes iron.
+	 */
+	static ItemStack conform(PathfinderMob mob, int role, @Nullable Faction f, boolean female, EquipmentSlot slot, ItemStack stack) {
+		if (!reserved(stack) || !List.of(ARMOUR).contains(slot)) {
+			return stack;
+		}
+		Item may = plate(mob, role, f, female, slot);
+		return stack.is(may) ? stack : stack.transmuteCopy(may);
+	}
+
+	/** {@link #conform} on everything {@code mob} has on. */
+	static void conform(PathfinderMob mob, int role, @Nullable Faction f, boolean female) {
+		for (EquipmentSlot slot : ARMOUR) {
+			ItemStack worn = mob.getItemBySlot(slot);
+			ItemStack fit = conform(mob, role, f, female, slot, worn);
+			if (fit != worn) {
+				mob.setItemSlot(slot, fit);
+			}
+		}
 	}
 }

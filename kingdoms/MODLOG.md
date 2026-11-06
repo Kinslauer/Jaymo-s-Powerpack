@@ -10042,3 +10042,18 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   firewatch tower (realms), graveyard (kingdoms from 50 people; Andy let its 27 x 37 past the 32 plot cap, D&T-only
   buildings may be up to `DntBuildings.MAX_SIDE` 40). Older projects keep their look. The dappled town hall is too big;
   the hamlet is a piglin bunker; D&T has no stable.
+
+## 0.7.630 (2026-11-06): diamond and netherite are the crown's
+- Andy: "only queens of rich kingdoms should ever wear the diamond armor w/ trim, the kings should wear netherite, and
+  any below can wear whatever else, just not those tiers."
+- `Regalia.plate`: a ruler's plate by rank. A king: netherite. A queen: trimmed diamond if her kingdom is wealthy
+  (`Wealth.Tier.WEALTHY`), trimmed gold if not. Lords and ladies: iron. Used by the gilded and breastplate attires
+  (`Regalia.dress`) and by armour in danger (`RoyalDress` PLATE; a king's plate no longer depends on his temper).
+- `RoyalDress.conform` on every ruler tick: diamond or netherite on a ruler (worn or put by) that isn't theirs becomes
+  their own plate, trim and marks kept, so lords already in diamond go to iron and a queen whose realm grows poor changes
+  diamond for gold (and back if it grows rich again).
+- Everyone else: MCA's armour routine (`McaEquipmentMixin`) puts iron on in place of diamond or netherite (its top
+  archers wore diamond, its elite guards netherite, and villagers wore any diamond they were given). Folk lords
+  (`Folk`, `Outfits.lord`) wear iron; an outlaw warlord Bane at rank five wears the Armory's warlord plate.
+- Left as they were: monsters and undead foes (corpse-knight Banes, bone lord, plague knight, `MonsterGear`) and loot.
+  Built, not played.
