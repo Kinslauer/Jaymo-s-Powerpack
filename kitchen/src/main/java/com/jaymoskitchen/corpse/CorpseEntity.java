@@ -1658,6 +1658,8 @@ public class CorpseEntity extends Entity {
 				}
 			}
 			level.addFreshEntity(living);
+			// (0.5.84) it rises from where it lay, not standing at once
+			Reanimation.start(level, living);
 			play(level, kind == CorpseKind.SKELETON ? SoundEvents.SKELETON_AMBIENT : SoundEvents.ZOMBIE_INFECT, voice());
 			level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.5, getZ(), 10, 0.3, 0.4, 0.3, 0.02);
 		}

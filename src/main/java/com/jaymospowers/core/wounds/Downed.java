@@ -298,6 +298,18 @@ public final class Downed {
 		boolean knocked;
 	}
 
+	/**
+	 * (0.21.37) Let go part way up: how long the drop back to the ground takes (ticks, as {@code CrawlPose.SINK_TICKS}
+	 * draws it), and how long after the body hits the ground before they can try again (Andy: "unable to restart the
+	 * getup until a second after you hit the ground").
+	 */
+	static final int SINK_TICKS = 7, SINK_WAIT = 20;
+	/** (0.21.37) Dust thrown up as a body thuds down: puffs and spread for a man-sized body (more for a bigger one). */
+	static final int THUD_DUST = 6;
+	static final double THUD_SPREAD = 0.3;
+	/** (0.21.37) Downed player → when their sunk body hits the ground (game time); dust then, and the wait after. Not saved. */
+	private static final Map<UUID, Long> SINKING = new HashMap<>();
+
 	/** (0.18.5) Downed player → their rise. Not saved. */
 	private static final Map<UUID, Rise> RISES = new HashMap<>();
 	/** (0.18.84) Knocked-out players holding sneak last tick (a press is sneak coming down). Not saved. */
@@ -425,6 +437,7 @@ public final class Downed {
 			REVIVING.clear();
 			GIVING_UP.clear();
 			RISES.clear();
+			SINKING.clear();
 			MASH_HELD.clear();
 		});
 	}
@@ -643,6 +656,7 @@ public final class Downed {
 		if (entity instanceof Player player) {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
+			SINKING.remove(player.getUUID());
 			AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {
 				speed.removeModifier(SLOW_ID);
@@ -1097,15 +1111,27 @@ public final class Downed {
 		Rise r = RISES.get(player.getUUID());
 		if (!player.isShiftKeyDown()) {
 			if (r != null && r.ticks > 0 && !r.knocked) {
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 0.8F, 0.9F);
+				// (0.21.37) the body drops back down; it lands (the thud and the dust) as the drawing does
+				SINKING.put(player.getUUID(), now + SINK_TICKS);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_stopped").withStyle(ChatFormatting.GRAY));
 			}
+			landing(level, player, now);
 			stopRising(player);
 			if (now % HINT_TICKS == 0) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_hint").withStyle(ChatFormatting.GRAY));
 			}
 			return;
 		}
+		landing(level, player, now);
+		Long sunk = SINKING.get(player.getUUID());
+		if (sunk != null && now < sunk + SINK_WAIT) {
+			// (0.21.37) still falling, or just hit the ground: a moment before they can try again
+			if (now % 4 == 0) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_winded").withStyle(ChatFormatting.GRAY));
+			}
+			return;
+		}
+		SINKING.remove(player.getUUID());
 		if (r == null) {
 			r = new Rise();
 			RISES.put(player.getUUID(), r);
@@ -1140,6 +1166,37 @@ public final class Downed {
 		}
 	}
 
+	/** (0.21.37) A body let go part way up hits the ground this tick: a thud, and dust as big as it is. */
+	private static void landing(ServerLevel level, ServerPlayer player, long now) {
+		Long sunk = SINKING.get(player.getUUID());
+		if (sunk == null || now != sunk) {
+			return;
+		}
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 0.8F, 0.9F);
+		thud(level, player);
+	}
+
+	/**
+	 * (0.21.37) Andy: "slight particle dust as you thud into the ground, larger dust for larger characters (apes, giants
+	 * etc)". A puff of the ground's own dust along the body, more and wider the bigger the body (by its width against a
+	 * man's, squared: a great ape's or a giant's raises a cloud).
+	 */
+	public static void thud(ServerLevel level, LivingEntity body) {
+		net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(body.blockPosition().below());
+		if (ground.isAir()) {
+			ground = level.getBlockState(body.blockPosition());
+		}
+		if (ground.isAir() || !ground.getFluidState().isEmpty()) {
+			return;
+		}
+		double size = Math.max(1.0, body.getBbWidth() / 0.6);
+		int count = (int) Math.min(120, Math.round(THUD_DUST * size * size));
+		double spread = THUD_SPREAD * size;
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, ground), body.getX(), body.getY() + 0.1,
+			body.getZ(), count, spread * 1.6, 0.05, spread * 1.6, 0.05);
+		level.sendParticles(ParticleTypes.POOF, body.getX(), body.getY() + 0.1, body.getZ(), Math.max(1, count / 6), spread, 0.02, spread, 0.01);
+	}
+
 	/** (0.18.5) No longer rising (let go, or can't now): the bar and the drawing gone. */
 	private static void stopRising(ServerPlayer player) {
 		RISES.remove(player.getUUID());
@@ -1161,6 +1218,9 @@ public final class Downed {
 			rise.hits = 0;
 			player.removeAttached(RISING);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 0.8F, 0.9F);
+			if (player.level() instanceof ServerLevel thrown) {
+				thud(thrown, player);
+			}
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_knocked").withStyle(ChatFormatting.RED));
 		}
 		Revive revive = REVIVING.get(player.getUUID());

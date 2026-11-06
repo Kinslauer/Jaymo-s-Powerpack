@@ -1342,7 +1342,10 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - Getting up by yourself is the one exception (Andy: "they fall everytime they let go, that one should restart the meter
   because the animation would break if not"): let go part way up and you drop back to the ground (a thud, and
   `CrawlPose.sink` draws the body falling from where the rise had got to, quicker as it goes, over 7 ticks), and the
-  next hold starts from the ground. Second Wind (`SelfRevive`) and coming to where you lay
+  next hold starts from the ground. Andy: "unable to restart the getup until a second after you hit the ground", with
+  "slight particle dust as you thud into the ground, larger dust for larger characters": a second's wait after landing
+  ("Winded from the fall"), and `Downed.thud` puffs the ground's own dust along the body, more and wider by the body's
+  width squared (a great ape or a giant raises a cloud); a rise knocked down by blows thuds the same way. Second Wind (`SelfRevive`) and coming to where you lay
   (`Mortality`): kept. Lifting someone (`Carry`): kept per target.
 - Not changed: throws (rocks, daggers), finishers, the stake struggle, spell and power charges, the knock-out mash, and
   minigame bars (smithing, brewing, jewellery). Compile-checked; not played.

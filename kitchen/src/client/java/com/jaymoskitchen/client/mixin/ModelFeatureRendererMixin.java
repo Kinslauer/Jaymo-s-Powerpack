@@ -24,6 +24,7 @@ abstract class ModelFeatureRendererMixin {
 		CarryPose.apply(model, submit.state());
 		com.jaymoskitchen.client.corpse.DragPose.apply(model, submit.state());
 		com.jaymoskitchen.client.corpse.CrawlPose.apply(model, submit.state());
+		com.jaymoskitchen.client.corpse.ReanimatePose.apply(model, submit.state());
 		com.jaymoskitchen.client.corpse.Severed.hide(model, submit.state());
 	}
 

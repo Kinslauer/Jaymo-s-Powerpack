@@ -1576,3 +1576,10 @@ mobs should be possible".
 - Andy: "every meter should work this way". Let go of a corpse's lift or leg hold before it fills and your next hold
   carries on where the bar was (someone else's hold starts fresh). Butchering a big carcass already kept its bar.
   Compile-checked; not played.
+
+## 0.5.84: the risen dead get up from where they lay
+- Andy: "zombies should have their own reanimation animation too". A body that reanimates (zombie, skeleton, a player's
+  body as a zombie) now rises over 2.5 s (`corpse/Reanimation`, held still with no AI, tag `jaymoskitchen.reanimating`
+  frees it if saved mid-rise), drawn by `client/corpse/ReanimatePose`: on its back with a twitch, the arms jerk up stiff
+  first, then it tips up from the heels like a plank in four fits, never bending at the waist, and lurches forward past
+  upright as it finds its feet, head lolling. Earth puffs up where it lay. Compile-checked; not played.
