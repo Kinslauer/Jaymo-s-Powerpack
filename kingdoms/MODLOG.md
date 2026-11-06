@@ -10117,3 +10117,14 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 ## 0.7.637: Iron Stomach drinks dirty water (needs Kitchen 0.5.80)
 - Iron Stomach now also covers water: `KitchenCompat` hands Kitchen's `Thirst.setIronGut` the perk check, so dirty water
   from anywhere never turns the stomach. The perk's description says so. Gradle compile clean; not played.
+
+## 0.7.638: Felled's trees knock over the trees they fall into
+- Andy: "the felled trees NEED to knock each other over still". Since 0.7.628 a player's felling stroke hands the tree to
+  Felled, whose rigid body only sees a standing tree as solid blocks, so it came to rest leaning on the next tree instead
+  of knocking it over the way our `FallingTree` does. `FelledCompat` now keeps Felled's trees (entity load/unload) and,
+  each tick one is still moving (its top at least `KNOCK_SPEED` 0.06 blocks a tick, this tick or the last), looks at and
+  just ahead of each of its logs along the way it's going (`KNOCK_AHEAD` 0, 0.6, 1.1 blocks). An upright log of a natural
+  tree there, no more than `FallingTree.KNOCK_SIZE` (2x) its logs, goes over that way through `Trees.knock` (one of ours,
+  which knocks on in turn), with the same crack sounds; at most `FallingTree.KNOCKS_MOST` (4) a tree, never its own stump
+  (`STUMP`, 1.6 blocks round where its trunk first stood). All by reflection on Felled's public `trunkTop`, `trunkStart`
+  and `cellToWorld`, nothing of Felled's copied. Built, not played.

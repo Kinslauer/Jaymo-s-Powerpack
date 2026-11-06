@@ -3,9 +3,22 @@ package com.jaymoskingdoms;
 import java.lang.reflect.Method;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import org.joml.Vector3d;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
@@ -30,6 +43,125 @@ public final class FelledCompat {
 	private static @Nullable Method fellFrom;
 
 	private FelledCompat() {
+	}
+
+	// ---- (0.7.638) knocking on ------------------------------------------------------------------------------------------
+
+	/**
+	 * (0.7.638) Andy: "the felled trees NEED to knock each other over still". Since 0.7.628 a player's tree comes down as
+	 * Felled's rigid body, and Jolt only ever sees a standing tree as solid blocks, so it came to rest leaning on the next
+	 * tree instead of knocking it over the way ours do ({@link FallingTree#knock}). Each tick, a Felled tree still moving
+	 * (its top at least {@link #KNOCK_SPEED} blocks a tick, this tick or the last) looks just ahead of each of its logs
+	 * along the way it's going ({@link #KNOCK_AHEAD}); an upright log of a natural tree there, no more than
+	 * {@link FallingTree#KNOCK_SIZE} times its size, goes over that way ({@link Trees#knock}: as one of ours, which knocks
+	 * on in turn). At most {@link FallingTree#KNOCKS_MOST} a tree; never the stump it was cut from.
+	 */
+	static final double KNOCK_SPEED = 0.06;
+	static final double[] KNOCK_AHEAD = {0.0, 0.6, 1.1};
+	/** How far (blocks, sideways) round where its trunk first stood counts as its own stump. */
+	static final double STUMP = 1.6;
+
+	/** Felled's trees in loaded levels. */
+	private static final Set<Entity> TREES = Collections.newSetFromMap(new WeakHashMap<>());
+	/** What each was doing last tick. */
+	private static final Map<Entity, Motion> MOTION = new WeakHashMap<>();
+
+	private static final class Motion {
+		@Nullable Vec3 top, stump, way;
+		double speed;
+		int knocks;
+	}
+
+	static void register() {
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (loaded() && groups() && treeClass.isInstance(entity)) {
+				TREES.add(entity);
+			}
+		});
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+			TREES.remove(entity);
+			MOTION.remove(entity);
+		});
+		ServerTickEvents.END_SERVER_TICK.register(FelledCompat::knockOn);
+	}
+
+	private static void knockOn(MinecraftServer server) {
+		if (TREES.isEmpty()) {
+			return;
+		}
+		for (Entity tree : List.copyOf(TREES)) {
+			if (!tree.isAlive() || !(tree.level() instanceof ServerLevel level)) {
+				TREES.remove(tree);
+				MOTION.remove(tree);
+				continue;
+			}
+			try {
+				knockOn(level, tree);
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't knock on from Felled's tree", e);
+				TREES.remove(tree);
+			}
+		}
+	}
+
+	/** {@code tree} (Felled's) knocks over a standing tree just ahead of its moving logs, if there is one. */
+	private static void knockOn(ServerLevel level, Entity tree) throws ReflectiveOperationException {
+		Motion m = MOTION.computeIfAbsent(tree, t -> new Motion());
+		Vec3 top = (Vec3)mTop.invoke(tree);
+		if (m.stump == null) {
+			m.stump = (Vec3)mStart.invoke(tree);
+		}
+		double speed = m.top == null ? 0.0 : top.distanceTo(m.top);
+		double was = m.speed;
+		if (m.top != null && speed >= KNOCK_SPEED) {
+			Vec3 flat = new Vec3(top.x - m.top.x, 0.0, top.z - m.top.z);
+			if (flat.lengthSqr() > 1.0E-6) {
+				m.way = flat.normalize();
+			}
+		}
+		m.top = top;
+		m.speed = speed;
+		if (m.way == null || m.knocks >= FallingTree.KNOCKS_MOST || Math.max(speed, was) < KNOCK_SPEED) {
+			return;
+		}
+		Object grid = mGrid.invoke(tree);
+		IntList ids = (IntList)mLiveIds.invoke(grid);
+		List<Vec3> logs = new ArrayList<>();
+		Vector3d at = new Vector3d();
+		for (int i = 0; i < ids.size(); i++) {
+			int id = ids.getInt(i);
+			BlockState state = (BlockState)mState.invoke(grid, id);
+			if (state != null && state.is(BlockTags.LOGS)) {
+				mCellToWorld.invoke(tree, id, at);
+				logs.add(new Vec3(at.x, at.y, at.z));
+			}
+		}
+		if (logs.isEmpty()) {
+			return;
+		}
+		float heading = (float)Math.atan2(m.way.z, m.way.x);
+		heading = Math.round(heading / Mth.HALF_PI) * Mth.HALF_PI;
+		int most = Math.max(1, Math.round(logs.size() * FallingTree.KNOCK_SIZE));
+		for (Vec3 log : logs) {
+			for (double ahead : KNOCK_AHEAD) {
+				BlockPos pos = BlockPos.containing(log.x + m.way.x * ahead, log.y, log.z + m.way.z * ahead);
+				double sx = pos.getX() + 0.5 - m.stump.x, sz = pos.getZ() + 0.5 - m.stump.z;
+				if (sx * sx + sz * sz < STUMP * STUMP) {
+					continue;
+				}
+				BlockState there = level.getBlockState(pos);
+				if (!there.is(BlockTags.LOGS) || !there.hasProperty(BlockStateProperties.AXIS)
+					|| there.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+					continue;
+				}
+				if (Trees.knock(level, pos, heading, null, most) > 0) {
+					m.knocks++;
+					level.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.4F, 0.5F);
+					level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
+					return;
+				}
+			}
+		}
 	}
 
 	/** Whether Felled is loaded (and its felling found). */
@@ -178,7 +310,7 @@ public final class FelledCompat {
 
 	private static boolean lookedGroups;
 	private static @Nullable Class<?> treeClass;
-	private static @Nullable Method mGrid, mLiveIds, mState, mX, mY, mZ, mTrunk, mBounds;
+	private static @Nullable Method mGrid, mLiveIds, mState, mX, mY, mZ, mTrunk, mBounds, mTop, mStart, mCellToWorld;
 
 	/** Felled's tree and Zarith's block grid, for giants. */
 	private static boolean groups() {
@@ -190,6 +322,9 @@ public final class FelledCompat {
 				mGrid = treeClass.getMethod("grid");
 				mTrunk = treeClass.getMethod("trunkDirection");
 				mBounds = treeClass.getMethod("solidBounds");
+				mTop = treeClass.getMethod("trunkTop");
+				mStart = treeClass.getMethod("trunkStart");
+				mCellToWorld = treeClass.getMethod("cellToWorld", int.class, Vector3d.class);
 				mLiveIds = grid.getMethod("liveIds");
 				mState = grid.getMethod("state", int.class);
 				mX = grid.getMethod("x", int.class);
