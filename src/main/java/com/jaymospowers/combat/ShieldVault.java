@@ -163,6 +163,8 @@ public final class ShieldVault {
 			return;
 		}
 		player.resetFallDistance();
+		// ((0.21.23) a vault keeps the count)
+		HitStreak.kept(player);
 		int move = (player.getRandom().nextInt(WebParkour.VARIANTS) * 8 + Freerun.VAULT) * 8;
 		player.setAttached(Freerun.MOVE, move);
 		VAULTS.put(player.getUUID(), new Vault(foe, now, move));

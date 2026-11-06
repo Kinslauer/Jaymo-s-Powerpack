@@ -1199,3 +1199,21 @@ Kingdoms Rivals patch 8, ideas only from the Arkham and Shadow of War games.
   twice as wide is "too big to vault".
 - **Shields** (`combat/Shields`): Yank on a mob with a shield tears it away instead of pulling him; a stun (Darktide's,
   Time Flow's, a parry's) knocks loose Kingdoms' armoured ogres' shields.
+
+## 0.21.23 (2026-11-06): more for Chrono and Web (Kingdoms Rivals patch 9)
+Ideas only from the Arkham and Shadow of War games. One new input: **sneak + attack, bare-handed** (`combat/Takedowns`;
+a weapon in hand keeps it the finisher's hold and the quick kill).
+- **Chrono, in Time Flow** (`chrono/ChronoTakedowns`):
+  - Takedown at 8 combo: time stops round the foe in front of you, a beatdown, and he's downed. At 16 the nearest other
+    goes down too. Spends that much combo.
+  - Shadow-strike blink: hit a foe with something thrown or shot and he's marked for 10 s. Sneak + attack at him (out to
+    24 blocks) blinks you to his back for a blow. Costs 3 combo.
+  - A strike at one already down finishes him and the combo goes on. A strike at a raised shield is a time-slowing
+    flourish: the bearer is stunned 2 s, guard down (an armoured ogre drops his shield).
+- **Web** (`web/WebTakedowns`), whose combo is the hit streak (`combat/HitStreak`, now counting to 32):
+  - Wrap-and-slam at 8: webbed and slammed down, downed. At 16, two. Spends that much of the streak.
+  - String up: from 2.5+ blocks above a foe, sneak + attack snatches him up and leaves him hanging from your ledge.
+  - A Spider-Sense counter that throws a foe into a wall pins him there in webbing for 5 s.
+  - A plain punch on one already down, 3+ into a streak, finishes him and counts on.
+  - Web Shot and Yank keep the streak alive.
+- **Both:** a dodge roll or a shield vault keeps the combo and the streak from timing out.

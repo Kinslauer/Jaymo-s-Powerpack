@@ -382,6 +382,8 @@ public final class WebPower implements Power {
 			}
 		});
 		WebLead.register();
+		// (0.21.23, Rivals patch 9) takedowns, wall pins, strung up from a perch
+		WebTakedowns.register();
 	}
 
 	@Override
@@ -1394,6 +1396,8 @@ public final class WebPower implements Power {
 		}
 		long held = now - state.shotChargeStart;
 		float charge = Math.min(1.0F, held / (float)SHOT_CHARGE_TICKS);
+		// (0.21.23, Rivals patch 9) a shot mid-fight keeps the streak going
+		com.jaymospowers.combat.HitStreak.kept(player);
 		state.shotChargeStart = -1;
 		WebCooldowns cooldowns = cooldowns(player);
 		if (now < cooldowns.shot()) {
@@ -1491,6 +1495,8 @@ public final class WebPower implements Power {
 			}
 			return;
 		}
+		// (0.21.23) a Yank mid-fight keeps the streak going
+		com.jaymospowers.combat.HitStreak.kept(player);
 		// a rider is plucked off their mount
 		target = WebHeft.pluck(player, target);
 		if (target instanceof net.minecraft.world.entity.LivingEntity shielded && com.jaymospowers.combat.Shields.tear(shielded, player)) {

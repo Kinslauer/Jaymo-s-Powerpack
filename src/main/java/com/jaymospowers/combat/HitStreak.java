@@ -33,6 +33,8 @@ public final class HitStreak {
 	// Tuning
 	/** Blows landed in a row for a quick kill. */
 	public static final int READY = 8;
+	/** (0.21.23) The count runs on to this (Chrono's and Web's takedowns take two foes at {@link #DOUBLE}). */
+	public static final int MAX = 32, DOUBLE = 16;
 	/** The count shows from this many on. */
 	public static final int SHOW_FROM = 3;
 	/** The streak runs out after this long without a blow landed (ticks). */
@@ -80,6 +82,8 @@ public final class HitStreak {
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST.clear());
+		// (0.21.23, Rivals patch 9) a roll keeps the count
+		com.jaymospowers.stamina.Dodge.onDodge((player, dir) -> kept(player));
 	}
 
 	/** {@code player}'s streak just now. */
@@ -97,15 +101,41 @@ public final class HitStreak {
 		return !(body instanceof Player) && body.getBbWidth() <= MAX_WIDTH && body.getBbHeight() <= MAX_HEIGHT && body.getMaxHealth() < MAX_HEALTH;
 	}
 
+	/** (0.21.23) A blow landed by other means (a web takedown's ground finish): counted like any. */
+	public static void add(ServerPlayer player) {
+		landed(player.level(), player);
+	}
+
+	/**
+	 * (0.21.23, Rivals patch 9) {@code player} dodged, vaulted or used a gadget mid-fight: the streak (and a Chrono's Time
+	 * Flow combo) holds, its lapse put off as if a blow had landed.
+	 */
+	public static void kept(ServerPlayer player) {
+		if (count(player) > 0) {
+			LAST.put(player.getUUID(), player.level().getGameTime());
+		}
+		com.jaymospowers.power.chrono.ChronoFlow.keepCombo(player);
+	}
+
+	/** (0.21.23) Spends {@code n} of the streak (all of it if it hasn't that many). */
+	public static void spend(ServerPlayer player, int n) {
+		int left = count(player) - n;
+		if (left <= 0) {
+			end(player);
+		} else {
+			player.setAttached(STREAK, left);
+		}
+	}
+
 	private static void landed(ServerLevel level, ServerPlayer player) {
 		LAST.put(player.getUUID(), level.getGameTime());
 		int was = count(player);
-		if (was >= READY) {
+		if (was >= MAX) {
 			return;
 		}
 		int now = was + 1;
 		player.setAttached(STREAK, now);
-		if (now == READY) {
+		if (now == READY || now == DOUBLE) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.hit_streak.ready", now).withStyle(ChatFormatting.GOLD));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.35F, 1.8F);
 		} else if (now >= SHOW_FROM) {
