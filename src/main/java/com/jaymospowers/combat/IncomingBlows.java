@@ -102,6 +102,8 @@ public final class IncomingBlows {
 	public static void aimed(LivingEntity attacker, LivingEntity target, int ticks, boolean heavy) {
 		if (target instanceof ServerPlayer player && player != attacker) {
 			send(player, attacker, ticks, heavy, false);
+			// ((0.21.20) for a parry to turn you toward, Crowds)
+			Crowds.incoming(attacker, player, ticks);
 		}
 	}
 

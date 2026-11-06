@@ -466,6 +466,8 @@ public final class Guard {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), PARRY_SOUND, SoundSource.PLAYERS, perfect ? 1.0F : 0.8F, (perfect ? 1.1F : 0.95F) + (player.getRandom().nextFloat() - 0.5F) * 0.1F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.35F, perfect ? 1.5F : 1.2F);
 		cue(player, attacker, perfect);
+		// ((0.21.20) turned to the next blow coming; a chain of parries makes the riposte harder, Crowds)
+		float chain = Crowds.counter(player, attacker);
 		Shakes.send(player, perfect ? 1.2F : 0.6F, from);
 		if (perfect) {
 			Feathers.refund(player, PERFECT_REFUND);
@@ -485,7 +487,7 @@ public final class Guard {
 			foe.getCooldowns().addCooldown(foe.getMainHandItem(), PERFECT_DISARM_TICKS);
 		}
 		RIPOSTES.put(player.getUUID(), new Riposte(attacker.getUUID(), now + (perfect ? PERFECT_RIPOSTE_TICKS : PARRY_RIPOSTE_TICKS),
-			perfect ? PERFECT_RIPOSTE : PARRY_RIPOSTE));
+			(perfect ? PERFECT_RIPOSTE : PARRY_RIPOSTE) * chain));
 	}
 
 	/**

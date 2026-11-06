@@ -16,6 +16,7 @@
 		"YoungSpawnMixin",
 		"AttackTellBrainMixin",
 		"AttackTellGoalMixin",
+		"CrowdWaitMixin",
 		"BackpackExplosionMixin",
 		"BlastGoreMixin",
 		"WillPushMixin",

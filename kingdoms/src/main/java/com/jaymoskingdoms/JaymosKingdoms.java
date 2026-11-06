@@ -544,6 +544,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
 		Temperaments.register();
+		// (0.7.622, Rivals patch 7) brutal kills scare the rest
+		Dread.register();
 		PlayerTemperaments.register();
 		// (0.7.509) the eight patrons, favour and blessings
 		LOGGER.debug("patron attachment: {}", Patrons.STATE);
