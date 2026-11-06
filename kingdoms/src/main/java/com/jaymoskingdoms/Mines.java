@@ -78,21 +78,37 @@ public final class Mines {
 	static final int DIGGING = 0, CAVE = 1, DEEP = 2, FLOODED = 3, BLOCKED = 4;
 
 	/** A mine: its mouth (the floor block one stands in), the way it runs, its steps level before it goes down, the step being dug, its state. */
-	record Mine(BlockPos entrance, Direction facing, int flat, int step, int state) {
+	record Mine(BlockPos entrance, Direction facing, int flat, int step, int state, int pit, int layer) {
 		static final Codec<Mine> CODEC = RecordCodecBuilder.create(i -> i.group(
 				BlockPos.CODEC.fieldOf("entrance").forGetter(Mine::entrance),
 				Direction.CODEC.fieldOf("facing").forGetter(Mine::facing),
 				Codec.INT.fieldOf("flat").forGetter(Mine::flat),
 				Codec.INT.fieldOf("step").forGetter(Mine::step),
-				Codec.INT.fieldOf("state").forGetter(Mine::state))
+				Codec.INT.fieldOf("state").forGetter(Mine::state),
+				Codec.INT.optionalFieldOf("pit", 0).forGetter(Mine::pit),
+				Codec.INT.optionalFieldOf("layer", 0).forGetter(Mine::layer))
 			.apply(i, Mine::new));
+
+		/** A plain tunnel or shaft (no pit). */
+		Mine(BlockPos entrance, Direction facing, int flat, int step, int state) {
+			this(entrance, facing, flat, step, state, 0, 0);
+		}
+
+		/** (0.7.624) An open pit ({@link MinePit}) still being dug, before its tunnel. */
+		boolean inPit() {
+			return this.pit > 0 && this.layer < MinePit.DEPTH;
+		}
+
+		Mine withLayer(int layer) {
+			return new Mine(this.entrance, this.facing, this.flat, this.step, this.state, this.pit, layer);
+		}
 
 		boolean done() {
 			return this.state != DIGGING;
 		}
 
 		Mine with(int step, int state) {
-			return new Mine(this.entrance, this.facing, this.flat, step, state);
+			return new Mine(this.entrance, this.facing, this.flat, step, state, this.pit, this.layer);
 		}
 
 		/** Step {@code i}'s floor height. */
@@ -177,7 +193,7 @@ public final class Mines {
 		return Factions.level(server).getAttachedOrElse(MINES, Map.<String, Mine>of()).get(Integer.toString(faction));
 	}
 
-	private static void put(MinecraftServer server, int faction, @Nullable Mine mine) {
+	static void put(MinecraftServer server, int faction, @Nullable Mine mine) {
 		Map<String, Mine> map = new HashMap<>(Factions.level(server).getAttachedOrElse(MINES, Map.<String, Mine>of()));
 		if (mine == null) {
 			map.remove(Integer.toString(faction));
@@ -224,16 +240,17 @@ public final class Mines {
 				continue;
 			}
 			put(server, f.id(), mine);
-			// its mouth is kept among the buildings, so nothing's built on it
-			BlockPos a = mine.entrance().relative(mine.facing().getOpposite()).relative(mine.side(), -2);
-			BlockPos b = mine.cell(COVER).relative(mine.side(), 2).atY(mine.entrance().getY() + HIGH + 1);
+			// its mouth (or its pit and shed) is kept among the buildings, so nothing's built on it
+			BlockPos[] box = mine.pit() > 0 ? MinePit.footprint(mine) : null;
+			BlockPos a = box != null ? box[0] : mine.entrance().relative(mine.facing().getOpposite()).relative(mine.side(), -2);
+			BlockPos b = box != null ? box[1] : mine.cell(COVER).relative(mine.side(), 2).atY(mine.entrance().getY() + HIGH + 1);
 			Works.update(server, f.id(), s -> {
 				List<Works.Built> built = new ArrayList<>(s.built());
 				built.add(new Works.Built("mine", min(a, b), max(a, b)));
 				return s.withBuilt(built);
 			});
 			JaymosKingdoms.LOGGER.info("{} begins a mine at {} facing {} ({})", f.name(), mine.entrance(), mine.facing(),
-				mine.flat() > 1 ? "into a cliff" : "a shaft");
+				mine.pit() > 0 ? "an open pit" : mine.flat() > 1 ? "into a cliff" : "a shaft");
 		}
 	}
 
@@ -245,10 +262,19 @@ public final class Mines {
 		return new BlockPos(Math.max(a.getX(), b.getX()), Math.max(a.getY(), b.getY()), Math.max(a.getZ(), b.getZ()));
 	}
 
-	/** The nearest rock or cliff face round the seat (rings outward), else the nearest open ground fit for a shaft; or null. */
+	/**
+	 * (0.7.624) The nearest ground fit for an open pit ({@link MinePit}), unless the settlement is poor; else (or if there's
+	 * none) the nearest rock or cliff face round the seat (rings outward), else the nearest open ground fit for a shaft; or null.
+	 */
 	static @Nullable Mine site(ServerLevel level, Faction f) {
 		BlockPos seat = f.seat();
 		List<int[]> taken = taken(level.getServer());
+		if (!MinePit.poor(level.getServer(), f)) {
+			Mine pit = MinePit.site(level, f, taken, f.type().isRealm() ? SITE_MIN_REALM : SITE_MIN);
+			if (pit != null) {
+				return pit;
+			}
+		}
 		Mine shaft = null;
 		double shaftD = Double.MAX_VALUE;
 		Mine cliff = null;
@@ -352,10 +378,18 @@ public final class Mines {
 
 	/** Its mouth (and the first steps) would cross something already there (a building, a plot, a building held). */
 	private static boolean clash(MinecraftServer server, Mine m, List<int[]> taken) {
-		BlockPos a = m.entrance().relative(m.facing().getOpposite(), 2);
-		BlockPos b = m.cell(COVER + 1);
-		int x0 = Math.min(a.getX(), b.getX()) - 3, x1 = Math.max(a.getX(), b.getX()) + 3;
-		int z0 = Math.min(a.getZ(), b.getZ()) - 3, z1 = Math.max(a.getZ(), b.getZ()) + 3;
+		return clash(server, new BlockPos[] {m.entrance().relative(m.facing().getOpposite(), 2), m.cell(COVER + 1)}, taken, 3);
+	}
+
+	/** The box with corners {@code box} (and {@code margin} round it) would cross something already there. */
+	static boolean clash(MinecraftServer server, BlockPos[] box, List<int[]> taken) {
+		return clash(server, box, taken, 1);
+	}
+
+	private static boolean clash(MinecraftServer server, BlockPos[] box, List<int[]> taken, int margin) {
+		BlockPos a = box[0], b = box[1];
+		int x0 = Math.min(a.getX(), b.getX()) - margin, x1 = Math.max(a.getX(), b.getX()) + margin;
+		int z0 = Math.min(a.getZ(), b.getZ()) - margin, z1 = Math.max(a.getZ(), b.getZ()) + margin;
 		if (Holds.guarded(server, x0, z0, x1, z1, 0)) {
 			return true;
 		}
@@ -444,10 +478,10 @@ public final class Mines {
 			}
 			return true;
 		}
-		b.setTask("digging a mine");
-		b.setSite(m.entrance());
+		b.setTask(m.inPit() ? "digging the mine pit" : "digging a mine");
+		b.setSite(m.inPit() ? MinePit.center(m) : m.entrance());
 		if (job.target == null || clear(level, job.target)) {
-			job.target = next(level, m, b);
+			job.target = m.inPit() ? MinePit.next(level, m, b.blockPosition()) : next(level, m, b);
 			job.actAt = 0;
 			job.trip.reset(now);
 			if (job.target == null) {
@@ -458,7 +492,8 @@ public final class Mines {
 		BlockPos target = job.target;
 		Vec3 eye = b.mob().getEyePosition();
 		if (eye.distanceToSqr(Vec3.atCenterOf(target)) > DIG_REACH * DIG_REACH) {
-			BlockPos stand = m.step() == 0 ? m.entrance().relative(m.facing().getOpposite()) : m.cell(m.step() - 1);
+			BlockPos stand = m.inPit() ? Construction.standable(level, target.above(), 2)
+				: m.step() == 0 ? m.entrance().relative(m.facing().getOpposite()) : m.cell(m.step() - 1);
 			if (!Gatherers.walk(b, job.trip, stand, STAND_REACH, WALK_SPEED, now) && now - job.trip.improvedAt > STUCK_TICKS) {
 				b.teleportTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5);
 				b.getNavigation().stop();
@@ -478,6 +513,9 @@ public final class Mines {
 				b.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			}
 			return true;
+		}
+		if (m.inPit()) {
+			MinePit.plug(level, target);
 		}
 		for (ItemStack d : dig(level, target, b.mob(), false)) {
 			job.bag.add(b, d);
@@ -532,6 +570,9 @@ public final class Mines {
 	 * the mine as stored.
 	 */
 	static Mine advance(ServerLevel level, Faction f, Mine m, boolean quiet) {
+		if (m.inPit()) {
+			return MinePit.advance(level, f, m, quiet);
+		}
 		int i = m.step();
 		BlockPos c = m.cell(i);
 		Direction side = m.side();
@@ -570,8 +611,13 @@ public final class Mines {
 				}
 			}
 		}
-		shore(level, m, i, p);
-		if (i == COVER - 1) {
+		if (m.pit() > 0 && i == MinePit.MOUTH) {
+			// (a pit's tunnel: its mouth framed where it goes in under the terraces, no roofed entry)
+			MinePit.mouth(level, m, i, p);
+		} else {
+			shore(level, m, i, p);
+		}
+		if (i == COVER - 1 && m.pit() == 0) {
 			cover(level, m, p);
 		}
 		int state = DIGGING;
@@ -707,11 +753,14 @@ public final class Mines {
 		Mine m = of(level.getServer(), f.id());
 		while (m != null && !m.done() && dug < blocks) {
 			boolean any = false;
-			for (BlockPos q : m.section(m.step())) {
+			for (BlockPos q : m.inPit() ? MinePit.left(level, m) : m.section(m.step())) {
 				if (dug >= blocks) {
 					break;
 				}
 				if (!clear(level, q)) {
+					if (m.inPit()) {
+						MinePit.plug(level, q);
+					}
 					for (ItemStack d : dig(level, q, null, true)) {
 						Storage.put(level, f, d);
 					}

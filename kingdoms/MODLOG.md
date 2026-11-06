@@ -9956,3 +9956,16 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Where: the first of each orc camp's ogre band, two inside each new ogre hold's gate, and one in five of a hold's
   recruits. Drops iron as well as an ogre's spoils.
 - Art: `tools/armoured_ogre_assets.py` (the ogre's skin recoloured; plate and shield our own). Model: `ArmouredOgreModel`.
+
+## 0.7.624 (2026-11-06): open-pit mines in the Dungeons and Taverns style
+- Andy: "the dungeons and taverns mine here is exactly what i was imagining when i wanted our builders to mine. the
+  current one should be for poverty nations only as it is too simple."
+- `MinePit`: a settlement that isn't poor now digs an open pit 13 across, a layer at a time, each terrace a step in from
+  the one above, down to a 5 x 5 floor 5 deep. Then its rim is fenced (lanterns on the corner posts), a minecart track
+  runs from the floor up the back terraces into a cobblestone shed with log corners and a plank roof (a cart, a barrel,
+  a stonecutter and a lantern inside), and the old tunnel goes on into the rock from the floor, its mouth framed in logs.
+  Our own build in that style; nothing of D&T's is copied.
+- Poor (`MinePit.POOR_WORTH` 80, by `Wealth.worth`: coin + 4 a villager + 60 a fiefdom; a fiefdom goes by its overlord)
+  still digs the plain cliff tunnel or shaft. No level, dry ground for a pit nearby: the plain mine too.
+- Saved mines keep their kind (`pit`/`layer` default 0). Sleep's catch-up digs the pit too; water or lava beside a pit
+  block is stopped with cobblestone first.
