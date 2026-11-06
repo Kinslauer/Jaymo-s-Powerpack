@@ -9972,3 +9972,6 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   killed puts its next claim off a day; kill them all and it has new ones three days later. Only you see the brand's wisp.
   Without Powers (no blood trails) they come when you're under half health instead.
 - Lines: `lang/parts/bane.json`. Built, not played.
+- **Takedowns on the skill bar (Powers 0.21.24):** Andy's answer on mapping the Chrono and Web moves: the skill bar shows
+  Powers' takedowns (`move_takedown`, `move_blink` spells, `FormSkills`) in Time Flow always, and for bare hands while
+  locked on, before any fist forms. Icons: `tools/gen_move_icons.py`. Lines: `lang/parts/power_moves.json`.

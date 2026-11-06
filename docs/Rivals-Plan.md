@@ -204,5 +204,8 @@ Andy picked all 34 rows (2026-11-06).
   all back with half again when it's ended or sworn), a claim on the nearest town every three days (its men come at you
   there; three of them killed there frees it; all on the boards), and two or three branded feral wolf hounds that come up
   your blood trail when you're alone (each killed puts the next claim off a day).
+- Takedowns on the skill bar (Powers 0.21.24, with patch 5): Andy: "chrono in time flow should get the display, but for
+  fist users across the board the menu can show while you have an empty hand and are locked on." Takedown and Shadow
+  Blink sit on the RPG skill bar in Time Flow; Web's Takedown with an empty hand while locked on.
 - Patch 5 put off (Andy, 2026-11-06: "skip patch 5 for now and come back later"): patch 6 goes next; patch 5 after
   patch 9 or whenever Andy asks. Nothing in 6-9 needs it.

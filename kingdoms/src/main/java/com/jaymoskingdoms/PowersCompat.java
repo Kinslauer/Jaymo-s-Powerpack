@@ -2140,6 +2140,50 @@ public final class PowersCompat {
 		return player.level().isClientSide() && lockedId() >= 0;
 	}
 
+	// ---- (0.7.624) Takedowns on the skill bar --------------------------------------------------------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle barMoves, castMove;
+	private static boolean lookedForMoves;
+
+	private static void lookForMoves() {
+		if (lookedForMoves) {
+			return;
+		}
+		lookedForMoves = true;
+		if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				Class<?> takedowns = Class.forName("com.jaymospowers.combat.Takedowns");
+				barMoves = java.lang.invoke.MethodHandles.publicLookup().findStatic(takedowns, "moves",
+					java.lang.invoke.MethodType.methodType(java.util.List.class, net.minecraft.world.entity.player.Player.class));
+				castMove = java.lang.invoke.MethodHandles.publicLookup().findStatic(takedowns, "cast",
+					java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, String.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no takedowns for the skill bar (older Powers?)", e);
+			}
+		}
+	}
+
+	/** (0.7.624) Powers' {@code Takedowns.moves}: the takedowns {@code player} has on the skill bar now, either side; none without Powers. */
+	@SuppressWarnings("unchecked")
+	public static java.util.List<String> barMoves(net.minecraft.world.entity.player.Player player) {
+		lookForMoves();
+		try {
+			return barMoves == null ? java.util.List.of() : (java.util.List<String>)barMoves.invoke(player);
+		} catch (Throwable e) {
+			return java.util.List.of();
+		}
+	}
+
+	/** (0.7.624) Powers' {@code Takedowns.cast}: {@code move} from the skill bar. False if it didn't go. */
+	public static boolean castMove(net.minecraft.server.level.ServerPlayer player, String move) {
+		lookForMoves();
+		try {
+			return castMove != null && (boolean)castMove.invoke(player, move);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	// ---- (0.7.390) Lock-on ----------------------------------------------------------------------------------------
 
 	/** Powers' {@code LockOn.target(ServerPlayer)}. */

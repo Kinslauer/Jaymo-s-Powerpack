@@ -21,6 +21,11 @@ import net.minecraft.world.entity.player.Player;
  * (a weapon in hand keeps it the finisher's hold and the hit streak's quick kill). What it does is the power's:
  * {@link ChronoTakedowns} (a frozen-time beatdown at 8 combo, two at 16; the shadow-strike blink to a marked foe) and
  * {@link WebTakedowns} (a wrap-and-slam at 8 of the hit streak, two at 16; stringing up a foe below your perch).
+ * <p>
+ * (0.21.24) Andy: "chrono in time flow should get the display, but for fist users across the board the menu can show
+ * while you have an empty hand and are locked on." The same moves sit on the RPG skill bar ({@link #moves}, read by
+ * Jaymo's Kingdoms' skill bar source): in Time Flow always, the takedown and the blink; with an empty hand and locked on,
+ * whatever takedown your power has. Cast from the bar ({@link #cast}) they go at your lock-on foe, else the one in your sights.
  */
 public final class Takedowns {
 	/** How far a takedown may be asked for (the blink reaches furthest), with slack. */
@@ -56,6 +61,62 @@ public final class Takedowns {
 			return player.getAttachedOrElse(ChronoFlow.COMBO, 0) >= CHRONO_MIN;
 		}
 		return Powers.has(player, WebPower.INSTANCE);
+	}
+
+	/** (0.21.24) A bar move: the takedown. */
+	public static final String TAKEDOWN = "takedown";
+	/** (0.21.24) A bar move: Chrono's shadow-strike blink. */
+	public static final String BLINK = "blink";
+
+	/**
+	 * (0.21.24) The moves {@code player} has on the skill bar just now, either side (for Kingdoms' bar, by reflection): in
+	 * Time Flow, the takedown and the blink; otherwise, with an empty hand and locked on, Web's takedown. None with
+	 * anything in hand.
+	 */
+	public static java.util.List<String> moves(Player player) {
+		if (!player.getMainHandItem().isEmpty() || player.isSpectator()) {
+			return java.util.List.of();
+		}
+		if (ChronoFlow.on(player)) {
+			return java.util.List.of(TAKEDOWN, BLINK);
+		}
+		if (com.jaymospowers.core.LockOn.target(player) != null && Powers.has(player, WebPower.INSTANCE)) {
+			return java.util.List.of(TAKEDOWN);
+		}
+		return java.util.List.of();
+	}
+
+	/** (0.21.24) {@code move} cast from the skill bar: at the lock-on foe, else the one in sights. False if there was none, or it can't go. */
+	public static boolean cast(ServerPlayer player, String move) {
+		if (!moves(player).contains(move)) {
+			return false;
+		}
+		LivingEntity target = com.jaymospowers.core.LockOn.target(player);
+		if (target == null) {
+			target = lookedAt(player, ASK_RANGE);
+		}
+		if (target == null || target == player || !target.isAlive() || target.distanceTo(player) > ASK_RANGE + 2.0) {
+			return false;
+		}
+		if (ChronoFlow.on(player)) {
+			return BLINK.equals(move) ? ChronoTakedowns.blinkAt(player, target) : ChronoTakedowns.takedown(player, target);
+		}
+		return WebTakedowns.takedown(player, target);
+	}
+
+	private static @org.jspecify.annotations.Nullable LivingEntity lookedAt(ServerPlayer player, double range) {
+		net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
+		net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F);
+		net.minecraft.world.phys.Vec3 end = eye.add(look.scale(range));
+		net.minecraft.world.phys.BlockHitResult block = player.level().clip(new net.minecraft.world.level.ClipContext(eye, end,
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		if (block.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, end,
+			player.getBoundingBox().expandTowards(look.scale(range)).inflate(1.0), e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator(),
+			eye.distanceToSqr(end));
+		return hit == null ? null : (LivingEntity)hit.getEntity();
 	}
 
 	private static void asked(ServerPlayer player, int id) {

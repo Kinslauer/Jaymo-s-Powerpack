@@ -4,5 +4,6 @@
   "message.jaymospowers.hit_streak.felled": "Struck down where you stood",
   "message.jaymospowers.shield_vault.too_big": "%s is too big to vault",
   "message.jaymospowers.takedown.short": "Takedowns need a combo of %s",
-  "message.jaymospowers.takedown.downed": "Taken down"
+  "message.jaymospowers.takedown.downed": "Taken down",
+  "message.jaymospowers.takedown.unmarked": "Mark them first: hit them with something thrown or shot."
 }

@@ -85,20 +85,20 @@ public final class WebTakedowns {
 		});
 	}
 
-	/** Sneak + attack at {@code target} (from {@code combat/Takedowns}). */
-	public static void takedown(ServerPlayer player, LivingEntity target) {
+	/** Sneak + attack at {@code target} (from {@code combat/Takedowns}). (0.21.24) True if it went. */
+	public static boolean takedown(ServerPlayer player, LivingEntity target) {
 		Vec3 flat = target.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 		if (player.onGround() && player.getY() - target.getY() >= PERCH_DROP && flat.length() <= PERCH_REACH + target.getBbWidth() * 0.5) {
 			stringUp(player, target, flat);
-			return;
+			return true;
 		}
 		if (target.distanceTo(player) - target.getBbWidth() * 0.5 > REACH) {
-			return;
+			return false;
 		}
 		int streak = HitStreak.count(player);
 		if (streak < HitStreak.READY) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.takedown.short", HitStreak.READY).withStyle(ChatFormatting.GRAY));
-			return;
+			return false;
 		}
 		boolean two = streak >= HitStreak.DOUBLE;
 		HitStreak.spend(player, two ? HitStreak.DOUBLE : HitStreak.READY);
@@ -110,6 +110,7 @@ public final class WebTakedowns {
 			}
 		}
 		HitStreak.kept(player);
+		return true;
 	}
 
 	/** Webbed head to foot, and down into the ground. */

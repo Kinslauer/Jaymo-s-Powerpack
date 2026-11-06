@@ -1217,3 +1217,10 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   - A plain punch on one already down, 3+ into a streak, finishes him and counts on.
   - Web Shot and Yank keep the streak alive.
 - **Both:** a dodge roll or a shield vault keeps the combo and the streak from timing out.
+
+## 0.21.24 (2026-11-06): takedowns on the skill bar (Kingdoms 0.7.624)
+- Andy: "chrono in time flow should get the display, but for fist users across the board the menu can show while you
+  have an empty hand and are locked on." `Takedowns.moves` / `Takedowns.cast` put patch 9's moves on the RPG skill bar
+  (through Jaymo's Kingdoms' Weapon Forms bar, Spell Engine's keys 1, 2...): in Time Flow, always, Takedown and Shadow
+  Blink; with an empty hand and locked on, Web's Takedown (wrap-and-slam, or string-up from a perch). They go at your
+  lock-on foe, else the one in your sights. Sneak + attack still works as before. A blink at an unmarked foe says so.
