@@ -1,5 +1,5 @@
 """(0.7.625) Skill bar icons for Powers' takedowns: move_takedown (a fist driving down, a burst under it) and
-move_blink (a violet swirl with a figure's shadow). (0.7.626) Web's and the symbiote's bare-handed moves. 16x16, drawn
+move_blink (a violet swirl with a figure's shadow). (0.7.627) Web's and the symbiote's bare-handed moves. 16x16, drawn
 here, our own."""
 from PIL import Image, ImageDraw
 import math, os

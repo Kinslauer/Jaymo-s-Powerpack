@@ -1225,7 +1225,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   Blink; with an empty hand and locked on, Web's Takedown (wrap-and-slam, or string-up from a perch). They go at your
   lock-on foe, else the one in your sights. Sneak + attack still works as before. A blink at an unmarked foe says so.
 
-## 0.21.25 (2026-11-06): all of Web's bare-handed moves on the skill bar (Kingdoms 0.7.626)
+## 0.21.25 (2026-11-06): all of Web's bare-handed moves on the skill bar (Kingdoms 0.7.627)
 - Andy: "can all of web's unarmed moves go to the bar? symbiote included?" `WebBarMoves`: with an empty hand while locked
   on, Web's bar (fixed order, so a slot keeps its key; nine at most):
   - Any web slinger: Takedown, Finish (a downed foe: a symbiote execution while suited, else a quick finish with 3+ in the
