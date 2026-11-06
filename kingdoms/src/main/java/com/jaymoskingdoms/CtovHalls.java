@@ -175,6 +175,11 @@ final class CtovHalls {
 	 * Null if it has no level street entrance near the ground or is too big for a crew.
 	 */
 	static @Nullable Blueprint convert(String entry, CompoundTag tag) {
+		return convert(entry, tag, MAX_SIDE);
+	}
+
+	/** (0.7.629) As {@link #convert(String, CompoundTag)}, up to {@code maxSide} across. */
+	static @Nullable Blueprint convert(String entry, CompoundTag tag, int maxSide) {
 		ListTag palette = tag.getList("palette").orElseGet(() -> tag.getListOrEmpty("palettes").getListOrEmpty(0));
 		List<BlockState> states = new ArrayList<>();
 		for (int i = 0; i < palette.size(); i++) {
@@ -239,7 +244,7 @@ final class CtovHalls {
 			trimmed.add(new Blueprint.Placement(pl.offset().offset(-minX, 0, -minZ), pl.state()));
 		}
 		int width = maxX - minX + 1, depth = maxZ - minZ + 1, height = maxY + 1;
-		if (width > MAX_SIDE || depth > MAX_SIDE || height > MAX_HEIGHT || trimmed.size() > Designs.MAX_BLOCKS) {
+		if (width > maxSide || depth > maxSide || height > MAX_HEIGHT || trimmed.size() > Designs.MAX_BLOCKS) {
 			return null;
 		}
 		return new Blueprint(entry, width, depth, height, List.copyOf(trimmed));
