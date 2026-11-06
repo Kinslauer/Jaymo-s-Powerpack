@@ -9893,3 +9893,26 @@ Ideas from Warframe's personal adversaries (a commercial game: our own names, co
 - **Not ended yet:** beaten, it is back in a day or two, having learned from it. The marks that end it come in patch 6.
 - Powers 0.21.18 adds `UltimateFilm.filming` for the film check (`PowersCompat.filming`). Lines:
   `lang/parts/bane.json`. Built, not played.
+
+## 0.7.620 (2026-11-06): Rivals patch 6a, the marks that end your Bane
+Ideas from Warframe's three-part key (a commercial game: our own names, code and lines). `docs/Rivals-Plan.md`.
+- **Eight marks, three in order** (`BaneMarks`): Ash, Bone, Crow, Flood, Iron, Moon, Thorn, Wolf. Each Bane has its own
+  three, in its own order.
+- **Its men carry them:** every living outlaw in its band (the warlord's cutthroats, the knight's grave-robbers, the
+  demon's cultists) now carries your brand, so you can pick them out, and knows one of the three. Away from its ground,
+  or while it heals, two of them now and then turn up in your fights without it. Down one and ask "What marks can end your
+  master?". He names his mark. With Rough Questions or Interrogation he also says where it falls in the order. With
+  Quiet Word (or taken from behind) he also lets slip two marks that aren't any of it. The proud and spiteful may lie,
+  never to Interrogation. Whatever anyone learns counts for the Bane's owner. One left downed stays when the rest go.
+- **Carving:** sneak and use a grindstone with a blade in hand. The marks screen shows the eight and what's known of each
+  (its place, "one of its", "not its"). Pick three in order and carve them, or clear the blade. The blade's tooltip shows
+  them.
+- **The finisher judges them:** finish your Bane (downed, or its head off) with a carved blade.
+  - The right three in order end it for good, its weapon goes to you, and the boards say so.
+  - Sneak as you do it and it's sworn to you instead. It keeps its traits and temper and follows you as a sworn captain
+    does (the knight and demon come back to you in a man's body when sent for).
+  - Wrong marks: it's up laughing, a rank higher, and gone. You learn which marks were in the right place, which belong
+    elsewhere in the order, and which aren't its at all.
+  - A finisher with no marks fells it as before; it's back in a day or two.
+- Once it's ended or sworn, a new brand may come.
+- Lines: `lang/parts/bane.json`. Built, not played. Next (6b): its element weapon head and its stronghold.

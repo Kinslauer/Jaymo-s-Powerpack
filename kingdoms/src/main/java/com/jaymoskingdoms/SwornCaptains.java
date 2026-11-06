@@ -325,6 +325,11 @@ public final class SwornCaptains {
 		return true;
 	}
 
+	/** (0.7.620) {@code sp}'s Bane, finished with its own marks while they spared it: sworn to them from now on. */
+	static void swearBane(ServerLevel level, ServerPlayer sp, LivingEntity body, Captain c) {
+		turn(level, sp, body, c, "bane");
+	}
+
 	/** {@code c} ({@code body}) is sworn to {@code sp}: up, off his camp, at their side. */
 	private static void turn(ServerLevel level, ServerPlayer sp, LivingEntity body, Captain c, String how) {
 		MinecraftServer server = level.getServer();
