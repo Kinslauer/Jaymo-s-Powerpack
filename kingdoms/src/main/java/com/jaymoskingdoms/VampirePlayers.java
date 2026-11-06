@@ -61,11 +61,35 @@ public final class VampirePlayers {
 	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> HALF_TURN = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
 		JaymosKingdoms.id("vampire_half_turn"), builder -> builder.persistent(com.mojang.serialization.Codec.BOOL));
 
+	/** (0.7.625) Our use phase, and Powers' first one (its revive hold and downed handling), which ours runs ahead of. */
+	private static final net.minecraft.resources.Identifier FIRST = JaymosKingdoms.id("vampire_first"),
+		POWERS_DOWNED_FIRST = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "downed_first");
+
 	private VampirePlayers() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(VampirePlayers::tick);
+		// (0.7.625) ahead of Powers' downed handling (its revive hold and its sneak lift): holding someone by the throat, the
+		// use held on them is the grab's alone, never a revive filling up; and a vampire's sneak+use on a downed person or
+		// piglin is the bite, not the lift
+		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, POWERS_DOWNED_FIRST);
+		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
+		UseEntityCallback.EVENT.register(FIRST, (player, level, hand, entity, hit) -> {
+			if (!(player instanceof ServerPlayer sp) || !(entity instanceof LivingEntity target)) {
+				return InteractionResult.PASS;
+			}
+			if (BloodGrab.holding(sp)) {
+				return InteractionResult.SUCCESS;
+			}
+			if (hand == InteractionHand.MAIN_HAND && level instanceof ServerLevel server && Downed.isDowned(target) && Vampires.isVampire(sp)
+				&& sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && !(target instanceof Player)
+				&& (Vampires.person(target) || Vampires.netherPrey(target))) {
+				drink(server, sp, target, false, Vampires.person(target));
+				return InteractionResult.SUCCESS;
+			}
+			return InteractionResult.PASS;
+		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND
 				|| !(entity instanceof LivingEntity target)) {
