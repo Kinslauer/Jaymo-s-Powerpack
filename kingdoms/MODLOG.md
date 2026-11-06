@@ -10092,7 +10092,23 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Right-click feeding is gone: no sneak+use bite (persons, Nether prey, downed, sleepers) and no double-tap grab
   (`BloodGrabClient` removed; letting go of use no longer throws). Use on someone held still does nothing (keeps
   Powers' revive bar from filling). Lapping pools stays sneak+use on the ground. Hints 120/122 reworded. Built, not played.
-## 0.7.635: traveller's journal as a bauble
+
+## 0.7.635: the grab keeps them by the throat, even down
+- Andy: "the grab should animate within the vampire's hand hands at the throat the whole time, even if they go down". A held
+  body that went down was laid on the ground by Powers' `DownedPose` while the hand held air. Now `BloodGrab.grabbed`/`holder`
+  (read off every player's synced `GRABBING`, so the client knows too) tells Powers to leave a held body alone (Powers
+  0.21.33), and it hangs from the hand until it dies or is let go.
+- The throat is put at the hand: `BloodGrab.place` works the hand out from the arm as drawn (shoulder 22/32 of the
+  vampire's height, arm 10/32 long, on the main hand's side) and `BloodGrab.raise` lifts the arm with the look (0.3 rad
+  level, 0.8 of the pitch, -0.25 to 0.9), the same angle `BloodGrabPose` draws, so First-person Model's arm and the
+  third-person view both keep the hand on the throat. Looking up lifts them higher; looking down lowers them a little.
+- The held one is posed (`BloodGrabPose.victim`): head pushed back, both hands clawing at the wrist and legs kicking while
+  it can; once down, limp and swaying, stiller when out cold (`PowersCompat.downedState`, Powers' synced Downed marks).
+  Built, not played.
+- Andy: "the drain isnt restoring my thirst either". Blood now quenches a vampire's Kitchen thirst as well
+  (`KitchenCompat.drink`, clean): 3 water a bite or grab gulp (`VampirePlayers.DRINK_WATER`), 4 for each unit lapped from
+  a pool (`LAP_WATER`), and 4 for a bottle of blood (`BOTTLE_WATER`, `Hemomancy.drankBottle`). Built, not played.
+## 0.7.636: traveller's journal as a bauble
 - Andy: "traveler journal should fit as a bauble". The journal (`jaymoskingdoms:journal`) now fits Jaymo's Powers' belt
   and charm slots (`data/jaymospowers/tags/item/baubles/belt.json`, `charm.json`), and `Journal.carries` also looks at
   the worn baubles (`PowersCompat.baubles`), so M opens it from a slot (client and server). The "need a journal" line

@@ -158,7 +158,7 @@ public final class Journal {
 	}
 
 	/**
-	 * Whether {@code player} has a journal anywhere in their inventory, or (0.7.635) wears one in a Jaymo's Powers bauble
+	 * Whether {@code player} has a journal anywhere in their inventory, or (0.7.636) wears one in a Jaymo's Powers bauble
 	 * slot (belt or charm; tags under data/jaymospowers). The worn list syncs to its wearer, so this holds on the client too.
 	 */
 	public static boolean carries(Player player) {
