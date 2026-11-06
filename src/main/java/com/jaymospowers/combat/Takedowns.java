@@ -80,8 +80,9 @@ public final class Takedowns {
 		if (ChronoFlow.on(player)) {
 			return java.util.List.of(TAKEDOWN, BLINK);
 		}
-		if (com.jaymospowers.core.LockOn.target(player) != null && Powers.has(player, WebPower.INSTANCE)) {
-			return java.util.List.of(TAKEDOWN);
+		if (com.jaymospowers.core.LockOn.target(player) != null) {
+			// ((0.21.25) all of Web's bare-handed moves, the symbiote's too)
+			return com.jaymospowers.power.web.WebBarMoves.moves(player);
 		}
 		return java.util.List.of();
 	}
@@ -95,13 +96,14 @@ public final class Takedowns {
 		if (target == null) {
 			target = lookedAt(player, ASK_RANGE);
 		}
-		if (target == null || target == player || !target.isAlive() || target.distanceTo(player) > ASK_RANGE + 2.0) {
-			return false;
+		if (target != null && (target == player || !target.isAlive() || target.distanceTo(player) > ASK_RANGE + 2.0)) {
+			target = null;
 		}
 		if (ChronoFlow.on(player)) {
-			return BLINK.equals(move) ? ChronoTakedowns.blinkAt(player, target) : ChronoTakedowns.takedown(player, target);
+			return target != null && (BLINK.equals(move) ? ChronoTakedowns.blinkAt(player, target) : ChronoTakedowns.takedown(player, target));
 		}
-		return WebTakedowns.takedown(player, target);
+		// ((0.21.25) some of Web's need no foe: the counter, the fists, the symbiote's own)
+		return com.jaymospowers.power.web.WebBarMoves.cast(player, move, target);
 	}
 
 	private static @org.jspecify.annotations.Nullable LivingEntity lookedAt(ServerPlayer player, double range) {

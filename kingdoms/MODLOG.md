@@ -10003,7 +10003,12 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - `VampirePlayers`: a use phase ahead of Powers' `downed_first`: while holding someone, use held on them is the grab's
   alone (it used to fill Powers' revive bar and could get them up in 3 s); a vampire's sneak+use with an empty hand on a
   downed person or piglin/Hornkin bites instead of lifting (carry them with the grab instead). Built, not played.
-## 0.7.627 (2026-11-06): Felled takes the felling stroke (Powers 0.21.25)
+
+## 0.7.627 (2026-11-06): Web's moves on the skill bar (Powers 0.21.25)
+- Nine more Powers move spells for the skill bar (`move_finish`, `counter`, `fists`, `arm`, `grab`, `tendril`, `spikes`,
+  `consume`, `shroud`), shown for Web with an empty hand while locked on. Icons: `tools/gen_move_icons.py`. Lines:
+  `lang/parts/power_moves.json`. Built, not played.
+## 0.7.628 (2026-11-06): Felled takes the felling stroke (Powers 0.21.26)
 - Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... if this is easier to ship do that instead, otherwise
   cannibalize it". Felled (Raiiiden) is all rights reserved, so no code of it is copied; it has a Fabric 26.3 build, so the
   pack ships it unchanged from CurseForge (0.1.5, with its physics library Zarith 0.2.0, Jolt with native libraries).

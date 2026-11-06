@@ -129,7 +129,7 @@ public final class Trees {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Trees::tick);
-		// (0.7.627) before anyone else's, so a chop in progress isn't taken for a log broken whole (Felled fells on those)
+		// (0.7.628) before anyone else's, so a chop in progress isn't taken for a log broken whole (Felled fells on those)
 		PlayerBlockBreakEvents.BEFORE.register(CHOPPING, Trees::breaking);
 		PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(CHOPPING, net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
 		// (0.5.59) said as soon as a bare hand starts on wood, not after the long, empty punch

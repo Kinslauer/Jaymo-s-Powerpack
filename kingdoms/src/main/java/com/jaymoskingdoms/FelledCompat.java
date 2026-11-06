@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.627) Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... it captures what i wanted for our trees". Felled
+ * (0.7.628) Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... it captures what i wanted for our trees". Felled
  * (Raiiiden, all rights reserved, shipped unchanged from CurseForge with its Zarith physics library) brings a tree down as
  * a real rigid body: it tips over its stump, rolls, snaps on a hard landing, floats, and can be stood on. When it's in the
  * pack, a player's chopping still goes through ours (the cut narrows, the chop meter, a woodcutter's credit), but the
@@ -76,7 +76,7 @@ public final class FelledCompat {
 	}
 
 	/**
-	 * (0.7.627) Andy: "so if a player cuts a tree down and a giant tried to grab it it wouldnt work?" The nearest tree Felled
+	 * (0.7.628) Andy: "so if a player cuts a tree down and a giant tried to grab it it wouldnt work?" The nearest tree Felled
 	 * brought down within {@code reach} of {@code at}, of no more than {@code mostLogs} logs, for a giant's grab; null if none.
 	 */
 	static @Nullable Entity near(ServerLevel level, Vec3 at, double reach, int mostLogs) {
@@ -97,7 +97,7 @@ public final class FelledCompat {
 	}
 
 	/**
-	 * (0.7.627) Felled's {@code tree} made one of ours ({@link FallingTree#adopt}), so a giant can hold and throw it: its blocks
+	 * (0.7.628) Felled's {@code tree} made one of ours ({@link FallingTree#adopt}), so a giant can hold and throw it: its blocks
 	 * as they stood (Felled keeps them in the tree's own upright grid), turned the way its trunk lay. Felled's is gone.
 	 */
 	static @Nullable FallingTree adopt(ServerLevel level, Entity tree) {

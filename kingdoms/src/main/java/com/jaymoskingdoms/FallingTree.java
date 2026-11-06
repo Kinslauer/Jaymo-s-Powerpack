@@ -750,7 +750,7 @@ public final class FallingTree extends Entity {
 	public static @Nullable Entity take(ServerLevel level, Vec3 at, double reach, Entity giant, int mostLogs) {
 		FallingTree tree = fallenNear(level, at, reach, mostLogs);
 		if (tree == null) {
-			// (0.7.627) one Felled brought down: it becomes ours in the giant's hand
+			// (0.7.628) one Felled brought down: it becomes ours in the giant's hand
 			Entity felled = FelledCompat.near(level, at, reach, mostLogs);
 			tree = felled == null ? null : FelledCompat.adopt(level, felled);
 		}
@@ -775,7 +775,7 @@ public final class FallingTree extends Entity {
 	}
 
 	/**
-	 * (0.7.627) A tree of these {@code pieces} (upright, as it stood, {@code x}/{@code z} from its trunk and {@code y} from its
+	 * (0.7.628) A tree of these {@code pieces} (upright, as it stood, {@code x}/{@code z} from its trunk and {@code y} from its
 	 * middle) made ours at {@code at}, heading {@code heading}: for a tree another mod brought down ({@link FelledCompat}).
 	 */
 	static @Nullable FallingTree adopt(ServerLevel level, Vec3 at, List<Piece> pieces, float heading) {
