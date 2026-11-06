@@ -1,0 +1,20 @@
+---
+name: cloud-playtest-setup
+description: How to playtest the 26.3 mods in-game from a cloud session (JDK 25, Xvfb + lavapipe Vulkan client, RCON, screenshots)
+metadata:
+  type: reference
+  modified: 2026-11-04T08:40:00.000Z
+---
+
+A real in-game playtest works in the cloud container (done 2026-10-10 for Kingdoms 0.3, see [[kingdoms-status]]):
+- JDK 25: container has only 21; download Temurin 25 from api.adoptium.net to /opt/jdk25 and set JAVA_HOME. Run `sh ./gradlew` (gradlew isn't executable). Maven Central may 429: retry with backoff.
+- Server: `./gradlew runServer` in kingdoms/; run/server.properties with online-mode=false, enable-rcon=true, rcon.password, `whitelist off` after boot. Drive it with a tiny python RCON client (responses truncate ~4KB).
+- Client: OpenGL fails under Xvfb ("no matching GLX visual"); `apt-get install mesa-vulkan-drivers xdotool` and MC 26.3 picks Vulkan on llvmpipe. Launch `xvfb-run -n 99 -s "-screen 0 1280x720x24" ./gradlew runClient --args="--quickPlayMultiplayer localhost:25565 --username Tester --width 1280 --height 720"` with XDG_RUNTIME_DIR set. Client doesn't reconnect after a server restart: relaunch it.
+- Screenshots: `import -window root` on :99 (XAUTHORITY from /tmp/xvfb-run.*); position the camera with `tp Tester x y z facing ...` in spectator, wait ~15 s for chunks.
+- Never `pkill -f` a pattern that appears in your own command line (it kills the shell); use `pgrep -f 'KnotClien[t]'`.
+- A throwaway `/ktest` harness (fake-player commands, block dumps) was kept out of git.
+- 2026-10-14 simpler route: Kingdoms dev game reads run/commands.txt as server commands every second (DevCommands), so no RCON needed. Make a flat world with runServer (server.properties level-type=minecraft\:flat), copy run/world to run/saves/test, then runClient --quickPlaySingleplayer test. Kingdoms alone crashes on load (silver_sword needs #c:ingots/silver from Powers): add a temporary empty data/c/tags/item/ingots/silver.json and never commit it. First join clicks through class pick, MCA "Who are you?", character, journey intro; then Escape-menu unpauses via Back to Game. `tick freeze` holds a scene for screenshots.
+- 2026-10-24 (PR #478): Powers dev runServer boots after 3 local-only edits (never commit): stormies-spiders `dev: false` in build.gradle, preLaunch only PickupPreset, and `"jade": []` in fabric.mod.json. A server-start hook with Fabric's FakePlayer can test block use + menu creation without a client (FakePlayer.openMenu does nothing, so call provider.createMenu yourself). 26.3 gotcha: ContainerLevelAccess.evaluate wraps the result in Optional.of, so a lambda returning null throws an NPE.
+- 2026-10-27 lag profiling (PR #572): `gradlew deckMods` builds modpack/mods (the Deck server set); fabric server jar from meta.fabricmc.net/v2/versions/loader/26.3/0.19.5/1.1.0/server/jar boots it. Stage Andy's save from the instance saves/ folder (skip data/lootr), set pause-when-empty-seconds=-1 (else it idles after 60 s), forceload the hot area, `-XX:StartFlightRecording` + `jcmd JFR.dump`, then `jfr print --events jdk.ExecutionSample` and count Server-thread stacks. Script was /tmp/claude-0/run.sh (not kept).
+- 2026-11-04 (armour on new races thread): Kingdoms runClient + MCA works for look checks. First join: click through the life story ("A den in the wild lands" = Beastfolk; the Look button cycles variants), MCA name/editor, "Live this life". F5 twice = front view; `item replace entity Tester armor.head with iron_helmet` via run/commands.txt. To swap looks freely, a local-only edit drops the `settled` check in HeritageVariants.claim under devCommands; then `kingdom heritage set Tester <kind>` + `execute as Tester run kingdom blood <variant>`. Never commit it.
+- Powers+Kitchen in the Kingdoms dev game: copy build/libs/jaymos-powers-*.jar and libs/jaymos-kitchen-*.jar into kingdoms/run/mods; the world then needs a datapack defining recipe minecraft:leather (unbound value). Freshly summoned MCA villagers show no skin there; natural ones do.

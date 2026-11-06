@@ -1,0 +1,11 @@
+---
+name: tree-knocks
+description: Felled trees: knock others over, smash weak blocks, blasts fell (#1019); stay entities until chopped, split, giants throw them (#1024)
+metadata:
+  type: project
+---
+2026-11-05 Andy: "the trees that fall should knock each other over, break blocks that are weaker as they fall, and fall without player input, (explosions / heavy impacts can fell trees too.)" PR #1019 MERGED (Kingdoms 0.7.586): FallingTree.knock/smash/weaker, Trees.knock/blast/unsupported, TreeBlastMixin. "Weaker" = softer AND less blast-proof than the falling log.
+Then Andy: "I dont like the tree pushing ... keep the trees as physics items until they are broken by the player ... a leaning tree broken in the middle will break into two", and "giants should also be able to grab and throw the trees". PR #1024 MERGED 15:35Z (Kingdoms 0.7.588, Powers 0.20.106, HINTS=115, branch claude/project-thread-r9lwqn): FallingTree stays an entity when down (saved), axe strikes the aimed piece (3 per log), split into connected parts; FallenTrunks deleted; no glancing (knock instead or rest propped); ChoppedLog resent 2 ticks after a chop (client prediction was resetting it to oak). Giants: FallingTree.treeNear/take/hold/hurl, Powers core/GiantTrees (reflection) in ApeGrab + Towerback; AetherGiant lobs trees at targets 9-40 blocks away.
+Jung's earlier "tree felling crash" = landing thud plays entity.generic.explode, which hit the Blasts.onPlay NPE fixed in Powers 0.20.64. Related: [[physical-falling-trees]], [[treechop-felling]].
+2026-11-05 19:05Z Andy: blasts should topple trees whole, not hole them; only leaves that impact break. PR #1042 MERGED 19:15Z (Kingdoms 0.7.604): TreeBlastMixin @ModifyVariable on ServerExplosion.interactWithBlocks -> Trees.blastStruck (spares natural logs + non-persistent leaves, knocks each reached tree from rootOf foot).
+2026-11-06 Andy asked for Felled (CurseForge 1715901, ARR, needs Zarith 1720181). It ships unchanged in packMods (dev:false). PR #1071 MERGED 04:07Z (Powers 0.21.26 / Kingdoms 0.7.628). Kingdoms FelledCompat hands the felling stroke of a player's chop to Felled's FellingHandler.fellFrom; Trees' BEFORE break handler runs in an early phase. Giant grabs adopt Felled trees into our FallingTree (this assumes Felled's grid is upright; not seen in game). Blasts, tornadoes, gatherers and Grimsby still use ours.
