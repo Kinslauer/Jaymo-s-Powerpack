@@ -1301,3 +1301,9 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - `FrostBeam`: a player tagged `jaymospowers_blood_gaze` (Kingdoms' vampire skill bar) gets the Frost-born beam out of both
   eyes, blood red, for `GAZE_TICKS` (20): same reach, damage, hit cooldown and wound roll, red dust instead of snow, no
   freezing water or putting out fire. Built, not played.
+- **0.21.31, the game wouldn't start (Zarith x Lithium):** startup crashed in Mutant Monsters/WeaponMod's first explosion
+  class load: Zarith 0.2.0's `ExplosionMixin` @Redirects `Level.clip` in `ServerExplosion.getSeenPercent` (trees block a
+  blast's sight), and Lithium's `world.explosions.entity_raycast` @Redirects the same call, so Zarith found nothing and
+  its `defaultRequire: 1` failed the class. Powers' fabric.mod.json now sets Lithium's `mixin.world.explosions.entity_raycast`
+  to false through `custom."lithium:options"` (Lithium reads it from any mod; server and every client get it with the
+  jar). Lithium's other explosion speedups stay on. Not run here.

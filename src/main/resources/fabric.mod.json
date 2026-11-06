@@ -69,5 +69,10 @@
 	},
 	"suggests": {
 		"weaponmod": "*"
+	},
+	"custom": {
+		"lithium:options": {
+			"mixin.world.explosions.entity_raycast": false
+		}
 	}
 }
