@@ -1,0 +1,8 @@
+---
+name: emberborn-fire-cold
+description: Heritage pass in PR #283 (MERGED, pack 0.11.102 / Kingdoms 0.7.75): Emberborn fireproof + cold-sapped, Frostborn ice prison on ;, Earthling heritage, Z Fighter races for non-Z players, scrolling cards
+metadata:
+  type: project
+---
+2026-10-16 Andy, in one thread: Emberborn immune to fire + weaker in cold/winter; heritage text cut off -> scroll; Frostborn freezes an enemy in ice once a day; "add all zfighter lineages to the heritage screen ... anyone can be any of those races, not just z fighters".
+PR #283 MERGED 2026-10-16 07:1xZ as pack 0.11.102 / Kingdoms 0.7.75 (not playtested; also halved all dismember chances via Dismember.RATE). Next free: 0.11.103 / 0.7.76.: IS_FIRE cancelled for Emberborn; cold land (biome temp <= 0.2) -15% dmg/-10% speed, powder snow -30%/-20% (no seasons mod). `;` = heritage gift key (`Heritage.gift`): Frostborn `FrostPrison` 10 s packed-ice shell, once per 24000 ticks; Warrior-born tail wrap via tag jaymoskingdoms_tail_toggle. New Earthling heritage (skill XP x1.25). Powers `ZFighterLineage.everyone`: non-Z players get lineage from heritage (tail + villager fear, Verdant green/mend/reach). Ki stuff (forms, Great Ape, healing others, TP) stays Z-only; Great Ape for non-Z offered, not built. Andy then: Verdant reach = animated 6-block stretch punch on left-mouse hold that grabs items; Frostborn prison = left-mouse hold. Done in Powers `RaceMoves`/`RaceHoldClient` (bare hand, not at a block; Z hold combo keeps targets within plain reach); `;` = Warrior tail only. The X screen lineage picker was already gone since 0.11.76. Related: [[attributes-heritage]], [[zfighter]].
