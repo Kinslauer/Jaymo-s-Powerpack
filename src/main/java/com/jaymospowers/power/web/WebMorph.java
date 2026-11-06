@@ -316,7 +316,7 @@ public final class WebMorph {
 	}
 
 	/** Pressed: the symbiote starts gathering into the arm, a weapon picked (never the same twice running), the other arm from last time. */
-	private static void gather(ServerPlayer player) {
+	static void gather(ServerPlayer player) {
 		if (!usable(player) || WebSymbiote.driving(player) || player.getAttached(CHARGE) != null) {
 			return;
 		}
@@ -347,7 +347,7 @@ public final class WebMorph {
 	}
 
 	/** Let go: strikes now if the weapon has formed, else as soon as it has. */
-	private static void release(ServerPlayer player, int targetId) {
+	static void release(ServerPlayer player, int targetId) {
 		Charge charge = player.getAttached(CHARGE);
 		if (charge == null) {
 			return;
