@@ -10042,3 +10042,12 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   firewatch tower (realms), graveyard (kingdoms from 50 people; Andy let its 27 x 37 past the 32 plot cap, D&T-only
   buildings may be up to `DntBuildings.MAX_SIDE` 40). Older projects keep their look. The dappled town hall is too big;
   the hamlet is a piglin bunker; D&T has no stable.
+
+## 0.7.630: a vampire's moves on the skill bar, and Blood Gaze
+- Andy: "please place them on the bar, and they should also get an eye laser that blasts for a second but otherwise
+  functions exactly like frostborn". `FormSkills`: a vampire's or dhampir's Blood Dash, Groundpound and Blood Gaze are bar
+  spells (`jaymoskingdoms:night_<move>`, delivery `night_move` -> `NightGifts.move`, which now says whether it went so a
+  failed Groundpound on the ground starts no cooldown). O and P still work. Icons `kingdoms/tools/gen_night_icons.py`,
+  lang `parts/vampire-bar.json`, hint 122.
+- Blood Gaze: `NightGifts` tags the vampire `jaymospowers_blood_gaze` (3 s wait); Powers' `FrostBeam` fires the Frost-born
+  beam out of both eyes, red, for 20 ticks: same reach, damage, hit pace and wound roll; no freezing water. Built, not played.

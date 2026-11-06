@@ -1,0 +1,9 @@
+{
+  "spell.jaymoskingdoms.night_dash.name": "Blood Dash",
+  "spell.jaymoskingdoms.night_dash.description": "Thrown the way you look, once more in the air before you land; looking up, a great leap. No fall damage till you've landed. (Also O.)",
+  "spell.jaymoskingdoms.night_pound.name": "Groundpound",
+  "spell.jaymoskingdoms.night_pound.description": "In the air: down like a stone. Everyone near where you land is thrown back and hurt, and every person near shows through walls for a while. (Also P.)",
+  "spell.jaymoskingdoms.night_gaze.name": "Blood Gaze",
+  "spell.jaymoskingdoms.night_gaze.description": "A red laser out of both eyes for a second, exactly where you look: a Frost-born's beam in blood, hurting what it touches and sometimes taking or breaking the part it lands on.",
+  "gui.jaymoskingdoms.story.hint.122": "A vampire's Blood Dash, Groundpound and Blood Gaze, a second's red laser from the eyes, sit on the skill bar beside the hotbar."
+}

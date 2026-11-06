@@ -47,6 +47,10 @@ import net.minecraft.world.phys.Vec3;
  * <p>
  * Kingdoms keeps the day's charge: a hold on cooldown comes back to us as {@link #BEAM_TAG} (Andy: "will be usable after
  * the single day ice charge"). Without Kingdoms there's no charge, and the hold is always the beam.
+ * <p>
+ * (0.21.28) Andy: vampires "should also get an eye laser that blasts for a second but otherwise functions exactly like
+ * frostborn". Kingdoms' skill bar puts {@link #GAZE_TAG} on a vampire; the same beam then comes out of both eyes, blood red,
+ * for {@link #GAZE_TICKS}: the same reach, damage, pace of hits and wound roll. Being no frost, it freezes no water.
  */
 public final class FrostBeam {
 	/** Damage (1.5 hearts), reach (blocks), the wait between beams (ticks), and the beam's width and life on screen. */
@@ -74,12 +78,19 @@ public final class FrostBeam {
 	public static final float WOUND_CHANCE = 0.4F, CRIPPLE_SHARE = 0.5F;
 	/** Kingdoms puts this on a Frost-born whose hold found the ice prison on its daily cooldown; taken off here. */
 	public static final String BEAM_TAG = "jaymospowers_frost_beam";
+	/** (0.21.28) Kingdoms puts this on a vampire who casts the eye laser from the skill bar; taken off here. */
+	public static final String GAZE_TAG = "jaymospowers_blood_gaze";
+	/** (0.21.28) How long the eye laser blasts (ticks), its colour, and where the eyes are (out along the look, to each side, blocks). */
+	public static final int GAZE_TICKS = 20, GAZE_COLOR = 0xD0101C;
+	public static final double EYE_OUT = 0.3, EYE_SIDE = 0.11;
 
 	private static final boolean KINGDOMS = FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
 	/** When each player last hurt something with it (game time). Not saved: a restart only clears a few seconds. */
 	private static final Map<UUID, Long> LAST = new HashMap<>();
 	/** Who has the beam out, and until when (game time) unless the client says it's still held. */
 	private static final Map<UUID, Long> ON = new HashMap<>();
+	/** (0.21.28) Whose eye laser is out, and until when (game time). */
+	private static final Map<UUID, Long> GAZING = new HashMap<>();
 
 	/** Client → server: the Frost-born's left mouse is still held (the beam stays out). */
 	public record Keep() implements CustomPacketPayload {
@@ -91,6 +102,8 @@ public final class FrostBeam {
 			return TYPE;
 		}
 	}
+
+	private static final net.minecraft.core.particles.DustParticleOptions GAZE_DUST = new net.minecraft.core.particles.DustParticleOptions(GAZE_COLOR, 1.0F);
 
 	private FrostBeam() {
 	}
@@ -122,6 +135,22 @@ public final class FrostBeam {
 				player.removeTag(BEAM_TAG);
 				fire(player);
 			}
+			if (player.entityTags().contains(GAZE_TAG)) {
+				player.removeTag(GAZE_TAG);
+				if (player.isAlive() && !player.isSpectator()) {
+					GAZING.put(player.getUUID(), player.level().getGameTime() + GAZE_TICKS);
+					player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.9F, 1.6F);
+				}
+			}
+		}
+		for (Iterator<Map.Entry<UUID, Long>> it = GAZING.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, Long> on = it.next();
+			ServerPlayer player = server.getPlayerList().getPlayer(on.getKey());
+			if (player == null || !player.isAlive() || player.isSpectator() || player.level().getGameTime() > on.getValue()) {
+				it.remove();
+				continue;
+			}
+			beam(player, true);
 		}
 		for (Iterator<Map.Entry<UUID, Long>> it = ON.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<UUID, Long> on = it.next();
@@ -131,7 +160,7 @@ public final class FrostBeam {
 				it.remove();
 				continue;
 			}
-			beam(player);
+			beam(player, false);
 		}
 	}
 
@@ -144,12 +173,12 @@ public final class FrostBeam {
 		boolean fresh = ON.put(player.getUUID(), level.getGameTime() + KEEP_TICKS) == null;
 		if (fresh) {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2F, 1.8F);
-			beam(player);
+			beam(player, false);
 		}
 	}
 
 	/** One tick of the beam: drawn from the hand to where the look meets something; a hit when the last one's long enough ago. */
-	private static void beam(ServerPlayer player) {
+	private static void beam(ServerPlayer player, boolean gaze) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Vec3 eye = player.getEyePosition();
@@ -166,15 +195,24 @@ public final class FrostBeam {
 		// from the right hand, held out toward where it's aimed
 		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
 		right = right.lengthSqr() < 1.0E-6 ? Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F) : right.normalize();
-		show(level, eye.add(look.scale(HAND_OUT)).add(right.scale(HAND_SIDE)).add(0.0, -HAND_DOWN, 0.0), end);
+		if (gaze) {
+			// (0.21.28) a vampire's: out of both eyes
+			Vec3 eyes = eye.add(look.scale(EYE_OUT));
+			show(level, eyes.add(right.scale(EYE_SIDE)), end, GAZE_COLOR);
+			show(level, eyes.add(right.scale(-EYE_SIDE)), end, GAZE_COLOR);
+		} else {
+			show(level, eye.add(look.scale(HAND_OUT)).add(right.scale(HAND_SIDE)).add(0.0, -HAND_DOWN, 0.0), end, COLOR);
+		}
 		if (now % 2L == 0L) {
-			level.sendParticles(ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 3, 0.08, 0.08, 0.08, 0.02);
+			level.sendParticles(gaze ? GAZE_DUST : ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 3, 0.08, 0.08, 0.08, 0.02);
 		}
 		if (now % HUM_EVERY == 0L) {
-			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.5F, 1.9F);
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.5F, gaze ? 0.9F : 1.9F);
 		}
 		if (target == null) {
-			frost(player, level, eye, end, wall);
+			if (!gaze) {
+				frost(player, level, eye, end, wall);
+			}
 			return;
 		}
 		boolean fighter = com.jaymospowers.core.Powers.has(player, ZFighterPower.INSTANCE);
@@ -183,8 +221,8 @@ public final class FrostBeam {
 			return;
 		}
 		LAST.put(player.getUUID(), now);
-		level.playSound(null, end.x, end.y, end.z, SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.8F, 1.4F);
-		level.sendParticles(ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 12, 0.15, 0.15, 0.15, 0.05);
+		level.playSound(null, end.x, end.y, end.z, gaze ? SoundEvents.PLAYER_HURT_ON_FIRE : SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.8F, 1.4F);
+		level.sendParticles(gaze ? GAZE_DUST : ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 12, 0.15, 0.15, 0.15, 0.05);
 		strike(player, target, fighter ? Z_DAMAGE + Z_PER_MASTERY * com.jaymospowers.core.Mastery.unlocked(player) : DAMAGE);
 	}
 
@@ -237,8 +275,8 @@ public final class FrostBeam {
 	}
 
 	/** The beam, drawn for everyone near for a couple of ticks (it's sent again each tick while held): hair-thin, all white. */
-	private static void show(ServerLevel level, Vec3 from, Vec3 to) {
-		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(from.x, from.y, from.z, to.x, to.y, to.z, RADIUS, COLOR, HELD_STYLE, SHOWN_TICKS);
+	private static void show(ServerLevel level, Vec3 from, Vec3 to, int color) {
+		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(from.x, from.y, from.z, to.x, to.y, to.z, RADIUS, color, HELD_STYLE, SHOWN_TICKS);
 		Vec3 middle = from.lerp(to, 0.5);
 		for (ServerPlayer viewer : level.players()) {
 			if (viewer.position().distanceToSqr(middle) <= ZFighterKi.BEAM_SEEN * ZFighterKi.BEAM_SEEN) {

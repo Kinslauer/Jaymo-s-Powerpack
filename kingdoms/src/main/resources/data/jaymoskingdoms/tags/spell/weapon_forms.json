@@ -24,6 +24,9 @@
     "jaymoskingdoms:move_tendril",
     "jaymoskingdoms:move_spikes",
     "jaymoskingdoms:move_consume",
-    "jaymoskingdoms:move_shroud"
+    "jaymoskingdoms:move_shroud",
+    "jaymoskingdoms:night_dash",
+    "jaymoskingdoms:night_pound",
+    "jaymoskingdoms:night_gaze"
   ]
 }

@@ -1252,3 +1252,8 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   - **Cyclone Lance**: a 1.2 s wind-up (lead arm drawn back, the other aiming, wind spiralling in), then a bigger spiral
     shot with a line of wind down its middle flies out (3 blocks a tick); hit radius 0.6 to 1.1, same damage, stun and
     Stormbound bolts.
+
+## 0.21.28: Blood Gaze
+- `FrostBeam`: a player tagged `jaymospowers_blood_gaze` (Kingdoms' vampire skill bar) gets the Frost-born beam out of both
+  eyes, blood red, for `GAZE_TICKS` (20): same reach, damage, hit cooldown and wound roll, red dust instead of snow, no
+  freezing water or putting out fire. Built, not played.
