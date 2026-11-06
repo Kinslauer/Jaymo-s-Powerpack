@@ -9956,3 +9956,19 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Where: the first of each orc camp's ogre band, two inside each new ogre hold's gate, and one in five of a hold's
   recruits. Drops iron as well as an ogre's spoils.
 - Art: `tools/armoured_ogre_assets.py` (the ogre's skin recoloured; plate and shield our own). Model: `ArmouredOgreModel`.
+
+## 0.7.624 (2026-11-06): Rivals patch 5, it takes from you
+- **The cut (`BaneCut`):** while your Bane lives, 15% of your job wages, bounty rewards, stall sales and merchant-order
+  sales goes to it (5% more for each place it holds, at most 40%), with a line saying how much. About once a day it also
+  takes a coin's worth from your purse. All of it is counted: end it or swear it and you get it all back with half again
+  more, in the coin of wherever you stand.
+- **Its claims:** three days after it first takes from you, and every three days after, it claims the nearest town or
+  village to you that no Bane holds (at most five; never a barbarian camp). The place and the roads out of it (128 blocks
+  from its seat) are its: now and then two of its men come at you there. Kill three of its men there (anyone can) and the
+  place is free. Every claim, freeing and letting go goes on the town boards.
+- **Its hounds:** two branded feral wolves (three from rank three). When you've bled in the last five minutes, are alone
+  (no other player within 48 blocks) and outside any town's land, they come up your blood trail from 24-32 blocks off and
+  stalk you as wild wolves do (`WolfStalkers`). A hunt ends after three minutes or if you get 96 blocks away. Each one
+  killed puts its next claim off a day; kill them all and it has new ones three days later. Only you see the brand's wisp.
+  Without Powers (no blood trails) they come when you're under half health instead.
+- Lines: `lang/parts/bane.json`. Built, not played.

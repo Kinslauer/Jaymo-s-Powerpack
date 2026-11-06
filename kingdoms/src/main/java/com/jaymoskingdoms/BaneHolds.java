@@ -54,7 +54,7 @@ import org.jspecify.annotations.Nullable;
  * bar shows how near it is. Held, the heart breaks and the gate falls in: its ward is gone, and it can be ended.</li>
  * <li>Left standing (not ended) it rebuilds after {@link #REBUILD_DAYS} days. Ended or sworn, the ruin stays.</li>
  * </ul>
- * Its hounds (patch 5) aren't in yet.
+ * (0.7.624) Its hounds and claims are {@link BaneCut}'s.
  */
 public final class BaneHolds {
 	// ================================================================================================================

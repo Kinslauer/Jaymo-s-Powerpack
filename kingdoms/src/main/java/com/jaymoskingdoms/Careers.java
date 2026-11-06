@@ -872,7 +872,8 @@ public final class Careers {
 					Storage.put(store, f, good, APPRENTICE_GOODS);
 				}
 			}
-			Currencies.Pay payout = new Currencies.Pay(money, paid, paidBits);
+			// ((0.7.624) less a Bane's cut)
+			Currencies.Pay payout = BaneCut.cut(player, new Currencies.Pay(money, paid, paidBits));
 			Currencies.give(player, payout);
 			player.sendSystemMessage(Component.translatable(paidMilli < owedMilli ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
 				payout.isEmpty() ? Currencies.amount(money, 0L) : Currencies.amount(payout), f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
@@ -945,7 +946,8 @@ public final class Careers {
 				money = Currency.SILVER;
 			}
 			// (0.7.498) whole coins, and the change in bits
-			Currencies.Pay coins = Currencies.pay(money, Money.worth(earned));
+			// ((0.7.624) less a Bane's cut)
+			Currencies.Pay coins = BaneCut.cut(player, Currencies.pay(money, Money.worth(earned)));
 			for (ItemStack each : coins.stacks()) {
 				ItemStack pay = each;
 				for (int slot = 0; slot < box.getContainerSize() && !pay.isEmpty(); slot++) {

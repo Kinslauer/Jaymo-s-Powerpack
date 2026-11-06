@@ -227,6 +227,8 @@ public final class Banes {
 		// ((0.7.621) its element weapon, and its hold at rank five)
 		BaneArms.register();
 		BaneHolds.register();
+		// ((0.7.624) its cut, its claims and its hounds)
+		BaneCut.register();
 		// (a band never harms its own: the knight's dead leave his grave-robbers be)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((victim, source, amount) -> {
 			String mine = VISITS.isEmpty() || source.getEntity() == null ? null : bandOf(victim);
@@ -497,7 +499,7 @@ public final class Banes {
 		if (!ground) {
 			// ((0.7.620) off its ground, or while it heals: now and then some of its men, who carry its marks)
 			if (level.getRandom().nextFloat() < MEN_CHANCE) {
-				men(level, p, c);
+				men(level, p, c, MEN);
 			}
 			return;
 		}
@@ -570,17 +572,17 @@ public final class Banes {
 	}
 
 	/** (0.7.620) Some of its men turn up in {@code p}'s fight without it, each with one of its marks; a line from the first. */
-	private static void men(ServerLevel level, ServerPlayer p, Captain c) {
+	private static boolean men(ServerLevel level, ServerPlayer p, Captain c, int count) {
 		RandomSource random = level.getRandom();
 		Rivals.Side kind = Rivals.side(c.tribe());
 		BlockPos spot = approach(level, p, random);
 		if (spot == null) {
-			return;
+			return false;
 		}
 		VISITS.put(c.tribe(), new Visit(level.getGameTime(), true));
 		List<UUID> band = new ArrayList<>();
 		PathfinderMob first = null;
-		for (int i = 0; i < MEN; i++) {
+		for (int i = 0; i < count; i++) {
 			BlockPos at = spot.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2);
 			PathfinderMob m = follower(level, kind, true, c.tribe(), Construction.standable(level, at, 2), random);
 			if (m != null) {
@@ -592,11 +594,25 @@ public final class Banes {
 		}
 		if (first == null) {
 			VISITS.remove(c.tribe());
-			return;
+			return false;
 		}
 		BANDS.put(c.tribe(), band);
 		Speech.say(level, first, Component.translatable("bane.jaymoskingdoms." + kind(kind) + ".men." + random.nextInt(LINES), Recollections.nameTo(p, first),
 			Component.literal(c.name())), Speech.RED, Captains.SAY_RANGE);
+		return true;
+	}
+
+	/** (0.7.624, for BaneCut) {@code count} of its men come at {@code p} in a place it holds. True if any came. */
+	static boolean claimMen(ServerLevel level, ServerPlayer p, Captain c, int count) {
+		if (VISITS.containsKey(c.tribe()) || Captains.filming(p) || PowersCompat.filming(p)) {
+			return false;
+		}
+		return men(level, p, c, count);
+	}
+
+	/** (0.7.624, for BaneCut) It, or some of its men, are about just now. */
+	static boolean visiting(String ladder) {
+		return VISITS.containsKey(ladder);
 	}
 
 	/** Where it comes from: on the ground {@link #ARRIVE_MIN}-{@link #ARRIVE_MAX} off, near {@code p}'s height. */
