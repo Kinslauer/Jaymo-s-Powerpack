@@ -1322,3 +1322,11 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 ## 0.21.35: Kitchen's quiver fits the body bauble slot
 - `baubles/body` tag takes `jaymoskitchen:quiver` (Kitchen 0.5.82 feeds bows from it there and draws every worn quiver,
   the RPG Series' too, animated on the back). Data only.
+
+## 0.21.36: the sprint slide needs a 1.5 s hold
+- Andy: "sprint slide should be activated after 1.5s of holding, it still activates too easy". `Slide.HOLD_TICKS` 4 -> 30
+  (1.5 s). While Sneak is held in a run short of that, `FreerunClient.slideWindup` keeps the Sneak bit off the movement
+  (`StanceInputMixin`), so you keep running at full pace (sprint and fast run kept); a tap or a short hold does nothing and
+  letting go early just runs on. Held the full 1.5 s, the slide starts as before (belly dive out of a fast run, back slide
+  out of a sprint; still held at the end = prone). The server's `Slide.valid` no longer checks Sneak (the client keeps it
+  off through the hold). `SPRINT_GRACE_TICKS` stays 8. Compile-checked against the 26.3 jars; not played.

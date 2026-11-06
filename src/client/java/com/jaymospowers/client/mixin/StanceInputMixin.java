@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.18.57) A held sneak or low crouch keeps the Sneak bit down without the key; standing by the wheel lets it up. (0.18.80)
- * On the knee in the low crouch the walking keys are dropped.
+ * On the knee in the low crouch the walking keys are dropped. (0.21.36) While Sneak is held toward a sprint slide (the 1.5 s
+ * hold, {@code FreerunClient.slideWindup}), the Sneak bit is kept off so the run goes on.
  */
 @Mixin(KeyboardInput.class)
 abstract class StanceInputMixin extends ClientInput {
@@ -22,6 +23,13 @@ abstract class StanceInputMixin extends ClientInput {
 		Input k = this.keyPresses;
 		if (shift != null && shift != k.shift()) {
 			this.keyPresses = new Input(k.forward(), k.backward(), k.left(), k.right(), k.jump(), shift, k.sprint());
+		}
+		// (0.21.36) Sneak held toward a sprint slide: the run goes on, no sneak, till the hold is long enough to slide
+		if (com.jaymospowers.client.freerun.FreerunClient.slideWindup()) {
+			k = this.keyPresses;
+			if (k.shift()) {
+				this.keyPresses = new Input(k.forward(), k.backward(), k.left(), k.right(), k.jump(), false, k.sprint());
+			}
 		}
 		// (0.18.80) settled onto the knee in the low crouch: you stay put till you change stance
 		if (StanceScroll.kneelHeld()) {
