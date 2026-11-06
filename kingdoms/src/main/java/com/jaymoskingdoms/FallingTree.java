@@ -739,7 +739,8 @@ public final class FallingTree extends Entity {
 
 	/** Whether a giant's hand at {@code at} could close on a tree within {@code reach}: a fallen one, or one standing. */
 	public static boolean treeNear(ServerLevel level, Vec3 at, double reach, int mostLogs) {
-		return fallenNear(level, at, reach, mostLogs) != null || standingNear(level, at, reach) != null;
+		return fallenNear(level, at, reach, mostLogs) != null || FelledCompat.near(level, at, reach, mostLogs) != null
+			|| standingNear(level, at, reach) != null;
 	}
 
 	/**
@@ -748,6 +749,11 @@ public final class FallingTree extends Entity {
 	 */
 	public static @Nullable Entity take(ServerLevel level, Vec3 at, double reach, Entity giant, int mostLogs) {
 		FallingTree tree = fallenNear(level, at, reach, mostLogs);
+		if (tree == null) {
+			// (0.7.627) one Felled brought down: it becomes ours in the giant's hand
+			Entity felled = FelledCompat.near(level, at, reach, mostLogs);
+			tree = felled == null ? null : FelledCompat.adopt(level, felled);
+		}
 		if (tree == null) {
 			BlockPos log = standingNear(level, at, reach);
 			tree = log == null ? null : Trees.pluck(level, log, mostLogs);
@@ -765,6 +771,23 @@ public final class FallingTree extends Entity {
 		tree.struck.add(giant.getUUID());
 		level.playSound(null, tree.getX(), tree.getY(), tree.getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.BLOCKS, 1.6F, 0.6F);
 		level.playSound(null, tree.getX(), tree.getY(), tree.getZ(), SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
+		return tree;
+	}
+
+	/**
+	 * (0.7.627) A tree of these {@code pieces} (upright, as it stood, {@code x}/{@code z} from its trunk and {@code y} from its
+	 * middle) made ours at {@code at}, heading {@code heading}: for a tree another mod brought down ({@link FelledCompat}).
+	 */
+	static @Nullable FallingTree adopt(ServerLevel level, Vec3 at, List<Piece> pieces, float heading) {
+		if (pieces.isEmpty()) {
+			return null;
+		}
+		FallingTree tree = new FallingTree(TYPE, level);
+		tree.setPos(at);
+		tree.setAttached(PIECES, List.copyOf(pieces));
+		tree.setAttached(HEADING, heading);
+		tree.flying = true;
+		level.addFreshEntity(tree);
 		return tree;
 	}
 

@@ -10014,4 +10014,8 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Our break handler runs in its own phase ahead of the default one (`Trees.CHOPPING`), so Felled never sees a chop in
   progress as a log broken whole. Sneak-breaking a single log, creative, and logs we don't chop are left to Felled's own rules.
 - Blasts, giants (grab and throw), tornadoes, gatherers, Grimsby's axe and trunks with nothing under them still use our
-  falling trees. Hint 121 (HINTS=121). Built, not played; Felled's own felling not seen in our pack yet.
+  falling trees. Andy: "so if a player cuts a tree down and a giant tried to grab it it wouldnt work?" It does now: a
+  giant's grab (`FallingTree.treeNear`/`take`, so the Great Ape, Towerback and the Aether Giants) also finds a tree Felled
+  brought down (`FelledCompat.near`, by Zarith's solid bounds) and makes it ours (`FelledCompat.adopt`: its live grid cells
+  as pieces, upright as it stood, heading the way its trunk lay; Felled's entity discarded), then lifts and throws it as
+  before. Assumes Felled's grid keeps the tree's standing frame (not seen in game). Hint 121 (HINTS=121). Built, not played; Felled's own felling not seen in our pack yet.
