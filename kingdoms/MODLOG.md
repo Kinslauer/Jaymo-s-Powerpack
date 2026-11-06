@@ -9801,3 +9801,26 @@ tribes had now belong to every side that fights you (ideas from Shadow of War: o
   look, +0.3 up, slams into walls for 5). With food level 16+ it bursts through anything softer than stone in its path
   for the first 6 blocks. It drops if it goes down or dies, if you're downed or hurt off it, or if you hold something.
   `BloodGrabPose`: the main arm raised in front, leaning back, shaking as you drink. Hint 120. Built, not played.
+
+## 0.7.616 (2026-11-06): Rivals patch 1, more to be
+- **15 new captain traits** (`Captains.Trait`, doings in the new `CaptainWays`): reads your parries (two parries and his
+  blows go past your guard for 10 s, via Powers' `Guard.PARRIED`), follows blood (comes for a bleeding player within 32),
+  runs a wolf pack (2 wolves, once a fight, gone after a minute), watchful (sees sneaking or invisible players within 14),
+  witch hunter (spells, ki and any Powers/Kingdoms damage at half), executioner (x2 on the downed, goes for them),
+  prayerful (a second wind under 30%), iron-clad (+6 armour, 15% slower), rock thrower, shield bearer (a shield that takes
+  front blows at 0.4), iron jaw (blunt and fists at half); heavy-footed (20% slower), a sot (a quarter of his blows
+  miss), bargains for his life (under 25%: drops 6 bent worth and runs 10 s); fears guns (a gun shot at or near him).
+  Clashes: watchful/blind side, iron jaw/glass jaw, iron-clad/heavy-footed, wolf pack/fears beasts.
+- **They learn from how they lost:** players' blows on a captain are tallied by kind (fire, shot, blunt, blade, magic,
+  beast). One who comes back swaps in the answer (fire-born; shield bearer, or arrow-proof if he had one; iron jaw; thick
+  hide; witch hunter; wolf pack and no more fear of beasts), loses the flaw it answers, carries its mark, and his return
+  on the boards says what he learned. The player who felled him learns his new trait. The journal only lists traits he
+  still has.
+- **Marks you can see:** burned face, eye patch, iron jaw, stitched cheek, pale eye, claw rakes. Kept as `mark:*` in
+  his scars, sent to clients by the synced `captain_marks` attachment, drawn by `CaptainMarks` on any humanoid model (on
+  MCA's body when MCA draws him). Textures painted by `kingdoms/tools/gen_scars.py`. Illagers don't show them. Hook hand
+  and wooden leg are left for later.
+- **Signature moves:** rank 4 and up get one (shield charge, ground slam, thrown axe, crushing grab), each with a red
+  glint and Powers' incoming warning first, unparryable (a guard still blocks), every 8-12 s. Shouted lines for each.
+- Lines in the common tongue, orc and goblin: `lang/parts/captain-ways.json`. Questioning's lies only name weaknesses
+  and fears. Built, not played.

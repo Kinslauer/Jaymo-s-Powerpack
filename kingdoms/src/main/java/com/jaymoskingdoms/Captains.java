@@ -170,7 +170,8 @@ public final class Captains {
 	static final String ORDERS_CAPTAIN = "jaymoskingdoms_orders_captain", ORDERS_TRAIT = "jaymoskingdoms_orders_trait";
 
 	enum Sort {
-		STRENGTH, WEAKNESS, FEAR
+		/** (0.7.616) MOVE: a signature move of his own, from rank {@link CaptainWays#MOVE_RANK} ({@link CaptainWays}). */
+		STRENGTH, WEAKNESS, FEAR, MOVE
 	}
 
 	/** What a captain is good at, bad at, or afraid of. */
@@ -205,6 +206,42 @@ public final class Captains {
 		FEARS_BEASTS(Sort.FEAR),
 		/** Bleeding and hurt: he runs. */
 		FEARS_BLOOD(Sort.FEAR),
+		// ---- (0.7.616, Rivals patch 1) more to be: what each does is in CaptainWays ----
+		/** Parry him twice and he's read your guard: his blows go past it a while. */
+		PARRY_READER(Sort.STRENGTH),
+		/** Smells out anyone bleeding near, and comes for them. */
+		BLOOD_TRACKER(Sort.STRENGTH),
+		/** Calls wolves to his fight. */
+		PACK_LEADER(Sort.STRENGTH),
+		/** Sees you sneaking, or unseen. */
+		WATCHFUL(Sort.STRENGTH),
+		/** Spells, ki and powers land at half. */
+		WITCH_HUNTER(Sort.STRENGTH),
+		/** Hits the downed twice as hard, and goes for them. */
+		EXECUTIONER(Sort.STRENGTH),
+		/** Once, badly hurt, a second wind. */
+		PRAYERFUL(Sort.STRENGTH),
+		/** Armoured in iron, and slower for it. */
+		IRON_CLAD(Sort.STRENGTH),
+		/** Throws rocks at you from afar. */
+		ROCK_THROWER(Sort.STRENGTH),
+		/** A shield that turns blows from the front. */
+		SHIELD_BEARER(Sort.STRENGTH),
+		/** Blunt blows and fists land at half. */
+		IRON_JAW(Sort.STRENGTH),
+		/** Slow on his feet. */
+		HEAVY_FOOTED(Sort.WEAKNESS),
+		/** Drunk: a quarter of his blows miss. */
+		SOT(Sort.WEAKNESS),
+		/** Near beaten, he buys his life with coin and runs. */
+		BARGAINER(Sort.WEAKNESS),
+		/** A shot at him, or near him: he runs. */
+		GUN_SHY(Sort.FEAR),
+		/** Signature moves (rank 4 and up), each with a red glint first. */
+		SHIELD_CHARGE(Sort.MOVE),
+		GROUND_SLAM(Sort.MOVE),
+		AXE_THROW(Sort.MOVE),
+		CRUSHING_GRAB(Sort.MOVE),
 		/**
 		 * (Andy) Raised from a death nothing else comes back from, by corrupted magic or a necromancer: no fear left in
 		 * him, tougher and harder-hitting ({@link #DEATHLESS_HEALTH}, {@link #DEATHLESS_DAMAGE}). Never rolled; only the raised have it.
@@ -227,7 +264,9 @@ public final class Captains {
 
 		/** The two can't go together in one captain. */
 		boolean clashes(Trait other) {
-			return pair(other, ARROW_PROOF, SOFT_TO_ARROWS) || pair(other, FIRE_BORN, BURNS_EASILY) || pair(other, FIRE_BORN, FEARS_FIRE);
+			return pair(other, ARROW_PROOF, SOFT_TO_ARROWS) || pair(other, FIRE_BORN, BURNS_EASILY) || pair(other, FIRE_BORN, FEARS_FIRE)
+				|| pair(other, WATCHFUL, BLIND_SIDE) || pair(other, IRON_JAW, GLASS_JAW) || pair(other, IRON_CLAD, HEAVY_FOOTED)
+				|| pair(other, PACK_LEADER, FEARS_BEASTS);
 		}
 
 		private boolean pair(Trait other, Trait a, Trait b) {
@@ -324,6 +363,11 @@ public final class Captains {
 
 		Captain renamed(String newName) {
 			return new Captain(id, tribe, newName, rank, traits, post, body, chief, fallen, trophy, slain, met, back, scars, brother);
+		}
+
+		/** (0.7.616) With {@code newScars} for the parts he's lost and the marks he carries. */
+		Captain scarred(List<String> newScars) {
+			return new Captain(id, tribe, name, rank, traits, post, body, chief, fallen, trophy, slain, met, back, newScars, brother);
 		}
 
 		Captain brothered(String other) {
@@ -439,6 +483,7 @@ public final class Captains {
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Captains::died);
+		CaptainWays.register();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Captains::filmHarm);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> hurt(victim, source, taken, blocked));
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -522,7 +567,7 @@ public final class Captains {
 		for (int n = 0; n < 40 && (strengths > 0 || flaws > 0); n++) {
 			Trait t = Trait.values()[random.nextInt(Trait.values().length)];
 			boolean strong = t.sort == Sort.STRENGTH;
-			if (t == Trait.DEATHLESS || (strong ? strengths : flaws) <= 0 || picked.contains(t) || picked.stream().anyMatch(t::clashes)) {
+			if (t == Trait.DEATHLESS || t.sort == Sort.MOVE || (strong ? strengths : flaws) <= 0 || picked.contains(t) || picked.stream().anyMatch(t::clashes)) {
 				continue;
 			}
 			picked.add(t);
@@ -825,6 +870,8 @@ public final class Captains {
 
 	/** As {@link #bind}; {@code dress}: the head he wears goes on now (else at his scene's height, {@link #slew}). */
 	private static void bind(ServerLevel level, Captain c, LivingEntity mob, boolean dress) {
+		// ((0.7.616) rank 4 and up: a move of his own)
+		c = CaptainWays.withMove(c, mob.getRandom());
 		McaCompat.rename(mob, c.name());
 		for (String tag : List.copyOf(mob.entityTags())) {
 			if (tag.startsWith(ID_TAG) || tag.startsWith(TRAIT_TAG)) {
@@ -854,6 +901,8 @@ public final class Captains {
 				PowersCompat.bornWithout(mob, bit);
 			}
 		}
+		// ((0.7.616) his iron, his shield, his marks)
+		CaptainWays.dress(c, mob);
 		put(level.getServer(), c.withBody(mob.getUUID()));
 	}
 
@@ -1051,6 +1100,10 @@ public final class Captains {
 			call(level, mob, target);
 			return true;
 		}
+		if (CaptainWays.step(level, mob, c, target)) {
+			// ((0.7.616) his move holds him)
+			return true;
+		}
 		if (has(mob, Trait.DEATHLESS) && mob.tickCount % 8 == 0) {
 			// (raised: the corruption that holds him together)
 			level.sendParticles(mob.getRandom().nextBoolean() ? ParticleTypes.SOUL : ParticleTypes.SMOKE, mob.getRandomX(0.6), mob.getRandomY(), mob.getRandomZ(0.6),
@@ -1116,6 +1169,12 @@ public final class Captains {
 			LivingEntity by = mob.getLastHurtByMob();
 			from = by != null ? by.position() : mob.position();
 		}
+		if (fear == null && has(mob, Trait.GUN_SHY) && CaptainWays.gunShy(mob, now)) {
+			// ((0.7.616) a shot at him or near him)
+			fear = Trait.GUN_SHY;
+			LivingEntity by = mob.getLastHurtByMob();
+			from = by != null ? by.position() : mob.position();
+		}
 		if (fear == null) {
 			return false;
 		}
@@ -1160,6 +1219,15 @@ public final class Captains {
 		}
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 1.2F, 1.1F);
 		Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.rally." + mob.getRandom().nextInt(LINES)), Speech.RED, SAY_RANGE);
+	}
+
+	/** (0.7.616) {@code mob} runs from {@code from} for {@code ticks}. */
+	static void scare(PathfinderMob mob, Vec3 from, int ticks) {
+		long now = mob.level().getGameTime();
+		FEARED.put(mob.getUUID(), now + ticks);
+		FEARED_FROM.put(mob.getUUID(), from);
+		FEAR_READY.put(mob.getUUID(), now + ticks + FEAR_AGAIN);
+		mob.setTarget(null);
 	}
 
 	/** (0.7.614, Rivals) A timid captain calls his own near to his foe, and keeps back from it a while. */
@@ -1318,9 +1386,14 @@ public final class Captains {
 
 	/** (From {@code LivingEntityHurtMixin}) a blow on a captain, as his traits take it. */
 	public static float dealt(LivingEntity self, DamageSource source, float amount) {
+		if (amount > 0.0F && source.getEntity() instanceof LivingEntity giver && giver != self && is(giver)) {
+			// ((0.7.616) an executioner's blow on the downed)
+			amount = CaptainWays.gives(giver, self, source, amount);
+		}
 		if (amount <= 0.0F || !is(self)) {
 			return amount;
 		}
+		amount = CaptainWays.takes(self, source, amount);
 		boolean fire = source.is(DamageTypeTags.IS_FIRE), shot = source.is(DamageTypeTags.IS_PROJECTILE);
 		if (fire && has(self, Trait.FIRE_BORN)) {
 			return 0.0F;
@@ -1355,6 +1428,8 @@ public final class Captains {
 		}
 		long now = level.getGameTime();
 		Entity by = source.getEntity();
+		// ((0.7.616) tallied for what he learns; the gun-shy, the prayerful, the bargainer)
+		CaptainWays.hurt(level, victim, source, taken);
 		if (is(victim)) {
 			Captain c = of(victim);
 			if (c != null && by instanceof ServerPlayer player) {
@@ -1418,6 +1493,15 @@ public final class Captains {
 			traits.add(Trait.DEATHLESS.key());
 			c = c.climbed(Math.min(Rivals.rankMax(server), c.rank() + 1), List.copyOf(traits), c.trophy(), c.slain());
 		}
+		// ((0.7.616) one who comes back has learned from how he lost)
+		Captain before = c;
+		Captain learned = CaptainWays.adapt(c, server);
+		if (returns) {
+			c = learned;
+			if (source.getEntity() instanceof ServerPlayer killer) {
+				CaptainWays.killerLearns(killer, before, c);
+			}
+		}
 		long back = returns ? now + 24000L * (RETURN_DAYS_MIN + random.nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
 		put(server, c.fell(back, lost));
 		FIGHTS.remove(c.id());
@@ -1426,6 +1510,7 @@ public final class Captains {
 			Spoils.captainFell(level, entity, c.rank(), source);
 		}
 		UUID id = entity.getUUID();
+		CaptainWays.forget(id);
 		FEARED.remove(id);
 		FEAR_READY.remove(id);
 		FEARED_FROM.remove(id);
@@ -1510,6 +1595,11 @@ public final class Captains {
 				continue;
 			} else {
 				put(server, c.returned(quietest(server, c.tribe(), camps)));
+			}
+			// ((0.7.616) word of what he learned)
+			Captain back = get(server, c.id());
+			if (back != null) {
+				put(server, CaptainWays.learnedNews(server, back));
 			}
 			// (4b) his death threats for whoever killed him
 			SwornCaptains.back(server, c);
@@ -1946,7 +2036,7 @@ public final class Captains {
 		if (lies) {
 			List<Trait> false_ = new ArrayList<>();
 			for (Trait x : Trait.values()) {
-				if (x.sort != Sort.STRENGTH && !c.has(x)) {
+				if ((x.sort == Sort.WEAKNESS || x.sort == Sort.FEAR) && !c.has(x)) {
 					false_.add(x);
 				}
 			}
@@ -2010,7 +2100,8 @@ public final class Captains {
 			boolean foe = sworn.contains(id);
 			Faction post = c.post() < 0 ? null : Factions.get(server, c.post());
 			MutableComponent text = Component.translatable("journal.jaymoskingdoms.captain.rank." + Math.max(1, Math.min(RANK_MAX, c.rank())));
-			List<String> known = known(player, id);
+			// ((0.7.616) what he's since lost isn't his any more)
+			List<String> known = known(player, id).stream().filter(c.traits()::contains).toList();
 			if (known.isEmpty()) {
 				text.append(" ").append(Component.translatable("journal.jaymoskingdoms.captain.nothing_known"));
 			} else {

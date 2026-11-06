@@ -1809,6 +1809,36 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * (0.7.616) Tells {@code listener} of every parry on the server (the player and whom they parried, null for an arrow), by
+	 * listening on Powers' {@code Guard.PARRIED} event. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void onParry(java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, @Nullable LivingEntity> listener) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> parry = Class.forName("com.jaymospowers.combat.Guard$Parry");
+			Object event = Class.forName("com.jaymospowers.combat.Guard").getField("PARRIED").get(null);
+			Object proxy = java.lang.reflect.Proxy.newProxyInstance(parry.getClassLoader(), new Class<?>[] {parry}, (self, method, args) -> {
+				if ("parried".equals(method.getName()) && args != null && args.length >= 2) {
+					listener.accept((net.minecraft.server.level.ServerPlayer)args[0], (LivingEntity)args[1]);
+					return null;
+				}
+				return switch (method.getName()) {
+					case "hashCode" -> System.identityHashCode(self);
+					case "equals" -> self == args[0];
+					case "toString" -> "Kingdoms parry listener";
+					default -> null;
+				};
+			});
+			((net.fabricmc.fabric.api.event.Event<Object>)event).register(proxy);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Guard.PARRIED (older Powers?)", e);
+		}
+	}
+
+	/**
 	 * (0.7.383) Tells {@code listener} of every tool with iron (or better) in it taken from one of Powers' Tool Stations (the
 	 * builder and the tool): Powers' {@code Tinkering.TOOL_BUILT_LISTENERS}. Nothing happens without Powers (or an older one).
 	 */
