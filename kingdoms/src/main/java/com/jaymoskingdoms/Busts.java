@@ -305,9 +305,12 @@ public final class Busts {
 				guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 1.0F, 0.8F);
 				Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.executed", name, f.name()));
-				// beheaded: nothing to get up from
-				player.addTag(Arrests.HEADLESS_TAG);
-				BEHEADED.add(player.getUUID());
+				// beheaded: nothing to get up from. (0.7.639) Andy: "decapitations should only ever happen to downed players",
+				// so one still on their feet is cut down with their head on
+				if (Downed.isDowned(player)) {
+					player.addTag(Arrests.HEADLESS_TAG);
+					BEHEADED.add(player.getUUID());
+				}
 				player.kill(level);
 			}
 		}

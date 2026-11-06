@@ -10128,3 +10128,7 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   which knocks on in turn), with the same crack sounds; at most `FallingTree.KNOCKS_MOST` (4) a tree, never its own stump
   (`STUMP`, 1.6 blocks round where its trunk first stood). All by reflection on Felled's public `trunkTop`, `trunkStart`
   and `cellToWorld`, nothing of Felled's copied. Built, not played.
+
+## 0.7.639: the block only beheads the downed
+- `Busts` execution: a player sentenced to the block is killed with their head on unless they're downed (Andy:
+  "decapitations should only ever happen to downed players"). Gradle compile clean; not played.

@@ -657,6 +657,9 @@ public final class Dismember {
 		if (!(target.level() instanceof ServerLevel level) || (missing(target) & part) != 0) {
 			return false;
 		}
+		if (part == HEAD && blast == null && !playerHeadMayGo(target)) {
+			return false;
+		}
 		int mask = missing(target) | part;
 		target.setAttached(MISSING, mask);
 		target.addTag(tag(part));
@@ -709,6 +712,16 @@ public final class Dismember {
 			default -> legs(target, mask);
 		}
 		return true;
+	}
+
+	/**
+	 * (0.21.34) Andy: "decapitations should only ever happen to downed players". A player keeps their head unless they're
+	 * downed: no crit, overkill, finisher, mob chop, archer pin or beam takes it off a player still on their feet (the blow
+	 * lands as it otherwise would, without the beheading). Mobs and villagers are as before. A body blown apart by a blast
+	 * ({@link BlastGore}) still goes all at once.
+	 */
+	public static boolean playerHeadMayGo(LivingEntity target) {
+		return !(target instanceof Player) || Downed.isDowned(target);
 	}
 
 	/**

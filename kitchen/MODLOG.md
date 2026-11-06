@@ -1550,3 +1550,7 @@ mobs should be possible".
   wherever it came from (a sip from a river, swamp or puddle, a pond bottle, a dirty waterskin). They still get the water.
   Kingdoms sets it for the Iron Stomach perk (Andy: "the rotten meat eating skill should let you drink water from wherever
   too"). Gradle compile clean; not played.
+
+## 0.5.81: headless player bodies stay down
+- `CorpseEntity`: a player's corpse missing its head never rises as a `ZombiePlayer` (Andy: "decapitated player corpses
+  cant reanimate"). It lies there with what was on it, searchable as before. Gradle compile clean; not played.
