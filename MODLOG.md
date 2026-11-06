@@ -1181,3 +1181,9 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
 - **Counter one, turn to the next:** a parry while another foe's blow is coming turns you to face him. Parries within 3 s
   of each other chain, each link making the riposte 15% harder, up to +60%.
 - Spec: `docs/Combat-Feel-Spec.md`.
+- **0.21.21, "Resource reload failed" (MCA's blur shader):** joining could fail a resource reload, and Minecraft then
+  switched off every selected resource pack (Fresh Animations, FA+Player, so Touch'n Motion had no model). MCA's
+  `sirben` post effect (`mca:post/blur_centered`) was GLSL without `layout(location = ...)` on its in/out, which 26.3's
+  SPIR-V shader compiler rejects ("SPIR-V requires location for user input/output"). Patched that one shader inside
+  `libs/mca-fabric-7.8.0-dev.3badc42+26.3.jar` (MCA Reborn is GPL-3) the way vanilla 26.3's `post/box_blur.fsh` does it:
+  `GL_ARB_separate_shader_objects` and location 0 on `texCoord` and `fragColor`. Not run here.
