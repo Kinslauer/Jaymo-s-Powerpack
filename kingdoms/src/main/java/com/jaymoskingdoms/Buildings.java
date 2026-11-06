@@ -98,6 +98,7 @@ final class Buildings {
 				dnt(type, "farmhouse", 1, 36);
 				dnt(type, "firewatch_tower", 2, 40);
 			}
+			dnt(FactionType.KINGDOM, "graveyard", 1, 50);
 			dnt(FactionType.VILLAGE, "apiary", 1, 12);
 			dnt(FactionType.VILLAGE, "farmhouse", 1, 16);
 			dnt(FactionType.VILLAGE, "sawmill", 1, 20);

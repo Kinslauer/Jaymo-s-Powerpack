@@ -30,11 +30,12 @@ import org.jspecify.annotations.Nullable;
  * <li>the <b>well</b>: D&T's well in the land's wood;</li>
  * <li>the <b>smithy</b>, on the tries CTOV's ({@link CtovHalls}) doesn't take: D&T's forest smith or ruined smith;</li>
  * <li>new buildings, only while D&T is installed: a <b>sawmill</b>, a <b>farmhouse</b> (the ruined farmer's), an
- * <b>apiary</b> (the bee keeper's) and, in realms, a <b>firewatch tower</b> in the land's wood.</li>
+ * <b>apiary</b> (the bee keeper's) and, in realms, a <b>firewatch tower</b> in the land's wood and, in kingdoms, a
+ * <b>graveyard</b> (bigger than a plot: {@link #MAX_SIDE}).</li>
  * </ul>
  * D&T scatters most of these as overgrown ruins; ours go up whole, without the cobwebs, leaves and weeds. The yard pieces
  * D&T joins round its taverns and wells in the wild (carts, stalls, the shaft under a well) aren't built. Too big for a
- * crew's plot ({@link Plots#MAX_SIDE}): the graveyard and the dappled town hall; the hamlet is a piglin bunker.
+ * crew to put up: the dappled town hall (40 x 48, and D&T joins some twenty more pieces onto it); the hamlet is a piglin bunker.
  * <p>
  * Like CTOV's halls, a variant staked from this version on carries {@link #MARK} (every second try for the tavern, well
  * and smithy, so a site too tight for D&T's can still take ours); older projects and buildings keep drawing as they were.
@@ -42,7 +43,10 @@ import org.jspecify.annotations.Nullable;
 final class DntBuildings {
 	static final long MARK = 0xD7A5L << 48;
 	/** Our buildings D&T has one for, and the ones only D&T draws. */
-	static final Set<String> SHARED = Set.of("tavern", "well", "smithy"), OWN = Set.of("sawmill", "farmhouse", "apiary", "firewatch_tower");
+	static final Set<String> SHARED = Set.of("tavern", "well", "smithy"), OWN = Set.of("sawmill", "farmhouse", "apiary", "firewatch_tower",
+		"graveyard");
+	/** Andy (2026-11-06) let the graveyard (27 x 37) past the plot size: buildings only D&T draws may be this big across. */
+	static final int MAX_SIDE = 40;
 
 	private static final Map<String, Optional<Blueprint>> CACHE = new HashMap<>();
 
@@ -92,6 +96,7 @@ final class DntBuildings {
 			case "sawmill" -> first(level.getServer(), entry, "remnant/sawmill");
 			case "farmhouse" -> first(level.getServer(), entry, "remnant/ruin_farmer");
 			case "apiary" -> first(level.getServer(), entry, "remnant/bee_keeper");
+			case "graveyard" -> first(level.getServer(), entry, "remnant/graveyard");
 			case "firewatch_tower" -> first(level.getServer(), entry, "firewatch_tower/firewatch_" + firewatch(wood), "firewatch_tower/firewatch_forest");
 			default -> null;
 		};
@@ -174,7 +179,7 @@ final class DntBuildings {
 			return null;
 		}
 		try {
-			Blueprint bp = CtovHalls.convert(entry, template.get().save(new CompoundTag()));
+			Blueprint bp = CtovHalls.convert(entry, template.get().save(new CompoundTag()), OWN.contains(entry) ? MAX_SIDE : CtovHalls.MAX_SIDE);
 			if (bp == null) {
 				JaymosKingdoms.LOGGER.info("Dungeons and Taverns' {} skipped for {} (too big for a crew)", id, entry);
 				return null;

@@ -10018,5 +10018,6 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   plain cliff tunnel or shaft as before. Saved mines keep their kind.
 - `DntBuildings`: marked variants (`MARK`, like CTOV's) draw D&T's tavern house (13 woods by biome), well (13 woods) and
   smithy (forest or ruined smith, on the tries CTOV's doesn't take); new D&T-only buildings: sawmill, farmhouse, apiary,
-  firewatch tower (realms). Older projects keep their look. Graveyard and dappled town hall are too big for a plot (32);
+  firewatch tower (realms), graveyard (kingdoms from 50 people; Andy let its 27 x 37 past the 32 plot cap, D&T-only
+  buildings may be up to `DntBuildings.MAX_SIDE` 40). Older projects keep their look. The dappled town hall is too big;
   the hamlet is a piglin bunker; D&T has no stable.
