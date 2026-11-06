@@ -92,6 +92,7 @@ public final class Costume {
 		CostumeTailoring.init();
 		SecretIdentity.init();
 		CorpseCostume.init();
+		HoodedCloak.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(TABLE);
 			output.accept(CostumeItem.of(CostumeDesign.DEFAULT));
@@ -164,6 +165,11 @@ public final class Costume {
 		LAST_MASK.put(player.getUUID(), now);
 		CostumeDesign worn = worn(player);
 		if (worn == null || worn.mask() == CostumeDesign.Mask.NONE) {
+			if (worn == null && HoodedCloak.wears(player)) {
+				// (0.21.41) a hood joined to a cloak: down onto the back, or back up
+				HoodedCloak.toggle(player);
+				return;
+			}
 			if (com.jaymospowers.rig.Rig.wears(player, com.jaymospowers.rig.Rig.Piece.HELM)) {
 				com.jaymospowers.rig.RigHelm.toggleFace(player);
 				return;
