@@ -1392,3 +1392,10 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   (`Mortality`): kept. Lifting someone (`Carry`): kept per target.
 - Not changed: throws (rocks, daggers), finishers, the stake struggle, spell and power charges, the knock-out mash, and
   minigame bars (smithing, brewing, jewellery). Compile-checked; not played.
+
+## 0.21.40: sliding down the wall when the grip goes
+- Andy: "There should be a fluid transition to an animation while sliding after you lose grip". `WebParkourPose`: a
+  freerun cling moving down (only the slip does) eases a `slip` share in (`SLIP_EASE` a frame) and blends the climb into a
+  slide: both arms up and clawing (`SLIDE_CLAW`), elbows a little bent, legs straight with the toes scraping and kicking a
+  knee up in turn, body pressed into the wall (`SLIDE_LEAN` 6 degrees), head back looking up. The drop doesn't count as
+  climbed distance, so the climb's limbs hold still under the blend instead of running backward. Compile-checked, not played.

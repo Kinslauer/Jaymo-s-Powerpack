@@ -35,6 +35,9 @@ import net.minecraft.world.entity.LivingEntity;
  * lets go and reaches up again, the hands half a cycle apart; each foot steps up with the opposite hand, knee out, and
  * pushes down straight. All of it is keyed to how far you've climbed (up, down or across), so it holds still while you
  * hang and runs backward as you climb down. Elbows and knees bend ({@link #bendLimbs}).
+ * <p>(0.21.40) Andy: "There should be a fluid transition to an animation while sliding after you lose grip". Once the
+ * grip gives out and you slide down the wall, the climb blends over into a slide ({@link Pose#slip()}): both arms up,
+ * fingers clawing and dragging, toes scraping and kicking for a hold, pressed in against the wall, looking up.
  * <p>Your own moves don't show in first person. (0.14.3) A freerunner's vault, cling and wall kick ({@code Freerun#MOVE})
  * are drawn the same way.
  */
@@ -69,6 +72,14 @@ public final class WebParkourPose {
 	static final float UPPER_ARM = 4.0F, FOREARM = 6.0F, ELBOW = 4.0F, THIGH = 6.0F, SHIN = 6.0F;
 	/** (0.21.38) The body's roll and twist toward the pushing leg, and the head turned up toward the reaching hand (radians). */
 	static final float CLIMB_ROLL = 0.04F, CLIMB_TWIST = 0.05F, CLIMB_LOOK_UP = -0.35F, CLIMB_LOOK_TURN = 0.15F;
+	/**
+	 * (0.21.40) Sliding down once the grip is gone: falling faster than this (blocks/tick) on a freerun cling is the slide,
+	 * eased in by this share a frame. Both arms up and clawing at the wall, the fingers dragging, the legs straight with
+	 * the toes scraping and kicking for a hold, the body pressed in ({@link #SLIDE_LEAN} degrees), the head back to look up.
+	 */
+	static final float SLIP_DETECT = 0.03F, SLIP_EASE = 0.12F;
+	static final float SLIDE_ARM = -2.85F, SLIDE_ARM_OUT = 0.3F, SLIDE_CLAW = 0.14F, SLIDE_CLAW_RATE = 0.9F, SLIDE_ELBOW = 0.35F;
+	static final float SLIDE_LEG = -0.12F, SLIDE_KICK = 0.25F, SLIDE_KNEE = 0.45F, SLIDE_LEAN = 6.0F, SLIDE_LOOK = -0.6F;
 	/** In the suit, the tendrils hold the body this far out from the wall (degrees, tipping the top back off it). */
 	static final float TENDRIL_HANG = 8.0F;
 	/** Crawling on the wall: how fast the limbs cycle (radians a tick), and the speed (blocks/tick) that's a full crawl. */
@@ -78,7 +89,8 @@ public final class WebParkourPose {
 	// ================================================================================================================
 
 	/** {@code kind}: a {@link WebParkour} move; {@code p}: how far through it (0-1, timed moves); {@code in}: settled into it (0-1). */
-	public record Pose(int kind, int variant, float p, float in, float time, boolean tendrils, float crawl, float height, float travel) {
+	public record Pose(int kind, int variant, float p, float in, float time, boolean tendrils, float crawl, float height, float travel,
+		float slip) {
 	}
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_parkour");
@@ -116,7 +128,7 @@ public final class WebParkourPose {
 		float time = entity.level().getGameTime() + partialTicks;
 		float[] started = STARTED.get(entity.getId());
 		if (started == null || started[0] != move) {
-			started = new float[] {move, time, 0.0F};
+			started = new float[] {move, time, 0.0F, 0.0F};
 			STARTED.put(entity.getId(), started);
 		}
 		float age = time - started[1];
@@ -129,18 +141,27 @@ public final class WebParkourPose {
 		float speed = (float)Math.sqrt(Mth.square(entity.getX() - entity.xo) + Mth.square(entity.getY() - entity.yo) + Mth.square(entity.getZ() - entity.zo));
 		float crawlWant = kind == WebParkour.CLING ? Mth.clamp(speed / CRAWL_FULL, 0.0F, 1.0F) : 0.0F;
 		started[2] = Mth.lerp(0.15F, started[2], crawlWant);
+		// (0.21.40) a freerunner's grip gone: sliding down the wall (the only way a cling moves down), eased in
+		boolean sliding = !web && kind == WebParkour.CLING && entity.getY() - entity.yo < -SLIP_DETECT;
+		started[3] = Mth.lerp(SLIP_EASE, started[3], sliding ? 1.0F : 0.0F);
 		// (0.21.38) the climb's limbs follow the distance climbed: up and down, plus across the wall
 		double x = Mth.lerp(partialTicks, entity.xo, entity.getX()), z = Mth.lerp(partialTicks, entity.zo, entity.getZ());
-		double[] across = ACROSS.computeIfAbsent(entity.getId(), id -> new double[] {x, z, 0.0});
+		double y = Mth.lerp(partialTicks, entity.yo, entity.getY());
+		double[] across = ACROSS.computeIfAbsent(entity.getId(), id -> new double[] {x, z, 0.0, y, 0.0});
 		double step = Math.sqrt(Mth.square(x - across[0]) + Mth.square(z - across[1]));
 		across[0] = x;
 		across[1] = z;
 		if (step < 0.5) {
 			across[2] = (across[2] + step) % 4096.0;
 		}
-		double y = Mth.lerp(partialTicks, entity.yo, entity.getY());
+		// (0.21.40) the drop while sliding isn't climbing: the limbs hold where they were instead of running backward
+		double fall = y - across[3];
+		across[3] = y;
+		if (sliding && fall < 0.0 && fall > -0.5) {
+			across[4] += fall;
+		}
 		state.setData(KEY, new Pose(kind, WebParkour.variant(move), p, Math.min(1.0F, in * (length > 0.0F ? 1.6F : 1.0F)), time, tendrils, started[2],
-			(float) y, (float) ((y + across[2]) % 4096.0)));
+			(float) y, (float) ((y - across[4] + across[2]) % 4096.0), smooth(Mth.clamp(started[3], 0.0F, 1.0F))));
 	}
 
 	/** After the body faces its way: tip over in a vault, lie back in a slide, lean into the wall in a cling. */
@@ -193,7 +214,7 @@ public final class WebParkourPose {
 					default -> poseStack.rotateDegrees(Axis.XP, -DIVE_PITCH * in);
 				}
 			}
-			case WebParkour.CLING -> poseStack.rotateDegrees(Axis.XP, (pose.tendrils() ? TENDRIL_HANG : -CLING_LEAN) * pose.in());
+			case WebParkour.CLING -> poseStack.rotateDegrees(Axis.XP, (pose.tendrils() ? TENDRIL_HANG : -CLING_LEAN - SLIDE_LEAN * pose.slip()) * pose.in());
 			case WebParkour.WALL_JUMP -> poseStack.rotateDegrees(Axis.XP, 18.0F * pose.in());
 			default -> {
 			}
@@ -278,6 +299,18 @@ public final class WebParkourPose {
 				h.body.zRot = Mth.lerp(e, h.body.zRot, CLIMB_ROLL * s);
 				h.head.xRot = Mth.lerp(e, h.head.xRot, Math.min(h.head.xRot, CLIMB_LOOK_UP));
 				h.head.yRot = Mth.lerp(e, h.head.yRot, h.head.yRot + CLIMB_LOOK_TURN * s);
+				// (0.21.40) the grip gone: blended over into the slide, so it flows out of wherever the climb was
+				float sl = pose.slip() * e;
+				if (sl > 0.0F) {
+					float claw = Mth.sin(pose.time() * SLIDE_CLAW_RATE);
+					set(h.rightArm, SLIDE_ARM + SLIDE_CLAW * claw, 0.0F, SLIDE_ARM_OUT, sl);
+					set(h.leftArm, SLIDE_ARM - SLIDE_CLAW * claw, 0.0F, -SLIDE_ARM_OUT, sl);
+					set(h.rightLeg, SLIDE_LEG - SLIDE_KICK * Math.max(0.0F, claw), 0.0F, 0.06F, sl);
+					set(h.leftLeg, SLIDE_LEG - SLIDE_KICK * Math.max(0.0F, -claw), 0.0F, -0.06F, sl);
+					h.body.yRot = Mth.lerp(sl, h.body.yRot, 0.0F);
+					h.body.zRot = Mth.lerp(sl, h.body.zRot, 0.0F);
+					h.head.xRot = Mth.lerp(sl, h.head.xRot, SLIDE_LOOK);
+				}
 			}
 			case WebParkour.WALL_JUMP -> {
 				// pushed off: arms up and out, legs driving down off the wall, tucking as it flies
@@ -344,15 +377,17 @@ public final class WebParkourPose {
 			return;
 		}
 		float u = pose.travel() / CLIMB_CYCLE, e = pose.in();
+		// (0.21.40) sliding: the elbows a little bent as the fingers drag, a knee coming up with each kick
+		float sl = pose.slip(), claw = Mth.sin(pose.time() * SLIDE_CLAW_RATE);
 		float[] limb = new float[2];
 		climbLimb(u, 0.0F, true, pose.crawl(), limb);
-		com.jaymospowers.client.KneeBend.bend(h.rightArm, limb[1] * e, ELBOW, false);
+		com.jaymospowers.client.KneeBend.bend(h.rightArm, Mth.lerp(sl, limb[1], SLIDE_ELBOW) * e, ELBOW, false);
 		climbLimb(u, 0.5F, true, pose.crawl(), limb);
-		com.jaymospowers.client.KneeBend.bend(h.leftArm, limb[1] * e, ELBOW, false);
+		com.jaymospowers.client.KneeBend.bend(h.leftArm, Mth.lerp(sl, limb[1], SLIDE_ELBOW) * e, ELBOW, false);
 		climbLimb(u, 0.6F, false, pose.crawl(), limb);
-		com.jaymospowers.client.KneeBend.bend(h.rightLeg, limb[1] * e);
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, Mth.lerp(sl, limb[1], SLIDE_KNEE * Math.max(0.0F, claw)) * e);
 		climbLimb(u, 0.1F, false, pose.crawl(), limb);
-		com.jaymospowers.client.KneeBend.bend(h.leftLeg, limb[1] * e);
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, Mth.lerp(sl, limb[1], SLIDE_KNEE * Math.max(0.0F, -claw)) * e);
 	}
 
 	/**
