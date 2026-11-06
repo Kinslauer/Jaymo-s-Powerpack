@@ -923,7 +923,7 @@ public final class Finishers {
 				continue;
 			}
 			long now = level.getGameTime();
-			// (0.21.21) a full hit streak: a quick kill on one still standing, dropped where he stands and finished at once
+			// (0.21.22) a full hit streak: a quick kill on one still standing, dropped where he stands and finished at once
 			if (player.isShiftKeyDown() && player.isWithinEntityInteractionRange(hold.body, SLACK) && !finishable(player, hold.body)
 				&& quickKillable(player, hold.body) && move(player, player.getMainHandItem()) != null
 				&& com.jaymospowers.combat.HitStreak.fell(level, player, hold.body)) {
@@ -1081,7 +1081,7 @@ public final class Finishers {
 	}
 
 	/**
-	 * (0.21.21) A quick kill ({@link com.jaymospowers.combat.HitStreak}): {@code player}'s hit streak is full, they have the
+	 * (0.21.22) A quick kill ({@link com.jaymospowers.combat.HitStreak}): {@code player}'s hit streak is full, they have the
 	 * Executioner perk and a weapon in hand, and {@code entity} is one still on his feet, small and frail enough to drop.
 	 * (Also asked on the client, so the hold doesn't swing at them.)
 	 */

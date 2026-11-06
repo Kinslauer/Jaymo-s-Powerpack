@@ -349,7 +349,7 @@ public final class ChronoFlow {
 		}
 		if (now == null) {
 			STUNNED.add(target);
-			// ((0.21.21) a stun shakes a shield loose: Kingdoms' armoured ogres)
+			// ((0.21.22) a stun shakes a shield loose: Kingdoms' armoured ogres)
 			com.jaymospowers.combat.Shields.stunned(target);
 		}
 		target.setAttached(STUN, until);

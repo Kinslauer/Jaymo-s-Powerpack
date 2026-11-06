@@ -9947,7 +9947,7 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   waiting their turn.
 - The clips, our timings and what still differs: `docs/Combat-Feel-Spec.md`. Built, not played.
 
-## 0.7.623 (2026-11-06): Rivals patch 8, armoured ogres (Powers 0.21.21)
+## 0.7.623 (2026-11-06): Rivals patch 8, armoured ogres (Powers 0.21.22)
 - Andy: "add armored ogres with shields and different skin colors matching orcs". The armoured ogre (`Ogre.ARMOURED`,
   `jaymoskingdoms:armoured_ogre`): 80 health, 12 armour, in our own plate (breastplate, fauld, pauldrons, vambraces,
   greaves, open helm) with a great wooden shield, its skin one of six orc tones. Its shield is up while its foe is within

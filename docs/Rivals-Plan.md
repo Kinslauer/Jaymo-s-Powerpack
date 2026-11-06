@@ -193,7 +193,7 @@ Andy picked all 34 rows (2026-11-06).
   circle and wait (Powers `Crowds`; Better Combat and `RangedTactics` did none of it). A parry turns you to the next blow
   coming, and chained parries make ripostes up to 60% harder. Brutal kills scare weaker witnesses into running, timid and
   gloomy first (`Dread`).
-- Patch 8 (Kingdoms 0.7.623, Powers 0.21.21): hit streak quick kills at 8 blows untouched (Executioner, a weapon,
+- Patch 8 (Kingdoms 0.7.623, Powers 0.21.22): hit streak quick kills at 8 blows untouched (Executioner, a weapon,
   sneak + hold on a standing foe), vaulting a raised shield (jump, then Dodge in the air; lands you behind him, he reels), Yank tears shields away, and
   armoured ogres in orc camps and ogre holds (plate, a shield, orc skin tones; shield off to a heavy blow, Yank or stun).
 - Patch 5 put off (Andy, 2026-11-06: "skip patch 5 for now and come back later"): patch 6 goes next; patch 5 after

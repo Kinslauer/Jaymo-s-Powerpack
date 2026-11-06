@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.21.21, Kingdoms Rivals patch 8) Shields in a fight, whoever carries them: whether one is raised ({@link #raised}, for
+ * (0.21.22, Kingdoms Rivals patch 8) Shields in a fight, whoever carries them: whether one is raised ({@link #raised}, for
  * {@link ShieldVault}), and knocking one off. Yank on a mob with a shield tears the shield away instead of pulling him
  * ({@code WebPower.yank}), and a stun shakes loose what other mods' shields hang on ({@link #stunned}): Jaymo's Kingdoms'
  * armoured ogres ({@code Ogre.tearShield}) through {@link #TEAR}.

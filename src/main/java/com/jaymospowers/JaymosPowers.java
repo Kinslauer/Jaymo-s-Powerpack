@@ -49,7 +49,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.combat.AttackTells.init();
 		com.jaymospowers.combat.IncomingBlows.init();
 		com.jaymospowers.combat.Crowds.init();
-		// (0.21.21, Rivals patch 8) the hit streak's quick kill, and vaulting a shield
+		// (0.21.22, Rivals patch 8) the hit streak's quick kill, and vaulting a shield
 		com.jaymospowers.combat.HitStreak.init();
 		com.jaymospowers.combat.ShieldVault.init();
 		com.jaymospowers.core.HiddenArmor.init();

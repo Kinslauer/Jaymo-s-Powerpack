@@ -22,7 +22,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.21.21, Kingdoms Rivals patch 8) The hit streak (the Arkham and Shadow of War games' idea; ideas only): blows you land
+ * (0.21.22, Kingdoms Rivals patch 8) The hit streak (the Arkham and Shadow of War games' idea; ideas only): blows you land
  * in a fight without being hit back count up. At {@link #READY} a quick kill is yours: with Kingdoms' Executioner perk and
  * a weapon in hand, sneak and hold attack on a foe still on his feet and he's dropped where he stands and finished at once
  * ({@code Finishers}, {@link #fell}). A blow taken from anyone ends the streak, as does {@link #LAPSE_TICKS} without

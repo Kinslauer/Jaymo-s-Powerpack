@@ -80,7 +80,7 @@ public final class DodgeClient {
 			wanted = !minecraft.options.keyShift.isDown();
 		}
 		if (wanted && vault(player)) {
-			// (0.21.21) in the air over a raised shield: the vault, not a roll
+			// (0.21.22) in the air over a raised shield: the vault, not a roll
 			wanted = false;
 		}
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
@@ -102,7 +102,7 @@ public final class DodgeClient {
 	}
 
 	/**
-	 * (0.21.21) Andy: "the input should be jump plus alt key or roll bind in mid air". Dodge pressed in the air with a foe's
+	 * (0.21.22) Andy: "the input should be jump plus alt key or roll bind in mid air". Dodge pressed in the air with a foe's
 	 * raised shield close ahead vaults him ({@link com.jaymospowers.combat.ShieldVault}): pushed up and over at once, and
 	 * the server told. True if it was a vault (one too big still takes the press, and the server says so).
 	 */

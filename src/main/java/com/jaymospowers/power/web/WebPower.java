@@ -1494,7 +1494,7 @@ public final class WebPower implements Power {
 		// a rider is plucked off their mount
 		target = WebHeft.pluck(player, target);
 		if (target instanceof net.minecraft.world.entity.LivingEntity shielded && com.jaymospowers.combat.Shields.tear(shielded, player)) {
-			// (0.21.21) a shield is torn from its arm instead (a mob's, or Kingdoms' armoured ogre's): that's the Yank
+			// (0.21.22) a shield is torn from its arm instead (a mob's, or Kingdoms' armoured ogre's): that's the Yank
 			player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + yankCooldown(player)));
 			thwip(player);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);

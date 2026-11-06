@@ -32,7 +32,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.21.21, Kingdoms Rivals patch 8) Vault over a shield (the Arkham games' idea; ideas only). Andy: "the input should be
+ * (0.21.22, Kingdoms Rivals patch 8) Vault over a shield (the Arkham games' idea; ideas only). Andy: "the input should be
  * jump plus alt key or roll bind in mid air". Jump, then press Dodge (Left Alt) in the air, with a foe who has his shield
  * up ({@link Shields#raised}) close and in front of you, and you go up and over him (the client pushes you at once,
  * {@code DodgeClient}, and tells the server, {@link Ask}), a hand on his shoulder, and
