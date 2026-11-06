@@ -196,5 +196,9 @@ Andy picked all 34 rows (2026-11-06).
 - Patch 8 (Kingdoms 0.7.623, Powers 0.21.22): hit streak quick kills at 8 blows untouched (Executioner, a weapon,
   sneak + hold on a standing foe), vaulting a raised shield (jump, then Dodge in the air; lands you behind him, he reels), Yank tears shields away, and
   armoured ogres in orc camps and ogre holds (plate, a shield, orc skin tones; shield off to a heavy blow, Yank or stun).
+- Patch 9 (Powers 0.21.23): sneak + attack bare-handed is the takedown. Chrono: beatdown at 8 combo (two at 16), the
+  blink to a foe marked by a thrown or shot blow (3 combo), ground finishes and shield flourishes inside the flow. Web
+  (combo = hit streak): wrap-and-slam at 8/16, string up from a perch, counters pin foes to walls, ground finishes mid-
+  streak, Web Shot and Yank keep the streak. A dodge or vault keeps both counts.
 - Patch 5 put off (Andy, 2026-11-06: "skip patch 5 for now and come back later"): patch 6 goes next; patch 5 after
   patch 9 or whenever Andy asks. Nothing in 6-9 needs it.

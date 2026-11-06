@@ -65,7 +65,9 @@ public final class ChronoFlowClient {
 	}
 
 	static void init() {
-		ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> clicks > 0 && ChronoFlow.on(player) && strike(minecraft, player));
+		// ((0.21.23) sneak + attack bare-handed is a takedown or the blink: combat/Takedowns)
+		ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> clicks > 0 && ChronoFlow.on(player)
+			&& (com.jaymospowers.client.combat.TakedownClient.tryTakedown(minecraft, player) || strike(minecraft, player)));
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			view(minecraft);
 			LocalPlayer player = minecraft.player;

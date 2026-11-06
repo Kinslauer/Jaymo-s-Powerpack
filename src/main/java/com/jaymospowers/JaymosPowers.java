@@ -52,6 +52,8 @@ public class JaymosPowers implements ModInitializer {
 		// (0.21.22, Rivals patch 8) the hit streak's quick kill, and vaulting a shield
 		com.jaymospowers.combat.HitStreak.init();
 		com.jaymospowers.combat.ShieldVault.init();
+		// (0.21.23, Rivals patch 9) Chrono's and Web's takedowns
+		com.jaymospowers.combat.Takedowns.init();
 		com.jaymospowers.core.HiddenArmor.init();
 		// (0.20.68) armour wears fast, absorbs more, breaks without vanishing
 		com.jaymospowers.core.ArmourWear.init();
