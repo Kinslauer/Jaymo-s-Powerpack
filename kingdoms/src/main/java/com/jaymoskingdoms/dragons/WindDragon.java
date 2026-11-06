@@ -37,6 +37,8 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -383,6 +385,11 @@ public abstract class WindDragon extends AbstractHorse {
 	/** (0.7.522) Whether it goes for players who come near (a grazing walker only fights whoever hurts it). */
 	protected boolean aggressive() {
 		return true;
+	}
+
+	/** (0.7.613) Whether a wild one hunts monsters near it (Atroxiia: met fighting them), though it leaves players be unless {@link #aggressive}. */
+	protected boolean huntsMonsters() {
+		return false;
 	}
 
 	/** (0.7.522) Whether a wild one shows a boss bar (the wind dragons are minibosses; the lesser dragons are beasts). */
@@ -854,6 +861,22 @@ public abstract class WindDragon extends AbstractHorse {
 			if (valid(near)) {
 				target = near;
 				level.playSound(null, this.blockPosition(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 3.0F, 0.7F);
+			}
+		}
+		// (0.7.613) a monster hunter goes for the nearest hostile mob it can see (looking twice a second)
+		if (target == null && huntsMonsters() && !this.isTamed() && this.tickCount % 10 == 0) {
+			LivingEntity prey = null;
+			double best = AGGRO_RANGE * AGGRO_RANGE;
+			for (Mob m : level.getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(AGGRO_RANGE),
+				m -> m instanceof Enemy && !(m instanceof WindDragon) && m.isAlive() && this.hasLineOfSight(m))) {
+				double d = m.distanceToSqr(this);
+				if (d < best) {
+					best = d;
+					prey = m;
+				}
+			}
+			if (valid(prey)) {
+				target = prey;
 			}
 		}
 		if (target == null && this.foe != null) {

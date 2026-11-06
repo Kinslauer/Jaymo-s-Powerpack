@@ -131,6 +131,12 @@ public class AtroxiiaDragon extends WindDragon {
 		return false;
 	}
 
+	/** (0.7.613) Andy: "hostile toward hostile mobs, so you can encounter it fighting". */
+	@Override
+	protected boolean huntsMonsters() {
+		return true;
+	}
+
 	@Override
 	protected boolean bossBar() {
 		return false;

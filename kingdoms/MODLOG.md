@@ -9751,3 +9751,11 @@ reference's animation list (names and lengths only, none of its files) in `docs/
   and no longer flip sideways as they die (`WindDragonRenderer.ownDeath()`).
 - Stegonaut unchanged (mapped in 0.7.531).
 - Gradle compile clean; not played. Atroxiia walk/run previews in project files `art-overhaul/lesser-dragons/`.
+
+## 0.7.613 (2026-11-06): Atroxiia, rare and a monster hunter (pack 0.21.16)
+Andy: "it needs to be extremely rare, and hostile toward hostile mobs, so you can encounter it fighting".
+- Only one in 400 natural spawn tries that would otherwise pass goes ahead (`Dragons.ATROXIIA_RARITY`); eggs and
+  `/kingdom dragon atroxiia` are unaffected.
+- A wild Atroxiia hunts the nearest hostile mob it can see within 22 blocks (`WindDragon.huntsMonsters()`), so you come
+  on it mid-fight. It still leaves players alone unless they hurt it, and tamed ones don't hunt on their own.
+- Gradle compile clean; not played.

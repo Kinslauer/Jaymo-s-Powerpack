@@ -1158,3 +1158,6 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
 - Atroxiia has a real walk and is back in the game; Varasuchus, Atroxiia and Ignivorus get their missing motions
   (bites, sweeps, runs, flinches, deaths, idle fidgets, sleep). See Kingdoms 0.7.612 and
   `docs/SaintsDragons-Animation-Spec.md`.
+
+## 0.21.16 (2026-11-06): Atroxiia rare and hunting monsters (Kingdoms 0.7.613)
+- Atroxiia spawns about 400 times less often and fights hostile mobs near it. See Kingdoms 0.7.613.
