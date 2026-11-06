@@ -236,6 +236,14 @@ final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Emberborn to drink fire (needs 0.5.48): {}", e.toString());
 		}
+		// (0.7.637, Andy: "the rotten meat eating skill should let you drink water from wherever too") Iron Stomach takes
+		// dirty water as well as rotten flesh: a river, swamp or puddle never turns the stomach
+		try {
+			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setIronGut", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Skills.of(player).rank(Skills.Perk.IRON_STOMACH) > 0);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Iron Stomach to drink dirty water (needs 0.5.80): {}", e.toString());
+		}
 	}
 
 	/**
