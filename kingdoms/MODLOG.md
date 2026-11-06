@@ -10114,7 +10114,11 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   the worn baubles (`PowersCompat.baubles`), so M opens it from a slot (client and server). The "need a journal" line
   says bauble slots too. Built, not played.
 
-## 0.7.637: Felled's trees knock over the trees they fall into
+## 0.7.637: Iron Stomach drinks dirty water (needs Kitchen 0.5.80)
+- Iron Stomach now also covers water: `KitchenCompat` hands Kitchen's `Thirst.setIronGut` the perk check, so dirty water
+  from anywhere never turns the stomach. The perk's description says so. Gradle compile clean; not played.
+
+## 0.7.638: Felled's trees knock over the trees they fall into
 - Andy: "the felled trees NEED to knock each other over still". Since 0.7.628 a player's felling stroke hands the tree to
   Felled, whose rigid body only sees a standing tree as solid blocks, so it came to rest leaning on the next tree instead
   of knocking it over the way our `FallingTree` does. `FelledCompat` now keeps Felled's trees (entity load/unload) and,

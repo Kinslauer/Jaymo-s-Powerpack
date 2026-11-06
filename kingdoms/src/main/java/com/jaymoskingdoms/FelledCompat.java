@@ -45,10 +45,10 @@ public final class FelledCompat {
 	private FelledCompat() {
 	}
 
-	// ---- (0.7.637) knocking on ------------------------------------------------------------------------------------------
+	// ---- (0.7.638) knocking on ------------------------------------------------------------------------------------------
 
 	/**
-	 * (0.7.637) Andy: "the felled trees NEED to knock each other over still". Since 0.7.628 a player's tree comes down as
+	 * (0.7.638) Andy: "the felled trees NEED to knock each other over still". Since 0.7.628 a player's tree comes down as
 	 * Felled's rigid body, and Jolt only ever sees a standing tree as solid blocks, so it came to rest leaning on the next
 	 * tree instead of knocking it over the way ours do ({@link FallingTree#knock}). Each tick, a Felled tree still moving
 	 * (its top at least {@link #KNOCK_SPEED} blocks a tick, this tick or the last) looks just ahead of each of its logs

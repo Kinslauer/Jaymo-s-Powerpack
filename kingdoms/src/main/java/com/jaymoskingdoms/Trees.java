@@ -129,7 +129,7 @@ public final class Trees {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Trees::tick);
-		// (0.7.637) Felled's trees knock over the trees they fall into, as ours do
+		// (0.7.638) Felled's trees knock over the trees they fall into, as ours do
 		FelledCompat.register();
 		// (0.7.628) before anyone else's, so a chop in progress isn't taken for a log broken whole (Felled fells on those)
 		PlayerBlockBreakEvents.BEFORE.register(CHOPPING, Trees::breaking);

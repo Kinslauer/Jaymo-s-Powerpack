@@ -1544,3 +1544,9 @@ mobs should be possible".
 - `CorpseEntity.reworkArmour(ObjIntConsumer<ItemStack>)`: hands other mods every piece of armour a body still wears
   (0 boots ... 3 helmet) to change in place, kept on the body's look and coming off with it. Powers dirties, bloodies and
   washes a dragged corpse's armour with it (Andy: "i'd like players to pull dirty beaten armor off enemies").
+
+## 0.5.80: iron guts drink dirty water safely
+- `Thirst.setIronGut(Predicate<Player>)` / `ironGut(Player)`: anyone it names never gets a turned stomach from dirty water,
+  wherever it came from (a sip from a river, swamp or puddle, a pond bottle, a dirty waterskin). They still get the water.
+  Kingdoms sets it for the Iron Stomach perk (Andy: "the rotten meat eating skill should let you drink water from wherever
+  too"). Gradle compile clean; not played.
