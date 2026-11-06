@@ -225,6 +225,21 @@ public final class ArmourGrime {
 			washAll(body, DRAG_WASH);
 			return;
 		}
+		Dirt dirt = dragDirt(level, body);
+		if (dirt == null) {
+			return;
+		}
+		for (int i = 0; i < SLOTS.length; i++) {
+			soil(body, SLOTS[i], dirt.gain() * DRAG_DIRT * DRAG_REACH[i], dirt.mud());
+		}
+	}
+
+	/** (0.21.26) What a body dragged over the ground here is scraped with: so much dirt a step, muddy or dusty. */
+	public record Dirt(float gain, boolean mud) {
+	}
+
+	/** (0.21.26) The dirt a body dragged a step over the ground under {@code body} picks up (walking's, before {@link #DRAG_DIRT}), or null. */
+	public static @Nullable Dirt dragDirt(ServerLevel level, net.minecraft.world.entity.Entity body) {
 		BlockPos under = body.getOnPos();
 		BlockState ground = level.getBlockState(under);
 		if (ground.isAir()) {
@@ -232,24 +247,30 @@ public final class ArmourGrime {
 		}
 		boolean rained = body.isInWaterOrRain();
 		Holder<Biome> biome = level.getBiome(under);
-		float gain = 0.0F;
-		boolean mud = false;
 		if (isMud(ground)) {
-			gain = MUD_GAIN;
-			mud = true;
-		} else if (isEarth(ground) && (rained || level.isRainingAt(body.blockPosition()) || biome.is(ConventionalBiomeTags.IS_SWAMP))) {
-			gain = WET_GROUND_GAIN;
-			mud = true;
-		} else if (isEarth(ground) || ground.is(BlockTags.SAND) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.SUSPICIOUS_GRAVEL)) {
+			return new Dirt(MUD_GAIN, true);
+		}
+		if (isEarth(ground) && (rained || level.isRainingAt(body.blockPosition()) || biome.is(ConventionalBiomeTags.IS_SWAMP))) {
+			return new Dirt(WET_GROUND_GAIN, true);
+		}
+		if (isEarth(ground) || ground.is(BlockTags.SAND) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.SUSPICIOUS_GRAVEL)) {
 			// dragged, even dry earth grinds in
-			gain = DUST_GAIN;
+			return new Dirt(DUST_GAIN, false);
 		}
-		if (gain <= 0.0F) {
-			return;
-		}
-		for (int i = 0; i < SLOTS.length; i++) {
-			soil(body, SLOTS[i], gain * DRAG_DIRT * DRAG_REACH[i], mud);
-		}
+		return null;
+	}
+
+	/**
+	 * (0.21.26) A corpse's armour (Jaymo's Kitchen keeps it on the body), piece {@code index} (0 boots ... 3 helmet), dragged
+	 * {@code steps} steps over {@code dirt}: scraped dirty as a living body's would be.
+	 */
+	public static void dragArmour(ItemStack stack, int index, Dirt dirt, int steps, net.minecraft.util.RandomSource random) {
+		soilStack(stack, dirt.gain() * DRAG_DIRT * DRAG_REACH[Mth.clamp(index, 0, DRAG_REACH.length - 1)] * steps, dirt.mud(), random);
+	}
+
+	/** (0.21.26) The same, through water: {@code steps} steps' washing. */
+	public static void washArmour(ItemStack stack, int steps) {
+		clean(stack, DRAG_WASH * steps);
 	}
 
 	private static boolean isMud(BlockState state) {
@@ -268,11 +289,15 @@ public final class ArmourGrime {
 
 	/** Dirties the piece in {@code slot} by {@code gain} (fractions carry over by chance). */
 	private static void soil(LivingEntity body, EquipmentSlot slot, float gain, boolean mud) {
-		ItemStack stack = body.getItemBySlot(slot);
+		soilStack(body.getItemBySlot(slot), gain, mud, body.getRandom());
+	}
+
+	/** Dirties {@code stack} by {@code gain} (fractions carry over by chance). */
+	static void soilStack(ItemStack stack, float gain, boolean mud, net.minecraft.util.RandomSource random) {
 		if (stack.isEmpty() || gain <= 0.0F) {
 			return;
 		}
-		int add = Mth.floor(gain) + (body.getRandom().nextFloat() < gain - Mth.floor(gain) ? 1 : 0);
+		int add = Mth.floor(gain) + (random.nextFloat() < gain - Mth.floor(gain) ? 1 : 0);
 		if (add <= 0) {
 			return;
 		}

@@ -223,6 +223,22 @@ public final class Bloodied {
 		body.setAttached(CORPSE_BLOOD, new Blood(amount, color, now));
 	}
 
+	/**
+	 * (0.21.26) A corpse's armour (Jaymo's Kitchen keeps it on the body), piece {@code index} (0 boots ... 3 helmet), dragged
+	 * through pools that gave up {@code soaked} (stain size): bloodied as a living body's would be.
+	 */
+	public static void dragArmour(ItemStack stack, int index, float soaked, int color, long now, net.minecraft.util.RandomSource random) {
+		float gain = soaked * DRAG_PER_SOAK * DRAG_REACH[Mth.clamp(index, 0, DRAG_REACH.length - 1)];
+		if (BLOOD == null || stack.isEmpty() || gain <= 0.0F) {
+			return;
+		}
+		int add = Mth.floor(gain) + (random.nextFloat() < gain - Mth.floor(gain) ? 1 : 0);
+		if (add > 0) {
+			Blood was = blood(stack);
+			stack.set(BLOOD, new Blood(Math.min(MAX, (was == null ? 0 : was.amount()) + add), color, now));
+		}
+	}
+
 	/** (0.21.26) A corpse dragged through water: its blood washed off by {@code amount}. */
 	public static void washCorpse(net.minecraft.world.entity.Entity corpse, int amount) {
 		Blood was = corpse.getAttached(CORPSE_BLOOD);

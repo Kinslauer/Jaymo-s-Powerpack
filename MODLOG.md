@@ -1260,3 +1260,8 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   chest and legs most; a corpse's own blood is topped up and freshened); over dirt, mud or sand its armour is scraped
   dirty (`ArmourGrime.dragged`, 0.6x a walking check per step, even dry earth); through water it's washed (12 a step,
   a corpse's blood too).
+- Andy: "i'd like players to pull dirty beaten armor off enemies." Enemies' armour already keeps the dirt and blood they
+  fought in when they die (it's saved on the body) and comes off worn down (Kitchen's `wear`). Now a dragged corpse's
+  armour also takes the drag's blood, dirt and washing, gathered over 4 steps at a time and written onto the body through
+  Kitchen 0.5.79's `CorpseEntity.reworkArmour` (`KitchenCompat.reworkArmour`, looked up by name; `Bloodied.dragArmour`,
+  `ArmourGrime.dragArmour` / `washArmour`).

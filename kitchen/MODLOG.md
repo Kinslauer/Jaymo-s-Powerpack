@@ -1539,3 +1539,8 @@ mobs should be possible".
 ## 0.5.78: grizzly and Bear Minimum bears as big carcasses (pack 0.21.14)
 - `jaymoskingdoms:grizzly`, `bearminimum:brown_bear` and `bearminimum:black_bear` in `big_carcasses`, `ragdoll_quadruped`
   and `scavengers`.
+
+## 0.5.79: a body's armour can be marked (pack 0.21.26)
+- `CorpseEntity.reworkArmour(ObjIntConsumer<ItemStack>)`: hands other mods every piece of armour a body still wears
+  (0 boots ... 3 helmet) to change in place, kept on the body's look and coming off with it. Powers dirties, bloodies and
+  washes a dragged corpse's armour with it (Andy: "i'd like players to pull dirty beaten armor off enemies").
