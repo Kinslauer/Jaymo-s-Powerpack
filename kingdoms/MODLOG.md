@@ -10146,8 +10146,16 @@ Slowness V refreshed every 5 ticks, a drip of dark blood. Out: a vampire player 
 out after 20 s, anyone with an empty hand right-clicks the staked to pull it into their hand; it drops on death or when
 cured. Further skewer hits still land 5x but don't lodge a second stake. Gradle compile clean; not played.
 
-## 0.7.641: stakes are seen
-Andy: "They should be visible". `Stakes.STAKE` now syncs to every viewer, and `StakeLayer` (client, on every humanoid
-renderer, filled in `MobSwingLivingEntityRendererMixin`) draws the lodged skewer item on the body bone: left of the
-breastbone, a third down, point buried in the chest and the grip standing out in front at a slight angle. Gradle
-compileClientJava clean; not played, so the angle and depth are untested.
+## 0.7.641: stakes are seen, and stack
+Andy: "They should be visible", then "Animate in any position like an arrow, because players and mobs should be able to
+stake multiple times, multiplying the debuff".
+- `Stakes.STAKE` is now a synced list of `Stake(stack, seed)` (new id `vampire_stakes`; a stake saved under 0.7.640's
+  single-stake id is dropped). Every biting skewer lodges, up to 8. Slowness V for one, VI for two, VII (pinned) from three;
+  from two on, Weakness too (I at two, rising to IV). Each 5x blow still lands.
+- Out one at a time, newest first: a vampire player's 3 s of held sneak pulls one, a mob tears one out every 20 s, an empty
+  hand's right-click pulls one into the hand. All drop on death or cure.
+- `StakeLayer` (client, every humanoid renderer, filled in `MobSwingLivingEntityRendererMixin`) draws each stake like a stuck
+  arrow: the seed picks a part (3 in 8 the body, else head, an arm or a leg), a point on one face of its cube and a lean of
+  up to 35% off straight in; the skewer item's point is buried along that line, the grip standing out. On the part's bone,
+  so it moves with every pose.
+Gradle compileJava + compileClientJava clean; not played, so the depth and lean are untested.

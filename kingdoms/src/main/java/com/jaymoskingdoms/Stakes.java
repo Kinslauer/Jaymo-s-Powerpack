@@ -2,6 +2,12 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -29,19 +35,35 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
+ * (0.7.641) Many stakes, like arrows: every skewer that bites lodges (up to {@link #MAX}), each at its own spot on the body
+ * ({@link Stake#seed}, drawn by {@code StakeLayer}), and each one more deepens the slow ({@link #slowAmplifier}: one is
+ * Slowness V, two VI, three or more pin them; from two on they're weakened too). They come out one at a time.
+ * <p>
  * (0.7.640) A wooden skewer that bites a vampire ({@link Vampires#staked}) stays in it: the stake leaves the hand that drove
  * it and the vampire is slowed to a crawl (Slowness V) until it comes out. A vampire player pulls it out by holding sneak
  * for {@link #PULL_TICKS}; a vampire mob tears it out after {@link #MOB_PULL_TICKS}; anyone with an empty hand can pull it
- * out by using the staked (it goes to their hand). Out, it drops at the vampire's feet (or into the puller's hand); on
+ * out by using the staked (it goes to their hand); one stake each time. Out, it drops at the vampire's feet (or into the puller's hand); on
  * death it drops with the body. Kept on the vampire ({@link #STAKE}) across saves. One stake at a time.
  * (0.7.641) Synced to everyone near, who see it sticking out of the chest ({@code StakeLayer}).
  */
 public final class Stakes {
-	/** The stake in a vampire. */
-	public static final AttachmentType<ItemStack> STAKE = AttachmentRegistry.create(JaymosKingdoms.id("vampire_stake"),
-		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC).syncWith(ItemStack.OPTIONAL_STREAM_CODEC, (target, viewer) -> true));
-	/** Slowness while staked: amplifier 4 (V, a fifth of walking speed), refreshed every check. */
-	static final int SLOW_AMPLIFIER = 4, SLOW_TICKS = 30, CHECK_EVERY = 5;
+	/** One stake in a vampire: the skewer, and the seed that picks where on the body it went in. */
+	public record Stake(ItemStack stack, int seed) {
+		static final Codec<Stake> CODEC = RecordCodecBuilder.create(i -> i.group(
+			ItemStack.OPTIONAL_CODEC.fieldOf("stack").forGetter(Stake::stack),
+			Codec.INT.fieldOf("seed").forGetter(Stake::seed)
+		).apply(i, Stake::new));
+		static final StreamCodec<RegistryFriendlyByteBuf, Stake> STREAM_CODEC = StreamCodec.composite(
+			ItemStack.OPTIONAL_STREAM_CODEC, Stake::stack, ByteBufCodecs.INT, Stake::seed, Stake::new);
+	}
+
+	/** The stakes in a vampire, oldest first (synced to everyone near, who see them: {@code StakeLayer}). */
+	public static final AttachmentType<List<Stake>> STAKE = AttachmentRegistry.create(JaymosKingdoms.id("vampire_stakes"),
+		builder -> builder.persistent(Stake.CODEC.listOf()).syncWith(Stake.STREAM_CODEC.apply(ByteBufCodecs.list()), (target, viewer) -> true));
+	/** At most this many in one vampire. */
+	static final int MAX = 8;
+	/** Slowness refreshed every check, for this long. */
+	static final int SLOW_TICKS = 30, CHECK_EVERY = 5;
 	/** A player holds sneak this long (ticks) to pull it out; a mob tears it out after this long. */
 	static final int PULL_TICKS = 60, MOB_PULL_TICKS = 400;
 
@@ -54,7 +76,7 @@ public final class Stakes {
 
 	static void register() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, dealt, taken, blocked) -> {
-			if (taken > 0.0F && entity.isAlive() && !blocked && Vampires.isVampire(entity) && !entity.hasAttached(STAKE)
+			if (taken > 0.0F && entity.isAlive() && !blocked && Vampires.isVampire(entity) && count(entity) < MAX
 				&& source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker
 				&& isStake(attacker.getMainHandItem())) {
 				ItemStack held = attacker.getMainHandItem();
@@ -80,13 +102,13 @@ public final class Stakes {
 			WORK.remove(entity.getUUID());
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity.hasAttached(STAKE)) {
+			while (staked(entity)) {
 				pull(entity, null);
 			}
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(entity instanceof LivingEntity staked)
-				|| !staked.hasAttached(STAKE) || !player.getMainHandItem().isEmpty()) {
+				|| !staked(staked) || !player.getMainHandItem().isEmpty()) {
 				return InteractionResult.PASS;
 			}
 			pull(staked, player);
@@ -104,32 +126,58 @@ public final class Stakes {
 	}
 
 	public static boolean staked(LivingEntity e) {
-		return e.hasAttached(STAKE);
+		return count(e) > 0;
+	}
+
+	static int count(LivingEntity e) {
+		List<Stake> stakes = e.getAttached(STAKE);
+		return stakes == null ? 0 : stakes.size();
+	}
+
+	/** Slowness's amplifier for so many stakes: V for one, VI for two, VII (pinned) from three. */
+	static int slowAmplifier(int count) {
+		return Math.min(3 + count, 6);
+	}
+
+	private static void slow(LivingEntity vampire, int count) {
+		vampire.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOW_TICKS, slowAmplifier(count), false, false, true));
+		if (count >= 2) {
+			vampire.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SLOW_TICKS, Math.min(count - 2, 3), false, false, true));
+		}
 	}
 
 	private static void lodge(LivingEntity vampire, ItemStack stake) {
-		vampire.setAttached(STAKE, stake);
+		List<Stake> stakes = new ArrayList<>(vampire.getAttachedOrElse(STAKE, List.of()));
+		stakes.add(new Stake(stake, vampire.getRandom().nextInt()));
+		vampire.setAttached(STAKE, List.copyOf(stakes));
 		STAKED.put(vampire.getUUID(), vampire);
 		WORK.remove(vampire.getUUID());
-		vampire.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOW_TICKS, SLOW_AMPLIFIER, false, false, true));
+		slow(vampire, stakes.size());
 		if (vampire.level() instanceof ServerLevel level) {
 			level.playSound(null, vampire.getX(), vampire.getY(), vampire.getZ(), SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.9F, 0.7F);
 		}
 	}
 
-	/** The stake comes out: into {@code puller}'s hand, or dropped at the vampire's feet. */
+	/** The newest stake comes out: into {@code puller}'s hand, or dropped at the vampire's feet. */
 	private static void pull(LivingEntity vampire, Player puller) {
-		ItemStack stake = vampire.getAttached(STAKE);
-		vampire.removeAttached(STAKE);
-		STAKED.remove(vampire.getUUID());
+		List<Stake> stakes = new ArrayList<>(vampire.getAttachedOrElse(STAKE, List.of()));
+		ItemStack stake = stakes.isEmpty() ? ItemStack.EMPTY : stakes.removeLast().stack();
 		WORK.remove(vampire.getUUID());
 		vampire.removeEffect(MobEffects.SLOWNESS);
+		vampire.removeEffect(MobEffects.WEAKNESS);
+		if (stakes.isEmpty()) {
+			vampire.removeAttached(STAKE);
+			STAKED.remove(vampire.getUUID());
+		} else {
+			vampire.setAttached(STAKE, List.copyOf(stakes));
+			slow(vampire, stakes.size());
+		}
 		if (!(vampire.level() instanceof ServerLevel level)) {
 			return;
 		}
 		level.sendParticles(new DustParticleOptions(0x5A0A0A, 1.0F), vampire.getX(), vampire.getY(0.65), vampire.getZ(), 10, 0.2, 0.2, 0.2, 0.0);
 		level.playSound(null, vampire.getX(), vampire.getY(), vampire.getZ(), SoundEvents.TRIDENT_RETURN, SoundSource.PLAYERS, 0.8F, 0.6F);
-		if (stake == null || stake.isEmpty()) {
+		if (stake.isEmpty()) {
 			return;
 		}
 		if (puller != null && puller.getMainHandItem().isEmpty()) {
@@ -151,16 +199,18 @@ public final class Stakes {
 				WORK.remove(e.getUUID());
 				continue;
 			}
-			if (!e.hasAttached(STAKE)) {
+			if (!staked(e)) {
 				STAKED.remove(e.getUUID());
 				continue;
 			}
-			// cured, or never truly one: it slides out
+			// cured, or never truly one: they slide out
 			if (!Vampires.isVampire(e)) {
-				pull(e, null);
+				while (staked(e)) {
+					pull(e, null);
+				}
 				continue;
 			}
-			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOW_TICKS, SLOW_AMPLIFIER, false, false, true));
+			slow(e, count(e));
 			int work = WORK.getOrDefault(e.getUUID(), 0);
 			if (e instanceof ServerPlayer player) {
 				work = player.isShiftKeyDown() ? work + CHECK_EVERY : 0;
