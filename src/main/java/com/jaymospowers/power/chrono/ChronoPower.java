@@ -145,6 +145,8 @@ public final class ChronoPower implements Power {
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);
 		ServerTickEvents.END_SERVER_TICK.register(ChronoPunch::tick);
 		ChronoFlow.init();
+		// (0.21.23, Rivals patch 9) takedowns, the shadow-strike blink
+		ChronoTakedowns.init();
 		com.jaymospowers.power.chrono.future.Future.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
