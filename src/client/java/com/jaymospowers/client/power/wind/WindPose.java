@@ -261,8 +261,11 @@ public final class WindPose {
 			state.setData(WindWhistlePose.KEY, null);
 			state.setData(WindFlightSwing.KEY, null);
 			state.setData(com.jaymospowers.client.FlightRolls.KEY, null);
+			state.setData(WindMovePose.KEY, null);
 			return;
 		}
+		// (Jung's revamp) a wind move's body: gather, push and uppercut, arms out, the Zephyr spin, the lance
+		state.setData(WindMovePose.KEY, WindMovePose.extract(entity, partialTicks));
 		// a barrel roll (Wind, Xenoform, Z Fighter and Smoke flights alike): drawn in rotate
 		com.jaymospowers.client.FlightRolls.extract(entity, state, partialTicks);
 		WindCyclonePose.Stance stance = WindCyclonePose.extract(entity, partialTicks);
@@ -325,6 +328,7 @@ public final class WindPose {
 		WindTumble.rotate(state, poseStack, entityScale);
 		WindWobble.rotate(state, poseStack, entityScale);
 		kickLean(state, poseStack);
+		WindMovePose.rotate(state, poseStack);
 		WindCyclonePose.rotate(state, poseStack);
 		WindWhistlePose.rotate(state, poseStack);
 		Float amount = state.getData(KEY);
@@ -532,7 +536,7 @@ public final class WindPose {
 
 	/** Any of Wind's body poses on this avatar (cruise, brake, kick, cyclone, Wind Whistle, hover sway, tumble, flight swing, cloak wobble). */
 	public static boolean posed(AvatarRenderState avatar) {
-		return avatar.getData(KEY) != null || avatar.getData(KICK_KEY) != null || avatar.getData(WindCyclonePose.KEY) != null
+		return avatar.getData(KEY) != null || avatar.getData(KICK_KEY) != null || avatar.getData(WindMovePose.KEY) != null || avatar.getData(WindCyclonePose.KEY) != null
 			|| avatar.getData(WindWhistlePose.KEY) != null || avatar.getData(WindHoverSway.KEY) != null || avatar.getData(WindTumble.KEY) != null || avatar.getData(WindFlightSwing.KEY) != null
 			|| avatar.getData(WindWobble.KEY) != null;
 	}
@@ -552,6 +556,11 @@ public final class WindPose {
 		WindCyclonePose.Stance stance = avatar.getData(WindCyclonePose.KEY);
 		if (stance != null) {
 			WindCyclonePose.applyModel(humanoid, stance);
+			return;
+		}
+		WindMovePose.Pose move = avatar.getData(WindMovePose.KEY);
+		if (move != null) {
+			WindMovePose.applyModel(humanoid, avatar, move);
 			return;
 		}
 		KickPose kick = avatar.getData(KICK_KEY);
