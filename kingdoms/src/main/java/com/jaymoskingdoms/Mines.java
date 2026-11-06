@@ -97,7 +97,7 @@ public final class Mines {
 		}
 
 		/**
-		 * (0.7.625) An open pit still being dug, before its tunnel: our own ({@link MinePit}, {@code pit} its half-width)
+		 * (0.7.627) An open pit still being dug, before its tunnel: our own ({@link MinePit}, {@code pit} its half-width)
 		 * or Dungeons and Taverns' miner's pit ({@link DntMine}, {@code pit} minus its layers, placed at {@code origin}
 		 * turned {@code turn} quarters).
 		 */
@@ -271,7 +271,7 @@ public final class Mines {
 	}
 
 	/**
-	 * (0.7.625) The nearest ground fit for an open pit ({@link MinePit}), unless the settlement is poor; else (or if there's
+	 * (0.7.627) The nearest ground fit for an open pit ({@link MinePit}), unless the settlement is poor; else (or if there's
 	 * none) the nearest rock or cliff face round the seat (rings outward), else the nearest open ground fit for a shaft; or null.
 	 */
 	static @Nullable Mine site(ServerLevel level, Faction f) {

@@ -88,7 +88,7 @@ final class Buildings {
 		// (0.5.27) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
 		Blueprint.register(FactionType.KINGDOM, new Blueprint.Entry("tavern",
 			(level, faction, variant) -> {
-				// (0.7.625) Dungeons and Taverns' own tavern house when it's installed ({@link DntBuildings})
+				// (0.7.627) Dungeons and Taverns' own tavern house when it's installed ({@link DntBuildings})
 				Blueprint dnt = DntBuildings.tavern(level, faction);
 				return dnt != null ? dnt : tavern(Kit.of(level, faction, variant, variant), Planner.size(faction));
 			}, 1, 26));

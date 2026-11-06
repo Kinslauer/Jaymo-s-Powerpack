@@ -541,7 +541,8 @@ final class MerchantOrders {
 			player.drop(left, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
 		// (0.7.498) whole coins of the town, and the change in bits, into the worn purse or the pack
-		Currencies.give(player, Currencies.payEmeralds(coinOf(level, town), g.emeralds()));
+		// ((0.7.625) less a Bane's cut)
+		Currencies.give(player, BaneCut.cut(player, Currencies.payEmeralds(coinOf(level, town), g.emeralds())));
 		player.setAttached(LEDGER, ledger.bought(WANT + key, today, 1, FAR_STANDING_XP));
 		Post.aside(player.getUUID(), Component.translatable("orders.jaymoskingdoms.tidings.want", town.name(), worldName(g)));
 		level.playSound(null, at, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.1F);

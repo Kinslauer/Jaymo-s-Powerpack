@@ -200,5 +200,12 @@ Andy picked all 34 rows (2026-11-06).
   blink to a foe marked by a thrown or shot blow (3 combo), ground finishes and shield flourishes inside the flow. Web
   (combo = hit streak): wrap-and-slam at 8/16, string up from a perch, counters pin foes to walls, ground finishes mid-
   streak, Web Shot and Yank keep the streak. A dodge or vault keeps both counts.
+- Patch 5 (Kingdoms 0.7.625): the cut (15% of wages, bounties and sales, +5% a claim, a coin from your purse now and then,
+  all back with half again when it's ended or sworn), a claim on the nearest town every three days (its men come at you
+  there; three of them killed there frees it; all on the boards), and two or three branded feral wolf hounds that come up
+  your blood trail when you're alone (each killed puts the next claim off a day).
+- Takedowns on the skill bar (Powers 0.21.24, with patch 5): Andy: "chrono in time flow should get the display, but for
+  fist users across the board the menu can show while you have an empty hand and are locked on." Takedown and Shadow
+  Blink sit on the RPG skill bar in Time Flow; Web's Takedown with an empty hand while locked on.
 - Patch 5 put off (Andy, 2026-11-06: "skip patch 5 for now and come back later"): patch 6 goes next; patch 5 after
   patch 9 or whenever Andy asks. Nothing in 6-9 needs it.

@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.forms;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.PowersCompat;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.loader.api.FabricLoader;
@@ -23,6 +24,11 @@ import org.jspecify.annotations.Nullable;
  * for a masterstroke, too hungry, sealed) delivers nothing, so the bar's cooldown doesn't start.</li>
  * </ul>
  * Without Spell Engine nothing here loads and the stance works with weapons as before.
+ * <p>
+ * (0.7.625) Andy: "chrono in time flow should get the display, but for fist users across the board the menu can show
+ * while you have an empty hand and are locked on." Powers' takedowns ({@code combat/Takedowns}) are bar spells too
+ * ({@code jaymoskingdoms:move_<move>}): in Time Flow the takedown and the blink, always; with an empty hand and locked
+ * on, the takedown your power has. They go at your lock-on foe, else the one in your sights.
  */
 public final class FormSkills {
 	private static final String MOD_ID = "spell_engine";
@@ -32,6 +38,9 @@ public final class FormSkills {
 	static final String SOURCE = "jaymoskingdoms_forms";
 	/** The custom delivery every form spell names. */
 	static final Identifier HANDLER = JaymosKingdoms.id("weapon_form");
+	/** (0.7.625) A Powers takedown's spell is {@code jaymoskingdoms:move_<move>}, delivered by this. */
+	static final String MOVE_PREFIX = "move_";
+	static final Identifier MOVE_HANDLER = JaymosKingdoms.id("power_move");
 	/** The spell tag of every form spell: what a form weapon's own container takes. */
 	public static final String TAG = JaymosKingdoms.MOD_ID + ":weapon_forms";
 
@@ -58,9 +67,25 @@ public final class FormSkills {
 		return Forms.get(id) == null ? null : id;
 	}
 
-	/** The form spells on {@code player}'s bar now. */
-	static List<String> spells(Player player) {
+	/** (0.7.625) The Powers takedown a spell id stands for, or null. */
+	public static @Nullable String moveOf(@Nullable Identifier spell) {
+		if (spell == null || !spell.getNamespace().equals(JaymosKingdoms.MOD_ID) || !spell.getPath().startsWith(MOVE_PREFIX)) {
+			return null;
+		}
+		return spell.getPath().substring(MOVE_PREFIX.length());
+	}
+
+	/** (0.7.625) A form's or a takedown's spell. */
+	public static boolean ours(@Nullable Identifier spell) {
+		return formOf(spell) != null || moveOf(spell) != null;
+	}
+
+	/** The form spells on {@code player}'s bar now, (0.7.625) its Powers takedowns first. */
+	public static List<String> spells(Player player) {
 		List<String> out = new ArrayList<>();
+		for (String move : PowersCompat.barMoves(player)) {
+			out.add(JaymosKingdoms.MOD_ID + ":" + MOVE_PREFIX + move);
+		}
 		for (String id : Forms.barForms(player)) {
 			out.add(spellId(id));
 		}
@@ -80,6 +105,10 @@ public final class FormSkills {
 			net.spell_engine.api.spell.event.SpellHandlers.registerCustomDelivery(HANDLER, (level, spell, caster, targets, context, position) -> {
 				String form = formOf(spell.unwrapKey().map(key -> key.identifier()).orElse(null));
 				return form != null && caster instanceof ServerPlayer player && Forms.cast(player, form);
+			});
+			net.spell_engine.api.spell.event.SpellHandlers.registerCustomDelivery(MOVE_HANDLER, (level, spell, caster, targets, context, position) -> {
+				String move = moveOf(spell.unwrapKey().map(key -> key.identifier()).orElse(null));
+				return move != null && caster instanceof ServerPlayer player && PowersCompat.castMove(player, move);
 			});
 		}
 	}

@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.625) Andy (2026-11-06), of Dungeons and Taverns' buildings: "same with the tavern". With D&T installed
+ * (0.7.627) Andy (2026-11-06), of Dungeons and Taverns' buildings: "same with the tavern". With D&T installed
  * ({@link DntMine#MOD}, All Rights Reserved; read at run time from the player's own copy, nothing of theirs copied into
  * ours), a kingdom's builders put up D&T's tavern house instead of ours, in the wood of the land round its seat (D&T has
  * thirteen: oak, spruce, birch, dark oak, acacia, jungle, mangrove, cherry, pale, swamp, desert, snowy, dappled). Built

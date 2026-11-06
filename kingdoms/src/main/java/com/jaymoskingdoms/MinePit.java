@@ -21,7 +21,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.625) A settlement's open-pit mine, Andy (2026-11-06): "the dungeons and taverns mine here is exactly what i was
+ * (0.7.627) A settlement's open-pit mine, Andy (2026-11-06): "the dungeons and taverns mine here is exactly what i was
  * imagining when i wanted our builders to mine. the current one should be for poverty nations only as it is too simple."
  * Our own build in that style (nothing of theirs copied): its builders dig a stepped pit {@link #HALF}*2+1 blocks across,
  * a layer at a time, each terrace a step in from the one above, down to a floor {@link #DEPTH} deep. Then they fence its
