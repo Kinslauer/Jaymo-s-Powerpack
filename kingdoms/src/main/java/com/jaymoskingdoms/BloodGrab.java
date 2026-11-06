@@ -40,11 +40,18 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * A vampire who taps use on their prey twice in quick succession (the first tap is the usual sneak bite) takes it by the
  * throat in one hand ({@link #GRABBING}, synced: the client's {@code BloodGrabPose}) and holds it up in front of them, its
- * feet off the ground, while they walk ({@link #HOLD_REACH}). Held, it can't fight back (its AI waits) and is drunk from
+ * feet off the ground, while they walk ({@link #place}). Held, it can't fight back (its AI waits) and is drunk from
  * every {@link #DRAIN_EVERY} ticks, twice the bite's pace, so it dies twice as fast. Letting go of use while it still lives
  * throws it hard the way they look ({@link #THROW_SPEED}); a vampire well fed ({@link #NOURISHED_FOOD}) throws it through
- * whatever is softer than stone ({@link #breakable}) for the first {@link #BREAK_RANGE} blocks of its flight. It goes down
- * (or dies) in the hold, the vampire is hurt off it or downed, or it's torn away, and it's simply dropped.
+ * whatever is softer than stone ({@link #breakable}) for the first {@link #BREAK_RANGE} blocks of its flight. It dies in the
+ * hold, the vampire is hurt off it or downed, or it's torn away, and it's simply dropped.
+ * <p>
+ * (0.7.635) Andy (2026-11-06): "the grab should animate within the vampire's hand hands at the throat the whole time, even
+ * if they go down". A held body going down stays up in the hand, hanging from it (Powers no longer lays it on the ground
+ * while it's held: {@link #grabbed}), and its throat is put where the vampire's hand really is: the arm follows the look up
+ * and down ({@link #raise}), and the body is placed at the hand's end of that arm ({@link #place}), so in first person
+ * (First-person Model draws the arm) and third the hand is on the throat. Held, it claws at the wrist and kicks; once
+ * down it hangs limp ({@code BloodGrabPose}).
  * <p>
  * Prey: whoever the bite takes that a hand can hold, grown villagers and folk ({@link Vampires#person}) and the Nether's
  * piglins and Hornkin ({@link Vampires#netherPrey}); never a player.
@@ -57,10 +64,22 @@ import org.jspecify.annotations.Nullable;
 public final class BloodGrab {
 	/** A grab reaches this far (blocks, eyes to the prey's box). */
 	static final double REACH = 3.0;
+	/**
+	 * (0.7.635) Where the hand is, as shares of the vampire's height (the player model's 32 pixels): the shoulder joint
+	 * ({@code SHOULDER} up), the arm's length from it to the hand ({@code ARM}), the hand's way out to the side of the
+	 * middle with the arm turned in ({@code SIDE}); the throat at this share of the prey's height ({@code THROAT}), its
+	 * middle this far behind the throat (blocks, {@code NECK}); and never closer than this between the two boxes ({@code GAP}).
+	 */
+	static final double SHOULDER = 22.0 / 32.0, ARM = 10.0 / 32.0, SIDE = 3.0 / 32.0, THROAT = 0.76, NECK = 0.2, GAP = 0.05;
+	/** (0.7.635) A body much taller than the vampire is held no lower than its feet this far into the ground (blocks). */
+	static final double FEET_SINK = 0.3;
+	/**
+	 * (0.7.635) How far the holding arm is raised above level (radians) looking straight ahead, how much of the look's
+	 * pitch it follows, and its limits (down, so the feet don't sink far into the ground; up).
+	 */
+	public static final float RAISE = 0.3F, RAISE_PER_PITCH = 0.8F, RAISE_MIN = -0.25F, RAISE_MAX = 0.9F;
 	/** (0.7.634) Feed's aim: off the crosshair, the nearest prey within this angle of the look (cosine: about 35 degrees). */
 	static final double FEED_CONE = 0.82;
-	/** Held this far in front (blocks, from the vampire's middle), the throat at this share of the vampire's height. */
-	static final double HOLD_REACH = 0.85, HOLD_HAND = 0.78;
 	/** Torn away past this (blocks): the hold ends. */
 	static final double LEASH = 4.0;
 	/** A drink every this many ticks while held (the bite's own pace is {@link VampirePlayers#DRINK_EVERY}). */
@@ -342,15 +361,49 @@ public final class BloodGrab {
 		}
 	}
 
-	/** Holds {@code target} up by the throat in front of {@code player}, facing them. */
+	/** (0.7.635) How far the holding arm is raised above level (radians) for a look pitched {@code pitch} degrees (down is positive). */
+	public static float raise(float pitch) {
+		return Mth.clamp(RAISE - pitch * Mth.DEG_TO_RAD * RAISE_PER_PITCH, RAISE_MIN, RAISE_MAX);
+	}
+
+	/**
+	 * (0.7.635) The vampire holding {@code e} up by the throat now, or null: read off everyone's synced {@link #GRABBING}, so
+	 * it answers the same on the client (the poses; Powers asks it by reflection so a held body isn't laid down).
+	 */
+	public static net.minecraft.world.entity.player.@Nullable Player holder(Entity e) {
+		for (net.minecraft.world.entity.player.Player p : e.level().players()) {
+			Integer id = p.getAttached(GRABBING);
+			if (id != null && id == e.getId() && p != e) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	/** (0.7.635) Whether a vampire holds {@code e} up by the throat now (client or server). */
+	public static boolean grabbed(Entity e) {
+		return holder(e) != null;
+	}
+
+	/**
+	 * Holds {@code target} up by the throat in front of {@code player}, facing them: (0.7.635) the throat at the hand's end
+	 * of the arm as {@code BloodGrabPose} draws it, raised with the look ({@link #raise}), on the main hand's side.
+	 */
 	private static void place(ServerPlayer player, LivingEntity target) {
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
 		double fx = -Mth.sin(yaw), fz = Mth.cos(yaw);
-		double reach = HOLD_REACH + player.getBbWidth() * 0.5 + target.getBbWidth() * 0.5 - 0.3;
-		double x = player.getX() + fx * reach, z = player.getZ() + fz * reach;
-		// the throat (90% of the prey's height) at the hand
-		double y = player.getY() + player.getBbHeight() * HOLD_HAND - target.getBbHeight() * 0.9;
-		y = Math.max(y, player.getY() - 0.2);
+		// the right hand's side (facing +z, the right is -x)
+		double side = player.getMainArm() == net.minecraft.world.entity.HumanoidArm.LEFT ? -1.0 : 1.0;
+		double rx = -Mth.cos(yaw) * side, rz = -Mth.sin(yaw) * side;
+		double h = player.getBbHeight();
+		float up = raise(player.getXRot());
+		double arm = ARM * h;
+		double ahead = Math.max(arm * Mth.cos(up) + NECK, (player.getBbWidth() + target.getBbWidth()) * 0.5 + GAP);
+		double x = player.getX() + fx * ahead + rx * SIDE * h, z = player.getZ() + fz * ahead + rz * SIDE * h;
+		// the throat at the hand
+		double y = player.getY() + h * SHOULDER + arm * Mth.sin(up) - target.getBbHeight() * THROAT;
+		// (a body much taller than the vampire still only sinks its feet a little into the ground)
+		y = Math.max(y, player.getY() - FEET_SINK);
 		target.setPos(x, y, z);
 		target.setDeltaMovement(Vec3.ZERO);
 		target.fallDistance = 0.0F;

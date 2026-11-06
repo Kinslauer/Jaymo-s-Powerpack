@@ -98,6 +98,10 @@ public final class DownedPose {
 		if (entity instanceof Player || !Downed.isDowned(entity) || Carry.isCarried(entity)) {
 			return;
 		}
+		if (com.jaymospowers.compat.KingdomsCompat.grabbed(entity)) {
+			// (0.21.33) held up by the throat in a vampire's hand (Kingdoms' BloodGrab): it hangs there, posed by Kingdoms, not laid down
+			return;
+		}
 		float down = entity.level().getGameTime() + partialTicks - Downed.since(entity);
 		boolean person = BodyPlan.of(entity) == BodyPlan.HUMANOID;
 		Down pose = new Down(fall(down), Downed.crawls(entity), person, Wounds.brokenLimbs(entity), Math.max(0.0F, down), entity.getId(),

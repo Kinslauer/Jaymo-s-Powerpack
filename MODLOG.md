@@ -1307,3 +1307,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   its `defaultRequire: 1` failed the class. Powers' fabric.mod.json now sets Lithium's `mixin.world.explosions.entity_raycast`
   to false through `custom."lithium:options"` (Lithium reads it from any mod; server and every client get it with the
   jar). Lithium's other explosion speedups stay on. Not run here.
+
+## 0.21.33: held by the throat isn't laid down
+- `DownedPose` skips a downed body a Kingdoms vampire holds up by the throat (`KingdomsCompat.grabbed`, reflection on
+  `BloodGrab.grabbed`), so it stays in the hand (Kingdoms 0.7.635 poses it hanging there). Built, not played.
