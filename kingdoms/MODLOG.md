@@ -9759,3 +9759,13 @@ Andy: "it needs to be extremely rare, and hostile toward hostile mobs, so you ca
 - A wild Atroxiia hunts the nearest hostile mob it can see within 22 blocks (`WindDragon.huntsMonsters()`), so you come
   on it mid-fight. It still leaves players alone unless they hurt it, and tamed ones don't hunt on their own.
 - Gradle compile clean; not played.
+
+## 0.7.614 (2026-11-06): a vampire can feed in the Nether (Powers 0.21.17)
+- Andy: "how do i feed in the nether?" Only grown villagers, realm folk and sleeping players could be bitten, and the
+  Nether has none of them. Agreed: "yes as long as there arent zombies".
+- Sneak and right-click with an empty hand now drinks from grown piglins, piglin brutes and Hornkin
+  (`Vampires.netherPrey`). Zombified piglins and zombified Hornkin are excluded. A bite that doesn't infect never turns
+  its prey (`VampirePlayers.drink` now checks `infect` for mobs too), so no piglin vampires.
+- A bottle of Kitchen's blood also counts as fed for the starving clock (`VampirePlayers.fedFromBottle`, from
+  `Hemomancy.drankBottle`). It was already a small heal and meal. Blood requests still want a real bite.
+- Hint 119 (`lang/parts/vampire-nether.json`). Built, not played.
