@@ -10024,3 +10024,21 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   brought down (`FelledCompat.near`, by Zarith's solid bounds) and makes it ours (`FelledCompat.adopt`: its live grid cells
   as pieces, upright as it stood, heading the way its trunk lay; Felled's entity discarded), then lifts and throws it as
   before. Assumes Felled's grid keeps the tree's standing frame (not seen in game). Hint 121 (HINTS=121). Built, not played; Felled's own felling not seen in our pack yet.
+
+## 0.7.629 (2026-11-06): builders build Dungeons and Taverns' mine, tavern and more; open-pit mines
+- Andy: "the dungeons and taverns mine here is exactly what i was imagining when i wanted our builders to mine. the
+  current one should be for poverty nations only as it is too simple." Then: "cant they just use the dungeon and taverns
+  structure?", "same with the tavern and stables if they have em", "do them all".
+- D&T (mod id `mr_dungeons_andtaverns`, ARR) is read at run time from the player's own copy, like CTOV's halls; nothing
+  of its is copied into ours. Built whole, without its ruins' cobwebs, leaves and weeds.
+- `DntMine`: with D&T installed, a settlement that isn't poor digs D&T's miner's pit (`remnant/wild_ruin_19` and `_b`,
+  joined as D&T joins them): open blocks dug a layer at a time (stone to storage), ladders/rails/floor laid as each layer
+  opens, fence and shed when the last is dug, then the plain tunnel on from its lowest floor into rock.
+- `MinePit` (no D&T): our own stepped open pit 13 across and 5 deep, fenced rim, rails up into a cobblestone shed, then
+  the tunnel. Poor (`MinePit.POOR_WORTH` 80 by `Wealth.worth`; fiefdoms by their overlord) or no level dry ground: the
+  plain cliff tunnel or shaft as before. Saved mines keep their kind.
+- `DntBuildings`: marked variants (`MARK`, like CTOV's) draw D&T's tavern house (13 woods by biome), well (13 woods) and
+  smithy (forest or ruined smith, on the tries CTOV's doesn't take); new D&T-only buildings: sawmill, farmhouse, apiary,
+  firewatch tower (realms), graveyard (kingdoms from 50 people; Andy let its 27 x 37 past the 32 plot cap, D&T-only
+  buildings may be up to `DntBuildings.MAX_SIDE` 40). Older projects keep their look. The dappled town hall is too big;
+  the hamlet is a piglin bunker; D&T has no stable.
