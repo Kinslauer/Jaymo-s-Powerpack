@@ -492,6 +492,56 @@ public class CorpseEntity extends Entity {
 		stack.setDamageValue(Math.max(stack.getDamageValue(), max - remaining));
 	}
 
+	/** (0.5.79) The armour slots a body's gear is kept under, boots first (the way {@link #reworkArmour} hands them over). */
+	private static final String[] ARMOUR = {"feet", "legs", "chest", "head"};
+
+	/**
+	 * (0.5.79) Andy: "i'd like players to pull dirty beaten armor off enemies". For other mods (Jaymo's Powers' blood and
+	 * dirt, by reflection or directly): {@code each} is handed every piece of armour the body still wears (with its slot,
+	 * 0 boots, 1 leggings, 2 chestplate, 3 helmet) to change in place, as a body dragged through blood, mud or water marks
+	 * or washes it; what it changes is kept on the body, and is what comes off it. False if it wears none.
+	 */
+	public boolean reworkArmour(java.util.function.ObjIntConsumer<ItemStack> each) {
+		if (!(level() instanceof ServerLevel)) {
+			return false;
+		}
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return false;
+		}
+		CompoundTag gear = tag.getCompoundOrEmpty("equipment");
+		if (gear.isEmpty()) {
+			return false;
+		}
+		var ops = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		boolean any = false, changed = false;
+		for (int i = 0; i < ARMOUR.length; i++) {
+			String slot = ARMOUR[i];
+			if (!gear.contains(slot)) {
+				continue;
+			}
+			ItemStack stack = ItemStack.CODEC.parse(ops, gear.get(slot)).result().orElse(ItemStack.EMPTY);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			any = true;
+			ItemStack before = stack.copy();
+			each.accept(stack, i);
+			if (!ItemStack.matches(before, stack)) {
+				net.minecraft.nbt.Tag saved = ItemStack.CODEC.encodeStart(ops, stack).result().orElse(null);
+				if (saved != null) {
+					gear.put(slot, saved);
+					changed = true;
+				}
+			}
+		}
+		if (changed) {
+			tag.put("equipment", gear);
+			this.entityData.set(LOOK, tag.toString());
+		}
+		return any;
+	}
+
 	/** Whether the mob's gear in that slot was something it picked up (vanilla keeps those as they were). */
 	private static boolean preserved(CompoundTag look, String slot) {
 		return look.getCompoundOrEmpty("drop_chances").getFloatOr(slot, 0.0F) > 1.0F;

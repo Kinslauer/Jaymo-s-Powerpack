@@ -21,7 +21,7 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.21.28) A shapeless crafting recipe that uses a hammer ({@code #jaymospowers:hammers}) instead of eating it, the way
+ * (0.21.29) A shapeless crafting recipe that uses a hammer ({@code #jaymospowers:hammers}) instead of eating it, the way
  * GregTech's hand tools work: the hammer comes back worn by {@link OreWashing#HAMMER_WEAR}. A Tinkering hammer stops at
  * broken rather than vanishing (as it does everywhere else), and a broken one won't do. Type
  * {@code jaymospowers:hammer_crafting}, written like {@code minecraft:crafting_shapeless} (after Jaymo's Kitchen's

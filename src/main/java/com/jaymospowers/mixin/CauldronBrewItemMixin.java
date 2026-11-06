@@ -22,7 +22,7 @@ abstract class CauldronBrewItemMixin {
 	private void jaymospowers$brew(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise,
 		CallbackInfo ci) {
 		if (entity instanceof ItemEntity item && level instanceof ServerLevel server && state.is(Blocks.WATER_CAULDRON)) {
-			// (0.21.28) crushed ore washes instead (OreWashing), and brewing never sees it
+			// (0.21.29) crushed ore washes instead (OreWashing), and brewing never sees it
 			if (!com.jaymospowers.tinkering.ore.OreWashing.itemInside(server, pos, state, item)) {
 				CauldronBrewing.itemInside(server, pos, state, item);
 			}

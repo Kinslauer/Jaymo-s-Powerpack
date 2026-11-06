@@ -23,7 +23,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.21.28) Andy, on Gemini's GregTech start: punching a tree "should deal slight hand damage". Jaymo's Kingdoms already
+ * (0.21.29) Andy, on Gemini's GregTech start: punching a tree "should deal slight hand damage". Jaymo's Kingdoms already
  * makes a bare hand useless on wood (no drops, no chop); here it also hurts: the first blow at a log with an empty main
  * hand drives a splinter into that hand's arm ({@link #SPLINTER} of a health point, through Wounds so the H screen shows
  * it on the arm), and so does every {@link #EVERY} ticks of keeping at it. Creative players and anyone holding anything

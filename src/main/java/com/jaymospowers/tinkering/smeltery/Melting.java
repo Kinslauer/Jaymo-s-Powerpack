@@ -168,7 +168,7 @@ public final class Melting {
 		add(Molten.SILVER, Molten.INGOT * ORE_INGOTS, ores);
 	}
 
-	/** (0.21.28) Crushed and washed ore ({@code tinkering/ore/OreWashing}) melt as raw ore does (doubled). */
+	/** (0.21.29) Crushed and washed ore ({@code tinkering/ore/OreWashing}) melt as raw ore does (doubled). */
 	public static void ores(Molten molten, Item... ores) {
 		add(molten, Molten.INGOT * ORE_INGOTS, ores);
 	}

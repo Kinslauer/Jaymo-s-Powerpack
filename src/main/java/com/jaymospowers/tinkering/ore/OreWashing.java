@@ -39,7 +39,7 @@ import net.minecraft.world.level.material.FluidState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.21.28) Ore washing, Andy's pick from Gemini's GregTech start (phase 4). GregTech's hand route, on our ores:
+ * (0.21.29) Ore washing, Andy's pick from Gemini's GregTech start (phase 4). GregTech's hand route, on our ores:
  * <ul>
  * <li><b>Crushing:</b> raw iron, copper, gold or silver with a hammer ({@code #jaymospowers:hammers}: the smithing
  * hammers, the Tinkering sledge and vein hammers, a mace, the Aether hammers) in a crafting grid gives one crushed ore
