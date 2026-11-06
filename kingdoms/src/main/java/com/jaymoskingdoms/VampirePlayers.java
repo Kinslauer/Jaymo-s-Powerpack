@@ -53,7 +53,7 @@ public final class VampirePlayers {
 	static final float DRINK_DAMAGE = 4.0F, DRINK_HEAL = 3.0F, DRINK_SATURATION = 1.5F;
 	static final int DRINK_FOOD = 4, DRINK_EVERY = 20;
 	/**
-	 * (0.7.633) Andy: "the drain isnt restoring my thirst either". Blood quenches a vampire's thirst too (Kitchen's water,
+	 * (0.7.634) Andy: "the drain isnt restoring my thirst either". Blood quenches a vampire's thirst too (Kitchen's water,
 	 * out of 20): this much a bite or grab gulp, this much a unit lapped from a pool, this much a bottle of blood.
 	 */
 	static final int DRINK_WATER = 3, LAP_WATER = 4, BOTTLE_WATER = 4;

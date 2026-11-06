@@ -99,7 +99,7 @@ public final class DownedPose {
 			return;
 		}
 		if (com.jaymospowers.compat.KingdomsCompat.grabbed(entity)) {
-			// (0.21.32) held up by the throat in a vampire's hand (Kingdoms' BloodGrab): it hangs there, posed by Kingdoms, not laid down
+			// (0.21.33) held up by the throat in a vampire's hand (Kingdoms' BloodGrab): it hangs there, posed by Kingdoms, not laid down
 			return;
 		}
 		float down = entity.level().getGameTime() + partialTicks - Downed.since(entity);

@@ -46,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  * whatever is softer than stone ({@link #breakable}) for the first {@link #BREAK_RANGE} blocks of its flight. It dies in the
  * hold, the vampire is hurt off it or downed, or it's torn away, and it's simply dropped.
  * <p>
- * (0.7.633) Andy (2026-11-06): "the grab should animate within the vampire's hand hands at the throat the whole time, even
+ * (0.7.634) Andy (2026-11-06): "the grab should animate within the vampire's hand hands at the throat the whole time, even
  * if they go down". A held body going down stays up in the hand, hanging from it (Powers no longer lays it on the ground
  * while it's held: {@link #grabbed}), and its throat is put where the vampire's hand really is: the arm follows the look up
  * and down ({@link #raise}), and the body is placed at the hand's end of that arm ({@link #place}), so in first person
@@ -62,16 +62,16 @@ public final class BloodGrab {
 	/** A grab reaches this far (blocks, eyes to the prey's box). */
 	static final double REACH = 3.0;
 	/**
-	 * (0.7.633) Where the hand is, as shares of the vampire's height (the player model's 32 pixels): the shoulder joint
+	 * (0.7.634) Where the hand is, as shares of the vampire's height (the player model's 32 pixels): the shoulder joint
 	 * ({@code SHOULDER} up), the arm's length from it to the hand ({@code ARM}), the hand's way out to the side of the
 	 * middle with the arm turned in ({@code SIDE}); the throat at this share of the prey's height ({@code THROAT}), its
 	 * middle this far behind the throat (blocks, {@code NECK}); and never closer than this between the two boxes ({@code GAP}).
 	 */
 	static final double SHOULDER = 22.0 / 32.0, ARM = 10.0 / 32.0, SIDE = 3.0 / 32.0, THROAT = 0.76, NECK = 0.2, GAP = 0.05;
-	/** (0.7.633) A body much taller than the vampire is held no lower than its feet this far into the ground (blocks). */
+	/** (0.7.634) A body much taller than the vampire is held no lower than its feet this far into the ground (blocks). */
 	static final double FEET_SINK = 0.3;
 	/**
-	 * (0.7.633) How far the holding arm is raised above level (radians) looking straight ahead, how much of the look's
+	 * (0.7.634) How far the holding arm is raised above level (radians) looking straight ahead, how much of the look's
 	 * pitch it follows, and its limits (down, so the feet don't sink far into the ground; up).
 	 */
 	public static final float RAISE = 0.3F, RAISE_PER_PITCH = 0.8F, RAISE_MIN = -0.25F, RAISE_MAX = 0.9F;
@@ -290,13 +290,13 @@ public final class BloodGrab {
 		}
 	}
 
-	/** (0.7.633) How far the holding arm is raised above level (radians) for a look pitched {@code pitch} degrees (down is positive). */
+	/** (0.7.634) How far the holding arm is raised above level (radians) for a look pitched {@code pitch} degrees (down is positive). */
 	public static float raise(float pitch) {
 		return Mth.clamp(RAISE - pitch * Mth.DEG_TO_RAD * RAISE_PER_PITCH, RAISE_MIN, RAISE_MAX);
 	}
 
 	/**
-	 * (0.7.633) The vampire holding {@code e} up by the throat now, or null: read off everyone's synced {@link #GRABBING}, so
+	 * (0.7.634) The vampire holding {@code e} up by the throat now, or null: read off everyone's synced {@link #GRABBING}, so
 	 * it answers the same on the client (the poses; Powers asks it by reflection so a held body isn't laid down).
 	 */
 	public static net.minecraft.world.entity.player.@Nullable Player holder(Entity e) {
@@ -309,13 +309,13 @@ public final class BloodGrab {
 		return null;
 	}
 
-	/** (0.7.633) Whether a vampire holds {@code e} up by the throat now (client or server). */
+	/** (0.7.634) Whether a vampire holds {@code e} up by the throat now (client or server). */
 	public static boolean grabbed(Entity e) {
 		return holder(e) != null;
 	}
 
 	/**
-	 * Holds {@code target} up by the throat in front of {@code player}, facing them: (0.7.633) the throat at the hand's end
+	 * Holds {@code target} up by the throat in front of {@code player}, facing them: (0.7.634) the throat at the hand's end
 	 * of the arm as {@code BloodGrabPose} draws it, raised with the look ({@link #raise}), on the main hand's side.
 	 */
 	private static void place(ServerPlayer player, LivingEntity target) {

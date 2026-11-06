@@ -344,12 +344,12 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.633) Powers' {@code Downed}: isDowned(Entity), passedOut(Entity). */
+	/** (0.7.634) Powers' {@code Downed}: isDowned(Entity), passedOut(Entity). */
 	private static java.lang.invoke.@Nullable MethodHandle downedIs, downedOut;
 	private static boolean lookedForDowned;
 
 	/**
-	 * (0.7.633) 0 up, 1 down, 2 down and out cold, by Jaymo's Powers' own synced marks (so it answers on the client too,
+	 * (0.7.634) 0 up, 1 down, 2 down and out cold, by Jaymo's Powers' own synced marks (so it answers on the client too,
 	 * where Kingdoms' tag check can't); without Powers, 1 for Kingdoms' downed tag (server only), else 0.
 	 */
 	public static int downedState(net.minecraft.world.entity.Entity entity) {
