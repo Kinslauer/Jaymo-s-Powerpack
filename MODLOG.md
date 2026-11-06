@@ -1224,3 +1224,11 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   (through Jaymo's Kingdoms' Weapon Forms bar, Spell Engine's keys 1, 2...): in Time Flow, always, Takedown and Shadow
   Blink; with an empty hand and locked on, Web's Takedown (wrap-and-slam, or string-up from a perch). They go at your
   lock-on foe, else the one in your sights. Sneak + attack still works as before. A blink at an unmarked foe says so.
+## 0.21.25 (2026-11-06): the downed and the dead bleed out (Kingdoms 0.7.626)
+- Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and vampires
+  have finite resources." `core/blood/BleedOut`: every body holds so much blood (a man's 3.0 in stain size, scaled by
+  width x height, 0.3 to 12). The downed pour it into a pool under them once a second (`BloodTrail.pour`), 60% of it by
+  the time they bleed out; it is their own trackable blood. Back up, it comes back over 10 minutes. A Kitchen corpse of
+  anything that died bleeding (downed, cut or bloodied) takes over what was left and pours it out over 90 s, the pool
+  spreading wider as it fills, until it is empty; carried, dragged or hooked bodies hold it. A full pool spills beside
+  itself, so exactly the body's blood lies there for blood magic (`BloodTrail.draw`) and vampires to draw, then it is gone.

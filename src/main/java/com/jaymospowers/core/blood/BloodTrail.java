@@ -156,6 +156,8 @@ public final class BloodTrail {
 
 	public static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(BloodTrail::tick);
+		// (0.21.25) the downed and the dead bleed out into pools
+		BleedOut.init();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof PathfinderMob mob && entity.getType().builtInRegistryHolder().is(TRACKERS)) {
 				mob.getGoalSelector().addGoal(BloodTracking.PRIORITY, new BloodTracking(mob));
@@ -223,6 +225,50 @@ public final class BloodTrail {
 			forget(marks, marks.order.pollFirst());
 		}
 		return mark;
+	}
+
+	/**
+	 * (0.21.25) Andy: "blood should pool under the downed and corpses until they bleed out". Pours {@code amount} of
+	 * {@code by}'s blood (stain size) on the ground under (x, from, z): into the round pool of theirs already lying there
+	 * (it grows by exactly that, up to {@link #MAX_SCALE}), or a new one that small. Returns how much went in: less than
+	 * {@code amount} when the pool there is full, nothing when it's full or there's no dry ground (water, lava, a drop
+	 * over {@link #FALL}). So what a body pours is all there is to draw back up ({@link #draw}): a body's blood is finite.
+	 */
+	static float pour(ServerLevel level, @Nullable UUID by, int color, double x, double from, double z, float amount) {
+		if (amount <= 0.0F) {
+			return 0.0F;
+		}
+		Vec3 top = new Vec3(x, from, z);
+		BlockHitResult hit = level.clip(new ClipContext(top, top.subtract(0.0, FALL, 0.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY,
+			CollisionContext.empty()));
+		if (hit.getType() != HitResult.Type.BLOCK || !level.getFluidState(hit.getBlockPos()).isEmpty()) {
+			return 0.0F;
+		}
+		Vec3 at = hit.getLocation();
+		long now = level.getGameTime();
+		Marks marks = LEVELS.computeIfAbsent(level, l -> new Marks());
+		List<Mark> chunk = marks.byChunk.computeIfAbsent(ChunkPos.pack(BlockPos.containing(at)), c -> new ArrayList<>());
+		for (Mark mark : chunk) {
+			if (mark.shape == BloodParticles.Puddle.ROUND && mark.expires > now && Math.abs(mark.x - at.x) < MERGE && Math.abs(mark.z - at.z) < MERGE
+				&& Math.abs(mark.y - at.y) < MERGE_UP && java.util.Objects.equals(mark.by, by)) {
+				float in = Math.min(amount, MAX_SCALE - mark.scale);
+				if (in <= 0.0F) {
+					return 0.0F;
+				}
+				mark.scale += in;
+				mark.laid = now;
+				mark.expires = now + LIFE;
+				mark.version++;
+				return in;
+			}
+		}
+		Mark mark = new Mark(marks.nextId++, at.x, at.y, at.z, color, by, Math.min(amount, MAX_SCALE), now, 0, BloodParticles.Puddle.ROUND);
+		chunk.add(mark);
+		marks.order.addLast(mark);
+		while (marks.order.size() > MAX_MARKS) {
+			forget(marks, marks.order.pollFirst());
+		}
+		return mark.scale;
 	}
 
 	private static void forget(Marks marks, Mark mark) {

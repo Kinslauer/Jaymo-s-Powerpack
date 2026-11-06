@@ -105,6 +105,14 @@ public final class KitchenCompat {
 		return LOADED && Kitchen.carried(entity);
 	}
 
+	/**
+	 * (0.21.25) A Kitchen body lying still on the ground: not carried, dragged or hung on a meat hook (those bleed their own
+	 * ways: smears, the hook's drip). False for anything that isn't one.
+	 */
+	public static boolean liesStill(Entity entity) {
+		return LOADED && Kitchen.liesStill(entity);
+	}
+
 	/** A player's corpse (it holds their belongings: never eaten). */
 	static boolean isPlayerCorpse(Entity entity) {
 		return LOADED && Kitchen.playerCorpse(entity);
@@ -312,6 +320,11 @@ public final class KitchenCompat {
 
 		static boolean carried(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.carrier() != null;
+		}
+
+		static boolean liesStill(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.carrier() == null && corpse.dragger() == null
+				&& corpse.hook() == null;
 		}
 
 		static boolean playerCorpse(Entity entity) {

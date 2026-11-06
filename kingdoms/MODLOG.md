@@ -9993,3 +9993,8 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - **Takedowns on the skill bar (Powers 0.21.24):** Andy's answer on mapping the Chrono and Web moves: the skill bar shows
   Powers' takedowns (`move_takedown`, `move_blink` spells, `FormSkills`) in Time Flow always, and for bare hands while
   locked on, before any fist forms. Icons: `tools/gen_move_icons.py`. Lines: `lang/parts/power_moves.json`.
+## 0.7.626 (2026-11-06): vampires lap up spilt blood
+- With Powers 0.21.25's bleeding out (the downed and the dead pour a finite pool), a vampire who sneaks and right-clicks
+  a pool of blood on the ground with an empty hand laps it up (`VampirePlayers.lap`): up to 0.5 of stain a gulp, once a
+  second, 3 health and 4 food per unit (a man's whole pool is about 3), counts as fed and eases the blood fever. Blood
+  Sorcerers already draw the same stains (`Hemomancy`), so both now feed on bodies that run dry.
