@@ -38,6 +38,9 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.ValorLook.extract(entity, state);
 		com.jaymoskingdoms.client.ValorWingsLook.extract(entity, state);
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
+		// (0.7.641) a stake in a vampire
+		com.jaymoskingdoms.client.StakeLayer.extract(entity, state);
+		com.jaymoskingdoms.client.StakeStruggle.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.BioForms.extract(entity, state);
 		com.jaymoskingdoms.client.ManaClient.extract(entity, state);
 		// (0.7.479) a corpse's body, drawn outside the world: found again by its id (MCA's skin colour)
@@ -65,6 +68,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.RubberEngulf.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BioForms.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.HandshakePose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		// (0.7.641) a staked vampire struggling with the stake
+		com.jaymoskingdoms.client.StakeStruggle.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		HiddenBladeClient.pose(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		// (0.7.321) last: a goblin's body is the goblin's (so held items and the parts on it follow)

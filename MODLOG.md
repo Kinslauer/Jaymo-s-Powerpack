@@ -1331,6 +1331,29 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   out of a sprint; still held at the end = prone). The server's `Slide.valid` no longer checks Sneak (the client keeps it
   off through the hold). `SPRINT_GRACE_TICKS` stays 8. Compile-checked against the 26.3 jars; not played.
 
+## 0.21.37: every worn bauble shows on the body
+- Andy: "Would this trinkets' system animate any other baubles? If so i want them to be integrated" (picked: Artifacts'
+  ported baubles and our own starters). No other pack mod relied on Trinkets for drawing (scanned all 123 downloaded jars),
+  but our Artifacts port never drew anything on the player. Now 49 baubles do: hats, hoods, masks and the circlet on the
+  head; scarves and pendants at the neck; charms and belt gadgets at the belt; gloves, claws, gauntlets, bracers and rings
+  on the hands (ring slot 1 right hand, slot 2 left); shoes on both feet; the featherfall cloak down the back (hides the cape).
+- `Baubles.LOOKS`: each slot's item id, synced to everyone (`Baubles.looks`). `client/baubles/WornLooks` reads
+  `worn_looks.json`, bakes a player-model layer per look (wide and slim arms, and a left-hand ring variant), and draws each
+  worn look; scarf tails, pendants, charms, hanging pouches, feathers, jester horns and the cloak swing with the stride and
+  idle; parts scale out over the matching armour piece.
+- Our own boxes and textures (REA, docs/Worn-Looks-Spec.md): `tools/gen_worn_looks.py` writes the json and
+  `textures/entity/worn/*.png`. Lanterns, the coin purse, the hip bottles, the lantern pole, fairies and quivers keep their
+  own drawing.
+- Andy: "Can we not port their looks too?" The 25 baubles that kept their Artifacts look (villager and angler's hats,
+  scarves, necklaces, pendants, the neck charms, cloud bottle, skull, antidote, crystal heart, chorus totem, claws, fire
+  gauntlet, vampiric glove, golden hook, withered bracelet, hare boots, kitty slippers, snowshoes, spikes, rooted and
+  strider shoes) now use Artifacts' own worn models, textures and renderers (MIT, ported into
+  `client/baubles/artifacts/worn/`, textures in `textures/entity/wearable/artifacts/` with the licence): `WornArtifacts`
+  draws them from `Baubles.looks`, gloves and claws on both hands, belt charms at the front of the right hip. The
+  cloud bottle, skull and antidote leave `#jaymospowers:hip_shown` (no more flat sprite at the hip). Our own looks stay for
+  the 7 starters, the sky mask and the 16 we repainted medieval, whose Artifacts models are the modern things we renamed
+  away from. Gradle compile clean; not played.
+
 ## 0.21.38: a traditional kneel, posed with the weapon; climbing hand over hand
 - Andy: "the newest kneel has both knees bent in front of the character, it should look more like a traditional kneel,
   posing with a weapon in hand like a hand on the sword's pommel, blade in the ground, similar with an axe, or a low ready
