@@ -52,6 +52,11 @@ public final class VampirePlayers {
 	/** A bite: what it takes, what it gives (food, saturation, health), how often (ticks). */
 	static final float DRINK_DAMAGE = 4.0F, DRINK_HEAL = 3.0F, DRINK_SATURATION = 1.5F;
 	static final int DRINK_FOOD = 4, DRINK_EVERY = 20;
+	/**
+	 * (0.7.633) Andy: "the drain isnt restoring my thirst either". Blood quenches a vampire's thirst too (Kitchen's water,
+	 * out of 20): this much a bite or grab gulp, this much a unit lapped from a pool, this much a bottle of blood.
+	 */
+	static final int DRINK_WATER = 3, LAP_WATER = 4, BOTTLE_WATER = 4;
 	/** (0.7.630) Lapping a pool on the ground: how near the spot, the most a gulp takes (stain size), what each unit gives. */
 	static final double LAP_RANGE = 1.5;
 	static final float LAP_MOST = 0.5F, LAP_HEAL = 3.0F, LAP_FOOD = 4.0F;
@@ -167,6 +172,7 @@ public final class VampirePlayers {
 		PowersCompat.drinkAtGround(player);
 		player.heal(LAP_HEAL * drawn);
 		player.getFoodData().eat(Math.max(1, Math.round(LAP_FOOD * drawn)), 0.4F);
+		KitchenCompat.drink(player, Math.max(1, Math.round(LAP_WATER * drawn)));
 		fedFromBottle(player);
 		BloodFever.bit(player);
 		level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.7F, 0.45F);
@@ -332,6 +338,7 @@ public final class VampirePlayers {
 		}
 		player.heal(DRINK_HEAL);
 		player.getFoodData().eat(DRINK_FOOD, DRINK_SATURATION);
+		KitchenCompat.drink(player, DRINK_WATER);
 		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
 		if (v != null) {
 			player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(v.kind(), nightNo, now));

@@ -10086,3 +10086,6 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - The held one is posed (`BloodGrabPose.victim`): head pushed back, both hands clawing at the wrist and legs kicking while
   it can; once down, limp and swaying, stiller when out cold (`PowersCompat.downedState`, Powers' synced Downed marks).
   Built, not played.
+- Andy: "the drain isnt restoring my thirst either". Blood now quenches a vampire's Kitchen thirst as well
+  (`KitchenCompat.drink`, clean): 3 water a bite or grab gulp (`VampirePlayers.DRINK_WATER`), 4 for each unit lapped from
+  a pool (`LAP_WATER`), and 4 for a bottle of blood (`BOTTLE_WATER`, `Hemomancy.drankBottle`). Built, not played.
