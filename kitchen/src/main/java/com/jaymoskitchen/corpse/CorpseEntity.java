@@ -1816,8 +1816,9 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * (0.5.31) Sneak + use with an empty hand, held: the bar fills, and full, it's in your arms. Let go sooner (more than
-	 * {@link #HOLD_GRACE} without use) and it starts again. A big carcass can't be lifted at all.
+	 * (0.5.31) Sneak + use with an empty hand, held: the bar fills, and full, it's in your arms. (0.5.83) Let go sooner, the
+	 * bar stays where it got to and your next hold carries on (Andy: "every meter should work this way"); someone else's
+	 * hold starts it again. A big carcass can't be lifted at all.
 	 */
 	private InteractionResult lift(ServerLevel level, Player player) {
 		return grab(level, player, false);
@@ -1830,9 +1831,12 @@ public class CorpseEntity extends Entity {
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		long now = level.getGameTime();
-		if (!player.getUUID().equals(liftBy) || now - liftLast > HOLD_GRACE) {
+		if (!player.getUUID().equals(liftBy)) {
 			liftBy = player.getUUID();
 			liftStart = now;
+		} else if (now - liftLast > HOLD_GRACE) {
+			// (0.5.83) let go before: the bar carries on from where it got to
+			liftStart = now - Math.max(0L, liftLast - liftStart);
 		}
 		liftLast = now;
 		long held = now - liftStart;

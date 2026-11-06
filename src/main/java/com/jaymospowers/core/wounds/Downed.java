@@ -5,6 +5,7 @@ import com.jaymospowers.core.Carry;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.HoldProgress;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -258,6 +259,8 @@ public final class Downed {
 		long held;
 		int ticks, hits;
 		boolean begun, over;
+		/** (0.21.37) Whether its bar has been carried on from the last hold on this body ({@link HoldProgress}). */
+		boolean resumed;
 
 		Revive(LivingEntity body, long start) {
 			this.body = body;
@@ -277,6 +280,14 @@ public final class Downed {
 	 * Xenoform adds one: a tap tears the Xeno-Band off a downed wearer.
 	 */
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TAPPED_LISTENERS = new ArrayList<>();
+
+	/**
+	 * (0.21.37) A revive's job in {@link HoldProgress}: this body, this time down (a bar left half full stays with that
+	 * downing, not the next).
+	 */
+	private static String reviveJob(LivingEntity body) {
+		return "revive:" + body.getUUID() + ":" + since(body);
+	}
 
 	/** Player → their revive. Not saved. */
 	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
@@ -1051,22 +1062,20 @@ public final class Downed {
 		MASH_HELD.remove(player.getUUID());
 		// (0.18.5) not too wounded: sneak gets them up instead (carried or adrift, they can't)
 		if (!out && !tooHurt(player) && !Carry.isCarried(player) && !adrift(player)) {
-			GIVING_UP.remove(player.getUUID());
 			rise(level, player, now);
 			return;
 		}
 		stopRising(player);
-		// giving up: sneak held (server side, from the player's input)
-		int held = player.isShiftKeyDown() ? GIVING_UP.merge(player.getUUID(), 1, Integer::sum) : 0;
-		if (held == 0) {
-			GIVING_UP.remove(player.getUUID());
-		}
+		// giving up: sneak held (server side, from the player's input). (0.21.37) Let go, the bar stays where it is (Andy:
+		// "every meter should work this way"); it's only emptied when they're up again or gone
+		boolean sneaking = player.isShiftKeyDown();
+		int held = sneaking ? GIVING_UP.merge(player.getUUID(), 1, Integer::sum) : GIVING_UP.getOrDefault(player.getUUID(), 0);
 		if (held >= GIVE_UP_TICKS) {
 			GIVING_UP.remove(player.getUUID());
 			finish(level, player);
 			return;
 		}
-		if (held > 0 ? held % 2 == 0 : now % HINT_TICKS == 0) {
+		if (sneaking ? held % 2 == 0 : now % HINT_TICKS == 0) {
 			int filled = Math.round(GIVE_UP_BAR * held / (float) GIVE_UP_TICKS);
 			String bar = "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled);
 			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
@@ -1074,15 +1083,18 @@ public final class Downed {
 			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
 				: blocking != null ? Component.translatable("message.jaymospowers.downed.give_up_hurt", blocking.displayName(), bar)
 				: Component.translatable("message.jaymospowers.downed.give_up", bar);
-			player.sendOverlayMessage(message.copy().withStyle(held > 0 ? ChatFormatting.RED : ChatFormatting.GRAY));
+			player.sendOverlayMessage(message.copy().withStyle(sneaking ? ChatFormatting.RED : ChatFormatting.GRAY));
 		}
 	}
 
-	/** (0.18.5) A downed player able to rise, this tick: sneak held fills the bar and, full, gets them up by themselves. */
+	/**
+	 * (0.18.5) A downed player able to rise, this tick: sneak held fills the bar and, full, gets them up by themselves.
+	 * (0.21.37) Let go, the bar stays where it is and the next hold carries on (knocked back down, it starts again).
+	 */
 	private static void rise(ServerLevel level, ServerPlayer player, long now) {
 		Rise r = RISES.get(player.getUUID());
 		if (!player.isShiftKeyDown()) {
-			if (r != null && r.ticks > 0 && !r.knocked) {
+			if (r != null && r.ticks > 0 && !r.knocked && player.hasAttached(RISING)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_stopped").withStyle(ChatFormatting.GRAY));
 			}
 			stopRising(player);
@@ -1099,9 +1111,11 @@ public final class Downed {
 			// (knocked back down: let go of sneak and try again)
 			return;
 		}
-		if (r.ticks++ == 0) {
-			player.setAttached(RISING, now);
+		if (!player.hasAttached(RISING)) {
+			// (0.21.37) the drawing picks up as far along as the bar is
+			player.setAttached(RISING, now - r.ticks);
 		}
+		r.ticks++;
 		if (r.ticks % 20 == 10) {
 			// straining with it
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F,
@@ -1125,9 +1139,15 @@ public final class Downed {
 		}
 	}
 
-	/** (0.18.5) No longer rising (let go, or can't now): the bar and the drawing gone. */
+	/**
+	 * (0.18.5) No longer rising (let go, or can't now): the drawing gone. (0.21.37) The bar is kept for the next hold,
+	 * unless they were knocked back down (that one starts again).
+	 */
 	private static void stopRising(ServerPlayer player) {
-		RISES.remove(player.getUUID());
+		Rise r = RISES.get(player.getUUID());
+		if (r != null && (r.knocked || r.ticks == 0)) {
+			RISES.remove(player.getUUID());
+		}
 		if (player.hasAttached(RISING)) {
 			player.removeAttached(RISING);
 		}
@@ -1140,7 +1160,7 @@ public final class Downed {
 	private static void struck(ServerPlayer player) {
 		int most = WillSkill.holdHits(player, HOLD_HITS);
 		Rise rise = RISES.get(player.getUUID());
-		if (rise != null && rise.ticks > 0 && !rise.knocked && ++rise.hits >= most) {
+		if (rise != null && rise.ticks > 0 && !rise.knocked && player.hasAttached(RISING) && ++rise.hits >= most) {
 			rise.knocked = true;
 			rise.ticks = 0;
 			rise.hits = 0;
@@ -1151,6 +1171,8 @@ public final class Downed {
 		Revive revive = REVIVING.get(player.getUUID());
 		if (revive != null && revive.begun && !revive.over && ++revive.hits >= most) {
 			revive.over = true;
+			// (0.21.37) broken off by blows: that bar starts again
+			HoldProgress.forget(player.getUUID(), reviveJob(revive.body));
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_broken", revive.body.getDisplayName())
 				.withStyle(ChatFormatting.RED));
 		}
@@ -1285,6 +1307,13 @@ public final class Downed {
 			}
 			// (0.15.99) down on one knee at their side
 			Tending.keep(player, body);
+			String job = reviveJob(body);
+			if (!r.resumed) {
+				// (0.21.37) let go before: the bar carries on where it stopped
+				r.resumed = true;
+				r.ticks = HoldProgress.get(player.getUUID(), job);
+			}
+			HoldProgress.set(player.getUUID(), job, r.ticks + 1);
 			if (++r.ticks % REVIVE_WORK_TICKS == 0) {
 				// kneeling at their side, hands at work
 				player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
@@ -1303,6 +1332,7 @@ public final class Downed {
 				continue;
 			}
 			r.over = true;
+			HoldProgress.forget(player.getUUID(), job);
 			int slot = cost(player, body);
 			if (slot < 0) {
 				player.sendOverlayMessage(Component.translatable(tamed(body) ? "message.jaymospowers.downed.no_treat" : "message.jaymospowers.downed.no_food",

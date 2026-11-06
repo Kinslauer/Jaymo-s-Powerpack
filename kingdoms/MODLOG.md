@@ -10145,3 +10145,8 @@ a vampire leaves the hand (creative keeps it) and lodges, one at a time (`Stakes
 Slowness V refreshed every 5 ticks, a drip of dark blood. Out: a vampire player holds sneak 3 s, a vampire mob tears it
 out after 20 s, anyone with an empty hand right-clicks the staked to pull it into their hand; it drops on death or when
 cured. Further skewer hits still land 5x but don't lodge a second stake. Gradle compile clean; not played.
+
+## 0.7.641: a picked pocket keeps its progress
+- Andy: "every meter should work this way". Let go of a lift, or let the mark step out of reach, and how deep your hand
+  got is kept (`Pickpocket.Kept`): the next lift on the same mark carries on with the same length. Caught, done, or a
+  different mark tried, it's forgotten. Compile-checked; not played.

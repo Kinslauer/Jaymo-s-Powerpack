@@ -2,6 +2,7 @@ package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.HoldProgress;
 import com.jaymospowers.power.web.KitchenCompat;
 import com.jaymospowers.power.zfighter.ZFighterAndroid;
 import io.netty.buffer.ByteBuf;
@@ -74,7 +75,8 @@ import org.jspecify.annotations.Nullable;
  * still need sneak (a blade without it is a weapon: a downed enemy's finisher), as before.</li>
  * <li><b>It takes time:</b> each remedy is a channel of {@link Remedy#ticks} with a bar over the hotbar, cancelled by
  * either of you moving more than {@link #MOVE_LIMIT}, by either being hit, by the medicine leaving your hand, or (sneak +
- * use) by letting go of sneak. All on the server: the screen's packet only names the part.</li>
+ * use) by letting go of sneak. (0.21.37) Stopped any way but a blow, the bar is kept ({@link HoldProgress}): the next go
+ * at the same part with the same remedy carries on. All on the server: the screen's packet only names the part.</li>
  * <li><b>Cautery:</b> a sword or axe held to a lit campfire, fire or lava is red-hot ({@link #HEATED_KEY}, custom data)
  * for {@link #HEAT_TICKS}; a Fire Aspect blade always is. It stops all bleeding on a part at once (the only thing that
  * closes a stump) and burns it for {@link #CAUTERY_BURN}.</li>
@@ -215,6 +217,8 @@ public final class Treatment {
 		final long start;
 		long held;
 		boolean begun, over;
+		/** (0.21.37) Whether its bar has been carried on from the last hold at the same job ({@link HoldProgress}). */
+		boolean resumed;
 
 		Session(LivingEntity target, @Nullable BodyPart part, Remedy remedy, InteractionHand hand, Vec3 from, boolean sneak, int need,
 			boolean hold, long now) {
@@ -231,6 +235,11 @@ public final class Treatment {
 			this.held = now;
 			this.begun = !hold;
 		}
+	}
+
+	/** (0.21.37) The job a session is in {@link HoldProgress}: who, which part (or the whole body), with what. */
+	private static String job(Session s) {
+		return "treat:" + s.target.getUUID() + ":" + (s.part == null ? "body" : s.part.name()) + ":" + s.remedy.name();
 	}
 
 	/** Player → their treatment. Not saved. */
@@ -265,6 +274,8 @@ public final class Treatment {
 					if (s.over) {
 						continue;
 					}
+					// (0.21.37) a blow spoils the work done, not only the hold
+					HoldProgress.forget(e.getKey(), job(s));
 					ServerPlayer healer = entity.level() instanceof ServerLevel level ? level.getServer().getPlayerList().getPlayer(e.getKey()) : null;
 					if (healer != null) {
 						stopped(healer, s);
@@ -774,7 +785,13 @@ public final class Treatment {
 				stopped(player, s);
 				continue;
 			}
+			if (!s.resumed) {
+				// (0.21.37) let go before, at the same part with the same remedy: the bar carries on where it stopped
+				s.resumed = true;
+				s.ticks = Math.min(HoldProgress.get(id, job(s)), s.need - 1);
+			}
 			s.ticks++;
+			HoldProgress.set(id, job(s), s.ticks);
 			// (0.15.99) down on one knee at their side
 			Tending.keep(player, body);
 			if (s.ticks % WORK_TICKS == 0) {
@@ -797,6 +814,7 @@ public final class Treatment {
 			} else {
 				SESSIONS.remove(id);
 			}
+			HoldProgress.forget(id, job(s));
 			apply(level, player, s, stack);
 		}
 	}

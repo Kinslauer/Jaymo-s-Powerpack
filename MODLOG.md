@@ -1330,3 +1330,17 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   letting go early just runs on. Held the full 1.5 s, the slide starts as before (belly dive out of a fast run, back slide
   out of a sprint; still held at the end = prone). The server's `Slide.valid` no longer checks Sneak (the client keeps it
   off through the hold). `SPRINT_GRACE_TICKS` stays 8. Compile-checked against the 26.3 jars; not played.
+
+## 0.21.37: every held bar keeps its progress
+- Andy: "the bar should stay where it is even after you stop scrolling, the same way tree chopping works, every meter
+  should work this way, especially washing rags" (throws and combat charges excepted). New `core/HoldProgress` keeps how
+  far each player got at each held job (not saved). Let go, step away or lose the target and the bar stays; the next hold
+  at the same job carries on. A job done empties it, and so does a hold broken off by blows (the rise knocked back down,
+  a revive or Second Wind broken by hits, a treatment spoiled by a hit).
+- Washing a rag (`RagWashing`): the wash counts its own ticks instead of the use time, so a rag half washed stays half
+  washed. Treating (`Treatment`): kept per patient, part and remedy. Reviving (`Downed`): kept per body and per downing.
+  Getting up by yourself: kept, and the drawing picks up as far along as the bar; hits only knock you down while you are
+  actually rising. Giving up: kept for the downing. Second Wind (`SelfRevive`) and coming to where you lay
+  (`Mortality`): kept. Lifting someone (`Carry`): kept per target.
+- Not changed: throws (rocks, daggers), finishers, the stake struggle, spell and power charges, the knock-out mash, and
+  minigame bars (smithing, brewing, jewellery). Compile-checked; not played.

@@ -1571,3 +1571,8 @@ mobs should be possible".
   and rattles each arrow on its own beat; fletchings now pivot on their shaft's foot so they move with it. Drawing a bow
   or loading a crossbow lifts the top arrow out of the quiver over 5 ticks, then it's gone from the quiver (it's on the
   string). Gradle compile clean; not played.
+
+## 0.5.83: lifting a carcass keeps its progress
+- Andy: "every meter should work this way". Let go of a corpse's lift or leg hold before it fills and your next hold
+  carries on where the bar was (someone else's hold starts fresh). Butchering a big carcass already kept its bar.
+  Compile-checked; not played.

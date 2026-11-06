@@ -341,16 +341,20 @@ public final class Mortality {
 			wake.carried = carried;
 			player.setAttached(WAKE_LINE, carried ? "message.jaymospowers.mortality.carried" : "message.jaymospowers.mortality.lying");
 		}
-		wake.held = player.isShiftKeyDown() && !dark ? wake.held + 1 : 0;
+		// (0.21.37) let go, the bar stays where it is and the next hold carries on (Andy: "every meter should work this way")
+		boolean holding = player.isShiftKeyDown() && !dark;
+		if (holding) {
+			wake.held++;
+		}
 		if (wake.held >= COME_TO_TICKS) {
 			comeTo(player, wake);
 			return;
 		}
-		if (!dark && (wake.held > 0 ? wake.held % 2 == 0 : now % 20 == 0)) {
+		if (!dark && (holding ? wake.held % 2 == 0 : now % 20 == 0)) {
 			int filled = Math.round(COME_TO_BAR * wake.held / (float) COME_TO_TICKS);
 			String bar = "|".repeat(filled) + ".".repeat(COME_TO_BAR - filled);
 			player.sendOverlayMessage(Component.translatable(carried ? "message.jaymospowers.mortality.come_to_carried"
-				: "message.jaymospowers.mortality.come_to", bar).withStyle(wake.held > 0 ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				: "message.jaymospowers.mortality.come_to", bar).withStyle(holding ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
 		}
 	}
 
