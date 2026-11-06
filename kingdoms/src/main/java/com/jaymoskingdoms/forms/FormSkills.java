@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.forms;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.NightGifts;
 import com.jaymoskingdoms.PowersCompat;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,10 @@ import org.jspecify.annotations.Nullable;
  * while you have an empty hand and are locked on." Powers' takedowns ({@code combat/Takedowns}) are bar spells too
  * ({@code jaymoskingdoms:move_<move>}): in Time Flow the takedown and the blink, always; with an empty hand and locked
  * on, the takedown your power has. They go at your lock-on foe, else the one in your sights.
+ * <p>
+ * (0.7.632) Andy: "please place them on the bar" (a vampire's O and P). A vampire's or dhampir's Blood Dash, Groundpound
+ * and Blood Gaze (the eye laser) are bar spells too ({@code jaymoskingdoms:night_<move>}, {@link NightGifts#move}), with
+ * anything or nothing in hand.
  */
 public final class FormSkills {
 	private static final String MOD_ID = "spell_engine";
@@ -41,6 +46,10 @@ public final class FormSkills {
 	/** (0.7.625) A Powers takedown's spell is {@code jaymoskingdoms:move_<move>}, delivered by this. */
 	static final String MOVE_PREFIX = "move_";
 	static final Identifier MOVE_HANDLER = JaymosKingdoms.id("power_move");
+	/** (0.7.632) A vampire's moves on the bar: {@code jaymoskingdoms:night_<move>}, delivered by this; the moves, by NightGifts' index. */
+	static final String NIGHT_PREFIX = "night_";
+	static final Identifier NIGHT_HANDLER = JaymosKingdoms.id("night_move");
+	static final List<String> NIGHT_MOVES = List.of("dash", "pound", "gaze");
 	/** The spell tag of every form spell: what a form weapon's own container takes. */
 	public static final String TAG = JaymosKingdoms.MOD_ID + ":weapon_forms";
 
@@ -75,14 +84,29 @@ public final class FormSkills {
 		return spell.getPath().substring(MOVE_PREFIX.length());
 	}
 
-	/** (0.7.625) A form's or a takedown's spell. */
+	/** (0.7.632) Which of a vampire's moves a spell id stands for (NightGifts' index), or -1. */
+	public static int nightOf(@Nullable Identifier spell) {
+		if (spell == null || !spell.getNamespace().equals(JaymosKingdoms.MOD_ID) || !spell.getPath().startsWith(NIGHT_PREFIX)) {
+			return -1;
+		}
+		return NIGHT_MOVES.indexOf(spell.getPath().substring(NIGHT_PREFIX.length()));
+	}
+
+	/** (0.7.625) A form's or a takedown's spell, (0.7.632) or a vampire's move. */
 	public static boolean ours(@Nullable Identifier spell) {
-		return formOf(spell) != null || moveOf(spell) != null;
+		return formOf(spell) != null || moveOf(spell) != null || nightOf(spell) >= 0;
 	}
 
 	/** The form spells on {@code player}'s bar now, (0.7.625) its Powers takedowns first. */
 	public static List<String> spells(Player player) {
 		List<String> out = new ArrayList<>();
+		// (0.7.632) a vampire's (or dhampir's) Blood Dash, Groundpound and eye laser, whatever's in hand
+		NightGifts.Gift gift = NightGifts.gift(player);
+		if (gift != null && gift.blood()) {
+			for (String move : NIGHT_MOVES) {
+				out.add(JaymosKingdoms.MOD_ID + ":" + NIGHT_PREFIX + move);
+			}
+		}
 		for (String move : PowersCompat.barMoves(player)) {
 			out.add(JaymosKingdoms.MOD_ID + ":" + MOVE_PREFIX + move);
 		}
@@ -109,6 +133,10 @@ public final class FormSkills {
 			net.spell_engine.api.spell.event.SpellHandlers.registerCustomDelivery(MOVE_HANDLER, (level, spell, caster, targets, context, position) -> {
 				String move = moveOf(spell.unwrapKey().map(key -> key.identifier()).orElse(null));
 				return move != null && caster instanceof ServerPlayer player && PowersCompat.castMove(player, move);
+			});
+			net.spell_engine.api.spell.event.SpellHandlers.registerCustomDelivery(NIGHT_HANDLER, (level, spell, caster, targets, context, position) -> {
+				int which = nightOf(spell.unwrapKey().map(key -> key.identifier()).orElse(null));
+				return which >= 0 && caster instanceof ServerPlayer player && NightGifts.move(player, which);
 			});
 		}
 	}

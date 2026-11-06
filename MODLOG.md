@@ -1296,3 +1296,8 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   gold: silver, silver: copper).
 - Washed ore smelts at full speed in a plain furnace (raw and crushed ore stay slow); the smeltery melts crushed and
   washed ore as raw ore (doubled). Raw bog iron (Kingdoms) isn't crushable yet.
+
+## 0.21.30: Blood Gaze
+- `FrostBeam`: a player tagged `jaymospowers_blood_gaze` (Kingdoms' vampire skill bar) gets the Frost-born beam out of both
+  eyes, blood red, for `GAZE_TICKS` (20): same reach, damage, hit cooldown and wound roll, red dust instead of snow, no
+  freezing water or putting out fire. Built, not played.
