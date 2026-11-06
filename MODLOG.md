@@ -1181,3 +1181,15 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
 - **Counter one, turn to the next:** a parry while another foe's blow is coming turns you to face him. Parries within 3 s
   of each other chain, each link making the riposte 15% harder, up to +60%.
 - Spec: `docs/Combat-Feel-Spec.md`.
+
+## 0.21.21 (2026-11-06): hit streaks and shield vaults (Kingdoms 0.7.623)
+Kingdoms Rivals patch 8, ideas only from the Arkham and Shadow of War games.
+- **Hit streak** (`combat/HitStreak`): blows you land without being hit back count up (shown from 3). At 8, with the
+  Executioner perk and a weapon in hand, sneak and hold attack on a foe still standing: he's dropped where he stands and
+  finished at once. A blow taken, 5 s without landing one, or the quick kill ends the streak. Nothing wider than 2, taller
+  than 3 or with 100+ health is dropped.
+- **Vault a shield** (`combat/ShieldVault`): jump at a foe with his shield up, within 3 blocks and ahead of you, and you
+  go over him (Freerun's vault look) and land behind; he reels for a second. Anyone more than a third taller or over
+  twice as wide is "too big to vault".
+- **Shields** (`combat/Shields`): Yank on a mob with a shield tears it away instead of pulling him; a stun (Darktide's,
+  Time Flow's, a parry's) knocks loose Kingdoms' armoured ogres' shields.

@@ -442,7 +442,9 @@ final class OgreGrowth {
 			return false;
 		}
 		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
-		EntityType<Ogre> type = random.nextInt(4) == 0 ? Monsters.CAVE_OGRE : Monsters.OGRE;
+		// ((0.7.623) and one in five an armoured ogre with a shield, Ogre#ARMOURED)
+		int roll = random.nextInt(20);
+		EntityType<Ogre> type = roll < 4 ? Monsters.ARMOURED_OGRE : roll < 9 ? Monsters.CAVE_OGRE : Monsters.OGRE;
 		Ogre ogre = OgreHolds.ogre(level, type, at, site.at(), OgreHolds.HOLD_HOME, site.id());
 		if (ogre == null) {
 			return false;

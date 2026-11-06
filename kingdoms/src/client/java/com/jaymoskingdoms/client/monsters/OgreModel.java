@@ -15,7 +15,7 @@ import net.minecraft.util.Mth;
  * animation as it was: the stomping legs and swaying loincloth, fists (or the club, for a two-headed
  * one) brought down on a blow, and the heads following the look. One head, or two and a club.
  */
-final class OgreModel extends EntityModel<LegendState> {
+class OgreModel extends EntityModel<LegendState> {
 	private static final float DEG = 57.29578F;
 
 	private final ModelPart head, brow, noseBridge, nose, rgtTusk, rgtTooth, lftTooth, lftTusk, lip, rgtEar, rgtRing, rgtRingHole, lftEar, lftRing, lftRingHole, hairRope, hair1, hair2, hair3, diamondHorn, rgtHorn, rgtHornTip, lftHorn, lftHornTip, neckRest, chest, stomach, buttCover, loinCloth, rgtThigh, rgtLeg, rgtKnee, rgtToes, rgtBigToe, lftThigh, lftLeg, lftKnee, lftToes, lftBigToe, lftShoulder, lftArm, lftHand, lftElbow, lftWeaponRoot, lftWeaponEnd, lftWeaponLump, lftWeaponBetween, lftWeaponTip, lftHammerNeck, lftHammerHeadSupport, lftHammerHead, lftSpike, lftSpike1, lftSpike2, lftSpike3, lftSpike4, rgtShoulder, rgtArm, rgtHand, rgtElbow, rgtWeaponRoot, rgtWeaponEnd, rgtWeaponLump, rgtWeaponBetween, rgtWeaponTip, rgtHammerNeck, rgtHammerHeadSupport, rgtHammerHead, rgtSpike, rgtSpike1, rgtSpike2, rgtSpike3, rgtSpike4, head3RgtEar, head3LftEar, head3Eyelid, head3Nose, head3, head3Brow, head3Hair, head3Lip, head3RgtTusk, head3RgtTooth, head3LftTooth, head3LftTusk, head3RingHole, head3Ring, head2Chin, head2, head2Lip, head2LftTusk, head2RgtTusk, head2Nose, head2NoseBridge, head2Brow, head2RgtHorn, head2LftHorn, head2DiamondHorn;
@@ -123,6 +123,11 @@ final class OgreModel extends EntityModel<LegendState> {
 	}
 
 	static LayerDefinition createBodyLayer() {
+		return LayerDefinition.create(mesh(), 128, 128);
+	}
+
+	/** (0.7.623) The ogre's boxes, for {@link ArmouredOgreModel} to put its plate on. */
+	static MeshDefinition mesh() {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
 		root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(80, 0).addBox(-6, -12, -6, 12, 12, 12), PartPose.offset(0, -13, 0));
@@ -223,7 +228,7 @@ final class OgreModel extends EntityModel<LegendState> {
 		root.addOrReplaceChild("head2_rgt_horn", CubeListBuilder.create().texOffs(24, 30).addBox(-4, -8, -15, 2, 2, 5), PartPose.offsetAndRotation(-7, -13, 0, -0.5235988F, 0, 0));
 		root.addOrReplaceChild("head2_lft_horn", CubeListBuilder.create().texOffs(24, 30).addBox(2, -8, -15, 2, 2, 5), PartPose.offsetAndRotation(-7, -13, 0, -0.5235988F, 0, 0));
 		root.addOrReplaceChild("head2_diamond_horn", CubeListBuilder.create().texOffs(120, 46).addBox(-1, -17, -6, 2, 6, 2), PartPose.offsetAndRotation(-7, -13, 0, 0.0872665F, 0, 0));
-		return LayerDefinition.create(mesh, 128, 128);
+		return mesh;
 	}
 
 	@Override

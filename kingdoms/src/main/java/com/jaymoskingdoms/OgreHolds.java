@@ -545,6 +545,11 @@ public final class OgreHolds {
 				guard.setCustomName(Component.translatable("entity.jaymoskingdoms.ogre_kings_guard"));
 			}
 		}
+		// (0.7.623) and a shield wall inside the gate: two armoured ogres (Ogre#ARMOURED)
+		BlockPos inside = at.relative(gate, HOLD_RADIUS - 5);
+		for (int s : new int[] {-1, 1}) {
+			ogre(level, Monsters.ARMOURED_OGRE, inside.relative(side, s * 2), inside, GUARD_HOME + 4, id);
+		}
 		put(server, Site.fresh(id, true, at, region, king.getUUID(), List.of(hoard)));
 		JaymosKingdoms.LOGGER.info("An ogre hold rose at {} ({})", at, king.getCustomName().getString());
 	}
@@ -682,7 +687,8 @@ public final class OgreHolds {
 		leader.setTwoHeads(true);
 		leader.addTag(CAMP_PREFIX + camp.id());
 		for (int i = 0; i < BAND_OGRES; i++) {
-			Ogre o = ogre(level, Monsters.OGRE, OrcCamps.spot(level, fire, random), fire, BAND_HOME, id);
+			// ((0.7.623) the first of the band in plate, with a shield: Ogre#ARMOURED)
+			Ogre o = ogre(level, i == 0 ? Monsters.ARMOURED_OGRE : Monsters.OGRE, OrcCamps.spot(level, fire, random), fire, BAND_HOME, id);
 			if (o != null) {
 				o.setTwoHeads(false);
 				o.addTag(CAMP_PREFIX + camp.id());

@@ -194,9 +194,10 @@ public final class FinisherClient {
 	 * execution's, so the powers' own held-attack moves (Z Fighter's combos and race holds) stand aside.
 	 */
 	public static boolean aimingAtHelpless(Minecraft minecraft) {
-		// ((0.18.97) or, with Quiet Word, someone on their feet to take from behind for questioning)
+		// ((0.18.97) or, with Quiet Word, someone on their feet to take from behind for questioning; (0.21.21) or a full hit
+		// streak's quick kill on one still standing)
 		return minecraft.player != null && minecraft.player.isShiftKeyDown() && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body
-			&& (Finishers.helpless(body) || Finishers.chokeable(minecraft.player, body));
+			&& (Finishers.helpless(body) || Finishers.chokeable(minecraft.player, body) || Finishers.quickKillable(minecraft.player, body));
 	}
 
 	/**

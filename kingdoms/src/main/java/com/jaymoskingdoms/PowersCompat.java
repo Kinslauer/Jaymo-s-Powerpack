@@ -650,6 +650,27 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.623, Rivals patch 8) Powers' shields ({@code combat/Shields}): a Yank or a stun knocks an armoured ogre's shield
+	 * off ({@link com.jaymoskingdoms.monsters.Ogre#tearShield}), and its raised shield counts as one (for Powers' vault, which
+	 * an ogre's size refuses anyway). Nothing without that Powers.
+	 */
+	@SuppressWarnings("unchecked")
+	static void ogreShields() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> shields = Class.forName("com.jaymospowers.combat.Shields");
+			((java.util.List<java.util.function.BiPredicate<LivingEntity, LivingEntity>>)shields.getField("TEAR").get(null))
+				.add(com.jaymoskingdoms.monsters.Ogre::tearShield);
+			((java.util.List<java.util.function.Predicate<LivingEntity>>)shields.getField("RAISED").get(null))
+				.add(e -> e instanceof com.jaymoskingdoms.monsters.Ogre ogre && ogre.guarding());
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no shields to knock off (older Powers?)", e);
+		}
+	}
+
 	/** (0.7.543) Lines a humanoid says when the one it was executing is gone from under it (Chrono's rewind). */
 	static final int PERPLEXED_LINES = 6;
 

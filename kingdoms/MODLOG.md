@@ -9946,3 +9946,13 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Kingdoms' fighters (Better Combat swings and MCA villagers' blows) hold their blow while Powers' `Crowds` has them
   waiting their turn.
 - The clips, our timings and what still differs: `docs/Combat-Feel-Spec.md`. Built, not played.
+
+## 0.7.623 (2026-11-06): Rivals patch 8, armoured ogres (Powers 0.21.21)
+- Andy: "add armored ogres with shields and different skin colors matching orcs". The armoured ogre (`Ogre.ARMOURED`,
+  `jaymoskingdoms:armoured_ogre`): 80 health, 12 armour, in our own plate (breastplate, fauld, pauldrons, vambraces,
+  greaves, open helm) with a great wooden shield, its skin one of six orc tones. Its shield is up while its foe is within
+  10 blocks and it isn't striking: blows and shots from in front glance off. A blow of 10 or more, or a blast, breaks the
+  shield (half the blow gets through), as do Powers' Yank and stuns; then it comes on 15% faster. Too big to vault.
+- Where: the first of each orc camp's ogre band, two inside each new ogre hold's gate, and one in five of a hold's
+  recruits. Drops iron as well as an ogre's spoils.
+- Art: `tools/armoured_ogre_assets.py` (the ogre's skin recoloured; plate and shield our own). Model: `ArmouredOgreModel`.
