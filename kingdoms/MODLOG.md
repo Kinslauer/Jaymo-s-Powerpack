@@ -9719,3 +9719,18 @@ Minimum (Apache-2.0, 26.3 Fabric build) is now in the pack unchanged, and our gr
 - Black bears stay as they were: Cube Animals' (neutral, defends its cubs, tameable) and Bear Minimum's (keeps away from
   people). Naturalist's bear unchanged.
 - Gradle compile clean; not played.
+
+## 0.7.611 (2026-11-05): the grizzly's own model and coat, the REA way
+Andy: "Can you use rea for models". Following REA-Prompts' clean-room method (spec first, own work only, then list
+what still differs), the grizzly's model and coat no longer come from Bear Minimum's brown bear.
+- `docs/Grizzly-Model-Spec.md`: the references, ten anatomy facts with their source (hump highest, rump lower, dished
+  face, small wide ears, long pale front claws, grizzled coat, stub tail, rears at the hips, opening jaw, mini-boss
+  size), the guesses marked UNKNOWN, the palette and UV layout, and the differences left.
+- `client/wild/GrizzlyModel` rebuilt from the spec: body pivoting at the hips with the head and forelegs riding it, a
+  hump, a dished muzzle, a jaw that drops for the roar and on every maul bite, long claws on the forepaws only, a slow
+  breath and a head bob in the stride.
+- `tools/gen_grizzly.py` paints the coat and egg from nothing (own palette, seeded fur noise, frosted saddle, dark
+  stockings, tan muzzle, mouth and teeth inside the jaw) and renders the pose previews (`--preview`).
+- Bear Minimum's licence copy and credit line removed from `textures/entity/wild/` (nothing of it is used now); the mod
+  itself still ships.
+- Gradle compile clean; not played.

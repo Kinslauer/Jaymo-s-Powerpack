@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 
-/** (0.7.610) Draws the grizzly ({@link Grizzly}) by its own model and poses ({@link GrizzlyModel}), 1.15x the brown bear's size. */
+/** (0.7.610) Draws the grizzly ({@link Grizzly}) by its own model and poses ({@link GrizzlyModel}), drawn 1.15x (about 2.3 blocks long, 1.7 to the hump). */
 public final class GrizzlyRenderer extends MobRenderer<Grizzly, GrizzlyRenderer.State, GrizzlyModel> {
 	static final float SCALE = 1.15F;
 	private static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/wild/grizzly.png");
