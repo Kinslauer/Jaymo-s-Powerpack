@@ -103,6 +103,8 @@ public final class MobCombat {
 	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
 	static final float TELL_SIZE = 1.2F;
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+	/** (0.7.622) Powers' Crowds: a foe waiting its turn in a crowd. */
+	static final String WAITING_TAG = "jaymospowers.waiting_turn";
 	/** (0.7.267) A gun's red glint comes this long (ticks) before the shot; an aim not fired this long after goes stale. */
 	static final int GUN_WINDUP = 10, AIM_STALE = 20;
 	/**
@@ -204,7 +206,8 @@ public final class MobCombat {
 	 * nothing more): starts the next swing of the combo when the target is in reach and the last swing is over.
 	 */
 	public static void attackTick(Mob mob, LivingEntity target) {
-		if (!(mob.level() instanceof ServerLevel level)) {
+		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds)
+		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG)) {
 			return;
 		}
 		Moves moves = BetterCombatBridge.moves(mob.getMainHandItem());
@@ -261,7 +264,8 @@ public final class MobCombat {
 	 * is still in reach and sight. Called every tick its melee task would strike; does nothing mid-swing.
 	 */
 	public static void plainBlow(Mob mob, LivingEntity target) {
-		if (!(mob.level() instanceof ServerLevel level)) {
+		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds)
+		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG)) {
 			return;
 		}
 		long now = level.getGameTime();

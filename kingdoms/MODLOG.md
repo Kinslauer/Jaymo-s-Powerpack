@@ -9937,3 +9937,12 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
     three days. Ended or sworn, the ruin stays.
   - Its hounds (patch 5) aren't in yet.
 - Lines: `lang/parts/bane.json`. Built, not played.
+
+## 0.7.622 (2026-11-06): Rivals patch 7, combat feel (Powers 0.21.20)
+- **Brutal kills scare the rest (`Dread`):** finish a foe (downed and executed, or its head off) and those within 16 blocks
+  who saw it and are weaker than you may break off and run for 7 s, holding their blows. Timid ones always run, gloomy ones
+  nearly always, brave ones never, proud and hotheaded ones seldom, and the rest about half the time. The undead, captains
+  and anything with more than 60 health don't scare. The first humanoid to run cries out (`lang/parts/dread.json`).
+- Kingdoms' fighters (Better Combat swings and MCA villagers' blows) hold their blow while Powers' `Crowds` has them
+  waiting their turn.
+- The clips, our timings and what still differs: `docs/Combat-Feel-Spec.md`. Built, not played.

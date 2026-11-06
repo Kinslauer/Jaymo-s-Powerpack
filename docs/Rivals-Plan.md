@@ -188,5 +188,10 @@ Andy picked all 34 rows (2026-11-06).
   element carried); at rank five a hold of its kind's stone on its ground, its band round it, its walls warding it (35%
   harm, can't be finished) until stormed by the seat siege rules (a banner held 2.5 minutes near its heart); fallen, it
   rebuilds in three days (`BaneArms`, `BaneHolds`, Powers `armory/BaneWeapons`). Hounds wait for patch 5.
+- Patch 7 (Kingdoms 0.7.622, Powers 0.21.20): `docs/Combat-Feel-Spec.md` from the clips. Only four of the 20 show melee,
+  and none can time a glint or a parry, so those numbers stay as coded. Crowds take turns: three at once, the rest ring,
+  circle and wait (Powers `Crowds`; Better Combat and `RangedTactics` did none of it). A parry turns you to the next blow
+  coming, and chained parries make ripostes up to 60% harder. Brutal kills scare weaker witnesses into running, timid and
+  gloomy first (`Dread`).
 - Patch 5 put off (Andy, 2026-11-06: "skip patch 5 for now and come back later"): patch 6 goes next; patch 5 after
   patch 9 or whenever Andy asks. Nothing in 6-9 needs it.

@@ -111,7 +111,8 @@ public final class AttackTells {
 		if (!(target instanceof LivingEntity living)) {
 			return mob.doHurtTarget(level, target);
 		}
-		if (PENDING.containsKey(mob)) {
+		if (PENDING.containsKey(mob) || Crowds.waiting(mob)) {
+			// ((0.21.20) one waiting its turn holds its blow, Crowds)
 			return false;
 		}
 		boolean heavy = heavy(mob);

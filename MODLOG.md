@@ -1172,3 +1172,12 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   ended Bane, never shaped, cast or forged, like the kings' heads; JEI says where they come from.
 - `jaymospowers:bane_element` holds the weapon's element; the Tool Station carries it (and the "Taken from" line) from the
   head onto the weapon. Kingdoms does the bursts. Art: `tools/bane_weapons_assets.py`, our own.
+
+## 0.21.20 (2026-11-06): crowds take turns, counter and turn (Kingdoms 0.7.622)
+- **Crowds take turns (`combat/Crowds`):** at most three melee foes come at a player at once. The rest wait in a ring
+  about 6 blocks out, circling and shouting now and then, and can't strike or close in (`mixin/CrowdWaitMixin`,
+  `AttackTells.windUp`). A turn lasts 5 s, then the next nearest gets one. Archers, bosses (100+ health) and anything too
+  big to circle never wait.
+- **Counter one, turn to the next:** a parry while another foe's blow is coming turns you to face him. Parries within 3 s
+  of each other chain, each link making the riposte 15% harder, up to +60%.
+- Spec: `docs/Combat-Feel-Spec.md`.
