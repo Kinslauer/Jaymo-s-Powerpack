@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
 public final class InteractActions {
 	/** MCA's command prefix, and the actions in the order their buttons stand. */
 	public static final String COMMAND = "act.";
-	public static final String AUDIENCE = "audience", WARES = "wares", TRIBUTE = "tribute", SPY = "spy", RAID = "raid";
+	public static final String AUDIENCE = "audience", WARES = "wares", TRIBUTE = "tribute", SPY = "spy", RAID = "raid", PLANT = "plant";
 	/** (0.7.498) Ask about Money: emeralds or coin ({@link MoneyTalk}). */
 	public static final String MONEY = "money";
 	/** (0.7.513) The cleric's Leaving Rite ({@link Rites}). */
@@ -41,7 +41,7 @@ public final class InteractActions {
 	public static final String ENVOY = "envoy";
 	/** (0.7.523) Keep Your Word: hand over what you promised to bring ({@link Promises}). */
 	public static final String PROMISE = "promise";
-	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, MONEY, RITE, ENVOY, PROMISE);
+	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -87,7 +87,7 @@ public final class InteractActions {
 			case AUDIENCE -> Rulers.is(v) || Audiences.canAsk(v);
 			case WARES -> Pedlars.pedlar(v) || com.jaymoskingdoms.nether.CinderForge.ignis(v) || GreenMarket.merchant(v);
 			case TRIBUTE -> Tribes.takesTribute(player, v);
-			case SPY, RAID -> SwornCaptains.takesOrders(player, v);
+			case SPY, RAID, PLANT -> SwornCaptains.takesOrders(player, v);
 			case MONEY -> v instanceof Villager villager && Directions.offers(villager);
 			case RITE -> Accusations.priest(v) && player.level() instanceof ServerLevel l && Turning.rite(player, Patrons.today(l.getServer())) != null;
 			case ENVOY -> Envoys.hearable(player, v);
@@ -135,6 +135,9 @@ public final class InteractActions {
 			}
 			case RAID -> {
 				return SwornCaptains.order(player, v, SwornCaptains.RAID_ANSWER);
+			}
+			case PLANT -> {
+				return SwornCaptains.order(player, v, SwornCaptains.PLANT_ANSWER);
 			}
 			case MONEY -> {
 				return MoneyTalk.answer(player, (Villager)v);

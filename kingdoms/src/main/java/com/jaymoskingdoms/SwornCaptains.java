@@ -90,6 +90,10 @@ public final class SwornCaptains {
 	static final String TAG = "jaymoskingdoms.captain.sworn";
 	/** Talk answers to a sworn captain from his lord. */
 	public static final String SPY_ANSWER = "jaymoskingdoms_sworn_spy", RAID_ANSWER = "jaymoskingdoms_sworn_raid";
+	/** (0.7.617, Rivals patch 2) Sent to live in his old camp as one of them again, yours inside it ({@link CaptainSchemes}). */
+	public static final String PLANT_ANSWER = "jaymoskingdoms_sworn_plant";
+	/** How far a plant or turned bodyguard comes to strike, and how far he's set down from the one he strikes. */
+	static final double INSIDE_REACH = 48.0;
 
 	/**
 	 * Whom a captain is sworn to (a player's id), how ({@code valor} or {@code binding}), his temperament then, what he's
@@ -421,6 +425,16 @@ public final class SwornCaptains {
 			return Dialects.tr(villager, "talk.jaymoskingdoms.captain.order.no");
 		}
 		long now = level.getGameTime();
+		if (PLANT_ANSWER.equals(answer)) {
+			Faction camp = nearestCamp(server, c.tribe(), villager.position());
+			if (camp == null) {
+				return Dialects.tr(villager, "talk.jaymoskingdoms.captain.order.nothing", Recollections.nameTo(player, villager));
+			}
+			put(server, c.id(), b.doing("plant", -1L, camp.id()));
+			leave(level, c, villager);
+			return Dialects.tr(villager, "talk.jaymoskingdoms.captain.order.plant." + random.nextInt(2), Recollections.nameTo(player, villager),
+				Component.literal(camp.name()));
+		}
 		if (RAID_ANSWER.equals(answer)) {
 			Faction camp = nearestCamp(server, c.tribe(), villager.position());
 			if (camp == null) {
@@ -528,6 +542,9 @@ public final class SwornCaptains {
 				spied(level, c, b, lord);
 			} else if ("raid".equals(b.job()) && now >= b.until()) {
 				raided(level, c, b);
+			} else if ("plant".equals(b.job()) && dawn && lord != null) {
+				// ((0.7.617) planted in his old camp: word of one more of its captains each dawn)
+				planted(level, c, lord);
 			}
 			if (dawn && betrays(level.getRandom(), b)) {
 				betray(level, c, b);
@@ -555,6 +572,58 @@ public final class SwornCaptains {
 			Post.report(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.spied.nothing", c.name()));
 		}
 		put(server, c.id(), b.doing("guard", -1L, -1));
+	}
+
+	/** (0.7.617) A plant's word at dawn: one thing more of his old tribe's captains. */
+	private static void planted(ServerLevel level, Captain c, ServerPlayer lord) {
+		Map.Entry<Captain, Captains.Trait> e = Captains.unknown(lord, c.tribe(), -1, java.util.EnumSet.allOf(Captains.Sort.class), level.getRandom());
+		if (e != null && !e.getKey().id().equals(c.id())) {
+			Captains.learn(lord, e.getKey().id(), e.getValue());
+			Post.report(lord.getUUID(), Component.translatable("tidings.jaymoskingdoms.captain.planted", c.name(), Captains.told(e.getKey(), e.getValue(), Dialects.ofTribe(c.tribe()))));
+		}
+	}
+
+	/** (0.7.617) {@code player}'s sworn captains, by id. */
+	static Map<String, Bond> bondsOf(MinecraftServer server, UUID player) {
+		Map<String, Bond> out = new HashMap<>();
+		bonds(server).forEach((id, b) -> {
+			if (player.toString().equals(b.lord())) {
+				out.put(id, b);
+			}
+		});
+		return out;
+	}
+
+	/**
+	 * (0.7.617) {@code c}, sworn to {@code lord}, in the world near {@code near} to strike: his body if it's close, else called
+	 * up and set down beside it. Null if he can't be.
+	 */
+	static @Nullable LivingEntity atSide(ServerLevel level, Captain c, ServerPlayer lord, Vec3 near) {
+		Entity body = c.body().map(level::getEntity).orElse(null);
+		if (body instanceof LivingEntity living && living.isAlive() && living.position().distanceTo(near) <= INSIDE_REACH) {
+			return living;
+		}
+		if (body != null) {
+			body.discard();
+		}
+		summon(level, Captains.get(level.getServer(), c.id()) == null ? c : Captains.get(level.getServer(), c.id()), lord);
+		Captain now = Captains.get(level.getServer(), c.id());
+		Entity fresh = now == null ? null : now.body().map(level::getEntity).orElse(null);
+		if (!(fresh instanceof LivingEntity living)) {
+			return null;
+		}
+		RandomSource random = level.getRandom();
+		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(near).offset(random.nextInt(3) - 1, 0, random.nextInt(3) - 1));
+		living.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+		return living;
+	}
+
+	/** (0.7.617) A plant who's shown himself: back at his lord's side from now on. */
+	static void home(MinecraftServer server, String id) {
+		Bond b = bond(server, id);
+		if (b != null) {
+			put(server, id, b.doing("guard", -1L, -1));
+		}
 	}
 
 	/** Dawn after a raid: a rival captain falls and he's back with loot, or he falls himself. */
