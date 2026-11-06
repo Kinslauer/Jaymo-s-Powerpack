@@ -179,6 +179,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SensesClient.register();
 		HiddenBladeClient.register();
 		VampireLooks.register();
+		StakeLayer.register();
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
