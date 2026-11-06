@@ -147,5 +147,13 @@
   "bane.jaymoskingdoms.warlord.hold_falls.0": "My fort! Do you know what that cost me?",
   "bane.jaymoskingdoms.warlord.hold_falls.1": "Fine. No walls. Just you and me.",
   "bane.jaymoskingdoms.demon.hold_falls.0": "My hearth is cold! You will burn for that.",
-  "bane.jaymoskingdoms.demon.hold_falls.1": "The fire is out. Mine is not."
+  "bane.jaymoskingdoms.demon.hold_falls.1": "The fire is out. Mine is not.",
+  "message.jaymoskingdoms.bane.cut": "%1$s takes its cut: %2$s.",
+  "message.jaymoskingdoms.bane.pinch": "Your purse is lighter than it was.",
+  "message.jaymoskingdoms.bane.cut_back": "What it took comes back to you, and more: %s.",
+  "message.jaymoskingdoms.bane.hound_killed": "One less on your trail. %s will be slower to take its next place.",
+  "message.jaymoskingdoms.bane.freed": "%s is free of it.",
+  "news.jaymoskingdoms.bane.claims": "%2$s now pays %1$s, who hunts %3$s. Its men walk the roads there.",
+  "news.jaymoskingdoms.bane.freed": "%1$s has thrown off %2$s's men.",
+  "news.jaymoskingdoms.bane.let_go": "Whoever held %s has let it go."
 }

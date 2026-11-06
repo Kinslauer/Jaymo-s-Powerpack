@@ -79,24 +79,19 @@ public final class ChronoTakedowns {
 		return mark != null && mark.by().equals(player.getUUID()) && player.level().getGameTime() < mark.until();
 	}
 
-	/** Sneak + attack at {@code target} (from {@code combat/Takedowns}). */
-	public static void takedown(ServerPlayer player, LivingEntity target) {
+	/** Sneak + attack at {@code target} (from {@code combat/Takedowns}). (0.21.24) True if it went. */
+	public static boolean takedown(ServerPlayer player, LivingEntity target) {
 		int combo = ChronoFlow.combo(player);
 		double d = target.distanceTo(player) - target.getBbWidth() * 0.5;
 		if (d > BLINK_FROM && marked(player, target)) {
-			if (combo >= BLINK_COST) {
-				blink(player, target);
-			} else {
-				short_(player, BLINK_COST);
-			}
-			return;
+			return blinkAt(player, target);
 		}
 		if (d > REACH) {
-			return;
+			return false;
 		}
 		if (combo < HitStreak.READY) {
 			short_(player, HitStreak.READY);
-			return;
+			return false;
 		}
 		boolean two = combo >= HitStreak.DOUBLE;
 		ChronoFlow.spendCombo(player, two ? HitStreak.DOUBLE : HitStreak.READY);
@@ -109,6 +104,21 @@ public final class ChronoTakedowns {
 		}
 		ChronoFlow.keepCombo(player);
 		player.setAttached(ChronoFlow.MOVE, new ChronoFlow.Move(ChronoFlow.UPPERCUT, player.level().getGameTime(), target.getId(), 1));
+		return true;
+	}
+
+	/** (0.21.24, the skill bar's blink) To a marked foe's back, if there's combo for it. True if it went. */
+	public static boolean blinkAt(ServerPlayer player, LivingEntity target) {
+		if (!marked(player, target)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.takedown.unmarked").withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		if (ChronoFlow.combo(player) < BLINK_COST) {
+			short_(player, BLINK_COST);
+			return false;
+		}
+		blink(player, target);
+		return true;
 	}
 
 	private static void short_(ServerPlayer player, int needed) {
