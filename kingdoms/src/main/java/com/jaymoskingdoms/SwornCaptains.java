@@ -299,7 +299,8 @@ public final class SwornCaptains {
 			return false;
 		}
 		RandomSource random = level.getRandom();
-		if (c.has(Captains.Trait.DEATHLESS) || c.rank() > valor + VALOR_REACH) {
+		// ((0.7.614, Rivals) illagers, the raised and the Hornkin make no man's oath)
+		if (c.has(Captains.Trait.DEATHLESS) || c.rank() > valor + VALOR_REACH || !Rivals.side(c.tribe()).swears) {
 			String why = c.has(Captains.Trait.DEATHLESS) ? "deathless" : "unbent";
 			Speech.say(level, seen, Dialects.tr(seen, "talk.jaymoskingdoms.captain.refuses." + why + "." + random.nextInt(LINES),
 				Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
@@ -313,7 +314,7 @@ public final class SwornCaptains {
 	/** (Ambrose's In-balming, {@link InBalming}) {@code player} binds the downed captain {@code seen} to them. False if he's no downed captain, or a chief. */
 	public static boolean bind(ServerLevel level, ServerPlayer player, LivingEntity seen) {
 		Captain c = seen instanceof Mob m && Captains.starable(m) ? Captains.of(seen) : null;
-		if (c == null || c.chief() || c.fallen() || sworn(level.getServer(), c.id())) {
+		if (c == null || c.chief() || c.fallen() || sworn(level.getServer(), c.id()) || !Rivals.side(c.tribe()).swears) {
 			return false;
 		}
 		turn(level, player, seen, c, "binding");
@@ -358,8 +359,10 @@ public final class SwornCaptains {
 		}
 		Speech.say(level, body, Dialects.tr(body, "talk.jaymoskingdoms.captain.sworn." + how + "." + random.nextInt(LINES),
 			Recollections.nameTo(sp, body)), Speech.RED, SAY_RANGE);
-		Tribes.add(server, sp.getUUID(), c.tribe(), TURN_GRUDGE);
-		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.sworn", c.name(), Tribes.name(c.tribe()), sp.getDisplayName()));
+		if (Rivals.tribe(c.tribe())) {
+			Tribes.add(server, sp.getUUID(), c.tribe(), TURN_GRUDGE);
+		}
+		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.sworn", c.name(), Rivals.name(c.tribe()), sp.getDisplayName()));
 	}
 
 	// ---- at your side ------------------------------------------------------------------------------------------------
@@ -443,7 +446,7 @@ public final class SwornCaptains {
 
 	private static @Nullable Faction nearestCamp(MinecraftServer server, String tribe, Vec3 from) {
 		Faction best = null;
-		for (Faction f : Tribes.camps(server, tribe)) {
+		for (Faction f : Rivals.camps(server, tribe)) {
 			if (best == null || f.seat().distToCenterSqr(from) < best.seat().distToCenterSqr(from)) {
 				best = f;
 			}
@@ -476,13 +479,16 @@ public final class SwornCaptains {
 
 	/** His body back at {@code lord}'s side (from spying or a raid, or left behind). */
 	private static void summon(ServerLevel level, Captain c, ServerPlayer lord) {
-		boolean orcs = c.tribe().startsWith(Tribes.ORC + "@");
+		// ((0.7.614, Rivals) a barbarian or a pirate comes back a man, axe or cutlass in hand)
+		Rivals.Side side = Rivals.side(c.tribe());
+		boolean axe = side == Rivals.Side.ORC || side == Rivals.Side.BARBARIAN;
 		List<ItemStack> gear = new ArrayList<>();
-		gear.add(new ItemStack(orcs ? c.rank() >= 3 ? Items.IRON_AXE : Items.STONE_AXE : c.rank() >= 3 ? Items.IRON_SWORD : Items.STONE_SWORD));
+		gear.add(new ItemStack(axe ? c.rank() >= 3 ? Items.IRON_AXE : Items.STONE_AXE : c.rank() >= 3 ? Items.IRON_SWORD : Items.STONE_SWORD));
 		gear.add(c.rank() >= 2 ? new ItemStack(c.rank() >= 4 ? Items.IRON_HELMET : Items.CHAINMAIL_HELMET) : ItemStack.EMPTY);
 		gear.add(c.rank() >= 2 ? new ItemStack(c.rank() >= 4 ? Items.IRON_CHESTPLATE : Items.CHAINMAIL_CHESTPLATE) : ItemStack.EMPTY);
 		gear.add(c.rank() >= Captains.RANK_MAX ? new ItemStack(Items.IRON_LEGGINGS) : ItemStack.EMPTY);
-		PathfinderMob mob = McaCompat.swornGreenskin(level, orcs ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN, c.name(), beside(level, lord), lord, gear);
+		Heritage.Kind kind = side == Rivals.Side.ORC ? Heritage.Kind.ORC : side == Rivals.Side.GOBLIN ? Heritage.Kind.GOBLIN : Heritage.Kind.HEARTLANDER;
+		PathfinderMob mob = McaCompat.swornGreenskin(level, kind, c.name(), beside(level, lord), lord, gear);
 		if (mob == null) {
 			return;
 		}
@@ -576,7 +582,9 @@ public final class SwornCaptains {
 				for (ItemStack coins : Money.stacks(Money.worth(RAID_LOOT + random.nextInt(RAID_LOOT)))) {
 					Post.later(lordId, coins);
 				}
-				Tribes.add(server, lordId, c.tribe(), RAID_GRUDGE);
+				if (Rivals.tribe(c.tribe())) {
+					Tribes.add(server, lordId, c.tribe(), RAID_GRUDGE);
+				}
 			}
 			put(server, c.id(), b.doing("guard", -1L, -1));
 			Post.news(server, rival == null
@@ -611,7 +619,7 @@ public final class SwornCaptains {
 				level.sendParticles(ParticleTypes.POOF, living.getX(), living.getY() + 1.0, living.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 				living.discard();
 			}
-			List<Faction> camps = Tribes.camps(server, c.tribe());
+			List<Faction> camps = Rivals.camps(server, c.tribe());
 			Captains.put(server, c.withPost(camps.isEmpty() ? -1 : Captains.quietest(server, c.tribe(), camps), false).withBody(null));
 		}
 		UUID lordId = b.lordId();
@@ -629,7 +637,7 @@ public final class SwornCaptains {
 		}
 		Component lordName = Post.nameOf(server, lordId);
 		Post.news(server, Component.translatable("king".equals(b.job()) ? "news.jaymoskingdoms.captain.betrayed.king" : "news.jaymoskingdoms.captain.betrayed",
-			c.name(), Tribes.name(c.tribe()), lordName));
+			c.name(), Rivals.name(c.tribe()), lordName));
 		threat(server, c, lordName);
 	}
 
@@ -656,7 +664,7 @@ public final class SwornCaptains {
 	/** {@code c}'s death threat for {@code who}, nailed up for the town boards (and in their own Tidings). */
 	static void threat(MinecraftServer server, Captain c, Component who) {
 		Post.news(server, Dialects.trTribe(c.tribe(), "news.jaymoskingdoms.captain.threat." + Factions.level(server).getRandom().nextInt(LINES),
-			c.name(), Tribes.name(c.tribe()), who));
+			c.name(), Rivals.name(c.tribe()), who));
 	}
 
 	/** (From {@code Captains.returns}) {@code c} is back: a threat for every player who killed him. */
@@ -689,7 +697,7 @@ public final class SwornCaptains {
 		String tribe = null;
 		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
 			Camps.CampData data = f.fallen() ? null : Camps.data(server, f.id());
-			String t = data == null || data.clearedAt() >= 0 ? null : Tribes.of(server, f.id());
+			String t = data == null || data.clearedAt() >= 0 ? null : Rivals.of(server, f.id());
 			if (t != null && data.center().closerThan(at, CHALLENGE_REACH)) {
 				camp = f;
 				tribe = t;
@@ -849,8 +857,10 @@ public final class SwornCaptains {
 		if (won == null || !(source.getEntity() instanceof ServerPlayer p)) {
 			return false;
 		}
-		Tribes.add(server, p.getUUID(), c.tribe(), -CHALLENGE_GRUDGE);
-		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.challenge.won", p.getDisplayName(), c.name(), Tribes.name(c.tribe())));
+		if (Rivals.tribe(c.tribe())) {
+			Tribes.add(server, p.getUUID(), c.tribe(), -CHALLENGE_GRUDGE);
+		}
+		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.challenge.won", p.getDisplayName(), c.name(), Rivals.name(c.tribe())));
 		return true;
 	}
 

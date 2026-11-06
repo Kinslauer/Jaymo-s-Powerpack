@@ -15,7 +15,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.7.614) The grab-drink ({@link BloodGrab}): a vampire holding their prey up by the throat in one hand, the main arm
+ * (0.7.615) The grab-drink ({@link BloodGrab}): a vampire holding their prey up by the throat in one hand, the main arm
  * out in front and raised a little, leaning back against the weight, the hand shaking as they drink. Laid over the
  * player's model right after it's posed, like {@link BioAbsorbPose}.
  */

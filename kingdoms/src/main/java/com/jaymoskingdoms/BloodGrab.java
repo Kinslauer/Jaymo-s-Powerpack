@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.614) The grab-drink. Andy: "double tapping the right click gives your drink a one handed grab animation where you can
+ * (0.7.615) The grab-drink. Andy: "double tapping the right click gives your drink a one handed grab animation where you can
  * walk with your target, draining blood more rapidly, so be careful as it can kill quicker. releasing early strong throws
  * the target, and if you are nourished enough the throw can break blocks weaker than stone at close range".
  * <p>

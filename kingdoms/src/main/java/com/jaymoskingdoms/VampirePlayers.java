@@ -71,7 +71,7 @@ public final class VampirePlayers {
 				|| !(entity instanceof LivingEntity target)) {
 				return InteractionResult.PASS;
 			}
-			// (0.7.614) holding someone up by the throat (BloodGrab), use does nothing else
+			// (0.7.615) holding someone up by the throat (BloodGrab), use does nothing else
 			if (BloodGrab.holding(sp)) {
 				return InteractionResult.SUCCESS;
 			}
@@ -79,7 +79,7 @@ public final class VampirePlayers {
 				drink(server, sp, target);
 				return InteractionResult.SUCCESS;
 			}
-			// (0.7.614) in the Nether: piglins and Hornkin, never zombified ones; they never turn
+			// (0.7.615) in the Nether: piglins and Hornkin, never zombified ones; they never turn
 			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && Vampires.netherPrey(target)) {
 				drink(server, sp, target, false, false);
 				return InteractionResult.SUCCESS;
@@ -206,7 +206,7 @@ public final class VampirePlayers {
 	}
 
 	/**
-	 * (0.7.614) A bottle of Kitchen's blood ({@link Hemomancy#drankBottle}): a thin meal, but it counts as fed, so a vampire
+	 * (0.7.615) A bottle of Kitchen's blood ({@link Hemomancy#drankBottle}): a thin meal, but it counts as fed, so a vampire
 	 * stranded where no one can be bitten (the Nether) doesn't starve on it. Blood requests and the like still want a bite.
 	 */
 	static void fedFromBottle(ServerPlayer player) {
@@ -217,7 +217,7 @@ public final class VampirePlayers {
 		}
 	}
 
-	/** (0.7.614) A gulp in the grab-drink ({@link BloodGrab}): the bite, on the grab's own quicker pace instead of the bite's. */
+	/** (0.7.615) A gulp in the grab-drink ({@link BloodGrab}): the bite, on the grab's own quicker pace instead of the bite's. */
 	static void drinkNow(ServerLevel level, ServerPlayer player, LivingEntity target, boolean infect) {
 		LAST_DRINK.remove(player.getUUID());
 		drink(level, player, target, false, infect);
@@ -259,7 +259,7 @@ public final class VampirePlayers {
 		}
 		level.sendParticles(PowersCompat.blood(0x8A0303, 1.0F), target.getX(), target.getEyeY() - 0.25, target.getZ(), 8, 0.15, 0.15, 0.15, 0.0);
 		level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.9F, 0.55F);
-		// (0.7.614) a bite that doesn't infect (a sleeper, the Nether's piglins and Hornkin) never turns its prey
+		// (0.7.615) a bite that doesn't infect (a sleeper, the Nether's piglins and Hornkin) never turns its prey
 		if (infect && target.isAlive() && target instanceof PathfinderMob p && !Lycans.cursed(p) && !p.hasAttached(Vampires.BITTEN)) {
 			Vampires.bite(p, clock);
 		} else if (infect && target.isAlive() && target instanceof ServerPlayer bitten) {

@@ -321,7 +321,7 @@ public final class Vampires {
 	}
 
 	/**
-	 * (0.7.614, Andy: "how do i feed in the nether?" ... "yes as long as there arent zombies") The Nether's living folk a
+	 * (0.7.615, Andy: "how do i feed in the nether?" ... "yes as long as there arent zombies") The Nether's living folk a
 	 * vampire can drink from: grown piglins, piglin brutes and Hornkin, never a zombified one (zombified piglins are their
 	 * own kind, never a {@code Piglin}). Their blood feeds like anyone's, but a bitten one never turns.
 	 */

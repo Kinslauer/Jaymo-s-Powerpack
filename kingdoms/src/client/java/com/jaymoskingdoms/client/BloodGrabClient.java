@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.7.614) The grab-drink's keys ({@link BloodGrab}): two taps of use on the same prey in quick succession
+ * (0.7.615) The grab-drink's keys ({@link BloodGrab}): two taps of use on the same prey in quick succession
  * ({@link BloodGrab#DOUBLE_TAP_TICKS}) by a vampire with an empty hand grabs it; letting go of use while holding it throws
  * it. The use key itself is left alone (the first tap is the usual bite); the server decides who can be grabbed.
  */
