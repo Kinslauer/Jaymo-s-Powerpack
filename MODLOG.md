@@ -1318,3 +1318,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   (`Wounds`), the axe finisher, mob chop executions, Frost Needle, and Kingdoms' archer wall pins all keep the head on
   a standing player; the blow still lands, and a killing one downs them as usual. Mobs and villagers are unchanged. A
   blast that blows a player apart (`BlastGore`) still takes everything. Gradle compile clean; not played.
+
+## 0.21.35: Kitchen's quiver fits the body bauble slot
+- `baubles/body` tag takes `jaymoskitchen:quiver` (Kitchen 0.5.82 feeds bows from it there and draws every worn quiver,
+  the RPG Series' too, animated on the back). Data only.

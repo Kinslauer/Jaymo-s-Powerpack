@@ -1554,3 +1554,20 @@ mobs should be possible".
 ## 0.5.81: headless player bodies stay down
 - `CorpseEntity`: a player's corpse missing its head never rises as a `ZombiePlayer` (Andy: "decapitated player corpses
   cant reanimate"). It lies there with what was on it, searchable as before. Gradle compile clean; not played.
+
+## 0.5.82: every quiver goes in a bauble slot and moves on your back (Powers 0.21.35)
+- Andy: "all quivers should animate and go in baubles". The pack has four quivers: ours and the RPG Series' small, medium
+  and large (Archers, worn in the bauble body slot for Spell Engine but never drawn, since that drawing is Trinkets-only).
+- **Bauble slot:** our quiver is tagged for Powers' body slot (`jaymospowers:baubles/body`). `Quivers.baubles(Player)`
+  reads Powers' `Baubles.worn` by reflection; a quiver worn there comes first for `worn`, for feeding bows (`drawAmmo`)
+  and for what's drawn. Carried in the off hand or inventory still works as before.
+- **Drawn:** the `worn_quiver` attachment is now a `WornQuiver` (item id + arrows). `Quivers.shown` picks a quiver worn in a
+  bauble slot (ours, or any item in the new `jaymoskitchen:shown_quivers` tag, which holds `#archers:quivers`; their
+  arrows are read from whatever `ContainerComponent` they keep, Bundle API's here), else ours carried. Every quiver uses
+  our slung model and arrows; the RPG ones get their own colours (`textures/entity/quiver/<id>.png`, repainted from ours
+  with their palettes by `tools/quiver_looks.py`; small dark leather with brass, medium brown with gold studs, large
+  teal with an iron rim and grey cord).
+- **Animated:** `QuiverModel.animate` swings the quiver with your stride, kicks it out at each footfall, breathes at rest,
+  and rattles each arrow on its own beat; fletchings now pivot on their shaft's foot so they move with it. Drawing a bow
+  or loading a crossbow lifts the top arrow out of the quiver over 5 ticks, then it's gone from the quiver (it's on the
+  string). Gradle compile clean; not played.
