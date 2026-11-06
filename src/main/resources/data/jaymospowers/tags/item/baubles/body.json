@@ -6,6 +6,10 @@
     {
       "id": "#spell_engine:spell_quiver",
       "required": false
+    },
+    {
+      "id": "jaymoskitchen:quiver",
+      "required": false
     }
   ]
 }
