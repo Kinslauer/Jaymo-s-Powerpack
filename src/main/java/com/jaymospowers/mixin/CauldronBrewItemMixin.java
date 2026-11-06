@@ -15,14 +15,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Items thrown into a water cauldron go to cauldron brewing ({@link CauldronBrewing#itemInside}). */
+/** Items thrown into a water cauldron go to ore washing, else to cauldron brewing ({@link CauldronBrewing#itemInside}). */
 @Mixin(LayeredCauldronBlock.class)
 abstract class CauldronBrewItemMixin {
 	@Inject(method = "entityInside", at = @At("HEAD"))
 	private void jaymospowers$brew(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise,
 		CallbackInfo ci) {
 		if (entity instanceof ItemEntity item && level instanceof ServerLevel server && state.is(Blocks.WATER_CAULDRON)) {
-			CauldronBrewing.itemInside(server, pos, state, item);
+			// (0.21.28) crushed ore washes instead (OreWashing), and brewing never sees it
+			if (!com.jaymospowers.tinkering.ore.OreWashing.itemInside(server, pos, state, item)) {
+				CauldronBrewing.itemInside(server, pos, state, item);
+			}
 		}
 	}
 }
