@@ -1,0 +1,12 @@
+{
+  "type": "jaymospowers:hammer_crafting",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:raw_silver",
+    "#jaymospowers:hammers"
+  ],
+  "result": {
+    "id": "jaymospowers:crushed_silver_ore",
+    "count": 1
+  }
+}

@@ -1283,3 +1283,16 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   armour also takes the drag's blood, dirt and washing, gathered over 4 steps at a time and written onto the body through
   Kitchen 0.5.79's `CorpseEntity.reworkArmour` (`KitchenCompat.reworkArmour`, looked up by name; `Bloodied.dragArmour`,
   `ArmourGrime.dragArmour` / `washArmour`).
+
+## 0.21.29 (2026-11-06): splinters from punching trees; ore crushing and washing (Andy's picks from Gemini's GregTech start)
+- **Splinters** (`ground/Splinters`): hitting a log with an empty main hand drives a splinter into that arm (0.5 health
+  through Wounds, so it shows on the H screen), and again every 1.5 s of keeping at it. Creative is spared.
+- **Ore crushing** (`tinkering/ore/HammerRecipe`, type `jaymospowers:hammer_crafting`): raw iron, copper, gold or silver
+  + any hammer (`#jaymospowers:hammers`) in a crafting grid = 1 crushed ore; the hammer stays, worn by 1 (a Tinkering
+  hammer stops at broken). An ore block mined with a hammer drops crushed ore in place of its raw ore (Andy).
+- **Ore washing** (`tinkering/ore/OreWashing`): crushed ore used on a water cauldron washes up to 8 for one level of
+  water; thrown into one it washes after 2 s; left in running (not still) water it washes after 10 s, free. A cauldron
+  holding a brew is left alone. Each washed ore has a 15% chance of a byproduct nugget (iron: copper, copper: gold,
+  gold: silver, silver: copper).
+- Washed ore smelts at full speed in a plain furnace (raw and crushed ore stay slow); the smeltery melts crushed and
+  washed ore as raw ore (doubled). Raw bog iron (Kingdoms) isn't crushable yet.

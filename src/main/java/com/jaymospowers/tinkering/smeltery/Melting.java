@@ -168,6 +168,11 @@ public final class Melting {
 		add(Molten.SILVER, Molten.INGOT * ORE_INGOTS, ores);
 	}
 
+	/** (0.21.29) Crushed and washed ore ({@code tinkering/ore/OreWashing}) melt as raw ore does (doubled). */
+	public static void ores(Molten molten, Item... ores) {
+		add(molten, Molten.INGOT * ORE_INGOTS, ores);
+	}
+
 	/** (0.18.56) Star metal ore melts in the smeltery, one ore for one ingot's worth. */
 	public static void starMetal(Item ore) {
 		add(Molten.STAR_METAL, Molten.INGOT, ore);

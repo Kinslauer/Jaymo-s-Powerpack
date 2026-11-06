@@ -95,11 +95,15 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.armory.TaczGuns.init();
 		com.jaymospowers.armory.FlintlockDraw.init();
 		com.jaymospowers.tinkering.Tinkering.init();
+		// (0.21.29) GregTech's hand route: hammer raw ore into crushed ore, wash it in a cauldron or running water
+		com.jaymospowers.tinkering.ore.OreWashing.init();
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
 		// (0.20.89) seamed stone and rocky dirt round ore veins
 		com.jaymospowers.ground.OreTells.init();
 		com.jaymospowers.ground.FirstTools.init();
+		// (0.21.29) punching a log drives splinters into the hand
+		com.jaymospowers.ground.Splinters.init();
 		// (0.17.14) players throw rocks, as Kingdoms' poor guards and barbarians do
 		com.jaymospowers.ground.ThrownRocks.init();
 		// (0.18.55) far worlds restart the stone age: veiled ore, first metals, the field anvil, the patrol's skip writ
