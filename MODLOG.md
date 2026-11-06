@@ -1237,3 +1237,18 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 ## 0.21.26 (2026-11-06): Felled in the pack (Kingdoms 0.7.628)
 - Felled (all rights reserved, Raiiiden; CurseForge 1715901 / file 9305152) and Zarith (1720181 / 9284445) join `packMods`
   (dev: false). Kingdoms hands the felling stroke of a player's chopping to it (`FelledCompat`).
+
+## 0.21.27 (2026-11-06): Jung's wind moves revamped
+- Jung's revamp of four Wind moves (`WindMoves` server shots and poses, `WindMovePose` client body, synced `wind_move`):
+  - **Gust** (G held on the ground): holding wheels both arms round in front, drawing wind in from all round; release is
+    a one-armed push flowing into an uppercut, and a spiralling gust leaves with the uppercut, runs forward and curls
+    upward, carrying and lifting everything it catches (same damage curve, now along the gust's run). It is bigger with
+    mastery (up to +60%) and ascension (+30%). At full mastery it takes up the element round about, as the Cyclone does
+    (fire, water, snow, sand, storm, or an Imbue's), with that element's effects on what it hits.
+  - **Zephyr's Breath**: on release a spiral of wind lifts the caster two blocks and spins them for 2 s, limbs loose and
+    trailing; the breath's effects (and holding for more) are as before. Not while flying or riding.
+  - **Gale Barrier**: both arms flung out at shoulder height while it gathers; a sphere of wind bands forms round the
+    caster and fades over 3 s. The barrier itself lasts as long as ever (the lingering swirl is gone).
+  - **Cyclone Lance**: a 1.2 s wind-up (lead arm drawn back, the other aiming, wind spiralling in), then a bigger spiral
+    shot with a line of wind down its middle flies out (3 blocks a tick); hit radius 0.6 to 1.1, same damage, stun and
+    Stormbound bolts.
