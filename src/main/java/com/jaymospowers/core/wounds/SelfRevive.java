@@ -64,7 +64,7 @@ public final class SelfRevive {
 
 	private static final Map<UUID, Eating> EATING = new HashMap<>();
 
-	/** (0.21.37) The eating's job in {@link HoldProgress}: this time down (let go, the bar stays for the next hold). */
+	/** (0.21.39) The eating's job in {@link HoldProgress}: this time down (let go, the bar stays for the next hold). */
 	private static String job(Player player) {
 		return "second_wind:" + Downed.since(player);
 	}
@@ -106,7 +106,7 @@ public final class SelfRevive {
 			Eating e = EATING.get(server.getUUID());
 			if (e == null) {
 				e = new Eating(hand, now);
-				// (0.21.37) let go before: the bar carries on where it stopped
+				// (0.21.39) let go before: the bar carries on where it stopped
 				e.ticks = HoldProgress.get(server.getUUID(), job(server));
 				EATING.put(server.getUUID(), e);
 			} else {
@@ -121,7 +121,7 @@ public final class SelfRevive {
 		Eating e = EATING.get(player.getUUID());
 		if (e != null && ++e.hits >= most) {
 			EATING.remove(player.getUUID());
-			// (0.21.37) broken off by blows: that bar starts again
+			// (0.21.39) broken off by blows: that bar starts again
 			HoldProgress.forget(player.getUUID(), job(player));
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.self_revive_broken").withStyle(ChatFormatting.RED));
 		}

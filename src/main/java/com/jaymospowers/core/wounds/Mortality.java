@@ -341,7 +341,7 @@ public final class Mortality {
 			wake.carried = carried;
 			player.setAttached(WAKE_LINE, carried ? "message.jaymospowers.mortality.carried" : "message.jaymospowers.mortality.lying");
 		}
-		// (0.21.37) let go, the bar stays where it is and the next hold carries on (Andy: "every meter should work this way")
+		// (0.21.39) let go, the bar stays where it is and the next hold carries on (Andy: "every meter should work this way")
 		boolean holding = player.isShiftKeyDown() && !dark;
 		if (holding) {
 			wake.held++;

@@ -1331,7 +1331,50 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   out of a sprint; still held at the end = prone). The server's `Slide.valid` no longer checks Sneak (the client keeps it
   off through the hold). `SPRINT_GRACE_TICKS` stays 8. Compile-checked against the 26.3 jars; not played.
 
-## 0.21.37: every held bar keeps its progress
+## 0.21.37: every worn bauble shows on the body
+- Andy: "Would this trinkets' system animate any other baubles? If so i want them to be integrated" (picked: Artifacts'
+  ported baubles and our own starters). No other pack mod relied on Trinkets for drawing (scanned all 123 downloaded jars),
+  but our Artifacts port never drew anything on the player. Now 49 baubles do: hats, hoods, masks and the circlet on the
+  head; scarves and pendants at the neck; charms and belt gadgets at the belt; gloves, claws, gauntlets, bracers and rings
+  on the hands (ring slot 1 right hand, slot 2 left); shoes on both feet; the featherfall cloak down the back (hides the cape).
+- `Baubles.LOOKS`: each slot's item id, synced to everyone (`Baubles.looks`). `client/baubles/WornLooks` reads
+  `worn_looks.json`, bakes a player-model layer per look (wide and slim arms, and a left-hand ring variant), and draws each
+  worn look; scarf tails, pendants, charms, hanging pouches, feathers, jester horns and the cloak swing with the stride and
+  idle; parts scale out over the matching armour piece.
+- Our own boxes and textures (REA, docs/Worn-Looks-Spec.md): `tools/gen_worn_looks.py` writes the json and
+  `textures/entity/worn/*.png`. Lanterns, the coin purse, the hip bottles, the lantern pole, fairies and quivers keep their
+  own drawing.
+- Andy: "Can we not port their looks too?" The 25 baubles that kept their Artifacts look (villager and angler's hats,
+  scarves, necklaces, pendants, the neck charms, cloud bottle, skull, antidote, crystal heart, chorus totem, claws, fire
+  gauntlet, vampiric glove, golden hook, withered bracelet, hare boots, kitty slippers, snowshoes, spikes, rooted and
+  strider shoes) now use Artifacts' own worn models, textures and renderers (MIT, ported into
+  `client/baubles/artifacts/worn/`, textures in `textures/entity/wearable/artifacts/` with the licence): `WornArtifacts`
+  draws them from `Baubles.looks`, gloves and claws on both hands, belt charms at the front of the right hip. The
+  cloud bottle, skull and antidote leave `#jaymospowers:hip_shown` (no more flat sprite at the hip). Our own looks stay for
+  the 7 starters, the sky mask and the 16 we repainted medieval, whose Artifacts models are the modern things we renamed
+  away from. Gradle compile clean; not played.
+
+## 0.21.38: a traditional kneel, posed with the weapon; climbing hand over hand
+- Andy: "the newest kneel has both knees bent in front of the character, it should look more like a traditional kneel,
+  posing with a weapon in hand like a hand on the sword's pommel, blade in the ground, similar with an axe, or a low ready
+  with a rifle or bow". `CrouchPose` (the low crouch's kneel): the knee on the ground is now behind the hip (`BACK_LEG`
+  0.40, shin flat behind, `BACK_KNEE` 1.09), the front knee a touch above the hip with the shin straight down
+  (`FRONT_THIGH`/`FRONT_KNEE` 1.65), hips sunk 6.5 px (`SINK`). The hands pose by `CrouchPose.Style`, read from the main
+  hand through `Finishers.kind`: `PLANT` (sword, greatsword, axe, blunt) puts it point or head down in front of the knee
+  with both hands stacked on the pommel or haft end; `UPRIGHT` (spear, polearm, staff) stands it beside the knee; `BOW`
+  and `RIFLE` (gun, crossbow) hold it at a low ready, arrow or muzzle toward the ground ahead. The weapon is turned in the
+  hand by `CrouchPose.grip` (from `FinisherItemInHandLayerMixin`); the off hand joins only when empty; left-handed bodies
+  are mirrored. Aiming, drawing or swinging from the knee still leaves the arms to vanilla. The other kneels (tending,
+  finishers, executions) keep `KneelLegs`.
+- Andy: "a better climbing animation, moving hands and feet interchangeably". The cling (freerun climb and webbed fists)
+  no longer borrows Not Enough Animations' ladder pose (`NeaLadderMixin`, `WallClimbs` and the nea mixin config are gone).
+  `WebParkourPose.climbLimb`: each hand grips (`HAND_HOLD` 0.6 of the cycle) and stays on its spot while the body rises,
+  then lets go and reaches up to the next hold; the hands half a cycle apart, each foot stepping up with the opposite hand
+  (`FOOT_HOLD` 0.45), knees turned out. Keyed to the distance climbed (up, down or across, `CLIMB_CYCLE` 1.2 blocks), so
+  it holds still while you hang and runs backward climbing down. Two-bone reach (`reach`) bends the elbows and knees at
+  draw time (`bendLimbs`, from `TendModelFeatureRendererMixin`). Worked out on preview renders
+  (`art-overhaul/kneel-climb`); compile-checked, not played.
+## 0.21.39: every held bar keeps its progress
 - Andy: "the bar should stay where it is even after you stop scrolling, the same way tree chopping works, every meter
   should work this way, especially washing rags" (throws and combat charges excepted). New `core/HoldProgress` keeps how
   far each player got at each held job (not saved). Let go, step away or lose the target and the bar stays; the next hold

@@ -87,6 +87,13 @@ public final class Baubles {
 	 */
 	public static final AttachmentType<List<ItemStack>> SHOWN = AttachmentRegistry.create(JaymosPowers.id("baubles_shown"),
 		builder -> builder.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.21.37) On a player: what's in each of the nine slots, by item id ({@code minecraft:air} for empty), synced to
+	 * everyone, so every worn bauble with a worn look is drawn on the body ({@code client/baubles/WornLooks}). Not saved.
+	 */
+	public static final AttachmentType<List<Identifier>> LOOKS = AttachmentRegistry.create(JaymosPowers.id("baubles_looks"),
+		builder -> builder.syncWith(Identifier.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list()),
+			AttachmentSyncPredicate.all()));
 	/** Vanilla's lanterns tag (plain, soul, every copper one): what hangs at the hip from the belt slot. */
 	static final TagKey<Item> LANTERNS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("minecraft", "lanterns"));
 	/**
@@ -309,6 +316,22 @@ public final class Baubles {
 
 	/** Syncs the hip lantern and lantern pole others should see, only when they change. */
 	private static void show(ServerPlayer player, List<ItemStack> worn) {
+		// (0.21.37) the worn looks: only items in a slot that takes them
+		List<Identifier> looks = new ArrayList<>(SIZE);
+		boolean any = false;
+		for (int i = 0; i < SIZE; i++) {
+			ItemStack stack = worn.get(i);
+			boolean shows = !stack.isEmpty() && fits(i, stack);
+			looks.add(shows ? BuiltInRegistries.ITEM.getKey(stack.getItem()) : BuiltInRegistries.ITEM.getDefaultKey());
+			any |= shows;
+		}
+		if (!any) {
+			if (player.getAttached(LOOKS) != null) {
+				player.removeAttached(LOOKS);
+			}
+		} else if (!looks.equals(player.getAttached(LOOKS))) {
+			player.setAttached(LOOKS, List.copyOf(looks));
+		}
 		ItemStack hip = hipItem(worn.get(BELT_SLOT)) ? worn.get(BELT_SLOT).copyWithCount(1) : ItemStack.EMPTY;
 		ItemStack back = worn.get(BODY_SLOT).is(LANTERN_POLE) ? worn.get(BODY_SLOT).copyWithCount(1) : ItemStack.EMPTY;
 		List<ItemStack> now = player.getAttached(SHOWN);
@@ -323,6 +346,12 @@ public final class Baubles {
 			|| now.get(0).isEmpty() != hip.isEmpty() || now.get(1).isEmpty() != back.isEmpty()) {
 			player.setAttached(SHOWN, List.of(hip, back));
 		}
+	}
+
+	/** (0.21.37) The item id worn in each slot, as everyone sees it (empty when nothing is worn; client and server). */
+	public static List<Identifier> looks(Player player) {
+		List<Identifier> now = player.getAttached(LOOKS);
+		return now == null ? List.of() : now;
 	}
 
 	/** What a player shows hung on them: {hip item (a lantern, or a coin purse), lantern pole}, either empty (client and server). */

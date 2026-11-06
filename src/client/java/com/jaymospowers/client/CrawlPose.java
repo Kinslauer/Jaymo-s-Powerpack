@@ -142,7 +142,7 @@ public final class CrawlPose {
 	static final float PUSH_SHARE = 0.35F, KNEEL_SHARE = 0.75F, PUSH_DEGREES = 30.0F, KNEEL_DEGREES = 62.0F, KNEEL_LEGS = -1.25F,
 		KNEE_HAND_X = -0.7F;
 	/**
-	 * (0.21.37) Let go part way up (Andy: "they fall everytime they let go"): how long the drop back to the ground takes
+	 * (0.21.39) Let go part way up (Andy: "they fall everytime they let go"): how long the drop back to the ground takes
 	 * (ticks). It falls faster as it goes, from wherever the rise had got to.
 	 */
 	static final float SINK_TICKS = 7.0F;
@@ -202,7 +202,7 @@ public final class CrawlPose {
 	static final RenderStateDataKey<Boolean> RISEN_KEY = RenderStateDataKey.create(() -> "jaymospowers:risen");
 	/** (0.18.5) Player entity id → the game time they were last seen nearly risen (client side). */
 	private static final Map<Integer, Long> RISEN = new HashMap<>();
-	/** (0.21.37) Player entity id → how far up their last rise was drawn, and (once let go) when the drop began. */
+	/** (0.21.39) Player entity id → how far up their last rise was drawn, and (once let go) when the drop began. */
 	private static final Map<Integer, float[]> SINKING = new HashMap<>();
 
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("crawl");
@@ -787,7 +787,7 @@ public final class CrawlPose {
 	}
 
 	/**
-	 * (0.21.37) The rise as drawn: while rising, as it is (remembered); the rise gone short of standing, it drops from
+	 * (0.21.39) The rise as drawn: while rising, as it is (remembered); the rise gone short of standing, it drops from
 	 * where it was back to the ground over {@link #SINK_TICKS}, quicker as it falls; then -1 (lying).
 	 */
 	private static float sink(int id, boolean downed, float rise, float now) {

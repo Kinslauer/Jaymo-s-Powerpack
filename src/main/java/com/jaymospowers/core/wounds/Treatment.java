@@ -75,7 +75,7 @@ import org.jspecify.annotations.Nullable;
  * still need sneak (a blade without it is a weapon: a downed enemy's finisher), as before.</li>
  * <li><b>It takes time:</b> each remedy is a channel of {@link Remedy#ticks} with a bar over the hotbar, cancelled by
  * either of you moving more than {@link #MOVE_LIMIT}, by either being hit, by the medicine leaving your hand, or (sneak +
- * use) by letting go of sneak. (0.21.37) Stopped any way but a blow, the bar is kept ({@link HoldProgress}): the next go
+ * use) by letting go of sneak. (0.21.39) Stopped any way but a blow, the bar is kept ({@link HoldProgress}): the next go
  * at the same part with the same remedy carries on. All on the server: the screen's packet only names the part.</li>
  * <li><b>Cautery:</b> a sword or axe held to a lit campfire, fire or lava is red-hot ({@link #HEATED_KEY}, custom data)
  * for {@link #HEAT_TICKS}; a Fire Aspect blade always is. It stops all bleeding on a part at once (the only thing that
@@ -217,7 +217,7 @@ public final class Treatment {
 		final long start;
 		long held;
 		boolean begun, over;
-		/** (0.21.37) Whether its bar has been carried on from the last hold at the same job ({@link HoldProgress}). */
+		/** (0.21.39) Whether its bar has been carried on from the last hold at the same job ({@link HoldProgress}). */
 		boolean resumed;
 
 		Session(LivingEntity target, @Nullable BodyPart part, Remedy remedy, InteractionHand hand, Vec3 from, boolean sneak, int need,
@@ -237,7 +237,7 @@ public final class Treatment {
 		}
 	}
 
-	/** (0.21.37) The job a session is in {@link HoldProgress}: who, which part (or the whole body), with what. */
+	/** (0.21.39) The job a session is in {@link HoldProgress}: who, which part (or the whole body), with what. */
 	private static String job(Session s) {
 		return "treat:" + s.target.getUUID() + ":" + (s.part == null ? "body" : s.part.name()) + ":" + s.remedy.name();
 	}
@@ -274,7 +274,7 @@ public final class Treatment {
 					if (s.over) {
 						continue;
 					}
-					// (0.21.37) a blow spoils the work done, not only the hold
+					// (0.21.39) a blow spoils the work done, not only the hold
 					HoldProgress.forget(e.getKey(), job(s));
 					ServerPlayer healer = entity.level() instanceof ServerLevel level ? level.getServer().getPlayerList().getPlayer(e.getKey()) : null;
 					if (healer != null) {
@@ -786,7 +786,7 @@ public final class Treatment {
 				continue;
 			}
 			if (!s.resumed) {
-				// (0.21.37) let go before, at the same part with the same remedy: the bar carries on where it stopped
+				// (0.21.39) let go before, at the same part with the same remedy: the bar carries on where it stopped
 				s.resumed = true;
 				s.ticks = Math.min(HoldProgress.get(id, job(s)), s.need - 1);
 			}

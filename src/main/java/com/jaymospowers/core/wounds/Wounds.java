@@ -163,7 +163,7 @@ public final class Wounds {
 		// (0.19.24) herbal remedies' lasting effects, rag washing and boiling
 		Herbal.register();
 		RagWashing.register();
-		// (0.21.37) held jobs' bars kept between holds
+		// (0.21.39) held jobs' bars kept between holds
 		com.jaymospowers.core.HoldProgress.register();
 		Treatment.register();
 		// (0.15.99) kneeling at someone's side to treat them

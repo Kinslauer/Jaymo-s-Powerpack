@@ -329,7 +329,7 @@ public final class Carry {
 	/** Player → the lift they're holding. Not saved. */
 	private static final Map<UUID, Lift> LIFTING = new HashMap<>();
 
-	/** (0.21.37) A lift's job in {@link HoldProgress}: whom. */
+	/** (0.21.39) A lift's job in {@link HoldProgress}: whom. */
 	private static String liftJob(Entity target) {
 		return "lift:" + target.getUUID();
 	}
@@ -596,7 +596,7 @@ public final class Carry {
 				if (lift != null && lift.target == target) {
 					lift.last = now;
 				} else {
-					// (0.21.37) let go before: the bar carries on where it stopped
+					// (0.21.39) let go before: the bar carries on where it stopped
 					lift = new Lift(target, now - HoldProgress.get(carrier.getUUID(), liftJob(target)));
 					lift.last = now;
 					LIFTING.put(carrier.getUUID(), lift);
@@ -622,7 +622,7 @@ public final class Carry {
 			}
 			long now = player.level().getGameTime();
 			if (now - lift.last > LIFT_GRACE || !player.isShiftKeyDown() || liftGap(player, target) > LIFT_GAP + LIFT_SLACK) {
-				// let go too soon, stood up, or they slipped away: (0.21.37) the bar stays where it got to, for the next hold
+				// let go too soon, stood up, or they slipped away: (0.21.39) the bar stays where it got to, for the next hold
 				it.remove();
 				HoldProgress.set(player.getUUID(), liftJob(target), (int) Math.min(LIFT_TICKS - 1, lift.last - lift.start));
 				continue;

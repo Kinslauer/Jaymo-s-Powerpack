@@ -158,7 +158,7 @@ public final class Pickpocket {
 	private static final Map<UUID, Rest> RESTING = new HashMap<>();
 
 	/**
-	 * (0.7.641) A lift let go of (or slipped away from) before the end: whose pocket, how far the hand got and how long the
+	 * (0.7.642) A lift let go of (or slipped away from) before the end: whose pocket, how far the hand got and how long the
 	 * whole lift was (ticks). Andy: "the bar should stay where it is even after you stop ... every meter should work this
 	 * way". The next lift on the same mark carries on there; caught, done, or another mark tried, it's forgotten.
 	 */
@@ -263,7 +263,7 @@ public final class Pickpocket {
 		Kept kept = KEPT.remove(player.getUUID());
 		Lift lift;
 		if (kept != null && kept.mark().equals(mark.getUUID())) {
-			// (0.7.641) the hand goes back in as deep as it got
+			// (0.7.642) the hand goes back in as deep as it got
 			lift = new Lift(mark, now - kept.done(), now - kept.done() + kept.total());
 			lift.held = now;
 		} else {
@@ -342,7 +342,7 @@ public final class Pickpocket {
 		}
 	}
 
-	/** (0.7.641) A lift stopped short: how far it got is kept for the next try on that mark ({@link Kept}). */
+	/** (0.7.642) A lift stopped short: how far it got is kept for the next try on that mark ({@link Kept}). */
 	private static void keep(ServerPlayer player, Lift lift) {
 		long done = Math.min(lift.held - lift.start, lift.until - lift.start - 1);
 		if (done > 0) {

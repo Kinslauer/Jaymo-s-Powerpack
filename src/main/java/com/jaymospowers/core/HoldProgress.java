@@ -7,12 +7,12 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 /**
- * (0.21.37) Andy: "the bar should stay where it is even after you stop ... the same way tree chopping works, every meter
+ * (0.21.39) Andy: "the bar should stay where it is even after you stop ... the same way tree chopping works, every meter
  * should work this way, especially washing rags" (throws and combat charges excepted). A held job's bar (washing a rag,
- * a treatment, a revive, getting up, giving up, Second Wind, coming to, a lift) no longer empties when you let go: how far
+ * a treatment, a revive, giving up, Second Wind, coming to, a lift) no longer empties when you let go: how far
  * it got is kept here, by player and by job (a job names what it was at, such as the body and part being treated), and
- * the next hold at the same job carries on from there. A job done is forgotten; so is a hold a blow broke off (a rise
- * knocked back down, a hold the hits ended): only stopping keeps it. Not saved (a restart empties every bar).
+ * the next hold at the same job carries on from there. A job done is forgotten; so is a hold a blow broke off: only stopping
+ * keeps it. (Getting up is the exception: let go and you sink back down, see Downed.rise.) Not saved (a restart empties every bar).
  */
 public final class HoldProgress {
 	/** How many jobs are kept per player; past it, the oldest goes. */

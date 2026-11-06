@@ -60,7 +60,7 @@ public final class RagWashing {
 	/** Washing is a held use this long (ticks); it ends when you let go or run out of rags. */
 	public static final int USE_TICKS = 72000;
 	static final int BAR = 12;
-	/** (0.21.37) The wash in {@link HoldProgress}: one rag's worth, kept between holds. */
+	/** (0.21.39) The wash in {@link HoldProgress}: one rag's worth, kept between holds. */
 	static final String WASH_JOB = "wash_rag";
 
 	/** A batch of rags in a cauldron. */
@@ -131,7 +131,7 @@ public final class RagWashing {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.25F,
 				1.2F + level.getRandom().nextFloat() * 0.4F);
 		}
-		// (0.21.37) the wash's bar is kept when you let go (Andy: "the bar should stay where it is even after you stop"):
+		// (0.21.39) the wash's bar is kept when you let go (Andy: "the bar should stay where it is even after you stop"):
 		// the next hold carries on the same rag
 		int into = HoldProgress.add(player.getUUID(), WASH_JOB, 1);
 		if (into < WASH_TICKS) {
