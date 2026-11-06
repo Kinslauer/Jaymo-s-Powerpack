@@ -1571,3 +1571,15 @@ mobs should be possible".
   and rattles each arrow on its own beat; fletchings now pivot on their shaft's foot so they move with it. Drawing a bow
   or loading a crossbow lifts the top arrow out of the quiver over 5 ticks, then it's gone from the quiver (it's on the
   string). Gradle compile clean; not played.
+
+## 0.5.83: lifting a carcass keeps its progress
+- Andy: "every meter should work this way". Let go of a corpse's lift or leg hold before it fills and your next hold
+  carries on where the bar was (someone else's hold starts fresh). Butchering a big carcass already kept its bar.
+  Compile-checked; not played.
+
+## 0.5.84: the risen dead get up from where they lay
+- Andy: "zombies should have their own reanimation animation too". A body that reanimates (zombie, skeleton, a player's
+  body as a zombie) now rises over 2.5 s (`corpse/Reanimation`, held still with no AI, tag `jaymoskitchen.reanimating`
+  frees it if saved mid-rise), drawn by `client/corpse/ReanimatePose`: on its back with a twitch, the arms jerk up stiff
+  first, then it tips up from the heels like a plank in four fits, never bending at the waist, and lurches forward past
+  upright as it finds its feet, head lolling. Earth puffs up where it lay. Compile-checked; not played.

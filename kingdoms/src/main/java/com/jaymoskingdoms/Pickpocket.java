@@ -157,6 +157,16 @@ public final class Pickpocket {
 	/** Player → their last try. */
 	private static final Map<UUID, Rest> RESTING = new HashMap<>();
 
+	/**
+	 * (0.7.642) A lift let go of (or slipped away from) before the end: whose pocket, how far the hand got and how long the
+	 * whole lift was (ticks). Andy: "the bar should stay where it is even after you stop ... every meter should work this
+	 * way". The next lift on the same mark carries on there; caught, done, or another mark tried, it's forgotten.
+	 */
+	private record Kept(UUID mark, long done, long total) {
+	}
+
+	private static final Map<UUID, Kept> KEPT = new HashMap<>();
+
 	private Pickpocket() {
 	}
 
@@ -196,6 +206,7 @@ public final class Pickpocket {
 			LIFTING.clear();
 			PICKED.clear();
 			RESTING.clear();
+			KEPT.clear();
 		});
 	}
 
@@ -249,7 +260,16 @@ public final class Pickpocket {
 	}
 
 	private static void start(ServerPlayer player, ServerLevel level, LivingEntity mark, long now) {
-		LIFTING.put(player.getUUID(), new Lift(mark, now, now + holdTicks(player, level, mark, level.getRandom())));
+		Kept kept = KEPT.remove(player.getUUID());
+		Lift lift;
+		if (kept != null && kept.mark().equals(mark.getUUID())) {
+			// (0.7.642) the hand goes back in as deep as it got
+			lift = new Lift(mark, now - kept.done(), now - kept.done() + kept.total());
+			lift.held = now;
+		} else {
+			lift = new Lift(mark, now, now + holdTicks(player, level, mark, level.getRandom()));
+		}
+		LIFTING.put(player.getUUID(), lift);
 		reach(player, mark.getId());
 	}
 
@@ -296,10 +316,12 @@ public final class Pickpocket {
 			long now = level.getGameTime();
 			if (now - lift.held > HOLD_GRACE) {
 				it.remove();
+				keep(player, lift);
 				end(player, mark, now);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.let_go").withStyle(ChatFormatting.GRAY));
 			} else if (player.distanceTo(mark) > HOLD_RANGE) {
 				it.remove();
+				keep(player, lift);
 				end(player, mark, now);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.slipped_away", mark.getDisplayName())
 					.withStyle(ChatFormatting.GRAY));
@@ -317,6 +339,14 @@ public final class Pickpocket {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.lifting", mark.getDisplayName(), bar)
 					.withStyle(ChatFormatting.GRAY));
 			}
+		}
+	}
+
+	/** (0.7.642) A lift stopped short: how far it got is kept for the next try on that mark ({@link Kept}). */
+	private static void keep(ServerPlayer player, Lift lift) {
+		long done = Math.min(lift.held - lift.start, lift.until - lift.start - 1);
+		if (done > 0) {
+			KEPT.put(player.getUUID(), new Kept(lift.mark.getUUID(), done, lift.until - lift.start));
 		}
 	}
 

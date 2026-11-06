@@ -1374,3 +1374,21 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   it holds still while you hang and runs backward climbing down. Two-bone reach (`reach`) bends the elbows and knees at
   draw time (`bendLimbs`, from `TendModelFeatureRendererMixin`). Worked out on preview renders
   (`art-overhaul/kneel-climb`); compile-checked, not played.
+## 0.21.39: every held bar keeps its progress
+- Andy: "the bar should stay where it is even after you stop scrolling, the same way tree chopping works, every meter
+  should work this way, especially washing rags" (throws and combat charges excepted). New `core/HoldProgress` keeps how
+  far each player got at each held job (not saved). Let go, step away or lose the target and the bar stays; the next hold
+  at the same job carries on. A job done empties it, and so does a hold broken off by blows (a revive or Second Wind broken by hits, a treatment spoiled by a hit).
+- Washing a rag (`RagWashing`): the wash counts its own ticks instead of the use time, so a rag half washed stays half
+  washed. Treating (`Treatment`): kept per patient, part and remedy. Reviving (`Downed`): kept per body and per downing.
+  Giving up: kept for the downing.
+- Getting up by yourself is the one exception (Andy: "they fall everytime they let go, that one should restart the meter
+  because the animation would break if not"): let go part way up and you drop back to the ground (a thud, and
+  `CrawlPose.sink` draws the body falling from where the rise had got to, quicker as it goes, over 7 ticks), and the
+  next hold starts from the ground. Andy: "unable to restart the getup until a second after you hit the ground", with
+  "slight particle dust as you thud into the ground, larger dust for larger characters": a second's wait after landing
+  ("Winded from the fall"), and `Downed.thud` puffs the ground's own dust along the body, more and wider by the body's
+  width squared (a great ape or a giant raises a cloud); a rise knocked down by blows thuds the same way. Second Wind (`SelfRevive`) and coming to where you lay
+  (`Mortality`): kept. Lifting someone (`Carry`): kept per target.
+- Not changed: throws (rocks, daggers), finishers, the stake struggle, spell and power charges, the knock-out mash, and
+  minigame bars (smithing, brewing, jewellery). Compile-checked; not played.

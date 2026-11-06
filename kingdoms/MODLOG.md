@@ -10166,3 +10166,7 @@ stake multiple times, multiplying the debuff".
   up to 35% off straight in; the skewer item's point is buried along that line, the grip standing out. On the part's bone,
   so it moves with every pose.
 Gradle compileJava + compileClientJava clean; not played, so the depth, lean and struggle pose are untested.
+## 0.7.642: a picked pocket keeps its progress
+- Andy: "every meter should work this way". Let go of a lift, or let the mark step out of reach, and how deep your hand
+  got is kept (`Pickpocket.Kept`): the next lift on the same mark carries on with the same length. Caught, done, or a
+  different mark tried, it's forgotten. Compile-checked; not played.
