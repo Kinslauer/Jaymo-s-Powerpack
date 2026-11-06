@@ -78,6 +78,13 @@ public final class ArmourGrime {
 	static final float[] REACH = {1.0F, 0.6F, 0.25F, 0.08F};
 	/** Washed off per check: under water, wading (boots and greaves), in the rain, and one scrub by hand. */
 	static final int UNDER_WATER_WASH = 30, WADING_WASH = 15, RAIN_WASH = 3, SCRUB = 35;
+	/**
+	 * (0.21.28) Dragged a step ({@link #dragged}): through water, this much washed off; over the ground, this many times a
+	 * walking check's dirt, shared over boots, greaves, chest and helmet like this.
+	 */
+	static final int DRAG_WASH = 12;
+	static final float DRAG_DIRT = 0.6F;
+	static final float[] DRAG_REACH = {0.7F, 1.0F, 1.0F, 0.4F};
 	/** A wet sponge scrubs once every this many ticks. */
 	static final int SPONGE_COOLDOWN = 20;
 	/** The armour slots, feet to head (matching {@link #REACH}). */
@@ -208,6 +215,64 @@ public final class ArmourGrime {
 		}
 	}
 
+	/**
+	 * (0.21.28) Andy: "dragging should bloody dirty and clean the armor they wear respectively". {@code body} was just
+	 * dragged (or crawled) a step: through water it's washed ({@link #DRAG_WASH}), over dirt, mud or sand everything it
+	 * wears is scraped through it, {@link #DRAG_DIRT} times walking's dust or mud a step (the chest and legs most).
+	 */
+	public static void dragged(ServerLevel level, LivingEntity body) {
+		if (body.isInWater()) {
+			washAll(body, DRAG_WASH);
+			return;
+		}
+		Dirt dirt = dragDirt(level, body);
+		if (dirt == null) {
+			return;
+		}
+		for (int i = 0; i < SLOTS.length; i++) {
+			soil(body, SLOTS[i], dirt.gain() * DRAG_DIRT * DRAG_REACH[i], dirt.mud());
+		}
+	}
+
+	/** (0.21.28) What a body dragged over the ground here is scraped with: so much dirt a step, muddy or dusty. */
+	public record Dirt(float gain, boolean mud) {
+	}
+
+	/** (0.21.28) The dirt a body dragged a step over the ground under {@code body} picks up (walking's, before {@link #DRAG_DIRT}), or null. */
+	public static @Nullable Dirt dragDirt(ServerLevel level, net.minecraft.world.entity.Entity body) {
+		BlockPos under = body.getOnPos();
+		BlockState ground = level.getBlockState(under);
+		if (ground.isAir()) {
+			ground = level.getBlockState(under.below());
+		}
+		boolean rained = body.isInWaterOrRain();
+		Holder<Biome> biome = level.getBiome(under);
+		if (isMud(ground)) {
+			return new Dirt(MUD_GAIN, true);
+		}
+		if (isEarth(ground) && (rained || level.isRainingAt(body.blockPosition()) || biome.is(ConventionalBiomeTags.IS_SWAMP))) {
+			return new Dirt(WET_GROUND_GAIN, true);
+		}
+		if (isEarth(ground) || ground.is(BlockTags.SAND) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.SUSPICIOUS_GRAVEL)) {
+			// dragged, even dry earth grinds in
+			return new Dirt(DUST_GAIN, false);
+		}
+		return null;
+	}
+
+	/**
+	 * (0.21.28) A corpse's armour (Jaymo's Kitchen keeps it on the body), piece {@code index} (0 boots ... 3 helmet), dragged
+	 * {@code steps} steps over {@code dirt}: scraped dirty as a living body's would be.
+	 */
+	public static void dragArmour(ItemStack stack, int index, Dirt dirt, int steps, net.minecraft.util.RandomSource random) {
+		soilStack(stack, dirt.gain() * DRAG_DIRT * DRAG_REACH[Mth.clamp(index, 0, DRAG_REACH.length - 1)] * steps, dirt.mud(), random);
+	}
+
+	/** (0.21.28) The same, through water: {@code steps} steps' washing. */
+	public static void washArmour(ItemStack stack, int steps) {
+		clean(stack, DRAG_WASH * steps);
+	}
+
 	private static boolean isMud(BlockState state) {
 		if (state.is(Blocks.MUD) || state.is(Blocks.MUDDY_MANGROVE_ROOTS) || state.is(Blocks.CLAY) || state.is(Blocks.SOUL_SOIL)) {
 			return true;
@@ -224,11 +289,15 @@ public final class ArmourGrime {
 
 	/** Dirties the piece in {@code slot} by {@code gain} (fractions carry over by chance). */
 	private static void soil(LivingEntity body, EquipmentSlot slot, float gain, boolean mud) {
-		ItemStack stack = body.getItemBySlot(slot);
+		soilStack(body.getItemBySlot(slot), gain, mud, body.getRandom());
+	}
+
+	/** Dirties {@code stack} by {@code gain} (fractions carry over by chance). */
+	static void soilStack(ItemStack stack, float gain, boolean mud, net.minecraft.util.RandomSource random) {
 		if (stack.isEmpty() || gain <= 0.0F) {
 			return;
 		}
-		int add = Mth.floor(gain) + (body.getRandom().nextFloat() < gain - Mth.floor(gain) ? 1 : 0);
+		int add = Mth.floor(gain) + (random.nextFloat() < gain - Mth.floor(gain) ? 1 : 0);
 		if (add <= 0) {
 			return;
 		}

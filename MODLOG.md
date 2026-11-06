@@ -1252,3 +1252,34 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   - **Cyclone Lance**: a 1.2 s wind-up (lead arm drawn back, the other aiming, wind spiralling in), then a bigger spiral
     shot with a line of wind down its middle flies out (3 blocks a tick); hit radius 0.6 to 1.1, same damage, stun and
     Stormbound bolts.
+## 0.21.28 (2026-11-06): the downed and the dead bleed out (Kingdoms 0.7.630, Kitchen 0.5.79)
+- Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and vampires
+  have finite resources." `core/blood/BleedOut`: every body holds so much blood (a man's 3.0 in stain size, scaled by
+  width x height, 0.3 to 12). The downed pour it into a pool under them once a second (`BloodTrail.pour`), 60% of it by
+  the time they bleed out; it is their own trackable blood. Back up, it comes back over 10 minutes. A Kitchen corpse of
+  anything that died bleeding (downed, cut or bloodied) takes over what was left and pours it out over 90 s, the pool
+  spreading wider as it fills, until it is empty; carried, dragged or hooked bodies hold it. A full pool spills beside
+  itself, so exactly the body's blood lies there for blood magic (`BloodTrail.draw`) and vampires to draw, then it is gone.
+- Andy: "dragging and walking through puddles should smear more than the regular trails." `BloodTrail.soak` takes blood
+  out of the round pools under a point. A body dragged (or crawling) through a pool soaks up to 0.35 a step and smears
+  it out after, up to 0.3 wider a step, in the pool's colour (`BloodSmears`). A foot set in a pool while moving carries
+  off 0.05 (0.1 sprinting) per check; the next steps lay skids along the way it went (1.4x a print, wider for what it
+  carries) before the plain prints. The blood is moved, not made. `Tending.GROUND_DRINK` + `drinkAtGround`: hands and
+  knees, leaning 58 degrees, head down and bobbing (TendPose), for Kingdoms' vampires lapping.
+- Andy: "the kneel we have on crouch right now needs a revamp too so change them all." `client/KneelLegs`: every kneel
+  is now built from the leg's two halves (KneeBend): the knee-down leg's thigh straight down (0.12 back) with the shin flat
+  behind (knee 1.33), the planted leg's thigh level ahead with the shin straight down (knee 1.57), the hips one thigh
+  (6 px) lower than standing. Used by the low crouch's kneel (`CrouchPose`), tending (`TendPose`), drinking (both knees
+  down, arms straight to the ground), and, through `KneelLegs.remap` of their old-style keys (front about -1.15, back
+  about 1.35), every finisher kneel, the web executions and Gravity's crush. Knees asked for with `want` are bent at
+  draw time (`TendModelFeatureRendererMixin`).
+- Andy: "dragging should bloody dirty and clean the armor they wear respectively." Each step a body is dragged or crawls
+  (`BloodSmears`): through a pool, what it soaked up bloodies its coat and armour (`Bloodied.dragged`, 90 points a unit,
+  chest and legs most; a corpse's own blood is topped up and freshened); over dirt, mud or sand its armour is scraped
+  dirty (`ArmourGrime.dragged`, 0.6x a walking check per step, even dry earth); through water it's washed (12 a step,
+  a corpse's blood too).
+- Andy: "i'd like players to pull dirty beaten armor off enemies." Enemies' armour already keeps the dirt and blood they
+  fought in when they die (it's saved on the body) and comes off worn down (Kitchen's `wear`). Now a dragged corpse's
+  armour also takes the drag's blood, dirt and washing, gathered over 4 steps at a time and written onto the body through
+  Kitchen 0.5.79's `CorpseEntity.reworkArmour` (`KitchenCompat.reworkArmour`, looked up by name; `Bloodied.dragArmour`,
+  `ArmourGrime.dragArmour` / `washArmour`).

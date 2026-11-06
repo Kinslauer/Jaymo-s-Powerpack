@@ -153,7 +153,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			folk.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.6);
 			folk.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(2.0);
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
-			// (0.7.630) diamond and netherite are the crown's ({@link Regalia#plate}): a lord wears iron
+			// (0.7.631) diamond and netherite are the crown's ({@link Regalia#plate}): a lord wears iron
 			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
 			folk.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
 			folk.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));

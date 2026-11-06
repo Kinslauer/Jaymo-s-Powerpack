@@ -231,7 +231,7 @@ final class RoyalDress {
 	}
 
 	/**
-	 * (0.7.630) Top-tier armour {@code ruler} may not wear, on them or put by, becomes what they may ({@link Regalia#conform}):
+	 * (0.7.631) Top-tier armour {@code ruler} may not wear, on them or put by, becomes what they may ({@link Regalia#conform}):
 	 * a lord's diamond iron, a queen's diamond gold once her realm is no longer rich, a poorer queen's gold diamond again
 	 * once it is.
 	 */
@@ -317,7 +317,7 @@ final class RoyalDress {
 			}
 			case ROBES -> Regalia.dress(ruler, role, f, McaCompat.female(ruler), false);
 			case PLATE -> {
-				// (0.7.630) netherite for a king, diamond for a rich realm's queen, gold for a poorer one's, iron for lords and ladies
+				// (0.7.631) netherite for a king, diamond for a rich realm's queen, gold for a poorer one's, iron for lords and ladies
 				boolean female = McaCompat.female(ruler);
 				ItemStack[] set = new ItemStack[SLOTS.length];
 				for (int i = 0; i < SLOTS.length; i++) {

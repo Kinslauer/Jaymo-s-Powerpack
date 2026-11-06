@@ -55,7 +55,7 @@ public final class Regalia {
 		CROWNS.put("coronet", "LA");
 	}
 	/**
-	 * The attire a ruler without royal clothes wears: gilded plate, a robe of their colour, a trimmed breastplate. (0.7.630)
+	 * The attire a ruler without royal clothes wears: gilded plate, a robe of their colour, a trimmed breastplate. (0.7.631)
 	 * The plate is of their rank ({@link #plate}): only a king wears netherite, only a rich realm's queen diamond.
 	 */
 	static final int GILDED = 0, ROBED = 1, DIAMOND = 2, ATTIRE = 3;
@@ -117,7 +117,7 @@ public final class Regalia {
 		}
 		switch (attire) {
 			case GILDED -> {
-				// (0.7.630) netherite for a king, diamond for a rich realm's queen, gold for a poorer one's, iron below ({@link #plate})
+				// (0.7.631) netherite for a king, diamond for a rich realm's queen, gold for a poorer one's, iron below ({@link #plate})
 				put(mob, EquipmentSlot.CHEST, trimmed(mob, new ItemStack(plate(mob, role, faction, female, EquipmentSlot.CHEST)), arms.pattern(), TrimMaterials.GOLD));
 				put(mob, EquipmentSlot.LEGS, trimmed(mob, new ItemStack(plate(mob, role, faction, female, EquipmentSlot.LEGS)), arms.pattern(), TrimMaterials.GOLD));
 				put(mob, EquipmentSlot.FEET, trimmed(mob, new ItemStack(Items.GOLDEN_BOOTS), arms.pattern(), gem));
@@ -212,7 +212,7 @@ public final class Regalia {
 		return stack;
 	}
 
-	// ---- (0.7.630) the top tiers of armour are the crown's ------------------------------------------------------------
+	// ---- (0.7.631) the top tiers of armour are the crown's ------------------------------------------------------------
 
 	/*
 	 * Andy (2026-11-06): "only queens of rich kingdoms should ever wear the diamond armor w/ trim, the kings should wear

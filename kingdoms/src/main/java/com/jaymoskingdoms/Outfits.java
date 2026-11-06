@@ -362,7 +362,7 @@ public final class Outfits {
 			case SNOWY -> dyed(Items.LEATHER_HELMET, SNOW);
 			default -> ItemStack.EMPTY;
 		});
-		// (0.7.630) diamond and netherite are the crown's ({@link Regalia#plate}): a lord's plate is iron
+		// (0.7.631) diamond and netherite are the crown's ({@link Regalia#plate}): a lord's plate is iron
 		folk.setItemSlot(EquipmentSlot.CHEST, trimmed(folk, Items.IRON_CHESTPLATE, arms.pattern(), arms.material()));
 		folk.setItemSlot(EquipmentSlot.LEGS, trimmed(folk, Items.IRON_LEGGINGS, arms.pattern(), arms.material()));
 		folk.setItemSlot(EquipmentSlot.FEET, trimmed(folk, Items.IRON_BOOTS, arms.pattern(), arms.material()));

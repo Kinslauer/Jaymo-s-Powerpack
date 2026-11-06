@@ -10042,8 +10042,15 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   firewatch tower (realms), graveyard (kingdoms from 50 people; Andy let its 27 x 37 past the 32 plot cap, D&T-only
   buildings may be up to `DntBuildings.MAX_SIDE` 40). Older projects keep their look. The dappled town hall is too big;
   the hamlet is a piglin bunker; D&T has no stable.
+## 0.7.630 (2026-11-06): vampires lap up spilt blood
+- With Powers 0.21.28's bleeding out (the downed and the dead pour a finite pool), a vampire who sneaks and right-clicks
+  a pool of blood on the ground with an empty hand laps it up (`VampirePlayers.lap`): up to 0.5 of stain a gulp, once a
+  second, 3 health and 4 food per unit (a man's whole pool is about 3), counts as fed and eases the blood fever. Blood
+  Sorcerers already draw the same stains (`Hemomancy`), so both now feed on bodies that run dry.
+- Andy: "is this animated?" Lapping now drops the vampire onto hands and knees, mouth to the pool, bobbing with each
+  gulp (`PowersCompat.drinkAtGround`, Powers' TendPose), held while the button is.
 
-## 0.7.630 (2026-11-06): diamond and netherite are the crown's
+## 0.7.631 (2026-11-06): diamond and netherite are the crown's
 - Andy: "only queens of rich kingdoms should ever wear the diamond armor w/ trim, the kings should wear netherite, and
   any below can wear whatever else, just not those tiers."
 - `Regalia.plate`: a ruler's plate by rank. A king: netherite. A queen: trimmed diamond if her kingdom is wealthy

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.171) MCA's own armour routine puts on a villager the best armour from their inventory, or nothing, which took a
  * ruler's crown and robes off (Andy found a queen dressed as any villager). A ruler's regalia stays on.
  * <p>
- * (0.7.630) Andy: "only queens of rich kingdoms should ever wear the diamond armor w/ trim, the kings should wear netherite,
+ * (0.7.631) Andy: "only queens of rich kingdoms should ever wear the diamond armor w/ trim, the kings should wear netherite,
  * and any below can wear whatever else, just not those tiers." MCA's best archers wear diamond and its elite guards
  * netherite, and a villager puts on any diamond they're given: everyone the routine dresses (never a ruler) wears iron
  * in its place ({@link Regalia#lesser}).
