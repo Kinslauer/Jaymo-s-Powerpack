@@ -46,12 +46,16 @@ import com.jaymospowers.power.xenoform.XenoformState;
  * foot on the ground wherever its thigh is ({@link #groundKnee}), the shin leaning forward over the foot as in a real crouch
  * walk; the thighs come further forward, the steps are longer and slower, only the leg coming through lifts, and the upper body leans
  * forward over the knees ({@link #LOW_LEAN}).
+ * <p>(0.21.26) Andy: "the kneel we have on crouch right now needs a revamp". The back leg was one straight stick out
+ * behind and the body sat between the legs like a split; now it kneels as every kneel does ({@link KneelLegs}): the
+ * left thigh straight down to the knee on the ground and the shin flat behind, the right thigh level and the shin straight
+ * down to the planted foot, the hips one thigh's length down.
  */
 public final class CrouchPose {
 	/** Arms out, and down onto the knee or back up (ticks). */
 	static final float READY_IN = 8.0F, KNEEL_IN = 7.0F, GET_UP = 5.0F;
 	/** Moving: how much lower than vanilla's crouch (blocks). On the knee: how far below vanilla's crouch the body sits. */
-	static final float LOW = 0.08F, SINK = 0.3F, HIP = 0.75F;
+	static final float LOW = 0.08F, SINK = KneelLegs.SINK - 0.125F, HIP = 0.75F;
 	/** The arms out from the sides (radians), and a little forward. */
 	static final float ARMS_OUT = 0.55F, ARMS_FORWARD = -0.35F;
 	/** The sway with the stride: the body's twist and roll (radians at full walking speed), and how fast it goes against the stride. */
@@ -62,7 +66,8 @@ public final class CrouchPose {
 	 * On the knee: the front (right) thigh out level from the hip, the knee bent so the shin stands on the ground
 	 * (radians), and the back (left) leg trailing to the knee on the ground. Drawn while aiming and firing too.
 	 */
-	static final float FRONT_THIGH = -1.55F, FRONT_KNEE = 1.5F, BACK_LEG = 1.35F;
+	static final float FRONT_THIGH = KneelLegs.UP_THIGH, FRONT_KNEE = KneelLegs.UP_KNEE, BACK_LEG = KneelLegs.DOWN_THIGH,
+		BACK_KNEE = KneelLegs.DOWN_KNEE;
 	/**
 	 * The low crouch: both thighs this far forward (radians), and the body sunk this much more (blocks). (0.19.30) Thighs further forward;
 	 * the knees bend to reach the ground from there ({@link #groundKnee}).
@@ -301,7 +306,8 @@ public final class CrouchPose {
 		float lift = Mth.sin(c.pos() * STRIDE_BEAT) * LOW_LIFT * stride(c) * low;
 		// (0.19.30) each foot on the ground wherever its thigh is (or lifted, coming through)
 		float right = Mth.lerp(c.kneel(), groundKnee(-h.rightLeg.xRot) * c.low() + Math.max(0.0F, lift), FRONT_KNEE);
-		float left = groundKnee(-h.leftLeg.xRot) * low + Math.max(0.0F, -lift);
+		// (0.21.26) and on the knee, the left shin laid flat behind (KneelLegs)
+		float left = groundKnee(-h.leftLeg.xRot) * low + Math.max(0.0F, -lift) + BACK_KNEE * c.kneel();
 		if (right > 0.0F) {
 			KneeBend.bend(h.rightLeg, right);
 		}

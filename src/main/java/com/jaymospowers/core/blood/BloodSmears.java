@@ -31,8 +31,22 @@ public final class BloodSmears {
 	/** How wide a smear is (stain scale, a man's), from a downed body at full strength down to spent, and from a carcass. */
 	static final float DOWNED_SMEAR = 0.42F, SPENT_SMEAR = 0.24F, CARCASS_SMEAR = 0.3F;
 
+	/**
+	 * (0.21.26) Andy: "dragging and walking through puddles should smear more than the regular trails". A body dragged
+	 * through a pool soaks up to this much of it each step (stain size) and smears it out after, this much at most a
+	 * step, so its streak runs wide and dark out of the pool and thins as it goes.
+	 */
+	static final float DRAG_SOAK = 0.35F, DRAG_SPILL = 0.3F;
+
 	/** Where each body last smeared. */
 	private static final Map<Entity, Vec3> LAST = new WeakHashMap<>();
+	/** (0.21.26) The blood each body has picked up off pools and not yet smeared out, and its colour. */
+	private static final class Wet {
+		float amount;
+		int color;
+	}
+
+	private static final Map<Entity, Wet> WET = new WeakHashMap<>();
 
 	private BloodSmears() {
 	}
@@ -69,6 +83,7 @@ public final class BloodSmears {
 		}
 		if (server.getTickCount() % 200 == 0) {
 			LAST.keySet().removeIf(Entity::isRemoved);
+			WET.keySet().removeIf(Entity::isRemoved);
 		}
 	}
 
@@ -92,6 +107,30 @@ public final class BloodSmears {
 		LAST.put(body, now);
 		if (!nearGround(level, body)) {
 			return;
+		}
+		// (0.21.26) through a pool: soak it up, and smear it on wider
+		int[] poolColor = {color};
+		float soaked = BloodTrail.soak(level, now, body.getBbWidth() * 0.5 + 0.3, DRAG_SOAK, poolColor);
+		Wet wet = WET.get(body);
+		if (soaked > 0.0F) {
+			if (wet == null) {
+				wet = new Wet();
+				WET.put(body, wet);
+			}
+			wet.amount += soaked;
+			wet.color = poolColor[0];
+		}
+		if (wet != null) {
+			float spill = Math.min(wet.amount, DRAG_SPILL);
+			wet.amount -= spill;
+			if (spill > scale) {
+				// mostly the pool's blood now (someone else's, maybe)
+				color = wet.color;
+			}
+			scale += spill;
+			if (wet.amount <= 0.01F) {
+				WET.remove(body);
+			}
 		}
 		BloodTrail.smear(level, body, color, last, now, scale);
 	}

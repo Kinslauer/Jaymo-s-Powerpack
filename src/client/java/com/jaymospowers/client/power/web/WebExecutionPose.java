@@ -420,7 +420,9 @@ public final class WebExecutionPose {
 		Key key = run.key();
 		float hip = HIP * Math.max(state.scale, 0.01F);
 		// (after the body's turn, forward is -Z)
-		poseStack.translate(0.0F, -key.sink() * w, -(run.step() + key.lunge()) * w);
+		// (0.21.26) a kneel sinks one thigh's length (KneelLegs)
+		float sink = com.jaymospowers.client.KneelLegs.remap(key.sink(), key.rightLeg(), key.leftLeg()).sink();
+		poseStack.translate(0.0F, -sink * w, -(run.step() + key.lunge()) * w);
 		poseStack.translate(0.0F, hip, 0.0F);
 		poseStack.rotateDegrees(Axis.YP, key.twist() * w);
 		poseStack.rotateDegrees(Axis.XP, -key.pitch() * w);
@@ -439,6 +441,10 @@ public final class WebExecutionPose {
 		float[] was = WebFeral.snapshot(h);
 		pose(h, avatar, run.key());
 		WebFeral.blend(h, was, run.in());
+		// (0.21.26) a kneel's knees (KneelLegs)
+		com.jaymospowers.client.KneelLegs.Legs legs = com.jaymospowers.client.KneelLegs.remap(run.key().sink(), run.key().rightLeg(),
+			run.key().leftLeg());
+		com.jaymospowers.client.KneelLegs.want(avatar, legs.rightKnee() * run.in(), legs.leftKnee() * run.in());
 	}
 
 	/** The move outright: set from the render state alone, so applying it twice changes nothing. */
@@ -461,8 +467,10 @@ public final class WebExecutionPose {
 		h.leftArm.zRot = key.laz();
 		// the legs as the world sees them, so they stay planted under the bend
 		float bend = key.pitch() * Mth.DEG_TO_RAD;
-		h.rightLeg.xRot = key.rightLeg() - bend;
-		h.leftLeg.xRot = key.leftLeg() - bend;
+		// (0.21.26) a kneel's thighs as a body really kneels (KneelLegs)
+		com.jaymospowers.client.KneelLegs.Legs legs = com.jaymospowers.client.KneelLegs.remap(key.sink(), key.rightLeg(), key.leftLeg());
+		h.rightLeg.xRot = legs.right() - bend;
+		h.leftLeg.xRot = legs.left() - bend;
 		h.rightLeg.yRot = 0.08F;
 		h.leftLeg.yRot = -0.08F;
 		h.rightLeg.zRot = 0.0F;

@@ -72,6 +72,13 @@ public final class BloodTrail {
 	static final int PRINT_TICKS = 4, FRESH_FOR = 4200, PRINTS = 10;
 	static final float MIN_POOL = 0.3F, PRINT_SCALE = 0.26F;
 	static final double STRIDE = 0.8, PRINT_SIDE = 0.12, WALKERS_RANGE = 40.0;
+	/**
+	 * (0.21.26) Walking through a pool: how much of it each foot set in it carries off (stain size, each check; twice that
+	 * running), at least how fast it must be moving (blocks a tick), the most a step smears out of what it carries, and a
+	 * skid's size next to a print's.
+	 */
+	static final float WALK_SOAK = 0.05F, STEP_SPILL = 0.18F, SKID = 1.4F;
+	static final double WALK_MOVING = 0.03;
 
 	/** (0.17.182) Mobs that follow blood trails to whoever left them. */
 	public static final TagKey<EntityType<?>> TRACKERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("blood_trackers"));
@@ -140,6 +147,8 @@ public final class BloodTrail {
 	private static final class Feet {
 		int left;
 		int color;
+		/** (0.21.26) Blood picked up off a pool walked through, smeared out over the next steps before the prints. */
+		float wet;
 		Vec3 last;
 		double carry;
 		boolean right;
@@ -415,6 +424,12 @@ public final class BloodTrail {
 			}
 			feet.left = PRINTS;
 			feet.color = pool.color;
+			// (0.21.26) a foot through it splashes it on: blood carried off to skid out over the next steps
+			Vec3 v = body.getDeltaMovement();
+			if (v.x * v.x + v.z * v.z > WALK_MOVING * WALK_MOVING) {
+				float soak = WALK_SOAK * (body.isSprinting() ? 2.0F : 1.0F);
+				feet.wet += soak(level, at, 0.75 * pool.scale + 0.15, soak, null);
+			}
 		} else if (feet != null && feet.left <= 0) {
 			FEET.remove(body);
 		}
@@ -449,6 +464,13 @@ public final class BloodTrail {
 			int shape = BloodParticles.Puddle.PRINT + dir + (feet.right ? BloodParticles.Puddle.PRINT_RIGHT : 0);
 			// fainter (smaller) as the blood wears off the soles
 			float scale = size * (0.65F + 0.35F * feet.left / (float) PRINTS);
+			if (feet.wet > 0.02F) {
+				// (0.21.26) still dripping from the pool: a skid along the way it went, wider for what it carries
+				float spill = Math.min(feet.wet, STEP_SPILL);
+				feet.wet -= spill;
+				shape = Math.abs(ux) >= Math.abs(uz) ? BloodParticles.Puddle.SMEAR_X : BloodParticles.Puddle.SMEAR_Z;
+				scale = size * SKID + spill;
+			}
 			lay(level, by, feet.color, x, at.y + 0.5, z, scale, 0, shape);
 			feet.left--;
 			feet.right = !feet.right;
@@ -571,6 +593,42 @@ public final class BloodTrail {
 			total += take;
 			if (drawn != null) {
 				drawn.accept(mark.position());
+			}
+		}
+		return total;
+	}
+
+	/**
+	 * (0.21.26) Andy: "dragging and walking through puddles should smear more than the regular trails". Takes up to
+	 * {@code most} (stain size) out of the round pools within {@code range} of {@code at} (anyone's, the nearest first),
+	 * the blood a body dragged or a foot set through them carries off to smear further on. A pool taken down past
+	 * {@link #DRAWN_DRY} dries away. {@code color} (if given) hears the colour of the last pool it took from. Returns how
+	 * much was taken: blood moved, never made, so a body's blood stays finite.
+	 */
+	public static float soak(ServerLevel level, Vec3 at, double range, float most, int @Nullable [] color) {
+		if (most <= 0.0F) {
+			return 0.0F;
+		}
+		List<Mark> found = near(level, at, range, mark -> mark.shape == BloodParticles.Puddle.ROUND && mark.scale > 0.0F
+			&& Math.abs(mark.y - at.y) < 0.6);
+		found.sort(java.util.Comparator.comparingDouble(mark -> at.distanceToSqr(mark.x, mark.y, mark.z)));
+		long now = level.getGameTime();
+		float total = 0.0F;
+		for (Mark mark : found) {
+			float take = Math.min(mark.scale, most - total);
+			if (take <= 0.0F) {
+				break;
+			}
+			mark.scale -= take;
+			if (mark.scale < DRAWN_DRY) {
+				take += mark.scale;
+				mark.scale = 0.0F;
+				mark.expires = Math.min(mark.expires, now + DRAWN_GONE);
+			}
+			mark.version++;
+			total += take;
+			if (color != null) {
+				color[0] = mark.color;
 			}
 		}
 		return total;

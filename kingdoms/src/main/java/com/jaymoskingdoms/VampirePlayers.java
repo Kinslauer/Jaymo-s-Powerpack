@@ -126,7 +126,10 @@ public final class VampirePlayers {
 			}
 			return InteractionResult.PASS;
 		});
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST_DRINK.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			LAST_DRINK.clear();
+			LAPPED.clear();
+		});
 	}
 
 	/**
@@ -136,11 +139,22 @@ public final class VampirePlayers {
 	 * a bite ({@link #LAP_FOOD}, {@link #LAP_HEAL} for each unit of stain, a man's whole pool about three), but it counts as
 	 * fed and eases the fever. What's lapped up is gone: a body's blood runs out. True if there was any to take.
 	 */
+	/** (0.7.628) When each vampire last lapped from the ground (game time), so the pose holds between gulps but not after a bite. */
+	private static final Map<UUID, Long> LAPPED = new HashMap<>();
+
+	private static boolean lapping(ServerPlayer player, long now) {
+		Long at = LAPPED.get(player.getUUID());
+		return at != null && now - at < DRINK_EVERY;
+	}
+
 	static boolean lap(ServerLevel level, ServerPlayer player, net.minecraft.world.phys.Vec3 at) {
 		long now = level.getGameTime();
 		Long last = LAST_DRINK.get(player.getUUID());
 		if (last != null && now - last < DRINK_EVERY) {
 			// (between gulps (or a bite): still drinking, so a held button opens nothing under them)
+			if (lapping(player, now)) {
+				PowersCompat.drinkAtGround(player);
+			}
 			return true;
 		}
 		float drawn = PowersCompat.drawStains(level, at, LAP_RANGE, LAP_MOST, LAP_MOST, from -> Hemomancy.rise(level, from, player.getEyePosition()));
@@ -148,6 +162,9 @@ public final class VampirePlayers {
 			return false;
 		}
 		LAST_DRINK.put(player.getUUID(), now);
+		LAPPED.put(player.getUUID(), now);
+		// (0.7.628) Andy: "is this animated?": down on hands and knees, mouth to the ground, bobbing with each gulp
+		PowersCompat.drinkAtGround(player);
 		player.heal(LAP_HEAL * drawn);
 		player.getFoodData().eat(Math.max(1, Math.round(LAP_FOOD * drawn)), 0.4F);
 		fedFromBottle(player);

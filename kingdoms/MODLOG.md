@@ -10013,3 +10013,5 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   a pool of blood on the ground with an empty hand laps it up (`VampirePlayers.lap`): up to 0.5 of stain a gulp, once a
   second, 3 health and 4 food per unit (a man's whole pool is about 3), counts as fed and eases the blood fever. Blood
   Sorcerers already draw the same stains (`Hemomancy`), so both now feed on bodies that run dry.
+- Andy: "is this animated?" Lapping now drops the vampire onto hands and knees, mouth to the pool, bobbing with each
+  gulp (`PowersCompat.drinkAtGround`, Powers' TendPose), held while the button is.
