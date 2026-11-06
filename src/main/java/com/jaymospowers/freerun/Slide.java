@@ -34,11 +34,13 @@ import net.minecraft.world.level.block.state.BlockState;
  * the back slide, holding or scrolling will keep you in it, on your back". A plain sprint slides too now (feet first, on the
  * back, as before); out of a fast run it's a head-first dive onto the belly ({@link #BELLY}). Held into prone, each lies the
  * way it slid ({@code Crawl.SUPINE}).
+ * <p>(0.21.36) Andy: "sprint slide should be activated after 1.5s of holding, it still activates too easy". The hold is
+ * {@link #HOLD_TICKS} = 30 ticks, and through it you keep running at full pace ({@code FreerunClient.slideWindup}).
  */
 public final class Slide {
 	// ===== feel: the knobs to tweak after playtesting ===============================================================
-	/** Ticks Sneak must be held (in a fast run) before the slide begins. */
-	public static final int HOLD_TICKS = 4;
+	/** Ticks Sneak must be held (in a run) before the slide begins. (0.21.36) 30 (1.5 s); you keep running while it's held. */
+	public static final int HOLD_TICKS = 30;
 	/** How long a slide lasts (ticks). */
 	public static final int TICKS = 15;
 	/** The slide's speed (blocks/tick) at the start, as a share of the run speed (at least {@link #MIN_SPEED}, at most {@link #MAX_SPEED}), and the friction each tick. */
@@ -52,7 +54,7 @@ public final class Slide {
 	/** Hunger the slide costs. */
 	public static final float EXHAUSTION = 0.3F;
 	/** (0.18.85) A plain sprint this recent (ticks) still counts for a slide (Sneak stops the sprint while it's held). */
-	public static final int SPRINT_GRACE_TICKS = HOLD_TICKS + 4;
+	public static final int SPRINT_GRACE_TICKS = 8;
 	/** Server: a slide not reported over ends this long past its length (ticks). */
 	static final int SLACK_TICKS = 10;
 	// ================================================================================================================
@@ -109,7 +111,8 @@ public final class Slide {
 		Long sprinted = SPRINTED.get(player.getUUID());
 		boolean running = FastRun.active(player) || player.isSprinting()
 			|| sprinted != null && player.level().getGameTime() - sprinted <= SPRINT_GRACE_TICKS;
-		return running && player.onGround() && player.isShiftKeyDown() && Freerun.canMove(player) && !sliding(player)
+		// (0.21.36) no Sneak check: the client keeps the Sneak bit off through the 1.5 s hold so the run goes on
+		return running && player.onGround() && Freerun.canMove(player) && !sliding(player)
 			&& !justEnded(player, COOLDOWN - 1);
 	}
 

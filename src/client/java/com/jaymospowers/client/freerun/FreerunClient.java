@@ -489,8 +489,8 @@ public final class FreerunClient {
 	 * a slide. Out of a fast run it's a head-first dive onto the belly, out of a plain sprint feet first on the back.
 	 */
 	private static boolean trySlide(LocalPlayer player, Input input) {
-		boolean running = FastRun.active(player) || player.isSprinting() || sinceSprint <= Slide.SPRINT_GRACE_TICKS;
-		if (!(player.onGround() && running && input.shift() && !input.jump() && Freerun.canMove(player, Freerun.SLIDE))) {
+		// (0.21.36) the Sneak key itself: while the hold builds, the movement doesn't see it (slideWindup)
+		if (!slideHoldable(player, Minecraft.getInstance().options.keyShift.isDown(), input.jump())) {
 			sneakTicks = 0;
 			return false;
 		}
@@ -505,6 +505,28 @@ public final class FreerunClient {
 		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
 		start(player, Freerun.SLIDE, null, BlockPos.ZERO);
 		return true;
+	}
+
+	/** (0.21.36) Whether Sneak held now counts toward a slide: running on the ground, no move under way, free to slide. */
+	private static boolean slideHoldable(LocalPlayer player, boolean sneak, boolean jump) {
+		boolean running = FastRun.active(player) || player.isSprinting() || sinceSprint <= Slide.SPRINT_GRACE_TICKS;
+		return sneak && !jump && player.onGround() && running && Freerun.canMove(player, Freerun.SLIDE);
+	}
+
+	/**
+	 * (0.21.36) Andy: "sprint slide should be activated after 1.5s of holding, it still activates too easy". While Sneak is
+	 * held in a run, short of {@link Slide#HOLD_TICKS}, the Sneak bit is kept off the movement ({@code StanceInputMixin}),
+	 * so you keep running (no slowing to a sneak, the sprint and the fast run kept) and a tap or a short hold does nothing;
+	 * held the full 1.5 s, you slide. Let go early and you just run on.
+	 */
+	public static boolean slideWindup() {
+		Minecraft minecraft = Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		if (player == null || kind != Freerun.NONE || cooldown > 0 || player.isSpectator() || LedgeClient.active()
+			|| com.jaymospowers.client.power.web.WebPowerClient.parkourBusy()) {
+			return false;
+		}
+		return sneakTicks < Slide.HOLD_TICKS && slideHoldable(player, minecraft.options.keyShift.isDown(), minecraft.options.keyJump.isDown());
 	}
 
 	private static void tickSlide(LocalPlayer player, boolean jumpPressed) {
