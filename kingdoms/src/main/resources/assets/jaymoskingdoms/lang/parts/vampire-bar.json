@@ -5,5 +5,9 @@
   "spell.jaymoskingdoms.night_pound.description": "In the air: down like a stone. Everyone near where you land is thrown back and hurt, and every person near shows through walls for a while. (Also P.)",
   "spell.jaymoskingdoms.night_gaze.name": "Blood Gaze",
   "spell.jaymoskingdoms.night_gaze.description": "A red laser out of both eyes for a second, exactly where you look: a Frost-born's beam in blood, hurting what it touches and sometimes taking or breaking the part it lands on.",
-  "gui.jaymoskingdoms.story.hint.122": "A vampire's Blood Dash, Groundpound and Blood Gaze, a second's red laser from the eyes, sit on the skill bar beside the hotbar."
+  "gui.jaymoskingdoms.story.hint.122": "A vampire's Blood Dash, Groundpound, Blood Gaze (a second's red laser from the eyes) and Feed sit on the skill bar beside the hotbar.",
+  "spell.jaymoskingdoms.night_feed.name": "Feed",
+  "spell.jaymoskingdoms.night_feed.description": "Empty-handed, at the prey in front of you (the one in your sights first): take them by the throat and drink fast as you walk; Feed again throws them, through anything softer than stone if you're well fed. A sleeper gets a quiet first bite. Downed ones too.",
+  "message.jaymoskingdoms.feed.none": "No one close enough to feed on.",
+  "message.jaymoskingdoms.feed.hand": "Empty your hand to feed."
 }

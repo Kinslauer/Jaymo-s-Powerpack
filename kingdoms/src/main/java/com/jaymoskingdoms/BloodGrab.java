@@ -48,12 +48,17 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Prey: whoever the bite takes that a hand can hold, grown villagers and folk ({@link Vampires#person}) and the Nether's
  * piglins and Hornkin ({@link Vampires#netherPrey}); never a player.
+ * <p>
+ * (0.7.634) Andy: "put feed on the hotbar too, i cant get it to activate reliably. the current right click ability can
+ * move". Feeding is the skill bar's Feed now ({@link #feed}), not right-click: on prey a hand can hold it's the grab, on
+ * a sleeper the sleeper's bite, on anyone else the bite takes the plain bite; Feed again while holding throws them. It
+ * finds its prey generously: the one in the crosshair, else the nearest in front within {@link #REACH} ({@link #FEED_CONE}).
  */
 public final class BloodGrab {
-	/** The second tap must come within this many ticks of the first (checked on the client, which sends {@link Start}). */
-	public static final int DOUBLE_TAP_TICKS = 8;
 	/** A grab reaches this far (blocks, eyes to the prey's box). */
 	static final double REACH = 3.0;
+	/** (0.7.634) Feed's aim: off the crosshair, the nearest prey within this angle of the look (cosine: about 35 degrees). */
+	static final double FEED_CONE = 0.82;
 	/** Held this far in front (blocks, from the vampire's middle), the throat at this share of the vampire's height. */
 	static final double HOLD_REACH = 0.85, HOLD_HAND = 0.78;
 	/** Torn away past this (blocks): the hold ends. */
@@ -178,6 +183,72 @@ public final class BloodGrab {
 		place(player, target);
 		// the first gulp straight away
 		VampirePlayers.drinkNow(level, player, target, Vampires.person(target));
+	}
+
+	/**
+	 * (0.7.634) The skill bar's Feed: holding someone, the throw; else a grab on prey a hand can hold, the bite on a
+	 * sleeper or anyone else it takes. Whether anything happened (nothing: the bar's cooldown doesn't start).
+	 */
+	public static boolean feed(ServerPlayer player) {
+		if (holding(player)) {
+			release(player, true);
+			return true;
+		}
+		if (!Vampires.isVampire(player) || !player.isAlive() || Downed.isDowned(player) || !(player.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		LivingEntity target = feedTarget(player);
+		if (target == null) {
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.feed.none")
+				.withStyle(net.minecraft.ChatFormatting.DARK_RED));
+			return false;
+		}
+		if (!player.getMainHandItem().isEmpty()) {
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.feed.hand")
+				.withStyle(net.minecraft.ChatFormatting.DARK_RED));
+			return false;
+		}
+		if (prey(target) && !isHeld(target)) {
+			start(player, target.getId());
+			return holding(player);
+		}
+		if (SleepingPrey.prey(target)) {
+			SleepingPrey.bite(level, player, (ServerPlayer)target);
+			return true;
+		}
+		VampirePlayers.drink(level, player, target, false, Vampires.person(target));
+		return true;
+	}
+
+	/** Who Feed would take: any it can, the one in the crosshair first, else the nearest within {@link #FEED_CONE} of the look. */
+	static boolean feedable(ServerPlayer player, LivingEntity e) {
+		return e != player && e.isAlive() && !e.isSpectator() && (prey(e) || SleepingPrey.prey(e) || Vampires.person(e) || Vampires.netherPrey(e));
+	}
+
+	static @Nullable LivingEntity feedTarget(ServerPlayer player) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 far = eye.add(look.scale(REACH + 1.0));
+		AABB around = player.getBoundingBox().expandTowards(look.scale(REACH + 1.0)).inflate(1.5);
+		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, far, around,
+			e -> e instanceof LivingEntity l && feedable(player, l), (REACH + 1.0) * (REACH + 1.0));
+		if (hit != null && hit.getEntity() instanceof LivingEntity l && l.getBoundingBox().distanceToSqr(eye) <= REACH * REACH && player.hasLineOfSight(l)) {
+			return l;
+		}
+		LivingEntity best = null;
+		double bestD = Double.MAX_VALUE;
+		for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH + 1.0), e -> feedable(player, e))) {
+			Vec3 to = e.getBoundingBox().getCenter().subtract(eye);
+			double d = e.getBoundingBox().distanceToSqr(eye);
+			if (d > REACH * REACH || to.lengthSqr() < 1.0E-6 || to.normalize().dot(look) < FEED_CONE || !player.hasLineOfSight(e)) {
+				continue;
+			}
+			if (d < bestD) {
+				bestD = d;
+				best = e;
+			}
+		}
+		return best;
 	}
 
 	/** Whether some vampire holds {@code e} now. */
