@@ -1258,7 +1258,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   through Wounds, so it shows on the H screen), and again every 1.5 s of keeping at it. Creative is spared.
 - **Ore crushing** (`tinkering/ore/HammerRecipe`, type `jaymospowers:hammer_crafting`): raw iron, copper, gold or silver
   + any hammer (`#jaymospowers:hammers`) in a crafting grid = 1 crushed ore; the hammer stays, worn by 1 (a Tinkering
-  hammer stops at broken).
+  hammer stops at broken). An ore block mined with a hammer drops crushed ore in place of its raw ore (Andy).
 - **Ore washing** (`tinkering/ore/OreWashing`): crushed ore used on a water cauldron washes up to 8 for one level of
   water; thrown into one it washes after 2 s; left in running (not still) water it washes after 10 s, free. A cauldron
   holding a brew is left alone. Each washed ore has a 15% chance of a byproduct nugget (iron: copper, copper: gold,

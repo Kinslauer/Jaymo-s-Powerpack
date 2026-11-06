@@ -10,6 +10,10 @@ import java.util.WeakHashMap;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+import com.jaymospowers.power.zfighter.pod.PodParts;
+import com.jaymospowers.tinkering.ToolStats;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -39,7 +43,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>Crushing:</b> raw iron, copper, gold or silver with a hammer ({@code #jaymospowers:hammers}: the smithing
  * hammers, the Tinkering sledge and vein hammers, a mace, the Aether hammers) in a crafting grid gives one crushed ore
- * ({@link HammerRecipe}; the hammer wears by {@link #HAMMER_WEAR}).</li>
+ * ({@link HammerRecipe}; the hammer wears by {@link #HAMMER_WEAR}). Andy: "smashing the block in world causes this too":
+ * an ore block mined with a hammer drops crushed ore where it would drop raw ore, as many.</li>
  * <li><b>Washing:</b> crushed ore used on a water cauldron washes up to {@link #PER_LEVEL} of the stack for one level of
  * water; crushed ore thrown in one washes after {@link #CAULDRON_SOAK} ticks (a level per {@link #PER_LEVEL}); crushed
  * ore left in running water (not still: a source block won't do) washes after {@link #RIVER_SOAK} ticks, for nothing.
@@ -125,6 +130,22 @@ public final class OreWashing {
 			return InteractionResult.SUCCESS;
 		});
 		ServerTickEvents.END_LEVEL_TICK.register(OreWashing::rivers);
+		// an ore block smashed with a hammer: crushed ore in place of its raw ore
+		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
+			if (context.getOptional(LootContextParams.BLOCK_STATE) == null
+				|| !(context.getOptional(LootContextParams.TOOL) instanceof ItemStack tool) || !tool.is(PodParts.HAMMERS) || ToolStats.isBroken(tool)) {
+				return;
+			}
+			for (int i = 0; i < drops.size(); i++) {
+				ItemStack drop = drops.get(i);
+				for (Ore ore : Ore.values()) {
+					if (ore.crushed != null && drop.is(ore.raw.get())) {
+						drops.set(i, new ItemStack(ore.crushed, drop.getCount()));
+						break;
+					}
+				}
+			}
+		});
 	}
 
 	private static Item item(String id) {
