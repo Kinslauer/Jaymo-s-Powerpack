@@ -74,6 +74,8 @@ public final class Dragons {
 	/** (0.7.522) Atroxiia, the frost wyrm of the snowfields and cold coasts (tag {@code has_atroxiia_dragon}): its body, weight, herd. */
 	static final float ATROXIIA_WIDTH = 3.0F, ATROXIIA_HEIGHT = 4.3F;
 	static final int ATROXIIA_WEIGHT = 1, ATROXIIA_MIN = 1, ATROXIIA_MAX = 1;
+	/** (0.7.613) Andy: "it needs to be extremely rare": only one natural spawn try in this many that would otherwise pass goes ahead. */
+	static final int ATROXIIA_RARITY = 40;
 	public static final TagKey<Biome> HAS_ATROXIIA = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_atroxiia_dragon"));
 	/** (0.7.536) Whether Atroxiia is in the game: it was off until its walk was redone (it glided along with no steps); (0.7.612) back on. */
 	public static final boolean ATROXIIA_ON = true;
@@ -155,7 +157,9 @@ public final class Dragons {
 		// (any ground they can stand on: snow and sand aren't grass)
 		ATROXIIA_DRAGON = dragon("atroxiia", AtroxiiaDragon::new, ATROXIIA_WIDTH, ATROXIIA_HEIGHT, false, AtroxiiaDragon.createAttributes());
 		ATROXIIA_DRAGON_SPAWN_EGG = egg(ATROXIIA_DRAGON);
-		SpawnPlacements.register(ATROXIIA_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
+		SpawnPlacements.register(ATROXIIA_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+			(type, level, reason, pos, random) -> Mob.checkMobSpawnRules(type, level, reason, pos, random)
+				&& (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION || random.nextInt(ATROXIIA_RARITY) == 0));
 		// (0.7.536) Andy: Atroxiia is pulled until it has a proper walk (ATROXIIA_ON): no biome spawns, no op command, and
 		// any already in a world are cleared away (AtroxiiaDragon.tick). Its type, model and art stay for when it's fixed.
 		if (ATROXIIA_ON) {
