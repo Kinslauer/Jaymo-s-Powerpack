@@ -91,9 +91,9 @@ public final class DragonsClient {
 			.createBodyLayer().bakeRoot()), ZEPHYRUS_SHADOW));
 		// (0.7.329) both eanncrod's Kintsugi wyvern: Eurus small enough to ride, Aeolus vast
 		EntityRenderers.register(Dragons.EURUS_DRAGON, c -> new WindDragonRenderer<>(c, "eurus", new KintsugiDragonModel(), EURUS_SHADOW, EURUS_SCALE,
-			KINTSUGI_REACH));
+			KINTSUGI_REACH).ownDeath());
 		EntityRenderers.register(Dragons.AEOLUS_DRAGON, c -> new WindDragonRenderer<>(c, "aeolus", new KintsugiDragonModel(), AEOLUS_SHADOW, AEOLUS_SCALE,
-			KINTSUGI_REACH));
+			KINTSUGI_REACH).ownDeath());
 		// (0.7.522) our own model of Saint's Dragons' Stegonaut (its art isn't used)
 		EntityRenderers.register(Dragons.STEGONAUT_DRAGON, c -> new WindDragonRenderer<>(c, "stegonaut", new StegonautDragonModel(StegonautDragonModel
 			.createBodyLayer().bakeRoot()), STEGONAUT_SHADOW, STEGONAUT_SCALE, STEGONAUT_REACH));
@@ -102,8 +102,8 @@ public final class DragonsClient {
 		EntityRenderers.register(Dragons.VARASUCHUS_DRAGON, c -> new WindDragonRenderer<>(c, "varasuchus", new VarasuchusDragonModel(VarasuchusDragonModel
 			.createBodyLayer().bakeRoot()), VARASUCHUS_SHADOW, VARASUCHUS_SCALE, VARASUCHUS_REACH));
 		// (0.7.522) Ignivorus: the Kintsugi wyvern again, cooled from lava
-		EntityRenderers.register(Dragons.IGNIVORUS_DRAGON, c -> new WindDragonRenderer<>(c, "ignivorus", new KintsugiDragonModel(), IGNIVORUS_SHADOW,
-			IGNIVORUS_SCALE, KINTSUGI_REACH));
+		EntityRenderers.register(Dragons.IGNIVORUS_DRAGON, c -> new WindDragonRenderer<>(c, "ignivorus", new KintsugiDragonModel(true), IGNIVORUS_SHADOW,
+			IGNIVORUS_SCALE, KINTSUGI_REACH).ownDeath());
 		EntityRenderers.register(Dragons.AETHERION_DRAGON, c -> new WindDragonRenderer<>(c, "aetherion", new AetherionDragonModel(AetherionDragonModel
 			.createBodyLayer().bakeRoot()), AETHERION_SHADOW, AETHERION_SCALE, AETHERION_REACH));
 		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,

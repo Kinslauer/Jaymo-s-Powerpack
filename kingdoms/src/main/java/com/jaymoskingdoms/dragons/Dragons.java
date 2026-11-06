@@ -75,8 +75,8 @@ public final class Dragons {
 	static final float ATROXIIA_WIDTH = 3.0F, ATROXIIA_HEIGHT = 4.3F;
 	static final int ATROXIIA_WEIGHT = 1, ATROXIIA_MIN = 1, ATROXIIA_MAX = 1;
 	public static final TagKey<Biome> HAS_ATROXIIA = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_atroxiia_dragon"));
-	/** (0.7.536) Whether Atroxiia is in the game: off until its walk is redone (it glided along with no steps). */
-	public static final boolean ATROXIIA_ON = false;
+	/** (0.7.536) Whether Atroxiia is in the game: it was off until its walk was redone (it glided along with no steps); (0.7.612) back on. */
+	public static final boolean ATROXIIA_ON = true;
 	/** (0.7.522) Varasuchus, the crocodile dragon of the beaches and swamps (tag {@code has_varasuchus_dragon}): its body, weight, herd. */
 	static final float VARASUCHUS_WIDTH = 4.0F, VARASUCHUS_HEIGHT = 3.3F;
 	static final int VARASUCHUS_WEIGHT = 1, VARASUCHUS_MIN = 1, VARASUCHUS_MAX = 1;

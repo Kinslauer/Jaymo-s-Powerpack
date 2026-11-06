@@ -28,11 +28,24 @@ import net.minecraft.util.Mth;
  * overhead and brings it down, the swipe rakes a hand across, the precise strike jabs with both hands in turn,
  * Gungnir arches the tail up over its back and drives the spear forward, the sweep swings the tail round, and the
  * Helheim quake rears the chest up twice and brings both arms down with the jaw wide.
+ * <p>
+ * (0.7.612, docs/SaintsDragons-Animation-Spec.md; Andy: "atroxiia has no walk animation") A walk you can see: it hauls
+ * itself along on its arms in turn like a crutching seal, each hand lifted high and planted ahead, the chest heaving up
+ * over the planted arm and rolling toward it, while the serpent body throws an S-wave back down its length in step with
+ * the ground covered (so the curves stay put as it slides through them). At a run both arms reach and pull together in
+ * bounds. Also: the plain bite (a lunge, jaws wide then shut), the tail lash (a flick to one side), a flinch at a blow,
+ * its death (arms giving way, head and tail slack), and idle: now and then a taunt (chest up, arms spread, jaw wide), a
+ * head-low sniff, or a grumble with the head tilted; sitting it dozes, head down on its arms and the tail curled round;
+ * floating still, its arms scull slowly.
  */
 final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 	/** How low its chest sinks crashed and sitting (model pixels). */
 	static final float CRASH_DROP = 20.0F, SIT_DROP = 8.0F;
 	static final int NECK = 3, TAIL = 11;
+	/** (0.7.612) The walk: how strongly a slow crawl shows, and the stride (radians of gait per walk distance). */
+	static final float WALK_GAIN = 2.2F, STRIDE = 0.42F;
+	/** (0.7.612) The serpent wave: radians of lag per segment, and its sway at the body's root and at the tip. */
+	static final float WAVE_LAG = 0.75F, WAVE_ROOT = 0.1F, WAVE_TIP = 0.32F;
 
 	private final ModelPart body, head, jaw, braid;
 	private final ModelPart[] neck = new ModelPart[NECK], tail = new ModelPart[TAIL];
@@ -195,10 +208,13 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 	public void setupAnim(WindDragonRenderer.State s) {
 		super.setupAnim(s);
 		float t = s.ageInTicks;
+		float dead = ease(s.deathTime / 20.0F);
 		float crash = ease(s.crash), swim = ease(s.swim) * (1.0F - crash);
 		float sit = ease(s.sit) * (1.0F - crash) * (1.0F - swim);
-		float walk = Math.min(s.walkAnimationSpeed, 1.0F) * (1.0F - crash) * (1.0F - sit) * (1.0F - swim);
-		float step = s.walkAnimationPos * 0.45F;
+		// (0.7.612) the walk shows at full from a slow crawl up (a heavy beast's walk speed reads low)
+		float walk = Math.min(s.walkAnimationSpeed * WALK_GAIN, 1.0F) * (1.0F - crash) * (1.0F - sit) * (1.0F - swim) * (1.0F - dead);
+		float run = ease((s.walkAnimationSpeed - 0.55F) / 0.35F) * walk;
+		float step = s.walkAnimationPos * STRIDE;
 		float headYaw = Mth.clamp(s.yRot, -60.0F, 60.0F) * Mth.DEG_TO_RAD;
 		float headPitch = Mth.clamp(s.xRot, -35.0F, 35.0F) * Mth.DEG_TO_RAD;
 		float x = AtroxiiaDragon.actionShare(s.action, s.actionAge);
@@ -221,25 +237,53 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 		float rear = a == AtroxiiaDragon.QUAKE_MOVE ? rise(x, 0.0F, 0.4F) * (1.0F - rise(x, 0.4F, 0.46F))
 			+ rise(x, 0.5F, 0.68F) * (1.0F - rise(x, 0.68F, 0.74F)) : 0.0F;
 		float roar = a == AtroxiiaDragon.QUAKE_MOVE ? rise(x, 0.0F, 0.15F) * (1.0F - rise(x, 0.8F, 1.0F)) : 0.0F;
-
+		// (0.7.612) the bite: neck drawn back with jaws wide (to 0.35), then lunged and snapped shut
+		float biteBack = a == AtroxiiaDragon.BITE_MOVE ? rise(x, 0.0F, 0.35F) * (1.0F - rise(x, 0.35F, 0.5F)) : 0.0F;
+		float biteIn = a == AtroxiiaDragon.BITE_MOVE ? bell(x, 0.35F, 1.0F) : 0.0F;
+		// (0.7.612) the tail lash: a flick to its right, rolling down the tail
+		float lashing = a == AtroxiiaDragon.LASH_MOVE ? 1.0F : 0.0F;
+		// (0.7.612) a blow: rocked back and aside, jaw open
+		float flinch = s.hurt <= 0.0F ? 0.0F : bell(1.0F - s.hurt, 0.0F, 1.0F) * (1.0F - dead);
+		// (0.7.612) idle, still and doing nothing: every 320 ticks a taunt, a sniff or a grumble
+		float idle = (1.0F - Math.min(s.walkAnimationSpeed * 4.0F, 1.0F)) * (1.0F - sit) * (1.0F - crash) * (1.0F - swim) * (1.0F - dead)
+			* (a == AtroxiiaDragon.NONE ? 1.0F : 0.0F);
+		float cycle = (t + 120.0F) / 320.0F;
+		float into = (cycle - Mth.floor(cycle)) * 320.0F;
+		int kind = Math.floorMod(Mth.floor(cycle), 3);
+		float fidget = idle * bell(into, 0.0F, kind == 0 ? 70.0F : kind == 1 ? 80.0F : 45.0F);
+		float taunt = kind == 0 ? fidget : 0.0F;
+		float sniff = kind == 1 ? fidget : 0.0F;
+		float sniffTurn = sniff * Mth.sin(into * Mth.PI / 40.0F);
+		float grumble = kind == 2 ? fidget : 0.0F;
+		// (0.7.612) sitting it dozes, head laid down and the tail curled round
+		float doze = sit * sit;
 		// the chest: high on the arms, rolling with each step, sunk crashed, lower sitting, reared for the quake
-		float drop = crash * CRASH_DROP + sit * SIT_DROP + swim * 6.0F - rear * 6.0F + slamDown * 1.5F + thrust * 1.5F;
-		this.body.y = this.bodyY + drop + Math.abs(Mth.sin(step)) * 0.8F * walk + Mth.sin(t * 0.07F) * 0.25F;
-		this.body.xRot = -rear * 0.45F - slamUp * 0.12F + slamDown * 0.08F + thrust * 0.06F + swim * 0.15F;
-		this.body.zRot = Mth.sin(step) * 0.06F * walk;
-		this.body.yRot = Mth.sin(step) * 0.07F * walk + Mth.sin(t * 0.12F) * 0.06F * swim - swipeAcross * swipe * 0.15F;
+		// (0.7.612) walking it heaves up over each planted arm (twice a stride) and rolls toward it; running it bounds
+		float heave = (0.5F - 0.5F * Mth.cos(step * 2.0F)) * (1.0F - run) + (0.5F - 0.5F * Mth.cos(step)) * run;
+		float drop = crash * CRASH_DROP + sit * SIT_DROP + swim * 6.0F - rear * 6.0F + slamDown * 1.5F + thrust * 1.5F + dead * 14.0F
+			- taunt * 4.0F + biteIn * 1.0F;
+		this.body.y = this.bodyY + drop - heave * 2.6F * walk + Mth.sin(t * 0.07F) * 0.25F;
+		this.body.xRot = -rear * 0.45F - slamUp * 0.12F + slamDown * 0.08F + thrust * 0.06F + swim * 0.15F + (heave - 0.5F) * 0.16F * run
+			- taunt * 0.3F + biteIn * 0.06F - flinch * 0.12F;
+		this.body.zRot = Mth.sin(step) * 0.13F * walk * (1.0F - run) + flinch * 0.12F + dead * 0.2F;
+		this.body.yRot = Mth.sin(step) * 0.14F * walk * (1.0F - run) + Mth.sin(t * 0.12F) * 0.06F * swim - swipeAcross * swipe * 0.15F;
 
 		// the neck: each segment a beat behind the one before
-		float neckDown = crash * 1.0F + swim * 0.6F - roar * 0.25F + slamDown * 0.25F + thrust * 0.2F;
+		float neckDown = crash * 1.0F + swim * 0.6F - roar * 0.25F + slamDown * 0.25F + thrust * 0.2F - biteBack * 0.45F + biteIn * 0.5F
+			- taunt * 0.3F + sniff * 0.9F - flinch * 0.35F + doze * 0.9F + dead * 1.2F;
 		for (int i = 0; i < NECK; i++) {
 			float share = (NECK - i) / 6.0F;
 			this.neck[i].xRot = this.neckRest[i] + neckDown * share - this.body.xRot * (i == 0 ? 0.6F : 0.0F)
 				+ Mth.sin(step * 2.0F - i * 0.5F) * 0.03F * walk + Mth.sin(t * 0.05F - i * 0.45F) * 0.02F;
-			this.neck[i].yRot = headYaw * 0.2F - this.body.yRot * (i == 0 ? 0.6F : 0.0F) - Mth.sin(step - i * 0.6F) * 0.04F * walk;
+			// (the head held steady as the body rolls under it)
+			this.neck[i].yRot = headYaw * 0.2F * (1.0F - fidget) * (1.0F - dead) - this.body.yRot * (i == 0 ? 0.8F : 0.0F)
+				- Mth.sin(step - i * 0.6F) * 0.04F * walk + sniffTurn * 0.25F + doze * (i == 2 ? 0.5F : 0.0F);
 		}
-		this.head.xRot = this.headRest + headPitch * 0.5F - neckDown * 0.4F - roar * 0.3F;
-		this.head.yRot = headYaw * 0.3F;
-		this.jaw.xRot = 0.04F + roar * 0.8F + (0.5F - 0.5F * Mth.cos(t * 0.04F)) * 0.04F + swipe * 0.25F + thrust * 0.3F + s.breath * 0.4F;
+		this.head.xRot = this.headRest + headPitch * 0.5F * (1.0F - dead) - neckDown * 0.4F - roar * 0.3F - taunt * 0.25F;
+		this.head.yRot = headYaw * 0.3F * (1.0F - fidget) * (1.0F - dead);
+		this.head.zRot = grumble * 0.3F * Mth.sin(into * 0.08F) + dead * 0.35F - this.body.zRot * 0.6F;
+		this.jaw.xRot = 0.04F + roar * 0.8F + (0.5F - 0.5F * Mth.cos(t * 0.04F)) * 0.04F + swipe * 0.25F + thrust * 0.3F + s.breath * 0.4F
+			+ biteBack * 0.9F + taunt * 0.75F + grumble * 0.3F + flinch * 0.45F + dead * 0.4F;
 		this.braid.xRot = 0.35F + Mth.sin(t * 0.08F) * 0.04F + walk * 0.1F - this.head.xRot * 0.3F;
 		this.nemesL.zRot = -0.18F - Mth.sin(t * 0.07F) * 0.02F - roar * 0.12F;
 		this.nemesR.zRot = -this.nemesL.zRot;
@@ -265,7 +309,12 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 			}
 			rx += Mth.sin(t * 0.06F - i * 0.5F) * 0.015F;
 			this.tail[i].xRot = rx;
-			this.tail[i].yRot = Mth.sin(step * 1.2F - i * 0.55F) * (0.04F + k * 0.08F) * walk + Mth.sin(t * 0.05F - i * 0.5F) * 0.03F
+			// (0.7.612) the serpent wave, keyed to the ground covered so the curves hold still as it slides through them
+			// (two curves down its length; flatter at a run, when the arms do the work)
+			float wave = Mth.sin(step - i * WAVE_LAG) * (WAVE_ROOT + k * (WAVE_TIP - WAVE_ROOT)) * walk * (1.0F - run * 0.5F);
+			float lash = lashing * bell(x, k * 0.3F, 0.6F + k * 0.4F) * (0.15F + k * 0.35F);
+			float curl = doze * (i >= 2 ? 0.28F : 0.1F);
+			this.tail[i].yRot = (wave - lash + curl) * (1.0F - dead) + Mth.sin(t * 0.05F - i * 0.5F) * 0.03F * (1.0F - dead)
 				+ Mth.sin(t * 0.22F - i * 0.6F) * (0.08F + k * 0.1F) * swim + sweep * 0.32F * (1.0F - k * 0.3F) * (i >= 2 ? 1.0F : 0.3F)
 				- (i == 0 ? this.body.yRot : 0.0F);
 		}
@@ -274,10 +323,13 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 		for (int i = 0; i < 2; i++) {
 			boolean left = i == 0;
 			float side = left ? 1.0F : -1.0F;
-			float phase = left ? 0.0F : Mth.PI;
-			float swing = Mth.cos(step + phase) * 0.45F * walk;
+			// (0.7.612) a seal's crutch: the hand lifted high and swung far forward, planted, and pulled back under it; at
+			// a run both arms together
+			float phase = Mth.lerp(run, left ? 0.0F : Mth.PI, left ? 0.0F : 0.25F);
+			float swing = Mth.cos(step + phase) * (0.75F + run * 0.15F) * walk;
 			float raise = (1.0F - Mth.sin(step + phase)) * 0.5F;
-			float elbow = raise * raise * 0.6F * walk;
+			float elbow = raise * raise * 1.0F * walk;
+			float spread = taunt * side;
 			float up = this.upperX[i] + swing, low = this.foreX[i] + elbow;
 			float uz = this.upperZ[i], lz = this.foreZ[i];
 			// the slam (left): raised high, then brought down; the swipe (right): swung out and raked across
@@ -298,14 +350,24 @@ final class AtroxiiaDragonModel extends EntityModel<WindDragonRenderer.State> {
 			// the quake: both raised as it rears, slammed as it lands
 			up = Mth.lerp(rear, up, -1.9F);
 			low = Mth.lerp(rear, low, 0.2F);
-			// sitting: folded before it; crashed: splayed out flat; swimming: swept back along its flanks
-			up = Mth.lerp(sit, up, -0.5F);
-			low = Mth.lerp(sit, low, 1.1F);
+			// (0.7.612) the taunt: both flung out wide; the bite: braced, a little forward
+			up = Mth.lerp(taunt, up, -1.2F);
+			uz = Mth.lerp(taunt, uz, this.upperZ[i] + spread * 0.9F);
+			low = Mth.lerp(taunt, low, -0.3F);
+			up -= biteIn * 0.2F;
+			// sitting: folded before it (dozing, its head laid on them); crashed: splayed out flat; swimming: swept back along its
+			// flanks; dead: given way, splayed
+			up = Mth.lerp(sit, up, -0.5F - doze * 0.2F);
+			low = Mth.lerp(sit, low, 1.1F + doze * 0.2F);
+			up = Mth.lerp(dead, up, -0.6F);
+			uz = Mth.lerp(dead, uz, -side * 1.0F);
+			low = Mth.lerp(dead, low, 0.4F);
 			up = Mth.lerp(crash, up, -0.4F);
 			uz = Mth.lerp(crash, uz, -side * 1.2F);
 			low = Mth.lerp(crash, low, 0.2F);
 			lz = Mth.lerp(crash, lz, side * 0.9F);
-			up = Mth.lerp(swim, up, 1.2F + Mth.sin(t * 0.2F + phase) * 0.2F);
+			float stroke = t * (0.08F + Math.min(s.walkAnimationSpeed, 1.0F) * 0.14F);
+			up = Mth.lerp(swim, up, 1.2F + Mth.sin(stroke + phase) * 0.2F);
 			low = Mth.lerp(swim, low, 0.3F);
 			this.upper[i].xRot = up;
 			this.upper[i].zRot = uz;

@@ -9734,3 +9734,20 @@ what still differs), the grizzly's model and coat no longer come from Bear Minim
 - Bear Minimum's licence copy and credit line removed from `textures/entity/wild/` (nothing of it is used now); the mod
   itself still ships.
 - Gradle compile clean; not played.
+
+## 0.7.612 (2026-11-06): Saint's dragons animated, the REA way (pack 0.21.15)
+Andy: "saint's dragons?" then "i really just want animations". The models stay; the motions are specced from the
+reference's animation list (names and lengths only, none of its files) in `docs/SaintsDragons-Animation-Spec.md`.
+- **Atroxiia walks**: it crutches along on its arms like a seal, each hand lifted high and planted, the chest heaving
+  and rolling over it, and the serpent body throws S-curves down its length keyed to the ground covered. Bounds at a
+  run. It is back in the game (`Dragons.ATROXIIA_ON = true`): spawns and `/kingdom dragon atroxiia` again.
+- Atroxiia also: bite, tail lash, flinch, death, taunt, sniff, grumble, dozing when sat, slow sculling afloat.
+- Varasuchus: bite, tail sweep, a gallop at a run, flinch, death, hiss / head shake / tail swish / sniff when idle,
+  basking with its jaws open when sat, slow treading afloat.
+- The plain bite and tail sweep every walker has now play as moves (`WindDragon.swept()` beside `bitten()`), so
+  Varasuchus and Atroxiia no longer bite with no motion.
+- Ignivorus plays the wyvern's own fire (hover fire in the air) for its fireball volley, its slam for the magma pillars'
+  stamp, and its bite and tail sweep; Ignivorus, Eurus and Aeolus also flinch, die, sleep when sat and roar now and then,
+  and no longer flip sideways as they die (`WindDragonRenderer.ownDeath()`).
+- Stegonaut unchanged (mapped in 0.7.531).
+- Gradle compile clean; not played. Atroxiia walk/run previews in project files `art-overhaul/lesser-dragons/`.
