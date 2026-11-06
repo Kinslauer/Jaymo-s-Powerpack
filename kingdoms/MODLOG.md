@@ -10152,10 +10152,17 @@ stake multiple times, multiplying the debuff".
 - `Stakes.STAKE` is now a synced list of `Stake(stack, seed)` (new id `vampire_stakes`; a stake saved under 0.7.640's
   single-stake id is dropped). Every biting skewer lodges, up to 8. Slowness V for one, VI for two, VII (pinned) from three;
   from two on, Weakness too (I at two, rising to IV). Each 5x blow still lands.
-- Out one at a time, newest first: a vampire player's 3 s of held sneak pulls one, a mob tears one out every 20 s, an empty
-  hand's right-click pulls one into the hand. All drop on death or cure.
+- Out one at a time, newest first. A vampire player tugs with Sneak + scroll up (Andy: "the input for the struggle should be
+  shift + scroll up ... the bar should stay where it is even after you stop scrolling, the same way tree chopping works"):
+  `Stakes.Tug` per notch (one counted every 2 ticks), 14 to pull one, shown as a chop-style square meter
+  (`Stakes.showTugs`) that holds between tugs; the count is saved on the stake (`Stake.tugs`). `StakeScrollMixin`
+  (priority 400) takes Sneak + scroll up only while staked, ahead of Powers' stance wheel; scroll down still steps stances.
+  A mob tears one out every 20 s; an empty hand's right-click pulls one into the hand. All drop on death or cure.
+- `StakeStruggle` (client): staked vampires are seen struggling, both hands clawing at the chest and wrenching outward in
+  jerks, bent over, head down, a shake; mobs the whole time they're staked, players for 12 ticks after each tug
+  (`Stakes.STRUGGLE`, synced last-tug time). The hands go to the chest, not to wherever the stake is.
 - `StakeLayer` (client, every humanoid renderer, filled in `MobSwingLivingEntityRendererMixin`) draws each stake like a stuck
   arrow: the seed picks a part (3 in 8 the body, else head, an arm or a leg), a point on one face of its cube and a lean of
   up to 35% off straight in; the skewer item's point is buried along that line, the grip standing out. On the part's bone,
   so it moves with every pose.
-Gradle compileJava + compileClientJava clean; not played, so the depth and lean are untested.
+Gradle compileJava + compileClientJava clean; not played, so the depth, lean and struggle pose are untested.
