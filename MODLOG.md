@@ -1161,3 +1161,7 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
 
 ## 0.21.16 (2026-11-06): Atroxiia rare and hunting monsters (Kingdoms 0.7.613)
 - Atroxiia spawns about 400 times less often and fights hostile mobs near it. See Kingdoms 0.7.613.
+
+## 0.21.18 (2026-11-06): who's in a film (Kingdoms 0.7.619)
+- `UltimateFilm.filming(ServerPlayer)`: whether a player is in a film just now (their own, or bars from someone else's),
+  kept on the server for each film's full length. Kingdoms' Bane waits for it to end before it turns up.

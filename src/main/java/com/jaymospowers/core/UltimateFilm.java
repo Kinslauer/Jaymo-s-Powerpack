@@ -2,8 +2,10 @@ package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -124,7 +126,34 @@ public final class UltimateFilm {
 	public static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Play.TYPE, Play.CODEC);
 		ServerTickEvents.END_SERVER_TICK.register(UltimateFilm::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LATER.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			LATER.clear();
+			UNTIL.clear();
+		});
+	}
+
+	/** (0.21.18) Each player's film (their own or another's bars) runs to this server tick. In memory. */
+	private static final Map<UUID, Integer> UNTIL = new HashMap<>();
+
+	private static void shown(ServerPlayer p, int length) {
+		int end = p.level().getServer().getTickCount() + length;
+		UNTIL.merge(p.getUUID(), end, Math::max);
+	}
+
+	/**
+	 * (0.21.18) Whether {@code player} is in a film just now, theirs or one whose bars they see (Kingdoms' Bane waits for it to
+	 * end before it turns up). An early skip on the client isn't known here, so this runs to the film's full length.
+	 */
+	public static boolean filming(ServerPlayer player) {
+		Integer end = UNTIL.get(player.getUUID());
+		if (end == null) {
+			return false;
+		}
+		if (player.level().getServer().getTickCount() < end) {
+			return true;
+		}
+		UNTIL.remove(player.getUUID());
+		return false;
 	}
 
 	/** A film framed on the caster themselves, seen as bars by everyone within {@code witnesses} blocks (0: no one). */
@@ -137,12 +166,14 @@ public final class UltimateFilm {
 		int length = Math.clamp(ticks, MIN_TICKS, MAX_TICKS);
 		int targetId = target == null ? -1 : target.getId();
 		ServerPlayNetworking.send(caster, new Play(caster.getId(), shot, length, at, targetId, false, false));
+		shown(caster, length);
 		if (witnesses <= 0.0) {
 			return;
 		}
 		for (ServerPlayer other : caster.level().players()) {
 			if (other != caster && other.distanceToSqr(caster) <= witnesses * witnesses) {
 				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, targetId, true, false));
+				shown(other, length);
 			}
 		}
 	}
@@ -161,6 +192,7 @@ public final class UltimateFilm {
 		int length = Math.clamp(ticks, MIN_TICKS, MAX_TICKS);
 		Vec3 at = caster.position();
 		ServerPlayNetworking.send(caster, new Play(caster.getId(), shot, length, at, -1, false, false, parts, first));
+		shown(caster, length);
 		for (ServerPlayer other : caster.level().players()) {
 			if (other == caster || other.isSpectator()) {
 				continue;
@@ -168,6 +200,7 @@ public final class UltimateFilm {
 			double d = other.distanceToSqr(caster);
 			if (witnessRange > 0.0 && d <= witnessRange * witnessRange && !inCombat(other, combatTicks)) {
 				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, -1, false, false, parts, first));
+				shown(other, length);
 			} else if (d <= MORPH_SYNC * MORPH_SYNC) {
 				// (0.20.9) in combat or further off: no film, but the in-world morph runs the same length and parts as everyone's
 				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, MORPH_ONLY, false, false, parts, first));
@@ -195,6 +228,7 @@ public final class UltimateFilm {
 		for (ServerPlayer other : level.players()) {
 			if (other.distanceToSqr(caster) <= witnesses * witnesses) {
 				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, targetId, true, false));
+				shown(other, length);
 			}
 		}
 	}
@@ -207,6 +241,7 @@ public final class UltimateFilm {
 	public static void afterDeath(ServerPlayer dead, int shot, int ticks, Vec3 at, @Nullable Entity target) {
 		int length = Math.clamp(ticks, MIN_TICKS, MAX_TICKS);
 		ServerPlayNetworking.send(dead, new Play(dead.getId(), shot, length, at, target == null ? -1 : target.getId(), false, true));
+		shown(dead, length);
 	}
 
 	/** Runs {@code what} on {@code player} once {@code ticks} have passed (if they're still on the server), e.g. a sound after the film. */

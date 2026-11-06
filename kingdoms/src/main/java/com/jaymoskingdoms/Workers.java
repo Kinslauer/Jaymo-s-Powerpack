@@ -95,6 +95,10 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (Banes.bandOf(mob) != null) {
+			// (0.7.619) a player's Bane, or one of its band, in a villager's body: their own doings
+			return Banes.villagerStep(level, w);
+		}
 		if (SwornCaptains.free(mob)) {
 			// (0.7.433) a captain sworn to a player: at their side, his brain his own (and never taken onto a roster)
 			return SwornCaptains.step(level, w);

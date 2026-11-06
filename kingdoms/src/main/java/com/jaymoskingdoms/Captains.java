@@ -487,6 +487,7 @@ public final class Captains {
 		CaptainSchemes.register();
 		CaptainGround.register();
 		Ladders.register();
+		Banes.register();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Captains::filmHarm);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> hurt(victim, source, taken, blocked));
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -584,7 +585,7 @@ public final class Captains {
 	}
 
 	/** (0.7.614, Rivals) A new captain's traits on {@code server}: more strengths as the world's floor rises. */
-	private static List<String> roll(MinecraftServer server, RandomSource random) {
+	static List<String> roll(MinecraftServer server, RandomSource random) {
 		return roll(random, Rivals.extraStrengths(server));
 	}
 
@@ -604,7 +605,7 @@ public final class Captains {
 		return Rivals.rollName(tribe, random);
 	}
 
-	private static String newId(RandomSource random) {
+	static String newId(RandomSource random) {
 		return Long.toString(random.nextLong() & Long.MAX_VALUE, 36);
 	}
 
@@ -803,7 +804,7 @@ public final class Captains {
 	}
 
 	/** (0.7.614, Rivals) The raised dead fear nothing: their captains are Deathless, every one. */
-	private static Captain raisedDead(Captain c) {
+	static Captain raisedDead(Captain c) {
 		List<String> traits = new ArrayList<>(c.traits());
 		traits.removeIf(k -> {
 			Trait t = Trait.parse(k);
@@ -1431,7 +1432,8 @@ public final class Captains {
 		if (has(self, Trait.BLIND_SIDE) && source.getEntity() instanceof LivingEntity by && self instanceof Mob mob && Rulers.target(mob) != by) {
 			out *= BLIND_SIDE;
 		}
-		return out;
+		// ((0.7.619) a Bane has learned how its owner fights)
+		return out * Banes.resist(self, source);
 	}
 
 	/** A blow landed: fights noted, venom, and one hard to kill back on his feet. */
@@ -1443,6 +1445,8 @@ public final class Captains {
 		Entity by = source.getEntity();
 		// ((0.7.616) tallied for what he learns; the gun-shy, the prayerful, the bargainer)
 		CaptainWays.hurt(level, victim, source, taken);
+		// ((0.7.619) a Bane: its owner's blows tallied, its owner downed)
+		Banes.hurt(level, victim, source, taken);
 		if (is(victim)) {
 			Captain c = of(victim);
 			if (c != null && by instanceof ServerPlayer player) {
@@ -1477,6 +1481,8 @@ public final class Captains {
 			slew(level, killer, player);
 			return;
 		}
+		// ((0.7.619) a branded foe finished by the one who sees the brand: their Bane, a day or two from now)
+		Banes.foeDied(level, entity, source);
 		Captain c = is(entity) ? of(entity) : null;
 		if (c == null || c.fallen() || !c.body().map(entity.getUUID()::equals).orElse(true)) {
 			return;
@@ -1496,8 +1502,10 @@ public final class Captains {
 		// (4b) a sworn captain dies in his lord's service; one beaten in his own challenge stays dead (but for the raised)
 		boolean wasSworn = SwornCaptains.fell(level, c);
 		boolean honoured = SwornCaptains.challengeWon(level, c, source);
-		boolean returns = !wasSworn && !honoured && !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
-		boolean raised = !returns && !c.chief() && !c.has(Trait.DEATHLESS) && random.nextFloat() < RAISED_CHANCE;
+		// ((0.7.619) a Bane always comes back: nothing ends it yet)
+		boolean bane = Rivals.side(c.tribe()).bane();
+		boolean returns = bane || !wasSworn && !honoured && !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
+		boolean raised = !bane && !returns && !c.chief() && !c.has(Trait.DEATHLESS) && random.nextFloat() < RAISED_CHANCE;
 		if (raised) {
 			// (Andy) back from anything, by corrupted magic or a necromancer: no fear left in him
 			returns = true;
@@ -1519,7 +1527,13 @@ public final class Captains {
 			}
 		}
 		long back = returns ? now + 24000L * (RETURN_DAYS_MIN + random.nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
+		if (bane) {
+			back = Banes.back(now, random);
+		}
 		put(server, c.fell(back, lost));
+		if (bane) {
+			Banes.fell(level, c, entity, source);
+		}
 		// ((0.7.617) a quick kill pinned on another; a price on his head paid)
 		CaptainSchemes.died(level, c, source);
 		FIGHTS.remove(c.id());
@@ -1661,7 +1675,7 @@ public final class Captains {
 			if (gained != null) {
 				traits.add(gained.key());
 			}
-			int rank = Math.min(Rivals.rankMax(server), c.rank() + 1);
+			int rank = Math.min(rankMax(server, c), c.rank() + 1);
 			if (rank > c.rank()) {
 				climb(killer);
 			}
@@ -1693,6 +1707,40 @@ public final class Captains {
 			player.getDisplayName(), Rivals.name(c.tribe())));
 		// ((0.7.617) a price on his head, for the friends of the fallen)
 		CaptainSchemes.priced(server, c, player);
+		// ((0.7.619) a Bane's better arms and its note)
+		Banes.slew(level, c, killer, player);
+	}
+
+	/** (0.7.619) The highest {@code c} may climb: a Bane's own top, else his ladder's. */
+	static int rankMax(MinecraftServer server, Captain c) {
+		return Rivals.side(c.tribe()).bane() ? Banes.RANK_MAX : Rivals.rankMax(server);
+	}
+
+	/** (0.7.619) {@code c} up a rank (to his top) with a new strength, on {@code body}; the captain as he is after. */
+	static Captain promote(ServerLevel level, Captain c, LivingEntity body) {
+		MinecraftServer server = level.getServer();
+		List<String> traits = new ArrayList<>(c.traits());
+		Trait gained = newStrength(c, level.getRandom());
+		if (gained != null) {
+			traits.add(gained.key());
+		}
+		int rank = Math.min(rankMax(server, c), c.rank() + 1);
+		if (rank > c.rank()) {
+			climb(body);
+		}
+		Captain after = c.climbed(rank, List.copyOf(traits), c.trophy(), c.slain());
+		bind(level, after, body);
+		return get(server, after.id()) == null ? after : get(server, after.id());
+	}
+
+	/** (0.7.619) {@code player} is held in {@code mob}'s film for {@code ticks}: no harm to them, and he stands for it ({@link #filmHarm}). */
+	static void hold(ServerPlayer player, LivingEntity mob, int ticks) {
+		long now = player.level().getGameTime();
+		if (FILM_SAFE) {
+			FILMED.put(player.getUUID(), now + ticks);
+			SCENE.put(mob.getUUID(), now + ticks);
+			SCENE_AT.put(mob.getUUID(), player.getEyePosition());
+		}
 	}
 
 	/**
