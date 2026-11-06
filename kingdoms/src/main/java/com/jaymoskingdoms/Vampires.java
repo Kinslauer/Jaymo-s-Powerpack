@@ -117,6 +117,9 @@ public final class Vampires {
 	static final float NIGHT_REGEN = 0.5F;
 	/** Fire's damage to a vampire (times). */
 	static final float FIRE_FACTOR = 2.0F;
+	/** (0.7.640) A wooden skewer (Jaymo's Powers' Armory) driven into a vampire, as a stake: its blow times this, a dhampir's times the other. */
+	static final float STAKE_FACTOR = 5.0F, STAKE_DHAMPIR_FACTOR = 2.0F;
+	static final String STAKE_ITEM = "jaymospowers:wooden_skewer";
 	/** Walk speeds (a villager's brain, a folk's navigation). */
 	static final float VILLAGER_HUNT_SPEED = 0.9F;
 	static final double FOLK_HUNT_SPEED = 1.2;
@@ -281,6 +284,27 @@ public final class Vampires {
 	}
 
 	// ---- who's what ----------------------------------------------------------------------------------------------------
+
+	/**
+	 * (0.7.640) A wooden skewer stabbed into a vampire (mob or player) bites like a stake: its blow lands {@link #STAKE_FACTOR}
+	 * times over (a dhampir, half-blooded, {@link #STAKE_DHAMPIR_FACTOR}), with a splash of dark blood. Only the blow of the
+	 * hand that holds it, so a held skewer never adds to fire or a spell. For {@code LivingEntityHurtMixin}.
+	 */
+	public static float staked(LivingEntity self, DamageSource source, float amount) {
+		if (amount <= 0.0F || !(source.getEntity() instanceof LivingEntity attacker) || source.getDirectEntity() != attacker) {
+			return amount;
+		}
+		Kind kind = kind(self);
+		if (kind == null || !STAKE_ITEM.equals(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(attacker.getMainHandItem().getItem()).toString())) {
+			return amount;
+		}
+		if (self.level() instanceof ServerLevel level) {
+			level.sendParticles(new DustParticleOptions(0x5A0A0A, 1.2F), self.getX(), self.getY(0.65), self.getZ(), 14, 0.2, 0.2, 0.2, 0.0);
+			level.sendParticles(ParticleTypes.SMOKE, self.getX(), self.getY(0.65), self.getZ(), 6, 0.15, 0.15, 0.15, 0.01);
+			level.playSound(null, self.getX(), self.getY(), self.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.6F);
+		}
+		return amount * (kind == Kind.DHAMPIR ? STAKE_DHAMPIR_FACTOR : STAKE_FACTOR);
+	}
 
 	public static boolean isVampire(Entity e) {
 		return e.hasAttached(VAMPIRE);
