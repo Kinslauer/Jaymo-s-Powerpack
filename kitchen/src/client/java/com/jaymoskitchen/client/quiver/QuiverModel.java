@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Fletchings are separate models ({@link Fletching}), one per shaft, because each is tinted to its arrow.
  *
- * <p>(0.5.81) It moves: the quiver swings and bounces against the back as you walk and run, the arrows rattle in its
+ * <p>(0.5.82) It moves: the quiver swings and bounces against the back as you walk and run, the arrows rattle in its
  * mouth, and drawing a bow pulls the top arrow up out of it (gone from the quiver once it's on the string).
  */
 public class QuiverModel extends PlayerModel {

@@ -50,7 +50,7 @@ public final class Quivers {
 		builder -> builder.syncWith(WornQuiver.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/**
-	 * (0.5.81) Other mods' quivers drawn on the back when worn in a bauble slot (the RPG Series' small, medium and large
+	 * (0.5.82) Other mods' quivers drawn on the back when worn in a bauble slot (the RPG Series' small, medium and large
 	 * quivers). Ours is drawn from anywhere in the inventory as well.
 	 */
 	public static final TagKey<Item> SHOWN_QUIVERS = TagKey.create(Registries.ITEM, JaymosKitchen.id("shown_quivers"));
@@ -121,7 +121,7 @@ public final class Quivers {
 		}
 	}
 
-	/** (0.5.81) Our quiver worn in a bauble slot, if any. */
+	/** (0.5.82) Our quiver worn in a bauble slot, if any. */
 	private static @Nullable ItemStack baubleQuiver(Player player) {
 		for (ItemStack stack : baubles(player)) {
 			if (stack.getItem() instanceof QuiverItem) {
@@ -211,7 +211,7 @@ public final class Quivers {
 	}
 
 	/**
-	 * (0.5.81) The quiver shown on a player's back: any quiver worn in a bauble slot (ours or another mod's), else ours
+	 * (0.5.82) The quiver shown on a player's back: any quiver worn in a bauble slot (ours or another mod's), else ours
 	 * carried in the off hand or inventory.
 	 */
 	static @Nullable WornQuiver shown(Player player) {

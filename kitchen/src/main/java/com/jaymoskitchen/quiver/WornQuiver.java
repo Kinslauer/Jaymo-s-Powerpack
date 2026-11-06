@@ -5,7 +5,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 
 /**
- * (0.5.81) The quiver a player shows on their back: which quiver it is (its item id, which picks its look) and the
+ * (0.5.82) The quiver a player shows on their back: which quiver it is (its item id, which picks its look) and the
  * arrows in it. Every quiver in the pack is drawn with the same slung leather model; only the colours change.
  */
 public record WornQuiver(Identifier item, QuiverContents contents) {

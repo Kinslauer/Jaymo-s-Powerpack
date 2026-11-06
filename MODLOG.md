@@ -1312,6 +1312,13 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - `DownedPose` skips a downed body a Kingdoms vampire holds up by the throat (`KingdomsCompat.grabbed`, reflection on
   `BloodGrab.grabbed`), so it stays in the hand (Kingdoms 0.7.635 poses it hanging there). Built, not played.
 
-## 0.21.34: Kitchen's quiver fits the body bauble slot
-- `baubles/body` tag takes `jaymoskitchen:quiver` (Kitchen 0.5.81 feeds bows from it there and draws every worn quiver,
+## 0.21.34: only the downed lose their heads
+- Andy: "decapitations should only ever happen to downed players". `Dismember.playerHeadMayGo`: a player's head comes off
+  only while they're downed (`Downed.isDowned`). Every beheading goes through `Dismember.lose`, so crits and overkill
+  (`Wounds`), the axe finisher, mob chop executions, Frost Needle, and Kingdoms' archer wall pins all keep the head on
+  a standing player; the blow still lands, and a killing one downs them as usual. Mobs and villagers are unchanged. A
+  blast that blows a player apart (`BlastGore`) still takes everything. Gradle compile clean; not played.
+
+## 0.21.35: Kitchen's quiver fits the body bauble slot
+- `baubles/body` tag takes `jaymoskitchen:quiver` (Kitchen 0.5.82 feeds bows from it there and draws every worn quiver,
   the RPG Series' too, animated on the back). Data only.

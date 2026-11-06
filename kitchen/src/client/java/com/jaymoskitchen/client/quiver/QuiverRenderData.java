@@ -16,7 +16,7 @@ import net.minecraft.world.item.alchemy.PotionContents;
 
 /**
  * What the back-worn quiver needs to draw: which quiver's colours, how many arrow shafts poke out, each one's fletching
- * colour, and (0.5.81) how far into drawing a bow the wearer is, so the top arrow is seen pulled out of the quiver.
+ * colour, and (0.5.82) how far into drawing a bow the wearer is, so the top arrow is seen pulled out of the quiver.
  * Each shaft stands for {@link #ARROWS_PER_SHAFT} arrows, so a full quiver of 32 shows all 16.
  */
 public record QuiverRenderData(Identifier texture, int shafts, int[] fletchingColors, float draw) {
@@ -30,7 +30,7 @@ public record QuiverRenderData(Identifier texture, int shafts, int[] fletchingCo
 	/** Ticks a hand takes to pull an arrow out of the quiver and up to the bow. */
 	static final float DRAW_TICKS = 5.0F;
 
-	/** The pack's quivers by item id: every one is drawn on the same model in its own colours (0.5.81). */
+	/** The pack's quivers by item id: every one is drawn on the same model in its own colours (0.5.82). */
 	private static final Identifier DEFAULT_TEXTURE = JaymosKitchen.id("textures/entity/quiver.png");
 	private static final Map<Identifier, Identifier> TEXTURES = Map.of(
 		Identifier.fromNamespaceAndPath("archers", "small_quiver"), JaymosKitchen.id("textures/entity/quiver/small_quiver.png"),

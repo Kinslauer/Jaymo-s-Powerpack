@@ -1593,6 +1593,11 @@ public class CorpseEntity extends Entity {
 			discard();
 			return;
 		} else if (rises()) {
+			if (kind == CorpseKind.PLAYER && (missing() & 1) != 0) {
+				// (0.5.81) Andy: "decapitated player corpses cant reanimate": a headless player's body never gets up, it
+				// just lies there with what was on it
+				return;
+			}
 			if (age > REANIMATE_TICKS - 200 && random.nextInt(40) == 0) {
 				// twitching (rattling): it's about to get up
 				play(level, kind == CorpseKind.SKELETON ? SoundEvents.SKELETON_AMBIENT : SoundEvents.ZOMBIE_AMBIENT, 0.6F * voice());

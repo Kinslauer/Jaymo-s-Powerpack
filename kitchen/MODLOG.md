@@ -1551,7 +1551,11 @@ mobs should be possible".
   Kingdoms sets it for the Iron Stomach perk (Andy: "the rotten meat eating skill should let you drink water from wherever
   too"). Gradle compile clean; not played.
 
-## 0.5.81: every quiver goes in a bauble slot and moves on your back (Powers 0.21.34)
+## 0.5.81: headless player bodies stay down
+- `CorpseEntity`: a player's corpse missing its head never rises as a `ZombiePlayer` (Andy: "decapitated player corpses
+  cant reanimate"). It lies there with what was on it, searchable as before. Gradle compile clean; not played.
+
+## 0.5.82: every quiver goes in a bauble slot and moves on your back (Powers 0.21.35)
 - Andy: "all quivers should animate and go in baubles". The pack has four quivers: ours and the RPG Series' small, medium
   and large (Archers, worn in the bauble body slot for Spell Engine but never drawn, since that drawing is Trinkets-only).
 - **Bauble slot:** our quiver is tagged for Powers' body slot (`jaymospowers:baubles/body`). `Quivers.baubles(Player)`
