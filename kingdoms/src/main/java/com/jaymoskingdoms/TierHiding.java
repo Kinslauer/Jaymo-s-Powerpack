@@ -327,8 +327,9 @@ public final class TierHiding {
 		if (hide.equals(SENT.get(player.getUUID()))) {
 			return;
 		}
-		SENT.put(player.getUUID(), hide);
+		// a client without Kingdoms can't take it (and is tried again on the next scan)
 		if (ServerPlayNetworking.canSend(player, Hidden.TYPE)) {
+			SENT.put(player.getUUID(), hide);
 			ServerPlayNetworking.send(player, new Hidden(hide.stream().map(BuiltInRegistries.ITEM::getKey).toList()));
 		}
 	}
