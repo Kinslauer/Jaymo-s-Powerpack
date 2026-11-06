@@ -10004,15 +10004,19 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   alone (it used to fill Powers' revive bar and could get them up in 3 s); a vampire's sneak+use with an empty hand on a
   downed person or piglin/Hornkin bites instead of lifting (carry them with the grab instead). Built, not played.
 
-## 0.7.627 (2026-11-06): open-pit mines in the Dungeons and Taverns style
+## 0.7.627 (2026-11-06): builders build Dungeons and Taverns' mine, tavern and more; open-pit mines
 - Andy: "the dungeons and taverns mine here is exactly what i was imagining when i wanted our builders to mine. the
-  current one should be for poverty nations only as it is too simple."
-- `MinePit`: a settlement that isn't poor now digs an open pit 13 across, a layer at a time, each terrace a step in from
-  the one above, down to a 5 x 5 floor 5 deep. Then its rim is fenced (lanterns on the corner posts), a minecart track
-  runs from the floor up the back terraces into a cobblestone shed with log corners and a plank roof (a cart, a barrel,
-  a stonecutter and a lantern inside), and the old tunnel goes on into the rock from the floor, its mouth framed in logs.
-  Our own build in that style; nothing of D&T's is copied.
-- Poor (`MinePit.POOR_WORTH` 80, by `Wealth.worth`: coin + 4 a villager + 60 a fiefdom; a fiefdom goes by its overlord)
-  still digs the plain cliff tunnel or shaft. No level, dry ground for a pit nearby: the plain mine too.
-- Saved mines keep their kind (`pit`/`layer` default 0). Sleep's catch-up digs the pit too; water or lava beside a pit
-  block is stopped with cobblestone first.
+  current one should be for poverty nations only as it is too simple." Then: "cant they just use the dungeon and taverns
+  structure?", "same with the tavern and stables if they have em", "do them all".
+- D&T (mod id `mr_dungeons_andtaverns`, ARR) is read at run time from the player's own copy, like CTOV's halls; nothing
+  of its is copied into ours. Built whole, without its ruins' cobwebs, leaves and weeds.
+- `DntMine`: with D&T installed, a settlement that isn't poor digs D&T's miner's pit (`remnant/wild_ruin_19` and `_b`,
+  joined as D&T joins them): open blocks dug a layer at a time (stone to storage), ladders/rails/floor laid as each layer
+  opens, fence and shed when the last is dug, then the plain tunnel on from its lowest floor into rock.
+- `MinePit` (no D&T): our own stepped open pit 13 across and 5 deep, fenced rim, rails up into a cobblestone shed, then
+  the tunnel. Poor (`MinePit.POOR_WORTH` 80 by `Wealth.worth`; fiefdoms by their overlord) or no level dry ground: the
+  plain cliff tunnel or shaft as before. Saved mines keep their kind.
+- `DntBuildings`: marked variants (`MARK`, like CTOV's) draw D&T's tavern house (13 woods by biome), well (13 woods) and
+  smithy (forest or ruined smith, on the tries CTOV's doesn't take); new D&T-only buildings: sawmill, farmhouse, apiary,
+  firewatch tower (realms). Older projects keep their look. Graveyard and dappled town hall are too big for a plot (32);
+  the hamlet is a piglin bunker; D&T has no stable.
