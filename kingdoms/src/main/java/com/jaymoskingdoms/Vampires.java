@@ -320,6 +320,21 @@ public final class Vampires {
 		return e.isAlive() && !e.isBaby() && !isVampire(e) && (e instanceof Villager || e instanceof Folk) && !Lycans.changed(e);
 	}
 
+	/**
+	 * (0.7.614, Andy: "how do i feed in the nether?" ... "yes as long as there arent zombies") The Nether's living folk a
+	 * vampire can drink from: grown piglins, piglin brutes and Hornkin, never a zombified one (zombified piglins are their
+	 * own kind, never a {@code Piglin}). Their blood feeds like anyone's, but a bitten one never turns.
+	 */
+	static boolean netherPrey(LivingEntity e) {
+		if (!e.isAlive() || e.isBaby()) {
+			return false;
+		}
+		if (e instanceof net.minecraft.world.entity.monster.piglin.Piglin || e instanceof net.minecraft.world.entity.monster.piglin.PiglinBrute) {
+			return true;
+		}
+		return e instanceof com.jaymoskingdoms.nether.Hornkin hornkin && !hornkin.zombified();
+	}
+
 	/** (stage 3) A player a vampire would drink from: in survival, not one of them, not a beast. */
 	static boolean mortal(LivingEntity e) {
 		return e instanceof ServerPlayer p && p.isAlive() && !p.isCreative() && !p.isSpectator() && !isVampire(p) && !WerewolfPlayers.beast(p);
