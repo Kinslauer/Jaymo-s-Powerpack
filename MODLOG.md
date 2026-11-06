@@ -1234,3 +1234,6 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   - Bonded: Weapon Arm (forms and strikes), Grab (seize a foe up to a cow's size; holding one, maul it; tendrils full, a
     combo), Tendril Grab, Spike Burst (a roar in the big suit), Consume, Shroud. The Suit and Wall Crawl stay on X.
 - Each goes at the lock-on foe, else the one in sights, by the same checks as its own key. Every old key still works.
+## 0.21.26 (2026-11-06): Felled in the pack (Kingdoms 0.7.628)
+- Felled (all rights reserved, Raiiiden; CurseForge 1715901 / file 9305152) and Zarith (1720181 / 9284445) join `packMods`
+  (dev: false). Kingdoms hands the felling stroke of a player's chopping to it (`FelledCompat`).
