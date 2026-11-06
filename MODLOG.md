@@ -1160,4 +1160,4 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
   `docs/SaintsDragons-Animation-Spec.md`.
 
 ## 0.21.16 (2026-11-06): Atroxiia rare and hunting monsters (Kingdoms 0.7.613)
-- Atroxiia spawns about 40 times less often and fights hostile mobs near it. See Kingdoms 0.7.613.
+- Atroxiia spawns about 400 times less often and fights hostile mobs near it. See Kingdoms 0.7.613.

@@ -75,7 +75,7 @@ public final class Dragons {
 	static final float ATROXIIA_WIDTH = 3.0F, ATROXIIA_HEIGHT = 4.3F;
 	static final int ATROXIIA_WEIGHT = 1, ATROXIIA_MIN = 1, ATROXIIA_MAX = 1;
 	/** (0.7.613) Andy: "it needs to be extremely rare": only one natural spawn try in this many that would otherwise pass goes ahead. */
-	static final int ATROXIIA_RARITY = 40;
+	static final int ATROXIIA_RARITY = 400;
 	public static final TagKey<Biome> HAS_ATROXIIA = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_atroxiia_dragon"));
 	/** (0.7.536) Whether Atroxiia is in the game: it was off until its walk was redone (it glided along with no steps); (0.7.612) back on. */
 	public static final boolean ATROXIIA_ON = true;
