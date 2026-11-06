@@ -41,7 +41,6 @@
 		{ "config": "jaymospowers.xenoform.client.mixins.json", "environment": "client" },
 		"jaymospowers.zfighter.mixins.json",
 		{ "config": "jaymospowers.zfighter.client.mixins.json", "environment": "client" },
-		{ "config": "jaymospowers.nea.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.tnm.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.shouldersurfing.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.respawnrecap.client.mixins.json", "environment": "client" },

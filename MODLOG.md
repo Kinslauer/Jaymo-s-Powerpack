@@ -1353,3 +1353,24 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   cloud bottle, skull and antidote leave `#jaymospowers:hip_shown` (no more flat sprite at the hip). Our own looks stay for
   the 7 starters, the sky mask and the 16 we repainted medieval, whose Artifacts models are the modern things we renamed
   away from. Gradle compile clean; not played.
+
+## 0.21.38: a traditional kneel, posed with the weapon; climbing hand over hand
+- Andy: "the newest kneel has both knees bent in front of the character, it should look more like a traditional kneel,
+  posing with a weapon in hand like a hand on the sword's pommel, blade in the ground, similar with an axe, or a low ready
+  with a rifle or bow". `CrouchPose` (the low crouch's kneel): the knee on the ground is now behind the hip (`BACK_LEG`
+  0.40, shin flat behind, `BACK_KNEE` 1.09), the front knee a touch above the hip with the shin straight down
+  (`FRONT_THIGH`/`FRONT_KNEE` 1.65), hips sunk 6.5 px (`SINK`). The hands pose by `CrouchPose.Style`, read from the main
+  hand through `Finishers.kind`: `PLANT` (sword, greatsword, axe, blunt) puts it point or head down in front of the knee
+  with both hands stacked on the pommel or haft end; `UPRIGHT` (spear, polearm, staff) stands it beside the knee; `BOW`
+  and `RIFLE` (gun, crossbow) hold it at a low ready, arrow or muzzle toward the ground ahead. The weapon is turned in the
+  hand by `CrouchPose.grip` (from `FinisherItemInHandLayerMixin`); the off hand joins only when empty; left-handed bodies
+  are mirrored. Aiming, drawing or swinging from the knee still leaves the arms to vanilla. The other kneels (tending,
+  finishers, executions) keep `KneelLegs`.
+- Andy: "a better climbing animation, moving hands and feet interchangeably". The cling (freerun climb and webbed fists)
+  no longer borrows Not Enough Animations' ladder pose (`NeaLadderMixin`, `WallClimbs` and the nea mixin config are gone).
+  `WebParkourPose.climbLimb`: each hand grips (`HAND_HOLD` 0.6 of the cycle) and stays on its spot while the body rises,
+  then lets go and reaches up to the next hold; the hands half a cycle apart, each foot stepping up with the opposite hand
+  (`FOOT_HOLD` 0.45), knees turned out. Keyed to the distance climbed (up, down or across, `CLIMB_CYCLE` 1.2 blocks), so
+  it holds still while you hang and runs backward climbing down. Two-bone reach (`reach`) bends the elbows and knees at
+  draw time (`bendLimbs`, from `TendModelFeatureRendererMixin`). Worked out on preview renders
+  (`art-overhaul/kneel-climb`); compile-checked, not played.

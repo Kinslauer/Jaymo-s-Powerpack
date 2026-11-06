@@ -29,7 +29,13 @@ import net.minecraft.world.entity.LivingEntity;
  * (rolled onto one side on a planted forearm, the legs stacked ahead) or a <b>head-first</b> dive (flat on the chest,
  * arms reaching ahead).</li>
  * </ul>
- * Your own moves don't show in first person. (0.14.3) A freerunner's vault, cling and wall kick ({@code Freerun#MOVE})
+ * (0.21.38) Andy: "a better climbing animation, moving hands and feet interchangeably". The cling (webbed fists and a
+ * freerunner's climb) is our own again, Not Enough Animations' ladder pose no longer borrowed: each hand reaches up,
+ * grips and stays put on the wall while the body rises past it, the elbow folding as it comes down to the shoulder, then
+ * lets go and reaches up again, the hands half a cycle apart; each foot steps up with the opposite hand, knee out, and
+ * pushes down straight. All of it is keyed to how far you've climbed (up, down or across), so it holds still while you
+ * hang and runs backward as you climb down. Elbows and knees bend ({@link #bendLimbs}).
+ * <p>Your own moves don't show in first person. (0.14.3) A freerunner's vault, cling and wall kick ({@code Freerun#MOVE})
  * are drawn the same way.
  */
 public final class WebParkourPose {
@@ -48,11 +54,21 @@ public final class WebParkourPose {
 	static final float[] SLIDE_DROP = {0.12F, 0.5F, 0.2F, 0.05F};
 	/** How far the body leans into the wall while clinging (degrees): (0.13.17) upright, as on a ladder. */
 	static final float CLING_LEAN = 0.0F;
+	/** (0.21.38) Blocks climbed per full cycle (each hand and each foot moves once). */
+	static final float CLIMB_CYCLE = 1.2F;
+	/** (0.21.38) Share of the cycle a hand, and a foot, stays gripped on the wall; the rest it's moving up to its next hold. */
+	static final float HAND_HOLD = 0.6F, FOOT_HOLD = 0.45F;
 	/**
-	 * (0.13.17) Climbing hand over hand: the hands' and feet's cycle follows height (radians a block), the arms reach
-	 * this high on the wall and swing this far apart, the feet lift this far.
+	 * (0.21.38) Where a hand grips (pixels above the shoulder, and out toward the wall), how far off the wall it comes
+	 * moving up; the same for a foot (pixels above the hip).
 	 */
-	static final float CLIMB_RATE = 2.4F, CLIMB_REACH = -2.35F, CLIMB_ARM_SWING = 0.4F, CLIMB_LEG_LIFT = 0.55F;
+	static final float HAND_TOP = 9.0F, HAND_WALL = 4.5F, HAND_LIFT = 1.5F, FOOT_TOP = -4.0F, FOOT_WALL = 3.0F, FOOT_LIFT = 1.5F;
+	/** (0.21.38) The hands out wider than the shoulders, the knees turned out as they come up (radians). */
+	static final float HAND_OUT = 0.32F, KNEE_OUT = 0.4F;
+	/** (0.21.38) The upper arm and forearm (to the hand), thigh and shin (pixels). */
+	static final float UPPER_ARM = 4.0F, FOREARM = 6.0F, ELBOW = 4.0F, THIGH = 6.0F, SHIN = 6.0F;
+	/** (0.21.38) The body's roll and twist toward the pushing leg, and the head turned up toward the reaching hand (radians). */
+	static final float CLIMB_ROLL = 0.04F, CLIMB_TWIST = 0.05F, CLIMB_LOOK_UP = -0.35F, CLIMB_LOOK_TURN = 0.15F;
 	/** In the suit, the tendrils hold the body this far out from the wall (degrees, tipping the top back off it). */
 	static final float TENDRIL_HANG = 8.0F;
 	/** Crawling on the wall: how fast the limbs cycle (radians a tick), and the speed (blocks/tick) that's a full crawl. */
@@ -62,13 +78,15 @@ public final class WebParkourPose {
 	// ================================================================================================================
 
 	/** {@code kind}: a {@link WebParkour} move; {@code p}: how far through it (0-1, timed moves); {@code in}: settled into it (0-1). */
-	public record Pose(int kind, int variant, float p, float in, float time, boolean tendrils, float crawl, float height) {
+	public record Pose(int kind, int variant, float p, float in, float time, boolean tendrils, float crawl, float height, float travel) {
 	}
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_parkour");
 
 	/** Per entity id: the move it's in and the game time it began. */
 	private static final java.util.Map<Integer, float[]> STARTED = new java.util.HashMap<>();
+	/** (0.21.38) Per entity id, on the wall: where it was last frame (x, z) and how far it has gone across the wall. */
+	private static final java.util.Map<Integer, double[]> ACROSS = new java.util.HashMap<>();
 
 	private WebParkourPose() {
 	}
@@ -89,6 +107,7 @@ public final class WebParkourPose {
 		if (move == null || ownView || entity.isPassenger()) {
 			if (move == null) {
 				STARTED.remove(entity.getId());
+				ACROSS.remove(entity.getId());
 			}
 			state.setData(KEY, null);
 			return;
@@ -110,8 +129,18 @@ public final class WebParkourPose {
 		float speed = (float)Math.sqrt(Mth.square(entity.getX() - entity.xo) + Mth.square(entity.getY() - entity.yo) + Mth.square(entity.getZ() - entity.zo));
 		float crawlWant = kind == WebParkour.CLING ? Mth.clamp(speed / CRAWL_FULL, 0.0F, 1.0F) : 0.0F;
 		started[2] = Mth.lerp(0.15F, started[2], crawlWant);
+		// (0.21.38) the climb's limbs follow the distance climbed: up and down, plus across the wall
+		double x = Mth.lerp(partialTicks, entity.xo, entity.getX()), z = Mth.lerp(partialTicks, entity.zo, entity.getZ());
+		double[] across = ACROSS.computeIfAbsent(entity.getId(), id -> new double[] {x, z, 0.0});
+		double step = Math.sqrt(Mth.square(x - across[0]) + Mth.square(z - across[1]));
+		across[0] = x;
+		across[1] = z;
+		if (step < 0.5) {
+			across[2] = (across[2] + step) % 4096.0;
+		}
+		double y = Mth.lerp(partialTicks, entity.yo, entity.getY());
 		state.setData(KEY, new Pose(kind, WebParkour.variant(move), p, Math.min(1.0F, in * (length > 0.0F ? 1.6F : 1.0F)), time, tendrils, started[2],
-			(float)Mth.lerp(partialTicks, entity.yo, entity.getY())));
+			(float) y, (float) ((y + across[2]) % 4096.0)));
 	}
 
 	/** After the body faces its way: tip over in a vault, lie back in a slide, lean into the wall in a cling. */
@@ -164,12 +193,7 @@ public final class WebParkourPose {
 					default -> poseStack.rotateDegrees(Axis.XP, -DIVE_PITCH * in);
 				}
 			}
-			case WebParkour.CLING -> {
-				// (0.13.17) with Not Enough Animations its ladder climb has the body (WallClimbs)
-				if (!com.jaymospowers.client.WallClimbs.NEA) {
-					poseStack.rotateDegrees(Axis.XP, (pose.tendrils() ? TENDRIL_HANG : -CLING_LEAN) * pose.in());
-				}
-			}
+			case WebParkour.CLING -> poseStack.rotateDegrees(Axis.XP, (pose.tendrils() ? TENDRIL_HANG : -CLING_LEAN) * pose.in());
 			case WebParkour.WALL_JUMP -> poseStack.rotateDegrees(Axis.XP, 18.0F * pose.in());
 			default -> {
 			}
@@ -227,10 +251,6 @@ public final class WebParkourPose {
 				}
 			}
 			case WebParkour.CLING -> {
-				if (com.jaymospowers.client.WallClimbs.NEA) {
-					// (0.13.17) Not Enough Animations climbs it (its ladder animation; WallClimbs)
-					break;
-				}
 				float sway = Mth.sin(pose.time() * 0.12F) * 0.05F;
 				if (pose.tendrils()) {
 					// held off the wall by the tendrils: arms loose and a little out, ready; legs drawn up a touch, swaying
@@ -240,15 +260,24 @@ public final class WebParkourPose {
 					set(h.leftLeg, -0.2F + sway, 0.0F, -0.12F, e);
 					break;
 				}
-				// (0.13.17) as on a vine or a ladder: both hands up on the wall going hand over hand, the feet stepping up
-				// in turn (the opposite foot with each hand), all of it moving with the height climbed, so it holds still
-				// while you hang
-				float s = Mth.sin(pose.height() * CLIMB_RATE);
-				set(h.rightArm, CLIMB_REACH - CLIMB_ARM_SWING * s, 0.0F, 0.1F, e);
-				set(h.leftArm, CLIMB_REACH + CLIMB_ARM_SWING * s, 0.0F, -0.1F, e);
-				set(h.rightLeg, -CLIMB_LEG_LIFT * (0.5F - 0.5F * s), 0.0F, 0.05F, e);
-				set(h.leftLeg, -CLIMB_LEG_LIFT * (0.5F + 0.5F * s), 0.0F, -0.05F, e);
-				h.head.xRot = Mth.lerp(e, h.head.xRot, Math.min(h.head.xRot, -0.2F));
+				// (0.21.38) hand over hand: each hand grips, the body rises past it, it lets go and reaches up again; each
+				// foot steps up with the opposite hand and pushes down (see the class notes). Elbows and knees: bendLimbs.
+				float u = pose.travel() / CLIMB_CYCLE;
+				float[] limb = new float[2];
+				climbLimb(u, 0.0F, true, pose.crawl(), limb);
+				set(h.rightArm, limb[0], 0.0F, HAND_OUT, e);
+				climbLimb(u, 0.5F, true, pose.crawl(), limb);
+				set(h.leftArm, limb[0], 0.0F, -HAND_OUT, e);
+				climbLimb(u, 0.6F, false, pose.crawl(), limb);
+				set(h.rightLeg, limb[0], KNEE_OUT * Math.min(1.0F, limb[1]), 0.08F, e);
+				climbLimb(u, 0.1F, false, pose.crawl(), limb);
+				set(h.leftLeg, limb[0], -KNEE_OUT * Math.min(1.0F, limb[1]), -0.08F, e);
+				// the body leans into the pushing leg, the head looks up toward the reaching hand
+				float s = Mth.sin(u * Mth.TWO_PI);
+				h.body.yRot = Mth.lerp(e, h.body.yRot, CLIMB_TWIST * s);
+				h.body.zRot = Mth.lerp(e, h.body.zRot, CLIMB_ROLL * s);
+				h.head.xRot = Mth.lerp(e, h.head.xRot, Math.min(h.head.xRot, CLIMB_LOOK_UP));
+				h.head.yRot = Mth.lerp(e, h.head.yRot, h.head.yRot + CLIMB_LOOK_TURN * s);
 			}
 			case WebParkour.WALL_JUMP -> {
 				// pushed off: arms up and out, legs driving down off the wall, tucking as it flies
@@ -300,6 +329,74 @@ public final class WebParkourPose {
 			default -> {
 			}
 		}
+	}
+
+	/**
+	 * (0.21.38) Right before the model is drawn (after {@link #applyModel}): a climber's elbows and knees bent for this one
+	 * draw ({@link com.jaymospowers.client.KneeBend}), as far as reaching each hold needs.
+	 */
+	public static void bendLimbs(Model<?> model, Object state) {
+		if (!(state instanceof LivingEntityRenderState living) || !(model instanceof HumanoidModel<?> h) || living.deathTime > 0.0F) {
+			return;
+		}
+		Pose pose = living.getData(KEY);
+		if (pose == null || pose.kind() != WebParkour.CLING || pose.tendrils()) {
+			return;
+		}
+		float u = pose.travel() / CLIMB_CYCLE, e = pose.in();
+		float[] limb = new float[2];
+		climbLimb(u, 0.0F, true, pose.crawl(), limb);
+		com.jaymospowers.client.KneeBend.bend(h.rightArm, limb[1] * e, ELBOW, false);
+		climbLimb(u, 0.5F, true, pose.crawl(), limb);
+		com.jaymospowers.client.KneeBend.bend(h.leftArm, limb[1] * e, ELBOW, false);
+		climbLimb(u, 0.6F, false, pose.crawl(), limb);
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, limb[1] * e);
+		climbLimb(u, 0.1F, false, pose.crawl(), limb);
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, limb[1] * e);
+	}
+
+	/**
+	 * (0.21.38) One limb of the climb, {@code offset} of a cycle along from the right hand, {@code u} cycles climbed: its
+	 * swing (xRot) and its elbow or knee bend into {@code out}. Gripped, the hand (or foot) stays on its spot on the wall
+	 * while the body rises past; then it comes off a little and moves up to the next hold. {@code moving}: 0 hanging still
+	 * (a hand caught between holds rests back on the wall) to 1 climbing.
+	 */
+	static void climbLimb(float u, float offset, boolean hand, float moving, float[] out) {
+		float v = u + offset;
+		v -= Mth.floor(v);
+		float hold = hand ? HAND_HOLD : FOOT_HOLD, top = hand ? HAND_TOP : FOOT_TOP, wall = hand ? HAND_WALL : FOOT_WALL;
+		float lift = hand ? HAND_LIFT : FOOT_LIFT;
+		float drop = hold * CLIMB_CYCLE * 16.0F, up, out2;
+		if (v < hold) {
+			up = top - v * CLIMB_CYCLE * 16.0F;
+			out2 = wall;
+		} else {
+			float t = (v - hold) / (1.0F - hold);
+			up = top - drop + drop * smooth(t);
+			out2 = wall - lift * Mth.sin(Mth.PI * t) * moving;
+		}
+		reach(up, out2, hand ? UPPER_ARM : THIGH, hand ? FOREARM : SHIN, out);
+	}
+
+	/**
+	 * (0.21.38) Two-bone reach in the body's side plane: the swing (xRot) and the bend (+ folds the lower half back, as
+	 * {@link com.jaymospowers.client.KneeBend} bends) that put the end of a limb {@code up} pixels above its pivot and
+	 * {@code ahead} pixels in front. The joint goes out behind the line to the target (elbows back, knees forward).
+	 */
+	static void reach(float up, float ahead, float upper, float lower, float[] out) {
+		float ym = -up, zm = -ahead;
+		float d = (float) Math.sqrt(ym * ym + zm * zm);
+		float at = (float) Math.atan2(zm, ym);
+		if (d >= upper + lower - 0.001F) {
+			out[0] = at;
+			out[1] = 0.0F;
+			return;
+		}
+		d = Math.max(d, Math.abs(upper - lower) + 0.5F);
+		float bend = Mth.PI - (float) Math.acos(Mth.clamp((upper * upper + lower * lower - d * d) / (2.0F * upper * lower), -1.0F, 1.0F));
+		float alpha = (float) Math.acos(Mth.clamp((upper * upper + d * d - lower * lower) / (2.0F * upper * d), -1.0F, 1.0F));
+		out[0] = at - alpha;
+		out[1] = bend;
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float e) {

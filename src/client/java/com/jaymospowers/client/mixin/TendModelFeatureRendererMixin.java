@@ -31,6 +31,8 @@ abstract class TendModelFeatureRendererMixin {
 		com.jaymospowers.client.CrawlPose.bendLimbs(submit.model(), submit.state());
 		// (0.20.38) and a sitter's knees
 		com.jaymospowers.client.MeditatePose.bendKnees(submit.model(), submit.state());
+		// (0.21.38) and a climber's elbows and knees
+		com.jaymospowers.client.power.web.WebParkourPose.bendLimbs(submit.model(), submit.state());
 	}
 
 	/** (0.17.18) And the leg's own straight boxes back once it's drawn. */
