@@ -37,6 +37,8 @@ public final class BloodSmears {
 	 * step, so its streak runs wide and dark out of the pool and thins as it goes.
 	 */
 	static final float DRAG_SOAK = 0.35F, DRAG_SPILL = 0.3F;
+	/** (0.21.26) A corpse dragged through water: how much of its blood washes off each step. */
+	static final int DRAG_WASH = 12;
 
 	/** Where each body last smeared. */
 	private static final Map<Entity, Vec3> LAST = new WeakHashMap<>();
@@ -91,6 +93,20 @@ public final class BloodSmears {
 	private static void drag(ServerLevel level, Entity body, int color, float scale) {
 		Vec3 now = body.position();
 		Vec3 last = LAST.get(body);
+		if (last != null && body.level() == level && (body.isInWater() || body.isInLava())
+			&& Math.hypot(now.x - last.x, now.z - last.z) >= STEP) {
+			// (0.21.26) dragged through water: washed, a step at a time
+			LAST.put(body, now);
+			WET.remove(body);
+			if (body.isInWater()) {
+				if (body instanceof LivingEntity living) {
+					com.jaymospowers.core.wet.ArmourGrime.dragged(level, living);
+				} else {
+					Bloodied.washCorpse(body, DRAG_WASH);
+				}
+			}
+			return;
+		}
 		if (last == null || body.level() != level) {
 			LAST.put(body, now);
 			return;
@@ -133,6 +149,13 @@ public final class BloodSmears {
 			}
 		}
 		BloodTrail.smear(level, body, color, last, now, scale);
+		// (0.21.26) and what it wears takes it: the pool's blood soaked up, the ground's dirt ground in
+		if (soaked > 0.0F) {
+			Bloodied.dragged(body, soaked, poolColor[0]);
+		}
+		if (body instanceof LivingEntity living) {
+			com.jaymospowers.core.wet.ArmourGrime.dragged(level, living);
+		}
 	}
 
 	/** Lying on (or just over) the ground, not in water. */

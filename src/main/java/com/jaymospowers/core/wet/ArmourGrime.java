@@ -78,6 +78,13 @@ public final class ArmourGrime {
 	static final float[] REACH = {1.0F, 0.6F, 0.25F, 0.08F};
 	/** Washed off per check: under water, wading (boots and greaves), in the rain, and one scrub by hand. */
 	static final int UNDER_WATER_WASH = 30, WADING_WASH = 15, RAIN_WASH = 3, SCRUB = 35;
+	/**
+	 * (0.21.26) Dragged a step ({@link #dragged}): through water, this much washed off; over the ground, this many times a
+	 * walking check's dirt, shared over boots, greaves, chest and helmet like this.
+	 */
+	static final int DRAG_WASH = 12;
+	static final float DRAG_DIRT = 0.6F;
+	static final float[] DRAG_REACH = {0.7F, 1.0F, 1.0F, 0.4F};
 	/** A wet sponge scrubs once every this many ticks. */
 	static final int SPONGE_COOLDOWN = 20;
 	/** The armour slots, feet to head (matching {@link #REACH}). */
@@ -205,6 +212,43 @@ public final class ArmourGrime {
 			} else {
 				soil(body, SLOTS[i], dirt, mud);
 			}
+		}
+	}
+
+	/**
+	 * (0.21.26) Andy: "dragging should bloody dirty and clean the armor they wear respectively". {@code body} was just
+	 * dragged (or crawled) a step: through water it's washed ({@link #DRAG_WASH}), over dirt, mud or sand everything it
+	 * wears is scraped through it, {@link #DRAG_DIRT} times walking's dust or mud a step (the chest and legs most).
+	 */
+	public static void dragged(ServerLevel level, LivingEntity body) {
+		if (body.isInWater()) {
+			washAll(body, DRAG_WASH);
+			return;
+		}
+		BlockPos under = body.getOnPos();
+		BlockState ground = level.getBlockState(under);
+		if (ground.isAir()) {
+			ground = level.getBlockState(under.below());
+		}
+		boolean rained = body.isInWaterOrRain();
+		Holder<Biome> biome = level.getBiome(under);
+		float gain = 0.0F;
+		boolean mud = false;
+		if (isMud(ground)) {
+			gain = MUD_GAIN;
+			mud = true;
+		} else if (isEarth(ground) && (rained || level.isRainingAt(body.blockPosition()) || biome.is(ConventionalBiomeTags.IS_SWAMP))) {
+			gain = WET_GROUND_GAIN;
+			mud = true;
+		} else if (isEarth(ground) || ground.is(BlockTags.SAND) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.SUSPICIOUS_GRAVEL)) {
+			// dragged, even dry earth grinds in
+			gain = DUST_GAIN;
+		}
+		if (gain <= 0.0F) {
+			return;
+		}
+		for (int i = 0; i < SLOTS.length; i++) {
+			soil(body, SLOTS[i], gain * DRAG_DIRT * DRAG_REACH[i], mud);
 		}
 	}
 

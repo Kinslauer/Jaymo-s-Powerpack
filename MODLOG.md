@@ -1255,3 +1255,8 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   down, arms straight to the ground), and, through `KneelLegs.remap` of their old-style keys (front about -1.15, back
   about 1.35), every finisher kneel, the web executions and Gravity's crush. Knees asked for with `want` are bent at
   draw time (`TendModelFeatureRendererMixin`).
+- Andy: "dragging should bloody dirty and clean the armor they wear respectively." Each step a body is dragged or crawls
+  (`BloodSmears`): through a pool, what it soaked up bloodies its coat and armour (`Bloodied.dragged`, 90 points a unit,
+  chest and legs most; a corpse's own blood is topped up and freshened); over dirt, mud or sand its armour is scraped
+  dirty (`ArmourGrime.dragged`, 0.6x a walking check per step, even dry earth); through water it's washed (12 a step,
+  a corpse's blood too).

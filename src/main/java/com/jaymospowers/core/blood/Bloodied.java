@@ -54,6 +54,12 @@ public final class Bloodied {
 	/** The bleeder's own armour: this much per point of damage, each piece taking its share (chest most). */
 	static final float ARMOUR_PER_DAMAGE = 3.0F;
 	static final float[] ARMOUR_REACH = {0.4F, 0.7F, 1.0F, 0.45F};
+	/**
+	 * (0.21.26) Dragged through a pool: how much blood (coat and armour points) each unit of stain soaked up gives, and its
+	 * share on boots, greaves, chest and helmet (lying on the ground: the chest and legs most).
+	 */
+	static final float DRAG_PER_SOAK = 90.0F;
+	static final float[] DRAG_REACH = {0.6F, 1.0F, 1.0F, 0.35F};
 	/** An attacker this close (blocks) is splashed. */
 	static final double SPLASH_RANGE = 3.2;
 	/** How often bodies are checked (ticks) and how far from a player (blocks). */
@@ -190,6 +196,44 @@ public final class Bloodied {
 			addBlood(attacker.getItemBySlot(EquipmentSlot.CHEST), splash * 0.5F, color, now, attacker);
 			addBlood(attacker.getItemBySlot(EquipmentSlot.HEAD), splash * 0.2F, color, now, attacker);
 			addBlood(attacker.getItemBySlot(EquipmentSlot.LEGS), splash * 0.25F, color, now, attacker);
+		}
+	}
+
+	/**
+	 * (0.21.26) Andy: "dragging should bloody dirty and clean the armor they wear respectively". {@code body} was dragged
+	 * (or crawled) through a pool and soaked up {@code soaked} of it (stain size): its own coat and everything it wears
+	 * take it, the chest and legs most (they're what's on the ground), the helmet least. A corpse's blood
+	 * ({@link #CORPSE_BLOOD}) takes it too, freshly laid.
+	 */
+	public static void dragged(net.minecraft.world.entity.Entity body, float soaked, int color) {
+		if (soaked <= 0.0F || !(body.level() instanceof ServerLevel level)) {
+			return;
+		}
+		long now = level.getGameTime();
+		float gain = soaked * DRAG_PER_SOAK;
+		if (body instanceof LivingEntity living) {
+			addCoat(living, Math.round(gain), color);
+			for (int i = 0; i < SLOTS.length; i++) {
+				addBlood(living.getItemBySlot(SLOTS[i]), gain * DRAG_REACH[i], color, now, living);
+			}
+			return;
+		}
+		Blood was = body.getAttached(CORPSE_BLOOD);
+		int amount = Math.min(MAX, (was == null ? 0 : was.amount()) + Math.max(1, Math.round(gain)));
+		body.setAttached(CORPSE_BLOOD, new Blood(amount, color, now));
+	}
+
+	/** (0.21.26) A corpse dragged through water: its blood washed off by {@code amount}. */
+	public static void washCorpse(net.minecraft.world.entity.Entity corpse, int amount) {
+		Blood was = corpse.getAttached(CORPSE_BLOOD);
+		if (was == null) {
+			return;
+		}
+		int left = was.amount() - amount;
+		if (left <= 0) {
+			corpse.removeAttached(CORPSE_BLOOD);
+		} else {
+			corpse.setAttached(CORPSE_BLOOD, new Blood(left, was.color(), was.laid()));
 		}
 	}
 
