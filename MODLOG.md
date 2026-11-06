@@ -1188,8 +1188,8 @@ Kingdoms Rivals patch 8, ideas only from the Arkham and Shadow of War games.
   Executioner perk and a weapon in hand, sneak and hold attack on a foe still standing: he's dropped where he stands and
   finished at once. A blow taken, 5 s without landing one, or the quick kill ends the streak. Nothing wider than 2, taller
   than 3 or with 100+ health is dropped.
-- **Vault a shield** (`combat/ShieldVault`): jump at a foe with his shield up, within 3 blocks and ahead of you, and you
-  go over him (Freerun's vault look) and land behind; he reels for a second. Anyone more than a third taller or over
+- **Vault a shield** (`combat/ShieldVault`): Andy: "jump plus alt key or roll bind in mid air". Jump, then press Dodge
+  (Left Alt) in the air with a foe's raised shield within 3 blocks ahead, and you go over him (no roll) (Freerun's vault look) and land behind; he reels for a second. Anyone more than a third taller or over
   twice as wide is "too big to vault".
 - **Shields** (`combat/Shields`): Yank on a mob with a shield tears it away instead of pulling him; a stun (Darktide's,
   Time Flow's, a parry's) knocks loose Kingdoms' armoured ogres' shields.

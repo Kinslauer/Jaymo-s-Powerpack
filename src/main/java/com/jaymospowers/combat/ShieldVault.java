@@ -4,11 +4,21 @@ import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.freerun.Freerun;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import com.jaymospowers.power.web.WebParkour;
+import io.netty.buffer.ByteBuf;
+import com.jaymospowers.JaymosPowers;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -22,8 +32,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.21.21, Kingdoms Rivals patch 8) Vault over a shield (the Arkham games' idea; ideas only). Jump at a foe who has his
- * shield up ({@link Shields#raised}), close and in front of you, and you go up and over him, a hand on his shoulder, and
+ * (0.21.21, Kingdoms Rivals patch 8) Vault over a shield (the Arkham games' idea; ideas only). Andy: "the input should be
+ * jump plus alt key or roll bind in mid air". Jump, then press Dodge (Left Alt) in the air, with a foe who has his shield
+ * up ({@link Shields#raised}) close and in front of you, and you go up and over him (the client pushes you at once,
+ * {@code DodgeClient}, and tells the server, {@link Ask}), a hand on his shoulder, and
  * land behind him; he reels for a beat ({@link #STUN_TICKS}) with his back to you. Not one much bigger than you
  * ({@link #TOO_TALL}, {@link #TOO_WIDE}): an ogre's shield is a wall, and you're told so. The vault's look is Freerun's
  * ({@code WebParkourPose}).
@@ -44,13 +56,21 @@ public final class ShieldVault {
 	public static final int STUN_TICKS = 20;
 	/** A vault ends when you land, or after this long (ticks); and none again for this long. */
 	public static final int MAX_TICKS = 30, COOLDOWN = 20;
+	/** The server allows this much more reach (blocks) than the client looked in (it sees you a tick or two late). */
+	public static final double SERVER_SLACK = 1.0;
 	// ================================================================================================================
 
-	/** Each player's footing last tick and height, to tell a jump. */
-	private record Footing(boolean onGround, double y) {
+	/** Client → server: Dodge pressed in the air over the shield of the entity {@code foe}. */
+	public record Ask(int foe) implements CustomPacketPayload {
+		public static final Type<Ask> TYPE = new Type<>(JaymosPowers.id("shield_vault"));
+		public static final StreamCodec<ByteBuf, Ask> CODEC = ByteBufCodecs.VAR_INT.map(Ask::new, Ask::foe);
+
+		@Override
+		public Type<Ask> type() {
+			return TYPE;
+		}
 	}
 
-	private static final Map<UUID, Footing> FOOTING = new HashMap<>();
 	/** A vault going on: over whom, since when, the pose it set. */
 	private record Vault(LivingEntity foe, long since, int move) {
 	}
@@ -62,73 +82,86 @@ public final class ShieldVault {
 	}
 
 	public static void init() {
+		PayloadTypeRegistry.serverboundPlay().register(Ask.TYPE, Ask.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Ask.TYPE, (payload, ctx) -> asked(ctx.player(), payload.foe()));
 		ServerTickEvents.END_SERVER_TICK.register(ShieldVault::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			FOOTING.clear();
 			VAULTS.clear();
 			NEXT.clear();
 		});
 	}
 
 	private static void tick(MinecraftServer server) {
-		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			UUID id = player.getUUID();
-			Footing was = FOOTING.put(id, new Footing(player.onGround(), player.getY()));
-			Vault vault = VAULTS.get(id);
-			if (vault != null) {
-				long ran = player.level().getGameTime() - vault.since();
-				if (ran > 2 && player.onGround() || ran > MAX_TICKS || !player.isAlive()) {
-					land(player, vault);
-				}
-				continue;
-			}
-			if (was == null || !was.onGround() || player.onGround() || player.getY() <= was.y()) {
-				continue;
-			}
-			// (just left the ground going up: a jump)
-			jumped(player);
+		if (VAULTS.isEmpty()) {
+			return;
 		}
-		if (FOOTING.size() > server.getPlayerList().getPlayerCount() * 2 + 8) {
-			FOOTING.keySet().removeIf(u -> server.getPlayerList().getPlayer(u) == null);
+		for (UUID id : List.copyOf(VAULTS.keySet())) {
+			ServerPlayer player = server.getPlayerList().getPlayer(id);
+			Vault vault = VAULTS.get(id);
+			if (player == null) {
+				VAULTS.remove(id);
+				continue;
+			}
+			long ran = player.level().getGameTime() - vault.since();
+			if (ran > 2 && player.onGround() || ran > MAX_TICKS || !player.isAlive()) {
+				land(player, vault);
+			}
 		}
 	}
 
-	private static void jumped(ServerPlayer player) {
-		ServerLevel level = player.level();
-		long now = level.getGameTime();
-		if (player.isSpectator() || player.isPassenger() || player.isFallFlying() || Downed.isDowned(player) || player.hasAttached(Freerun.MOVE)
-			|| now < NEXT.getOrDefault(player.getUUID(), 0L)) {
-			return;
-		}
+	/** Whether {@code player} may vault now: in the air, not riding, gliding, downed or mid-freerun. Either side. */
+	public static boolean canVault(Player player) {
+		return !player.onGround() && !player.isSpectator() && !player.isPassenger() && !player.isFallFlying() && !player.isInWater()
+			&& !player.getAbilities().flying && !Downed.isDowned(player) && !player.hasAttached(Freerun.MOVE);
+	}
+
+	/** The nearest foe with his shield up, close and ahead of {@code player} ({@code slack}: extra reach allowed), or null. Either side. */
+	public static @Nullable LivingEntity target(Player player, double slack) {
 		Vec3 ahead = Vec3.directionFromRotation(0.0F, player.getYRot());
 		LivingEntity foe = null;
 		double best = Double.MAX_VALUE;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH + 1.0),
+		for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH + 1.0 + slack),
 			e -> e != player && e.isAlive() && !e.isSpectator() && Shields.raised(e))) {
 			Vec3 to = e.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 			double d = to.length();
-			if (d > REACH + e.getBbWidth() * 0.5 || d < 0.01) {
+			if (d > REACH + slack + e.getBbWidth() * 0.5 || d < 0.01) {
 				continue;
 			}
 			double angle = Math.toDegrees(Math.acos(Mth.clamp(to.normalize().dot(ahead), -1.0, 1.0)));
-			if (angle <= AHEAD && d < best) {
+			if (angle <= AHEAD + slack * 10.0 && d < best) {
 				foe = e;
 				best = d;
 			}
 		}
-		if (foe == null) {
+		return foe;
+	}
+
+	/** Whether {@code foe} is too big for {@code player} to vault. Either side. */
+	public static boolean tooBig(Player player, LivingEntity foe) {
+		return foe.getBbHeight() > player.getBbHeight() * TOO_TALL || foe.getBbWidth() > player.getBbWidth() * TOO_WIDE;
+	}
+
+	/** The push that carries {@code player} up and over {@code foe} to land past him. Either side (the client moves itself). */
+	public static Vec3 push(Player player, LivingEntity foe) {
+		Vec3 to = foe.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+		Vec3 flat = to.normalize().scale((to.length() + LAND_BEYOND) / AIR_SPAN);
+		return new Vec3(flat.x, Mth.clamp(UP_BASE + UP_PER_HEIGHT * foe.getBbHeight(), UP_MIN, UP_MAX), flat.z);
+	}
+
+	/** The client vaulted (or tried) over {@code id}'s shield: checked, then the look, his guard broken, and the landing watched. */
+	private static void asked(ServerPlayer player, int id) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (!(level.getEntity(id) instanceof LivingEntity foe) || now < NEXT.getOrDefault(player.getUUID(), 0L) || VAULTS.containsKey(player.getUUID())
+			|| player.isSpectator() || Downed.isDowned(player) || player.isPassenger() || foe == player || !foe.isAlive() || !Shields.raised(foe)
+			|| foe.distanceTo(player) > REACH + SERVER_SLACK + foe.getBbWidth() + 1.0) {
 			return;
 		}
 		NEXT.put(player.getUUID(), now + COOLDOWN);
-		if (foe.getBbHeight() > player.getBbHeight() * TOO_TALL || foe.getBbWidth() > player.getBbWidth() * TOO_WIDE) {
+		if (tooBig(player, foe)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.shield_vault.too_big", foe.getDisplayName()).withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		Vec3 to = foe.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
-		Vec3 push = to.normalize().scale((to.length() + LAND_BEYOND) / AIR_SPAN);
-		double up = Mth.clamp(UP_BASE + UP_PER_HEIGHT * foe.getBbHeight(), UP_MIN, UP_MAX);
-		player.setDeltaMovement(push.x, up, push.z);
-		player.needsSync = true;
 		player.resetFallDistance();
 		int move = (player.getRandom().nextInt(WebParkour.VARIANTS) * 8 + Freerun.VAULT) * 8;
 		player.setAttached(Freerun.MOVE, move);
