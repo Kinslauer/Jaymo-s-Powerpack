@@ -10139,4 +10139,9 @@ on a vampire, mob or player, lands 5 times over (`Vampires.STAKE_FACTOR`); a dha
 (`STAKE_DHAMPIR_FACTOR`). Dark blood and smoke burst from the chest with a low crit sound. `Vampires.staked`, first in
 `LivingEntityHurtMixin`, so the other perks multiply on top. Only the hand's own blow counts (direct attacker, main hand),
 so fire or a spell cast with a skewer held doesn't. The skewer can't be thrown, so there is no thrown stake. An Elder hit
-in bat form passes the blow on with the same source, so it is staked too. Gradle compile clean; not played.
+in bat form passes the blow on with the same source, so it is staked too.
+- The stake stays in (Andy: "the staked are severely slowed until they remove the stake"). `Stakes`: a skewer that hurts
+a vampire leaves the hand (creative keeps it) and lodges, one at a time (`Stakes.STAKE`, a persistent ItemStack). While in,
+Slowness V refreshed every 5 ticks, a drip of dark blood. Out: a vampire player holds sneak 3 s, a vampire mob tears it
+out after 20 s, anyone with an empty hand right-clicks the staked to pull it into their hand; it drops on death or when
+cured. Further skewer hits still land 5x but don't lodge a second stake. Gradle compile clean; not played.
