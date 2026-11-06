@@ -204,6 +204,11 @@ public final class Armory {
 		PatronWeapons.SUNBRAND = item("sunbrand", p -> new PatronWeaponItem(p, PatronWeapons.Kind.SUNBRAND), p -> PatronWeapons.props(PatronWeapons.Kind.SUNBRAND, p));
 		PatronWeapons.ASHFANG = item("ashfang", p -> new PatronWeaponItem(p, PatronWeapons.Kind.ASHFANG), p -> PatronWeapons.props(PatronWeapons.Kind.ASHFANG, p));
 		PatronWeapons.PLAIN_WORD = item("plain_word", p -> new PatronWeaponItem(p, PatronWeapons.Kind.PLAIN_WORD), p -> PatronWeapons.props(PatronWeapons.Kind.PLAIN_WORD, p));
+		// (0.21.19) the Banes' weapons (Kingdoms Rivals patch 6b): heads taken from an ended Bane, at the Tool Station only
+		BaneWeapons.registerComponents();
+		BaneWeapons.GRAVESWORN = item("gravesworn", p -> new BaneWeapons.BaneWeaponItem(p, BaneWeapons.Kind.GRAVESWORN), p -> BaneWeapons.props(BaneWeapons.Kind.GRAVESWORN, p));
+		BaneWeapons.GRUDGE = item("grudge", p -> new BaneWeapons.BaneWeaponItem(p, BaneWeapons.Kind.GRUDGE), p -> BaneWeapons.props(BaneWeapons.Kind.GRUDGE, p));
+		BaneWeapons.HORNSCYTHE = item("hornscythe", p -> new BaneWeapons.BaneWeaponItem(p, BaneWeapons.Kind.HORNSCYTHE), p -> BaneWeapons.props(BaneWeapons.Kind.HORNSCYTHE, p));
 		// (0.15.148) the single-tail leather whip: cracks, wraps and hauls (Lash)
 		item("leather_whip", LeatherWhipItem::new, p -> p.durability(LeatherWhipItem.DURABILITY).repairable(net.minecraft.world.item.Items.LEATHER)
 			.component(DataComponents.LORE, new ItemLore(List.of(

@@ -82,6 +82,10 @@ PARTS = [
     ("sunbrand_blade", "Sunbrand Blade", "drawn:sunbrand_blade", ["iron"]),
     ("ashfang_blade", "Ashfang Blade", "drawn:ashfang_blade", ["iron"]),
     ("plain_word_blade", "Plain Word Blade", "drawn:plain_word_blade", ["iron"]),
+    # (Rivals patch 6b) the Banes' weapons' heads: taken from an ended Bane, iron only (tools/bane_weapons_assets.py)
+    ("gravesworn_blade", "Gravesworn Blade", "drawn:gravesworn_blade", ["iron"]),
+    ("grudge_head", "Grudge Head", "drawn:grudge_head", ["iron"]),
+    ("hornscythe_blade", "Hornscythe Blade", "drawn:hornscythe_blade", ["iron"]),
 
     # (RPG Series) Rogues & Warriors' and Archers' forged weapons (their own art is all rights reserved, so drawn here)
     ("rogue_dagger_blade", "Rogue Dagger Blade", "drawn:rogue_dagger_blade", ["iron", "gold"]),
@@ -414,6 +418,57 @@ DRAWN["plain_word_blade"] = [
     ".....#oxxx#.....",
     ".....#oxxx#.....",
     "......####......",
+    "................",
+    "................"]
+DRAWN["gravesworn_blade"] = [
+    ".......##.......",
+    "......#ox#......",
+    "......#ox#......",
+    ".....#oxxx#.....",
+    ".....#oxxx#.....",
+    ".....#ox#x#.....",
+    ".....#ox#x#.....",
+    ".....#ox#x#.....",
+    ".....#ox#x#.....",
+    ".....#ox#x#.....",
+    ".....#oxxx#.....",
+    ".....#oxxx#.....",
+    "..###########...",
+    "..#oxxxxxxxx#...",
+    "..###########...",
+    "................"]
+DRAWN["grudge_head"] = [
+    "................",
+    "..####..........",
+    ".#oxxx##........",
+    "#oxxxxxx##......",
+    "#oxxxxxxxx######",
+    "#oxxxxxxxx#ooxx#",
+    "#oxxxxxxxx#xxxx#",
+    "#oxxxxxxxx######",
+    "#oxxxxxx##......",
+    ".#oxxx##........",
+    "..#x##..........",
+    "...#............",
+    "................",
+    "................",
+    "................",
+    "................"]
+DRAWN["hornscythe_blade"] = [
+    "................",
+    "....######......",
+    "..##oooxxx##....",
+    ".#oxx####xxx#...",
+    "#ox##....##xx#..",
+    "#x#........#xx#.",
+    "##..........#x#.",
+    ".............#x#",
+    "..............##",
+    "...........###x#",
+    "...........#oxx#",
+    "...........#xxx#",
+    "...........#####",
+    "................",
     "................",
     "................"]
 # outline, metal, shine

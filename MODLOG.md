@@ -1165,3 +1165,10 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
 ## 0.21.18 (2026-11-06): who's in a film (Kingdoms 0.7.619)
 - `UltimateFilm.filming(ServerPlayer)`: whether a player is in a film just now (their own, or bars from someone else's),
   kept on the server for each film's full length. Kingdoms' Bane waits for it to end before it turns up.
+
+## 0.21.19 (2026-11-06): the Banes' weapons (Kingdoms 0.7.621)
+- Three found-only weapons for Kingdoms' Banes (`armory/BaneWeapons`): the Gravesworn (Crossguard and Tough Handle), the
+  Grudge (Tough Handle and Tool Binding) and the Hornscythe (Tool Handle and Tool Binding). Their iron heads come only from an
+  ended Bane, never shaped, cast or forged, like the kings' heads; JEI says where they come from.
+- `jaymospowers:bane_element` holds the weapon's element; the Tool Station carries it (and the "Taken from" line) from the
+  head onto the weapon. Kingdoms does the bursts. Art: `tools/bane_weapons_assets.py`, our own.

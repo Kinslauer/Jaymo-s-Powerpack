@@ -9916,3 +9916,24 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
   - A finisher with no marks fells it as before; it's back in a day or two.
 - Once it's ended or sworn, a new brand may come.
 - Lines: `lang/parts/bane.json`. Built, not played. Next (6b): its element weapon head and its stronghold.
+
+## 0.7.621 (2026-11-06): Rivals patch 6b, its weapon and its hold (Powers 0.21.19)
+- **Its own weapon:** each Bane fights with its kind's weapon from Jaymo's Powers (grave-knight: Gravesworn, a long blade;
+  outlaw warlord: Grudge, an axe; demon-sworn: Hornscythe, a scythe). It is steeped in one of the Sorcerer's elements, the
+  same for that Bane always (knight: death, ice, earth or water; warlord: fire, earth, air, lightning, ice or water; demon:
+  fire, blood, lightning or death), and gets keener each rank. One blow in six bursts with the element, the Sorcerer's own
+  burst; the rest spark (`BaneArms`). Without Powers it keeps its old plain weapons, with the element still on its blows.
+- **Its head is yours:** ended with its marks, it leaves you its weapon's head instead of the weapon. The head carries the
+  element and "Taken from <name>". It can't be cast or forged: put it together at the Tool Station like the kings' heads,
+  and the weapon keeps the element and still bursts with it in your hand.
+- **Its hold at rank five:** when it reaches rank five it raises a keep of its kind's stone 24 to 48 blocks from where it
+  was born, in the Overworld or the Nether (deepslate, a log palisade, or nether brick; corner towers, a south gate, a heart
+  with a light on it). Its owner gets a note with where; the boards carry it. From then on it waits there (only its men
+  still come to your fights, marks and all), with six of its band round it whenever anyone is near (`BaneHolds`).
+  - Its walls ward it: inside 40 blocks of its heart it takes 35% of the harm, and a killing blow can't finish it.
+  - Storm it by the seat siege rules: plant any banner within 24 blocks of its heart, and hold it 2.5 minutes with none of
+    its band within 16. The nearest three of its band go to tear it down. A boss bar shows how near it is.
+  - Held, the heart breaks and the gate falls in. Its ward is gone and it can be ended there. Left alive, it rebuilds in
+    three days. Ended or sworn, the ruin stays.
+  - Its hounds (patch 5) aren't in yet.
+- Lines: `lang/parts/bane.json`. Built, not played.
