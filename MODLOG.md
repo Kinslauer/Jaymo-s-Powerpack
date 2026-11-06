@@ -1217,3 +1217,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   - A plain punch on one already down, 3+ into a streak, finishes him and counts on.
   - Web Shot and Yank keep the streak alive.
 - **Both:** a dodge roll or a shield vault keeps the combo and the streak from timing out.
+
+## 0.21.24 (2026-11-06): Felled in the pack (Kingdoms 0.7.625)
+- Felled (all rights reserved, Raiiiden; CurseForge 1715901 / file 9305152) and Zarith (1720181 / 9284445) join `packMods`
+  (dev: false). Kingdoms hands the felling stroke of a player's chopping to it (`FelledCompat`).

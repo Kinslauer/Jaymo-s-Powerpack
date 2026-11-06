@@ -9974,3 +9974,16 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
     An item only reached through such recipes but also found in the world (a magma block) shows once picked up.
 - Server log at start: "Tier hiding: N items wait for a tier, M for knowledge". JEI is compile-only (`client/compat/TierJei`,
   its `jei_mod_plugin` entrypoint); the recipe book through `ClientRecipeBookMixin`. Built, not played.
+
+## 0.7.625 (2026-11-06): Felled takes the felling stroke (Powers 0.21.24)
+- Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... if this is easier to ship do that instead, otherwise
+  cannibalize it". Felled (Raiiiden) is all rights reserved, so no code of it is copied; it has a Fabric 26.3 build, so the
+  pack ships it unchanged from CurseForge (0.1.5, with its physics library Zarith 0.2.0, Jolt with native libraries).
+- `FelledCompat`: with Felled loaded, a player's chopping still narrows the cut, fills the chop meter and counts for a
+  woodcutter, but the stroke that would fell the tree mends the chopped logs and hands the tree to Felled's
+  `FellingHandler.fellFrom` (by reflection), which brings it down as a rigid body (tips over the stump, rolls, snaps,
+  floats, can be stood on and ridden). Too big for Felled, or it fails: our `FallingTree` as before.
+- Our break handler runs in its own phase ahead of the default one (`Trees.CHOPPING`), so Felled never sees a chop in
+  progress as a log broken whole. Sneak-breaking a single log, creative, and logs we don't chop are left to Felled's own rules.
+- Blasts, giants (grab and throw), tornadoes, gatherers, Grimsby's axe and trunks with nothing under them still use our
+  falling trees. Hint 121 (HINTS=121). Built, not played; Felled's own felling not seen in our pack yet.
