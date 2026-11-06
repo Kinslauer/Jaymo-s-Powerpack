@@ -36,7 +36,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.624, Rivals patch 5) What a Bane ({@link Banes}) takes from its owner while it lives.
+ * (0.7.625, Rivals patch 5) What a Bane ({@link Banes}) takes from its owner while it lives.
  * <ul>
  * <li><b>The cut:</b> a share ({@link #CUT_BASE}, more for each place it holds) of their job wages, bounty rewards and
  * merchant sales goes to it ({@link #cut}), and now and then a coin goes from their purse ({@link #PINCH_MILLI}). All of it

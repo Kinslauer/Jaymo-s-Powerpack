@@ -884,7 +884,7 @@ public final class Bounties {
 		unpinAll(level, b.key());
 		// (0.7.490) paid in the court's own coin
 		Currency money = Currencies.of(level.getServer(), court);
-		// ((0.7.624) less a Bane's cut)
+		// ((0.7.625) less a Bane's cut)
 		Currencies.Pay coins = BaneCut.cut(player, Currencies.payEmeralds(money, emeralds));
 		Currencies.give(player, coins);
 		Reputation.change(player, court, Math.max(REP_MIN, emeralds / REP_PER));

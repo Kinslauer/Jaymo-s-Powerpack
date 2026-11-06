@@ -2140,7 +2140,7 @@ public final class PowersCompat {
 		return player.level().isClientSide() && lockedId() >= 0;
 	}
 
-	// ---- (0.7.624) Takedowns on the skill bar --------------------------------------------------------------------------
+	// ---- (0.7.625) Takedowns on the skill bar --------------------------------------------------------------------------
 
 	private static java.lang.invoke.@Nullable MethodHandle barMoves, castMove;
 	private static boolean lookedForMoves;
@@ -2163,7 +2163,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.624) Powers' {@code Takedowns.moves}: the takedowns {@code player} has on the skill bar now, either side; none without Powers. */
+	/** (0.7.625) Powers' {@code Takedowns.moves}: the takedowns {@code player} has on the skill bar now, either side; none without Powers. */
 	@SuppressWarnings("unchecked")
 	public static java.util.List<String> barMoves(net.minecraft.world.entity.player.Player player) {
 		lookForMoves();
@@ -2174,7 +2174,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.624) Powers' {@code Takedowns.cast}: {@code move} from the skill bar. False if it didn't go. */
+	/** (0.7.625) Powers' {@code Takedowns.cast}: {@code move} from the skill bar. False if it didn't go. */
 	public static boolean castMove(net.minecraft.server.level.ServerPlayer player, String move) {
 		lookForMoves();
 		try {

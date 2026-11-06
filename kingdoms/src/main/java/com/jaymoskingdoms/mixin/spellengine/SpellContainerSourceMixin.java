@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * <li>Any resolving container takes the form spells too, so a Rogues dagger shows its class skills and its forms; the
  * forms source only ever offers forms that fit the hand.</li>
  * </ul>
- * (0.7.624) The same for Powers' takedowns on a bare hand (in Time Flow, or locked on).
+ * (0.7.625) The same for Powers' takedowns on a bare hand (in Time Flow, or locked on).
  * Runs on both sides, as Spell Engine does.
  */
 @Mixin(value = SpellContainerSource.class, remap = false)

@@ -227,7 +227,7 @@ public final class Banes {
 		// ((0.7.621) its element weapon, and its hold at rank five)
 		BaneArms.register();
 		BaneHolds.register();
-		// ((0.7.624) its cut, its claims and its hounds)
+		// ((0.7.625) its cut, its claims and its hounds)
 		BaneCut.register();
 		// (a band never harms its own: the knight's dead leave his grave-robbers be)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((victim, source, amount) -> {
@@ -602,7 +602,7 @@ public final class Banes {
 		return true;
 	}
 
-	/** (0.7.624, for BaneCut) {@code count} of its men come at {@code p} in a place it holds. True if any came. */
+	/** (0.7.625, for BaneCut) {@code count} of its men come at {@code p} in a place it holds. True if any came. */
 	static boolean claimMen(ServerLevel level, ServerPlayer p, Captain c, int count) {
 		if (VISITS.containsKey(c.tribe()) || Captains.filming(p) || PowersCompat.filming(p)) {
 			return false;
@@ -610,7 +610,7 @@ public final class Banes {
 		return men(level, p, c, count);
 	}
 
-	/** (0.7.624, for BaneCut) It, or some of its men, are about just now. */
+	/** (0.7.625, for BaneCut) It, or some of its men, are about just now. */
 	static boolean visiting(String ladder) {
 		return VISITS.containsKey(ladder);
 	}

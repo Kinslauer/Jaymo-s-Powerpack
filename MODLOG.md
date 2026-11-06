@@ -1218,7 +1218,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   - Web Shot and Yank keep the streak alive.
 - **Both:** a dodge roll or a shield vault keeps the combo and the streak from timing out.
 
-## 0.21.24 (2026-11-06): takedowns on the skill bar (Kingdoms 0.7.624)
+## 0.21.24 (2026-11-06): takedowns on the skill bar (Kingdoms 0.7.625)
 - Andy: "chrono in time flow should get the display, but for fist users across the board the menu can show while you
   have an empty hand and are locked on." `Takedowns.moves` / `Takedowns.cast` put patch 9's moves on the RPG skill bar
   (through Jaymo's Kingdoms' Weapon Forms bar, Spell Engine's keys 1, 2...): in Time Flow, always, Takedown and Shadow

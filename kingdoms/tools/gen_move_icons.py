@@ -1,4 +1,4 @@
-"""(0.7.624) Skill bar icons for Powers' takedowns: move_takedown (a fist driving down, a burst under it) and
+"""(0.7.625) Skill bar icons for Powers' takedowns: move_takedown (a fist driving down, a burst under it) and
 move_blink (a violet swirl with a figure's shadow). 16x16, drawn here, our own."""
 from PIL import Image, ImageDraw
 import math, os
