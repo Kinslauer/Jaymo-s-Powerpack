@@ -177,5 +177,11 @@ Andy picked all 34 rows (2026-11-06).
   notes, half harm from what you use most, arrivals mid-fight on its ground with a film (never during another), friends
   fight it but only you finish it (`Banes`, client `BaneBrand`). Outlaws are branded most (4x weight), and every band
   has living outlaws to question. It can't be ended until patch 6.
+- Patch 6a (Kingdoms 0.7.620): eight marks, three in order; its band's outlaws carry them (branded, and turning up
+  without it); the question "What marks can end your master?" (Rough Questions/Interrogation: the place; Quiet Word: two
+  ruled out; lies but not to Interrogation); carving at a grindstone (marks screen); the finisher judges (right: killed,
+  its weapon yours, or sworn if you sneak; wrong: it ranks up, laughs, goes, and you learn which were right) (`BaneMarks`,
+  client `BaneMarksScreen`). Marks go on any blade, not Gem Sockets: sockets hold at most two and only on Master-forged
+  pieces. Still to do (6b): its element weapon head (Tinkers routes) and its stronghold at rank five.
 - Patch 5 put off (Andy, 2026-11-06: "skip patch 5 for now and come back later"): patch 6 goes next; patch 5 after
   patch 9 or whenever Andy asks. Nothing in 6-9 needs it.

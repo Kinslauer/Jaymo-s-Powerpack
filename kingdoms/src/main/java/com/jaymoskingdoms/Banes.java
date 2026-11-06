@@ -112,6 +112,11 @@ public final class Banes {
 	static final int SWING_TICKS = 20;
 	/** Struck down by anyone but its owner, it gets up with this share of its health and goes. */
 	static final float NOT_YOURS_HEALTH = 0.3F;
+	/** (0.7.620) Away from its ground, or while it heals: each look in a fight, the chance some of its men come (this many), marks and all. */
+	static final float MEN_CHANCE = 0.12F;
+	static final int MEN = 2;
+	/** (0.7.620) Finished with the wrong marks, it's up with this share of its health; sworn, with this. */
+	static final float WRONG_HEALTH = 0.6F, SWORN_HEALTH = 0.5F;
 	// ================================================================================================================
 
 	/** On a Bane's body. */
@@ -145,17 +150,25 @@ public final class Banes {
 	static final AttachmentType<Map<String, Map<String, Float>>> TALLY = AttachmentRegistry.create(JaymosKingdoms.id("bane_tally"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.unboundedMap(Codec.STRING, Codec.FLOAT))));
 
-	/** A visit: when it came, the last blow struck by or at it or its band, when its owner fell (−1), whether it downed them yet. */
+	/**
+	 * A visit: when it came, the last blow struck by or at it or its band, when its owner fell (−1), whether it downed them
+	 * yet; (0.7.620) {@code men}: only some of its band, come without it.
+	 */
 	private static final class Visit {
 		final long at;
+		final boolean men;
 		long lastBlow, ownerDead = -1L;
 		boolean downed;
 
-		Visit(long at) {
+		Visit(long at, boolean men) {
 			this.at = at;
-			this.lastBlow = at + ARRIVE_FILM;
+			this.men = men;
+			this.lastBlow = at + (men ? 0 : ARRIVE_FILM);
 		}
 	}
+
+	/** (0.7.620) Its owner's finisher with the right marks: these Banes fall for good. In memory, for the moment of the blow. */
+	private static final java.util.Set<String> ENDING = new java.util.HashSet<>();
 
 	/** Each Bane here now (its ladder). In memory: a reload sends them off. */
 	private static final Map<String, Visit> VISITS = new HashMap<>();
@@ -197,6 +210,8 @@ public final class Banes {
 			}
 		});
 		ServerLivingEntityEvents.ALLOW_DEATH.register(Banes::allowDeath);
+		// ((0.7.620) the marks that end it)
+		BaneMarks.register();
 		// (a band never harms its own: the knight's dead leave his grave-robbers be)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((victim, source, amount) -> {
 			String mine = VISITS.isEmpty() || source.getEntity() == null ? null : bandOf(victim);
@@ -256,7 +271,8 @@ public final class Banes {
 	static @Nullable Captain of(ServerPlayer player) {
 		Bane b = player.getAttached(BANE);
 		Captain c = b == null ? null : Captains.get(player.level().getServer(), b.id());
-		return c == null || c.fallen() && c.back() < 0 ? null : c;
+		// ((0.7.620) one sworn to you is your Bane no more)
+		return c == null || c.fallen() && c.back() < 0 || SwornCaptains.sworn(player.level().getServer(), c.id()) ? null : c;
 	}
 
 	static String[] names(Rivals.Side s) {
@@ -447,10 +463,15 @@ public final class Banes {
 		ServerLevel level = (ServerLevel)p.level();
 		Bane b = p.getAttached(BANE);
 		long now = level.getGameTime();
-		if (b == null || c.fallen() || VISITS.containsKey(c.tribe()) || now < b.next() || !level.dimension().identifier().toString().equals(b.dim())) {
+		if (b == null || VISITS.containsKey(c.tribe()) || now < b.next() || !fighting(p) || Downed.isDowned(p)) {
 			return;
 		}
-		if (p.position().distanceTo(Vec3.atCenterOf(b.home())) > GROUND || !fighting(p) || Downed.isDowned(p)) {
+		boolean ground = !c.fallen() && level.dimension().identifier().toString().equals(b.dim()) && p.position().distanceTo(Vec3.atCenterOf(b.home())) <= GROUND;
+		if (!ground) {
+			// ((0.7.620) off its ground, or while it heals: now and then some of its men, who carry its marks)
+			if (level.getRandom().nextFloat() < MEN_CHANCE) {
+				men(level, p, c);
+			}
 			return;
 		}
 		if (Captains.filming(p) || PowersCompat.filming(p) || level.getRandom().nextFloat() >= ARRIVE_CHANCE) {
@@ -476,7 +497,7 @@ public final class Banes {
 		}
 		long now = level.getGameTime();
 		// (a visit first: its body is known for one when it loads)
-		VISITS.put(c.tribe(), new Visit(now));
+		VISITS.put(c.tribe(), new Visit(now, false));
 		PathfinderMob body = body(level, kind, spot, random);
 		if (body == null) {
 			VISITS.remove(c.tribe());
@@ -498,6 +519,9 @@ public final class Banes {
 			// (every band has living men in it, to be questioned: the knight's grave-robbers, the demon's cultists)
 			boolean man = kind == Rivals.Side.BANE_WARLORD || i % 2 == 0;
 			PathfinderMob m = follower(level, kind, man, c.tribe(), Construction.standable(level, at, 2), random);
+			if (m != null && man) {
+				BaneMarks.carry(m, c.tribe(), random);
+			}
 			if (m != null) {
 				band.add(m.getUUID());
 				Rulers.charge(m, p);
@@ -516,6 +540,36 @@ public final class Banes {
 		Speech.say(level, body, Component.translatable("bane.jaymoskingdoms." + kind(kind) + ".arrives." + last + "." + random.nextInt(LINES),
 			Recollections.nameTo(p, body), Component.literal(c.name())), Speech.RED, Captains.SAY_RANGE);
 		Captains.put(level.getServer(), c.met(p.getUUID(), new Meeting(m == null ? 1 : m.times() + 1, m == null ? "met" : m.last(), now)));
+	}
+
+	/** (0.7.620) Some of its men turn up in {@code p}'s fight without it, each with one of its marks; a line from the first. */
+	private static void men(ServerLevel level, ServerPlayer p, Captain c) {
+		RandomSource random = level.getRandom();
+		Rivals.Side kind = Rivals.side(c.tribe());
+		BlockPos spot = approach(level, p, random);
+		if (spot == null) {
+			return;
+		}
+		VISITS.put(c.tribe(), new Visit(level.getGameTime(), true));
+		List<UUID> band = new ArrayList<>();
+		PathfinderMob first = null;
+		for (int i = 0; i < MEN; i++) {
+			BlockPos at = spot.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2);
+			PathfinderMob m = follower(level, kind, true, c.tribe(), Construction.standable(level, at, 2), random);
+			if (m != null) {
+				BaneMarks.carry(m, c.tribe(), random);
+				Rulers.charge(m, p);
+				band.add(m.getUUID());
+				first = first == null ? m : first;
+			}
+		}
+		if (first == null) {
+			VISITS.remove(c.tribe());
+			return;
+		}
+		BANDS.put(c.tribe(), band);
+		Speech.say(level, first, Component.translatable("bane.jaymoskingdoms." + kind(kind) + ".men." + random.nextInt(LINES), Recollections.nameTo(p, first),
+			Component.literal(c.name())), Speech.RED, Captains.SAY_RANGE);
 	}
 
 	/** Where it comes from: on the ground {@link #ARRIVE_MIN}-{@link #ARRIVE_MAX} off, near {@code p}'s height. */
@@ -627,6 +681,10 @@ public final class Banes {
 		for (Map.Entry<String, Visit> e : List.copyOf(VISITS.entrySet())) {
 			String ladder = e.getKey();
 			Visit v = e.getValue();
+			if (v.men) {
+				men(level, ladder, v, now);
+				continue;
+			}
 			Captain c = null;
 			for (Captain x : Captains.of(server, ladder)) {
 				c = x;
@@ -672,6 +730,29 @@ public final class Banes {
 		}
 	}
 
+	/** (0.7.620) Its men without it: after its owner (or whoever's on them), and gone when the fight's over or all are down. */
+	private static void men(ServerLevel level, String ladder, Visit v, long now) {
+		UUID ownerId = owner(ladder);
+		ServerPlayer p = ownerId == null ? null : level.getServer().getPlayerList().getPlayer(ownerId);
+		if (p != null && !p.isAlive() && v.ownerDead < 0) {
+			v.ownerDead = now;
+		}
+		double nearest = Double.MAX_VALUE;
+		boolean any = false;
+		for (UUID id : BANDS.getOrDefault(ladder, List.of())) {
+			if (level.getEntity(id) instanceof PathfinderMob m && m.isAlive()) {
+				any = true;
+				if (p != null && p.level() == level) {
+					nearest = Math.min(nearest, p.distanceTo(m));
+				}
+			}
+		}
+		if (!any || p == null || p.level() != level || nearest > LEAVE_FAR || now - v.lastBlow > LEAVE_QUIET
+			|| v.ownerDead >= 0 && now - v.ownerDead > LEAVE_AFTER_KILL) {
+			end(level, ladder);
+		}
+	}
+
 	/** Who {@code mob} goes for: its owner, or a player who's hurt it lately and is nearer. */
 	private static @Nullable LivingEntity foe(PathfinderMob mob, @Nullable ServerPlayer owner) {
 		LivingEntity by = mob.getLastHurtByMob();
@@ -691,13 +772,18 @@ public final class Banes {
 			return false;
 		}
 		Visit v = VISITS.get(ladder);
+		if (v == null && !is(mob) && !Downed.isDowned(mob)) {
+			// ((0.7.620) one left down when the rest went, back on his feet: he slips off too)
+			vanish(mob);
+			return true;
+		}
 		if (is(mob)) {
 			// (his fears, rage and moves, the players he meets)
 			if (Captains.step(level, w)) {
 				return true;
 			}
 		}
-		if (v == null || level.getGameTime() < v.at + ARRIVE_FILM || Downed.isDowned(mob)) {
+		if (v == null || !v.men && level.getGameTime() < v.at + ARRIVE_FILM || Downed.isDowned(mob)) {
 			mob.getNavigation().stop();
 			return true;
 		}
@@ -749,7 +835,8 @@ public final class Banes {
 			for (ServerLevel l : level.getServer().getAllLevels()) {
 				m = m == null ? l.getEntity(id) : m;
 			}
-			if (m != null && m.isAlive() && m.level() instanceof ServerLevel there) {
+			if (m != null && m.isAlive() && m.level() instanceof ServerLevel there && !(m instanceof LivingEntity l && Downed.isDowned(l))) {
+				// ((0.7.620) one lying downed stays, to be questioned)
 				puff(there, m, Rivals.side(ladder), 8);
 				vanish(m);
 			}
@@ -866,10 +953,104 @@ public final class Banes {
 		end(level, c.tribe());
 		UUID ownerId = owner(c.tribe());
 		ServerPlayer p = ownerId == null ? null : level.getServer().getPlayerList().getPlayer(ownerId);
+		if (ENDING.remove(c.id())) {
+			// ((0.7.620) its own marks: it's over)
+			ended(level, c, p);
+			puff(level, body, Rivals.side(c.tribe()), 40);
+			return;
+		}
 		if (p != null) {
 			p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bane.not_over", c.name()).withStyle(ChatFormatting.DARK_RED));
 		}
 		puff(level, body, Rivals.side(c.tribe()), 30);
+	}
+
+	/** (0.7.620) {@code c} is falling for good to its own marks (for {@code Captains.died}). */
+	static boolean ending(Captain c) {
+		return ENDING.contains(c.id());
+	}
+
+	/**
+	 * (0.7.620) Its owner's blow that would kill it. A finisher (downed, or its head off) with marks carved in the blade is
+	 * judged: the right three end it (killed, or sworn if they sneak); wrong ones and it's up, laughing, a rank higher, and gone.
+	 * No marks, or no finisher: it falls as before. True if it dies.
+	 */
+	private static boolean finished(ServerLevel level, Captain c, LivingEntity body, ServerPlayer p) {
+		boolean finisher = Downed.isDowned(body) || body.entityTags().contains(Captains.MISSING_TAG + "head");
+		if (!finisher) {
+			return true;
+		}
+		Rivals.Side kind = Rivals.side(c.tribe());
+		switch (BaneMarks.judge(p, c)) {
+			case NONE -> {
+				return true;
+			}
+			case WRONG -> {
+				BaneMarks.flash(level, body, false);
+				body.setHealth(body.getMaxHealth() * WRONG_HEALTH);
+				body.addTag(Downed.REVIVE_TAG);
+				Captain after = Captains.promote(level, c, body);
+				if (body instanceof Mob mob) {
+					gear(mob, after.rank(), kind);
+				}
+				p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bane.wrong", Component.literal(after.name())).withStyle(ChatFormatting.DARK_RED));
+				climbed(level, c, after, p);
+				leave(level, after, body, "laughs");
+				return false;
+			}
+			default -> {
+				BaneMarks.flash(level, body, true);
+				if (p.isShiftKeyDown()) {
+					sworn(level, c, body, p);
+					return false;
+				}
+				ENDING.add(c.id());
+				// (its weapon is yours)
+				ItemStack arms = body.getMainHandItem().copy();
+				if (!arms.isEmpty() && !p.getInventory().add(arms)) {
+					body.spawnAtLocation(level, arms);
+				}
+				return true;
+			}
+		}
+	}
+
+	/** (0.7.620) Ended by its own marks: no more Bane for {@code p} (a new brand may come), and word on the boards. */
+	private static void ended(ServerLevel level, Captain c, @Nullable ServerPlayer p) {
+		MinecraftServer server = level.getServer();
+		forgetAll(server, c);
+		if (p != null) {
+			p.removeAttached(BANE);
+			List<String> sworn = new ArrayList<>(p.getAttachedOrElse(Captains.SWORN, List.of()));
+			if (sworn.remove(c.id())) {
+				p.setAttached(Captains.SWORN, List.copyOf(sworn));
+			}
+			p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bane.ended", c.name()).withStyle(ChatFormatting.GOLD));
+			Post.news(server, Component.translatable("news.jaymoskingdoms.bane.ended", Component.literal(c.name()), p.getDisplayName()));
+		}
+	}
+
+	/** (0.7.620) Finished with its own marks while its owner held back: sworn to them, its traits and temper kept. */
+	private static void sworn(ServerLevel level, Captain c, LivingEntity body, ServerPlayer p) {
+		MinecraftServer server = level.getServer();
+		body.setHealth(body.getMaxHealth() * SWORN_HEALTH);
+		body.removeTag(BODY_TAG);
+		end(level, c.tribe());
+		forgetAll(server, c);
+		p.removeAttached(BANE);
+		SwornCaptains.swearBane(level, p, body, c);
+		p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bane.sworn", c.name()).withStyle(ChatFormatting.GOLD));
+		Post.news(server, Component.translatable("news.jaymoskingdoms.bane.sworn", Component.literal(c.name()), p.getDisplayName()));
+	}
+
+	/** Its key, what's known of it and its tally. */
+	private static void forgetAll(MinecraftServer server, Captain c) {
+		BaneMarks.forget(server, c.id());
+		ServerLevel world = Factions.level(server);
+		Map<String, Map<String, Float>> tally = new HashMap<>(world.getAttachedOrElse(TALLY, Map.of()));
+		if (tally.remove(c.id()) != null) {
+			world.setAttached(TALLY, Map.copyOf(tally));
+		}
 	}
 
 	/** (From {@code Captains.dealt}) The harm its owner has dealt it most, once there's been enough of it: taken at {@link #RESIST}. */
@@ -917,7 +1098,7 @@ public final class Banes {
 		}
 		UUID ownerId = owner(c.tribe());
 		if (source.getEntity() instanceof ServerPlayer p && p.getUUID().equals(ownerId)) {
-			return true;
+			return finished(level, c, entity, p);
 		}
 		entity.setHealth(entity.getMaxHealth() * NOT_YOURS_HEALTH);
 		ServerPlayer owner = ownerId == null ? null : level.getServer().getPlayerList().getPlayer(ownerId);

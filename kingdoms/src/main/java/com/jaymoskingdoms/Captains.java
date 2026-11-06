@@ -1502,10 +1502,11 @@ public final class Captains {
 		// (4b) a sworn captain dies in his lord's service; one beaten in his own challenge stays dead (but for the raised)
 		boolean wasSworn = SwornCaptains.fell(level, c);
 		boolean honoured = SwornCaptains.challengeWon(level, c, source);
-		// ((0.7.619) a Bane always comes back: nothing ends it yet)
-		boolean bane = Rivals.side(c.tribe()).bane();
-		boolean returns = bane || !wasSworn && !honoured && !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
-		boolean raised = !bane && !returns && !c.chief() && !c.has(Trait.DEATHLESS) && random.nextFloat() < RAISED_CHANCE;
+		// ((0.7.619) a Bane always comes back, unless (0.7.620) its own marks ended it or it was sworn to its owner)
+		boolean ended = Banes.ending(c);
+		boolean bane = Rivals.side(c.tribe()).bane() && !wasSworn && !ended;
+		boolean returns = bane || !ended && !wasSworn && !honoured && !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
+		boolean raised = !bane && !ended && !returns && !c.chief() && !c.has(Trait.DEATHLESS) && random.nextFloat() < RAISED_CHANCE;
 		if (raised) {
 			// (Andy) back from anything, by corrupted magic or a necromancer: no fear left in him
 			returns = true;
@@ -1531,7 +1532,7 @@ public final class Captains {
 			back = Banes.back(now, random);
 		}
 		put(server, c.fell(back, lost));
-		if (bane) {
+		if (bane || ended) {
 			Banes.fell(level, c, entity, source);
 		}
 		// ((0.7.617) a quick kill pinned on another; a price on his head paid)

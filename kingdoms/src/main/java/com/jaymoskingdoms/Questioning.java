@@ -72,8 +72,10 @@ public final class Questioning {
 	/** The questions on MCA's {@code main} menu (our dialogue data), shown only to the one questioning them. */
 	public static final String LEADER = "jaymoskingdoms_q_leader", HOME = "jaymoskingdoms_q_home", THREATEN = "jaymoskingdoms_q_threaten",
 		SPARE = "jaymoskingdoms_q_spare", FINISH = "jaymoskingdoms_q_finish", NEARBY = "jaymoskingdoms_q_nearby", STARE = "jaymoskingdoms_q_stare",
-		SWEAR = "jaymoskingdoms_q_swear", MOOD = "jaymoskingdoms_q_mood", CAPTAIN = "jaymoskingdoms_q_captain";
-	public static final List<String> ANSWERS = List.of(LEADER, HOME, NEARBY, MOOD, CAPTAIN, THREATEN, STARE, SWEAR, SPARE, FINISH);
+		SWEAR = "jaymoskingdoms_q_swear", MOOD = "jaymoskingdoms_q_mood", CAPTAIN = "jaymoskingdoms_q_captain",
+		// (0.7.620) one of a Bane's band: the marks that end it (BaneMarks)
+		BANE = "jaymoskingdoms_q_bane";
+	public static final List<String> ANSWERS = List.of(BANE, LEADER, HOME, NEARBY, MOOD, CAPTAIN, THREATEN, STARE, SWEAR, SPARE, FINISH);
 	/** The perks that unlock questioning (any one), by key: Strength's, Stealth's, Will's. */
 	public static final String ROUGH = "rough_questions", QUIET = "quiet_word", WILL = "interrogation";
 
@@ -166,6 +168,8 @@ public final class Questioning {
 			case MOOD -> Tribes.of(body) != null && !session.asked.contains(answer);
 			// (0.7.431) one of a tribe's: what their captain fears, while there's something you don't know (Captains)
 			case CAPTAIN -> !session.asked.contains(answer) && Captains.asks(player, body);
+			// (0.7.620) one of a Bane's band who knows one of its marks
+			case BANE -> !session.asked.contains(answer) && BaneMarks.asks(body);
 			default -> !session.asked.contains(answer);
 		};
 	}
@@ -249,6 +253,10 @@ public final class Questioning {
 		if (body instanceof Worker w) {
 			// (0.7.425) what they let slip of their kind goes in your bestiary
 			Bestiary.note(player, w.role(), Bestiary.TOLD);
+		}
+		if (BANE.equals(answer)) {
+			// (0.7.620) each perk gets something of its own: Rough Questions and Interrogation its place, Quiet Word two that aren't
+			return BaneMarks.questioned(player, body, lies, has(player, ROUGH), session.unseen || has(player, QUIET), has(player, WILL));
 		}
 		if (CAPTAIN.equals(answer)) {
 			// (0.7.431) a fear or weakness of one of their captains, now in your journal (a lie isn't)
