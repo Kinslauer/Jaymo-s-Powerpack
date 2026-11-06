@@ -83,7 +83,11 @@ public final class Rivals {
 		ILLAGER("illager", true, false),
 		PIRATE("pirate", true, true),
 		RAISED("raised", false, false),
-		HORNKIN("hornkin", false, false);
+		HORNKIN("hornkin", false, false),
+		// ((0.7.619, patch 4) a player's Bane, one ladder each: bane_<kind>@<their id>, Banes)
+		BANE_KNIGHT("bane_knight", false, false),
+		BANE_WARLORD("bane_warlord", false, false),
+		BANE_DEMON("bane_demon", false, false);
 
 		/** Its ladder keys start with this (and {@code @}); its dialect's name. */
 		final String key;
@@ -100,6 +104,21 @@ public final class Rivals {
 
 		boolean tribe() {
 			return this == GOBLIN || this == ORC;
+		}
+
+		/** (0.7.619) One player's Bane ({@link Banes}). */
+		boolean bane() {
+			return this == BANE_KNIGHT || this == BANE_WARLORD || this == BANE_DEMON;
+		}
+
+		/** (0.7.619) The side whose voice its captain lines use: a Bane's nearest kin (the raised, the barbarians, the Hornkin). */
+		Side voice() {
+			return switch (this) {
+				case BANE_KNIGHT -> RAISED;
+				case BANE_WARLORD -> BARBARIAN;
+				case BANE_DEMON -> HORNKIN;
+				default -> this;
+			};
 		}
 
 		static @Nullable Side byKey(@Nullable String key) {
@@ -198,6 +217,11 @@ public final class Rivals {
 				return c.tribe();
 			}
 		}
+		String bane = Banes.followerOf(e);
+		if (bane != null) {
+			// ((0.7.619) one of a Bane's band)
+			return bane;
+		}
 		int camp = faction(e);
 		return camp < 0 ? null : of(server, camp);
 	}
@@ -213,6 +237,10 @@ public final class Rivals {
 
 	/** The side {@code e} would rise for if it rose as a captain from the land: the risen dead, the Hornkin; null for anything else. */
 	static @Nullable Side roamer(Entity e) {
+		if (Banes.followerOf(e) != null) {
+			// ((0.7.619) a Bane's own never rise for another ladder)
+			return null;
+		}
 		if (e instanceof Hornkin h) {
 			return h.kind() == Hornkin.Kind.WARRIOR || h.kind() == Hornkin.Kind.BRUTE ? Side.HORNKIN : null;
 		}
@@ -257,6 +285,10 @@ public final class Rivals {
 		if (s.tribe()) {
 			return Tribes.name(ladder);
 		}
+		if (s.bane()) {
+			// ((0.7.619) a Bane's band)
+			return Component.translatable("rival.jaymoskingdoms.name." + s.key);
+		}
 		int i = s.ordinal() - Side.BARBARIAN.ordinal();
 		long h = ladder.hashCode() * 0x9E3779B97F4A7C15L;
 		String word = FIRST[i][(int) Math.floorMod(h, (long) FIRST[i].length)] + SECOND[i][(int) Math.floorMod(h >>> 20, (long) SECOND[i].length)];
@@ -273,6 +305,7 @@ public final class Rivals {
 			case PIRATE -> PIRATE_BYNAMES;
 			case RAISED -> RAISED_BYNAMES;
 			case HORNKIN -> HORNKIN_BYNAMES;
+			case BANE_KNIGHT, BANE_WARLORD, BANE_DEMON -> Banes.bynames(side(ladder));
 		};
 		return bynames[random.nextInt(bynames.length)];
 	}
@@ -287,6 +320,7 @@ public final class Rivals {
 			case PIRATE -> PIRATE_NAMES;
 			case RAISED -> RAISED_NAMES;
 			case HORNKIN -> HORNKIN_NAMES;
+			case BANE_KNIGHT, BANE_WARLORD, BANE_DEMON -> Banes.names(side(ladder));
 		};
 		String first = names == null ? Greenskins.name(side(ladder) == Side.ORC ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN, random.nextLong())
 			: names[random.nextInt(names.length)];
@@ -340,6 +374,11 @@ public final class Rivals {
 	 * armour (their hide).
 	 */
 	static void gear(Mob mob, int rank, Side s) {
+		if (s.bane()) {
+			// ((0.7.619) a Bane's arms are its own, better at each rank)
+			Banes.gear(mob, rank, s);
+			return;
+		}
 		ItemStack weapon = switch (s) {
 			case ORC, BARBARIAN, ILLAGER -> new ItemStack(rank >= 3 ? Items.IRON_AXE : Items.STONE_AXE);
 			case GOBLIN, PIRATE -> new ItemStack(rank >= 3 ? Items.IRON_SWORD : Items.STONE_SWORD);
@@ -369,6 +408,11 @@ public final class Rivals {
 
 	/** {@code mob}'s own near: the same camp's (workers, its illagers), or for a side without camps, more of its kind. */
 	static List<Mob> allies(ServerLevel level, Mob mob, double range) {
+		String band = Banes.bandOf(mob);
+		if (band != null) {
+			// ((0.7.619) a Bane and its band)
+			return level.getEntitiesOfClass(Mob.class, mob.getBoundingBox().inflate(range), e -> e != mob && e.isAlive() && band.equals(Banes.bandOf(e)));
+		}
 		int camp = faction(mob);
 		Side roams = camp < 0 ? roamer(mob) : null;
 		return level.getEntitiesOfClass(Mob.class, mob.getBoundingBox().inflate(range), e -> e != mob && e.isAlive()
@@ -487,6 +531,8 @@ public final class Rivals {
 		if (s == null || s.tribe()) {
 			return brood;
 		}
+		// ((0.7.619) a Bane speaks in its kin's voice)
+		s = s.voice();
 		if (!key.contains("captain")) {
 			// (only captains' lines are kept in the common tongue: anything else stays as it was)
 			return Dialects.ORC;

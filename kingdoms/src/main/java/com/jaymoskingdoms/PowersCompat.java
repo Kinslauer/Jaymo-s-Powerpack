@@ -568,6 +568,29 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle filming;
+	private static boolean lookedForFilming;
+
+	/** (0.7.619) Whether {@code player} is in one of Powers' films just now (Powers 0.21.18's {@code UltimateFilm.filming}); false without. */
+	public static boolean filming(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForFilming) {
+			lookedForFilming = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					filming = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.UltimateFilm"), "filming",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Powers can't say who's in a film (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return filming != null && (boolean)filming.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/**
 	 * (0.7.459) Powers' executions of the downed (pack 0.19.20, {@code MobExecutions}): Andy: guards "prioritize arresting
 	 * you because unless they are of a certain temperament they try to be righteous and just". A realm's guard or archer

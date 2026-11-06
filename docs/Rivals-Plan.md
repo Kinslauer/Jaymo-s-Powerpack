@@ -172,3 +172,8 @@ Andy picked all 34 rows (2026-11-06).
   another captain, and prices on the heads of captains who kill players (`CaptainSchemes`).
 - Patch 3 (Kingdoms 0.7.618): claims round each camp (tolls you can sneak past, caravans robbed), ground in journal
   entries on the map, and the ladder screen from the journal's Captains button (`CaptainGround`, `Ladders`).
+- Patch 4 (Kingdoms 0.7.619, Powers 0.21.18): the brand only you see, the Bane born from a branded foe you finish, three
+  kinds (corpse-knight, outlaw warlord, demon-sworn) with bands and lines, ranks to five with better arms and mocking
+  notes, half harm from what you use most, arrivals mid-fight on its ground with a film (never during another), friends
+  fight it but only you finish it (`Banes`, client `BaneBrand`). Still to do: questioning the knight's and demon's band
+  (they aren't villagers; patch 6's followers will carry the marks); it can't be ended until patch 6.

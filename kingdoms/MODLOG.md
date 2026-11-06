@@ -9860,3 +9860,31 @@ tribes had now belong to every side that fights you (ideas from Shadow of War: o
   with a "?" for each you haven't learned; and how many times you've met and how the last went. UiStyle panel, lines
   slide, rows scroll.
 - Lines: `lang/parts/captain-ground.json`. Built, not played.
+
+## 0.7.619 (2026-11-06): Rivals patch 4, your Bane is born
+Ideas from Warframe's personal adversaries (a commercial game: our own names, code and lines). `docs/Rivals-Plan.md`.
+- **The brand** (`Banes`): now and then, while you have no Bane, a foe near you carries a faint red rune on its brow and
+  gives off a wisp now and then. Only you see it (client `BaneBrand`, painted by `tools/gen_brand.py`). Any of the dead,
+  an outlaw or illager, or one of the Nether's own (Hornkin, piglins) can carry it. Kill it any old way and nothing
+  happens. Finish it (downed, or its head off) and the brand flares: a day or two later it rises as your Bane. One Bane
+  per player.
+- **Three kinds**, each with its own band, arms and lines (and its kin's voice for the usual captain lines): a raised
+  corpse-knight (a wither skeleton with the dead at its back), an outlaw warlord who climbed on your name (an MCA
+  villager outlaw with cutthroats; a vindicator without MCA), and a demon-sworn one (a Hornkin brute with Hornkin
+  warriors, who don't rot outside the Nether).
+- **A captain of its own:** it's a captain on a ladder of one (`bane_<kind>@<your id>`), so it has traits, a temper,
+  learns from how it lost, wears your head when it kills you and shows on your ladder screen as its own tab.
+- **Ranks:** each time it kills or downs you it climbs a rank (five at most), gains a strength and a better weapon, and
+  sends you a mocking note by messenger; the boards say it climbed.
+- **It learns how you fight:** your blows on it are tallied by kind (fire, shot, blunt, blade, magic, beasts). Once
+  you've dealt 40 of one kind, the kind you use most does half to it, and it tells you so.
+- **It turns up mid-fight:** while you're fighting on its ground (320 blocks from where it was born), never during
+  a film (a captain's, or any of Powers'), about a third of the time each 5 s. It comes 10-16 blocks off with its band
+  (1 to 4 by rank) in a speaker-shot film, with a line about last time (it killed you, you killed it, or anything else).
+  You aren't harmed while the film runs. It goes, band and all, when you get 72 blocks away, a minute passes with no
+  blows, or after it has killed you. Then not again for half a day.
+- **Friends can help:** anyone can fight it and its band, and question the warlord's cutthroats (they tell its traits).
+  Only you can finish it: struck down by anyone or anything else, it gets up laughing and goes.
+- **Not ended yet:** beaten, it is back in a day or two, having learned from it. The marks that end it come in patch 6.
+- Powers 0.21.18 adds `UltimateFilm.filming` for the film check (`PowersCompat.filming`). Lines:
+  `lang/parts/bane.json`. Built, not played.

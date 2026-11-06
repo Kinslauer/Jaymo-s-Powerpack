@@ -455,7 +455,9 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 	/** Out of the Nether (wherever piglins turn) it lasts {@link #TURN_TICKS}, then rots into a zombified Hornkin. */
 	private void turnOutside(ServerLevel level) {
-		if (!this.isNoAi() && level.environmentAttributes().getValue(EnvironmentAttributes.PIGLINS_ZOMBIFY, this.position())) {
+		// ((0.7.619) a Bane's own, demon-sworn, keep whole wherever they go)
+		if (!this.isNoAi() && level.environmentAttributes().getValue(EnvironmentAttributes.PIGLINS_ZOMBIFY, this.position())
+			&& com.jaymoskingdoms.Banes.bandOf(this) == null && !this.entityTags().contains(com.jaymoskingdoms.Banes.BODY_TAG)) {
 			if (++this.timeOut > TURN_TICKS) {
 				this.dropHoard(level);
 				this.convertTo(Nether.ZOMBIFIED_HORNKIN, ConversionParams.single(this, true, true),

@@ -220,6 +220,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		GreenskinLooks.register();
 		// (0.7.616, Rivals patch 1) the marks captains carry back
 		CaptainMarks.register();
+		// (0.7.619) the brand of your Bane-to-be, seen by you alone
+		BaneBrand.register();
 		// (0.7.618, Rivals patch 3) the ladder screen
 		LadderScreen.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
