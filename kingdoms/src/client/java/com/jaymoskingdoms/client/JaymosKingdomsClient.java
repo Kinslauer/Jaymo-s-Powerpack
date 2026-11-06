@@ -148,7 +148,6 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		WerewolfKey.register();
 		FrostPrisonKey.register();
 		NightGiftsClient.register();
-		BloodGrabClient.register();
 		BloodVision.register();
 		// (0.7.471) blood thirst: veins creep in from the screen edges
 		ThirstVeins.register();

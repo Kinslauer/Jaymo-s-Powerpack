@@ -10084,8 +10084,16 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Scared off your home: the first time a deer bolts from a player within 48 blocks of their bed, deer learn that home
   (kept on the Overworld, up to 128 homes): none spawn within 48 blocks of it again and any that wander in run out.
 - Hint 123. Built, not played.
+## 0.7.634: Feed on the skill bar
+- Andy: "put feed on the hotbar too, i cant get it to activate reliably. the current right click ability can move".
+  `FormSkills` adds `night_feed` (NightGifts move 3 -> `BloodGrab.feed`): holding someone, Feed throws them; else it
+  finds prey generously (the crosshair, else the nearest within ~35 degrees of the look and 3 blocks, in sight) and
+  grabs one a hand can hold, bites a sleeper (`SleepingPrey`), or bites anyone else the bite takes. Empty hand needed.
+- Right-click feeding is gone: no sneak+use bite (persons, Nether prey, downed, sleepers) and no double-tap grab
+  (`BloodGrabClient` removed; letting go of use no longer throws). Use on someone held still does nothing (keeps
+  Powers' revive bar from filling). Lapping pools stays sneak+use on the ground. Hints 120/122 reworded. Built, not played.
 
-## 0.7.634: the grab keeps them by the throat, even down
+## 0.7.635: the grab keeps them by the throat, even down
 - Andy: "the grab should animate within the vampire's hand hands at the throat the whole time, even if they go down". A held
   body that went down was laid on the ground by Powers' `DownedPose` while the hand held air. Now `BloodGrab.grabbed`/`holder`
   (read off every player's synced `GRABBING`, so the client knows too) tells Powers to leave a held body alone (Powers

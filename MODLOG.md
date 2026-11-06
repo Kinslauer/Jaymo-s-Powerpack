@@ -1310,4 +1310,4 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 
 ## 0.21.33: held by the throat isn't laid down
 - `DownedPose` skips a downed body a Kingdoms vampire holds up by the throat (`KingdomsCompat.grabbed`, reflection on
-  `BloodGrab.grabbed`), so it stays in the hand (Kingdoms 0.7.634 poses it hanging there). Built, not played.
+  `BloodGrab.grabbed`), so it stays in the hand (Kingdoms 0.7.635 poses it hanging there). Built, not played.

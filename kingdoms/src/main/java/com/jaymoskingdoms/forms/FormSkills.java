@@ -33,7 +33,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.7.632) Andy: "please place them on the bar" (a vampire's O and P). A vampire's or dhampir's Blood Dash, Groundpound
  * and Blood Gaze (the eye laser) are bar spells too ({@code jaymoskingdoms:night_<move>}, {@link NightGifts#move}), with
- * anything or nothing in hand.
+ * anything or nothing in hand. (0.7.634) And Feed ({@code night_feed}, {@link com.jaymoskingdoms.BloodGrab#feed}), the bite and
+ * the grab off right-click.
  */
 public final class FormSkills {
 	private static final String MOD_ID = "spell_engine";
@@ -49,7 +50,7 @@ public final class FormSkills {
 	/** (0.7.632) A vampire's moves on the bar: {@code jaymoskingdoms:night_<move>}, delivered by this; the moves, by NightGifts' index. */
 	static final String NIGHT_PREFIX = "night_";
 	static final Identifier NIGHT_HANDLER = JaymosKingdoms.id("night_move");
-	static final List<String> NIGHT_MOVES = List.of("dash", "pound", "gaze");
+	static final List<String> NIGHT_MOVES = List.of("dash", "pound", "gaze", "feed");
 	/** The spell tag of every form spell: what a form weapon's own container takes. */
 	public static final String TAG = JaymosKingdoms.MOD_ID + ":weapon_forms";
 

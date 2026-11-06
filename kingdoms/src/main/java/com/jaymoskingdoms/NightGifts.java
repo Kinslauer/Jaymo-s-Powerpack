@@ -489,7 +489,7 @@ public final class NightGifts {
 
 	// ---- the moves -----------------------------------------------------------------------------------------------------
 
-	/** Whether it went: {@code which} 0 ({@code O}), 1 ({@code P}) or (0.7.632) 2, a vampire's eye laser (the skill bar only). */
+	/** Whether it went: {@code which} 0 ({@code O}), 1 ({@code P}) or (0.7.632) 2, a vampire's eye laser, or (0.7.634) 3, Feed (the skill bar only). */
 	public static boolean move(ServerPlayer player, int which) {
 		Gift g = player.getAttached(GIFT);
 		if (g == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping()) {
@@ -497,8 +497,8 @@ public final class NightGifts {
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[3]);
-		if (which < 0 || which > 2 || now < ready[which]) {
+		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[4]);
+		if (which < 0 || which > 3 || now < ready[which]) {
 			return false;
 		}
 		if (g.blood()) {
@@ -513,6 +513,9 @@ public final class NightGifts {
 				player.addTag(GAZE_TAG);
 				ready[2] = now + GAZE_COOLDOWN;
 				return true;
+			} else if (which == 3) {
+				// (0.7.634) Feed: the grab, the throw, or a bite (BloodGrab.feed)
+				return BloodGrab.feed(player);
 			}
 		} else if (g.wolf()) {
 			boolean beast = WerewolfPlayers.beast(player);

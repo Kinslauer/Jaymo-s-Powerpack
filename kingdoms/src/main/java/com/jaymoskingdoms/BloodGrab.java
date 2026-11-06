@@ -46,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  * whatever is softer than stone ({@link #breakable}) for the first {@link #BREAK_RANGE} blocks of its flight. It dies in the
  * hold, the vampire is hurt off it or downed, or it's torn away, and it's simply dropped.
  * <p>
- * (0.7.634) Andy (2026-11-06): "the grab should animate within the vampire's hand hands at the throat the whole time, even
+ * (0.7.635) Andy (2026-11-06): "the grab should animate within the vampire's hand hands at the throat the whole time, even
  * if they go down". A held body going down stays up in the hand, hanging from it (Powers no longer lays it on the ground
  * while it's held: {@link #grabbed}), and its throat is put where the vampire's hand really is: the arm follows the look up
  * and down ({@link #raise}), and the body is placed at the hand's end of that arm ({@link #place}), so in first person
@@ -55,26 +55,31 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Prey: whoever the bite takes that a hand can hold, grown villagers and folk ({@link Vampires#person}) and the Nether's
  * piglins and Hornkin ({@link Vampires#netherPrey}); never a player.
+ * <p>
+ * (0.7.634) Andy: "put feed on the hotbar too, i cant get it to activate reliably. the current right click ability can
+ * move". Feeding is the skill bar's Feed now ({@link #feed}), not right-click: on prey a hand can hold it's the grab, on
+ * a sleeper the sleeper's bite, on anyone else the bite takes the plain bite; Feed again while holding throws them. It
+ * finds its prey generously: the one in the crosshair, else the nearest in front within {@link #REACH} ({@link #FEED_CONE}).
  */
 public final class BloodGrab {
-	/** The second tap must come within this many ticks of the first (checked on the client, which sends {@link Start}). */
-	public static final int DOUBLE_TAP_TICKS = 8;
 	/** A grab reaches this far (blocks, eyes to the prey's box). */
 	static final double REACH = 3.0;
 	/**
-	 * (0.7.634) Where the hand is, as shares of the vampire's height (the player model's 32 pixels): the shoulder joint
+	 * (0.7.635) Where the hand is, as shares of the vampire's height (the player model's 32 pixels): the shoulder joint
 	 * ({@code SHOULDER} up), the arm's length from it to the hand ({@code ARM}), the hand's way out to the side of the
 	 * middle with the arm turned in ({@code SIDE}); the throat at this share of the prey's height ({@code THROAT}), its
 	 * middle this far behind the throat (blocks, {@code NECK}); and never closer than this between the two boxes ({@code GAP}).
 	 */
 	static final double SHOULDER = 22.0 / 32.0, ARM = 10.0 / 32.0, SIDE = 3.0 / 32.0, THROAT = 0.76, NECK = 0.2, GAP = 0.05;
-	/** (0.7.634) A body much taller than the vampire is held no lower than its feet this far into the ground (blocks). */
+	/** (0.7.635) A body much taller than the vampire is held no lower than its feet this far into the ground (blocks). */
 	static final double FEET_SINK = 0.3;
 	/**
-	 * (0.7.634) How far the holding arm is raised above level (radians) looking straight ahead, how much of the look's
+	 * (0.7.635) How far the holding arm is raised above level (radians) looking straight ahead, how much of the look's
 	 * pitch it follows, and its limits (down, so the feet don't sink far into the ground; up).
 	 */
 	public static final float RAISE = 0.3F, RAISE_PER_PITCH = 0.8F, RAISE_MIN = -0.25F, RAISE_MAX = 0.9F;
+	/** (0.7.634) Feed's aim: off the crosshair, the nearest prey within this angle of the look (cosine: about 35 degrees). */
+	static final double FEED_CONE = 0.82;
 	/** Torn away past this (blocks): the hold ends. */
 	static final double LEASH = 4.0;
 	/** A drink every this many ticks while held (the bite's own pace is {@link VampirePlayers#DRINK_EVERY}). */
@@ -199,6 +204,72 @@ public final class BloodGrab {
 		VampirePlayers.drinkNow(level, player, target, Vampires.person(target));
 	}
 
+	/**
+	 * (0.7.634) The skill bar's Feed: holding someone, the throw; else a grab on prey a hand can hold, the bite on a
+	 * sleeper or anyone else it takes. Whether anything happened (nothing: the bar's cooldown doesn't start).
+	 */
+	public static boolean feed(ServerPlayer player) {
+		if (holding(player)) {
+			release(player, true);
+			return true;
+		}
+		if (!Vampires.isVampire(player) || !player.isAlive() || Downed.isDowned(player) || !(player.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		LivingEntity target = feedTarget(player);
+		if (target == null) {
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.feed.none")
+				.withStyle(net.minecraft.ChatFormatting.DARK_RED));
+			return false;
+		}
+		if (!player.getMainHandItem().isEmpty()) {
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.feed.hand")
+				.withStyle(net.minecraft.ChatFormatting.DARK_RED));
+			return false;
+		}
+		if (prey(target) && !isHeld(target)) {
+			start(player, target.getId());
+			return holding(player);
+		}
+		if (SleepingPrey.prey(target)) {
+			SleepingPrey.bite(level, player, (ServerPlayer)target);
+			return true;
+		}
+		VampirePlayers.drink(level, player, target, false, Vampires.person(target));
+		return true;
+	}
+
+	/** Who Feed would take: any it can, the one in the crosshair first, else the nearest within {@link #FEED_CONE} of the look. */
+	static boolean feedable(ServerPlayer player, LivingEntity e) {
+		return e != player && e.isAlive() && !e.isSpectator() && (prey(e) || SleepingPrey.prey(e) || Vampires.person(e) || Vampires.netherPrey(e));
+	}
+
+	static @Nullable LivingEntity feedTarget(ServerPlayer player) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 far = eye.add(look.scale(REACH + 1.0));
+		AABB around = player.getBoundingBox().expandTowards(look.scale(REACH + 1.0)).inflate(1.5);
+		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, far, around,
+			e -> e instanceof LivingEntity l && feedable(player, l), (REACH + 1.0) * (REACH + 1.0));
+		if (hit != null && hit.getEntity() instanceof LivingEntity l && l.getBoundingBox().distanceToSqr(eye) <= REACH * REACH && player.hasLineOfSight(l)) {
+			return l;
+		}
+		LivingEntity best = null;
+		double bestD = Double.MAX_VALUE;
+		for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH + 1.0), e -> feedable(player, e))) {
+			Vec3 to = e.getBoundingBox().getCenter().subtract(eye);
+			double d = e.getBoundingBox().distanceToSqr(eye);
+			if (d > REACH * REACH || to.lengthSqr() < 1.0E-6 || to.normalize().dot(look) < FEED_CONE || !player.hasLineOfSight(e)) {
+				continue;
+			}
+			if (d < bestD) {
+				bestD = d;
+				best = e;
+			}
+		}
+		return best;
+	}
+
 	/** Whether some vampire holds {@code e} now. */
 	static boolean isHeld(Entity e) {
 		for (Hold h : HOLDS.values()) {
@@ -290,13 +361,13 @@ public final class BloodGrab {
 		}
 	}
 
-	/** (0.7.634) How far the holding arm is raised above level (radians) for a look pitched {@code pitch} degrees (down is positive). */
+	/** (0.7.635) How far the holding arm is raised above level (radians) for a look pitched {@code pitch} degrees (down is positive). */
 	public static float raise(float pitch) {
 		return Mth.clamp(RAISE - pitch * Mth.DEG_TO_RAD * RAISE_PER_PITCH, RAISE_MIN, RAISE_MAX);
 	}
 
 	/**
-	 * (0.7.634) The vampire holding {@code e} up by the throat now, or null: read off everyone's synced {@link #GRABBING}, so
+	 * (0.7.635) The vampire holding {@code e} up by the throat now, or null: read off everyone's synced {@link #GRABBING}, so
 	 * it answers the same on the client (the poses; Powers asks it by reflection so a held body isn't laid down).
 	 */
 	public static net.minecraft.world.entity.player.@Nullable Player holder(Entity e) {
@@ -309,13 +380,13 @@ public final class BloodGrab {
 		return null;
 	}
 
-	/** (0.7.634) Whether a vampire holds {@code e} up by the throat now (client or server). */
+	/** (0.7.635) Whether a vampire holds {@code e} up by the throat now (client or server). */
 	public static boolean grabbed(Entity e) {
 		return holder(e) != null;
 	}
 
 	/**
-	 * Holds {@code target} up by the throat in front of {@code player}, facing them: (0.7.634) the throat at the hand's end
+	 * Holds {@code target} up by the throat in front of {@code player}, facing them: (0.7.635) the throat at the hand's end
 	 * of the arm as {@code BloodGrabPose} draws it, raised with the look ({@link #raise}), on the main hand's side.
 	 */
 	private static void place(ServerPlayer player, LivingEntity target) {

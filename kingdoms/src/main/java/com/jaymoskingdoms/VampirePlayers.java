@@ -53,7 +53,7 @@ public final class VampirePlayers {
 	static final float DRINK_DAMAGE = 4.0F, DRINK_HEAL = 3.0F, DRINK_SATURATION = 1.5F;
 	static final int DRINK_FOOD = 4, DRINK_EVERY = 20;
 	/**
-	 * (0.7.634) Andy: "the drain isnt restoring my thirst either". Blood quenches a vampire's thirst too (Kitchen's water,
+	 * (0.7.635) Andy: "the drain isnt restoring my thirst either". Blood quenches a vampire's thirst too (Kitchen's water,
 	 * out of 20): this much a bite or grab gulp, this much a unit lapped from a pool, this much a bottle of blood.
 	 */
 	static final int DRINK_WATER = 3, LAP_WATER = 4, BOTTLE_WATER = 4;
@@ -78,51 +78,13 @@ public final class VampirePlayers {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(VampirePlayers::tick);
-		// (0.7.625) ahead of Powers' downed handling (its revive hold and its sneak lift): holding someone by the throat, the
-		// use held on them is the grab's alone, never a revive filling up; and a vampire's sneak+use on a downed person or
-		// piglin is the bite, not the lift
+		// (0.7.625) ahead of Powers' downed handling (its revive hold): holding someone by the throat, use on them does
+		// nothing, never a revive filling up. (0.7.634) Feeding itself is the skill bar's Feed ({@link BloodGrab#feed}), no
+		// longer sneak+use (Andy: "the current right click ability can move")
 		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, POWERS_DOWNED_FIRST);
 		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
-		UseEntityCallback.EVENT.register(FIRST, (player, level, hand, entity, hit) -> {
-			if (!(player instanceof ServerPlayer sp) || !(entity instanceof LivingEntity target)) {
-				return InteractionResult.PASS;
-			}
-			if (BloodGrab.holding(sp)) {
-				return InteractionResult.SUCCESS;
-			}
-			if (hand == InteractionHand.MAIN_HAND && level instanceof ServerLevel server && Downed.isDowned(target) && Vampires.isVampire(sp)
-				&& sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && !(target instanceof Player)
-				&& (Vampires.person(target) || Vampires.netherPrey(target))) {
-				drink(server, sp, target, false, Vampires.person(target));
-				return InteractionResult.SUCCESS;
-			}
-			return InteractionResult.PASS;
-		});
-		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND
-				|| !(entity instanceof LivingEntity target)) {
-				return InteractionResult.PASS;
-			}
-			// (0.7.615) holding someone up by the throat (BloodGrab), use does nothing else
-			if (BloodGrab.holding(sp)) {
-				return InteractionResult.SUCCESS;
-			}
-			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && Vampires.person(target)) {
-				drink(server, sp, target);
-				return InteractionResult.SUCCESS;
-			}
-			// (0.7.615) in the Nether: piglins and Hornkin, never zombified ones; they never turn
-			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && Vampires.netherPrey(target)) {
-				drink(server, sp, target, false, false);
-				return InteractionResult.SUCCESS;
-			}
-			// (0.7.332) sleeping prey: a mortal player asleep in a bed ({@link SleepingPrey})
-			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && target != sp && SleepingPrey.prey(target)) {
-				SleepingPrey.bite(server, sp, (ServerPlayer) target);
-				return InteractionResult.SUCCESS;
-			}
-			return InteractionResult.PASS;
-		});
+		UseEntityCallback.EVENT.register(FIRST, (player, level, hand, entity, hit) ->
+			player instanceof ServerPlayer sp && BloodGrab.holding(sp) ? InteractionResult.SUCCESS : InteractionResult.PASS);
 		// (0.7.630) sneak and right-click a pool of blood on the ground with an empty hand: lap it up
 		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (level instanceof ServerLevel server && player instanceof ServerPlayer sp && hand == InteractionHand.MAIN_HAND && Vampires.isVampire(sp)
