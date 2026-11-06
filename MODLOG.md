@@ -1335,12 +1335,14 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - Andy: "the bar should stay where it is even after you stop scrolling, the same way tree chopping works, every meter
   should work this way, especially washing rags" (throws and combat charges excepted). New `core/HoldProgress` keeps how
   far each player got at each held job (not saved). Let go, step away or lose the target and the bar stays; the next hold
-  at the same job carries on. A job done empties it, and so does a hold broken off by blows (the rise knocked back down,
-  a revive or Second Wind broken by hits, a treatment spoiled by a hit).
+  at the same job carries on. A job done empties it, and so does a hold broken off by blows (a revive or Second Wind broken by hits, a treatment spoiled by a hit).
 - Washing a rag (`RagWashing`): the wash counts its own ticks instead of the use time, so a rag half washed stays half
   washed. Treating (`Treatment`): kept per patient, part and remedy. Reviving (`Downed`): kept per body and per downing.
-  Getting up by yourself: kept, and the drawing picks up as far along as the bar; hits only knock you down while you are
-  actually rising. Giving up: kept for the downing. Second Wind (`SelfRevive`) and coming to where you lay
+  Giving up: kept for the downing.
+- Getting up by yourself is the one exception (Andy: "they fall everytime they let go, that one should restart the meter
+  because the animation would break if not"): let go part way up and you drop back to the ground (a thud, and
+  `CrawlPose.sink` draws the body falling from where the rise had got to, quicker as it goes, over 7 ticks), and the
+  next hold starts from the ground. Second Wind (`SelfRevive`) and coming to where you lay
   (`Mortality`): kept. Lifting someone (`Carry`): kept per target.
 - Not changed: throws (rocks, daggers), finishers, the stake struggle, spell and power charges, the knock-out mash, and
   minigame bars (smithing, brewing, jewellery). Compile-checked; not played.

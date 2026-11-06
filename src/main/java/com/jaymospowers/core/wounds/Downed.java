@@ -1089,12 +1089,15 @@ public final class Downed {
 
 	/**
 	 * (0.18.5) A downed player able to rise, this tick: sneak held fills the bar and, full, gets them up by themselves.
-	 * (0.21.37) Let go, the bar stays where it is and the next hold carries on (knocked back down, it starts again).
+	 * (0.21.37) The one bar that doesn't keep its progress (Andy: "they fall everytime they let go, that one should restart
+	 * the meter because the animation would break if not"): let go part way up and they drop back to the ground (the
+	 * client draws the fall, {@code CrawlPose}), and the next hold starts from the ground.
 	 */
 	private static void rise(ServerLevel level, ServerPlayer player, long now) {
 		Rise r = RISES.get(player.getUUID());
 		if (!player.isShiftKeyDown()) {
-			if (r != null && r.ticks > 0 && !r.knocked && player.hasAttached(RISING)) {
+			if (r != null && r.ticks > 0 && !r.knocked) {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 0.8F, 0.9F);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_stopped").withStyle(ChatFormatting.GRAY));
 			}
 			stopRising(player);
@@ -1111,11 +1114,9 @@ public final class Downed {
 			// (knocked back down: let go of sneak and try again)
 			return;
 		}
-		if (!player.hasAttached(RISING)) {
-			// (0.21.37) the drawing picks up as far along as the bar is
-			player.setAttached(RISING, now - r.ticks);
+		if (r.ticks++ == 0) {
+			player.setAttached(RISING, now);
 		}
-		r.ticks++;
 		if (r.ticks % 20 == 10) {
 			// straining with it
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F,
@@ -1139,15 +1140,9 @@ public final class Downed {
 		}
 	}
 
-	/**
-	 * (0.18.5) No longer rising (let go, or can't now): the drawing gone. (0.21.37) The bar is kept for the next hold,
-	 * unless they were knocked back down (that one starts again).
-	 */
+	/** (0.18.5) No longer rising (let go, or can't now): the bar and the drawing gone. */
 	private static void stopRising(ServerPlayer player) {
-		Rise r = RISES.get(player.getUUID());
-		if (r != null && (r.knocked || r.ticks == 0)) {
-			RISES.remove(player.getUUID());
-		}
+		RISES.remove(player.getUUID());
 		if (player.hasAttached(RISING)) {
 			player.removeAttached(RISING);
 		}
@@ -1160,7 +1155,7 @@ public final class Downed {
 	private static void struck(ServerPlayer player) {
 		int most = WillSkill.holdHits(player, HOLD_HITS);
 		Rise rise = RISES.get(player.getUUID());
-		if (rise != null && rise.ticks > 0 && !rise.knocked && player.hasAttached(RISING) && ++rise.hits >= most) {
+		if (rise != null && rise.ticks > 0 && !rise.knocked && ++rise.hits >= most) {
 			rise.knocked = true;
 			rise.ticks = 0;
 			rise.hits = 0;

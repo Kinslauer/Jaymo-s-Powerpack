@@ -141,6 +141,11 @@ public final class CrawlPose {
 	 */
 	static final float PUSH_SHARE = 0.35F, KNEEL_SHARE = 0.75F, PUSH_DEGREES = 30.0F, KNEEL_DEGREES = 62.0F, KNEEL_LEGS = -1.25F,
 		KNEE_HAND_X = -0.7F;
+	/**
+	 * (0.21.37) Let go part way up (Andy: "they fall everytime they let go"): how long the drop back to the ground takes
+	 * (ticks). It falls faster as it goes, from wherever the rise had got to.
+	 */
+	static final float SINK_TICKS = 7.0F;
 	/** (0.18.5) How long after rising the leftover swimming tilt is cancelled (ticks). */
 	static final long RISEN_TICKS = 30L;
 	/** Passed out: the head turned to the side, the arms slack by the body. */
@@ -197,6 +202,8 @@ public final class CrawlPose {
 	static final RenderStateDataKey<Boolean> RISEN_KEY = RenderStateDataKey.create(() -> "jaymospowers:risen");
 	/** (0.18.5) Player entity id → the game time they were last seen nearly risen (client side). */
 	private static final Map<Integer, Long> RISEN = new HashMap<>();
+	/** (0.21.37) Player entity id → how far up their last rise was drawn, and (once let go) when the drop began. */
+	private static final Map<Integer, float[]> SINKING = new HashMap<>();
 
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("crawl");
 
@@ -243,6 +250,7 @@ public final class CrawlPose {
 		} else if (downed) {
 			RISEN.remove(player.getId());
 		}
+		rise = sink(player.getId(), downed, rise, time + partialTicks);
 		// (0.19.30) which way they're going along the body: the way they face, or backing up
 		float yaw = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		double along = -Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo);
@@ -776,6 +784,38 @@ public final class CrawlPose {
 				KneeBend.bend(h.leftLeg, KNEE_FOLD * KNEE_DRIVE * knee(cycle(phase), moving) * flat, KneeBend.KNEE, true);
 			}
 		}
+	}
+
+	/**
+	 * (0.21.37) The rise as drawn: while rising, as it is (remembered); the rise gone short of standing, it drops from
+	 * where it was back to the ground over {@link #SINK_TICKS}, quicker as it falls; then -1 (lying).
+	 */
+	private static float sink(int id, boolean downed, float rise, float now) {
+		if (!downed) {
+			SINKING.remove(id);
+			return rise;
+		}
+		float[] sink = SINKING.get(id);
+		if (rise >= 0.0F) {
+			SINKING.put(id, new float[] {rise, -1.0F});
+			return rise;
+		}
+		if (sink == null) {
+			return rise;
+		}
+		if (sink[1] < 0.0F) {
+			if (sink[0] >= 0.9F || sink[0] <= 0.0F) {
+				SINKING.remove(id);
+				return rise;
+			}
+			sink[1] = now;
+		}
+		float k = (now - sink[1]) / SINK_TICKS;
+		if (k >= 1.0F) {
+			SINKING.remove(id);
+			return rise;
+		}
+		return sink[0] * (1.0F - k * k);
 	}
 
 	/** (0.18.5) How far the body is turned up off the ground {@code t} through the rise (degrees; 90 stands). */
