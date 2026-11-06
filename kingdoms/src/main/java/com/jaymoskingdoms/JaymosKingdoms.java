@@ -244,6 +244,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		OwnWants.register();
 		// (0.7.383) what is beyond a player's world tier isn't offered to them (before the smiths grade what is left)
 		TierGate.register();
+		// (Andy, 2026-11-06) what is beyond a player's tier is hidden from JEI and the recipe book until reached or found
+		TierHiding.register();
 		// a realm's smiths sell better-forged gear to those it thinks well of (with Jaymo's Powers)
 		GradedTrades.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground

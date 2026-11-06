@@ -31,6 +31,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
+		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
+		TierHidingClient.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.client.beasts.BeastsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);

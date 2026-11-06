@@ -9956,3 +9956,21 @@ Ideas from Warframe's three-part key (a commercial game: our own names, code and
 - Where: the first of each orc camp's ogre band, two inside each new ogre hold's gate, and one in five of a hold's
   recruits. Drops iron as well as an ogre's spoils.
 - Art: `tools/armoured_ogre_assets.py` (the ogre's skin recoloured; plate and shield our own). Model: `ArmouredOgreModel`.
+
+## 0.7.624 (2026-11-06): what's beyond your tier is hidden (`TierHiding`)
+- Andy: "all items that are inaccessible to your world tier should be hidden from JEI and otherwise. you should really have
+  to discover everything." Each player's JEI list (and every JEI page that makes or uses a hidden item) and recipe book
+  leave out what their world tier or Knowledge level hasn't reached, until it has, or until they've had one in their own
+  inventory (then it's discovered for good, `tier_seen`). Creative and spectators see everything. Trades stay `TierGate`'s.
+- Where each item sits, worked out at server start and `/reload`:
+  - Seeds: tags `jaymoskingdoms:tier_hidden/<borderlands|wildlands|dread|legend|never>` (each takes in `tier_gate/<tier>`),
+    `TierGate.tierOf`, the Aether mods (Borderlands), spawn eggs (never); knowledge from every block `Knowledge.needed`
+    (anvils 1, smithing table 2, enchanting table 3) and tags `knowledge_hidden/<level>`.
+  - Defaults: the Nether's own things (netherrack, quartz, debris, blaze rods, ghast tears, wart, nether woods, glowstone,
+    wither skulls...) Borderlands; nether star and wither rose Dread; End city and outer island things (elytra, shulker
+    shells, chorus, the egg) Legend; End stone, dragon's breath, end crystals knowledge 5; operator blocks never.
+  - Then through every recipe (modded types too): an item made only from hidden things or at a hidden station waits for
+    the easiest way to make it (netherite gear: the smithing table, so knowledge 2; a beacon: Dread). Never below its seed.
+    An item only reached through such recipes but also found in the world (a magma block) shows once picked up.
+- Server log at start: "Tier hiding: N items wait for a tier, M for knowledge". JEI is compile-only (`client/compat/TierJei`,
+  its `jei_mod_plugin` entrypoint); the recipe book through `ClientRecipeBookMixin`. Built, not played.
