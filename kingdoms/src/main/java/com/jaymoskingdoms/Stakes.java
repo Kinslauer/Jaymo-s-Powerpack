@@ -34,11 +34,12 @@ import net.minecraft.world.item.ItemStack;
  * for {@link #PULL_TICKS}; a vampire mob tears it out after {@link #MOB_PULL_TICKS}; anyone with an empty hand can pull it
  * out by using the staked (it goes to their hand). Out, it drops at the vampire's feet (or into the puller's hand); on
  * death it drops with the body. Kept on the vampire ({@link #STAKE}) across saves. One stake at a time.
+ * (0.7.641) Synced to everyone near, who see it sticking out of the chest ({@code StakeLayer}).
  */
 public final class Stakes {
 	/** The stake in a vampire. */
-	static final AttachmentType<ItemStack> STAKE = AttachmentRegistry.create(JaymosKingdoms.id("vampire_stake"),
-		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC));
+	public static final AttachmentType<ItemStack> STAKE = AttachmentRegistry.create(JaymosKingdoms.id("vampire_stake"),
+		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC).syncWith(ItemStack.OPTIONAL_STREAM_CODEC, (target, viewer) -> true));
 	/** Slowness while staked: amplifier 4 (V, a fifth of walking speed), refreshed every check. */
 	static final int SLOW_AMPLIFIER = 4, SLOW_TICKS = 30, CHECK_EVERY = 5;
 	/** A player holds sneak this long (ticks) to pull it out; a mob tears it out after this long. */

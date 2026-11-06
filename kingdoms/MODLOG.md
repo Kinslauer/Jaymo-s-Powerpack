@@ -10145,3 +10145,9 @@ a vampire leaves the hand (creative keeps it) and lodges, one at a time (`Stakes
 Slowness V refreshed every 5 ticks, a drip of dark blood. Out: a vampire player holds sneak 3 s, a vampire mob tears it
 out after 20 s, anyone with an empty hand right-clicks the staked to pull it into their hand; it drops on death or when
 cured. Further skewer hits still land 5x but don't lodge a second stake. Gradle compile clean; not played.
+
+## 0.7.641: stakes are seen
+Andy: "They should be visible". `Stakes.STAKE` now syncs to every viewer, and `StakeLayer` (client, on every humanoid
+renderer, filled in `MobSwingLivingEntityRendererMixin`) draws the lodged skewer item on the body bone: left of the
+breastbone, a third down, point buried in the chest and the grip standing out in front at a slight angle. Gradle
+compileClientJava clean; not played, so the angle and depth are untested.

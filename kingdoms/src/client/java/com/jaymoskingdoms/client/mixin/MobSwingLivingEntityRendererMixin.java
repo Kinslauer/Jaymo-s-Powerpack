@@ -38,6 +38,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.ValorLook.extract(entity, state);
 		com.jaymoskingdoms.client.ValorWingsLook.extract(entity, state);
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
+		// (0.7.641) a stake in a vampire
+		com.jaymoskingdoms.client.StakeLayer.extract(entity, state);
 		com.jaymoskingdoms.client.BioForms.extract(entity, state);
 		com.jaymoskingdoms.client.ManaClient.extract(entity, state);
 		// (0.7.479) a corpse's body, drawn outside the world: found again by its id (MCA's skin colour)
