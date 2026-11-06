@@ -191,7 +191,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		return this.entityData.get(ADMIRING);
 	}
 
-	boolean zombified() {
+	public boolean zombified() {
 		return this.kind == Kind.ZOMBIFIED;
 	}
 

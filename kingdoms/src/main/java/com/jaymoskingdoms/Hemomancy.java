@@ -423,6 +423,8 @@ public final class Hemomancy {
 			player.heal(BOTTLE_HEAL);
 			player.getFoodData().eat(BOTTLE_FOOD, 0.6F);
 			BloodFever.bit(player);
+			// (0.7.615) it holds off starving, too
+			VampirePlayers.fedFromBottle(player);
 			used = true;
 		}
 		if (bloodMage(player)) {

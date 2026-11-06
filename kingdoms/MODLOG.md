@@ -9781,3 +9781,23 @@ tribes had now belong to every side that fights you (ideas from Shadow of War: o
 - Turning (Valor, In-balming) works on barbarians and pirates (sworn back as men); illagers, the raised and the Hornkin
   refuse. Questioning anyone of a side asks after its captains.
 - Gradle compile clean; not played.
+
+## 0.7.615 (2026-11-06): a vampire can feed in the Nether, and the grab-drink (Powers 0.21.17)
+- Andy: "how do i feed in the nether?" Only grown villagers, realm folk and sleeping players could be bitten, and the
+  Nether has none of them. Agreed: "yes as long as there arent zombies".
+- Sneak and right-click with an empty hand now drinks from grown piglins, piglin brutes and Hornkin
+  (`Vampires.netherPrey`). Zombified piglins and zombified Hornkin are excluded. A bite that doesn't infect never turns
+  its prey (`VampirePlayers.drink` now checks `infect` for mobs too), so no piglin vampires.
+- A bottle of Kitchen's blood also counts as fed for the starving clock (`VampirePlayers.fedFromBottle`, from
+  `Hemomancy.drankBottle`). It was already a small heal and meal. Blood requests still want a real bite.
+- Hint 119 (`lang/parts/vampire-nether.json`). Built, not played.
+- (same version) The grab-drink, Andy: "double tapping the right click gives your drink a one handed grab animation where you
+  can walk with your target, draining blood more rapidly, so be careful as it can kill quicker. releasing early strong
+  throws the target, and if you are nourished enough the throw can break blocks weaker than stone at close range".
+  `BloodGrab`: two taps of use on the same prey within 8 ticks (`BloodGrabClient`; the first is the usual sneak bite),
+  empty hand, grabs grown villagers/folk and the Nether's piglins/Hornkin (never players, never the downed). The prey
+  is held up by the throat in front (its AI and gravity paused) while you walk slowed, and drunk from every 10 ticks
+  (twice the bite's pace; `VampirePlayers.drinkNow`). Letting go of use while it lives throws it (1.7 b/t along the
+  look, +0.3 up, slams into walls for 5). With food level 16+ it bursts through anything softer than stone in its path
+  for the first 6 blocks. It drops if it goes down or dies, if you're downed or hurt off it, or if you hold something.
+  `BloodGrabPose`: the main arm raised in front, leaning back, shaking as you drink. Hint 120. Built, not played.
