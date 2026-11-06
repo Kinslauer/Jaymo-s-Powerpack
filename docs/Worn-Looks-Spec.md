@@ -6,6 +6,12 @@ picked "also our own 7 starter baubles". No mod in the pack draws worn items thr
 out. This spec follows REA-Prompts section 4 (clean-room): references studied as a black box, facts and guesses written
 down, then built only from this spec with our own boxes and pixels. No Artifacts boxes, UVs or pixels are copied.
 
+**Update (Andy: "Can we not port their looks too?"):** the 25 baubles that kept their Artifacts look now use Artifacts'
+own worn models and textures, ported under its MIT licence (`client/baubles/artifacts/worn/`). This spec now covers only
+the 24 looks that stay our own: the 7 starters, the sky mask, and the 16 Artifacts items we repainted medieval (alewife
+cap, jester cap, reed breather, owl mask, soothsayer hood, rider's hat, lodestone charm, wind bladder, ender pouch, iron
+knuckles, ram bracer, smelter's bracer, glutton's ring, courier's boots, waterstrider boots, frogskin flippers).
+
 ## 1. References
 
 | Ref | What | Used for |

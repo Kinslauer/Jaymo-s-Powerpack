@@ -1343,4 +1343,13 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   idle; parts scale out over the matching armour piece.
 - Our own boxes and textures (REA, docs/Worn-Looks-Spec.md): `tools/gen_worn_looks.py` writes the json and
   `textures/entity/worn/*.png`. Lanterns, the coin purse, the hip bottles, the lantern pole, fairies and quivers keep their
-  own drawing. Gradle compile clean; not played.
+  own drawing.
+- Andy: "Can we not port their looks too?" The 25 baubles that kept their Artifacts look (villager and angler's hats,
+  scarves, necklaces, pendants, the neck charms, cloud bottle, skull, antidote, crystal heart, chorus totem, claws, fire
+  gauntlet, vampiric glove, golden hook, withered bracelet, hare boots, kitty slippers, snowshoes, spikes, rooted and
+  strider shoes) now use Artifacts' own worn models, textures and renderers (MIT, ported into
+  `client/baubles/artifacts/worn/`, textures in `textures/entity/wearable/artifacts/` with the licence): `WornArtifacts`
+  draws them from `Baubles.looks`, gloves and claws on both hands, belt charms at the front of the right hip. The
+  cloud bottle, skull and antidote leave `#jaymospowers:hip_shown` (no more flat sprite at the hip). Our own looks stay for
+  the 7 starters, the sky mask and the 16 we repainted medieval, whose Artifacts models are the modern things we renamed
+  away from. Gradle compile clean; not played.

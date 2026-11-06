@@ -454,7 +454,16 @@ def strip(parts):
     return out
 
 
+# (0.21.37) these kept their Artifacts look and are drawn with Artifacts' own worn models (client/baubles/artifacts/worn)
+ARTIFACTS_LOOK = ['villager_hat', 'fishers_hat', 'lucky_scarf', 'scarf_of_invisibility', 'cross_necklace', 'panic_necklace', 'shock_pendant', 'flame_pendant', 'thorn_pendant', 'charm_of_sinking', 'charm_of_shrinking', 'chorus_totem', 'crystal_heart', 'digging_claws', 'feral_claws', 'fire_gauntlet', 'vampiric_glove', 'golden_hook', 'withered_bracelet', 'hare_boots', 'kitty_slippers', 'snowshoes', 'steadfast_spikes', 'rooted_boots', 'strider_shoes']
+
+
 def main():
+    for item in ARTIFACTS_LOOK:
+        LOOKS.pop(item, None)
+        stale = os.path.join(OUT_TEX, item + '.png')
+        if os.path.exists(stale):
+            os.remove(stale)
     os.makedirs(OUT_TEX, exist_ok=True)
     out = {}
     for item, spec in LOOKS.items():

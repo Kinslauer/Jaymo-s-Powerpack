@@ -52,6 +52,8 @@ import org.jspecify.annotations.Nullable;
  * pendants, charms, hanging pouches, hat feathers and the cloak swing with the stride; parts sit out over armour when the
  * matching piece is worn. Lanterns, the coin purse, the bottles at the hip, the lantern pole, fairies and quivers keep
  * their own drawing.
+ * <p>(0.21.37) Andy: "Can we not port their looks too?" The baubles that kept their Artifacts look now use Artifacts' own
+ * worn models ({@code artifacts/worn/WornArtifacts}); the looks here are for our starters and the sixteen we repainted.
  */
 public final class WornLooks {
 	// ===== the knobs ================================================================================================
@@ -73,6 +75,8 @@ public final class WornLooks {
 	}
 
 	static final RenderStateDataKey<Shown> KEY = RenderStateDataKey.create(() -> "jaymospowers:worn_looks");
+	/** Every slot's worn item id this frame, for the Artifacts looks ({@code artifacts/worn/WornArtifacts}). */
+	public static final RenderStateDataKey<List<Identifier>> WORN = RenderStateDataKey.create(() -> "jaymospowers:worn_bauble_ids");
 
 	/** One look, read from the json: its texture and the parts to build. */
 	record Look(Identifier item, Identifier texture, int width, int height, boolean hideCape, List<Part> parts, boolean hasRing) {
@@ -95,6 +99,8 @@ public final class WornLooks {
 
 	public static void init() {
 		load();
+		// (0.21.37) the baubles that kept their Artifacts look are drawn with Artifacts' own models
+		com.jaymospowers.client.baubles.artifacts.worn.WornArtifacts.init();
 		for (Look look : LOOKS.values()) {
 			for (Variant variant : Variant.values()) {
 				if (variant.ringLeft && !look.hasRing) {
@@ -119,9 +125,11 @@ public final class WornLooks {
 	public static void extract(Avatar entity, AvatarRenderState state) {
 		if (!(entity instanceof Player player)) {
 			state.setData(KEY, null);
+			state.setData(WORN, null);
 			return;
 		}
 		List<Identifier> looks = Baubles.looks(player);
+		state.setData(WORN, looks.isEmpty() ? null : looks);
 		Identifier[] slots = null;
 		for (int i = 0; i < looks.size(); i++) {
 			Look look = LOOKS.get(looks.get(i));
