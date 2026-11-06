@@ -29,7 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
  * (rolled onto one side on a planted forearm, the legs stacked ahead) or a <b>head-first</b> dive (flat on the chest,
  * arms reaching ahead).</li>
  * </ul>
- * (0.21.37) Andy: "a better climbing animation, moving hands and feet interchangeably". The cling (webbed fists and a
+ * (0.21.38) Andy: "a better climbing animation, moving hands and feet interchangeably". The cling (webbed fists and a
  * freerunner's climb) is our own again, Not Enough Animations' ladder pose no longer borrowed: each hand reaches up,
  * grips and stays put on the wall while the body rises past it, the elbow folding as it comes down to the shoulder, then
  * lets go and reaches up again, the hands half a cycle apart; each foot steps up with the opposite hand, knee out, and
@@ -54,20 +54,20 @@ public final class WebParkourPose {
 	static final float[] SLIDE_DROP = {0.12F, 0.5F, 0.2F, 0.05F};
 	/** How far the body leans into the wall while clinging (degrees): (0.13.17) upright, as on a ladder. */
 	static final float CLING_LEAN = 0.0F;
-	/** (0.21.37) Blocks climbed per full cycle (each hand and each foot moves once). */
+	/** (0.21.38) Blocks climbed per full cycle (each hand and each foot moves once). */
 	static final float CLIMB_CYCLE = 1.2F;
-	/** (0.21.37) Share of the cycle a hand, and a foot, stays gripped on the wall; the rest it's moving up to its next hold. */
+	/** (0.21.38) Share of the cycle a hand, and a foot, stays gripped on the wall; the rest it's moving up to its next hold. */
 	static final float HAND_HOLD = 0.6F, FOOT_HOLD = 0.45F;
 	/**
-	 * (0.21.37) Where a hand grips (pixels above the shoulder, and out toward the wall), how far off the wall it comes
+	 * (0.21.38) Where a hand grips (pixels above the shoulder, and out toward the wall), how far off the wall it comes
 	 * moving up; the same for a foot (pixels above the hip).
 	 */
 	static final float HAND_TOP = 9.0F, HAND_WALL = 4.5F, HAND_LIFT = 1.5F, FOOT_TOP = -4.0F, FOOT_WALL = 3.0F, FOOT_LIFT = 1.5F;
-	/** (0.21.37) The hands out wider than the shoulders, the knees turned out as they come up (radians). */
+	/** (0.21.38) The hands out wider than the shoulders, the knees turned out as they come up (radians). */
 	static final float HAND_OUT = 0.32F, KNEE_OUT = 0.4F;
-	/** (0.21.37) The upper arm and forearm (to the hand), thigh and shin (pixels). */
+	/** (0.21.38) The upper arm and forearm (to the hand), thigh and shin (pixels). */
 	static final float UPPER_ARM = 4.0F, FOREARM = 6.0F, ELBOW = 4.0F, THIGH = 6.0F, SHIN = 6.0F;
-	/** (0.21.37) The body's roll and twist toward the pushing leg, and the head turned up toward the reaching hand (radians). */
+	/** (0.21.38) The body's roll and twist toward the pushing leg, and the head turned up toward the reaching hand (radians). */
 	static final float CLIMB_ROLL = 0.04F, CLIMB_TWIST = 0.05F, CLIMB_LOOK_UP = -0.35F, CLIMB_LOOK_TURN = 0.15F;
 	/** In the suit, the tendrils hold the body this far out from the wall (degrees, tipping the top back off it). */
 	static final float TENDRIL_HANG = 8.0F;
@@ -85,7 +85,7 @@ public final class WebParkourPose {
 
 	/** Per entity id: the move it's in and the game time it began. */
 	private static final java.util.Map<Integer, float[]> STARTED = new java.util.HashMap<>();
-	/** (0.21.37) Per entity id, on the wall: where it was last frame (x, z) and how far it has gone across the wall. */
+	/** (0.21.38) Per entity id, on the wall: where it was last frame (x, z) and how far it has gone across the wall. */
 	private static final java.util.Map<Integer, double[]> ACROSS = new java.util.HashMap<>();
 
 	private WebParkourPose() {
@@ -129,7 +129,7 @@ public final class WebParkourPose {
 		float speed = (float)Math.sqrt(Mth.square(entity.getX() - entity.xo) + Mth.square(entity.getY() - entity.yo) + Mth.square(entity.getZ() - entity.zo));
 		float crawlWant = kind == WebParkour.CLING ? Mth.clamp(speed / CRAWL_FULL, 0.0F, 1.0F) : 0.0F;
 		started[2] = Mth.lerp(0.15F, started[2], crawlWant);
-		// (0.21.37) the climb's limbs follow the distance climbed: up and down, plus across the wall
+		// (0.21.38) the climb's limbs follow the distance climbed: up and down, plus across the wall
 		double x = Mth.lerp(partialTicks, entity.xo, entity.getX()), z = Mth.lerp(partialTicks, entity.zo, entity.getZ());
 		double[] across = ACROSS.computeIfAbsent(entity.getId(), id -> new double[] {x, z, 0.0});
 		double step = Math.sqrt(Mth.square(x - across[0]) + Mth.square(z - across[1]));
@@ -260,7 +260,7 @@ public final class WebParkourPose {
 					set(h.leftLeg, -0.2F + sway, 0.0F, -0.12F, e);
 					break;
 				}
-				// (0.21.37) hand over hand: each hand grips, the body rises past it, it lets go and reaches up again; each
+				// (0.21.38) hand over hand: each hand grips, the body rises past it, it lets go and reaches up again; each
 				// foot steps up with the opposite hand and pushes down (see the class notes). Elbows and knees: bendLimbs.
 				float u = pose.travel() / CLIMB_CYCLE;
 				float[] limb = new float[2];
@@ -332,7 +332,7 @@ public final class WebParkourPose {
 	}
 
 	/**
-	 * (0.21.37) Right before the model is drawn (after {@link #applyModel}): a climber's elbows and knees bent for this one
+	 * (0.21.38) Right before the model is drawn (after {@link #applyModel}): a climber's elbows and knees bent for this one
 	 * draw ({@link com.jaymospowers.client.KneeBend}), as far as reaching each hold needs.
 	 */
 	public static void bendLimbs(Model<?> model, Object state) {
@@ -356,7 +356,7 @@ public final class WebParkourPose {
 	}
 
 	/**
-	 * (0.21.37) One limb of the climb, {@code offset} of a cycle along from the right hand, {@code u} cycles climbed: its
+	 * (0.21.38) One limb of the climb, {@code offset} of a cycle along from the right hand, {@code u} cycles climbed: its
 	 * swing (xRot) and its elbow or knee bend into {@code out}. Gripped, the hand (or foot) stays on its spot on the wall
 	 * while the body rises past; then it comes off a little and moves up to the next hold. {@code moving}: 0 hanging still
 	 * (a hand caught between holds rests back on the wall) to 1 climbing.
@@ -379,7 +379,7 @@ public final class WebParkourPose {
 	}
 
 	/**
-	 * (0.21.37) Two-bone reach in the body's side plane: the swing (xRot) and the bend (+ folds the lower half back, as
+	 * (0.21.38) Two-bone reach in the body's side plane: the swing (xRot) and the bend (+ folds the lower half back, as
 	 * {@link com.jaymospowers.client.KneeBend} bends) that put the end of a limb {@code up} pixels above its pivot and
 	 * {@code ahead} pixels in front. The joint goes out behind the line to the target (elbows back, knees forward).
 	 */

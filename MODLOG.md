@@ -1331,7 +1331,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   out of a sprint; still held at the end = prone). The server's `Slide.valid` no longer checks Sneak (the client keeps it
   off through the hold). `SPRINT_GRACE_TICKS` stays 8. Compile-checked against the 26.3 jars; not played.
 
-## 0.21.37: a traditional kneel, posed with the weapon; climbing hand over hand
+## 0.21.38: a traditional kneel, posed with the weapon; climbing hand over hand
 - Andy: "the newest kneel has both knees bent in front of the character, it should look more like a traditional kneel,
   posing with a weapon in hand like a hand on the sword's pommel, blade in the ground, similar with an axe, or a low ready
   with a rifle or bow". `CrouchPose` (the low crouch's kneel): the knee on the ground is now behind the hip (`BACK_LEG`
