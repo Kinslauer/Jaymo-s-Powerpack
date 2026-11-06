@@ -975,6 +975,10 @@ public abstract class WindDragon extends AbstractHorse {
 	protected void bitten(LivingEntity target) {
 	}
 
+	/** (0.7.612) Its tail sweep just landed (in {@link #groundFight}), for a model to play it. */
+	protected void swept() {
+	}
+
 	protected void groundFight(ServerLevel level, LivingEntity target, boolean breathe) {
 		lookAt(target);
 		double reach = BITE_REACH + this.getBbWidth() * 0.5 + target.getBbWidth() * 0.5;
@@ -1010,6 +1014,7 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	private void sweep(ServerLevel level, List<LivingEntity> hit) {
+		swept();
 		level.playSound(null, this.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 2.0F, 0.5F);
 		level.sendParticles(ParticleTypes.SWEEP_ATTACK, this.getX(), this.getY() + 1.0, this.getZ(), 6, 2.5, 0.3, 2.5, 0.0);
 		for (LivingEntity e : hit) {

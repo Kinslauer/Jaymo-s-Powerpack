@@ -1153,3 +1153,8 @@ fox, Naturalist's snakes; a snake's bite poisons 7 s), `scratches_when_held` (ca
 - Bear Minimum 1.0.5 (Apache-2.0) in packMods, unchanged: shy black bears, warier brown bears, bear meat, tougher polar
   bears. Kingdoms adds the grizzly mini-boss, drawn after its brown bear (see Kingdoms 0.7.610).
 - The grizzly and Bear Minimum's bears are in `blood_trackers`, `furry` and `body/quadruped`.
+
+## 0.21.15 (2026-11-06): Saint's dragons animated (Kingdoms 0.7.612)
+- Atroxiia has a real walk and is back in the game; Varasuchus, Atroxiia and Ignivorus get their missing motions
+  (bites, sweeps, runs, flinches, deaths, idle fidgets, sleep). See Kingdoms 0.7.612 and
+  `docs/SaintsDragons-Animation-Spec.md`.

@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -58,6 +61,13 @@ public class IgnivorusDragon extends WindDragon {
 	static final int PILLAR_EVERY = 180, PILLARS = 7, PILLAR_GAP = 4, PILLAR_BURN = 6;
 	static final float PILLAR_DAMAGE = 12.0F;
 
+	// ---- (0.7.612) its moves, for the model (docs/SaintsDragons-Animation-Spec.md) ----
+	public static final int NONE = 0, VOLLEY_MOVE = 1, STAMP_MOVE = 2, BITE_MOVE = 3, SWEEP_MOVE = 4;
+	/** How long each is shown (ticks): the wyvern's own fire, slam, bite and sweep played a little faster than authored. */
+	static final int[] ACTION_TICKS = {0, 60, 50, 32, 42};
+	private static final EntityDataAccessor<Integer> DATA_ACTION = SynchedEntityData.defineId(IgnivorusDragon.class, EntityDataSerializers.INT);
+	private int actionLeft;
+
 	private int volleyIn = VOLLEY_EVERY / 2, pillarIn = PILLAR_EVERY / 2;
 	/** Shots still to fire in this volley, and ticks till the next. */
 	private int shots, shotIn;
@@ -82,6 +92,43 @@ public class IgnivorusDragon extends WindDragon {
 
 	public static AttributeSupplier.Builder createAttributes() {
 		return dragonAttributes(HEALTH, ARMOR, TOUGHNESS, SPEED, BITE);
+	}
+
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_ACTION, NONE);
+	}
+
+	@Override
+	public int action() {
+		return this.entityData.get(DATA_ACTION);
+	}
+
+	/** Shows {@code action} on its model for its length (a move already showing gives way only to the volley and stamp). */
+	private void act(int action) {
+		this.entityData.set(DATA_ACTION, action);
+		this.actionLeft = ACTION_TICKS[action];
+	}
+
+	@Override
+	protected void bitten(LivingEntity target) {
+		if (action() == NONE) {
+			act(BITE_MOVE);
+		}
+	}
+
+	@Override
+	protected void swept() {
+		if (action() == NONE) {
+			act(SWEEP_MOVE);
+		}
+	}
+
+	/** How far through {@code action} its model is after {@code age} ticks (0 to 1). */
+	public static float actionShare(int action, float age) {
+		int length = action <= 0 || action >= ACTION_TICKS.length ? 1 : ACTION_TICKS[action];
+		return Math.min(1.0F, Math.max(0.0F, age / length));
 	}
 
 	@Override
@@ -167,6 +214,7 @@ public class IgnivorusDragon extends WindDragon {
 			this.shots = VOLLEY_SHOTS;
 			this.shotIn = 0;
 			this.volleyAt = target;
+			act(VOLLEY_MOVE);
 			level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 3.0F, 0.5F);
 		}
 		if (--this.pillarIn <= 0 && this.pillars.isEmpty() && this.onGround() && distance < PILLAR_RANGE) {
@@ -177,6 +225,7 @@ public class IgnivorusDragon extends WindDragon {
 
 	/** A stamp, and the line of pillars it sends toward {@code target}. */
 	private void pillars(ServerLevel level, LivingEntity target) {
+		act(STAMP_MOVE);
 		level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 2.0F, 0.5F);
 		level.sendParticles(ParticleTypes.LAVA, this.getX(), this.getY() + 0.2, this.getZ(), 30, 2.0, 0.2, 2.0, 0.1);
 		Vec3 way = target.position().subtract(this.position()).multiply(1.0, 0.0, 1.0);
@@ -192,6 +241,9 @@ public class IgnivorusDragon extends WindDragon {
 		super.tick();
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
+		}
+		if (this.actionLeft > 0 && --this.actionLeft == 0) {
+			this.entityData.set(DATA_ACTION, NONE);
 		}
 		// the volley, a shot at a time
 		if (this.shots > 0 && --this.shotIn <= 0) {

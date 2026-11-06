@@ -81,10 +81,10 @@ public class VarasuchusDragon extends WindDragon {
 
 	/** Its moves, for the model ({@link #action}). */
 	public static final int NONE = 0, CLAW_MOVE = 1, HORN_MOVE = 2, DASH_MOVE = 3, BARRAGE_MOVE = 4, SHIFT_MOVE = 5, GUARD_MOVE = 6, PARRY_MOVE = 7,
-		RAGE_MOVE = 8;
+		RAGE_MOVE = 8, BITE_MOVE = 9, SWEEP_MOVE = 10;
 	/** How long each lasts (ticks). */
 	static final int[] ACTION_TICKS = {0, 10, 14, DASH_TICKS + DASH_TAIL_AFTER + 6, BARRAGE_HITS * BARRAGE_GAP + 6, SHIFT_TICKS + 4,
-		GUARD_STARTUP + GUARD_HOLD, 12, 30};
+		GUARD_STARTUP + GUARD_HOLD, 12, 30, 16, 26};
 
 	private static final EntityDataAccessor<Integer> DATA_ACTION = SynchedEntityData.defineId(VarasuchusDragon.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_RAGING = SynchedEntityData.defineId(VarasuchusDragon.class, EntityDataSerializers.BOOLEAN);
@@ -315,6 +315,21 @@ public class VarasuchusDragon extends WindDragon {
 			double across = Math.abs(to.x * -this.moveAim.z + to.z * this.moveAim.x);
 			return along > 0.0 && along < reach + e.getBbWidth() * 0.5 && across < side + e.getBbWidth() * 0.5;
 		});
+	}
+
+	/** (0.7.612) The plain bite and tail sweep every walker has, shown as moves of their own (docs/SaintsDragons-Animation-Spec.md). */
+	@Override
+	protected void bitten(LivingEntity target) {
+		if (this.move == NONE) {
+			begin(BITE_MOVE, target, target.position().subtract(this.position()));
+		}
+	}
+
+	@Override
+	protected void swept() {
+		if (this.move == NONE) {
+			begin(SWEEP_MOVE, null, Vec3.directionFromRotation(0.0F, this.getYRot()));
+		}
 	}
 
 	// ---- fighting -------------------------------------------------------------------------------------------------------

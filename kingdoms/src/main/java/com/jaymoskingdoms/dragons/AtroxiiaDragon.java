@@ -82,9 +82,9 @@ public class AtroxiiaDragon extends WindDragon {
 	static final int RIDER_GUNGNIR_EVERY = 100;
 
 	/** Its moves, for the model ({@link #action}). */
-	public static final int NONE = 0, SLAM_MOVE = 1, SWIPE_MOVE = 2, STRIKE_MOVE = 3, GUNGNIR_MOVE = 4, SWEEP_MOVE = 5, QUAKE_MOVE = 6;
+	public static final int NONE = 0, SLAM_MOVE = 1, SWIPE_MOVE = 2, STRIKE_MOVE = 3, GUNGNIR_MOVE = 4, SWEEP_MOVE = 5, QUAKE_MOVE = 6, BITE_MOVE = 7, LASH_MOVE = 8;
 	/** How long each lasts (ticks). */
-	static final int[] ACTION_TICKS = {0, 16, 12, 26, GUNGNIR_WINDUP + 13, 20, QUAKE_SECOND + 12};
+	static final int[] ACTION_TICKS = {0, 16, 12, 26, GUNGNIR_WINDUP + 13, 20, QUAKE_SECOND + 12, 16, 24};
 
 	private static final EntityDataAccessor<Integer> DATA_ACTION = SynchedEntityData.defineId(AtroxiiaDragon.class, EntityDataSerializers.INT);
 
@@ -261,6 +261,21 @@ public class AtroxiiaDragon extends WindDragon {
 			this.move = NONE;
 			this.moveTarget = null;
 			this.entityData.set(DATA_ACTION, NONE);
+		}
+	}
+
+	/** (0.7.612) The plain bite and tail sweep every walker has, shown as moves of their own (docs/SaintsDragons-Animation-Spec.md). */
+	@Override
+	protected void bitten(LivingEntity target) {
+		if (this.move == NONE) {
+			begin(BITE_MOVE, target, target.position().subtract(this.position()));
+		}
+	}
+
+	@Override
+	protected void swept() {
+		if (this.move == NONE) {
+			begin(LASH_MOVE, null, Vec3.directionFromRotation(0.0F, this.getYRot()));
 		}
 	}
 

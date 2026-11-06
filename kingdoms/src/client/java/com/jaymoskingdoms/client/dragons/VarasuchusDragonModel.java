@@ -26,6 +26,12 @@ import net.minecraft.util.Mth;
  * the horns dipped and tossed, the dash low and fast with the tail lashed round at its end, a barrage of claws from
  * both forelegs, the phase shift's crouch, the tailguard curling the tail round before it (and snapping out on a
  * parry), and its rage, head flung up and jaws wide. Crashed it lies flat on its belly; sitting, it settles back.
+ * <p>
+ * (0.7.612, docs/SaintsDragons-Animation-Spec.md) The rest of a crocodile's day: the plain bite (drawn back, jaws wide,
+ * snapped shut), the tail sweep (lashed round to one side and back, the body twisting into it), a gallop when it runs
+ * (front and hind pairs together, the body rocking), a flinch at a blow, its death (legs locked out, jaw slack, tail
+ * limp), and idle: now and then a hiss, a head shake, a tail swish or a slow sniff along the ground; sitting, it basks
+ * with its jaws propped open; floating still, its legs tread slowly.
  */
 final class VarasuchusDragonModel extends EntityModel<WindDragonRenderer.State> {
 	/** How low it sinks crashed and sitting (model pixels). */
@@ -204,13 +210,16 @@ final class VarasuchusDragonModel extends EntityModel<WindDragonRenderer.State> 
 	public void setupAnim(WindDragonRenderer.State s) {
 		super.setupAnim(s);
 		float t = s.ageInTicks;
+		float dead = ease(s.deathTime / 20.0F);
 		float crash = ease(s.crash), swim = ease(s.swim) * (1.0F - crash);
 		float sit = ease(s.sit) * (1.0F - crash) * (1.0F - swim);
 		int a = s.action;
 		float x = VarasuchusDragon.actionShare(a, s.actionAge);
 		float age = s.actionAge;
 		float dash = a == VarasuchusDragon.DASH_MOVE ? rise(x, 0.0F, 0.12F) * (1.0F - rise(x, 0.62F, 0.8F)) : 0.0F;
-		float walk = Mth.clamp(s.walkAnimationSpeed + dash * 0.6F, 0.0F, 1.0F) * (1.0F - crash) * (1.0F - sit) * (1.0F - swim);
+		float walk = Mth.clamp(s.walkAnimationSpeed + dash * 0.6F, 0.0F, 1.0F) * (1.0F - crash) * (1.0F - sit) * (1.0F - swim) * (1.0F - dead);
+		// (0.7.612) at a run it gallops, as crocodiles can: the front pair and the hind pair each together, the body rocking
+		float run = ease((s.walkAnimationSpeed + dash * 0.6F - 0.55F) / 0.35F) * walk;
 		float step = s.walkAnimationPos * 0.5F;
 		float headYaw = Mth.clamp(s.yRot, -45.0F, 45.0F) * Mth.DEG_TO_RAD;
 		float headPitch = Mth.clamp(s.xRot, -30.0F, 30.0F) * Mth.DEG_TO_RAD;
@@ -229,7 +238,27 @@ final class VarasuchusDragonModel extends EntityModel<WindDragonRenderer.State> 
 		float guard = a == VarasuchusDragon.GUARD_MOVE ? rise(x, 0.0F, 0.23F) * (1.0F - rise(x, 0.85F, 1.0F)) : 0.0F;
 		float parry = a == VarasuchusDragon.PARRY_MOVE ? bell(x, 0.0F, 1.0F) : 0.0F;
 		float rage = a == VarasuchusDragon.RAGE_MOVE ? bell(x, 0.0F, 1.0F) : 0.0F;
-
+		// (0.7.612) the bite: drawn back with the jaws wide (to 0.35), then snapped forward and shut
+		float biteBack = a == VarasuchusDragon.BITE_MOVE ? rise(x, 0.0F, 0.35F) * (1.0F - rise(x, 0.35F, 0.5F)) : 0.0F;
+		float biteIn = a == VarasuchusDragon.BITE_MOVE ? bell(x, 0.35F, 1.0F) : 0.0F;
+		// (0.7.612) the tail sweep: the tail swung round to its left and back, the body twisting into it
+		float sweep = a == VarasuchusDragon.SWEEP_MOVE ? bell(x, 0.0F, 1.0F) : 0.0F;
+		// (0.7.612) a blow: it jerks aside, head tossed back, jaw open, and rights itself
+		float flinch = s.hurt <= 0.0F ? 0.0F : bell(1.0F - s.hurt, 0.0F, 1.0F) * (1.0F - dead);
+		// (0.7.612) idle, stood still and doing nothing: every 300 ticks one of a hiss, a head shake, a tail swish or a sniff
+		float idle = (1.0F - Math.min(s.walkAnimationSpeed * 4.0F, 1.0F)) * (1.0F - sit) * (1.0F - crash) * (1.0F - swim) * (1.0F - dead)
+			* (a == VarasuchusDragon.NONE ? 1.0F : 0.0F) * (1.0F - ease(s.stand));
+		float cycle = (t + 140.0F) / 300.0F;
+		float into = (cycle - Mth.floor(cycle)) * 300.0F;
+		int kind = Math.floorMod(Mth.floor(cycle), 4);
+		float fidget = idle * bell(into, 0.0F, kind == 3 ? 90.0F : 50.0F);
+		float hiss = kind == 0 ? fidget : 0.0F;
+		float shake = kind == 1 ? fidget * Mth.sin(into * 0.6F) : 0.0F;
+		float swish = kind == 2 ? fidget : 0.0F;
+		float sniff = kind == 3 ? fidget : 0.0F;
+		float sniffTurn = sniff * Mth.sin(into * Mth.PI / 45.0F);
+		// (0.7.612) sitting it basks, jaws propped open, breathing slow
+		float bask = sit * sit;
 		// upright (raging): tipped back onto its hind legs about the hips, which stay where they were
 		float stand = ease(s.stand) * (1.0F - crash) * (1.0F - swim);
 		float tilt = -STAND_TILT * stand;
@@ -238,22 +267,26 @@ final class VarasuchusDragonModel extends EntityModel<WindDragonRenderer.State> 
 
 		// the body: held high, swaying in the walk, low in the dash and the shift's crouch, flat crashed
 		this.body.y = (HIP_Y - hipY) + this.bodyY + crash * CRASH_DROP + sit * SIT_DROP + Math.abs(Mth.sin(step)) * 0.5F * walk + Mth.sin(t * 0.06F) * 0.15F
-			+ dash * 2.0F + crouch * 4.0F - rage * 2.0F;
-		this.body.xRot = tilt + dash * 0.06F - sit * 0.14F - rage * 0.18F + dip * 0.05F;
-		this.body.yRot = Mth.sin(step) * 0.08F * walk + Mth.sin(t * 0.14F) * 0.07F * swim - guard * 0.22F - parry * 0.1F;
-		this.body.zRot = Mth.sin(step) * 0.025F * walk;
+			+ dash * 2.0F + crouch * 4.0F - rage * 2.0F + Math.abs(Mth.sin(step)) * 1.5F * run + dead * 6.0F + biteIn * 1.0F;
+		this.body.xRot = tilt + dash * 0.06F - sit * 0.14F - rage * 0.18F + dip * 0.05F + Mth.sin(step) * 0.12F * run - biteBack * 0.06F
+			+ biteIn * 0.05F;
+		this.body.yRot = Mth.sin(step) * 0.08F * walk * (1.0F - run) + Mth.sin(t * 0.14F) * 0.07F * swim - guard * 0.22F - parry * 0.1F + sweep * 0.3F;
+		this.body.zRot = Mth.sin(step) * 0.025F * walk * (1.0F - run) + flinch * 0.14F;
 
 		// the neck and head: level with the back; swaying against the body, dipped and tossed for the gore, flung up raging
-		float down = crash * 0.45F + swim * 0.2F + dip * 0.35F - toss * 0.45F - rage * 0.5F + dash * 0.15F;
+		float down = crash * 0.45F + swim * 0.2F + dip * 0.35F - toss * 0.45F - rage * 0.5F + dash * 0.15F - biteBack * 0.35F + biteIn * 0.3F
+			+ hiss * 0.15F + sniff * 0.55F - flinch * 0.4F + bask * 0.3F + dead * 0.6F;
 		this.neck0.xRot = this.neck0Rest + down * 0.55F + Mth.sin(step * 2.0F) * 0.02F * walk - tilt * 0.55F;
 		this.neck1.xRot = this.neck1Rest + down * 0.45F + Mth.sin(step * 2.0F - 0.5F) * 0.02F * walk - tilt * 0.3F;
-		this.neck0.yRot = headYaw * 0.3F - this.body.yRot * 0.5F;
-		this.neck1.yRot = headYaw * 0.3F - Mth.sin(step - 0.5F) * 0.04F * walk;
+		float lookYaw = headYaw * (1.0F - fidget) * (1.0F - dead);
+		this.neck0.yRot = lookYaw * 0.3F - this.body.yRot * 0.5F + sniffTurn * 0.3F + shake * 0.12F;
+		this.neck1.yRot = lookYaw * 0.3F - Mth.sin(step - 0.5F) * 0.04F * walk + sniffTurn * 0.3F + shake * 0.18F;
 		this.head.xRot = this.headRest + headPitch * 0.5F - down * 0.3F - toss * 0.25F - crash * 0.2F;
-		this.head.yRot = headYaw * 0.3F;
+		this.head.yRot = lookYaw * 0.3F + shake * 0.25F;
+		this.head.zRot = shake * 0.2F + dead * 0.3F;
 		// (a crocodile's gape at rest, wide raging and in the dash)
 		this.jaw.xRot = 0.04F + (0.5F - 0.5F * Mth.cos(t * 0.03F)) * 0.12F * (1.0F - walk) + rage * 0.85F + dash * 0.55F + toss * 0.2F
-			+ s.breath * 0.4F;
+			+ s.breath * 0.4F + biteBack * 0.95F + flinch * 0.5F + hiss * 0.75F + bask * (0.75F + Mth.sin(t * 0.03F) * 0.05F) + dead * 0.4F;
 
 		// the tail: snaking behind, each segment a beat behind; sculling in the water; curled round in the tailguard
 		for (int i = 0; i < TAIL; i++) {
@@ -268,7 +301,11 @@ final class VarasuchusDragonModel extends EntityModel<WindDragonRenderer.State> 
 			float whip = (a == VarasuchusDragon.DASH_MOVE ? bell(x, 0.55F + k * 0.15F, 0.85F + k * 0.15F) * 0.8F : 0.0F)
 				+ (a == VarasuchusDragon.PARRY_MOVE ? bell(x, k * 0.25F, 0.6F + k * 0.4F) * 0.6F : 0.0F);
 			float wrap = Math.max(guard, whip);
-			this.tail[i].yRot = sway * (1.0F - wrap) + wrap * WRAP[i] + this.body.yRot * -0.3F;
+			// (0.7.612) the sweep rolls down the tail a beat a segment; the swish flicks its last half; dead it lies limp
+			float lash = a == VarasuchusDragon.SWEEP_MOVE ? bell(x, k * 0.25F, 0.65F + k * 0.35F) : 0.0F;
+			float flick = swish * Mth.sin(t * 0.5F - i * 0.6F) * k * 0.3F;
+			this.tail[i].yRot = (sway * (1.0F - wrap) + wrap * WRAP[i] + this.body.yRot * -0.3F - lash * 0.45F + flick) * (1.0F - dead)
+				+ dead * 0.06F;
 			// (wrapped round, it's held level off the ground; upright, its root bends so it still lies along the ground)
 			this.tail[i].xRot = this.tailRest[i] * (1.0F - Math.max(swim * 0.7F, wrap * 0.85F)) - dash * 0.03F + crash * (i == 0 ? 0.08F : 0.0F)
 				- sit * (i == 0 ? 0.1F : 0.0F) - (i == 0 ? tilt * 0.85F : 0.0F);
@@ -277,8 +314,9 @@ final class VarasuchusDragonModel extends EntityModel<WindDragonRenderer.State> 
 		// legs: a high, sprawling walk with the diagonal pairs together; folded flat back swimming; splayed crashed
 		for (int i = 0; i < 4; i++) {
 			boolean front = i < 2, left = i % 2 == 0;
-			float phase = front == left ? 0.0F : Mth.PI;
-			float swing = Mth.cos(step + phase) * 0.45F * walk;
+			// (0.7.612) the gallop: the pairs fall out of the walk's diagonal into front-together, hind-together
+			float phase = Mth.lerp(run, front == left ? 0.0F : Mth.PI, front ? (left ? 0.0F : 0.35F) : (left ? Mth.PI * 0.9F : Mth.PI * 1.25F));
+			float swing = Mth.cos(step + phase) * (0.45F + run * 0.2F) * walk;
 			float lift = (1.0F - Mth.sin(step + phase)) * 0.5F;
 			float knee = lift * lift * 0.5F * walk;
 			float up = swing, low = knee;
@@ -303,11 +341,16 @@ final class VarasuchusDragonModel extends EntityModel<WindDragonRenderer.State> 
 			up = Mth.lerp(crouch, up, front ? -0.3F : 0.3F);
 			low = Mth.lerp(crouch, low, front ? 0.6F : 0.3F);
 			// swimming: laid flat back along its flanks
-			up = Mth.lerp(swim, up, 1.3F + Mth.sin(t * 0.2F + phase) * 0.12F);
+			// (0.7.612) floating still, they tread slowly; under way, the strokes quicken
+			float stroke = t * (0.08F + Math.min(s.walkAnimationSpeed, 1.0F) * 0.14F);
+			up = Mth.lerp(swim, up, 1.3F + Mth.sin(stroke + phase) * 0.12F);
+			// (0.7.612) dead: locked out stiff
+			up = Mth.lerp(dead, up, front ? -0.35F : 0.35F);
+			low = Mth.lerp(dead, low, 0.0F);
 			low = Mth.lerp(swim, low, 0.2F);
 			float side = left ? -1.0F : 1.0F;
 			this.upper[i].xRot = up;
-			this.upper[i].zRot = this.upperZ[i] * (1.0F - swim * 0.6F) + side * crash * 0.9F;
+			this.upper[i].zRot = this.upperZ[i] * (1.0F - swim * 0.6F) + side * crash * 0.9F + side * dead * 0.5F;
 			this.lower[i].xRot = low;
 			this.lower[i].zRot = this.lowerZ[i] * (1.0F - swim * 0.6F) - side * crash * 0.6F;
 			// the foot kept flat on the ground (upright, the forefeet held as hands)

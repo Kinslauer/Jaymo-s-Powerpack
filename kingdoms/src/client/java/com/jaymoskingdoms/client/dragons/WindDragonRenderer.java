@@ -43,6 +43,8 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 	private final String species;
 	private final float scale;
 	private final float reach;
+	/** (0.7.612) Whether its model plays a death of its own (then it isn't flipped onto its side as it dies). */
+	private boolean ownDeath;
 
 	/** {@code species}: its folder under {@code textures/entity/dragon/}; {@code shadow}: its shadow's radius (blocks). */
 	WindDragonRenderer(EntityRendererProvider.Context context, String species, M model, float shadow) {
@@ -70,6 +72,17 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 			poseStack.scale(s, s, s);
 		}
 		super.scale(state, poseStack);
+	}
+
+	/** (0.7.612) Its model plays its own death: no sideways flip. */
+	WindDragonRenderer<M> ownDeath() {
+		this.ownDeath = true;
+		return this;
+	}
+
+	@Override
+	protected float getFlipDegrees() {
+		return this.ownDeath ? 0.0F : super.getFlipDegrees();
 	}
 
 	@Override
