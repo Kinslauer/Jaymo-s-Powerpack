@@ -9883,7 +9883,12 @@ Ideas from Warframe's personal adversaries (a commercial game: our own names, co
   (1 to 4 by rank) in a speaker-shot film, with a line about last time (it killed you, you killed it, or anything else).
   You aren't harmed while the film runs. It goes, band and all, when you get 72 blocks away, a minute passes with no
   blows, or after it has killed you. Then not again for half a day.
-- **Friends can help:** anyone can fight it and its band, and question the warlord's cutthroats (they tell its traits).
+- **Outlaws first** (Andy: "the outlaws should be the most common for this system, the questioning is very important"):
+  an outlaw or illager near you is 4 times as likely to get the brand, and anything else picked keeps it only half the
+  time, so most Banes are warlords. Every band has living outlaws in it to question: all of the warlord's cutthroats,
+  and every other one of the knight's (grave-robbers with shovels) and the demon's (cultists with gold blades). A band
+  never harms its own.
+- **Friends can help:** anyone can fight it and its band, and question its outlaws (they tell its traits).
   Only you can finish it: struck down by anyone or anything else, it gets up laughing and goes.
 - **Not ended yet:** beaten, it is back in a day or two, having learned from it. The marks that end it come in patch 6.
 - Powers 0.21.18 adds `UltimateFilm.filming` for the film check (`PowersCompat.filming`). Lines:

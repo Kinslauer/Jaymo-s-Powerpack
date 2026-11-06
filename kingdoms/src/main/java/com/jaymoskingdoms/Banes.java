@@ -79,6 +79,12 @@ public final class Banes {
 	/** Each look (every {@link #LOOK} ticks), the chance a fitting foe within {@link #BRAND_NEAR} of a player without a Bane is branded for them. */
 	static final float BRAND_CHANCE = 0.015F;
 	static final double BRAND_NEAR = 24.0;
+	/**
+	 * (Andy: "the outlaws should be the most common for this system") An outlaw or illager is this many times as likely to be
+	 * picked for the brand as anything else near, and anything else, once picked, keeps it only at {@link #OTHER_KEEPS}.
+	 */
+	static final int OUTLAW_WEIGHT = 4;
+	static final float OTHER_KEEPS = 0.5F;
 	static final int LOOK = 100;
 	/** Days until a newly born Bane first rises; days until a beaten one is back. */
 	static final int RISE_DAYS_MIN = 1, RISE_DAYS_MAX = 2, BACK_DAYS_MIN = 1, BACK_DAYS_MAX = 2;
@@ -191,6 +197,11 @@ public final class Banes {
 			}
 		});
 		ServerLivingEntityEvents.ALLOW_DEATH.register(Banes::allowDeath);
+		// (a band never harms its own: the knight's dead leave his grave-robbers be)
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((victim, source, amount) -> {
+			String mine = VISITS.isEmpty() || source.getEntity() == null ? null : bandOf(victim);
+			return mine == null || !mine.equals(bandOf(source.getEntity()));
+		});
 		ServerEntityEvents.ENTITY_LOAD.register(Banes::loaded);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			VISITS.clear();
@@ -322,11 +333,25 @@ public final class Banes {
 		if (random.nextFloat() >= BRAND_CHANCE) {
 			return;
 		}
-		List<Mob> fit = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(BRAND_NEAR), m -> m.isAlive() && !m.hasAttached(BRAND) && kindOf(m) != null);
+		List<Mob> fit = new ArrayList<>(level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(BRAND_NEAR), m -> m.isAlive() && !m.hasAttached(BRAND) && kindOf(m) != null));
 		if (fit.isEmpty()) {
 			return;
 		}
-		Mob foe = fit.get(random.nextInt(fit.size()));
+		int total = 0;
+		for (Mob m : fit) {
+			total += kindOf(m) == Rivals.Side.BANE_WARLORD ? OUTLAW_WEIGHT : 1;
+		}
+		Mob foe = fit.getFirst();
+		for (int roll = random.nextInt(total); ; ) {
+			foe = fit.removeFirst();
+			roll -= kindOf(foe) == Rivals.Side.BANE_WARLORD ? OUTLAW_WEIGHT : 1;
+			if (roll < 0 || fit.isEmpty()) {
+				break;
+			}
+		}
+		if (kindOf(foe) != Rivals.Side.BANE_WARLORD && random.nextFloat() >= OTHER_KEEPS) {
+			return;
+		}
 		foe.setAttached(BRAND, p.getStringUUID());
 		foe.setPersistenceRequired();
 		BRANDS.put(p.getUUID(), foe.getUUID());
@@ -470,7 +495,9 @@ public final class Banes {
 		int count = Math.min(BAND_MAX, BAND_BASE + c.rank() / 2);
 		for (int i = 0; i < count; i++) {
 			BlockPos at = spot.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2);
-			PathfinderMob m = follower(level, kind, c.tribe(), Construction.standable(level, at, 2), random);
+			// (every band has living men in it, to be questioned: the knight's grave-robbers, the demon's cultists)
+			boolean man = kind == Rivals.Side.BANE_WARLORD || i % 2 == 0;
+			PathfinderMob m = follower(level, kind, man, c.tribe(), Construction.standable(level, at, 2), random);
 			if (m != null) {
 				band.add(m.getUUID());
 				Rulers.charge(m, p);
@@ -529,10 +556,12 @@ public final class Banes {
 		return mob;
 	}
 
-	/** One of its band: the dead (zombies, skeletons), cutthroats, or Hornkin warriors; tagged for {@code ladder}. */
-	private static @Nullable PathfinderMob follower(ServerLevel level, Rivals.Side kind, String ladder, BlockPos at, RandomSource random) {
-		PathfinderMob mob = switch (kind) {
-			case BANE_WARLORD -> outlaw(level, at, random);
+	/**
+	 * One of its band, tagged for {@code ladder}: a living outlaw ({@code man}: the warlord's cutthroats, the knight's grave-robbers,
+	 * the demon's cultists, all of them villagers who can be questioned), else the dead (zombies, skeletons) or Hornkin warriors.
+	 */
+	private static @Nullable PathfinderMob follower(ServerLevel level, Rivals.Side kind, boolean man, String ladder, BlockPos at, RandomSource random) {
+		PathfinderMob mob = man ? outlaw(level, at, random) : switch (kind) {
 			case BANE_DEMON -> Nether.HORNKIN.create(level, EntitySpawnReason.EVENT);
 			default -> random.nextBoolean() ? EntityTypes.ZOMBIE.create(level, EntitySpawnReason.EVENT) : EntityTypes.SKELETON.create(level, EntitySpawnReason.EVENT);
 		};
@@ -541,11 +570,19 @@ public final class Banes {
 		}
 		mob.addTag(BAND_TAG + ladder);
 		mob.addTag(Rivals.ROLLED_TAG);
-		switch (kind) {
-			case BANE_WARLORD -> {
-				mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextBoolean() ? Items.IRON_SWORD : Items.STONE_AXE));
-				mob.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE));
+		if (man) {
+			// (a cutthroat's blade; a grave-robber's shovel; a cultist's dagger-sword and a gold charm)
+			Item held = switch (kind) {
+				case BANE_KNIGHT -> Items.IRON_SHOVEL;
+				case BANE_DEMON -> Items.GOLDEN_SWORD;
+				default -> random.nextBoolean() ? Items.IRON_SWORD : Items.STONE_AXE;
+			};
+			mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(held));
+			mob.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE));
+			if (kind == Rivals.Side.BANE_KNIGHT) {
+				mob.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
 			}
+		} else switch (kind) {
 			case BANE_KNIGHT -> {
 				mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(mob instanceof AbstractSkeleton ? Items.BOW : Items.IRON_SWORD));
 				// (a helmet against the sun)
