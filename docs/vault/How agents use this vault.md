@@ -4,13 +4,17 @@ The vault is `docs/vault/` in the repo, and Andy opens the copy in the main chec
 It has two kinds of notes:
 
 - **Reference notes** ([[Home]], `Context/`, `Templates/`, this note) are in git. They change through PRs like code.
-- **Live notes** are in `Live/`, which git ignores. There's only one copy: the main checkout's
-  **`E:\Origins Mod\docs\vault\Live\`**. Every agent writes there directly, by that absolute path, never in its own
+- **Live notes** are in `Live/`. It's a link (a Windows junction) to the live folder **`E:/Jaymo Vault Live/`**, which is
+  outside git, so there's only one copy. Every agent writes there directly, by that absolute path, never in its own
   worktree's copy. That way the [[Board]] shows an agent the moment it starts, and Andy has one place to look.
   - `Live/Agents/`: one note per agent. Finished ones move to `Live/Agents/Done/`.
   - `Live/Decisions.md`: the decision log ([[Decisions]]).
+  - `Live/Open PRs.md`: every open PR ([[Open PRs]]), written by `tools/vault_prs.py`. It refreshes by itself
+    when a Claude session starts and after any vault edit (hooks in `.claude/settings.json`, at most once a minute);
+    other assistants run `python tools/vault_prs.py` after opening or merging a PR.
 
-Writing into `Live/` is the **only** thing an agent does in the main checkout: no git commands there, no other files.
+Always use the `E:/Jaymo Vault Live/` path, not `E:/Origins Mod/docs/vault/Live/`: the app blocks Claude's file tools from
+writing into the main checkout. Never run git commands in the main checkout.
 Cloud sessions can't reach this PC; they put the same details in their PR body instead.
 
 ## Your own worktree, always
@@ -26,10 +30,10 @@ Every agent, Hermes included, works only in **its own git worktree** on its own 
 ## When you start
 
 1. Read [[Home]] (versions, open PRs, what's next), then `CLAUDE.md`.
-2. Read every note in `E:\Origins Mod\docs\vault\Live\Agents\` whose `status` is `running`, `in-review` or
+2. Read every note in `E:/Jaymo Vault Live/Agents/` whose `status` is `running`, `in-review` or
    `blocked`. Their `owns:` lists are the files they're editing. **Don't edit a file another agent owns.** If you
    need one, ask Andy (or that agent's session) first.
-3. Make your agent note: copy `Templates/Agent.md` to `E:\Origins Mod\docs\vault\Live\Agents\<branch name without
+3. Make your agent note: copy `Templates/Agent.md` to `E:/Jaymo Vault Live/Agents/<branch name without
    claude/>.md` (in Obsidian: new note, which lands in `Live/Agents/`, then *Insert template*). Fill in the task,
    branch, the files you'll own, and `status: running`.
 
@@ -37,7 +41,7 @@ Every agent, Hermes included, works only in **its own git worktree** on its own 
 
 - Add a file to `owns:` before you start editing it.
 - Each time Andy decides something (a ruling, a tuning number, "yes do it", "no, leave it"), append an entry to
-  `E:\Origins Mod\docs\vault\Live\Decisions.md` using `Templates/Decision.md`: date, which agent, the decision in
+  `E:/Jaymo Vault Live/Decisions.md` using `Templates/Decision.md`: date, which agent, the decision in
   Andy's words, where it applies.
 - Lasting facts (a 26.3 API gotcha, a standing rule) also go in `docs/AI-HANDBOOK.md` or `docs/HANDOFF.md` through
   your PR, so they're in git too.
