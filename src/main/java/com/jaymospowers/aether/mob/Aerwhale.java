@@ -4,7 +4,6 @@ import com.jaymospowers.armory.ThrownWeapon;
 import java.lang.reflect.Method;
 import java.util.EnumSet;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -211,7 +210,7 @@ public class Aerwhale extends Mob {
 			this.bleeding = true;
 			this.hurtServer(level, this.damageSources().generic(), BLEED * Math.min(this.irons, MOST_BLEEDING));
 			this.bleeding = false;
-			level.sendParticles(new DustParticleOptions(0x7A0A0A, 2.5F), this.getX(), this.getY() + HEIGHT * 0.5, this.getZ(), 8 * this.irons,
+			level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0A0A, 2.5F), this.getX(), this.getY() + HEIGHT * 0.5, this.getZ(), 8 * this.irons,
 				WIDTH * 0.4, HEIGHT * 0.4, WIDTH * 0.4, 0.0);
 		}
 		if (!fleeing) {

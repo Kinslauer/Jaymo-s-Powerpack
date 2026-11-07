@@ -36,6 +36,10 @@ public class WeaponPartItem extends Item {
 
 	public static WeaponParts.Metal metal(ItemStack stack) {
 		WeaponParts.Metal metal = WeaponParts.Metal.byId(stack.get(Tinkering.WEAPON_PART_METAL));
+		if (metal == null && stack.getItem() instanceof WeaponPartItem part && WeaponParts.king(part.kind)) {
+			// (Havens patch 5) a king's head, dropped bare by Kingdoms: it's iron
+			return WeaponParts.Metal.IRON;
+		}
 		return metal != null ? metal : WeaponParts.Metal.STONE;
 	}
 
@@ -77,6 +81,7 @@ public class WeaponPartItem extends Item {
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
 		TooltipFlag flag) {
 		com.jaymospowers.tinkering.smithing.Finishing.tooltip(stack, builder);
+		com.jaymospowers.armory.BaneWeapons.tooltip(stack, builder);
 		ItemStack weapon = weapon(stack);
 		if (weapon == null) {
 			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.cast_only").withStyle(ChatFormatting.GRAY));

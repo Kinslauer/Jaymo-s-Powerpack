@@ -96,6 +96,7 @@ public final class Grimsby extends Spirit {
 		MOVES.add(new RiposteMove());
 		MOVES.add(new GuardBreakMove());
 		MOVES.add(SpiritExecutions.move("finish", Spirits.GRIMSBY));
+		MOVES.add(new InBalm(Spirits.GRIMSBY));
 	}
 
 	public Grimsby() {

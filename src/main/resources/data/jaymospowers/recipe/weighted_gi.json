@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "I": "minecraft:iron_ingot",
+    "W": "#minecraft:wool"
+  },
+  "pattern": [
+    "L L",
+    "IWI",
+    "LIL"
+  ],
+  "result": {
+    "id": "jaymospowers:weighted_gi"
+  }
+}

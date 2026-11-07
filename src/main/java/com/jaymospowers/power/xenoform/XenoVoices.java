@@ -230,7 +230,7 @@ public final class XenoVoices {
 	 * blow was struck in it. Counts toward the deeds, and spends Nadir.
 	 */
 	static void formEnded(ServerPlayer player, XenoForm form, boolean knockout, boolean timedOut, boolean hurt) {
-		if (form.hidden()) {
+		if (form.lent()) {
 			spent(player);
 			return;
 		}

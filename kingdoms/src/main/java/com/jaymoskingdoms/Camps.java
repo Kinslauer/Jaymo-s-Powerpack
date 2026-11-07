@@ -197,12 +197,21 @@ public final class Camps {
 		Goblins.init();
 		// 0.5.45: orc war camps
 		Orcs.init();
+		// (0.7.490) goblin slaves in the orc camps
+		Slaves.init();
 		// 0.7.42: pirate coves and the sailors of the kingdoms
 		Pirates.init();
 		CampBuildings.registerCatalogue();
+		// (0.7.475) greenskin camps grow in tiers
+		Hordes.register();
+		// (0.7.490) villages and Blossom villages grow into walled towns
+		JaymosKingdoms.LOGGER.debug("walled town attachment: {}", WalledTowns.TOWNS);
+		WalledTowns.register();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Raids.clear();
+			OgreRaids.clear();
+			OgreGrowth.clear();
 			IllagerCamps.clear();
 			GoblinVillages.clear();
 			OrcCamps.clear();
@@ -435,7 +444,7 @@ public final class Camps {
 	}
 
 	/** {@code at} is free for a camp: loaded, nobody's land, far from every settlement and camp, out of every player's sight, no bell near. */
-	private static boolean open(MinecraftServer server, ServerLevel level, BlockPos at) {
+	static boolean open(MinecraftServer server, ServerLevel level, BlockPos at) {
 		if (!level.isPositionEntityTicking(at)) {
 			return false;
 		}
@@ -463,6 +472,8 @@ public final class Camps {
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		Raids.tick(server);
+		// (0.7.490) ogre raids are driven
+		OgreRaids.tick(server);
 		long now = level.getGameTime();
 		if (now % SPAWN_CHECK_TICKS == 0) {
 			spawnCamps(server, level);
@@ -625,6 +636,12 @@ public final class Camps {
 	 * is anyone's), and its tents start to rot.
 	 */
 	static void chiefSlain(ServerLevel level, LivingEntity chief, int campId, DamageSource source) {
+		// (0.7.435) a goblin king's or a warchief's spoils: his trophy, and a tribe's king his crown and weapon
+		Spoils.kingFell(level, chief, campId, source);
+		if (SwornCaptains.seatTaken(level, chief, campId, source)) {
+			// (0.7.433) a tribe's king, killed by one with a sworn captain to crown: the seat is theirs, the camp stands
+			return;
+		}
 		MinecraftServer server = level.getServer();
 		Faction camp = Factions.get(server, campId);
 		if (camp == null || camp.fallen() || camp.type() != FactionType.BARBARIAN) {
@@ -654,8 +671,16 @@ public final class Camps {
 			level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.6F);
 		}
 		Raids.scatter(level, camp.id());
+		if (orcs) {
+			// (0.7.474) its band of ogres breaks up
+			CampData band = data(server, camp.id());
+			OgreHolds.campFell(server, band != null ? band.center() : camp.seat());
+		}
+		// (0.7.475) a greenskin realm's vassals are free
+		Hordes.fell(server, camp.id());
+		// (0.7.490) its slaves stay: Slaves.tick sees the camp gone and sends them running
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, new AABB(camp.seat()).inflate(SCATTER_RANGE),
-			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f))) {
+			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f) && f.role() != Slaves.SLAVE)) {
 			if (folk.isCarrying()) {
 				folk.spawnAtLocation(level, folk.takeCarried());
 			}
@@ -675,6 +700,10 @@ public final class Camps {
 		BlockPos center = data != null ? data.center() : camp.seat();
 		List<Long> rot = new ArrayList<>();
 		int reach = pirates ? PirateCoves.RADIUS + 1 : orcs ? OrcBuildings.CLEAR_RADIUS : goblins ? GoblinBuildings.CLEAR_RADIUS : illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
+		if (orcs || goblins) {
+			// (0.7.475) and its outer walls and band, as far as it grew
+			reach = Math.max(reach, Hordes.radius(server, camp.id()) + 2);
+		}
 		int high = pirates ? PirateCoves.CLEAR_HEIGHT : orcs ? OrcBuildings.CLEAR_HEIGHT : goblins ? GoblinBuildings.CLEAR_HEIGHT : illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
 		// (a camp in a Grim ruin leaves the ruin as it stands: nothing of it rots)
 		Holds.Hold held = Holds.get(server, camp.id());
@@ -736,7 +765,9 @@ public final class Camps {
 				.then(Commands.literal("pirate").executes(c -> foundHere(c, PirateCoves.KIND))))
 			.then(Commands.literal("raid").executes(Camps::raidNow))
 			.then(Commands.literal("grow").executes(Camps::growNow))
-			.then(Commands.literal("info").executes(Camps::info));
+			.then(Commands.literal("info").executes(Camps::info))
+			// (0.7.475) a greenskin camp's tier
+			.then(Hordes.command());
 	}
 
 	private static int foundHere(CommandContext<CommandSourceStack> c, String kind) throws CommandSyntaxException {
@@ -765,7 +796,7 @@ public final class Camps {
 		return 1;
 	}
 
-	private static @Nullable Faction nearestCamp(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+	static @Nullable Faction nearestCamp(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		Faction best = null;
 		double bestDist = Double.MAX_VALUE;
@@ -871,6 +902,10 @@ public final class Camps {
 					.append(data.grown()).append(" days");
 			}
 			out.append(", last raid ").append((now - data.lastRaid()) / 20).append(" s ago");
+			if (data.orc() || data.goblin()) {
+				// (0.7.475) its tier
+				out.append("\n").append(Hordes.describe(level, camp, data).getString());
+			}
 		}
 		out.append("\nroster: ").append(camp.holdings().roster());
 		boolean leaderHere = camp.leader().isPresent() && level.getEntity(camp.leader().get()) != null;

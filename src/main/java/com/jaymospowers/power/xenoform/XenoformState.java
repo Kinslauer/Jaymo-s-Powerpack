@@ -121,9 +121,11 @@ public final class XenoformState {
 	 * {@code rechargeTotal}: the band's recharge; {@code until}/{@code length}: each move's cooldown end (game time) and
 	 * length; {@code scan}/{@code scanTotal}: the scan's progress; {@code scanForm}: the alien being scanned ("" for none).
 	 */
-	public record Hud(int formTicks, int formTotal, int recharge, int rechargeTotal, long[] until, int[] length, int scan, int scanTotal, String scanForm) {
-		public static final int SLOTS = 4;
-		public static final Hud NONE = new Hud(0, 0, 0, 0, new long[SLOTS], new int[SLOTS], 0, 0, "");
+	public record Hud(int formTicks, int formTotal, int recharge, int rechargeTotal, long[] until, int[] length, int scan, int scanTotal, String scanForm,
+		float under, float underMax) {
+		/** (0.20.9) Five slots: R G V B and C. {@code under}/{@code underMax}: the base alien's held health while its Ultimate is on (0: not). */
+		public static final int SLOTS = 5;
+		public static final Hud NONE = new Hud(0, 0, 0, 0, new long[SLOTS], new int[SLOTS], 0, 0, "", 0.0F, 0.0F);
 		public static final StreamCodec<ByteBuf, Hud> STREAM_CODEC = StreamCodec.of((buf, hud) -> {
 			ByteBufCodecs.VAR_INT.encode(buf, hud.formTicks);
 			ByteBufCodecs.VAR_INT.encode(buf, hud.formTotal);
@@ -136,6 +138,8 @@ public final class XenoformState {
 			ByteBufCodecs.VAR_INT.encode(buf, hud.scan);
 			ByteBufCodecs.VAR_INT.encode(buf, hud.scanTotal);
 			ByteBufCodecs.STRING_UTF8.encode(buf, hud.scanForm);
+			ByteBufCodecs.FLOAT.encode(buf, hud.under);
+			ByteBufCodecs.FLOAT.encode(buf, hud.underMax);
 		}, buf -> {
 			int formTicks = ByteBufCodecs.VAR_INT.decode(buf);
 			int formTotal = ByteBufCodecs.VAR_INT.decode(buf);
@@ -147,8 +151,11 @@ public final class XenoformState {
 				until[i] = ByteBufCodecs.VAR_LONG.decode(buf);
 				length[i] = ByteBufCodecs.VAR_INT.decode(buf);
 			}
-			return new Hud(formTicks, formTotal, recharge, rechargeTotal, until, length, ByteBufCodecs.VAR_INT.decode(buf),
-				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.STRING_UTF8.decode(buf));
+			int scan = ByteBufCodecs.VAR_INT.decode(buf);
+			int scanTotal = ByteBufCodecs.VAR_INT.decode(buf);
+			String scanForm = ByteBufCodecs.STRING_UTF8.decode(buf);
+			return new Hud(formTicks, formTotal, recharge, rechargeTotal, until, length, scan, scanTotal, scanForm,
+				ByteBufCodecs.FLOAT.decode(buf), ByteBufCodecs.FLOAT.decode(buf));
 		});
 
 		public long cooldownLeft(int slot, long now) {
@@ -158,7 +165,7 @@ public final class XenoformState {
 		boolean same(Hud other) {
 			return formTicks == other.formTicks && formTotal == other.formTotal && recharge == other.recharge && rechargeTotal == other.rechargeTotal
 				&& java.util.Arrays.equals(until, other.until) && java.util.Arrays.equals(length, other.length) && scan == other.scan
-				&& scanTotal == other.scanTotal && scanForm.equals(other.scanForm);
+				&& scanTotal == other.scanTotal && scanForm.equals(other.scanForm) && under == other.under && underMax == other.underMax;
 		}
 	}
 
@@ -172,12 +179,36 @@ public final class XenoformState {
 		builder -> builder.syncWith(Hud.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/**
 	 * How the alien is flying right now, for everyone's client to pose it ({@link XenoForm#flight}): {@link #FLY_JET}
-	 * (Pyre; {@link #FLY_SUN} under Sunheart, faster), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Wisp), {@link #FLY_VOID}
+	 * (Pyre; {@link #FLY_SUN} under Sunheart, faster), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Keen, Talon), {@link #FLY_FLOAT} (Wisp, Revenant), {@link #FLY_VOID}
 	 * (Nadir). Absent: not flying.
 	 */
 	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("xenoform_flight"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5;
+	/** (0.18.113) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
+	public static final AttachmentType<Boolean> CEILING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ceiling"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.19.62) An alien's ability pose, drawn for everyone: "charge", "roll", "spin" and the rest (see XenoformPower.syncAct). */
+	public static final AttachmentType<String> ACT = AttachmentRegistry.create(JaymosPowers.id("xenoform_act"),
+		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+
+	/**
+	 * (0.19.62) Skitter crawling up a wall as a spider (prone): the side the wall is on (a horizontal
+	 * {@code Direction}'s 2D data value), so every client draws it on that wall.
+	 */
+	public static final AttachmentType<Integer> CLIMB = AttachmentRegistry.create(JaymosPowers.id("xenoform_climb"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** (0.18.119, Scan G) Towerback's grab: when it began (game time), so every client poses its arm. Absent: not grabbing. */
+	public static final AttachmentType<Long> GRAB = AttachmentRegistry.create(JaymosPowers.id("xenoform_grab"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/** (0.19.28) Towerback's swat: when it began (game time), so every client poses the backhand. Absent: not swatting. */
+	public static final AttachmentType<Long> SWAT = AttachmentRegistry.create(JaymosPowers.id("xenoform_swat"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/** (0.19.28) Towerback's footfalls so far: each new one, every client brings its legs' stride round to a foot coming down. */
+	public static final AttachmentType<Integer> STEP = AttachmentRegistry.create(JaymosPowers.id("xenoform_step"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5,
+		/** (0.20.23) Wisp's and Revenant's upright float. */
+		FLY_FLOAT = 6;
 
 	/** Pyre's jet, plain or Sunheart's. */
 	public static boolean jet(int kind) {
@@ -187,9 +218,32 @@ public final class XenoformState {
 	/** Set (true) while a form is in its last {@link XenoformPower#BEEP_TICKS}: everyone's client glows the alien red. */
 	public static final AttachmentType<Boolean> ENDING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ending"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.18.95) Rivet's shell: the block it has melded into (furnace, piston, ...), drawn as that block. */
+	public static final AttachmentType<String> SHELL = AttachmentRegistry.create(JaymosPowers.id("xenoform_shell"),
+		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+	/** (0.18.96) How many times this player has caught the stalker's eye (three, and it sheds its skin). Kept, not synced. */
+	public static final AttachmentType<Integer> SIGHTINGS = AttachmentRegistry.create(JaymosPowers.id("xenoform_sightings"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
+	/** (0.18.96) Duplex looking out through a double's eyes: the double's entity id. Synced to that player only. */
+	public static final AttachmentType<Integer> EYES = AttachmentRegistry.create(JaymosPowers.id("xenoform_eyes"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 	/** (0.18.93) The alien is its Ultimate form (drawn armoured, spiked and glowing, {@code XenoformLayer}). */
 	public static final AttachmentType<Boolean> ULTIMATE = AttachmentRegistry.create(JaymosPowers.id("xenoform_ultimate"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
+	/**
+	 * (0.18.125, Xeno-Band patch 8) The band worn is the rival band (dark red; its aliens drawn darkened). Saved, kept
+	 * through death, synced to everyone so every client draws it. The player also carries {@link #RIVAL_TAG} while it's on.
+	 */
+	public static final AttachmentType<Boolean> RIVAL = AttachmentRegistry.create(JaymosPowers.id("xenoform_rival"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.18.125) The player tag for the rival band's wearer, for mods that read players without our classes (Kingdoms' law). */
+	public static final String RIVAL_TAG = "jaymospowers_rival_band";
+
+	/** Whether {@code player} wears the rival band (both sides). */
+	public static boolean rival(Player player) {
+		return Boolean.TRUE.equals(player.getAttached(RIVAL));
+	}
 
 	private XenoformState() {
 	}
@@ -209,9 +263,18 @@ public final class XenoformState {
 		return hud == null ? Hud.NONE : hud;
 	}
 
-	/** The alien this player is right now, or null (both sides). */
+	/** The alien this player is right now, or null (both sides). While the Ultimate is on, this is still the base alien. */
 	public static @Nullable XenoForm form(Player player) {
 		return XenoForms.get(player.getAttached(FORM));
+	}
+
+	/**
+	 * (0.20.9) The Ultimate this player is right now ({@link #ULTIMATE} on and the base alien has an {@link XenoForm#evolved()}),
+	 * or null (both sides). The fallback 0.18.93 buff has no Ultimate class, so it is null there.
+	 */
+	public static @Nullable XenoUltimate ultimate(Player player) {
+		XenoForm form = form(player);
+		return form != null && Boolean.TRUE.equals(player.getAttached(ULTIMATE)) ? form.evolved() : null;
 	}
 
 	/** How the player's alien is flying ({@link #FLY_NONE} when it isn't). */
@@ -227,5 +290,26 @@ public final class XenoformState {
 
 	public static boolean transformed(Player player) {
 		return player.hasAttached(FORM);
+	}
+
+	/** (0.19.66) The aliens that take the swimming pose's low box out of water too (drawn level, at their own pace); (0.19.82) the two oozes too. */
+	public static final java.util.Set<String> LOW_BOX = java.util.Set.of("billow", "croaker", "ooze", "magma_ooze");
+
+	/**
+	 * (0.19.84) The aliens whose bodies solve their own legs and crouch (non-human builds): the low stance still lowers
+	 * them, but they never settle onto a knee (no kneel lock, no kneeling pose, no steadied shots).
+	 */
+	public static final java.util.Set<String> OWN_CROUCH = java.util.Set.of("bulwark", "knell", "rime", "shade", "thornwild", "lurk", "rivet", "nadir", "dud");
+
+	/** (0.19.84) Whether {@code player} is one of the {@link #OWN_CROUCH} aliens (both sides). */
+	public static boolean ownCrouch(Player player) {
+		String form = player.getAttached(FORM);
+		return form != null && OWN_CROUCH.contains(form);
+	}
+
+	/** (0.19.66) Whether {@code player} is one of the {@link #LOW_BOX} aliens (both sides). */
+	public static boolean lowBox(net.minecraft.world.entity.player.Player player) {
+		String form = player.getAttached(FORM);
+		return form != null && LOW_BOX.contains(form);
 	}
 }

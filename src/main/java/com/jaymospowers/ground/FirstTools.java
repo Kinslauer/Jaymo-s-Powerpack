@@ -4,6 +4,7 @@ import com.jaymospowers.JaymosPowers;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -44,6 +45,9 @@ import net.minecraft.world.phys.BlockHitResult;
  * other, it chips the flint and breaks the rock": right click a block with flint and a rock in your two hands. A strike
  * catches {@link #STRIKE_CHANCE} of the time; when it does the rock breaks, and the flint chips down to a shard
  * {@link #FLINT_CHIP_CHANCE} of the time. Eight plant fibres in a ring make string (a data recipe).
+ * (0.20.81) Andy: "you should be able to shift click flint in mid air with a rock off hand to splinter it without causing
+ * a fire": sneak + use with flint and a rock in your two hands splinters the flint into shards, as knapping it on a block
+ * does, at the air or at any block, and never strikes fire (the rock is kept).
  */
 public final class FirstTools {
 	/** Shards one flint knaps into. */
@@ -69,6 +73,8 @@ public final class FirstTools {
 	public static Item FLINT_SHARD;
 	public static Item PLANT_FIBRE;
 	public static Item PLANT_STRING;
+	/** (0.19.86) Plant Fibers pick: fibre woven into a mesh, soaked into pulp, dried over a fire into paper. */
+	public static Item PLANT_MESH, WET_PAPER_PULP;
 
 	private FirstTools() {
 	}
@@ -77,10 +83,15 @@ public final class FirstTools {
 		FLINT_SHARD = item("flint_shard");
 		PLANT_FIBRE = item("plant_fiber");
 		PLANT_STRING = item("plant_string");
+		PLANT_MESH = item("plant_mesh");
+		WET_PAPER_PULP = item("wet_paper_pulp");
+		GrassBed.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(FLINT_SHARD);
 			output.accept(PLANT_FIBRE);
 			output.accept(PLANT_STRING);
+			output.accept(PLANT_MESH);
+			output.accept(WET_PAPER_PULP);
 		});
 
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -101,6 +112,14 @@ public final class FirstTools {
 			return InteractionResult.PASS;
 		});
 
+		// sneak + use with flint and a rock: splinter the flint in your hands, at the air (a block is the strike handler's)
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			if (player.isSpectator() || !player.isSecondaryUseActive() || !striking(player)) {
+				return InteractionResult.PASS;
+			}
+			return splinter(player, level, hand);
+		});
+
 		// flint struck on a rock: after everything else (Kingdoms watches for fires being lit), so in a later phase
 		Identifier late = JaymosPowers.id("strike_fire");
 		UseBlockCallback.EVENT.addPhaseOrdering(net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE, late);
@@ -108,7 +127,7 @@ public final class FirstTools {
 			if (player.isSpectator() || !striking(player)) {
 				return InteractionResult.PASS;
 			}
-			return strike(player, level, hand, hit);
+			return player.isSecondaryUseActive() ? splinter(player, level, hand) : strike(player, level, hand, hit);
 		});
 
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
@@ -127,9 +146,13 @@ public final class FirstTools {
 		return Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key)));
 	}
 
-	/** Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft. */
+	/**
+	 * Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft. (0.20.2) Netherrack too, though it
+	 * breaks quick, so flint can be knapped anywhere in the Nether.
+	 */
 	private static boolean hard(Level level, BlockPos pos, BlockState state) {
-		return state.requiresCorrectToolForDrops() && state.getDestroySpeed(level, pos) >= 1.0F && state.is(BlockTags.MINEABLE_WITH_PICKAXE);
+		return state.requiresCorrectToolForDrops() && (state.getDestroySpeed(level, pos) >= 1.0F || state.is(BlockTags.BASE_STONE_NETHER))
+			&& state.is(BlockTags.MINEABLE_WITH_PICKAXE);
 	}
 
 	private static InteractionResult knap(Player player, Level level, InteractionHand hand, ItemStack flint, BlockHitResult hit) {
@@ -142,8 +165,25 @@ public final class FirstTools {
 		return InteractionResult.SUCCESS;
 	}
 
+	/**
+	 * Sneak + use with flint and a rock in your two hands: one flint splinters into {@link #SHARDS_PER_FLINT} shards in
+	 * your hands, never a spark.
+	 */
+	private static InteractionResult splinter(Player player, Level level, InteractionHand hand) {
+		ItemStack flint = player.getMainHandItem().is(Items.FLINT) ? player.getMainHandItem() : player.getOffhandItem();
+		InteractionHand flintHand = flint == player.getMainHandItem() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+		if (level instanceof ServerLevel server) {
+			flint.consume(1, player);
+			player.getInventory().placeItemBackInInventory(new ItemStack(FLINT_SHARD, SHARDS_PER_FLINT), net.minecraft.util.Prediction.SERVER_ONLY);
+			server.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.STONE_HIT, SoundSource.PLAYERS, 1.0F,
+				1.4F + server.getRandom().nextFloat() * 0.3F);
+		}
+		player.swing(flintHand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		return InteractionResult.SUCCESS;
+	}
+
 	/** A rock in one hand and flint in the other. */
-	static boolean striking(Player player) {
+	public static boolean striking(Player player) {
 		ItemStack main = player.getMainHandItem(), off = player.getOffhandItem();
 		return main.is(Items.FLINT) && rock(off) || rock(main) && off.is(Items.FLINT);
 	}

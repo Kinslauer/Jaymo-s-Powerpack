@@ -254,6 +254,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "bog_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_bog_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -403,6 +416,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/part/bow_limb_star_metal"
+          }
+        },
+        {
+          "when": "bog_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_bog_iron"
           }
         }
       ],

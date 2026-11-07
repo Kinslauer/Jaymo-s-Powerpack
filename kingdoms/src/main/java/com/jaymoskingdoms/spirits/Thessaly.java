@@ -41,6 +41,7 @@ import org.jspecify.annotations.Nullable;
  * every spirit), and every twenty minutes or so she points out a chest nearby you have not opened, even behind a wall
  * ({@link #tick}). Advice in battle comes from the core ({@link Spirits#advice}).</li>
  * </ul>
+ * <b>Mana wings</b> (1, Andy 2026-11-01): a toggle; spread, the keeper hovers ({@link ThessalyWings}).
  * The per-tick state of the moves is in {@link ThessalyHands}.
  */
 public final class Thessaly extends Spirit {
@@ -97,7 +98,11 @@ public final class Thessaly extends Spirit {
 			}
 		});
 		MOVES.add(new JuggleMove());
+		MOVES.add(SpiritCharms.turnBack());
+		// (Andy, 2026-11-01) her mana wings: hover, higher and faster as she is mastered
+		MOVES.add(new Ambrose.Def("wings", ThessalyWings.SPREAD_COST, ThessalyWings.SPREAD_COOLDOWN, 1, Poses.IDLE, Mana.WILL, ThessalyWings::cast));
 		MOVES.add(SpiritExecutions.move("execute_thessaly", Spirits.THESSALY));
+		MOVES.add(new InBalm(Spirits.THESSALY));
 	}
 
 	Thessaly() {
@@ -109,6 +114,7 @@ public final class Thessaly extends Spirit {
 			Moves.register(move);
 		}
 		ThessalyHands.register();
+		ThessalyWings.register();
 	}
 
 	/** Drops a keeper who left: their traps, juggled things and chests seen (called from {@link Spirits}' disconnect). */
@@ -185,7 +191,7 @@ public final class Thessaly extends Spirit {
 			}
 		} else if (target instanceof Villager || target instanceof Folk) {
 			did = Pickpocket.liftBySpirit(player, target);
-		} else if (target instanceof Mob mob) {
+		} else if (target instanceof Mob mob && !(mob instanceof com.jaymoskingdoms.PatronChampion)) {
 			ItemStack held = mob.getMainHandItem();
 			did = !held.isEmpty();
 			if (did) {

@@ -5,12 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,6 +44,9 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Vampires</b> ({@link VampirePlayers}) cast it cheaper and harder, but every cast stokes their blood fever.</li>
  * <li>A camp's <b>blood witch</b> ({@link Sorcery#BLOOD_WITCH}) casts the same: bolts that cut, grips, hemorrhages, and
  * she drinks the bleeding round her to heal.</li>
+ * <li>(0.7.481) Andy: "Blood magic should draw from stains on ground". Both also draw the spilt blood out of the stains
+ * round them (Jaymo's Powers' blood trail, {@link PowersCompat#drawStains}): it rises to them in a thread of red and the
+ * stain shrinks and fades, gone once drawn dry (a trail drawn up can't be followed any more).</li>
  * </ul>
  */
 public final class Hemomancy {
@@ -50,8 +57,23 @@ public final class Hemomancy {
 	/** Below this share of health, a cast opens a cut on you. */
 	static final float CUT_BELOW = 0.5F;
 	/** The pool: the most it holds; what each bleeding cut near feeds it a second (and the most a second); how near. */
-	static final float POOL_MAX = 20.0F, DRINK_PER_CUT = 0.25F, DRINK_MOST = 2.0F;
+	public static final float POOL_MAX = 20.0F, DRINK_PER_CUT = 0.25F, DRINK_MOST = 2.0F;
 	static final double DRINK_RANGE = 8.0;
+	/**
+	 * (0.7.481) Drawing from the stains on the ground: how near; how much of each stain a second (stain size: a drip's is
+	 * about 0.2, a pool 1 to 3); the pool (or a witch's health) each unit of stain is worth. The pool still fills at most
+	 * {@link #DRINK_MOST} a second, the bleeding first.
+	 */
+	static final double STAIN_RANGE = 6.0;
+	static final float STAIN_EACH = 0.12F, STAIN_BLOOD = 4.0F;
+	/**
+	 * (0.7.481) Jaymo's Kitchen's blood grates (under a meat hook): how near, the most levels drawn a second, what each
+	 * level (250 mB) is worth to the pool. A bottle of that blood, drunk: what it gives a Blood Sorcerer's pool, and a
+	 * vampire's heal and food.
+	 */
+	static final int GRATE_RANGE = 6, GRATE_MOST = 1;
+	static final float GRATE_BLOOD = 3.0F, BOTTLE_POOL = 6.0F, BOTTLE_HEAL = 2.0F;
+	static final int BOTTLE_FOOD = 3;
 	/** A vampire's costs and power. */
 	static final float VAMPIRE_COST = 0.75F, VAMPIRE_POWER = 1.5F, VAMPIRE_FEVER = 3.0F;
 	/** Hemorrhage: how far, how many bleed ticks each cut bursts for. */
@@ -72,8 +94,12 @@ public final class Hemomancy {
 	static final int CRIMSON = 0x8A0F14, DARK = 0x4A0508;
 	static final DustParticleOptions BLOOD_MOTE = new DustParticleOptions(CRIMSON, 1.0F), DARK_MOTE = new DustParticleOptions(DARK, 1.2F);
 
-	/** The blood a Sorcerer has drunk, by player. */
-	private static final Map<UUID, Float> POOL = new HashMap<>();
+	/**
+	 * The blood a Sorcerer has drunk, their reservoir (0.7.554: kept on the player and shown on their own screen,
+	 * client/BloodReservoirHud; {@link BloodBlasts} gathers it by the handful and throws it). Not kept over a restart.
+	 */
+	public static final AttachmentType<Float> RESERVOIR = AttachmentRegistry.create(JaymosKingdoms.id("blood_reservoir"),
+		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.targetOnly()));
 	/** Frenzied until (game time), by player. */
 	private static final Map<UUID, Long> FRENZY = new HashMap<>();
 
@@ -82,11 +108,13 @@ public final class Hemomancy {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Hemomancy::serverTick);
+		BloodBlasts.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			POOL.clear();
 			FRENZY.clear();
 		});
 		// Frenzy: your blows heal you
+		// (0.7.481) a bottle of Kitchen's blood: a vampire's thirst and a Blood Sorcerer's pool take it; anyone else retches
+		KitchenCompat.onBloodDrunk(Hemomancy::drankBottle);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player && entity != player && damageTaken > 0.0F
 				&& !blocked && frenzied(player)) {
@@ -98,12 +126,22 @@ public final class Hemomancy {
 	// ---- who and what it costs -----------------------------------------------------------------------------------------
 
 	/** A Blood Sorcerer. */
-	static boolean bloodMage(Player player) {
+	public static boolean bloodMage(Player player) {
 		return Classes.is(player, PlayerClass.SORCERER) && "blood".equals(Classes.of(player).option());
 	}
 
-	static float pool(Player player) {
-		return POOL.getOrDefault(player.getUUID(), 0.0F);
+	/** The reservoir, on either side. */
+	public static float pool(Player player) {
+		Float f = player.getAttached(RESERVOIR);
+		return f == null ? 0.0F : f;
+	}
+
+	static void setPool(Player player, float pool) {
+		if (pool <= 0.0F) {
+			player.removeAttached(RESERVOIR);
+		} else {
+			player.setAttached(RESERVOIR, Math.min(POOL_MAX, pool));
+		}
 	}
 
 	static float cost(String what) {
@@ -134,7 +172,7 @@ public final class Hemomancy {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood.too_little").withStyle(ChatFormatting.DARK_RED));
 			return false;
 		}
-		POOL.put(player.getUUID(), pool - fromPool);
+		setPool(player, pool - fromPool);
 		if (rest > 0.0F) {
 			player.setHealth(player.getHealth() - rest);
 			if (player.getHealth() < player.getMaxHealth() * CUT_BELOW && PowersCompat.cut(player)) {
@@ -174,6 +212,10 @@ public final class Hemomancy {
 		}
 		net.minecraft.world.item.ItemStack key = Arcana.BONE_STAFF.getDefaultInstance();
 		if (player.getCooldowns().isOnCooldown(key)) {
+			return true;
+		}
+		// (0.7.465) the spirit stays your hand (the Grue is near)
+		if (ForbiddenArts.stayed(player)) {
 			return true;
 		}
 		boolean cast = target != null ? grip(level, player, target, power(player), true) : hemorrhage(level, player, power(player), true);
@@ -224,7 +266,7 @@ public final class Hemomancy {
 		if (target instanceof Player) {
 			target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, (int) (GRIP_WEAKEN * power), 0), player);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, (int) (GRIP_WEAKEN * power), 1), player);
-		} else if (target instanceof Mob mob) {
+		} else if (target instanceof Mob mob && !(mob instanceof PatronChampion)) {
 			ItemStack held = mob.getMainHandItem();
 			if (!held.isEmpty()) {
 				mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
@@ -315,8 +357,16 @@ public final class Hemomancy {
 			Sorcery.beam(level, e, witch.getBoundingBox().getCenter(), BLOOD_MOTE);
 			drank++;
 		}
-		if (drank > 0) {
-			witch.heal(WITCH_DRINK * drank);
+		float heal = WITCH_DRINK * drank;
+		// (0.7.481) and the spilt blood round her (every two seconds: two seconds' worth)
+		float room = witch.getMaxHealth() - witch.getHealth() - heal;
+		if (room > 0.0F) {
+			float seconds = WITCH_DRINK_EVERY / 20.0F;
+			heal += STAIN_BLOOD * PowersCompat.drawStains(level, witch.position(), STAIN_RANGE, STAIN_EACH * seconds,
+				Math.min(room, DRINK_MOST * seconds) / STAIN_BLOOD, at -> rise(level, at, witch));
+		}
+		if (heal > 0.0F) {
+			witch.heal(heal);
 		}
 	}
 
@@ -328,7 +378,8 @@ public final class Hemomancy {
 		}
 		FRENZY.values().removeIf(until -> until < Factions.level(server).getGameTime());
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (!bloodMage(player) || !player.isAlive() || !(player.level() instanceof ServerLevel level)) {
+			// ((0.7.554) one holding J gathers it faster, BloodBlasts)
+			if (!bloodMage(player) || !player.isAlive() || !(player.level() instanceof ServerLevel level) || BloodBlasts.holding(player)) {
 				continue;
 			}
 			float pool = pool(player);
@@ -345,9 +396,60 @@ public final class Hemomancy {
 					level.sendParticles(BLOOD_MOTE, mid.x, mid.y, mid.z, 2, 0.15, 0.15, 0.15, 0.0);
 				}
 			}
+			drank = Math.min(DRINK_MOST, drank);
+			// (0.7.481) and the spilt blood on the ground round them, as much as the pool has room for this second
+			float room = Math.min(DRINK_MOST - drank, POOL_MAX - pool - drank);
+			if (room > 0.0F) {
+				drank += STAIN_BLOOD * PowersCompat.drawStains(level, player.position(), STAIN_RANGE, STAIN_EACH, room / STAIN_BLOOD,
+					at -> rise(level, at, player));
+			}
+			// (0.7.481) and the blood caught in grates round them (Jaymo's Kitchen's butchery)
+			// (a level at a time, over and above what the bleeding and the stains gave this second)
+			room = POOL_MAX - pool - drank;
+			if (room >= GRATE_BLOOD) {
+				drank += GRATE_BLOOD * KitchenCompat.drawGrates(level, player.position(), GRATE_RANGE, Math.min(GRATE_MOST, (int) (room / GRATE_BLOOD)),
+					at -> rise(level, at, player));
+			}
 			if (drank > 0.0F) {
-				POOL.put(player.getUUID(), Math.min(POOL_MAX, pool + Math.min(DRINK_MOST, drank)));
+				setPool(player, pool + drank);
 			}
 		}
+	}
+
+	/** (0.7.481) {@code player} drank a bottle of blood: theirs if they're a vampire (fed, the fever eased) or a Blood Sorcerer (into the pool). */
+	static boolean drankBottle(ServerPlayer player) {
+		boolean used = false;
+		if (VampirePlayers.vampire(player)) {
+			player.heal(BOTTLE_HEAL);
+			player.getFoodData().eat(BOTTLE_FOOD, 0.6F);
+			// (0.7.635) and quenches their thirst
+			KitchenCompat.drink(player, VampirePlayers.BOTTLE_WATER);
+			BloodFever.bit(player);
+			// (0.7.615) it holds off starving, too
+			VampirePlayers.fedFromBottle(player);
+			used = true;
+		}
+		if (bloodMage(player)) {
+			setPool(player, pool(player) + BOTTLE_POOL);
+			splash((ServerLevel) player.level(), player, 6);
+			used = true;
+		}
+		return used;
+	}
+
+	/** (0.7.481) Blood drawn up out of a stain at {@code from}: a thread of red motes rising from the ground to {@code to}. */
+	static void rise(ServerLevel level, Vec3 from, LivingEntity to) {
+		rise(level, from, to.getBoundingBox().getCenter());
+	}
+
+	/** (0.7.554) The same thread of red, rising to a point (a Blood Sorcerer's hands, {@link BloodBlasts}). */
+	static void rise(ServerLevel level, Vec3 from, Vec3 end) {
+		Vec3 step = end.subtract(from);
+		int n = Math.max(2, (int) (step.length() * 2.0));
+		for (int i = 0; i <= n; i += 2) {
+			Vec3 p = from.add(step.scale(i / (double) n)).add(0.0, 0.1, 0.0);
+			level.sendParticles(BLOOD_MOTE, p.x, p.y, p.z, 1, 0.04, 0.04, 0.04, 0.0);
+		}
+		level.sendParticles(DARK_MOTE, from.x, from.y + 0.05, from.z, 3, 0.2, 0.02, 0.2, 0.0);
 	}
 }

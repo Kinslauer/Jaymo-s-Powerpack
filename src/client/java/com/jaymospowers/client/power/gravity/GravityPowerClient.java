@@ -50,6 +50,8 @@ public final class GravityPowerClient implements PowerClient {
 		PowerClients.register(GravityPower.ID, INSTANCE);
 		GravityHeldClient.init();
 		GravityMeteorFx.init();
+		// (0.21.10) the rock ball and the orbiting rocks, on every client
+		GravityRocksLayer.init();
 		// every gravity user's aura, on every client
 		ClientTickEvents.END_CLIENT_TICK.register(GravityPowerClient::auras);
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -98,10 +100,15 @@ public final class GravityPowerClient implements PowerClient {
 	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
 		long now = player.level().getGameTime();
 		GravityCooldowns cooldowns = cooldowns(player);
-		if (key == PowerKey.ABILITY_4) {
+		if (key == PowerKey.ABILITY_2 && down && crushFrom >= 0) {
+			// (0.21.10) B+G: the rocks, not a Crush (the held B lands nothing)
+			crushFrom = -1;
+		} else if (key == PowerKey.ABILITY_4) {
 			crushFrom = down && now >= cooldowns.crush() ? now : -1;
 		} else if (key == PowerKey.ABILITY_1) {
-			liftFrom = down && now >= cooldowns.lift() ? now : -1;
+			// (0.21.10) sneak+R with rocks out throws them, no lift
+			boolean throwsRocks = player.isShiftKeyDown() && player.getAttached(com.jaymospowers.power.gravity.GravityRocks.ROCKS) != null;
+			liftFrom = down && !throwsRocks && now >= cooldowns.lift() ? now : -1;
 		}
 	}
 
@@ -173,13 +180,10 @@ public final class GravityPowerClient implements PowerClient {
 		boolean ascended = Fate.isAscended(player) || Fate.isCorrupted(player);
 		int chips = ascended ? 5 : 4;
 		int total = CHIP * chips + CHIP_GAP * (chips - 1);
-		// right of the hotbar, past the off-hand slot; above the hunger bar on narrow screens
-		int x = width / 2 + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + total > width - 2) {
-			x = width / 2 + 91 - total;
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		boolean weightless = player.getAttached(GravityPower.WEIGHTLESS_ON) != null;
 		chip(graphics, font, x, y, PowerKey.ABILITY_1, Items.SHULKER_SHELL, cooldowns.lift() - now, GravityPower.LIFT_COOLDOWN,
 			liftFrom >= 0 ? 1.0F - Mth.clamp((now - liftFrom) / (float)GravityPower.LIFT_MAX_TICKS, 0.0F, 1.0F) : -1.0F);

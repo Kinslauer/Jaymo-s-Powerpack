@@ -24,6 +24,8 @@ public final class FirstPersonCompat {
 	private static MethodHandle hideLeftArm;
 	private static MethodHandle hideRightArm;
 	private static boolean lookedArms;
+	private static MethodHandle cameraEntity;
+	private static boolean lookedCamera;
 
 	private FirstPersonCompat() {
 	}
@@ -61,6 +63,39 @@ public final class FirstPersonCompat {
 	private static boolean panoramic() {
 		Minecraft minecraft = Minecraft.getInstance();
 		return minecraft.gameRenderer != null && minecraft.gameRenderer.mainCamera().isPanoramicMode();
+	}
+
+	/**
+	 * (0.19.45) {@code state} is your own body being drawn in first person by First-person Model (its
+	 * {@code LivingEntityRenderStateAccess.isCameraEntity}, set only while it draws the camera's player from inside), so
+	 * {@code FirstPersonTrim} can cut the top of the torso off it.
+	 */
+	public static boolean isCameraBody(Object state) {
+		if (!LOADED || state == null) {
+			return false;
+		}
+		if (!lookedCamera) {
+			lookedCamera = true;
+			try {
+				Class<?> access = Class.forName(STATE_ACCESS);
+				cameraEntity = MethodHandles.publicLookup().findVirtual(access, "isCameraEntity", MethodType.methodType(boolean.class))
+					.asType(MethodType.methodType(boolean.class, Object.class));
+			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+				cameraEntity = null;
+			}
+		}
+		if (cameraEntity == null || !Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
+			return false;
+		}
+		try {
+			return (boolean)cameraEntity.invokeExact(state);
+		} catch (ClassCastException e) {
+			// not a living thing's state
+			return false;
+		} catch (Throwable e) {
+			cameraEntity = null;
+			return false;
+		}
 	}
 
 	/** Your own body (and so its tendrils) is being drawn in first person right now, by First-person Model. */

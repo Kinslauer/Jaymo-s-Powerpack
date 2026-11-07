@@ -21,6 +21,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import java.util.Set;
+import com.jaymospowers.core.wounds.Downed;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -107,6 +111,27 @@ public final class Dismember {
 	/** (0.18.87) Kingdoms' Rubber-folk heritage tag: a blade severs their limbs this many times as often. */
 	static final String RUBBER_TAG = "jaymoskingdoms_heritage_rubberfolk";
 	static final float RUBBER_SEVER_SCALE = 2.0F;
+	/**
+	 * (0.20.61) A double leg cleave ({@link #cleave}): an axe or greatsword blow of at least this much damage that cuts off one
+	 * leg takes the other too at this chance (zombies at the zombie one).
+	 */
+	public static final float CLEAVE_DAMAGE = 10.0F, CLEAVE_CHANCE = 0.25F, ZOMBIE_CLEAVE_CHANCE = 0.6F;
+	/** (0.20.61) Cut in half at the waist ({@link #halve}): an axe or greatsword blow to the torso this hard, at this chance. */
+	public static final float HALVE_DAMAGE = 16.0F, HALVE_CHANCE = 0.2F, ZOMBIE_HALVE_CHANCE = 0.5F;
+	/**
+	 * (0.20.61) Andy: "rubber folk can survive any of these dismemberments ... as long as they absorb within 10s of a torso
+	 * chop, they will start to regenerate. it is slow, so it takes them out of the fight". Cut in half, Rubber-folk go down
+	 * instead of dying, tagged {@link #SPLIT_TAG}: a swallow within this long (Kingdoms' RubberFolk swaps it for
+	 * {@link #MENDING_TAG}) and they mend, staying down till both legs are back; none, and they die.
+	 */
+	public static final int SPLIT_TICKS = 200;
+	/**
+	 * (0.20.95) Andy: "I also didnt bleed out after being cleaved in two, that should happen within 10s". A halving that
+	 * doesn't kill outright (the blow left health over) bleeds the body out within this long (ticks); Rubber-folk and zombies
+	 * are spared it (they mend, or crawl on).
+	 */
+	public static final int HALVE_BLEED_OUT_TICKS = 160;
+	public static final String SPLIT_TAG = "jaymospowers_rubber_split", MENDING_TAG = "jaymospowers_rubber_mending";
 	public static final AttachmentType<Integer> MISSING = AttachmentRegistry.create(JaymosPowers.id("missing_parts"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
@@ -128,6 +153,10 @@ public final class Dismember {
 	private static final Map<LivingEntity, long[]> STAGGERING = new HashMap<>();
 	/** Fresh stumps bleeding: the creature, until when. */
 	private static final Map<LivingEntity, Long> BLEEDING = new HashMap<>();
+	/** (0.20.61) A Rubber-folk cut in half → the game time their swallow must come by ({@link #SPLIT_TICKS}). */
+	private static final Map<LivingEntity, Long> SPLIT = new java.util.WeakHashMap<>();
+	/** (0.20.95) Cut in half and not yet dead: the creature → the game time it bleeds out, and who cut it. */
+	private static final Map<LivingEntity, Object[]> HALVED = new java.util.WeakHashMap<>();
 	/** Players missing an arm (their hand is kept empty). */
 	private static final List<ServerPlayer> ONE_ARMED = new ArrayList<>();
 	/** Set while a power deals its own cut ({@link #cut}), so the held weapon's roll doesn't roll it again. */
@@ -172,6 +201,9 @@ public final class Dismember {
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			// (Andy: lost limbs don't grow back on death) the stumps come along; only a lost head is back
+			// (0.20.61) a halving's hold ends with the life it was in
+			newPlayer.removeTag(SPLIT_TAG);
+			newPlayer.removeTag(MENDING_TAG);
 			int mask = missing(newPlayer) & ~HEAD;
 			for (int part : PARTS) {
 				if ((mask & part) != 0) {
@@ -199,9 +231,13 @@ public final class Dismember {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dismember::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Dismember::tickSplit);
+		// (0.20.67) blasts blow bodies apart and take limbs off survivors (after the respawn hook above: it fixes up after it)
+		BlastGore.init();
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STAGGERING.clear();
 			BLEEDING.clear();
+			HALVED.clear();
 			ONE_ARMED.clear();
 		});
 	}
@@ -339,6 +375,14 @@ public final class Dismember {
 	 * True if it came off.
 	 */
 	public static boolean severOnOverkill(LivingEntity target, int part, DamageSource source) {
+		return severOnOverkill(target, part, source, 0.0F);
+	}
+
+	/**
+	 * (0.20.61) As {@link #severOnOverkill(LivingEntity, int, DamageSource)}, with the blow's damage ({@code taken}): a leg
+	 * cut off by a heavy chop may take the other leg with it ({@link #cleave}).
+	 */
+	public static boolean severOnOverkill(LivingEntity target, int part, DamageSource source, float taken) {
 		if (!(target.level() instanceof ServerLevel) || !canLoseParts(target) || target instanceof Player p && (p.isCreative() || p.isSpectator())
 			|| (missing(target) & part) != 0) {
 			return false;
@@ -370,7 +414,134 @@ public final class Dismember {
 		if (severed && cut != null && cut.target == target) {
 			cut.severed = true;
 		}
+		if (severed && (part == RIGHT_LEG || part == LEFT_LEG)) {
+			cleave(target, part, attacker, taken, scale / scale(target, BLADE_CHANCE));
+		}
 		return severed;
+	}
+
+	/**
+	 * (0.20.61) Andy: "cleave both legs off once I'm strong enough", "more often on zombie humanoids than anyone else". A
+	 * leg just cut off by an axe or a greatsword blow of at least {@link #CLEAVE_DAMAGE} goes through to the other leg at
+	 * {@link #CLEAVE_CHANCE} ({@link #ZOMBIE_CLEAVE_CHANCE} on zombies), times {@code extra} (Grim Hand, Rubber-folk; the
+	 * cut's own scale over a plain blade's), at most certain.
+	 */
+	private static void cleave(LivingEntity target, int part, @Nullable LivingEntity attacker, float taken, float extra) {
+		int other = part == RIGHT_LEG ? LEFT_LEG : RIGHT_LEG;
+		if (attacker == null || taken < CLEAVE_DAMAGE || (missing(target) & other) != 0) {
+			return;
+		}
+		com.jaymospowers.core.finisher.Finishers.Kind kind = com.jaymospowers.core.finisher.Finishers.kind(attacker.getMainHandItem());
+		if (kind != com.jaymospowers.core.finisher.Finishers.Kind.AXE && kind != com.jaymospowers.core.finisher.Finishers.Kind.GREATSWORD) {
+			return;
+		}
+		float chance = zombie(target) ? ZOMBIE_CLEAVE_CHANCE : CLEAVE_CHANCE;
+		if (target.getRandom().nextFloat() < Math.min(1.0F, chance * Math.max(1.0F, extra))) {
+			sever(target, other, attacker);
+		}
+	}
+
+	/**
+	 * (0.20.61) Andy: "why not splitting a torso clean off too". A heavy axe or greatsword blow (at least
+	 * {@link #HALVE_DAMAGE}) that lands on the torso ({@code torso}; null: worked out from a player's aim, a mob's lands
+	 * there by chance) may cut the body in half at the waist: both legs come off at once and the upper half is left. At
+	 * {@link #HALVE_CHANCE}, zombies at {@link #ZOMBIE_HALVE_CHANCE}, times Grim Hand and Rubber-folk. Called on a blow that
+	 * kills or downs (Downed lets a halved body die, as a beheaded one does) and, for zombies only, on any blow (the upper
+	 * half crawls on). True if it happened.
+	 */
+	public static boolean halve(LivingEntity target, DamageSource source, float amount, @Nullable Boolean torso) {
+		if (!(target.level() instanceof ServerLevel) || !canLoseParts(target) || amount < HALVE_DAMAGE
+			|| target instanceof Player p && (p.isCreative() || p.isSpectator()) || (missing(target) & (RIGHT_LEG | LEFT_LEG)) != 0
+			|| !(source.getDirectEntity() instanceof LivingEntity striker) || source.getEntity() != striker || striker == target) {
+			return false;
+		}
+		com.jaymospowers.core.finisher.Finishers.Kind kind = com.jaymospowers.core.finisher.Finishers.kind(striker.getMainHandItem());
+		if (kind != com.jaymospowers.core.finisher.Finishers.Kind.AXE && kind != com.jaymospowers.core.finisher.Finishers.Kind.GREATSWORD) {
+			return false;
+		}
+		if (torso == null) {
+			torso = !(striker instanceof Player)
+				|| Integer.valueOf(LimbBoxes.TORSO).equals(LimbBoxes.aimedPart(target, striker.getEyePosition(), striker.getLookAngle()));
+		}
+		if (!torso) {
+			return false;
+		}
+		float extra = target.entityTags().contains(RUBBER_TAG) ? RUBBER_SEVER_SCALE : 1.0F;
+		extra *= com.jaymospowers.core.wounds.WillSkill.severScale(striker, target);
+		float chance = zombie(target) ? ZOMBIE_HALVE_CHANCE : HALVE_CHANCE;
+		if (target.getRandom().nextFloat() >= Math.min(1.0F, chance * extra)) {
+			return false;
+		}
+		boolean right = sever(target, RIGHT_LEG, striker);
+		boolean left = sever(target, LEFT_LEG, striker);
+		if ((right || left) && !rubber(target) && !zombie(target) && target.isAlive()) {
+			// (0.20.95) nobody lives long cut in two: dead within the bleed-out, whatever the blow left (a killing one ends it now)
+			HALVED.put(target, new Object[] {target.level().getGameTime() + HALVE_BLEED_OUT_TICKS, striker});
+			if (target instanceof ServerPlayer player) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.halved").withStyle(ChatFormatting.DARK_RED));
+			}
+		}
+		return right || left;
+	}
+
+	/** (0.20.61) Whether {@code target} is Rubber-folk (Kingdoms' heritage tag). */
+	public static boolean rubber(LivingEntity target) {
+		return target.entityTags().contains(RUBBER_TAG);
+	}
+
+	/** (0.20.61) A Rubber-folk just cut in half ({@link Downed} has put them down): the clock on their swallow starts. */
+	public static void split(LivingEntity target) {
+		target.removeTag(MENDING_TAG);
+		target.addTag(SPLIT_TAG);
+		SPLIT.put(target, target.level().getGameTime() + SPLIT_TICKS);
+		if (target instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rubber_split").withStyle(ChatFormatting.LIGHT_PURPLE));
+		}
+	}
+
+	/**
+	 * (0.20.61) Whether a Rubber-folk cut in half is still being held down by it: waiting on a swallow, or mending with a
+	 * leg still to grow back. {@link Downed} lets no one up while it holds.
+	 */
+	public static boolean pulledApart(LivingEntity target) {
+		Set<String> tags = target.entityTags();
+		return tags.contains(SPLIT_TAG) || tags.contains(MENDING_TAG) && (missing(target) & (RIGHT_LEG | LEFT_LEG)) != 0;
+	}
+
+	/** (0.20.61) Each tick: a halved Rubber-folk with no swallow in time dies of it; one whose legs are back is let up. */
+	private static void tickSplit(MinecraftServer server) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			Set<String> tags = player.entityTags();
+			if (tags.contains(MENDING_TAG) && (missing(player) & (RIGHT_LEG | LEFT_LEG)) == 0) {
+				player.removeTag(MENDING_TAG);
+			}
+			if (!tags.contains(SPLIT_TAG)) {
+				SPLIT.remove(player);
+				continue;
+			}
+			long now = player.level().getGameTime();
+			Long by = SPLIT.get(player);
+			if (by == null) {
+				// (back from a reload: the clock starts again)
+				SPLIT.put(player, now + SPLIT_TICKS);
+				continue;
+			}
+			if (!player.isAlive() || !Downed.isDowned(player)) {
+				player.removeTag(SPLIT_TAG);
+				SPLIT.remove(player);
+				continue;
+			}
+			if (now >= by) {
+				player.removeTag(SPLIT_TAG);
+				SPLIT.remove(player);
+				Downed.letDie(player.level(), player, null);
+			}
+		}
+	}
+
+	/** (0.20.61) Whether {@code target} is a zombie (cleaves and halvings come more often, and its upper half fights on). */
+	public static boolean zombie(LivingEntity target) {
+		return target.getType().builtInRegistryHolder().is(EntityTypeTags.ZOMBIES);
 	}
 
 	/**
@@ -391,7 +562,43 @@ public final class Dismember {
 
 	/** Takes {@code part} off {@code target} (if it still has it), with everything that follows. True if it came off. */
 	public static boolean sever(LivingEntity target, int part, @Nullable LivingEntity by) {
-		return lose(target, part, by, false);
+		return lose(target, part, by, false, null, false);
+	}
+
+	/**
+	 * (0.20.67) A blast takes {@code part} off ({@link BlastGore}): it flies away from {@code from} (the blast's centre), and a
+	 * skeleton's shatters instead. {@code quiet}: one of several parts going at once (a body blown apart), so each bleeds
+	 * only a little (Andy, #961: blood toned down). True if it came off.
+	 */
+	public static boolean blastOff(LivingEntity target, int part, @Nullable LivingEntity by, @Nullable Vec3 from, boolean quiet) {
+		boolean bones = target.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS);
+		return lose(target, part, by, bones, from, quiet);
+	}
+
+	/**
+	 * (0.20.67) Sets the parts {@code target} is missing to exactly {@code mask}, quietly: what isn't in it grows back with
+	 * no show (a player blown apart comes back with only the parts they'd lost before the blast, {@link BlastGore}).
+	 */
+	static void restore(LivingEntity target, int mask) {
+		int before = missing(target);
+		int back = before & ~mask;
+		if (back == 0) {
+			return;
+		}
+		for (int part : PARTS) {
+			if ((back & part) != 0) {
+				target.removeTag(tag(part));
+			}
+		}
+		int now = before & mask;
+		if (now == 0) {
+			target.removeAttached(MISSING);
+		} else {
+			target.setAttached(MISSING, now);
+		}
+		legs(target, now);
+		Prosthetics.sync(target);
+		com.jaymospowers.core.wounds.Breaks.regrown(target, back);
 	}
 
 	/**
@@ -406,7 +613,7 @@ public final class Dismember {
 		SeveredPart.pinNextAt = wall;
 		SeveredPart.pinNextYaw = yaw;
 		try {
-			return lose(target, HEAD, by, false);
+			return lose(target, HEAD, by, false, null, false);
 		} finally {
 			SeveredPart.pinNextAt = null;
 		}
@@ -417,7 +624,7 @@ public final class Dismember {
 	 * off and nothing bleeds, just a shower of bone and a bone or two on the ground. True if it went.
 	 */
 	public static boolean shatter(LivingEntity target, int part, @Nullable LivingEntity by) {
-		return lose(target, part, by, true);
+		return lose(target, part, by, true, null, false);
 	}
 
 	/**
@@ -445,8 +652,12 @@ public final class Dismember {
 		return true;
 	}
 
-	private static boolean lose(LivingEntity target, int part, @Nullable LivingEntity by, boolean shattered) {
+	private static boolean lose(LivingEntity target, int part, @Nullable LivingEntity by, boolean shattered, @Nullable Vec3 blast,
+		boolean quiet) {
 		if (!(target.level() instanceof ServerLevel level) || (missing(target) & part) != 0) {
+			return false;
+		}
+		if (part == HEAD && blast == null && !playerHeadMayGo(target)) {
 			return false;
 		}
 		int mask = missing(target) | part;
@@ -455,15 +666,24 @@ public final class Dismember {
 		if (shattered) {
 			Fractures.crack(level, target, part);
 			Vec3 at = stump(target, part);
-			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z, 30,
-				0.2, 0.2, 0.2, 0.3);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z,
+				quiet ? 10 : 30, 0.2, 0.2, 0.2, 0.3);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.SKELETON_HURT, SoundSource.HOSTILE, 1.0F, 0.6F);
 			drop(level, target, new ItemStack(net.minecraft.world.item.Items.BONE, 1 + target.getRandom().nextInt(2)));
 		} else {
-			Vec3 from = by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
+			Vec3 from = blast != null ? blast : by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
 			SeveredPart.spawn(level, target, part, from);
-			gore(level, target, part);
-			BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
+			if (quiet) {
+				// (0.20.67) one of a blown-apart body's parts: a fleck or two, no sounds of its own (the blast is loud enough)
+				Vec3 at = stump(target, part);
+				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(target), 1.4F), at.x, at.y, at.z, 6,
+					0.15, 0.15, 0.15, 0.1);
+			} else {
+				gore(level, target, part);
+			}
+			if (target.isAlive()) {
+				BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
+			}
 		}
 		track(target);
 		if (part != HEAD) {
@@ -492,6 +712,16 @@ public final class Dismember {
 			default -> legs(target, mask);
 		}
 		return true;
+	}
+
+	/**
+	 * (0.21.34) Andy: "decapitations should only ever happen to downed players". A player keeps their head unless they're
+	 * downed: no crit, overkill, finisher, mob chop, archer pin or beam takes it off a player still on their feet (the blow
+	 * lands as it otherwise would, without the beheading). Mobs and villagers are as before. A body blown apart by a blast
+	 * ({@link BlastGore}) still goes all at once.
+	 */
+	public static boolean playerHeadMayGo(LivingEntity target) {
+		return !(target instanceof Player) || Downed.isDowned(target);
 	}
 
 	/**
@@ -647,6 +877,25 @@ public final class Dismember {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (!HALVED.isEmpty()) {
+			for (Iterator<Map.Entry<LivingEntity, Object[]>> it = HALVED.entrySet().iterator(); it.hasNext(); ) {
+				Map.Entry<LivingEntity, Object[]> e = it.next();
+				LivingEntity body = e.getKey();
+				if (body.isRemoved() || !body.isAlive() || !(body.level() instanceof ServerLevel level)) {
+					it.remove();
+					continue;
+				}
+				if (level.getGameTime() >= (Long)e.getValue()[0]) {
+					it.remove();
+					DamageSource felled = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+						.getOrThrow(com.jaymospowers.core.wounds.Bleeding.BLEEDING_DAMAGE), (Entity)e.getValue()[1]);
+					com.jaymospowers.core.wounds.Downed.letDie(level, body, felled);
+				} else if (level.getGameTime() % 10L == 0L) {
+					// (it pours out of them meanwhile)
+					BLEEDING.put(body, Math.max(BLEEDING.getOrDefault(body, 0L), (Long)e.getValue()[0]));
+				}
+			}
+		}
 		if (!STAGGERING.isEmpty()) {
 			for (Iterator<Map.Entry<LivingEntity, long[]>> it = STAGGERING.entrySet().iterator(); it.hasNext(); ) {
 				Map.Entry<LivingEntity, long[]> e = it.next();

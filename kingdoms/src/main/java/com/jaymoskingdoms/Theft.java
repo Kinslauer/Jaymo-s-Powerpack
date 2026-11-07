@@ -72,6 +72,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>(0.5.52) A theft nobody saw is Stealth experience ({@link Skills}); Soft Step hides a sneaking thief from farther
  * off, and a Ghost's unseen thefts are never missed.
+ *
+ * <p>(0.7.497) Picking a lock or breaking a locked block in a faction's land is burglary ({@link Locks}).
  */
 public final class Theft {
 	/** How far a witness sees a crime (sneaking: this share of it); closer than {@link #HEAR_RANGE} they notice whichever way they face. */
@@ -141,7 +143,11 @@ public final class Theft {
 		/** (0.7.231) death magic cast where a realm's people see ({@link Necromancy}). */
 		NECROMANCY(Weight.HEAVY, "necromancy"),
 		/** (0.7.231) blood magic cast where a realm's people see ({@link Hemomancy}). */
-		BLOOD_MAGIC(Weight.HEAVY, "blood_magic");
+		BLOOD_MAGIC(Weight.HEAVY, "blood_magic"),
+		/** (0.7.446) Powers' rival band worn where a realm that knows the band's aliens sees it ({@link Aliens#rivalBand}). */
+		RIVAL_BAND(Weight.HEAVY, "rival_band"),
+		/** (0.7.497) a lock picked or a locked block broken where a realm's law holds ({@link Locks}). */
+		BURGLARY(Weight.MEDIUM, "burglary");
 
 		final Weight weight;
 		final String cry;
@@ -413,6 +419,19 @@ public final class Theft {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.gift", f.name()).withStyle(ChatFormatting.GREEN));
 	}
 
+	/** (0.7.497) {@code player} picked the lock at {@code pos}: burglary if its realm's people see it (heavy against a storehouse). */
+	static void burgled(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state) {
+		if (player.isCreative() || level != Factions.level(level.getServer()) || Placed.byPlayer(player, level, pos, state)) {
+			return;
+		}
+		Faction owner = Factions.storageOwner(level.getServer(), pos);
+		Faction f = owner != null ? owner : lawAt(level, pos);
+		if (f == null || f.fallen() || f.type() == FactionType.BARBARIAN || exempt(player, f)) {
+			return;
+		}
+		commit(player, level, f, Crime.BURGLARY, pos, owner != null ? Weight.HEAVY : null, false);
+	}
+
 	private static void broke(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity entity) {
 		boolean own = Placed.byPlayer(player, level, pos, state);
 		Placed.forget(level, pos);
@@ -423,6 +442,11 @@ public final class Theft {
 		Faction owner = Factions.storageOwner(level.getServer(), pos);
 		Faction f = owner != null ? owner : lawAt(level, pos);
 		if (f == null || f.fallen() || f.type() == FactionType.BARBARIAN || exempt(player, f)) {
+			return;
+		}
+		if (Locks.lockedAgainst(level, pos, state, entity, player)) {
+			// (0.7.497) a locked door, gate, trapdoor or chest broken open is burglary
+			commit(player, level, f, Crime.BURGLARY, pos, owner != null ? Weight.HEAVY : null, false);
 			return;
 		}
 		Crime crime;
@@ -527,7 +551,7 @@ public final class Theft {
 			return;
 		}
 		commit(killer, level, f, crime, victim.blockPosition(), null, false);
-		if (crime == Crime.VILLAGER && !witnesses(level, f, killer).isEmpty()) {
+		if (crime == Crime.VILLAGER && !crimeWitnesses(level, f, killer).isEmpty()) {
 			// (0.7.109) seen: the dead one's family won't forget who did it
 			Recollections.murdered(level, killer, victim);
 		}
@@ -535,10 +559,21 @@ public final class Theft {
 
 	// ---- witnesses and consequences -----------------------------------------------------------------------------
 
-	/** The faction's people who see {@code player} now, nearest first. */
+	/** The faction's crime witnesses: those fond enough of the player look away. Only for crime paths. */
+	static List<LivingEntity> crimeWitnesses(ServerLevel level, Faction f, ServerPlayer player) {
+		List<LivingEntity> out = witnesses(level, f, player);
+		out.removeIf(e -> e instanceof Villager v && Bearings.shields(v, player));
+		return out;
+	}
+
+	/** The faction's people who see {@code player} now, nearest first (everyone, fond or not). */
 	static List<LivingEntity> witnesses(ServerLevel level, Faction f, ServerPlayer player) {
+		// (0.7.509) the Ash Whisperer's Smoke and Whispers: nobody bears witness
+		if (Blessings.unseen(player)) {
+			return new ArrayList<>();
+		}
 		// (0.7.102) a hood hides you from farther off, on top of sneaking
-		double range = (player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE) * Identities.hoodSight(player);
+		double range = (player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE) * Identities.hoodSight(player) * Turning.witnessRange(player);
 		List<LivingEntity> out = new ArrayList<>();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range), LivingEntity::isAlive)) {
 			boolean ours = e instanceof Folk folk ? folk.factionId() == f.id() : e instanceof Villager || (e instanceof IronGolem g && !g.isPlayerCreated());
@@ -577,7 +612,7 @@ public final class Theft {
 			// (no crime against a realm at war with yours)
 			return;
 		}
-		commit(player, level, f, crime, weight, noticeable, witnesses(level, f, player));
+		commit(player, level, f, crime, weight, noticeable, crimeWitnesses(level, f, player));
 	}
 
 	/** {@link #commit}, with who saw it already worked out (a pickpocket's mark knows, or doesn't, whatever way they face). */
@@ -587,6 +622,8 @@ public final class Theft {
 			return;
 		}
 		Weight w = weight != null ? weight : crime.weight;
+		// (0.7.535) a crime breaks commandments, seen or not
+		Commandments.crime(player, crime, !seen.isEmpty(), w == Weight.HEAVY);
 		if (!seen.isEmpty()) {
 			// (0.7.102) a hood is a fragile mask: seen close, face on, in the light, it is you
 			Identities.recognise(level, player, f, seen, null);
@@ -620,10 +657,11 @@ public final class Theft {
 		if (w == Weight.LIGHT) {
 			return;
 		}
-		long until = level.getGameTime() + (w == Weight.HEAVY ? OUTLAW_TICKS : HUNT_TICKS);
+		// (0.7.509) the Ash Whisperer's Short Memories
+		long until = level.getGameTime() + Blessings.wantedTicks(player, w == Weight.HEAVY ? OUTLAW_TICKS : HUNT_TICKS);
 		markWanted(player, f.id(), until);
 		if (w == Weight.HEAVY) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), OUTLAW_TICKS / 24000L)
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), Math.max(1L, (until - level.getGameTime()) / 24000L))
 				.withStyle(ChatFormatting.DARK_RED));
 		}
 		// (0.7.125) a price on their head (or their mask's)
@@ -645,6 +683,22 @@ public final class Theft {
 		}
 		markWanted(player, f.id(), level.getGameTime() + ticks);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.guard.arrest", f.name(), ticks / 20).withStyle(ChatFormatting.RED));
+		pursue(level, f, player);
+	}
+
+	/**
+	 * (0.7.581) {@code f}'s faithful cast {@code player} out ({@link CastOut}): an outlaw there however well liked, no pardon,
+	 * and its guards after them now. Not a realm at war with theirs, nor their own crown's.
+	 */
+	static void castOut(ServerPlayer player, ServerLevel level, Faction f) {
+		if (Wars.enemy(player, f) || Crowns.rules(level.getServer(), f, player.getUUID())) {
+			return;
+		}
+		long until = level.getGameTime() + OUTLAW_TICKS;
+		if (until(player, f.id()) < until) {
+			markWanted(player, f.id(), until);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cast_out", f.name()).withStyle(ChatFormatting.DARK_RED));
+		}
 		pursue(level, f, player);
 	}
 

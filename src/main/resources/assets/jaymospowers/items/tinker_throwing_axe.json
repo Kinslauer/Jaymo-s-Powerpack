@@ -227,6 +227,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/throwing_axe/head_star_metal"
             }
+          },
+          {
+            "when": "bog_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_bog_iron"
+            }
           }
         ],
         "fallback": {

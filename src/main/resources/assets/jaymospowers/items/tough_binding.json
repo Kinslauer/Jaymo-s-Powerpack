@@ -371,6 +371,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "bog_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/tough_binding_bog_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -583,6 +596,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/part/tough_binding_star_metal"
+          }
+        },
+        {
+          "when": "bog_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/tough_binding_bog_iron"
           }
         }
       ],

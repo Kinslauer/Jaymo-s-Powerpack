@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Parties;
 import java.util.List;
@@ -49,21 +50,36 @@ public final class PartyClient {
 		}
 		Font font = minecraft.font;
 		String here = player.level().dimension().identifier().toString();
-		int y = TOP;
+		int others = 0;
+		for (Parties.Entry e : party) {
+			if (!e.id().equals(player.getUUID())) {
+				others++;
+			}
+		}
+		if (others == 0) {
+			return;
+		}
+		// (HUD rework) top-left rail, row 30 (under the kin-sense compass); the plates run 2 px out of the text box on each side
+		int[] at = HudZones.place(HudZones.RAIL, "jaymoskingdoms:party", 30, WIDTH + 4, others * (ROW + 2) - 2);
+		if (at == null) {
+			return;
+		}
+		int left = at[0] + 2;
+		int y = at[1] + 2;
 		for (Parties.Entry e : party) {
 			if (e.id().equals(player.getUUID())) {
 				continue;
 			}
-			graphics.fill(LEFT - 2, y - 2, LEFT + WIDTH + 2, y + ROW - 2, BACK);
-			graphics.text(font, e.name(), LEFT, y, e.leader() ? LEADER : NAME, true);
+			graphics.fill(left - 2, y - 2, left + WIDTH + 2, y + ROW - 2, BACK);
+			graphics.text(font, e.name(), left, y, e.leader() ? LEADER : NAME, true);
 			Component where = where(player, e, here);
-			graphics.text(font, where, LEFT + WIDTH - font.width(where), y, FAR, true);
+			graphics.text(font, where, left + WIDTH - font.width(where), y, FAR, true);
 			int bar = y + font.lineHeight + 1;
 			float share = e.maxHealth() <= 0.0F ? 0.0F : Mth.clamp(e.health() / e.maxHealth(), 0.0F, 1.0F);
-			graphics.fill(LEFT, bar, LEFT + WIDTH, bar + BAR, EMPTY);
-			graphics.fill(LEFT, bar, LEFT + Math.round(WIDTH * share), bar + BAR, share < 0.3F ? LOW : HEALTH);
-			graphics.fill(LEFT, bar + BAR, LEFT + WIDTH, bar + BAR + THIN, EMPTY);
-			graphics.fill(LEFT, bar + BAR, LEFT + Math.round(WIDTH * Mth.clamp(e.food() / 20.0F, 0.0F, 1.0F)), bar + BAR + THIN, HUNGER);
+			graphics.fill(left, bar, left + WIDTH, bar + BAR, EMPTY);
+			graphics.fill(left, bar, left + Math.round(WIDTH * share), bar + BAR, share < 0.3F ? LOW : HEALTH);
+			graphics.fill(left, bar + BAR, left + WIDTH, bar + BAR + THIN, EMPTY);
+			graphics.fill(left, bar + BAR, left + Math.round(WIDTH * Mth.clamp(e.food() / 20.0F, 0.0F, 1.0F)), bar + BAR + THIN, HUNGER);
 			y += ROW + 2;
 		}
 	}

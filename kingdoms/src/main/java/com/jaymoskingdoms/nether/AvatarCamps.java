@@ -3,6 +3,8 @@ package com.jaymoskingdoms.nether;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
+import com.jaymoskingdoms.Speech;
+import com.jaymoskingdoms.Stacked;
 import com.jaymoskingdoms.VillagerHeritage;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
@@ -25,6 +27,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
@@ -32,6 +35,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -68,6 +73,14 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Each camp takes in a new avatar now and then while a player is near, up to {@link #MOST}. Without MCA, the camps
  * rise empty. Ops: {@code /kingdom avatarcamp found | info}.
+ *
+ * <p>(0.7.502) Andy: "make the flame avatar take you in and amicable to you". An Emberborn is one of their own blood, and a
+ * camp takes them in ({@link #welcome}): the first time one comes within {@link #WELCOME_RANGE} of a camp, its nearest avatar
+ * greets them and the whole camp warms to them ({@link #WELCOME_HEARTS} hearts, enough for MCA's follow and hire). Andy:
+ * "they will fight and help you but will only give you the gear after you speak to them": the newcomer's start (flint,
+ * sticks, plant string, food) comes the first time they speak to one of the camp's avatars ({@link #gift}). At the camp's hearth they rest and heal
+ * ({@link #HEARTH_REGEN_TICKS}), and avatars near an Emberborn go for whatever is after them ({@link #prey}). Camps rise
+ * near an Emberborn in the Nether more readily ({@link #EMBERBORN_FOUND_CHANCE}).
  */
 public final class AvatarCamps {
 	// ---- tuning ----
@@ -90,6 +103,20 @@ public final class AvatarCamps {
 	static final int HOME_RADIUS = 12;
 	/** An avatar's health (MCA's guards are frail for the Nether). */
 	static final double HEALTH = 40.0;
+	/** (0.7.502) An Emberborn this near a camp is taken in; the camp warms to them by this many hearts. */
+	public static final double WELCOME_RANGE = 32.0;
+	static final int WELCOME_HEARTS = 50;
+	/** (0.7.502) The newcomer's gifts, given when they first speak to an avatar: flint, sticks, plant string (Jaymo's Powers', if it's there), cooked pork. */
+	static final int GIFT_FLINT = 3, GIFT_STICKS = 4, GIFT_STRING = 2, GIFT_FOOD = 4;
+	/** (0.7.502) At the hearth (within {@link #HOME_RADIUS}) an Emberborn rests: Regeneration this long, renewed every 10 s. */
+	static final int HEARTH_REGEN_TICKS = 220;
+	/** (0.7.502) Avatars this near an Emberborn go for what hunts them or hurt them lately (this many ticks ago at most). */
+	static final double DEFEND_RANGE = 24.0;
+	static final int DEFEND_HURT_TICKS = 100;
+	/** (0.7.502) The chance a camp rises near an Emberborn (others: {@link #FOUND_CHANCE}). */
+	static final float EMBERBORN_FOUND_CHANCE = 0.6F;
+	/** How many greeting lines there are ({@code message.jaymoskingdoms.avatar.welcome.<n>}). */
+	static final int WELCOME_LINES = 3;
 
 	/** A camp: its hearth (floor), name, when it last took one in and sent a band. */
 	public record Camp(int id, BlockPos center, String name, long lastRecruit, long lastBand) {
@@ -116,6 +143,12 @@ public final class AvatarCamps {
 	/** On every avatar: its camp's id. Saved, seen by all (the look). */
 	public static final AttachmentType<Integer> AVATAR = AttachmentRegistry.create(JaymosKingdoms.id("flame_avatar"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** (0.7.502) On a player: the camps whose avatars have given them a start (spoken to). Saved, kept through death. */
+	public static final AttachmentType<List<Integer>> GIFTED = AttachmentRegistry.create(JaymosKingdoms.id("avatar_gifted"),
+		builder -> builder.persistent(Codec.INT.listOf()).copyOnDeath());
+	/** (0.7.502) On a player: the camps that have taken them in. Saved, kept through death. */
+	public static final AttachmentType<List<Integer>> WELCOMED = AttachmentRegistry.create(JaymosKingdoms.id("avatar_welcomed"),
+		builder -> builder.persistent(Codec.INT.listOf()).copyOnDeath());
 
 	private static final String[] FIRST_NAME = {"Cinder", "Pyre", "Ash", "Ember", "Scorch", "Brand", "Kindle", "Char", "Blaze", "Smoulder"};
 	private static final String[] SECOND_NAME = {"ring", "hearth", "circle", "pyre", "rest", "brand", "throne", "watch"};
@@ -149,9 +182,15 @@ public final class AvatarCamps {
 		return entity.hasAttached(AVATAR);
 	}
 
-	/** {@code target} is what {@code avatar} goes for: Hornkin, piglins, and anyone not Emberborn near its camp. */
+	/**
+	 * {@code target} is what {@code avatar} goes for: Hornkin, piglins, anyone not Emberborn near its camp, and (0.7.502) any
+	 * creature hunting or lately hurting an Emberborn near it.
+	 */
 	public static boolean prey(LivingEntity avatar, LivingEntity target) {
 		if (target instanceof Hornkin || target instanceof AbstractPiglin) {
+			return true;
+		}
+		if (!(target instanceof Player) && !avatar(target) && guarding(avatar, target)) {
 			return true;
 		}
 		if (!(target instanceof Player player) || player.isCreative() || player.isSpectator() || Heritage.is(player, Heritage.Kind.EMBERBORN)
@@ -163,9 +202,30 @@ public final class AvatarCamps {
 		return camp != null && player.blockPosition().closerThan(camp.center(), GUARD_RANGE);
 	}
 
+	/** (0.7.502) {@code target} hunts, or lately hurt, an Emberborn within {@link #DEFEND_RANGE} of {@code avatar}. */
+	private static boolean guarding(LivingEntity avatar, LivingEntity target) {
+		for (Player p : avatar.level().players()) {
+			if (p.isSpectator() || !p.isAlive() || p.distanceToSqr(avatar) > DEFEND_RANGE * DEFEND_RANGE || !Heritage.is(p, Heritage.Kind.EMBERBORN)) {
+				continue;
+			}
+			if (target instanceof Mob mob && mob.getTarget() == p
+				|| p.getLastHurtByMob() == target && p.tickCount - p.getLastHurtByMobTimestamp() < DEFEND_HURT_TICKS) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Anyone not Emberborn gets nothing out of an avatar: no talk, no menu. */
 	private static InteractionResult use(Player player, Entity entity) {
-		if (!avatar(entity) || player.isSpectator() || Heritage.is(player, Heritage.Kind.EMBERBORN)) {
+		if (!avatar(entity) || player.isSpectator()) {
+			return InteractionResult.PASS;
+		}
+		if (Heritage.is(player, Heritage.Kind.EMBERBORN)) {
+			if (player instanceof ServerPlayer sp && entity instanceof Mob avatar && sp.level() instanceof ServerLevel level) {
+				gift(level, sp, avatar);
+			}
+			// MCA's menu opens as ever
 			return InteractionResult.PASS;
 		}
 		if (!player.level().isClientSide()) {
@@ -198,7 +258,7 @@ public final class AvatarCamps {
 	// ---- each tick -----------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
-		ServerLevel nether = server.getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		if (nether == null) {
 			return;
 		}
@@ -209,6 +269,11 @@ public final class AvatarCamps {
 					keep(nether, mob);
 				}
 			}
+			for (ServerPlayer player : Stacked.players(nether.getServer(), Level.NETHER)) {
+				if (!player.isSpectator() && player.isAlive() && Heritage.is(player, Heritage.Kind.EMBERBORN)) {
+					kin(nether, player);
+				}
+			}
 		}
 		if (now % 200 == 0) {
 			for (Camp camp : camps(nether)) {
@@ -216,12 +281,80 @@ public final class AvatarCamps {
 			}
 		}
 		if (now % FOUND_EVERY == 0) {
-			for (ServerPlayer player : nether.players()) {
-				if (!player.isSpectator() && nether.getRandom().nextFloat() < FOUND_CHANCE) {
+			for (ServerPlayer player : Stacked.players(nether.getServer(), Level.NETHER)) {
+				float chance = Heritage.is(player, Heritage.Kind.EMBERBORN) ? EMBERBORN_FOUND_CHANCE : FOUND_CHANCE;
+				if (!player.isSpectator() && nether.getRandom().nextFloat() < chance) {
 					tryFound(nether, player);
 				}
 			}
 		}
+	}
+
+	// ---- kin (0.7.502) ---------------------------------------------------------------------------------------------------
+
+	/** Every 2 s for an Emberborn in the Nether: taken in by a camp they come near, and rested at its hearth. */
+	private static void kin(ServerLevel nether, ServerPlayer player) {
+		List<Integer> welcomed = player.getAttached(WELCOMED);
+		for (Camp camp : camps(nether)) {
+			if (!player.blockPosition().closerThan(camp.center(), WELCOME_RANGE)) {
+				continue;
+			}
+			if (welcomed == null || !welcomed.contains(camp.id())) {
+				if (welcome(nether, player, camp)) {
+					List<Integer> now = new ArrayList<>(welcomed == null ? List.of() : welcomed);
+					now.add(camp.id());
+					player.setAttached(WELCOMED, List.copyOf(now));
+					welcomed = now;
+				}
+			} else if (player.blockPosition().closerThan(camp.center(), HOME_RADIUS + 0.5)
+				&& !player.hasEffect(MobEffects.REGENERATION) && player.getHealth() < player.getMaxHealth()) {
+				player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, HEARTH_REGEN_TICKS, 0, true, true));
+			}
+		}
+	}
+
+	/** The camp's nearest avatar greets {@code player}; the camp warms to them. False while none is about. */
+	private static boolean welcome(ServerLevel nether, ServerPlayer player, Camp camp) {
+		List<Mob> people = members(camp.id());
+		Mob speaker = null;
+		for (Mob m : people) {
+			if (m.getTarget() == null && (speaker == null || m.distanceToSqr(player) < speaker.distanceToSqr(player))) {
+				speaker = m;
+			}
+		}
+		if (speaker == null) {
+			return false;
+		}
+		speaker.getLookControl().setLookAt(player);
+		Speech.tell(nether, speaker, player, Component.translatable("message.jaymoskingdoms.avatar.welcome." + nether.getRandom().nextInt(WELCOME_LINES),
+			Component.literal(camp.name())), Speech.GOLD);
+		for (Mob m : people) {
+			McaCompat.hearts(m, player, WELCOME_HEARTS);
+		}
+		nether.sendParticles(ParticleTypes.FLAME, camp.center().getX() + 0.5, camp.center().getY() + 2.0, camp.center().getZ() + 0.5, 24, 0.8, 1.0, 0.8, 0.03);
+		return true;
+	}
+
+	/** The first time an Emberborn speaks to one of a camp's avatars: the newcomer's start (once per camp). */
+	private static void gift(ServerLevel level, ServerPlayer player, Mob avatar) {
+		Integer id = avatar.getAttached(AVATAR);
+		List<Integer> gifted = player.getAttached(GIFTED);
+		if (id == null || gifted != null && gifted.contains(id)) {
+			return;
+		}
+		List<Integer> now = new ArrayList<>(gifted == null ? List.of() : gifted);
+		now.add(id);
+		player.setAttached(GIFTED, List.copyOf(now));
+		Speech.tell(level, avatar, player, Component.translatable("message.jaymoskingdoms.avatar.gift." + level.getRandom().nextInt(WELCOME_LINES)), Speech.GOLD);
+		give(player, new ItemStack(Items.FLINT, GIFT_FLINT));
+		give(player, new ItemStack(Items.STICK, GIFT_STICKS));
+		BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "plant_string"))
+			.ifPresent(string -> give(player, new ItemStack(string, GIFT_STRING)));
+		give(player, new ItemStack(Items.COOKED_PORKCHOP, GIFT_FOOD));
+	}
+
+	private static void give(ServerPlayer player, ItemStack stack) {
+		player.getInventory().placeItemBackInInventory(stack, net.minecraft.util.Prediction.SERVER_ONLY);
 	}
 
 	/** An avatar at home that's strayed, with nothing to fight, walks back to its hearth. */
@@ -253,7 +386,7 @@ public final class AvatarCamps {
 	/** Every 10 s for each camp: recruits and war bands while a player is near; a band on the march walks on. */
 	private static void tend(ServerLevel nether, Camp camp, long now) {
 		boolean near = false;
-		for (ServerPlayer p : nether.players()) {
+		for (ServerPlayer p : Stacked.players(nether.getServer(), Level.NETHER)) {
 			if (!p.isSpectator() && p.blockPosition().closerThan(camp.center(), ACTIVE_RANGE)) {
 				near = true;
 				break;
@@ -394,7 +527,7 @@ public final class AvatarCamps {
 
 	private static int foundHere(CommandContext<CommandSourceStack> c) {
 		ServerLevel level = c.getSource().getLevel();
-		if (level.dimension() != Level.NETHER) {
+		if (!Stacked.at(level, BlockPos.containing(c.getSource().getPosition()), Level.NETHER)) {
 			c.getSource().sendFailure(Component.literal("Avatar camps rise in the Nether."));
 			return 0;
 		}
@@ -410,7 +543,7 @@ public final class AvatarCamps {
 	}
 
 	private static int info(CommandContext<CommandSourceStack> c) {
-		ServerLevel nether = c.getSource().getServer().getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(c.getSource().getServer(), Level.NETHER);
 		if (nether == null) {
 			return 0;
 		}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:lantern",
+    "S": "minecraft:stick",
+    "C": "minecraft:iron_chain",
+    "T": "minecraft:string"
+  },
+  "pattern": [
+    "SSC",
+    "S L",
+    "ST "
+  ],
+  "result": {
+    "id": "jaymospowers:lantern_pole",
+    "count": 1
+  }
+}

@@ -126,6 +126,12 @@ public final class ArsenalPowerClient implements PowerClient {
 	}
 
 	@Override
+	public int hudHeight(LocalPlayer player) {
+		// (HUD rework) the text rows' block in the right dock
+		return 70;
+	}
+
+	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.level == null) {
@@ -137,8 +143,9 @@ public final class ArsenalPowerClient implements PowerClient {
 
 		// to the right of the hotbar, clear of the core's badge (top-left); a row higher with Rift Chains to show
 		boolean corrupted = Fate.isCorrupted(player);
-		int x = graphics.guiWidth() / 2 + 98;
-		int y = graphics.guiHeight() - (corrupted ? 34 : 45);
+		// (HUD rework) now inside the power block of the right dock (PowerDock), keeping the block's internal arrangement
+		int x = com.jaymospowers.client.hud.PowerDock.left() + 2;
+		int y = com.jaymospowers.client.hud.PowerDock.bottom() - (corrupted ? 33 : 44);
 		// the first ability row: Hundred Blades and the pin stack above it, never over it
 		int top = y;
 

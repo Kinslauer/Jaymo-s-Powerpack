@@ -448,10 +448,10 @@ public class PowerScreen extends Screen {
 		y += 24;
 		float progress = player != null && !player.isCreative() ? Mastery.progress(player) : -2.0F;
 		if (progress > -2.0F) {
-			Component label = progress < 0.0F ? Component.translatable("screen.jaymospowers.mastered")
+			Component label = progress < 0.0F ? rankLabel(player)
 				: Component.translatable("screen.jaymospowers.mastery_bar", Math.round(progress * 100.0F));
 			line(graphics, label, x, y, w, progress < 0.0F ? accent(power) : COLOR_TEXT);
-			bar(graphics, x, y + 10, w, progress < 0.0F ? 1.0F : progress, accent(power));
+			bar(graphics, x, y + 10, w, progress < 0.0F ? rankBar(player) : progress, accent(power));
 			y += 18;
 		}
 		wrapped(graphics, power.description(), x, y, w, (toggleY() - 6 - y) / 9, COLOR_DIM);
@@ -777,6 +777,22 @@ public class PowerScreen extends Screen {
 
 	// ---------------------------------------------------------------- mastery
 
+	/** (0.19.29) Past the four abilities: the Mastery rank and the way to the next. */
+	private static Component rankLabel(Player player) {
+		float next = Mastery.rankProgress(player);
+		Component rank = com.jaymospowers.core.Training.rankName(Mastery.rank(player));
+		if (Mastery.rank(player) == 0) {
+			rank = Component.translatable("screen.jaymospowers.mastered");
+		}
+		return next < 0.0F ? Component.translatable("training.jaymospowers.rank_max", rank)
+			: Component.translatable("training.jaymospowers.rank_bar", rank, Math.round(next * 100.0F));
+	}
+
+	private static float rankBar(Player player) {
+		float next = Mastery.rankProgress(player);
+		return next < 0.0F ? 1.0F : next;
+	}
+
 	private void mastery(GuiGraphicsExtractor graphics, Power power) {
 		int x = cx() + 4, y = cy() + 4, w = CANVAS_W - 8;
 		Player player = owner(power);
@@ -792,8 +808,8 @@ public class PowerScreen extends Screen {
 			line(graphics, Component.translatable("screen.jaymospowers.mastery_bar", Math.round(progress * 100.0F)), x, y, w, COLOR_DIM);
 			bar(graphics, x, y + 10, w, progress, accent(power));
 		} else {
-			line(graphics, Component.translatable("screen.jaymospowers.mastered"), x, y, w, accent(power));
-			bar(graphics, x, y + 10, w, 1.0F, accent(power));
+			line(graphics, rankLabel(player), x, y, w, accent(power));
+			bar(graphics, x, y + 10, w, rankBar(player), accent(power));
 		}
 		y += 20;
 		// each ability in the order they come

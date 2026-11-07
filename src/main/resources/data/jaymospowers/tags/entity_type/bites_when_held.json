@@ -1,0 +1,10 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:wolf",
+		"minecraft:fox",
+		{"id": "naturalist:snake", "required": false},
+		{"id": "naturalist:coral_snake", "required": false},
+		{"id": "naturalist:rattlesnake", "required": false}
+	]
+}

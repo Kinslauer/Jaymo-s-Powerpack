@@ -54,7 +54,8 @@ public final class Blueprints {
 	/** Shapes the creative tab offers a blueprint for (the wandering trader's few are in data). */
 	public static final List<String> CREATIVE_SHAPES = List.of("weapon/claymore_blade", "weapon/broadsword_blade", "weapon/longsword_blade",
 		"weapon/katana_blade", "weapon/ninjato_blade", "weapon/war_scythe_blade", "weapon/glaive_blade", "weapon/halberd_head",
-		"part/broad_blade", "part/large_plate", "armour/helmet", "armour/chestplate", "armour/leggings", "armour/boots");
+		"part/broad_blade", "part/large_plate", "armour/helmet", "armour/chestplate", "armour/leggings", "armour/boots",
+		"jewel/ring_frame", "jewel/amulet_frame", "jewel/bracelet_frame", "jewel/circlet_frame");
 
 	private Blueprints() {
 	}

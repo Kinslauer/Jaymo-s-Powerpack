@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -480,6 +481,11 @@ public final class ZFighterSagas {
 			}
 		}
 		return items;
+	}
+
+	/** (0.20.0) Pays {@code silver} silver (what that many emeralds used to be) through {@link KingdomsMoney}: coins, into the worn purse if any. */
+	static void paySilver(ServerPlayer player, int silver) {
+		KingdomsMoney.pay(player, KingdomsMoney.worth(silver));
 	}
 
 	static void give(ServerPlayer player, ItemStack stack) {

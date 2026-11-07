@@ -3,6 +3,7 @@ package com.jaymoskingdoms.nether;
 import com.jaymoskingdoms.Armory;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
+import com.jaymoskingdoms.Stacked;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -115,7 +116,7 @@ public final class FortressHaunts {
 	}
 
 	private static void tick(MinecraftServer server) {
-		ServerLevel nether = server.getLevel(Level.NETHER);
+		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		if (nether == null) {
 			return;
 		}
@@ -131,7 +132,7 @@ public final class FortressHaunts {
 		if (now % RISE_EVERY != 0) {
 			return;
 		}
-		for (ServerPlayer player : nether.players()) {
+		for (ServerPlayer player : Stacked.players(nether.getServer(), Level.NETHER)) {
 			if (player.isSpectator() || nether.getRandom().nextFloat() >= RISE_CHANCE || !inFortress(nether, player.blockPosition())) {
 				continue;
 			}

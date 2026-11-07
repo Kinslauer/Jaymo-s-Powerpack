@@ -49,6 +49,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		com.jaymospowers.armory.PatronWeapons.VIEWER = () -> Minecraft.getInstance().player;
 		// (0.17.67) after every mod's main entrypoint (TaCZ's vanilla registry lookup), for singleplayer worlds
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
 		// (0.15.147) the inventory's tab to the powers screen
@@ -64,7 +65,21 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.blood.BloodClient.init();
+		// (0.20.51) Subtle Effects' skeleton bone sprites off, and again now and then (the server's config syncs on join)
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("subtle_effects")) {
+			net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+				if (client.level != null && client.level.getGameTime() % 200L == 0L) {
+					com.jaymospowers.compat.SubtleEffectsCompat.noBones();
+				}
+			});
+		}
+		// (0.20.41) blood splashed on bodies
+		com.jaymospowers.client.blood.BloodCoatLayer.register();
+		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
+		com.jaymospowers.client.wet.WetClient.init();
+		com.jaymospowers.client.wet.ArmourGrimeTextures.init();
 		com.jaymospowers.client.wounds.DressingsLayer.register();
+		com.jaymospowers.client.armory.LodgedLayer.register();
 		com.jaymospowers.client.wounds.ProstheticLayer.register();
 		// (0.18.71) a bolas' cord on a tripped body's legs
 		com.jaymospowers.client.wounds.TrippedPose.register();
@@ -75,6 +90,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.web.FirstPersonCompat.hideInPanoramas();
 		LockOnClient.init();
 		com.jaymospowers.client.combat.GuardClient.init();
+		com.jaymospowers.client.combat.IncomingBlowsClient.init();
+		com.jaymospowers.client.combat.TellGlintParticle.register(); // (0.20.4)
+		com.jaymospowers.client.combat.ShieldBangClient.init();
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
 		com.jaymospowers.client.power.ember.FlameAvatarClient.init();
@@ -126,6 +144,33 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (Motion patch 5) vanilla tools, bow, compass, clock, totem, brush, saddle and bottles solid in hand, 3D mushrooms
+		// and dripstone (tools/gen_held_3d.py); on by default, switched off in Resource Packs for the flat look
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_3d"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (0.19.72) the optional Excalibur look (ExcaliburLook, docs/Excalibur-Style.md): our own textures graded toward
+		// Excalibur's colours (tools/excalibur_style) and calmer leaves (Excalibur's leaves hang fringes off every leaf
+		// block that repeat like a hall of mirrors inside a canopy; plain leaf cubes turned at random instead). Off by
+		// default; /excalibur on switches it on with Excalibur and its Fresh Animations patch, in the right order.
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("excalibur_style"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: Excalibur colours and leaves"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
+		ExcaliburLook.init();
+		// (0.19.63) bushy leaves (tools/bushy_leaves.py: every vanilla leaf block also draws two crossed planes reaching past
+		// it) and grass and snow lips leaning over open ledges (tools/grass_edges.py); on by default, switched off in
+		// Resource Packs. Our own take on Recrafted's bushy leaves and overlays (nothing copied).
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("living_world"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: bushy leaves, grass and snow edges"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (Motion patch 5) the iron golem's eyes glow
+		com.jaymospowers.client.glow.GolemEyes.init();
+		// (Motion patch 6) pets acting like pets, and wet coats that shake dry
+		com.jaymospowers.client.pets.PetPoses.init();
+		com.jaymospowers.client.pets.WetCoats.init();
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(SeasonAura::tick);
 		// the affinity choice waits until no other screen is open
@@ -133,6 +178,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
 		ScreenShake.init();
+		com.jaymospowers.client.sound.Blasts.init();
+		com.jaymospowers.client.sound.ShellWhistle.init();
+		PanicCam.init();
+		com.jaymospowers.client.water.BoatWakes.init();
 		BeamClashClient.init();
 		BeamCinematic.init();
 		UltimateCinematic.init();
@@ -141,15 +190,19 @@ public class JaymosPowersClient implements ClientModInitializer {
 		LeafRustle.init();
 		CarryClient.init();
 		com.jaymospowers.client.stamina.DodgeClient.init();
+		com.jaymospowers.client.combat.TakedownClient.init();
+		SneakZoom.init();
 		com.jaymospowers.client.stamina.FeathersHud.init();
 		JeiCheats.init();
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
 		com.jaymospowers.client.armory.MusketSights.init();
+		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
 		StanceScroll.init();
+		ProneTransition.init();
 		StanceHud.init();
 		com.jaymospowers.client.wounds.WoundsHud.init();
 		com.jaymospowers.client.wounds.DownedHud.init();
@@ -159,9 +212,15 @@ public class JaymosPowersClient implements ClientModInitializer {
 		SwallowedPowerClient.init();
 		HiddenArmorClient.init();
 		com.jaymospowers.client.costume.CostumeClient.init();
+		// (0.19.49) a dead player's body still wears their costume (Kitchen's corpse)
+		com.jaymospowers.client.costume.CorpseCostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
+		// (0.19.87) the jeweller's bench screen, the lapidary wheel's cut screen and cutting bar
+		com.jaymospowers.client.jewellery.JewelleryClient.init();
+		// (Motion patch 4) lanterns worn at the hip (belt slot) and on a pole on the back (body slot)
+		com.jaymospowers.client.baubles.WornLanterns.init();
 		com.jaymospowers.client.alchemy.AlchemyClient.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();
@@ -172,10 +231,14 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
+		// (0.20.52) the stacked Aether hidden from under the clouds
+		com.jaymospowers.client.aether.AetherVeil.init();
 		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
 		com.jaymospowers.client.power.cryo.CryoPowerClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
+		// (0.19.24) campfire embers and hot spring steam
+		com.jaymospowers.client.wounds.RestClient.init();
 	}
 
 	/** Steering one of Jaymo's Kingdoms' dragons (R breathes its fire then), told by its id alone, so no compile-time tie. */

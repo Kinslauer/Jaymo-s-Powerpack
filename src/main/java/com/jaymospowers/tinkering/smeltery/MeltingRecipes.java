@@ -62,7 +62,7 @@ import org.jspecify.annotations.Nullable;
 public final class MeltingRecipes {
 	/** Log each metal-sounding item that still doesn't melt when a server starts (a dev aid for Andy). */
 	static final boolean LOG_GAPS = true;
-	/** Words in an item's id that make it sound metal, for the gap log. */
+	/** Words in an item's id that make it sound metal, for the gap log (coins are left out by {@code KingdomsMoney.isMoney}). */
 	static final List<String> METAL_WORDS = List.of("iron", "gold", "golden", "copper", "silver", "steel", "chain",
 		"chainmail", "netherite", "bronze");
 	/** Passes at most through the recipes (chains are rarely more than five deep). */
@@ -366,7 +366,9 @@ public final class MeltingRecipes {
 		for (Item item : BuiltInRegistries.ITEM) {
 			Identifier id = BuiltInRegistries.ITEM.getKey(item);
 			if (item instanceof ToolPartItem || item instanceof WeaponPartItem || item instanceof TinkerTool
-				|| METAL_WORDS.stream().noneMatch(id.getPath()::contains) || Melting.of(new ItemStack(item)) != null) {
+				|| METAL_WORDS.stream().noneMatch(id.getPath()::contains) || Melting.of(new ItemStack(item)) != null
+				// (0.20.0) a coin is money, not metal to melt: realm silver, hacksilver, gold dinars, copper bits and bent copper
+				|| com.jaymospowers.core.KingdomsMoney.isMoney(new ItemStack(item))) {
 				continue;
 			}
 			JaymosPowers.LOGGER.info("Melting gap: {} doesn't melt", id);

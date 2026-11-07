@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "jaymospowers:plant_string"
+  },
+  "result": {
+    "id": "jaymospowers:plant_mesh",
+    "count": 1
+  }
+}

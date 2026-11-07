@@ -30,12 +30,21 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 	static final class State extends LivingEntityRenderState {
 		DragonLook look = DragonLook.decode(0);
 		float fly, breath, land, sit, crash, flap, glide, pitch, swim;
+		/** (0.7.522) Risen onto its hind legs (0 to 1). */
+		float stand;
 		boolean saddled;
+		/** (0.7.522) The move it's making ({@link WindDragon#action}) and how long it has been at it (ticks, smoothed). */
+		int action;
+		float actionAge;
+		/** (0.7.531) A blow's flinch, 1 as it lands and easing to 0 over half a second. */
+		float hurt;
 	}
 
 	private final String species;
 	private final float scale;
 	private final float reach;
+	/** (0.7.612) Whether its model plays a death of its own (then it isn't flipped onto its side as it dies). */
+	private boolean ownDeath;
 
 	/** {@code species}: its folder under {@code textures/entity/dragon/}; {@code shadow}: its shadow's radius (blocks). */
 	WindDragonRenderer(EntityRendererProvider.Context context, String species, M model, float shadow) {
@@ -65,6 +74,17 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		super.scale(state, poseStack);
 	}
 
+	/** (0.7.612) Its model plays its own death: no sideways flip. */
+	WindDragonRenderer<M> ownDeath() {
+		this.ownDeath = true;
+		return this;
+	}
+
+	@Override
+	protected float getFlipDegrees() {
+		return this.ownDeath ? 0.0F : super.getFlipDegrees();
+	}
+
 	@Override
 	public State createRenderState() {
 		return new State();
@@ -83,7 +103,11 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		state.glide = Mth.lerp(partialTicks, dragon.glideAnimO, dragon.glideAnim);
 		state.pitch = Mth.lerp(partialTicks, dragon.pitchAnimO, dragon.pitchAnim);
 		state.swim = Mth.lerp(partialTicks, dragon.swimAnimO, dragon.swimAnim);
+		state.stand = Mth.lerp(partialTicks, dragon.standAnimO, dragon.standAnim);
 		state.saddled = dragon.saddled();
+		state.action = dragon.actionSeen;
+		state.actionAge = dragon.actionAge + partialTicks;
+		state.hurt = dragon.hurtTime > 0 ? Math.max(0.0F, (dragon.hurtTime - partialTicks) / 10.0F) : 0.0F;
 	}
 
 	@Override

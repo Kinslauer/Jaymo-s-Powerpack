@@ -65,7 +65,7 @@ public final class CryoSlide {
 
 	/** Skating on Ice Slide (both sides). */
 	public static boolean active(Player player) {
-		return player.getAttached(SLIDING) != null && Powers.has(player, CryoPower.INSTANCE);
+		return player.getAttached(SLIDING) != null && (Powers.has(player, CryoPower.INSTANCE) || CryoLent.lent(player));
 	}
 
 	/** Whether this player can skate at all right now. */

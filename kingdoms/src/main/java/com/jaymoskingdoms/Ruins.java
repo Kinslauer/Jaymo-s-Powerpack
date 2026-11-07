@@ -59,16 +59,17 @@ final class Ruins {
 			return c.boxes();
 		}
 		List<BoundingBox> out = new ArrayList<>();
-		if (level.hasChunk(cx, cz)) {
-			ChunkAccess chunk = level.getChunk(cx, cz);
+		ChunkAccess chunk = level.getChunkSource().getChunkNow(cx, cz);
+		if (chunk != null) {
 			BoundingBox area = new BoundingBox(cx << 4, level.getMinY(), cz << 4, (cx << 4) + 15, level.getMaxY(), (cz << 4) + 15);
 			for (Map.Entry<Structure, LongSet> e : chunk.getAllReferences().entrySet()) {
 				for (long ref : e.getValue()) {
 					ChunkPos from = ChunkPos.unpack(ref);
-					if (!level.hasChunk(from.x(), from.z())) {
+					ChunkAccess startChunk = level.getChunkSource().getChunkNow(from.x(), from.z());
+					if (startChunk == null) {
 						continue;
 					}
-					StructureStart start = level.getChunk(from.x(), from.z()).getStartForStructure(e.getKey());
+					StructureStart start = startChunk.getStartForStructure(e.getKey());
 					if (start == null || !start.isValid()) {
 						continue;
 					}

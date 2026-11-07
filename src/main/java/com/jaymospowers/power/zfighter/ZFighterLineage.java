@@ -295,9 +295,19 @@ public final class ZFighterLineage {
 
 	/** The lang key of a technique: the V's Ki Wave is each lineage's own (Crimson Cannon, Spiral Lance, Frost Needle). */
 	public static String techniqueKey(Player player, int technique) {
+		if (technique < 0 || technique >= ZFighterTraining.TECHNIQUES) {
+			// (0.18.94) a made technique has a name, not a key (techniqueName)
+			return "technique.jaymospowers.zfighter.made";
+		}
 		String key = "technique.jaymospowers.zfighter." + ZFighterTraining.TECHNIQUE_KEYS[technique];
 		int lineage = of(player);
 		return technique == ZFighterTraining.KI_WAVE && lineage > EARTHLING ? key + "." + KEYS[lineage] : key;
+	}
+
+	/** (0.18.94) A technique's name as shown: a made one's own, in its colour, or the learned one's. */
+	public static net.minecraft.network.chat.Component techniqueName(Player player, int technique) {
+		ZFighterCreator.Made made = ZFighterCreator.made(player, technique);
+		return made != null ? ZFighterCreator.name(made) : net.minecraft.network.chat.Component.translatable(techniqueKey(player, technique));
 	}
 
 	public static String formKey(Player player, int form) {
@@ -565,7 +575,9 @@ public final class ZFighterLineage {
 			player.removeAttached(TAIL_CUT);
 		}
 		boolean wild = wild(player);
-		boolean moonlit = tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
+		// (Andy, 2026-11-01) a false moon ({@link ZFighterFakeMoon}) shines like a full one, any night
+		boolean fakeMoon = tailOut(player) && ZFighterFakeMoon.shines(level, player);
+		boolean moonlit = fakeMoon || tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
 			&& level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.FULL_MOON;
 		if (!ape(player)) {
 			live.apePeak = player.getY();
@@ -631,6 +643,10 @@ public final class ZFighterLineage {
 		if (now % APE_STOMP_EVERY == 0 && live.apeSize >= 0.5F) {
 			stomp(player, level);
 		}
+		if (live.apeSize >= 0.5F) {
+			// (0.19.39) walking into a tree pushes it over
+			com.jaymospowers.core.GiantTrample.tick(player, now);
+		}
 		ApeSmash.tick(player, now);
 	}
 
@@ -652,6 +668,8 @@ public final class ZFighterLineage {
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, foot.x, foot.y + 0.2, foot.z, 6, reach * 0.3, 0.1, reach * 0.3, 0.02);
 		BlockPos under = BlockPos.containing(foot.x, foot.y - 0.5, foot.z);
 		com.jaymospowers.core.GroundCracks.crack(level, under, level.getRandom(), Math.max(1, (int)Math.round(reach * 0.5)));
+		// (0.19.39) the trees round his feet go down
+		com.jaymospowers.core.GiantTrample.step(player);
 		ZFighterNet.ApeStep step = new ZFighterNet.ApeStep(player.getId(), live.apeLeftFoot, foot.x, under.getY() + 1.0, foot.z, (float)reach,
 			(float)(APE_STRIDE * Math.max(0.5F, live.apeSize)));
 		for (ServerPlayer viewer : PlayerLookup.tracking(player)) {

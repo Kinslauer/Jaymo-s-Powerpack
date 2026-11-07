@@ -30,6 +30,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
+import com.jaymoskingdoms.money.Money;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
@@ -47,13 +48,13 @@ import org.jspecify.annotations.Nullable;
  * slain), unless the spouse did it or the realm is ruined.</li>
  * <li><b>Conquest.</b> A lord who plants the banner on an enemy seat, or kills its ruler, in a war may claim its crown
  * for a day ({@code /kingdom crown claim <name>}): it's freed from vassalage and allied with their old realm.</li>
- * <li><b>Founding.</b> {@code /kingdom crown found [name]} pays {@link #FOUND_COST} emeralds into a new kingdom's treasury
+ * <li><b>Founding.</b> {@code /kingdom crown found [name]} pays {@link #FOUND_COST} silver into a new kingdom's treasury
  * at your feet, away from every other realm.</li>
  * </ul>
  * Sovereigns are kept on the Overworld, by faction id.
  */
 public final class Crowns {
-	/** Emeralds to found a realm (they seed its treasury). */
+	/** (0.7.498) Silver (coins; once emeralds) to found a realm (it seeds the treasury, which counts in silver). */
 	static final int FOUND_COST = 256;
 	/** A ruler slain this close to their throne fell in their own hall. */
 	static final double USURP_RANGE = 16.0;
@@ -339,18 +340,9 @@ public final class Crowns {
 		if (near != null) {
 			return Component.translatable("message.jaymoskingdoms.crown.too_near", near.name(), KingdomEvents.CAPITAL_SPACING);
 		}
-		int have = player.getInventory().countItem(Items.EMERALD);
-		if (have < FOUND_COST) {
-			return Component.translatable("message.jaymoskingdoms.crown.found_cost", FOUND_COST, have);
-		}
-		int take = FOUND_COST;
-		for (int slot = 0; slot < player.getInventory().getContainerSize() && take > 0; slot++) {
-			ItemStack stack = player.getInventory().getItem(slot);
-			if (stack.is(Items.EMERALD)) {
-				int n = Math.min(take, stack.getCount());
-				stack.shrink(n);
-				take -= n;
-			}
+		// (0.7.498) coins, coin stacks, purses (worn too) and bundles all count, and a creative player pays nothing
+		if (!Money.charge(player, Money.worth(FOUND_COST))) {
+			return Component.translatable("message.jaymoskingdoms.crown.found_cost", FOUND_COST, Money.count(player) / Money.UNIT);
 		}
 		Faction k = KingdomEvents.found(level, at, null);
 		if (name != null) {

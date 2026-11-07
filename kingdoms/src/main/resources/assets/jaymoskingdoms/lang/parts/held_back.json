@@ -1,0 +1,17 @@
+{
+  "held_back.jaymoskingdoms.fine.0": "Enough! Up you get. You'll pay for that blow, and that's the end of it.",
+  "held_back.jaymoskingdoms.fine.1": "Put it away, all of you. The law settles this, not a blade.",
+  "held_back.jaymoskingdoms.fine.2": "We're not butchers here. Pay the fine and mind your aim.",
+  "held_back.jaymoskingdoms.warning.0": "Not a coin on you? Then get up and count yourself lucky.",
+  "held_back.jaymoskingdoms.warning.1": "Back off, the lot of you. This one's had their lesson.",
+  "held_back.jaymoskingdoms.warning.2": "On your feet. Strike one of ours again and it'll be the cells.",
+  "held_back.jaymoskingdoms.cells.0": "Up. You'll cool off in the cells, not in the ground.",
+  "held_back.jaymoskingdoms.cells.1": "Stand down, all of you. This one goes below.",
+  "held_back.jaymoskingdoms.cells.2": "A night's thinking in the cells. That's the law here.",
+  "message.jaymoskingdoms.held_back.fined": "%s's guard takes you in: you're fined %s for the blow, and the fight's called off.",
+  "message.jaymoskingdoms.held_back.warned": "%s's guard takes you in: you can't pay the fine, so you're let off with a warning.",
+  "gui.jaymoskingdoms.story.hint.107": "A town's people keep each other honest: with others watching, its guards take a downed troublemaker to the cells (or fine them) instead of cutting them down. Only a hothead alone would kill an enemy of the town.",
+  "message.jaymoskingdoms.held_back.jailed": "%s's guard takes you in for the blow: you're locked in the cells for %s minutes, and the fight's called off.",
+  "message.jaymoskingdoms.hard.cell.open": "The cell door stands open. The jailer's stair beyond it climbs to a hatch in town: mind who's watching when you come up.",
+  "gui.jaymoskingdoms.story.hint.112": "A picked or opened cell door is walked out of: the passage beyond climbs to a hatch in town. Break out and you're hunted to be taken back, not shot on sight."
+}

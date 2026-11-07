@@ -186,6 +186,8 @@ public final class Powers {
 	static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Power power = of(player);
+			// (0.19.29) the Mastery rank perks, kept in step (and taken off a player who lost their power)
+			Training.tick(player);
 			if (power != null) {
 				// a fall is measured from its highest point: anything still moving up isn't falling yet (so a swing's or
 				// a hover's ups and downs don't pile up into one huge fall)

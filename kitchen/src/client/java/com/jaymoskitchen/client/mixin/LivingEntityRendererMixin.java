@@ -24,11 +24,17 @@ abstract class LivingEntityRendererMixin {
 		int arrows = entity instanceof net.minecraft.world.entity.player.Player ? 0
 			: com.jaymoskitchen.archery.StuckArrows.total(com.jaymoskitchen.archery.StuckArrows.of(entity));
 		state.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows > 0 ? new int[] {arrows, entity.getId()} : null);
+		// (0.5.41) a snow golem melts down instead of tipping over red
+		com.jaymoskitchen.client.corpse.SnowMeltPose.extract(entity, state);
+		// (0.5.84) the risen dead getting up from where they lay
+		com.jaymoskitchen.client.corpse.ReanimatePose.extract(entity, state, partialTicks);
 	}
 
 	@Inject(method = "setupRotations", at = @At("TAIL"))
 	private void jaymoskitchen$layDown(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		CrawlPose.rotate(state, poseStack, entityScale);
+		com.jaymoskitchen.client.corpse.SnowMeltPose.squash(state, poseStack);
+		com.jaymoskitchen.client.corpse.ReanimatePose.rotate(state, poseStack);
 	}
 
 	@ModifyVariable(method = "getRenderType", at = @At("STORE"), ordinal = 0)

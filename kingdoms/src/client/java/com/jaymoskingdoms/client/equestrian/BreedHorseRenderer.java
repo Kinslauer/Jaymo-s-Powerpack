@@ -57,6 +57,8 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 		boolean wings, airborne, flapping;
 		/** (0.7.305) Ridden by you in first person: how solid it's drawn (you look down through it), and how far its head dips out of view. */
 		float fade = 1.0F, headDip;
+		/** (0.7.445) Its own offset in ticks, so a grazing herd doesn't shuffle its feet all at once. */
+		float phase;
 	}
 
 	/** (0.7.305) In the saddle in first person: it starts to fade once you look this far down (degrees), and is this faint looking straight down. */
@@ -84,6 +86,7 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 		state.coat = coat != null ? coat : horse instanceof SkeletonHorse ? HorseLooks.FALLBACK_SKELETON
 			: horse instanceof ZombieHorse ? HorseLooks.FALLBACK_ZOMBIE : HorseLooks.FALLBACK;
 		state.build = HorseLooks.build(state);
+		state.phase = Math.floorMod(horse.getId() * 37, 997);
 		ItemStack armor = state.bodyArmorItem;
 		Equippable equippable = armor.isEmpty() ? null : armor.get(DataComponents.EQUIPPABLE);
 		Identifier asset = equippable == null ? null : equippable.assetId().map(k -> k.identifier()).orElse(null);

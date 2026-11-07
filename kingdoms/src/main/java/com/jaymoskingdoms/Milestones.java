@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -430,11 +431,10 @@ public final class Milestones {
 		if (player.isCreative()) {
 			return true;
 		}
-		if (Purse.count(player, Items.EMERALD) < fare) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
+		if (!Money.charge(player, Money.worth(fare))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", Money.text(player, Money.worth(fare))).withStyle(ChatFormatting.RED));
 			return false;
 		}
-		Purse.take(player, Items.EMERALD, fare);
 		return true;
 	}
 

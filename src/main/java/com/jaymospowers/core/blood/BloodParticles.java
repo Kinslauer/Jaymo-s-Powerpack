@@ -24,6 +24,15 @@ import net.minecraft.network.codec.StreamCodec;
  */
 public final class BloodParticles {
 	/**
+	 * (0.20.41) Magma creatures' blood (Hematic's idea): it glows as it flies and where it lands, then cools to a dark crust
+	 * over {@link #MAGMA_COOLS} ticks. The client knows it by this colour.
+	 */
+	public static final int MAGMA = 0xFF5A0A;
+	public static final int MAGMA_COOLS = 900;
+	/** (0.20.41) A crust's colour once cooled. */
+	public static final int MAGMA_CRUST = 0x3A2622;
+
+	/**
 	 * The blood a creature sprays: one of the drops at random, in its colour, this size (1 = a man's). (0.17.182) A drop
 	 * leaves its own short-lived splash where it lands unless {@code stains} is false (a cut's drip, whose lasting stain
 	 * the server lays, {@link BloodTrail}).
@@ -49,20 +58,34 @@ public final class BloodParticles {
 	/**
 	 * A pool of blood on the ground (or whatever's under it), this size. (0.17.182) One of {@link BloodTrail}'s lasting
 	 * stains carries its {@code mark} id (0 for a passing splash), how many ticks old it is and how many it has left.
+	 * (0.19.55) {@code shape}: {@link #ROUND}, or a smear dragged out along the ground east-west ({@link #SMEAR_X}) or
+	 * north-south ({@link #SMEAR_Z}), long and narrow (a body dragged through it, {@link BloodTrail#smear}).
 	 */
-	public record Puddle(int color, float scale, long mark, int age, int life) implements ParticleOptions {
+	public record Puddle(int color, float scale, long mark, int age, int life, int shape) implements ParticleOptions {
+		public static final int ROUND = 0, SMEAR_X = 1, SMEAR_Z = 2;
+		/**
+		 * (0.20.41) A bloody footprint ({@link BloodTrail#print}): {@code PRINT} plus the way it points (sixteenths of a turn,
+		 * 0 = south, clockwise as yaw goes), plus {@link #PRINT_RIGHT} for a right foot.
+		 */
+		public static final int PRINT = 16, PRINT_RIGHT = 16, PRINT_END = PRINT + 32;
+
+		/** (0.20.41) Whether {@code shape} is a footprint. */
+		public static boolean print(int shape) {
+			return shape >= PRINT && shape < PRINT_END;
+		}
 		public static final MapCodec<Puddle> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 			Codec.INT.fieldOf("color").forGetter(Puddle::color),
 			Codec.FLOAT.optionalFieldOf("scale", 1.0F).forGetter(Puddle::scale),
 			Codec.LONG.optionalFieldOf("mark", 0L).forGetter(Puddle::mark),
 			Codec.INT.optionalFieldOf("age", 0).forGetter(Puddle::age),
-			Codec.INT.optionalFieldOf("life", 0).forGetter(Puddle::life)).apply(i, Puddle::new));
+			Codec.INT.optionalFieldOf("life", 0).forGetter(Puddle::life),
+			Codec.INT.optionalFieldOf("shape", ROUND).forGetter(Puddle::shape)).apply(i, Puddle::new));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Puddle> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT, Puddle::color, ByteBufCodecs.FLOAT, Puddle::scale, ByteBufCodecs.VAR_LONG, Puddle::mark, ByteBufCodecs.VAR_INT,
-			Puddle::age, ByteBufCodecs.VAR_INT, Puddle::life, Puddle::new);
+			Puddle::age, ByteBufCodecs.VAR_INT, Puddle::life, ByteBufCodecs.VAR_INT, Puddle::shape, Puddle::new);
 
 		public Puddle(int color, float scale) {
-			this(color, scale, 0L, 0, 0);
+			this(color, scale, 0L, 0, 0, ROUND);
 		}
 
 		@Override
@@ -99,6 +122,8 @@ public final class BloodParticles {
 	public static final SimpleParticleType RED_FLECK = simple("blood_fleck_red");
 
 	/** The drops a {@link Spray} picks from (each its own sprites, {@code particles/<name>.json}). */
+	/** (0.20.41) Sprites only (looked up by the client): the footprints and the runs down a wall. */
+	public static final SimpleParticleType PRINT_SPRITES = simple("blood_print"), RUN_SPRITES = simple("blood_run");
 	public static final SimpleParticleType DROP = simple("blood_drop"), SPAT_1 = simple("blood_spat_1"), SPAT_2 = simple("blood_spat_2"),
 		SPURT = simple("blood_spurt"), SWIPE_1 = simple("blood_swipe_1"), SWIPE_2 = simple("blood_swipe_2");
 
@@ -108,6 +133,8 @@ public final class BloodParticles {
 	/** Registers the particles (by loading this class). */
 	public static void init() {
 		BloodTrail.init();
+		// (0.19.55) bodies dragged over the ground smear it
+		BloodSmears.init();
 	}
 
 	/** (0.15.109) A {@link Fleck} of this colour (RGB) and size, where a {@code DustParticleOptions} would go. */

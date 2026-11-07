@@ -151,15 +151,28 @@ public final class Wounds {
 		WillSkill.register();
 		// (0.14.2) phase 3: broken limbs
 		Breaks.register();
+		// (0.20.110) low and hit: broken limbs don't hold you back for a while
+		Adrenaline.register();
+		// (0.20.111) passing out from hunger or thirst
+		Fainting.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
 		// (0.17.54) the Potion of Cleansing: festering cured
 		Cleansing.register();
 		MedicineItems.register();
+		// (0.19.24) herbal remedies' lasting effects, rag washing and boiling
+		Herbal.register();
+		RagWashing.register();
+		// (0.21.39) held jobs' bars kept between holds
+		com.jaymospowers.core.HoldProgress.register();
 		Treatment.register();
 		// (0.15.99) kneeling at someone's side to treat them
 		Tending.register();
 		SelfRevive.register();
+		// (0.20.26) death by cause: final, or left for dead with an injury that fits (after the downed state, which it follows)
+		Mortality.register();
+		// (0.19.20) hostiles walk up and finish a downed player off, filmed for them
+		MobExecutions.register();
 		// (0.15.82) up from the downed, but battered
 		Battered.register();
 		// (0.18.71) tripped by a bolas: a leg broken, face down on the ground a while
@@ -167,6 +180,9 @@ public final class Wounds {
 		// (0.15.98) finishing the downed off, one move for each kind of weapon
 		com.jaymospowers.core.finisher.Finishers.register();
 		Pain.register();
+		// (0.19.24) rest by a campfire, soaking in a hot spring
+		Resting.register();
+		HotSprings.register();
 		// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(Downed.LAST, KILLING_PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(KILLING_PHASE, (entity, source, amount) -> {
@@ -259,8 +275,20 @@ public final class Wounds {
 	 * no further than the part may heal ({@link Breaks#caps}). Returns what it took.
 	 */
 	public static float healPart(LivingEntity entity, BodyPart part, float amount) {
+		return healPart(entity, part, amount, true);
+	}
+
+	/** As {@link #healPart(LivingEntity, BodyPart, float)}; {@code slow} false when the caller already applied the cut once (Mending). */
+	static float healPart(LivingEntity entity, BodyPart part, float amount, boolean slow) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null || !(entity.level() instanceof ServerLevel) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
+			return 0.0F;
+		}
+		// (0.20.14) the Hearthkeeper's trial and scar on one who turned from it (Jaymo's Kingdoms): every part heal is slower
+		if (slow) {
+			amount *= 1.0F - MedicineSkill.blessing(entity, "wounds_slow");
+		}
+		if (amount <= 0.0F) {
 			return 0.0F;
 		}
 		if (plan == BodyPlan.SIMPLE) {
@@ -382,7 +410,7 @@ public final class Wounds {
 		boolean overkill = landed == BodyPart.HEAD
 			? was[index] > EPS && now[index] <= EPS && loss - was[index] > most
 			: !landed.vital() && Breaks.isBroken(victim, landed) && loss > most;
-		return overkill && Dismember.severOnOverkill(victim, limb, source);
+		return overkill && Dismember.severOnOverkill(victim, limb, source, taken);
 	}
 
 	/**
@@ -408,6 +436,10 @@ public final class Wounds {
 			landed = aimed;
 		} else {
 			landed = HitRouting.route(victim, plan, blow.source(), points, victim.getMaxHealth(), loss);
+		}
+		// (0.20.61) a heavy chop to the torso may cut the body in half (Downed already tried it on the downable)
+		if (Dismember.halve(victim, blow.source(), loss, landed == BodyPart.BODY)) {
+			return;
 		}
 		sever(victim, plan, blow.source(), landed, was, points, loss, victim.getMaxHealth(), loss);
 	}
@@ -454,6 +486,14 @@ public final class Wounds {
 			|| player.getHealth() < player.getMaxHealth()) {
 			healAll(player);
 		}
+	}
+
+	/**
+	 * (0.20.50) Every wound undone, as creative mode heals (Chrono's rewind out of death): breaks, cuts, fevers, severed
+	 * limbs, a bolas trip. Health is the caller's to set after.
+	 */
+	public static void undoAll(ServerPlayer player) {
+		creativeHeal(player);
 	}
 
 	/** Brings the parts in line with the health (healing fills the most hurt part, an unrouted loss comes off the limbs first). */
@@ -627,6 +667,10 @@ public final class Wounds {
 			victim.setHealth(Math.max(0.01F, hearts(points, plan, max)));
 		}
 		Entity by = source.getEntity();
+		// (0.20.61) a zombie cut in half at the waist by a heavy chop crawls on as its upper half
+		if (!blocked && Dismember.zombie(victim) && Dismember.halve(victim, source, loss, landed == BodyPart.BODY)) {
+			return;
+		}
 		// (0.14.2) overkill: a blade on a limb already broken, or past the head's zero, may cut it off
 		if (!blocked && sever(victim, plan, source, landed, was, points, loss, max, loss)
 			&& (landed == BodyPart.HEAD || !victim.isAlive())) {

@@ -2,7 +2,9 @@ package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
+import com.jaymospowers.power.xenoform.XenoUltimate;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import com.jaymospowers.power.xenoform.forms.ultimate.Geode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -41,9 +43,7 @@ import net.minecraft.world.phys.Vec3;
  * projectiles shatter.</li>
  * <li>B, Spike Field: crystal spikes burst from the ground round you, cutting and slowing everything within
  * {@link #SPIKE_RADIUS}.</li>
- * <li>C (ascended), Geode: everything within {@link #GEODE_RADIUS} is cased in crystal for {@link #GEODE_TICKS}: held
- * fast, unable to strike, with amethyst grown round it; you're hard as the crystal meanwhile. Again every
- * {@link #GEODE_COOLDOWN}.</li>
+ * <li>C (ascended), Geode: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Geode}.</li>
  * </ul>
  */
 public final class Prism extends XenoForm {
@@ -57,12 +57,10 @@ public final class Prism extends XenoForm {
 	public static final int SPIKE_COOLDOWN = 200, SPIKE_SLOW_TICKS = 80;
 	public static final double SPIKE_RADIUS = 4.5;
 	public static final float SPIKE_DAMAGE = 5.0F;
-	/** Geode: its reach, how long it holds, C's cooldown, and the resistance you get while it holds (amplifier). */
-	public static final double GEODE_RADIUS = 6.0;
-	public static final int GEODE_TICKS = 80, GEODE_COOLDOWN = 400, GEODE_RESISTANCE = 2;
-
 	private static final BlockState CRYSTAL = Blocks.AMETHYST_BLOCK.defaultBlockState();
 	private static final BlockParticleOption CRYSTAL_DUST = new BlockParticleOption(ParticleTypes.BLOCK, CRYSTAL);
+
+	private final XenoUltimate geode = new Geode(this);
 
 	public Prism() {
 		super("prism", 1.1F, 30.0F, 5.0, -0.05, 0.4, 0.0, Items.AMETHYST_SHARD, 0xC48BF0);
@@ -178,105 +176,10 @@ public final class Prism extends XenoForm {
 
 	// ---- Geode ----
 
+	/** (0.20.21) Geode is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Geode}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		return geode(player, live);
-	}
-
-	@Override
-	public boolean ultimateHasMove() {
-		return true;
-	}
-
-	@Override
-	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
-		if (ultimateReady(player, live)) {
-			geode(player, live);
-		}
-	}
-
-	@Override
-	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		if (live.geodeUntil <= 0L) {
-			return;
-		}
-		if (level.getGameTime() >= live.geodeUntil) {
-			shatter(level, live);
-			return;
-		}
-		// held fast
-		for (int id : live.frozen) {
-			if (level.getEntity(id) instanceof LivingEntity living && living.isAlive()) {
-				living.setDeltaMovement(0.0, Math.min(0.0, living.getDeltaMovement().y), 0.0);
-				living.syncVelocity = true;
-				if (living instanceof net.minecraft.world.entity.Mob mob) {
-					mob.getNavigation().stop();
-					mob.setTarget(null);
-				}
-				if (player.tickCount % 5 == 0) {
-					level.sendParticles(CRYSTAL_DUST, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 1, 0.3, 0.4, 0.3, 0.0);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
-		shatter(player.level(), live);
-	}
-
-	/** Crystal grows over everything near: the creatures are held and cased, and projectiles shatter. */
-	private static boolean geode(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		shatter(level, live);
-		for (LivingEntity living : around(player, GEODE_RADIUS)) {
-			live.frozen.add(living.getId());
-			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, GEODE_TICKS, 9, false, false));
-			living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, GEODE_TICKS, 4, false, false));
-			living.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, GEODE_TICKS, 4, false, false));
-			// amethyst round its feet and head
-			BlockPos feet = living.blockPosition();
-			int height = Math.max(1, (int)Math.ceil(living.getBbHeight()));
-			for (int h = 0; h < height; h++) {
-				for (Direction side : Direction.Plane.HORIZONTAL) {
-					BlockPos pos = feet.above(h).relative(side);
-					if (level.getBlockState(pos).isAir() && level.getEntities(null, new AABB(pos)).isEmpty()) {
-						level.setBlock(pos, CRYSTAL, Block.UPDATE_ALL);
-						live.crystals.add(pos);
-					}
-				}
-			}
-		}
-		for (Entity projectile : level.getEntitiesOfClass(net.minecraft.world.entity.projectile.Projectile.class, player.getBoundingBox().inflate(GEODE_RADIUS))) {
-			level.sendParticles(CRYSTAL_DUST, projectile.getX(), projectile.getY(), projectile.getZ(), 6, 0.1, 0.1, 0.1, 0.0);
-			projectile.discard();
-		}
-		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, GEODE_TICKS, GEODE_RESISTANCE, false, false));
-		live.geodeUntil = level.getGameTime() + GEODE_TICKS;
-		ultimateCooldown(player, live, GEODE_COOLDOWN);
-		Vec3 at = player.position();
-		ring(level, CRYSTAL_DUST, at, GEODE_RADIUS * 0.5, 16);
-		ring(level, CRYSTAL_DUST, at, GEODE_RADIUS, 32);
-		sound(player, SoundEvents.AMETHYST_CLUSTER_PLACE, 1.5F, 0.5F);
-		sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.5F, 0.6F);
-		com.jaymospowers.core.Shakes.heavy(player, at, GEODE_RADIUS * 2.0, 1.1F);
-		return true;
-	}
-
-	private static void shatter(ServerLevel level, XenoformPower.Live live) {
-		for (BlockPos pos : live.crystals) {
-			if (level.getBlockState(pos).is(Blocks.AMETHYST_BLOCK)) {
-				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-				level.sendParticles(CRYSTAL_DUST, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.0);
-			}
-		}
-		if (!live.crystals.isEmpty()) {
-			level.playSound(null, live.crystals.get(0), SoundEvents.AMETHYST_CLUSTER_BREAK, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.8F);
-		}
-		live.crystals.clear();
-		live.frozen.clear();
-		live.geodeUntil = 0L;
+	public XenoUltimate evolved() {
+		return geode;
 	}
 
 	private static void shards(ServerPlayer player) {

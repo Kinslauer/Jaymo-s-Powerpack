@@ -1,0 +1,9 @@
+{
+  "feature": "jaymospowers:upfall",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 48
+    }
+  ]
+}

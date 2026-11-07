@@ -33,6 +33,33 @@ public final class Uncraftable {
 	 */
 	static final Set<String> TANNED = Set.of("minecraft:leather");
 
+	/**
+	 * (RPG Series) Rogues &amp; Warriors' and Archers' stone, iron and golden weapons are forged from heads
+	 * ({@link WeaponParts}), and their diamond ones are loot only, like every diamond weapon (their netherite ones smith
+	 * from those). Flint daggers and spears stay in the grid, as the flint hatchet does.
+	 */
+	static final Set<String> RPG_SERIES = rpgSeries();
+
+	private static Set<String> rpgSeries() {
+		Set<String> ids = new java.util.HashSet<>();
+		// Bag of Holding: only a Mage's Enchanted Storage makes them (Kingdoms' StorageEnchanting)
+		for (String bag : List.of("leather", "iron", "golden")) {
+			ids.add("bagofholding:" + bag + "_bag_of_holding");
+		}
+		for (String weapon : List.of("dagger", "sickle", "double_axe", "glaive")) {
+			for (String metal : List.of("iron", "golden", "diamond")) {
+				ids.add("rogues:" + metal + "_" + weapon);
+			}
+		}
+		ids.add("rogues:stone_double_axe");
+		// (RPG Series patch 2) Andy: spells are learned on the skill web or from a trainer, so no Spell Binding Table
+		ids.add("spell_engine:spell_binding_table");
+		for (String metal : List.of("iron", "golden", "diamond")) {
+			ids.add("archers:" + metal + "_spear");
+		}
+		return Set.copyOf(ids);
+	}
+
 	/** (0.16.18) Andy: "the wooden weapons should not be craftable". Balkon's wooden ones (Armory's and vanilla's are off in data). */
 	static final Set<String> WOODEN = wooden();
 
@@ -66,7 +93,10 @@ public final class Uncraftable {
 	 * targets, the statue, the poster); only the gun smith table (our Gunsmith's Bench) and its gunpowder recipe stay.
 	 * (0.15.118) Andy didn't like our flintlocks, so they're gone and the gun smith table with them.
 	 */
-	static final List<String> PREFIXES = List.of("tacz:gun/", "tacz:ammo/", "tacz:attachments/", "tacz:misc/");
+	static final List<String> PREFIXES = List.of("tacz:gun/", "tacz:ammo/", "tacz:attachments/", "tacz:misc/",
+		// (0.20.85) Andy: "chemical X should not be acquirable": Mutant Monsters' four brewing recipes for it (the
+		// only way to get it; it's in no loot table), so no mob can be turned into a mutant
+		"mutantmonsters:brewing/");
 	static final Set<String> TACZ = Set.of("tacz:attachment_workbench", "tacz:ammo_workbench", "tacz:iron_ammo_box",
 		"tacz:gold_ammo_box", "tacz:diamond_ammo_box", "tacz:statue", "tacz:target", "tacz:target_minecart",
 		"tacz:gun_smith_table");
@@ -82,6 +112,6 @@ public final class Uncraftable {
 
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
-		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !TACZ.contains(id) && !RPG_SERIES.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

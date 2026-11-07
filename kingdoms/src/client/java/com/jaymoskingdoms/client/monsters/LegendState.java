@@ -11,11 +11,15 @@ public final class LegendState extends HumanoidRenderState {
 	/** An ogre with two heads; a werewolf hunched for the hunt or mid-change; a mimic shut. */
 	boolean twoHeads, hunched, changing, shut;
 	boolean sprinting, aggressive;
+	/** (0.7.623) An armoured ogre: still has its shield; has it up. */
+	boolean shield, guard;
 	/** (0.7.0) A cursed werewolf: how much of the beast shows (0-1, mid-change), and its build (0 lean, 1, 2 heavy). */
 	float beast = 1.0F;
 	int build = 1;
 	/** (0.7.1) A cursed werewolf's look (0 wild; else 1 + wear * 3 + rags) and its rags' colour. */
 	int look, rags;
+	/** (0.7.574) A werewolf player's lean wolf (LeanWolfModel). */
+	boolean lean;
 	/** (0.7.326) A silver skeleton: how long since it last took a blow on its buckler, and since its guard was broken (ticks). */
 	float sinceBlocked = 1000.0F, sinceGuardBroken = 1000.0F;
 }

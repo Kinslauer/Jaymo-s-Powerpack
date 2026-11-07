@@ -206,6 +206,10 @@ public final class Busts {
 	/** Downed by a guard, or yielding to one: true if they were sentenced. */
 	private static boolean caught(ServerLevel level, ServerPlayer player, Faction f, String crime) {
 		boolean downed = Downed.isDowned(player);
+		if (downed && Unmasking.awaits(player)) {
+			// (0.7.473) masked: the guards see who it is first
+			return false;
+		}
 		List<Worker> near = Underworld.guards(level, f, player.getBoundingBox().inflate(downed ? TAKE_RANGE : YIELD_RANGE));
 		if (near.isEmpty()) {
 			YIELDING.remove(player.getUUID());
@@ -285,10 +289,12 @@ public final class Busts {
 				if (d != null) {
 					Underworld.putCell(level.getServer(), d, cell);
 				}
+				// (0.7.571) a door and a stair up, so the way out is walked
+				Speakeasy.cellDoor(level, cell);
 				long until = now + JAIL_TICKS + offences * JAIL_PER_OFFENCE;
 				player.setAttached(JAILED, new Jail(f.id(), cell, until));
 				// (0.7.419) a road deed: someone locked in a realm's cells
-				Deeds.done(level.getServer(), "cells.held");
+				Deeds.done(player, "cells.held");
 				Vec3 c = Vec3.atBottomCenterOf(cell);
 				player.teleportTo(level, c.x, c.y, c.z, Set.of(), player.getYRot(), 0.0F, false);
 				level.playSound(null, c.x, c.y, c.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.7F);
@@ -299,9 +305,12 @@ public final class Busts {
 				guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 1.0F, 0.8F);
 				Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.executed", name, f.name()));
-				// beheaded: nothing to get up from
-				player.addTag(Arrests.HEADLESS_TAG);
-				BEHEADED.add(player.getUUID());
+				// beheaded: nothing to get up from. (0.7.639) Andy: "decapitations should only ever happen to downed players",
+				// so one still on their feet is cut down with their head on
+				if (Downed.isDowned(player)) {
+					player.addTag(Arrests.HEADLESS_TAG);
+					BEHEADED.add(player.getUUID());
+				}
 				player.kill(level);
 			}
 		}
@@ -361,11 +370,12 @@ public final class Busts {
 			player.removeAttached(JAILED);
 			if (f != null) {
 				// (0.7.419) a road deed: a sentence served out
-				Deeds.done(level.getServer(), "cells.served");
+				Deeds.done(player, "cells.served");
 			}
 			if (f != null && player.isAlive()) {
-				Vec3 out = Speakeasy.release(level, f);
-				player.teleportTo(level, out.x, out.y, out.z, Set.of(), player.getYRot(), 0.0F, false);
+				// (0.7.571) the door's opened and they walk out up the jailer's stair (they were set down by the seat)
+				Speakeasy.openDoor(level, jail.cell());
+				level.playSound(null, Speakeasy.doorAt(jail.cell()), SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.9F);
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bust.released", f.name()).withStyle(ChatFormatting.YELLOW));
 			}
 			return;
@@ -376,7 +386,7 @@ public final class Busts {
 		if (player.level() != level || player.position().distanceTo(Vec3.atBottomCenterOf(jail.cell())) > JAIL_REACH) {
 			player.removeAttached(JAILED);
 			// (0.7.419) a road deed: out of the cells before the sentence was done
-			Deeds.done(level.getServer(), "cells.broke");
+			Deeds.done(player, "cells.broke");
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bust.escaped", f.name()).withStyle(ChatFormatting.DARK_RED));
 			Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.escaped", Post.nameOf(player), f.name()));
 			Theft.arrest(player, level, f, Theft.OUTLAW_TICKS);

@@ -22,6 +22,8 @@ import net.minecraft.world.phys.Vec3;
 public final class BandFlashHud {
 	/** The whiteout's colours: near white at its height, the band's green as it fades. */
 	static final int HOT = 0xEAFFEE, COOL = 0x5CF07A;
+	/** (0.18.126) How far the height of the flash is toward white from the band's own glow. */
+	static final float HOT_WHITE = 0.85F;
 	/** Its opacity at full strength, and the share of its time it holds before fading. */
 	static final float PEAK_ALPHA = 0.95F, HOLD = 0.4F;
 	/** Strength: full within this many blocks, down to {@link #FAR_STRENGTH} at the flash's reach; looking away keeps this much of it. */
@@ -30,13 +32,15 @@ public final class BandFlashHud {
 
 	private static int ticks;
 	private static float strength;
+	/** The flashing band's glow (RGB). */
+	private static int glow = COOL;
 
 	private BandFlashHud() {
 	}
 
 	/** From {@link XenoformPowerClient#init}. */
 	static void init() {
-		ClientPlayNetworking.registerGlobalReceiver(XenoNet.Flash.TYPE, (payload, context) -> flash(payload.at()));
+		ClientPlayNetworking.registerGlobalReceiver(XenoNet.Flash.TYPE, (payload, context) -> flash(payload.at(), payload.glow()));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (ticks > 0) {
 				ticks--;
@@ -45,7 +49,8 @@ public final class BandFlashHud {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("xenoform_band_flash"), BandFlashHud::render);
 	}
 
-	private static void flash(Vec3 at) {
+	private static void flash(Vec3 at, int colour) {
+		glow = colour;
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
 			return;
@@ -67,9 +72,14 @@ public final class BandFlashHud {
 		float t = Mth.clamp(1.0F - (ticks - delta.getGameTimeDeltaPartialTick(false)) / BandFlash.TICKS, 0.0F, 1.0F);
 		float fade = t < HOLD ? 1.0F : 1.0F - (t - HOLD) / (1.0F - HOLD);
 		int alpha = Mth.clamp((int)(PEAK_ALPHA * strength * fade * 255.0F), 0, 255);
-		int r = (int)Mth.lerp(t, HOT >> 16 & 0xFF, COOL >> 16 & 0xFF);
-		int g = (int)Mth.lerp(t, HOT >> 8 & 0xFF, COOL >> 8 & 0xFF);
-		int b = (int)Mth.lerp(t, HOT & 0xFF, COOL & 0xFF);
+		int r = (int)Mth.lerp(t, hot(glow >> 16 & 0xFF), glow >> 16 & 0xFF);
+		int g = (int)Mth.lerp(t, hot(glow >> 8 & 0xFF), glow >> 8 & 0xFF);
+		int b = (int)Mth.lerp(t, hot(glow & 0xFF), glow & 0xFF);
 		graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), alpha << 24 | r << 16 | g << 8 | b);
+	}
+
+	/** A channel of the flash at its height: the glow, most of the way to white. */
+	private static float hot(int channel) {
+		return Mth.lerp(HOT_WHITE, channel, 255);
 	}
 }

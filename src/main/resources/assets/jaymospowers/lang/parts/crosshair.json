@@ -1,0 +1,9 @@
+{
+	"message.jaymospowers.crosshair.now": "Crosshair: %s with a weapon, %s otherwise; %s. Change it with /crosshair weapon <style>, /crosshair hand <style> or /crosshair zoom on|off.",
+	"message.jaymospowers.crosshair.set_weapon": "With a weapon in hand your crosshair is now %s.",
+	"message.jaymospowers.crosshair.set_hand": "Without a weapon your crosshair is now %s.",
+	"message.jaymospowers.crosshair.set_zoom_on": "Your crosshair now shrinks as you zoom in.",
+	"message.jaymospowers.crosshair.set_zoom_off": "Your crosshair now keeps its size when you zoom in.",
+	"message.jaymospowers.crosshair.zoom_on": "it shrinks as you zoom in",
+	"message.jaymospowers.crosshair.zoom_off": "it keeps its size when you zoom in"
+}

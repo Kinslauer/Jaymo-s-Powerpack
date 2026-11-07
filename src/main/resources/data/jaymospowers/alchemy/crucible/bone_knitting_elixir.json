@@ -1,0 +1,13 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "plant": 6,
+    "life": 4,
+    "earth": 4
+  },
+  "result": {
+    "item": "jaymospowers:bone_knitting_elixir",
+    "count": 1
+  },
+  "research": "bonesetting"
+}

@@ -2,6 +2,8 @@ package com.jaymoskitchen.client.ragdoll;
 
 import com.jaymoskitchen.ragdoll.RagdollRig;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -70,6 +72,12 @@ public final class RagdollPose {
 	public final RagdollRig.Shape shape;
 	/** (0.5.19) How far its legs are curled up as a dead spider's (0 to 1), see {@link #curl}. */
 	private final float curl;
+	/** (0.5.40) A corpse's parts the ragdoll doesn't drive, hung loose (see {@link LooseParts}); null for none. */
+	private LooseParts.Motion loose;
+	/** (0.5.47) A chain body's line from the head's tip to the tail's tip (x, y, z each, drawn-relative); null if not one. */
+	private float[] chain;
+	private float looseTime, looseScale = 1.0F;
+	private boolean looseGrounded;
 
 	private RagdollPose(Matrix4f body, Limb[] limbs, float[] angles, RagdollRig.Shape shape, float curl) {
 		this.body = body;
@@ -160,7 +168,7 @@ public final class RagdollPose {
 		Limb[] limbs = switch (rig.shape) {
 			case HUMANOID -> HUMANOID;
 			case QUADRUPED -> QUADRUPED;
-			case BOX -> NONE;
+			case BOX, CHAIN -> NONE;
 		};
 		float[] angles = new float[limbs.length * 3];
 		float[] out = new float[3];
@@ -176,7 +184,38 @@ public final class RagdollPose {
 				angles[l * 3 + k] = onSide && !onBack ? out[k] + (QUADRUPED_SIDE[l * 3 + k] - out[k]) * side : out[k];
 			}
 		}
-		return new RagdollPose(body, onBack ? NONE : limbs, angles, rig.shape, onBack ? side : 0.0F);
+		RagdollPose pose = new RagdollPose(body, onBack ? NONE : limbs, angles, rig.shape, onBack ? side : 0.0F);
+		if (rig.chain() && !onBack) {
+			// (0.5.47) the snout, the back of the head, then every joint back to the tail's tip
+			int joints = n - RagdollRig.CHAIN_FIRST;
+			float[] line = new float[(joints + 2) * 3];
+			line[0] = (x[RagdollRig.TOP_RIGHT] + x[RagdollRig.TOP_LEFT]) * 0.5F;
+			line[1] = (y[RagdollRig.TOP_RIGHT] + y[RagdollRig.TOP_LEFT]) * 0.5F;
+			line[2] = (z[RagdollRig.TOP_RIGHT] + z[RagdollRig.TOP_LEFT]) * 0.5F;
+			line[3] = (x[RagdollRig.BOTTOM_RIGHT] + x[RagdollRig.BOTTOM_LEFT]) * 0.5F;
+			line[4] = (y[RagdollRig.BOTTOM_RIGHT] + y[RagdollRig.BOTTOM_LEFT]) * 0.5F;
+			line[5] = (z[RagdollRig.BOTTOM_RIGHT] + z[RagdollRig.BOTTOM_LEFT]) * 0.5F;
+			for (int j = 0; j < joints; j++) {
+				line[6 + j * 3] = x[RagdollRig.CHAIN_FIRST + j];
+				line[7 + j * 3] = y[RagdollRig.CHAIN_FIRST + j];
+				line[8 + j * 3] = z[RagdollRig.CHAIN_FIRST + j];
+			}
+			pose.chain = line;
+		}
+		return pose;
+	}
+
+	/**
+	 * (0.5.40) Hangs every part of the body the ragdoll doesn't drive (wings, tails, necks, a modded mob's legs) loose,
+	 * swinging with {@code motion} ({@link LooseParts#motion}); {@code time} in ticks, {@code grounded} lying on the
+	 * ground, {@code scale} the body's drawn size. Not on humanoids whose limbs it all drives.
+	 */
+	public RagdollPose loosen(LooseParts.Motion motion, float time, boolean grounded, float scale) {
+		this.loose = motion;
+		this.looseTime = time;
+		this.looseGrounded = grounded;
+		this.looseScale = scale;
+		return this;
 	}
 
 	/** R = now^T * rest (frames as rows): rest-world vectors to world vectors. Rows of a 3x3 matrix. */
@@ -264,6 +303,8 @@ public final class RagdollPose {
 		RagdollPose pose = renderState.getData(KEY);
 		if (pose != null) {
 			pose.pose(model.root());
+		} else {
+			LooseParts.apply(model, renderState);
 		}
 	}
 
@@ -276,9 +317,18 @@ public final class RagdollPose {
 				body.resetPose();
 			}
 		}
+		// (0.5.68) a modded four-legged body's own legs and head, by what they are rather than vanilla's names
+		// (only on models without vanilla's legs: a horse's head inside its "head_parts" stays loose as before)
+		Stand[] stands = limbs == QUADRUPED && find(root, "right_front_leg") == null && find(root, "right_hind_leg") == null
+			? STANDS.computeIfAbsent(root, RagdollPose::stands) : null;
+		java.util.Set<String> driven = new java.util.HashSet<>();
 		for (int l = 0; l < limbs.length; l++) {
 			ModelPart part = find(root, limbs[l].part);
 			if (part == null) {
+				if (stands != null && stands[l] != null) {
+					stands[l].turn(angles[l * 3], angles[l * 3 + 1], angles[l * 3 + 2]);
+					driven.add(stands[l].name);
+				}
 				continue;
 			}
 			if (shape == RagdollRig.Shape.HUMANOID) {
@@ -293,6 +343,23 @@ public final class RagdollPose {
 		}
 		if (curl > 0.0F) {
 			curl(root);
+		}
+		// (0.5.47) a snake's body laid along its chain, segment by segment
+		java.util.Set<String> spine = chain != null ? ChainSpine.apply(root, body, looseScale, chain) : null;
+		// (humanoids only when their arms aren't the ones the ragdoll knows: a modded brute's, a villager's folded arms)
+		if (loose != null && (shape != RagdollRig.Shape.HUMANOID || find(root, "right_arm") == null)) {
+			java.util.Set<String> skip = new java.util.HashSet<>();
+			for (Limb limb : limbs) {
+				skip.add(limb.part);
+			}
+			skip.addAll(driven);
+			if (curl > 0.0F) {
+				java.util.Collections.addAll(skip, SPIDER_LEGS);
+			}
+			if (spine != null) {
+				skip.addAll(spine);
+			}
+			LooseParts.apply(root, body, looseScale, loose, looseTime, looseGrounded, skip);
 		}
 		for (String[] overlay : OVERLAYS) {
 			if (root.hasChild(overlay[0]) && root.hasChild(overlay[1])) {
@@ -314,6 +381,101 @@ public final class RagdollPose {
 			part.yRot = rest.yRot() * (1.0F - (1.0F - CURL_GATHER) * curl);
 			part.xRot = rest.xRot();
 		}
+	}
+
+	/**
+	 * (0.5.68) Andy: "the deer also fell with their bodies clipping into the ground as corpses, they should flop".
+	 * Cube Animals' (and other modded) four-legged models call their legs "frontleg", "BackLegL" or "FrontLeg1", often
+	 * inside a group and a wrapper turned a quarter round, so the ragdoll never moved them: they hung loose from a body
+	 * lying on the ground and went straight through it. A part the ragdoll drives this way, found by what it is.
+	 */
+	private record Stand(String name, ModelPart part, ModelPart[] chain) {
+		/**
+		 * Turns it as a vanilla limb would be turned ({@code x, y, z}: that limb's rotation from standing, in the
+		 * model's space), from however it stood, whatever its parents' turn.
+		 */
+		void turn(float x, float y, float z) {
+			Quaternionf standingChain = new Quaternionf(), nowChain = new Quaternionf(), q = new Quaternionf();
+			for (ModelPart p : chain) {
+				PartPose rest = p.getInitialPose();
+				standingChain.mul(q.rotationZYX(rest.zRot(), rest.yRot(), rest.xRot()));
+				nowChain.mul(q.rotationZYX(p.zRot, p.yRot, p.xRot));
+			}
+			PartPose rest = part.getInitialPose();
+			Quaternionf standing = new Quaternionf(standingChain).mul(q.rotationZYX(rest.zRot(), rest.yRot(), rest.xRot()));
+			Quaternionf target = new Quaternionf().rotationZYX(z, y, x).mul(standing);
+			Quaternionf local = nowChain.conjugate().mul(target);
+			org.joml.Vector3f euler = local.getEulerAnglesZYX(new org.joml.Vector3f());
+			part.xRot = euler.x;
+			part.yRot = euler.y;
+			part.zRot = euler.z;
+		}
+	}
+
+	private static final java.util.Map<ModelPart, Stand[]> STANDS = new java.util.WeakHashMap<>();
+
+	/**
+	 * A four-legged model's head and legs in {@link #QUADRUPED}'s order (null where not found): the shallowest part called
+	 * "head"; the legs are the outermost parts with "leg" in their names that draw something, if there are just four:
+	 * the two furthest forward (toward -z, as the model stands) the front ones, each pair's right one on -x.
+	 */
+	private static Stand[] stands(ModelPart root) {
+		Stand[] out = new Stand[QUADRUPED.length];
+		List<Stand> legs = new ArrayList<>();
+		List<Stand> heads = new ArrayList<>();
+		collect(root, new ModelPart[0], legs, heads);
+		if (!heads.isEmpty()) {
+			heads.sort(java.util.Comparator.comparingInt(h -> h.chain.length));
+			out[0] = heads.get(0);
+		}
+		if (legs.size() == 4) {
+			float[][] at = new float[4][];
+			for (int i = 0; i < 4; i++) {
+				at[i] = pivot(legs.get(i));
+			}
+			Integer[] order = {0, 1, 2, 3};
+			java.util.Arrays.sort(order, (a, b) -> Float.compare(at[a][2], at[b][2]));
+			int[] front = {order[0], order[1]}, hind = {order[2], order[3]};
+			boolean frontSwap = at[front[0]][0] > at[front[1]][0], hindSwap = at[hind[0]][0] > at[hind[1]][0];
+			out[1] = legs.get(frontSwap ? front[1] : front[0]);
+			out[2] = legs.get(frontSwap ? front[0] : front[1]);
+			out[3] = legs.get(hindSwap ? hind[1] : hind[0]);
+			out[4] = legs.get(hindSwap ? hind[0] : hind[1]);
+		}
+		return out;
+	}
+
+	private static void collect(ModelPart part, ModelPart[] chain, List<Stand> legs, List<Stand> heads) {
+		ModelPart[] next = java.util.Arrays.copyOf(chain, chain.length + 1);
+		next[chain.length] = part;
+		for (java.util.Map.Entry<String, ModelPart> e : ((com.jaymoskitchen.client.mixin.ModelPartAccessor) (Object) part)
+			.jaymoskitchen$children().entrySet()) {
+			String name = e.getKey();
+			String lower = name.toLowerCase(java.util.Locale.ROOT);
+			ModelPart child = e.getValue();
+			if (lower.equals("head")) {
+				heads.add(new Stand(name, child, next));
+				continue;
+			}
+			if (lower.contains("leg") && !((com.jaymoskitchen.client.mixin.ModelPartAccessor) (Object) child).jaymoskitchen$cubes().isEmpty()) {
+				legs.add(new Stand(name, child, next));
+				continue;
+			}
+			collect(child, next, legs, heads);
+		}
+	}
+
+	/** Where a part hinges, as the model stands (pixels, the model's space). */
+	private static float[] pivot(Stand stand) {
+		Matrix4f m = new Matrix4f();
+		Quaternionf q = new Quaternionf();
+		for (ModelPart p : stand.chain) {
+			PartPose rest = p.getInitialPose();
+			m.translate(rest.x(), rest.y(), rest.z()).rotate(q.rotationZYX(rest.zRot(), rest.yRot(), rest.xRot()));
+		}
+		PartPose rest = stand.part.getInitialPose();
+		org.joml.Vector3f at = m.transformPosition(new org.joml.Vector3f(rest.x(), rest.y(), rest.z()));
+		return new float[] {at.x, at.y, at.z};
 	}
 
 	/** A part on the model's root, or on its body (some models hang their legs from the body). */

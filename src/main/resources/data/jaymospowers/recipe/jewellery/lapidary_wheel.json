@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "IGI",
+    "P P"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:grindstone",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymospowers:lapidary_wheel"
+  }
+}

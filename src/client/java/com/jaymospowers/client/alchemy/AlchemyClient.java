@@ -11,5 +11,6 @@ public final class AlchemyClient {
 		FluxClient.init();
 		InfusionClient.init();
 		GearClient.init();
+		BrewingClient.init(); // (0.20.13)
 	}
 }

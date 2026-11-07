@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
+import com.jaymospowers.power.xenoform.XenoformState;
 
 /**
  * (0.17.7) Andy: "shift should now animate a crouch, the players gets low, hands out to the side, swaying as they move, ready
@@ -40,33 +41,95 @@ import net.minecraft.world.entity.player.Player;
  * sneak is vanilla's, and only the low crouch goes onto one knee when still (the firing stance). And every change eases: vanilla snaps in and out of
  * its crouch, so the body is blended between standing and crouched over {@link #BEND_IN} ticks ({@link #bendBody}),
  * the low crouch and the arms over {@link #LOW_IN} and {@link #READY_IN}, all on a smootherstep curve.
+ * <p>(0.19.30) Andy: "the crouch walk looks like tippy toeing". The stride swung the thighs while the body stayed at one
+ * height, so the legs came up short and the feet hovered or stood on their toes. Now each knee bends just enough to put its
+ * foot on the ground wherever its thigh is ({@link #groundKnee}), the shin leaning forward over the foot as in a real crouch
+ * walk; the thighs come further forward, the steps are longer and slower, only the leg coming through lifts, and the upper body leans
+ * forward over the knees ({@link #LOW_LEAN}).
+ * <p>(0.21.28) Andy: "the kneel we have on crouch right now needs a revamp". The back leg was one straight stick out
+ * behind and the body sat between the legs like a split; now it kneels as every kneel does ({@link KneelLegs}): the
+ * left thigh straight down to the knee on the ground and the shin flat behind, the right thigh level and the shin straight
+ * down to the planted foot, the hips one thigh's length down.
+ * <p>(0.21.38) Andy: "the newest kneel has both knees bent in front of the character, it should look more like a
+ * traditional kneel, posing with a weapon in hand like a hand on the sword's pommel, blade in the ground, similar with an
+ * axe, or a low ready with a rifle or bow". A genuflect: the knee on the ground is now well behind the hip ({@link #BACK_LEG}),
+ * the shin flat behind it, the front knee raised a touch above the hip with the shin straight down, the hips sunk to match
+ * ({@link #SINK}). And the hands pose with what's held ({@link Style}): a sword or axe planted point or head down in front
+ * of the knee, both hands stacked on the pommel or haft end; a spear or staff stood upright; a bow or a gun at a low
+ * ready, muzzle or arrow toward the ground ahead. The weapon is turned in the hand for it ({@link #grip}). Worked out on
+ * preview renders of the model ({@code art-overhaul/kneel-climb}).
  */
 public final class CrouchPose {
 	/** Arms out, and down onto the knee or back up (ticks). */
 	static final float READY_IN = 8.0F, KNEEL_IN = 7.0F, GET_UP = 5.0F;
 	/** Moving: how much lower than vanilla's crouch (blocks). On the knee: how far below vanilla's crouch the body sits. */
-	static final float LOW = 0.08F, SINK = 0.3F, HIP = 0.75F;
+	static final float LOW = 0.08F, SINK = 6.47F / 16.0F - 0.125F, HIP = 0.75F;
 	/** The arms out from the sides (radians), and a little forward. */
 	static final float ARMS_OUT = 0.55F, ARMS_FORWARD = -0.35F;
 	/** The sway with the stride: the body's twist and roll (radians at full walking speed), and how fast it goes against the stride. */
-	static final float SWAY_TWIST = 0.14F, SWAY_ROLL = 0.08F, SWAY_RATE = 0.3331F;
+	static final float SWAY_TWIST = 0.14F, SWAY_ROLL = 0.08F, SWAY_RATE = 0.25F;
 	/** On the knee: a slight lean forward (degrees). */
 	static final float KNEEL_LEAN = 4.0F;
 	/**
 	 * On the knee: the front (right) thigh out level from the hip, the knee bent so the shin stands on the ground
 	 * (radians), and the back (left) leg trailing to the knee on the ground. Drawn while aiming and firing too.
 	 */
-	static final float FRONT_THIGH = -1.55F, FRONT_KNEE = 1.5F, BACK_LEG = 1.35F;
-	/** The low crouch: both thighs this far forward (radians), and the body sunk to match (blocks: 6 px of thigh, 1 - cos). */
-	static final float LOW_THIGH = 1.2F, LOW_DROP = 0.24F;
+	static final float FRONT_THIGH = -1.65F, FRONT_KNEE = 1.65F, BACK_LEG = 0.40F, BACK_KNEE = 1.09F;
+	/** (0.21.38) The legs turned a little out (radians): the front one, the back one. */
+	static final float FRONT_OUT = 0.12F, BACK_OUT = -0.08F;
+	/**
+	 * (0.21.38) The arms on the knee for each {@link Style} (radians, xRot / yRot / zRot, the main hand's then the other's,
+	 * for a right-handed body; mirrored for a left-handed one), and how far the weapon is turned in the main hand (degrees,
+	 * + toward the ground). Solved on the model's preview so the blade stands straight with its point on the ground.
+	 */
+	static final float[] EMPTY_MAIN = {-0.25F, 0.0F, 0.12F}, EMPTY_OFF = {-0.75F, 0.25F, -0.05F};
+	static final float[] PLANT_MAIN = {-1.13F, -0.53F, -0.01F}, PLANT_OFF = {-1.85F, 0.55F, 0.0F};
+	static final float[] UPRIGHT_MAIN = {-0.55F, 0.0F, 0.18F};
+	static final float[] BOW_MAIN = {-0.75F, -0.15F, 0.05F}, BOW_OFF = {-0.95F, 0.55F, 0.0F};
+	static final float[] RIFLE_MAIN = {-0.85F, -0.3F, 0.0F}, RIFLE_OFF = {-1.15F, 0.6F, 0.0F};
+	static final float PLANT_GRIP = 151.0F, UPRIGHT_GRIP = -55.0F, BOW_GRIP = 75.0F, RIFLE_GRIP = 85.0F;
+
+	/** (0.21.38) How the hands pose on the knee, by what's in the main hand. */
+	public enum Style {
+		/** Nothing held, or nothing with a pose of its own: the hand by the hip, the other forearm over the knee. */
+		EMPTY,
+		/** A sword, greatsword, axe, hammer or club: planted point (or head) down ahead of the knee, hands on the pommel. */
+		PLANT,
+		/** A spear, polearm or staff: stood upright beside the raised knee. */
+		UPRIGHT,
+		/** A bow: low ready, the arrow toward the ground ahead, the other hand at the string. */
+		BOW,
+		/** A gun or crossbow: low ready, muzzle down ahead, the other hand under the barrel. */
+		RIFLE;
+
+		static Style of(net.minecraft.world.item.ItemStack stack) {
+			if (stack.isEmpty()) {
+				return EMPTY;
+			}
+			return switch (Finishers.kind(stack)) {
+				case SWORD, GREATSWORD, AXE, BLUNT -> PLANT;
+				case SPEAR, POLEARM, STAFF -> UPRIGHT;
+				case BOW -> BOW;
+				case CROSSBOW, GUN -> RIFLE;
+				default -> EMPTY;
+			};
+		}
+	}
+	/**
+	 * The low crouch: both thighs this far forward (radians), and the body sunk this much more (blocks). (0.19.30) Thighs further forward;
+	 * the knees bend to reach the ground from there ({@link #groundKnee}).
+	 */
+	static final float LOW_THIGH = 1.3F, LOW_DROP = 0.22F;
+	/** (0.19.30) The low crouch: the upper body leaned forward over the knees (radians, past vanilla's crouch), the head kept up. */
+	static final float LOW_LEAN = 0.2F;
 	/**
 	 * (0.18.85) The low crouch's stride, a Skyrim sneak: how far each thigh swings either side of {@link #LOW_THIGH}
 	 * (radians), how quickly it's at full stride with walking speed (vanilla's 0..1, times this), and how far the knee bends
 	 * more to lift the foot as it comes through (radians).
 	 */
-	static final float LOW_STRIDE = 0.5F, STRIDE_GAIN = 2.5F, LOW_LIFT = 0.6F;
-	/** Vanilla's stride beat (radians per walked step). */
-	static final float STRIDE_BEAT = 0.6662F;
+	static final float LOW_STRIDE = 0.35F, STRIDE_GAIN = 2.5F, LOW_LIFT = 0.5F;
+	/** The stride's beat (radians per unit walked; vanilla's walk is 0.6662). (0.19.30) Slower: longer, heavier steps. */
+	static final float STRIDE_BEAT = 0.5F;
 	/** Into and out of the low crouch (ticks). */
 	static final float LOW_IN = 9.0F;
 	/** Standing into vanilla's crouch and back (ticks). */
@@ -81,7 +144,7 @@ public final class CrouchPose {
 	 * {@code ready}: 0 to 1, arms out; {@code kneel}: 0 to 1, on the knee; {@code pos}, {@code speed}: the stride's;
 	 * {@code low}: 0 to 1, in the low crouch; {@code bend}: 0 to 1, how far into vanilla's crouch the body is drawn.
 	 */
-	public record Crouch(float ready, float kneel, float pos, float speed, float low, float bend) {
+	public record Crouch(float ready, float kneel, float pos, float speed, float low, float bend, Style style, boolean offFree) {
 	}
 
 	public static final RenderStateDataKey<Crouch> KEY = RenderStateDataKey.create(() -> "jaymospowers:crouch");
@@ -101,6 +164,12 @@ public final class CrouchPose {
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+		if (ownCrouch(entity)) {
+			// (0.19.84) an alien that poses its own crouch: vanilla's drop only, none of the low crouch, kneel or eased bend
+			TRACKS.remove(entity.getId());
+			state.setData(KEY, null);
+			return;
+		}
 		Track track = TRACKS.get(entity.getId());
 		boolean crouched = entity.isCrouching() && entity.onGround() && !entity.isPassenger() && !entity.isSwimming() && !entity.isFallFlying()
 			&& !entity.isSpectator() && !otherwise(entity);
@@ -136,8 +205,19 @@ public final class CrouchPose {
 			state.setData(KEY, null);
 			return;
 		}
+		// (0.21.38) the hands' pose on the knee, by what's held (only looked up while kneeling)
+		Style style = track.kneel > 0.0F ? Style.of(entity.getMainHandItem()) : Style.EMPTY;
 		state.setData(KEY, new Crouch(smooth(track.ready), smooth(track.kneel), state.walkAnimationPos, state.walkAnimationSpeed,
-			smooth(track.low), smooth(track.bend)));
+			smooth(track.low), smooth(track.bend), style, entity.getOffhandItem().isEmpty()));
+	}
+
+	/**
+	 * (0.19.84) {@code entity} is an alien whose body solves its own legs and crouch (Bulwark, Knell, Rime, Shade, ...):
+	 * the low crouch's thighs, the kneel's vanilla places and the eased bend would pull it apart, so they stay off it
+	 * (the low stance's height still holds; it just doesn't settle onto a knee).
+	 */
+	public static boolean ownCrouch(net.minecraft.world.entity.Entity entity) {
+		return entity instanceof Player player && XenoformState.ownCrouch(player);
 	}
 
 	/** Another full-body pose has them: tending, a finisher, carrying or being carried, crawling, downed. */
@@ -199,6 +279,9 @@ public final class CrouchPose {
 			float swing = Mth.cos(c.pos() * STRIDE_BEAT) * LOW_STRIDE * stride(c);
 			h.rightLeg.xRot = Mth.lerp(low, h.rightLeg.xRot, -LOW_THIGH + swing);
 			h.leftLeg.xRot = Mth.lerp(low, h.leftLeg.xRot, -LOW_THIGH - swing);
+			// (0.19.30) leaning forward over the knees, eyes still ahead
+			PoseBlend.bend(h, LOW_LEAN * low, 0.0F, 0.0F, 0.0F, 0.0F);
+			h.head.xRot -= LOW_LEAN * low;
 		}
 		if (k <= 0.0F) {
 			return;
@@ -214,13 +297,32 @@ public final class CrouchPose {
 		h.leftLeg.y = Mth.lerp(k, h.leftLeg.y, 12.0F);
 		h.rightLeg.z = Mth.lerp(k, h.rightLeg.z, 0.0F);
 		h.leftLeg.z = Mth.lerp(k, h.leftLeg.z, 0.0F);
-		// right thigh out ahead, bent at the knee (KneeBend) down to the planted foot; left knee down
-		blend(h.rightLeg, FRONT_THIGH - pitch, 0.1F, 0.0F, k);
-		blend(h.leftLeg, BACK_LEG - pitch, -0.1F, 0.0F, k);
+		// right thigh out ahead (a touch above level), bent at the knee (KneeBend) down to the planted foot; the left knee
+		// down behind the hip, its shin flat along the ground (0.21.38)
+		blend(h.rightLeg, FRONT_THIGH - pitch, FRONT_OUT, 0.0F, k);
+		blend(h.leftLeg, BACK_LEG - pitch, BACK_OUT, 0.0F, k);
 		if (armsFree) {
-			// right hand by the hip, ready to draw; left forearm over the raised knee
-			blend(h.rightArm, -0.25F, 0.0F, 0.12F, k);
-			blend(h.leftArm, -0.75F, 0.25F, -0.05F, k);
+			// (0.21.38) posed with what's held: by the hip and over the knee empty-handed, a sword planted, a gun at a low ready
+			boolean right = state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT;
+			ModelPart main = right ? h.rightArm : h.leftArm, off = right ? h.leftArm : h.rightArm;
+			float side = right ? 1.0F : -1.0F;
+			float[] mainPose = switch (c.style()) {
+				case PLANT -> PLANT_MAIN;
+				case UPRIGHT -> UPRIGHT_MAIN;
+				case BOW -> BOW_MAIN;
+				case RIFLE -> RIFLE_MAIN;
+				default -> EMPTY_MAIN;
+			};
+			float[] offPose = !c.offFree() ? EMPTY_OFF : switch (c.style()) {
+				case PLANT -> PLANT_OFF;
+				case BOW -> BOW_OFF;
+				case RIFLE -> RIFLE_OFF;
+				default -> EMPTY_OFF;
+			};
+			// (held weapons are laid out upright, so the lean is taken back off the arms)
+			float lean = c.style() == Style.EMPTY ? 0.0F : pitch;
+			blend(main, mainPose[0] - lean, mainPose[1] * side, mainPose[2] * side, k);
+			blend(off, offPose[0] - lean, offPose[1] * side, offPose[2] * side, k);
 		} else {
 			// (aiming or swinging from the knee: the arms are vanilla's, only no longer crouched)
 			h.rightArm.xRot -= 0.4F * k;
@@ -270,14 +372,41 @@ public final class CrouchPose {
 		float low = c.low() * (1.0F - c.kneel());
 		// (0.18.85) and more as the leg comes through, lifting the foot off the ground
 		float lift = Mth.sin(c.pos() * STRIDE_BEAT) * LOW_LIFT * stride(c) * low;
-		float right = Mth.lerp(c.kneel(), Math.max(0.0F, -h.rightLeg.xRot) * c.low() + Math.max(0.0F, lift), FRONT_KNEE);
-		float left = Math.max(0.0F, -h.leftLeg.xRot) * low + Math.max(0.0F, -lift);
+		// (0.19.30) each foot on the ground wherever its thigh is (or lifted, coming through)
+		float right = Mth.lerp(c.kneel(), groundKnee(-h.rightLeg.xRot) * c.low() + Math.max(0.0F, lift), FRONT_KNEE);
+		// (0.21.28) and on the knee, the left shin laid flat behind (KneelLegs)
+		float left = groundKnee(-h.leftLeg.xRot) * low + Math.max(0.0F, -lift) + BACK_KNEE * c.kneel();
 		if (right > 0.0F) {
 			KneeBend.bend(h.rightLeg, right);
 		}
 		if (left > 0.0F) {
 			KneeBend.bend(h.leftLeg, left);
 		}
+	}
+
+	/**
+	 * (0.21.38) From the held-item layer, just before the main hand's item is drawn (the pose stack at the grip): on the
+	 * knee, the weapon turned in the hand for its {@link Style} (a sword point down into the ground, a gun's muzzle down).
+	 * Not while the arms are busy (aiming, drawing, swinging), when they're vanilla's.
+	 */
+	public static void grip(Object renderState, net.minecraft.world.entity.HumanoidArm arm, PoseStack poseStack) {
+		if (!(renderState instanceof AvatarRenderState state) || arm != state.mainArm || !state.isCrouching || state.deathTime > 0.0F) {
+			return;
+		}
+		Crouch c = state.getData(KEY);
+		if (c == null || c.kneel() <= 0.0F || c.style() == Style.EMPTY || otherPose(state) || state.isUsingItem || state.swingAnimation > 0.0F
+			|| !free(state.rightArmPose) || !free(state.leftArmPose)) {
+			return;
+		}
+		float degrees = switch (c.style()) {
+			case PLANT -> PLANT_GRIP;
+			case UPRIGHT -> UPRIGHT_GRIP;
+			case BOW -> BOW_GRIP;
+			case RIFLE -> RIFLE_GRIP;
+			default -> 0.0F;
+		};
+		// (about the hand's own side-to-side axis, as FinisherPose turns a weapon)
+		poseStack.rotateDegrees(Axis.XP, -degrees * c.kneel());
 	}
 
 	/** The crouch to lay over this model, or null when it isn't a crouching body or another full-body pose has it. */
@@ -293,7 +422,9 @@ public final class CrouchPose {
 	private static boolean otherPose(AvatarRenderState state) {
 		return state.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null
 			|| state.getData(com.jaymospowers.client.finisher.FinisherPose.KEY) != null || state.getData(CarryPose.CARRIER_KEY) != null
-			|| state.getData(CrawlPose.KEY) != null;
+			|| state.getData(CrawlPose.KEY) != null
+			// (0.20.38) sitting down while still holding Sneak: the sit's own legs, not the crouch's
+			|| state.getData(MeditatePose.KEY) != null;
 	}
 
 	/** An arm with nothing to do (empty, or just holding something), free to be held out or rested. */
@@ -302,6 +433,20 @@ public final class CrouchPose {
 	}
 
 	/** (0.18.85) How far into a full stride the low crouch is stepping, by walking speed (0 stood still). */
+	/**
+	 * (0.19.30) In the low crouch, how far a knee bends so the foot of a thigh raised {@code thigh} radians forward is on the
+	 * ground, the body sunk {@link #LOW} + {@link #LOW_DROP}: the shin leans back from the knee to the foot (the knee over the
+	 * toes). A thigh too far forward to reach just hangs its shin straight down.
+	 */
+	static float groundKnee(float thigh) {
+		if (thigh <= 0.0F) {
+			return 0.0F;
+		}
+		float reach = (12.0F - (LOW + LOW_DROP) * 16.0F) / 6.0F - Mth.cos(thigh);
+		float shin = reach >= 1.0F ? 0.0F : (float) Math.acos(Mth.clamp(reach, -1.0F, 1.0F));
+		return thigh + shin;
+	}
+
 	private static float stride(Crouch c) {
 		return Mth.clamp(c.speed() * STRIDE_GAIN, 0.0F, 1.0F);
 	}

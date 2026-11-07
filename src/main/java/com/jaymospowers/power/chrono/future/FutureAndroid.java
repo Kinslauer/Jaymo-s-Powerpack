@@ -24,7 +24,8 @@ import net.minecraft.world.level.Level;
 /**
  * An android of the future: a machine in a person's shape, still on the patrol it was set long ago, shooting anyone
  * living and any of the dead it meets. Most carry a modern gun ({@link FutureGuns}) and keep their distance; the rest
- * close in to strike. They leave no body, only scrap: nuggets, redstone, now and then a copper ingot.
+ * close in to strike. (0.19.32) They fall like an iron golem: searched, the scrap inside falls out (nuggets, redstone,
+ * now and then a copper ingot) and the shell comes apart (Kitchen's machine corpses).
  */
 public class FutureAndroid extends Monster {
 	static final double HEALTH = 30.0, DAMAGE = 6.0, SPEED = 0.3, FOLLOW = 40.0, ARMOR = 6.0;
@@ -34,7 +35,6 @@ public class FutureAndroid extends Monster {
 	public FutureAndroid(EntityType<? extends FutureAndroid> type, Level level) {
 		super(type, level);
 		this.xpReward = 10;
-		addTag("jaymoskitchen.no_corpse");
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

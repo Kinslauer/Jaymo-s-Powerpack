@@ -32,20 +32,58 @@ import net.minecraft.world.item.Items;
 final class XenoformHud {
 	private static final int CHIP = 20;
 	private static final int CHIP_GAP = 2;
-	private static final int BAR_WIDTH = 4 * CHIP + 3 * CHIP_GAP;
 	private static final int WARN_COLOR = 0xFF4040;
 	/** Each move's icon, per alien (R G V B). */
-	private static final Map<String, Item[]> ICONS = Map.of(
-		"bulwark", new Item[] {Items.IRON_INGOT, Items.HEAVY_CORE, Items.LEAD, Items.ANVIL},
-		"pyre", new Item[] {Items.FIRE_CHARGE, Items.BLAZE_POWDER, Items.MAGMA_CREAM, Items.MAGMA_BLOCK},
-		"blur", new Item[] {Items.SUGAR, Items.PISTON, Items.WIND_CHARGE, Items.ENDER_PEARL},
-		"prism", new Item[] {Items.AMETHYST_SHARD, Items.AMETHYST_BLOCK, Items.SHIELD, Items.POINTED_DRIPSTONE},
-		"wisp", new Item[] {Items.PHANTOM_MEMBRANE, Items.GLASS, Items.SCULK_SHRIEKER, Items.ELYTRA},
-		"gremlin", new Item[] {Items.SLIME_BALL, Items.LEVER, Items.ROTTEN_FLESH, Items.VINE},
-		"knell", new Item[] {Items.ECHO_SHARD, Items.SCULK_SENSOR, Items.SCULK_SHRIEKER, Items.DIRT},
-		"wyrm", new Item[] {Items.DRAGON_BREATH, Items.ELYTRA, Items.WIND_CHARGE, Items.ENDER_EYE},
-		"duplex", new Item[] {Items.COPPER_INGOT, Items.LIGHTNING_ROD.asList().get(0), Items.COPPER_BULB.asList().get(0), Items.HONEYCOMB},
-		"nadir", new Item[] {Items.ENDER_EYE, Items.BARRIER, Items.BARRIER, Items.BARRIER});
+	private static final Map<String, Item[]> ICONS = Map.ofEntries(
+		Map.entry("bulwark", new Item[] {Items.IRON_INGOT, Items.HEAVY_CORE, Items.LEAD, Items.ANVIL}),
+		Map.entry("pyre", new Item[] {Items.FIRE_CHARGE, Items.BLAZE_POWDER, Items.MAGMA_CREAM, Items.MAGMA_BLOCK}),
+		Map.entry("blur", new Item[] {Items.SUGAR, Items.PISTON, Items.WIND_CHARGE, Items.ENDER_PEARL}),
+		Map.entry("prism", new Item[] {Items.AMETHYST_SHARD, Items.AMETHYST_BLOCK, Items.SHIELD, Items.POINTED_DRIPSTONE}),
+		Map.entry("wisp", new Item[] {Items.PHANTOM_MEMBRANE, Items.GLASS, Items.SCULK_SHRIEKER, Items.ELYTRA}),
+		Map.entry("gremlin", new Item[] {Items.SLIME_BALL, Items.LEVER, Items.ROTTEN_FLESH, Items.VINE}),
+		Map.entry("knell", new Item[] {Items.ECHO_SHARD, Items.SCULK_SENSOR, Items.SCULK_SHRIEKER, Items.DIRT}),
+		Map.entry("wyrm", new Item[] {Items.DRAGON_BREATH, Items.ELYTRA, Items.WIND_CHARGE, Items.ENDER_EYE}),
+		Map.entry("duplex", new Item[] {Items.COPPER_INGOT, Items.LIGHTNING_ROD.asList().get(0), Items.COPPER_BULB.asList().get(0), Items.HONEYCOMB}),
+		Map.entry("nadir", new Item[] {Items.ENDER_EYE, Items.BARRIER, Items.BARRIER, Items.BARRIER}),
+		Map.entry("gorger", new Item[] {Items.COBBLESTONE, Items.TNT, Items.GOAT_HORN, Items.ARMADILLO_SCUTE}),
+		Map.entry("slipfin", new Item[] {Items.WATER_BUCKET, Items.SLIME_BALL, Items.TROPICAL_FISH, Items.GLOW_BERRIES}),
+		Map.entry("polestar", new Item[] {Items.LODESTONE, Items.IRON_CHESTPLATE, Items.IRON_BLOCK, Items.ARROW}),
+		Map.entry("lurk", new Item[] {Items.SPYGLASS, Items.ENDER_PEARL, Items.INK_SAC, Items.ECHO_SHARD}),
+		Map.entry("gyre", new Item[] {Items.TURTLE_SCUTE, Items.WIND_CHARGE, Items.BREEZE_ROD, Items.TURTLE_HELMET}),
+		Map.entry("cortex", new Item[] {Items.PRISMARINE_SHARD, Items.HEART_OF_THE_SEA, Items.FEATHER, Items.PRISMARINE_CRYSTALS}),
+		Map.entry("locust", new Item[] {Items.RABBIT_FOOT, Items.GOAT_HORN, Items.LADDER, Items.SLIME_BALL}),
+		Map.entry("croaker", new Item[] {Items.LEAD, Items.FROGSPAWN, Items.LILY_PAD, Items.NOTE_BLOCK}),
+		Map.entry("dud", new Item[] {Items.BELL, Items.SLIME_BALL, Items.POPPY, Items.SNOWBALL}),
+		Map.entry("rime", new Item[] {Items.PACKED_ICE, Items.PRISMARINE_SHARD, Items.BLUE_ICE, Items.ICE}),
+		Map.entry("marrow", new Item[] {Items.BONE_BLOCK, Items.BONE, Items.SHIELD, Items.BONE_MEAL}),
+		Map.entry("swathe", new Item[] {Items.LEAD, Items.FISHING_ROD, Items.SAND, Items.PAPER}),
+		Map.entry("blight", new Item[] {Items.WITHER_SKELETON_SKULL, Items.WITHER_ROSE, Items.COARSE_DIRT, Items.NETHER_STAR}),
+		Map.entry("howl", new Item[] {Items.RABBIT_FOOT, Items.GOAT_HORN, Items.REDSTONE, Items.BONE}),
+		Map.entry("prowl", new Item[] {Items.RABBIT_HIDE, Items.SHEARS, Items.SPYGLASS, Items.GOAT_HORN}),
+		Map.entry("tusk", new Item[] {Items.LEATHER_HORSE_ARMOR, Items.BONE, Items.CARROT, Items.LEATHER_CHESTPLATE}),
+		Map.entry("talon", new Item[] {Items.FEATHER, Items.IRON_SWORD, Items.SPYGLASS, Items.ARROW}),
+		Map.entry("murk", new Item[] {Items.INK_SAC, Items.LEAD, Items.PRISMARINE_CRYSTALS, Items.GLOW_INK_SAC}),
+		Map.entry("gnasher", new Item[] {Items.BONE, Items.WATER_BUCKET, Items.REDSTONE, Items.NAUTILUS_SHELL}),
+		Map.entry("lumen", new Item[] {Items.GLISTERING_MELON_SLICE, Items.GLOWSTONE_DUST, Items.TORCH, Items.HOPPER}),
+		Map.entry("keen", new Item[] {Items.SCULK_SENSOR, Items.GOAT_HORN, Items.REDSTONE, Items.PHANTOM_MEMBRANE}),
+		Map.entry("hive", new Item[] {Items.HONEYCOMB, Items.BEE_SPAWN_EGG, Items.HONEY_BOTTLE, Items.BEEHIVE}),
+		Map.entry("skitter", new Item[] {Items.STRING, Items.COBWEB, Items.SPIDER_EYE, Items.FERMENTED_SPIDER_EYE}),
+		Map.entry("shade", new Item[] {Items.GRASS_BLOCK, Items.ENDER_EYE, Items.ENDER_PEARL, Items.CHORUS_FRUIT}),
+		Map.entry("mirage", new Item[] {Items.ARMOR_STAND, Items.INK_SAC, Items.GLASS, Items.ENDER_EYE}),
+		Map.entry("ooze", new Item[] {Items.SLIME_BALL, Items.SLIME_BLOCK, Items.STRING, Items.SLIME_BALL}),
+		Map.entry("magma_ooze", new Item[] {Items.MAGMA_CREAM, Items.MAGMA_BLOCK, Items.STRING, Items.MAGMA_CREAM}),
+		Map.entry("fuse", new Item[] {Items.TNT, Items.GUNPOWDER, Items.CREEPER_HEAD, Items.WATER_BUCKET}),
+		Map.entry("thornwild", new Item[] {Items.HANGING_ROOTS, Items.SWEET_BERRIES, Items.OAK_LEAVES, Items.BONE_MEAL}),
+		Map.entry("billow", new Item[] {Items.WATER_BUCKET, Items.LIGHTNING_ROD.asList().get(0), Items.WIND_CHARGE, Items.GHAST_TEAR}),
+		Map.entry("towerback", new Item[] {Items.LEAD, Items.MACE, Items.PISTON, Items.GOAT_HORN}),
+		Map.entry("rivet", new Item[] {Items.COPPER_INGOT, Items.IRON_CHAIN, Items.WATER_BUCKET, Items.MINECART}),
+		Map.entry("rivet_furnace", new Item[] {Items.BLAZE_POWDER, Items.FIRE_CHARGE, Items.FURNACE, Items.CAMPFIRE}),
+		Map.entry("rivet_piston", new Item[] {Items.PISTON, Items.OBSIDIAN, Items.STICKY_PISTON, Items.SLIME_BLOCK}),
+		Map.entry("rivet_anvil", new Item[] {Items.FEATHER, Items.ANVIL, Items.ENDER_EYE, Items.IRON_BLOCK}),
+		Map.entry("rivet_stonecutter", new Item[] {Items.STONECUTTER, Items.IRON_SHOVEL, Items.LADDER, Items.IRON_SWORD}),
+		Map.entry("rivet_smithing", new Item[] {Items.SHIELD, Items.SMITHING_TABLE, Items.IRON_AXE, Items.GOLDEN_APPLE}),
+		Map.entry("rivet_dispenser", new Item[] {Items.ARROW, Items.SPLASH_POTION, Items.FIRE_CHARGE, Items.WATER_BUCKET}),
+		Map.entry("rivet_note", new Item[] {Items.NOTE_BLOCK, Items.BELL, Items.JUKEBOX, Items.GOAT_HORN}));
 	/** The slam's burst of light: where the band is on screen (shares of the width and height), how big it blooms (share of the height), its layers and row height. */
 	private static final float BURST_X = 0.52F, BURST_Y = 0.74F, BURST_SIZE = 0.4F;
 	private static final int BURST_LAYERS = 5, BURST_STEP = 3, BURST_ALPHA = 30;
@@ -66,12 +104,26 @@ final class XenoformHud {
 		XenoForm form = XenoformState.form(player);
 		long now = player.level().getGameTime();
 		if (form != null) {
-			int[] at = chipsOrigin(width, height, 4);
-			Item[] icons = ICONS.getOrDefault(form.id, NO_ICONS);
-			for (int i = 0; i < 4; i++) {
-				moveChip(graphics, font, hud, form, i, icons[i], at[0] + i * (CHIP + CHIP_GAP), at[1], now, time);
+			// (0.20.9) the Ultimate's own five chips (R G V B C) while it is on; C also shows through its re-enter cooldown
+			com.jaymospowers.power.xenoform.XenoUltimate ult = XenoformState.ultimate(player);
+			boolean cChip = ult != null || form.evolved() != null && hud.cooldownLeft(XenoForm.C, now) > 0;
+			int chips = cChip ? 5 : 4;
+			int[] at = chipsOrigin(width, height, chips);
+			String shell = player.getAttached(XenoformState.SHELL);
+			Item[] icons = ult != null ? ult.icons() : ICONS.getOrDefault(shell != null ? form.id + "_" + shell : form.id, ICONS.getOrDefault(form.id, NO_ICONS));
+			for (int i = 0; i < chips; i++) {
+				Item icon = i < icons.length ? icons[i] : form.icon;
+				if (i == XenoForm.C && ult == null) {
+					// (the base alien's C chip, waiting out the re-enter cooldown: the Ultimate's icon)
+					Item[] evolved = form.evolved().icons();
+					icon = evolved.length > i ? evolved[i] : form.icon;
+				}
+				moveChip(graphics, font, hud, form, i, icon, at[0] + i * (CHIP + CHIP_GAP), at[1], now, time);
 			}
-			timer(graphics, font, hud, form, at[0], at[1] - 14, time);
+			if (hud.underMax() > 0.0F) {
+				under(graphics, hud, form, at[0], at[1] - 2, chipsWidth(chips));
+			}
+			timer(graphics, font, hud, ult != null ? ult : form, at[0], at[1] - 14, time, chipsWidth(chips));
 			return;
 		}
 		int[] at = chipsOrigin(width, height, 2);
@@ -193,22 +245,31 @@ final class XenoformHud {
 			String seconds = left >= 200 ? String.valueOf(left / 20) : String.format(Locale.ROOT, "%.1f", left / 20.0F);
 			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
 		}
-		PowerKey key = PowerKey.values()[slot];
-		String label = font.plainSubstrByWidth(JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage().getString(), CHIP - 2);
+		// (0.20.9) C is the ultimate key, which PowerKey has no value for
+		net.minecraft.client.KeyMapping mapping = slot < PowerKey.values().length ? JaymosPowersClient.keyMapping(PowerKey.values()[slot]) : JaymosPowersClient.ultimateKey();
+		String label = font.plainSubstrByWidth(mapping.getTranslatedKeyMessage().getString(), CHIP - 2);
 		graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, ready ? 0xFFFFFFFF : 0xFF909090);
 	}
 
+	/** (0.20.9) The thin bar over the chips: the base alien's held health while its Ultimate is on, in its colour, darkened. */
+	private static void under(GuiGraphicsExtractor graphics, XenoformState.Hud hud, XenoForm form, int x, int y, int width) {
+		float share = Mth.clamp(hud.under() / hud.underMax(), 0.0F, 1.0F);
+		int dim = (form.color >> 16 & 0xFF) * 3 / 4 << 16 | (form.color >> 8 & 0xFF) * 3 / 4 << 8 | (form.color & 0xFF) * 3 / 4;
+		graphics.fill(x, y, x + width, y + 2, 0x90000000);
+		graphics.fill(x, y, x + Mth.ceil(width * share), y + 2, 0xFF000000 | dim);
+	}
+
 	/** The form's clock: a bar in its colour, red and pulsing through the beeps, and the seconds. */
-	private static void timer(GuiGraphicsExtractor graphics, Font font, XenoformState.Hud hud, XenoForm form, int x, int y, float time) {
+	private static void timer(GuiGraphicsExtractor graphics, Font font, XenoformState.Hud hud, XenoForm form, int x, int y, float time, int barWidth) {
 		float share = Mth.clamp(hud.formTicks() / (float)Math.max(1, hud.formTotal()), 0.0F, 1.0F);
 		boolean warn = hud.formTicks() <= XenoformPower.BEEP_TICKS;
 		int color = warn ? pulse(WARN_COLOR, 0xFFFFFF, time * 1.2F) : form.color;
-		graphics.fill(x, y + 8, x + BAR_WIDTH, y + 11, 0x90000000);
-		graphics.fill(x, y + 8, x + Mth.ceil(BAR_WIDTH * share), y + 11, 0xFF000000 | color);
+		graphics.fill(x, y + 8, x + barWidth, y + 11, 0x90000000);
+		graphics.fill(x, y + 8, x + Mth.ceil(barWidth * share), y + 11, 0xFF000000 | color);
 		Component name = form == com.jaymospowers.power.xenoform.XenoForms.DUPLEX ? com.jaymospowers.power.xenoform.forms.Duplex.title(1 + doubles()) : form.name();
 		graphics.text(font, name.getString(), x, y - 2, 0xFF000000 | form.color);
 		String seconds = String.valueOf(Mth.ceil(hud.formTicks() / 20.0F));
-		graphics.text(font, seconds, x + BAR_WIDTH - font.width(seconds), y - 2, warn ? 0xFF000000 | color : 0xFFFFFFFF);
+		graphics.text(font, seconds, x + barWidth - font.width(seconds), y - 2, warn ? 0xFF000000 | color : 0xFFFFFFFF);
 	}
 
 	/** How many of Duplex's doubles of yours this client can see. */
@@ -232,12 +293,10 @@ final class XenoformHud {
 
 	private static int[] chipsOrigin(int width, int height, int count) {
 		int cx = width / 2;
-		int x = cx + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + chipsWidth(count) > width - 2) {
-			x = cx + 91 - chipsWidth(count);
-			y = height - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		return new int[] {x, y};
 	}
 

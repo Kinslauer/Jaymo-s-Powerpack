@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:golden_oak_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.4,
+      "feature": {
+        "feature": "jaymospowers:skyroot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.1,
+      "feature": {
+        "feature": "jaymospowers:large_skyroot_tree",
+        "placement": []
+      }
+    }
+  ]
+}

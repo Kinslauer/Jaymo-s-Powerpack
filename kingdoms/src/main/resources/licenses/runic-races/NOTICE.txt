@@ -1,0 +1,8 @@
+The heritage kits of Jaymo's Kingdoms (each heritage and look has one ability on the heritage key, one gift and one flaw;
+com.jaymoskingdoms.HeritageKits) take their ideas, their ability and race names (Shadowmeld, Frostbind, Tremorsense, Forge
+Blessing, Web Snare, Wind Burst, Howl of the Pack, Pounce, Foxfire Illusion, Shed Skin, Undying Hunger, Conscript the Dead,
+Spectral Phase, Soul Harvest, Mirror Shift, Phase Shift, Faerie Bargain, Arcane Reflex, Moonlit Veil, Blood Frenzy and the
+rest) and their rough numbers from Runic Races (https://github.com/otectus/runic-races) by Otectus, licensed under the MIT
+License (LICENSE, beside this file).
+
+No code, texture or other asset of Runic Races is copied: the code is written new for Minecraft 26.3 and Fabric.

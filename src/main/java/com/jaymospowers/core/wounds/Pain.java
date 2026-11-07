@@ -123,11 +123,22 @@ public final class Pain {
 
 	/** (0.14.4) A cup of willow-bark tea: the pain fades after a while. */
 	static void tea(LivingEntity entity) {
+		tea(entity, 1.0F);
+	}
+
+	/** (0.19.24) A cup of tea that lasts {@code share} of willow-bark's (chamomile's is weaker). */
+	static void tea(LivingEntity entity, float share) {
 		long now = entity.level().getGameTime();
-		dull(entity, now + TEA_DELAY, now + TEA_DELAY + TEA_TICKS);
+		dull(entity, now + TEA_DELAY, now + TEA_DELAY + Math.round(TEA_TICKS * share));
 		if (entity instanceof Player player) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.tea").withStyle(ChatFormatting.GRAY));
 		}
+	}
+
+	/** (0.19.24) A little ease from rest or a warm soak: the pain dulled at once, for {@code ticks} more (joined to any numbness already running). */
+	public static void ease(LivingEntity entity, int ticks) {
+		long now = entity.level().getGameTime();
+		dull(entity, now, now + ticks);
 	}
 
 	/** (0.14.4) Leeches: the pain dulled at once, and for longer. */

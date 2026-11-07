@@ -37,6 +37,7 @@ model = {
     "textures": {"0": "jaymospowers:item/armory/iron_saber_3d", "particle": "jaymospowers:item/armory/iron_saber_3d"},
     "elements": elements,
     # the grip (2 to 8) in the fist, the whole saber (0 to 30) centred on 15
-    "display": display(tp=0.85, fp=0.68, gui=0.5, center_y=15, grip_y=5),
+    # (Andy: the knuckle bow sat on the wrong side) flip turns it half round the blade, the bow over the fingers
+    "display": display(tp=0.85, fp=0.68, gui=0.5, center_y=15, grip_y=5, flip=True),
 }
 write_json(f"{ASSETS}/models/item/armory/iron_saber.json", model)

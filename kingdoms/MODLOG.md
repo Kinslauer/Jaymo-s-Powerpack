@@ -11,6 +11,676 @@ localhost:25597"`, and drive it with RCON.
 With no player on, set `pause-when-empty-seconds=0` in `run/server.properties` (the server otherwise stops
 ticking a minute after it empties) and `/forceload` the area under test.
 
+Entries before 0.7.498 are in `docs/modlog/kingdoms-0.1-to-0.7.497.md` (grep there for older history). New entries go at the end of this file.
+
+## 0.7.498: coins replace emeralds (pack 0.20.0, Kitchen 0.5.56)
+Andy's Custom Trade Currency pick, and his choice "Combine: culture coins replace emeralds". Design: `docs/Coins-Plan.md`
+in the pack. The culture coins of the currencies patch (`Currency`, `Currencies`: realm silver, hacksilver, gold dinars,
+shell strings, mon, the greenskins' bent copper, pirate gold) are the money everywhere; the emerald is a gem.
+- **Copper bit** (`Currency.BIT`, the item `jaymoskingdoms:copper_coin`, shown as "Copper Bit", a tenth of an emerald):
+  the one small coin every town takes at par, the change for any price in place of emerald change.
+- **What a payer takes** (`Money`): the settlement's own coin at par, bits at par, and any other realm's coin at its going
+  rate less `FOREIGN_CUT` (10%, switch `FOREIGN_TAKEN`). Never emeralds. Change comes back in the town's coin and bits.
+  Outside any settlement (wild villages, wanderers) the coin is that of a settlement within 160 blocks, else realm silver.
+  The trade screen stays strict (a slot needs the exact coin) and fills the slot from purses and bundles
+  (`MerchantMenuCoinMixin`, `Coinage.fill`); the money changer has a real job. A price over 64 of the town's coin is asked
+  in dinars with the rest in the town's coin.
+- **Emeralds as a gem:** the money changer (master's profession) buys emeralds at 90% of their worth in his town's coin
+  and sells them at 112%, an emerald block is nine, he buys a diamond at four and no more, and bits trade for the town's
+  coin at par. Keepers (15% of villagers, 40% of wandering traders, fixed by who they are, only real traders: `Currencies.keeper`)
+  still price in emeralds; a keeper's offers go back to emeralds on a save from before.
+- **Coin purse** (`money/`): holds mixed coins, up to 640, and shows how full it is (leather, string, one copper bit).
+  A purse from the first dev format (copper, silver, gold) reads as bits, two silver and five dinars. Worn on the belt
+  slot of Jaymo's Powers and drawn on the hip. `Money` counts loose coins, the worn purse, purses in the pack and bundles,
+  takes the town's coin first, breaks the smallest coin that covers the rest and puts the change back where it came
+  from, and lets creative players through. `Purse` is a thin wrapper kept for old callers.
+- **Dropped from the first coinage:** the silver and gold coin items, the ten-coin stacks and piles, the Coin Press, the
+  Counting Table, our own money changer, `VillagerTradeCoinMixin` and `Coinage.convert` (trades are priced in coin
+  when they open, `Currencies.localize`).
+- **They talk about it** (`MoneyTalk`). Andy: "they must speak about this and answer you if asked".
+  - Interact has Ask about Money. A keeper says so. The money changer gives his emerald rate in the town's coin. Anyone
+    else says which coin the town uses and why (the trading hub's name, else the land), and that foreign coin is the
+    changer's business.
+  - Ask the Way has Who Takes Emeralds and A Money Changer.
+  - Unasked: a keeper says it as you open their trades, and a coin trader tells you they don't take emeralds if you come
+    with emeralds and no coin. Each at most once every 5 minutes to the same player (speech bubble).
+  - MCA's chat AI is told the town's coin, its hub and who nearby still takes emeralds.
+  - Andy: "people who use coin generally look down upon emerald traders as outdated luddites". Coin folk sneer at
+    them and the keepers know it and don't care.
+- **Thieves:** crooks go for a visible belt purse first and may take it whole (`Crooks`, `PURSE_LIFT_CHANCE`); a mugging
+  takes a handful of whatever you carry, owed back in the land's coin. Pickpocketing a villager mostly lifts a small
+  purse in the victim's own coin or a copper bit.
+- **Loot:** `LootSwap` turns emeralds in chest, mob and hero-of-the-village loot into the coin of the land where they
+  were found (an emerald's worth each); mined emerald ore still drops emeralds.
+- **Wages and rewards:** careers are paid in the town's coin out of the storehouse's coin and bits, with its emeralds and
+  other coin held as reserve at worth; pilot fares and prospector bonuses in the coin of the land. Quest rewards are in
+  the giver's coin (the old `emeralds` field reads as worth, `copper` as bits). Merchant orders are asked in the town's
+  coin (bits where it won't land) and refunded as the coin paid. Life-story start purses are in the birthplace's coin.
+  Lockpicking counts coin by worth.
+- Realm silver and hacksilver are money, not the metal their names say: vampires aren't hurt by a coin and a werewolf
+  doesn't take a coin in the hand for a silver weapon.
+- Emeralds stay a gem: ore, enchanting, tinkering's emerald modifier, trims, beacons and caravan gem goods.
+- Built, reviewed, and a dev server boots; not played.
+
+## 0.7.500: cold-blooded Serpen don't overheat
+- Andy: "the reptile beastfolk should be cold blooded, therefore not overheating in the sun". Anyone with the
+  `COLD_BLOODED` perk (the Serpen look of the Beastfolk) is heat-proof to Kitchen's body heat, like an Emberborn: the
+  sun, hot lands, armour baking and fires can push them no further than comfortable, so no sweating, overheating or
+  heatstroke (`HeritageKits.coldBlooded`, `KitchenCompat`).
+- The cold stays their flaw as before (15% lighter blows, 20% slower in the cold lands); body heat's chill is unchanged.
+- The perk's card line says so.
+- Built, reviewed, and a dev server boots; not played.
+
+## 0.7.501: tails with a mind of their own (pack 0.20.1)
+- Andy: "they should pulse and slap like they have their own mind, but they swing violently whenever you walk". Beastfolk
+  tails (`BeastParts.tail`: beastfolk, canine, feline, kitsune, avian, serpen) swayed at `age * (rate + walk speed)`, so any
+  change of walk speed spun the phase and the tail whipped about. Now every wave runs on a fixed clock: a lazy wander of two
+  slow waves, a curl rolling up the far half now and then, and an occasional slap (`slap()`: a slow gate opens for a moment
+  and the tail whips quickly to the side, harder toward the tip). Walking calms all of that by half, lifts the tail a little
+  (`RUN_LIFT` 0.15, was 0.25; `RUN_STRAIGHTEN` 0.2, was 0.3) and adds only a small swing in step with the stride.
+- Feline tails (Andy: "like a cheetah's in sprint and otherwise, like an aileron helping them achieve speed in turning,
+  sticking straight up and moving"): carried straight up with the tip hooked over, still wandering, curling and slapping;
+  at a sprint (the sprint flag, or over 0.2 blocks a tick for villagers) the tail eases down level out behind and its own
+  life fades. Turning swings it: level, sideways like a rudder; upright, leaning across like an aileron. It swings into the
+  turn (`TAIL_RUDDER` -3.5; flip the sign to swing it out). Sprint and turn are eased per entity each frame (`EASED`).
+- Not compile-checked in the cloud; not played.
+
+## 0.7.502: the Flame Avatars take the Emberborn in (pack 0.20.2)
+Andy: "make the flame avatar take you in and amicable to you", with rare Nether rocks and flint in Powers so a Nether start
+isn't stuck stealing piglin axes.
+- **Taken in** (`nether/AvatarCamps`): the first time an Emberborn comes within 32 blocks of an avatar camp, its nearest
+  avatar greets them by speech bubble (`message.jaymoskingdoms.avatar.welcome.0-2`) and every avatar of the camp warms to
+  them by 50 hearts (MCA's follow and hire). Saved per player per camp (`avatar_welcomed`, kept through death).
+- **The gear only when you speak to them** (Andy): the first right click on one of a camp's avatars gives 3 flint, 4 sticks,
+  2 plant string (Powers') and 4 cooked pork with a line (`avatar.gift.0-2`), once per camp (`avatar_gifted`); MCA's menu
+  still opens.
+- **The hearth:** an Emberborn within the camp's home radius who is hurt gets Regeneration I (11 s, renewed every 10 s).
+- **They stand with you:** avatars within 24 blocks of an Emberborn go for any creature hunting them or that hurt them in the
+  last 5 s (`AvatarCamps.guarding`; never other players).
+- Camps rise near an Emberborn in the Nether at 60% per 3-minute roll (others still 25%).
+- **Sticks in the Nether** (`Trees`): wart blocks (nether and warped) torn down by hand give a stick 15% of the time, as
+  leaves do in the overworld.
+- `McaCompat.hearts` is public now (the camp's warmth).
+- Built, reviewed, and a dev server boots; not played.
+## 0.7.503: sworn starts are known, every start carries meds
+- Andy: "the relevant folk should know you as a sworn start" (his king asked his name like a stranger's). While a Sworn
+  start's player stays a member of the realm they swore to (`StoryTalk.swornRealm`), its king, its lords (and its fiefs'
+  lords) and its guards (`StoryTalk.serves`) know them: within 24 blocks each comes to know them once (`sworn_known`
+  player attachment): you know their name with no introduction, MCA counts you as met, and they start warm (30 hearts for
+  a ruler, 20 for a guard, raised to that, never lowered). Every time you open their menu they greet you as their sworn
+  man or a fellow guard (`story.jaymoskingdoms.sworn.<ruler|guard>.0-2`), not as a stranger, and not only for the first
+  three days. Worlds already played: the Landing a Sworn start saved is enough, so it works there too.
+- Andy: "everyone should start with applicable meds. obviously still none for rock bottom, and a whole medkit for sworn".
+  `StoryMeds` gives each start Jaymo's Powers' medicine (looked up by id) after its kit: Sworn a healer's satchel packed
+  with 4 linen bandages, 2 clean rags, 2 splints, needle and thread, smelling salts, 2 yarrow, 2 knitbone, burn salve,
+  garlic poultice, 2 willow-bark tea and poppy syrup. Nothing for rock bottom, a captive, chained, an android or the
+  afterlife. Others by their road: banished 2 bandages + a rag, cave 2 bandages + yarrow, village 2 bandages + willow tea,
+  whalers 2 bandages + needle, trader 2 bandages + tea + salve, burned 2 salves + a rag, sky fall a splint + 2 rags,
+  snowed-in 2 rags + tea, unarmed 2 clean rags, hideout 2 rags + poppy, greenskin 2 rags + garlic, lab one of each
+  remedy, sentenced/evicted/cast out 1 rag, the rest 2 rags. A Survivalist weaves 2 grass bandages more. The rags flaw
+  still gives nothing.
+
+## 0.7.504: wary folk keep their names; you bow to rulers
+- Andy: "someone who has any distaste toward you would not introduce themselves, i was just on a beastfolk, and the guy
+  said remember this city isnt for you, but still shook my hand, they should be as apprehensive as the old orcs were until
+  you prove yourself". `Introductions.wary`: a villager who minds your blood (`Prejudice.minds`: a haven's folk minding a
+  human, a townsman minding a Tideborn or Beastfolk...), whose realm holds you below welcome, or who remembers you coldly
+  (`Recollections.COLD`). They don't come over to you, don't take your hand (`takesHand`), give a wary line instead of
+  their name (`name_wary.0-4`, orc and goblin dialects too), and at a first meeting step back with that line in place of a
+  wave or a shake (`Handshakes.standOff`), then their menu opens with no name in it. Proven: a warm memory of you
+  (`Recollections.WARM`: a rescue, a kindness), or enough MCA hearts (gifts, talk): 8 per degree they mind, at most 50
+  (`PROVEN_HEARTS_PER_DEGREE`); 20 hearts outweighs a bad name with their realm (`PROVEN_HEARTS_REP`).
+- Andy: "introducing yourself to kings, is no longer a wave or handshake, but you bow, using all the relevant animation in
+  context. (hand on pommel if wielding a sword)". `Handshakes.bowTo`: the first use of a ruler you haven't met, their
+  Introduce, Ask their name and the handshake answer all have you turn to them and bow (`Hand.BOW`, 40 ticks, held still).
+  The ruler inclines their head (`Hand.NOD`) and names themselves with their title; a wary ruler doesn't return it.
+  `HandshakePose.bow`: bent from the waist as a crouch is, head down; empty handed, the hand over the heart and the other
+  swept behind; a sword or light blade in hand, held low at your side with the other hand across on its pommel; anything
+  else, held at your side with the free hand over the heart; an off hand holding something stays at your side. Mirrored
+  for the left-handed; MCA bodies' clothes follow (`McaPullerPose.follow`).
+- Not compile-checked against the game jars (none staged in this cloud session); a source-path javac pass showed no
+  errors in our own symbols. Not played.
+
+## 0.7.505: attack tells are easy to see and hear (pack 0.20.4)
+Andy: "the particle effect for attack indicators should be more visible, and a sound should play like for time flow".
+- `MobCombat.tell` (fighters' and crewmen's swings) and the gunners' aim tell (`MobCombat.aimed`) call Powers' new glint
+  through `PowersCompat.tellGlint`: a full-bright star in the tell's colour (white parry, red heavy) with a white heart, and
+  Time Flow's warning bell (high for parryable, low with a drum for heavy). Without Powers the old dust stays and a bell
+  plays with it. The gun's flint click stays on top.
+
+## 0.7.506: builds again (pack 0.20.5)
+
+- A merge left `client/HandshakePose` with two `NOD` constants (the nod pose and the head tilt while shaking hands), so
+  the client didn't compile. The head tilt is now `SHAKE_NOD`; nothing changes in game.
+
+## 0.7.508: gem sockets loading hint (pack 0.20.7)
+- Loading-screen hint 86 explains gem sockets at the Smithing Anvil.
+- Not played.
+
+## 0.7.509: patron gods, part (a) (pack 0.20.8, Kitchen 0.5.57)
+Andy picked the Runic Gods idea (our own version, nothing taken from it). `docs/Patrons-Plan.md`.
+- **Eight patrons** (`Patron`): the Hearthkeeper, the Anvil-Father, the Deep Mother, the Green Huntsman, the Lantern
+  Warden, the Crowned Sun, the Ash Whisperer, and The Truth, the human faith (Andy: "it usually is the faith among
+  humans, you will rarely find one who entertains another creed"). Rivals: the Sun and the Ash Whisperer, the Mother and
+  the Anvil-Father, the Lantern Warden and the vampires' dark; The Truth and the seven.
+- **Shrines** (`Shrine`): use a patron's offering on a plain shrine to give it to them (a glyph shows on the altar).
+  Hold use to pray as before. Sneak and use with an empty hand for the patrons screen.
+- **Swearing** (`Patrons`): pray at a patron's shrine three days running. A devout life story starts sworn: The Truth
+  for a human, their blood's patron for anyone else.
+- **Favour**: prayer, a fitting offering once a day, their kind of deeds; four tiers (10, 30, 55, 80 of 100); after two
+  days without any it slips 5 a day (the new Survival perk **Devotion** takes a point off a rank), never below the
+  first tier for now.
+- **Blessings** (`Blessings`): a passive at tiers 1-3 and a boon at tier 4 (the left square bracket key, every three days), each
+  hooked into what was there: Wounds' healing and revives, the Smithing Anvil, tool wear, ore drops, breath, storms,
+  great whales, sneaking, Kitchen's meat hooks, legend hunts, Night Vision, blows on the undead, the Nightfall plague,
+  reputation, guards, Valor, war parties, pickpocketing, locks, fire, the guards' hunt, accusations, spells.
+- **Faiths** (`Faiths`): every villager and townsperson holds a faith, drawn once: most humans The Truth, clerics always,
+  Faith-creed realms' folk always; non-human folk mostly their blood's patron. Truth and the seven, and rival pairs,
+  think less of each other: a little dearer, slower to warm, more guard trouble, cooler neighbours and good name, on
+  top of blood prejudice. MCA's chat AI is told.
+- The patrons' books (lore) are left on a shrine the first time you meet its patron.
+- Loading hints 87-88 (86 is gem sockets).
+- Built and fixed up (below); not played.
+
+### Fixes to the patrons
+- Rich Seam and Father's Fire, and the deep-ore deed, need a tool that could harvest the ore.
+- The Crowned Sun's siege deed is paid once, and only for a party that sacked a realm.
+- An MCA villager keeps its faith across loads; it is drawn again only when its blood changes.
+- A road told after the creator starts the patron story again (a devout road starts sworn).
+- A true accusation of one already exposed earns no more favour or name.
+- The outlaw message shows the days after Short Memories.
+- The patrons button no longer covers the Valor button. The boon key is no longer Z (see the last fix below).
+
+### More patron fixes
+- The boon key is now the left square bracket. The full stop is Shoulder Surfing's swap shoulder in the pack.
+- On the Strength page the footer buttons no longer overlap: Patrons sits right of Valor, and World Tier is clear.
+- Dawnlight spares thralls and your realm's folk.
+- Andy: Dawnborn "start crowned sun" and "say praise the sun". A devout Dawnborn starts sworn to the Crowned Sun, and most
+  Dawnborn villagers hold it (`Faiths.DAWNBORN_SUN_SHARE`). At sunrise some of the Sun's folk near a player praise the sun
+  aloud (speech bubbles), and Dawnborn have two more lines of talk about it.
+
+## Patron fixes
+- **Realm census** (`RealmFaiths`): each realm now keeps its own last count day. A realm whose seat was not loaded at the
+  first scan of the day is counted when it loads, not skipped until tomorrow.
+- **Cold shrine** (`Shrine`): the "shrine is cold to you" line goes before the prayer, so the turning progress and the
+  turned line show last and are not overwritten.
+- **Cleric coldness** (`Faiths.minds`): the cleric's extra coldness applies to players of the seven only, not villagers.
+- **Leaving Rite** (`Turning`, `Rites`): the rite is offered for the longest live trial, and paying eases every live full
+  trial of that patron, so a second longer trial no longer stays at full strength.
+
+## 0.7.510: chopping cracks logs instead of thinning them (pack 0.20.10)
+Andy asked whether Timber Tales' chopping could replace our thinning logs. Its licence allows no derivatives, so this
+is our own take on the idea (none of its code or art).
+- `ChoppedLog` keeps the whole log's size and shape now. The game's own crack stages are drawn on it, deeper with each
+  chop (6 chops reach the deepest), and deeper still while an axe is mid-swing. Chops past 6 still go into the log above.
+- Each chop throws wood chips off the face toward the chopper (players and woodcutters).
+- A chop meter on the action bar (filled/empty squares, up to 12) shows how near the tree is to coming down. When it's
+  full and red, the next stroke fells it. It uses squares, not the `|...` charge bar, so it never locks the mouse.
+- Felling, the fall, the crack and crush, Aether Giants, the Great Ape and Towerback trampling trees, and tornadoes are
+  unchanged (none of them go through `Trees.chop`).
+- Not played; compile not checked against the game jars.
+
+## 0.7.512: pink fairies are prized (pack 0.20.12)
+- **FairyWonder:** Jaymo's Powers' Bottled Pink Fairy (a super rare bauble) is the rarest thing townsfolk ever see.
+  Villagers (vanilla and MCA) within 8 blocks who see a player wearing one (amulet or charm slot, via
+  `PowersCompat.baubles`) or holding one stop, stare and say so in a gold bubble (8 grown lines of longing, envy and old
+  tales, 4 for children who beg to hold her), once a day each per player, one at a time; an MCA villager's mood rises 3.
+- **MCA gift:** `data/mca/gifts/fairy.json` makes her the dearest gift there is (60; a nether star is 40), +20 for
+  children, +15 for the married.
+
+## 0.7.513: patron gods, part (b): turning away, clerics, realms (pack 0.20.14)
+`docs/Patrons-B-Plan.md`. Andy: turning away should be harsh, "the harsher the better for this pack".
+- **Turning away** (`Turning`): pray three days at another patron's shrine while sworn and you turn. Each of those days
+  costs your patron 5 favour. The old patron leaves a **scar**, a small penalty in its domain that never fades and
+  stacks with each leaving. Then come the **trials**, 7 days (gamerule `jaymoskingdoms:patron_trial_days`, 0 for none;
+  `jaymoskingdoms:patron_scars` false for no scar): the old patron's omens follow you. Hearthkeeper: wounds heal slow.
+  Anvil-Father: tools wear faster and smithing slips. Deep Mother: storms find you, bolts fall near you, the water pulls
+  you under. Green Huntsman: wild beasts turn on you. Lantern Warden: the dead come for you at night. Crowned Sun: guards
+  halt and search you more and good name comes slower. Ash Whisperer: witnesses see farther, guards hunt you longer.
+  The Truth: townsfolk shun you and clerics call you out. The old faith's people mind you hard and its shrines are cold.
+  The new patron's favour starts at 2 and can fall to nothing during the trials. A mark is left for part (c)'s champion hunt.
+- **Clerics** (`Sermons`, `Rites`): clerics preach The Truth against the seven. Evening sermons on the square of Truth
+  realms and villages (a bell, then speech bubbles), words at shrines given to one of the seven and to those sworn to
+  them, apostates denounced. They are colder to the seven's sworn. The **Leaving Rite** (a cleric's Interact page) halves
+  the trials and dulls the omens, during a turning or after it. It costs 8 emeralds' worth in the town's coin, 4 more a
+  scar, double to leave The Truth and half to come to it. It never takes a scar.
+- **Realms** (`RealmFaiths`): Faith-creed realms hold The Truth. Others hold the patron most of their folk do (counted
+  daily). A haven holds its blood's patron. The ruler's info shows it. Folk who share your patron like you more (good name
+  won 15% faster, lost 15% slower, now and then a heart more). The faith you left and its rivals like you less.
+- **Holy wars** (`GreatWars`): realms of rival patrons grow tense each day (a named rival pair faster, more under the
+  Faith creed). A war between them is a holy war: always a great war, and realms of the same faith rally to it.
+- Screens: the patrons screen shows your scars and trials. The rite has its own screen. Loading hints 89-90.
+- Powers 0.20.14: the Hearthkeeper's trial and scar slow every part heal.
+- Built, reviewed, and a dev server boots; not played.
+
+## Patron champion fixes
+- Champions no longer freeze: the cast, turn and sleep timers now run from the entity's own tick, so wind-ups end, phase turns finish, sleeping champions wake near a Wildlands player, and a champion can be killed again. The Skeleton Lord got the same fix.
+- A `/kill` and other invulnerability-bypassing damage now work on a sleeping or turning champion.
+- The patron weapon a champion holds is for show only, so its blow stays the tuned number.
+- A temple champion only counts players inside its leash. An archer beyond it no longer holds off the rest heal and reset.
+- Adds give no experience and no loot.
+- The hunt ends when the quarry dies, even if the player respawns at once.
+- Pulls and pushes now reach the moved player's own client (Undertow, Chain of Truth).
+- The great temple's doorway is on the north side like every blueprint, and the Inquisitor's altar is found at its real height.
+- Temple sites check every chunk under the footprint for a realm's land. The forge-hall tunnel keeps its far wall. The ash-hollow ladders reach down to its floor.
+- Town folk no longer fight, flee or fear a patron's champion, and never count as its foes. A champion no longer turns on its own adds.
+- A reset champion goes back to its champion spot, facing the way out. The ruined cathedral's champion stands before the altar. The deep forge-hall's tunnel now ends in a ladder shaft to the surface.
+- The Forge-Thane's slag cubes no longer split into plain cubes. Summoned and egg champions roll a head too. The smoke double's life and the foe memory are constants.
+- The forge-hall's ladder shaft opens into its tunnel. The forge-hall's tunnel and shaft stay off realm land. A rebuilt great temple keeps its one Inquisitor. Champion wind-ups and turns last their full time. Iron Skin wears a weapon only for blows that land.
+- The town's guards, royals and casters no longer see a sleeping or fighting champion, or its adds, as a foe. Champion max health can now grow past 1024 with the group and tier. Blood Grip and the Unseen Hand leave a champion's weapon alone. Adds that reload from a save are discarded. The smoke double's blind and the foe ranges are constants.
+
+## 0.7.514: the skill web (pack 0.20.15)
+- Andy: "the skill trees need a redesign, something more akin to skyrim or path of exile, where the tree branches far out,
+  and you can easily see where what you pick lands. It should also allow you to more easily branch into other trees for
+  builds ... a large circle with three quadrants for stealth survival and strength." He picked bridge perks on the borders.
+- **K screen** (`SkillScreen`, layout in `client/SkillWeb`): the three pillar tabs and their pages are one web. You sit in the
+  middle; Strength takes the top, Survival the lower right, Stealth the lower left. Every old page is a branch running
+  outward (Will with Killing Intent past it, Combat Arts, Might; Foraging, Medicine; Freerunning, Thievery, Shadows), and a
+  perk's ring is how deep it sits along its requirements. Drag to move, scroll to zoom about the mouse, Recentre fits it all.
+  Pointing at a perk lights its path back to the middle in white and the card says what it needs and what it leads to;
+  pointing at a pillar's crest shows what that pillar levels on. Perks are learnt on click-release (a drag never learns one).
+  Names show on every perk from 1.5x zoom. Attributes and Jobs stay as tabs with their panels.
+- Nothing about the old perks changed: ranks, costs, levels, requirements and per-pillar points are as before, saves untouched.
+- **Bridge perks** (`Bridges`, `Skills.Perk.other`), two per border, opened by a rank in any one of the two perks named
+  (one each side), paid from whichever side has more points (saved as `<perk>@<pillar>` in the ranks map, so each side's
+  points count what it paid; `Skills.forget` undoes them when `/skills set` lowers a pillar):
+  - Stealth/Strength: **Ambusher** (Sneak Attack or Grim Hand; 1 pt): a sneak attack leaves its mark Slowness III and
+    Weakness for 3 s. **Cutthroat** (Assassinate or Last Look; 2 pts): a kill within 1 s of a sneak attack or a hidden
+    blade assassination gives 4 s of Invisibility and Speed.
+  - Strength/Survival: **Iron Hide** (Bulldozer or Rally; 1 pt): +2 armour, +1 toughness. **Beast of Burden** (Packhorse or
+    Iron Stomach; 2 pts): +1 heart, hunger a fifth slower.
+  - Survival/Stealth: **Tracker** (Field Dresser or Climber; 1 pt): anything you wound (not players) bleeds 30 s, a drop of its own blood every 0.75 s (Powers' blood trail, marked as its, `PowersCompat.trailDrop`), so you can follow it (Andy: "they just bleed so you can track them"). **Light
+    Pack** (Plague Doctor or Bar Swing; 2 pts): sneaking and sprinting cost 40% less hunger.
+- Mock-ups: project files `art-overhaul/skill-web/`. Kingdoms compiled with Gradle (compileClientJava); not played.
+
+## 0.7.515: RPG Series class gates (pack 0.20.16)
+- Andy shipped Zsolt Molnar's Wizards, Archers and Rogues & Warriors (Powers' packMods, PR #919). `RpgSeriesGate` answers
+  Spell Engine's cast check (`SpellEvents.CASTING_ATTEMPT.PRE`, both sides) so only the matching class casts their spells:
+  Wizards = Mage; Archers = Archer and Marksman; the rogue book (Slice and Dice, Shock Powder, Shadow Step, Vanish,
+  Mutilate, Bear Trap) = Thief; the warrior book (Shout, Charge, Last Stand, Mortal Strike, Throw, Throw Net) = Warlord,
+  Brute and Rider; the Survivalist also sets the Bear Trap and throws the net. Creative players cast anything. A refused
+  cast shows "Only a Mage can cast this" on the action bar (every 2 s at most). Weapons and armour stay usable by all.
+  Other mods' spells are untouched. Compiled against Spell Engine (compileOnly), never required. Not played.
+
+## 0.7.516: RPG Series spells and forms on the skill web (pack 0.20.16)
+- Andy: spells and moves come only from perks or a trainer. 49 perks appended to `Skills.Perk` (no ordinals moved), in six
+  new branches on the web: **Archery** and **Spellcraft** (arcane, fire, frost chains) in Survival, **Rogue's Arts** and
+  **Knife Arts** in Stealth, **Warfare** and **Weapon Forms** in Strength. Late branches start at ring 3 (`SkillWeb`).
+- `Learnables` maps each perk to its Spell Engine spell or Weapon Form. A class spell perk is locked to its classes (hover
+  shows "For: ..."); Weapon Forms are open to all. Buying a form perk teaches the form; forms learned before are marked
+  taught. Spell Engine reads learned spells from a new source (`RpgSeriesGate`), and the gate refuses spells not learned.
+  Tier 0-1 weapon spells (Arcane Bolt, Fireball, Frost Shard and so on) stay free with the weapon.
+- **Trainers:** veteran drills (`GuardDrills`) and wizard trials (`WizardTrials`, Mage only) teach the next perk free
+  (`@taught` rank: no points, survives a respec). Spell books and the binding table teach nothing. Not played.
+
+## 0.7.517: Brute rage and Enchanted Storage (pack 0.20.16)
+- **Brute rage** (`BruteRage`, Andy; idea from Warrior Rage, all rights reserved, nothing taken): melee blows given (+8%)
+  and taken (+10%) and kills (+25%) fill a meter shown as a thin bar right of the hotbar (`client/BruteRageHud`); it drains
+  5 s after the fight. Full, the Brute roars and rages 12 s: blows +25% and set foes alight 2 s, +0.5 knockback resistance,
+  flames round them; each kill adds 3 s (20 s at most). Then they are spent: Slowness and Mining Fatigue 6 s. The class
+  card lists "Rage +25%".
+- **Enchanted Storage** (`StorageEnchanting`, Andy: wizards enchant storage high on the tree and gain a bag of holding): a
+  3-rank Mage perk atop Spellcraft's arcane column (tier 18, after Arcane Evocation). Sneak-use an enchanting table holding
+  a chest (rank 1: leather Bag of Holding, 3 levels + 2 lapis), a leather bag (rank 2: iron, 6 + 4) or an iron bag
+  (rank 3: golden, 10 + 6); bags keep their contents. Bag of Holding (Fuzs, MPL-2.0) ships in Powers' packMods with its
+  grid recipes dropped. Not played.
+- **Spirit charms** (`spirits/SpiritCharms`, Andy: The Four Houses' spells as "spellcraft perks or moves for the ki
+  spirits"; MIT, ideas only). Disarming and a shield were already the spirits' (Thessaly's Unseen Hand, Ambrose's Aegis),
+  so three new moves: **Petrify** (the Quiet One, level 4: the foe in sight turns to stone 4 s, rooted and weak, dust
+  falling; no bosses), **Guardian Light** (Ambrose, level 5: undead within 12 blocks take 6, burn 4 s, are thrown back),
+  **Turn Back** (Thessaly, level 6: 5 s of arrows and bolts flying at you sent back, now yours). Existing poses. Not played.
+
+## 0.7.518: patron gods, part (c): temples, champions, the patrons' weapons (pack 0.20.18)
+`docs/Patrons-C-Plan.md`. Andy: champions are group fights, "only the strongest can fight alone".
+- **Temples** (`Temples`, `TempleSites`, `TempleBuildings`): once a player is in the Wildlands (or higher), now and then
+  a patron's temple rises out of sight in a place that fits it: the Hearthkeeper's hearth-hall in open country, the
+  Anvil-Father's forge-hall carved deep in the stone or in the Nether's wastes, the Deep Mother's tide-court on pillars by
+  the sea, the Green Huntsman's glade in deep forest, the Lantern Warden's graveyard and crypt (or a vault in the soul
+  valleys), the Crowned Sun's sun-court on high ground or in the Aether, the Ash Whisperer's hollow (hidden under dry
+  country, or in the basalt deltas), and the Truth's ruined cathedral. A Faith-creed kingdom's capital builds the Truth's
+  **great temple** (`GreatTemple`). Each altar is the patron's shrine; coming near teaches you the patron.
+- **Champions** (`PatronChampion`, `PatronChampions`, `champions/`): each temple's champion sleeps at its altar as a
+  statue and wakes for a Wildlands player (the great temple's only when struck). Group fights: health and blows grow
+  with every player near (up to six) and with the world tier; a group of three or more brings a fourth phase. Three moves
+  each, opened by the phases, all telegraphed: the Hearth-Warden, the Forge-Thane, the Tide-Bride, the Antlered Hunter,
+  the Grave-Lamp, the Sun-Marshal, the Cinder-Shade and the Inquisitor. A boss bar, the posture bar, great-foe credit. It
+  leashes to its temple, resets when everyone leaves, and stands again three days after it falls.
+- **The patrons' weapons**: a fallen champion drops its patron's iron head for each fighter, at the latest on their
+  third kill (34%, 50%, sure), Perfect (a solo kill's a Masterwork). Put together at the Tool Station (Powers 0.20.18).
+- **The hunt** (part (b)'s mark): after the trials, the patron you left sends its champion once, in a weaker hunting
+  form, outside any town. Kill it (the new patron is pleased) or fall to it, and the hunt is over; outrun it and it comes
+  again.
+- Loading hints 91-92.
+- Built (both mods compile); not played.
+
+## 0.7.519: diplomacy and elections (pack 0.20.19)
+Otectus pick 10 (Andy chose MCA: Kingdoms' idea; our own version, none of its code or art). Plan: `docs/Diplomacy-Plan.md`.
+- **Treaties:** free realms sign four kinds, each for a while and renewable (`Treaties`):
+  - **Recognition** (30 days): tension eases 3 a day, and they don't fall into rivalry. Every other kind needs it.
+  - **Safe passage** (10): the partner's people aren't halted, searched or tolled by the guards, and the ruler's
+    retinue lets them by.
+  - **Trade charter** (15): partner caravans go more often (60% of the wait), take an extra cart and come home 20
+    points fuller, and are preferred. The partner's people get 10% off at traders and pay half the gate toll.
+  - **Aid** (20): when either goes to war, the other is pledged to its side like a great war's ally (its soldiers join
+    the war parties, it shares spoils and reparations). Already at war elsewhere, it sends up to 100 from its treasury.
+  Vassals share their overlord's treaties.
+- **Envoys** (`Envoys`): NPC kingdoms send envoys once a day by creed (Coin wants charters, Conquest aid...). Courts
+  weigh offers by temper, creed, friction, tension, rivalry, a truce, a common foe, blood (purists) and, for a player
+  realm, your reputation. Envoys ride the King's Roads like couriers, with the realm's banner; you can meet them. Kill
+  one and the sender (-200) and the land's realm (-60) remember. Envoys are never drafted as guards or rulers.
+- **Players' realms:** an envoy waits up to two days in your hall and you get a letter. "Hear the Envoy" (MCA Interact
+  page; right-click without MCA) offers Sign, Refuse or Not yet. Seek an audience with your own steward for the Ruler's
+  Desk: the realms in reach, their creed, relation and tension, the treaties in force (Renounce), each kind's odds, and
+  Send an Envoy (20 from the treasury, the rest from your purse).
+- **Breaking faith:** declaring war on a partner, or renouncing, tears treaties up: +25 tension, +8 with the breaker's
+  other partners. A player sovereign loses 150 reputation with the wronged realm and 30 with each other partner. NPC
+  tyrants and warlords may break faith when tension boils over; others hold their hand.
+- **News:** the town boards carry every treaty; the Tidings only aid, a player realm's treaties, great charters,
+  broken faith and war.
+- **Succession** (`Elections`, MCA realms): Coin realms elect, and Warriorborn/Frostborn realms of the Old Blood or
+  Conquest acclaim at a moot. Notables are the grown townsfolk (profession level, guard service, kin to the late
+  ruler, a gift, temper, luck) and sworn players of Knight rank or higher; a player who wins wears the crown with the
+  old steward. In other realms blood inherits, but a child heir gets a regent (the best councillor) until they come of
+  age; then the regent steps down. If the child dies, the regent rules on. A teen is never crowned outright now.
+- **Ruler info** (MCA interact screen): how the realm chooses its rulers, how this one came to the throne, "Regent for
+  ...", and its treaties (hover for the list).
+- Loading hint 93 (89-92 belong to other open PRs and show raw until those merge). Not played; compile-checked with
+  `kingdoms/gradlew build`.
+
+### Fixes: desk, aid coin, wording
+- The Ruler's Desk now stays open: seeking an audience with your own steward no longer opens the quest screen over it
+  (`KingdomEvents.audience` reports that the desk opened; `Rulers.audience` and `Folk` skip `Quests.open`).
+- Renewing a treaty of aid no longer charges an ally's coin again; it is paid once, when the aid is first signed or the
+  war begins.
+- The aid-in-coin board line and the Ruler's Desk treasury and envoy cost now name the realm's coin (the Desk packet
+  carries the worded amounts).
+- Election score: the reputation divisor and cap are now constants (`PLAYER_REP_DIV`, `PLAYER_REP_MOST`).
+- Ruler's Desk: a full road or a closed kind now says so, instead of "your envoy is on the road".
+- Player-crowned realms no longer send envoys or sign treaties on their own in the daily round.
+- A ward who comes of age at the regent's death is now announced on the board.
+- A chartered allied pair no longer loses the trade friction twice.
+
+## 0.7.520: RPG Series kit for starts, guards, archers and wizards (patch 3)
+- `RpgKit` looks up the Wizards, Archers and Rogues & Warriors items (old gear stays without them).
+- **Class starts** (`Classes.gear`): Thief + flint dagger, rogue's tunic and boots; Warlord warrior's chest; Mage the
+  wand of their school (warding = frost, mending = novice) and the wizard's hat and robe; Archer a small quiver and
+  archer's hood and boots; Brute berserker's chest; Marksman + rapid crossbow and 16 arrows, archer's tunic.
+- **Guards** (`Outfits.guard`): veterans carry an iron glaive (30%, with their shield) or an iron double axe (15%,
+  two-handed). **Archers**: in temperate lands the Archers' hood (40%) and tunic (50%) instead of the dyed leathers.
+- **Court wizards and hermits** wear the Wizards' pointed hat over the realm's robes; a slain court wizard drops a
+  school's wand 35% of the time, besides the staff. Not played.
+
+## 0.7.521: ChoiceTheorem's villages: trade buildings and havens
+- **Trade buildings from CTOV** (`CtovHalls`): ChoiceTheorem's Overhauled Village (CC BY-NC-ND 4.0, shipped unchanged in
+  the pack) has a building for every trade in every kind of land. A town's butcher, fishery, hunting lodge, smithy and
+  mason are now CTOV's own for its land (`ctov:village/<land>/jobsite/butcher|fishing_hut|hunter|smith|mason`), read
+  whole from its structure file in the game and put up block by block by the builders like any design. Its jigsaws
+  become the blocks they're meant to, its street entrance turns to our door side (north), and containers come empty.
+  A realm favours CTOV's fortified towns and a village the plain ones (`CtovHalls.lands`). Ours stay among the cherry
+  trees (Blossom), in havens other than CTOV villages' own, on every second staking try (so a tight site still takes our smaller one), when CTOV has
+  no building there, and on the plain design. Only variants staked from now on carry the CTOV mark (top 16 bits
+  `0xC70A`, `Planner.variant`), so a half-built or standing hall from before keeps its look.
+- **CTOV villages are havens** (`Havens.ctov`). Andy: "those should function like the havens, there should rarely be
+  a human there and if there is theres a REASON." A settlement founded in one of its villages (`ctov:*`) is always a
+  haven, of the land's blood or mixed (never a purist's). About one human in 25 standing there stays human
+  (`Havens.keptHuman`, by who they are), and says why when asked their name: wed in, cast out of the human towns, a
+  foundling, its healer, working off a debt, or a deserter it hid. Compile-checked; not played.
+
+## 0.7.522: Stegonaut, Atroxiia, Varasuchus, Ignivorus and Aetherion, the first of the lesser dragons (pack 0.20.24)
+Andy: "we NEED these dragons" (Saint's Dragons). It is a 1.20.1 mod whose code is MIT and whose art is All Rights
+Reserved, so its eight dragons are rebuilt here with our own models and paint (`docs/SaintsDragons-Plan.md`, patches 1
+and 2 of 5; the MIT notice is in `licenses/saints-dragons-MIT.txt`).
+- **Walkers** (`WindDragon.flies`): a dragon that never takes off. Wild it strolls and grazes about its home, fights on
+  its feet where it stands, and bolting it lumbers off; tamed and saddled it's ridden like a horse, and R sends its own
+  move. New hooks for the lesser dragons: `aggressive` (a grazer fights only whoever hurts it), `bossBar` (beasts, not
+  minibosses), `windDragon` (killing one doesn't count toward Eurus and Aeolus's disguises), `crashKey`/`boltKey`,
+  `walkerFight`, and `action` (the move its model is playing, with `actionSeen`/`actionAge` on the client).
+- **Stegonaut** (`StegonautDragon`, `jaymoskingdoms:stegonaut_dragon`): a tall plated dragon (2.8 x 3.4 blocks, its back
+  about 2.9 high and its plates over 4) of the jungles and
+  plains (`has_stegonaut_dragon`), spawning with the herds in ones and twos and staying put like cattle. 100 health,
+  armour 15. Besides the bite and the tail sweep: a **chin slam** (8, a throw up), a **ground slam** (rears, stamps:
+  20 in a ring of 5, then seven earth spikes burst along the ground toward its foe, 10 each), **ground eating** (at 7-24
+  blocks it bites up the earth, chews, and spits a clod in an arc, 10) and, worn down or ridden and hit, a **roar** that
+  hardens its plates (Resistance and Absorption for it, its riders and its owner near it, 10 s). Tamed the usual way
+  (wear it below a third, crouch empty-handed, raw beef its favourite, Stoneborn twice as fast); ridden, R is the ground
+  slam with its spikes running where you look (5 s).
+- **Its look** (`client/dragons/StegonautDragonModel`, `tools/gen_stegonaut.py`, which prints the model's body plan from
+  its own UV table): Andy wanted it "taller, to be imposing": long pillar legs with long shins ("longer cannons"), a long neck
+  raised high in four segments,
+  two staggered rows of tall horn plates, a bony brow and a shovel jaw, a long four-spiked tail;
+  four hides (moss stone, jungle green, sandstone, slate) with moss on its back and four glowing-lichen marking patterns;
+  short/long horns or a nose horn and a broken plate by its DragonLook; drawn 1.3x. It plods, rears and stamps for the
+  slam, noses the ground and chews, and flares its plates to roar.
+  Andy: "all the joints should move and blend smoothly": every move's envelope is smoothstep-eased and ends where it
+  began, sitting/crashing/swimming ease in and out, the knees fold on a smooth curve, and the neck's bob and sway roll up
+  it a beat per segment.
+- **Swimmers** (`WindDragon.swims`): a walker of the waters. It breathes under water and currents don't push it; wild it
+  floats with its back out and dives straight at whoever it fights there; ridden in water it swims where you look (W
+  ahead, Space up and out at a bank, Shift down, S brakes) and keeps its riders' air topped up. Shared helpers for the
+  lesser dragons' moves: `spareable`, `inFront`, `fighting`, `stun` (rooted and heavy-handed, stars over the head).
+- **Atroxiia** (`AtroxiiaDragon`, `jaymoskingdoms:atroxiia_dragon`): a pale serpent wyrm on two great arms and its tail, no
+  hind legs (3 x 4.3 blocks, its head about 4.5 up) of the snowy plains, ice spikes, snowy taiga, snowy beaches and frozen rivers (`has_atroxiia_dragon`),
+  alone and rare. 200 health, armour 10, a grazer that fights only whoever hurts it, and it leaves frosted ice on still
+  water where it strolls. Besides the bite and the tail sweep: a fist **slam** (16), a claw **swipe** (12), the
+  **precise strike** (three jabs of its tail spear at 3-6 blocks, 9 each, dragging them in, the last a 2 s stun),
+  **Gungnir** (the spear drawn back, a lunge, and driven through everything in an 8-block line: 40 and a stun), the
+  **devastating sweep** (pressed close: the tail spun round, 13 in a ring of 7, a big throw) and the **Helheim quake**
+  (at range, or freely once below half: it rears and brings both fists down twice, 25 to everyone on their feet within 9, the second
+  a 5 s stun, and the water round it freezes). Raw cod its favourite, Frostborn twice as fast; ridden, R is Gungnir
+  where you look (5 s).
+- **Varasuchus** (`VarasuchusDragon`, `jaymoskingdoms:varasuchus_dragon`): a crocodile dragon (4 x 3.3 blocks, its back
+  3.2 up, about 10 long with its tail) of the beaches and swamps (`has_varasuchus_dragon`), alone and rare. 200 health,
+  armour 8, a hunter: it goes for players who come near, and it's quick in the water. Bite 15, **claws** (8) and a
+  **horn gore** (8, a toss), a **dash** at 6-16 blocks (it charges: claws 15 as it reaches you, then its tail lashed
+  round, 10), a **slash barrage** up close (eight claws, 5 each), a **phase shift** (hit, it may slip past you in a blur
+  and come out behind you, untouchable meanwhile) and the **tailguard** (hit, it may curl its tail round as a guard: the
+  next blow within 8 blocks is parried with our parry's sparks and ring, the striker takes 10, is slowed and thrown back).
+  Below half it **rages**: bites 25, horns 15.8, claws 12, every move a third quicker. Raw salmon its favourite, Tideborn
+  twice as fast; ridden, R charges (a burst of pace, goring whoever it reaches, 4 s).
+- **Their looks** (`AtroxiiaDragonModel`/`VarasuchusDragonModel`, painted and printed by `tools/gen_atroxiia.py` and
+  `tools/gen_varasuchus.py`, sharing `tools/lesser_dragon_art.py`): both tall and long-limbed. Atroxiia: a serpent's body
+  raised on two long, heavy arms (gold cuffs, three-fingered hands) with no hind legs, the eleven-segment tail as its
+  third support, curling up over its back into a gold-bound spear of ice; a three-segment neck and a head in a striped
+  nemes cloth with a gold band (some wear a short cloth, some an ice uraeus on the brow), gold collar; hides glacier, deep ice, rime grey,
+  midnight frost, with glowing frost veins, rims, stars or a spine line; drawn 1.15x. Varasuchus: long sprawling legs, two
+  rows of bony scutes, a heavy blocky head (squared skull, brow ridge, cheek plates, a broad snout with a blunt tip) with
+  horns swept up and back (a nose horn on some), and a twelve-segment double-crested tail about seven blocks long, long
+  enough to wrap round its flank to the front; raging, it rears up on its hind legs (a generic `standing()` stance on
+  `WindDragon`) and fights with its arms; hides swamp olive, river brown, mangrove black, pale sand, with marsh-light bands, spots, scute
+  rims or a jaw line; drawn 1.3x. Every move eases in and out and ends at rest, and the neck and tail roll a beat per
+  segment: Atroxiia's tail jabs, coils and drives straight for Gungnir, swings round low for the sweep; Varasuchus's
+  snakes as it walks, lashes after the dash, wraps round to its front for the tailguard and snaps out on a parry; both tuck their
+  legs back and scull their tails in the water. (Stegonaut's chewing jaw lost its last kink too.)
+- **Ignivorus** (`IgnivorusDragon`, `jaymoskingdoms:ignivorus_dragon`), Andy: "put the effects onto Kintsugi's model
+  then put that in the nether": the Nether's fire dragon, drawn as eanncrod's Kintsugi wyvern (as Eurus and Aeolus) at
+  0.55 (about 4.3 blocks tall, 14 across the wings; box 4.4 x 3.7), its hide obsidian, basalt ash, ember or crimson and
+  its seams glowing lava cracks (orange, magma yellow, white-hot, crimson; `tools/gen_kintsugi_dragons.py`). Every 30 s
+  each player anywhere in the Nether (`#minecraft:is_nether`) has a 1 in 360 chance of one turning up flying about
+  40-64 blocks off (about once in three hours there; never with one within 160 blocks). 450 health, armour 12, bite 22,
+  fire-proof, a boss bar (`c:bosses`), and it leaves players be until one hurts it. Then, besides the swoop, hover, bite
+  and tail sweep: fire breath (Notus's), a **fireball volley** at 10-48 blocks (three exploding fireballs, every 8-11
+  s) and, on its feet within 16 blocks, a stamp that sends a line of seven **magma pillars** bursting toward you, one
+  after another (a smoking warning, then 12 damage, 6 s of fire and a throw upward). Cooked porkchop its favourite,
+  Emberborn twice as fast; tame, it's saddled and ridden like the wind dragons (R breathes fire). Drops leather, bone,
+  magma cream, blaze powder, obsidian and sometimes netherite scrap. Not one of the wind dragons for Eurus's and
+  Aeolus's showing themselves. Its moves follow Saint's Dragons' Ignivorus (none of that mod's art).
+- **Aetherion** (`AetherionDragon`, `jaymoskingdoms:aetherion_dragon`): a star dragon Andy sent (a public-domain,
+  CC0 GeckoLib dragon, not Saint's Dragons'): "the wings and head might need upgrading". Our own model on its body plan
+  (`AetherionDragonModel`, `tools/gen_aetherion.py`, a 512 sheet; drawn 1.25x: its back 3.7 blocks up, about 17 across the
+  wings; box 3.2 x 3.8): four long legs, a four-segment neck rising in an S, a seven-segment tail ending in a crossed
+  fan, crystal spines down its neck, back and tail. Each wing is an arm, a forearm and a hand of three fanned finger
+  bones with a thumb claw, a membrane behind each bone tapering to a scalloped trailing edge; the head has a heavy brow,
+  two great swept horns (short, or with a lower pair, by its look), cheek frills and a jaw that opens. Hides night sky,
+  pale silver, dusk violet, dawn gold, with glowing constellations on the membranes, starlit veins, rims or a sky of
+  stars. The wingbeat rolls out from the shoulder a beat per joint, the fingers spreading on the downstroke; gliding
+  they're held open; landed they fold (arm up, forearm down along it, hand up, fingers closed), the fold eased in and
+  out; the neck straightens in flight and (Andy: "so much so it looks like it doesn't have any in the air") the legs fold
+  flat back under the belly, drawn in small and up into the body. Andy chose "Aether sky dragon, plus Nulljaw": every 30 s each
+  player over the Aether (`jaymospowers:aether`) has a 1 in 240 chance of one turning up flying 40-64 blocks off (none
+  within 160). 420 health, armour 12, bite 18, a boss bar, and it leaves players be until hurt; then its **bite**, a
+  **breath beam** of starlight (28 blocks, stopped by blocks, 7 a strike, burns nothing) and, below half health, the
+  **Cataclysm** (it rears up roaring, wings flung high, and 14 stars fall on its foes and round it, each after a closing
+  ring of light: 14 damage and a throw, no block touched). Glow berries its favourite, Nightborn twice as fast; ridden,
+  R is the beam.
+- `/kingdom dragon stegonaut|atroxiia|varasuchus|ignivorus|aetherion [tame]` (operators).
+- Compiled clean (`compileClientJava`, Gradle against the 26.3 jars); not played.
+
+## 0.7.523: talks that matter (pack 0.20.25)
+Our own take on the idea of MCA: Conversations (none of its code). Plan: `docs/Talks-Plan.md`.
+- **Trust, respect and warmth** (`Bearings`): every villager now holds three hidden feelings about each player, kept
+  on their memory of you (`Recollections.Person.bearing`; a masked stranger's go to the costume). Everything they
+  already remember moves them (gifts, trades, help, rescues, crimes seen, blows, bouts, quests, apologies, promises),
+  word passed on moves them half as much, and they fade slowly. MCA hearts and realm reputation colour them. They're
+  never shown: you see them in how villagers act. Fond ones charge less and sour ones more (up to a fifth), the
+  trusting gossip more and tell you secrets, the wary say nothing, a guard who trusts and respects you comes to your
+  side when a monster hits you (others shout a warning), one who's fond of you looks away from your crimes, and one
+  who can't stand you won't talk at all. The chat AI is told in words.
+- **Have a word** (MCA talk menu, and now and then Chat): a short talk on the talk screen with two or three replies.
+  52 talks about their work, family, blood, faith, realm, the weather and what you've done. Each reply has their
+  answer and shifts how they feel. Some lead to a promise, a favour, a rumour or a secret, a loan, or a quarrel (no
+  more talk until tomorrow). An opening line hints at how they look at you.
+- **Promises** (`Promises`, kept with the player): bring something by a day, come back, look in on a child for two
+  days, walk a wandering child home, speak for them to the ruler (an audience does it), keep the peace in their
+  town, pay back a loan (in coin). They're listed in the journal's Quests page. Keep Your Word on the Interact page hands over
+  what you brought. On the due day they may come over to remind you. Kept: trust and warmth up a lot, hearts and
+  reputation, their family hears, a deed of The Truth (and of the Hearthkeeper for a child). Broken: trust drops
+  hard, hearts and reputation down, they remember and bring it up, and their kin and friends cool too. Saying
+  honestly that you can't costs much less. Apologise covers a broken promise.
+- Loading hints 94-95. Not played; compile-checked with `kingdoms/gradlew build`.
+
+### Fixes to Talks, Bearings, Promises and Theft
+- If the one you promised to escort a child for dies, the child stops following you.
+- A quarrel now lasts the full number of days, so the villager keeps sulking tomorrow too.
+- Trust, respect and warmth now fade by calendar periods, so meeting a villager often no longer stops the fade.
+- Talks that are told only once are never forgotten when old talks are trimmed.
+- Letting go of a loan counts as a broken word. The coin is not free any more.
+- Looking away is only for crimes. Renown, brawls and disguises see everyone again.
+- A villager you already know now comes over on the due day to remind you of a promise.
+- A chat that turns into a talk no longer closes the talk screen at once.
+- Promises to come back aren't kept by the villager walking over to remind you; babies don't get the war, loan or bloodline talks; a ruler can't promise to speak to themself.
+
+## 0.7.524: death by cause hooks (pack 0.20.26)
+- Powers' death by cause (`Mortality`) now knows Kingdoms' bosses: whatever shows a boss bar (`BossBars.boss`, told through
+  `PowersCompat.tellBosses`), so dying to a king, warlord, champion, wild dragon or Aether Giant is a boss's death (70% final,
+  spared if you're far too weak).
+- **Taken captive** (`Captors`). Andy: "if you are kidnapped by your sentient murderers (orcs goblins ogres pirates etc) theyll
+  have it hidden or even wear it". Left for dead by an orc, goblin, ogre, pirate, camp raider, illager or outlaw, you wake
+  chained in their camp (theirs, else the nearest within 640 blocks), shackled like the "still in chains" start (pick it or slip
+  it at night; the camp hunts you for a day after). Everything you carried is taken: about half your armour and weapons are
+  worn by whoever downed you and the camp's people (they drop it when killed), and the rest is in chests buried about the camp.
+  With no camp near, you wake in the wild with your gear.
+- Town healers treat what will kill (poisoned blood, water in the lungs, withering: `PowersCompat.afflicted`), for 8 more coins.
+  Compile-checked; not played.
+
+## 0.7.525: turned by what killed you (pack 0.20.27)
+- Andy: "whenever they die, there's a chance that the death method that killed them turns them into one of those specific
+  hollows, like enthralled by a vampire, or maybe zombified by a witch." Powers' death by cause now asks `Hollows` first: killed
+  by one of these, you may rise where you fell as a Hollow instead of rolling for your life (never final, no new injury, the
+  Hollow unlocked for your children too, each look with its own line):
+  - Zombie: zombies of every kind 25%, witches and blood witches 30% ("zombified by a witch").
+  - Skeleton: skeletons of every kind 25%.
+  - Wraith: a vampire, players too, 40% (enthralled); a phantom or a vex 25%.
+  - Reaper: a necromancer or the Wither 35%.
+  - Any other undead: the Pallid (the Hollow's first look) 20%.
+- One who is Hollow already, or an android, isn't turned. `Heritage.set` can go quietly (no "You are ... born").
+  Compile-checked; not played.
+
+## 0.7.526: predators spawn on their own, Cube Animals beside ours (pack 0.20.28)
+- Andy: "remove the encounters, its better when the predators can naturally spawn." Nothing comes hunting a player out of
+  nowhere any more (`Encounters` keeps only the quest hunts, `send`). Naturalist's bears, lions, tigers, alligators, komodo
+  dragons, rhinos, scorpions and elephants spawn as Naturalist has them; only its mammoths, whales and boar stay out.
+- Every Kingdoms beast of the old table spawns on its own in its `has_<beast>` biome tag by the table's weight and pack size:
+  feral wolves, coyotes (at night), tarantulas, moose, the monsters of legend and the Boreas, Zephyrus and Notus dragons.
+  On the surface only (the cave ogre anywhere dark); night ones in the dark; monsters of legend only 1 in 10 of the times
+  they could (`LEGEND_CHANCE`), monsters that walk by day 3% (`DAY_MONSTER_CHANCE`); legends and dragons never within 256
+  blocks of a settlement, nor while chunks are first made. Sightings and beast quests work as before.
+- Cube Animals: its kinds we already have (black bear, crocodile, komodo dragon, moose, piranha, red and roe deer, snail,
+  tiger) are kept out of natural spawning (`CUBE_DUPLICATES`); its rattlesnake, shark and elephant spawn as other breeds.
+  Compile-checked; not played.
+
+## 0.7.527: Cube Animals' deer, crocodile and black bear (pack 0.20.29)
+- Andy: "add the deer too and the croc, and the bear." `Encounters.CUBE_DUPLICATES` no longer keeps out Cube Animals' red
+  deer, roe deer, crocodile and black bear; they spawn as other breeds beside Naturalist's. Still kept out: komodo dragon,
+  moose, piranha, snail, tiger. Compile-checked; not played.
+## 0.7.528: the stacked Nether and Aether (pack 0.20.30)
+Powers 0.20.30 ships One Dimension: new worlds stack the Aether over the Overworld over the Nether in the Overworld's own
+level. There every band answers `level.dimension() == OVERWORLD`, so Kingdoms asks its own `Stacked` (a copy of Powers'
+`compat/Stacked`: the realm by height, the level that holds a realm, its height shift, its players, `within` a band).
+- Nether forts, Flame Avatar camps, fortress haunts, portal raids and the Cinder Forge run on the Nether band's players;
+  the forge's wayfinder points straight down at it in a stacked world (the band is under the Overworld 1:1, not an
+  eighth). Their op commands check the band you stand in.
+- Notus and Ignivorus over the Nether band, Aetherions over the Aether band; Nether bounties find the fort under the realm.
+- Temples rise by the band you're in (an Aether temple looks for the islands' ground, `Stacked.within`); golem lairs keep
+  out of the Nether band; ore veins seed the Nether band's ancient debris too; mythic mounts, Nether world-tier feats,
+  patron champions' hunts, the Wind dragon's cruise and perch read the band.
+- Life-story starts set down in a band (the demon start) let you go once you climb out of it (`LifeStory.leftBand`).
+- The Grue's trial arena and the monoliths' height keep under their own realm's top, not the Aether's.
+Compile-checked; not played.
+
+## 0.7.529: Golemworks (lamp wardens, menders, the throne golem) (pack 0.20.31)
+Andy: "I like the idea of a magically attuned kingdom using golems like these for everyday things". Then: no porter,
+frost tender or scribe (copper and snow golems already exist); keep the lamp warden and mender as iron golems' allies; "I
+want the diamond one to be a throne, that takes the damage from the seat holder ... it just needs to transform into a giant
+throne. LIKE THE MOD". Ideas from Special Golems (custom licence, files not used): `docs/TownGolems-Spec.md`.
+- **Golemworks** (`Golemworks`): 15% of realms (never a purist's or a camp), drawn once from who they are. Their folk round
+  the seat are attuned (a faint mana glow to the attuned, power 1-2, "ask about their magic" works). The realm keeps 2 lamp
+  wardens, 2 menders and a throne golem knelt into its throne by the seat; the whole roster is built when a player first
+  comes near, then one lost golem is rebuilt every 5 minutes. `/kingdom golemworks on|off` (operators) sets the realm you
+  stand in.
+- **Town golems** (`TownGolem`, one entity, three kinds, `client/TownGolemRenderer`, textures by `tools/gen_town_golems.py`):
+  our own rune golem, a stone body with a carved core in its chest, eyes and core glowing.
+  - **Gilt Lamp Warden** (big, slow, 160 health): glows through the night; every 1.5 s a beam at the nearest monster
+    within 16 for 6 (undead 12 and set alight).
+  - **Verdant Mender**: Regeneration II on hurt folk it looks after (each at most every 20 s), and keeps one of them from
+    dying (left at 4 health, a moment's Regeneration and Resistance; each at most every 5 minutes).
+  - **Throne Golem** (biggest, 300 health, armour 14, hits for 14 and throws up): dark stone set with diamond. It serves
+    its realm's king or queen alone (Andy: "this should only answer to the realm's king, so noone else can use it. and it
+    will always absorb the damage from the king or queen, not just while they sit. If it takes more than 20 damage, it will
+    transform into the guard mode, and attack whoever was attacking the royal.").
+    - Only the ruler commands it: use it (empty hand) and it kneels and folds into a giant throne over 1.5 s (body sinks
+      as the back, arms forward as the armrests, legs flat as the seat); use the throne to sit (sneak to get up); sneak and
+      use the throne to have it stand; sneak and use it standing to fold it into its item. Anyone else is told it answers
+      only to its king or queen (anyone may still mend it with diamonds).
+    - **Every blow the ruler takes within 48 blocks of it goes to the golem instead**, sitting or not (not void, /kill,
+      hunger or drowning). Once it has taken more than 20 for them (the tally clears after 30 s with no blow), it rises out
+      of its throne (throwing the ruler off if they sat in it) and goes for whoever struck; 10 s after the fight it walks
+      home and kneels into its throne again.
+    - A realm's throne golem kneels as a throne by the seat. One made on the altar serves the realm its maker rules, else
+      the realm it's set down in; outside any realm it won't stand up.
+  - Who they look after: the town's folk and villagers, golems, the maker with their party and pets, players in good
+    standing with the realm. Mended with gold ingots, emeralds or diamonds.
+  - Anyone who knows **Golemancy** makes them on the infusion altar (gold, emerald or diamond block at the centre, with
+    ichor); set down, one works within 16 of where it stood up. Its maker sneaks and uses a standing one with an empty hand
+    to fold it back into its item.
+- Compiled clean with Gradle (`compileClientJava`); not played.
+
+## 0.7.530: quests to 272, town troubles and town works (pack 0.20.33)
+Patch 9. Andy picked the idea of the MCA: Quests add-on and asked for "260+ ... get close"; our own version, none of
+its code. Plan: `docs/Quests-Plan.md`. There were 189 quest titles (187 quest templates); now there are 272.
+- **55 more trade quests** (`QuestBoard`): two or three more for every trade, from farmers to farriers, the tailor's
+  and healer's (shepherd, cleric) and the whalers' (whale oil and blubber at the harbour). Cooks, pullers and
+  money-changers give their own quests now. Some ask you to lead cows, pigs or sheep home on a lead.
+- **Town troubles** (`TownTroubles`, 28 quests): while a town is hungry (stores nearly bare), sick (the Nightfall
+  plague, or many wounded), raided (a camp's raid or a portal raid), burned, sacked in war, in drought, missing one of
+  its own (taken captive) or feuding with a neighbour, 2-4 of its villagers ask for help with that trouble. Food,
+  wheat, timber and iron brought for it go into the town's stores. When the trouble ends, the asks not taken go too.
+  Taken ones still pay. Players near the town hear when it starts and ends.
+- **Town works** (`TownProjects`): a Town works sheet on every town board lists six shared projects (well, granary,
+  wall, watchtower, bridge, infirmary). Anyone gives goods or coin. Progress is shared and saved per town. When it's
+  done the town gets it for real: the builders raise the well or infirmary, a granary keeps it fed on half the food, a
+  wall and a watchtower mean fewer raids (the tower warns of one mustering), and a bridge lays a new road with bridges
+  to one more neighbour. Everyone who gave is paid coin and reputation by their share, and paid on joining if they
+  were away.
+- A trouble pushed out of a full town (two troubles already, a more urgent one came) is removed quietly. It no longer
+  says it is over while its cause is still there.
+- Ops: `/kingdom quests trouble <kind>|clear`, `/kingdom quests works fill <project>`.
+- Loading hints 96-97. Not played; compile-checked with `kingdoms/gradlew build`.
+- The Old Quiver keepsake is now built on leather, not an arrow, so a bow or crossbow can no longer fire it and lose the quest item.
+
+### Fixes: Hornkin and led animals
+- The raid trouble's "Hornkin in the Streets" counts any Hornkin: warriors, hurlers and brutes.
+- An animal handed in on a lead quest is marked, so the same cows, pigs or sheep can't be led to another giver for pay.
+
 ## 0.1.0: stage 1
 - **Kingdoms** (`Kingdom`, stored on the Overworld by `Kingdoms`): name, colour, capital (a village bell), king,
   members (rank and standing), treasury (emeralds), claimed chunks (7 x 7 round the capital), overlord, fallen,
@@ -7478,3 +8148,2025 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   view space and carried into the world at the same spot on screen through the world's own field of view (the hand is
   drawn at a fixed 70), so it lines up at any FOV. Third person and other players are unchanged.
 - Compile-checked only; not played.
+
+## 0.7.423: Rubber-folk melt onto a self-destruct's target (pack 0.18.94)
+- Andy: "rubber uses the skin colored blob animation to kind of melt onto the grab target". While a Rubber-folk gathers
+  Jaymo's Powers' Self-Destruct, `RubberEngulf` reads Powers' `ZFighterSelfDestruct.HOLDING` (by reflection) and draws the
+  swallow's rope and skin on the held foe, run up to sealed (`MELT`, 0.58 of the way) and held there wobbling, never
+  gulped and with no swell after. The first-person reaching arm follows it too.
+- Compile-checked only; not played.
+
+## 0.7.424: Questioning the downed, and tidings on town boards (pack 0.18.97)
+- Andy: "you can question downed humanoids, unlocked in the tree"; "it should be early on the tree, and available in
+  stealth and strength as well". Perks `ROUGH_QUESTIONS` (Strength tier 1), `QUIET_WORD` (Stealth tier 1),
+  `INTERROGATION` (Will tier 8, level 2). `Questioning` runs the talk: MCA's main menu shows only `jaymoskingdoms_q_*`
+  answers while you hold someone (leader, home, nearby, threaten, stare, swear, spare, finish); whether they talk is by
+  temperament, a threat may break them; Rough Questions doubles it and adds a try, Quiet Word's choke leaves no memory of
+  you and asks who's about, Interrogation stops lies and adds the stare and the oath. Recollections `QUESTIONED`,
+  `SPARED`, `SWORE`. `playerAnswer` gives Powers a held player's realm truths (or a lie).
+- Andy: "tidings can now be nailed this way and posted on boards in towns ... you may just not hear of some news". World
+  news is kept (`Post.POSTED`, 3 days) and pinned on town boards as "Word from abroad" (`town|tidings.<id>|<board>|t`),
+  each town hearing about 70% of it; a bird brings a piece only when it names you or your realm (`Post.concerns`).
+## 0.7.425: the tribes and their grudge (Havens patch 1)
+- `Tribes`: every goblin village and orc camp belongs to its brood's tribe in a 1536-block region; the oldest camp is the
+  king's seat. One grudge per tribe per player (0-100): a kill +4, a king or warchief +30, the pedlar +25, the rival
+  brood's folk in the same country -2, and -3 a day. At 60 a hunting band (3-7, from the nearest camp) musters 40-56
+  blocks off and follows you for five minutes (`HUNTER_TAG`, `hunterStep`; strays from a restart are discarded).
+- Tribute ("Offer tribute" on a chief or the pedlar while you owe a grudge): 3 emeralds for each 10 of grudge. Truce
+  token (`truce_token`, from the pedlar, 16 emeralds): raised in a tribe member's sight, it wipes the grudge and gives
+  a 3-day truce (`McaCompat.foe` spares you unless you strike them).
+- Every chief's store gets a map to its king's seat once (`MAPPED`).
+- `Pedlars`: a goblin trader with two orc guards, met out in a tribe's country (4% per 10 s, once a day per player),
+  walking camp to camp. Sells three odd wares, a goblin mask, a seat map, a truce token and the bestiary; tells you the
+  tribe's mood ("How does the tribe take to me?"); his party strikes no one who hasn't struck it, and no greenskin sets
+  on it. Not saved.
+- `Bestiary` (Greasy Bestiary): a page per goblin/orc kind, a smudge until learned; a kill writes how they fight, one
+  talking under questioning writes their ways. Hints only.
+- Questioning a greenskin: "What does your king think of me?" (`Questioning.MOOD`).
+- Compile-checked only; not played.
+
+## 0.7.426: Sure Footing leaves the tree (pack 0.18.99)
+- Andy: give everyone the landing roll. Sure Footing is gone from Stealth's Freerun page; ranks saved under
+  `sure_footing` count for nothing, so their points come back. Bar Swing moved up into its slot (needs Climber now).
+  Freerunner's text mentions the air flip, Meditation's the sit (sneak and look down) and the Shadowbox key.
+- Compile-checked only; not played.
+
+## 0.7.427: the ogre tribe, bog iron and crippling blows (Havens patch 2, first half)
+- `OgreHolds`: up to 3 ogre outposts per region (1536 blocks) in plains and swamps, rising 64-96 blocks from a player
+  away from settlements: a broken ring of mossy stones, a log lean-to, a bone pile, a fire and a chest of scraps; led by a
+  two-headed brute (plains) or a cave ogre (swamps) with two ogres. Once a region has had an outpost, its ogre hold may
+  rise: a stone-walled yard with a throne and a hoard chest, the Ogre King on it (320 health, 1.7x size) and two
+  two-headed King's Guards (1.3x) at the gate. Saved as `ogre_sites`.
+- The king in three phases: fists and smash; at two thirds a roar, two ogres called from the hold, Speed and Strength;
+  at a third he hurls boulders (10 damage) every 2.5 s at a foe out of reach. His fall clears his region's outposts
+  (their ogres go), goes on the news, and the first king to fall frees bog iron.
+- `BogIron`: lumps of bog iron ore in the mud and clay under new swamp chunks. Until an Ogre King has fallen it crumbles
+  to rust when mined; after, it drops raw bog iron (1-2), which smelts to iron and counts as raw iron for Tinkers.
+- `CripplingBlows`: a hit of 6+ from an ogre (18%, the king 30%), a warchief (22%) or a raging grunt (10%) may break a
+  leg (Powers' `Wounds.breakPart`, through `PowersCompat.breakLeg`).
+## 0.7.428: Player temperaments (pack 0.18.101)
+- Andy: the starting questionnaire gives players a temperament they can't change. `PlayerTemperaments` works it out
+  from the life story (who raised you and the childhood weigh 2, some roads 1; ties go to the childhood), sets it in
+  the villagers' own `Temperaments.TEMPERAMENT` (synced, so Powers draws it), and says it once in chat ("Your nature is
+  set for good"). Old players get theirs on next join; it's set again after death. Players aren't humanoids, so none
+  of the villagers' temperament rules touch them.
+- Compile-checked only; not played.
+
+## 0.7.429: the king's guard and the trials (Havens patch 2, second half; pack 0.18.102)
+- `Trials`: every goblin king and orc warchief keeps two guards at his door (the biggest of their kind: 1.35x size, twice
+  the health), replaced a day after one falls. "Ask to see the king" on one of them sets the trial:
+  - orcs, the pit fight: their champion (1.25x, 60 health) in the fighting pit until one of you is down (3 minutes);
+  - goblins, the trap hall: from the door to the throne within 60 s while darts, caltrops and nets go off round you.
+  Hold out an empty hand to an Ogre King's guard for the stone-lifting brawl: hold sneak by the guard for 5 s, then
+  knock him to half with bare fists (a weapon ends it). The rest of the camp holds off during a trial, and nobody dies
+  of one (below 5 health you're beaten and let go).
+- Passing wipes the tribe's grudge with a 3-day truce (for ogres: the region's ogres leave you be for 3 days,
+  `OgreHolds.TRUCE`), and the king sends 8 emeralds. A tribe sets no other trial for 3 days.
+- Bog iron no longer smelts to iron: it melts into Powers' bog iron (`tinkering_melting/bog_iron.json`).
+## 0.7.430: Tideborn swim with a dolphin's grace (pack 0.18.104)
+- Andy: only Tideborn (and Powers' swimming Xeno forms) get the faster swim. A sprint-swimming Tideborn has Dolphin's
+  Grace (no particles), on top of their water movement bonus. Powers' Motion patch 2.
+- Compile-checked only; not played.
+## 0.7.431: captains (Havens patch 3; pack 0.18.106)
+- `Captains`: every goblin and orc tribe keeps a ladder of 4 named captains under its king (up to 7; ranks 1 to 5), each
+  with a byname, gear and size by rank, posted to one of its camps (shown when a player comes within 80 blocks), or at
+  the head of a hunting band. A new one rises a day to fill the ladder.
+- 2 to 4 traits each: strengths (thick hide, arrow-proof, fire-born, heavy-handed (cripples at 40%), hard to kill,
+  blood rage, venomous, rallying), weaknesses (soft to arrows, glass jaw (blunt and fists), blind side, burns easily)
+  and fears (fire, beasts and riders, his own blood: he runs for 5 s).
+- Learning them: "What does your captain fear?" when questioning one of the tribe (a proud or spiteful one may lie,
+  unless you have Interrogation); a chief's orders in each camp's store (read the page); the pedlar's rumours ("Heard
+  anything of the captains?", 2 emeralds). What you know is in your journal.
+- Meetings remembered: the first time a captain sees you, a short letterbox film (Powers) and his name; later, a line
+  about how it went last time (you ran, beat him, spared or questioned him, or he killed you).
+- A captain who kills a player climbs a rank, gains a strength and wears their head (it drops when he dies); one of the
+  tribe's common folk who does it becomes a captain. He's that player's sworn foe in their journal until he falls.
+- Andy: a short scene before you respawn. Your camera cuts round your killer (Powers 0.18.106's film after death, the
+  death screen waiting) as he stands over your body and gloats; halfway, he roars, puts your head on, and his own
+  cheer his name.
+- When a king's camp falls and another becomes the seat, the strongest captain takes it as its chief. Fallen captains
+  stay fallen for now (patch 4 brings some back). Captains' deaths, rises and crownings go on the post.
+- Compile-checked only; not played.
+## 0.7.432: captains living their lives (Havens patch 4, first half)
+- **They come back:** a captain killed without being finished (killed while downed, or beheaded) or burned comes back
+  75% of the time, 1 to 3 days later, at one of his tribe's camps. He's missing whatever parts he lost (Powers'
+  limbs), he's your sworn foe if you killed him, and the post says he's been seen again. His first words are about it.
+- **Duels, ambushes and feasts:** once a day, in a tribe whose seat is within 2000 blocks of a player, two of its captains
+  may duel at a camp, one may ambush another, or one holds a feast. You hear of it on the post when it's set and when it's
+  settled at dawn (the winner or feaster climbs a rank; the loser falls, sometimes to come back). Kill one of them first
+  and it never happens.
+- **Blood brothers and avengers:** a new captain has a blood brother among the standing ones a quarter of the time. A
+  brother within 40 blocks joins his brother's fight with you, and when one falls to a player, the other climbs a rank,
+  gains a strength and swears to avenge him (with no brother, another of the tribe may, 30%).
+- **Spared or shamed:** stare a downed captain down (Stare Down). With an empty hand you spare him: he gets up and runs,
+  and remembers it. With anything in hand you shame him before his own: down a rank, a strength lost, a new fear, "the
+  Shamed" for a byname, and he gets up and runs. The post hears of it.
+- **Raised (Andy):** a captain who would have stayed dead (finished, burned, anything but a chief) still comes back 6% of
+  the time, raised by a necromancer or corrupted magic. He's Deathless: every fear gone, a rank up, half again the
+  health, +3 damage, a touch bigger, soul smoke drifting off him. Rarer, much harder. Deathless is never rolled.
+- Compile-checked only; not played.
+
+## 0.7.433: captains challenged, turned and crowned (Havens patch 4, second half)
+- **Challenges:** sneak and use a sheet of paper on anything within 32 blocks of a tribe's goblin village or orc camp to
+  nail up a challenge for its strongest captain there (the post hears of it). Come within 24 blocks in the next day and he
+  steps out to fight you alone while his camp stands back. Kill him and he stays dead (bar the raised), and the tribe's
+  grudge falls by 15. Run (56 blocks) or fall and he climbs a rank. Never come and he calls you a coward on the post.
+- **Death threats:** a captain who swears to have your head (a coward's challenger, a turncoat, one back from the dead you
+  killed) has his threat nailed up for the town boards, and it's in your own Tidings.
+- **Turning captains:** stare a downed captain down with Valor's coating up (Tempered or better, his rank at most two past
+  your Valor rank; a Deathless one never bends), or calm one with Ambrose's In-balming (below). He gets up, leaves his tribe (its grudge rises 20) and follows you as an MCA follower, fighting
+  what's after you and never you. In talk, send him **spying** (back in 2 days with up to 2 of his old tribe's secrets in
+  your Tidings) or to **lead a raid** on its nearest camp (settled at dawn: odds 55% plus 10% a rank over the rival he
+  meets; a win fells that rival and brings you 6 to 11 emeralds by messenger, a loss kills him). Proud captains turn back
+  8% of dawns, spiteful 12% (half if bound), going home and swearing to kill you. A sworn captain who dies doesn't come
+  back (unless he's raised, and then he's his tribe's again). Left behind in another dimension or far off, he catches up.
+- **Taking a king's seat:** a tribe's king takes a fifth of every blow from a player or a sworn captain while any of its
+  captains still stand, and says how many. Kill him with none left standing and a sworn captain of his brood at your
+  call, and that captain is crowned instead of the camp falling: the tribe is yours (no grudge, it never rises, they
+  spare you). Lose the captain or the seat and it's over.
+- **In-balming (Andy):** every spirit binds orcs and goblins its own way, a move at spirit level 4 (each spirit teaches it
+  in a few lines), cast on a downed one in reach (never a chief), 40 mana, a 2-minute wait:
+  - **Varro, Ki Mark** (up to 5): a mark of ki on his brow that only ki users (Z Fighters) see. He goes home as before,
+    but half the time when you're in a fight within 64 blocks (once in 5 minutes) he joins it: a short film for those near,
+    "FOR <you>!!", and he fights your foe for a minute.
+  - **Ambrose, Gentle Hand** (one at a time): only the big ones, a downed orc or an ogre under a quarter of its health
+    (never the Ogre King). He follows you and fights your foes. A captain he calms is sworn to you (spy, raid, all of it).
+  - **Grimsby, Steel Oath** (up to 3): an iron sword in his hand, and when you fight within 24 blocks of him he turns it on
+    his own.
+  - **Thessaly, Borrowed Eyes** (up to 3): each day she tells you what he saw: a captain's secret, or that his tribe is
+    out to hunt you.
+  - **The Quiet One, Silent Shadow** (one): he follows you unseen and silent, and once in 2 minutes steps out of nothing
+    to end a foe of yours under 30% health.
+  Past a spirit's limit the oldest one is let go.
+- Compile-checked only; not played.
+
+## 0.7.434: clockwork golem idle fidgets (Motion patch 6; pack 0.18.112)
+- Idle clockwork golems glance around now and then and shift their weight (`ClockworkGolemRenderer`).
+- Compile-checked only; not played.
+
+## 0.7.435: spoils (Havens patch 5; pack 0.18.114)
+- **Trophies worn as baubles** (Powers' bauble slots take them by its `jaymospowers:baubles/<slot>` tags; `Spoils`): a
+  captain who stays dead leaves a player his tusk (a charm named for him, +1 Will, +2 from rank 3 up); every goblin
+  king leaves his ring (+1 luck, +5% speed), every orc warchief a necklace of tusks (+1.5 attack), the Ogre King his
+  hide (a cloak: +3 armour, +0.15 knockback resistance). Each also adds 1 Will (staredowns and Will clashes).
+- **Weapons taken from kings:** a tribe's king (the goblin king or warchief at its seat) holds his own weapon and drops
+  its iron head, as does the Ogre King: Gutting Hook, Warchief's Cleaver, Ogre King's Maul, put together at Powers'
+  Tool Station only.
+- **Monster crowns:** the same kings drop their crown (goblin, orc, ogre). Right-click the air to wear it (drawn on the
+  head, +1 armour, +2 Will), or place it as a small block.
+- Drops only when a player had the kill. Compile-checked; not played.
+## 0.7.436: rare pets (Motion patch 7; pack 0.18.115)
+- `RarePets`: settlements of 8+ grown get one villager keeping an animal from a far climate (13 kinds by vanilla
+  variants), tamed dogs/parrots trail them, others keep near their spot. The keeper brags to players who come near (once a
+  day each, `rarepet.jaymoskingdoms.brag.N`) or tells an old tale hinting at Powers' hidden name-tag looks (`.hint.N`).
+  Orphaned rare pets go to a neighbour; a dead one is mourned.
+- Kingdoms' tarantulas, coyotes, feral wolves, moose, wild boars, great whales and pigeons get young via Powers'
+  `jaymospowers:has_young` tag.
+- Compile-checked only; not played.
+## 0.7.437: larger oceans and biomes, and the far grounds (Andy: "Oceans should generate much larger, and whalers should go further and further out to open ocean with every successful expedition, incurring greater risks of attack from pirates and wildlife, but also greater reward")
+- **Larger oceans and biomes** (Andy: "why cant biomes be larger as well? ... the cherry grove is usually too small"):
+  `data/minecraft/worldgen/density_function/overworld/` swaps continents, temperature, vegetation and erosion for the
+  Large Biomes noises (four times the scale; continents also shifted 0.06 toward the sea). Oceans, continents and
+  every biome (cherry groves too) are four times as wide, mountain ranges broader; structures keep their size.
+  New chunks only: an explored world gets a seam where old land meets new terrain, so it wants a new map to show.
+- **The far grounds (`FarGrounds`):** each realm counts its whalers home with whales; each one puts its next ground 160
+  blocks further out (up to 10 steps: 160-320 blocks at first, about 1760-1920 at the furthest). A whaler sunk, given
+  up for lost, or lost unseen puts it back a step. Her captain says how far out she's bound when she sails.
+- **Dangers out there**, rolled every minute while she's on her ground, more each step out:
+  - sea rovers: a pirate ship out of the nearest pirate cove heaves into sight
+    96-128 blocks off, out of players' sight, and runs her down; galleons likelier further out; one more rover is
+    possible every 4 steps. (Andy: "The pirates should always build a cove before a ship of theirs set sail") With no
+    cove standing, pirates found one first: when a whaler fits out for a far ground, on the coast near her harbour, or
+    on an island coast near her on the ground; until one stands, no rover comes. Rovers cruise that ground and are stowed after a day with nobody near. Sinking one doesn't
+    count against its camp's own ship.
+  - sharks: more come to her carcass, sooner, and from step 2 sharks come up under her lowered boats after the oarsmen.
+  - her pods hold more sperm whales (which turn on the boats that strike them) and the white whale now and then.
+  - a voyage made out of anyone's sight is lost with 4% a step (at most 35%).
+- **Reward:** her hold comes home 25% richer for each step out (oil, meat, bone, ambergris), pods are a whale bigger
+  every 3 steps, and ambergris is likelier.
+- Compile-checked and dev-server booted on a fresh world; not played.
+
+## 0.7.438: havens with their own life, first half (Havens patch 6a)
+- **Haven rulers' titles** (`Rulers.title`): a haven's ruler goes by their blood's title in the boss bar, audiences,
+  introductions and standing: Tide-Father/Tide-Mother and Shore-Warden (Tideborn), Stone-Elder and Stone-Reeve
+  (Stoneborn), Grove-Warden and Grove-Keeper (Sylvan), War-Chief and War-Leader (Warrior-born), High Elder and Elder
+  (mixed). Rules and succession are unchanged.
+- **Banners** (`Outfits.HAVEN_ARMS`, `HavenGates.banners`): each blood has its own arms (Tideborn cyan with waves,
+  Stoneborn grey with bricks, Sylvan green with a flower, Warrior-born red with a skull, mixed purple with a globe).
+  Once a haven's seat is loaded its banner goes up beside it, and its guards' shields bear the arms.
+- **Dress** (`Uniforms`, `tools/gen_uniforms.py havens`): haven guards and folk wear 32 new MCA outfits in their
+  blood's style: shell and net, stone-grey leather, leaf and bark, furs and war paint.
+- **Strangers at the gate** (`HavenGates`): a human within 40 blocks of a haven's seat is stopped by its nearest guard.
+  First a warning, then 10 s later a shove back out with Slowness, and if they keep coming, the guards set on them.
+  Non-humans of any blood walk in, and so does a masked player who passes for one. A human is let in if they carry
+  a Haven Token for that haven, have 400+ reputation there, or walk with an escort: a non-human player, or one of the
+  haven's folk with 40+ hearts.
+- **Haven Token:** a new talk answer, "Ask them to vouch for you at the gate", is offered to humans by a haven's grown
+  folk. With 60+ hearts they give you a token named for their haven; otherwise they politely refuse.
+- Compile-checked; not played.
+
+## 0.7.439: havens with their own life, second half (Havens patch 6b)
+- **Wares only havens make** (`HavenWares`): a haven's traders also sell their blood's wares. Tideborn sell Tide Pearls
+  and Deep Fish (good food), Stoneborn sell Cut Gems and Stoneborn picks/axes (stone, Efficiency II, Unbreaking II),
+  Sylvan sell Sylvan Herbs and Sylvan Bows (Power II), and Warrior-born sell War Hides and War Jerkins (dark-red
+  leather, Protection II). A mixed haven's trader sells one blood's. Traders in human towns buy the five goods a
+  player carries, when their trade has a use for them, at about twice the haven's price.
+- **Border clashes** (`BorderClashes`): now and then the nearest human purist realm (within 1500 blocks) sends 3-6 of
+  its guards against a haven a player is near. They muster on the road, march on the seat, fight its guards for two
+  minutes, then go home. A raided haven owes them one: once a player is near that realm's seat, the haven's militia
+  march on it the same way. Cutting down a raider (or militiaman) earns +8 with the side being raided, and cutting
+  down a defender earns +8 with the raiders, on top of the usual price for killing a realm's guard.
+- **Kidnapped children:** raiders who aren't all cut down may carry off one of the haven's children, left bound at
+  their muster on the road. A villager there cries out and has a rescue quest ready: free the child and they follow
+  you home (the usual captive rewards, plus the quest's).
+- **Haven bounties** (`QuestBoard.haven`): a haven villager with work asks for one of the haven's own troubles 40% of
+  the time: bring the carried-off child home, cut down 3-5 purist raiders (while a purist realm is near), or kill the
+  chief of the nearest camp that preys on them.
+- Compile-checked; not played.
+
+## 0.7.440: props (Motion patch 9; pack 0.18.120)
+- `props/Props`: scarecrow (birds and rabbits within 10 blocks are sent off, every 2 s), gravestone, lamp post (light
+  15), iron candle stand (flint and steel or a fire charge lights it, a bare hand snuffs it; light 12), four plushies
+  (bear, bunny, cat, frog) that squeak when pressed or squeezed in hand, window box and pot planter (plant a small flower,
+  it grows over random ticks, a bare hand picks 1-2 at full bloom).
+- Plushies are MCA gifts (`data/mca/gifts/plushies.json`): children +20, the married +10.
+- Our own shapes on vanilla textures, from `tools/gen_props.py`. Compile-checked only; not played.
+## 0.7.441: havens built their own way (Havens patch 6c)
+- **Haven houses** (`HavenBuildings`): a haven's houses are drawn in its blood's way, and a mixed haven's take a bit of
+  each, house by house.
+  - Tideborn: stilt houses three blocks up, with steps to a railed front deck, a fish rack and a barrel, plank walls
+    and a dried-kelp roof.
+  - Stoneborn: low stone-brick houses with a turf-and-moss mound for a roof and the door set in a stone arch (a
+    furnace and a stonecutter inside).
+  - Sylvan: tree houses, a platform on a trunk and four posts five blocks up, a ladder, rope rails, and a small house
+    under a leafy crown.
+  - Warrior-born: longhouses, 7 by 13-15, log walls under a steep spruce roof, a hearth down the middle and beds
+    along both sides.
+- **Fighting ring:** a Warrior-born or mixed haven also builds one: a round of posts and rails 13 across round a
+  sand floor.
+- **Havens alongside goblins and orcs:** a quarter of havens have goblins and orcs among their folk (a quarter of
+  those born there), and the tribes' war bands don't raid them. About a third of those sit under an orc king: more
+  of their folk are orcs, and their ruler is the Orc-Sworn Elder (lords: Orc-Sworn Reeve).
+## 0.7.442: star-readers (Xeno-Band patch 6; pack 0.18.122)
+- **Star-readers** (`ZFighterFolk.KINDS`, `star_reader`): Powers' new characters who come to a fallen star's crater and
+  keep to its rim. They are MCA villagers like the other Z Fighter characters, with their own opening lines, name line,
+  part ("Star-Reader") and bearing ("Watchful"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a night-blue
+  robe pricked with silver stars, a deep hood, a rope belt and a lens on a chain. Powers holds their spawning and talk.
+- Compile-checked; not played.
+
+## 0.7.443: havens and the tribes (Havens patch 7)
+- **Havens pay the tribes** (`TribePacts`): once a day every haven pays 4 emeralds from its treasury to each goblin or
+  orc tribe with a camp within 1200 blocks (into the king's seat). The tribe's war bands leave a paid-up haven alone
+  for 2 days; a haven that can't pay is raided like anyone. Human realms never pay. Havens that live alongside the
+  tribes (6c) are spared as before.
+- **Ogre Kings take tribute:** each standing Ogre King takes 3 emeralds a day from the nearest haven within 1200
+  blocks, into a chest of his hold when it's loaded. Haven folk talk of what they pay (and when they couldn't).
+- **Non-humans' grudge:** a non-human's grudge with a tribe rises at half the usual (by blood, mask or no).
+- **A tribe's favour:** the grudge can now go below nothing, down to -60, and that is the tribe's favour. You win it
+  with gifts to a chief or the pedlar once you owe nothing (6 emeralds for 10 favour) and by killing the rival brood's
+  folk. It fades 1 a day. The tribe's mood has a new "friend" line.
+- **Calling on a tribe:** with favour of 30 or more, when raiders (a camp's or purists') set out against the realm or
+  haven you're sworn to, the friendliest tribe with a camp within 1500 blocks sends a war band of 3-6 to its seat (at
+  most once a day per player). The band fights only the raiders and whoever is set on you; the town's guards leave
+  it be. It goes home 30 s after the raid is over, or after 6 minutes.
+- Good standing (favour 20) with an orc tribe is recorded as the deed `tribe.orc_friend`, which will open the greenskin road
+  (below). Haven guards no longer set on a tribe's pedlar.
+- A tribe whose favour you hold (20 or more) leaves you be unless you strike first. A truce token now clears only the
+  grudge, never the favour.
+- **A greenskin life** (`GreenskinLife`): a new life-story road, "Raised by the camps", opened for the world once anyone
+  stands well with an orc tribe. Only for bloods that pass for human. You wake 10-18 blocks outside the nearest orc camp
+  (a half-orc) or goblin village (goblin-raised), with a leather jerkin, a stone axe and (goblin-raised) a goblin mask.
+  - No goblin or orc of any tribe sets on you unless you strike first; every tribe's grudge rises at a quarter; your
+    home tribe starts you at 30 favour, enough to call on it.
+  - Human towns mind you at degree 5 (Bio-built 6, Tideborn 4), the tolerant at 40% of that, purists harder. A full
+    mask hides a goblin-raised human's past; a half-orc's never. Non-humans and havens don't hold it against you.
+  - Aim: a good name of 100 with a human realm ("the Accepted").
+- **More monstrous non-humans:**
+  - Tideborn fins are drawn 1.45x bigger, and both hands get webbing down the outer edge (players and villagers).
+  - Stoneborn get dark cracks over the face, neck and chest and a heavy stone brow (players and villagers).
+  - Warrior-born villagers always show a furred tail, swaying.
+  - Bio-built villagers wear the first form's horns, beak, claws and growths and its stinger tail over their marks.
+  - Textures: `tools/gen_monstrous_looks.py`.
+- **Tails smelled:** a Warrior-born player's tied tail still fools townsfolk, but not those who know: Warrior-born
+  villagers, a haven's people, hunters (fletchers and leatherworkers) and the tribes' goblins and orcs. A mask no longer
+  hides the blood from them, and now and then (at most every 2.5 minutes) one within 6 blocks says they smell it.
+## 0.7.444: the star smith (Xeno-Band patch 7; pack 0.18.123)
+- **Star smith** (`ZFighterFolk.KINDS`, `star_smith`): Powers' smith who keeps the Star Forge on a far world. They are an
+  MCA villager like the other Z Fighter characters, with their own opening lines, name line, part ("Star Smith") and
+  bearing ("Gruff"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a dark suit with green-lit seams, a
+  scorched leather apron, elbow gloves and a welding visor. `KINDS` is now `Map.ofEntries` (it outgrew `Map.of`).
+- Compile-checked; not played.
+
+## 0.7.445: horses (Havens patch 8; pack 0.18.124)
+- **Better Horses** (by CanineGray, CC BY-NC 4.0; Modrinth alMAK8J4, v4.3 for 1.21.11) ships unchanged with credit: the
+  pack's client fetches it on first launch and switches it on above Fresh Animations (`PackResourcePacks`). Our breed
+  horses keep our own renderer, so it draws donkeys and mules. It's made for an older game version (formats 22 to 94),
+  so it needs a look in game on 26.3.
+- **Donkeys and mules join our breeds** (`Breed.DONKEY`, `Breed.MULE`): bond and trust, the roster, the command wheel,
+  gaits and stamina (they canter at most), hunger and thirst, the stats a Rider reads. They keep vanilla's saddle and
+  chest (no Tack button) and vanilla's look. A jenny and a jack make a donkey; a horse and a donkey a mule, which never
+  breeds. Rider gifts: the donkey keeps its pace under a pack, the mule is quicker on bare stone and gravel.
+- **Coat names you can read:** the Rider's saddle glance, the horse's screen and the roster name the coat ("Bay with
+  Blaze"), the rare one in gold, and two handbook pages list every breed's coats and how foals take a parent's coat.
+- **Smoother rearing and grazing** (`BreedHorseModel`): both blends ease in and out; reared, the head tosses and the
+  tail lashes; a grazing horse steps a foreleg on now and then, each horse on its own beat.
+- **A fuller horse** (`tools/horse_rig.py` FULLER, the classic shape kept): jointed legs (knee, hock and gaskin,
+  fetlock and coronet, feathering on the draft and destrier), a shaped muzzle by breed (nostrils, jowl, Roman nose,
+  dished face; never over 4 wide, so the bridle fits) and longer manes (a forelock, and the mane falling over the neck
+  on all but the steppe pony). Set FULLER = False and rerun `tools/gen_horses.py` for the plain horse again.
+- Compile-checked; not played.
+
+## 0.7.446: the band hunter and the red band (Xeno-Band patch 8; pack 0.18.125)
+- **Band hunter** (`ZFighterFolk.KINDS`, `band_hunter`): Powers' outcast who wears the rival band and hunts Xeno-Band
+  wearers. An MCA villager with his own opening lines, name line, part ("Band Hunter") and bearing ("Hungry"); Powers
+  walks him (like the patrol), so `step` leaves him be, and the same once he's bandless and running. 4 new outfits
+  (`tools/gen_zfighter_outfits.py`): a long ragged coat over patched clothes, a torn hood, wrapped shins and the red band
+  on his left wrist.
+- **Wearing the red band is a crime** (`Theft.Crime.RIVAL_BAND`, heavy) where a realm that knows the bands holds the law
+  and its people see it (`Aliens.rivalBand`). A realm knows the bands once its people have seen anyone change into the
+  alien (`Aliens.AWARE`, from now on). Once per realm every 2 minutes; nobody notices it later.
+- Compile-checked; not played.
+
+## 0.7.447: donkeys and mules no longer crash the server (pack 0.18.127)
+- Andy: "what just happened to the server?" The Deck server crashed when a roaming caravan's pack donkey spawned. Since
+  0.7.445 donkeys and mules are breeds with a single coat, and rolling a coat for one asked for a random pick out of zero
+  ordinary coats (`Equine.coat`, `nextInt(0)`), which throws. A one-coat breed now just takes its coat.
+
+## 0.7.448: the life story fits the heritage you were born to (pack 0.19.0)
+- Andy: "this screen should recontextualize dependent on which heritage you pick. bio built wouldnt have anyone who
+  raised them for example. switch all applicably and add wherever you see fit". The story's pages after "Where were you
+  born?" now read in that blood's words: `LifeStoryScreen.story` takes `story.jaymoskingdoms.as.<heritage>.<rest>` over
+  the plain key where the lang has one (titles, lines, answers, tales, short lines).
+- Bio-built: "Who took you in, after the vats?" (bought as a field hand, a sideshow exhibit, broken out of a cage by
+  outlaws, "Nobody: you raised yourself"); "In your first months..." and "Once you were full grown..." with every answer
+  and tale rewritten. Rubber-folk are raised on the fair's road, Tideborn are found, Warrior-born grow up in the camp,
+  Stoneborn in the hold, and the rest get their land's farmers, hunters, fishers and so on.
+- One raiser of their own per blood (`Answer.onlyBorn`): the Mad Tinkerer and sewer vat-kin (Bio-built), the acrobats and
+  the ringmaster (Rubber-folk), the water temple's keepers (Tideborn), the grove-keepers (Sylvan), a Verdant elder, Hornkin
+  under the truce (Emberborn), snow wolves (Frostborn), barrow-keepers (Nightborn), the warband's chief (Warrior-born), an
+  old martial master (Earthling), the dawn priests (Dawnborn). Each gives an attribute point, a temperament, a figure's
+  clothes and a village job lean like the others.
+- "Minor nobles of a realm" isn't asked of the Bio-built, Warrior-born or Verdant (`Answer.notBorn`). A new birthplace
+  drops answers its blood isn't asked; the server refuses them too.
+- The narrator: a blood's own lines are voiced once their clips are made (`make_voices.py narrator`, then `--sounds`);
+  till then they're read in silence. The 13 new raisers' tales are listed in sounds.json for the same run.
+- Compile-checked; not seen in game.
+
+## 0.7.449: villagers come over for a reason, and you can ask why; accuse whoever robbed you (pack 0.19.2)
+Andy: "when villagers run up to you, you should be able to ask them why or whats going on. they should also have a
+reason other than just introducing themselves." / "you should be able to confront who you think stole from you in the
+talk or interact screen. accusing the wrong person loses you hearts w them".
+- `ComingOver`: a stranger only hurries over (`Handshakes`) with a reason, picked by weight and temperament: you're
+  hurt (they hand you bread), a monster's near you (they point it out, it glows a few seconds), rain or a storm, thanks
+  they owe you (their memory of you), your deeds here, your rare heritage is theirs, you're a foreigner or in armour
+  they've not seen, word of a beast, or (rarely) they took you for someone else. No reason, nobody comes. The hail
+  says why, the arrival line says it fully, and they still wave or shake and give their name.
+- "Ask what's going on" in MCA's menu for a day after (also after an `Approaches` visit: what more they had to say).
+  Without a shared tongue it's gestures.
+- "Accuse them of theft" in MCA's menu for a day after you notice you were robbed or cheated (`Crooks`): the thief is
+  confronted as by a right-click, however long ago it was; anyone else loses 8 hearts with you, says so, and remembers
+  it (`Recollections.Kind.ACCUSED`, which you can apologise for). One accusation per villager per theft.
+## 0.7.450: fair bouts, the bookie leads you down, crackdowns, a clear ladder (pack 0.19.3)
+- Andy: "I just accepted a bout, and got instantly knocked out because i was teleported in." Nobody is teleported into
+  the ring any more (`FightPit.run`). At the bell's time the bell waits up to a minute (`CALL_TICKS`) for a player on
+  the card to walk into the ring, the bookie calling them in; if they never come the bout's called off and every stake,
+  their entry too, goes back. After the bell both stand in their corners 3 seconds (`GRACE_TICKS`) before anyone
+  swings or a punch counts. A player needs 8 wind (12 health) to take a place (`MIN_WIND`), checked again at the bell,
+  and a blow made bigger by anything else is still never let take them under the yield point.
+- Andy: "if you pay the bookie outside of the speakeasy, he should lead you to it." By day the bookie may be up in town
+  (`Bookies.outAndAbout`). There he won't open his book or take a coin: he says to follow and walks you to the hatch
+  (`Bookies.Walk`), waiting when you fall behind and giving up if you wander 32 blocks off, then goes down first.
+  Come evening he walks home himself.
+- Andy: "guards overhearing talk of the speakeasy will begin to crackdown, so deals out in the open are frowned upon and
+  rare." Asking a bookie in the street with a guard within 12 blocks: he's never heard of a den, and the guard has
+  (`Underworld.crackDown`, attachment `den_crackdowns`). A street sale of contraband seen by a guard does the same.
+  For a day: no crook whispers the way, street buyers are 25 less receptive, bookies lead nobody and stay home.
+- Andy: "bug where there are so many villagers stuck on the speakeasy ladder" (video: an unemployed villager wedged in
+  the shaft). The den's hands wandered up the ladder, a replacement was hired a day later, and so on. Now every 2 seconds
+  (`Underworld.keepHome`): the fence, dice-thrower, attendant and fighters found out of their rooms are put back at
+  their spots, a second hand with the same job goes back to town as an ordinary villager, the bookie counts as present
+  anywhere within 64 blocks, and anyone else stuck in the shaft 2 checks running is put out at its nearer end.
+## 0.7.451: story screen fixes (pack 0.19.4)
+- Andy: "there is a problem with the way the character is drawn". A Bio-built's form parts (beak head, horns, bracers,
+  tail) were placed on the marks model's bones at submit time, but that shared model still held a pose from another draw
+  (the world's, another player's); the body itself is posed from the state only when drawn. So on the story screen the
+  head and parts sat askew of the body and armour. `BioForms.submit` now poses the bones from the state first
+  (`ModelPoses.now`: `setupAnim` plus the same after-pose list the `prepareModel` mixin runs, now kept in `ModelPoses.after`).
+- Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'". The road
+  carousel goes through the open starts only; a "Locked (n)" button in its header switches to the locked ones (with
+  their hints and reasons, as before) and "Open starts (n)" back.
+- Andy: "there is nothing that tells you the start you got if you choose the random start". Fate's pick is shown as a
+  title on waking (the start's name, its short line under it) and said in chat as "Fate chose your start: ...".
+- Andy: "i seem unable to select any of these" (the harder life's flaws and switches). Nothing in the click path drops
+  the click, and a flip is the only click on the screen that undoes itself if it arrives twice, so a second click on the
+  same choice within 250 ms (`FLIP_REPEAT_MS`) now counts as the same click. Unconfirmed cause: check in game.
+- Compile-checked; not seen in game.
+
+## 0.7.452: the land round a new arrival is made ahead (pack 0.19.6)
+- Andy: "the issue with chunky is we are not necessarily going to be spawning within the 500 or so blocks it generates
+  because of the distinct starts." Once a life story sets someone down (any start, any world), `ArrivalGround` makes the
+  land round them in the background: every chunk from just past their view (8) out to 20 chunks, nearest first, two at
+  a time, and none while the server's average tick is over 40 ms. Each is let go once made. One arrival's land at a time.
+  Tuning at the top of `ArrivalGround`. Built; not yet watched on the Deck.
+## 0.7.454: ask a villager the way; action options on the Interact page (pack 0.19.8)
+- Andy: "you should be able to ask villagers where certain things in town are in the talk option, such as if you need a
+  doctor, or a butcher"; then "move some of these options to the interact menu". MCA's Interact page has Ask the
+  Way (row 9, `McaScreensMixin`), opening its own page (`McaWayPageMixin`; its back arrow returns to Interact): a healer
+  (a cleric), a butcher, a smith (armourer, weaponsmith or toolsmith), a tailor (a grown shepherd), the tavern, the
+  stables, whoever rules here. Each sends MCA command `way.<place>`, answered by `Directions` (`McaCommandMixin`).
+- They find the nearest in their town (folk within 128 blocks, at their workstation if it's near them; the faction's
+  standing tavern or stable; the ruler, or the seat while they're away) and turn to face it for a moment, telling you
+  who and where in MCA's chat ("Bram the butcher? That way: about 40 paces to the north-east."), and if they're abed.
+- One with 10+ hearts for you, or any child, walks you there if it's 10-96 blocks off: waits when you fall 7 blocks
+  behind and calls you on, gives up past 32, points out the rest after 2 minutes or 12 seconds of getting no nearer,
+  and says so when you've arrived. Guards, archers, a realm's workers and rulers keep their posts and only point; their
+  routines leave a guide be (`Routines.idle`). Below -15 hearts: "Find it yourself." Asking needs a shared tongue (a
+  foreigner shrugs); a ship's crew says nothing. Tuning at the top of `Directions`.
+- Andy picked "Ask the way plus action options": Seek an audience, a pedlar's wares, Offer tribute and a sworn
+  captain's Send to Spy / Send to Raid are Interact buttons now (`InteractActions`), gone from the talk menu
+  (`McaAnswersMixin`). Which apply is worked out as you right-click a villager and sent ahead of MCA's screen
+  (`InteractActions.Offered`); the client shows only those, stacked under Ask the Way (`McaActionButtonsMixin`). Each
+  comes back as MCA command `act.<action>` and is checked again before it's done. Wares and tribute need no words.
+- "Offer a handshake" stays where it was: it only shows to someone whose name you don't know, and their page has no
+  Interact button (only Introduce, Gift, Trade).
+- Compile-checked; not seen in game.
+
+## 0.7.456: a felled tree never stands back up (pack 0.19.15)
+- A tree felled into another tree was caught almost upright and then settled as real blocks at that lean, so it
+  looked like it replanted itself. Now, struck before it's half over (`FallingTree.LYING`, 45°), it glances off a
+  quarter turn to whichever side is clear and falls on that way (at most `GLANCES` times, with a knock).
+- With no clear way down it leans there a moment and breaks apart, dropping its wood and leaves; it is never set back
+  as standing blocks. Trees that get past half over still settle lying as before.
+- Compile-checked; not seen in game.
+## 0.7.457: flaws can be ticked; the Bio-built figure drawn right (pack 0.19.16)
+- Andy: "i still cant tick any flaws or switches". 26.3 numbers the mouse buttons from 1 (left 1, right 3): the story's
+  flaw click waited for button 0 and never came, and the right-click step-back took button 1, so a left click on the
+  Heritage, Class and Look buttons stepped back. Both use `InputConstants.MOUSE_BUTTON_LEFT/RIGHT` now. The double-click
+  guard from 0.7.451 is gone (it was a wrong guess).
+- Andy: "still having a problem with the way the character is drawn on the start path screen". MCA's skin and clothes
+  bodies take the pose MCA captured off the renderer's model after our poses were laid on it; the Bio-built hunch (an
+  added offset) was then added again when each was drawn, sinking the head into the chest. `ModelPoses.after` skips it
+  on a body MCA has posed (`McaLookModels.posedByMca`). Checked in a test game (Xvfb): the flaws tick and the figure
+  stands right.
+
+## 0.7.458: larger monoliths with a living heart (pack 0.19.19)
+- Andy: "I'd like the monoliths larger and animated more like the mod they came from" (Ancient Remnants: Monoliths,
+  studied from its public source as behaviour only). Its monoliths stand about 120 blocks with an Elderheart of six
+  glowing shards that tumbles and breathes; ours now match that feel with our own code and blocks.
+- Bigger: new monoliths rise 78-102 blocks to the crown (was 39-54) on a broad 5x5 foot (corners cut, a third of the
+  way up) under the 3x3 shaft and 1x1 crown; paved ground and rubble spread wider. Cut shorter under the world's ceiling.
+- Animated (`MonolithHeart`): the heart floats over the crown as seven block displays of the element's gem, all
+  full-bright: a core that turns and swells, and six crystal shards (cubes stood on a corner) on its six sides. The
+  cluster tumbles slowly on all three axes; the shards breathe out and in, stretching as they swing. Moved every 3
+  ticks with smooth interpolation, only while a player is within 192 blocks. Motes of its element and end-rod sparks
+  are drawn in to it off the stone round it.
+- Old monoliths still awake keep their size but get the living heart: their block core and the four still shards are
+  taken out and the displays float in their place (once, when first loaded). Monoliths remember their heart height
+  (`heart` in the `monoliths` attachment).
+- Giant slain: the core goes out and the shards hang still and dark (band stone).
+- Tuning at the top of `MonolithHeart` and `Monoliths`. Compile-checked; not seen in game.
+
+- **0.7.459 (pack 0.19.20):** with Powers' executions of the downed (`MobExecutions`), a realm's guards and archers and a
+  village's own iron golems never finish off a downed player: they arrest as before. Only a hotheaded or spiteful guard
+  will (`PowersCompat.spareRighteousGuards`). Compile-checked; not seen in game.
+
+- **0.7.461, werewolves and the false moon:** Andy: werewolves "should" turn under a Z Fighter's false moon (Powers'
+  `ZFighterFakeMoon`, a great ball of ki thrown up into the night). Cursed villagers and cursed players under its light
+  change as under a full moon, any night (`PowersCompat.falseMoon`, read by reflection; nothing without Powers). Once
+  changed, the beast lasts the night as usual. Compile-checked; not seen in game.
+## 0.7.462: Healers, the infirmary cot and the shrine
+Healing plan 9 to 11 (`docs/Healing-Plan.md`). All three reach Jaymo's Powers' wounds through `PowersCompat` (new calls: `injuries`,
+`setBones`, `healEveryPart`); without Powers they heal the hearts. The shared code is `Healing`; tuning is in `static final`
+constants at the top of each class.
+- **Paid healing** (`Restoration.services`, `Healing.treat`): a village cleric (sneak and use, with emeralds or empty-handed, as
+  before) and a court wizard now also offer **A full treatment**: cuts closed, festering cleaned, every break set, every part
+  healed to full so the breaks knit. Not a severed limb, not the downed, no curse lifted. Price `4`, plus `5` a break, `1` a cut,
+  `3` a festering part and `2` a quarter of health lost, at most 48 emeralds; the option is greyed out when there is nothing to
+  treat or you cannot pay. The healer answers in a speech bubble.
+- **Infirmary cot** (`InfirmaryCot`, a vanilla `BedBlock` subclass, 6/16 high, no block entity, its own head and foot models; recipe
+  3 wool over 2 planks and a stick; in the `beds` tag): sleeps, rests (`BedRest`) and sets the spawn like any bed. Lying on it for
+  5 seconds, asleep or resting, with a cleric or court wizard within 16 blocks or a brewing stand within 8, sets and knits your breaks
+  and heals every part to full (once a lying down; the healer speaks, a brewing stand only an overlay line).
+- **Shrine** (`Shrine`; recipe 2 candles, 5 stone bricks, a gold nugget): hold use for 5 seconds (the held button re-uses the block
+  every 4 ticks; a pause over 10 ticks, walking off or turning away breaks the prayer). Once per Minecraft day per player
+  (`shrine_prayed` attachment, the overworld day number, kept through death): every part heals 3 and festering is cleared, with a
+  chime and motes.
+- Textures and models by `tools/gen_healing_blocks.py`.
+
+## 0.7.463: the infirmary cot's loot table loads (pack 0.19.27)
+- The Deck server would not start on 0.19.25 ("Failed to load registries"): `infirmary_cot.json` used `minecraft:block_state_property`,
+  which 26.3 dropped. It's written with `minecraft:match_block` now, as the Training Post's was.
+
+- **0.7.464, longer skill training with milestones (Jaymo's Powers 0.19.29):** Andy: "a longer grind but every milestone
+  should feel more rewarding". `Skills.XP_BASE`/`XP_STEP` 30/15 -> 60/30; saved experience is scaled once on join to
+  `Skills.PACE` (kept in the xp map under `_pace`), so nobody loses a level. Every `MILESTONE_EVERY` (5) levels in a pillar
+  is a bonus point (`Progress.points`, retroactive). Level-ups play `Fanfare.fanfare` (a copy of Powers' chord):
+  overlay for a level, title for every fifth, the grand one at a pillar's top. A Weighted Gi (Powers) worn gives Strength
+  experience x1.5. Valor and Bio-built keep #823's pace.
+## 0.7.465: the Grue (pack 0.19.31)
+Andy: corruption should matter to mana spirits. The deeper a keeper goes into the dark arts (flux, death and blood magic),
+the closer the Grue comes. The spirit fights it the whole way, until the Grue takes the spirit, then the body. `spirits/Grue`.
+- **Hold (0-100):** each look (20 s) adds 0.03 per point of alchemical corruption above 10, up to half less at full bond.
+  Every forbidden cast adds 3. It ebbs by 1 a look while corruption is under 10.
+- **Warnings:** every spirit warns in its own voice when you cast death or blood magic, stand in pooled flux, or your
+  corruption jumps. The Quiet One breaks its silence for this alone.
+- **25+:** the spirit may stop a forbidden cast (35% rising to 75%), plucking what's in your hand and flinging it ahead.
+  In pooled flux it may take the wheel and walk you out. The arms flicker dark red.
+- **55+:** every 1.5 to 3.5 min the Grue lashes at you both: 3 to 8 hurt (never past 2 hearts), -2 bond, a red flash.
+  The arms stay streaked red.
+- **100, taken:** the spirit turns deep dark red and stops answering. The Grue keeps it out with no mana drain and drives
+  the body (client steering shared with seizures). It walks your routine (the spot you were at each in-game hour, kept
+  every 30 s), idles there, and fights anything after you: a 14-hurt strike and a 9-hurt grasp from 14 blocks, scaled by
+  spirit level. It runs below 30% health. Now and then it says one of your last 16 lines aloud when someone is within 32
+  blocks, and taunts you. You may only eat and drink: no attacks, blocks or other uses, and your chat doesn't come out
+  (/ooc does).
+- **Exorcism:** a friend downs the host, then uses a Purifying Draught on them. The Grue burns out, takes the spirit with
+  it (never another), and 20 lingering corruption goes. Ops: `/kingdom grue free <player>`, `/kingdom grue hold <player> <n>`.
+
+## 0.7.466: born again from the afterlife; starts per player and group (pack 0.19.33)
+Andy: "when respawning from heaven or leaving the aether you are given the option to start over, or reincarnate, giving
+you access to all the different starts you may have unlocked. starts are now per group / player", and "make the judge
+offer it in his interactions menu".
+- **Road deeds per player and group (`RoadDeeds`):** a deed (a captive freed, a pit bout won, a world reached, ...) no
+  longer opens its road for the whole world. It is kept for the one who did it (`road_deeds_own`, by UUID, so a merchant
+  order delivered while away counts) and for their group, the handshake party (`Parties.team`, `road_deeds_groups` by team
+  name). A road is open to you if you, your group, or a group member who is on did its deed. World events count for who
+  was there: a blood moon for everyone on in the Overworld as it ends, a falling star for everyone within 384 blocks
+  (`RoadDeeds.STAR_SEEN`), a whale for the striker and everyone near it.
+- Old saves: the world-wide deeds done before this patch are handed, once, to every player who had already told their
+  story (`road_deeds_handed`). New players start with only their own. Ops' `/kingdom roads unlock|lock` still force a road
+  for everyone; `/kingdom roads deeds <player>` lists the deeds a player may count.
+- **`LifeStory.reincarnate`** (called by Powers): unmakes heritage, class and story as a Writ of Rebirth does and tells
+  the whole life story again, with every road the player or their group has opened. Roads already taken stay theirs.
+  MCA's look and name are kept.
+- Compile-checked with javac against the 26.3 jars; not built with Gradle or seen in game.
+## 0.7.467: the Strong Strike and the barrage clash (pack 0.19.35)
+Andy: "each spirit should have a strong strike attack that whips the fist straight forward within your view, and when one
+of these punches clashes with another you get a barrage style clash, that requires precise timing or manipulation
+otherwise to win" (the stand rush gif), and the Grue trial "needs to culminate in one of these, with letterboxing and music".
+- **Strong Strike (`SpiritPunch`, move `punch`):** every spirit's first move, from level 1. The fist winds up and whips
+  straight out along your aim (`Poses.PUNCH`: the arm stretches the whole way, a beat at full stretch, snapped back), in
+  first person too, and hits the first thing in line. Per spirit: Grimsby 6.5 hurt / 0.8 s / 7 blocks, Varro 9 / 1.3 s /
+  6 blocks with a big throw, Ambrose 6 / 0.9 s / 7, Thessaly 4.5 / 0.5 s / 10 blocks, the Quiet One 6 / 0.8 s / 7 by its
+  size this summon. Scaled by spirit level; 5 mana; a punch into the air still goes out. Allies are never struck.
+- **Punches meeting:** a punch at a keeper whose spirit is out lands 3 ticks late; if they punch back at you within 12
+  ticks, the fists meet, neither lands, and a barrage begins. A folk keeper punched with its spirit out answers in kind one
+  time in two. Punches don't start the old locked-arms clash (`SpiritClash`) any more; the other strikes still do.
+- **The barrage clash (`SpiritBarrage`):** both rooted face to face, both spirits pounding fists in the middle
+  (`Poses.BARRAGE`, both arms, fast, each blow from its own angle, ghost trails), sparks and fist sounds where they meet.
+  The film is the clash's (`ClashCinematic`: letterbox, side camera, tug bar) with its own drum track. The drum is the
+  clock: two count-in clicks, then 6 beats every half second, 6 every 0.4 s, 8 every 0.3 s.
+  - Tap the spirit key on the drum: within 1 tick is PERFECT (4 points), within 2.5 ticks Good (2); landed blows in a row
+    add 0.5 each (up to 2). A beat let pass scores nothing.
+  - Mashing loses: a tap off the beat, or a second tap on one beat, staggers you (3 points to them, your next beat lost).
+  - Feint (the manipulation): sneak and tap on a beat (8 mana, once in 3 beats). If they struck that beat, their blow goes
+    past you, its worth (4) is yours and their streak breaks; if they didn't, it's wasted.
+  - Taps are timed on your own screen, every frame, to the hundredth of a tick, and sent as an offset (`SpiritBarrage.Tap`),
+    so lag doesn't move the beat.
+  - Decided at a 30 point lead or when the drum ends; within 2 points it's a draw (a crash, both pushed back 3 blocks).
+    Otherwise the winner's flurry breaks through: a second of blows (1 hurt each, scaled by level), a last 4 with an
+    impact frame, the loser thrown 8 blocks, +4 bond, the clash win/lose lines.
+  - HUD over the tug bar: a square closing on your fist (white on the drum), the good window, your tap's timing (PERFECT /
+    Good / Too early / Too late), what came of the beat (landed, missed, staggered, feinted, ...), and the keys.
+  - Music: `sounds/spirit/barrage_theme.ogg` (big drum and clap on every beat, fist ticks between, a climbing A-minor bass,
+    a riser), `barrage_rush.ogg` (a roll into the blow) and `barrage_draw.ogg`, our own, made by `tools/barrage_music.py`.
+    Played on the jukebox volume (music is often turned off, and the drum is the clock).
+- **For scripted fights (the Grue trial):** `SpiritBarrage.start(ServerPlayer, LivingEntity foe, float skill, Ending)`
+  against any living thing; the foe keeps the beat by `skill` (0-1). Neither side needs a spirit out. It never takes
+  either side below 1 health; `Ending` is told once: WON, LOST, DRAW, or BROKEN (a side died, left, changed world, or
+  `cancel` was called). `inBarrage(entity)`. The two sides can't hurt each other during it except by its own blows.
+- Not compile-checked or seen in game yet.
+
+## 0.7.468: the Grue's trial (pack 0.19.36)
+Jung, through Andy: when the Grue takes you, you're sent to a black realm to fight it, and if you win you can use the curse
+at will. Andy chose a sealed arena in the sky (no new dimension, keeping the no-new-realms rule) and "the blindness fog
+rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`.
+- **Fog:** at hold 100, black fog rolls in from the screen's edges (blindness, darkness) for 3 s.
+- **Arena:** a sealed drum of black concrete (radius 13, 10 high), 26 blocks below the top of the world over where you stood,
+  lit only by a ring of crying obsidian. It's built only into air, and afterwards only arena blocks in the arena's shape are
+  removed. Wander off (a pearl, a power) and you're put back inside.
+- **The Grue:** a dark red evoker with 260 health and 10 armour, plus its own fangs and vexes. It has a 7-hurt strike up close
+  and a 5-hurt grasp from 4-20 blocks. Below 2/3 health it calls 3 shades (every 20 s) and throws darkness. Below 1/3 it's dark
+  the whole time and it blinks about the arena every 6 s, while your spirit breaks through every 10 s to hold it (Slowness VI,
+  Weakness III). 5 minute limit. It has a boss bar.
+- **Win:** the curse is subjugated. The hold is gone for good, `SpiritState.MASTERED` is set (it survives every summon), and
+  two spirit moves are added: Grue Form (a toggle: arms deep red, every spirit move does 1.75x, 2 mana a second) and Grue's
+  Grasp (20 blocks, 10 hurt x level, pulls in).
+- **Lose** (you would die, you're downed, or time runs out): you're back where you stood and the Grue has you, as in 0.7.465.
+  Exorcism still frees you.
+- **Cut short** (logout, server stop, the boss lost without dying): arena cleared, you're put back, and the hold drops to 95,
+  so it comes again. `TRIAL` is saved, so a crash is mended at your next login.
+- **Finale (0.7.468):** Andy: "the fight needs to culminate in one of these, with letterboxing and music". At a tenth of its
+  health, or on what would be the killing blow, the Grue sweeps its shades and vexes off the drum and locks fists with you
+  in a barrage clash (`SpiritBarrage`, letterboxed with drums; Grue skill 0.68). Win and it falls, and the curse is yours.
+  Lose and it has you. A draw starts the clash again, with the Grue 0.1 clumsier each time (never below 0.3). If the clash is
+  broken off, the fight goes on and the clash starts again. If the clash can't start at all, the Grue just dies as before.
+- Fixes two compile errors that came in with 0.7.467's barrage: `Entity.invulnerableTime` is private in 26.3 (now
+  `setInvulnerableTime`), and `SpiritRig` declared `beat` twice.
+- Compile-checked with javac against the 26.3 jars; not played.
+
+## 0.7.469: the greenskin road's deed goes to who earned it (pack 0.19.37)
+- Master didn't compile: 0.7.466 made deeds per player and group, and `TribePacts.favoured` still marked the deed for the
+  whole world. It now records it for the player who won the orc tribe's favour (`RoadDeeds.done`, kept even if they're away).
+
+## 0.7.470: Aether Giants fell trees with every step (pack 0.19.39)
+- Andy: "all giants should get this damaging effect" (trees knocked down by their strides). Each footfall now topples the
+  natural trees within `STEP_TREE_REACH` (2.5 blocks) of the Giant, away from it, and the falling wood crushes what it lands
+  on (mob griefing on). Walking into trees still knocks them over as before. Powers' Great Apes and Towerback do the same
+  through `core/GiantTrample`.
+
+## 0.7.471: blood-thirst veins creep in from the screen's edges (pack 0.19.44)
+- Andy: "veins should encroach on your screen the thirstier you get". The pack has two thirsts (Kitchen's water thirst and a
+  vampire's blood thirst); the veins are the vampire's. New client `ThirstVeins`: dark veins grow in from the corners and edges
+  as the pallor rises (`Vampires.pallor`: from 5 minutes after a drink to full at 2 days), reaching about two thirds of the way
+  in, the middle left clear, once starving or the blood fever burns. They darken and swell with the vampire's heartbeat
+  (`BloodVision.beat`), creep in slowly and draw back over a few seconds after a drink. Dhampirs never thirst, so never see
+  them. Art: six growth rings, `textures/gui/thirst_veins_1..6.png` (320x180 pixel art, drawn by `tools/gen_thirst_veins.py`).
+
+## 0.7.472: the Bio-built figure on the road page, again (pack 0.19.48)
+- Andy: "the bio built start still glitches on the preview can you see it? you said it was fixed but this is still broken"
+  (video: on "What sets you on the road now?" the Bio-built figure of you leant over, rose out of its frame and came apart).
+  0.7.455 was checked in a test game without Fresh Animations. While the story is up you hang in stasis, flying
+  (`StoryStasis`), and Fresh Animations' player pack reads `abilities.flying`: through EMF it played its flying pose on the
+  road page's figure of you (it's you yourself there, not a stand-in). That pose moves the bones' pivots, which MCA's
+  bodies, the armour and the form's parts each take differently. EMF now pauses for you while the story screen is up
+  (`StoryFigure.drawingYou`, registered in `EmfBladePause`), so the figure acts out its scene as the stand-in does.
+- Checked in a test game (Xvfb) with MCA, EMF/ETF and Fresh Animations: Player Extension: before, you hung in Fresh
+  Animations' flying pose (legs dangling) on every road; after, the figure stands, walks or works as the road says, the
+  form whole.
+## 0.7.474: ogres live with the orcs, half-orcs look the part, orcs named right (pack 0.19.50)
+- **Ogres build with the orcs.** Andy: "these ogres should build these camps with the orcs as they will help them expand and
+  buid like the villagers do". An ogre band (a two-headed brute and two ogres) no longer rings itself with mossy stones in the
+  wild. It moves into an orc camp in its region that has no band yet (`OgreHolds.joinCamp`), or raises a new orc camp there
+  with the orcs (`OrcCamps.foundNear`, in orc country, kingdom or no). Each ogre in a camp lets it raise one more building a
+  day, and the nearest one lumbers over and heaves each new building into place (`OgreHolds.haul`). Ogres and greenskins
+  never attack each other unless one is struck (`OgreHolds.spares`, in `Ogre`'s targets and the MCA guard sensor). A band in
+  a camp also spares anyone raised among the orcs. When the camp is cleared its band breaks up: they fight on, and are gone
+  once they unload. Lone outposts raised before this stay as they were. The Ogre King and his hold are unchanged; his death
+  still breaks up every band in his region.
+- **Jade names greenskins.** Andy: "they shouldnt be referred to as villagers if they are orc or goblin, jade reads them out
+  incorrectly". A goblin or orc you haven't been introduced to now shows as "Goblin" or "Orc" (`Introductions.what`), not
+  MCA's "Male Villager". Jade's mod line under them reads Jaymo's Kingdoms instead of Minecraft Comes Alive.
+- **Half-orc looks.** Andy: "half orcs should look just like these green skins, just with a skin color slider that includes
+  more than green". A half-orc player (greenskin road, raised by orcs) is drawn with an orc's tusks, brow, ears, marks and
+  scars (`GreenskinLooks`, now on players too). Their skin comes from a new slider on the greenskin road's page in the life
+  story, which runs through ash-pale, sallow, lime, orc green, moss, grey-green, slate, ruddy brown, umber and charcoal
+  (`GreenskinLife.TONES`, saved as `TONE`). You see yourself on that skin while you slide it. Masks and the symbiote cover the
+  look. The raised-by attachment is now synced so other clients draw it. Half-orcs from before default to lime.
+- **Idle orcs stop crying "My weapon!".** MCA puts a guard's weapon in their pack between fights. `Rearm` took that for a lost
+  weapon and pulled it out ("Not done yet!"), MCA stowed it again, and the guard looped. A weapon in a villager's pack now
+  counts as theirs, and MCA draws it for the next fight.
+- Compile-checked with javac against the 26.3 jars; not played.
+
+## 0.7.475: greenskin camps grow in tiers (pack 0.19.52)
+Hordes patch 2 (`docs/Hordes-Plan.md`). Andy: "they should all build similarly and expand further, making it possible to find
+a large goblin camp the size of a kingdom even".
+- **Tiers** (`Hordes`, saved per camp in `jaymoskingdoms:hordes`; a camp without an entry is tier 1, so old camps start
+  there). Orc camps go War camp, Warhold, Horde town, Horde kingdom; goblin villages go Village, Warren, Goblin town,
+  Goblin kingdom. Wall radius 22 / 36 / 52 / 72, folk cap 15 or 16 / 20 / 25 / 30 (`WALL_RADIUS`, `ORC_CAP`,
+  `GOBLIN_CAP`). A camp moves up at its daily growth once its tier is filled: tier 1 its seven inner buildings up, tiers
+  2 and 3 their wall closed, gates cut and band built; its folk at the cap; and old enough (10 / 25 / 50 days,
+  `TIER_DAYS`). Tier 4 only for the tribe's king seat (its oldest camp). Daily takings grow with the tier
+  (`YIELD_PERCENT`, 100 to 250%) until Patch 3's jobs replace them. New folk wander out to six blocks inside the outer
+  wall. The tier's name shows in `/kingdom list` and `info`, the journal's map and list, and the "Entering" line.
+- **Outer palisades.** Moving up, a camp raises its new ring one arc of eight a day (`ARCS`, 6 logs each), two a day with
+  ogres in the camp, starting at the front gate and working round to the back. Same style as its first stockade (dark oak
+  on a blackstone foot with bone-and-skull posts for orcs, spruce with skull posts for goblins), stakes on top, a walkway
+  and ladders, gates on all four sides and the two gate towers at the front. The wall follows the land (each column on its
+  own ground, its foot filled where the land falls away) and leaves a gap wherever a player placed a block (`Placed`),
+  anything is built, there's water, or another settlement holds the land. Once it closes, gates are cut in the old ring's
+  sides and back (with ladders beside them), and roads of coarse dirt (with gravel for orcs) run from each old gate to the
+  new ring's. Nothing goes up with a player within 24 blocks, as before.
+- **The band and its planner.** New buildings go into the band between the two walls, one or more a day as the inner list
+  did (each ogre one more). The angle-slot planner shuffles the tier's list with a seed from the camp's id and fire (the
+  same layout after a restart, a different one for every camp), then tries each building round the band from its own
+  angle, row by row, facing the fire, until its whole footprint lies in the band, off the four ways out and two blocks
+  clear of the others. Each goes up on its own levelled patch (no more than 4 blocks of rise and fall), or is passed over
+  if a player's block, anything built or water is in the way. Per-tier lists replace the fixed seven: tier 2 tents or
+  huts, a forge or tavern, a watchtower or lookout, a pit, racks, patches, totems and the war-beast pens; tier 3 adds the
+  market square, the ogre den (orcs), the smelter and the brewery (goblins); tier 4 has two of most.
+- **New buildings** (`HordeBuildings`, our own designs in the camps' materials): the market square (9 x 9, four stalls
+  under striped awnings, a lantern post over a trough), the ogre den (a mossy stone mound with a bone-framed mouth, hay
+  and bones inside), the smelter (furnaces and blast furnaces under a smoking chimney, a lava cauldron, an anvil), the
+  goblin brewery (a mushroom-roofed hall of cauldrons, brewing stands and casks), war-beast pens (a staked yard with
+  troughs, a tethering post and a lean-to), and the great halls.
+- **Tier 4, a greenskin realm.** The great hall goes up over the longhouse or great hut in its footprint (taller, stone
+  below, corner towers or mushroom spires), the throne where it was and the hoard chest left standing with its loot. The
+  camp claims land as a kingdom does (6 chunks each way; tiers 2 and 3 claim 3 and 4). Its chief takes a title, Warlord
+  or Goblin King, on his boss bar. The news tells of each new tier, and of the realm and how many camps bow to it. Its
+  tribe's smaller camps within 640 blocks become its vassals: the realm stays a camp (`FactionType.BARBARIAN`) and the
+  vassals keep theirs, with the realm as their overlord (`Relations.vassalize`), so `/kingdom list` shows "vassal of".
+  Killing its chief frees them, and a cleared camp's outer walls and band rot like its middle.
+- **`/kingdom camp tier`** (operators): the nearest greenskin camp's tier, its wall arcs, band buildings, days in the
+  tier, and what it still needs for the next (or its realm's title, land and vassals). `/kingdom camp tier <1-4>` moves
+  it there, building each tier between at once; `... now` builds the last one at once too. `/kingdom camp info` shows the
+  same lines; `/kingdom camp grow` grows it a day (its next step goes up even with you near, if its days and pile allow).
+- A `hoard` field waits on each camp's tier for Patch 3's chief's hoard. Coins, jobs, markets' traders, caravans and the
+  city buildings are Patches 3 and 4.
+- Compile-checked against the 26.3 jars; not played.
+
+## 0.7.476: Thessaly's mana wings (pack 0.19.56)
+Andy: "Thelassy should grow mana wings for users, that allow them to hover, with the wind hover animation, and increases
+height and speed as they master it. the mana wings animate like angelic wispy 2-3 player wide hands with wings that extend
+beneath it, and flap gently as they hover."
+- **Mana wings** (`wings`, Thessaly's, level 1, cost 6, a toggle bit `SpiritState.WINGS`): spread, you hover whenever you
+  are off the ground (WASD drifts, Jump rises, Sneak sinks to land); spread on the ground they lift you, and Jump takes off
+  again. Everything grows with the spirit's level (`ThessalyWings`): the most height above the ground 4 to 24 blocks (over
+  a drop they settle down to it), drift 0.22 to 0.5 blocks a tick, rise 0.16 to 0.36, the hands from about two to three
+  player-widths across; the upkeep falls from 2 to 0.8 mana a second aloft. No fall damage while spread, 1 spirit xp per
+  5 s aloft, no flying kick (`ValorFlightMixin`); out of mana they fade into a short slow fall. Put away, they fold.
+- **The look** (`client/spirits/ManaWings`): at your shoulder blades two great open hands of her light, palms back and
+  fingers fanned like a wing's tips, with seven feathers of light hanging beneath each, longer further out; drawn as the
+  arms are (the ki glow's wisps in hollow shells, her rose in mana's blue taken toward white). While you hover they beat
+  like an eagle's (Andy sent a fish eagle gif: "flap beside and down you"): a full stroke from high over your back down
+  past your sides, the downstroke quicker than the recovery, about one beat in two seconds and faster as you climb; the
+  hands lag the stroke (tips up on the way down, trailing on the way up), the fingers spread on the downstroke, and the
+  feathers trail each beat and keep hanging down beside you at the bottom;
+  on the ground they rest half spread, and folding away they sweep back, droop and fade. Motes of light drift down off
+  them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
+- **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
+  and sway in the air the way the wind's hover does, for anyone watching.
+
+## 0.7.531: the Stegonaut's moves after the Bastionodon set (pack 0.20.35)
+Andy sent a "Bastionodon" pack and asked to map its animations onto our Stegonaut. Its files say CC0, but its rig is
+Saint's Dragons' Stegonaut (the same 56 bone names, 23 of the pivots, the same 27 animation names and lengths), so none
+of its files are used; its motions were redrawn as procedural poses in `StegonautDragonModel.setupAnim`:
+- **Ground eating** in three parts: the scoop (head to the earth, jaw wide), the chew (head raised, cheeks full, jaw
+  working) and the spit at the moment it fires (head thrown back and flung forward, jaw wide).
+- **Bite** (`StegonautDragon.BITE_MOVE`, 20 ticks): the neck draws back with the jaws wide and snaps in. New
+  `WindDragon.bitten(target)` hook, called when a walker's bite lands in `groundFight`.
+- **Grazing** (`GRAZE`, 30 ticks): when it noses the ground at home, the head goes down for two chomps.
+- **Chin slam** (now 16 ticks): crouch and draw the head down and back, then fling it up, the body rising with it.
+- **Ground slam:** the forelegs splay as it rears, and the body pitches forward on the landing (tail whipping up) and
+  rocks back.
+- **Roar** (now 60 ticks, a show of its plates): the head swings to one side then the other, jaw held wide, tail lashing.
+- **Idle grumbles:** stood still and doing nothing, every 13 s one of three (a head toss, a head tilt, the neck lifted),
+  each with the jaw half open.
+- **Flinch** when struck (body rocks back and over, jaw opens; `WindDragonRenderer.State.hurt`), a **doze** after it has
+  sat (head down and turned aside, slower breaths), a **gallop** at a run (the right pair an eighth of a stride behind,
+  longer strides, rocking), a paddling **swim** (forelegs splayed, tail sweeping), and stiff splayed legs as it **dies**.
+Preview: `/mnt/project-files/art-overhaul/lesser-dragons/stegonaut-moves.png`. Compile-checked; not played.
+- **0.7.532, story figure tails:** Beastfolk, Canine, Feline, Kitsune, Avian and Serpen tails on the life story's figure
+  (and any screen figure) hung down between the legs. 0.7.507's lying-down check read the screen's flipped y as a body
+  lying flat; `BeastParts.lying` now counts only the tilt off the up-down line. Compile-checked; not played.
+- **0.7.533, gap jumps and dug-out rooms** (Andy's clips, 2026-11-04):
+  - **Humanoids jump gaps** (`GapJumps`, from `PathNavigationMixin` beside `Unstick`). His hired villagers stopped at the
+    lip of a trench he had jumped: vanilla's pathfinder never plans a jump, so their path ended at the near edge. Now a
+    walking humanoid (MCA villagers, folk, illagers, zombies, skeletons, piglins, witches) standing at the end of a path
+    that falls short, with its goal still 2.5+ blocks off, looks across toward it (straight on and up to 90 degrees
+    either side) for ground past a drop at least 2 deep, 1.5 to 5 blocks away, at most 1 higher or 3 lower, with room
+    for its body over the gap and leaving it 1.5+ blocks nearer its goal. It takes a jump sized to land there (vanilla's
+    air drag and gravity, at most 0.8 blocks a tick), then paths on. Not onto lava, fire, magma, campfires or cactus, not
+    out of water, not while riding. Looks every 5 ticks, waits 30 after a jump and 20 after finding nothing.
+  - **Buried rooms dug out** (`BuriedRooms`, from `StructureStartMixin` before `Foundations`). Dungeons and Taverns saves
+    its taverns with structure voids for rooms (no air blocks) and leaves the digging to the terrain carving round the
+    building, which can't clear a hillside: his desert tavern came out packed with ground, doors blocked. Now every cell
+    of a surface structure's rigid jigsaw piece that no piece saved a block in, with that piece's own blocks over it and
+    on all four sides at its level, is cleared to air (fluids and block entities left alone). Pieces placed inside it
+    (the taverns' tables and stalls) keep their blocks. Accessors `SinglePoolElementAccessor`, `StructureTemplateAccessor`.
+    New chunks only: a tavern already generated stays as it is. Compile-checked; not played.
+- **0.7.534, the Nobodies' rags:** the Nobodies start's three hired hands wore a pirate deckhand's striped shirt and
+  bandana. `Uniforms.POOR` is now six roughspun tunics with a belt and dark breeches, no hat (undyed linen, dun, grey,
+  russet, weld green, woad; `tools/gen_nobody_rags.py`, drawn over the deckhands' slops). Nobodies already hired in a
+  deckhand's slops change when they load. Not compiled or played yet.
+- **0.7.535, commandments for every patron** (`Commandments`, Andy 2026-11-04: "all the patrons should have commandments
+  like these, these are all good to keep for Truth, and truth villagers will vehemently refuse if asked/forced to break
+  any of them"). Every patron has ten, in lang part `commandments.json` (`commandment.jaymoskingdoms.<patron>.<0-9>`);
+  The Truth's are his ten as they were. Each commandment is a set of named acts (`Commandments.LAWS`), reported from where
+  they happen (`Commandments.act`): kills and blows (AFTER_DEATH/AFTER_DAMAGE), crimes (`Theft.commit`, seen or not),
+  rude answers (`Recollections.replied`), broken promises, bribes/tolls/searches (`Approaches`), accusing, `/introduce`,
+  lockpicks, blood drinking and turning, raising the dead, deep ore, what's eaten (`CommandmentFoodMixin`), blasts
+  (`CommandmentBlastMixin`), tools breaking (`ItemStackWearMixin`), lights and hearths broken, fires lit, the patron's
+  book thrown away, and every 2 s the Nether, the sky (the Aether, or wings), a night not slept (on at midnight, still up
+  at dawn), the sea, three dry days, the dark without a light, invisibility by day. A sworn player who breaks one of their
+  own patron's loses 6 favour (once a day for each). The book of Commandments (`jaymoskingdoms:commandments`, one item, the
+  patron in custom data) is given on swearing and left at a shrine with the lore book; `client/CommandmentsScreen` shows it
+  as an open book, I-V and VI-X, the broken ones struck through in red and "Broken: n / 10" for your own patron (synced
+  attachment `jaymoskingdoms:commandments`, counted fresh when you swear to another).
+  The Truth's folk keep its law: they never go for the unarmed and innocent (`ThrallTargetMixin`, every mob's
+  `canAttack`), won't follow or ride with you at night, in the Nether or up in the sky and leave you if you go there
+  (`McaCommandMixin`, and a 2 s look at each player's followers), won't take rot as a gift, won't take a bribe whatever
+  their king is like, and their poor don't rob the dead. They say why, hotly (`commandment.jaymoskingdoms.refuse.*`).
+  Compiled; not played.
+- **0.7.536, Atroxiia pulled for now (pack 0.20.43):** Andy (2026-11-04): "atroxiia has no walk animation, this is
+  unacceptable". It's off until its walk is redone (`Dragons.ATROXIIA_ON = false`): no biome spawns, gone from
+  `/kingdom dragon`, and any already in a world (or given by egg) are cleared away on their next tick. Its type, model,
+  art and loot stay, so turning it back on is one flag. The other lesser dragons stay in: Stegonaut's gait was redone
+  in 0.7.531, Varasuchus walks on four legs, and Ignivorus and Aetherion fly (both walk on landing).
+- **0.7.537, the Zoological Guide is crafted, not given** (Andy, 2026-11-04: "remove the zoo book from player inventory on
+  spawn, and add a recipe for it instead"): Cube Animals put its guide in every new player's inventory with a chat line.
+  `NoStartGuideMixin` (tweaks) cancels its join gift (`cubeanimals$handleJoin`, priority 1500 so it lands after Cube's
+  own Player mixin; `require = 0`). New recipe `zoological_guide`: shapeless book + feather + ink sac + bone, only when
+  Cube Animals is loaded. Its loot-chest copies are untouched. Not compiled or played yet.
+- **0.7.538, opening a chest can wake sleepers** (Andy, 2026-11-04: "opening chests makes noise that can wake sleeping
+  villagers or guards"): `ChestNoise`. Opening a chest, barrel, shulker box or another mod's chest/barrel/crate/coffer
+  rolls for every sleeper but a player within 12 blocks: 85% at 2 blocks or closer, falling off evenly to 0 at 12, x0.4
+  through a wall, x0.5 if you open it sneaking (less again with Soft Step and the stealthy heritages, through
+  `Skills.sneakFactor`). Whoever wakes mutters a line, turns to you, walks over to the chest and stays up 15 s (put back
+  to bed if their brain tries). Awake, they count as witnesses (`Theft.witnesses` skips sleepers), so a guard you woke
+  sees you take from a realm's chest and it is a theft seen. Light Fingers (Andy: "the sound lowers with thief skill in
+  light fingers") takes 15% per rank off both the wake chance and the creak itself, so rank 5 opens at a quarter volume:
+  `ContainerOpenersHushMixin` marks who is opening around `ContainerOpenersCounter.incrementOpeners`, and
+  `ChestCreakVolumeMixin` scales `ServerLevel.playSeededSound`'s BLOCKS volume meanwhile (chests and barrels; shulker
+  boxes and modded chests with their own sound code keep full volume). Compiled (Gradle `compileJava`), not played yet.
+- **0.7.540, attributes run 0-100, capped by world tier; Attributes and Jobs tabs no longer overlap** (Andy, 2026-11-04:
+  "UI needs a rework, the text is overlapping. And character level points should scale way further, making stats go from
+  0/100 and scale accordingly, giving users a reason to world tier up"):
+  - `Stats`: `MAX` 100. One old point is `STEP` (10) new ones: each character level earns `POINTS_PER_LEVEL` (5; was one
+    per 2 levels), heritage/class/story/aim/flaw/Zenkai points count 10 each. Every effect per point is a tenth of the old
+    one times `TOP_SHARE` 1.5, so 100 gives half again the old 10 (Might +37.5% damage, Agility +15% speed, Finesse +37.5%
+    attack speed, Endurance 37.5% less hunger, Grit +7.5 armour and +30% knockback resistance, Wits +45% skill xp and +1.5
+    luck; Arcana +150 / +75 mana and +2.25 a second, `Mana`).
+  - World tier caps (`TIER_CAP`): Hearth 40, Borderlands 55, Wildlands 70, Dread 85, Legend 100, from the highest tier opened
+    (or the one you stand in, if higher), so stepping down to play with a friend costs nothing. Opening a tier also adds
+    `TIER_POINTS` (10 / 25 / 45 / 70 in all). Points past a cap stay banked; a new tier re-applies the attributes.
+  - Old saves: `Stats.migrate` (from `Skills.refresh`) multiplies every `stat_` rank by 10 once and marks the save
+    (`stat_scale`); each raise sets the mark. Respec cost counts ten attribute points as one rank.
+  - Shift-click puts in 10 at once (`Raise` now carries a count).
+  - `SkillScreen`: the panel is as tall as the screen allows (up to 300), the detail box sits just above the footer, and the
+    rows between scroll with the wheel, clipped to their own area (thin scrollbar), so the Jobs list no longer runs under the
+    description. Job rows 12 high. Attribute rows draw a 10-segment bar (heritage, class, story, yours) with the tier cap
+    notched and the locked part dark; the idle box gives your cap and every tier's.
+  - Lang: story/heritage/flaw/Zenkai texts show the new point sizes.
+  Compiled (`compileClientJava`); not played.
+- **0.7.541, lanterns burn on fuel and go out** (Andy, 2026-11-04: "lanterns should be fueled with coal or ambergris and
+  go out like torches", "ambergris lasts longer", "it shouldnt tell you how many days are left anywhere, but it can have a
+  durability bar, and soul lanterns should not go out"): `Lanterns` + `LanternBlockMixin` (trees mixins) give lanterns
+  random ticks. Each burns until its fuel runs out (end time and last fill kept per chunk in the `lantern_fuel`
+  attachment), then becomes a dark `burnt_lantern` (standing or hung; drops itself). A lantern never fuelled starts with
+  one coal's worth (3 days). Use coal or charcoal (`#minecraft:coals`) on a lantern, lit or burnt, for +3 days, ambergris
+  for +15 days, up to 30; no message says how much is left. Broken lanterns drop with their fuel left in the
+  `lantern_fuel` item component and burn on it when set down again; `LanternItemBarMixin` draws a durability-style bar
+  (green to red, share of its last fill) once some is burnt. Burnt lantern + coal crafts a lantern. Villagers relight
+  burnt lanterns as they do burnt torches (shared `burnt_torches` list); camps' burnt lanterns rot away with the rest.
+  Soul lanterns never go out; copper lanterns and oil lamps are left alone. No rain douse (behind glass). Texture: vanilla
+  lantern with the flame painted out to soot. Compiled (Gradle `compileJava processResources`); not played yet.
+
+## 0.7.542: the Skeleton Lord faces the way he walks (pack 0.20.49)
+- Andy: "his head is facing the complete wrong way". The Skeleton Lord's Workshop model is built facing the other way
+  from our other Blockbench mobs, so he was drawn back to front: face and chest on his back, ponytail and cape in front.
+  `SkeletonLordRenderer.scale` now gives the model a half turn about the vertical. Animations, the head's look and the
+  sleeping statue all turn with him.
+- **0.7.543, perplexed executioners (pack 0.20.50):** Andy (2026-11-04), on Chrono rewinding out from under an execution:
+  "humanoid mobs can say something about it too, 'I was just about to....kill you?!'". `PowersCompat.tellPerplexed` hooks
+  Powers' `ChronoCheatDeath.PERPLEXED`: a humanoid executioner (`Temperaments.humanoid`) says one of six lines over its
+  head (`lang/parts/perplexed.json`, through `Speech.say`, in its own tongue). Gradle compile only, not played.
+- **0.7.544, carts stand on the ground:** Andy (2026-11-05): "the carts often spawn stuck inside terrain" (clip: a
+  red-roofed carriage sunk in the grass bank beside a road). A `Wagon` was always put at its horse's height (on hitching,
+  when snapped back behind it, and every tick it trailed), so behind a horse on a road along a bank, or at the foot of a
+  rise, it sat inside the hill. `Wagon.ground` finds the top of the block (or water) with room above it, nearest that
+  height (3 up, 4 down), under the cart's middle, and the cart stands there, easing to a new height unless it's over 2
+  blocks off. Gradle compile only, not played.
+- **0.7.545, no glowing eyes on human bloods:** Andy (2026-11-04): "remove glowing eyes from all heritages/ races considered
+  humans", then: Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, Emberborn and Frostborn "are actually all not
+  human". `HeritageLooks.human` = Heartlander, Nightborn, Earthling, Stormborn, Dawnborn (and their variants): their eyes
+  never light, players and villagers alike (`HeritageLooks.extract`, `VillagerLooks.extract`). Marks and other glows stay;
+  every other blood keeps its eyes. Vampire red eyes, a Nightborn vampire's red-silver eyes at night, werewolf flashes,
+  Valor hunter eyes and power eyes are states, not bloods, and stay. Andy "change that too": faith and prejudice follow.
+  `Prejudice.degree` now 1 for Emberborn, Frostborn, Rubberfolk, Divine-born and 2 for Endborn, Deepborn, Dragonblood, so
+  `Faiths.human` (which the eyes read too) is just those five. The seven now start with a patron of the seven (`Faiths.lean`:
+  Emberborn Ash Whisperer, Frostborn Green Huntsman, Endborn Lantern Warden, Deepborn Anvil-Father, Dragonblood Crowned
+  Sun, Divine-born and Rubberfolk Hearthkeeper), are muttered at, can live in havens and mind humans. Faiths already
+  stored on villagers stay. Gradle compile only, not played.
+- **0.7.546, fallen royals brought home:** Andy (2026-11-05), of a dead king left lying in diamonds outside his walls for a
+  player to strip: "the royals should never just be left dead like this, unless there was noone at all left in the kingdom
+  to defend, SOMEONE should find the body and get it to safety, remove the armor, and bury or mourn them if not bring them
+  to the cleric". New `RoyalRemains`: a realm's ruler's body (role KING/LORD, or recorded by `KingdomEvents.rulerDied`) is
+  fetched 5 s after death once no foe is within 8 blocks, by the nearest free guard (folk or MCA) else any grown townsperson
+  within 96 (a realm in ruin: any villager about). Carried to the town's cleric (else the seat), laid down, stripped
+  (`KitchenCompat.robBy`) into the realm's stores (overflow dropped at the seat), the cleric says the rites (6 s, bell, lines),
+  then `Bearers.entrustRoyal` buries it in the graveyard with a lit candle on the headstone and up to 8 mourners (family,
+  3 guards standing, townsfolk). No grave ground: it lies in state at the seat and is mourned there. Bearers now skip their
+  own ruler's body; `Bearers.Dead.realm` also reads a villager's settlement. Lines in `lang/parts/royal-remains.json`.
+  Andy (00:12Z): "guards will prioritize the body, and flee the fight with it over shoulder": a guard goes for it 1 s after
+  death whatever fighting is about, drops its own fight (target and MCA attack memory cleared each step) and runs it home
+  (speed 1.25, villager guard 0.85); townsfolk still wait for no foe within 8 blocks.
+  Gradle build only, not played.
+- **0.7.547, the heavens overhead:** Andy (2026-11-05): "some villagers know about the heavens overhead, but they never
+  explicitly tell you", then "some of them try to get there". `Heavens`: one grown MCA villager in 8 knows (fixed from their
+  UUID; never hermits), and never names the Aether: 18 riddles, plus lines about the Aether's stones in your pack and, for
+  seekers, their tower. They hint in MCA's chat (25%, before pit-fight/emigrant talk), in five talks (`heavens_stars` on clear
+  nights, `heavens_giants` once, `heavens_rain`, `heavens_pockets` when you carry ambrosium/zanite/gravitite/holystone and
+  the like, `heavens_tower` for seekers, who ask you to bring 8 scaffolding); replies may draw a riddle (`TalkBook.Out.RIDDLE`).
+  On a clear night a knower near you may stop, look straight up and mutter (seekers always, others 1 night in 4). One knower
+  in 3 (never guards) is a seeker: by day, near home, they build a scaffolding tower beside it (about 1-2 blocks a day, to
+  24 high); once it's as high as it goes they sooner or later take it down (no drops) with a sigh and start again after 3
+  days. Words go over their heads only. Lines in `lang/parts/heavens.json`; loading hint 98 (HINTS=98). Not played.
+
+- **0.7.548 (Powers 0.20.51), guards finish downed monsters and keep their weapon:** Andy (2026-11-05): "it seemed as
+  though this guard couldnt execute, and he kept losing he weapon." `Rearm` skips MCA villagers (MCA hands its guards a
+  weapon each fight and stows it between, so the empty hand cried "My weapon!" over and over and walked them off to
+  weapons on the ground). `PowersCompat.guardsFinishMonsters` adds guards and archers to Powers' `MobExecutions.FINISHES`:
+  they walk to a downed monster and execute it (hotheaded or spiteful ones anyone they fight); `Temperaments.spares` no
+  longer spares monsters. Sharks and the great whale bleed Powers' blood, not red dust. Gradle build only, not played.
+
+## 0.7.549: Big Cannons booms (pack 0.20.56)
+Andy: "i really like the screen shake and sound effects from [Create Big Cannons] what can we add from it?" Ideas only,
+our own code; the delayed, muffled booms and whistling shells live in Powers (`client/sound/Blasts`, `ShellWhistle`).
+- **Cannons** fire with Powers' own report (`PowersCompat.cannonReport`, vanilla's explosion without Powers) and jolt
+  everyone within 10 blocks. Cannonball hits and dynamite already play the explosion sound, so they now shake and boom
+  with distance through Powers.
+- **Shakes from a place** (`PowersCompat.shakeAround`, Powers' `Shakes.around`): every Aether Giant footfall (28 blocks,
+  1.1) and its grab's slam (36, 3.0), an ogre's ground smash (18, 1.8), a wind dragon landing (22, 1.4 times its size).
+
+- **0.7.550, Weapon Forms on the RPG skill bar; the skill bar no longer overlaps the body row:** Andy (2026-11-05): "more
+  UI overlap with the rpg skills. weapon form skills should move to that system too. makes the moves easier to access with
+  less keys". The "RPG skills" are Spell Engine's skill bar (Zsolt's RPG Series). Its bar sat at a fixed spot left of the
+  hotbar, on top of our left dock's body row. `client/hud/SkillBarDock` makes it the left dock's lowest row (5, under the
+  stomach, valor, symbiote arm and body row) each frame through `HudZones`, and hides it during films; Spell Engine's HUD
+  editor can no longer move it. Every Weapon Form is now also a Spell Engine spell (`data/jaymoskingdoms/spell/form_*.json`,
+  tag `#jaymoskingdoms:weapon_forms`, 13 icons in `textures/spell/`): with a form weapon in hand the forms you know for it
+  are on the bar (belt order first) and fire on its keys (1, 2, 3..., right-click stays the guard), with the cooldown on the
+  slot. `forms/FormSkills` adds the spell source and a custom delivery that runs `Forms.cast` (the old checks; a form that
+  can't go starts no cooldown). `mixin/spellengine/SpellContainerSourceMixin` gives a form weapon with no spell container
+  one that takes only the forms (so class skills still need their own weapons) and lets a weapon that has one (a Rogues
+  dagger) take the forms too. No stance or belt picking any more: the Combat Art key is the art again. Bare fists get their
+  forms on the bar only while locked on (Andy: "give it to fists but only when locked on"; right-click is the first fist
+  form then, and stays free for doors and villagers otherwise; `PowersCompat.lockedOn`). A Combat Art tap tugs a pinned
+  spear back. Without Spell Engine the stance works as before. Gradle build only, not played.
+## 0.7.551: lower cutscene cameras (pack 0.20.60)
+Andy: "all the cutscenes should be a little lower. you cant see the user well." The spirit-clash film's camera sits 0.9
+blocks over the pair's feet (was 1.5), and the handshake film's wide shot 0.2 over the hands (was 0.5). Powers' ability,
+ultimate and beam-clash films came down with it. Not played.
+
+
+## 0.7.552 (2026-11-05): Rubber-folk pull themselves together
+
+- Andy: "rubber folk can survive any of these dismemberments, and they can absorb from downed as well, as long as they
+  absorb within 10s of a torso chop, they will start to regenerate. it is slow, so it takes them out of the fight as they
+  are still vulnerable until their limbs regrow". Rubber-folk can swallow while downed (`HeritageHold.downedStill`). Cut in
+  half (Powers 0.20.61's waist cut, which puts them down instead of killing them), a swallow within 10 s turns Powers'
+  `jaymospowers_rubber_split` tag into `jaymospowers_rubber_mending` (`RubberFolk.absorb`). That swallow doesn't regrow a
+  limb at once: the legs come back on the usual 20 s clock, one at a time, and they stay down until both are back. No
+  regrowth while still waiting on the swallow. Lang in `lang/parts/message-rubber.json`. Gradle build only, not played.
+- **0.7.553 (pack 0.20.62), server freeze from structure scans:** the Deck's server froze and its watchdog stopped it
+  (crash 2026-11-04 20:16) with the server thread in `GrimSites.scan` waiting on `Level.getChunk` while C2ME was still
+  generating chunks (two stuck 1.5 min at structure_starts). `hasChunk` then `getChunk` isn't a safe "only if loaded"
+  under C2ME's chunk system, so every such scan now reads `getChunkSource().getChunkNow` and skips a chunk that isn't
+  ready: `GrimSites`, `remnants/AncientRemnantsCompat`, `Ruins.pieces`, `Clearing.sites`, `GolemLairs.look`,
+  `QuestFoes.bury`. Nothing else changes. Types checked against the 26.3 jar; not built here.
+
+## 0.7.554: Blood Sorcerers gather spilt blood and throw it as blood blasts
+
+- Andy (2026-11-05): "blood Sorcerers should also be able to conjure small blasts of their blood by holding J when near it
+  to gather, and they build a reservoir of that blood, that fire like z fighter ki blasts after holding j with an empty
+  hand." New `BloodBlasts`. A Blood Sorcerer's J (not sneaking) is now sent as down/up (`BloodBlasts.Hold`, client
+  `ClassKeys`): a tap (under 6 ticks) is still the Imbue, decided on release; sneak and J are the old keys.
+- Hold J: every 5 ticks the blood near (8 blocks: bleeding cuts, Powers' stains via `PowersCompat.drawStains`, Kitchen
+  grates once a second) rises in threads of red to the hands, up to 1.5 a pulse (about 6 a second, vs the passive 2), into
+  the reservoir. The passive drinking pauses while J is held.
+- Empty-handed, after a 12-tick windup (blood motes swell in both palms), a blood blast every 5 ticks, hands taking turns
+  (swing animation), for as long as J is held: 1 reservoir each (a vampire 0.75), never paid from health; 4 damage (a
+  vampire's x1.5), a cut, a little knockback, a splash and a small stain where it bursts; falls slightly, 30 ticks of life.
+  A barrage counts as one forbidden cast (`Spellcraft.afterCast`: corruption, Grue, crime where seen); the Grue can stay
+  the hand; a vampire's fever is stoked once per barrage; thralls aren't hit (`Thralls.refuses`).
+- The reservoir (`Hemomancy.RESERVOIR`, was a server-only map) is now a synced attachment shown by
+  `client/BloodReservoirHud`: a crimson bar right of the hotbar (the Brute's spot), easing as it fills or drains,
+  throbbing when full. Loading hint 99; class description and key name updated (`lang/parts/blood-blasts.json`).
+- Andy (same day): "J only collects when looking at a blood source, and when collecting you dont fire." A hold's purpose is
+  settled as it begins (tick 6): if a gather pulse at what you look at draws anything (a bleeding creature in sight within 8,
+  else stains within 1.75 of the block you look at, or a Kitchen grate there), it gathers for the whole hold and never
+  fires; otherwise, empty-handed, it's a barrage. A full reservoir draws nothing, so it fires.
+- Built in the cloud; not played.
+
+## 0.7.555 — the Judge's menu back; villagers want their own things
+- Andy: "i messed up ... it should instead be whatever is proper". 0.7.539's "only Have a word" on Powers' Z Fighter
+  characters is undone (`McaZFighterPageMixin` gone, the `ZFighterFolk.WORD`/`keeps` filter gone). It had also reused
+  `jaymoskingdoms_word`, the villagers' own "Have a word" (`Talks`), so on the Judge it opened a villager small talk (or
+  nothing) instead of his menu with "be born again", and every other villager lost "Have a word". The Judge, the Keeper,
+  the masters and the rest have their full MCA screen again, and "Talk about work" opens their own menu as before.
+- Andy: "not everyone should strictly trade for whale products. they should all have some separate thing THEY want".
+  `WhaleTrade` no longer gives every villager cooked whale meat, oil and ambergris purchases; only the trades that use whale
+  goods buy them, and such offers already put on anyone else are taken off. New `OwnWants`: each grown villager has one
+  thing of their own they pay well for (60% from their trade's list, else small pleasures anyone might want), picked from
+  their UUID so it never changes. Neither touches Z Fighter characters.
+- (follow-up) Andy: "every villager should want something different, it could relate to their temperament or personality.
+  the judge, keeper and masters dont need the FULL screen". `OwnWants` now draws mostly from the villager's MCA personality
+  (`byNature`, three things each), then their trade, then small pleasures. Z Fighter characters get a trimmed MCA screen
+  again (`McaZFighterPageMixin`: Talk and Trade only) and a trimmed talk menu (`ZFighterFolk.keeps`: Talk about work, Talk
+  about training on a master, Chat; joke and story for pilots and patrolmen). No hugs, rumours, flirting or Have a word.
+
+## 0.7.556 (2026-11-05): blast hint (pack 0.20.67)
+
+- Loading-screen hint 100 (`lang/parts/blast-gore.json`, HINTS 100) for Powers' blasts blowing bodies apart and taking
+  limbs off survivors. Not played.
+
+## 0.7.558 (2026-11-05): rocks barely hurt zombies and Hornkin (pack 0.20.69)
+
+- Guards' and barbarians' thrown rocks hit zombies (all `Zombie` kinds, zombified piglins included) and every Hornkin for
+  0.5 instead of 3 (`Javelins.SHRUGGED_ROCK_DAMAGE`, `rockDamage`), matching Powers' player rocks. Not played.
+
+## 0.7.561 (2026-11-05): a downed king's armour no longer multiplies when he's lifted (pack 0.20.72)
+
+- Andy: "the king's armor seems to be duplicating when they carry him ... i found a ton of armor". Lifting a downed ruler
+  in plate is too heavy, so Powers' `Carry.shed` pulls the heaviest piece off and drops it (chest, legs, boots, then the
+  helmet). With the helmet gone `Rulers.step` saw no crown and ran `fit`, which wiped `RoyalDress`'s kept sets and dressed
+  them afresh; the next danger then made a brand-new trimmed plate set. Every lift-and-recover cycle left one more set.
+- Now a ruler missing only their crown gets the crown back (`Regalia.recrown`, same crown as before) and nothing else;
+  the full `fit` is kept for rulers who never had regalia. Nothing re-dresses a downed ruler, and `RoyalDress` doesn't
+  change a downed ruler's outfit. What was shed lies where it fell, once. Built, not played.
+
+## 0.7.562 (2026-11-05): haven guards' rally cry shows its words; orc lines for everyone (pack 0.20.75)
+
+- Andy's screenshot: a haven guard's rally bubble read `dialect.jaymoskingdoms.orc.speech.jaymoskingdoms.haven_guard.rally.1`.
+  `HavenGrowth` asked `Dialects.tr` (orc/goblin-only lines) for a human guard's line, and no dialect copy exists; it now
+  uses the plain `speech.jaymoskingdoms.haven_guard.rally.N` lines. A scan of every Dialects call and literal lang key in
+  Powers, Kingdoms and Kitchen against the lang files (including numbered line ranges) found no other missing speech key.
+- Andy: "everyone should have orc specific lines when they encounter them, some friendly, adversarial, and fighting".
+  New `OrcSightings`: any grown MCA villager, guard or worker who sees an orc (orc villager, camp orc, unmasked
+  half-orc player) within 10 blocks says an orc line: friendly (gold) when they don't mind orcs (tolerant, greenskin
+  haven, ruler's edicts, or fond of that half-orc player), wary (yellow) for another tribe's orc or when they mind its
+  blood, fighting (red) when they're at blows. Goblins say theirs in goblin dialect. 10 lines per mood (8 goblin) in
+  `lang/parts/orc-sightings.json`; once per pair per 10 minutes, fight shouts every 10 s at most. Hint 102. Not played.
+
+## 0.7.563 (2026-11-05): a warband captain's first kill no longer crashes the server
+
+- Andy's crash report (2026-11-05 02:10): an orc downed and finished him, and the server died in `Captains.slew` with
+  `UnsupportedOperationException`. When the killer had no captain yet, the new captain has no fight list, and
+  `FIGHTS.getOrDefault(id, Map.of()).remove(...)` tried to remove from the immutable empty map. Now it only removes from a
+  fight list that exists. Every first kill by a greenskin with no captain crashed the server before this.
+
+## 0.7.564 (2026-11-05): herd animals flee killings
+
+- Andy: "passive animals should run when someone is killed near them". Any death, downing, or blow on the downed (people,
+  villagers, monsters; not herd animals themselves, whose kin already panic) makes every `jaymoskingdoms:skittish` animal
+  within 16 blocks that sees it, or within 6 out of sight, run from the killer (or the body) for 4 s (`Herds.killing`,
+  `KILL_SEEN`, `KILL_HEARD`). Ridden and tamed animals stay calm; leashed ones pull at the rope. Hint 103. Not played.
+## 0.7.565 (2026-11-05): no fighting the unseen (pack 0.20.77)
+
+- Andy: an orc "was invulnerable, and invisible", and "i could only see other npcs attacking it". No log covered it, so
+  two ways an orc goes unseen are fixed. A cursed orc hidden inside his werewolf (invisible, frozen, unhurtable) is never
+  taken for a foe (`Lycans.hidden`, `ThrallTargetMixin`), and whoever was fighting him within 32 blocks turns on the
+  beast (`Lycans.unTarget`). The Quiet One's In-balmed orc wears a 5 s veil topped up only at his keeper's side, instead
+  of an hour's invisibility that outlasted his keeper logging off (`InBalming.SHADOW_VEIL`). Not played.
+
+## 0.7.566 (2026-11-05): strays indoors get shooed out
+- Andy: "villagers should react to animals being somewhere they shouldnt, like deer in the speakeasy". A wild animal
+  indoors in a settlement (a built floor under a roof that isn't a tree, or anywhere in a realm's speakeasy) is noticed
+  by a villager who sees it (speech bubble + grumble), and the nearest guard, else worker, else that villager walks up
+  and shoos it with swats toward the nearest reachable open-sky spot, opening a closed wooden door and shutting it after.
+  After 30 s a guard, den hand or butcher puts it down; anyone else calls a guard. Skipped: the settlement's own
+  stables/barns/pens, ridden/leashed/tamed/named/owned animals, house animals (tag `jaymoskingdoms:house_animals`:
+  cats, parrots, bees, axolotls, frogs, allays). `Strays`, lang part strays.json (12 lines per family), hint 104. Not played.
+- **0.7.567, hint 105** (Powers 0.20.81): a loading-screen hint for rocks by hand (main hand sets down, off hand throws
+  after a short hold, sneak + use with flint and a rock splinters the flint). Lang part rock_hands.json. Merged ahead of
+  the purse PR (#993), which then takes hint 106. Not played.
+
+## 0.7.568 (2026-11-05): coin purses fill up visibly and work like bundles
+- Andy: "coin purses dont animate correctly, you should also be able to remove the coins like bundles, and add them to
+  other purses". The purse's icon picked its look from how full it was out of 640 coins, so anything under 160 coins
+  looked the same. It now reads the coin count itself (item model property `jaymoskingdoms:purse_coins`, `PurseCoins`):
+  coins showing from 1, bigger at 24, 96 and 320. The same model hangs on the hip in Powers. A gold bar under the icon
+  shows how full it is (red when full), as on a bundle.
+- Like a bundle (`CoinPurseItem`): right click a purse in a slot with an empty cursor to take out one stack of its biggest
+  coin; right click an empty slot with a purse on the cursor to put one down; drop coins on a purse (either button) to
+  fill it; drop one purse on another (either button) to pour it in, as far as there's room. Bundle sounds on each.
+  An empty purse still picks up and swaps as usual. Lang part coin_purse.json, hint 106. Not played.
+- Andy: "the pick pocket animation should reach for it if they have one". A crook picking a player's pocket used to
+  just swing an arm and take. Now they stop behind you and reach in for 25 ticks first (the same arm-in-the-pocket pose a
+  player pickpocket uses, `PickpocketPose`), aimed at the coin purse on your hip if you wear one
+  (`Pickpocket.Reach.purse`, `PickpocketPose.aim`), then lift and draw the hand back. Turn round mid-reach and the hand
+  comes back out and they wait. `Crooks.PICK_REACH_TICKS`. Powers 0.20.82 moves the purse out of the leg to match.
+- **0.7.569, villager voices quieter and one at a time:** Andy: "voice lines from npcs are too loud and layer like the old
+  intro did." (`VoiceGate`, `Languages.voice`/`farewell`) a villager says no new line until its last one has finished
+  (our tongue clips measured from the .ogg, MCA's taken as 3 s) plus 4 s; a player hears one villager's line at a time
+  (a line that starts while another is playing to them isn't sent to them). Lines in a tongue play at 40% volume, MCA's
+  words and the grunts at 70%. Pain cries and snores are left alone. Not played.
+
+## 0.7.570 (2026-11-05): a town's people hold each other to the law; no more catapulting blows
+- Andy's clip: a thrown rock hit one of Thalshire's people by accident, the town rallied, one blow flung him about 14
+  blocks and downed him, and a rallied townsman executed him at once. "if that many guards are there they will force one
+  another to do the just thing, so as not to attract bad attention."
+- Held to the law (`HeldBack.spares`, through `PowersCompat.spareRighteousGuards`): every one of a town's people (guards
+  and archers, haven sworn, grown villagers including MCA's, settled folk; not orcs, goblins, barbarians or rulers) now
+  spares a downed player, not only guards. Only a hotheaded or spiteful one may execute, and only with none of the town's
+  people on their feet within 16 blocks (`WATCHED`), and only over a real enemy of the town (outlaw there, reputation at
+  or under hostile, or at war). Village iron golems never, as before.
+- Taken in, not cut down (`HeldBack.assaulted`, from `Retaliation.struck`): within 2 minutes of a seen blow on one of a
+  realm's people, a downed player with one of its guards or sworn within 6 blocks is taken in: everyone near is called
+  off and they're got up (revive + bandage tags). Andy: "if they have a jail, you go there": a kingdom or fiefdom locks
+  them in its cells under the seat (Busts' pit, dug if needed; same release and break-out rules) for 2 minutes
+  (`JAIL_TICKS`); a village or haven fines 6 emeralds' worth of coin, or lets them off with a warning if they can't pay.
+  Lang part held_back.json, hint 107.
+- No catapults (`HeldBack.cap`): the throw from a blow by a town person or a folk fighter (not orcs or rulers) is capped
+  at the end of the tick at 0.6 blocks/tick along the ground and 0.4 up (0.25 / 0.2 if downed), whatever pushes stacked
+  in that tick. The exact push couldn't be pinned from the clip: several guards' blows plus their weapon-form pushes
+  (`SchooledGuards`, which add to the knockback rather than replace it) landing together is the likely cause; the cap
+  covers them all. Not played.
+
+## 0.7.571 (2026-11-05): every Sorcerer absorbs their element
+- Andy: "sorcerers should all be able to absorb their elements like the blood sorcerer. i especially want a cone of
+  absorption in front of fire sorcerers that can put out flames and feed their reserve". `Absorption` gives every element
+  but blood (which keeps `Hemomancy`/`BloodBlasts`) the blood Sorcerer's loop: a reserve (`Absorption.RESERVE`, 20,
+  synced, shown in the blood bar's spot in the element's colour), J held looking at a source absorbs it (a gathering hold
+  never fires), J held empty-handed for 3 s (nothing shown till then) or double tapped and held (at once; an empty hand's
+  tap waits 8 ticks before its Imbue/Mend) throws it as a barrage of element blasts (4 damage, a touch of the element, one in 3
+  a full `Spellcraft.strike`), a tap is still the Imbue/Mend/Storm Ring. The reserve pays for J keys before mana
+  (`Mana.cast` → `Absorption.payKey`, a point = 2.5 mana).
+- **Fire's cone** (8 blocks, 35° half-width, nearest 8 sources a pulse): fire blocks go out, lit campfires and candles
+  are snuffed, burning creatures and the Sorcerer stop burning, fireballs in flight are swallowed, blazes and magma cubes
+  are drained (1 damage), lava gives heat but stays lava. Flames stream to the hands; it keeps putting fires out even when
+  the reserve is full.
+- Other sources: water (water, cauldrons lowered, rain), ice (ice/packed/blue thawed a step, snow taken, the frozen
+  thawed), earth (natural stone, dirt, sand, gravel, clay), air (looking up into open sky, richer higher; breezes),
+  lightning (a storm's sky, lightning rods, redstone blocks), restoration (flowers, leaves, saplings, crops, amethyst;
+  its blasts heal the living and sear only monsters/undead), death (undead drained, the downed/dying, bodies, soul sand,
+  bone, skulls; every death within 12 blocks gives 2). A slow trickle (0.25/s, earth 0.1) while standing in the element.
+  Hints 108-109. Gradle compileClientJava clean, not played.
+- **0.7.573, reincarnation from nothing:** Andy: "you should get reprompted completely, like with a new character
+  creator". `LifeStory.reincarnateAnew` (called by Powers 0.20.83 after a final death, once it has wiped the old life):
+  MCA's own player reset (single again), their look unset and its creator sent anew (`McaBridge.newDestiny`), then the
+  whole life story as `reincarnate` does. Loading screen hint 110 tells of the two sure wakes.
+- **0.7.573, taken in:** Andy: "taken in by a village or nearby villagers". `Shelter` (Powers' `Mortality.SHELTERS`):
+  when a village, fiefdom or kingdom not set against you (reputation 0 or more) has its seat within 320 blocks of where you
+  fell, there's a 45% chance its folk carry you in. You wake on one of its free beds (any of the near ones, picked by
+  distance), or on the ground by its seat if it has none. Once you come round you're laid in that bed resting
+  (`BedRest.lay`). Captors still come first. Tuning is at the top of `Shelter`. Not played.
+- **0.7.574, werewolf bites curse players; the beast hides the player:** Andy: "it should spread to players as well".
+  (`Lycans.bite`, `WerewolfPlayers.bitten`) a cursed beast's bite (a cursed villager's, or a player's beast's melee hit)
+  that a player lives through curses them at the same `BITE_CHANCE` (40% a hit) as villagers; a wolfblood's half curse is
+  finished. No text, only a far howl they alone hear; the first change waits for the next full moon. Vampires, creative
+  and spectators can't take it. A player's beast now spreads it to villagers too. Wild werewolves still pass on nothing.
+  Andy: Jung's beast "was still holding a knife, nothing should animate like the suits and costumes". (`strip`/`stow`) the
+  claws' items went back into the selected slot when it was the first free one, so the knife never left; now they go
+  anywhere else or drop. (`BeastHidesPlayerMixin`) a player who is the beast (invisible, torn out) isn't drawn at all, so
+  held items, Powers suits/costumes and worn weapons no longer float on the beast. Not played.
+  Also in 0.7.574, Andy: "it should be a variation that you can achieve" (after Werewolves: Become a Beast's three
+  paths; its art is Vampirism-only, so nothing of it is used). (`WerewolfPlayers` LEAN_*, `LeanWolfModel`,
+  `tools/gen_lean_wolf.py`) once the change comes at will (3 moons) and the wildness is at most stage 1, sneak+U changes
+  into a lean wolf on all fours (our own boxes and coats, one per werewolf coat, the fiery one flickering): Speed III,
+  Jump Boost III, +2 hearts, no Strength or Resistance. Too wild: an overlay line says so. Full moons are always the
+  great beast; the mostly-human path stays the wolfblood (ritual off the full moon). Hint 111. Not played.
+
+## 0.7.575 (2026-11-05): break out of the cells on foot; an escape is hunted, not shot on sight
+- Andy's clip (Sentenced start): he picked the cell door, was teleported to the street by Eldhollow's seat, told the realm
+  "now counts you an enemy", downed and shot dead where he lay. "you should not just teleport out of the jail cell upon
+  lockpicking like this, if there is no jail in the city, there needs to be a more realistic alternative".
+- The cells have a way out (`Speakeasy.passage`, dug with the cell door, `cellDoor`): a walled passage 3 blocks east
+  from the iron door, then a laddered shaft up to a shut spruce hatch in the first floor at the seat's level (caves on
+  the way are walled off; blocks with block entities are left alone). Every way out opens the door (`Speakeasy.openDoor`)
+  and you walk up: picking it, paying the fine, or serving the sentence (`Busts.serve`). No more teleport to the seat.
+  Busts' contraband cells and HeldBack's assault cells get the door and stair too.
+- A broken-out prisoner is hunted (wanted for 6 minutes, `Theft.HUNT_TICKS * 3`) to be taken back (`Busts` "escape"
+  charge), not outlawed for two days. The broken life aim's reputation hit (`LifeAims.betray`) no longer drops a realm
+  below hostile, so its guards don't attack on sight. The story's forced respawn by the seat is dropped on escape, so a
+  death doesn't put you back among the guards hunting you.
+- Downed players aren't shot or cut at by townspeople who'd spare them (`HeldBack.standDown`): they drop the target and
+  guards walk over to take them in. Hint 112 (lang part held_back.json). Not played.
+- **0.7.576, villagers run from blasts, monsters fear campfires:** Andy (seven-mods picklist): "all villager mobs and non
+  guards should react by running away if they hear explosions (within 40 blocks)". Every villager (MCA's too) within 40
+  blocks of an explosion runs from it and hides, as from a monster. The brave hear it from nearer and the timid from
+  farther (`Temperaments.frightRange`), and the timid hide longer. Guards, archers, war-party soldiers, MCA's guards and
+  anyone already fighting stand their ground (`BlastFright`, `Frights.blast`, hooked in `ServerExplosionMixin` next to
+  the horses' shying). A chain of blasts close together, like TNT or a meteor's ring, counts as one. And monsters fear a
+  lit campfire (after HearthGuard's idea, our own code): within 8 blocks of a lit campfire or soul campfire near a
+  player, a monster backs off about 12 blocks and lets go of whoever is by the fire; bosses, raiders, barbarians and
+  patron champions aren't held back (`CampfireWard`). Not played.
+- **0.7.578, the cafe (seven-mods patches 7 to 9):** Andy (seven-mods plan): "build 7-9". Cozy Cafe's idea (Chakyl, LGPL),
+  our own code and art, nothing copied.
+  - **Menu board** (`CafeBoard`, crafted from sticks, planks and charcoal): a chalkboard on legs that stands on a counter.
+    Whoever sets it down owns it. Its 27 slots hold one sample of each dish or drink on the menu (it stays on the board;
+    you serve from your own stock). Sneak-use with an empty hand cycles its prices: cheap (0.75x), fair, dear (1.5x).
+    Using it shows whether it's open, its name, its seats, its comfort and its prices.
+  - **Customers** (`Cafe`): from morning till dusk (day time 1000 to 12500), while the owner is within 48 blocks and the
+    menu isn't empty, grown townsfolk and visitors (visitors three times as likely) come in. Guards, posted soldiers,
+    rulers, cooks, the frightened, the busy and anyone already at a meal don't. Each walks to a free seat (a bottom
+    slab, bottom stairs, a carpentry bench, or the block tag `jaymoskingdoms:cafe_seats`), sits on a cushion, and asks
+    for one dish off the menu in a speech bubble, reminding you now and then. Use the dish on them to serve it: they
+    pay in coin, eat, thank you and leave. A wrong dish costs a fifth of their patience; when it runs out (90 s, before
+    comfort) they leave cross. The same villager won't come back for 5 minutes.
+  - **Tips:** price is by how filling the dish is (30 milli a hunger point, 20 a point of saturation, at least 100) times
+    the markup. A quick serve earns a tip of up to 30% of it, more in a comfortable room and at cheap prices, less at
+    dear ones.
+  - **Reputation** (0 to 100, kept on the board): +1 a dish served, +1 more if it's Perfect, +1 more if served in the
+    first half of their patience; -1 for a wrong dish, -3 for an angry customer. Each 25 points: one more customer at
+    once, more often, and the room grows (seats count 6 blocks out, a block more each 20 points, to 11). Passing 25,
+    50, 75 and 100 puts word of the place on the town boards (`Post.news`).
+  - **Quality sells:** Kitchen's cooking grade (read off the dish's name) sets the price: Perfect 1.5x, burnt, charred
+    or undercooked 0.5x. Brews have no grade, and dishes have no freshness clock, so neither changes the price.
+  - **Comfort:** cosy blocks round the seats (block tag `jaymoskingdoms:cafe_comfort`: carpets, candles, flower pots,
+    banners, lanterns, bookshelves; any Beautify block; Kitchen's cabinets and rugs), up to 40. At 40 customers wait 60%
+    longer and tip half again as much.
+  - **Innkeeper** (`Careers.Job.INNKEEPER`, the eleventh career job; a town with a tavern is always hiring): orders to
+    serve 4 to 8 customers, and bread, baked potatoes, cooked beef and mushroom stew for the storehouse. Kit: a menu
+    board, bowls and bread. Journeyman: your customers wait half again as long. Master: tips doubled, and your
+    apprentice (within 24 blocks of the board) serves for you, carrying ordered dishes out of chests and barrels within
+    2 blocks of the board, the coin coming to you.
+  - **Town taverns:** all three tavern blueprints set a menu board on the bar. A town board fills itself with the
+    tavern's fare (vanilla and Kitchen dishes and brews, whichever exist) and, while a cook (or failing that some
+    townsfolk who isn't on guard) is within 12 blocks, sells anyone a hot meal: click a dish to buy one, priced by the
+    town's food index, up to 24 a day, the coin going to the town's till. Taverns already built don't get one. Not played.
+- **0.7.579, our part of the advancement tab:** `PackAdvancements` awards Powers' `jaymospowers:pack/*` advancements for the life story, a job's first rank, a sworn patron, a monolith seen, a ship taken out, a great whale killed and each kind of Giant felled (Powers 0.20.88). Not played.
+- **0.7.580, mice raid pantries; the mime (seven-mods patch 4):** Caverns & Chasms' ideas, our own code. **Mice**
+  (`Mice`): Andy's note was "rat behaviour on Cube Animals mice", so `cubeanimals:mouse` and `cubeanimals:rat` (if the
+  build has it) get it, with no new mob. Every second, a wild mouse near a player may (8%, at most every 2 minutes) creep
+  to a chest, barrel or Kitchen cabinet within 12 blocks that holds food, when nobody is within 5 blocks of it. There it
+  eats one food item. Cats within 12 blocks chase mice, which run, and bite the ones they catch. Feeding a mouse wheat,
+  seeds, bread or any cheese tames it one time in three: a tame mouse follows you, is never despawned and steals
+  nothing. **The mime** (`monsters/Mime`, `MimeRenderer`): a pale figure on the slim player model, rare (weight 3)
+  and only below y 0. The first time it sees its target player, it takes copies of what they hold and wear and fights
+  with them. Its copies never drop. It isn't a monster of legend. Not played.
+- **0.7.581, patron wrath and grace, the cast-out, monolith glyphs (seven-mods plan, patches 5 and 6):** Andy: "ok do
+  5 and 6, and the devout villagers even if you have high reputation will cast you out for blasphemy against their
+  patron, and the Truth's followers will cast out and are sworn to cleanse evil". New `PatronWrath`: beasts killed
+  past the meat you've eaten (3 free, one forgiven a day) cost the Huntsman (fish the Deep Mother) and the
+  Hearthkeeper favour, a tame beast slain costs the Hearthkeeper 4, a monster cleared is a small deed for any patron
+  (1 in 4). The wrath ladder under favour 10 (only sin gets you there; neglect stops at 10): omens (a far bell, a
+  howl, a snuffed flame, a cold breath, sent to that player alone), wilting crops, beasts bolting, lightning near, and
+  at 0 a smiting (lightning on you, or underground a blow from the earth) once a day. The watcher: under favour 5,
+  looking up under open sky, now and then (once a day at most) a vast hooded figure stands in the clouds for 7 s, a
+  display entity sent to that player alone (item model `jaymoskingdoms:watcher`). Grace: tier 4 players have a 1 in 4
+  chance at dawn of a gift of their patron's kind at their feet. Thirteen happenings, two or so per patron (fires
+  kindle, hens lay, ore glints, an anvil rings below, fish rain, the water hums, beasts turn to watch, howls, the dead
+  stand still, a soul-flame ring, a halo, a whisper behind you, torches gutter, bells ring, books rustle), at most one
+  a day. Strict faith: gamerule `jaymoskingdoms:patron_strict_faith` or `/patron strict true|false`: commandments cost
+  double and neglect has no floor. New `CastOut`: a devout villager (a priest, or the devout temperament) who sees you
+  break their patron's commandment (an act done in sight) cries blasphemy and casts you out with every devout of that
+  patron in earshot: no trade or talk with them again whatever your reputation, and a realm holding that patron
+  outlaws you on the spot (`Theft.castOut`). A Truth follower who sees a forbidden spell cast, or comes to suspect
+  (rightly) a vampire or werewolf (`Suspicion`), turns on you at once with every Truth follower in earshot: guards
+  take you as a foe, the rest come at you with fists or what they hold; a Truth realm outlaws you. Kept per villager
+  by the name they know you by, so a mask still fools them. New `remnants/MonolithGlyphs`: rows of carved stone
+  (holystone keystone, chiseled deepslate, chiseled packed ice bricks, faded holystone keystone) round each monolith's
+  foot (old ones carved when a player comes near); a book and quill used on them copies a row of runes as a page (one
+  a day from each), and the more rows a book holds the more its copier makes out under each: the next standing Giant's
+  kind, its heading, how far, whether it stirs. Not played.
+
+## 0.7.582 (2026-11-05): orc cutscenes you can read (Powers 0.20.93)
+Andy: "you dont get enough time or visibility on the orc cutscenes to view what they say ... pan into the text box and
+character, sacrificing the view of the character near the end to get high enough to view the whole chat bubble."
+- A goblin or orc captain's first meeting film is now Powers' speaker shot (in on his face, then up to his words) and
+  runs 6.75 s instead of 2.5 s (`Captains.FILM_TICKS` 50 to 135), about as long as his line's bubble stays.
+- His scene over your body before you respawn uses the same shot and runs 7.5 s (`SCENE_TICKS` 90 to 150); he's raised
+  at 3.5 s (`SCENE_RAISED` 45 to 70) so the gloat and the line after can both be read.
+- Powers' FOV is held at your plain setting during these films (see Powers 0.20.93). Built, not played.
+- Andy: "you should become invulnerable for the duration, and the orc should stop for a second when it is in view, so
+  that you can read". During a captain's first-meeting film the player takes no harm from anything, and he stands
+  still facing them (`Captains.FILMED`, `filmHarm`, his pause rides the death scene's `SCENE` hold). If the player
+  strikes a blow, both end early, so he doesn't stand there taking free hits. Turn it off with `Captains.FILM_SAFE`.
+- **0.7.583, a new life's black screen:** `LifeStory.making` (story, MCA's creator, heritage or class still to choose, or
+  held in stasis), read by Powers 0.20.94 to keep a reincarnated player's screen black until their character is made.
+
+## 0.7.584 (2026-11-05): captives left alone till they act up; collars, tethers, breaking free (Powers 0.20.95)
+Andy, woken in chains at a camp and set on at once: "they shouldnt do that until you try to escape or steal or do something
+slaves are not allowed", then "im shackled to the roof of the building ... there should be some kind of visible chain or
+yoke around the slaves/ prisoners necks ... chans can be broken with rocks or flint and repeatedly slamming, and the rope
+can be sawed through similarly."
+- `CaptiveConduct`: a shackled player is spared by captors (`Captors.sentient`, and the holding camp's own) through
+  `canAttack` (`ThrallTargetMixin`); any already on them let go. Before, only barbarian raiders checked the shackle, so orcs,
+  goblins, pirates, ogres and illagers attacked a fresh captive. Striking anyone, breaking a block, opening a container,
+  picking the shackle where a captor sees, or being caught at the tether turns the camp on them for a minute
+  (`UNRULY_TICKS`), and the chains' Resistance is off meanwhile.
+- `LifeStory.ground` (used by the kidnap wake and the "still in chains" start) prefers open ground (earth, sand, stone), then a floor indoors with room to stand,
+  before a roof as the last resort, so nobody wakes chained on a hut roof.
+- `Shackles`: a captive is collared and tied to a stake beside them (iron collar and chain to a cobblestone wall post, or
+  a rope to a spruce fence, 40% rope). Synced (`TETHER`) and drawn for everyone by `client/ShackleTether`. A chain breaks
+  under 24 slams of a rock (flint, flint shard, cobble/stone), loud, each heard by any captor within 14 blocks at 15%;
+  a rope saws through in 16 strokes of something sharp (flint, shard, blade, shears), each seen by a watching captor at
+  30%. Through, they're free and hunted as from a picked lock. The stake can't be pulled up while tied to it.
+- Hint 113. Built, not played.
+
+## 0.7.585 (2026-11-05): taken-over bodies face the way they walk (Powers 0.20.97)
+Andy: "takeovers need to face your character toward its walking direction ... this was a problem for symbiotes and i just
+saw it with the werewolf players."
+- A werewolf player's beast (and lean wolf) turns to the way it runs on every screen. Before, it copied its player's
+  camera, so it slid sideways and walked backwards. Its head turns toward where they look, up to 60 degrees.
+  (`Werewolf.tickHeadTurn`, `WerewolfRenderer`, `TakeoverFacing`.)
+- A player held by the blood fever, the feral curse or the Grue is drawn the same way. `Seizures.SEIZED` (synced to
+  everyone) tells other screens a hold has them. (`TakeoverFacingMixin`, `TakeoverFacingHeadMixin`,
+  `SeizureClient.drivenBody`.) The camera is unchanged. Built, not played.
+
+## 0.7.586 (2026-11-05): falling trees knock others over, smash weak blocks; blasts fell trees
+Andy: "the trees that fall should knock each other over, break blocks that are weaker as they fall, and fall without
+player input, (explosions / heavy impacts can fell trees too.)"
+- A falling tree whose wood strikes a standing tree at 0.25 blocks a tick or faster knocks it over the same way, whole
+  from its foot (`FallingTree.knock`, `Trees.knock`), unless that tree has more than 1.5x its logs. Each tree knocks at
+  most 2, and those can knock on, so a stand of trees can go down like dominoes.
+- Its wood smashes through blocks both softer and less blast-proof than the log itself (`FallingTree.weaker`): glass,
+  panes, wool, crops, pumpkins, ice, ladders, sandstone and the like, dropping what they would. Planks, stone, earth (anything dug
+  with a shovel), water and blocks that hold something (chests, signs, beds) still stop it. At most 12 a tick; a tree
+  thrown by a tornado smashes the same way once clear of its hole.
+- Blasts that break blocks (`TreeBlastMixin` on `ServerExplosion.explode`) fell trees within twice their radius (at most 12
+  blocks), likelier the closer (90% at the heart), away from the blast, up to 6 trees of at most 8 logs per block of
+  radius (creeper 24, TNT 32). Radius under 2 (wind charges) fells nothing.
+- A tree left standing on nothing comes down by itself: blown out from under by a blast, or its last trunk log broken
+  whole (sneaking or in creative), it falls to its heavier side (`Trees.unsupported`).
+- Hint 114. Built, not played.
+
+## 0.7.587 (2026-11-05): hint 105 tells of holding a charged rock (Powers 0.20.103)
+- The off hand rock is held drawn back at full charge and thrown on release, charging faster with each throw close after
+  the last (Powers `ThrownRocks`); hint 105 says so.
+
+## 0.7.588 (2026-11-05): felled trees stay as fallen trees until chopped; no more trunk pushing
+Andy: "I dont like the tree pushing, can you keep the trees as physics items until they are broken by the player?
+meaning a leaning tree broken in the middle will break into two?" Then, from a clip: "this tree turned into oak when i
+started breaking it ... it also took an unexpected swapped trajectory and hit me ... if the trees are what knocked it
+off course then those should break upon contact".
+- A felled tree never turns back into blocks. Down, `FallingTree` stays an entity, saved with the world (pieces by block
+  state, lean, heading, whether it's down, leaning or falling). Lying, it's lifted half a block so its wood rests on the
+  ground rather than half sunk in it.
+- Chopping it: strike it (attack) and the piece you aim at takes the stroke (`skipAttackInteraction`, a ray through its
+  pieces). A log takes 3 axe strokes (`LOG_CHOPS`), a point of axe wear each, and needs an axe as standing wood does; a
+  leaf breaks at once. Broken out, it drops what it would and the tree splits into the parts that still touch
+  (`split`, corners count); each leaf goes with the nearest part within 3 blocks, or falls. Lying, the parts lie where
+  they are as separate trees. Leaning, the part still on its stump falls on if it now can, and the rest drops free
+  (flying, tumbling 3 degrees a tick) and lands as a fallen tree.
+- Its box covers its wood as it lies (`makeBoundingBox`), so you can aim at it; arrows pass through.
+- Its leaves drop off as it lies (2 every half second, giving saplings, sticks, apples), and the ones that snapped as it
+  landed drop at once. A tree caught leaning checks every second whether what held it is gone, and falls on if so.
+- No more glancing sideways (the "swapped trajectory"): wood it strikes while moving at all knocks that tree over its way
+  (`KNOCK_SIZE` 2x its logs, up to 4 trees each). A tree too big to knock over holds it leaning.
+- `FallenTrunks` (pushing and rolling lying logs) is gone. Logs already lying as blocks stay as blocks.
+- Chopped logs no longer draw as oak mid-chop: a chop the client guessed as a break got the block put back without its
+  wood, so `Trees` sends the chopped log's data again two ticks after each chop.
+- A woodcutter's tree still breaks up into his bag.
+- Giants grab and throw trees (Andy: "giants should also be able to grab and throw the trees with their grabs").
+  `FallingTree.treeNear/take/hold/hurl`: a giant's hand takes a fallen tree, or tears a standing one out whole; held, it
+  lies along the giant's facing; thrown, it flies tumbling, strikes what it passes through (never its thrower) and lands
+  as a fallen tree. Aether Giants (mob griefing on) tear one up and lob it at a target out of grab reach but within 40
+  blocks (up to 120 logs). Powers 0.20.106's Great Ape and Towerback grabs do it when no one is in reach (`GiantTrees`).
+- Mob griefing is always on (Andy: "it should be on by default in this pack and always on the server"): `PackRules`
+  sets it on as the server starts and puts it back every 10 seconds if it's turned off.
+- Hint 115. Built, not played, not booted.
+
+## 0.7.589 (2026-11-05): fewer hostiles, sharks in a ship's wake (Powers 0.20.107)
+- Andy: "mobs are overspawning, reduce the rates by a ton. especially for the hostile mobs", then (after his clip of a
+  seabed packed with sharks) "i kind of like the idea of a feeding frenzy like that ... maybe add an event or a group that
+  often follows ships", and chose to cut only the hostiles. The monster cap is halved (70 to 35; every mod's natural
+  monster spawns count against it, `mixin/tweaks/MonsterCapMixin`). Sea life, animals and the pack's own spawners are
+  unchanged.
+- Shark wake (`whaling/SharkWake`): out on open ocean (ocean biome, 8+ blocks of water under her), a ship, boat or
+  anything a player rides under way has a 30% chance every 30 s of picking up 3-5 Naturalist great whites that trail
+  her wake for about 5 minutes. Anything hurt or killed in the water near them sets off a 15 s feeding frenzy: they go
+  for the bleeding thing, then anything else swimming near (players overboard too), the water churns red and up to 3
+  more come, at most 10. When the pack breaks up, sharks out of sight go back into the deep. Hint 116.
+- The 02:10 crash (`Captains.slew` removing from `Map.of()`) was on 0.7.558; fixed since 0.7.561.
+- Built, not played.
+## 0.7.591 (2026-11-05): new features checked against villager talk and the world tiers (Powers 0.20.109)
+- Andy: "make sure all the new features work wth all the old, im thinking specifically of the chat interactions and
+  sevtech style world generating as you progress".
+- Villagers no longer come over to ask you something (Approaches) or hold out a hand (Handshakes) while you're downed or
+  out cold, carried, lying left for dead, black while a new character is made after Reincarnate, inside Chrono's death
+  window, tethered as a captive, or in a captain's first-meeting film (`Approaches.unreachable`, Powers' `OutOfPlay`).
+  One already on the way gives up if any of that starts. Nobody downed, carried off or in chains comes over either.
+- Their question no longer knocks away whatever screen you have open (the death screen, the story and character
+  screens, MCA's chat, the journal): it waits for that screen to close, up to 20 s (`TalkScreen.WAIT_TICKS`).
+- The Ground Changes: an iron, copper or gold vein grown under the surface when a tier opens now gets the same faint
+  ore pebble chance as a vein that was always there (40%, half hidden nuggets; `GroundChanges.tell`), so the pebbles
+  from Powers 0.20.105 work over the new ground too. Pebbles still only ever sit over ore that's really there, so they
+  never show anything ahead of your tier. Built, not played.
+
+## 0.7.592
+- Hint 117 for Powers 0.20.110's adrenaline (`lang/parts/adrenaline.json`).
+
+## 0.7.593
+- Hint 118 for Powers 0.20.111's fainting from hunger and thirst (`lang/parts/fainting.json`).
+
+## 0.7.594
+- Andy: "Villagers near you can wake you and either hint at what happened, outright tell you and give you a drink from
+  theirs, or just steal from you". `FaintWakers`: a player passed out (Powers 0.20.112's Fainting) draws the nearest
+  villager or settlement folk within 16 blocks who can see them. By temperament they shake you awake and, as the black
+  lifts, hint at it ("when did you last eat?"), or tell you straight and give you a drink of clean water from their
+  waterskin (Kitchen thirst +6) or a bite of food (+4) for hunger, or (villagers only, mostly greedy or spiteful ones)
+  don't wake you at all: they take a stack from your pack (half of a big one) into their own inventory, where a
+  pickpocket can win it back. Speech bubbles only (`lang/parts/fainting.json`, 36 lines). Built, not played.
+
+## 0.7.597
+- Villagers keep one attitude toward you (Andy: "this villager talked to me then acted this way when i introduced myself,
+  the interactions should be consistent"). One who is wary of you (`Introductions.wary`: minds your blood, their realm
+  thinks ill of you, or remembers you coldly) now shows it from the first moment: opening their menu gets the same cold
+  word they'd give for your name or your hand (`McaBridge.waryOpening`) instead of MCA's friendly stranger's welcome,
+  and they no longer come over to chat, ask after you, beg, bargain, gossip or bring gifts (`Approaches.pick`; only an
+  accusation or checking on a quest they gave you). The cold line is the same one all day for that villager and player
+  (`Introductions.waryLine`), so a step back from your hand and "ask their name" don't say two different things.
+  A villager who isn't wary of you never turns cold on the introduction.
+- Speech bubbles: words still showing aren't stacked again under themselves (they stay up longer), and like name tags a
+  faint copy shows through blocks, so a wall between you and the speaker no longer cuts lines off mid-word.
+  Built, not played.
+
+## 0.7.598 (2026-11-05): kingdoms only in Epic towns; Grim castles are fiefs only
+- Andy, of a Winterhold citadel standing as a kingdom's seat on open snow: "these structures should only spawn as fiefs
+  or smaller villages allied to larger kingdoms that are always from epic villages, this would never pass a kingdom's
+  structure".
+- `GrandSeats` no longer offers Grim Kingdoms' keeps and citadels (Winterhold, Whitewarden, Snowgrave, Grain Sack,
+  Glimmervault): they stay fiefdom holds only (`GrimSites.HOLDS`). Snowy land takes ATi's woodland keep instead.
+- Only an Epic town (vanilla's `minecraft:village_*` ids, which Epic Structures: Villages redraws; `Seats.epic`) founds
+  a kingdom. Any other mod's village (ChoiceTheorem's, the shared pool's others) is always a village, and a new village
+  now sides with the nearest standing kingdom within 1000 blocks (`Villages.ally`, allied both ways).
+- A kingdom made where no village stands (the story start's capital, a trader's second town, a whaler's shore realm)
+  now raises an Epic town of the land's kind there first (`EpicTowns`: generated as `/place structure` does, entered in
+  its chunks' structure references) and seats in it like any town; only if it won't generate or would stand mostly on
+  water does the castle go up as before. The story's capital search looks at Epic towns only.
+- Kingdoms already founded keep their seats; this applies to new ones (a new map shows it). Built, not played.
+- **0.7.599, werewolf players can be hurt:** Andy: "jungxvv seemed to be invulnerable after becoming a werewolf". Two
+  causes. The beast's player wore Invisibility to hide their body, and monsters all but ignore an invisible player, so
+  nothing fought them; now no Invisibility (`WerewolfPlayers.buffs`): their body and first-person arm are hidden by
+  `BeastHidesPlayerMixin`/`BeastHidesHandMixin` once the beast has torn out (`NightGifts.Gift#beast` now means torn out,
+  `WerewolfPlayers.tornOut`). And blows to a player's beast took the wild werewolf's thick hide (x0.25 unless gold or
+  silver) before reaching the player, on top of Resistance and 5 extra hearts; now only silver's x2 applies
+  (`Werewolf.hurtServer`). Not played.
+
+## 0.7.600: wolves stalk you (pack 0.20.116)
+Andy: "wolves should stalk you, letting you think you're safe and attacking from cover and concealment, similar to creepers
+but more of a hunter. they can smell you out."
+- **Who** (`wild/WolfStalkers`): our feral wolves always; the game's wild wolves at night, or by day when you're under
+  half health, and never while you hold a bone (taming still works). Tamed wolves, pups and leashed wolves never stalk;
+  nothing stalks on Peaceful or a creative or spectator player. Feral wolves no longer charge players on sight (only one
+  that walks within 4 blocks of an unstalked wolf, or hits it); the encounters' feral wolf packs start stalking too.
+- **The nose**: a wolf smells you from 36 blocks in still air; 0.6 of that while you sneak, half in the rain, 1.5x when
+  you're under half health. Out under the sky the wind (slowly turning through the day) carries it: a wolf downwind
+  smells you from up to 1.6x as far, one upwind from only 0.4x. Past that, a footstep of yours from the last minute
+  within 12 blocks of it (the werewolves' scent trail, `ScentTrails.freshest`) puts it on your trail, and it follows the
+  trail in. One wolf taking up a scent brings its pack (same kind, 16 blocks).
+- **Shadowing**: a stalking wolf goes silent and keeps to a ring round you, 18 blocks out, creeping 2.5 blocks closer
+  each hop you don't see it (no closer than 7). It picks spots out of your sight (behind blocks and trunks, in grass,
+  ferns, bushes and leaves), toward your back, downwind of you, and not far to go; a pack fans out round you, each wolf
+  on its own side. Losing your scent for 20 s it gives up (and rests a minute before it will stalk again).
+- **Hanging back**: look right at a stalking wolf you can see (in undergrowth or the dark you only see it within 6
+  blocks) and it freezes, then slinks back out of sight and starts again from farther off. Spot one within 6 blocks
+  and it commits.
+- **The rush**: within 10 blocks, while you aren't looking at it, and your back is turned, your hands are busy (eating,
+  drinking, drawing a bow, a shield up) or it is hidden from you (or after two minutes of stalking), it breaks cover with
+  one low growl (the tell, like a creeper's hiss) and the whole pack within 32 blocks comes at once, with a burst of
+  speed for 4 s. Hit a stalker and the pack comes in then. Lose them after and they fall back to stalking. A stalking
+  wolf doesn't fill the stealth gauge and can't be sneak-attacked by the one it stalks.
+- **Fewer wolves and walruses** (Andy: "they also spawn way too much ... we were flooded with walrus and wolves";
+  `wild/Thinning`): after every mod adds its spawns, the game's wolves keep a quarter of their spawn weight, feral wolves
+  and Cube Animals' walruses a fifth, in every biome; wolves come at most 3 together, walruses 2. New spawns only: the
+  ones already out in explored land stay.
+- Tuning: the constants at the top of `WolfStalkers`. Stalks aren't saved: a reload forgets the hunt (and gives back a
+  hushed wolf's voice). Compile-checked (Gradle `compileJava`, 0 errors); not played.
+
+## 0.7.601 (2026-11-05): every melee weapon gets a weapon skill
+Andy: "it also has no moves, neither does the ninjato, they should all integrate with the weapon arts". The skill bar's
+weapon skills (Swift Strikes, Whirlwind, Cleave, Smash, Ground Slam, Flurry, Thrust, Impale, Swipe, Fan of Knives) come
+from Spell Engine, which hands them out by matching item ids against a short list and only to items with the vanilla
+weapon component: the battleaxe, ninjato, saber, machete, katana, halberd, rapier, scythes, cleavers and more got none.
+- As the server starts, every melee weapon still without one gets the skill its kind fits (`forms/WeaponSkills`, applied
+  by `mixin/spellengine/SpellAssignmentsMixin`): battleaxe Whirlwind, ninjato / katana / saber / machete Swift Strikes,
+  halberd / rapier / skewer Thrust, scythes / kama Swipe, cleavers Cleave, cudgels / staves Smash, and so on. Tools,
+  ranged and thrown-only weapons and items with their own spells are left alone. The log says how many it gave.
+- WeaponMod's halberd joins the spear Weapon Forms (`form_spears`). Axes, maces and hammers still have no Weapon Forms
+  family of their own. Built, not played.
+
+## 0.7.602 (2026-11-05): no taking a mounted villager's reins
+- Andy: "mounted mca shouldnt just let you take the reins." A player can no longer climb onto a living mount (horse,
+  elephant, camel, dragon...) that someone other than a player is riding: a mounted MCA villager, guard, carter or
+  courier keeps their horse, and you can't ride behind them or in their place either. Throw or bring the rider down
+  first (a downed rider is pulled off by Powers anyway) and the horse is free. Carts, carriages, rickshaws, cannons and
+  ships aren't mounts and keep their passenger seats. The check sits on the rider's side of every way onto a mount
+  (`EntityMountMixin` on `Entity.startRiding`, `Mounted.npcRidden`), server side, forced or not. Built, not played.
+
+## 0.7.603 (2026-11-05): fighters' and gunners' blows show Powers' incoming-blow cue
+- Andy: "is it possible to add an indicator for pvp? as of right now it is hard to parry or defend at all"
+- `MobCombat`: a fighter's swing (Better Combat moves and plain blows) and a gunner's aim at a player call
+  `PowersCompat.tellIncoming`, which shows Jaymo's Powers' incoming-blow cue round that player's crosshair (the side it
+  comes from, closing as it lands, red when heavy, gold in the perfect-parry window). Nothing without Powers. Built, not
+  played.
+
+## 0.7.604 (2026-11-05): blasts topple trees whole instead of holing them
+Andy: "when an explosion hits a tree that would break the block it should break and topple instead of breaking the
+blocks, and only the leaves that impact should break, like when players fall into it at speed".
+- `TreeBlastMixin` filters the blocks a blast is about to break (`ServerExplosion.interactWithBlocks`) through
+  `Trees.blastStruck`: a living tree's logs and leaves are spared, and every tree whose wood the blast reached comes down
+  whole from its foot (`rootOf` follows branches back to the trunk), away from the blast, any size. Its leaves then break
+  only where they strike, as any falling tree's. Logs in buildings and placed (persistent) leaves still blow apart.
+- Trees near the blast that it didn't reach still fall by chance, as before (`Trees.blast`). Built, not played.
+
+## 0.7.605 (2026-11-05): Family farmhand, Andy's day-one starts, an advancement for every locked start, fate's odds
+Andy, with a screenshot of Moog's Voyager Structures' barn: "This is what I imagine for a starting over in a village
+start, it should instead be family farmhand, and you live with the villager(s) that spawn there. Rock bottom, Heritage
+specifics, and Banished, Shipwreck, Let fate decide (random even from non unlocked! percentage table)", then
+"everything locked should now have its own unlock method and achievment", and on the card "Yes, lock the rest".
+- **Family farmhand** (`FarmhandHome`, the `VILLAGE` road renamed): you wake beside a bed inside the nearest `mvs:barn`,
+  else a Homesteads farmstead (`homesteads:*_home_steads`). A house with fewer than two grown villagers gets a farming
+  couple of your blood, married, with a child half the time; everyone in it starts at 40 hearts with you. Your job is
+  farmer; bread and 4 silver, no bed in the pack (yours is in the house). A party mate's farmhouse is yours too. With
+  neither mod's farmhouse within 100 chunks, the old village start (a haven of your blood) still runs. Villagers' first
+  lines there are a farm family's now.
+- **Day one** (`RoadLocks.OPEN`): Family farmhand, Rock bottom, Banished, Shipwreck, Let fate decide and the heritage
+  starts (Verdant World, demon master, the afterlife, the lab). The capital, the wild, sworn, the cells, the nobodies and
+  the burned village are locked again, each on its own deed: a journeyman rank in any trade (`trade.ranked`), a dawn
+  outdoors 256+ blocks from every settlement (`wild.night`), a raider slain (`raider.slain`), time in a cell
+  (`cells.held`), a merchant's order taken (`orders.taken`), a fire doused (`fire.doused`). The bench (android) no
+  longer shares Rustfall's deed: only finishing the lab's aim opens it. Every locked start now has a deed of its own.
+- **Advancements**: a new tab, Roads of a Life (`jaymoskingdoms:roads/*`), one "Road Opened: <start>" for each of the
+  27 locked starts, earned as soon as your (or your group's) deed opens it (`RoadLocks.look`, every 5 s). The
+  description is the start's oblique hint.
+- **Let fate decide** (`LifeStory.FATE_ODDS`): every start, locked or not, by a percentage table that adds up to 100
+  (Family farmhand 8; city, wild, shipwreck 6; banished 5; sworn 4; ten common starts 3; the hard and heritage starts 2;
+  moon, Rustfall, the Maw 1). Left out for the player: starts their blood can't take, ones whose mod isn't loaded, the
+  afterlife (it remakes your heritage), and realm roads in a world with no realm; the rest share the odds. A realm road
+  picked by fate goes to a random realm. Built, not played.
+
+## 0.7.606 (2026-11-05): the afterlife start is earned
+Andy: "divine born start should be an unlock". "Back from the afterlife" (the start that makes you Divine-born) is no
+longer open on day one (`RoadLocks.OPEN`). It opens the way the blood itself is earned: dying again while one of the
+dead in the Other World (`Heritage.died` now also records the deed `afterlife.died`, `RoadLocks.DIVINE_DEED`). Anyone
+who already has the Divine-born blood counts (`RoadLocks.look`), and like every road deed it opens for your group too.
+No secret past opens it. Its advancement is "Road Opened: Back from the afterlife" (`roads/afterlife`), hint "Someone has
+to have died twice over first." Ops can still `/kingdom roads unlock afterlife`. Fate already never picks it. Built, not
+played.
+- **0.7.607 (pack 0.21.9), a road's search for ground held the server:** `LifeStory.ground` (and `cave`, `beside`) made
+  every chunk it tried, up to 64 brand-new ones in one tick while the server waited (part of the 2026-11-05 15:00 crash).
+  New `reach`: a chunk already made is used freely, and at most `NEW_CHUNKS` (6) new ones per search; past that, spots
+  in unmade chunks are skipped. Not built here.
+
+## 0.7.608 (2026-11-05): fewer deer, and none in the Nether (Powers 0.21.11)
+- Andy: "why are there deer in the nether? they clearly overspawn up in the overworld too" (a deer at 385 -121 719, in
+  the stacked world's Nether band). Nothing of ours spawns deer; they're Naturalist's natural spawns. Natural and
+  new-chunk deer spawns now never happen in a Nether biome or the Nether, and elsewhere only 30% of them still do
+  (`mixin/tweaks/DeerSpawnMixin`, on `SpawnPlacements.checkSpawnRules`). Eggs, spawners and commands are untouched.
+- Built, not played.
+
+## 0.7.609 (2026-11-05): a vampire's eyes on MCA's face, and real bat wings (Powers 0.21.13)
+- Andy's clip (Nether start, a vampire gliding): "the eyes are not synced and whatever wings those are look awful".
+- Eyes: the vampire's pallor, fangs, bite marks and red eyes were drawn on the plain player model, posed on their own,
+  and the red eyes sat where the player's Mojang skin has eyes, while MCA draws its own body and face over the player.
+  Now they ride MCA's skin body in MCA's pose (`VampireLooks.skinBody`/`glowBody`, the way `HeritageLooks` does since
+  0.7.219), and the glowing eyes light MCA's own eye pixels (`VampireLooks.faceEyes`, via `McaEyes`). The same for the
+  werewolf's hidden-change tells (`WolfTells`), the Emberborn's eyes (`EmberLook`) and every heritage's lit eyes
+  (`HeritageLooks`), and (Andy: "is anything else drawn on the player model instead of where it needs to be?") a Valor
+  Hunter's eyes (`ValorLook`). Players MCA doesn't draw keep the old way. Powers 0.21.13 does the same for Wind's storm
+  eyes and the Flame Avatar's char.
+- Wings: the bat wings were the elytra's two slabs in leather at 1.35x, which from behind hid the whole player like a
+  pair of grey boards. New `BatWings`: a real bat wing per side (arm bone, hand bone with a thumb claw, a thin membrane
+  hung from both, scalloped between finger bones; `tools/gen_bat_wings.py`), worn as a `WornModel` so it follows MCA's,
+  Fresh Animations' and our own poses. They unfold out of the back as the glide starts, ripple as it goes and sweep back
+  at speed. Shape and pose numbers are constants at the top of `BatWings`.
+- Built, not played.
+
+## 0.7.610 (2026-11-05): the grizzly, a mini-boss bear (pack 0.21.14, Kitchen 0.5.78)
+Andy: "can this be an agressive mini boss grizzly bear? maintaining or less agressive black bear to be realistic and add
+a real early threat." The spectacled bear mod he linked (Animal Garden) is all rights reserved, so ideas only; Bear
+Minimum (Apache-2.0, 26.3 Fabric build) is now in the pack unchanged, and our grizzly is drawn after its brown bear.
+- **Grizzly** (`wild/Grizzly`, `jaymoskingdoms:grizzly`, spawn egg): 120 health, 6 armour, 9 a swipe, hard to knock
+  back, a boss bar for whoever hits it (`BossBars`). Rare: weight 3 in `has_grizzly` (taiga, old growth taiga,
+  windswept forest and hills, meadow, grove), half its tries fail, none within 128 blocks of another or 160 of a
+  settlement (once the land is made). It keeps a 40-block territory round where it was born and goes back to it.
+- It notices a player within 24 blocks (12 sneaking), villagers within 12. A new quarry first gets its warning: it
+  rears up and roars. Then: paw swipes left or right up close; a charge from 5 to 18 blocks (11 damage, knocked flying;
+  a wall stops it staggered); a maul after a charge hit (60%): its victim pinned under it and bitten three times, then
+  flung off; rearing up again close in, its forepaws come down in a slam (10 in 3.5 blocks, thrown up). Below 35%
+  health it roars (players within 10 slowed and weakened 3 s) and fights faster with shorter cooldowns.
+- Out of a maul: hit it for 8 and it lets go, staggered; or play dead (hold sneak, don't hit it) for 1.5 s and, unless
+  enraged, it wanders off and leaves people be for a minute. Hurting it ends that calm.
+- Drawn by `client/wild/GrizzlyModel` (Bear Minimum's brown bear boxes plus a shoulder hump, 1.15x) with its own poses:
+  rear, swipes, bounding charge, maul bites, roar, stagger. Coat and egg painted by `tools/gen_grizzly.py` from Bear
+  Minimum's (silver-tipped hump and back, pale muzzle, dark legs, black claws, scars). Credits and the Apache licence in
+  `textures/entity/wild/`.
+- Drops 3-5 beef, 4-7 leather, 1-3 bones; Kitchen butchers it as a big carcass.
+- Black bears stay as they were: Cube Animals' (neutral, defends its cubs, tameable) and Bear Minimum's (keeps away from
+  people). Naturalist's bear unchanged.
+- Gradle compile clean; not played.
+
+## 0.7.611 (2026-11-05): the grizzly's own model and coat, the REA way
+Andy: "Can you use rea for models". Following REA-Prompts' clean-room method (spec first, own work only, then list
+what still differs), the grizzly's model and coat no longer come from Bear Minimum's brown bear.
+- `docs/Grizzly-Model-Spec.md`: the references, ten anatomy facts with their source (hump highest, rump lower, dished
+  face, small wide ears, long pale front claws, grizzled coat, stub tail, rears at the hips, opening jaw, mini-boss
+  size), the guesses marked UNKNOWN, the palette and UV layout, and the differences left.
+- `client/wild/GrizzlyModel` rebuilt from the spec: body pivoting at the hips with the head and forelegs riding it, a
+  hump, a dished muzzle, a jaw that drops for the roar and on every maul bite, long claws on the forepaws only, a slow
+  breath and a head bob in the stride.
+- `tools/gen_grizzly.py` paints the coat and egg from nothing (own palette, seeded fur noise, frosted saddle, dark
+  stockings, tan muzzle, mouth and teeth inside the jaw) and renders the pose previews (`--preview`).
+- Bear Minimum's licence copy and credit line removed from `textures/entity/wild/` (nothing of it is used now); the mod
+  itself still ships.
+- Gradle compile clean; not played.
+
+## 0.7.612 (2026-11-06): Saint's dragons animated, the REA way (pack 0.21.15)
+Andy: "saint's dragons?" then "i really just want animations". The models stay; the motions are specced from the
+reference's animation list (names and lengths only, none of its files) in `docs/SaintsDragons-Animation-Spec.md`.
+- **Atroxiia walks**: it crutches along on its arms like a seal, each hand lifted high and planted, the chest heaving
+  and rolling over it, and the serpent body throws S-curves down its length keyed to the ground covered. Bounds at a
+  run. It is back in the game (`Dragons.ATROXIIA_ON = true`): spawns and `/kingdom dragon atroxiia` again.
+- Atroxiia also: bite, tail lash, flinch, death, taunt, sniff, grumble, dozing when sat, slow sculling afloat.
+- Varasuchus: bite, tail sweep, a gallop at a run, flinch, death, hiss / head shake / tail swish / sniff when idle,
+  basking with its jaws open when sat, slow treading afloat.
+- The plain bite and tail sweep every walker has now play as moves (`WindDragon.swept()` beside `bitten()`), so
+  Varasuchus and Atroxiia no longer bite with no motion.
+- Ignivorus plays the wyvern's own fire (hover fire in the air) for its fireball volley, its slam for the magma pillars'
+  stamp, and its bite and tail sweep; Ignivorus, Eurus and Aeolus also flinch, die, sleep when sat and roar now and then,
+  and no longer flip sideways as they die (`WindDragonRenderer.ownDeath()`).
+- Stegonaut unchanged (mapped in 0.7.531).
+- Gradle compile clean; not played. Atroxiia walk/run previews in project files `art-overhaul/lesser-dragons/`.
+
+## 0.7.613 (2026-11-06): Atroxiia, rare and a monster hunter (pack 0.21.16)
+Andy: "it needs to be extremely rare, and hostile toward hostile mobs, so you can encounter it fighting".
+- Only one in 400 natural spawn tries that would otherwise pass goes ahead (`Dragons.ATROXIIA_RARITY`); eggs and
+  `/kingdom dragon atroxiia` are unaffected.
+- A wild Atroxiia hunts the nearest hostile mob it can see within 22 blocks (`WindDragon.huntsMonsters()`), so you come
+  on it mid-fight. It still leaves players alone unless they hurt it, and tamed ones don't hunt on their own.
+## 0.7.614 (2026-11-06): Rivals patch 0, captains for every side
+Andy picked all 34 rows of the rivals pick list (docs/Rivals-Plan.md). Patch 0: the captain ladders the goblin and orc
+tribes had now belong to every side that fights you (ideas from Shadow of War: our own names, code and lines).
+- **A shared core, `Rivals`:** sides, ladder keys (`<side>@<region>`), camps, seats, names, bodies and gear. The tribes'
+  ladders are untouched (same keys, same saves).
+- **Sides with camps:** barbarian warbands, illager hosts and pirate coves keep a ladder per region and post their
+  captains to their camps, as the tribes do: daily risers, posted bodies (MCA barbarians and deckhands, vindicators for
+  the illagers), orders in the camp store, duels, feasts and ambushes, returns, blood brothers and avengers.
+- **Sides without:** the risen dead of the Overworld (zombies and skeletons, every captain Deathless) and the Hornkin of
+  the Nether. A fitting one near a player may rise as a captain while the region's ladder is short (3%, one a day); a
+  fallen one due back takes the next of his kind. No new realm.
+- **Anyone who kills you** can climb: a camp's own, the dead, the Hornkin (was only goblins and orcs).
+- **The world's tier:** every two floors, one more captain a ladder, one rank higher at most and at the start, one more
+  strength; each floor adds 20% health and +1 damage.
+- **Temperament:** a captain keeps the temperament of his first body (`captain_tempers`). Half his first meetings and
+  gloats are his temper's own line. Brave ones run only when nearly done, proud ones not above half health, hotheads rage
+  from the first blow, timid ones call their own and keep back, spiteful ones swear on whoever beat them or ran, greedy
+  ones let up sell you a trait of another captain.
+- **Lines:** a common tongue for the new sides plus each side's own voice for first meetings, gloats, rallies, cheers,
+  climbs and death threats; temper lines for orcs, goblins and the common tongue (`lang/parts/rivals.json`, 339 lines).
+- Turning (Valor, In-balming) works on barbarians and pirates (sworn back as men); illagers, the raised and the Hornkin
+  refuse. Questioning anyone of a side asks after its captains.
+- Gradle compile clean; not played.
+
+## 0.7.615 (2026-11-06): a vampire can feed in the Nether, and the grab-drink (Powers 0.21.17)
+- Andy: "how do i feed in the nether?" Only grown villagers, realm folk and sleeping players could be bitten, and the
+  Nether has none of them. Agreed: "yes as long as there arent zombies".
+- Sneak and right-click with an empty hand now drinks from grown piglins, piglin brutes and Hornkin
+  (`Vampires.netherPrey`). Zombified piglins and zombified Hornkin are excluded. A bite that doesn't infect never turns
+  its prey (`VampirePlayers.drink` now checks `infect` for mobs too), so no piglin vampires.
+- A bottle of Kitchen's blood also counts as fed for the starving clock (`VampirePlayers.fedFromBottle`, from
+  `Hemomancy.drankBottle`). It was already a small heal and meal. Blood requests still want a real bite.
+- Hint 119 (`lang/parts/vampire-nether.json`). Built, not played.
+- (same version) The grab-drink, Andy: "double tapping the right click gives your drink a one handed grab animation where you
+  can walk with your target, draining blood more rapidly, so be careful as it can kill quicker. releasing early strong
+  throws the target, and if you are nourished enough the throw can break blocks weaker than stone at close range".
+  `BloodGrab`: two taps of use on the same prey within 8 ticks (`BloodGrabClient`; the first is the usual sneak bite),
+  empty hand, grabs grown villagers/folk and the Nether's piglins/Hornkin (never players, never the downed). The prey
+  is held up by the throat in front (its AI and gravity paused) while you walk slowed, and drunk from every 10 ticks
+  (twice the bite's pace; `VampirePlayers.drinkNow`). Letting go of use while it lives throws it (1.7 b/t along the
+  look, +0.3 up, slams into walls for 5). With food level 16+ it bursts through anything softer than stone in its path
+  for the first 6 blocks. It drops if it goes down or dies, if you're downed or hurt off it, or if you hold something.
+  `BloodGrabPose`: the main arm raised in front, leaning back, shaking as you drink. Hint 120. Built, not played.
+
+## 0.7.616 (2026-11-06): Rivals patch 1, more to be
+- **15 new captain traits** (`Captains.Trait`, doings in the new `CaptainWays`): reads your parries (two parries and his
+  blows go past your guard for 10 s, via Powers' `Guard.PARRIED`), follows blood (comes for a bleeding player within 32),
+  runs a wolf pack (2 wolves, once a fight, gone after a minute), watchful (sees sneaking or invisible players within 14),
+  witch hunter (spells, ki and any Powers/Kingdoms damage at half), executioner (x2 on the downed, goes for them),
+  prayerful (a second wind under 30%), iron-clad (+6 armour, 15% slower), rock thrower, shield bearer (a shield that takes
+  front blows at 0.4), iron jaw (blunt and fists at half); heavy-footed (20% slower), a sot (a quarter of his blows
+  miss), bargains for his life (under 25%: drops 6 bent worth and runs 10 s); fears guns (a gun shot at or near him).
+  Clashes: watchful/blind side, iron jaw/glass jaw, iron-clad/heavy-footed, wolf pack/fears beasts.
+- **They learn from how they lost:** players' blows on a captain are tallied by kind (fire, shot, blunt, blade, magic,
+  beast). One who comes back swaps in the answer (fire-born; shield bearer, or arrow-proof if he had one; iron jaw; thick
+  hide; witch hunter; wolf pack and no more fear of beasts), loses the flaw it answers, carries its mark, and his return
+  on the boards says what he learned. The player who felled him learns his new trait. The journal only lists traits he
+  still has.
+- **Marks you can see:** burned face, eye patch, iron jaw, stitched cheek, pale eye, claw rakes. Kept as `mark:*` in
+  his scars, sent to clients by the synced `captain_marks` attachment, drawn by `CaptainMarks` on any humanoid model (on
+  MCA's body when MCA draws him). Textures painted by `kingdoms/tools/gen_scars.py`. Illagers don't show them. Hook hand
+  and wooden leg are left for later.
+- **Signature moves:** rank 4 and up get one (shield charge, ground slam, thrown axe, crushing grab), each with a red
+  glint and Powers' incoming warning first, unparryable (a guard still blocks), every 8-12 s. Shouted lines for each.
+- Lines in the common tongue, orc and goblin: `lang/parts/captain-ways.json`. Questioning's lies only name weaknesses
+  and fears. Built, not played.
+
+## 0.7.617 (2026-11-06): Rivals patch 2, their schemes and yours
+- **Bodyguards** (`CaptainSchemes`): each dawn a captain of rank 4+ keeps one lesser captain of his ladder (two at the top
+  rank), posted to his camp, news on the boards. A bodyguard stays within 10 of his boss and takes up his boss's fight
+  (within 48). Turn a bodyguard, and the first time you strike his old boss he is set down beside him and stabs him
+  for 35% of his health, with a speaker-shot film (once, then he's an ordinary sworn captain).
+- **Your plants:** a new sworn-captain order on the Interact page, "Plant in Camp": he goes back to his old tribe's
+  nearest camp. Each dawn he sends word (Tidings) of one more trait of its captains; when you strike a captain posted
+  there, he turns on him as a turned bodyguard does, then comes back to your side.
+- **Their plants:** each dawn, at 12%, a captain sworn to have your head (a camp side, posted, not the chief) takes the
+  place of a villager in a town within 64 of you (`captains_plants`). At night with you within 24 he strikes now and
+  then (2% each check), with a film; the villager is gone and he's there in his own body. A Will staredown on that
+  villager unmasks him first: he's revealed slowed and weakened.
+- **Schemes:** sneak and use a spider eye or poisonous potato within 32 of a camp with a feast set: at dawn the captain
+  falls (half the time for good). A gold ingot at a camp with a duel set rigs it: the loser lives and tells you all his
+  traits. Kill a captain within 3 s of your first blow, before he has struck you, and another captain at his camp is
+  blamed and put to death by his own.
+- **Avenge a friend:** a captain who kills a player has a price on his head on the boards. Whoever else kills him gets
+  12 silver and the friend's head (if he wasn't wearing it already, it drops anyway), and the friend hears of it.
+- Lines in the common tongue, orc and goblin: `lang/parts/captain-schemes.json`. Built, not played.
+
+## 0.7.618 (2026-11-06): Rivals patch 3, ground and the ladder screen
+- **Captains hold ground** (`CaptainGround`): each camp's highest-ranked unsworn captain at home claims 80 blocks round
+  its centre, plus 16 a rank. Crossing it outside the camp itself (40 blocks), once a day a claim, you pay his men a
+  toll of 2 emeralds' worth in the local coin, or a tribe's grudge rises by 4 if you can't. Sneak through and they don't
+  see you; a tribe you rule lets you pass. A caravan of another tribe or realm crossing it loses 30% of every cart, once
+  a claim, with news on the boards. Kill or turn him and the next captain there takes it, or it's gone. Patrols are
+  the camp's own men as before.
+- **Map marks:** a captain you know of already shows on the journal's map at his camp; his entry now also says how far
+  his ground runs.
+- **The ladder screen** (`Ladders`, client `LadderScreen`): a "Captains" button on the journal opens it. A tab for each
+  ladder you know something of (met, a trait known, sworn either way), the leader first and the rest by rank. Each row:
+  his name (or "Unknown captain"), his rank, sworn to you or to kill you, whose bodyguard he is, his ground; his traits
+  with a "?" for each you haven't learned; and how many times you've met and how the last went. UiStyle panel, lines
+  slide, rows scroll.
+- Lines: `lang/parts/captain-ground.json`. Built, not played.
+
+## 0.7.619 (2026-11-06): Rivals patch 4, your Bane is born
+Ideas from Warframe's personal adversaries (a commercial game: our own names, code and lines). `docs/Rivals-Plan.md`.
+- **The brand** (`Banes`): now and then, while you have no Bane, a foe near you carries a faint red rune on its brow and
+  gives off a wisp now and then. Only you see it (client `BaneBrand`, painted by `tools/gen_brand.py`). Any of the dead,
+  an outlaw or illager, or one of the Nether's own (Hornkin, piglins) can carry it. Kill it any old way and nothing
+  happens. Finish it (downed, or its head off) and the brand flares: a day or two later it rises as your Bane. One Bane
+  per player.
+- **Three kinds**, each with its own band, arms and lines (and its kin's voice for the usual captain lines): a raised
+  corpse-knight (a wither skeleton with the dead at its back), an outlaw warlord who climbed on your name (an MCA
+  villager outlaw with cutthroats; a vindicator without MCA), and a demon-sworn one (a Hornkin brute with Hornkin
+  warriors, who don't rot outside the Nether).
+- **A captain of its own:** it's a captain on a ladder of one (`bane_<kind>@<your id>`), so it has traits, a temper,
+  learns from how it lost, wears your head when it kills you and shows on your ladder screen as its own tab.
+- **Ranks:** each time it kills or downs you it climbs a rank (five at most), gains a strength and a better weapon, and
+  sends you a mocking note by messenger; the boards say it climbed.
+- **It learns how you fight:** your blows on it are tallied by kind (fire, shot, blunt, blade, magic, beasts). Once
+  you've dealt 40 of one kind, the kind you use most does half to it, and it tells you so.
+- **It turns up mid-fight:** while you're fighting on its ground (320 blocks from where it was born), never during
+  a film (a captain's, or any of Powers'), about a third of the time each 5 s. It comes 10-16 blocks off with its band
+  (1 to 4 by rank) in a speaker-shot film, with a line about last time (it killed you, you killed it, or anything else).
+  You aren't harmed while the film runs. It goes, band and all, when you get 72 blocks away, a minute passes with no
+  blows, or after it has killed you. Then not again for half a day.
+- **Outlaws first** (Andy: "the outlaws should be the most common for this system, the questioning is very important"):
+  an outlaw or illager near you is 4 times as likely to get the brand, and anything else picked keeps it only half the
+  time, so most Banes are warlords. Every band has living outlaws in it to question: all of the warlord's cutthroats,
+  and every other one of the knight's (grave-robbers with shovels) and the demon's (cultists with gold blades). A band
+  never harms its own.
+- **Friends can help:** anyone can fight it and its band, and question its outlaws (they tell its traits).
+  Only you can finish it: struck down by anyone or anything else, it gets up laughing and goes.
+- **Not ended yet:** beaten, it is back in a day or two, having learned from it. The marks that end it come in patch 6.
+- Powers 0.21.18 adds `UltimateFilm.filming` for the film check (`PowersCompat.filming`). Lines:
+  `lang/parts/bane.json`. Built, not played.
+
+## 0.7.620 (2026-11-06): Rivals patch 6a, the marks that end your Bane
+Ideas from Warframe's three-part key (a commercial game: our own names, code and lines). `docs/Rivals-Plan.md`.
+- **Eight marks, three in order** (`BaneMarks`): Ash, Bone, Crow, Flood, Iron, Moon, Thorn, Wolf. Each Bane has its own
+  three, in its own order.
+- **Its men carry them:** every living outlaw in its band (the warlord's cutthroats, the knight's grave-robbers, the
+  demon's cultists) now carries your brand, so you can pick them out, and knows one of the three. Away from its ground,
+  or while it heals, two of them now and then turn up in your fights without it. Down one and ask "What marks can end your
+  master?". He names his mark. With Rough Questions or Interrogation he also says where it falls in the order. With
+  Quiet Word (or taken from behind) he also lets slip two marks that aren't any of it. The proud and spiteful may lie,
+  never to Interrogation. Whatever anyone learns counts for the Bane's owner. One left downed stays when the rest go.
+- **Carving:** sneak and use a grindstone with a blade in hand. The marks screen shows the eight and what's known of each
+  (its place, "one of its", "not its"). Pick three in order and carve them, or clear the blade. The blade's tooltip shows
+  them.
+- **The finisher judges them:** finish your Bane (downed, or its head off) with a carved blade.
+  - The right three in order end it for good, its weapon goes to you, and the boards say so.
+  - Sneak as you do it and it's sworn to you instead. It keeps its traits and temper and follows you as a sworn captain
+    does (the knight and demon come back to you in a man's body when sent for).
+  - Wrong marks: it's up laughing, a rank higher, and gone. You learn which marks were in the right place, which belong
+    elsewhere in the order, and which aren't its at all.
+  - A finisher with no marks fells it as before; it's back in a day or two.
+- Once it's ended or sworn, a new brand may come.
+- Lines: `lang/parts/bane.json`. Built, not played. Next (6b): its element weapon head and its stronghold.
+
+## 0.7.621 (2026-11-06): Rivals patch 6b, its weapon and its hold (Powers 0.21.19)
+- **Its own weapon:** each Bane fights with its kind's weapon from Jaymo's Powers (grave-knight: Gravesworn, a long blade;
+  outlaw warlord: Grudge, an axe; demon-sworn: Hornscythe, a scythe). It is steeped in one of the Sorcerer's elements, the
+  same for that Bane always (knight: death, ice, earth or water; warlord: fire, earth, air, lightning, ice or water; demon:
+  fire, blood, lightning or death), and gets keener each rank. One blow in six bursts with the element, the Sorcerer's own
+  burst; the rest spark (`BaneArms`). Without Powers it keeps its old plain weapons, with the element still on its blows.
+- **Its head is yours:** ended with its marks, it leaves you its weapon's head instead of the weapon. The head carries the
+  element and "Taken from <name>". It can't be cast or forged: put it together at the Tool Station like the kings' heads,
+  and the weapon keeps the element and still bursts with it in your hand.
+- **Its hold at rank five:** when it reaches rank five it raises a keep of its kind's stone 24 to 48 blocks from where it
+  was born, in the Overworld or the Nether (deepslate, a log palisade, or nether brick; corner towers, a south gate, a heart
+  with a light on it). Its owner gets a note with where; the boards carry it. From then on it waits there (only its men
+  still come to your fights, marks and all), with six of its band round it whenever anyone is near (`BaneHolds`).
+  - Its walls ward it: inside 40 blocks of its heart it takes 35% of the harm, and a killing blow can't finish it.
+  - Storm it by the seat siege rules: plant any banner within 24 blocks of its heart, and hold it 2.5 minutes with none of
+    its band within 16. The nearest three of its band go to tear it down. A boss bar shows how near it is.
+  - Held, the heart breaks and the gate falls in. Its ward is gone and it can be ended there. Left alive, it rebuilds in
+    three days. Ended or sworn, the ruin stays.
+  - Its hounds (patch 5) aren't in yet.
+- Lines: `lang/parts/bane.json`. Built, not played.
+
+## 0.7.622 (2026-11-06): Rivals patch 7, combat feel (Powers 0.21.20)
+- **Brutal kills scare the rest (`Dread`):** finish a foe (downed and executed, or its head off) and those within 16 blocks
+  who saw it and are weaker than you may break off and run for 7 s, holding their blows. Timid ones always run, gloomy ones
+  nearly always, brave ones never, proud and hotheaded ones seldom, and the rest about half the time. The undead, captains
+  and anything with more than 60 health don't scare. The first humanoid to run cries out (`lang/parts/dread.json`).
+- Kingdoms' fighters (Better Combat swings and MCA villagers' blows) hold their blow while Powers' `Crowds` has them
+  waiting their turn.
+- The clips, our timings and what still differs: `docs/Combat-Feel-Spec.md`. Built, not played.
+
+## 0.7.623 (2026-11-06): Rivals patch 8, armoured ogres (Powers 0.21.22)
+- Andy: "add armored ogres with shields and different skin colors matching orcs". The armoured ogre (`Ogre.ARMOURED`,
+  `jaymoskingdoms:armoured_ogre`): 80 health, 12 armour, in our own plate (breastplate, fauld, pauldrons, vambraces,
+  greaves, open helm) with a great wooden shield, its skin one of six orc tones. Its shield is up while its foe is within
+  10 blocks and it isn't striking: blows and shots from in front glance off. A blow of 10 or more, or a blast, breaks the
+  shield (half the blow gets through), as do Powers' Yank and stuns; then it comes on 15% faster. Too big to vault.
+- Where: the first of each orc camp's ogre band, two inside each new ogre hold's gate, and one in five of a hold's
+  recruits. Drops iron as well as an ogre's spoils.
+- Art: `tools/armoured_ogre_assets.py` (the ogre's skin recoloured; plate and shield our own). Model: `ArmouredOgreModel`.
+
+## 0.7.624 (2026-11-06): what's beyond your tier is hidden (`TierHiding`)
+- Andy: "all items that are inaccessible to your world tier should be hidden from JEI and otherwise. you should really have
+  to discover everything." Each player's JEI list (and every JEI page that makes or uses a hidden item) and recipe book
+  leave out what their world tier or Knowledge level hasn't reached, until it has, or until they've had one in their own
+  inventory (then it's discovered for good, `tier_seen`). Creative and spectators see everything. Trades stay `TierGate`'s.
+- Where each item sits, worked out at server start and `/reload`:
+  - Seeds: tags `jaymoskingdoms:tier_hidden/<borderlands|wildlands|dread|legend|never>` (each takes in `tier_gate/<tier>`),
+    `TierGate.tierOf`, the Aether mods (Borderlands), spawn eggs (never); knowledge from every block `Knowledge.needed`
+    (anvils 1, smithing table 2, enchanting table 3) and tags `knowledge_hidden/<level>`.
+  - Defaults: the Nether's own things (netherrack, quartz, debris, blaze rods, ghast tears, wart, nether woods, glowstone,
+    wither skulls...) Borderlands; nether star and wither rose Dread; End city and outer island things (elytra, shulker
+    shells, chorus, the egg) Legend; End stone, dragon's breath, end crystals knowledge 5; operator blocks never.
+  - Then through every recipe (modded types too): an item made only from hidden things or at a hidden station waits for
+    the easiest way to make it (netherite gear: the smithing table, so knowledge 2; a beacon: Dread). Never below its seed.
+    An item only reached through such recipes but also found in the world (a magma block) shows once picked up.
+- Server log at start: "Tier hiding: N items wait for a tier, M for knowledge". JEI is compile-only (`client/compat/TierJei`,
+  its `jei_mod_plugin` entrypoint); the recipe book through `ClientRecipeBookMixin`. Built, not played.
+
+## 0.7.625 (2026-11-06): Rivals patch 5, it takes from you
+- **The cut (`BaneCut`):** while your Bane lives, 15% of your job wages, bounty rewards, stall sales and merchant-order
+  sales goes to it (5% more for each place it holds, at most 40%), with a line saying how much. About once a day it also
+  takes a coin's worth from your purse. All of it is counted: end it or swear it and you get it all back with half again
+  more, in the coin of wherever you stand.
+- **Its claims:** three days after it first takes from you, and every three days after, it claims the nearest town or
+  village to you that no Bane holds (at most five; never a barbarian camp). The place and the roads out of it (128 blocks
+  from its seat) are its: now and then two of its men come at you there. Kill three of its men there (anyone can) and the
+  place is free. Every claim, freeing and letting go goes on the town boards.
+- **Its hounds:** two branded feral wolves (three from rank three). When you've bled in the last five minutes, are alone
+  (no other player within 48 blocks) and outside any town's land, they come up your blood trail from 24-32 blocks off and
+  stalk you as wild wolves do (`WolfStalkers`). A hunt ends after three minutes or if you get 96 blocks away. Each one
+  killed puts its next claim off a day; kill them all and it has new ones three days later. Only you see the brand's wisp.
+  Without Powers (no blood trails) they come when you're under half health instead.
+- Lines: `lang/parts/bane.json`. Built, not played.
+- **Takedowns on the skill bar (Powers 0.21.24):** Andy's answer on mapping the Chrono and Web moves: the skill bar shows
+  Powers' takedowns (`move_takedown`, `move_blink` spells, `FormSkills`) in Time Flow always, and for bare hands while
+  locked on, before any fist forms. Icons: `tools/gen_move_icons.py`. Lines: `lang/parts/power_moves.json`.
+
+## 0.7.626: drink from the downed, and the grab holds on
+- Andy: "the grab does not work, i tap and hold, and they go down. i should be able to drink from the downed too." The
+  grab's drain downed its prey in about a second and the grab let go of anyone downed; a downed body couldn't be bitten
+  either (Powers' sneak lift took the sneak+use first).
+- `BloodGrab`: downed prey can be grabbed and stay held; the drain on a downed body is a wound each gulp (Powers' 10th
+  wound kills, so about 5 s held), and a downed body can still be thrown. Not one already being carried.
+- `VampirePlayers`: a use phase ahead of Powers' `downed_first`: while holding someone, use held on them is the grab's
+  alone (it used to fill Powers' revive bar and could get them up in 3 s); a vampire's sneak+use with an empty hand on a
+  downed person or piglin/Hornkin bites instead of lifting (carry them with the grab instead). Built, not played.
+
+## 0.7.627 (2026-11-06): Web's moves on the skill bar (Powers 0.21.25)
+- Nine more Powers move spells for the skill bar (`move_finish`, `counter`, `fists`, `arm`, `grab`, `tendril`, `spikes`,
+  `consume`, `shroud`), shown for Web with an empty hand while locked on. Icons: `tools/gen_move_icons.py`. Lines:
+  `lang/parts/power_moves.json`. Built, not played.
+## 0.7.628 (2026-11-06): Felled takes the felling stroke (Powers 0.21.26)
+- Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... if this is easier to ship do that instead, otherwise
+  cannibalize it". Felled (Raiiiden) is all rights reserved, so no code of it is copied; it has a Fabric 26.3 build, so the
+  pack ships it unchanged from CurseForge (0.1.5, with its physics library Zarith 0.2.0, Jolt with native libraries).
+- `FelledCompat`: with Felled loaded, a player's chopping still narrows the cut, fills the chop meter and counts for a
+  woodcutter, but the stroke that would fell the tree mends the chopped logs and hands the tree to Felled's
+  `FellingHandler.fellFrom` (by reflection), which brings it down as a rigid body (tips over the stump, rolls, snaps,
+  floats, can be stood on and ridden). Too big for Felled, or it fails: our `FallingTree` as before.
+- Our break handler runs in its own phase ahead of the default one (`Trees.CHOPPING`), so Felled never sees a chop in
+  progress as a log broken whole. Sneak-breaking a single log, creative, and logs we don't chop are left to Felled's own rules.
+- Blasts, giants (grab and throw), tornadoes, gatherers, Grimsby's axe and trunks with nothing under them still use our
+  falling trees. Andy: "so if a player cuts a tree down and a giant tried to grab it it wouldnt work?" It does now: a
+  giant's grab (`FallingTree.treeNear`/`take`, so the Great Ape, Towerback and the Aether Giants) also finds a tree Felled
+  brought down (`FelledCompat.near`, by Zarith's solid bounds) and makes it ours (`FelledCompat.adopt`: its live grid cells
+  as pieces, upright as it stood, heading the way its trunk lay; Felled's entity discarded), then lifts and throws it as
+  before. Assumes Felled's grid keeps the tree's standing frame (not seen in game). Hint 121 (HINTS=121). Built, not played; Felled's own felling not seen in our pack yet.
+
+## 0.7.629 (2026-11-06): builders build Dungeons and Taverns' mine, tavern and more; open-pit mines
+- Andy: "the dungeons and taverns mine here is exactly what i was imagining when i wanted our builders to mine. the
+  current one should be for poverty nations only as it is too simple." Then: "cant they just use the dungeon and taverns
+  structure?", "same with the tavern and stables if they have em", "do them all".
+- D&T (mod id `mr_dungeons_andtaverns`, ARR) is read at run time from the player's own copy, like CTOV's halls; nothing
+  of its is copied into ours. Built whole, without its ruins' cobwebs, leaves and weeds.
+- `DntMine`: with D&T installed, a settlement that isn't poor digs D&T's miner's pit (`remnant/wild_ruin_19` and `_b`,
+  joined as D&T joins them): open blocks dug a layer at a time (stone to storage), ladders/rails/floor laid as each layer
+  opens, fence and shed when the last is dug, then the plain tunnel on from its lowest floor into rock.
+- `MinePit` (no D&T): our own stepped open pit 13 across and 5 deep, fenced rim, rails up into a cobblestone shed, then
+  the tunnel. Poor (`MinePit.POOR_WORTH` 80 by `Wealth.worth`; fiefdoms by their overlord) or no level dry ground: the
+  plain cliff tunnel or shaft as before. Saved mines keep their kind.
+- `DntBuildings`: marked variants (`MARK`, like CTOV's) draw D&T's tavern house (13 woods by biome), well (13 woods) and
+  smithy (forest or ruined smith, on the tries CTOV's doesn't take); new D&T-only buildings: sawmill, farmhouse, apiary,
+  firewatch tower (realms), graveyard (kingdoms from 50 people; Andy let its 27 x 37 past the 32 plot cap, D&T-only
+  buildings may be up to `DntBuildings.MAX_SIDE` 40). Older projects keep their look. The dappled town hall is too big;
+  the hamlet is a piglin bunker; D&T has no stable.
+## 0.7.630 (2026-11-06): vampires lap up spilt blood
+- With Powers 0.21.28's bleeding out (the downed and the dead pour a finite pool), a vampire who sneaks and right-clicks
+  a pool of blood on the ground with an empty hand laps it up (`VampirePlayers.lap`): up to 0.5 of stain a gulp, once a
+  second, 3 health and 4 food per unit (a man's whole pool is about 3), counts as fed and eases the blood fever. Blood
+  Sorcerers already draw the same stains (`Hemomancy`), so both now feed on bodies that run dry.
+- Andy: "is this animated?" Lapping now drops the vampire onto hands and knees, mouth to the pool, bobbing with each
+  gulp (`PowersCompat.drinkAtGround`, Powers' TendPose), held while the button is.
+
+## 0.7.631 (2026-11-06): diamond and netherite are the crown's
+- Andy: "only queens of rich kingdoms should ever wear the diamond armor w/ trim, the kings should wear netherite, and
+  any below can wear whatever else, just not those tiers."
+- `Regalia.plate`: a ruler's plate by rank. A king: netherite. A queen: trimmed diamond if her kingdom is wealthy
+  (`Wealth.Tier.WEALTHY`), trimmed gold if not. Lords and ladies: iron. Used by the gilded and breastplate attires
+  (`Regalia.dress`) and by armour in danger (`RoyalDress` PLATE; a king's plate no longer depends on his temper).
+- `RoyalDress.conform` on every ruler tick: diamond or netherite on a ruler (worn or put by) that isn't theirs becomes
+  their own plate, trim and marks kept, so lords already in diamond go to iron and a queen whose realm grows poor changes
+  diamond for gold (and back if it grows rich again).
+- Everyone else: MCA's armour routine (`McaEquipmentMixin`) puts iron on in place of diamond or netherite (its top
+  archers wore diamond, its elite guards netherite, and villagers wore any diamond they were given). Folk lords
+  (`Folk`, `Outfits.lord`) wear iron; an outlaw warlord Bane at rank five wears the Armory's warlord plate.
+- Left as they were: monsters and undead foes (corpse-knight Banes, bone lord, plague knight, `MonsterGear`) and loot.
+  Built, not played.
+
+## 0.7.632: a vampire's moves on the skill bar, and Blood Gaze
+- Andy: "please place them on the bar, and they should also get an eye laser that blasts for a second but otherwise
+  functions exactly like frostborn". `FormSkills`: a vampire's or dhampir's Blood Dash, Groundpound and Blood Gaze are bar
+  spells (`jaymoskingdoms:night_<move>`, delivery `night_move` -> `NightGifts.move`, which now says whether it went so a
+  failed Groundpound on the ground starts no cooldown). O and P still work. Icons `kingdoms/tools/gen_night_icons.py`,
+  lang `parts/vampire-bar.json`, hint 122.
+- Blood Gaze: `NightGifts` tags the vampire `jaymospowers_blood_gaze` (3 s wait); Powers' `FrostBeam` fires the Frost-born
+  beam out of both eyes, red, for 20 ticks: same reach, damage, hit pace and wound roll; no freezing water. Built, not played.
+
+## 0.7.633 (2026-11-06): shy deer (Powers 0.21.32)
+- Andy: "the deer are still a nuisance and overspawning, but i like the fact that they are in packs in the overworld, they
+  should just be far more skittish and scare away from your home after the first interaction" (`ShyDeer`).
+- Fewer, still in herds: whether a herd may come is now rolled once per 64-block patch for 5 minutes (15% of patches), so
+  herds come whole instead of thinned; none come once 6 deer are within 96 blocks; still none in the Nether
+  (`DeerSpawnMixin` now asks `ShyDeer.mayGraze`; the old flat 30% per spot is gone).
+- Skittish: a deer bolts 20 blocks from any player within 24 blocks (10 if sneaking).
+- Scared off your home: the first time a deer bolts from a player within 48 blocks of their bed, deer learn that home
+  (kept on the Overworld, up to 128 homes): none spawn within 48 blocks of it again and any that wander in run out.
+- Hint 123. Built, not played.
+## 0.7.634: Feed on the skill bar
+- Andy: "put feed on the hotbar too, i cant get it to activate reliably. the current right click ability can move".
+  `FormSkills` adds `night_feed` (NightGifts move 3 -> `BloodGrab.feed`): holding someone, Feed throws them; else it
+  finds prey generously (the crosshair, else the nearest within ~35 degrees of the look and 3 blocks, in sight) and
+  grabs one a hand can hold, bites a sleeper (`SleepingPrey`), or bites anyone else the bite takes. Empty hand needed.
+- Right-click feeding is gone: no sneak+use bite (persons, Nether prey, downed, sleepers) and no double-tap grab
+  (`BloodGrabClient` removed; letting go of use no longer throws). Use on someone held still does nothing (keeps
+  Powers' revive bar from filling). Lapping pools stays sneak+use on the ground. Hints 120/122 reworded. Built, not played.
+
+## 0.7.635: the grab keeps them by the throat, even down
+- Andy: "the grab should animate within the vampire's hand hands at the throat the whole time, even if they go down". A held
+  body that went down was laid on the ground by Powers' `DownedPose` while the hand held air. Now `BloodGrab.grabbed`/`holder`
+  (read off every player's synced `GRABBING`, so the client knows too) tells Powers to leave a held body alone (Powers
+  0.21.33), and it hangs from the hand until it dies or is let go.
+- The throat is put at the hand: `BloodGrab.place` works the hand out from the arm as drawn (shoulder 22/32 of the
+  vampire's height, arm 10/32 long, on the main hand's side) and `BloodGrab.raise` lifts the arm with the look (0.3 rad
+  level, 0.8 of the pitch, -0.25 to 0.9), the same angle `BloodGrabPose` draws, so First-person Model's arm and the
+  third-person view both keep the hand on the throat. Looking up lifts them higher; looking down lowers them a little.
+- The held one is posed (`BloodGrabPose.victim`): head pushed back, both hands clawing at the wrist and legs kicking while
+  it can; once down, limp and swaying, stiller when out cold (`PowersCompat.downedState`, Powers' synced Downed marks).
+  Built, not played.
+- Andy: "the drain isnt restoring my thirst either". Blood now quenches a vampire's Kitchen thirst as well
+  (`KitchenCompat.drink`, clean): 3 water a bite or grab gulp (`VampirePlayers.DRINK_WATER`), 4 for each unit lapped from
+  a pool (`LAP_WATER`), and 4 for a bottle of blood (`BOTTLE_WATER`, `Hemomancy.drankBottle`). Built, not played.
+## 0.7.636: traveller's journal as a bauble
+- Andy: "traveler journal should fit as a bauble". The journal (`jaymoskingdoms:journal`) now fits Jaymo's Powers' belt
+  and charm slots (`data/jaymospowers/tags/item/baubles/belt.json`, `charm.json`), and `Journal.carries` also looks at
+  the worn baubles (`PowersCompat.baubles`), so M opens it from a slot (client and server). The "need a journal" line
+  says bauble slots too. Built, not played.
+
+## 0.7.637: Iron Stomach drinks dirty water (needs Kitchen 0.5.80)
+- Iron Stomach now also covers water: `KitchenCompat` hands Kitchen's `Thirst.setIronGut` the perk check, so dirty water
+  from anywhere never turns the stomach. The perk's description says so. Gradle compile clean; not played.
+
+## 0.7.638: Felled's trees knock over the trees they fall into
+- Andy: "the felled trees NEED to knock each other over still". Since 0.7.628 a player's felling stroke hands the tree to
+  Felled, whose rigid body only sees a standing tree as solid blocks, so it came to rest leaning on the next tree instead
+  of knocking it over the way our `FallingTree` does. `FelledCompat` now keeps Felled's trees (entity load/unload) and,
+  each tick one is still moving (its top at least `KNOCK_SPEED` 0.06 blocks a tick, this tick or the last), looks at and
+  just ahead of each of its logs along the way it's going (`KNOCK_AHEAD` 0, 0.6, 1.1 blocks). An upright log of a natural
+  tree there, no more than `FallingTree.KNOCK_SIZE` (2x) its logs, goes over that way through `Trees.knock` (one of ours,
+  which knocks on in turn), with the same crack sounds; at most `FallingTree.KNOCKS_MOST` (4) a tree, never its own stump
+  (`STUMP`, 1.6 blocks round where its trunk first stood). All by reflection on Felled's public `trunkTop`, `trunkStart`
+  and `cellToWorld`, nothing of Felled's copied. Built, not played.
+
+## 0.7.639: the block only beheads the downed
+- `Busts` execution: a player sentenced to the block is killed with their head on unless they're downed (Andy:
+  "decapitations should only ever happen to downed players"). Gradle compile clean; not played.
+
+## 0.7.640: wooden skewers stake vampires
+Andy: "wood skewers should do massive damage to vampires". A blow from a held `jaymospowers:wooden_skewer` (Powers' Armory)
+on a vampire, mob or player, lands 5 times over (`Vampires.STAKE_FACTOR`); a dhampir takes 2 times
+(`STAKE_DHAMPIR_FACTOR`). Dark blood and smoke burst from the chest with a low crit sound. `Vampires.staked`, first in
+`LivingEntityHurtMixin`, so the other perks multiply on top. Only the hand's own blow counts (direct attacker, main hand),
+so fire or a spell cast with a skewer held doesn't. The skewer can't be thrown, so there is no thrown stake. An Elder hit
+in bat form passes the blow on with the same source, so it is staked too.
+- The stake stays in (Andy: "the staked are severely slowed until they remove the stake"). `Stakes`: a skewer that hurts
+a vampire leaves the hand (creative keeps it) and lodges, one at a time (`Stakes.STAKE`, a persistent ItemStack). While in,
+Slowness V refreshed every 5 ticks, a drip of dark blood. Out: a vampire player holds sneak 3 s, a vampire mob tears it
+out after 20 s, anyone with an empty hand right-clicks the staked to pull it into their hand; it drops on death or when
+cured. Further skewer hits still land 5x but don't lodge a second stake. Gradle compile clean; not played.
+
+## 0.7.641: stakes are seen, and stack
+Andy: "They should be visible", then "Animate in any position like an arrow, because players and mobs should be able to
+stake multiple times, multiplying the debuff".
+- `Stakes.STAKE` is now a synced list of `Stake(stack, seed)` (new id `vampire_stakes`; a stake saved under 0.7.640's
+  single-stake id is dropped). Every biting skewer lodges, up to 8. Slowness V for one, VI for two, VII (pinned) from three;
+  from two on, Weakness too (I at two, rising to IV). Each 5x blow still lands.
+- Out one at a time, newest first. A vampire player tugs with Sneak + scroll up (Andy: "the input for the struggle should be
+  shift + scroll up ... the bar should stay where it is even after you stop scrolling, the same way tree chopping works"):
+  `Stakes.Tug` per notch (one counted every 2 ticks), 14 to pull one, shown as a chop-style square meter
+  (`Stakes.showTugs`) that holds between tugs; the count is saved on the stake (`Stake.tugs`). `StakeScrollMixin`
+  (priority 400) takes Sneak + scroll up only while staked, ahead of Powers' stance wheel; scroll down still steps stances.
+  A mob tears one out every 20 s; an empty hand's right-click pulls one into the hand. All drop on death or cure.
+- `StakeStruggle` (client): staked vampires are seen struggling, both hands clawing at the chest and wrenching outward in
+  jerks, bent over, head down, a shake; mobs the whole time they're staked, players for 12 ticks after each tug
+  (`Stakes.STRUGGLE`, synced last-tug time). The hands go to the chest, not to wherever the stake is.
+- `StakeLayer` (client, every humanoid renderer, filled in `MobSwingLivingEntityRendererMixin`) draws each stake like a stuck
+  arrow: the seed picks a part (3 in 8 the body, else head, an arm or a leg), a point on one face of its cube and a lean of
+  up to 35% off straight in; the skewer item's point is buried along that line, the grip standing out. On the part's bone,
+  so it moves with every pose.
+Gradle compileJava + compileClientJava clean; not played, so the depth, lean and struggle pose are untested.
+## 0.7.642: a picked pocket keeps its progress
+- Andy: "every meter should work this way". Let go of a lift, or let the mark step out of reach, and how deep your hand
+  got is kept (`Pickpocket.Kept`): the next lift on the same mark carries on with the same length. Caught, done, or a
+  different mark tried, it's forgotten. Compile-checked; not played.

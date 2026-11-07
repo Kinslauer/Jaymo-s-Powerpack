@@ -18,5 +18,11 @@
   "message.jaymospowers.zfighter_arts_nofoe": "Nothing to aim at.",
   "message.jaymospowers.zfighter_nova_base": "The Nova Sphere is too much for base form. It needs a form, or Frost-born blood.",
   "message.jaymospowers.zfighter_scream_calm": "You are too calm to scream. It needs Rage, or a body near its end.",
-  "message.jaymospowers.zfighter_afterimage_nospace": "No room to blink aside."
+  "message.jaymospowers.zfighter_afterimage_nospace": "No room to blink aside.",
+  "technique.jaymospowers.zfighter.self_destruct": "Self-Destruct",
+  "technique.jaymospowers.zfighter.self_destruct.desc": "Charged on V, for android, Bio-built and Rubber-folk bodies only. Grab someone within 3.5 blocks and hold on: a cord of ki tethers them to you while your body glows and builds. Let go of V and it all goes off in one great blast that tears up the ground, harder the stronger your ki. The one you hold takes the worst of it. Whatever ki you have left goes in too, and you don't walk away from it. 40-120 ki.",
+  "screen.jaymospowers.zfighter.need_self_destruct_body": "Only an android, Bio-built or Rubber-folk body can hold this together long enough.",
+  "message.jaymospowers.zfighter_self_destruct": "You gave everything you had.",
+  "message.jaymospowers.zfighter_self_destruct_nofoe": "There's no one in reach to take with you.",
+  "message.jaymospowers.zfighter_self_destruct_held": "%s has you and won't let go. Their body is glowing!"
 }

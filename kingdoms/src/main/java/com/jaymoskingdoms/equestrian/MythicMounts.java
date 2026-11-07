@@ -2,6 +2,7 @@ package com.jaymoskingdoms.equestrian;
 
 import com.jaymoskingdoms.Encounters;
 import com.jaymoskingdoms.Factions;
+import com.jaymoskingdoms.Stacked;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -120,7 +121,7 @@ public final class MythicMounts {
 
 	/** One turns up near {@code player}, if they're somewhere one would. */
 	private static void find(MinecraftServer server, ServerLevel level, ServerPlayer player) {
-		boolean nether = level.dimension() == Level.NETHER;
+		boolean nether = Stacked.in(player, Level.NETHER);
 		if (!nether && (level != Factions.level(server) || !level.isDarkOutside() || !Encounters.inTheWild(server, level, player))) {
 			return;
 		}
@@ -166,7 +167,7 @@ public final class MythicMounts {
 				continue;
 			}
 			Level level = horse.level();
-			boolean due = level.dimension() == Level.NETHER ? level.getGameTime() > w.until() : !level.isDarkOutside();
+			boolean due = Stacked.in(horse, Level.NETHER) ? level.getGameTime() > w.until() : !level.isDarkOutside();
 			if (due && level.getNearestPlayer(horse, LEAVE_RANGE) == null) {
 				horse.discard();
 				it.remove();

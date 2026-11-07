@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:oak_boat"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.cast_off.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.cast_off.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

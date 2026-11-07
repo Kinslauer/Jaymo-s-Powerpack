@@ -143,6 +143,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/limb_bottom_star_metal"
               }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_bog_iron"
+              }
             }
           ],
           "fallback": {
@@ -286,6 +293,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/limb_top_star_metal"
+              }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_bog_iron"
               }
             }
           ],
@@ -463,6 +477,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/grip_star_metal"
               }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
+              }
             }
           ],
           "fallback": {
@@ -615,6 +636,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/limb_bottom_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -758,6 +786,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/limb_top_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_bog_iron"
                 }
               }
             ],
@@ -935,6 +970,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/grip_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -1090,6 +1132,13 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_star_metal"
                       }
+                    },
+                    {
+                      "when": "bog_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_bog_iron"
+                      }
                     }
                   ],
                   "fallback": {
@@ -1233,6 +1282,13 @@
                       "model": {
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_top_2_star_metal"
+                      }
+                    },
+                    {
+                      "when": "bog_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_bog_iron"
                       }
                     }
                   ],
@@ -1410,6 +1466,13 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/grip_star_metal"
                       }
+                    },
+                    {
+                      "when": "bog_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
+                      }
                     }
                   ],
                   "fallback": {
@@ -1562,6 +1625,13 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_star_metal"
                       }
+                    },
+                    {
+                      "when": "bog_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_bog_iron"
+                      }
                     }
                   ],
                   "fallback": {
@@ -1705,6 +1775,13 @@
                       "model": {
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_top_3_star_metal"
+                      }
+                    },
+                    {
+                      "when": "bog_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_bog_iron"
                       }
                     }
                   ],
@@ -1882,6 +1959,13 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/grip_star_metal"
                       }
+                    },
+                    {
+                      "when": "bog_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
+                      }
                     }
                   ],
                   "fallback": {
@@ -2033,6 +2117,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_star_metal"
                   }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_bog_iron"
+                  }
                 }
               ],
               "fallback": {
@@ -2176,6 +2267,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/limb_top_1_star_metal"
+                  }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_bog_iron"
                   }
                 }
               ],
@@ -2352,6 +2450,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/grip_star_metal"
+                  }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
                   }
                 }
               ],

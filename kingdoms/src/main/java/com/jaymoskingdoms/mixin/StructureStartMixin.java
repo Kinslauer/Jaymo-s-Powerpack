@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin;
 
+import com.jaymoskingdoms.BuriedRooms;
 import com.jaymoskingdoms.Foundations;
 import com.jaymoskingdoms.GolemLairs;
 import com.jaymoskingdoms.Hearths;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * After a structure's pieces are placed in a chunk, the gaps under any that float are filled ({@link Foundations}), and a
+ * After a structure's pieces are placed in a chunk, rooms left full of earth are dug out ({@link BuriedRooms}), the gaps under any that float are filled ({@link Foundations}), and a
  * village's fires get stone hearths and chimneys ({@link Hearths}), and (0.7.333) dungeons may get a rogue clockwork golem
  * ({@link GolemLairs}).
  */
@@ -26,6 +27,7 @@ abstract class StructureStartMixin {
 	private void jaymoskingdoms$foundations(WorldGenLevel level, StructureManager structureManager, ChunkGenerator generator, RandomSource random,
 		BoundingBox chunkBB, ChunkPos chunkPos, CallbackInfo ci) {
 		StructureStart self = (StructureStart)(Object)this;
+		BuriedRooms.clear(level, self.getStructure(), self.getPieces(), chunkBB);
 		Foundations.fill(level, self.getStructure(), self.getPieces(), chunkBB);
 		Hearths.build(level, self.getStructure(), self.getPieces(), chunkBB);
 		GolemLairs.place(level, self, chunkBB);

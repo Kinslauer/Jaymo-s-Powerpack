@@ -5,6 +5,7 @@ import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeNet;
 import com.jaymospowers.costume.CostumeSets;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.costume.CostumeTailoring;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -22,7 +23,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -54,8 +54,12 @@ public class CostumeScreen extends Screen {
 
 	/** The table, or null for a tailor's order. */
 	private final @Nullable BlockPos pos;
-	/** A tailor's price in emeralds, or -1 at a table. */
+	/** A tailor's price in emeralds' worth, or -1 at a table. */
 	private final int price;
+	/** (0.20.0) The tailor's price as the server wrote it in the coin of the land, one of that coin, and whether the player can pay it (the server counts: a purse is hidden from the client). */
+	private final Component cost;
+	private final ItemStack coin;
+	private final boolean affordable;
 	/** Kept between openings (so a closed screen doesn't lose a half-done design). */
 	private static CostumeDesign design = CostumeDesign.DEFAULT;
 	private static float yaw = 20.0F;
@@ -68,18 +72,21 @@ public class CostumeScreen extends Screen {
 	private Button cut, mask, cape, sew, takeOff, maskToggle;
 
 	public CostumeScreen(BlockPos pos) {
-		this(pos, -1);
+		this(pos, -1, Component.empty(), ItemStack.EMPTY, true);
 	}
 
-	private CostumeScreen(@Nullable BlockPos pos, int price) {
+	private CostumeScreen(@Nullable BlockPos pos, int price, Component cost, ItemStack coin, boolean affordable) {
 		super(Component.translatable(price >= 0 ? "screen.jaymospowers.costume.tailor_title" : "screen.jaymospowers.costume.title"));
 		this.pos = pos;
 		this.price = price;
+		this.cost = cost;
+		this.coin = coin;
+		this.affordable = affordable;
 	}
 
-	/** (0.11.78) The designer for a tailor's order, at {@code price} emeralds. */
-	static CostumeScreen tailored(int price) {
-		return new CostumeScreen(null, Math.max(0, price));
+	/** (0.11.78) The designer for a tailor's order, at {@code price} emeralds' worth, shown as {@code cost} in the coin of the land. */
+	static CostumeScreen tailored(int price, Component cost, ItemStack coin, boolean affordable) {
+		return new CostumeScreen(null, Math.max(0, price), cost, coin, affordable);
 	}
 
 	private boolean tailoring() {
@@ -222,7 +229,7 @@ public class CostumeScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		int mouseX = (int)event.x(), mouseY = (int)event.y();
-		boolean right = event.button() == 1;
+		boolean right = event.button() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 		// right-click on a cycling button steps it back
 		if (right && this.cut.isMouseOver(mouseX, mouseY)) {
 			cycleCut(-1);
@@ -444,12 +451,11 @@ public class CostumeScreen extends Screen {
 		boolean creative = player.isCreative();
 		boolean enough = true;
 		if (tailoring()) {
-			// (0.11.78) the tailor's price, in emeralds (bundles count)
-			int have = CostumeTailoring.emeralds(player);
-			boolean ok = creative || have >= this.price;
+			// (0.11.78) the tailor's price; (0.20.0) in coin (purses and bundles count), by worth, with the realm silver coin's icon
+			boolean ok = creative || this.affordable;
 			enough = ok;
-			graphics.item(new ItemStack(Items.EMERALD), x, iy);
-			String text = creative ? "×" + this.price : Math.min(have, 999) + "/" + this.price;
+			graphics.item(this.coin.isEmpty() ? KingdomsMoney.icon() : this.coin, x, iy);
+			Component text = creative ? Component.literal("×" + this.price) : this.cost;
 			graphics.text(this.font, text, x + 17, iy + 4, ok ? OK : SHORT);
 			x += 17 + this.font.width(text) + 6;
 		}

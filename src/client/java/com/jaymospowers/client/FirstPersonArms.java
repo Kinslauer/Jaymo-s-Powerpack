@@ -3,12 +3,15 @@ package com.jaymospowers.client;
 import com.jaymospowers.client.power.chrono.ChronoFlowPose;
 import com.jaymospowers.client.power.cryo.CryoPose;
 import com.jaymospowers.client.power.ember.EmberKindleClient;
+import com.jaymospowers.client.power.zfighter.ZFighterHandsPose;
 import com.jaymospowers.client.power.web.FirstPersonCompat;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.power.chrono.ChronoFlow;
 import com.jaymospowers.power.cryo.CryoMoves;
 import com.jaymospowers.power.ember.EmberKindle;
 import com.jaymospowers.power.gravity.GravityPower;
+import com.jaymospowers.power.zfighter.ZFighterHands;
+import com.jaymospowers.power.zfighter.ZFighterWaveBeam;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.Arrays;
@@ -119,6 +122,22 @@ public final class FirstPersonArms {
 	static final float[] BLIZZARD_SPREAD = {-0.25F, 0.45F, 0.1F, 60.0F, -6.0F, -20.0F};
 	static final float BLIZZARD_RISE = 10.0F, BLIZZARD_SPREAD_TICKS = 8.0F, BLIZZARD_SWAY = 4.0F, BLIZZARD_SHIVER = 1.0F;
 
+	/**
+	 * (0.19.60) Z Fighter ki in the hands (ZFighterHandsPose): the wave's cup low on the lead side (the other hand reaching
+	 * across to it), the Frost Needle's pointed hand, the barrage's palms held out and the guard between its throws, a
+	 * tapped blast's hand drawn back, a thrown palm, both pushed out (a bomb, and the fired wave while it's out).
+	 */
+	static final float[] KI_CUP_LEAD = {0.32F, -0.2F, -0.02F, 6.0F, 22.0F, 35.0F};
+	static final float[] KI_CUP_OTHER = {0.78F, -0.22F, 0.0F, 6.0F, 32.0F, 45.0F};
+	static final float[] KI_POINT = {0.24F, 0.14F, 0.4F, 24.0F, 8.0F, 4.0F};
+	static final float[] KI_PALMS = {0.2F, 0.08F, 0.12F, 18.0F, 6.0F, 12.0F};
+	static final float[] KI_GUARD = {0.16F, 0.02F, 0.02F, 12.0F, 4.0F, 8.0F};
+	static final float[] KI_COCK = {-0.05F, -0.12F, -0.2F, -8.0F, 0.0F, 0.0F};
+	static final float[] KI_THRUST = {0.26F, 0.14F, 0.46F, 24.0F, 10.0F, 16.0F};
+	static final float[] KI_PUSH = {0.3F, 0.14F, 0.42F, 26.0F, 12.0F, 20.0F};
+	/** The cup's tremble and the fired beam's shake (blocks, degrees, beats a second). */
+	static final float KI_TREMBLE = 0.006F, KI_TREMBLE_TURN = 1.2F, KI_BEAT = 41.0F, KI_BEAM_SHAKE = 1.6F, KI_BEAM_BEAT = 34.0F;
+
 	private static final PoseBlend.Channel KINDLE = PoseBlend.channel("first_person_kindle");
 	private static final PoseBlend.Channel CHRONO = PoseBlend.channel("first_person_chrono_flow");
 	private static final PoseBlend.Channel GRIP = PoseBlend.channel("first_person_gravity_grip");
@@ -143,7 +162,8 @@ public final class FirstPersonArms {
 		Arm arm = ARMS[main ? 0 : 1];
 		LocalPlayer self = Minecraft.getInstance().player;
 		if (self == null || avatar.id != self.getId() || !empty || carrySink > 0.0F || self.getAttached(Carry.CARRYING) != null
-			|| com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(self) || FirstPersonCompat.bodyShown()) {
+			|| com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(self) || com.jaymospowers.core.CarryOnCompat.isCarrying(self)
+			|| FirstPersonCompat.bodyShown()) {
 			arm.live = false;
 			return -1.0F;
 		}
@@ -152,6 +172,7 @@ public final class FirstPersonArms {
 		chrono(mix, avatar, right);
 		grip(mix, self, avatar, main, right, partialTicks);
 		cryo(mix, avatar, main);
+		zfighter(mix, self, avatar, main, right);
 		float w = mix.weight;
 		if (w > WEIGHT_CAP) {
 			float scale = WEIGHT_CAP / w;
@@ -348,6 +369,11 @@ public final class FirstPersonArms {
 		pose[YAW] += Mth.clamp(-side * aim[1] * GRIP_FOLLOW, -GRIP_AIM_MAX, GRIP_AIM_MAX);
 		float w = track.weight();
 		mix.add(w, pose);
+		// (0.21.8) the hurl: the arm whips from over the shoulder through (RockThrowPose's timing), as Kindle's throw does
+		float[] hurl = com.jaymospowers.client.armory.RockThrowPose.hurl(partial);
+		if (hurl != null) {
+			mix.add(hurl[1], lerp(hurl[0], KINDLE_WIND, KINDLE_THROUGH));
+		}
 		// straining against it
 		float time = avatar.ageInTicks;
 		mix.shake(w, PITCH, Mth.sin(time * GRIP_STRAIN_BEAT) * GRIP_STRAIN);
@@ -404,6 +430,40 @@ public final class FirstPersonArms {
 			mix.add(blizzard, lerp(rise, new float[SLOTS], lerp(spread, BLIZZARD_RAISED, BLIZZARD_SPREAD)));
 			float sway = Mth.sin(time * 0.11F) + Mth.sin(time * 0.27F + 2.0F) * 0.4F;
 			mix.shake(blizzard, ROLL, (main ? sway : -sway) * BLIZZARD_SWAY + Mth.sin(time * 3.7F) * BLIZZARD_SHIVER);
+		}
+	}
+
+	/** (0.19.60) A Z Fighter's ki in the hands, on the third-person timing (ZFighterHandsPose; the beam's push as ZFighterFiringPose). */
+	private static void zfighter(Mix mix, LocalPlayer self, AvatarRenderState avatar, boolean main, boolean right) {
+		if (avatar.deathTime > 0.0F) {
+			return;
+		}
+		int pose = ZFighterHandsPose.heldPose(self);
+		boolean firing = ZFighterWaveBeam.out(self) && !com.jaymospowers.power.zfighter.ZFighterLineage.ape(self);
+		float[] t = ZFighterHandsPose.arm(self.getId(), right, avatar.ageInTicks);
+		float[] base = firing ? KI_PUSH : switch (pose) {
+			case ZFighterHands.CUP, ZFighterHands.ART -> main ? KI_CUP_LEAD : KI_CUP_OTHER;
+			case ZFighterHands.POINT -> main ? KI_POINT : null;
+			case ZFighterHands.PALMS -> KI_PALMS;
+			case ZFighterHands.VOLLEY -> KI_GUARD;
+			default -> null;
+		};
+		if (base == null && t[0] <= 0.0F && t[1] <= 0.0F) {
+			return;
+		}
+		float[] key = base == null ? new float[SLOTS] : base;
+		key = lerp(t[0], key, KI_COCK);
+		key = lerp(t[1], key, t[2] > 0.0F ? KI_PUSH : KI_THRUST);
+		mix.add(1.0F, key);
+		float time = avatar.ageInTicks / 20.0F;
+		if (firing) {
+			// braced against the beam's push
+			mix.shake(1.0F, PITCH, Mth.sin(time * KI_BEAM_BEAT + (right ? 0.0F : 1.1F)) * KI_BEAM_SHAKE);
+		} else if (pose == ZFighterHands.CUP && t[1] <= 0.0F) {
+			// the charge trembling in the cup
+			mix.shake(1.0F, X, Mth.sin(time * KI_BEAT) * KI_TREMBLE);
+			mix.shake(1.0F, Y, Mth.sin(time * KI_BEAT * 0.8F + 1.0F) * KI_TREMBLE);
+			mix.shake(1.0F, PITCH, Mth.sin(time * KI_BEAT * 1.1F) * KI_TREMBLE_TURN);
 		}
 	}
 

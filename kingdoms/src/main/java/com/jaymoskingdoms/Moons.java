@@ -302,7 +302,7 @@ public final class Moons {
 		shown = moon;
 		// (0.7.419) a road deed: a blood moon that has come and gone
 		if (was.blood() && !moon.blood()) {
-			Deeds.done(level.getServer(), "moon.blood");
+			RoadDeeds.doneAll(level, "moon.blood");
 		}
 		for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
 			ServerPlayNetworking.send(player, new Sync(moon.ordinal()));

@@ -1,0 +1,23 @@
+{
+  "feature": "jaymospowers:hanging_roots",
+  "placement": [
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "absolute": 100
+        },
+        "max_inclusive": {
+          "absolute": 130
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

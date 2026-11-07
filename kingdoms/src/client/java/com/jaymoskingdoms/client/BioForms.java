@@ -257,6 +257,11 @@ public final class BioForms {
 			return false;
 		}
 		int form = shape.form(), palette = shape.palette();
+		// (0.7.451) Andy: "there is a problem with the way the character is drawn" (the story's figure of you). The parts and
+		// tail are placed on the bones now, the body is posed again from the state when it's drawn later; a pose left over
+		// from another draw (the world's, or another player's: the model is shared) put the head, horns and bracers askew
+		// of the body. So the bones are posed from this state first, the same way the draw will pose them.
+		ModelPoses.now(marks, state);
 		if (!bodyCovered) {
 			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(texture(palette, form + "_skin")), light,
 				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
@@ -269,6 +274,14 @@ public final class BioForms {
 			tail(poseStack, collector, light, marks.body, form, palette, tail, state.ageInTicks);
 		}
 		return true;
+	}
+
+	/** (0.7.443, Havens patch 7b) A Bio-built villager: the first form's parts and its tail over their own body (their marks under it). */
+	static void villagerForm(PoseStack poseStack, SubmitNodeCollector collector, int light, HumanoidModel<?> model, int palette, float age) {
+		parts(poseStack, collector, light, model, 0, palette, false, false);
+		if (model.body.visible && TAILS[0] != null) {
+			tail(poseStack, collector, light, model.body, 0, palette, TAILS[0], age);
+		}
 	}
 
 	/** The form's parts on {@code model}'s bones (a bud's too). */

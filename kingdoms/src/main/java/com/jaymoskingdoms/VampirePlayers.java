@@ -52,6 +52,14 @@ public final class VampirePlayers {
 	/** A bite: what it takes, what it gives (food, saturation, health), how often (ticks). */
 	static final float DRINK_DAMAGE = 4.0F, DRINK_HEAL = 3.0F, DRINK_SATURATION = 1.5F;
 	static final int DRINK_FOOD = 4, DRINK_EVERY = 20;
+	/**
+	 * (0.7.635) Andy: "the drain isnt restoring my thirst either". Blood quenches a vampire's thirst too (Kitchen's water,
+	 * out of 20): this much a bite or grab gulp, this much a unit lapped from a pool, this much a bottle of blood.
+	 */
+	static final int DRINK_WATER = 3, LAP_WATER = 4, BOTTLE_WATER = 4;
+	/** (0.7.630) Lapping a pool on the ground: how near the spot, the most a gulp takes (stain size), what each unit gives. */
+	static final double LAP_RANGE = 1.5;
+	static final float LAP_MOST = 0.5F, LAP_HEAL = 3.0F, LAP_FOOD = 4.0F;
 	/** Nights without blood before they starve. */
 	static final int STARVE_NIGHTS = 2;
 
@@ -61,28 +69,76 @@ public final class VampirePlayers {
 	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> HALF_TURN = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
 		JaymosKingdoms.id("vampire_half_turn"), builder -> builder.persistent(com.mojang.serialization.Codec.BOOL));
 
+	/** (0.7.625) Our use phase, and Powers' first one (its revive hold and downed handling), which ours runs ahead of. */
+	private static final net.minecraft.resources.Identifier FIRST = JaymosKingdoms.id("vampire_first"),
+		POWERS_DOWNED_FIRST = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "downed_first");
+
 	private VampirePlayers() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(VampirePlayers::tick);
-		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND
-				|| !(entity instanceof LivingEntity target)) {
-				return InteractionResult.PASS;
-			}
-			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && Vampires.person(target)) {
-				drink(server, sp, target);
-				return InteractionResult.SUCCESS;
-			}
-			// (0.7.332) sleeping prey: a mortal player asleep in a bed ({@link SleepingPrey})
-			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && target != sp && SleepingPrey.prey(target)) {
-				SleepingPrey.bite(server, sp, (ServerPlayer) target);
+		// (0.7.625) ahead of Powers' downed handling (its revive hold): holding someone by the throat, use on them does
+		// nothing, never a revive filling up. (0.7.634) Feeding itself is the skill bar's Feed ({@link BloodGrab#feed}), no
+		// longer sneak+use (Andy: "the current right click ability can move")
+		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, POWERS_DOWNED_FIRST);
+		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
+		UseEntityCallback.EVENT.register(FIRST, (player, level, hand, entity, hit) ->
+			player instanceof ServerPlayer sp && BloodGrab.holding(sp) ? InteractionResult.SUCCESS : InteractionResult.PASS);
+		// (0.7.630) sneak and right-click a pool of blood on the ground with an empty hand: lap it up
+		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+			if (level instanceof ServerLevel server && player instanceof ServerPlayer sp && hand == InteractionHand.MAIN_HAND && Vampires.isVampire(sp)
+				&& sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && lap(server, sp, hit.getLocation())) {
 				return InteractionResult.SUCCESS;
 			}
 			return InteractionResult.PASS;
 		});
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST_DRINK.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			LAST_DRINK.clear();
+			LAPPED.clear();
+		});
+	}
+
+	/**
+	 * (0.7.630) Andy: "blood should pool under the downed and corpses until they bleed out, that way blood sorcerers and
+	 * vampires have finite resources". A vampire laps the spilt blood off the ground at {@code at} (Jaymo's Powers' stains,
+	 * the pools the downed and the dead bleed out into): up to {@link #LAP_MOST} a gulp, once a second, a thin meal next to
+	 * a bite ({@link #LAP_FOOD}, {@link #LAP_HEAL} for each unit of stain, a man's whole pool about three), but it counts as
+	 * fed and eases the fever. What's lapped up is gone: a body's blood runs out. True if there was any to take.
+	 */
+	/** (0.7.630) When each vampire last lapped from the ground (game time), so the pose holds between gulps but not after a bite. */
+	private static final Map<UUID, Long> LAPPED = new HashMap<>();
+
+	private static boolean lapping(ServerPlayer player, long now) {
+		Long at = LAPPED.get(player.getUUID());
+		return at != null && now - at < DRINK_EVERY;
+	}
+
+	static boolean lap(ServerLevel level, ServerPlayer player, net.minecraft.world.phys.Vec3 at) {
+		long now = level.getGameTime();
+		Long last = LAST_DRINK.get(player.getUUID());
+		if (last != null && now - last < DRINK_EVERY) {
+			// (between gulps (or a bite): still drinking, so a held button opens nothing under them)
+			if (lapping(player, now)) {
+				PowersCompat.drinkAtGround(player);
+			}
+			return true;
+		}
+		float drawn = PowersCompat.drawStains(level, at, LAP_RANGE, LAP_MOST, LAP_MOST, from -> Hemomancy.rise(level, from, player.getEyePosition()));
+		if (drawn <= 0.0F) {
+			return false;
+		}
+		LAST_DRINK.put(player.getUUID(), now);
+		LAPPED.put(player.getUUID(), now);
+		// (0.7.630) Andy: "is this animated?": down on hands and knees, mouth to the ground, bobbing with each gulp
+		PowersCompat.drinkAtGround(player);
+		player.heal(LAP_HEAL * drawn);
+		player.getFoodData().eat(Math.max(1, Math.round(LAP_FOOD * drawn)), 0.4F);
+		KitchenCompat.drink(player, Math.max(1, Math.round(LAP_WATER * drawn)));
+		fedFromBottle(player);
+		BloodFever.bit(player);
+		level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.7F, 0.45F);
+		return true;
 	}
 
 	static boolean vampire(Player player) {
@@ -173,6 +229,7 @@ public final class VampirePlayers {
 
 	/** They wake changed (vaguely told: they find out the rest), in a crypt where there's room for one. */
 	private static void turn(ServerPlayer player, long nightNo) {
+		Commandments.act(player, "turned");
 		player.removeAttached(Vampires.BITTEN);
 		boolean half = Boolean.TRUE.equals(player.removeAttached(HALF_TURN));
 		Vampires.Kind kind = half ? Vampires.Kind.DHAMPIR : Vampires.Kind.PLAYER;
@@ -193,6 +250,24 @@ public final class VampirePlayers {
 			player.setAttached(HALF_TURN, true);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.gold").withStyle(ChatFormatting.GOLD));
 		}
+	}
+
+	/**
+	 * (0.7.615) A bottle of Kitchen's blood ({@link Hemomancy#drankBottle}): a thin meal, but it counts as fed, so a vampire
+	 * stranded where no one can be bitten (the Nether) doesn't starve on it. Blood requests and the like still want a bite.
+	 */
+	static void fedFromBottle(ServerPlayer player) {
+		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
+		if (v != null) {
+			long now = player.level().getGameTime();
+			player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(v.kind(), Vampires.nightIndex(((ServerLevel) player.level()).getOverworldClockTime()), now));
+		}
+	}
+
+	/** (0.7.615) A gulp in the grab-drink ({@link BloodGrab}): the bite, on the grab's own quicker pace instead of the bite's. */
+	static void drinkNow(ServerLevel level, ServerPlayer player, LivingEntity target, boolean infect) {
+		LAST_DRINK.remove(player.getUUID());
+		drink(level, player, target, false, infect);
 	}
 
 	/** A bite from a player who's one of them. */
@@ -225,13 +300,15 @@ public final class VampirePlayers {
 		}
 		player.heal(DRINK_HEAL);
 		player.getFoodData().eat(DRINK_FOOD, DRINK_SATURATION);
+		KitchenCompat.drink(player, DRINK_WATER);
 		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
 		if (v != null) {
 			player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(v.kind(), nightNo, now));
 		}
 		level.sendParticles(PowersCompat.blood(0x8A0303, 1.0F), target.getX(), target.getEyeY() - 0.25, target.getZ(), 8, 0.15, 0.15, 0.15, 0.0);
 		level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.9F, 0.55F);
-		if (target.isAlive() && target instanceof PathfinderMob p && !Lycans.cursed(p) && !p.hasAttached(Vampires.BITTEN)) {
+		// (0.7.615) a bite that doesn't infect (a sleeper, the Nether's piglins and Hornkin) never turns its prey
+		if (infect && target.isAlive() && target instanceof PathfinderMob p && !Lycans.cursed(p) && !p.hasAttached(Vampires.BITTEN)) {
 			Vampires.bite(p, clock);
 		} else if (infect && target.isAlive() && target instanceof ServerPlayer bitten) {
 			// (0.7.185) a ravenous fever's player prey ({@link BloodFever})
@@ -243,6 +320,7 @@ public final class VampirePlayers {
 			BloodThralls.drank(player, victim, nightNo);
 		}
 		BloodRequests.fed(player, target);
+		Commandments.act(player, "blood");
 		VampireMask.fed(player);
 		// (0.7.332) villagers who saw it suspect them by name ({@link Suspicion}); a player bitten remembers the biter ({@link VictimMemory})
 		Suspicion.witnessed(level, player, Suspicion.VAMPIRE, Suspicion.ADD_FEEDING, player.isShiftKeyDown() ? Suspicion.FEED_RANGE * Suspicion.SNEAK_SHARE : Suspicion.FEED_RANGE, false);

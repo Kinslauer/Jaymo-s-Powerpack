@@ -555,6 +555,59 @@ public final class Identities {
 		}
 	}
 
+	/**
+	 * (0.7.473) Andy: "your corpse will still have the costume on and it can be removed after death to identify you". The
+	 * costume has been pulled off {@code owner}'s body ({@code by}: a player, or one of a town's guards; Powers'
+	 * {@code CorpseCostume.strip}, which calls this by name), and the dead face shows: every settlement whose people see
+	 * the body (and the guard's own) knows now that identity {@code key} was them, as if they'd unmasked in front of
+	 * them ({@link #link}, "corpse"); a player who pulled it off knows their name. Owners not online are still linked,
+	 * only without the costume's name and crimes being added to theirs.
+	 */
+	public static void corpseUnmasked(ServerLevel level, Entity corpse, UUID owner, String key, @Nullable LivingEntity by) {
+		MinecraftServer server = level.getServer();
+		if (level != Factions.level(server)) {
+			return;
+		}
+		Map<Faction, LivingEntity> seen = new LinkedHashMap<>(witnesses(level, corpse, REVEAL_RANGE, false));
+		if (by != null && !(by instanceof Player)) {
+			Faction theirs = Aliens.factionOf(server, by);
+			if (theirs != null && seen.keySet().stream().noneMatch(f -> f.id() == theirs.id())) {
+				seen.put(theirs, by);
+			}
+		}
+		ServerPlayer player = server.getPlayerList().getPlayer(owner);
+		Component name = nameOf(get(server, key) == null ? "" : get(server, key).name());
+		for (Map.Entry<Faction, LivingEntity> e : seen.entrySet()) {
+			Faction f = e.getKey();
+			boolean told;
+			if (player != null) {
+				told = link(level, player, key, f, null, "corpse");
+			} else {
+				told = linkOffline(server, key, f, owner);
+			}
+			if (told) {
+				Speech.say(level, e.getValue(), Component.translatable("talk.jaymoskingdoms.identity.corpse." + level.getRandom().nextInt(LINES), name),
+					Speech.YELLOW, 16.0);
+			}
+		}
+		if (by instanceof ServerPlayer sp && !sp.getUUID().equals(owner)) {
+			Introductions.learn(sp, owner);
+		}
+	}
+
+	/** (0.7.473) As {@link #link} for a player not online: {@code f} knows identity {@code key} is {@code owner}. False if it knew. */
+	private static boolean linkOffline(MinecraftServer server, String key, Faction f, UUID owner) {
+		Identity id = getOrNew(server, key);
+		String fid = Integer.toString(f.id());
+		if (owner.toString().equals(id.links().get(fid))) {
+			return false;
+		}
+		Map<String, String> links = new HashMap<>(id.links());
+		links.put(fid, owner.toString());
+		put(server, key, id.withLinks(links));
+		return true;
+	}
+
 	/** {@code faction}'s people know {@code player} wears identity {@code key}. */
 	static boolean linked(MinecraftServer server, String key, int faction, ServerPlayer player) {
 		Identity id = get(server, key);
@@ -726,8 +779,8 @@ public final class Identities {
 		}
 	}
 
-	/** A settlement's people (villagers, folk) who can see {@code player}, the nearest of each settlement. */
-	private static Map<Faction, LivingEntity> witnesses(ServerLevel level, ServerPlayer player, double range, boolean looking) {
+	/** A settlement's people (villagers, folk) who can see {@code player} (or (0.7.473) a body), the nearest of each settlement. */
+	private static Map<Faction, LivingEntity> witnesses(ServerLevel level, Entity player, double range, boolean looking) {
 		MinecraftServer server = level.getServer();
 		List<LivingEntity> near = new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),
 			e -> e.isAlive() && !e.isSleeping() && (e instanceof Villager || e instanceof Folk) && e.distanceTo(player) <= range));

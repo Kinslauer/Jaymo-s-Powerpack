@@ -31,17 +31,32 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Ledge.init();
 		// (0.14.3) freerunning, Kingdoms' Stealth tree's second page
 		com.jaymospowers.freerun.Freerun.init();
+		com.jaymospowers.water.Dives.init();
 		// (0.15.5) feathers (stamina) and the dodge, in place of Combat Roll
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();
 		com.jaymospowers.core.Meditate.init();
+		com.jaymospowers.core.Sitting.init();
+		// (0.19.29) training gear and the Mastery ranks
+		com.jaymospowers.core.Training.init();
 		com.jaymospowers.core.SwallowedPower.init();
 		com.jaymospowers.core.FlightRoll.init();
 		com.jaymospowers.core.LockOn.init();
 		// (0.17.67) the guard and the parry, for everyone
 		com.jaymospowers.combat.Guard.init();
+		// (0.20.3) a weapon banged on a raised shield: hostiles come, animals bolt
+		com.jaymospowers.combat.ShieldBang.init();
 		com.jaymospowers.combat.AttackTells.init();
+		com.jaymospowers.combat.IncomingBlows.init();
+		com.jaymospowers.combat.Crowds.init();
+		// (0.21.22, Rivals patch 8) the hit streak's quick kill, and vaulting a shield
+		com.jaymospowers.combat.HitStreak.init();
+		com.jaymospowers.combat.ShieldVault.init();
+		// (0.21.23, Rivals patch 9) Chrono's and Web's takedowns
+		com.jaymospowers.combat.Takedowns.init();
 		com.jaymospowers.core.HiddenArmor.init();
+		// (0.20.68) armour wears fast, absorbs more, breaks without vanishing
+		com.jaymospowers.core.ArmourWear.init();
 		com.jaymospowers.core.Dismember.init();
 		com.jaymospowers.core.wounds.Wounds.init();
 		com.jaymospowers.core.Oddities.init();
@@ -50,6 +65,10 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.GroundCracks.register();
 		com.jaymospowers.core.UltimateFilm.register();
 		com.jaymospowers.core.Soundscape.register();
+		// (0.20.88) the "Jaymo's Powerpack" advancement tab
+		com.jaymospowers.core.PackAdvancements.init();
+		// (0.20.89) blunt and large arrow heads
+		com.jaymospowers.tinkering.ranged.ArrowHeads.init();
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();
@@ -76,9 +95,15 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.armory.TaczGuns.init();
 		com.jaymospowers.armory.FlintlockDraw.init();
 		com.jaymospowers.tinkering.Tinkering.init();
+		// (0.21.29) GregTech's hand route: hammer raw ore into crushed ore, wash it in a cauldron or running water
+		com.jaymospowers.tinkering.ore.OreWashing.init();
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
+		// (0.20.89) seamed stone and rocky dirt round ore veins
+		com.jaymospowers.ground.OreTells.init();
 		com.jaymospowers.ground.FirstTools.init();
+		// (0.21.29) punching a log drives splinters into the hand
+		com.jaymospowers.ground.Splinters.init();
 		// (0.17.14) players throw rocks, as Kingdoms' poor guards and barbarians do
 		com.jaymospowers.ground.ThrownRocks.init();
 		// (0.18.55) far worlds restart the stone age: veiled ore, first metals, the field anvil, the patrol's skip writ
@@ -100,17 +125,36 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.baubles.Baubles.init();
 		// (0.17.188) Friends & Foes' totems work from the charm slot
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
+		// (RPG Series) Spell Engine's spell books, scrolls and quivers work worn in bauble slots
+		com.jaymospowers.compat.SpellEngineCompat.init();
+		// (0.20.30) One Dimension's default stack: the Aether over the Overworld over the Nether (compat.Stacked)
+		com.jaymospowers.compat.OneDimensionDefaults.init();
+		// (0.20.51) Subtle Effects' bone sprites on hurt skeletons off; our splinters instead
+		com.jaymospowers.compat.SubtleEffectsCompat.init();
+		// (0.20.104) Homesteads' workstation advancements only for placing the workstation (not any block)
+		com.jaymospowers.compat.HomesteadsCompat.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
+		// (0.19.87) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles
+		com.jaymospowers.jewellery.Jewellery.init();
 		// (0.17.115) the 26.4 snapshots' ice: Freezing and its potion, ice balls, the Frostbite, icicles and the ice blocks
 		com.jaymospowers.frost.Frost.init();
 		// (0.17.116) snow-style layer blocks of every wooden and stone block, cut with the saw or at the stonecutter
 		com.jaymospowers.layers.Layers.init();
+		// (0.18.115) young for spiders, parrots and our wild beasts, whales and sky creatures
+		com.jaymospowers.young.Younglings.init();
+		// (0.18.118) weapons stuck in bodies: zombies rising with one, thrown daggers, a finisher's blade left in
+		com.jaymospowers.armory.Lodged.init();
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
+		// (0.19.63) armour gets dirty and washes clean; wet weather's puddles and underwater light (client/wet)
+		com.jaymospowers.core.wet.WetParticles.init();
+		com.jaymospowers.core.wet.ArmourGrime.init();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollHolds();
 		com.jaymospowers.power.web.KitchenCompat.registerCorpseBlood();
 		com.jaymospowers.power.web.KitchenCompat.registerBrawn();
+		com.jaymospowers.power.web.KitchenCompat.registerTemperate();
+		com.jaymospowers.power.web.KitchenCompat.registerNoCorpseZone();
 		registerAttachments();
 	}
 
@@ -121,12 +165,12 @@ public class JaymosPowers implements ModInitializer {
 	 */
 	private static void registerAttachments() {
 		String[] holders = {
-			"core.Affinity", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Breaks", "core.wounds.Bleeding", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.Tending", "core.finisher.Finishers", "core.gifted.Gifted", "combat.Guard",
+			"core.Affinity", "compat.HomesteadsCompat", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.LockOn", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Mortality", "core.wounds.Afflictions", "core.wounds.Scars", "core.wounds.Breaks", "core.wounds.Adrenaline", "core.wounds.Fainting", "core.wounds.Bleeding", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.Tending", "core.blood.Bloodied", "core.finisher.Finishers", "core.gifted.Gifted", "combat.Guard", "combat.HitStreak",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalChains", "power.arsenal.ArsenalPlaces", "power.arsenal.ArsenalStanding",
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoDirectives", "power.chrono.ChronoSpeed", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.future.Future", "power.chrono.future.FutureRuins", "power.chrono.future.FutureOmenPilots", "power.wind.WindKick",
-			"power.gravity.GravityPower", "power.gravity.GravityForward", "power.gravity.GravityWalk",
+			"power.gravity.GravityPower", "power.gravity.GravityRocks", "power.gravity.GravityForward", "power.gravity.GravityWalk",
 			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebMorph", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebSymbioteBond", "power.web.WebSymbioteCushion", "power.web.WebTendrils", "power.web.WebHeldGrab", "power.web.WebExecutions",
 			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength", "power.web.WebShooters", "power.web.WebSymbioteStrains", "power.web.WebSymbioteCollect", "power.web.WebSymbioteBody",
 			"power.web.WebSymbioteMind",
@@ -134,22 +178,22 @@ public class JaymosPowers implements ModInitializer {
 			"power.wind.WindCyclone", "power.wind.WindJet", "power.wind.aether.WindAether",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
 			"power.darktide.DarktideState",
-			"power.xenoform.XenoformState", "power.xenoform.XenoBands", "power.xenoform.nadir.NadirRules", "power.xenoform.nadir.NadirStash",
-			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam",
+			"power.xenoform.XenoformState", "power.xenoform.XenoBands", "power.xenoform.StarReaders", "power.xenoform.BandUpgrades", "power.xenoform.BandForge", "power.xenoform.RivalHunter", "power.xenoform.BandStyle", "power.xenoform.nadir.NadirRules", "power.xenoform.nadir.NadirStash",
+			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
 			"power.zfighter.ZFighterTeleport",
 			"power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.zfighter.ZFighterAura", "power.zfighter.ZFighterSlots", "power.zfighter.ZFighterKiWeapon","power.zfighter.ZFighterGrab", "power.zfighter.ZFighterSidestep",
 			"power.zfighter.ZFighterFusionItems", "power.zfighter.ZFighterFiveFusion", "power.zfighter.ZFighterMasterFusion", "power.zfighter.ZFighterFalseSuper", "power.zfighter.ZFighterGoldenApe", "power.zfighter.ZFighterGod", "power.zfighter.ZFighterGodRitual", "power.zfighter.ZFighterInstinct", "power.zfighter.ZFighterLegendary",
-			"power.zfighter.ZFighterEarthlingRace", "power.zfighter.ZFighterVerdantMerge", "power.zfighter.ZFighterFrostReserve", "power.zfighter.ZFighterWarriorComeback", "power.zfighter.ZFighterSonicSway",
+			"power.zfighter.ZFighterEarthlingRace", "power.zfighter.ZFighterVerdantMerge", "power.zfighter.ZFighterFrostReserve", "power.zfighter.ZFighterWarriorComeback", "power.zfighter.ZFighterSonicSway", "power.zfighter.ZFighterSelfDestruct", "power.zfighter.ZFighterCreator",
 			"power.zfighter.ZFighterLookout", "power.zfighter.ZFighterWishExtras", "power.zfighter.ZFighterSagas", "power.zfighter.ZFighterSideQuests", "power.zfighter.ZFighterAfterlife", "power.zfighter.ZFighterDemonRealm",
 			"power.zfighter.pod.PodWrecks", "power.zfighter.sky.Charts", "power.zfighter.farworld.FarWorlds", "power.zfighter.farworld.PatrolWrit",
 			"power.zfighter.ZFighterSpace", "power.zfighter.ZFighterPodTrip", "power.zfighter.ZFighterPatrol", "power.zfighter.ZFighterRaiders", "power.zfighter.ZFighterSpaceMissions", "power.zfighter.ZFighterStarts",
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.heritage.HeritageMoves",
 			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "baubles.Baubles", "armory.Lash", "armory.FlintlockDraw", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker",
-			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.LabEscape",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "baubles.Baubles", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker",
+			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",
 		};
 		for (String holder : holders) {
 			try {

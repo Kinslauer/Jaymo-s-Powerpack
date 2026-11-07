@@ -1,6 +1,7 @@
 package com.jaymospowers.power.gravity;
 
 import com.jaymospowers.aether.AetherBlocks;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Soundscape;
@@ -231,8 +232,9 @@ final class GravityMeteor {
 		ServerLevel level = player.level();
 		float size = 1.0F + (SIZE_MAX - 1.0F) * charge;
 		Vec3 to = ground(level, GravityPower.aimPoint(player, range(charge)));
-		// down out of the sky from build height, at a slant from behind you, so it can be watched all the way down
-		double height = Math.max(16.0, level.getMaxY() - to.y);
+		// down out of the sky from build height, at a slant from behind you, so it can be watched all the way down ((0.20.30)
+		// the realm's own build height: in a One Dimension world, not from over the Aether stacked on top)
+		double height = Math.max(16.0, Stacked.maxY(level.getServer(), Stacked.realm(level, to.y)) - to.y);
 		Vec3 back = player.getLookAngle().horizontal();
 		back = back.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : back.normalize();
 		Vec3 from = to.add(back.scale(-height * FALL_SLANT)).add(0.0, height, 0.0);

@@ -56,7 +56,7 @@ final class CampChiefs {
 		});
 	}
 
-	private static void dropBar(UUID id) {
+	static void dropBar(UUID id) {
 		ServerBossEvent bar = BARS.remove(id);
 		if (bar != null) {
 			bar.removeAllPlayers();
@@ -77,16 +77,24 @@ final class CampChiefs {
 		if (w.role() == Orcs.WARCHIEF) {
 			Bodies.wear(mob, Bodies.WARCHIEF);
 		}
+		if (w.role() == Orcs.WARCHIEF || w.role() == Goblins.KING) {
+			// (0.7.435) a tribe's king holds his own weapon
+			Spoils.arm(level, mob, w.role(), w.factionId());
+		}
 		if (mob.isSleeping() || Downed.isDowned(mob)) {
 			return;
 		}
 		if (mob.tickCount % 5 == 0) {
-			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id, mob.getDisplayName(),
+			// ((0.7.475) a greenskin realm's chief by his title: Warlord, Goblin King)
+			net.minecraft.network.chat.Component name = Hordes.titled(level.getServer(), w.factionId(), mob.getDisplayName());
+			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id, name,
 				w.role() == Goblins.KING ? BossEvent.BossBarColor.GREEN : BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
+			bar.setName(name);
 			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
 			BossBars.show(level, mob, bar);
 		}
-		if (mob.getHealth() <= mob.getMaxHealth() * Folk.RALLY_AT && RALLIED.add(mob.getUUID())) {
+		// ((0.7.490) not in a camp brawl: a chief challenge's blows aren't a fight to call his camp to)
+		if (!Brutality.fighting(mob) && mob.getHealth() <= mob.getMaxHealth() * Folk.RALLY_AT && RALLIED.add(mob.getUUID())) {
 			rally(level, mob, w.factionId());
 		}
 	}

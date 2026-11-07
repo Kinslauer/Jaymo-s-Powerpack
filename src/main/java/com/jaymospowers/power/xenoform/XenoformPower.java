@@ -48,6 +48,9 @@ import org.jspecify.annotations.Nullable;
  * and you become the dialled alien. As an alien, Z held {@link #HOLD_TICKS} turns you back early.</li>
  * <li>R G V B: the alien's moves ({@link XenoForm#onKey}). As a human they do nothing.</li>
  * <li>X held {@link #SCAN_TICKS} at a creature: scan it; if it carries an alien's DNA, the band unlocks that alien.</li>
+ * <li>(0.19.85) Until the band is reforged ({@link BandForge}) a change lasts a random {@link #TIMER_MIN}-{@link #TIMER_MAX}
+ * and the band recharges {@link #TIMER_RECHARGE} after it (Andy: "i want the charge to be something you unlock, its a
+ * random timer before then"); reforged, it holds the charge below ({@link #charged}).</li>
  * <li>(0.18.92) The band's charge: a form spends it a point a tick, more when you're hit ({@link #HURT_DRAIN}) or a move
  * goes on cooldown ({@link #MOVE_DRAIN}); as yourself it refills over {@link #REFILL_TICKS}. Mastery grows it from
  * {@link #CHARGE_MIN} to {@link #CHARGE_MAX}. The band beeps through the last {@link #BEEP_TICKS}. When it's spent, when the
@@ -71,6 +74,16 @@ public final class XenoformPower implements Power {
 	// ---- tuning (ticks) ----
 	/** Z held this long slams the band. */
 	public static final int HOLD_TICKS = 10;
+	/** (0.19.34) The dial's ratchet click pitch, turning on (a little lower turning back). */
+	static final float DIAL_CLICK_PITCH = 1.7F;
+	/** (0.18.122, patch 6) A wrong-alien glitch lands this often on an alien the band never held, and the band keeps it. */
+	public static final float GLITCH_TEACH_CHANCE = 0.2F;
+	/**
+	 * (0.19.85) An unforged band's random timer: a change lasts this long at random (1 to 5 minutes), then the band
+	 * recharges this long ({@link #TIMER_KNOCKOUT} after a knockout). Bigger Charge lengthens the change and Faster
+	 * Recharge shortens the wait, as they do the charge.
+	 */
+	public static final int TIMER_MIN = 1200, TIMER_MAX = 6000, TIMER_RECHARGE = 1200, TIMER_KNOCKOUT = 2400;
 	/** (0.18.92) The band's charge (ticks of form): its size unmastered and fully mastered (2 and 5 minutes). */
 	public static final int CHARGE_MIN = 2400, CHARGE_MAX = 6000;
 	/** An empty band refills in this long as yourself; a slam needs at least this much. */
@@ -112,8 +125,26 @@ public final class XenoformPower implements Power {
 	public static final int GLITCH_SELF_TICKS = 7200;
 	/** How often (ticks) a human checks whether the band is complete and the power ready to ascend. */
 	public static final int ASCEND_CHECK_EVERY = 40;
-	/** (0.16.24) An Ultimate's film (ticks): low and close, sweeping round the alien. */
-	static final int ULTIMATE_FILM_TICKS = 36;
+	/**
+	 * (0.20.9, Ultimates patch 0) Each Ultimate is its own evolved alien ({@link XenoUltimate}). C held this long (ticks) as the
+	 * Ultimate drops back to the base alien; a shorter tap is the Ultimate's big move.
+	 */
+	public static final int ULT_DROP_HOLD = 10;
+	/** (0.20.9) When the Ultimate's own health runs out: this long stunned (Slowness III and nausea), and locked for the rest of the change. */
+	public static final int ULT_BREAK_STUN = 30;
+	/** (0.20.9) After a voluntary drop-back, C (slot {@link XenoForm#C}) is on cooldown this long before the Ultimate comes again. */
+	public static final int ULT_REENTER = 200;
+	/** (0.20.9) On a reforged band, each tick as the Ultimate takes this much extra off the charge (1 doubles the burn). */
+	public static final int ULT_DRAIN = 1;
+	/** (0.20.9) Changing in by C needs at least this much charge left (ticks). */
+	public static final int ULT_MIN_LEFT = 400;
+	/** (0.20.9) The last stand: a hit that would leave you at or under this share of your health (or kill you) while fighting a great foe. */
+	public static final float ULT_LAST_STAND = 0.25F;
+	/** (0.20.9) The change-in film's length (ticks): the short cut, and the long first-time cut. */
+	public static final int ULT_FILM_TICKS = 40, ULT_FILM_FIRST = 100;
+	/** (0.20.9) Other players this near (blocks) see the change-in film too, unless they were in combat in the last {@link #ULT_FILM_COMBAT} ticks. */
+	public static final double ULT_FILM_WITNESS = 32.0;
+	public static final int ULT_FILM_COMBAT = 100;
 	/**
 	 * (0.18.93, patch 2: Andy wants "real ultimate forms") The Ultimate is its own body on top of the base alien's: this
 	 * much more health (share of the alien's, its own bar on top, healed in full as it comes on), more fist damage (share),
@@ -141,6 +172,8 @@ public final class XenoformPower implements Power {
 		/** The health they had as a human, given back when they turn back. */
 		float humanHealth;
 		int recharge, rechargeTotal;
+		/** (0.19.85) An unforged band's quick change: the time left and the whole to carry into the next alien (0: none). */
+		int carryTicks, carryTotal;
 		/** (0.18.92) The band's charge as yourself (-1: not yet known, full). In a form it is {@link #ticksLeft}. */
 		float charge = -1.0F;
 		/** When the band last saved you from a killing blow (game time, 0: never); ticks to the wild dial's next change. */
@@ -153,9 +186,9 @@ public final class XenoformPower implements Power {
 		boolean scanning;
 		int scanTicks;
 		@Nullable String scanForm;
-		final long[] cooldownUntil = new long[XenoformState.Hud.SLOTS];
-		final int[] cooldownLength = new int[XenoformState.Hud.SLOTS];
-		boolean hudDirty = true;
+		public final long[] cooldownUntil = new long[XenoformState.Hud.SLOTS];
+		public final int[] cooldownLength = new int[XenoformState.Hud.SLOTS];
+		public boolean hudDirty = true;
 		int hudTick;
 		long lastHint;
 		// ---- scratch the forms use (see each form) ----
@@ -198,7 +231,37 @@ public final class XenoformPower implements Power {
 		public @Nullable Vec3 burrowTo;
 		public boolean wings;
 		// ---- stage 3: the Ultimate and the corruption ----
-		/** In the Ultimate form (C, ascended) for the rest of this timer; the Ultimate's own move's cooldown. */
+		/**
+		 * (0.20.9) The Ultimate the player is right now (an evolved alien, {@link XenoForm#evolved()}); {@link #form} stays the base
+		 * alien under it. Null: none (or the fallback buff, {@link #ultimate}).
+		 */
+		public @Nullable XenoUltimate ult;
+		/** The base alien's health frozen while the Ultimate is on, and its cooldowns put aside (R G V B and C). */
+		public float baseHealth;
+		final long[] baseCooldownUntil = new long[XenoformState.Hud.SLOTS];
+		final int[] baseCooldownLength = new int[XenoformState.Hud.SLOTS];
+		/** (0.20.9) The Ultimate's own cooldowns while the base alien is back, kept for the next change-in of this change. */
+		final long[] ultCooldownUntil = new long[XenoformState.Hud.SLOTS];
+		final int[] ultCooldownLength = new int[XenoformState.Hud.SLOTS];
+		/** (0.20.9) Cooldowns of Ultimates left behind by quick changes this change, keyed by Ultimate (until, then length). */
+		final Map<XenoUltimate, long[]> keptUltUntil = new HashMap<>();
+		final Map<XenoUltimate, int[]> keptUltLength = new HashMap<>();
+		/** (0.20.9) The last stand just cancelled a hit: that hit must not drain the charge. */
+		boolean lastStandHit;
+		/** (0.20.9) Health and absorption just before the hit now being taken (set in ALLOW_DAMAGE), what the last stand puts the base alien back to. */
+		float healthBefore, absorbBefore;
+		/** (0.20.9) The base alien's absorption while the Ultimate is on. */
+		float baseAbsorb;
+		/** The Ultimate's health when it was dropped by hand (-1: none kept), given back on the next change-in this change. */
+		public float ultHealth = -1.0F;
+		/** The Ultimate broke this change (C is locked), and the last stand is spent (once per change). */
+		public boolean ultBroken, lastStandSpent;
+		/** When C went down as the Ultimate (game time, -1: not held). */
+		long ultDownAt = -1L;
+		/**
+		 * In an Ultimate form (C, ascended) for the rest of this timer: a mirror of {@code ult != null} for the evolved Ultimates,
+		 * and the fallback 0.18.93 buff's flag for a form whose {@link XenoForm#evolved()} is null. The Ultimate's own move's cooldown.
+		 */
 		public boolean ultimate;
 		public long ultimateNext;
 		/** The band is corrupted right now (a slam may give the wrong alien; see {@link XenoForm#corrupt}). Refreshed every tick. */
@@ -213,6 +276,8 @@ public final class XenoformPower implements Power {
 		public final List<Integer> frozen = new ArrayList<>();
 		public long geodeUntil;
 		public int tolls;
+		/** (0.19.84) Knell: the game time it last tolled at (it tolls once per value of the clock). */
+		public long lastToll = -1L;
 		/** This change has hurt a living thing (the voices' trial counts the ones that don't). */
 		public boolean hurt;
 		/** Nadir: the Beacon's chosen player, R held for this many ticks (0: not held), and when the last tap was. */
@@ -222,11 +287,126 @@ public final class XenoformPower implements Power {
 		/** Duplex: its doubles (entity ids), and when Copper Storm's charge wears off. */
 		public final List<Integer> doubles = new ArrayList<>();
 		public long chargedUntil;
+		/**
+		 * (0.18.95) Rivet: the shell it's melded into (null: none); holding Brace, the water spray; Rebound on; mid Drop and
+		 * the height it fell from; last tick's fall speed; the Chord's tick (0: not playing).
+		 */
+		public @Nullable String shell;
+		public boolean brace, spray, rebound, anvilDrop;
+		public double dropFrom, fallSpeed;
+		public int song;
+		/**
+		 * (0.18.96, patch 4) Gorger: blocks eaten toward the blast; ticks left of the horn charge, whether it ran off a ledge
+		 * (now a slam) and from what height; rolled up. Slipfin: ticks out of water. Polestar: the iron block held
+		 * overhead (null: none); the field is held. Lurk: the creature it watches (entity id, -1 none); faded. Duplex:
+		 * the double whose eyes you look through (entity id, -1 none).
+		 */
+		public int gorge, horn;
+		public boolean hornSlam, rolled;
+		public double hornFrom;
+		public int dry;
+		public net.minecraft.world.level.block.state.@Nullable BlockState lifted;
+		public boolean field;
+		public int watched = -1;
+		public boolean faded;
+		public int eyes = -1;
+		/**
+		 * (0.18.103, patch 5) Gyre: ticks left of the shell spin and who it has already bowled; the whirlwind's eye and its
+		 * ticks left. Cortex: the bubble's last tick. Locust: ticks R has been held; mid a crash leap. Croaker: the creature
+		 * in its gullet (entity id, -1 none).
+		 */
+		public int spin;
+		public final java.util.Set<Integer> spun = new java.util.HashSet<>();
+		public net.minecraft.world.phys.@Nullable Vec3 whirl;
+		public int whirlTicks;
+		public long bubbleUntil;
+		public int leapCharge;
+		public boolean crashing;
+		public int swallowed = -1;
+		/**
+		 * (0.18.107, Scan B) Rime: ticks since it last sprinted while skating. Marrow: it has fallen apart and stood back up
+		 * this change; the bone shield's last tick; lying in a heap until this tick. Swathe: ticks left of the sandstorm.
+		 * Blight: the dark shield is up.
+		 */
+		public int skateIdle;
+		public boolean breathWas;
+		public boolean risen;
+		public long shieldUntil, heapUntil;
+		public int storm;
+		public boolean darkShield;
+		/** Marrow: the thrown rib's heading (its place is {@link #whirl}, its ticks {@link #spin}, who it hit {@link #spun}). */
+		public net.minecraft.world.phys.@Nullable Vec3 ribDir;
+		/**
+		 * (0.18.109, Scan C) Howl, Prowl, Tusk, Talon: ticks left of a pounce, charge or dive; the creature held in the jaws or
+		 * talons (and ticks left); the wild wolves answering the howl (and ticks left); ticks left of the scent; the stalked
+		 * creature (and until when); Thick Hide until this tick.
+		 */
+		public int rush;
+		public int latched = -1, latchTicks;
+		public final java.util.List<Integer> pack = new java.util.ArrayList<>();
+		public int packTicks;
+		public int sniff;
+		public int stalked = -1;
+		public long stalkUntil, hideUntil;
+		/**
+		 * (0.18.111, Scan D) Murk: the creatures held in its tentacles (and ticks left); ticks left of the lure. Gnasher:
+		 * ticks left of the frenzy and the death roll. Lumen: its lights (packed block positions, each with the tick it
+		 * goes out); ticks left of the fetch. Keen: ticks left of the sonar; hanging from a ceiling.
+		 */
+		public final java.util.List<Integer> grips = new java.util.ArrayList<>();
+		public int gripTicks, lure, frenzy, rolls, fetch, sonar;
+		public final it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap lights = new it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap();
+		public boolean perched;
+		/**
+		 * (0.18.113, Scan E) Hive: ticks left of the scatter. Skitter: where its web line is fixed and the line's length;
+		 * ticks left of its brood.
+		 */
+		public int scatter, brood;
+		public net.minecraft.world.phys.@Nullable Vec3 anchor;
+		public double rope;
+		/**
+		 * (0.18.117, Scan F) Ooze: squeezed small; blobs split off for the hurt taken. Fuse: ticks Self-Destruct has swelled ({@code swell});
+		 * the ring blasts still to go off. Billow: ticks left of the downpour and of the fog.
+		 */
+		public boolean squeeze;
+		public int splits, swell, blasts, rain, fog;
+		/**
+		 * (0.18.119, Scan G) Towerback: risen to monolith size, and when it may change size again; the moveDist at its last
+		 * step, which foot came down last, its shockwaves running out; its grab (since when, -1: none; whom it went for;
+		 * holding them; where it snatched them from and where it slams them).
+		 */
+		public boolean towering, leftFoot, grabHolding;
+		public long sizeNext, grabStart = -1L;
+		public float strideAt;
+		/** (0.19.28) Towerback's swat (since when, -1: none) and its footfalls so far (synced, for the legs' stride). */
+		public long swatStart = -1L;
+		public int steps;
+		public int grabPrey = -1;
+		public net.minecraft.world.phys.@Nullable Vec3 grabFrom, grabTo;
+		public final java.util.List<com.jaymospowers.power.xenoform.forms.Towerback.Wave> waves = new java.util.ArrayList<>();
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
+		/** (0.20.9) The body whose kit is live: the Ultimate while it is on, else the base alien (null: none). */
+		public @Nullable XenoForm body() {
+			return ult != null ? ult : form;
+		}
+
 		void clearForm() {
 			form = null;
+			ult = null;
+			baseHealth = 0.0F;
+			java.util.Arrays.fill(baseCooldownUntil, 0L);
+			java.util.Arrays.fill(baseCooldownLength, 0);
+			java.util.Arrays.fill(ultCooldownUntil, 0L);
+			java.util.Arrays.fill(ultCooldownLength, 0);
+			keptUltUntil.clear();
+			keptUltLength.clear();
+			lastStandHit = false;
+			healthBefore = absorbBefore = baseAbsorb = 0.0F;
+			ultHealth = -1.0F;
+			ultBroken = lastStandSpent = false;
+			ultDownAt = -1L;
 			ticksLeft = total = 0;
 			java.util.Arrays.fill(cooldownUntil, 0L);
 			java.util.Arrays.fill(cooldownLength, 0);
@@ -270,11 +450,58 @@ public final class XenoformPower implements Power {
 			doubles.clear();
 			chargedUntil = 0L;
 			nadir.clear();
+			shell = null;
+			brace = spray = rebound = anvilDrop = false;
+			dropFrom = fallSpeed = 0.0;
+			song = 0;
+			skateIdle = storm = 0;
+			risen = darkShield = breathWas = false;
+			shieldUntil = heapUntil = 0L;
+			ribDir = null;
+			rush = latchTicks = packTicks = sniff = 0;
+			latched = stalked = -1;
+			pack.clear();
+			stalkUntil = hideUntil = 0L;
+			grips.clear();
+			gripTicks = lure = frenzy = rolls = fetch = sonar = 0;
+			lights.clear();
+			perched = false;
+			scatter = brood = 0;
+			anchor = null;
+			rope = 0.0;
+			squeeze = false;
+			splits = swell = blasts = rain = fog = 0;
+			towering = leftFoot = grabHolding = false;
+			sizeNext = 0L;
+			grabStart = -1L;
+			strideAt = 0.0F;
+			swatStart = -1L;
+			steps = 0;
+			grabPrey = -1;
+			grabFrom = grabTo = null;
+			waves.clear();
+			spin = whirlTicks = leapCharge = 0;
+			spun.clear();
+			whirl = null;
+			bubbleUntil = 0L;
+			crashing = false;
+			swallowed = -1;
+			gorge = horn = 0;
+			hornSlam = rolled = false;
+			hornFrom = 0.0;
+			dry = 0;
+			lifted = null;
+			field = false;
+			watched = -1;
+			faded = false;
+			eyes = -1;
 			hudDirty = true;
 		}
 	}
 
 	private static final Map<UUID, Live> LIVES = new HashMap<>();
+	/** (0.19.85) A player who logged off: {recharge, rechargeTotal, charge} until they're back (this server run). */
+	private static final Map<UUID, int[]> KEPT = new HashMap<>();
 
 	private XenoformPower() {
 	}
@@ -285,8 +512,16 @@ public final class XenoformPower implements Power {
 		XenoNet.register();
 		com.jaymospowers.power.xenoform.nadir.NadirNet.register();
 		XenoDouble.init();
+		// (0.18.107, Scan B) Rime has Cryokinesis's moves lent
+		com.jaymospowers.power.cryo.CryoLent.lender = p -> XenoformState.form(p) == XenoForms.RIME;
+		XenoStalker.init();
+		// (0.18.125, patch 8) the band hunter and the rival band's aliens
+		RivalHunter.init();
 		XenoBandItem.init();
 		FallenStarBlock.init();
+		XenoFinds.init();
+		// (0.18.123, patch 7) the band's reforge, modules and skills
+		BandUpgrades.init();
 		FallingStars.init();
 		XenoBands.init();
 		XenoJam.register();
@@ -304,15 +539,45 @@ public final class XenoformPower implements Power {
 				revert(player, false, false);
 				return true;
 			}
+			Live live = live(player);
+			if (live.ult != null) {
+				// (0.20.9) the Ultimate's own health is gone: it breaks, and you are the base alien again (the rest of the blow is lost)
+				breakUltimate(player, live);
+				return false;
+			}
+			if (lastStand(player, live, source, live.healthBefore)) {
+				// (0.20.9) the unforged band's last stand: the Ultimate comes on in place of the killing blow
+				return false;
+			}
 			revert(player, true, true);
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			// (0.18.103) Dud can't hurt anything (0.20.9: its Ultimate can)
+			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && has(attacker) && live(attacker).body() == XenoForms.DUD) {
+				return false;
+			}
+			if (com.jaymospowers.power.xenoform.forms.ultimate.Swarm.bitesPlayer(source, entity)) {
+				return false;
+			}
 			if (!(entity instanceof ServerPlayer player) || !has(player)) {
 				return true;
 			}
 			Live live = live(player);
-			return live.form == null || live.form.allowDamage(player, live, source, amount);
+			live.healthBefore = player.getHealth();
+			live.absorbBefore = player.getAbsorptionAmount();
+			return live.form == null || live.body().allowDamage(player, live, source, amount);
+		});
+		// (0.20.9) the last stand, judged on the damage actually taken (after the form's allowDamage, shield, armour and i-frames): a hit that
+		// leaves you at or under ULT_LAST_STAND brings the Ultimate on and is undone (the base alien is put back to its health before the hit)
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (entity instanceof ServerPlayer player && has(player) && damageTaken > 0.0F && player.isAlive()) {
+				Live live = live(player);
+				if (live.form != null && live.ult == null && lastStandReady(player, live, source)
+					&& player.getHealth() + player.getAbsorptionAmount() <= player.getMaxHealth() * ULT_LAST_STAND) {
+					lastStand(player, live, source, live.healthBefore);
+				}
+			}
 		});
 		// (0.18.92) hits drain the charge
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
@@ -328,7 +593,7 @@ public final class XenoformPower implements Power {
 				Live live = live(player);
 				if (live.form != null) {
 					live.hurt = true;
-					live.form.onDealtDamage(player, live, entity);
+					live.body().onDealtDamage(player, live, entity);
 				}
 			}
 		});
@@ -337,11 +602,30 @@ public final class XenoformPower implements Power {
 			if (has(player) && live(player).form != null) {
 				revert(player, false, false);
 			}
-			LIVES.remove(player.getUUID());
+			// (0.19.85) the band's recharge and charge outlast a relog (a relog must not skip the wait)
+			Live gone = LIVES.remove(player.getUUID());
+			if (gone != null && (gone.recharge > 0 || gone.charge >= 0.0F)) {
+				KEPT.put(player.getUUID(), new int[] {gone.recharge, gone.rechargeTotal, Math.round(gone.charge)});
+			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(FallingStars::tick);
+		com.jaymospowers.power.xenoform.forms.ultimate.Swarm.init(); // (0.20.21)
+		com.jaymospowers.power.xenoform.forms.ultimate.Geode.init(); // (0.20.21)
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			// (0.20.21) players are disconnected after LIVES is cleared, so an Ultimate's world changes (clones, crystals, a possessed host) are undone here
+			for (Map.Entry<UUID, Live> entry : LIVES.entrySet()) {
+				Live live = entry.getValue();
+				ServerPlayer online = server.getPlayerList().getPlayer(entry.getKey());
+				if (online != null && live.ult != null) {
+					try {
+						live.ult.onExit(online, live);
+					} catch (RuntimeException ignored) {
+						// never block the stop
+					}
+				}
+			}
 			LIVES.clear();
+			KEPT.clear();
 			FallingStars.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> XenoformDebugCommand.register(dispatcher));
@@ -353,7 +637,16 @@ public final class XenoformPower implements Power {
 	}
 
 	static Live live(ServerPlayer player) {
-		return LIVES.computeIfAbsent(player.getUUID(), id -> new Live());
+		return LIVES.computeIfAbsent(player.getUUID(), id -> {
+			Live live = new Live();
+			int[] kept = KEPT.remove(id);
+			if (kept != null) {
+				live.recharge = kept[0];
+				live.rechargeTotal = kept[1];
+				live.charge = kept[2];
+			}
+			return live;
+		});
 	}
 
 	/** No affinity and no random awakening: the band is the only way in. */
@@ -381,7 +674,13 @@ public final class XenoformPower implements Power {
 	@Override
 	public @Nullable String statusSuffix(Player player) {
 		XenoForm form = XenoformState.form(player);
-		return form == null ? null : "." + form.id;
+		String shell = player.getAttached(XenoformState.SHELL);
+		// (0.18.95) Rivet melded into a shell: that shell's keys
+		// (0.20.9) the Ultimate has keys of its own ("_ultimate"), where the alien has an evolved form
+		if (form != null && XenoformState.ultimate(player) != null) {
+			return "." + form.id + "_ultimate";
+		}
+		return form == null ? null : shell != null ? "." + form.id + "_" + shell : "." + form.id;
 	}
 
 	/** The moves belong to the alien, not to mastery: every key works from the first slam. Mastery stretches the timer. */
@@ -410,24 +709,37 @@ public final class XenoformPower implements Power {
 			revert(player, false, false);
 		}
 		LIVES.remove(player.getUUID());
+		KEPT.remove(player.getUUID());
 		XenoBands.unworn(player);
+		player.removeAttached(XenoformState.RIVAL);
+		player.removeTag(XenoformState.RIVAL_TAG);
 		player.removeAttached(XenoformState.HUD);
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
 		player.removeAttached(XenoformState.ULTIMATE);
+		player.removeAttached(XenoformState.SHELL);
+		player.removeAttached(XenoformState.EYES);
 		player.removeAttached(XenoformState.FLIGHT);
+		player.removeAttached(XenoformState.CEILING);
+		player.removeAttached(XenoformState.CLIMB);
+		player.removeAttached(XenoformState.ACT);
+		player.removeAttached(XenoformState.GRAB);
+		player.removeAttached(XenoformState.SWAT);
+		player.removeAttached(XenoformState.STEP);
+		BandUpgrades.clear(player);
+		player.removeAttached(BandStyle.STYLE);
 	}
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
 		Live live = live(player);
-		return live.form != null && live.form.allowsFloating(player, live);
+		return live.form != null && live.body().allowsFloating(player, live);
 	}
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
 		Live live = live(player);
-		return live.form != null && live.form.skipsMovementCheck(player, live);
+		return live.form != null && live.body().skipsMovementCheck(player, live);
 	}
 
 	@Override
@@ -436,17 +748,24 @@ public final class XenoformPower implements Power {
 		if (!player.isAlive()) {
 			return;
 		}
+		BandUpgrades.tick(player);
 		long now = player.level().getGameTime();
 		if (live.form != null && XenoJam.jammed(player)) {
 			revert(player, false, true);
 		}
 		if (live.form != null) {
 			// in a form: the charge runs down
+			int before = live.ticksLeft;
 			live.ticksLeft--;
+			if (live.ult != null && charged(player) && !player.isCreative()) {
+				// (0.20.9) a reforged band burns faster as the Ultimate (directly, not through drain(), which would re-sync the HUD every tick)
+				live.ticksLeft -= ULT_DRAIN;
+			}
 			if (live.ticksLeft <= BEEP_TICKS && !XenoformState.ending(player)) {
 				player.setAttached(XenoformState.ENDING, true);
 			}
-			if (beepsAt(live.ticksLeft)) {
+			// (0.20.9) the Ultimate's drain steps over 2 ticks at a time: a beep tick it stepped over counts
+			if (beepsAt(live.ticksLeft) || before - live.ticksLeft > 1 && beepsAt(live.ticksLeft + 1)) {
 				float pitch = live.ticksLeft <= BEEP_FAST_TICKS ? 1.8F : 1.4F;
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.6F, pitch);
 				player.level().sendParticles(player, ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFFFF4040), true, false,
@@ -456,12 +775,13 @@ public final class XenoformPower implements Power {
 				revert(player, false, true);
 			} else {
 				live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
-				live.form.tick(player, live);
+				live.body().tick(player, live);
+				syncAct(player, live);
 				if (live.corrupted && live.form != null) {
 					live.form.corrupt(player, live);
 				}
 				if (live.form != null) {
-					int flight = live.form.flight(player, live);
+					int flight = live.body().flight(player, live);
 					if (flight != XenoformState.flight(player)) {
 						if (flight == XenoformState.FLY_NONE) {
 							player.removeAttached(XenoformState.FLIGHT);
@@ -470,11 +790,11 @@ public final class XenoformPower implements Power {
 						}
 					}
 				}
-				if (live.ultimate && live.form != null) {
+				if (live.ultimate && live.ult == null && live.form != null) {
 					live.form.tickUltimate(player, live);
 				}
 				// the wild dial: now and then another alien, whether you like it or not
-				if (live.form != null && wild(player) && --live.wildNext <= 0) {
+				if (live.form != null && live.ult == null && wild(player) && --live.wildNext <= 0) {
 					live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
 					XenoForm next = randomKnown(player, live.form);
 					if (next != null) {
@@ -492,11 +812,15 @@ public final class XenoformPower implements Power {
 		} else {
 			// as yourself the charge refills (not while a knockout has the band locked)
 			int capacity = capacity(player);
+			if (!charged(player)) {
+				// (0.19.85) an unforged band holds no charge, only its recharge: kept full so it's ready once that's done
+				live.charge = capacity;
+			}
 			boolean wasReady = live.recharge <= 0 && charge(player, live) >= SLAM_MIN;
 			if (live.recharge > 0) {
 				live.recharge--;
 			} else if (live.charge < capacity) {
-				live.charge = Math.min(capacity, live.charge + capacity / (float)REFILL_TICKS);
+				live.charge = Math.min(capacity, live.charge + capacity / (float)refillTicks(player));
 			}
 			if (!wasReady && live.recharge <= 0 && live.charge >= SLAM_MIN) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.recharged").withStyle(ChatFormatting.GREEN));
@@ -515,7 +839,7 @@ public final class XenoformPower implements Power {
 			tickAscension(player);
 			XenoVoices.tick(player);
 			// corrupted: now and then the band changes you without being asked
-			if (live.recharge <= 0 && !player.isCreative() && com.jaymospowers.core.Fate.isCorrupted(player)
+			if (live.recharge <= 0 && !player.isCreative() && glitchy(player)
 				&& player.getRandom().nextInt(GLITCH_SELF_TICKS) == 0) {
 				XenoForm any = glitch(player, null);
 				if (any != null && transform(player, any, false)) {
@@ -532,10 +856,17 @@ public final class XenoformPower implements Power {
 			int formTicks = live.form != null ? live.ticksLeft : (int)charge(player, live);
 			int formTotal = live.form != null ? live.total : capacity(player);
 			int wait = live.form != null ? 0 : untilReady(player, live);
-			int waitTotal = live.form != null ? 0 : Math.max(wait, live.recharge > 0 ? live.rechargeTotal + Mth.ceil(SLAM_MIN * REFILL_TICKS / (float)formTotal)
-				: Mth.ceil(SLAM_MIN * REFILL_TICKS / (float)formTotal));
+			int waitTotal = live.form != null ? 0 : Math.max(wait, live.recharge > 0 ? live.rechargeTotal + Mth.ceil(SLAM_MIN * refillTicks(player) / (float)formTotal)
+				: Mth.ceil(SLAM_MIN * refillTicks(player) / (float)formTotal));
+			if (live.form == null && !charged(player)) {
+				// (0.19.85) an unforged band's bar as yourself is its recharge filling back up
+				formTotal = Math.max(1, live.rechargeTotal);
+				formTicks = live.recharge > 0 ? formTotal - live.recharge : formTotal;
+				waitTotal = Math.max(wait, live.rechargeTotal);
+			}
 			XenoformState.Hud hud = new XenoformState.Hud(formTicks, formTotal, wait, waitTotal, live.cooldownUntil.clone(),
-				live.cooldownLength.clone(), live.scanTicks, SCAN_TICKS, live.scanForm == null ? "" : live.scanForm);
+				live.cooldownLength.clone(), live.scanTicks, SCAN_TICKS, live.scanForm == null ? "" : live.scanForm,
+				live.ult != null ? live.baseHealth : 0.0F, live.ult != null && live.form != null ? live.form.health : 0.0F);
 			if (!hud.same(XenoformState.hud(player))) {
 				player.setAttached(XenoformState.HUD, hud);
 			}
@@ -597,8 +928,9 @@ public final class XenoformPower implements Power {
 	/** What the crosshair rests on within {@link #SCAN_REACH}: a creature, or a piece of the Ender Dragon (its body). */
 	private static @Nullable Entity scanTarget(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition();
-		Vec3 end = eye.add(player.getLookAngle().scale(SCAN_REACH));
-		net.minecraft.world.phys.AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(SCAN_REACH)).inflate(1.0);
+		double reach = BandUpgrades.scanReach(player);
+		Vec3 end = eye.add(player.getLookAngle().scale(reach));
+		net.minecraft.world.phys.AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(reach)).inflate(1.0);
 		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player.level(), player, eye, end, box,
 			e -> e != player && e.isAlive() && !e.isSpectator() && (e instanceof LivingEntity || e instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragonPart), 0.3F);
 		if (hit == null) {
@@ -630,9 +962,23 @@ public final class XenoformPower implements Power {
 	 */
 	private static @Nullable XenoForm glitch(ServerPlayer player, @Nullable XenoForm wanted) {
 		List<String> unlocked = XenoformState.band(player).unlocked();
-		if (wanted != null && (!com.jaymospowers.core.Fate.isCorrupted(player) || unlocked.size() < 2
+		if (wanted != null && (!glitchy(player) || unlocked.size() < 2
 			|| player.getRandom().nextFloat() >= GLITCH_WRONG_CHANCE)) {
 			return wanted;
+		}
+		// (0.18.122) now and then the glitch lands on an alien the band never held, and it keeps it (Dud comes only so)
+		if (player.getRandom().nextFloat() < GLITCH_TEACH_CHANCE) {
+			List<XenoForm> unknown = new ArrayList<>();
+			for (XenoForm form : XenoForms.all()) {
+				if ((!form.hidden() || form == XenoForms.DUD) && !unlocked.contains(form.id)) {
+					unknown.add(form);
+				}
+			}
+			if (!unknown.isEmpty()) {
+				XenoForm taught = unknown.get(player.getRandom().nextInt(unknown.size()));
+				unlock(player, taught);
+				return taught;
+			}
 		}
 		List<XenoForm> others = new ArrayList<>();
 		for (String id : unlocked) {
@@ -642,6 +988,11 @@ public final class XenoformPower implements Power {
 			}
 		}
 		return others.isEmpty() ? wanted : others.get(player.getRandom().nextInt(others.size()));
+	}
+
+	/** (0.18.123) Whether the band glitches: corrupted (unless the Steady module holds it), or the Wild module forcing it. */
+	static boolean glitchy(Player player) {
+		return BandUpgrades.wild(player) || com.jaymospowers.core.Fate.isCorrupted(player) && !BandUpgrades.steady(player);
 	}
 
 	/** A glitch always shows: static on the screen, a sour note, and a line saying what the band did. */
@@ -662,14 +1013,19 @@ public final class XenoformPower implements Power {
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		Live live = live(player);
 		if (live.form != null) {
-			if (live.ultimate && key == PowerKey.ABILITY_4 && live.form.ultimateHasMove()) {
+			if (live.ultimate && live.ult == null && key == PowerKey.ABILITY_4 && live.form.ultimateHasMove()) {
 				// (0.18.93) the Ultimate's own move takes B
 				if (down) {
 					live.form.onUltimateAgain(player, live);
 				}
 				return;
 			}
-			live.form.onKey(player, live, key, down);
+			live.body().onKey(player, live, key, down);
+			return;
+		}
+		if (down && key == PowerKey.ABILITY_4 && live.modeDownAt < 0L) {
+			// (0.18.123, patch 7) B as yourself: the band screen
+			BandUpgrades.open(player);
 			return;
 		}
 		if (down) {
@@ -708,11 +1064,16 @@ public final class XenoformPower implements Power {
 					live.slammed = true;
 					revert(player, false, true);
 				}
+			} else if (slam) {
+				// (0.18.119) a tap: the form's own use for Z (Towerback's size)
+				live.body().onModeTap(player, live);
 			}
 			return;
 		}
 		if (slam) {
 			live.slammed = true;
+			// (0.18.122) a star tablet in hand is read first
+			XenoFinds.readTablet(player);
 			XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
 			if (dialled != null) {
 				XenoForm glitched = glitch(player, dialled);
@@ -721,6 +1082,22 @@ public final class XenoformPower implements Power {
 				}
 			}
 		}
+	}
+
+	/**
+	 * (0.19.34) Andy: "right clicking while scrolling the watch should let you put it away". Right click while Z is held:
+	 * the hold is dropped, so letting Z go neither slams, quick-changes nor turns you back. The dial stays where it was turned.
+	 */
+	static void putAway(ServerPlayer player) {
+		Live live = live(player);
+		if (!has(player) || live.modeDownAt < 0L) {
+			return;
+		}
+		live.modeDownAt = -1L;
+		live.slammed = true;
+		live.quickDial = false;
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_CHAIN.value(),
+			net.minecraft.sounds.SoundSource.PLAYERS, 0.5F, 1.4F);
 	}
 
 	/** The scroll wheel while Z is held (from the client): turns the dial, as yourself only. */
@@ -740,36 +1117,80 @@ public final class XenoformPower implements Power {
 	}
 
 	/**
-	 * C, once the power has ascended: as an alien, you become its Ultimate form for the rest of the timer (C again is the
-	 * Ultimate's own move, where it has one). As yourself, nothing: slam first.
+	 * C, once the power has ascended. (0.20.9) As an alien with an evolved form ({@link XenoForm#evolved()}): on a reforged band, a
+	 * press changes you into it ({@link #evolve}); before the reforge it does nothing (the Ultimate only comes on by itself as a
+	 * last stand, {@link #lastStand}). As the Ultimate, a tap is its big move and C held {@link #ULT_DROP_HOLD} drops back to the
+	 * base alien, both on release. A form with no evolved form yet keeps the 0.18.93 buff on the base body. As yourself, nothing:
+	 * slam first.
 	 */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
-		if (!down) {
-			return;
-		}
 		Live live = live(player);
 		XenoForm form = live.form;
-		if (form == null && live.modeDownAt >= 0L) {
-			// (0.18.92) C while Z is held as yourself: the wild dial on or off (letting Z go then doesn't slam)
-			live.slammed = true;
-			toggleWild(player, live);
-			return;
-		}
 		if (form == null) {
+			if (!down) {
+				return;
+			}
+			if (live.modeDownAt >= 0L) {
+				// (0.18.92) C while Z is held as yourself: the wild dial on or off (letting Z go then doesn't slam)
+				live.slammed = true;
+				toggleWild(player, live);
+				return;
+			}
 			hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_human"));
 			return;
 		}
 		if (form.ultimateIsMove()) {
 			// (patch 6) a one-off move (Nadir's Three Worlds Film): no Ultimate form, no flash of its own
-			if (form.onUltimate(player, live)) {
+			if (down && form.onUltimate(player, live)) {
 				Mastery.used(player);
 			}
 			return;
 		}
+		if (live.ult != null) {
+			// (0.20.9) the Ultimate: press notes the time, release decides (a tap is the big move, a hold drops back)
+			long now = player.level().getGameTime();
+			if (down) {
+				live.ultDownAt = now;
+			} else if (live.ultDownAt >= 0L) {
+				long held = now - live.ultDownAt;
+				live.ultDownAt = -1L;
+				if (held >= ULT_DROP_HOLD) {
+					dropUltimate(player, live, DropKind.VOLUNTARY, true);
+				} else {
+					live.ult.onBigMove(player, live);
+				}
+			}
+			return;
+		}
+		if (!down) {
+			return;
+		}
+		if (form.evolved() != null) {
+			if (!charged(player)) {
+				// (0.20.9) an unforged band: C changes nothing, the Ultimate comes by itself as a last stand
+				hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_unforged"));
+				return;
+			}
+			if (live.ultBroken) {
+				hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_broken"));
+				return;
+			}
+			if (!slotReady(live, XenoForm.C, player.level().getGameTime())) {
+				hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_wait"));
+				return;
+			}
+			if (!player.isCreative() && live.ticksLeft < ULT_MIN_LEFT) {
+				hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_not_now"));
+				return;
+			}
+			evolve(player, live, false, 0.0F);
+			return;
+		}
+		// the fallback: the 0.18.93 buff on the base body
 		if (live.ultimate) {
 			// (0.18.93) C again: back to the base alien
-			dropUltimate(player, live, true);
+			dropUltimate(player, live, DropKind.FALLBACK, true);
 			return;
 		}
 		if (!form.onUltimate(player, live)) {
@@ -786,9 +1207,13 @@ public final class XenoformPower implements Power {
 		level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.3);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.9F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.5F, 1.6F);
-		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ORBIT, ULTIMATE_FILM_TICKS, 0.0);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ORBIT, ULT_FILM_TICKS, 0.0);
 		player.sendOverlayMessage(form.ultimateName().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
 		Mastery.used(player);
+	}
+
+	private static boolean slotReady(Live live, int slot, long now) {
+		return live.cooldownUntil[slot] <= now;
 	}
 
 	/**
@@ -821,6 +1246,8 @@ public final class XenoformPower implements Power {
 	public static void dial(ServerPlayer player, int by) {
 		XenoformState.Band band = XenoformState.band(player);
 		if (band.unlocked().size() <= 1) {
+			// (0.19.34) the dial still clicks, but it's stuck: a dull knock
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LEVER_CLICK, SoundSource.PLAYERS, 0.5F, 0.6F);
 			XenoForm only = XenoForms.get(band.dialled());
 			if (only != null) {
 				hint(player, live(player), Component.translatable("message.jaymospowers.xenoform.only_one", only.name()));
@@ -834,7 +1261,13 @@ public final class XenoformPower implements Power {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.dialled", form.name().copy()
 				.withStyle(style -> style.withColor(TextColor.fromRgb(form.color)))));
 		}
-		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7F, 1.6F);
+		// (0.19.34) Andy: "there should be mechanical sound effects for every scroll": a ratchet's click (higher turning on,
+		// lower turning back) over the tick of the bulb's relay, and the chime under them
+		float pitch = by > 0 ? DIAL_CLICK_PITCH : DIAL_CLICK_PITCH * 0.85F;
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LEVER_CLICK, SoundSource.PLAYERS, 0.55F,
+			pitch + player.getRandom().nextFloat() * 0.08F);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.35F, 1.8F);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.25F, 1.6F);
 	}
 
 	private static void hint(ServerPlayer player, Live live, Component text) {
@@ -850,7 +1283,7 @@ public final class XenoformPower implements Power {
 
 	/** Becomes {@code form}. {@code force} skips the recharge (commands). */
 	public static boolean transform(ServerPlayer player, XenoForm form, boolean force) {
-		if (form.hidden() && !force && !XenoVoices.content(player)) {
+		if (form.lent() && !force && !XenoVoices.content(player)) {
 			// the void alien is lent, never owned: the voices must be content first
 			XenoVoices.refuse(player);
 			return false;
@@ -882,6 +1315,17 @@ public final class XenoformPower implements Power {
 		live.humanHealth = player.getHealth();
 		live.total = capacity(player);
 		live.ticksLeft = Math.max(1, player.isCreative() ? live.total : (int)charge);
+		if (!charged(player)) {
+			// (0.19.85) unforged: a random time (a quick change carries what was left of the last one)
+			if (live.carryTicks > 0) {
+				live.total = Math.max(live.carryTicks, live.carryTotal);
+				live.ticksLeft = live.carryTicks;
+			} else {
+				live.total = timer(player);
+				live.ticksLeft = live.total;
+			}
+		}
+		live.carryTicks = live.carryTotal = 0;
 		live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
 		player.setAttached(XenoformState.FORM, form.id);
 		player.removeAttached(XenoformState.ENDING);
@@ -916,14 +1360,21 @@ public final class XenoformPower implements Power {
 		if (form == null) {
 			return;
 		}
-		if (live.ultimate) {
+		XenoUltimate ult = live.ult;
+		if (ult != null) {
+			// (0.20.9) the evolved Ultimate: its own undoing; the base alien's onExit already ran at the change-in, so it is skipped below
+			ult.onExit(player, live);
+			player.removeAttached(XenoformState.ULTIMATE);
+		} else if (live.ultimate) {
 			form.onUltimateEnd(player, live);
 			ultimateBody(player, form, false);
 		}
 		if (fx) {
 			XenoVoices.formEnded(player, form, knockout, live.ticksLeft <= 0, live.hurt);
 		}
-		form.onExit(player, live);
+		if (ult == null) {
+			form.onExit(player, live);
+		}
 		player.removeTag(XenoformState.TAG);
 		player.removeTag(XenoformState.TAG + ":" + form.id);
 		for (Entity passenger : new ArrayList<>(player.getPassengers())) {
@@ -934,6 +1385,9 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
 		player.removeAttached(XenoformState.FLIGHT);
+		player.removeAttached(XenoformState.CEILING);
+		player.removeAttached(XenoformState.CLIMB);
+		player.removeAttached(XenoformState.ACT);
 		player.setHealth(Mth.clamp(live.humanHealth, 1.0F, player.getMaxHealth()));
 		player.resetFallDistance();
 		int left = Math.max(0, live.ticksLeft);
@@ -941,6 +1395,11 @@ public final class XenoformPower implements Power {
 		// what's left of the charge stays in the band; a knockout empties and locks it
 		live.charge = knockout ? 0.0F : left;
 		live.recharge = live.rechargeTotal = knockout ? RECHARGE_KNOCKOUT : 0;
+		if (!charged(player)) {
+			// (0.19.85) unforged: nothing kept, the band recharges (longer after a knockout)
+			live.charge = capacity(player);
+			live.recharge = live.rechargeTotal = Math.max(1, Math.round((knockout ? TIMER_KNOCKOUT : TIMER_RECHARGE) * BandUpgrades.refillFactor(player)));
+		}
 		live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
 		if (player.isCreative()) {
 			live.recharge = live.rechargeTotal = 0;
@@ -965,19 +1424,106 @@ public final class XenoformPower implements Power {
 		live.hudDirty = true;
 	}
 
+	/** (0.20.9) How the Ultimate ends short of the band running out: dropped by hand (hold C), broken (its health gone), or the fallback buff. */
+	private enum DropKind {
+		VOLUNTARY, BROKEN, DEBUG, FALLBACK
+	}
+
 	/**
-	 * (0.18.93) C again as the Ultimate: back to the base alien, its own extras undone, the Ultimate's health gone with it.
-	 * The charge runs on.
+	 * (0.20.9) The change-in: the base alien becomes its {@link XenoForm#evolved()} Ultimate. The caller has checked the entry rules
+	 * (C: reforged, not broken, off cooldown, {@link #ULT_MIN_LEFT} left; the last stand: {@link #lastStand}). The base alien's extras
+	 * are turned off ({@code onExit}, not {@code clearForm}), its health and cooldowns put aside, the Ultimate's body applied with its
+	 * own health bar (what a hand-drop left of it, else full), and the film plays for the caster and the out-of-combat witnesses.
 	 */
-	private static void dropUltimate(ServerPlayer player, Live live, boolean fx) {
+	private static boolean evolve(ServerPlayer player, Live live, boolean lastStand, float baseAtLeast) {
+		XenoForm form = live.form;
+		XenoUltimate ult = form == null ? null : form.evolved();
+		if (form == null || ult == null || live.ult != null) {
+			return false;
+		}
+		form.onExit(player, live);
+		live.baseHealth = Math.max(player.getHealth(), baseAtLeast);
+		live.baseAbsorb = lastStand ? live.absorbBefore : player.getAbsorptionAmount();
+		System.arraycopy(live.cooldownUntil, 0, live.baseCooldownUntil, 0, live.cooldownUntil.length);
+		System.arraycopy(live.cooldownLength, 0, live.baseCooldownLength, 0, live.cooldownLength.length);
+		// (0.20.9) the Ultimate's own cooldowns carry through a drop and a change-in of the same change (all clear the first time)
+		System.arraycopy(live.ultCooldownUntil, 0, live.cooldownUntil, 0, live.cooldownUntil.length);
+		System.arraycopy(live.ultCooldownLength, 0, live.cooldownLength, 0, live.cooldownLength.length);
+		live.ult = ult;
+		live.ultimate = true;
+		live.ultDownAt = -1L;
+		if (lastStand) {
+			live.lastStandSpent = true;
+		}
+		apply(player, ult);
+		float kept = live.ultHealth;
+		player.setHealth(kept > 0.0F ? Math.min(kept, ult.health) : ult.health);
+		player.setAttached(XenoformState.ULTIMATE, true);
+		ult.onEnter(player, live);
+		live.hudDirty = true;
+		ServerLevel level = player.level();
+		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | form.color), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 60, 0.6, 1.0, 0.6, 0.15);
+		level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.3);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.9F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.5F, 1.6F);
+		boolean first = !BandUpgrades.seenUltimate(player, ult.id);
+		if (first) {
+			BandUpgrades.markUltimateSeen(player, ult.id);
+		}
+		com.jaymospowers.core.UltimateFilm.shared(player, com.jaymospowers.core.UltimateFilm.MORPH, first ? ULT_FILM_FIRST : ULT_FILM_TICKS,
+			java.util.List.of(ult.morphParts()), first, ULT_FILM_WITNESS, ULT_FILM_COMBAT);
+		player.sendOverlayMessage(ult.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
+		Mastery.used(player);
+		return true;
+	}
+
+	/**
+	 * (0.20.9) The Ultimate ends and the base alien is back, at the health it held and with its cooldowns put back. A hand-drop keeps
+	 * the Ultimate's health for the next change-in this change, spends the last stand and starts the {@link #ULT_REENTER} wait on C;
+	 * a break locks the Ultimate for the rest of the change. The charge runs on. (The fallback buff just comes off.)
+	 */
+	private static void dropUltimate(ServerPlayer player, Live live, DropKind kind, boolean fx) {
 		XenoForm form = live.form;
 		if (form == null || !live.ultimate) {
 			return;
 		}
-		form.onUltimateEnd(player, live);
-		live.ultimate = false;
-		ultimateBody(player, form, false);
-		live.hudDirty = true;
+		XenoUltimate ult = live.ult;
+		if (ult == null) {
+			form.onUltimateEnd(player, live);
+			live.ultimate = false;
+			ultimateBody(player, form, false);
+			live.hudDirty = true;
+		} else {
+			if (kind == DropKind.VOLUNTARY) {
+				live.ultHealth = player.getHealth();
+				live.lastStandSpent = true;
+			} else if (kind == DropKind.BROKEN) {
+				live.ultHealth = 0.0F;
+				live.ultBroken = true;
+				// (0.20.21) a break fires at zero health: stand up first so onExit sees a living player (Standstill's return)
+				player.setHealth(Mth.clamp(live.baseHealth, 1.0F, player.getMaxHealth()));
+			}
+			ult.onExit(player, live);
+			System.arraycopy(live.cooldownUntil, 0, live.ultCooldownUntil, 0, live.cooldownUntil.length);
+			System.arraycopy(live.cooldownLength, 0, live.ultCooldownLength, 0, live.cooldownLength.length);
+			live.ult = null;
+			live.ultimate = false;
+			live.ultDownAt = -1L;
+			player.removeAttached(XenoformState.ULTIMATE);
+			apply(player, form);
+			player.setHealth(Mth.clamp(live.baseHealth, 1.0F, player.getMaxHealth()));
+			player.setAbsorptionAmount(live.baseAbsorb);
+			System.arraycopy(live.baseCooldownUntil, 0, live.cooldownUntil, 0, live.cooldownUntil.length);
+			System.arraycopy(live.baseCooldownLength, 0, live.cooldownLength, 0, live.cooldownLength.length);
+			if (kind == DropKind.VOLUNTARY) {
+				live.cooldownUntil[XenoForm.C] = player.level().getGameTime() + ULT_REENTER;
+				live.cooldownLength[XenoForm.C] = ULT_REENTER;
+			}
+			form.onEnter(player, live);
+			live.hudDirty = true;
+		}
 		if (fx) {
 			ServerLevel level = player.level();
 			Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
@@ -986,6 +1532,90 @@ public final class XenoformPower implements Power {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 			player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color))));
 		}
+	}
+
+	/**
+	 * (0.20.9) The Ultimate's own health is gone: it breaks. You are the base alien again at its held health, stunned for
+	 * {@link #ULT_BREAK_STUN}, and the Ultimate is locked for the rest of this change. Not a knockout: no corruption, no knockout count.
+	 */
+	private static void breakUltimate(ServerPlayer player, Live live) {
+		dropUltimate(player, live, DropKind.BROKEN, false);
+		player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, ULT_BREAK_STUN, 0, false, false));
+		player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ULT_BREAK_STUN, 2, false, false));
+		ServerLevel level = player.level();
+		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 30, 0.5, 0.8, 0.5, 0.2);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.2F, 0.7F);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.ultimate_broke").withStyle(ChatFormatting.RED));
+	}
+
+	/**
+	 * (0.20.9) The last stand's standing rules: an ascended alien whose Ultimate hasn't been spent or broken this change, hit
+	 * (not by the void or /kill) while fighting a great foe ({@link GreatFoes}). Works on a reforged band too.
+	 */
+	private static boolean lastStandReady(ServerPlayer player, Live live, DamageSource source) {
+		XenoForm form = live.form;
+		return form != null && live.ult == null && form.evolved() != null && !form.ultimateIsMove() && !live.ultBroken && !live.lastStandSpent
+			&& com.jaymospowers.core.Fate.isAscended(player) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && greatFoe(player, source);
+	}
+
+	/** (0.20.9) The last stand: the Ultimate comes on by itself, once per change. Returns whether it did (the caller then cancels the hit). */
+	private static boolean lastStand(ServerPlayer player, Live live, DamageSource source, float baseAtLeast) {
+		return lastStandReady(player, live, source) && evolve(player, live, true, baseAtLeast);
+	}
+
+	/** (0.20.9) A great foe is hitting you, or you fought one in the last {@link #ULT_FILM_COMBAT} ticks. */
+	private static boolean greatFoe(ServerPlayer player, DamageSource source) {
+		Entity attacker = source.getEntity();
+		Entity direct = source.getDirectEntity();
+		if (attacker != null && GreatFoes.is(attacker) || direct != null && GreatFoes.is(direct)) {
+			return true;
+		}
+		LivingEntity hurtBy = player.getLastHurtByMob();
+		if (hurtBy != null && hurtBy.isAlive() && player.tickCount - player.getLastHurtByMobTimestamp() < ULT_FILM_COMBAT && GreatFoes.is(hurtBy)) {
+			return true;
+		}
+		LivingEntity hit = player.getLastHurtMob();
+		return hit != null && hit.isAlive() && player.tickCount - player.getLastHurtMobTimestamp() < ULT_FILM_COMBAT && GreatFoes.is(hit);
+	}
+
+	/**
+	 * (0.20.9) The debug command's hand on the Ultimate: {@code on} (change in now, no entry rules), {@code off} (drop back, no
+	 * locks), {@code break} (break it as if its health ran out). Returns a message for the command to show, or null if it worked.
+	 */
+	static @Nullable String debugUltimate(ServerPlayer player, String mode) {
+		Live live = live(player);
+		if (live.form == null) {
+			return "You are not an alien.";
+		}
+		if (live.form.evolved() == null) {
+			return live.form.id + " has no evolved Ultimate yet (C still gives the old buff).";
+		}
+		switch (mode) {
+			case "on" -> {
+				if (live.ult != null) {
+					return "Already the Ultimate.";
+				}
+				live.ultBroken = false;
+				evolve(player, live, false, 0.0F);
+			}
+			case "off" -> {
+				if (live.ult == null) {
+					return "Not the Ultimate.";
+				}
+				dropUltimate(player, live, DropKind.DEBUG, true);
+			}
+			case "break" -> {
+				if (live.ult == null) {
+					return "Not the Ultimate.";
+				}
+				breakUltimate(player, live);
+			}
+			default -> {
+				return "ultimate <on|off|break>";
+			}
+		}
+		return null;
 	}
 
 	/** (0.18.93) The Ultimate's body on ({@code on}) or off: its health on top (healed in full), fists, size, and the look everyone sees. */
@@ -1057,6 +1687,8 @@ public final class XenoformPower implements Power {
 	static void ready(ServerPlayer player) {
 		Live live = live(player);
 		java.util.Arrays.fill(live.cooldownUntil, 0L);
+		java.util.Arrays.fill(live.baseCooldownUntil, 0L);
+		java.util.Arrays.fill(live.ultCooldownUntil, 0L);
 		live.recharge = 0;
 		live.charge = capacity(player);
 		live.lastSave = 0L;
@@ -1075,7 +1707,27 @@ public final class XenoformPower implements Power {
 			return CHARGE_MAX;
 		}
 		float mastery = Mth.clamp(Mastery.unlocked(player) / (float)Mastery.ALL, 0.0F, 1.0F);
-		return CHARGE_MIN + Math.round((CHARGE_MAX - CHARGE_MIN) * mastery);
+		// (0.18.123) the Cell module and Bigger Charge
+		return Math.round((CHARGE_MIN + (CHARGE_MAX - CHARGE_MIN) * mastery) * BandUpgrades.capacityFactor(player));
+	}
+
+	/**
+	 * (0.19.85) Whether the band holds a charge: once it's reforged at the moon forge ({@link BandForge}), and always in
+	 * creative. Before that a change lasts a random {@link #timer}.
+	 */
+	public static boolean charged(Player player) {
+		return player.isCreative() || BandUpgrades.get(player).reforged();
+	}
+
+	/** (0.19.85) An unforged band's change: a random {@link #TIMER_MIN}-{@link #TIMER_MAX}, lengthened by Bigger Charge. */
+	static int timer(Player player) {
+		int ticks = TIMER_MIN + player.getRandom().nextInt(TIMER_MAX - TIMER_MIN + 1);
+		return Math.max(SLAM_MIN, Math.round(ticks * (1.0F + BandUpgrades.CHARGE_PER_RANK * BandUpgrades.rank(player, BandUpgrades.Skill.CHARGE))));
+	}
+
+	/** (0.18.123) How long an empty band takes to fill as yourself: {@link #REFILL_TICKS}, cut by Faster Recharge. */
+	static int refillTicks(Player player) {
+		return Math.max(1, Math.round(REFILL_TICKS * BandUpgrades.refillFactor(player)));
 	}
 
 	/** The charge as yourself (full the first time it's asked). */
@@ -1092,12 +1744,21 @@ public final class XenoformPower implements Power {
 			return 0;
 		}
 		float charge = charge(player, live);
-		int refill = charge >= SLAM_MIN ? 0 : Mth.ceil((SLAM_MIN - charge) * REFILL_TICKS / (float)capacity(player));
+		int refill = charge >= SLAM_MIN ? 0 : Mth.ceil((SLAM_MIN - charge) * refillTicks(player) / (float)capacity(player));
 		return Math.max(0, live.recharge) + refill;
 	}
 
 	/** Takes {@code amount} off a form's charge (hits, moves). Never in creative. */
 	public static void drain(ServerPlayer player, Live live, int amount) {
+		if (!charged(player)) {
+			// (0.19.85) an unforged band's random timer runs on its own: hits and moves don't shorten it
+			return;
+		}
+		spend(player, live, amount);
+	}
+
+	/** (0.19.85) Takes {@code amount} off a form's time as a move's own price (Fuse's Self-Destruct), charged or not. Never in creative. */
+	public static void spend(ServerPlayer player, Live live, int amount) {
 		if (live.form == null || amount <= 0 || player.isCreative()) {
 			return;
 		}
@@ -1107,13 +1768,18 @@ public final class XenoformPower implements Power {
 
 	/** Quick change: {@link #QUICK_SHARE} of the full charge for another alien, then a moment's dizziness. */
 	private static void quickChange(ServerPlayer player, Live live, XenoForm target) {
+		if (!player.isCreative() && BandUpgrades.rank(player, BandUpgrades.Skill.QUICK) == 0) {
+			// (0.18.123, patch 7) quick change is bought with band points
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.band.need_skill", BandUpgrades.Skill.QUICK.title()).withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		int cost = Math.round(live.total * QUICK_SHARE);
 		if (!player.isCreative() && live.ticksLeft - cost < SLAM_MIN) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.quick_low").withStyle(ChatFormatting.RED));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
 			return;
 		}
-		if (target.hidden() && !XenoVoices.content(player)) {
+		if (target.lent() && !XenoVoices.content(player)) {
 			XenoVoices.refuse(player);
 			return;
 		}
@@ -1126,14 +1792,46 @@ public final class XenoformPower implements Power {
 	/** From one alien straight into another, {@code cost} off the charge, keeping the health you'll turn back at. */
 	private static boolean swap(ServerPlayer player, Live live, XenoForm target, int cost) {
 		float human = live.humanHealth;
+		// (0.20.9) the Ultimate's locks belong to the change, not the alien: they ride through a quick change (as the Ultimate, its health is what's left)
+		boolean wasUlt = live.ult != null;
+		float keptUlt = wasUlt ? player.getHealth() : live.ultHealth;
+		boolean keptBroken = live.ultBroken, keptSpent = live.lastStandSpent || wasUlt;
+		if (live.ult instanceof com.jaymospowers.power.xenoform.forms.ultimate.Tolling) {
+			com.jaymospowers.power.xenoform.forms.ultimate.Tolling.pendingCooldown(player, live); // (0.20.21) a cut-short Tolling's wait is in the snapshot
+		}
+		long[] keptUntil = (wasUlt ? live.cooldownUntil : live.ultCooldownUntil).clone();
+		int[] keptLength = (wasUlt ? live.cooldownLength : live.ultCooldownLength).clone();
+		// (0.20.9) the Ultimates' cooldowns are kept per Ultimate for the whole change, so a round trip through another alien restores them
+		java.util.Map<XenoUltimate, long[]> mapUntil = new java.util.HashMap<>(live.keptUltUntil);
+		java.util.Map<XenoUltimate, int[]> mapLength = new java.util.HashMap<>(live.keptUltLength);
+		XenoUltimate fromUlt = wasUlt ? live.ult : live.form == null ? null : live.form.evolved();
+		if (fromUlt != null) {
+			mapUntil.put(fromUlt, keptUntil);
+			mapLength.put(fromUlt, keptLength);
+		}
 		int left = Math.max(SLAM_MIN, live.ticksLeft - (player.isCreative() ? 0 : cost));
+		int whole = live.total;
 		revert(player, false, false);
 		live.charge = left;
-		live.recharge = 0;
+		live.recharge = live.rechargeTotal = 0;
+		// (0.19.85) unforged: the next alien runs on what's left of this one's timer
+		live.carryTicks = left;
+		live.carryTotal = whole;
 		if (!transform(player, target, true)) {
+			live.carryTicks = live.carryTotal = 0;
 			return false;
 		}
 		live.humanHealth = human;
+		live.ultHealth = keptUlt;
+		live.ultBroken = keptBroken;
+		live.lastStandSpent = keptSpent;
+		live.keptUltUntil.putAll(mapUntil);
+		live.keptUltLength.putAll(mapLength);
+		XenoUltimate toUlt = target.evolved();
+		if (toUlt != null && mapUntil.containsKey(toUlt)) {
+			System.arraycopy(mapUntil.get(toUlt), 0, live.ultCooldownUntil, 0, live.ultCooldownUntil.length);
+			System.arraycopy(mapLength.get(toUlt), 0, live.ultCooldownLength, 0, live.ultCooldownLength.length);
+		}
 		return true;
 	}
 
@@ -1144,7 +1842,7 @@ public final class XenoformPower implements Power {
 	private static boolean save(ServerPlayer player, DamageSource source) {
 		Live live = live(player);
 		long now = player.level().getGameTime();
-		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || XenoJam.jammed(player) || live.recharge > 0
+		if (BandUpgrades.rank(player, BandUpgrades.Skill.SAVE) == 0 || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || XenoJam.jammed(player) || live.recharge > 0
 			|| live.lastSave != 0L && now - live.lastSave < SAVE_COOLDOWN) {
 			return false;
 		}
@@ -1179,7 +1877,7 @@ public final class XenoformPower implements Power {
 			}
 		}
 		XenoForm dialled = XenoForms.get(band.dialled());
-		return dialled != null && !dialled.hidden() ? dialled : randomKnown(player, null);
+		return dialled != null && !dialled.lent() ? dialled : randomKnown(player, null);
 	}
 
 	/** A random alien the band holds (never the hidden one unless the voices are content), other than {@code not}. */
@@ -1187,7 +1885,7 @@ public final class XenoformPower implements Power {
 		List<XenoForm> known = new ArrayList<>();
 		for (String id : XenoformState.band(player).unlocked()) {
 			XenoForm form = XenoForms.get(id);
-			if (form != null && form != not && (!form.hidden() || XenoVoices.content(player))) {
+			if (form != null && form != not && (!form.lent() || XenoVoices.content(player))) {
 				known.add(form);
 			}
 		}
@@ -1210,5 +1908,52 @@ public final class XenoformPower implements Power {
 		player.sendOverlayMessage(Component.translatable(on ? "message.jaymospowers.xenoform.wild_on" : "message.jaymospowers.xenoform.wild_off")
 			.withStyle(on ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.GRAY));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 0.8F, on ? 1.8F : 0.9F);
+	}
+
+	/**
+	 * (0.19.62) What the four-legged aliens' bodies show for everyone ({@link XenoformState#ACT}): Tusk's Charge and
+	 * Gorger's Horn Charge ("charge"), Gorger or Gyre rolled up ("roll"), Gyre's Shell Spin ("spin"), Keen hanging
+	 * from a ceiling ("hang"); (0.19.82) Prism rooted ("root"), Gnasher's Death Roll ("roll"); (0.19.84) the bipeds:
+	 * Bulwark carrying or leaping ("carry", "leap"), Knell burrowing, tolling or sensing, Shade holding a block or
+	 * staring ("hold", "stare"), Thornwild's Roots and Bloom, Lurk faded ("fade"), Rivet pouring or fighting ("pour",
+	 * "fight"), Dud playing dead or rolling ("dead", "roll").
+	 */
+	/** (0.19.84) Whether {@code player} struck a creature, or was struck by one, in the last {@code ticks}. */
+	private static boolean fighting(ServerPlayer player, int ticks) {
+		int hit = player.getLastHurtMobTimestamp();
+		return hit > 0 && player.tickCount - hit < ticks
+			|| player.getLastHurtByMob() != null && player.tickCount - player.getLastHurtByMobTimestamp() < ticks;
+	}
+
+	private static void syncAct(ServerPlayer player, Live live) {
+		String act = null;
+		if (live.form != null) {
+			switch (live.form.id) {
+				case "tusk" -> act = live.rush > 0 ? "charge" : null;
+				case "gorger" -> act = live.rolled ? "roll" : live.horn > 0 ? "charge" : null;
+				case "gyre" -> act = live.spin > 0 ? "spin" : live.rolled ? "roll" : null;
+				// (0.19.75) Keen hanging from a ceiling by its feet
+				case "keen" -> act = live.perched ? "hang" : null;
+				// (0.19.82) Prism rooted in crystal while Reflect is held; Gnasher's death roll
+				case "prism" -> act = live.reflecting ? "root" : null;
+				case "gnasher" -> act = live.rolls > 0 ? "roll" : null;
+				// (0.19.84) the bipeds' stances
+				case "bulwark" -> act = live.grabbed >= 0 ? "carry" : live.leaping ? "leap" : null;
+				case "knell" -> act = live.burrow > 0 ? "burrow" : live.tolls > 0 ? "toll" : live.sense ? "sense" : null;
+				case "shade" -> act = live.lifted != null ? "hold" : live.stalked >= 0 ? "stare" : null;
+				case "thornwild" -> act = live.latchTicks > 0 ? "roots" : live.brood > 0 ? "bloom" : null;
+				case "lurk" -> act = live.faded ? "fade" : null;
+				case "rivet" -> act = live.rolls > 0 ? "pour" : fighting(player, com.jaymospowers.power.xenoform.forms.Rivet.FIGHT_TICKS) ? "fight" : null;
+				case "dud" -> act = live.horn > 0 ? "dead" : live.rolls > 0 ? "roll" : null;
+				default -> act = null;
+			}
+		}
+		if (!java.util.Objects.equals(act, player.getAttached(XenoformState.ACT))) {
+			if (act == null) {
+				player.removeAttached(XenoformState.ACT);
+			} else {
+				player.setAttached(XenoformState.ACT, act);
+			}
+		}
 	}
 }

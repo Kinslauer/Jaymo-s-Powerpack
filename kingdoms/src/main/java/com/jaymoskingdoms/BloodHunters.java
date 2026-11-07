@@ -151,7 +151,7 @@ final class BloodHunters {
 	}
 
 	/** Powers' {@code BloodTrail.follow}, or null without Powers (or before 0.17.182). */
-	private static Object @Nullable [] follow(ServerLevel level, Vec3 from, double range, @Nullable UUID by, long after) {
+	static Object @Nullable [] follow(ServerLevel level, Vec3 from, double range, @Nullable UUID by, long after) {
 		if (!looked) {
 			looked = true;
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {

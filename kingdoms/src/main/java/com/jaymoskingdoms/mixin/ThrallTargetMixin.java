@@ -15,14 +15,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.5.37) A necromancer's thralls never take their own side for a foe, nor their side's folk them ({@link Thralls#refuses}).
  * Every mob's targeting (goals, brains, {@code setTarget}) asks {@code canAttack}. (0.7.88) Nor do the dead risen under a
  * Blood Moon go for a Nightborn vampire ({@link NightbornBlood#spares}). (0.7.186) Nor does a kindhearted or devout mob
- * go for someone who's down ({@link Temperaments#spares}).
+ * go for someone who's down ({@link Temperaments#spares}). (0.7.535) Nor does one of The Truth's folk go for the unarmed
+ * and innocent ({@link com.jaymoskingdoms.Commandments#spares}). Nor anyone at someone hidden inside their werewolf
+ * ({@link com.jaymoskingdoms.Lycans#hidden}). (0.7.584) Nor a captor at a captive keeping their place
+ * ({@link com.jaymoskingdoms.CaptiveConduct#spares}).
  */
 @Mixin(LivingEntity.class)
 public abstract class ThrallTargetMixin {
 	@Inject(method = "canAttack(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$spareOwnSide(LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
 		if (Thralls.refuses((LivingEntity)(Object)this, target) || NightbornBlood.spares((LivingEntity)(Object)this, target)
-			|| (Object)this instanceof Mob mob && Downed.isDowned(target) && Temperaments.spares(mob, target)) {
+			|| (Object)this instanceof Mob mob && Downed.isDowned(target) && Temperaments.spares(mob, target)
+			|| com.jaymoskingdoms.Commandments.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.Lycans.hidden(target)
+			|| com.jaymoskingdoms.CaptiveConduct.spares((LivingEntity)(Object)this, target)) {
 			cir.setReturnValue(false);
 		}
 	}

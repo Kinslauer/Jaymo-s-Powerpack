@@ -39,6 +39,8 @@ import org.jspecify.annotations.Nullable;
  * <p>(0.7.220) Or a <b>Help wanted</b> notice ({@code town|help.<job>|...}): a job the poster's town is short of hands
  * for ({@link Careers#shortOf}). Pulled off, it's the job, with them ({@link Careers#hire}); it stays up if they won't
  * have you.
+ * <p>(0.7.424) Or a piece of the world's news ({@code town|tidings.<id>|<board>|...}, kept by {@link Post#postable}):
+ * read like any other news, and it comes down once the news is old.
  */
 final class TownNotices {
 	// ---- tuning ----
@@ -53,6 +55,8 @@ final class TownNotices {
 	static final float HELP_CHANCE = 0.3F;
 	/** (0.7.385, Off-World Orders) The chance a notice asks for a far world's goods ({@link OffWorldGoods}), once a player has the tier for it. */
 	static final float FAR_CHANCE = 0.25F;
+	/** (0.7.424) The chance a notice is a piece of the world's news, when the board's town has heard some it hasn't up. */
+	static final float TIDINGS_CHANCE = 0.6F;
 	/** (0.7.220) A Help wanted notice's kind. */
 	static final int HELP = -2;
 
@@ -156,6 +160,10 @@ final class TownNotices {
 		if (p[1].startsWith("help.")) {
 			return Careers.Job.of(p[1].substring(5)) == null ? null : new N(p[1], HELP, "", 0, 0, 0);
 		}
+		if (p[1].startsWith("tidings.")) {
+			// (0.7.424) the world's news, while it's kept
+			return Post.posted(p[1].substring(8)) == null ? null : N.news(p[1]);
+		}
 		if (p[1].startsWith("far.")) {
 			// (0.7.385) a warrant for a far world's goods
 			OffWorldGoods.Good g = OffWorldGoods.byKey(p[1].substring(4));
@@ -186,8 +194,17 @@ final class TownNotices {
 
 	// ---- posting -----------------------------------------------------------------------------------------------------------
 
-	/** A notice of {@code poster}'s village type that isn't up already ({@code up}: every key pinned or on its way), or null. */
-	static @Nullable String pick(Villager poster, Set<String> up, long now, RandomSource random) {
+	/**
+	 * A notice of {@code poster}'s village type that isn't up already ({@code up}: every key pinned or on its way), or null;
+	 * (0.7.424) or a piece of news the town of the board at {@code board} has heard.
+	 */
+	static @Nullable String pick(Villager poster, Set<String> up, long now, RandomSource random, long board) {
+		if (random.nextFloat() < TIDINGS_CHANCE && poster.level() instanceof ServerLevel heard) {
+			Post.Posted news = Post.postable(heard.getServer(), board, up);
+			if (news != null) {
+				return "town|tidings." + news.id() + "|" + board + "|" + now;
+			}
+		}
 		String type = poster.getVillagerData().type().unwrapKey().map(k -> k.identifier().getPath()).orElse("plains");
 		List<N> list = NOTICES.getOrDefault(type, NOTICES.get("plains"));
 		if (random.nextFloat() < FAR_CHANCE && poster.level() instanceof ServerLevel far && OffWorldGoods.anyoneAsked(far.getServer())
@@ -227,6 +244,9 @@ final class TownNotices {
 		if (n.help()) {
 			return Component.translatable("quest.jaymoskingdoms.town.help.title", n.job() == null ? Component.empty() : n.job().title());
 		}
+		if (n.key().startsWith("tidings.")) {
+			return Component.translatable("quest.jaymoskingdoms.town.tidings.title");
+		}
 		return Component.translatable("quest.jaymoskingdoms.town." + n.key() + ".title");
 	}
 
@@ -239,10 +259,13 @@ final class TownNotices {
 		}
 		stack.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.town_notice.of", title(n))
 			.withStyle(style -> style.withItalic(false).withColor(ChatFormatting.WHITE)));
+		Post.Posted news = n.key().startsWith("tidings.") ? Post.posted(level.getServer(), n.key().substring(8)) : null;
 		Component words = n.errand() ? Component.translatable("quest.jaymoskingdoms.town.errand_lore")
 			: n.help() ? Component.translatable("quest.jaymoskingdoms.town.help.lore")
 			: Component.translatable("quest.jaymoskingdoms.town." + n.key() + ".text");
-		stack.set(DataComponents.LORE, new ItemLore(List.of(words.copy().withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY)))));
+		List<Component> lines = news != null ? Post.wrap(news.line()) : List.of(words);
+		stack.set(DataComponents.LORE, new ItemLore(lines.stream()
+			.map(line -> (Component) line.copy().withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY))).toList()));
 		CompoundTag tag = new CompoundTag();
 		tag.putString(Bounties.NOTICE_KEY, key);
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));

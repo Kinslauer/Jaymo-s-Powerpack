@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "jaymospowers:block/herbs/wild_garlic_0"
+    },
+    "age=1": {
+      "model": "jaymospowers:block/herbs/wild_garlic_1"
+    },
+    "age=2": {
+      "model": "jaymospowers:block/herbs/wild_garlic_2"
+    },
+    "age=3": {
+      "model": "jaymospowers:block/herbs/wild_garlic_3"
+    }
+  }
+}

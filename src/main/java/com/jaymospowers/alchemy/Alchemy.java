@@ -25,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
  * <li>{@code flux/}: what alchemy leaves behind ({@link Flux}): blight on the land, {@link Corruption} in people.</li>
  * <li>{@code infusion/}: the infusion altar, its pedestals and its instability.</li>
  * <li>{@code gear/}: essence enchanting and the artificer's gear (the rod and its foci, ichor gear...).</li>
+ * <li>{@code brewing/}: grinding, brew grades and the Brewer's Alembic (0.20.13).</li>
  * </ol>
  * Shared here: the essence component and phials, the creative tab, and the init order.
  */
@@ -59,7 +60,11 @@ public final class Alchemy {
 		com.jaymospowers.alchemy.flux.FluxEffects.init();
 		com.jaymospowers.alchemy.infusion.Infusion.init();
 		com.jaymospowers.alchemy.gear.AlchemyGear.init();
+		// (0.20.13) brewing quality: mortar, graded brews, the Brewer's Alembic
+		com.jaymospowers.alchemy.brewing.Brewing.init();
 		com.jaymospowers.alchemy.cauldron.CauldronBrewing.init();
+		// (0.19.24) the bone-knitting elixir and the draught of vigour
+		com.jaymospowers.alchemy.healing.HealingBrews.init();
 		LabEscape.init();
 	}
 

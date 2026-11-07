@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.ldl",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"LdlWornLanternMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

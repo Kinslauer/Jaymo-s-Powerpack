@@ -104,6 +104,10 @@ public final class Doorways {
 
 	/** Opens the shut wooden door or fence gate at {@code at}: true if there was one. */
 	private static boolean open(ServerLevel level, PathfinderMob mob, BlockPos at) {
+		// (0.7.497) a locked door or gate they've no key to stays shut; fence gates skip DoorBlock.setOpen
+		if (Locks.barred(level, at, mob)) {
+			return false;
+		}
 		BlockState s = level.getBlockState(at);
 		if (s.is(BlockTags.MOB_INTERACTABLE_DOORS) && s.getBlock() instanceof DoorBlock door) {
 			if (!door.isOpen(s)) {

@@ -18,6 +18,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
+import com.jaymoskingdoms.money.Money;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
@@ -42,8 +43,8 @@ final class KingdomCommands {
 			.then(Commands.literal("pledge").then(Commands.argument("name", StringArgumentType.word()).executes(KingdomCommands::pledge)))
 			.then(Commands.literal("serve").then(Commands.argument("name", StringArgumentType.word()).executes(KingdomCommands::serve)))
 			.then(Commands.literal("leave").executes(KingdomCommands::leave))
-			.then(Commands.literal("deposit").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::deposit)))
-			.then(Commands.literal("withdraw").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::withdraw)))
+			.then(Commands.literal("deposit").then(Commands.argument("silver", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::deposit)))
+			.then(Commands.literal("withdraw").then(Commands.argument("silver", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::withdraw)))
 			.then(Commands.literal("reputation").executes(KingdomCommands::reputation))
 			// (0.7.184) asking the nearest guard to be taken to their ruler (what a folk guard's audience offers)
 			.then(Commands.literal("audience").executes(c -> {
@@ -76,6 +77,7 @@ final class KingdomCommands {
 				.then(Commands.literal("blossom").executes(BlossomVillages::foundHere)))
 			.then(Crowns.command())
 			.then(Camps.command())
+			.then(WalledTowns.command())
 			.then(FleetCommands.command())
 			.then(Roads.command())
 			.then(RoamingCaravans.command())
@@ -109,7 +111,7 @@ final class KingdomCommands {
 				.then(Commands.argument("name", StringArgumentType.word()).executes(c -> caravan(c, StringArgumentType.getString(c, "name")))))
 			.then(Commands.literal("carriage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::carriage))
 			.then(Commands.literal("treasury").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-				.then(Commands.argument("emeralds", IntegerArgumentType.integer(0, 100000)).executes(KingdomCommands::treasury)))
+				.then(Commands.argument("silver", IntegerArgumentType.integer(0, 100000)).executes(KingdomCommands::treasury)))
 			.then(Commands.literal("vassal").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("fief", StringArgumentType.word()).then(Commands.argument("overlord", StringArgumentType.word())
 					.executes(KingdomCommands::vassal))))
@@ -140,7 +142,7 @@ final class KingdomCommands {
 			: f.overlord() >= 0 ? Component.translatable("message.jaymoskingdoms.state.vassal", nameOf(server, f.overlord()))
 			: Component.translatable("message.jaymoskingdoms.state.standing");
 		return Component.literal(f.name()).withStyle(ChatFormatting.GOLD)
-			.append(Component.translatable("message.jaymoskingdoms.line", Component.translatable(f.type().key()), f.color().getName(),
+			.append(Component.translatable("message.jaymoskingdoms.line", Hordes.kindName(server, f), f.color().getName(),
 				f.seat().toShortString(), state, f.members().size(), f.treasury()).withStyle(ChatFormatting.GRAY));
 	}
 
@@ -256,11 +258,20 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
 			return 0;
 		}
+		if (k.type() == FactionType.BARBARIAN && Hordes.realm(server, k.id())) {
+			// (0.7.491) the horde oath: swearing to a greenskin king (HordeCity)
+			String failure = HordeCity.swear(player, k);
+			if (failure != null) {
+				c.getSource().sendFailure(Component.translatable(failure, k.name()));
+				return 0;
+			}
+			return 1;
+		}
 		if (!k.type().isRealm()) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_pledge", k.name()));
 			return 0;
 		}
-		if (Factions.of(server, player.getUUID()) != null) {
+		if (Factions.of(server, player.getUUID()) != null || HordeCity.oathOf(server, player.getUUID()) != null) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.already_sworn"));
 			return 0;
 		}
@@ -294,6 +305,12 @@ final class KingdomCommands {
 		MinecraftServer server = c.getSource().getServer();
 		Faction k = Factions.of(server, player.getUUID());
 		if (k == null) {
+			// (0.7.491) or a horde oath forsworn
+			Faction horde = HordeCity.forswear(player);
+			if (horde != null) {
+				c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.horde_oath.left", horde.name()), false);
+				return 1;
+			}
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_sworn"));
 			return 0;
 		}
@@ -315,25 +332,17 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_sworn"));
 			return 0;
 		}
-		int want = IntegerArgumentType.getInteger(c, "emeralds");
-		int have = player.getInventory().countItem(Items.EMERALD);
-		if (have < want) {
-			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_enough", have));
+		int want = IntegerArgumentType.getInteger(c, "silver");
+		// (0.7.498) silver is the treasury's unit; coins, coin stacks, purses (worn too) and bundles all count
+		// creative players pay nothing, so they may not deposit (it would mint treasury)
+		if (player.hasInfiniteMaterials() || !Money.charge(player, Money.worth(want))) {
+			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_enough", Money.text(Money.count(player))));
 			return 0;
-		}
-		int take = want;
-		for (int slot = 0; slot < player.getInventory().getContainerSize() && take > 0; slot++) {
-			ItemStack stack = player.getInventory().getItem(slot);
-			if (stack.is(Items.EMERALD)) {
-				int n = Math.min(take, stack.getCount());
-				stack.shrink(n);
-				take -= n;
-			}
 		}
 		Faction paid = Factions.update(server, k.id(), f -> f.withTreasury(f.treasury() + want));
 		Reputation.change(player, paid, want / 4);
 		KingdomEvents.standing(server, player, paid, paid.member(player.getUUID()).standing() + want);
-		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.deposited", want, k.name(), paid.treasury()), false);
+		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.deposited", Money.text(Money.worth(want)), k.name(), paid.treasury()), false);
 		return want;
 	}
 
@@ -346,18 +355,11 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.lords_only"));
 			return 0;
 		}
-		int want = (int)Math.min(IntegerArgumentType.getInteger(c, "emeralds"), k.treasury());
+		int want = (int)Math.min(IntegerArgumentType.getInteger(c, "silver"), k.treasury());
 		Factions.update(server, k.id(), f -> f.withTreasury(f.treasury() - want));
-		int left = want;
-		while (left > 0) {
-			int n = Math.min(64, left);
-			ItemStack stack = new ItemStack(Items.EMERALD, n);
-			if (!player.getInventory().add(stack)) {
-				player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
-			}
-			left -= n;
-		}
-		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.withdrew", want, k.name()), false);
+		// (0.7.498) paid out in silver: into the worn purse if it has room, else the pack, else the ground
+		Money.pay(player, Money.worth(want));
+		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.withdrew", Money.text(Money.worth(want)), k.name()), false);
 		return want;
 	}
 
@@ -424,7 +426,7 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
 			return 0;
 		}
-		int n = IntegerArgumentType.getInteger(c, "emeralds");
+		int n = IntegerArgumentType.getInteger(c, "silver");
 		MinecraftServer server = c.getSource().getServer();
 		Faction after = Factions.update(server, f.id(), x -> x.withTreasury(n));
 		c.getSource().sendSuccess(() -> Component.literal(f.name() + "'s treasury: " + n + " (worth " + Wealth.worth(server, after) + ", "

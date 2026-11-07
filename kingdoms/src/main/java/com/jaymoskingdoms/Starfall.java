@@ -240,7 +240,7 @@ public final class Starfall {
 			return;
 		}
 		// (0.7.419) a road deed: a star came down
-		Deeds.done(level.getServer(), "star.fell");
+		RoadDeeds.doneNear(level, net.minecraft.world.phys.Vec3.atCenterOf(at), RoadDeeds.STAR_SEEN, "star.fell");
 		RandomSource random = level.getRandom();
 		// the bowl, dug out of whatever is there (never bedrock or a chest), then lined with scorched rock
 		List<BlockPos> floor = new ArrayList<>();

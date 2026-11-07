@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.BioBuilt;
 import com.jaymoskingdoms.EarthlingSurge;
+import com.jaymoskingdoms.Faiths;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -30,6 +31,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -84,10 +86,27 @@ import org.jspecify.annotations.Nullable;
  * own marks get the form's plates laid over them ({@code biobuilt_plates_*}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) glossy highlights on the forearms and knuckles over the pink skin (the pink is MCA's skin
  * tint, {@code HeritageVariants#skin}); no glow, no eyes, no particles.</li>
+ * <li><b>Beastfolk, Hollow:</b> (0.7.490, textures from {@code tools/gen_heritage_looks.py}) tawny fur painted on the skin (its ears and tail are
+ * real model parts, {@link BeastParts}), eyes that catch the night; a drained grey-blue pallor with sunken eyes and a cold pale glow in the veins. Every
+ * variant of theirs, like the Sylvan's new fae and elves, draws its own marks over these ({@link VariantLooks}).</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
+ * <p>(0.7.545) Andy: "remove glowing eyes from all heritages/ races considered humans": a human blood
+ * ({@link #human}) keeps its marks, but its eyes never light.
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
+	/**
+	 * (0.7.490) How a heritage's marks are drawn: cutout, but a Wraith's mist is blended (its skin is painted half-clear), so
+	 * it shows as a haze over the body rather than solid patches. The body under it stays as it is. (0.7.490) The Sprite's and
+	 * the Faerie's gossamer wings are model parts now ({@link BeastParts}, blended there), no longer painted on the skin.
+	 */
+	static RenderType marksType(Identifier skin, VariantLooks.@Nullable Style style) {
+		return style != null && TRANSLUCENT_MARKS.contains(style.variant()) ? RenderTypes.entityTranslucent(skin) : RenderTypes.entityCutout(skin);
+	}
+
+	/** (0.7.490) The variants whose marks are painted half-clear (the Wraith's mist): drawn blended. */
+	private static final java.util.Set<HeritageVariants.Variant> TRANSLUCENT_MARKS = java.util.EnumSet.of(HeritageVariants.Variant.WRAITH);
+
 	/** How a heritage's eyes glow. (0.7.106) {@code NIGHT}: in the dark of night only. */
 	enum Eyes { ALWAYS, DAY, NIGHT, STORM, NEVER }
 
@@ -108,7 +127,10 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		// (0.7.262) the Bio-built have three drawings: their forms
 		DIVINE(Heritage.Kind.DIVINE, "divine", 1, 0xFFFFF4D0, Eyes.ALWAYS, 30),
 		BIOBUILT(Heritage.Kind.BIOBUILT, "biobuilt", 3, 0xFFFFB454, Eyes.ALWAYS, 0),
-		RUBBERFOLK(Heritage.Kind.RUBBERFOLK, "rubberfolk", 1, 0, Eyes.NEVER, 0);
+		RUBBERFOLK(Heritage.Kind.RUBBERFOLK, "rubberfolk", 1, 0, Eyes.NEVER, 0),
+		// (0.7.490) the beastfolk's fur, ears and tail (their variants add the rest) and the Hollow's drained pallor and cold eyes
+		BEASTFOLK(Heritage.Kind.BEASTFOLK, "beastfolk", 1, 0xFFFFD27A, Eyes.NIGHT, 0),
+		HOLLOW(Heritage.Kind.HOLLOW, "hollow", 1, 0xFFBEEBDC, Eyes.ALWAYS, 0);
 
 		final Heritage.Kind heritage;
 		final Identifier[] skin, glow;
@@ -191,7 +213,18 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	/** The fin sets, by drawing: a crest, ear fins, long arm fins (every set has arm fins). */
 	static final boolean[] CREST = {true, false, true}, EARS = {false, true, true}, LONG_ARMS = {false, false, true};
 	private static final ModelPart[] HEAD_FINS = new ModelPart[3];
-	private static ModelPart rightArmFin, leftArmFin, rightArmFinLong, leftArmFinLong;
+	private static ModelPart rightArmFin, leftArmFin, rightArmFinLong, leftArmFinLong, rightWeb, leftWeb;
+	/**
+	 * (0.7.443, Havens patch 7b: "more monstrous non-humans") A Tideborn's fins this much bigger than they were, and webbing
+	 * along the outer edge of each hand (arm space: the hand y 9-12).
+	 */
+	static final float FIN_SCALE = 1.45F, WEB_TOP = 8.5F;
+	static final int WEB_HEIGHT = 4;
+	/** (0.7.443) A Stoneborn's heavy stone brow (head space: just over the eyes) and the cracks over the face, neck and chest. */
+	static final Identifier STONE_BROW = JaymosKingdoms.id("textures/entity/heritage/stoneborn_brow.png"),
+		STONE_CRACKS = JaymosKingdoms.id("textures/entity/heritage/stoneborn_cracks.png");
+	static final float BROW_Y = -5.6F, BROW_JUT = 1.4F;
+	private static ModelPart brow;
 
 	/** (0.7.262) A Divine-born's drifting light. */
 	private static final DustParticleOptions LIGHT_MOTE = new DustParticleOptions(0xFFE9A0, 0.6F);
@@ -222,11 +255,15 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		if (kind == null) {
 			// (0.7.214) a Heartlander's, a Warrior-born's or an Emberborn's variant: its own marks and eyes, lit in full
-			state.setData(KEY, new Look(null, 0, style.eyes() != null && eyesLit(style.eyes(), entity), -1, false, style));
+			// ((0.7.545) Andy: no glowing eyes on any blood counted human, the Heartlander's variants included)
+			boolean variantLit = style.eyes() != null && eyesLit(style.eyes(), entity) && !human(Heritage.of((Player)entity));
+			state.setData(KEY, new Look(null, 0, variantLit, -1, false, style));
 			return;
 		}
 		boolean blood = kind == Kind.NIGHTBORN && NightbornBlood.starlit(entity);
-		boolean lit = blood || eyesLit(kind, entity, style);
+		// ((0.7.545) Andy: "remove glowing eyes from all heritages/ races considered humans" (#human); a Nightborn
+		// vampire's red-silver eyes at night are the vampire's, so they stay)
+		boolean lit = blood || eyesLit(kind, entity, style) && !human(kind.heritage);
 		int glow = mood(kind, entity);
 		int flags = entity.getAttachedOrElse(Heritage.LOOK, 0);
 		if (kind == Kind.TIDEBORN) {
@@ -259,6 +296,11 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			return 0;
 		}
 		return look.glow() != 0 ? 2 : 1;
+	}
+
+	/** (0.7.545) The bloods that are human ({@link Faiths#human}: Heartlander, Nightborn, Earthling, Stormborn, Dawnborn): their eyes never glow. */
+	static boolean human(Heritage.@Nullable Kind kind) {
+		return kind != null && Faiths.human(kind);
 	}
 
 	/** Whether {@code kind}'s eyes glow on {@code entity} now (a player's or a villager's). */
@@ -342,7 +384,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		Identifier skin = look.blood() ? BLOOD_SKIN : style != null ? style.skin() : kind.skin[look.variant()];
 		Identifier glow = look.blood() ? BLOOD_GLOW : style != null ? style.glow() : kind.glow[look.variant()];
 		if (!armFinsCovered) {
-			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(skin), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+			collector.order(1).submitModel(marks, state, poseStack, marksType(skin, look.blood() ? null : style), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
 		}
 		if (look.glow() != 0 && !armFinsCovered) {
@@ -351,16 +393,18 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		if (look.eyesLit() && !look.blood() && style != null && style.stockEyes() != null) {
 			// (0.7.214) a variant's own eyes
-			Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), style.eyeColor(), style.stockEyes(), style.eyesPrefix(),
-				style.eyesBySkin());
+			Identifier eyes = VampireLooks.faceEyes(state, model, style.eyeColor(), () -> VampireLooks.glowingEyes(state.skin.body().texturePath(),
+				style.eyeColor(), style.stockEyes(), style.eyesPrefix(), style.eyesBySkin()));
 			collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		} else if (look.eyesLit() && kind != null && kind.stockEyes != null) {
 			Integer vampire = state.getData(VampireLooks.LOOK);
 			boolean redSilver = look.blood() && vampire != null && vampire == 2;
-			Identifier eyes = redSilver ? VampireLooks.glowingEyes(state.skin.body().texturePath(), BLOOD_EYE_COLOR, BLOOD_EYES, "nightborn_blood_eyes/",
-				BLOOD_EYES_BY_SKIN) : VampireLooks.glowingEyes(state.skin.body().texturePath(), kind.eyeColor, kind.stockEyes,
-				kind.name().toLowerCase(java.util.Locale.ROOT) + "_eyes/", kind.eyesBySkin);
+			// (0.7.609) on a player MCA draws, MCA's own eyes lit (VampireLooks#faceEyes)
+			Identifier eyes = VampireLooks.faceEyes(state, model, redSilver ? BLOOD_EYE_COLOR : kind.eyeColor, () -> redSilver
+				? VampireLooks.glowingEyes(state.skin.body().texturePath(), BLOOD_EYE_COLOR, BLOOD_EYES, "nightborn_blood_eyes/", BLOOD_EYES_BY_SKIN)
+				: VampireLooks.glowingEyes(state.skin.body().texturePath(), kind.eyeColor, kind.stockEyes,
+					kind.name().toLowerCase(java.util.Locale.ROOT) + "_eyes/", kind.eyesBySkin));
 			collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		}
@@ -384,8 +428,35 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		if (kind == Kind.TIDEBORN) {
 			finTextures(style);
-			fins(poseStack, collector, lightCoords, marks, look.variant(), look.glow() != 0);
+			// (0.7.486) a sea-blooded look keeps only the fins its own parts leave room for (SeaParts)
+			SeaParts.Fins keep = SeaParts.fins(style);
+			fins(poseStack, collector, lightCoords, marks, look.variant(), look.glow() != 0, headFinsCovered || !keep.head, armFinsCovered || !keep.arms);
 		}
+		if (kind == Kind.STONEBORN) {
+			// (0.7.443) cracks over the face and chest, and the heavy brow
+			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(STONE_CRACKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+				state.outlineColor);
+			if (!headFinsCovered) {
+				brow(poseStack, collector, lightCoords, marks);
+			}
+		}
+	}
+
+	/** (0.7.443) A Stoneborn's heavy brow ridge over the eyes (players and villagers). */
+	static void brow(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, net.minecraft.client.model.HumanoidModel<?> model) {
+		if (!model.head.visible) {
+			return;
+		}
+		if (brow == null) {
+			MeshDefinition mesh = new MeshDefinition();
+			mesh.getRoot().addOrReplaceChild("brow", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -1.0F, -BROW_JUT, 8.0F, 2.0F, 2.0F),
+				PartPose.offset(0.0F, BROW_Y, -4.0F + BROW_JUT * 0.5F));
+			brow = LayerDefinition.create(mesh, 32, 32).bakeRoot();
+		}
+		poseStack.pushPose();
+		model.head.translateAndRotate(poseStack);
+		collector.order(1).submitModelPart(brow, poseStack, RenderTypes.entityCutout(STONE_BROW), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
+		poseStack.popPose();
 	}
 
 	/** (0.7.262) The Bio-built's plates laid over a variant's own marks, by form (the second, the third). */
@@ -476,12 +547,14 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			poseStack.pushPose();
 			model.rightArm.translateAndRotate(poseStack);
 			fin(poseStack, collector, lightCoords, glow, LONG_ARMS[set] ? rightArmFinLong : rightArmFin);
+			fin(poseStack, collector, lightCoords, glow, rightWeb);
 			poseStack.popPose();
 		}
 		if (model.leftArm.visible && !armFinsCovered) {
 			poseStack.pushPose();
 			model.leftArm.translateAndRotate(poseStack);
 			fin(poseStack, collector, lightCoords, glow, LONG_ARMS[set] ? leftArmFinLong : leftArmFin);
+			fin(poseStack, collector, lightCoords, glow, leftWeb);
 			poseStack.popPose();
 		}
 	}
@@ -509,7 +582,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 						PartPose.offsetAndRotation(side * 4.0F, -6.0F, -1.0F, 0.0F, side * EAR_FLARE, 0.0F));
 				}
 			}
-			HEAD_FINS[set] = LayerDefinition.create(mesh, 32, 32).bakeRoot();
+			HEAD_FINS[set] = bigger(LayerDefinition.create(mesh, 32, 32).bakeRoot());
 		}
 		return HEAD_FINS[set];
 	}
@@ -523,13 +596,35 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		leftArmFin = armFin(1, 16, 12, 6, 3.0F);
 		rightArmFinLong = armFin(-1, 24, 0, 8, 1.0F);
 		leftArmFinLong = armFin(1, 24, 0, 8, 1.0F);
+		rightWeb = web(-1);
+		leftWeb = web(1);
 	}
 
 	private static ModelPart armFin(int side, int u, int v, int height, float top) {
 		MeshDefinition mesh = new MeshDefinition();
 		mesh.getRoot().addOrReplaceChild("fin", CubeListBuilder.create().texOffs(u, v).addBox(0.0F, 0.0F, 0.0F, 0.0F, height, 3.0F),
 			PartPose.offsetAndRotation(side * 1.0F, top, 2.0F, 0.0F, side * ARM_FLARE, 0.0F));
+		return bigger(LayerDefinition.create(mesh, 32, 32).bakeRoot());
+	}
+
+	/** (0.7.443) Webbing down the outer edge of a hand, from the fin sheet. */
+	private static ModelPart web(int side) {
+		MeshDefinition mesh = new MeshDefinition();
+		mesh.getRoot().addOrReplaceChild("web", CubeListBuilder.create().texOffs(16, 12).addBox(0.0F, 0.0F, -1.5F, 0.0F, WEB_HEIGHT, 3.0F),
+			PartPose.offsetAndRotation(side * 3.2F, WEB_TOP, 0.0F, 0.0F, 0.0F, side * 0.2F));
 		return LayerDefinition.create(mesh, 32, 32).bakeRoot();
+	}
+
+	/** (0.7.443) Every fin of {@code root} drawn {@link #FIN_SCALE} bigger, each about its own root. */
+	private static ModelPart bigger(ModelPart root) {
+		root.getAllParts().forEach(p -> {
+			if (p != root) {
+				p.xScale = FIN_SCALE;
+				p.yScale = FIN_SCALE;
+				p.zScale = FIN_SCALE;
+			}
+		});
+		return root;
 	}
 
 	/** Every client tick: now and then a particle off a hand (whatever each heritage has). */

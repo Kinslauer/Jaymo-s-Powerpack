@@ -66,15 +66,12 @@ final class SkillCommands {
 			Skills.Progress before = Skills.of(p);
 			Map<String, Integer> xp = new HashMap<>(before.xp());
 			xp.put(pillar.key(), Skills.total(level));
+			xp.put(Skills.PACE_KEY, Skills.PACE);
 			Map<String, Integer> ranks = new HashMap<>(before.ranks());
 			Skills.Progress after = new Skills.Progress(Map.copyOf(xp), Map.copyOf(ranks));
 			if (after.points(pillar) < 0) {
 				// fewer levels than its perks cost: that pillar's perks come back to spend again
-				for (Skills.Perk perk : Skills.Perk.values()) {
-					if (perk.pillar == pillar) {
-						ranks.remove(perk.key());
-					}
-				}
+				Skills.forget(ranks, pillar);
 				after = new Skills.Progress(Map.copyOf(xp), Map.copyOf(ranks));
 			}
 			p.setAttached(Skills.PROGRESS, after);

@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.aether.AetherBlocks;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.aether.WindAether;
 import com.mojang.serialization.Codec;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -34,6 +36,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -51,8 +54,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.illager.Vindicator;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -83,13 +86,20 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>The tournament of the dead</b>, a ring east of the pavilion: ring its bell for {@link #ROUNDS} bouts against spirit
  * fighters, one after the other, each harder and each paying TP. Win all of them and the fortune teller sends you back free.</li>
  * <li><b>The fortune teller</b>, west of the pavilion, who sends you back to where you woke in the world: free after the
- * tournament, for {@link #PRICE_EMERALDS} emeralds in your hand or {@link #PRICE_TP} TP (sneak and right-click), or by the
+ * tournament, for {@link #PRICE_SILVER} silver coins or {@link #PRICE_TP} TP (sneak and right-click), or by the
  * Eternal Dragon's wish ({@link ZFighterWishes#CALL_BACK}). Nobody is stuck: after {@link #STAY_TICKS} the Other World lets go.</li>
  * </ul>
  * (0.17.108, Andy: "you respawn in the afterlife, you can only leave with one of those ways") The dead are held: a death at the
  * site wakes him there again (the same stay, the same way home), and leaving any other way (falling off the island, a pearl,
  * a power, a command) brings him straight back to the hall ({@link #hold}). Only the fortune teller, the wish and the
  * {@link #STAY_TICKS} wait let him go. A living visitor is free to come and go as before.
+ * <p>
+ * (0.19.33) Andy: "when respawning from heaven or leaving the aether you are given the option to start over, or reincarnate,
+ * giving you access to all the different starts you may have unlocked", and "make the judge offer it in his interactions
+ * menu". With Jaymo's Kingdoms, whoever is let go chooses: go back to the life he had, or be born again ({@link #reborn}: the
+ * whole life story told anew, with every start he or his group has opened). The fortune teller asks once he has paid (or won);
+ * paid and not yet gone, he goes free next time ({@link #PAID}). Let go by the wish or the long wait, he is asked as he wakes.
+ * The Judge offers it any time during the stay, on his talk screen.
  */
 public final class ZFighterAfterlife {
 	// ---- tuning ----
@@ -99,6 +109,8 @@ public final class ZFighterAfterlife {
 	static final int FALL_LIMIT = 24;
 	/** How long he stays at most (ticks) before the Other World lets him go. */
 	static final long STAY_TICKS = 36000L;
+	/** (0.18.121) How many chunks round the way home are loaded before he is sent back (0 = that chunk only). */
+	static final int HOME_RADIUS = 1;
 	/**
 	 * The site: the hall's middle in the Aether (blocks). Far from the lowland islands Wind arrives on (it arrives at the x and z it
 	 * rose from, and nobody rises from out here).
@@ -138,8 +150,8 @@ public final class ZFighterAfterlife {
 	static final double SPIRIT_DAMAGE_PER_ROUND = 1.5;
 	/** The gauntlet is called off if the fighter wanders this far from the ring (blocks). */
 	static final double RING_LEASH = 48.0;
-	/** The fortune teller's price. */
-	static final int PRICE_EMERALDS = 24;
+	/** The fortune teller's price in silver coins (0.19.69: was emeralds, 1 silver = 1 old emerald). */
+	static final int PRICE_SILVER = 24;
 	static final int PRICE_TP = 400;
 	/** The effects of waking up again. */
 	static final int WAKE_REGEN = 200;
@@ -173,6 +185,9 @@ public final class ZFighterAfterlife {
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	public static final AttachmentType<Boolean> CHAMPION = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_champion"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
+	/** (0.19.33) He paid the fortune teller this stay but hasn't gone yet (he chose nothing): the next ask is free. Saved. */
+	public static final AttachmentType<Boolean> PAID = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_paid"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	/** On the Aether's level: the Other World's site has been built. Saved. */
 	public static final AttachmentType<Boolean> BUILT = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_built"),
 		builder -> builder.persistent(Codec.BOOL));
@@ -180,6 +195,10 @@ public final class ZFighterAfterlife {
 	/** A death waiting for its respawn (game time of the death), and a move waiting for next tick (the tick to do it on). */
 	private static final Map<UUID, Long> PENDING = new HashMap<>();
 	private static final Map<UUID, Long> ARRIVALS = new HashMap<>();
+	/** (0.19.33) Players let go by the wish or the wait, and the tick to ask them whether to be born again. */
+	private static final Map<UUID, Long> WAKINGS = new HashMap<>();
+	/** (0.19.33) How long after waking in the world (ticks) that is asked: past the dimension's loading screen. */
+	static final long WAKE_ASK_DELAY = 40L;
 
 	/** A tournament in progress: the round, the spirit fighter in the ring, and whether he fell. */
 	private static final class Gauntlet {
@@ -190,6 +209,24 @@ public final class ZFighterAfterlife {
 
 	private static final Map<UUID, Gauntlet> GAUNTLETS = new HashMap<>();
 
+	/**
+	 * (0.18.121, Andy: "crash on startup") A way home being opened: where he goes, and the loading of its chunks. Sending him back
+	 * used to load the spot on the server thread ({@code ServerLevel.getChunk}). Where it had never been generated (a new world,
+	 * a life story's way back) that stalled the whole server for most of a minute on the Deck, and every client timed out. Now
+	 * the chunks are asked for with a ticket of our own and he is sent on the tick they are there ({@link #tick}).
+	 */
+	private record Return(ResourceKey<Level> dimension, BlockPos at, CompletableFuture<?> loading, After after) {
+	}
+
+	/** (0.19.33) What follows the way home: nothing more, he is born again, or he is asked whether to be. */
+	enum After {
+		AS_WAS, REBORN, ASK
+	}
+
+	private static final Map<UUID, Return> RETURNS = new HashMap<>();
+	/** Holds a way home's chunks while they load: no timeout, loads, never saved (so it needs no registry entry). */
+	private static final TicketType HOMEWARD = new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_LOADING);
+
 	private ZFighterAfterlife() {
 	}
 
@@ -197,8 +234,11 @@ public final class ZFighterAfterlife {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				// (0.17.108) and one of the dead dying again wakes among the dead again
-				if (ZFighterRealism.afterlife() && !player.isSpectator() && (among(player) || !inOtherWorld(player)
-					&& Powers.has(player, ZFighterPower.INSTANCE))) {
+				// ((0.20.26) and anyone whose life ended for good, Mortality: they leave only to be born again)
+				// ((0.20.94) no more: Andy wants a life that ended to go black and straight on to the new one, not by the hall,
+				// where the Judge's rebirth put him back in the world still dead, in a wall, to die and come back again)
+				if (ZFighterRealism.afterlife() && !player.isSpectator() && !com.jaymospowers.core.wounds.Mortality.isFinal(player)
+					&& (among(player) || !inOtherWorld(player) && Powers.has(player, ZFighterPower.INSTANCE))) {
 					PENDING.put(player.getUUID(), player.level().getGameTime());
 				}
 				endGauntlet(player);
@@ -211,6 +251,11 @@ public final class ZFighterAfterlife {
 			}
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			// (0.20.94) a life that ended among the dead leaves them for good: no stay to hold it there
+			if (com.jaymospowers.core.wounds.Mortality.isFinal(newPlayer)) {
+				newPlayer.removeAttached(STAY);
+				newPlayer.removeAttached(HOME);
+			}
 			Long died = PENDING.remove(newPlayer.getUUID());
 			if (!alive && died != null && newPlayer.level().getGameTime() - died <= PENDING_TICKS) {
 				ARRIVALS.put(newPlayer.getUUID(), newPlayer.level().getGameTime() + 1L);
@@ -219,7 +264,9 @@ public final class ZFighterAfterlife {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			PENDING.clear();
 			ARRIVALS.clear();
+			WAKINGS.clear();
 			GAUNTLETS.clear();
+			RETURNS.clear();
 		});
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterAfterlife::tick);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
@@ -284,6 +331,26 @@ public final class ZFighterAfterlife {
 
 	private static void tick(MinecraftServer server) {
 		long now = server.overworld().getGameTime();
+		if (!RETURNS.isEmpty()) {
+			for (Iterator<Map.Entry<UUID, Return>> it = RETURNS.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<UUID, Return> entry = it.next();
+				Return ret = entry.getValue();
+				if (!ret.loading().isDone()) {
+					continue;
+				}
+				it.remove();
+				ServerLevel to = server.getLevel(ret.dimension());
+				if (to == null) {
+					continue;
+				}
+				ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+				if (player != null && player.isAlive() && among(player)) {
+					wake(player, to, ret.at(), ret.after());
+				}
+				// (after the move his own tickets hold the chunks; if he left, they're on disk for his next turn)
+				to.getChunkSource().removeTicketWithRadius(HOMEWARD, ChunkPos.containing(ret.at()), HOME_RADIUS);
+			}
+		}
 		if (!ARRIVALS.isEmpty()) {
 			for (Iterator<Map.Entry<UUID, Long>> it = ARRIVALS.entrySet().iterator(); it.hasNext();) {
 				Map.Entry<UUID, Long> entry = it.next();
@@ -297,17 +364,30 @@ public final class ZFighterAfterlife {
 				}
 			}
 		}
+		if (!WAKINGS.isEmpty()) {
+			for (Iterator<Map.Entry<UUID, Long>> it = WAKINGS.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<UUID, Long> entry = it.next();
+				if (entry.getValue() > now) {
+					continue;
+				}
+				it.remove();
+				ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+				if (player != null) {
+					askNow(player);
+				}
+			}
+		}
 		if (now % 20 != 0) {
 			return;
 		}
 		for (ServerPlayer player : new ArrayList<>(server.getPlayerList().getPlayers())) {
 			Long since = player.getAttached(STAY);
-			if (since == null) {
+			if (since == null || RETURNS.containsKey(player.getUUID())) {
 				continue;
 			}
 			if (now - since >= STAY_TICKS) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_let_go").withStyle(ChatFormatting.AQUA));
-				returnHome(player);
+				returnHome(player, After.ASK);
 			} else if (player.isAlive() && !ARRIVALS.containsKey(player.getUUID()) && (!inOtherWorld(player) || player.getY() < FLOOR - FALL_LIMIT)) {
 				hold(server, player);
 			}
@@ -366,6 +446,7 @@ public final class ZFighterAfterlife {
 			player.setAttached(STAY, player.level().getGameTime());
 			player.removeAttached(TAUGHT);
 			player.removeAttached(CHAMPION);
+			player.removeAttached(PAID);
 		}
 		double ax = SITE_X + 0.5;
 		double az = SITE_Z + 5.5;
@@ -392,12 +473,21 @@ public final class ZFighterAfterlife {
 		player.setAttached(STAY, player.level().getGameTime());
 		player.removeAttached(TAUGHT);
 		player.removeAttached(CHAMPION);
+		player.removeAttached(PAID);
 		arrive(server, player);
 		return inOtherWorld(player);
 	}
 
-	/** Back among the living: to where he woke in the world, whole, the halo gone. */
+	/**
+	 * Back among the living: to where he woke in the world, whole, the halo gone. (0.18.121) If the spot isn't loaded he waits
+	 * among the dead while it loads ({@link Return}) and goes on the tick it is there; a second call while it loads does nothing.
+	 */
 	static void returnHome(ServerPlayer player) {
+		returnHome(player, After.AS_WAS);
+	}
+
+	/** (0.19.33) {@code after}: what follows once he wakes in the world (born again, or asked whether to be). */
+	private static void returnHome(ServerPlayer player, After after) {
 		endGauntlet(player);
 		MinecraftServer server = player.level().getServer();
 		Home home = player.getAttached(HOME);
@@ -409,10 +499,28 @@ public final class ZFighterAfterlife {
 		} else {
 			at = home.pos();
 		}
+		ChunkPos chunk = ChunkPos.containing(at);
+		if (to.getChunkSource().hasChunk(chunk.x(), chunk.z())) {
+			wake(player, to, at, after);
+			return;
+		}
+		if (RETURNS.containsKey(player.getUUID())) {
+			return;
+		}
+		CompletableFuture<?> loading = to.getChunkSource().addTicketAndLoadWithRadius(HOMEWARD, chunk, HOME_RADIUS);
+		RETURNS.put(player.getUUID(), new Return(to.dimension(), at, loading, after));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_opening").withStyle(ChatFormatting.AQUA));
+	}
+
+	/** The move itself, once the spot is loaded (the sync load stays for an odd failed load: the old way, a stall at worst). */
+	private static void wake(ServerPlayer player, ServerLevel to, BlockPos at, After after) {
 		to.getChunk(at);
+		// (0.20.94) Andy: "reincarnating just spawned me in a wall": never into anything solid
+		at = com.jaymospowers.core.wounds.Mortality.safe(to, at);
 		player.removeAttached(STAY);
 		player.removeAttached(TAUGHT);
 		player.removeAttached(CHAMPION);
+		player.removeAttached(PAID);
 		player.teleportTo(to, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), player.getYRot(), 0.0F, true);
 		player.setHealth(player.getMaxHealth());
 		player.getFoodData().setFoodLevel(20);
@@ -420,7 +528,103 @@ public final class ZFighterAfterlife {
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, WAKE_RESISTANCE, 1));
 		to.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 40, 0.4, 0.8, 0.4, 0.05);
 		to.playSound(null, at, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.4F);
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_back").withStyle(ChatFormatting.GREEN));
+		// (0.19.33) born again: Kingdoms tells the life story anew (back as he was if it can't)
+		if (com.jaymospowers.core.wounds.Mortality.isFinal(player)) {
+			// ((0.20.26) the end of a life: Mortality tells the story anew once he stands in the world)
+			return;
+		}
+		if (after != After.REBORN || !ZFighterKingdoms.reincarnate(player)) {
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_back").withStyle(ChatFormatting.GREEN));
+		}
+		if (after == After.ASK) {
+			askOnWaking(player);
+		}
+	}
+
+	// ---------------------------------------------------------------- born again (0.19.33)
+
+	/** Whether {@code player} may be asked to be born again: Kingdoms' life story, and the talk screen, on his side. */
+	static boolean mayBeReborn(ServerPlayer player) {
+		// ((0.20.26) one whose life ended isn't asked: they will be, Mortality.endLife, the moment they're let go)
+		return ZFighterNpcs.canAsk() && ZFighterKingdoms.canReincarnate(player) && !com.jaymospowers.core.wounds.Mortality.isFinal(player);
+	}
+
+	/**
+	 * (0.20.26) Born again through Kingdoms' life story, told anew with every start unlocked (for Mortality's end of a life).
+	 * False if it can't be (no Kingdoms, or its story screen).
+	 */
+	public static boolean bornAgain(ServerPlayer player) {
+		return ZFighterKingdoms.reincarnate(player);
+	}
+
+	/** (0.20.94) Whether {@code player} is still making their character (Kingdoms' story, MCA's creator, heritage, class). */
+	public static boolean making(ServerPlayer player) {
+		return ZFighterKingdoms.making(player);
+	}
+
+	/** (0.20.83) Born again from nothing (Mortality's end of a life): MCA's creator too, then the whole life story. */
+	public static boolean bornAnew(ServerPlayer player) {
+		return ZFighterKingdoms.reincarnateAnew(player);
+	}
+
+	/**
+	 * He chose to be born again: among the dead, he is let go and, once he wakes in the world, Kingdoms tells his life story
+	 * anew ({@link #wake}); already back among the living, it is told now.
+	 */
+	static void reborn(ServerPlayer player) {
+		if (among(player)) {
+			returnHome(player, After.REBORN);
+		} else if (!ZFighterKingdoms.reincarnate(player)) {
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_back").withStyle(ChatFormatting.GREEN));
+		}
+	}
+
+	/**
+	 * He is free to go (paid, or the tournament won): {@code by} (the fortune teller) asks whether he goes back as he was or is
+	 * born again, after {@code intro} (what she said first, or null). Without the choice he simply goes back. Shutting the
+	 * screen keeps him here, free to go the next time he asks.
+	 */
+	private static void leave(ServerPlayer player, @org.jspecify.annotations.Nullable LivingEntity by, @org.jspecify.annotations.Nullable Component intro) {
+		if (by == null || !mayBeReborn(player)) {
+			if (intro != null) {
+				player.sendSystemMessage(intro);
+			}
+			returnHome(player);
+			return;
+		}
+		player.setAttached(PAID, true);
+		Component ask = Component.translatable("talk.jaymospowers.afterlife.leave");
+		ZFighterNpcs.ask(player, by, intro == null ? ask : Component.empty().append(intro).append("\n").append(ask), List.of(
+			ZFighterNpcs.Option.of("talk.jaymospowers.afterlife.leave_same", true, () -> {
+				if (among(player)) {
+					returnHome(player);
+				}
+			}),
+			ZFighterNpcs.Option.of("talk.jaymospowers.afterlife.leave_reborn", true, () -> {
+				if (among(player)) {
+					reborn(player);
+				}
+			})));
+	}
+
+	/**
+	 * Let go by the wish or the long wait, back in the world: he is asked, a little after waking ({@link #WAKE_ASK_DELAY},
+	 * past the dimension's loading screen), whether to be born again.
+	 */
+	private static void askOnWaking(ServerPlayer player) {
+		if (mayBeReborn(player)) {
+			WAKINGS.put(player.getUUID(), player.level().getServer().overworld().getGameTime() + WAKE_ASK_DELAY);
+		}
+	}
+
+	private static void askNow(ServerPlayer player) {
+		if (!mayBeReborn(player) || !player.isAlive() || among(player)) {
+			return;
+		}
+		ZFighterNpcs.ask(player, player, Component.translatable("talk.jaymospowers.afterlife.waking"), List.of(
+			ZFighterNpcs.Option.of("talk.jaymospowers.afterlife.waking_same", true, () -> {
+			}),
+			ZFighterNpcs.Option.of("talk.jaymospowers.afterlife.leave_reborn", true, () -> reborn(player))));
 	}
 
 	/** The Eternal Dragon's wish ({@link ZFighterWishes#CALL_BACK}): everyone among the dead is called back. False if none was. */
@@ -430,7 +634,7 @@ public final class ZFighterAfterlife {
 			if (among(player)) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_called", wisher.getDisplayName())
 					.withStyle(ChatFormatting.GREEN));
-				returnHome(player);
+				returnHome(player, After.ASK);
 				any = true;
 			}
 		}
@@ -480,39 +684,36 @@ public final class ZFighterAfterlife {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.0F);
 	}
 
-	/** The fortune teller: free after the tournament, or sneak and right-click to pay (emeralds in hand first, else TP). */
+	/** The fortune teller: free after the tournament, or sneak and right-click to pay (silver coins first, else TP). */
 	private static void tell(ServerPlayer player, net.minecraft.world.entity.Entity teller) {
 		if (!among(player)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_alive", teller.getDisplayName())
 				.withStyle(ChatFormatting.LIGHT_PURPLE));
 			return;
 		}
-		if (Boolean.TRUE.equals(player.getAttached(CHAMPION))) {
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_champion", teller.getDisplayName())
-				.withStyle(ChatFormatting.LIGHT_PURPLE));
-			returnHome(player);
+		if (Boolean.TRUE.equals(player.getAttached(CHAMPION)) || Boolean.TRUE.equals(player.getAttached(PAID))) {
+			boolean champion = Boolean.TRUE.equals(player.getAttached(CHAMPION));
+			leave(player, teller instanceof LivingEntity l ? l : null, Component.translatable(champion ? "message.jaymospowers.zfighter_afterlife_teller_champion"
+				: "message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName()).withStyle(ChatFormatting.LIGHT_PURPLE));
 			return;
 		}
 		if (!player.isShiftKeyDown()) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_offer", teller.getDisplayName(),
-				PRICE_EMERALDS, PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
+				KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
 			return;
 		}
-		ItemStack held = player.getMainHandItem();
-		if (held.is(Items.EMERALD) && held.getCount() >= PRICE_EMERALDS) {
-			held.shrink(PRICE_EMERALDS);
-		} else {
+		// (0.20.0) the silver comes from anywhere you carry it (coins, purses, bundles), no longer only the held stack
+		if (!KingdomsMoney.charge(player, KingdomsMoney.worth(PRICE_SILVER))) {
 			ZFighterTraining.Data data = ZFighterTraining.of(player);
 			if (data.tp() < PRICE_TP) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_poor", teller.getDisplayName(),
-					PRICE_EMERALDS, PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
+					KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
 				return;
 			}
 			player.setAttached(ZFighterTraining.DATA, data.withTp(data.tp() - PRICE_TP));
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName())
-			.withStyle(ChatFormatting.LIGHT_PURPLE));
-		returnHome(player);
+		leave(player, teller instanceof LivingEntity l ? l : null, Component.translatable("message.jaymospowers.zfighter_afterlife_teller_paid",
+			teller.getDisplayName()).withStyle(ChatFormatting.LIGHT_PURPLE));
 	}
 
 	// ---------------------------------------------------------------- talking (0.17.146)
@@ -525,7 +726,14 @@ public final class ZFighterAfterlife {
 				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ask", true, () -> ZFighterNpcs.reply(player, npc, () -> judge(player, npc), back)),
 				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ring", true, () -> ZFighterNpcs.ask(player, npc,
 					Component.translatable(Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.judge.ring_won" : "talk.jaymospowers.judge.ring_how", ROUNDS),
-					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))))));
+					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))),
+				// (0.19.33) Andy: "make the judge offer it in his interactions menu": one of the dead may ask to be born again
+				// (0.20.78) Andy: "you should always be able to reset your character at the Judge, the option shouldnt be greyed":
+				// never greyed, for the dead and for a living visitor alike (born again on the spot)
+				ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn", true, () -> ZFighterNpcs.ask(player, npc,
+					Component.translatable("talk.jaymospowers.judge.reborn_ask"), List.of(
+						ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn_yes", true, () -> reborn(player)),
+						ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))))));
 			case MASTER_TAG -> {
 				boolean taught = Boolean.TRUE.equals(player.getAttached(TAUGHT)) && !player.isCreative();
 				ZFighterNpcs.ask(player, npc, Component.translatable(taught ? "talk.jaymospowers.road_master.greet_taught" : "talk.jaymospowers.road_master.greet"),
@@ -533,38 +741,37 @@ public final class ZFighterAfterlife {
 						() -> ZFighterNpcs.reply(player, npc, () -> teach(player, npc, true), back))));
 			}
 			default -> {
-				if (!among(player) || Boolean.TRUE.equals(player.getAttached(CHAMPION))) {
-					ZFighterNpcs.ask(player, npc, Component.translatable(among(player) ? "talk.jaymospowers.teller.champion" : "talk.jaymospowers.teller.alive"),
-						among(player) ? List.of(ZFighterNpcs.Option.of("talk.jaymospowers.teller.go", true, () -> ZFighterNpcs.reply(player, npc, () -> tell(player, npc), back)))
-							: List.of());
+				boolean free = Boolean.TRUE.equals(player.getAttached(CHAMPION)) || Boolean.TRUE.equals(player.getAttached(PAID));
+				if (!among(player) || free) {
+					// (0.19.33) free to go: she asks how (as he was, or born again), unless only the old way is there
+					ZFighterNpcs.ask(player, npc, Component.translatable(!among(player) ? "talk.jaymospowers.teller.alive"
+						: Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.teller.champion" : "talk.jaymospowers.teller.paid"),
+						among(player) ? List.of(ZFighterNpcs.Option.of("talk.jaymospowers.teller.go", true, () -> {
+							if (mayBeReborn(player)) {
+								leave(player, npc, null);
+							} else {
+								ZFighterNpcs.reply(player, npc, () -> tell(player, npc), back);
+							}
+						})) : List.of());
 					return;
 				}
-				boolean emeralds = count(player, Items.EMERALD) >= PRICE_EMERALDS;
+				boolean emeralds = KingdomsMoney.canPay(player, KingdomsMoney.worth(PRICE_SILVER));
 				boolean tp = ZFighterTraining.of(player).tp() >= PRICE_TP;
-				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", PRICE_EMERALDS, PRICE_TP), List.of(
-					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> ZFighterNpcs.reply(player, npc, () -> pay(player, npc, true), back), PRICE_EMERALDS),
-					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_tp", tp, () -> ZFighterNpcs.reply(player, npc, () -> pay(player, npc, false), back), PRICE_TP)));
+				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP), List.of(
+					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> paid(player, npc, true, back), KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER))),
+					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_tp", tp, () -> paid(player, npc, false, back), PRICE_TP)));
 			}
 		}
 	}
 
-	/** (0.17.146) Paid from the talk screen: {@link #PRICE_EMERALDS} emeralds from anywhere in the pack, or {@link #PRICE_TP} TP. */
+	/** (0.17.146) Paid from the talk screen: {@link #PRICE_SILVER} silver from anywhere you carry it, or {@link #PRICE_TP} TP. */
 	private static void pay(ServerPlayer player, LivingEntity teller, boolean emeralds) {
 		if (!among(player)) {
 			return;
 		}
 		if (emeralds) {
-			if (count(player, Items.EMERALD) < PRICE_EMERALDS) {
+			if (!KingdomsMoney.charge(player, KingdomsMoney.worth(PRICE_SILVER))) {
 				return;
-			}
-			int left = PRICE_EMERALDS;
-			for (int i = 0; i < player.getInventory().getContainerSize() && left > 0; i++) {
-				ItemStack stack = player.getInventory().getItem(i);
-				if (stack.is(Items.EMERALD)) {
-					int take = Math.min(left, stack.getCount());
-					stack.shrink(take);
-					left -= take;
-				}
 			}
 		} else {
 			ZFighterTraining.Data data = ZFighterTraining.of(player);
@@ -573,20 +780,20 @@ public final class ZFighterAfterlife {
 			}
 			player.setAttached(ZFighterTraining.DATA, data.withTp(data.tp() - PRICE_TP));
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName())
+		leave(player, teller, Component.translatable("message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName())
 			.withStyle(ChatFormatting.LIGHT_PURPLE));
-		returnHome(player);
 	}
 
-	private static int count(ServerPlayer player, net.minecraft.world.item.Item item) {
-		int n = 0;
-		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-			ItemStack stack = player.getInventory().getItem(i);
-			if (stack.is(item)) {
-				n += stack.getCount();
-			}
+	/**
+	 * (0.19.33) Paid from her talk screen: with the choice there she asks it herself ({@link #leave}); without it, as before,
+	 * what came of it is her reply.
+	 */
+	private static void paid(ServerPlayer player, LivingEntity teller, boolean emeralds, Runnable back) {
+		if (mayBeReborn(player)) {
+			pay(player, teller, emeralds);
+		} else {
+			ZFighterNpcs.reply(player, teller, () -> pay(player, teller, emeralds), back);
 		}
-		return n;
 	}
 
 	// ---------------------------------------------------------------- the tournament of the dead
@@ -732,6 +939,12 @@ public final class ZFighterAfterlife {
 	private static void ensureNpcs(ServerLevel world) {
 		for (Npc npc : npcs()) {
 			BlockPos spot = BlockPos.containing(npc.at());
+			// (0.20.94) Andy: "the judges keep multiplying": a chunk's blocks load before its creatures, so one looked for too
+			// soon was never there and another was made each time someone arrived. Only once its creatures are in; and any
+			// second one is sent away.
+			if (!world.areEntitiesLoaded(ChunkPos.containing(spot).pack())) {
+				continue;
+			}
 			boolean near = false;
 			for (ServerPlayer player : world.players()) {
 				if (player.distanceToSqr(npc.at()) <= NPC_NEAR * NPC_NEAR) {
@@ -743,8 +956,13 @@ public final class ZFighterAfterlife {
 				continue;
 			}
 			AABB around = new AABB(spot).inflate(6.0, 4.0, 6.0);
-			if (world.getEntitiesOfClass(LivingEntity.class, around, e -> e.entityTags().contains(npc.tag())).isEmpty()) {
+			List<LivingEntity> there = world.getEntitiesOfClass(LivingEntity.class, around.inflate(10.0, 4.0, 10.0),
+				e -> e.entityTags().contains(npc.tag()));
+			if (there.isEmpty()) {
 				ZFighterSites.spawnNpc(world, npc.at(), npc.tag(), npc.name(), new MerchantOffers());
+			}
+			for (int i = 1; i < there.size(); i++) {
+				there.get(i).discard();
 			}
 		}
 	}

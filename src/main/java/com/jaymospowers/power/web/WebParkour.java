@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Parkour for web slingers (our own take on ParCool's moves, which is Forge-only):
  * <ul>
- * <li><b>Vault:</b> sprint at a one-block obstacle and you plant a hand on it and swing your legs over.</li>
+ * <li><b>Vault:</b> faster than a sprint (see {@link #VAULT_MIN_SPEED}), run at a one-block obstacle and you plant a hand on it and swing your legs over.</li>
  * <li><b>Wall cling:</b> in the air against a wall in front of you, hold Sneak to hang on it; A/D shimmy along, W climbs
  * (and pulls you over the top), let go of Sneak to drop. You hold on longer with mastery, then start to slip. It takes
  * webbed fists to start one (X; Sneak + X when bonded); in the symbiote's suit its tendrils hold you instead, and never slip.</li>
@@ -64,6 +64,13 @@ public final class WebParkour {
 	public static final double WALL_JUMP_KEEP = 0.5;
 	/** A vault: up, and at least this fast forward (blocks/tick). */
 	public static final double VAULT_UP = 0.5, VAULT_FORWARD = 0.42;
+	/**
+	 * A vault only comes out of real speed: the fastest you moved across the ground (blocks/tick) in the last
+	 * {@link #VAULT_SPEED_TICKS} ticks must reach this. A plain sprint is about 0.28, so this is ~15% over it: a
+	 * sprint-jump landing, Speed, a slide or a swing's run-out will do, a flat sprint won't (you just bump or step up).
+	 */
+	public static final double VAULT_MIN_SPEED = 0.32;
+	public static final int VAULT_SPEED_TICKS = 5;
 	/** A slide: the push at the start (times your speed, at least the minimum), how much speed is left each tick, how long at most, and the slowest it keeps going. */
 	public static final double SLIDE_BOOST = 1.5, SLIDE_MIN = 0.5, SLIDE_KEEP = 0.94, SLIDE_STOP = 0.14;
 	public static final int SLIDE_TICKS = 24;

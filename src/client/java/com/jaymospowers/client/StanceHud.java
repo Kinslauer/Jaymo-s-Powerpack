@@ -81,7 +81,13 @@ final class StanceHud {
 			return;
 		}
 		int size = 18 * SCALE;
-		int x = MARGIN + 2, y = graphics.guiHeight() - MARGIN - 2 - size;
+		// (HUD rework) the body row of the left dock, beside the hotbar (it sat in the corner, under chat and the voice-chat icon)
+		int[] slot = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.DOCK_LEFT, "jaymospowers:stance", 30,
+			size + 12, size + 4);
+		if (slot == null) {
+			return;
+		}
+		int x = slot[0] + 2, y = slot[1] + 2;
 		graphics.fill(x - 2, y - 2, x + size + 10, y + size + 2, fade(BACK_COLOR));
 		float at = Mth.clamp(Mth.lerp(delta.getGameTimeDeltaPartialTick(false), markerLast, marker), Stance.PRONE, Stance.STAND);
 		// the figure part way between the two stances the marker is between

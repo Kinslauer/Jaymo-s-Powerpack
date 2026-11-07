@@ -1,6 +1,7 @@
 package com.jaymospowers.rig;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.power.chrono.future.Future;
 import com.jaymospowers.power.chrono.future.FutureAndroid;
 import com.jaymospowers.power.chrono.future.FutureMachines;
@@ -79,6 +80,10 @@ public final class RigWrecks {
 			return;
 		}
 		ResourceKey<Level> dimension = level.dimension();
+		if (dimension == Level.OVERWORLD && Stacked.joined(level.getServer(), Level.NETHER)) {
+			// (0.20.30) a One Dimension world: the Overworld's chunks hold the stacked Nether's band, where the wrecks go
+			dimension = Level.NETHER;
+		}
 		ChunkPos pos = chunk.getPos();
 		int chance;
 		if (dimension == Future.FUTURE) {
@@ -120,20 +125,19 @@ public final class RigWrecks {
 		for (int i = 0; i < PER_TICK && !QUEUE.isEmpty(); i++) {
 			Pending pending = QUEUE.poll();
 			QUEUED.remove(pending);
-			ServerLevel level = server.getLevel(pending.dimension());
+			ServerLevel level = Stacked.level(server, pending.dimension());
 			if (level == null || !(level.getChunkSource().getChunkNow(pending.pos().x(), pending.pos().z()) instanceof LevelChunk chunk)
 				|| Boolean.TRUE.equals(chunk.getAttached(CHECKED))) {
 				continue;
 			}
 			chunk.setAttached(CHECKED, true);
 			chunk.markUnsaved();
-			place(level, pending.pos());
+			place(level, pending.pos(), pending.dimension());
 		}
 	}
 
-	private static void place(ServerLevel level, ChunkPos pos) {
+	private static void place(ServerLevel level, ChunkPos pos, ResourceKey<Level> dimension) {
 		RandomSource random = RandomSource.create(pos.pack() * 31L + 0x816L);
-		ResourceKey<Level> dimension = level.dimension();
 		for (int attempt = 0; attempt < 6; attempt++) {
 			int x = pos.getMinBlockX() + 2 + random.nextInt(12);
 			int z = pos.getMinBlockZ() + 2 + random.nextInt(12);
@@ -161,8 +165,9 @@ public final class RigWrecks {
 	}
 
 	private static @Nullable BlockPos netherFloor(ServerLevel level, int x, int z, RandomSource random) {
-		int start = NETHER_LOW + random.nextInt(NETHER_HIGH - NETHER_LOW);
-		for (int y = start; y < NETHER_HIGH; y++) {
+		int shift = level.dimension() == Level.NETHER ? 0 : Stacked.shift(level.getServer(), Level.NETHER);
+		int start = NETHER_LOW + shift + random.nextInt(NETHER_HIGH - NETHER_LOW);
+		for (int y = start; y < NETHER_HIGH + shift; y++) {
 			BlockPos at = new BlockPos(x, y, z);
 			if (fits(level, at)) {
 				return at;

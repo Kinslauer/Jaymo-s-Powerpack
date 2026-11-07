@@ -223,12 +223,26 @@ public final class Kitchen {
 	 * and it keeps cooking on the oven (bubbling, sizzling, baking) for its own time first, see HobQueue and
 	 * {@link Dish#hobTicks()}.
 	 */
+	/** {@code jaymospowers:pack/<name>} done for {@code player}; nothing without Powers' advancements. */
+	private static void advance(ServerPlayer player, String name) {
+		net.minecraft.advancements.AdvancementHolder holder = player.level().getServer().getAdvancements()
+			.get(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "pack/" + name));
+		if (holder != null && !player.getAdvancements().getOrStartProgress(holder).isDone()) {
+			player.getAdvancements().award(holder, "done");
+		}
+	}
+
 	static void award(ServerPlayer player, Dish dish, BlockPos pos, Quality quality) {
 		if (ExplodingPot.blowsUp(player, pos, quality)) {
 			return;
 		}
 		ItemStack stack = new ItemStack(ModItems.dish(dish), dish.batch());
 		quality.apply(stack, dish);
+		// (0.5.71) the "Jaymo's Powerpack" advancement tab (Powers' data): a dish cooked, and a perfect one
+		advance(player, "cooked");
+		if (quality == Quality.PERFECT) {
+			advance(player, "perfect_dish");
+		}
 		ServerLevel level = player.level();
 		if (level.getBlockState(pos).getBlock() instanceof OvenBlock && level.getBlockEntity(pos) instanceof OvenBlockEntity oven) {
 			int ticks = dish.hobTicks();

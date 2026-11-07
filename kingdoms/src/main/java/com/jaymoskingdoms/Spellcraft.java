@@ -140,6 +140,8 @@ public final class Spellcraft {
 		Restoration.register();
 		Necromancy.register();
 		Hemomancy.register();
+		// (0.7.570) every other element absorbed and thrown as the blood is
+		Absorption.register();
 		// the Mage's staff (0.7.212: and an attuned caster's)
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
@@ -211,6 +213,11 @@ public final class Spellcraft {
 		if (!staffCaster(player) || c.spells().contains(spell)) {
 			return false;
 		}
+		if (!Knowledge.has(player, Knowledge.HIGHER_ARTS)) {
+			// (0.7.492) learning a spell for good is a higher art (Knowledge 4): until then the scroll is read once, as anyone's
+			Knowledge.refuse(player, Knowledge.HIGHER_ARTS);
+			return false;
+		}
 		List<String> spells = new ArrayList<>(c.spells());
 		spells.add(spell);
 		player.setAttached(Classes.CLASS, new Classes.Chosen(c.cls(), c.option(), List.copyOf(spells), c.selected()));
@@ -268,6 +275,14 @@ public final class Spellcraft {
 		}
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
+		if (!mage && "wind".equals(PowersCompat.power(player))) {
+			// (0.7.477) a Wind Controller's magic only ever goes out through the wind: a gust carries the spell off the staff
+			net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F);
+			for (int i = 1; i <= 4; i++) {
+				level.sendParticles(ParticleTypes.GUST, player.getX() + look.x * i, player.getEyeY() + look.y * i, player.getZ() + look.z * i, 1, 0.1, 0.1, 0.1, 0.0);
+			}
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 0.5F, 1.3F);
+		}
 		if (mage && player.getRandom().nextInt(MAGE_ECHO_ONE_IN) == 0) {
 			// the spell echoes: no cooldown this time
 			level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
@@ -346,7 +361,7 @@ public final class Spellcraft {
 		return stack.is(ItemTags.SWORDS) || stack.is(ClassPerks.LIGHT_BLADES) || stack.is(ClassPerks.TWO_HANDED);
 	}
 
-	private static void imbue(ServerPlayer player, boolean bolt) {
+	static void imbue(ServerPlayer player, boolean bolt) {
 		String element = element(player);
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return;
@@ -433,6 +448,10 @@ public final class Spellcraft {
 
 	/** (0.7.231) A Sorcerer's key paid for: in mana, or (blood) in blood ({@link Hemomancy#pay}). */
 	private static boolean pay(ServerPlayer player, String element, String what) {
+		// (0.7.465) the spirit stays a death or blood Sorcerer's hand (the Grue is near)
+		if (ForbiddenArts.forbidden(element) && ForbiddenArts.stayed(player)) {
+			return false;
+		}
 		return element.equals("blood") ? Hemomancy.pay(player, Hemomancy.cost(what)) : Mana.cast(player, what);
 	}
 

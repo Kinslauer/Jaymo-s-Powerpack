@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The bauble slots, drawn in the survival inventory's own greys and bevels so it reads as part of it: the player in a
  * black box in the middle (following the mouse, as in the inventory), the amulet, rings and belt on the left, the head,
- * body and charm on the right. An empty slot shows a faint picture of what goes there.
+ * body, charm and wrist (0.19.87) on the right. An empty slot shows a faint picture of what goes there.
  */
 public class BaublesScreen extends AbstractContainerScreen<BaublesMenu> {
 	static final int PANEL = 0xFFC6C6C6, LIGHT = 0xFFFFFFFF, SHADE = 0xFF555555, EDGE = 0xFF000000, WELL = 0xFF8B8B8B, WELL_DARK = 0xFF373737,
@@ -56,6 +56,8 @@ public class BaublesScreen extends AbstractContainerScreen<BaublesMenu> {
 		graphics.fill(x + 3, y + h - 3, x + w - 1, y + h - 1, SHADE);
 		graphics.fill(x + w - 3, y + 3, x + w - 1, y + h - 1, SHADE);
 		graphics.fill(x + 3, y + 3, x + w - 3, y + h - 3, PANEL);
+		// (Artifacts) the player box first: the feet slot sits inside it
+		graphics.fill(x + BOX_X0, y + BOX_Y0, x + BOX_X1, y + BOX_Y1, EDGE);
 		for (Slot slot : this.menu.slots) {
 			well(graphics, x + slot.x, y + slot.y);
 		}
@@ -67,7 +69,6 @@ public class BaublesScreen extends AbstractContainerScreen<BaublesMenu> {
 				graphics.fill(sx, sy, sx + 16, sy + 16, GHOST_FADE);
 			}
 		}
-		graphics.fill(x + BOX_X0, y + BOX_Y0, x + BOX_X1, y + BOX_Y1, EDGE);
 		if (this.minecraft.player != null) {
 			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x + BOX_X0, y + BOX_Y0, x + BOX_X1, y + BOX_Y1, 30, 0.0625F,
 				this.xMouse, this.yMouse, this.minecraft.player);

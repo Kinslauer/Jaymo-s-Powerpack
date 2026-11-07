@@ -1,0 +1,11 @@
+{
+	"entity.jaymoskingdoms.town_golem": "Town Golem",
+	"item.jaymoskingdoms.gilt_golem": "Gilt Lamp Warden",
+	"item.jaymoskingdoms.verdant_golem": "Verdant Mender",
+	"item.jaymoskingdoms.diamond_golem": "Throne Golem",
+	"golem.jaymoskingdoms.throne.not_yours": "It answers only to its king or queen",
+	"golem.jaymoskingdoms.throne.no_crown": "A throne golem serves only a crown: set it down in your realm, or in a realm",
+	"golem.jaymoskingdoms.works.none": "No realm here",
+	"golem.jaymoskingdoms.works.on": "%s keeps golems now",
+	"golem.jaymoskingdoms.works.off": "%s keeps no golems now"
+}

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": "jaymospowers:gold_dust",
+  "result": {
+    "id": "minecraft:gold_ingot"
+  },
+  "experience": 0.35,
+  "cookingtime": 200
+}

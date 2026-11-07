@@ -1,0 +1,40 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "minecraft:block/mangrove_leaves"
+      },
+      {
+        "model": "minecraft:block/mangrove_leaves",
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/mangrove_leaves",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/mangrove_leaves",
+        "y": 270
+      },
+      {
+        "model": "minecraft:block/mangrove_leaves",
+        "x": 180
+      },
+      {
+        "model": "minecraft:block/mangrove_leaves",
+        "x": 180,
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/mangrove_leaves",
+        "x": 180,
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/mangrove_leaves",
+        "x": 180,
+        "y": 270
+      }
+    ]
+  }
+}

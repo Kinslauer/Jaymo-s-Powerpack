@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/weapon_part/gutting_hook_blade_iron"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:grass_bed",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:grass_bed",
+            "state": {
+              "part": "head"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/grass_bed"
+}

@@ -1,6 +1,8 @@
 package com.jaymospowers.client.mixin;
 
+import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Stance;
+import com.jaymospowers.core.wounds.Downed;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec2;
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,7 +10,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.18.57) The low crouch walks slower than a sneak ({@link Stance#LOW_SPEED}). */
+/**
+ * (0.18.57) The low crouch walks slower than a sneak ({@link Stance#LOW_SPEED}). (0.19.30) Prone on the back, shuffling on
+ * the hips is slower than crawling on the belly ({@link Crawl#SUPINE_SPEED}). (0.19.62) Skitter prone is a spider: it
+ * scuttles much faster than a man crawls ({@code Skitter.SPIDER_PACE}).
+ */
 @Mixin(LocalPlayer.class)
 abstract class StanceSpeedMixin {
 	@Inject(method = "modifyInput", at = @At("RETURN"), cancellable = true)
@@ -16,6 +22,13 @@ abstract class StanceSpeedMixin {
 		LocalPlayer self = (LocalPlayer) (Object) this;
 		if (Stance.LOW_SPEED != 1.0F && self.isCrouching() && Stance.low(self)) {
 			cir.setReturnValue(cir.getReturnValue().scale(Stance.LOW_SPEED));
+		}
+		if (Crawl.supine(self) && Crawl.canCrawl(self) && !Downed.isDowned(self)) {
+			cir.setReturnValue(cir.getReturnValue().scale(Crawl.SUPINE_SPEED));
+		}
+		if ("skitter".equals(self.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM))
+			&& com.jaymospowers.power.xenoform.forms.Skitter.crawling(self) && !Downed.isDowned(self)) {
+			cir.setReturnValue(cir.getReturnValue().scale(com.jaymospowers.power.xenoform.forms.Skitter.SPIDER_PACE));
 		}
 	}
 }

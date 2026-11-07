@@ -1,0 +1,9 @@
+{
+	"subtitles.jaymospowers.blast.crack": "Blast cracks",
+	"subtitles.jaymospowers.blast.far": "Distant boom",
+	"subtitles.jaymospowers.blast.report": "Cannon fires",
+	"subtitles.jaymospowers.blast.whistle": "Shell whistles",
+	"message.jaymospowers.shake.now": "Screen shake: %s%%. Change it with /shake <0-200> or /shake off.",
+	"message.jaymospowers.shake.set": "Screen shake set to %s%%.",
+	"message.jaymospowers.shake.off": "Screen shake is off."
+}

@@ -6,6 +6,7 @@ import com.jaymospowers.aether.world.FerrositeSpireFeature;
 import com.jaymospowers.aether.world.IceSpikeFeature;
 import com.jaymospowers.aether.world.MoaNestFeature;
 import com.jaymospowers.aether.world.PointedHolystoneFeature;
+import com.jaymospowers.aether.world.SkySpringFeature;
 import com.mojang.serialization.MapCodec;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -52,6 +53,8 @@ public final class AetherFeatures {
 		register("ferrosite_spire", FerrositeSpireFeature.CODEC);
 		register("moa_nest", MoaNestFeature.CODEC);
 		register("pointed_holystone", PointedHolystoneFeature.CODEC);
+		register("sky_spring", SkySpringFeature.CODEC);
+		SkySpringFeature.init();
 	}
 
 	private static void register(String id, MapCodec<? extends Feature> codec) {

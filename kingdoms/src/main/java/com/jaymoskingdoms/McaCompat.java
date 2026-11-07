@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * <li>(0.5.21) A realm's workers (builders, farmers, miners, woodcutters) are its MCA villagers, promoted where they
  * stand ({@link #enlist}) or through MCA's Professions menu ({@link #promote}); its old {@link Folk} workers become
  * villagers ({@link #becomeVillager}). See {@link Workers}.</li>
- * <li>(0.5.53) A kingdom's court wizard is one of its elders ({@link CourtWizards}).</li>
+ * <li>(0.5.54) A kingdom's court wizard is one of its elders ({@link CourtWizards}).</li>
  * </ul>
  * Everything that names an MCA class is in {@link McaBridge}, which is only touched while MCA is {@link #LOADED}.
  */
@@ -163,7 +163,7 @@ public final class McaCompat {
 	}
 
 	/** (0.5.29) {@code villager} (if MCA's) warms to {@code player} by {@code hearts}: a quest done for them, a letter brought. */
-	static void hearts(LivingEntity villager, ServerPlayer player, int hearts) {
+	public static void hearts(LivingEntity villager, ServerPlayer player, int hearts) {
 		// (0.7.62) not for a masked stranger: they don't know whom they're warming to
 		if (LOADED && villager instanceof Villager v && !Identities.hiddenFrom(player, villager)) {
 			McaBridge.hearts(v, player, hearts);
@@ -181,6 +181,23 @@ public final class McaCompat {
 	/** (0.6.9) {@link McaBridge#families}; 0 without MCA. */
 	static int families(ServerLevel level, AABB box, int grownPerYoung, int leastGrown, float chance, int soonUnits, boolean takeIn) {
 		return LOADED ? McaBridge.families(level, box, grownPerYoung, leastGrown, chance, soonUnits, takeIn) : 0;
+	}
+
+	/** (0.7.490) {@code villager} gives up their bed (to look for another, {@link Peoples}); nothing without MCA. */
+	static void leaveHome(Villager villager) {
+		if (LOADED) {
+			McaBridge.leaveHome(villager);
+		}
+	}
+
+	/** (0.7.490) {@link Peoples#meet}: {@code villager} already knows {@code player} (MCA has memories of them), so a first meeting is long past. */
+	static boolean knows(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.knows(villager, player);
+	}
+
+	/** (0.7.490) {@link Settlers}: a lone goblin or orc ({@code kind}) named {@code name} with trade {@code trade}, new to a village, at {@code at}; null without a body made. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, net.minecraft.world.phys.Vec3 at, int trade) {
+		return LOADED ? McaBridge.settler(level, kind, name, at, trade) : null;
 	}
 
 	/** (0.6.9) Where {@code villager} lives (their bed): MCA's home, else the vanilla villager's. */
@@ -320,6 +337,17 @@ public final class McaCompat {
 		return LOADED ? McaBridge.hireNobodies(level, player, around, n, outfits, health, damage, contract) : 0;
 	}
 
+	/** (0.7.433) A turned captain follows {@code player} from now on (MCA's own Follow, off his camp's roster). False without MCA. */
+	static boolean swear(net.minecraft.world.entity.Entity mob, ServerPlayer player) {
+		return LOADED && McaBridge.swear(mob, player);
+	}
+
+	/** (0.7.433) A sworn captain's body back at {@code player}'s side; null without MCA. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob swornGreenskin(ServerLevel level, Heritage.Kind kind, String name,
+		net.minecraft.world.phys.Vec3 at, ServerPlayer player, List<net.minecraft.world.item.ItemStack> gear) {
+		return LOADED ? McaBridge.swornGreenskin(level, kind, name, at, player, gear) : null;
+	}
+
 	/** (0.7.418) {@code e} is an MCA villager whose hired contract is still running; false without MCA. */
 	static boolean contractRunning(net.minecraft.world.entity.Entity e) {
 		return LOADED && McaBridge.contractRunning(e);
@@ -371,7 +399,44 @@ public final class McaCompat {
 	 * ({@code house}: who they were), else anyone grown, else someone who moves in. Null without MCA.
 	 */
 	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house) {
-		return LOADED ? McaBridge.enlistRuler(level, f, role, house) : null;
+		return enlistRuler(level, f, role, house, null);
+	}
+
+	/** (0.7.519) As above, but {@code chosen} (an elected villager, a regent, a ward come of age) first if they are about and grown enough. */
+	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house, java.util.@Nullable UUID chosen) {
+		return LOADED ? McaBridge.enlistRuler(level, f, role, house, chosen) : null;
+	}
+
+	/** (0.7.519) {@code f}'s grown villagers who could rule or stand for election (not {@code house}, the late ruler); none without MCA. */
+	static java.util.List<Villager> notables(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		return LOADED ? McaBridge.notables(level, f, house) : java.util.List.of();
+	}
+
+	/** (0.7.519) The late ruler's children and teens in {@code f}'s town, the eldest first; none without MCA. */
+	static java.util.List<Villager> youngKin(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		return LOADED ? McaBridge.youngKin(level, f, house) : java.util.List.of();
+	}
+
+	/** (0.7.519) {@code v} is a grown villager. */
+	static boolean adult(Villager v) {
+		return LOADED && McaBridge.adult(v);
+	}
+
+	/** (0.7.519) {@code v}'s trade level, 1 to 5 (0 without a trade). */
+	static int professionLevel(Villager v) {
+		return LOADED ? McaBridge.professionLevel(v) : 0;
+	}
+
+	/** (0.7.519) An envoy's villager: a grown newcomer of no settlement; null without MCA. */
+	static @Nullable Villager envoy(ServerLevel level, Faction f, net.minecraft.core.BlockPos at) {
+		return LOADED ? McaBridge.envoy(level, f, at) : null;
+	}
+
+	/** (0.7.519) {@code mob} is no longer a worker or a ruler of a realm (their role, home and load put away). */
+	static void discharge(PathfinderMob mob) {
+		if (LOADED) {
+			McaBridge.discharge(mob);
+		}
 	}
 
 	/** (0.7.138) A posted folk guard of a realm, with MCA loaded: an MCA guard of the same blood takes the post; true if so. */
@@ -379,7 +444,7 @@ public final class McaCompat {
 		return LOADED && McaBridge.convertGuard(level, folk);
 	}
 
-	/** (0.5.53) {@code f}'s court wizard: {@code chosen}, else the eldest of its spare villagers; null if it has no elder (or without MCA). */
+	/** (0.5.54) {@code f}'s court wizard: {@code chosen}, else the eldest of its spare villagers; null if it has no elder (or without MCA). */
 	static @Nullable Worker enlistWizard(ServerLevel level, Faction f, @Nullable PathfinderMob chosen) {
 		return LOADED ? McaBridge.enlistWizard(level, f, chosen) : null;
 	}
@@ -394,7 +459,7 @@ public final class McaCompat {
 		return LOADED && Casters.mayConvert(level, folk) && McaBridge.convertCaster(level, folk);
 	}
 
-	/** (0.5.53) The grown MCA villager nearest {@code player} (a few blocks), or null. */
+	/** (0.5.54) The grown MCA villager nearest {@code player} (a few blocks), or null. */
 	static @Nullable PathfinderMob nearestGrown(ServerLevel level, ServerPlayer player) {
 		return LOADED ? McaBridge.nearestGrown(level, player) : null;
 	}
@@ -505,6 +570,23 @@ public final class McaCompat {
 		return Greenskins.brood(folk.role()) != null ? McaBridge.greenskinOf(level, folk) : McaBridge.raiderOf(level, folk);
 	}
 
+	/** (0.7.431) {@code mob} goes by {@code name}: an MCA villager's own name, or else a name of its own (a captain, {@link Captains}). */
+	public static void rename(net.minecraft.world.entity.LivingEntity mob, String name) {
+		if (!LOADED || !McaBridge.rename(mob, name)) {
+			mob.setCustomName(net.minecraft.network.chat.Component.literal(name));
+		}
+	}
+
+	/**
+	 * (0.7.490) {@code mob} (an MCA villager of {@code kind}'s brood) has just been made or unmade its camp's chief: it carries
+	 * only the gear it now wears, and has a chief's build (the biggest of its brood) or a common one. Anyone else: nothing.
+	 */
+	static void reranked(net.minecraft.world.entity.PathfinderMob mob, Heritage.Kind kind, boolean chief) {
+		if (LOADED) {
+			McaBridge.reranked(mob, kind, chief);
+		}
+	}
+
 	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
 	static boolean becomeGreenskin(ServerLevel level, Folk folk) {
 		return LOADED && Greenskins.mayConvert(level, folk) && McaBridge.convertGreenskin(level, folk);
@@ -559,9 +641,29 @@ public final class McaCompat {
 		return LOADED && McaBridge.outlawOpening(villager, player);
 	}
 
+	/** (0.7.597) A wary villager's cold opening, never MCA's friendly stranger's welcome ({@link McaBridge#waryOpening}). */
+	public static boolean waryOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.waryOpening(villager, player);
+	}
+
+	/** (0.7.424) The opening of one held down for questioning ({@link McaBridge#questioningOpening}). */
+	public static boolean questioningOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.questioningOpening(villager, player);
+	}
+
 	/** (0.7.405) A Z Fighter character's own opening, never MCA's stranger's welcome ({@link McaBridge#zfighterOpening}). */
 	public static boolean zfighterOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.zfighterOpening(villager, player);
+	}
+
+	/** (0.7.486) {@link SeaBodies}: the {@code slot} armour an MCA villager carries, dropped at their feet; whether there was any. */
+	static boolean shedPacked(net.minecraft.world.entity.Mob mob, net.minecraft.world.entity.EquipmentSlot slot, net.minecraft.server.level.ServerLevel level) {
+		return LOADED && McaBridge.shedPacked(mob, slot, level);
+	}
+
+	/** (0.7.486) {@link SeaBodies}: an MCA guard who can't wear armour takes up the bow; whether they did just now. */
+	static boolean toBow(net.minecraft.world.entity.Mob mob) {
+		return LOADED && McaBridge.toBow(mob);
 	}
 
 	/** (0.7.246) A crewman (one of MCA's villagers) with no armour packed, and a sailor by trade. */
@@ -583,7 +685,7 @@ public final class McaCompat {
 	}
 
 	static boolean becomeVillager(ServerLevel level, Folk folk) {
-		return LOADED && folk.style() != FactionType.BARBARIAN && McaBridge.convert(level, folk);
+		return LOADED && McaBridge.convert(level, folk);
 	}
 
 	/**
@@ -607,6 +709,30 @@ public final class McaCompat {
 		if (com.jaymoskingdoms.nether.AvatarCamps.avatar(guard)) {
 			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
 			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);
+		}
+		Boolean balmed = InBalming.foe(guard, target);
+		if (balmed != null) {
+			// (0.7.433) an in-balmed one never goes for his keeper or their others
+			return balmed;
+		}
+		Boolean sworn = SwornCaptains.foe(guard, target);
+		if (sworn != null) {
+			// (0.7.433) a sworn captain at his lord's side, or a camp standing back from a challenge
+			return sworn;
+		}
+		Boolean trial = Trials.foe(guard, target);
+		if (trial != null) {
+			// (0.7.429) a trial under way: the pit's champion goes for his challenger alone, the rest of the camp leaves them be
+			return trial;
+		}
+		Boolean pact = TribePacts.foe(guard, target);
+		if (pact != null) {
+			// (0.7.443) a tribe's war band called to a friend's aid, or the guards of the place it came to
+			return pact;
+		}
+		if (Tribes.of(guard) != null && (Pedlars.party(target) || Tribes.spares(guard, target))) {
+			// (0.7.425) no greenskin sets on a pedlar's party; a tribe under truce with a player, or a pedlar's party, spares them
+			return false;
 		}
 		if (guard instanceof Worker w && Barbarians.villagerRole(w.role()) && guard.level().getServer() != null) {
 			// (0.7.148) a camp's MCA villager: what its raiders (or pirates) go for
@@ -650,5 +776,10 @@ public final class McaCompat {
 	 */
 	public static boolean destinyPending(ServerPlayer player) {
 		return LOADED && McaBridge.destinyPending(player);
+	}
+
+	/** (0.7.573) MCA's creator anew for {@code player}: a new look, a new name ({@link McaBridge#newDestiny}). */
+	static boolean newDestiny(ServerPlayer player) {
+		return LOADED && McaBridge.newDestiny(player);
 	}
 }

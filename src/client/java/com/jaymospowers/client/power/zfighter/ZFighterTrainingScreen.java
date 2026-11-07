@@ -119,6 +119,9 @@ public class ZFighterTrainingScreen extends Screen {
 		// (0.17.61) the Story screen: sagas and side jobs
 		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.story_button"),
 			b -> this.minecraft.gui.setScreen(new ZFighterStoryScreen(this))).bounds(left() + 56, top() + 7, 44, 14).build());
+		// (0.18.94) the technique creator
+		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_creator.button"),
+			b -> this.minecraft.gui.setScreen(new ZFighterCreatorScreen(this))).bounds(left() + panelW() - 52, top() + 7, 44, 14).build());
 		ZFighterTips.show(ZFighterTips.Tip.TRAINING);
 		auraButton = addRenderableWidget(Button.builder(Component.empty(), b -> {
 			int next = (com.jaymospowers.power.zfighter.ZFighterAura.style(this.minecraft.player) + 1) % com.jaymospowers.power.zfighter.ZFighterAura.STYLES;

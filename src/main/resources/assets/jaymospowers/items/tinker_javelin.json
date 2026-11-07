@@ -195,6 +195,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/handle_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -338,6 +345,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/grip_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_bog_iron"
                     }
                   }
                 ],
@@ -525,6 +539,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/head_broken_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -668,6 +689,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/guard_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_bog_iron"
                     }
                   }
                 ],
@@ -860,6 +888,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/handle_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1003,6 +1038,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/grip_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_bog_iron"
                     }
                   }
                 ],
@@ -1190,6 +1232,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/head_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1333,6 +1382,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/guard_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_bog_iron"
                     }
                   }
                 ],
@@ -1532,6 +1588,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/handle_large_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -1675,6 +1738,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/grip_large_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_bog_iron"
                 }
               }
             ],
@@ -1862,6 +1932,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/head_broken_large_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -2005,6 +2082,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/guard_large_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_bog_iron"
                 }
               }
             ],
@@ -2197,6 +2281,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/handle_large_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -2340,6 +2431,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/grip_large_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_bog_iron"
                 }
               }
             ],
@@ -2527,6 +2625,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/head_large_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -2670,6 +2775,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/guard_large_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_bog_iron"
                 }
               }
             ],

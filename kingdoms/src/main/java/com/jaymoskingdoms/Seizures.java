@@ -161,6 +161,13 @@ public final class Seizures {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> HOLDS.clear());
 	}
 
+	/**
+	 * (2026-11-05, Andy: "takeovers need to face your character toward its walking direction") Something has this player:
+	 * synced to everyone, so every screen draws their body facing the way it's driven (TakeoverFacing), not the way they look.
+	 */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> SEIZED = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
+		JaymosKingdoms.id("seized"), builder -> builder.syncWith(ByteBufCodecs.BOOL, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
+
 	/** Whether something has {@code player} right now. */
 	public static boolean held(ServerPlayer player) {
 		return HOLDS.containsKey(player.getUUID());
@@ -180,6 +187,7 @@ public final class Seizures {
 		Hold hold = new Hold(kind, id, ticks, needed, fade, canGiveIn, now);
 		hold.nextBlow = now + GRACE / 2;
 		HOLDS.put(player.getUUID(), hold);
+		player.setAttached(SEIZED, true);
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}
@@ -191,6 +199,7 @@ public final class Seizures {
 	/** It lets go (and the curse that had them hears how). */
 	static void end(ServerPlayer player, End how) {
 		Hold hold = HOLDS.remove(player.getUUID());
+		player.removeAttached(SEIZED);
 		if (hold == null) {
 			return;
 		}

@@ -195,6 +195,18 @@ final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to know who's experienced with butchering (needs 0.4.32): {}", e.toString());
 		}
+		// (0.7.509) the Green Huntsman: Clean Cuts gives a hung carcass more, and finishing one is his kind of deed (Kitchen's Hanging hooks)
+		try {
+			Class<?> hanging = Class.forName("com.jaymoskitchen.corpse.Hanging");
+			hanging.getMethod("addExtraCuts", java.util.function.ToIntFunction.class)
+				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) player ->
+					Patrons.blessed(player, Patron.GREEN_HUNTSMAN, 2) ? Blessings.CLEAN_CUTS_EXTRA : 0);
+			hanging.getMethod("addOnDone", java.util.function.BiConsumer.class)
+				.invoke(null, (java.util.function.BiConsumer<net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity>) (player, carcass) ->
+					Patrons.deed(player, Patron.GREEN_HUNTSMAN, Patrons.DEED_SMALL, "carcass"));
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Green Huntsman's meat hook blessings (needs 0.5.57): {}", e.toString());
+		}
 		// (0.7.123) winter's cold doesn't touch a Frostborn
 		if (SEASON_NAME != null) {
 			try {
@@ -204,15 +216,51 @@ final class KitchenCompat {
 				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Frostborn to shrug off winter: {}", e.toString());
 			}
 		}
-		// (0.7.200) Kitchen's body heat: an Emberborn shrugs off the heat, and blizzards and sandstorms reach the body
+		// (0.7.200) Kitchen's body heat: an Emberborn shrugs off the heat, and blizzards and sandstorms reach the body;
+		// (0.7.500, Andy: "the reptile beastfolk should be cold blooded, therefore not overheating in the sun") so does anyone
+		// cold-blooded (the Serpen): they bask, the sun and heat never build to overheating; the cold slowing them stays their flaw
 		try {
 			Class<?> bodyHeat = Class.forName("com.jaymoskitchen.climate.BodyHeat");
 			bodyHeat.getMethod("setHeatProof", java.util.function.Predicate.class)
-				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.EMBERBORN));
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.EMBERBORN)
+					|| HeritageKits.coldBlooded(player));
 			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Calamities::bodyHeat);
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for body heat (needs 0.5.25): {}", e.toString());
+		}
+		// (0.7.477) an Emberborn drinks fire and lava, and water only hisses on their tongue
+		try {
+			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setFireDrinker", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.EMBERBORN));
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Emberborn to drink fire (needs 0.5.48): {}", e.toString());
+		}
+		// (0.7.637, Andy: "the rotten meat eating skill should let you drink water from wherever too") Iron Stomach takes
+		// dirty water as well as rotten flesh: a river, swamp or puddle never turns the stomach
+		try {
+			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setIronGut", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Skills.of(player).rank(Skills.Perk.IRON_STOMACH) > 0);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Iron Stomach to drink dirty water (needs 0.5.80): {}", e.toString());
+		}
+	}
+
+	/**
+	 * (0.7.594) {@code player} drinks {@code water} of clean water (Kitchen's {@code Thirst.drink}); false without Kitchen,
+	 * or for one who drinks fire, not water (an Emberborn).
+	 */
+	static boolean drink(net.minecraft.server.level.ServerPlayer player, int water) {
+		try {
+			Class<?> thirst = Class.forName("com.jaymoskitchen.climate.Thirst");
+			if ((boolean)thirst.getMethod("fireDrinker", net.minecraft.world.entity.player.Player.class).invoke(null, player)) {
+				return false;
+			}
+			thirst.getMethod("drink", net.minecraft.server.level.ServerPlayer.class, int.class, boolean.class, float.class)
+				.invoke(null, player, water, true, 0.0F);
+			return true;
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			return false;
 		}
 	}
 
@@ -392,6 +440,59 @@ final class KitchenCompat {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Kitchen butcher gossip failed: {}", e.toString());
 			return null;
+		}
+	}
+
+	// ---- (0.7.481) Kitchen 0.5.51's butchery: blood grates and bottled blood --------------------------------------------
+
+	private static @Nullable Method drawGrates, addOnDrink;
+	private static boolean lookedForButchery;
+
+	private static void butchery() {
+		if (lookedForButchery) {
+			return;
+		}
+		lookedForButchery = true;
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return;
+		}
+		try {
+			Class<?> butchery = Class.forName("com.jaymoskitchen.butchery.Butchery");
+			drawGrates = butchery.getMethod("drawGrates", net.minecraft.server.level.ServerLevel.class, Vec3.class, int.class, int.class,
+				java.util.function.Consumer.class);
+			addOnDrink = butchery.getMethod("addOnDrink", java.util.function.Predicate.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Kitchen has no blood grates (older Kitchen?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.481) Blood magic draws from the blood caught in Kitchen's blood grates: up to {@code most} levels from those within
+	 * {@code range} of {@code at}, the nearest first; {@code drawn} hears where each is. How many levels (0 without Kitchen).
+	 */
+	static int drawGrates(net.minecraft.server.level.ServerLevel level, Vec3 at, int range, int most,
+		java.util.function.@Nullable Consumer<Vec3> drawn) {
+		butchery();
+		if (drawGrates == null) {
+			return 0;
+		}
+		try {
+			return (int) drawGrates.invoke(null, level, at, range, most, drawn);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return 0;
+		}
+	}
+
+	/** (0.7.481) Whoever {@code hook} says has a use for a bottle of Kitchen's blood drinks it without retching. */
+	static void onBloodDrunk(java.util.function.Predicate<net.minecraft.server.level.ServerPlayer> hook) {
+		butchery();
+		if (addOnDrink == null) {
+			return;
+		}
+		try {
+			addOnDrink.invoke(null, hook);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hook Kitchen's bottled blood: {}", e.toString());
 		}
 	}
 

@@ -16,6 +16,9 @@ import org.jspecify.annotations.Nullable;
  * for the flattest stretch of plain ground (no water, lava, houses or roads in it, at most {@link #MAX_RISE} from its
  * lowest to its highest), and a floor is laid there: smooth stone, edged in stone bricks at the ring's line, the dips
  * under it filled and what grows over it (grass, trees, snow) cleared to {@link #CLEAR_HIGH} above.
+ * <p>
+ * (0.19.1) If there's no such ground, there's no ring and no tournament (it used to go anywhere). A kingdom's ring is
+ * kept ({@link ZFighterTournaments#SITES}) and used again while it stands, so its tournaments are always held there.
  */
 final class ZFighterArena {
 	/** How far from the seat to look (blocks), and in how many directions at each. */
@@ -27,6 +30,8 @@ final class ZFighterArena {
 	static final int MAX_RISE = 4;
 	/** Room kept clear over the floor (blocks); higher up, only trees are cleared, to {@code CLEAR_HIGH}. */
 	static final int HEADROOM = 5, CLEAR_HIGH = 10;
+	/** (0.19.1) How much of a kept ring's floor must still be there for it to be used again. */
+	static final double KEPT = 0.85;
 
 	private ZFighterArena() {
 	}
@@ -64,6 +69,37 @@ final class ZFighterArena {
 		}
 		lay(level, best);
 		return best.above();
+	}
+
+	/**
+	 * (0.19.1) A ring laid before at {@code center} (the floor's middle block), used again: true, and tidied (the floor
+	 * mended, what grew over it cleared), if it's still there with nothing built or flooded over it; else false.
+	 */
+	static boolean reuse(ServerLevel level, BlockPos center) {
+		int laid = 0, total = 0;
+		for (int dx = -FLOOR; dx <= FLOOR; dx++) {
+			for (int dz = -FLOOR; dz <= FLOOR; dz++) {
+				if (dx * dx + dz * dz > FLOOR * FLOOR) {
+					continue;
+				}
+				total++;
+				BlockState state = level.getBlockState(center.offset(dx, 0, dz));
+				if (state.is(Blocks.SMOOTH_STONE) || state.is(Blocks.STONE_BRICKS)) {
+					laid++;
+				}
+				for (int dy = 1; dy <= HEADROOM; dy++) {
+					BlockState over = level.getBlockState(center.offset(dx, dy, dz));
+					if (!over.getFluidState().isEmpty() || !clearable(over)) {
+						return false;
+					}
+				}
+			}
+		}
+		if (laid < total * KEPT) {
+			return false;
+		}
+		lay(level, center);
+		return true;
 	}
 
 	/** The top of the ground in each column of the floor (y of the ground block), or null if any of it won't do. */

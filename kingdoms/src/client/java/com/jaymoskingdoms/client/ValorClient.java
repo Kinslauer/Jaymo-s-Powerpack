@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Valor;
 import com.jaymoskingdoms.ValorWings;
@@ -246,7 +247,12 @@ public final class ValorClient {
 		if (!coated && share >= 0.999F && !Valor.spent(player)) {
 			return;
 		}
-		int x = graphics.guiWidth() / 2 - BAR_W / 2, y = graphics.guiHeight() - BAR_ABOVE;
+		// (HUD rework) left dock, row 15 (the bar plus its 1 px frame)
+		int[] at = HudZones.place(HudZones.DOCK_LEFT, "jaymoskingdoms:valor", 15, BAR_W + 2, BAR_H + 2);
+		if (at == null) {
+			return;
+		}
+		int x = at[0] + 1, y = at[1] + 1;
 		int color = Valor.spent(player) ? 0xFF606060 : (Valor.state(player) & Valor.KINGS) != 0 ? ARGB.opaque(data.soulColor()) : 0xFFB0B8C8;
 		Ui.bar(graphics, x, y, BAR_W, BAR_H, share, color);
 	}

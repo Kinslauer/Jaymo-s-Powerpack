@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -28,7 +29,8 @@ import org.jspecify.annotations.Nullable;
  * taiga, dark forest, hills, plains and snow), a dark oak stockade round a war fire, the warchief in his longhouse, grunts
  * sparring in the pit, rangers on the towers, a shaman by the fire ({@link OrcBuildings}, {@link Orcs}). It grows daily by
  * its own hands (more orcs, more tents), and its war bands raid the nearest kingdom ({@link Raids}). Kill its warchief and
- * it is cleared like any camp ({@link Camps#chiefSlain}).
+ * it is cleared like any camp ({@link Camps#chiefSlain}). (0.7.474) A band of ogres may live in one ({@link OgreHolds#joinCamp}),
+ * or raise a new one with the orcs ({@link #foundNear}); each of its ogres lets the camp raise another building a day.
  */
 final class OrcCamps {
 	/** {@link Camps.CampData#kind} of an orc camp. */
@@ -40,10 +42,8 @@ final class OrcCamps {
 	static final int MAX_SPREAD = 5;
 	/** A new camp's orcs, and how it grows: another orc every so many days, every so many of them a ranger, up to a most. */
 	static final int START_GRUNTS = 6, START_SPARRING = 2, START_RANGERS = 3, DAYS_PER_ORC = 2, RANGER_EVERY = 4, MAX_ORCS = 15;
-	/** What a camp takes in each day by its own hands (hunting, felling, smithing, tanning). */
-	static final int DAY_LOGS = 6, DAY_HIDES = 6, DAY_BONES = 3, DAY_MEAT = 6, DAY_IRON = 6, DAY_ARROWS = 8, DAY_LEATHER = 2;
-	/** The plunder a new camp starts with. */
-	static final int START_LOGS = 24, START_HIDES = 16, START_MEAT = 16, START_ARROWS = 32, START_IRON = 8, START_EMERALDS = 3;
+	/** (0.7.490) What a camp takes in each day is its folk's jobs now ({@link HordeEconomy}); this is the plunder a new camp starts with (and bent copper in the store). */
+	static final int START_LOGS = 24, START_HIDES = 16, START_MEAT = 16, START_ARROWS = 32, START_IRON = 8, START_BENT = 6;
 	/** Raising a building: one a day at most, from this much of its pile; never with a player this near. */
 	static final int BUILD_LOGS = 4, BUILD_HIDES = 4;
 	static final double BUILD_HIDE_RANGE = 24.0;
@@ -97,7 +97,9 @@ final class OrcCamps {
 		Storage.put(level, stocked, Items.COOKED_BEEF, START_MEAT);
 		Storage.put(level, stocked, Items.ARROW, START_ARROWS);
 		Storage.put(level, stocked, Items.IRON_INGOT, START_IRON);
-		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
+		Storage.put(level, stocked, BentIngots.BENT_COPPER, START_BENT);
+		// ((0.7.490) and a chief's hoard to start on)
+		HordeEconomy.deposit(server, id, HordeEconomy.START_HOARD);
 		Camps.takeSides(server, id, KIND);
 		crown(level, Factions.get(server, id), layout.throne(), gate);
 		// rangers on the watchtower and the gate towers, grunts in the pit and at the forge, the rest about the fire, the shaman by it
@@ -116,6 +118,30 @@ final class OrcCamps {
 		spawn(level, id, Orcs.SHAMAN, fire.offset(2, 0, 2), fire, OrcBuildings.HOME_RADIUS / 2);
 		JaymosKingdoms.LOGGER.info("An orc camp, {}, rose at {}", camp.name(), fire);
 		return Factions.get(server, id);
+	}
+
+	/**
+	 * (0.7.474) A band of ogres and the orcs raise a camp together somewhere near {@code player} in {@code region}, by the
+	 * same rules as any camp (open ground out of sight, orc country, ground flat enough) but in the wild, kingdom or no; or
+	 * null if there's nowhere fit.
+	 */
+	static @Nullable Faction foundNear(ServerLevel level, ServerPlayer player, String region) {
+		MinecraftServer server = level.getServer();
+		RandomSource random = level.getRandom();
+		for (int tries = 0; tries < Camps.SITE_TRIES; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int r = Camps.HIDE_RANGE + random.nextInt(Camps.SITE_SPREAD);
+			BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
+			if (!OgreHolds.region(at).equals(region) || !Camps.open(server, level, at) || !land(level, at)) {
+				continue;
+			}
+			int floor = IllagerBuildings.floor(level, at, MAX_SPREAD, OrcBuildings.CLEAR_RADIUS);
+			if (floor == Integer.MIN_VALUE) {
+				continue;
+			}
+			return found(level, at, floor, Direction.Plane.HORIZONTAL.getRandomDirection(random));
+		}
+		return null;
 	}
 
 	private static String name(MinecraftServer server, RandomSource random) {
@@ -185,37 +211,29 @@ final class OrcCamps {
 	/** {@code days}' growth: what the camp takes in by its own hands, and (as it ages) more orcs. */
 	static void grow(ServerLevel level, Faction camp, int days) {
 		MinecraftServer server = level.getServer();
-		Map<Item, Integer> takings = new LinkedHashMap<>();
-		takings.put(Items.DARK_OAK_LOG, DAY_LOGS);
-		takings.put(Items.WOOL.pick(DyeColor.BLACK), DAY_HIDES / 2);
-		takings.put(Items.WOOL.pick(DyeColor.BROWN), DAY_HIDES / 2);
-		takings.put(Items.BONE, DAY_BONES);
-		takings.put(Items.COOKED_BEEF, DAY_MEAT);
-		takings.put(Items.IRON_NUGGET, DAY_IRON);
-		takings.put(Items.ARROW, DAY_ARROWS);
-		takings.put(Items.LEATHER, DAY_LEATHER);
-		if (Storage.loaded(level, camp)) {
-			for (var e : takings.entrySet()) {
-				Storage.put(level, camp, e.getKey(), e.getValue() * days);
-			}
-		}
+		// ((0.7.490) its folk's jobs bring in the goods and the hoard's wages, and everyone eats: HordeEconomy)
+		HordeEconomy.day(level, camp, true, days);
 		Camps.updateData(server, camp.id(), d -> d.withGrown(d.grown() + days));
 		Camps.CampData data = Camps.data(server, camp.id());
 		if (data == null) {
 			return;
 		}
-		int cap = (int)Math.min(MAX_ORCS, START_GRUNTS + START_RANGERS + data.grown() / DAYS_PER_ORC);
+		// ((0.7.475) the cap grows with its tier; (0.7.490) a camp in plenty grows faster, a hungry one not at all)
+		int cap = Math.min(Hordes.folkCap(server, camp.id(), true),
+			START_GRUNTS + START_RANGERS + HordeEconomy.age(server, camp.id(), data.grown()) / DAYS_PER_ORC);
 		RandomSource random = level.getRandom();
 		BlockPos fire = data.center();
-		for (int i = 0; i < days; i++) {
+		for (int i = 0; i < days * HordeEconomy.births(level, camp); i++) {
 			Faction now = Factions.get(server, camp.id());
-			if (now == null || fighters(now) >= cap) {
+			if (now == null || fighters(now) >= cap || HordeEconomy.hungry(server, camp.id())) {
 				break;
 			}
 			int rangers = now.holdings().count(Orcs.RANGER);
 			int role = rangers * RANGER_EVERY < fighters(now) ? Orcs.RANGER : Orcs.GRUNT;
-			spawn(level, camp.id(), role, spot(level, fire, random), fire, OrcBuildings.HOME_RADIUS);
+			spawn(level, camp.id(), role, spot(level, fire, random), fire, Hordes.homeRadius(server, camp.id(), OrcBuildings.HOME_RADIUS));
 		}
+		// (0.7.475) and it may move up a tier
+		Hordes.day(level, camp.id());
 	}
 
 	/** Its grunts and rangers on the roster, or on their way back to it (a dead one's place still to fill). */
@@ -246,8 +264,19 @@ final class OrcCamps {
 			crown(level, camp, OrcBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new warchief (the last was lost)", camp.name());
 		}
-		int allowed = Math.min(OrcBuildings.GROWTH.size(), data.grown());
-		if (data.built() >= allowed || !Storage.loaded(level, camp)) {
+		// (0.7.490) now and then it takes another goblin slave
+		Slaves.restock(level, camp, data);
+		// ((0.7.490) its market merchants stand about their stalls)
+		GreenMarket.tick(level, camp, data);
+		// (0.7.475) past its first stockade: its tier's wall and band
+		if (Hordes.tick(level, camp, data, force)) {
+			return;
+		}
+		// ((0.7.474) each of its ogres hauls for the builders: another building a day apiece, OgreHolds)
+		int ogres = OgreHolds.haulers(level, camp.id(), data.center()).size();
+		// ((0.7.490) a hungry camp raises nothing; one in plenty ages sooner)
+		int allowed = Math.min(OrcBuildings.GROWTH.size(), HordeEconomy.age(server, camp.id(), data.grown()) * (1 + ogres));
+		if (data.built() >= allowed || !Storage.loaded(level, camp) || HordeEconomy.hungry(server, camp.id())) {
 			return;
 		}
 		IllagerBuildings.Spot spot = OrcBuildings.GROWTH.get(data.built());
@@ -268,6 +297,9 @@ final class OrcCamps {
 			Storage.take(level, camp, e.getKey(), e.getValue());
 		}
 		OrcBuildings.place(level, spot, data.center(), data.gate());
+		OgreHolds.haul(level, camp.id(), data.center(), where);
+		// (0.7.490) and its goblin slaves carry logs to the new building
+		Slaves.haul(level, camp.id(), data.center(), where);
 		Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
 		JaymosKingdoms.LOGGER.debug("{} raised a {}", camp.name(), spot.id());
 	}

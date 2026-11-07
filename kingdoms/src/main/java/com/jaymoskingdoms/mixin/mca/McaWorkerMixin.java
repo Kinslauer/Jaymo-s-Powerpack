@@ -35,7 +35,7 @@ abstract class McaWorkerMixin implements Enlisted {
 	private String jaymoskingdoms$task = "";
 	@Unique
 	private boolean jaymoskingdoms$carrying;
-	/** (0.5.53) When they came of age, and a court wizard's spell timers. */
+	/** (0.5.54) When they came of age, and a court wizard's spell timers. */
 	@Unique
 	private long jaymoskingdoms$grownSince = CourtWizards.UNKNOWN;
 	@Unique

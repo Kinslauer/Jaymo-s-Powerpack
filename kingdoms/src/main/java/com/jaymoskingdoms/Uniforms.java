@@ -47,10 +47,12 @@ public final class Uniforms {
 	static final List<List<String>> GUARDS = List.of(ids("guard/temperate"), ids("guard/sunny"), ids("guard/cold"));
 
 	/**
-	 * (0.7.414) The poorest outfits of ours: a deckhand's plain slops. The Nobodies ({@link StoryKit#nobodies}) wear them, clothes
-	 * locked so {@link #fit} leaves them be (MCA's own clothes are banned; these are the pack's own).
+	 * (0.7.414) The poorest outfits of ours. The Nobodies ({@link StoryKit#nobodies}) wear them, clothes locked so {@link #fit}
+	 * leaves them be (MCA's own clothes are banned; these are the pack's own). (0.7.534) Andy (2026-11-04): they "arent
+	 * wearing medieval attire": a deckhand's striped shirt and bandana on land. Now a roughspun tunic, belt and breeches in
+	 * six plain wools ({@code tools/gen_nobody_rags.py}); Nobodies still in a deckhand's slops change when they load.
 	 */
-	static final List<String> POOR = DECKHANDS;
+	static final List<String> POOR = ids("poor/rags", 6);
 
 	private Uniforms() {
 	}
@@ -85,8 +87,18 @@ public final class Uniforms {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof VillagerEntityMCA v) {
 				fit(v);
+				redressNobody(v);
 			}
 		});
+	}
+
+	/** (0.7.534) A Nobody hired before 0.7.534, still locked in a deckhand's slops, is put in plain rags. */
+	private static void redressNobody(VillagerEntityMCA villager) {
+		if (villager.level().isClientSide() || !DECKHANDS.contains(villager.getClothes()) || Crewmen.tagged(villager)
+			|| villager.entityTags().stream().noneMatch(t -> t.startsWith(LifeAims.NOBODY_TAG))) {
+			return;
+		}
+		villager.setClothes(POOR.get(villager.getRandom().nextInt(POOR.size())));
 	}
 
 	/** {@code clothes} are one of ours. */
@@ -169,12 +181,37 @@ public final class Uniforms {
 			return role == Goblins.GOBLIN ? GOBLINS : role == Goblins.SLINGER ? GOBLIN_SLINGERS : role == Goblins.KING ? GOBLIN_KINGS
 				: role == Orcs.RANGER ? ORC_RANGERS : role == Orcs.SHAMAN ? ORC_SHAMANS : role == Orcs.WARCHIEF ? ORC_WARCHIEFS : ORC_GRUNTS;
 		}
+		String blood = havenBlood(villager);
+		if (blood != null) {
+			// (0.7.438, Havens patch 6) a haven's guards and folk dress in their blood's way
+			return ids("haven/" + blood + "/" + (role == Folk.GUARD || villager.isGuard() ? "guard" : "folk"));
+		}
 		if (role == Folk.GUARD || villager.isGuard()) {
 			int land = f == null || !(villager.level() instanceof ServerLevel level) ? 0
 				: Math.floorMod(Climate.at(level, f.seat()).skinGroup(), GUARDS.size());
 			return GUARDS.get(land);
 		}
 		return List.of();
+	}
+
+	/** The bloods whose havens dress their own way. */
+	static final java.util.Set<Heritage.Kind> HAVEN_BLOODS = java.util.EnumSet.of(Heritage.Kind.TIDEBORN, Heritage.Kind.STONEBORN,
+		Heritage.Kind.SYLVAN, Heritage.Kind.WARRIORBORN);
+
+	/**
+	 * (0.7.438) The blood whose dress {@code villager} wears, living in a haven: the haven's own, or in a mixed one their own
+	 * blood's. Null outside a haven (or a blood with no dress of its own).
+	 */
+	private static @Nullable String havenBlood(VillagerEntityMCA villager) {
+		Faction haven = Havens.home(villager);
+		if (haven == null || !(villager.level() instanceof ServerLevel level)) {
+			return null;
+		}
+		Heritage.Kind kind = Heritage.Kind.byKey(Havens.of(level.getServer(), haven));
+		if (kind == null) {
+			kind = VillagerHeritage.of(villager);
+		}
+		return kind != null && HAVEN_BLOODS.contains(kind) ? kind.key() : null;
 	}
 
 	/** The crew's side from their tag ({@link Crewmen#sideTag}), or pirates. */

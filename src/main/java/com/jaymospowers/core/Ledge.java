@@ -52,6 +52,17 @@ import org.jspecify.annotations.Nullable;
  * isn't possible. The catch is more forgiving too: an edge a little above your eyes, a wall a little further off, or the
  * top of a jump already falling are all caught, and Jump needn't be held (forward still is).
  *
+ * <p>(0.19.40) The crouch grab: standing in front of a single block with a gap only one block high over it (no room to
+ * stand up there), the crouch stance (the wheel's low crouch, (0.19.51) never plain Sneak) takes hold of its edge and pulls you up and in onto your belly the same way, with no jump
+ * and no hang ({@link #crouchSpot}).
+ *
+ * <p>(0.20.63) Andy: "shift scrolling infront of a ledge or single block opening will grab onto it when you get to crouch
+ * height, this should prevent the other checks and issues trying to use this feature. this should also let you climb
+ * fences, or other blocks that arent quite 2 blocks tall." The crouch grab now comes only from Sneak + a scroll down
+ * (the notch that takes you down to the crouch, or on from it), never from walking into the block or settling into the
+ * crouch. Facing anything 0.7 to just under 2 blocks over your feet it climbs: up onto the top if the crouched body fits
+ * there, in on the belly under a one-high gap, and over a fence, wall or gate (landing on the far side).
+ *
  * <p>The moves are the client's (player movement is client-authoritative; see {@code client/LedgeClient}): it finds the
  * ledge with {@link #find}, holds the body still and walks it up the mantle's path. The server checks the rules
  * ({@link #canHang}), resets the fall, charges the climb's hunger, plays the sounds, syncs {@link #HOLD} so everyone
@@ -106,6 +117,16 @@ public final class Ledge {
 	public static final double PRONE_EYE_KEEP = 1.22;
 	/** Where the prone climb ends: your middle this far past the edge (blocks), or {@link #CLIMB_IN} when the gap is shallower. */
 	public static final double PRONE_IN = 0.9;
+	/**
+	 * (0.19.40) The crouch grab, (0.20.63) the shift-scroll grab: facing a block whose top edge is this far over your feet
+	 * (blocks: over a slab's step, short of two blocks), a Sneak + scroll down to the crouch catches its edge and climbs it
+	 * (up onto it, in on your belly under a one-high gap, or over a fence or wall).
+	 */
+	public static final double CROUCH_EDGE_MIN = 0.7, CROUCH_EDGE_MAX = 1.95;
+	/** (0.20.63) A vault over a fence or wall lands only where there's ground at most this far under the feet you left (blocks). */
+	public static final double VAULT_DROP_MAX = 3.0;
+	/** (0.20.63) Blocks never climbed or vaulted from the shift-scroll grab (cactus, magma, barriers, and anything a datapack adds). */
+	public static final TagKey<Block> NO_VAULT = TagKey.create(Registries.BLOCK, JaymosPowers.id("ledge_no_vault"));
 
 	/** Ticks the local client waits for the server to confirm a grab before giving up on it (a refused grab drops). */
 	public static final int CONFIRM_TICKS = 20;
@@ -151,16 +172,27 @@ public final class Ledge {
 	 * A ledge found ahead: the block whose top is the edge ({@code pos}), the wall's side from the player
 	 * ({@code face}), the edge's height ({@code top}), where the body hangs ({@code hang}) and where the climb ends
 	 * ({@code onTop}). (0.15.108) {@code stand}: there's room to stand on the top (else only {@code onBelly}, where a prone
-	 * climb ends, null when there's no room to lie there either).
+	 * climb ends, null when there's no room to lie there either). (0.20.63) {@code vault}: over a fence or wall from the
+	 * ground, {@code onTop} being on the far side, over the ground the body drops to.
 	 */
-	public record Spot(BlockPos pos, Direction face, double top, Vec3 hang, Vec3 onTop, boolean stand, @Nullable Vec3 onBelly) {
+	public record Spot(BlockPos pos, Direction face, double top, Vec3 hang, Vec3 onTop, boolean stand, @Nullable Vec3 onBelly, boolean vault) {
+		public Spot(BlockPos pos, Direction face, double top, Vec3 hang, Vec3 onTop, boolean stand, @Nullable Vec3 onBelly) {
+			this(pos, face, top, hang, onTop, stand, onBelly, false);
+		}
 	}
 
-	/** Client → server: caught the edge of the block at {@code pos}, on the wall at side {@code face} (2D value). */
-	public record Grab(BlockPos pos, int face) implements CustomPacketPayload {
+	/**
+	 * Client → server: caught the edge of the block at {@code pos}, on the wall at side {@code face} (2D value);
+	 * (0.20.63) {@code vault}: to go over it (a fence or wall, {@link #vaultable}), not hang from it.
+	 */
+	public record Grab(BlockPos pos, int face, boolean vault) implements CustomPacketPayload {
 		public static final Type<Grab> TYPE = new Type<>(JaymosPowers.id("ledge_grab"));
 		public static final StreamCodec<ByteBuf, Grab> CODEC = StreamCodec.composite(
-			BlockPos.STREAM_CODEC, Grab::pos, ByteBufCodecs.VAR_INT, Grab::face, Grab::new);
+			BlockPos.STREAM_CODEC, Grab::pos, ByteBufCodecs.VAR_INT, Grab::face, ByteBufCodecs.BOOL, Grab::vault, Grab::new);
+
+		public Grab(BlockPos pos, int face) {
+			this(pos, face, false);
+		}
 
 		@Override
 		public Type<Grab> type() {
@@ -188,6 +220,8 @@ public final class Ledge {
 	private static final Map<UUID, BlockPos> HOLDING = new HashMap<>();
 	/** Server: until when (game time) a player who just left a ledge isn't kicked for how they move. */
 	private static final Map<UUID, Long> GRACE = new HashMap<>();
+	/** (0.20.63) Server: who's vaulting over a fence or wall (it's held by {@link #vaultable}, not {@link #holdable}). */
+	private static final java.util.Set<UUID> VAULTING = new java.util.HashSet<>();
 
 	/** Client only: the local player's hold, ahead of the server's copy, so their own pose shows at once. */
 	public static volatile @Nullable Hold localHold;
@@ -215,6 +249,7 @@ public final class Ledge {
 	private static void clear() {
 		HOLDING.clear();
 		GRACE.clear();
+		VAULTING.clear();
 	}
 
 	// ---- queries (both sides)
@@ -250,7 +285,7 @@ public final class Ledge {
 			|| player.isSleeping() || player.isAutoSpinAttack()) {
 			return false;
 		}
-		if (Carry.isCarried(player) || Carry.isCarrying(player) || Carry.isThrown(player) || KitchenCompat.isCarryingCorpse(player)
+		if (Carry.isCarried(player) || Carry.isCarrying(player) || Carry.isThrown(player) || KitchenCompat.isCarryingCorpse(player) || CarryOnCompat.isCarrying(player)
 			|| Crawl.crawling(player) && !proneClimbing(player) || player.getAttached(Meditate.STATE) != null || KitchenCompat.isLimp(player)) {
 			return false;
 		}
@@ -361,6 +396,97 @@ public final class Ledge {
 			return finish(player, level, pos, walk.getOpposite(), top, wall, -sign);
 		}
 
+		/**
+		 * (0.19.40) The crouch grab's spot, (0.20.63) the shift-scroll grab's: the block straight ahead whose top is
+		 * {@link #CROUCH_EDGE_MIN} to {@link #CROUCH_EDGE_MAX} over the feet, within {@link #REACH}. The "hang" is where the
+		 * player stands, against the block. In order: room on its top for the body as it is (crouched) is a climb up onto
+		 * it; a gap over it too low for that but with room to lie flat is the prone climb in; a thin top (a fence, a wall,
+		 * a gate, bars: {@link #NO_GRAB} or under {@link #MIN_TOP_AREA}) is a vault over it, landing on the far side
+		 * ({@link Spot#vault}). Null when there's none, or the block is {@link #NO_VAULT}.
+		 */
+		public static @Nullable Spot crouchSpot(Player player) {
+			Direction face = Direction.fromYRot(player.getYRot());
+			if (Math.abs(Mth.wrapDegrees(player.getYRot() - face.toYRot())) > GRAB_FACING_DEGREES) {
+				return null;
+			}
+			Level level = player.level();
+			double half = player.getBbWidth() * 0.5;
+			double feet = player.getY();
+			double aheadX = player.getX() + face.getStepX() * (half + REACH + 0.01);
+			double aheadZ = player.getZ() + face.getStepZ() * (half + REACH + 0.01);
+			CollisionContext context = CollisionContext.of(player);
+			for (int y = Mth.floor(feet + CROUCH_EDGE_MAX); y >= Mth.floor(feet + CROUCH_EDGE_MIN) - 1; y--) {
+				BlockPos pos = BlockPos.containing(aheadX, y, aheadZ);
+				BlockState state = level.getBlockState(pos);
+				VoxelShape shape = state.getCollisionShape(level, pos, context);
+				if (shape.isEmpty()) {
+					continue;
+				}
+				double top = pos.getY() + shape.max(Direction.Axis.Y);
+				if (top > feet + CROUCH_EDGE_MAX || top < feet + CROUCH_EDGE_MIN || state.is(NO_VAULT)) {
+					return null;
+				}
+				boolean thin = state.is(NO_GRAB) || topArea(shape) < MIN_TOP_AREA;
+				int sign = face.getAxisDirection().getStep();
+				Direction.Axis axis = face.getAxis();
+				int base = axis == Direction.Axis.X ? pos.getX() : pos.getZ();
+				double wall = base + (sign > 0 ? shape.min(axis) : shape.max(axis));
+				double at = axis == Direction.Axis.X ? player.getX() : player.getZ();
+				double gap = (wall - at) * sign - half;
+				if (gap < -0.05 || gap > REACH) {
+					return null;
+				}
+				// stand where you are, up against the block
+				Vec3 hang = along(face, player.position(), wall - sign * (half + HANG_GAP), feet);
+				AABB box = player.getBoundingBox().move(hang.subtract(player.position())).deflate(1.0E-7);
+				if (!level.noCollision(player, box)) {
+					return null;
+				}
+				// the body as it is (crouched) straight up beside the block to over its top
+				AABB rise = box.expandTowards(0.0, top + CLIMB_LIFT - feet, 0.0);
+				AABB raised = box.move(0.0, top + CLIMB_LIFT - feet, 0.0);
+				if (thin) {
+					// (0.20.63) over it and down the far side
+					double far = base + (sign > 0 ? shape.max(axis) : shape.min(axis));
+					Vec3 land = along(face, hang, far + sign * (half + HANG_GAP + 0.05), top + CLIMB_LIFT);
+					AABB across = raised.expandTowards(land.x - hang.x, 0.0, land.z - hang.z);
+					AABB drop = raised.move(land.x - hang.x, 0.0, land.z - hang.z).expandTowards(0.0, -(top - feet) - VAULT_DROP_MAX, 0.0);
+					if (level.noCollision(player, rise) && level.noCollision(player, across) && !level.noCollision(player, drop)) {
+						return new Spot(pos, face, top, hang, land, true, null, true);
+					}
+					return null;
+				}
+				// (0.20.63) room up there for the crouched body: climb onto it
+				Vec3 onTop = along(face, hang, wall + sign * CLIMB_IN, top + CLIMB_LIFT);
+				AABB onto = raised.expandTowards(onTop.x - hang.x, 0.0, onTop.z - hang.z);
+				if (level.noCollision(player, rise) && level.noCollision(player, onto) && solidUnder(level, onTop, top)) {
+					return new Spot(pos, face, top, hang, onTop, true, null);
+				}
+				// the flat body (lifted so the eyes keep their place, as from a hang) up to the top, then in on the belly
+				AABB flat = player.getDimensions(net.minecraft.world.entity.Pose.SWIMMING).makeBoundingBox(hang).deflate(1.0E-7);
+				double from = Math.min(hang.y + PRONE_EYE_KEEP, top + CLIMB_LIFT);
+				AABB flatRise = flat.move(0.0, from - hang.y, 0.0).expandTowards(0.0, top + CLIMB_LIFT - from, 0.0);
+				if (!level.noCollision(player, flatRise)) {
+					return null;
+				}
+				for (double in : new double[] {PRONE_IN, CLIMB_IN}) {
+					Vec3 belly = along(face, hang, wall + sign * in, top + CLIMB_LIFT);
+					AABB flatAcross = flat.move(0.0, top + CLIMB_LIFT - hang.y, 0.0).expandTowards(belly.x - hang.x, 0.0, belly.z - hang.z);
+					if (level.noCollision(player, flatAcross) && solidUnder(level, belly, top)) {
+						return new Spot(pos, face, top, hang, belly, false, belly);
+					}
+				}
+				return null;
+			}
+			return null;
+		}
+
+		/** (0.20.63) Whether a vault may go over the block at {@code pos}: something solid there, not {@link #NO_VAULT}. */
+		public static boolean vaultable(Level level, BlockPos pos) {
+			BlockState state = level.getBlockState(pos);
+			return !state.getCollisionShape(level, pos).isEmpty() && !state.is(NO_VAULT);
+		}
+
 		private static @Nullable Spot finish(Player player, Level level, BlockPos pos, Direction face, double top, double wall, int sign) {
 			double half = player.getBbWidth() * 0.5;
 			double hangAlong = wall - sign * (half + HANG_GAP);
@@ -447,11 +573,16 @@ public final class Ledge {
 		ServerLevel level = player.level();
 		BlockPos pos = grab.pos();
 		if (grab.face() < 0 || grab.face() > 3 || !canHang(player) || powerMoving(player)
-			|| player.position().distanceToSqr(Vec3.atCenterOf(pos)) > 9.0 || !holdable(level, pos)) {
+			|| player.position().distanceToSqr(Vec3.atCenterOf(pos)) > 9.0 || !(grab.vault() ? vaultable(level, pos) : holdable(level, pos))) {
 			end(player);
 			return;
 		}
 		HOLDING.put(player.getUUID(), pos.immutable());
+		if (grab.vault()) {
+			VAULTING.add(player.getUUID());
+		} else {
+			VAULTING.remove(player.getUUID());
+		}
 		player.setAttached(HOLD, new Hold(grab.face(), level.getGameTime(), false));
 		player.resetFallDistance();
 		sound(level, player, pos, 0.7F, 0.8F);
@@ -494,6 +625,7 @@ public final class Ledge {
 	}
 
 	private static void end(ServerPlayer player) {
+		VAULTING.remove(player.getUUID());
 		if (HOLDING.remove(player.getUUID()) != null || player.hasAttached(HOLD)) {
 			GRACE.put(player.getUUID(), player.level().getGameTime() + RELEASE_GRACE_TICKS);
 		}
@@ -507,13 +639,16 @@ public final class Ledge {
 			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
 			Hold hold = player == null ? null : player.getAttached(HOLD);
 			if (player == null || hold == null) {
+				VAULTING.remove(entry.getKey());
 				it.remove();
 				continue;
 			}
 			ServerLevel level = player.level();
 			long age = level.getGameTime() - hold.start();
 			boolean over = hold.climbing() ? age > hold.climbTicks() + CLIMB_SLACK_TICKS : age > HANG_MAX_TICKS + CONFIRM_TICKS;
-			if (over || !canHang(player) || !hold.climbing() && !holdable(level, entry.getValue())) {
+			boolean held = VAULTING.contains(entry.getKey()) ? vaultable(level, entry.getValue()) : holdable(level, entry.getValue());
+			if (over || !canHang(player) || !hold.climbing() && !held) {
+				VAULTING.remove(entry.getKey());
 				it.remove();
 				GRACE.put(player.getUUID(), level.getGameTime() + RELEASE_GRACE_TICKS);
 				player.removeAttached(HOLD);

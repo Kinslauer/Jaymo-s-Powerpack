@@ -170,6 +170,8 @@ public final class HandMoves {
 	};
 
 	static {
+		// (0.7.467) the strong strike first: every spirit's own punch (SpiritPunch)
+		SHARED.add(SpiritPunch.MOVE);
 		SHARED.add(FAR_HAND);
 		SHARED.add(SHOVE);
 		SHARED.add(GRAB);

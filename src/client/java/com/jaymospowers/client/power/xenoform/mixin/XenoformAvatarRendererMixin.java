@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.xenoform.mixin;
 
 import com.jaymospowers.client.power.xenoform.XenoBand;
 import com.jaymospowers.client.power.xenoform.XenoformClient;
+import com.jaymospowers.client.power.xenoform.SkitterCeiling;
 import com.jaymospowers.client.power.xenoform.XenoformFlightPose;
 import com.jaymospowers.client.power.xenoform.XenoformHand;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -31,6 +32,7 @@ abstract class XenoformAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$xenoformGlide(AvatarRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		XenoformFlightPose.rotate(state, poseStack, entityScale);
+		SkitterCeiling.rotate(state, poseStack, entityScale);
 	}
 
 	@Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)

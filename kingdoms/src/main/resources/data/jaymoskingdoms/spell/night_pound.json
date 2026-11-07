@@ -1,0 +1,27 @@
+{
+  "school": "spell_power:physical_melee",
+  "range": 0.0,
+  "tier": 1,
+  "group": "night_gifts",
+  "type": "ACTIVE",
+  "active": {
+    "cast": {
+      "duration": 0.0
+    }
+  },
+  "target": {
+    "type": "NONE"
+  },
+  "deliver": {
+    "type": "CUSTOM",
+    "custom": {
+      "handler": "jaymoskingdoms:night_move"
+    }
+  },
+  "cost": {
+    "exhaust": 0.0,
+    "cooldown": {
+      "duration": 5
+    }
+  }
+}

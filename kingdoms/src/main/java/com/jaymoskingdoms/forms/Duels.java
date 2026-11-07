@@ -372,7 +372,7 @@ public final class Duels {
 			String key = rival != null ? "duel.jaymoskingdoms.challenge.rival." : "duel.jaymoskingdoms.challenge.";
 			Speech.tell(level, foe, player, Component.translatable(key + level.getRandom().nextInt(LINES), player.getDisplayName(),
 				Rivals.name(school), rival != null ? Rivals.name(rival) : Rivals.name(school)), Speech.GOLD);
-			Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.duel.challenged", foe.getDisplayName(), Rivals.name(school)));
+			Post.report(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.duel.challenged", foe.getDisplayName(), Rivals.name(school)));
 			return;
 		}
 	}
@@ -621,14 +621,14 @@ public final class Duels {
 				&& Schools.standing(player, duel.school) >= Schools.MASTERY_STANDING) {
 				Schools.openMasterstroke(player, duel.school);
 			}
-			Post.tidings(player.getUUID(), Component.translatable(duel.master ? "tidings.jaymoskingdoms.duel.won_master" : "tidings.jaymoskingdoms.duel.won",
+			Post.aside(player.getUUID(), Component.translatable(duel.master ? "tidings.jaymoskingdoms.duel.won_master" : "tidings.jaymoskingdoms.duel.won",
 				foe.getDisplayName(), Rivals.name(mine)));
 		} else if (outcome == Outcome.LOST) {
 			int dock = mood == Mood.WARM ? 0 : mood == Mood.COLD ? LOSS_STANDING * 2 : LOSS_STANDING;
 			if (joined && dock > 0 && Schools.standing(player, mine) > 0) {
 				Schools.addStanding(player, mine, -Math.min(dock, Schools.standing(player, mine)));
 			}
-			Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.duel.lost." + mood.key(), foe.getDisplayName()));
+			Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.duel.lost." + mood.key(), foe.getDisplayName()));
 		}
 	}
 

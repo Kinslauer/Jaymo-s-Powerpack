@@ -39,6 +39,13 @@ class Part:
 # out along it, so the neck's base stays where it was), extra pieces for its form, and the knight's barding.
 SIMPLE = True
 LIFT, NECK = (0.0, 0.0) if SIMPLE else (3.0, 3.0)
+# (0.7.445, Havens patch 8) FULLER: the classic shape and size kept, but fuller where it shows: jointed legs (a knee in
+# front, a hock and gaskin behind, the fetlock and coronet, feathering on the heavy breeds), a shaped muzzle by breed
+# (nostrils, the jowl, the draft's Roman nose, the desert horse's fine dished one; never over 4 wide, for the bridle)
+# and longer manes (a forelock, and the mane falling over the neck on all but the steppe pony's standing one). The body
+# keeps the classic barrel (no chest, withers, croup or belly pieces).
+FULLER = True
+FULL_EXTRA = {"jowl", "forelock", "forelock_tip", "nostril_left", "nostril_right", "mane_flow"}
 
 
 def head_pivot(tilt):
@@ -61,7 +68,7 @@ def rig(build):
 
     def add(name, parent, pose, *cubes):
         part = Part(name, parent, pose, list(cubes))
-        if not (SIMPLE and name in EXTRA):
+        if not (SIMPLE and name in EXTRA and not (FULLER and name in FULL_EXTRA)):
             parts.append(part)
         return part
 
@@ -109,7 +116,7 @@ def rig(build):
         leg_a = add(f"leg{k}_a", None, (x, 9 - LIFT, z, 0, 0, 0),
                     Cube((cx - upper[0] / 2, top, zc - upper[2] / 2), upper, region="leg_a"))
         # (0.7.322) the knee in front, the hock behind (its point sticks out at the back)
-        if SIMPLE:
+        if SIMPLE and not FULLER:
             pass
         elif front:
             leg_a.cubes.append(Cube((cx - upper[0] / 2 - 0.3, 4.6 + LIFT, zc - upper[2] / 2 - 0.3), (upper[0] + 0.6, 2.2, upper[2] + 0.6),
@@ -120,7 +127,7 @@ def rig(build):
                                     region="leg_a"))  # the gaskin
         leg_b = add(f"leg{k}_b", None, (x, 16, z, 0, 0, 0),
                     Cube((cx - cannon[0] / 2, 0, zc - cannon[2] / 2), cannon, region="leg_b"))
-        if SIMPLE:
+        if SIMPLE and not FULLER:
             pass
         elif heavy:
             leg_b.cubes.append(Cube((cx - 3, 2, zc - 3), (6, 3, 6), kind="hair", region="feather", axis="y", tip=1))
@@ -130,7 +137,7 @@ def rig(build):
             leg_b.cubes.append(Cube((cx - (cannon[0] + 1) / 2, 4, zc - (cannon[2] + 1) / 2), (cannon[0] + 1, 1, cannon[2] + 1),
                                     region="fetlock"))
         leg_c = add(f"leg{k}_c", None, (x, 16, z, 0, 0, 0), Cube((cx - 2, 5.1, zc - 2), (4, 3, 4), kind="hoof", region="hoof"))
-        if not heavy and b != "destrier" and not SIMPLE:
+        if not heavy and b != "destrier" and (not SIMPLE or FULLER):
             # (0.7.322) the coronet band round the top of the hoof, and the ergot's tuft behind the fetlock
             leg_c.cubes.append(Cube((cx - 2.2, 4.8, zc - 2.2), (4.4, 0.8, 4.4), region="fetlock"))
             leg_c.cubes.append(Cube((cx - 0.75, 4.0, zc + 1.6), (1.5, 1.5, 1), kind="hair", region="feather", axis="y", tip=1))
@@ -155,7 +162,7 @@ def rig(build):
             Cube((-fl[0] / 2, -10.6, 4.5 - fl[2] - 1), (fl[0], 2, 1), kind="hair", region="forelock", axis="y", tip=1))
 
     # the muzzle: a Roman nose on the draft, a fine dished one on the desert horse
-    if SIMPLE:
+    if SIMPLE and not FULLER:
         upper, lower = Cube((-2, -10, -7), (4, 3, 6), region="muzzle"), Cube((-2, -7, -6.5), (4, 2, 5), region="lip")
     elif b == "desert_horse":
         upper, lower = Cube((-1.5, -9.5, -6.5), (3, 3, 5), region="muzzle"), Cube((-1.5, -6.5, -6), (3, 2, 4), region="lip")
@@ -195,7 +202,7 @@ def rig(build):
     add("neck", None, HEAD_POSE, Cube((-neck[0] / 2 - 0.05, neck_top, -2), neck, region="neck"))
     # the mane: along the crest, and (on the long-maned breeds) falling over the neck's right side
     back = -2 + neck[2]  # the neck's crest line
-    if SIMPLE:
+    if SIMPLE and not FULLER:
         mane = Cube((-1, -11.5, back - 1), (2, 16, 4), kind="hair", region="mane", axis="z", tip=1)  # (the classic horse's)
     elif b == "steppe_pony":
         mane = Cube((-1, -12, back - 1), (2, 16 + NECK, 4), kind="hair", region="mane", axis="z", tip=1)  # stands up, cropped
@@ -204,8 +211,8 @@ def rig(build):
     else:
         mane = Cube((-1, -11.5, back - 2), (2, 16 + NECK, 4), kind="hair", region="mane", axis="z", tip=1)
     add("mane", None, HEAD_POSE, mane)
-    if b in ("destrier", "palfrey", "draft", "bat_horse"):
-        flow_d = 6 if b in ("destrier", "draft") else 5
+    if b in ("destrier", "palfrey", "draft", "bat_horse") or FULLER and b != "steppe_pony":
+        flow_d = 6 if b in ("destrier", "draft") else 5 if b in ("palfrey", "bat_horse") else 4
         add("mane_flow", "mane", (0, 0, 0, 0, 0, 0),
             Cube((neck[0] / 2 - 0.05 - 0.6, -11, back - flow_d + 0.5), (1, 15 + NECK, flow_d), kind="hair", region="mane", axis="z", tip=-1))
 

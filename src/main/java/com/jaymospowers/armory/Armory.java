@@ -191,6 +191,24 @@ public final class Armory {
 		throwing("harpoon", p -> p.sword(ToolMaterial.IRON, 3.5F, -2.9F), 8.0F, false);
 		// (0.18.47) the Fang Gauntlets: claws for Weapon Forms' Claw family (Kingdoms' form_claws tag); forged only (tinkering/WeaponParts)
 		FANG_GAUNTLETS = item("fang_gauntlets", Item::new, p -> p.sword(ToolMaterial.IRON, 2.5F, -1.6F));
+		// (Havens patch 5) the kings' weapons: from the iron heads Kingdoms drops off fallen kings, at the Tool Station only
+		KingWeapons.GUTTING_HOOK = item("gutting_hook", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.HOOK), KingWeapons::hook);
+		KingWeapons.WARCHIEF_CLEAVER = item("warchief_cleaver", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.CLEAVER), KingWeapons::cleaver);
+		KingWeapons.OGRE_KINGS_MAUL = item("ogre_kings_maul", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.MAUL), KingWeapons::maul);
+		// (0.20.18) the patrons' weapons: iron heads Kingdoms drops off the champions, at the Tool Station only
+		PatronWeapons.HEARTHGUARD = item("hearthguard", p -> new PatronWeaponItem(p, PatronWeapons.Kind.HEARTHGUARD), p -> PatronWeapons.props(PatronWeapons.Kind.HEARTHGUARD, p));
+		PatronWeapons.ANVIL_FATHERS_HAMMER = item("anvil_fathers_hammer", p -> new PatronWeaponItem(p, PatronWeapons.Kind.ANVIL_HAMMER), p -> PatronWeapons.props(PatronWeapons.Kind.ANVIL_HAMMER, p));
+		PatronWeapons.TIDECALLER = item("tidecaller", p -> new PatronWeaponItem(p, PatronWeapons.Kind.TIDECALLER), p -> PatronWeapons.props(PatronWeapons.Kind.TIDECALLER, p));
+		PatronWeapons.HUNTSMANS_SPEAR = item("huntsmans_spear", p -> new PatronWeaponItem(p, PatronWeapons.Kind.HUNTSMANS_SPEAR), p -> PatronWeapons.props(PatronWeapons.Kind.HUNTSMANS_SPEAR, p));
+		PatronWeapons.GRAVELIGHT = item("gravelight", p -> new PatronWeaponItem(p, PatronWeapons.Kind.GRAVELIGHT), p -> PatronWeapons.props(PatronWeapons.Kind.GRAVELIGHT, p));
+		PatronWeapons.SUNBRAND = item("sunbrand", p -> new PatronWeaponItem(p, PatronWeapons.Kind.SUNBRAND), p -> PatronWeapons.props(PatronWeapons.Kind.SUNBRAND, p));
+		PatronWeapons.ASHFANG = item("ashfang", p -> new PatronWeaponItem(p, PatronWeapons.Kind.ASHFANG), p -> PatronWeapons.props(PatronWeapons.Kind.ASHFANG, p));
+		PatronWeapons.PLAIN_WORD = item("plain_word", p -> new PatronWeaponItem(p, PatronWeapons.Kind.PLAIN_WORD), p -> PatronWeapons.props(PatronWeapons.Kind.PLAIN_WORD, p));
+		// (0.21.19) the Banes' weapons (Kingdoms Rivals patch 6b): heads taken from an ended Bane, at the Tool Station only
+		BaneWeapons.registerComponents();
+		BaneWeapons.GRAVESWORN = item("gravesworn", p -> new BaneWeapons.BaneWeaponItem(p, BaneWeapons.Kind.GRAVESWORN), p -> BaneWeapons.props(BaneWeapons.Kind.GRAVESWORN, p));
+		BaneWeapons.GRUDGE = item("grudge", p -> new BaneWeapons.BaneWeaponItem(p, BaneWeapons.Kind.GRUDGE), p -> BaneWeapons.props(BaneWeapons.Kind.GRUDGE, p));
+		BaneWeapons.HORNSCYTHE = item("hornscythe", p -> new BaneWeapons.BaneWeaponItem(p, BaneWeapons.Kind.HORNSCYTHE), p -> BaneWeapons.props(BaneWeapons.Kind.HORNSCYTHE, p));
 		// (0.15.148) the single-tail leather whip: cracks, wraps and hauls (Lash)
 		item("leather_whip", LeatherWhipItem::new, p -> p.durability(LeatherWhipItem.DURABILITY).repairable(net.minecraft.world.item.Items.LEATHER)
 			.component(DataComponents.LORE, new ItemLore(List.of(
@@ -215,6 +233,7 @@ public final class Armory {
 
 		ArmoryHits.init();
 		RapierItem.init();
+		PatronWeapons.init();
 		Lash.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker

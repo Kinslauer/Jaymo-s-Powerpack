@@ -176,7 +176,9 @@ public final class QuietOne extends Spirit {
 		MOVES.add(new Def("mirror", 10.0F, 120, 3, Poses.MIRROR, Mana.WARD, QuietOne::mirrorStep));
 		MOVES.add(new Def("still", 30.0F, 1200, 6, Poses.STILL, Mana.WARD, QuietOne::stillness));
 		MOVES.add(new Def("silent", 40.0F, 24000, 8, Poses.SILENT, Mana.HARM, QuietOne::silentEnd));
+		MOVES.add(SpiritCharms.petrify());
 		MOVES.add(SpiritExecutions.move("execute_quiet", Spirits.QUIET));
+		MOVES.add(new InBalm(Spirits.QUIET));
 	}
 
 	QuietOne() {
@@ -240,7 +242,8 @@ public final class QuietOne extends Spirit {
 
 	/** Whether the Quiet One may say {@code event} to {@code player}: its sick dots, and its one word at full bond, once. */
 	static boolean mayWhisper(ServerPlayer player, String event) {
-		if (event.startsWith("sick.")) {
+		// (0.7.465) the one thing that breaks its silence: the Grue
+		if (event.startsWith("sick.") || event.startsWith("grue.")) {
 			return true;
 		}
 		if (!event.equals("word")) {

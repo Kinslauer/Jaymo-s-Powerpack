@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:spring_feature",
+  "type": "jaymospowers:sky_spring",
   "state": {
     "id": "minecraft:water",
     "properties": {

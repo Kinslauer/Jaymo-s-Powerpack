@@ -48,8 +48,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.5.56) The monsters of legend, after Fangs 'n Claws' list: the werewolf, the ogres (green, cave, fire), the wraiths
  * (and the flame wraith), the silver skeleton (after DrZhark's Mo' Creatures, GPL-3, see {@code licenses/mocreatures};
- * this package and its client side are under that licence too), and Kingdoms' own mud golem and chest mimic. They come
- * as wilderness encounters ({@code Encounters}), the fire ogre and the flame wraith also in the Nether, and the mimic
+ * this package and its client side are under that licence too), and Kingdoms' own mud golem and chest mimic. (0.7.526)
+ * They spawn on their own, rarely, out where they roam ({@code Encounters}; no longer as wilderness encounters), the fire ogre and the flame wraith also in the Nether, and the mimic
  * from loot chests out in the wild. The silver sword (from silver skeletons) bites deep into werewolves and the undead.
  */
 public final class Monsters {
@@ -69,10 +69,15 @@ public final class Monsters {
 
 	public static EntityType<Werewolf> WEREWOLF;
 	public static EntityType<Ogre> OGRE, CAVE_OGRE, FIRE_OGRE;
+	/** (0.7.623) the armoured ogre, of orc camps and ogre holds only ({@link Ogre#ARMOURED}). */
+	public static EntityType<Ogre> ARMOURED_OGRE;
 	public static EntityType<Wraith> WRAITH, FLAME_WRAITH;
 	public static EntityType<SilverSkeleton> SILVER_SKELETON;
 	public static EntityType<MudGolem> MUD_GOLEM;
 	public static EntityType<Mimic> MIMIC;
+	/** (0.7.580) the mime, deep in the caves ({@link Mime}). */
+	public static EntityType<Mime> MIME;
+	static final int MIME_WEIGHT = 3;
 	public static Item SILVER_SWORD;
 
 	private Monsters() {
@@ -96,6 +101,8 @@ public final class Monsters {
 			.clientTrackingRange(10));
 		FIRE_OGRE = type("fire_ogre", EntityType.Builder.<Ogre>of((t, l) -> new Ogre(t, l, Ogre.FIRE), MobCategory.MONSTER).sized(1.6F, 3.4F)
 			.fireImmune().clientTrackingRange(10));
+		ARMOURED_OGRE = type("armoured_ogre", EntityType.Builder.<Ogre>of((t, l) -> new Ogre(t, l, Ogre.ARMOURED), MobCategory.MONSTER).sized(1.6F, 3.4F)
+			.clientTrackingRange(10));
 		WRAITH = type("wraith", EntityType.Builder.<Wraith>of((t, l) -> new Wraith(t, l, false), MobCategory.MONSTER).sized(0.7F, 1.9F)
 			.clientTrackingRange(8));
 		FLAME_WRAITH = type("flame_wraith", EntityType.Builder.<Wraith>of((t, l) -> new Wraith(t, l, true), MobCategory.MONSTER).sized(0.7F, 1.9F)
@@ -107,11 +114,16 @@ public final class Monsters {
 		FabricDefaultAttributeRegistry.register(OGRE, Ogre.createAttributes(Ogre.GREEN));
 		FabricDefaultAttributeRegistry.register(CAVE_OGRE, Ogre.createAttributes(Ogre.CAVE));
 		FabricDefaultAttributeRegistry.register(FIRE_OGRE, Ogre.createAttributes(Ogre.FIRE));
+		FabricDefaultAttributeRegistry.register(ARMOURED_OGRE, Ogre.createAttributes(Ogre.ARMOURED));
 		FabricDefaultAttributeRegistry.register(WRAITH, Wraith.createAttributes(false));
 		FabricDefaultAttributeRegistry.register(FLAME_WRAITH, Wraith.createAttributes(true));
 		FabricDefaultAttributeRegistry.register(SILVER_SKELETON, SilverSkeleton.createAttributes());
 		FabricDefaultAttributeRegistry.register(MUD_GOLEM, MudGolem.createAttributes());
 		FabricDefaultAttributeRegistry.register(MIMIC, Mimic.createAttributes());
+		MIME = type("mime", EntityType.Builder.of(Mime::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(MIME, Mime.createAttributes());
+		SpawnPlacements.register(MIME, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mime::checkSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, MIME, MIME_WEIGHT, 1, 1);
 
 		// the Nether's own: fire ogres and flame wraiths among its monsters
 		SpawnPlacements.register(FIRE_OGRE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);

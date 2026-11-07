@@ -102,6 +102,7 @@ public final class FallenStarBlock extends Block {
 			}
 			return;
 		}
+		XenoFinds.fromStar(level, pos, random);
 		popResource(level, pos, new ItemStack(Items.RAW_IRON, IRON_MIN + random.nextInt(IRON_MAX - IRON_MIN + 1)));
 		popResource(level, pos, new ItemStack(Items.AMETHYST_SHARD, AMETHYST_MIN + random.nextInt(AMETHYST_MAX - AMETHYST_MIN + 1)));
 		ExperienceOrb.award(level, centre, XP);

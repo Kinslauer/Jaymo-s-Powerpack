@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -32,6 +34,11 @@ import net.minecraft.world.phys.Vec3;
  * bolt from the attacker for a few seconds. A player sprinting or breaking blocks near one spooks it too; sneaking never
  * does, and the Stealth pillar's Soft Step perk ({@link Skills}) lets you come closer. A leashed, tamed or named animal
  * doesn't spook (it still panics when hit). Penned animals aren't told apart: a fence holds them anyway.
+ * <p>
+ * (0.7.560, Andy: "passive animals should run when someone is killed near them") A killing scares every herd animal
+ * near enough that sees it (or near enough to hear it, out of sight): someone dying, going down, or a blow landing on
+ * the downed. They run from the killer, or from the body if nothing killed it. Only a ridden or tamed animal keeps its
+ * head; a leashed one strains at the rope.
  */
 final class Herds {
 	/** The herd animals. */
@@ -43,6 +50,8 @@ final class Herds {
 	/** How long they run (ticks); how often a run is re-aimed and sprinters are checked (ticks); how fast and how far they go. */
 	static final int FLEE_TICKS = 80, EVERY = 10, RUN = 14, RUN_Y = 5;
 	static final double FLEE_SPEED = 1.8;
+	/** How far a killing scares herd animals that see it; how close they hear it out of sight (blocks). */
+	static final double KILL_SEEN = 16.0, KILL_HEARD = 6.0;
 
 	private record Flight(Entity from, long until) {
 	}
@@ -59,6 +68,17 @@ final class Herds {
 			if (taken > 0.0F && entity instanceof PathfinderMob hurt && skittish(hurt) && source.getEntity() instanceof LivingEntity attacker
 				&& attacker != hurt && hurt.level() instanceof ServerLevel level) {
 				panic(level, hurt, attacker);
+			}
+		});
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			// (a blow that put someone down, or landed on someone already down)
+			if (taken > 0.0F && !skittish(entity) && Downed.isDowned(entity) && entity.level() instanceof ServerLevel level) {
+				killing(level, entity, source.getEntity());
+			}
+		});
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (!skittish(entity) && entity.level() instanceof ServerLevel level) {
+				killing(level, entity, source.getEntity());
 			}
 		});
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
@@ -87,6 +107,23 @@ final class Herds {
 				flee(level, m, attacker);
 			}
 		}
+	}
+
+	/** {@code body} was killed or downed by {@code killer} (or by nothing): herd animals near enough run from it. */
+	private static void killing(ServerLevel level, LivingEntity body, @Nullable Entity killer) {
+		Entity from = killer != null && killer != body && killer.isAlive() ? killer : body;
+		for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, body.getBoundingBox().inflate(KILL_SEEN),
+			m -> m != body && m.isAlive() && skittish(m) && !FLIGHTS.containsKey(m) && !m.isVehicle() && !owned(m))) {
+			double d = m.distanceToSqr(body);
+			if (d <= KILL_HEARD * KILL_HEARD || d <= KILL_SEEN * KILL_SEEN && m.hasLineOfSight(body)) {
+				flee(level, m, from);
+			}
+		}
+	}
+
+	/** Someone's animal (tamed), which trusts its keeper more than its fear. */
+	private static boolean owned(PathfinderMob m) {
+		return m instanceof AbstractHorse h && h.isTamed() || m instanceof OwnableEntity o && o.getOwnerReference() != null;
 	}
 
 	/** How close {@code player} may come before a herd animal spooks (Soft Step shrinks it). */

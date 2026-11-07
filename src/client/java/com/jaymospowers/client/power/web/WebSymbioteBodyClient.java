@@ -97,11 +97,17 @@ final class WebSymbioteBodyClient {
 			return;
 		}
 		WebSymbioteBody.Arm arm = WebSymbioteBody.arm(player);
-		int width = minecraft.getWindow().getGuiScaledWidth();
-		int height = minecraft.getWindow().getGuiScaledHeight();
 		int total = WebSymbioteBody.ARM_SLOTS * CHIP + (WebSymbioteBody.ARM_SLOTS - 1) * CHIP_GAP;
-		int x0 = width / 2 - HOTBAR_HALF - HOTBAR_MARGIN - total;
-		int y = height - BOTTOM + 1;
+		boolean named = !arm.picked().isEmpty() && minecraft.gui.screen() == null;
+		Component name = named ? arm.picked().getHoverName() : null;
+		int boxW = named ? Math.max(total, minecraft.font.width(name)) : total;
+		// (HUD rework) arm slots + picked name: DOCK_LEFT zone, row 20
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.DOCK_LEFT, "jaymospowers:symbiote_arm", 20, boxW, named ? CHIP + 10 : CHIP);
+		if (at == null) {
+			return;
+		}
+		int x0 = at[0] + boxW - total;
+		int y = at[1] + (named ? 10 : 0);
 		for (int slot = 0; slot < WebSymbioteBody.ARM_SLOTS; slot++) {
 			int x = x0 + slot * (CHIP + CHIP_GAP);
 			ItemStack stack = arm.get(slot);
@@ -113,9 +119,8 @@ final class WebSymbioteBodyClient {
 				graphics.itemDecorations(minecraft.font, stack, x + 3, y + 3);
 			}
 		}
-		if (!arm.picked().isEmpty() && minecraft.gui.screen() == null) {
-			Component name = arm.picked().getHoverName();
-			graphics.text(minecraft.font, name, x0, y - 10, CHIP_PICK, true);
+		if (named) {
+			graphics.text(minecraft.font, name, at[0], y - 10, CHIP_PICK, true);
 		}
 	}
 }

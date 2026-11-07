@@ -13,6 +13,12 @@ Four of each, all original:
 - demon_master: a demon master, a dark gi with a sash and spiked pauldrons.
 - patrolman: (0.7.358) a galactic patrolman, a dark fitted bodysuit under a hard chest plate with shoulder guards, white
   gloves and boots, the patrol's gold badge on the chest.
+- star_reader: (0.7.442) a star-reader from Powers' fallen-star craters, a long night-blue robe pricked with silver stars,
+  a deep hood, a rope belt and a lens on a chain.
+- star_smith: (0.7.444) the star forge's smith, a dark fitted suit with green-lit seams under a heavy scorched leather
+  apron, thick gloves to the elbow and a welding visor pushed up on the brow.
+- band_hunter: (0.7.446) Powers' band hunter, an outcast in a long ragged dark coat over patched clothes, a torn hood,
+  wrapped shins, and the rival band dark red on his left wrist with a red-lit face.
 
 Run from the kingdoms project root: python -I tools/gen_zfighter_outfits.py (also writes build/zfighter-outfits-preview.png)."""
 import os
@@ -384,6 +390,167 @@ def patrolmen():
             patrolman((56, 22, 28), (232, 226, 220), (200, 60, 50), 9803), patrolman((36, 26, 54), (226, 226, 236), (150, 100, 220), 9804)]
 
 
+# ---- a star-reader -------------------------------------------------------------------------------------------------
+
+SILVER = (214, 220, 232)
+
+
+def star_reader(cloth, hood, rope, seed):
+    def draw(img, rnd, tone):
+        robe(img, rnd, cloth, 4)
+        sea.hands(img, rnd, tone)
+        skirt_layer(img, rnd, cloth)
+        # silver stars pricked over the robe and the sleeves
+        for part in [BODY, JACKET] + ARMS + SLEEVES + LEGS:
+            for side in SIDES:
+                x, y, w, h = part[side]
+                for _ in range(max(1, w * h // 14)):
+                    if rnd.random() < 0.7:
+                        sx, sy = x + rnd.randrange(w), y + rnd.randrange(h)
+                        if img.getpixel((sx, sy))[3]:
+                            sea.px(img, sx, sy, SILVER if rnd.random() < 0.6 else (150, 170, 220))
+        # a rope belt, and a lens on a chain at the chest
+        bx, by, bw, bh = BODY["front"]
+        sea.rows(img, BODY, 7, 1, rope, 8, rnd)
+        for y in range(by, by + 4):
+            sea.px(img, bx + 2 + (y - by) // 2, y, SILVER)
+            sea.px(img, bx + 5 - (y - by) // 2, y, SILVER)
+        sea.px(img, bx + 3, by + 4, (120, 200, 230))
+        sea.px(img, bx + 4, by + 4, (190, 240, 255))
+        # a deep hood: over the top, sides and back, and a rim round the face
+        for side in ("back", "right", "left", "top"):
+            sea.paint(img, HAT[side], hood, 5, rnd)
+        hx, hy, hw, hh = HAT["front"]
+        for x in range(hx, hx + hw):
+            sea.px(img, x, hy, sea.shade(hood, -18))
+        for y in range(hy, hy + hh - 2):
+            sea.px(img, hx, y, sea.shade(hood, -18))
+            sea.px(img, hx + hw - 1, y, sea.shade(hood, -18))
+    return drawn(draw, seed)
+
+
+def star_readers():
+    return [star_reader((26, 34, 74), (20, 26, 58), (150, 120, 80), 9901), star_reader((44, 30, 74), (34, 22, 58), (170, 140, 90), 9902),
+            star_reader((18, 48, 66), (14, 36, 50), (140, 110, 70), 9903), star_reader((36, 38, 48), (24, 26, 34), (120, 96, 60), 9904)]
+
+
+# ---- the star smith ------------------------------------------------------------------------------------------------
+
+def star_smith(suit, apron, glove, glow, seed):
+    def draw(img, rnd, tone):
+        sea.box(img, BODY, suit, 4, rnd)
+        for arm in ARMS:
+            sea.box(img, arm, suit, 4, rnd)
+        sea.hands(img, rnd, tone)
+        sea.legs(img, rnd, suit, (30, 28, 30))
+        # green-lit seams down the suit's sides and arms
+        for part in [BODY] + ARMS + LEGS:
+            for side in ("right", "left"):
+                x, y, w, h = part[side]
+                for yy in range(y, y + h, 2):
+                    sea.px(img, x + w // 2, yy, glow)
+        # thick gloves to the elbow
+        for arm in ARMS:
+            for side in SIDES:
+                x, y, w, h = arm[side]
+                sea.paint(img, (x, y + h - 6, w, 6), glove, 5, rnd)
+            sea.paint(img, arm["bottom"], glove, 5, rnd)
+        # a heavy apron over the front (the jacket layer), strapped round the back, scorched here and there
+        fx, fy, fw, fh = JACKET["front"]
+        sea.paint(img, (fx, fy, fw, fh), apron, 6, rnd)
+        for x in (fx, fx + fw - 1):
+            img.putpixel((x, fy), (0, 0, 0, 0))
+            img.putpixel((x, fy + 1), (0, 0, 0, 0))
+        for _ in range(5):
+            sea.px(img, fx + rnd.randrange(fw), fy + 3 + rnd.randrange(fh - 3), sea.shade(apron, -40))
+        bx, by, bw, bh = JACKET["back"]
+        sea.paint(img, (bx, by + 6, bw, 1), sea.shade(apron, -20), 3, rnd)
+        for x in (bx + 1, bx + bw - 2):
+            sea.paint(img, (x, by, 1, 6), sea.shade(apron, -20), 3, rnd)
+        # a welding visor pushed up on the brow: a band round the head, a dark glass plate in front
+        for side in SIDES:
+            x, y, w, h = HAT[side]
+            sea.paint(img, (x, y + 1, w, 1), (54, 56, 62), 3, rnd)
+        hx, hy, hw, hh = HAT["front"]
+        for x in range(hx + 1, hx + hw - 1):
+            sea.px(img, x, hy, (70, 72, 80))
+            sea.px(img, x, hy + 1, (26, 60, 40))
+            sea.px(img, x, hy + 2, (70, 72, 80))
+        sea.px(img, hx + 2, hy + 1, glow)
+    return drawn(draw, seed)
+
+
+def star_smiths():
+    return [star_smith((36, 38, 46), (110, 74, 44), (60, 44, 32), (92, 240, 122), 9951),
+            star_smith((44, 30, 40), (96, 62, 40), (40, 40, 44), (92, 240, 122), 9952),
+            star_smith((28, 44, 44), (120, 84, 50), (70, 50, 34), (120, 220, 240), 9953),
+            star_smith((50, 50, 54), (86, 58, 36), (34, 34, 36), (92, 240, 122), 9954)]
+
+
+# ---- the band hunter -----------------------------------------------------------------------------------------------
+
+RIVAL_BAND, RIVAL_GLOW = (70, 18, 20), (255, 60, 50)
+
+
+def band_hunter(coat, under, hood, wrap, seed):
+    def draw(img, rnd, tone):
+        sea.box(img, BODY, under, 6, rnd)
+        for arm in ARMS:
+            sea.box(img, arm, under, 6, rnd)
+        sea.hands(img, rnd, tone)
+        sea.legs(img, rnd, sea.shade(under, -10), (34, 28, 24))
+        # patches on the clothes underneath
+        for _ in range(4):
+            part = rnd.choice([BODY] + LEGS)
+            x, y, w, h = part[rnd.choice(("front", "back"))]
+            sea.paint(img, (x + rnd.randrange(max(1, w - 2)), y + rnd.randrange(max(1, h - 2)), 2, 2), sea.shade(under, 22), 4, rnd)
+        # a long coat (the jacket and sleeve layers), its hem torn ragged
+        for part in [JACKET] + SLEEVES:
+            for side in SIDES:
+                x, y, w, h = part[side]
+                sea.paint(img, (x, y, w, h), coat, 7, rnd)
+                if part is JACKET:
+                    for xx in range(x, x + w):
+                        for yy in range(y + h - rnd.randrange(0, 3), y + h):
+                            img.putpixel((xx, yy), (0, 0, 0, 0))
+        fx, fy, fw, fh = JACKET["front"]
+        for y in range(fy, fy + fh - 2):
+            img.putpixel((fx + fw // 2, y), (0, 0, 0, 0)) if rnd.random() < 0.85 else None
+        # shins wrapped in strips
+        for leg in LEGS:
+            for side in SIDES:
+                x, y, w, h = leg[side]
+                for yy in range(y + h - 5, y + h - 1, 2):
+                    sea.paint(img, (x, yy, w, 1), wrap, 5, rnd)
+        # the rival band on the left wrist (the sleeve layer, over any coat), its face lit red
+        left_sleeve = SLEEVES[1]
+        for side in SIDES:
+            x, y, w, h = left_sleeve[side]
+            sea.paint(img, (x, y + h - 4, w, 2), RIVAL_BAND, 4, rnd)
+        x, y, w, h = left_sleeve["right"]
+        sea.px(img, x + w // 2, y + h - 4, RIVAL_GLOW)
+        sea.px(img, x + w // 2 - 1, y + h - 3, sea.shade(RIVAL_GLOW, -60))
+        # a torn hood: over the top, sides and back, a ragged rim round the face
+        for side in ("back", "right", "left", "top"):
+            sea.paint(img, HAT[side], hood, 7, rnd)
+        hx, hy, hw, hh = HAT["front"]
+        for x in range(hx, hx + hw):
+            sea.px(img, x, hy, sea.shade(hood, -18))
+            if rnd.random() < 0.5:
+                sea.px(img, x, hy + 1, sea.shade(hood, -10))
+        for y in range(hy, hy + hh - 1):
+            sea.px(img, hx, y, sea.shade(hood, -18))
+            sea.px(img, hx + hw - 1, y, sea.shade(hood, -18))
+    return drawn(draw, seed)
+
+
+def band_hunters():
+    return [band_hunter((34, 30, 30), (62, 52, 42), (28, 24, 24), (110, 96, 76), 9971),
+            band_hunter((40, 28, 26), (54, 56, 50), (34, 24, 22), (96, 86, 70), 9972),
+            band_hunter((26, 28, 32), (70, 58, 44), (22, 24, 28), (120, 104, 80), 9973),
+            band_hunter((44, 36, 30), (48, 46, 52), (38, 30, 26), (100, 90, 74), 9974)]
+
+
 def all_outfits():
     out = {}
     uni.numbered(out, "zfighter/keeper", keepers())
@@ -394,6 +561,9 @@ def all_outfits():
     uni.numbered(out, "zfighter/teller", tellers())
     uni.numbered(out, "zfighter/demon_master", demon_masters())
     uni.numbered(out, "zfighter/patrolman", patrolmen())
+    uni.numbered(out, "zfighter/star_reader", star_readers())
+    uni.numbered(out, "zfighter/star_smith", star_smiths())
+    uni.numbered(out, "zfighter/band_hunter", band_hunters())
     return out
 
 

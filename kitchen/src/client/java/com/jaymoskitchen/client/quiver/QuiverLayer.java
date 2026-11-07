@@ -1,6 +1,5 @@
 package com.jaymoskitchen.client.quiver;
 
-import com.jaymoskitchen.JaymosKitchen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.player.PlayerModel;
@@ -11,12 +10,12 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.Identifier;
 
-/** Draws the quiver a player carries on their back, with one shaft per two arrows left in it. */
+/**
+ * Draws the quiver a player carries on their back, with one shaft per two arrows left in it. Every quiver in the pack
+ * (ours and the RPG Series' three, worn in the bauble body slot) uses this model in its own colours.
+ */
 public class QuiverLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
-	private static final Identifier TEXTURE = JaymosKitchen.id("textures/entity/quiver.png");
-
 	private final QuiverModel model;
 	private final QuiverModel.Fletching[] fletchings = new QuiverModel.Fletching[QuiverRenderData.SHAFTS];
 
@@ -40,10 +39,14 @@ public class QuiverLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			// sit on top of a chestplate rather than inside it (the cape does the same)
 			poseStack.translate(0.0F, -0.053125F, 0.06875F);
 		}
-		RenderType renderType = RenderTypes.entityCutout(TEXTURE);
+		RenderType renderType = RenderTypes.entityCutout(data.texture());
 		collector.submitModel(model, state, poseStack, renderType, lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 			state.outlineColor);
 		for (int i = 0; i < data.shafts(); i++) {
+			if (QuiverModel.pulled(data, i)) {
+				// already on the bow
+				continue;
+			}
 			collector.submitModel(fletchings[i], state, poseStack, renderType, lightCoords, OverlayTexture.NO_OVERLAY,
 				data.fletchingColors()[i], null, state.outlineColor);
 		}

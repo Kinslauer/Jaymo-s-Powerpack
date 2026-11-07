@@ -32,7 +32,7 @@ public final class BandFlash {
 				continue;
 			}
 			if (e instanceof ServerPlayer seer) {
-				ServerPlayNetworking.send(seer, new XenoNet.Flash(at));
+				ServerPlayNetworking.send(seer, new XenoNet.Flash(at, BandStyle.glow(wearer)));
 			} else {
 				e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, TICKS, 0, false, false), wearer);
 				if (e instanceof Mob mob) {

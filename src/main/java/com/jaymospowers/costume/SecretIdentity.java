@@ -132,6 +132,9 @@ public final class SecretIdentity {
 			if (!worn.name().isEmpty() && want.stream().noneMatch(t -> t.startsWith(NAME))) {
 				want.add(NAME + worn.name());
 			}
+		} else if (worn == null && HoodedCloak.up(player)) {
+			// (0.21.41) a cloak's hood up (the archer hood): hooded as the wearer's own hooded figure
+			want.add(HOODED + HoodedCloak.key(player));
 		}
 		boolean changed = false;
 		for (String tag : new ArrayList<>(player.entityTags())) {

@@ -191,6 +191,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/broad_axe/handle_star_metal"
                   }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_bog_iron"
+                  }
                 }
               ],
               "fallback": {
@@ -381,6 +388,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/head_broken_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -566,6 +580,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/head_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_bog_iron"
                     }
                   }
                 ],
@@ -758,6 +779,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/back_broken_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -943,6 +971,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/back_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_bog_iron"
                     }
                   }
                 ],
@@ -1152,6 +1187,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/broad_axe/binding_star_metal"
                   }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_bog_iron"
+                  }
                 }
               ],
               "fallback": {
@@ -1345,6 +1387,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/broad_axe/large/handle_star_metal"
               }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_bog_iron"
+              }
             }
           ],
           "fallback": {
@@ -1535,6 +1584,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -1720,6 +1776,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/head_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_bog_iron"
                 }
               }
             ],
@@ -1912,6 +1975,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -2097,6 +2167,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/back_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_bog_iron"
                 }
               }
             ],
@@ -2305,6 +2382,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/broad_axe/large/binding_star_metal"
+              }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_bog_iron"
               }
             }
           ],

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:plant_fiber",
+    "jaymospowers:plant_fiber",
+    "jaymospowers:plant_fiber",
+    "jaymospowers:plant_string"
+  ],
+  "result": {
+    "id": "jaymospowers:grass_bandage",
+    "count": 2
+  }
+}

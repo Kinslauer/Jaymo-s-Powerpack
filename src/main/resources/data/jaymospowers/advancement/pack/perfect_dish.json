@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/cooked",
+  "display": {
+    "icon": {
+      "id": "minecraft:golden_carrot"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.perfect_dish.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.perfect_dish.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

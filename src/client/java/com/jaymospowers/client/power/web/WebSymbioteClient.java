@@ -2226,9 +2226,14 @@ public final class WebSymbioteClient {
 	static void renderHud(GuiGraphicsExtractor graphics, LocalPlayer player) {
 		if (peelFight()) {
 			// fighting it for the suit: the same bar (the edges are the dread's: WebSymbioteDread)
-			int barWidth = 120;
-			int bx = (graphics.guiWidth() - barWidth) / 2;
-			int by = graphics.guiHeight() - 66;
+			int barWidth = com.jaymospowers.client.hud.HudStyle.FOCUS_BAR_W;
+			// (HUD rework) struggle bar: FOCUS zone, row 10
+			int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.FOCUS, "jaymospowers:symbiote_struggle", 10, barWidth, 7);
+			if (at == null) {
+				return;
+			}
+			int bx = at[0];
+			int by = at[1] + 2;
 			graphics.fill(bx - 1, by - 1, bx + barWidth + 1, by + 4, 0xA0000000);
 			graphics.fill(bx, by, bx + Math.round(barWidth * struggleShare(player)), by + 3, 0xFFB050E0);
 			return;
@@ -2243,15 +2248,19 @@ public final class WebSymbioteClient {
 		int needed = WebSymbiote.breakFreeNeeded(player);
 		float share = struggleShare(player);
 		if (needed > 0 && struggleMeter > 0.0F) {
-			int barWidth = 120;
+			int barWidth = com.jaymospowers.client.hud.HudStyle.FOCUS_BAR_W;
 			int filled = Math.round(barWidth * share);
-			int bx = (width - barWidth) / 2;
-			int by = height - 66;
-			graphics.fill(bx - 1, by - 1, bx + barWidth + 1, by + 4, 0xA0000000);
-			graphics.fill(bx, by, bx + filled, by + 3, 0xFFB050E0);
-			// halfway: get past it twice and you tear yourself out of it (WebSymbiote.LOCKOUT_SURGE)
-			int half = bx + Math.round(barWidth * WebSymbiote.LOCKOUT_SURGE);
-			graphics.fill(half, by - 2, half + 1, by + 5, 0xFFE8D8F0);
+			// (HUD rework) struggle bar: FOCUS zone, row 10
+			int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.FOCUS, "jaymospowers:symbiote_struggle", 10, barWidth, 7);
+			if (at != null) {
+				int bx = at[0];
+				int by = at[1] + 2;
+				graphics.fill(bx - 1, by - 1, bx + barWidth + 1, by + 4, 0xA0000000);
+				graphics.fill(bx, by, bx + filled, by + 3, 0xFFB050E0);
+				// halfway: get past it twice and you tear yourself out of it (WebSymbiote.LOCKOUT_SURGE)
+				int half = bx + Math.round(barWidth * WebSymbiote.LOCKOUT_SURGE);
+				graphics.fill(half, by - 2, half + 1, by + 5, 0xFFE8D8F0);
+			}
 		}
 		// the further out of it you've torn, the more the dark gives way, flickering as the two of you fight for it
 		float flicker = share <= 0.0F ? 0.0F : Mth.sin(player.tickCount * 1.9F) * Mth.sin(player.tickCount * 0.53F + 1.0F) * HUD_FLICKER * share;

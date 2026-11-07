@@ -62,7 +62,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.332) "Accuse someone here" with a priest ({@link com.jaymoskingdoms.Accusations}).
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
  * (0.7.397) Opening the menu on an outlaw ({@link com.jaymoskingdoms.Outlaws}): a curt word, never MCA's stranger's welcome.
+ * (0.7.424) Held down on the execution hold for questioning ({@link com.jaymoskingdoms.Questioning}): the questions only.
  * (0.7.405) Opening it on a Z Fighter character ({@link com.jaymoskingdoms.ZFighterFolk}): a line of their own, likewise.
+ * (0.7.597) Opening it on one wary of you ({@link Introductions#wary}): the cold word they'd give for your name, likewise.
  * (0.7.380) Opening the menu just after something passed between you (carried out, got up, a monster drawn off, a blow):
  * they open with that ({@link Recollections#opening}).
  * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}): a guard of a town that owes you says what it means.
@@ -82,18 +84,84 @@ abstract class McaDialogueMixin {
 
 	@Inject(method = "selectAnswer", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$homeTalk(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
+		if ("root".equals(question) && McaCompat.questioningOpening(villager, player)) {
+			// (0.7.424) held down for questioning: they beg or glare, and only the questions show
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Questioning.ANSWERS.contains(answer)) {
+			// (0.7.424) a question, a threat, let go or finished ({@link com.jaymoskingdoms.Questioning})
+			com.jaymoskingdoms.Questioning.select(player, villager, answer);
+			ci.cancel();
+			return;
+		}
 		if ("root".equals(question) && (McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
-			|| McaCompat.outlawOpening(villager, player) || McaCompat.zfighterOpening(villager, player))) {
+			|| McaCompat.outlawOpening(villager, player) || McaCompat.zfighterOpening(villager, player)
+			|| McaCompat.waryOpening(villager, player))) {
 			// (0.7.380) just after something passed between you: they open with that; (0.7.246) a shipmate, or one who knows
 			// how your story started: they open with that, and never as to a stranger; (0.7.397) an outlaw: a curt word;
-			// (0.7.405) a Z Fighter character: a line of their own
+			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Pedlars.WARES_ANSWER.equals(answer)) {
+			// (0.7.425) a pedlar's wares
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Pedlars.trade(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Pedlars.MOOD_ANSWER.equals(answer) && Languages.understands(player, villager)) {
+			// (0.7.425) how his tribe takes to you, as the pedlar puts it
+			villager.sendChatMessage(com.jaymoskingdoms.Pedlars.mood(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && (com.jaymoskingdoms.SwornCaptains.SPY_ANSWER.equals(answer) || com.jaymoskingdoms.SwornCaptains.RAID_ANSWER.equals(answer))
+			&& com.jaymoskingdoms.SwornCaptains.takesOrders(player, villager)) {
+			// (0.7.433) a sworn captain sent off spying on his old tribe, or to raid it
+			villager.sendChatMessage(com.jaymoskingdoms.SwornCaptains.order(player, villager, answer), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Captains.PEDLAR_ANSWER.equals(answer) && Languages.understands(player, villager)) {
+			// (0.7.431) what the pedlar's heard of the tribe's captains, for a few emeralds
+			villager.sendChatMessage(com.jaymoskingdoms.Captains.pedlarTells(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.HavenGates.VOUCH_ANSWER.equals(answer) && Languages.understands(player, villager)
+			&& com.jaymoskingdoms.HavenGates.offers(player, villager)) {
+			// (0.7.438) asked to vouch for a human at their haven's gate: a token, if they think well enough of you
+			villager.sendChatMessage(com.jaymoskingdoms.HavenGates.vouch(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Trials.ANSWER.equals(answer) && Languages.understands(player, villager)) {
+			// (0.7.429) asked to see the king: a trial is set
+			villager.sendChatMessage(com.jaymoskingdoms.Trials.ask(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER.equals(answer)) {
+			// (0.7.425) emeralds toward the tribe's grudge
+			villager.sendChatMessage(com.jaymoskingdoms.Tribes.tribute(player, villager), player);
+			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
 		}
 		if ("main".equals(question) && Introductions.INTRODUCE.equals(answer)) {
 			// (0.7.230) the stranger page's Introduce: their name if you share a tongue, else a hand held out (the screen stays
 			// open, and fills in once you know them)
-			if (Languages.understands(player, villager)) {
+			if (Rulers.is(villager) && !Introductions.knows(player, villager) && Handshakes.bowTo(player, villager, true)) {
+				// (0.7.504) to a ruler you bow (a bow needs no words): the screen closes for it and opens again after
+				villager.getInteractions().stopInteracting();
+			} else if (Languages.understands(player, villager)) {
 				villager.sendChatMessage(Introductions.askName(player, villager), player);
 			} else {
 				Handshakes.offerTo(player, villager);
@@ -115,6 +183,23 @@ abstract class McaDialogueMixin {
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Talks.ANSWER.equals(answer)) {
+			// (0.7.523) "Have a word": a short talk on the talk screen, or nothing much to say today
+			villager.getInteractions().stopInteracting();
+			if (!com.jaymoskingdoms.Talks.open(player, villager, false)) {
+				villager.sendChatMessage(com.jaymoskingdoms.Talks.nothing(player, villager), player);
+			}
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && "chat".equals(answer) && com.jaymoskingdoms.Talks.canChatTalk(player, villager)) {
+			// (0.7.523) now and then a chat turns into a talk (close MCA's screen first, then open ours)
+			villager.getInteractions().stopInteracting();
+			if (com.jaymoskingdoms.Talks.openFromChat(player, villager)) {
+				ci.cancel();
+				return;
+			}
 		}
 		if ("main".equals(question) && "hug".equals(answer)) {
 			// (0.7.102) an Emberborn is too hot to hold without fire resistance (either of you)
@@ -249,6 +334,26 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.Crooks.ACCUSE_ANSWER.equals(answer)) {
+			// (0.7.449) the one you think robbed you: the thief is confronted, anyone else takes it badly
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Crooks.accuse(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.ComingOver.ANSWER.equals(answer)) {
+			// (0.7.449) why they came over to you: in their words, or (no shared tongue) their hands
+			Component why = com.jaymoskingdoms.ComingOver.ask(player, villager);
+			if (Languages.understands(player, villager)) {
+				villager.sendChatMessage(why, player);
+			} else {
+				player.sendSystemMessage(why.copy().withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+			}
+			com.jaymoskingdoms.ComingOver.answered(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && SharedHistory.ASK_AFTER.equals(answer)) {
 			// (0.7.254) one you saved, freed or brought home: how they are
 			villager.sendChatMessage(SharedHistory.askAfter(player, villager), player);
@@ -300,7 +405,10 @@ abstract class McaDialogueMixin {
 		}
 		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
 			// (0.7.180) asked their name: they say it, and you know it from now on
-			villager.sendChatMessage(Introductions.askName(player, villager), player);
+			// ((0.7.504) a ruler you've not met you bow to first, and they name themselves after: Handshakes#bowTo)
+			if (!Rulers.is(villager) || Introductions.knows(player, villager) || !Handshakes.bowTo(player, villager, false)) {
+				villager.sendChatMessage(Introductions.askName(player, villager), player);
+			}
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
@@ -347,6 +455,14 @@ abstract class McaDialogueMixin {
 				ci.cancel();
 				return;
 			}
+		}
+		// (0.7.547) one who knows of the heavens overhead hints at them, and never says it outright
+		Component heavens = com.jaymoskingdoms.Heavens.chat(villager, player);
+		if (heavens != null) {
+			villager.sendChatMessage(heavens, player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
 		}
 		// (0.7.224) a pit fighter with wins to his name (a champion, a retired one) brags of them
 		Component bout = FightPit.tell(villager, player);
@@ -397,10 +513,16 @@ abstract class McaDialogueMixin {
 		if (before != null) {
 			int gained = villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before;
 			// (0.7.221) one who looks down on your blood warms to you slower
-			int taken = Prejudice.hearts(villager, player, gained);
+			int taken = Prejudice.hearts(villager, player, gained) + com.jaymoskingdoms.Faiths.hearts(villager, player, gained);
 			if (taken > 0) {
 				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(-taken);
 				gained -= taken;
+			}
+			// (0.7.509) The Truth's flock warm to one of their own sooner
+			int warm = com.jaymoskingdoms.Blessings.flockHearts(villager, player, gained) + com.jaymoskingdoms.Faiths.kinHearts(villager, player, gained);
+			if (warm > 0) {
+				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(warm);
+				gained += warm;
 			}
 			Recollections.socialised(villager, player, question, gained);
 		}

@@ -5,6 +5,12 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
 
 - Root: Jaymo's Powers (`./gradlew build`). `kingdoms/`: Jaymo's Kingdoms. `kitchen/`: Jaymo's Kitchen. Each is its
   own Gradle project (JDK 25).
+- Finding code: grep `docs/codemap/<powers|kingdoms|kitchen>.md` first (one line per class: path, what it does, main
+  methods), then open only what you need. Regenerate it with `python3 tools/codemap.py` after adding classes.
+- Kingdoms lang is split into `kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/*.json`, merged at build
+  (there is no source `en_us.json`). Put a new feature's keys in its own part. A branch that still has the old
+  single file: on the merge conflict keep its en_us.json, then run `python3 tools/lang_split.py` (moves its keys into parts).
+- MODLOGs hold only recent entries; older ones are in `docs/modlog/`. Append new entries at the end as before.
 - Check every Minecraft API against the 26.3 sources (`./gradlew genSources`) before using it.
 - Keep each power in its own package and `lang/parts/<power>.json`; list every class that holds an attachment in
   `JaymosPowers.registerAttachments()`.
@@ -24,3 +30,7 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   (Sonnet 5.5), each in its own worktree.
 - Every finding gets an independent verifier agent before it's reported. A fix loop stops after two rounds
   with no progress.
+- Gemini second opinion: `.mcp.json` runs omni-ai-mcp 4.8.2 via `tools/gemini-mcp.sh` (needs `GEMINI_API_KEY` as a plain
+  environment variable; a network secret breaks it because Gemini rejects the Bearer header the proxy adds). Use only its
+  text/code tools (`ask_gemini`, `gemini_code_review`, `gemini_challenge`, `gemini_analyze_codebase`) as an extra verifier;
+  its answers are advice to check against the code. Media, agent and OpenRouter tools are denied in `.claude/settings.json`.

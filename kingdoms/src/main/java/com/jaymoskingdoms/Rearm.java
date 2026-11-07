@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * <ol>
  * <li>cry out ({@code talk.jaymoskingdoms.disarmed.*}) the moment their hand is empty;</li>
  * <li>go back for their own weapon if it's lying near;</li>
- * <li>otherwise swap: a weapon in the off hand (or, for a villager, in their pack) comes to hand, and folk draw the
+ * <li>otherwise swap: a weapon in the off hand comes to hand, and folk draw the
  * sidearm at their belt ({@link #SIDEARM}, once a life);</li>
  * <li>otherwise go for the nearest weapon on the ground ({@link #SEARCH_RANGE}), an archer preferring a bow;</li>
  * <li>and with none, fight with their fists (an archer with nothing to shoot closes in instead of standing at range).</li>
@@ -93,12 +93,18 @@ public final class Rearm {
 		});
 	}
 
-	/** One who fights with a weapon in hand: a folk fighter (not a caster), or a villager guard or archer. */
+	/**
+	 * One who fights with a weapon in hand: a folk fighter (not a caster), or a villager guard or archer. (0.7.548) Not
+	 * an MCA villager: MCA hands its guards their weapon for each fight (from their pack, or a fresh one of their rank's
+	 * when the pack has none) and takes it away again between, so an empty hand there is never a lost weapon. Watching
+	 * them had a guard cry "My weapon!" every time a fight ended or paused (Andy's clip: over a downed zombie, again and
+	 * again) and walk off after weapons on the ground mid-fight instead of finishing the foe.
+	 */
 	static boolean fighter(Mob mob) {
 		if (mob instanceof Folk folk) {
 			return folk.combatant() && !Sorcery.isCaster(folk.role()) && !folk.isCarrying();
 		}
-		return mob instanceof Villager && Downed.isGuard(mob);
+		return mob instanceof Villager && Downed.isGuard(mob) && !McaCompat.isMca(mob);
 	}
 
 	/** Whether {@code stack} is something to fight with: a blade, axe, spear, mace, trident, bow or crossbow. */
@@ -130,6 +136,13 @@ public final class Rearm {
 			// never seen with a weapon: empty-handed is how they are
 			return;
 		}
+		if (mob instanceof Villager villager && packed(villager)) {
+			// (0.7.474) MCA puts a guard's weapon away in their pack between fights and draws it again for the next: it isn't
+			// lost (taking it out here only had MCA put it back, crying "My weapon!" and "Not done yet!" over and over)
+			state.lost = false;
+			state.seeking = null;
+			return;
+		}
 		if (!state.lost) {
 			state.lost = true;
 			say(level, mob, "disarmed", DISARMED_LINES, Speech.RED);
@@ -158,6 +171,17 @@ public final class Rearm {
 		}
 	}
 
+	/** A weapon waits in {@code villager}'s pack. */
+	private static boolean packed(Villager villager) {
+		SimpleContainer pack = villager.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			if (isWeapon(pack.getItem(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** A weapon they already have comes to hand: the off hand's, a villager's pack's, or folk's sidearm. */
 	private static boolean swap(ServerLevel level, Mob mob, State state) {
 		ItemStack off = mob.getOffhandItem();
@@ -167,15 +191,8 @@ public final class Rearm {
 			drawn(level, mob);
 			return true;
 		}
-		if (mob instanceof Villager villager) {
-			SimpleContainer pack = villager.getInventory();
-			for (int i = 0; i < pack.getContainerSize(); i++) {
-				if (isWeapon(pack.getItem(i))) {
-					mob.setItemSlot(EquipmentSlot.MAINHAND, pack.removeItem(i, 1));
-					drawn(level, mob);
-					return true;
-				}
-			}
+		if (mob instanceof Villager) {
+			// (a weapon in a villager's pack is MCA's to draw: see tick)
 			return false;
 		}
 		if (!state.sidearmDrawn) {
@@ -238,7 +255,8 @@ public final class Rearm {
 	}
 
 	private static void say(ServerLevel level, Mob mob, String kind, int lines, int color) {
-		Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms." + kind + "." + mob.getRandom().nextInt(lines)), color, SPEECH_RANGE);
+		// (0.7.490) an orc or goblin fighter barks in its own dialect
+		Speech.say(level, mob, Dialects.trShared(mob, "talk.jaymoskingdoms." + kind + "." + mob.getRandom().nextInt(lines)), color, SPEECH_RANGE);
 	}
 
 	/** Whether {@code folk} is on its way to a weapon (its other goals that move it wait). */

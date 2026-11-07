@@ -4,8 +4,8 @@ import com.jaymoskitchen.client.corpse.CarryPose;
 import com.jaymoskitchen.client.quiver.QuiverRenderData;
 import com.jaymoskitchen.corpse.CorpseEntity;
 import net.minecraft.world.entity.player.Player;
-import com.jaymoskitchen.quiver.QuiverContents;
 import com.jaymoskitchen.quiver.Quivers;
+import com.jaymoskitchen.quiver.WornQuiver;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -22,10 +22,13 @@ abstract class AvatarRendererMixin {
 		method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymoskitchen$quiver(Avatar entity, AvatarRenderState state, float partialTick, CallbackInfo ci) {
-		QuiverContents worn = ((AttachmentTarget) entity).getAttached(Quivers.WORN);
-		state.setData(QuiverRenderData.KEY, worn == null ? null : QuiverRenderData.of(worn));
+		WornQuiver worn = ((AttachmentTarget) entity).getAttached(Quivers.WORN);
+		state.setData(QuiverRenderData.KEY, worn == null ? null : QuiverRenderData.of(worn, entity, partialTick));
 		// carrying a corpse: arms out in front, under it
-		state.setData(CarryPose.KEY, entity instanceof Player player && CorpseEntity.carriedBy(player) != null);
+		CorpseEntity carried = entity instanceof Player player ? CorpseEntity.carriedBy(player) : null;
+		state.setData(CarryPose.KEY, carried != null && !carried.oneHanded());
+		// (0.5.50) a small one hangs from the right hand by the neck
+		state.setData(CarryPose.ONE_HAND, carried != null && carried.oneHanded());
 		// (0.5.39) dragging one: reaching back to the legs in hand
 		state.setData(com.jaymoskitchen.client.corpse.DragPose.KEY,
 			entity instanceof Player player ? com.jaymoskitchen.client.corpse.DragPose.of(player, state, partialTick) : null);

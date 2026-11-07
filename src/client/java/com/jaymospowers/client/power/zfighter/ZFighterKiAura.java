@@ -83,7 +83,8 @@ public final class ZFighterKiAura {
 	}
 
 	static void extract(Avatar entity, AvatarRenderState state) {
-		state.setData(KEY, entity instanceof Player player ? aura(player, state.ageInTicks) : null);
+		// (0.19.70) only the attuned see ki (KiSight)
+		state.setData(KEY, entity instanceof Player player && KiSight.sees(player) ? aura(player, state.ageInTicks) : null);
 	}
 
 	private static float @Nullable [] aura(Player player, float age) {

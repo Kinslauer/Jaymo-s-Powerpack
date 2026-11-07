@@ -78,6 +78,7 @@ public final class PlayerCorpses {
 		RagdollBody limp = LivingRagdolls.lastBody(player);
 		corpse.startRagdoll(limp != null ? limp : Corpses.deathBody(player));
 		Corpses.pinFrom(player, corpse);
+		Corpses.tellBody(player, corpse);
 		level.addFreshEntity(corpse);
 	}
 
@@ -150,6 +151,8 @@ public final class PlayerCorpses {
 		ItemStack held = selected >= 0 && selected < rest.size() ? rest.set(selected, ItemStack.EMPTY) : ItemStack.EMPTY;
 		zombie.arm(held, rest);
 		level.addFreshEntity(zombie);
+		// (0.5.84) it rises from where it lay, not standing at once
+		Reanimation.start(level, zombie);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 1.0F,
 			0.8F * (corpse.slim() ? SLIM_PITCH : 1.0F));
 	}

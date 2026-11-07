@@ -6,6 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.component.TypedDataComponent;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.component.ContainerComponent;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
@@ -36,11 +43,21 @@ public final class Quivers {
 	public static Item QUIVER;
 
 	/**
-	 * The worn quiver's contents, synced to every client tracking the player (inventories aren't). Absent when the
-	 * player carries no quiver; recomputed from the inventory every tick, so it's never saved.
+	 * The quiver shown on the player's back and what's in it, synced to every client tracking the player (inventories
+	 * aren't). Absent when the player shows no quiver; recomputed every tick, so it's never saved.
 	 */
-	public static final AttachmentType<QuiverContents> WORN = AttachmentRegistry.create(JaymosKitchen.id("worn_quiver"),
-		builder -> builder.syncWith(QuiverContents.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	public static final AttachmentType<WornQuiver> WORN = AttachmentRegistry.create(JaymosKitchen.id("worn_quiver"),
+		builder -> builder.syncWith(WornQuiver.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/**
+	 * (0.5.82) Other mods' quivers drawn on the back when worn in a bauble slot (the RPG Series' small, medium and large
+	 * quivers). Ours is drawn from anywhere in the inventory as well.
+	 */
+	public static final TagKey<Item> SHOWN_QUIVERS = TagKey.create(Registries.ITEM, JaymosKitchen.id("shown_quivers"));
+
+	/** Jaymo's Powers' {@code Baubles.worn(Player)}, looked up once (null when Powers isn't there). */
+	private static @Nullable MethodHandle wornBaubles;
+	private static boolean lookedForBaubles;
 
 	/** Ammo handed to a bow from a quiver, and where it came from, so what the bow uses can be taken out. */
 	private static final Map<ItemStack, Draw> DRAWS = new MapMaker().weakKeys().makeMap();
@@ -77,8 +94,49 @@ public final class Quivers {
 			.register(output -> output.insertAfter(Items.ARROW, new ItemStack(QUIVER)));
 	}
 
-	/** The quiver a player wears: the off-hand one, else the first in their inventory. */
+	/**
+	 * What the player wears in Jaymo's Powers' bauble slots (a quiver goes in the body slot), empty when Powers isn't
+	 * there. Works on the server, and on the client for the local player (the slots sync to their wearer).
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<ItemStack> baubles(Player player) {
+		if (!lookedForBaubles) {
+			lookedForBaubles = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					wornBaubles = MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.baubles.Baubles"), "worn",
+						MethodType.methodType(List.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKitchen.LOGGER.warn("Couldn't find Jaymo's Powers' bauble slots; quivers won't be read from them", e);
+				}
+			}
+		}
+		if (wornBaubles == null) {
+			return List.of();
+		}
+		try {
+			return (List<ItemStack>) wornBaubles.invoke(player);
+		} catch (Throwable e) {
+			return List.of();
+		}
+	}
+
+	/** (0.5.82) Our quiver worn in a bauble slot, if any. */
+	private static @Nullable ItemStack baubleQuiver(Player player) {
+		for (ItemStack stack : baubles(player)) {
+			if (stack.getItem() instanceof QuiverItem) {
+				return stack;
+			}
+		}
+		return null;
+	}
+
+	/** The quiver a player wears: one in a bauble slot, else the off-hand one, else the first in their inventory. */
 	public static @Nullable ItemStack worn(Player player) {
+		ItemStack bauble = baubleQuiver(player);
+		if (bauble != null) {
+			return bauble;
+		}
 		if (player.getOffhandItem().getItem() instanceof QuiverItem) {
 			return player.getOffhandItem();
 		}
@@ -97,8 +155,13 @@ public final class Quivers {
 	 * stand-in: the bow shrinks it as it fires, and {@link #afterUseAmmo} takes the same number out of the quiver.
 	 */
 	public static @Nullable ItemStack drawAmmo(Player player, Predicate<ItemStack> supported) {
+		ItemStack bauble = baubleQuiver(player);
+		ItemStack found = bauble == null ? null : drawFrom(bauble, supported);
+		if (found != null) {
+			return found;
+		}
 		ItemStack offhand = player.getOffhandItem();
-		ItemStack found = drawFrom(offhand, supported);
+		found = drawFrom(offhand, supported);
 		if (found != null) {
 			return found;
 		}
@@ -147,11 +210,42 @@ public final class Quivers {
 		}
 	}
 
+	/**
+	 * (0.5.82) The quiver shown on a player's back: any quiver worn in a bauble slot (ours or another mod's), else ours
+	 * carried in the off hand or inventory.
+	 */
+	static @Nullable WornQuiver shown(Player player) {
+		for (ItemStack stack : baubles(player)) {
+			if (stack.getItem() instanceof QuiverItem) {
+				return new WornQuiver(BuiltInRegistries.ITEM.getKey(stack.getItem()), QuiverItem.contents(stack));
+			}
+			if (!stack.isEmpty() && stack.is(SHOWN_QUIVERS)) {
+				return new WornQuiver(BuiltInRegistries.ITEM.getKey(stack.getItem()), containerArrows(stack));
+			}
+		}
+		ItemStack quiver = worn(player);
+		return quiver == null ? null : new WornQuiver(BuiltInRegistries.ITEM.getKey(quiver.getItem()), QuiverItem.contents(quiver));
+	}
+
+	/** The arrows in another mod's quiver: whatever container component it keeps them in (Bundle API's, for the RPG Series). */
+	private static QuiverContents containerArrows(ItemStack stack) {
+		QuiverContents contents = QuiverContents.EMPTY;
+		for (TypedDataComponent<?> component : stack.getComponents()) {
+			if (component.value() instanceof ContainerComponent<?> container) {
+				for (ItemStack arrow : (Iterable<ItemStack>) container.itemCopies()::iterator) {
+					if (QuiverContents.canHold(arrow)) {
+						contents = contents.withAdded(arrow, arrow.getCount());
+					}
+				}
+			}
+		}
+		return contents;
+	}
+
 	/** Keeps every player's worn-quiver attachment in step with their inventory (and so with everyone's screens). */
 	public static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			ItemStack quiver = worn(player);
-			QuiverContents wearing = quiver == null ? null : QuiverItem.contents(quiver);
+			WornQuiver wearing = shown(player);
 			AttachmentTarget target = (AttachmentTarget) player;
 			if (!Objects.equals(wearing, target.getAttached(WORN))) {
 				if (wearing == null) {

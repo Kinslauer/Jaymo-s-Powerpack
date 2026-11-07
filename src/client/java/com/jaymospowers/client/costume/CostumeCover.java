@@ -77,6 +77,12 @@ public final class CostumeCover {
 		state.setData(KEY, new Covered(parts, skins));
 	}
 
+	/** (0.19.49) As {@link #mark}, for a body drawn on its own (a dead player's): {@code skin} is the one model that draws it. */
+	static void markSkin(EntityRenderState state, Model<?> skin, Identifier primary, Identifier secondary) {
+		int parts = coverage(primary, secondary);
+		state.setData(KEY, parts == 0 ? null : new Covered(parts, new Model<?>[] {skin}));
+	}
+
 	/**
 	 * Just before a model is drawn: if it draws the skin of a player whose costume covers parts of it, those go. Only a
 	 * solid draw ({@code tint}'s alpha at least {@link #SOLID_TINT}): a see-through copy of the body (Chrono's streak

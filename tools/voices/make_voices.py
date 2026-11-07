@@ -1,7 +1,7 @@
 """Voices for Jaymo's Kingdoms and Powers, made with VoxCPM2 (Apache-2.0, openbmb/VoxCPM2).
 
 Each voice is designed once from a description (no real person is cloned), saved as refs/<voice>.wav, then every line is
-cloned from that one clip so the voice stays the same. The lines come from Kingdoms' en_us.json by the same rule as
+cloned from that one clip so the voice stays the same. The lines come from Kingdoms' lang parts by the same rule as
 `Voices.voiced()` in Kingdoms: the narrator reads each life-story question (title and the line under it), each realm
 page, every answer's tale and the closing line, plus (Kingdoms 0.7.352) the who-are-you page, the skip-the-story ask and
 the hold screen; the spirits read their summon lines; (Kingdoms 0.7.348) each tongue's
@@ -29,7 +29,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 ASSETS = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms")
-LANG = os.path.join(ASSETS, "lang", "en_us.json")
+LANG = os.path.join(ASSETS, "lang", "parts")
 POWERS = os.path.join(ROOT, "src", "main", "resources", "assets", "jaymospowers")
 POWERS_LANG = os.path.join(POWERS, "lang", "parts")
 # each mod's assets, by namespace
@@ -126,6 +126,12 @@ def lines(lang, powers):
                 realm = s + "realm." + parts[3]
                 if realm in lang:
                     out.append(("narrator", realm, lang[s + "realm.title"] + " " + lang[realm]))
+    # (Kingdoms 0.7.448) a blood's own telling of the story (story.jaymoskingdoms.as.<heritage>.<question>...): its pages'
+    # titles and lines and its answers' tales. Kingdoms only voices these once their clip is made (`Voices.heritageVoiced`).
+    for key in lang:
+        parts = key.split(".")
+        if key.startswith(s + "as.") and (len(parts) == 6 and parts[5] in ("title", "sub") or len(parts) == 7 and parts[6] == "tale"):
+            out.append(("narrator", key, realm_free(lang[key])))
     out.append(("narrator", STORY_END, lang["gui.jaymoskingdoms.story.summary_sub"]))
     for key in INTRO_LINES:
         out.append(("narrator", key, lang[key]))
@@ -174,8 +180,9 @@ def write_sounds(all_lines):
         for voice, key, _ in all_lines:
             if NAMESPACE.get(voice, "jaymoskingdoms") != ns:
                 continue
-            if (ns == "jaymospowers" or "tongue" in VOICES.get(voice, {})) and not os.path.exists(clip_path(voice, key)):
-                # (Kingdoms registers a tongue's line only once its clip exists)
+            if (ns == "jaymospowers" or "tongue" in VOICES.get(voice, {}) or key.startswith("story.jaymoskingdoms.as.")) \
+                    and not os.path.exists(clip_path(voice, key)):
+                # (Kingdoms registers a tongue's line, and a blood's own telling, only once its clip exists)
                 continue
             sid, file = sound_name(key)
             entry = {"name": ns + ":voice/" + file}
@@ -362,8 +369,11 @@ def seeded(seed):
 
 
 def main():
-    with open(LANG, encoding="utf-8") as f:
-        lang = json.load(f)
+    lang = {}
+    for name in sorted(os.listdir(LANG)):
+        if name.endswith(".json"):
+            with open(os.path.join(LANG, name), encoding="utf-8") as f:
+                lang.update(json.load(f))
     powers = {}
     for name in sorted(os.listdir(POWERS_LANG)):
         if name.endswith(".json"):

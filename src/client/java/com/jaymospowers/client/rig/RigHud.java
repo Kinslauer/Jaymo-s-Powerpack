@@ -74,9 +74,15 @@ final class RigHud {
 		int level = Rig.level(player);
 		boolean second = level >= Rig.SCAN_LEVEL;
 		int lines = 2 + (second ? 1 : 0) + (target != null ? 1 : 0) + (warnings != 0 ? 1 : 0);
-		int x = graphics.guiWidth() - WIDTH - 2;
-		int bottom = graphics.guiHeight() - 40;
-		int y = bottom - lines * LINE - 4;
+		// (HUD rework) the top row of the right dock, over the power's chips and any mount bar (it sat in the corner, over the wounds doll)
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.DOCK_RIGHT, "jaymospowers:rig", 50, WIDTH,
+			lines * LINE + 4);
+		if (at == null) {
+			return;
+		}
+		int x = at[0];
+		int y = at[1];
+		int bottom = y + lines * LINE + 4;
 		graphics.fill(x, y, x + WIDTH, bottom, PANEL);
 		graphics.fill(x, y, x + WIDTH, y + 1, ACCENT);
 		if (level > 0) {

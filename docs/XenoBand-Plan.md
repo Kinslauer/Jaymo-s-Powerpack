@@ -50,7 +50,8 @@ patches 6 (Kingdoms side) and 9 (art) can run beside another.
   (patch 8).
 - **Charge:** a band charge replaces the random 1 to 5 minute timer. Changed, it drains one point a tick, and faster
   when you're hit or when a move goes on cooldown. As a human it refills. Mastery makes it bigger, from 2 minutes up to
-  5 at full mastery. The HUD bar becomes the charge, and the last 5 seconds beep and flash (patch 0).
+  5 at full mastery. The HUD bar becomes the charge, and the last 5 seconds beep and flash (patch 0). (0.19.85, Andy: the
+  charge is unlocked by reforging the band at the moon forge; before that it's the random 1 to 5 minute timer.)
 - **Quick change:** while you're an alien, hold Z and scroll to another alien. It costs a quarter of the charge, and
   you're dizzy for a second.
 - **The band saves you:** a killing blow while you're human slams the band for you, before Downed. The form fits the
@@ -83,6 +84,8 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
   page. Sneak + R pours you back out.
 - **Ride a machine:** Rivet climbs into an android mech, a golem, a ship's cannon or a minecart and drives it. While
   you're inside it has green lines, more speed and more damage.
+- **Built (0.18.95):** everything above but the ship's cannon (Kingdoms' cannons are blocks, not something to climb into),
+  left for later. See `docs/xenoform.md`, "Rivet's shells".
 
 ### Patch 4, New aliens A (Powers, large; picks gorger, slipfin, polestar, watcher-alien, duplex-senses)
 - **Gorger:** scanned from an armadillo. It eats blocks to charge a blast, and has a horn charge that turns into a
@@ -94,6 +97,8 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
 - **The stalker:** near a monolith, something watches band wearers at night. Look straight at it three times and it
   leaves a shed skin to scan. It's a hidden alien, like Nadir.
 - **Duplex:** sneak + V looks through the aimed double's eyes.
+- **Built (0.18.96):** all of the above; the stalker's alien is called Lurk. Also Rivet's missing Ultimate (its C
+  did nothing and it had no Ultimate skin). See `docs/xenoform.md`.
 
 ### Patch 5, New aliens B (Powers, large; picks gyre, cortex, locust, croaker, dud)
 - **Gyre:** scanned from a turtle, a wind-shell turtle.
@@ -102,8 +107,17 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
 - **Croaker:** scanned from a frog. It has a tongue grab and swallows small mobs.
 - **Dud:** never scanned, only learned from a corrupted band's glitch (patch 6). Nothing hurts it, it can't attack,
   and every mob nearby goes for it.
+- **Built (0.18.103):** all five, plus the breeze for Gyre and the tadpole for Croaker (from the scan-gap picks). Cortex
+  reads health and Kingdoms temperaments. Dud is hidden and has no Ultimate; until patch 6 it's only
+  `/powerdebug xenoform unlock dud`. See `docs/xenoform.md`.
 
 ### Patch 6, Earning aliens (Powers + Kingdoms, large; picks code-tablets, alien-crafting, star-wreck, band-hunters, glitch-teaches, star-smith)
+
+**Built, Powers side (0.18.122):** tablets, the three alien crafts with JEI pages, star wrecks with probes, band hunters
+and the teaching glitch, as in `docs/xenoform.md` ("Earning aliens"). Choices: a tablet holds no alien of its own; the
+band reads a random one it doesn't hold yet. Probes are built on the vex (its flight, our skin). The star-reader
+(Kingdoms 0.7.442) is spawned and talked for by Powers (`StarReaders`), dressed and voiced by Kingdoms; module plans
+join their trade once patch 7 makes them.
 - **Star tablets:** found in fallen star loot, fishing treasure and remnant chests. Hold one while slamming and the
   band learns that alien.
 - **Alien-only crafting:** Gremlin assembles tablets, Bulwark grinds ore into two dusts, and Pyre smelts what you carry.
@@ -117,6 +131,10 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
   gives oblique hints.
 
 ### Patch 7, Upgrading the band (Powers, large; picks band-reforge, modules, mod-*, skill-tree, band-wipe)
+
+**Built (0.18.123, Kingdoms 0.7.444):** as in `docs/xenoform.md` ("Upgrading the band"). Choices: there is only one moon,
+so the forge's world is picked at random per save from the five surface far worlds. Modules are learned from plans and
+fitted on the band screen (B as yourself). Quick change and the death save are now bought with band points.
 - **Reforge:** done on a moon, in a structure generated on a random moon of the pod's worlds. An alien smith keeps
   the forge there. Bring the material (star metal, a wreck core and Bulwark's dust) and it reforges your own band
   (Andy's note).
@@ -130,6 +148,11 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
 - **Forget an alien:** take one alien off the dial, or wipe the band clean.
 
 ### Patch 8, The rival band (Kingdoms + Powers, large; pick rival-band)
+
+**Built (0.18.125, Kingdoms 0.7.446):** as in `docs/xenoform.md` ("The rival band"). Choices: only the four darkened aliens
+(no Dud). The hunter comes at night for one wearer, at most once every 3 days, while the rival band is out of the world;
+beaten means his alien fell, and a tap then takes the band (killing him drops it). "Realms that know about aliens" are
+those whose people have seen anyone change into the alien. Band items now carry their upgrades.
 - **The hunter:** a band hunter, an outcast MCA villager wearing a dark-red rival band, hunts band wearers. He changes
   into his own aliens to fight.
 - **Taking it:** beat him and you can take his band.
@@ -138,6 +161,9 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
 - **The crime:** in realms that know about aliens, wearing it is a crime.
 
 ### Patch 9, Looks (Powers, art; picks alien-looks, band-custom)
+
+**Built (0.18.126):** as in `docs/xenoform.md` ("Looks"). Choices: the three looks are painted on the client from each
+alien's own skin (no new art, every alien covered); the preview turns you (the band), not the alien.
 - **Alien looks:** two or three looks per alien (plain, armoured, weathered), picked on the band screen.
 - **Dress the band:** a glow colour that also tints each alien's green lines and the slam flash, a faceplate shape and
   spikes, with a turning preview.
@@ -145,5 +171,7 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
 ## Open questions (Claude assumes the first answer and carries on)
 1. Patch 2: does each Ultimate keep its current special move as its C, or should the move fold into the new kit with C
    just turning back? (Assumed: it stays as C.)
-2. Patch 1: should the charge fully replace the random timer before mastery? (Assumed: yes.)
+2. Patch 1: should the charge fully replace the random timer before mastery? (Andy, 2026-11-04: no, "i want the charge to
+   be something you unlock, its a random timer before then"; he picked reforging the band as the unlock. Built in 0.19.85:
+   unforged, a change lasts a random 1 to 5 minutes and the band recharges a minute after; reforged, the charge.)
 3. Patch 8: is Dud on the rival band's dial too, or only the four darkened aliens? (Assumed: only the four.)

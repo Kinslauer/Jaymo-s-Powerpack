@@ -320,7 +320,8 @@ public final class Breaks {
 	static boolean armBroken(LivingEntity entity, InteractionHand hand) {
 		boolean right = (entity.getMainArm() == HumanoidArm.RIGHT) == (hand == InteractionHand.MAIN_HAND);
 		BodyPart arm = right ? BodyPart.RIGHT_ARM : BodyPart.LEFT_ARM;
-		return isBroken(entity, arm) || missing(entity, arm);
+		// (0.20.110) on adrenaline a broken arm works: only a severed one is no use
+		return missing(entity, arm) || isBroken(entity, arm) && !Adrenaline.active(entity);
 	}
 
 	/**
@@ -381,8 +382,13 @@ public final class Breaks {
 		return !stack.isEmpty() && (stack.is(Items.SHIELD) || stack.has(DataComponents.BLOCKS_ATTACKS) || stack.getItem() instanceof ProjectileWeaponItem);
 	}
 
-	/** A person whose two legs are both broken (not severed): crawling is all that's left. */
+	/** A person whose two legs are both broken (not severed): crawling is all that's left, (0.20.110) unless on {@link Adrenaline}. */
 	public static boolean crawlOnly(Entity entity) {
+		return bothLegsBroken(entity) && !Adrenaline.active(entity);
+	}
+
+	/** (0.20.110) Two broken legs (not severed, not both splinted), adrenaline or not: what {@link #crawlOnly} holds to the ground. */
+	public static boolean bothLegsBroken(Entity entity) {
 		// (0.14.4) both splinted: a slow hobble, on their feet
 		return entity instanceof LivingEntity living && BodyPlan.of(living) == BodyPlan.HUMANOID
 			&& isBroken(living, BodyPart.LEFT_LEG) && isBroken(living, BodyPart.RIGHT_LEG)
@@ -521,7 +527,7 @@ public final class Breaks {
 	}
 
 	/** Every break gone at once (full healing, a debug command). */
-	static void clearAll(LivingEntity entity) {
+	public static void clearAll(LivingEntity entity) {
 		boolean crawled = crawlOnly(entity);
 		int mask = broken(entity);
 		entity.removeAttached(BROKEN);
@@ -685,8 +691,9 @@ public final class Breaks {
 			legs = 0;
 			feet = 0;
 		}
-		if (Pain.numb(entity)) {
-			// (0.14.4) willow bark, poppy, leeches or drink: the pain's hidden, the slowness and weakness with it
+		if (Pain.numb(entity) || Adrenaline.active(entity)) {
+			// (0.14.4) willow bark, poppy, leeches or drink: the pain's hidden, the slowness and weakness with it;
+			// (0.20.110) and on adrenaline the body doesn't care yet
 			arms = 0.0;
 			legs = 0;
 			feet = 0;
@@ -754,8 +761,8 @@ public final class Breaks {
 			if (mask == 0) {
 				continue;
 			}
-			// (no sprinting on a broken leg)
-			if (body.isSprinting() && (mask & (bit(BodyPart.LEFT_LEG) | bit(BodyPart.RIGHT_LEG) | bit(BodyPart.FRONT_LEGS)
+			// (no sprinting on a broken leg; (0.20.110) unless on adrenaline)
+			if (body.isSprinting() && !Adrenaline.active(body) && (mask & (bit(BodyPart.LEFT_LEG) | bit(BodyPart.RIGHT_LEG) | bit(BodyPart.FRONT_LEGS)
 				| bit(BodyPart.HIND_LEGS) | bit(BodyPart.LEGS))) != 0) {
 				body.setSprinting(false);
 			}

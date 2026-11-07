@@ -73,10 +73,12 @@ public final class EmberLook extends RenderLayer<AvatarRenderState, PlayerModel>
 			// (0.7.81) under a mask or the symbiote's suit
 			return;
 		}
-		PlayerModel model = this.getParentModel();
+		// (0.7.609) on MCA's body and pose when MCA draws the player (VampireLooks#glowBody)
+		PlayerModel model = VampireLooks.glowBody(this.getParentModel());
 		collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(MARKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 			state.outlineColor);
-		Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), EYE_GLOW, EYES, "ember_eyes/", EYES_BY_SKIN);
+		Identifier eyes = VampireLooks.faceEyes(state, this.getParentModel(), EYE_GLOW,
+			() -> VampireLooks.glowingEyes(state.skin.body().texturePath(), EYE_GLOW, EYES, "ember_eyes/", EYES_BY_SKIN));
 		collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 			state.outlineColor);
 	}

@@ -1,0 +1,19 @@
+{
+  "commands.jaymoskingdoms.roaming.no_room": "No open ground for a caravan near you (it needs dry land outside any realm, 64-96 blocks away).",
+  "commands.jaymoskingdoms.roaming.spawned": "A %s caravan is on its way past you.",
+  "commands.jaymoskingdoms.roaming.count": "%s roaming caravans about.",
+  "commands.jaymoskingdoms.roaming.line": "%s at %s, bound for %s: %s fighters, %s pack animals",
+  "commands.jaymoskingdoms.roads.count": "%s King's Roads",
+  "commands.jaymoskingdoms.roads.road": "%s - %s: %s blocks, paved in %s of %s chunks",
+  "commands.jaymoskingdoms.roads.plan": "%s roads still to plan; planning the next",
+  "commands.jaymoskingdoms.underworld.none": "There's no realm's law here (or it keeps no den).",
+  "commands.jaymoskingdoms.underworld.nosite": "This realm keeps a den now, but no site was found to dig it yet.",
+  "commands.jaymoskingdoms.underworld.made": "This realm keeps a speakeasy.",
+  "commands.jaymoskingdoms.underworld.heat": "%s's underworld now runs at %s heat.",
+  "commands.jaymoskingdoms.roads.unknown": "Not a lockable road: %s",
+  "commands.jaymoskingdoms.roads.unlocked": "Unlocked the road %s",
+  "commands.jaymoskingdoms.roads.locked": "Locked the road %s",
+  "commands.jaymoskingdoms.roads.unlocked_n": "Unlocked %s roads",
+  "commands.jaymoskingdoms.roads.locked_n": "Locked %s roads",
+  "commands.jaymoskingdoms.roads.deeds": "%s may count %s road deeds (their own and their group's): %s"
+}

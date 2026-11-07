@@ -76,7 +76,7 @@ public final class Deeds {
 	static final long SAVE_GAP = 1200L, FIRE_THANKS_GAP = 600L;
 	/** The chance the one you saved hands you something. */
 	static final float SAVE_GIFT_CHANCE = 0.3F;
-	/** What they hand you. */
+	/** What they hand you ((0.7.498) the emerald is a coin of the town's: {@link #gift}). */
 	static final List<Item> GIFTS = List.of(Items.EMERALD, Items.BREAD, Items.APPLE, Items.COOKIE, Items.BAKED_POTATO, Items.PUMPKIN_PIE,
 		Items.HONEY_BOTTLE);
 	/** How often folk may call out to someone they remember (ticks), and the least gap between two calls to one player. */
@@ -256,7 +256,7 @@ public final class Deeds {
 		// (0.7.109) and never forgets it
 		Recollections.remember(saved, player, Recollections.Kind.SAVED, Component.empty());
 		if (level.getRandom().nextFloat() < SAVE_GIFT_CHANCE) {
-			give(player, new ItemStack(GIFTS.get(level.getRandom().nextInt(GIFTS.size()))));
+			give(player, new ItemStack(gift(level, saved, GIFTS.get(level.getRandom().nextInt(GIFTS.size())))));
 			saved.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		}
 		cheer(level, player, saved, "talk.jaymoskingdoms.deed.save.cheer");
@@ -374,6 +374,11 @@ public final class Deeds {
 		}
 	}
 
+	/** (0.7.498) {@code pick} as a gift from {@code from}: an emerald is a coin of the land instead (the emerald is a gem now). */
+	private static Item gift(ServerLevel level, Villager from, Item pick) {
+		return pick == Items.EMERALD ? Currencies.at(level, from.blockPosition()).item() : pick;
+	}
+
 	private static void give(ServerPlayer player, ItemStack stack) {
 		if (!stack.isEmpty() && !player.getInventory().add(stack)) {
 			player.drop(stack, false, Prediction.SERVER_ONLY);
@@ -395,9 +400,9 @@ public final class Deeds {
 	private static void record(ServerPlayer player, Faction f, Kind kind) {
 		// (0.7.419) road deeds: a fire put out, a life saved (anyone doing it opens a road for everyone, RoadLocks)
 		if (kind == Kind.FIRE) {
-			done(player.level().getServer(), "fire.doused");
+			done(player, "fire.doused");
 		} else if (kind == Kind.SAVE) {
-			done(player.level().getServer(), "life.saved");
+			done(player, "life.saved");
 		}
 		if (Identities.hidden(player, f.id())) {
 			// (0.7.62) a masked stranger did it: the costume's name is made by it (its reputation), not theirs
@@ -453,6 +458,11 @@ public final class Deeds {
 			return Component.translatable(Oddities.line(family + ".heard", level.getRandom()), Identities.shownName(player), from.name());
 		}
 		return Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player));
+	}
+
+	/** (0.7.449, {@link ComingOver}) What one of {@code f} who's heard of {@code player}'s deeds hails them with, or null if they know of nothing. */
+	static @Nullable Component greeting(ServerLevel level, ServerPlayer player, Faction f) {
+		return line(level, player, f, "greet");
 	}
 
 	/** (Approaches) A gossip of {@code f}'s talk about what {@code player} did, or null if they know of nothing (or don't feel like it). */
@@ -556,13 +566,13 @@ public final class Deeds {
 
 	// ---- road deeds (0.7.418) -------------------------------------------------------------------------------------------
 
-	/** (0.7.418) Records road deed {@code id} as done, for the whole world ({@link RoadDeeds}). True if it is new. */
-	public static boolean done(MinecraftServer server, String id) {
-		return RoadDeeds.done(server, id);
+	/** (0.7.418) Records road deed {@code id} as done (0.7.466: by {@code player} and their group, {@link RoadDeeds}). True if it is new. */
+	public static boolean done(ServerPlayer player, String id) {
+		return RoadDeeds.done(player, id);
 	}
 
-	/** (0.7.418) Whether road deed {@code id} has been done in this world ({@link RoadDeeds}). */
-	public static boolean has(MinecraftServer server, String id) {
-		return RoadDeeds.has(server, id);
+	/** (0.7.466) Whether {@code player} (or their group) has done road deed {@code id} ({@link RoadDeeds}). */
+	public static boolean has(ServerPlayer player, String id) {
+		return RoadDeeds.has(player, id);
 	}
 }

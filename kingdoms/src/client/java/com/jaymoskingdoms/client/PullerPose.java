@@ -43,7 +43,7 @@ public final class PullerPose {
 				return;
 			}
 			for (Entity e : client.level.entitiesForRendering()) {
-				if (e instanceof Wagon w && w.kind() == Wagon.RICKSHAW && w.pullerId() >= 0) {
+				if (e instanceof Wagon w && (w.kind() == Wagon.RICKSHAW || w.kind() == Wagon.HANDCART) && w.pullerId() >= 0) {
 					PULLING.put(w.pullerId(), w.tired());
 				}
 			}

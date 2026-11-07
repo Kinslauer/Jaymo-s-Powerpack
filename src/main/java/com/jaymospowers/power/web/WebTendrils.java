@@ -321,6 +321,8 @@ public final class WebTendrils {
 	public static boolean grabbable(Player player, Entity entity) {
 		return entity != player && entity.isAlive() && !entity.isSpectator() && !(entity instanceof ArmorStand) && !KitchenCompat.isHeavy(entity)
 			&& !WebHeldGrab.heldByAnyone(entity)
+			// (0.18.96) Slipfin's skin is too slick to hold
+			&& !com.jaymospowers.power.xenoform.forms.Slipfin.slippery(entity)
 			&& !(entity instanceof Player p && p.isCreative()) && entity.getVehicle() == null && !entity.isVehicle()
 			&& (entity instanceof LivingEntity || entity instanceof net.minecraft.world.entity.item.ItemEntity
 				|| entity instanceof com.jaymospowers.core.BlockCluster || com.jaymospowers.power.gravity.GravityPower.isCorpse(entity));

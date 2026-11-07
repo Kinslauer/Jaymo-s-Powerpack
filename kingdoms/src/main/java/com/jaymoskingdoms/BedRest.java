@@ -119,6 +119,25 @@ public final class BedRest {
 		return Either.right(Unit.INSTANCE);
 	}
 
+	/**
+	 * (0.7.573) Lays {@code player} in the bed at {@code pos} (its head) to rest, without vanilla's checks or a new spawn
+	 * point: one carried in by a village ({@link Shelter}), coming round. False if they can't lie there.
+	 */
+	static boolean lay(ServerPlayer player, BlockPos pos) {
+		if (player.isSleeping()) {
+			return false;
+		}
+		RESTING.add(player.getUUID());
+		if (!player.startSleeping(pos)) {
+			RESTING.remove(player.getUUID());
+			return false;
+		}
+		((PlayerSleepAccessor) player).jaymoskingdoms$setSleepCounter(0);
+		player.level().updateSleepingPlayerList();
+		ServerPlayNetworking.send(player, new State(true));
+		return true;
+	}
+
 	private static boolean monstersNear(ServerPlayer player, BlockPos pos) {
 		if (player.isCreative()) {
 			return false;

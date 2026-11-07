@@ -191,7 +191,7 @@ public class SuitEditorScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		int mouseX = (int)event.x(), mouseY = (int)event.y();
-		if (event.button() == 1) {
+		if (event.button() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT) {
 			// right-click on a stepping button steps it back
 			Button[] buttons = {this.cut, this.mask, this.cape, this.gloves, this.boots, this.belt, this.helm, this.fins};
 			for (int i = 0; i < buttons.length; i++) {

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/jewellery/bracelet_frame_silver",
+    "layer1": "jaymospowers:item/jewellery/bracelet_gem_rose"
+  }
+}

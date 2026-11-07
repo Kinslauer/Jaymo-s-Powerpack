@@ -290,7 +290,8 @@ public final class ZFighterGrowth {
 		if (now % HEAVY_GRAVITY_TICKS == 0 && ZFighterTraining.heavyGravity(player)) {
 			train(player, HEAVY_GRAVITY, HEAVY_GRAVITY_POINTS);
 		}
-		if (now % CARRY_TICKS == 0 && (Carry.isCarrying(player) || com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(player))) {
+		if (now % CARRY_TICKS == 0 && (Carry.isCarrying(player) || com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(player)
+			|| com.jaymospowers.core.CarryOnCompat.isCarrying(player))) {
 			train(player, CARRYING, CARRY_POINTS);
 		}
 		Meditate.State meditation = Meditate.of(player);

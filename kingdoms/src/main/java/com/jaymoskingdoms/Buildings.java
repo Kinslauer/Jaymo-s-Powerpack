@@ -52,26 +52,30 @@ final class Buildings {
 			realm(type, "pen", Buildings::pen, 1, 0);
 			realm(type, "farm", Buildings::farm, 1, 0);
 			realm(type, "house", Buildings::house, 2, 0);
-			realm(type, "smithy", Buildings::smithy, 1, 0);
+			hall(type, "smithy", Buildings::smithy, 1, 0);
 			realm(type, "road", Buildings::road, 2, 0);
 			realm(type, "well", Buildings::well, 1, 0);
 			// (0.7.299) where townsfolk without a stove at home buy their meals ({@link Meals})
 			realm(type, "cookhouse", Buildings::cookhouse, 1, 12);
 			realm(type, "house", Buildings::house, 4, 16);
-			realm(type, "mason", Buildings::mason, 1, 20);
+			hall(type, "mason", Buildings::mason, 1, 20);
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
 			// (0.7.250) the job halls ({@link JobHalls}): where a town's butchers, fishers and hunters work
-			realm(type, "butcher", JobHalls::butcher, 1, 22);
+			// (0.7.483) earlier now, with the healer's infirmary: every town keeps a butcher and a healer ({@link TownTrades})
+			hall(type, "butcher", JobHalls::butcher, 1, 10);
+			realm(type, "infirmary", JobHalls::infirmary, 1, 12);
 			realm(type, "market", Buildings::market, 1, 24);
-			realm(type, "fishery", JobHalls::fishery, 1, 26);
+			hall(type, "fishery", JobHalls::fishery, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
-			realm(type, "hunting_lodge", JobHalls::huntingLodge, 1, 30);
+			hall(type, "hunting_lodge", JobHalls::huntingLodge, 1, 30);
 			realm(type, "farm", Buildings::farm, 2, 28);
 			realm(type, "road", Buildings::road, 4, 28);
 			realm(type, "barracks", Buildings::barracks, 1, 32);
 			// (0.7.384) the school's hall, its master at the middle ({@link SchoolHalls}; Weapon Forms)
 			realm(type, "training_hall", JobHalls::trainingHall, 1, 34);
+			// (0.7.441) a Warrior-born (or mixed) haven's fighting ring ({@link Planner#eligible} keeps it to them)
+			realm(type, HavenBuildings.RING, HavenBuildings::ring, 1, 30);
 			realm(type, "house", Buildings::house, 7, 36);
 			town(type, "wall", Buildings::wall, 12, 40);
 			town(type, "tower", Buildings::tower, 4, 40);
@@ -83,7 +87,24 @@ final class Buildings {
 		}
 		// (0.5.27) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
 		Blueprint.register(FactionType.KINGDOM, new Blueprint.Entry("tavern",
-			(level, faction, variant) -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction)), 1, 26));
+			// (0.7.629) Dungeons and Taverns' own tavern house when it's installed and the variant's marked ({@link DntBuildings})
+			(level, faction, variant) -> DntBuildings.draw(level, faction, variant, "tavern",
+				() -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction))), 1, 26));
+		if (DntBuildings.loaded()) {
+			// (0.7.629) buildings only Dungeons and Taverns draws
+			for (FactionType type : new FactionType[] {FactionType.KINGDOM, FactionType.FIEFDOM}) {
+				dnt(type, "apiary", 1, 26);
+				dnt(type, "sawmill", 1, 30);
+				dnt(type, "farmhouse", 1, 36);
+				dnt(type, "firewatch_tower", 2, 40);
+			}
+			dnt(FactionType.KINGDOM, "graveyard", 1, 50);
+			dnt(FactionType.VILLAGE, "apiary", 1, 12);
+			dnt(FactionType.VILLAGE, "farmhouse", 1, 16);
+			dnt(FactionType.VILLAGE, "sawmill", 1, 20);
+		}
+		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
+		realm(FactionType.KINGDOM, Temples.GREAT_TEMPLE, GreatTemple::draw, 1, Temples.GREAT_TEMPLE_FROM);
 		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
 		realm(FactionType.VILLAGE, "pen", Buildings::pen, 1, 0);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 1, 0);
@@ -92,15 +113,17 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "cookhouse", Buildings::cookhouse, 1, 8);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 1, 8);
 		realm(FactionType.VILLAGE, "fire_pit", Buildings::firePit, 1, 10);
-		realm(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 10);
-		realm(FactionType.VILLAGE, "hunting_lodge", JobHalls::huntingLodge, 1, 14);
+		hall(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 6);
+		realm(FactionType.VILLAGE, "infirmary", JobHalls::infirmary, 1, 8);
+		hall(FactionType.VILLAGE, "hunting_lodge", JobHalls::huntingLodge, 1, 14);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 2, 14);
 		// (0.5.27) a row stable, its horses bought in when it's done ({@link Gatherers#built})
 		realm(FactionType.VILLAGE, "stable", Buildings::stable, 1, 18);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 2, 16);
-		realm(FactionType.VILLAGE, "fishery", JobHalls::fishery, 1, 16);
+		hall(FactionType.VILLAGE, "fishery", JobHalls::fishery, 1, 16);
+		realm(FactionType.VILLAGE, HavenBuildings.RING, HavenBuildings::ring, 1, 16);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 4, 16);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 6, 20);
 		town(FactionType.VILLAGE, "palisade", Buildings::palisade, 10, 22);
@@ -112,16 +135,33 @@ final class Buildings {
 			Planner.setRings(ring, WALL_RING_MIN, WALL_RING_MAX);
 		}
 		Planner.setRings("palisade", PALISADE_RING_MIN, PALISADE_RING_MAX);
+		// (0.7.490) the works a haven raises ({@link HavenGrowth})
+		HavenBuildings.register();
 	}
 
-	private interface Design {
+	interface Design {
 		Blueprint draw(Kit k);
 	}
 
-	/** A building whose materials and details are its own. */
-	private static void realm(FactionType type, String id, Design design, int max, int minSize) {
-		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> design.draw(Kit.of(level, faction, variant, variant)), max,
-			minSize));
+	/** A building whose materials and details are its own (the well D&T's own when marked, {@link DntBuildings}). */
+	static void realm(FactionType type, String id, Design design, int max, int minSize) {
+		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> DntBuildings.draw(level, faction, variant, id,
+			() -> design.draw(Kit.of(level, faction, variant, variant))), max, minSize));
+	}
+
+	/** (0.7.629) A building only Dungeons and Taverns draws ({@link DntBuildings}); a fire pit if it can't be read. */
+	private static void dnt(FactionType type, String id, int max, int minSize) {
+		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> DntBuildings.draw(level, faction, variant, id,
+			() -> firePit(Kit.of(level, faction, variant, variant))), max, minSize));
+	}
+
+	/**
+	 * (0.7.521) A trade's own building: CTOV's for the trade and land when its variant is marked for it
+	 * ({@link CtovHalls}), else ours.
+	 */
+	static void hall(FactionType type, String id, Design design, int max, int minSize) {
+		Blueprint.register(type, new Blueprint.Entry(id, (level, faction, variant) -> DntBuildings.draw(level, faction, variant, id,
+			() -> CtovHalls.draw(level, faction, variant, id, design)), max, minSize));
 	}
 
 	/** A piece of the town's defences: one look for the whole settlement (so they join up), its own details. */
@@ -159,6 +199,10 @@ final class Buildings {
 	 * village), a gabled roof, a bed, a table.
 	 */
 	static Blueprint house(Kit k) {
+		if (!k.haven.isEmpty() && !k.classic) {
+			// (0.7.441) a haven builds its own way ({@link HavenBuildings})
+			return HavenBuildings.house(k);
+		}
 		if (k.blossom && !k.classic) {
 			// (0.7.250) among the cherry trees, a minka ({@link Blossom})
 			return Blossom.minka(k);
@@ -1020,6 +1064,8 @@ final class Buildings {
 		}
 		s.set(1, 2, 7, Blocks.BARREL.defaultBlockState());
 		s.set(2, 2, 7, Blocks.BARREL.defaultBlockState());
+		// (0.7.578) the menu board on the bar ({@link CafeBoard}): a hot meal for anyone passing
+		s.set(4, 2, 5, Sketch.facing(CafeBoard.BOARD, Direction.NORTH));
 		table(s, k, 3, 1, 2, true);
 		table(s, k, 7, 1, 2, true);
 		table(s, k, 7, 1, 5, true);
@@ -1090,6 +1136,7 @@ final class Buildings {
 			s.set(11, 1, z, Blocks.BARREL.defaultBlockState());
 			s.set(11, 2, z, Blocks.BARREL.defaultBlockState());
 		}
+		s.set(9, 2, 5, Sketch.facing(CafeBoard.BOARD, Direction.WEST));
 		s.set(1, 1, 6, p.wall());
 		s.set(1, 1, 8, p.wall());
 		s.set(1, 1, 7, Sketch.facing(Blocks.SMOKER, Direction.EAST));
@@ -1146,6 +1193,7 @@ final class Buildings {
 			s.set(x, 1, 9, Blocks.BARREL.defaultBlockState());
 		}
 		s.set(1, 2, 9, Blocks.BARREL.defaultBlockState());
+		s.set(4, 2, 7, Sketch.facing(CafeBoard.BOARD, Direction.NORTH));
 		table(s, k, 2, 1, 3, false);
 		table(s, k, 6, 1, 3, false);
 		s.set(1, 1, 5, Sketch.facing(Blocks.SMOKER, Direction.EAST));
@@ -1406,6 +1454,8 @@ final class Buildings {
 			"oxeye_daisy", "cornflower", "lily_of_the_valley", "fern"};
 
 		final Palette p;
+		/** (0.7.483) The land's own palette (one of {@link Palette}'s, by biome): what regional design a job hall takes ({@link JobHalls}). */
+		final Palette land;
 		final boolean village;
 		/** (0.7.250) It stands among the cherry trees: the Blossom land's way of building ({@link Blossom}). */
 		final boolean blossom;
@@ -1419,6 +1469,8 @@ final class Buildings {
 		final boolean classic;
 		/** (0.5.7) the land is dry (flat roofs are common), and how this building's stone is weathered */
 		final boolean dry;
+		/** (0.7.441) the haven it's built for: "" none, "mixed", or a blood's key ({@link HavenBuildings}) */
+		String haven = "";
 		final int salt;
 		private final List<String> colours;
 		private final RandomSource r;
@@ -1426,6 +1478,7 @@ final class Buildings {
 		/** The plain kit (variant 0), as before 0.5.7. */
 		private Kit(Palette p, boolean village, String wood, String color) {
 			this.p = p;
+			this.land = p;
 			this.village = village;
 			this.blossom = p == Palette.CHERRY;
 			this.door = block(wood + "_door", Blocks.OAK_DOOR);
@@ -1452,8 +1505,9 @@ final class Buildings {
 
 		/** A building's own kit: its materials from {@code look} (and the land's palette), its details rolled from {@code r}. */
 		private Kit(Palette p, boolean village, String wood, String color, String accent, BlockState roofStairs, BlockState roofSlab, BlockState roofBlock,
-			BlockState infill, List<String> colours, boolean dry, boolean blossom, RandomSource r) {
+			BlockState infill, List<String> colours, boolean dry, boolean blossom, Palette land, RandomSource r) {
 			this.p = p;
+			this.land = land;
 			this.village = village;
 			this.blossom = blossom;
 			this.door = block(wood + "_door", Blocks.OAK_DOOR);
@@ -1495,6 +1549,12 @@ final class Buildings {
 			if (materials == 0L) {
 				return new Kit(land, village, woodOf(land), colour);
 			}
+			Kit kit = of(level, faction, land, village, colour, materials, details);
+			kit.haven = Havens.of(level.getServer(), faction);
+			return kit;
+		}
+
+		private static Kit of(ServerLevel level, Faction faction, Palette land, boolean village, String colour, long materials, long details) {
 			RandomSource m = RandomSource.create(materials);
 			Townscape.Look look = Townscape.of(level, faction);
 			// the wood: one the settlement builds in, or the land's own
@@ -1555,7 +1615,7 @@ final class Buildings {
 				infill = or(Townscape.named("white_terracotta"), Blocks.CALCITE.defaultBlockState());
 			}
 			return new Kit(p, village, wood, main, accent, roofStairs.defaultBlockState(), roofSlab.defaultBlockState(), roofBlock.defaultBlockState(),
-				infill, colours, dry, blossom, RandomSource.create(details ^ 0x5DEECE66DL));
+				infill, colours, dry, blossom, land, RandomSource.create(details ^ 0x5DEECE66DL));
 		}
 
 		// ---- rolling choices (the plain kit always takes the first) ----

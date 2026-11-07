@@ -208,7 +208,8 @@ public final class Nightfall {
 
 	/** (0.7.136) {@code mob} is a player who knows Plague Doctor (Survival's Medicine page): the plague goes easier on them. */
 	static boolean plagueDoctor(LivingEntity mob) {
-		return mob instanceof Player p && Skills.of(p).rank(Skills.Perk.PLAGUE_DOCTOR) > 0;
+		// (0.7.509) or the Lantern Warden's Lamp Against the Night
+		return mob instanceof Player p && (Skills.of(p).rank(Skills.Perk.PLAGUE_DOCTOR) > 0 || com.jaymoskingdoms.Patrons.blessed(p, com.jaymoskingdoms.Patron.LANTERN_WARDEN, 3));
 	}
 
 	/** A Night Bleeder's bite: the plague, or worse if it's already in them. */

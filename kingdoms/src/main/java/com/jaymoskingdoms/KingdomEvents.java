@@ -96,7 +96,8 @@ public final class KingdomEvents {
 			}
 			ServerPlayer player = source.getEntity() instanceof ServerPlayer p ? p : null;
 			// a monster cut down on a faction's land: they're grateful (members earn standing too)
-			if (entity instanceof Enemy && player != null) {
+			// (0.7.518) a patron champion and its adds earn no thanks
+			if (entity instanceof Enemy && player != null && !PatronChampions.outsideTown(entity)) {
 				Faction faction = Factions.at(level.getServer(), level, entity.blockPosition());
 				if (faction != null) {
 					Reputation.change(player, faction, REP_KILL_MONSTER);
@@ -123,7 +124,9 @@ public final class KingdomEvents {
 			}
 			for (Faction faction : Factions.all(server)) {
 				if (faction.successionAt() >= 0 && now >= faction.successionAt() && !faction.fallen()) {
-					Faction crowned = crown(overworld, faction.withSuccessionAt(-1L));
+					// (0.7.519) the realm's custom decides who: an election, a moot, a regent for a child heir
+					Elections.Choice choice = Elections.choose(overworld, faction);
+					Faction crowned = crown(overworld, faction.withSuccessionAt(-1L), choice.villager());
 					PathfinderMob heir = crowned == null ? null : Rulers.of(overworld, crowned);
 					// (0.7.225) a player wears the crown: a steward, in their name
 					java.util.UUID sovereign = crowned == null ? null : Crowns.sovereign(server, crowned);
@@ -132,6 +135,9 @@ public final class KingdomEvents {
 							announce(server, Component.translatable("message.jaymoskingdoms.crown.new_steward", heir.getDisplayName(), faction.name())
 								.withStyle(ChatFormatting.GOLD));
 						}
+						continue;
+					}
+					if (Elections.crowned(overworld, crowned, choice)) {
 						continue;
 					}
 					// (0.7.171) a new queen (or lady), if the heir's a woman
@@ -155,8 +161,12 @@ public final class KingdomEvents {
 				int id = here == null ? -1 : here.id();
 				Integer was = WHERE.put(player.getUUID(), id);
 				if (was != null && was != id && here != null) {
-					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.entering", here.name(),
-						Component.translatable("reputation.jaymoskingdoms." + Reputation.word(Reputation.get(player, here.id()))))
+					Component rep = Component.translatable("reputation.jaymoskingdoms." + Reputation.word(Reputation.get(player, here.id())));
+					// ((0.7.475) a greenskin camp by its tier: "Entering Skullmaw, Horde town")
+					String tier = Hordes.tierKey(server, here);
+					player.sendOverlayMessage((tier != null
+						? Component.translatable("message.jaymoskingdoms.entering_camp", here.name(), Component.translatable(tier), rep)
+						: Component.translatable("message.jaymoskingdoms.entering", here.name(), rep))
 						.withStyle(here.color().getTextColor() == 0 ? ChatFormatting.WHITE : ChatFormatting.GOLD));
 				}
 			}
@@ -195,13 +205,21 @@ public final class KingdomEvents {
 			Math.min(area.maxX(), b.getX() + LOAD_REACH), Math.min(area.maxZ(), b.getZ() + LOAD_REACH))) {
 			return;
 		}
-		if (Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
-			if (foundIn(level, bell.get(), village.start()) == null) {
-				// (0.5.1) no building there fit for a king: the kingdom raises its citadel beside the village
-				found(level, bell.get(), Castle.Kind.CITADEL);
+		Faction founded;
+		// (0.7.598) only an Epic town becomes a capital; any other mod's village is a village, allied to the nearest kingdom
+		if (Seats.epic(village.id()) && Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
+			founded = foundIn(level, bell.get(), village.start());
+			if (founded == null) {
+				// (0.5.1) no building there fit for a king: the kingdom raises its castle beside the village
+				founded = found(level, bell.get(), Castle.Kind.CITADEL);
 			}
 		} else {
-			Villages.found(level, bell.get());
+			founded = Villages.found(level, bell.get());
+			Villages.ally(server, founded);
+		}
+		// (0.7.521) one of ChoiceTheorem's villages is a haven (Havens#ctov)
+		if (founded != null && village.id().startsWith(Havens.CTOV)) {
+			Havens.ctov(level, founded);
 		}
 	}
 
@@ -209,22 +227,31 @@ public final class KingdomEvents {
 	static List<Long> claim(MinecraftServer server, BlockPos center, int radius) {
 		List<Long> claims = new ArrayList<>();
 		ChunkPos middle = ChunkPos.containing(center);
+		// (0.7.490) every claim held, gathered once, so each chunk is one lookup rather than a search of every faction's land
+		java.util.Set<Long> taken = new java.util.HashSet<>();
+		for (Faction other : Factions.all(server)) {
+			if (!other.fallen()) {
+				taken.addAll(other.claims());
+			}
+		}
 		for (int dx = -radius; dx <= radius; dx++) {
 			for (int dz = -radius; dz <= radius; dz++) {
-				ChunkPos chunk = new ChunkPos(middle.x() + dx, middle.z() + dz);
-				boolean taken = false;
-				for (Faction other : Factions.all(server)) {
-					if (other.claims(chunk)) {
-						taken = true;
-						break;
-					}
-				}
-				if (!taken) {
-					claims.add(chunk.pack());
+				long chunk = new ChunkPos(middle.x() + dx, middle.z() + dz).pack();
+				if (!taken.contains(chunk)) {
+					claims.add(chunk);
 				}
 			}
 		}
 		return claims;
+	}
+
+	/**
+	 * (0.7.598) A kingdom where no village stands: an Epic town is raised there for it ({@link EpicTowns}), and only if
+	 * none will do, its castle on open ground.
+	 */
+	static Faction foundTown(ServerLevel level, BlockPos at) {
+		Faction town = EpicTowns.found(level, at);
+		return town != null ? town : found(level, at, Castle.Kind.CITADEL);
 	}
 
 	/** A new kingdom at {@code capital}: named, coloured, its land claimed, its banner raised, its king and guards. */
@@ -361,6 +388,11 @@ public final class KingdomEvents {
 	 * Returns the faction as stored, with him in it.
 	 */
 	static Faction crown(ServerLevel level, Faction faction) {
+		return crown(level, faction, null);
+	}
+
+	/** (0.7.519) As above, with {@code chosen} (an election's winner, a regent, a ward come of age) first if they are about and grown enough. */
+	static Faction crown(ServerLevel level, Faction faction, java.util.@Nullable UUID chosen) {
 		MinecraftServer server = level.getServer();
 		Factions.put(server, faction);
 		int role = leaderRole(faction.type());
@@ -370,7 +402,7 @@ public final class KingdomEvents {
 		}
 		if (Rulers.inPlace(faction)) {
 			// (0.7.138) with MCA, one of its own villagers (the late ruler's family first)
-			Faction crowned = Rulers.crown(level, faction, role);
+			Faction crowned = Rulers.crown(level, faction, role, chosen);
 			if (crowned != null) {
 				return crowned;
 			}
@@ -528,7 +560,9 @@ public final class KingdomEvents {
 		} else if (faction != null && w.role() >= 0 && !Rulers.leaderRole(w.role())) {
 			// ((0.7.294) a caravan's villagers were never on its roster; (0.7.295) a war party's loss is undone, as its folk's)
 			WarParties.soldierDied(w);
-			lostHand(server, faction, w.role(), killer, !Caravans.isCaravanFolk(w));
+			// (0.7.439) a border clash's man was never on a roster either; and cutting one down takes a side
+			boolean clash = BorderClashes.died(level, w, killer);
+			lostHand(server, faction, w.role(), killer, !Caravans.isCaravanFolk(w) && !clash);
 		}
 	}
 
@@ -551,7 +585,7 @@ public final class KingdomEvents {
 			return;
 		}
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
-		if (Corsairs.isCrew(folk) || Pirates.offRoster(folk.role())) {
+		if (Corsairs.isCrew(folk) || Pirates.offRoster(folk.role()) || folk.role() == Slaves.SLAVE) {
 			// (0.7.42) a ship's crew, a harbour's shipwright, a pirate captain ashore: never on a roster; a cove's captain is its
 			// leader (his cove is cleared: Camps)
 			if (faction.leader().isPresent() && faction.leader().get().equals(folk.getUUID())) {
@@ -582,6 +616,8 @@ public final class KingdomEvents {
 			// (a camp's chief: the barbarians' own business)
 			return;
 		}
+		// (0.7.546) their body is to be brought home, stripped of its armour and buried with the rites (RoyalRemains)
+		RoyalRemains.fell(ruler.getUUID(), faction.id());
 		// (0.7.225) a player wears its crown: only their steward fell
 		if (wasLeader && Crowns.stewardFell(level, faction)) {
 			return;
@@ -594,7 +630,7 @@ public final class KingdomEvents {
 			}
 			if (wasLeader) {
 				Factions.update(server, faction.id(), f -> f.withSuccessionAt(level.getGameTime() + SUCCESSION_TICKS));
-				announce(server, Component.translatable(Rulers.her(lord ? "message.jaymoskingdoms.old_age.lord" : "message.jaymoskingdoms.old_age.king", female),
+				announce(server, Component.translatable(Rulers.her(Elections.deathKey(server, faction, lord ? "message.jaymoskingdoms.old_age.lord" : "message.jaymoskingdoms.old_age.king"), female),
 					faction.name()).withStyle(ChatFormatting.YELLOW));
 			}
 			return;
@@ -608,6 +644,8 @@ public final class KingdomEvents {
 			return;
 		}
 		if (killer != null) {
+			// (0.7.519) whoever slew the ruler does not stand at the election after
+			Elections.killed(faction.id(), killer.getUUID());
 			Reputation.change(killer, faction, lord ? REP_KILL_LORD : REP_KILL_KING);
 			// the realm's rivals are glad of it (every other standing realm that isn't its vassal or overlord)
 			for (Faction other : Factions.all(server)) {
@@ -658,23 +696,31 @@ public final class KingdomEvents {
 			announce(server, Component.translatable("message.jaymoskingdoms.fate.ruin", faction.name()).withStyle(ChatFormatting.DARK_RED));
 		} else {
 			Factions.update(server, faction.id(), f -> f.withSuccessionAt(heir));
-			announce(server, Component.translatable(Rulers.her(lord ? "message.jaymoskingdoms.fate.successor_lord" : "message.jaymoskingdoms.fate.successor", female),
+			announce(server, Component.translatable(Rulers.her(Elections.deathKey(server, faction, lord ? "message.jaymoskingdoms.fate.successor_lord" : "message.jaymoskingdoms.fate.successor"), female),
 				faction.name()).withStyle(ChatFormatting.YELLOW));
 		}
 	}
 
 	/** An audience with one of a faction's people (right click): what they think of you, and (its ruler) an offer to pledge. */
-	static void audience(ServerPlayer player, Folk folk) {
-		audience(player, folk, folk.factionId());
+	static boolean audience(ServerPlayer player, Folk folk) {
+		return audience(player, folk, folk.factionId());
 	}
 
 	/** (0.7.138) An audience with {@code folk}, one of {@code factionId}'s people: a folk, or a villager ruler (MCA's menu). */
-	static void audience(ServerPlayer player, LivingEntity folk, int factionId) {
+	static boolean audience(ServerPlayer player, LivingEntity folk, int factionId) {
 		MinecraftServer server = player.level().getServer();
 		Faction faction = Factions.get(server, factionId);
 		// barbarians don't hold court
 		if (faction == null || faction.type() == FactionType.BARBARIAN) {
-			return;
+			return false;
+		}
+		if (Rulers.is(folk) && !Crowns.rules(server, faction, player.getUUID())) {
+			// (0.7.523) an audience with the ruler keeps a promise to speak for someone
+			Promises.audience(player, factionId);
+		}
+		// (0.7.519) a sovereign's own steward opens the ruler's desk (the old audience stays if their game can't show it)
+		if (Rulers.is(folk) && Crowns.rules(server, faction, player.getUUID()) && RulersDesk.open(player, faction)) {
+			return true;
 		}
 		int rep = Reputation.get(player, faction.id());
 		Faction.Member member = faction.member(player.getUUID());
@@ -710,6 +756,7 @@ public final class KingdomEvents {
 		// (0.5.1) a ruler short of guards keeps to his hall, and may ask for a sworn protector
 		Wardens.audience(player.level(), player, faction, folk);
 		player.level().playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1.0F, 0.7F);
+		return false;
 	}
 
 	/** Sets a member's standing (and so their rank), telling them of a promotion. */

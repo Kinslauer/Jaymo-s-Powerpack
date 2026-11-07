@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.SleepingPrey;
 import com.jaymoskingdoms.VampireMask;
 import com.jaymoskingdoms.Vampires;
@@ -103,7 +104,7 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 			if (!Boolean.TRUE.equals(state.getData(MARKS)) || state.isInvisible) {
 				return;
 			}
-			collector.order(1).submitModel(this.getParentModel(), state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
+			collector.order(1).submitModel(skinBody(this.getParentModel()), state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 				-1, null, state.outlineColor);
 		}
 	}
@@ -115,7 +116,10 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 			// (0.7.81) under a mask or the symbiote's suit
 			return;
 		}
-		PlayerModel model = this.getParentModel();
+		// (0.7.609) on MCA's own skin body and pose, like the heritage marks (Andy: "the eyes are not synced"): drawn on the
+		// plain player model they were posed a second time on their own and drifted off the face MCA draws
+		PlayerModel model = skinBody(this.getParentModel());
+		PlayerModel glowing = glowBody(this.getParentModel());
 		// (0.7.332) the pallor: barely there when fed within the day, the whole ashen skin when starving
 		Float pallor = state.getData(PALLOR);
 		int tint = ARGB.white(Mth.lerp(pallor == null ? 1.0F : pallor, PALE_FED, PALE_STARVING));
@@ -127,10 +131,42 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 			HeritageLooks.Look heritage = state.getData(HeritageLooks.KEY);
 			if (heritage == null || !heritage.blood()) {
 				// (0.7.88) a Nightborn's red-silver eyes take the place of these (HeritageLooks)
-				collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyesFor(state.skin.body().texturePath())), lightCoords,
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(faceEyes(state, this.getParentModel(), GLOW,
+					() -> eyesFor(state.skin.body().texturePath()))), lightCoords,
 					OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 			}
 		}
+	}
+
+	/**
+	 * (0.7.609) The body to lay skin-deep looks on (pallor, fangs, marks, hairy hands): MCA's skin body for a player MCA
+	 * draws, posed as MCA poses its skin ({@link McaLookModels}), else {@code parent}.
+	 */
+	static PlayerModel skinBody(PlayerModel parent) {
+		PlayerModel mca = McaCompat.LOADED ? McaLookModels.playerMarks(parent) : null;
+		return mca != null ? mca : parent;
+	}
+
+	/** (0.7.609) The body to lay glowing eyes on: MCA's, just over its face, for a player MCA draws; else {@code parent}. */
+	static PlayerModel glowBody(PlayerModel parent) {
+		PlayerModel mca = McaCompat.LOADED ? McaLookModels.playerGlow(parent) : null;
+		return mca != null ? mca : parent;
+	}
+
+	/**
+	 * (0.7.609) Glowing eyes for {@code state}'s face: on a player MCA draws, MCA's own eyes (its face gene's eye pixels,
+	 * {@link McaEyes}) lit {@code color}, since MCA's face, not the player's skin, is what shows; else {@code fromSkin}
+	 * (the eyes found on the player's own skin). Andy (2026-11-05): "the eyes are not synced", the red eyes sat where the
+	 * Mojang skin's eyes are, not on MCA's face.
+	 */
+	static Identifier faceEyes(AvatarRenderState state, PlayerModel parent, int color, java.util.function.Supplier<Identifier> fromSkin) {
+		if (McaCompat.LOADED && McaLookModels.drawsPlayer(parent)) {
+			Identifier mca = McaEyes.glowing(state, color | 0xFF000000);
+			if (mca != null) {
+				return mca;
+			}
+		}
+		return fromSkin.get();
 	}
 
 	/** The red-eyes texture for {@code skin}, made the first time it's asked for once the skin's pixels can be read. */

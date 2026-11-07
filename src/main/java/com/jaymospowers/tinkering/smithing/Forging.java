@@ -82,6 +82,9 @@ public final class Forging {
 		if (options == null) {
 			Map<String, Option> out = new LinkedHashMap<>();
 			for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+				if (WeaponParts.king(kind)) {
+					continue;
+				}
 				int ingots = Math.max(1, Math.round(kind.mb() / (float) Molten.INGOT));
 				for (WeaponParts.Metal metal : WeaponParts.Metal.values()) {
 					if (metal.molten != null && kind.in(metal) != null) {

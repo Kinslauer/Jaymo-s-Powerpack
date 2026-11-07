@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:milk_bucket",
+    "minecraft:sugar",
+    "minecraft:bowl"
+  ],
+  "result": {
+    "id": "jaymospowers:posset",
+    "count": 1
+  }
+}

@@ -27,7 +27,15 @@ public final class Tending {
 	/** Ticks without a {@link #keep} before the healer gets up. */
 	static final long LINGER = 2L;
 
-	/** Kneeling by {@code target} (entity id), since {@code since} (game time). */
+	/**
+	 * (0.21.28) A {@link Tend#target} that isn't anyone: down on hands and knees, mouth to the ground, drinking (a vampire
+	 * lapping up spilt blood, Jaymo's Kingdoms' {@code VampirePlayers.lap}).
+	 */
+	public static final int GROUND_DRINK = -2;
+	/** (0.21.28) How long a drink at the ground holds them down after each call (ticks: a held button repeats every 4). */
+	static final long DRINK_HOLD = 10L;
+
+	/** Kneeling by {@code target} (entity id, or {@link #GROUND_DRINK}), since {@code since} (game time). */
 	public record Tend(int target, long since) {
 		public static final StreamCodec<ByteBuf, Tend> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Tend::target,
@@ -60,6 +68,19 @@ public final class Tending {
 			healer.setAttached(TEND, new Tend(body.getId(), now));
 		}
 		KEPT.put(healer.getUUID(), now);
+	}
+
+	/**
+	 * (0.21.28) {@code player} is down drinking from the ground ({@link #GROUND_DRINK}), for {@link #DRINK_HOLD} ticks
+	 * more. Plain types only: Jaymo's Kingdoms calls it by reflection.
+	 */
+	public static void drinkAtGround(ServerPlayer player) {
+		long now = player.level().getGameTime();
+		Tend tend = player.getAttached(TEND);
+		if (tend == null || tend.target() != GROUND_DRINK) {
+			player.setAttached(TEND, new Tend(GROUND_DRINK, now));
+		}
+		KEPT.put(player.getUUID(), now + DRINK_HOLD);
 	}
 
 	private static void tick(MinecraftServer server) {

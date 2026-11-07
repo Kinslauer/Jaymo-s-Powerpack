@@ -1,0 +1,10 @@
+{
+  "tack.jaymoskingdoms.trust": "Trust %s",
+  "tack.jaymoskingdoms.discipline": "%s %s",
+  "tack.jaymoskingdoms.hunger": "Hunger",
+  "tack.jaymoskingdoms.thirst": "Thirst",
+  "tack.jaymoskingdoms.shoes": "Shoes",
+  "tack.jaymoskingdoms.hooves": "Hooves",
+  "tack.jaymoskingdoms.wary": "It won't show you its paces until it trusts you (trust %s).",
+  "tack.jaymoskingdoms.gift_locked": "A Rider's gift, from trust %s."
+}

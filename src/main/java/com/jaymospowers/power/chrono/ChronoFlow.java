@@ -349,6 +349,8 @@ public final class ChronoFlow {
 		}
 		if (now == null) {
 			STUNNED.add(target);
+			// ((0.21.22) a stun shakes a shield loose: Kingdoms' armoured ogres)
+			com.jaymospowers.combat.Shields.stunned(target);
 		}
 		target.setAttached(STUN, until);
 		if (target instanceof net.minecraft.world.entity.Mob mob) {
@@ -488,6 +490,35 @@ public final class ChronoFlow {
 		return FIGHTERS.computeIfAbsent(player.getUUID(), id -> new Fighter());
 	}
 
+	/** (0.21.23) {@code player}'s Time Flow combo (0 out of it). */
+	public static int combo(ServerPlayer player) {
+		Fighter f = FIGHTERS.get(player.getUUID());
+		return f == null || !on(player) ? 0 : f.combo;
+	}
+
+	/** (0.21.23) Spends {@code n} of the combo (Rivals patch 9's takedowns and blink). */
+	public static void spendCombo(ServerPlayer player, int n) {
+		Fighter f = FIGHTERS.get(player.getUUID());
+		if (f != null) {
+			setCombo(player, f, Math.max(0, f.combo - n));
+		}
+	}
+
+	/** (0.21.23) A dodge, vault or takedown mid-fight: the combo holds, its timeout put off. */
+	public static void keepCombo(ServerPlayer player) {
+		Fighter f = FIGHTERS.get(player.getUUID());
+		if (f != null && f.combo > 0 && on(player)) {
+			f.lastBlow = player.level().getGameTime();
+		}
+	}
+
+	/** (0.21.23) Counts one more for the combo (a ground takedown, the blink's blow), as a landed blow does. */
+	static void addCombo(ServerPlayer player) {
+		Fighter f = fighter(player);
+		f.lastBlow = player.level().getGameTime();
+		setCombo(player, f, f.combo + 1);
+	}
+
 	private static void setCombo(ServerPlayer player, Fighter fighter, int combo) {
 		fighter.combo = combo;
 		if (combo >= CORRUPT_COMBO && !Fate.isCorrupted(player)) {
@@ -532,6 +563,14 @@ public final class ChronoFlow {
 			return;
 		}
 		Fighter fighter = fighter(player);
+		if (style != COUNTER && ChronoTakedowns.grounded(player, target)) {
+			// (0.21.23, Rivals patch 9) one already down is finished in passing, and the flow goes on
+			return;
+		}
+		if (style != COUNTER && ChronoTakedowns.shieldStun(player, target)) {
+			// (0.21.23) a raised shield: time slows round it, and its bearer's left reeling
+			return;
+		}
 		float bonus = Math.min(COMBO_MAX_BONUS, fighter.combo * COMBO_BONUS);
 		float weapon = Math.max(0.0F, (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) - 1.0F) * WEAPON_SHARE;
 		float damage = (DAMAGE[style] + weapon) * (1.0F + bonus);

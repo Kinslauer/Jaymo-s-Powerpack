@@ -22,6 +22,12 @@ repositories {
 		forRepository { maven { url = "https://cursemaven.com" } }
 		filter { includeGroup "curse.maven" }
 	}
+	// MixinSquared (MIT, Bawnorton): lets compat/mixin/lithostitched reach into Lithostitched's own mixin
+	exclusiveContent {
+		forRepository { maven { url = "https://maven.bawnorton.com/releases" } }
+		forRepository { maven { url = "https://maven.enjarai.dev/mirrors" } }
+		filter { includeGroup "com.github.bawnorton.mixinsquared" }
+	}
 }
 
 loom {
@@ -109,6 +115,16 @@ def packMods = [
 	// and ships. No castles of its own, so none of its structures is a grand seat. Needs Cristel Lib (above). Pinned by its
 	// Modrinth version number (1.13.12, the 26.3 build of 2026-09-16; CurseForge file t_and_t-fabric-neoforge-1.13.12.jar).
 	[dep: "maven.modrinth:towns-and-towers:1.13.12", cf: [626761, 8895612]],
+	// ChoiceTheorem's Overhauled Village (CC BY-NC-ND 4.0, by ChoiceTheorem; shipped unchanged, never edited, with credit
+	// and a link: modrinth.com/mod/ct-overhaul-village): 23 kinds of village and 14 of pillager outpost by land (its
+	// villages are tagged as villages, so they join Jaymo's Kingdoms' shared pool, and a settlement founded in one is a
+	// haven: Havens.ctov). Jaymo's Kingdoms reads its trade buildings in the game (ctov:village/<land>/jobsite/<trade>)
+	// for a town's butcher, fishery, hunting lodge, smithy and mason (CtovHalls). The 26.2 Fabric build (4.1.1, says
+	// minecraft >=26.1, no mixins, almost all data); needs Lithostitched (above). Server-side worldgen.
+	// Taken out 2026-11-04 (0.20.32): CTOV 4.1.1 is a 26.2 build, and on 26.3 its structures fail to load (vanilla
+	// no longer has minecraft:simple_state_provider / weighted_state_provider, and Lithostitched 2.0.6 has no
+	// lithostitched:limited), so the server refused to start. Put the line back once CTOV has a 26.3 build.
+	// [dep: "maven.modrinth:ct-overhaul-village:DpxVZVuT", cf: [623908, 9435529]],
 	// William Wythers' Overhauled Overworld (CC BY-NC-ND 4.0; shipped unchanged, downloaded by id) and its library Cristel
 	// Lib (same licence): every vanilla biome redecorated (trees, foliage, rocks, sub-biomes) under its vanilla id, so
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
@@ -137,6 +153,26 @@ def packMods = [
 	// Its key starts on R (a power key): client/KeyConflicts moves it to Caps Lock. Needs Forge Config API Port.
 	// Client and server.
 	[dep: "maven.modrinth:traveler-tool-belt:r5bfVDn1", cf: [1457447, 9070319]],
+	// Zsolt Molnar's RPG Series (2026-11-04, Andy: "upgrade our classes with these"): Wizards (Arcane, Fire and Frost
+	// schools), Archers (bow, crossbow and spear skills) and Rogues & Warriors (dagger, sickle, double axe and glaive
+	// skills). All three are all rights reserved: shipped unchanged, downloaded by id, never copied. Built on Better
+	// Combat (above). Their iron, golden, stone and diamond weapons' grid recipes are dropped (tinkering/Uncraftable) and
+	// the iron, golden and stone ones forged from heads (tinkering/WeaponParts). Spell books, scrolls and quivers are worn
+	// in our bauble slots (compat/SpellEngineCompat), so no Trinkets. Client and server.
+	[dep: "maven.modrinth:wizards:KQuYpfVP", cf: [734325, 9062861]],
+	[dep: "maven.modrinth:archers:SXwTz6Sf", cf: [932359, 9062864]],
+	[dep: "maven.modrinth:rogues-and-warriors:vMFN5Fd1", cf: [1048409, 9110999]],
+	// Bag of Holding 26.3.5 (MPL-2.0, Fuzs): leather/iron/golden bags (Item Interactions bundled inside; needs Puzzles Lib
+	// and Forge Config API Port, both above). Grid recipes dropped (Uncraftable): Kingdoms' Mages enchant them (0.7.517).
+	[dep: "maven.modrinth:bag-of-holding:Kz2iNqzF", cf: [593996, 9201657]],
+	// Spell Engine (GPL-3.0; the RPG Series' casting, spell hotbar and spell books) and Spell Power Attributes (LGPL-3.0)
+	[dep: "maven.modrinth:spell-engine:kgVsejrW", cf: [807653, 9012032]],
+	[dep: "maven.modrinth:spell-power:YdRPWTj8", cf: [771265, 9004379]],
+	// the RPG Series' small libraries (MIT, same author): armour models, bows and crossbows, village structures, quivers
+	[dep: "maven.modrinth:armor-model-api:1smYVF1k", cf: [1659764, 9004390]],
+	[dep: "maven.modrinth:ranged-weapon-api:5ywtfrkS", cf: [962162, 9004410]],
+	[dep: "maven.modrinth:structure-pool-api:Zxs162Py", cf: [927915, 9004387]],
+	[dep: "maven.modrinth:bundle-api:mQ3mo5tp", cf: [1189983, 8990141]],
 	// Fancy World Animations (MIT, by maDU59; "feel free to add this mod in your modpacks"): doors, trapdoors, gates,
 	// levers, buttons, chests, lecterns and more swing smoothly; lanterns and chains sway. Works with Sodium and Iris.
 	// Client-only.
@@ -150,9 +186,23 @@ def packMods = [
 	// smelted stacks, so less server tick time and fewer orbs to draw. Needs Fabric API only. Client and server.
 	[dep: "maven.modrinth:clumps:J4I1wxJZ", cf: [256717, 8897016]],
 	// Naturalist (code MIT, art all rights reserved; Starfish Studios' own 26.3 Fabric build, needs only Fabric API):
-	// wildlife. Kingdoms keeps its predators out of natural spawning and sends them as rare wilderness encounters
-	// (Encounters), and keeps its elephants and mammoths out too since Kingdoms has its own
+	// wildlife. (0.20.28) Its predators and elephants spawn naturally again (Andy: "its better when the predators can
+	// naturally spawn"); Kingdoms keeps only its mammoths, whales and boar out, since Kingdoms has its own (Encounters)
 	[dep: "maven.modrinth:naturalist:35ZJ5hlX", cf: [627986, 9004241]],
+	// Cube Animals (CubeDirection, by SupRK and xUszaty; CC0-1.0 in the jar's fabric.mod.json and LICENSE_cubeanimals,
+	// though its CurseForge page says All Rights Reserved, so it ships unchanged; only on CurseForge; needs only Fabric API):
+	// 29 vanilla-style animals (antelope, barn owl, bison, capuchin, caracal, chameleon, cricket, eagle, fennec, lynx,
+	// marmot, mouse, reindeer, sawfish, snow leopard, toucan, walrus...), a Sleep Arrow, an Animal Transporter, the
+	// camouflage enchant, a Hunter villager job and a Zoological Guide. Kingdoms (Encounters) keeps its kinds we already have
+	// out of natural spawning (komodo dragon, moose, piranha, snail, tiger); its rattlesnake, shark, elephant, (0.20.29)
+	// red and roe deer, crocodile and black bear spawn as other breeds beside Naturalist's and Kingdoms' (Andy, 0.20.28)
+	[dep: "curse.maven:cube-animals-1550917:9411257", cf: [1550917, 9411257]],
+	// Bear Minimum 1.0.5 (Apache-2.0, by Startraveler / scientistknight1; needs only Fabric API): black bears (shy: they
+	// keep away from people unless they or their cubs are threatened, and a goat horn scares them off) and brown bears
+	// (warier, they go for anyone who comes within 4 blocks) that forage crops, berries and prey; bear meat; polar bears
+	// made bigger and tougher. Shipped unchanged. Kingdoms' grizzly mini-boss (wild/Grizzly) is drawn after its brown
+	// bear (2026-11-05, Andy). Client and server.
+	[dep: "maven.modrinth:bear-minimum:L6rn1t3T", cf: [1240239, 9379925]],
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium.
 	// Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
@@ -214,6 +264,17 @@ def packMods = [
 	// unless someone picks a Lost Cities profile when making a world. Needs Forge Config API Port (above). McJty's own
 	// 26.3 Fabric build, 26.3-12.0.0-fabric (Modrinth version xuEuPjKk).
 	[dep: "maven.modrinth:the-lost-cities:xuEuPjKk", cf: [269024, 9277225]],
+	// One Dimension (CodxIO; the jars say CC0-1.0, CurseForge says CC BY-NC 3.0: free pack, shipped unchanged) with its
+	// libraries CustomChunks (CC0 in the jar, CurseForge says all rights reserved; closed source) and Planeshift (CC0, source
+	// github.com/Codx-org/Planeshift) and CodxLib (MIT): new worlds stack the Aether over the Overworld over the Nether in one
+	// level, so you fly up into the islands and dig down into the Nether's sky with no portal and no loading screen, seeing
+	// the next world through the seam (0.20.30, Andy). The pack's default order is written by compat/OneDimensionDefaults;
+	// our code asks which layer you're in through compat/Stacked (and Kingdoms'/Kitchen's own Stacked). Worlds made before,
+	// or with it turned off on the create-world screen, stay as they were. CurseForge only. Kept out of the dev game.
+	[dep: "curse.maven:one-dimension-1633224:9101534", cf: [1633224, 9101534], dev: false],
+	[dep: "curse.maven:customchunks-1727847:9101536", cf: [1727847, 9101536], dev: false],
+	[dep: "curse.maven:planeshift-1714620:9083764", cf: [1714620, 9083764], dev: false],
+	[dep: "curse.maven:codxlib-1633207:8893340", cf: [1633207, 8893340], dev: false],
 	// Voice (0.17.157; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
 	// by id, never copied or taken apart): proximity voice, push-to-talk or voice activation (V opens its menu). Client
 	// and server; the server listens on UDP 24454, so the Deck's playit tunnel needs a UDP tunnel to it (deck/README.md).
@@ -221,6 +282,12 @@ def packMods = [
 	// Voice Physics (MIT, Shamanalle; shipped unchanged): voices muffled by walls by material, echo in caves and stone
 	// rooms, weather and water, quieter sneaking; needs Simple Voice Chat. CurseForge only.
 	[dep: "curse.maven:voice-physics-1712556:9251110", cf: [1712556, 9251110], dev: false],
+	// Felled (all rights reserved, by Raiiiden; downloaded by id from CurseForge, never copied or edited) and its physics
+	// library Zarith (Jolt, with Windows/Linux/macOS natives): a felled tree comes down as a real rigid body, tips over
+	// its stump, rolls, snaps on a hard landing, floats, can be stood on. Kingdoms' chopping hands the felling stroke to it
+	// (FelledCompat); blasts, giants, tornadoes and gatherers still use Kingdoms' own falling trees.
+	[dep: "curse.maven:felled-1715901:9305152", cf: [1715901, 9305152], dev: false],
+	[dep: "curse.maven:zarith-1720181:9284445", cf: [1720181, 9284445], dev: false],
 	// Simple Voice Voice Changer (CC BY-NC-SA 4.0, sawiq; shipped unchanged in a free pack): your own voice changed
 	// (man, woman, kid, titan, demon, radio..., J toggles it), and Kingdoms' VoiceMasks turns it for a werewolf, a Great
 	// Ape, a goblin disguise or a full mask through its API. 1.2.5, the newest Fabric 26.3 file on CurseForge.
@@ -253,48 +320,117 @@ def packMods = [
 	// sorts faster. Middle mouse is also lock-on, but that key only acts with no screen open and ClientSort's only inside
 	// one, so they never clash. Needs Cloth Config and Mod Menu (above). 3.104.1+26.3 (Modrinth version UWMryUad).
 	[dep: "maven.modrinth:clientsort:UWMryUad", cf: [1049891, 8978806]],
-]
-// First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
-// Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
-// manifest needs ids for every entry there.
-// TODO(home PC): look up their CurseForge [project id, file id] (CurseForge is blocked from the cloud), add a cf entry
-// to each and move both lines into packMods; until then they're in modpack/mods (server, hand-made profile) and the dev
-// game, but not in the CurseForge import zip.
-def packModsNoCf = [
-	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
-	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
+	// Carry On (LGPL-3.0, Tschipp; shipped unchanged, 0.20.17): sneak + right-click a chest, furnace, barrel or any other
+	// block with something in it, empty hands, to lift it with its contents; right-click to set it down. It replaced our
+	// own block lifting; bodies stay ours (core/CarryOnCompat + mixin/carryon keep it off entities, off busy arms and off
+	// the jaymospowers:carry_on_no_lift blocks). Needs Fabric API; Cloth Config (above) gives it a config screen.
+	// 2.12.1 for 26.3 (Modrinth version d0jTyKNs).
+	[dep: "maven.modrinth:carry-on:d0jTyKNs", cf: [274259, 9420425]],
+	// First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
+	// Animations (tr7zw Protective License: fine to ship in a pack). 2.7.3 and 1.12.6 for 26.3.
+	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: [333287, 8990505]],
+	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: [433760, 8929069]],
 	// EMF Compat: Not Enough Animations (GPL-3.0, STRadaT; shipped unchanged): keeps Not Enough Animations' eating, map
-	// holding, rowing and petting showing under Fresh Animations. Here beside NEA until NEA's CurseForge ids are looked up
-	// (then this one is CurseForge project 1605181, file 9103628).
-	[dep: "maven.modrinth:not-enough-animations-emf-compat:Xs6WnTQm", cf: null],
+	// holding, rowing and petting showing under Fresh Animations. 1.2.1 for 26.3.
+	[dep: "maven.modrinth:not-enough-animations-emf-compat:Xs6WnTQm", cf: [1605181, 9103628]],
 	// Sounds (all rights reserved, by imb11; modpacks on Modrinth and CurseForge allowed under legal.imb11.dev/mods/eula):
-	// 170+ new sound effects for screens, items and blocks. Client-only; needs MRU and YACL (packMods).
-	// TODO(home PC): its CurseForge [project id, file id], as above (the cloud couldn't find its CurseForge page).
-	[dep: "maven.modrinth:sound:QCFPBvDa", cf: null],
-	// Grim Kingdoms, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): castles, citadels and
-	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts.
-	// TODO(home PC): its CurseForge [project id, file id], as above.
-	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
-	// Repurposed Structures (LGPL-3.0, by TelepathicGrunt; shipped unchanged): biome versions of vanilla structures (its
-	// villages and outposts join Jaymo's Kingdoms' shared pools), and its jungle fortress is the grand seat Jaymo's
-	// Kingdoms raises for a kingdom in the jungle (GrandSeats). Server-side worldgen; needs MidnightLib (below).
-	// TODO(home PC): CurseForge [project id, file id] for it and MidnightLib, as above.
-	[dep: "maven.modrinth:repurposed-structures-fabric:9jHXeIeI", cf: null],
-	// MidnightLib (MIT, by Motschen): config library Repurposed Structures needs.
-	[dep: "maven.modrinth:midnightlib:G9RaNHAC", cf: null],
-	// Ji AFK Cinematic (Ji Mods Source License: official jars may go in modpacks with credit, by Jiory_): stand idle and the
-	// camera goes into slow cinematic shots of you and the world; any key or damage brings you back. Client-only.
-	// TODO(home PC): CurseForge project 1697412 has no 26.3 file yet; add [1697412, <file id>] once it does.
-	[dep: "maven.modrinth:ji-afk-cinematic:7BvkctiX", cf: null],
+	// 170+ new sound effects for screens, items and blocks. Client-only; needs MRU and YACL (above). 2.6.0 for 26.3.
+	[dep: "maven.modrinth:sound:QCFPBvDa", cf: [925889, 9060125]],
 	// Load and chunk speed (0.17.199, Andy's load-time ask; all shipped unchanged, none change what generates):
 	// Lithium (LGPL-3.0, CaffeineMC; Sodium's team): faster game logic, mob AI, chunk ticking and worldgen. 0.26.3.
 	// FerriteCore (MIT, malte0811): less memory for block states and models, so startup and the game use less RAM. 9.0.0.
 	// C2ME (MIT, ishland): generates and loads chunks on every processor core, the big one for new worlds and travel.
 	// Alpha for 26.3 (0.4.2-alpha.0.106); drop it if a worldgen mod misbehaves with it.
-	// TODO(home PC): their CurseForge [project id, file id], as above.
-	[dep: "maven.modrinth:lithium:fWv5bnZk", cf: null],
-	[dep: "maven.modrinth:ferrite-core:d5ddUdiB", cf: null],
-	[dep: "maven.modrinth:c2me-fabric:gKKkuSYc", cf: null],
+	[dep: "maven.modrinth:lithium:fWv5bnZk", cf: [360438, 9357338]],
+	[dep: "maven.modrinth:ferrite-core:d5ddUdiB", cf: [459857, 7806040]],
+	[dep: "maven.modrinth:c2me-fabric:gKKkuSYc", cf: [533097, 9225022]],
+	// Structory and Structory: Towers (Stardust Labs License, which allows modpacks): weathered ruins, camps, shrines and
+	// biome-themed watchtowers with light lore. 1.3.18 and 1.0.19. Server-side worldgen (medieval gap-fillers, below).
+	[dep: "maven.modrinth:structory:GjOkOVW4", cf: [636540, 8968053]],
+	[dep: "maven.modrinth:structory-towers:5ntmnN83", cf: [783522, 8968055]],
+	// Homesteads (all rights reserved; linked, never edited): lone farmsteads and hamlets out in the wilds, the
+	// countryside between our villages and towns. 3.0.0. Server-side worldgen.
+	[dep: "maven.modrinth:homesteads:xYCdL31w", cf: [1336255, 9234266]],
+	// Seven-mods picks (0.20.85, Andy 2026-11-05, picklist "Seven mods"; all shipped unchanged, never edited):
+	// Better Advancements ("Don't Be a Jerk" licence, way2muchnoise): a bigger, zoomable advancements screen that holds
+	// modded trees. Client-only. 0.6.0.81. Fancy Toasts (MIT, Bivrik): nicer advancement and recipe toasts made to go
+	// with it. Client-only. 1.5.1.
+	[dep: "maven.modrinth:better-advancements:FQp3HIDr", cf: [272515, 9300836]],
+	[dep: "maven.modrinth:fancy-toasts:wG7aMfVG", cf: [1326436, 9028888]],
+	// From the Worldbound pack (it's all rights reserved itself, so only these mods, each from its own author):
+	// It Takes a Pillage (MIT, Faboslav): bigger illager outposts and camps, new illager kinds. Needs Resourceful Lib
+	// (above). 1.0.13.
+	[dep: "maven.modrinth:it-takes-a-pillage-continuation:ea1YvgAO", cf: [1111063, 9018148]],
+	// Mutant Monsters (AGPL-3.0, Fuzs; unchanged jar): Andy wants the zombies only, so Powers' data turns off the mutant
+	// creeper, skeleton and enderman spawns everywhere (data/mutantmonsters/tags/worldgen/biome/without_mutant_*_spawns).
+	// The Mutant Zombie is its only zombie with a model of its own. Chemical X is never brewable (Uncraftable.PREFIXES).
+	// Needs Forge Config API Port and Puzzles Lib (above).
+	[dep: "maven.modrinth:mutant-monsters:XNliGY5t", cf: [852665, 9084637]],
+	// Eternal Nether (MIT, Fuzs): new Nether biomes and mobs, room for the demon content that lives in the Nether.
+	[dep: "maven.modrinth:eternal-nether:TIviaC6F", cf: [1252482, 8994588]],
+	// Moog's Nether Structures (LGPL-3.0): Nether ruins and keeps. Needs Moog's Structure Lib (above). 3.1.1.
+	[dep: "maven.modrinth:mns-moogs-nether-structures:OLTqXnsN", cf: [967466, 8902210]],
+	// Epic Structures: Witch Huts (all rights reserved; linked, never edited): completes the Epic Structures set. 1.3.2.
+	[dep: "maven.modrinth:epic-structures-witch-huts:4yucqO2B", cf: [1335768, 8984107]],
+	// Hopo Better Ruined Portals (LGPL-3.0): ruined portals rebuilt as proper ruins (still broken vanilla portals). 1.5.2.
+	[dep: "maven.modrinth:hopo-better-ruined-portals:hPiCEWrD", cf: [632624, 9005922]],
+	// Particle Rain (MIT, PigCart): rain and snow as falling particles with splashes. Client-only. 4.0.3.
+	// Biome Blends (MIT): smoother colour blending between biomes. 1.5.1.
+	[dep: "maven.modrinth:particle-rain:ddleyxF8", cf: [421897, 9430146]],
+	[dep: "maven.modrinth:biome-blends:JMV9cA1C", cf: [1285135, 8940768]],
+	// Crops Love Rain (MIT, ThePoultryMan): crops grow faster while it rains. Server-side. 3.2.2.
+	[dep: "maven.modrinth:crops-love-rain:2wR3dP9w", cf: [580294, 9211709]],
+	// Building blocks: Macaw's Doors (MIT), Diagonal Windows (MPL-2.0, Fuzs), Beautify: Refabricated (MIT; rope lights,
+	// blinds, trellises; needs Cloth Config) and Lanterns Belong on Walls (MIT, ThePoultryMan).
+	[dep: "maven.modrinth:macaws-doors:xfU8SZ7D", cf: [378646, 9007648]],
+	[dep: "maven.modrinth:diagonal-windows:orlnUKLD", cf: [891328, 8953012]],
+	[dep: "maven.modrinth:beautify-refabricated:Ac7Roc6F", cf: [809311, 9419457]],
+	[dep: "maven.modrinth:lanterns-bow:az9lailz", cf: [596474, 9379625]],
+	// GeckoLib (MIT, Tslat and contributors): the animation library Simply Tents 3.5 needs (5.5.6+; without it the
+	// server refused to start, "Incompatible mods found"). 5.5.7 for Fabric 26.3.
+	[dep: "maven.modrinth:geckolib:kSxHvs99", cf: [388172, 8945630]],
+	// Simply Tents (all rights reserved; linked, never edited): tents to pitch and sleep in on the road. 3.5.
+	[dep: "maven.modrinth:simply-tents:wvIeMmbl", cf: [1152882, 8937407]],
+	// Critter Armory (all rights reserved; linked, never edited): armour for wolves, cats and other pets. 0.6.5.
+	[dep: "maven.modrinth:critter-armory:Qcu5lZ5g", cf: [1198794, 8914440]],
+	// Kaffee's Dual Ride (GPL-3.0): a second player can ride behind you on a horse. 1.2.0.
+	[dep: "maven.modrinth:kaffees_dual_ride:T14PXNLz", cf: [683156, 9183919]],
+	// JamLib (MIT, JamCoreModding): the library RightClickHarvest (packModsNoCf, below) needs. 2.3.1.
+	[dep: "maven.modrinth:jamlib:EbhilCj8", cf: [623764, 8914234]],
+]
+// on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
+// can't list them: they're in modpack/mods (server, hand-made profile) and the dev game, but not in the CurseForge import
+// zip. Once CurseForge has the matching file, add its [project id, file id] and move the line into packMods.
+def packModsNoCf = [
+	// Runes (all rights reserved, Zsolt Molnar; shipped unchanged): the rune reagents Wizards' spells use up, and its
+	// Rune Crafting Altar. No CurseForge page found.
+	[dep: "maven.modrinth:runes:PwSpmtFJ", cf: null],
+	// Grim Kingdoms, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): castles, citadels and
+	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts. No CurseForge page found.
+	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
+	// Repurposed Structures (LGPL-3.0, by TelepathicGrunt; shipped unchanged): biome versions of vanilla structures (its
+	// villages and outposts join Jaymo's Kingdoms' shared pools), and its jungle fortress is the grand seat Jaymo's
+	// Kingdoms raises for a kingdom in the jungle (GrandSeats). Server-side worldgen; needs MidnightLib (below).
+	// CurseForge project 391366 stops at 7.7.6 for 26.2 (no 26.3 file yet).
+	[dep: "maven.modrinth:repurposed-structures-fabric:9jHXeIeI", cf: null],
+	// MidnightLib (MIT, by Motschen): config library Repurposed Structures needs. CurseForge project 488090 has only
+	// 1.9.3 for Fabric 26.3, not our 1.10.0.
+	[dep: "maven.modrinth:midnightlib:G9RaNHAC", cf: null],
+	// Ji AFK Cinematic (Ji Mods Source License: official jars may go in modpacks with credit, by Jiory_): stand idle and the
+	// camera goes into slow cinematic shots of you and the world; any key or damage brings you back. Client-only.
+	// CurseForge project 1697412 has no 26.3 file yet; add [1697412, <file id>] once it does.
+	[dep: "maven.modrinth:ji-afk-cinematic:7BvkctiX", cf: null],
+	// Medieval structures to fill gaps (Andy, 2026-11-04: "check these structures [Rabbit's DawnCraft] or any that have good
+	// medieval structures to fill voids we haven't already"). DawnCraft is Forge 1.18.2; of its structure mods only
+	// Structory has a 26.3 Fabric build, so the rest come from Modrinth's 26.3 list. All shipped unchanged, server-side worldgen.
+	// Dungeons and Taverns (all rights reserved, nova_wostra; linked, never edited): roadside taverns, dungeons and
+	// overhauled strongholds, mansions, outposts, mineshafts and temples. 6.1.0. CurseForge project 853794 stops at 6.0.2.
+	[dep: "maven.modrinth:dungeons-and-taverns:hn5CugpP", cf: null],
+	// Seven-mods picks (0.20.85): Moog's Mineshafts Reimagined (GPL-3.0; mineshafts rebuilt with a theme for
+	// each biome; needs Moog's Structure Lib; 1.1.0) and RightClickHarvest (MIT, JamCoreModding; right-click a ripe crop to
+	// harvest and replant it; needs JamLib; 4.6.2). CurseForge's pages for them show no 26.3 file yet (checked 2026-11-05).
+	[dep: "maven.modrinth:mmr-moogs-mineshafts-reimagined:JJc7pNHb", cf: null],
+	[dep: "maven.modrinth:rightclickharvest:MTui9kST", cf: null],
 	// Better Ping (MIT, UltimateGamerMC): exact ping in ms, color-coded, in the tab list. Client-only, works on any server.
 	// Fabric 26.3-native; CurseForge [project id, file id] to look up from the home PC (cloud can't reach CurseForge).
 	[dep: "maven.modrinth:betterping:ss1Ygqnx", cf: null],
@@ -319,9 +455,52 @@ def packModsOverride = [
 	// Pinned by its Modrinth version number (modrinth.com/mod/omnicrossbow/version/1.1.4+mc26.3, project TxqFWfQR), as
 	// Cloth Config and Balm are. TODO(home PC): move it to packMods if it has a CurseForge file.
 	[dep: "maven.modrinth:omnicrossbow:1.1.4+mc26.3"],
+	// Respawn Recap (MIT, by DialingSpoon; github.com/DialingSpoon527/Respawn-Recap; shipped as the untouched jar with credit):
+	// an Outer Wilds-style memory replay of your last life on death, from screenshots it takes as you play (kept in
+	// .minecraft/respawnrecap). Client-only. Andy (2026-11-04): Chrono's cheat-death rewind uses it: R on the black screen
+	// plays the replay as the rewind (client/mixin/respawnrecap). Needs Fabric Language Kotlin 1.13.12+ (packMods has 1.14.2).
+	// Pinned by its Modrinth version number (project rgcja1LM). TODO(home PC): move it to packMods if it has a CurseForge file.
+	[dep: "maven.modrinth:respawn-recap:1.2.1-26.3"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
-def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
+// The Kitchen jar in libs/: the one matching the Kitchen source (kitchen/gradle.properties), else the newest. A git pull on
+// Windows can leave an old one behind if the game or Gradle had it open; extra jars are ignored with a warning (two would
+// both be compiled against and shipped under one mod id), so delete them when you see it.
+def kitchenCandidates = fileTree("libs") { include "jaymos-kitchen-*.jar" }.files.sort { it.name }
+if (kitchenCandidates.isEmpty()) {
+	throw new GradleException("libs/ holds no jaymos-kitchen-*.jar: build kitchen/ and copy its jar into libs/.")
+}
+def kitchenSourceProps = new Properties()
+file("kitchen/gradle.properties").withInputStream { kitchenSourceProps.load(it) }
+def kitchenWanted = "jaymos-kitchen-${kitchenSourceProps.version}.jar".toString()
+def kitchenVersion = { File f -> (f.name - "jaymos-kitchen-" - ".jar").findAll(/\d+/).collect { it as long } }
+def kitchenChosen = kitchenCandidates.find { it.name == kitchenWanted } ?: kitchenCandidates.max { a, b ->
+	def x = kitchenVersion(a), y = kitchenVersion(b)
+	for (int i = 0; i < Math.max(x.size(), y.size()); i++) {
+		def c = (i < x.size() ? x[i] : 0L) <=> (i < y.size() ? y[i] : 0L)
+		if (c != 0) return c
+	}
+	0
+}
+if (kitchenCandidates.size() > 1) {
+	logger.warn("WARNING: libs/ holds ${kitchenCandidates.collect { it.name }}; using ${kitchenChosen.name}. " +
+		"Delete the others.")
+}
+if (kitchenChosen.name != kitchenWanted) {
+	logger.warn("WARNING: libs/${kitchenChosen.name} is not the Kitchen source's version " +
+		"(${kitchenSourceProps.version}). Build kitchen/ and replace the jar in libs/.")
+}
+def kitchenJar = files(kitchenChosen)
+// (0.20.78) What the pack ships is Kitchen built from kitchen/ at its source version, like Kingdoms, never the jar in libs/
+// (that one is only compiled against and run in the dev game). libs/ held Kitchen 0.5.57 while kitchen/ was at 0.5.68, so a
+// pack built without swapping it by hand shipped a Kitchen without the Other World's no-bodies rule (0.5.61): player bodies
+// still rose there as zombies.
+tasks.register("buildKitchen", GradleBuild) {
+	dir = file("kitchen")
+	tasks = ["build"]
+}
+def kitchenLibs = file(file("E:/").exists() ? "E:/jaymos-kitchen-build/libs" : "kitchen/build/libs")
+def kitchenShipJar = fileTree(kitchenLibs) { include kitchenWanted }.builtBy("buildKitchen")
 // Minecraft Comes Alive (GPL-3.0, by Luke100000 and team): human villagers to befriend, marry and raise children with,
 // village ranks up to monarch. Its newest CurseForge/Modrinth file is for 26.2, so until a 26.3 one comes out the pack
 // ships a jar built from the authors' own 26.3 branch (github.com/Luke100000/minecraft-comes-alive, dev/26.3 at
@@ -370,6 +549,16 @@ def packResourcePacks = [
 	// Canoe Boats (by CanineGray; CC BY-NC 4.0, shipped unchanged, credit to its author): every boat becomes a canoe,
 	// through Entity Model Features and Entity Texture Features (both already in the pack). Made for 26.3.
 	[cf: [1086847, 8944107], file: "Canoe boats 26.3.zip"],
+	// (Motion patch 6) Fresh Animations itself (by FreshLX; modpacks may include it, never redistribute it) isn't listed
+	// here yet: its CurseForge file id couldn't be looked up from the cloud, so client/PackResourcePacks fetches it from
+	// Modrinth on first launch. Add [cf: [<project>, <file>], file: "FreshAnimations_v1.11.1_26.1+.zip"] once known.
+	// (Havens patch 8) Better Horses (by CanineGray; CC BY-NC 4.0, shipped unchanged, credit to its author): redrawn
+	// donkeys and mules through Entity Model Features. Same story as Fresh Animations: fetched from Modrinth by
+	// client/PackResourcePacks until its CurseForge file id is added here, [cf: [<project>, <file>], file: "Better Horses v4.3 1.21.11.zip"].
+	// (0.19.65) Excalibur (by Maffhew; CC BY-NC-ND 3.0, shipped unchanged, link to its page on the pack's page) and
+	// "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; modpacks may include it): fetched from Modrinth by
+	// client/PackResourcePacks for now, like Fresh Animations, but never switched on: optional, /excalibur on (0.19.72,
+	// docs/Excalibur-Style.md). Add their CurseForge ids here once known.
 ]
 // shader packs, client-only: the CurseForge import downloads them into shaderpacks/ by id, and Jaymo's Powers chooses
 // and switches on Complementary Unbound in Iris once per install (client/ShaderPreset).
@@ -390,8 +579,8 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
-// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar)
-def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll"]
+// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar); CTOV (0.20.32, a 26.2 build that stops a 26.3 server loading)
+def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modJson = { File jar ->
 	try {
@@ -427,12 +616,17 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// (0.20.34) MixinSquared, shipped inside our jar: mixin/lithostitched skips Lithostitched's clay-band hook when One
+	// Dimension builds a layer without a region (it threw, and a new world hung at "Selecting global world spawn")
+	include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.7")))
 
 	// the rest of the modpack, loaded in the dev game only (fabric-api is already on the classpath)
 	localRuntime kitchenJar
 	localRuntime mcaJar
 	// compiled against (for its corpses); required at runtime since 0.8 (fabric.mod.json), touched only via power/web/KitchenCompat
 	compileOnly kitchenJar
+	// (0.21.13) compiled against to draw skin-deep looks on MCA's own body and face; touched only via client/McaSkin (behind McaLooks)
+	compileOnly mcaJar
 	// compiled against to read Better Combat's attack swings while flying; touched only via client/power/wind/PalAccess
 	compileOnly "maven.modrinth:player-animation-library:xJ30QmpE"
 	// compiled against to make its swings hit bodies, not boxes; touched only via client/compat/mixin/LimbSwingMixin
@@ -444,6 +638,11 @@ dependencies {
 	compileOnly "maven.modrinth:jei:wQJNj1C5"
 	// (0.15.47) compiled against to keep its panel off blocks; touched only via client/compat/JadeEntitiesOnly (its jade entrypoint)
 	compileOnly "maven.modrinth:jade:71CTWqdE"
+	// (RPG Series) compiled against to wear spell books, scrolls and quivers in bauble slots; touched only via compat/SpellEngineCompat
+	compileOnly "maven.modrinth:spell-engine:kgVsejrW"
+	// (0.20.52) compiled against to keep the Aether out of its chunk culling from under the clouds; touched only via
+	// client/aether/SodiumVeil and client/mixin/sodium (an optional mixin config)
+	compileOnly "maven.modrinth:sodium:bAZQdGpg"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
@@ -457,7 +656,7 @@ def packDir = file("modpack")
 tasks.register("modpackMods", Sync) {
 	from configurations.packJars
 	from tasks.named("jar")
-	from kitchenJar
+	from kitchenShipJar
 	from mcaJar
 	from kingdomsJar
 	from trmtJar
@@ -489,7 +688,7 @@ tasks.register("curseforgePack", Zip) {
 	into("overrides/mods") {
 		from configurations.packOverrideJars
 		from tasks.named("jar")
-		from kitchenJar
+		from kitchenShipJar
 		from mcaJar
 		from kingdomsJar
 		from trmtJar
@@ -518,7 +717,7 @@ tasks.register("serverMods", Sync) {
 	}
 	from configurations.packJars
 	from tasks.named("jar")
-	from kitchenJar
+	from kitchenShipJar
 	from mcaJar
 	from kingdomsJar
 	from trmtJar
@@ -530,11 +729,11 @@ tasks.register("serverMods", Sync) {
 // running (its jars are locked).
 def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
-	dependsOn "jar", "buildKingdoms", "buildTrmt"
+	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt"
 	onlyIf { profileMods.isDirectory() }
 	doLast {
 		def wanted = [[jar: tasks.named("jar").get().archiveFile.get().asFile, prefix: "jaymos-powers-"]]
-		kitchenJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
+		kitchenShipJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
 		mcaJar.files.each { wanted << [jar: it, prefix: "mca-fabric-"] }
 		kingdomsJar.files.each { wanted << [jar: it, prefix: "jaymos-kingdoms-"] }
 		trmtJar.files.each { wanted << [jar: it, prefix: "trmt-"] }

@@ -97,6 +97,13 @@ import org.jspecify.annotations.Nullable;
  * plain right-click on someone downed is the revive ({@link Downed}), and holding left-click executes them
  * ({@code Finishers}), so none of the three can be mistaken for another. Nobody lifts a big animal or anything bigger than a
  * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can).
+ * <p>
+ * (0.19.55) Andy: "the user dragging a player grabs them by the shoulder, while the legs ragdoll and drag along" (Death
+ * Engine's drag as the idea, rebuilt). Sneak + held use on someone downed ({@link #draggable}) now takes them by the
+ * shoulder and drags them along the ground behind you ({@link #DRAG}), whatever armour they wear; their body follows your
+ * hand on its own path ({@link #dragStep}), and they smear their blood along it ({@code BloodSmears}). Right-click lets
+ * go where they lie; sneak + right-click hoists them up into your arms (a carry's hold, if their armour isn't too heavy:
+ * otherwise a piece comes off first, as a lift's would).
  */
 public final class Carry {
 	/** The holds: over one shoulder, across both arms, held up by the shoulder at your side, slung over your back. */
@@ -107,6 +114,15 @@ public final class Carry {
 	public static final int BLOCK = 5;
 	/** A severed head or limb ({@link SeveredPart}) dangling from the right hand. Never rolled, kept in flight. */
 	public static final int PART = 6;
+	/** (0.19.55) Someone downed, taken by the shoulder and dragged along the ground behind. Never rolled. */
+	public static final int DRAG = 7;
+	/**
+	 * (0.19.55) The drag: the grip (the dragged one's shoulders) this far to the carrier's right and behind their feet
+	 * (blocks), held on this much slack; their hips trail the shoulders this far behind along the path. The carrier walks
+	 * this much slower (share of their speed).
+	 */
+	public static final double DRAG_GRIP_SIDE = 0.3, DRAG_GRIP_BACK = 0.55, DRAG_SLACK = 0.12, DRAG_BODY = 0.8;
+	static final double DRAG_WEIGHT = 0.3;
 	/** (0.15.114) A severed part lying in a body is found this far past reach (blocks), its box grown this much to aim at. */
 	static final double PART_REACH_SLACK = 0.5, PART_PICK_INFLATE = 0.15;
 	/** On foot only the first two are rolled; in flight any of the four. */
@@ -143,8 +159,10 @@ public final class Carry {
 	public static final int FREE_ARMOUR = 12, ARMOUR_PER_BRAWN = 6;
 	/** After being let go, how long before the same one can be picked up again (ticks). */
 	static final int REGRAB_TICKS = 20;
-	/** Let go: a drop carries on with the carrier's momentum, nudged ahead; a throw goes this fast ahead and up (b/t). */
-	static final double DROP_AHEAD = 0.12, DROP_UP = 0.08, THROW_AHEAD = 0.5, THROW_UP = 0.32;
+	/** Let go: a drop carries on with the carrier's momentum, nudged ahead (b/t); a throw, see {@link #THROW_SPEED}. */
+	static final double DROP_AHEAD = 0.12, DROP_UP = 0.08;
+	/** (0.19.62) How far a carried head reaches a wall to be mounted on it, and how far out from the face it hangs. */
+	static final double TROPHY_REACH = 3.0, TROPHY_OFF_WALL = 0.18;
 	/** One jump frees a carried player: they spring off up and back (b/t). */
 	static final double ESCAPE_UP = 0.42, ESCAPE_BACK = 0.3;
 	/** A struggle that can't work (stunned, say) can't be retried for this long (ticks). */
@@ -163,11 +181,24 @@ public final class Carry {
 		{0.0, 1.4, 0.7},
 		{0.0, 0.6, 1.25},
 		{0.36, 0.5, 0.3},
+		{0.0, 0.0, 0.0},
 	};
 	/** Overhead, it's let go this much further ahead per block of its width, so it clears you. */
 	static final double OVERHEAD_RELEASE_PER_WIDTH = 0.5;
-	/** Thrown from overhead it's heavy: it goes this fast ahead and up (b/t), a short, low heave. */
-	static final double HEAVE_AHEAD = 0.38, HEAVE_UP = 0.18;
+	/**
+	 * (0.20.103) Andy: "throwing held items and mobs should follow the cursor, if you look high the trajectory is higher,
+	 * and smaller things can be flung further w/ higher strength stat". A throw goes along your look (up, level or down) at
+	 * {@link #THROW_SPEED} (overhead {@link #HEAVE_SPEED}), with {@link #THROW_LIFT} up so a level throw still arcs; times
+	 * how light it is for its size ({@link #lightness}) and how strong you are ({@link #BRAWN_THROW} more per point of
+	 * brawn, Kitchen's {@code Hauling}: Strength, size, Might, Packhorse; up to {@link #BRAWN_THROW_MAX} points).
+	 */
+	static final double THROW_SPEED = 0.55, HEAVE_SPEED = 0.42, THROW_LIFT = 0.14;
+	public static final double BRAWN_THROW = 0.2;
+	public static final int BRAWN_THROW_MAX = 5;
+	/** (0.20.103) A person's bulk (width x width x height); something this bulky flies as far as a person, a lighter one further. */
+	public static final double PERSON_BULK = 0.6 * 0.6 * 1.8;
+	/** (0.20.103) How much further the lightest thing flies, and how much shorter the heaviest. */
+	public static final double LIGHTEST = 1.8, HEAVIEST = 0.5;
 	static final Identifier WEIGHT_ID = JaymosPowers.id("carry_weight");
 
 	/** Small animals anyone can pick up (wolves, cats, chickens...). Babies of any animal count too. */
@@ -253,6 +284,8 @@ public final class Carry {
 		net.minecraft.core.@Nullable BlockPos placeAt;
 		/** Only a Wind user could pick this up (a villager): if they stop being one, it's dropped. */
 		final boolean windOnly;
+		/** (0.19.55) Dragging: where the dragged one's shoulders and hips are on the ground (null until the first step). */
+		@Nullable Vec3 dragShoulders, dragHips;
 
 		Entry(UUID carrier, Entity carried, int hold, boolean flying, Vec3 at, boolean gravityOnly, boolean windOnly) {
 			this.carrier = carrier;
@@ -296,6 +329,11 @@ public final class Carry {
 	/** Player → the lift they're holding. Not saved. */
 	private static final Map<UUID, Lift> LIFTING = new HashMap<>();
 
+	/** (0.21.39) A lift's job in {@link HoldProgress}: whom. */
+	private static String liftJob(Entity target) {
+		return "lift:" + target.getUUID();
+	}
+
 	private Carry() {
 	}
 
@@ -318,6 +356,7 @@ public final class Carry {
 		ServerTickEvents.END_SERVER_TICK.register(Carry::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> clear());
 		CarryBlock.init();
+		CarryOnCompat.init();
 	}
 
 	// ---- queries (both sides, from the synced attachments)
@@ -336,6 +375,56 @@ public final class Carry {
 	public static @Nullable Player carrierOf(Entity entity) {
 		Integer id = entity.getAttached(CARRIED_BY);
 		return id != null && entity.level().getEntity(id) instanceof Player player ? player : null;
+	}
+
+	/** (0.19.55) This entity is being dragged along the ground by the shoulder ({@link #DRAG}), either side. */
+	public static boolean isDragged(Entity entity) {
+		Player carrier = carrierOf(entity);
+		Carrying hold = carrier == null ? null : carrier.getAttached(CARRYING);
+		return hold != null && hold.hold() == DRAG && hold.target() == entity.getId();
+	}
+
+	/**
+	 * (0.19.55) Whether this is taken by the shoulder and dragged rather than lifted: someone downed (a player, a villager,
+	 * any humanoid), not an animal, and no bigger than a person.
+	 */
+	public static boolean draggable(Entity entity) {
+		return entity instanceof LivingEntity && !(entity instanceof SeveredPart) && !(entity instanceof Animal) && Downed.isDowned(entity)
+			&& !tooBig(entity);
+	}
+
+	/**
+	 * (0.19.55) One step of a drag, the same on the server and on every client: the grip is beside and behind the carrier
+	 * ({@code at}, facing {@code yaw}); the shoulders ({@code shoulders}) are pulled after it once the slack is taken up,
+	 * and the hips ({@code hips}) trail the shoulders along the way they've come, like a trailer. Null ones start lying
+	 * straight out behind. Returns {shoulders, hips} (on the carrier's level, height and all).
+	 */
+	public static Vec3[] dragStep(Vec3 at, float yaw, @Nullable Vec3 shoulders, @Nullable Vec3 hips) {
+		float r = yaw * Mth.DEG_TO_RAD;
+		double aheadX = -Mth.sin(r), aheadZ = Mth.cos(r);
+		double rightX = -Mth.cos(r), rightZ = -Mth.sin(r);
+		Vec3 grip = new Vec3(at.x + rightX * DRAG_GRIP_SIDE - aheadX * DRAG_GRIP_BACK, at.y, at.z + rightZ * DRAG_GRIP_SIDE - aheadZ * DRAG_GRIP_BACK);
+		Vec3 s = shoulders == null ? grip : new Vec3(shoulders.x, at.y, shoulders.z);
+		double dx = s.x - grip.x, dz = s.z - grip.z;
+		double d = Math.sqrt(dx * dx + dz * dz);
+		if (d > DRAG_SLACK) {
+			s = new Vec3(grip.x + dx / d * DRAG_SLACK, at.y, grip.z + dz / d * DRAG_SLACK);
+		}
+		Vec3 h = hips == null ? new Vec3(s.x - aheadX * DRAG_BODY, at.y, s.z - aheadZ * DRAG_BODY) : hips;
+		double hx = h.x - s.x, hz = h.z - s.z;
+		double hd = Math.sqrt(hx * hx + hz * hz);
+		if (hd < 1.0E-4) {
+			hx = -aheadX;
+			hz = -aheadZ;
+			hd = 1.0;
+		}
+		h = new Vec3(s.x + hx / hd * DRAG_BODY, at.y, s.z + hz / hd * DRAG_BODY);
+		return new Vec3[] {s, h};
+	}
+
+	/** (0.19.55) The way a dragged body lies (its yaw: feet toward {@code hips}, head toward its shoulders and the carrier). */
+	public static float dragYaw(Vec3 shoulders, Vec3 hips) {
+		return (float) (Mth.atan2(-(hips.x - shoulders.x), hips.z - shoulders.z) * Mth.RAD_TO_DEG);
 	}
 
 	/** The two are carrier and carried (either way round): they don't shove each other apart. */
@@ -368,7 +457,9 @@ public final class Carry {
 		if (!(entity instanceof LivingEntity) || tooBig(entity)) {
 			return false;
 		}
-		if (entity.getType().builtInRegistryHolder().is(CARRYABLE) || entity instanceof Animal animal && animal.isBaby()) {
+		if (entity.getType().builtInRegistryHolder().is(CARRYABLE) || entity instanceof Animal animal && animal.isBaby()
+			// ((0.21.7) Andy: "you can pick up live animals, but not all of them like it": any small one, CarryTemper)
+			|| CarryTemper.liftable(entity)) {
 			return true;
 		}
 		return Downed.isDowned(entity) && !(entity instanceof Animal);
@@ -386,6 +477,10 @@ public final class Carry {
 	 * work on them).
 	 */
 	public static boolean canBeCarriedBy(Player player, Entity entity) {
+		if (com.jaymospowers.power.xenoform.forms.Slipfin.slippery(entity)) {
+			// (0.18.96) Slipfin slides out of any grip
+			return false;
+		}
 		return canBeCarried(entity) || GravityWeight.lightens(player) && player.getMainHandItem().isEmpty() && GravityWeight.liftable(entity)
 			|| windCarries(player, entity);
 	}
@@ -501,7 +596,10 @@ public final class Carry {
 				if (lift != null && lift.target == target) {
 					lift.last = now;
 				} else {
-					LIFTING.put(carrier.getUUID(), new Lift(target, now));
+					// (0.21.39) let go before: the bar carries on where it stopped
+					lift = new Lift(target, now - HoldProgress.get(carrier.getUUID(), liftJob(target)));
+					lift.last = now;
+					LIFTING.put(carrier.getUUID(), lift);
 				}
 			}
 		}
@@ -524,17 +622,22 @@ public final class Carry {
 			}
 			long now = player.level().getGameTime();
 			if (now - lift.last > LIFT_GRACE || !player.isShiftKeyDown() || liftGap(player, target) > LIFT_GAP + LIFT_SLACK) {
-				// let go too soon, stood up, or they slipped away: nothing
+				// let go too soon, stood up, or they slipped away: (0.21.39) the bar stays where it got to, for the next hold
 				it.remove();
+				HoldProgress.set(player.getUUID(), liftJob(target), (int) Math.min(LIFT_TICKS - 1, lift.last - lift.start));
 				continue;
 			}
 			long held = now - lift.start;
 			if (held >= LIFT_TICKS) {
 				it.remove();
+				HoldProgress.forget(player.getUUID(), liftJob(target));
 				if (!isCarrying(player) && !isCarried(player) && !Downed.isDowned(player) && !KitchenCompat.isCarryingCorpse(player)
 					&& !isCarried(target) && !isCarrying(target) && !target.isPassenger() && !target.isVehicle() && canBeCarriedBy(player, target)) {
-					// (0.18.84) too heavy in their armour: a piece comes off instead, and the next lift tries again
-					if (overloaded(player, target) > 0) {
+					// (0.19.55) someone downed is taken by the shoulder and dragged, armour and all; (0.18.84) anyone else too
+					// heavy in their armour has a piece come off instead, and the next lift tries again
+					if (draggable(target) && !GravityWeight.lightens(player) && !flying(player)) {
+						drag(player, target);
+					} else if (overloaded(player, target) > 0) {
 						shed(player, (LivingEntity) target);
 					} else {
 						pickUp(player, target);
@@ -656,6 +759,54 @@ public final class Carry {
 		return best;
 	}
 
+	/** (0.19.55) Takes {@code target} (someone downed) by the shoulder, to drag along the ground behind {@code carrier}. */
+	static void drag(ServerPlayer carrier, Entity target) {
+		Entry entry = new Entry(carrier.getUUID(), target, DRAG, false, carrier.position(), false, false);
+		Vec3[] lay = dragStep(carrier.position(), carrier.getYRot(), null, null);
+		entry.dragShoulders = lay[0];
+		entry.dragHips = lay[1];
+		CARRIES.put(carrier.getUUID(), entry);
+		carrier.setAttached(CARRYING, new Carrying(target.getId(), DRAG));
+		target.setAttached(CARRIED_BY, carrier.getId());
+		target.removeAttached(THROWN);
+		target.stopRiding();
+		target.resetFallDistance();
+		if (target instanceof ServerPlayer player) {
+			player.stopUsingItem();
+			ServerPlayNetworking.send(player, new Self(carrier.getId()));
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.dragged", carrier.getDisplayName()).withStyle(ChatFormatting.GRAY));
+		} else if (target instanceof Mob mob) {
+			mob.getNavigation().stop();
+			mob.setTarget(null);
+		}
+		carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.dragging", target.getDisplayName()).withStyle(ChatFormatting.GRAY));
+		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null) {
+			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -DRAG_WEIGHT, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
+		ServerLevel level = carrier.level();
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.8F, 0.7F);
+		for (BiConsumer<ServerPlayer, Entity> listener : PICKED_UP_LISTENERS) {
+			listener.accept(carrier, target);
+		}
+	}
+
+	/**
+	 * (0.19.55) Dragging someone, sneak + right-click: up into your arms (too heavy in their armour, a piece comes off
+	 * instead and you keep dragging).
+	 */
+	private static void hoist(ServerPlayer carrier, Entry entry) {
+		Entity body = entry.carried;
+		if (overloaded(carrier, body) > 0 && body instanceof LivingEntity living) {
+			shed(carrier, living);
+			return;
+		}
+		CARRIES.remove(entry.carrier);
+		carrier.removeAttached(CARRYING);
+		body.removeAttached(CARRIED_BY);
+		pickUp(carrier, body);
+	}
+
 	static void pickUp(ServerPlayer carrier, Entity target) {
 		boolean flying = flying(carrier);
 		boolean light = GravityWeight.lightens(carrier);
@@ -710,6 +861,15 @@ public final class Carry {
 		if (entry == null) {
 			return;
 		}
+		if (entry.hold == DRAG) {
+			// (0.19.55) let go where they lie, or hoisted up into the arms
+			if (toss) {
+				hoist(carrier, entry);
+			} else {
+				end(carrier, entry, Let.SET_DOWN);
+			}
+			return;
+		}
 		if (!toss && CarryBlock.is(entry.carried)) {
 			// (0.18.49) a space pod part looked at a pod goes onto the pod (the display is gone then, so nothing is put in the world)
 			switch (com.jaymospowers.power.zfighter.pod.PodParts.tryAttach(carrier, entry.carried)) {
@@ -732,6 +892,19 @@ public final class Carry {
 			entry.placeAt = spot;
 			end(carrier, entry, Let.PLACE);
 			return;
+		}
+		if (!toss && entry.carried instanceof SeveredPart head && head.part() == Dismember.HEAD) {
+			// (0.19.62) a head set down looking at a wall goes up on it as a trophy
+			net.minecraft.world.phys.BlockHitResult wall = carrier.level().clip(new net.minecraft.world.level.ClipContext(carrier.getEyePosition(),
+				carrier.getEyePosition().add(carrier.getViewVector(1.0F).scale(TROPHY_REACH)), net.minecraft.world.level.ClipContext.Block.COLLIDER,
+				net.minecraft.world.level.ClipContext.Fluid.NONE, carrier));
+			if (wall.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && wall.getDirection().getAxis().isHorizontal()) {
+				Vec3 out = Vec3.atLowerCornerOf(wall.getDirection().getUnitVec3i());
+				end(carrier, entry, Let.SET_DOWN);
+				head.mountOn(wall.getLocation().add(out.scale(TROPHY_OFF_WALL)), (float) Math.toDegrees(Math.atan2(-out.x, out.z)));
+				carrier.level().playSound(null, head.getX(), head.getY(), head.getZ(), SoundEvents.WOOD_PLACE, SoundSource.PLAYERS, 0.8F, 0.8F);
+				return;
+			}
 		}
 		// a chest is only ever set down, never thrown
 		end(carrier, entry, toss && !CarryBlock.holdsContents(entry.carried) ? Let.THROW : Let.DROP);
@@ -778,6 +951,21 @@ public final class Carry {
 	}
 
 	/** Ends a carry: forgets it, lifts the weight, and puts the body down the way it was let go. */
+	/** (0.20.103) A throw's own speed (b/t): along {@code thrower}'s look, a little up, by its lightness and their brawn. */
+	static Vec3 fling(Player thrower, Entity thrown, double speed) {
+		int brawn = Math.min(BRAWN_THROW_MAX, KitchenCompat.brawn(thrower));
+		// (a carried block is a display, with no real size of its own: it flies as a block)
+		double light = CarryBlock.is(thrown) ? lightness(1.0, 1.0) : lightness(thrown.getBbWidth(), thrown.getBbHeight());
+		double fast = speed * light * (1.0 + BRAWN_THROW * brawn);
+		return thrower.getViewVector(1.0F).scale(fast).add(0.0, THROW_LIFT, 0.0);
+	}
+
+	/** (0.20.103) How far something of this size flies against a person ({@link #HEAVIEST} to {@link #LIGHTEST}). */
+	public static double lightness(double width, double height) {
+		double bulk = Math.max(1.0E-3, width * width * height);
+		return Math.clamp(Math.cbrt(PERSON_BULK / bulk), HEAVIEST, LIGHTEST);
+	}
+
 	private static void end(@Nullable ServerPlayer carrier, Entry entry, Let how) {
 		CARRIES.remove(entry.carrier);
 		Entity carried = entry.carried;
@@ -796,7 +984,8 @@ public final class Carry {
 		REGRAB.put(carried.getUUID(), now + REGRAB_TICKS);
 		Vec3 at = carried.position();
 		Vec3 velocity = Vec3.ZERO;
-		if (carrier != null && carrier.level() == level && how != Let.SET_DOWN) {
+		// ((0.19.55) a dragged body is let go where it lies)
+		if (carrier != null && carrier.level() == level && how != Let.SET_DOWN && entry.hold != DRAG) {
 			float yaw = carrier.getYRot() * Mth.DEG_TO_RAD;
 			Vec3 ahead = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
 			Vec3 right = new Vec3(-Mth.cos(yaw), 0.0, -Mth.sin(yaw));
@@ -813,9 +1002,8 @@ public final class Carry {
 			}
 			velocity = switch (how) {
 				case DROP -> momentum.add(ahead.scale(DROP_AHEAD)).add(0.0, DROP_UP, 0.0);
-				case THROW -> entry.hold == OVERHEAD
-					? momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(HEAVE_AHEAD)).add(0.0, HEAVE_UP, 0.0)
-					: momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(THROW_AHEAD)).add(0.0, THROW_UP, 0.0);
+				// (0.20.103) along the look, further the lighter it is and the stronger you are
+				case THROW -> momentum.multiply(1.0, 0.0, 1.0).add(fling(carrier, carried, entry.hold == OVERHEAD ? HEAVE_SPEED : THROW_SPEED));
 				case ESCAPE -> momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(-ESCAPE_BACK)).add(0.0, ESCAPE_UP, 0.0);
 				default -> Vec3.ZERO;
 			};
@@ -904,6 +1092,34 @@ public final class Carry {
 		}
 		entry.lastCarrierPos = here;
 		carried.resetFallDistance();
+		if (entry.hold == DRAG) {
+			// (0.19.55) along the ground behind the hand: the server lays a mob there (a player's own client moves them, the same way)
+			Vec3[] lay = dragStep(here, carrier.getYRot(), entry.dragShoulders, entry.dragHips);
+			entry.dragShoulders = lay[0];
+			entry.dragHips = lay[1];
+			if (!(carried instanceof Player)) {
+				carried.setPos(lay[0].x, lay[0].y, lay[0].z);
+				carried.setDeltaMovement(Vec3.ZERO);
+				float yaw = dragYaw(lay[0], lay[1]);
+				carried.setYRot(yaw);
+				if (carried instanceof LivingEntity living) {
+					living.yBodyRot = yaw;
+				}
+				if (carried instanceof Mob mob) {
+					mob.getNavigation().stop();
+				}
+			}
+			if (flying(carrier) || !Downed.isDowned(carried)) {
+				// taken off into the air, or they're up again: let go
+				end(carrier, entry, Let.SET_DOWN);
+			}
+			return;
+		}
+		// (0.21.7) a wild animal that won't stand being held bites, scratches or squirms its way free
+		if (CarryTemper.tick(carrier, carried)) {
+			end(carrier, entry, Let.DROP);
+			return;
+		}
 		if (!(carried instanceof Player) && !(carried instanceof SeveredPart)) {
 			// (a severed part holds itself in the hand, see SeveredPart#tick) the server holds animals at the carrier's feet (each client draws them in the hold)
 			carried.setPos(here.x, here.y, here.z);

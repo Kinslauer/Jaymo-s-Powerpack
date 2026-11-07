@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " W ",
+    "WSW"
+  ],
+  "key": {
+    "W": "minecraft:lime_wool",
+    "S": "minecraft:string"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:frog_plush"
+  }
+}

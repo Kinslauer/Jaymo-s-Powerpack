@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
@@ -103,6 +104,8 @@ public final class Planner {
 	}
 
 	private static final Map<String, int[]> RINGS = new HashMap<>();
+	/** (0.7.490) Builds that stand on the shore, by entry: {the blueprint row their water end starts at, the least of their columns over water}. */
+	private static final Map<String, int[]> SHORE = new HashMap<>();
 	private static final Map<Integer, Map<Item, Integer>> NEEDS = new HashMap<>();
 	private static final Map<Integer, Long> NEEDS_AT = new HashMap<>();
 
@@ -112,6 +115,20 @@ public final class Planner {
 	/** Builds of {@code entry} (any faction type) go up between {@code min} and {@code max} blocks from the seat. */
 	public static void setRings(String entry, int min, int max) {
 		RINGS.put(entry, new int[] {min, max});
+	}
+
+	/**
+	 * (0.7.490) Builds of {@code entry} stand on the shore: the blueprint's rows from {@code fromRow} on (drawn north, its
+	 * head toward the seat) may lie over water, and at least {@code leastWet} of its columns must, its surface no higher
+	 * than the floor and within {@link #LEVEL_TOLERANCE} below it. The rows before stand on dry ground as usual.
+	 */
+	public static void setShore(String entry, int fromRow, int leastWet) {
+		SHORE.put(entry, new int[] {fromRow, leastWet});
+	}
+
+	/** (0.7.490) Whether builds of {@code entry} stand partly over water (their builders don't fill under them). */
+	static boolean shore(String entry) {
+		return SHORE.containsKey(entry);
 	}
 
 	/** The settlement's size, for the catalogue's gates: its villagers and its folk. */
@@ -139,17 +156,32 @@ public final class Planner {
 		int size = size(f);
 		List<Blueprint.Entry> out = new ArrayList<>();
 		Set<String> seen = new HashSet<>();
+		// (0.7.488) plans its people gave it come first ({@link Commissions})
+		for (Blueprint.Entry e : Commissions.next(server, f)) {
+			if (seen.add(e.id())) {
+				out.add(e);
+			}
+		}
 		Blueprint.Entry tavern = null;
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
 			// (0.5.11) the wall goes up as a whole, round everything, once the rest is built ({@link Enclosure})
 			if (Enclosure.piece(e.id())) {
 				continue;
 			}
+			if (e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f)) {
+				// (0.7.441) only a Warrior-born or mixed haven builds a fighting ring
+				continue;
+			}
+			if (e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f)) {
+				// (0.7.518) only the capital of a Faith-creed realm builds the great temple
+				continue;
+			}
 			if (e.id().equals(TAVERN)) {
 				tavern = size >= e.minPopulation() && works.count(e.id()) < e.max() ? e : null;
 				continue;
 			}
-			if (size >= e.minPopulation() && works.count(e.id()) < Focus.max(server, f, e.id(), e.max()) && seen.add(e.id())) {
+			// (0.7.490) a haven's works by its blood and its size ({@link HavenGrowth})
+			if (size >= e.minPopulation() && works.count(e.id()) < HavenGrowth.max(server, f, e.id(), Focus.max(server, f, e.id(), e.max())) && seen.add(e.id())) {
 				out.add(e);
 			}
 		}
@@ -168,7 +200,9 @@ public final class Planner {
 		Works.Site works = Works.of(server, f.id());
 		Map<String, Integer> most = new HashMap<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
-			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && e.minPopulation() < Integer.MAX_VALUE) {
+			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && !HavenGrowth.isWork(e.id()) && e.minPopulation() < Integer.MAX_VALUE
+				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))
+				&& !(e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f))) {
 				most.merge(e.id(), Focus.max(server, f, e.id(), e.max()), Math::max);
 			}
 		}
@@ -247,7 +281,8 @@ public final class Planner {
 		}
 		// (0.5.11) once every other kind of building is up to its full count, the builders wall the settlement in
 		// (0.5.14) not a fiefdom: it lives to supply its overlord, not to hold out ({@link Focus})
-		if (only == null && Focus.walled(server, f) && utilitiesDone(server, f) || only != null && Enclosure.piece(only)) {
+		// (0.7.490) not a walled town past its first tier: its own rings wall it in ({@link WalledTowns})
+		if (only == null && Focus.walled(server, f) && !WalledTowns.walled(server, f) && utilitiesDone(server, f) || only != null && Enclosure.piece(only)) {
 			Enclosure.Piece piece = Enclosure.next(level, f);
 			Blueprint.Entry wallEntry = piece == null ? null : entry(f, piece.entry());
 			if (piece != null && wallEntry != null) {
@@ -278,7 +313,9 @@ public final class Planner {
 		v ^= v >>> 31;
 		v *= 0xBF58476D1CE4E5B9L;
 		v ^= v >>> 29;
-		return v == 0L ? 1L : v;
+		// (0.7.521) a trade's building may be CTOV's (every second try), marked so older ones keep their look
+		// (0.7.629) or Dungeons and Taverns' ({@link DntBuildings})
+		return DntBuildings.tag(entry, CtovHalls.tag(entry, v == 0L ? 1L : v, attempt), attempt);
 	}
 
 	private static Works.Project start(ServerLevel level, Faction f, String entry, Placing at, int plot, long variant) {
@@ -388,6 +425,7 @@ public final class Planner {
 	/** The best open site for {@code bp} in {@code f}'s land, ring by ring out from the seat; null if none. */
 	static @Nullable Placing site(ServerLevel level, Faction f, String entry, Blueprint bp) {
 		int[] rings = RINGS.getOrDefault(entry, new int[] {RING_MIN, MAX_RADIUS});
+		int[] shore = SHORE.get(entry);
 		int reach = Math.min(rings[1], landRadius(f));
 		Palette palette = Palette.at(level, f.seat());
 		List<int[]> taken = taken(level, f);
@@ -395,6 +433,7 @@ public final class Planner {
 		int firstRing = -1, candidates = 0, ringIndex = 0;
 		double start = (f.id() * 0.618) % 1.0 * Math.PI * 2.0;
 		Works.Site works = Works.of(level.getServer(), f.id());
+		boolean town = WalledTowns.walled(level.getServer(), f);
 		for (int r = Math.max(rings[0], SEAT_CLEAR + Math.max(bp.width(), bp.depth())); r <= reach; r += RING_STEP, ringIndex++) {
 			if (firstRing >= 0 && ringIndex > firstRing + RING_LOOKAHEAD) {
 				break;
@@ -410,11 +449,13 @@ public final class Planner {
 				Rotation rotation = facing(Direction.getApproximateNearest(f.seat().getX() - center.getX(), 0, f.seat().getZ() - center.getZ()));
 				int[] size = turned(bp, rotation);
 				BlockPos corner = center.offset(-size[0] / 2, 0, -size[1] / 2);
-				if (!Enclosure.inside(works, corner.getX() - GAP, corner.getZ() - GAP, corner.getX() + size[0] + GAP,
+				// (0.7.490) a walled town's builders keep inside its newest wall and off its band's plots, whatever rectangle it had
+				if (town ? !WalledTowns.plannable(level, f, corner.getX() - GAP, corner.getZ() - GAP, corner.getX() + size[0] + GAP,
+					corner.getZ() + size[1] + GAP) : !Enclosure.inside(works, corner.getX() - GAP, corner.getZ() - GAP, corner.getX() + size[0] + GAP,
 					corner.getZ() + size[1] + GAP)) {
 					continue;
 				}
-				Footing footing = check(level, f, corner, size[0], size[1], bp.height(), taken);
+				Footing footing = check(level, f, corner, size[0], size[1], bp.height(), taken, rotation, bp.depth(), shore);
 				if (footing == null) {
 					continue;
 				}
@@ -433,10 +474,13 @@ public final class Planner {
 		return best;
 	}
 
-	/** Every footprint already spoken for (all factions' buildings, projects and plots), as {minX, minZ, maxX, maxZ}. */
-	private static List<int[]> taken(ServerLevel level, Faction f) {
-		List<int[]> out = new ArrayList<>();
+	/**
+	 * Every footprint already spoken for (all factions' buildings, projects and plots, and (0.7.490) every walled town's
+	 * raised band buildings, {@link WalledTowns#raised}), as {minX, minZ, maxX, maxZ}.
+	 */
+	static List<int[]> taken(ServerLevel level, Faction f) {
 		MinecraftServer server = level.getServer();
+		List<int[]> out = new ArrayList<>(WalledTowns.raised(server));
 		for (var e : Works.all(server).entrySet()) {
 			Faction owner = Factions.get(server, e.getKey());
 			for (Works.Built b : e.getValue().built()) {
@@ -464,9 +508,11 @@ public final class Planner {
 	 * {@link #LEVEL_TOLERANCE}, and open air above. A column may instead stand on an old structure ({@link Ruins}): its
 	 * ground is then the land under the structure, and the structure's blocks above count as open (they'll be torn
 	 * down), unless the site is {@link Ruins#guarded} or has a bell. Returns the floor height (the median ground block)
-	 * and whether it's on an old structure, or null.
+	 * and whether it's on an old structure, or null. (0.7.490) With {@code shore} (see {@link #setShore}), the rows of the
+	 * blueprint ({@code depth} deep, turned by {@code rotation}) from its water end on may lie over water instead.
 	 */
-	static @Nullable Footing check(ServerLevel level, Faction f, BlockPos corner, int w, int d, int height, List<int[]> taken) {
+	static @Nullable Footing check(ServerLevel level, Faction f, BlockPos corner, int w, int d, int height, List<int[]> taken, Rotation rotation,
+		int depth, int @Nullable [] shore) {
 		int x0 = corner.getX(), z0 = corner.getZ(), x1 = x0 + w - 1, z1 = z0 + d - 1;
 		// in its land
 		for (int[] c : new int[][] {{x0 - MARGIN, z0 - MARGIN}, {x1 + MARGIN, z0 - MARGIN}, {x0 - MARGIN, z1 + MARGIN}, {x1 + MARGIN, z1 + MARGIN}}) {
@@ -488,7 +534,7 @@ public final class Planner {
 		}
 		// the ground (a margin column over an old structure is left as it stands, and not looked over)
 		int[] grounds = new int[(w + 2 * MARGIN) * (d + 2 * MARGIN)];
-		List<Integer> inside = new ArrayList<>();
+		List<Integer> inside = new ArrayList<>(), surfaces = new ArrayList<>();
 		boolean ruins = false;
 		int n = 0;
 		for (int x = x0 - MARGIN; x <= x1 + MARGIN; x++) {
@@ -500,11 +546,20 @@ public final class Planner {
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 				BlockState ground = level.getBlockState(top.below());
 				boolean margin = x < x0 || x > x1 || z < z0 || z > z1;
-				if (!level.getFluidState(top).isEmpty() || !level.getFluidState(top.below()).isEmpty()) {
-					return null;
-				}
 				int at;
-				if (Storehouse.ground(ground) || (margin && road(ground, null))) {
+				boolean wet = false;
+				if (!level.getFluidState(top).isEmpty() || !level.getFluidState(top.below()).isEmpty()) {
+					// (0.7.490) only a shore build's water end may lie over water, and only open water
+					if (shore == null || row(rotation, x - x0, z - z0, depth) < shore[0] || !level.getFluidState(top).isEmpty()
+						|| !level.getFluidState(top.below()).is(FluidTags.WATER)) {
+						return null;
+					}
+					at = top.getY() - 1;
+					wet = true;
+					if (!margin) {
+						surfaces.add(at);
+					}
+				} else if (Storehouse.ground(ground) || (margin && road(ground, null))) {
 					at = top.getY() - 1;
 				} else if (Ruins.inPiece(level, top.below())) {
 					if (margin) {
@@ -521,15 +576,23 @@ public final class Planner {
 					return null;
 				}
 				grounds[n++] = at;
-				if (!margin) {
+				if (!margin && !wet) {
 					inside.add(at);
 				}
 			}
+		}
+		if (inside.isEmpty() || shore != null && surfaces.size() < shore[1]) {
+			return null;
 		}
 		inside.sort(Integer::compare);
 		int floor = inside.get(inside.size() / 2);
 		for (int g : inside) {
 			if (Math.abs(g - floor) > LEVEL_TOLERANCE) {
+				return null;
+			}
+		}
+		for (int g : surfaces) {
+			if (g > floor || floor - g > LEVEL_TOLERANCE) {
 				return null;
 			}
 		}
@@ -560,6 +623,16 @@ public final class Planner {
 			return null;
 		}
 		return new Footing(floor, ruins);
+	}
+
+	/** (0.7.490) Which row of a {@code depth}-deep blueprint, turned by {@code rotation}, the footprint's column at {@code (x, z)} is. */
+	private static int row(Rotation rotation, int x, int z, int depth) {
+		return switch (rotation) {
+			case CLOCKWISE_90 -> depth - 1 - x;
+			case CLOCKWISE_180 -> depth - 1 - z;
+			case COUNTERCLOCKWISE_90 -> x;
+			default -> z;
+		};
 	}
 
 	/**

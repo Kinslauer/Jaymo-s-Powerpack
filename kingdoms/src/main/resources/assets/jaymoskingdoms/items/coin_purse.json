@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "jaymoskingdoms:purse_coins",
+    "entries": [
+      {
+        "threshold": 1,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/coin_purse_1"
+        }
+      },
+      {
+        "threshold": 24,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/coin_purse_2"
+        }
+      },
+      {
+        "threshold": 96,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/coin_purse_3"
+        }
+      },
+      {
+        "threshold": 320,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/coin_purse_4"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/coin_purse_0"
+    }
+  }
+}

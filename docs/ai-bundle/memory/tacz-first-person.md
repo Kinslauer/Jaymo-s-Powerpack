@@ -1,0 +1,12 @@
+---
+name: tacz-first-person
+description: Flintlocks low in first person (First-person Model) + TaCZ default modern pack removed (PR #182, 0.10.85); gun arms + flintlock animations failing to load (PR #221 MERGED, 0.11.14)
+metadata:
+  type: project
+  modified: 2026-10-15T02:55:20.353Z
+---
+2026-10-14 Andy: flintlocks stayed low in first person, couldn't aim them into view. Cause: First-person Model (tr7zw) and TaCZ both inject at HEAD of FirstPersonHandsAndItemsRenderer.submitArmWithItem; FPM (vanillaHandsMode OFF by default) cancels for any item not on its `autoVanillaHands` list, so TaCZ never drew; you saw the body's 3rd-person hand. Not EMF/Fresh Animations/Better Combat.
+Fix PR #182 (branch claude/project-thread-pnijj6): client/armory/TaczFirstPerson adds tacz:modern_kinetic_gun to FPM's autoVanillaHands by reflection at CLIENT_STARTED; display JSONs get player_animator_3rd (pistol_default for pistols). Test jar /mnt/project-files/flintlock-first-person/.
+**How to apply:** any other mod item with its own first-person renderer needs the same FPM list entry. Related: [[tacz-guns]].
+2026-10-14 Andy: "remove everything from tacz except what i need for the blunderbuss musket and flintlocks... nothing modern". Same PR #182 (now pack 0.10.79): TaczGuns.dropDefaultPack() keeps tacz_default_gun from loading (client + new server entrypoint, deletes .minecraft/tacz copy); our gunpack has its own Lua state machine, PAL poses, flash, sounds, and data/tacz/index/blocks/gun_smith_table.json -> our Gunsmith's Bench. Leftover TaCZ items (ammo boxes, targets, statue, poster) are uncraftable but still registered.
+2026-10-15 Andy: "the arms animate in the gun pov" (arms huge at view edges). Cause: TaCZ draws its arms via AvatarRenderer.renderHand; EMF hooks that (MixinPlayerEntityRenderer, root.animate with isFirstPersonHand) and plays Fresh Animations' first-person arm moves on them. Not our poses. Fix PR #221 (branch claude/project-thread-1mpv1g, pack 0.11.14, MERGED 2026-10-15 03:1xZ, jar /mnt/project-files/gun-arms/): EmfAccess pause also when EMFState.isInHand && TaczFirstPerson.holdingGun. Same PR: "muskets have no reload animation" = every flintlock animation file failed to load (log: Failed to load gun animation runtime) because shoot had empty "sound_effects": {} (TaCZ throws on a 0-keyframe sound channel); key removed. **How to apply:** never write an empty sound_effects; check Andy's logs/latest.log (approved folder) for TaCZ load errors first. Not playtested.

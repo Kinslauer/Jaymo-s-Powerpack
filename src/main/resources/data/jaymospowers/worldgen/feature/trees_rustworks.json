@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:skybirch_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.2,
+      "feature": {
+        "feature": "jaymospowers:wisptop_tree",
+        "placement": []
+      }
+    }
+  ]
+}

@@ -1252,3 +1252,334 @@ Cup** (board; `far_ward` and Fire Resistance) and **Salt Trail Bread** (oven; `f
 buffs are Powers' own effects, found by id when first needed: `Dish.Buff` now takes a supplier (`Buff.far(id, ticks)`; the old
 constructor with a Holder is kept), and falls back to Luck if Powers is missing. Each recipe loads only when its items exist
 (`fabric:load_conditions`). Art, models, recipes and lang come from Powers' `tools/gen_back_home.py`. Compile-checked; not seen in game.
+
+## 0.5.43: faint veins when you need water (pack 0.19.44)
+Andy, after the vampire's blood-thirst veins (Kingdoms 0.7.471): water thirst too, "smaller less emphasized, just to show the
+user they need water". New client `DryVeins`: at `FROM` (8) water or less, thin dusky veins show at the screen's edges and
+corners, reaching a little further in and showing a little more as the water runs out (opacity 0.35 to 0.65, three short
+layers, no heartbeat), and fade back once you drink. Hidden in creative and spectator. Art: `textures/gui/dry_veins_1..3.png`,
+drawn by Kingdoms' `tools/gen_thirst_veins.py water`. Compile-checked; not seen in game.
+
+## 0.5.44: small spiders always smash, any spider sometimes (pack 0.19.46)
+Andy: "smaller spiders should be smashed on every kill, and a chance for any spider to smash from any weapon, not just
+blunt." `SpiderCrush.crushed`: a crushable mob no wider than `SMALL_WIDTH` (1 block: cave spiders, shrunken or young
+spiders) bursts into legs on any kill, whatever the weapon; any other spider killed by someone (blade, arrow, power) is
+smashed `ANY_KILL_CHANCE` (25%) of the time. Deaths with no killer (poison, burning, drowning) still leave a body unless
+they crush (falls, anvils, mace, Powers' blunt marks). Corpse smashing unchanged. Not compile-checked; not seen in game.
+
+## 0.5.47: dead snakes go limp (pack 0.19.53)
+Andy: "a snake should go all noodle like when they ragdoll, this stiffness doesnt make sense". Naturalist's snake was a
+rigid `BOX` ragdoll, its tail segments only swung by `LooseParts`, so it lay as a few stiff blocks bent at sharp angles.
+New ragdoll shape `RagdollRig.Shape.CHAIN` (tag `jaymoskitchen:ragdoll_chain`, holding `naturalist:snake`): a small rigid
+head (four corners, so it has a torso frame like every other shape) and `CHAIN_JOINTS` (10) joints behind it, each held to
+the next by a stick and free to bend every way up to `CHAIN_BEND` (1.3 rad, kept by compression-only struts two joints
+apart, `RagdollRig.strutA/strutB/strutMin`). Its belly grips what it lies on (`RagdollBody.CHAIN_GRIP`, `GRIP_GIVE`): a
+slowly sliding point stops dead and barely gives to the sticks, so a snake draped over a step stays draped instead of
+slithering off. A snake wedged among blocks that goes nowhere in `CHAIN_SETTLE_TICKS` falls asleep (`settleChain`), and
+asleep it only wakes past `CHAIN_WAKE`. Laid down (`RagdollBody.lying`) it lies in a lazy S. Held by the tail's tip.
+Drawing: new client `ChainSpine` finds the model's spine by name (a `tail...` run and a `neck`/`head` beside it; Naturalist:
+main -> neck -> skull, main -> tail -> tail2 -> tail3 -> tail4) and lays it along the chain, head tip first: the first
+segment each way is moved onto the chain, every segment turned so its far end lands on the chain its own length on, the
+neck laid flat and the head level. `LooseParts` leaves the spine alone, and (when there's no physics, carried) follows a
+run of same-named parts (tail, tail2, tail3...) to its end instead of stopping two deep. Old snake corpses keep their box.
+`tools/ragdoll_sim` gains snake checks (settles flat, drapes over a bump and down a step, bends no further than it can);
+the spine laying was checked against a stand-in of Naturalist's snake model. Not compile-checked against the game; not seen
+in game.
+
+## 0.5.48: fire drinkers (pack 0.19.57, Kingdoms 0.7.477)
+`Thirst.setFireDrinker` (Kingdoms gives it the Emberborn): water only hisses to steam for them (no water, a steam puff,
+an overlay line); sneak-use with an empty hand on a fire or lit campfire drinks it (+4; a loose fire goes out, a campfire
+keeps burning), on lava gulps it (+12, a short regeneration, 3 s apart); soaking in lava gives a point every 3 s; the
+Nether doesn't dry them. Non-water potions, milk, stews and fruit still count. The HUD's sip packet also goes out at open lava.
+
+## 0.5.50: carried snakes drape, small bodies in one hand (pack 0.19.61)
+Andy: "The snake is still very rigid when carried, but the ragdoll looks great." Carried, slung over a horse or falling,
+a corpse has no physics, and `LooseParts` took the snake's neck and first tail segment as the trunk, so only the tail's
+tip hung. Now `ChainSpine.drape` lays the spine over the arms by hand: the middle flat across them (`DRAPE_REST` either
+side), rolling over their edge (`DRAPE_BEND` radius), and both ends hanging down, swung by the corpse's carry swing, more
+the lower they hang (`DRAPE_LAG`). The head hangs off whichever side it already lay. It is drawn through `DRAPE_POINTS`
+(24) points by the same segment laying as the ragdoll. Only chain-tagged bodies (`ragdoll_chain`) drape; old box snake
+corpses drape too. A carried snake is no longer laid back like a tall body (`state.tall`). `LooseParts.Frame` gains a
+`Drape`. The drape was checked headless against the snake stand-in; not compile-checked against the game; not seen in game.
+
+Small bodies in one hand. Andy: "You should carry small mobs like that with one hand, so the snake and chicken would
+be from the neck, you can remove the chicken corpse bag." The pocket pickup (a small corpse turned into a `CorpseItem`
+in your inventory) is gone: an empty-hand click on a small corpse (`fitsInPocket`, now up to 0.6 wide and 0.8 tall:
+chickens, rabbits, snakes, babies; never player corpses or machines) carries it in your right hand
+(`CorpseEntity.handPosition`, `HAND_FORWARD/RIGHT/HEIGHT`). It hangs by the neck (`CorpseRenderer.hangFromHand`,
+`NECK_FRONT/UP`), legs and wings dangling through `LooseParts`; a snake hangs its body down from the hand and trails the
+rest of its length on the ground behind you (`ChainSpine.hang`). Your right arm holds it low and out (`CarryPose`
+`ONE_HAND`, `HAND_HOLD/OUT/SWAY`), not both arms. `CorpseItem` stays registered so bags already held still work.
+Checked headless against the snake stand-in; not compile-checked; not seen in game.
+
+## 0.5.51: meat hooks, blood grates, hanging butchery (pack 0.19.64, Kingdoms 0.7.482)
+Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery's hooks and blood grates; GPLv3 Forge
+1.20.1 and needs Alex's Mobs, so ideas only, nothing copied). New package `butchery/`, the steps in `corpse/Hanging`.
+- **Meat Hook** (`MeatHookBlock`; 2 from chain + iron ingot + nugget): hangs under any block with collision. Right-click it
+  while carrying a carcass, or dragging one within 3 blocks (plus its height), and it hangs there by its hind legs: a
+  ragdoll gripped at the hook (`Hanging.held`: both hind feet, a person's feet, a snake's tail tip), so it swings and
+  turns. Picking it up or dragging it takes it down. Hook gone: it falls. Animals only (no fish, machines, iron).
+- **Blood Grate** (`BloodGrateBlock`; iron bars over an iron basin): `level` 0-8, 250 mB a level, the blood drawn rising
+  in it. A glass bottle takes a level as a **Bottle of Blood** (`BloodBottleItem`); right-click shows how full; a
+  comparator reads it.
+- **Steps on the hook** (right-clicks, each wears the tool): a cleaver (`#jaymoskitchen:cleavers`: axes, Armory and
+  Tinkering cleavers, the warchief cleaver) bleeds it out (small 10 s / 250 mB, most 20 s / 1000 mB, big 40 s / 2000 mB)
+  into a grate up to 4 blocks under it, else the blood pools on the ground (Powers lays stains); the cleaver takes the
+  head (the body's drawn headless; Powers drops it as a trophy head that never despawns); a skinning knife
+  (`#jaymoskitchen:skinning_knives`) takes everything in `#jaymoskitchen:skins` (hide, leather, wool, feathers, pelts),
+  skipped if it has none; three cleaver cuts give the rest a third at a time, with the butcher table's extras, then
+  1-3 bones (and 1-2 animal fat from anything bigger than a chicken) and it's gone. Drained, it can be taken down and finished on the ground.
+- **Too big to lift** (cow and up): bled where it lies with a cleaver (no sneak), then cut up there as before, with the
+  table's extras added.
+- Hooks for the other mods: `Hanging.setOnDrip/setOnSpill/setOnHead`, `Butchery.addOnDrink`, `Butchery.drawGrates`.
+- **Andy: "Yes all of this"** (the follow-up ideas):
+  - **Unbled meat spoils** (`Spoilage`): raw meat cut from a carcass that was never bled (table, ground, cut up where it
+    lay) is marked "Unbled" with the day; after `SPOIL_DAYS` (3) raw in a player's pockets it turns to rotten flesh. Bled on
+    a hook, or cut by a village butcher, it keeps. Fish aren't marked.
+  - **Prime skins**: skinning on the hook gives `PRIME_EXTRA` (1) more of each skin and 1-2 **Leather Scraps**.
+  - **Village butchers use hooks** (`Butchers`): a butcher with a meat hook near the back of the shop hangs the body,
+    bleeds it (`HOOK_CHOP_TICKS`) and works it there instead of on the floor.
+  - **Blood Sausage**: blood bottle + pork/beef/mutton + wheat + animal fat = 3 raw (2 hunger), cooked in a furnace,
+    smoker or campfire (7 hunger). Bottles come back.
+  - **Blood Meal**: blood bottle + bone meal = 3, works as bone meal.
+  - **Leather finishes**: tanned leather + animal fat = **Supple Leather** (book from 3 paper makes 2); + resin =
+    **Harness Leather** (saddle); smelted = **Hardened Leather** (leather horse armour). Leather + a work blade = 4
+    **Leather Scraps**; 4 scraps + resin = leather. Scraps, supple and hardened leather repair leather armour.
+  - **Hide Rug**: 2 hides make 2 rug carpets.
+  - Not done: skeleton displays (need a model per animal) and hide traits (need their own armour items); later if wanted.
+- Tuning: `Hanging.BLEED_*`, `BLOOD_*`, `DRIP_EVERY`, `SPILL_EVERY`, `GRATE_DEPTH`, `DRAG_TO_HOOK`; `BloodGrateBlock.MAX`;
+  `Butchery.MB_PER_LEVEL`; `BloodBottleItem.NAUSEA_TICKS/HUNGER_TICKS`.
+
+## 0.5.52: Excalibur's look (pack 0.19.65, Kingdoms 0.7.483)
+Item and block textures are graded toward Excalibur's darker, earthier palette by the pack's
+`tools/excalibur_style/grade.py`. Rerun it after adding or redrawing a texture.
+
+## 0.5.53: the Excalibur look made optional (pack 0.19.72, Kingdoms 0.7.485)
+Every texture graded in 0.5.52 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.5.54: thrown bodies keep their ragdoll, risen zombies keep their face (pack 0.19.76)
+Andy: "thrown mobs should stop snapping to a pose, and instead keep the ragdoll, so they fall how they fall".
+- Letting go of a carried body (dropped, thrown, tossed into a fire by a guard, its carrier gone, sliding off a horse)
+  used to start its physics from `lyingBody`: sprawled flat, limbs splayed, a fresh random way up. So it snapped into
+  that pose in mid-air. Now `RagdollBody.held` starts it in the pose it was drawn held in (`CorpseRenderer`): a
+  humanoid on its back across the arms, head to the carrier's right, arms hanging and legs back; an animal belly down,
+  legs hanging, head drooping; a small body hanging by the neck from one hand. It keeps the speed it was thrown with
+  and falls however it falls from there.
+- Carried humanoids' legs and heads (client `Limp`) hang as far back as the leg and head cones allow
+  (`RagdollRig.HELD_LEG_HANG`, `HELD_HEAD_BACK`), so the physics never has to swing them on the first tick.
+- The released body's points are sent at once, and clients forget a held body's old points, so it is never drawn for a
+  frame where it lay before it was picked up.
+- `tools/ragdoll_sim` checks a player, cow, chicken, snake and giant let go of in each hold: no point off by more
+  than a hair on the first tick, bones their length, lands and settles out of the ground. All pass.
+- A zombie (or skeleton) body that gets back up came back with a fresh random id. Excalibur picks each zombie's look
+  (its people: hair, clothes) from that id, so it rose wearing someone else's face, or the plain zombie skin, and died
+  again that way (Andy: "the zombie died and changed skins"). It now gets up with the id it had alive, unless
+  something in the world already has it.
+- Compile-checked; not played.
+
+## 0.5.55: one HUD layout (pack 0.19.79, Kingdoms 0.7.487)
+The stomach slots and the body-heat thermometer moved into the left dock beside the hotbar (`client/hud/HudZones`, a
+copy of Powers'; see `docs/HUD-Layout.md` in the pack). The stomach no longer sits where the power chips and the
+attack indicator are; the thermometer no longer covers the XP number.
+## 0.5.56: butchers take coins (pack 0.20.0, Kingdoms 0.7.498)
+Part of Kingdoms' "coins replace emeralds" (`docs/Coins-Plan.md`). A butcher villager's price is now asked in the coin of
+the land where you stand (one emerald's worth in the old price is `KingdomsMoney.worth(1)`, paid in the town's coin and
+copper bits). `KingdomsMoney` is a MethodHandles bridge to `com.jaymoskingdoms.money.Money`, so loose coins, a purse
+(the worn belt purse too) and bundles all count, and change comes back as coins. The butcher screen is sent the price as
+a server-made line ("6 Realm Silver"), one of that coin to draw beside it, the cost and what you carry (`OpenButcher`
+now carries a Component and an ItemStack instead of a silver count). Without Kingdoms the price falls back to emeralds
+one for one.
+## 0.5.57: hooks for the Green Huntsman (pack 0.20.8, Kingdoms 0.7.509)
+`Hanging.addExtraCuts` and `Hanging.addOnDone`: hooks for Kingdoms' Green Huntsman (more from a carcass, and the deed).
+Kitchen stays free of Kingdoms; Kingdoms adds both by reflection (`KitchenCompat.skills`).
+## 0.5.58: drinks are told (pack 0.20.26)
+`Thirst.DRANK`: every drink of water (a sip, a bottle, a cup) is told to its listeners. Powers adds one by reflection: with
+water in the lungs, a drink may go down the wrong pipe.
+## 0.5.59: the stacked Nether (pack 0.20.30)
+Body heat and thirst know the Nether band of a One Dimension world (Powers 0.20.30), where every band answers
+`level.dimension() == OVERWORLD`: `Stacked.realm` asks CustomChunks for the realm at the player's height by reflection.
+## 0.5.60: no cold or heat in heaven (pack 0.20.46)
+Andy: "you should not freeze or overheat in heaven". `BodyHeat.addTemperate(Predicate<Player>)` lets other mods name places
+the weather never reaches. There, body heat goes straight to neutral every second, no warning lines, no frost on the
+screen. Powers adds the Other World (the Judge's hall and the grounds round it) by reflection.
+## 0.5.61: no bodies in heaven (pack 0.20.47)
+Andy: "player corpses dont spawn in the otherworld". `Corpses.addNoCorpseZone(Predicate<Entity>)`
+lets other mods name places no body is left. Dying there (player or mob) leaves no corpse, a player's hotbar drops with the rest of the
+inventory, and a rising body (zombie, skeleton, player) already there fades and drops what it held instead of getting up.
+Powers adds the Other World (the Judge's hall and the grounds round it) by reflection.
+## 0.5.62: villagers don't get stuck on the wagon
+Andy: "this guy got stuck" (a quest villager up on a wagon's bench, the wagon stood nearly on end on a hillside).
+`CartEntity`: a two-wheeler pitches over the real gap to its puller and never past 30 degrees (`MAX_PITCH`; before, a horse
+up a bank tipped it to ~70 and hoisted the bench rider up at the top). A cart blocked at the foot of a bank its puller went
+up is hauled up a block at a time (`HAUL_UP_RISE`). Mobs that climbed onto the wagon's bench or a coach seat by
+themselves (not tamed pets) step down on the cart's right once it has stood still 30 s (`SIT_STILL_TICKS`); on the move
+they stay aboard, and sneak + right-click still lets everyone out at once.
+
+- **0.5.63 (Powers 0.20.51), no more redstone blood:** Andy (2026-11-05): "the redstone like particle effect needs to go
+  as well. it does not ever resemble blood." Corpse cuts, gibs, scavengers, the chopper, hangings and blood grates sent
+  redstone-block crumbs or red dust; `KitchenBlood.send` sends Powers' red blood instead (nothing without Powers).
+  Gradle build only, not played.
+
+- **0.5.64 (Powers 0.20.53), tall animals die as animals:** Andy (2026-11-05): "downed animals should fall to their side".
+  `RagdollShapes` guessed any untagged mob 1.6x taller than wide a person, so Cube Animals' deer, moose, antelope and
+  elephant (and Kingdoms' moose) died with a man's ragdoll. A wild creature (creature, ambient or water category) guessed a
+  person gets the four-legged ragdoll instead (a box if under 0.6 blocks), and ragdoll_quadruped lists Cube Animals' big
+  beasts. Not played.
+- **0.5.65 (Powers 0.20.55), corpses stay bloodied:** `Corpses.ON_BODY` (dead body, new corpse) runs just before a mob's
+  or player's corpse is added, and `CorpseDressing.BODY` (corpse, body state) as a non-plain body's state is made each
+  frame, both for other mods by reflection. Powers uses them to keep the blood a body died with on its corpse, drying
+  darker. Gradle build only, not played.
+
+- **0.5.66 (Powers 0.20.57), small critters go like fish:** Andy (2026-11-05): "crickets and any new small animals should
+  work like fish, if they drop an item the corpse disappears." A small critter's body is a fish's now (`CorpseKind.FISH`):
+  one click spills its loot and it's gone, nothing to carry or butcher. `Corpses.isSmallCritter` counts the new
+  `small_corpses` tag (Cube Animals' cricket, mouse, snail, chameleon; Naturalist's butterfly, caterpillar, firefly,
+  dragonfly, snail; Alex's Mobs' bugs and hummingbird; vanilla tadpole, bee, silverfish, endermite) and, without a tag,
+  any non-monster kind under 0.5 blocks both ways (`SMALL_CRITTER_SIZE`), so future small mobs are covered. It goes by
+  the kind's size, so babies and rabbits, chickens and frogs still leave a body. Old critter bodies already lying around
+  count too. On dry land they puff instead of splashing. Not played.
+
+## 0.5.67 (2026-11-05): Powers decides which blasts blow bodies apart (pack 0.20.67)
+
+- `Gibs.blownApart` follows Jaymo's Powers' roll by blast proximity (`BlastGore`): tag `jaymoskitchen.gib` blows the body
+  apart, `jaymoskitchen.no_gib` leaves it whole. Without either (no Powers), the old 12-damage rule stays. Creepers
+  still always burst. Not played.
+
+## 0.5.68 (2026-11-05): modded animals' corpses fold their legs and shut their eyes
+
+- Andy: "the deer also fell with their bodies clipping into the ground as corpses, they should flop". The ragdoll drove
+  only legs with vanilla's names (`right_front_leg`...). Cube Animals' legs are "frontleg", "BackLegL", "FrontLeg1",
+  inside a legs group and a wrapper turned a quarter round, so they only hung loose (barely swinging, as parts on a
+  group) and went through the ground. `RagdollPose.stands`: on a four-legged body without vanilla's legs, the outermost
+  four parts named *leg* that draw something (front pair the two furthest forward, right on -x) and the shallowest part
+  named head in any case are turned with the ragdoll like vanilla limbs, whatever their parents' turn (`Stand.turn`).
+- Andy: "all the new mobs need a corpse texture pass cause they dont close their eyes". `ClosedEyes.headFaces` read the
+  head's faces in the cube's own space, so a head built sideways (Cube Animals') had one side and its back painted, not
+  both sides; and it only knew a part called exactly "head" or "real_head", its first box. Now: the shallowest head in
+  any case, every part on it except ears, horns, mouths, necks and the like (each by its biggest box, so snouts and
+  horns on the head's own part are left alone), faces judged in the model's space. Not played.
+
+## 0.5.69: zombie players fade in the Other World
+
+Andy: "the zombie players still reanimate in heaven, theyre supposed to disappear". `ZombiePlayer.tick` checks
+`Corpses.inNoCorpseZone` once a second; one standing there (risen before the rule, or brought in) fades in souls and drops
+what it held and carried. Bodies there already never rose since 0.5.61; the pack had been shipping 0.5.57 (Powers 0.20.80
+now ships Kitchen built from source). Built, not played.
+
+## 0.5.70: a carcass bled where it lies drains where you can see it (pack 0.20.84)
+
+Andy, on Jung's clip of a deer on a butcher table: "the deer was clipping through the butcher table, i didnt see any blood
+draining either". A carcass bled on the ground or a table dripped from inside its own middle, so every drop and the pool
+it left were hidden under the body. `CorpseEntity.throatPoint`: it bleeds from just past its head or snout (out from its
+middle), so the drops fall and pool beside it, or run off the table's edge when the head hangs over. A hung carcass drips
+from the bottom of its lowest part, not its middle. The clipping was the old 0.5.57 jar the pack shipped until 0.5.69:
+Cube Animals' deer got a man's ragdoll and its legs hung loose through whatever it lay on, fixed in 0.5.64 and 0.5.68.
+tools/ragdoll_sim checks a deer dragged off a 2x4 table never ends up inside it (0/128). Built, not played.
+
+## 0.5.71: dishes count on the pack's advancement tab (pack 0.20.88)
+`Kitchen.award` gives Powers' Home Cooking for any dish cooked and Cooked to Perfection for a perfect one
+(`jaymospowers:pack/cooked`, `pack/perfect_dish`). Nothing happens without Powers. Built, not played.
+
+## 0.5.72: every corpse can be aimed at, all of it
+Andy: "some corpses dont seem to have hitboxes, so they cannot be interacted with, like this skeleton". A corpse's box is
+small and low under its torso (so it drops to the ground and never hangs on a block edge), while the ragdoll lies two
+blocks long. Aiming at a skeleton's skull, arms or legs, or at a body that had slid off its box, hit the ground behind
+it. Now, on the client, the box takes in the whole drawn ragdoll (`CorpseEntity#makeBoundingBox`, from
+`ClientRagdolls.Track#bounds`, refreshed every tick), so the crosshair finds any part of any corpse. It is left as it was
+while the body is held, pinned, slung or in a cart. The server keeps the small box, so physics is unchanged. Built, not
+played.
+
+## 0.5.73: hearts from a meal stay after it wears off, but don't heal back
+Andy: "instead of the hearts you gain from eating disappearing after the duration ends, now they just shouldnt come back
+if you no longer have the nourishment, so you wont heal back to the same amount". When a meal wears off, its hearts you
+still have filled stay as leftover health (`Stomach.LEFTOVER`, saved, emptied on death); the ones already empty are gone.
+Every point of health you lose afterwards comes off the leftover hearts first, so your max health shrinks with each hit
+down to what your stomach still holds, and nothing heals them back. Built, not played.
+
+## 0.5.74: bodies fall where they stand; first person rides in the head
+Andy: "the knockback ragdoll is still too strong, i know i wasnt killed by a knockback ability, you should just fall
+where you stand or a bit further if knocked back" and "the first person POV should follow the head too, falling as you
+fall, etc like it does for decapitations".
+- A big hit (8+ damage) that knocks a player limp no longer adds its own 0.8-1.4 blocks/tick fling on top of the blow's
+  knockback: the server sends only a topple (`LivingRagdolls.HIT_FLING` 0.1, lift 0.04), and the client carries on 70% of
+  the speed the player already had, the real knockback included (`LimpController.KNOCK_CARRY`). A knockback ability
+  still throws you; an ordinary blow drops you about where you stood.
+- A mob or player who dies (not already limp) keeps 60% of its speed and none of vanilla's knockback hop
+  (`Corpses.DEATH_CARRY`, `DEATH_LIFT` 0.05).
+- Limp no longer flips first person to third person. In first person the view sits just in front of the ragdoll's face
+  and turns and falls with the head (`client/ragdoll/HeadCam`, `RagdollHeadCamMixin`), while limp and, once dead, from
+  your own corpse until you respawn. Third person is left as it is. Built, not played.
+- **0.5.75 (pack 0.20.101), joining near a corpse disconnected you:** 0.5.72's drawn-body box (`CorpseEntity.makeBoundingBox`
+  -> `drawnBounds` -> `ClientRagdolls`) looked the ragdoll up by `getId()`, but a corpse sent to a joining client is placed
+  (and its box made) before its id is set, in the constructor and again in `recreateFromPacket`: "Tried to access entity ID
+  before ID assignment", and the client dropped with "Network Protocol Error". The corpse now notes its id (`setId`
+  override) and keeps its own box until then. Checked against the 26.3 jar; not built here.
+
+## 0.5.76: tossed bodies follow your aim (Powers 0.20.103)
+- `CorpseEntity.toss`: a thrown body goes along your look (up, level or down) at `TOSS_SPEED` with `TOSS_LIFT`, further the
+  smaller the dead one stood (`tossLightness`, 0.5x to 1.8x of a person's) and +20% per point of `Hauling.brawn` (up to 5).
+  Andy: "throwing held items and mobs should follow the cursor ... smaller things can be flung further w/ higher strength stat".
+
+## 0.5.77: small animals cracked with a rock and roasted on a campfire (pack 0.20.113)
+Andy: "i need a way to cook and eat this crab with just a fire and a rock, the most primitive barebones survival with small
+mobs should be possible".
+- A loose rock (any of Powers' ground rocks, item tag `jaymoskitchen:cracking_rocks`) in the main hand cracks open any
+  small animal's body, one carried in one hand (`fitsInPocket`: a crab, chicken, rabbit, frog, baby...): `CHOPS` (3) blows,
+  always a rough job, the rock isn't used up (`CorpseEntity.crack`). Before this only an axe or a flint/bone knife could.
+- A rough job (rock, or an axe off the block) that would leave nothing now keeps one of the body's food, so a crab's single
+  meat isn't lost to the halving.
+- A small animal's body laid on a lit campfire (carry it and right-click the campfire, or drop/throw it on) roasts whole
+  instead of burning away: smoke and crackle for 30 s (`ROAST_TICKS`), then its loot drops cooked by the campfire's own
+  recipes (crab meat -> cooked crab meat); what won't cook drops as it is (`CorpseEntity.roast`). Flint and steel, open
+  fire and lava still burn bodies to nothing. Raw meat still cooks on the campfire as in vanilla.
+- Bats and other small non-animals were already searched by hand, and tiny critters loot in one click (0.5.66).
+  Gradle compile clean; not played.
+
+## 0.5.78: grizzly and Bear Minimum bears as big carcasses (pack 0.21.14)
+- `jaymoskingdoms:grizzly`, `bearminimum:brown_bear` and `bearminimum:black_bear` in `big_carcasses`, `ragdoll_quadruped`
+  and `scavengers`.
+
+## 0.5.79: a body's armour can be marked (pack 0.21.28)
+- `CorpseEntity.reworkArmour(ObjIntConsumer<ItemStack>)`: hands other mods every piece of armour a body still wears
+  (0 boots ... 3 helmet) to change in place, kept on the body's look and coming off with it. Powers dirties, bloodies and
+  washes a dragged corpse's armour with it (Andy: "i'd like players to pull dirty beaten armor off enemies").
+
+## 0.5.80: iron guts drink dirty water safely
+- `Thirst.setIronGut(Predicate<Player>)` / `ironGut(Player)`: anyone it names never gets a turned stomach from dirty water,
+  wherever it came from (a sip from a river, swamp or puddle, a pond bottle, a dirty waterskin). They still get the water.
+  Kingdoms sets it for the Iron Stomach perk (Andy: "the rotten meat eating skill should let you drink water from wherever
+  too"). Gradle compile clean; not played.
+
+## 0.5.81: headless player bodies stay down
+- `CorpseEntity`: a player's corpse missing its head never rises as a `ZombiePlayer` (Andy: "decapitated player corpses
+  cant reanimate"). It lies there with what was on it, searchable as before. Gradle compile clean; not played.
+
+## 0.5.82: every quiver goes in a bauble slot and moves on your back (Powers 0.21.35)
+- Andy: "all quivers should animate and go in baubles". The pack has four quivers: ours and the RPG Series' small, medium
+  and large (Archers, worn in the bauble body slot for Spell Engine but never drawn, since that drawing is Trinkets-only).
+- **Bauble slot:** our quiver is tagged for Powers' body slot (`jaymospowers:baubles/body`). `Quivers.baubles(Player)`
+  reads Powers' `Baubles.worn` by reflection; a quiver worn there comes first for `worn`, for feeding bows (`drawAmmo`)
+  and for what's drawn. Carried in the off hand or inventory still works as before.
+- **Drawn:** the `worn_quiver` attachment is now a `WornQuiver` (item id + arrows). `Quivers.shown` picks a quiver worn in a
+  bauble slot (ours, or any item in the new `jaymoskitchen:shown_quivers` tag, which holds `#archers:quivers`; their
+  arrows are read from whatever `ContainerComponent` they keep, Bundle API's here), else ours carried. Every quiver uses
+  our slung model and arrows; the RPG ones get their own colours (`textures/entity/quiver/<id>.png`, repainted from ours
+  with their palettes by `tools/quiver_looks.py`; small dark leather with brass, medium brown with gold studs, large
+  teal with an iron rim and grey cord).
+- **Animated:** `QuiverModel.animate` swings the quiver with your stride, kicks it out at each footfall, breathes at rest,
+  and rattles each arrow on its own beat; fletchings now pivot on their shaft's foot so they move with it. Drawing a bow
+  or loading a crossbow lifts the top arrow out of the quiver over 5 ticks, then it's gone from the quiver (it's on the
+  string). Gradle compile clean; not played.
+
+## 0.5.83: lifting a carcass keeps its progress
+- Andy: "every meter should work this way". Let go of a corpse's lift or leg hold before it fills and your next hold
+  carries on where the bar was (someone else's hold starts fresh). Butchering a big carcass already kept its bar.
+  Compile-checked; not played.
+
+## 0.5.84: the risen dead get up from where they lay
+- Andy: "zombies should have their own reanimation animation too". A body that reanimates (zombie, skeleton, a player's
+  body as a zombie) now rises over 2.5 s (`corpse/Reanimation`, held still with no AI, tag `jaymoskitchen.reanimating`
+  frees it if saved mid-rise), drawn by `client/corpse/ReanimatePose`: on its back with a twitch, the arms jerk up stiff
+  first, then it tips up from the heels like a plank in four fits, never bending at the waist, and lurches forward past
+  upright as it finds its feet, head lolling. Earth puffs up where it lay. Compile-checked; not played.

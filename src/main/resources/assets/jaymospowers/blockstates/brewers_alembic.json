@@ -1,0 +1,33 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymospowers:block/alchemy/brewers_alembic"
+      }
+    },
+    {
+      "when": {
+        "bottles": "1|2|3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/brewers_alembic_bottle_1"
+      }
+    },
+    {
+      "when": {
+        "bottles": "2|3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/brewers_alembic_bottle_2"
+      }
+    },
+    {
+      "when": {
+        "bottles": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/brewers_alembic_bottle_3"
+      }
+    }
+  ]
+}

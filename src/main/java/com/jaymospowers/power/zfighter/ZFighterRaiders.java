@@ -70,6 +70,8 @@ public final class ZFighterRaiders {
 	/** A band on the ground: its pods, its raiders, and when it gives up. */
 	private static final class Band {
 		final ServerLevel level;
+		/** (0.19.1) Who the Patrol is chasing, when it follows the band down. */
+		final UUID id = UUID.randomUUID();
 		final List<PodEntity> pods = new ArrayList<>();
 		final List<UUID> raiders = new ArrayList<>();
 		final long until;
@@ -96,6 +98,22 @@ public final class ZFighterRaiders {
 				entity.discard();
 			}
 		});
+	}
+
+	/** (0.19.1) The living raiders of band {@code id} (none once it is beaten or gone); a band still coming down counts as its pods. */
+	static List<LivingEntity> raiders(UUID id) {
+		List<LivingEntity> alive = new ArrayList<>();
+		for (Band band : BANDS) {
+			if (!band.id.equals(id)) {
+				continue;
+			}
+			for (UUID raider : band.raiders) {
+				if (band.level.getEntity(raider) instanceof ZFighterRogue r && r.isAlive()) {
+					alive.add(r);
+				}
+			}
+		}
+		return alive;
 	}
 
 	private static boolean tracked(Entity e) {
@@ -185,6 +203,8 @@ public final class ZFighterRaiders {
 			band.pods.add(flier.pod);
 		}
 		level.playSound(null, middle.getX(), middle.getY() + 30, middle.getZ(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 1.5F);
+		// (0.19.1) the Patrol may be on their tail
+		ZFighterPatrol.pursue(level, band.id, middle);
 		return true;
 	}
 
@@ -192,24 +212,38 @@ public final class ZFighterRaiders {
 	private static void stepOut(Band band, ZFighterPatrol.Flier f, boolean chief) {
 		band.coming--;
 		ServerLevel level = band.level;
+		BlockPos at = f.ground;
+		// (0.20.36) counted as the band's before it is in the world, so the load check never takes it for a leftover
+		ZFighterRogue raider = raider(level, at.getX() + 1.5, at.getY(), at.getZ() + 0.5, chief, f.name, TAG, r -> band.raiders.add(r.getUUID()));
+		if (raider != null) {
+			level.playSound(null, at, SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.0F, 1.4F);
+		}
+	}
+
+	/**
+	 * (0.20.36) A Warrior-born raider at (x, y, z): the band's chief (a tyrant, named {@code name}) or one of his men, at a raider's
+	 * health and blows, tagged {@code tag}. {@code before} sees him just before he is added to the world. Null if none could be made.
+	 */
+	static @Nullable ZFighterRogue raider(ServerLevel level, double x, double y, double z, boolean chief, int name, String tag,
+		java.util.function.Consumer<ZFighterRogue> before) {
 		ZFighterRogue raider = ZFighterRaids.ROGUE.create(level, EntitySpawnReason.EVENT);
 		if (raider == null) {
-			return;
+			return null;
 		}
-		BlockPos at = f.ground;
-		raider.snapTo(at.getX() + 1.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
-		Component name = chief ? Component.translatable("entity.jaymospowers.raider.chief." + f.name) : Component.translatable("entity.jaymospowers.raider");
-		raider.become(chief ? ZFighterRogue.TYRANT : ZFighterRogue.CHAMPION, name);
+		raider.snapTo(x, y, z, level.getRandom().nextFloat() * 360.0F, 0.0F);
+		Component shown = chief ? Component.translatable("entity.jaymospowers.raider.chief." + Math.floorMod(name, NAMES))
+			: Component.translatable("entity.jaymospowers.raider");
+		raider.become(chief ? ZFighterRogue.TYRANT : ZFighterRogue.CHAMPION, shown);
 		double health = chief ? ZFighterRogue.TYRANT_HEALTH * CHIEF_HEALTH : ZFighterRogue.CHAMPION_HEALTH * RAIDER_HEALTH;
 		raider.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(health);
 		raider.setHealth((float)health);
 		raider.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).setBaseValue(chief ? ZFighterRogue.TYRANT_DAMAGE * CHIEF_DAMAGE
 			: ZFighterRogue.CHAMPION_DAMAGE * RAIDER_DAMAGE);
-		raider.addTag(TAG);
+		raider.addTag(tag);
 		raider.setPersistenceRequired();
+		before.accept(raider);
 		level.addFreshEntity(raider);
-		band.raiders.add(raider.getUUID());
-		level.playSound(null, at, SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.0F, 1.4F);
+		return raider;
 	}
 
 	/** Every second: raiders go for the town; a beaten band leaves one pod; a band out of time flies off. */

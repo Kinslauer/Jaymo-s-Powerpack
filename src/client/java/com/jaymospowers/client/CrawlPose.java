@@ -14,6 +14,9 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
@@ -41,20 +44,70 @@ import org.jspecify.annotations.Nullable;
  * hand on one knee, then up onto their feet, the whole body turned up off the ground about the feet till it stands. Once
  * up, the swimming tilt vanilla eases out over a few ticks is cancelled ({@link #RISEN_KEY}), so they don't pitch
  * forward again as they stand.
+ * <p>
+ * (0.19.30) Andy: "realistically animate your hands moving and grabbing and dragging you, same with the prone movement on
+ * your back, you shuffle forward with your hips, so you move slower than you would prone on your stomach" (Smart Moving's
+ * crawl as the feel to aim for; GPL, so ideas only, nothing of it copied). Each hand now reaches ahead, plants, and stays
+ * put on the ground while the body is dragged up past it: the hand's path is solved for the shoulder and a bent elbow
+ * ({@link #arm}, folded flat along the ground by {@link KneeBend}), and the stroke is tied to the ground covered so the
+ * planted hand doesn't slide. Elbow and the opposite knee go together, high-crawl style, the knee drawn up the side bent
+ * and pushing back as that arm pulls. Crawling backward plays it in reverse (the hands push). On the back
+ * ({@code Crawl.SUPINE}) it's a hip shuffle: heels dug in ahead, knees up, hands pushing beside the hips while the hips
+ * scoot up to the heels ({@link #surge}), then the legs slide out again, and it's slower ({@code Crawl.SUPINE_SPEED}).
+ * <p>
+ * (0.19.55) Andy: "the animation should change as the strength fades" (Death Engine's crawl as the idea, rebuilt). A downed
+ * crawl is drawn by how much strength is left ({@link Downed#strength}, {@link #vigour}): on the first adrenaline the
+ * hands claw ahead quick and even, the head up looking for cover, the chest heaving high; as they weaken the reach
+ * shortens, the hands slide back along the ground instead of lifting, each pull lingers longer (the hitch), the head
+ * hangs, the arms tremble and the breathing slows to deep gasps; nearly spent, the pushes up off the ground come rarely
+ * and barely lift.
  */
 public final class CrawlPose {
-	/** Strokes per unit of the walk cycle (vanilla's walk is 0.6662), and the uneven downed crawl's hitch on each pull. */
-	static final float STROKE = 0.42F, DOWNED_HITCH = 0.35F;
+	/**
+	 * Strokes per unit of the walk cycle (vanilla's walk is 0.6662; the walk cycle runs 4 a block). (The uneven downed
+	 * crawl's hitch on each pull: (0.19.55) {@link #STRONG_HITCH}, by strength.) (0.19.30) One stroke (both hands) is 2 PI / (4 * STROKE) blocks, about 1: each hand is
+	 * planted for {@link #PLANTED} of it while the body slides about as far as the hand is dragged under it
+	 * ({@link #HAND_REACH} to {@link #HAND_PULL}), so it all but stays put on the ground.
+	 */
+	static final float STROKE = 1.6F;
 	/** Moving: how much of the stroke shows at a crawl's speed (walkAnimationSpeed times this, at the most 1). */
-	static final float MOVING_PER_SPEED = 2.5F;
+	static final float MOVING_PER_SPEED = 6.0F;
+	/**
+	 * (0.19.30) The hand's path, in model pixels from the shoulder (out to the side, back toward the feet): reached ahead
+	 * beside the head, pulled straight back beside the chest (the elbow out and back), folded under the face at rest.
+	 */
+	static final float[] HAND_REACH = {1.0F, -9.4F}, HAND_PULL = {1.0F, -2.8F}, HAND_REST = {-3.0F, -6.0F};
+	/** (0.19.30) The share of each hand's stroke it's planted and pulling (the rest it's lifted, coming forward). */
+	static final float PLANTED = 0.5F;
+	/** (0.19.30) Swinging forward, the hand arcs out this far (pixels) and lifts off the ground this much (radians). */
+	static final float RECOVER_OUT = 2.0F, RECOVER_LIFT = 0.4F;
+	/**
+	 * (0.19.55) Spent (no strength left): the hand reaches only this far ahead (pixels out, back), lifts this share of
+	 * {@link #RECOVER_LIFT}/{@link #RECOVER_OUT} coming forward (sliding along the ground), and the arms tremble this much
+	 * (radians). On adrenaline each pull's hitch is cut to this share.
+	 */
+	static final float[] HAND_REACH_SPENT = {1.6F, -6.2F};
+	static final float SPENT_LIFT = 0.2F, SPENT_TREMBLE = 0.05F, ADRENALINE_HITCH = 0.4F;
+	/** (0.19.55) The hitch on each pull: full strength, spent (under 0.5, or the stroke would run backward). */
+	static final float STRONG_HITCH = 0.3F, SPENT_HITCH = 0.46F;
+	/** (0.19.55) Spent: the head hangs this low at rest (radians), its look ahead on a pull this much of a strong one's. */
+	static final float SPENT_HEAD = -0.08F, SPENT_LOOK = 0.3F;
+	/** (0.19.55) The chest's heave on a pull, and the push-ups, this much of a strong one's spent; on adrenaline this much more. */
+	static final float SPENT_HEAVE = 0.35F, ADRENALINE_HEAVE = 1.4F, SPENT_ATTEMPT = 0.35F;
+	/** (0.19.55) Breathing spent: this much deeper and this much slower; on adrenaline this much quicker. */
+	static final float SPENT_BREATH_DEPTH = 2.2F, SPENT_BREATH_RATE = 0.5F, ADRENALINE_BREATH_RATE = 1.5F;
+	/** (0.19.30) The arm: shoulder to elbow and elbow to fingertips (pixels), and the elbow this far down the arm's box. */
+	static final float UPPER_ARM = 4.0F, FOREARM = 6.0F, ELBOW = 4.0F;
+	/** (0.19.30) The knee folds the shin back flat along the ground by this much of the thigh's drive (keeps the foot behind). */
+	static final float KNEE_FOLD = 1.15F;
 	/**
 	 * The arms sweep flat along the ground (face down, a roll (z) of PI points an arm ahead past the head, PI/2 straight
 	 * out to its side): reached ahead, pulled back to the side, and at rest folded ahead under the head. They dip a little
 	 * to the ground (x, - is down) and lift off it coming forward.
 	 */
-	static final float REACH_SWEEP = 2.6F, PULL_SWEEP = 1.1F, REST_SWEEP = 2.3F, ARM_DIP = -0.25F, REACH_LIFT = 0.35F;
-	/** The knees driven up the side (radians out), at rest and at the drive, and the foot lifted with it. */
-	static final float LEG_OUT = 0.1F, KNEE_DRIVE = 0.55F, KNEE_LIFT = 0.15F;
+	static final float ARM_DIP = -0.15F;
+	/** The knees driven up the side (radians out), at rest and at the drive, and the foot lifted with it. (0.19.30) further. */
+	static final float LEG_OUT = 0.1F, KNEE_DRIVE = 0.85F, KNEE_LIFT = 0.1F;
 	/** The head: resting, and lifted to look ahead on each pull (radians: -PI/2 looks along the ground). */
 	static final float HEAD_REST = -0.75F, HEAD_LOOK = -1.3F, HEAD_DOWN_REST = -0.3F;
 	/** The body: rocking onto the driving side (degrees) and twisting at the waist against it (radians). */
@@ -66,7 +119,9 @@ public final class CrawlPose {
 	 * work faster per block), how much of the stroke shows at its speed, the chest heaved up off the ground on each pull
 	 * (degrees), and the limp torso's sway (share of {@link #ROCK_DEGREES}).
 	 */
-	static final float DRAG_STROKE = 2.3F, DRAG_MOVING_PER_SPEED = 8.0F, DRAG_HEAVE = 4.0F, LIMP_ROCK = 0.35F;
+	static final float DRAG_STROKE = 0.6F, DRAG_MOVING_PER_SPEED = 8.0F, DRAG_HEAVE = 4.0F, LIMP_ROCK = 0.35F;
+	/** (0.19.30) Crawling (not downed), the chest lifts this much on each pull too (degrees). */
+	static final float CRAWL_HEAVE = 1.5F;
 	/** (0.15.86) Downed, the limp legs trailing: spread apart, toes dragging (x), and the small bounce each pull gives them. */
 	static final float LIMP_LEG_OUT = 0.12F, LIMP_LEG_X = 0.08F, LIMP_BOUNCE = 0.06F;
 	/** Downed: the breathing (degrees of heave, beats per tick), quicker and deeper than at rest. */
@@ -80,9 +135,17 @@ public final class CrawlPose {
 	/**
 	 * (0.18.5) Rising: the share of the rise spent pushing up, then kneeling (the rest is standing), how far the body is
 	 * turned up by the end of each (degrees: 90 stands), the knees drawn under kneeling (radians), and the hand on the knee.
+	 * (0.19.41) Andy: "the get up animation should be more gradual so you are only just getting to your feet as the
+	 * animation ends": the stages no longer ease out and pause between them, and the standing straightens steadily right
+	 * to the last tick, so they reach their feet as the bar fills, not a second before.
 	 */
-	static final float PUSH_SHARE = 0.3F, KNEEL_SHARE = 0.65F, PUSH_DEGREES = 25.0F, KNEEL_DEGREES = 60.0F, KNEEL_LEGS = -1.25F,
+	static final float PUSH_SHARE = 0.35F, KNEEL_SHARE = 0.75F, PUSH_DEGREES = 30.0F, KNEEL_DEGREES = 62.0F, KNEEL_LEGS = -1.25F,
 		KNEE_HAND_X = -0.7F;
+	/**
+	 * (0.21.39) Let go part way up (Andy: "they fall everytime they let go"): how long the drop back to the ground takes
+	 * (ticks). It falls faster as it goes, from wherever the rise had got to.
+	 */
+	static final float SINK_TICKS = 7.0F;
 	/** (0.18.5) How long after rising the leftover swimming tilt is cancelled (ticks). */
 	static final long RISEN_TICKS = 30L;
 	/** Passed out: the head turned to the side, the arms slack by the body. */
@@ -92,11 +155,25 @@ public final class CrawlPose {
 	 * {@code roll}: progress through a roll (signed by direction), or null; {@code stride}/{@code speed}: the crawl's walk
 	 * cycle; {@code downed}: ticks since they went down, or -1; {@code out}: passed out; {@code broken}: the broken limbs
 	 * ({@link Dismember} bits); {@code age}: ticks, for the breathing; {@code id}: the player's entity id; {@code sneak}:
-	 * (0.15.86) downed and holding Sneak to give up; {@code back}: (0.18.85) 0 to 1, turned over onto the back.
+	 * (0.15.86) downed and holding Sneak to give up; {@code back}: (0.18.85) 0 to 1, turned over onto the back; {@code fwd}:
+	 * (0.19.30) 1 moving the way they face (head first on the belly, feet first on the back), -1 the other way; {@code vigour}:
+	 * (0.19.55) downed, the strength left (0 spent to 1), up to {@code 1 + ADRENALINE} on the first adrenaline; 1 otherwise.
 	 */
 	public record State(@Nullable Float roll, float stride, float speed, float downed, boolean out, int broken, float age, int id,
-		boolean sneak, float rise, float back) {
+		boolean sneak, float rise, float back, float fwd, float vigour) {
+		/** (0.19.55) The strength left, 0 to 1 (adrenaline counts as full). */
+		float strength() {
+			return Mth.clamp(this.vigour, 0.0F, 1.0F);
+		}
+
+		/** (0.19.55) How far into the first adrenaline (1 just down, 0 once it's worn off). */
+		float rush() {
+			return Mth.clamp((this.vigour - 1.0F) / ADRENALINE, 0.0F, 1.0F);
+		}
 	}
+
+	/** (0.19.55) On the first adrenaline, {@code vigour} runs this far over 1 (fading as it wears off). */
+	static final float ADRENALINE = 0.25F;
 
 	/**
 	 * (0.18.85) On the back ({@code Crawl.SUPINE}): turning over takes this long (ticks), twisting about the middle of the
@@ -107,6 +184,16 @@ public final class CrawlPose {
 	static final float BACK_HEAD = 0.95F, BACK_ARMS_REST = 0.15F, BACK_ARMS_OUT = 0.18F, BACK_ARMS_AIM = -0.45F;
 	/** On the back: one knee up, the other leg out straight (radians). */
 	static final float BACK_KNEE_UP = -0.55F, BACK_LEG_OUT = 0.12F;
+	/**
+	 * (0.19.30) The hip shuffle on the back: hip to heel (pixels, along the ground) with the legs slid out and with the hips
+	 * scooted up to the heels; the share of each shuffle the heels are dug in (the hips moving); and strokes per unit of the
+	 * walk cycle, set so one shuffle covers the hips' scoot (8.3 pixels: 2 PI / (4 * 8.3/16)).
+	 */
+	static final float HEEL_FAR = 11.8F, HEEL_NEAR = 3.5F, SCOOT = 0.55F, BACK_STROKE = 3.03F;
+	/** (0.19.30) On the back: the hands press down beside the hips as they scoot (radians), and the head nods forward with it. */
+	static final float BACK_PUSH = 0.35F, BACK_NOD = 0.15F;
+	/** (0.19.9) The neck up the body from the feet, and the eyes out from it (up and ahead, blocks). */
+	static final float NECK = 1.5F, EYE_FROM_NECK = 0.25F;
 	/** (0.18.85) Player id → how far over onto the back (0 to 1), and when it was last stepped (game time). */
 	private static final Map<Integer, float[]> TURNED = new HashMap<>();
 
@@ -115,6 +202,8 @@ public final class CrawlPose {
 	static final RenderStateDataKey<Boolean> RISEN_KEY = RenderStateDataKey.create(() -> "jaymospowers:risen");
 	/** (0.18.5) Player entity id → the game time they were last seen nearly risen (client side). */
 	private static final Map<Integer, Long> RISEN = new HashMap<>();
+	/** (0.21.39) Player entity id → how far up their last rise was drawn, and (once let go) when the drop began. */
+	private static final Map<Integer, float[]> SINKING = new HashMap<>();
 
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("crawl");
 
@@ -122,6 +211,20 @@ public final class CrawlPose {
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+		// (0.19.62) Skitter crawls as its spider, not as a man on its belly (see XenoFormModels.Skitter)
+		if (entity instanceof Player skitter && "skitter".equals(skitter.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM))
+			&& com.jaymospowers.client.power.xenoform.SkitterCeiling.spiderOrRising(skitter)) {
+			state.setData(ProneTransition.KEY, null);
+			state.setData(KEY, null);
+			state.setData(RISEN_KEY, null);
+			return;
+		}
+		// (0.19.9) going down into the crawl or getting up from it
+		if (entity instanceof Player p) {
+			ProneTransition.extract(p, state, partialTicks);
+		} else {
+			state.setData(ProneTransition.KEY, null);
+		}
 		// (0.15.108) climbing in onto the belly from a ledge, LedgePose draws it until the climb is done
 		if (!(entity instanceof Player player) || !(Crawl.crawling(player) || Downed.isDowned(player)) || player.isInWater()
 			|| com.jaymospowers.core.Ledge.proneClimbing(player)) {
@@ -147,11 +250,64 @@ public final class CrawlPose {
 		} else if (downed) {
 			RISEN.remove(player.getId());
 		}
+		rise = sink(player.getId(), downed, rise, time + partialTicks);
+		// (0.19.30) which way they're going along the body: the way they face, or backing up
+		float yaw = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
+		double along = -Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo);
 		state.setData(KEY, new State(roll, state.walkAnimationPos, state.walkAnimationSpeed, since, downed && Downed.passedOut(player),
 			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId(), downed && player.isShiftKeyDown(), rise,
-			turned(player, time + partialTicks)));
+			turned(player, time + partialTicks), along < -1.0E-4 ? -1.0F : 1.0F, vigour(player, since)));
 		// (0.15.86) lying flat, Sneak isn't a crouch: vanilla's would bend the upper body down into the ground
 		state.isCrouching = false;
+	}
+
+	/**
+	 * (0.19.55) How much a downed player has left in them ({@code down} ticks after going down): their strength (0 to 1),
+	 * and on the first adrenaline more, from {@code 1 + ADRENALINE} just down to 1 as it wears off. 1 when not downed.
+	 */
+	static float vigour(Player player, float down) {
+		if (down < 0.0F) {
+			return 1.0F;
+		}
+		float strength = Downed.strength(player, down);
+		if (strength >= 1.0F && down <= Downed.ADRENALINE_TICKS && !Downed.passedOut(player)) {
+			return 1.0F + ADRENALINE * (1.0F - down / Downed.ADRENALINE_TICKS);
+		}
+		return strength;
+	}
+
+	/**
+	 * (0.19.9) Andy: "the swap from belly down to belly up prone should move your fov with your head so you can see your
+	 * body correctly". First person, turning over: how far the eyes have moved from where they are lying on the belly
+	 * (world blocks), following the head round the twist ({@link #rotate}) to where it lies face up behind the hips; or
+	 * null lying on the belly. The view keeps where it sits on the belly and moves by this.
+	 */
+	public static @Nullable Vec3 supineEyeShift(Player player, float partialTicks) {
+		if (!Crawl.crawling(player) || player.isInWater() || Downed.isDowned(player)) {
+			return null;
+		}
+		float back = turned(player, player.level().getGameTime() + partialTicks);
+		if (back <= 0.0F) {
+			return null;
+		}
+		Vector3f shift = bodyEye(back).sub(bodyEye(0.0F));
+		// the body's frame turns with its yaw (as setupRotations does), and with the player's size
+		float bodyRot = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
+		shift.rotateY((180.0F - bodyRot) * Mth.DEG_TO_RAD).mul(player.getScale());
+		return new Vec3(shift.x, shift.y, shift.z);
+	}
+
+	/**
+	 * (0.19.9) Where the eyes are, {@code back} over onto the back, from the feet in the body's own frame (-Z ahead): up
+	 * the body to the neck and out from it as the head is pitched, then through vanilla's crawl tilt and the twist.
+	 */
+	private static Vector3f bodyEye(float back) {
+		float pitch = Mth.lerp(back, HEAD_REST, BACK_HEAD);
+		float s = Mth.sin(pitch), c = Mth.cos(pitch);
+		Vector3f eye = new Vector3f(0.0F, NECK + EYE_FROM_NECK * (c - s), -EYE_FROM_NECK * (s + c));
+		Matrix4f m = new Matrix4f().rotateX(-Mth.HALF_PI).translate(0.0F, -1.0F, 0.3F)
+			.translate(0.0F, BACK_PIVOT, 0.0F).rotateZ(Mth.PI * back).rotateY(Mth.PI * back).translate(0.0F, -BACK_PIVOT, 0.0F);
+		return m.transformPosition(eye);
 	}
 
 	/** (0.18.85) How far over onto the back this player is drawn (0 to 1, eased), stepped toward where they lie. */
@@ -180,6 +336,12 @@ public final class CrawlPose {
 	 */
 	public static void rotate(AvatarRenderState state, PoseStack poseStack) {
 		State crawl = state.getData(KEY);
+		Float move = state.getData(ProneTransition.KEY);
+		if (move != null && (crawl == null || crawl.rise() < 0.0F && crawl.downed() < 0.0F)) {
+			// (0.19.9) crouching down into it (or getting up), in place of vanilla's tilt
+			ProneTransition.rotate(state, poseStack, move);
+			return;
+		}
 		if (crawl == null && state.getData(RISEN_KEY) != null && state.swimAmount > 0.0F) {
 			// (0.18.5) up on their feet: vanilla's tilt (and its shift, while the pose lasts) undone as it eases out
 			if (state.isVisuallySwimming) {
@@ -193,12 +355,18 @@ public final class CrawlPose {
 		}
 		if (crawl.rise() >= 0.0F) {
 			// (0.18.5) turned up off the ground about the feet; stood, vanilla's tilt and shift are undone outright
-			float up = PoseBlend.smooth(crawl.rise());
+			float up = riseDegrees(crawl.rise()) / 90.0F;
 			poseStack.translate(0.0F, up, -0.3F * up);
 			poseStack.rotateDegrees(Axis.XP, riseDegrees(crawl.rise()) + Mth.sin(crawl.age() * 2.3F) * 0.6F * (1.0F - crawl.rise()));
 			return;
 		}
 		if (crawl.back() > 0.0F) {
+			// (0.19.30) the hips scooting up to the heels and resting while the legs slide out: the body drawn a little ahead
+			// of or behind where it is, along its length (the way they look; feet first)
+			float surge = surge(crawl) * crawl.back();
+			if (Math.abs(surge) > 1.0E-4F) {
+				poseStack.translate(0.0F, surge, 0.0F);
+			}
 			// (0.18.85) over onto the back: a twist about the middle, head and feet trading ends as the body rolls face up
 			poseStack.translate(0.0F, BACK_PIVOT, 0.0F);
 			poseStack.rotateDegrees(Axis.ZP, 180.0F * crawl.back());
@@ -219,14 +387,22 @@ public final class CrawlPose {
 			// the jolt of hitting the ground: the chest bouncing up off it, smaller each time
 			lift += FALL_JOLT * (float)Math.exp(-crawl.downed() * FALL_DECAY) * Math.abs(Mth.sin(crawl.downed() * FALL_RING));
 			if (!crawl.out()) {
-				// laboured breathing, and now and then a try at pushing up
-				lift += BREATH_DEGREES * (0.5F + 0.5F * Mth.sin(crawl.age() * BREATH_RATE)) * w;
-				lift += ATTEMPT_DEGREES * attempt(crawl) * w;
-				// (0.15.86) each arm's pull hauls the chest up off the ground a little
-				lift += DRAG_HEAVE * Math.abs(Mth.sin(phase(crawl))) * moving(crawl) * w;
+				// laboured breathing, and now and then a try at pushing up; (0.19.55) quick and shallow on adrenaline, slowing to
+				// deep gasps as they weaken
+				float weak = 1.0F - crawl.strength();
+				float depth = Mth.lerp(weak, 1.0F, SPENT_BREATH_DEPTH);
+				float rate = BREATH_RATE * Mth.lerp(weak, 1.0F, SPENT_BREATH_RATE) * Mth.lerp(crawl.rush(), 1.0F, ADRENALINE_BREATH_RATE);
+				lift += BREATH_DEGREES * depth * (0.5F + 0.5F * Mth.sin(crawl.age() * rate)) * w;
+				lift += ATTEMPT_DEGREES * attempt(crawl) * Mth.lerp(weak, 1.0F, SPENT_ATTEMPT) * w;
+				// (0.15.86) each arm's pull hauls the chest up off the ground a little; (0.19.55) less as they weaken
+				float heave = Mth.lerp(weak, 1.0F, SPENT_HEAVE) * Mth.lerp(crawl.rush(), 1.0F, ADRENALINE_HEAVE);
+				lift += DRAG_HEAVE * heave * Math.abs(Mth.sin(phase(crawl))) * moving(crawl) * w;
 			} else {
 				lift += BREATH_DEGREES * 0.5F * (0.5F + 0.5F * Mth.sin(crawl.age() * BREATH_RATE * 0.5F)) * w;
 			}
+		} else {
+			// (0.19.30) the chest lifts a little as each hand pulls
+			lift += CRAWL_HEAVE * Math.abs(Mth.sin(phase(crawl))) * moving(crawl) * w;
 		}
 		if (!crawl.out()) {
 			float phase = phase(crawl);
@@ -253,9 +429,20 @@ public final class CrawlPose {
 			return;
 		}
 		State crawl = state.getData(KEY);
-		boolean on = crawl != null && state.isVisuallySwimming;
+		Float move = state.getData(ProneTransition.KEY);
+		if (crawl != null && (crawl.rise() >= 0.0F || crawl.downed() >= 0.0F)) {
+			move = null;
+		}
+		boolean on = crawl != null && state.isVisuallySwimming || move != null;
 		PoseBlend.Track track = BLEND.track(state.id, on);
 		if (track == null) {
+			return;
+		}
+		if (move != null) {
+			// (0.19.9) going down into the crawl or getting up: crouched, then onto the hands
+			PoseBlend.Frame f = new PoseBlend.Frame(h);
+			ProneTransition.pose(f, move);
+			track.apply(h, f, 1.6F);
 			return;
 		}
 		if (!on) {
@@ -294,7 +481,13 @@ public final class CrawlPose {
 			track.apply(h, f, 1.2F);
 			return;
 		}
-		stroke(f, phase(crawl), moving(crawl), broken, crawl.downed() >= 0.0F);
+		stroke(f, phase(crawl), moving(crawl), broken, crawl.downed() >= 0.0F, elbow(state, true), elbow(state, false), crawl.strength());
+		if (crawl.downed() >= 0.0F) {
+			// (0.19.55) weakening, the arms tremble with the effort (still or crawling)
+			float tremble = SPENT_TREMBLE * (1.0F - crawl.strength()) * Mth.sin(crawl.age() * 2.1F);
+			f.shake(PoseBlend.RIGHT_ARM + 2, tremble);
+			f.shake(PoseBlend.LEFT_ARM + 2, -tremble * 0.8F);
+		}
 		float press = crawl.downed() >= 0.0F ? attempt(crawl) : 0.0F;
 		if (press > 0.0F) {
 			// the try at pushing up: both (good) arms pressed straight down under the shoulders, head up
@@ -315,12 +508,25 @@ public final class CrawlPose {
 			// (0.18.85) on the back: head up looking down past the feet, one knee raised; the arms at the sides, or up
 			// and out toward the feet to aim (a drawn bow, a crossbow or gun held ready)
 			boolean aiming = state.isUsingItem || aims(state.rightArmPose) || aims(state.leftArmPose);
-			float arms = aiming ? BACK_ARMS_AIM : BACK_ARMS_REST;
-			f.mix(PoseBlend.HEAD, BACK_HEAD, f.vanilla(PoseBlend.HEAD + 1) * 0.3F, 0.0F, back);
-			f.mix(PoseBlend.RIGHT_ARM, arms, aiming ? -0.1F : 0.0F, aiming ? 0.05F : BACK_ARMS_OUT, back);
-			f.mix(PoseBlend.LEFT_ARM, arms, aiming ? 0.25F : 0.0F, aiming ? -0.05F : -BACK_ARMS_OUT, back);
-			f.mix(PoseBlend.RIGHT_LEG, BACK_KNEE_UP, 0.0F, BACK_LEG_OUT, back);
-			f.mix(PoseBlend.LEFT_LEG, 0.0F, 0.0F, -BACK_LEG_OUT, back);
+			// (0.19.30) the belly crawl's stroke (laid past the springs) fades out as they turn over
+			for (int i = PoseBlend.RIGHT_ARM; i < PoseBlend.HIP_PITCH; i++) {
+				f.raw[i] *= 1.0F - back;
+			}
+			// (0.19.30) the hip shuffle: heels dug in ahead, the hands pressing down by the hips as they scoot up to them
+			float m = moving(crawl);
+			float u = backCycle(crawl);
+			float push = m * Mth.sin(Mth.PI * Math.min(1.0F, u / SCOOT));
+			if (u >= SCOOT) {
+				push = 0.0F;
+			}
+			float arms = aiming ? BACK_ARMS_AIM : BACK_ARMS_REST + BACK_PUSH * push;
+			float armsOut = BACK_ARMS_OUT + 0.15F * push;
+			f.mix(PoseBlend.HEAD, BACK_HEAD + BACK_NOD * push, f.vanilla(PoseBlend.HEAD + 1) * 0.3F, 0.0F, back);
+			f.mix(PoseBlend.RIGHT_ARM, arms, aiming ? -0.1F : 0.0F, aiming ? 0.05F : armsOut, back);
+			f.mix(PoseBlend.LEFT_ARM, arms, aiming ? 0.25F : 0.0F, aiming ? -0.05F : -armsOut, back);
+			float right = backThigh(crawl, true), left = backThigh(crawl, false);
+			f.mix(PoseBlend.RIGHT_LEG, -right, 0.0F, BACK_LEG_OUT, back);
+			f.mix(PoseBlend.LEFT_LEG, -left, 0.0F, -BACK_LEG_OUT, back);
 		}
 		track.apply(h, f, crawl.downed() >= 0.0F ? 0.7F : 1.0F);
 	}
@@ -335,25 +541,39 @@ public final class CrawlPose {
 	 * The army crawl's limbs on a frame lying face down (the swimming tilt, or a downed mob's): {@code phase} through the
 	 * stroke, {@code moving} how much of it shows (0 lying still), {@code broken} the limbs left to drag ({@link Dismember}
 	 * bits), {@code downed} resting the head lower when still and (0.15.86) the legs and torso limp, dragged along by the
-	 * arms. Shared with {@code DownedPose}'s crawlers.
+	 * arms. Shared with {@code DownedPose}'s crawlers (whose arms stay straight: nothing bends their elbows).
 	 */
 	public static void stroke(PoseBlend.Frame f, float phase, float moving, int broken, boolean downed) {
+		stroke(f, phase, moving, broken, downed, false, false);
+	}
+
+	/**
+	 * (0.19.30) As above; {@code rightElbow}/{@code leftElbow}: that arm's elbow is drawn bent ({@link #bendLimbs}), so its
+	 * hand is placed with the bend, otherwise the straight arm points at where the hand would be.
+	 */
+	public static void stroke(PoseBlend.Frame f, float phase, float moving, int broken, boolean downed, boolean rightElbow,
+		boolean leftElbow) {
+		stroke(f, phase, moving, broken, downed, rightElbow, leftElbow, 1.0F);
+	}
+
+	/**
+	 * (0.19.55) As above, {@code strength} left (0 spent to 1): the reach shortens, the hands slide back along the ground
+	 * rather than lifting, and the head hangs and looks up less on each pull.
+	 */
+	public static void stroke(PoseBlend.Frame f, float phase, float moving, int broken, boolean downed, boolean rightElbow,
+		boolean leftElbow, float strength) {
 		boolean rightArm = (broken & Dismember.RIGHT_ARM) == 0, leftArm = (broken & Dismember.LEFT_ARM) == 0;
 		boolean rightLeg = (broken & Dismember.RIGHT_LEG) == 0, leftLeg = (broken & Dismember.LEFT_LEG) == 0;
 		float effort = rightArm && leftArm && rightLeg && leftLeg ? 1.0F : HURT_EFFORT;
-		// each arm's reach (0 pulled under the chest, 1 reached ahead); the right reaches while sin(phase) is rising
-		float rightReach = 0.5F - 0.5F * Mth.cos(phase), leftReach = 1.0F - rightReach;
-		float rightLift = Math.max(0.0F, Mth.sin(phase)), leftLift = Math.max(0.0F, -Mth.sin(phase));
-		// a good arm doing a broken one's share reaches further; lying still the arms rest folded ahead
-		float reach = REACH_SWEEP + 0.15F * (effort - 1.0F);
-		float rest = 1.0F - moving;
-		float rightSweep = Mth.lerp(rest, Mth.lerp(rightReach, PULL_SWEEP, reach), REST_SWEEP);
-		float leftSweep = Mth.lerp(rest, Mth.lerp(leftReach, PULL_SWEEP, reach), REST_SWEEP + 0.1F);
+		// (0.19.30) each hand reaches, plants and drags the body up past it; the left half a stroke behind the right. The
+		// cycle is laid on past the springs (they'd lag behind the ground and the planted hand would slide); the springs
+		// only ease the pose in and out.
+		float rightU = cycle(phase), leftU = cycle(phase + Mth.PI);
 		if (rightArm) {
-			f.set(PoseBlend.RIGHT_ARM, ARM_DIP + REACH_LIFT * rightLift * moving, 0.0F, rightSweep);
+			armOnto(f, PoseBlend.RIGHT_ARM, rightU, moving, rightElbow, 1.0F, strength);
 		}
 		if (leftArm) {
-			f.set(PoseBlend.LEFT_ARM, ARM_DIP + REACH_LIFT * leftLift * moving, 0.0F, -leftSweep);
+			armOnto(f, PoseBlend.LEFT_ARM, leftU, moving, leftElbow, -1.0F, strength);
 		}
 		if (downed) {
 			// (0.15.86) limp: the legs trail apart, toes dragging, bounced a little by each pull; the waist doesn't twist
@@ -366,18 +586,25 @@ public final class CrawlPose {
 			}
 			f.set(PoseBlend.BODY + 1, 0.0F);
 			f.set(PoseBlend.HIP_YAW, 0.0F);
-			float look = Math.abs(Mth.sin(phase)) * moving;
-			f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, HEAD_DOWN_REST, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
+			// (0.19.55) weakening, the head hangs lower and lifts less on each pull
+			float look = Math.abs(Mth.sin(phase)) * moving * Mth.lerp(strength, SPENT_LOOK, 1.0F);
+			float rest = Mth.lerp(moving * strength, Mth.lerp(strength, SPENT_HEAD, HEAD_DOWN_REST), HEAD_REST);
+			f.set(PoseBlend.HEAD, Mth.lerp(look, rest, HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
 			return;
 		}
-		// the opposite knee drives up the side as an arm reaches (a good leg drives harder for a broken one)
-		float rightDrive = Math.max(0.0F, -Mth.sin(phase)) * moving * (leftLeg ? 1.0F : effort);
-		float leftDrive = Math.max(0.0F, Mth.sin(phase)) * moving * (rightLeg ? 1.0F : effort);
+		// (0.19.30) elbow and opposite knee together: the right knee draws up the side as the left hand comes forward, and
+		// pushes back as it pulls (a good leg drives harder for a broken one)
 		if (rightLeg) {
-			f.set(PoseBlend.RIGHT_LEG, 0.05F + KNEE_LIFT * rightDrive, 0.0F, LEG_OUT + KNEE_DRIVE * rightDrive);
+			float drive = knee(leftU, moving) * (leftLeg ? 1.0F : effort);
+			f.set(PoseBlend.RIGHT_LEG, 0.05F, 0.0F, LEG_OUT);
+			f.shake(PoseBlend.RIGHT_LEG, KNEE_LIFT * drive);
+			f.shake(PoseBlend.RIGHT_LEG + 2, KNEE_DRIVE * drive);
 		}
 		if (leftLeg) {
-			f.set(PoseBlend.LEFT_LEG, 0.05F + KNEE_LIFT * leftDrive, 0.0F, -LEG_OUT - KNEE_DRIVE * leftDrive);
+			float drive = knee(rightU, moving) * (rightLeg ? 1.0F : effort);
+			f.set(PoseBlend.LEFT_LEG, 0.05F, 0.0F, -LEG_OUT);
+			f.shake(PoseBlend.LEFT_LEG, KNEE_LIFT * drive);
+			f.shake(PoseBlend.LEFT_LEG + 2, -KNEE_DRIVE * drive);
 		}
 		// the shoulders twist against the hips
 		f.set(PoseBlend.BODY + 1, 0.0F);
@@ -388,15 +615,222 @@ public final class CrawlPose {
 		f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, headRest, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
 	}
 
+	/** (0.19.30) Where in its own stroke a hand is (0 just planted ahead, {@link #PLANTED} pulled back, 1 planted again). */
+	static float cycle(float phase) {
+		float u = phase / Mth.TWO_PI;
+		return u - Mth.floor(u);
+	}
+
+	/** (0.19.30) An arm's angles for this frame: the shoulder's sweep along the ground, the elbow's fold, the lift. */
+	record Arm(float sweep, float elbow, float lift) {
+	}
+
+	/**
+	 * (0.19.30) The arm {@code u} through its stroke: planted, the hand dragged straight back along the ground from the reach
+	 * to beside the chest (at the pace the body moves past it); then lifted and swung out and forward to the reach again.
+	 * Lying still it rests folded under the face. Without an elbow the straight arm points where the hand would be.
+	 */
+	static Arm arm(float u, float moving, boolean elbow) {
+		return arm(u, moving, elbow, 1.0F);
+	}
+
+	/** (0.19.55) As above, with {@code strength} left (0 to 1): a shorter reach, the hand sliding forward low along the ground. */
+	static Arm arm(float u, float moving, boolean elbow, float strength) {
+		float out, back, lift = ARM_DIP;
+		float reachOut = Mth.lerp(strength, HAND_REACH_SPENT[0], HAND_REACH[0]), reachBack = Mth.lerp(strength, HAND_REACH_SPENT[1], HAND_REACH[1]);
+		float raise = Mth.lerp(strength, SPENT_LIFT, 1.0F);
+		if (u < PLANTED) {
+			float t = u / PLANTED;
+			out = Mth.lerp(t, reachOut, HAND_PULL[0]);
+			back = Mth.lerp(t, reachBack, HAND_PULL[1]);
+		} else {
+			float t = PoseBlend.smooth((u - PLANTED) / (1.0F - PLANTED));
+			float arc = Mth.sin(Mth.PI * t);
+			out = Mth.lerp(t, HAND_PULL[0], reachOut) + RECOVER_OUT * raise * arc;
+			back = Mth.lerp(t, HAND_PULL[1], reachBack);
+			lift += RECOVER_LIFT * raise * arc;
+		}
+		out = Mth.lerp(moving, HAND_REST[0], out);
+		back = Mth.lerp(moving, HAND_REST[1], back);
+		lift = Mth.lerp(moving, ARM_DIP, lift);
+		return reach(out, back, lift, elbow);
+	}
+
+	/**
+	 * (0.19.30) The shoulder's sweep (zRot of a right arm: 0 down along the body toward the feet, PI ahead past the head) and
+	 * the elbow's fold that put the fingertips {@code out} to the side and {@code back} toward the feet (pixels), the elbow
+	 * out and behind; or, without an elbow, the straight arm pointing there.
+	 */
+	static Arm reach(float out, float back, float lift, boolean elbow) {
+		float aim = (float) Mth.atan2(out, back);
+		if (aim < 0.0F) {
+			aim += Mth.TWO_PI;
+		}
+		if (!elbow) {
+			return new Arm(aim, 0.0F, lift);
+		}
+		float r = Mth.clamp(Mth.sqrt(out * out + back * back), FOREARM - UPPER_ARM + 0.05F, FOREARM + UPPER_ARM - 0.05F);
+		float cos = (r * r - UPPER_ARM * UPPER_ARM - FOREARM * FOREARM) / (2.0F * UPPER_ARM * FOREARM);
+		float fold = (float) Math.acos(Mth.clamp(cos, -1.0F, 1.0F));
+		float offset = (float) Mth.atan2(FOREARM * Mth.sin(fold), UPPER_ARM + FOREARM * Mth.cos(fold));
+		return new Arm(aim - offset, fold, lift);
+	}
+
+	/** (0.19.30) Lays the arm on: a steady target for the springs to ease in, the stroke on top past them. {@code side}: 1 right, -1 left. */
+	private static void armOnto(PoseBlend.Frame f, int part, float u, float moving, boolean elbow, float side, float strength) {
+		Arm rest = arm(0.0F, 0.0F, elbow);
+		Arm now = arm(u, moving, elbow, strength);
+		f.set(part, rest.lift(), 0.0F, side * rest.sweep());
+		f.shake(part, now.lift() - rest.lift());
+		f.shake(part + 2, side * (now.sweep() - rest.sweep()));
+	}
+
+	/**
+	 * (0.19.30) How far a knee is drawn up the side (0 to 1) as the opposite hand is {@code u} through its stroke: drawn up
+	 * as that hand swings forward, pushed back out straight as it pulls.
+	 */
+	static float knee(float u, float moving) {
+		float k = u < PLANTED ? 1.0F - PoseBlend.smooth(u / PLANTED) : PoseBlend.smooth((u - PLANTED) / (1.0F - PLANTED));
+		return k * moving;
+	}
+
+	/** (0.19.30) Where in the hip shuffle (0 heels just dug in, {@link #SCOOT} hips up to them, 1 legs slid out again). */
+	static float backCycle(State crawl) {
+		return cycle(crawl.stride() * BACK_STROKE * crawl.fwd());
+	}
+
+	/** (0.19.30) Hip to heel (pixels) through the shuffle: shrinking as the hips scoot up, growing as the legs slide out. */
+	static float heel(float u) {
+		return u < SCOOT ? Mth.lerp(PoseBlend.smooth(u / SCOOT), HEEL_FAR, HEEL_NEAR)
+			: Mth.lerp(PoseBlend.smooth((u - SCOOT) / (1.0F - SCOOT)), HEEL_NEAR, HEEL_FAR);
+	}
+
+	/**
+	 * (0.19.30) On the back, how far a thigh is raised (radians, toward the sky) so its heel sits on the ground where the
+	 * shuffle has it (the shin folds back down to it, {@link #bendLimbs}); the right leads a little. Lying still, the right
+	 * knee up and the left out straight.
+	 */
+	static float backThigh(State crawl, boolean right) {
+		float u = backCycle(crawl);
+		if (!right) {
+			u = cycle((u - 0.08F) * Mth.TWO_PI);
+		}
+		float lifted = (float) Math.acos(Mth.clamp(heel(u) / 12.0F, -1.0F, 1.0F));
+		return Mth.lerp(moving(crawl), right ? -BACK_KNEE_UP : 0.0F, lifted);
+	}
+
+	/**
+	 * (0.19.30) On the back, the body drawn along its length (blocks, toward the feet; 1 = how far a shuffle goes) so the hips
+	 * move only while the heels are dug in and rest while the legs slide out, though the player glides on all the while.
+	 */
+	static float surge(State crawl) {
+		float u = backCycle(crawl);
+		float d = Mth.TWO_PI / (4.0F * BACK_STROKE);
+		float s = u < SCOOT ? d * (PoseBlend.smooth(u / SCOOT) - u) : d * (1.0F - u);
+		return s * crawl.fwd() * moving(crawl);
+	}
+
+	/** (0.19.30) Whether this arm's elbow is bent in the crawl: an empty hand (one holding something keeps it straight, the item in it). */
+	private static boolean elbow(AvatarRenderState state, boolean right) {
+		return (right ? state.rightArmPose : state.leftArmPose) == HumanoidModel.ArmPose.EMPTY;
+	}
+
+	/**
+	 * (0.19.30) Right before the model is drawn (after {@link #applyModel}): the crawl's elbows and knees bent for this one
+	 * draw ({@link KneeBend#restore} once it's drawn). On the belly the forearms and shins fold flat along the ground; on the
+	 * back the knees bend up so the heels sit on it.
+	 */
+	public static void bendLimbs(Model<?> model, Object renderState) {
+		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h) || !state.isVisuallySwimming) {
+			return;
+		}
+		State crawl = state.getData(KEY);
+		if (crawl == null || crawl.roll() != null || crawl.out() || crawl.rise() >= 0.0F
+			|| state.getData(ProneTransition.KEY) != null && crawl.downed() < 0.0F) {
+			return;
+		}
+		PoseBlend.Track track = BLEND.peek(crawl.id());
+		float w = track == null ? 0.0F : track.amount();
+		if (w <= 0.0F) {
+			return;
+		}
+		int broken = crawl.broken();
+		float back = crawl.back();
+		if (back >= 0.5F) {
+			// on the back: each shin folded back down from its raised thigh to the heel on the ground
+			if ((broken & Dismember.RIGHT_LEG) == 0) {
+				KneeBend.bend(h.rightLeg, 2.0F * Math.max(0.0F, -h.rightLeg.xRot) * w, KneeBend.KNEE, false);
+			}
+			if ((broken & Dismember.LEFT_LEG) == 0) {
+				KneeBend.bend(h.leftLeg, 2.0F * Math.max(0.0F, -h.leftLeg.xRot) * w, KneeBend.KNEE, false);
+			}
+			return;
+		}
+		float flat = w * (1.0F - back);
+		float phase = phase(crawl), moving = moving(crawl);
+		float press = 1.0F - (crawl.downed() >= 0.0F ? attempt(crawl) : 0.0F);
+		if ((broken & Dismember.RIGHT_ARM) == 0 && elbow(state, true)) {
+			KneeBend.bend(h.rightArm, arm(cycle(phase), moving, true, crawl.strength()).elbow() * flat * press, ELBOW, true);
+		}
+		if ((broken & Dismember.LEFT_ARM) == 0 && elbow(state, false)) {
+			KneeBend.bend(h.leftArm, -arm(cycle(phase + Mth.PI), moving, true, crawl.strength()).elbow() * flat * press, ELBOW, true);
+		}
+		if (crawl.downed() < 0.0F) {
+			// the knee drawn up the side folds its shin back along the ground, the foot behind it
+			if ((broken & Dismember.RIGHT_LEG) == 0) {
+				KneeBend.bend(h.rightLeg, -KNEE_FOLD * KNEE_DRIVE * knee(cycle(phase + Mth.PI), moving) * flat, KneeBend.KNEE, true);
+			}
+			if ((broken & Dismember.LEFT_LEG) == 0) {
+				KneeBend.bend(h.leftLeg, KNEE_FOLD * KNEE_DRIVE * knee(cycle(phase), moving) * flat, KneeBend.KNEE, true);
+			}
+		}
+	}
+
+	/**
+	 * (0.21.39) The rise as drawn: while rising, as it is (remembered); the rise gone short of standing, it drops from
+	 * where it was back to the ground over {@link #SINK_TICKS}, quicker as it falls; then -1 (lying).
+	 */
+	private static float sink(int id, boolean downed, float rise, float now) {
+		if (!downed) {
+			SINKING.remove(id);
+			return rise;
+		}
+		float[] sink = SINKING.get(id);
+		if (rise >= 0.0F) {
+			SINKING.put(id, new float[] {rise, -1.0F});
+			return rise;
+		}
+		if (sink == null) {
+			return rise;
+		}
+		if (sink[1] < 0.0F) {
+			if (sink[0] >= 0.9F || sink[0] <= 0.0F) {
+				SINKING.remove(id);
+				return rise;
+			}
+			sink[1] = now;
+		}
+		float k = (now - sink[1]) / SINK_TICKS;
+		if (k >= 1.0F) {
+			SINKING.remove(id);
+			return rise;
+		}
+		return sink[0] * (1.0F - k * k);
+	}
+
 	/** (0.18.5) How far the body is turned up off the ground {@code t} through the rise (degrees; 90 stands). */
 	static float riseDegrees(float t) {
+		t = Mth.clamp(t, 0.0F, 1.0F);
 		if (t < PUSH_SHARE) {
-			return PUSH_DEGREES * PoseBlend.smooth(t / PUSH_SHARE);
+			// (0.19.41) a slow start off the ground, then on at a steady pace (no ease-out: no pause before kneeling)
+			float x = t / PUSH_SHARE;
+			return PUSH_DEGREES * x * x * (2.0F - x);
 		}
 		if (t < KNEEL_SHARE) {
-			return Mth.lerp(PoseBlend.smooth((t - PUSH_SHARE) / (KNEEL_SHARE - PUSH_SHARE)), PUSH_DEGREES, KNEEL_DEGREES);
+			return Mth.lerp((t - PUSH_SHARE) / (KNEEL_SHARE - PUSH_SHARE), PUSH_DEGREES, KNEEL_DEGREES);
 		}
-		return Mth.lerp(PoseBlend.smooth((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE)), KNEEL_DEGREES, 90.0F);
+		// (0.19.41) straightening steadily to the very end: upright only as the rise finishes
+		return Mth.lerp((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE), KNEEL_DEGREES, 90.0F);
 	}
 
 	/**
@@ -406,8 +840,9 @@ public final class CrawlPose {
 	private static void rise(PoseBlend.Frame f, State crawl, boolean rightArm, boolean leftArm) {
 		float t = crawl.rise();
 		float press = 1.0F - PoseBlend.seg(t, PUSH_SHARE * 0.7F, KNEEL_SHARE);
-		float kneel = PoseBlend.bump(t, PUSH_SHARE * 0.6F, PUSH_SHARE + 0.1F, KNEEL_SHARE, 1.0F);
-		float stand = PoseBlend.seg(t, KNEEL_SHARE, 1.0F);
+		// (0.19.41) the knees and arms straighten steadily through the standing, done only at the end
+		float stand = Mth.clamp((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE), 0.0F, 1.0F);
+		float kneel = PoseBlend.seg(t, PUSH_SHARE * 0.6F, PUSH_SHARE + 0.1F) * (1.0F - stand);
 		float shake = Mth.sin(crawl.age() * 2.3F) * 0.05F * (1.0F - stand);
 		if (rightArm) {
 			f.set(PoseBlend.RIGHT_ARM, Mth.lerp(press, Mth.lerp(stand, KNEE_HAND_X, 0.0F), PRESS_X), 0.0F, Mth.lerp(press, 0.1F, PRESS_OUT));
@@ -432,10 +867,13 @@ public final class CrawlPose {
 
 	/** Where in the stroke: from the distance crawled; downed, slower and hitching (lingering on each pull). */
 	private static float phase(State crawl) {
-		float phase = crawl.stride() * STROKE;
+		// (0.19.30) backing up plays the stroke in reverse (the hands push)
+		float phase = crawl.stride() * STROKE * crawl.fwd();
 		if (crawl.downed() >= 0.0F) {
 			phase *= DRAG_STROKE;
-			phase += DOWNED_HITCH * Mth.sin(phase * 2.0F);
+			// (0.19.55) lingering longer on each pull as they weaken, hardly at all on adrenaline
+			float hitch = Mth.lerp(crawl.strength(), SPENT_HITCH, STRONG_HITCH) * Mth.lerp(crawl.rush(), 1.0F, ADRENALINE_HITCH);
+			phase += hitch * Mth.sin(phase * 2.0F);
 		}
 		return phase;
 	}

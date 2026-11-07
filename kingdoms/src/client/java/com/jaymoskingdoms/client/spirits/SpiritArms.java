@@ -64,6 +64,8 @@ import org.jspecify.annotations.Nullable;
 public final class SpiritArms {
 	/** On a being's render state: its spirit's arms this frame, or null for none. */
 	static final RenderStateDataKey<Look> LOOK = RenderStateDataKey.create(() -> "jaymoskingdoms:spirit_arms");
+	/** (0.7.465) The Grue's hold on the wearer (0-100), for the red in the arms ({@link GrueClient#tint}). */
+	static final RenderStateDataKey<Float> GRUE = RenderStateDataKey.create(() -> "jaymoskingdoms:spirit_grue");
 
 	/** Ticks the arms take to appear and to vanish. */
 	static final int MANIFEST_TICKS = 10;
@@ -200,6 +202,9 @@ public final class SpiritArms {
 		TABLE[Poses.SENSE] = new float[] {-0.10F, 0.30F, 1.50F};    // spread wide and still
 		TABLE[Poses.CLASH] = new float[] {-1.57F, -0.65F, 0.05F};   // both thrust forward, hands locked at full reach
 		TABLE[Poses.SPEAK] = TABLE[Poses.IDLE];                     // as it rests (the floating ones take their own rest)
+		// (0.7.467) the strong strike: straight out along the aim (the hand then shoots the whole way, as a far hand does)
+		TABLE[Poses.PUNCH] = new float[] {-1.57F, 0.0F, 0.0F};
+		TABLE[Poses.BARRAGE] = new float[] {-1.57F, -0.30F, 0.05F}; // both fists pounding ahead, in turn (SpiritRig)
 	}
 
 	/** How far manifest each being's arms are: eased from where they were when the spirit went out or away. */
@@ -272,6 +277,10 @@ public final class SpiritArms {
 	/** From the living renderer's extractRenderState (called by {@link ManaClient#extract}): this being's arms, if it has a spirit. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		state.setData(LOOK, look(entity));
+		// (0.7.465) how far the Grue has it
+		state.setData(GRUE, com.jaymoskingdoms.spirits.Grue.hold(entity));
+		// (Andy, 2026-11-01) Thessaly's mana wings
+		ManaWings.extract(entity, state);
 	}
 
 	private static @Nullable Look look(LivingEntity entity) {
@@ -309,7 +318,9 @@ public final class SpiritArms {
 		float age = (float)(now - spirit.shownAt());
 		float weight = 0.0F;
 		if (spirit.show() != 0L && pose > Poses.IDLE && pose < Poses.COUNT && age >= 0.0F) {
-			weight = age < POSE_TICKS ? Math.min(1.0F, age / POSE_IN) : 1.0F - (age - POSE_TICKS) / POSE_OUT;
+			// (0.7.467) the barrage is stamped again every 8 ticks: held at full, not eased in each time
+			float in = pose == Poses.BARRAGE ? 1.0F : Math.min(1.0F, age / POSE_IN);
+			weight = age < POSE_TICKS ? in : 1.0F - (age - POSE_TICKS) / POSE_OUT;
 			weight = Mth.clamp(weight, 0.0F, 1.0F);
 		}
 		// the figure shows each time the projection forms, and fades while the arms go on
@@ -405,7 +416,7 @@ public final class SpiritArms {
 				// waiting unseen: now and then a wisp at the shoulder, so the keeper knows it's there
 				float yaw = entity.yBodyRot * Mth.DEG_TO_RAD;
 				double side = entity.getRandom().nextBoolean() ? 0.4 : -0.4;
-				level.addParticle(new DustParticleOptions(ghost(mix(Spirits.of(kind).color())) & 0xFFFFFF, 0.7F),
+				level.addParticle(new DustParticleOptions(GrueClient.tint(entity, ghost(mix(Spirits.of(kind).color()))) & 0xFFFFFF, 0.7F),
 					entity.getX() - Mth.cos(yaw) * side, entity.getY() + 1.4, entity.getZ() - Mth.sin(yaw) * side, 0.0, 0.02, 0.0);
 			}
 		} else if (flickerLeft > 0 && entity == Minecraft.getInstance().player) {
@@ -420,7 +431,7 @@ public final class SpiritArms {
 			return;
 		}
 		Spirit sp = Spirits.of(kind);
-		DustParticleOptions mote = new DustParticleOptions(ghost(mix(sp.color())) & 0xFFFFFF, 1.3F);
+		DustParticleOptions mote = new DustParticleOptions(GrueClient.tint(entity, ghost(mix(sp.color()))) & 0xFFFFFF, 1.3F);
 		float yaw = entity.yBodyRot * Mth.DEG_TO_RAD;
 		double behindX = Mth.sin(yaw), behindZ = -Mth.cos(yaw);
 		for (int i = 0; i < arms; i++) {
@@ -465,7 +476,7 @@ public final class SpiritArms {
 		// where the hand landed: as far as it reached out, or just ahead
 		double out = spirit.reach() > 0 ? spirit.reach() : BURST_AHEAD + BURST_AHEAD * size;
 		Vec3 at = entity.getEyePosition().add(entity.getLookAngle().scale(out));
-		DustParticleOptions dust = new DustParticleOptions(mix(Spirits.of(spirit.kind()).color()) & 0xFFFFFF, 1.6F);
+		DustParticleOptions dust = new DustParticleOptions(GrueClient.tint(entity, mix(Spirits.of(spirit.kind()).color())) & 0xFFFFFF, 1.6F);
 		var random = entity.getRandom();
 		if (spirit.pose() == Poses.HAMMER || spirit.pose() == Poses.SLAM) {
 			// a slam lands on the ground in front: a ring of aura thrown out along it
@@ -654,6 +665,10 @@ public final class SpiritArms {
 			float spear = kind == Spirits.GRIMSBY && look.pose() == Poses.SPEAR ? look.poseWeight() : 0.0F;
 			color = ARGB.srgbLerp(axe * AXE_MIX, color, AXE_COLOR);
 			color = ARGB.srgbLerp(spear * SPEAR_MIX, color, SPEAR_COLOR);
+			// (0.7.465) the Grue's red: a flicker, then streaks, then all of it
+			Float hold = state.getData(GRUE);
+			float grue = hold == null ? 0.0F : GrueClient.tint(hold, state.ageInTicks);
+			color = ARGB.srgbLerp(grue, color, GrueClient.RED);
 			float flow = 1.0F + axe * (AXE_FLOW - 1.0F) + spear * (SPEAR_FLOW - 1.0F);
 			float rise = (state.ageInTicks * ManaClient.RISE * ARM_FLOW * flow) % 1.0F;
 			// the arms fade with how manifest they are, as well as grow
@@ -668,7 +683,7 @@ public final class SpiritArms {
 					float light = Mth.clamp(SpiritFigure.SHELL_LIGHT[i] * strength * pulse * look.figure(), 0.0F, 1.0F);
 					collector.order(ORDER + i).submitModel(this.figure(kind, i), state, poseStack,
 						RenderTypes.energySwirl(ManaClient.TEXTURE, i * 0.37F + 0.21F, -rise * (1 + i)), lightCoords, OverlayTexture.NO_OVERLAY,
-						ManaClient.tint(i == 0 ? ghost(color) : color, light), null, 0);
+						ManaClient.tint(i == 0 ? GrueClient.core(ghost(color), grue) : color, light), null, 0);
 				}
 			}
 			for (int i = 0; i < ARM_SHELLS.length; i++) {
@@ -683,12 +698,12 @@ public final class SpiritArms {
 				// the core paler and near still (the body of the ghost), the edges in the spirit's colour, drifting
 				collector.order(ORDER + i).submitModel(this.model(kind, i), state, poseStack,
 					RenderTypes.energySwirl(ManaClient.TEXTURE, i * 0.29F + 0.13F, -rise * (1 + i)), lightCoords, OverlayTexture.NO_OVERLAY,
-					ManaClient.tint(i == 0 ? ghost(color) : color, light), null, 0);
+					ManaClient.tint(i == 0 ? GrueClient.core(ghost(color), grue) : color, light), null, 0);
 			}
 			// the trail: two soft ghosts of the arm behind it while it moves fast (a blow's snap, a grasp closing), not at rest;
 			// the slower wisp is the smoke off it ({@link #wisp})
 			boolean fast = look.pose() != Poses.IDLE && look.poseWeight() > 0.0F && look.poseAge() >= SpiritRig.WIND_T
-				&& look.poseAge() <= SpiritRig.HIT_T + TRAIL_AFTER;
+				&& look.poseAge() <= SpiritRig.HIT_T + TRAIL_AFTER || look.pose() == Poses.BARRAGE && look.poseWeight() > 0.0F;
 			if (!fast) {
 				return;
 			}
@@ -838,6 +853,8 @@ public final class SpiritArms {
 	static final float SHIELD_OUT = 1.25F, SHIELD_DROP = 0.3F, SHIELD_APART = 0.32F, SHIELD_HAND = 2.8F;
 	/** Beneath: the hands' gap (pixels), how far ahead of the feet (pixels), how far below them, how big they swell, their cup. */
 	static final float BENEATH_APART = 3.0F, BENEATH_AHEAD = 1.5F, BENEATH_DROP = 2.0F, BENEATH_HAND = 2.6F, BENEATH_CUP = 0.45F;
+	/** (0.7.467) The strong strike: ticks the fist stays at full stretch, and ticks it takes to snap back. */
+	static final float PUNCH_HOLD = 7.0F, PUNCH_BACK = 4.0F;
 	/** Ticks the shield and the cradle take to form. */
 	static final float FORM_TICKS = 3.0F;
 
@@ -854,6 +871,10 @@ public final class SpiritArms {
 	private static void shape(ModelPart arm, SpiritRig.Frame f, int mode, Look look, HumanoidRenderState state, float age, float w,
 		float size, float side, boolean pair) {
 		float hold = age < POSE_TICKS ? 1.0F : w;
+		if (look.pose() == Poses.PUNCH) {
+			// (0.7.467) a whip, not a reach: out, a beat at full stretch, and snapped back
+			hold = Math.min(hold, Mth.clamp(1.0F - (age - PUNCH_HOLD) / PUNCH_BACK, 0.0F, 1.0F));
+		}
 		float pitch = state.xRot * Mth.DEG_TO_RAD, yaw = state.yRot * Mth.DEG_TO_RAD;
 		// the aim, in the model's own space (y down, -z ahead, the right side -x)
 		float dx = -Mth.cos(pitch) * Mth.sin(yaw), dy = Mth.sin(pitch), dz = -Mth.cos(pitch) * Mth.cos(yaw);

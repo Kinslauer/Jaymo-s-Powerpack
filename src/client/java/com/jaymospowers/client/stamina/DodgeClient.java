@@ -4,7 +4,6 @@ import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.freerun.FreerunClient;
 import com.jaymospowers.freerun.Freerun;
 import com.jaymospowers.freerun.LandingRoll;
-import com.jaymospowers.power.web.WebParkour;
 import com.jaymospowers.stamina.Dodge;
 import com.jaymospowers.stamina.Feathers;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -20,31 +19,16 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.5) The dodge on this side (see {@link Dodge}): the Dodge key (Left Alt), or Sneak tapped twice within
- * {@link #DOUBLE_TAP_TICKS} (the gesture Combat Roll had here, kept). R and Sneak + R belong to the powers. The hop
- * goes the way the movement keys point (back with none held), at once, and the server is told.
- * <p>Carried over from the Sneak gesture: no dodge from Sneak while clinging to a wall or hanging from a bar (web
- * parkour's or a freerunner's: Sneak lets go there), nor until {@link #CLING_SETTLE} ticks after landing from one; and
- * none from Web's double-Sneak yank.
+ * (0.15.5) The dodge on this side (see {@link Dodge}): the Dodge key (Left Alt). R and Sneak + R belong to the powers.
+ * The hop goes the way the movement keys point (back with none held), at once, and the server is told.
+ * <p>(0.20.65) Andy: "alt should be roll". Sneak tapped twice no longer dodges (Combat Roll's old gesture): a double
+ * tap held is the zoom now ({@code SneakZoom}), and OK Zoomer's own key came off Left Alt so Alt only dodges.
  */
 public final class DodgeClient {
-	/** The most ticks between two Sneak presses that count as a double tap. */
-	private static final int DOUBLE_TAP_TICKS = 6;
-	/** A first press held longer than this (ticks) is a hold, not a tap (a freerunner's slide is a held Sneak). */
-	private static final int TAP_HOLD_TICKS = 3;
-	/** After a cling or bar hang, ticks on the ground before Sneak taps dodge again. */
-	private static final int CLING_SETTLE = 10;
-
 	private static @Nullable KeyMapping dodgeKey;
-	private static boolean sneakWasDown;
-	private static int sinceLastTap = Integer.MAX_VALUE;
-	/** How long Sneak has been held down this press. */
-	private static int held;
-	private static boolean afterCling;
-	private static int groundedAfterCling;
 	/** Ticks until the next dodge (the server's {@link Dodge#COOLDOWN}, kept here too so the hop isn't spent twice). */
 	private static int cooldown;
-	/** (0.15.67) Sure Footing: ticks left in which a dodge pressed in the air still rolls you as you land ({@link LandingRoll}). */
+	/** (0.15.67) Ticks left in which a dodge pressed in the air still rolls you as you land ({@link LandingRoll}; everyone's since Motion patch 0). */
 	private static int landingRoll;
 	/** Ticks since this player last dodged (the HUD flashes the row). */
 	public static int sinceDodge = Integer.MAX_VALUE;
@@ -53,6 +37,23 @@ public final class DodgeClient {
 	static float rollX, rollZ;
 
 	private DodgeClient() {
+	}
+
+	/**
+	 * The Dodge key is held (Sneak + it zooms, see {@code SneakZoom}). (0.20.79) Read off the keyboard itself as well as the
+	 * key mapping: Andy's Shift + Alt didn't zoom in 0.20.74-0.20.77 though the double tap did, so something between the
+	 * key event and the mapping drops Alt while Shift is down. Left Alt itself always counts, wherever the Dodge key is.
+	 */
+	public static boolean keyDown() {
+		KeyMapping key = dodgeKey;
+		if (key == null) {
+			return false;
+		}
+		if (key.isDown() || InputConstants.isKeyDown(InputConstants.KEY_LALT)) {
+			return true;
+		}
+		InputConstants.Key bound = KeyMappingHelper.getBoundKeyOf(key);
+		return bound.getType() == InputConstants.Type.KEYBOARD && bound.getValue() > 0 && InputConstants.isKeyDown(bound.getValue());
 	}
 
 	public static void init() {
@@ -69,20 +70,20 @@ public final class DodgeClient {
 			sinceDodge++;
 		}
 		if (player == null || minecraft.gui.screen() != null) {
-			sneakWasDown = false;
-			sinceLastTap = Integer.MAX_VALUE;
 			landingRoll = 0;
 			return;
 		}
 		boolean wanted = false;
 		KeyMapping key = dodgeKey;
 		while (key != null && key.consumeClick()) {
-			wanted = true;
+			// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
+			wanted = !minecraft.options.keyShift.isDown();
 		}
-		if (sneakDoubleTap(minecraft, player)) {
-			wanted = true;
+		if (wanted && vault(player)) {
+			// (0.21.22) in the air over a raised shield: the vault, not a roll
+			wanted = false;
 		}
-		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0 && Freerun.perk(player, Freerun.Perk.SURE_FOOTING) > 0) {
+		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
 			// falling: held until you land
 			landingRoll = LandingRoll.EARLY_TICKS;
 		} else if (wanted) {
@@ -100,41 +101,27 @@ public final class DodgeClient {
 		}
 	}
 
-	/** Sneak pressed twice in quick succession (and not one of the moves where Sneak means something else). */
-	private static boolean sneakDoubleTap(Minecraft minecraft, LocalPlayer player) {
-		boolean sneak = minecraft.options.keyShift.isDown();
-		if (sinceLastTap < Integer.MAX_VALUE) {
-			sinceLastTap++;
-		}
-		Integer move = player.getAttached(WebParkour.MOVE);
-		if (move != null && WebParkour.kind(move) == WebParkour.CLING || FreerunClient.holding()) {
-			afterCling = true;
-			groundedAfterCling = 0;
-		} else if (afterCling && (player.onGround() || player.isInWater()) && ++groundedAfterCling >= CLING_SETTLE) {
-			afterCling = false;
-		}
-		// double Sneak with two webs on small things is Web's yank, not a dodge
-		if (afterCling || player.tickCount - com.jaymospowers.client.power.web.WebSwing.reelReadyTick <= 1) {
-			sinceLastTap = Integer.MAX_VALUE;
-			sneakWasDown = sneak;
+	/**
+	 * (0.21.22) Andy: "the input should be jump plus alt key or roll bind in mid air". Dodge pressed in the air with a foe's
+	 * raised shield close ahead vaults him ({@link com.jaymospowers.combat.ShieldVault}): pushed up and over at once, and
+	 * the server told. True if it was a vault (one too big still takes the press, and the server says so).
+	 */
+	private static boolean vault(LocalPlayer player) {
+		if (!com.jaymospowers.combat.ShieldVault.canVault(player)) {
 			return false;
 		}
-		held = sneak ? held + 1 : 0;
-		if (held > TAP_HOLD_TICKS) {
-			// held, not tapped: it doesn't start a double tap
-			sinceLastTap = Integer.MAX_VALUE;
+		net.minecraft.world.entity.LivingEntity foe = com.jaymospowers.combat.ShieldVault.target(player, 0.0);
+		if (foe == null) {
+			return false;
 		}
-		boolean tapped = false;
-		if (sneak && !sneakWasDown) {
-			if (sinceLastTap <= DOUBLE_TAP_TICKS) {
-				tapped = true;
-				sinceLastTap = Integer.MAX_VALUE;
-			} else {
-				sinceLastTap = 0;
-			}
+		if (!com.jaymospowers.combat.ShieldVault.tooBig(player, foe)) {
+			Vec3 push = com.jaymospowers.combat.ShieldVault.push(player, foe);
+			player.setDeltaMovement(push);
+			player.setSprinting(false);
+			landingRoll = 0;
 		}
-		sneakWasDown = sneak;
-		return tapped;
+		ClientPlayNetworking.send(new com.jaymospowers.combat.ShieldVault.Ask(foe.getId()));
+		return true;
 	}
 
 	/** {@code landing}: a landing roll, which goes forward when no movement key is held. */

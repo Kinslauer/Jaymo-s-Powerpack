@@ -43,8 +43,8 @@ import net.minecraft.world.phys.Vec3;
  * android mech, because each build has its own model and skin). It is a pilot's machine, not a patrol's: it fights
  * androids, android and war mechs and the dead on sight, and is neutral toward players unless one hurts it or its drone
  * ({@link FutureWorky}); then it answers, and so does the rest of its squad. It hoses its target with a heavy arm cannon
- * (the future's own gun code, {@link FutureGuns}) and smashes what gets close. Beaten, it leaves scrap, now and then a
- * cockpit log, and its pilot climbs out of the hatch (a curious survivor from the future, an MCA villager: {@link FutureOmenPilots}).
+ * (the future's own gun code, {@link FutureGuns}) and smashes what gets close. Beaten, it leaves a wreck (0.19.32: searched,
+ * it comes apart like an iron golem) holding scrap, now and then a cockpit log, and its pilot climbs out of the hatch (a curious survivor from the future, an MCA villager: {@link FutureOmenPilots}).
  * <p>Squads turn up rarely, with their drones, in the future only ({@link FutureOmens}). Nothing its own kind fires
  * (or its drones) does it harm.
  */
@@ -73,7 +73,6 @@ public class FutureOmen extends PathfinderMob {
 	public FutureOmen(EntityType<? extends FutureOmen> type, Level level) {
 		super(type, level);
 		this.xpReward = 70;
-		addTag("jaymoskitchen.no_corpse");
 	}
 
 	/** The blue build rather than the red? */

@@ -402,6 +402,8 @@ public final class HiddenBlade {
 		if (assassin) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.assassinate").withStyle(ChatFormatting.DARK_RED));
 			Skills.assassination(sp);
+			// (0.7.514) Cutthroat
+			Bridges.unseenBlow(sp);
 		} else {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.stab").withStyle(ChatFormatting.DARK_RED));
 		}

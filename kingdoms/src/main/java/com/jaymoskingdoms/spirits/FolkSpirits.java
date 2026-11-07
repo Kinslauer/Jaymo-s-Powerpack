@@ -92,6 +92,11 @@ public final class FolkSpirits {
 		}
 		long now = level.getGameTime();
 		UUID id = folk.getUUID();
+		if (SpiritBarrage.busy(folk)) {
+			// (0.7.467) locked in a barrage: its fists are busy
+			LAST_TARGET.put(id, now);
+			return;
+		}
 		boolean has = target != null && target.isAlive() && folk.distanceTo(target) <= SHOW_RANGE;
 		if (has) {
 			LAST_TARGET.put(id, now);

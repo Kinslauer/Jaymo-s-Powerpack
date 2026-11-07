@@ -212,6 +212,29 @@ public final class ScentTrails {
 		return freshest;
 	}
 
+	/**
+	 * (0.7.600) For the wild wolves ({@code wild.WolfStalkers}): the freshest footstep {@code player} left in {@code level}
+	 * within {@code range} blocks of {@code from}, no older than {@code maxAge} ticks; null if none.
+	 */
+	public static @Nullable Vec3 freshest(UUID player, net.minecraft.world.level.Level level, Vec3 from, double range, int maxAge) {
+		Deque<Step> steps = TRAILS.get(player);
+		if (steps == null || !(level instanceof ServerLevel server)) {
+			return null;
+		}
+		long now = server.getServer().overworld().getGameTime();
+		Identifier world = level.dimension().identifier();
+		for (var it = steps.descendingIterator(); it.hasNext(); ) {
+			Step s = it.next();
+			if (now - s.time() > maxAge) {
+				return null;
+			}
+			if (s.world().equals(world) && from.distanceToSqr(s.x(), s.y(), s.z()) <= range * range) {
+				return new Vec3(s.x(), s.y(), s.z());
+			}
+		}
+		return null;
+	}
+
 	/** {@code follow}'s trail, as the points near {@code wolf} in their world. */
 	private static void send(ServerPlayer wolf, Follow follow, long now) {
 		Deque<Step> steps = TRAILS.get(follow.target);

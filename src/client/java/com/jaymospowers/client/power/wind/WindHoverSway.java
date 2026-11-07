@@ -175,6 +175,10 @@ public final class WindHoverSway {
 		if (com.jaymospowers.client.power.xenoform.XenoformFlightPose.floating(player)) {
 			return true;
 		}
+		// (Andy, 2026-11-01) and so does anyone held up by Thessaly's mana wings (Jaymo's Kingdoms)
+		if (ManaWingsCompat.hovering(player)) {
+			return true;
+		}
 		if (player == minecraft.player) {
 			return WindPowerClient.isActive(minecraft.player) && WindPowerClient.INSTANCE.flight().state() == WindFlight.HOVER;
 		}

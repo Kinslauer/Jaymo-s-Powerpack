@@ -187,6 +187,21 @@ public final class ZFighterNpcs {
 				// (0.17.192) an Omen's pilot, in the future
 				return com.jaymospowers.power.chrono.future.FutureOmenPilots.talk(player, npc);
 			}
+			if (npc.entityTags().contains(com.jaymospowers.power.xenoform.RivalHunter.TAG) || npc.entityTags().contains(com.jaymospowers.power.xenoform.RivalHunter.FLED_TAG)) {
+				// (0.18.125) the band hunter
+				com.jaymospowers.power.xenoform.RivalHunter.talk(player, npc);
+				return true;
+			}
+			if (npc.entityTags().contains(com.jaymospowers.power.xenoform.BandForge.SMITH_TAG)) {
+				// (0.18.123) the star forge's smith
+				com.jaymospowers.power.xenoform.BandForge.talk(player, npc);
+				return true;
+			}
+			if (npc.entityTags().contains(com.jaymospowers.power.xenoform.StarReaders.TAG)) {
+				// (0.18.121) a star-reader, on a crater's rim
+				com.jaymospowers.power.xenoform.StarReaders.talk(player, npc);
+				return true;
+			}
 			if (npc.entityTags().contains(ZFighterPatrol.TAG)) {
 				// (0.18.6) a galactic patrolman
 				ZFighterPatrol.talk(player, npc);
@@ -206,6 +221,11 @@ public final class ZFighterNpcs {
 			default -> ZFighterAfterlife.talk(player, npc, tag);
 		}
 		return true;
+	}
+
+	/** (0.19.33) Whether the talk screen is there (Kingdoms and MCA), so a choice can be put to a player. */
+	public static boolean canAsk() {
+		return ASK != null;
 	}
 
 	/** {@code npc} says {@code words}, with these answers and a farewell. Without the talk screen, the words go to chat. */

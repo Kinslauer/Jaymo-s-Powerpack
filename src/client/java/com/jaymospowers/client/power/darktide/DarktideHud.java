@@ -57,12 +57,10 @@ final class DarktideHud {
 		List<Chip> chips = chips(player, hud, drowned);
 		int width = FLOW_WIDTH + CHIP_GAP + chips.size() * (CHIP + CHIP_GAP) - CHIP_GAP;
 		int cx = graphics.guiWidth() / 2;
-		int x = cx + 91 + 30;
-		int y = graphics.guiHeight() - CHIP - 1;
-		if (x + width > graphics.guiWidth() - 2) {
-			x = cx + 91 - width;
-			y = graphics.guiHeight() - 22 - 30 - CHIP;
-		}
+		// (HUD rework) the right dock's power block: its bottom edge
+		int[] dock = com.jaymospowers.client.hud.PowerDock.origin(CHIP);
+		int x = dock[0];
+		int y = dock[1];
 		flowChip(graphics, font, hud, x, y, time, drowned);
 		int cx2 = x + FLOW_WIDTH + CHIP_GAP;
 		for (Chip chip : chips) {
@@ -201,21 +199,19 @@ final class DarktideHud {
 		if (move == null || move.kind() != DarktideMove.STANCE) {
 			return;
 		}
-		int cx = graphics.guiWidth() / 2;
-		int cy = graphics.guiHeight() / 2;
-		int barWidth = 52;
-		int x0 = cx - barWidth / 2;
-		int y = cy - 20;
 		float grow = Mth.clamp((now - move.start()) / 100.0F, 0.0F, 1.0F);
-		graphics.fill(x0 - 1, y - 1, x0 + barWidth + 1, y + 4, 0x90000000);
 		int color = grow >= 1.0F ? pulse(WATER_LIGHT, 0xFFFFFF, time * 0.4F) : WATER_LIGHT;
-		graphics.fill(x0, y, x0 + Mth.ceil(barWidth * grow), y + 3, 0xFF000000 | color);
 		int extra = move.variant() >> 2;
 		Component label = Component.translatable("hud.jaymospowers.darktide.stance." + (move.variant() & 3)).withColor(WATER_LIGHT);
 		if (extra > 0) {
 			label = label.copy().append(Component.literal("  +" + extra).withColor(0xFFFFFF));
 		}
-		graphics.centeredText(font, label, cx, y - 11, 0xFFFFFFFF);
+		// (HUD rework) Gedan bar: ABOVE zone, row 20
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:darktide_gedan", 20, com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
+		if (at == null) {
+			return;
+		}
+		com.jaymospowers.client.hud.HudStyle.labelledBar(graphics, font, label, at[0], at[1], com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, grow, color);
 	}
 
 	private static int pulse(int a, int b, float phase) {

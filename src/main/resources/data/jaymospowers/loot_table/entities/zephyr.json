@@ -38,18 +38,16 @@
           ]
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance_with_enchanted_bonus",
-          "enchantment": "minecraft:looting",
-          "unenchanted_chance": 0.111,
-          "enchanted_chance": {
-            "type": "minecraft:linear",
-            "base": 0.222,
-            "per_level_above_first": 0.111
-          }
+      "condition": {
+        "type": "minecraft:random_chance_with_enchanted_bonus",
+        "enchantment": "minecraft:looting",
+        "unenchanted_chance": 0.111,
+        "enchanted_chance": {
+          "type": "minecraft:linear",
+          "base": 0.222,
+          "per_level_above_first": 0.111
         }
-      ]
+      }
     }
   ],
   "random_sequence": "jaymospowers:entities/zephyr"

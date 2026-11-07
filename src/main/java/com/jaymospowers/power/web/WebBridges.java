@@ -83,6 +83,8 @@ public final class WebBridges {
 			.sound(SoundType.WOOL)
 			.pushReaction(PushReaction.POPPED)
 			.setId(key)));
+		// (0.19.71) the planks catch and burn like wool
+		net.fabricmc.fabric.api.registry.FlammableBlockRegistry.getDefaultInstance().add(BRIDGE, 60, 100);
 		ServerTickEvents.END_SERVER_TICK.register(WebBridges::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			// a stopping server takes its weblines with it (nothing left hanging in the save)
@@ -161,6 +163,29 @@ public final class WebBridges {
 		return true;
 	}
 
+	/**
+	 * (0.19.71) A webline that runs through fire, or that anything alight crosses, burns through and comes down, planks
+	 * and all; a symbiote's (rope or tendril) recoils from it and pulls itself down the same way.
+	 */
+	private static void burn(MinecraftServer server) {
+		for (Line line : List.copyOf(LINES)) {
+			ServerLevel level = server.getLevel(line.dimension());
+			if (level == null || !level.isLoaded(BlockPos.containing(line.span().from())) || !level.isLoaded(BlockPos.containing(line.span().to()))) {
+				continue;
+			}
+			Vec3 at = WebHeft.burning(level, line.span().from(), line.span().to(), null, null);
+			if (at == null) {
+				continue;
+			}
+			if (line.span().style() == WebBridgeBlock.WEB) {
+				WebHeft.burnFx(level, at);
+			} else {
+				WebHeft.recoilFx(level, at);
+			}
+			cut(level, line.span().from(), line.span().to());
+		}
+	}
+
 	private static void syncSpans(ServerLevel level) {
 		List<Span> spans = new ArrayList<>();
 		for (Line line : LINES) {
@@ -177,6 +202,9 @@ public final class WebBridges {
 
 	private static void tick(MinecraftServer server) {
 		clock++;
+		if (clock % WebHeft.BURN_EVERY == 0) {
+			burn(server);
+		}
 		for (Iterator<Line> it = LINES.iterator(); it.hasNext(); ) {
 			Line line = it.next();
 			if (clock >= line.until()) {

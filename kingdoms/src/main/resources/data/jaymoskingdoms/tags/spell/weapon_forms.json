@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:form_sheath_draw",
+    "jaymoskingdoms:form_crescent_sweep",
+    "jaymoskingdoms:form_rain_of_cuts",
+    "jaymoskingdoms:form_spear_lunge",
+    "jaymoskingdoms:form_couched_lance",
+    "jaymoskingdoms:form_pinning_throw",
+    "jaymoskingdoms:form_ground_stomp",
+    "jaymoskingdoms:form_falling_fist",
+    "jaymoskingdoms:form_marked_quarry",
+    "jaymoskingdoms:form_cast_off_cloak",
+    "jaymoskingdoms:form_tangle_cord",
+    "jaymoskingdoms:form_rending_claw",
+    "jaymoskingdoms:form_feral_pounce",
+    "jaymoskingdoms:move_takedown",
+    "jaymoskingdoms:move_blink",
+    "jaymoskingdoms:move_finish",
+    "jaymoskingdoms:move_counter",
+    "jaymoskingdoms:move_fists",
+    "jaymoskingdoms:move_arm",
+    "jaymoskingdoms:move_grab",
+    "jaymoskingdoms:move_tendril",
+    "jaymoskingdoms:move_spikes",
+    "jaymoskingdoms:move_consume",
+    "jaymoskingdoms:move_shroud",
+    "jaymoskingdoms:night_dash",
+    "jaymoskingdoms:night_pound",
+    "jaymoskingdoms:night_gaze",
+    "jaymoskingdoms:night_feed"
+  ]
+}

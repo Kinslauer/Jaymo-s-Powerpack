@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/monolith",
+  "display": {
+    "icon": {
+      "id": "minecraft:skeleton_skull"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.giant.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.giant.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

@@ -145,6 +145,8 @@ public final class SpiritClash {
 	static boolean strikes(Move move) {
 		return switch (move.id()) {
 			case "grab", "shove", "pin" -> true;
+			// (0.7.467) two punches meeting are a barrage instead (SpiritBarrage)
+			case "punch" -> false;
 			default -> move.intent() == Mana.HARM;
 		};
 	}

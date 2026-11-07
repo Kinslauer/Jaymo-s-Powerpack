@@ -1,0 +1,604 @@
+{
+  "variants": {
+    "facing=north,flower=1,age=0": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_0"
+    },
+    "facing=north,flower=1,age=1": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_1"
+    },
+    "facing=north,flower=1,age=2": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_2"
+    },
+    "facing=north,flower=1,age=3": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_3"
+    },
+    "facing=north,flower=2,age=0": {
+      "model": "jaymoskingdoms:block/window_box_poppy_0"
+    },
+    "facing=north,flower=2,age=1": {
+      "model": "jaymoskingdoms:block/window_box_poppy_1"
+    },
+    "facing=north,flower=2,age=2": {
+      "model": "jaymoskingdoms:block/window_box_poppy_2"
+    },
+    "facing=north,flower=2,age=3": {
+      "model": "jaymoskingdoms:block/window_box_poppy_3"
+    },
+    "facing=north,flower=3,age=0": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_0"
+    },
+    "facing=north,flower=3,age=1": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_1"
+    },
+    "facing=north,flower=3,age=2": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_2"
+    },
+    "facing=north,flower=3,age=3": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_3"
+    },
+    "facing=north,flower=4,age=0": {
+      "model": "jaymoskingdoms:block/window_box_allium_0"
+    },
+    "facing=north,flower=4,age=1": {
+      "model": "jaymoskingdoms:block/window_box_allium_1"
+    },
+    "facing=north,flower=4,age=2": {
+      "model": "jaymoskingdoms:block/window_box_allium_2"
+    },
+    "facing=north,flower=4,age=3": {
+      "model": "jaymoskingdoms:block/window_box_allium_3"
+    },
+    "facing=north,flower=5,age=0": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_0"
+    },
+    "facing=north,flower=5,age=1": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_1"
+    },
+    "facing=north,flower=5,age=2": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_2"
+    },
+    "facing=north,flower=5,age=3": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_3"
+    },
+    "facing=north,flower=6,age=0": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_0"
+    },
+    "facing=north,flower=6,age=1": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_1"
+    },
+    "facing=north,flower=6,age=2": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_2"
+    },
+    "facing=north,flower=6,age=3": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_3"
+    },
+    "facing=north,flower=7,age=0": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_0"
+    },
+    "facing=north,flower=7,age=1": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_1"
+    },
+    "facing=north,flower=7,age=2": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_2"
+    },
+    "facing=north,flower=7,age=3": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_3"
+    },
+    "facing=north,flower=8,age=0": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_0"
+    },
+    "facing=north,flower=8,age=1": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_1"
+    },
+    "facing=north,flower=8,age=2": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_2"
+    },
+    "facing=north,flower=8,age=3": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_3"
+    },
+    "facing=north,flower=9,age=0": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_0"
+    },
+    "facing=north,flower=9,age=1": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_1"
+    },
+    "facing=north,flower=9,age=2": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_2"
+    },
+    "facing=north,flower=9,age=3": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_3"
+    },
+    "facing=north,flower=0,age=0": {
+      "model": "jaymoskingdoms:block/window_box"
+    },
+    "facing=north,flower=0,age=1": {
+      "model": "jaymoskingdoms:block/window_box"
+    },
+    "facing=north,flower=0,age=2": {
+      "model": "jaymoskingdoms:block/window_box"
+    },
+    "facing=north,flower=0,age=3": {
+      "model": "jaymoskingdoms:block/window_box"
+    },
+    "facing=east,flower=1,age=0": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_0",
+      "y": 90
+    },
+    "facing=east,flower=1,age=1": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_1",
+      "y": 90
+    },
+    "facing=east,flower=1,age=2": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_2",
+      "y": 90
+    },
+    "facing=east,flower=1,age=3": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_3",
+      "y": 90
+    },
+    "facing=east,flower=2,age=0": {
+      "model": "jaymoskingdoms:block/window_box_poppy_0",
+      "y": 90
+    },
+    "facing=east,flower=2,age=1": {
+      "model": "jaymoskingdoms:block/window_box_poppy_1",
+      "y": 90
+    },
+    "facing=east,flower=2,age=2": {
+      "model": "jaymoskingdoms:block/window_box_poppy_2",
+      "y": 90
+    },
+    "facing=east,flower=2,age=3": {
+      "model": "jaymoskingdoms:block/window_box_poppy_3",
+      "y": 90
+    },
+    "facing=east,flower=3,age=0": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_0",
+      "y": 90
+    },
+    "facing=east,flower=3,age=1": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_1",
+      "y": 90
+    },
+    "facing=east,flower=3,age=2": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_2",
+      "y": 90
+    },
+    "facing=east,flower=3,age=3": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_3",
+      "y": 90
+    },
+    "facing=east,flower=4,age=0": {
+      "model": "jaymoskingdoms:block/window_box_allium_0",
+      "y": 90
+    },
+    "facing=east,flower=4,age=1": {
+      "model": "jaymoskingdoms:block/window_box_allium_1",
+      "y": 90
+    },
+    "facing=east,flower=4,age=2": {
+      "model": "jaymoskingdoms:block/window_box_allium_2",
+      "y": 90
+    },
+    "facing=east,flower=4,age=3": {
+      "model": "jaymoskingdoms:block/window_box_allium_3",
+      "y": 90
+    },
+    "facing=east,flower=5,age=0": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_0",
+      "y": 90
+    },
+    "facing=east,flower=5,age=1": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_1",
+      "y": 90
+    },
+    "facing=east,flower=5,age=2": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_2",
+      "y": 90
+    },
+    "facing=east,flower=5,age=3": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_3",
+      "y": 90
+    },
+    "facing=east,flower=6,age=0": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_0",
+      "y": 90
+    },
+    "facing=east,flower=6,age=1": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_1",
+      "y": 90
+    },
+    "facing=east,flower=6,age=2": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_2",
+      "y": 90
+    },
+    "facing=east,flower=6,age=3": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_3",
+      "y": 90
+    },
+    "facing=east,flower=7,age=0": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_0",
+      "y": 90
+    },
+    "facing=east,flower=7,age=1": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_1",
+      "y": 90
+    },
+    "facing=east,flower=7,age=2": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_2",
+      "y": 90
+    },
+    "facing=east,flower=7,age=3": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_3",
+      "y": 90
+    },
+    "facing=east,flower=8,age=0": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_0",
+      "y": 90
+    },
+    "facing=east,flower=8,age=1": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_1",
+      "y": 90
+    },
+    "facing=east,flower=8,age=2": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_2",
+      "y": 90
+    },
+    "facing=east,flower=8,age=3": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_3",
+      "y": 90
+    },
+    "facing=east,flower=9,age=0": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_0",
+      "y": 90
+    },
+    "facing=east,flower=9,age=1": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_1",
+      "y": 90
+    },
+    "facing=east,flower=9,age=2": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_2",
+      "y": 90
+    },
+    "facing=east,flower=9,age=3": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_3",
+      "y": 90
+    },
+    "facing=east,flower=0,age=0": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 90
+    },
+    "facing=east,flower=0,age=1": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 90
+    },
+    "facing=east,flower=0,age=2": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 90
+    },
+    "facing=east,flower=0,age=3": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 90
+    },
+    "facing=south,flower=1,age=0": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_0",
+      "y": 180
+    },
+    "facing=south,flower=1,age=1": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_1",
+      "y": 180
+    },
+    "facing=south,flower=1,age=2": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_2",
+      "y": 180
+    },
+    "facing=south,flower=1,age=3": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_3",
+      "y": 180
+    },
+    "facing=south,flower=2,age=0": {
+      "model": "jaymoskingdoms:block/window_box_poppy_0",
+      "y": 180
+    },
+    "facing=south,flower=2,age=1": {
+      "model": "jaymoskingdoms:block/window_box_poppy_1",
+      "y": 180
+    },
+    "facing=south,flower=2,age=2": {
+      "model": "jaymoskingdoms:block/window_box_poppy_2",
+      "y": 180
+    },
+    "facing=south,flower=2,age=3": {
+      "model": "jaymoskingdoms:block/window_box_poppy_3",
+      "y": 180
+    },
+    "facing=south,flower=3,age=0": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_0",
+      "y": 180
+    },
+    "facing=south,flower=3,age=1": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_1",
+      "y": 180
+    },
+    "facing=south,flower=3,age=2": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_2",
+      "y": 180
+    },
+    "facing=south,flower=3,age=3": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_3",
+      "y": 180
+    },
+    "facing=south,flower=4,age=0": {
+      "model": "jaymoskingdoms:block/window_box_allium_0",
+      "y": 180
+    },
+    "facing=south,flower=4,age=1": {
+      "model": "jaymoskingdoms:block/window_box_allium_1",
+      "y": 180
+    },
+    "facing=south,flower=4,age=2": {
+      "model": "jaymoskingdoms:block/window_box_allium_2",
+      "y": 180
+    },
+    "facing=south,flower=4,age=3": {
+      "model": "jaymoskingdoms:block/window_box_allium_3",
+      "y": 180
+    },
+    "facing=south,flower=5,age=0": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_0",
+      "y": 180
+    },
+    "facing=south,flower=5,age=1": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_1",
+      "y": 180
+    },
+    "facing=south,flower=5,age=2": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_2",
+      "y": 180
+    },
+    "facing=south,flower=5,age=3": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_3",
+      "y": 180
+    },
+    "facing=south,flower=6,age=0": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_0",
+      "y": 180
+    },
+    "facing=south,flower=6,age=1": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_1",
+      "y": 180
+    },
+    "facing=south,flower=6,age=2": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_2",
+      "y": 180
+    },
+    "facing=south,flower=6,age=3": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_3",
+      "y": 180
+    },
+    "facing=south,flower=7,age=0": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_0",
+      "y": 180
+    },
+    "facing=south,flower=7,age=1": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_1",
+      "y": 180
+    },
+    "facing=south,flower=7,age=2": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_2",
+      "y": 180
+    },
+    "facing=south,flower=7,age=3": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_3",
+      "y": 180
+    },
+    "facing=south,flower=8,age=0": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_0",
+      "y": 180
+    },
+    "facing=south,flower=8,age=1": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_1",
+      "y": 180
+    },
+    "facing=south,flower=8,age=2": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_2",
+      "y": 180
+    },
+    "facing=south,flower=8,age=3": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_3",
+      "y": 180
+    },
+    "facing=south,flower=9,age=0": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_0",
+      "y": 180
+    },
+    "facing=south,flower=9,age=1": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_1",
+      "y": 180
+    },
+    "facing=south,flower=9,age=2": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_2",
+      "y": 180
+    },
+    "facing=south,flower=9,age=3": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_3",
+      "y": 180
+    },
+    "facing=south,flower=0,age=0": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 180
+    },
+    "facing=south,flower=0,age=1": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 180
+    },
+    "facing=south,flower=0,age=2": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 180
+    },
+    "facing=south,flower=0,age=3": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 180
+    },
+    "facing=west,flower=1,age=0": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_0",
+      "y": 270
+    },
+    "facing=west,flower=1,age=1": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_1",
+      "y": 270
+    },
+    "facing=west,flower=1,age=2": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_2",
+      "y": 270
+    },
+    "facing=west,flower=1,age=3": {
+      "model": "jaymoskingdoms:block/window_box_dandelion_3",
+      "y": 270
+    },
+    "facing=west,flower=2,age=0": {
+      "model": "jaymoskingdoms:block/window_box_poppy_0",
+      "y": 270
+    },
+    "facing=west,flower=2,age=1": {
+      "model": "jaymoskingdoms:block/window_box_poppy_1",
+      "y": 270
+    },
+    "facing=west,flower=2,age=2": {
+      "model": "jaymoskingdoms:block/window_box_poppy_2",
+      "y": 270
+    },
+    "facing=west,flower=2,age=3": {
+      "model": "jaymoskingdoms:block/window_box_poppy_3",
+      "y": 270
+    },
+    "facing=west,flower=3,age=0": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_0",
+      "y": 270
+    },
+    "facing=west,flower=3,age=1": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_1",
+      "y": 270
+    },
+    "facing=west,flower=3,age=2": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_2",
+      "y": 270
+    },
+    "facing=west,flower=3,age=3": {
+      "model": "jaymoskingdoms:block/window_box_blue_orchid_3",
+      "y": 270
+    },
+    "facing=west,flower=4,age=0": {
+      "model": "jaymoskingdoms:block/window_box_allium_0",
+      "y": 270
+    },
+    "facing=west,flower=4,age=1": {
+      "model": "jaymoskingdoms:block/window_box_allium_1",
+      "y": 270
+    },
+    "facing=west,flower=4,age=2": {
+      "model": "jaymoskingdoms:block/window_box_allium_2",
+      "y": 270
+    },
+    "facing=west,flower=4,age=3": {
+      "model": "jaymoskingdoms:block/window_box_allium_3",
+      "y": 270
+    },
+    "facing=west,flower=5,age=0": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_0",
+      "y": 270
+    },
+    "facing=west,flower=5,age=1": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_1",
+      "y": 270
+    },
+    "facing=west,flower=5,age=2": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_2",
+      "y": 270
+    },
+    "facing=west,flower=5,age=3": {
+      "model": "jaymoskingdoms:block/window_box_azure_bluet_3",
+      "y": 270
+    },
+    "facing=west,flower=6,age=0": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_0",
+      "y": 270
+    },
+    "facing=west,flower=6,age=1": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_1",
+      "y": 270
+    },
+    "facing=west,flower=6,age=2": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_2",
+      "y": 270
+    },
+    "facing=west,flower=6,age=3": {
+      "model": "jaymoskingdoms:block/window_box_red_tulip_3",
+      "y": 270
+    },
+    "facing=west,flower=7,age=0": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_0",
+      "y": 270
+    },
+    "facing=west,flower=7,age=1": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_1",
+      "y": 270
+    },
+    "facing=west,flower=7,age=2": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_2",
+      "y": 270
+    },
+    "facing=west,flower=7,age=3": {
+      "model": "jaymoskingdoms:block/window_box_oxeye_daisy_3",
+      "y": 270
+    },
+    "facing=west,flower=8,age=0": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_0",
+      "y": 270
+    },
+    "facing=west,flower=8,age=1": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_1",
+      "y": 270
+    },
+    "facing=west,flower=8,age=2": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_2",
+      "y": 270
+    },
+    "facing=west,flower=8,age=3": {
+      "model": "jaymoskingdoms:block/window_box_cornflower_3",
+      "y": 270
+    },
+    "facing=west,flower=9,age=0": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_0",
+      "y": 270
+    },
+    "facing=west,flower=9,age=1": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_1",
+      "y": 270
+    },
+    "facing=west,flower=9,age=2": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_2",
+      "y": 270
+    },
+    "facing=west,flower=9,age=3": {
+      "model": "jaymoskingdoms:block/window_box_lily_of_the_valley_3",
+      "y": 270
+    },
+    "facing=west,flower=0,age=0": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 270
+    },
+    "facing=west,flower=0,age=1": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 270
+    },
+    "facing=west,flower=0,age=2": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 270
+    },
+    "facing=west,flower=0,age=3": {
+      "model": "jaymoskingdoms:block/window_box",
+      "y": 270
+    }
+  }
+}

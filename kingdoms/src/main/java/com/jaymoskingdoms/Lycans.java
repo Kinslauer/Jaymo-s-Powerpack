@@ -24,6 +24,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -76,6 +77,8 @@ public final class Lycans {
 	static final int CONVULSE_TICKS = 50, STAGGER_TICKS = 200;
 	/** After the change back: sick and shaking this long (ticks). */
 	static final int AFTER_TICKS = 1200;
+	/** How far round a hidden person those still fighting them are turned onto the beast (blocks). */
+	static final double UNTARGET_RANGE = 32.0;
 
 	// ---- what's kept ---------------------------------------------------------------------------------------------------
 
@@ -174,6 +177,14 @@ public final class Lycans {
 		return BEASTS.containsKey(e.getUUID()) || CONVULSING.containsKey(e.getUUID());
 	}
 
+	/**
+	 * Someone hidden inside their beast right now (invisible, frozen and unhurt where it stands): no one can fight them there,
+	 * so nothing takes them for a foe ({@code ThrallTargetMixin}); whoever had them turns on the beast instead.
+	 */
+	public static boolean hidden(Entity e) {
+		return BEASTS.containsKey(e.getUUID()) && e.isInvisible();
+	}
+
 	/** A full moon tonight (or one an operator called). */
 	static boolean fullMoon(ServerLevel overworld, long clock) {
 		Long forced = overworld.getAttached(FORCED);
@@ -254,6 +265,18 @@ public final class Lycans {
 
 	/** (Werewolf) a cursed beast bit {@code target}: if they live through it, the curse may be theirs too. */
 	public static void bite(ServerLevel level, Werewolf beast, Entity target) {
+		bite(level, target);
+	}
+
+	/** A cursed beast's bite (a villager's, or a player's beast's claws) landed on {@code target}. */
+	static void bite(ServerLevel level, Entity target) {
+		// (Andy, 2026-11-05) "it should spread to players as well"
+		if (target instanceof ServerPlayer player) {
+			if (level.getRandom().nextFloat() < BITE_CHANCE) {
+				WerewolfPlayers.bitten(player);
+			}
+			return;
+		}
 		if (target instanceof PathfinderMob mob && mob.isAlive() && !mob.isBaby() && (mob instanceof Villager || mob instanceof Folk)
 			&& !cursed(mob) && !Vampires.isVampire(mob) && level.getRandom().nextFloat() < BITE_CHANCE) {
 			curse(level, mob);
@@ -289,6 +312,9 @@ public final class Lycans {
 				host.setPos(w.getX(), w.getY(), w.getZ());
 				host.setDeltaMovement(Vec3.ZERO);
 				host.fallDistance = 0.0;
+				if (host.tickCount % 10 == 0) {
+					unTarget(host, w);
+				}
 			}
 			if (!night) {
 				if (!(w.level() instanceof ServerLevel l) || !l.isPositionEntityTicking(w.blockPosition())) {
@@ -328,7 +354,8 @@ public final class Lycans {
 				}
 				continue;
 			}
-			if (!moon || BEASTS.containsKey(id)) {
+			// (Andy, 2026-11-01) a Z Fighter's false moon takes them too, any night
+			if (!(moon || night && PowersCompat.falseMoon(level, mob)) || BEASTS.containsKey(id)) {
 				DUE.remove(id);
 				continue;
 			}
@@ -495,6 +522,27 @@ public final class Lycans {
 			host.addEffect(new MobEffectInstance(MobEffects.NAUSEA, AFTER_TICKS / 4, 0));
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.0, at.z, 16, 0.3, 0.5, 0.3, 0.02);
 			level.playSound(null, host.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 1.0F, 0.7F);
+		}
+	}
+
+	/**
+	 * Anyone who was fighting {@code host} (guards, a rival camp) when the beast tore out of them fights the beast now: the
+	 * person inside can't be seen, hit or hurt, and swinging at them only looked like swinging at nothing.
+	 */
+	private static void unTarget(PathfinderMob host, Werewolf w) {
+		var attack = net.minecraft.world.entity.ai.memory.MemoryModuleType.ATTACK_TARGET;
+		for (net.minecraft.world.entity.Mob m : host.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+			host.getBoundingBox().inflate(UNTARGET_RANGE), m -> m != w && m != host
+				&& (m.getTarget() == host || m.getBrain().getMemory(attack).orElse(null) == host))) {
+			LivingEntity beast = w.isAlive() && m.canAttack(w) ? w : null;
+			m.setTarget(beast);
+			if (m.getBrain().checkMemory(attack, net.minecraft.world.entity.ai.memory.MemoryStatus.REGISTERED)) {
+				if (beast != null) {
+					m.getBrain().setMemory(attack, beast);
+				} else {
+					m.getBrain().eraseMemory(attack);
+				}
+			}
 		}
 	}
 

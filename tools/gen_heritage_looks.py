@@ -289,6 +289,70 @@ def deepborn(rng, solid, glow):
     hands(hand)
 
 
+# ---- (Kingdoms 0.7.490) Beastfolk and Hollow, and the family's variants. Painted on the same UVs as the rest, so every mark is
+# flat on the 64x64 skin. (0.7.490, later) The ears, tails, wings and legs that used to be painted here are real model parts now
+# (client BeastParts, textures from tools/gen_heritage_parts.py); the skins keep the fur, the faces and the glow.
+# Head: front (8-16, 8-16, eyes on row 12), top (8-16, 0-8, its front edge the bottom), sides (0-8 / 16-24, 8-16), back (24-32).
+# Body: front (20-28, 20-32), back (32-40, 20-32). Legs' backs: (12-16, 20-32) and (28-32, 52-64).
+HEAD_FRONT = (8, 8, 16, 16)
+BODY_BACK = (32, 20, 40, 32)
+LEG_BACKS = ((12, 20, 16, 32), (28, 52, 32, 64))
+
+
+def rect(img, x0, y0, x1, y1, c):
+    for x in range(x0, x1):
+        for y in range(y0, y1):
+            put(img, x, y, c)
+
+
+def dots(img, pts, c):
+    for x, y in pts:
+        put(img, x, y, c)
+
+
+def fur_arms(rng, solid, colours, reach=8, ragged=0.5):
+    """Fur creeping up the forearms from the hand."""
+    def fur(x, y, r, x0, x1):
+        if r < reach - 3 or (r < reach and rng.random() < ragged):
+            put(solid, x, y, rng.choice(colours))
+    arm_pixels(fur)
+
+
+def muzzle(solid, light, dark):
+    dots(solid, ((10, 14), (11, 14), (12, 14), (13, 14), (10, 15), (11, 15), (12, 15), (13, 15)), light)
+    dots(solid, ((11, 13), (12, 13)), dark)
+
+
+def beastfolk(rng, solid, glow):
+    """The plain beastfolk: short tawny fur up the forearms, dark claws and a nose (its ears and tail are model parts)."""
+    FUR = [(166, 120, 72, 255), (146, 102, 60, 255), (184, 140, 88, 255)]
+    CLAW = (52, 40, 34, 255)
+    fur_arms(rng, solid, FUR)
+    hands(lambda x, y: put(solid, x, y, CLAW if rng.random() < 0.6 else FUR[1]))
+    muzzle(solid, (226, 200, 160, 255), (52, 36, 36, 255))
+    # (0.7.490) the ears and the tail are model parts now (client BeastParts; tools/gen_heritage_parts.py)
+
+
+def hollow_heritage(rng, solid, glow):
+    """The Hollow: a drained, grey-blue pallor in patches up the forearms, dark rings round the eyes, a pale glow."""
+    PALE = [(176, 186, 190, 255), (156, 168, 174, 255), (136, 148, 158, 255)]
+    VEIN = (84, 96, 112, 255)
+    RING = (60, 64, 80, 255)
+
+    def drained(x, y, r, x0, x1):
+        if r < 9 and (x + y) % 3 != 0 and rng.random() < 0.8:
+            put(solid, x, y, rng.choice(PALE))
+        if r in (2, 5) and (x - x0) % 4 == 1:
+            put(solid, x, y, VEIN)
+    arm_pixels(drained)
+    hands(lambda x, y: put(solid, x, y, PALE[2]))
+    dots(solid, ((9, 11), (10, 11), (9, 13), (10, 13), (13, 11), (14, 11), (13, 13), (14, 13), (8, 12), (11, 12), (12, 12), (15, 12)), RING)
+    dots(solid, ((10, 15), (11, 15), (12, 15), (13, 15)), VEIN)
+    for _ in range(5):  # a faint cold glow in the veins
+        x, y = rng.randrange(40, 56), 20 + rng.randrange(4, 10)
+        put(glow, x, y, (110, 190, 200, 255))
+
+
 def write(name, fn, *args, seed=None):
     solid, glow = blank(), blank()
     fn(random.Random(sum(map(ord, seed or name)) * 31), solid, glow, *args)
@@ -300,7 +364,8 @@ def write(name, fn, *args, seed=None):
 EYE_COLOURS = {"stoneborn": (214, 170, 255), "tideborn": (110, 250, 235), "sylvan": (214, 245, 150),
                "frostborn": (200, 236, 255), "nightborn": (236, 238, 255), "nightborn_blood": (255, 184, 192),
                "dawnborn": (255, 210, 122), "endborn": (214, 156, 255), "dragonblood": (255, 176, 64),
-               "deepborn": (184, 244, 236), "stormborn": (196, 228, 255)}
+               "deepborn": (184, 244, 236), "stormborn": (196, 228, 255),
+               "beastfolk": (255, 210, 122), "hollow": (190, 235, 220)}
 
 write("stoneborn", stoneborn)
 for v in range(3):
@@ -317,6 +382,8 @@ write("dawnborn", dawnborn)
 write("endborn", endborn)
 write("dragonblood", dragonblood)
 write("deepborn", deepborn)
+write("beastfolk", beastfolk)  # (0.7.490)
+write("hollow", hollow_heritage)  # (0.7.490) the heritage; hollow in variant/ is the Deepborn's
 for key, c in EYE_COLOURS.items():
     img = blank()
     for x, y in EYES:
@@ -797,6 +864,434 @@ def geode(rng, solid, glow):
     hands(lambda x, y: (put(solid, x, y, AM[1]), put(glow, x, y, AM[0])) if rng.random() < 0.5 else None)
 
 
+# ---- (Kingdoms 0.7.490) the Sylvan fae and elves, the Beastfolk family and the Hollow dead. Each is a variant over its heritage's
+# first look (beastfolk_skin / hollow_skin / sylvan_<n>_skin), so a variant paints only what is its own.
+
+def dryad(rng, solid, glow):
+    """Bark in rough patches up the forearms and over the shoulders, ringed knots, moss, and leaves for hair."""
+    BARK = [(98, 72, 48, 255), (80, 58, 38, 255), (116, 88, 58, 255)]
+    MOSS = [(78, 120, 44, 255), (104, 150, 54, 255)]
+    LEAF = [(86, 150, 46, 255), (122, 184, 64, 255), (60, 110, 36, 255)]
+    LEAF_GLOW = (168, 232, 96, 255)
+
+    def bark(x, y, r, x0, x1):
+        if r < 8 and (rng.random() < 0.85 - r * 0.04):
+            put(solid, x, y, BARK[(x // 2 + y // 3) % 3])
+        if r in (2, 6) and (x - x0) % 5 == 2:
+            put(solid, x, y, BARK[1])  # a knot
+    arm_pixels(bark)
+    for _ in range(14):
+        put(solid, rng.randrange(40, 56), 20 + rng.randrange(8), rng.choice(MOSS))
+    for x0, y0, x1, y1 in ((20, 20, 28, 24),):  # bark creeping over the chest
+        for x in range(x0, x1):
+            for y in range(y0, y1):
+                if rng.random() < 0.5:
+                    put(solid, x, y, BARK[(x + y) % 3])
+    hands(lambda x, y: put(solid, x, y, BARK[1]))
+    for x in range(8, 16):  # a crown of leaves over the brow and across the top of the head
+        for y in range(0, 8):
+            if y > 3 or rng.random() < 0.45:
+                put(solid, x, y, rng.choice(LEAF))
+    for x in range(8, 16):
+        if x % 3 != 1:
+            put(solid, x, 8, rng.choice(LEAF))
+    for _ in range(6):
+        put(glow, rng.randrange(8, 16), rng.randrange(0, 8), LEAF_GLOW)
+    for _ in range(4):
+        put(glow, rng.randrange(40, 56), 20 + rng.randrange(10), LEAF_GLOW)
+
+
+def changeling(rng, solid, glow):
+    """Never quite the one they seem: mismatched patches of pale and grey skin, a seam across the brow, twig fingers."""
+    PATCH = [(188, 190, 176, 255), (150, 156, 140, 255), (212, 208, 190, 255)]
+    SEAM = (60, 66, 52, 255)
+    TWIG = (96, 74, 52, 255)
+    for x0, x1, y0 in ARMS:
+        for _ in range(5):
+            px_, py_ = rng.randrange(x0, x1 - 2), y0 + rng.randrange(0, 10)
+            col = rng.choice(PATCH)
+            for dx in range(rng.randrange(2, 4)):
+                for dy in range(rng.randrange(2, 4)):
+                    put(solid, px_ + dx, py_ + dy, col)
+    for y in range(8, 16):  # half the face a shade off, a seam down the middle of it
+        for x in range(8, 12):
+            if rng.random() < 0.75:
+                put(solid, x, y, PATCH[(x + y) % 2])
+        put(solid, 11, y, SEAM if y % 2 == 0 else PATCH[1])
+    dots(solid, ((8, 9), (9, 9), (10, 9), (13, 9), (14, 9), (15, 9)), SEAM)  # the brow seam
+    hands(lambda x, y: put(solid, x, y, TWIG if rng.random() < 0.5 else PATCH[1]))
+    for _ in range(6):
+        put(glow, rng.randrange(40, 56), 20 + rng.randrange(10), (200, 230, 170, 255))
+
+
+def sprite(rng, solid, glow):
+    """Pollen glow and sparkles in the hair (the dragonfly wings are model parts)."""
+    for _ in range(8):
+        put(glow, rng.randrange(8, 16), rng.randrange(0, 8), (230, 255, 220, 255))
+    for x0, x1, y0 in ARMS:
+        for _ in range(5):
+            put(glow, rng.randrange(x0, x1), y0 + rng.randrange(0, 11), (210, 255, 230, 255))
+    hands(lambda x, y: put(glow, x, y, (210, 255, 230, 255)) if rng.random() < 0.5 else None)
+
+
+def nymph(rng, solid, glow):
+    """Pearled water on the skin: ripple lines up the forearms, droplets, a water lily in the hair."""
+    RIPPLE = [(120, 206, 214, 255), (86, 168, 190, 255)]
+    PEARL = (236, 248, 250, 255)
+    LILY = [(250, 220, 236, 255), (240, 170, 200, 255), (250, 240, 120, 255)]
+
+    def ripples(x, y, r, x0, x1):
+        if r in (1, 4, 7) and (x - x0 + r) % 3 != 2:
+            put(solid, x, y, RIPPLE[r // 3 % 2])
+            if r == 4:
+                put(glow, x, y, (150, 240, 240, 255))
+    arm_pixels(ripples)
+    for _ in range(12):
+        x, y = rng.randrange(40, 56), 20 + rng.randrange(9)
+        put(solid, x, y, PEARL)
+        put(glow, x, y, (190, 250, 250, 255))
+    hands(lambda x, y: put(glow, x, y, (150, 240, 240, 255)) if rng.random() < 0.5 else None)
+    for (x, y, c) in ((9, 5, 0), (10, 5, 1), (9, 6, 1), (10, 6, 2), (8, 5, 1), (11, 6, 0), (8, 6, 0), (10, 4, 0), (9, 4, 1)):
+        put(solid, x, y, LILY[c])
+    # a drop under each eye
+    dots(solid, ((9, 13), (14, 13)), PEARL)
+
+
+def faerie(rng, solid, glow):
+    """A flower crown, glitter on the cheeks and arms (the butterfly wings are model parts)."""
+    FLOWER = [(250, 150, 190, 255), (250, 220, 120, 255), (190, 150, 240, 255)]
+    for x in range(8, 16):
+        put(solid, x, 8, FLOWER[x % 2 * 2 if x % 3 else 1])
+    for x in (9, 12, 14):
+        put(glow, x, 8, FLOWER[0])
+    scatter(rng, glow, CHEEKS, [(255, 220, 250, 255)], 0.5)
+    for x0, x1, y0 in ARMS:
+        for _ in range(6):
+            put(glow, rng.randrange(x0, x1), y0 + rng.randrange(0, 11), (255, 210, 250, 255))
+
+
+def gold_lines(rng, solid, glow, gold, spacing=5, rows=(2, 6)):
+    for x0, x1, y0 in ARMS:
+        for r in rows:
+            for x in range(x0, x1):
+                if (x - x0) % spacing != 4:
+                    put(solid, x, y0 + 11 - r, gold)
+        for x in range(x0, x1, spacing):  # a rising line joining them
+            for r in range(rows[0], rows[1] + 1):
+                put(solid, x, y0 + 11 - r, gold)
+    hands(lambda x, y: put(solid, x, y, gold) if (x + y) % 3 == 0 else None)
+
+
+def elf_ears(solid, colour, tip):
+    """Long pointed ears: swept back along the sides of the head, their tips on the crown's edges."""
+    for sx, direction in ((0, 1), (23, -1)):
+        for i in range(4):
+            put(solid, sx + (i if direction > 0 else -i), 11 + (1 if i == 3 else 0) - (1 if i == 0 else 0), colour)
+        put(solid, sx + (4 if direction > 0 else -4), 12, tip)
+    dots(solid, ((8, 8), (15, 8)), colour)
+
+
+def highelf(rng, solid, glow):
+    """Gold: a circlet across the brow with a gem, filigree up the forearms, tall ears, flaxen shimmer."""
+    GOLD = (232, 196, 96, 255)
+    GEM = (120, 200, 255, 255)
+    gold_lines(rng, solid, glow, GOLD)
+    for x in range(8, 16):
+        put(solid, x, 8, GOLD)
+    dots(solid, ((11, 9), (12, 9)), GEM)
+    dots(glow, ((11, 9), (12, 9), (11, 8), (12, 8)), (200, 240, 255, 255))
+    elf_ears(solid, (236, 214, 176, 255), GOLD)
+    for x0, x1, y0 in ARMS:
+        for x in range(x0 + 2, x1, 5):
+            put(glow, x, y0 + 5, (255, 230, 150, 255))
+
+
+def moonelf(rng, solid, glow):
+    """Silver-blue: a crescent on the brow, star freckles that shine at night, violet-tipped ears, silver lines."""
+    SILVER = (176, 188, 232, 255)
+    STAR = (230, 236, 255, 255)
+    gold_lines(rng, solid, glow, SILVER, spacing=6, rows=(3, 7))
+    dots(solid, ((11, 9), (12, 9), (10, 10), (13, 10), (10, 11), (13, 11)), SILVER)
+    dots(glow, ((11, 9), (12, 9), (10, 10), (13, 10), (10, 11), (13, 11)), STAR)
+    elf_ears(solid, (196, 190, 236, 255), (120, 100, 190, 255))
+    for _ in range(16):
+        x, y = rng.randrange(40, 56), 20 + rng.randrange(0, 11)
+        put(solid, x, y, SILVER)
+        put(glow, x, y, STAR)
+    scatter(rng, glow, CHEEKS, [STAR], 0.5)
+
+
+def bloodelf(rng, solid, glow):
+    """Crimson sigils up the forearms and a red mark under each eye, gold-trimmed ears; they burn a fel red."""
+    RED = (176, 24, 44, 255)
+    FEL = (255, 70, 80, 255)
+    GOLD = (222, 180, 90, 255)
+    for x0, x1, y0 in ARMS:
+        for x in range(x0, x1):
+            if (x - x0) % 4 != 3:
+                put(solid, x, y0 + 8, RED)
+                put(glow, x, y0 + 8, FEL)
+        for x in range(x0 + 1, x1, 4):  # sigil strokes rising from the line
+            for r in range(3):
+                put(solid, x, y0 + 7 - r, RED)
+                put(glow, x, y0 + 7 - r, (210, 40, 60, 255))
+    hands(lambda x, y: put(glow, x, y, FEL) if rng.random() < 0.4 else None)
+    dots(solid, ((9, 14), (10, 15), (14, 14), (13, 15)), RED)
+    dots(glow, ((9, 14), (14, 14)), FEL)
+    elf_ears(solid, (240, 214, 196, 255), GOLD)
+    for x in range(9, 15):
+        put(solid, x, 8, GOLD if x % 2 else RED)
+
+
+# ---- Beastfolk
+def arachnid(rng, solid, glow):
+    """Dark banded fur like a tarantula's, a ring of extra eyes across the brow, a patterned abdomen on the back."""
+    DARK = [(48, 36, 52, 255), (66, 50, 60, 255), (34, 26, 40, 255)]
+    BAND = (150, 116, 80, 255)
+
+    def hairy(x, y, r, x0, x1):
+        if r < 9 and rng.random() < 0.9:
+            put(solid, x, y, BAND if r in (3, 6) else rng.choice(DARK))
+    arm_pixels(hairy)
+    hands(lambda x, y: put(solid, x, y, DARK[2]))
+    # four extra eyes: a row of two small, two large above the real ones, glowing
+    for (x, y) in ((8, 10), (9, 9), (14, 9), (15, 10), (10, 10), (13, 10)):
+        put(solid, x, y, (20, 14, 24, 255))
+        put(glow, x, y, (255, 50, 60, 255))
+    # the back: an hourglass of pale hair on dark
+    x0, y0, x1, y1 = BODY_BACK
+    for y in range(y0, y1):
+        for x in range(x0, x1):
+            if rng.random() < 0.55:
+                put(solid, x, y, rng.choice(DARK))
+    for i in range(5):
+        w = 3 - abs(i - 2)
+        for dx in range(-w, w + 1):
+            put(solid, 35 + dx, 23 + i, BAND)
+    for x0_, y0_, x1_, y1_ in LEG_BACKS:
+        rect(solid, x0_, y0_ + 6, x1_, y1_, DARK[0])
+    dots(solid, ((10, 15), (13, 15)), (200, 190, 180, 255))  # fangs
+
+
+def avian(rng, solid, glow):
+    """Feathers in scalloped rows up the forearms, a beak (the folded wings, crest and tail feathers are model parts)."""
+    PRIMARY = [(92, 70, 52, 255), (120, 92, 64, 255), (70, 52, 40, 255)]
+    COVERT = [(188, 156, 110, 255), (214, 184, 134, 255)]
+    TIP = (240, 232, 214, 255)
+
+    def feathers(x, y, r, x0, x1):
+        if r < 10:
+            row = r // 2
+            if (x + row) % 2 == 0 or r % 2 == 0:
+                put(solid, x, y, COVERT[(x + row) % 2] if r % 2 else PRIMARY[(x // 2) % 3])
+            if r % 2 == 1 and (x + row) % 2 == 0:
+                put(solid, x, y, TIP)
+    arm_pixels(feathers)
+    hands(lambda x, y: put(solid, x, y, (214, 176, 70, 255)))  # yellow talons
+    # (0.7.490) the folded wings, the crest and the tail feathers are model parts now (client BeastParts)
+    dots(solid, ((11, 13), (12, 13), (11, 14), (12, 14)), (232, 188, 60, 255))  # beak
+    dots(solid, ((11, 15), (12, 15)), (200, 150, 40, 255))
+
+
+def canine(rng, solid, glow):
+    """A wolf's grey fur with a pale muzzle and chest, dark paws (its ears and bushy tail are model parts)."""
+    FUR = [(112, 112, 116, 255), (92, 92, 98, 255), (136, 134, 132, 255)]
+    PALE = (208, 204, 196, 255)
+    fur_arms(rng, solid, FUR, reach=9, ragged=0.6)
+    hands(lambda x, y: put(solid, x, y, (50, 46, 46, 255)))
+    muzzle(solid, PALE, (30, 28, 30, 255))
+    for y in range(20, 26):  # pale ruff on the chest
+        for x in range(22, 26):
+            if rng.random() < 0.8:
+                put(solid, x, y, PALE)
+    for x in range(8, 16):  # a darker saddle across the brow
+        if rng.random() < 0.6:
+            put(solid, x, 8, FUR[1])
+
+
+def feline(rng, solid, glow):
+    """Tabby stripes on the forearms and back, whisker marks, a pink nose (ears and tail are model parts)."""
+    FUR = (190, 144, 84, 255)
+    STRIPE = (96, 64, 40, 255)
+    CREAM = (234, 214, 176, 255)
+
+    def tabby(x, y, r, x0, x1):
+        if r < 9:
+            put(solid, x, y, STRIPE if r % 3 == 1 else FUR)
+    arm_pixels(tabby)
+    hands(lambda x, y: put(solid, x, y, CREAM))
+    muzzle(solid, CREAM, (222, 120, 132, 255))
+    dots(solid, ((8, 13), (8, 14), (15, 13), (15, 14), (9, 9), (14, 9), (10, 8), (13, 8)), STRIPE)  # whiskers and brow stripes
+    for y in range(20, 32, 3):  # stripes across the back
+        for x in range(33, 39):
+            put(solid, x, y, STRIPE)
+
+
+def kitsune(rng, solid, glow):
+    """A fox: russet fur with white socks, red whisker marks (the tall ears and the one to three tails are model parts),
+    and blue fox-fire sparking up the forearms."""
+    FUR = [(214, 106, 40, 255), (190, 84, 30, 255)]
+    WHITE = (246, 238, 226, 255)
+    MARK = (176, 40, 40, 255)
+    FIRE = (120, 200, 255, 255)
+
+    def fox(x, y, r, x0, x1):
+        if r < 9:
+            put(solid, x, y, WHITE if r < 2 else FUR[(x + r) % 2])
+        if r in (4, 7) and (x - x0) % 4 == 1:
+            put(solid, x, y, FIRE)
+            put(glow, x, y, FIRE)
+    arm_pixels(fox)
+    hands(lambda x, y: put(solid, x, y, WHITE))
+    muzzle(solid, WHITE, (30, 24, 24, 255))
+    dots(solid, ((8, 13), (9, 14), (15, 13), (14, 14), (10, 8), (13, 8)), MARK)
+    # the tails (one to three, by player) are model parts now (client BeastParts)
+
+
+def serpen(rng, solid, glow):
+    """Green scales in diamonds up the forearms, across the chest and over the cheeks and neck, a pale belly, slit eyes
+    (the long scaled tail is a model part)."""
+    SCALE = [(70, 130, 68, 255), (52, 104, 56, 255), (92, 154, 80, 255)]
+    BELLY = (216, 208, 150, 255)
+    EDGE = (34, 72, 44, 255)
+
+    def scales(x, y, r, x0, x1):
+        if r < 10 and (x + y) % 2 == 0:
+            put(solid, x, y, SCALE[(x // 2 + r // 2) % 3])
+        elif r < 10:
+            put(solid, x, y, EDGE)
+    arm_pixels(scales)
+    hands(lambda x, y: put(solid, x, y, EDGE))
+    for y in range(20, 27):  # chest scales
+        for x in range(20, 28):
+            if (x + y) % 2 == 0:
+                put(solid, x, y, SCALE[(x + y) // 2 % 3])
+    for y in range(26, 32):  # belly plates
+        for x in range(22, 26):
+            put(solid, x, y, BELLY if y % 2 else (188, 180, 120, 255))
+    for x, y in ((8, 14), (8, 15), (9, 15), (15, 14), (15, 15), (14, 15), (8, 10), (15, 10), (9, 8), (14, 8), (11, 8), (12, 8)):
+        put(solid, x, y, SCALE[(x + y) % 3])  # scales on the cheeks and brow
+    dots(solid, ((9, 11), (14, 11), (9, 13), (14, 13)), EDGE)  # lids: slit pupils
+
+
+# ---- Hollow
+def zombie(rng, solid, glow):
+    """Rotting green flesh in patches, torn open to the red meat in places, stitches across the forearms and the brow."""
+    ROT = [(96, 132, 82, 255), (78, 112, 68, 255), (118, 150, 92, 255)]
+    MEAT = [(136, 52, 56, 255), (108, 36, 44, 255)]
+    THREAD = (40, 32, 30, 255)
+
+    def rot(x, y, r, x0, x1):
+        if r < 10 and rng.random() < 0.7:
+            put(solid, x, y, rng.choice(ROT))
+    arm_pixels(rot)
+    for x0, x1, y0 in ARMS:
+        for _ in range(3):
+            cx, cy = rng.randrange(x0, x1 - 2), y0 + rng.randrange(2, 8)
+            for dx in range(2):
+                for dy in range(2):
+                    put(solid, cx + dx, cy + dy, MEAT[(dx + dy) % 2])
+        for x in range(x0 + 1, x1, 4):  # stitches across the forearm
+            dots(solid, ((x, y0 + 4), (x, y0 + 6), (x + 1, y0 + 5)), THREAD)
+    hands(lambda x, y: put(solid, x, y, ROT[1]))
+    for x in range(8, 16):
+        put(solid, x, 9, THREAD if x % 2 else ROT[1])
+    rect(solid, 20, 22, 24, 26, ROT[0])
+    dots(solid, ((21, 23), (22, 24), (23, 25)), MEAT[0])
+
+
+def skeleton(rng, solid, glow):
+    """Bare bone: ribs across the chest on dark, bone down the forearms with knuckled joints, cracks and teeth in the face."""
+    BONE = [(232, 228, 210, 255), (200, 196, 176, 255), (170, 166, 150, 255)]
+    DARK = (28, 26, 30, 255)
+
+    def bones(x, y, r, x0, x1):
+        if r < 10:
+            put(solid, x, y, DARK)
+        if 2 <= r < 9 and (x - x0) % 4 in (1, 2):
+            put(solid, x, y, BONE[(x - x0) % 4 - 1] if r not in (5,) else BONE[2])
+        if r in (9, 1):
+            put(solid, x, y, BONE[0])
+    arm_pixels(bones)
+    hands(lambda x, y: put(solid, x, y, BONE[(x + y) % 3]))
+    for y in range(20, 30):  # ribs
+        for x in range(20, 28):
+            put(solid, x, y, DARK)
+        if y % 2 == 0 and y < 28:
+            for x in range(20, 28):
+                if x not in (23, 24):
+                    put(solid, x, y, BONE[0] if y % 4 else BONE[1])
+    for y in range(20, 29):  # spine
+        put(solid, 23, y, BONE[1])
+        put(solid, 24, y, BONE[2])
+    for x in range(10, 14):  # teeth
+        put(solid, x, 15, BONE[0] if x % 2 else BONE[1])
+    dots(solid, ((9, 11), (10, 11), (9, 12), (10, 12), (13, 11), (14, 11), (13, 12), (14, 12)), DARK)  # sockets
+    dots(solid, ((11, 13), (12, 13)), DARK)  # nose hole
+    dots(solid, ((8, 9), (9, 10), (15, 9), (14, 10)), BONE[2])  # a cracked brow
+
+
+def wraith(rng, solid, glow):
+    """A body of pale cold mist: translucent patches fading toward the elbow, wisps trailing off the legs, a ghost-lit hollow face."""
+    MIST = [(196, 222, 236, 150), (170, 204, 226, 120), (214, 236, 246, 90)]
+    CHILL = (150, 230, 255, 255)
+
+    def mist(x, y, r, x0, x1):
+        if r < 10 and rng.random() < 0.9 - r * 0.04:
+            put(solid, x, y, rng.choice(MIST))
+        if rng.random() < 0.06:
+            put(glow, x, y, CHILL)
+    arm_pixels(mist)
+    for x in range(20, 28):
+        for y in range(20, 32):
+            if rng.random() < 0.55 - (y - 20) * 0.02:
+                put(solid, x, y, rng.choice(MIST))
+    for lx0, ly0, lx1, ly1 in ((0, 20, 16, 32), (16, 52, 32, 64)):  # tatters trailing down the legs
+        for x in range(lx0, lx1):
+            for y in range(ly0 + 4, ly1):
+                if rng.random() < 0.45 + (y - ly0) * 0.02:
+                    put(solid, x, y, rng.choice(MIST))
+    dots(solid, ((9, 11), (10, 11), (13, 11), (14, 11), (9, 13), (10, 13), (13, 13), (14, 13), (11, 14), (12, 14), (11, 15), (12, 15)), (40, 60, 86, 190))
+    for _ in range(14):
+        put(glow, rng.randrange(0, 64), rng.choice((rng.randrange(20, 32), rng.randrange(52, 64))), CHILL)
+
+
+def reaper(rng, solid, glow):
+    """Funeral black: a tattered shroud over the torso and legs, bandages up the arms, a grey skull-white jaw, soul-red sigils."""
+    SHROUD = [(18, 16, 24, 255), (30, 26, 38, 255), (42, 36, 52, 255)]
+    BAND = [(110, 100, 96, 255), (86, 78, 76, 255)]
+    SOUL = (255, 60, 60, 255)
+
+    def wraps(x, y, r, x0, x1):
+        if r < 11:
+            put(solid, x, y, SHROUD[(x + y) % 3] if r % 4 else BAND[(x + y) % 2])
+    arm_pixels(wraps)
+    hands(lambda x, y: put(solid, x, y, SHROUD[0]))
+    for x in range(20, 28):  # robe over the front
+        for y in range(20, 32):
+            if y < 28 or rng.random() < 0.6:
+                put(solid, x, y, SHROUD[(x + y) % 3])
+    x0, y0, x1, y1 = BODY_BACK
+    for x in range(x0, x1):
+        for y in range(y0, y1):
+            if y < y1 - 3 or rng.random() < 0.55:
+                put(solid, x, y, SHROUD[(x + y) % 3])
+    for lx0, ly0, lx1, ly1 in ((0, 20, 16, 32), (16, 52, 32, 64)):
+        for x in range(lx0, lx1):
+            for y in range(ly0, ly1):
+                if y < ly0 + 6 or rng.random() < 0.7:
+                    put(solid, x, y, SHROUD[(x + y) % 3])
+    for x in range(8, 16):  # the cowl's edge across the brow
+        put(solid, x, 8, SHROUD[0])
+        put(solid, x, 9, SHROUD[1] if x % 2 else SHROUD[0])
+    for x in range(9, 15):  # a bone-white jaw
+        put(solid, x, 15, (214, 210, 196, 255))
+    dots(solid, ((9, 11), (10, 11), (13, 11), (14, 11)), SHROUD[0])
+    for x, y in ((23, 24), (24, 24), (23, 25), (24, 25), (23, 23), (24, 26), (22, 24), (25, 24)):  # a sigil on the chest, alight
+        put(solid, x, y, (90, 12, 18, 255))
+        put(glow, x, y, SOUL)
+
+
 VARIANTS = {"sunfreckled": sunfreckled, "skymarked": skymarked, "obsidian": obsidian, "magmavein": magmavein,
             "reefcrowned": reefcrowned, "abyssal": abyssal, "thornrose": thornrose, "blossomkin": blossomkin,
             "glowcap": glowcap, "mosshide": mosshide, "soulflame": soulflame, "ashen": ashen,
@@ -804,7 +1299,11 @@ VARIANTS = {"sunfreckled": sunfreckled, "skymarked": skymarked, "obsidian": obsi
             "battlescarred": battlescarred, "warpainted": warpainted, "ironknuckle": ironknuckle, "inkmarked": inkmarked,
             "lodeborn": lodeborn, "galeborn": galeborn, "twilight": twilight, "gilded": gilded,
             "chorusgrown": chorusgrown, "voidpale": voidpale, "goldscale": goldscale, "rimewyrm": rimewyrm,
-            "hollow": hollow, "geode": geode}
+            "hollow": hollow, "geode": geode,
+            # (0.7.490) the Sylvan fae and elves, the Beastfolk, the Hollow dead
+            "dryad": dryad, "changeling": changeling, "sprite": sprite, "nymph": nymph, "faerie": faerie, "highelf": highelf,
+            "moonelf": moonelf, "bloodelf": bloodelf, "arachnid": arachnid, "avian": avian, "canine": canine, "feline": feline,
+            "kitsune": kitsune, "serpen": serpen, "zombie": zombie, "skeleton": skeleton, "wraith": wraith, "reaper": reaper}
 # their eyes' colours (client VariantLooks has the same); those missing keep their heritage's eyes
 VARIANT_EYES = {"skymarked": (207, 239, 255), "obsidian": (196, 156, 255), "magmavein": (255, 160, 64),
                 "reefcrowned": (255, 180, 156), "abyssal": (230, 255, 255), "thornrose": (255, 112, 136),
@@ -813,7 +1312,12 @@ VARIANT_EYES = {"skymarked": (207, 239, 255), "obsidian": (196, 156, 255), "magm
                 "moonpale": (244, 246, 255), "umbral": (184, 168, 255), "lodeborn": (196, 168, 255),
                 "galeborn": (240, 248, 255), "twilight": (255, 230, 200), "gilded": (255, 224, 138),
                 "chorusgrown": (240, 180, 255), "voidpale": (42, 20, 64), "goldscale": (255, 208, 96),
-                "rimewyrm": (184, 232, 255), "hollow": (240, 255, 252), "geode": (214, 170, 255)}
+                "rimewyrm": (184, 232, 255), "hollow": (240, 255, 252), "geode": (214, 170, 255),
+                "dryad": (180, 224, 112), "changeling": (200, 224, 160), "sprite": (200, 255, 224), "nymph": (156, 240, 240),
+                "faerie": (255, 192, 240), "highelf": (255, 232, 144), "moonelf": (176, 192, 255), "bloodelf": (255, 80, 96),
+                "arachnid": (255, 48, 48), "avian": (255, 224, 112), "canine": (255, 208, 96), "feline": (200, 255, 96),
+                "kitsune": (255, 160, 64), "serpen": (232, 240, 96), "zombie": (168, 255, 112), "skeleton": (240, 244, 236),
+                "wraith": (156, 240, 255), "reaper": (255, 64, 64)}
 for key, fn in VARIANTS.items():
     solid, glow = blank(), blank()
     fn(random.Random(sum(map(ord, key)) * 31), solid, glow)

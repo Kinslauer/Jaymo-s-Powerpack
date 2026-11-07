@@ -139,10 +139,14 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.init();
 		ChronoDirectives.init();
 		StoppedClockItem.init();
+		// (0.20.50) cheating death: R on a black screen instead of dying
+		ChronoCheatDeath.init();
 		// touch the attachment types so they register at startup
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);
 		ServerTickEvents.END_SERVER_TICK.register(ChronoPunch::tick);
 		ChronoFlow.init();
+		// (0.21.23, Rivals patch 9) takedowns, the shadow-strike blink
+		ChronoTakedowns.init();
 		com.jaymospowers.power.chrono.future.Future.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
@@ -254,6 +258,7 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.fadeAll(player);
 		ChronoMemory.forget(player);
 		ChronoDirectives.forget(player);
+		ChronoCheatDeath.forget(player);
 		// clear the HUD state on the client
 		if (ServerPlayNetworking.canSend(player, ChronoSync.TYPE)) {
 			int[] zero = new int[ChronoSync.ABILITIES];
@@ -399,6 +404,12 @@ public final class ChronoPower implements Power {
 		setOverclockModifier(player, state.overclockLeft > 0);
 		ChronoSpeed.tick(player, level, state.overclockLeft > 0);
 		sync(player, state, now);
+	}
+
+	/** (0.20.92) Whether Rewind is off its cooldown for {@code player} (server side). */
+	static boolean rewindReady(ServerPlayer player) {
+		ChronoState state = STATES.get(player.getUUID());
+		return state == null || state.cooldownLeft(REWIND, now(player)) <= 0;
 	}
 
 	/** Whether Overclock is running for {@code player} (server side). */

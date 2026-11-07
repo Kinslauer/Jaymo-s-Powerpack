@@ -236,6 +236,12 @@ public final class TaczGuns {
 		}
 	}
 
+	/** (0.20.100) The fire mode a TaCZ gun is set to ({@code SEMI}, {@code AUTO}, {@code BURST}), or "". */
+	public static String fireMode(ItemStack stack) {
+		CustomData data = stack.isEmpty() ? null : stack.get(DataComponents.CUSTOM_DATA);
+		return data == null ? "" : data.copyTag().getStringOr("GunFireMode", "");
+	}
+
 	/** Rounds in a TaCZ gun: its magazine plus the one in the barrel. */
 	public static int ammo(ItemStack stack) {
 		CustomData data = stack.get(DataComponents.CUSTOM_DATA);

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "omni-ai-mcp": {
+      "command": "sh",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/tools/gemini-mcp.sh"]
+    }
+  }
+}

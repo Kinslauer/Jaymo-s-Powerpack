@@ -1,0 +1,18 @@
+{
+  "conditions": [
+    {
+      "age_group": "child",
+      "satisfaction_boost": 20
+    },
+    {
+      "is_married": true,
+      "satisfaction_boost": 10
+    }
+  ],
+  "items": {
+    "jaymoskingdoms:bear_plush": 8,
+    "jaymoskingdoms:bunny_plush": 8,
+    "jaymoskingdoms:cat_plush": 8,
+    "jaymoskingdoms:frog_plush": 8
+  }
+}

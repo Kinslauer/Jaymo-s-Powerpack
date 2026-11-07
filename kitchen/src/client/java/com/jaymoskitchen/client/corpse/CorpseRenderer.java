@@ -45,9 +45,15 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		@Nullable EntityRenderer<?, ?> bodyRenderer;
 		/** Being carried: drawn lying on its back across the carrier's arms instead of fallen over. */
 		boolean carried;
+		/** (0.5.50) Small enough to be carried in one hand: hanging from it by the neck instead of across the arms. */
+		boolean inHand;
+		/** (0.5.50) How high the hand is above the carrier's feet (blocks). */
+		float handDrop;
 		/** The carrier's facing, and the body's size, for the carry pose. */
 		float carryYaw;
 		float bodyHeight;
+		/** (0.5.50) The body's standing width (about its length, for an animal), for hanging it from a hand. */
+		float bodyWidth;
 		boolean tall;
 		/** A player's corpse: drawn here as a player model in their skin. */
 		boolean player;
@@ -81,6 +87,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 
 	/** (0.5.23) How far a pinned body slumps forward off its wall (degrees). */
 	private static final float PIN_SLUMP = 8.0F;
+	/** (0.5.50) Where a body held in one hand is held: its neck (see CorpseEntity#NECK_FRONT). */
+	private static final float NECK_FRONT = CorpseEntity.NECK_FRONT, NECK_UP = CorpseEntity.NECK_UP;
 
 	/**
 	 * (0.4.42) A dead player's body: the player model, but baked from layers of its own. Entity Model Features finds
@@ -157,10 +165,15 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 				extractPhysical(corpse, state, track, partialTicks);
 				return;
 			}
+		} else {
+			// (0.5.53) held, slung or in a cart: its old points are no good any more. Let go of, it's drawn falling from
+			// the pose it was held in until its new points come (never from where it lay before it was picked up)
+			ClientRagdolls.forget(corpse.getId());
 		}
 		// dropped and still falling: drawn limp as if carried, turning over as it goes, until it lands
 		boolean tumbling = carrier == null && corpse.isTumbling() && !corpse.isPassenger();
 		state.carried = carrier != null || tumbling;
+		state.inHand = carrier != null && corpse.oneHanded();
 		state.tumbling = tumbling;
 		state.tumblePitch = tumbling ? corpse.tumblePitch(partialTicks) : 0.0F;
 		state.tumbleRoll = tumbling ? corpse.tumbleRoll(partialTicks) : 0.0F;
@@ -172,10 +185,11 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		if (carrier != null) {
 			// carried: drawn from the carrier's smooth (per-frame) position and facing, not the per-tick one
 			yaw = carrier.getYRot(partialTicks);
-			Vec3 at = CorpseEntity.carryPosition(carrier, yaw,
-				Mth.lerp(partialTicks, carrier.xo, carrier.getX()),
-				Mth.lerp(partialTicks, carrier.yo, carrier.getY()),
-				Mth.lerp(partialTicks, carrier.zo, carrier.getZ()), corpse.getBbWidth());
+			double cx = Mth.lerp(partialTicks, carrier.xo, carrier.getX()), cy = Mth.lerp(partialTicks, carrier.yo, carrier.getY()),
+				cz = Mth.lerp(partialTicks, carrier.zo, carrier.getZ());
+			Vec3 at = state.inHand ? CorpseEntity.handPosition(carrier, yaw, cx, cy, cz)
+				: CorpseEntity.carryPosition(carrier, yaw, cx, cy, cz, corpse.getBbWidth());
+			state.handDrop = (float) (at.y - cy);
 			state.x = at.x;
 			state.y = at.y;
 			state.z = at.z;
@@ -192,7 +206,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		// (0.4.44) a dead player is drawn as the villager MCA draws them as (their genes, hair and clothes), lying like any
 		// other villager's body; without one, in their player skin
-		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		Entity look = corpse.isPlayerCorpse() && !CorpseDressing.plain(corpse) ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
 			extractPlayer(corpse, state, carrier, yaw, partialTicks);
 			state.avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
@@ -207,6 +221,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			corpse.placeBody(look, yaw);
 		}
 		state.bodyHeight = body.getBbHeight();
+		state.bodyWidth = body.getBbWidth();
 		EntityRenderer<? super Entity, ?> renderer = this.entityRenderDispatcher.getRenderer(body);
 		Object kindOfRenderer = renderer;
 		if (state.carried) {
@@ -217,9 +232,10 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 				&& living.getModel().root().hasChild("right_front_leg");
 			boolean humanoid = kindOfRenderer instanceof LivingEntityRenderer<?, ?, ?> living
 				&& living.getModel().root().hasChild("right_arm");
-			state.tall = !fourLegged && (humanoid || body.getBbHeight() > body.getBbWidth() * 1.1F);
-			// tall bodies face away before being laid back; long bodies lie across the arms
-			corpse.placeBody(body, state.tall ? yaw : yaw + 90.0F);
+			state.tall = !fourLegged && !chainBody(corpse) && (humanoid || body.getBbHeight() > body.getBbWidth() * 1.1F);
+			// tall bodies face away before being laid back; long bodies lie across the arms; (0.5.50) one held in the
+			// hand faces the way the carrier does, then hangs head up
+			corpse.placeBody(body, state.tall || state.inHand ? yaw : yaw + 90.0F);
 		}
 		if (!state.carried && (kindOfRenderer instanceof SpiderRenderer<?> || kindOfRenderer instanceof SilverfishRenderer
 			|| kindOfRenderer instanceof EndermiteRenderer)) {
@@ -293,6 +309,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		// no name over a body (a zombie player's, say)
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		CorpseDressing.body(corpse, bodyState);
 		ClosedEyes.mark(bodyState);
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
@@ -303,6 +320,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	/** (0.5.23) A body nailed to a wall: standing as it hangs there, facing out at {@code yaw}, no physics. */
 	private void extractPinned(CorpseEntity corpse, State state, float yaw, float partialTicks) {
 		state.carried = false;
+		state.inHand = false;
 		state.tumbling = false;
 		state.sprawled = false;
 		state.ragdolled = false;
@@ -316,7 +334,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		state.turn.identity();
 		state.move.set(0.0F, 0.0F, 0.0F);
 		state.lift[0] = 0.0F;
-		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		Entity look = corpse.isPlayerCorpse() && !CorpseDressing.plain(corpse) ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
 			extractPlayer(corpse, state, null, yaw, partialTicks);
 			AvatarRenderState avatar = state.avatar;
@@ -352,6 +370,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		CorpseDressing.body(corpse, bodyState);
 		bodyState.setData(Pinned.KEY, Pinned.HANGING);
 		ClosedEyes.mark(bodyState);
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
@@ -389,6 +408,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	 */
 	private void extractPhysical(CorpseEntity corpse, State state, ClientRagdolls.Track track, float partialTicks) {
 		state.carried = false;
+		state.inHand = false;
 		state.tumbling = false;
 		state.sprawled = false;
 		state.ragdolled = false;
@@ -405,7 +425,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		RagdollPose pose = RagdollPose.of(track.rig, track.points(partialTicks), state.x, state.y, state.z,
 			track.side(partialTicks), track.sideUp(), false);
 		state.pose = pose;
-		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		Entity look = corpse.isPlayerCorpse() && !CorpseDressing.plain(corpse) ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
 			extractPlayer(corpse, state, null, 0.0F, partialTicks);
 			AvatarRenderState avatar = state.avatar;
@@ -446,8 +466,12 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		CorpseDressing.body(corpse, bodyState);
 		ClosedEyes.mark(bodyState);
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
+		// (0.5.40) whatever the ragdoll doesn't drive (a vulture's wings and neck, a modded mob's legs) hangs loose
+		pose.loosen(com.jaymoskitchen.client.ragdoll.LooseParts.motion(corpse), state.age, !corpse.isTumbling(),
+			bodyState instanceof LivingEntityRenderState living ? living.scale : 1.0F);
 		bodyState.setData(RagdollPose.KEY, pose);
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
@@ -473,6 +497,21 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		flop.placed(placement, baseX, baseY, baseZ, partialTicks, state.tilt, state.move, state.turn, state.lift);
 		bodyState.setData(Flop.KEY, new Flop.Frame(flop, partialTicks));
+		// (0.5.40) and whatever its limp pose doesn't hang (a vulture's wings and neck, a modded mob's legs) hangs loose,
+		// placed as the body's own renderer would stand it (it turns it half round itself)
+		bodyState.setData(com.jaymoskitchen.client.ragdoll.LooseParts.KEY, new com.jaymoskitchen.client.ragdoll.LooseParts.Frame(
+			com.jaymoskitchen.client.ragdoll.LooseParts.motion(corpse), new Matrix4f(placement).rotateY(-Mth.PI), state.age,
+			layout == Flop.Layout.LYING, bodyState instanceof LivingEntityRenderState living ? living.scale : 1.0F,
+			// (0.5.50) a snake off the ground lies draped over the arms (or the horse, or nothing as it falls)
+			state.carried && chainBody(corpse) ? new com.jaymoskitchen.client.ragdoll.LooseParts.Drape(state.carryYaw,
+				corpse.swingBack(partialTicks), corpse.swingLeft(partialTicks), state.inHand ? state.handDrop : 0.0F,
+				-state.anchorX, -state.anchorY, -state.anchorZ) : null));
+	}
+
+	/** (0.5.50) A body with a chain ragdoll (a snake): long and bendy, see {@code RagdollShapes.CHAIN}. */
+	private static boolean chainBody(CorpseEntity corpse) {
+		net.minecraft.world.entity.EntityType<?> type = corpse.isPlayerCorpse() ? null : corpse.sourceType();
+		return type != null && type.builtInRegistryHolder().is(com.jaymoskitchen.ragdoll.RagdollShapes.CHAIN);
 	}
 
 	/** Where the body is placed (its feet, facing as drawn), relative to the corpse's own spot. */
@@ -526,6 +565,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			avatar.setData(Ragdoll.KEY, ragdoll);
 			state.faceUp = ragdoll.faceUp();
 		}
+		// (0.5.46) whatever another mod dresses the body in (Jaymo's Powers: the costume they died in)
+		CorpseDressing.extract(corpse, avatar);
 	}
 
 	@Override
@@ -566,6 +607,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			PlayerModel model = state.avatar.skin.model() == PlayerModelType.SLIM ? slim : wide;
 			collector.submitModel(model, state.avatar, poseStack, state.avatar.skin.body().texturePath(), state.lightCoords,
 				OverlayTexture.NO_OVERLAY, state.outlineColor);
+			CorpseDressing.submit(state.avatar, model, poseStack, collector, state.lightCoords);
 		} else if (state.bodyRenderer != null) {
 			submitBody(state.bodyRenderer, state.body, poseStack, collector, camera);
 		}
@@ -606,6 +648,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 				poseStack.rotate(Axis.XP.rotationDegrees(state.faceUp ? 90.0F : -90.0F));
 				poseStack.translate(0.0F, -0.9F, 0.0F);
 			}
+		} else if (state.inHand) {
+			hangFromHand(state, poseStack);
 		} else if (state.carried) {
 			layAcrossArms(state, poseStack);
 		} else if (state.sprawled) {
@@ -624,6 +668,23 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	 * points up (head toward the carrier), then swung round so it lies across the arms, and centred. A long body
 	 * already lies across the arms (it faces sideways): it's just let down so its belly rests on them.
 	 */
+	/**
+	 * (0.5.50) Held by the neck in one hand: the body (standing, facing the carrier's way) turned head up about its neck,
+	 * the neck at the hand (the corpse's spot), the rest hanging below it. Its swing comes from Flop, as any carried
+	 * body's.
+	 */
+	private static void hangFromHand(State state, PoseStack poseStack) {
+		float yaw = state.carryYaw * Mth.DEG_TO_RAD;
+		Vector3f front = new Vector3f(-Mth.sin(yaw), 0.0F, Mth.cos(yaw));
+		float length = Math.max(state.bodyWidth, 0.2F), h = state.bodyHeight;
+		// the neck, standing: up near the top of the body, toward its front
+		Vector3f neck = new Vector3f(front).mul(length * NECK_FRONT).add(0.0F, h * NECK_UP, 0.0F);
+		Quaternionf up = new Quaternionf().rotationTo(front, new Vector3f(0.0F, 1.0F, 0.0F));
+		Vector3f moved = up.transform(new Vector3f(neck));
+		poseStack.translate(-moved.x, -moved.y, -moved.z);
+		poseStack.rotate(up);
+	}
+
 	private static void layAcrossArms(State state, PoseStack poseStack) {
 		float yaw = state.carryYaw * Mth.DEG_TO_RAD;
 		// the carrier's right, as a direction in the world

@@ -32,7 +32,7 @@ final class StoryHoldScreen extends Screen {
 	 * continue saying what it does now". So under the title a hint ({@code gui.jaymoskingdoms.story.hint.<1..HINTS>}) shows
 	 * for HINT_MS each, from a random one on. Widest a hint may run.
 	 */
-	private static final int HINTS = 44, HINT_W = 320;
+	private static final int HINTS = 123, HINT_W = 320;
 	private static final long HINT_MS = 7000L;
 
 	/** What the server holds this client for (a lang key), or "" for nothing. */
@@ -48,13 +48,44 @@ final class StoryHoldScreen extends Screen {
 	/** A sound only counts as playing once the engine has picked it up. */
 	private static final long READ_START_MS = 500L;
 
-	/** The hint the screen opened on, and when (ms). */
-	private final int firstHint;
+	/**
+	 * (0.7.499) Andy: "the hints on loading creen should be randomized". Hints come off a shuffled deck that lasts across
+	 * loading screens: every hint shows once, in random order, before any repeats, then the deck is shuffled again (never
+	 * starting on the hint just shown).
+	 */
+	private static final int[] deck = new int[HINTS];
+	private static int dealt = HINTS, lastHint = -1;
+
+	/** The hint on screen (1..HINTS), the HINT_MS slot it was dealt for, and when the screen opened (ms). */
+	private int hint;
+	private long hintSlot = -1L;
 	private final long opened = System.currentTimeMillis();
 
 	private StoryHoldScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.story.hold.title"));
-		this.firstHint = java.util.concurrent.ThreadLocalRandom.current().nextInt(HINTS);
+	}
+
+	/** The next hint off the deck (1..HINTS), reshuffling once every hint has been shown. */
+	private static int dealHint() {
+		if (dealt >= HINTS) {
+			java.util.concurrent.ThreadLocalRandom random = java.util.concurrent.ThreadLocalRandom.current();
+			for (int i = 0; i < HINTS; i++) {
+				deck[i] = i + 1;
+			}
+			for (int i = HINTS - 1; i > 0; i--) {
+				int j = random.nextInt(i + 1), swap = deck[i];
+				deck[i] = deck[j];
+				deck[j] = swap;
+			}
+			if (deck[0] == lastHint) {
+				int j = 1 + random.nextInt(HINTS - 1), swap = deck[0];
+				deck[0] = deck[j];
+				deck[j] = swap;
+			}
+			dealt = 0;
+		}
+		lastHint = deck[dealt++];
+		return lastHint;
 	}
 
 	static void register() {
@@ -152,8 +183,14 @@ final class StoryHoldScreen extends Screen {
 		long now = System.currentTimeMillis();
 		String dots = ".".repeat((int)(now / DOT_MS % 4));
 		graphics.centeredText(this.font, this.title.copy().append(dots), cx, cy - 24, Ui.GOLD);
-		// (0.7.360) a hint at how something works, a new one every HINT_MS (what the hold is for is only heard)
-		int hint = (this.firstHint + (int)((now - this.opened) / HINT_MS)) % HINTS + 1;
+		// (0.7.360) a hint at how something works, a new one every HINT_MS (what the hold is for is only heard);
+		// (0.7.499) dealt at random off the shared deck
+		long slot = (now - this.opened) / HINT_MS;
+		if (slot != this.hintSlot) {
+			this.hintSlot = slot;
+			this.hint = dealHint();
+		}
+		int hint = this.hint;
 		int ty = cy - 6;
 		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.story.hint." + hint),
 			Math.min(HINT_W, this.width - 32))) {

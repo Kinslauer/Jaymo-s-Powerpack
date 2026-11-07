@@ -10,11 +10,9 @@
           "name": "jaymospowers:gravity_machine"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ],
   "random_sequence": "jaymospowers:blocks/gravity_machine"

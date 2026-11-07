@@ -14,8 +14,11 @@ abstract class WebModelFeatureRendererMixin {
 	@Inject(method = "prepareModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/Model;setupAnim(Ljava/lang/Object;)V",
 		shift = At.Shift.AFTER))
 	private void jaymospowers$webArms(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
+		com.jaymospowers.client.BodyMotion.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.FreefallPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.BalancePose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.water.SwimStrokePose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.armory.HeldItems.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.RunPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.UpRunPose.applyModel(submit.model(), submit.state());
 		WebArms.applyModel(submit.model(), submit.state());

@@ -1,0 +1,14 @@
+{
+  "relief.jaymoskingdoms.struck": "%s has been struck by %s!",
+  "relief.jaymoskingdoms.paid": "The treasury of %s pays %s silver for the repairs.",
+  "relief.jaymoskingdoms.paid.noble": "The ruler of %s opens the treasury: %s silver for the repairs, and bread for every door.",
+  "relief.jaymoskingdoms.tyrant": "The tyrant of %s raises a storm tax of %s silver on folk who have just lost everything.",
+  "relief.jaymoskingdoms.blamed": "The ruler of %s blames the disaster on your unnatural powers. His people won't soon forget it.",
+  "relief.jaymoskingdoms.wizard": "\"The stars are troubled. %s\"",
+  "relief.jaymoskingdoms.kind.sandstorm": "a sandstorm",
+  "relief.jaymoskingdoms.kind.blizzard": "a blizzard",
+  "relief.jaymoskingdoms.kind.hail": "a hailstorm",
+  "relief.jaymoskingdoms.kind.wildfire": "a wildfire",
+  "relief.jaymoskingdoms.kind.flood": "a flood",
+  "relief.jaymoskingdoms.kind.quake": "an earthquake"
+}

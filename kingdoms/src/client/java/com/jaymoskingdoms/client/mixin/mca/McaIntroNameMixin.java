@@ -10,7 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * (0.7.180) On a client, a villager whose name you haven't asked ({@link Introductions}) goes by what they are
- * ("Villager", their trade) wherever the client names them: Jade, MCA's screens.
+ * ("Villager", their trade) wherever the client names them: Jade, MCA's screens. (0.7.474) A goblin or an orc goes by
+ * "Goblin" or "Orc", never MCA's "Male Villager".
  */
 @Mixin(VillagerEntityMCA.class)
 abstract class McaIntroNameMixin {
@@ -18,7 +19,7 @@ abstract class McaIntroNameMixin {
 	private void jaymoskingdoms$unasked(CallbackInfoReturnable<Component> cir) {
 		VillagerEntityMCA self = (VillagerEntityMCA)(Object)this;
 		if (self.level().isClientSide() && !Introductions.knownHere(self)) {
-			cir.setReturnValue(self.getType().getDescription());
+			cir.setReturnValue(Introductions.what(self));
 		}
 	}
 }

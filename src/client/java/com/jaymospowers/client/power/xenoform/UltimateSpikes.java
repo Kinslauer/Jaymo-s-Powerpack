@@ -31,16 +31,17 @@ final class UltimateSpikes extends HumanoidModel<AvatarRenderState> {
 	 */
 	record Style(int crown, float crownLength, int ridge, float ridgeLength, int shoulder, int blade, float bulk) {}
 
-	private static final Map<String, Style> STYLES = Map.of(
-		"bulwark", new Style(0, 0.0F, 3, 5.0F, 2, 0, 1.0F),
-		"pyre", new Style(5, 5.0F, 2, 3.0F, 1, 0, 0.0F),
-		"blur", new Style(2, 4.0F, 0, 0.0F, 0, 1, 0.0F),
-		"prism", new Style(3, 4.0F, 3, 4.0F, 2, 1, 0.3F),
-		"wisp", new Style(3, 3.0F, 0, 0.0F, 1, 0, 0.0F),
-		"gremlin", new Style(2, 3.0F, 3, 2.5F, 0, 1, 0.0F),
-		"knell", new Style(0, 0.0F, 4, 4.5F, 2, 0, 0.6F),
-		"wyrm", new Style(2, 6.0F, 4, 3.5F, 1, 0, 0.3F),
-		"duplex", new Style(1, 4.0F, 0, 0.0F, 2, 0, 0.0F));
+	private static final Map<String, Style> STYLES = Map.ofEntries(
+		Map.entry("pyre", new Style(5, 5.0F, 2, 3.0F, 1, 0, 0.0F)),
+		Map.entry("wisp", new Style(3, 3.0F, 0, 0.0F, 1, 0, 0.0F)),
+		Map.entry("duplex", new Style(1, 4.0F, 0, 0.0F, 2, 0, 0.0F)),
+		Map.entry("polestar", new Style(2, 5.0F, 2, 4.0F, 2, 0, 0.7F)),
+		Map.entry("marrow", new Style(2, 4.5F, 5, 3.0F, 2, 1, 0.0F)),
+		Map.entry("swathe", new Style(0, 0.0F, 3, 2.5F, 1, 1, 0.2F)),
+		Map.entry("skitter", new Style(0, 0.0F, 5, 3.0F, 2, 1, 0.3F)),
+		Map.entry("mirage", new Style(5, 3.0F, 0, 0.0F, 1, 0, 0.0F)),
+		Map.entry("fuse", new Style(2, 3.0F, 4, 3.0F, 0, 0, 0.2F)),
+		Map.entry("towerback", new Style(1, 3.0F, 4, 4.0F, 2, 0, 1.0F)));
 
 	private static final Map<String, UltimateSpikes> MODELS = new HashMap<>();
 
@@ -72,7 +73,8 @@ final class UltimateSpikes extends HumanoidModel<AvatarRenderState> {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
 		PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.ZERO);
-		root.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+		// (the hat sits inside the head in 26.3: at the root, building the model threw and crashed whoever saw an Ultimate)
+		head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
 		PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
 		PartDefinition rightArm = root.addOrReplaceChild("right_arm", CubeListBuilder.create(), PartPose.offset(-5.0F, 2.0F, 0.0F));
 		PartDefinition leftArm = root.addOrReplaceChild("left_arm", CubeListBuilder.create(), PartPose.offset(5.0F, 2.0F, 0.0F));

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "G": "minecraft:glass_pane",
+    "C": "minecraft:charcoal",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "SLS",
+    "GLG",
+    " C "
+  ],
+  "result": {
+    "id": "jaymospowers:sky_mask",
+    "count": 1
+  }
+}

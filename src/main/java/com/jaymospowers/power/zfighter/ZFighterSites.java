@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -424,6 +425,7 @@ public final class ZFighterSites {
 		level.addFreshEntity(npc);
 	}
 
+	/** The hermit's wares. (0.20.0) The emerald cost is only the price table: the count is the price in silver (see {@link #hermitTalk}). */
 	private static MerchantOffers hermitOffers() {
 		MerchantOffers offers = new MerchantOffers();
 		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, 12), new ItemStack(ZFighterItems.HERMIT_BEAN), 999, 0, 0.0F));
@@ -445,34 +447,24 @@ public final class ZFighterSites {
 				() -> ZFighterNpcs.reply(player, keeper, () -> ZFighterSagas.speak(player, keeper, true), back))));
 	}
 
-	/** The Hermit's talk: his wares for emeralds (he no longer keeps a trader's stall). */
+	/** The Hermit's talk: his wares for silver coins (he no longer keeps a trader's stall). (0.20.0) Was emeralds; prices unchanged, 1 silver = 1 old emerald. */
 	static void hermitTalk(ServerPlayer player, LivingEntity hermit) {
 		List<ZFighterNpcs.Option> options = new ArrayList<>();
 		for (MerchantOffer offer : hermitOffers()) {
 			ItemStack ware = offer.getResult();
 			int price = offer.getCostA().getCount();
-			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.hermit.buy", emeralds(player) >= price || player.isCreative(),
-				() -> buy(player, hermit, ware.copy(), price), ware.getCount(), ware.getHoverName(), price));
+			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.hermit.buy", KingdomsMoney.canPay(player, KingdomsMoney.worth(price)),
+				() -> buy(player, hermit, ware.copy(), price), ware.getCount(), ware.getHoverName(), KingdomsMoney.text(player, KingdomsMoney.worth(price))));
 		}
 		ZFighterNpcs.ask(player, hermit, Component.translatable("talk.jaymospowers.hermit.greet"), options);
 	}
 
 	private static void buy(ServerPlayer player, LivingEntity hermit, ItemStack ware, int price) {
-		if (!player.isCreative()) {
-			if (emeralds(player) < price) {
-				ZFighterNpcs.ask(player, hermit, Component.translatable("talk.jaymospowers.hermit.poor", price),
-					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, () -> hermitTalk(player, hermit))));
-				return;
-			}
-			int left = price;
-			for (int i = 0; i < player.getInventory().getContainerSize() && left > 0; i++) {
-				ItemStack stack = player.getInventory().getItem(i);
-				if (stack.is(Items.EMERALD)) {
-					int take = Math.min(left, stack.getCount());
-					stack.shrink(take);
-					left -= take;
-				}
-			}
+		// (0.20.0) paid through KingdomsMoney (coins, purses and bundles; a creative player pays nothing)
+		if (!KingdomsMoney.charge(player, KingdomsMoney.worth(price))) {
+			ZFighterNpcs.ask(player, hermit, Component.translatable("talk.jaymospowers.hermit.poor", KingdomsMoney.text(player, KingdomsMoney.worth(price))),
+				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, () -> hermitTalk(player, hermit))));
+			return;
 		}
 		Component name = ware.getHoverName();
 		int count = ware.getCount();
@@ -482,17 +474,6 @@ public final class ZFighterSites {
 		player.level().playSound(null, hermit.getX(), hermit.getY(), hermit.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
 		ZFighterNpcs.ask(player, hermit, Component.translatable("talk.jaymospowers.hermit.sold", count, name),
 			List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, () -> hermitTalk(player, hermit))));
-	}
-
-	private static int emeralds(ServerPlayer player) {
-		int n = 0;
-		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-			ItemStack stack = player.getInventory().getItem(i);
-			if (stack.is(Items.EMERALD)) {
-				n += stack.getCount();
-			}
-		}
-		return n;
 	}
 
 	// ---------------------------------------------------------------- the Keeper

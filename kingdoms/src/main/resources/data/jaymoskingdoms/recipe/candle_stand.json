@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CCC",
+    " I ",
+    " I "
+  ],
+  "key": {
+    "C": "#minecraft:candles",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:candle_stand"
+  }
+}

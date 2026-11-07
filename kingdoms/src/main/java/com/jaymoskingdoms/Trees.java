@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -43,6 +44,8 @@ import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
@@ -58,7 +61,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Felling</b>: cut a log of a tree (a trunk under living leaves, not a building's logs) and everything above the
  * cut comes down, logs and the leaves they held, and (0.5.9) it topples over whole, away from the
  * cutter, breaking apart where it lands and giving its wood there ({@link FallingTree}). (0.5.25) As in HT's TreeChop,
- * it takes chops, not one break: each stroke at a log narrows it ({@link ChoppedLog}), and the tree comes down on the
+ * it takes chops, not one break: each stroke at a log cracks it deeper ({@link ChoppedLog}), and the tree comes down on the
  * chop that makes up what its size needs ({@link #needed}); the axe takes a point of wear per chop. Sneak to break one
  * log only. Woodcutters chop and fell the same way ({@link Gatherers}). (0.7.11) As in Physical Falling Trees, it falls
  * to its heavier side (or away from the cutter if it's even), strikes what's in its way as hard as it's moving, angers
@@ -91,6 +94,17 @@ public final class Trees {
 	static final double CHOP_SCALE = 10.0;
 	/** (0.5.59) Leaves broken by hand: the chance of a stick, for the first hand axe (3 flint and a stick). */
 	static final float LEAF_STICK_CHANCE = 0.12F;
+	/** (0.7.502) Nether wart blocks (the huge fungi's caps) broken by hand: the chance of a stick, so a Nether start can make its first tools. */
+	static final float WART_STICK_CHANCE = 0.15F;
+
+	/**
+	 * (0.7.586) Andy: "explosions / heavy impacts can fell trees too". A blast of at least this radius fells trees within
+	 * {@link #BLAST_REACH} times its radius (at most {@link #BLAST_REACH_MOST} blocks): one at its heart nearly always
+	 * ({@link #BLAST_FELL}), less often further off, away from the blast; at most {@link #BLAST_MOST} trees, each of no more
+	 * than {@link #BLAST_LOGS} logs per block of radius. A tree it leaves standing on nothing always falls.
+	 */
+	static final float BLAST_SMALLEST = 2.0F, BLAST_REACH = 2.0F, BLAST_REACH_MOST = 12.0F, BLAST_FELL = 0.9F;
+	static final int BLAST_MOST = 6, BLAST_LOGS = 8;
 
 	/** A growing tree: its foot, its sapling, its step, when it next grows. */
 	record Growing(BlockPos pos, String sapling, int stage, long next) {
@@ -111,9 +125,15 @@ public final class Trees {
 	private Trees() {
 	}
 
+	private static final Identifier CHOPPING = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, "chopping");
+
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Trees::tick);
-		PlayerBlockBreakEvents.BEFORE.register(Trees::breaking);
+		// (0.7.638) Felled's trees knock over the trees they fall into, as ours do
+		FelledCompat.register();
+		// (0.7.628) before anyone else's, so a chop in progress isn't taken for a log broken whole (Felled fells on those)
+		PlayerBlockBreakEvents.BEFORE.register(CHOPPING, Trees::breaking);
+		PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(CHOPPING, net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
 		// (0.5.59) said as soon as a bare hand starts on wood, not after the long, empty punch
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> {
 			if (!level.isClientSide() && needsAxe(player, level.getBlockState(pos))) {
@@ -122,10 +142,19 @@ public final class Trees {
 			return InteractionResult.PASS;
 		});
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
+			// (0.7.586) the trunk's last log out from under a tree (broken whole, not chopped): it comes down by itself
+			if (level instanceof ServerLevel server && state.is(BlockTags.LOGS)) {
+				unsupported(server, pos, state);
+			}
 			if (level instanceof ServerLevel server && !player.isCreative() && state.getBlock() instanceof LeavesBlock
 				&& !state.getValue(LeavesBlock.PERSISTENT) && player.getMainHandItem().isEmpty()
 				&& server.getRandom().nextFloat() < LEAF_STICK_CHANCE) {
 				Block.popResource(server, pos, new ItemStack(Items.STICK));
+			} else if (level instanceof ServerLevel wart && !player.isCreative() && (state.is(Blocks.NETHER_WART_BLOCK) || state.is(Blocks.WARPED_WART_BLOCK))
+				&& player.getMainHandItem().isEmpty() && wart.getRandom().nextFloat() < WART_STICK_CHANCE) {
+				// (0.7.502) Andy: a start in the Nether could only go on by stealing a piglin's axe. The huge fungi's wart
+				// caps are its leaves: torn by hand they give a dry stalk now and then, the stick a flint knife wants.
+				Block.popResource(wart, pos, new ItemStack(Items.STICK));
 			}
 		});
 	}
@@ -367,7 +396,35 @@ public final class Trees {
 		return null;
 	}
 
+	/**
+	 * (0.7.588) A chopped log the chopper's screen guessed broken: once the server's "no, it stands" reaches it, the
+	 * screen puts back a bare chopped log that has forgotten which wood it was, and drew it as oak (Andy: "this tree
+	 * turned into oak when i started breaking it"). So which log it was is sent again a tick after the chop.
+	 */
+	private record Resend(ServerPlayer player, BlockPos pos, int at) {
+	}
+
+	private static final List<Resend> RESEND = new ArrayList<>();
+
+	private static void resend(MinecraftServer server) {
+		int now = server.getTickCount();
+		for (Iterator<Resend> it = RESEND.iterator(); it.hasNext();) {
+			Resend r = it.next();
+			if (now < r.at()) {
+				continue;
+			}
+			it.remove();
+			if (!r.player().hasDisconnected() && r.player().level().getBlockEntity(r.pos()) instanceof ChoppedLog.Entity log) {
+				var packet = log.getUpdatePacket();
+				if (packet != null) {
+					r.player().connection.send(packet);
+				}
+			}
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
+		resend(server);
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
 		if (now % CHECK_TICKS == 0) {
@@ -458,7 +515,7 @@ public final class Trees {
 
 	/**
 	 * (0.5.25) A player's axe stroke at a tree's log is a chop, not a break (unless they're sneaking or in creative, or it
-	 * isn't a tree): the log narrows ({@link ChoppedLog}), and the tree comes down whole on the chop that makes up
+	 * isn't a tree): the log cracks deeper ({@link ChoppedLog}), and the tree comes down whole on the chop that makes up
 	 * {@link #needed} for its size. False keeps the block (the chop was done here instead).
 	 */
 	private static boolean breaking(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.@Nullable BlockEntity be) {
@@ -473,6 +530,9 @@ public final class Trees {
 		int felled = chop(server, pos, player, tool, null);
 		if (felled < 0) {
 			return true;
+		}
+		if (felled == 0 && player instanceof ServerPlayer sp) {
+			RESEND.add(new Resend(sp, pos.immutable(), server.getServer().getTickCount() + 2));
 		}
 		if (felled > 0 && player instanceof net.minecraft.server.level.ServerPlayer sp) {
 			// (0.7.220) a woodcutter's felling, for their orders
@@ -505,8 +565,8 @@ public final class Trees {
 	}
 
 	/**
-	 * (0.5.25) One chop at the tree whose log is {@code cut}, the way HT's TreeChop fells them: the log narrows (once it's
-	 * as thin as it goes, the chop goes into the next whole-enough log up the trunk), and once the tree has taken
+	 * (0.5.25) One chop at the tree whose log is {@code cut}, the way HT's TreeChop fells them: the log cracks deeper (once
+	 * it's as cracked as it goes, the chop goes into the next whole-enough log up the trunk), and once the tree has taken
 	 * {@link #needed} chops for its size it comes down from {@code cut} ({@link #fell}). Returns -1 if it isn't a tree
 	 * (break it as ever), 0 for a chop that left it standing, or how many logs came down.
 	 */
@@ -531,7 +591,7 @@ public final class Trees {
 		level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, cut, Block.getId(real));
 		// (0.7.220) a Woodcutter's chop counts for more
 		if (taken + Careers.chop(cutter) >= needed(logs.size())) {
-			return fell(level, cut, cutter, tool, sink, false);
+			return felling(level, cut, logs, cutter, tool, sink);
 		}
 		// the chop: into the cut, or once that's as thin as it goes, the nearest log up the trunk with wood to spare
 		BlockPos at = cut;
@@ -543,12 +603,59 @@ public final class Trees {
 				}
 			}
 			if (at == null) {
-				return fell(level, cut, cutter, tool, sink, false);
+				return felling(level, cut, logs, cutter, tool, sink);
 			}
 		}
 		BlockState there = level.getBlockState(at);
 		ChoppedLog.set(level, at, there, ChoppedLog.chops(there) + 1);
+		chips(level, cut, real, cutter);
+		if (cutter instanceof ServerPlayer player) {
+			// (0.7.510) as in Timber Tales: the chopper sees how near the tree is to coming down; full, the next stroke fells it
+			int need = needed(logs.size());
+			showChops(player, Math.min(need, taken + 1 + Careers.chop(cutter)), need);
+		}
 		return 0;
+	}
+
+	/** The stroke that fells it: a player's goes to Felled when it's in the pack ({@link FelledCompat}), else ours. */
+	private static int felling(ServerLevel level, BlockPos cut, List<BlockPos> logs, @Nullable Entity cutter, ItemStack tool, @Nullable Consumer<ItemStack> sink) {
+		if (sink == null && cutter instanceof ServerPlayer player && FelledCompat.loaded()) {
+			int felled = FelledCompat.fell(level, cut, logs, player);
+			if (felled > 0) {
+				return felled;
+			}
+		}
+		return fell(level, cut, cutter, tool, sink, false);
+	}
+
+	/** (0.7.510) The most marks the chop meter draws; bigger trees fill it a mark per few chops. */
+	static final int METER = 12;
+
+	/**
+	 * (0.7.510) The chop meter on the action bar: {@code done} of {@code need} chops, as filled and empty squares (never the
+	 * {@code |...} charge bar, which would hold the mouse and stop the next swing).
+	 */
+	private static void showChops(ServerPlayer player, int done, int need) {
+		int marks = Math.min(METER, need);
+		int filled = need <= 0 ? marks : Math.round(marks * (float)done / need);
+		Component bar = Component.literal("\u25A0".repeat(filled)).withStyle(filled >= marks ? ChatFormatting.RED : ChatFormatting.GOLD)
+			.append(Component.literal("\u25A1".repeat(marks - filled)).withStyle(ChatFormatting.DARK_GRAY));
+		player.sendOverlayMessage(bar);
+	}
+
+	/** (0.7.510) Wood chips flying off the face of {@code cut} toward whoever's chopping. */
+	private static void chips(ServerLevel level, BlockPos cut, BlockState log, @Nullable Entity cutter) {
+		double x = cut.getX() + 0.5, y = cut.getY() + 0.5, z = cut.getZ() + 0.5;
+		if (cutter != null) {
+			double dx = cutter.getX() - x, dz = cutter.getZ() - z, len = Math.sqrt(dx * dx + dz * dz);
+			if (len > 0.01) {
+				x += dx / len * 0.55;
+				z += dz / len * 0.55;
+			}
+			y = Math.max(cut.getY() + 0.2, Math.min(cut.getY() + 0.8, cutter.getEyeY() - 0.4));
+		}
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, log),
+			x, y, z, 10, 0.12, 0.12, 0.12, 0.12);
 	}
 
 	/**
@@ -610,6 +717,179 @@ public final class Trees {
 			return null;
 		}
 		return FallingTree.fling(level, foot, logs, leavesOf(level, logs), velocity, heading, tumble);
+	}
+
+	/**
+	 * (0.7.586) Something struck the standing tree whose log is {@code struck} (another falling tree): it goes over toward
+	 * {@code heading} (radians, along a compass line), whole from its foot, its wood where it lands. Nothing if it isn't a
+	 * natural tree or has more than {@code mostLogs} logs. Returns how many logs came down.
+	 */
+	public static int knock(ServerLevel level, BlockPos struck, float heading, @Nullable Entity by, int mostLogs) {
+		BlockState state = level.getBlockState(struck);
+		if (!state.is(BlockTags.LOGS) || fallen(level, struck, state)) {
+			return 0;
+		}
+		BlockPos foot = foot(level, struck);
+		List<BlockPos> logs = trunk(level, foot);
+		if (logs.isEmpty() || logs.size() > mostLogs || logs.stream().noneMatch(p -> natural(level, p))) {
+			return 0;
+		}
+		List<BlockPos> leaves = leavesOf(level, logs);
+		logs.sort(Comparator.comparingInt(BlockPos::getY));
+		leaves.addAll(FallingTree.hives(level, logs, by));
+		FallingTree.topple(level, foot, logs, leaves, heading, by, ItemStack.EMPTY, null);
+		return logs.size();
+	}
+
+	/** The lowest log of the upright run {@code log} is in. */
+	private static BlockPos foot(ServerLevel level, BlockPos log) {
+		BlockPos p = log;
+		while (log.getY() - p.getY() < FELL_SPREAD * 4 && level.getBlockState(p.below()).is(BlockTags.LOGS)) {
+			p = p.below();
+		}
+		return p;
+	}
+
+	/** Whether the log at {@code foot} stands on something: the ground, or wood below it (beside it too, for a wide trunk). */
+	private static boolean held(ServerLevel level, BlockPos foot) {
+		if (level.getBlockState(foot.below()).isFaceSturdy(level, foot.below(), Direction.UP)) {
+			return true;
+		}
+		for (BlockPos q : BlockPos.betweenClosed(foot.offset(-1, -1, -1), foot.offset(1, 0, 1))) {
+			if (!q.equals(foot) && level.getBlockState(q).is(BlockTags.LOGS)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * (0.7.586) The upright log {@code gone} is gone from under a tree (broken whole, or blown away): if the log above it now
+	 * stands on nothing, that tree comes down by itself, to its heavier side.
+	 */
+	static void unsupported(ServerLevel level, BlockPos gone, BlockState was) {
+		if (!was.hasProperty(BlockStateProperties.AXIS) || was.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+			return;
+		}
+		BlockPos above = gone.above();
+		BlockState state = level.getBlockState(above);
+		if (!state.is(BlockTags.LOGS) || !state.hasProperty(BlockStateProperties.AXIS) || state.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y
+			|| held(level, above)) {
+			return;
+		}
+		fell(level, above, null, ItemStack.EMPTY, null, false);
+	}
+
+	/**
+	 * (0.7.586) A blast of {@code radius} at {@code center} fells the trees round it ({@link #BLAST_FELL}), away from it;
+	 * any it leaves standing on nothing come down as well.
+	 */
+	public static void blast(ServerLevel level, Vec3 center, float radius) {
+		if (radius < BLAST_SMALLEST) {
+			return;
+		}
+		double reach = Math.min(BLAST_REACH_MOST, radius * BLAST_REACH);
+		int r = Mth.ceil(reach);
+		BlockPos c = BlockPos.containing(center);
+		Set<BlockPos> feet = new HashSet<>();
+		int felled = 0;
+		for (BlockPos n : BlockPos.betweenClosed(c.offset(-r, -r, -r), c.offset(r, r, r))) {
+			if (felled >= BLAST_MOST) {
+				return;
+			}
+			BlockState state = level.getBlockState(n);
+			if (!state.is(BlockTags.LOGS) || !state.hasProperty(BlockStateProperties.AXIS) || state.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+				continue;
+			}
+			BlockPos foot = foot(level, n.immutable());
+			if (!feet.add(foot)) {
+				continue;
+			}
+			double d = Math.sqrt(foot.distToCenterSqr(center));
+			boolean loose = !held(level, foot);
+			if (!loose && (d > reach || level.getRandom().nextFloat() >= BLAST_FELL * (1.0 - d / reach))) {
+				continue;
+			}
+			double dx = foot.getX() + 0.5 - center.x, dz = foot.getZ() + 0.5 - center.z;
+			float away = dx * dx + dz * dz < 1.0E-4 ? level.getRandom().nextFloat() * Mth.TWO_PI : (float)Math.atan2(dz, dx);
+			float heading = Math.round(away / Mth.HALF_PI) * Mth.HALF_PI;
+			if (knock(level, foot, heading, null, loose ? FELL_MOST : Math.max(1, Math.round(radius * BLAST_LOGS))) > 0) {
+				felled++;
+			}
+		}
+	}
+
+	/**
+	 * (0.7.604) Andy: "when an explosion hits a tree that would break the block it should break and topple instead of
+	 * breaking the blocks, and only the leaves that impact should break". Of the blocks a blast is about to break
+	 * ({@code blown}), a living tree's wood and leaves are spared: every tree the blast reached comes down whole instead,
+	 * away from it (its leaves break only where they strike, as any falling tree's). Returns what the blast still breaks.
+	 */
+	public static List<BlockPos> blastStruck(ServerLevel level, Vec3 center, List<BlockPos> blown) {
+		List<BlockPos> rest = new ArrayList<>(blown.size());
+		List<BlockPos> struck = new ArrayList<>();
+		for (BlockPos pos : blown) {
+			BlockState state = level.getBlockState(pos);
+			if (state.getBlock() instanceof LeavesBlock && !state.getValue(LeavesBlock.PERSISTENT)) {
+				continue;
+			}
+			if (state.is(BlockTags.LOGS) && !fallen(level, pos, state) && natural(level, pos)) {
+				struck.add(pos);
+				continue;
+			}
+			rest.add(pos);
+		}
+		Set<BlockPos> feet = new HashSet<>();
+		for (BlockPos log : struck) {
+			BlockPos foot = rootOf(level, log);
+			if (!feet.add(foot) || !level.getBlockState(foot).is(BlockTags.LOGS)) {
+				continue;
+			}
+			double dx = foot.getX() + 0.5 - center.x, dz = foot.getZ() + 0.5 - center.z;
+			float away = dx * dx + dz * dz < 1.0E-4 ? level.getRandom().nextFloat() * Mth.TWO_PI : (float)Math.atan2(dz, dx);
+			knock(level, foot, Math.round(away / Mth.HALF_PI) * Mth.HALF_PI, null, FELL_MOST);
+		}
+		return rest;
+	}
+
+	/** (0.7.604) The lowest log of the wood {@code log} is joined to (branches lead back to the trunk's foot). */
+	private static BlockPos rootOf(ServerLevel level, BlockPos log) {
+		BlockPos lowest = log;
+		Set<BlockPos> seen = new HashSet<>();
+		Deque<BlockPos> open = new ArrayDeque<>();
+		open.add(log);
+		seen.add(log);
+		while (!open.isEmpty() && seen.size() < FELL_MOST) {
+			BlockPos at = open.poll();
+			if (at.getY() < lowest.getY()) {
+				lowest = at;
+			}
+			for (BlockPos n : BlockPos.betweenClosed(at.offset(-1, -1, -1), at.offset(1, 0, 1))) {
+				BlockPos q = n.immutable();
+				if (Math.abs(q.getX() - log.getX()) <= FELL_SPREAD && Math.abs(q.getZ() - log.getZ()) <= FELL_SPREAD && seen.add(q)
+					&& level.getBlockState(q).is(BlockTags.LOGS)) {
+					open.add(q);
+				}
+			}
+		}
+		return foot(level, lowest);
+	}
+
+	/**
+	 * (0.7.588) A giant's hand closes on the standing tree whose log is {@code log}: it's torn out whole from its foot
+	 * ({@link FallingTree#fling}, not moving yet), if it's a natural tree of no more than {@code mostLogs} logs. Null otherwise.
+	 */
+	static @Nullable FallingTree pluck(ServerLevel level, BlockPos log, int mostLogs) {
+		BlockState state = level.getBlockState(log);
+		if (!state.is(BlockTags.LOGS) || fallen(level, log, state)) {
+			return null;
+		}
+		BlockPos foot = foot(level, log);
+		List<BlockPos> logs = trunk(level, foot);
+		if (logs.isEmpty() || logs.size() > mostLogs || logs.stream().noneMatch(p -> natural(level, p))) {
+			return null;
+		}
+		return FallingTree.fling(level, foot, logs, leavesOf(level, logs), Vec3.ZERO, 0.0F, 0.0F);
 	}
 
 	/**

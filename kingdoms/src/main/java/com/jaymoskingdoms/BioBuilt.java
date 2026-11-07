@@ -58,8 +58,11 @@ import net.minecraft.world.phys.Vec3;
  * and magic hurt them half again ({@link Heritage#dealt}).
  */
 public final class BioBuilt {
-	/** The worth (absorbed) that each form begins at: the first at 0. */
-	static final int[] FORM_AT = {0, 4, 12};
+	/**
+	 * The worth (absorbed) that each form begins at: the first at 0. (2026-11-01, Andy: "i absorbed maybe 4 zombies and
+	 * leveled, way too easy") 4x the old {0, 4, 12}; a plain zombie is worth 2 ({@link #worth}).
+	 */
+	static final int[] FORM_AT = {0, 16, 48};
 	/** Each form's max health change (half-hearts), blow share, armour, and knockback resistance. */
 	static final double[] HEALTH = {-4.0, 2.0, 8.0}, DAMAGE = {0.0, 0.10, 0.22}, ARMOR = {0.0, 1.0, 3.0}, KNOCK = {0.0, 0.0, 0.2};
 	/** The share of each blow they take back as life, by form. */

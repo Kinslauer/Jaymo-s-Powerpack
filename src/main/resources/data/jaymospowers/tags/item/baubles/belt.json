@@ -1,6 +1,16 @@
 {
   "replace": false,
   "values": [
-    "jaymospowers:brawlers_belt"
+    "jaymospowers:brawlers_belt",
+    "#minecraft:lanterns",
+    "jaymospowers:bottled_fairy",
+    "jaymospowers:cloud_in_a_bottle",
+    "jaymospowers:obsidian_skull",
+    "jaymospowers:antidote_vessel",
+    "jaymospowers:lodestone_charm",
+    "jaymospowers:crystal_heart",
+    "jaymospowers:wind_bladder",
+    "jaymospowers:ender_pouch",
+    "jaymospowers:jesters_cushion"
   ]
 }

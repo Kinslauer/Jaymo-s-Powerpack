@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
@@ -18,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -32,9 +35,12 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -51,14 +57,19 @@ import org.jspecify.annotations.Nullable;
 public final class Wagon extends Entity {
 	/** (0.5.26) {@link #CAB}: a hired carriage of a rich realm's, for players ({@link Cabs}). */
 	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2, CAB = 3, COACH = 4;
+	/** (0.7.490) {@link #HANDCART}: a poor settlement's trade, two wheels and a pair of handles in its carter's hands. {@link #SKIFF}: a cove's trade by water, a deckhand at the tiller. */
+	public static final int HANDCART = 5, SKIFF = 6;
 	/** (0.5.28) Its caravan when it's no caravan's: none (a carriage), or a war party's spoils cart ({@link WarParties}). */
 	static final int NO_CARAVAN = -1, WAR_CART = -2;
 	/** What a cart's load looks like: nothing, stone and ore, food, a bit of everything. */
 	public static final int EMPTY = 0, STONE = 1, FOOD = 2, GOODS = 3;
 	/** How far behind its horse's middle its own middle trails (a cart, a carriage). */
-	static final double CART_HITCH = 2.9, CARRIAGE_HITCH = 3.3, RICKSHAW_HITCH = 1.75;
+	static final double CART_HITCH = 2.9, CARRIAGE_HITCH = 3.3, RICKSHAW_HITCH = 1.75, HAND_HITCH = 1.5;
 	/** Blows a cart takes from players before it breaks open (a carriage never does). */
-	static final float CART_HEALTH = 24.0F;
+	static final float CART_HEALTH = 24.0F, HAND_HEALTH = 12.0F;
+	/** (0.7.490) A skiff's pace on the water (blocks a tick), and how long (ticks) it sails on a heading the caravan last gave it. */
+	static final double SKIFF_SPEED = 0.2;
+	static final long SAIL_HOLD = 60L;
 	/** Left without its horse this long (ticks), a caravan's cart is done ({@link Caravans}); a carriage just waits. */
 	static final int LOST_HORSE_TICKS = 100;
 
@@ -83,6 +94,9 @@ public final class Wagon extends Entity {
 	private final List<ItemStack> cargo = new ArrayList<>();
 	private boolean parked;
 	private int ride = -1;
+	/** (0.7.490) A skiff's heading (set by its caravan) and when it was given. Not saved: a caravan sets it again. */
+	private @Nullable Vec3 sailTarget;
+	private long sailStamp;
 
 	/** Client side: its wheels' turn (radians) now and last tick. */
 	public float wheel, wheelO;
@@ -112,7 +126,8 @@ public final class Wagon extends Entity {
 		w.caravan = caravan;
 		w.slot = slot;
 		Vec3 back = Vec3.directionFromRotation(0.0F, horse.getYRot()).scale(-w.hitch());
-		w.snapTo(horse.getX() + back.x, horse.getY(), horse.getZ() + back.z, horse.getYRot(), 0.0F);
+		double x = horse.getX() + back.x, z = horse.getZ() + back.z;
+		w.snapTo(x, ground(level, x, horse.getY(), z), z, horse.getYRot(), 0.0F);
 		level.addFreshEntity(w);
 		return w;
 	}
@@ -173,6 +188,8 @@ public final class Wagon extends Entity {
 		return switch (this.kind()) {
 			case CARRIAGE -> CARRIAGE_HITCH;
 			case RICKSHAW -> RICKSHAW_HITCH;
+			case HANDCART -> HAND_HITCH;
+			case SKIFF -> 0.0;
 			case CAB -> CARRIAGE_HITCH;
 			default -> CART_HITCH;
 		};
@@ -270,7 +287,11 @@ public final class Wagon extends Entity {
 				return;
 			}
 		}
-		if (this.kind() == RICKSHAW) {
+		if (this.kind() == SKIFF) {
+			this.skiffTick(level, horse);
+			return;
+		}
+		if (this.kind() == RICKSHAW || this.kind() == HANDCART) {
 			int id = horse == null ? -1 : horse.getId();
 			if (this.pullerId() != id) {
 				this.entityData.set(PULLER, id);
@@ -298,6 +319,68 @@ public final class Wagon extends Entity {
 		this.trail(horse);
 	}
 
+	/** (0.7.490) A skiff is given a heading by its caravan ({@code null}: it lies at its mooring). */
+	void sailTo(@Nullable Vec3 to) {
+		this.sailTarget = to;
+		if (this.level() instanceof ServerLevel level) {
+			this.sailStamp = level.getGameTime();
+		}
+	}
+
+	/** (0.7.490) Whether there is open water under {@code (x, z)}, its chunk loaded. */
+	static boolean water(ServerLevel level, double x, double z) {
+		BlockPos at = BlockPos.containing(x, 0.0, z);
+		if (!level.isLoaded(at)) {
+			return false;
+		}
+		int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, at.getX(), at.getZ());
+		return level.getFluidState(new BlockPos(at.getX(), top - 1, at.getZ())).is(FluidTags.WATER);
+	}
+
+	/**
+	 * (0.7.490) A skiff rides the water, never leaving it: toward its heading while it has a fresh one, turning aside
+	 * to the nearest open water when the way is shore, bobbing at the surface. Its deckhand falling ends the voyage
+	 * like a carter's fall ends a cart's.
+	 */
+	private void skiffTick(ServerLevel level, @Nullable Entity hand) {
+		if (hand == null || !hand.isAlive()) {
+			if (++this.horseLost >= LOST_HORSE_TICKS && this.caravan != NO_CARAVAN) {
+				Caravans.cartLost(level, this);
+			}
+			return;
+		}
+		this.horseLost = 0;
+		double x = this.getX(), z = this.getZ();
+		float yaw = this.getYRot();
+		Vec3 to = this.sailTarget;
+		if (to != null && level.getGameTime() - this.sailStamp <= SAIL_HOLD) {
+			Vec3 flat = new Vec3(to.x - x, 0.0, to.z - z);
+			double len = flat.length();
+			if (len > 1.0) {
+				double step = Math.min(SKIFF_SPEED, len);
+				for (float turn : new float[] {0.0F, 0.5F, -0.5F, 1.0F, -1.0F, 1.5F, -1.5F}) {
+					Vec3 dir = flat.scale(1.0 / len).yRot(turn);
+					if (water(level, x + dir.x * (step + 1.5), z + dir.z * (step + 1.5)) && water(level, x + dir.x * step, z + dir.z * step)) {
+						x += dir.x * step;
+						z += dir.z * step;
+						yaw = (float)(Mth.atan2(dir.z, dir.x) * Mth.RAD_TO_DEG) - 90.0F;
+						break;
+					}
+				}
+			}
+		}
+		int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, Mth.floor(x), Mth.floor(z));
+		double bob = Math.sin(this.tickCount * 0.12) * 0.04;
+		this.setPos(x, top - 0.25 + bob, z);
+		this.setYRot(yaw);
+		for (Entity rider : this.getPassengers()) {
+			rider.setYRot(yaw);
+			if (rider instanceof LivingEntity living) {
+				living.setYBodyRot(yaw);
+			}
+		}
+	}
+
 	/**
 	 * Drawn along behind {@code horse}. Its own tick does this; a caravan does it too for a cart left just outside where
 	 * the world is ticking (at the edge of a player's range) while its horse is inside, so it isn't left standing.
@@ -311,12 +394,16 @@ public final class Wagon extends Entity {
 		if (len > 8.0) {
 			// (left behind: set down behind its horse)
 			Vec3 back = Vec3.directionFromRotation(0.0F, horse.getYRot()).scale(-this.hitch());
-			this.snapTo(to.x + back.x, to.y, to.z + back.z, horse.getYRot(), 0.0F);
+			this.snapTo(to.x + back.x, ground(this.level(), to.x + back.x, to.y, to.z + back.z), to.z + back.z, horse.getYRot(), 0.0F);
 			return;
 		}
 		if (len > 1.0E-3) {
 			Vec3 dir = flat.scale(1.0 / len);
-			Vec3 at = new Vec3(to.x - dir.x * this.hitch(), Mth.lerp(0.35, here.y, to.y), to.z - dir.z * this.hitch());
+			double x = to.x - dir.x * this.hitch(), z = to.z - dir.z * this.hitch();
+			// (0.7.544) on the ground where it stands, not at its horse's height: a cart behind a horse on a road along a
+			// bank was drawn sunk into the bank, and one set down at the foot of a rise spawned inside it
+			double y = ground(this.level(), x, Mth.lerp(0.35, here.y, to.y), z);
+			Vec3 at = new Vec3(x, Math.abs(y - here.y) > 2.0 ? y : Mth.lerp(0.5, here.y, y), z);
 			float yaw = (float)(Mth.atan2(dir.z, dir.x) * Mth.RAD_TO_DEG) - 90.0F;
 			this.setPos(at.x, at.y, at.z);
 			this.setYRot(yaw);
@@ -329,16 +416,50 @@ public final class Wagon extends Entity {
 		}
 	}
 
+	/** (0.7.544) How far up and down from where it would be (blocks) a wagon looks for the ground to stand on. */
+	static final int GROUND_UP = 3, GROUND_DOWN = 4;
+
+	/**
+	 * (0.7.544) The height of the ground under {@code (x, z)} nearest {@code y}: the top of a block (or water) with room
+	 * above it, within {@link #GROUND_UP} above and {@link #GROUND_DOWN} below. Nothing there (or not loaded): {@code y}.
+	 */
+	static double ground(Level level, double x, double y, double z) {
+		int bx = Mth.floor(x), bz = Mth.floor(z), by = Mth.floor(y);
+		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(bx, by, bz);
+		if (!level.isLoaded(p)) {
+			return y;
+		}
+		double best = y, bestGap = Double.MAX_VALUE;
+		boolean roomAbove = false;
+		for (int iy = by + GROUND_UP + 1; iy >= by - GROUND_DOWN; iy--) {
+			p.set(bx, iy, bz);
+			BlockState state = level.getBlockState(p);
+			VoxelShape shape = state.getCollisionShape(level, p);
+			boolean water = !state.getFluidState().isEmpty();
+			boolean solid = !shape.isEmpty() || water;
+			if (solid && roomAbove && iy <= by + GROUND_UP) {
+				double top = shape.isEmpty() ? iy + 0.85 : iy + shape.max(Direction.Axis.Y);
+				double gap = Math.abs(top - y);
+				if (gap < bestGap) {
+					best = top;
+					bestGap = gap;
+				}
+			}
+			roomAbove = !solid;
+		}
+		return best;
+	}
+
 	// ---- its passenger (the king in his carriage) ---------------------------------------------------------------------
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return (this.kind() == CARRIAGE || this.kind() == RICKSHAW || this.kind() == CAB || this.kind() == COACH) && this.getPassengers().isEmpty();
+		return (this.kind() == CARRIAGE || this.kind() == RICKSHAW || this.kind() == CAB || this.kind() == COACH || this.kind() == SKIFF) && this.getPassengers().isEmpty();
 	}
 
 	@Override
 	protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
-		Vec3 seat = this.kind() == RICKSHAW ? new Vec3(0.0, 0.42, -0.25) : new Vec3(0.0, 0.4, -0.45);
+		Vec3 seat = this.kind() == RICKSHAW ? new Vec3(0.0, 0.42, -0.25) : this.kind() == SKIFF ? new Vec3(0.0, 0.3, -0.7) : new Vec3(0.0, 0.4, -0.45);
 		return seat.yRot(-this.getYRot() * Mth.DEG_TO_RAD);
 	}
 
@@ -362,14 +483,14 @@ public final class Wagon extends Entity {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-		if (this.isRemoved() || this.kind() != CART || !(source.getEntity() instanceof ServerPlayer player) || player.isSpectator()) {
+		if (this.isRemoved() || this.kind() != CART && this.kind() != HANDCART && this.kind() != SKIFF || !(source.getEntity() instanceof ServerPlayer player) || player.isSpectator()) {
 			return false;
 		}
 		this.damage += amount;
 		level.playSound(null, this.blockPosition(), SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.NEUTRAL, 0.6F, 1.2F);
 		level.sendParticles(ParticleTypes.CRIT, this.getX(), this.getY() + 1.0, this.getZ(), 6, 0.5, 0.4, 0.5, 0.1);
 		Caravans.struck(level, this, player);
-		if (this.damage >= CART_HEALTH) {
+		if (this.damage >= (this.kind() == HANDCART ? HAND_HEALTH : CART_HEALTH)) {
 			Caravans.robbed(level, this, player);
 		}
 		return true;
@@ -391,7 +512,11 @@ public final class Wagon extends Entity {
 			return InteractionResult.SUCCESS;
 		}
 		if (player instanceof ServerPlayer sp && this.level() instanceof ServerLevel level) {
-			Component what = this.kind() == CART ? Caravans.describe(level, this)
+			if ((this.kind() == CART || this.kind() == HANDCART || this.kind() == SKIFF) && TradeRoutes.deal(level, this, sp)) {
+				// ((0.7.490) emeralds in hand: a bargain struck with the cart's carter)
+				return InteractionResult.SUCCESS;
+			}
+			Component what = this.kind() == CART || this.kind() == HANDCART || this.kind() == SKIFF ? Caravans.describe(level, this)
 				: Component.translatable("message.jaymoskingdoms.carriage", Caravans.nameOf(level.getServer(), this.faction));
 			sp.sendSystemMessage(what.copy().withStyle(ChatFormatting.GRAY));
 		}

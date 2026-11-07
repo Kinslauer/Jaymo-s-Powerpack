@@ -1,0 +1,50 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": [
+            "gui",
+            "ground",
+            "fixed",
+            "on_shelf"
+          ],
+          "model": {
+            "type": "minecraft:model",
+            "model": "minecraft:item/fishing_rod"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/held_3d/minecraft/fishing_rod"
+      }
+    },
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": [
+            "gui",
+            "ground",
+            "fixed",
+            "on_shelf"
+          ],
+          "model": {
+            "type": "minecraft:model",
+            "model": "minecraft:item/fishing_rod_cast"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/held_3d/minecraft/fishing_rod_cast"
+      }
+    },
+    "property": "minecraft:fishing_rod/cast"
+  }
+}

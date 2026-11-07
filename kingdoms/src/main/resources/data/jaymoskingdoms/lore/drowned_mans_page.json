@@ -1,0 +1,13 @@
+{
+  "title": "A Wet Page",
+  "author": "unsigned",
+  "pages": [
+    "The tide brought the stone up again last night. Third time. It is warm, which a stone from the deep should not be.",
+    "I put my ear to it and heard a bell, very far off, and then something very large turning over to listen back. I have stopped going to the shore."
+  ],
+  "drop": {
+    "entities": ["minecraft:drowned"],
+    "dimensions": ["minecraft:overworld"],
+    "chance": 0.01
+  }
+}

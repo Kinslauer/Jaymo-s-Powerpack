@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin;
 
+import com.jaymoskingdoms.GapJumps;
 import com.jaymoskingdoms.Unstick;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
@@ -12,7 +13,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Hands every mob's walking to {@link Unstick} after each step, so one that makes no headway works itself loose. */
+/**
+ * Hands every mob's walking to {@link Unstick} after each step, so one that makes no headway works itself loose, and
+ * (0.7.533) to {@link GapJumps}, so a humanoid whose path stops at the edge of a gap jumps it.
+ */
 @Mixin(PathNavigation.class)
 abstract class PathNavigationMixin {
 	@Shadow
@@ -25,9 +29,12 @@ abstract class PathNavigationMixin {
 
 	@Unique
 	private final Unstick.State jaymoskingdoms$unstick = new Unstick.State();
+	@Unique
+	private final GapJumps.State jaymoskingdoms$gapJumps = new GapJumps.State();
 
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void jaymoskingdoms$unstick(CallbackInfo ci) {
 		Unstick.tick(this.mob, (PathNavigation) (Object) this, this.jaymoskingdoms$unstick, this.speedModifier, this.reachRange);
+		GapJumps.tick(this.mob, (PathNavigation) (Object) this, this.jaymoskingdoms$gapJumps, this.speedModifier);
 	}
 }

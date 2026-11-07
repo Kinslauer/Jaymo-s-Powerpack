@@ -34,11 +34,12 @@ public final class Workers {
 
 	/**
 	 * {@code role} is filled in place from {@code f}'s own MCA villagers: MCA's loaded, it isn't a camp, and it's a
-	 * worker's job, or a realm's guard (made an MCA guard or archer; its archers on their posts stay soldiers).
+	 * worker's job (a camp's too), or a realm's guard (made an MCA guard or archer; its archers on their posts stay soldiers).
 	 */
 	static boolean inPlace(Faction f, int role) {
 		// ((0.7.293) and its wall archers, WallArchers)
-		return McaCompat.LOADED && f.type() != FactionType.BARBARIAN && (Worker.isWork(role) || (role == Folk.GUARD || role == Folk.ARCHER) && f.type().isRealm());
+		// ((0.7.481) and a camp's builders and other workers too: Andy, "Foremen and builders are not villagers")
+		return McaCompat.LOADED && (Worker.isWork(role) || (role == Folk.GUARD || role == Folk.ARCHER) && f.type().isRealm());
 	}
 
 	/** A worker's day's work (a {@link Folk}'s from its own tick; an MCA villager's from {@link #step}). */
@@ -94,6 +95,19 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (Banes.bandOf(mob) != null) {
+			// (0.7.619) a player's Bane, or one of its band, in a villager's body: their own doings
+			return Banes.villagerStep(level, w);
+		}
+		if (SwornCaptains.free(mob)) {
+			// (0.7.433) a captain sworn to a player: at their side, his brain his own (and never taken onto a roster)
+			return SwornCaptains.step(level, w);
+		}
+		Boolean balmed = InBalming.step(level, w);
+		if (balmed != null) {
+			// (0.7.433) an orc or goblin a spirit in-balmed: fighting for their keeper, or at their side
+			return balmed;
+		}
 		if (w.role() == Looters.LOOTER && !(mob instanceof Folk)) {
 			// (0.7.295) a looter: his creeping and robbing are Looters' doing
 			return true;
@@ -133,7 +147,7 @@ public final class Workers {
 		}
 		if (mob.tickCount % RECONCILE_TICKS == 0) {
 			if (w instanceof Enlisted e) {
-				// (0.5.53) how long they've been grown (elders become court wizards)
+				// (0.5.54) how long they've been grown (elders become court wizards)
 				CourtWizards.age(level, e);
 				// (0.7.218) a gifted Wind the storm has taken
 				GiftedFolk.step(level, e.mob());
@@ -152,6 +166,10 @@ public final class Workers {
 			// (0.7.138) a realm's ruler, one of its villagers: their day at court and on their round
 			return Rulers.step(level, e);
 		}
+		if (BorderClashes.isMan(w)) {
+			// (0.7.439) one of a border clash's party: on the march as it sends him
+			return BorderClashes.villagerStep(level, w);
+		}
 		if (WarParties.isSoldier(w)) {
 			// (0.7.295) a soldier of a war party: on the march as it sends him
 			return WarParties.villagerStep(level, w);
@@ -165,7 +183,7 @@ public final class Workers {
 			return Rulers.guardStep(level, e);
 		}
 		if (w.role() == Sorcery.WIZARD && w instanceof Enlisted e) {
-			// (0.5.53) a court wizard lives as a villager until a foe comes near
+			// (0.5.54) a court wizard lives as a villager until a foe comes near
 			if (Hermits.is(e)) {
 				// (0.5.62) a floating island's hermit: their fall caught, visitors greeted
 				Hermits.step(level, e);
@@ -179,6 +197,35 @@ public final class Workers {
 		if (CampChiefs.isRole(w.role()) || w.role() == Pirates.CAPTAIN && !Crewmen.tagged(mob) && Pirates.isCoveCaptain(mob)) {
 			// (0.7.293) a camp's chief, king or warchief: his boss bar and his rally; (0.7.296) a cove's captain ashore too
 			CampChiefs.step(level, w);
+		}
+		if (Captains.is(mob)) {
+			// (0.7.431) one of a tribe's captains: his fears, rage and rally, the players he meets (on a band, the trail)
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return Captains.step(level, w);
+		}
+		if (Pedlars.party(mob)) {
+			// (0.7.425) a tribe's pedlar on his road, or one of his guards at his back
+			Greenskins.step(level, w);
+			return Pedlars.step(level, w);
+		}
+		if (Trials.kingsGuard(mob)) {
+			// (0.7.429) one of a king's guard, at their post by his door
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return Trials.guardStep(level, w);
+		}
+		if (TribePacts.ally(mob)) {
+			// (0.7.443) one of a tribe's war band, called to a friend's aid
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return TribePacts.allyStep(level, w);
+		}
+		if (Tribes.hunter(mob)) {
+			// (0.7.425) one of a tribe's hunting band on a hated player's trail
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return Tribes.hunterStep(level, w);
 		}
 		if (!(mob instanceof Folk) && Raids.isRaider(mob)) {
 			// (0.7.295) a camp's villager out on a raid: its march and plunder; its ways in a fight as at home

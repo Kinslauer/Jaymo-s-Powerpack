@@ -30,8 +30,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>V, Grab and Throw: pick up the creature you look at and carry it overhead; V again hurls it. Looking at a block
  * instead rips a chunk out of the ground and throws it.</li>
  * <li>B, Leap Slam: a great leap; landing hits everything within {@link #SLAM_RADIUS}.</li>
- * <li>C (ascended), Titan: twice your size, a hide of stone ({@link #TITAN_ARMOR} armour), {@link #TITAN_HEALTH} more
- * health, and the clap smashes walls up to {@link #TITAN_BREAK_DEPTH} blocks thick ahead of you.</li>
+ * <li>C (ascended), Titan: (0.20.9) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Titan}.</li>
  * </ul>
  */
 public final class Bulwark extends XenoForm {
@@ -50,17 +49,12 @@ public final class Bulwark extends XenoForm {
 	public static final int SLAM_COOLDOWN = 120;
 	public static final double LEAP_OUT = 1.1, LEAP_UP = 0.95, SLAM_RADIUS = 4.0;
 	public static final float SLAM_DAMAGE = 8.0F;
-	/** Titan: the extra size (added to the form's 1.5x), armour and health; how deep, wide and tall the clap breaks walls. */
-	public static final double TITAN_EXTRA_SCALE = 0.5, TITAN_ARMOR = 12.0, TITAN_HEALTH = 20.0;
-	/** Screen shake (degrees, and how far it's felt): the clap, the leap's landing, growing into the Titan. */
-	public static final float CLAP_SHAKE = 1.0F, SLAM_SHAKE = 1.5F, TITAN_SHAKE = 1.6F;
-	public static final double CLAP_SHAKE_RANGE = 14.0, SLAM_SHAKE_RANGE = 16.0, TITAN_SHAKE_RANGE = 24.0;
-	public static final int TITAN_BREAK_DEPTH = 3, TITAN_BREAK_HALF_WIDTH = 1, TITAN_BREAK_HEIGHT = 3;
-	public static final float TITAN_BREAK_MAX_HARDNESS = 6.0F;
+	/** Screen shake (degrees, and how far it's felt): the clap, the leap's landing. */
+	public static final float CLAP_SHAKE = 1.0F, SLAM_SHAKE = 1.5F;
+	public static final double CLAP_SHAKE_RANGE = 14.0, SLAM_SHAKE_RANGE = 16.0;
 
-	private static final net.minecraft.resources.Identifier TITAN_SCALE_ID = com.jaymospowers.JaymosPowers.id("xenoform_titan_scale");
-	private static final net.minecraft.resources.Identifier TITAN_ARMOR_ID = com.jaymospowers.JaymosPowers.id("xenoform_titan_armor");
-	private static final net.minecraft.resources.Identifier TITAN_HEALTH_ID = com.jaymospowers.JaymosPowers.id("xenoform_titan_health");
+	/** (0.20.9) Its Ultimate, built once. */
+	private final com.jaymospowers.power.xenoform.XenoUltimate titan = new com.jaymospowers.power.xenoform.forms.ultimate.Titan(this);
 
 	public Bulwark() {
 		super("bulwark", 1.5F, 40.0F, 7.0, -0.1, 0.6, 0.6, Items.IRON_BLOCK, 0xB8C4D0);
@@ -68,7 +62,8 @@ public final class Bulwark extends XenoForm {
 
 	@Override
 	public boolean scans(Entity creature) {
-		return creature instanceof IronGolem;
+		// (0.18.98) Kingdoms' clockwork golem is built on the iron golem, but it carries Rivet, not Bulwark
+		return creature instanceof IronGolem && !"jaymoskingdoms".equals(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(creature.getType()).getNamespace());
 	}
 
 	@Override
@@ -87,9 +82,6 @@ public final class Bulwark extends XenoForm {
 			case ABILITY_2 -> {
 				if (ready(player, live, G)) {
 					clap(player, live);
-					if (live.ultimate) {
-						smashWalls(player);
-					}
 					cooldown(player, live, G, CLAP_COOLDOWN);
 				}
 			}
@@ -120,7 +112,7 @@ public final class Bulwark extends XenoForm {
 		if (live.combo > 0 && now >= live.comboNext) {
 			live.combo--;
 			live.comboNext = now + COMBO_SPACING;
-			punch(player, live.combo == 0);
+			punch(player, live.combo == 0, live.combo);
 		}
 		if (live.leaping) {
 			live.leapTicks++;
@@ -153,83 +145,15 @@ public final class Bulwark extends XenoForm {
 
 	// ---- Titan ----
 
+	/** (0.20.9) Titan is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Titan}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		var scale = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
-		var armor = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR);
-		var health = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-		if (scale == null || armor == null || health == null) {
-			return false;
-		}
-		scale.addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(TITAN_SCALE_ID, TITAN_EXTRA_SCALE,
-			net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
-		armor.addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(TITAN_ARMOR_ID, TITAN_ARMOR,
-			net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
-		health.addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(TITAN_HEALTH_ID, TITAN_HEALTH,
-			net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
-		player.refreshDimensions();
-		player.heal((float)TITAN_HEALTH);
-		ServerLevel level = player.level();
-		Debris.ring(level, player.blockPosition(), 3, 1.2F);
-		ring(level, ParticleTypes.POOF, player.position(), 3.0, 24);
-		sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.5F, 0.5F);
-		sound(player, SoundEvents.ANVIL_LAND, 1.0F, 0.4F);
-		com.jaymospowers.core.Shakes.heavy(player, player.position(), TITAN_SHAKE_RANGE, TITAN_SHAKE);
-		return true;
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return titan;
 	}
 
-	@Override
-	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
-		if (player.tickCount % 3 == 0 && (player.getDeltaMovement().horizontalDistanceSqr() > 0.01)) {
-			burst(player.level(), ParticleTypes.POOF, player.position(), 1, 0.4, 0.0);
-		}
-	}
-
-	@Override
-	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
-		var scale = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
-		var armor = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR);
-		var health = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-		if (scale != null) {
-			scale.removeModifier(TITAN_SCALE_ID);
-		}
-		if (armor != null) {
-			armor.removeModifier(TITAN_ARMOR_ID);
-		}
-		if (health != null) {
-			health.removeModifier(TITAN_HEALTH_ID);
-		}
-		player.refreshDimensions();
-	}
-
-	/** The Titan's clap: the wall ahead (a box {@link #TITAN_BREAK_DEPTH} deep) comes down, block by breakable block. */
-	private static void smashWalls(ServerPlayer player) {
-		ServerLevel level = player.level();
-		net.minecraft.core.Direction facing = player.getDirection();
-		net.minecraft.core.Direction across = facing.getClockWise();
-		net.minecraft.core.BlockPos feet = player.blockPosition();
-		int broken = 0;
-		for (int d = 1; d <= TITAN_BREAK_DEPTH; d++) {
-			for (int w = -TITAN_BREAK_HALF_WIDTH; w <= TITAN_BREAK_HALF_WIDTH; w++) {
-				for (int h = 0; h < TITAN_BREAK_HEIGHT; h++) {
-					net.minecraft.core.BlockPos pos = feet.relative(facing, d).relative(across, w).above(h);
-					net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
-					float hardness = state.getDestroySpeed(level, pos);
-					if (state.isAir() || state.hasBlockEntity() || hardness < 0.0F || hardness > TITAN_BREAK_MAX_HARDNESS || !state.getFluidState().isEmpty()) {
-						continue;
-					}
-					level.destroyBlock(pos, true, player);
-					broken++;
-				}
-			}
-		}
-		if (broken > 0) {
-			sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 0.7F);
-		}
-	}
-
-	private static void punch(ServerPlayer player, boolean last) {
-		player.swing(player.getRandom().nextBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
+	private static void punch(ServerPlayer player, boolean last, int left) {
+		// (0.20.60) the hands take turns (in first person too); every client throws each blow with the next of the four arms
+		player.swing(left % 2 == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
 		LivingEntity target = aimed(player, COMBO_REACH, e -> true);
 		if (target == null) {
 			sound(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 0.7F);

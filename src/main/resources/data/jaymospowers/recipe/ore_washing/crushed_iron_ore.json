@@ -1,0 +1,12 @@
+{
+  "type": "jaymospowers:hammer_crafting",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:raw_iron",
+    "#jaymospowers:hammers"
+  ],
+  "result": {
+    "id": "jaymospowers:crushed_iron_ore",
+    "count": 1
+  }
+}

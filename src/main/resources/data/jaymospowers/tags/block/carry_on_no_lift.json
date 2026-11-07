@@ -1,0 +1,38 @@
+{
+	"replace": false,
+	"values": [
+		"jaymospowers:pod_keel",
+		"jaymospowers:pod_fin",
+		"jaymospowers:pod_bell",
+		"jaymospowers:pod_tank",
+		"jaymospowers:pod_plate",
+		"jaymospowers:pod_canopy",
+		"jaymospowers:pod_mast",
+		"jaymospowers:salvage_rack",
+		"jaymospowers:smeltery_controller",
+		"jaymospowers:seared_drain",
+		"jaymospowers:kiln_load",
+		"jaymospowers:sentry_spawner",
+		"jaymospowers:infusion_matrix",
+		{
+			"id": "jaymoskingdoms:bounty_board",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:pulley",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:plot_stake",
+			"required": false
+		},
+		{
+			"id": "jaymoskitchen:windmill",
+			"required": false
+		},
+		{
+			"id": "jaymoskitchen:waterwheel",
+			"required": false
+		}
+	]
+}

@@ -32,6 +32,11 @@ import org.jspecify.annotations.Nullable;
  * they're in the pack), found as {@code /locate} finds them.
  */
 final class QuestBoard {
+	/** (0.7.496) What a smith's jewellery order pays (emeralds, by the floor grade Poor to Masterwork), and its random spread. Coin change will convert these. */
+	static final int[] JEWEL_ORDER_EMERALDS = {6, 10, 16, 24, 40};
+	static final int JEWEL_ORDER_SPREAD = 4;
+	/** (0.7.530) What a trade's lead quest pays (emeralds, least then the spread) and its hearts on top. */
+	static final int LEAD_EMERALDS = 6, LEAD_SPREAD = 4, LEAD_HEARTS = 4;
 	/** (0.5.56) What a beast quest pays at least (emeralds; up to 6 more). */
 	static final int BEAST_EMERALDS = 10;
 	/** How far a villager's (and a king's) fetch or champion quest looks for its ruin (chunks). */
@@ -57,6 +62,16 @@ final class QuestBoard {
 	static final float ESCORT_CHANCE = 0.2F;
 	/** How far off the realm he sends you against may be. */
 	static final double RIVAL_RANGE = 2500.0;
+	/**
+	 * (0.7.439) A haven's villager with work asks a haven's bounty this often: raiders driven off (while a purist realm is
+	 * near), a camp that preys on them cleared, or (asked at once, {@link BorderClashes}) a child carried off brought home.
+	 */
+	static final float HAVEN_QUEST_CHANCE = 0.4F, HAVEN_RAIDERS_SHARE = 0.5F;
+	/** Raiders to drive off (least, most); what each haven bounty pays (emeralds, least then the spread), and its hearts on top. */
+	static final int HAVEN_RAIDERS_MIN = 3, HAVEN_RAIDERS_MAX = 5;
+	static final int HAVEN_RAIDERS_EMERALDS = 8, HAVEN_CAMP_EMERALDS = 14, HAVEN_CHILD_EMERALDS = 12, HAVEN_SPREAD = 7, HAVEN_HEARTS = 10;
+	/** A haven asks after a preying camp this near it. */
+	static final double HAVEN_CAMP_RANGE = 600.0;
 	/** Chance a villager's quest pays a relic: a smith's, a guard's or fletcher's, and anyone else's. */
 	static final float SMITH_RELIC = 0.35F, ARMS_RELIC = 0.2F, OTHER_RELIC = 0.04F;
 
@@ -84,6 +99,11 @@ final class QuestBoard {
 			return new T(key, Quest.GATHER, item, min, max, List.of(), "");
 		}
 
+		/** (0.7.530) Bring so many of an animal to the giver on a lead (a town notice's errand, now a trade's too). */
+		static T lead(String key, String type, int min, int max) {
+			return new T(key, Quest.LEAD, type, min, max, List.of(), "");
+		}
+
 		static T fetch(String key, String keepsake, List<String> where) {
 			return new T(key, Quest.FETCH, "", 1, 1, where, keepsake);
 		}
@@ -103,6 +123,9 @@ final class QuestBoard {
 		"abandoned_camp_wooded_badlands", "abandoned_camp_windswept_forest", "abandoned_camp_cherry_grove", "trail_ruins", "swamp_hut", "igloo");
 
 	private static final Trade FARMING = new Trade(List.of(
+				T.gather("farmer.pumpkins", "minecraft:pumpkin", 6, 12),
+				T.gather("farmer.bonemeal", "minecraft:bone_meal", 16, 32),
+				T.lead("farmer.cows", "minecraft:cow", 2, 3),
 			T.slay("farmer.rabbits", "minecraft:rabbit", 4, 8),
 			T.slay("farmer.zombies", "#minecraft:zombies", 6, 10),
 			T.gather("farmer.bones", "minecraft:bone", 8, 16),
@@ -113,6 +136,8 @@ final class QuestBoard {
 	private static final Map<String, Trade> TRADES = Map.ofEntries(
 		Map.entry("farmer", FARMING),
 		Map.entry("butcher", new Trade(List.of(
+				T.lead("butcher.pigs", "minecraft:pig", 2, 3),
+				T.slay("butcher.foxes", "minecraft:fox", 3, 5),
 				T.gather("butcher.beef", "minecraft:beef", 8, 16),
 				T.gather("butcher.pork", "minecraft:porkchop", 8, 16),
 				T.gather("butcher.mutton", "minecraft:mutton", 8, 16),
@@ -122,18 +147,26 @@ final class QuestBoard {
 			List.of("minecraft:cooked_beef*8-16", "minecraft:cooked_porkchop*8-16", "minecraft:leather*6-12", "minecraft:cooked_mutton*8-16",
 				"jaymoskitchen:beef_jerky*6-12"))),
 		Map.entry("shepherd", new Trade(List.of(
+				T.lead("shepherd.sheep", "minecraft:sheep", 2, 4),
+				T.gather("shepherd.dye", "minecraft:red_dye", 8, 16),
+				T.fetch("shepherd.cloak", "minecraft:stick|weavers_shuttle", FIELDS),
 				T.slay("shepherd.wolves", "minecraft:wolf", 3, 5),
 				T.slay("shepherd.spiders", "minecraft:spider", 6, 10),
 				T.gather("shepherd.string", "minecraft:string", 12, 24),
 				T.fetch("shepherd.shears", "minecraft:shears|golden_shears", FIELDS)),
 			List.of("minecraft:white_wool*16-32", "minecraft:red_wool*8-16", "minecraft:blue_wool*8-16", "minecraft:white_bed*1-2", "minecraft:white_carpet*12-24"))),
 		Map.entry("leatherworker", new Trade(List.of(
+				T.gather("leatherworker.scutes", "minecraft:armadillo_scute", 3, 6),
+				T.gather("leatherworker.blubber", "jaymoskingdoms:whale_blubber", 4, 8),
 				T.gather("leatherworker.leather", "minecraft:leather", 10, 20),
 				T.gather("leatherworker.hides", "minecraft:rabbit_hide", 6, 12),
 				T.gather("leatherworker.feet", "minecraft:rabbit_foot", 2, 4),
 				T.fetch("leatherworker.saddle", "minecraft:saddle|old_saddle", FIELDS)),
 			List.of("minecraft:leather*8-16", "minecraft:saddle*1-1", "minecraft:bundle*1-1", "minecraft:leather_horse_armor*1-1", "minecraft:item_frame*4-8"))),
 		Map.entry("fisherman", new Trade(List.of(
+				T.gather("fisherman.whale_oil", "jaymoskingdoms:whale_oil", 2, 4),
+				T.slay("fisherman.guardians", "minecraft:guardian", 3, 5),
+				T.gather("fisherman.puffers", "minecraft:pufferfish", 3, 6),
 				T.gather("fisherman.cod", "minecraft:cod", 10, 20),
 				T.gather("fisherman.salmon", "minecraft:salmon", 8, 16),
 				T.gather("fisherman.ink", "minecraft:ink_sac", 6, 10),
@@ -141,68 +174,101 @@ final class QuestBoard {
 				T.fetch("fisherman.compass", "minecraft:compass|lost_compass", SEA)),
 			List.of("minecraft:cooked_cod*8-16", "minecraft:cooked_salmon*8-16", "minecraft:fishing_rod*1-1", "minecraft:nautilus_shell*1-2", "minecraft:prismarine_crystals*4-8"))),
 		Map.entry("fletcher", new Trade(List.of(
+				T.gather("fletcher.string", "minecraft:string", 12, 24),
+				T.fetch("fletcher.quiver", "minecraft:leather|fletchers_quiver", WAR),
 				T.gather("fletcher.feathers", "minecraft:feather", 16, 32),
 				T.gather("fletcher.flint", "minecraft:flint", 12, 24),
 				T.slay("fletcher.skeletons", "#minecraft:skeletons", 6, 10),
 				T.fetch("fletcher.bow", "minecraft:bow|grandsires_bow", WAR)),
 			List.of("minecraft:arrow*32-64", "minecraft:spectral_arrow*12-24", "minecraft:target*1-2", "minecraft:crossbow*1-1"))),
 		Map.entry("armorer", new Trade(List.of(
+				T.gather("armorer.gold", "minecraft:gold_ingot", 6, 12),
+				T.gather("armorer.leather", "minecraft:leather", 8, 16),
 				T.gather("armorer.iron", "minecraft:iron_ingot", 10, 20),
 				T.gather("armorer.coal", "minecraft:coal", 16, 32),
 				T.slay("armorer.pillagers", "#minecraft:illager", 4, 8),
+				T.gather("armorer.amulet", "jaymospowers:gem_amulet@well", 1, 1),
 				T.fetch("armorer.helm", "minecraft:iron_helmet|ancestral_helm", WAR)),
 			List.of("minecraft:iron_chestplate*1-1", "minecraft:iron_helmet*1-1", "minecraft:shield*1-1", "minecraft:iron_ingot*6-12", "minecraft:chainmail_leggings*1-1"))),
 		Map.entry("weaponsmith", new Trade(List.of(
+				T.gather("weaponsmith.diamonds", "minecraft:diamond", 2, 3),
+				T.slay("weaponsmith.skeletons", "#minecraft:skeletons", 8, 12),
 				T.slay("weaponsmith.zombies", "#minecraft:zombies", 8, 14),
 				T.slay("weaponsmith.pillagers", "#minecraft:illager", 4, 8),
 				T.gather("weaponsmith.iron", "minecraft:iron_ingot", 8, 16),
+				T.gather("weaponsmith.ring", "jaymospowers:gem_ring@expert", 1, 2),
 				T.fetch("weaponsmith.blade", "minecraft:iron_sword|broken_blade", WAR)),
 			List.of("minecraft:iron_sword*1-1", "minecraft:iron_axe*1-1", "minecraft:diamond_sword*1-1", "minecraft:iron_ingot*6-12"))),
 		Map.entry("toolsmith", new Trade(List.of(
+				T.gather("toolsmith.copper", "minecraft:copper_ingot", 12, 24),
+				T.gather("toolsmith.sticks", "minecraft:stick", 24, 48),
 				T.gather("toolsmith.iron", "minecraft:iron_ingot", 8, 16),
 				T.gather("toolsmith.coal", "minecraft:coal", 16, 32),
+				T.gather("toolsmith.bracelet", "jaymospowers:gem_bracelet@well", 1, 1),
 				T.fetch("toolsmith.pick", "minecraft:iron_pickaxe|old_pick", MINES)),
 			List.of("minecraft:iron_pickaxe*1-1", "minecraft:iron_shovel*1-1", "minecraft:diamond_pickaxe*1-1", "minecraft:iron_ingot*6-12", "minecraft:anvil*1-1"))),
 		Map.entry("librarian", new Trade(List.of(
+				T.gather("librarian.leather", "minecraft:leather", 6, 12),
+				T.gather("librarian.glow", "minecraft:glow_ink_sac", 4, 8),
+				T.fetch("librarian.scroll", "minecraft:paper|sealed_scroll", LORE),
 				T.fetch("librarian.tome", "minecraft:book|lost_tome", LORE),
 				T.gather("librarian.paper", "minecraft:paper", 18, 32),
 				T.gather("librarian.ink", "minecraft:ink_sac", 6, 12),
 				T.gather("librarian.feathers", "minecraft:feather", 8, 16)),
 			List.of("minecraft:book*4-8", "minecraft:bookshelf*2-4", "minecraft:lantern*2-4", "minecraft:writable_book*1-1"))),
 		Map.entry("cleric", new Trade(List.of(
+				T.gather("cleric.bandages", "jaymospowers:linen_bandage", 3, 6),
+				T.gather("cleric.garlic", "jaymoskingdoms:garlic", 6, 12),
+				T.slay("cleric.bleeders", "jaymoskingdoms:night_bleeder", 2, 4),
 				T.slay("cleric.undead", "#minecraft:undead", 8, 14),
 				T.gather("cleric.eyes", "minecraft:spider_eye", 6, 10),
 				T.gather("cleric.flesh", "minecraft:rotten_flesh", 16, 32),
 				T.fetch("cleric.relic", "minecraft:amethyst_shard|holy_relic", HOLY)),
 			List.of("minecraft:experience_bottle*8-16", "minecraft:lapis_lazuli*12-24", "minecraft:golden_apple*1-2", "minecraft:glowstone_dust*8-16"))),
 		Map.entry("cartographer", new Trade(List.of(
+				T.gather("cartographer.paper", "minecraft:paper", 12, 24),
+				T.gather("cartographer.amethyst", "minecraft:amethyst_shard", 4, 8),
+				T.fetch("cartographer.log", "minecraft:writable_book|ships_log", SEA),
 				T.fetch("cartographer.chart", "minecraft:paper|torn_chart", SEA),
 				T.fetch("cartographer.map", "minecraft:paper|old_map", RUINS),
 				T.slay("cartographer.phantoms", "minecraft:phantom", 3, 5)),
 			List.of("minecraft:map*2-4", "minecraft:compass*1-1", "minecraft:spyglass*1-1", "minecraft:recovery_compass*1-1"))),
 		Map.entry("mason", new Trade(List.of(
+				T.gather("mason.andesite", "minecraft:andesite", 32, 64),
+				T.gather("mason.bricks", "minecraft:brick", 16, 32),
 				T.gather("mason.clay", "minecraft:clay_ball", 16, 32),
 				T.gather("mason.quartz", "minecraft:quartz", 8, 16),
 				T.slay("mason.silverfish", "minecraft:silverfish", 6, 10),
 				T.fetch("mason.chisel", "minecraft:flint|masters_chisel", RUINS)),
 			List.of("minecraft:stone_bricks*32-64", "minecraft:stone*32-64", "minecraft:polished_andesite*24-48", "minecraft:smooth_stone*24-48"))),
 		Map.entry("builder", new Trade(List.of(
+				T.gather("builder.glass", "minecraft:glass", 16, 32),
+				T.gather("builder.planks", "minecraft:oak_planks", 32, 64),
+				T.slay("builder.creepers", "minecraft:creeper", 3, 5),
 				T.gather("builder.logs", "minecraft:oak_log", 16, 32),
 				T.gather("builder.cobble", "minecraft:cobblestone", 32, 64),
 				T.fetch("builder.plans", "minecraft:paper|lost_plans", RUINS)),
 			List.of("minecraft:stone*32-64", "minecraft:oak_log*16-32", "minecraft:stone_bricks*24-48", "minecraft:spruce_log*16-32", "minecraft:glass*12-24"))),
 		Map.entry("miner", new Trade(List.of(
+				T.gather("miner.coal", "minecraft:coal", 16, 32),
+				T.gather("miner.ladders", "minecraft:ladder", 12, 24),
 				T.slay("miner.spiders", "minecraft:cave_spider", 5, 8),
 				T.slay("miner.creepers", "minecraft:creeper", 4, 6),
 				T.gather("miner.torches", "minecraft:torch", 24, 48),
 				T.fetch("miner.lantern", "minecraft:lantern|lost_lantern", MINES)),
 			List.of("minecraft:raw_iron*8-16", "minecraft:coal*16-32", "minecraft:stone*32-64", "minecraft:raw_copper*12-24", "minecraft:torch*16-32"))),
 		Map.entry("woodcutter", new Trade(List.of(
+				T.gather("woodcutter.logs", "minecraft:spruce_log", 16, 32),
+				T.slay("woodcutter.zombies", "#minecraft:zombies", 6, 10),
+				T.gather("woodcutter.charcoal", "minecraft:charcoal", 12, 24),
 				T.slay("woodcutter.spiders", "minecraft:spider", 6, 10),
 				T.gather("woodcutter.saplings", "minecraft:oak_sapling", 6, 12),
 				T.fetch("woodcutter.axe", "minecraft:iron_axe|felling_axe", FIELDS)),
 			List.of("minecraft:oak_log*24-48", "minecraft:spruce_log*16-32", "minecraft:birch_log*16-32", "minecraft:oak_planks*32-64", "minecraft:stick*16-32"))),
 		Map.entry("guard", new Trade(List.of(
+				T.slay("guard.creepers", "minecraft:creeper", 4, 6),
+				T.slay("guard.spiders", "minecraft:spider", 6, 10),
+				T.gather("guard.arrows", "minecraft:arrow", 32, 64),
 				T.slay("guard.monsters", "*monster", 10, 16),
 				T.slay("guard.skeletons", "#minecraft:skeletons", 8, 12),
 				T.slay("guard.pillagers", "#minecraft:illager", 5, 8),
@@ -210,16 +276,35 @@ final class QuestBoard {
 			List.of("minecraft:iron_sword*1-1", "minecraft:shield*1-1", "minecraft:arrow*16-32", "minecraft:iron_chestplate*1-1", "minecraft:cooked_beef*6-12"))),
 		// (0.5.47) a stable's people (a stablehand's horse quests are its own, Stables)
 		Map.entry("stablehand", new Trade(List.of(
+				T.gather("stablehand.hay", "minecraft:hay_block", 6, 12),
+				T.gather("stablehand.apples", "minecraft:apple", 8, 16),
 				T.gather("stablehand.wheat", "minecraft:wheat", 16, 32),
 				T.gather("stablehand.carrots", "minecraft:carrot", 12, 24),
 				T.slay("stablehand.wolves", "minecraft:wolf", 3, 5)),
 			List.of("minecraft:golden_carrot*3-6", "minecraft:hay_block*4-8", "minecraft:lead*1-2", "minecraft:saddle*1-1", "jaymoskingdoms:oats*8-16"))),
 		Map.entry("farrier", new Trade(List.of(
+				T.gather("farrier.nuggets", "minecraft:iron_nugget", 18, 36),
+				T.fetch("farrier.horseshoe", "minecraft:iron_ingot|lucky_horseshoe", FIELDS),
 				T.gather("farrier.iron", "minecraft:iron_ingot", 8, 16),
 				T.gather("farrier.coal", "minecraft:coal", 12, 24),
 				T.gather("farrier.leather", "minecraft:leather", 6, 12)),
 			List.of("jaymoskingdoms:horseshoes*1-2", "jaymoskingdoms:hoof_pick*1-1", "jaymoskingdoms:bridle*1-1", "minecraft:iron_ingot*3-6"))),
+		// (0.7.530) a kitchen's, a puller's and a money-changer's own work (they asked only the jobless quests before)
+		Map.entry("cook", new Trade(List.of(
+				T.gather("cook.sugar", "minecraft:sugar", 12, 24),
+				T.gather("cook.milk", "minecraft:milk_bucket", 2, 3),
+				T.gather("cook.potatoes", "minecraft:potato", 16, 32)),
+			List.of("minecraft:bread*8-16", "minecraft:pumpkin_pie*4-8", "minecraft:cake*1-1", "minecraft:cookie*12-24", "jaymoskitchen:beef_jerky*6-12"))),
+		Map.entry("puller", new Trade(List.of(
+				T.gather("puller.leads", "minecraft:lead", 2, 4),
+				T.gather("puller.bread", "minecraft:bread", 8, 16)),
+			List.of("minecraft:leather*6-12", "minecraft:lead*1-2", "minecraft:bread*6-12", "minecraft:saddle*1-1"))),
+		Map.entry("changer", new Trade(List.of(
+				T.gather("changer.emeralds", "minecraft:emerald", 4, 8)),
+			List.of("minecraft:gold_nugget*8-16", "minecraft:gold_ingot*1-3", "jaymoskingdoms:copper_coin*10-20"))),
 		Map.entry("none", new Trade(List.of(
+				T.gather("none.mushrooms", "minecraft:brown_mushroom", 6, 12),
+				T.gather("none.eggs", "minecraft:egg", 8, 16),
 				T.gather("none.berries", "minecraft:sweet_berries", 12, 24),
 				T.gather("none.flowers", "minecraft:poppy", 6, 12),
 				T.fetch("none.heirloom", "minecraft:gold_nugget|family_heirloom", RUINS)),
@@ -260,6 +345,13 @@ final class QuestBoard {
 		// a letter a third of the time (more for the jobless and cartographers), else one of the trade's own
 		float mail = job.equals("none") || job.equals("cartographer") ? 0.45F : 0.25F;
 		List<T> options = new ArrayList<>(trade.quests());
+		if (Havens.is(level.getServer(), f) && random.nextFloat() < HAVEN_QUEST_CHANCE) {
+			// (0.7.439) a haven's own trouble
+			Quest q = haven(level, giver, f, who, trade, random);
+			if (q != null) {
+				return q;
+			}
+		}
 		if (job.equals("stablehand") && random.nextFloat() < Stables.STABLEHAND_HORSE_QUEST) {
 			// (0.5.47) a stablehand's horse quests
 			return Stables.stablehandQuest(level, f, who, random);
@@ -287,6 +379,57 @@ final class QuestBoard {
 		return mail(level, giver, f, who, random, trade);
 	}
 
+	/** (0.7.439) A haven's bounty: its carried-off child brought home, purist raiders driven off, or a preying camp cleared. */
+	private static @Nullable Quest haven(ServerLevel level, LivingEntity giver, Faction f, Quest.Giver who, Trade trade, RandomSource random) {
+		Quest q = havenRescue(level, giver, f, random);
+		if (q != null) {
+			return q;
+		}
+		if (BorderClashes.foe(level.getServer(), f) != null && random.nextFloat() < HAVEN_RAIDERS_SHARE) {
+			int count = HAVEN_RAIDERS_MIN + random.nextInt(HAVEN_RAIDERS_MAX - HAVEN_RAIDERS_MIN + 1);
+			Quest.Objective o = new Quest.Objective("*purist_raider", count, 0, Optional.empty(), Optional.empty(), "", "", false);
+			return new Quest(UUID.randomUUID().toString(), Quest.SLAY, "haven.raiders", who, o,
+				reward(level, who.job(), Quest.SLAY, HAVEN_RAIDERS_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
+		}
+		Faction best = null;
+		double bestD = HAVEN_CAMP_RANGE * HAVEN_CAMP_RANGE;
+		for (Faction camp : Factions.all(level.getServer(), FactionType.BARBARIAN)) {
+			double d = camp.seat().distSqr(f.seat());
+			if (!camp.fallen() && camp.leader().isPresent() && d < bestD) {
+				best = camp;
+				bestD = d;
+			}
+		}
+		if (best == null) {
+			return null;
+		}
+		Quest.Objective o = new Quest.Objective("camp:" + best.id(), 1, 0, Optional.of(best.seat()), best.leader(), "", best.name(), false);
+		return new Quest(UUID.randomUUID().toString(), Quest.CHIEF, "haven.camp", who, o,
+			reward(level, who.job(), Quest.CHIEF, HAVEN_CAMP_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
+	}
+
+	/** (0.7.439) {@code giver} of haven {@code f} asks for its carried-off child back; null if none is held. */
+	static @Nullable Quest havenRescue(ServerLevel level, LivingEntity giver, Faction f, RandomSource random) {
+		String[] taken = BorderClashes.taken(level.getServer(), f);
+		if (taken == null) {
+			return null;
+		}
+		String job = job(giver);
+		Trade trade = TRADES.getOrDefault(job, TRADES.get("none"));
+		Quest.Giver who = new Quest.Giver(giver.getUUID(), giver.getName().getString(), f.id(), false, job);
+		UUID child;
+		BlockPos at;
+		try {
+			child = UUID.fromString(taken[0]);
+			at = new BlockPos(Integer.parseInt(taken[2]), Integer.parseInt(taken[3]), Integer.parseInt(taken[4]));
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+		Quest.Objective o = new Quest.Objective("captive:" + child, 1, 0, Optional.of(at), Optional.of(child), taken[1], taken[5], false);
+		return new Quest(UUID.randomUUID().toString(), Quest.RESCUE, "haven.child", who, o,
+			reward(level, job, Quest.RESCUE, HAVEN_CHILD_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
+	}
+
 	/** (Testing) A villager's fetch quest at the nearest trail ruins: a dig. Null if their trade has no fetch, or none are near. */
 	static @Nullable Quest dig(ServerLevel level, LivingEntity giver, Faction f, RandomSource random) {
 		String job = job(giver);
@@ -312,17 +455,20 @@ final class QuestBoard {
 			// (target: the ruin; otherName: what the keepsake is and is called)
 			objective = new Quest.Objective(where, 1, 0, Optional.of(ruin.getFirst()), Optional.empty(), t.keepsake(), where, false);
 		} else {
-			if (t.kind() == Quest.GATHER && BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(t.target())).isEmpty()) {
+			if (t.kind() == Quest.GATHER && BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(Quests.itemId(t.target()))).isEmpty()) {
 				return null;
 			}
 			objective = new Quest.Objective(t.target(), count, 0, Optional.empty(), Optional.empty(), "", "", false);
 		}
-		int emeralds = switch (t.kind()) {
+		// (0.7.496) a jewellery order (a grade floor in the target) pays by that grade
+		int floor = t.kind() == Quest.GATHER ? Quests.minGrade(t.target()) : -1;
+		int emeralds = floor >= 0 ? JEWEL_ORDER_EMERALDS[floor] + random.nextInt(JEWEL_ORDER_SPREAD + 1) : switch (t.kind()) {
 			case Quest.FETCH -> 8 + random.nextInt(7);
 			case Quest.SLAY -> 2 + Math.round(count * 0.6F) + random.nextInt(3);
+			case Quest.LEAD -> LEAD_EMERALDS + random.nextInt(LEAD_SPREAD + 1); // (0.7.530)
 			default -> 3 + random.nextInt(6);
 		};
-		int hearts = HEARTS + (t.kind() == Quest.FETCH ? 8 : t.kind() == Quest.SLAY ? 4 : 0);
+		int hearts = HEARTS + (t.kind() == Quest.FETCH ? 8 : t.kind() == Quest.SLAY ? 4 : t.kind() == Quest.LEAD ? LEAD_HEARTS : 0);
 		return new Quest(UUID.randomUUID().toString(), t.kind(), t.key(), who, objective, reward(level, who.job(), t.kind(), emeralds, hearts, trade, random), 0L);
 	}
 
@@ -446,11 +592,14 @@ final class QuestBoard {
 
 	/** (0.7.147) A bounty on the warlord of the standing Nether fort nearest the realm (by Nether reckoning); null with none. */
 	static @Nullable Quest netherBounty(ServerLevel level, Faction f, Quest.Giver who, RandomSource random) {
-		ServerLevel nether = level.getServer().getLevel(net.minecraft.world.level.Level.NETHER);
+		ServerLevel nether = Stacked.level(level.getServer(), net.minecraft.world.level.Level.NETHER);
 		if (nether == null) {
 			return null;
 		}
-		BlockPos under = new BlockPos(f.seat().getX() / 8, f.seat().getY(), f.seat().getZ() / 8);
+		// (0.7.528) in a One Dimension world the Nether is a band straight under the realm (Stacked), not an eighth as far
+		int scale = nether.dimension() == net.minecraft.world.level.Level.NETHER ? 8 : 1;
+		BlockPos under = new BlockPos(f.seat().getX() / scale, f.seat().getY() + Stacked.shift(level.getServer(), net.minecraft.world.level.Level.NETHER),
+			f.seat().getZ() / scale);
 		com.jaymoskingdoms.nether.NetherForts.Fort best = com.jaymoskingdoms.nether.NetherForts.standing(nether).stream()
 			.min(java.util.Comparator.comparingDouble(fort -> fort.center().distSqr(under))).orElse(null);
 		if (best == null) {

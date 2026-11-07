@@ -4,6 +4,9 @@ import com.jaymospowers.api.Power;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.client.hud.HudStyle;
+import com.jaymospowers.client.hud.HudZones;
+import com.jaymospowers.client.hud.PowerDock;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -11,7 +14,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 
-/** The power badge (icon + name, top-left), then the active power's own HUD. */
+/** The power badge (icon + name, top-left under the minimap), then the active power's own HUD (the right dock's bottom row). */
 final class PowerHud {
 	/** The corrupted badge's colour. */
 	static final int CORRUPT_COLOR = 0x8A3FB5;
@@ -56,40 +59,50 @@ final class PowerHud {
 		Component name = title(power, fate, player);
 		int right = 24 + minecraft.font.width(name) + 4;
 		int pips = 4 * 5;
-		graphics.fill(2, 2, right + pips + 2, 22, fate.corrupted() ? 0x90140A1E : 0x60000000);
+		// (HUD rework) the badge heads the top-left rail, under Xaero's minimap (it sat on top of it)
+		int[] at = HudZones.place(HudZones.RAIL, "jaymospowers:power_badge", 10, right + pips + 2, 25);
+		if (at == null) {
+			return;
+		}
+		int ox = at[0] - 2, oy = at[1] - 1;
+		graphics.fill(ox + 2, oy + 2, ox + right + pips + 2, oy + 22, fate.corrupted() ? 0x90140A1E : HudStyle.PLATE_SOFT);
 		if (fate.ascended()) {
 			// ascended: a gold rim
-			graphics.outline(1, 1, right + pips + 2, 22, 0xFFFFD54A);
+			graphics.outline(ox + 1, oy + 1, right + pips + 2, 22, 0xFFFFD54A);
 		}
-		graphics.item(power.icon(), 4, 4);
+		graphics.item(power.icon(), ox + 4, oy + 4);
 		int accent = 0xFF000000 | (fate.corrupted() ? CORRUPT_COLOR : power.color());
-		graphics.text(minecraft.font, name, 24, 8, accent);
+		graphics.text(minecraft.font, name, ox + 24, oy + 8, accent, true);
 		if (fate.corrupted()) {
 			// corrupted: cracks across the badge
 			for (int i = 0; i < CRACKS.length; i += 2) {
-				graphics.fill(CRACKS[i], CRACKS[i + 1], CRACKS[i] + 1, CRACKS[i + 1] + 1, 0xC0000000);
+				graphics.fill(ox + CRACKS[i], oy + CRACKS[i + 1], ox + CRACKS[i] + 1, oy + CRACKS[i + 1] + 1, 0xC0000000);
 			}
 		}
 		// one pip per ability: lit once unlocked; a thin bar under the badge fills toward the next one
 		int unlocked = Mastery.unlocked(player);
 		for (int i = 0; i < 4; i++) {
-			int px = right + i * 5;
-			graphics.fill(px, 10, px + 3, 13, i < unlocked ? accent : 0x50FFFFFF);
+			int px = ox + right + i * 5;
+			graphics.fill(px, oy + 10, px + 3, oy + 13, i < unlocked ? accent : 0x50FFFFFF);
 		}
 		float progress = Mastery.progress(player);
-		int barY = 22;
+		int barY = oy + 22;
 		if (progress >= 0.0F) {
-			graphics.fill(2, barY, right + pips + 2, barY + 2, 0x60000000);
-			graphics.fill(2, barY, 2 + Math.round((right + pips) * progress), barY + 2, accent);
+			graphics.fill(ox + 2, barY, ox + right + pips + 2, barY + 2, HudStyle.PLATE_SOFT);
+			graphics.fill(ox + 2, barY, ox + 2 + Math.round((right + pips) * progress), barY + 2, accent);
 			barY += 2;
 		}
 		// something creeping in: a dark sliver that grows (only once there's something to see)
 		if (!fate.corrupted() && fate.corruption() > 0) {
 			int width = Math.round((right + pips) * fate.corruption() / (float)Fate.MAX_CORRUPTION);
-			graphics.fill(2, barY, 2 + width, barY + 1, 0xFF000000 | CORRUPT_COLOR);
+			graphics.fill(ox + 2, barY, ox + 2 + width, barY + 1, 0xFF000000 | CORRUPT_COLOR);
 		}
 		PowerClient client = PowerClients.get(power.id());
 		if (client != null) {
+			// (HUD rework) the power's own block (chips, and its lines over them) is the right dock's bottom row
+			if (!PowerDock.begin(client.hudHeight(player))) {
+				return;
+			}
 			client.renderHud(graphics, delta, player);
 		}
 	}

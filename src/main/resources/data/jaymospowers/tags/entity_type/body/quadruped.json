@@ -39,6 +39,89 @@
 			"required": false
 		},
 		"minecraft:turtle",
-		"minecraft:frog"
+		"minecraft:frog",
+		{
+			"id": "cubeanimals:roedeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:reddeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:reindeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:moose",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:bison",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:antilope",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:elephant",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:tiger",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:snowleopard",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:fennec",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:caracal",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:lynx",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:blackbear",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:walrus",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:capuchin",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:marmot",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:mouse",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:komododragon",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:crocodile",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:chameleon",
+			"required": false
+		},
+		{"id": "jaymoskingdoms:grizzly", "required": false},
+		{"id": "bearminimum:brown_bear", "required": false},
+		{"id": "bearminimum:black_bear", "required": false}
 	]
 }

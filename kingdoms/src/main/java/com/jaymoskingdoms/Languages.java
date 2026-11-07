@@ -101,12 +101,21 @@ public final class Languages {
 	 * MCA's buttons that need no words: trading, a gift, beckoning them to follow or stay or move, riding, picking up a
 	 * little one, and (for your own hires and family) their pack and armour. Everything else is asked aloud.
 	 */
-	public static final Set<String> SIMPLE_COMMANDS = Set.of("trade", "gift", "follow", "stay", "move", "ridehorse", "pick_up", "inventory", "armor",
+	public static final Set<String> SIMPLE_COMMANDS = Set.of(
+		// (0.7.454) goods pointed at and emeralds held out, from the Interact page now (InteractActions)
+		InteractActions.COMMAND + InteractActions.WARES, InteractActions.COMMAND + InteractActions.TRIBUTE,
+		"trade", "gift", "follow", "stay", "move", "ridehorse", "pick_up", "inventory", "armor",
 		"slap");
 	/** MCA's talk menu: what can be done without words (a hug, a kiss, rock-paper-scissors, (0.7.204) a handshake), and the greetings that lead to it. */
 	static final Set<String> SIMPLE_ANSWERS = Set.of("hug", "kiss", "rock_paper_scissor", Introductions.HANDSHAKE,
+		// (0.7.424) a blade pressed closer, a hand let go, the blow: no words needed
+		Questioning.THREATEN, Questioning.STARE, Questioning.SPARE, Questioning.FINISH,
+		// (0.7.425) goods pointed at and emeralds held out
+		Pedlars.WARES_ANSWER, Pedlars.TRIBUTE_ANSWER,
 		// (0.7.254) thanks need no words
-		SharedHistory.THANK);
+		SharedHistory.THANK,
+		// (0.7.449) why they came over: they can show you
+		ComingOver.ANSWER);
 	static final Set<String> SIMPLE_QUESTIONS = Set.of("root", "first", "greet", "hug", "kiss", "rock_paper_scissor");
 
 	/** Learning: what speaking a tongue takes; what each stretch among its speakers and each trade with one adds. */
@@ -156,6 +165,7 @@ public final class Languages {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Languages::tick);
+		VoiceGate.register();
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> home(handler.player));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			REMINDED.remove(handler.player.getUUID());
@@ -286,28 +296,45 @@ public final class Languages {
 			return false;
 		}
 		String kind = key.getPath().substring(key.getPath().lastIndexOf('.') + 1);
+		if (UNGATED.contains(kind)) {
+			// (a cry of pain or a snore is not a line: it plays as MCA sends it)
+			return false;
+		}
+		// (0.7.569) one line at a time per villager, and per listener (VoiceGate)
+		int now = level.getServer().getTickCount();
+		if (VoiceGate.busy(speaker, now)) {
+			return true;
+		}
 		net.minecraft.sounds.SoundEvent grunt = GRUNTS.get(kind);
 		Tongue t = of(speaker);
 		net.minecraft.core.@Nullable Holder<net.minecraft.sounds.SoundEvent> spoken = t == null ? null
 			: Voices.tongue(t, key.getPath().startsWith("villager.female."), kind);
-		if (t == null || (grunt == null && spoken == null)) {
-			return false;
-		}
+		net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> own = net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
 		double range = sound.getRange(volume);
 		long seed = level.getRandom().nextLong();
+		int longest = VoiceGate.length(own);
 		for (ServerPlayer p : level.players()) {
-			if (p.distanceToSqr(speaker) > range * range) {
+			if (p.distanceToSqr(speaker) > range * range || VoiceGate.hearing(p, now)) {
 				continue;
 			}
 			// (their words; a line in their tongue; a grunt; or, with neither made yet, the words anyway)
-			net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> heard = understands(p, speaker) ? net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound)
+			boolean words = t == null || understands(p, speaker) || (grunt == null && spoken == null);
+			net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> heard = words ? own
 				: spoken != null ? spoken
-				: net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(grunt != null ? grunt : sound);
+				: net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(grunt);
+			int length = VoiceGate.length(heard);
+			longest = Math.max(longest, length);
+			VoiceGate.heard(p, now, length);
+			float loud = volume * (heard == spoken ? VoiceGate.TONGUE_VOLUME : VoiceGate.WORDS_VOLUME);
 			p.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(heard, speaker.getSoundSource(),
-				speaker.getX(), speaker.getY(), speaker.getZ(), volume, pitch, seed));
+				speaker.getX(), speaker.getY(), speaker.getZ(), loud, pitch, seed));
 		}
+		VoiceGate.spoke(speaker, now, longest);
 		return true;
 	}
+
+	/** (0.7.569) MCA sounds that aren't spoken lines, left out of {@link VoiceGate}. */
+	static final Set<String> UNGATED = Set.of("hurt", "snore");
 
 	/**
 	 * (0.7.348) ({@code McaCloseMixin}) {@code player} leaves the talk menu of {@code speaker}, a villager whose tongue they
@@ -327,9 +354,16 @@ public final class Languages {
 		if (sound == null || (last != null && now - last < FAREWELL_GAP)) {
 			return;
 		}
+		// (0.7.569) not over another line, and quieter (VoiceGate)
+		if (VoiceGate.busy(speaker, now) || VoiceGate.hearing(player, now)) {
+			return;
+		}
 		FAREWELLED.put(player.getUUID(), now);
+		int length = VoiceGate.length(sound);
+		VoiceGate.spoke(speaker, now, length);
+		VoiceGate.heard(player, now, length);
 		player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(sound, speaker.getSoundSource(),
-			speaker.getX(), speaker.getY(), speaker.getZ(), 1.0F, pitch, level.getRandom().nextLong()));
+			speaker.getX(), speaker.getY(), speaker.getZ(), VoiceGate.TONGUE_VOLUME, pitch, level.getRandom().nextLong()));
 	}
 
 	/** {@link #understands}, and if not, a reminder over the hotbar (now and then) that only simple things will do. */

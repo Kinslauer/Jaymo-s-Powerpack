@@ -429,6 +429,7 @@ public final class ZFighterPower implements Power {
 		ZFighterGift.init();
 		ZFighterKi.init();
 		ZFighterWaveBeam.init();
+		ZFighterHands.init();
 		ZFighterDisc.init();
 		ZFighterItems.init();
 		ZFighterSparring.init();
@@ -463,6 +464,7 @@ public final class ZFighterPower implements Power {
 		ZFighterNpcs.init();
 		ZFighterPatrol.init();
 		ZFighterRaiders.init();
+		ZFighterHighSky.init();
 		ZFighterCorruption.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();
@@ -490,6 +492,7 @@ public final class ZFighterPower implements Power {
 			ZFighterGrowth.clear();
 			ZFighterKi.clear();
 			ZFighterWaveBeam.clear();
+			ZFighterHands.clear();
 			ZFighterDisc.clear();
 			ZFighterArts.clear();
 		});
@@ -528,13 +531,13 @@ public final class ZFighterPower implements Power {
 		}
 		if (key == PowerKey.ABILITY_2) {
 			int quick = ZFighterTraining.of(player).quick();
-			return quick != ZFighterTraining.KI_BLAST && ZFighterTraining.of(player).knows(quick);
+			return quick != ZFighterTraining.KI_BLAST && ZFighterTraining.owns(player, quick);
 		}
 		if (key != PowerKey.ABILITY_3) {
 			return false;
 		}
 		int charged = ZFighterTraining.of(player).charged();
-		boolean bought = charged != ZFighterTraining.KI_WAVE && ZFighterTraining.of(player).knows(charged);
+		boolean bought = charged != ZFighterTraining.KI_WAVE && ZFighterTraining.owns(player, charged);
 		return bought && (player.isShiftKeyDown() || state(player).waveFrom() >= 0);
 	}
 
@@ -597,6 +600,7 @@ public final class ZFighterPower implements Power {
 		if (live != null && live.flying) {
 			live.flying = false;
 		}
+		ZFighterHands.drop(player);
 		landFlight(player);
 		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID, APE_FIST_ID}) {
 			remove(player, Attributes.ATTACK_DAMAGE, id);
@@ -663,6 +667,7 @@ public final class ZFighterPower implements Power {
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
+		ZFighterSelfDestruct.tick(player, live);
 		// (0.17.56) the lineages' extras: adrenaline, water regen, the ki reserve, the comeback
 		ZFighterRaces.tick(player, live, max);
 		ZFighterCorruption.tick(player, live);
@@ -708,6 +713,7 @@ public final class ZFighterPower implements Power {
 
 		ZFighterKi.tickWave(player, live);
 		ZFighterKi.tickBarrage(player, live);
+		ZFighterHands.sync(player, live);
 		ZFighterTechniques.tickBarrier(player, live);
 		ZFighterTechniques.tickSpirit(player, live);
 

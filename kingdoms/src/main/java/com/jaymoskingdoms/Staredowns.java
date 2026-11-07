@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.sailing.Crew;
 import com.jaymoskingdoms.sailing.Ship;
 import java.util.HashMap;
@@ -108,6 +109,10 @@ final class Staredowns {
 		if (refused(sp, mob)) {
 			return false;
 		}
+		if (Captains.starable(mob) || CaptainSchemes.planted(mob)) {
+			// (0.7.432) a downed captain: to spare or to shame; ((0.7.617) a plant among a town's folk, to unmask)
+			return true;
+		}
 		return captainOf(mob) != null || ruled(sp, mob) != null;
 	}
 
@@ -142,7 +147,7 @@ final class Staredowns {
 
 	// ---- Will against nerve -------------------------------------------------------------------------------------------
 
-	/** {@code sp}'s Will: their Will pages' ranks, their world tier, a Warrior's name, Second Breath. */
+	/** {@code sp}'s Will: their Will pages' ranks, their world tier, a Warrior's name, Second Breath, trophies and a crown worn. */
 	static int will(ServerPlayer sp) {
 		int will = Will.rank(sp, Skills.Perk.DREAD_PRESENCE) + Will.rank(sp, Skills.Perk.STARE_DOWN) + Will.rank(sp, Skills.Perk.BROKEN_MORALE)
 			+ Will.rank(sp, Skills.Perk.NAME_THAT_CARRIES) + Will.rank(sp, Skills.Perk.LAST_LOOK);
@@ -150,6 +155,8 @@ final class Staredowns {
 		if (Renown.alignment(Skills.of(sp)) == Skills.Pillar.STRENGTH) {
 			will += WILL_ALIGNED;
 		}
+		// (0.7.435) trophies and a crown worn
+		will += Spoils.will(sp);
 		return Will.surging(sp) ? will + WILL_SURGE : will;
 	}
 
@@ -197,6 +204,15 @@ final class Staredowns {
 	 * always; a foe aboard, in the saddle, casting or outlawed), false for a plain foe to drop its weapon and run.
 	 */
 	static boolean broke(ServerLevel level, ServerPlayer sp, Mob seen, long now) {
+		if (CaptainSchemes.unmask(level, sp, seen)) {
+			// ((0.7.617) a captain planted among a town's folk, unmasked)
+			return true;
+		}
+		if (Captains.starable(seen)) {
+			// (0.7.432) a downed captain, spared (an empty hand) or shamed
+			Captains.stared(level, sp, seen, now);
+			return true;
+		}
 		Ship ship = captainOf(seen);
 		if (ship != null) {
 			captain(level, sp, seen, ship, now);
@@ -229,6 +245,11 @@ final class Staredowns {
 			level.playSound(null, mount.getX(), mount.getY(), mount.getZ(), SoundEvents.HORSE_ANGRY, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			Will.cowed(level, sp, seen, now);
 			tell(sp, "thrown", seen);
+			return true;
+		}
+		if (HavenGrowth.sworn(seen)) {
+			// (0.7.490) a haven's sworn neither drops its weapon nor runs
+			holds(level, sp, seen, "sworn");
 			return true;
 		}
 		if ((Bandits.wears(seen) || Bounties.wanted(level.getServer(), seen)) && PowersCompat.knockOut(level, seen, KNEEL_TICKS)) {
@@ -296,10 +317,8 @@ final class Staredowns {
 		long paid = pay;
 		TRIBUTE_READY.put(f.id(), now + TRIBUTE_TICKS);
 		Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - paid)));
-		ItemStack emeralds = new ItemStack(Items.EMERALD, (int) paid);
-		if (!sp.getInventory().add(emeralds) && !emeralds.isEmpty()) {
-			sp.spawnAtLocation(level, emeralds);
-		}
+		// (0.7.498) the tribute is silver coins (the treasury counts silver)
+		Money.pay(sp, Money.worth(paid));
 		Reputation.change(sp, f, REP_TRIBUTE);
 		say(level, ruler, "tribute");
 		sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stare.tribute", ruler.getDisplayName(), paid, f.name()).withStyle(ChatFormatting.GOLD));

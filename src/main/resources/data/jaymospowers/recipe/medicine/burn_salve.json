@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:plantain",
+    "jaymospowers:plantain",
+    "#minecraft:leaves"
+  ],
+  "result": {
+    "id": "jaymospowers:burn_salve",
+    "count": 2
+  }
+}

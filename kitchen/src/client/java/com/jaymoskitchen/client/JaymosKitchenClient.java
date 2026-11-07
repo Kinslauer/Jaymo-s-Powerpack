@@ -43,9 +43,13 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.stomach.StomachHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
+		// (0.5.43) low on water: faint veins at the screen edges
+		com.jaymoskitchen.client.climate.DryVeins.register();
 		com.jaymoskitchen.client.herb.PmehTooltip.register();
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
+		// (0.5.45) a dragged body follows the hand this client draws
+		com.jaymoskitchen.client.ragdoll.DragSim.register();
 		com.jaymoskitchen.client.ragdoll.LimpController.register();
 		// drinking: the view sways when you're drunk
 		com.jaymoskitchen.client.brewing.DrunkSway.register();

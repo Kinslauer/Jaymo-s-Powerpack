@@ -1,0 +1,13 @@
+{
+  "message.jaymoskingdoms.captive.unruly.struck": "You strike out in your chains. The camp falls on you!",
+  "message.jaymoskingdoms.captive.unruly.broke": "A captive tearing at the camp? They fall on you!",
+  "message.jaymoskingdoms.captive.unruly.stole": "Caught rifling their stores. The camp falls on you!",
+  "message.jaymoskingdoms.captive.unruly.pick": "They see you working at the shackle. The camp falls on you!",
+  "message.jaymoskingdoms.captive.unruly.slam": "They heard you hammering at your chain. The camp falls on you!",
+  "message.jaymoskingdoms.captive.unruly.saw": "They catch you sawing at your rope. The camp falls on you!",
+  "message.jaymoskingdoms.shackle.slamming": "Beating at the chain: %s%%",
+  "message.jaymoskingdoms.shackle.sawing": "Sawing at the rope: %s%%",
+  "message.jaymoskingdoms.hard.chains.broken": "A link gives way. The chain falls from your neck.",
+  "message.jaymoskingdoms.hard.chains.cut": "The last strands part. The rope falls from your neck.",
+  "gui.jaymoskingdoms.story.hint.113": "Taken captive, your captors leave you be while you keep your place. Strike out, steal, break things or get caught at your bonds and the camp falls on you. A chain gives to a rock beaten on it, a rope to anything sharp, but both are heard or seen."
+}

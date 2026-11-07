@@ -174,11 +174,16 @@ public final class Spirits {
 		Grimsby.register();
 		Varro.register();
 		Ambrose.register();
+		SpiritCharms.register();
 		Thessaly.register();
 		QuietOne.register();
 		SpiritExecutions.register();
 		SpiritClash.register();
+		// (0.7.467) the strong strike's barrage clash
+		SpiritBarrage.register();
 		FolkSpirits.register();
+		// (0.7.465) the Grue, who takes the spirits of those who dabble in the dark
+		Grue.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OUT_TICKS.clear();
 			IDLE_AT.clear();
@@ -301,6 +306,10 @@ public final class Spirits {
 				list.add(move);
 			}
 		}
+		// (0.7.468) the Grue's, once subjugated
+		if (GrueTrial.mastered(state)) {
+			list.addAll(GrueTrial.MOVES);
+		}
 		return list;
 	}
 
@@ -312,7 +321,9 @@ public final class Spirits {
 
 	/** How much harder its moves hit at this level (1.0 at level 1, {@link #LEVEL_DAMAGE} more for each level after). */
 	public static float damageScale(SpiritState state) {
-		return 1.0F + LEVEL_DAMAGE * (Math.clamp(state.level(), 1, MAX_LEVEL) - 1);
+		float scale = 1.0F + LEVEL_DAMAGE * (Math.clamp(state.level(), 1, MAX_LEVEL) - 1);
+		// (0.7.468) Grue Form
+		return state.toggled(SpiritState.GRUE_FORM) ? scale * GrueTrial.FORM_DAMAGE : scale;
 	}
 
 	/** The arms hold {@code pose} ({@link Poses}) from now, for the viewers. */
@@ -355,10 +366,16 @@ public final class Spirits {
 	// ---- the key ----------------------------------------------------------------------------------------------------
 
 	private static void key(ServerPlayer player, Key key) {
-		if (player.isSpectator() || !player.isAlive()) {
+		// (0.7.467) in a barrage the key beats time (SpiritBarrage.Tap), and the spirit can't be sent off or swapped
+		if (player.isSpectator() || !player.isAlive() || SpiritBarrage.busy(player)) {
 			return;
 		}
 		SpiritState state = state(player);
+		if (Grue.taken(player)) {
+			// (0.7.465) it isn't yours any more
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.grue.no_answer").withStyle(s -> s.withColor(Grue.COLOR)));
+			return;
+		}
 		if (state == null) {
 			if (key.action() == SUMMON) {
 				player.sendOverlayMessage(Component.translatable(SpiritSickness.sick(player) ? "message.jaymoskingdoms.spirit.asleep"
@@ -418,6 +435,16 @@ public final class Spirits {
 		Mana.sendSeen(level, Mana.MOTE, player.getX(), player.getY() + 1.2, player.getZ(), 24, 0.5, 0.7, 0.5, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.9F);
 		SpiritVoice.sayNow(player, state.kind(), "summon");
+	}
+
+	/** (0.7.465) The Grue keeps the spirit out, whatever mana there is (it's no longer theirs to call). */
+	static void forceOut(ServerPlayer player) {
+		SpiritState state = state(player);
+		if (state == null || state.out()) {
+			return;
+		}
+		set(player, state.withOut(true).withShow(player.level().getGameTime(), Poses.REACH));
+		OUT_TICKS.put(player.getUUID(), 0);
 	}
 
 	/** Puts the spirit away, saying {@code event} if it has one to say (null: quietly). */
@@ -490,6 +517,7 @@ public final class Spirits {
 		if (now % 20L == 0L) {
 			SpiritSickness.tick(player, now);
 		}
+		Grue.tick(player, now);
 		SpiritState state = state(player);
 		if (state == null || !state.out()) {
 			return;
@@ -508,7 +536,8 @@ public final class Spirits {
 
 	/** Once a second while it's out: the drain, the bond, the tiredness. False if it faded. */
 	private static boolean second(ServerPlayer player, SpiritState state) {
-		if (!player.isCreative()) {
+		// (0.7.465) the Grue needs none of your mana to keep it out
+		if (!player.isCreative() && !Grue.taken(player)) {
 			Mana.drain(player, DRAIN_PER_SECOND);
 			if (Mana.current(player) < TIRED_AT) {
 				putAway(player, "tired");
@@ -650,6 +679,10 @@ public final class Spirits {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.spirit.level", Component.translatable("spirit.jaymoskingdoms." + spirit.id() + ".name"), level)
 			.withStyle(ChatFormatting.AQUA));
 		SpiritVoice.sayNow(player, state.kind(), "level");
+		if (state.level() < com.jaymoskingdoms.InBalming.LEVEL && level >= com.jaymoskingdoms.InBalming.LEVEL) {
+			// (0.7.433) each spirit teaches its In-balming (Varro remembers the leagues of orcs he led)
+			SpiritVoice.sayNow(player, state.kind(), "teach");
+		}
 	}
 
 	/** {@code player} killed {@code victim}: with the spirit out, a fight won together. */

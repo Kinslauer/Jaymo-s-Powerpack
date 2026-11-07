@@ -3,3 +3,8 @@ by cybercat5555, itsmeowdev and Wolverbyte (https://github.com/itsmeow/betterani
 (https://creativecommons.org/licenses/by-nc-sa/4.0/). The models were carried over to Minecraft 26.3 names in
 kingdoms/src/client/java/com/jaymoskingdoms/client/wild/*Model.java; those adapted models and these textures are shared
 under the same licence (non-commercial, share alike, with this credit). The textures are unchanged.
+
+Grizzly (0.7.611): grizzly.png, textures/item/grizzly_spawn_egg.png and the model in
+kingdoms/src/client/java/com/jaymoskingdoms/client/wild/GrizzlyModel.java are our own, built from
+docs/Grizzly-Model-Spec.md and painted by tools/gen_grizzly.py. No other mod's boxes or pixels. Not under the CC BY-NC-SA
+terms above.

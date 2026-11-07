@@ -34,7 +34,8 @@ public final class ZFighterSlots {
 
 	/** Whether technique {@code index} can sit on the wheel. */
 	public static boolean fits(int index) {
-		return index >= 0 && index < ZFighterTraining.TECHNIQUES && index != ZFighterTraining.SPIRIT_BOMB && index != ZFighterTraining.TELEPORT;
+		return ZFighterCreator.custom(index)
+			|| index >= 0 && index < ZFighterTraining.TECHNIQUES && index != ZFighterTraining.SPIRIT_BOMB && index != ZFighterTraining.TELEPORT;
 	}
 
 	/** His eight slots ({@link #EMPTY} where none), saved or, if none are, his known techniques in order. Both sides. */
@@ -45,7 +46,7 @@ public final class ZFighterSlots {
 		if (saved != null) {
 			for (int i = 0; i < SLOTS; i++) {
 				int index = i < saved.size() ? saved.get(i) : EMPTY;
-				slots.add(fits(index) && data.knows(index) && !slots.contains(index) ? index : EMPTY);
+				slots.add(fits(index) && ZFighterTraining.owns(player, index) && !slots.contains(index) ? index : EMPTY);
 			}
 			return slots;
 		}
@@ -72,7 +73,7 @@ public final class ZFighterSlots {
 
 	/** Server: the training screen's wheel button: takes a technique off the wheel, or puts it in the first free slot. */
 	static void toggle(ServerPlayer player, int index) {
-		if (!fits(index) || !ZFighterTraining.of(player).knows(index)) {
+		if (!fits(index) || !ZFighterTraining.owns(player, index)) {
 			return;
 		}
 		List<Integer> slots = of(player);

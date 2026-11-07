@@ -3,6 +3,7 @@ package com.jaymospowers.power.gravity;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.PowerInput;
 import com.jaymospowers.core.Powers;
@@ -76,6 +77,8 @@ import org.jspecify.annotations.Nullable;
  * slowing what it passes and carving up the ground ({@link GravityWave}). A tap is still the force kneel around you.
  * B while Lift holds a creature (R+B): Inversion, yanked in for a gut punch that bleeds it inside
  * ({@link GravityGutPunch}).</li>
+ * <li>B+G (hold B, tap G), carrying more than 8 rocks: the rock ball, then the orbiting rocks, then put away
+ * ({@link GravityRocks}).</li>
  * </ul>
  * 0.2.0 fate: creatures that die to the weight you gave them (falls after Lift, Crush, the Singularity) count toward
  * <b>ascension</b> (Event Horizon: unmovable, projectiles bend away; C is the {@code Singularity}); the same deaths, and
@@ -192,6 +195,8 @@ public final class GravityPower implements Power {
 	 * + {@code THROW_DAMAGE_PER_SPEED} x its speed (x its size). It flies for at most {@code THROW_TICKS}.
 	 */
 	static final double THROW_SPEED = 2.6;
+	/** (0.21.8) The arm drawn back before a hurl lets go (ticks; ThrownRocks' pose). */
+	static final int HURL_WIND = 7;
 	static final float THROW_DAMAGE_BASE = 4.0F, THROW_DAMAGE_PER_SPEED = 5.0F;
 	static final int THROW_TICKS = 60;
 	/** Held, a throwable thing drifts in toward you (blocks a tick) until it hangs this close, for a better throw. */
@@ -375,6 +380,8 @@ public final class GravityPower implements Power {
 	/** Per player, server memory. */
 	private static final class State {
 		int liftTarget = -1;
+		/** (0.21.8) When the hurl being wound up lets go (game time), or -1. */
+		long hurlAt = -1;
 		double liftHold;
 		int liftTicks;
 		long crushFrom = -1;
@@ -475,6 +482,8 @@ public final class GravityPower implements Power {
 		GravityTrainingField.init();
 		// (0.17.3) what a gifted villager does with Gravity
 		GravityGift.init();
+		// (0.21.10) the rock ball and the orbiting rocks (B+G)
+		GravityRocks.init();
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
 		// surviving a hard fall is a step toward ascension, like a kill by weight
@@ -588,6 +597,7 @@ public final class GravityPower implements Power {
 		GravityRockFlight.stop(player);
 		GravityForward.stop(player);
 		GravityCometRam.stop(player);
+		GravityRocks.dismiss(player, true);
 	}
 
 	@Override
@@ -599,6 +609,7 @@ public final class GravityPower implements Power {
 		setWeightless(player, false);
 		GravityForward.forget(player);
 		GravityCometRam.forget(player);
+		GravityRocks.forget(player);
 		GravityWalk.stop(player);
 		modifier(player, Attributes.GRAVITY, COLLAPSE_ID, 0.0, false);
 		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, COLLAPSE_FALL_ID, 0.0, false);
@@ -635,6 +646,8 @@ public final class GravityPower implements Power {
 					if (state.chunkHold && state.liftTarget >= 0) {
 						// R again drops a chunk held on its own
 						dropLift(player, state, true);
+					} else if (player.isShiftKeyDown() && state.liftTarget < 0 && GravityRocks.throwRocks(player)) {
+						// (0.21.10) sneak+R with rocks out (B+G): the ball thrown where you look, or the orbit flung outward
 					} else {
 						startLift(player, state);
 					}
@@ -652,7 +665,12 @@ public final class GravityPower implements Power {
 				}
 			}
 			case ABILITY_2 -> {
-				if (down) {
+				if (down && PowerInput.isDown(player, PowerKey.ABILITY_4)) {
+					// (0.21.10) B+G (B held, G tapped): the rocks you carry, gathered into a ball, split to orbit you, or put away;
+					// the B held for it never lands its Crush or Wave
+					state.crushFrom = -1;
+					GravityRocks.cycle(player);
+				} else if (down) {
 					well(player);
 				}
 			}
@@ -833,6 +851,15 @@ public final class GravityPower implements Power {
 			return;
 		}
 		Entity target = entity;
+		if (state.hurlAt >= 0 && player.level().getGameTime() >= state.hurlAt) {
+			// (0.21.8) wound up: let it fly
+			state.hurlAt = -1;
+			if (throwable(entity)) {
+				hurl(player, state, entity);
+				return;
+			}
+			com.jaymospowers.ground.ThrownRocks.hurlDropped(player);
+		}
 		if (state.choking && !(target instanceof LivingEntity)) {
 			state.choking = false;
 		}
@@ -901,6 +928,11 @@ public final class GravityPower implements Power {
 		}
 		Entity entity = player.level().getEntity(state.liftTarget);
 		state.liftTarget = -1;
+		if (state.hurlAt >= 0) {
+			// (0.21.8) let go mid wind-up: no hurl
+			state.hurlAt = -1;
+			com.jaymospowers.ground.ThrownRocks.hurlDropped(player);
+		}
 		state.choking = false;
 		state.chunkHold = false;
 		player.removeAttached(GRIP);
@@ -974,7 +1006,11 @@ public final class GravityPower implements Power {
 		Entity entity = player.level().getEntity(state.liftTarget);
 		if (left) {
 			if (entity != null && throwable(entity)) {
-				hurl(player, state, entity);
+				// (0.21.8) Andy: "gravity users throw instantly": the arm draws back first (tickLift lets go)
+				if (state.hurlAt < 0) {
+					state.hurlAt = player.level().getGameTime() + HURL_WIND;
+					com.jaymospowers.ground.ThrownRocks.hurling(player, HURL_WIND);
+				}
 			} else if (entity instanceof LivingEntity living && living.isAlive() && com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_1)) {
 				// the Push: away, far, and through
 				state.choking = false;
@@ -1171,6 +1207,8 @@ public final class GravityPower implements Power {
 	/** Right click on such a thing: let go and hurl it where you look, hard. */
 	private static void hurl(ServerPlayer player, State state, Entity entity) {
 		dropLift(player, state, true);
+		// (0.21.8) the arm whips through with it, as a thrown rock's does (RockThrowPose)
+		com.jaymospowers.ground.ThrownRocks.hurled(player);
 		Vec3 velocity = player.getViewVector(1.0F).scale(THROW_SPEED);
 		entity.setDeltaMovement(velocity);
 		entity.needsSync = true;
@@ -1308,6 +1346,10 @@ public final class GravityPower implements Power {
 	/** Lift ends for a slam: weight back on, cooldown, no Collapse fling. */
 	private static void dropLiftQuietly(ServerPlayer player, State state, Entity target) {
 		state.liftTarget = -1;
+		if (state.hurlAt >= 0) {
+			state.hurlAt = -1;
+			com.jaymospowers.ground.ThrownRocks.hurlDropped(player);
+		}
 		player.removeAttached(GRIP);
 		cool(player, LIFT, LIFT_COOLDOWN);
 		modifier(target, Attributes.GRAVITY, LIFT_ID, 0.0, false);
@@ -1814,7 +1856,7 @@ public final class GravityPower implements Power {
 			GravityOrbit.drop(player);
 		}
 		// the Nether's weight takes hold of the power: corrupted on arrival
-		if (player.level().dimension() == Level.NETHER && Fate.canCorrupt(player) && !player.isCreative()) {
+		if (Stacked.in(player, Level.NETHER) && Fate.canCorrupt(player) && !player.isCreative()) {
 			Fate.corrupt(player);
 		}
 		if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3) && PowerInput.isDown(player, PowerKey.ABILITY_3)) {
@@ -2324,7 +2366,7 @@ public final class GravityPower implements Power {
 		return type.getNamespace().equals("jaymoskitchen") && type.getPath().contains("corpse");
 	}
 
-	private static void fizzle(ServerPlayer player) {
+	static void fizzle(ServerPlayer player) {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHULKER_BULLET_HIT, SoundSource.PLAYERS, 0.4F, 1.6F);
 	}
 }

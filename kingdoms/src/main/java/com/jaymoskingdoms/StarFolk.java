@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -33,7 +34,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.384, Andy's SevTech picks: "Reading the sky") Star charts, in Kingdoms' hands. Jaymo's Powers' pod flies only to worlds
  * whose chart the pilot has read. The floating islands' hermits ({@link Hermits}) and the stargazers (about one villager in
- * {@link GiftedFolk#STARGAZER_ODDS}, tagged {@link #STARGAZER}) sell the charts a player hasn't read, for emeralds: "Ask about
+ * {@link GiftedFolk#STARGAZER_ODDS}, tagged {@link #STARGAZER}) sell the charts a player hasn't read, for silver coins: "Ask about
  * the stars" in MCA's menu ({@link #ANSWER}) opens a talk screen ({@link ZFighterFolk#ask}) with a few words about the sky and
  * the charts for sale, cheapest trip first (a hermit sells {@link Hermits#CHARTS_OFFERED}, a stargazer {@link #STARGAZER_OFFERED}).
  * A stargazer's words also go into the player's next Tidings ({@link Post#tidings}).
@@ -49,7 +50,7 @@ public final class StarFolk {
 	public static final String STARGAZER = "jaymoskingdoms_stargazer";
 	/** How many charts a stargazer has for sale at once (a hermit's is {@link Hermits#CHARTS_OFFERED}). */
 	public static final int STARGAZER_OFFERED = 2;
-	/** A chart's price in emeralds: the base, plus this much for each place down the cost order (the Pale Moon is first). */
+	/** A chart's price in silver coins: the base, plus this much for each place down the cost order (the Pale Moon is first). */
 	static final int PRICE_BASE = 6, PRICE_STEP = 4;
 	/** Variants of each line in the lang file ({@code talk.jaymoskingdoms.stars.<hermit|stargazer>.<n>}, {@code news.jaymoskingdoms.sky.*}). */
 	static final int TALK_LINES = 4, NEWS_LINES = 4;
@@ -62,7 +63,7 @@ public final class StarFolk {
 	static final int REMEMBERED = 64;
 	/** Powers' tags on pods: a raiders' band, and a patrolman's visit. */
 	static final String RAIDER_TAG = "jaymospowers.raider", PATROL_TAG = "jaymospowers.patrol_pod";
-	/** (0.7.387) A hermit trades Maw dust, the grit off the Maw's rim: this many pieces for this many emeralds (Powers' item, looked up by id). */
+	/** (0.7.387) A hermit trades Maw dust, the grit off the Maw's rim: this many pieces for this many silver coins (Powers' item, looked up by id). */
 	static final int DUST_COUNT = 2, DUST_PRICE = 10;
 	static final Identifier MAW_DUST = Identifier.fromNamespaceAndPath("jaymospowers", "maw_dust");
 	/** A talk's colour (the stars' pale blue). */
@@ -159,7 +160,7 @@ public final class StarFolk {
 
 	// ---- selling ------------------------------------------------------------------------------------------------------
 
-	/** A chart's price in emeralds. */
+	/** A chart's price in silver coins. */
 	static int price(int world) {
 		return PRICE_BASE + PRICE_STEP * rank(world);
 	}
@@ -174,25 +175,14 @@ public final class StarFolk {
 		return is(e) && ready();
 	}
 
-	private static int emeralds(ServerPlayer player) {
-		int count = 0;
-		for (ItemStack stack : player.getInventory()) {
-			if (stack.is(Items.EMERALD)) {
-				count += stack.getCount();
-			}
-		}
-		return count;
+	/** (0.7.498) Whether the player can pay {@code count} of the unit in coin where they stand (foreign coin at its going rate less the cut). */
+	private static boolean canPay(ServerPlayer player, int count) {
+		return Money.canPay(player, Money.worth(count));
 	}
 
-	private static void take(ServerPlayer player, int count) {
-		int left = count;
-		for (ItemStack stack : player.getInventory()) {
-			if (left > 0 && stack.is(Items.EMERALD)) {
-				int use = Math.min(left, stack.getCount());
-				stack.shrink(use);
-				left -= use;
-			}
-		}
+	/** (0.7.498) Takes {@code count} of the unit in coin, all or nothing; true if it was paid. */
+	private static boolean take(ServerPlayer player, int count) {
+		return Money.charge(player, Money.worth(count));
 	}
 
 	/** "Ask about the stars": a few words about the sky, and the charts for sale on the talk screen. */
@@ -217,27 +207,26 @@ public final class StarFolk {
 		if (worlds.isEmpty()) {
 			words = Component.translatable("talk.jaymoskingdoms.stars.none");
 		}
-		int have = emeralds(player);
 		List<Component> options = new ArrayList<>();
 		List<Boolean> enabled = new ArrayList<>();
 		for (int world : worlds) {
-			options.add(Component.translatable("talk.jaymoskingdoms.stars.buy", name(world), price(world)));
-			enabled.add(have >= price(world));
+			options.add(Component.translatable("talk.jaymoskingdoms.stars.buy", name(world), Money.text(player, Money.worth(price(world)))));
+			enabled.add(canPay(player, price(world)));
 		}
 		boolean sellsDust = dust != Items.AIR;
 		if (sellsDust) {
-			options.add(Component.translatable("talk.jaymoskingdoms.stars.dust", DUST_COUNT, DUST_PRICE));
-			enabled.add(have >= DUST_PRICE);
+			options.add(Component.translatable("talk.jaymoskingdoms.stars.dust", DUST_COUNT, Money.text(player, Money.worth(DUST_PRICE))));
+			enabled.add(canPay(player, DUST_PRICE));
 		}
 		options.add(Component.translatable("talk.jaymoskingdoms.stars.leave"));
 		enabled.add(true);
 		ZFighterFolk.ask(player, speaker, words, options, enabled, pick -> {
 			if (sellsDust && pick == worlds.size()) {
-				if (emeralds(player) < DUST_PRICE) {
+				// (0.7.498) the dust is handed over only once the coin is taken
+				if (!take(player, DUST_PRICE)) {
 					Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.short"), COLOR);
 					return;
 				}
-				take(player, DUST_PRICE);
 				player.getInventory().placeItemBackInInventory(new ItemStack(dust, DUST_COUNT), net.minecraft.util.Prediction.SERVER_ONLY);
 				level.playSound(null, speaker.getX(), speaker.getY(), speaker.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 				Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.dust_sold"), COLOR);
@@ -247,15 +236,18 @@ public final class StarFolk {
 				return;
 			}
 			int world = worlds.get(pick);
-			if (emeralds(player) < price(world)) {
+			// (0.7.498) the coin is taken first (all or nothing) and given back if the chart can't be sold
+			if (!take(player, price(world))) {
 				Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.short"), COLOR);
 				return;
 			}
 			if (!sell(player, world)) {
+				if (!player.hasInfiniteMaterials()) {
+					Money.pay(player, Money.worth(price(world)));
+				}
 				Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.known"), COLOR);
 				return;
 			}
-			take(player, price(world));
 			level.playSound(null, speaker.getX(), speaker.getY(), speaker.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.sold", name(world)), COLOR);
 		});
@@ -275,7 +267,7 @@ public final class StarFolk {
 			return;
 		}
 		TOLD.put(key, now);
-		Post.tidings(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky.gazer." + level.getRandom().nextInt(NEWS_LINES), speaker.getDisplayName()));
+		Post.aside(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky.gazer." + level.getRandom().nextInt(NEWS_LINES), speaker.getDisplayName()));
 	}
 
 	// ---- lights in the sky --------------------------------------------------------------------------------------------
@@ -320,8 +312,14 @@ public final class StarFolk {
 						seen.clear();
 					}
 					if (seen.add(pod.getUUID())) {
-						Post.tidings(player.getUUID(), Component.translatable("news.jaymoskingdoms.sky." + (raiders ? "raiders." : "patrol.")
-							+ level.getRandom().nextInt(NEWS_LINES), town.name()));
+						// ((0.7.494) raiders falling on a town are great news, for a roost-keeper; a patrolman setting down is a passing sight)
+						Component line = Component.translatable("news.jaymoskingdoms.sky." + (raiders ? "raiders." : "patrol.")
+							+ level.getRandom().nextInt(NEWS_LINES), town.name());
+						if (raiders) {
+							Post.tidings(player.getUUID(), line);
+						} else {
+							Post.aside(player.getUUID(), line);
+						}
 					}
 				}
 			}

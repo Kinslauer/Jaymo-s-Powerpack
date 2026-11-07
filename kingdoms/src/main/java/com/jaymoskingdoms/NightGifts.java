@@ -125,6 +125,13 @@ public final class NightGifts {
 	static final float KILL_HEAL = 2.0F;
 	/** Frenzy after a werewolf's kill (ticks); Strength amplifier in human form and as the beast. */
 	static final int FRENZY_TICKS = 100, FRENZY_STRENGTH = 0, FRENZY_BEAST_STRENGTH = 2;
+	/**
+	 * (0.7.632) Andy: vampires "should also get an eye laser that blasts for a second but otherwise functions exactly like
+	 * frostborn". Its wait (ticks: a Frost-born's held beam hits once every 3 s, so this hits no faster), and the tag that
+	 * has Jaymo's Powers fire it ({@code FrostBeam.GAZE_TAG}).
+	 */
+	static final int GAZE_COOLDOWN = 60;
+	static final String GAZE_TAG = "jaymospowers_blood_gaze";
 	/** Bat wings: seconds of gliding when whole; how much each point of experience mends. */
 	public static final int WINGS_MAX = 120;
 	static final int WINGS_PER_XP = 2;
@@ -376,7 +383,8 @@ public final class NightGifts {
 	private static void second(MinecraftServer server, ServerPlayer player, boolean night) {
 		int kind = kindOf(player);
 		Gift old = player.getAttached(GIFT);
-		boolean beast = WerewolfPlayers.beast(player);
+		// (2026-11-05) torn out, not doubled over: the client hides their body by this (BeastHidesPlayerMixin)
+		boolean beast = WerewolfPlayers.tornOut(player);
 		int wings = old == null || !old.blood() ? WINGS_MAX : old.wings();
 		if (kind == VAMPIRE || kind == DHAMPIR) {
 			if (onBatWings(player)) {
@@ -481,32 +489,46 @@ public final class NightGifts {
 
 	// ---- the moves -----------------------------------------------------------------------------------------------------
 
-	private static void move(ServerPlayer player, int which) {
+	/** Whether it went: {@code which} 0 ({@code O}), 1 ({@code P}) or (0.7.632) 2, a vampire's eye laser, or (0.7.634) 3, Feed (the skill bar only). */
+	public static boolean move(ServerPlayer player, int which) {
 		Gift g = player.getAttached(GIFT);
 		if (g == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping()) {
-			return;
+			return false;
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[2]);
-		if (which < 0 || which > 1 || now < ready[which]) {
-			return;
+		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[4]);
+		if (which < 0 || which > 3 || now < ready[which]) {
+			return false;
 		}
 		if (g.blood()) {
 			if (which == 0 && dash(level, player)) {
 				ready[0] = now + DASH_COOLDOWN;
+				return true;
 			} else if (which == 1 && pound(level, player)) {
 				ready[1] = now + POUND_COOLDOWN;
+				return true;
+			} else if (which == 2 && net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				// (0.7.632) Jaymo's Powers fires it (its FrostBeam, out of the eyes, red, for a second)
+				player.addTag(GAZE_TAG);
+				ready[2] = now + GAZE_COOLDOWN;
+				return true;
+			} else if (which == 3) {
+				// (0.7.634) Feed: the grab, the throw, or a bite (BloodGrab.feed)
+				return BloodGrab.feed(player);
 			}
 		} else if (g.wolf()) {
 			boolean beast = WerewolfPlayers.beast(player);
 			if (which == 0 && leap(level, player, beast)) {
 				ready[0] = now + LEAP_COOLDOWN;
+				return true;
 			} else if (which == 1) {
 				howl(level, player, beast);
 				ready[1] = now + HOWL_COOLDOWN;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private static void push(ServerPlayer player, Vec3 v) {

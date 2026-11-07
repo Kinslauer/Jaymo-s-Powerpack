@@ -30,7 +30,9 @@ public enum Molten {
 	HONEY("honey", 0xFFF9A42C, null),
 	BLOOD("blood", 0xFF6B0000, null),
 	// ---- (0.18.56) back home (keep apart when merging far-world metals) ----
-	STAR_METAL("star_metal", 0xFFC9C2FF, TinkerMaterial.STAR_METAL);
+	STAR_METAL("star_metal", 0xFFC9C2FF, TinkerMaterial.STAR_METAL),
+	// ---- (0.18.102) bog iron (Jaymo's Kingdoms' raw bog iron melts into it: data/jaymoskingdoms/tinkering_melting) ----
+	BOG_IRON("bog_iron", 0xFF9A5428, TinkerMaterial.BOG_IRON);
 
 	/** mB in an ingot, a nugget and a block of metal (Tinkers' numbers). */
 	public static final int INGOT = 90, NUGGET = 10, BLOCK = 810;

@@ -421,6 +421,96 @@ def greenskins(out):
     numbered(out, "greenskin/orc_warchief", [greenskin(orcs, orcs.warchief, seed="orc-warchief-%d" % i) for i in range(4)])
 
 
+# ---- the havens (Havens patch 6): each blood's own dress -------------------------------------------------------------
+
+# cloth, second cloth, trim (net cord, stone-leather straps, bark, fur) and the blood's motif
+HAVEN_STYLES = {
+    "tideborn": ((52, 110, 120), (34, 74, 92), (226, 220, 200), "net"),
+    "stoneborn": ((112, 110, 104), (84, 82, 78), (62, 52, 44), "stone"),
+    "sylvan": ((74, 112, 52), (96, 74, 44), (120, 160, 70), "leaf"),
+    "warriorborn": ((118, 78, 48), (70, 50, 36), (150, 40, 32), "fur"),
+}
+
+
+def over(img, rect, colour, test=lambda x, y: True):
+    """{colour} on every opaque pixel of {rect} where {test(x, y)} holds (skin and bare head stay clear)."""
+    x0, y0, w, h = rect
+    for y in range(y0, y0 + h):
+        for x in range(x0, x0 + w):
+            if 0 <= x < 64 and 0 <= y < 64 and img.getpixel((x, y))[3] > 0 and test(x - x0, y - y0):
+                img.putpixel((x, y), tuple(colour) + (255,))
+
+
+def haven_motif(img, style, seed):
+    cloth, cloth2, trim, motif = style
+    rnd = random.Random(seed)
+    torso = [sea.BODY[s] for s in sea.SIDES] + [sea.JACKET[s] for s in sea.SIDES]
+    arms = [a[s] for a in sea.ARMS + sea.SLEEVES for s in sea.SIDES]
+    if motif == "net":
+        # a fishing net over the chest and back, shells knotted in it
+        for r in torso:
+            over(img, r, trim, lambda x, y: y > 2 and ((x + y) % 5 == 0 or (x - y) % 5 == 0))
+        for r in (sea.BODY["front"], sea.BODY["back"]):
+            for _ in range(2):
+                over(img, (r[0] + rnd.randrange(1, r[2] - 1), r[1] + rnd.randrange(3, r[3] - 2), 1, 1), (240, 196, 172))
+    elif motif == "stone":
+        # stone-grey leather in plates, riveted
+        for r in torso:
+            over(img, r, cloth2, lambda x, y: y % 4 == 3)
+            over(img, r, trim, lambda x, y: y % 4 == 1 and x % 3 == 1)
+        for r in arms:
+            over(img, r, cloth2, lambda x, y: y < 4)
+    elif motif == "leaf":
+        # leaves stitched over bark-brown cloth
+        for r in torso + arms:
+            for y in range(r[3]):
+                for x in range(r[2]):
+                    if rnd.random() < 0.18:
+                        over(img, (r[0] + x, r[1] + y, 1, 1), trim if rnd.random() < 0.6 else (52, 88, 40))
+        for r in (sea.BODY["front"], sea.BODY["back"]):
+            over(img, (r[0], r[1] + 7, r[2], 1), cloth2)
+    elif motif == "fur":
+        # furs over the shoulders and war paint stripes across the chest
+        for r in torso:
+            over(img, (r[0], r[1], r[2], 3), (150, 120, 84), lambda x, y: rnd.random() < 0.85)
+        for r in arms:
+            over(img, (r[0], r[1], r[2], 3), (150, 120, 84), lambda x, y: rnd.random() < 0.85)
+        for r in (sea.BODY["front"], sea.JACKET["front"]):
+            over(img, (r[0] + 1, r[1] + 5, r[2] - 2, 1), trim)
+            over(img, (r[0] + 2, r[1] + 7, r[2] - 4, 1), trim)
+
+
+def haven_guards(blood):
+    """A haven's guard: a gambeson in the blood's cloth (plain, belted, darker, lighter), with its motif."""
+    style = HAVEN_STYLES[blood]
+    out = []
+    for v, by in enumerate((0, 14, -14, 8)):
+        img = folk_look(folk.guard, cloth=folk.shade(style[0] if v % 2 == 0 else style[1], by))
+        haven_motif(img, style, seed="haven-guard-%s-%d" % (blood, v))
+        if v in (1, 3):
+            folk.belt(img, (70, 46, 26), (180, 180, 186))
+        out.append(img)
+    return out
+
+
+def haven_folk(blood):
+    """A haven's folk: a shirt and apron (a worker's) in the blood's cloths, with its motif."""
+    cloth, cloth2, trim, _ = style = HAVEN_STYLES[blood]
+    out = []
+    for v, (shirt, apron, cap) in enumerate(((cloth, cloth2, cloth2), (folk.shade(cloth, 18), sea.LEATHER, cloth),
+                                              (cloth2, cloth, trim), (folk.shade(cloth2, 16), folk.shade(cloth, -18), cloth2))):
+        img = shipwright(shirt, apron, cap)
+        haven_motif(img, style, seed="haven-folk-%s-%d" % (blood, v))
+        out.append(img)
+    return out
+
+
+def havens(out):
+    for blood in HAVEN_STYLES:
+        numbered(out, "haven/%s/guard" % blood, haven_guards(blood))
+        numbered(out, "haven/%s/folk" % blood, haven_folk(blood))
+
+
 # ---- all of them ----------------------------------------------------------------------------------------------------
 
 def numbered(out, name, imgs):
@@ -455,6 +545,7 @@ def all_outfits():
         numbered(out, "caster/wizard/" + name, [caster(sorc.wizard, name, colour, trim=t, beard=False, hat=False, seed="wizard-%s-%d" % (name, i))
                                                 for i, t in enumerate(WIZARD_TRIMS)])
     greenskins(out)
+    havens(out)
     return out
 
 
@@ -493,6 +584,14 @@ def preview(outfits, path):
 
 
 if __name__ == "__main__":
+    if sys.argv[1:] == ["havens"]:
+        # (Havens patch 6) only the havens' dress
+        outfits = {}
+        havens(outfits)
+        for name, img in outfits.items():
+            save(img, name)
+        preview(outfits, "build/havens-preview.png")
+        sys.exit(0)
     outfits = all_outfits()
     for name, img in outfits.items():
         save(img, name)

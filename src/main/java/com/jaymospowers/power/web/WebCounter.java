@@ -277,7 +277,7 @@ public final class WebCounter {
 	}
 
 	/** Right click: the counter, if the window's open and there's something to hit. */
-	private static void strike(ServerPlayer player) {
+	static void strike(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long ready = player.getAttached(READY);
@@ -700,6 +700,8 @@ public final class WebCounter {
 		ServerLevel level = player.level();
 		target.hurtServer(level, level.damageSources().playerAttack(player), damage);
 		push(target, push);
+		// (0.21.23) thrown into a wall: pinned there
+		WebTakedowns.thrown(player, target, push);
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(particle, at.x, at.y, at.z, particle == ParticleTypes.SWEEP_ATTACK || particle == ParticleTypes.EXPLOSION ? 1 : 12,
 			0.3, 0.3, 0.3, 0.2);

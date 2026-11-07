@@ -1,6 +1,7 @@
 package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.Stacked;
 import com.mojang.serialization.Codec;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -12,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -108,9 +110,11 @@ public final class ArsenalEmber {
 		if (!emberborn(player) || stranded(player)) {
 			return false;
 		}
-		boolean home = level.dimension() == Level.OVERWORLD;
+		// (0.20.30) by the layer you stand in, so a One Dimension world's stacked Nether counts (Stacked)
+		ResourceKey<Level> realm = Stacked.realm(player);
+		boolean home = realm == Level.OVERWORLD;
 		if (escaped(player)) {
-			return netherMode(player) && (home || level.dimension() == Level.NETHER);
+			return netherMode(player) && (home || realm == Level.NETHER);
 		}
 		return home && level.getRandom().nextDouble() < NETHER_CHANCE;
 	}
@@ -130,7 +134,7 @@ public final class ArsenalEmber {
 
 	/** Every {@link #CHECK_EVERY} ticks: a stranded player who is in the Overworld has escaped. */
 	static void tick(ServerPlayer player) {
-		if (player.tickCount % CHECK_EVERY != 0 || !stranded(player) || player.level().dimension() != Level.OVERWORLD) {
+		if (player.tickCount % CHECK_EVERY != 0 || !stranded(player) || !Stacked.in(player, Level.OVERWORLD)) {
 			return;
 		}
 		player.removeAttached(STRANDED);
@@ -159,14 +163,14 @@ public final class ArsenalEmber {
 	static void cross(ServerPlayer player, boolean owner) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel from = player.level();
-		boolean toNether = from.dimension() != Level.NETHER;
-		ServerLevel to = server.getLevel(toNether ? Level.NETHER : Level.OVERWORLD);
+		boolean toNether = !Stacked.in(player, Level.NETHER);
+		ServerLevel to = Stacked.level(server, toNether ? Level.NETHER : Level.OVERWORLD);
 		if (to == null) {
 			return;
 		}
 		Vec3 at;
 		if (toNether) {
-			at = netherSpot(to, Math.floorDiv(player.getBlockX(), SCALE), Math.floorDiv(player.getBlockZ(), SCALE));
+			at = netherSpot(to, Math.floorDiv(player.getBlockX(), SCALE), Math.floorDiv(player.getBlockZ(), SCALE), Stacked.shift(server, Level.NETHER));
 		} else {
 			int x = Math.max(-WORLD_LIMIT, Math.min(WORLD_LIMIT, player.getBlockX() * SCALE));
 			int z = Math.max(-WORLD_LIMIT, Math.min(WORLD_LIMIT, player.getBlockZ() * SCALE));
@@ -187,7 +191,7 @@ public final class ArsenalEmber {
 	}
 
 	/** Safe ground near (x, z) in the Nether: a solid floor with two air above and no lava; else a small platform. */
-	private static Vec3 netherSpot(ServerLevel nether, int x, int z) {
+	private static Vec3 netherSpot(ServerLevel nether, int x, int z, int shift) {
 		BlockPos.MutableBlockPos feet = new BlockPos.MutableBlockPos();
 		for (int r = 0; r <= SEARCH_RADIUS; r++) {
 			for (int dx = -r; dx <= r; dx++) {
@@ -195,7 +199,7 @@ public final class ArsenalEmber {
 					if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
 						continue;
 					}
-					for (int y = NETHER_TOP; y >= NETHER_BOTTOM; y--) {
+					for (int y = NETHER_TOP + shift; y >= NETHER_BOTTOM + shift; y--) {
 						feet.set(x + dx, y, z + dz);
 						if (safe(nether, feet)) {
 							return Vec3.atBottomCenterOf(feet.immutable());
@@ -208,13 +212,13 @@ public final class ArsenalEmber {
 		BlockState netherrack = Blocks.NETHERRACK.defaultBlockState();
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dz = -1; dz <= 1; dz++) {
-				nether.setBlock(new BlockPos(x + dx, PLATFORM_Y - 1, z + dz), dx == 0 && dz == 0 ? obsidian : netherrack, Block.UPDATE_CLIENTS);
+				nether.setBlock(new BlockPos(x + dx, PLATFORM_Y + shift - 1, z + dz), dx == 0 && dz == 0 ? obsidian : netherrack, Block.UPDATE_CLIENTS);
 				for (int h = 0; h < 3; h++) {
-					nether.setBlock(new BlockPos(x + dx, PLATFORM_Y + h, z + dz), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+					nether.setBlock(new BlockPos(x + dx, PLATFORM_Y + shift + h, z + dz), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 				}
 			}
 		}
-		return Vec3.atBottomCenterOf(new BlockPos(x, PLATFORM_Y, z));
+		return Vec3.atBottomCenterOf(new BlockPos(x, PLATFORM_Y + shift, z));
 	}
 
 	private static boolean safe(ServerLevel level, BlockPos feet) {

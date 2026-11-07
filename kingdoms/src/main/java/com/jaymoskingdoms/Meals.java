@@ -83,8 +83,8 @@ public final class Meals {
 	static final int HOME_PORTIONS = 2;
 	/** Servings in the eatery's pot from an item: a cook's dish, a soup or stew, or anything else. */
 	static final int DISH_SERVINGS = 3, STEW_SERVINGS = 4, PLAIN_SERVINGS = 2;
-	/** A meal's price in bits ({@link #BITS} to an emerald) when food is as it should be; the realm's tax on townsfolk's meals (percent). */
-	static final int MEAL_BITS = 2, BITS = 16, TAX_PERCENT = 25;
+	/** A meal's price in bits ({@link #BITS} to an emerald) when food is as it should be; the realm's tax on townsfolk's meals (percent). (0.7.498) Ten bits to the emerald's worth, as the coinage made it. */
+	static final int MEAL_BITS = 2, BITS = 10, TAX_PERCENT = 25;
 	/** The food a town wants in store (items): per head, and at least. The price index's bounds (percent). */
 	static final int WANT_PER_HEAD = 2, WANT_LEAST = 16, INDEX_LEAST = 50, INDEX_MOST = 300;
 	/** Dear from this index (percent; they grumble), cheap below this (they're content); the chance of saying so. */

@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:wool_carpets",
+    "#minecraft:candles",
+    "#minecraft:flower_pots",
+    "#minecraft:banners",
+    "minecraft:lantern",
+    "minecraft:soul_lantern",
+    "minecraft:bookshelf",
+    "minecraft:chiseled_bookshelf",
+    "minecraft:moss_carpet",
+    "minecraft:pale_moss_carpet",
+    {
+      "id": "#minecraft:copper_lanterns",
+      "required": false
+    }
+  ]
+}

@@ -245,8 +245,8 @@
   "wish.jaymospowers.zfighter.revive.short": "Deaths in the last hour",
   "wish.jaymospowers.zfighter.revive.desc": "Everyone who died in the last hour is brought to your side, healed, with what they dropped.",
   "wish.jaymospowers.zfighter.riches": "Riches",
-  "wish.jaymospowers.zfighter.riches.short": "192 emeralds",
-  "wish.jaymospowers.zfighter.riches.desc": "Three stacks of emeralds.",
+  "wish.jaymospowers.zfighter.riches.short": "192 emeralds' worth",
+  "wish.jaymospowers.zfighter.riches.desc": "Three stacks of emeralds' worth (192) in coin, into your purse.",
   "wish.jaymospowers.zfighter.awaken": "Awaken",
   "wish.jaymospowers.zfighter.awaken.short": "Open the way to Super",
   "wish.jaymospowers.zfighter.awaken.desc": "For a Z Fighter not yet Super: enough hardship to break through at the next near-death.",
@@ -275,7 +275,7 @@
   "message.jaymospowers.zfighter_lesson_mastery": "deeper mastery of %s",
   "message.jaymospowers.zfighter_raid": "%s falls from the sky beside %s! Every fighter is needed!",
   "message.jaymospowers.zfighter_raid_share_tp": "Your share of the victory: %s TP.",
-  "message.jaymospowers.zfighter_raid_share": "Your share of the victory: %s emeralds and experience.",
+  "message.jaymospowers.zfighter_raid_share": "Your share of the victory: %s and experience.",
   "message.jaymospowers.zfighter_raid_won": "%s is beaten! %s is saved; %s fighters share the prize.",
   "message.jaymospowers.zfighter_tournament_open": "A tournament opens at %s! Step into the ring of light at %s, %s within %s minutes to enter.",
   "message.jaymospowers.zfighter_tournament_entered": "%s enters the tournament at %s!",
@@ -290,8 +290,8 @@
   "message.jaymospowers.zfighter_tournament_won_gone": "%s wins: %s left the ring.",
   "message.jaymospowers.zfighter_tournament_won_time": "Time! %s wins on points over %s.",
   "message.jaymospowers.zfighter_tournament_champion": "%s is the champion of the tournament at %s!",
-  "message.jaymospowers.zfighter_tournament_prize_tp": "Prize: %s TP and %s emeralds.",
-  "message.jaymospowers.zfighter_tournament_prize": "Prize: %s emeralds.",
+  "message.jaymospowers.zfighter_tournament_prize_tp": "Prize: %s TP and %s.",
+  "message.jaymospowers.zfighter_tournament_prize": "Prize: %s.",
   "entity.jaymospowers.rogue_fighter": "Rogue Fighter",
   "entity.jaymospowers.rogue_fighter.tyrant.garrok": "Garrok the Tyrant",
   "entity.jaymospowers.rogue_fighter.tyrant.vexa": "Vexa the Tyrant",
@@ -346,5 +346,6 @@
   "message.jaymospowers.zfighter_super_4_not_warrior": "Primal Super is the Warrior-born's alone, and your heritage isn't Warrior-born now.",
   "message.jaymospowers.zfighter_super_4_no_super": "Break through to your first Super before you reach for Primal Super.",
   "message.jaymospowers.zfighter_super_4_ape": "Not while you are the ape.",
-  "message.jaymospowers.zfighter_super_primal_wait": "The ape's fire isn't all yours yet."
+  "message.jaymospowers.zfighter_super_primal_wait": "The ape's fire isn't all yours yet.",
+  "message.jaymospowers.villager_ape_turn_fake_moon": "%s stares up at the false moon. Something tears loose from their belt. They're growing..."
 }

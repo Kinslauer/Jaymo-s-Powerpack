@@ -137,83 +137,16 @@ public final class WindTempest {
 		}
 		final Vec3 tip = end;
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.PROFILE, LANCE_FILM_TICKS, tip, null, 0.0);
-		AABB area = new AABB(eye, tip).inflate(LANCE_RADIUS + 1.0);
-		List<Entity> hits = new ArrayList<>(level.getEntities(player, area, e -> e.isAlive() && !e.isSpectator() && e != player.getVehicle()
-			&& (e instanceof LivingEntity || e instanceof Projectile)
-			&& (e.getBoundingBox().inflate(LANCE_RADIUS).contains(eye) || e.getBoundingBox().inflate(LANCE_RADIUS).clip(eye, tip).isPresent())));
-		hits.sort(Comparator.comparingDouble(e -> e.distanceToSqr(eye)));
-
 		// the lance blows out the fire along it (a Stormbound lance's bolts fall after)
 		WindDouse.line(level, eye, tip, LANCE_RADIUS + 1.0, player);
 		// Stormbound only in the rain: under a clear sky it's the Tempest's own lance
 		boolean stormbound = Fate.isCorrupted(player) && WindModes.thunderPower(level) > 0.0F;
-		if (stormbound) {
-			// lightning first (our own damage goes on top of it, so the lance's full damage still lands)
-			List<Vec3> bolts = new ArrayList<>();
-			for (Entity hit : hits) {
-				if (bolts.size() >= LANCE_MAX_BOLTS) {
-					break;
-				}
-				if (hit instanceof LivingEntity) {
-					bolts.add(hit.position());
-				}
-			}
-			for (int i = 1; bolts.size() < LANCE_MAX_BOLTS; i++) {
-				bolts.add(eye.lerp(tip, i / (double)LANCE_MAX_BOLTS));
-			}
-			bolts.forEach(at -> WindStorm.strike(player, at));
-		}
-
 		float damage = net.minecraft.util.Mth.clampedMap(weather, 1.0F, LANCE_WEATHER_TOP, LANCE_DAMAGE, LANCE_DAMAGE_MAX);
 		DamageSource source = player.damageSources().source(LANCE_DAMAGE_TYPE, player);
-		for (Entity hit : hits) {
-			if (hit instanceof LivingEntity living) {
-				living.hurtServer(level, source, damage);
-				double resist = 1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-				if (resist > 0.0) {
-					Vec3 push = look.scale(LANCE_KNOCKBACK * resist);
-					living.push(push.x, Math.max(push.y, 0.0) + LANCE_LIFT * resist, push.z);
-					living.syncVelocity = true;
-				}
-				level.sendParticles(ParticleTypes.SWEEP_ATTACK, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-				if (WindModes.mode(player) != WindModes.NONE) {
-					// in a mode, the lance stuns: dazed and slowed to a crawl
-					living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, LANCE_MODE_STUN, 4), player);
-					living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, LANCE_MODE_STUN, 1), player);
-					living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NAUSEA, LANCE_MODE_STUN, 0), player);
-				}
-			} else if (hit instanceof Projectile projectile) {
-				projectile.setDeltaMovement(look.scale(2.0));
-				projectile.needsSync = true;
-			}
-		}
-
-		// a double helix of wind along the line, everyone sees it
-		double length = eye.distanceTo(tip);
-		Vec3 side = look.cross(new Vec3(0.0, 1.0, 0.0));
-		side = side.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : side.normalize();
-		Vec3 up = side.cross(look).normalize();
-		int points = (int)Math.ceil(length * LANCE_PARTICLES_PER_BLOCK);
-		ParticleOptions strand = stormbound ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.CLOUD;
-		Vec3 start = eye.add(look.scale(1.0)).add(0.0, -0.2, 0.0);
-		for (int i = 0; i < points; i++) {
-			double d = i / (double)LANCE_PARTICLES_PER_BLOCK;
-			double angle = d * 1.6;
-			double radius = 0.35 + 0.1 * Math.sin(d * 0.7);
-			for (int strandIndex = 0; strandIndex < 2; strandIndex++) {
-				double a = angle + strandIndex * Math.PI;
-				Vec3 at = start.add(look.scale(d)).add(side.scale(Math.cos(a) * radius)).add(up.scale(Math.sin(a) * radius));
-				level.sendParticles(strandIndex == 0 ? ParticleTypes.CLOUD : strand, true, false, at.x, at.y, at.z, 0, look.x * 0.3, look.y * 0.3, look.z * 0.3, 1.0);
-			}
-			if (i % 8 == 0) {
-				Vec3 at = start.add(look.scale(d));
-				level.sendParticles(ParticleTypes.SMALL_GUST, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			}
-		}
-		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, true, false, tip.x, tip.y, tip.z, 1, 0.0, 0.0, 0.0, 0.0);
+		// (Jung's revamp) a bigger spiral shot with a line of wind down its middle, flying out to the tip (WindMoves)
+		WindMoves.launchLance(player, eye.add(look.scale(1.0)).add(0.0, -0.2, 0.0), look, Math.max(1.0, eye.distanceTo(tip) - 1.0), damage, source, stormbound,
+			WindModes.mode(player) != WindModes.NONE);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_3, SoundSource.PLAYERS, 1.2F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.4F, 0.6F);
-		level.playSound(null, tip.x, tip.y, tip.z, SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.2F, 0.7F);
-		com.jaymospowers.core.Shakes.around(level, tip, 14.0, 1.2F, com.jaymospowers.core.Shakes.ticksFor(1.2F), player);
 	}
 }

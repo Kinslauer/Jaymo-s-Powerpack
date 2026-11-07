@@ -51,6 +51,11 @@ public class BaubleItem extends Item {
 		return this.bonuses;
 	}
 
+	/** (0.19.87) The bonuses this stack gives. Jewellery works them out from its gem; the rest use the item's. */
+	public List<Bonus> bonuses(ItemStack stack) {
+		return this.bonuses;
+	}
+
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		if (player instanceof ServerPlayer server) {
@@ -62,11 +67,15 @@ public class BaubleItem extends Item {
 		return InteractionResult.SUCCESS;
 	}
 
+	/** The slot (or slots) it fits, for the tooltip. */
+	protected Component slotName() {
+		return Component.translatable("bauble.jaymospowers.slot." + this.kind.id);
+	}
+
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
-		builder.accept(Component.translatable("item.jaymospowers.bauble.slot", Component.translatable("bauble.jaymospowers.slot." + this.kind.id))
-			.withStyle(ChatFormatting.GRAY));
-		for (Bonus bonus : this.bonuses) {
+		builder.accept(Component.translatable("item.jaymospowers.bauble.slot", this.slotName()).withStyle(ChatFormatting.GRAY));
+		for (Bonus bonus : bonuses(stack)) {
 			boolean percent = bonus.operation() != AttributeModifier.Operation.ADD_VALUE;
 			double amount = percent ? bonus.amount() * 100.0 : bonus.amount();
 			String key = (amount >= 0 ? "attribute.modifier.plus." : "attribute.modifier.take.") + (percent ? "1" : "0");

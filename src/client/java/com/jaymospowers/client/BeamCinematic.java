@@ -68,6 +68,9 @@ public final class BeamCinematic {
 			HudElementRegistry.replaceElement(id, old -> (graphics, delta) -> {
 				if (!running) {
 					old.extractRenderState(graphics, delta);
+				} else {
+					// (HUD rework) and every zoned piece of ours with it (the badge, chips, bars, docks)
+					com.jaymospowers.client.hud.HudZones.hideFor(100L);
 				}
 			});
 		}
@@ -183,7 +186,8 @@ public final class BeamCinematic {
 				look = focus;
 			}
 		}
-		pos = clipped(self, look, pos);
+		// (0.20.60) a little lower, as every film is, so the fighters are seen better
+		pos = clipped(self, look, UltimateCinematic.lowered(self, pos, self.getPosition(partialTicks)));
 		Vec3 dir = look.subtract(pos);
 		if (dir.lengthSqr() < 1.0E-6) {
 			dir = axis;

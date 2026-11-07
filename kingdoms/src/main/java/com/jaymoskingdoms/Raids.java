@@ -50,6 +50,8 @@ final class Raids {
 	static final float RAID_CHANCE = 0.12F;
 	/** (0.7.123) The raid chance's factor in summer and in winter (Kitchen's seasons). */
 	static final float SUMMER_RAIDS = 1.5F, WINTER_RAIDS = 0.4F;
+	/** (0.7.490) The raid chance's factor for a camp that can't feed its folk ({@link HordeEconomy#hungry}). */
+	static final float HUNGRY_RAIDS = 3.0F;
 	static final long COOLDOWN_TICKS = 48000L;
 	/** The same settlement isn't raided again for this long (ticks: a day), by any camp. */
 	static final long TARGET_COOLDOWN_TICKS = 24000L;
@@ -73,6 +75,8 @@ final class Raids {
 	static final double LOOT_REACH = 4.0;
 	static final int LOOT_PER_RAIDER = 32;
 	static final long PLUNDER_TICKS = 20 * 120;
+	/** (0.7.490) How far (blocks) from the seat a party looks for loose chests and barrels to break into. */
+	static final int LOOSE_SCAN = 28;
 	/** Golems this near a raider at the seat turn on him. */
 	static final double GOLEM_RANGE = 20.0;
 	/** Going home: a raider is home this near the camp's fire, or once no player is this near him (he's gone off over the land). */
@@ -104,6 +108,10 @@ final class Raids {
 		Phase phase = Phase.MARCH;
 		/** Raiders who made it home. */
 		int home;
+		/** (0.7.490) How many items and coins the party has taken so far. */
+		int looted;
+		/** (0.7.490) Loose chests and barrels on the target's land, looked for once when the party arrives (null until then). */
+		@Nullable List<BlockPos> loose;
 		final long started;
 		long phaseAt;
 
@@ -129,6 +137,23 @@ final class Raids {
 
 	static boolean raiding(int camp) {
 		return ACTIVE.containsKey(camp);
+	}
+
+	/** (0.7.490) The settlement camp {@code camp} is raiding just now (its id), or -1 if it isn't. */
+	static int targetOf(int camp) {
+		Raid raid = ACTIVE.get(camp);
+		return raid == null ? -1 : raid.target;
+	}
+
+	/** (0.7.490) Camp {@code a} is raiding camp {@code b} just now, or the other way about. */
+	static boolean between(int a, int b) {
+		Raid ab = ACTIVE.get(a), ba = ACTIVE.get(b);
+		return ab != null && ab.target == b || ba != null && ba.target == a;
+	}
+
+	/** (0.7.443) Settlement {@code target} has a raid on it just now. */
+	static boolean raided(int target) {
+		return ACTIVE.values().stream().anyMatch(r -> r.target == target);
 	}
 
 	static boolean isRaider(Folk folk) {
@@ -179,13 +204,21 @@ final class Raids {
 				continue;
 			}
 			Camps.CampData data = Camps.data(server, camp.id());
-			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < COOLDOWN_TICKS
-				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin()) {
-				// (goblin villages don't raid: they're somewhere to go)
+			// ((0.7.490) a hungry greenskin camp raids twice as often, and a hungry goblin village raids at all)
+			boolean hungry = data != null && (data.orc() || data.goblin()) && HordeEconomy.hungry(server, camp.id());
+			// ((0.7.491) a greenskin realm on the warpath: it and its vassals all go for the one target, often)
+			Faction warpath = data == null ? null : warpathTarget(server, level, camp);
+			if (data == null || data.clearedAt() >= 0
+				|| now - data.lastRaid() < (warpath != null ? COOLDOWN_TICKS / 4 : hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
+				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry && warpath == null) {
+				// (goblin villages don't raid: they're somewhere to go, unless they're starving or their king calls)
 				continue;
 			}
-			Faction target = target(server, level, camp);
-			if (target != null && random.nextFloat() < Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level)) {
+			Faction target = warpath != null ? warpath : target(server, level, camp);
+			// ((0.7.530) a wall and a watchtower put raiders off; a horde on the warpath isn't)
+			float chance = warpath != null ? HordeCity.RAID_CHANCE
+				: Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level) * (hungry ? HUNGRY_RAIDS : 1.0F) * TownProjects.raidFactor(server, target);
+			if (target != null && random.nextFloat() < chance) {
 				start(level, camp, target);
 			}
 		}
@@ -198,7 +231,7 @@ final class Raids {
 		Faction best = null;
 		double bestDist = REACH * REACH;
 		for (Faction f : Factions.all(server)) {
-			if (f.fallen() || f.type() == FactionType.BARBARIAN || now - RAIDED.getOrDefault(f.id(), -TARGET_COOLDOWN_TICKS) < TARGET_COOLDOWN_TICKS) {
+			if (f.fallen() || f.type() == FactionType.BARBARIAN && !Brutality.rival(server, camp, f) || now - RAIDED.getOrDefault(f.id(), -TARGET_COOLDOWN_TICKS) < TARGET_COOLDOWN_TICKS) {
 				continue;
 			}
 			double d = horizontal(f.seat(), camp.seat());
@@ -206,6 +239,14 @@ final class Raids {
 				continue;
 			}
 			if (ACTIVE.values().stream().anyMatch(r -> r.target == f.id())) {
+				continue;
+			}
+			if ((Camps.orc(server, camp.id()) || Camps.goblin(server, camp.id())) && TribePacts.spared(server, camp, f)) {
+				// (0.7.441) a haven that lives alongside the tribes isn't raided by them; (0.7.443) nor one that pays them
+				continue;
+			}
+			if (HordeCity.spared(server, camp, f)) {
+				// (0.7.491) nor a realm that pays the greenskin king tribute
 				continue;
 			}
 			if (pirates && !PirateCoves.coastal(level, f)) {
@@ -216,6 +257,18 @@ final class Raids {
 			bestDist = d;
 		}
 		return best;
+	}
+
+	/**
+	 * (0.7.491) The target of the warpath {@code camp}'s greenskin realm is on ({@link HordeCity#warpath}), if it can be
+	 * raided now: loaded, a player near its seat, and this camp not already at it.
+	 */
+	private static @Nullable Faction warpathTarget(MinecraftServer server, ServerLevel level, Faction camp) {
+		Faction f = HordeCity.warpath(server, camp);
+		if (f == null || !level.isPositionEntityTicking(f.seat()) || !playerNear(level, f.seat(), PLAYER_RANGE)) {
+			return null;
+		}
+		return f;
 	}
 
 	/** The nearest standing settlement to {@code camp}, however far (for {@code /faction camp raid}). */
@@ -245,11 +298,18 @@ final class Raids {
 		Raid raid = new Raid(camp.id(), target.id(), now);
 		ACTIVE.put(camp.id(), raid);
 		RAIDED.put(target.id(), now);
+		// (0.7.530) a watchtower warns players near the town where the party musters
+		TownProjects.watch(level, target, muster);
+		// (0.7.443) a tribe that favours one of the raided realm's own may send them a war band
+		TribePacts.called(level, target, camp);
 		Camps.noteRaid(server, camp.id(), now);
-		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id());
-		int band = illagers ? Illagers.fighters(camp) : orcs ? OrcCamps.fighters(camp) : pirates ? PirateCoves.fighters(camp)
+		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id()), goblins = Camps.goblin(server, camp.id());
+		int band = illagers ? Illagers.fighters(camp) : orcs ? OrcCamps.fighters(camp) : goblins ? GoblinVillages.goblins(camp) : pirates ? PirateCoves.fighters(camp)
 			: camp.holdings().count(Folk.BARBARIAN);
-		int size = Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
+		// ((0.7.491) a warpath's bands are bigger)
+		Faction path = HordeCity.warpath(server, camp);
+		boolean warpath = path != null && path.id() == target.id();
+		int size = warpath ? Math.min(HordeCity.PARTY_MAX, PARTY_BASE + HordeCity.PARTY_EXTRA + band / PARTY_PER) : Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
 		for (int i = 0; i < size; i++) {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
 			if (illagers) {
@@ -268,6 +328,7 @@ final class Raids {
 			// (0.5.47) an orc war band: grunts, every third one a ranger
 			int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER
 					: i % PIRATES_PER_BOMBARDIER == 1 ? Pirates.BOMBARDIER : Pirates.DECKHAND)
+				: goblins ? i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Goblins.SLINGER : Goblins.GOBLIN
 				: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
 			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);
@@ -399,6 +460,11 @@ final class Raids {
 			case PLUNDER -> {
 				Economy.noteAttack(server, target, party.getFirst());
 				BlockPos depot = Builders.depot(target);
+				if (raid.loose == null) {
+					raid.loose = new ArrayList<>(Plunder.looseAll(level, target, LOOSE_SCAN));
+				}
+				// (0.7.490) once the storehouse is bare they break into the chests and barrels standing about the land
+				boolean bare = !raid.loose.isEmpty() && Storage.contents(level, target).isEmpty();
 				boolean done = true;
 				for (Mob raider : party) {
 					for (IronGolem golem : level.getEntitiesOfClass(IronGolem.class, raider.getBoundingBox().inflate(GOLEM_RANGE),
@@ -412,10 +478,17 @@ final class Raids {
 					if (target(raider) != null) {
 						continue;
 					}
-					if (raider.distanceToSqr(Vec3.atCenterOf(depot)) <= LOOT_REACH * LOOT_REACH || nearStorage(raider, target)) {
+					// (0.7.490) the last loose chest may have gone to an earlier raider this pass: back to the depot then
+					bare &= !raid.loose.isEmpty();
+					BlockPos aim = bare ? raid.loose.get(Math.floorMod(raider.getUUID().hashCode(), raid.loose.size())) : depot;
+					if (raider.distanceToSqr(Vec3.atCenterOf(aim)) <= LOOT_REACH * LOOT_REACH || !bare && nearStorage(raider, target)) {
 						plunder(level, raider, target, raid);
+						if (bare && raid.emptyHanded.remove(raider.getUUID())) {
+							// (that one was bare or smashed already: on to the next)
+							raid.loose.remove(aim);
+						}
 					} else {
-						walk(level, raider, depot);
+						walk(level, raider, aim);
 					}
 				}
 				if (done || now - raid.phaseAt > PLUNDER_TICKS) {
@@ -441,6 +514,9 @@ final class Raids {
 				raid.party.removeIf(id -> !(level.getEntity(id) instanceof Mob));
 				raid.home += before - raid.party.size();
 				if (raid.party.isEmpty() && target != null) {
+					if (raid.looted > 0) {
+						tell(level, target.seat(), Component.translatable("message.jaymoskingdoms.raid.looted", camp.name(), raid.looted).withStyle(ChatFormatting.GOLD));
+					}
 					tell(level, target.seat(), raid.home > 0
 						? Component.translatable("message.jaymoskingdoms.raid.withdraw", camp.name()).withStyle(ChatFormatting.GOLD)
 						: Component.translatable("message.jaymoskingdoms.raid.beaten", camp.name()).withStyle(ChatFormatting.GREEN));
@@ -476,25 +552,23 @@ final class Raids {
 		return false;
 	}
 
-	/** A raider at the storage takes what he can carry (the valuables first, half the time). */
+	/** (0.7.490) What a raider (or a war's victor) takes first: coin of any realm, anything gold, iron and diamonds. */
+	static boolean valuable(ItemStack s) {
+		return Plunder.valuable(s);
+	}
+
+	/**
+	 * A raider at the settlement takes what he can carry ({@link Plunder#take}): coin now and then, valuables from its
+	 * storage first, then the chests and barrels standing loose on its land, which he breaks into (0.7.490).
+	 */
 	private static void plunder(ServerLevel level, Mob raider, Faction target, Raid raid) {
-		List<ItemStack> contents = Storage.contents(level, target);
-		if (contents.isEmpty()) {
-			raid.emptyHanded.add(raider.getUUID());
-			return;
-		}
-		RandomSource random = level.getRandom();
-		List<ItemStack> valuables = contents.stream()
-			.filter(s -> s.is(Items.EMERALD) || s.is(Items.GOLD_INGOT) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND)).toList();
-		ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
-			: contents.get(random.nextInt(contents.size()));
-		ItemStack taken = Storage.take(level, target, s -> ItemStack.isSameItemSameComponents(s, pick), LOOT_PER_RAIDER);
+		ItemStack taken = Plunder.take(level, raider, target, LOOT_PER_RAIDER, Plunder.SMASH_CHANCE, PirateCoves.is(level.getServer(), raid.camp));
 		if (taken.isEmpty()) {
 			raid.emptyHanded.add(raider.getUUID());
 			return;
 		}
+		raid.looted += taken.getCount();
 		setCarried(raider, taken);
-		level.playSound(null, raider.getX(), raider.getY(), raider.getZ(), SoundEvents.BARREL_OPEN, SoundSource.HOSTILE, 1.0F, 0.8F);
 	}
 
 	/** Sends {@code raider} toward {@code to}, a waypoint at a time (long paths fail). */
@@ -516,7 +590,8 @@ final class Raids {
 	private static void goHome(ServerLevel level, @Nullable Faction camp, Mob raider) {
 		ItemStack load = takeCarried(raider);
 		if (camp != null && !camp.fallen() && !load.isEmpty()) {
-			Camps.deposit(level, camp, load);
+			// ((0.7.490) a greenskin camp bends what it brings home)
+			Camps.deposit(level, camp, Camps.orc(level.getServer(), camp.id()) || Camps.goblin(level.getServer(), camp.id()) ? Plunder.bend(load) : load);
 		} else if (!load.isEmpty()) {
 			raider.spawnAtLocation(level, load);
 		}
@@ -526,6 +601,8 @@ final class Raids {
 
 	private static void end(ServerLevel level, Raid raid, List<Mob> party, @Nullable Faction camp) {
 		ACTIVE.remove(raid.camp);
+		// (0.7.530) the town is left to pick up the pieces
+		TownTroubles.event(level.getServer(), raid.target, TownTroubles.RAID, Integer.toString(raid.camp));
 		for (Mob raider : party) {
 			goHome(level, camp, raider);
 		}
@@ -548,7 +625,7 @@ final class Raids {
 		}
 		raid.party.remove(raider.getUUID());
 		Faction target = Factions.get(level.getServer(), raid.target);
-		if (target != null && source.getEntity() instanceof ServerPlayer player) {
+		if (target != null && target.type() != FactionType.BARBARIAN && source.getEntity() instanceof ServerPlayer player) {
 			Reputation.change(player, target, REP_RAIDER_SLAIN);
 		}
 	}

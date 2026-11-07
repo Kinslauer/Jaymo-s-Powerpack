@@ -30,6 +30,10 @@ import net.minecraft.world.entity.player.Player;
  * <p>
  * Not while one of our poses is on (EMF and Touch'n Motion are paused for those, and our poses are laid on each model
  * themselves), nor on a downed body, a whip hand, or your own body in first person, which Touch'n Motion leaves alone.
+ * <p>
+ * (0.19.34) Nor on a player changed into an alien: the alien's body (and its Ultimate spikes) has its own build and
+ * gait, and stamping the player's part positions on it pulled it apart. Andy (2026-11-01): Duplex's "legs are
+ * disconnected", the golem's body and arms lifted to a player's shoulders over its short legs.
  */
 public final class TnmFollow {
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("touch_n_motion");
@@ -74,6 +78,7 @@ public final class TnmFollow {
 	public static void beforeDraw(Model<?> model, Object state) {
 		if (!LOADED || !(model instanceof HumanoidModel<?> humanoid) || !(state instanceof AvatarRenderState avatar) || avatar.deathTime > 0.0F
 			|| model == avatar.getData(BODY) || PoseTakeover.posed(avatar) || DownedPose.down(avatar)
+			|| avatar.getData(com.jaymospowers.client.power.xenoform.XenoformClient.FORM) != null
 			|| com.jaymospowers.client.wounds.TrippedPose.tripped(avatar)) {
 			return;
 		}

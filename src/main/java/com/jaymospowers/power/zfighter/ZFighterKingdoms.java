@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
  * name, seat, wealth), their people, a player's reputation with one, whether he walks the Rogue's path, and how long an
  * elder has been grown. Without Kingdoms every answer is empty and the masters, tournaments and raids don't happen.
  */
-final class ZFighterKingdoms {
+public final class ZFighterKingdoms {
 	/** A settlement: its id, kind (KINGDOM, FIEFDOM, VILLAGE, BARBARIAN), name, seat and treasury, and Kingdoms' own record. */
 	record Settlement(int id, String type, String name, BlockPos seat, long treasury, Object handle) {
 		boolean realm() {
@@ -45,6 +45,12 @@ final class ZFighterKingdoms {
 	private static Method NEAREST_MONOLITH;
 	/** (0.18.52) Kingdoms' WorldTiers.deed(ServerPlayer, String): a rung's exit deed is done ("pod_flight", "maw_salvage"). */
 	private static Method DEED;
+	/** (0.19.33) Kingdoms' LifeStory.canReincarnate(ServerPlayer) and reincarnate(ServerPlayer): being born again. */
+	private static Method CAN_REBORN, REBORN;
+	/** (0.20.83) Kingdoms' LifeStory.reincarnateAnew(ServerPlayer): born again with MCA's creator too (the third death). */
+	private static Method REBORN_ANEW;
+	/** (0.20.94) Kingdoms' LifeStory.making(ServerPlayer): still making their character. */
+	private static Method MAKING;
 	/** (0.18.54) Kingdoms' WorldTiers.open(Player, Tier) and the Tier constants: whether a tier is open to a player (their deeds). */
 	private static Method TIER_OPEN;
 	private static Object[] TIERS;
@@ -119,6 +125,24 @@ final class ZFighterKingdoms {
 				DEED = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("deed", ServerPlayer.class, String.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				DEED = null;
+			}
+			try {
+				Class<?> story = Class.forName("com.jaymoskingdoms.LifeStory");
+				CAN_REBORN = story.getMethod("canReincarnate", ServerPlayer.class);
+				REBORN = story.getMethod("reincarnate", ServerPlayer.class);
+				try {
+					REBORN_ANEW = story.getMethod("reincarnateAnew", ServerPlayer.class);
+				} catch (NoSuchMethodException e) {
+					REBORN_ANEW = null;
+				}
+				try {
+					MAKING = story.getMethod("making", ServerPlayer.class);
+				} catch (NoSuchMethodException e) {
+					MAKING = null;
+				}
+			} catch (ReflectiveOperationException | LinkageError e) {
+				CAN_REBORN = null;
+				REBORN = null;
 			}
 			try {
 				Class<?> tier = Class.forName("com.jaymoskingdoms.WorldTiers$Tier");
@@ -196,6 +220,61 @@ final class ZFighterKingdoms {
 			return (BlockPos)NEAREST_MONOLITH.invoke(null, level, from);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return null;
+		}
+	}
+
+	/** (0.19.33) Whether {@code player} can be born again through Kingdoms' life story (Kingdoms there, its story screen on his client). */
+	static boolean canReincarnate(ServerPlayer player) {
+		if (CAN_REBORN == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(CAN_REBORN.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			CAN_REBORN = null;
+			return false;
+		}
+	}
+
+	/** (0.20.94) Whether Kingdoms still has {@code player} making their character; false without it. */
+	static boolean making(ServerPlayer player) {
+		if (MAKING == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(MAKING.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			MAKING = null;
+			return false;
+		}
+	}
+
+	/** (0.20.83) Born again from nothing: Kingdoms' reincarnateAnew (MCA's creator too), or {@link #reincarnate} before it had one. */
+	static boolean reincarnateAnew(ServerPlayer player) {
+		if (REBORN_ANEW == null) {
+			return reincarnate(player);
+		}
+		try {
+			return Boolean.TRUE.equals(REBORN_ANEW.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			REBORN_ANEW = null;
+			return reincarnate(player);
+		}
+	}
+
+	/**
+	 * (0.19.33) {@code player} is born again: Kingdoms unmakes his heritage, class and story and tells the life story anew,
+	 * with every start he or his group has opened. False without Kingdoms (or its story screen).
+	 */
+	static boolean reincarnate(ServerPlayer player) {
+		if (REBORN == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(REBORN.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			REBORN = null;
+			return false;
 		}
 	}
 
@@ -329,7 +408,7 @@ final class ZFighterKingdoms {
 	}
 
 	/** (0.15.61) His Kingdoms world tier, from 0 (Hearth, the first), or -1 if it can't be read. */
-	static int worldTier(net.minecraft.world.entity.player.Player player) {
+	public static int worldTier(net.minecraft.world.entity.player.Player player) {
 		if (TIER_OF == null) {
 			return -1;
 		}
@@ -343,7 +422,7 @@ final class ZFighterKingdoms {
 	private ZFighterKingdoms() {
 	}
 
-	static boolean present() {
+	public static boolean present() {
 		return ALL != null;
 	}
 

@@ -1,0 +1,36 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": [
+          "gui",
+          "ground",
+          "fixed",
+          "on_shelf"
+        ],
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/potion",
+          "tints": [
+            {
+              "type": "minecraft:potion",
+              "default": -13083194
+            }
+          ]
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/held_3d/minecraft/potion",
+      "tints": [
+        {
+          "type": "minecraft:potion",
+          "default": -13083194
+        }
+      ]
+    }
+  }
+}

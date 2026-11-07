@@ -63,6 +63,8 @@ public final class WebTricks {
 			case WebPose.HERO_LAND -> {
 				level.playSound(null, x, y, z, SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 0.6F, 0.7F);
 				level.sendParticles(ParticleTypes.POOF, x, y + 0.1, z, 10, 0.5, 0.05, 0.5, 0.03);
+				// (Motion patch 0) the ring of dust every hero landing kicks up
+				com.jaymospowers.freerun.LandingRoll.dust(level, player);
 			}
 			case WebPose.LAND_ROLL, WebPose.WINGS_LAND ->
 				level.playSound(null, x, y, z, SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 0.5F, 1.2F);

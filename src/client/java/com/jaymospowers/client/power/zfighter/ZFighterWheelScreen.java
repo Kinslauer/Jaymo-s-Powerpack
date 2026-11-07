@@ -194,7 +194,7 @@ final class ZFighterWheelScreen extends Screen {
 
 		// the middle: the pick's name; under the ring, where it goes
 		int technique = selected >= 0 ? slots.get(selected) : ZFighterSlots.EMPTY;
-		Component name = technique != ZFighterSlots.EMPTY ? Component.translatable(ZFighterLineage.techniqueKey(player, technique)) : null;
+		Component name = technique != ZFighterSlots.EMPTY ? ZFighterLineage.techniqueName(player, technique) : null;
 		if (name != null) {
 			UiStyle.lineCentred(graphics, font, name, cx, cy - 4, 2 * DEAD_ZONE + 20, UiStyle.TEXT);
 		}

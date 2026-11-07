@@ -5,11 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -56,6 +60,12 @@ public final class LockOn {
 	}
 
 	private static final Map<UUID, Lock> LOCKS = new HashMap<>();
+	/**
+	 * (Motion patch 1) On a player while they're locked onto something, synced to everyone so every client draws their
+	 * fighter's side-step ({@code client.BodyMotion}). Only whether, never who.
+	 */
+	public static final AttachmentType<Boolean> LOCKED = AttachmentRegistry.create(JaymosPowers.id("locked_on"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** (0.17.130) The client's own lock (LockOnClient fills it in), so code run on both sides can ask either. */
 	public static Function<Player, @Nullable LivingEntity> clientTarget = player -> null;
 
@@ -75,11 +85,12 @@ public final class LockOn {
 
 	private static void set(ServerPlayer player, int id) {
 		if (id < 0 || !player.isAlive()) {
-			LOCKS.remove(player.getUUID());
+			drop(player);
 			return;
 		}
 		if (player.level().getEntity(id) instanceof LivingEntity living && usable(player, living)) {
 			LOCKS.put(player.getUUID(), new Lock(living.getUUID()));
+			player.setAttached(LOCKED, true);
 		}
 	}
 
@@ -96,17 +107,25 @@ public final class LockOn {
 		}
 		Entity found = player.level().getEntity(lock.target);
 		if (!(found instanceof LivingEntity living) || !usable(player, living) || !player.isAlive()) {
-			LOCKS.remove(player.getUUID());
+			drop(player);
 			return;
 		}
 		lock.blind = player.hasLineOfSight(living) ? 0 : lock.blind + 1;
 		if (lock.blind > BLIND_TICKS) {
-			LOCKS.remove(player.getUUID());
+			drop(player);
 		}
 	}
 
 	public static void drop(ServerPlayer player) {
 		LOCKS.remove(player.getUUID());
+		if (player.hasAttached(LOCKED)) {
+			player.removeAttached(LOCKED);
+		}
+	}
+
+	/** (Motion patch 1) Whether {@code player} is locked onto something, on either side, for anyone in view. */
+	public static boolean locked(Player player) {
+		return Boolean.TRUE.equals(player.getAttached(LOCKED));
 	}
 
 	/** Who he's locked onto, or null. */

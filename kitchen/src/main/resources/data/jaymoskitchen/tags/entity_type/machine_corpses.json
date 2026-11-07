@@ -1,0 +1,12 @@
+{
+	"values": [
+		"#jaymoskitchen:heavy_corpses",
+		{ "id": "minecraft:copper_golem", "required": false },
+		{ "id": "friendsandfoes:copper_golem", "required": false },
+		{ "id": "friendsandfoes:tuff_golem", "required": false },
+		{ "id": "jaymospowers:future_android", "required": false },
+		{ "id": "jaymospowers:worky_drone", "required": false },
+		{ "id": "jaymospowers:star_probe", "required": false },
+		{ "id": "jaymospowers:detonation_sentry", "required": false }
+	]
+}

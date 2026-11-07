@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.Speakeasy.Pit;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -48,7 +49,7 @@ import org.jspecify.annotations.Nullable;
  * on and yields (nobody's hurt for real: it's a show). Winning bets are paid at the odds. The winner stays on as the
  * house champion for the next bout, until {@link #RETIRE_WINS} wins see him retire rich; the beaten go back up to town.
  *
- * <p><b>Fighting yourself.</b> Ask the bookie for a place on the card ({@link #enter}, {@link #ENTRY} emeralds): you
+ * <p><b>Fighting yourself.</b> Ask the bookie for a place on the card ({@link #enter}, {@link #ENTRY} silver coins): you
  * take the newcomer's place (or a card is called for you), and at the bell you're put in your corner. Punch with an
  * empty hand (anything in it is a foul, and the bout's lost); sneak to cover up and turn half his blows; step out of the
  * ring and you've thrown it. Win and the purse is yours ({@link #PURSE} and more for each win the beaten had), and
@@ -90,13 +91,20 @@ public final class FightPit {
 	/** The loser is led out, the winner rests, this long after (ticks). */
 	static final long AFTER_TICKS = 160L;
 	/**
-	 * A player in the ring: the entry (emeralds), their wind, how they're measured for the odds (power, guard); a full
+	 * A player in the ring: the entry (silver coins), their wind, how they're measured for the odds (power, guard); a full
 	 * punch lands for {@link #PLAYER_POWER} + 0-1 (a half-charged one for less); covering up (sneaking) turns this share
 	 * of blows (percent). The purse: this much, and this much more for each win the beaten had.
 	 */
 	static final int ENTRY = 3, PLAYER_WIND = 20, PLAYER_POWER = 2, PLAYER_GUARD = 25, COVER_GUARD = 50, PURSE = 8, PURSE_PER_WIN = 4;
 	/** A punch charged less than this counts for nothing. */
 	static final float WEAK_PUNCH = 0.3F;
+	/**
+	 * (0.7.450) A player must have at least this much wind (health over {@link #YIELD_HEALTH}) to take a place on the card;
+	 * at the bell's time the bell waits up to {@link #CALL_TICKS} for them to walk into the ring (called every
+	 * {@link #CALL_EVERY}), and after the bell both stand in their corners {@link #GRACE_TICKS} before the first blow.
+	 */
+	static final int MIN_WIND = 8;
+	static final long CALL_TICKS = 1200L, CALL_EVERY = 100L, GRACE_TICKS = 60L;
 	/** Talk: a fighter with a win to his name brings it up in a chat this often. */
 	static final float TALK_CHANCE = 0.4F;
 	static final int TALK_LINES = 3;
@@ -282,7 +290,7 @@ public final class FightPit {
 	}
 
 	/** Where the attendant waits: outside the ropes in a backroom; by the bookie, in the den, if the ring fills the room. */
-	private static Vec3 ringside(ServerLevel level, Underworld.Den d, Pit pit) {
+	static Vec3 ringside(ServerLevel level, Underworld.Den d, Pit pit) {
 		int out = Speakeasy.RING_HALF + 2;
 		BlockPos c = pit.center();
 		for (int[] o : new int[][] {{out, 0}, {-out, 0}, {0, out}, {0, -out}, {out, out}, {-out, out}, {out, -out}, {-out, -out}}) {
@@ -604,21 +612,53 @@ public final class FightPit {
 		switch (bout.phase) {
 			case BETTING -> {
 				hold(v, pit, bout);
-				if (now - bout.at >= BETTING_TICKS) {
-					bout.phase = Phase.FIGHT;
-					bout.at = now;
-					for (int i = 0; i < 2; i++) {
-						if (bout.player[i] && v[i] instanceof ServerPlayer p) {
-							Vec3 at = corner(pit, i);
-							p.teleportTo(level, at.x, at.y, at.z, java.util.Set.of(), i == 0 ? -90.0F : 90.0F, 0.0F, false);
-							// (Andy: "as soon as you enter the pit, your armor and gear is held")
-							hold(p);
-							bout.wind[i] = wind(p);
-							p.sendOverlayMessage(Component.translatable("fightpit.jaymoskingdoms.you.bell").withStyle(ChatFormatting.GOLD));
+				if (now - bout.at < BETTING_TICKS) {
+					break;
+				}
+				// (0.7.450) Andy: "I just accepted a bout, and got instantly knocked out because i was teleported in."
+				// Nobody's put in the ring any more: the bell waits until a player on the card walks in themselves
+				boolean ready = true;
+				for (int i = 0; i < 2; i++) {
+					if (bout.player[i] && v[i] instanceof ServerPlayer p && !pit.ring().contains(p.position())) {
+						ready = false;
+						long left = BETTING_TICKS + CALL_TICKS - (now - bout.at);
+						if (left <= 0) {
+							// never came: the card's off, and everything staked (their entry too) goes back
+							p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.you.no_show").withStyle(ChatFormatting.GRAY));
+							abort(level, bout);
+							return;
+						}
+						p.sendOverlayMessage(Component.translatable("fightpit.jaymoskingdoms.you.step_in", Math.max(1L, left / 20)).withStyle(ChatFormatting.GOLD));
+						if ((now - bout.at - BETTING_TICKS) % CALL_EVERY == 0) {
+							Villager bookie = Bookies.near(level, pit.room().inflate(16.0));
+							if (bookie != null) {
+								Speech.tell(level, bookie, p, Component.translatable("fightpit.jaymoskingdoms.step_in." + level.getRandom().nextInt(Underworld.LINES)), Speech.GOLD);
+							}
 						}
 					}
-					level.playSound(null, pit.center(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1.2F, 1.0F);
 				}
+				if (!ready) {
+					break;
+				}
+				for (int i = 0; i < 2; i++) {
+					if (bout.player[i] && v[i] instanceof ServerPlayer p && wind(p) < MIN_WIND) {
+						// too hurt by now to go on: called off, nothing lost
+						p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.enter.hurt").withStyle(ChatFormatting.GRAY));
+						abort(level, bout);
+						return;
+					}
+				}
+				bout.phase = Phase.FIGHT;
+				bout.at = now;
+				for (int i = 0; i < 2; i++) {
+					if (bout.player[i] && v[i] instanceof ServerPlayer p) {
+						// (Andy: "as soon as you enter the pit, your armor and gear is held")
+						hold(p);
+						bout.wind[i] = wind(p);
+						p.sendOverlayMessage(Component.translatable("fightpit.jaymoskingdoms.you.bell").withStyle(ChatFormatting.GOLD));
+					}
+				}
+				level.playSound(null, pit.center(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1.2F, 1.0F);
 			}
 			case FIGHT -> {
 				for (int i = 0; i < 2; i++) {
@@ -640,6 +680,11 @@ public final class FightPit {
 						p.sendOverlayMessage(Component.translatable("fightpit.jaymoskingdoms.you.wind", Math.max(0, bout.wind[i]),
 							Math.max(0, bout.wind[1 - i])).withStyle(ChatFormatting.GOLD));
 					}
+				}
+				if (now - bout.at < GRACE_TICKS) {
+					// (0.7.450) a breath after the bell: both square up in their corners before the first blow
+					hold(v, pit, bout);
+					break;
 				}
 				keepInRing(v, pit, bout);
 				if ((now - bout.at) % EXCHANGE_TICKS < 5) {
@@ -770,6 +815,10 @@ public final class FightPit {
 			float hurt = Math.min(blow, p.getHealth() - YIELD_HEALTH);
 			if (hurt > 0.0F) {
 				p.hurtServer(level, level.damageSources().mobAttack(v[i]), hurt);
+				// (0.7.450) whatever else made more of the blow, a bout never takes them past the point they're done at
+				if (p.isAlive() && p.getHealth() < YIELD_HEALTH) {
+					p.setHealth(YIELD_HEALTH);
+				}
 			}
 			bout.wind[j] = wind(p);
 		} else {
@@ -789,6 +838,11 @@ public final class FightPit {
 		}
 	}
 
+	/** Whether {@code bout} is still in the breath after the bell. */
+	private static boolean squaringUp(Bout bout, long now) {
+		return bout.phase == Phase.FIGHT && now - bout.at < GRACE_TICKS;
+	}
+
 	/** A player in the ring throws a punch at {@code target}. */
 	private static void punch(ServerPlayer player, Villager target) {
 		ServerLevel level = player.level();
@@ -800,6 +854,9 @@ public final class FightPit {
 			int mine = bout.corner(player.getUUID()), theirs = bout.corner(target.getUUID());
 			if (bout.phase != Phase.FIGHT || mine < 0 || theirs < 0 || mine == theirs || bout.winner >= 0) {
 				continue;
+			}
+			if (squaringUp(bout, level.getGameTime())) {
+				return;
 			}
 			f = Factions.get(level.getServer(), e.getKey());
 			if (charge < WEAK_PUNCH || player.distanceTo(target) > REACH + 1.2) {
@@ -853,11 +910,11 @@ public final class FightPit {
 			LivingEntity foe = v[1 - i];
 			if (i == winner) {
 				// (0.7.419) a road deed: a bout won in the pit
-				Deeds.done(server, "pit.won");
+				Deeds.done(p, "pit.won");
 				int beatenWins = bout.stats[1 - i].wins();
 				int purse = PURSE + PURSE_PER_WIN * beatenWins;
 				GreatWars.owe(server, p.getUUID(), purse);
-				p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.you.won", name(level, bout.fighters[1 - i]), purse).withStyle(ChatFormatting.GOLD));
+				p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.you.won", name(level, bout.fighters[1 - i]), Money.text(p, Money.worth(purse))).withStyle(ChatFormatting.GOLD));
 				if (foe != null) {
 					Recollections.remember(foe, p, Recollections.Kind.BEAT_YOU, Component.empty());
 				}
@@ -874,11 +931,11 @@ public final class FightPit {
 				int paid = (int)Math.floor(bet.stake() * bet.odds());
 				GreatWars.owe(server, bet.player(), paid);
 				if (player != null) {
-					player.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.bet.won", name(level, bout.fighters[winner]), paid)
+					player.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.bet.won", name(level, bout.fighters[winner]), Money.text(player, Money.worth(paid)))
 						.withStyle(ChatFormatting.GOLD));
 				}
 			} else if (player != null) {
-				player.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.bet.lost", name(level, bout.fighters[bet.fighter()]), bet.stake())
+				player.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.bet.lost", name(level, bout.fighters[bet.fighter()]), Money.text(player, Money.worth(bet.stake())))
 					.withStyle(ChatFormatting.GRAY));
 			}
 		}
@@ -918,6 +975,10 @@ public final class FightPit {
 		Bout bout = BOUTS.get(f.id());
 		if (bout != null && bout.corner(player.getUUID()) >= 0) {
 			return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.enter.already"), 0);
+		}
+		if (wind(player) < MIN_WIND) {
+			// (0.7.450) half dead already: he won't take their money
+			return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.enter.hurt"), 0);
 		}
 		if (bout == null) {
 			bout = call(level, f, pit, player, level.getGameTime());
@@ -1011,11 +1072,11 @@ public final class FightPit {
 		}
 		int amount = Math.min(stake, MOST_STAKE - already);
 		if (amount <= 0) {
-			return new GreatWars.Taken(Component.translatable("message.jaymoskingdoms.wager.most", MOST_STAKE), 0);
+			return new GreatWars.Taken(Component.translatable("message.jaymoskingdoms.wager.most", Money.text(player, Money.worth(MOST_STAKE))), 0);
 		}
 		bout.bets.add(new Bet(player.getUUID(), fighter, amount, bout.odds[fighter]));
-		return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.bet.made", amount, name(level, bout.fighters[fighter]),
-			(int)Math.floor(amount * bout.odds[fighter])), amount);
+		return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.bet.made", Money.text(player, Money.worth(amount)), name(level, bout.fighters[fighter]),
+			Money.text(player, Money.worth((int)Math.floor(amount * bout.odds[fighter])))), amount);
 	}
 
 	// ---- their story ---------------------------------------------------------------------------------------------------

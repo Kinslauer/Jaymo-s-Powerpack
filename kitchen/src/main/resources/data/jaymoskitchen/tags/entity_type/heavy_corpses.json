@@ -1,5 +1,14 @@
 {
 	"values": [
-		"minecraft:iron_golem"
+		"minecraft:iron_golem",
+		{ "id": "jaymoskingdoms:clockwork_golem", "required": false },
+		{ "id": "jaymoskingdoms:redstone_golem", "required": false },
+		{ "id": "jaymoskingdoms:skulk_golem", "required": false },
+		{ "id": "jaymospowers:future_mech", "required": false },
+		{ "id": "jaymospowers:android_mech", "required": false },
+		{ "id": "jaymospowers:omen_red", "required": false },
+		{ "id": "jaymospowers:omen_blue", "required": false },
+		{ "id": "jaymospowers:sentry_golem", "required": false },
+		{ "id": "jaymospowers:slider", "required": false }
 	]
 }

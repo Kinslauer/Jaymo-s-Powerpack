@@ -332,6 +332,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "bog_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_bog_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -523,6 +536,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/part/large_plate_star_metal"
+          }
+        },
+        {
+          "when": "bog_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_bog_iron"
           }
         }
       ],

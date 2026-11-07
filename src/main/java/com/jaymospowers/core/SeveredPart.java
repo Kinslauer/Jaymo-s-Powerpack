@@ -77,6 +77,8 @@ public class SeveredPart extends Entity {
 	static float pinNextYaw;
 
 	private int age;
+	/** (0.19.62) A head taken off a carcass on Jaymo's Kitchen's meat hook: kept, it never goes. */
+	private boolean trophy;
 	/** Client side: how far it has turned over (degrees), this tick and last, and about which way it spins. */
 	public float spin, spinO, spinAxis;
 	/** Client side: how fast it's turning over (degrees a tick). */
@@ -131,6 +133,22 @@ public class SeveredPart extends Entity {
 		level.addFreshEntity(severed);
 	}
 
+	/**
+	 * (0.19.62) A head off a butchered carcass (Jaymo's Kitchen's meat hook, {@code Hanging}): drawn from the corpse's
+	 * {@code look}, falling from {@code at}; kept for good (a trophy), not gone after {@link #LIFETIME}.
+	 */
+	public static void dropTrophyHead(ServerLevel level, String look, float height, float yaw, Vec3 at) {
+		SeveredPart severed = new SeveredPart(TYPE, level);
+		severed.setPos(at.x, at.y - 0.15, at.z);
+		severed.setDeltaMovement((level.getRandom().nextDouble() - 0.5) * 0.1, 0.05, (level.getRandom().nextDouble() - 0.5) * 0.1);
+		severed.setYRot(yaw);
+		severed.entityData.set(PART, Dismember.HEAD);
+		severed.entityData.set(HEIGHT, height);
+		severed.entityData.set(LOOK, look.length() > MAX_LOOK ? "{}" : look);
+		severed.trophy = true;
+		level.addFreshEntity(severed);
+	}
+
 	/** How {@code body} looks, as saved data (without its gear and the things that don't show). */
 	static String look(LivingEntity body) {
 		TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, body.registryAccess());
@@ -151,6 +169,20 @@ public class SeveredPart extends Entity {
 
 	public String look() {
 		return this.entityData.get(LOOK);
+	}
+
+	/**
+	 * (0.19.62) Andy: "wall trophy heads". A carried head set down while looking at a wall goes up on it (see
+	 * {@link Carry}): nailed there facing out, at {@code at} on the face, and kept for good like a hook's trophy head.
+	 */
+	void mountOn(Vec3 at, float yaw) {
+		this.setPos(at.x, at.y - MIDDLE, at.z);
+		this.setDeltaMovement(Vec3.ZERO);
+		this.setYRot(yaw);
+		this.entityData.set(PINNED, true);
+		this.setNoGravity(true);
+		this.trophy = true;
+		this.age = 200;
 	}
 
 	/** (0.15.148) Whether it's nailed to a wall. */
@@ -197,7 +229,7 @@ public class SeveredPart extends Entity {
 			// (0.15.148) nailed to the wall: it stays put, dripping a while, until someone takes it down
 			this.setDeltaMovement(Vec3.ZERO);
 			if (this.level() instanceof ServerLevel level) {
-				if (++this.age > LIFETIME) {
+				if (++this.age > LIFETIME && !this.trophy) {
 					this.discard();
 					return;
 				}
@@ -222,7 +254,7 @@ public class SeveredPart extends Entity {
 		}
 		this.setDeltaMovement(this.getDeltaMovement().scale(this.onGround() ? 0.55 : 0.98));
 		if (this.level() instanceof ServerLevel level) {
-			if (++this.age > LIFETIME) {
+			if (++this.age > LIFETIME && !this.trophy) {
 				this.discard();
 				return;
 			}
@@ -324,6 +356,7 @@ public class SeveredPart extends Entity {
 		this.entityData.set(PART, input.getIntOr("Part", Dismember.HEAD));
 		this.entityData.set(HEIGHT, input.getFloatOr("BodyHeight", 1.8F));
 		this.age = input.getIntOr("Age", 0);
+		this.trophy = input.getBooleanOr("Trophy", false);
 		this.entityData.set(PINNED, input.getBooleanOr("Pinned", false));
 		this.setNoGravity(pinned());
 	}
@@ -335,6 +368,9 @@ public class SeveredPart extends Entity {
 		output.putInt("Part", part());
 		output.putFloat("BodyHeight", bodyHeight());
 		output.putInt("Age", this.age);
+		if (this.trophy) {
+			output.putBoolean("Trophy", true);
+		}
 		output.putBoolean("Pinned", pinned());
 	}
 }

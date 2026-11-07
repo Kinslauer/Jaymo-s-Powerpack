@@ -159,7 +159,7 @@ final class ZFighterDebugCommand {
 					.executes(c -> {
 						ServerPlayer player = c.getSource().getPlayerOrException();
 						boolean opened = ZFighterTournaments.open(player.level(), player.blockPosition(), "Debug");
-						c.getSource().sendSuccess(() -> Component.literal(opened ? "A tournament opens nearby." : "A tournament is already on."), false);
+						c.getSource().sendSuccess(() -> Component.literal(opened ? "A tournament opens nearby." : "No tournament: one is already on, or there is no flat, clear ground for a ring nearby."), false);
 						return 1;
 					})
 					.then(Commands.literal("start")

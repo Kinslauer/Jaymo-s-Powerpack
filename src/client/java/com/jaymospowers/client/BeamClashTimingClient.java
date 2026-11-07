@@ -88,9 +88,13 @@ public final class BeamClashTimingClient {
 		if (clash(minecraft) == null || BeamCinematic.running()) {
 			return;
 		}
-		int x = graphics.guiWidth() / 2 - BAR_W / 2;
-		int y = graphics.guiHeight() - 80;
-		bar(graphics, delta, x, y, BAR_W);
+		// (HUD rework) the focus band over the action-bar line (its bottom touched the clash's own action-bar messages)
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.FOCUS, "jaymospowers:beam_timing", 40,
+			BAR_W + 2, BAR_H + 14);
+		if (at == null) {
+			return;
+		}
+		bar(graphics, delta, at[0] + 1, at[1] + 12, BAR_W);
 	}
 
 	/** In the clash film: the bar in the bottom bar, right of the balance panel. */
@@ -132,6 +136,6 @@ public final class BeamClashTimingClient {
 		Component words = result ? Component.translatable("hud.jaymospowers.beam_clash.timing_" + (grade == BeamClashTiming.PERFECT ? "perfect"
 			: grade == BeamClashTiming.GOOD ? "good" : "miss")) : Component.translatable("hud.jaymospowers.beam_clash.timing");
 		int color = result ? GRADE_COLORS[Mth.clamp(grade, 0, 2)] : 0xFFC0C0D0;
-		graphics.text(font, words, x + w / 2 - font.width(words) / 2, y - 12, color);
+		graphics.text(font, words, x + w / 2 - font.width(words) / 2, y - 12, color, true);
 	}
 }

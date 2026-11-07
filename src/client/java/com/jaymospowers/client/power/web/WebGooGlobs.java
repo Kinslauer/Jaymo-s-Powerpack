@@ -30,7 +30,10 @@ import org.joml.Vector3f;
  * chest's upper half) or the soles of the feet.
  *
  * <p>The first twelve each carry a tendril ({@link WebTendrilLayer}, tendril {@code i} out of glob {@code i}): it grows
- * from wherever its glob has crept to, out along the surface's outward way. A tendril on a job that needs its old root
+ * from wherever its glob has crept to, out along the surface's outward way. (0.19.71, Andy: the blobs "should only grow
+ * tendrils for living tendril grabs and attacks while they move along the back") those twelve only ever creep over the
+ * back; the rest, on the shoulders, arms, legs, sides and belly, carry none (the webs and spikes the tendrils form
+ * still come off the arms and anywhere else, as before). A tendril on a job that needs its old root
  * (a strike, the weapon, a walker on a wall, a tether, a barrage stab, something held; everything in first person)
  * has its glob flow over to that root ({@link #ROOT_IN_TICKS}) and stay there until it's done, then creep back off
  * ({@link #ROOT_OUT_TICKS}). Struck while they're out ({@link WebSymbioteClient#FLAIL}), the globs heave and ripple.
@@ -41,8 +44,10 @@ final class WebGooGlobs {
 	static final RenderStateDataKey<float[]> ROOTS = RenderStateDataKey.create(() -> "jaymospowers:web_goo_roots");
 	static final int STRIDE = 7;
 
-	/** How many globs: the first {@code TENDRIL_GLOBS} carry a tendril each (as many as WebTendrilLayer has), then one on the skull and one more on the torso. */
-	static final int GLOBS = 14, TENDRIL_GLOBS = 12;
+	/** How many globs: the first {@code TENDRIL_GLOBS} carry a tendril each (as many as WebTendrilLayer has) and keep to the back; the rest roam the body bare. */
+	static final int GLOBS = 22, TENDRIL_GLOBS = 12;
+	/** The back's tendril globs: how far round from the middle of the back they wander (the torso's round, see {@link #place}), and how much smaller they are, so twelve fit. */
+	private static final float BACK_ROUND_MIN = 0.2F, BACK_ROUND_MAX = 0.95F, BACK_ROUND_WANDER = 0.4F, BACK_SIZE = 0.8F;
 	/**
 	 * A glob's half-width (pixels, between these, per glob), how flat it lies ({@code GLOB_FLAT}: its thickness, of
 	 * that), how far it's drawn out along the way it creeps ({@code GLOB_LONG}, of its width, narrower across it), and
@@ -262,33 +267,21 @@ final class WebGooGlobs {
 		return GOO.computeIfAbsent(id, key -> {
 			Goo goo = new Goo();
 			long seed = key * 7919L + 31L;
-			// per side: tendrils 2, 4 and 6 on the torso, an arm and a leg (2 never on a leg: it strikes), the spares on the torso and a leg
-			for (int s = 0; s < 2; s++) {
-				int[] mid = {TORSO, ARM, LEG};
-				for (int k = 2; k > 0; k--) {
-					int j = (int)(hash(seed + s * 13L + k) * (k + 1));
-					int swap = mid[k];
-					mid[k] = mid[j];
-					mid[j] = swap;
-				}
-				if (mid[0] == LEG) {
-					mid[0] = mid[1];
-					mid[1] = LEG;
-				}
-				boolean legFirst = hash(seed + s * 17L + 5L) < 0.5;
-				int[] regions = {SHOULDER, mid[0], mid[1], mid[2], legFirst ? LEG : TORSO, legFirst ? TORSO : LEG};
-				for (int j = 0; j < regions.length; j++) {
-					int i = j * 2 + s;
-					goo.region[i] = regions[j];
+			// the tendrils' globs: all on the back, six down each side of it (tendril i on side i % 2, as their old roots)
+			for (int i = 0; i < TENDRIL_GLOBS; i++) {
+				goo.region[i] = TORSO;
+				goo.side[i] = i % 2 == 0 ? -1.0F : 1.0F;
+			}
+			// the bare ones, per side: a shoulder, an arm, two on the legs and one round the side to the belly
+			// ((0.17.172) never on the head, Andy: "the tendril blobs should now never come out of the head")
+			int[] bare = {SHOULDER, ARM, LEG, LEG, TORSO};
+			for (int j = 0; j < bare.length; j++) {
+				for (int s = 0; s < 2; s++) {
+					int i = TENDRIL_GLOBS + j * 2 + s;
+					goo.region[i] = bare[j];
 					goo.side[i] = s == 0 ? -1.0F : 1.0F;
 				}
 			}
-			// (0.17.172) never on the head (Andy: "the tendril blobs should now never come out of the head"): the
-			// spare that crept over the skull is a second torso one
-			goo.region[12] = TORSO;
-			goo.side[12] = hash(seed + 91L) < 0.5 ? -1.0F : 1.0F;
-			goo.region[13] = TORSO;
-			goo.side[13] = hash(seed + 92L) < 0.5 ? -1.0F : 1.0F;
 			for (int i = 0; i < GLOBS; i++) {
 				float[] p = goo.param[i];
 				long g = seed + i * 1009L;
@@ -327,6 +320,15 @@ final class WebGooGlobs {
 					}
 				}
 				p[4] = Mth.lerp((float)hash(g + 3), GLOB_MIN, GLOB_MAX);
+				if (i < TENDRIL_GLOBS) {
+					// on the back only (round from its middle no further than its edge), six rows down it, a little smaller
+					int row = i / 2 % 6;
+					p[0] = Mth.lerp(a, BACK_ROUND_MIN, BACK_ROUND_MAX);
+					p[1] = BACK_ROUND_WANDER;
+					p[2] = 2.0F + row * 1.6F + (b - 0.5F) * 1.2F;
+					p[3] = 1.6F;
+					p[4] *= BACK_SIZE;
+				}
 				// speeds (0-1) and phases (radians) by turns; the last a phase too
 				for (int k = 5; k < 12; k++) {
 					p[k] = (float)hash(g + k) * (k % 2 == 0 || k == 11 ? Mth.TWO_PI : 1.0F);

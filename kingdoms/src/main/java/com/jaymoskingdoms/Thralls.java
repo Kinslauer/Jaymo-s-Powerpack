@@ -225,7 +225,7 @@ public final class Thralls {
 		if (attacker.getUUID().equals(t.master())) {
 			return true;
 		}
-		// (0.5.53) a realm's MCA villager in its service (a court wizard) sides as its folk do
+		// (0.5.54) a realm's MCA villager in its service (a court wizard) sides as its folk do
 		if (t.player()) {
 			if (attacker instanceof Worker w && w.factionId() >= 0) {
 				ServerPlayer owner = server == null ? null : server.getPlayerList().getPlayer(t.master());

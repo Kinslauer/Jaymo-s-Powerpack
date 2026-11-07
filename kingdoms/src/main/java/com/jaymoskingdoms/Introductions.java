@@ -64,6 +64,13 @@ public final class Introductions {
 	static final int LINES = 3, RULER_LINES = 2;
 	/** (0.7.397) Lines an outlaw has for keeping their name to themselves. */
 	static final int OUTLAW_LINES = 3;
+	/** (0.7.504) Lines a wary villager has for keeping their name from you until you've proven yourself ({@link #wary}). */
+	public static final int WARY_LINES = 5;
+	/**
+	 * (0.7.504) Proving yourself to one who minds your blood ({@link Prejudice#minds}): MCA hearts needed per degree they
+	 * mind, never more than {@link Strangers#TRUSTED_HEARTS}; and the hearts that win over one whose people think ill of you.
+	 */
+	static final int PROVEN_HEARTS_PER_DEGREE = 8, PROVEN_HEARTS_REP = 20;
 
 	/**
 	 * (0.7.204) Taking an offered hand ({@link Handshakes#offerTo}): the odds before anything else, what each heart and
@@ -183,6 +190,21 @@ public final class Introductions {
 		player.setAttached(STRUCK, next);
 	}
 
+	/**
+	 * (0.7.474) What {@code e}, a villager whose name you haven't asked, goes by: a goblin or an orc as one (Andy: "they
+	 * shouldnt be referred to as villagers if they are orc or goblin"), anyone else what MCA calls them.
+	 */
+	public static Component what(Entity e) {
+		Heritage.Kind brood = Greenskins.of(e);
+		if (brood == Heritage.Kind.ORC) {
+			return Component.translatable("identity.jaymoskingdoms.orc_name");
+		}
+		if (brood == Heritage.Kind.GOBLIN) {
+			return Component.translatable("identity.jaymoskingdoms.goblin_name");
+		}
+		return e.getType().getDescription();
+	}
+
 	/** What an unintroduced player is called. */
 	public static Component stranger() {
 		return Component.translatable("identity.jaymoskingdoms.stranger");
@@ -190,25 +212,74 @@ public final class Introductions {
 
 	/** {@code player} now knows {@code e}'s name. True if they didn't before. */
 	static boolean learn(ServerPlayer player, Entity e) {
+		return learn(player, e.getUUID());
+	}
+
+	/** (0.7.473) {@code player} now knows the name of whoever has the id {@code id} (a dead player whose face they've seen). */
+	static boolean learn(ServerPlayer player, UUID id) {
 		Set<UUID> known = player.getAttached(KNOWN);
-		if (known != null && known.contains(e.getUUID())) {
+		if (known != null && known.contains(id)) {
 			return false;
 		}
 		// a new set, so it's synced
 		Set<UUID> next = known == null ? new HashSet<>() : new HashSet<>(known);
-		next.add(e.getUUID());
+		next.add(id);
 		player.setAttached(KNOWN, next);
 		return true;
+	}
+
+	/**
+	 * (0.7.504) Andy: "someone who has any distaste toward you would not introduce themselves, i was just on a beastfolk,
+	 * and the guy said remember this city isnt for you, but still shook my hand, they should be as apprehensive as the old
+	 * orcs were until you prove yourself". {@code villager} keeps you at arm's length: no name, no hand, no coming over to
+	 * say hello. Anyone who minds your blood ({@link Prejudice#minds}: a haven's folk minding a human, a townsman minding a
+	 * Tideborn...), whose people think ill of you (their realm's reputation below welcome), or who remembers you coldly.
+	 * You've proven yourself once they remember you warmly ({@link Recollections#WARM}: a rescue, a kindness), or once
+	 * you've won enough of MCA's hearts (gifts and talk): {@link #PROVEN_HEARTS_PER_DEGREE} for each degree they mind.
+	 */
+	public static boolean wary(ServerPlayer player, Villager villager) {
+		int lean = Recollections.leaning(villager, player);
+		if (lean >= Recollections.WARM) {
+			return false;
+		}
+		if (lean <= Recollections.COLD) {
+			return true;
+		}
+		int hearts = McaCompat.heartsOf(villager, player);
+		float minds = Prejudice.minds(villager, player);
+		if (minds > 0.0F && hearts < Math.min(Strangers.TRUSTED_HEARTS, Math.round(minds * PROVEN_HEARTS_PER_DEGREE))) {
+			return true;
+		}
+		Faction f = Approaches.home(player.level(), villager);
+		return f != null && Reputation.get(player, f.id()) < Reputation.WELCOME && hearts < PROVEN_HEARTS_REP;
+	}
+
+	/**
+	 * (0.7.504) What a {@linkplain #wary wary} villager says in place of their name (a greenskin in its own dialect).
+	 * (0.7.597) Andy: "this villager talked to me then acted this way when i introduced myself, the interactions should be
+	 * consistent". The same line to the same player all day, so a step back from your hand, their menu opening and
+	 * asking their name don't each draw a different cold word (and the bubbles showing it at once show it once).
+	 */
+	public static Component waryLine(Villager villager, ServerPlayer player) {
+		long day = Deeds.today(player.level().getServer());
+		int variant = Math.floorMod(java.util.Objects.hash(villager.getUUID(), player.getUUID(), day), WARY_LINES);
+		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_wary." + variant);
 	}
 
 	/** {@code player} asked {@code villager}'s name (MCA's menu): what they answer, and {@code player} knows it from then. */
 	public static Component askName(ServerPlayer player, Villager villager) {
 		if (Recollections.refuses(villager, player)) {
-			return Component.translatable("dialogue.chat.jaymoskingdoms.name_refused");
+			// (0.7.490) an orc or goblin with a grudge refuses in its own dialect
+			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused");
+		}
+		if (!Outlaws.is(villager) && !ZFighterFolk.is(villager) && wary(player, villager)) {
+			// (0.7.504) one who minds you keeps their name until you've proven yourself
+			return waryLine(villager, player);
 		}
 		if (Outlaws.is(villager)) {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
-			return Component.translatable("dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
+			// (0.7.490) an orc or goblin refuses in its own dialect
+			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
 		}
 		String kind = ZFighterFolk.is(villager) ? ZFighterFolk.kind(villager) : null;
 		if (kind != null) {
@@ -221,8 +292,9 @@ public final class Introductions {
 		Component name = Component.literal(villager.getName().getString());
 		Faction f = Rulers.is(villager) ? Factions.get(player.level().getServer(), Rulers.faction(villager)) : null;
 		if (f != null) {
-			Component title = Rulers.title(Rulers.role(villager), McaCompat.female(villager));
-			return Component.translatable("dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
+			Component title = Rulers.title(player.level().getServer(), f, Rulers.role(villager), McaCompat.female(villager));
+			// (0.7.490) an orc king (or a goblin one) names himself in his own dialect
+			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
 		}
 		// (0.7.254) Andy: "if a guard i havent met before's first interaction is a shove or searching me, the introduction
 		// might be awkward": one whose first dealing with you was like that says so (SharedHistory)
@@ -230,7 +302,13 @@ public final class Introductions {
 		if (met != null) {
 			return met;
 		}
-		return Component.translatable("dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
+		// (0.7.521) a human living in a ChoiceTheorem village's haven says, in a word, why they're there (Havens#ctov)
+		String reason = Havens.humanReason(villager);
+		if (reason != null) {
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_haven_human." + reason, name);
+		}
+		// (0.7.490) a greenskin gives its name in its own dialect
+		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
 	}
 
 	/**
@@ -239,7 +317,8 @@ public final class Introductions {
 	 * with a grudge, likelier the more hearts, the better their mood and the warmer their temper.
 	 */
 	static boolean takesHand(ServerPlayer player, Villager villager) {
-		if (Recollections.refuses(villager, player) || Outlaws.is(villager)) {
+		if (Recollections.refuses(villager, player) || Outlaws.is(villager) || wary(player, villager)) {
+			// ((0.7.504) nor one who minds you, till you've proven yourself)
 			return false;
 		}
 		float chance = HAND_TAKEN + McaCompat.heartsOf(villager, player) * HAND_PER_HEART + McaCompat.mood(villager) * HAND_PER_MOOD
@@ -267,6 +346,7 @@ public final class Introductions {
 		}
 		LAST.remove(player.getUUID(), to.getUUID());
 		boolean fresh = learn(to, player);
+		Commandments.act(player, "introduce");
 		Component shown = Identities.trueName(player);
 		Component them = knows(player, to) ? Identities.trueName(to) : stranger();
 		player.sendSystemMessage(Component.translatable(fresh ? "message.jaymoskingdoms.introduce.done" : "message.jaymoskingdoms.introduce.again", them)

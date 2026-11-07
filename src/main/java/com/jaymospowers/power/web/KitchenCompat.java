@@ -11,6 +11,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class KitchenCompat {
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("jaymoskitchen");
+	/** (0.20.56) A body blown apart: the shake it gives everyone this near (degrees at its peak, blocks). */
+	static final float GIB_SHAKE = 0.7F;
+	static final double GIB_SHAKE_RANGE = 14.0;
 
 	private KitchenCompat() {
 	}
@@ -71,14 +74,90 @@ public final class KitchenCompat {
 	private static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> HEAVY_CORPSES = net.minecraft.tags.TagKey.create(
 		net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "heavy_corpses"));
 
+	/** (0.19.32) A robot or golem (Kitchen's machine corpses, heavy ones included): nothing in it to eat or tear up. */
+	public static boolean machine(net.minecraft.world.entity.@Nullable EntityType<?> type) {
+		return type != null && (type.builtInRegistryHolder().is(MACHINE_CORPSES) || heavy(type));
+	}
+
+	private static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> MACHINE_CORPSES = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "machine_corpses"));
+
+	/** (0.19.55) The carcass {@code player} is dragging along the ground behind them (Kitchen's drag), or null. */
+	public static @Nullable Entity draggedCorpse(Player player) {
+		if (!LOADED) {
+			return null;
+		}
+		try {
+			return Kitchen.dragged(player);
+		} catch (LinkageError e) {
+			// an older Kitchen with no dragging
+			return null;
+		}
+	}
+
+	/** (0.19.55) What a Kitchen body was (a player's corpse: a player), or null if unknown. */
+	public static net.minecraft.world.entity.@Nullable EntityType<?> bodyType(Entity corpse) {
+		return isPlayerCorpse(corpse) ? net.minecraft.world.entity.EntityTypes.PLAYER : sourceType(corpse);
+	}
+
 	/** Someone (anyone) is carrying this corpse right now. */
 	static boolean isCarried(Entity entity) {
 		return LOADED && Kitchen.carried(entity);
 	}
 
+	/**
+	 * (0.21.28) A Kitchen body lying still on the ground: not carried, dragged or hung on a meat hook (those bleed their own
+	 * ways: smears, the hook's drip). False for anything that isn't one.
+	 */
+	public static boolean liesStill(Entity entity) {
+		return LOADED && Kitchen.liesStill(entity);
+	}
+
+	/**
+	 * (0.21.28) Hands {@code each} every piece of armour a Kitchen body still wears (and its slot, 0 boots ... 3 helmet) to
+	 * change in place; the changes stay on the body and come off with the armour. False if it wears none, or Kitchen is
+	 * older than 0.5.79.
+	 */
+	public static boolean reworkArmour(Entity corpse, java.util.function.ObjIntConsumer<net.minecraft.world.item.ItemStack> each) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!reworkLooked) {
+			reworkLooked = true;
+			try {
+				reworkArmour = java.lang.invoke.MethodHandles.publicLookup().findVirtual(Class.forName("com.jaymoskitchen.corpse.CorpseEntity"),
+					"reworkArmour", java.lang.invoke.MethodType.methodType(boolean.class, java.util.function.ObjIntConsumer.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				// an older Kitchen: a body's armour stays as it died
+			}
+		}
+		if (reworkArmour == null || !Kitchen.isCorpse(corpse)) {
+			return false;
+		}
+		try {
+			return (boolean) reworkArmour.invoke(corpse, each);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.21.28) Kitchen 0.5.79's {@code CorpseEntity.reworkArmour}, looked up by name (the Kitchen jar built against may be older). */
+	private static java.lang.invoke.@Nullable MethodHandle reworkArmour;
+	private static boolean reworkLooked;
+
 	/** A player's corpse (it holds their belongings: never eaten). */
 	static boolean isPlayerCorpse(Entity entity) {
 		return LOADED && Kitchen.playerCorpse(entity);
+	}
+
+	/** (0.19.49) Whose body a player's corpse is (null if it isn't one, or Jaymo's Kitchen isn't here). */
+	public static java.util.@Nullable UUID corpseOwner(Entity entity) {
+		return LOADED ? Kitchen.owner(entity) : null;
+	}
+
+	/** (0.19.49) The name of the player a corpse was ("" if it isn't one). */
+	public static String corpseOwnerName(Entity entity) {
+		return LOADED ? Kitchen.ownerName(entity) : "";
 	}
 
 	/** (0.15.33) Players leave a body when they die (only with Jaymo's Kitchen): the symbiote hunts them for it. */
@@ -136,7 +215,7 @@ public final class KitchenCompat {
 	 * rough job, about half its loot. Returns whether it was.
 	 */
 	static boolean butcherRough(Entity entity) {
-		return LOADED && !isHeavy(entity) && Kitchen.butcherRough(entity);
+		return LOADED && !isHeavy(entity) && !machine(Kitchen.sourceType(entity)) && Kitchen.butcherRough(entity);
 	}
 
 	/** Kitchen's tag for a body that leaves nothing behind when it dies (read as it would swap the dying mob for its corpse). */
@@ -204,6 +283,14 @@ public final class KitchenCompat {
 
 	/** Only touched when Jaymo's Kitchen is loaded. */
 	private static final class Kitchen {
+		static java.util.@Nullable UUID owner(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.isPlayerCorpse() ? corpse.owner().orElse(null) : null;
+		}
+
+		static String ownerName(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.isPlayerCorpse() ? corpse.ownerName() : "";
+		}
+
 		static void endLegCrawl(Entity entity) {
 			if (entity.hasAttached(com.jaymoskitchen.archery.LegShots.CRAWL)) {
 				entity.removeAttached(com.jaymoskitchen.archery.LegShots.CRAWL);
@@ -220,6 +307,10 @@ public final class KitchenCompat {
 
 		static @Nullable Entity carried(Player player) {
 			return com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+		}
+
+		static @Nullable Entity dragged(Player player) {
+			return com.jaymoskitchen.corpse.CorpseEntity.draggedBy(player);
 		}
 
 		static void take(Player player, Entity entity) {
@@ -261,6 +352,15 @@ public final class KitchenCompat {
 
 		static boolean carried(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.carrier() != null;
+		}
+
+		static boolean isCorpse(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity;
+		}
+
+		static boolean liesStill(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.carrier() == null && corpse.dragger() == null
+				&& corpse.hook() == null;
 		}
 
 		static boolean playerCorpse(Entity entity) {
@@ -412,8 +512,9 @@ public final class KitchenCompat {
 			return;
 		}
 		try {
+			// (0.20.111) and someone passed out from hunger or thirst lies where they fell till they come round
 			java.util.function.Predicate<Player> adrift = player -> com.jaymospowers.core.wounds.Downed.isDowned(player)
-				&& com.jaymospowers.core.wounds.Downed.adrift(player);
+				&& com.jaymospowers.core.wounds.Downed.adrift(player) || com.jaymospowers.core.wounds.Fainting.heldDown(player);
 			Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("addHold", java.util.function.Predicate.class)
 				.invoke(null, adrift);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
@@ -436,6 +537,41 @@ public final class KitchenCompat {
 			Class.forName("com.jaymoskitchen.corpse.Hauling").getMethod("addBrawn", java.util.function.ToIntFunction.class).invoke(null, brawn);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen: hauling slows everyone alike
+		}
+	}
+
+	/**
+	 * (0.20.46, Andy: "you should not freeze or overheat in heaven") Kitchen's body heat is held neutral at the Other World
+	 * (the Judge's hall, road, pavilion and ring: {@link com.jaymospowers.power.zfighter.ZFighterAfterlife#inOtherWorld}), however
+	 * high the platform stands; the rest of the Aether keeps its weather.
+	 */
+	public static void registerTemperate() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<Player> heaven = com.jaymospowers.power.zfighter.ZFighterAfterlife::inOtherWorld;
+			Class.forName("com.jaymoskitchen.climate.BodyHeat").getMethod("addTemperate", java.util.function.Predicate.class).invoke(null, heaven);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen: the Other World has the Aether's weather
+		}
+	}
+
+	/**
+	 * (0.20.47) Andy: "player corpses dont spawn in the otherworld". Kitchen leaves no body (player's or mob's) in the Other
+	 * World ({@link com.jaymospowers.power.zfighter.ZFighterAfterlife#inOtherWorld}), and one already there never gets up.
+	 */
+	public static void registerNoCorpseZone() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<net.minecraft.world.entity.Entity> heaven = com.jaymospowers.power.zfighter.ZFighterAfterlife::inOtherWorld;
+			Class.forName("com.jaymoskitchen.corpse.Corpses").getMethod("addNoCorpseZone", java.util.function.Predicate.class).invoke(null, heaven);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen (before 0.5.61): bodies are left there as anywhere, and rise. (0.20.78) Said aloud now: a pack
+			// that shipped the stale Kitchen in libs/ had player zombies rising in heaven with nothing in the log
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Jaymo's Kitchen has no Other World rule (Kitchen 0.5.61+ needed): bodies there will rise", e);
 		}
 	}
 
@@ -462,6 +598,9 @@ public final class KitchenCompat {
 	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all ({@code BladeBlood.corpse}).
 	 * Kitchen (0.5.17 on) tells us of each blow that lands on a body with flesh on it.
 	 */
+	/** (0.19.62) The stain a hung carcass's blood leaves on the ground each second it has no grate to run into (it grows as more falls). */
+	static final float HUNG_SPILL_STAIN = 0.35F;
+
 	public static void registerCorpseBlood() {
 		if (!LOADED) {
 			return;
@@ -498,11 +637,46 @@ public final class KitchenCompat {
 					if (type != null) {
 						com.jaymospowers.core.BladeBlood.blownApart(body, type);
 					}
+					// (0.20.56) the wet thump of a body coming apart, felt by those close by (on top of the blast's own)
+					if (body.level() instanceof net.minecraft.server.level.ServerLevel level) {
+						com.jaymospowers.core.Shakes.around(level, body.position(), GIB_SHAKE_RANGE, GIB_SHAKE);
+					}
 				};
 			Class.forName("com.jaymoskitchen.corpse.Gibs").getMethod("addOnBurst", java.util.function.BiConsumer.class)
 				.invoke(null, burst);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen that doesn't blow bodies apart
+		}
+		try {
+			// (0.19.62) Kitchen 0.5.51's meat hook (corpse/Hanging): a carcass bled on it drips real blood, the blood with
+			// no grate under it pools on the ground as lasting stains (blood magic draws them), and its head comes off whole
+			Class<?> hanging = Class.forName("com.jaymoskitchen.corpse.Hanging");
+			java.util.function.BiConsumer<Entity, net.minecraft.world.phys.Vec3> drip = (corpse, at) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				if (type != null && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					level.sendParticles(new com.jaymospowers.core.blood.BloodParticles.Spray(com.jaymospowers.core.BladeBlood.color(type), 0.35F, false),
+						true, false, at.x, at.y - 0.05, at.z, 1, 0.02, 0.0, 0.02, 0.0);
+				}
+			};
+			java.util.function.BiConsumer<Entity, net.minecraft.world.phys.Vec3> spill = (corpse, at) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				if (type != null && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					com.jaymospowers.core.blood.BloodTrail.lay(level, null, com.jaymospowers.core.BladeBlood.color(type), at.x, at.y, at.z,
+						HUNG_SPILL_STAIN, 8);
+				}
+			};
+			java.util.function.BiConsumer<Entity, net.minecraft.world.phys.Vec3> head = (corpse, at) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				String look = lookOf(corpse);
+				if (type != null && look != null && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					com.jaymospowers.core.SeveredPart.dropTrophyHead(level, look, type.getDimensions().height(), corpse.getYRot(), at);
+				}
+			};
+			hanging.getMethod("setOnDrip", java.util.function.BiConsumer.class).invoke(null, drip);
+			hanging.getMethod("setOnSpill", java.util.function.BiConsumer.class).invoke(null, spill);
+			hanging.getMethod("setOnHead", java.util.function.BiConsumer.class).invoke(null, head);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen with no meat hooks
 		}
 	}
 

@@ -86,9 +86,9 @@ public final class ApeRage {
 	/** The rage now (0-100), while he's the ape. Synced to him (his HUD). */
 	public static final AttachmentType<Float> RAGE = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_rage"),
 		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.targetOnly()));
-	/** A fit has him: how far his struggle's got (0-1). Synced to him. */
+	/** A fit has him: how far his struggle's got (0-1). Synced to all (2026-11-05: every screen draws the driven ape facing the way it goes). */
 	public static final AttachmentType<Float> FIT = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_fit"),
-		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.targetOnly()));
+		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
 
 	/** Fits he's won, ever (saved, kept through death). */
 	public static final AttachmentType<Integer> TAMED = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_tamed"),

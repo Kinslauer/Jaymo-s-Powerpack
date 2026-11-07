@@ -1,8 +1,10 @@
 package com.jaymoskingdoms.whaling;
 
 import com.jaymoskingdoms.Downed;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -22,8 +24,9 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * parts are extremely valuable to kingdoms and their inhabitants"). A grown villager <b>buys</b> whale goods for emeralds,
  * dearly, by their trade: fishermen and butchers the meat and blubber, clerics the oil for their lamps and ambergris for
  * their incense, librarians and cartographers oil to read and draw by, leatherworkers blubber to dress hides, armourers and
- * weaponsmiths oil against rust, toolsmiths and fletchers bone, masons bone and oil; and anyone at all, whatever their
- * trade, pays well for cooked whale meat, whale oil and ambergris. A sale on a realm's land pays the realm its toll like any
+ * weaponsmiths oil against rust, toolsmiths and fletchers bone, masons bone and oil.
+ * (0.7.555) Andy: "not everyone should strictly trade for whale products." Only those trades buy whale goods now; the rest
+ * want something of their own ({@code OwnWants}), and a whale purchase put on someone outside those trades before is taken off. A sale on a realm's land pays the realm its toll like any
  * other trade ({@code Treasuries.traded}), so a whaling crew's haul fills its kingdom's purse.
  * <p>
  * As with {@code Remedies}, the offers are added when a player right-clicks the villager, just before the trading screen
@@ -43,12 +46,14 @@ final class WhaleTrade {
 
 	/** Built when first asked for (the items are only registered when {@link Whaling#register} runs). */
 	private static Map<ResourceKey<VillagerProfession>, List<Want>> byTrade;
-	private static List<Want> anyone;
+	/** Every whale good. */
+	private static Set<Item> whale;
 
 	static void register() {
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (hand == InteractionHand.MAIN_HAND && !world.isClientSide() && world instanceof ServerLevel && entity instanceof Villager v
-				&& v.isAlive() && !v.isBaby() && !Downed.isDowned(v) && !player.isSpectator() && v.getTradingPlayer() == null) {
+				&& v.isAlive() && !v.isBaby() && !Downed.isDowned(v) && !player.isSpectator() && v.getTradingPlayer() == null
+				&& !com.jaymoskingdoms.ZFighterFolk.is(v)) {
 				stock(v);
 			}
 			return InteractionResult.PASS;
@@ -59,9 +64,9 @@ final class WhaleTrade {
 		if (byTrade != null) {
 			return;
 		}
-		Want meat = new Want(Whaling.WHALE_MEAT, 4, 3, 12), cooked = new Want(Whaling.COOKED_WHALE_MEAT, 3, 4, 12);
+		Want meat = new Want(Whaling.WHALE_MEAT, 4, 3, 12);
 		Want blubber = new Want(Whaling.WHALE_BLUBBER, 4, 4, 16), oil = new Want(Whaling.WHALE_OIL, 1, 4, 12);
-		Want bone = new Want(Whaling.WHALE_BONE, 2, 5, 8), ambergris = new Want(Whaling.AMBERGRIS, 1, 40, 3);
+		Want bone = new Want(Whaling.WHALE_BONE, 2, 5, 8);
 		byTrade = Map.ofEntries(
 			Map.entry(VillagerProfession.FISHERMAN, List.of(meat, blubber, new Want(Whaling.WHALE_BONE, 2, 4, 8))),
 			Map.entry(VillagerProfession.BUTCHER, List.of(new Want(Whaling.WHALE_MEAT, 3, 4, 16), blubber)),
@@ -75,28 +80,31 @@ final class WhaleTrade {
 			Map.entry(VillagerProfession.FLETCHER, List.of(new Want(Whaling.WHALE_BONE, 2, 6, 10))),
 			Map.entry(VillagerProfession.MASON, List.of(bone, oil)),
 			Map.entry(VillagerProfession.FARMER, List.of(blubber)));
-		anyone = List.of(cooked, oil, ambergris);
+		whale = Set.of(Whaling.WHALE_MEAT, Whaling.COOKED_WHALE_MEAT, Whaling.WHALE_BLUBBER, Whaling.WHALE_OIL, Whaling.WHALE_BONE, Whaling.AMBERGRIS);
 	}
 
-	/** {@code v}'s whale purchases: their trade's, then everyone's; each added the first time, and kept after. */
+	/** {@code v}'s whale purchases, their trade's only: each added the first time, and kept after. */
 	static void stock(Villager v) {
 		wants();
 		MerchantOffers offers = v.getOffers();
+		Set<Item> theirs = new HashSet<>();
 		for (var entry : byTrade.entrySet()) {
 			if (v.getVillagerData().profession().is(entry.getKey())) {
 				for (Want w : entry.getValue()) {
+					theirs.add(w.item());
 					offer(offers, w);
 				}
 			}
 		}
-		for (Want w : anyone) {
-			offer(offers, w);
-		}
+		// (0.7.555) everyone used to buy cooked meat, oil and ambergris: off again on those whose trade doesn't
+		offers.removeIf(o -> whale.contains(o.getCostA().getItem()) && !theirs.contains(o.getCostA().getItem())
+			&& com.jaymoskingdoms.Currencies.isMoney(o.getResult()));
 	}
 
 	private static void offer(MerchantOffers offers, Want w) {
 		for (MerchantOffer offer : offers) {
-			if (offer.getCostA().is(w.item()) && offer.getResult().is(Items.EMERALD)) {
+			// (0.7.490) paid in any coin: the town's coin they were set in counts too (Currencies.localize)
+			if (offer.getCostA().is(w.item()) && com.jaymoskingdoms.Currencies.isMoney(offer.getResult())) {
 				// (they already buy it: their trade's dearer price, added first, stands)
 				return;
 			}

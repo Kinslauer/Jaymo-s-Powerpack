@@ -385,7 +385,10 @@ public final class ArsenalPower implements Power {
 			stacks.set(0, relic);
 		} else {
 			List<ItemStack> pair = ArsenalFlintlock.pairFor(player, player.getRandom());
-			stacks = pair != null ? pair : new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
+			// (0.19.26) now and then a handgun from the future, one magazine in it (ArsenalFutureGun)
+			List<ItemStack> future = pair == null ? ArsenalFutureGun.roll(player, player.getRandom()) : null;
+			stacks = pair != null ? pair : future != null ? future
+				: new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
 		}
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);

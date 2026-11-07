@@ -110,5 +110,7 @@ public final class WildRenderer<T extends Mob & WildLook> extends MobRenderer<T,
 				"tarantula_jungle_3"}, null, "tarantula_eyes");
 		register(Wild.MOOSE, MooseModel::new, MooseModel.createBodyLayer(), 0.8F, 1.5F, new String[] {"moose_1", "moose_2", "moose_3", "moose_4"},
 			null, null);
+		// (0.7.610) the grizzly mini-boss, by its own model and poses
+		EntityRenderers.register(Wild.GRIZZLY, GrizzlyRenderer::new);
 	}
 }

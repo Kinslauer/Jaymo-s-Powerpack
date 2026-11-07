@@ -1,0 +1,22 @@
+{
+	"values": [
+		"minecraft:tadpole",
+		"minecraft:bee",
+		"minecraft:silverfish",
+		"minecraft:endermite",
+		{ "id": "cubeanimals:cricket", "required": false },
+		{ "id": "cubeanimals:mouse", "required": false },
+		{ "id": "cubeanimals:snail", "required": false },
+		{ "id": "cubeanimals:chameleon", "required": false },
+		{ "id": "naturalist:butterfly", "required": false },
+		{ "id": "naturalist:caterpillar", "required": false },
+		{ "id": "naturalist:firefly", "required": false },
+		{ "id": "naturalist:dragonfly", "required": false },
+		{ "id": "naturalist:snail", "required": false },
+		{ "id": "alexsmobs:cockroach", "required": false },
+		{ "id": "alexsmobs:fly", "required": false },
+		{ "id": "alexsmobs:crimson_mosquito", "required": false },
+		{ "id": "alexsmobs:hummingbird", "required": false },
+		{ "id": "alexsmobs:leafcutter_ant", "required": false }
+	]
+}

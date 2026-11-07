@@ -1,4 +1,31 @@
 {
   "model": "claude-opus-5-5",
-  "ultracode": true
+  "ultracode": true,
+  "enabledMcpjsonServers": [
+    "omni-ai-mcp"
+  ],
+  "permissions": {
+    "deny": [
+      "mcp__omni-ai-mcp__ask_model",
+      "mcp__omni-ai-mcp__gemini_agent_task",
+      "mcp__omni-ai-mcp__gemini_generate_code",
+      "mcp__omni-ai-mcp__gemini_deep_research",
+      "mcp__omni-ai-mcp__gemini_web_search",
+      "mcp__omni-ai-mcp__gemini_generate_image",
+      "mcp__omni-ai-mcp__gemini_generate_video",
+      "mcp__omni-ai-mcp__gemini_generate_music",
+      "mcp__omni-ai-mcp__gemini_text_to_speech",
+      "mcp__omni-ai-mcp__gemini_design_voice",
+      "mcp__omni-ai-mcp__gemini_replicate_voice",
+      "mcp__omni-ai-mcp__gemini_list_voices",
+      "mcp__omni-ai-mcp__gemini_transcribe_audio",
+      "mcp__omni-ai-mcp__gemini_analyze_image",
+      "mcp__omni-ai-mcp__gemini_analyze_video",
+      "mcp__omni-ai-mcp__gemini_embed",
+      "mcp__omni-ai-mcp__gemini_create_file_store",
+      "mcp__omni-ai-mcp__gemini_list_file_stores",
+      "mcp__omni-ai-mcp__gemini_upload_file",
+      "mcp__omni-ai-mcp__gemini_file_search"
+    ]
+  }
 }

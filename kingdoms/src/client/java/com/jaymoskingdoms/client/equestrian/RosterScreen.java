@@ -151,6 +151,10 @@ final class RosterScreen extends Screen {
 		if (!e.name().isEmpty()) {
 			info.append(breedName).append(Component.literal(" · "));
 		}
+		// (0.7.445) its coat, once the roster has seen it since
+		if (!e.coat().isEmpty()) {
+			info.append(Component.translatable("coat.jaymoskingdoms." + e.coat())).append(Component.literal(" · "));
+		}
 		info.append(where).append(Component.literal(" · ")).append(Component.translatable(Herd.Order.byId(e.order()).key()));
 		if (!e.here()) {
 			info.append(Component.literal(" · ")).append(Component.translatable("screen.jaymoskingdoms.roster.away"));

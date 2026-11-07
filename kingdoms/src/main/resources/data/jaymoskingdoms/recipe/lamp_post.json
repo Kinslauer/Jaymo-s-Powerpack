@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "L",
+    "B",
+    "B"
+  ],
+  "key": {
+    "L": "minecraft:lantern",
+    "B": "minecraft:iron_bars"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:lamp_post"
+  }
+}

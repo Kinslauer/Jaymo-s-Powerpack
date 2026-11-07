@@ -1,11 +1,14 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -28,9 +31,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -58,7 +58,10 @@ final class ZFighterTournaments {
 	static final double RING_OUT = RADIUS + 1.5;
 	static final double RING_HIGH = 12.0;
 	static final double RING_LOW = 4.0;
-	static final int RING_OFFSET = 14;
+	/** (0.19.1) How far a kingdom's kept ring may lie from its seat and still be its ring (blocks). */
+	static final int SITE_KEEP = 64;
+	/** (0.19.1) When no kingdom near anyone has proper ground for a ring, how long until the next try (ticks). */
+	static final long NO_SITE_RETRY = 6000L;
 	static final int MAX_ENTRANTS = 8;
 	static final int MIN_BRACKET = 4;
 	/** Champions get this much more health and punch for each round past the first. */
@@ -77,6 +80,9 @@ final class ZFighterTournaments {
 	/** When the next tournament may be held (overworld game time). */
 	public static final AttachmentType<Long> NEXT = AttachmentRegistry.create(JaymosPowers.id("zfighter_next_tournament"),
 		builder -> builder.persistent(Codec.LONG));
+	/** (0.19.1) Each kingdom's ring: the middle of the floor laid for it (by name), used again while it stands. */
+	public static final AttachmentType<Map<String, BlockPos>> SITES = AttachmentRegistry.create(JaymosPowers.id("zfighter_tournament_sites"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, BlockPos.CODEC)));
 
 	/** A place in the bracket: a player, or one of the kingdom's champions. */
 	private record Entry(@Nullable UUID player, Component name) {
@@ -231,12 +237,21 @@ final class ZFighterTournaments {
 			return;
 		}
 		RandomSource random = overworld.getRandom();
-		ZFighterKingdoms.Settlement s = near.get(random.nextInt(near.size()));
-		open(overworld, s.seat(), s.name());
-		overworld.setAttached(NEXT, now + TOURNEY_DAYS * DAY + random.nextInt((int)TOURNEY_SPREAD));
+		// (0.19.1) a kingdom with no proper ground for a ring holds none; the next one near someone is tried
+		Collections.shuffle(near, new java.util.Random(random.nextLong()));
+		for (ZFighterKingdoms.Settlement s : near) {
+			if (open(overworld, s.seat(), s.name())) {
+				overworld.setAttached(NEXT, now + TOURNEY_DAYS * DAY + random.nextInt((int)TOURNEY_SPREAD));
+				return;
+			}
+		}
+		overworld.setAttached(NEXT, now + NO_SITE_RETRY);
 	}
 
-	/** A tournament opens beside {@code seat}: the ring is drawn and sign-up begins. False if one is already on. */
+	/**
+	 * A tournament opens beside {@code seat}: the ring is drawn and sign-up begins. False if one is already on, or
+	 * (0.19.1) if there's no proper ground for a ring near the seat: then none is held at all.
+	 */
 	static boolean open(ServerLevel level, BlockPos seat, String kingdom) {
 		return open(level, seat, kingdom, level.getRandom().nextFloat() < ROYALE_CHANCE);
 	}
@@ -246,12 +261,11 @@ final class ZFighterTournaments {
 		if (current != null || ZFighterBattleRoyale.active()) {
 			return false;
 		}
-		// (0.11.71) a floor laid on the flattest plain ground near the seat (ZFighterArena); only if there's none, anywhere
-		BlockPos center = ZFighterArena.build(level, seat);
+		// (0.11.71) a floor laid on the flattest plain ground near the seat (ZFighterArena). (0.19.1) It used to fall back
+		// to any spot at all (a hillside, a roof, the river) when there was none; now there's no tournament then.
+		BlockPos center = site(level, seat, kingdom);
 		if (center == null) {
-			double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
-			center = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-				seat.offset((int)(Math.cos(angle) * RING_OFFSET), 0, (int)(Math.sin(angle) * RING_OFFSET)));
+			return false;
 		}
 		current = new Tourney(level, kingdom, center, level.getGameTime() + SIGNUP_TICKS);
 		current.royale = royale;
@@ -260,6 +274,26 @@ final class ZFighterTournaments {
 			: "message.jaymospowers.zfighter_tournament_open", kingdom, center.getX(), center.getZ(), SIGNUP_TICKS / 1200).withStyle(ChatFormatting.GOLD), false);
 		level.playSound(null, center, SoundEvents.RAID_HORN.value(), SoundSource.NEUTRAL, 8.0F, 1.2F);
 		return true;
+	}
+
+	/**
+	 * (0.19.1) Where {@code kingdom}'s ring is: the floor laid for it before, if it still stands near the seat (tidied),
+	 * else a new one on proper ground (kept for next time), else null. Returns the spot fighters stand on at its middle.
+	 */
+	private static @Nullable BlockPos site(ServerLevel level, BlockPos seat, String kingdom) {
+		Map<String, BlockPos> sites = level.getAttachedOrElse(SITES, Map.of());
+		BlockPos kept = sites.get(kingdom);
+		if (kept != null && kept.distSqr(seat) <= (double)SITE_KEEP * SITE_KEEP && ZFighterArena.reuse(level, kept)) {
+			return kept.above();
+		}
+		BlockPos center = ZFighterArena.build(level, seat);
+		if (center == null) {
+			return null;
+		}
+		Map<String, BlockPos> next = new HashMap<>(sites);
+		next.put(kingdom, center.below());
+		level.setAttached(SITES, next);
+		return center;
 	}
 
 	private static void run(Tourney t, long now) {
@@ -605,18 +639,16 @@ final class ZFighterTournaments {
 		lastBoard = board;
 	}
 
-	/** A Z Fighter is paid in TP; anyone else in emeralds (a Z Fighter gets the emeralds too). */
+	/** A Z Fighter is paid in TP; anyone else in silver coins (a Z Fighter gets the coins too). (0.20.0) Was emeralds; 1 silver = 1 old emerald. */
 	static void pay(ServerPlayer player, int tp, int emeralds) {
+		Component money = KingdomsMoney.text(player, KingdomsMoney.worth(emeralds));
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(player, tp);
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize_tp", tp, emeralds).withStyle(ChatFormatting.GOLD));
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize_tp", tp, money).withStyle(ChatFormatting.GOLD));
 		} else {
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize", emeralds).withStyle(ChatFormatting.GOLD));
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_prize", money).withStyle(ChatFormatting.GOLD));
 		}
-		ItemStack stack = new ItemStack(Items.EMERALD, emeralds);
-		if (!player.getInventory().add(stack)) {
-			player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
-		}
+		KingdomsMoney.pay(player, KingdomsMoney.worth(emeralds));
 	}
 
 	private static boolean inRing(Tourney t, Vec3 pos) {

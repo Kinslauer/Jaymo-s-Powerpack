@@ -1,6 +1,7 @@
 package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.HoldProgress;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -63,6 +64,11 @@ public final class SelfRevive {
 
 	private static final Map<UUID, Eating> EATING = new HashMap<>();
 
+	/** (0.21.39) The eating's job in {@link HoldProgress}: this time down (let go, the bar stays for the next hold). */
+	private static String job(Player player) {
+		return "second_wind:" + Downed.since(player);
+	}
+
 	private SelfRevive() {
 	}
 
@@ -99,7 +105,10 @@ public final class SelfRevive {
 			long now = server.level().getGameTime();
 			Eating e = EATING.get(server.getUUID());
 			if (e == null) {
-				EATING.put(server.getUUID(), new Eating(hand, now));
+				e = new Eating(hand, now);
+				// (0.21.39) let go before: the bar carries on where it stopped
+				e.ticks = HoldProgress.get(server.getUUID(), job(server));
+				EATING.put(server.getUUID(), e);
 			} else {
 				e.held = now;
 			}
@@ -112,6 +121,8 @@ public final class SelfRevive {
 		Eating e = EATING.get(player.getUUID());
 		if (e != null && ++e.hits >= most) {
 			EATING.remove(player.getUUID());
+			// (0.21.39) broken off by blows: that bar starts again
+			HoldProgress.forget(player.getUUID(), job(player));
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.self_revive_broken").withStyle(ChatFormatting.RED));
 		}
 	}
@@ -138,6 +149,7 @@ public final class SelfRevive {
 				continue;
 			}
 			e.ticks++;
+			HoldProgress.set(player.getUUID(), job(player), e.ticks);
 			if (e.ticks % 4 == 0) {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.5F,
 					0.9F + level.getRandom().nextFloat() * 0.2F);
@@ -154,6 +166,7 @@ public final class SelfRevive {
 				continue;
 			}
 			it.remove();
+			HoldProgress.forget(player.getUUID(), job(player));
 			stack.consume(1, player);
 			player.setAttached(LAST, now);
 			Downed.getUp(level, player);

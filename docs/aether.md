@@ -220,7 +220,7 @@ counts are the notes' per-chunk counts as attempts. The upper islets get `HIGH_S
 - **Ores** (all of N1's): agiosite, ambrosium, arkenium, corrobonite, glint, gravitite, zanite, holystone quartz, icestone, crude
   scatterglass, with the notes' sizes and counts, in holystone and undershale (`aether_stone_ore_replaceables`,
   `aether_undershale_ore_replaceables`), plus ichorite pockets in the undershale.
-- **Water**: vanilla `lake` ponds (plain, arctic with packed ice rims, swamp with ferrosite mud), springs, arilum on the water, arctic
+- **Water**: vanilla `lake` ponds (plain, arctic with packed ice rims, swamp with ferrosite mud), springs (`aether.world.SkySpringFeature`: in a One Dimension world a spring whose water would fall out of the bottom of the Aether onto the Overworld is not placed, except in a rare heavenfall chunk at least 3000 blocks from spawn, and only once a player has reached the Dread world tier), arilum on the water, arctic
   ice sheets over cold lakes (an `arctic_ice` disk, since there is no freeze step).
 - **Plants and ground**: grass, ferns, bushes, flower fields per zone, blueberries, orange trees, valkyrie sprouts, brettl, holystone
   rocks and twigs, magnetic shrooms and huge magnetic shrooms (vanilla `huge_red_mushroom` with our blocks), rotshrooms (plants only),
@@ -250,6 +250,20 @@ structures (other tracks), custom sky, weather and cloud renderers.
 **To check first in game**: that the dimension loads with a fresh Aether (the server boot test did, and every biome was found with
 `locate biome`); the look from a Wind arrival (big islands, islets above, open sky); trees and ores; caves; lakes; the cloudbed from
 the underside; falling out below y -8 and landing home; day and night; a moa on a highfields island.
+
+## The sky (0.20.96, seven-mods plan patch 10) [aether.sky]
+
+- **Updraft vents** (`UpdraftVentBlock`, `UpdraftBlock`): columns of rising air, 110 blocks at most, from vents on island
+  tops. Placed `updraft_vents` (rarity 10, lowland tops) and `updraft_vents_high` (rarity 16, upper islets).
+- **Pockets and gas** (`SkyPockets`): light and heavy 160-block stretches above Aether height 60; gas in one 96-block stretch
+  of the Hestveil in 3. The Sky Mask (head bauble) keeps the gas out.
+- **Upfalls** (`UpfallBlock`): `upfalls`, rarity 48, hung from lowland undersides.
+- **Biomes**: hanging_roots, mistsea (highfields), rustworks (magnetic), gilded_ridge (highfields, upper depth only). Their
+  boxes and dressing are in the generator (`ROOTS_WEIRD`, `MIST_WEIRD`, `GILDED_WEIRD`).
+- **Sky warden** (`SkyWarden`, arena from `SkyFeature` kind `sky_arena`): one arena per 1280-block square. Flips the arena's
+  gravity below half health.
+- **Watched vault** (`VaultHeartEntity`, `SkyFeature` kind `watched_vault`): rarity 70 at heights 14 to 44, only set into rock.
+- All worldgen is the one feature type `jaymospowers:sky` with a `kind`.
 
 ## What is not in yet
 

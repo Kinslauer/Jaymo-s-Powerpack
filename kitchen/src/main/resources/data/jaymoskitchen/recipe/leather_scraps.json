@@ -1,0 +1,12 @@
+{
+  "type": "jaymoskitchen:blade_crafting",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:leather",
+    "#jaymoskitchen:work_blades"
+  ],
+  "result": {
+    "id": "jaymoskitchen:leather_scraps",
+    "count": 4
+  }
+}

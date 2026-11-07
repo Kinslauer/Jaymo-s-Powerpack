@@ -63,7 +63,9 @@ final class WindStormEyes extends RenderLayer<AvatarRenderState, PlayerModel> {
 		if (!(entity instanceof Player player) || WindModes.mode(player) != WindModes.BOTH) {
 			return;
 		}
-		collector.order(2).submitModel(this.getParentModel(), state, poseStack, RenderTypes.eyes(eyesFor(state.skin.body().texturePath())), lightCoords,
+		// (0.21.13) on MCA's face and pose when MCA draws the player (McaLooks)
+		Identifier eyes = com.jaymospowers.client.McaLooks.faceEyes(state, this.getParentModel(), WHITE, () -> eyesFor(state.skin.body().texturePath()));
+		collector.order(2).submitModel(com.jaymospowers.client.McaLooks.glowBody(this.getParentModel()), state, poseStack, RenderTypes.eyes(eyes), lightCoords,
 			OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 	}
 

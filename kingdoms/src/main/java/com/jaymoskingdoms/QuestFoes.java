@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.mixin.BrushableBlockEntityAccessor;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -53,6 +54,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BrushableBlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -256,7 +258,8 @@ final class QuestFoes {
 		BlockEntity be = level.getBlockEntity(spot);
 		if (be instanceof ChestBlockEntity chest) {
 			chest.setItem(13, keepsake);
-			chest.setItem(random.nextInt(9), new ItemStack(Items.EMERALD, 1 + random.nextInt(4)));
+			// (0.7.498) coins of the land, an emerald's worth for each emerald it was
+			chest.setItem(random.nextInt(9), Money.stacks(level, spot, Money.worth(1 + random.nextInt(4))).get(0));
 			chest.setItem(18 + random.nextInt(9), new ItemStack(random.nextBoolean() ? Items.BREAD : Items.BONE, 2 + random.nextInt(4)));
 		}
 		for (int i = 0; i < CACHE_GUARDS; i++) {
@@ -284,8 +287,9 @@ final class QuestFoes {
 		BlockPos found = null;
 		Identifier id = Identifier.tryParse(q.objective().target());
 		Structure structure = id == null ? null : level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(id);
-		if (structure != null && level.hasChunk(located.getX() >> 4, located.getZ() >> 4)) {
-			StructureStart start = level.structureManager().getStartForStructure(structure, level.getChunk(located.getX() >> 4, located.getZ() >> 4));
+		ChunkAccess locatedChunk = level.getChunkSource().getChunkNow(located.getX() >> 4, located.getZ() >> 4);
+		if (structure != null && locatedChunk != null) {
+			StructureStart start = level.structureManager().getStartForStructure(structure, locatedChunk);
 			if (start != null && start.isValid()) {
 				BlockPos middle = start.getBoundingBox().getCenter();
 				double best = Double.MAX_VALUE;

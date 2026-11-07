@@ -171,6 +171,12 @@ public final class FinisherPose {
 			k(20, 0.02F, 10, 0, -1.75F, -0.05F, 0.05F, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.5F, 0),
 			k(24, 0.03F, 12, 0, -1.3F, -0.05F, 0, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.55F, 0),
 			rest(30, 0)});
+		// (0.20.100) a future gun's, one-handed: Head Shot's one round, Three Shots on semi a beat apart, on full auto at once
+		KEYS.put(Finishers.Kind.FUTURE_SHOT, oneHanded(Finishers.Kind.FUTURE_SHOT));
+		KEYS.put(Finishers.Kind.FUTURE_BURST, oneHanded(Finishers.Kind.FUTURE_BURST));
+		KEYS.put(Finishers.Kind.FUTURE_AUTO, oneHanded(Finishers.Kind.FUTURE_AUTO));
+		// (0.20.100) the untrained snap shot, without Executioner
+		KEYS.put(Finishers.Kind.FUTURE_WILD, oneHanded(Finishers.Kind.FUTURE_WILD));
 		// Bare hands: down on a knee, the head taken in both hands; (0.15.114) Andy: "neck break should take 5s to finish":
 		// held, it's wrenched one way and fought back twice (40, 70), a wind back, and the snap at 100
 		KEYS.put(Finishers.Kind.FIST, new Key[] {
@@ -344,9 +350,56 @@ public final class FinisherPose {
 			k(30, 0.4F, 28, 0, -0.75F, 0, 0.05F, 0.1F, 0, -0.3F, -1.15F, 1.35F, 0.5F, 0),
 			k(36, 0.4F, 28, 0, -0.75F, 0, 0.05F, 0.1F, 0, -0.3F, -1.15F, 1.35F, 0.5F, 0),
 			rest(44, 0)});
+		// Questioning holds (Andy, 2026-10-31): held still for as long as the talk lasts, one hold per weapon kind
+		float q = Finishers.QUESTION_TICKS;
+		// The blade at the throat: on a knee at their head, the edge laid across the neck, the off hand on the chest
+		Key throat = k(0, 0.45F, 34, 0, -0.55F, -0.2F, 0.1F, -0.35F, 0.25F, -0.1F, -1.15F, 1.35F, 0.65F, 100);
+		KEYS.put(Finishers.Kind.Q_BLADE, new Key[] {rest(0, 0), at(throat, 8), turned(throat, q * 0.5F, 2), at(throat, q - 8), rest(q, 0)});
+		// The club raised: standing over them, the weapon up and ready to come down
+		Key raised = k(0, 0.0F, 6, -8, -2.6F, -0.1F, 0.25F, -0.5F, 0.2F, -0.2F, -0.2F, 0.2F, 0.55F, 0);
+		KEYS.put(Finishers.Kind.Q_BLUNT, new Key[] {rest(0, 0), at(raised, 8), turned(raised, q * 0.5F, -4), at(raised, q - 8), rest(q, 0)});
+		// The shot levelled at the face from a step off
+		Key levelled = k(0, 0.05F, 18, 0, -1.15F, -0.1F, 0, -1.1F, 0.6F, 0, -0.2F, 0.2F, 0.65F, 0);
+		KEYS.put(Finishers.Kind.Q_AIM, new Key[] {rest(0, 0), at(levelled, 8), at(levelled, q - 8), rest(q, 0)});
+		// A fist in the collar: on a knee, the head pulled up by the collar, the other fist drawn back
+		Key collar = k(0, 0.45F, 32, 6, -1.4F, 0.2F, 0.3F, -0.6F, 0.1F, 0.1F, -1.15F, 1.35F, 0.65F, 0);
+		KEYS.put(Finishers.Kind.Q_GRIP, new Key[] {rest(0, 0), at(collar, 8), turned(collar, q * 0.5F, 2), at(collar, q - 8), rest(q, 0)});
+		// (Quiet Word) The choke hold: stood close behind them, the right arm hooked round the throat, the left at their ribs
+		Key choke = k(0, 0.05F, 6, 0, -1.55F, 0.75F, 0.2F, -1.0F, -0.2F, -0.1F, -0.1F, 0.1F, 0.25F, 0);
+		KEYS.put(Finishers.Kind.Q_CHOKE, new Key[] {rest(0, 0), at(choke, 6), turned(choke, q * 0.5F, 3), at(choke, q - 8), rest(q, 0)});
 	}
 
 	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */
+	/**
+	 * (0.20.100) A one-handed blast for {@code kind}'s beats: the gun swung up in the gun hand, the arm straight down at them,
+	 * the off hand hanging at the side, the muzzle kicking up on each shot (less, on full auto) and settling between, and
+	 * lowered after the last. The body leans a little into it.
+	 */
+	private static Key[] oneHanded(Finishers.Kind kind) {
+		int[] shots = kind.beats;
+		int first = shots[0], last = shots[shots.length - 1];
+		boolean rapid = shots.length > 1 && shots[1] - first <= 2;
+		float aim = -1.15F, kick = rapid ? -1.45F : -1.7F;
+		java.util.List<Key> keys = new java.util.ArrayList<>();
+		keys.add(rest(0, 0));
+		// swung up past the line, then brought down onto them
+		keys.add(k(first - 9, 0.0F, 4, 0, -1.95F, -0.1F, 0.1F, 0.1F, 0.05F, -0.15F, -0.05F, 0.05F, 0.45F, 0));
+		keys.add(k(first - 5, 0.02F, 12, 0, aim, -0.05F, 0.0F, 0.12F, 0.05F, -0.15F, -0.15F, 0.15F, 0.65F, 0));
+		keys.add(k(first - 1, 0.02F, 12, 0, aim + 0.02F, -0.05F, 0.0F, 0.12F, 0.05F, -0.15F, -0.15F, 0.15F, 0.65F, 0));
+		for (int i = 0; i < shots.length; i++) {
+			int s = shots[i];
+			int next = i + 1 < shots.length ? shots[i + 1] : s + 4;
+			// the kick: the muzzle up, the body rocked back a touch
+			keys.add(k(s, 0.0F, 6, 0, kick, -0.05F, 0.05F, 0.15F, 0.05F, -0.15F, -0.12F, 0.12F, 0.55F, 0));
+			// back on them before the next
+			keys.add(k(s + Math.max(1, (next - s) / 2), 0.02F, 11, 0, aim - 0.05F, -0.05F, 0.0F, 0.12F, 0.05F, -0.15F, -0.15F, 0.15F, 0.62F, 0));
+		}
+		keys.add(k(last + 5, 0.01F, 9, 0, aim - 0.1F, -0.05F, 0.0F, 0.12F, 0.05F, -0.15F, -0.12F, 0.12F, 0.6F, 0));
+		keys.add(k(kind.length - 4, 0.0F, 5, 0, -0.6F, -0.05F, 0.05F, -0.1F, 0.0F, -0.1F, -0.05F, 0.05F, 0.45F, 0));
+		keys.add(rest(kind.length, 0));
+		return keys.toArray(Key[]::new);
+	}
+
 	private static Key twirl(Key key, float t, float grip) {
 		return k(t, key.sink(), key.pitch(), key.twist(), key.rax(), key.ray(), key.raz(), key.lax(), key.lay(), key.laz(), key.rightLeg(),
 			key.leftLeg(), key.head(), grip);
@@ -419,7 +472,10 @@ public final class FinisherPose {
 		Entity body = entity.level().getEntity(finish.target());
 		if (body != null) {
 			// (0.15.146) the neck snap kneels to the head, not the middle; (0.17.181) so does the rock
-			net.minecraft.world.phys.Vec3 at = (kind == Finishers.Kind.FIST || kind == Finishers.Kind.ROCK) && body instanceof net.minecraft.world.entity.LivingEntity living
+			// (0.20.100) and a future gun's shots stand over it
+			net.minecraft.world.phys.Vec3 at = (kind == Finishers.Kind.FIST || kind == Finishers.Kind.ROCK || kind == Finishers.Kind.Q_BLADE
+				|| kind == Finishers.Kind.Q_GRIP || kind == Finishers.Kind.FUTURE_SHOT || kind == Finishers.Kind.FUTURE_BURST
+				|| kind == Finishers.Kind.FUTURE_AUTO || kind == Finishers.Kind.FUTURE_WILD) && body instanceof net.minecraft.world.entity.LivingEntity living
 				? Finishers.headAt(living) : body.position();
 			double dx = at.x - entity.getX(), dz = at.z - entity.getZ();
 			float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
@@ -464,7 +520,9 @@ public final class FinisherPose {
 		float w = track == null ? 0.0F : track.amount();
 		Key key = pose.key();
 		// (after the body's turn, forward is -Z)
-		poseStack.translate(0.0F, -key.sink() * w, -pose.step() * w);
+		// (0.21.28) a kneel sinks one thigh's length (KneelLegs)
+		float sink = com.jaymospowers.client.KneelLegs.remap(key.sink(), key.rightLeg(), key.leftLeg()).sink();
+		poseStack.translate(0.0F, -sink * w, -pose.step() * w);
 		poseStack.translate(0.0F, HIP, 0.0F);
 		poseStack.rotateDegrees(Axis.YP, key.twist() * w);
 		poseStack.rotateDegrees(Axis.XP, -key.pitch() * w);
@@ -498,8 +556,16 @@ public final class FinisherPose {
 		float bend = key.pitch() * Mth.DEG_TO_RAD;
 		int mainLeg = pose.rightHanded() ? PoseBlend.RIGHT_LEG : PoseBlend.LEFT_LEG;
 		int offLeg = pose.rightHanded() ? PoseBlend.LEFT_LEG : PoseBlend.RIGHT_LEG;
-		frame.set(mainLeg, key.rightLeg() - bend, 0.08F * m, 0.0F);
-		frame.set(offLeg, key.leftLeg() - bend, -0.08F * m, 0.0F);
+		// (0.21.28) a kneel's thighs and knees as a body really kneels (KneelLegs)
+		com.jaymospowers.client.KneelLegs.Legs legs = com.jaymospowers.client.KneelLegs.remap(key.sink(), key.rightLeg(), key.leftLeg());
+		frame.set(mainLeg, legs.right() - bend, 0.08F * m, 0.0F);
+		frame.set(offLeg, legs.left() - bend, -0.08F * m, 0.0F);
+		float w = track.amount();
+		if (pose.rightHanded()) {
+			com.jaymospowers.client.KneelLegs.want(state, legs.rightKnee() * w, legs.leftKnee() * w);
+		} else {
+			com.jaymospowers.client.KneelLegs.want(state, legs.leftKnee() * w, legs.rightKnee() * w);
+		}
 		frame.set(PoseBlend.HEAD, key.head(), frame.vanilla(PoseBlend.HEAD + 1), 0.0F);
 		track.apply(h, frame, LIMB_STIFFNESS);
 	}

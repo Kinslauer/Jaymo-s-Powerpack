@@ -300,6 +300,12 @@ corrects your pronunciation of spells, "dear". Reach: things from far away, trap
 - **Juggle** (`juggle`, level 4, cost 8 per item, charges): tap: the arms lift up to 4 nearby item entities or small mobs
   (height < 1) into the air round you (`JUGGLE` pose, orbit them 2 blocks out, no gravity, as `HandGrip` holds); tap again
   to throw the next one along your look (`THROW_SPEED`), charge for speed. Uses `HandGrip`-style per-player state.
+- **Mana wings** (`wings`, level 1, cost 6, toggle; Andy 2026-11-01): two great hands of her light spread at your back,
+  2-3 player-widths across, feathered wings hanging beneath them, flapping gently. Spread, you hover whenever you are off the
+  ground (WASD, Jump rises, Sneak sinks) and hang in the air with Powers' wind hover sway. Height above ground 4 -> 24
+  blocks, drift 0.22 -> 0.5, rise 0.16 -> 0.36 and the hands' size grow with the spirit's level; upkeep 2 -> 0.8 mana a
+  second aloft; no fall damage while spread; 1 spirit xp per 5 s aloft; out of mana they fade into a slow fall.
+  `ThessalyWings` (server), `client/spirits/ManaWings` (controls, look); only the attuned see the wings.
 - Autonomous: `hurt` at bond ≥ 20: snatches an arrow (`HandMoves.catchIfReady` is already wired for every spirit); `tick`
   at bond ≥ 20: points out loot: once per `LOOT_EVERY` 1200 ticks, a chest within 16 you haven't opened (a `Set` of
   positions seen per player) gets motes and a line ("There's a chest behind that wall, dear. No, the other wall.").

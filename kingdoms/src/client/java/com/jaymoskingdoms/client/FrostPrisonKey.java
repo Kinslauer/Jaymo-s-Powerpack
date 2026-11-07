@@ -26,8 +26,7 @@ final class FrostPrisonKey {
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (key.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null
-					&& (Heritage.is(minecraft.player, Heritage.Kind.WARRIORBORN) || Heritage.is(minecraft.player, Heritage.Kind.BIOBUILT)
-					|| Heritage.is(minecraft.player, Heritage.Kind.RUBBERFOLK))
+					&& Heritage.of(minecraft.player) != null
 					&& ClientPlayNetworking.canSend(FrostPrison.Cast.TYPE)) {
 					ClientPlayNetworking.send(new FrostPrison.Cast());
 				}

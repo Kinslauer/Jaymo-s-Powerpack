@@ -27,6 +27,8 @@ public final class Villages {
 	static final double VILLAGE_RADIUS = 48.0;
 	/** Land claimed round a village's bell (chunks out each way; only chunks nobody holds). */
 	static final int CLAIM_RADIUS = 2;
+	/** (0.7.598) A new village sides with the nearest kingdom this near its bell (blocks). */
+	static final int ALLY_REACH = 1000;
 	/** How often golems look for the village's enemies, and how far (ticks, blocks). */
 	static final int GOLEM_CHECK_TICKS = 40;
 	static final double GOLEM_RANGE = 24.0;
@@ -50,9 +52,33 @@ public final class Villages {
 		return Factions.get(server, village.id());
 	}
 
+	/**
+	 * (0.7.598) A new village sides with the nearest standing kingdom within {@link #ALLY_REACH} of its bell (Andy: the
+	 * smaller villages are "allied to larger kingdoms"). None that near: it stands alone, as before.
+	 */
+	static void ally(MinecraftServer server, @Nullable Faction village) {
+		if (village == null) {
+			return;
+		}
+		Faction nearest = null;
+		double best = (double) ALLY_REACH * ALLY_REACH;
+		for (Faction k : Factions.all(server, FactionType.KINGDOM)) {
+			double d = k.seat().distSqr(village.seat());
+			if (!k.fallen() && d <= best) {
+				best = d;
+				nearest = k;
+			}
+		}
+		if (nearest != null) {
+			Relations.set(server, village.id(), nearest.id(), Relation.ALLIED);
+			JaymosKingdoms.LOGGER.info("The village of {} sides with {}", village.name(), nearest.name());
+		}
+	}
+
 	/** Its elder: the oldest-standing grown villager nearest the bell, named for the village. Returns him (or null if none is near). */
 	static @Nullable Villager chooseElder(ServerLevel level, Faction village) {
-		List<Villager> villagers = new ArrayList<>(level.getEntitiesOfClass(Villager.class, new AABB(village.seat()).inflate(VILLAGE_RADIUS),
+		// (0.7.490) a walled town's folk out to its wall
+		List<Villager> villagers = new ArrayList<>(level.getEntitiesOfClass(Villager.class, new AABB(village.seat()).inflate(WalledTowns.reach(level, village)),
 			v -> v.isAlive() && !v.isBaby()));
 		if (villagers.isEmpty()) {
 			return null;
@@ -102,12 +128,14 @@ public final class Villages {
 
 	/** A village's guards: its iron golems. */
 	public static List<IronGolem> guards(ServerLevel level, Faction village) {
-		return level.getEntitiesOfClass(IronGolem.class, new AABB(village.seat()).inflate(VILLAGE_RADIUS), IronGolem::isAlive);
+		// (0.7.490) a walled town's out to its wall
+		return level.getEntitiesOfClass(IronGolem.class, new AABB(village.seat()).inflate(WalledTowns.reach(level, village)), IronGolem::isAlive);
 	}
 
 	/** Its people: the villagers round its bell (loaded ones). */
 	public static List<Villager> people(ServerLevel level, Faction village) {
-		return level.getEntitiesOfClass(Villager.class, new AABB(village.seat()).inflate(VILLAGE_RADIUS), Villager::isAlive);
+		// (0.7.490) a walled town's out to its wall
+		return level.getEntitiesOfClass(Villager.class, new AABB(village.seat()).inflate(WalledTowns.reach(level, village)), Villager::isAlive);
 	}
 
 	/** A villager died: if it was a village's elder, the village mourns and will choose another; his killer is resented. */
