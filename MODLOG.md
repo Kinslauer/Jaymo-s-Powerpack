@@ -1560,12 +1560,12 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 
 Built; not played.
 
-
 ## 0.21.56 (2026-11-07): Critter Armour fits under Fresh Animations
 - Andy: "the new armor isnt mapped properly to the mobs": Critter Armory's pig, sheep and horse armour was drawn in
   the vanilla pose while Fresh Animations re-animates the animal models, so the armour slid off the animated body.
-- client/compat/CritterArmoryFreshAnimationsCompat plus mixins on PoseLayersLivingEntityRendererMixin and QuadrupedModel
-  keep Fresh Animations's animated body pose on the render state just before the render layers, so Critter Armory's
+- client/compat/CritterArmoryFreshAnimationsCompat (EMF checks in CritterArmoryEmf) plus mixins on PoseLayersLivingEntityRendererMixin,
+  QuadrupedModel (pigs, sheep) and AbstractEquineModel (horses, donkeys, mules; head and neck, body, legs, not the tail)
+  keep Fresh Animations's animated body pose on the render state, only when EMF animated it that frame (not paused), just before the render layers, so Critter Armory's
   armour models take it (Powers 0.21.56). Only active when both Entity Model Features and Critter Armory are loaded;
   Critter Armory is linked, never edited.
 - Built; not played (Fresh Animations isn't in the dev environment).
