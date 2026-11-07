@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Check open work against Hermes fixes" (ParCool track B, part 2 of 2)
-claimed_by: 
+claimed_by: hermes-a
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/freerun/gear/
