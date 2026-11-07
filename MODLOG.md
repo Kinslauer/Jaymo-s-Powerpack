@@ -1455,9 +1455,13 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   most hurt part mends every 2 seconds (1 health point), all the way to whole; after a minute a broken bone sets itself.
   The worse you're hurt, the longer it takes. Hold sneak to get up whenever you're well enough; you rise with what you've
   mended. Crawl off and the rest ends.
+- **Cuts in bed** (Andy: "the bleeding can hold up to two cuts by holding still. any others will still bleed. taking into
+  account each bleeding entity's mB"): lying still, you hold two open cuts shut (a severed stump counts as two); every
+  other cut still pours your blood, each at the downed rate of your own body's blood. Shift about and they all bleed.
+  Bled dry in bed, you pass out where you lie.
 - `DownedStruggle` (new): the struggle and the bed rest; tuning at the top. `compat.SpookyDoorsCompat` (new) calls Spooky
   Doors' public API by reflection. `Downed`: the use-block refusal moved to the FIRST phase and lets an awake main hand
   through, a LAST-phase handler runs the struggle; `awake()`, `holdClock()`; rising after rest keeps the mended health.
-  `Wounds.restPart`/`restedHealth`. `DownedKeysMixin` keeps `key.use` live with the crosshair on a block. Spooky Doors
+  `Wounds.restPart`/`restedHealth`; `BleedOut` pours a resting player's blood by `DownedStruggle.bleedingCuts`. `DownedKeysMixin` keeps `key.use` live with the crosshair on a block. Spooky Doors
   26.3.0.2 joins `packModsNoCf` (needs Balm, already in the pack).
 - Not built locally (no JDK 25 here; GitHub's PR checks build it); not played.

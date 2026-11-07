@@ -188,6 +188,14 @@ public final class BleedOut {
 			return;
 		}
 		float each = full * DOWNED_SHARE * EVERY / Downed.BLEED_OUT_TICKS;
+		// (0.21.49) resting in a bed only the cuts they aren't holding shut bleed, each at the downed rate of their own blood
+		int cuts = living instanceof ServerPlayer resting ? com.jaymospowers.core.wounds.DownedStruggle.bleedingCuts(resting) : -1;
+		if (cuts >= 0) {
+			each *= cuts;
+			if (each <= 0.0F) {
+				return;
+			}
+		}
 		if (left <= 0.0F) {
 			return;
 		}

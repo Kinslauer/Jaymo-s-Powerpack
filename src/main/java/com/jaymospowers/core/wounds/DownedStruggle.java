@@ -63,6 +63,15 @@ public final class DownedStruggle {
 	public static final double REST_REACH = 1.2;
 	/** How often the resting are told how they're doing (ticks). */
 	static final int REST_HINT_TICKS = 40;
+	/**
+	 * (0.21.49) Andy: "the bleeding can hold up to two cuts by holding still. any others will still bleed. taking into
+	 * account each bleeding entity's mB". Lying still in bed a downed player holds this many open cuts shut (no blood lost
+	 * from them); every other cut pours as a downed body does, each its own share ({@code BleedOut}, by the body's own
+	 * blood). Moving, every cut bleeds. Their blood run dry, they pass out where they lie.
+	 */
+	public static final int HELD_CUTS = 2;
+	/** The most they may shift in a second (blocks, squared) and still be holding still (as {@link Resting}'s). */
+	static final double STILL_DISTANCE_SQR = Resting.STILL_DISTANCE_SQR;
 	/** How high on a bed a body lies (the bed's top). */
 	static final double BED_TOP = 0.5625;
 
@@ -86,7 +95,20 @@ public final class DownedStruggle {
 		}
 	}
 
-	private record Rest(BlockPos bed, Vec3 spot, long since) {
+	private static final class Rest {
+		final BlockPos bed;
+		final Vec3 spot;
+		final long since;
+		/** Where they lay a second ago, and whether they've kept still since (holding their cuts). */
+		Vec3 last;
+		boolean still;
+
+		Rest(BlockPos bed, Vec3 spot, long since) {
+			this.bed = bed;
+			this.spot = spot;
+			this.since = since;
+			this.last = spot;
+		}
 	}
 
 	// ---- the struggle (server, from Downed's last right-click say on a block) --------------------------------------------
@@ -163,6 +185,20 @@ public final class DownedStruggle {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.bed").withStyle(ChatFormatting.GREEN));
 	}
 
+	/**
+	 * How many of a resting player's cuts are bleeding: every open cut (a severed stump counts as two) less the
+	 * {@link #HELD_CUTS} they hold while lying still. -1 if they aren't resting (a downed body's usual bleeding).
+	 */
+	public static int bleedingCuts(ServerPlayer player) {
+		Rest rest = RESTS.get(player.getUUID());
+		if (rest == null) {
+			return -1;
+		}
+		int stumps = Bleeding.stumps(player);
+		int open = Integer.bitCount(Bleeding.bleeding(player) & ~stumps) + 2 * Integer.bitCount(stumps);
+		return Math.max(0, open - (rest.still ? HELD_CUTS : 0));
+	}
+
 	/** Whether this downed player lies resting in a bed. */
 	public static boolean resting(ServerPlayer player) {
 		return RESTS.containsKey(player.getUUID());
@@ -181,18 +217,29 @@ public final class DownedStruggle {
 		if (rest == null) {
 			return false;
 		}
-		if (player.level() != level || !(level.getBlockState(rest.bed()).getBlock() instanceof AbstractBedBlock)
-			|| player.position().distanceTo(rest.spot()) > REST_REACH || Carry.isCarried(player) || !Downed.awake(player)) {
+		if (player.level() != level || !(level.getBlockState(rest.bed).getBlock() instanceof AbstractBedBlock)
+			|| player.position().distanceTo(rest.spot) > REST_REACH || Carry.isCarried(player) || !Downed.awake(player)) {
 			// crawled off, carried off, the bed gone, or knocked out
 			RESTS.remove(player.getUUID());
 			return false;
 		}
-		// lying still in bed: not bleeding out, never passing out ({@link Downed}'s clock held at the end of the adrenaline)
+		if (now % 20 == 0) {
+			rest.still = rest.last.distanceToSqr(player.position()) < STILL_DISTANCE_SQR;
+			rest.last = player.position();
+		}
+		if (com.jaymospowers.core.blood.BleedOut.left(player) <= 0.01F) {
+			// bled dry in bed: out cold where they lie
+			RESTS.remove(player.getUUID());
+			player.setAttached(Downed.OUT, true);
+			return false;
+		}
+		// in bed: the wounds' clock held at the end of the adrenaline, so they don't bleed out toward passing out (only
+		// their open cuts take blood now, {@link #bleedingCuts})
 		Downed.holdClock(player, now);
 		if (now % 20 == 0) {
 			Pain.ease(player, Resting.EASE_TICKS);
 		}
-		long lain = now - rest.since();
+		long lain = now - rest.since;
 		if (lain > 0 && lain % REST_INTERVAL == 0) {
 			mendWorst(player);
 		}
