@@ -5,7 +5,7 @@ from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Compare ParCool moves with ours"
 claimed_by: parcool-ledges-a2d223
-pr: 
+pr: 1116
 suggested_owns:
   - src/main/java/com/jaymospowers/core/Ledge.java
   - src/client/java/com/jaymospowers/client/LedgeClient.java
