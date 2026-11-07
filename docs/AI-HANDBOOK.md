@@ -287,3 +287,12 @@ from. Add new ones at the end.
    ids into each class. (#1104)
 7. **Write in the PR body only what you checked.** "Builds" isn't "works". Every PR body has a "not tested" line,
    especially for multiplayer (how another player sees you). (#1104)
+8. **Fix a bug where it lives.** If Kitchen's drag fails in water, fix Kitchen's drag; don't build a second drag in
+   another mod beside it. Two systems moving one thing disagree about its state. (#1106: Powers' drag ran alongside
+   Kitchen's, which then thought the body was lying still.)
+9. **A new input check must be as narrow as the bug.** Check the right hand, the right item and the right place, then
+   read what the mod already does on that same click and keep it working. (#1106: catching every sneak + right-click on
+   a corpse took over Kitchen's lift, campfire and butcher-block carries everywhere, not only in water, and let players
+   drag iron golems by hand.)
+10. **Start every PR from fresh master,** never from another open PR's branch. (#1106 carried #1104's hood commits, its
+    version number and its MODLOG entry, and had no entry of its own.)

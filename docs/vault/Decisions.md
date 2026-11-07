@@ -26,3 +26,9 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Decided:** rules learned from reviewing Hermes's PRs go in `docs/AI-HANDBOOK.md` (section 11).
 - **Applies to:** every assistant.
 - **Agent:** [[Agents/handbook-hermes-rules|handbook-hermes-rules]]
+
+### 2026-11-07: Hermes keeps fixing its own PRs
+- **Decided:** Hermes keeps doing small fixes and iterations on its own PRs (#1104, #1106) "till he gets it"; Claude
+  reviews them and adds what it finds to `docs/AI-HANDBOOK.md` section 11.
+- **Applies to:** Hermes's PRs.
+- **Agent:** [[Agents/handbook-hermes-rules|handbook-hermes-rules]]
