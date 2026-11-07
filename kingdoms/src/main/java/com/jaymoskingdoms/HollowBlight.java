@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -58,18 +59,17 @@ public final class HollowBlight {
 	/** The vignette each Hollow's turning casts over the black (RGB): the pallid one is {@link #PALLID_TINT}. */
 	static final int ZOMBIE_TINT = 0x5C8A24, SKELETON_TINT = 0xB8B094, WRAITH_TINT = 0x5A6EA8, REAPER_TINT = 0x3C8C82, PALLID_TINT = 0x8A8A8A;
 
-/** A blight in someone: the Hollow it's making (a variant key, or "pallid"), its wake line, when it took, the last stage told,
- * whether they have passed out waiting to rise turned, and the game time they should wake at. Persistent: logging out while
- * passed out keeps the pending turn. */
+	/** A blight in someone: the Hollow it's making (a variant key, or "pallid"), its wake line, when it took,
+	 * whether they have passed out waiting to rise turned, and the game time they should wake at. Persistent: logging out while
+	 * passed out keeps the pending turn. */
 	record Blight(String look, String line, long since, int told, boolean passedOut, long wakeAt) {
 		static final Codec<Blight> CODEC = RecordCodecBuilder.create(i -> i.group(
-				Codec.STRING.fieldOf("look").forGetter(Blight::look),
-				Codec.STRING.fieldOf("line").forGetter(Blight::line),
-				Codec.LONG.fieldOf("since").forGetter(Blight::since),
-				Codec.INT.optionalFieldOf("told", 0).forGetter(Blight::told),
-				Codec.BOOL.optionalFieldOf("passedOut", false).forGetter(Blight::passedOut),
-				Codec.LONG.optionalFieldOf("wakeAt", 0L).forGetter(Blight::wakeAt))
-				.apply(i, Blight::new));
+			Codec.STRING.fieldOf("look").forGetter(Blight::look),
+			Codec.STRING.fieldOf("line").forGetter(Blight::line),
+			Codec.LONG.fieldOf("since").forGetter(Blight::since),
+			Codec.INT.optionalFieldOf("told", 0).forGetter(Blight::told),
+			Codec.BOOL.optionalFieldOf("passedOut", false).forGetter(Blight::passedOut),
+			Codec.LONG.optionalFieldOf("wakeAt", 0L).forGetter(Blight::wakeAt)).apply(i, Blight::new));
 
 		HeritageVariants.@Nullable Variant variant() {
 			return HeritageVariants.Variant.byKey(this.look);
@@ -81,7 +81,7 @@ public final class HollowBlight {
 	}
 
 	static final AttachmentType<Blight> BLIGHT = AttachmentRegistry.create(JaymosKingdoms.id("hollow_blight"),
-			builder -> builder.persistent(Blight.CODEC));
+		builder -> builder.persistent(Blight.CODEC));
 
 	private HollowBlight() {
 	}
@@ -102,16 +102,15 @@ public final class HollowBlight {
 	}
 
 	private static boolean immune(ServerPlayer player) {
-		return player.isCreative() || player.isSpectator() || Heritage.of(player) == Heritage.Kind.HOLLOW
-				|| PowersCompat.android(player) || Vampires.isVampire(player)
-				|| player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player);
+		return player.isCreative() || player.isSpectator() || Heritage.of(player) == Heritage.Kind.HOLLOW || PowersCompat.android(player)
+			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player);
 	}
 
 	/** A blow on {@code player} they lived through: one of the turners' may leave the blight. */
 	private static void struck(ServerPlayer player, DamageSource source) {
 		Entity by = source.getEntity();
-		if (by == null || by == player || !player.isAlive() || player.isDeadOrDying() || blighted(player)
-				|| Vampires.isVampire(by) || immune(player)) {
+		if (by == null || by == player || !player.isAlive() || player.isDeadOrDying() || blighted(player) || Vampires.isVampire(by)
+			|| immune(player)) {
 			return;
 		}
 		Hollows.Turn turn = Hollows.turnOf(by);
@@ -162,7 +161,14 @@ public final class HollowBlight {
 			if (stage > blight.told()) {
 				player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), blight.since(), stage, false, 0L));
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.stage." + stage)
-						.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+					.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+			}
+			if (stage > 0 && player.getRandom().nextInt(SYMPTOM_EVERY) == 0) {
+				player.addEffect(new MobEffectInstance(MobEffects.HUNGER, SYMPTOM_TICKS, 0, true, false, true));
+				if (stage > 1) {
+					player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SYMPTOM_TICKS, 0, true, false, true));
+					player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SYMPTOM_TICKS / 2, 0, true, false, true));
+				}
 			}
 			// While the blight spreads, zombies don't attack you: they stand down and speak instead,
 			// for the whole blight from stage 0; their target choice is hooked so they don't re-target you.
@@ -170,11 +176,10 @@ public final class HollowBlight {
 		}
 	}
 
-/** While the blight spreads, nearby zombies stand down and speak to you instead of attacking.
- * Runs every check for the whole blight, from stage 0. Targets on you are cleared so they stop
- * attacking, and ZombieBlightMixin hooks their target choice so they don't re-target you next tick.
- * One or two of the nearest speak with ambient zombie sounds now and then.
- */
+	/** While the blight spreads, nearby zombies stand down and speak to you instead of attacking.
+	 * Runs every check for the whole blight, from stage 0. Targets on you are cleared so they stop
+	 * attacking, and ZombieBlightMixin hooks their target choice so they don't re-target you next tick.
+	 * One or two of the nearest speak with ambient zombie sounds now and then. */
 	private static void standDownAndSpeak(ServerPlayer player) {
 		Level level = player.level();
 		List<Zombie> zombies = level.getEntitiesOfClass(Zombie.class,
@@ -228,8 +233,8 @@ public final class HollowBlight {
 		};
 	}
 
-/** A golden apple eaten while the blight spreads burns it out -- but only while the player is Weakened
- * (a drunk, splash or lingering weakness potion all apply it), like curing a zombie villager. */
+	/** A golden apple eaten while the blight spreads burns it out -- but only while the player is Weakened
+	 * (a drunk, splash or lingering weakness potion all apply it), like curing a zombie villager. */
 	public static void ateGold(ServerPlayer player) {
 		if (player.hasEffect(MobEffects.WEAKNESS) && player.removeAttached(BLIGHT) != null) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.cured").withStyle(ChatFormatting.GOLD));
