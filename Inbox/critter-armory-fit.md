@@ -23,3 +23,4 @@ part names/poses), not by copying its code.
 
 ## Notes
 - Cause not known yet.
+- 2026-11-07 17:36 Coordinator: raised the Fresh Animations question with Andy 2026-11-07 17:37.
