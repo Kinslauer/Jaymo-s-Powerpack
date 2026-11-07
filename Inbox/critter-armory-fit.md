@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: any
 from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Fix new armour mapping on mobs" (never started, thread ran out of usage)
 claimed_by: hermes-b
-pr: 
+pr: 1125
 suggested_owns:
   - 
 ---
