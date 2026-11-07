@@ -5,7 +5,7 @@ branch: claude/parcool-running-655696
 with: 
 pr: 
 mods: Powers
-versions: 
+versions: Powers 0.21.51 (moves PR); gear PR takes the next one after
 started: 2026-11-07
 owns:
   - src/main/java/com/jaymospowers/freerun/FastRun.java
