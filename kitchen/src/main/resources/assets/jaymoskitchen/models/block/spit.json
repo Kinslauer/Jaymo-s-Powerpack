@@ -1,0 +1,33 @@
+{
+  "elements": [
+    {
+      "from": [7, 0, 7],
+      "to": [9, 16, 9],
+      "shade": false,
+      "faces": {
+        "down": { "texture": "#0" },
+        "up": { "texture": "#0" },
+        "north": { "texture": "#0" },
+        "south": { "texture": "#0" },
+        "west": { "texture": "#0" },
+        "east": { "texture": "#0" }
+      }
+    },
+    {
+      "from": [4, 0, 4],
+      "to": [12, 2, 12],
+      "shade": false,
+      "faces": {
+        "down": { "texture": "#0" },
+        "up": { "texture": "#0" },
+        "north": { "texture": "#0" },
+        "south": { "texture": "#0" },
+        "west": { "texture": "#0" },
+        "east": { "texture": "#0" }
+      }
+    }
+  ],
+  "textures": {
+    "0": "jaymoskitchen:block/spit"
+  }
+}

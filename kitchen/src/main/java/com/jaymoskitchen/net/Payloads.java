@@ -399,9 +399,23 @@ public final class Payloads {
 		}
 	}
 
+	/** Server → client: the player tore a chunk off the spit at {@code pos}; play the tearing animation. */
+	public record SpitRip(BlockPos pos) implements CustomPacketPayload {
+		public static final Type<SpitRip> TYPE = new Type<>(JaymosKitchen.id("spit_rip"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, SpitRip> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBlockPos(p.pos),
+			buf -> new SpitRip(buf.readBlockPos()));
+
+		@Override
+		public Type<SpitRip> type() {
+			return TYPE;
+		}
+	}
+
 	public static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Sip.TYPE, Sip.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SeasonSync.TYPE, SeasonSync.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(SpitRip.TYPE, SpitRip.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenButcher.TYPE, OpenButcher.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ButcherDeal.TYPE, ButcherDeal.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SearFinish.TYPE, SearFinish.CODEC);
