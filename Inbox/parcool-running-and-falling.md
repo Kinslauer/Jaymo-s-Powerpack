@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Compare ParCool moves with ours"
-claimed_by: 
+claimed_by: parcool-running-655696
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/freerun/FastRun.java
