@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: blocked
 task: kitchen-spit-roast
 branch: claude/kitchen-spit-roast
 with:
@@ -7,6 +7,7 @@ pr: 1123
 mods: kitchen
 versions: 0.5.87
 started: 2026-11-07
+claimed_by: hermes-fixer
 owns:
   - kitchen/src/main/java/com/jaymoskitchen/cooking/spit/
   - kitchen/src/client/java/com/jaymoskitchen/client/spit/
