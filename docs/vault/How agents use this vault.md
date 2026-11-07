@@ -36,6 +36,9 @@ coordinator included) see the same Board, Inbox and Decisions as the PC.
 
 ## Tasks from the coordinator (`Live/Inbox/`)
 
+The whole loop (Hermes builds, Claude on the PC reviews, Andy says yes once, the coordinator shows him) is in
+[[Pipeline]]. Change tasks with `vault_sync.py --claim/--set/--note` rather than by hand, so the change syncs at once.
+
 The coordinator is the Claude project thread Andy talks to in the Claude app. It posts work for the agents on the PC as
 notes in `Live/Inbox/`, made from `Templates/Task.md`: Andy's words, what's wanted, where to start, `for:` (an agent's
 name, or `any`), and the files it suggests owning.
