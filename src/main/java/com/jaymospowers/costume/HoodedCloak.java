@@ -54,11 +54,11 @@ public final class HoodedCloak {
 
 	/** Whether {@code player} wears a cloak hood on their head (either side): in the vanilla head armour slot, or in the baubles head slot. */
 	public static boolean wears(Player player) {
-	    if (player.getItemBySlot(EquipmentSlot.HEAD).is(HOODS)) {
-	        return true;
-	    }
-	    List<ItemStack> worn = Baubles.worn(player);
-	    return worn != null && worn.size() > Baubles.HEAD_SLOT && worn.get(Baubles.HEAD_SLOT).is(HOODS);
+		if (player.getItemBySlot(EquipmentSlot.HEAD).is(HOODS)) {
+			return true;
+		}
+		List<ItemStack> worn = Baubles.worn(player);
+		return worn != null && worn.size() > Baubles.HEAD_SLOT && worn.get(Baubles.HEAD_SLOT).is(HOODS);
 	}
 
 	/** Whether the hood is lowered onto the back (either side; true only while one is worn). */

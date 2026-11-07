@@ -1433,3 +1433,9 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   hangs at the hip, a lantern lights the way, and Kingdoms pays from and pickpockets lift the purse (`Baubles.belt` and
   `setBelt` read and write the first purse, else lantern, inside the tool belt; `Baubles.beltSlot` is the slot itself).
   Gradle build only, not played.
+
+## 0.21.48 (2026-11-07): hoods worn as baubles trigger the hooded cloak
+- The soothsayer hood (artifact bauble) and the ichorcloth hood now work with the hooded cloak from #1095: the cloak's collar, back panel and mantles render on the wearer, the mask key lowers the hood onto the back and raises it again, and Kingdoms sees the wearer as hooded while it's up.
+- `HoodedCloak.wears()` checks both the vanilla armour head slot and the Baubles head slot; `HoodedCloakLayer` picks a per-hood cloak texture (`hooded_cloak.png`, `hooded_cloak_soothsayer.png`, `hooded_cloak_ichorcloth.png` from `tools/gen_hooded_cloak.py`); `WornLooks` skips drawing a bauble hood on the head while it's down on the back.
+- `Baubles` exposes `HEAD_SLOT = 4`.
+- Compile-checked; not played.

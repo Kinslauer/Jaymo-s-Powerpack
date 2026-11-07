@@ -57,10 +57,9 @@ public final class HoodedCloakLayer {
 	static final float BARE_COLLAR_X = 0.82F, BARE_COLLAR_Z = 0.8F, BARE_MANTLE = 0.8F, BARE_BACK_Z = -0.9F;
 	// ================================================================================================================
 
-	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
 	static final int TEX_W = 64, TEX_H = 64;
-	/** On a player's render state: null for no cloak, else whether the hood is down. */
-	static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymospowers:hooded_cloak");
+	/** On a player's render state: null for no cloak, else the cloak texture to draw (per hood). */
+	static final RenderStateDataKey<Identifier> KEY = RenderStateDataKey.create(() -> "jaymospowers:hooded_cloak");
 
 	private HoodedCloakLayer() {
 	}
@@ -83,7 +82,8 @@ public final class HoodedCloakLayer {
 	/**
 	 * From the avatar renderer's extractRenderState: whether this player shows the cloak, and with the hood down the hood
 	 * comes off the head (the armour layer skips it). A costume over everything, or the hood hidden with the armour eye,
-	 * shows no cloak. Detects hoods in the vanilla head armour slot and in the baubles head slot.
+	 * shows no cloak. Detects hoods in the vanilla head armour slot and in the baubles head slot, and picks the cloak
+	 * texture by which hood is worn.
 	 */
 	public static void extract(Avatar entity, AvatarRenderState state) {
 		if (!(entity instanceof Player player) || Costume.worn(player) != null
@@ -91,20 +91,31 @@ public final class HoodedCloakLayer {
 			state.setData(KEY, null);
 			return;
 		}
-		boolean hoodInArmor = player.getItemBySlot(EquipmentSlot.HEAD).is(HoodedCloak.HOODS);
-		boolean hoodInBaubles = false;
-		List<Identifier> looks = Baubles.looks(player);
-		if (looks.size() > Baubles.HEAD_SLOT) {
-			Identifier headLook = looks.get(Baubles.HEAD_SLOT);
-			hoodInBaubles = BuiltInRegistries.ITEM.get(headLook)
-			.map(item -> item.is(HoodedCloak.HOODS)).orElse(false);
+		Identifier texture = null;
+		if (player.getItemBySlot(EquipmentSlot.HEAD).is(HoodedCloak.HOODS)) {
+			texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
+		} else {
+			List<Identifier> looks = Baubles.looks(player);
+			if (looks.size() > Baubles.HEAD_SLOT) {
+				Identifier headLook = looks.get(Baubles.HEAD_SLOT);
+				if (headLook.getNamespace().equals("jaymospowers")) {
+					switch (headLook.getPath()) {
+						case "soothsayer_hood" ->
+							texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_soothsayer.png");
+						case "ichorcloth_hood" ->
+							texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_ichorcloth.png");
+						default ->
+							texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
+					}
+				}
+			}
 		}
-		if (!hoodInArmor && !hoodInBaubles) {
+		if (texture == null) {
 			state.setData(KEY, null);
 			return;
 		}
 		boolean down = HoodedCloak.down(player);
-		state.setData(KEY, down);
+		state.setData(KEY, texture);
 		state.showCape = false;
 		if (down) {
 			state.headEquipment = ItemStack.EMPTY;
@@ -200,14 +211,16 @@ public final class HoodedCloakLayer {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-			Boolean down = state.getData(KEY);
-			if (down == null || state.isInvisible) {
+			Identifier texture = state.getData(KEY);
+			if (texture == null || state.isInvisible) {
 				return;
 			}
+			// hood down when the head slot was cleared in extract()
+			boolean down = state.headEquipment.isEmpty();
 			Model model = model(state.skin != null && state.skin.model() == PlayerModelType.SLIM);
 			model.setupAnim(state);
 			model.pose(state, down);
-			collector.submitModel(model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, -1,
+			collector.submitModel(model, state, poseStack, RenderTypes.entityCutout(texture), lightCoords, OverlayTexture.NO_OVERLAY, -1,
 				null, state.outlineColor);
 		}
 	}

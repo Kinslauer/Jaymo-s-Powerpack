@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.baubles.Baubles;
+import com.jaymospowers.costume.HoodedCloak;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,11 +36,14 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -134,6 +138,13 @@ public final class WornLooks {
 		for (int i = 0; i < looks.size(); i++) {
 			Look look = LOOKS.get(looks.get(i));
 			if (look == null) {
+				continue;
+			}
+			// (0.21.48) a cloak hood worn as a bauble is drawn by HoodedCloakLayer, not here: skip it while the hood is down
+			Identifier lookId = looks.get(i);
+			if (lookId.getNamespace().equals("jaymospowers")
+				&& (lookId.getPath().equals("soothsayer_hood") || lookId.getPath().equals("ichorcloth_hood"))
+				&& HoodedCloak.down(player)) {
 				continue;
 			}
 			if (slots == null) {
