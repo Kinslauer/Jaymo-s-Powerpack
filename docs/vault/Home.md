@@ -11,7 +11,7 @@ Start here. Agents: read this note, then [[How agents use this vault]], then [[B
 |---|---|---|
 | Jaymo's Powers (and the pack) | **0.21.50** | `gradle.properties` |
 | Jaymo's Kingdoms | **0.7.646** | `kingdoms/gradle.properties` |
-| Jaymo's Kitchen | **0.5.84** | `kitchen/gradle.properties` |
+| Jaymo's Kitchen | **0.5.86** | `kitchen/gradle.properties` |
 
 Minecraft 26.3, Fabric, JDK 25. Versions collide when several branches run at once: take the next free numbers
 right before merging, not when you start, and write the numbers you took on your agent note.

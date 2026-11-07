@@ -1485,13 +1485,18 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - **Corpses bleed the body's own blood**: a new body keeps the blood it died with (`BleedOut.CORPSE_OWN`, saved), so an
   Emberborn's corpse pools magma, a zombie's rotten blood, and a bloodless heritage's corpse doesn't bleed when hit, blown
   apart, dragged or hung (`BladeBlood.bleeds/color(Entity, EntityType)`).
-- **Blood on the ground lies still**: pools, stains, footprints and runs down walls no longer do anything by themselves.
-  Gone: a magma pool's lava pops and smoke (the "bubbling"), a wall run dripping off its end, and pools falling/sliding
-  under gravity. They change only when something touches them (stepped in, dragged through, washed, drawn up by blood magic).
+- **Blood that lands, and magma** (Andy: "the magma should bubble as it cools throwing off those popping lava particles, the
+  BLOOD should not. it can still move and fall and drip, like water does through blocks, but over ledges. this way a
+  bleeding body above a ledge can drip a pool up to 20 blocks below it"): magma blood keeps its lava pops and smoke as it
+  cools; blood still pours down ledges and drips off them. Blood now falls up to 20 blocks to the ground (was 6), its
+  stain showing once the drop could have got there (`BloodTrail.FALL`, `DROP_FALL`). The red "bubbling" on trails was most
+  likely the stump bleed's vanilla lava drips, which splash and sizzle where they land; those are gone (below).
 - **No redstone dust for blood**: the Z-Fighter's blood-for-ki spills blood flecks, not red dust.
 - **Skeletons don't bleed when cut apart** (Andy: "skeletons should not bleed"): losing a head or limb used to throw gore
   and bleed from the stump whatever the body; a body with no blood now loses it in chips of bone, with no stump bleed, and
   its severed head or limb never drips (`SeveredPart` keeps the body's blood).
+- **Kitchen's blood is the body's own** (Andy: "double check that", with Kitchen 0.5.86): `BladeBlood.bodyBlood(Entity)`
+  gives Kitchen a living body's or a corpse's blood, or none; a bloodless carcass on a meat hook no longer drips or pools.
 - **A stump spurts** (Andy: "the decapitation bleed effect looks just like lava drips, it can stay but the particle should
   be red, and it should shoot multiple at once, in larger spurts as they fall if they do, less if they stay standing"): the
   vanilla lava drip is gone; every few ticks a fresh stump throws several drops of the body's own blood out of it (up from a
