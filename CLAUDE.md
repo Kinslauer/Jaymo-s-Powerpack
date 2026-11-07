@@ -3,9 +3,10 @@
 Minecraft 26.3 Fabric mods for the user's friends' modpack. **Read `docs/HANDOFF.md` first**: what each folder is,
 how to build, hard-won 26.3 API facts, the user's preferences, and what to do next.
 - **Project vault** (`docs/vault/`, Obsidian): read `docs/vault/Home.md` first (versions, open PRs, what's next), then
-  follow `docs/vault/How agents use this vault.md`: make your note in `docs/vault/Agents/` from `Templates/Agent.md`
-  (branch, PR, files you own) when you start, update it when you finish, never edit a file another running agent owns,
-  and append each of the user's decisions to `docs/vault/Decisions.md`.
+  follow `docs/vault/How agents use this vault.md`. Live notes go straight into the main checkout, never your worktree:
+  make your agent note in `E:/Origins Mod/docs/vault/Live/Agents/` from `Templates/Agent.md` (branch, PR, files you
+  own) when you start, update it when you finish, never edit a file another running agent owns, and append each of the
+  user's decisions to `E:/Origins Mod/docs/vault/Live/Decisions.md`.
 
 - Root: Jaymo's Powers (`./gradlew build`). `kingdoms/`: Jaymo's Kingdoms. `kitchen/`: Jaymo's Kitchen. Each is its
   own Gradle project (JDK 25).
