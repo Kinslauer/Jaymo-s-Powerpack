@@ -1,14 +1,17 @@
 ---
-status: blocked
+status: running
 task: critter-armory-fit
 branch: claude/critter-armory-fit
 with:
-pr:
-mods:
-versions:
+pr: 1125
+mods: Powers
+versions: 0.21.56
 started: 2026-11-07
 owns:
-  -
+  - src/client/java/com/jaymospowers/client/mixin/CritterArmourFreshAnimationsMixin.java
+  - src/client/java/com/jaymospowers/client/mixin/PoseLayersLivingEntityRendererMixin.java
+  - src/client/java/com/jaymospowers/client/EmfAccess.java
+  - MODLOG.md
 ---
 
 # Critter Armory armour sits wrong on animals
