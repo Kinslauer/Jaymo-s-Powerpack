@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Checks a PR branch against master: version bumps, stale jars, copied item models, shared item models.
 """Checks a branch against master before it merges (run by .github/workflows/pr-checks.yml, or by hand).
 
     python3 tools/pr_checks.py [base-ref]      (default origin/master)
