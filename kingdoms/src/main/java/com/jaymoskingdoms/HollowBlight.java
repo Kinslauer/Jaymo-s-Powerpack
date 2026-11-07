@@ -1,12 +1,8 @@
 package com.jaymoskingdoms;
 
-import com.jaymospowers.core.wounds.Downed;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -39,179 +35,193 @@ import org.jspecify.annotations.Nullable;
  * One who is Hollow already, an android, a vampire (or one bitten) or a werewolf can't take it.
  */
 public final class HollowBlight {
-	/** A turner's blow lands the blight at its {@link Hollows.Turn#chance} times this (a zombie: one blow in sixteen). */
-	static final float BLIGHT_SHARE = 0.25F;
-	/** How long the blight takes to turn one (ticks of game time: a Minecraft day). */
-	static final long TURN_TICKS = 24000L;
-	/** The stages (shares of {@link #TURN_TICKS}) at which it shows: hunger, then weakness and sickness. */
-	static final float STAGE_HUNGRY = 0.33F, STAGE_WEAK = 0.66F;
-	/** Out of every this many seconds, a stage's symptom comes on (for this many ticks). */
-	static final int SYMPTOM_EVERY = 45, SYMPTOM_TICKS = 20 * 8;
+    /** A turner's blow lands the blight at its {@link Hollows.Turn#chance} times this (a zombie: one blow in sixteen). */
+    static final float BLIGHT_SHARE = 0.25F;
+    /** How long the blight takes to turn one (ticks of game time: a Minecraft day). */
+    static final long TURN_TICKS = 24000L;
+    /** The stages (shares of {@link #TURN_TICKS}) at which it shows: hunger, then weakness and sickness. */
+    static final float STAGE_HUNGRY = 0.33F, STAGE_WEAK = 0.66F;
+    /** Out of every this many seconds, a stage's symptom comes on (for this many ticks). */
+    static final int SYMPTOM_EVERY = 45, SYMPTOM_TICKS = 20 * 8;
 
-	/** The vignette each Hollow's turning casts over the black (RGB): the pallid one is {@link #PALLID_TINT}. */
-	static final int ZOMBIE_TINT = 0x5C8A24, SKELETON_TINT = 0xB8B094, WRAITH_TINT = 0x5A6EA8, REAPER_TINT = 0x3C8C82, PALLID_TINT = 0x8A8A8A;
+    /** How long the black screen lasts while passing out (ticks; 14 s). */
+    static final int TURN_DARK = 20 * 14;
 
-	/** A blight in someone: the Hollow it's making (a variant key, or "pallid"), its wake line, when it took, the last stage told. */
-	record Blight(String look, String line, long since, int told) {
-		static final Codec<Blight> CODEC = RecordCodecBuilder.create(i -> i.group(
-			Codec.STRING.fieldOf("look").forGetter(Blight::look),
-			Codec.STRING.fieldOf("line").forGetter(Blight::line),
-			Codec.LONG.fieldOf("since").forGetter(Blight::since),
-			Codec.INT.optionalFieldOf("told", 0).forGetter(Blight::told)).apply(i, Blight::new));
+    /** The vignette each Hollow's turning casts over the black (RGB): the pallid one is {@link #PALLID_TINT}. */
+    static final int ZOMBIE_TINT = 0x5C8A24, SKELETON_TINT = 0xB8B094, WRAITH_TINT = 0x5A6EA8, REAPER_TINT = 0x3C8C82, PALLID_TINT = 0x8A8A8A;
 
-		HeritageVariants.@Nullable Variant variant() {
-			return HeritageVariants.Variant.byKey(this.look);
-		}
+    /** A blight in someone: the Hollow it's making (a variant key, or "pallid"), its wake line, when it took, the last stage told,
+     * whether they have passed out waiting to rise turned, and the game time they should wake at. Persistent: logging out while
+     * passed out keeps the pending turn. */
+    record Blight(String look, String line, long since, int told, boolean passedOut, long wakeAt) {
+        static final Codec<Blight> CODEC = RecordCodecBuilder.create(i -> i.group(
+                Codec.STRING.fieldOf("look").forGetter(Blight::look),
+                Codec.STRING.fieldOf("line").forGetter(Blight::line),
+                Codec.LONG.fieldOf("since").forGetter(Blight::since),
+                Codec.INT.optionalFieldOf("told", 0).forGetter(Blight::told),
+                Codec.BOOL.optionalFieldOf("passedOut", false).forGetter(Blight::passedOut),
+                Codec.LONG.optionalFieldOf("wakeAt", 0L).forGetter(Blight::wakeAt))
+                .apply(i, Blight::new));
 
-		Hollows.Turn turn() {
-			return new Hollows.Turn(variant(), 1.0F, this.line);
-		}
-	}
+        HeritageVariants.@Nullable Variant variant() {
+            return HeritageVariants.Variant.byKey(this.look);
+        }
 
-	static final AttachmentType<Blight> BLIGHT = AttachmentRegistry.create(JaymosKingdoms.id("hollow_blight"),
-		builder -> builder.persistent(Blight.CODEC));
+        Hollows.Turn turn() {
+            return new Hollows.Turn(variant(), 1.0F, this.line);
+        }
+    }
 
-	/** A blight that finished while they lived: they passed out, and rise turned when they come round. Keyed by player. */
-	static final Map<UUID, Hollows.Turn> PENDING_TURN = new HashMap<>();
+    static final AttachmentType<Blight> BLIGHT = AttachmentRegistry.create(JaymosKingdoms.id("hollow_blight"),
+            builder -> builder.persistent(Blight.CODEC));
 
-	private HollowBlight() {
-	}
+    private HollowBlight() {
+    }
 
-	static void register() {
-		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
-			if (entity instanceof ServerPlayer player && taken > 0.0F && !blocked) {
-				struck(player, source);
-			}
-		});
-		ServerTickEvents.END_SERVER_TICK.register(HollowBlight::tick);
-		PowersCompat.tellMidTurns(HollowBlight::midTurn);
-	}
+    static void register() {
+        ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+            if (entity instanceof ServerPlayer player && taken > 0.0F && !blocked) {
+                struck(player, source);
+            }
+        });
+        ServerTickEvents.END_SERVER_TICK.register(HollowBlight::tick);
+        PowersCompat.tellMidTurns(HollowBlight::midTurn);
+    }
 
-	/** Whether {@code player} carries the blight. */
-	static boolean blighted(ServerPlayer player) {
-		return player.hasAttached(BLIGHT);
-	}
+    /** Whether {@code player} carries the blight. */
+    static boolean blighted(ServerPlayer player) {
+        return player.hasAttached(BLIGHT);
+    }
 
-	private static boolean immune(ServerPlayer player) {
-		return player.isCreative() || player.isSpectator() || Heritage.of(player) == Heritage.Kind.HOLLOW || PowersCompat.android(player)
-			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player);
-	}
+    private static boolean immune(ServerPlayer player) {
+        return player.isCreative() || player.isSpectator() || Heritage.of(player) == Heritage.Kind.HOLLOW
+                || PowersCompat.android(player) || Vampires.isVampire(player)
+                || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player);
+    }
 
-	/** A blow on {@code player} they lived through: one of the turners' may leave the blight. */
-	private static void struck(ServerPlayer player, DamageSource source) {
-		Entity by = source.getEntity();
-		if (by == null || by == player || !player.isAlive() || player.isDeadOrDying() || blighted(player) || Vampires.isVampire(by)
-			|| immune(player)) {
-			return;
-		}
-		Hollows.Turn turn = Hollows.turnOf(by);
-		if (turn == null || player.getRandom().nextFloat() >= turn.chance() * BLIGHT_SHARE) {
-			return;
-		}
-		String look = turn.look() == null ? "pallid" : turn.look().key();
-		player.setAttached(BLIGHT, new Blight(look, turn.line(), player.level().getGameTime(), 0));
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.took").withStyle(ChatFormatting.DARK_GRAY,
-			ChatFormatting.ITALIC));
-		JaymosKingdoms.LOGGER.info("{} took the Hollow's blight ({}) from {}", player.getScoreboardName(), look, by.getType().getDescriptionId());
-	}
+    /** A blow on {@code player} they lived through: one of the turners' may leave the blight. */
+    private static void struck(ServerPlayer player, DamageSource source) {
+        Entity by = source.getEntity();
+        if (by == null || by == player || !player.isAlive() || player.isDeadOrDying() || blighted(player)
+                || Vampires.isVampire(by) || immune(player)) {
+            return;
+        }
+        Hollows.Turn turn = Hollows.turnOf(by);
+        if (turn == null || player.getRandom().nextFloat() >= turn.chance() * BLIGHT_SHARE) {
+            return;
+        }
+        String look = turn.look() == null ? "pallid" : turn.look().key();
+        player.setAttached(BLIGHT, new Blight(look, turn.line(), player.level().getGameTime(), 0, false, 0L));
+        player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.took").withStyle(ChatFormatting.DARK_GRAY,
+                ChatFormatting.ITALIC));
+        JaymosKingdoms.LOGGER.info("{} took the Hollow's blight ({}) from {}", player.getScoreboardName(), look, by.getType().getDescriptionId());
+    }
 
-	private static void tick(MinecraftServer server) {
-		long tick = server.getTickCount();
-		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if ((tick + player.getId()) % 20 != 0 || !player.isAlive()) {
-				continue;
-			}
-			Blight blight = player.getAttached(BLIGHT);
-			if (blight == null) {
-				continue;
-			}
-			if (immune(player) && !player.isCreative() && !player.isSpectator()) {
-				// turned some other way meanwhile (or already Hollow): nothing left for it to make
-				player.removeAttached(BLIGHT);
-				continue;
-			}
-			if (PowersCompat.waking(player)) {
-				continue; // (left for dead: Powers finishes it as they rise)
-			}
-			float done = (player.level().getGameTime() - blight.since()) / (float) TURN_TICKS;
-			if (done >= 1.0F) {
-				turnNow(player, blight);
-				continue;
-			}
-			int stage = done >= STAGE_WEAK ? 2 : done >= STAGE_HUNGRY ? 1 : 0;
-			if (stage > blight.told()) {
-				player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), blight.since(), stage));
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.stage." + stage)
-					.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-			}
-			if (stage > 0 && player.getRandom().nextInt(SYMPTOM_EVERY) == 0) {
-				player.addEffect(new MobEffectInstance(MobEffects.HUNGER, SYMPTOM_TICKS, 0, true, false, true));
-				if (stage > 1) {
-					player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SYMPTOM_TICKS, 0, true, false, true));
-					player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SYMPTOM_TICKS / 2, 0, true, false, true));
-				}
-				// (2026-11-07) the Hollow you're becoming doesn't raise a hand to you: nearby zombies stand down and speak instead
-				Level level = player.level();
-				for (Zombie z : level.getEntitiesOfClass(Zombie.class,
-						player.getBoundingBox().inflate(16.0),
-						z -> z.isAlive() && z.getTarget() == player)) {
-					z.setTarget(null);
-					if (player.getRandom().nextInt(8) == 0) {
-						level.playSound(null, z.blockPosition(), SoundEvents.ZOMBIE_AMBIENT, SoundSource.HOSTILE, 0.6F, 1.0F);
-					}
-				}
-		}
+    private static void tick(MinecraftServer server) {
+        long tick = server.getTickCount();
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if ((tick + player.getId()) % 20 != 0 || !player.isAlive()) {
+                continue;
+            }
+            Blight blight = player.getAttached(BLIGHT);
+            if (blight == null) {
+                continue;
+            }
 
-	// (2026-11-07) rise turned after passing out: they come round, then rise as the Hollow they were becoming
-	for (Iterator<Map.Entry<UUID, Hollows.Turn>> it = PENDING_TURN.entrySet().iterator(); it.hasNext();) {
-		Map.Entry<UUID, Hollows.Turn> entry = it.next();
-		ServerPlayer p = server.getPlayerList().getPlayer(entry.getKey());
-		if (p == null || !p.isAlive() || Downed.isDowned(p) || Downed.passedOut(p)) {
-			continue;
-		}
-		it.remove();
-		Hollows.turn(p, entry.getValue());
-	}
+            // Passed out waiting to rise turned: wake at wakeAt and rise.
+            if (blight.passedOut()) {
+                if (player.level().getGameTime() >= blight.wakeAt()) {
+                    Hollows.turn(player, blight.turn());
+                    player.removeAttached(BLIGHT);
+                }
+                continue;
+            }
 
-/** The blight has run its course while they lived: they pass out first, then rise turned. */
-	private static void turnNow(ServerPlayer player, Blight blight) {
-		player.removeAttached(BLIGHT);
-		player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.8F, 0.6F);
-		PENDING_TURN.put(player.getUUID(), blight.turn());
-		Downed.knockOut(player.level(), player, TURN_DARK, false, "message.jaymospowers.mortality.turning", false);
-	}
+            if (immune(player) && !player.isCreative() && !player.isSpectator()) {
+                // turned some other way meanwhile (or already Hollow): nothing left for it to make
+                player.removeAttached(BLIGHT);
+                continue;
+            }
+            if (PowersCompat.waking(player)) {
+                continue; // (left for dead: Powers finishes it as they rise)
+            }
+            float done = (player.level().getGameTime() - blight.since()) / (float) TURN_TICKS;
+            if (done >= 1.0F) {
+                turnNow(player, blight);
+                continue;
+            }
+            int stage = done >= STAGE_WEAK ? 2 : done >= STAGE_HUNGRY ? 1 : 0;
+            if (stage > blight.told()) {
+                player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), blight.since(), stage, false, 0L));
+                player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.stage." + stage)
+                        .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+            }
+            // While the blight spreads, zombies don't attack you: they stand down and speak instead.
+            if (stage > 0) {
+                standDownAndSpeak(player);
+            }
+        }
+    }
 
-	/** For Powers' death by cause: one dying with the blight in them rises the Hollow it was making ({@code Mortality.MID_TURNS}). */
-	static Map.@Nullable Entry<Integer, Runnable> midTurn(ServerPlayer player) {
-		Blight blight = player.getAttached(BLIGHT);
-		if (blight == null || immune(player)) {
-			return null;
-		}
-		return Map.entry(tint(blight.variant()), () -> {
-			player.removeAttached(BLIGHT);
-			Hollows.turn(player, blight.turn());
-		});
-	}
+    /** While the blight spreads, nearby zombies stand down and speak to you instead of attacking.
+     * Runs every tick for the whole blight (stage > 0), not only during symptom ticks.
+     * Hooks their target choice so they don't re-target you next tick.
+     */
+    private static void standDownAndSpeak(ServerPlayer player) {
+        Level level = player.level();
+        for (Zombie z : level.getEntitiesOfClass(Zombie.class,
+                player.getBoundingBox().inflate(16.0),
+                z -> z.isAlive())) {
+            if (z.getTarget() == player) {
+                z.setTarget(null);
+            }
+            if (player.getRandom().nextInt(8) == 0) {
+                level.playSound(null, z.blockPosition(), SoundEvents.ZOMBIE_AMBIENT, SoundSource.HOSTILE, 0.6F, 1.0F);
+            }
+        }
+    }
 
-	/** The colour of {@code look}'s turning, on the black. */
-	static int tint(HeritageVariants.@Nullable Variant look) {
-		if (look == null) {
-			return PALLID_TINT;
-		}
-		return switch (look) {
-			case ZOMBIE -> ZOMBIE_TINT;
-			case SKELETON -> SKELETON_TINT;
-			case WRAITH -> WRAITH_TINT;
-			case REAPER -> REAPER_TINT;
-			default -> PALLID_TINT;
-		};
-	}
+    /** The blight has run its course while they lived: they pass out first, then rise turned. */
+    private static void turnNow(ServerPlayer player, Blight blight) {
+        player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), blight.since(), blight.told(), true,
+                player.level().getGameTime() + TURN_DARK));
+        player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.8F, 0.6F);
+        // Kingdoms never compiles against Powers: mark the player downed via its scoreboard tag so Powers'
+        // downed system puts them to sleep until wakeAt. Kingdoms' Downed.DOWNED_TAG is the same string Powers reads.
+        player.addTag(Downed.DOWNED_TAG);
+    }
 
-	/** A golden apple eaten while the blight spreads burns it out. */
-	public static void ateGold(ServerPlayer player) {
-		if (player.removeAttached(BLIGHT) != null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.cured").withStyle(ChatFormatting.GOLD));
-			player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.6F, 1.2F);
-		}
-	}
+    /** For Powers' death by cause: one dying with the blight in them rises the Hollow it was making ({@code Mortality.MID_TURNS}). */
+    static Map.@Nullable Entry<Integer, Runnable> midTurn(ServerPlayer player) {
+        Blight blight = player.getAttached(BLIGHT);
+        if (blight == null || immune(player)) {
+            return null;
+        }
+        return Map.entry(tint(blight.variant()), () -> {
+            player.removeAttached(BLIGHT);
+            Hollows.turn(player, blight.turn());
+        });
+    }
+
+    /** The colour of {@code look}'s turning, on the black. */
+    static int tint(HeritageVariants.@Nullable Variant look) {
+        if (look == null) {
+            return PALLID_TINT;
+        }
+        return switch (look) {
+            case ZOMBIE -> ZOMBIE_TINT;
+            case SKELETON -> SKELETON_TINT;
+            case WRAITH -> WRAITH_TINT;
+            case REAPER -> REAPER_TINT;
+            default -> PALLID_TINT;
+        };
+    }
+
+    /** A golden apple eaten while the blight spreads burns it out. */
+    public static void ateGold(ServerPlayer player) {
+        if (player.removeAttached(BLIGHT) != null) {
+            player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.cured").withStyle(ChatFormatting.GOLD));
+            player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.6F, 1.2F);
+        }
+    }
 }
