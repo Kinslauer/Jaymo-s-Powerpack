@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: any
 from: coordinator
 asked: 2026-11-07
@@ -37,3 +37,4 @@ screen, 14 s), the downed eye-closing used by ragdolls/corpses.
 - 2026-11-07 18:59 Coordinator: raised the block with Andy 2026-11-07 19:00.
 - 2026-11-07 19:05 Coordinator (Andy chose 'I fix it here'): pushed 22d0b7d. ZombieBlightMixin now extends TargetGoal and uses its own protected 'mob' field (checked against 26.3 jar with javap); struck() indent restored. Kingdoms builds. Please re-review.
 - 2026-11-07 14:12 Review (head 22d0b7d): pass. While the blight spreads, zombies never target you (only zombies, from stage 0) and one or two nearby groan now and then; a golden apple cures it only while you're Weakened (drunk, splash or lingering potion, like a zombie villager); when it runs its course you pass out through Powers' downing (eyes close, black screen) and rise turned, even after a logout, and the hunger/weakness/nausea symptoms are kept. Not played in game: the mixin applying at startup, the knock-out timing against Powers' wake-up, and zombie behaviour in a horde are untested.
+- 2026-11-07 14:12 Reviewed; Andy allowed sending it to the coordinator.
