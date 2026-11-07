@@ -568,9 +568,22 @@ public final class Carry {
 		}
 		// a severed part is taken with a plain right-click too, as long as the hand is empty
 		boolean grab = player.isShiftKeyDown() || target instanceof SeveredPart && player.getMainHandItem().isEmpty();
-		if (hand != InteractionHand.MAIN_HAND || !grab || player.isSpectator() || !canBeCarriedBy(player, target)) {
-			return InteractionResult.PASS;
-		}
+			// Kitchen corpse: Powers can drag it, including out of water. Kitchen's own drag handles bodies on land;
+			// Powers takes over so a corpse in water can be hauled onto dry ground.
+			if (KitchenCompat.isCorpse(target) && grab && !canBeCarriedBy(player, target)
+				&& !isCarrying(player) && !KitchenCompat.isCarryingCorpse(player)
+				&& !player.isPassenger() && !player.isSleeping()
+				&& !isCarried(target) && !KitchenCompat.isCarried(target)
+				&& !target.isPassenger() && !target.isVehicle()
+				&& liftGap(player, target) <= LIFT_GAP) {
+				if (level instanceof ServerLevel server && player instanceof ServerPlayer carrier) {
+					drag(carrier, target);
+				}
+				return InteractionResult.SUCCESS;
+			}
+			if (hand != InteractionHand.MAIN_HAND || !grab || player.isSpectator() || !canBeCarriedBy(player, target)) {
+				return InteractionResult.PASS;
+			}
 		if (isCarrying(player) || KitchenCompat.isCarryingCorpse(player) || player.isPassenger() || player.isSleeping()) {
 			return InteractionResult.PASS;
 		}
@@ -1109,7 +1122,7 @@ public final class Carry {
 					mob.getNavigation().stop();
 				}
 			}
-			if (flying(carrier) || !Downed.isDowned(carried)) {
+			if (flying(carrier) || (!Downed.isDowned(carried) && !KitchenCompat.isCorpse(carried))) {
 				// taken off into the air, or they're up again: let go
 				end(carrier, entry, Let.SET_DOWN);
 			}

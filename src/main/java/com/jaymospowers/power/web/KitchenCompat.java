@@ -101,8 +101,13 @@ public final class KitchenCompat {
 	}
 
 	/** Someone (anyone) is carrying this corpse right now. */
-	static boolean isCarried(Entity entity) {
+	public static boolean isCarried(Entity entity) {
 		return LOADED && Kitchen.carried(entity);
+	}
+
+	/** Whether {@code entity} is a Jaymo's Kitchen corpse. */
+	public static boolean isCorpse(Entity entity) {
+		return LOADED && entity instanceof com.jaymoskitchen.corpse.CorpseEntity;
 	}
 
 	/**
@@ -354,7 +359,8 @@ public final class KitchenCompat {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.carrier() != null;
 		}
 
-		static boolean isCorpse(Entity entity) {
+		/** Whether {@code entity} is a Jaymo's Kitchen corpse. */
+		public static boolean isCorpse(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity;
 		}
 
