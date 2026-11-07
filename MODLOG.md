@@ -1531,6 +1531,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - The traceur gloves and boots come in a second PR.
 - Built; not played.
 
+
 ## 0.21.52 (2026-11-07): ParCool track A: ledge shimmy, castaway, wall slide, moving along bars
 - Andy's picks from the ParCool checklist ("Go to their tutorial on github and make a checklist of everything we dont have
   yet"), track A. Our own code after ParCool's ideas; nothing of theirs copied.
@@ -1546,4 +1547,8 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   is the hook for track B's traceur gloves.
 - **Moving along bars and chains**: in Bar Swing, the movement keys (W/S, or A/D across) move you hand over hand along a
   run of bars, chains or fences at the same height (`Freerun.BAR_MOVE_SPEED`, `Freerun.BAR_MOVE`); Jump still swings off
-  and Sneak drops. The swing calms and the hands alternate while moving (`BarHangPose`).
+  The swing calms and the hands alternate while moving (`BarHangPose`).
+
+## 0.21.53 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
+- **Realistic fishing**: a bite now hooks a live fish entity (cod, salmon, pufferfish or tropical fish) instead of vanilla loot, and the player plays a tug-of-war to reel it in. Line tension rises as the fish fights; hold use to reel it down, or the line breaks at full tension. Stronger fish fight harder and break the line sooner. (`com.jaymospowers.fishing.FishingReal`, `FishingHookMixin`, `FishingRealClient`)
+- Built; not played.
