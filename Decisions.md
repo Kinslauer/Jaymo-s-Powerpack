@@ -38,3 +38,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Agent:** [[blood-heritage]]
 - 2026-11-07: ParCool can't ship (Forge/NeoForge only, LGPL); Andy picked 12 of its moves to remake ourselves (not zipline, grapple, energy drink), split into Inbox tasks parcool-ledge-and-wall-moves and parcool-running-and-falling.
 - 2026-11-07: Andy: "the hermes reviews should be handled here": reviews of Hermes's Inbox PRs run in the Claude session "Train Hermes to work like the Claude threads" (vault-review skill), not in the coordinator thread.
+- 2026-11-07: Andy: "review what the fixer sends you then send it to the coordinator, dont ask me for that, the coordinator will bring it to my attention and i can kick it back down the ladder if need be." The PC Claude reviewer runs vault_sync --send on a passing Hermes PR without asking Andy first. Also: three Hermes bots (hermes-a, hermes-b, hermes-fixer) set up as Hermes profiles with scheduled Inbox jobs.
