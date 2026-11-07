@@ -260,3 +260,51 @@ The Claude setup used a project "coordinator" that started one thread per task, 
 merged on Andy's word. Another assistant won't have that. Run one task at a time: give it this handbook, `CLAUDE.md`
 and the relevant memory file from `docs/ai-bundle/memory/`, and keep the same version and merge rules. When you learn
 a lasting fact (a ruling, a gotcha), add it to this handbook or the matching memory file so the next assistant has it.
+
+## 11. Lessons from reviews
+
+Mistakes found when reviewing an assistant's PR, written as rules so no one repeats them. Each names the PR it came
+from. Add new ones at the end.
+
+1. **Build only what Andy asked for.** If a related extra seems useful, ask Andy first; don't build it and mention
+   it in the PR body. (#1104: Andy asked for a cloak on the RPG Series archer hood; the PR added cloaks for the
+   soothsayer and ichorcloth hoods too, which Andy never asked for.)
+2. **When you add a second place an item can be worn, find every reader of the first place.** Grep the old check
+   (for example `getItemBySlot(EquipmentSlot.HEAD)`, `HoodedCloak.wears/up/down`) and anything reading the render
+   state built from it (`state.headEquipment`). Assume each one still expects only the old slot until you've checked
+   it. (#1104)
+3. **Before reading synced data on the client, check who it's synced to.** `AttachmentSyncPredicate.targetOnly()`
+   means only the owner's own client has it. Rendering, name tags and anything about another player need data
+   synced to everyone; for baubles that's `Baubles.looks`, not `Baubles.worn`. Don't call code "server-side" in a
+   comment or PR body until you've traced every caller. (#1104)
+4. **A `default` branch must not match things you didn't mean.** When a switch picks behaviour for a small known
+   set, the default does nothing, and the set comes from the tag, not a namespace check. (#1104: every head bauble
+   from our mod got the archer cloak.)
+5. **Before adding an item to a slot feature, check it can go in that slot.** For baubles: it's in
+   `tags/item/baubles/<kind>.json` and has a `worn_looks.json` entry. Don't claim it works somewhere it can't be
+   placed. (#1104)
+6. **Keep a list of item ids in one place.** If a tag exists (`cloak_hoods`), test against the tag; don't copy the
+   ids into each class. (#1104)
+7. **Write in the PR body only what you checked.** "Builds" isn't "works". Every PR body has a "not tested" line,
+   especially for multiplayer (how another player sees you). (#1104)
+8. **Fix a bug where it lives.** If Kitchen's drag fails in water, fix Kitchen's drag; don't build a second drag in
+   another mod beside it. Two systems moving one thing disagree about its state. (#1106: Powers' drag ran alongside
+   Kitchen's, which then thought the body was lying still.)
+9. **A new input check must be as narrow as the bug.** Check the right hand, the right item and the right place, then
+   read what the mod already does on that same click and keep it working. (#1106: catching every sneak + right-click on
+   a corpse took over Kitchen's lift, campfire and butcher-block carries everywhere, not only in water, and let players
+   drag iron golems by hand.)
+10. **Start every PR from fresh master,** never from another open PR's branch. (#1106 carried #1104's hood commits, its
+    version number and its MODLOG entry, and had no entry of its own.)
+11. **Look at what a generator made before you commit it.** Open the PNG, or at least compare its average colour with
+    the existing one beside it. When you sample colours from another mod's texture, take the main surface colour, not
+    the darkest shadow pixels. (#1104 round 3: the ranger cloaks came out almost black, about #0f1b13 and #091112,
+    beside the archer cloak's #442c1e.)
+12. **A generator and the files it made must agree.** If you change shared data in a generator (a palette, a box
+    table), rerun it for every file it writes and commit them all, or leave the old data alone. (#1104 round 3: the
+    archer palette was changed to near-black but `hooded_cloak.png` wasn't regenerated, so the next person who runs it
+    silently changes the archer cloak.)
+13. **Don't touch lines you didn't need to.** Revert whitespace-only changes and leftovers from earlier rounds (unused
+    imports, unused locals, comments describing code that's gone) before you push. The final diff should contain only
+    the feature. (#1104 round 3: re-indented `Baubles.java` and `HoodedCloak.wears`, and left four unused imports and
+    an unused local in `WornLooks`.)
