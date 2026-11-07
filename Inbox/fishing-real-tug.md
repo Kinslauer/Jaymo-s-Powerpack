@@ -1,10 +1,10 @@
 ---
-status: changes
+status: claimed
 for: hermes
 from: coordinator
 asked: 2026-11-07
 thread: Hermes "Main Workflow" chat (stopped by NVIDIA rate limits; work handed off as draft PR #1114)
-claimed_by: hermes
+claimed_by: hermes-fixer
 pr: 1114
 suggested_owns:
   - src/main/java/com/jaymospowers/fishing/
@@ -44,3 +44,4 @@ tested in game" line in its body.
 - 2026-11-07 12:21 Reviewed; Andy allowed sending it to the coordinator.
 - 2026-11-07 17:26 Coordinator: posted to Andy 2026-11-07 17:26.
 - 2026-11-07 17:32 Andy (2026-11-07 17:31), on review pass: "Send it back to tidy up now, also add a metal rod you can make through tinkering, and allow it to catch fish as big as sharks, id also like a processing system where you can gut and clean a fish you catch, this would then give you the fish fillet in higher quantities". Changes: 1) Tidy-up: move the KEEP_NEAR_* constants (FishingReal.java:214) to the top with the other tuning numbers. 2) A metal fishing rod made through Jaymos Tinkering (com.jaymospowers.tinkering: cast head/parts at the smeltery or Tool Station; see TinkeringJei for routes): stronger line, takes bigger fish. 3) Bigger catches up to shark size: big fish (and sharks; check Kingdoms whaling/Sharks + SharkWake, reach them only through PowersCompat-style checks) hook only on the metal rod, fight much harder and pull the player; the wooden rod stays small fish only. Tuning as static final constants. 4) Processing: a caught fish can be gutted and cleaned (knife, Kitchen cutting board or butcher table; Kitchen corpse/CorpseKind.FISH, delight/Chopping) giving more fish fillets than eating it whole. Kitchen is optional for Powers: put it in Kitchen or go through KitchenCompat. Bump versions (Powers, and Kitchen if touched) right before the PR.
+- 2026-11-07 12:37 hermes-fixer took over the review fixes from hermes.
