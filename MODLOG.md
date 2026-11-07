@@ -1548,11 +1548,24 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   run of bars, chains or fences at the same height (`Freerun.BAR_MOVE_SPEED`, `Freerun.BAR_MOVE`); Jump still swings off
   and Sneak drops. The swing calms and the hands alternate while moving (`BarHangPose`).
 
-## 0.21.55 (2026-11-07): Critter Armour fits under Fresh Animations
+## 0.21.54 (2026-11-07): traceur gloves and boots (ParCool track B part 2)
+
+- **Traceur gloves** (wrist bauble, leather and string): bare hands no longer burn on a long wall slide —
+  `WallSlide.addHandGuard` now registers the traceur gloves (`freerun/gear/TraceurGloves`).
+- **Traceur boots** (leather): more safe fall distance softens landings, and while worn they carry the freerun leaps
+  farther: long jump speed x 1.10 (`LONG_JUMP_BONUS`), charge jump +0.05 blocks a tick (`CHARGE_JUMP_BONUS`), and the
+  safety tap takes 85% of the fall damage off instead of 60% (`SAFETY_CUT` plus `SAFETY_CUT_BONUS`). Worn boots draw
+  their own equipment texture (`equipment/traceur_boots.json`), and the gloves' and boots' descriptions now show as
+  item tooltips.
+
+Built; not played.
+
+
+## 0.21.56 (2026-11-07): Critter Armour fits under Fresh Animations
 - Andy: "the new armor isnt mapped properly to the mobs": Critter Armory's pig, sheep and horse armour was drawn in
   the vanilla pose while Fresh Animations re-animates the animal models, so the armour slid off the animated body.
 - client/compat/CritterArmoryFreshAnimationsCompat plus mixins on PoseLayersLivingEntityRendererMixin and QuadrupedModel
-  keep Fresh Animations' animated body pose on the render state just before the render layers, so Critter Armory's
-  armour models take it (Powers 0.21.55). Only active when both Entity Model Features and Critter Armory are loaded;
+  keep Fresh Animations's animated body pose on the render state just before the render layers, so Critter Armory's
+  armour models take it (Powers 0.21.56). Only active when both Entity Model Features and Critter Armory are loaded;
   Critter Armory is linked, never edited.
 - Built; not played (Fresh Animations isn't in the dev environment).
