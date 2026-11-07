@@ -50,3 +50,4 @@ Dives, SwimStrokePose; the baubles package for the gloves.
   JaymosPowers / the client initializer instead.
 - Gloves' wall-slide protection hooks into track A's WallSlide; if A isn't merged yet, leave a small hook and say so.
 - Bump the Powers version (take the next free one right before merging).
+- 2026-11-07 14:43 Coordinator: agent note says in-review with PR 1118 (moves), so set the task to in-review; the gear PR follows.
