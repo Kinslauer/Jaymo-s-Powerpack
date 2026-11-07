@@ -10180,3 +10180,11 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
 - Dying with it (`Mortality.MID_TURNS`): no prompt, a long black edged in the Hollow's colour (zombie green, bone,
   wraith blue, reaper teal, pallid grey), and you rise that Hollow. `VampirePlayers.midTurn`: the bitten who die before
   nightfall rise a vampire (a dhampir if they ate gold), the black edged blood red. Hint 124. Compile-checked; not played.
+
+## 0.7.644 (2026-11-07): fewer water mobs at once (Powers 0.21.47)
+- Andy: "still too many mobs spawning at once in the water". Water caps cut: water ambients (fish) 20 to 6, water
+  creatures (squid, dolphins, sharks...) 5 to 3, underground water creatures 5 to 2 (`MonsterCapMixin`). Each natural
+  spawn of a water mob now brings at most 2 at once instead of a whole school (`WaterClusterMixin`, on
+  `Mob.getMaxSpawnClusterSize` in `NaturalSpawner.spawnCategoryForPosition`). Great Whales keep their pods of 1-3
+  (Andy chose to exempt them). Ship shark packs (`SharkWake`) unchanged.
+- Built, not played.
