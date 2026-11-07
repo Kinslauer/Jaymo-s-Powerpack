@@ -120,7 +120,7 @@ public final class HollowBlight {
 		String look = turn.look() == null ? "pallid" : turn.look().key();
 		player.setAttached(BLIGHT, new Blight(look, turn.line(), player.level().getGameTime(), 0, false, 0L));
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.took").withStyle(ChatFormatting.DARK_GRAY,
-				ChatFormatting.ITALIC));
+			ChatFormatting.ITALIC));
 		JaymosKingdoms.LOGGER.info("{} took the Hollow's blight ({}) from {}", player.getScoreboardName(), look, by.getType().getDescriptionId());
 	}
 
