@@ -51,6 +51,12 @@ public final class DownedHud {
 	 */
 	static final float WAKE_OUT_TICKS = 80.0F, LINE_SCALE = 1.5F, LINE_WIDTH = 0.6F;
 
+	/**
+	 * (0.21.42) Dying mid-turn: the vignette's reach (as {@link #ring}'s strength, lower reaches further), how bright, and one
+	 * slow breath every this many ticks.
+	 */
+	static final float TURN_STRENGTH = 0.25F, TURN_GLOW = 1.1F, TURN_BREATH = 70.0F;
+
 	/** (0.20.94) The line on the black now (a lang key), kept while the black lifts. */
 	private static @org.jspecify.annotations.Nullable String line;
 
@@ -130,6 +136,11 @@ public final class DownedHud {
 	 * {@code strength} fades, swelling a little on each heartbeat. Drawn as frames of bands, from the edge in.
 	 */
 	private static void ring(GuiGraphicsExtractor graphics, float strength, float swell, float fade) {
+		ring(graphics, strength, swell, fade, RING);
+	}
+
+	/** (0.21.42) {@link #ring} in {@code rgb}. */
+	private static void ring(GuiGraphicsExtractor graphics, float strength, float swell, float fade, int rgb) {
 		int w = graphics.guiWidth(), h = graphics.guiHeight();
 		float weak = 1.0F - strength;
 		float reach = Math.min(w, h) * net.minecraft.util.Mth.lerp(weak, RING_STRONG, RING_SPENT) * (1.0F + RING_PULSE * swell);
@@ -145,7 +156,7 @@ public final class DownedHud {
 			if (b <= a || a * 2 >= Math.min(w, h)) {
 				continue;
 			}
-			int color = Math.min(255, alpha) << 24 | RING;
+			int color = Math.min(255, alpha) << 24 | rgb;
 			// one frame: the top and bottom strips full width, the sides between them
 			graphics.fill(a, a, w - a, b, color);
 			graphics.fill(a, h - b, w - a, h - a, color);
@@ -159,6 +170,15 @@ public final class DownedHud {
 		float dark = blackBefore + (black - blackBefore) * delta.getGameTimeDeltaPartialTick(false);
 		if (dark > 0.0F) {
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), Math.round(dark * 255.0F) << 24);
+		}
+		// (0.21.42) dying mid-turn (Mortality.TURN_TINT): what they're becoming creeps in from the edges of the black, slowly
+		// breathing, the colour of it
+		LocalPlayer player = Minecraft.getInstance().player;
+		Integer tint = player == null ? null : player.getAttached(com.jaymospowers.core.wounds.Mortality.TURN_TINT);
+		if (tint != null && dark > 0.0F) {
+			float t = (player.tickCount + delta.getGameTimeDeltaPartialTick(false)) / TURN_BREATH;
+			float breath = 0.5F + 0.5F * net.minecraft.util.Mth.sin(t * net.minecraft.util.Mth.TWO_PI);
+			ring(graphics, TURN_STRENGTH, breath, dark * TURN_GLOW, tint);
 		}
 		// (0.20.94) what happened, large in the middle of it, to be read before the world comes back
 		int alpha = Math.round(dark * 255.0F);
