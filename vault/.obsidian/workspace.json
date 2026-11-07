@@ -1,0 +1,28 @@
+{
+  "workspace": {
+    "id": "main",
+    "name": "Main",
+    "type": "folder",
+    "path": "/",
+    "children": []
+  },
+  "pinned": [],
+  "activeFile": null,
+  "layout": {
+    "type": "split",
+    "direction": "vertical",
+    "children": [
+      {
+        "type": "leaf",
+        "id": "readme",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "README.md",
+            "mode": "source"
+          }
+        }
+      }
+    ]
+  }
+}
