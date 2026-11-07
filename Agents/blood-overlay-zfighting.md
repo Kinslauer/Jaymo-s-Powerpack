@@ -27,4 +27,9 @@ owns:
 - Open PR versions taken: hollow-turning-follow-ups 0.21.52, fishing-real-tug 0.21.53, parcool-traceur-gear 0.21.54 -> take 0.21.55 right before opening the PR.
 
 ## Done
+Blood on the ground, walls and weapons no longer z-fights with the surface it sits on; puddles near the screen edge stay in view until their whole quad is out instead of popping out. Decal lift (0.06 + per-decal jitter), wall-mark lift (0.015) and item overlay offset (0.02) are static final constants; puddle culling uses the quad's bounds, not just its centre. Version 0.21.55, MODLOG entry appended.
+
+Not tested in game: no client run here; Complementary shader interaction and Fresh Animations/EMF pose compliance for BloodCoatLayer were not verified. `sh ./gradlew build` passes and tools/pr_checks.py passes.
+
+PR #1124 ready for review; not merged.
 ---
