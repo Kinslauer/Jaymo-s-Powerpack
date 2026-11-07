@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: coordinator
 asked: 2026-11-07
 thread: Hermes "Main Workflow" chat (stopped by NVIDIA rate limits; work handed off as draft PR #1114)
-claimed_by: 
+claimed_by: hermes
 pr: 1114
 suggested_owns:
   - src/main/java/com/jaymospowers/fishing/
