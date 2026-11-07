@@ -24,3 +24,4 @@ part names/poses), not by copying its code.
 ## Notes
 - Cause not known yet.
 - 2026-11-07 17:36 Coordinator: raised the Fresh Animations question with Andy 2026-11-07 17:37.
+- 2026-11-07 17:42 Andy (2026-11-07 17:42) chose: build a compat fix so Critter Armory's armour fits Fresh Animations' pig, sheep and horse models (not turning Fresh Animations off, not dropping Critter Armory). Fresh Animations is an EMF/ETF resource pack: get its .jem files for pig/sheep/horse (download the pack the way PackResourcePacks does) and offset the armour layers to match, through a compat class that checks both are loaded.
