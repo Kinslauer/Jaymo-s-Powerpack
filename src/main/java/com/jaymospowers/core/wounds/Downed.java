@@ -140,6 +140,11 @@ public final class Downed {
 	 */
 	public static final int ADRENALINE_TICKS = 200;
 	public static final double ADRENALINE_SLOW = -0.3, SPENT_CRAWL_SLOW = -0.85, ADRENALINE_PACE = 1.4, SPENT_PACE = 0.35;
+	/**
+	 * (0.21.49) A downed player who hasn't passed out can still work blocks with the main hand (doors, trapdoors, gates,
+	 * buttons, levers, chests), as with an empty hand; items, attacks and powers stay dead. False: no use at all, as before.
+	 */
+	public static final boolean DOWNED_USE_BLOCKS = true;
 	/** How long a downed player holds sneak to give up (ticks). */
 	public static final int GIVE_UP_TICKS = 100;
 	/** (0.18.5) A blow this hard (health points: three hearts) on anyone downed kills them outright. */
@@ -396,13 +401,39 @@ public final class Downed {
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+		// (0.21.49) Andy: "while downed, you cannot interact with doors or other right-clickable things". A downed player who is
+		// still awake works blocks again (doors, trapdoors, gates, buttons, levers, chests), with the main hand only and never
+		// with what it holds: first every other mod's say (locks, lockpicking, knowledge gates), then, last, the block's own
+		// empty-hand use. Passed out or knocked out, nothing.
+		UseBlockCallback.EVENT.addPhaseOrdering(FIRST, Event.DEFAULT_PHASE);
+		UseBlockCallback.EVENT.register(FIRST, (player, level, hand, hit) -> {
 			if (!isDowned(player)) {
 				return InteractionResult.PASS;
 			}
 			// (0.15.49) lying face down, use lands on the ground: Second Wind's eating still counts ({@link SelfRevive})
 			InteractionResult eat = SelfRevive.use(player, hand);
-			return eat != null ? eat : InteractionResult.FAIL;
+			if (eat != null) {
+				return eat;
+			}
+			return DOWNED_USE_BLOCKS && hand == InteractionHand.MAIN_HAND && !passedOut(player) ? InteractionResult.PASS : InteractionResult.FAIL;
+		});
+		UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
+		UseBlockCallback.EVENT.register(LAST, (player, level, hand, hit) -> {
+			if (!isDowned(player)) {
+				return InteractionResult.PASS;
+			}
+			if (level.isClientSide()) {
+				// (SUCCESS on the client sends the click without predicting it, nor using the held item: the server decides)
+				return InteractionResult.SUCCESS;
+			}
+			// the block as if the hand were empty: the held item is never used, placed or eaten from; and no sleeping or eating
+			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(hit.getBlockPos());
+			if (state.getBlock() instanceof net.minecraft.world.level.block.BedBlock || state.getBlock() instanceof net.minecraft.world.level.block.CakeBlock
+				|| state.getBlock() instanceof net.minecraft.world.level.block.CandleCakeBlock) {
+				return InteractionResult.FAIL;
+			}
+			InteractionResult used = state.useWithoutItem(level, player, hit);
+			return used.consumesAction() ? used : InteractionResult.FAIL;
 		});
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			if (!isDowned(player)) {
