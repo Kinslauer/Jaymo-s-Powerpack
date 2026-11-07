@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: any
 from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Check open work against Hermes fixes"
 claimed_by: hermes-a
-pr: 
+pr: 1124
 suggested_owns:
   - src/client/java/com/jaymospowers/client/blood/
   - src/client/java/com/jaymospowers/client/wet/
