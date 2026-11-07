@@ -55,6 +55,7 @@
 		{ "config": "jaymospowers.cryo.client.mixins.json", "environment": "client" },
 		"jaymospowers.ember.mixins.json",
 		"jaymospowers.carryon.mixins.json",
+		"jaymospowers.toolbelt.mixins.json",
 		"jaymospowers.lithostitched.mixins.json",
 		"jaymospowers.artifacts.mixins.json",
 		{ "config": "jaymospowers.artifacts.client.mixins.json", "environment": "client" }

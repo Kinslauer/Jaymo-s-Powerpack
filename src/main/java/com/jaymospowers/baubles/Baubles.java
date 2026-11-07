@@ -102,7 +102,8 @@ public final class Baubles {
 	 */
 	static final TagKey<Item> HIP_SHOWN = TagKey.create(Registries.ITEM, JaymosPowers.id("hip_shown"));
 	/** The belt and body slots, for {@link #SHOWN}. */
-	static final int BELT_SLOT = 3, BODY_SLOT = 5;
+	public static final int BELT_SLOT = 3;
+	static final int BODY_SLOT = 5;
 
 	public static MenuType<BaublesMenu> MENU;
 	public static Item LANTERN_POLE;

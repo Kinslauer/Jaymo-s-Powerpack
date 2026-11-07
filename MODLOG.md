@@ -1399,3 +1399,13 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   slide: both arms up and clawing (`SLIDE_CLAW`), elbows a little bent, legs straight with the toes scraping and kicking a
   knee up in turn, body pressed into the wall (`SLIDE_LEAN` 6 degrees), head back looking up. The drop doesn't count as
   climbed distance, so the climb's limbs hold still under the blend instead of running backward. Compile-checked, not played.
+
+## 0.21.42 (2026-11-07): up to 3 weapons on the body; the tool belt is a bauble and shows them all
+- Andy: "players should animate up to 3 weapons on them by default, and wearing the toolbelt animates everything like
+  before. it should go in the baubles slot."
+- Weapon Master draws up to 3 hotbar items on the body (the lowest slots not in hand; was 1 since 0.20.73), and all of
+  them while a Traveler Tool Belt is worn (`client/mixin/weaponmaster/WeaponMasterShownMixin`, `MAX_SHOWN`).
+- The tool belts (all six) fit the Baubles belt slot, and only a belt worn there counts: its radial menu, tool swap
+  and hip model all read that slot (`mixin/toolbelt/ToolBeltHelperMixin`, `compat/ToolBeltCompat`). A belt carried in
+  the inventory no longer counts, so move it to the belt slot. It shares that slot with lanterns and coin purses.
+  Smoke's vapour sheds it from the slot. Gradle build only, not played.

@@ -3,7 +3,7 @@
 	"package": "com.jaymospowers.client.mixin.weaponmaster",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"WeaponMasterOneItemMixin"
+		"WeaponMasterShownMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0
