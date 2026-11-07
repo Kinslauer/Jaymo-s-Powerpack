@@ -21,32 +21,37 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 
 HOOD = sys.argv[1] if len(sys.argv) > 1 else 'archer'
 
-# Palettes per hood, sampled from the Archers jar (archer_armor_head, ranger_armor_head,
-# netherite_ranger_armor_head). The cloak wool is a shade deeper than the hood so the hood
-# reads as a separate piece.
+# Palettes per hood, sampled from the Archers jar (assets/archers/textures/armor/
+# ranger_armor.png bright green, netherite_ranger_armor.png teal) and from the cloak
+# spec (archer_armor_head #6d3e26 leather). The cloak wool is a shade deeper than the
+# hood so the hood reads as a separate piece. Base colours are brightened so that, after
+# the per-face shading, edge darkening and weave grain are applied, the cloak still reads
+# as the hood's colour rather than near-black.
 PALETTES = {
-    'archer': {  # Archers' archer hood: dark brown leather + deeper wool
-        'hood': (0x1c, 0x16, 0x16),
-        'hood_in': (0x0a, 0x08, 0x08),
-        'wool': (0x14, 0x0e, 0x0e),
-        'lining': (0x0a, 0x06, 0x06),
-        'trim': (0x36, 0x23, 0x1a),
-        'clasp': (0x55, 0x36, 0x2a),
+    'archer': {  # Archers' archer hood: from docs/Hooded-Cloak-Spec.md (#6d3e26 leather)
+        'hood': (0x6d, 0x3e, 0x26),
+        'hood_in': (0x37, 0x25, 0x23),
+        'wool': (0x4f, 0x34, 0x24),
+        'lining': (0x2f, 0x22, 0x1c),
+        'trim': (0x83, 0x4d, 0x32),
+        'clasp': (0xa8, 0x8a, 0x52),
     },
-    'ranger': {  # Ranger's hood: bright green from ranger_armor.png + deeper wool
-        'hood': (0x2a, 0x81, 0x42),
-        'hood_in': (0x15, 0x40, 0x21),
-        'wool': (0x1a, 0x50, 0x2a),
-        'lining': (0x0e, 0x28, 0x14),
-        'trim': (0x4a, 0xc1, 0x62),
+    'ranger': {  # Ranger's hood: bright green from ranger_armor.png (#257145 main), brightened
+        # so the shaded cloak still reads green
+        'hood': (0x4a, 0xa0, 0x65),
+        'hood_in': (0x2a, 0x50, 0x33),
+        'wool': (0x3a, 0x8a, 0x55),
+        'lining': (0x1e, 0x3e, 0x2a),
+        'trim': (0x6a, 0xc0, 0x75),
         'clasp': (0x55, 0x7f, 0x5b),
     },
-    'netherite_ranger': {  # Netherite Ranger's hood: teal from netherite_ranger_armor.png + deeper wool
-        'hood': (0x14, 0x67, 0x62),
-        'hood_in': (0x0a, 0x33, 0x31),
-        'wool': (0x0e, 0x3c, 0x3a),
-        'lining': (0x06, 0x1e, 0x1c),
-        'trim': (0x2a, 0x8f, 0x8a),
+    'netherite_ranger': {  # Netherite Ranger's hood: teal from netherite_ranger_armor.png
+        # (#11545a main), brightened so the shaded cloak still reads teal
+        'hood': (0x3a, 0x90, 0x85),
+        'hood_in': (0x1a, 0x48, 0x45),
+        'wool': (0x2a, 0x80, 0x75),
+        'lining': (0x0e, 0x2e, 0x2b),
+        'trim': (0x5a, 0xb0, 0xa5),
         'clasp': (0x49, 0x6f, 0x6b),
     },
 }
@@ -105,9 +110,9 @@ def paint(name, u, v, size, material, dagged):
             for x in range(fw):
                 f = LIGHT[face] * (0.93 + rng.random() * 0.12)
                 if material == 'wool' and (x + y * 2) % 4 == 0:
-                    f *= 0.94
+                    f *= 0.94  # a twill weave
                 if material == 'hood' and (x * 3 + y) % 5 == 0:
-                    f *= 0.92
+                    f *= 0.92  # leather grain
                 if material == 'clasp' and (x + y) % 2 == 0:
                     f *= 1.15
                 rgb = base
@@ -117,10 +122,10 @@ def paint(name, u, v, size, material, dagged):
                 elif edge and fw > 2 and fh > 2:
                     f *= 0.82
                 if name.startswith('back') and face == 'back' and x == fw // 2 and y % 2 == 0:
-                    f *= 0.78
+                    f *= 0.78  # stitched seam down the middle of the back panel
                 px = shade(rgb, f)
                 if dagged and face in ('front', 'back', 'east', 'west') and y == fh - 1 and (x // 2) % 2 == 1:
-                    px = (0, 0, 0, 0)
+                    px = (0, 0, 0, 0)  # a dagged hem: every other pair of texels on the bottom row cut away
                 img.putpixel((x0 + x, y0 + y), px)
 
 

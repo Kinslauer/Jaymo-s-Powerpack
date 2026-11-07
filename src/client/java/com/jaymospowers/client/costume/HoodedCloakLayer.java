@@ -58,6 +58,10 @@ public final class HoodedCloakLayer {
 	static final int TEX_W = 64, TEX_H = 64;
 	/** On a player's render state: null for no cloak, else the cloak texture to draw (per hood). */
 	static final RenderStateDataKey<Identifier> KEY = RenderStateDataKey.create(() -> "jaymospowers:hooded_cloak");
+	/** Cloak textures, one per hood, from {@code tools/gen_hooded_cloak.py}. */
+	static final Identifier TEX_ARCHER = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
+	static final Identifier TEX_RANGER = JaymosPowers.id("textures/entity/worn/hooded_cloak_ranger.png");
+	static final Identifier TEX_NETHERITE_RANGER = JaymosPowers.id("textures/entity/worn/hooded_cloak_netherite_ranger.png");
 
 	private HoodedCloakLayer() {
 	}
@@ -93,11 +97,11 @@ public final class HoodedCloakLayer {
 		if (headStack.is(HoodedCloak.HOODS)) {
 			switch (BuiltInRegistries.ITEM.getKey(headStack.getItem()).getPath()) {
 				case "ranger_armor_head" ->
-					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_ranger.png");
+					texture = TEX_RANGER;
 				case "netherite_ranger_armor_head" ->
-					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_netherite_ranger.png");
+					texture = TEX_NETHERITE_RANGER;
 				default ->
-					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
+					texture = TEX_ARCHER;
 			}
 		}
 		if (texture == null) {
