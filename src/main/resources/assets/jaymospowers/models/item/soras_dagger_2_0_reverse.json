@@ -1,5 +1,5 @@
 {
-  "credit": "Sora Dagger 2.0 model converted from Blockbench .bbmodel",
+  "credit": "Sora Dagger 2.0 model converted from Blockbench .bbmodel (reverse grip)",
   "texture_size": [
     128,
     128
@@ -11,10 +11,15 @@
   },
   "display": {
     "thirdperson_righthand": {
+      "rotation": [
+        -170,
+        0,
+        0
+      ],
       "translation": [
         0,
-        0.75,
-        2.75
+        -3.06,
+        -0.34
       ],
       "scale": [
         0.63,
@@ -23,10 +28,15 @@
       ]
     },
     "thirdperson_lefthand": {
+      "rotation": [
+        -170,
+        0,
+        0
+      ],
       "translation": [
         0.25,
-        0,
-        3
+        -3.7,
+        0
       ],
       "scale": [
         0.87,
@@ -35,6 +45,16 @@
       ]
     },
     "firstperson_righthand": {
+      "rotation": [
+        -60,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0.23,
+        -3.6
+      ],
       "scale": [
         0.51,
         1,
@@ -42,10 +62,37 @@
       ]
     },
     "firstperson_lefthand": {
+      "rotation": [
+        -60,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0.23,
+        -3.6
+      ],
       "scale": [
         0.63,
         1,
         1
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        2,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
       ]
     },
     "gui": {

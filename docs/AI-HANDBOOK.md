@@ -89,6 +89,28 @@ Check every Minecraft API against the 26.3 sources (`sh ./gradlew genSources`) b
 - Never commit `Serverfiles/` or `playit-secret.txt` (they hold secrets). Never accept API keys pasted in chat; ask
   Andy to revoke any that get pasted.
 
+### Before you open a PR
+
+Every tool (Claude, Hermes, Codex, Cursor, anyone) goes through this list. PR #1096 skipped it and broke three dagger
+stages, so it's not optional. The **PR checks** GitHub Action (`.github/workflows/pr-checks.yml`) re-checks items 1 to 4
+on every PR and builds all three mods; a red check means don't merge. Run `python3 tools/pr_checks.py` yourself first.
+
+1. **Version bumped** for every mod you touched (`gradle.properties`, `kingdoms/gradle.properties`,
+   `kitchen/gradle.properties`), to the next number no open PR has taken.
+2. **Builds pass**: `sh ./gradlew build` at the root, and in `kingdoms/` or `kitchen/` if you touched them.
+3. **libs/ jars**: never add a jar older than one already there (`libs/jaymos-kitchen-*`, `mca-fabric-*`). The Powers
+   build picks the Kitchen jar matching `kitchen/gradle.properties`, else the newest. Only add a jar when the mod
+   needs it, and delete the one it replaces.
+4. **Item models**: a variant model (reverse grip, stage, colour) must differ from its base, with its own display
+   transforms or textures; never commit a copy. Each item and each stage (gold, diamond, tempest...) keeps pointing at
+   its own model; don't point several items at one new model to "upgrade" them. A new held model needs a `ground` pose
+   too. A deliberate share goes in `tools/pr_checks_allow.txt` with a reason.
+5. **Kingdoms lang** keys go in `kingdoms/.../lang/parts/<feature>.json`, never a single `en_us.json`.
+6. **MODLOG.md**: append one entry at the end, headed with the new version, saying what a player will see.
+7. **Codemap**: added a class? Run `python3 tools/codemap.py` and commit the result.
+8. **PR body** says what changed for players and what you did not test. Never commit `Serverfiles/` or secrets.
+9. Don't merge. Andy merges only on "merge".
+
 ## 5. pbdr (pull, build, deploy, restart)
 
 "pbdr" means pull master, build the pack, deploy the jars to the Deck server and restart it on the same world.
