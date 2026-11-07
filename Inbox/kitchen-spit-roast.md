@@ -1,6 +1,7 @@
 ---
 status: claimed
 for: hermes
+claimed_by: hermes-b
 from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Check open work against Hermes fixes" (asked alongside the fishing send-back, PR #1114)
@@ -9,7 +10,6 @@ suggested_owns:
   - kitchen/src/main/java/com/jaymoskitchen/cooking/spit/ (new)
   - kitchen/src/client/java/com/jaymoskitchen/client/spit/ (new)
   - kitchen/src/main/resources/assets/jaymoskitchen/lang/parts/spit.json (new, or the Kitchen lang file if Kitchen has no parts)
-claimed_by: hermes-b
 ---
 # Spit roast over an open fire
 
