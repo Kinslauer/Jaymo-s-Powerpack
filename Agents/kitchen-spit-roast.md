@@ -1,11 +1,11 @@
 ---
-status: running
+status: in-review
 task: kitchen-spit-roast
 branch: claude/kitchen-spit-roast
 with:
-pr:
+pr: 1123
 mods: kitchen
-versions:
+versions: 0.5.87
 started: 2026-11-07
 owns:
   - kitchen/src/main/java/com/jaymoskitchen/cooking/spit/
