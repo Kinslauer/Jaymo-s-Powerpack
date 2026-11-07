@@ -67,9 +67,9 @@ named `hermes-<something>`; `for: hermes-a` goes to that bot only; `for: any` to
 | Builder B | `hermes-b` | every 10 min, 5 min after A | Same, as `hermes-b`. Two builders take two tracks at once (ParCool A and B). |
 | Fixer | `hermes-fixer --fixes` | every 15 min | Takes the oldest task the reviewer sent back, from whichever bot, so a busy or rate-limited builder doesn't hold it up. |
 
-Keep it to **two builders**, plus the fixer if you want one. The vault allows three agents editing at once, and the
-Claude reviewer counts too, because NVIDIA's rate limits already stopped one Hermes run today. Add a third builder
-only once two run a day without hitting limits.
+Keep it to **two builders**, plus the fixer if you want one: the vault allows three agents editing at once (the
+Claude reviewer only reads, so it doesn't count). NVIDIA's rate limits already stopped one Hermes run today, so add
+a third builder only once two have run for a day without hitting them.
 
 **Persona for every bot** (paste it in, changing the name):
 
