@@ -1,6 +1,6 @@
 filters:
   and:
-    - file.inFolder("Agents")
+    - file.inFolder("Live/Agents")
     - 'file.ext == "md"'
 views:
   - type: table
