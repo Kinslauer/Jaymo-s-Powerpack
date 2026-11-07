@@ -92,4 +92,36 @@ public final class KingdomsCompat {
 			return false;
 		}
 	}
+
+	private static Method hunt;
+	private static boolean huntLooked;
+
+	/**
+	 * (0.21.53) A great white shark is drawn up from the deep near {@code (x, y, z)} (Kingdoms' whaling sharks, see
+	 * {@code com.jaymoskingdoms.whaling.Sharks#hunt}): false without Kingdoms, without Naturalist's shark, or when
+	 * there is no water deep enough there. Like everything else here, reached by reflection and fail-soft.
+	 */
+	public static boolean sharkDrawnIn(net.minecraft.server.level.ServerLevel level, double x, double y, double z) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!huntLooked) {
+			huntLooked = true;
+			try {
+				hunt = Class.forName("com.jaymoskingdoms.whaling.Sharks")
+						.getMethod("hunt", net.minecraft.server.level.ServerLevel.class,
+								net.minecraft.world.phys.Vec3.class, net.minecraft.world.entity.LivingEntity.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				hunt = null;
+			}
+		}
+		if (hunt == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(hunt.invoke(null, level, new net.minecraft.world.phys.Vec3(x, y, z), null));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
 }

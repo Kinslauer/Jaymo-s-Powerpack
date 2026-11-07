@@ -3,5 +3,9 @@
   "message.jaymospowers.fishing.fish_on": "Fish on!",
   "message.jaymospowers.fishing.caught": "Caught a fish!",
   "message.jaymospowers.fishing.fish_got_away": "The fish got away.",
+  "item.jaymospowers.metal_fishing_rod": "Metal Fishing Rod",
+  "item.jaymospowers.metal_rod_head": "Fishing Rod Head",
+  "message.jaymospowers.fishing.shark_hooked": "A shark's on the line!",
+  "message.jaymospowers.fishing.too_big": "Too big to land — it broke free.",
   "hud.jaymospowers.fishing.tension": "Fishing: %s%% tension"
 }

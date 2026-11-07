@@ -28,9 +28,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin {
     private static final int RNG_TICKS = 4;
-    private static final int CHANCE_COD = 40;
-    private static final int CHANCE_SALMON = 75;
-    private static final int CHANCE_PUFFERFISH = 90;
 
     /** Decide whether this hook gets a bite this tick; on a bite, spawn a live fish and start the fight. */
     @Inject(method = "tick", at = @At("HEAD"))
@@ -54,7 +51,26 @@ public abstract class FishingHookMixin {
         }
         Level level = hook.level();
         int r = level.getRandom().nextInt(100);
-        int kind = r < CHANCE_COD ? 0 : r < CHANCE_SALMON ? 1 : r < CHANCE_PUFFERFISH ? 2 : 3;
+        int kind;
+        if (!com.jaymospowers.fishing.FishingReal.isMetalRod((net.minecraft.server.level.ServerPlayer) player)) {
+            // a wooden rod stays small fish: cod or salmon
+            kind = r < 50 ? com.jaymospowers.fishing.FishingReal.FISH_COD : com.jaymospowers.fishing.FishingReal.FISH_SALMON;
+        } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK) {
+            kind = com.jaymospowers.fishing.FishingReal.FISH_SHARK;
+        } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK + 34) {
+            kind = com.jaymospowers.fishing.FishingReal.FISH_COD;
+        } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK + 34 + 34) {
+            kind = com.jaymospowers.fishing.FishingReal.FISH_SALMON;
+        } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK + 34 + 34 + 8) {
+            kind = com.jaymospowers.fishing.FishingReal.FISH_PUFFERFISH;
+        } else {
+            kind = com.jaymospowers.fishing.FishingReal.FISH_TROPICAL;
+        }
+        // a shark only comes up for a metal rod, in water deep enough for it
+        if (kind == com.jaymospowers.fishing.FishingReal.FISH_SHARK
+                && !com.jaymospowers.compat.KingdomsCompat.sharkDrawnIn((net.minecraft.server.level.ServerLevel) level, hook.getX(), hook.getY(), hook.getZ())) {
+            kind = com.jaymospowers.fishing.FishingReal.FISH_COD;
+        }
         LivingEntity fish = switch (kind) {
             case 0 -> new Cod((EntityType<? extends Cod>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("cod")).orElseThrow().value(), level);
             case 1 -> new Salmon((EntityType<? extends Salmon>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("salmon")).orElseThrow().value(), level);

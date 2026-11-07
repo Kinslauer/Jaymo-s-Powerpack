@@ -96,6 +96,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
 		com.jaymospowers.armory.FlintlockDraw.init();
+		// (0.21.53) realistic fishing: a bite hooks a live fish and the player reels it in tug-of-war style
+		com.jaymospowers.fishing.FishingReal.init();
 		com.jaymospowers.tinkering.Tinkering.init();
 		// (0.21.29) GregTech's hand route: hammer raw ore into crushed ore, wash it in a cauldron or running water
 		com.jaymospowers.tinkering.ore.OreWashing.init();
@@ -157,9 +159,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.web.KitchenCompat.registerBrawn();
 		com.jaymospowers.power.web.KitchenCompat.registerTemperate();
 		com.jaymospowers.power.web.KitchenCompat.registerNoCorpseZone();
-		// (0.21.51) realistic fishing: a bite hooks a live fish and the player reels it in tug-of-war style
-		com.jaymospowers.fishing.FishingReal.init();
 		registerAttachments();
+
 	}
 
 	/**

@@ -1551,4 +1551,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 
 ## 0.21.53 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
 - **Realistic fishing**: a bite now hooks a live fish entity (cod, salmon, pufferfish or tropical fish) instead of vanilla loot, and the player plays a tug-of-war to reel it in. Line tension rises as the fish fights; hold use to reel it down, or the line breaks at full tension. Stronger fish fight harder and break the line sooner. (`com.jaymospowers.fishing.FishingReal`, `FishingHookMixin`, `FishingRealClient`)
+- **Metal fishing rod**: forged through Tinkering — cast an iron rod head at the smeltery, fit handle and binding at the Tool Station (see TinkeringJei). Its stronger line takes bigger fish; a wooden rod stays small-fish only.
+- **Sharks**: on the metal rod, a great white shark can hook instead of an ordinary fish — Kingdoms' whaling sharks, reached through `com.jaymospowers.compat.KingdomsCompat` (inactive without Kingdoms). A shark fights hardest and pulls the player, and is too big to land.
+- **Cleaning a catch**: a caught fish laid on a cutting board and cut with a knife gives fillets worth more than eating the fish whole (Jaymo's Kitchen).
 - Built; not played.

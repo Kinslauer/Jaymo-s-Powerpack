@@ -1,0 +1,50 @@
+package com.jaymospowers.fishing;
+
+import com.jaymospowers.JaymosPowers;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+
+/**
+ * The metal fishing rod, forged through Jaymo's Tinkering: a cast iron head fitted with a handle and binding at the
+ * Tool Station. Stronger line than a wooden rod, and it can hook big fish - up to sharks - on the right water.
+ */
+public class MetalFishingRodItem extends Item {
+    public MetalFishingRodItem(Item.Properties properties) {
+        super(properties);
+    }
+
+    /** Cast the hook like a fishing rod; while a fight is on, reeling is driven by holding use ({@link FishingRealClient}). */
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        ServerLevel serverLevel = (ServerLevel) level;
+        ItemStack stack = player.getItemInHand(hand);
+        if (!(player instanceof ServerPlayer serverPlayer) || FishingReal.fight(serverPlayer).fighting()) {
+            return InteractionResult.PASS;
+        }
+        net.minecraft.world.entity.EntityType<? extends FishingHook> hookType =
+                (net.minecraft.world.entity.EntityType<? extends FishingHook>) BuiltInRegistries.ENTITY_TYPE
+                        .get(net.minecraft.resources.Identifier.withDefaultNamespace("fishing_hook")).orElseThrow().value();
+        FishingHook hook = new FishingHook(hookType, serverLevel);
+        hook.setOwner(player);
+        hook.setPos(player.getX(), player.getEyeY() - 0.1D, player.getZ());
+        hook.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
+        serverLevel.addFreshEntity(hook);
+        serverLevel.playSound(null, player.getX(), player.getEyeY() - 0.1D, player.getZ(),
+                SoundEvents.BUCKET_FILL_FISH, SoundSource.PLAYERS, 0.5F, 1.0F);
+        stack.hurtAndBreak(1, serverPlayer, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
+        return InteractionResult.SUCCESS;
+    }
+}
