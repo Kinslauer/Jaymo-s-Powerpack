@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: in-review
 task: kitchen-spit-roast
 branch: claude/kitchen-spit-roast
 with:
