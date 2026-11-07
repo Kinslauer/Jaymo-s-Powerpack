@@ -1547,3 +1547,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - **Moving along bars and chains**: in Bar Swing, the movement keys (W/S, or A/D across) move you hand over hand along a
   run of bars, chains or fences at the same height (`Freerun.BAR_MOVE_SPEED`, `Freerun.BAR_MOVE`); Jump still swings off
   and Sneak drops. The swing calms and the hands alternate while moving (`BarHangPose`).
+
+## 0.21.55 (2026-11-07): blood decals and overlays stop fighting their surfaces
+- Blood on the ground, on walls and on weapons no longer z-fights with the surface it's drawn on: puddles and wall marks sit a clear hair above blocks, and blood on swords and axes is drawn a clear step off the item's own faces. Puddles near the screen edge stay in view until their whole quad is out instead of popping out. The offsets are `static final` tuning constants at the top of each class.
+- Built; not played.

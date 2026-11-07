@@ -50,6 +50,8 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	static final float DRAWN_EASE = 0.12F;
 	static final int QUICK_FADE_UNDER = 100;
 	private static final double SAME_HEIGHT = 1.0E-4;
+	/** How far a decal sits above the surface it's drawn on, plus a per-decal jitter so overlapping decals don't flicker in step. */
+	static final float DECAL_LIFT = 0.06F, DECAL_LIFT_JITTER = 0.03F;
 	/** (0.19.63) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
 	static final float WET_ALPHA = 0.5F;
 	static final int WATER = 0x8EA4B6;
@@ -250,7 +252,11 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** Whether the camera could see where it lies. */
 	@Override
 	public boolean visible(net.minecraft.client.renderer.culling.Frustum frustum) {
-		return frustum.pointInFrustum(this.x, this.y, this.z);
+		// culled by the quad's own bounds, not just its centre point: a big puddle near the screen edge
+		// stays drawn until the whole quad is out of view instead of popping out
+		float r = this.baseSize * 0.6F;
+		return frustum.isVisible(new net.minecraft.world.phys.AABB(this.x - r, this.y - 0.1F, this.z - r,
+				this.x + r, this.y + 0.1F, this.z + r));
 	}
 
 	/** Lays its pieces into {@code decals} for this frame. */
@@ -306,7 +312,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float fx = -Mth.sin(this.printYaw), fz = Mth.cos(this.printYaw);
 		float rx = Mth.cos(this.printYaw), rz = Mth.sin(this.printYaw);
 		float h = size * 0.5F;
-		float lift = (this.zFight + 0.08F) * 0.02F + 0.004F;
+		float lift = DECAL_LIFT + this.zFight * DECAL_LIFT_JITTER;
 		int color = ARGB.color(Math.round(this.alpha * 0.85F * 255.0F), this.shown);
 		float[][] corners = {{-h, -h, u0, v1}, {-h, h, u0, v0}, {h, h, u1, v0}, {h, -h, u1, v1}};
 		for (float[] c : corners) {
@@ -375,8 +381,8 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float u0 = this.sprite.getU0(), u1 = this.sprite.getU1(), v0 = this.sprite.getV0(), v1 = this.sprite.getV1();
 		Vec3 cam = camera.position();
 		float cos = Mth.cos(this.yaw), sin = Mth.sin(this.yaw);
-		// (a hair above the block, a little different for each puddle so overlapping ones don't flicker)
-		float lift = (this.zFight + 0.08F) * Math.max(0.05F, this.alpha - 0.3F) * 0.05F;
+		// above the block top, with a per-puddle jitter so overlapping decals don't lock in step and flicker
+		float lift = DECAL_LIFT + this.zFight * DECAL_LIFT_JITTER;
 		// (0.20.41) drying darker, or magma cooling: shade()
 		int color = this.wet ? ARGB.colorFromFloat(this.alpha * fade, this.r, this.g, this.b)
 			: ARGB.color(Math.round(this.alpha * fade * 255.0F), this.shown);

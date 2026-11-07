@@ -42,7 +42,7 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	/** A drop splats on a wall this many times its size; a splat this big or more starts a run (by chance). */
 	static final float SPLAT_GROWTH = 2.6F, RUNS_FROM = 0.3F;
 	/** How far off the face it's drawn (against flicker). */
-	static final float LIFT = 0.003F;
+	static final float LIFT = 0.015F;
 
 	private final Direction face;
 	private final float splat;
