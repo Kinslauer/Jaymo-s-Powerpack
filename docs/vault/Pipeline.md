@@ -6,10 +6,10 @@ How work flows without Andy watching each step. He's asked only once, at the end
    (`status: open`).
 2. **Hermes** checks the Inbox on a schedule, claims the oldest task, does it in its own worktree, opens a PR, then
    sets `status: in-review` and `pr:`.
-3. **Claude Code on the PC** runs `/loop 10m /vault-review` (`.claude/skills/vault-review`) and reviews each
+3. **Claude Code on the PC** runs `/loop 15m /vault-review` (`.claude/skills/vault-review`) and reviews each
    `in-review` PR. A failing one goes back to Hermes (`status: changes`, with the review notes in the task). For a
    passing one it runs `vault_sync.py --send`, **the step that asks Andy**. Saying yes sets `status: ready`.
-4. **Coordinator** checks the vault every hour, posts each `ready` PR to Andy with a link and the review, and sets
+4. **Coordinator** checks the vault every 15 minutes, posts each `ready` PR to Andy with a link and the review, and sets
    `status: sent`. Andy says "merge" there. The coordinator merges, sets `status: done` and moves the task to
    `Inbox/Done/`.
 
@@ -33,7 +33,7 @@ python tools/vault_sync.py --send <task>             # reviewer only, after Andy
 
 ## Setting it up on the PC
 
-**Claude Code (reviewer):** open a session in the repo and type `/loop 10m /vault-review`. Leave that window open.
+**Claude Code (reviewer):** open a session in the repo and type `/loop 15m /vault-review`. Leave that window open.
 For it to ask only at `--send`, the session needs these in its permissions (Andy adds them: `/permissions`, or
 `.claude/settings.local.json`):
 
@@ -41,7 +41,7 @@ For it to ask only at `--send`, the session needs these in its permissions (Andy
   `Bash(git show origin/:*)`
 - ask: `Bash(python tools/vault_sync.py --send:*)` (ask beats allow, so this one always prompts)
 
-**Hermes:** give it a scheduled job (every 10 minutes) with this prompt:
+**Hermes:** give it a scheduled job (every 15 minutes) with this prompt:
 
 > In the Jaymo's Powerpack repo, run `python tools/vault_sync.py --claim hermes`. If it says "No task waiting", stop.
 > Otherwise it printed a task: do it, following `AGENTS.md` and `docs/vault/How agents use this vault.md` (your own
@@ -63,8 +63,8 @@ named `hermes-<something>`; `for: hermes-a` goes to that bot only; `for: any` to
 | Bot | `--claim` | Schedule | What it does |
 |---|---|---|---|
 | Default | `hermes` | as now | Keeps the tasks it already claimed (its send-backs come back to it). |
-| Builder A | `hermes-a` | every 10 min | The prompt above with `hermes` swapped for `hermes-a`. |
-| Builder B | `hermes-b` | every 10 min, 5 min after A | Same, as `hermes-b`. Two builders take two tracks at once (ParCool A and B). |
+| Builder A | `hermes-a` | every 15 min | The prompt above with `hermes` swapped for `hermes-a`. |
+| Builder B | `hermes-b` | every 15 min, 7 min after A | Same, as `hermes-b`. Two builders take two tracks at once (ParCool A and B). |
 | Fixer | `hermes-fixer --fixes` | every 15 min | Takes the oldest task the reviewer sent back, from whichever bot, so a busy or rate-limited builder doesn't hold it up. |
 
 Keep it to **two builders**, plus the fixer if you want one: the vault allows three agents editing at once (the
