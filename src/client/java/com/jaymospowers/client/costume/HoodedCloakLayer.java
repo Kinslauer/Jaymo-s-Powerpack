@@ -92,27 +92,32 @@ public final class HoodedCloakLayer {
 			return;
 		}
 		Identifier texture = null;
-		if (player.getItemBySlot(EquipmentSlot.HEAD).is(HoodedCloak.HOODS)) {
-			texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
+		// Find the hood: armour head slot first, then baubles head slot; only if it's in HoodedCloak.HOODS
+		ItemStack headStack = player.getItemBySlot(EquipmentSlot.HEAD);
+		Identifier hoodId = null;
+		if (headStack.is(HoodedCloak.HOODS)) {
+			hoodId = BuiltInRegistries.ITEM.getKey(headStack.getItem());
 		} else {
 			List<Identifier> looks = Baubles.looks(player);
 			if (looks.size() > Baubles.HEAD_SLOT) {
 				Identifier headLook = looks.get(Baubles.HEAD_SLOT);
-				if (headLook.getNamespace().equals("jaymospowers")) {
-					switch (headLook.getPath()) {
-						case "soothsayer_hood" ->
-							texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_soothsayer.png");
-						case "ichorcloth_hood" ->
-							texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_ichorcloth.png");
-						default ->
-							texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
-					}
+				var headItem = BuiltInRegistries.ITEM.getOptional(headLook).orElse(null);
+				if (headItem != null && new ItemStack(headItem).is(HoodedCloak.HOODS)) {
+					hoodId = headLook;
 				}
 			}
 		}
-		if (texture == null) {
+		if (hoodId == null) {
 			state.setData(KEY, null);
 			return;
+		}
+		switch (hoodId.getPath()) {
+			case "soothsayer_hood" ->
+				texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_soothsayer.png");
+			case "ichorcloth_hood" ->
+				texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_ichorcloth.png");
+			default ->
+				texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
 		}
 		boolean down = HoodedCloak.down(player);
 		state.setData(KEY, texture);
