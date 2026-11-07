@@ -36,6 +36,9 @@ coordinator included) see the same Board, Inbox and Decisions as the PC.
 
 ## Tasks from the coordinator (`Live/Inbox/`)
 
+The whole loop (Hermes builds, Claude on the PC reviews, Andy says yes once, the coordinator shows him) is in
+[[Pipeline]]. Change tasks with `vault_sync.py --claim/--set/--note` rather than by hand, so the change syncs at once.
+
 The coordinator is the Claude project thread Andy talks to in the Claude app. It posts work for the agents on the PC as
 notes in `Live/Inbox/`, made from `Templates/Task.md`: Andy's words, what's wanted, where to start, `for:` (an agent's
 name, or `any`), and the files it suggests owning.
@@ -45,10 +48,12 @@ name, or `any`), and the files it suggests owning.
    agent note as usual with a `task:` line naming the Inbox note. If the sync shows someone else claimed it first,
    leave it and take another.
 3. Questions for Andy go under the task's *Notes* (and to Andy, if he's there): the coordinator reads them and asks him.
-4. When your PR is up, fill in the task's `pr:`. When it's merged, set `status: done` and move the note to
-   `Live/Inbox/Done/`.
+4. When your PR is up, run `python tools/vault_sync.py --set <task> status=in-review pr=<number>`. The reviewer
+   only picks up tasks whose own status is `in-review`; setting just your agent note isn't enough. The coordinator
+   sets `done` and moves the task to `Live/Inbox/Done/` after Andy merges.
 
-The coordinator never edits an agent note or a claimed task's properties; it only adds lines under *Notes*.
+The coordinator never edits an agent note. On a claimed task it only adds lines under *Notes*, except to set
+`in-review` when an agent forgot to, and `sent`/`done` at the end.
 
 ## Your own worktree, always
 
@@ -84,7 +89,8 @@ Every agent, Hermes included, works only in **its own git worktree** on its own 
 ## When you finish
 
 1. Set your note's `status` to `in-review`, fill in `pr:` and the version numbers you took, and write a short
-   "Done" line: what a player will see, and what wasn't tested.
+   "Done" line: what a player will see, and what wasn't tested. If the work came from an Inbox task, also set the
+   task to `in-review` (step 4 of the Inbox section above).
 2. If your PR changes versions, update the table on [[Home]] in the same PR.
 3. After Andy merges, the agent that merged it (usually the project thread) sets the note to `merged` and moves it to
    `Live/Agents/Done/`.

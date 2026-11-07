@@ -52,6 +52,11 @@ public final class AirFlipClient {
 		}
 	}
 
+	/** (ParCool track B) A long jump's Sneak tap ({@code RunMovesClient}) is that move's, not a flip. */
+	public static void cancelTap() {
+		waiting = 0;
+	}
+
 	private static void flip(LocalPlayer player) {
 		if (!player.level().noCollision(player, player.getBoundingBox().expandTowards(0.0, -AirFlip.MIN_HEIGHT, 0.0))
 			|| !Feathers.canSpend(player, AirFlip.COST) || !ClientPlayNetworking.canSend(AirFlip.Flip.TYPE)) {

@@ -63,6 +63,10 @@ import org.jspecify.annotations.Nullable;
  * crouch. Facing anything 0.7 to just under 2 blocks over your feet it climbs: up onto the top if the crouched body fits
  * there, in on the belly under a one-high gap, and over a fence, wall or gate (landing on the far side).
  *
+ * <p>(ParCool track A, Andy's picks from ParCool's moves, our own code) Hanging, A or D shimmies you along the edge hand
+ * over hand ({@link #shimmySpot}, {@link #SHIMMY_SPEED}), stopping where it ends or something is in the way; Jump + Back
+ * is the castaway, a kick off backwards, out and up ({@link #CASTAWAY_OUT}, {@link #CASTAWAY_UP}).
+ *
  * <p>The moves are the client's (player movement is client-authoritative; see {@code client/LedgeClient}): it finds the
  * ledge with {@link #find}, holds the body still and walks it up the mantle's path. The server checks the rules
  * ({@link #canHang}), resets the fall, charges the climb's hunger, plays the sounds, syncs {@link #HOLD} so everyone
@@ -127,6 +131,17 @@ public final class Ledge {
 	public static final double VAULT_DROP_MAX = 3.0;
 	/** (0.20.63) Blocks never climbed or vaulted from the shift-scroll grab (cactus, magma, barriers, and anything a datapack adds). */
 	public static final TagKey<Block> NO_VAULT = TagKey.create(Registries.BLOCK, JaymosPowers.id("ledge_no_vault"));
+
+	/** (ParCool track A) Ledge shimmy: A or D while hanging moves you along the edge this fast (blocks/tick). */
+	public static final double SHIMMY_SPEED = 0.05;
+	/** (ParCool track A) Ledge shimmy: the leading hand is this far in from the body's side (blocks), and the edge may differ by this much (blocks) and still be the same one. */
+	public static final double SHIMMY_HAND_IN = 0.05, SHIMMY_EDGE_SLACK = 0.07;
+	/** (ParCool track A) Castaway: Jump + Back while hanging kicks you off backwards, out and up (blocks/tick). */
+	public static final double CASTAWAY_OUT = 0.6, CASTAWAY_UP = 0.5;
+	/** (ParCool track A) Castaway: Back alone waits this long (ticks) for Jump before it just lets go. */
+	public static final int CASTAWAY_WAIT_TICKS = 3;
+	/** (ParCool track A) Castaway: hunger it costs (exhaustion: 4 is one hunger point). */
+	public static final float CASTAWAY_EXHAUSTION = 0.3F;
 
 	/** Ticks the local client waits for the server to confirm a grab before giving up on it (a refused grab drops). */
 	public static final int CONFIRM_TICKS = 20;
@@ -216,6 +231,21 @@ public final class Ledge {
 		}
 	}
 
+	/**
+	 * (ParCool track A) Client → server: the hanging player shimmied along the edge onto the block at {@code pos}, or,
+	 * with {@code castaway}, kicked off it backwards.
+	 */
+	public record Shimmy(BlockPos pos, boolean castaway) implements CustomPacketPayload {
+		public static final Type<Shimmy> TYPE = new Type<>(JaymosPowers.id("ledge_shimmy"));
+		public static final StreamCodec<ByteBuf, Shimmy> CODEC = StreamCodec.composite(
+			BlockPos.STREAM_CODEC, Shimmy::pos, ByteBufCodecs.BOOL, Shimmy::castaway, Shimmy::new);
+
+		@Override
+		public Type<Shimmy> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server: who's on a ledge, and the block they hold. */
 	private static final Map<UUID, BlockPos> HOLDING = new HashMap<>();
 	/** Server: until when (game time) a player who just left a ledge isn't kicked for how they move. */
@@ -234,6 +264,8 @@ public final class Ledge {
 	public static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Grab.TYPE, Grab.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Act.TYPE, Act.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Shimmy.TYPE, Shimmy.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Shimmy.TYPE, (payload, ctx) -> shimmy(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(Grab.TYPE, (payload, ctx) -> grab(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(Act.TYPE, (payload, ctx) -> act(ctx.player(), payload.climb(), payload.prone()));
 		ServerTickEvents.END_SERVER_TICK.register(Ledge::tick);
@@ -370,7 +402,7 @@ public final class Ledge {
 		if (gap < -0.05 || gap > REACH) {
 			return null;
 		}
-		return finish(player, level, pos, face, top, wall, sign);
+		return finish(player, level, pos, face, top, wall, sign, lateral(player, face));
 		}
 
 		/**
@@ -393,7 +425,7 @@ public final class Ledge {
 			double wall = walk.getAxis() == Direction.Axis.X
 				? pos.getX() + (sign > 0 ? shape.max(Direction.Axis.X) : shape.min(Direction.Axis.X))
 				: pos.getZ() + (sign > 0 ? shape.max(Direction.Axis.Z) : shape.min(Direction.Axis.Z));
-			return finish(player, level, pos, walk.getOpposite(), top, wall, -sign);
+			return finish(player, level, pos, walk.getOpposite(), top, wall, -sign, lateral(player, walk));
 		}
 
 		/**
@@ -487,12 +519,69 @@ public final class Ledge {
 			return !state.getCollisionShape(level, pos).isEmpty() && !state.is(NO_VAULT);
 		}
 
-		private static @Nullable Spot finish(Player player, Level level, BlockPos pos, Direction face, double top, double wall, int sign) {
+		/** Where the player is along a wall on side {@code face} (the coordinate across it: z for an east or west wall). */
+		private static double lateral(Player player, Direction face) {
+			return face.getAxis() == Direction.Axis.X ? player.getZ() : player.getX();
+		}
+
+		/**
+		 * (ParCool track A) The ledge shimmy: the spot {@code step} blocks along the edge held at {@code from}, toward
+		 * {@code side} (the hanger's left or right), or null where the edge ends, rises, drops or something blocks the body.
+		 * The edge has to go on under the middle of the body and under the leading hand, at the same height and in the same
+		 * plane as the one held, and be one a hang may hold ({@link #NO_GRAB}, {@link #MIN_TOP_AREA}).
+		 */
+		public static @Nullable Spot shimmySpot(Player player, Spot from, Direction side, double step) {
+			Level level = player.level();
+			Direction face = from.face();
+			Direction.Axis axis = face.getAxis();
+			if (side.getAxis() == axis || !side.getAxis().isHorizontal()) {
+				return null;
+			}
+			int sign = face.getAxisDirection().getStep();
+			double half = player.getBbWidth() * 0.5;
+			Vec3 hang = from.hang();
+			double wall = (axis == Direction.Axis.X ? hang.x : hang.z) + sign * (half + HANG_GAP);
+			double across = side.getAxisDirection().getStep();
+			double lateral = (axis == Direction.Axis.X ? hang.z : hang.x) + across * step;
+			BlockPos held = edgeAt(player, level, face, wall, from.top(), lateral);
+			if (held == null || edgeAt(player, level, face, wall, from.top(), lateral + across * (half - SHIMMY_HAND_IN)) == null) {
+				return null;
+			}
+			Spot next = finish(player, level, held, face, from.top(), wall, sign, lateral);
+			// (the hang mustn't creep up or down a step as it goes: that's no longer the same edge)
+			return next == null || Math.abs(next.hang().y - hang.y) > 0.11 ? null : next;
+		}
+
+		/** (ParCool track A) The block whose top is an edge at height {@code top} on the wall plane {@code wall}, at {@code lateral} along it, or null. */
+		private static @Nullable BlockPos edgeAt(Player player, Level level, Direction face, double wall, double top, double lateral) {
+			int sign = face.getAxisDirection().getStep();
+			Direction.Axis axis = face.getAxis();
+			double in = wall + sign * 0.01;
+			CollisionContext context = CollisionContext.of(player);
+			for (int y = Mth.floor(top + 0.5); y >= Mth.floor(top - 1.0); y--) {
+				BlockPos pos = axis == Direction.Axis.X ? BlockPos.containing(in, y, lateral) : BlockPos.containing(lateral, y, in);
+				BlockState state = level.getBlockState(pos);
+				VoxelShape shape = state.getCollisionShape(level, pos, context);
+				if (shape.isEmpty()) {
+					continue;
+				}
+				double at = pos.getY() + shape.max(Direction.Axis.Y);
+				int base = axis == Direction.Axis.X ? pos.getX() : pos.getZ();
+				double plane = base + (sign > 0 ? shape.min(axis) : shape.max(axis));
+				if (Math.abs(at - top) > SHIMMY_EDGE_SLACK || Math.abs(plane - wall) > SHIMMY_EDGE_SLACK || state.is(NO_GRAB) || topArea(shape) < MIN_TOP_AREA) {
+					return null;
+				}
+				return pos.immutable();
+			}
+			return null;
+		}
+
+		private static @Nullable Spot finish(Player player, Level level, BlockPos pos, Direction face, double top, double wall, int sign, double lateral) {
 			double half = player.getBbWidth() * 0.5;
 			double hangAlong = wall - sign * (half + HANG_GAP);
 		double onAlong = wall + sign * CLIMB_IN;
-		Vec3 hang = face.getAxis() == Direction.Axis.X ? new Vec3(hangAlong, top - HANG_FEET_BELOW_EDGE, player.getZ())
-			: new Vec3(player.getX(), top - HANG_FEET_BELOW_EDGE, hangAlong);
+		Vec3 hang = face.getAxis() == Direction.Axis.X ? new Vec3(hangAlong, top - HANG_FEET_BELOW_EDGE, lateral)
+			: new Vec3(lateral, top - HANG_FEET_BELOW_EDGE, hangAlong);
 		// short of a full hang over low ground: as low as the body fits, never lower than the ground
 		AABB box = player.getDimensions(net.minecraft.world.entity.Pose.STANDING).makeBoundingBox(hang).deflate(1.0E-7);
 		for (int i = 0; i < 12 && !level.noCollision(player, box); i++) {
@@ -613,6 +702,33 @@ public final class Ledge {
 		player.causeFoodExhaustion(CLIMB_EXHAUSTION);
 		player.resetFallDistance();
 		sound(level, player, pos, 0.8F, 0.7F);
+	}
+
+	/**
+	 * (ParCool track A) The hand-over-hand along the edge reached another block ({@code castaway} false), checked as a
+	 * grab is: still hanging, the new block next to the old and holdable, the body near it. Or the castaway: off the
+	 * ledge backwards, which costs a little hunger and makes the hands' sound.
+	 */
+	private static void shimmy(ServerPlayer player, Shimmy shimmy) {
+		BlockPos pos = HOLDING.get(player.getUUID());
+		Hold hold = player.getAttached(HOLD);
+		if (pos == null || hold == null || hold.climbing() || VAULTING.contains(player.getUUID())) {
+			return;
+		}
+		ServerLevel level = player.level();
+		if (shimmy.castaway()) {
+			player.causeFoodExhaustion(CASTAWAY_EXHAUSTION);
+			sound(level, player, pos, 0.8F, 1.1F);
+			end(player);
+			return;
+		}
+		BlockPos next = shimmy.pos();
+		if (next.distManhattan(pos) > 2 || player.position().distanceToSqr(Vec3.atCenterOf(next)) > 9.0 || !holdable(level, next)) {
+			return;
+		}
+		HOLDING.put(player.getUUID(), next.immutable());
+		player.resetFallDistance();
+		sound(level, player, next, 0.35F, 1.2F);
 	}
 
 	/** A hit takes you off the ledge: the grip goes and you ragdoll as you fall (the hold drops on its next tick, see canHang). */
