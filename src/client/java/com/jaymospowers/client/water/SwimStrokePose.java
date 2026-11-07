@@ -24,6 +24,8 @@ import org.jspecify.annotations.Nullable;
  * going backward, a side stroke rolled onto the side going sideways, and treading water (sculling hands, slow
  * cycling legs) when hardly moving. Worked out from where they move, so everyone in view sees the same. It pauses
  * Fresh Animations while it plays ({@code PoseTakeover}), and any power's pose wins over it.
+ * <p>(ParCool track B) In a fast swim ({@code FastSwim}, out of a long sprint swim) the crawl stroke gives way to a
+ * butterfly: both arms sweep round together and the legs dolphin-kick as one.
  */
 public final class SwimStrokePose {
 	// ===== the knobs ================================================================================================
@@ -37,15 +39,17 @@ public final class SwimStrokePose {
 	static final float STROKE_SPEED = 0.22F, TREAD_SPEED = 0.16F;
 	/** How fast a stroke blends into the next (share a tick), and into the pose at all. */
 	static final float BLEND = 0.18F;
+	/** The fast swim's butterfly: stroke speed (radians a tick) and how hard the legs kick. */
+	static final float FAST_SPEED = 0.3F, FAST_KICK = 0.5F;
 	// ================================================================================================================
 
-	/** Weights (0-1, adding to {@code in}) of each stroke; {@code side}: −1 left, 1 right; {@code time} ticks. */
-	public record Stroke(float tread, float breast, float back, float sideStroke, float side, float time, float in) {
+	/** Weights (0-1, adding to {@code in}) of each stroke ({@code fast}: the fast swim's butterfly); {@code side}: −1 left, 1 right; {@code time} ticks. */
+	public record Stroke(float tread, float breast, float back, float sideStroke, float side, float time, float in, float fast) {
 	}
 
 	public static final RenderStateDataKey<Stroke> KEY = RenderStateDataKey.create(() -> "jaymospowers:swim_stroke");
 
-	/** Per entity id: {tread, breast, back, side, in, last frame time, side sign}. */
+	/** Per entity id: {tread, breast, back, side, in, last frame time, side sign, fast}. */
 	private static final Map<Integer, float[]> BLENDS = new HashMap<>();
 
 	private SwimStrokePose() {
@@ -55,7 +59,8 @@ public final class SwimStrokePose {
 		if (!(entity instanceof Player player) || !(state instanceof AvatarRenderState avatar)) {
 			return;
 		}
-		boolean swimming = player.isInWater() && player.getFluidHeight(FluidTags.WATER) > player.getBbHeight() * WAIST && !player.onGround() && !player.isPassenger() && !player.isSpectator()
+		boolean fast = player.isInWater() && avatar.isVisuallySwimming && com.jaymospowers.freerun.moves.FastSwim.active(player) && !player.isPassenger();
+		boolean swimming = fast || player.isInWater() && player.getFluidHeight(FluidTags.WATER) > player.getBbHeight() * WAIST && !player.onGround() && !player.isPassenger() && !player.isSpectator()
 			&& !avatar.isVisuallySwimming && !avatar.isFallFlying && state.pose == Pose.STANDING && !player.getAbilities().flying;
 		float time = player.level().getGameTime() + partialTicks;
 		float[] b = BLENDS.get(player.getId());
@@ -64,14 +69,16 @@ public final class SwimStrokePose {
 				state.setData(KEY, null);
 				return;
 			}
-			b = new float[] {1.0F, 0.0F, 0.0F, 0.0F, 0.0F, time, 1.0F};
+			b = new float[] {fast ? 0.0F : 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, time, 1.0F, fast ? 1.0F : 0.0F};
 			BLENDS.put(player.getId(), b);
 		}
 		float frame = Mth.clamp(time - b[5], 0.0F, 2.0F);
 		b[5] = time;
 		float k = Math.min(1.0F, BLEND * frame);
-		float tread = 0.0F, breast = 0.0F, back = 0.0F, sideStroke = 0.0F;
-		if (swimming) {
+		float tread = 0.0F, breast = 0.0F, back = 0.0F, sideStroke = 0.0F, butterfly = 0.0F;
+		if (fast) {
+			butterfly = 1.0F;
+		} else if (swimming) {
 			double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
 			float yaw = state.bodyRot * Mth.DEG_TO_RAD;
 			double forward = dx * -Mth.sin(yaw) + dz * Mth.cos(yaw), right = dx * -Mth.cos(yaw) + dz * -Mth.sin(yaw);
@@ -90,6 +97,7 @@ public final class SwimStrokePose {
 		b[1] += (breast - b[1]) * k;
 		b[2] += (back - b[2]) * k;
 		b[3] += (sideStroke - b[3]) * k;
+		b[7] += (butterfly - b[7]) * k;
 		b[4] = Mth.clamp(b[4] + (swimming ? k : -k * 1.5F), 0.0F, 1.0F);
 		if (!swimming && b[4] <= 0.0F) {
 			BLENDS.remove(player.getId());
@@ -97,7 +105,7 @@ public final class SwimStrokePose {
 			return;
 		}
 		float in = b[4] * b[4] * (3.0F - 2.0F * b[4]);
-		state.setData(KEY, new Stroke(b[0], b[1], b[2], b[3], b[6], time, in));
+		state.setData(KEY, new Stroke(b[0], b[1], b[2], b[3], b[6], time, in, b[7]));
 	}
 
 	static @Nullable Stroke stroke(LivingEntityRenderState state) {
@@ -159,7 +167,17 @@ public final class SwimStrokePose {
 		add(high, s.sideStroke(), -0.4F - (1.0F - pull) * 1.2F, 0.0F, -sign * 0.3F);
 		add(rl, s.sideStroke(), (pull - 0.5F) * 1.0F, 0.0F, 0.0F);
 		add(ll, s.sideStroke(), -(pull - 0.5F) * 1.0F, 0.0F, 0.0F);
-		float total = Math.max(0.001F, s.tread() + s.breast() + s.back() + s.sideStroke());
+		// butterfly: both arms sweep from far ahead down to the hips together, then swing back round out at the sides;
+		// the legs kick as one, twice a stroke
+		float bp = t * FAST_SPEED;
+		float sweep = -Mth.PI * (0.5F + 0.5F * Mth.cos(bp));
+		float out = 0.2F + 1.2F * Math.max(0.0F, Mth.sin(bp));
+		add(ra, s.fast(), sweep, 0.0F, out);
+		add(la, s.fast(), sweep, 0.0F, -out);
+		float kick = Mth.sin(bp * 2.0F) * FAST_KICK;
+		add(rl, s.fast(), kick, 0.0F, 0.0F);
+		add(ll, s.fast(), kick, 0.0F, 0.0F);
+		float total = Math.max(0.001F, s.tread() + s.breast() + s.back() + s.sideStroke() + s.fast());
 		float e = s.in();
 		set(h.rightArm, ra, total, e);
 		set(h.leftArm, la, total, e);

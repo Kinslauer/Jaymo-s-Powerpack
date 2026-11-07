@@ -1502,3 +1502,31 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   vanilla lava drip is gone; every few ticks a fresh stump throws several drops of the body's own blood out of it (up from a
   neck), 2 small ones while the body stands, 5 bigger, faster ones once it has fallen (`Dismember.spurt`, tuning `SPURT_*`).
 - Built; not played.
+
+## 0.21.51 (2026-11-07): ParCool's running and falling moves, our own
+- Andy picked these off the ParCool comparison checklist ("Go to their tutorial on github and make a checklist of
+  everything we dont have yet"). Our own code after ParCool's ideas (alRex-U, LGPL, Forge-only): nothing of its code or
+  art. Everyone gets them; they cost Feathers. New package `freerun/moves` (`RunMoves` registers them all).
+- **Long jump** (`LongJump`): in a fast run, tap Sneak as you jump (up to 4 ticks before, 3 after): a long, flat leap
+  (about 7 blocks), legs reaching ahead; 3 feathers. A tap only: a held Sneak is still the slide, two taps the zoom, and
+  the air flip lets that tap go.
+- **Charge jump** (`ChargeJump`): stand still on the ground and hold Sneak; after 8 ticks a pale bar fills over the
+  Feathers row (1.5 s to full). Jump leaps up to about twice as high; moving lets it go. 1-4 feathers. Not for a web
+  slinger: Web keeps its own (`WebSwing#tickChargeJump`). A double tap (the zoom's) never charges.
+- **Trick jump** (`TrickJump`): a jump out of a fast run flips on its own a quarter of the time (front flip mostly,
+  back flip sometimes), in the air flip's pose. Free; never on a long jump. The Sneak-tap air flip is unchanged.
+- **Safety tap** (`LandingRoll.safetyTap`): the dodge at touchdown with no direction held (from the air, or just after
+  landing a fall of 2.5+ blocks) is now a crouched landing instead of the forward roll: 60% of the fall damage off, 3
+  feathers. Hold a direction to roll as before (all of it off, 6 feathers).
+- **Sky dive** (`SkyDive`): 6+ blocks into a fast fall, press Jump to spread out flat: falls at most 1.5 blocks a tick
+  (a plain fall reaches about 3.9), steers much faster; Jump again ends it. 2 feathers. Only if, two ticks after the press,
+  you're still plainly falling, so a cloud in a bottle's jump, wings or a flight keep their Jump. Fall damage is unchanged.
+- **Fast swim** (`FastSwim`): 2 s of sprint swimming breaks into a faster swim (a pull the way you look, up to 0.55
+  blocks a tick) with a butterfly stroke and dolphin kick (`SwimStrokePose`) and a bubble trail; a feather every 1.5 s.
+- **Hiding** (`Hiding`): hold Sneak and walk into a leaves block or a hay bale at your feet for 12 ticks and you squeeze
+  in, sunk so it covers you. Mobs drop you as a target and barely see you (only one right beside you notices), and your
+  name tag is hidden. Jump climbs out; so does taking damage, the block going, or using or swinging anything. Inside hay
+  you don't suffocate, aren't pushed out, and can see out (mixins in `freerun/moves/mixin` and the client's).
+- Poses for everyone (`RunMovesPose`): the long jump's sail, the safety tap's crouch, the sky dive spread flat.
+- The traceur gloves and boots come in a second PR.
+- Built; not played.

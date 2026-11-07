@@ -39,6 +39,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * keep the skillcheck"): Sure Footing left Kingdoms' Freerun tree. And a hard fall that isn't rolled lands in the
  * three-point <b>hero landing</b> ({@link WebPose#HERO_LAND}, drawn for everyone), with a ring of dust kicked out of
  * the ground: fall damage of {@link #HERO_DAMAGE} or more that you'd live through. A roll after it takes its place.
+ * <p>(ParCool track B) The <b>safety tap</b>, after ParCool's: the dodge at touchdown with no direction held (early or
+ * late, the same window as the roll's) is a crouched landing instead of a roll, knees taking the hit, for a tight spot
+ * with no room to roll. It takes {@link #SAFETY_CUT} of the fall damage away (the roll takes all of it) for
+ * {@link #SAFETY_COST} feathers ({@code RunMovesClient} picks it, {@link #safetyTap} here; drawn by {@code RunMovesPose}).
  */
 public final class LandingRoll {
 	// ===== the knobs ================================================================================================
@@ -53,6 +57,9 @@ public final class LandingRoll {
 	/** The hero landing's ring of dust: how wide (blocks) and how many puffs round it. */
 	static final double DUST_RADIUS = 1.6;
 	static final int DUST_PUFFS = 18;
+	/** The safety tap: the share of the fall damage it takes away, and its feathers. */
+	public static final float SAFETY_CUT = 0.6F;
+	public static final int SAFETY_COST = 3;
 	// ================================================================================================================
 
 	private record Pending(DamageSource source, float amount, long at) {
@@ -62,6 +69,8 @@ public final class LandingRoll {
 	private static final Map<UUID, Pending> PENDING = new HashMap<>();
 	/** Server: game time of each player's last dodge. */
 	private static final Map<UUID, Long> ROLLED = new HashMap<>();
+	/** Server: game time of each player's last safety tap. */
+	private static final Map<UUID, Long> TAPPED = new HashMap<>();
 	/** True while held-back damage is dealt, so it isn't held back again. */
 	private static boolean dealing;
 
@@ -79,6 +88,13 @@ public final class LandingRoll {
 			if (rolled != null && now - rolled <= SLACK_TICKS) {
 				// the roll got here first
 				rolled(player);
+				return false;
+			}
+			Long tapped = TAPPED.get(player.getUUID());
+			if (tapped != null && now - tapped <= SLACK_TICKS) {
+				// the safety tap got here first: the knees take part of it
+				TAPPED.remove(player.getUUID());
+				deal(player, new Pending(source, amount * (1.0F - SAFETY_CUT), now));
 				return false;
 			}
 			PENDING.put(player.getUUID(), new Pending(source, amount, now));
@@ -108,10 +124,12 @@ public final class LandingRoll {
 				deal(handler.player, pending);
 			}
 			ROLLED.remove(handler.player.getUUID());
+			TAPPED.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			PENDING.clear();
 			ROLLED.clear();
+			TAPPED.clear();
 		});
 	}
 
@@ -134,8 +152,36 @@ public final class LandingRoll {
 		}
 	}
 
+	/**
+	 * (ParCool track B) The safety tap, asked by the client at touchdown: a crouched landing that takes
+	 * {@link #SAFETY_CUT} of the fall damage away, held back or still to come, for {@link #SAFETY_COST} feathers.
+	 */
+	public static void safetyTap(ServerPlayer player) {
+		// as the dodge: the client checked the ground; the server may not have it landed yet
+		if (!com.jaymospowers.core.Ledge.canHang(player) || com.jaymospowers.core.Ledge.onLedge(player)
+			|| !com.jaymospowers.stamina.Feathers.spend(player, SAFETY_COST)) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		Pending pending = PENDING.remove(player.getUUID());
+		if (pending != null) {
+			WebPose pose = player.getAttached(WebPower.POSE);
+			if (pose != null && pose.kind() == WebPose.HERO_LAND && now - pose.start() <= LATE_TICKS + SLACK_TICKS) {
+				player.removeAttached(WebPower.POSE);
+			}
+			deal(player, new Pending(pending.source(), pending.amount() * (1.0F - SAFETY_CUT), pending.at()));
+		} else {
+			TAPPED.put(player.getUUID(), now);
+		}
+		com.jaymospowers.freerun.moves.RunMoves.pose(player, com.jaymospowers.freerun.moves.RunMoves.SAFETY_TAP);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 0.9F, 0.75F);
+		level.sendParticles(ParticleTypes.POOF, player.getX(), player.getY() + 0.1, player.getZ(), 5, 0.3, 0.05, 0.3, 0.02);
+		player.addTag(Freerun.XP_TAG);
+	}
+
 	private static void deal(ServerPlayer player, Pending pending) {
-		if (!player.isAlive()) {
+		if (!player.isAlive() || pending.amount() < 0.5F) {
 			return;
 		}
 		dealing = true;
