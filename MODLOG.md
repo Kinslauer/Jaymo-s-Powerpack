@@ -1439,3 +1439,13 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - `HoodedCloakLayer` picks a per-hood cloak texture (`hooded_cloak.png`, `hooded_cloak_ranger.png`, `hooded_cloak_netherite_ranger.png` from `tools/gen_hooded_cloak.py`, coloured from each hood's own texture in the Archers jar).
 - `cloak_hoods.json` now lists exactly the three Archers hoods.
 - Compile-checked; not played.
+
+## 0.21.49 (2026-11-07): downed, you can still open doors
+- Andy: "while downed, you cannot interact with doors or other right clickable things". A downed player who is still
+  awake can right-click blocks again: doors, trapdoors, fence gates, buttons, levers, chests. It works as if the hand
+  were empty, so what you're holding is never used, placed or eaten (beds and cakes stay off). Attacking, items and
+  powers stay dead while down; passed out or knocked out, nothing works. Locks and other mods' gates still apply.
+- `Downed`: the use-block refusal moved to the FIRST phase and lets the main hand through when `awake()`; a LAST-phase
+  handler does the block's `useWithoutItem`. `DownedKeysMixin` keeps `key.use` live with the crosshair on a block.
+  `Downed.DOWNED_USE_BLOCKS` turns it off.
+- Not built locally (no JDK 25 here; GitHub's PR checks build it); not played.

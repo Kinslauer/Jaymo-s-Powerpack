@@ -415,11 +415,12 @@ public final class Downed {
 			if (eat != null) {
 				return eat;
 			}
-			return DOWNED_USE_BLOCKS && hand == InteractionHand.MAIN_HAND && !passedOut(player) ? InteractionResult.PASS : InteractionResult.FAIL;
+			return DOWNED_USE_BLOCKS && hand == InteractionHand.MAIN_HAND && awake(player) ? InteractionResult.PASS : InteractionResult.FAIL;
 		});
 		UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
 		UseBlockCallback.EVENT.register(LAST, (player, level, hand, hit) -> {
-			if (!isDowned(player)) {
+			if (!isDowned(player) || !DOWNED_USE_BLOCKS || hand != InteractionHand.MAIN_HAND || !awake(player)) {
+				// (anyone not down, or the FIRST phase's FAIL already ended it for the off hand and the passed out)
 				return InteractionResult.PASS;
 			}
 			if (level.isClientSide()) {
@@ -536,6 +537,14 @@ public final class Downed {
 	/** A downed player who has passed out. */
 	public static boolean passedOut(Entity entity) {
 		return entity.hasAttached(OUT);
+	}
+
+	/**
+	 * (0.21.49) Down but awake: not passed out and not knocked out. Only then can a downed player still work blocks
+	 * ({@link #DOWNED_USE_BLOCKS}). Both sides for the player themselves (OUT is synced to all, KNOCKED to its owner).
+	 */
+	public static boolean awake(Entity entity) {
+		return !passedOut(entity) && !entity.hasAttached(KNOCKED);
 	}
 
 	/**

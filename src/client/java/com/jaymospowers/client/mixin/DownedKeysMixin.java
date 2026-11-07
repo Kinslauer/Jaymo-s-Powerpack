@@ -80,7 +80,7 @@ abstract class DownedKeysMixin {
 	 */
 	private static boolean atBlock(LocalPlayer player) {
 		net.minecraft.world.phys.HitResult hit = Minecraft.getInstance().hitResult;
-		return Downed.DOWNED_USE_BLOCKS && !Downed.passedOut(player) && hit != null
+		return Downed.DOWNED_USE_BLOCKS && Downed.awake(player) && hit != null
 			&& hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK;
 	}
 
