@@ -50,5 +50,7 @@
 	"message.jaymospowers.mortality.mended": "You've mended. You're no longer living on borrowed time.",
 	"message.jaymospowers.mortality.wake.sheltered": "You wake to low voices and the smell of herbs. Someone found you and carried you in.",
 	"message.jaymospowers.mortality.wake.captured": "You wake in chains. Your things are gone.",
-	"message.jaymospowers.mortality.wake.risen": "You wake cold. Nothing hurts. Your heart isn't beating."
+	"message.jaymospowers.mortality.wake.risen": "You wake cold. Nothing hurts. Your heart isn't beating.",
+	"message.jaymospowers.mortality.turning": "Everything goes dark. Something in your blood keeps moving after your heart stops.",
+	"message.jaymospowers.mortality.wake.turned": "You open your eyes. The turning is done. Whatever you were, you are not that any more."
 }

@@ -19,6 +19,7 @@ abstract class GoldenAppleMixin {
 		ItemStack self = (ItemStack) (Object) this;
 		if (entity instanceof ServerPlayer player && (self.is(Items.GOLDEN_APPLE) || self.is(Items.ENCHANTED_GOLDEN_APPLE))) {
 			VampirePlayers.ateGold(player);
+			com.jaymoskingdoms.HollowBlight.ateGold(player); // (0.7.643) and burns out a Hollow's blight
 		}
 	}
 }

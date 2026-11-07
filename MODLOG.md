@@ -1400,7 +1400,27 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   knee up in turn, body pressed into the wall (`SLIDE_LEAN` 6 degrees), head back looking up. The drop doesn't count as
   climbed distance, so the climb's limbs hold still under the blend instead of running backward. Compile-checked, not played.
 
-## 0.21.43 (2026-11-07): up to 3 weapons on the body; the tool belt is a bauble and shows them all
+## 0.21.44: Sora's Dagger stages keep their own look
+- Fixes what #1096 (Sora's Dagger 2.0 models) broke. The gold, diamond and tempest daggers point back at their own models
+  (`soras_dagger_<stage>` and `_reverse`); only the base dagger uses 2.0, since 2.0 has no per-stage textures yet.
+- `soras_dagger_2_0_reverse` was a copy of the forward model, so a reverse grip looked like a normal one. It now flips the
+  blade the way the old reverse did (third person X -170, first person X -60), with the translation worked out so the
+  grip (model point 8,5,6) stays in the hand.
+- The 2.0 models (and the wood variant) get a `ground` pose (scale 0.4) so a dropped dagger isn't full size.
+- Removed the stale `libs/jaymos-kitchen-0.5.38.jar` (#1096 added it; master builds Kitchen 0.5.57). Compile-checked; not played.
+
+## 0.21.45: dying mid-turn rises you turned
+- Andy: "players that get infected and are turning into hollow, shouldnt reincarnate the way everyone else does, if they
+  die before fully turning, then they dont get a prompt on death, just a longer black screen, an appropriate vignette, and
+  a wakeup as a full turned hollow whichever they may be." `Mortality.MID_TURNS` (Kingdoms fills it: the Hollow's blight,
+  a vampire's bite before nightfall) is asked before `TURNINGS`. Such a death is never final (beheaded, the void, lava or an
+  execution aside), skips the come-to bar, doesn't use up a sure wake, and lies `TURN_DARK` (14 s) in the black with the
+  line "Something in your blood keeps moving after your heart stops", then rises where it fell (the drowned on the shore)
+  as what it was becoming, with no new injury ("The turning is done").
+- `Mortality.TURN_TINT` (synced, not saved) carries the turning's colour; `DownedHud` draws it as a slow breathing ring
+  at the edges of the black. Chrono's R window on a waking is unchanged (a rewind clears the tint). Compile-checked; not played.
+
+## 0.21.46 (2026-11-07): up to 3 weapons on the body; the tool belt is a bauble and shows them all
 - Andy: "players should animate up to 3 weapons on them by default, and wearing the toolbelt animates everything like
   before. it should go in the baubles slot."
 - Weapon Master draws up to 3 hotbar items on the body (the lowest slots not in hand; was 1 since 0.20.73), and all of

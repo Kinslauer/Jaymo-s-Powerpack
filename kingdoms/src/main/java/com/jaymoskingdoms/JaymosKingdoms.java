@@ -365,6 +365,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.573) or taken in by a village that thinks well enough of them
 		Shelter.register();
 		Hollows.register();
+		// (0.7.643) and the blight that turns one slowly, and the death mid-turn that finishes it
+		HollowBlight.register();
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);
 		StoryKit.register();
