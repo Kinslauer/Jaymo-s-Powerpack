@@ -23,28 +23,40 @@ public class MetalFishingRodItem extends Item {
         super(properties);
     }
 
-    /** Cast the hook like a fishing rod; while a fight is on, reeling is driven by holding use ({@link FishingRealClient}). */
+    /** Cast the hook like a fishing rod; while a fight is on, reeling is driven by holding use ({@link FishingRealClient}). Reeling in an idle hook retrieves it. */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (level.isClientSide()) {
-            return InteractionResult.SUCCESS;
-        }
-        ServerLevel serverLevel = (ServerLevel) level;
         ItemStack stack = player.getItemInHand(hand);
-        if (!(player instanceof ServerPlayer serverPlayer) || FishingReal.fight(serverPlayer).fighting()) {
-            return InteractionResult.PASS;
+        if (player.fishing != null) {
+            // already have a hook out: reel it in
+            if (!level.isClientSide()) {
+                int dmg = player.fishing.retrieve(stack);
+                stack.hurtAndBreak(dmg, player, hand.asEquipmentSlot());
+            }
+            level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL,
+                    1.0F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
+            stack.causeUseVibration(player, net.minecraft.world.level.gameevent.GameEvent.ITEM_INTERACT_FINISH);
+            return InteractionResult.SUCCESS;
         }
         net.minecraft.world.entity.EntityType<? extends FishingHook> hookType =
                 (net.minecraft.world.entity.EntityType<? extends FishingHook>) BuiltInRegistries.ENTITY_TYPE
                         .get(net.minecraft.resources.Identifier.withDefaultNamespace("fishing_hook")).orElseThrow().value();
+        ServerLevel serverLevel = (ServerLevel) level;
+        if (!(player instanceof ServerPlayer serverPlayer) || FishingReal.fight(serverPlayer).fighting()) {
+            return InteractionResult.PASS;
+        }
         FishingHook hook = new FishingHook(hookType, serverLevel);
         hook.setOwner(player);
+        player.fishing = hook;
         hook.setPos(player.getX(), player.getEyeY() - 0.1D, player.getZ());
         hook.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
         serverLevel.addFreshEntity(hook);
         serverLevel.playSound(null, player.getX(), player.getEyeY() - 0.1D, player.getZ(),
                 SoundEvents.BUCKET_FILL_FISH, SoundSource.PLAYERS, 0.5F, 1.0F);
         stack.hurtAndBreak(1, serverPlayer, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
+        player.awardStat(net.minecraft.world.stats.Stats.ITEM_USED.get(this));
+        stack.causeUseVibration(player, net.minecraft.world.level.gameevent.GameEvent.ITEM_INTERACT_START);
         return InteractionResult.SUCCESS;
     }
 }

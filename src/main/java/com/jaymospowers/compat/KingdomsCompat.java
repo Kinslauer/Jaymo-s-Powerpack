@@ -3,7 +3,9 @@ package com.jaymospowers.compat;
 import java.lang.reflect.Method;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.20.9) Jaymo's Kingdoms is optional for Powers: this is the only place that touches it, by reflection, and only when it is
@@ -93,35 +95,29 @@ public final class KingdomsCompat {
 		}
 	}
 
-	private static Method hunt;
-	private static boolean huntLooked;
-
 	/**
-	 * (0.21.53) A great white shark is drawn up from the deep near {@code (x, y, z)} (Kingdoms' whaling sharks, see
-	 * {@code com.jaymoskingdoms.whaling.Sharks#hunt}): false without Kingdoms, without Naturalist's shark, or when
-	 * there is no water deep enough there. Like everything else here, reached by reflection and fail-soft.
+	 * (0.21.53) A great white shark is drawn up from the deep near {@code (x, y, z)}.
 	 */
-	public static boolean sharkDrawnIn(net.minecraft.server.level.ServerLevel level, double x, double y, double z) {
+	public static @Nullable LivingEntity sharkDrawnIn(net.minecraft.server.level.ServerLevel level, double x, double y, double z) {
 		if (!LOADED) {
-			return false;
+			return null;
 		}
-		if (!huntLooked) {
-			huntLooked = true;
-			try {
-				hunt = Class.forName("com.jaymoskingdoms.whaling.Sharks")
-						.getMethod("hunt", net.minecraft.server.level.ServerLevel.class,
-								net.minecraft.world.phys.Vec3.class, net.minecraft.world.entity.LivingEntity.class);
-			} catch (ReflectiveOperationException | LinkageError e) {
-				hunt = null;
-			}
+		net.minecraft.world.entity.EntityType<?> sharkType =
+				net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+						.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("naturalist", "great_white_shark"))
+						.orElse(null);
+		if (sharkType == null) {
+			return null;
 		}
-		if (hunt == null) {
-			return false;
+		// Needs water deep enough for a great white: the hook block and two below must be water.
+		net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x, y, z);
+		if (!level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)
+				|| !level.getFluidState(pos.below()).is(net.minecraft.tags.FluidTags.WATER)
+				|| !level.getFluidState(pos.below().below()).is(net.minecraft.tags.FluidTags.WATER)) {
+			return null;
 		}
-		try {
-			return Boolean.TRUE.equals(hunt.invoke(null, level, new net.minecraft.world.phys.Vec3(x, y, z), null));
-		} catch (ReflectiveOperationException | RuntimeException e) {
-			return false;
-		}
+		net.minecraft.world.entity.Entity shark = sharkType.spawn(level, pos, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+		return shark instanceof net.minecraft.world.entity.LivingEntity
+				? (net.minecraft.world.entity.LivingEntity) shark : null;
 	}
 }

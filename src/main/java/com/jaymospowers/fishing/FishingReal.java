@@ -19,7 +19,9 @@ import net.minecraft.world.entity.animal.fish.Pufferfish;
 import net.minecraft.world.entity.animal.fish.Salmon;
 import net.minecraft.world.entity.animal.fish.TropicalFish;
 import net.minecraft.core.Registry;
+import net.minecraft.core.ResourceKey;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.FishingHook;
@@ -100,7 +102,9 @@ public final class FishingReal {
 
     public static void init() {
         METAL_ROD = Registry.register(BuiltInRegistries.ITEM, JaymosPowers.id("metal_fishing_rod"),
-                new MetalFishingRodItem(new Item.Properties().durability(256)));
+                new MetalFishingRodItem(new Item.Properties()
+                        .setId(ResourceKey.create(Registries.ITEM, JaymosPowers.id("metal_fishing_rod")))
+                        .durability(256)));
         FishingPayloads.register();
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -247,6 +251,7 @@ public final class FishingReal {
         }
         if (hook != null) {
             hook.discard();
+            player.fishing = null;
         }
     }
 
@@ -277,6 +282,11 @@ public final class FishingReal {
     /** True while the player's main hand holds the metal fishing rod. */
     public static boolean isMetalRod(ServerPlayer player) {
         return METAL_ROD != null && player.getItemInHand(InteractionHand.MAIN_HAND).is(METAL_ROD);
+    }
+
+    /** Whether {@code stack} is the metal fishing rod. */
+    public static boolean isMetalRodItem(ItemStack stack) {
+        return METAL_ROD != null && stack.is(METAL_ROD);
     }
 
     /** Whether a bite should happen for a hook at {@code (x, y, z)} in {@code level} (used by the mixin). */

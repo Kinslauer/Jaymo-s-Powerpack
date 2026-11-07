@@ -14,6 +14,7 @@ import net.minecraft.world.entity.animal.fish.TropicalFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -67,19 +68,32 @@ public abstract class FishingHookMixin {
             kind = com.jaymospowers.fishing.FishingReal.FISH_TROPICAL;
         }
         // a shark only comes up for a metal rod, in water deep enough for it
-        if (kind == com.jaymospowers.fishing.FishingReal.FISH_SHARK
-                && !com.jaymospowers.compat.KingdomsCompat.sharkDrawnIn((net.minecraft.server.level.ServerLevel) level, hook.getX(), hook.getY(), hook.getZ())) {
-            kind = com.jaymospowers.fishing.FishingReal.FISH_COD;
+        LivingEntity shark = null;
+        if (kind == com.jaymospowers.fishing.FishingReal.FISH_SHARK) {
+            shark = com.jaymospowers.compat.KingdomsCompat.sharkDrawnIn(
+                    (net.minecraft.server.level.ServerLevel) level, hook.getX(), hook.getY(), hook.getZ());
+            if (shark == null) {
+                kind = com.jaymospowers.fishing.FishingReal.FISH_COD;
+            }
         }
-        LivingEntity fish = switch (kind) {
-            case 0 -> new Cod((EntityType<? extends Cod>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("cod")).orElseThrow().value(), level);
-            case 1 -> new Salmon((EntityType<? extends Salmon>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("salmon")).orElseThrow().value(), level);
-            case 2 -> new Pufferfish((EntityType<? extends Pufferfish>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("pufferfish")).orElseThrow().value(), level);
-            default -> new TropicalFish((EntityType<? extends TropicalFish>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("tropical_fish")).orElseThrow().value(), level);
-        };
-        fish.setPos(new net.minecraft.world.phys.Vec3(hook.getX(), hook.getY(), hook.getZ()));
-        fish.setYRot(hook.getYRot());
-        fish.setXRot(hook.getXRot());
+        LivingEntity fish;
+        if (kind == com.jaymospowers.fishing.FishingReal.FISH_SHARK) {
+            // fight the shark itself, right at the hook
+            fish = shark;
+            fish.setPos(new net.minecraft.world.phys.Vec3(hook.getX(), hook.getY(), hook.getZ()));
+            fish.setYRot(hook.getYRot());
+            fish.setXRot(hook.getXRot());
+        } else {
+            fish = switch (kind) {
+                case 0 -> new Cod((EntityType<? extends Cod>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("cod")).orElseThrow().value(), level);
+                case 1 -> new Salmon((EntityType<? extends Salmon>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("salmon")).orElseThrow().value(), level);
+                case 2 -> new Pufferfish((EntityType<? extends Pufferfish>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("pufferfish")).orElseThrow().value(), level);
+                default -> new TropicalFish((EntityType<? extends TropicalFish>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("tropical_fish")).orElseThrow().value(), level);
+            };
+            fish.setPos(new net.minecraft.world.phys.Vec3(hook.getX(), hook.getY(), hook.getZ()));
+            fish.setYRot(hook.getYRot());
+            fish.setXRot(hook.getXRot());
+        }
         level.addFreshEntity(fish);
         FishingReal.startFight((net.minecraft.server.level.ServerPlayer) player, kind, fish, hook);
     }
@@ -100,5 +114,15 @@ public abstract class FishingHookMixin {
     @Inject(method = "catchingFish", at = @At("HEAD"), cancellable = true)
     private void onCatchingFish(BlockPos blockPos, CallbackInfo ci) {
         ci.cancel();
+    }
+
+    /** The metal rod counts as a fishing rod: don't discard a metal-rod hook just because the player isn't holding a vanilla rod. */
+    @Inject(method = "shouldStopFishing", at = @At("HEAD"), cancellable = true)
+    private void onShouldStopFishing(Player owner, CallbackInfoReturnable<Boolean> cir) {
+        if (FishingReal.isMetalRodItem(owner.getItemInHand(InteractionHand.MAIN_HAND))
+                || FishingReal.isMetalRodItem(owner.getItemInHand(InteractionHand.OFF_HAND))) {
+            cir.setReturnValue(false);
+            cir.cancel();
+        }
     }
 }
