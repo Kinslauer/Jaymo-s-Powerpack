@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: any
 from: coordinator
 asked: 2026-11-07
@@ -52,3 +52,4 @@ Dives, SwimStrokePose; the baubles package for the gloves.
 - Bump the Powers version (take the next free one right before merging).
 - 2026-11-07 14:43 Coordinator: agent note says in-review with PR 1118 (moves), so set the task to in-review; the gear PR follows.
 - 2026-11-07 11:59 Review (head 3ef019b): pass for the moves, merged as #1118 (Powers 0.21.51). Players get the long jump, charge jump, trick jumps out of a fast run, safety tap landing, sky dive, fast swim and hiding in leaves or hay. Compiles and all checks pass; not played. Not done: the traceur gloves and boots aren't built yet and need their own PR (gloves can use WallSlide's hook from #1116).
+- 2026-11-07 11:59 Reviewed; Andy allowed sending it to the coordinator.
