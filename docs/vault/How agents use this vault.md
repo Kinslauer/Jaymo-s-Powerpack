@@ -9,6 +9,8 @@ It has two kinds of notes:
   worktree's copy. That way the [[Board]] shows an agent the moment it starts, and Andy has one place to look.
   - `Live/Agents/`: one note per agent. Finished ones move to `Live/Agents/Done/`.
   - `Live/Decisions.md`: the decision log ([[Decisions]]).
+  - `Live/Open PRs.md`: every open PR ([[Open PRs]]), written by `python3 tools/vault_prs.py`. Run it after you open
+    or merge a PR, and the project thread runs it whenever it reviews.
 
 Writing into `Live/` is the **only** thing an agent does in the main checkout: no git commands there, no other files.
 Cloud sessions can't reach this PC; they put the same details in their PR body instead.

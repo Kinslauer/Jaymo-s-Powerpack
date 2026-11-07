@@ -30,10 +30,8 @@ Full detail: the ends of the MODLOGs, see [[Logs]].
 
 ## Open PRs
 
-- **#766** Add mesh_to_cubes: realistic meshes to Blockbench cube models (`claude/project-thread-2x3tva`, last touched
-  2026-10-31)
-
-Refresh with `gh api "repos/Kinslauer/Jaymo-s-Powerpack/pulls?state=open"` (GraphQL is blocked; use REST).
+See [[Open PRs]]: every open PR with its branch, last update, checks and the agent working on it. It's a live note,
+so refresh it with `python3 tools/vault_prs.py` (from any worktree; the project thread runs it whenever it reviews).
 
 ## What's next
 
