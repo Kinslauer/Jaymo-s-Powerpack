@@ -52,6 +52,8 @@ public final class FreerunClient {
 	private static final double HOP_DRAG_SUM = 6.9;
 	/** (review) Ticks a slide waits for the server's go-ahead before giving up. */
 	private static final int SLIDE_CONFIRM_TICKS = 10;
+	/** (ParCool track A) Moving along a bar: the leading hand is this far ahead of the body's middle (blocks). */
+	private static final double BAR_HAND_AHEAD = 0.25;
 
 	private static int kind = Freerun.NONE;
 	/** The wall's side for a cling or a run (null otherwise). */
@@ -93,6 +95,7 @@ public final class FreerunClient {
 
 	public static void init() {
 		ClientTickEvents.END_CLIENT_TICK.register(FreerunClient::tick);
+		WallSlideClient.init();
 	}
 
 	/**
@@ -854,7 +857,67 @@ public final class FreerunClient {
 			cooldown = LET_GO_COOLDOWN;
 			player.setDeltaMovement(dir.scale(Freerun.RELEASE_FORWARD).add(0.0, Freerun.RELEASE_UP, 0.0));
 			ClientPlayNetworking.send(new Freerun.Move(Freerun.RELEASE, -1, BlockPos.ZERO));
+			return;
 		}
+		if (confirmed && ticks >= BAR_SETTLE_TICKS) {
+			moveAlongBar(player, input);
+		}
+	}
+
+	/**
+	 * (ParCool track A) Andy's pick: "moving along chains and bars". Hanging from a bar, the movement keys (W/S, or A/D
+	 * across) move you hand over hand along the run of bars, chains or fences ({@link Freerun#BAR_MOVE_SPEED}): the way
+	 * the keys point most, else the other way they point, as far as the run goes on at the same height with room for
+	 * the body under it. The server hears each new bar taken hold of ({@link Freerun#BAR_MOVE}).
+	 */
+	private static void moveAlongBar(LocalPlayer player, Input input) {
+		Vec3 keys = keysDirection(player, input, true);
+		if (keys == Vec3.ZERO) {
+			return;
+		}
+		Direction alongX = keys.x > 0.0 ? Direction.EAST : Direction.WEST, alongZ = keys.z > 0.0 ? Direction.SOUTH : Direction.NORTH;
+		boolean xFirst = Math.abs(keys.x) >= Math.abs(keys.z);
+		double second = xFirst ? Math.abs(keys.z) : Math.abs(keys.x);
+		if (!stepAlongBar(player, xFirst ? alongX : alongZ) && second > 0.3) {
+			stepAlongBar(player, xFirst ? alongZ : alongX);
+		}
+	}
+
+	/** (ParCool track A) One step of {@link #moveAlongBar} toward {@code way}, or false where the run doesn't go on. */
+	private static boolean stepAlongBar(LocalPlayer player, Direction way) {
+		BlockPos at = bar;
+		if (at == null) {
+			return false;
+		}
+		net.minecraft.world.level.Level level = player.level();
+		double bottom = Freerun.barBottom(level, at);
+		double speed = Freerun.BAR_MOVE_SPEED;
+		// along the run, the hands drawn in to the middle of the bar across it (after turning a corner of the run)
+		double x = way.getAxis() == Direction.Axis.X ? hangAt.x + way.getStepX() * speed : approach(hangAt.x, at.getX() + 0.5, speed);
+		double z = way.getAxis() == Direction.Axis.Z ? hangAt.z + way.getStepZ() * speed : approach(hangAt.z, at.getZ() + 0.5, speed);
+		Vec3 next = new Vec3(x, hangAt.y, z);
+		// the leading hand must still be on the run, and the body must fit under it
+		BlockPos ahead = BlockPos.containing(x + way.getStepX() * BAR_HAND_AHEAD, at.getY(), z + way.getStepZ() * BAR_HAND_AHEAD);
+		BlockPos under = BlockPos.containing(x, at.getY(), z);
+		for (BlockPos pos : new BlockPos[] {ahead, under}) {
+			if (!pos.equals(at) && !(Math.abs(Freerun.barBottom(level, pos) - bottom) <= Freerun.BAR_RUN_SLACK)) {
+				return false;
+			}
+		}
+		AABB body = player.getDimensions(net.minecraft.world.entity.Pose.STANDING).makeBoundingBox(next).deflate(1.0E-7);
+		if (!level.noCollision(player, body)) {
+			return false;
+		}
+		hangAt = next;
+		if (!under.equals(at)) {
+			bar = under.immutable();
+			ClientPlayNetworking.send(new Freerun.Move(Freerun.BAR_MOVE, -1, bar));
+		}
+		return true;
+	}
+
+	private static double approach(double from, double to, double step) {
+		return from + Mth.clamp(to - from, -step, step);
 	}
 
 	/** In place of the player's travel while hanging from a bar: settle under it and stay there. */

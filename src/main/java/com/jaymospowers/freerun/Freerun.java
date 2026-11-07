@@ -76,7 +76,10 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Leap of Faith</b>: from any height, landing in a hay bale, water or leaves ({@link #SOFT_LANDING}) takes no
  * fall damage (Andy's one exception to "fall damage always applies"); falling looking down, you dive head first.</li>
  * <li><b>Bar Swing</b>: jump at a fence, iron bar or chain lying above your head to catch it and hang, swinging; Jump
- * lets go forward ({@link #RELEASE_FORWARD}, {@link #RELEASE_UP}), Sneak drops.</li>
+ * lets go forward ({@link #RELEASE_FORWARD}, {@link #RELEASE_UP}), Sneak drops. (ParCool track A) The movement keys move
+ * you hand over hand along a run of bars ({@link #BAR_MOVE}, {@link #BAR_MOVE_SPEED}).</li>
+ * <li>(ParCool track A) <b>Wall slide</b> (everyone): falling by a wall, hold right-click with an empty hand to press
+ * against it and slow the fall ({@link WallSlide}).</li>
  * <li><b>Wall Runner</b> (2 ranks): a sprinting jump alongside a wall runs you along it for {@link #RUN_TICKS}, light
  * on gravity; then you drop, or kick off it with Freerunner 2.</li>
  * </ul>
@@ -136,6 +139,8 @@ public final class Freerun {
 	/** (review) How near (squared, from the eyes to the bar's middle) a bar must be to catch it and to stay on it. */
 	static final double BAR_REACH_SQR = 9.0;
 	public static final double RELEASE_FORWARD = 0.9, RELEASE_UP = 0.5;
+	/** (ParCool track A) Bar Swing: moving hand over hand along the bar run (blocks/tick), and how far (blocks) the bars' undersides may differ and still be one run. */
+	public static final double BAR_MOVE_SPEED = 0.06, BAR_RUN_SLACK = 0.1;
 	/** What can be swung from (horizontal chains only). */
 	public static final TagKey<Block> BARS = TagKey.create(Registries.BLOCK, JaymosPowers.id("freerun_bars"));
 
@@ -184,7 +189,9 @@ public final class Freerun {
 
 	/** Moves (as in {@link Move}): the first four are {@link WebParkour}'s own kinds, so its pose draws them. */
 	public static final int NONE = 0, VAULT = WebParkour.VAULT, CLING = WebParkour.CLING, WALL_JUMP = WebParkour.WALL_JUMP, BAR = 5, WALL_RUN = 6,
-		RELEASE = 7, UP_RUN = 8, SLIDE = 9, POLE = 10, HOP = 11;
+		RELEASE = 7, UP_RUN = 8, SLIDE = 9, POLE = 10, HOP = 11,
+		/** (ParCool track A) Hanging from a bar, the hands moved along the run onto the bar at {@link Move#pos}. */
+		BAR_MOVE = 12;
 
 	/** The perks, in the order they're packed into {@link #PERKS} (4 bits each), with their Kingdoms keys. */
 	public enum Perk {
@@ -243,7 +250,8 @@ public final class Freerun {
 	private static final class Doing {
 		final int kind;
 				int face;
-		final BlockPos pos;
+		/** The bar held ((ParCool track A) it changes as the hands move along the run). */
+		BlockPos pos;
 		int ticks;
 		double lastY;
 		/** (review) Where it began (height), and ticks the wall has been missing (a corner is crossed in a few). */
@@ -285,6 +293,7 @@ public final class Freerun {
 		});
 		LandingRoll.init();
 		AirFlip.init();
+		WallSlide.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
 		FastRun.init();
 		Slide.init();
@@ -539,6 +548,17 @@ public final class Freerun {
 			return;
 		}
 		ServerLevel level = player.level();
+		if (kind == BAR_MOVE) {
+			// (ParCool track A) along the run: the next bar, next to the last and at the same height, in reach
+			BlockPos next = move.pos();
+			if (current != null && current.kind == BAR && next.distManhattan(current.pos) == 1
+				&& player.getEyePosition().distanceToSqr(Vec3.atCenterOf(next)) < BAR_REACH_SQR
+				&& Math.abs(barBottom(level, next) - barBottom(level, current.pos)) <= BAR_RUN_SLACK) {
+				current.pos = next.immutable();
+				player.resetFallDistance();
+			}
+			return;
+		}
 		if (kind == RELEASE) {
 			if (current != null && current.kind == BAR) {
 				player.causeFoodExhaustion(MOVE_EXHAUSTION);
