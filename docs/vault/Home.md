@@ -30,8 +30,9 @@ Full detail: the ends of the MODLOGs, see [[Logs]].
 
 ## Open PRs
 
-See [[Open PRs]]: every open PR with its branch, last update, checks and the agent working on it. It's a live note,
-so refresh it with `python3 tools/vault_prs.py` (from any worktree; the project thread runs it whenever it reviews).
+See [[Open PRs]]: every open PR with its branch, last update, checks and the agent working on it. It refreshes by
+itself (at most once a minute) when a Claude session starts, when an agent edits a vault note, and when you open the
+vault with `tools/open-vault.bat`. To refresh by hand: `python tools/vault_prs.py`.
 
 ## What's next
 
