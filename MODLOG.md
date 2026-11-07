@@ -1472,3 +1472,28 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   `Wounds.restPart`/`restedHealth`; `BleedOut` pours a resting player's blood by `DownedStruggle.bleedingCuts`. `DownedKeysMixin` keeps `key.use` live with the crosshair on a block. Spooky Doors
   26.3.0.2 joins `packModsNoCf` (needs Balm, already in the pack).
 - Not built locally (no JDK 25 here; GitHub's PR checks build it); not played.
+
+## 0.21.50 (2026-11-07): who bleeds what, settled; blood on the ground lies still; no redstone look
+- Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the magmavein
+  stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too. just no
+  redstone textures ... and the blood that falls on the ground shouldnt randomly sputter or splat or move unless directly
+  interacted with. right now you will see it erupting from trails on the ground like it was bubbling or something."
+- **Kinds of blood**: every zombie (zombies, husks, drowned, zombie villagers, zombified piglins, zoglins, anything in
+  `#minecraft:zombies` or `#c:zombies`, and any mod's mob that is a `Zombie` in code) bleeds dark, rotten blood
+  (`BladeBlood.ROTTEN`, tag `blood/rotten`). Magma cubes really bleed the glowing, cooling magma now: they were in both
+  `blood/dark` and `blood/magma` and dark won. New colours for Kingdoms' heritages: `GOLD` (Divine), `SAP` (Verdant).
+- **Corpses bleed the body's own blood**: a new body keeps the blood it died with (`BleedOut.CORPSE_OWN`, saved), so an
+  Emberborn's corpse pools magma, a zombie's rotten blood, and a bloodless heritage's corpse doesn't bleed when hit, blown
+  apart, dragged or hung (`BladeBlood.bleeds/color(Entity, EntityType)`).
+- **Blood on the ground lies still**: pools, stains, footprints and runs down walls no longer do anything by themselves.
+  Gone: a magma pool's lava pops and smoke (the "bubbling"), a wall run dripping off its end, and pools falling/sliding
+  under gravity. They change only when something touches them (stepped in, dragged through, washed, drawn up by blood magic).
+- **No redstone dust for blood**: the Z-Fighter's blood-for-ki spills blood flecks, not red dust.
+- **Skeletons don't bleed when cut apart** (Andy: "skeletons should not bleed"): losing a head or limb used to throw gore
+  and bleed from the stump whatever the body; a body with no blood now loses it in chips of bone, with no stump bleed, and
+  its severed head or limb never drips (`SeveredPart` keeps the body's blood).
+- **A stump spurts** (Andy: "the decapitation bleed effect looks just like lava drips, it can stay but the particle should
+  be red, and it should shoot multiple at once, in larger spurts as they fall if they do, less if they stay standing"): the
+  vanilla lava drip is gone; every few ticks a fresh stump throws several drops of the body's own blood out of it (up from a
+  neck), 2 small ones while the body stands, 5 bigger, faster ones once it has fallen (`Dismember.spurt`, tuning `SPURT_*`).
+- Built; not played.

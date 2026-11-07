@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>a drop that flies into a wall splats on it ({@link #splat}), a bigger one with a run trickling down from it;</li>
  * <li>a pool that spreads over the edge of a drop-off pours over it ({@link #edges}): a run down the side, growing as it
- * runs, as far as the wall goes (a block or two at most), dripping off the bottom for a while.</li>
+ * runs, as far as the wall goes (a block or two at most).</li>
  * </ul>
  * It lies as long as the pool that fed it (a lasting stain's runs as long as the stain), darkens as it dries, and fades.
  * Magma blood glows and cools here as it does on the ground.
@@ -37,8 +37,6 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	static final float MOST_RUN = 2.0F;
 	/** How long a passing mark lies (ticks), the last of them fading. */
 	static final int LIFE = 1400, FADE = 150;
-	/** A run drips off its end: once every this many ticks (by chance), this many times at most. */
-	static final int DRIP_EVERY = 14, DRIPS = 4;
 	/** A drop splats on a wall this many times its size; a splat this big or more starts a run (by chance). */
 	static final float SPLAT_GROWTH = 2.6F, RUNS_FROM = 0.3F;
 	/** How far off the face it's drawn (against flicker). */
@@ -55,7 +53,6 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	private final @Nullable TextureAtlasSprite runSprite;
 	/** Where it starts on the face (its top: the splat's middle, or the edge a run pours over). */
 	private final double ax, ay, az;
-	private int drips;
 	/** (0.20.54) When the rain started washing it off (it fades from then), or -1. */
 	private int washFrom = -1;
 
@@ -80,7 +77,6 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 		SpriteSet puddles = BloodClient.puddleSprites(), runs = BloodClient.runSprites();
 		this.splatSprite = splat > 0.0F && puddles != null ? puddles.get(this.random) : null;
 		this.runSprite = run > 0.0F && runs != null ? runs.get(this.random) : null;
-		this.drips = run > 0.0F ? DRIPS : 0;
 	}
 
 	@Override
@@ -98,17 +94,7 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 			this.lifetime = this.age + BloodPuddle.RAIN_WASH;
 			this.washFrom = this.age;
 		}
-		// the run, grown to its length, drips off its end for a while
-		if (this.drips > 0 && this.age >= RUN_TICKS && this.age < RUN_TICKS + DRIP_EVERY * DRIPS * 2 && this.age % DRIP_EVERY == 0
-			&& this.random.nextFloat() < 0.6F) {
-			this.drips--;
-			Vec3 end = this.point(0.0, -this.run, 0.03);
-			BloodClient.drip(this.level, end.x, end.y - 0.05, end.z, this.color, 0.3F + this.runWidth);
-		}
-		if (this.magma && this.age < BloodParticles.MAGMA_COOLS / 2 && this.random.nextFloat() < 0.02F) {
-			Vec3 at = this.point(0.0, -this.run * 0.5, 0.05);
-			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, at.x, at.y, at.z, 0.0, 0.02, 0.0);
-		}
+		// (0.21.50) Andy: blood that has landed stays still: a run no longer drips off its end, nor magma smokes, by itself
 	}
 
 	/** A point on the face: {@code across} along it, {@code down} from the top (negative is down), {@code out} off it. */

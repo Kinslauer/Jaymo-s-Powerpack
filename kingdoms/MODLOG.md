@@ -10196,3 +10196,13 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
   heritage bleed as before. Villagers of those heritages too.
 - `PowersCompat.heritageBlood` adds a rule to Powers' `BladeBlood.BLOOD`, from `Heritage.register`.
 - Not built locally (no JDK 25 here); not played.
+
+## 0.7.646 (2026-11-07): Magmavein, zombies, Endborn, Divine and Verdant blood; no redstone-dust blood
+- Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the magmavein
+  stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too. just no
+  redstone textures". With Jaymo's Powers 0.21.50 (`PowersCompat.heritageBlood`): a Magmavein Stoneborn bleeds the
+  magma cubes' glowing magma that cools to a crust (other Stoneborn stay bloodless), as Emberborn do; a Zombie Hollow
+  bleeds dark, rotten blood; Endborn ender-purple; Divine gold; Verdant green sap. Their corpses pool the same blood.
+- Blood magic's motes, a Nightborn vampire's blood mist and a Blood Elf's motes are Powers' blood flecks in their own
+  colour, not red dust (`PowersCompat.blood` now passes the colour on, through Powers' `BloodParticles.fleck`).
+- Built; not played.

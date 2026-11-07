@@ -200,7 +200,7 @@ public final class BloodBlasts {
 				float wind = (held - TAP_TICKS) / (float) (WINDUP - TAP_TICKS);
 				for (boolean left : new boolean[] {false, true}) {
 					Vec3 p = palm(player, look, left);
-					level.sendParticles(Hemomancy.BLOOD_MOTE, p.x, p.y, p.z, 1 + (int) (wind * 2), 0.05, 0.05, 0.05, 0.0);
+					level.sendParticles(Hemomancy.bloodMote(), p.x, p.y, p.z, 1 + (int) (wind * 2), 0.05, 0.05, 0.05, 0.0);
 				}
 				if (held == TAP_TICKS) {
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.8F, 1.4F);
@@ -211,7 +211,7 @@ public final class BloodBlasts {
 		long firing = held - WINDUP;
 		boolean next = (firing / EVERY) % 2 == 0;
 		Vec3 forming = palm(player, look, next);
-		level.sendParticles(Hemomancy.BLOOD_MOTE, forming.x, forming.y, forming.z, 1, 0.04, 0.04, 0.04, 0.0);
+		level.sendParticles(Hemomancy.bloodMote(), forming.x, forming.y, forming.z, 1, 0.04, 0.04, 0.04, 0.0);
 		if (firing % EVERY != 0) {
 			return;
 		}
@@ -328,7 +328,7 @@ public final class BloodBlasts {
 		Vec3 step = end.subtract(from);
 		for (int i = 0; i < 3; i++) {
 			Vec3 p = from.add(step.scale(i / 3.0));
-			level.sendParticles(Hemomancy.BLOOD_MOTE, true, false, p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0.0);
+			level.sendParticles(Hemomancy.bloodMote(), true, false, p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0.0);
 		}
 		level.sendParticles(Hemomancy.DARK_MOTE, true, false, end.x, end.y, end.z, 1, 0.02, 0.02, 0.02, 0.0);
 		if (block.getType() != HitResult.Type.MISS) {
@@ -343,7 +343,7 @@ public final class BloodBlasts {
 
 	/** A blast bursting at {@code at}: a splash, and a stain on the ground under it. */
 	private static void burst(ServerLevel level, Vec3 at) {
-		level.sendParticles(Hemomancy.BLOOD_MOTE, at.x, at.y, at.z, 8, 0.2, 0.2, 0.2, 0.05);
+		level.sendParticles(Hemomancy.bloodMote(), at.x, at.y, at.z, 8, 0.2, 0.2, 0.2, 0.05);
 		level.sendParticles(PowersCompat.blood(Hemomancy.CRIMSON, 1.0F), at.x, at.y, at.z, 4, 0.15, 0.15, 0.15, 0.1);
 		PowersCompat.stain(level, Hemomancy.CRIMSON, at.x, at.y + 0.5, at.z, BLAST_STAIN);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.6F, 0.8F);

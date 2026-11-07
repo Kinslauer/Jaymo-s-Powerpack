@@ -144,14 +144,6 @@ public final class BloodClient {
 		return runs;
 	}
 
-	/** (0.20.41) A drop of {@code color} this big falling straight down from here (off the end of a run on a wall). */
-	static void drip(ClientLevel level, double x, double y, double z, int color, float scale) {
-		if (drops != null) {
-			net.minecraft.client.Minecraft.getInstance().particleEngine.add(new BloodDrop(level, x, y, z, 0.0, 0.0, 0.0, drops, 4, 32, false, color, scale * 0.5F,
-				true).drip());
-		}
-	}
-
 	/** A drop kind: a sheet of {@code frames} frames, each {@code size} pixels, that turns to its flight if {@code directional}. */
 	private static void kind(ParticleProviderRegistry registry, SimpleParticleType type, int frames, int size, boolean directional) {
 		registry.register(type, sprites -> {

@@ -191,7 +191,8 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	private static final Identifier BLOOD_EYES = JaymosKingdoms.id("textures/entity/heritage/nightborn_blood_eyes.png");
 	static final int BLOOD_EYE_COLOR = 0xFFFFB8C0;
 	private static final Map<Identifier, Identifier> BLOOD_EYES_BY_SKIN = new HashMap<>();
-	private static final DustParticleOptions BLOOD_MIST = new DustParticleOptions(0x7A0A12, 0.9F);
+	/** (0.7.646) Blood mist is Powers' blood fleck (Andy: "no redstone textures"), dust only without Powers. */
+	static final int BLOOD_MIST = 0x7A0A12;
 
 	/** (0.7.80) A sneaking Sylvan's glow, dimmed to this (opaque ARGB tint; out entirely for a Thief or with a Stealth perk). */
 	static final int SYLVAN_SNEAK_GLOW = 0xFF4A4A4A;
@@ -698,7 +699,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 				case NIGHTBORN -> {
 					if (level.isDarkOutside()) {
 						// (0.7.88) a Nightborn vampire's wisps are blood mist
-						level.addParticle(NightbornBlood.starlit(player) ? BLOOD_MIST : ParticleTypes.SMOKE, x, y, z, 0.0, 0.02, 0.0);
+						level.addParticle(NightbornBlood.starlit(player) ? com.jaymoskingdoms.PowersCompat.blood(BLOOD_MIST, 0.9F) : ParticleTypes.SMOKE, x, y, z, 0.0, 0.02, 0.0);
 					}
 				}
 				default -> {

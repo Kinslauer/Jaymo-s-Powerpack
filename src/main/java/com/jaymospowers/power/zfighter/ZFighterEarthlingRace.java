@@ -167,7 +167,8 @@ public final class ZFighterEarthlingRace {
 		player.setHealth(player.getHealth() - hp);
 		live.ki += hp * BLOOD_KI_PER_HP;
 		ServerLevel level = player.level();
-		level.sendParticles(new DustParticleOptions(BLOOD_COLOR, 1.2F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.3, 0.6, 0.3, 0.05);
+		// (0.21.50) blood flecks, not red dust (Andy: "no redstone textures")
+		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BLOOD_COLOR, 1.2F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.3, 0.6, 0.3, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 0.5F, 0.8F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_blood_ki", Math.round(hp)).withStyle(ChatFormatting.DARK_RED));
 		return true;

@@ -558,7 +558,7 @@ public final class Spellcraft {
 			case "ice" -> ParticleTypes.SNOWFLAKE;
 			case "restoration" -> Restoration.GOLD_MOTE;
 			case "death" -> Necromancy.VIOLET_MOTE;
-			case "blood" -> Hemomancy.BLOOD_MOTE;
+			case "blood" -> Hemomancy.bloodMote();
 			default -> ParticleTypes.ENCHANT;
 		};
 	}
