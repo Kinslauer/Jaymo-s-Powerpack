@@ -17,7 +17,8 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 
 ### 2026-11-07: the hooded cloak is only for the RPG Series archer hoods
 - **Decided:** "Just the RPG SERIES archer hoods." No cloak for the soothsayer or ichorcloth hoods: "this should not
-  exist, i never asked for that".
+  exist, i never asked for that". Every Archers hood tier gets one: "they all get hoods matching their respective
+  desings" (each tier's cloak matches that hood's design).
 - **Applies to:** Powers, `HoodedCloak`, `HoodedCloakLayer`, `tags/item/cloak_hoods.json`; PR #1104.
 - **Agent:** [[Agents/handbook-hermes-rules|handbook-hermes-rules]]
 
