@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: parcool-traceur-gear
 branch: claude/parcool-traceur-gear
 with:
-pr:
+pr: 1122
 mods: Powers
 versions: 0.21.54
 started: 2026-11-07
