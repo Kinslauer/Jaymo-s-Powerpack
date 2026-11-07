@@ -1,25 +1,36 @@
 # Dashboard — all threads at a glance
 
-This is the central view for the vault. Open it in one pane, then open each active thread in its own split (see [Split-view](Split-view.md)).
+Central hub for every PR thread. The side menu sorts threads by status; click any thread to open it.
+
+## Side menu
+
+### In progress
+- [ ] None yet
+
+### Idle
+- [ ] None yet
+
+### Waiting for review
+- [ ] None yet
+
+### Resolved
+- [x] [#1096 Sora's Dagger 2.0 models](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1096) — merged
+- [x] [#1097 Up to 3 weapons + tool belt bauble](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1097) — merged
+- [x] [#1098 Hollow blight / vampire bite](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1098) — merged
+- [x] [#1099 Sora's Dagger stages fix](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1099) — merged
+- [ ] [#1101 Obsidian vault for agent context](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1101) — open, awaiting merge
 
 ## Active agents
 
 See [Agents.md](Agents.md) for who's working on what and who's idle.
 
-## Active projects (PR threads)
-
-| Project | Status | PR | Notes |
-|---------|--------|-----|-------|
-| Obsidian vault | open | [#1101](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1101) | awaiting merge |
-
 ## Shared context
 
 - [Context.md](Context.md) — build rules, versions, standing rulings, open issues
-- [README.md](README.md) — how to use this vault
 
 ## How to add a thread
 
 1. Create a new note under `Projects/` (use the agent task template)
-2. Add a row to this table
+2. Add it to the right status bucket above
 3. Update `Agents.md` with the agent claiming it
-4. Open the PR; when it merges, mark the row "done" and archive the note
+4. Open the PR; when it merges, move it to Resolved

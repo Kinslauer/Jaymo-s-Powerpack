@@ -5,15 +5,10 @@ Open this folder as an Obsidian vault. Plain markdown, no plugins.
 | File | Purpose |
 |------|---------|
 | `README.md` | This index |
-| `Dashboard.md` | Central view of all active agent threads |
-| `Split-view.md` | How to see multiple threads side by side |
+| `Dashboard.md` | Central hub — side menu sorts PR threads by status (in progress / idle / waiting for review / resolved) |
 | `Context.md` | Build rules, versions, standing rulings. Read first. |
 | `Agents.md` | Claim work: name, task, status, PR. |
 | `Projects/` | One note per active task or PR thread. |
-
-## See every thread at once
-
-Open `Dashboard.md` in one pane, then open each active project note under `Projects/` in its own split (`Ctrl`+`click` or right-click → **"Open in new split"**). See [Split-view.md](Split-view.md) for the full shortcuts.
 
 ## How agents work
 
