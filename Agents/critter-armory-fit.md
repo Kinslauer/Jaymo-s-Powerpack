@@ -1,5 +1,5 @@
 ---
-status: running
+status: blocked
 task: critter-armory-fit
 branch: claude/critter-armory-fit
 with:
@@ -22,7 +22,23 @@ owns:
 - Patch and build-check
 
 ## Notes
-- Cause not known yet (from task)
+**Investigation findings:**
+- Critter Armory 0.6.5 added in Powers 0.20.85 (MODLOG line 683-689), shipped unchanged, never play-tested
+- Critter Armory uses mixins on PigRenderer/SheepRenderer (adds PigArmorLayer/SheepArmorLayer), HorseMixin (entity class), EquipmentLayerRendererMixin
+- PigArmorLayer/SheepArmorLayer bake their own armor models (PIG_ARMOR/SHEEP_ARMOR layers) and call CommonUtils.renderArmor(ResourceKey) to position armor relative to animal model parts
+- Our code does NOT modify animal model parts for pigs/sheep/horses:
+  - All Powers pose methods check for AvatarRenderState/HumanoidModel (player-only) — verified by reading each applyModel method
+  - Kitchen's Limp.apply only affects carried/dead entities
+  - Kitchen's CarryPose only affects AvatarRenderState/HumanoidModel (players)
+  - Kingdoms' AbstractHorseRendererMixin only extracts render state data
+  - No mixins on PigModel/SheepModel/HorseModel in our codebase
+  - No custom entity renderers for pig/sheep/horse in Powers or Kitchen
+- Fresh Animations (EMF resource pack, PackResourcePacks.java line 89) is installed and changes models of "most vanilla mobs" including pigs, sheep, horses — this changes model part positions, which would cause Critter Armory's armor (positioned relative to those parts) to be misplaced
+- Fresh Animations is NOT downloaded in the dev environment (not in modpack/resourcepacks/), so the issue can't be reproduced or tested here
+
+**Conclusion:** Our code is NOT the cause. Fresh Animations changing model geometry is the most likely cause. A code-side compat fix would need to know exactly what Fresh Animations changes to each model part, which can't be determined without inspecting the Fresh Animations resource pack.
+
+**Question for Andy:** Is Fresh Animations active in your game? Do you want us to create a compatibility fix for Critter Armory + Fresh Animations, or should we take a different approach (e.g., disabling Fresh Animations for pigs/sheep/horses)?
 
 ## Done
 What a player will see, and what wasn't tested.
