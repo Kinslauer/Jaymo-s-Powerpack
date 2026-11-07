@@ -37,3 +37,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Applies to:** Powers blood, Kitchen `KitchenBlood`.
 - **Agent:** [[blood-heritage]]
 - 2026-11-07: ParCool can't ship (Forge/NeoForge only, LGPL); Andy picked 12 of its moves to remake ourselves (not zipline, grapple, energy drink), split into Inbox tasks parcool-ledge-and-wall-moves and parcool-running-and-falling.
+- 2026-11-07: Andy: "the hermes reviews should be handled here": reviews of Hermes's Inbox PRs run in the Claude session "Train Hermes to work like the Claude threads" (vault-review skill), not in the coordinator thread.
