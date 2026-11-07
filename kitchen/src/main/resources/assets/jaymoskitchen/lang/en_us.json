@@ -975,5 +975,11 @@
 	"item.jaymoskitchen.harness_leather": "Harness Leather",
 	"item.jaymoskitchen.hardened_leather": "Hardened Leather",
 	"block.jaymoskitchen.hide_rug": "Hide Rug",
-	"item.jaymoskitchen.unbled": "Unbled: spoils in a few days"
-}
+	"item.jaymoskitchen.unbled": "Unbled: spoils in a few days",
+	  "item.jaymoskitchen.spit": "Spit",
+	  "block.jaymoskitchen.spit": "Spit",
+	  "message.jaymoskitchen.spit.on": "Sizzling on the spit.",
+	  "message.jaymoskitchen.spit.raw": "Still raw.",
+	  "message.jaymoskitchen.spit.done": "Cooked through.",
+	  "message.jaymoskitchen.spit.burnt": "Burnt to a crisp."
+	}

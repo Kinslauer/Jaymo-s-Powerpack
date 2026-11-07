@@ -2240,7 +2240,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** (0.4.32) Everything a proper job on a butcher block gets out of it (its loot and the extras), without dropping any of it. */
-	List<ItemStack> butcheredDrops() {
+	public List<ItemStack> butcheredDrops() {
 		List<ItemStack> drops = new ArrayList<>();
 		for (ItemStack stack : loot) {
 			drops.add(stack.copy());
@@ -2637,7 +2637,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** Puts a carried animal corpse back into the world. */
-	void restore(CorpseData data) {
+	public void restore(CorpseData data) {
 		List<ItemStack> stacks = new ArrayList<>();
 		for (ItemStackTemplate template : data.loot()) {
 			stacks.add(template.create());

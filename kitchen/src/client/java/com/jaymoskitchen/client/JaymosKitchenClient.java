@@ -73,6 +73,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		BlockEntityRenderers.register(com.jaymoskitchen.mill.power.Power.ROTOR_ENTITY, com.jaymoskitchen.client.mill.RotorRenderer::new);
 		// the potter's wheel turning
 		BlockEntityRenderers.register(com.jaymoskitchen.mill.machines.PowerMachines.POTTERS_WHEEL_ENTITY, com.jaymoskitchen.client.mill.PottersWheelRenderer::new);
+		// the spit: what's roasting on it, turning over the fire
+		BlockEntityRenderers.register(com.jaymoskitchen.cooking.spit.SpitBlock.ENTITY,
+			com.jaymoskitchen.client.spit.SpitBlockEntityRenderer::new);
 		// what's left on crafting tables
 		BlockEntityRenderers.register(Tables.CRAFTING_TABLE, CraftingTableRenderer::new);
 		// (0.5.28) what's lying on a cutting board
@@ -134,7 +137,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 				screen.onGrillUpdate(payload);
 			}
 		});
-	}
+		ClientPlayNetworking.registerGlobalReceiver(Payloads.SpitRip.TYPE, (payload, ctx) ->
+			com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos()));
+		}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static net.minecraft.client.renderer.entity.layers.RenderLayer stuckArrows(net.minecraft.client.renderer.entity.LivingEntityRenderer<?, ?, ?> renderer,
