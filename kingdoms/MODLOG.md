@@ -10170,3 +10170,10 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
 - Andy: "every meter should work this way". Let go of a lift, or let the mark step out of reach, and how deep your hand
   got is kept (`Pickpocket.Kept`): the next lift on the same mark carries on with the same length. Caught, done, or a
   different mark tried, it's forgotten. Compile-checked; not played.
+
+## 0.7.643 (2026-11-07): fewer water mobs at once (Powers 0.21.45)
+- Andy: "still too many mobs spawning at once in the water". Water caps cut: water ambients (fish) 20 to 6, water
+  creatures (squid, dolphins, sharks...) 5 to 3, underground water creatures 5 to 2 (`MonsterCapMixin`). Each natural
+  spawn of a water mob now brings at most 2 at once instead of a whole school (`WaterClusterMixin`, on
+  `Mob.getMaxSpawnClusterSize` in `NaturalSpawner.spawnCategoryForPosition`). Ship shark packs (`SharkWake`) unchanged.
+- Built, not played.
