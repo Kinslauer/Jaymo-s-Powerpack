@@ -1,10 +1,10 @@
 ---
-status: changes
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Check open work against Hermes fixes"
-claimed_by: hermes-a
+claimed_by: hermes-fixer
 pr: 1124
 suggested_owns:
   - src/client/java/com/jaymospowers/client/blood/
@@ -35,3 +35,4 @@ appearing/vanishing suddenly at distance or on spawn (pop-in):
 - 2026-11-07 14:11 Review (head 0b278a0): changes needed (second review). Fixed: the ground lift is small again (DECAL_LIFT 0.002), and the PR body now lists the audit (wall marks, weapon blood, BloodCoatLayer, ArmourGrimeMixin, wounds, Kitchen corpses). To do: 1) The flicker isn't fixed, only moved further away: the PR says '26.3's RenderType/RenderSetup have no polygon or depth offset', but 26.3 has depth bias in DepthStencilState (biasScale, biasConstant): RenderPipelines.java:1041-1047, LINES_DEPTH_BIAS = new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, true, 1.0F, 1.0F). With only a 0.002-block lift and no bias, ground decals z-fight again past a few dozen blocks as depth precision drops, which is Andy's complaint. Give the decal group (BloodDecals.TYPE) its own pipeline, copied from the translucent particle one with a depth bias, and draw puddles, footprints and wall marks through it; keep the lift tiny. 2) Kingdoms wasn't audited: the PR says Kingdoms Armory 3D pieces/WornModel are 'in a separate checkout, not inspectable', but kingdoms/ is in this same repo (kingdoms/src/client/java/.../WornModel, ArmorPoseLivingEntityRendererMixin, EmfWornPose). Check them like the rest and list the result. 3) Pop-in at draw distance isn't covered: the task asks decals to fade in and out instead of popping on spawn and at the edge of view distance; say where the puddles' and wall marks' draw distance is (constant, file:line) and fade them over the last few blocks instead of a hard cut, or show it already does. Then build, pr_checks, push, set status=in-review.
 - 2026-11-07 17:18 hermes-a's last run stopped before finishing; handed back as changes so it can carry on.
 - 2026-11-07 17:51 Review (head be8b269): changes needed (third review; last round's three items are fixed, these are new). Fixed: decals draw through their own pipeline with a depth bias (BloodDecals.DECAL_PIPELINE, same bias as vanilla's LINES_DEPTH_BIAS), the lift stays tiny, puddles and wall marks fade at the edge of view distance, and the audit covers Kingdoms' WornModel/EmfWornPose. To do: 1) Far-away puddles fade out for good: BloodPuddle.java:298 multiplies the particle's own alpha field (this.alpha) every frame while it's near the view-distance edge, and this.alpha is only recalculated in the final lifetime fade (:285), so a puddle seen from far drops toward 0 a little more each frame and stays faded when you walk back to it. Compute the distance fade into a local variable used only for this frame's colour (as BloodWallMark does with its local 'alpha'), and leave this.alpha alone. 2) No checks ran: the PR conflicts with master in gradle.properties (master is 0.21.54 now). Merge origin/master, keep 0.21.55 (still free), keep master's MODLOG and append only this entry. 3) BloodWallMark.java:36-37: the new DRAW_DISTANCE_FADE javadoc and constant start at column 0; indent with a tab like the lines around them. Then build, pr_checks, push, wait for green checks, set status=in-review.
+- 2026-11-07 17:52 hermes-fixer took over the review fixes from hermes-a.
