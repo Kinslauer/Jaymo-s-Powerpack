@@ -7,8 +7,9 @@
     python tools/vault_sync.py --hook       # for Claude Code hooks: only after vault edits, never fails
 
 Inbox tasks (each syncs first and after, so everyone sees the change at once):
-    python tools/vault_sync.py --claim hermes          # take the oldest task for hermes/any (or one sent back to
-                                                       # hermes with status: changes), print it; exit 3 if none
+    python tools/vault_sync.py --claim hermes-a        # take the oldest task sent back to hermes-a, else the oldest
+                                                       # open one for hermes-a, hermes or any; print it; exit 3 if none
+    python tools/vault_sync.py --claim hermes-fixer --fixes   # a fixer bot: the oldest task sent back to anyone
     python tools/vault_sync.py --tasks in-review       # task names with that status, one per line
     python tools/vault_sync.py --show <task>           # print a task
     python tools/vault_sync.py --set <task> status=in-review pr=1234   # change a task's properties
@@ -228,19 +229,30 @@ def tasks(live, wanted=None):
     return found
 
 
-def claim(live, agent):
-    """The oldest task sent back to this agent, else the oldest open one for it or for any. Exit 3 if none."""
-    mine = [t for t in tasks(live, ("changes",)) if t[2].get("claimed_by", "").startswith(agent)]
-    fresh = [t for t in tasks(live, ("open",)) if t[2].get("for", "any") in (agent, "any", "")]
-    pick = sorted(mine)[0] if mine else (sorted(fresh)[0] if fresh else None)
+def meant_for(props, agent):
+    """`for: hermes` covers every Hermes bot named hermes-<something>; `for: any` (or blank) covers everyone."""
+    target = props.get("for", "any") or "any"
+    return target in (agent, "any") or agent.startswith(target + "-")
+
+
+def claim(live, agent, fixes=False):
+    """The oldest task sent back to this agent, else the oldest open one meant for it. With fixes=True (a fixer
+    bot), the oldest task sent back to anyone, which it takes over. Exit 3 if none."""
+    back = tasks(live, ("changes",))
+    if fixes:
+        pick = sorted(back)[0] if back else None
+    else:
+        mine = [t for t in back if t[2].get("claimed_by", "") == agent]
+        fresh = [t for t in tasks(live, ("open",)) if meant_for(t[2], agent)]
+        pick = sorted(mine)[0] if mine else (sorted(fresh)[0] if fresh else None)
     if not pick:
         print("No task waiting.")
         sys.exit(3)
     path = task_path(live, pick[1])
-    if pick[2].get("status") == "open":
-        set_props(path, {"status": "claimed", "claimed_by": agent})
-    else:
-        set_props(path, {"status": "claimed"})
+    before = pick[2].get("claimed_by", "")
+    set_props(path, {"status": "claimed", "claimed_by": agent})
+    if fixes and before and before != agent:
+        add_note(path, f"{agent} took over the review fixes from {before}.")
     sync(live)
     if frontmatter(path).get("claimed_by") != agent:  # someone else won the race
         print("No task waiting.")
@@ -256,7 +268,8 @@ def task_command(live):
     rest = args[args.index(cmd) + 1:]
     sync(live)
     if cmd == "--claim":
-        return claim(live, rest[0] if rest else "any")
+        names = [a for a in rest if not a.startswith("--")]
+        return claim(live, names[0] if names else "any", fixes="--fixes" in rest)
     if cmd == "--tasks":
         for _, name, _ in sorted(tasks(live, tuple(rest) or None)):
             print(name)

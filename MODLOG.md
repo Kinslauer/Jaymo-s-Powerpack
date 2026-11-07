@@ -1531,6 +1531,24 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - The traceur gloves and boots come in a second PR.
 - Built; not played.
 
-## 0.21.52 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
+
+## 0.21.52 (2026-11-07): ParCool track A: ledge shimmy, castaway, wall slide, moving along bars
+- Andy's picks from the ParCool checklist ("Go to their tutorial on github and make a checklist of everything we dont have
+  yet"), track A. Our own code after ParCool's ideas; nothing of theirs copied.
+- **Ledge shimmy**: hanging from a ledge, A or D moves you sideways along the edge, slowly (`Ledge.SHIMMY_SPEED`), hand
+  over hand; it stops where the edge ends, steps up or down, or something is in the way (`Ledge.shimmySpot`). The server
+  hears each new block held (`Ledge.Shimmy`). Everyone sees the hands shuffle and the body rock (`LedgePose`).
+- **Castaway**: hanging, Jump + Back kicks you off backwards, out and up (`Ledge.CASTAWAY_OUT/UP`, like the vertical wall
+  run's eject). Back alone still lets go, after a 3-tick wait for the Jump (`CASTAWAY_WAIT_TICKS`).
+- **Wall slide** (`WallSlide`, `WallSlideClient`, everyone): falling beside or facing a wall, hold right-click with an
+  empty hand to press against it and slow the fall to 0.15 blocks/tick. Each tick on the wall sheds half a block of the
+  fall, and 1.5 s on it takes all of it. Ice, glass and leaves are too slippery. 1 Feather (half-icon) to press on, then
+  1 a second. Bare hands burn on a long slide (half a heart every 2 s) unless guarded: `WallSlide.addHandGuard(Predicate)`
+  is the hook for track B's traceur gloves.
+- **Moving along bars and chains**: in Bar Swing, the movement keys (W/S, or A/D across) move you hand over hand along a
+  run of bars, chains or fences at the same height (`Freerun.BAR_MOVE_SPEED`, `Freerun.BAR_MOVE`); Jump still swings off
+  The swing calms and the hands alternate while moving (`BarHangPose`).
+
+## 0.21.53 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
 - **Realistic fishing**: a bite now hooks a live fish entity (cod, salmon, pufferfish or tropical fish) instead of vanilla loot, and the player plays a tug-of-war to reel it in. Line tension rises as the fish fights; hold use to reel it down, or the line breaks at full tension. Stronger fish fight harder and break the line sooner. (`com.jaymospowers.fishing.FishingReal`, `FishingHookMixin`, `FishingRealClient`)
 - Built; not played.

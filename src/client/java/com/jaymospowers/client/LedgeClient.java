@@ -35,6 +35,9 @@ import org.jspecify.annotations.Nullable;
  * height". The crouch grab is the wheel's alone now ({@link #scrollGrab}): Sneak + a scroll down facing the block. Walking
  * into it, settling into the crouch or pushing forward from the knee no longer does it. It also climbs anything short of
  * two blocks: up onto it, or over a fence or wall.
+ *
+ * <p>(ParCool track A) Hanging, A or D shimmies along the edge ({@link #shimmy}), and Jump + Back is the castaway, a kick
+ * off backwards ({@link #castaway}); Back alone still lets go, after a short wait for the Jump.
  */
 public final class LedgeClient {
 	private enum Phase { NONE, HANG, CLIMB }
@@ -62,6 +65,8 @@ public final class LedgeClient {
 	private static final double DROP_MAX = 3.2;
 	private static int dropLeft;
 	private static double dropTop;
+	/** (ParCool track A) Ticks Back has been held while hanging (it waits {@link Ledge#CASTAWAY_WAIT_TICKS} for Jump). */
+	private static int backTicks;
 
 	private LedgeClient() {
 	}
@@ -124,7 +129,8 @@ public final class LedgeClient {
 			clickGrab(minecraft, minecraft.player);
 		}
 		// (0.14.3) and while both hands hold a wall or a bar (freerunning)
-		if (phase == Phase.NONE && !com.jaymospowers.client.freerun.FreerunClient.holding()) {
+		if (phase == Phase.NONE && !com.jaymospowers.client.freerun.FreerunClient.holding()
+			&& !com.jaymospowers.client.freerun.WallSlideClient.sliding()) {
 			return;
 		}
 		while (minecraft.options.keyAttack.consumeClick()) {
@@ -186,7 +192,7 @@ public final class LedgeClient {
 	}
 
 	/** (0.21.12) The crosshair is on something a right-click is for: a mob, or a block with a menu or a switch. */
-	private static boolean clickTaken(Minecraft minecraft, LocalPlayer player) {
+	public static boolean clickTaken(Minecraft minecraft, LocalPlayer player) {
 		net.minecraft.world.phys.HitResult hit = minecraft.hitResult;
 		if (hit instanceof net.minecraft.world.phys.EntityHitResult) {
 			return true;
@@ -278,6 +284,7 @@ public final class LedgeClient {
 		edge = false;
 		shiftLatch = false;
 		prone = false;
+		backTicks = 0;
 		spot = found;
 		phase = Phase.HANG;
 		ticks = 0;
@@ -310,10 +317,20 @@ public final class LedgeClient {
 			dropTop = top;
 			return;
 		}
+		// (ParCool track A) Back waits a moment for Jump (the castaway) before it lets go
+		backTicks = input.backward() ? backTicks + 1 : 0;
+		if (at != null && input.backward() && input.jump() && jumpReleased && !input.shift() && confirmed && ticks >= Ledge.GRAB_SETTLE_TICKS) {
+			castaway(player, at);
+			return;
+		}
 		float away = Math.abs(Mth.wrapDegrees(player.getYRot() - (at == null ? 0.0F : at.face().toYRot())));
-		if (at == null || !Ledge.canHang(player)	|| !Ledge.holdable(player.level(), at.pos()) || input.shift() && !shiftLatch || input.backward()
+		if (at == null || !Ledge.canHang(player)	|| !Ledge.holdable(player.level(), at.pos()) || input.shift() && !shiftLatch || backTicks > Ledge.CASTAWAY_WAIT_TICKS
 			|| away > Ledge.LOOK_AWAY_DEGREES || ticks > Ledge.HANG_MAX_TICKS || confirmed && !held || !confirmed && ticks > Ledge.CONFIRM_TICKS) {
 			letGo(player);
+			return;
+		}
+		if (input.backward()) {
+			// (waiting to see whether this is a castaway)
 			return;
 		}
 		if ((input.jump() && jumpReleased || autoClimb && confirmed && input.forward()) && ticks >= Ledge.GRAB_SETTLE_TICKS) {
@@ -324,6 +341,40 @@ public final class LedgeClient {
 				startClimb(player, at, true);
 			}
 		}
+		if (phase == Phase.HANG && confirmed && ticks >= Ledge.GRAB_SETTLE_TICKS && input.left() != input.right()) {
+			shimmy(player, at, input.left());
+		}
+	}
+
+	/**
+	 * (ParCool track A) Andy's pick from ParCool's moves: "ledge shimmy". A or D while hanging moves you hand over hand
+	 * along the edge ({@link Ledge#SHIMMY_SPEED}), stopping where it ends, steps up or down, or something is in the way
+	 * ({@link Ledge#shimmySpot}). The server hears each new block taken hold of.
+	 */
+	private static void shimmy(LocalPlayer player, Ledge.Spot at, boolean left) {
+		Direction side = left ? at.face().getCounterClockWise() : at.face().getClockWise();
+		Ledge.Spot next = Ledge.shimmySpot(player, at, side, Ledge.SHIMMY_SPEED);
+		if (next == null) {
+			return;
+		}
+		if (!next.pos().equals(at.pos())) {
+			ClientPlayNetworking.send(new Ledge.Shimmy(next.pos(), false));
+		}
+		spot = next;
+		// (the settle is over: travel holds the body at the new hang)
+		edge = false;
+	}
+
+	/**
+	 * (ParCool track A) Andy's pick: "castaway". Jump + Back while hanging kicks you off backwards, out from the wall
+	 * and up ({@link Ledge#CASTAWAY_OUT}, {@link Ledge#CASTAWAY_UP}), as the vertical wall run's eject does.
+	 */
+	private static void castaway(LocalPlayer player, Ledge.Spot at) {
+		Direction face = at.face();
+		ClientPlayNetworking.send(new Ledge.Shimmy(at.pos(), true));
+		end();
+		cooldown = Ledge.REGRAB_COOLDOWN_TICKS;
+		player.setDeltaMovement(-face.getStepX() * Ledge.CASTAWAY_OUT, Ledge.CASTAWAY_UP, -face.getStepZ() * Ledge.CASTAWAY_OUT);
 	}
 
 	private static void tickClimb(LocalPlayer player) {

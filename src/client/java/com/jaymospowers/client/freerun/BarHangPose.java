@@ -30,10 +30,15 @@ public final class BarHangPose {
 	static final float SWING_DEGREES = 22.0F, SWING_SPEED = 0.16F, EASE_IN = 12.0F;
 	/** The arms straight up (radians: straight up is -PI) and a little apart; the legs trailing the swing (radians). */
 	static final float ARM_UP = -3.0F, ARM_SPREAD = 0.15F, LEG_TRAIL = 0.35F;
+	/**
+	 * (ParCool track A) Moving along the bar, hand over hand: radians a tick of the hands' turn, how far each hand comes
+	 * off the bar (radians), and how much of the pendulum swing is left while moving (share).
+	 */
+	static final float SHUFFLE_RATE = 0.55F, SHUFFLE_LIFT = 0.5F, MOVING_SWING = 0.3F;
 	// ================================================================================================================
 
-	/** {@code time}: ticks, for the swing; {@code in}: how far the swing has built up (0-1). */
-	public record Hang(float time, float in) {
+	/** {@code time}: ticks, for the swing; {@code in}: how far the swing has built up (0-1); {@code moving}: (ParCool track A) going along the bar (0-1). */
+	public record Hang(float time, float in, float moving) {
 	}
 
 	public static final RenderStateDataKey<Hang> KEY = RenderStateDataKey.create(() -> "jaymospowers:freerun_bar_hang");
@@ -62,7 +67,10 @@ public final class BarHangPose {
 		state.bodyRot = Direction.from2DDataValue(face).toYRot();
 		state.yRot = Mth.clamp(Mth.wrapDegrees(head - state.bodyRot), -70.0F, 70.0F);
 		state.walkAnimationSpeed = 0.0F;
-		state.setData(KEY, new Hang(time - started, Mth.clamp((time - started) / EASE_IN, 0.0F, 1.0F)));
+		// (ParCool track A) moving along the run: read from the body's own motion, so it shows for everyone
+		double dx = entity.getX() - entity.xo, dz = entity.getZ() - entity.zo;
+		float moving = Mth.clamp((float)(Math.sqrt(dx * dx + dz * dz) / Freerun.BAR_MOVE_SPEED), 0.0F, 1.0F);
+		state.setData(KEY, new Hang(time - started, Mth.clamp((time - started) / EASE_IN, 0.0F, 1.0F), moving < 0.15F ? 0.0F : moving));
 	}
 
 	/** After the body faces its way: the pendulum swing from the hands. */
@@ -72,7 +80,7 @@ public final class BarHangPose {
 			return;
 		}
 		poseStack.translate(0.0F, HANDS, 0.0F);
-		poseStack.rotateDegrees(Axis.XP, Mth.sin(hang.time() * SWING_SPEED) * SWING_DEGREES * hang.in());
+		poseStack.rotateDegrees(Axis.XP, Mth.sin(hang.time() * SWING_SPEED) * SWING_DEGREES * hang.in() * Mth.lerp(hang.moving(), 1.0F, MOVING_SWING));
 		poseStack.translate(0.0F, -HANDS, 0.0F);
 	}
 
@@ -87,9 +95,11 @@ public final class BarHangPose {
 		}
 		h.body.xRot = 0.0F;
 		h.body.yRot = 0.0F;
-		float trail = -Mth.cos(hang.time() * SWING_SPEED) * LEG_TRAIL * hang.in();
-		set(h.rightArm, ARM_UP, 0.0F, ARM_SPREAD);
-		set(h.leftArm, ARM_UP, 0.0F, -ARM_SPREAD);
+		float trail = -Mth.cos(hang.time() * SWING_SPEED) * LEG_TRAIL * hang.in() * Mth.lerp(hang.moving(), 1.0F, MOVING_SWING);
+		// (ParCool track A) hand over hand: one hand off the bar and on, then the other
+		float hand = Mth.sin(hang.time() * SHUFFLE_RATE) * hang.moving();
+		set(h.rightArm, ARM_UP + Math.max(0.0F, hand) * SHUFFLE_LIFT, 0.0F, ARM_SPREAD);
+		set(h.leftArm, ARM_UP + Math.max(0.0F, -hand) * SHUFFLE_LIFT, 0.0F, -ARM_SPREAD);
 		set(h.rightLeg, trail + 0.05F, 0.0F, 0.03F);
 		set(h.leftLeg, trail - 0.05F, 0.0F, -0.03F);
 	}

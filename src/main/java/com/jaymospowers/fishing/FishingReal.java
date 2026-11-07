@@ -49,8 +49,10 @@ public final class FishingReal {
 
     /** Base ticks a hooked fish must wait before it can be caught (gives the player time to react). */
     private static final int MIN_FIGHT_TICKS = 60;
+    /** Progress a fresh fight starts with, so the fish cannot get away on the first tick. */
+    private static final float START_PROGRESS = 0.3F;
     /** Max fight duration before the line breaks from exhaustion (ticks). */
-    private static final int MAX_FIGHT_TICKS = 900;
+    private static final int MAX_FIGHT_TICKS = 1800;
     /** Tension added per tick while reeling, per unit of fish strength. */
     private static final float TENSION_REEL = 0.05F;
     /** Tension removed per tick while not reeling (the player eases off). */
@@ -58,13 +60,18 @@ public final class FishingReal {
     /** Progress added per tick while reeling at safe tension. */
     private static final float PROGRESS_REEL = 0.004F;
     /** Progress removed per tick while not reeling, per unit of fish strength (fish takes line back). */
-    private static final float PROGRESS_FISH_BACK = 0.003F;
+    private static final float PROGRESS_FISH_BACK = 0.0015F;
     /** Tension above which reeling makes no progress (the fish is pulling too hard). */
     private static final float TOO_TENSE = 0.8F;
     /** Tension at which the line snaps. */
     private static final float LINE_BREAK = 1.0F;
     /** Chance a hooked tick produces a bite (checked 4 times a second). */
     private static final float BITE_CHANCE = 0.03F;
+    /** How hard each fish kind fights (0..1): tension added per tick while reeling, line taken back while easing. */
+    private static final float STRENGTH_COD = 0.35F;
+    private static final float STRENGTH_SALMON = 0.5F;
+    private static final float STRENGTH_PUFFERFISH = 0.75F;
+    private static final float STRENGTH_TROPICAL = 0.6F;
 
     private FishingReal() {
     }
@@ -162,12 +169,12 @@ public final class FishingReal {
     /** Start a fight: hook a live fish on the player's line. Called by the mixin when a bite happens. */
     public static void startFight(ServerPlayer player, int fishKind, LivingEntity fish, FishingHook hook) {
         float strength = switch (fishKind) {
-            case 0 -> 0.35F; // cod: steady
-            case 1 -> 0.5F;  // salmon: stronger
-            case 2 -> 0.75F; // pufferfish: erratic, strong
-            default -> 0.6F; // tropical: varied
+            case 0 -> STRENGTH_COD; // cod: steady
+            case 1 -> STRENGTH_SALMON; // salmon: stronger
+            case 2 -> STRENGTH_PUFFERFISH; // pufferfish: erratic, strong
+            default -> STRENGTH_TROPICAL; // tropical: varied
         };
-        player.setAttached(FIGHTING, new FishFight(fishKind, strength, 0.0F, 0.0F, player.level().getGameTime()));
+        player.setAttached(FIGHTING, new FishFight(fishKind, strength, 0.0F, START_PROGRESS, player.level().getGameTime()));
         HOOKED.put(player.getUUID(), fish);
         HOOKS.put(player.getUUID(), hook);
         player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.fish_on").withStyle(net.minecraft.ChatFormatting.GOLD));
@@ -204,13 +211,17 @@ public final class FishingReal {
     }
 
     /** Keep the hooked fish near the hook/water, tugging against the line, so it is not dragged onto land. */
+    private static final double KEEP_NEAR_DIST = 3.0;
+    private static final double KEEP_NEAR_PULL = 0.12;
+    private static final double KEEP_NEAR_LIFT = 0.05;
+
     private static void keepNear(ServerPlayer player, LivingEntity fish, FishingHook hook) {
         double dx = hook.getX() - fish.getX();
         double dz = hook.getZ() - fish.getZ();
         double dist = Math.sqrt(dx * dx + dz * dz);
-        if (dist > 3.0) {
-            double pull = 0.12;
-            fish.setDeltaMovement(fish.getDeltaMovement().add(dx / dist * pull, 0.05, dz / dist * pull));
+        if (dist > KEEP_NEAR_DIST) {
+            double pull = KEEP_NEAR_PULL;
+            fish.setDeltaMovement(fish.getDeltaMovement().add(dx / dist * pull, KEEP_NEAR_LIFT, dz / dist * pull));
         }
     }
 
