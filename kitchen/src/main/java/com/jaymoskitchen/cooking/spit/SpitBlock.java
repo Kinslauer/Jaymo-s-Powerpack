@@ -45,6 +45,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.resources.ResourceKey;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
@@ -124,7 +125,12 @@ public class SpitBlock extends BaseEntityBlock {
 			if (data != null) {
 				CorpseEntity corpse = new CorpseEntity(Corpses.CORPSE, server);
 				corpse.restore(data);
-				return corpse.butcheredDrops();
+				java.util.List<ItemStack> drops = new java.util.ArrayList<>();
+				for (ItemStack drop : corpse.butcheredDrops()) {
+					Item cooked = cookedOf(drop.getItem());
+					drops.add(cooked == null ? drop : new ItemStack(cooked, drop.getCount()));
+				}
+				return drops;
 			}
 		}
 		Item cooked = cookedOf(stack.getItem());
@@ -165,9 +171,9 @@ public class SpitBlock extends BaseEntityBlock {
 		}
 		if (!held.isEmpty() && held.is(SpitBlockEntity.ROASTABLE) && be.items.get(0).isEmpty()) {
 			be.items.set(0, held.copyWithCount(1));
+			be.chunks = chunksFor(held);
 			held.shrink(1);
 			be.doneness = 0.0F;
-			be.chunks = chunksFor(held);
 			be.markUpdated();
 			server.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.on"));

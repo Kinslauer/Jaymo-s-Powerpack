@@ -73,7 +73,11 @@ public class SpitBlockEntityRenderer implements BlockEntityRenderer<SpitBlockEnt
 		}
 		state.turn = (be.getLevel().getGameTime() + partialTicks) * 2.0F % 360.0F;
 		state.tint = tintFor(be.doneness());
-		Long ripStart = RIP_START.remove(be.getBlockPos());
+		Long ripStart = RIP_START.get(be.getBlockPos());
+		if (ripStart != null && be.getLevel().getGameTime() - ripStart >= 8) {
+			RIP_START.remove(be.getBlockPos());
+			ripStart = null;
+		}
 		state.rip = ripStart == null ? 0 : (int) Mth.clamp(8 - (be.getLevel().getGameTime() - ripStart), 0, 8);
 		state.corpseEntity = null;
 		state.corpseState = null;

@@ -94,7 +94,7 @@ public class SpitBlockEntity extends BlockEntity {
 		items.clear();
 		net.minecraft.world.ContainerHelper.loadAllItems(input, items);
 		doneness = input.getFloatOr("Doneness", 0.0F);
-	chunks = input.getIntOr("Chunks", 0);
+		chunks = input.getIntOr("Chunks", 0);
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class SpitBlockEntity extends BlockEntity {
 		super.saveAdditional(output);
 		writeShared(output);
 		output.putFloat("Doneness", doneness);
-	output.putInt("Chunks", chunks);
+		output.putInt("Chunks", chunks);
 	}
 
 	private void writeShared(ValueOutput output) {
@@ -119,7 +119,7 @@ public class SpitBlockEntity extends BlockEntity {
 		TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
 		writeShared(output);
 		output.putFloat("Doneness", doneness);
-	output.putInt("Chunks", chunks);
+		output.putInt("Chunks", chunks);
 		return output.buildResult();
 	}
 }
