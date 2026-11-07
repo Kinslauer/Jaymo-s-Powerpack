@@ -9,6 +9,7 @@ import com.jaymospowers.freerun.moves.ChargeJump;
 import com.jaymospowers.freerun.moves.FastSwim;
 import com.jaymospowers.freerun.moves.Hiding;
 import com.jaymospowers.freerun.moves.LongJump;
+import com.jaymospowers.freerun.gear.TraceurBoots;
 import com.jaymospowers.freerun.moves.RunMoves;
 import com.jaymospowers.freerun.moves.SkyDive;
 import com.jaymospowers.freerun.moves.TrickJump;
@@ -155,7 +156,9 @@ public final class RunMovesClient {
 	private static void tickJumped(LocalPlayer player, long now) {
 		if (charge >= ChargeJump.MIN_TICKS && ChargeJump.allowed(player) && Feathers.canSpend(player, ChargeJump.COST_MIN)) {
 			Vec3 v = player.getDeltaMovement();
-			player.setDeltaMovement(v.x, ChargeJump.up(charge, v.y), v.z);
+			double up = ChargeJump.up(charge, v.y);
+			if (TraceurBoots.wears(player)) up += TraceurBoots.CHARGE_JUMP_BONUS;
+			player.setDeltaMovement(v.x, up, v.z);
 			send(RunMoves.CHARGE_JUMP, charge);
 			charge = 0;
 			return;
@@ -179,6 +182,7 @@ public final class RunMovesClient {
 		Vec3 v = player.getDeltaMovement();
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
 		double speed = Mth.clamp(v.horizontalDistance() * LongJump.BOOST, LongJump.MIN_SPEED, LongJump.MAX_SPEED);
+		if (TraceurBoots.wears(player)) speed *= 1.0 + TraceurBoots.LONG_JUMP_BONUS;
 		player.setDeltaMovement(-Mth.sin(yaw) * speed, LongJump.UP, Mth.cos(yaw) * speed);
 		longJumped = true;
 		keepSprint = LongJump.POSE_TICKS + 6;
