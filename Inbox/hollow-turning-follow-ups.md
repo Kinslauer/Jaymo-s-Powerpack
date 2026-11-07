@@ -8,7 +8,7 @@ claimed_by:
 pr: 
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/HollowBlight.java
-  - kingdoms/src/main/java/com/jaymoskingdoms/lang/parts/hollow-blight.json
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/hollow-blight.json
   - src/main/java/com/jaymospowers/core/wounds/Mortality.java
 ---
 # Hollow turning follow-ups
