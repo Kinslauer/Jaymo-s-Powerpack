@@ -25,6 +25,7 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
@@ -54,10 +55,9 @@ public final class HoodedCloakLayer {
 	static final float BARE_COLLAR_X = 0.82F, BARE_COLLAR_Z = 0.8F, BARE_MANTLE = 0.8F, BARE_BACK_Z = -0.9F;
 	// ================================================================================================================
 
-	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
 	static final int TEX_W = 64, TEX_H = 64;
-	/** On a player's render state: null for no cloak, else whether the hood is down. */
-	static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymospowers:hooded_cloak");
+	/** On a player's render state: null for no cloak, else the cloak texture to draw (per hood). */
+	static final RenderStateDataKey<Identifier> KEY = RenderStateDataKey.create(() -> "jaymospowers:hooded_cloak");
 
 	private HoodedCloakLayer() {
 	}
@@ -80,16 +80,32 @@ public final class HoodedCloakLayer {
 	/**
 	 * From the avatar renderer's extractRenderState: whether this player shows the cloak, and with the hood down the hood
 	 * comes off the head (the armour layer skips it). A costume over everything, or the hood hidden with the armour eye,
-	 * shows no cloak.
+	 * shows no cloak. Detects hoods in the vanilla head armour slot and picks the cloak texture by which hood is worn.
 	 */
 	public static void extract(Avatar entity, AvatarRenderState state) {
-		if (!(entity instanceof Player player) || !HoodedCloak.wears(player) || Costume.worn(player) != null
+		if (!(entity instanceof Player player) || Costume.worn(player) != null
 			|| HiddenArmor.hidden(player, EquipmentSlot.HEAD)) {
 			state.setData(KEY, null);
 			return;
 		}
+		Identifier texture = null;
+		ItemStack headStack = player.getItemBySlot(EquipmentSlot.HEAD);
+		if (headStack.is(HoodedCloak.HOODS)) {
+			switch (BuiltInRegistries.ITEM.getKey(headStack.getItem()).getPath()) {
+				case "ranger_armor_head" ->
+					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_ranger.png");
+				case "netherite_ranger_armor_head" ->
+					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_netherite_ranger.png");
+				default ->
+					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
+			}
+		}
+		if (texture == null) {
+			state.setData(KEY, null);
+			return;
+		}
 		boolean down = HoodedCloak.down(player);
-		state.setData(KEY, down);
+		state.setData(KEY, texture);
 		state.showCape = false;
 		if (down) {
 			state.headEquipment = ItemStack.EMPTY;
@@ -185,14 +201,16 @@ public final class HoodedCloakLayer {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-			Boolean down = state.getData(KEY);
-			if (down == null || state.isInvisible) {
+			Identifier texture = state.getData(KEY);
+			if (texture == null || state.isInvisible) {
 				return;
 			}
+			// hood down when the head slot was cleared in extract()
+			boolean down = state.headEquipment.isEmpty();
 			Model model = model(state.skin != null && state.skin.model() == PlayerModelType.SLIM);
 			model.setupAnim(state);
 			model.pose(state, down);
-			collector.submitModel(model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, -1,
+			collector.submitModel(model, state, poseStack, RenderTypes.entityCutout(texture), lightCoords, OverlayTexture.NO_OVERLAY, -1,
 				null, state.outlineColor);
 		}
 	}

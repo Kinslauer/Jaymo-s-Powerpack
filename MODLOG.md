@@ -1433,3 +1433,9 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   hangs at the hip, a lantern lights the way, and Kingdoms pays from and pickpockets lift the purse (`Baubles.belt` and
   `setBelt` read and write the first purse, else lantern, inside the tool belt; `Baubles.beltSlot` is the slot itself).
   Gradle build only, not played.
+
+## 0.21.48 (2026-11-07): the Ranger and Netherite Ranger hoods get the hooded cloak, each in its own colours
+- The Archers' ranger_armor_head and netherite_ranger_armor_head now work with the hooded cloak from #1095: the cloak's collar, back panel and mantles render on the wearer, the mask key lowers the hood onto the back and raises it again, and Kingdoms sees the wearer as hooded while it's up.
+- `HoodedCloakLayer` picks a per-hood cloak texture (`hooded_cloak.png`, `hooded_cloak_ranger.png`, `hooded_cloak_netherite_ranger.png` from `tools/gen_hooded_cloak.py`, coloured from each hood's own texture in the Archers jar).
+- `cloak_hoods.json` now lists exactly the three Archers hoods.
+- Compile-checked; not played.
