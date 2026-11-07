@@ -47,7 +47,7 @@ public final class VariantLooks {
 		// (0.7.490) the fae's pollen and leaf-light, a fox's fire, the elves' blood and the dead's chill
 		LEAF_MOTE = new DustParticleOptions(0x7CB84A, 0.6F), POLLEN_MOTE = new DustParticleOptions(0xB8FFD8, 0.5F),
 		WATER_MOTE = new DustParticleOptions(0x8CE0F0, 0.5F), FAE_MOTE = new DustParticleOptions(0xFFA8E8, 0.5F),
-		BLOOD_MOTE = new DustParticleOptions(0xC0182A, 0.6F), FOX_FIRE = new DustParticleOptions(0xFF9A3C, 0.6F),
+		FOX_FIRE = new DustParticleOptions(0xFF9A3C, 0.6F),
 		CHILL_MOTE = new DustParticleOptions(0x9AF0FF, 0.5F),
 		// (0.7.486) a jellyfish's shimmer and a sea slug's bright flecks (the weedfrond's leaf is LEAF_MOTE above)
 		JELLY_MOTE = new DustParticleOptions(0xE0B8FF, 0.5F), FRILL_MOTE = new DustParticleOptions(0xFF8A30, 0.5F);
@@ -113,7 +113,8 @@ public final class VariantLooks {
 		style(Variant.FAERIE, 0xFFFFC0F0, HeritageLooks.Eyes.ALWAYS, FAE_MOTE, 16, When.ALWAYS);
 		style(Variant.HIGHELF, 0xFFFFE890, HeritageLooks.Eyes.DAY, ParticleTypes.WHITE_ASH, 50, When.ALWAYS);
 		style(Variant.MOONELF, 0xFFB0C0FF, HeritageLooks.Eyes.NIGHT, MOON_MOTE, 18, When.NIGHT);
-		style(Variant.BLOODELF, 0xFFFF5060, HeritageLooks.Eyes.ALWAYS, BLOOD_MOTE, 30, When.DRY);
+		// (0.7.646) Andy: "no redstone textures": a Blood Elf's motes are Powers' blood flecks
+		style(Variant.BLOODELF, 0xFFFF5060, HeritageLooks.Eyes.ALWAYS, com.jaymoskingdoms.PowersCompat.blood(0xC0182A, 0.6F), 30, When.DRY);
 		// the Beastfolk's family
 		style(Variant.ARACHNID, 0xFFFF3030, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
 		style(Variant.AVIAN, 0xFFFFE070, HeritageLooks.Eyes.DAY, ParticleTypes.CLOUD, 70, When.ALWAYS);

@@ -4,6 +4,8 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.blood.BloodParticles;
 import com.jaymospowers.core.blood.BloodTrail;
 import com.jaymospowers.core.blood.Bloodied;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -40,7 +42,12 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class BladeBlood {
 	/** Red blood (Simple Blood's), and the other kinds' colours (see {@link #color}). */
-	static final int RED = 0x80000D, ENDER = 0x800D80, DARK = 0x231D21, SLIME = 0x76BE6D, BUG = 0xD8CB3A;
+	public static final int RED = 0x80000D, ENDER = 0x800D80, DARK = 0x231D21, SLIME = 0x76BE6D, BUG = 0xD8CB3A;
+	/**
+	 * (0.21.50) Andy: "all zombies should get the rotten blood": a zombie's dark, rotten blood. And the heritages' own
+	 * (Jaymo's Kingdoms picks them): a Divine's gold, a Verdant's green sap.
+	 */
+	public static final int ROTTEN = 0x2E2410, GOLD = 0xC9A227, SAP = 0x4F8A1E;
 	/**
 	 * (0.20.41) A shot's blood: the drops where it went in (this many, plus this many per point of damage, at most this many),
 	 * flying back toward the shooter this fast; and for a bullet out the far side, this many times as many, this fast, and
@@ -107,7 +114,7 @@ public final class BladeBlood {
 	public static final TagKey<EntityType<?>> BLOODLESS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("bloodless"));
 	/** (0.15.93) What bleeds another colour than red (Simple Blood's kinds). */
 	public static final TagKey<EntityType<?>> ENDER_BLOOD = tag("blood/ender"), DARK_BLOOD = tag("blood/dark"),
-		SLIME_BLOOD = tag("blood/slime"), BUG_BLOOD = tag("blood/bug"), MAGMA_BLOOD = tag("blood/magma");
+		SLIME_BLOOD = tag("blood/slime"), BUG_BLOOD = tag("blood/bug"), MAGMA_BLOOD = tag("blood/magma"), ROTTEN_BLOOD = tag("blood/rotten");
 
 	/** Who bled this tick (the game time): a power's blade blow that also reads as a held blade bleeds only once. */
 	private static final Map<LivingEntity, Long> SPLASHED = new WeakHashMap<>();
@@ -320,9 +327,28 @@ public final class BladeBlood {
 		return weapon != null && Fractures.blunt(weapon);
 	}
 
+	/**
+	 * (0.21.49) Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race. (emberborn should have
+	 * the magma blood)". A body's own blood, beyond its kind's: each answers {@link #NO_SAY}, {@link #NO_BLOOD} or an RGB
+	 * colour. Jaymo's Kingdoms adds its heritages here ({@code PowersCompat}); the first that has a say decides.
+	 */
+	public static final List<java.util.function.ToIntFunction<LivingEntity>> BLOOD = new ArrayList<>();
+	public static final int NO_SAY = Integer.MIN_VALUE, NO_BLOOD = -1;
+
+	private static int own(LivingEntity target) {
+		for (java.util.function.ToIntFunction<LivingEntity> blood : BLOOD) {
+			int said = blood.applyAsInt(target);
+			if (said != NO_SAY) {
+				return said;
+			}
+		}
+		return NO_SAY;
+	}
+
 	/** Whether {@code target} has blood to spill. */
 	public static boolean bleeds(LivingEntity target) {
-		return bleeds(target.getType());
+		int own = own(target);
+		return own == NO_SAY ? bleeds(target.getType()) : own != NO_BLOOD;
 	}
 
 	/** (0.15.111) Whether this kind of creature has blood to spill. */
@@ -332,7 +358,48 @@ public final class BladeBlood {
 
 	/** (0.15.93) {@code target}'s blood colour (RGB). */
 	public static int color(LivingEntity target) {
-		return color(target.getType());
+		int own = own(target);
+		if (own == NO_SAY || own == NO_BLOOD) {
+			// (0.21.50) any mod's zombie that is one in code bleeds rotten, tagged or not
+			return target instanceof net.minecraft.world.entity.monster.zombie.Zombie ? ROTTEN : color(target.getType());
+		}
+		return own;
+	}
+
+	/**
+	 * (0.21.50) Andy: corpses bleed the body's own blood. Whether the corpse {@code body} of a {@code type} has blood, by
+	 * the blood it died with ({@code BleedOut.CORPSE_OWN}), or its kind's if it has none noted.
+	 */
+	public static boolean bleeds(Entity body, EntityType<?> type) {
+		if (body instanceof LivingEntity living) {
+			return bleeds(living);
+		}
+		Integer own = body.getAttached(com.jaymospowers.core.blood.BleedOut.CORPSE_OWN);
+		return own != null ? own != NO_BLOOD : bleeds(type);
+	}
+
+	/** (0.21.50) The colour of the corpse {@code body}'s blood (see {@link #bleeds(Entity, EntityType)}). */
+	public static int color(Entity body, EntityType<?> type) {
+		if (body instanceof LivingEntity living) {
+			return color(living);
+		}
+		Integer own = body.getAttached(com.jaymospowers.core.blood.BleedOut.CORPSE_OWN);
+		return own != null && own != NO_BLOOD ? own : color(type);
+	}
+
+	/**
+	 * (0.21.50) For Jaymo's Kitchen (looked up by reflection): the blood of {@code body}, a living one or one of Kitchen's
+	 * corpses, as an RGB colour, or {@link #NO_BLOOD} if it has none (a skeleton in the chopper, a Stoneborn on the hook).
+	 */
+	public static int bodyBlood(Entity body) {
+		if (body instanceof LivingEntity living) {
+			return bleeds(living) ? color(living) : NO_BLOOD;
+		}
+		EntityType<?> type = com.jaymospowers.power.web.KitchenCompat.bodyType(body);
+		if (type == null) {
+			return RED;
+		}
+		return bleeds(body, type) ? color(body, type) : NO_BLOOD;
 	}
 
 	/** (0.15.111) This kind of creature's blood colour (RGB). */
@@ -341,11 +408,15 @@ public final class BladeBlood {
 		if (type.is(ENDER_BLOOD)) {
 			return ENDER;
 		}
-		if (type.is(DARK_BLOOD)) {
-			return DARK;
-		}
+		// (0.21.50) magma before dark: a magma cube was in both and bled dark
 		if (type.is(MAGMA_BLOOD)) {
 			return BloodParticles.MAGMA;
+		}
+		if (type.is(ROTTEN_BLOOD)) {
+			return ROTTEN;
+		}
+		if (type.is(DARK_BLOOD)) {
+			return DARK;
 		}
 		if (type.is(SLIME_BLOOD)) {
 			return SLIME;
@@ -434,10 +505,10 @@ public final class BladeBlood {
 	 * one on the living ({@link #heavyBlunt}); anything else (a fist, an arrow) only throws a few flecks.
 	 */
 	public static void corpse(Entity corpse, EntityType<?> type, DamageSource source, float damage) {
-		if (!(corpse.level() instanceof ServerLevel level) || damage <= 0.0F || !bleeds(type)) {
+		if (!(corpse.level() instanceof ServerLevel level) || damage <= 0.0F || !bleeds(corpse, type)) {
 			return;
 		}
-		int color = color(type);
+		int color = color(corpse, type);
 		float size = (corpse.getBbWidth() + 2.0F) / 3.0F;
 		Vec3 at = corpse.getBoundingBox().getCenter();
 		double w = corpse.getBbWidth() * 0.35 + 0.05;
@@ -485,10 +556,10 @@ public final class BladeBlood {
 	 * bursts out farther than a crushing's, with pools and gore flung wide.
 	 */
 	public static void blownApart(Entity body, EntityType<?> type) {
-		if (!(body.level() instanceof ServerLevel level) || !bleeds(type)) {
+		if (!(body.level() instanceof ServerLevel level) || !bleeds(body, type)) {
 			return;
 		}
-		int color = color(type);
+		int color = color(body, type);
 		float size = (type.getWidth() + 2.0F) / 3.0F;
 		double w = type.getWidth() * 0.6 + 0.2, h = type.getHeight() * 0.3 + 0.1;
 		double x = body.getX(), y = body.getY() + type.getHeight() * 0.4, z = body.getZ();

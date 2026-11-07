@@ -1590,3 +1590,12 @@ mobs should be possible".
   interaction in `CorpseEntity.interact()` (kitchen/src/main/java/com/jaymoskitchen/corpse/CorpseEntity.java:1678),
   so drag never started -- the body was picked up into your arms or nothing happened. `falling()` now returns false in
   water, so shift + right-click (empty hand) drags a floating corpse onto dry ground like any other carcass. Compile-checked; not played.
+
+## 0.5.86 (2026-11-07): Kitchen bleeds the body's own blood, or none
+- Andy, on "Kitchen's own blood (meat grates, machines) wasn't checked and may still be red for every body": "double check
+  that". It was: every body bled plain red, skeletons and golems' bodies included. Now, with Jaymo's Powers 0.21.50
+  (`BladeBlood.bodyBlood`), the chopper's victims, a corpse being cut up, scavengers feeding, a hanging carcass's drips
+  and a body blown apart without Powers' own blast blood spill that body's blood (an Emberborn's magma, a zombie's rotten
+  blood, an Endborn's purple), and nothing from a body with no blood. A blood grate's blood stays red (it holds no one
+  body's). `KitchenBlood.send(level, body, ...)`; plain red with an older Powers.
+- Built; not played.

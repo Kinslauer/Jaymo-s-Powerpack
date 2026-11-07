@@ -653,15 +653,15 @@ public final class KitchenCompat {
 			Class<?> hanging = Class.forName("com.jaymoskitchen.corpse.Hanging");
 			java.util.function.BiConsumer<Entity, net.minecraft.world.phys.Vec3> drip = (corpse, at) -> {
 				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
-				if (type != null && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
-					level.sendParticles(new com.jaymospowers.core.blood.BloodParticles.Spray(com.jaymospowers.core.BladeBlood.color(type), 0.35F, false),
+				if (type != null && com.jaymospowers.core.BladeBlood.bleeds(corpse, type) && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					level.sendParticles(new com.jaymospowers.core.blood.BloodParticles.Spray(com.jaymospowers.core.BladeBlood.color(corpse, type), 0.35F, false),
 						true, false, at.x, at.y - 0.05, at.z, 1, 0.02, 0.0, 0.02, 0.0);
 				}
 			};
 			java.util.function.BiConsumer<Entity, net.minecraft.world.phys.Vec3> spill = (corpse, at) -> {
 				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
-				if (type != null && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
-					com.jaymospowers.core.blood.BloodTrail.lay(level, null, com.jaymospowers.core.BladeBlood.color(type), at.x, at.y, at.z,
+				if (type != null && com.jaymospowers.core.BladeBlood.bleeds(corpse, type) && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					com.jaymospowers.core.blood.BloodTrail.lay(level, null, com.jaymospowers.core.BladeBlood.color(corpse, type), at.x, at.y, at.z,
 						HUNG_SPILL_STAIN, 8);
 				}
 			};

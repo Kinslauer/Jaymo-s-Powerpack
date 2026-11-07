@@ -209,7 +209,7 @@ public final class Scavengers {
 			if (level.noCollision(body, body.getBoundingBox().move(drag))) {
 				body.setPos(body.getX() + drag.x, body.getY(), body.getZ() + drag.z);
 			}
-			com.jaymoskitchen.KitchenBlood.send(level, body.getX(), body.getY() + 0.25, body.getZ(), 10, 0.2, 0.1, 0.2, 0.15);
+			com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.25, body.getZ(), 10, 0.2, 0.1, 0.2, 0.15);
 			level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, body.getX(), body.getY() + 0.3, body.getZ(), 2, 0.2, 0.1, 0.2, 0.05);
 			float pitch = 0.6F + mob.getRandom().nextFloat() * 0.3F;
 			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.HOSTILE, 1.0F, pitch);
@@ -219,7 +219,7 @@ public final class Scavengers {
 				mob.playAmbientSound();
 			}
 			if (bites >= BITES + Mth.floor(body.getBbWidth() * BITES_PER_WIDTH)) {
-				com.jaymoskitchen.KitchenBlood.send(level, body.getX(), body.getY() + 0.3, body.getZ(), 40, 0.35, 0.15, 0.35, 0.25);
+				com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.3, body.getZ(), 40, 0.35, 0.15, 0.35, 0.25);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.0F, 0.5F);
 				java.util.Optional<java.util.UUID> villager = body.isVillager() ? body.deadId() : java.util.Optional.empty();
 				CARRION.addAll(body.tearApart(level));

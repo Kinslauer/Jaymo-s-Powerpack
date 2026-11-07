@@ -102,6 +102,15 @@ public final class Dismember {
 	public static final float BLIND_SPREAD = 28.0F;
 	/** Blood from a fresh stump: how long (ticks) and how often. */
 	public static final int BLEED_TICKS = 200, BLEED_EVERY = 6;
+	/**
+	 * (0.21.50) Andy: the stump's bleed "looks just like lava drips, it can stay but the particle should be red, and it should
+	 * shoot multiple at once, in larger spurts as they fall if they do, less if they stay standing". Each spurt from a fresh
+	 * stump: this many drops (fallen: this many), thrown out this fast (fallen: this fast), this scattered, this big
+	 * (fallen: this big; 1 = a man's blow).
+	 */
+	public static final int SPURT_DROPS = 2, SPURT_DROPS_FALLEN = 5;
+	public static final double SPURT_SPEED = 0.16, SPURT_SPEED_FALLEN = 0.3, SPURT_SPREAD = 0.06;
+	public static final float SPURT_SIZE = 0.45F, SPURT_SIZE_FALLEN = 0.8F;
 	/** (0.14.2) Overkill: a blow past this share of a part's health (on a broken limb, or past the head's zero) can sever it. */
 	public static final float SEVER_OVERKILL = 0.5F;
 	/** (0.14.2) Overkill's chance to sever, times the blade's scale ({@link #scale}). */
@@ -673,7 +682,12 @@ public final class Dismember {
 		} else {
 			Vec3 from = blast != null ? blast : by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
 			SeveredPart.spawn(level, target, part, from);
-			if (quiet) {
+			if (!BladeBlood.bleeds(target)) {
+				// (0.21.50) Andy: "skeletons should not bleed": a body with no blood loses the part in chips of bone, and no stump bleeds
+				Vec3 at = stump(target, part);
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z,
+					quiet ? 6 : 16, 0.15, 0.15, 0.15, 0.2);
+			} else if (quiet) {
 				// (0.20.67) one of a blown-apart body's parts: a fleck or two, no sounds of its own (the blast is loud enough)
 				Vec3 at = stump(target, part);
 				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(target), 1.4F), at.x, at.y, at.z, 6,
@@ -681,7 +695,7 @@ public final class Dismember {
 			} else {
 				gore(level, target, part);
 			}
-			if (target.isAlive()) {
+			if (target.isAlive() && BladeBlood.bleeds(target)) {
 				BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
 			}
 		}
@@ -843,6 +857,33 @@ public final class Dismember {
 		target.setSprinting(false);
 	}
 
+	/**
+	 * (0.21.50) A fresh stump spurts: several red drops (the body's own blood) thrown out of it at once, away from the body
+	 * (up from a neck), more, faster and bigger once the body has fallen (dying, downed or lying) than while it stands.
+	 * Nothing from a body with no blood.
+	 */
+	static void spurt(ServerLevel level, LivingEntity body, int part) {
+		if (!BladeBlood.bleeds(body)) {
+			return;
+		}
+		boolean fallen = body.isDeadOrDying() || com.jaymospowers.core.wounds.Downed.isDowned(body)
+			|| body.getPose() != net.minecraft.world.entity.Pose.STANDING && body.getPose() != net.minecraft.world.entity.Pose.CROUCHING;
+		Vec3 at = stump(body, part);
+		Vec3 out = at.subtract(body.position()).multiply(1.0, 0.0, 1.0);
+		out = part == HEAD || out.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 1.0, 0.0) : out.normalize().add(0.0, part == RIGHT_LEG || part == LEFT_LEG
+			? -0.3 : 0.4, 0.0).normalize();
+		double speed = fallen ? SPURT_SPEED_FALLEN : SPURT_SPEED;
+		int drops = fallen ? SPURT_DROPS_FALLEN : SPURT_DROPS;
+		var spray = new com.jaymospowers.core.blood.BloodParticles.Spray(BladeBlood.color(body), fallen ? SPURT_SIZE_FALLEN : SPURT_SIZE, true);
+		var random = level.getRandom();
+		for (int i = 0; i < drops; i++) {
+			double push = speed * (0.7 + random.nextDouble() * 0.6);
+			Vec3 v = out.scale(push).add((random.nextDouble() - 0.5) * 2.0 * SPURT_SPREAD, (random.nextDouble() - 0.5) * SPURT_SPREAD,
+				(random.nextDouble() - 0.5) * 2.0 * SPURT_SPREAD);
+			level.sendParticles(spray, true, false, at.x, at.y, at.z, 0, v.x, v.y, v.z, 1.0);
+		}
+	}
+
 	private static void gore(ServerLevel level, LivingEntity target, int part) {
 		Vec3 at = stump(target, part);
 		var blood = com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(target), 1.4F);
@@ -922,9 +963,7 @@ public final class Dismember {
 					int mask = missing(body);
 					for (int part : PARTS) {
 						if ((mask & part) != 0) {
-							Vec3 at = stump(body, part);
-							level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0000, 1.1F), at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.0);
-							level.sendParticles(ParticleTypes.DRIPPING_LAVA, at.x, at.y, at.z, 1, 0.05, 0.0, 0.05, 0.0);
+							spurt(level, body, part);
 						}
 					}
 				}

@@ -97,8 +97,8 @@ public final class BloodSmears {
 				continue;
 			}
 			EntityType<?> type = KitchenCompat.bodyType(corpse);
-			if (type != null && BladeBlood.bleeds(type)) {
-				drag(level, corpse, BladeBlood.color(type), CARCASS_SMEAR * size(type.getWidth()));
+			if (type != null && BladeBlood.bleeds(corpse, type)) {
+				drag(level, corpse, BladeBlood.color(corpse, type), CARCASS_SMEAR * size(type.getWidth()));
 			}
 		}
 		if (server.getTickCount() % 200 == 0) {

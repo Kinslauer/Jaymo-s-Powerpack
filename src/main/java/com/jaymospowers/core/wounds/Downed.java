@@ -140,6 +140,11 @@ public final class Downed {
 	 */
 	public static final int ADRENALINE_TICKS = 200;
 	public static final double ADRENALINE_SLOW = -0.3, SPENT_CRAWL_SLOW = -0.85, ADRENALINE_PACE = 1.4, SPENT_PACE = 0.35;
+	/**
+	 * (0.21.49) A downed player who hasn't passed out can still work blocks with the main hand (doors, trapdoors, gates,
+	 * buttons, levers, chests), as with an empty hand; items, attacks and powers stay dead. False: no use at all, as before.
+	 */
+	public static final boolean DOWNED_USE_BLOCKS = true;
 	/** How long a downed player holds sneak to give up (ticks). */
 	public static final int GIVE_UP_TICKS = 100;
 	/** (0.18.5) A blow this hard (health points: three hearts) on anyone downed kills them outright. */
@@ -396,13 +401,35 @@ public final class Downed {
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+		// (0.21.49) Andy: "while downed, you cannot interact with doors or other right-clickable things". A downed player who is
+		// still awake works blocks again (doors, trapdoors, gates, buttons, levers, chests), with the main hand only and never
+		// with what it holds: first every other mod's say (locks, lockpicking, knowledge gates), then, last, the block's own
+		// empty-hand use. Passed out or knocked out, nothing.
+		UseBlockCallback.EVENT.addPhaseOrdering(FIRST, Event.DEFAULT_PHASE);
+		UseBlockCallback.EVENT.register(FIRST, (player, level, hand, hit) -> {
 			if (!isDowned(player)) {
 				return InteractionResult.PASS;
 			}
 			// (0.15.49) lying face down, use lands on the ground: Second Wind's eating still counts ({@link SelfRevive})
 			InteractionResult eat = SelfRevive.use(player, hand);
-			return eat != null ? eat : InteractionResult.FAIL;
+			if (eat != null) {
+				return eat;
+			}
+			return DOWNED_USE_BLOCKS && hand == InteractionHand.MAIN_HAND && awake(player) ? InteractionResult.PASS : InteractionResult.FAIL;
+		});
+		UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
+		UseBlockCallback.EVENT.register(LAST, (player, level, hand, hit) -> {
+			if (!isDowned(player) || !DOWNED_USE_BLOCKS || hand != InteractionHand.MAIN_HAND || !awake(player)) {
+				// (anyone not down, or the FIRST phase's FAIL already ended it for the off hand and the passed out)
+				return InteractionResult.PASS;
+			}
+			if (level.isClientSide()) {
+				// (SUCCESS on the client sends the click without predicting it, nor using the held item: the server decides)
+				return InteractionResult.SUCCESS;
+			}
+			// (0.21.49) a struggle, then the block as if the hand were empty; a bed hauls them into it ({@link DownedStruggle})
+			return player instanceof ServerPlayer server && level instanceof ServerLevel world
+				? DownedStruggle.use(server, world, hit) : InteractionResult.FAIL;
 		});
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			if (!isDowned(player)) {
@@ -502,9 +529,28 @@ public final class Downed {
 		return CRAWL_SPEED * (adrenaline(entity) ? ADRENALINE_PACE : net.minecraft.util.Mth.lerp(strength(entity), SPENT_PACE, 1.0));
 	}
 
+	/**
+	 * (0.21.49) Holds a resting downed player's clock (every second) just past their adrenaline: their strength stays and
+	 * they don't bleed out toward passing out ({@link DownedStruggle}).
+	 */
+	static void holdClock(ServerPlayer player, long now) {
+		Long downed = player.getAttached(DOWNED);
+		if (downed != null && now % 20 == 0) {
+			player.setAttached(DOWNED, (now - ADRENALINE_TICKS - 1) << 1 | (downed & 1L));
+		}
+	}
+
 	/** A downed player who has passed out. */
 	public static boolean passedOut(Entity entity) {
 		return entity.hasAttached(OUT);
+	}
+
+	/**
+	 * (0.21.49) Down but awake: not passed out and not knocked out. Only then can a downed player still work blocks
+	 * ({@link #DOWNED_USE_BLOCKS}). Both sides for the player themselves (OUT is synced to all, KNOCKED to its owner).
+	 */
+	public static boolean awake(Entity entity) {
+		return !passedOut(entity) && !entity.hasAttached(KNOCKED);
 	}
 
 	/**
@@ -657,6 +703,9 @@ public final class Downed {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
 			SINKING.remove(player.getUUID());
+			if (player instanceof ServerPlayer server) {
+				DownedStruggle.forget(server);
+			}
 			AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {
 				speed.removeModifier(SLOW_ID);
@@ -1018,8 +1067,10 @@ public final class Downed {
 			player.addTag(DOWNED_TAG);
 		}
 		long now = level.getGameTime();
+		// (0.21.49) lying in a bed they struggled into, mending: never bleeding out ({@link DownedStruggle})
+		boolean resting = DownedStruggle.tick(level, player, now);
 		boolean out = passedOut(player);
-		if (!out && now - since(player) >= BLEED_OUT_TICKS) {
+		if (!out && !resting && now - since(player) >= BLEED_OUT_TICKS) {
 			// (Andy: "Lie until roused or give up": no respawn for bleeding out)
 			player.setAttached(OUT, true);
 			out = true;
@@ -1157,10 +1208,12 @@ public final class Downed {
 			return;
 		}
 		RISES.remove(player.getUUID());
+		// (0.21.49) what a rest in bed mended, they rise with
+		float rested = DownedStruggle.resting(player) ? Wounds.restedHealth(player) : 0.0F;
 		getUp(level, player);
 		if (!isDowned(player)) {
 			// (on their own legs, not a friend's arm: less in them than a revive leaves)
-			player.setHealth(Math.min(player.getHealth(), Math.max(1.0F, player.getMaxHealth() * RISE_HEALTH)));
+			player.setHealth(Math.max(rested, Math.min(player.getHealth(), Math.max(1.0F, player.getMaxHealth() * RISE_HEALTH))));
 			Wounds.reconcile(player);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.risen").withStyle(ChatFormatting.GREEN));
 		}

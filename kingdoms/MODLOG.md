@@ -10188,3 +10188,21 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
   `Mob.getMaxSpawnClusterSize` in `NaturalSpawner.spawnCategoryForPosition`). Great Whales keep their pods of 1-3
   (Andy chose to exempt them). Ship shark packs (`SharkWake`) unchanged.
 - Built, not played.
+
+## 0.7.645 (2026-11-07): the bloodless heritages, and the Emberborn's magma blood
+- Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race. (emberborn should have the magma
+  blood)". With Jaymo's Powers 0.21.49: Stoneborn, Bio-built, and the Skeleton, Wraith and Reaper Hollow (bones,
+  spirits and machines) never bleed, open cuts or leave blood. An Emberborn's blood is magma. Zombie Hollow and every other
+  heritage bleed as before. Villagers of those heritages too.
+- `PowersCompat.heritageBlood` adds a rule to Powers' `BladeBlood.BLOOD`, from `Heritage.register`.
+- Not built locally (no JDK 25 here); not played.
+
+## 0.7.646 (2026-11-07): Magmavein, zombies, Endborn, Divine and Verdant blood; no redstone-dust blood
+- Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the magmavein
+  stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too. just no
+  redstone textures". With Jaymo's Powers 0.21.50 (`PowersCompat.heritageBlood`): a Magmavein Stoneborn bleeds the
+  magma cubes' glowing magma that cools to a crust (other Stoneborn stay bloodless), as Emberborn do; a Zombie Hollow
+  bleeds dark, rotten blood; Endborn ender-purple; Divine gold; Verdant green sap. Their corpses pool the same blood.
+- Blood magic's motes, a Nightborn vampire's blood mist and a Blood Elf's motes are Powers' blood flecks in their own
+  colour, not red dust (`PowersCompat.blood` now passes the colour on, through Powers' `BloodParticles.fleck`).
+- Built; not played.

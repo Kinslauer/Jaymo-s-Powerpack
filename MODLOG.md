@@ -1439,3 +1439,66 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - `HoodedCloakLayer` picks a per-hood cloak texture (`hooded_cloak.png`, `hooded_cloak_ranger.png`, `hooded_cloak_netherite_ranger.png` from `tools/gen_hooded_cloak.py`, coloured from each hood's own texture in the Archers jar).
 - `cloak_hoods.json` now lists exactly the three Archers hoods.
 - Compile-checked; not played.
+
+## 0.21.49 (2026-11-07): downed, every right-click is a struggle; doors push open, beds let you mend
+- Andy: "while downed, you cannot interact with doors or other right clickable things", then: "every downed right click
+  should be a 3s struggle ... making the door push open slowly for every second holding, right clicking a bed while downed
+  hauls you into it, so you can recover there without the need for meds or another player, it just takes time, more the
+  more you are hurt" and "you get back up whenever you want, but you recover the whole time".
+- Downed but awake, hold right-click on a block: a 3-second struggle bar fills (it keeps its place if you let go), then
+  the block works as if your hand were empty (doors, trapdoors, gates, buttons, levers, chests). What you hold is never
+  used; cakes stay off. Attacking, items and powers stay dead; passed out or knocked out, nothing works. Locks and other
+  mods' gates still apply.
+- **Doors** (with Spooky Doors, now in the pack): the door swings open a little more for every moment you push; an open
+  one is pushed shut. Without Spooky Doors it opens when the bar fills.
+- **Beds**: the struggle hauls you up onto the bed. Lying there you don't bleed out or pass out, the pain eases, and your
+  most hurt part mends every 2 seconds (1 health point), all the way to whole; after a minute a broken bone sets itself.
+  The worse you're hurt, the longer it takes. Hold sneak to get up whenever you're well enough; you rise with what you've
+  mended. Crawl off and the rest ends.
+- **Cuts in bed** (Andy: "the bleeding can hold up to two cuts by holding still. any others will still bleed. taking into
+  account each bleeding entity's mB"): lying still, you hold two open cuts shut (a severed stump counts as two); every
+  other cut still pours your blood, each at the downed rate of your own body's blood. Shift about and they all bleed.
+  Bled dry in bed, you pass out where you lie.
+- **Stemming the bleeding** (Andy: "animate the hands moving to stem the bleeding"): holding still in bed, your hands press
+  on the cuts they hold: under the chest, at the neck, back on a thigh, across to the other arm. Everyone sees it
+  (`DownedStruggle.HOLDING`, synced; `CrawlPose.stem`, tuning `STEM_*`).
+- **Who bleeds** (Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race. (emberborn should
+  have the magma blood)"): with Kingdoms 0.7.645, Stoneborn, Bio-built, and the Skeleton, Wraith and Reaper Hollow have no
+  blood: no cuts, no pools, no smears. Emberborn bleed magma. `BladeBlood.BLOOD` (new) lets another mod decide a body's
+  own blood; `Bleeding.bleeds` and a body's corpse now ask it.
+- `DownedStruggle` (new): the struggle and the bed rest; tuning at the top. `compat.SpookyDoorsCompat` (new) calls Spooky
+  Doors' public API by reflection. `Downed`: the use-block refusal moved to the FIRST phase and lets an awake main hand
+  through, a LAST-phase handler runs the struggle; `awake()`, `holdClock()`; rising after rest keeps the mended health.
+  `Wounds.restPart`/`restedHealth`; `BleedOut` pours a resting player's blood by `DownedStruggle.bleedingCuts`. `DownedKeysMixin` keeps `key.use` live with the crosshair on a block. Spooky Doors
+  26.3.0.2 joins `packModsNoCf` (needs Balm, already in the pack).
+- Not built locally (no JDK 25 here; GitHub's PR checks build it); not played.
+
+## 0.21.50 (2026-11-07): who bleeds what, settled; blood on the ground lies still; no redstone look
+- Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the magmavein
+  stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too. just no
+  redstone textures ... and the blood that falls on the ground shouldnt randomly sputter or splat or move unless directly
+  interacted with. right now you will see it erupting from trails on the ground like it was bubbling or something."
+- **Kinds of blood**: every zombie (zombies, husks, drowned, zombie villagers, zombified piglins, zoglins, anything in
+  `#minecraft:zombies` or `#c:zombies`, and any mod's mob that is a `Zombie` in code) bleeds dark, rotten blood
+  (`BladeBlood.ROTTEN`, tag `blood/rotten`). Magma cubes really bleed the glowing, cooling magma now: they were in both
+  `blood/dark` and `blood/magma` and dark won. New colours for Kingdoms' heritages: `GOLD` (Divine), `SAP` (Verdant).
+- **Corpses bleed the body's own blood**: a new body keeps the blood it died with (`BleedOut.CORPSE_OWN`, saved), so an
+  Emberborn's corpse pools magma, a zombie's rotten blood, and a bloodless heritage's corpse doesn't bleed when hit, blown
+  apart, dragged or hung (`BladeBlood.bleeds/color(Entity, EntityType)`).
+- **Blood that lands, and magma** (Andy: "the magma should bubble as it cools throwing off those popping lava particles, the
+  BLOOD should not. it can still move and fall and drip, like water does through blocks, but over ledges. this way a
+  bleeding body above a ledge can drip a pool up to 20 blocks below it"): magma blood keeps its lava pops and smoke as it
+  cools; blood still pours down ledges and drips off them. Blood now falls up to 20 blocks to the ground (was 6), its
+  stain showing once the drop could have got there (`BloodTrail.FALL`, `DROP_FALL`). The red "bubbling" on trails was most
+  likely the stump bleed's vanilla lava drips, which splash and sizzle where they land; those are gone (below).
+- **No redstone dust for blood**: the Z-Fighter's blood-for-ki spills blood flecks, not red dust.
+- **Skeletons don't bleed when cut apart** (Andy: "skeletons should not bleed"): losing a head or limb used to throw gore
+  and bleed from the stump whatever the body; a body with no blood now loses it in chips of bone, with no stump bleed, and
+  its severed head or limb never drips (`SeveredPart` keeps the body's blood).
+- **Kitchen's blood is the body's own** (Andy: "double check that", with Kitchen 0.5.86): `BladeBlood.bodyBlood(Entity)`
+  gives Kitchen a living body's or a corpse's blood, or none; a bloodless carcass on a meat hook no longer drips or pools.
+- **A stump spurts** (Andy: "the decapitation bleed effect looks just like lava drips, it can stay but the particle should
+  be red, and it should shoot multiple at once, in larger spurts as they fall if they do, less if they stay standing"): the
+  vanilla lava drip is gone; every few ticks a fresh stump throws several drops of the body's own blood out of it (up from a
+  neck), 2 small ones while the body stands, 5 bigger, faster ones once it has fallen (`Dismember.spurt`, tuning `SPURT_*`).
+- Built; not played.

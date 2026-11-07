@@ -70,8 +70,19 @@ abstract class DownedKeysMixin {
 		}
 		LocalPlayer player = Minecraft.getInstance().player;
 		// (0.15.49) use stays live for Second Wind's eating to rise, with food in hand
-		return player != null && Downed.isDowned(player) && !("key.use".equals(this.name) && SelfRevive.canEat(player))
+		return player != null && Downed.isDowned(player) && !("key.use".equals(this.name) && (SelfRevive.canEat(player) || atBlock(player)))
 			&& !this.powerKeepsLive(player);
+	}
+
+	/**
+	 * (0.21.49) Use stays live with the crosshair on a block, awake: held, it's a downed struggle with the block
+	 * ({@code DownedStruggle}: a door pushed open, a bed hauled into, the rest worked as with an empty hand, never the held
+	 * item). On air or on someone it's dead as before; passed out or knocked out, always.
+	 */
+	private static boolean atBlock(LocalPlayer player) {
+		net.minecraft.world.phys.HitResult hit = Minecraft.getInstance().hitResult;
+		return Downed.DOWNED_USE_BLOCKS && Downed.awake(player) && hit != null
+			&& hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK;
 	}
 
 	/** An ability key the player's power keeps working while they're down (Chrono's Rewind). */
