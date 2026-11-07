@@ -1459,6 +1459,13 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   account each bleeding entity's mB"): lying still, you hold two open cuts shut (a severed stump counts as two); every
   other cut still pours your blood, each at the downed rate of your own body's blood. Shift about and they all bleed.
   Bled dry in bed, you pass out where you lie.
+- **Stemming the bleeding** (Andy: "animate the hands moving to stem the bleeding"): holding still in bed, your hands press
+  on the cuts they hold: under the chest, at the neck, back on a thigh, across to the other arm. Everyone sees it
+  (`DownedStruggle.HOLDING`, synced; `CrawlPose.stem`, tuning `STEM_*`).
+- **Who bleeds** (Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race. (emberborn should
+  have the magma blood)"): with Kingdoms 0.7.645, Stoneborn, Bio-built, and the Skeleton, Wraith and Reaper Hollow have no
+  blood: no cuts, no pools, no smears. Emberborn bleed magma. `BladeBlood.BLOOD` (new) lets another mod decide a body's
+  own blood; `Bleeding.bleeds` and a body's corpse now ask it.
 - `DownedStruggle` (new): the struggle and the bed rest; tuning at the top. `compat.SpookyDoorsCompat` (new) calls Spooky
   Doors' public API by reflection. `Downed`: the use-block refusal moved to the FIRST phase and lets an awake main hand
   through, a LAST-phase handler runs the struggle; `awake()`, `holdClock()`; rising after rest keeps the mended health.

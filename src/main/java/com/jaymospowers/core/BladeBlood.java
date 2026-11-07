@@ -4,6 +4,8 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.blood.BloodParticles;
 import com.jaymospowers.core.blood.BloodTrail;
 import com.jaymospowers.core.blood.Bloodied;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -320,9 +322,28 @@ public final class BladeBlood {
 		return weapon != null && Fractures.blunt(weapon);
 	}
 
+	/**
+	 * (0.21.49) Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race. (emberborn should have
+	 * the magma blood)". A body's own blood, beyond its kind's: each answers {@link #NO_SAY}, {@link #NO_BLOOD} or an RGB
+	 * colour. Jaymo's Kingdoms adds its heritages here ({@code PowersCompat}); the first that has a say decides.
+	 */
+	public static final List<java.util.function.ToIntFunction<LivingEntity>> BLOOD = new ArrayList<>();
+	public static final int NO_SAY = Integer.MIN_VALUE, NO_BLOOD = -1;
+
+	private static int own(LivingEntity target) {
+		for (java.util.function.ToIntFunction<LivingEntity> blood : BLOOD) {
+			int said = blood.applyAsInt(target);
+			if (said != NO_SAY) {
+				return said;
+			}
+		}
+		return NO_SAY;
+	}
+
 	/** Whether {@code target} has blood to spill. */
 	public static boolean bleeds(LivingEntity target) {
-		return bleeds(target.getType());
+		int own = own(target);
+		return own == NO_SAY ? bleeds(target.getType()) : own != NO_BLOOD;
 	}
 
 	/** (0.15.111) Whether this kind of creature has blood to spill. */
@@ -332,7 +353,8 @@ public final class BladeBlood {
 
 	/** (0.15.93) {@code target}'s blood colour (RGB). */
 	public static int color(LivingEntity target) {
-		return color(target.getType());
+		int own = own(target);
+		return own == NO_SAY || own == NO_BLOOD ? color(target.getType()) : own;
 	}
 
 	/** (0.15.111) This kind of creature's blood colour (RGB). */

@@ -650,6 +650,42 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * (Kingdoms 0.7.645, Powers 0.21.49) Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race.
+	 * (emberborn should have the magma blood)". A heritage's own blood, for Powers' {@code BladeBlood.BLOOD}: no blood in a
+	 * Stoneborn, the bone-and-spirit Hollow ({@link #BLOODLESS_HOLLOW}) or a Bio-built; an Emberborn's runs as magma. Every
+	 * other heritage, a Zombie Hollow included, bleeds as their kind does. Nothing without Powers.
+	 */
+	@SuppressWarnings("unchecked")
+	static void heritageBlood() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> blade = Class.forName("com.jaymospowers.core.BladeBlood");
+			int noSay = blade.getField("NO_SAY").getInt(null), noBlood = blade.getField("NO_BLOOD").getInt(null);
+			int magma = Class.forName("com.jaymospowers.core.blood.BloodParticles").getField("MAGMA").getInt(null);
+			((java.util.List<java.util.function.ToIntFunction<LivingEntity>>)blade.getField("BLOOD").get(null)).add(body -> {
+				Heritage.Kind kind = VillagerHeritage.of(body);
+				if (kind == null) {
+					return noSay;
+				}
+				return switch (kind) {
+					case STONEBORN, BIOBUILT -> noBlood;
+					case EMBERBORN -> magma;
+					case HOLLOW -> BLOODLESS_HOLLOW.contains(HeritageVariants.of(body)) ? noBlood : noSay;
+					default -> noSay;
+				};
+			});
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no per-body blood (older Powers?): heritages bleed as their kind", e);
+		}
+	}
+
+	/** (0.7.645) The Hollow with no blood in them: bones and spirits. A Zombie Hollow (and the first look) still bleeds. */
+	static final java.util.Set<HeritageVariants.Variant> BLOODLESS_HOLLOW = java.util.EnumSet.of(HeritageVariants.Variant.SKELETON,
+		HeritageVariants.Variant.WRAITH, HeritageVariants.Variant.REAPER);
+
+	/**
 	 * (0.7.548) Powers' executions of downed mobs ({@code MobExecutions.FINISHES}). Andy (2026-11-05): "it seemed as though
 	 * this guard couldnt execute": a realm's guard or archer ({@link Downed#isGuard}) walks over to a downed monster and
 	 * finishes it with its weapon, instead of standing over it swinging. A downed person is left for arrest as before

@@ -1,14 +1,19 @@
 package com.jaymospowers.core.wounds;
 
+import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.SpookyDoorsCompat;
 import com.jaymospowers.core.Carry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -74,6 +79,13 @@ public final class DownedStruggle {
 	static final double STILL_DISTANCE_SQR = Resting.STILL_DISTANCE_SQR;
 	/** How high on a bed a body lies (the bed's top). */
 	static final double BED_TOP = 0.5625;
+
+	/**
+	 * The cuts a resting player holds shut, a bit per {@link BodyPart#ordinal()} (synced to all: their hands are drawn
+	 * pressed on them, {@code CrawlPose}). A severed stump takes both hands.
+	 */
+	public static final AttachmentType<Integer> HOLDING = AttachmentRegistry.create(JaymosPowers.id("downed_holding"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT.cast(), AttachmentSyncPredicate.all()));
 
 	private static final Map<UUID, Struggle> STRUGGLES = new HashMap<>();
 	private static final Map<UUID, Rest> RESTS = new HashMap<>();
@@ -195,8 +207,45 @@ public final class DownedStruggle {
 			return -1;
 		}
 		int stumps = Bleeding.stumps(player);
-		int open = Integer.bitCount(Bleeding.bleeding(player) & ~stumps) + 2 * Integer.bitCount(stumps);
-		return Math.max(0, open - (rest.still ? HELD_CUTS : 0));
+		int open = Bleeding.bleeding(player);
+		int held = rest.still ? held(player) : 0;
+		return hands(open, stumps) - hands(open & held, stumps);
+	}
+
+	/** Cuts counted as hands: a cut one, a stump two. */
+	private static int hands(int cuts, int stumps) {
+		return Integer.bitCount(cuts & ~stumps) + 2 * Integer.bitCount(cuts & stumps);
+	}
+
+	/** The open cuts two hands hold: the worst-placed first (a stump, then the head and body, then the limbs). */
+	private static int held(ServerPlayer player) {
+		int open = Bleeding.bleeding(player);
+		int stumps = Bleeding.stumps(player);
+		int held = 0, hands = HELD_CUTS;
+		for (BodyPart part : HOLD_ORDER) {
+			int bit = 1 << part.ordinal();
+			int need = (stumps & bit) != 0 ? 2 : 1;
+			if ((open & bit) != 0 && need <= hands) {
+				held |= bit;
+				hands -= need;
+			}
+		}
+		return held;
+	}
+
+	/** Which cuts get the hands first. */
+	private static final BodyPart[] HOLD_ORDER = {BodyPart.BODY, BodyPart.HEAD, BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG,
+		BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM, BodyPart.LEFT_FOOT, BodyPart.RIGHT_FOOT};
+
+	private static void hold(ServerPlayer player, int held) {
+		Integer was = player.getAttached(HOLDING);
+		if (held == 0) {
+			if (was != null) {
+				player.removeAttached(HOLDING);
+			}
+		} else if (was == null || was != held) {
+			player.setAttached(HOLDING, held);
+		}
 	}
 
 	/** Whether this downed player lies resting in a bed. */
@@ -221,15 +270,18 @@ public final class DownedStruggle {
 			|| player.position().distanceTo(rest.spot) > REST_REACH || Carry.isCarried(player) || !Downed.awake(player)) {
 			// crawled off, carried off, the bed gone, or knocked out
 			RESTS.remove(player.getUUID());
+			hold(player, 0);
 			return false;
 		}
 		if (now % 20 == 0) {
 			rest.still = rest.last.distanceToSqr(player.position()) < STILL_DISTANCE_SQR;
 			rest.last = player.position();
+			hold(player, rest.still ? held(player) : 0);
 		}
 		if (com.jaymospowers.core.blood.BleedOut.left(player) <= 0.01F) {
 			// bled dry in bed: out cold where they lie
 			RESTS.remove(player.getUUID());
+			hold(player, 0);
 			player.setAttached(Downed.OUT, true);
 			return false;
 		}
@@ -283,8 +335,9 @@ public final class DownedStruggle {
 	}
 
 	/** They're up, gone or dead: nothing of theirs is kept. */
-	static void forget(UUID player) {
-		STRUGGLES.remove(player);
-		RESTS.remove(player);
+	static void forget(ServerPlayer player) {
+		STRUGGLES.remove(player.getUUID());
+		RESTS.remove(player.getUUID());
+		hold(player, 0);
 	}
 }

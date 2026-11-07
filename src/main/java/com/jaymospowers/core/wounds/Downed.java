@@ -703,7 +703,9 @@ public final class Downed {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
 			SINKING.remove(player.getUUID());
-			DownedStruggle.forget(player.getUUID());
+			if (player instanceof ServerPlayer server) {
+				DownedStruggle.forget(server);
+			}
 			AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {
 				speed.removeModifier(SLOW_ID);

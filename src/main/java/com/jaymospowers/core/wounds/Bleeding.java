@@ -180,7 +180,7 @@ public final class Bleeding {
 	/** Whether {@code entity} can bleed at all: a body Wounds parts, with blood in it, not a creative player. */
 	static boolean bleeds(LivingEntity entity) {
 		BodyPlan plan = BodyPlan.of(entity);
-		return plan != null && entity.isAlive() && !entity.getType().builtInRegistryHolder().is(BladeBlood.BLOODLESS)
+		return plan != null && entity.isAlive() && BladeBlood.bleeds(entity)
 			&& !(entity instanceof Player player && (player.isCreative() || player.isSpectator()));
 	}
 

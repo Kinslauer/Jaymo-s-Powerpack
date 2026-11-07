@@ -438,6 +438,8 @@ public final class Heritage {
 		PayloadTypeRegistry.serverboundPlay().register(Choose.TYPE, Choose.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.kind(), payload.variant()));
 		ServerTickEvents.END_SERVER_TICK.register(Heritage::tick);
+		// (0.7.645) a heritage's own blood, for Powers' bleeding
+		PowersCompat.heritageBlood();
 		// (0.7.490) the risen are forgotten with the world, so singleplayer's next world never wakes a Hollow from this one
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> RISEN.clear());
 		// Emberborn: fire, lava, hot floors and burning never hurt

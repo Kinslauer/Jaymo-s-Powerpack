@@ -108,7 +108,7 @@ public final class BleedOut {
 	 * blows) the blood it still had pours out of the corpse.
 	 */
 	private static void toCorpse(LivingEntity dead, Entity corpse) {
-		if (!BladeBlood.bleeds(dead.getType())) {
+		if (!BladeBlood.bleeds(dead)) {
 			return;
 		}
 		Bloodied.Coat coat = Bloodied.coat(dead);

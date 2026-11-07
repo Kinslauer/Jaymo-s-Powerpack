@@ -10188,3 +10188,11 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
   `Mob.getMaxSpawnClusterSize` in `NaturalSpawner.spawnCategoryForPosition`). Great Whales keep their pods of 1-3
   (Andy chose to exempt them). Ship shark packs (`SharkWake`) unchanged.
 - Built, not played.
+
+## 0.7.645 (2026-11-07): the bloodless heritages, and the Emberborn's magma blood
+- Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race. (emberborn should have the magma
+  blood)". With Jaymo's Powers 0.21.49: Stoneborn, Bio-built, and the Skeleton, Wraith and Reaper Hollow (bones,
+  spirits and machines) never bleed, open cuts or leave blood. An Emberborn's blood is magma. Zombie Hollow and every other
+  heritage bleed as before. Villagers of those heritages too.
+- `PowersCompat.heritageBlood` adds a rule to Powers' `BladeBlood.BLOOD`, from `Heritage.register`.
+- Not built locally (no JDK 25 here); not played.

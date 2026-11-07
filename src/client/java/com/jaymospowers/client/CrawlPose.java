@@ -2,7 +2,9 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.DownedStruggle;
 import com.jaymospowers.core.wounds.Wounds;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -150,6 +152,15 @@ public final class CrawlPose {
 	static final long RISEN_TICKS = 30L;
 	/** Passed out: the head turned to the side, the arms slack by the body. */
 	static final float OUT_HEAD_TURN = 1.1F, OUT_ARM_X = -0.35F, OUT_ARM_OUT = 0.25F;
+	/**
+	 * (0.21.49) Resting in bed, a hand pressed on a held cut ({@link #stem}), lying face down: the arm's pitch and its roll
+	 * in toward the body (radians; the roll is mirrored for the left hand). The body's under the chest, the head's at the
+	 * neck, an arm's across to the other arm, a leg's back to the thigh on its own side (and further across for the other
+	 * leg). The press throbs this much, this fast.
+	 */
+	static final float[] STEM_BODY = {-0.35F, -0.6F}, STEM_HEAD = {-2.5F, -0.45F}, STEM_ARM = {-0.7F, -0.95F};
+	static final float[] STEM_LEG = {0.45F, 0.12F, 0.3F};
+	static final float STEM_THROB = 0.04F, STEM_THROB_RATE = 0.35F;
 
 	/**
 	 * {@code roll}: progress through a roll (signed by direction), or null; {@code stride}/{@code speed}: the crawl's walk
@@ -158,9 +169,10 @@ public final class CrawlPose {
 	 * (0.15.86) downed and holding Sneak to give up; {@code back}: (0.18.85) 0 to 1, turned over onto the back; {@code fwd}:
 	 * (0.19.30) 1 moving the way they face (head first on the belly, feet first on the back), -1 the other way; {@code vigour}:
 	 * (0.19.55) downed, the strength left (0 spent to 1), up to {@code 1 + ADRENALINE} on the first adrenaline; 1 otherwise.
+	 * {@code held}: (0.21.49) resting in a bed, the cuts their hands hold shut ({@link DownedStruggle#HOLDING}).
 	 */
 	public record State(@Nullable Float roll, float stride, float speed, float downed, boolean out, int broken, float age, int id,
-		boolean sneak, float rise, float back, float fwd, float vigour) {
+		boolean sneak, float rise, float back, float fwd, float vigour, int held) {
 		/** (0.19.55) The strength left, 0 to 1 (adrenaline counts as full). */
 		float strength() {
 			return Mth.clamp(this.vigour, 0.0F, 1.0F);
@@ -256,7 +268,8 @@ public final class CrawlPose {
 		double along = -Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo);
 		state.setData(KEY, new State(roll, state.walkAnimationPos, state.walkAnimationSpeed, since, downed && Downed.passedOut(player),
 			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId(), downed && player.isShiftKeyDown(), rise,
-			turned(player, time + partialTicks), along < -1.0E-4 ? -1.0F : 1.0F, vigour(player, since)));
+			turned(player, time + partialTicks), along < -1.0E-4 ? -1.0F : 1.0F, vigour(player, since),
+			downed ? player.getAttachedOrElse(DownedStruggle.HOLDING, 0) : 0));
 		// (0.15.86) lying flat, Sneak isn't a crouch: vanilla's would bend the upper body down into the ground
 		state.isCrouching = false;
 	}
@@ -528,8 +541,62 @@ public final class CrawlPose {
 			f.mix(PoseBlend.RIGHT_LEG, -right, 0.0F, BACK_LEG_OUT, back);
 			f.mix(PoseBlend.LEFT_LEG, -left, 0.0F, -BACK_LEG_OUT, back);
 		}
+		if (crawl.held() != 0 && crawl.downed() >= 0.0F) {
+			stem(f, crawl, rightArm, leftArm);
+		}
 		track.apply(h, f, crawl.downed() >= 0.0F ? 0.7F : 1.0F);
 	}
+
+	/**
+	 * (0.21.49) Andy: "animate the hands moving to stem the bleeding". Resting in bed and holding still, each hand presses
+	 * on a cut it holds shut ({@code DownedStruggle#HOLDING}): under the chest for the body, up to the neck for the head,
+	 * back to the thigh for a leg or foot, across to the other arm for an arm; both hands on a stump. The press throbs a
+	 * little with the heartbeat. The track's own stiffness eases the hands there and away.
+	 */
+	private static void stem(PoseBlend.Frame f, State crawl, boolean rightArm, boolean leftArm) {
+		float throb = STEM_THROB * Mth.sin(crawl.age() * STEM_THROB_RATE);
+		// the right hand takes the first cut it can reach (not on its own arm), the left the next
+		boolean rightFree = rightArm, leftFree = leftArm;
+		for (BodyPart part : STEM_ORDER) {
+			if ((crawl.held() & 1 << part.ordinal()) == 0) {
+				continue;
+			}
+			boolean right;
+			if (rightFree && part != BodyPart.RIGHT_ARM) {
+				right = true;
+			} else if (leftFree && part != BodyPart.LEFT_ARM) {
+				right = false;
+			} else {
+				continue;
+			}
+			float[] to = stemTo(part, right);
+			f.mix(right ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM, to[0] + throb, to[1], to[2], 1.0F);
+			if (right) {
+				rightFree = false;
+			} else {
+				leftFree = false;
+			}
+		}
+	}
+
+	/** Where a hand goes to press on {@code part} (the arm's pitch, yaw, roll), the {@code right} hand or the left. */
+	private static float[] stemTo(BodyPart part, boolean right) {
+		float side = right ? 1.0F : -1.0F;
+		return switch (part) {
+			case HEAD -> new float[] {STEM_HEAD[0], 0.0F, STEM_HEAD[1] * side};
+			case LEFT_ARM, RIGHT_ARM -> new float[] {STEM_ARM[0], 0.0F, STEM_ARM[1] * side};
+			case LEFT_LEG, RIGHT_LEG, LEFT_FOOT, RIGHT_FOOT -> {
+				// back along the side the leg is on: a reach across for the other one
+				boolean own = right == (part == BodyPart.RIGHT_LEG || part == BodyPart.RIGHT_FOOT);
+				yield new float[] {STEM_LEG[0], 0.0F, (own ? STEM_LEG[1] : -STEM_LEG[2]) * side};
+			}
+			default -> new float[] {STEM_BODY[0], 0.0F, STEM_BODY[1] * side};
+		};
+	}
+
+	/** Which held cut the hands go to first. */
+	private static final BodyPart[] STEM_ORDER = {BodyPart.BODY, BodyPart.HEAD, BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG,
+		BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM, BodyPart.LEFT_FOOT, BodyPart.RIGHT_FOOT};
 
 	/** (0.18.85) An arm pose that points a weapon. */
 	private static boolean aims(HumanoidModel.ArmPose pose) {
