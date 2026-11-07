@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Check open work against Hermes fixes" (asked alongside the fishing send-back, PR #1114)
 claimed_by: hermes-b
-pr: 
+pr: 1123
 suggested_owns:
   - kitchen/src/main/java/com/jaymoskitchen/cooking/spit/ (new)
   - kitchen/src/client/java/com/jaymoskitchen/client/spit/ (new)
