@@ -11,6 +11,9 @@ owns:
   - docs/HANDOFF.md
   - CLAUDE.md
   - .gitignore
+  - AGENTS.md
+  - GEMINI.md
+  - docs/AI-HANDBOOK.md
 ---
 # obsidian-vault-4d9705
 
