@@ -1,6 +1,7 @@
 package com.jaymospowers.client.blood;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -54,10 +55,13 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	 * How far a decal sits above the surface it's drawn on, plus a per-decal jitter so overlapping decals don't
 	 * flicker in step. Kept to a few thousandths of a block: enough to clear coplanar z-fighting with the block, small
 	 * enough that a puddle hanging over a slab edge or lying on a carpet or snow layer stays flush instead of floating.
-	 * Coplanar flicker is handled by drawing through the decal render state (BloodDecals.TYPE) - 26.3's RenderType and
-	 * RenderSetup carry no polygon or depth offset, so the lift cannot be relied on alone.
+	 * The flicker itself is stopped by drawing through {@link BloodDecals#DECAL_LAYER}: its pipeline is the translucent
+	 * particle pipeline with a depth bias, so a decal coplanar with a block stays flush past a few dozen blocks; the
+	 * lift stays tiny and only needs to clear exact coplanarity.
 	 */
 	static final float DECAL_LIFT = 0.002F, DECAL_LIFT_JITTER = 0.002F;
+	/** (0.21.x) Puddles at the edge of view distance fade out over these last blocks instead of popping at it. */
+	static final float DRAW_DISTANCE_FADE = 8.0F;
 	/** (0.19.63) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
 	static final float WET_ALPHA = 0.5F;
 	static final int WATER = 0x8EA4B6;
@@ -283,6 +287,17 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		double cx = Mth.lerp(partialTick, this.xo, this.x);
 		double cy = Mth.lerp(partialTick, this.yo, this.y);
 		double cz = Mth.lerp(partialTick, this.zo, this.z);
+		// (0.21.x) at the edge of view distance fade out over the last blocks instead of popping at it
+		if (this.alpha > 0.0F) {
+			float drawDistance = Minecraft.getInstance().options.renderDistance().get() * 16.0F;
+			Vec3 at = new Vec3(cx, cy, cz);
+			double dx = camera.position().x - at.x, dy = camera.position().y - at.y, dz = camera.position().z - at.z;
+			float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+			float fadeStart = drawDistance - DRAW_DISTANCE_FADE;
+			if (dist > fadeStart) {
+				this.alpha *= 1.0F - Mth.clamp((dist - fadeStart) / DRAW_DISTANCE_FADE, 0.0F, 1.0F);
+			}
+		}
 		double halfX = size * this.stretchX * 0.5, halfZ = size * this.stretchZ * 0.5;
 		double minX = cx - halfX, maxX = cx + halfX, minZ = cz - halfZ, maxZ = cz + halfZ;
 		int light = this.getLightCoords(partialTick);
@@ -323,7 +338,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float[][] corners = {{-h, -h, u0, v1}, {-h, h, u0, v0}, {h, h, u1, v0}, {h, -h, u1, v1}};
 		for (float[] c : corners) {
 			double x = cx + rx * c[0] + fx * c[1], z = cz + rz * c[0] + fz * c[1];
-			decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (x - cam.x), (float) (cy - cam.y) + lift, (float) (z - cam.z), c[2], c[3], color,
+			decals.add(BloodDecals.DECAL_LAYER, (float) (x - cam.x), (float) (cy - cam.y) + lift, (float) (z - cam.z), c[2], c[3], color,
 				light);
 		}
 	}
@@ -399,7 +414,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			// (the yaw is a quarter turn: a smear's is half turns, so its local axes stay its world ones)
 			float u = (lx / (size * this.stretchX) + 0.5F) * (u1 - u0) + u0;
 			float v = (lz / (size * this.stretchZ) + 0.5F) * (v1 - v0) + v0;
-			decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (corner[0] - cam.x), (float) (y - cam.y) + lift,
+			decals.add(BloodDecals.DECAL_LAYER, (float) (corner[0] - cam.x), (float) (y - cam.y) + lift,
 				(float) (corner[1] - cam.z), u, v, color, light);
 		}
 	}

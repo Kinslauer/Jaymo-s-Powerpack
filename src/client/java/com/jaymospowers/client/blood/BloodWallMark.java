@@ -33,6 +33,8 @@ import org.jspecify.annotations.Nullable;
 public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	/** Its opacity; how long a run takes to run its length (ticks); how far it can run (blocks). */
 	static final float ALPHA = 0.75F;
+/** (0.21.x) Wall marks at the edge of view distance fade out over these last blocks instead of popping at it. */
+static final float DRAW_DISTANCE_FADE = 8.0F;
 	static final int RUN_TICKS = 50;
 	static final float MOST_RUN = 2.0F;
 	/** How long a passing mark lies (ticks), the last of them fading. */
@@ -137,6 +139,17 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 		if (age > fadeFrom) {
 			alpha *= 1.0F - Mth.clamp((age - fadeFrom) / (this.lifetime - fadeFrom), 0.0F, 1.0F);
 		}
+		// (0.21.x) at the edge of view distance fade out over the last blocks instead of popping at it
+		if (alpha > 0.0F) {
+			float drawDistance = Minecraft.getInstance().options.renderDistance().get() * 16.0F;
+			Vec3 at = new Vec3(this.ax, this.ay, this.az);
+			double dx = camera.position().x - at.x, dy = camera.position().y - at.y, dz = camera.position().z - at.z;
+			float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+			float fadeStart = drawDistance - DRAW_DISTANCE_FADE;
+			if (dist > fadeStart) {
+				alpha *= 1.0F - Mth.clamp((dist - fadeStart) / DRAW_DISTANCE_FADE, 0.0F, 1.0F);
+			}
+		}
 		if (alpha <= 0.01F) {
 			return;
 		}
@@ -167,10 +180,10 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 		float u0 = sprite.getU0(), u1 = sprite.getU1(), v0 = sprite.getV0(), v1 = sprite.getV1();
 		// corners: top left, bottom left, bottom right, top right (seen from outside)
 		Vec3 tl = this.point(a0, top, LIFT), bl = this.point(a0, bottom, LIFT), br = this.point(a1, bottom, LIFT), tr = this.point(a1, top, LIFT);
-		decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (tl.x - cam.x), (float) (tl.y - cam.y), (float) (tl.z - cam.z), u0, v0, argb, light);
-		decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (bl.x - cam.x), (float) (bl.y - cam.y), (float) (bl.z - cam.z), u0, v1, argb, light);
-		decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (br.x - cam.x), (float) (br.y - cam.y), (float) (br.z - cam.z), u1, v1, argb, light);
-		decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (tr.x - cam.x), (float) (tr.y - cam.y), (float) (tr.z - cam.z), u1, v0, argb, light);
+		decals.add(BloodDecals.DECAL_LAYER, (float) (tl.x - cam.x), (float) (tl.y - cam.y), (float) (tl.z - cam.z), u0, v0, argb, light);
+		decals.add(BloodDecals.DECAL_LAYER, (float) (bl.x - cam.x), (float) (bl.y - cam.y), (float) (bl.z - cam.z), u0, v1, argb, light);
+		decals.add(BloodDecals.DECAL_LAYER, (float) (br.x - cam.x), (float) (br.y - cam.y), (float) (br.z - cam.z), u1, v1, argb, light);
+		decals.add(BloodDecals.DECAL_LAYER, (float) (tr.x - cam.x), (float) (tr.y - cam.y), (float) (tr.z - cam.z), u1, v0, argb, light);
 	}
 
 	// ---- where they come from ------------------------------------------------------------------------------------------
