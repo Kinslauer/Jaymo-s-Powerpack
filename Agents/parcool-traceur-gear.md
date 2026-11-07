@@ -10,6 +10,8 @@ started: 2026-11-07
 owns:
   - src/main/java/com/jaymospowers/freerun/gear/
   - src/main/resources/assets/jaymospowers/lang/parts/freerun-gear.json
+  - src/main/resources/assets/jaymospowers/textures/entity/equipment/humanoid/traceur_boots.png
+  - src/main/resources/assets/jaymospowers/textures/item/traceur_boots.png
 ---
 # ParCool track B part 2: traceur gloves and boots
 
@@ -30,4 +32,4 @@ of Powers.
 - Boots: attribute modifiers via `Equippable` FEET; own `EquipmentAsset` (`equipment/traceur_boots.json`) so worn boots draw their texture on the feet; `TraceurBoots.wears(player)` checks the feet slot
 
 ## Done
-What a player will see, and what wasn't tested.
+Worn traceur boots now draw a complete boot: side faces painted edge to edge over the foot only (no see-through slits down the sides, no thigh-high wrap), with a solid sole and top face, in our own dark brown with a black sole edge — no ParCool art. Build `sh ./gradlew build` passes and `tools/pr_checks.py` is green. Not tested: playtested in game (Andy merges only on his word; merged = compiled, not played).
