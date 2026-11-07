@@ -1,5 +1,6 @@
 package com.jaymospowers.mixin.toolbelt;
 
+import com.jaymospowers.baubles.Baubles;
 import com.jaymospowers.compat.ToolBeltCompat;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,6 +36,17 @@ abstract class ToolBeltHelperMixin {
 		if (entity instanceof Player player) {
 			ItemStack belt = ToolBeltCompat.shown(player);
 			cir.setReturnValue(belt.isEmpty() ? Optional.empty() : Optional.of(belt));
+		}
+	}
+
+	/**
+	 * Andy: "lanterns and coin purses can work from inside the belt": the belt takes them as well as tools, and one
+	 * carried in a worn belt hangs at the hip and works as if worn there ({@code Baubles.belt}).
+	 */
+	@Inject(method = "isItemValid", at = @At("HEAD"), cancellable = true, require = 0)
+	private static void jaymospowers$hipItems(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+		if (Baubles.hipItem(stack)) {
+			cir.setReturnValue(true);
 		}
 	}
 

@@ -1407,5 +1407,9 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   them while a Traveler Tool Belt is worn (`client/mixin/weaponmaster/WeaponMasterShownMixin`, `MAX_SHOWN`).
 - The tool belts (all six) fit the Baubles belt slot, and only a belt worn there counts: its radial menu, tool swap
   and hip model all read that slot (`mixin/toolbelt/ToolBeltHelperMixin`, `compat/ToolBeltCompat`). A belt carried in
-  the inventory no longer counts, so move it to the belt slot. It shares that slot with lanterns and coin purses.
-  Smoke's vapour sheds it from the slot. Gradle build only, not played.
+  the inventory no longer counts, so move it to the belt slot. Smoke's vapour sheds it from the slot.
+- Andy: "lanterns and coin purses can work from inside the belt". The tool belt takes lanterns and coin purses
+  (`ToolBeltHelperMixin` on `isItemValid`), and one carried in a worn tool belt works as if worn in the belt slot: it
+  hangs at the hip, a lantern lights the way, and Kingdoms pays from and pickpockets lift the purse (`Baubles.belt` and
+  `setBelt` read and write the first purse, else lantern, inside the tool belt; `Baubles.beltSlot` is the slot itself).
+  Gradle build only, not played.

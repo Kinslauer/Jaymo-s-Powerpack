@@ -39,7 +39,7 @@ public final class ToolBeltCompat {
 	 * sync to their wearer).
 	 */
 	public static ItemStack worn(Player player) {
-		ItemStack belt = LOADED ? Baubles.belt(player) : ItemStack.EMPTY;
+		ItemStack belt = LOADED ? Baubles.beltSlot(player) : ItemStack.EMPTY;
 		return isBelt(belt) ? belt : ItemStack.EMPTY;
 	}
 

@@ -1,6 +1,7 @@
 package com.jaymospowers.baubles;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.ToolBeltCompat;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashSet;
@@ -15,6 +16,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -37,6 +39,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.gamerules.GameRules;
 
 /**
@@ -293,24 +296,72 @@ public final class Baubles {
 		return stack.is(LANTERNS) || stack.is(HIP_SHOWN);
 	}
 
-	/**
-	 * (0.20.0) What {@code player} wears in the belt slot: the live stack (changing a purse's contents in place changes it),
-	 * or empty. Jaymo's Kingdoms reads its coin purse from here ({@code PowersCompat.belt}).
-	 */
-	public static ItemStack belt(Player player) {
+	/** What sits in the belt slot itself (the live stack), or empty: a tool belt stays a tool belt here. */
+	public static ItemStack beltSlot(Player player) {
 		List<ItemStack> saved = player.getAttached(WORN);
 		return saved != null && BELT_SLOT < saved.size() ? saved.get(BELT_SLOT) : ItemStack.EMPTY;
 	}
 
 	/**
+	 * (0.20.0) What {@code player} wears in the belt slot: the live stack (changing a purse's contents in place changes it),
+	 * or empty. Jaymo's Kingdoms reads its coin purse from here ({@code PowersCompat.belt}).
+	 * <p>(0.21.42, Andy: "lanterns and coin purses can work from inside the belt") With a Traveler Tool Belt in the slot,
+	 * the hip item carried in it instead (a copy: write it back with {@link #setBelt}), a purse before a lantern, or empty.
+	 */
+	public static ItemStack belt(Player player) {
+		ItemStack slot = beltSlot(player);
+		if (!ToolBeltCompat.isBelt(slot)) {
+			return slot;
+		}
+		int at = carriedHip(slot);
+		return at < 0 ? ItemStack.EMPTY : carried(slot).get(at);
+	}
+
+	/** (0.21.42) Copies of what a tool belt carries, in its slot order (empties kept). */
+	private static List<ItemStack> carried(ItemStack toolBelt) {
+		return toolBelt.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).itemCopies().toList();
+	}
+
+	/** (0.21.42) Where in a tool belt the hip item {@link #belt} hands out is: the first purse, else the first lantern, or -1. */
+	private static int carriedHip(ItemStack toolBelt) {
+		List<ItemStack> items = carried(toolBelt);
+		int lantern = -1;
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).is(HIP_SHOWN)) {
+				return i;
+			}
+			if (lantern < 0 && items.get(i).is(LANTERNS)) {
+				lantern = i;
+			}
+		}
+		return lantern;
+	}
+
+	/**
 	 * (0.20.0) Puts {@code stack} in the belt slot (if it fits there, or is empty), redoing the bonuses and the hip. Kingdoms
 	 * calls it after changing a worn purse, or when a pickpocket lifts the whole thing ({@code PowersCompat.setBelt}).
+	 * <p>(0.21.42) With a tool belt in the slot, {@code stack} replaces the hip item carried in it ({@link #belt}): an
+	 * empty stack takes it out (a lifted purse), and the tool belt stays on. Nothing happens if it carries none.
 	 */
 	public static void setBelt(ServerPlayer player, ItemStack stack) {
 		if (!stack.isEmpty() && !fits(BELT_SLOT, stack)) {
 			return;
 		}
 		List<ItemStack> worn = worn(player);
+		ItemStack slot = worn.get(BELT_SLOT);
+		if (ToolBeltCompat.isBelt(slot) && (stack.isEmpty() || hipItem(stack))) {
+			int at = carriedHip(slot);
+			if (at < 0) {
+				return;
+			}
+			List<ItemStack> items = new ArrayList<>(carried(slot));
+			items.set(at, stack.copy());
+			ItemStack toolBelt = slot.copy();
+			toolBelt.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(items));
+			worn.set(BELT_SLOT, toolBelt);
+			setWorn(player, worn);
+			return;
+		}
 		worn.set(BELT_SLOT, stack);
 		setWorn(player, worn);
 	}
@@ -334,6 +385,11 @@ public final class Baubles {
 			player.setAttached(LOOKS, List.copyOf(looks));
 		}
 		ItemStack hip = hipItem(worn.get(BELT_SLOT)) ? worn.get(BELT_SLOT).copyWithCount(1) : ItemStack.EMPTY;
+		// (0.21.42) a lantern or purse carried in a worn tool belt hangs at the hip too
+		if (hip.isEmpty() && ToolBeltCompat.isBelt(worn.get(BELT_SLOT))) {
+			int at = carriedHip(worn.get(BELT_SLOT));
+			hip = at < 0 ? ItemStack.EMPTY : carried(worn.get(BELT_SLOT)).get(at).copyWithCount(1);
+		}
 		ItemStack back = worn.get(BODY_SLOT).is(LANTERN_POLE) ? worn.get(BODY_SLOT).copyWithCount(1) : ItemStack.EMPTY;
 		List<ItemStack> now = player.getAttached(SHOWN);
 		if (hip.isEmpty() && back.isEmpty()) {
