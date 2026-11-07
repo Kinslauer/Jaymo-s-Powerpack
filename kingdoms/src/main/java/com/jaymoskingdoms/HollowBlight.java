@@ -1,8 +1,12 @@
 package com.jaymoskingdoms;
 
+import com.jaymospowers.core.wounds.Downed;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -17,6 +21,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -64,6 +70,9 @@ public final class HollowBlight {
 
 	static final AttachmentType<Blight> BLIGHT = AttachmentRegistry.create(JaymosKingdoms.id("hollow_blight"),
 		builder -> builder.persistent(Blight.CODEC));
+
+	/** A blight that finished while they lived: they passed out, and rise turned when they come round. Keyed by player. */
+	static final Map<UUID, Hollows.Turn> PENDING_TURN = new HashMap<>();
 
 	private HollowBlight() {
 	}
@@ -141,15 +150,35 @@ public final class HollowBlight {
 					player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SYMPTOM_TICKS, 0, true, false, true));
 					player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SYMPTOM_TICKS / 2, 0, true, false, true));
 				}
-			}
+				// (2026-11-07) the Hollow you're becoming doesn't raise a hand to you: nearby zombies stand down and speak instead
+				Level level = player.level();
+				for (Zombie z : level.getEntitiesOfClass(Zombie.class,
+						player.getBoundingBox().inflate(16.0),
+						z -> z.isAlive() && z.getTarget() == player)) {
+					z.setTarget(null);
+					if (player.getRandom().nextInt(8) == 0) {
+						level.playSound(null, z.blockPosition(), SoundEvents.ZOMBIE_AMBIENT, SoundSource.HOSTILE, 0.6F, 1.0F);
+					}
+				}
 		}
+
+	// (2026-11-07) rise turned after passing out: they come round, then rise as the Hollow they were becoming
+	for (Iterator<Map.Entry<UUID, Hollows.Turn>> it = PENDING_TURN.entrySet().iterator(); it.hasNext();) {
+		Map.Entry<UUID, Hollows.Turn> entry = it.next();
+		ServerPlayer p = server.getPlayerList().getPlayer(entry.getKey());
+		if (p == null || !p.isAlive() || Downed.isDowned(p) || Downed.passedOut(p)) {
+			continue;
+		}
+		it.remove();
+		Hollows.turn(p, entry.getValue());
 	}
 
-	/** The blight has run its course while they lived: they turn where they stand. */
+/** The blight has run its course while they lived: they pass out first, then rise turned. */
 	private static void turnNow(ServerPlayer player, Blight blight) {
 		player.removeAttached(BLIGHT);
 		player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.8F, 0.6F);
-		Hollows.turn(player, blight.turn());
+		PENDING_TURN.put(player.getUUID(), blight.turn());
+		Downed.knockOut(player.level(), player, TURN_DARK, false, "message.jaymospowers.mortality.turning", false);
 	}
 
 	/** For Powers' death by cause: one dying with the blight in them rises the Hollow it was making ({@code Mortality.MID_TURNS}). */
