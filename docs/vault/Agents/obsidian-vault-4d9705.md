@@ -2,7 +2,7 @@
 status: in-review
 task: Set up this Obsidian vault for running three agents at once
 branch: claude/obsidian-vault-4d9705
-pr: 
+pr: 1102
 mods: none (docs only)
 versions: no bump
 started: 2026-11-06
