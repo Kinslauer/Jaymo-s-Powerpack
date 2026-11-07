@@ -10170,3 +10170,13 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
 - Andy: "every meter should work this way". Let go of a lift, or let the mark step out of reach, and how deep your hand
   got is kept (`Pickpocket.Kept`): the next lift on the same mark carries on with the same length. Caught, done, or a
   different mark tried, it's forgotten. Compile-checked; not played.
+## 0.7.643: the Hollow's blight
+- Andy (2026-11-07): infected players turning into a Hollow wake fully turned if they die first (Powers 0.21.42). There
+  was no slow turning before (a kill could only turn you at death), so `HollowBlight` adds one: a blow you live through
+  from one of `Hollows`' turners (zombies, witches, skeletons' arrows, phantoms and vexes, necromancers, other undead)
+  leaves the blight at a quarter of that turner's turn chance (a zombie, 1 blow in 16). It takes a Minecraft day:
+  hunger from a third of the way, weakness and nausea from two thirds, each stage told once, then you turn where you stand.
+  A golden apple burns it out. Hollow already, androids, vampires, the bitten and werewolves can't take it.
+- Dying with it (`Mortality.MID_TURNS`): no prompt, a long black edged in the Hollow's colour (zombie green, bone,
+  wraith blue, reaper teal, pallid grey), and you rise that Hollow. `VampirePlayers.midTurn`: the bitten who die before
+  nightfall rise a vampire (a dhampir if they ate gold), the black edged blood red. Hint 124. Compile-checked; not played.

@@ -2697,6 +2697,49 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.643) Hands Powers' death by cause who is already turning when they die ({@link HollowBlight}, {@link VampirePlayers}):
+	 * the vignette's colour and what finishes the turning. Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellMidTurns(java.util.function.Function<net.minecraft.server.level.ServerPlayer, java.util.Map.@Nullable Entry<Integer, Runnable>> mid) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("MID_TURNS").get(null);
+			((java.util.List<java.util.function.Function<net.minecraft.server.level.ServerPlayer, java.util.Map.Entry<Integer, Runnable>>>)list).add(mid);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality mid-turns (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle waking;
+	private static boolean wakingLooked;
+
+	/** (0.7.643) Whether {@code player} lies left for dead, waiting to wake (Powers' {@code Mortality.waking}). False without Powers. */
+	static boolean waking(net.minecraft.world.entity.player.Player player) {
+		if (!wakingLooked) {
+			wakingLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					waking = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mortality"),
+						"waking", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.player.Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality.waking (older Powers?)", e);
+				}
+			}
+		}
+		if (waking == null) {
+			return false;
+		}
+		try {
+			return (boolean)waking.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.462) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
 	public static boolean setBones(net.minecraft.world.entity.LivingEntity entity) {
 		lookForHealing();

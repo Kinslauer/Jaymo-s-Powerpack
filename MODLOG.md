@@ -1399,3 +1399,14 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   slide: both arms up and clawing (`SLIDE_CLAW`), elbows a little bent, legs straight with the toes scraping and kicking a
   knee up in turn, body pressed into the wall (`SLIDE_LEAN` 6 degrees), head back looking up. The drop doesn't count as
   climbed distance, so the climb's limbs hold still under the blend instead of running backward. Compile-checked, not played.
+
+## 0.21.42: dying mid-turn rises you turned
+- Andy: "players that get infected and are turning into hollow, shouldnt reincarnate the way everyone else does, if they
+  die before fully turning, then they dont get a prompt on death, just a longer black screen, an appropriate vignette, and
+  a wakeup as a full turned hollow whichever they may be." `Mortality.MID_TURNS` (Kingdoms fills it: the Hollow's blight,
+  a vampire's bite before nightfall) is asked before `TURNINGS`. Such a death is never final (beheaded, the void, lava or an
+  execution aside), skips the come-to bar, doesn't use up a sure wake, and lies `TURN_DARK` (14 s) in the black with the
+  line "Something in your blood keeps moving after your heart stops", then rises where it fell (the drowned on the shore)
+  as what it was becoming, with no new injury ("The turning is done").
+- `Mortality.TURN_TINT` (synced, not saved) carries the turning's colour; `DownedHud` draws it as a slow breathing ring
+  at the edges of the black. Chrono's R window on a waking is unchanged (a rewind clears the tint). Compile-checked; not played.

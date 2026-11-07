@@ -78,6 +78,9 @@ public final class VampirePlayers {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(VampirePlayers::tick);
+		// (0.7.643) bitten and killed before nightfall: Powers' death by cause has them rise the rest of the way, a vampire
+		// (a dhampir if they ate gold), after a long black with blood at its edges (Andy: "a wakeup as a full turned hollow")
+		PowersCompat.tellMidTurns(VampirePlayers::midTurn);
 		// (0.7.625) ahead of Powers' downed handling (its revive hold): holding someone by the throat, use on them does
 		// nothing, never a revive filling up. (0.7.634) Feeding itself is the skill bar's Feed ({@link BloodGrab#feed}), no
 		// longer sneak+use (Andy: "the current right click ability can move")
@@ -242,6 +245,21 @@ public final class VampirePlayers {
 		if (!player.isPassenger() && Lairs.crypt(player.level(), player)) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.crypt").withStyle(ChatFormatting.DARK_RED));
 		}
+	}
+
+	/** (0.7.643) The colour at the edges of the black for one dying bitten (RGB). */
+	static final int BITTEN_TINT = 0xA0101C;
+
+	/** (0.7.643) For Powers' death by cause ({@code Mortality.MID_TURNS}): one bitten who dies rises turned. */
+	static java.util.Map.@org.jspecify.annotations.Nullable Entry<Integer, Runnable> midTurn(ServerPlayer player) {
+		if (!player.hasAttached(Vampires.BITTEN) || Vampires.isVampire(player) || Lycans.cursed(player)) {
+			return null;
+		}
+		return java.util.Map.entry(BITTEN_TINT, () -> {
+			if (player.hasAttached(Vampires.BITTEN) && !Vampires.isVampire(player)) {
+				turn(player, nightIndex(player.level().getOverworldClockTime()));
+			}
+		});
 	}
 
 	/** (0.7.66) A golden apple, eaten by the bitten before they turn: they'll only half turn. */
