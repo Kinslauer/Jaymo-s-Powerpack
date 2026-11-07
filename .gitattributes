@@ -1,1 +1,4 @@
 deck/*.sh text eol=lf
+# The vault keeps LF: Obsidian saves LF, so CRLF checkouts showed every note it touched as changed
+docs/vault/** text eol=lf
+docs/vault-settings/** text eol=lf
