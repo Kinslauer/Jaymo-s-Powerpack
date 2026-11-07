@@ -10,8 +10,47 @@
   "activeFile": null,
   "layout": {
     "type": "split",
-    "direction": "vertical",
+    "direction": "horizontal",
     "children": [
+      {
+        "type": "leaf",
+        "id": "context",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "Context.md",
+            "mode": "source"
+          }
+        }
+      },
+      {
+        "type": "split",
+        "direction": "vertical",
+        "children": [
+          {
+            "type": "leaf",
+            "id": "agents",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Agents.md",
+                "mode": "source"
+              }
+            }
+          },
+          {
+            "type": "leaf",
+            "id": "projects",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Projects/README.md",
+                "mode": "source"
+              }
+            }
+          }
+        ]
+      },
       {
         "type": "leaf",
         "id": "readme",

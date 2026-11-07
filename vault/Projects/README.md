@@ -1,34 +1,30 @@
 # Projects
 
-One note per active task or PR thread. Create a new note here when you start work; archive (or delete) it when the PR merges.
-
-## Active projects
+One note per active task or PR thread. Create when you start; archive when the PR merges.
 
 | Project | Owner | PR | Status |
 |---------|-------|-----|--------|
-| (none) | — | — | — |
+| — | — | — | — |
 
-## Templates
-
-### Agent task note
+## Agent task note
 
 ```
-# <task name>
+# <task>
 
-Owner: <agent name>
+Owner: <agent>
 Status: active / blocked / done
-PR: #<number> (or none yet)
+PR: #<number>
 
 ## Goal
-One line on what this changes.
+One line: what this changes.
 
 ## What I did
-- Bullet per file changed, with the player-facing result.
+- One bullet per file changed, player-facing result.
 
 ## What's left
-- Anything still needed before the PR can merge.
+- Still needed before merge.
 
 ## Verified
-- `sh ./gradlew build` passed / failed (paste the error if failed).
-- Did / did not launch a dev run.
+- `sh ./gradlew build` passed / failed (paste error).
+- Did / did not launch dev run.
 ```

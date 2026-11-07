@@ -1,22 +1,13 @@
 # Agents
 
-Three agents share this vault. Each agent owns its current task and updates this file when it starts, pauses, or finishes work. Read `Context.md` before claiming anything.
+Three agents share this vault. Each owns its current task. Update this file when you start, pause, or finish. Read `Context.md` before claiming anything.
 
-## Agent roles
+| Agent | Role | Task | Status | PR |
+|-------|------|------|--------|-----|
+| 1 | Combat & powers | — | idle | — |
+| 2 | Models & assets | — | idle | — |
+| 3 | Build & deploy | — | idle | — |
 
-| Agent | Role | Current task | Status | PR |
-|-------|------|--------------|--------|----|
-| Agent 1 | Modding — combat & powers | (none claimed) | idle | — |
-| Agent 2 | Modding — models & assets | (none claimed) | idle | — |
-| Agent 3 | Infrastructure — build & deploy | (none claimed) | idle | — |
+To claim: pick an idle slot, write task + one-line description + PR number, set `active`. When done, set `done`, link merged PR, free the slot.
 
-## How to claim a task
-
-1. Pick an idle agent slot.
-2. Write your task name, a one-line description, and the PR number (if you've opened one).
-3. Set status to `active`.
-4. When done, set status to `done`, link the merged PR, and free the slot.
-
-## Claimed work
-
-None yet.
+Claimed work: none.
