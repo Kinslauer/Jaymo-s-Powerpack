@@ -1552,7 +1552,10 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 
 - **Traceur gloves** (wrist bauble, leather and string): bare hands no longer burn on a long wall slide —
   `WallSlide.addHandGuard` now registers the traceur gloves (`freerun/gear/TraceurGloves`).
-- **Traceur boots** (leather): more safe fall distance softens landings, and the jump-strength boost carries the long
-  jump, charge jump and safety tap farther (`freerun/gear/TraceurBoots`).
+- **Traceur boots** (leather): more safe fall distance softens landings, and while worn they carry the freerun leaps
+  farther: long jump speed x 1.10 (`LONG_JUMP_BONUS`), charge jump +0.05 blocks a tick (`CHARGE_JUMP_BONUS`), and the
+  safety tap takes 85% of the fall damage off instead of 60% (`SAFETY_CUT` plus `SAFETY_CUT_BONUS`). Worn boots draw
+  their own equipment texture (`equipment/traceur_boots.json`), and the gloves' and boots' descriptions now show as
+  item tooltips.
 
 Built; not played.

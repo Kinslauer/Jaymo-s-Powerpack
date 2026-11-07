@@ -1,5 +1,6 @@
 package com.jaymospowers.freerun;
 
+import com.jaymospowers.freerun.gear.TraceurBoots;
 import com.jaymospowers.power.web.WebPose;
 import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.stamina.Dodge;
@@ -94,7 +95,7 @@ public final class LandingRoll {
 			if (tapped != null && now - tapped <= SLACK_TICKS) {
 				// the safety tap got here first: the knees take part of it
 				TAPPED.remove(player.getUUID());
-				deal(player, new Pending(source, amount * (1.0F - SAFETY_CUT), now));
+				deal(player, new Pending(source, amount * (1.0F - safetyCut(player)), now));
 				return false;
 			}
 			PENDING.put(player.getUUID(), new Pending(source, amount, now));
@@ -169,7 +170,7 @@ public final class LandingRoll {
 			if (pose != null && pose.kind() == WebPose.HERO_LAND && now - pose.start() <= LATE_TICKS + SLACK_TICKS) {
 				player.removeAttached(WebPower.POSE);
 			}
-			deal(player, new Pending(pending.source(), pending.amount() * (1.0F - SAFETY_CUT), pending.at()));
+			deal(player, new Pending(pending.source(), pending.amount() * (1.0F - safetyCut(player)), pending.at()));
 		} else {
 			TAPPED.put(player.getUUID(), now);
 		}
@@ -178,6 +179,13 @@ public final class LandingRoll {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 0.9F, 0.75F);
 		level.sendParticles(ParticleTypes.POOF, player.getX(), player.getY() + 0.1, player.getZ(), 5, 0.3, 0.05, 0.3, 0.02);
 		player.addTag(Freerun.XP_TAG);
+	}
+
+	/** The safety tap's fall-damage cut: {@link #SAFETY_CUT}, more while traceur boots are worn. */
+	private static float safetyCut(ServerPlayer player) {
+		float cut = SAFETY_CUT;
+		if (TraceurBoots.wears(player)) cut += TraceurBoots.SAFETY_CUT_BONUS;
+		return cut;
 	}
 
 	private static void deal(ServerPlayer player, Pending pending) {
