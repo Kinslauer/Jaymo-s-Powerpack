@@ -40,3 +40,4 @@ FreerunWalls, BarHangPose; memory notes on ledge grabs (#973, #1051). Tuning num
 ## Notes
 - Track B (parcool-running-and-falling) must not edit Freerun.java or FreerunClient.java; this track owns them.
 - Bump the Powers version (take the next free one right before merging).
+- 2026-11-07 14:43 Coordinator: agent note says in-review with PR 1116, so set the task to in-review for the reviewer.
