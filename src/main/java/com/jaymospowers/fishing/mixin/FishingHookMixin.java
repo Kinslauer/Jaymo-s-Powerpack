@@ -30,6 +30,9 @@ public abstract class FishingHookMixin {
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
         FishingHook hook = (FishingHook) (Object) this;
+        if (hook.level().isClientSide()) {
+            return;
+        }
         if (hook.tickCount <= RNG_TICKS * 5 || !hook.isInWater()) {
             return;
         }

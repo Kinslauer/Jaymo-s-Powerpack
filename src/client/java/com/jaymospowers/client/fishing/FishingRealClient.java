@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 /**
@@ -56,8 +57,8 @@ public final class FishingRealClient {
         if (state == null || !state.fighting()) {
             return;
         }
-        int w = minecraft.getWindow().getWidth();
-        int h = minecraft.getWindow().getHeight();
+        int w = graphics.guiWidth();
+        int h = graphics.guiHeight();
         int x = w / 2 - BAR_W / 2;
         int y = h - 40;
         Font font = minecraft.font;
@@ -65,7 +66,7 @@ public final class FishingRealClient {
         graphics.fill(x, y, x + BAR_W, y + BAR_H, 0xFF202028);
         int tension = Math.round(BAR_W * Mth.clamp(state.tension(), 0.0F, 1.0F));
         graphics.fill(x, y, x + tension, y + BAR_H, 0xFFFF5050);
-        String label = "Fishing: " + Mth.clamp((int) (state.tension() * 100), 0, 100) + "% tension";
-        graphics.text(font, label, x + BAR_W / 2 - font.width(label) / 2, y - 10, 0xFFFFFFFF, true);
+        int percent = Mth.clamp((int) (state.tension() * 100), 0, 100);
+        graphics.text(font, Component.translatable("hud.jaymospowers.fishing.tension", percent), x + BAR_W / 2 - font.width(Component.translatable("hud.jaymospowers.fishing.tension", percent)) / 2, y - 10, 0xFFFFFFFF, true);
     }
 }

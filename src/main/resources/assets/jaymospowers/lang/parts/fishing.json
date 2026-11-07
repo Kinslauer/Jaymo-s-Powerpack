@@ -1,5 +1,7 @@
 {
   "message.jaymospowers.fishing.line_broke": "The line snapped and the fish got away.",
   "message.jaymospowers.fishing.fish_on": "Fish on!",
-  "message.jaymospowers.fishing.caught": "Caught a fish!"
+  "message.jaymospowers.fishing.caught": "Caught a fish!",
+  "message.jaymospowers.fishing.fish_got_away": "The fish got away.",
+  "hud.jaymospowers.fishing.tension": "Fishing: %s%% tension"
 }

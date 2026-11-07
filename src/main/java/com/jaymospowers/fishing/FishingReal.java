@@ -32,8 +32,8 @@ import java.util.UUID;
 
 /**
  * Realistic fishing: when a fish bites, a live fish entity is hooked instead of an item dropping, and the player
- * plays a tug-of-war to reel it in. Line tension rises as the fish fights; reel it down (hold use) to land the fish,
- * or let it climb to 1 and the line breaks. Stronger fish fight harder and break the line sooner.
+ * plays a tug-of-war to reel it in. Holding use raises tension and pulls the fish in; easing off lets tension fall
+ * while the fish takes line back. Stronger fish surge harder and break the line sooner.
  */
 public final class FishingReal {
     public static final Identifier ID = JaymosPowers.id("fishing_real");
@@ -44,17 +44,27 @@ public final class FishingReal {
     /** Server side: the fish entity each player is currently fighting, keyed by player uuid. */
     private static final Map<UUID, LivingEntity> HOOKED = new HashMap<>();
     private static final Map<UUID, FishingHook> HOOKS = new HashMap<>();
+    /** Set true for one tick by the ReelInput packet when the player is holding use to reel. */
+    private static final Map<UUID, Boolean> REELING = new HashMap<>();
 
     /** Base ticks a hooked fish must wait before it can be caught (gives the player time to react). */
     private static final int MIN_FIGHT_TICKS = 60;
     /** Max fight duration before the line breaks from exhaustion (ticks). */
     private static final int MAX_FIGHT_TICKS = 900;
-    /** How far tension falls per tick while the player reels. */
-    private static final float REEL_RELEASE = 0.015F;
-    /** How far progress rises per tick while reeling at safe tension. */
-    private static final float REEL_PROGRESS = 0.002F;
+    /** Tension added per tick while reeling, per unit of fish strength. */
+    private static final float TENSION_REEL = 0.05F;
+    /** Tension removed per tick while not reeling (the player eases off). */
+    private static final float TENSION_EASE = 0.025F;
+    /** Progress added per tick while reeling at safe tension. */
+    private static final float PROGRESS_REEL = 0.004F;
+    /** Progress removed per tick while not reeling, per unit of fish strength (fish takes line back). */
+    private static final float PROGRESS_FISH_BACK = 0.003F;
     /** Tension above which reeling makes no progress (the fish is pulling too hard). */
-    private static final float TOO_TENSE = 0.6F;
+    private static final float TOO_TENSE = 0.8F;
+    /** Tension at which the line snaps. */
+    private static final float LINE_BREAK = 1.0F;
+    /** Chance a hooked tick produces a bite (checked 4 times a second). */
+    private static final float BITE_CHANCE = 0.03F;
 
     private FishingReal() {
     }
@@ -71,7 +81,7 @@ public final class FishingReal {
         ServerPlayNetworking.registerGlobalReceiver(FishingPayloads.ReelInput.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
             if (payload.reeling()) {
-                reel(player);
+                REELING.put(player.getUUID(), true);
             }
         });
     }
@@ -94,46 +104,59 @@ public final class FishingReal {
             return;
         }
         LivingEntity fish = HOOKED.get(player.getUUID());
+        FishingHook hook = HOOKS.get(player.getUUID());
         long now = player.level().getGameTime();
+
+        // End the fight if the hook is gone (player switched item, hook removed).
+        if (hook == null || hook.isRemoved()) {
+            endFight(player, false);
+            return;
+        }
+
         if (fish == null || !fish.isAlive() || now - state.startTime() > MAX_FIGHT_TICKS) {
             // fish died, despawned, or the fight ran too long: line breaks
             endFight(player, false);
             player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.line_broke").withStyle(net.minecraft.ChatFormatting.RED));
             return;
         }
-        // the fish pulls on the line every tick
-        float tension = Math.min(1.0F, state.tension() + state.strength() * 0.05F);
+
+        boolean reeling = REELING.remove(player.getUUID()) != null;
+        float tension = state.tension();
         float progress = state.progress();
-        if (tension >= 1.0F) {
+
+        if (reeling) {
+            // reeling: tension rises (pulling hard), fish comes in
+            tension = Math.min(1.0F, tension + state.strength() * TENSION_REEL);
+            if (tension < TOO_TENSE) {
+                progress = Math.min(1.0F, progress + PROGRESS_REEL);
+            }
+        } else {
+            // easing off: tension falls, fish takes line back
+            tension = Math.max(0.0F, tension - TENSION_EASE);
+            progress = Math.max(0.0F, progress - state.strength() * PROGRESS_FISH_BACK);
+        }
+
+        if (tension >= LINE_BREAK) {
             endFight(player, false);
             player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.line_broke").withStyle(net.minecraft.ChatFormatting.RED));
             return;
         }
-        // keep the fish near the player, tugging against the line
-        keepNear(player, fish);
-        player.setAttached(FIGHTING, state.withTension(tension).withProgress(progress));
-    }
 
-    /** The player is reeling: ease tension down and, when the line isn't too tense, bring the fish in. */
-    private static void reel(ServerPlayer player) {
-        FishFight state = fight(player);
-        if (!state.fighting()) {
-            return;
-        }
-        LivingEntity fish = HOOKED.get(player.getUUID());
-        if (fish == null || !fish.isAlive()) {
-            endFight(player, false);
-            return;
-        }
-        float tension = Math.max(0.0F, state.tension() - REEL_RELEASE);
-        float progress = state.progress();
-        if (tension < TOO_TENSE) {
-            progress = Math.min(1.0F, progress + REEL_PROGRESS);
-        }
-        player.setAttached(FIGHTING, state.withTension(tension).withProgress(progress));
-        if (progress >= 1.0F && player.level().getGameTime() - state.startTime() >= MIN_FIGHT_TICKS) {
+        if (progress >= 1.0F && now - state.startTime() >= MIN_FIGHT_TICKS) {
             endFight(player, true);
+            return;
         }
+
+        if (progress <= 0.0F) {
+            // fish got away
+            endFight(player, false);
+            player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.fish_got_away").withStyle(net.minecraft.ChatFormatting.RED));
+            return;
+        }
+
+        // keep the fish near the hook/water, tugging against the line, so it is not dragged onto land
+        keepNear(player, fish, hook);
+        player.setAttached(FIGHTING, state.withTension(tension).withProgress(progress));
     }
 
     /** Start a fight: hook a live fish on the player's line. Called by the mixin when a bite happens. */
@@ -155,6 +178,7 @@ public final class FishingReal {
     /** End the fight: if caught, drop the fish item; otherwise let it swim off. */
     public static void endFight(ServerPlayer player, boolean caught) {
         player.setAttached(FIGHTING, FishFight.NONE);
+        REELING.remove(player.getUUID());
         LivingEntity fish = HOOKED.remove(player.getUUID());
         FishingHook hook = HOOKS.remove(player.getUUID());
         if (fish != null) {
@@ -178,17 +202,15 @@ public final class FishingReal {
             hook.discard();
         }
     }
-    /** Keep the hooked fish near the player, tugging against the line. */
-    private static void keepNear(ServerPlayer player, LivingEntity fish) {
-        double dx = player.getX() - fish.getX();
-        double dz = player.getZ() - fish.getZ();
+
+    /** Keep the hooked fish near the hook/water, tugging against the line, so it is not dragged onto land. */
+    private static void keepNear(ServerPlayer player, LivingEntity fish, FishingHook hook) {
+        double dx = hook.getX() - fish.getX();
+        double dz = hook.getZ() - fish.getZ();
         double dist = Math.sqrt(dx * dx + dz * dz);
-        if (dist > 4.0) {
-            double pull = 0.15;
+        if (dist > 3.0) {
+            double pull = 0.12;
             fish.setDeltaMovement(fish.getDeltaMovement().add(dx / dist * pull, 0.05, dz / dist * pull));
-        } else if (dist < 1.5) {
-            double push = 0.1;
-            fish.setDeltaMovement(fish.getDeltaMovement().add(-dx / Math.max(dist, 0.1) * push, 0.0, -dz / Math.max(dist, 0.1) * push));
         }
     }
 
@@ -197,6 +219,6 @@ public final class FishingReal {
         if (level.isClientSide() || level.getGameTime() % 4L != 0L) {
             return false;
         }
-        return RANDOM.nextFloat() < 0.03F;
+        return RANDOM.nextFloat() < BITE_CHANCE;
     }
 }
