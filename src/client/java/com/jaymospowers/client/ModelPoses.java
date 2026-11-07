@@ -52,6 +52,7 @@ public final class ModelPoses {
 		com.jaymospowers.client.armory.HeldItems.applyModel(model, state);
 		com.jaymospowers.client.freerun.RunPose.applyModel(model, state);
 		com.jaymospowers.client.freerun.UpRunPose.applyModel(model, state);
+		com.jaymospowers.client.freerun.moves.RunMovesPose.applyModel(model, state);
 		WebArms.applyModel(model, state);
 		WebFeral.applyModel(model, state);
 		WebSuitGrowth.applyModel(model, state);

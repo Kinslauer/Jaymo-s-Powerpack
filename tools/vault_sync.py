@@ -6,6 +6,17 @@
     python tools/vault_sync.py --if-older 60   # skip if it synced under 60 s ago
     python tools/vault_sync.py --hook       # for Claude Code hooks: only after vault edits, never fails
 
+Inbox tasks (each syncs first and after, so everyone sees the change at once):
+    python tools/vault_sync.py --claim hermes          # take the oldest task for hermes/any (or one sent back to
+                                                       # hermes with status: changes), print it; exit 3 if none
+    python tools/vault_sync.py --tasks in-review       # task names with that status, one per line
+    python tools/vault_sync.py --show <task>           # print a task
+    python tools/vault_sync.py --set <task> status=in-review pr=1234   # change a task's properties
+    python tools/vault_sync.py --note <task> "Reviewer: ..."           # add a line under the task's Notes
+    python tools/vault_sync.py --send <task>           # reviewed and passed: hand it to the coordinator (status: ready)
+
+Task statuses: open -> claimed -> in-review -> (changes -> in-review)* -> ready -> sent -> done; blocked = waiting on Andy (moved to Inbox/Done/).
+
 The live folder is docs/vault/Live in the main checkout: on Andy's PC a junction to E:/Jaymo Vault Live (outside git),
 in a cloud session a plain folder that --setup clones the branch into. Either way it is its own small git checkout of
 the orphan branch `vault-live`, which holds only live notes: Agents/, Inbox/ (tasks from the coordinator),
@@ -168,6 +179,103 @@ def status(live):
             print("- (none)")
 
 
+def task_path(live, name):
+    name = name[:-3] if name.endswith(".md") else name
+    path = os.path.join(live, "Inbox", name + ".md")
+    if not os.path.exists(path):
+        raise SystemExit(f"No Inbox task called {name}")
+    return path
+
+
+def set_props(path, changes):
+    """Set frontmatter properties (single-line values) in place, adding any that are missing."""
+    text = open(path, encoding="utf-8").read()
+    lines = text.split("\n")
+    if lines[0].strip() != "---":
+        lines = ["---", "---"] + lines
+    end = lines.index("---", 1)
+    for key, value in changes.items():
+        for i in range(1, end):
+            if lines[i].split(":", 1)[0].strip() == key and not lines[i].startswith(" "):
+                lines[i] = f"{key}: {value}"
+                break
+        else:
+            lines.insert(end, f"{key}: {value}")
+            end += 1
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(lines))
+
+
+def add_note(path, note):
+    text = open(path, encoding="utf-8").read().rstrip("\n")
+    stamp = time.strftime("%Y-%m-%d %H:%M")
+    if "\n## Notes" not in text:
+        text += "\n\n## Notes"
+    if text.endswith("\n- ") or text.endswith("\n-"):  # the template's empty bullet
+        text = text[:text.rfind("\n")]
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(text + f"\n- {stamp} {note}\n")
+
+
+def tasks(live, wanted=None):
+    root = os.path.join(live, "Inbox")
+    found = []
+    for name in sorted(os.listdir(root)) if os.path.isdir(root) else []:
+        if name.endswith(".md"):
+            p = frontmatter(os.path.join(root, name))
+            if wanted is None or p.get("status") in wanted:
+                found.append((os.path.getmtime(os.path.join(root, name)), name[:-3], p))
+    return found
+
+
+def claim(live, agent):
+    """The oldest task sent back to this agent, else the oldest open one for it or for any. Exit 3 if none."""
+    mine = [t for t in tasks(live, ("changes",)) if t[2].get("claimed_by", "").startswith(agent)]
+    fresh = [t for t in tasks(live, ("open",)) if t[2].get("for", "any") in (agent, "any", "")]
+    pick = sorted(mine)[0] if mine else (sorted(fresh)[0] if fresh else None)
+    if not pick:
+        print("No task waiting.")
+        sys.exit(3)
+    path = task_path(live, pick[1])
+    if pick[2].get("status") == "open":
+        set_props(path, {"status": "claimed", "claimed_by": agent})
+    else:
+        set_props(path, {"status": "claimed"})
+    sync(live)
+    if frontmatter(path).get("claimed_by") != agent:  # someone else won the race
+        print("No task waiting.")
+        sys.exit(3)
+    sys.stdout.reconfigure(encoding="utf-8")
+    print(f"Task: {pick[1]}  ({path})\n")
+    print(open(path, encoding="utf-8").read())
+
+
+def task_command(live):
+    args = sys.argv[1:]
+    cmd = next(a for a in args if a in ("--claim", "--tasks", "--show", "--set", "--note", "--send"))
+    rest = args[args.index(cmd) + 1:]
+    sync(live)
+    if cmd == "--claim":
+        return claim(live, rest[0] if rest else "any")
+    if cmd == "--tasks":
+        for _, name, _ in sorted(tasks(live, tuple(rest) or None)):
+            print(name)
+        return
+    path = task_path(live, rest[0])
+    if cmd == "--show":
+        sys.stdout.reconfigure(encoding="utf-8")
+        return print(open(path, encoding="utf-8").read())
+    if cmd == "--set":
+        set_props(path, dict(kv.split("=", 1) for kv in rest[1:]))
+    elif cmd == "--note":
+        add_note(path, " ".join(rest[1:]))
+    elif cmd == "--send":
+        set_props(path, {"status": "ready"})
+        add_note(path, "Reviewed; Andy allowed sending it to the coordinator.")
+    sync(live)
+    print(f"{rest[0]}: {frontmatter(path).get('status')}")
+
+
 def hook_wants_sync():
     try:
         event = json.loads(sys.stdin.read() or "{}")
@@ -191,6 +299,8 @@ def main():
         if "--hook" in sys.argv:
             return
         raise SystemExit(f"{live} isn't set up yet: run python tools/vault_sync.py --setup")
+    if any(a in sys.argv for a in ("--claim", "--tasks", "--show", "--set", "--note", "--send")):
+        return task_command(live)
     if "--if-older" in sys.argv:
         seconds = int(sys.argv[sys.argv.index("--if-older") + 1])
         try:

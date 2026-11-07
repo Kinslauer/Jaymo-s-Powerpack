@@ -11,4 +11,4 @@ files you own, never edit a file another running agent owns, and append each of 
 `E:/Jaymo Vault Live/Decisions.md`. Sharing a PR with another assistant (Claude, Hermes, ...): see that note's
 "Two agents on one PR" section. Run `python tools/vault_sync.py` when you start and after you change a live note
 (it syncs the live folder with the `vault-live` branch), and check `E:/Jaymo Vault Live/Inbox/` for tasks the
-coordinator posted for you.
+coordinator posted for you. The pick-up and review loop, with the exact commands, is in `docs/vault/Pipeline.md`.
