@@ -3,7 +3,7 @@ status: running
 task: Inbox/parcool-running-and-falling.md
 branch: claude/parcool-running-655696
 with: 
-pr: 
+pr: "#1118"
 mods: Powers
 versions: Powers 0.21.51 (moves PR); gear PR takes the next one after
 started: 2026-11-07
