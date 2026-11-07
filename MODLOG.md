@@ -1547,3 +1547,12 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - **Moving along bars and chains**: in Bar Swing, the movement keys (W/S, or A/D across) move you hand over hand along a
   run of bars, chains or fences at the same height (`Freerun.BAR_MOVE_SPEED`, `Freerun.BAR_MOVE`); Jump still swings off
   and Sneak drops. The swing calms and the hands alternate while moving (`BarHangPose`).
+
+## 0.21.55 (2026-11-07): Critter Armour fits under Fresh Animations
+- Andy: "the new armor isnt mapped properly to the mobs": Critter Armory's pig, sheep and horse armour was drawn in
+  the vanilla pose while Fresh Animations re-animates the animal models, so the armour slid off the animated body.
+- client/compat/CritterArmoryFreshAnimationsCompat plus mixins on PoseLayersLivingEntityRendererMixin and QuadrupedModel
+  keep Fresh Animations' animated body pose on the render state just before the render layers, so Critter Armory's
+  armour models take it (Powers 0.21.55). Only active when both Entity Model Features and Critter Armory are loaded;
+  Critter Armory is linked, never edited.
+- Built; not played (Fresh Animations isn't in the dev environment).
