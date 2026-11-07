@@ -4,6 +4,16 @@ The vault is `docs/vault/` in the repo. It's plain markdown, so agents read and 
 Andy opens the same folder in Obsidian. Every agent's worktree has its own copy, so **notes reach master through PRs**
 like code does. Keep edits small so they merge cleanly.
 
+## Your own worktree, always
+
+Every agent, Hermes included, works only in **its own git worktree** on its own branch
+(`git worktree add ../<name> -b claude/<name> origin/master`, or the app's worktree).
+
+- Never switch branches in a checkout someone else might be using (the main `E:\Origins Mod` folder included).
+- Never run `git checkout -- .`, `git restore .`, `git clean -f` or `git reset --hard`: they throw away unsaved work,
+  yours or another agent's, with no undo. On 2026-11-06 Hermes lost unsaved work exactly that way.
+- To set work aside, make a WIP commit on your own branch instead.
+
 ## When you start
 
 1. Read [[Home]] (versions, open PRs, what's next), then `CLAUDE.md`.
@@ -27,6 +37,20 @@ like code does. Keep edits small so they merge cleanly.
 2. If your PR changes versions, update the table on [[Home]] in the same PR.
 3. After Andy merges, the next agent (or the project thread) sets the note to `merged` and moves it to
    `Agents/Done/`.
+
+## Two agents on one PR
+
+Claude and Hermes (or any two assistants) can share a PR: a PR is just a branch.
+
+- **One agent note, both names.** Add a `with:` line naming the other assistant, and split `owns:` per agent
+  (for example `- kingdoms/ (Claude)` and `- docs/ (Hermes)`). Never edit the other's files.
+- **Take turns on the branch.** `git pull` before you start, commit and `git push` when you stop. If the push is
+  refused, `git pull`, resolve, push again. **Never force-push or rebase** a shared branch: it erases the other's work.
+- **One agent owns the shared files** (`gradle.properties` versions, MODLOG entries, `docs/codemap/*.md`) and does
+  them once, at the end, right before review. Say which agent on the note.
+- Leave a line under *Notes* when you hand over ("Claude: done with the AI, Hermes can do the models"), so the other
+  knows where things stand without asking Andy.
+- Both log Andy's rulings in [[Decisions]], so neither works from an old answer.
 
 ## Three agents at once
 

@@ -2,6 +2,7 @@
 status: running
 task: 
 branch: claude/
+with: 
 pr: 
 mods: 
 versions: 
