@@ -1,16 +1,40 @@
 {
-  "replace": false,
-  "values": [
-    "jaymospowers:brawlers_belt",
-    "#minecraft:lanterns",
-    "jaymospowers:bottled_fairy",
-    "jaymospowers:cloud_in_a_bottle",
-    "jaymospowers:obsidian_skull",
-    "jaymospowers:antidote_vessel",
-    "jaymospowers:lodestone_charm",
-    "jaymospowers:crystal_heart",
-    "jaymospowers:wind_bladder",
-    "jaymospowers:ender_pouch",
-    "jaymospowers:jesters_cushion"
-  ]
+	"replace": false,
+	"values": [
+		"jaymospowers:brawlers_belt",
+		"#minecraft:lanterns",
+		"jaymospowers:bottled_fairy",
+		"jaymospowers:cloud_in_a_bottle",
+		"jaymospowers:obsidian_skull",
+		"jaymospowers:antidote_vessel",
+		"jaymospowers:lodestone_charm",
+		"jaymospowers:crystal_heart",
+		"jaymospowers:wind_bladder",
+		"jaymospowers:ender_pouch",
+		"jaymospowers:jesters_cushion",
+		{
+			"id": "travelertoolbelt:belt",
+			"required": false
+		},
+		{
+			"id": "travelertoolbelt:copper_belt",
+			"required": false
+		},
+		{
+			"id": "travelertoolbelt:iron_belt",
+			"required": false
+		},
+		{
+			"id": "travelertoolbelt:gold_belt",
+			"required": false
+		},
+		{
+			"id": "travelertoolbelt:diamond_belt",
+			"required": false
+		},
+		{
+			"id": "travelertoolbelt:netherite_belt",
+			"required": false
+		}
+	]
 }

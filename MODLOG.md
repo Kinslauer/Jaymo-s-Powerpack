@@ -1419,3 +1419,17 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   as what it was becoming, with no new injury ("The turning is done").
 - `Mortality.TURN_TINT` (synced, not saved) carries the turning's colour; `DownedHud` draws it as a slow breathing ring
   at the edges of the black. Chrono's R window on a waking is unchanged (a rewind clears the tint). Compile-checked; not played.
+
+## 0.21.46 (2026-11-07): up to 3 weapons on the body; the tool belt is a bauble and shows them all
+- Andy: "players should animate up to 3 weapons on them by default, and wearing the toolbelt animates everything like
+  before. it should go in the baubles slot."
+- Weapon Master draws up to 3 hotbar items on the body (the lowest slots not in hand; was 1 since 0.20.73), and all of
+  them while a Traveler Tool Belt is worn (`client/mixin/weaponmaster/WeaponMasterShownMixin`, `MAX_SHOWN`).
+- The tool belts (all six) fit the Baubles belt slot, and only a belt worn there counts: its radial menu, tool swap
+  and hip model all read that slot (`mixin/toolbelt/ToolBeltHelperMixin`, `compat/ToolBeltCompat`). A belt carried in
+  the inventory no longer counts, so move it to the belt slot. Smoke's vapour sheds it from the slot.
+- Andy: "lanterns and coin purses can work from inside the belt". The tool belt takes lanterns and coin purses
+  (`ToolBeltHelperMixin` on `isItemValid`), and one carried in a worn tool belt works as if worn in the belt slot: it
+  hangs at the hip, a lantern lights the way, and Kingdoms pays from and pickpockets lift the purse (`Baubles.belt` and
+  `setBelt` read and write the first purse, else lantern, inside the tool belt; `Baubles.beltSlot` is the slot itself).
+  Gradle build only, not played.
