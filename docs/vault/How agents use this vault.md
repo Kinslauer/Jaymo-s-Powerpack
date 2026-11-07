@@ -4,6 +4,16 @@ The vault is `docs/vault/` in the repo. It's plain markdown, so agents read and 
 Andy opens the same folder in Obsidian. Every agent's worktree has its own copy, so **notes reach master through PRs**
 like code does. Keep edits small so they merge cleanly.
 
+## Your own worktree, always
+
+Every agent, Hermes included, works only in **its own git worktree** on its own branch
+(`git worktree add ../<name> -b claude/<name> origin/master`, or the app's worktree).
+
+- Never switch branches in a checkout someone else might be using (the main `E:\Origins Mod` folder included).
+- Never run `git checkout -- .`, `git restore .`, `git clean -f` or `git reset --hard`: they throw away unsaved work,
+  yours or another agent's, with no undo. On 2026-11-06 Hermes lost unsaved work exactly that way.
+- To set work aside, make a WIP commit on your own branch instead.
+
 ## When you start
 
 1. Read [[Home]] (versions, open PRs, what's next), then `CLAUDE.md`.
