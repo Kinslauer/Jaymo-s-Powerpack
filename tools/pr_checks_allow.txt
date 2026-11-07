@@ -1,0 +1,8 @@
+# Files tools/pr_checks.py may let share a model or copy one. One repo path per line; say why after a #.
+src/main/resources/assets/jaymospowers/items/sentry_flagstones.json  # shared a model before the check existed (2026-11-07)
+src/main/resources/assets/jaymospowers/items/sentry_trap.json  # shared a model before the check existed (2026-11-07)
+kitchen/src/main/resources/assets/jaymoskitchen/items/cooking_oil.json  # shared a model before the check existed (2026-11-07)
+kitchen/src/main/resources/assets/jaymoskitchen/items/clean_water.json  # shared a model before the check existed (2026-11-07)
+kitchen/src/main/resources/assets/jaymoskitchen/items/blood_bottle.json  # shared a model before the check existed (2026-11-07)
+kitchen/src/main/resources/assets/jaymoskitchen/items/press.json  # shared a model before the check existed (2026-11-07)
+kitchen/src/main/resources/assets/jaymoskitchen/items/horse_press.json  # shared a model before the check existed (2026-11-07)
