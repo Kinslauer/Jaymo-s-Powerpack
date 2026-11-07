@@ -38,11 +38,19 @@ public class SpitBlockEntity extends BlockEntity {
 	public static final int BURNT_TICKS = 8 * 20;
 	/** Doneness a single torn chunk takes off. */
 	public static final float CHUNK = 0.25F;
+	/** Chunks a whole animal carcass yields when torn off the spit. */
+	public static final int CHUNKS_PER_ANIMAL = 4;
+	/** Chunks a single piece of food yields. */
+	public static final int CHUNKS_PER_PIECE = 1;
 	/** What can go on the spit: raw meats and fish, and carcasses in your pocket. */
 	public static final TagKey<Item> ROASTABLE = TagKey.create(Registries.ITEM, JaymosKitchen.id("spit_foods"));
 
 	final NonNullList<ItemStack> items = NonNullList.withSize(1, ItemStack.EMPTY);
 	float doneness;
+	/** How many cooked chunks are left to tear off this roast. */
+	int chunks;
+	/** Ticks this roast has been cooking: for periodic client colour updates. */
+	int cookTicks;
 
 	public SpitBlockEntity(BlockPos pos, BlockState state) {
 		super(com.jaymoskitchen.cooking.spit.SpitBlock.ENTITY, pos, state);
@@ -74,8 +82,9 @@ public class SpitBlockEntity extends BlockEntity {
 		float rate = be.doneness < COOKED ? 1.0F / COOK_TICKS : 1.0F / BURNT_TICKS;
 		float before = be.doneness;
 		be.doneness = Mth.clamp(be.doneness + rate, 0.0F, BURNT);
-		if ((before >= COOKED) != (be.doneness >= COOKED) || (before >= BURNT) != (be.doneness >= BURNT)) {
-			be.setChanged();
+		if ((before >= COOKED) != (be.doneness >= COOKED) || (before >= BURNT) != (be.doneness >= BURNT)
+			|| ++be.cookTicks % 20 == 0) {
+			be.markUpdated();
 		}
 	}
 
@@ -85,6 +94,7 @@ public class SpitBlockEntity extends BlockEntity {
 		items.clear();
 		net.minecraft.world.ContainerHelper.loadAllItems(input, items);
 		doneness = input.getFloatOr("Doneness", 0.0F);
+	chunks = input.getIntOr("Chunks", 0);
 	}
 
 	@Override
@@ -92,6 +102,7 @@ public class SpitBlockEntity extends BlockEntity {
 		super.saveAdditional(output);
 		writeShared(output);
 		output.putFloat("Doneness", doneness);
+	output.putInt("Chunks", chunks);
 	}
 
 	private void writeShared(ValueOutput output) {
@@ -108,6 +119,7 @@ public class SpitBlockEntity extends BlockEntity {
 		TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
 		writeShared(output);
 		output.putFloat("Doneness", doneness);
+	output.putInt("Chunks", chunks);
 		return output.buildResult();
 	}
 }

@@ -19,6 +19,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
+import com.jaymoskitchen.corpse.CorpseData;
+import com.jaymoskitchen.corpse.CorpseEntity;
+import com.jaymoskitchen.corpse.Corpses;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -32,14 +38,17 @@ public class SpitBlockEntityRenderer implements BlockEntityRenderer<SpitBlockEnt
 		float turn;
 		int tint;
 		int rip;
+		@Nullable Entity corpseEntity;
+		@Nullable EntityRenderState corpseState;
+		@Nullable EntityRenderer<Entity, EntityRenderState> corpseRenderer;
 	}
 
-	/** The positions where a chunk was just torn off, with the animation length left in ticks. */
-	private static final Map<BlockPos, Integer> RIPPING = new HashMap<>();
+	/** The game time a tear started at each position, for the tearing countdown. */
+	private static final Map<BlockPos, Long> RIP_START = new HashMap<>();
 
 	/** The client plays the tearing animation here when the server reports a chunk torn off. */
-	public static void ripAt(BlockPos pos) {
-		RIPPING.put(pos, 8);
+	public static void ripAt(BlockPos pos, long startTick) {
+		RIP_START.put(pos, startTick);
 	}
 
 	private final ItemModelResolver itemModels;
@@ -47,9 +56,6 @@ public class SpitBlockEntityRenderer implements BlockEntityRenderer<SpitBlockEnt
 	public SpitBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
 		this.itemModels = context.itemModelResolver();
 	}
-
-	/** How far the spit has turned (degrees), advanced each frame the block is rendered. */
-	private float turn;
 
 	@Override
 	public State createRenderState() {
@@ -62,14 +68,31 @@ public class SpitBlockEntityRenderer implements BlockEntityRenderer<SpitBlockEnt
 		BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, camera, breakProgress);
 		net.minecraft.world.item.ItemStack stack = be.roasting();
 		state.has = !stack.isEmpty();
-		if (state.has) {
+		if (state.has && state.corpseState == null) {
 			itemModels.updateForTopItem(state.item, stack, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
 		}
-		turn = (turn + 1.0F) % 360.0F;
-		state.turn = turn;
+		state.turn = (be.getLevel().getGameTime() + partialTicks) * 2.0F % 360.0F;
 		state.tint = tintFor(be.doneness());
-		Integer rip = RIPPING.remove(be.getBlockPos());
-		state.rip = rip == null ? 0 : rip;
+		Long ripStart = RIP_START.remove(be.getBlockPos());
+		state.rip = ripStart == null ? 0 : (int) Mth.clamp(8 - (be.getLevel().getGameTime() - ripStart), 0, 8);
+		state.corpseEntity = null;
+		state.corpseState = null;
+		state.corpseRenderer = null;
+		if (state.has && stack.is(Corpses.CORPSE_ITEM)) {
+			CorpseData data = stack.get(Corpses.CORPSE_DATA);
+			if (data != null) {
+				CorpseEntity corpse = new CorpseEntity(Corpses.CORPSE, be.getLevel());
+				corpse.restore(data);
+				Entity body = corpse.clientBody(0.0F);
+				if (body != null) {
+					EntityRenderer rawRenderer = (EntityRenderer) net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(body);
+					state.corpseRenderer = (EntityRenderer<Entity, EntityRenderState>) rawRenderer;
+					state.corpseState = rawRenderer.createRenderState(body, partialTicks);
+					rawRenderer.extractRenderState(body, state.corpseState, partialTicks);
+					state.corpseEntity = corpse;
+				}
+			}
+		}
 	}
 
 	/** Raw pale → cooked golden → burnt dark, following {@link SpitBlockEntity#doneness()}. */
@@ -100,12 +123,16 @@ public class SpitBlockEntityRenderer implements BlockEntityRenderer<SpitBlockEnt
 		}
 		poseStack.pushPose();
 		poseStack.translate(0.5F, 1.05F, 0.5F);
-		poseStack.rotateDegrees(Axis.YP, state.turn);
-		if (state.rip > 0) {
-			float shake = Mth.sin(state.rip * 0.9F) * 0.04F;
-			poseStack.translate(0.0F, shake, 0.0F);
+		poseStack.rotateDegrees(Axis.XP, state.turn);
+		if (state.corpseState != null && state.corpseRenderer != null) {
+			state.corpseRenderer.submit(state.corpseState, poseStack, collector, camera);
+		} else {
+			if (state.rip > 0) {
+				float shake = Mth.sin(state.rip * 0.9F) * 0.04F;
+				poseStack.translate(0.0F, shake, 0.0F);
+			}
+			state.item.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.tint);
 		}
-		state.item.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.tint);
 		poseStack.popPose();
 	}
 }

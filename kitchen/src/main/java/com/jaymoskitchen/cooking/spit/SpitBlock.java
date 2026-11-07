@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -146,6 +148,11 @@ public class SpitBlock extends BaseEntityBlock {
 		return null;
 	}
 
+	/** How many tears this roast yields: a whole carcass more than a single piece. */
+	private static int chunksFor(ItemStack stack) {
+		return stack.is(Corpses.CORPSE_ITEM) ? SpitBlockEntity.CHUNKS_PER_ANIMAL : SpitBlockEntity.CHUNKS_PER_PIECE;
+	}
+
 	@Override
 	protected InteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player,
 		InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
@@ -160,6 +167,7 @@ public class SpitBlock extends BaseEntityBlock {
 			be.items.set(0, held.copyWithCount(1));
 			held.shrink(1);
 			be.doneness = 0.0F;
+			be.chunks = chunksFor(held);
 			be.markUpdated();
 			server.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.on"));
@@ -198,19 +206,24 @@ public class SpitBlock extends BaseEntityBlock {
 				be.markUpdated();
 				server.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
 			} else {
-				// tear a cooked chunk off
-				ItemStack chunk = cookedProduct(stack, server).get(0).copyWithCount(1);
-				give(player, chunk);
-				stack.shrink(1);
-				if (stack.isEmpty()) {
-					be.items.set(0, ItemStack.EMPTY);
+				// tear a cooked chunk off: one cooked piece per tear, counting down the roast's chunks;
+				// the last tear clears the spit
+				if (be.chunks > 0) {
+					ItemStack chunk = cookedProduct(stack, server).get(0).copyWithCount(1);
+					give(player, chunk);
+					be.chunks -= 1;
+					be.doneness = Mth.clamp(be.doneness - SpitBlockEntity.CHUNK, 0.0F, SpitBlockEntity.BURNT);
+					if (be.chunks <= 0) {
+						be.items.set(0, ItemStack.EMPTY);
+					}
+					be.markUpdated();
+					server.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.0F, 1.0F);
+					player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+					if (player instanceof ServerPlayer serverPlayer) {
+						net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(serverPlayer, new Payloads.SpitRip(pos));
+					}
+					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.done"));
 				}
-				be.markUpdated();
-				server.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.0F, 1.0F);
-				if (player instanceof ServerPlayer serverPlayer) {
-					net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(serverPlayer, new Payloads.SpitRip(pos));
-				}
-				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.done"));
 			}
 			return InteractionResult.SUCCESS_SERVER;
 		}

@@ -137,8 +137,12 @@ public class JaymosKitchenClient implements ClientModInitializer {
 				screen.onGrillUpdate(payload);
 			}
 		});
-		ClientPlayNetworking.registerGlobalReceiver(Payloads.SpitRip.TYPE, (payload, ctx) ->
-			com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos()));
+		ClientPlayNetworking.registerGlobalReceiver(Payloads.SpitRip.TYPE, (payload, ctx) -> {
+			net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+			if (level != null) {
+				com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos(), level.getGameTime());
+			}
+		});
 		}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
