@@ -14,3 +14,14 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
   checkout, and never runs `git checkout -- .`, `git clean -f` or `git reset --hard` (Hermes lost unsaved work that way).
 - **Applies to:** every agent session, every assistant.
 - **Agent:** the project thread (PR #1100 review session).
+
+### 2026-11-07: the hooded cloak is only for the RPG Series archer hoods
+- **Decided:** "Just the RPG SERIES archer hoods." No cloak for the soothsayer or ichorcloth hoods: "this should not
+  exist, i never asked for that".
+- **Applies to:** Powers, `HoodedCloak`, `HoodedCloakLayer`, `tags/item/cloak_hoods.json`; PR #1104.
+- **Agent:** [[Agents/handbook-hermes-rules|handbook-hermes-rules]]
+
+### 2026-11-07: review lessons go in the handbook
+- **Decided:** rules learned from reviewing Hermes's PRs go in `docs/AI-HANDBOOK.md` (section 11).
+- **Applies to:** every assistant.
+- **Agent:** [[Agents/handbook-hermes-rules|handbook-hermes-rules]]

@@ -260,3 +260,30 @@ The Claude setup used a project "coordinator" that started one thread per task, 
 merged on Andy's word. Another assistant won't have that. Run one task at a time: give it this handbook, `CLAUDE.md`
 and the relevant memory file from `docs/ai-bundle/memory/`, and keep the same version and merge rules. When you learn
 a lasting fact (a ruling, a gotcha), add it to this handbook or the matching memory file so the next assistant has it.
+
+## 11. Lessons from reviews
+
+Mistakes found when reviewing an assistant's PR, written as rules so no one repeats them. Each names the PR it came
+from. Add new ones at the end.
+
+1. **Build only what Andy asked for.** If a related extra seems useful, ask Andy first; don't build it and mention
+   it in the PR body. (#1104: Andy asked for a cloak on the RPG Series archer hood; the PR added cloaks for the
+   soothsayer and ichorcloth hoods too, which Andy never asked for.)
+2. **When you add a second place an item can be worn, find every reader of the first place.** Grep the old check
+   (for example `getItemBySlot(EquipmentSlot.HEAD)`, `HoodedCloak.wears/up/down`) and anything reading the render
+   state built from it (`state.headEquipment`). Assume each one still expects only the old slot until you've checked
+   it. (#1104)
+3. **Before reading synced data on the client, check who it's synced to.** `AttachmentSyncPredicate.targetOnly()`
+   means only the owner's own client has it. Rendering, name tags and anything about another player need data
+   synced to everyone; for baubles that's `Baubles.looks`, not `Baubles.worn`. Don't call code "server-side" in a
+   comment or PR body until you've traced every caller. (#1104)
+4. **A `default` branch must not match things you didn't mean.** When a switch picks behaviour for a small known
+   set, the default does nothing, and the set comes from the tag, not a namespace check. (#1104: every head bauble
+   from our mod got the archer cloak.)
+5. **Before adding an item to a slot feature, check it can go in that slot.** For baubles: it's in
+   `tags/item/baubles/<kind>.json` and has a `worn_looks.json` entry. Don't claim it works somewhere it can't be
+   placed. (#1104)
+6. **Keep a list of item ids in one place.** If a tag exists (`cloak_hoods`), test against the tag; don't copy the
+   ids into each class. (#1104)
+7. **Write in the PR body only what you checked.** "Builds" isn't "works". Every PR body has a "not tested" line,
+   especially for multiplayer (how another player sees you). (#1104)
