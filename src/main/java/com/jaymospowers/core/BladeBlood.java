@@ -387,6 +387,21 @@ public final class BladeBlood {
 		return own != null && own != NO_BLOOD ? own : color(type);
 	}
 
+	/**
+	 * (0.21.50) For Jaymo's Kitchen (looked up by reflection): the blood of {@code body}, a living one or one of Kitchen's
+	 * corpses, as an RGB colour, or {@link #NO_BLOOD} if it has none (a skeleton in the chopper, a Stoneborn on the hook).
+	 */
+	public static int bodyBlood(Entity body) {
+		if (body instanceof LivingEntity living) {
+			return bleeds(living) ? color(living) : NO_BLOOD;
+		}
+		EntityType<?> type = com.jaymospowers.power.web.KitchenCompat.bodyType(body);
+		if (type == null) {
+			return RED;
+		}
+		return bleeds(body, type) ? color(body, type) : NO_BLOOD;
+	}
+
 	/** (0.15.111) This kind of creature's blood colour (RGB). */
 	public static int color(EntityType<?> entityType) {
 		var type = entityType.builtInRegistryHolder();

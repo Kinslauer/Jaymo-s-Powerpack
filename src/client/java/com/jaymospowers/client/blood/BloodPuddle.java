@@ -33,8 +33,7 @@ import java.util.TreeSet;
  * <p>(0.20.41, Hematic's ideas) A pool that spreads over the edge of a drop-off pours down the side
  * ({@link BloodWallMark#edges}). A bloody footprint ({@link BloodParticles.Puddle#print}) is one sole, turned the way its
  * walker went and laid flat where it fell. Magma blood ({@link BloodParticles#MAGMA}) glows bright and cools to a dark crust
- * ({@link #shade}, {@link #glow}). (0.21.50) It never smokes, pops or moves by itself: Andy saw trails "erupting ... like it was
- * bubbling".
+ * ({@link #shade}, {@link #glow}), smoking while it's hot.
  */
 public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** Its starting opacity; how long it takes to splat in (ticks); how far down it can lie (blocks). */
@@ -128,10 +127,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		} else {
 			this.lifetime = LIFE + this.random.nextInt(LIFE_SPREAD);
 		}
-		// (0.21.50) Andy: blood on the ground "shouldnt randomly sputter or splat or move unless directly interacted with":
-		// a pool lies where it was laid, never falling or sliding (it used to drop onto whatever it overlapped)
-		this.gravity = 0.0F;
-		this.hasPhysics = false;
+		this.gravity = 1.0F;
 		SpriteSet prints = BloodClient.printSprites();
 		this.sprite = this.print && prints != null ? prints.get(0, 1) : sprites.get(this.random);
 		this.r = red(color);
@@ -141,6 +137,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		if (!wet && !this.print && round) {
 			// (0.20.41) a pool spread over a ledge pours down its side
 			BloodWallMark.edges(level, x, y, z, this.baseSize, color, this.age, this.lifetime - this.age, this.stain);
+		}
+		if (this.magma && this.age < 40) {
+			level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, x, y + 0.05, z, 0.0, 0.04, 0.0);
+			level.addParticle(net.minecraft.core.particles.ParticleTypes.LAVA, x, y + 0.05, z, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -201,6 +201,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			&& rainedOn(this.level, this.x, this.y + 0.5, this.z)) {
 			this.lifetime = this.age + RAIN_WASH;
 			this.quickFade = RAIN_WASH;
+		}
+		if (this.magma && this.age < BloodParticles.MAGMA_COOLS / 2 && this.random.nextFloat() < 0.03F) {
+			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, this.x + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6,
+				this.y + 0.05, this.z + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6, 0.0, 0.03, 0.0);
 		}
 		if (this.baseSize > this.targetSize) {
 			this.baseSize = Math.max(this.targetSize, this.baseSize - Math.max(DRAWN_EASE * this.baseSize, 0.01F));
