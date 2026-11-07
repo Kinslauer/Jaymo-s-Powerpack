@@ -9,7 +9,8 @@
 It also runs on its own: at the start of every Claude Code session, after any agent edits a vault note, and when
 Andy opens the vault with tools/open-vault.bat.
 
-Run it from any worktree: it finds the main checkout through git, because Live/ exists only there (git ignores it).
+Run it from any worktree: it finds the main checkout through git. Live/ there is a junction to E:/Jaymo Vault Live
+(outside git, so agents in worktrees can write to it).
 Uses `gh api` over REST (GraphQL is blocked here). For each open PR: title, branch, last update, its checks, and the
 agent note in Live/Agents/ that claims it (by `pr:`).
 """
@@ -95,7 +96,15 @@ def hook_wants_refresh():
     path = (event.get("tool_input") or {}).get("file_path")
     if not path:
         return True
-    return "docs/vault/" in path.replace("\\", "/")
+    path = os.path.normcase(os.path.normpath(path)).replace("\\", "/")
+    live = os.path.normcase(os.path.realpath(live_dir())).replace("\\", "/")
+    return "docs/vault/" in path or path.startswith(live + "/")
+
+
+def live_dir():
+    """The live folder: docs/vault/Live in the main checkout, a junction to E:/Jaymo Vault Live (outside git, so
+    agents in worktrees can write to it)."""
+    return os.path.join(main_checkout(), "docs", "vault", "Live")
 
 
 def fresh_enough(path, seconds):
@@ -109,7 +118,7 @@ def main():
     hook = "--hook" in sys.argv
     if hook and not hook_wants_refresh():
         return
-    live = os.path.join(main_checkout(), "docs", "vault", "Live")
+    live = live_dir()
     if "--if-older" in sys.argv:
         seconds = int(sys.argv[sys.argv.index("--if-older") + 1])
         if fresh_enough(os.path.join(live, "Open PRs.md"), seconds):
