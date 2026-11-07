@@ -5,8 +5,8 @@ Follow `CLAUDE.md` (the project rules; they apply to every assistant, not only C
 Project memory, reference notes and the modpack readout are in `docs/ai-bundle/` (start with its README).
 
 Before you start, read `docs/vault/Home.md` (current versions, open PRs, what's next) and follow
-`docs/vault/How agents use this vault.md`: make or join a note in `E:/Origins Mod/docs/vault/Live/Agents/` (the main
-checkout's live folder, not your worktree) listing your branch, PR and the
+`docs/vault/How agents use this vault.md`: make or join a note in `E:/Jaymo Vault Live/Agents/` (the live
+folder outside git, not your worktree) listing your branch, PR and the
 files you own, never edit a file another running agent owns, and append each of Andy's decisions to
-`E:/Origins Mod/docs/vault/Live/Decisions.md`. Sharing a PR with another assistant (Claude, Hermes, ...): see that note's
+`E:/Jaymo Vault Live/Decisions.md`. Sharing a PR with another assistant (Claude, Hermes, ...): see that note's
 "Two agents on one PR" section.

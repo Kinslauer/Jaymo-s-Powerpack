@@ -1583,3 +1583,10 @@ mobs should be possible".
   frees it if saved mid-rise), drawn by `client/corpse/ReanimatePose`: on its back with a twitch, the arms jerk up stiff
   first, then it tips up from the heels like a plank in four fits, never bending at the waist, and lurches forward past
   upright as it finds its feet, head lolling. Earth puffs up where it lay. Compile-checked; not played.
+
+## 0.5.85: drag bodies through water
+- Andy: "you need to be able to drag bodies that are in water". A corpse floating in water (`falling()` returned true
+  because `onGround()` is false when the body isn't touching the bottom) was intercepted by the catch-falling-body
+  interaction in `CorpseEntity.interact()` (kitchen/src/main/java/com/jaymoskitchen/corpse/CorpseEntity.java:1678),
+  so drag never started -- the body was picked up into your arms or nothing happened. `falling()` now returns false in
+  water, so shift + right-click (empty hand) drags a floating corpse onto dry ground like any other carcass. Compile-checked; not played.

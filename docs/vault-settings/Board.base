@@ -1,13 +1,13 @@
 filters:
   and:
     - file.inFolder("Live/Agents")
-    - 'file.ext == "md"'
+    - file.ext == "md"
 views:
   - type: table
     name: Active
     filters:
       and:
-        - 'status != "merged"'
+        - status != "merged"
     order:
       - file.name
       - status

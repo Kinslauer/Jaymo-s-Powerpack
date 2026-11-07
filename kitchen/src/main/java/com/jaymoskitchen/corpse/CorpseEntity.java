@@ -3012,9 +3012,13 @@ public class CorpseEntity extends Entity {
 		return isTumbling() || falling() || super.shouldRenderAtSqrDistance(distanceSq);
 	}
 
-	/** In the air on its own: dropped, thrown, or falling off something (not held, not in a cart, not lying down). */
+	/**
+	 * In the air on its own: dropped, thrown, or falling off something (not held, not in a cart, not lying down).
+	 * A body floating in water isn't falling -- it's buoyant -- so it can be dragged onto dry ground.
+	 */
 	public boolean falling() {
-		return !onGround() && carrier() == null && !isPassenger() && !isNoGravity() && this.entityData.get(SLUNG) < 0;
+		return !onGround() && !isInWater() && carrier() == null && !isPassenger() && !isNoGravity()
+			&& this.entityData.get(SLUNG) < 0;
 	}
 
 	/** Ticks after being let go before it can be grabbed again. */
