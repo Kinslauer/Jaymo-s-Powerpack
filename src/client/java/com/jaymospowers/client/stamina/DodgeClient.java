@@ -126,7 +126,15 @@ public final class DodgeClient {
 
 	/** {@code landing}: a landing roll, which goes forward when no movement key is held. */
 	private static void tryDodge(LocalPlayer player, boolean landing) {
-		if (cooldown > 0 || player.isSpectator() || !Dodge.canDodge(player) || FreerunClient.active() || !Feathers.canSpend(player, Dodge.COST)) {
+		if (cooldown > 0 || player.isSpectator() || !Dodge.canDodge(player) || FreerunClient.active()) {
+			return;
+		}
+		if (com.jaymospowers.client.freerun.moves.RunMovesClient.safetyTap(player, landing)) {
+			// (ParCool track B) at touchdown with no direction held: the safety tap, not a roll
+			cooldown = Dodge.COOLDOWN;
+			return;
+		}
+		if (!Feathers.canSpend(player, Dodge.COST)) {
 			return;
 		}
 		Input input = player.input.keyPresses;
