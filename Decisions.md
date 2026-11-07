@@ -36,3 +36,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
   Kitchen's blood follows the body (checked at Andy's ask). Merged as #1109.
 - **Applies to:** Powers blood, Kitchen `KitchenBlood`.
 - **Agent:** [[blood-heritage]]
+- 2026-11-07: ParCool can't ship (Forge/NeoForge only, LGPL); Andy picked 12 of its moves to remake ourselves (not zipline, grapple, energy drink), split into Inbox tasks parcool-ledge-and-wall-moves and parcool-running-and-falling.
