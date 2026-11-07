@@ -10207,14 +10207,8 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
   colour, not red dust (`PowersCompat.blood` now passes the colour on, through Powers' `BloodParticles.fleck`).
 - Built; not played.
 
-## 0.7.647 (2026-11-07): Hollow turning follow-ups - weakness potion cures the blight, zombies speak not attack, pass out then turn
-- **Weakness potion cures the blight** (like curing a zombie villager): a weakness potion (splash, lingering or drunk) with a golden apple
-  burns the Hollow's blight out while it's still spreading (`HollowBlight.ateGold`, called from `GoldenAppleMixin`). Splash and lingering
-  weakness potions count too, not only drunk.
-- **Zombies don't attack the blighted**: while the blight spreads, nearby zombies stand down (their target choice hooked so they don't
-  re-target you) and speak with ambient zombie sounds now and then, instead of attacking. Andy's "no discovery chat text" rule: no chat
-  messages, sounds only.
-- **Pass out, then turn**: when the blight finishes, you pass out first (eyes animate closed via Downed's black screen), then rise turned as
-  the Hollow you were becoming. The pending turn is kept in a persistent attachment, so logging out or a restart while passed out still
-  finishes the turn when you come round.
-- Kingdoms 0.7.647; built; not played.
+## 0.7.647 (2026-11-07): Hollow turning follow-ups - weakness then a golden apple cures the blight, zombies stand down, pass out then turn
+- **Weakness then a golden apple cures the blight** (like curing a zombie villager): eating a golden apple while Weakness is active burns the Hollow's blight out while it's still spreading (`HollowBlight.ateGold`, called from `GoldenAppleMixin`). Weakness from a drunk, splash or lingering potion all count; a golden apple alone or a weakness potion alone does nothing.
+- **Zombies don't attack the blighted**: for the whole blight, from stage 0, nearby zombies' target choice is hooked so they skip blighted players and never re-target them (`ZombieBlightMixin` on `NearestAttackableTargetGoal`), and one or two of the nearest speak with ambient zombie sounds now and then instead of attacking. Andy's "no discovery chat text" rule: no chat messages, sounds only.
+- **Pass out, then turn**: when the blight finishes, you pass out first (eyes animate closed via Powers' downed black screen), then rise turned as the Hollow you were becoming. The pending turn is kept in a persistent attachment, so logging out or a restart while passed out still finishes the turn when you come round (`PowersCompat.knockOut` for `TURN_DARK`, wake at `wakeAt`).
+- Compile-checked; not played.
