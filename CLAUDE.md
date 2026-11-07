@@ -2,6 +2,10 @@
 
 Minecraft 26.3 Fabric mods for the user's friends' modpack. **Read `docs/HANDOFF.md` first**: what each folder is,
 how to build, hard-won 26.3 API facts, the user's preferences, and what to do next.
+- **Project vault** (`docs/vault/`, Obsidian): read `docs/vault/Home.md` first (versions, open PRs, what's next), then
+  follow `docs/vault/How agents use this vault.md`: make your note in `docs/vault/Agents/` from `Templates/Agent.md`
+  (branch, PR, files you own) when you start, update it when you finish, never edit a file another running agent owns,
+  and append each of the user's decisions to `docs/vault/Decisions.md`.
 
 - Root: Jaymo's Powers (`./gradlew build`). `kingdoms/`: Jaymo's Kingdoms. `kitchen/`: Jaymo's Kitchen. Each is its
   own Gradle project (JDK 25).
@@ -16,7 +20,7 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   `JaymosPowers.registerAttachments()`.
 - Bump the version on every release. Never commit `Serverfiles/` (it holds a secret).
 - Build to check work; don't launch long dev client/server runs unless the user asks.
-- Next Powers patch: `docs/Plan-0.8.md` (4 tracks: Gravity, Arsenal, Chrono, Web; open questions at the end).
+- `docs/Plan-0.8.md` (built and merged) is the example of splitting a patch into tracks (4 tracks: Gravity, Arsenal, Chrono, Web; open questions at the end).
 - Default keys: R/G/V/B = abilities 1-4, C = ultimate, Z = mode, H = menu, ' = costume mask. "G+B" means G, then B (e.g. Crush
   released inside your own Gravity Well).
 - Tuning numbers live in `static final` constants at the top of each class; change balance there.

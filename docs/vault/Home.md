@@ -1,0 +1,58 @@
+---
+updated: 2026-11-06
+---
+# Jaymo's mods: home
+
+Start here. Agents: read this note, then [[How agents use this vault]], then [[Board]].
+
+## Current versions (master)
+
+| Mod | Version | File |
+|---|---|---|
+| Jaymo's Powers (and the pack) | **0.21.47** | `gradle.properties` |
+| Jaymo's Kingdoms | **0.7.644** | `kingdoms/gradle.properties` |
+| Jaymo's Kitchen | **0.5.84** | `kitchen/gradle.properties` |
+
+Minecraft 26.3, Fabric, JDK 25. Versions collide when several branches run at once: take the next free numbers
+right before merging, not when you start, and write the numbers you took on your agent note.
+
+## Merged lately (2026-11-06)
+
+- #1100 Fewer water mobs at once (Kingdoms 0.7.644, Powers 0.21.47)
+- #1097 Up to 3 weapons on the body; the tool belt is a bauble and shows them all
+- #1098 Dying mid-turn rises you turned: the Hollow's blight and vampire bites
+- #1099 Fix Sora's Dagger stages broken by #1096; PR checks Action added
+- #1096 Sora's Dagger 2.0 models
+- Archer hood joins a fitted cloak (0.21.41); sliding down the wall when the grip goes (0.21.40)
+- AI handbook and bundle for other assistants (`docs/AI-HANDBOOK.md`, `docs/ai-bundle/`)
+
+Full detail: the ends of the MODLOGs, see [[Logs]].
+
+## Open PRs
+
+- **#766** Add mesh_to_cubes: realistic meshes to Blockbench cube models (`claude/project-thread-2x3tva`, last touched
+  2026-10-31)
+
+Refresh with `gh api "repos/Kinslauer/Jaymo-s-Powerpack/pulls?state=open"` (GraphQL is blocked; use REST).
+
+## What's next
+
+- Whatever Andy asks for next from playtests; each request becomes one agent on the [[Board]].
+- #766 waits on Andy's review.
+- Open issues to remember (from `docs/AI-HANDBOOK.md` section 9): the invisible orc (#988, grab `logs/latest.log` if
+  it happens again); takeovers still drag the camera toward targets; the Aether sky hide on the minimap is unconfirmed.
+- `docs/Plan-0.8.md` (Gravity, Arsenal, Chrono, Web) is **done**: built on `plan-0.8` and merged long ago. Keep it as
+  the example of how to split a patch into tracks.
+
+## Running agents
+
+See [[Board]]. At most **three** at once, each owning its own files.
+
+## Context
+
+- [[Rules]]: `CLAUDE.md`, the AI handbook, Andy's rulings
+- [[Handoff]]: folders, building, 26.3 API facts (current summary; `docs/HANDOFF.md` is from Powers 0.7.1)
+- [[Logs]]: MODLOGs and the archive in `docs/modlog/`
+- [[Codemap]]: where each class lives
+- [[Plans]]: the plan and spec docs
+- [[Decisions]]: every decision Andy makes, newest last

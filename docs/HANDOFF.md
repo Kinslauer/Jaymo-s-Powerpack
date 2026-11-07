@@ -2,6 +2,10 @@
 
 Written 2026-10-10 at the end of a long local session, so a cloud session can carry on.
 
+> **Partly stale.** Written at Powers 0.7.1. The folders, build notes, 26.3 API facts and preferences still hold;
+> "Where things stand" and "Next" are history. Current versions, open PRs, running agents and what's next are in
+> the project vault: `docs/vault/Home.md` (summary of this file: `docs/vault/Context/Handoff.md`).
+
 ## What's in this repository
 - **The root: Jaymo's Powers** (`jaymospowers`, Fabric, Minecraft 26.3), now **v0.7.1**. Powers: Gravity, Wind Control,
   Web Slinger (with the symbiote), Pocket Arsenal, Chronokinesis, Resonance, Darktide, Xenoform (the Xeno-Band
