@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: open
 for: hermes
 from: coordinator
 asked: 2026-11-07
@@ -9,7 +9,6 @@ suggested_owns:
   - kitchen/src/main/java/com/jaymoskitchen/cooking/spit/ (new)
   - kitchen/src/client/java/com/jaymoskitchen/client/spit/ (new)
   - kitchen/src/main/resources/assets/jaymoskitchen/lang/parts/spit.json (new, or the Kitchen lang file if Kitchen has no parts)
-claimed_by: hermes-fixer
 ---
 # Spit roast over an open fire
 
