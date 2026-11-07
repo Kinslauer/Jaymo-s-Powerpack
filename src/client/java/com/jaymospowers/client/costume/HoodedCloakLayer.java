@@ -1,12 +1,10 @@
 package com.jaymospowers.client.costume;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.baubles.Baubles;
 import com.jaymospowers.core.HiddenArmor;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.HoodedCloak;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.List;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -92,32 +90,20 @@ public final class HoodedCloakLayer {
 			return;
 		}
 		Identifier texture = null;
-		// Find the hood: armour head slot first, then baubles head slot; only if it's in HoodedCloak.HOODS
 		ItemStack headStack = player.getItemBySlot(EquipmentSlot.HEAD);
-		Identifier hoodId = null;
 		if (headStack.is(HoodedCloak.HOODS)) {
-			hoodId = BuiltInRegistries.ITEM.getKey(headStack.getItem());
-		} else {
-			List<Identifier> looks = Baubles.looks(player);
-			if (looks.size() > Baubles.HEAD_SLOT) {
-				Identifier headLook = looks.get(Baubles.HEAD_SLOT);
-				var headItem = BuiltInRegistries.ITEM.getOptional(headLook).orElse(null);
-				if (headItem != null && new ItemStack(headItem).is(HoodedCloak.HOODS)) {
-					hoodId = headLook;
-				}
+			switch (BuiltInRegistries.ITEM.getKey(headStack.getItem()).getPath()) {
+				case "ranger_armor_head" ->
+					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_ranger.png");
+				case "netherite_ranger_armor_head" ->
+					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_netherite_ranger.png");
+				default ->
+					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
 			}
 		}
-		if (hoodId == null) {
+		if (texture == null) {
 			state.setData(KEY, null);
 			return;
-		}
-		switch (hoodId.getPath()) {
-			case "soothsayer_hood" ->
-				texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_soothsayer.png");
-			case "ichorcloth_hood" ->
-				texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_ichorcloth.png");
-			default ->
-				texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
 		}
 		boolean down = HoodedCloak.down(player);
 		state.setData(KEY, texture);

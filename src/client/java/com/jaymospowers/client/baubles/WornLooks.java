@@ -142,10 +142,6 @@ public final class WornLooks {
 			}
 			// (0.21.48) a cloak hood worn as a bauble is drawn by HoodedCloakLayer, not here: skip it while the hood is down
 			Identifier lookId = looks.get(i);
-			var headItem = BuiltInRegistries.ITEM.getOptional(lookId).orElse(null);
-			if (headItem != null && new ItemStack(headItem).is(HoodedCloak.HOODS) && HoodedCloak.down(player)) {
-				continue;
-			}
 			if (slots == null) {
 				slots = new Identifier[looks.size()];
 			}

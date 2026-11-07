@@ -7,9 +7,9 @@ from flat colours, per-face shading, seeded noise, a darker rim and a weave.
 Boxes and texture offsets must match the BOXES table in HoodedCloakLayer.
 
 Run:
-  python3 tools/gen_hooded_cloak.py archer      -> hooded_cloak.png
-  python3 tools/gen_hooded_cloak.py soothsayer  -> hooded_cloak_soothsayer.png
-  python3 tools/gen_hooded_cloak.py ichorcloth  -> hooded_cloak_ichorcloth.png
+  python3 tools/gen_hooded_cloak.py archer            -> hooded_cloak.png
+  python3 tools/gen_hooded_cloak.py ranger            -> hooded_cloak_ranger.png
+  python3 tools/gen_hooded_cloak.py netherite_ranger  -> hooded_cloak_netherite_ranger.png
 """
 import os
 import random
@@ -21,32 +21,33 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 
 HOOD = sys.argv[1] if len(sys.argv) > 1 else 'archer'
 
-# Palettes per hood. The cloak wool is a shade deeper than the hood so the hood reads
-# as a separate piece.
+# Palettes per hood, sampled from the Archers jar (archer_armor_head, ranger_armor_head,
+# netherite_ranger_armor_head). The cloak wool is a shade deeper than the hood so the hood
+# reads as a separate piece.
 PALETTES = {
-    'archer': {  # Archers' archer hood: brown leather + wool
-        'hood': (0x6d, 0x3e, 0x26),
-        'hood_in': (0x37, 0x25, 0x23),
-        'wool': (0x4f, 0x34, 0x24),
-        'lining': (0x2f, 0x22, 0x1c),
-        'trim': (0x83, 0x4d, 0x32),
-        'clasp': (0xa8, 0x8a, 0x52),
+    'archer': {  # Archers' archer hood: dark brown leather + deeper wool
+        'hood': (0x1c, 0x16, 0x16),
+        'hood_in': (0x0a, 0x08, 0x08),
+        'wool': (0x14, 0x0e, 0x0e),
+        'lining': (0x0a, 0x06, 0x06),
+        'trim': (0x36, 0x23, 0x1a),
+        'clasp': (0x55, 0x36, 0x2a),
     },
-    'soothsayer': {  # Soothsayer's hood: deep purple + charcoal wool
-        'hood': (0x6e, 0x3c, 0x8c),
-        'hood_in': (0x18, 0x0e, 0x1e),
-        'wool': (0x2a, 0x18, 0x36),
-        'lining': (0x14, 0x0c, 0x1c),
-        'trim': (0x92, 0x5c, 0xb0),
-        'clasp': (0x74, 0x59, 0xa8),
+    'ranger': {  # Ranger's hood: dark green leather + deeper wool
+        'hood': (0x19, 0x29, 0x21),
+        'hood_in': (0x0c, 0x14, 0x10),
+        'wool': (0x10, 0x1a, 0x14),
+        'lining': (0x08, 0x0c, 0x0a),
+        'trim': (0x2a, 0x62, 0x35),
+        'clasp': (0x3c, 0x7f, 0x3b),
     },
-    'ichorcloth': {  # Ichorcloth's hood: ichor purple + dark wool
-        'hood': (0x3a, 0x2e, 0x5c),
-        'hood_in': (0x14, 0x0e, 0x28),
-        'wool': (0x1c, 0x16, 0x2e),
-        'lining': (0x10, 0x0c, 0x1c),
-        'trim': (0x9a, 0x7f, 0xd0),
-        'clasp': (0x54, 0x41, 0x7f),
+    'netherite_ranger': {  # Netherite Ranger's hood: dark teal + deeper wool
+        'hood': (0x11, 0x1e, 0x21),
+        'hood_in': (0x06, 0x0a, 0x0c),
+        'wool': (0x0a, 0x10, 0x12),
+        'lining': (0x04, 0x06, 0x08),
+        'trim': (0x12, 0x3d, 0x3a),
+        'clasp': (0x76, 0x6a, 0x76),
     },
 }
 
