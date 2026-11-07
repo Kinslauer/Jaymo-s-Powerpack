@@ -5,7 +5,7 @@ branch: claude/parcool-ledges-a2d223
 with: 
 pr: 
 mods: Powers
-versions: 
+versions: Powers 0.21.52
 started: 2026-11-07
 owns:
   - src/main/java/com/jaymospowers/core/Ledge.java
