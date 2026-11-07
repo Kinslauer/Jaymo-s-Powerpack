@@ -10206,3 +10206,9 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
 - Blood magic's motes, a Nightborn vampire's blood mist and a Blood Elf's motes are Powers' blood flecks in their own
   colour, not red dust (`PowersCompat.blood` now passes the colour on, through Powers' `BloodParticles.fleck`).
 - Built; not played.
+
+## 0.7.647 (2026-11-07): Hollow turning follow-ups - weakness then a golden apple cures the blight, zombies stand down, pass out then turn
+- **Weakness then a golden apple cures the blight** (like curing a zombie villager): eating a golden apple while Weakness is active burns the Hollow's blight out while it's still spreading (`HollowBlight.ateGold`, called from `GoldenAppleMixin`). Weakness from a drunk, splash or lingering potion all count; a golden apple alone or a weakness potion alone does nothing.
+- **Zombies don't attack the blighted**: for the whole blight, from stage 0, nearby zombies' target choice is hooked so they skip blighted players and never re-target them (`ZombieBlightMixin` on `NearestAttackableTargetGoal`), and one or two of the nearest speak with ambient zombie sounds now and then instead of attacking. Andy's "no discovery chat text" rule: no chat messages, sounds only.
+- **Pass out, then turn**: when the blight finishes, you pass out first (eyes animate closed via Powers' downed black screen), then rise turned as the Hollow you were becoming. The pending turn is kept in a persistent attachment, so logging out or a restart while passed out still finishes the turn when you come round (`PowersCompat.knockOut` for `TURN_DARK`, wake at `wakeAt`).
+- Compile-checked; not played.

@@ -58,14 +58,16 @@ public abstract class FishingHookMixin {
             kind = r < 50 ? com.jaymospowers.fishing.FishingReal.FISH_COD : com.jaymospowers.fishing.FishingReal.FISH_SALMON;
         } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK) {
             kind = com.jaymospowers.fishing.FishingReal.FISH_SHARK;
-        } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK + 34) {
-            kind = com.jaymospowers.fishing.FishingReal.FISH_COD;
-        } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK + 34 + 34) {
-            kind = com.jaymospowers.fishing.FishingReal.FISH_SALMON;
-        } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK + 34 + 34 + 8) {
-            kind = com.jaymospowers.fishing.FishingReal.FISH_PUFFERFISH;
+        } else if (r < FishingReal.CHANCE_SHARK + FishingReal.CHANCE_TUNA) {
+            kind = FishingReal.FISH_TUNA;
+        } else if (r < FishingReal.CHANCE_SHARK + FishingReal.CHANCE_TUNA + 25) {
+            kind = FishingReal.FISH_COD;
+        } else if (r < FishingReal.CHANCE_SHARK + FishingReal.CHANCE_TUNA + 50) {
+            kind = FishingReal.FISH_SALMON;
+        } else if (r < FishingReal.CHANCE_SHARK + FishingReal.CHANCE_TUNA + 56) {
+            kind = FishingReal.FISH_PUFFERFISH;
         } else {
-            kind = com.jaymospowers.fishing.FishingReal.FISH_TROPICAL;
+            kind = FishingReal.FISH_TROPICAL;
         }
         // a shark only comes up for a metal rod, in water deep enough for it
         LivingEntity shark = null;
@@ -85,7 +87,7 @@ public abstract class FishingHookMixin {
             fish.setXRot(hook.getXRot());
         } else {
             fish = switch (kind) {
-                case 0 -> new Cod((EntityType<? extends Cod>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("cod")).orElseThrow().value(), level);
+                case 0, FishingReal.FISH_TUNA -> new Cod((EntityType<? extends Cod>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("cod")).orElseThrow().value(), level);
                 case 1 -> new Salmon((EntityType<? extends Salmon>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("salmon")).orElseThrow().value(), level);
                 case 2 -> new Pufferfish((EntityType<? extends Pufferfish>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("pufferfish")).orElseThrow().value(), level);
                 default -> new TropicalFish((EntityType<? extends TropicalFish>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.withDefaultNamespace("tropical_fish")).orElseThrow().value(), level);
@@ -93,6 +95,14 @@ public abstract class FishingHookMixin {
             fish.setPos(new net.minecraft.world.phys.Vec3(hook.getX(), hook.getY(), hook.getZ()));
             fish.setYRot(hook.getYRot());
             fish.setXRot(hook.getXRot());
+            if (kind == FishingReal.FISH_TUNA) {
+                // a tuna is a big cod
+                net.minecraft.world.entity.ai.attributes.AttributeInstance scale =
+                        fish.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+                if (scale != null) {
+                    scale.setBaseValue(FishingReal.TUNA_SCALE);
+                }
+            }
         }
         level.addFreshEntity(fish);
         FishingReal.startFight((net.minecraft.server.level.ServerPlayer) player, kind, fish, hook);

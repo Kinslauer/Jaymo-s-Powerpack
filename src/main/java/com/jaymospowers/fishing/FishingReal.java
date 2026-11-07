@@ -19,11 +19,10 @@ import net.minecraft.world.entity.animal.fish.Pufferfish;
 import net.minecraft.world.entity.animal.fish.Salmon;
 import net.minecraft.world.entity.animal.fish.TropicalFish;
 import net.minecraft.core.Registry;
-import net.minecraft.core.ResourceKey;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -62,7 +61,8 @@ public final class FishingReal {
     private static final float START_PROGRESS = 0.3F;
     /** Max fight duration before the line breaks from exhaustion (ticks). Shorter for a shark. */
     private static final int MAX_FIGHT_TICKS = 1800;
-    private static final int MAX_FIGHT_TICKS_SHARK = 400;
+    private static final int MAX_FIGHT_TICKS_SHARK = 900;
+    private static final int MAX_FIGHT_TICKS_TUNA = 1200;
     /** Tension added per tick while reeling, per unit of fish strength. */
     private static final float TENSION_REEL = 0.05F;
     /** Tension removed per tick while not reeling (the player eases off). */
@@ -73,6 +73,9 @@ public final class FishingReal {
     private static final float PROGRESS_FISH_BACK = 0.0015F;
     /** Tension above which reeling makes no progress (the fish is pulling too hard). */
     private static final float TOO_TENSE = 0.8F;
+    /** The metal rod's stronger line stays productive at a higher tension, and its reel brings a fish in faster. */
+    private static final float TOO_TENSE_METAL = 1.05F;
+    private static final float PROGRESS_REEL_METAL = 0.008F;
     /** Tension at which a wooden rod's line snaps; the metal rod's stronger line takes more. */
     private static final float LINE_BREAK = 1.0F;
     private static final float LINE_BREAK_METAL = 1.25F;
@@ -83,13 +86,21 @@ public final class FishingReal {
     private static final float STRENGTH_SALMON = 0.5F;
     private static final float STRENGTH_PUFFERFISH = 0.75F;
     private static final float STRENGTH_TROPICAL = 0.6F;
+    private static final float STRENGTH_TUNA = 0.8F;
     private static final float STRENGTH_SHARK = 1.0F;
-    /** Fish kinds: cod, salmon, pufferfish, tropical fish, and shark (metal rod only). */
-    public static final int FISH_COD = 0, FISH_SALMON = 1, FISH_PUFFERFISH = 2, FISH_TROPICAL = 3, FISH_SHARK = 4;
-    /** Out of 100: chance a bite on the metal rod is a shark instead of an ordinary fish. */
+    /** How big a hooked tuna is (a cod grown to this scale). */
+    public static final double TUNA_SCALE = 2.4;
+    /** Raw fish a landed tuna and a landed shark give (cut on a Kitchen cutting board for fillets). */
+    private static final int TUNA_YIELD = 3;
+    private static final int SHARK_YIELD = 6;
+    /** Fish kinds: cod, salmon, pufferfish, tropical fish, shark and tuna (the last two on the metal rod only). */
+    public static final int FISH_COD = 0, FISH_SALMON = 1, FISH_PUFFERFISH = 2, FISH_TROPICAL = 3, FISH_SHARK = 4, FISH_TUNA = 5;
+    /** Out of 100: chance a bite on the metal rod is a shark, and a tuna, instead of an ordinary fish. */
     public static final int CHANCE_SHARK = 15;
-    /** How hard a hooked shark pulls the player toward it while they reel (blocks per tick). */
+    public static final int CHANCE_TUNA = 20;
+    /** How hard a hooked shark and a hooked tuna pull the player toward them while they reel (blocks per tick). */
     public static final double PULL_PLAYER = 0.04;
+    public static final double PULL_PLAYER_TUNA = 0.02;
     /** Keep the fish within this many blocks of the hook, tugging it back on the line. */
     private static final double KEEP_NEAR_DIST = 3.0;
     /** How hard the line pulls the fish back toward the hook. */
@@ -161,16 +172,17 @@ public final class FishingReal {
         float progress = state.progress();
         boolean metalRod = isMetalRod(player);
         float breakLimit = metalRod ? LINE_BREAK_METAL : LINE_BREAK;
+        float tooTense = metalRod ? TOO_TENSE_METAL : TOO_TENSE;
 
         if (reeling) {
             // reeling: tension rises (pulling hard), fish comes in
             tension = Math.min(breakLimit, tension + state.strength() * TENSION_REEL);
-            if (tension < TOO_TENSE) {
-                progress = Math.min(1.0F, progress + PROGRESS_REEL);
+            if (tension < tooTense) {
+                progress = Math.min(1.0F, progress + (metalRod ? PROGRESS_REEL_METAL : PROGRESS_REEL));
             }
-            if (metalRod && fish != null && state.fishKind() == FISH_SHARK) {
-                // a shark on the line pulls the player toward it
-                pullPlayer(player, fish);
+            if (metalRod && (state.fishKind() == FISH_SHARK || state.fishKind() == FISH_TUNA)) {
+                // a big fish on the line pulls the player toward it
+                pullPlayer(player, fish, state.fishKind() == FISH_SHARK ? PULL_PLAYER : PULL_PLAYER_TUNA);
             }
         } else {
             // easing off: tension falls, fish takes line back
@@ -185,8 +197,8 @@ public final class FishingReal {
         }
 
         if (progress >= 1.0F && now - state.startTime() >= MIN_FIGHT_TICKS) {
-            if (state.fishKind() == FISH_SHARK) {
-                // too big to land: it breaks free
+            if ((state.fishKind() == FISH_SHARK || state.fishKind() == FISH_TUNA) && !metalRod) {
+                // a big fish can only be landed on the metal rod (the rod was swapped mid-fight)
                 endFight(player, false);
                 player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.too_big").withStyle(net.minecraft.ChatFormatting.RED));
                 return;
@@ -213,12 +225,17 @@ public final class FishingReal {
             case 0 -> STRENGTH_COD; // cod: steady
             case 1 -> STRENGTH_SALMON; // salmon: stronger
             case 2 -> STRENGTH_PUFFERFISH; // pufferfish: erratic, strong
+            case FISH_SHARK -> STRENGTH_SHARK; // shark: hardest
+            case FISH_TUNA -> STRENGTH_TUNA; // tuna: big and strong
             default -> STRENGTH_TROPICAL; // tropical: varied
         };
         player.setAttached(FIGHTING, new FishFight(fishKind, strength, 0.0F, START_PROGRESS, player.level().getGameTime()));
         HOOKED.put(player.getUUID(), fish);
         HOOKS.put(player.getUUID(), hook);
         player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.fish_on").withStyle(net.minecraft.ChatFormatting.GOLD));
+        if (fishKind == FISH_TUNA) {
+            player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.tuna_hooked").withStyle(net.minecraft.ChatFormatting.GOLD));
+        }
         if (fishKind == FISH_SHARK) {
             player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.shark_hooked").withStyle(net.minecraft.ChatFormatting.RED));
         }
@@ -228,6 +245,7 @@ public final class FishingReal {
 
     /** End the fight: if caught, drop the fish item; otherwise let it swim off. */
     public static void endFight(ServerPlayer player, boolean caught) {
+        int kindFought = fight(player).fishKind();
         player.setAttached(FIGHTING, FishFight.NONE);
         REELING.remove(player.getUUID());
         LivingEntity fish = HOOKED.remove(player.getUUID());
@@ -235,7 +253,8 @@ public final class FishingReal {
         if (fish != null) {
             if (caught) {
                 String kind = BuiltInRegistries.ENTITY_TYPE.getKey(fish.getType()).getPath();
-                ItemStack loot = switch (kind) {
+                ItemStack loot = kindFought == FISH_SHARK ? new ItemStack(Items.SALMON, SHARK_YIELD)
+                        : kindFought == FISH_TUNA ? new ItemStack(Items.COD, TUNA_YIELD) : switch (kind) {
                     case "cod" -> new ItemStack(Items.COD);
                     case "salmon" -> new ItemStack(Items.SALMON);
                     case "pufferfish" -> new ItemStack(Items.PUFFERFISH);
@@ -243,7 +262,9 @@ public final class FishingReal {
                     default -> ItemStack.EMPTY;
                 };
                 if (!loot.isEmpty()) {
-                    player.addItem(loot);
+                    if (!player.addItem(loot)) {
+                        player.spawnAtLocation(player.level(), loot, 1.0F);
+                    }
                     player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.caught").withStyle(net.minecraft.ChatFormatting.GREEN));
                 }
             }
@@ -260,23 +281,34 @@ public final class FishingReal {
         double dx = hook.getX() - fish.getX();
         double dz = hook.getZ() - fish.getZ();
         double dist = Math.sqrt(dx * dx + dz * dz);
+        if (fish instanceof net.minecraft.world.entity.Mob mob && mob.isNoAi()) {
+            // a shark held without its AI is drawn back by hand
+            if (dist > KEEP_NEAR_DIST) {
+                fish.setPos(fish.getX() + dx / dist * KEEP_NEAR_PULL, fish.getY(), fish.getZ() + dz / dist * KEEP_NEAR_PULL);
+            }
+            return;
+        }
         if (dist > KEEP_NEAR_DIST) {
             double pull = KEEP_NEAR_PULL;
             fish.setDeltaMovement(fish.getDeltaMovement().add(dx / dist * pull, KEEP_NEAR_LIFT, dz / dist * pull));
         }
     }
 
-    /** A shark on a metal rod pulls the player toward it while they reel. */
-    private static void pullPlayer(ServerPlayer player, LivingEntity fish) {
+    /** A big fish on a metal rod pulls the player toward it while they reel. */
+    private static void pullPlayer(ServerPlayer player, LivingEntity fish, double force) {
         Vec3 pull = new Vec3(fish.getX() - player.getX(), 0.0D, fish.getZ() - player.getZ());
         if (pull.lengthSqr() > 1.0E-6D) {
-            player.addDeltaMovement(pull.normalize().scale(PULL_PLAYER));
+            player.addDeltaMovement(pull.normalize().scale(force));
         }
     }
 
     /** The longest a fight can run before exhaustion snaps the line. */
     private static int fightLimit(FishFight state) {
-        return state.fishKind() == FISH_SHARK ? MAX_FIGHT_TICKS_SHARK : MAX_FIGHT_TICKS;
+        return switch (state.fishKind()) {
+            case FISH_SHARK -> MAX_FIGHT_TICKS_SHARK;
+            case FISH_TUNA -> MAX_FIGHT_TICKS_TUNA;
+            default -> MAX_FIGHT_TICKS;
+        };
     }
 
     /** True while the player's main hand holds the metal fishing rod. */

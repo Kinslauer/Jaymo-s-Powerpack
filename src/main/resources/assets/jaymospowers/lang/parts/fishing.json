@@ -6,6 +6,7 @@
   "item.jaymospowers.metal_fishing_rod": "Metal Fishing Rod",
   "item.jaymospowers.metal_rod_head": "Fishing Rod Head",
   "message.jaymospowers.fishing.shark_hooked": "A shark's on the line!",
-  "message.jaymospowers.fishing.too_big": "Too big to land — it broke free.",
+  "message.jaymospowers.fishing.too_big": "Too big for this rod - it broke free.",
+  "message.jaymospowers.fishing.tuna_hooked": "A big tuna - hold on!",
   "hud.jaymospowers.fishing.tension": "Fishing: %s%% tension"
 }

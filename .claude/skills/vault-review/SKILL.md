@@ -1,6 +1,6 @@
 ---
 name: vault-review
-description: Review the PRs that agents finished from the vault Inbox (status in-review), send failing ones back, and ask Andy before handing passing ones to the coordinator. Run it on a loop with /loop 10m /vault-review.
+description: Review the PRs that agents finished from the vault Inbox (status in-review), send failing ones back, and ask Andy before handing passing ones to the coordinator. Run it on a loop with /loop 15m /vault-review.
 ---
 # Vault review
 

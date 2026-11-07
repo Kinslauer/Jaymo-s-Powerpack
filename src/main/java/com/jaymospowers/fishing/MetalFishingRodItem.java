@@ -55,7 +55,7 @@ public class MetalFishingRodItem extends Item {
         serverLevel.playSound(null, player.getX(), player.getEyeY() - 0.1D, player.getZ(),
                 SoundEvents.BUCKET_FILL_FISH, SoundSource.PLAYERS, 0.5F, 1.0F);
         stack.hurtAndBreak(1, serverPlayer, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
-        player.awardStat(net.minecraft.world.stats.Stats.ITEM_USED.get(this));
+        player.awardStat(net.minecraft.stats.Stats.ITEM_USED.get(this));
         stack.causeUseVibration(player, net.minecraft.world.level.gameevent.GameEvent.ITEM_INTERACT_START);
         return InteractionResult.SUCCESS;
     }

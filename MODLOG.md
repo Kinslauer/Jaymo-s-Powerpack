@@ -1531,7 +1531,6 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - The traceur gloves and boots come in a second PR.
 - Built; not played.
 
-
 ## 0.21.52 (2026-11-07): ParCool track A: ledge shimmy, castaway, wall slide, moving along bars
 - Andy's picks from the ParCool checklist ("Go to their tutorial on github and make a checklist of everything we dont have
   yet"), track A. Our own code after ParCool's ideas; nothing of theirs copied.
@@ -1547,11 +1546,36 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   is the hook for track B's traceur gloves.
 - **Moving along bars and chains**: in Bar Swing, the movement keys (W/S, or A/D across) move you hand over hand along a
   run of bars, chains or fences at the same height (`Freerun.BAR_MOVE_SPEED`, `Freerun.BAR_MOVE`); Jump still swings off
-  The swing calms and the hands alternate while moving (`BarHangPose`).
+  and Sneak drops. The swing calms and the hands alternate while moving (`BarHangPose`).
 
-## 0.21.53 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
-- **Realistic fishing**: a bite now hooks a live fish entity (cod, salmon, pufferfish or tropical fish) instead of vanilla loot, and the player plays a tug-of-war to reel it in. Line tension rises as the fish fights; hold use to reel it down, or the line breaks at full tension. Stronger fish fight harder and break the line sooner. (`com.jaymospowers.fishing.FishingReal`, `FishingHookMixin`, `FishingRealClient`)
-- **Metal fishing rod**: forged through Tinkering — cast an iron rod head at the smeltery, fit handle and binding at the Tool Station (see TinkeringJei). Its stronger line takes bigger fish; a wooden rod stays small-fish only.
-- **Sharks**: on the metal rod, a great white shark can hook instead of an ordinary fish — Kingdoms' whaling sharks, reached through `com.jaymospowers.compat.KingdomsCompat` (inactive without Kingdoms). A shark fights hardest and pulls the player, and is too big to land.
-- **Cleaning a catch**: a caught fish laid on a cutting board and cut with a knife gives fillets worth more than eating the fish whole (Jaymo's Kitchen).
+## 0.21.54 (2026-11-07): traceur gloves and boots (ParCool track B part 2)
+
+- **Traceur gloves** (wrist bauble, leather and string): bare hands no longer burn on a long wall slide —
+  `WallSlide.addHandGuard` now registers the traceur gloves (`freerun/gear/TraceurGloves`).
+- **Traceur boots** (leather): more safe fall distance softens landings, and while worn they carry the freerun leaps
+  farther: long jump speed x 1.10 (`LONG_JUMP_BONUS`), charge jump +0.05 blocks a tick (`CHARGE_JUMP_BONUS`), and the
+  safety tap takes 85% of the fall damage off instead of 60% (`SAFETY_CUT` plus `SAFETY_CUT_BONUS`). Worn boots draw
+  their own equipment texture (`equipment/traceur_boots.json`), and the gloves' and boots' descriptions now show as
+  item tooltips.
+
+Built; not played.
+
+## 0.21.57 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
+
+- **Realistic fishing**: a bite hooks a live fish entity (cod, salmon, pufferfish, tropical fish) instead of dropping
+  vanilla loot, and you play a tug-of-war: hold use to reel, tension climbs while you do and falls when you ease off,
+  the fish takes line back while you ease, and the line snaps at full tension. Stronger fish pull tension up faster
+  (`FishingReal`, `FishingHookMixin`, `FishFight`). A wooden rod only ever hooks cod and salmon.
+- **Metal fishing rod** (`MetalFishingRodItem`): forged through Tinkering (an iron rod head cast at the smeltery, handle
+  and binding at the Tool Station). Its line holds to 1.25 tension, it keeps gaining on a fish at higher tension and
+  reels faster, and it casts and retrieves like a vanilla rod (`FishingHookMixin` also keeps its hook from being
+  discarded for not holding a vanilla rod). Only it hooks the big fish.
+- **Big fish**: on the metal rod a bite may be a tuna (a cod grown 2.4x, lands as 3 raw cod) or, with Jaymo's Kingdoms,
+  a great white shark (the Naturalist shark Kingdoms' whaling sharks use, brought up at the hook by
+  `KingdomsCompat.sharkDrawnIn`, held without AI and unkillable while on the line). Both fight harder and pull you
+  toward them while you reel; the shark is the hardest (a 45 s fight) and lands as 6 raw salmon. Without Kingdoms a
+  shark bite is a cod.
+- **Cleaning a catch** (Jaymo's Kitchen 0.5.88): a cod or salmon laid on a cutting board and cut with a knife now
+  gives 3 fillets and bone meal (was 2), so a tuna or shark catch cleans into many.
+- Fixed: the startup crash (the metal rod item had no id set) and a shark bite that fought a tropical fish.
 - Built; not played.

@@ -1599,3 +1599,10 @@ mobs should be possible".
   blood, an Endborn's purple), and nothing from a body with no blood. A blood grate's blood stays red (it holds no one
   body's). `KitchenBlood.send(level, body, ...)`; plain red with an older Powers.
 - Built; not played.
+
+## 0.5.88 (2026-11-07): gutting a fish gives more fillets
+
+- With Jaymo's Powers 0.21.57's real fishing (a hooked cod or salmon, or a big tuna or shark catch that lands as
+  several): a cod or salmon laid on a cutting board and cut with a knife is gutted and cleaned into 3 fillets
+  (`Chopping.FISH_FILLETS`, was 2) and bone meal, more than the whole fish eaten raw is worth.
+- Built; not played.

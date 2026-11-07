@@ -96,7 +96,8 @@ public final class KingdomsCompat {
 	}
 
 	/**
-	 * (0.21.53) A great white shark is drawn up from the deep near {@code (x, y, z)}.
+	 * (0.21.53) A great white shark (the Naturalist entity Kingdoms' whaling sharks use, see {@code Sharks}), brought up at
+	 * {@code (x, y, z)} to be fought on the line; null without Kingdoms, without the shark, or in shallow water.
 	 */
 	public static @Nullable LivingEntity sharkDrawnIn(net.minecraft.server.level.ServerLevel level, double x, double y, double z) {
 		if (!LOADED) {
@@ -117,7 +118,16 @@ public final class KingdomsCompat {
 			return null;
 		}
 		net.minecraft.world.entity.Entity shark = sharkType.spawn(level, pos, net.minecraft.world.entity.EntitySpawnReason.EVENT);
-		return shark instanceof net.minecraft.world.entity.LivingEntity
-				? (net.minecraft.world.entity.LivingEntity) shark : null;
+		if (!(shark instanceof LivingEntity living)) {
+			return null;
+		}
+		// held on the line, not hunting: no AI, no gravity, and no one else can kill it
+		living.setPermanentlyInvulnerable(true);
+		living.setNoGravity(true);
+		if (living instanceof net.minecraft.world.entity.Mob mob) {
+			mob.setNoAi(true);
+			mob.setPersistenceRequired();
+		}
+		return living;
 	}
 }
