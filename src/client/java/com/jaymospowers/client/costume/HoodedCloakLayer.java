@@ -80,8 +80,7 @@ public final class HoodedCloakLayer {
 	/**
 	 * From the avatar renderer's extractRenderState: whether this player shows the cloak, and with the hood down the hood
 	 * comes off the head (the armour layer skips it). A costume over everything, or the hood hidden with the armour eye,
-	 * shows no cloak. Detects hoods in the vanilla head armour slot and in the baubles head slot, and picks the cloak
-	 * texture by which hood is worn.
+	 * shows no cloak. Detects hoods in the vanilla head armour slot and picks the cloak texture by which hood is worn.
 	 */
 	public static void extract(Avatar entity, AvatarRenderState state) {
 		if (!(entity instanceof Player player) || Costume.worn(player) != null

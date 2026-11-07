@@ -50,9 +50,9 @@ public final class HoodedCloak {
 	}
 
 	/** Whether {@code player} wears a cloak hood on their head (either side). */
-		public static boolean wears(Player player) {
-			return player.getItemBySlot(EquipmentSlot.HEAD).is(HOODS);
-		}
+	public static boolean wears(Player player) {
+		return player.getItemBySlot(EquipmentSlot.HEAD).is(HOODS);
+	}
 
 	/** Whether the hood is lowered onto the back (either side; true only while one is worn). */
 	public static boolean down(Player player) {
