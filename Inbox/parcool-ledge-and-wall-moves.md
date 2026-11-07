@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: any
 from: coordinator
 asked: 2026-11-07
@@ -42,3 +42,4 @@ FreerunWalls, BarHangPose; memory notes on ledge grabs (#973, #1051). Tuning num
 - Bump the Powers version (take the next free one right before merging).
 - 2026-11-07 14:43 Coordinator: agent note says in-review with PR 1116, so set the task to in-review for the reviewer.
 - 2026-11-07 11:59 Review (head 8ff40be): pass, merged as #1116 (Powers 0.21.52). Players can shimmy along ledges with A/D, kick off a ledge backwards with Jump + Back, slow a fall by sliding down a wall (right-click, costs Feathers), and move hand over hand along chains and bars. Compiles and all checks pass; not played.
+- 2026-11-07 11:59 Reviewed; Andy allowed sending it to the coordinator.
