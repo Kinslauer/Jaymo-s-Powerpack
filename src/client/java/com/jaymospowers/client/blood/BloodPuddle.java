@@ -305,6 +305,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		if (this.magma) {
 			light = glow(light, age);
 		}
+		this.drawAlpha = alpha;
 		this.shown = shade(this.color, age, this.stain);
 		if (this.print) {
 			this.printQuad(decals, camera, cx, cy, cz, size, light);
@@ -321,6 +322,9 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** (0.20.41) This frame's colour (RGB): {@link #shade}. */
 	private int shown;
 
+	/** (0.21.55) This frame's opacity: its own alpha with the view-distance fade; never written back to {@link #alpha}. */
+	private float drawAlpha;
+
 	/** (0.20.41) A footprint: one sole lying flat where it fell, toes the way its walker went. */
 	private void printQuad(BloodDecals.State decals, Camera camera, double cx, double cy, double cz, float size, int light) {
 		float u0 = this.sprite.getU0(), u1 = this.sprite.getU1(), v0 = this.sprite.getV0(), v1 = this.sprite.getV1();
@@ -335,7 +339,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float rx = Mth.cos(this.printYaw), rz = Mth.sin(this.printYaw);
 		float h = size * 0.5F;
 		float lift = DECAL_LIFT + this.zFight * DECAL_LIFT_JITTER;
-		int color = ARGB.color(Math.round(alpha * 0.85F * 255.0F), this.shown);
+		int color = ARGB.color(Math.round(this.drawAlpha * 0.85F * 255.0F), this.shown);
 		float[][] corners = {{-h, -h, u0, v1}, {-h, h, u0, v0}, {h, h, u1, v0}, {h, -h, u1, v1}};
 		for (float[] c : corners) {
 			double x = cx + rx * c[0] + fx * c[1], z = cz + rz * c[0] + fz * c[1];
@@ -406,8 +410,8 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		// above the block top, with a per-puddle jitter so overlapping decals don't lock in step and flicker
 		float lift = DECAL_LIFT + this.zFight * DECAL_LIFT_JITTER;
 		// (0.20.41) drying darker, or magma cooling: shade()
-		int color = this.wet ? ARGB.colorFromFloat(alpha * fade, this.r, this.g, this.b)
-			: ARGB.color(Math.round(alpha * fade * 255.0F), this.shown);
+		int color = this.wet ? ARGB.colorFromFloat(this.drawAlpha * fade, this.r, this.g, this.b)
+			: ARGB.color(Math.round(this.drawAlpha * fade * 255.0F), this.shown);
 		double[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};
 		for (double[] corner : corners) {
 			float dx = (float) (corner[0] - cx), dz = (float) (corner[1] - cz);
