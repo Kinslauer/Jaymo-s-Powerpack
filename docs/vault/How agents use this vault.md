@@ -15,7 +15,40 @@ It has two kinds of notes:
 
 Always use the `E:/Jaymo Vault Live/` path, not `E:/Origins Mod/docs/vault/Live/`: the app blocks Claude's file tools from
 writing into the main checkout. Never run git commands in the main checkout.
-Cloud sessions can't reach this PC; they put the same details in their PR body instead.
+
+## The live folder syncs through GitHub
+
+The live folder is its own small git checkout of the **`vault-live`** branch (an orphan branch: only live notes, it never
+merges into master). `tools/vault_sync.py` commits what changed, merges the branch and pushes, so cloud sessions (the
+coordinator included) see the same Board, Inbox and Decisions as the PC.
+
+- **Claude Code** syncs by itself: the hooks in `.claude/settings.json` run it at session start and after any edit in
+  the live folder.
+- **Hermes and other assistants:** run `python tools/vault_sync.py` when you start (before reading notes) and right after
+  you change a live note.
+- **Once per PC:** `python tools/vault_sync.py --setup` turns the existing `E:/Jaymo Vault Live/` into that checkout and
+  keeps every file already in it. A cloud session runs the same command (as `python3`) and gets the branch in its own
+  `docs/vault/Live/`.
+- `python tools/vault_sync.py --status` prints the running, in-review and blocked agents and the open Inbox tasks.
+- Conflicts are rare because every note has one owner. `Decisions.md` keeps both sides' lines; anything else keeps the
+  local copy, and the other side's is still in the branch history.
+- The sync never runs git in the main checkout: only inside the live folder.
+
+## Tasks from the coordinator (`Live/Inbox/`)
+
+The coordinator is the Claude project thread Andy talks to in the Claude app. It posts work for the agents on the PC as
+notes in `Live/Inbox/`, made from `Templates/Task.md`: Andy's words, what's wanted, where to start, `for:` (an agent's
+name, or `any`), and the files it suggests owning.
+
+1. When you start, run the sync and read every Inbox note with `status: open` whose `for:` is you or `any`.
+2. **Claim one**: set `status: claimed` and `claimed_by:` to your agent note's name, sync straight away, and make your
+   agent note as usual with a `task:` line naming the Inbox note. If the sync shows someone else claimed it first,
+   leave it and take another.
+3. Questions for Andy go under the task's *Notes* (and to Andy, if he's there): the coordinator reads them and asks him.
+4. When your PR is up, fill in the task's `pr:`. When it's merged, set `status: done` and move the note to
+   `Live/Inbox/Done/`.
+
+The coordinator never edits an agent note or a claimed task's properties; it only adds lines under *Notes*.
 
 ## Your own worktree, always
 
@@ -29,6 +62,8 @@ Every agent, Hermes included, works only in **its own git worktree** on its own 
 
 ## When you start
 
+0. Sync the live folder (`python tools/vault_sync.py`; Claude Code's hook does it for you), then check `Live/Inbox/`
+   for a task meant for you (see above).
 1. Read [[Home]] (versions, open PRs, what's next), then `CLAUDE.md`.
 2. Read every note in `E:/Jaymo Vault Live/Agents/` whose `status` is `running`, `in-review` or
    `blocked`. Their `owns:` lists are the files they're editing. **Don't edit a file another agent owns.** If you

@@ -10,7 +10,8 @@ Written 2026-11-06, at Powers/pack 0.21.40, Kingdoms 0.7.642, Kitchen 0.5.84.
 ## 1. What to read, in order
 
 0. `docs/vault/Home.md`: the project vault (Obsidian). Current versions, open PRs, the agent board (who owns which
-   files) and Andy's decisions. How to use it: `docs/vault/How agents use this vault.md`.
+   files) and Andy's decisions. How to use it: `docs/vault/How agents use this vault.md`. Its live
+   folder syncs with the `vault-live` branch through `tools/vault_sync.py`; tasks from the coordinator land in `Inbox/`.
 1. `CLAUDE.md`: the short project rules. Everything in it applies to every assistant, not only Claude.
 2. `docs/HANDOFF.md`: folders, build, 26.3 API facts, Andy's preferences.
 3. This handbook: standing rulings and workflows.
