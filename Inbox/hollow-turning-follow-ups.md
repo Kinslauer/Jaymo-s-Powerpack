@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-07
 thread: Claude project thread "Hollow turning" (PR #1098 merged; follow-ups never started, thread ran out of usage)
-claimed_by: 
+claimed_by: hermes
 pr: 
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/HollowBlight.java
