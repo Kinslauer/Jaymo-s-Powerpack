@@ -13,6 +13,9 @@ Obsidian never blocks a `git pull`. Its default is `docs/vault-settings/Board.ba
 **Status values:** `running` (editing), `in-review` (PR open, waiting for Andy), `blocked` (waiting on an answer),
 `merged`.
 
+**Tasks waiting for an agent** are in `Live/Inbox/` (posted by the coordinator, see [[How agents use this vault]]).
+`python tools/vault_sync.py --status` lists the live agents and open tasks from any checkout, cloud included.
+
 **Rule:** at most three `running` agents, and no file in two `owns:` lists. Agents without Obsidian check with:
 
 ```bash

@@ -7,7 +7,9 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   it shows in the vault as `Live/`), never in your worktree: make your agent note in `E:/Jaymo Vault Live/Agents/` from
   `Templates/Agent.md` (branch, PR, files you
   own) when you start, update it when you finish, never edit a file another running agent owns, and append each of the
-  user's decisions to `E:/Jaymo Vault Live/Decisions.md`.
+  user's decisions to `E:/Jaymo Vault Live/Decisions.md`. The live folder syncs with the `vault-live` branch
+  (`tools/vault_sync.py`, run by hooks); the coordinator posts tasks in its `Inbox/`. Cloud sessions:
+  `python3 tools/vault_sync.py --setup` gets it in `docs/vault/Live/`.
 
 - Root: Jaymo's Powers (`./gradlew build`). `kingdoms/`: Jaymo's Kingdoms. `kitchen/`: Jaymo's Kitchen. Each is its
   own Gradle project (JDK 25).
