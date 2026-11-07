@@ -1,5 +1,5 @@
 ---
-status: ready
+status: sent
 for: any
 from: coordinator
 asked: 2026-11-07
