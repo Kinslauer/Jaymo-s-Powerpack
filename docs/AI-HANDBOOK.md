@@ -296,3 +296,15 @@ from. Add new ones at the end.
    drag iron golems by hand.)
 10. **Start every PR from fresh master,** never from another open PR's branch. (#1106 carried #1104's hood commits, its
     version number and its MODLOG entry, and had no entry of its own.)
+11. **Look at what a generator made before you commit it.** Open the PNG, or at least compare its average colour with
+    the existing one beside it. When you sample colours from another mod's texture, take the main surface colour, not
+    the darkest shadow pixels. (#1104 round 3: the ranger cloaks came out almost black, about #0f1b13 and #091112,
+    beside the archer cloak's #442c1e.)
+12. **A generator and the files it made must agree.** If you change shared data in a generator (a palette, a box
+    table), rerun it for every file it writes and commit them all, or leave the old data alone. (#1104 round 3: the
+    archer palette was changed to near-black but `hooded_cloak.png` wasn't regenerated, so the next person who runs it
+    silently changes the archer cloak.)
+13. **Don't touch lines you didn't need to.** Revert whitespace-only changes and leftovers from earlier rounds (unused
+    imports, unused locals, comments describing code that's gone) before you push. The final diff should contain only
+    the feature. (#1104 round 3: re-indented `Baubles.java` and `HoodedCloak.wears`, and left four unused imports and
+    an unused local in `WornLooks`.)
