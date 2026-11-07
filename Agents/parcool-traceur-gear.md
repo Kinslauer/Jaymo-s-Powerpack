@@ -27,7 +27,7 @@ of Powers.
 ## Notes
 - Gloves on `Baubles.Kind.WRIST` ("gloves and claws on the wrist" per ArtifactBaubles); the wall-slide burn is checked
   server-side, where the synced worn list is present
-- Boots: attribute modifiers via `Equippable` FEET, no custom `EquipmentAsset` (like zfighter training weights)
+- Boots: attribute modifiers via `Equippable` FEET; own `EquipmentAsset` (`equipment/traceur_boots.json`) so worn boots draw their texture on the feet; `TraceurBoots.wears(player)` checks the feet slot
 
 ## Done
 What a player will see, and what wasn't tested.
