@@ -1440,12 +1440,24 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
 - `cloak_hoods.json` now lists exactly the three Archers hoods.
 - Compile-checked; not played.
 
-## 0.21.49 (2026-11-07): downed, you can still open doors
-- Andy: "while downed, you cannot interact with doors or other right clickable things". A downed player who is still
-  awake can right-click blocks again: doors, trapdoors, fence gates, buttons, levers, chests. It works as if the hand
-  were empty, so what you're holding is never used, placed or eaten (beds and cakes stay off). Attacking, items and
-  powers stay dead while down; passed out or knocked out, nothing works. Locks and other mods' gates still apply.
-- `Downed`: the use-block refusal moved to the FIRST phase and lets the main hand through when `awake()`; a LAST-phase
-  handler does the block's `useWithoutItem`. `DownedKeysMixin` keeps `key.use` live with the crosshair on a block.
-  `Downed.DOWNED_USE_BLOCKS` turns it off.
+## 0.21.49 (2026-11-07): downed, every right-click is a struggle; doors push open, beds let you mend
+- Andy: "while downed, you cannot interact with doors or other right clickable things", then: "every downed right click
+  should be a 3s struggle ... making the door push open slowly for every second holding, right clicking a bed while downed
+  hauls you into it, so you can recover there without the need for meds or another player, it just takes time, more the
+  more you are hurt" and "you get back up whenever you want, but you recover the whole time".
+- Downed but awake, hold right-click on a block: a 3-second struggle bar fills (it keeps its place if you let go), then
+  the block works as if your hand were empty (doors, trapdoors, gates, buttons, levers, chests). What you hold is never
+  used; cakes stay off. Attacking, items and powers stay dead; passed out or knocked out, nothing works. Locks and other
+  mods' gates still apply.
+- **Doors** (with Spooky Doors, now in the pack): the door swings open a little more for every moment you push; an open
+  one is pushed shut. Without Spooky Doors it opens when the bar fills.
+- **Beds**: the struggle hauls you up onto the bed. Lying there you don't bleed out or pass out, the pain eases, and your
+  most hurt part mends every 2 seconds (1 health point), all the way to whole; after a minute a broken bone sets itself.
+  The worse you're hurt, the longer it takes. Hold sneak to get up whenever you're well enough; you rise with what you've
+  mended. Crawl off and the rest ends.
+- `DownedStruggle` (new): the struggle and the bed rest; tuning at the top. `compat.SpookyDoorsCompat` (new) calls Spooky
+  Doors' public API by reflection. `Downed`: the use-block refusal moved to the FIRST phase and lets an awake main hand
+  through, a LAST-phase handler runs the struggle; `awake()`, `holdClock()`; rising after rest keeps the mended health.
+  `Wounds.restPart`/`restedHealth`. `DownedKeysMixin` keeps `key.use` live with the crosshair on a block. Spooky Doors
+  26.3.0.2 joins `packModsNoCf` (needs Balm, already in the pack).
 - Not built locally (no JDK 25 here; GitHub's PR checks build it); not played.

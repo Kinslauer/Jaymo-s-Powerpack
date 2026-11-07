@@ -427,14 +427,9 @@ public final class Downed {
 				// (SUCCESS on the client sends the click without predicting it, nor using the held item: the server decides)
 				return InteractionResult.SUCCESS;
 			}
-			// the block as if the hand were empty: the held item is never used, placed or eaten from; and no sleeping or eating
-			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(hit.getBlockPos());
-			if (state.getBlock() instanceof net.minecraft.world.level.block.BedBlock || state.getBlock() instanceof net.minecraft.world.level.block.CakeBlock
-				|| state.getBlock() instanceof net.minecraft.world.level.block.CandleCakeBlock) {
-				return InteractionResult.FAIL;
-			}
-			InteractionResult used = state.useWithoutItem(level, player, hit);
-			return used.consumesAction() ? used : InteractionResult.FAIL;
+			// (0.21.49) a struggle, then the block as if the hand were empty; a bed hauls them into it ({@link DownedStruggle})
+			return player instanceof ServerPlayer server && level instanceof ServerLevel world
+				? DownedStruggle.use(server, world, hit) : InteractionResult.FAIL;
 		});
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			if (!isDowned(player)) {
@@ -532,6 +527,17 @@ public final class Downed {
 	/** (0.19.55) A downed mob's crawl pace: a share of {@link #CRAWL_SPEED}, quick on adrenaline, fading with its strength. */
 	public static double crawlPace(Entity entity) {
 		return CRAWL_SPEED * (adrenaline(entity) ? ADRENALINE_PACE : net.minecraft.util.Mth.lerp(strength(entity), SPENT_PACE, 1.0));
+	}
+
+	/**
+	 * (0.21.49) Holds a resting downed player's clock (every second) just past their adrenaline: their strength stays and
+	 * they don't bleed out toward passing out ({@link DownedStruggle}).
+	 */
+	static void holdClock(ServerPlayer player, long now) {
+		Long downed = player.getAttached(DOWNED);
+		if (downed != null && now % 20 == 0) {
+			player.setAttached(DOWNED, (now - ADRENALINE_TICKS - 1) << 1 | (downed & 1L));
+		}
 	}
 
 	/** A downed player who has passed out. */
@@ -697,6 +703,7 @@ public final class Downed {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
 			SINKING.remove(player.getUUID());
+			DownedStruggle.forget(player.getUUID());
 			AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {
 				speed.removeModifier(SLOW_ID);
@@ -1058,8 +1065,10 @@ public final class Downed {
 			player.addTag(DOWNED_TAG);
 		}
 		long now = level.getGameTime();
+		// (0.21.49) lying in a bed they struggled into, mending: never bleeding out ({@link DownedStruggle})
+		boolean resting = DownedStruggle.tick(level, player, now);
 		boolean out = passedOut(player);
-		if (!out && now - since(player) >= BLEED_OUT_TICKS) {
+		if (!out && !resting && now - since(player) >= BLEED_OUT_TICKS) {
 			// (Andy: "Lie until roused or give up": no respawn for bleeding out)
 			player.setAttached(OUT, true);
 			out = true;
@@ -1197,10 +1206,12 @@ public final class Downed {
 			return;
 		}
 		RISES.remove(player.getUUID());
+		// (0.21.49) what a rest in bed mended, they rise with
+		float rested = DownedStruggle.resting(player) ? Wounds.restedHealth(player) : 0.0F;
 		getUp(level, player);
 		if (!isDowned(player)) {
 			// (on their own legs, not a friend's arm: less in them than a revive leaves)
-			player.setHealth(Math.min(player.getHealth(), Math.max(1.0F, player.getMaxHealth() * RISE_HEALTH)));
+			player.setHealth(Math.max(rested, Math.min(player.getHealth(), Math.max(1.0F, player.getMaxHealth() * RISE_HEALTH))));
 			Wounds.reconcile(player);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.risen").withStyle(ChatFormatting.GREEN));
 		}

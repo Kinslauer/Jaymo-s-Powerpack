@@ -75,8 +75,9 @@ abstract class DownedKeysMixin {
 	}
 
 	/**
-	 * (0.21.49) Use stays live with the crosshair on a block, awake: doors, levers, chests work (Downed lets only the block's
-	 * empty-hand use through, never the held item). On air or on someone it's dead as before; passed out, always.
+	 * (0.21.49) Use stays live with the crosshair on a block, awake: held, it's a downed struggle with the block
+	 * ({@code DownedStruggle}: a door pushed open, a bed hauled into, the rest worked as with an empty hand, never the held
+	 * item). On air or on someone it's dead as before; passed out or knocked out, always.
 	 */
 	private static boolean atBlock(LocalPlayer player) {
 		net.minecraft.world.phys.HitResult hit = Minecraft.getInstance().hitResult;
