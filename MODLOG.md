@@ -1548,6 +1548,18 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   run of bars, chains or fences at the same height (`Freerun.BAR_MOVE_SPEED`, `Freerun.BAR_MOVE`); Jump still swings off
   and Sneak drops. The swing calms and the hands alternate while moving (`BarHangPose`).
 
+## 0.21.54 (2026-11-07): traceur gloves and boots (ParCool track B part 2)
+
+- **Traceur gloves** (wrist bauble, leather and string): bare hands no longer burn on a long wall slide —
+  `WallSlide.addHandGuard` now registers the traceur gloves (`freerun/gear/TraceurGloves`).
+- **Traceur boots** (leather): more safe fall distance softens landings, and while worn they carry the freerun leaps
+  farther: long jump speed x 1.10 (`LONG_JUMP_BONUS`), charge jump +0.05 blocks a tick (`CHARGE_JUMP_BONUS`), and the
+  safety tap takes 85% of the fall damage off instead of 60% (`SAFETY_CUT` plus `SAFETY_CUT_BONUS`). Worn boots draw
+  their own equipment texture (`equipment/traceur_boots.json`), and the gloves' and boots' descriptions now show as
+  item tooltips.
+
+Built; not played.
+
 ## 0.21.55 (2026-11-07): blood decals and overlays stop fighting their surfaces
 - Blood on the ground, on walls and on weapons no longer z-fights with the surface it's drawn on: puddles, footprints and wall marks sit a clear hair above blocks, and blood on swords and axes is drawn a clear step off the item's own faces. The flicker is stopped by a depth bias on the decals' own pipeline (`BloodDecals.DECAL_LAYER`: the translucent particle pipeline with a depth bias), not by the lift, so decals stay flush on slopes, slabs, stairs, carpets, snow layers and at block edges; the lift stays tiny (`DECAL_LIFT 0.002`, `BloodPuddle.java`).
 - Puddles and wall marks at the edge of view distance fade out over the last blocks instead of popping (`DRAW_DISTANCE_FADE`, `BloodPuddle.java`, `BloodWallMark.java`).

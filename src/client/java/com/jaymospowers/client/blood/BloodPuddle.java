@@ -288,14 +288,15 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		double cy = Mth.lerp(partialTick, this.yo, this.y);
 		double cz = Mth.lerp(partialTick, this.zo, this.z);
 		// (0.21.x) at the edge of view distance fade out over the last blocks instead of popping at it
-		if (this.alpha > 0.0F) {
+		float alpha = this.alpha;
+		if (alpha > 0.0F) {
 			float drawDistance = Minecraft.getInstance().options.renderDistance().get() * 16.0F;
 			Vec3 at = new Vec3(cx, cy, cz);
 			double dx = camera.position().x - at.x, dy = camera.position().y - at.y, dz = camera.position().z - at.z;
 			float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
 			float fadeStart = drawDistance - DRAW_DISTANCE_FADE;
 			if (dist > fadeStart) {
-				this.alpha *= 1.0F - Mth.clamp((dist - fadeStart) / DRAW_DISTANCE_FADE, 0.0F, 1.0F);
+				alpha *= 1.0F - Mth.clamp((dist - fadeStart) / DRAW_DISTANCE_FADE, 0.0F, 1.0F);
 			}
 		}
 		double halfX = size * this.stretchX * 0.5, halfZ = size * this.stretchZ * 0.5;
@@ -334,7 +335,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float rx = Mth.cos(this.printYaw), rz = Mth.sin(this.printYaw);
 		float h = size * 0.5F;
 		float lift = DECAL_LIFT + this.zFight * DECAL_LIFT_JITTER;
-		int color = ARGB.color(Math.round(this.alpha * 0.85F * 255.0F), this.shown);
+		int color = ARGB.color(Math.round(alpha * 0.85F * 255.0F), this.shown);
 		float[][] corners = {{-h, -h, u0, v1}, {-h, h, u0, v0}, {h, h, u1, v0}, {h, -h, u1, v1}};
 		for (float[] c : corners) {
 			double x = cx + rx * c[0] + fx * c[1], z = cz + rz * c[0] + fz * c[1];
@@ -405,8 +406,8 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		// above the block top, with a per-puddle jitter so overlapping decals don't lock in step and flicker
 		float lift = DECAL_LIFT + this.zFight * DECAL_LIFT_JITTER;
 		// (0.20.41) drying darker, or magma cooling: shade()
-		int color = this.wet ? ARGB.colorFromFloat(this.alpha * fade, this.r, this.g, this.b)
-			: ARGB.color(Math.round(this.alpha * fade * 255.0F), this.shown);
+		int color = this.wet ? ARGB.colorFromFloat(alpha * fade, this.r, this.g, this.b)
+			: ARGB.color(Math.round(alpha * fade * 255.0F), this.shown);
 		double[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};
 		for (double[] corner : corners) {
 			float dx = (float) (corner[0] - cx), dz = (float) (corner[1] - cz);

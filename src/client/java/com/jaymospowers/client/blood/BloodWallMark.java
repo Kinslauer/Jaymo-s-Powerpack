@@ -33,8 +33,8 @@ import org.jspecify.annotations.Nullable;
 public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	/** Its opacity; how long a run takes to run its length (ticks); how far it can run (blocks). */
 	static final float ALPHA = 0.75F;
-/** (0.21.x) Wall marks at the edge of view distance fade out over these last blocks instead of popping at it. */
-static final float DRAW_DISTANCE_FADE = 8.0F;
+	/** (0.21.x) Wall marks at the edge of view distance fade out over these last blocks instead of popping at it. */
+	static final float DRAW_DISTANCE_FADE = 8.0F;
 	static final int RUN_TICKS = 50;
 	static final float MOST_RUN = 2.0F;
 	/** How long a passing mark lies (ticks), the last of them fading. */
