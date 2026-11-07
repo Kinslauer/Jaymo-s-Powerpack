@@ -1,0 +1,32 @@
+filters:
+  and:
+    - file.inFolder("Live/Agents")
+    - file.ext == "md"
+views:
+  - type: table
+    name: Active
+    filters:
+      and:
+        - status != "merged"
+    order:
+      - file.name
+      - status
+      - task
+      - branch
+      - pr
+      - versions
+      - owns
+    sort:
+      - property: branch
+        direction: DESC
+      - property: file.name
+        direction: ASC
+  - type: table
+    name: All
+    order:
+      - file.name
+      - status
+      - task
+      - branch
+      - pr
+      - started

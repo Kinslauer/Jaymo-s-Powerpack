@@ -1,3 +1,38 @@
 # Decisions
 
-Every decision Andy makes, newest last (template: Templates/Decision.md).
+Every decision Andy makes, newest **last**. Append with `Templates/Decision.md`. Standing rulings from before this
+log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
+
+### 2026-11-06: project vault
+- **Decided:** the vault lives in the repo at `docs/vault/`, committed and shared by every agent. Obsidian installed
+  on the PC with winget.
+- **Applies to:** all three mods; every agent session.
+- **Agent:** [[Done/obsidian-vault-4d9705|obsidian-vault-4d9705]]
+
+### 2026-11-06: agents work only in their own worktree
+- **Decided:** every agent, Hermes included, works only in its own git worktree, never switches branches in a shared
+  checkout, and never runs `git checkout -- .`, `git clean -f` or `git reset --hard` (Hermes lost unsaved work that way).
+- **Applies to:** every agent session, every assistant.
+- **Agent:** the project thread (PR #1100 review session).
+
+### 2026-11-07: one live spot for agents and decisions
+- **Decided:** agent notes and this decision log live in `E:\Origins Mod\docs\vault\Live\` (ignored by git), written
+  there directly by every agent, so the board shows agents the moment they start and everything is in one place.
+- **Applies to:** every agent session, every assistant.
+- **Agent:** [[vault-live-board]]
+
+### 2026-11-07: who bleeds what, and ground blood lies still
+- **Decided:** Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the
+  magmavein stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too. just
+  no redstone textures ... the blood that falls on the ground shouldnt randomly sputter or splat or move unless directly
+  interacted with." Endborn ender-purple, Divine gold, Verdant sap approved; corpses bleed their own blood.
+- **Applies to:** Powers blood (`BladeBlood`, client blood), Kingdoms `PowersCompat.heritageBlood`.
+- **Agent:** [[blood-heritage]] (PR #1109)
+
+### 2026-11-07: magma bubbles, blood falls; Kitchen bleeds the body's blood
+- **Decided:** Andy: "the magma should bubble as it cools throwing off those popping lava particles, the BLOOD should not.
+  it can still move and fall and drip, like water does through blocks, but over ledges. this way a bleeding body above a
+  ledge can drip a pool up to 20 blocks below it". Skeletons don't bleed; stump bleeds are red spurts, bigger once fallen.
+  Kitchen's blood follows the body (checked at Andy's ask). Merged as #1109.
+- **Applies to:** Powers blood, Kitchen `KitchenBlood`.
+- **Agent:** [[blood-heritage]]
