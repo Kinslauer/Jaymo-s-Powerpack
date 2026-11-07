@@ -1,10 +1,10 @@
 ---
-status: running
+status: in-review
 task: blood-overlay-zfighting
 branch: claude/blood-overlay-zfighting
-pr: 
+pr: 1124
 mods: Powers
-versions: 0.21.55 (take right before opening the PR)
+versions: 0.21.55
 started: 2026-11-07
 owns:
   - src/client/java/com/jaymospowers/client/blood/
