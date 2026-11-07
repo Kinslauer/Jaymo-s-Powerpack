@@ -1502,3 +1502,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   vanilla lava drip is gone; every few ticks a fresh stump throws several drops of the body's own blood out of it (up from a
   neck), 2 small ones while the body stands, 5 bigger, faster ones once it has fallen (`Dismember.spurt`, tuning `SPURT_*`).
 - Built; not played.
+
+## 0.21.51 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
+- **Realistic fishing**: a bite now hooks a live fish entity (cod, salmon, pufferfish or tropical fish) instead of vanilla loot, and the player plays a tug-of-war to reel it in. Line tension rises as the fish fights; hold use to reel it down, or the line breaks at full tension. Stronger fish fight harder and break the line sooner. (`com.jaymospowers.fishing.FishingReal`, `FishingHookMixin`, `FishingRealClient`)
+- Built; not played.

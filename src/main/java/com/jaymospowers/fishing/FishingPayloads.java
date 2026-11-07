@@ -8,9 +8,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /** Client -> server: whether the player is holding the reel key while fighting a fish on the line. */
 public record FishingPayloads() {
-    private FishingPayloads() {
-    }
-
     public record ReelInput(boolean reeling) implements CustomPacketPayload {
         public static final Type<ReelInput> TYPE = new Type<>(JaymosPowers.id("reel_input"));
         public static final StreamCodec<RegistryFriendlyByteBuf, ReelInput> CODEC = CustomPacketPayload.codec(
