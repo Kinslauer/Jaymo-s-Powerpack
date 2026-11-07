@@ -1,7 +1,9 @@
 package com.jaymospowers.costume;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.baubles.Baubles;
 import com.mojang.serialization.Codec;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +20,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * (0.21.41) Andy: "The archer hood should attach to a cloak that fits the player, and allows the hood to be removed and
@@ -49,9 +52,13 @@ public final class HoodedCloak {
 	public static void init() {
 	}
 
-	/** Whether {@code player} wears a cloak hood on their head (either side). */
+	/** Whether {@code player} wears a cloak hood on their head (either side): in the vanilla head armour slot, or in the baubles head slot. */
 	public static boolean wears(Player player) {
-		return player.getItemBySlot(EquipmentSlot.HEAD).is(HOODS);
+	    if (player.getItemBySlot(EquipmentSlot.HEAD).is(HOODS)) {
+	        return true;
+	    }
+	    List<ItemStack> worn = Baubles.worn(player);
+	    return worn != null && worn.size() > Baubles.HEAD_SLOT && worn.get(Baubles.HEAD_SLOT).is(HOODS);
 	}
 
 	/** Whether the hood is lowered onto the back (either side; true only while one is worn). */

@@ -1,10 +1,12 @@
 package com.jaymospowers.client.costume;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.baubles.Baubles;
 import com.jaymospowers.core.HiddenArmor;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.HoodedCloak;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.List;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -25,6 +27,7 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
@@ -80,11 +83,23 @@ public final class HoodedCloakLayer {
 	/**
 	 * From the avatar renderer's extractRenderState: whether this player shows the cloak, and with the hood down the hood
 	 * comes off the head (the armour layer skips it). A costume over everything, or the hood hidden with the armour eye,
-	 * shows no cloak.
+	 * shows no cloak. Detects hoods in the vanilla head armour slot and in the baubles head slot.
 	 */
 	public static void extract(Avatar entity, AvatarRenderState state) {
-		if (!(entity instanceof Player player) || !HoodedCloak.wears(player) || Costume.worn(player) != null
+		if (!(entity instanceof Player player) || Costume.worn(player) != null
 			|| HiddenArmor.hidden(player, EquipmentSlot.HEAD)) {
+			state.setData(KEY, null);
+			return;
+		}
+		boolean hoodInArmor = player.getItemBySlot(EquipmentSlot.HEAD).is(HoodedCloak.HOODS);
+		boolean hoodInBaubles = false;
+		List<Identifier> looks = Baubles.looks(player);
+		if (looks.size() > Baubles.HEAD_SLOT) {
+			Identifier headLook = looks.get(Baubles.HEAD_SLOT);
+			hoodInBaubles = BuiltInRegistries.ITEM.get(headLook)
+			.map(item -> item.is(HoodedCloak.HOODS)).orElse(false);
+		}
+		if (!hoodInArmor && !hoodInBaubles) {
 			state.setData(KEY, null);
 			return;
 		}
