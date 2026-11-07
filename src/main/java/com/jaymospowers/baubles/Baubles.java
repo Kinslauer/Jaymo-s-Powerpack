@@ -305,7 +305,7 @@ public final class Baubles {
 	/**
 	 * (0.20.0) What {@code player} wears in the belt slot: the live stack (changing a purse's contents in place changes it),
 	 * or empty. Jaymo's Kingdoms reads its coin purse from here ({@code PowersCompat.belt}).
-	 * <p>(0.21.42, Andy: "lanterns and coin purses can work from inside the belt") With a Traveler Tool Belt in the slot,
+	 * <p>(0.21.43, Andy: "lanterns and coin purses can work from inside the belt") With a Traveler Tool Belt in the slot,
 	 * the hip item carried in it instead (a copy: write it back with {@link #setBelt}), a purse before a lantern, or empty.
 	 */
 	public static ItemStack belt(Player player) {
@@ -317,12 +317,12 @@ public final class Baubles {
 		return at < 0 ? ItemStack.EMPTY : carried(slot).get(at);
 	}
 
-	/** (0.21.42) Copies of what a tool belt carries, in its slot order (empties kept). */
+	/** (0.21.43) Copies of what a tool belt carries, in its slot order (empties kept). */
 	private static List<ItemStack> carried(ItemStack toolBelt) {
 		return toolBelt.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).itemCopies().toList();
 	}
 
-	/** (0.21.42) Where in a tool belt the hip item {@link #belt} hands out is: the first purse, else the first lantern, or -1. */
+	/** (0.21.43) Where in a tool belt the hip item {@link #belt} hands out is: the first purse, else the first lantern, or -1. */
 	private static int carriedHip(ItemStack toolBelt) {
 		List<ItemStack> items = carried(toolBelt);
 		int lantern = -1;
@@ -340,7 +340,7 @@ public final class Baubles {
 	/**
 	 * (0.20.0) Puts {@code stack} in the belt slot (if it fits there, or is empty), redoing the bonuses and the hip. Kingdoms
 	 * calls it after changing a worn purse, or when a pickpocket lifts the whole thing ({@code PowersCompat.setBelt}).
-	 * <p>(0.21.42) With a tool belt in the slot, {@code stack} replaces the hip item carried in it ({@link #belt}): an
+	 * <p>(0.21.43) With a tool belt in the slot, {@code stack} replaces the hip item carried in it ({@link #belt}): an
 	 * empty stack takes it out (a lifted purse), and the tool belt stays on. Nothing happens if it carries none.
 	 */
 	public static void setBelt(ServerPlayer player, ItemStack stack) {
@@ -385,7 +385,7 @@ public final class Baubles {
 			player.setAttached(LOOKS, List.copyOf(looks));
 		}
 		ItemStack hip = hipItem(worn.get(BELT_SLOT)) ? worn.get(BELT_SLOT).copyWithCount(1) : ItemStack.EMPTY;
-		// (0.21.42) a lantern or purse carried in a worn tool belt hangs at the hip too
+		// (0.21.43) a lantern or purse carried in a worn tool belt hangs at the hip too
 		if (hip.isEmpty() && ToolBeltCompat.isBelt(worn.get(BELT_SLOT))) {
 			int at = carriedHip(worn.get(BELT_SLOT));
 			hip = at < 0 ? ItemStack.EMPTY : carried(worn.get(BELT_SLOT)).get(at).copyWithCount(1);

@@ -1400,7 +1400,7 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   knee up in turn, body pressed into the wall (`SLIDE_LEAN` 6 degrees), head back looking up. The drop doesn't count as
   climbed distance, so the climb's limbs hold still under the blend instead of running backward. Compile-checked, not played.
 
-## 0.21.42 (2026-11-07): up to 3 weapons on the body; the tool belt is a bauble and shows them all
+## 0.21.43 (2026-11-07): up to 3 weapons on the body; the tool belt is a bauble and shows them all
 - Andy: "players should animate up to 3 weapons on them by default, and wearing the toolbelt animates everything like
   before. it should go in the baubles slot."
 - Weapon Master draws up to 3 hotbar items on the body (the lowest slots not in hand; was 1 since 0.20.73), and all of

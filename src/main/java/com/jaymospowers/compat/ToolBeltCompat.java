@@ -12,7 +12,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 /**
- * Traveler Tool Belt (optional; read by item id, never linked). (0.21.42, Andy: "wearing the toolbelt animates
+ * Traveler Tool Belt (optional; read by item id, never linked). (0.21.43, Andy: "wearing the toolbelt animates
  * everything like before. it should go in the baubles slot.") The belt is worn in the Baubles belt slot, and only there:
  * {@code mixin/toolbelt/ToolBeltHelperMixin} hands that one to the mod, for its radial menu, its tool swap and drawing it
  * on the hip. A belt carried in the inventory is just carried.

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * hotbar slot that isn't in hand) and skips the rest. Every item it draws, for your own body and for other players',
  * goes through {@code HumanoidItemLayer.renderItem}; its quiver isn't an item and still shows. Skipped when Weapon
  * Master isn't there.
- * <p>(0.21.42) Andy: "players should animate up to 3 weapons on them by default, and wearing the toolbelt animates
+ * <p>(0.21.43) Andy: "players should animate up to 3 weapons on them by default, and wearing the toolbelt animates
  * everything like before. it should go in the baubles slot." Up to {@link #MAX_SHOWN} items (the lowest slots), and
  * every one while a Traveler Tool Belt is worn in the Baubles belt slot ({@code ToolBeltCompat.wears}).
  */

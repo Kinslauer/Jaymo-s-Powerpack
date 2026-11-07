@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Optional;
 
 /**
- * (0.21.42) Traveler Tool Belt (optional; all rights reserved, nothing of it copied) finds a player's belt anywhere in
+ * (0.21.43) Traveler Tool Belt (optional; all rights reserved, nothing of it copied) finds a player's belt anywhere in
  * their inventory. Andy: "it should go in the baubles slot": the belt it uses (radial menu, tool swap, the belt drawn on
  * the hip) is the one in the Baubles belt slot, or none ({@link ToolBeltCompat}). Skipped when the mod isn't there.
  */
