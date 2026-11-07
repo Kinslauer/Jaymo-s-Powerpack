@@ -50,8 +50,14 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	static final float DRAWN_EASE = 0.12F;
 	static final int QUICK_FADE_UNDER = 100;
 	private static final double SAME_HEIGHT = 1.0E-4;
-	/** How far a decal sits above the surface it's drawn on, plus a per-decal jitter so overlapping decals don't flicker in step. */
-	static final float DECAL_LIFT = 0.06F, DECAL_LIFT_JITTER = 0.03F;
+	/**
+	 * How far a decal sits above the surface it's drawn on, plus a per-decal jitter so overlapping decals don't
+	 * flicker in step. Kept to a few thousandths of a block: enough to clear coplanar z-fighting with the block, small
+	 * enough that a puddle hanging over a slab edge or lying on a carpet or snow layer stays flush instead of floating.
+	 * Coplanar flicker is handled by drawing through the decal render state (BloodDecals.TYPE) - 26.3's RenderType and
+	 * RenderSetup carry no polygon or depth offset, so the lift cannot be relied on alone.
+	 */
+	static final float DECAL_LIFT = 0.002F, DECAL_LIFT_JITTER = 0.002F;
 	/** (0.19.63) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
 	static final float WET_ALPHA = 0.5F;
 	static final int WATER = 0x8EA4B6;
