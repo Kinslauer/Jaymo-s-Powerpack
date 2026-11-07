@@ -31,6 +31,10 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Ledge.init();
 		// (0.14.3) freerunning, Kingdoms' Stealth tree's second page
 		com.jaymospowers.freerun.Freerun.init();
+		// (ParCool track B part 2) traceur gloves and boots: gloves guard the hands on a wall slide,
+		// boots soften landings and help the parkour moves (#1118)
+		com.jaymospowers.freerun.gear.TraceurGloves.init();
+		com.jaymospowers.freerun.gear.TraceurBoots.init();
 		// (ParCool track B) long jump, charge jump, trick jump, safety tap, sky dive, fast swim, hiding in leaves or hay
 		com.jaymospowers.freerun.moves.RunMoves.init();
 		com.jaymospowers.water.Dives.init();
