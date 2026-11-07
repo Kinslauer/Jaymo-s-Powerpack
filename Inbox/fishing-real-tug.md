@@ -1,5 +1,5 @@
 ---
-status: ready
+status: sent
 for: hermes
 from: coordinator
 asked: 2026-11-07
