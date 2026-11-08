@@ -51,6 +51,13 @@ public final class HookBait {
             if (!bait.is(BAITS)) {
                 return InteractionResult.PASS;
             }
+            if (Tackle.isLure(bait.getItem()) && !Tackle.rodOf(rod).lures) {
+                // (0.21.63) a lure needs a rod that can work it
+                if (player instanceof ServerPlayer sp) {
+                    sp.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.lure_needs_rod").withStyle(ChatFormatting.GRAY));
+                }
+                return InteractionResult.FAIL;
+            }
             if (rod.has(BAIT)) {
                 if (player instanceof ServerPlayer sp) {
                     sp.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.already_baited").withStyle(ChatFormatting.GRAY));

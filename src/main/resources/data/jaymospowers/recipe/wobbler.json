@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " L ",
+    "PPN",
+    "  N"
+  ],
+  "key": {
+    "L": "minecraft:string",
+    "P": "#minecraft:planks",
+    "N": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "jaymospowers:wobbler",
+    "count": 1
+  }
+}

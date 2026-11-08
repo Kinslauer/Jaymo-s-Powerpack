@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " L ",
+    "GN ",
+    " N "
+  ],
+  "key": {
+    "L": "minecraft:string",
+    "G": "minecraft:gold_nugget",
+    "N": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "jaymospowers:spinner",
+    "count": 1
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "SLS",
+    "LSL",
+    " S "
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "L": "minecraft:string"
+  },
+  "result": {
+    "id": "jaymospowers:landing_net",
+    "count": 1
+  }
+}

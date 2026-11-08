@@ -30,6 +30,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class FishingHookMixin {
     private static final int RNG_TICKS = 4;
 
+    private FishingHook hook() {
+        return (FishingHook) (Object) this;
+    }
+
     /** Decide whether this hook gets a bite this tick; on a bite, spawn a live fish and start the fight. */
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
@@ -74,8 +78,10 @@ public abstract class FishingHookMixin {
     /** The metal rod counts as a fishing rod: don't discard a metal-rod hook just because the player isn't holding a vanilla rod. */
     @Inject(method = "shouldStopFishing", at = @At("HEAD"), cancellable = true)
     private void onShouldStopFishing(Player owner, CallbackInfoReturnable<Boolean> cir) {
-        if (FishingReal.isMetalRodItem(owner.getItemInHand(InteractionHand.MAIN_HAND))
-                || FishingReal.isMetalRodItem(owner.getItemInHand(InteractionHand.OFF_HAND))) {
+        // (0.21.63) and so do Track B's rods (any FishingRodItem; vanilla only keeps a hook for its own rod)
+        if ((com.jaymospowers.fishing.HookBait.isRod(owner.getItemInHand(InteractionHand.MAIN_HAND))
+                || com.jaymospowers.fishing.HookBait.isRod(owner.getItemInHand(InteractionHand.OFF_HAND)))
+                && hook().distanceToSqr(owner) <= 1024.0) {
             cir.setReturnValue(false);
             cir.cancel();
         }

@@ -1,0 +1,13 @@
+{
+  "gives": {
+    "id": "jaymospowers:spinning_rod",
+    "count": 1
+  },
+  "max_uses": 3,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 10
+  },
+  "xp": 15
+}

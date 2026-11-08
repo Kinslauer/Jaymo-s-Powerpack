@@ -39,20 +39,20 @@ Andy picked "all three together": the strike window, then a charged cast, drag a
 - [ ] Fish spook: no bites while you stand in the water near the hook (True Fishing)
 
 ## Track B: tackle
-- [ ] Rod kinds with plain textures: pole (small fish), spinning rod (predators), ledger rod (bottom fish, rod pod), sea rod
+- [x] Rod kinds with plain textures: pole (small fish), spinning rod (predators), ledger rod (bottom fish, rod pod), sea rod
       (tuna, sharks); the metal rod becomes the sea rod's tier (Reel to Fish, Advanced Fishing)
-- [ ] Baits: natural baits used up per catch (worm, maggots, dough, corn, boilie, bait fish, lugworm) and lures that stay on
+- [x] Baits: natural baits used up per catch (worm, maggots, dough, corn, boilie, bait fish, lugworm) and lures that stay on
       but can snap (spinner, wobbler, soft shad, pirk, trolling squid); each rod + bait has its own catch table (Reel to Fish)
 - [ ] Lure depth: let the lure sink before reeling to reach deeper fish (Advanced Fishing)
-- [ ] Groundbait: thrown into a spot, raises bites there for a while (Advanced Fishing, Legendary Fishing)
+- [x] Groundbait: thrown into a spot, raises bites there for a while (Advanced Fishing, Legendary Fishing)
 - [ ] Rod pod with a bite alarm: holds up to three rods, beeps and gives a redstone signal on a bite (Reel to Fish,
       Advanced Fishing)
-- [ ] Landing net: scoops small fish, shrimp, crabs and jellyfish (Reel to Fish)
-- [ ] Live bait: a small fish you caught, put on the hook, draws predators and big fish (True Fishing)
-- [ ] Villager fishermen sell bait and lures (True Fishing)
+- [x] Landing net: scoops small fish, shrimp, crabs and jellyfish (Reel to Fish)
+- [x] Live bait: a small fish you caught, put on the hook, draws predators and big fish (True Fishing)
+- [x] Villager fishermen sell bait and lures (True Fishing)
 - [ ] Ice fishing: cut a hole in ice and fish through it (True Fishing)
-- [ ] Trolling: fish from a moving boat with the line out behind (True Fishing)
-- [ ] Magnet fishing: a magnet on the line pulls up scrap and lost things (True Fishing)
+- [x] Trolling: fish from a moving boat with the line out behind (True Fishing)
+- [x] Magnet fishing: a magnet on the line pulls up scrap and lost things (True Fishing)
 - [ ] Crab pot: baited underwater, catches crabs, lobster, shrimp and crayfish over time (Reel to Fish)
 
 ## Track C: fish

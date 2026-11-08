@@ -1622,3 +1622,29 @@ Andy: "The goal is more realistic fishing", then: "i need there to be real fish 
   Meat, a piece per 50 kg (3 to 12). Steaks and shark meat cook in a furnace, smoker or campfire.
 - **Tideborn** (with Kingdoms 0.7.650): every bite calls `KingdomsCompat.fished`, see the Kingdoms log.
 - Built; not played.
+
+## 0.21.63 (2026-11-08): fishing tackle - rods, baits, lures, groundbait, trolling, magnet, landing net
+
+Track B of `docs/Plan-fishing.md`. Ideas from Reel to Fish, Advanced Fishing, Legendary Fishing and True Fishing (all
+rights reserved: ideas only, our own code and art). Andy: their rods are "too realistic looking, the function is all i
+want", so every rod here looks like a plain Minecraft rod.
+- **Rods** (`Tackle.Rod`): vanilla's rod takes any small fish. The **Cane Pole** (bamboo and string) takes small fish
+  only (cod, pufferfish, tropical) but they notice bait 1.5x as fast and from 0.7x as far. The **Spinning Rod** works
+  lures and draws from 1.2x as far. The **Ledger Rod** fishes bait on the bottom and draws from 1.5x as far. The metal
+  rod is the sea rod: the only one tuna and sharks take, and it works lures too. Each new rod has a cast model.
+- **Baits** (eaten by the fish that takes them): Earthworms, Maggots, Dough Bait, Boilies, Lugworms, plus bread, rotten
+  flesh, spider eyes, Kitchen's fish bait, and live bait (a tropical fish on the hook draws tuna and sharks). Each draws
+  some fish more than others (`Tackle.Bait.draws`): lugworms are sea bait for cod, boilies and dough draw salmon.
+- **Lures** (stay on the line, spinning or sea rod only, 5-8% chance to snap off on a strike): Spinner and Wobbler for
+  salmon, Soft Shad for cod, Pirk (a heavy jig for cod, tuna, sharks) and Trolling Squid (tuna, sharks).
+- **Groundbait** (`FishingGear`): thrown at water, fish within 8 blocks notice bait twice as often for 2 minutes.
+- **Trolling**: fishing from a moving boat draws from 1.5x as far and 1.5x as keen (2.5x with a Trolling Squid).
+- **Fishing Magnet**: put on the hook like bait; it draws no fish but now and then snags scrap off the bottom (iron
+  nuggets, chain, rails, a bucket, shears, an old sword, a rare trident: `loot_table/gameplay/magnet_fishing`).
+- **Landing Net**: use it on the fish you're fighting once it's within 4 blocks to land it, or scoop a free tropical
+  fish or pufferfish straight out of the water.
+- **Fishermen sell tackle**: bait at levels 1-2, lures at 3-4, the spinning and ledger rods at 4-5.
+- Rod, bait and lure tooltips say what each is for. All craftable from vanilla materials.
+- Not in this round (still open in the plan): rod pod and bite alarm, crab pot (needs Track C's crabs), lure depth,
+  an ice auger.
+- Built; not played.

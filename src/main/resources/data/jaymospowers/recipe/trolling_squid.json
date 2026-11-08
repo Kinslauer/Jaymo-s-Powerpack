@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " L ",
+    "ISI",
+    " N "
+  ],
+  "key": {
+    "L": "minecraft:string",
+    "I": "minecraft:ink_sac",
+    "S": "minecraft:pink_wool",
+    "N": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "jaymospowers:trolling_squid",
+    "count": 1
+  }
+}
