@@ -10258,3 +10258,13 @@ Andy: "tideborn will see fishing as an attack, and doing in their havens is seen
   reputation there drops, the guards come after you and a bounty goes up. Charged at most once per 30 s; the haven's
   own folk may fish freely (`TideFishing`).
 - Built; not played.
+
+## 0.7.651 (2026-11-08): no digging or building in tagged dungeons
+
+Andy: "get them, we need it" (Stormborn Tomb, whose tombs rely on DungeonZ's no-build rule).
+- Inside a structure in the `#jaymoskingdoms:no_build_dungeons` tag, survival players can't break or place blocks; doors,
+  chests, levers and buttons still work, and an action-bar line says why. Cobwebs and pots stay breakable
+  (`#jaymoskingdoms:no_build_dungeons_breakable`). Creative and spectators are never blocked.
+- A player's explosion spares blocks inside such a dungeon (`ServerExplosionNoBuildMixin`).
+- The tag is empty until the Stormborn Tomb structures land, so nothing changes in play yet.
+- Built; not played.
