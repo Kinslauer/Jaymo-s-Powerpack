@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: bogre-model
 branch: claude/bogre-model
 with: 
@@ -32,3 +32,4 @@ owns:
 
 ## Done
 Added the Bogre's GeckoLib geometry, unchanged texture, 21 animations, editable Blockbench project, render and MIT credit as PR #1146. Root and Kingdoms builds and PR checks passed; rendered front, side and rear views were inspected. No gameplay Java was added and the assets were not tested on a live mob in game.
+- 2026-11-08 16:42 PR #1146 is merged into master; moved to Agents/Done.
