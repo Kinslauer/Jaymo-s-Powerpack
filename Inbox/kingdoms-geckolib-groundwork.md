@@ -1,5 +1,5 @@
 ---
-status: open
+status: in-review
 for: claude
 from: coordinator
 asked: 2026-11-08
