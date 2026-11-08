@@ -1,15 +1,10 @@
 ---
-updated: 2026-11-08 04:08
+updated: 2026-11-08 04:11
 ---
 # Open PRs
 
-4 open, as of 2026-11-08 04:08. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-08 04:11. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
-
-## [#1129](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1129) Sora's Dagger 2.0 models for every stage (Powers 0.21.60)
-- **Branch:** `claude/lucid-wilson-4012a4` · **Updated:** 2026-11-08 (today)
-- **Checks:** ⏳ 2 of 4 running
-- **Agent:** no agent note
 
 ## [#1130](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1130) One character menu on H (Powers 0.21.60, Kingdoms 0.7.649)
 - **Branch:** `claude/lucid-cohen-0470d8` · **Updated:** 2026-11-08 (today)
