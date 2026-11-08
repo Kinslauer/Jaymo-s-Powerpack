@@ -54,6 +54,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
+		// (0.21.60) the character menu's tabs (Kingdoms adds its own through com.jaymoskingdoms.client.MenuCompat)
+		com.jaymospowers.client.menu.MenuTabs.init();
 		for (PowerKey key : PowerKey.values()) {
 			ABILITY_KEYS[key.ordinal()] = KeyMappingHelper.registerKeyMapping(
 				new KeyMapping("key.jaymospowers." + key.id(), DEFAULT_KEYS[key.ordinal()], CATEGORY));
@@ -314,11 +316,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 			}
 		}
 		while (menuKey.consumeClick()) {
-			// in survival there's nothing to see until your power has awakened (but an unmade affinity choice comes back)
-			if (power != null || player.isCreative()) {
-				minecraft.gui.setScreen(new PowerScreen());
-			} else if (com.jaymospowers.core.Affinity.ENABLED && !com.jaymospowers.core.Affinity.chosen(player)) {
+			// (0.21.60) the character menu, on the tab you had open last; an unmade affinity choice still comes first
+			if (power == null && !player.isCreative() && com.jaymospowers.core.Affinity.ENABLED && !com.jaymospowers.core.Affinity.chosen(player)) {
 				minecraft.gui.setScreen(new AffinityScreen());
+			} else {
+				com.jaymospowers.client.menu.MenuTabs.openLast();
 			}
 		}
 

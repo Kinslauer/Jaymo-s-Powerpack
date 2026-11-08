@@ -5,7 +5,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
@@ -26,6 +30,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
@@ -41,6 +46,13 @@ public final class Journal {
 	static final int MAX_PLACES = 48;
 
 	public static Item JOURNAL;
+
+	/**
+	 * (0.7.649) Andy: "everyone spawns with a journal now". Whether {@code player} has been given their journal: with their
+	 * life story's kit, or (anyone from before) once on joining. Saved, kept through death; a lost journal isn't replaced.
+	 */
+	static final AttachmentType<Boolean> GIVEN = AttachmentRegistry.create(JaymosKingdoms.id("journal_given"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 
 	/** One quest as the journal shows it. */
 	public record Entry(boolean royal, boolean ready, Component title, Component giver, Component text, Component objective, Optional<BlockPos> target) {
@@ -145,6 +157,12 @@ public final class Journal {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("journal"));
 		JOURNAL = Registry.register(BuiltInRegistries.ITEM, key, new JournalItem(new Item.Properties().setId(key).stacksTo(1)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.insertAfter(Items.MAP, JOURNAL));
+		// (0.7.649) a journal for everyone already past their life story (the story's kit gives the newcomers theirs)
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			if (!LifeStory.owed(handler.player)) {
+				handOut(handler.player);
+			}
+		});
 		PayloadTypeRegistry.clientboundPlay().register(Book.TYPE, Book.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Ask.TYPE, Ask.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Ask.TYPE, (payload, context) -> {
@@ -171,6 +189,17 @@ public final class Journal {
 			}
 		}
 		return false;
+	}
+
+	/** Gives {@code player} their journal, once ({@link #GIVEN}). */
+	static void handOut(ServerPlayer player) {
+		if (player.getAttachedOrElse(GIVEN, false)) {
+			return;
+		}
+		player.setAttached(GIVEN, true);
+		if (!carries(player)) {
+			player.getInventory().placeItemBackInInventory(new ItemStack(JOURNAL), net.minecraft.util.Prediction.SERVER_ONLY);
+		}
 	}
 
 	/** Writes up {@code player}'s journal and sends it to them to open. */
