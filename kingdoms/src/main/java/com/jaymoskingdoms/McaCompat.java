@@ -162,6 +162,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.panicking(villager);
 	}
 
+	/** {@link FarmFamily}: an MCA villager someone set to one of MCA's chores; false without MCA. */
+	static boolean choring(Villager villager) {
+		return LOADED && McaBridge.choring(villager);
+	}
+
 	/** (0.5.29) {@code villager} (if MCA's) warms to {@code player} by {@code hearts}: a quest done for them, a letter brought. */
 	public static void hearts(LivingEntity villager, ServerPlayer player, int hearts) {
 		// (0.7.62) not for a masked stranger: they don't know whom they're warming to

@@ -1595,3 +1595,39 @@ Built; not played.
   gives 3 fillets and bone meal (was 2), so a tuna or shark catch cleans into many.
 - Fixed: the startup crash (the metal rod item had no id set) and a shark bite that fought a tropical fish.
 - Built; not played.
+
+## 0.21.60: Sora's Dagger 2.0 for every stage
+- Andy's four Sora Dagger 2.0 Blockbench models are in: the base dagger is Iron, the gold stage Gilded, the diamond stage
+  Diamond Edged, the tempest stage Tempest (`models/item/soras_dagger_2_0_<iron|gilded|diamond|tempest>` and
+  `_reverse`, textures `soras_dagger_2_0_<stage>_hilt` and `_blade`). Stage logic is unchanged; each stage's item
+  definition points at its own model, with the reverse grip on custom_model_data flag 0 as before.
+- Converted by `tools/blockbench/sora_2_0.py` from `tools/bbmodels/sora-dagger-2-0-*.bbmodel`. It fixes what the #1096
+  conversion got wrong: faces now name their texture slot (`#0`/`#1`; the full paths showed the missing texture),
+  UVs are scaled to 0-16 (they were raw 128-pixel values), and the tilted cubes keep their rotations.
+- Each model keeps its own hand, GUI and item-frame transforms; on the ground all four use #1099's 0.4 pose, and the
+  reverse grip uses #1099's reverse hand transforms (the hand transforms are the same in all four models).
+- Tempest's 1240px hilt texture is cropped to what the model uses and saved at 512px, so the item atlas keeps its
+  mipmaps.
+- Removed the old `soras_dagger_2_0`, `_reverse` and `_wood` models and their textures (the Gilded and Iron models
+  replace them; nothing else used them).
+- Built; not looked at in game.
+## 0.21.59 (2026-11-07): Kingdoms 0.7.648, the Family farmhand's family stop being deadweight
+- The family you wake with on the Family farmhand start now run from zombies (spotting them from 20 blocks), go
+  indoors at dusk and stay in until morning, and only swing back, weakly, when a monster has them cornered.
+- By day they work the farm: harvest and replant crops, shear sheep, milk cows (given buckets), breed the animals from
+  the house chest's feed, and the child gathers eggs, wool and saplings; it all goes in the house chest. MCA's Work
+  button (chores) is open for them too.
+- Compile-checked; not played.
+## 0.21.58 (2026-11-07): Chrono's echoes stop piling up (one echo per Chrono, for real)
+Andy: "Whenver chrono uses his cheat death, an echo respawns, and the same echos will appear in the nether, meaning he can
+spawn up to 30 down there waiting to kill him."
+- Cause: "one echo per Chrono" only counted echoes in loaded chunks. An echo left behind (a cheat-death rewind throws
+  you minutes back, often far off or into another dimension) stopped counting once its chunks unloaded, so the next
+  timer brought another; the Nether blink-return and following through a portal didn't check at all.
+- Now each Chrono's memory names their one echo, loaded or not (`ChronoMemory.echo`, saved). No new echo comes while it
+  exists, a blinked-out Nether echo doesn't come back if another is out there, and any other echo of theirs outside the
+  future fades as soon as it's loaded, so existing piles (the Nether's too) clear themselves. It's cleared when that
+  echo really ends (killed, shattered, blinked, faded); with the owner offline that's noted in the overworld till
+  they're back (`ChronoEchoes.ENDED`).
+- Through a portal only that one echo follows you (the future's extra stalkers stay in the future).
+- Built; not played.
