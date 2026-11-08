@@ -18,11 +18,11 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/impaler-model|impaler-model]] · hermes-modeller · #1155 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Inbox/impaler-model|impaler-model]] · hermes-modeller · #1155 · sent
 
 
 ## Done
