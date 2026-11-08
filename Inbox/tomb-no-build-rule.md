@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: coordinator
 asked: 2026-11-08
 thread: Claude reviewer session (Andy: Stormborn Tomb, "we need it")
 claimed_by: hermes-b
-pr: 
+pr: 1138
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/dungeon/ (new: the rule)
   - kingdoms/src/main/resources/data/jaymoskingdoms/tags/worldgen/structure/no_build_dungeons.json (new)
