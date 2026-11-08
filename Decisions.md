@@ -67,3 +67,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Applies to:** Powers (menu, H), Kingdoms (its tabs, starting journal).
 - **Agent:** character-menu.
 - 2026-11-08: Andy: Inhabitants (JeremySeq, MIT, Forge 1.20.1) is "going to be a kingdoms addition": port its Bogre, Impaler and Warped Clam into Kingdoms (GeckoLib is already in the pack), one Inbox task per feature. Andy wants a dedicated modelling model for the Bogre ("claude doesnt do the best with models").
+- 2026-11-08: Andy wants Dungeon Conquest: Stormborn Tomb ("get them, we need it"). None of it or its deps (DungeonZ, Draugr Invasion, Supplementaries+Moonlight, FrogiLib) has a 26.3 Fabric build, so it becomes a Kingdoms port: MIT tomb structures (Supplementaries decor swapped), the DungeonZ-style no-build rule (MIT), our own Draugr-like undead on the Hollows (Draugr Invasion is ARR: nothing copied), our own tomb boss.
