@@ -1600,6 +1600,14 @@ mobs should be possible".
   body's). `KitchenBlood.send(level, body, ...)`; plain red with an older Powers.
 - Built; not played.
 
+## 0.5.87: spit roast over an open fire
+- Andy: "you should also be able to cook it on an open fire, similar to other animals". A new `jaymoskitchen:spit`, crafted
+  from four sticks, goes on top of a lit campfire or another lit heat source (`jaymoskitchen:heat_sources`). Put a raw meat,
+  fish or carcass on it and it turns slowly over the flames, cooking raw → cooked → burnt with a visible colour change.
+  Right-click with an empty hand to tear a cooked chunk off, or sneak + right-click to take the whole cooked product when
+  it's done (`cooking/spit/SpitBlock`, `cooking/spit/SpitBlockEntity`; `client/spit/SpitBlockEntityRenderer`). Tuning
+  numbers (`COOK_TICKS`, `BURNT_TICKS`, `CHUNK`) are `static final` at the top of `SpitBlockEntity`. Compile-checked; not played.
+
 ## 0.5.88 (2026-11-07): gutting a fish gives more fillets
 
 - With Jaymo's Powers 0.21.57's real fishing (a hooked cod or salmon, or a big tuna or shark catch that lands as

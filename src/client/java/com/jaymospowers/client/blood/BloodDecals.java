@@ -5,8 +5,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Set;
 import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import com.mojang.renderpearl.api.pipeline.CompareOp;
+import com.mojang.renderpearl.api.pipeline.DepthStencilState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -25,6 +32,21 @@ import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
  */
 public final class BloodDecals {
 	public static final ParticleRenderType TYPE = new ParticleRenderType("jaymospowers:blood_decal", "BD");
+
+	/** The puddles', footprints' and wall marks' pipeline: the translucent particle pipeline with a depth bias, so a
+	 * decal coplanar with a block wins the depth test against it instead of z-fighting with it past a few dozen blocks.
+	 * {@link RenderPipelines} keeps {@code PARTICLE_SNIPPET} private, so it is taken reflectively and only the
+	 * depth-stencil state changes; {@link #registerPipeline} puts it with the pipelines the engine compiles at startup. */
+	private static final RenderPipeline DECAL_PIPELINE = decalPipeline();
+
+	static {
+		registerPipeline(DECAL_PIPELINE);
+	}
+
+	/** The layer {@link BloodPuddle}s, {@linkplain BloodPuddle#printQuad footprints} and {@link BloodWallMark}s are
+	 * drawn with: translucent textured quads on the particles atlas through {@link #DECAL_PIPELINE}. */
+	public static final SingleQuadParticle.Layer DECAL_LAYER =
+		new SingleQuadParticle.Layer(true, TextureAtlas.LOCATION_PARTICLES, DECAL_PIPELINE, RenderPipelines.OIT_PARTICLE);
 
 	private BloodDecals() {
 	}
@@ -137,6 +159,34 @@ public final class BloodDecals {
 
 		void clear() {
 			this.size = 0;
+		}
+	}
+
+	/** The translucent particle pipeline with a depth bias: {@code PARTICLE_SNIPPET} is private on {@link RenderPipelines},
+	 * so this takes it reflectively; only the depth-stencil state changes. */
+	private static RenderPipeline decalPipeline() {
+		try {
+			Field snippet = RenderPipelines.class.getDeclaredField("PARTICLE_SNIPPET");
+			snippet.setAccessible(true);
+			RenderPipeline.Snippet base = (RenderPipeline.Snippet) snippet.get(null);
+			return RenderPipeline.builder(base)
+				.withLocation("pipeline/jaymospowers_blood_decal")
+				.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, true, 1.0F, 1.0F))
+				.build();
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException("jaymospowers: couldn't build the blood decal pipeline", e);
+		}
+	}
+
+	/** Puts {@code pipeline} with {@link RenderPipelines}' private {@code register} so the engine compiles it at startup
+	 * with the required pipelines. */
+	private static void registerPipeline(RenderPipeline pipeline) {
+		try {
+			Method register = RenderPipelines.class.getDeclaredMethod("register", RenderPipeline.class);
+			register.setAccessible(true);
+			register.invoke(null, pipeline);
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException("jaymospowers: couldn't register the blood decal pipeline", e);
 		}
 	}
 }

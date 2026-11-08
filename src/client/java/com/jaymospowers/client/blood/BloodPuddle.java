@@ -1,6 +1,7 @@
 package com.jaymospowers.client.blood;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -50,6 +51,17 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	static final float DRAWN_EASE = 0.12F;
 	static final int QUICK_FADE_UNDER = 100;
 	private static final double SAME_HEIGHT = 1.0E-4;
+	/**
+	 * How far a decal sits above the surface it's drawn on, plus a per-decal jitter so overlapping decals don't
+	 * flicker in step. Kept to a few thousandths of a block: enough to clear coplanar z-fighting with the block, small
+	 * enough that a puddle hanging over a slab edge or lying on a carpet or snow layer stays flush instead of floating.
+	 * The flicker itself is stopped by drawing through {@link BloodDecals#DECAL_LAYER}: its pipeline is the translucent
+	 * particle pipeline with a depth bias, so a decal coplanar with a block stays flush past a few dozen blocks; the
+	 * lift stays tiny and only needs to clear exact coplanarity.
+	 */
+	static final float DECAL_LIFT = 0.002F, DECAL_LIFT_JITTER = 0.002F;
+	/** (0.21.x) Puddles at the edge of view distance fade out over these last blocks instead of popping at it. */
+	static final float DRAW_DISTANCE_FADE = 8.0F;
 	/** (0.19.63) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
 	static final float WET_ALPHA = 0.5F;
 	static final int WATER = 0x8EA4B6;
@@ -250,7 +262,11 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** Whether the camera could see where it lies. */
 	@Override
 	public boolean visible(net.minecraft.client.renderer.culling.Frustum frustum) {
-		return frustum.pointInFrustum(this.x, this.y, this.z);
+		// culled by the quad's own bounds, not just its centre point: a big puddle near the screen edge
+		// stays drawn until the whole quad is out of view instead of popping out
+		float r = this.baseSize * 0.6F;
+		return frustum.isVisible(new net.minecraft.world.phys.AABB(this.x - r, this.y - 0.1F, this.z - r,
+				this.x + r, this.y + 0.1F, this.z + r));
 	}
 
 	/** Lays its pieces into {@code decals} for this frame. */
@@ -271,12 +287,25 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		double cx = Mth.lerp(partialTick, this.xo, this.x);
 		double cy = Mth.lerp(partialTick, this.yo, this.y);
 		double cz = Mth.lerp(partialTick, this.zo, this.z);
+		// (0.21.x) at the edge of view distance fade out over the last blocks instead of popping at it
+		float alpha = this.alpha;
+		if (alpha > 0.0F) {
+			float drawDistance = Minecraft.getInstance().options.renderDistance().get() * 16.0F;
+			Vec3 at = new Vec3(cx, cy, cz);
+			double dx = camera.position().x - at.x, dy = camera.position().y - at.y, dz = camera.position().z - at.z;
+			float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+			float fadeStart = drawDistance - DRAW_DISTANCE_FADE;
+			if (dist > fadeStart) {
+				alpha *= 1.0F - Mth.clamp((dist - fadeStart) / DRAW_DISTANCE_FADE, 0.0F, 1.0F);
+			}
+		}
 		double halfX = size * this.stretchX * 0.5, halfZ = size * this.stretchZ * 0.5;
 		double minX = cx - halfX, maxX = cx + halfX, minZ = cz - halfZ, maxZ = cz + halfZ;
 		int light = this.getLightCoords(partialTick);
 		if (this.magma) {
 			light = glow(light, age);
 		}
+		this.drawAlpha = alpha;
 		this.shown = shade(this.color, age, this.stain);
 		if (this.print) {
 			this.printQuad(decals, camera, cx, cy, cz, size, light);
@@ -293,6 +322,9 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** (0.20.41) This frame's colour (RGB): {@link #shade}. */
 	private int shown;
 
+	/** (0.21.55) This frame's opacity: its own alpha with the view-distance fade; never written back to {@link #alpha}. */
+	private float drawAlpha;
+
 	/** (0.20.41) A footprint: one sole lying flat where it fell, toes the way its walker went. */
 	private void printQuad(BloodDecals.State decals, Camera camera, double cx, double cy, double cz, float size, int light) {
 		float u0 = this.sprite.getU0(), u1 = this.sprite.getU1(), v0 = this.sprite.getV0(), v1 = this.sprite.getV1();
@@ -306,12 +338,12 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float fx = -Mth.sin(this.printYaw), fz = Mth.cos(this.printYaw);
 		float rx = Mth.cos(this.printYaw), rz = Mth.sin(this.printYaw);
 		float h = size * 0.5F;
-		float lift = (this.zFight + 0.08F) * 0.02F + 0.004F;
-		int color = ARGB.color(Math.round(this.alpha * 0.85F * 255.0F), this.shown);
+		float lift = DECAL_LIFT + this.zFight * DECAL_LIFT_JITTER;
+		int color = ARGB.color(Math.round(this.drawAlpha * 0.85F * 255.0F), this.shown);
 		float[][] corners = {{-h, -h, u0, v1}, {-h, h, u0, v0}, {h, h, u1, v0}, {h, -h, u1, v1}};
 		for (float[] c : corners) {
 			double x = cx + rx * c[0] + fx * c[1], z = cz + rz * c[0] + fz * c[1];
-			decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (x - cam.x), (float) (cy - cam.y) + lift, (float) (z - cam.z), c[2], c[3], color,
+			decals.add(BloodDecals.DECAL_LAYER, (float) (x - cam.x), (float) (cy - cam.y) + lift, (float) (z - cam.z), c[2], c[3], color,
 				light);
 		}
 	}
@@ -375,11 +407,11 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		float u0 = this.sprite.getU0(), u1 = this.sprite.getU1(), v0 = this.sprite.getV0(), v1 = this.sprite.getV1();
 		Vec3 cam = camera.position();
 		float cos = Mth.cos(this.yaw), sin = Mth.sin(this.yaw);
-		// (a hair above the block, a little different for each puddle so overlapping ones don't flicker)
-		float lift = (this.zFight + 0.08F) * Math.max(0.05F, this.alpha - 0.3F) * 0.05F;
+		// above the block top, with a per-puddle jitter so overlapping decals don't lock in step and flicker
+		float lift = DECAL_LIFT + this.zFight * DECAL_LIFT_JITTER;
 		// (0.20.41) drying darker, or magma cooling: shade()
-		int color = this.wet ? ARGB.colorFromFloat(this.alpha * fade, this.r, this.g, this.b)
-			: ARGB.color(Math.round(this.alpha * fade * 255.0F), this.shown);
+		int color = this.wet ? ARGB.colorFromFloat(this.drawAlpha * fade, this.r, this.g, this.b)
+			: ARGB.color(Math.round(this.drawAlpha * fade * 255.0F), this.shown);
 		double[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};
 		for (double[] corner : corners) {
 			float dx = (float) (corner[0] - cx), dz = (float) (corner[1] - cz);
@@ -387,7 +419,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			// (the yaw is a quarter turn: a smear's is half turns, so its local axes stay its world ones)
 			float u = (lx / (size * this.stretchX) + 0.5F) * (u1 - u0) + u0;
 			float v = (lz / (size * this.stretchZ) + 0.5F) * (v1 - v0) + v0;
-			decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (corner[0] - cam.x), (float) (y - cam.y) + lift,
+			decals.add(BloodDecals.DECAL_LAYER, (float) (corner[0] - cam.x), (float) (y - cam.y) + lift,
 				(float) (corner[1] - cam.z), u, v, color, light);
 		}
 	}

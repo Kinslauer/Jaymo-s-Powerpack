@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
 public final class BloodItemOverlay {
 	/** Flat items are this deep at most (model units; a sprite item is 1/16). */
 	static final float FLAT = 0.15F;
-	/** How far over the item's faces the blood is drawn (model units). */
-	static final float OVER = 0.001F;
+	/** How far over the item's faces the blood is drawn (model units). Far enough to clear the item's own faces so it no longer z-fights with them. */
+	static final float OVER = 0.02F;
 
 	/** What the extra layer draws: the painted picture over the item's bounds. */
 	record Overlay(Identifier texture, float minX, float maxX, float minY, float maxY, float minZ, float maxZ) {
