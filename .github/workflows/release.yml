@@ -1,0 +1,43 @@
+# After every push to master: turn the merged PRs' change notes (changes/<mod>/*.md) into version bumps and MODLOG
+# entries, regenerate docs/codemap/, and commit that back to master. PRs never touch those lines, so they stop
+# "conflicting" with each other. What it does: tools/release.py. Why: docs/AI-HANDBOOK.md, "Versions and change notes".
+name: Release
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# One release at a time; a run queued behind another checks out the newest master, so it picks up every note.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Release pending change notes
+        run: python3 tools/release.py
+      - name: Commit and push
+        run: |
+          git add -A gradle.properties kingdoms/gradle.properties kitchen/gradle.properties \
+                     MODLOG.md kingdoms/MODLOG.md kitchen/MODLOG.md changes docs/codemap docs/vault/Home.md
+          if git diff --cached --quiet; then echo "Nothing to release."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          summary=$(cat build/release-summary.txt 2>/dev/null || echo "codemap")
+          git commit -m "Release: $summary [skip ci]"
+          # Another merge landed meanwhile: rebase onto it and try again (its own run then releases its notes).
+          for try in 1 2 3 4 5; do
+            git push origin HEAD:master && exit 0
+            git pull --rebase origin master
+          done
+          exit 1

@@ -27,8 +27,10 @@ OLD=$(git rev-parse HEAD)              # for the patch notes (step 1b)
 git pull --ff-only origin master
 ```
 
-If the checkout has other local changes, stop and tell Andy what they are instead of discarding them. Report the
-versions: `version` in `gradle.properties` (pack / Powers), `kingdoms/gradle.properties`, `kitchen/gradle.properties`.
+If the checkout has other local changes, stop and tell Andy what they are instead of discarding them. If
+`python3 tools/release.py --check` lists notes, the Release workflow hasn't finished for the last merge (it bumps the
+versions and writes the MODLOG entries about a minute after each merge): wait a minute and pull again, or tell Andy
+the build will carry the old version numbers. Report the versions: `version` in `gradle.properties` (pack / Powers), `kingdoms/gradle.properties`, `kitchen/gradle.properties`.
 
 ## 1b. Patch notes (every pull, also "PB" and a PC pbdr)
 

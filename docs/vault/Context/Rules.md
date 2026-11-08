@@ -17,7 +17,8 @@ in Obsidian use the GitHub links, since Obsidian only opens files inside the vau
 
 The ones that bite most often:
 - Andy merges only when Andy says "merge". Never merge yourself; one PR at a time.
-- Bump the version of every mod you touched, to the next number no open PR has taken, right before the PR.
+- Add a change note for every mod you touched (`changes/<mod>/<branch-name>.md`); never change `version=`, the
+  MODLOGs or `docs/codemap/` in a PR. The Release workflow does those after the merge.
 - Never commit `Serverfiles/` or `playit-secret.txt`.
 - Check every Minecraft API against the 26.3 sources (`./gradlew genSources`).
 - Build to check; don't start long dev client/server runs unless Andy asks.

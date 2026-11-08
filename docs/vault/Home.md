@@ -9,12 +9,12 @@ Start here. Agents: read this note, then [[How agents use this vault]], then [[B
 
 | Mod | Version | File |
 |---|---|---|
-| Jaymo's Powers (and the pack) | **0.21.52** | `gradle.properties` |
-| Jaymo's Kingdoms | **0.7.646** | `kingdoms/gradle.properties` |
+| Jaymo's Powers (and the pack) | **0.21.68** | `gradle.properties` |
+| Jaymo's Kingdoms | **0.7.655** | `kingdoms/gradle.properties` |
 | Jaymo's Kitchen | **0.5.86** | `kitchen/gradle.properties` |
 
-Minecraft 26.3, Fabric, JDK 25. Versions collide when several branches run at once: take the next free numbers
-right before merging, not when you start, and write the numbers you took on your agent note.
+Minecraft 26.3, Fabric, JDK 25. The Release workflow keeps this table, the versions and the MODLOGs up to date after
+each merge; PRs add a change note instead (`changes/README.md`) and never take version numbers.
 
 ## Merged lately (2026-11-06)
 

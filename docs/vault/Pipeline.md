@@ -9,11 +9,19 @@ How work flows without Andy watching each step. He's asked only once, at the end
 3. **Claude Code on the PC** runs `/loop 15m /vault-review` (`.claude/skills/vault-review`) and reviews each
    `in-review` PR. A failing one goes back to Hermes (`status: changes`, with the review notes in the task). For a
    passing one it runs `vault_sync.py --send`, **the step that asks Andy**. Saying yes sets `status: ready`.
-4. **Coordinator** checks the vault every 15 minutes, posts each `ready` PR to Andy with a link and the review, and sets
+4. **Coordinator** checks the vault every 15 minutes (also reviewing `in-review` tasks itself when the reviewer is
+   away, below), posts each `ready` PR to Andy with a link and the review, and sets
    `status: sent`. Andy says "merge" there. The coordinator merges, sets `status: done` and moves the task to
    `Inbox/Done/`.
 
 `blocked` at any step means it needs Andy: the coordinator asks him.
+
+**When the reviewer is away.** Every reviewer round starts with `vault_sync.py --reviewer-seen`. If it hasn't run for
+30 minutes (PC off, loop stopped), `vault_sync.py --reviewer-away` lists the `in-review` tasks and the coordinator
+reviews them itself, the same way (`.claude/skills/vault-review`), then posts passing ones to Andy or sends them back.
+
+**Merged work tidies itself.** Every sync marks an agent note or Inbox task whose `pr:` is merged into master as
+`done` and moves it to `Agents/Done/` or `Inbox/Done/`, whoever merged it, so the Board never shows merged work.
 
 ## Statuses
 
@@ -76,7 +84,8 @@ a third builder only once two have run for a day without hitting them.
 > You are hermes-a, a builder on Jaymo's Powerpack (Minecraft 26.3 Fabric mods). Follow `AGENTS.md`, `CLAUDE.md` and
 > `docs/vault/How agents use this vault.md`. Always work in your own git worktree on your own branch; never touch
 > the main checkout, never force-push, never merge. Before opening a PR, go through the "Before you open a PR"
-> checklist in `docs/AI-HANDBOOK.md` and run `python tools/pr_checks.py`. Take versions right before the PR.
+> checklist in `docs/AI-HANDBOOK.md` and run `python tools/pr_checks.py`. Never change versions, MODLOGs or
+> codemaps: add a change note per mod (`changes/<mod>/<branch-name>.md`).
 
 **The Fixer's scheduled prompt:**
 

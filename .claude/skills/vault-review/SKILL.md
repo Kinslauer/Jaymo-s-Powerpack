@@ -10,15 +10,17 @@ says yes. Never edit code, comment on GitHub, push or merge here.
 
 All task changes go through `python tools/vault_sync.py` (it syncs before and after), never by editing the files.
 
-1. `python tools/vault_sync.py --tasks in-review`. If it prints nothing, reply only "Nothing to review." and stop.
+1. `python tools/vault_sync.py --reviewer-seen` (tells the coordinator you're here; if you skip rounds for 30 minutes
+   it reviews in-review tasks itself), then `python tools/vault_sync.py --tasks in-review`. If it prints nothing, reply only "Nothing to review." and stop.
 2. For each task, oldest first:
    1. `python tools/vault_sync.py --show <task>`: Andy's words, what's wanted, the `pr:` number, earlier review notes.
    2. `gh pr view <pr> --json number,title,body,headRefName,headRefOid,mergeable,statusCheckRollup` and
       `gh pr diff <pr>`. If a note already says `Review (head <first 7 of headRefOid>)`, this head was reviewed: skip it.
    3. Review it:
       - Does it do what Andy asked, all of it, the way he asked? Anything missing is a change request.
-      - `CLAUDE.md` rules and the "Before you open a PR" checklist in `docs/AI-HANDBOOK.md`: version bumps, MODLOG
-        entry, lang in its own `lang/parts/` file, tuning numbers as constants, optional mods only through compat
+      - `CLAUDE.md` rules and the "Before you open a PR" checklist in `docs/AI-HANDBOOK.md`: a change note
+        (`changes/<mod>/<branch>.md`) for each mod changed and no edits to `version=`, MODLOGs or `docs/codemap/`
+        (send back an old-style PR with "run `py -3 tools/change_note.py convert`"), lang in its own `lang/parts/` file, tuning numbers as constants, optional mods only through compat
         classes, no copied art or code.
       - PR checks must be green (`statusCheckRollup`). Still running: skip the task until the next round.
       - Real bugs: read the code around each change (`git fetch origin <headRefName>`, then

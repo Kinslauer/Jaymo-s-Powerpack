@@ -1216,6 +1216,8 @@ public final class LifeStory {
 			: (landed == Start.BANISHED || landed == Start.SWORN || landed == Start.SENTENCED || landed == Start.EVICTED) && roadRealm != null ? roadRealm.id() : -1);
 		// (0.7.418) and the one thing they mean to do (a page in their pack, LifeAims)
 		LifeAims.begin(player, landed, roadRealm);
+		// (Andy) a farmhand wakes in the family's bed, everything they set out with in a chest beside it (FarmhandWake)
+		FarmhandWake.stow(player);
 		// (0.7.420) everyone is wary, a price on their head: once, as the road lands
 		Flaws.landed(player);
 		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads

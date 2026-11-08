@@ -66,7 +66,8 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
 - Power HUDs sit bottom-right, right of the hotbar, in Wind's chip style; never mid-screen. (0.19.79) Every HUD piece now goes through `client/hud/HudZones` and `HudStyle`: see `docs/HUD-Layout.md`.
 - Natural awakenings start with one ability; the rest unlock through Mastery: 3 in-game days an ability from time alone, ability use and meditating (I) bring it down to 1 day, training in someone else's Immense Field to half a day (the field's owner only while shadowboxing in it beside another shadowboxer; a Gravity user's shadowboxing pays only with a partner). Creative gets all.
 - Ascension/corruption is discovered in play; messages stay vague; cures are circumstances in the world.
-- Bump `version` on every release (new packets break old clients). After a release on the home PC:
+- Every release gets a new `version` (new packets break old clients); since 2026-11-08 the Release workflow bumps it
+  after each merge from the PR's change note (`changes/README.md`). After a release on the home PC:
   `packageModpack`, the friends get `modpack/Jaymos-Powers-Modpack-<v>.zip`, the server restarts.
 - Don't launch long test runs without asking: the user closed the slow dev client/server consoles. Build only.
 - The user reads the `docs/Abilities.md` table to request changes.

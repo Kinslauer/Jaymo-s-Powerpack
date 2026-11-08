@@ -197,6 +197,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Frights.register();
 		// the Family farmhand's family: wary of monsters, indoors at night, at work on the farm
 		FarmFamily.register();
+		FarmhandWake.register();
 		// 0.7.576: monsters keep off a lit campfire near a player
 		CampfireWard.register();
 		Clearing.register();
