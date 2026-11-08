@@ -1,5 +1,20 @@
 package com.jaymoskingdoms.monsters;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.level.ServerLevelAccessor;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
@@ -28,9 +43,11 @@ import net.minecraft.world.phys.Vec3;
  * (0.5.56) The silver skeleton (after Mo' Creatures'): a skeleton warrior that sprints at you from afar and cuts at you;
  * daylight burns it. Now and then one drops its silver sword, the bane of werewolves. (0.7.326) Drawn as polyjo's Dead
  * Traveler, with one sword and a buckler: it cuts with the sword and now and then takes a blow from the front on the
- * buckler instead; an axe knocks its guard down for a while.
+ * buckler instead; an axe knocks its guard down for a while. Drawn with GeckoLib (SilverSkeletonRenderer; the model and its
+ * animations, ours added, in kingdoms/art/silver_skeleton.bbmodel). They are the Stormborn Tomb's skeletons: one a spawner or
+ * the Skeleton Lord's Grave Call brings up first climbs out of its coffin ({@link #rise}), standing still while it does.
  */
-public class SilverSkeleton extends LegendMonster {
+public class SilverSkeleton extends LegendMonster implements GeoEntity {
 	static final double HEALTH = 25.0, SPEED = 0.27, DAMAGE = 4.0;
 	/** It sprints at anyone farther than this (blocks). */
 	static final double SPRINT_FROM = 4.0;
@@ -41,6 +58,23 @@ public class SilverSkeleton extends LegendMonster {
 	/** How long its sword cut shows (ticks): the Dead Traveler's slash, played through. */
 	static final int SLASH_TICKS = 25;
 	public static final byte BLOCKED = 92, GUARD_BROKEN = 93;
+	/** How long it takes to climb out of its coffin (ticks): its "rise" animation, 2 s. */
+	public static final int RISE_TICKS = 40;
+	/** How long the buckler shows raised after a block, and its guard knocked aside after an axe (ticks). */
+	static final int BLOCK_SHOWN_TICKS = 15, GUARD_BROKEN_SHOWN_TICKS = 35;
+
+	static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	static final RawAnimation CHARGE = RawAnimation.begin().thenLoop("charge");
+	static final RawAnimation BLOCK = RawAnimation.begin().thenLoop("block");
+	static final RawAnimation BLOCK_DESTROY = RawAnimation.begin().thenPlay("block_destroy");
+	static final RawAnimation RISE = RawAnimation.begin().thenPlay("rise");
+	static final RawAnimation SLASH = RawAnimation.begin().thenPlay("slash");
+
+	private static final EntityDataAccessor<Boolean> RISING = SynchedEntityData.defineId(SilverSkeleton.class, EntityDataSerializers.BOOLEAN);
+
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+	private int rising;
 
 	private int guardBroken;
 	/** (Client) the tick it last blocked, and the tick its guard was last broken. */
@@ -54,6 +88,76 @@ public class SilverSkeleton extends LegendMonster {
 	public static AttributeSupplier.Builder createAttributes() {
 		return createMonsterAttributes().add(Attributes.MAX_HEALTH, HEALTH).add(Attributes.MOVEMENT_SPEED, SPEED)
 			.add(Attributes.ATTACK_DAMAGE, DAMAGE).add(Attributes.FOLLOW_RANGE, 32.0);
+	}
+
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+		super.defineSynchedData(entityData);
+		entityData.define(RISING, false);
+	}
+
+	/** Climbs up out of its coffin (or the ground) before it fights. */
+	public void rise() {
+		this.rising = RISE_TICKS;
+		this.entityData.set(RISING, true);
+	}
+
+	public boolean rising() {
+		return this.entityData.get(RISING);
+	}
+
+	@Override
+	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+		@Nullable SpawnGroupData groupData) {
+		if (EntitySpawnReason.isSpawner(reason) || reason == EntitySpawnReason.STRUCTURE) {
+			this.rise();
+		}
+		return super.finalizeSpawn(level, difficulty, reason, groupData);
+	}
+
+	@Override
+	protected boolean isImmobile() {
+		return super.isImmobile() || this.rising();
+	}
+
+	@Override
+	public void aiStep() {
+		super.aiStep();
+		if (!this.level().isClientSide() && this.rising > 0 && --this.rising == 0) {
+			this.entityData.set(RISING, false);
+		}
+	}
+
+	@Override
+	public boolean doHurtTarget(ServerLevel level, Entity target) {
+		boolean hit = !this.rising() && super.doHurtTarget(level, target);
+		if (hit) {
+			this.triggerAnim("action", "slash");
+		}
+		return hit;
+	}
+
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<SilverSkeleton>("move", 4, test -> {
+			SilverSkeleton me = test.animatable();
+			if (me.rising()) {
+				return test.setAndContinue(RISE);
+			}
+			if (me.sinceGuardBroken() < GUARD_BROKEN_SHOWN_TICKS) {
+				return test.setAndContinue(BLOCK_DESTROY);
+			}
+			if (me.sinceBlocked() < BLOCK_SHOWN_TICKS) {
+				return test.setAndContinue(BLOCK);
+			}
+			return test.setAndContinue(test.isMoving() ? (me.isSprinting() ? CHARGE : WALK) : IDLE);
+		}));
+		controllers.add(new AnimationController<SilverSkeleton>("action", test -> PlayState.STOP).triggerableAnim("slash", SLASH));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	@Override

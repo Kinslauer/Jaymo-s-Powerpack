@@ -624,6 +624,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.monsters.Monsters.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.beasts.Beasts.register();
+		// Kingdoms' GeckoLib mobs: the barrow beetle (the example to copy) and the Stormborn Tomb's draugr
+		com.jaymoskingdoms.inhabitants.Inhabitants.register();
 		// 0.7.137: the wind dragons (Notus first)
 		com.jaymoskingdoms.dragons.Dragons.register();
 		// 0.7.145: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier

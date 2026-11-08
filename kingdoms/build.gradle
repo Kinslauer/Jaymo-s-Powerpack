@@ -36,6 +36,9 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// GeckoLib (MIT, Tslat and contributors): the animation library our mobs in inhabitants/ are drawn and animated with
+	// (docs/AI-HANDBOOK.md, "Adding a GeckoLib mob"). Required; the same file the pack ships (root build.gradle), 5.5.7.
+	implementation "maven.modrinth:geckolib:kSxHvs99"
 	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): its sprawling towns are where
 	// kingdoms rise in the pack. Only loaded in the dev game, to found kingdoms in them.
 	localRuntime "maven.modrinth:epic-structures-villages:hCRa4eFr"
