@@ -8,12 +8,12 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-b · open
 
 
 ## Being built
 
 - [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
+- [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · claimed
 
 
 ## Text pass
