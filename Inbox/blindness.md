@@ -1,10 +1,10 @@
 ---
 status: claimed
-for: prometheus
+for: hermes-b
 from: coordinator
 asked: 2026-11-08
 thread: Discord thread 1569108674721357906 (Tiv)
-claimed_by: hermes-modeller
+claimed_by: hermes-b
 pr:
 suggested_owns:
 ---
@@ -28,3 +28,4 @@ suggested_owns:
 - No existing worktree or branch for this topic yet.
 - 2026-11-08 17:21 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-08 17:24 Andy (2026-11-08): reassigned to Prometheus; hermes-a's run stopped before finishing.
+- 2026-11-08 17:26 Andy (2026-11-08): swapped to Bacchus (hermes-b); Prometheus takes the mimic.
