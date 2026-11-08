@@ -23,12 +23,19 @@ public class MetalFishingRodItem extends Item {
         super(properties);
     }
 
-    /** Cast the hook like a fishing rod; while a fight is on, reeling is driven by holding use ({@link FishingRealClient}). Reeling in an idle hook retrieves it. */
+    /**
+     * Cast the hook like a fishing rod: (Track A) hold use to charge, release to throw ({@link FishCast}); sneak + use turns the
+     * drag. While a fight is on, reeling is driven by holding use (FishingRealClient). Use with an idle hook out retrieves it.
+     */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        InteractionResult charge = FishCast.use(level, player, hand);
+        if (charge != null) {
+            return charge;
+        }
         ItemStack stack = player.getItemInHand(hand);
         if (player.fishing != null) {
-            // already have a hook out: reel it in
+            // already have a hook out: reel it in (or strike a taken hook: FishingHookMixin)
             if (!level.isClientSide()) {
                 int dmg = player.fishing.retrieve(stack);
                 stack.hurtAndBreak(dmg, player, hand.asEquipmentSlot());
@@ -39,13 +46,13 @@ public class MetalFishingRodItem extends Item {
             stack.causeUseVibration(player, net.minecraft.world.level.gameevent.GameEvent.ITEM_INTERACT_FINISH);
             return InteractionResult.SUCCESS;
         }
+        if (!(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)
+                || FishingReal.fight(serverPlayer).fighting()) {
+            return InteractionResult.SUCCESS;
+        }
         net.minecraft.world.entity.EntityType<? extends FishingHook> hookType =
                 (net.minecraft.world.entity.EntityType<? extends FishingHook>) BuiltInRegistries.ENTITY_TYPE
                         .get(net.minecraft.resources.Identifier.withDefaultNamespace("fishing_hook")).orElseThrow().value();
-        ServerLevel serverLevel = (ServerLevel) level;
-        if (!(player instanceof ServerPlayer serverPlayer) || FishingReal.fight(serverPlayer).fighting()) {
-            return InteractionResult.PASS;
-        }
         FishingHook hook = new FishingHook(hookType, serverLevel);
         hook.setOwner(player);
         player.fishing = hook;
@@ -53,10 +60,23 @@ public class MetalFishingRodItem extends Item {
         hook.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
         serverLevel.addFreshEntity(hook);
         serverLevel.playSound(null, player.getX(), player.getEyeY() - 0.1D, player.getZ(),
-                SoundEvents.BUCKET_FILL_FISH, SoundSource.PLAYERS, 0.5F, 1.0F);
+                SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
         stack.hurtAndBreak(1, serverPlayer, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
         player.awardStat(net.minecraft.stats.Stats.ITEM_USED.get(this));
         stack.causeUseVibration(player, net.minecraft.world.level.gameevent.GameEvent.ITEM_INTERACT_START);
         return InteractionResult.SUCCESS;
+    }
+
+    /** (Track A) Charging the cast lasts until use is let go. */
+    @Override
+    public int getUseDuration(ItemStack itemStack, net.minecraft.world.entity.LivingEntity user) {
+        return FishCast.USE_TICKS;
+    }
+
+    /** (Track A) Letting go of use throws the hook, farther the longer it was charged. */
+    @Override
+    public boolean releaseUsing(ItemStack itemStack, Level level, net.minecraft.world.entity.LivingEntity entity, int remainingTime) {
+        InteractionHand hand = entity.getUsedItemHand();
+        return FishCast.release(itemStack, level, entity, remainingTime, () -> this.use(level, (Player) entity, hand));
     }
 }

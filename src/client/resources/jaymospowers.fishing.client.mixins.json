@@ -4,7 +4,12 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"FishingHookRenderStateMixin",
-		"FishingHookRendererMixin"
+		"FishingHookRendererMixin",
+		"FishingRodFirstPersonMixin",
+		"FishingRodThirdPersonMixin",
+		"FishingScrollMixin"
 	],
-	"injectors": { "defaultRequire": 1 }
+	"injectors": {
+		"defaultRequire": 1
+	}
 }

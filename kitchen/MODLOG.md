@@ -1615,7 +1615,28 @@ mobs should be possible".
   (`Chopping.FISH_FILLETS`, was 2) and bone meal, more than the whole fish eaten raw is worth.
 - Built; not played.
 
-## 0.5.91 (2026-11-07): fillets by the fish's weight, tuna steaks
+## 0.5.90: five new savoury dishes
+
+- Rabbit Stew (Stir, Furnace/Smoker): rabbit, carrot, potato, onion, brown mushroom — Resistance + Regeneration
+- Smoked Duck (Smoke, Smoker): duck, sugar — Fire Resistance + Strength
+- Bushmeat Stew (Stir, Furnace/Smoker): bushmeat, turnip, potato, brown mushroom — Health Boost + Resistance
+- Clam Chowder (Stir, Furnace/Smoker): clam meat, potato, onion, milk bottle — Water Breathing + Night Vision
+- Grilled Anglerfish (Grill, Campfire): anglerfish, lemon — Night Vision + Conduit Power
+- All original pixel art; recipes in the cooking table.
+## 0.5.89 (2026-11-07): the server starts again
+
+- Fix: 0.5.87's spit block never set its block id, so the game crashed at startup ("Block id not set" in
+  `SpitBlock.register`). Its properties now carry `setId(key)` like every other block.
+- Fix: the spit's recipe used the old ingredient format and a 4-row pattern (3 is the most), so the recipe
+  registry failed to load and the server stopped. It is now four sticks as two posts (`S S` / `S S`).
+- Fix: the vanilla rabbit-hide-to-leather recipe was switched off, but its vanilla recipe-book advancement still
+  pointed at it, so without another mod supplying `minecraft:leather` (the server has Naturalist) the recipe
+  registry failed with "Unbound values ... [minecraft:leather]". That advancement is now switched off too.
+
+## 0.5.91: five new Kitchen dishes (Builder B)
+- Andy: "have them work on adding more recipes we dont already have". Five new dishes for the cooking minigame, all baked goods, desserts, breakfasts and sides: Honey Bun (oven: dough, honey bottle, sugar; gives SPEED), Chocolate Cookie (oven: wheat, wheat, cocoa beans; HASTE, comes out in a batch of six), Pancakes (campfire grill: dough, egg, milk bottle; REGENERATION and SPEED), French Toast (campfire grill: bread, egg, milk bottle, sugar; REGENERATION and ABSORPTION) and Hash Browns (cutting board: potato, potato, onion; SPEED). Hand-drawn item textures via `kitchen/tools/gen_assets.py`, plus minigame recipes and lang keys. Compile-checked; not played.
+
+## 0.5.92 (2026-11-07): fillets by the fish's weight, tuna steaks
 
 - With Jaymo's Powers 0.21.61 a caught fish carries its weight. Gutting a weighed cod or salmon on the cutting board
   gives a fillet per 1.5 kg (2 to 8; an unweighed one still gives 3), and Powers' whole Raw Skipjack Tuna cuts into a steak

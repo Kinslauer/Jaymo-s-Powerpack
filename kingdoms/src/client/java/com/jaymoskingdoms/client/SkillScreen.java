@@ -120,6 +120,11 @@ final class SkillScreen extends Screen {
 		return Math.max(4, (this.height - panelH()) / 2);
 	}
 
+	/** (0.7.649) The panel's top-left corner, where Jaymo's Powers' character menu hangs its tabs ({@link MenuCompat}). */
+	int[] corner() {
+		return new int[] {left(), top()};
+	}
+
 	/** (0.7.540) Where the detail box starts, just above the footer. */
 	private int detailY() {
 		return top() + panelH() - FOOTER - DETAIL_H;

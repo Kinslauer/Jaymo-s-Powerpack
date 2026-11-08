@@ -150,5 +150,11 @@ public final class FarmhandHome {
 		for (Villager v : folk) {
 			McaCompat.hearts(v, player, FAMILY_HEARTS);
 		}
+		// (Andy: "they need some kind of utility or function": their farm round, their fear of monsters, their nights indoors)
+		FarmFamily.adopt(level, house.wake(), folk);
+		if (McaCompat.LOADED && !folk.isEmpty()) {
+			player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("story.jaymoskingdoms.farm_family.hint")
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+		}
 	}
 }

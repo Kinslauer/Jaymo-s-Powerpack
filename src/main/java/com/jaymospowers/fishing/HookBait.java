@@ -52,7 +52,7 @@ public final class HookBait {
                 return InteractionResult.PASS;
             }
             if (Tackle.isLure(bait.getItem()) && !Tackle.rodOf(rod).lures) {
-                // (0.21.63) a lure needs a rod that can work it
+                // (0.21.64) a lure needs a rod that can work it
                 if (player instanceof ServerPlayer sp) {
                     sp.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.lure_needs_rod").withStyle(ChatFormatting.GRAY));
                 }

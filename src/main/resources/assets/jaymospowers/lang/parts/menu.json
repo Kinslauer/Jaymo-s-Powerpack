@@ -1,0 +1,22 @@
+{
+	"menu.jaymospowers.tab.character": "Character",
+	"menu.jaymospowers.tab.powers": "Powers",
+	"menu.jaymospowers.tab.map": "Map & Waypoints",
+	"menu.jaymospowers.character.powers": "Powers",
+	"menu.jaymospowers.character.power": "Power",
+	"menu.jaymospowers.character.no_power": "None yet",
+	"menu.jaymospowers.character.fate": "Fate",
+	"menu.jaymospowers.character.mastery": "Mastery",
+	"menu.jaymospowers.character.health": "Health",
+	"menu.jaymospowers.character.of": "%s / %s",
+	"menu.jaymospowers.character.armour": "Armour",
+	"menu.jaymospowers.character.level": "Level",
+	"menu.jaymospowers.map.waypoints": "Waypoints",
+	"menu.jaymospowers.map.none": "No waypoints in this world yet. Arsenal's remembered places, and with Jaymo's Kingdoms the settlements you know and your party, show here.",
+	"menu.jaymospowers.map.mark": "Arsenal mark %s",
+	"menu.jaymospowers.map.at": "%s, %s, %s",
+	"menu.jaymospowers.map.m": "%s m",
+	"menu.jaymospowers.map.km": "%s km",
+	"menu.jaymospowers.map.zoom": "1:%s",
+	"menu.jaymospowers.map.full": "World map"
+}

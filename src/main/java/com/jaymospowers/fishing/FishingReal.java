@@ -52,7 +52,7 @@ public final class FishingReal {
     private static final Map<UUID, FishingHook> HOOKS = new HashMap<>();
     /** Set true for one tick by the ReelInput packet when the player is holding use to reel. */
     private static final Map<UUID, Boolean> REELING = new HashMap<>();
-    /** (0.21.61) The weight of the fish each player is fighting (kg, {@link FishCatch}). */
+    /** (0.21.62) The weight of the fish each player is fighting (kg, {@link FishCatch}). */
     private static final Map<UUID, Float> WEIGHTS = new HashMap<>();
     /** A hooked fish's own size, put back if it gets away. */
     private static final Map<UUID, Float> BASE_SCALE = new HashMap<>();
@@ -115,7 +115,7 @@ public final class FishingReal {
         FishCatch.init();
         HookBait.init();
         Skipjack.init();
-        // (0.21.63) Track B: rods, baits, lures and the rest of the tackle box
+        // (0.21.64) Track B: rods, baits, lures and the rest of the tackle box
         Tackle.init();
         FishingGear.init();
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(server -> Tackle.kitchen());
@@ -181,25 +181,38 @@ public final class FishingReal {
         boolean metalRod = isMetalRod(player);
         float breakLimit = metalRod ? LINE_BREAK_METAL : LINE_BREAK;
         float tooTense = metalRod ? TOO_TENSE_METAL : TOO_TENSE;
+        // (Track A) the fish surges in runs, left or right, now and then jumping (FishRun)
+        int run = FishRun.tick(player, fish, state, now);
 
         if (reeling) {
-            // reeling: tension rises (pulling hard), fish comes in
-            tension = Math.min(breakLimit, tension + state.strength() * TENSION_REEL);
-            if (tension < tooTense) {
-                progress = Math.min(1.0F, progress + (metalRod ? PROGRESS_REEL_METAL : PROGRESS_REEL));
+            // reeling: tension rises (pulling hard), fish comes in; reeling into a run spikes it and gains nothing
+            tension += state.strength() * TENSION_REEL * (run != 0 ? FishRun.RUN_REEL_SPIKE : 1.0F);
+            if (run == 0 && tension < tooTense) {
+                progress = Math.min(1.0F, progress + (metalRod ? PROGRESS_REEL_METAL : PROGRESS_REEL) * FishRun.reelFactor(player));
             }
             if (metalRod && (state.fishKind() == FISH_SHARK || state.fishKind() == FISH_TUNA)) {
                 // a big fish on the line pulls the player toward it
                 pullPlayer(player, fish, state.fishKind() == FISH_SHARK ? PULL_PLAYER : PULL_PLAYER_TUNA);
             }
+        } else if (run != 0) {
+            // easing off in a run: the fish still pulls and takes line
+            tension += state.strength() * FishRun.RUN_PULL;
+            progress -= state.strength() * FishRun.RUN_LINE_OUT;
         } else {
             // easing off: tension falls, fish takes line back
             tension = Math.max(0.0F, tension - TENSION_EASE);
-            progress = Math.max(0.0F, progress - state.strength() * PROGRESS_FISH_BACK);
+            progress -= state.strength() * PROGRESS_FISH_BACK;
         }
+
+        // (Track A) the rod's drag lets line slip past its setting instead of the line taking the strain
+        float[] line = {progress};
+        tension = FishRun.slip(player, state, tension, breakLimit, line, now);
+        progress = Math.max(0.0F, line[0]);
 
         if (tension >= breakLimit) {
             endFight(player, false);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                    net.minecraft.sounds.SoundEvents.LEAD_BREAK, net.minecraft.sounds.SoundSource.PLAYERS, 0.9F, 1.3F);
             player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.line_broke").withStyle(net.minecraft.ChatFormatting.RED));
             return;
         }
@@ -224,10 +237,18 @@ public final class FishingReal {
 
         // keep the fish near the hook/water, tugging against the line, so it is not dragged onto land
         keepNear(player, fish, hook);
-        player.setAttached(FIGHTING, state.withTension(tension).withProgress(progress));
+        player.setAttached(FIGHTING, state.with(tension, progress, run, breakLimit));
     }
 
-    /** Start a fight: hook a live fish on the player's line. Called by the mixin when a bite happens. */
+    /**
+     * (Track A) A fish of {@code kind} has reached {@code player}'s hook: it nibbles, then takes it, and a strike in time
+     * starts the fight ({@link FishBite}). Called by the hook mixin in place of {@link #startFight}.
+     */
+    public static void fishAtHook(ServerPlayer player, int kind, LivingEntity fish, FishingHook hook) {
+        FishBite.begin(player, kind, fish, hook);
+    }
+
+    /** Start a fight: hook a live fish on the player's line. Called by {@link FishBite#strike} when the player strikes. */
     public static void startFight(ServerPlayer player, int fishKind, LivingEntity fish, FishingHook hook) {
         float strength = switch (fishKind) {
             case 0 -> STRENGTH_COD; // cod: steady
@@ -279,7 +300,7 @@ public final class FishingReal {
         FishingHook hook = HOOKS.remove(player.getUUID());
         if (fish != null) {
             if (caught) {
-                // (0.21.61) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
+                // (0.21.62) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
                 float kg = weighed != null ? weighed : FishCatch.roll(kindFought, player.getRandom());
                 ItemStack loot = FishCatch.loot(kindFought, kg);
                 if (!loot.isEmpty()) {

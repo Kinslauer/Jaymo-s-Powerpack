@@ -101,7 +101,7 @@ public final class FishBites {
                 return;
             }
             if (onHook == FishingGear.FISHING_MAGNET) {
-                // (0.21.63) a magnet draws no fish; it snags scrap now and then
+                // (0.21.64) a magnet draws no fish; it snags scrap now and then
                 FishingGear.magnet(level, hook, player);
                 return;
             }
@@ -140,7 +140,8 @@ public final class FishBites {
         level.playSound(null, hook.getX(), hook.getY(), hook.getZ(), SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.5F, 1.0F);
         level.sendParticles(ParticleTypes.BUBBLE, hook.getX(), hook.getY(), hook.getZ(), 8, 0.2, 0.1, 0.2, 0.1);
         taken(player);
-        FishingReal.startFight(player, kindOf(fish), fish, hook);
+        // (Track A) the strike window: use in time hooks it and starts the fight (FishBite)
+        FishingReal.fishAtHook(player, kindOf(fish), fish, hook);
     }
 
     /** The hook was pulled out or broke: whatever fish was coming forgets it. */
