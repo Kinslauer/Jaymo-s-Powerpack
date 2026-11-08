@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes-b
 from: coordinator
 asked: 2026-11-07
 thread: Claude reviewer session (Andy asked both builders for five new recipes each)
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 suggested_owns:
   - kitchen/src/main/java/com/jaymoskitchen/cooking/Dish.java (5 new entries only)
