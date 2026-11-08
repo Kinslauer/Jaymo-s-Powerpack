@@ -1,5 +1,5 @@
 ---
-status: open
+status: claimed
 for: hermes-b
 from: coordinator
 asked: 2026-11-08
