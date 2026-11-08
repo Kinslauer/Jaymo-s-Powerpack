@@ -163,7 +163,8 @@ public final class FishRun {
 
     /** Whether {@code stack} is a fishing rod (vanilla or metal). */
     public static boolean isRod(ItemStack stack) {
-        return stack.is(Items.FISHING_ROD) || FishingReal.isMetalRodItem(stack);
+        // every fishing rod: vanilla's, the tackle rods (cane pole, spinning, ledger) and the metal rod
+        return HookBait.isRod(stack);
     }
 
     /** The rod the player holds (main hand first), or empty. */

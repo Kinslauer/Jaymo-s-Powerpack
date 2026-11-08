@@ -115,6 +115,10 @@ public final class FishingReal {
         FishCatch.init();
         HookBait.init();
         Skipjack.init();
+        // (0.21.64) Track B: rods, baits, lures and the rest of the tackle box
+        Tackle.init();
+        FishingGear.init();
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(server -> Tackle.kitchen());
         FishingPayloads.register();
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {

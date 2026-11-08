@@ -1,0 +1,13 @@
+{
+  "gives": {
+    "id": "jaymospowers:trolling_squid",
+    "count": 1
+  },
+  "max_uses": 6,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 8
+  },
+  "xp": 15
+}

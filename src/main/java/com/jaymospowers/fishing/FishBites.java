@@ -96,7 +96,13 @@ public final class FishBites {
         }
         Drawn drawn = DRAWN.get(hook.getUUID());
         if (drawn == null) {
-            if (HookBait.bait(player) == null) {
+            net.minecraft.world.item.Item onHook = HookBait.bait(player);
+            if (onHook == null) {
+                return;
+            }
+            if (onHook == FishingGear.FISHING_MAGNET) {
+                // (0.21.64) a magnet draws no fish; it snags scrap now and then
+                FishingGear.magnet(level, hook, player);
                 return;
             }
             LivingEntity fish = notice(level, hook, player);
@@ -133,7 +139,7 @@ public final class FishBites {
         dip(level, hook, TAKE_DIP);
         level.playSound(null, hook.getX(), hook.getY(), hook.getZ(), SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.5F, 1.0F);
         level.sendParticles(ParticleTypes.BUBBLE, hook.getX(), hook.getY(), hook.getZ(), 8, 0.2, 0.1, 0.2, 0.1);
-        HookBait.eaten(player);
+        taken(player);
         // (Track A) the strike window: use in time hooks it and starts the fight (FishBite)
         FishingReal.fishAtHook(player, kindOf(fish), fish, hook);
     }
@@ -143,23 +149,64 @@ public final class FishBites {
         DRAWN.remove(hook.getUUID());
     }
 
-    /** A fish in range that notices the bait this check, or null. */
+    /**
+     * A fish in range that notices the bait this check, or null. (0.21.63, Track B) The rod decides which fish come at all
+     * and from how far ({@link Tackle.Rod}), the bait which of them it draws most ({@link Tackle.Bait}; a lure draws
+     * nothing on a rod that can't work it); groundbait and trolling make them keener and draw from farther.
+     */
     private static @Nullable LivingEntity notice(ServerLevel level, FishingHook hook, ServerPlayer player) {
-        float keen = FishWaters.bites(level, hook.blockPosition());
+        Tackle.Rod rod = Tackle.rodOf(player);
+        Tackle.Bait bait = Tackle.baitOf(HookBait.bait(player));
+        if (bait == null || bait.lure() && !rod.lures) {
+            return null;
+        }
+        boolean trolling = FishingGear.trolling(player);
+        float keen = FishWaters.bites(level, hook.blockPosition()) * rod.keen * FishingGear.groundbait(level, hook.blockPosition());
+        if (trolling) {
+            keen *= HookBait.bait(player) == Tackle.TROLLING_SQUID ? FishingGear.TROLL_LURE_KEEN : FishingGear.TROLL_KEEN;
+        }
         if (level.getRandom().nextFloat() >= NOTICE_CHANCE * keen) {
             return null;
         }
-        boolean metal = FishingReal.isMetalRod(player);
-        List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, hook.getBoundingBox().inflate(DRAW_RANGE), e -> {
+        double range = DRAW_RANGE * rod.range * (trolling ? FishingGear.TROLL_RANGE : 1.0);
+        List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, hook.getBoundingBox().inflate(range), e -> {
             int kind = kindOf(e);
-            return kind >= 0 && e.isAlive() && e.isInWater() && !taken(e)
-                    && (metal || kind != FishingReal.FISH_TUNA && kind != FishingReal.FISH_SHARK);
+            return kind >= 0 && e.isAlive() && e.isInWater() && !taken(e) && rod.takes(kind) && bait.draw(kind) > 0;
         });
         if (near.isEmpty()) {
             return null;
         }
-        near.sort((a, b) -> Double.compare(a.distanceToSqr(hook), b.distanceToSqr(hook)));
-        return near.get(level.getRandom().nextInt(Math.min(3, near.size())));
+        // the bait's favourites, and the nearer, the likelier
+        double total = 0.0;
+        double[] weight = new double[near.size()];
+        for (int i = 0; i < near.size(); i++) {
+            LivingEntity e = near.get(i);
+            weight[i] = bait.draw(kindOf(e)) / (1.0 + e.distanceTo(hook));
+            total += weight[i];
+        }
+        double roll = level.getRandom().nextDouble() * total;
+        for (int i = 0; i < near.size(); i++) {
+            roll -= weight[i];
+            if (roll <= 0.0) {
+                return near.get(i);
+            }
+        }
+        return near.getLast();
+    }
+
+    /** A fish took {@code player}'s hook: natural bait is eaten; a lure stays on, unless it snaps off. */
+    private static void taken(ServerPlayer player) {
+        net.minecraft.world.item.Item onHook = HookBait.bait(player);
+        Tackle.Bait bait = Tackle.baitOf(onHook);
+        if (bait != null && bait.lure()) {
+            if (player.getRandom().nextFloat() < bait.snap()) {
+                HookBait.eaten(player);
+                player.sendSystemMessage(Component.translatable("message.jaymospowers.fishing.lure_snapped",
+                        new net.minecraft.world.item.ItemStack(onHook).getHoverName()).withStyle(ChatFormatting.RED));
+            }
+            return;
+        }
+        HookBait.eaten(player);
     }
 
     /** {@code e} is already coming to a hook, or on a line. */
