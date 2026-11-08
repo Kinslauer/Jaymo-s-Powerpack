@@ -1,5 +1,6 @@
 package com.jaymospowers.client.fishing.mixin;
 
+import com.jaymospowers.client.fishing.HookBaitState;
 import net.minecraft.client.renderer.entity.state.FishingHookRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import org.spongepowered.asm.mixin.Mixin;
