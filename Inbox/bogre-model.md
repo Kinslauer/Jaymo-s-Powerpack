@@ -1,5 +1,5 @@
 ---
-status: ready
+status: sent
 for: prometheus
 from: coordinator
 asked: 2026-11-08
