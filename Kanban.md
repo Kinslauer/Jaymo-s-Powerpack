@@ -12,13 +12,13 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/impaler-model|impaler-model]] · hermes-modeller · claimed
 - [ ] [[Inbox/blindness|blindness]] · hermes-a · claimed
 - [ ] [[Inbox/mimic|mimic]] · hermes-b · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/impaler-model|impaler-model]] · hermes-modeller · #1155 · in-review
 
 
 ## Needs Andy
