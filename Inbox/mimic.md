@@ -19,3 +19,4 @@ suggested_owns:
 - No existing worktree or branch for this topic yet.
 - 2026-11-08 17:16 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-08 17:17 Blocked awaiting prometheus design confirmation (Discord thread 1569108674721357906, Tiv): which echos (Chrono powers echoes / Quiet One echo strike / both), what the mimic is mechanically, and what it takes over from echos. Investigation filed in Agents/mimic.md; worktree E:/wt/mimic, branch claude/mimic.
+- 2026-11-08 17:26 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
