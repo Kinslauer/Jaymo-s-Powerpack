@@ -1,10 +1,10 @@
 ---
-status: open
-for: hermes
+status: claimed
+for: prometheus
 from: coordinator
 asked: 2026-11-08
 thread: Discord thread 1569108674721357906 (Tiv)
-claimed_by: hermes-a
+claimed_by: hermes-modeller
 pr:
 suggested_owns:
 ---
