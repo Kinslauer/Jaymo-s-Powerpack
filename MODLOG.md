@@ -1676,7 +1676,7 @@ spawn up to 30 down there waiting to kill him."
 - Through a portal only that one echo follows you (the future's extra stalkers stay in the future).
 - Built; not played.
 
-## 0.21.62 (2026-11-08): the fishing fight (Track A of docs/Plan-fishing.md)
+## 0.21.66 (2026-11-08): the fishing fight (Track A of docs/Plan-fishing.md)
 Andy picked "all three together": nibbles and a strike window, a charged cast, drag and fish runs, the rod bending.
 Ideas from Reel to Fish, Legendary Fishing, Advanced Fishing and True Fishing (all rights reserved: ideas only, our own code).
 - **Strike window** (`FishBite`): once a fish that swam to the baited hook has nibbled and taken it (`FishBites`), the
