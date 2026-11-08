@@ -148,6 +148,7 @@ public final class Baubles {
 		com.jaymospowers.baubles.artifacts.ArtifactBaubles.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		BaublesNet.init();
+		BaublesQuickEquip.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				tickWorn(player);
