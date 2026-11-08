@@ -13,12 +13,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
-- [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · claimed
 
 
 ## Text pass
 
 - [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
+- [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · #1160 · in-review
 
 
 ## In review
