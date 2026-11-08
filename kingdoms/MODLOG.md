@@ -10297,3 +10297,52 @@ the loading screen so they can read the tips for as long as it takes to load, ra
 - **Speech bubbles** (Andy: "almost all of the text here was unreadable", with Chat Bubbles as the look he wants): words over a speaker's head (ours and MCA villagers') no longer fill the screen and run off its top when the speaker is a block or two away; nearer than 5 blocks they shrink to the size they'd be from there. The bubble now sits just above the name tag instead of running into it, has a dark background (was faint) and shadowed words, and shows at most 5 rows per speaker. `SpeechBubbles`.
 - **Family farmhand start** (Andy: "start you waking up from the bed, with all your gear in a chest nearby. you should be greeted by the family"): you wake lying in a bed in the family's house, awake (bed rest; Leave Bed gets you up), your eyes opening for a moment. Everything you set out with, journal included, is in a chest beside the bed (a second chest if one isn't enough). The family walk over and tell you, a line at a time over their heads and in chat, that they found you out past the fields, carried you in, your things are in the chest, and you're welcome to stay and work the farm; a child, if there is one, asks if you're staying. Their farm round (wary of monsters, indoors at night, farm work) picks up after. With no bed in the house you stand by it as before. `FarmhandWake` (new), `FarmhandHome`, `FarmFamily`, `LifeStory`, `lang/parts/farm-wake.json`.
 - Built; not played.
+
+## 0.7.656 (2026-11-08): GeckoLib mobs: the draugr, the barrow beetle, and the Stormborn Tomb's skeletons and boss (#1149)
+
+- **GeckoLib** (5.5.7, MIT, Tslat and contributors; the same file the pack already ships) is now a Kingdoms requirement.
+  New animated mobs live in `inhabitants/` (`Inhabitants`, `client/inhabitants/InhabitantsClient`); the pattern to copy
+  is in `docs/AI-HANDBOOK.md`, "Adding a GeckoLib mob to Kingdoms". `tools/bbmodel_geckolib.py` turns a Blockbench
+  project into GeckoLib's files; `kingdoms/tools/gen_tomb_undead.py` makes our models (`kingdoms/art/*.bbmodel`).
+- **Draugr** (`jaymoskingdoms:draugr`, our own model, texture and code): a dead Nordic warrior in a horned helm, mail and
+  fur, 40 health, armour 8. Each rises with a sword and shield (it takes blows and arrows from in front on its shield
+  now and then; an axe knocks its guard down for 5 s) or a two-handed bearded axe (10 damage, knocks a raised shield
+  aside). Its blows chill (a short slowness). Only from spawners and its egg: it's for the Stormborn Tomb's halls.
+- **Barrow beetle** (`jaymoskingdoms:barrow_beetle`, our own): a harmless little beetle in small groups in dark caves
+  under the cold biomes (`has_barrow_beetle`); runs and flutters when hurt. The example GeckoLib mob.
+- **Silver skeleton**, now drawn with GeckoLib (polyjo's Dead Traveler, CC BY 4.0): one a spawner raises first climbs up
+  out of its coffin (a new 2 s "rise", standing still while it does). It is the Stormborn Tomb's skeleton.
+- **Skeleton Lord**, now drawn with GeckoLib (Blockbench Workshop, CC BY 4.0), with three new moves of our own: his staff
+  swung at whoever he hits; a slam of the staff's foot (every 8 s at a foe within 8 blocks) that hurts and throws up
+  everything on the ground within 4.5 blocks; and his Grave Call at 75% and 40% health, raising 2 then 3 silver
+  skeletons that climb out of the floor round him (no more than 6 near him at once). He is the tomb's boss.
+- Draugr Invasion (All Rights Reserved) and Supplementaries are not copied in any form.
+- Built; not played, and no server boot was run: check the four mobs' facing, the GeckoLib animations (Lord's statue,
+  laugh and moves, the skeleton's rise, the draugr's shield) and the beetles' spawning in game.
+
+## 0.7.657 (2026-11-08): Stormborn Tomb: a Nordic barrow and the tomb beneath it (MIT port) (#1137)
+
+Andy: "get them, we need it" (Dungeon Conquest: Stormborn Tomb by Tada_no_ahiru, MIT; licence and credit in
+`licenses/stormborn-tomb-MIT.txt`).
+- **What you find:** in snowy and cold taiga, groves, snowy slopes, meadows and windswept hills (rare: one try per 60x60
+  chunks), a great barrow hill with a hall inside. Beside the end portal frame in the hall, where DungeonZ's portal was,
+  the stone door stands open (the original's Eye of Ender redstone doesn't hold it shut once generated, so nobody is
+  locked out of a no-build tomb); behind it a ladder shaft and a tunnel lead down
+  into the tomb: the entrance hall, hallways, a split with a parkour climb, the great halls and the boss arena, about
+  100 blocks under the hill. Chests and barrels hold the tomb's loot (low to end tier, deeper is better); a chest of
+  boss loot waits in the arena.
+- **Undead:** our own tomb dead stand where Draugr Invasion's did: 27 silver skeletons and 22 draugr (#1149), kept
+  (never despawn), plus spiders in the webbed hall; the old skeleton-warrior spawners spawn silver skeletons. In the
+  boss arena the Skeleton Lord sleeps as a statue until you come within 8 blocks or strike him. Until #1149 is in,
+  the draugr just aren't there.
+- **Swaps** (nothing of Supplementaries, Draugr Invasion, DungeonZ, FrogiLib or Moonlight comes along): candle holders
+  -> candles, fire pits -> campfires, sconces -> torches, urns -> decorated pots, pedestals -> stone brick walls,
+  statues and the hat stand -> armor stands, goblets -> flower pots, cage -> iron bars, globe -> lodestone,
+  hourglasses -> lanterns, FrogiLib anvils/trapdoors -> damaged anvils/open spruce trapdoors, dragon banners -> skull
+  banners, draugr swords/bows -> iron swords/bows, ebony gear -> crossbow/diamond axe/silver sword, bombs -> dynamite
+  and TNT, Supplementaries' disc -> music disc 13, DungeonZ portals -> doorways, DungeonZ's mob/boss/exit marker blocks
+  -> the mobs above, an empty boss spot, a loot chest and an open exit.
+- **How it's built:** the tomb was made for DungeonZ's own dimension, so its rooms were saved as empty space; they're
+  air now, so they don't fill with stone underground. It's ~270 blocks across, past what a jigsaw structure may reach,
+  so the new `StormbornTomb` structure type places its 12 pieces (11 from the original plus our descent) at fixed
+  offsets worked out from their jigsaws. In `#no_build_dungeons`.
