@@ -23,3 +23,4 @@ suggested_owns:
 - Built and through two review/fix rounds. A third review found about 11 issues that were never fixed and aren't written down here: review the seven Ultimate classes again yourself (real bugs with file:line, 26.3 APIs checked against genSources) and fix what you find.
 - The branch is ~91 commits behind master and was made under the old rules: it edits `gradle.properties` (version=), `MODLOG.md` and `docs/codemap/`. Merge master in, revert those three to master's copy, and add `changes/powers/<branch>.md` instead (see changes/README.md).
 - Work on a fresh branch from it (e.g. `hermes/xeno-ultimates-2`), build Powers, run `python3 tools/pr_checks.py`, open the PR, set this task to in-review.
+- 2026-11-08 18:08 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
