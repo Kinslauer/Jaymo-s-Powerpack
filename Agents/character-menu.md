@@ -1,9 +1,9 @@
 ---
-status: working
+status: in-review
 task: One combined character menu on H (idea from Kageborne's Shinobi Menu): Character, Powers, Skills, Journal & Quests, Faction, Map & Waypoints, Party
 branch: claude/lucid-cohen-0470d8
 with: Claude Code session (side session of the coordinator)
-pr:
+pr: 1130
 mods: Powers, Kingdoms
 versions: Powers 0.21.60, Kingdoms 0.7.649
 started: 2026-11-07
