@@ -1144,6 +1144,9 @@ public final class LifeStory {
 			DEPARTED.remove(id);
 			return;
 		}
+		// (Andy: "it should keep them in the loading screen so they can read the tips for as long as it takes to load,
+		// rather than getting teleported") up now, before anything is searched for or made
+		StoryGround.holdNow(player, StoryGround.ARRIVING);
 		RandomSource random = player.getRandom();
 		boolean byFate = chosen == Start.FATE;
 		Start road0 = byFate ? fated(server, player, random) : chosen;
@@ -1159,6 +1162,8 @@ public final class LifeStory {
 			}
 			// (0.7.419) the road fate (or a fallback) set them on stays theirs as well
 			RoadLocks.note(p, start);
+			// (the loading screen up before they're let down out of stasis and moved: a new body may not have it yet)
+			StoryGround.holdNow(p, StoryGround.ARRIVING);
 			p.removeAttached(ROAD);
 			DEPARTED.remove(id);
 			StoryStasis.release(p);

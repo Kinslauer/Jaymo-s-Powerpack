@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cobweb",
+    "minecraft:flower_pot",
+    "minecraft:decorated_pot"
+  ]
+}

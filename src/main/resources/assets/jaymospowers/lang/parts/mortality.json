@@ -52,5 +52,6 @@
 	"message.jaymospowers.mortality.wake.captured": "You wake in chains. Your things are gone.",
 	"message.jaymospowers.mortality.wake.risen": "You wake cold. Nothing hurts. Your heart isn't beating.",
 	"message.jaymospowers.mortality.turning": "Everything goes dark. Something in your blood keeps moving after your heart stops.",
-	"message.jaymospowers.mortality.wake.turned": "You open your eyes. The turning is done. Whatever you were, you are not that any more."
+	"message.jaymospowers.mortality.wake.turned": "You open your eyes. The turning is done. Whatever you were, you are not that any more.",
+	"message.jaymospowers.mortality.turning_out": "Your legs give. Your eyes close by themselves. Something in your blood is finishing what it started."
 }

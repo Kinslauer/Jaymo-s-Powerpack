@@ -10,7 +10,8 @@ says yes. Never edit code, comment on GitHub, push or merge here.
 
 All task changes go through `python tools/vault_sync.py` (it syncs before and after), never by editing the files.
 
-1. `python tools/vault_sync.py --tasks in-review`. If it prints nothing, reply only "Nothing to review." and stop.
+1. `python tools/vault_sync.py --reviewer-seen` (tells the coordinator you're here; if you skip rounds for 30 minutes
+   it reviews in-review tasks itself), then `python tools/vault_sync.py --tasks in-review`. If it prints nothing, reply only "Nothing to review." and stop.
 2. For each task, oldest first:
    1. `python tools/vault_sync.py --show <task>`: Andy's words, what's wanted, the `pr:` number, earlier review notes.
    2. `gh pr view <pr> --json number,title,body,headRefName,headRefOid,mergeable,statusCheckRollup` and

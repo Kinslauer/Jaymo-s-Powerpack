@@ -13,6 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.jaymoskingdoms.dungeon.NoBuildDungeons;
 
 /**
  * Jaymo's Kingdoms: kingdoms rise at the world's villages, each under a king who is a boss in his own right; players
@@ -364,6 +365,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Captors.register();
 		CaptiveConduct.register();
 		Shackles.register();
+		// (Andy, 2026-11-08) tombs and other #jaymoskingdoms:no_build_dungeons structures: no digging or building inside
+		NoBuildDungeons.register();
 		// (0.7.573) or taken in by a village that thinks well enough of them
 		Shelter.register();
 		Hollows.register();

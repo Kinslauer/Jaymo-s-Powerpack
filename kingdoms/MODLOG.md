@@ -10258,3 +10258,36 @@ Andy: "tideborn will see fishing as an attack, and doing in their havens is seen
   reputation there drops, the guards come after you and a bounty goes up. Charged at most once per 30 s; the haven's
   own folk may fish freely (`TideFishing`).
 - Built; not played.
+
+## 0.7.651 (2026-11-08): no digging or building in tagged dungeons
+
+Andy: "get them, we need it" (Stormborn Tomb, whose tombs rely on DungeonZ's no-build rule).
+- Inside a structure in the `#jaymoskingdoms:no_build_dungeons` tag, survival players can't break or place blocks; doors,
+  chests, levers and buttons still work, and an action-bar line says why. Cobwebs and pots stay breakable
+  (`#jaymoskingdoms:no_build_dungeons_breakable`). Creative and spectators are never blocked.
+- A player's explosion spares blocks inside such a dungeon (`ServerExplosionNoBuildMixin`).
+- The tag is empty until the Stormborn Tomb structures land, so nothing changes in play yet.
+- Built; not played.
+
+## 0.7.652 (2026-11-08): newcomers stay on the loading screen till they're at their start
+
+Andy: "the player is spawned into the world before they teleport to their start, instead of this it should keep them in
+the loading screen so they can read the tips for as long as it takes to load, rather than getting teleported".
+- His clip: once the story was told the newcomer was let down out of stasis onto the spawn village and could walk about
+  for ~7 s while the server searched for the farmhouse (`FarmhandHome.find`), then was put 6,000 blocks off in unloaded
+  land, and only then did the loading screen come up (it was only checked every 5 ticks, after the move).
+- The loading screen now goes up the moment the story sets out (`StoryGround.holdNow`, sent before any search or move),
+  and stays up while they're on their way (`LifeStory.departing`), through the move and the few seconds after.
+- Let go by the server, the screen still stays up (tips cycling) till the chunks round the player have come in and the
+  ground they stand on is drawn, as vanilla's own loading screen waits (at most 30 s), then half a second more.
+- Built; not played.
+- **0.7.653 (pack 0.21.65), a new world never finished starting:** 0.7.644's `WaterClusterMixin` had a non-private static
+  field (`WATER_CLUSTER`), which Mixin refuses ("contains non-private static field"), so `NaturalSpawner` failed to
+  load and chunk [0, 0] failed at its spawn step: the server sat at spawn preparation forever (Streams Reflowing's
+  stall watch: no progress for 180 s). The field is private now; no other mixin has one. Not built here.
+## 0.7.654: the dead talk to the turning
+- Andy's gaps on #1117: zombies standing down by a blighted player now and then stop, look at them and say a line over
+  their head (`hollow_blight.kin.0-9`, a speech bubble to that player, no chat; at most once every 15 s). The blight's
+  pass-out goes through Powers' `Mortality.turnOut` (the Hollow's colour on the black, eyes closing). A vampire's bite at
+  nightfall now passes you out for 14 s first, the black edged blood red, then you wake turned (`VampirePlayers.TURNING_OUT`;
+  at once as before without Powers). Hint 124 mentions weakness and the zombies. Compile-checked; not played.

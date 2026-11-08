@@ -2097,6 +2097,35 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle turnOut;
+	private static boolean turnOutLooked;
+
+	/**
+	 * (0.7.654) Out cold for {@code ticks} to finish a turning (Powers' {@code Mortality.turnOut}: the black with the
+	 * turning's colour, {@code tint} RGB, at its edges); a plain knock-out with an older Powers. False without Powers.
+	 */
+	public static boolean turnOut(net.minecraft.server.level.ServerPlayer player, int tint, int ticks) {
+		if (!turnOutLooked) {
+			turnOutLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					turnOut = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mortality"),
+						"turnOut", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, int.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality.turnOut (older Powers?)", e);
+				}
+			}
+		}
+		if (turnOut == null) {
+			return knockOut(player.level(), player, ticks);
+		}
+		try {
+			return (boolean)turnOut.invoke(player, tint, ticks);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.342) {@code entity}'s power level, as a Z Fighter's scouter reads it; 0 without Powers. */
 	public static int powerLevel(LivingEntity entity) {
 		lookForWill();

@@ -1,0 +1,11 @@
+{
+    "required": true,
+    "package": "com.jaymoskingdoms.mixin.dungeon",
+    "compatibilityLevel": "JAVA_25",
+    "mixins": [
+        "ServerExplosionNoBuildMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

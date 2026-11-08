@@ -679,6 +679,21 @@ public final class StoryGround {
 
 	// ---- the loading screen (0.7.236) -----------------------------------------------------------------------------
 
+	/** The loading screen's line while a newcomer is being put at their start. */
+	static final String ARRIVING = "gui.jaymoskingdoms.story.hold.arriving";
+
+	/**
+	 * Puts the loading screen up for {@code player} now, not at the next look ({@link #HOLD_EVERY}): sent before the
+	 * story moves them, so it's up before the move (and before finding their start stalls the server a while), and
+	 * they never see the ground they're taken from or the unloaded land they're put in.
+	 */
+	static void holdNow(ServerPlayer player, String key) {
+		SENT.put(player.getUUID(), key);
+		if (ServerPlayNetworking.canSend(player, Hold.TYPE)) {
+			ServerPlayNetworking.send(player, new Hold(key));
+		}
+	}
+
 	/** Holds {@code player} behind the loading screen a few seconds more, while the land where the story put them loads. */
 	static void settle(ServerPlayer player) {
 		SETTLING.put(player.getUUID(), player.level().getServer().getTickCount() + SETTLE_TICKS);
@@ -728,10 +743,15 @@ public final class StoryGround {
 		if (LifeStory.of(player) != null && PowersCompat.waitingForFuture(player)) {
 			return "gui.jaymoskingdoms.story.hold.future";
 		}
+		// (Andy: "the player is spawned into the world before they teleport to their start, instead of this it should keep
+		// them in the loading screen") told, and on their way to the start: never let down into the world in between
+		if (LifeStory.departing(player) && !LifeStory.owed(player) && !McaCompat.destinyPending(player)) {
+			return ARRIVING;
+		}
 		Integer until = SETTLING.get(id);
 		if (until != null) {
 			if (now < until) {
-				return "gui.jaymoskingdoms.story.hold.arriving";
+				return ARRIVING;
 			}
 			SETTLING.remove(id);
 		}
