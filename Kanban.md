@@ -9,12 +9,12 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-b · open
+- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · open
 
 
 ## Being built
 
 - [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
-- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · claimed
 
 
 ## In review
