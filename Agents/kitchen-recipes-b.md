@@ -5,7 +5,7 @@ branch: claude/kitchen-recipes-b
 with: 
 pr: 
 mods: Kitchen
-versions: Kitchen 0.5.89 (tentative; next free right before the PR)
+versions: Kitchen 0.5.91 (next free after master's 0.5.90; taken right before the PR)
 started: 2026-11-07
 owns:
   - kitchen/src/main/java/com/jaymoskitchen/cooking/Dish.java (5 new entries only)
