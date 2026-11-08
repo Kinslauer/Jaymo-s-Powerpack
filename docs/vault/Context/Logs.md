@@ -1,8 +1,8 @@
 # Logs
 
 The MODLOGs are the design log: one entry per version, saying what a player will see. They hold only recent entries;
-older ones are in `docs/modlog/`. **Append new entries at the end.** On a merge conflict keep master's file and
-re-append your own entry.
+older ones are in `docs/modlog/`. **PRs don't write to them**: a PR adds a change note (`changes/<mod>/<branch>.md`,
+see `changes/README.md`) and the Release workflow appends it, with the new version, after the merge.
 
 | Log | Latest entry (2026-11-06) | Link |
 |---|---|---|

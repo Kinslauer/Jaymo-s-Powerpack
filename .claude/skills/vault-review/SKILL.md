@@ -18,8 +18,9 @@ All task changes go through `python tools/vault_sync.py` (it syncs before and af
       `gh pr diff <pr>`. If a note already says `Review (head <first 7 of headRefOid>)`, this head was reviewed: skip it.
    3. Review it:
       - Does it do what Andy asked, all of it, the way he asked? Anything missing is a change request.
-      - `CLAUDE.md` rules and the "Before you open a PR" checklist in `docs/AI-HANDBOOK.md`: version bumps, MODLOG
-        entry, lang in its own `lang/parts/` file, tuning numbers as constants, optional mods only through compat
+      - `CLAUDE.md` rules and the "Before you open a PR" checklist in `docs/AI-HANDBOOK.md`: a change note
+        (`changes/<mod>/<branch>.md`) for each mod changed and no edits to `version=`, MODLOGs or `docs/codemap/`
+        (send back an old-style PR with "run `py -3 tools/change_note.py convert`"), lang in its own `lang/parts/` file, tuning numbers as constants, optional mods only through compat
         classes, no copied art or code.
       - PR checks must be green (`statusCheckRollup`). Still running: skip the task until the next round.
       - Real bugs: read the code around each change (`git fetch origin <headRefName>`, then
