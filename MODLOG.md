@@ -1747,3 +1747,10 @@ want", so every rod here looks like a plain Minecraft rod.
 - Fix: the first blood puddle, footprint or wall mark on screen crashed the client ("Render pass color attachment
   count must match pipeline color target state count"). The blood decal pipeline (`BloodDecals.decalPipeline`) was built
   without a colour target; it now has the translucent one vanilla's translucent particles use.
+
+## 0.21.69 (2026-11-08): shift-click a bauble to put it on (#1148)
+
+- **Shift-click** something wearable (a bauble, a tool belt, a spell ring...; not lanterns or other placeable blocks, so sorting a stack of them still works) in the survival inventory, hotbar or offhand: one goes into a free bauble slot that takes it and the Baubles screen opens so you see it on. With every slot that takes it full, shift-click moves it as before and a short "No free bauble slot takes that" message shows. Other container screens (chests and so on) keep vanilla shift-click.
+- **Sneak-use** in the air with a bauble puts it on and opens the Baubles screen too (a plain right-click still just puts it on). Lanterns, totems and other wearables with no use of their own do the same; on a block a lantern is still placed. Items with their own sneak-use keep it (the Bottled Fairy still lets its fairy out, tool belts keep theirs).
+- All on the server (`InventoryMenu.quickMoveStack` mixin, `BaublesQuickEquipMixin`, and `BaublesQuickEquip`): it takes one from the clicked slot itself, so a double click or lag can only put on what's there; the screen opens the next tick, and only if you're still in your inventory with nothing on the cursor (then the bauble still goes on, the screen just stays). Opening it closes the inventory as vanilla does, so the 2x2 crafting grid goes back into your inventory.
+- Built; not played.
