@@ -1596,6 +1596,13 @@ Built; not played.
 - Fixed: the startup crash (the metal rod item had no id set) and a shark bite that fought a tropical fish.
 - Built; not played.
 
+## 0.21.59 (2026-11-07): Kingdoms 0.7.648, the Family farmhand's family stop being deadweight
+- The family you wake with on the Family farmhand start now run from zombies (spotting them from 20 blocks), go
+  indoors at dusk and stay in until morning, and only swing back, weakly, when a monster has them cornered.
+- By day they work the farm: harvest and replant crops, shear sheep, milk cows (given buckets), breed the animals from
+  the house chest's feed, and the child gathers eggs, wool and saplings; it all goes in the house chest. MCA's Work
+  button (chores) is open for them too.
+- Compile-checked; not played.
 ## 0.21.58 (2026-11-07): Chrono's echoes stop piling up (one echo per Chrono, for real)
 Andy: "Whenver chrono uses his cheat death, an echo respawns, and the same echos will appear in the nether, meaning he can
 spawn up to 30 down there waiting to kill him."
