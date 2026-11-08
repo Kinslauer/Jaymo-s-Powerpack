@@ -1,5 +1,5 @@
 ---
-status: sent
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-08
@@ -39,3 +39,4 @@ it hasn't been seen in game yet.
 - The Bogre mob itself (entity, AI, spawning) is a separate task, done after `kingdoms-geckolib-groundwork`.
 - 2026-11-08 12:25 Review (head 0281e67): pass. Art only: Inhabitants' Bogre geo (1.12.0, geometry.bogre), 128x128 texture and 21 animations incl. idle/walk/run/attack/cooking/carving, editable .bbmodel, render checked, MIT notice and credit kept; checks green. Not loaded on a mob or seen in game (the Bogre mob task wires it up).
 - 2026-11-08 12:26 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-08 21:37 PR #1146 is merged into master; moved to Inbox/Done.
