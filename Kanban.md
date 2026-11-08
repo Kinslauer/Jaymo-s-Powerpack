@@ -4,16 +4,16 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 17:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 17:16). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/mimic|mimic]] · hermes-b · open
 
 
 ## Being built
 
 - [ ] [[Inbox/blindness|blindness]] · hermes-a · claimed
-- [ ] [[Inbox/mimic|mimic]] · hermes-b · claimed
 
 
 ## In review
