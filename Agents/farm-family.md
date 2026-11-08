@@ -1,11 +1,11 @@
 ---
-status: running
+status: in-review
 task: Family farmhand's MCA family - wary of zombies, hide at night, last-resort defence, farm work
 branch: claude/musing-tharp-a4b281
 with: Claude Code session (side session of the coordinator)
-pr: 
+pr: 1127
 mods: Powers, Kingdoms
-versions: Powers 0.21.58, Kingdoms 0.7.648 (claimed)
+versions: Powers 0.21.59, Kingdoms 0.7.648 (PR #1127)
 started: 2026-11-07
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/FarmFamily.java (new)
