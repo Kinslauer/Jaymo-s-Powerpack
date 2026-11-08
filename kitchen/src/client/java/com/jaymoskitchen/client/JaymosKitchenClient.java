@@ -56,6 +56,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		// corpses look like the mob they were; dead players can get back up as zombies wearing their skin
 		EntityRendererRegistry.register(Corpses.CORPSE, CorpseRenderer::new);
 		EntityRendererRegistry.register(PlayerCorpses.ZOMBIE_PLAYER, ZombiePlayerRenderer::new);
+		// rats, and the traps for them
+		com.jaymoskitchen.client.rats.RatsClient.register();
 		// (0.5.18) a crushed spider's loose legs
 		EntityRendererRegistry.register(com.jaymoskitchen.corpse.SpiderCrush.SPIDER_LEG, com.jaymoskitchen.client.corpse.SpiderLegRenderer::new);
 		// (0.5.21) chunks of a body blown apart

@@ -10,4 +10,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface MobAccessor {
 	@Accessor("goalSelector")
 	GoalSelector jaymoskitchen$goals();
+
+	/** (And who it hunts: cats hunt rats, see rats/Rats.) */
+	@Accessor("targetSelector")
+	GoalSelector jaymoskitchen$targets();
 }

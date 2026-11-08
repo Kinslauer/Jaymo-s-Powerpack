@@ -2043,8 +2043,8 @@ public class CorpseEntity extends Entity {
 		com.jaymoskitchen.KitchenBlood.send(level, this, getX(), getY() + 0.3, getZ(), 10, 0.3, 0.1, 0.3, 0.1);
 		ItemStack piece = nextPiece();
 		if (!piece.isEmpty()) {
-			if (butcherStage < Hanging.DRAINED) {
-				// (0.5.51) cut up unbled: spoils in a few days
+			if (butcherStage < Hanging.DRAINED || entityTags().contains(com.jaymoskitchen.rats.Rats.GNAWED_TAG)) {
+				// (0.5.51) cut up unbled (or rats got at it): spoils in a few days
 				com.jaymoskitchen.butchery.Spoilage.mark(piece, level.getOverworldClockTime() / 24000L);
 			}
 			spawnAtLocation(level, piece, 0.4F);
@@ -2190,7 +2190,7 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		// (0.5.51) never bled: its raw meat spoils in a few days (Spoilage)
-		boolean unbled = butcherStage < Hanging.DRAINED;
+		boolean unbled = butcherStage < Hanging.DRAINED || entityTags().contains(com.jaymoskitchen.rats.Rats.GNAWED_TAG);
 		long day = level.getOverworldClockTime() / 24000L;
 		if (onBlock) {
 			for (ItemStack extra : blockExtras()) {
