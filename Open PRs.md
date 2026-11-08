@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-08 12:33
+updated: 2026-11-08 14:12
 ---
 # Open PRs
 
-3 open, as of 2026-11-08 12:33. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-08 14:12. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1137](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1137) Stormborn Tomb structures for Kingdoms (MIT port)
@@ -20,3 +20,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/bogre-model` · **Updated:** 2026-11-08 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** [[bogre-model]]
+
+## [#1148](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1148) Shift-click a bauble to put it on and open the Baubles screen
+- **Branch:** `claude/bauble-shift-equip` · **Updated:** 2026-11-08 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
