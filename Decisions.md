@@ -45,3 +45,9 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Applies to:** Powers compat, task critter-armory-fit.
 - **Agent:** coordinator thread.
 - 2026-11-07: Andy, on the fishing send-back (metal rod, sharks, fish processing): "i phrased those as three separate things intentionally, its fine if they would have taken one each, next time break it up that way." When Andy lists separate features, the coordinator posts one Inbox task per feature (each its own branch and PR), not one bundled task.
+
+### 2026-11-07: Realistic fishing, round 2
+- **Decided:** Andy picked all four: fish by place and time (plus Kitchen bait working again), overfishing, real tuna and shark meat, fish size and weight. Tideborn react to fishing (attack, poaching crime in their havens) is built either way.
+- **Applies to:** Powers fishing, Kitchen chopping, Kingdoms Tideborn.
+- **Agent:** fishing-tideborn.
+- 2026-11-07 (farm family): Andy picked all four jobs for the Family farmhand's family: tend the crops, keep the animals, unlock MCA's chores (Work button), and the child gathers items into the house chest.
