@@ -1,9 +1,9 @@
 ---
-status: running
+status: done
 task: kitchen-recipes-b
 branch: claude/kitchen-recipes-b
 with: 
-pr: 
+pr: 1135
 mods: Kitchen
 versions: Kitchen 0.5.91 (next free after master's 0.5.90; taken right before the PR)
 started: 2026-11-07
@@ -27,3 +27,6 @@ owns:
 **Notes:** Builder A (kitchen-recipes-a, PR #1131) takes Rabbit Stew, Smoked Duck, Bushmeat Stew, Clam Chowder, Grilled Anglerfish — stay out of mains/soups/stews. Master is Kitchen 0.5.88; Builder A's branch took 0.5.90, so take 0.5.89 now and re-check master right before pushing.
 
 **Done:** (none yet)
+
+## Notes
+- 2026-11-08 12:44 PR #1135 is merged into master; moved to Agents/Done.
