@@ -1,5 +1,5 @@
 ---
-status: sent
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-08
@@ -37,3 +37,4 @@ it hasn't been seen in game yet.
 - The Impaler mob itself (entity, AI, spawning) is a separate task.
 - 2026-11-08 16:20 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-08 22:20 Coordinator review (reviewer away) of #1155: 19 bones, all 7 animations target existing bones, 128x128 texture, GeckoLib 5 paths, change note present. Added the missing geckolib_format_version marker. Pass; sent to Andy.
+- 2026-11-08 17:24 PR #1155 is merged into master; moved to Inbox/Done.

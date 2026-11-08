@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: impaler-model
 branch: claude/impaler-model
 with: 
@@ -32,3 +32,4 @@ owns:
 
 ## Done
 PR #1155 adds the Impaler's source-faithful model, texture, editable Blockbench project and all 7 animations for the separate mob task. Rendered and visually checked; GeckoLib 5.5.7 deserialized the geometry and baked every animation; both full builds and PR checks passed. Not tested on a live mob in game.
+- 2026-11-08 17:24 PR #1155 is merged into master; moved to Agents/Done.
