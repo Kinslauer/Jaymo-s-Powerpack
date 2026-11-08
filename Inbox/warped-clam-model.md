@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: prometheus
 from: coordinator
 asked: 2026-11-08
 thread: Claude reviewer session (Andy: "have it do the impaler and warped clam")
 claimed_by: hermes-modeller
-pr: 
+pr: 1153
 suggested_owns:
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geo/warped_clam.geo.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/animations/warped_clam.animation.json
