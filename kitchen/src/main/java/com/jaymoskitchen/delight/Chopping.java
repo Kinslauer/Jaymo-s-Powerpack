@@ -27,9 +27,9 @@ public final class Chopping {
 	/** (0.5.91) A weighed cod or salmon: a fillet for each this many kg, at least and at most. */
 	static final float KG_PER_FILLET = 1.5F;
 	static final int FILLETS_LEAST = 2, FILLETS_MOST = 8;
-	/** (0.5.91) Powers' whole tuna: a steak for each this many kg, at least and at most (three for one with no weight). */
-	static final float KG_PER_TUNA_STEAK = 15.0F;
-	static final int TUNA_STEAKS_LEAST = 3, TUNA_STEAKS_MOST = 14;
+	/** (0.5.91) Powers' whole tuna: a steak for each this many kg, at least and at most (two for one with no weight). */
+	static final float KG_PER_TUNA_STEAK = 1.5F;
+	static final int TUNA_STEAKS_LEAST = 2, TUNA_STEAKS_MOST = 8;
 	static final Identifier POWERS_TUNA = Identifier.fromNamespaceAndPath("jaymospowers", "tuna");
 	static final Identifier POWERS_TUNA_STEAK = Identifier.fromNamespaceAndPath("jaymospowers", "tuna_steak");
 	static final Identifier POWERS_FISH_WEIGHT = Identifier.fromNamespaceAndPath("jaymospowers", "fish_weight");

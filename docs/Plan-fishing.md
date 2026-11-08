@@ -16,12 +16,12 @@ Andy (2026-11-07): ship what's built as one PR now, then the tracks below each a
 - [x] Metal rod: stronger line, faster reel, the only rod for big fish (#1114)
 - [x] Tuna and great white sharks that pull you toward them (#1114)
 - [x] Gutting a fish on Kitchen's board for fillets (#1114)
-- [x] Fish by water: river, lake, cold, open and warm sea; tuna and sharks only at sea (Au Naturel, Reel to Fish)
-- [x] More bites at dawn, dusk and in rain; no fish in pools high above the sea (Au Naturel, Advanced Fishing)
-- [x] Overfishing: a spot runs out and refills over 3 days (Au Naturel)
-- [x] Kitchen bait makes bites likelier and is used up per fish
+- [x] Every bite is a real fish that swims to the hook; what you catch is what lives there (Andy: "they have to ACTUALLY be there")
+- [x] Fish keener at dawn, dusk and in rain (Au Naturel, Advanced Fishing)
+- [x] Overfishing is real: a landed fish is gone, so a spot runs out when its fish do (Au Naturel)
+- [x] Bait the hook by hand (sneak + use), shown under the bobber; no bites on a bare hook
 - [x] Every catch weighed; heavier fights harder; fillets and tuna steaks by weight (Reel to Fish, Advanced Fishing)
-- [x] Whole tuna, tuna steaks and shark meat items
+- [x] Skipjack tuna mob; whole tuna, tuna steaks and shark meat items
 - [x] Tideborn treat fishing as an attack; fishing a Tideborn haven is poaching
 
 ## Track A: the fight (the minigame)
