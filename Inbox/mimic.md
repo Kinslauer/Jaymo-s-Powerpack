@@ -17,3 +17,4 @@ suggested_owns:
 ## Notes
 - "Echos" refers to an existing mechanic that the mimic should replace. Ask prometheus/Tiv for clarification on what echos currently do and how the mimic should take over that role.
 - No existing worktree or branch for this topic yet.
+- 2026-11-08 17:16 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
