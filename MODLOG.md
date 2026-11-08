@@ -1754,3 +1754,13 @@ want", so every rod here looks like a plain Minecraft rod.
 - **Sneak-use** in the air with a bauble puts it on and opens the Baubles screen too (a plain right-click still just puts it on). Lanterns, totems and other wearables with no use of their own do the same; on a block a lantern is still placed. Items with their own sneak-use keep it (the Bottled Fairy still lets its fairy out, tool belts keep theirs).
 - All on the server (`InventoryMenu.quickMoveStack` mixin, `BaublesQuickEquipMixin`, and `BaublesQuickEquip`): it takes one from the clicked slot itself, so a double click or lag can only put on what's there; the screen opens the next tick, and only if you're still in your inventory with nothing on the cursor (then the bauble still goes on, the screen just stays). Opening it closes the inventory as vanilla does, so the 2x2 crafting grid goes back into your inventory.
 - Built; not played.
+
+## 0.21.70 (2026-11-08): skyfalls made before 0.21.4 dry up too
+
+Andy: "I saw another skyfall earlier today, i need them all removed until at least the world teir remember?" Since 0.21.4
+a new chunk gets no sky waterfall before the Dread tier, but chunks made earlier kept theirs. `aether/world/SkyfallCleanup`
+checks every chunk that loads in a One Dimension world: water running down out of the Aether's floor is traced back up
+through the Aether (at most 8000 water blocks) and each source feeding it is sealed with the commonest solid block beside
+it (else air), so the fall drains away. A heavenfall chunk's fall is kept once someone online has reached Dread, as for
+new chunks. Water that lands on the islands is untouched; a waterfall poured off an edge by hand before Dread goes too.
+Built, not played.
