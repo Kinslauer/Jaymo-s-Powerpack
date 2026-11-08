@@ -1727,7 +1727,7 @@ want", so every rod here looks like a plain Minecraft rod.
   an ice auger.
 - Built; not played.
 
-## 0.21.65: eyes that close as you pass out to turn
+## 0.21.66: eyes that close as you pass out to turn
 - Andy: "you pass out and then turn as well, make sure the eyes animate closed too". `Mortality.turnOut` (Kingdoms calls
   it for the blight run its course and a vampire bite at nightfall): out cold where you stand with the turning's colour at
   the edges of the black (`TURN_TINT`) and its own line ("Your legs give. Your eyes close by themselves...").

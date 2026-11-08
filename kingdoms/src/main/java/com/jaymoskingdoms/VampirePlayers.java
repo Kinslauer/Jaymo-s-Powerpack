@@ -173,7 +173,7 @@ public final class VampirePlayers {
 			}
 			Long bitten = player.getAttached(Vampires.BITTEN);
 			if (bitten != null && night && (nightIndex(bitten) < nightNo || NightbornBlood.oldBlood(player, bitten, clock))) {
-				// (0.7.653) Andy: "you pass out and then turn as well": out cold first (the black edged in blood), then they
+				// (0.7.654) Andy: "you pass out and then turn as well": out cold first (the black edged in blood), then they
 				// wake turned; without Powers (or no knock-out), at once as before
 				Long out = TURNING_OUT.get(player.getUUID());
 				if (out == null) {
@@ -259,7 +259,7 @@ public final class VampirePlayers {
 		}
 	}
 
-	/** (0.7.653) How long the bitten lie out cold at nightfall before they wake turned (ticks), and who's out for it now. */
+	/** (0.7.654) How long the bitten lie out cold at nightfall before they wake turned (ticks), and who's out for it now. */
 	static final int TURN_OUT_TICKS = 20 * 14;
 	private static final java.util.Map<java.util.UUID, Long> TURNING_OUT = new java.util.HashMap<>();
 

@@ -214,7 +214,7 @@ public final class Mortality {
 	static final int TURN_DARK = 20 * 14;
 
 	/**
-	 * (0.21.65) Andy: "you pass out and then turn as well, make sure the eyes animate closed too". A turning finishing in one
+	 * (0.21.66) Andy: "you pass out and then turn as well, make sure the eyes animate closed too". A turning finishing in one
 	 * still alive (Kingdoms: the Hollow's blight run its course, a vampire's bite at nightfall): out cold where they stand for
 	 * {@code ticks}, the same vignette ({@code tint}, RGB) and a line of its own on the black as dying mid-turn
 	 * ({@link #MID_TURNS}). The caller finishes the turning once the black is over. False if they couldn't be put out.

@@ -10281,7 +10281,11 @@ the loading screen so they can read the tips for as long as it takes to load, ra
 - Let go by the server, the screen still stays up (tips cycling) till the chunks round the player have come in and the
   ground they stand on is drawn, as vanilla's own loading screen waits (at most 30 s), then half a second more.
 - Built; not played.
-## 0.7.653: the dead talk to the turning
+- **0.7.653 (pack 0.21.65), a new world never finished starting:** 0.7.644's `WaterClusterMixin` had a non-private static
+  field (`WATER_CLUSTER`), which Mixin refuses ("contains non-private static field"), so `NaturalSpawner` failed to
+  load and chunk [0, 0] failed at its spawn step: the server sat at spawn preparation forever (Streams Reflowing's
+  stall watch: no progress for 180 s). The field is private now; no other mixin has one. Not built here.
+## 0.7.654: the dead talk to the turning
 - Andy's gaps on #1117: zombies standing down by a blighted player now and then stop, look at them and say a line over
   their head (`hollow_blight.kin.0-9`, a speech bubble to that player, no chat; at most once every 15 s). The blight's
   pass-out goes through Powers' `Mortality.turnOut` (the Hollow's colour on the black, eyes closing). A vampire's bite at

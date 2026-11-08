@@ -45,7 +45,7 @@ public final class DownedHud {
 
 	/** (0.18.84) Knocked out: how long the black takes to come over the screen, and to lift as they come round (ticks). */
 	static final float BLACK_IN_TICKS = 6.0F, BLACK_OUT_TICKS = 30.0F;
-	/** (0.21.65) Passing out to turn: the eyes take this long to close (ticks); the soft edge of a lid (share of the screen). */
+	/** (0.21.66) Passing out to turn: the eyes take this long to close (ticks); the soft edge of a lid (share of the screen). */
 	static final float TURN_CLOSE_TICKS = 50.0F, LID_SOFT = 0.12F;
 	/**
 	 * (0.20.94) A death turned away (Mortality.WAKE_LINE): the black lifts this slowly, the line on it this big, and wrapped
@@ -89,7 +89,7 @@ public final class DownedHud {
 		if (said != null) {
 			line = said;
 		}
-		// ((0.21.65) passing out to turn, the eyes close slowly: Mortality.TURN_TINT)
+		// ((0.21.66) passing out to turn, the eyes close slowly: Mortality.TURN_TINT)
 		boolean turning = player != null && player.hasAttached(com.jaymospowers.core.wounds.Mortality.TURN_TINT);
 		black = knocked ? Math.min(1.0F, black + 1.0F / (turning ? TURN_CLOSE_TICKS : BLACK_IN_TICKS))
 			: Math.max(0.0F, black - 1.0F / (line != null ? WAKE_OUT_TICKS : BLACK_OUT_TICKS));
@@ -170,7 +170,7 @@ public final class DownedHud {
 	}
 
 	/**
-	 * (0.21.65) Andy: "make sure the eyes animate closed too". The black comes as eyelids: a lid down from the top and one up
+	 * (0.21.66) Andy: "make sure the eyes animate closed too". The black comes as eyelids: a lid down from the top and one up
 	 * from the bottom, soft at their edges, meeting in the middle as {@code dark} reaches 1 (and parting again as it lifts),
 	 * the rest of the screen dimming behind them.
 	 */

@@ -2101,7 +2101,7 @@ public final class PowersCompat {
 	private static boolean turnOutLooked;
 
 	/**
-	 * (0.7.653) Out cold for {@code ticks} to finish a turning (Powers' {@code Mortality.turnOut}: the black with the
+	 * (0.7.654) Out cold for {@code ticks} to finish a turning (Powers' {@code Mortality.turnOut}: the black with the
 	 * turning's colour, {@code tint} RGB, at its edges); a plain knock-out with an older Powers. False without Powers.
 	 */
 	public static boolean turnOut(net.minecraft.server.level.ServerPlayer player, int tint, int ticks) {

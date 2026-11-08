@@ -5,7 +5,7 @@ import java.util.Map;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.21.65) Andy: "make sure the eyes animate closed too". A body passing out ({@code Downed.passedOut}) doesn't shut its
+ * (0.21.66) Andy: "make sure the eyes animate closed too". A body passing out ({@code Downed.passedOut}) doesn't shut its
  * eyes all at once: over {@link #CLOSING_TICKS} they droop, shut a little longer each flutter ({@link #FLUTTER} ticks a
  * flutter), until they stay shut. The skins only have open and shut (Kitchen's {@code ClosedEyes}), so the closing is in the
  * timing. Client side, per entity, from when it was first seen out cold.
