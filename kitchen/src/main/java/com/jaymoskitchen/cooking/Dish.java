@@ -255,19 +255,29 @@ public enum Dish {
 	FROSTED_FRUIT_CUP(Method.CHOP, EnumSet.of(Station.BOARD), List.of(BOWL, VERDANT_FRUIT, ICE, SUGAR), 6, 0.5F, true,
 		List.of(Buff.far("far_ward", 10 * 60 * 20), new Buff(MobEffects.FIRE_RESISTANCE, 120 * 20, 0))),
 	SALT_TRAIL_BREAD(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, GLACIA_SALT, VERDANT_FRUIT), 9, 0.7F, false,
-			List.of(Buff.far("far_thrift", 10 * 60 * 20))),
-		// --- content drop: five new savoury dishes ---
-		RABBIT_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, RABBIT, CARROT, POTATO, ONION, BROWN_MUSHROOM), 10, 0.8F, true,
-			List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.REGENERATION, 20 * 20, 0))),
-		SMOKED_DUCK(Method.SMOKE, EnumSet.of(Station.SMOKER), List.of(DUCK, SUGAR), 11, 0.9F, false,
-			List.of(new Buff(MobEffects.FIRE_RESISTANCE, 120 * 20, 0), new Buff(MobEffects.STRENGTH, 60 * 20, 0))),
-		BUSHMEAT_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, BUSHMEAT, TURNIP, POTATO, BROWN_MUSHROOM), 11, 0.8F, true,
-			List.of(new Buff(MobEffects.HEALTH_BOOST, 120 * 20, 0), new Buff(MobEffects.RESISTANCE, 30 * 20, 0))),
-		CLAM_CHOWDER(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CLAM_MEAT, POTATO, ONION, MILK_BOTTLE), 10, 0.75F, true,
-			List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.NIGHT_VISION, 60 * 20, 0))),
-		GRILLED_ANGLERFISH(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(ANGLERFISH, LEMON, FLIP, FLIP), 9, 0.8F, false,
-			List.of(new Buff(MobEffects.NIGHT_VISION, 180 * 20, 0), new Buff(MobEffects.CONDUIT_POWER, 60 * 20, 0)));
-
+		List.of(Buff.far("far_thrift", 10 * 60 * 20))),
+	// --- (0.5.91) Builder B: baked goods, desserts, breakfasts and sides ---
+	HONEY_BUN(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, HONEY_BOTTLE, SUGAR), 7, 0.6F, false,
+		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0))),
+	CHOCOLATE_COOKIE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(WHEAT, WHEAT, COCOA_BEANS), 2, 0.1F, false,
+		List.of(new Buff(MobEffects.HASTE, 60 * 20, 0))),
+	PANCAKES(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(DOUGH, EGG, MILK_BOTTLE), 8, 0.7F, false,
+		List.of(new Buff(MobEffects.REGENERATION, 20 * 20, 0), new Buff(MobEffects.SPEED, 60 * 20, 0))),
+	FRENCH_TOAST(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(BREAD, EGG, MILK_BOTTLE, SUGAR), 9, 0.8F, false,
+		List.of(new Buff(MobEffects.REGENERATION, 20 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0))),
+	HASH_BROWNS(Method.CHOP, EnumSet.of(Station.BOARD), List.of(POTATO, POTATO, ONION), 6, 0.6F, false,
+		List.of(new Buff(MobEffects.SPEED, 90 * 20, 0))),
+	// --- content drop: five new savoury dishes (Builder A, 0.5.90) ---
+	RABBIT_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, RABBIT, CARROT, POTATO, ONION, BROWN_MUSHROOM), 10, 0.8F, true,
+		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.REGENERATION, 20 * 20, 0))),
+	SMOKED_DUCK(Method.SMOKE, EnumSet.of(Station.SMOKER), List.of(DUCK, SUGAR), 11, 0.9F, false,
+		List.of(new Buff(MobEffects.FIRE_RESISTANCE, 120 * 20, 0), new Buff(MobEffects.STRENGTH, 60 * 20, 0))),
+	BUSHMEAT_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, BUSHMEAT, TURNIP, POTATO, BROWN_MUSHROOM), 11, 0.8F, true,
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 120 * 20, 0), new Buff(MobEffects.RESISTANCE, 30 * 20, 0))),
+	CLAM_CHOWDER(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CLAM_MEAT, POTATO, ONION, MILK_BOTTLE), 10, 0.75F, true,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.NIGHT_VISION, 60 * 20, 0))),
+	GRILLED_ANGLERFISH(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(ANGLERFISH, LEMON, FLIP, FLIP), 9, 0.8F, false,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 180 * 20, 0), new Buff(MobEffects.CONDUIT_POWER, 60 * 20, 0)));
 	/** Which minigame cooks the dish. */
 	public enum Method {
 		/** Press the recipe steps in order (furnace / smoker). */
@@ -436,6 +446,11 @@ public enum Dish {
 			case STEAK_AND_POTATOES -> 90;
 			case ROAST_CHICKEN_FEAST -> 110;
 			case SHEPHERDS_PIE_FEAST, STUFFED_PUMPKIN_FEAST -> 220;
+			case HONEY_BUN -> 170;
+			case CHOCOLATE_COOKIE -> 110;
+			case PANCAKES -> 90;
+			case FRENCH_TOAST -> 100;
+			case HASH_BROWNS -> 100;
 			default -> 100;
 		};
 	}
@@ -459,7 +474,7 @@ public enum Dish {
 	/** How many one cook makes (the batch): a batch of cookies, a pair of rolls. */
 	public int batch() {
 		return switch (this) {
-			case SWEET_BERRY_COOKIE, HONEY_COOKIE -> 6;
+			case SWEET_BERRY_COOKIE, HONEY_COOKIE, CHOCOLATE_COOKIE -> 6;
 			case DUMPLINGS, SALMON_ROLL, COD_ROLL -> 2;
 			default -> 1;
 		};
