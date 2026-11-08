@@ -26,7 +26,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 
 /**
- * (0.21.70, Andy: "I saw another skyfall earlier today, i need them all removed until at least the world teir") Since 0.21.4
+ * (2026-11-08, Andy: "I saw another skyfall earlier today, i need them all removed until at least the world teir") Since 0.21.4
  * a new chunk gets no sky waterfall before the Dread tier ({@link SkySpringFeature}), but chunks made before that kept
  * theirs: water poured on from an Aether spring, down through the Overworld's sky. Now, in a One Dimension world, every
  * chunk that loads is checked at the Aether's floor: water running on down out of it is traced back up through the Aether to the source blocks
