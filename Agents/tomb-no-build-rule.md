@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: tomb-no-build-rule
 branch: claude/tomb-no-build-rule
 with: 
-pr: 
+pr: 1138
 mods: kingdoms
 versions: kingdoms 0.7.650 on master (no version bump yet - taken at merge per workflow)
 started: 2026-11-08
