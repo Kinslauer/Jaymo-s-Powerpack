@@ -334,9 +334,15 @@ def tasks(live, wanted=None):
     return found
 
 
+SPECIALISTS = {"hermes-modeller": "prometheus", "hermes-writer": "quill"}  # bot name -> the name Andy calls it
+
+
 def meant_for(props, agent):
-    """`for: hermes` covers every Hermes bot named hermes-<something>; `for: any` (or blank) covers everyone."""
-    target = props.get("for", "any") or "any"
+    """`for: hermes` covers every Hermes builder named hermes-<something>; `for: any` (or blank) covers everyone.
+    Specialist bots (the modeller, the writer) only take tasks addressed to them, by bot name or nickname."""
+    target = (props.get("for", "any") or "any").strip().lower()
+    if agent in SPECIALISTS:
+        return target in (agent, SPECIALISTS[agent])
     return target in (agent, "any") or agent.startswith(target + "-")
 
 

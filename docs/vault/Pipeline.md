@@ -67,6 +67,7 @@ If Hermes has no scheduler, paste the same prompt whenever you want it to take t
 Each Hermes bot (the + on Hermes's Bots screen) is its own profile: name, persona, model, skills and schedule. Its
 name is what it passes to `--claim`, so every bot needs a different one. A task with `for: hermes` goes to any bot
 named `hermes-<something>`; `for: hermes-a` goes to that bot only; `for: any` to everyone, Claude sessions included.
+The modeller and the writer are specialists: they skip `for: hermes` and `for: any` tasks and take only their own.
 
 | Bot | `--claim` | Schedule | What it does |
 |---|---|---|---|
@@ -74,6 +75,8 @@ named `hermes-<something>`; `for: hermes-a` goes to that bot only; `for: any` to
 | Builder A | `hermes-a` | every 15 min | The prompt above with `hermes` swapped for `hermes-a`. |
 | Builder B | `hermes-b` | every 15 min, 7 min after A | Same, as `hermes-b`. Two builders take two tracks at once (ParCool A and B). |
 | Fixer | `hermes-fixer --fixes` | every 15 min | Takes the oldest task the reviewer sent back, from whichever bot, so a busy or rate-limited builder doesn't hold it up. |
+| Modeller (Prometheus) | `hermes-modeller` | every 15 min | GeckoLib/Blockbench models, textures and animations. Takes only tasks with `for: hermes-modeller` or `for: prometheus`. |
+| Writer (Quill) | `hermes-writer` | every 15 min | Lore, dialogue, quest and item text, hints, lang entries, patch notes. Takes only tasks with `for: hermes-writer` or `for: quill`. |
 
 Keep it to **two builders**, plus the fixer if you want one: the vault allows three agents editing at once (the
 Claude reviewer only reads, so it doesn't count). NVIDIA's rate limits already stopped one Hermes run today, so add
