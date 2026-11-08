@@ -72,3 +72,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 
 - 2026-11-08 (kitchen-rats): Andy chose to reuse the Rats mod's textures (LGPL-3.0, with credit) for Kitchen's rats, after seeing the look page.
 - 2026-11-08 (kingdoms-geckolib-groundwork): Andy: the Stormborn Tomb reuses the Skeleton Lord (boss) and the silver skeleton (Dead Traveler model) instead of a new tomb skeleton and draugr lord, both ported to GeckoLib with improved animations; the new Draugr is built too (GeckoLib, our own art). The example GeckoLib mob is the barrow beetle. PR #1149.
+- 2026-11-08: Andy: Hermes picks up a backup reviewer role — if the PC reviewer and the coordinator session are both down, Hermes reviews in-review Inbox tasks (build, pr_checks, review-lessons, the task's numbered list), sends failures back with numbered notes and `status: changes`, passes good ones with `--send`, and posts ready PRs to Andy; it never merges on its own.
