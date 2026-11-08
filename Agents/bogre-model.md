@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: bogre-model
 branch: claude/bogre-model
 with: 
-pr: 
+pr: 1146
 mods: Kingdoms
 versions: 
 started: 2026-11-08
@@ -31,4 +31,4 @@ owns:
 - The Bogre entity and AI are a separate task after the GeckoLib groundwork.
 
 ## Done
-Work in progress; not tested in game.
+Added the Bogre's GeckoLib geometry, unchanged texture, 21 animations, editable Blockbench project, render and MIT credit as PR #1146. Root and Kingdoms builds and PR checks passed; rendered front, side and rear views were inspected. No gameplay Java was added and the assets were not tested on a live mob in game.
