@@ -79,6 +79,10 @@ public final class InteractActions {
 				out.add(a);
 			}
 		}
+		if (FarmFamily.is(v) && !v.isBaby()) {
+			// (not a button of ours: MCA's Work button, shown for them as for family, McaFarmWorkButtonMixin)
+			out.add(FarmFamily.WORK_OFFER);
+		}
 		return out;
 	}
 

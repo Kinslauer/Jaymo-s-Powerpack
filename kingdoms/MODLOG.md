@@ -10212,3 +10212,24 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
 - **Zombies don't attack the blighted**: for the whole blight, from stage 0, nearby zombies' target choice is hooked so they skip blighted players and never re-target them (`ZombieBlightMixin` on `NearestAttackableTargetGoal`), and one or two of the nearest speak with ambient zombie sounds now and then instead of attacking. Andy's "no discovery chat text" rule: no chat messages, sounds only.
 - **Pass out, then turn**: when the blight finishes, you pass out first (eyes animate closed via Powers' downed black screen), then rise turned as the Hollow you were becoming. The pending turn is kept in a persistent attachment, so logging out or a restart while passed out still finishes the turn when you come round (`PowersCompat.knockOut` for `TURN_DARK`, wake at `wakeAt`).
 - Compile-checked; not played.
+
+## 0.7.648 (2026-11-07): the Family farmhand's family - wary of monsters, indoors at night, and a farm to work
+Andy: "for the farmhand start, those MCA should be far more wary of zombies and try to hide at night, as a very last
+resort they will have to swing back and defend themselves. they are just deadweight and they make life harder for the
+player. they need some kind of utility or function as of now." (`FarmFamily`, from `FarmhandHome.takeIn` and `Workers.step`.)
+- **Wary**: the family spot a monster from 20 blocks (`WARY_RANGE`) and run, home if that's away from it, else away,
+  until they're 14 blocks clear (`KEEP_AWAY`). They no longer stand about or walk into zombies.
+- **Indoors at night**: from dusk (`HIDE_FROM` 12000) to just before dawn they walk home to their house and stay
+  there; once inside, MCA's brain puts them to bed.
+- **Last resort**: a grown one with a monster at arm's length (`CORNERED` 2.3) and no ground gained running for
+  1.5 s swings back, weakly (`DEFEND_DAMAGE` 1.5, a shove), then tries to run again. Children only run.
+- **Work** (Andy picked all four): by day the grown ones harvest ripe crops within 24 blocks of the house and sow them
+  again, sow bare farmland from their seed, shear sheep, milk a cow when the chest holds an empty bucket, and feed
+  pairs of cows, sheep, pigs or chickens from the chest to breed them while there are fewer than 8 grown of a kind.
+  Everyone (the child too) gathers what's lain about the house for 10 s (eggs, wool, saplings) and carries it to the
+  house chest; a chest is put beside the home spot if the house has none. Each grown one gets a stone hoe.
+- **MCA's chores**: MCA's Work button (harvest, chop, hunt, fish) shows on the grown ones as on your own family
+  (`McaFarmWorkButtonMixin`, told by `InteractActions`); set to a chore, they leave the farm round to MCA's chore.
+- Who they are, their home spot and their chest are kept as entity tags, so it lasts; only new Family farmhand starts.
+- A gray line after the start tells the player what the family does.
+- Compile-checked; not played.
