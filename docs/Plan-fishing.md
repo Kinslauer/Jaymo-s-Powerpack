@@ -26,17 +26,18 @@ Andy (2026-11-07): ship what's built as one PR now, then the tracks below each a
 
 ## Track A: the fight (the minigame)
 Andy picked "all three together": the strike window, then a charged cast, drag and fish runs, with the rod bending.
-- [ ] Strike window: when a fish bites, the bobber dips and you have a few seconds to strike (use) or it's gone (Reel to Fish)
-- [ ] Casting power: hold use to charge the cast, release to throw; farther casts reach deeper water (Legendary Fishing)
-- [ ] Drag: a setting on the rod (scroll or sneak + use) that lets the fish take line instead of the line snapping;
+Built in Powers 0.21.62 (branch `claude/fishing-fight-track-a`): `FishBite`, `FishCast`, `FishRun`, `FishingRealClient`.
+- [x] Strike window: when a fish bites, the bobber dips and you have a few seconds to strike (use) or it's gone (Reel to Fish)
+- [x] Casting power: hold use to charge the cast, release to throw; farther casts reach deeper water (Legendary Fishing)
+- [x] Drag: a setting on the rod (scroll or sneak + use) that lets the fish take line instead of the line snapping;
       high drag lands fish faster but risks the line (Legendary Fishing)
-- [ ] Fish runs: a hooked fish surges in bursts, left and right; reeling into a run spikes tension (Advanced Fishing:
+- [x] Fish runs: a hooked fish surges in bursts, left and right; reeling into a run spikes tension (Advanced Fishing:
       "fish resistance")
-- [ ] Rod bend: the held rod bends with tension (first and third person), still the plain Minecraft rod (Advanced Fishing)
-- [ ] Line tension sound and HUD: the line creaks near the break point
-- [ ] Nibbles: a fish swims up to the hook and nibbles a few times before it takes it, so you strike on the take (True Fishing)
-- [ ] Scroll wheel to reel and play the fish as an option to holding use; fish jump as well as run (True Fishing)
-- [ ] Fish spook: no bites while you stand in the water near the hook (True Fishing)
+- [x] Rod bend: the held rod bends with tension (first and third person), still the plain Minecraft rod (Advanced Fishing)
+- [x] Line tension sound and HUD: the line creaks near the break point
+- [x] Nibbles: a fish swims up to the hook and nibbles a few times before it takes it, so you strike on the take (True Fishing)
+- [x] Scroll wheel to reel and play the fish as an option to holding use; fish jump as well as run (True Fishing)
+- [x] Fish spook: no bites while you stand in the water near the hook (True Fishing)
 
 ## Track B: tackle
 - [ ] Rod kinds with plain textures: pole (small fish), spinning rod (predators), ledger rod (bottom fish, rod pod), sea rod

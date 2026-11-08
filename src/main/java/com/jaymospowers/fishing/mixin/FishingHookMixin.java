@@ -56,6 +56,10 @@ public abstract class FishingHookMixin {
             angler.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.fishing.no_fish_here")
                     .withStyle(net.minecraft.ChatFormatting.GRAY));
         }
+        if (com.jaymospowers.fishing.FishBite.tick(angler, hook)) {
+            // (Track A) a fish is nibbling or has taken the hook, or the angler wading near it spooks the fish
+            return;
+        }
         if (!FishingReal.shouldBite(angler, hook)) {
             return;
         }
@@ -99,7 +103,8 @@ public abstract class FishingHookMixin {
             }
         }
         level.addFreshEntity(fish);
-        FishingReal.startFight((net.minecraft.server.level.ServerPlayer) player, kind, fish, hook);
+        // (Track A) it nibbles, then takes the hook; a strike in time starts the fight
+        FishingReal.fishAtHook((net.minecraft.server.level.ServerPlayer) player, kind, fish, hook);
     }
 
     /** While a fish is on the line, don't retrieve the hook or drop vanilla loot. */
@@ -108,9 +113,12 @@ public abstract class FishingHookMixin {
         FishingHook hook = (FishingHook) (Object) this;
         Entity owner = hook.getOwner();
         if (owner instanceof net.minecraft.server.level.ServerPlayer player
-                && FishingReal.fight(player).fighting()) {
+                && (FishingReal.fight(player).fighting() || com.jaymospowers.fishing.FishBite.strike(player, hook))) {
+            // (Track A) a pull on a taken hook is the strike: the fight starts and the hook stays out
             cir.setReturnValue(0);
             cir.cancel();
+        } else if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
+            com.jaymospowers.fishing.FishBite.clear(player);
         }
     }
 

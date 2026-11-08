@@ -1617,3 +1617,28 @@ Andy: "The goal is more realistic fishing." Ideas from Au Naturel (public domain
   per 50 kg (3 to 12). Steaks and shark meat cook in a furnace, smoker or campfire. New textures for all five.
 - **Tideborn** (with Kingdoms 0.7.650): every bite calls `KingdomsCompat.fished`, see the Kingdoms log.
 - Built; not played.
+
+## 0.21.62 (2026-11-08): the fishing fight (Track A of docs/Plan-fishing.md)
+Andy picked "all three together": nibbles and a strike window, a charged cast, drag and fish runs, the rod bending.
+Ideas from Reel to Fish, Legendary Fishing, Advanced Fishing and True Fishing (all rights reserved: ideas only, our own code).
+- **Nibbles, then strike** (`FishBite`): a fish at the hook nibbles 1-4 times (the bobber twitches), then takes it (the
+  bobber goes under, "strike!"); use within 2.5 s hooks it and the fight starts. Too early scares it off, too late it
+  spits the hook; another comes after 5 s. The hook mixin now calls `FishingReal.fishAtHook` instead of `startFight`.
+- **Fish spook**: no bites while you stand in water within 6 blocks of the hook.
+- **Charged cast** (`FishCast`, `FishingRodItemMixin`, `MetalFishingRodItem`): with no hook out, hold use to draw the
+  rod back and let go to throw, 0.55x (tap) to 1.6x (1.5 s) the old throw. Sneak + use with no hook out cycles the drag.
+  The metal rod no longer casts a `ClientLevel` to `ServerLevel` on the client.
+- **Drag** (`FishRun`, `jaymospowers:rod_drag` component, 1-5, default 3): past the drag's slip point (45-95% of the
+  breaking point) the reel clicks and line goes out instead of the line taking the strain; a tighter drag reels 0.7-1.3x
+  as fast. Sneak + scroll with a rod in hand turns it; the rod's tooltip shows it.
+- **Runs and jumps**: a hooked fish surges left or right for 0.75-1.75 s every few seconds (more often for strong fish),
+  a third of runs start with a jump. Reeling into a run triples the tension it adds and gains nothing; easing off, the
+  fish still pulls and takes line. The line snaps with a lead-break sound.
+- **HUD and sound**: the tension bar is now a share of the breaking point (the metal rod's line no longer runs off the
+  end), with the drag's slip mark, `<<`/`>>` for a run, and drag in the label; a cast bar while charging. The line creaks
+  (crossbow-loading sound) above 75% strain, faster near the break.
+- **Scroll to reel**: while a fish is on, each scroll notch reels for 3 ticks (holding use still works).
+- **Rod bend** (`FishingRodFirstPersonMixin`, `FishingRodThirdPersonMixin`): the plain rod tips down with strain, swings
+  toward a run and shakes near the break; drawn back while charging. Pose only, no new model. Third person shows for
+  your own player (the fight state still syncs to its player only); `THIRD_PERSON_SIGN` flips it if it bends the wrong way.
+- Lang in `lang/parts/fishing_fight.json`. Built; not played.

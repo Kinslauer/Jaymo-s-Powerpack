@@ -1,0 +1,10 @@
+{
+  "message.jaymospowers.fishing.strike": "It's taken the hook - strike! (use)",
+  "message.jaymospowers.fishing.missed": "Too slow - it spat the hook.",
+  "message.jaymospowers.fishing.too_early": "Too early - you scared it off.",
+  "message.jaymospowers.fishing.spooked": "You're spooking the fish. Get out of the water near your hook.",
+  "message.jaymospowers.fishing.drag": "Drag %s/%s",
+  "hud.jaymospowers.fishing.tension_drag": "Tension %s%%  Drag %s/%s",
+  "hud.jaymospowers.fishing.cast": "Cast: %s%%",
+  "tooltip.jaymospowers.rod_drag": "Drag %s/%s (sneak + scroll)"
+}

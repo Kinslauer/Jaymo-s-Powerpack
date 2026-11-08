@@ -102,6 +102,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.armory.FlintlockDraw.init();
 		// (0.21.53) realistic fishing: a bite hooks a live fish and the player reels it in tug-of-war style
 		com.jaymospowers.fishing.FishingReal.init();
+		com.jaymospowers.fishing.FishRun.init(); // (Track A) the rod's drag and fish runs
 		com.jaymospowers.tinkering.Tinkering.init();
 		// (0.21.29) GregTech's hand route: hammer raw ore into crushed ore, wash it in a cauldron or running water
 		com.jaymospowers.tinkering.ore.OreWashing.init();
