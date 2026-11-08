@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-08 12:01
+updated: 2026-11-08 12:20
 ---
 # Open PRs
 
-3 open, as of 2026-11-08 12:01. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-08 12:20. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1137](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1137) Stormborn Tomb structures for Kingdoms (MIT port)
