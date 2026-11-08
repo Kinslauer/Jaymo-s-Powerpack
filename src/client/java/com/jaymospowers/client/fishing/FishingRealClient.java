@@ -80,6 +80,15 @@ public final class FishingRealClient {
             } else if (com.jaymospowers.fishing.HookBait.isRod(stack)) {
                 lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.hook_bare").withStyle(ChatFormatting.DARK_GRAY));
             }
+            // (0.21.64) Track B tackle: what each rod is for, and how to use bait and lures
+            if (stack.is(com.jaymospowers.fishing.Tackle.CANE_POLE) || stack.is(com.jaymospowers.fishing.Tackle.SPINNING_ROD)
+                    || stack.is(com.jaymospowers.fishing.Tackle.LEDGER_ROD)) {
+                String id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+                lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.rod." + id).withStyle(ChatFormatting.GRAY));
+            } else if (stack.is(com.jaymospowers.fishing.HookBait.BAITS)) {
+                lines.add(Math.min(1, lines.size()), Component.translatable(com.jaymospowers.fishing.Tackle.isLure(stack.getItem())
+                        ? "tooltip.jaymospowers.lure" : "tooltip.jaymospowers.bait").withStyle(ChatFormatting.GRAY));
+            }
             // (Track A) a rod shows its drag
             if (FishRun.isRod(stack)) {
                 lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.rod_drag",

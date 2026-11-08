@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " L ",
+    "II ",
+    "N  "
+  ],
+  "key": {
+    "L": "minecraft:string",
+    "I": "minecraft:iron_ingot",
+    "N": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "jaymospowers:pirk",
+    "count": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:wheat",
+    "minecraft:wheat_seeds",
+    "minecraft:bone_meal",
+    "minecraft:dirt"
+  ],
+  "result": {
+    "id": "jaymospowers:groundbait",
+    "count": 4
+  }
+}
