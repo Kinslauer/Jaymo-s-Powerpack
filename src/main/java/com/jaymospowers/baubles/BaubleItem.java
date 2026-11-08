@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 
 /**
  * One of our baubles: worn in a {@link Baubles} slot of its kind it gives its bonuses (nowhere else). Right-click it to
- * put it straight into an empty slot that takes it.
+ * put it straight into an empty slot that takes it (while sneaking, the bauble screen opens too).
  */
 public class BaubleItem extends Item {
 	/** The most bonuses one bauble may give (each takes its own modifier id per slot). */
@@ -62,6 +62,10 @@ public class BaubleItem extends Item {
 			if (!Baubles.equipFromHand(server, player.getItemInHand(hand))) {
 				server.sendOverlayMessage(Component.translatable("message.jaymospowers.baubles.full"));
 				return InteractionResult.FAIL;
+			}
+			if (player.isShiftKeyDown()) {
+				// sneak-use: show it on in the bauble screen
+				BaublesQuickEquip.openNextTick(server);
 			}
 		}
 		return InteractionResult.SUCCESS;
