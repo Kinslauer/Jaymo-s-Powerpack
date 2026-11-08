@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: prometheus
 from: coordinator
 asked: 2026-11-08
 thread: Claude reviewer session (Andy wants a dedicated modelling model for the Bogre)
 claimed_by: hermes-modeller
-pr: 
+pr: 1146
 suggested_owns:
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geo/bogre.geo.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/animations/bogre.animation.json
