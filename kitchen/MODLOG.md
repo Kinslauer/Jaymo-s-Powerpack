@@ -1633,6 +1633,9 @@ mobs should be possible".
   pointed at it, so without another mod supplying `minecraft:leather` (the server has Naturalist) the recipe
   registry failed with "Unbound values ... [minecraft:leather]". That advancement is now switched off too.
 
+## 0.5.91: five new Kitchen dishes (Builder B)
+- Andy: "have them work on adding more recipes we dont already have". Five new dishes for the cooking minigame, all baked goods, desserts, breakfasts and sides: Honey Bun (oven: dough, honey bottle, sugar; gives SPEED), Chocolate Cookie (oven: wheat, wheat, cocoa beans; HASTE, comes out in a batch of six), Pancakes (campfire grill: dough, egg, milk bottle; REGENERATION and SPEED), French Toast (campfire grill: bread, egg, milk bottle, sugar; REGENERATION and ABSORPTION) and Hash Browns (cutting board: potato, potato, onion; SPEED). Hand-drawn item textures via `kitchen/tools/gen_assets.py`, plus minigame recipes and lang keys. Compile-checked; not played.
+
 ## 0.5.92 (2026-11-08): fillets by the fish's weight, tuna steaks
 
 - With Jaymo's Powers 0.21.64 a caught fish carries its weight. Gutting a weighed cod or salmon on the cutting board
