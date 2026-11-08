@@ -23,5 +23,28 @@
     "sounds": [
       "jaymoskitchen:block/skillet/attack_weak"
     ]
+  },
+  "entity.rat.ambient": {
+    "sounds": [
+      "jaymoskitchen:entity/rat/idle0",
+      "jaymoskitchen:entity/rat/idle1",
+      "jaymoskitchen:entity/rat/idle2"
+    ],
+    "subtitle": "subtitles.jaymoskitchen.entity.rat.ambient"
+  },
+  "entity.rat.hurt": {
+    "sounds": [
+      "jaymoskitchen:entity/rat/hurt0",
+      "jaymoskitchen:entity/rat/hurt1",
+      "jaymoskitchen:entity/rat/hurt2"
+    ],
+    "subtitle": "subtitles.jaymoskitchen.entity.rat.hurt"
+  },
+  "entity.rat.death": {
+    "sounds": [
+      "jaymoskitchen:entity/rat/die0",
+      "jaymoskitchen:entity/rat/die1"
+    ],
+    "subtitle": "subtitles.jaymoskitchen.entity.rat.death"
   }
 }

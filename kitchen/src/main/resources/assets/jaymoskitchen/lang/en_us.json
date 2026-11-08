@@ -991,5 +991,15 @@
 	"message.jaymoskitchen.spit.on": "Sizzling on the spit.",
 	"message.jaymoskitchen.spit.raw": "Still raw.",
 	"message.jaymoskitchen.spit.done": "Cooked through.",
-	"message.jaymoskitchen.spit.burnt": "Burnt to a crisp."
+	"message.jaymoskitchen.spit.burnt": "Burnt to a crisp.",
+	"entity.jaymoskitchen.rat": "Rat",
+	"item.jaymoskitchen.rat_spawn_egg": "Rat Spawn Egg",
+	"block.jaymoskitchen.snap_trap": "Snap Trap",
+	"item.jaymoskitchen.snap_trap": "Snap Trap",
+	"block.jaymoskitchen.cage_trap": "Cage Trap",
+	"item.jaymoskitchen.cage_trap": "Cage Trap",
+	"item.jaymoskitchen.caged_rat": "Caged Rat",
+	"subtitles.jaymoskitchen.entity.rat.ambient": "Rat squeaks",
+	"subtitles.jaymoskitchen.entity.rat.hurt": "Rat hurts",
+	"subtitles.jaymoskitchen.entity.rat.death": "Rat dies"
 	}
