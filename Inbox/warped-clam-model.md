@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: prometheus
 from: coordinator
 asked: 2026-11-08
 thread: Claude reviewer session (Andy: "have it do the impaler and warped clam")
-claimed_by: 
+claimed_by: hermes-modeller
 pr: 
 suggested_owns:
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geo/warped_clam.geo.json
