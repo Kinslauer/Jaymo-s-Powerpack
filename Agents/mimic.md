@@ -1,14 +1,20 @@
 ---
-status: blocked
+status: running
 task: mimic
 branch: claude/mimic
-with:
+with: hermes-b (initial investigation)
 pr:
 mods: Powers
 versions:
 started: 2026-11-08
 owns:
-  - (none yet - awaiting design confirmation from prometheus)
+  - art/mimic.bbmodel
+  - art/mimic-render.png
+  - art/mimic-CREDITS.md
+  - src/main/resources/assets/jaymospowers/geckolib/models/entity/mimic.geo.json
+  - src/main/resources/assets/jaymospowers/geckolib/animations/entity/mimic.animation.json
+  - src/main/resources/assets/jaymospowers/textures/entity/mimic.png
+  - changes/powers/claude-mimic.md
 ---
 
 # Mimic: replace the way echos function
