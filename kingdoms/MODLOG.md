@@ -10355,3 +10355,9 @@ Andy: "get them, we need it" (Dungeon Conquest: Stormborn Tomb by Tada_no_ahiru,
 - **Weaknesses** (mob vampires only; a vampire player's are unchanged): fire burns 4x (was 2x). A blow from someone holding a torch in either hand lands 3x and sets it alight for 5 seconds, a burning arrow lands 3x, and a silver weapon (the silver sword) lands 4x.
 - `Vampires` (night step, flee, outcome, weakness), `VampireAlarm` (new), `Downed#canHelp`, `LivingEntityHurtMixin`; lang part `vampire-alarm.json`.
 - Built; not played. Not tested in game: the flight to darkness, villagers' torch blows, and how often MCA villagers' own brains override the walk targets.
+
+## 0.7.659 (2026-11-08): Bogre model, texture and animations (#1146)
+
+- **Bogre art**: added the Bogre's GeckoLib model, original green swamp-ogre texture, editable Blockbench project and 21 animations, including idle, walk, run, attack, cooking and bone-club carving, ready for the separate mob task.
+- Ported from Inhabitants by JeremySeq / Team Synapse, with artist Catalyst and the upstream MIT licence credited in `kingdoms/art/`.
+- Rendered and visually checked; not seen in game yet. The entity, AI and spawning are not included.
