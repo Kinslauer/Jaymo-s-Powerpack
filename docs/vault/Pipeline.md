@@ -6,10 +6,15 @@ How work flows without Andy watching each step. He's asked only once, at the end
    (`status: open`).
 2. **Hermes** checks the Inbox on a schedule, claims the oldest task, does it in its own worktree, opens a PR, then
    sets `status: in-review` and `pr:`.
-3. **Claude Code on the PC** runs `/loop 15m /vault-review` (`.claude/skills/vault-review`) and reviews each
-   `in-review` PR. A failing one goes back to Hermes (`status: changes`, with the review notes in the task). For a
+3. **Quill** (the writer bot, `hermes-writer`) gives every `in-review` PR a text pass before anyone reviews it:
+   it goes through every word a player will see that the PR adds or changes (lang entries, dialogue, hints, item and
+   ability text, chat lines, screens) and rewrites it on the PR's branch. It sets `status: writing` while it works,
+   then `status: in-review` with `text_pass: done` (or `text_pass: none` when the PR has no player-visible text).
+   Builders don't change anything: they still set `in-review` when their PR is up.
+4. **Claude Code on the PC** runs `/loop 15m /vault-review` (`.claude/skills/vault-review`) and reviews each
+   `in-review` PR that has had its text pass (`vault_sync.py --review-queue`). A failing one goes back to Hermes (`status: changes`, with the review notes in the task). For a
    passing one it runs `vault_sync.py --send`, **the step that asks Andy**. Saying yes sets `status: ready`.
-4. **Coordinator** checks the vault every 15 minutes (also reviewing `in-review` tasks itself when the reviewer is
+5. **Coordinator** checks the vault every 15 minutes (also reviewing `in-review` tasks itself when the reviewer is
    away, below), posts each `ready` PR to Andy with a link and the review, and sets
    `status: sent`. Andy says "merge" there. The coordinator merges, sets `status: done` and moves the task to
    `Inbox/Done/`.
@@ -25,13 +30,18 @@ reviews them itself, the same way (`.claude/skills/vault-review`), then posts pa
 
 ## Statuses
 
-`open` → `claimed` → `in-review` → (`changes` → `claimed` → `in-review`)… → `ready` → `sent` → `done`
+`open` → `claimed` → `in-review` → `writing` (text pass) → `in-review` + `text_pass: done` → (`changes` → `claimed` →
+`in-review` → `writing` → …) → `ready` → `sent` → `done`
+
+Sending a task back (`status=changes`) clears `text_pass`, so the fixes get their own text pass before the next review.
 
 ## Commands (each syncs before and after)
 
 ```bash
 python tools/vault_sync.py --claim hermes-a          # take a task (exit 3 = none waiting), prints it
 python tools/vault_sync.py --claim hermes-fixer --fixes   # take the oldest sent-back task from anyone
+python tools/vault_sync.py --claim hermes-writer --writes   # writer: take the oldest PR waiting for its text pass
+python tools/vault_sync.py --review-queue            # in-review tasks that have had their text pass (reviewers)
 python tools/vault_sync.py --tasks in-review         # list tasks by status
 python tools/vault_sync.py --show <task>
 python tools/vault_sync.py --set <task> status=in-review pr=1234
@@ -67,6 +77,7 @@ If Hermes has no scheduler, paste the same prompt whenever you want it to take t
 Each Hermes bot (the + on Hermes's Bots screen) is its own profile: name, persona, model, skills and schedule. Its
 name is what it passes to `--claim`, so every bot needs a different one. A task with `for: hermes` goes to any bot
 named `hermes-<something>`; `for: hermes-a` goes to that bot only; `for: any` to everyone, Claude sessions included.
+The modeller and the writer are specialists: they skip `for: hermes` and `for: any` tasks and take only their own.
 
 | Bot | `--claim` | Schedule | What it does |
 |---|---|---|---|
@@ -74,6 +85,8 @@ named `hermes-<something>`; `for: hermes-a` goes to that bot only; `for: any` to
 | Builder A | `hermes-a` | every 15 min | The prompt above with `hermes` swapped for `hermes-a`. |
 | Builder B | `hermes-b` | every 15 min, 7 min after A | Same, as `hermes-b`. Two builders take two tracks at once (ParCool A and B). |
 | Fixer | `hermes-fixer --fixes` | every 15 min | Takes the oldest task the reviewer sent back, from whichever bot, so a busy or rate-limited builder doesn't hold it up. |
+| Modeller (Prometheus) | `hermes-modeller` | every 15 min | GeckoLib/Blockbench models, textures and animations. Takes only tasks with `for: hermes-modeller` or `for: prometheus`. |
+| Writer (Quill) | `hermes-writer` | every 15 min | Lore, dialogue, quest and item text, hints, lang entries, patch notes. Takes only tasks with `for: hermes-writer` or `for: quill`. |
 
 Keep it to **two builders**, plus the fixer if you want one: the vault allows three agents editing at once (the
 Claude reviewer only reads, so it doesn't count). NVIDIA's rate limits already stopped one Hermes run today, so add
@@ -86,6 +99,17 @@ a third builder only once two have run for a day without hitting them.
 > the main checkout, never force-push, never merge. Before opening a PR, go through the "Before you open a PR"
 > checklist in `docs/AI-HANDBOOK.md` and run `python tools/pr_checks.py`. Never change versions, MODLOGs or
 > codemaps: add a change note per mod (`changes/<mod>/<branch-name>.md`).
+
+**Quill's scheduled prompt** (every 15 minutes; its persona is its SOUL.md):
+
+> Run `python tools/vault_sync.py --claim hermes-writer --writes`. If it printed a task, make a worktree from its
+> PR's branch (`git pull` first) and go through every player-visible string the PR adds or changes: lang parts,
+> dialogue, hints, item and ability text, chat lines, screens, change notes. Rewrite what needs it in the speaker's
+> voice, keep the lang keys and format codes, build the mod you touched, commit and push normally (never force-push:
+> it is another bot's branch). Add a `--note` listing what you rewrote, then
+> `python tools/vault_sync.py --set <task> status=in-review text_pass=done` (`text_pass=none` if there was nothing to
+> read). If it said "No task waiting", run `python tools/vault_sync.py --claim hermes-writer` for a writing task of
+> your own, and do that one as a normal task.
 
 **The Fixer's scheduled prompt:**
 
