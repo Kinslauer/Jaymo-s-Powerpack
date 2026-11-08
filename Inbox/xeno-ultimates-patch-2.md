@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: coordinator
 asked: 2026-11-08
 thread: Xeno-Band thread (session_01S8tFWxtVXYCM5eJxe3Uvjm)
-claimed_by:
+claimed_by: hermes-b
 pr:
 suggested_owns:
   - src/main/java/com/jaymospowers/power/xenoform/
