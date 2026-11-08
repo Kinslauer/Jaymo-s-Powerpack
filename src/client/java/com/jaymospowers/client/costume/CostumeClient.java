@@ -83,6 +83,8 @@ public final class CostumeClient {
 		maskKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.costume_mask", InputConstants.KEY_APOSTROPHE,
 			JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(CostumeClient::maskTick);
+		// (0.21.41) the archer hood's cloak
+		HoodedCloakLayer.init();
 	}
 
 	/** (0.12.3) The mask key, for the key guide. */
@@ -137,7 +139,9 @@ public final class CostumeClient {
 			if (masked != null) {
 				state.nameTag = masked;
 				state.scoreText = null;
-			} else if (player != Minecraft.getInstance().player && Costume.hooded(player)) {
+			} else if (player != Minecraft.getInstance().player
+				&& (Costume.hooded(player) || com.jaymospowers.costume.HoodedCloak.up(player))) {
+				// (0.21.41) a cloak's hood up too
 				// (0.14.3) a hood up: their real name, but only when you are close (never your own)
 				LocalPlayer me = Minecraft.getInstance().player;
 				if (me == null || me.distanceToSqr(player) > HOOD_NAME_RANGE * HOOD_NAME_RANGE) {

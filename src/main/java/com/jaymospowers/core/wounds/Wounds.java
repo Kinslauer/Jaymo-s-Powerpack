@@ -163,6 +163,8 @@ public final class Wounds {
 		// (0.19.24) herbal remedies' lasting effects, rag washing and boiling
 		Herbal.register();
 		RagWashing.register();
+		// (0.21.39) held jobs' bars kept between holds
+		com.jaymospowers.core.HoldProgress.register();
 		Treatment.register();
 		// (0.15.99) kneeling at someone's side to treat them
 		Tending.register();
@@ -314,6 +316,42 @@ public final class Wounds {
 		entity.setHealth(Math.min(max, health + hearts(points, plan, max) - before));
 		store(entity, plan, points);
 		return add;
+	}
+
+	/**
+	 * (0.21.49) A downed body resting ({@link DownedStruggle}) mends {@code part} by up to {@code amount}, to no more than
+	 * {@code share} of it and what its break allows ({@link Breaks#caps}). Only the parts: a downed one's health is their
+	 * downed health, so it's left alone (they rise with what the parts hold, {@link #restedHealth}). Returns what it took.
+	 */
+	static float restPart(LivingEntity entity, BodyPart part, float amount, float share) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan == null || plan == BodyPlan.SIMPLE || !(entity.level() instanceof ServerLevel) || !entity.isAlive() || amount <= 0.0F) {
+			return 0.0F;
+		}
+		amount *= 1.0F - MedicineSkill.blessing(entity, "wounds_slow");
+		int index = plan.index(part);
+		if (index < 0 || amount <= 0.0F) {
+			return 0.0F;
+		}
+		float[] caps = Breaks.caps(entity, plan);
+		float[] points = load(entity, plan);
+		float most = cap(entity, plan, index) * Math.min(share, caps == null ? 1.0F : caps[index]);
+		float add = Math.min(amount, Math.max(0.0F, most - points[index]));
+		if (add <= EPS) {
+			return 0.0F;
+		}
+		points[index] += add;
+		store(entity, plan, points);
+		return add;
+	}
+
+	/** (0.21.49) The health a body's parts hold together (what a rested downed player rises with). */
+	static float restedHealth(LivingEntity entity) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan == null || plan == BodyPlan.SIMPLE) {
+			return 0.0F;
+		}
+		return hearts(load(entity, plan), plan, entity.getMaxHealth());
 	}
 
 	/**

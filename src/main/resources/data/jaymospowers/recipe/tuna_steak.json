@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:tuna"
+  ],
+  "result": {
+    "id": "jaymospowers:tuna_steak",
+    "count": 3
+  }
+}

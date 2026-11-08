@@ -32,11 +32,22 @@ final class StoryHoldScreen extends Screen {
 	 * continue saying what it does now". So under the title a hint ({@code gui.jaymoskingdoms.story.hint.<1..HINTS>}) shows
 	 * for HINT_MS each, from a random one on. Widest a hint may run.
 	 */
-	private static final int HINTS = 123, HINT_W = 320;
+	private static final int HINTS = 124, HINT_W = 320;
 	private static final long HINT_MS = 7000L;
 
 	/** What the server holds this client for (a lang key), or "" for nothing. */
 	private static String holding = "";
+	/**
+	 * Andy: "it should keep them in the loading screen so they can read the tips for as long as it takes to load, rather
+	 * than getting teleported". Let go by the server, the screen still stays up till the land round where they were put has
+	 * come in and been drawn (or LAND_GIVE_UP_MS has passed): whether that's being waited on, and since when (ms).
+	 */
+	private static boolean landing;
+	private static long landingFrom;
+	/** Chunks round the player (each way) that must have come in, how long the screen waits on them at most, and a last beat once they have (ms). */
+	static final int LAND_CHUNKS = 2;
+	static final long LAND_GIVE_UP_MS = 30000L, LAND_BEAT_MS = 500L;
+	private static long landedAt = -1L;
 	/**
 	 * (0.7.352) The narrator reads the screen ({@link Voices}): its title once (0.7.400: only that). What it began
 	 * reading ("" before it has), the line being read, those still to read, and when the line began (ms).
@@ -94,26 +105,85 @@ final class StoryHoldScreen extends Screen {
 			Minecraft minecraft = context.client();
 			if (!holding.isEmpty()) {
 				StoryCurtain.raise();
+				landing = false;
 			}
 			if (holding.isEmpty()) {
-				hush(minecraft);
 				if (minecraft.gui.screen() instanceof StoryHoldScreen) {
-					minecraft.gui.setScreen(null);
+					// let go: up till the land they were put in is in and drawn
+					landing = true;
+					landingFrom = System.currentTimeMillis();
+					landedAt = -1L;
+					StoryCurtain.raise();
+				} else {
+					hush(minecraft);
 				}
 			} else if (minecraft.gui.screen() == null) {
 				minecraft.gui.setScreen(new StoryHoldScreen());
 			}
 		});
-		// (up again if anything took its place and went, while they're still held)
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
-			if (!holding.isEmpty() && minecraft.player != null && minecraft.gui.screen() == null) {
+			if (landing) {
+				long now = System.currentTimeMillis();
+				net.minecraft.client.gui.screens.Screen screen = minecraft.gui.screen();
+				if (screen != null && !(screen instanceof StoryHoldScreen)) {
+					// something else took its place (the life story, MCA's creator): that holds them now
+					landing = false;
+				} else if (minecraft.player == null || now - landingFrom > LAND_GIVE_UP_MS) {
+					land(minecraft);
+				} else if (landed(minecraft)) {
+					if (landedAt < 0L) {
+						landedAt = now;
+					} else if (now - landedAt >= LAND_BEAT_MS) {
+						land(minecraft);
+					}
+				} else {
+					landedAt = -1L;
+				}
+			}
+			// (up again if anything took its place and went, while they're still held)
+			if (holding() && minecraft.player != null && minecraft.gui.screen() == null) {
 				minecraft.gui.setScreen(new StoryHoldScreen());
 			}
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			holding = "";
+			landing = false;
 			hush(minecraft);
 		});
+	}
+
+	/** The wait on the land is over: the screen comes down. */
+	private static void land(Minecraft minecraft) {
+		landing = false;
+		hush(minecraft);
+		if (minecraft.gui.screen() instanceof StoryHoldScreen) {
+			minecraft.gui.setScreen(null);
+		}
+	}
+
+	/**
+	 * Whether the land round the player has come in (the chunks round them) and the ground where they stand is drawn, as
+	 * vanilla's own loading screen waits on. Out of the world's height, dead or spectating, there's nothing to wait on.
+	 */
+	private static boolean landed(Minecraft minecraft) {
+		var player = minecraft.player;
+		var level = minecraft.level;
+		if (player == null || level == null) {
+			return true;
+		}
+		net.minecraft.core.BlockPos pos = player.blockPosition();
+		if (level.isOutsideBuildHeight(pos.getY()) || !player.isAlive() || player.isSpectator()) {
+			return true;
+		}
+		int cx = pos.getX() >> 4, cz = pos.getZ() >> 4;
+		for (int dx = -LAND_CHUNKS; dx <= LAND_CHUNKS; dx++) {
+			for (int dz = -LAND_CHUNKS; dz <= LAND_CHUNKS; dz++) {
+				if (!level.hasChunk(cx + dx, cz + dz)) {
+					return false;
+				}
+			}
+		}
+		return minecraft.levelRenderer.isSectionCompiledAndVisible(pos, 0L);
 	}
 
 	/** The hold is over: stop reading, so the life story's narrator isn't talked over. */
@@ -153,7 +223,7 @@ final class StoryHoldScreen extends Screen {
 	}
 
 	static boolean holding() {
-		return !holding.isEmpty();
+		return !holding.isEmpty() || landing;
 	}
 
 	@Override
@@ -173,7 +243,7 @@ final class StoryHoldScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		if (holding.isEmpty()) {
+		if (!holding()) {
 			this.onClose();
 			return;
 		}

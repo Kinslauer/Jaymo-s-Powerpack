@@ -3,7 +3,9 @@ package com.jaymospowers.compat;
 import java.lang.reflect.Method;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.20.9) Jaymo's Kingdoms is optional for Powers: this is the only place that touches it, by reflection, and only when it is
@@ -17,6 +19,8 @@ public final class KingdomsCompat {
 	private static boolean blessingLooked;
 	private static Method grabbed;
 	private static boolean grabbedLooked;
+	private static Method fished;
+	private static boolean fishedLooked;
 
 	private KingdomsCompat() {
 	}
@@ -90,6 +94,70 @@ public final class KingdomsCompat {
 			return Boolean.TRUE.equals(grabbed.invoke(null, entity));
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return false;
+		}
+	}
+
+	/**
+	 * (0.21.53) A great white shark (the Naturalist entity Kingdoms' whaling sharks use, see {@code Sharks}), brought up at
+	 * {@code (x, y, z)} to be fought on the line; null without Kingdoms, without the shark, or in shallow water.
+	 */
+	public static @Nullable LivingEntity sharkDrawnIn(net.minecraft.server.level.ServerLevel level, double x, double y, double z) {
+		if (!LOADED) {
+			return null;
+		}
+		net.minecraft.world.entity.EntityType<?> sharkType =
+				net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+						.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("naturalist", "great_white_shark"))
+						.orElse(null);
+		if (sharkType == null) {
+			return null;
+		}
+		// Needs water deep enough for a great white: the hook block and two below must be water.
+		net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x, y, z);
+		if (!level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)
+				|| !level.getFluidState(pos.below()).is(net.minecraft.tags.FluidTags.WATER)
+				|| !level.getFluidState(pos.below().below()).is(net.minecraft.tags.FluidTags.WATER)) {
+			return null;
+		}
+		net.minecraft.world.entity.Entity shark = sharkType.spawn(level, pos, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+		if (!(shark instanceof LivingEntity living)) {
+			return null;
+		}
+		// held on the line, not hunting: no AI, no gravity, and no one else can kill it
+		living.setPermanentlyInvulnerable(true);
+		living.setNoGravity(true);
+		if (living instanceof net.minecraft.world.entity.Mob mob) {
+			mob.setNoAi(true);
+			mob.setPersistenceRequired();
+		}
+		return living;
+	}
+
+	/**
+	 * (0.21.61, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime") A fish took
+	 * {@code player}'s hook at {@code hook}: Kingdoms' {@code TideFishing} has any Tideborn who see it fight them, and calls it
+	 * poaching in a Tideborn haven. Nothing without Kingdoms.
+	 */
+	public static void fished(net.minecraft.server.level.ServerPlayer player, net.minecraft.core.BlockPos hook) {
+		if (!LOADED || player == null) {
+			return;
+		}
+		if (!fishedLooked) {
+			fishedLooked = true;
+			try {
+				fished = Class.forName("com.jaymoskingdoms.TideFishing").getMethod("fished",
+					net.minecraft.server.level.ServerPlayer.class, net.minecraft.core.BlockPos.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				fished = null;
+			}
+		}
+		if (fished == null) {
+			return;
+		}
+		try {
+			fished.invoke(null, player, hook);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (an older Kingdoms, or one that threw: the fishing goes on)
 		}
 	}
 }

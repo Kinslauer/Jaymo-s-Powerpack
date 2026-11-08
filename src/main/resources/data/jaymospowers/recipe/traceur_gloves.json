@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "LS",
+    "SL"
+  ],
+  "result": {
+    "id": "jaymospowers:traceur_gloves"
+  }
+}

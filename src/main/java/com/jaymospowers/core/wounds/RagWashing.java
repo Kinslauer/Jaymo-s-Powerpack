@@ -1,5 +1,6 @@
 package com.jaymospowers.core.wounds;
 
+import com.jaymospowers.core.HoldProgress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,7 +42,7 @@ import net.minecraft.world.phys.HitResult;
  * clean one ({@link MedicineItems#CLEAN_RAG}) dresses the same and never does. Two ways, both slow on purpose:
  * <ul>
  * <li><b>Washing:</b> hold use with rags while standing in water or facing it (without sneaking: sneak + use still
- * treats). One rag every {@link #WASH_TICKS}; {@link #STAYS_DIRTY} of the time it comes out still dirty and is kept.</li>
+ * treats). One rag every {@link #WASH_TICKS} of washing (let go and the bar stays: the next hold carries on); {@link #STAYS_DIRTY} of the time it comes out still dirty and is kept.</li>
  * <li><b>Boiling:</b> use rags on a water cauldron with a heat source under it (a fire, soul fire, lit campfire, magma or
  * lava). Up to {@link #RAGS_PER_LEVEL} rags per water level go in, and {@link #BOIL_TICKS} later they all come out clean,
  * always. The water is not used up. If the water or the heat goes first, the rags come out dirty again.</li>
@@ -59,6 +60,8 @@ public final class RagWashing {
 	/** Washing is a held use this long (ticks); it ends when you let go or run out of rags. */
 	public static final int USE_TICKS = 72000;
 	static final int BAR = 12;
+	/** (0.21.39) The wash in {@link HoldProgress}: one rag's worth, kept between holds. */
+	static final String WASH_JOB = "wash_rag";
 
 	/** A batch of rags in a cauldron. */
 	private static final class Boil {
@@ -128,18 +131,18 @@ public final class RagWashing {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.25F,
 				1.2F + level.getRandom().nextFloat() * 0.4F);
 		}
-		int into = used % WASH_TICKS;
-		if (into != 0) {
-			if (used % 2 == 0) {
+		// (0.21.39) the wash's bar is kept when you let go (Andy: "the bar should stay where it is even after you stop"):
+		// the next hold carries on the same rag
+		int into = HoldProgress.add(player.getUUID(), WASH_JOB, 1);
+		if (into < WASH_TICKS) {
+			if (into % 2 == 0) {
 				int filled = Math.round(BAR * into / (float) WASH_TICKS);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.washing_bar", "|".repeat(filled) + ".".repeat(BAR - filled))
 					.withStyle(ChatFormatting.GRAY));
 			}
 			return;
 		}
-		if (used == 0) {
-			return;
-		}
+		HoldProgress.forget(player.getUUID(), WASH_JOB);
 		if (level.getRandom().nextFloat() < STAYS_DIRTY) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.wash_failed").withStyle(ChatFormatting.GRAY));
 		} else {

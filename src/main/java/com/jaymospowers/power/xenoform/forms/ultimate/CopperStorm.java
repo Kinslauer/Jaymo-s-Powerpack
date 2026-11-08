@@ -320,15 +320,18 @@ public final class CopperStorm extends XenoUltimate {
 		XenoDouble pick = aimedAt instanceof XenoDouble twin ? twin : null;
 		if (pick == null) {
 			double best = -1.0;
+			XenoDouble chosen = null;
 			for (XenoDouble twin : Duplex.loyal(player, live)) {
 				double d = twin.distanceToSqr(player);
 				if (d > best && d < Duplex.SWITCH_REACH * Duplex.SWITCH_REACH) {
 					best = d;
-					pick = twin;
+					chosen = twin;
 				}
 			}
+			pick = chosen;
 		}
-		if (pick == null) {
+		final XenoDouble target = pick;
+		if (target == null) {
 			return false;
 		}
 		Vec3 mine = player.position();
@@ -346,8 +349,8 @@ public final class CopperStorm extends XenoUltimate {
 		Vec3 to = theirs.add(0.0, 1.0, 0.0);
 		beam(level, from, to, ParticleTypes.ELECTRIC_SPARK, Math.max(4, (int)(from.distanceTo(to) * 2.0)));
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, to).inflate(ARC_WIDTH + 1.0),
-			e -> e != player && e != pick && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !Duplex.mine(player, e) && !spared(player, e)
-				&& harmable(player, e))) {
+			e -> e != player && e != target && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !Duplex.mine(player, e) && !spared(player, e)
+			&& harmable(player, e))) {
 			if (e.getBoundingBox().inflate(ARC_WIDTH).clip(from, to).isPresent()) {
 				e.hurtServer(level, level.damageSources().lightningBolt(), ARC_DAMAGE);
 				burst(level, ParticleTypes.ELECTRIC_SPARK, e.position().add(0.0, e.getBbHeight() * 0.5, 0.0), 10, 0.3, 0.12);

@@ -322,6 +322,11 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();
 	}
 
+	/** {@link FarmFamily}: an MCA villager someone set to one of MCA's chores (harvest, chop, hunt, fish). */
+	static boolean choring(Villager villager) {
+		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getCurrentJob() != net.conczin.mca.entity.ai.Chore.NONE;
+	}
+
 	// ---- player size (0.7.87; 0.7.290 every heritage's body, BodySizes) ---------------------------------------------------
 
 	/** MCA's Size and Width genes, as a player's look stores them (under {@code MCAData}, or at the top). */

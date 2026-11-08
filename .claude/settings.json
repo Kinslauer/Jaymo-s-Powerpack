@@ -1,6 +1,33 @@
 {
   "model": "claude-opus-5-5",
   "ultracode": true,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "e=$(cat); d=\"$CLAUDE_PROJECT_DIR/tools\"; [ -f \"$d/vault_prs.py\" ] && printf %s \"$e\" | python \"$d/vault_prs.py\" --hook --if-older 60; [ -f \"$d/vault_sync.py\" ] && printf %s \"$e\" | python \"$d/vault_sync.py\" --hook --if-older 30; true",
+            "async": true,
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "e=$(cat); d=\"$CLAUDE_PROJECT_DIR/tools\"; [ -f \"$d/vault_prs.py\" ] && printf %s \"$e\" | python \"$d/vault_prs.py\" --hook --if-older 60; [ -f \"$d/vault_sync.py\" ] && printf %s \"$e\" | python \"$d/vault_sync.py\" --hook --if-older 5; true",
+            "async": true,
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
   "enabledMcpjsonServers": [
     "omni-ai-mcp"
   ],

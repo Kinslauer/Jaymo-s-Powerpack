@@ -1571,3 +1571,105 @@ mobs should be possible".
   and rattles each arrow on its own beat; fletchings now pivot on their shaft's foot so they move with it. Drawing a bow
   or loading a crossbow lifts the top arrow out of the quiver over 5 ticks, then it's gone from the quiver (it's on the
   string). Gradle compile clean; not played.
+
+## 0.5.83: lifting a carcass keeps its progress
+- Andy: "every meter should work this way". Let go of a corpse's lift or leg hold before it fills and your next hold
+  carries on where the bar was (someone else's hold starts fresh). Butchering a big carcass already kept its bar.
+  Compile-checked; not played.
+
+## 0.5.84: the risen dead get up from where they lay
+- Andy: "zombies should have their own reanimation animation too". A body that reanimates (zombie, skeleton, a player's
+  body as a zombie) now rises over 2.5 s (`corpse/Reanimation`, held still with no AI, tag `jaymoskitchen.reanimating`
+  frees it if saved mid-rise), drawn by `client/corpse/ReanimatePose`: on its back with a twitch, the arms jerk up stiff
+  first, then it tips up from the heels like a plank in four fits, never bending at the waist, and lurches forward past
+  upright as it finds its feet, head lolling. Earth puffs up where it lay. Compile-checked; not played.
+
+## 0.5.85: drag bodies through water
+- Andy: "you need to be able to drag bodies that are in water". A corpse floating in water (`falling()` returned true
+  because `onGround()` is false when the body isn't touching the bottom) was intercepted by the catch-falling-body
+  interaction in `CorpseEntity.interact()` (kitchen/src/main/java/com/jaymoskitchen/corpse/CorpseEntity.java:1678),
+  so drag never started -- the body was picked up into your arms or nothing happened. `falling()` now returns false in
+  water, so shift + right-click (empty hand) drags a floating corpse onto dry ground like any other carcass. Compile-checked; not played.
+
+## 0.5.86 (2026-11-07): Kitchen bleeds the body's own blood, or none
+- Andy, on "Kitchen's own blood (meat grates, machines) wasn't checked and may still be red for every body": "double check
+  that". It was: every body bled plain red, skeletons and golems' bodies included. Now, with Jaymo's Powers 0.21.50
+  (`BladeBlood.bodyBlood`), the chopper's victims, a corpse being cut up, scavengers feeding, a hanging carcass's drips
+  and a body blown apart without Powers' own blast blood spill that body's blood (an Emberborn's magma, a zombie's rotten
+  blood, an Endborn's purple), and nothing from a body with no blood. A blood grate's blood stays red (it holds no one
+  body's). `KitchenBlood.send(level, body, ...)`; plain red with an older Powers.
+- Built; not played.
+
+## 0.5.87: spit roast over an open fire
+- Andy: "you should also be able to cook it on an open fire, similar to other animals". A new `jaymoskitchen:spit`, crafted
+  from four sticks, goes on top of a lit campfire or another lit heat source (`jaymoskitchen:heat_sources`). Put a raw meat,
+  fish or carcass on it and it turns slowly over the flames, cooking raw → cooked → burnt with a visible colour change.
+  Right-click with an empty hand to tear a cooked chunk off, or sneak + right-click to take the whole cooked product when
+  it's done (`cooking/spit/SpitBlock`, `cooking/spit/SpitBlockEntity`; `client/spit/SpitBlockEntityRenderer`). Tuning
+  numbers (`COOK_TICKS`, `BURNT_TICKS`, `CHUNK`) are `static final` at the top of `SpitBlockEntity`. Compile-checked; not played.
+
+## 0.5.88 (2026-11-07): gutting a fish gives more fillets
+
+- With Jaymo's Powers 0.21.57's real fishing (a hooked cod or salmon, or a big tuna or shark catch that lands as
+  several): a cod or salmon laid on a cutting board and cut with a knife is gutted and cleaned into 3 fillets
+  (`Chopping.FISH_FILLETS`, was 2) and bone meal, more than the whole fish eaten raw is worth.
+- Built; not played.
+
+## 0.5.90: five new savoury dishes
+
+- Rabbit Stew (Stir, Furnace/Smoker): rabbit, carrot, potato, onion, brown mushroom — Resistance + Regeneration
+- Smoked Duck (Smoke, Smoker): duck, sugar — Fire Resistance + Strength
+- Bushmeat Stew (Stir, Furnace/Smoker): bushmeat, turnip, potato, brown mushroom — Health Boost + Resistance
+- Clam Chowder (Stir, Furnace/Smoker): clam meat, potato, onion, milk bottle — Water Breathing + Night Vision
+- Grilled Anglerfish (Grill, Campfire): anglerfish, lemon — Night Vision + Conduit Power
+- All original pixel art; recipes in the cooking table.
+## 0.5.89 (2026-11-07): the server starts again
+
+- Fix: 0.5.87's spit block never set its block id, so the game crashed at startup ("Block id not set" in
+  `SpitBlock.register`). Its properties now carry `setId(key)` like every other block.
+- Fix: the spit's recipe used the old ingredient format and a 4-row pattern (3 is the most), so the recipe
+  registry failed to load and the server stopped. It is now four sticks as two posts (`S S` / `S S`).
+- Fix: the vanilla rabbit-hide-to-leather recipe was switched off, but its vanilla recipe-book advancement still
+  pointed at it, so without another mod supplying `minecraft:leather` (the server has Naturalist) the recipe
+  registry failed with "Unbound values ... [minecraft:leather]". That advancement is now switched off too.
+
+## 0.5.91: five new Kitchen dishes (Builder B)
+- Andy: "have them work on adding more recipes we dont already have". Five new dishes for the cooking minigame, all baked goods, desserts, breakfasts and sides: Honey Bun (oven: dough, honey bottle, sugar; gives SPEED), Chocolate Cookie (oven: wheat, wheat, cocoa beans; HASTE, comes out in a batch of six), Pancakes (campfire grill: dough, egg, milk bottle; REGENERATION and SPEED), French Toast (campfire grill: bread, egg, milk bottle, sugar; REGENERATION and ABSORPTION) and Hash Browns (cutting board: potato, potato, onion; SPEED). Hand-drawn item textures via `kitchen/tools/gen_assets.py`, plus minigame recipes and lang keys. Compile-checked; not played.
+
+## 0.5.92 (2026-11-07): fillets by the fish's weight, tuna steaks
+
+- With Jaymo's Powers 0.21.61 a caught fish carries its weight. Gutting a weighed cod or salmon on the cutting board
+  gives a fillet per 1.5 kg (2 to 8; an unweighed one still gives 3), and Powers' whole Raw Skipjack Tuna cuts into a steak
+  per 1.5 kg (2 to 8) and bone meal (`Chopping`).
+- Built; not played.
+
+## 0.5.93 (2026-11-08): Rats in the kitchen, with snap traps, cage traps and cats (#1150)
+
+- **Rats**: food left out and unguarded draws rats. Every 20 s, for each player, one food store near them may get a rat
+  in a dark corner (4-10 blocks off, light 7 or less). This happens only if nobody's within 10 blocks of the store, no
+  cat is within 16 and there are fewer than 3 rats about. The more food it holds and the more food dropped on the floor
+  nearby, the likelier. Food stores are any storage block with food, grain, seeds or dough in it (chests, barrels,
+  Kitchen cabinets and baskets; not shulker boxes), food left on a cutting board, and carcasses on meat hooks.
+- A rat creeps up to the food, sniffs, sits up and nibbles. Then it either eats one piece and comes back a minute
+  later, or runs off with it in its mouth. A thief that gets 16 blocks away with nobody within 12 is gone for good, with
+  the food; kill it first and it drops what it took. Rats gnaw hung carcasses instead: that carcass's meat then spoils
+  in a few days like an unbled one's, however well it's bled.
+- Rats run from players (unless you sneak up on them) and from cats. They're weak (2 hearts) and never fight back.
+  They come in brown, black and blue-grey and squeak now and then.
+- **Snap Trap** (iron ingot, iron trapdoor, 3 wooden slabs): bait it with food (right-click), take the bait back with
+  sneak + empty hand. A rat that runs onto it is killed and the bar stays down until you right-click it again. Stepping
+  on a set one without sneaking hurts (1 heart). A shut trap gives a full comparator signal.
+- **Cage Trap** (5 iron bars, 3 wooden slabs): bait it. A rat that goes in for the bait is shut in alive, and you can
+  see it in there sniffing at the bars. Break the cage to carry it off as a Caged Rat, set it down far away and
+  right-click it: the rat bolts and doesn't come back.
+- **Cats** (and ocelots), tame or stray, hunt rats, and no rat turns up within 16 blocks of a cat.
+- Baited traps draw rats from 16 blocks, before any other food. When a trap goes off, the other rats nearby scatter.
+- The rat's model, animations (walk, run, sniff, sit up and eat, twitching nose and whiskers), coats and sounds, and
+  the snap trap's model and texture are from the Rats mod (LGPL-3.0, by Alexthe666 and its maintainers;
+  `LICENSE_rats`), redone on vanilla 26.3 models. The code is our own.
+- Classes: `rats/Rats`, `Rat`, `FoodStores`, `RatSpawning`, `TrapBlock`, `SnapTrapBlock`, `SnapTrapEntity`,
+  `CageTrapBlock`, `CageTrapEntity`, `BaitTrapEntity`, `CagedRatItem`, `client/rats/RatModel`, `RatRenderer`,
+  `SnapTrapRenderer`, `CageTrapRenderer`, `RatsClient`. `CorpseEntity` marks a gnawed carcass's cuts as spoiling, and
+  `MobAccessor` gained the target selector.
+- Built; not played. Not tested in game: spawning, the raids, the traps, the cage's rat, cats hunting, the mouth item's
+  placement, and the snap trap's and spawn egg's item icons.

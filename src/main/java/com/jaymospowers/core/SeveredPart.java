@@ -84,6 +84,8 @@ public class SeveredPart extends Entity {
 	/** Client side: how fast it's turning over (degrees a tick). */
 	private float spinVel;
 	private int kickCooldown;
+	/** (0.21.50) The blood of whoever lost it (RGB), or {@code BladeBlood.NO_BLOOD}: a skeleton's head never drips. */
+	private int blood = 0x7A0000;
 
 	public SeveredPart(EntityType<? extends SeveredPart> type, Level level) {
 		super(type, level);
@@ -115,6 +117,7 @@ public class SeveredPart extends Entity {
 		severed.setYRot(body.yBodyRot);
 		severed.entityData.set(PART, part);
 		severed.entityData.set(HEIGHT, body.getBbHeight());
+		severed.blood = BladeBlood.bleeds(body) ? BladeBlood.color(body) : BladeBlood.NO_BLOOD;
 		if (part == Dismember.HEAD && pinNextAt != null) {
 			// (0.15.148) the arrow carries it into the wall behind and nails it there
 			severed.setPos(pinNextAt.x, pinNextAt.y - MIDDLE, pinNextAt.z);
@@ -233,8 +236,8 @@ public class SeveredPart extends Entity {
 					this.discard();
 					return;
 				}
-				if (this.age < 200 && this.age % 8 == 0) {
-					level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0000, 1.0F), this.getX(), this.getY(), this.getZ(), 1, 0.03, 0.0, 0.03, 0.0);
+				if (this.age < 200 && this.age % 8 == 0 && this.blood != BladeBlood.NO_BLOOD) {
+					level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(this.blood, 1.0F), this.getX(), this.getY(), this.getZ(), 1, 0.03, 0.0, 0.03, 0.0);
 				}
 			} else {
 				this.spinO = this.spin;
@@ -261,9 +264,9 @@ public class SeveredPart extends Entity {
 			if (this.onGround() && --this.kickCooldown <= 0) {
 				kickedBy(level);
 			}
-			if (this.age < 40 && this.age % 3 == 0) {
+			if (this.age < 40 && this.age % 3 == 0 && this.blood != BladeBlood.NO_BLOOD) {
 				// a trail of blood off the cut
-				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0000, 1.0F), this.getX(), this.getY() + 0.1, this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
+				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(this.blood, 1.0F), this.getX(), this.getY() + 0.1, this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
 			}
 		} else {
 			this.spinO = this.spin;
@@ -357,6 +360,7 @@ public class SeveredPart extends Entity {
 		this.entityData.set(HEIGHT, input.getFloatOr("BodyHeight", 1.8F));
 		this.age = input.getIntOr("Age", 0);
 		this.trophy = input.getBooleanOr("Trophy", false);
+		this.blood = input.getIntOr("Blood", 0x7A0000);
 		this.entityData.set(PINNED, input.getBooleanOr("Pinned", false));
 		this.setNoGravity(pinned());
 	}
@@ -368,6 +372,7 @@ public class SeveredPart extends Entity {
 		output.putInt("Part", part());
 		output.putFloat("BodyHeight", bodyHeight());
 		output.putInt("Age", this.age);
+		output.putInt("Blood", this.blood);
 		if (this.trophy) {
 			output.putBoolean("Trophy", true);
 		}

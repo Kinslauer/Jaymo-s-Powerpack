@@ -16,3 +16,8 @@ modpack/
 Serverfiles/
 libs/DistantHorizons-*.jar
 __pycache__/
+
+# Obsidian rewrites its settings whenever they change; the shared defaults are in docs/vault-settings/
+docs/vault/.obsidian/
+docs/vault/.trash/
+docs/vault/Live/

@@ -25,6 +25,7 @@ public final class PowersCompat {
 	/** (0.7.169) Powers' still red blood fleck (or null before it's looked up, or without Powers). */
 	private static @Nullable ParticleOptions bloodFleck;
 	private static boolean lookedForBlood;
+	private static java.lang.invoke.@Nullable MethodHandle bloodFleckOf;
 
 	/** (0.7.184) Powers' {@code Dismember.beheadPinned(LivingEntity, LivingEntity, Vec3, float)}. */
 	private static java.lang.invoke.@Nullable MethodHandle beheadPinned;
@@ -188,16 +189,32 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.169) Blood drops of this colour (RGB) and size for {@code sendParticles}: Jaymo's Powers' still red blood fleck
-	 * (Andy: blood mustn't shimmer like redstone dust), or vanilla dust of that colour without Powers.
+	 * (0.7.169) Blood drops of this colour (RGB) and size for {@code sendParticles}: Jaymo's Powers' still blood fleck
+	 * (Andy: blood mustn't shimmer like redstone dust), or vanilla dust of that colour without Powers. (0.7.646) In its own
+	 * colour (Powers' {@code BloodParticles.fleck}); Andy: "no redstone textures".
 	 */
 	public static ParticleOptions blood(int color, float size) {
 		if (!lookedForBlood) {
 			lookedForBlood = true;
-			if (FabricLoader.getInstance().isModLoaded("jaymospowers")
-				&& net.minecraft.core.registries.BuiltInRegistries.PARTICLE_TYPE.getValue(Identifier.fromNamespaceAndPath("jaymospowers",
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					bloodFleckOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.blood.BloodParticles"),
+						"fleck", java.lang.invoke.MethodType.methodType(Class.forName("com.jaymospowers.core.blood.BloodParticles$Fleck"), int.class,
+							float.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' coloured blood fleck (older Powers?): blood is plain red", e);
+				}
+				if (net.minecraft.core.registries.BuiltInRegistries.PARTICLE_TYPE.getValue(Identifier.fromNamespaceAndPath("jaymospowers",
 					"blood_fleck_red")) instanceof net.minecraft.core.particles.SimpleParticleType fleck) {
-				bloodFleck = fleck;
+					bloodFleck = fleck;
+				}
+			}
+		}
+		if (bloodFleckOf != null) {
+			try {
+				return (ParticleOptions) bloodFleckOf.invoke(color, size);
+			} catch (Throwable e) {
+				bloodFleckOf = null;
 			}
 		}
 		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
@@ -648,6 +665,54 @@ public final class PowersCompat {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions to spare guards from (older Powers?)", e);
 		}
 	}
+
+	/**
+	 * (Kingdoms 0.7.645, Powers 0.21.49) Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race.
+	 * (emberborn should have the magma blood)". A heritage's own blood, for Powers' {@code BladeBlood.BLOOD}: no blood in a
+	 * Stoneborn, the bone-and-spirit Hollow ({@link #BLOODLESS_HOLLOW}) or a Bio-built; an Emberborn's runs as magma.
+	 * (0.7.646) Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the
+	 * magmavein stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too":
+	 * a Magmavein Stoneborn bleeds magma too, a Zombie Hollow rotten blood, an Endborn ender-purple, a Divine gold, a
+	 * Verdant green sap. Every other heritage bleeds as their kind does. Nothing without Powers.
+	 */
+	@SuppressWarnings("unchecked")
+	static void heritageBlood() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> blade = Class.forName("com.jaymospowers.core.BladeBlood");
+			int noSay = blade.getField("NO_SAY").getInt(null), noBlood = blade.getField("NO_BLOOD").getInt(null);
+			int magma = Class.forName("com.jaymospowers.core.blood.BloodParticles").getField("MAGMA").getInt(null);
+			// (0.7.646) Powers' own blood kinds: a zombie's rotten, the End's purple, a Divine's gold, a Verdant's sap
+			int rotten = blade.getField("ROTTEN").getInt(null), ender = blade.getField("ENDER").getInt(null);
+			int gold = blade.getField("GOLD").getInt(null), sap = blade.getField("SAP").getInt(null);
+			((java.util.List<java.util.function.ToIntFunction<LivingEntity>>)blade.getField("BLOOD").get(null)).add(body -> {
+				Heritage.Kind kind = VillagerHeritage.of(body);
+				if (kind == null) {
+					return noSay;
+				}
+				HeritageVariants.Variant variant = HeritageVariants.of(body);
+				return switch (kind) {
+					// (0.7.646) Andy: "the magmavein stoneborn" bleeds the magma cubes' cooling magma; the other Stoneborn none
+					case STONEBORN -> variant == HeritageVariants.Variant.MAGMAVEIN ? magma : noBlood;
+					case BIOBUILT -> noBlood;
+					case EMBERBORN -> magma;
+					case ENDBORN -> ender;
+					case DIVINE -> gold;
+					case VERDANT -> sap;
+					case HOLLOW -> BLOODLESS_HOLLOW.contains(variant) ? noBlood : variant == HeritageVariants.Variant.ZOMBIE ? rotten : noSay;
+					default -> noSay;
+				};
+			});
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no per-body blood (older Powers?): heritages bleed as their kind", e);
+		}
+	}
+
+	/** (0.7.645) The Hollow with no blood in them: bones and spirits. A Zombie Hollow (and the first look) still bleeds. */
+	static final java.util.Set<HeritageVariants.Variant> BLOODLESS_HOLLOW = java.util.EnumSet.of(HeritageVariants.Variant.SKELETON,
+		HeritageVariants.Variant.WRAITH, HeritageVariants.Variant.REAPER);
 
 	/**
 	 * (0.7.548) Powers' executions of downed mobs ({@code MobExecutions.FINISHES}). Andy (2026-11-05): "it seemed as though
@@ -2032,6 +2097,35 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle turnOut;
+	private static boolean turnOutLooked;
+
+	/**
+	 * (0.7.654) Out cold for {@code ticks} to finish a turning (Powers' {@code Mortality.turnOut}: the black with the
+	 * turning's colour, {@code tint} RGB, at its edges); a plain knock-out with an older Powers. False without Powers.
+	 */
+	public static boolean turnOut(net.minecraft.server.level.ServerPlayer player, int tint, int ticks) {
+		if (!turnOutLooked) {
+			turnOutLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					turnOut = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mortality"),
+						"turnOut", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, int.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality.turnOut (older Powers?)", e);
+				}
+			}
+		}
+		if (turnOut == null) {
+			return knockOut(player.level(), player, ticks);
+		}
+		try {
+			return (boolean)turnOut.invoke(player, tint, ticks);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.342) {@code entity}'s power level, as a Z Fighter's scouter reads it; 0 without Powers. */
 	public static int powerLevel(LivingEntity entity) {
 		lookForWill();
@@ -2694,6 +2788,49 @@ public final class PowersCompat {
 				Runnable>>)list).add(turning);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality turnings (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.643) Hands Powers' death by cause who is already turning when they die ({@link HollowBlight}, {@link VampirePlayers}):
+	 * the vignette's colour and what finishes the turning. Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellMidTurns(java.util.function.Function<net.minecraft.server.level.ServerPlayer, java.util.Map.@Nullable Entry<Integer, Runnable>> mid) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("MID_TURNS").get(null);
+			((java.util.List<java.util.function.Function<net.minecraft.server.level.ServerPlayer, java.util.Map.Entry<Integer, Runnable>>>)list).add(mid);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality mid-turns (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle waking;
+	private static boolean wakingLooked;
+
+	/** (0.7.643) Whether {@code player} lies left for dead, waiting to wake (Powers' {@code Mortality.waking}). False without Powers. */
+	static boolean waking(net.minecraft.world.entity.player.Player player) {
+		if (!wakingLooked) {
+			wakingLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					waking = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mortality"),
+						"waking", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.player.Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality.waking (older Powers?)", e);
+				}
+			}
+		}
+		if (waking == null) {
+			return false;
+		}
+		try {
+			return (boolean)waking.invoke(player);
+		} catch (Throwable e) {
+			return false;
 		}
 	}
 

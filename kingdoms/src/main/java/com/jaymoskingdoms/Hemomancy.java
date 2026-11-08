@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
@@ -92,7 +93,12 @@ public final class Hemomancy {
 	static final int WITCH_DRINK_EVERY = 40, WITCH_HEMORRHAGE_COOLDOWN = 20 * 12, WITCH_GRIP_COOLDOWN = 20 * 10;
 
 	static final int CRIMSON = 0x8A0F14, DARK = 0x4A0508;
-	static final DustParticleOptions BLOOD_MOTE = new DustParticleOptions(CRIMSON, 1.0F), DARK_MOTE = new DustParticleOptions(DARK, 1.2F);
+	static final DustParticleOptions DARK_MOTE = new DustParticleOptions(DARK, 1.2F);
+
+	/** (0.7.646) Andy: "no redstone textures": the blood drawn out is Powers' blood fleck, not red dust. */
+	static ParticleOptions bloodMote() {
+		return PowersCompat.blood(CRIMSON, 1.0F);
+	}
 
 	/**
 	 * The blood a Sorcerer has drunk, their reservoir (0.7.554: kept on the player and shown on their own screen,
@@ -244,7 +250,7 @@ public final class Hemomancy {
 			return false;
 		}
 		for (LivingEntity e : bleeding) {
-			Sorcery.beam(level, player, e.getBoundingBox().getCenter(), BLOOD_MOTE);
+			Sorcery.beam(level, player, e.getBoundingBox().getCenter(), bloodMote());
 			PowersCompat.hemorrhage(e, player, HEMORRHAGE_TIMES * power);
 			splash(level, e, 14);
 		}
@@ -305,7 +311,7 @@ public final class Hemomancy {
 	}
 
 	static void splash(ServerLevel level, LivingEntity at, int count) {
-		level.sendParticles(BLOOD_MOTE, at.getX(), at.getY(0.6), at.getZ(), count, 0.3, 0.4, 0.3, 0.05);
+		level.sendParticles(bloodMote(), at.getX(), at.getY(0.6), at.getZ(), count, 0.3, 0.4, 0.3, 0.05);
 		level.sendParticles(PowersCompat.blood(CRIMSON, 1.0F), at.getX(), at.getY(0.5), at.getZ(), count / 2, 0.25, 0.3, 0.25, 0.1);
 	}
 
@@ -320,7 +326,7 @@ public final class Hemomancy {
 			timers[Sorcery.T_SPIKES] = WITCH_HEMORRHAGE_COOLDOWN;
 			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, witch.getBoundingBox().inflate(HEMORRHAGE_RANGE),
 				e -> caster.foe(e) && bleeding(e))) {
-				Sorcery.beam(level, witch, e.getBoundingBox().getCenter(), BLOOD_MOTE);
+				Sorcery.beam(level, witch, e.getBoundingBox().getCenter(), bloodMote());
 				PowersCompat.hemorrhage(e, witch, HEMORRHAGE_TIMES);
 				splash(level, e, 12);
 			}
@@ -337,7 +343,7 @@ public final class Hemomancy {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 1.2F, 1.2F);
 			return;
 		}
-		Sorcery.beam(level, witch, target.getBoundingBox().getCenter(), BLOOD_MOTE);
+		Sorcery.beam(level, witch, target.getBoundingBox().getCenter(), bloodMote());
 		if (target.hurtServer(level, level.damageSources().indirectMagic(witch, witch), WITCH_BOLT)) {
 			PowersCompat.cut(target);
 			splash(level, target, 6);
@@ -354,7 +360,7 @@ public final class Hemomancy {
 		int drank = 0;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, witch.getBoundingBox().inflate(DRINK_RANGE),
 			e -> caster.foe(e) && bleeding(e))) {
-			Sorcery.beam(level, e, witch.getBoundingBox().getCenter(), BLOOD_MOTE);
+			Sorcery.beam(level, e, witch.getBoundingBox().getCenter(), bloodMote());
 			drank++;
 		}
 		float heal = WITCH_DRINK * drank;
@@ -393,7 +399,7 @@ public final class Hemomancy {
 					drank += cuts * DRINK_PER_CUT;
 					Vec3 from = e.getBoundingBox().getCenter();
 					Vec3 mid = from.add(player.getEyePosition().subtract(from).scale(0.5));
-					level.sendParticles(BLOOD_MOTE, mid.x, mid.y, mid.z, 2, 0.15, 0.15, 0.15, 0.0);
+					level.sendParticles(bloodMote(), mid.x, mid.y, mid.z, 2, 0.15, 0.15, 0.15, 0.0);
 				}
 			}
 			drank = Math.min(DRINK_MOST, drank);
@@ -448,7 +454,7 @@ public final class Hemomancy {
 		int n = Math.max(2, (int) (step.length() * 2.0));
 		for (int i = 0; i <= n; i += 2) {
 			Vec3 p = from.add(step.scale(i / (double) n)).add(0.0, 0.1, 0.0);
-			level.sendParticles(BLOOD_MOTE, p.x, p.y, p.z, 1, 0.04, 0.04, 0.04, 0.0);
+			level.sendParticles(bloodMote(), p.x, p.y, p.z, 1, 0.04, 0.04, 0.04, 0.0);
 		}
 		level.sendParticles(DARK_MOTE, from.x, from.y + 0.05, from.z, 3, 0.2, 0.02, 0.2, 0.0);
 	}

@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymoskitchen:cage_trap",
+                "state": {
+                  "caught": "true"
+                }
+              },
+              "name": "jaymoskitchen:caged_rat"
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymoskitchen:cage_trap"
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

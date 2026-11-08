@@ -51,8 +51,12 @@ public final class FarmhandHome {
 	/** How far round the house its folk are counted (blocks). */
 	static final double HOUSE_REACH = 6.0;
 
-	/** A farmhouse found for a farmhand: where to wake, and the house's bounds. */
-	record House(BlockPos wake, BoundingBox box) {
+	/** A farmhouse found for a farmhand: where to stand, the house's bounds, and the bed they wake in (its head; null with none). */
+	record House(BlockPos wake, BoundingBox box, @Nullable BlockPos bed) {
+	}
+
+	/** A spot on the floor beside a bed, and that bed's head. */
+	private record Bedside(BlockPos spot, BlockPos head) {
 	}
 
 	private FarmhandHome() {
@@ -88,15 +92,16 @@ public final class FarmhandHome {
 			return null;
 		}
 		BoundingBox box = start.getBoundingBox();
-		BlockPos wake = bedside(level, box);
-		if (wake == null) {
-			wake = LifeStory.ground(level, box.getCenter(), 0, Math.max(box.getXSpan(), box.getZSpan()) / 2 + 2, random);
+		Bedside side = bedside(level, box);
+		if (side != null) {
+			return new House(side.spot(), box, side.head());
 		}
-		return wake == null ? null : new House(wake, box);
+		BlockPos wake = LifeStory.ground(level, box.getCenter(), 0, Math.max(box.getXSpan(), box.getZSpan()) / 2 + 2, random);
+		return wake == null ? null : new House(wake, box, null);
 	}
 
-	/** A spot to stand beside one of the house's beds (loading its chunks), or null with none. */
-	private static @Nullable BlockPos bedside(ServerLevel level, BoundingBox box) {
+	/** A spot to stand beside one of the house's beds (loading its chunks), and the bed's head; null with none. */
+	private static @Nullable Bedside bedside(ServerLevel level, BoundingBox box) {
 		for (BlockPos p : BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ())) {
 			BlockState bed = level.getBlockState(p);
 			if (!(bed.getBlock() instanceof BedBlock) || bed.getValue(BedBlock.PART) != BedPart.FOOT) {
@@ -107,7 +112,7 @@ public final class FarmhandHome {
 				BlockPos side = p.relative(dir);
 				if (level.getBlockState(side).isAir() && level.getBlockState(side.above()).isAir()
 					&& level.getBlockState(side.below()).isFaceSturdy(level, side.below(), net.minecraft.core.Direction.UP)) {
-					return side.immutable();
+					return new Bedside(side.immutable(), p.relative(bed.getValue(BedBlock.FACING)).immutable());
 				}
 			}
 		}
@@ -149,6 +154,15 @@ public final class FarmhandHome {
 		}
 		for (Villager v : folk) {
 			McaCompat.hearts(v, player, FAMILY_HEARTS);
+		}
+		// (Andy: "they need some kind of utility or function": their farm round, their fear of monsters, their nights indoors)
+		FarmFamily.adopt(level, house.wake(), folk);
+		if (McaCompat.LOADED && !folk.isEmpty()) {
+			player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("story.jaymoskingdoms.farm_family.hint")
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+		}
+		if (house.bed() != null) {
+			FarmhandWake.expect(player, house.bed(), house.wake(), folk);
 		}
 	}
 }

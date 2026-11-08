@@ -1,0 +1,23 @@
+{
+  "values": [
+    {
+      "id": "jaymoskitchen:fish_bait",
+      "required": false
+    },
+    "minecraft:bread",
+    "minecraft:rotten_flesh",
+    "minecraft:spider_eye",
+    "minecraft:tropical_fish",
+    "jaymospowers:earthworm",
+    "jaymospowers:maggots",
+    "jaymospowers:dough_bait",
+    "jaymospowers:boilie",
+    "jaymospowers:lugworm",
+    "jaymospowers:spinner",
+    "jaymospowers:wobbler",
+    "jaymospowers:soft_shad",
+    "jaymospowers:pirk",
+    "jaymospowers:trolling_squid",
+    "jaymospowers:fishing_magnet"
+  ]
+}

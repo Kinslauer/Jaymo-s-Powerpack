@@ -5,6 +5,7 @@ import com.jaymospowers.core.Carry;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.HoldProgress;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -139,6 +140,11 @@ public final class Downed {
 	 */
 	public static final int ADRENALINE_TICKS = 200;
 	public static final double ADRENALINE_SLOW = -0.3, SPENT_CRAWL_SLOW = -0.85, ADRENALINE_PACE = 1.4, SPENT_PACE = 0.35;
+	/**
+	 * (0.21.49) A downed player who hasn't passed out can still work blocks with the main hand (doors, trapdoors, gates,
+	 * buttons, levers, chests), as with an empty hand; items, attacks and powers stay dead. False: no use at all, as before.
+	 */
+	public static final boolean DOWNED_USE_BLOCKS = true;
 	/** How long a downed player holds sneak to give up (ticks). */
 	public static final int GIVE_UP_TICKS = 100;
 	/** (0.18.5) A blow this hard (health points: three hearts) on anyone downed kills them outright. */
@@ -258,6 +264,8 @@ public final class Downed {
 		long held;
 		int ticks, hits;
 		boolean begun, over;
+		/** (0.21.39) Whether its bar has been carried on from the last hold on this body ({@link HoldProgress}). */
+		boolean resumed;
 
 		Revive(LivingEntity body, long start) {
 			this.body = body;
@@ -278,6 +286,14 @@ public final class Downed {
 	 */
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TAPPED_LISTENERS = new ArrayList<>();
 
+	/**
+	 * (0.21.39) A revive's job in {@link HoldProgress}: this body, this time down (a bar left half full stays with that
+	 * downing, not the next).
+	 */
+	private static String reviveJob(LivingEntity body) {
+		return "revive:" + body.getUUID() + ":" + since(body);
+	}
+
 	/** Player → their revive. Not saved. */
 	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
 
@@ -286,6 +302,18 @@ public final class Downed {
 		int ticks, hits;
 		boolean knocked;
 	}
+
+	/**
+	 * (0.21.39) Let go part way up: how long the drop back to the ground takes (ticks, as {@code CrawlPose.SINK_TICKS}
+	 * draws it), and how long after the body hits the ground before they can try again (Andy: "unable to restart the
+	 * getup until a second after you hit the ground").
+	 */
+	static final int SINK_TICKS = 7, SINK_WAIT = 20;
+	/** (0.21.39) Dust thrown up as a body thuds down: puffs and spread for a man-sized body (more for a bigger one). */
+	static final int THUD_DUST = 6;
+	static final double THUD_SPREAD = 0.3;
+	/** (0.21.39) Downed player → when their sunk body hits the ground (game time); dust then, and the wait after. Not saved. */
+	private static final Map<UUID, Long> SINKING = new HashMap<>();
 
 	/** (0.18.5) Downed player → their rise. Not saved. */
 	private static final Map<UUID, Rise> RISES = new HashMap<>();
@@ -373,13 +401,35 @@ public final class Downed {
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+		// (0.21.49) Andy: "while downed, you cannot interact with doors or other right-clickable things". A downed player who is
+		// still awake works blocks again (doors, trapdoors, gates, buttons, levers, chests), with the main hand only and never
+		// with what it holds: first every other mod's say (locks, lockpicking, knowledge gates), then, last, the block's own
+		// empty-hand use. Passed out or knocked out, nothing.
+		UseBlockCallback.EVENT.addPhaseOrdering(FIRST, Event.DEFAULT_PHASE);
+		UseBlockCallback.EVENT.register(FIRST, (player, level, hand, hit) -> {
 			if (!isDowned(player)) {
 				return InteractionResult.PASS;
 			}
 			// (0.15.49) lying face down, use lands on the ground: Second Wind's eating still counts ({@link SelfRevive})
 			InteractionResult eat = SelfRevive.use(player, hand);
-			return eat != null ? eat : InteractionResult.FAIL;
+			if (eat != null) {
+				return eat;
+			}
+			return DOWNED_USE_BLOCKS && hand == InteractionHand.MAIN_HAND && awake(player) ? InteractionResult.PASS : InteractionResult.FAIL;
+		});
+		UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
+		UseBlockCallback.EVENT.register(LAST, (player, level, hand, hit) -> {
+			if (!isDowned(player) || !DOWNED_USE_BLOCKS || hand != InteractionHand.MAIN_HAND || !awake(player)) {
+				// (anyone not down, or the FIRST phase's FAIL already ended it for the off hand and the passed out)
+				return InteractionResult.PASS;
+			}
+			if (level.isClientSide()) {
+				// (SUCCESS on the client sends the click without predicting it, nor using the held item: the server decides)
+				return InteractionResult.SUCCESS;
+			}
+			// (0.21.49) a struggle, then the block as if the hand were empty; a bed hauls them into it ({@link DownedStruggle})
+			return player instanceof ServerPlayer server && level instanceof ServerLevel world
+				? DownedStruggle.use(server, world, hit) : InteractionResult.FAIL;
 		});
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			if (!isDowned(player)) {
@@ -414,6 +464,7 @@ public final class Downed {
 			REVIVING.clear();
 			GIVING_UP.clear();
 			RISES.clear();
+			SINKING.clear();
 			MASH_HELD.clear();
 		});
 	}
@@ -478,9 +529,28 @@ public final class Downed {
 		return CRAWL_SPEED * (adrenaline(entity) ? ADRENALINE_PACE : net.minecraft.util.Mth.lerp(strength(entity), SPENT_PACE, 1.0));
 	}
 
+	/**
+	 * (0.21.49) Holds a resting downed player's clock (every second) just past their adrenaline: their strength stays and
+	 * they don't bleed out toward passing out ({@link DownedStruggle}).
+	 */
+	static void holdClock(ServerPlayer player, long now) {
+		Long downed = player.getAttached(DOWNED);
+		if (downed != null && now % 20 == 0) {
+			player.setAttached(DOWNED, (now - ADRENALINE_TICKS - 1) << 1 | (downed & 1L));
+		}
+	}
+
 	/** A downed player who has passed out. */
 	public static boolean passedOut(Entity entity) {
 		return entity.hasAttached(OUT);
+	}
+
+	/**
+	 * (0.21.49) Down but awake: not passed out and not knocked out. Only then can a downed player still work blocks
+	 * ({@link #DOWNED_USE_BLOCKS}). Both sides for the player themselves (OUT is synced to all, KNOCKED to its owner).
+	 */
+	public static boolean awake(Entity entity) {
+		return !passedOut(entity) && !entity.hasAttached(KNOCKED);
 	}
 
 	/**
@@ -632,6 +702,10 @@ public final class Downed {
 		if (entity instanceof Player player) {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
+			SINKING.remove(player.getUUID());
+			if (player instanceof ServerPlayer server) {
+				DownedStruggle.forget(server);
+			}
 			AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {
 				speed.removeModifier(SLOW_ID);
@@ -993,8 +1067,10 @@ public final class Downed {
 			player.addTag(DOWNED_TAG);
 		}
 		long now = level.getGameTime();
+		// (0.21.49) lying in a bed they struggled into, mending: never bleeding out ({@link DownedStruggle})
+		boolean resting = DownedStruggle.tick(level, player, now);
 		boolean out = passedOut(player);
-		if (!out && now - since(player) >= BLEED_OUT_TICKS) {
+		if (!out && !resting && now - since(player) >= BLEED_OUT_TICKS) {
 			// (Andy: "Lie until roused or give up": no respawn for bleeding out)
 			player.setAttached(OUT, true);
 			out = true;
@@ -1051,22 +1127,20 @@ public final class Downed {
 		MASH_HELD.remove(player.getUUID());
 		// (0.18.5) not too wounded: sneak gets them up instead (carried or adrift, they can't)
 		if (!out && !tooHurt(player) && !Carry.isCarried(player) && !adrift(player)) {
-			GIVING_UP.remove(player.getUUID());
 			rise(level, player, now);
 			return;
 		}
 		stopRising(player);
-		// giving up: sneak held (server side, from the player's input)
-		int held = player.isShiftKeyDown() ? GIVING_UP.merge(player.getUUID(), 1, Integer::sum) : 0;
-		if (held == 0) {
-			GIVING_UP.remove(player.getUUID());
-		}
+		// giving up: sneak held (server side, from the player's input). (0.21.39) Let go, the bar stays where it is (Andy:
+		// "every meter should work this way"); it's only emptied when they're up again or gone
+		boolean sneaking = player.isShiftKeyDown();
+		int held = sneaking ? GIVING_UP.merge(player.getUUID(), 1, Integer::sum) : GIVING_UP.getOrDefault(player.getUUID(), 0);
 		if (held >= GIVE_UP_TICKS) {
 			GIVING_UP.remove(player.getUUID());
 			finish(level, player);
 			return;
 		}
-		if (held > 0 ? held % 2 == 0 : now % HINT_TICKS == 0) {
+		if (sneaking ? held % 2 == 0 : now % HINT_TICKS == 0) {
 			int filled = Math.round(GIVE_UP_BAR * held / (float) GIVE_UP_TICKS);
 			String bar = "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled);
 			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
@@ -1074,23 +1148,41 @@ public final class Downed {
 			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
 				: blocking != null ? Component.translatable("message.jaymospowers.downed.give_up_hurt", blocking.displayName(), bar)
 				: Component.translatable("message.jaymospowers.downed.give_up", bar);
-			player.sendOverlayMessage(message.copy().withStyle(held > 0 ? ChatFormatting.RED : ChatFormatting.GRAY));
+			player.sendOverlayMessage(message.copy().withStyle(sneaking ? ChatFormatting.RED : ChatFormatting.GRAY));
 		}
 	}
 
-	/** (0.18.5) A downed player able to rise, this tick: sneak held fills the bar and, full, gets them up by themselves. */
+	/**
+	 * (0.18.5) A downed player able to rise, this tick: sneak held fills the bar and, full, gets them up by themselves.
+	 * (0.21.39) The one bar that doesn't keep its progress (Andy: "they fall everytime they let go, that one should restart
+	 * the meter because the animation would break if not"): let go part way up and they drop back to the ground (the
+	 * client draws the fall, {@code CrawlPose}), and the next hold starts from the ground.
+	 */
 	private static void rise(ServerLevel level, ServerPlayer player, long now) {
 		Rise r = RISES.get(player.getUUID());
 		if (!player.isShiftKeyDown()) {
 			if (r != null && r.ticks > 0 && !r.knocked) {
+				// (0.21.39) the body drops back down; it lands (the thud and the dust) as the drawing does
+				SINKING.put(player.getUUID(), now + SINK_TICKS);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_stopped").withStyle(ChatFormatting.GRAY));
 			}
+			landing(level, player, now);
 			stopRising(player);
 			if (now % HINT_TICKS == 0) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_hint").withStyle(ChatFormatting.GRAY));
 			}
 			return;
 		}
+		landing(level, player, now);
+		Long sunk = SINKING.get(player.getUUID());
+		if (sunk != null && now < sunk + SINK_WAIT) {
+			// (0.21.39) still falling, or just hit the ground: a moment before they can try again
+			if (now % 4 == 0) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_winded").withStyle(ChatFormatting.GRAY));
+			}
+			return;
+		}
+		SINKING.remove(player.getUUID());
 		if (r == null) {
 			r = new Rise();
 			RISES.put(player.getUUID(), r);
@@ -1116,13 +1208,46 @@ public final class Downed {
 			return;
 		}
 		RISES.remove(player.getUUID());
+		// (0.21.49) what a rest in bed mended, they rise with
+		float rested = DownedStruggle.resting(player) ? Wounds.restedHealth(player) : 0.0F;
 		getUp(level, player);
 		if (!isDowned(player)) {
 			// (on their own legs, not a friend's arm: less in them than a revive leaves)
-			player.setHealth(Math.min(player.getHealth(), Math.max(1.0F, player.getMaxHealth() * RISE_HEALTH)));
+			player.setHealth(Math.max(rested, Math.min(player.getHealth(), Math.max(1.0F, player.getMaxHealth() * RISE_HEALTH))));
 			Wounds.reconcile(player);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.risen").withStyle(ChatFormatting.GREEN));
 		}
+	}
+
+	/** (0.21.39) A body let go part way up hits the ground this tick: a thud, and dust as big as it is. */
+	private static void landing(ServerLevel level, ServerPlayer player, long now) {
+		Long sunk = SINKING.get(player.getUUID());
+		if (sunk == null || now != sunk) {
+			return;
+		}
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 0.8F, 0.9F);
+		thud(level, player);
+	}
+
+	/**
+	 * (0.21.39) Andy: "slight particle dust as you thud into the ground, larger dust for larger characters (apes, giants
+	 * etc)". A puff of the ground's own dust along the body, more and wider the bigger the body (by its width against a
+	 * man's, squared: a great ape's or a giant's raises a cloud).
+	 */
+	public static void thud(ServerLevel level, LivingEntity body) {
+		net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(body.blockPosition().below());
+		if (ground.isAir()) {
+			ground = level.getBlockState(body.blockPosition());
+		}
+		if (ground.isAir() || !ground.getFluidState().isEmpty()) {
+			return;
+		}
+		double size = Math.max(1.0, body.getBbWidth() / 0.6);
+		int count = (int) Math.min(120, Math.round(THUD_DUST * size * size));
+		double spread = THUD_SPREAD * size;
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, ground), body.getX(), body.getY() + 0.1,
+			body.getZ(), count, spread * 1.6, 0.05, spread * 1.6, 0.05);
+		level.sendParticles(ParticleTypes.POOF, body.getX(), body.getY() + 0.1, body.getZ(), Math.max(1, count / 6), spread, 0.02, spread, 0.01);
 	}
 
 	/** (0.18.5) No longer rising (let go, or can't now): the bar and the drawing gone. */
@@ -1146,11 +1271,16 @@ public final class Downed {
 			rise.hits = 0;
 			player.removeAttached(RISING);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 0.8F, 0.9F);
+			if (player.level() instanceof ServerLevel thrown) {
+				thud(thrown, player);
+			}
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_knocked").withStyle(ChatFormatting.RED));
 		}
 		Revive revive = REVIVING.get(player.getUUID());
 		if (revive != null && revive.begun && !revive.over && ++revive.hits >= most) {
 			revive.over = true;
+			// (0.21.39) broken off by blows: that bar starts again
+			HoldProgress.forget(player.getUUID(), reviveJob(revive.body));
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_broken", revive.body.getDisplayName())
 				.withStyle(ChatFormatting.RED));
 		}
@@ -1285,6 +1415,13 @@ public final class Downed {
 			}
 			// (0.15.99) down on one knee at their side
 			Tending.keep(player, body);
+			String job = reviveJob(body);
+			if (!r.resumed) {
+				// (0.21.39) let go before: the bar carries on where it stopped
+				r.resumed = true;
+				r.ticks = HoldProgress.get(player.getUUID(), job);
+			}
+			HoldProgress.set(player.getUUID(), job, r.ticks + 1);
 			if (++r.ticks % REVIVE_WORK_TICKS == 0) {
 				// kneeling at their side, hands at work
 				player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
@@ -1303,6 +1440,7 @@ public final class Downed {
 				continue;
 			}
 			r.over = true;
+			HoldProgress.forget(player.getUUID(), job);
 			int slot = cost(player, body);
 			if (slot < 0) {
 				player.sendOverlayMessage(Component.translatable(tamed(body) ? "message.jaymospowers.downed.no_treat" : "message.jaymospowers.downed.no_food",

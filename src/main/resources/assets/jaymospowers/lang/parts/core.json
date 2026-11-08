@@ -5,7 +5,7 @@
 	"key.jaymospowers.ability_2": "Power Ability 2",
 	"key.jaymospowers.ability_3": "Power Ability 3",
 	"key.jaymospowers.ability_4": "Power Ability 4",
-	"key.jaymospowers.menu": "Powers Menu",
+	"key.jaymospowers.menu": "Character Menu",
 	"message.jaymospowers.awakened": "Your power awakens",
 	"message.jaymospowers.awakened_chat": "Your power has awakened: %s.",
 	"message.jaymospowers.swallowed_power": "You take in %1$s, and their %2$s runs in you now beside your own: its R is on your Swallowed Power key (comma; R if you have no power of your own). Until you die, or swallow another's.",

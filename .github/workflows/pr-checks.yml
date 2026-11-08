@@ -1,0 +1,60 @@
+# Runs on every pull request to master. A red check means: don't merge yet, read the failing step's log.
+# PRs add change notes (changes/README.md); versions, MODLOGs and codemaps are written after the merge by release.yml.
+# What it checks and why: docs/AI-HANDBOOK.md, "Before you open a PR".
+name: PR checks
+
+on:
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Change notes, libs jars, item models
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 tools/pr_checks.py origin/${{ github.base_ref }}
+
+  build:
+    name: Build ${{ matrix.mod }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mod: Powers
+            dir: .
+          - mod: Kingdoms
+            dir: kingdoms
+          - mod: Kitchen
+            dir: kitchen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      # The cache keeps the Gradle download between runs. Without cache-read-only: false a pull request never writes
+      # it (this workflow doesn't run on master), so every run fetched Gradle again and failed when that server 504'd.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      # services.gradle.org times out now and then: fetch Gradle on its own, a few tries, before the real build.
+      - name: Fetch Gradle
+        working-directory: ${{ matrix.dir }}
+        run: |
+          for try in 1 2 3 4 5; do
+            sh ./gradlew --version --no-daemon && exit 0
+            echo "Gradle download failed (try $try), waiting before the next one"
+            sleep $((try * 20))
+          done
+          exit 1
+      - name: Build
+        working-directory: ${{ matrix.dir }}
+        run: sh ./gradlew build --no-daemon --stacktrace

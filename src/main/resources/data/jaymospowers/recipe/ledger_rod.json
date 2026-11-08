@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  S",
+    " SL",
+    "CIL"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "L": "minecraft:string",
+    "I": "minecraft:iron_nugget",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "jaymospowers:ledger_rod",
+    "count": 1
+  }
+}

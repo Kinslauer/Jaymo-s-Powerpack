@@ -1,0 +1,19 @@
+---
+name: symbiote-weapons
+description: Symbiote weapon arm, counter animations, hulking body + tongue, layered equip, arm-sheath swing, lingering cracks, Doc Ock Wall Crawl, Chrono V speedster streak; PR #252 merged as 0.11.62
+metadata:
+  type: project
+---
+2026-10-15: PR #252 MERGED 15:0xZ as pack 0.11.62 (not playtested).
+- Weapon arm: left click, empty hand, in the suit (WebMorph); 18 counter poses (WebCounterPose); hulk model WebHulk from tools/gen_web_hulk.py; equip = tendrils wrap, goo, then suit (WebSuitGrowth/WebSuitWrapLayer).
+- Andy round 2: suit swing lines stream off the whole arm (WebLineRenderer.armSheath); every tendril bite cracks the block and lingers 5 s + 10 s fade (WebCracks, server + client); Wall Crawl = Doc Ock: 4 tendrils hoist you 1.2 and walk, grab anything within 4.5 (WebTendrilWalk.striding, WebSymbioteClient.stride), 4 spare tendrils (WebTendrilLayer.FIRST_SPARE) while walking. Chrono V: ChronoStreak afterimages/lightning/enchant glyphs + ChronoRunPose, synced ChronoSpeed.FLASH.
+- Andy ruling: tendrils carry you whenever Wall Crawl is on (flat ground too); Wall Crawl switches off when Living Armor ends; full-bond Living Armor never times out. PR #254 MERGED as 0.11.66. Behemoth still old body; no emblem.
+- Dev runServer can't load the client CameraPreset entrypoint; use runClient for screenshots.
+- PR #271 MERGED 2026-10-16 03:1xZ as pack 0.11.91 (not playtested): Wall Crawl withdraws like the suit; front pair grab ceilings while striding; Sneak slam-latches walls AND ceilings (another Sneak press drops off a ceiling); hungry symbiote hunts to feed only, low mood (stress >= 60) = kill spree until you break free (SPREE, 80 presses); weapon arm is click-and-hold (WebMorph.Gather/CHARGE: lumps course over suit, forearm swells, weapon grows; release strikes); barrage stabs have spear/hooked blade tips (WebTendrilLayer.blades).
+- PR #281 MERGED 2026-10-16 06:1xZ as pack 0.11.99: Wall Crawl tendrils drawn whenever CRAWL is on (Crawl can be on without Living Armor); in the suit, Jump on the walking tendrils coils a charged leap (no stride climb then), release flings you (WebSymbioteClient.launchable/leapt, LEAP_GRACE_TICKS).
+- PR #289 MERGED 2026-10-16 08:5xZ as pack 0.11.107: Tendril Grab tethers drawn as Wall Crawl's jointed limbs (WebTendrilLayer.tetherLegs -> bend); elastic hold unchanged.
+- PR #333 MERGED 2026-10-20 23:3xZ as pack 0.13.36: Web Whip now starts with Sneak when both swing webs are within WebWhip.NEAR 3 on one mob/terrain (terrain pries while held; release early = cracks stay, attack ends); Sneak+R/G whip removed. First person under First-person Model: WebFirstPerson.posing cancels vanilla hands + carry/ledge extra arms during moves, FirstPersonCompat.showArms clears FPM arm-hide flags. Andy's message cut off at "except".
+- PR #401 MERGED 2026-10-22 02:0xZ as pack 0.15.69 (not playtested): downed rescue (WebSymbioteRescue: heal 50%, close-call line by pre-blow health, leap, zip away, hand back; refuses only satiety<=15 AND bond<30), foe comments (WebSymbioteFoes, 18 kinds), no stalls (underwater tendrils, takeover stuck/climb/circle/pressOn), suit removal fought by chance (FIGHT_CHANCE_*) up to 3; takeovers in plain suit, big body 10% web / 3% host / 40% anti (BIG_TAKEOVER_CHANCE*).
+- PR #414 MERGED 2026-10-22 04:13Z as pack 0.15.86: player-body hesitation back to 3 s (HESITATE_TICKS 60), 9 hesitate lines + 4 thrown lines.
+- PR #480 MERGED 2026-10-24 22:08Z (pack 0.15.147 / Kingdoms 0.7.184, not playtested): three rescues never repeated back to back (leap+zip / suit forms: regen II 5 s + EMPOWERED 30 s all abilities / tendril lash), symbiote satiety feeds your hunger bar (SHARE_*); same PR has Kingdoms RangedTactics, cove gunners+bombardiers as MCA villagers, RoyalDress royal days.
+- PR #651 (Collect, engulf, mind/body/life): see [[symbiote-checklist-651]].

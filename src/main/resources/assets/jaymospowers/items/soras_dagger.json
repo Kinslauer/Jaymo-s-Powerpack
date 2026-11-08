@@ -5,11 +5,11 @@
     "index": 0,
     "on_true": {
       "type": "minecraft:model",
-      "model": "jaymospowers:item/soras_dagger_reverse"
+      "model": "jaymospowers:item/soras_dagger_2_0_iron_reverse"
     },
     "on_false": {
       "type": "minecraft:model",
-      "model": "jaymospowers:item/soras_dagger"
+      "model": "jaymospowers:item/soras_dagger_2_0_iron"
     }
   }
 }

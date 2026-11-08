@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "minecraft:iron_bars",
+    "S": "#minecraft:wooden_slabs"
+  },
+  "pattern": [
+    "BBB",
+    "B B",
+    "SSS"
+  ],
+  "result": {
+    "id": "jaymoskitchen:cage_trap"
+  }
+}

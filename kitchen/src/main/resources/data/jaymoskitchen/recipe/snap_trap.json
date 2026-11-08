@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "#c:ingots/iron",
+    "T": "minecraft:iron_trapdoor",
+    "S": "#minecraft:wooden_slabs"
+  },
+  "pattern": [
+    "IT ",
+    "SSS"
+  ],
+  "result": {
+    "id": "jaymoskitchen:snap_trap"
+  }
+}

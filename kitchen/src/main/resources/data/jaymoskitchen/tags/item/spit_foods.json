@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:beef",
+    "minecraft:porkchop",
+    "minecraft:mutton",
+    "minecraft:rabbit",
+    "minecraft:chicken",
+    "minecraft:cod",
+    "minecraft:salmon",
+    "jaymoskitchen:minced_beef",
+    "jaymoskitchen:raw_bacon",
+    "jaymoskitchen:chicken_cuts",
+    "jaymoskitchen:mutton_chops",
+    "jaymoskitchen:cod_slice",
+    "jaymoskitchen:salmon_slice",
+    "jaymoskitchen:raw_blood_sausage",
+    "jaymoskitchen:corpse"
+  ]
+}

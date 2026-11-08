@@ -377,7 +377,9 @@ public final class Downed {
 
 	private static boolean canHelp(Villager v, LivingEntity body) {
 		// ((0.7.453) a rider may come too: he gets down at their side)
-		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body) && !isDowned(v) && !v.isSleeping() && (!v.isPassenger() || Cavalry.mounted(v)) && !v.isNoAi() && v.getTarget() == null
+		// (a vampire at night never tends the downed: Morven knelt by the one he'd fed on, got them up and fed again)
+		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body)
+			&& !(Vampires.isVampire(v) && Vampires.night(v.level().getOverworldClockTime())) && !VampireAlarm.defending(v) && !isDowned(v) && !v.isSleeping() && (!v.isPassenger() || Cavalry.mounted(v)) && !v.isNoAi() && v.getTarget() == null
 			&& (!Frights.afraid(v.getUUID()) || Temperaments.fearless(v)) && !McaCompat.panicking(v) && v.level() == body.level()
 			&& v.distanceToSqr(body) < Temperaments.helpRange(v) * Temperaments.helpRange(v) * 1.5;
 	}

@@ -1,0 +1,280 @@
+# Project memory index
+
+One file per topic, exported from the Claude project memory on 2026-11-06 (thread ids removed). `[[name]]` links point to `name.md` in this folder.
+
+- [accurate-hitboxes](accurate-hitboxes.md): Accurate Hitboxes not added; own per-limb hitboxes + blunt weapons break bones (core/Fractures) in PR #170 (pack 0.10.64)
+- [adrenaline](adrenaline.md): Adrenaline at low health (PR #1026 MERGED 2026-11-05, Powers 0.20.110 / Kingdoms 0.7.592 / hint 117): 10 s where broken limbs don't hinder; my readings of Andy's ask
+- [aether-veil-minimap](aether-veil-minimap.md): Aether hidden from Overworld sky (AetherVeil, 0.20.60) still reported by Jung; Xaero minimap band fix PR #1040 merged (Powers 0.21.2)
+- [alexs-mobs](alexs-mobs.md): Alex's Mobs + Citadel were added in PR #70 (0.8.82), then removed in PR #90 (0.8.107) because they break Iris shaders
+- [apotheosis-world-tiers](apotheosis-world-tiers.md): Apotheosis licence facts (code MIT, assets ARR) and the world-tiers remake offer, 2026-10-16
+- [armory-age-of-weapons](armory-age-of-weapons.md): Jaymo's Armory (Powers 0.8.61, PR #51 merged 2026-10-12): 27 Age of Weapons weapons Andy picked, rebuilt for 26.3; medieval-or-earlier rule
+- [armour-double-pose-mca](armour-double-pose-mca.md): MCA's armour model copies the body's captured pose, so our poses doubled on armour (downed/execution); PR #908 MERGED (Powers 0.20.6 / Kingdoms 0.7.507)
+- [armour-grime-wet-weather](armour-grime-wet-weather.md): Dirty armour (grime component, dust/mud, washing) + client drips, rain puddles near trees, underwater light shafts; PR #861 merged (Powers 0.19.63)
+- [armour-poses](armour-poses.md): Why Armory 3D pieces/wizard hats clipped (not HumanoidModels, no EMF pose); WornModel fix PR #223 (pack 0.11.18 / Kingdoms 0.7.48)
+- [armour-wear](armour-wear.md): Armour rework PR #979 (Powers 0.20.68/Kingdoms 0.7.557, hint 101): 30% durability, absorbs more, breaks without vanishing, NPC armour wears, no repairs in combat
+- [arsenal-pocket-dimension](arsenal-pocket-dimension.md): Arsenal's Pocket Stash replaced by a buildable pocket-dimension room (own remake of MavLeague's Pocket Dimension datapack), PR #173
+- [arsenal-rift-chains](arsenal-rift-chains.md): Arsenal uncorrupted B = Rift Chains (bind target, B again yanks), replacing the duplicate Pocket Dimension on B; PR #280
+- [ask-the-way](ask-the-way.md): Kingdoms 0.7.454 / pack 0.19.8 (PR #812, MERGED 2026-10-31): MCA Interact-page "Ask the Way" button, villagers point or guide you to healer/butcher/smith/tailor/tavern/stables/ruler
+- [assassins](assassins.md): Rare assassination attempts on rulers and marked players (Assassins class), merged PR #105 as Kingdoms 0.5.61 / pack 0.8.119
+- [attributes-heritage](attributes-heritage.md): PlayerEx + Origins remade in Kingdoms as K-screen Attributes and a Heritage character-creation step; PR #247 (pack 0.11.56 / Kingdoms 0.7.57)
+- [backpack](backpack.md): Our own Backpack (worn + animated, placeable, only strong blasts break it), PR #270 MERGED as pack 0.11.89
+- [battlefield-dead](battlefield-dead.md): Clearing the dead (Bearers: graves, burning foes, MCA mourning) + Looters/poor villagers robbing corpses + ROBBING crime; + judgement of looters carried to a guard; PR #372 (Kingdoms 0.7.132 / Kitchen 0.5.9 / pack 0.15.41)
+- [beg-pardon](beg-pardon.md): Kingdoms 0.6.2 / pack 0.9.2 (PR #110 merged 2026-10-13 14:02Z): right-click an NPC who approached you to beg their pardon or ask for more
+- [blast-gore](blast-gore.md): Explosions gib the killed and dismember survivors by proximity (core/BlastGore); PR #978 MERGED 2026-11-05 02:1xZ, Powers 0.20.67 / Kitchen 0.5.67 / Kingdoms 0.7.556 (hint 100)
+- [block-carry](block-carry.md): Powers 0.8.52/0.8.59 (PRs #33, #46 merged 2026-10-12): sneak+right-click carries player-placed blocks; containers set down only
+- [blockbench-cc-models-684](blockbench-cc-models-684.md): Six CC BY Blockbench models Andy added (PR #684): pistol, mandrake, Kintsugi, Primal Visage, Launch whaleboat, Skeleton Lord
+- [blockbench-mcp](blockbench-mcp.md): How cloud threads model in Blockbench: WaitMyDawn/blockbench-mcp runs headless (Andy's pick 2026-10-27)
+- [blood-blasts](blood-blasts.md): Blood Sorcerer hold-J gather into reservoir + empty-hand blood blast barrage; PR #975 (Kingdoms 0.7.554, hint 99), merged 2026-11-05 (6430097c)
+- [blood-fever-feral-curse](blood-fever-feral-curse.md): Vampire blood fever + werewolf feral curse + Great Ape rage takeovers (symbiote-style holds), merged 2026-10-24 (#483, via combined merge #490)
+- [blood-magic-stains](blood-magic-stains.md): Blood magic draws from ground stains + Kitchen hanging-carcass butchery and extras; PR #864 merged 2026-11-03 as Powers 0.19.64 / Kingdoms 0.7.482 / Kitchen 0.5.51
+- [boss-posture-dawncraft](boss-posture-dawncraft.md): Gemini's DawnCraft boss handoff (2026-11-04): boss posture + Knowledge boss ladder (5 levels gating anvils/smithing/enchanting/higher arts/End) MERGED 2026-11-04 01:03Z as PR #889, Kingdoms 0.7.492
+- [builder-mines](builder-mines.md): Kingdoms builders use Dungeons and Taverns' own mine pit, tavern, well, smithy + D&T-only buildings at run time (PR #1070, 0.7.629); our MinePit fallback; poor nations plain tunnel
+- [butcher-table-pin](butcher-table-pin.md): Ragdoll bodies on a butcher table are pinned (torso held over the table top) so they don't flop off; PR #497 (Kitchen 0.5.24 / pack 0.16.4)
+- [butcher-villagers](butcher-villagers.md): Butcher villagers butcher passive-animal corpses for emeralds; hidden 1x-3x skill learned via gossip or the Survival butchering perk. Merged PR #79 (Kitchen 0.4.32 / Kingdoms 0.5.51 / pack 0.8.99)
+- [camera-utils-f7](camera-utils-f7.md): Camera Utils in the pack with Andy's F7 third-person preset; merged PR #128 as pack 0.9.23
+- [camp-workers-mca](camp-workers-mca.md): Camp (barbarian/pirate/orc) foremen and builders are MCA villagers since Kingdoms 0.7.481 (PR #866); before that camps were excluded and stayed folk
+- [captive-conduct](captive-conduct.md): Kidnapped/shackled players spared by captors until they act up; visible collar+chain/rope tether, break with rocks/saw; halving bleeds out in 8 s (PR #1009 merged)
+- [carry-left-for-dead](carry-left-for-dead.md): PR #1046 (Powers 0.21.7): left-for-dead bodies lie until sneak-held come-to or a revive somewhere safe; live small animals liftable, some bite
+- [cauldron-brewing](cauldron-brewing.md): (merged #626) Andy 2026-10-28: early potions in a heated water cauldron (throw ingredients, stir each, 3 bottles, gunpowder splash) + thrown water bottles douse fire; PR #626
+- [character-names](character-names.md): Players go by MCA character names, never usernames (except commands); #394 + #410 (Kingdoms 0.7.160 / pack 0.15.80), 2026-10-22
+- [chrono-downed-rewind](chrono-downed-rewind.md): Chrono R (Rewind) works while downed and gets you up unbattered; no fall damage while Overclock runs; PR #411 MERGED (Powers 0.15.83), 2026-10-22
+- [chrono-echo-directives](chrono-echo-directives.md): Timeless Chrono echoes take orders from the H screen (Standby/Harvest/Guard/Record-Loop, unlocked over time) + Time Flow for all Timeless, PR #468 MERGED 2026-10-24 00:56Z (pack 0.15.144)
+- [chrono-g-reset](chrono-g-reset.md): Chrono G (Stasis Field) also resets all other cooldowns + Overclock water run fix, PR #188 MERGED (pack 0.10.96), 2026-10-14
+- [chrono-overclock-toggle](chrono-overclock-toggle.md): Chrono V (Overclock) is a toggle once all four abilities are unlocked + lava run + straight wall run, PR #234 (pack 0.11.40), 2026-10-15
+- [chrono-time-stop-glyphs](chrono-time-stop-glyphs.md): Chrono Time Flow time stop (Space after Space counter) glyph burst + doubled length, PR #265 merged as pack 0.11.78, 2026-10-15
+- [claude-gemini-tandem](claude-gemini-tandem.md): How Claude and Gemini could work together on the powerpack (argon-bridge vs omni-ai-mcp evaluation, 2026-11-03)
+- [cloud-build](cloud-build.md): How to compile the mods in a cloud thread (JDK 25 + Google Maven mirror); Andy gave a standing approval for the mirror
+- [cloud-playtest-setup](cloud-playtest-setup.md): How to playtest the 26.3 mods in-game from a cloud session (JDK 25, Xvfb + lavapipe Vulkan client, RCON, screenshots)
+- [coins-replace-emeralds](coins-replace-emeralds.md): Otectus patch 3 coins (Kingdoms money, purses, emerald keepers, MoneyTalk): worktree, commits, versions, push plan
+- [combat-animations](combat-animations.md): Own Better Combat animations + combos (quarterstaff twirls), PR #107 merged as pack 0.8.116; how the animation JSON axes really work
+- [combat-arts](combat-arts.md): Strength tree "Combat Arts" second page (combos, finishers, Charge/War Cry on Y, Bladestorm), PR #116 MERGED, Kingdoms 0.6.5 / pack 0.9.10
+- [coming-over-reasons](coming-over-reasons.md): PR #809 (Kingdoms 0.7.449 / pack 0.19.2, MERGED 2026-10-31 a156230d): strangers only come over with a reason, "Ask what's going on" MCA option, "Accuse them of theft"
+- [corpse-despawn](corpse-despawn.md): PR #36 merged (Kitchen 0.4.28, Kingdoms 0.5.23, pack 0.8.55): skeletons rise, fire spread, guards burn monster corpses, fire pits
+- [corpse-ragdoll-emf](corpse-ragdoll-emf.md): Player corpse ragdolls broke because EMF/Fresh Animations animates anything baked from vanilla ModelLayers.PLAYER; fixed with own layers (PR #236)
+- [damocles-recall](damocles-recall.md): Arsenal G recalls a standing Sword of Damocles early (PR #180 merged, pack 0.10.77)
+- [darktide-resonance](darktide-resonance.md): Darktide and Resonance, the 6th/7th powers (PR #25, 0.8.28): Andy's design decisions not obvious from code
+- [darktide-shade](darktide-shade.md): Darktide shade (die at night, return as your shadow, sunlight burns it), PR #77 merged as pack 0.8.98; Andy's rulings
+- [darktide-wind-fixes](darktide-wind-fixes.md): Andy's 2026-10-13 rulings on Darktide shadows/dash and Wind fire + carried-player drops + dismemberment (PR #122, pack 0.9.27 / Kitchen 0.4.37)
+- [deeds-captives](deeds-captives.md): Villagers react to deeds (fires out, saves, rescues) + chained captives in camps/dungeons; PR #255 (Kingdoms 0.7.61 / pack 0.11.68)
+- [distant-horizons-chunky](distant-horizons-chunky.md): DH removed at Andy's request 2026-10-13 (PR #113, pack 0.9.6); earlier: Andy's DH "not working" (2026-10-13) was a 256-chunk LOD radius + out-of-memory; Chunky added for fast gliding (PR #94, pack 0.8.109)
+- [double-tap-crawl](double-tap-crawl.md): Double-tap Jump+Sneak crawl (PR #82, 0.8.95) A/D crawl roll that puts out fire (PR #103, 0.8.113), own poses + held/quick rolls (PR #121, 0.9.18)
+- [downed-guards](downed-guards.md): Every humanoid is downed (0.15.41, PR #372; villagers+folk since 0.7.84); guards (Kingdoms GUARD/ARCHER role or MCA guard/archer job) were first, PR #266: instead of killed: crawl or lie, disarm by right-click, no loot; PR #266 (pack 0.11.90 / Kingdoms 0.7.73)
+- [downed-self-rise](downed-self-rise.md): Downed rework 2026-10-29 PR #693 MERGED (pack 0.18.5 / Kingdoms 0.7.358): 6+ dmg kills the downed, sneak self-rise if no limb red, 2-hit interrupt, Will node Unflinching
+- [drown-water-orb](drown-water-orb.md): Darktide Drown drawn as an end crystal water orb (PR #213 merged, pack 0.11.2); how water orbs ride the Z Fighter ki orb packet
+- [earthboard-stance](earthboard-stance.md): Gravity earthboard ride pose redone as a side-on snowboard stance; PR #217 (pack 0.11.13)
+- [earthling-glow](earthling-glow.md): Earthling heritage ki glow only for Z Fighters; no heritage marks/glow under costumes (PR #473, Kingdoms 0.7.184 / pack 0.15.147)
+- [ember-hugs](ember-hugs.md): Emberborn too hot to hug without fire resistance (EmberHugs), PR #337 MERGED 2026-10-20 23:5xZ as pack 0.14.4 / Kingdoms 0.7.102
+- [emberborn-fire-cold](emberborn-fire-cold.md): Heritage pass in PR #283 (MERGED, pack 0.11.102 / Kingdoms 0.7.75): Emberborn fireproof + cold-sapped, Frostborn ice prison on ;, Earthling heritage, Z Fighter races for non-Z players, scrolling cards
+- [enchanting-overhaul](enchanting-overhaul.md): Enchanting System Overhaul (MIT) ported into Powers enchanting/ (PR #246 MERGED 2026-10-15 13:2xZ, pack 0.11.51); Pomkots Mechs rejected
+- [epic-town-kingdoms](epic-town-kingdoms.md): PR #1033 (Kingdoms 0.7.598, merged 2026-11-05): kingdoms only in Epic towns, Grim castles fief-only, villages ally nearest kingdom
+- [equestrian-plan](equestrian-plan.md): Jaymo's Equestrian (our own SWEM, in Kingdoms): stages 1-2 merged (#58, #66); stage 3 Kingdoms hooks PR #74 (Kingdoms 0.5.45 / pack 0.8.88)
+- [fainting](fainting.md): Passing out from hunger/thirst + villager wakers (PR #1028 MERGED 2026-11-05 ~16:55Z, Powers 0.20.112 / Kingdoms 0.7.594 / hint 118): my readings of Andy's ask
+- [family-farmhand-starts](family-farmhand-starts.md): Andy 2026-11-05 - village start became Family farmhand (mvs:barn / Homesteads), day-one start list, every locked start has own deed + advancement, fate by odds table (PR #1045)
+- [farmers-delight-cooking](farmers-delight-cooking.md): Farmer's Delight (MIT incl. art) remade in Kitchen's delight/ package: placed pot/pan over fire, cutting board, feasts, Comfort/Nourishment, cabbage/rice; PR #524
+- [farsight-stalkers](farsight-stalkers.md): Farsighted Mobs + Stalker Creepers remade in Kingdoms (Farsight, Stalkers), PR #243 merged as pack 0.11.53 / Kingdoms 0.7.56
+- [feedback-more-means-ideas](feedback-more-means-ideas.md): When Andy replies just "More" to a feature, he wants more of Claude's own ideas in the same direction, not a clarifying question
+- [fish-loot](fish-loot.md): Fish corpses loot in one click and vanish (CorpseKind.FISH, fish_corpses tag), merged PR #75, Kitchen 0.4.29 / pack 0.8.89
+- [flail-whip](flail-whip.md): Flail rework + leather whip (Web Whip mechanics on weapons), PR #487 MERGED 2026-10-24 22:26Z, pack 0.15.148 (2026-10-24)
+- [flash-shield](flash-shield.md): Flash speed on Chrono V (Overclock) + Shield Throw Strength combat art, PR #153 (pack 0.10.28 / Kingdoms 0.7.3), from heropack ideas
+- [flight-terrain-ahead](flight-terrain-ahead.md): Fast flight slows while chunks ahead load (client/TerrainAhead) + Chunky back, PR #165 MERGED pack 0.10.51 (2026-10-14)
+- [flintlock-spare-draw](flintlock-spare-draw.md): Q on your own flintlock draws a spare from inventory (armory/FlintlockDraw), PR #522 MERGED 2026-10-25
+- [floating-riders](floating-riders.md): Kingdoms 0.5.32 (PR #56 merged 2026-10-12 15:30Z): Folk riders floated over horses; fixed with ridingOffset(-0.7F) on the folk EntityType
+- [fresh-animations-player](fresh-animations-player.md): Fresh Animations Player Extension + EMF/ETF in the pack (PR #154, pack 0.10.29); our poses pause EMF; Xenoform extras FA-style
+- [future-los-perrito](future-los-perrito.md): The future dimension (Chrono sneak+B to ruined Los Perrito City with feral zombie hordes), PR #197, pack 0.10.109
+- [gemini-gregtech-plan](gemini-gregtech-plan.md): Andy 2026-11-06 pasted Gemini's 8-phase GregTech start plan; reviewed only (no code). Recommended Phase 5 PBF/coke oven + hot-ingot burns; pack has no tin
+- [gemini-handoff-ki-forge](gemini-handoff-ki-forge.md): Gemini 16-file handoff (2026-11-03) integrated as design intent in 3 passes; Andy's rulings on Writ of Rebirth and scope
+- [giant-sizes](giant-sizes.md): Giants sized to the Z Fighter Great Ape (30.6 x 10.2) and smash any tree/building in their way, PR #400 (Kingdoms 0.7.152 / pack 0.15.68), 2026-10-22
+- [goblin-villages](goblin-villages.md): Goblin villages (palisade fort) + goblin mask, plus ported Loot Goblins (LGPL) in Kingdoms (PR #54, Kingdoms 0.5.31 / pack 0.8.64, merged 2026-10-12)
+- [golem-burning](golem-burning.md): Merged PR #81 (Kingdoms 0.5.48 / Kitchen 0.4.31 / pack 0.8.94): every iron golem carries corpses to a fire and drops them in
+- [golem-corpses](golem-corpses.md): Heavy iron golem corpses (PR #32): only Gravity lifts them, no butchering or burning, crumble after looting
+- [golems-quiet-firefighters](golems-quiet-firefighters.md): Kingdoms 0.5.42 (PR #69 merged, pack 0.8.83): iron golems never speak and beat out settlement fires
+- [grabbable-severed-parts](grabbable-severed-parts.md): Severed heads/limbs carryable in one hand via Carry.PART, PR #133 MERGED 2026-10-14 as pack 0.10.5
+- [gravity-0825](gravity-0825.md): Gravity 0.8.25 rework (PR #21) status and the earthboard unlock decision made on Andy's behalf
+- [gravity-control-moves](gravity-control-moves.md): Gravity 0.10.6 (PR #135): sideways fall, fall forward, wall walk ideas from Gravity Control; key choices made on Andy's behalf
+- [gravity-field-hunger](gravity-field-hunger.md): Immense Field (Gravity Z) drains owner hunger, less as they level + wall walk first-person fix; PR #189 MERGED (pack 0.10.95)
+- [gravity-meteor-burst](gravity-meteor-burst.md): Gravity meteor: magnetic-region rock from build height, crashes through, embeds, bursts, sweep removes hanging debris (PR #423, pack 0.15.91); earlier burst FX #276
+- [great-wars-creeds](great-wars-creeds.md): Kingdoms 0.7.224 (PR #540, 2026-10-26): realm creeds, daily tension into inevitable wars, great wars between rich realms (coalitions, sellswords, upkeep, rebellions, creed war goals), war wagers
+- [grim-camps-056](grim-camps-056.md): Kingdoms 0.5.6 (draft PR #26, 2026-10-11): barbarians settle beside Grim ruins and take wild ones; how to playtest Grim in dev
+- [ground-rocks-rlcraft-start](ground-rocks-rlcraft-start.md): Andy 2026-10-24: loose rocks/flint on the ground + RLCraft-style start (flint shards, plant string, flint hatchet, no crafted planks); PR #493 merged 2026-10-25 (master then pack 0.16.4 / Kingdoms 0.7.199)
+- [guard-audiences](guard-audiences.md): Quest carriers get free passage past any temper's guards; guards escort players to the ruler on request (PR #476 merged 2026-10-24; master after it pack 0.15.158 / Kingdoms 0.7.192)
+- [hearty-meals](hearty-meals.md): Spice of Life Valheim Edition remade as Kitchen "hearty meals" (stomach slots), PR #240, pack 0.11.42 / Kitchen 0.4.43
+- [heavens-knowers](heavens-knowers.md): Villagers who know of the heavens (Aether) hint only in riddles; seekers build scaffolding towers (PR #960, Kingdoms 0.7.547, 2026-11-05)
+- [herd-killings](herd-killings.md): Herd animals flee nearby killings/downings (Kingdoms Herds.killing), PR #983, Kingdoms 0.7.560, hint 102
+- [heritage-life-story](heritage-life-story.md): Life story screen reworded per heritage (story.jaymoskingdoms.as.<heritage>.*), heritage-only raisers; PR #805 = pack 0.19.0 / Kingdoms 0.7.448
+- [heritage-prejudice](heritage-prejudice.md): Non-human heritages looked down on (Prejudice) + non-human-only haven villages and human/non-human rivalry (Havens); + villagers emigrating (Emigrants); #529 merged, Kingdoms 0.7.221 / pack 0.17.6
+- [hidden-armor](hidden-armor.md): Hide-armour eye buttons beside inventory armour slots (core/HiddenArmor), merged PR #100 as pack 0.8.117
+- [immersion-mods-0152](immersion-mods-0152.md): Andy's 9 immersion mods (2026-10-14): Shoulder Surfing replaced Camera Utils + our shoulder view; spiders, portal spread, tool belt; own burning torches + dark nights; PR #167
+- [immersivevfx](immersivevfx.md): ImmersiveVFX (CF 1766116) not in pack: NeoForge-only 26.3, ARR, breaks Iris; Andy said skip remake 2026-11-05
+- [jaki-ships](jaki-ships.md): Jaki Versatile Structures Sails & Sea (GPLv3) ships used as crewed ships in Kingdoms (JakiShips), PR #349 MERGED as Kingdoms 0.7.112
+- [jei-cheat-mode](jei-cheat-mode.md): Why JEI items couldn't be pulled in creative, and PR #87 (pack 0.8.102) that auto-enables JEI cheat mode in creative
+- [kingdoms-armory](kingdoms-armory.md): Kingdoms 0.5.30 (PR #53 merged 2026-10-12, pack 0.8.63): four original 3D armour sets (Paladin, Gladiator, Ronin, Warlord) replacing the ask for Jet and Elia's Armors
+- [kingdoms-arson](kingdoms-arson.md): Kingdoms 0.5.20 (PR #41 merged 2026-10-12): lighting a fire in a settlement is arson; seen, the townsfolk mob you until you hit back
+- [kingdoms-caravans](kingdoms-caravans.md): Kingdoms 0.5.14 (PR #44, pack 0.8.47): fief focus, caravans of horse-drawn carts, mounted guards/archers, king's carriage
+- [kingdoms-languages](kingdoms-languages.md): Kingdoms language system (PR #176 MERGED 2026-10-14 18:54Z, Kingdoms 0.7.20 / pack 0.10.69): tongues by climate, only simple dealings with foreign folk
+- [kingdoms-living-economy](kingdoms-living-economy.md): Andy's Kingdoms "living economy" ask (2026-10-11) and its 3-stage split; stages 1-2 and living trees merged in PR #22 (Kingdoms 0.5.4) 2026-10-11
+- [kingdoms-quests](kingdoms-quests.md): Kingdoms 0.5.29 quests (PR #52): villager/king quests rebuilt in Kingdoms since Quest Giver has no 26.3 Fabric build
+- [kingdoms-rickshaws](kingdoms-rickshaws.md): Kingdoms 0.5.26 rickshaws (PR #50 merged 2026-10-12): pullers haul gatherers' loads, errands, townsfolk, carriage-less rulers, paid player rides
+- [kingdoms-sorcery](kingdoms-sorcery.md): Kingdoms 0.5.37 sorcery (PR #60 merged, pack 0.8.74): our own Iron's Spells take - camp shamans/necromancers, court wizards, thralls, scrolls
+- [kingdoms-stables](kingdoms-stables.md): Kingdoms 0.5.27 stables + taverns (PR #49 merged 2026-10-12 09:14Z, pack 0.8.62); both "mix by size"
+- [kingdoms-war-tempers](kingdoms-war-tempers.md): Kingdoms 0.5.12 (PR #29 merged) and PR #42 (Kingdoms 0.5.28, merged 2026-10-12): javelin/rock tiers, treasuries, war-party join + spoils carts: javelins, destructive attackers, five ruler tempers, villagers flee monsters
+- [kingdoms-workers-mca](kingdoms-workers-mca.md): Kingdoms 0.5.21 (PR #40 merged 2026-10-12, pack 0.8.53): realm workers are MCA villagers promoted in place, MCA guards count, Prey, miner torches
+- [kings-roads](kings-roads.md): King's Roads (Kingdoms 0.7.9 / pack 0.10.44, PR #159): own settlement roads; Via Romana and Settlement Roads can't ship on 26.3
+- [kitchen-jar-shipping](kitchen-jar-shipping.md): Which Kitchen jar the pack ships; libs/ held a stale 0.5.57 that silently dropped Kitchen fixes (heaven zombies)
+- [leg-cleave-halve](leg-cleave-halve.md): Double leg cleave + waist halving with heavy chops, more on zombies; PR #962 MERGED 2026-11-05 01:2xZ (Powers 0.20.61 / Kingdoms 0.7.552)
+- [lift-revive-execute-inputs](lift-revive-execute-inputs.md): PR #538 (pack 0.17.7 / Kingdoms 0.7.222 / Kitchen 0.5.31): sneak+hold = lift, hold use = revive, hold left-click 1.5s = execute; big carcasses cut up in place
+- [lineage](lineage.md): Lineage replaced the Blood Rite (PR #479 merged, Kingdoms 0.7.189 / pack 0.15.154): sneak-use your teen+ MCA child to live on as them; Andy's rules for blood, powers, items
+- [loose-parts-ragdoll](loose-parts-ragdoll.md): Dead mobs' unknown parts (vulture wings, tails, necks, modded legs) hang loose via Kitchen LooseParts; PR #813 (Kitchen 0.5.40)
+- [loot-tables-26-3-format](loot-tables-26-3-format.md): 26.3 loot tables need modifier/condition/type keys; old functions/conditions only worked via Moog's Structures upgrade (fixed #887)
+- [lootr-mimics](lootr-mimics.md): Lootr chests and our mimics; Loot Integrations declined (2026-10-16)
+- [lunar-events-omens](lunar-events-omens.md): Lunar events (Blood/Super Blood/Harvest/Blue moons) + Bad Omen grudges in Kingdoms, PR #117 MERGED 2026-10-13 15:22Z (Kingdoms 0.6.6 / pack 0.9.15)
+- [mash-minigames-eased](mash-minigames-eased.md): Andy 2026-10-26: mashing minigames were overdone; eased across the pack and beam clashes weigh power levels (PR #530 merged 2026-10-26)
+- [mastery-pacing](mastery-pacing.md): Power ability mastery pacing (3 days/ability, 1 day floor, field half day), Gravity owner sparring, shadowbox combos; PR #253 (pack 0.11.65)
+- [mca-court-wizards](mca-court-wizards.md): Court wizards are MCA elders, merged PR #88 as Kingdoms 0.5.53 / pack 0.8.104; elder = grown 8+ days, tracked by us since MCA has no old age
+- [mca-in-pack](mca-in-pack.md): Minecraft Comes Alive is shipped as a self-built 26.3 jar in libs/ (PR #18, Powers 0.8.21 / Kingdoms 0.4.2) until an official 26.3 release
+- [mca-medieval-pack](mca-medieval-pack.md): "MCA - Default Medieval" resource pack (CurseForge 667175) merged as pack 0.8.58 (PR #47), auto-enabled once
+- [medicine-tree](medicine-tree.md): Survival's Medicine page (Steady Hands..Lifesaver) + Stealth XP from sneaking past monsters; PR #377 MERGED 2026-10-21 13:0xZ (Kingdoms 0.7.136 / pack 0.15.49)
+- [messenger-post](messenger-post.md): Letters, messenger pigeons, MCA couriers riding across the land, and world news/MCA mail by letter instead of chat (PR #507, Kingdoms 0.7.201 / pack 0.16.14)
+- [meteor-stuck-downed](meteor-stuck-downed.md): Players stuck at 0 health with no death (Jung after a gravity meteor, 2026-10-22); PR #453 (pack 0.15.130) adds a limbo catch; root cause still unknown
+- [mob-executions](mob-executions.md): PR #819 (pack 0.19.20 / Kingdoms 0.7.459): hostile mobs/illagers walk up and execute downed players with a letterboxed UltimateFilm scene
+- [mob-unstick](mob-unstick.md): Pack-wide stuck-pathing fix (Kingdoms Unstick + PathNavigationMixin), merged PR #62, Kingdoms 0.5.36 / pack 0.8.72
+- [monolith-heart](monolith-heart.md): Monoliths enlarged + animated Elderheart-style heart (PR #818 merged, Kingdoms 0.7.458 / pack 0.19.19)
+- [monsters-hunt-villagers](monsters-hunt-villagers.md): Andy 2026-10-26: every hostile mob attacks villagers at half damage; golems hunt and one-shot creepers (Kingdoms VillagerHunters, PR #533)
+- [mounted-revive](mounted-revive.md): PR #814 MERGED 2026-10-31 22:5xZ (Kingdoms 0.7.453 / pack 0.19.7): mounted guards dismount 4 blocks from a downed one, tend on foot, remount after
+- [mouse-buttons-26-3](mouse-buttons-26-3.md): In MC 26.3 MouseButtonEvent.button() is 1-based (left 1, middle 2, right 3); compare with InputConstants.MOUSE_BUTTON_* only
+- [muskets-cannons](muskets-cannons.md): Kingdoms 0.5.64 (PR #104 merged 2026-10-13, pack 0.8.122): 1000+ emerald kingdoms get musketeer guards (1 in 3) and 2-4 archer-manned cannons
+- [natural-disasters-plan](natural-disasters-plan.md): Natural disasters (own take on Weather2): all 3 plan stages MERGED (stage 1 PR #127; stages 2-3 PR #205 as pack 0.10.130 / Kingdoms 0.7.43)
+- [naturalist-encounters](naturalist-encounters.md): PR #92 (pack 0.8.110 / Kingdoms 0.5.56 / Kitchen 0.4.34) - Naturalist + BAP beasts as wild encounters, Fangs 'n Claws-style legends, beast gossip/quests, bat horse + nightmare
+- [nether-faction](nether-faction.md): Nether faction (own remake of Just-In NETHER, ARR): stage 1 Hornkin merged #373; stage 2 war forts merged #387 2026-10-21 (Kingdoms 0.7.142 / pack 0.15.55); stage 3 raids+bounties+trophies+truce MERGED #390 2026-10-21 (Kingdoms 0.7.147 / pack 0.15.61); all 3 stages done
+- [network-protocol-error](network-protocol-error.md): "Connection Lost: Network Protocol Error" on join = client packet-handler exception; usually a friend's mods folder not matching the server
+- [nightfall-plague](nightfall-plague.md): Nightfall Plague (ARR Forge mod) remade in Kingdoms nightfall/ package; PR #369 MERGED 2026-10-21 09:50Z (Kingdoms 0.7.129 / pack 0.15.37)
+- [no-punching-trees](no-punching-trees.md): Andy 2026-10-13: no punching trees (wood needs an axe) and vanilla recipes for anything Tinkering makes are off; merged PR #106 (pack 0.8.124, Kingdoms 0.5.65)
+- [no-rainbow-hair](no-rainbow-hair.md): Andy turned off MCA rainbow hair and random dyed hair (PR #68 merged, Kingdoms 0.5.43 / pack 0.8.84)
+- [no-static-itemstacks](no-static-itemstacks.md): Never build ItemStacks in static fields/initialisers (crashes 26.3 at startup); boot a dev server before merging new registries
+- [old-age](old-age.md): NPCs grow old and die (OldAge), merged PR #89 as Kingdoms 0.5.54 / pack 0.8.105
+- [orc-camps](orc-camps.md): Orc war camps in Kingdoms (own take on The Orcs!, which is ARR/1.20.4), PR #73, Kingdoms 0.5.45 / pack 0.8.88
+- [orc-corpse-drag-858](orc-corpse-drag-858.md): Corpse bodies are off-world entities (id -1000-corpseId); MCA skin hooks must look them up via Kingdoms client DrawnBodies; dragged bodies never settle on side (PR #858)
+- [ore-pebbles](ore-pebbles.md): Andy 2026-11-05: rocky dirt ore tells removed (too obvious); shallow coal/copper/iron/gold veins get a 40% lone pebble, faintly stained or hidden-nugget (PR #1022 merged 2026-11-05 as pack 0.20.105)
+- [otectus-jewellery-locks](otectus-jewellery-locks.md): Otectus patches 4 (jewellery, /home/user/jewel) and 6 (locks, /home/user/locks) built by workflow; versions and push plan
+- [otectus-mods-fit-log](otectus-mods-fit-log.md): Older running log for the Otectus mods-fit thread (patches 1-7 build/merge history)
+- [otectus-mods-fit](otectus-mods-fit.md): 2026-11-03 comparison of Andy's 18 Otectus-era CurseForge links (MCA add-ons, Immersive X) vs the pack; checklist artifact + picks doc
+- [own-blocks-no-crime](own-blocks-no-crime.md): Breaking or opening blocks you placed yourself in a settlement is no crime; merged PR #76 (Kingdoms 0.5.46 / pack 0.8.90)
+- [pack-worldgen-and-wishlist](pack-worldgen-and-wishlist.md): Pack worldgen decisions (2026-10-10, Powers 0.8.4) and the mod wishlist verdicts awaiting Andy's go
+- [paranoid-guards](paranoid-guards.md): Every king's guards treat players by his temper (Retinue class: paranoid drive-out, tyrant kneel/fine, warlord sheathe/salute, noble bread, reveler toss); merged PR #97 as Kingdoms 0.5.63 / pack 0.8.121
+- [patch-notes](patch-notes.md): Player-facing patch notes for testers: where they live, Andy's cuts, how they're built (thread "Edit 0.16 patch notes for testers")
+- [patrol-needs-cause](patrol-needs-cause.md): Galactic patrolmen never spawn at random; only pursuit of a raider band or recruiting a strong fighter (PR #808, 2026-10-31)
+- [physical-falling-trees](physical-falling-trees.md): Physical Falling Trees datapack remade in Kingdoms FallingTree (PR #164, Kingdoms 0.7.11 / pack 0.10.50)
+- [physics-mod](physics-mod.md): Physics Mod can't drive our corpses (closed, ARR, client-only, no API); own ragdolls built instead, PR #161 (pack 0.10.47 / Kitchen 0.4.39)
+- [pickpocketing](pickpocketing.md): Pickpocketing in Kingdoms is a held action (stay behind the mark 1-3 s, light/armour/MCA mood scale it); merged PR #80 as Kingdoms 0.5.50 / pack 0.8.97
+- [player-classes](player-classes.md): Pack 0.9.0 = player classes (9: Thief, Warlord, Mage, Archer, Survivalist, Brute, Marksman, Sorcerer, Rider); MERGED PR #108 2026-10-13 (pack 0.9.0 / Kingdoms 0.6.0), not playtested
+- [player-crowns](player-crowns.md): Players can wear a realm's crown (Crowns.java, PR #542, Kingdoms 0.7.225 / pack 0.17.10): usurp, inherit by marriage, conquest claim, /kingdom crown found
+- [player-groups-handshakes](player-groups-handshakes.md): Player groups via handshakes (#477, Kingdoms 0.7.184 / pack 0.15.147): both use on each other, cinematic, scoreboard team perks
+- [pocket-rift-walkthrough](pocket-rift-walkthrough.md): Arsenal Z opens a standing rift ahead you walk into (no instant teleport); V on a void gate closes it (PR #181, pack 0.10.75)
+- [pose-takeover-emf](pose-takeover-emf.md): Why our poses broke under Fresh Animations/EMF and holstered items walked mid-air; fixes in PR #185 (pack 0.10.86), plus Xeno Z+scroll dial and dragon-wing Wyrm
+- [power-fixes-0918](power-fixes-0918.md): PR #123 MERGED (pack 0.9.19 / Kitchen 0.4.36): corpse catching, web tug jumps, one-web whip, flintlock pair drop, Damocles returns, random cannons, JEI when opped
+- [proximity-chat-voice](proximity-chat-voice.md): Proximity text chat (Kingdoms ProximityChat) + Simple Voice Chat/Voice Physics/Voice Changer in pack, VoiceMasks; PR #652 merged 2026-10-29 02:4xZ (Kingdoms 0.7.330 / pack 0.17.157)
+- [purist-temper](purist-temper.md): Purist ruler temper (6th Tempers.Temper, Purists class): heritage-proud king, PR #371 MERGED 2026-10-21 as Kingdoms 0.7.130 / pack 0.15.38
+- [pvp-incoming-cue](pvp-incoming-cue.md): PvP/foe attack indicator (IncomingBlows): star+bell to the swing's target, closing arc round crosshair, gold = perfect parry; PR #1039 merged (Powers 0.21.1)
+- [rarer-quests](rarer-quests.md): Andy wanted quests rarer; merged PR #83 (Kingdoms 0.5.49 / pack 0.8.96) makes 1 in 20 villagers givers, kings seldom, reputation helps
+- [reference-notes](reference-notes.md): Rule for links and videos Andy shares: check /mnt/project-files/references/Reference-Notes.md first, add an entry after reading one
+- [reincarnation](reincarnation.md): Andy 2026-11-05 - first two deaths of a life always wake; final death button "Reincarnate"; new life wipes all our attachments + MCA creator anew (PR #998)
+- [rig-costume-plan](rig-costume-plan.md): Andy's 2026-10-15 ask from FSang18's Heroes (ARR, Forge 1.20.1 Palladium addon): AI armour suit (Rig + Mind) and Costume Table plan; certain callings PR #248
+- [risen-villagers](risen-villagers.md): Darktide Shadow Harvest on villagers raises the SAME villager; non-guards go back to life, townsfolk notice/panic (PR #285 merged, pack 0.11.103 / Kingdoms 0.7.76)
+- [roaming-caravans](roaming-caravans.md): Pillager Caravans ask remade as Kingdoms RoamingCaravans (hostile pillager + neutral merchant caravans), PR #169 MERGED, Kingdoms 0.7.13 / pack 0.10.55
+- [rocks-match-ground](rocks-match-ground.md): PR #817 (pack 0.19.22, merged 2026-11-01): loose rocks take their stone from the block they lie on; grass always plain cobblestone rock; gravel half flint
+- [roost-tidings](roost-tidings.md): Tidings letters only reach players with a Pigeon Roost, only great news, at most every 2 days (PR #892 MERGED 2026-11-04 01:4xZ, Kingdoms 0.7.494)
+- [royal-armour-shed-dupe](royal-armour-shed-dupe.md): King's armour "duplicating" (2026-11-05): Carry.shed on a downed ruler + Rulers.step re-fit made a new plate set per lift; PR #984 MERGED 2026-11-05 07:17Z (Kingdoms 0.7.561, pack 0.20.72)
+- [royal-remains](royal-remains.md): Dead rulers are fetched, stripped into realm stores, given cleric rites and buried with candle + big mourning; PR #959 MERGED 2026-11-05 00:16Z (Kingdoms 0.7.546)
+- [sailing](sailing.md): Sailing: our own block-built ships (Kingdoms com.jaymoskingdoms.sailing), stages 1-2 merged, stage 3 pirates/navies PR #209; licence verdicts on other ship mods
+- [scavengers](scavengers.md): Predators eat their kills (gnaw corpses, meat spills, eaten off ground; tame dogs eat dropped meat), merged PR #118, Kitchen 0.4.35 / pack 0.9.14
+- [schematic-building](schematic-building.md): Schematic files (.nbt/.schem/.litematic) as Kingdoms designs, Mason's Table screen (no commands), Building Plan, offering plans to settlements (PR #870 merged, Kingdoms 0.7.488)
+- [screen-shake](screen-shake.md): Our own directional screen shake (Perception rejected); PR #157 system + PR #191 every-impact shakes scaled by body heft
+- [seats-sit-key](seats-sit-key.md): Seats + Sit key (] default) patch, PR #871 Powers 0.19.67: stair/slab seats, pose cycling, held-item poses, campfire rest
+- [sense-counters](sense-counters.md): PR #131 (pack 0.10.2): sword stones 3000 apart; Web sense charges by level + 9 web / 9 symbiote right-click counters
+- [sevtech-starter-routes](sevtech-starter-routes.md): Andy 2026-10-25: SevTech-style leather tanning chain, salt crystals, 8 fibre string, flint+rock fire; PR #520 merged (Powers 0.16.24 / Kitchen 0.5.27 / Kingdoms 0.7.205)
+- [shared-history-talk](shared-history-talk.md): PR #574 (Kingdoms 0.7.254 / pack 0.17.44, MERGED 2026-10-27): SharedHistory MCA menu options Thank / Apologise / Clear the air / Ask how they are, plus first-impression introductions
+- [skill-tree](skill-tree.md): Skill tree (Survival/Stealth/Strength, K key) in Kingdoms with respec and alignment/gossip; PR #84 merged PR #84, Kingdoms 0.5.52 / pack 0.8.103
+- [skin-tones-climate](skin-tones-climate.md): Villager skin tone by climate (merged PR #64 2026-10-12 23:07Z, Kingdoms 0.5.38 / pack 0.8.77): MCA melanin re-rolled by biome heat
+- [sky-hermits](sky-hermits.md): Sky-island villagers made hermit wizards (Hermits class), PR #99 merged, Kingdoms 0.5.62 / pack 0.8.120
+- [sleep-timelapse-bed-rest](sleep-timelapse-bed-rest.md): Sleeping Overhaul 2 (Forge only) remade in Kingdoms as Timelapse + BedRest; PR #156 (pack 0.10.37 / Kingdoms 0.7.5)
+- [slower-awakening](slower-awakening.md): Andy wants powers to take at least 3 in-game days to awaken, sooner only via a power's own acquisition method (PR #102 merged, pack 0.8.123)
+- [slower-valor-bio](slower-valor-bio.md): 2026-11-01 Andy slowed Valor waking (24 days played) and Bio-built forms (16/48 worth) about 4x; PR #823
+- [small-spiders-ai](small-spiders-ai.md): Andy's More Babies-sized spiders + NYF/Yuka AI ask (2026-10-20): Kingdoms wild/SpiderMinds, PR #329
+- [smoke-armour](smoke-armour.md): Smoke Vapour Form drops everything worn on going up in smoke (PR #286 MERGED, 0.11.108); nothing goes on while smoke
+- [smoke-move-poses](smoke-move-poses.md): Smoke poses for every move + Vapour Form as a sprint-triggered mode holding top speed; PR #218 MERGED (pack 0.11.17)
+- [smoke-power](smoke-power.md): Smoke power (Andy 2026-10-14, from a YouTube top-10 video), stage 1 draft PR #168 as pack 0.10.54; gas sim in power/smoke/SmokeField
+- [smoke-vapour-flight](smoke-vapour-flight.md): Barrel rolls for all flights + Smoke Vapour Form as smoke-legged flight on R + thicker smoke; MERGED PR #183 as pack 0.10.81
+- [sneak-zoom-alt-dodge](sneak-zoom-alt-dodge.md): Zoom = double-tap-and-hold Sneak driving OK Zoomer's key (SneakZoom); dodge = Left Alt only (PR #974 merged 2026-11-05, Powers 0.20.65)
+- [snow-golem-melt](snow-golem-melt.md): Snow golems melt instead of leaving corpses (PR #820, Kitchen 0.5.41 / pack 0.19.18), merged 2026-11-01
+- [soft-imprints](soft-imprints.md): Soft Imprints (Modrinth snow-imprints, MIT, client-only) added as a pack mod for snow/sand tracks; PR #171 pack 0.10.60
+- [soft-leaves](soft-leaves.md): Soft leaves (Realistic Leaves remake, PR #203 0.10.116); PR #284 (0.11.100): mobs path through leaves, spiders hide in them, hard hits crash through
+- [sorcerer-imbue-blade](sorcerer-imbue-blade.md): Kingdoms Sorcerer Imbue lives on the blade (custom data), survives drops/hand-overs, one imbued blade per sorcerer; PR #225
+- [sound-detail-mods](sound-detail-mods.md): Sounds/AmbientSounds/Subtle Effects/A Good Place added + own Ambience effects (PR #160, pack 0.10.49); Particular and Dynamic Surroundings rejected
+- [spirit-figures](spirit-figures.md): Mana spirits draw a larger aura figure behind the player; arms hang from its shoulders; figure fades, arms stay (#624)
+- [story-figure-fa-pause](story-figure-fa-pause.md): Why the Bio-built road preview kept breaking (Fresh Animations' flying pose during story stasis); PR #845 pauses EMF on you while the story screen is up
+- [strays-indoors](strays-indoors.md): Villagers shoo stray animals out of houses/speakeasy (Kingdoms Strays), PR #992, Kingdoms 0.7.566, hint 104
+- [sure-footing-wall-run](sure-footing-wall-run.md): Sure Footing became a landing roll (dodge at touchdown negates fall damage); vertical wall run is a fast Naruto run with slide + back eject (PR #399, 0.15.67 / 0.7.151)
+- [symbiote-checklist-651](symbiote-checklist-651.md): PR #651 symbiote Collect mode, swing engulf and Andy's checklist picks (mind, body, life tracks); classes, keys, bond gates
+- [symbiote-fix-list-0-12-10](symbiote-fix-list-0-12-10.md): Andy's 2026-10-16 symbiote fix list + heartier meals, PR #301 (pack 0.12.10 / Kitchen 0.4.46): rulings and where they live
+- [symbiote-remodel](symbiote-remodel.md): Andy's 2026-10-14 symbiote remodel ask (video "Spider-Man Brand New Day", Legends mod): whole-body Spike Burst PR #195 and the staged plan
+- [symbiote-rigid-barrage](symbiote-rigid-barrage.md): PR #112 (pack 0.9.8): rigid Doc Ock tendrils, two-web Web Whip with midair lasso hover, tendril barrage combo, wilder behemoth
+- [symbiote-roar-tethers](symbiote-roar-tethers.md): Symbiote roar (near-death takeover + big-body radial) and per-tendril wall tethers, merged PR #55 as pack 0.8.66 on 2026-10-12
+- [symbiote-stuck-crawl](symbiote-stuck-crawl.md): Andy stuck lying in the symbiote suit 2026-10-29 after brawl downs; PR #659 (pack 0.17.164) symbiote knits broken legs + Jump ends a server-held crawl
+- [symbiote-weapons](symbiote-weapons.md): Symbiote weapon arm, counter animations, hulking body + tongue, layered equip, arm-sheath swing, lingering cracks, Doc Ock Wall Crawl, Chrono V speedster streak; PR #252 merged as 0.11.62
+- [tacz-first-person](tacz-first-person.md): Flintlocks low in first person (First-person Model) + TaCZ default modern pack removed (PR #182, 0.10.85); gun arms + flintlock animations failing to load (PR #221 MERGED, 0.11.14)
+- [tacz-guns](tacz-guns.md): TaCZ ask (2026-10-14): TaCZ 26.3 port in pack only to run OUR flintlock gunpack (musket, blunderbuss, pistol), PR #158 MERGED (pack 0.10.43 / Kingdoms 0.7.8)
+- [talk-out-of-play](talk-out-of-play.md): PR #1027 (Powers 0.20.109 / Kingdoms 0.7.591, 2026-11-05): villagers don't approach players who are down/carried/waking/reborning/Chrono-held/tethered/filmed; TalkScreen waits for open screens
+- [thirst-temperature-weathering](thirst-temperature-weathering.md): Immersion pass 2026-10-25: remake Dehydration (thirst), Scorchful+Frostiful (temperature), Immersive Weathering; none have 26.3 builds
+- [tier-hiding](tier-hiding.md): TierHiding (PR #1068 MERGED 2026-11-06 03:35Z, Kingdoms 0.7.624): items beyond a player's world tier/knowledge hidden from JEI + recipe book until reached or held
+- [tinkering-plan](tinkering-plan.md): Jaymo's Tinkering (own Tinkers' Construct for 26.3, in Powers tinkering/): stages, Andy's go, stage 1 MERGED (PR #61, 0.8.73); stage 2 MERGED (PR #63, 0.8.75); stage 3 MERGED (PR #65, 0.8.76): all 3 stages done
+- [town-trades-butcher-healer](town-trades-butcher-healer.md): Every Kingdoms settlement keeps a butcher and a cleric (healer) via TownTrades; + regional butcher shops/infirmaries; PR #867 MERGED 2026-11-03 20:47Z (Kingdoms 0.7.483)
+- [townsfolk-oddities](townsfolk-oddities.md): Villagers react to meteors, stars, symbiotes, shades, powers in use, strange moons (PR #124 MERGED 2026-10-13 21:13Z, pack 0.9.24 / Kingdoms 0.6.11)
+- [training-pass](training-pass.md): 2026-11-01 pack-wide training pass (PR #829): longer grind, shared milestone fanfare, Mastery ranks, training spots/items
+- [tree-knocks](tree-knocks.md): Felled trees: knock others over, smash weak blocks, blasts fell (#1019); stay entities until chopped, split, giants throw them (#1024)
+- [treechop-felling](treechop-felling.md): Kingdoms 0.5.25 (PR #48 merged 2026-10-12): TreeChop-style chopping of trees via ChoppedLog block; woodcutters chop too
+- [two-handed-reach](two-handed-reach.md): Two-handed weapons reach 25% further and sweep a bigger box/arc for players and mobs; PR #262 MERGED (pack 0.11.75 / Kingdoms 0.7.67)
+- [ui-restyle](ui-restyle.md): Andy's "change all the UI" ask: restyle every screen like the Z Fighter training screen; batch 1 = H screen PR #151, batch 2 = PR #204
+- [underworld-speakeasies](underworld-speakeasies.md): Kingdoms criminal underbelly (Pmeh, Shash bricks, speakeasy dens, dice, busts/flogging/cells/beheading); stage 1 merged as PR #525 (Kingdoms 0.7.211 / Kitchen 0.5.29 / pack 0.16.33)
+- [unseen-orc-988](unseen-orc-988.md): Andy's invisible+invulnerable orc that only NPCs attacked (2026-11-05); PR #988 takes pack 0.20.77 / Kingdoms 0.7.565; root cause unconfirmed
+- [valor-design](valor-design.md): Valor (Jung's idea, Will-related anti-magic mechanic, haki-like but original): design list awaiting Andy's ticks, not built yet (2026-10-29)
+- [vampire-blood-vision](vampire-blood-vision.md): Vampire players get MCA's Sirben screen + blood vision + looks (PR #178 merged, Kingdoms 0.7.24 / pack 0.10.83)
+- [vampire-deception](vampire-deception.md): Vampire/werewolf deception (Symbiote-inspired): hunger+heartbeat near players and all 24 picked ideas, PR #650 MERGED 2026-10-29 as Kingdoms 0.7.332 / pack 0.17.160
+- [vampire-eyes-bat-wings](vampire-eyes-bat-wings.md): Vampire eyes drifted off MCA's face and bat wings were elytra slabs; PR #1052 (Kingdoms 0.7.609 / Powers 0.21.13) moves them onto MCA's body/eyes and remakes the wings
+- [vampires-strike-back](vampires-strike-back.md): CurseForge pack Vampires Strike Back (Forge 1.20.1) checked 2026-10-15: vampires are ARR datapack, ideas only
+- [vampires-werewolves](vampires-werewolves.md): Vampires + werewolves drop, PR #129 MERGED 2026-10-14 as pack 0.10.3 / Kingdoms 0.7.0
+- [vassal-lords](vassal-lords.md): Vassal lords vs kings (PR #272 MERGED, pack 0.11.86 / Kingdoms 0.7.72): vassalized king steps down to lord in place, lord escort 4, fief audience line
+- [verdants](verdants.md): Verdants (Z Fighter Verdant lineage + Verdant World villagers) have antennae and green skin; PR #179 (pack 0.10.78 / Kingdoms 0.7.23, MERGED 2026-10-14 21:2xZ)
+- [village-groundwork](village-groundwork.md): Village terrain levelling (beard_box village overrides + Groundwork groundskeepers), merged PR #96, Kingdoms 0.5.58 / pack 0.8.112
+- [village-life](village-life.md): Village Life (ARR Forge mod) ideas remade in Kingdoms 0.7.46 / pack 0.11.5, PR #214 MERGED: festivals, village pets, couriers, hunger/weariness
+- [villager-approaches](villager-approaches.md): Kingdoms 0.5.39 (PR #67, pack 0.8.78): villagers/children/guards walk up to players and start interactions; right-click to answer
+- [villager-days](villager-days.md): Kingdoms 0.6.9 / pack 0.9.20 (PR #125 MERGED 2026-10-13 20:48Z): real tag, toddlers (Families), 19 daily Routines incl. 0.6.10 batch (chores, lunch, dance, hide and seek...), Trespass
+- [villager-memory](villager-memory.md): Recollections (per-villager memory of each player) + MCA chat AI realm context (ChatPrompts); PR #347 MERGED 2026-10-21, Kingdoms 0.7.109 / pack 0.15.10
+- [villager-neighbours](villager-neighbours.md): Kingdoms 0.7.19 / pack 0.10.68 (PR #175 MERGED 2026-10-14 18:47Z): villager-to-villager regard drives fights/arguments to gifts/hugs/courting/MCA marriage
+- [villager-speech](villager-speech.md): Kingdoms 0.5.17 (PR #43 merged 2026-10-12 06:51Z): villager talk (MCA + Kingdoms) floats over the speaker's head instead of chat
+- [visitors-meals](visitors-meals.md): Kingdoms Visitors (day visitors, Visiting Villagers remade) + Meals (home cooking / cookhouse / cooks / food prices, Chef's Delight remade), PR #625, Kingdoms 0.7.299 / pack 0.17.112
+- [wagon-bench-stuck](wagon-bench-stuck.md): 2026-11-05 PR #957 (Kitchen 0.5.62 + Kingdoms 0.7.544): wagon bench villager stuck/pitch cap/haul-up; Kingdoms Wagon carts sunk in terrain now stand on ground
+- [war-alert](war-alert.md): Kingdoms 0.7.65 WarAlert (PR #261): whole realm on alert in a war: bells, sandbags block, civilians hide, guards at sandbags
+- [wary-villagers](wary-villagers.md): PR #1034 (Kingdoms 0.7.597, merged 2026-11-05): Introductions.wary villagers stay cold from the first word; speech bubbles show through walls
+- [weapon-executions](weapon-executions.md): Basic weapon executions for everyone (Wild Slam / Stabbed Through) and neck snap only at the head; PR #472 (pack 0.15.146 / Kingdoms 0.7.183)
+- [weapon-forms](weapon-forms.md): Weapon Forms (Kingdoms 0.7.30, PR #200): full Better Combat combos are a Strength perk; mobs get 2 plain swings unless experienced
+- [weapon-parry-guard](weapon-parry-guard.md): Why weapon parry broke (MCA chat on right click, Tool Station weapons unguarded) and PR #987 fix (Powers 0.20.76)
+- [weapon-skills-parry](weapon-skills-parry.md): PR #1038: every melee weapon parries (WeaponMod katana/battleaxe/halberd/spear, patron weapons) and gets an RPG Series skill bar move
+- [web-airbrake](web-airbrake.md): Powers 0.8.45 (PR #38 merged 2026-10-12): web wings Sneak airbrake, no glide landing damage, swing momentum ramp, falling spent zip lines
+- [web-lines-weight](web-lines-weight.md): Advanced Hook Launchers + Enchanted Fishing Line asks (2026-10-14): remade; rope-sim web lines (synced), weight/rip-outs/fire; PR #166 MERGED, pack 0.10.53
+- [web-reel](web-reel.md): Web: both swing webs on small mobs/items + Shift reels them in (Andy 2026-10-15); PR #237, pack 0.11.42 MERGED
+- [web-shooters](web-shooters.md): Web shooters + cartridges (optional upgrade), braided web lines, true-rope swing, PS5 symbiote slams/surge/tear-off, tendrils on ridden mobs; PR #292 MERGED (pack 0.12.4)
+- [web-slide](web-slide.md): Web parkour: 4 random vault looks + 4 random slide looks, slide jump-out leaps higher/further; PR #215 (pack 0.11.19)
+- [web-strength](web-strength.md): Stronger Web (Andy picked all 7 ideas 2026-10-14): spider physique, impact/taser webs, web bomb, webbed fists on X; PR #146 MERGED, pack 0.10.21
+- [web-swing-cling](web-swing-cling.md): Legends Superheroes ask (2026-10-14): mod unusable (Forge 1.20.1, ARR); own active web swing + fists/suit-gated wall cling, PR #194 (pack 0.10.100)
+- [whaling](whaling.md): Whaling system (Andy 2026-10-25): stages 1, 2, 4 + whale oil uses MERGED (PR #523, Kingdoms 0.7.206 / pack 0.16.25); stage 3 (crews + whaleboats) MERGED PR #526 (Kingdoms 0.7.210 / pack 0.16.32)
+- [wild-great-ape](wild-great-ape.md): Wild Great Ape (non-Z Fighter Warrior-born) AI + ape shoulder camera fix, PR #303 (pack 0.13.5), 2026-10-16
+- [will-tree](will-tree.md): Strength's Will tree (counter magic + presence), Andy's 17 picks and rulings; PR #673 MERGED 2026-10-29 (pack 0.17.187 / Kingdoms 0.7.345)
+- [wind-flight-swing](wind-flight-swing.md): Wind flight swings timed to Better Combat attacks (PR #138 merged, pack 0.10.8); how BC/PAL are read
+- [wind-hover-sway](wind-hover-sway.md): Wind hover sway (camera-following springs), aimable Tempest Kick, R-only take-off; merged PR #98 as pack 0.8.114
+- [wind-staff](wind-staff.md): Quarterstaff gales for wind sorcerers only (Kingdoms Sorcerer, air element), WindStaff, PR #140 MERGED 2026-10-14 07:0xZ as pack 0.10.17
+- [wwoo-overhauled-overworld](wwoo-overhauled-overworld.md): William Wythers' Overhauled Overworld 3.0.1 + Cristel Lib added to the pack, merged PR #59 as pack 0.8.69
+- [xenoform-plan](xenoform-plan.md): Xenoform, our original Omnitrix-style power (Xeno-Band from falling stars, 8 scanned aliens + Nadir the void alien from two voices, Ultimates on C, Kingdoms reactions); MERGED PR #109 (0.9.7); detail pass + insignia + band on wrist + Z slam + red ending glow + Wind-style free flight MERGED PR #126 2026-10-13 21:0xZ as pack 0.9.22; Nadir's G/V/B still await Andy
+- [yank-heave](yank-heave.md): Yank/Web Whip moves swing the whole upper body (waist turn, planted legs); PR #216, pack 0.11.3 (2026-10-15)
+- [zfighter-menu-own-wants](zfighter-menu-own-wants.md): PR #977 (Kingdoms 0.7.555, merged 2026-11-05): Judge's rebirth menu restored, trimmed Z Fighter MCA screen, villagers' own wants by personality, whale trades narrowed
+- [zfighter-viltrumite-combat](zfighter-viltrumite-combat.md): Z Fighter Viltrumite-style combat (2026-10-25): tyrants/champions throw light blow strings, finisher slams into walls, rush after the foe; pack 0.16.10, PR #504 MERGED 2026-10-25
+- [zfighter](zfighter.md): Z Fighter power (Andy's ki/fists/Super idea), PR #134 MERGED 2026-10-14 as pack 0.10.13, power/zfighter; 6-stage "add all of it" plan
+- [zombie-awareness](zombie-awareness.md): Zombie Awareness (ARR) remade as Kingdoms Awareness: zombies hear noise, see lights, smell blood, call hordes; tied to Stealth perks. PR #402 MERGED 2026-10-22 02:2xZ (Kingdoms 0.7.155 / pack 0.15.73)

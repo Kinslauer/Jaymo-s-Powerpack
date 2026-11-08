@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.toolbelt",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"ToolBeltHelperMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

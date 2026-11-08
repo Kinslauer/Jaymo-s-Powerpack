@@ -90,6 +90,8 @@
   "costume.jaymospowers.key.mask.name": "Unmask",
   "costume.jaymospowers.key.mask.off": "Put your %s back on: your face is hidden again",
   "costume.jaymospowers.key.mask.off.name": "Mask up",
+  "message.jaymospowers.cloak_hood.down": "You lower your hood onto your back",
+  "message.jaymospowers.cloak_hood.up": "You pull your hood up",
   "message.jaymospowers.costume.mask_off": "You take your %s off",
   "message.jaymospowers.costume.mask_on": "You put your %s back on",
   "message.jaymospowers.costume.no_mask": "Your costume has nothing on the head to take off",

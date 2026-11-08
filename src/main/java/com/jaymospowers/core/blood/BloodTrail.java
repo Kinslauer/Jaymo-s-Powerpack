@@ -56,8 +56,12 @@ public final class BloodTrail {
 	/** Blood landing this close (blocks across, and up or down) to a stain soaks into it, which grows this much, to this size. */
 	static final double MERGE = 0.45, MERGE_UP = 0.5;
 	static final float GROW = 0.25F, MAX_SCALE = 1.8F;
-	/** How far under a bleeder blood can fall to the ground (blocks). */
-	static final double FALL = 6.0;
+	/**
+	 * How far under a bleeder blood can fall to the ground (blocks). (0.21.50) Andy: "a bleeding body above a ledge can drip
+	 * a pool up to 20 blocks below it". A stain that far down shows once the drop could have fallen there (a drop falls
+	 * {@link #DROP_FALL} blocks a tick per tick, the client's {@code BloodDrop}).
+	 */
+	static final double FALL = 20.0, DROP_FALL = 0.06;
 	/** The most stains a level keeps (the oldest go first). */
 	static final int MAX_MARKS = 6000;
 	/** (0.19.62) Blood magic ({@link #draw}): a stain drawn smaller than this dries away, gone this many ticks later. */
@@ -214,6 +218,10 @@ public final class BloodTrail {
 			return null;
 		}
 		Vec3 at = hit.getLocation();
+		if (delay > 0) {
+			// (0.21.50) a long drop takes longer to land
+			delay = Math.max(delay, Mth.ceil(Math.sqrt(2.0 * Math.max(0.0, from - 0.5 - at.y) / DROP_FALL)));
+		}
 		long now = level.getGameTime();
 		Marks marks = LEVELS.computeIfAbsent(level, l -> new Marks());
 		List<Mark> chunk = marks.byChunk.computeIfAbsent(ChunkPos.pack(BlockPos.containing(at)), c -> new ArrayList<>());

@@ -10145,3 +10145,235 @@ a vampire leaves the hand (creative keeps it) and lodges, one at a time (`Stakes
 Slowness V refreshed every 5 ticks, a drip of dark blood. Out: a vampire player holds sneak 3 s, a vampire mob tears it
 out after 20 s, anyone with an empty hand right-clicks the staked to pull it into their hand; it drops on death or when
 cured. Further skewer hits still land 5x but don't lodge a second stake. Gradle compile clean; not played.
+
+## 0.7.641: stakes are seen, and stack
+Andy: "They should be visible", then "Animate in any position like an arrow, because players and mobs should be able to
+stake multiple times, multiplying the debuff".
+- `Stakes.STAKE` is now a synced list of `Stake(stack, seed)` (new id `vampire_stakes`; a stake saved under 0.7.640's
+  single-stake id is dropped). Every biting skewer lodges, up to 8. Slowness V for one, VI for two, VII (pinned) from three;
+  from two on, Weakness too (I at two, rising to IV). Each 5x blow still lands.
+- Out one at a time, newest first. A vampire player tugs with Sneak + scroll up (Andy: "the input for the struggle should be
+  shift + scroll up ... the bar should stay where it is even after you stop scrolling, the same way tree chopping works"):
+  `Stakes.Tug` per notch (one counted every 2 ticks), 14 to pull one, shown as a chop-style square meter
+  (`Stakes.showTugs`) that holds between tugs; the count is saved on the stake (`Stake.tugs`). `StakeScrollMixin`
+  (priority 400) takes Sneak + scroll up only while staked, ahead of Powers' stance wheel; scroll down still steps stances.
+  A mob tears one out every 20 s; an empty hand's right-click pulls one into the hand. All drop on death or cure.
+- `StakeStruggle` (client): staked vampires are seen struggling, both hands clawing at the chest and wrenching outward in
+  jerks, bent over, head down, a shake; mobs the whole time they're staked, players for 12 ticks after each tug
+  (`Stakes.STRUGGLE`, synced last-tug time). The hands go to the chest, not to wherever the stake is.
+- `StakeLayer` (client, every humanoid renderer, filled in `MobSwingLivingEntityRendererMixin`) draws each stake like a stuck
+  arrow: the seed picks a part (3 in 8 the body, else head, an arm or a leg), a point on one face of its cube and a lean of
+  up to 35% off straight in; the skewer item's point is buried along that line, the grip standing out. On the part's bone,
+  so it moves with every pose.
+Gradle compileJava + compileClientJava clean; not played, so the depth, lean and struggle pose are untested.
+## 0.7.642: a picked pocket keeps its progress
+- Andy: "every meter should work this way". Let go of a lift, or let the mark step out of reach, and how deep your hand
+  got is kept (`Pickpocket.Kept`): the next lift on the same mark carries on with the same length. Caught, done, or a
+  different mark tried, it's forgotten. Compile-checked; not played.
+## 0.7.643: the Hollow's blight
+- Andy (2026-11-07): infected players turning into a Hollow wake fully turned if they die first (Powers 0.21.42). There
+  was no slow turning before (a kill could only turn you at death), so `HollowBlight` adds one: a blow you live through
+  from one of `Hollows`' turners (zombies, witches, skeletons' arrows, phantoms and vexes, necromancers, other undead)
+  leaves the blight at a quarter of that turner's turn chance (a zombie, 1 blow in 16). It takes a Minecraft day:
+  hunger from a third of the way, weakness and nausea from two thirds, each stage told once, then you turn where you stand.
+  A golden apple burns it out. Hollow already, androids, vampires, the bitten and werewolves can't take it.
+- Dying with it (`Mortality.MID_TURNS`): no prompt, a long black edged in the Hollow's colour (zombie green, bone,
+  wraith blue, reaper teal, pallid grey), and you rise that Hollow. `VampirePlayers.midTurn`: the bitten who die before
+  nightfall rise a vampire (a dhampir if they ate gold), the black edged blood red. Hint 124. Compile-checked; not played.
+
+## 0.7.644 (2026-11-07): fewer water mobs at once (Powers 0.21.47)
+- Andy: "still too many mobs spawning at once in the water". Water caps cut: water ambients (fish) 20 to 6, water
+  creatures (squid, dolphins, sharks...) 5 to 3, underground water creatures 5 to 2 (`MonsterCapMixin`). Each natural
+  spawn of a water mob now brings at most 2 at once instead of a whole school (`WaterClusterMixin`, on
+  `Mob.getMaxSpawnClusterSize` in `NaturalSpawner.spawnCategoryForPosition`). Great Whales keep their pods of 1-3
+  (Andy chose to exempt them). Ship shark packs (`SharkWake`) unchanged.
+- Built, not played.
+
+## 0.7.645 (2026-11-07): the bloodless heritages, and the Emberborn's magma blood
+- Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race. (emberborn should have the magma
+  blood)". With Jaymo's Powers 0.21.49: Stoneborn, Bio-built, and the Skeleton, Wraith and Reaper Hollow (bones,
+  spirits and machines) never bleed, open cuts or leave blood. An Emberborn's blood is magma. Zombie Hollow and every other
+  heritage bleed as before. Villagers of those heritages too.
+- `PowersCompat.heritageBlood` adds a rule to Powers' `BladeBlood.BLOOD`, from `Heritage.register`.
+- Not built locally (no JDK 25 here); not played.
+
+## 0.7.646 (2026-11-07): Magmavein, zombies, Endborn, Divine and Verdant blood; no redstone-dust blood
+- Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the magmavein
+  stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too. just no
+  redstone textures". With Jaymo's Powers 0.21.50 (`PowersCompat.heritageBlood`): a Magmavein Stoneborn bleeds the
+  magma cubes' glowing magma that cools to a crust (other Stoneborn stay bloodless), as Emberborn do; a Zombie Hollow
+  bleeds dark, rotten blood; Endborn ender-purple; Divine gold; Verdant green sap. Their corpses pool the same blood.
+- Blood magic's motes, a Nightborn vampire's blood mist and a Blood Elf's motes are Powers' blood flecks in their own
+  colour, not red dust (`PowersCompat.blood` now passes the colour on, through Powers' `BloodParticles.fleck`).
+- Built; not played.
+
+## 0.7.647 (2026-11-07): Hollow turning follow-ups - weakness then a golden apple cures the blight, zombies stand down, pass out then turn
+- **Weakness then a golden apple cures the blight** (like curing a zombie villager): eating a golden apple while Weakness is active burns the Hollow's blight out while it's still spreading (`HollowBlight.ateGold`, called from `GoldenAppleMixin`). Weakness from a drunk, splash or lingering potion all count; a golden apple alone or a weakness potion alone does nothing.
+- **Zombies don't attack the blighted**: for the whole blight, from stage 0, nearby zombies' target choice is hooked so they skip blighted players and never re-target them (`ZombieBlightMixin` on `NearestAttackableTargetGoal`), and one or two of the nearest speak with ambient zombie sounds now and then instead of attacking. Andy's "no discovery chat text" rule: no chat messages, sounds only.
+- **Pass out, then turn**: when the blight finishes, you pass out first (eyes animate closed via Powers' downed black screen), then rise turned as the Hollow you were becoming. The pending turn is kept in a persistent attachment, so logging out or a restart while passed out still finishes the turn when you come round (`PowersCompat.knockOut` for `TURN_DARK`, wake at `wakeAt`).
+- Compile-checked; not played.
+
+## 0.7.649 (2026-11-07): Kingdoms' tabs on the character menu; everyone gets a journal
+- **Character menu tabs** (Jaymo's Powers 0.21.60's H menu, when Powers is loaded; `client/MenuCompat`, reflection
+  only): **Skills** (the K screen), **Journal & Quests** (the M journal; it still needs a journal on you, Andy: "keep
+  that rule"), **Faction** and **Party**, plus the Character page's "Your life" rows and the Map page's pins. K and M
+  open their page as before, with the menu's tabs on it. Without Powers nothing changes.
+- **Faction** (`FactionScreen`, new; `MenuNet` asks the server): the realm you're sworn to, its kind and overlord,
+  your rank and standing toward the next rank, sworn players, people, treasury, your patron, and its relations. Not
+  sworn: how to join one.
+- **Party** (`PartyScreen`, new): your party's members with health, hunger and distance; buttons that run the
+  `/party` commands (invite a player within 32 blocks, accept or turn down an invite, leave, PvP on/off for the leader).
+- **Everyone gets a traveller's journal** (Andy: "everyone spawns with a journal now"): newcomers with their life
+  story's kit, whatever the start; players from before get one the next time they join. Once only
+  (`Journal.GIVEN`); a lost journal isn't replaced.
+- Built; not played.
+## 0.7.648 (2026-11-07): the Family farmhand's family - wary of monsters, indoors at night, and a farm to work
+Andy: "for the farmhand start, those MCA should be far more wary of zombies and try to hide at night, as a very last
+resort they will have to swing back and defend themselves. they are just deadweight and they make life harder for the
+player. they need some kind of utility or function as of now." (`FarmFamily`, from `FarmhandHome.takeIn` and `Workers.step`.)
+- **Wary**: the family spot a monster from 20 blocks (`WARY_RANGE`) and run, home if that's away from it, else away,
+  until they're 14 blocks clear (`KEEP_AWAY`). They no longer stand about or walk into zombies.
+- **Indoors at night**: from dusk (`HIDE_FROM` 12000) to just before dawn they walk home to their house and stay
+  there; once inside, MCA's brain puts them to bed.
+- **Last resort**: a grown one with a monster at arm's length (`CORNERED` 2.3) and no ground gained running for
+  1.5 s swings back, weakly (`DEFEND_DAMAGE` 1.5, a shove), then tries to run again. Children only run.
+- **Work** (Andy picked all four): by day the grown ones harvest ripe crops within 24 blocks of the house and sow them
+  again, sow bare farmland from their seed, shear sheep, milk a cow when the chest holds an empty bucket, and feed
+  pairs of cows, sheep, pigs or chickens from the chest to breed them while there are fewer than 8 grown of a kind.
+  Everyone (the child too) gathers what's lain about the house for 10 s (eggs, wool, saplings) and carries it to the
+  house chest; a chest is put beside the home spot if the house has none. Each grown one gets a stone hoe.
+- **MCA's chores**: MCA's Work button (harvest, chop, hunt, fish) shows on the grown ones as on your own family
+  (`McaFarmWorkButtonMixin`, told by `InteractActions`); set to a chore, they leave the farm round to MCA's chore.
+- Who they are, their home spot and their chest are kept as entity tags, so it lasts; only new Family farmhand starts.
+- A gray line after the start tells the player what the family does.
+- Compile-checked; not played.
+
+## 0.7.650 (2026-11-07): the Tideborn and fishing
+
+Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime."
+- When a fish takes your hook (Powers 0.21.61's real fishing), any Tideborn within 24 blocks who can see you take it
+  as an attack on their kin: the nearest cries out and squares up, and their neighbours join in, exactly as if you'd
+  struck them (`Retaliation.struck`, an assault where a realm's law holds).
+- On a Tideborn haven's land it's also **poaching**, a new medium crime (`Theft.Crime.POACHING`): if its people see it,
+  reputation there drops, the guards come after you and a bounty goes up. Charged at most once per 30 s; the haven's
+  own folk may fish freely (`TideFishing`).
+- Built; not played.
+
+## 0.7.651 (2026-11-08): no digging or building in tagged dungeons
+
+Andy: "get them, we need it" (Stormborn Tomb, whose tombs rely on DungeonZ's no-build rule).
+- Inside a structure in the `#jaymoskingdoms:no_build_dungeons` tag, survival players can't break or place blocks; doors,
+  chests, levers and buttons still work, and an action-bar line says why. Cobwebs and pots stay breakable
+  (`#jaymoskingdoms:no_build_dungeons_breakable`). Creative and spectators are never blocked.
+- A player's explosion spares blocks inside such a dungeon (`ServerExplosionNoBuildMixin`).
+- The tag is empty until the Stormborn Tomb structures land, so nothing changes in play yet.
+- Built; not played.
+
+## 0.7.652 (2026-11-08): newcomers stay on the loading screen till they're at their start
+
+Andy: "the player is spawned into the world before they teleport to their start, instead of this it should keep them in
+the loading screen so they can read the tips for as long as it takes to load, rather than getting teleported".
+- His clip: once the story was told the newcomer was let down out of stasis onto the spawn village and could walk about
+  for ~7 s while the server searched for the farmhouse (`FarmhandHome.find`), then was put 6,000 blocks off in unloaded
+  land, and only then did the loading screen come up (it was only checked every 5 ticks, after the move).
+- The loading screen now goes up the moment the story sets out (`StoryGround.holdNow`, sent before any search or move),
+  and stays up while they're on their way (`LifeStory.departing`), through the move and the few seconds after.
+- Let go by the server, the screen still stays up (tips cycling) till the chunks round the player have come in and the
+  ground they stand on is drawn, as vanilla's own loading screen waits (at most 30 s), then half a second more.
+- Built; not played.
+- **0.7.653 (pack 0.21.65), a new world never finished starting:** 0.7.644's `WaterClusterMixin` had a non-private static
+  field (`WATER_CLUSTER`), which Mixin refuses ("contains non-private static field"), so `NaturalSpawner` failed to
+  load and chunk [0, 0] failed at its spawn step: the server sat at spawn preparation forever (Streams Reflowing's
+  stall watch: no progress for 180 s). The field is private now; no other mixin has one. Not built here.
+## 0.7.654: the dead talk to the turning
+- Andy's gaps on #1117: zombies standing down by a blighted player now and then stop, look at them and say a line over
+  their head (`hollow_blight.kin.0-9`, a speech bubble to that player, no chat; at most once every 15 s). The blight's
+  pass-out goes through Powers' `Mortality.turnOut` (the Hollow's colour on the black, eyes closing). A vampire's bite at
+  nightfall now passes you out for 14 s first, the black edged blood red, then you wake turned (`VampirePlayers.TURNING_OUT`;
+  at once as before without Powers). Hint 124 mentions weakness and the zombies. Compile-checked; not played.
+
+## 0.7.655 (2026-11-08): Farmhand wakes in bed, family greets you; readable speech bubbles (#1147)
+
+- **Speech bubbles** (Andy: "almost all of the text here was unreadable", with Chat Bubbles as the look he wants): words over a speaker's head (ours and MCA villagers') no longer fill the screen and run off its top when the speaker is a block or two away; nearer than 5 blocks they shrink to the size they'd be from there. The bubble now sits just above the name tag instead of running into it, has a dark background (was faint) and shadowed words, and shows at most 5 rows per speaker. `SpeechBubbles`.
+- **Family farmhand start** (Andy: "start you waking up from the bed, with all your gear in a chest nearby. you should be greeted by the family"): you wake lying in a bed in the family's house, awake (bed rest; Leave Bed gets you up), your eyes opening for a moment. Everything you set out with, journal included, is in a chest beside the bed (a second chest if one isn't enough). The family walk over and tell you, a line at a time over their heads and in chat, that they found you out past the fields, carried you in, your things are in the chest, and you're welcome to stay and work the farm; a child, if there is one, asks if you're staying. Their farm round (wary of monsters, indoors at night, farm work) picks up after. With no bed in the house you stand by it as before. `FarmhandWake` (new), `FarmhandHome`, `FarmFamily`, `LifeStory`, `lang/parts/farm-wake.json`.
+- Built; not played.
+
+## 0.7.656 (2026-11-08): GeckoLib mobs: the draugr, the barrow beetle, and the Stormborn Tomb's skeletons and boss (#1149)
+
+- **GeckoLib** (5.5.7, MIT, Tslat and contributors; the same file the pack already ships) is now a Kingdoms requirement.
+  New animated mobs live in `inhabitants/` (`Inhabitants`, `client/inhabitants/InhabitantsClient`); the pattern to copy
+  is in `docs/AI-HANDBOOK.md`, "Adding a GeckoLib mob to Kingdoms". `tools/bbmodel_geckolib.py` turns a Blockbench
+  project into GeckoLib's files; `kingdoms/tools/gen_tomb_undead.py` makes our models (`kingdoms/art/*.bbmodel`).
+- **Draugr** (`jaymoskingdoms:draugr`, our own model, texture and code): a dead Nordic warrior in a horned helm, mail and
+  fur, 40 health, armour 8. Each rises with a sword and shield (it takes blows and arrows from in front on its shield
+  now and then; an axe knocks its guard down for 5 s) or a two-handed bearded axe (10 damage, knocks a raised shield
+  aside). Its blows chill (a short slowness). Only from spawners and its egg: it's for the Stormborn Tomb's halls.
+- **Barrow beetle** (`jaymoskingdoms:barrow_beetle`, our own): a harmless little beetle in small groups in dark caves
+  under the cold biomes (`has_barrow_beetle`); runs and flutters when hurt. The example GeckoLib mob.
+- **Silver skeleton**, now drawn with GeckoLib (polyjo's Dead Traveler, CC BY 4.0): one a spawner raises first climbs up
+  out of its coffin (a new 2 s "rise", standing still while it does). It is the Stormborn Tomb's skeleton.
+- **Skeleton Lord**, now drawn with GeckoLib (Blockbench Workshop, CC BY 4.0), with three new moves of our own: his staff
+  swung at whoever he hits; a slam of the staff's foot (every 8 s at a foe within 8 blocks) that hurts and throws up
+  everything on the ground within 4.5 blocks; and his Grave Call at 75% and 40% health, raising 2 then 3 silver
+  skeletons that climb out of the floor round him (no more than 6 near him at once). He is the tomb's boss.
+- Draugr Invasion (All Rights Reserved) and Supplementaries are not copied in any form.
+- Built; not played, and no server boot was run: check the four mobs' facing, the GeckoLib animations (Lord's statue,
+  laugh and moves, the skeleton's rise, the draugr's shield) and the beetles' spawning in game.
+
+## 0.7.657 (2026-11-08): Stormborn Tomb: a Nordic barrow and the tomb beneath it (MIT port) (#1137)
+
+Andy: "get them, we need it" (Dungeon Conquest: Stormborn Tomb by Tada_no_ahiru, MIT; licence and credit in
+`licenses/stormborn-tomb-MIT.txt`).
+- **What you find:** in snowy and cold taiga, groves, snowy slopes, meadows and windswept hills (rare: one try per 60x60
+  chunks), a great barrow hill with a hall inside. Beside the end portal frame in the hall, where DungeonZ's portal was,
+  the stone door stands open (the original's Eye of Ender redstone doesn't hold it shut once generated, so nobody is
+  locked out of a no-build tomb); behind it a ladder shaft and a tunnel lead down
+  into the tomb: the entrance hall, hallways, a split with a parkour climb, the great halls and the boss arena, about
+  100 blocks under the hill. Chests and barrels hold the tomb's loot (low to end tier, deeper is better); a chest of
+  boss loot waits in the arena.
+- **Undead:** our own tomb dead stand where Draugr Invasion's did: 27 silver skeletons and 22 draugr (#1149), kept
+  (never despawn), plus spiders in the webbed hall; the old skeleton-warrior spawners spawn silver skeletons. In the
+  boss arena the Skeleton Lord sleeps as a statue until you come within 8 blocks or strike him. Until #1149 is in,
+  the draugr just aren't there.
+- **Swaps** (nothing of Supplementaries, Draugr Invasion, DungeonZ, FrogiLib or Moonlight comes along): candle holders
+  -> candles, fire pits -> campfires, sconces -> torches, urns -> decorated pots, pedestals -> stone brick walls,
+  statues and the hat stand -> armor stands, goblets -> flower pots, cage -> iron bars, globe -> lodestone,
+  hourglasses -> lanterns, FrogiLib anvils/trapdoors -> damaged anvils/open spruce trapdoors, dragon banners -> skull
+  banners, draugr swords/bows -> iron swords/bows, ebony gear -> crossbow/diamond axe/silver sword, bombs -> dynamite
+  and TNT, Supplementaries' disc -> music disc 13, DungeonZ portals -> doorways, DungeonZ's mob/boss/exit marker blocks
+  -> the mobs above, an empty boss spot, a loot chest and an open exit.
+- **How it's built:** the tomb was made for DungeonZ's own dimension, so its rooms were saved as empty space; they're
+  air now, so they don't fill with stone underground. It's ~270 blocks across, past what a jigsaw structure may reach,
+  so the new `StormbornTomb` structure type places its 12 pieces (11 from the original plus our descent) at fixed
+  offsets worked out from their jigsaws. In `#no_build_dungeons`.
+
+## 0.7.658 (2026-11-08): Vampires feed once and flee; villagers fight back with torches (#1151)
+
+- **No more feeding loop** (Andy's playtest: Morven kept feeding on a downed villager and downing them again). A vampire villager knelt to tend the very person it had downed, got them up, and bit again. A vampire now never tends the downed at night. Once its prey is down it does one thing, drains them to death (6 seconds at most), kills them with one blow, or leaves them, and then flees. It never hunts that person again the same night, and never goes after someone already downed. An abstainer still bites once and goes, and now flees too.
+- **Vampires run from fights**: hit by anyone except a lone victim, badly hurt, or with 2 or more armed people (guards, a weapon or a torch in hand) within 10 blocks, a vampire runs at once. It goes fast, toward the darkest spot it can reach away from the scene, for 20 seconds; the Elder flies off as a bat when he can. It only picks prey with fewer than 2 armed people near them.
+- **Others react** (`VampireAlarm`): villagers and folk who see a vampire bite someone are alarmed. One cries out what it is, the rest run and call the guards. Guards, a realm's fighting folk and brave villagers grab a torch (main hand if it holds no weapon, else off hand) and go for it; every guard within 32 blocks answers the call. After 30 seconds, or once it's 28 blocks away, they give up and put the torch away.
+- **Weaknesses** (mob vampires only; a vampire player's are unchanged): fire burns 4x (was 2x). A blow from someone holding a torch in either hand lands 3x and sets it alight for 5 seconds, a burning arrow lands 3x, and a silver weapon (the silver sword) lands 4x.
+- `Vampires` (night step, flee, outcome, weakness), `VampireAlarm` (new), `Downed#canHelp`, `LivingEntityHurtMixin`; lang part `vampire-alarm.json`.
+- Built; not played. Not tested in game: the flight to darkness, villagers' torch blows, and how often MCA villagers' own brains override the walk targets.
+
+## 0.7.659 (2026-11-08): Bogre model, texture and animations (#1146)
+
+- **Bogre art**: added the Bogre's GeckoLib model, original green swamp-ogre texture, editable Blockbench project and 21 animations, including idle, walk, run, attack, cooking and bone-club carving, ready for the separate mob task.
+- Ported from Inhabitants by JeremySeq / Team Synapse, with artist Catalyst and the upstream MIT licence credited in `kingdoms/art/`.
+- Rendered and visually checked; not seen in game yet. The entity, AI and spawning are not included.
+
+## 0.7.660 (2026-11-08): Warped Clam model, texture and animations (#1153)
+
+- **Warped Clam art**: added the Warped Clam's GeckoLib model, original purple Ender-variant texture, editable Blockbench project and all 4 source animations (Opening, closing, Opened and Pushing), ready for the separate mob task.
+- Ported from Inhabitants by JeremySeq / Team Synapse, with artist Catalyst and the upstream MIT licence credited in `kingdoms/art/`.
+- Rendered closed and opened poses and visually checked them; not seen in game yet. The entity, AI and spawning are not included.
+
+## 0.7.661 (2026-11-08): Bogre art in GeckoLib's folders (#1154)
+
+- **Bogre art**: moved the Bogre model and animations into GeckoLib's `geckolib/models/entity/` and `geckolib/animations/entity/` folders and added GeckoLib's format marker, so the Bogre mob can load them when it is added.
+
+## 0.7.662 (2026-11-08): Impaler model, texture and animations (#1155)
+
+- **Impaler art**: added the Impaler's GeckoLib 5 model, original tan spike-covered texture, editable Blockbench project and all 7 source animations: idle, walk, run, bite, hurt, scream and spike throw, ready for the separate mob task.
+- Ported from Inhabitants by JeremySeq / Team Synapse, with artist Catalyst and the upstream MIT licence credited in `kingdoms/art/`.
+- Rendered and visually checked; not seen in game yet. The entity, AI and spawning are not included.

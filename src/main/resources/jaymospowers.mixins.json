@@ -62,7 +62,8 @@
 		"WoundsHurtMixin",
 		"WoundsPlayerHurtMixin",
 		"WoundsRegenMixin",
-		"StructureStateLockMixin"
+		"StructureStateLockMixin",
+		"BaublesQuickEquipMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

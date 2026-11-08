@@ -1144,6 +1144,9 @@ public final class LifeStory {
 			DEPARTED.remove(id);
 			return;
 		}
+		// (Andy: "it should keep them in the loading screen so they can read the tips for as long as it takes to load,
+		// rather than getting teleported") up now, before anything is searched for or made
+		StoryGround.holdNow(player, StoryGround.ARRIVING);
 		RandomSource random = player.getRandom();
 		boolean byFate = chosen == Start.FATE;
 		Start road0 = byFate ? fated(server, player, random) : chosen;
@@ -1159,6 +1162,8 @@ public final class LifeStory {
 			}
 			// (0.7.419) the road fate (or a fallback) set them on stays theirs as well
 			RoadLocks.note(p, start);
+			// (the loading screen up before they're let down out of stasis and moved: a new body may not have it yet)
+			StoryGround.holdNow(p, StoryGround.ARRIVING);
 			p.removeAttached(ROAD);
 			DEPARTED.remove(id);
 			StoryStasis.release(p);
@@ -1195,6 +1200,8 @@ public final class LifeStory {
 		RAGS_ONLY = Flaws.rags(player);
 		try {
 			kit(player, start, landed, raised, cls, option, random);
+			// (0.7.649) Andy: "everyone spawns with a journal now", whatever the start (rags, chains and all)
+			Journal.handOut(player);
 			// (0.7.503) and the medicine that road would have left them (StoryMeds: a full satchel for the sworn, none at rock bottom)
 			for (ItemStack meds : StoryMeds.of(player, start, landed, cls)) {
 				give(player, meds);
@@ -1209,6 +1216,8 @@ public final class LifeStory {
 			: (landed == Start.BANISHED || landed == Start.SWORN || landed == Start.SENTENCED || landed == Start.EVICTED) && roadRealm != null ? roadRealm.id() : -1);
 		// (0.7.418) and the one thing they mean to do (a page in their pack, LifeAims)
 		LifeAims.begin(player, landed, roadRealm);
+		// (Andy) a farmhand wakes in the family's bed, everything they set out with in a chest beside it (FarmhandWake)
+		FarmhandWake.stow(player);
 		// (0.7.420) everyone is wary, a price on their head: once, as the road lands
 		Flaws.landed(player);
 		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads

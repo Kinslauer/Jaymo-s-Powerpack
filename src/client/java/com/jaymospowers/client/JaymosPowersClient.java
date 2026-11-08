@@ -54,6 +54,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
+		// (0.21.60) the character menu's tabs (Kingdoms adds its own through com.jaymoskingdoms.client.MenuCompat)
+		com.jaymospowers.client.menu.MenuTabs.init();
 		for (PowerKey key : PowerKey.values()) {
 			ABILITY_KEYS[key.ordinal()] = KeyMappingHelper.registerKeyMapping(
 				new KeyMapping("key.jaymospowers." + key.id(), DEFAULT_KEYS[key.ordinal()], CATEGORY));
@@ -235,8 +237,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.aether.AetherVeil.init();
 		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
 		com.jaymospowers.client.power.cryo.CryoPowerClient.init();
+		// (0.21.51) realistic fishing: client sends the reel input packet and draws the tension HUD
+		com.jaymospowers.client.fishing.FishingRealClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
+		com.jaymospowers.client.freerun.moves.RunMovesClient.init();
 		// (0.19.24) campfire embers and hot spring steam
 		com.jaymospowers.client.wounds.RestClient.init();
 	}
@@ -311,11 +316,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 			}
 		}
 		while (menuKey.consumeClick()) {
-			// in survival there's nothing to see until your power has awakened (but an unmade affinity choice comes back)
-			if (power != null || player.isCreative()) {
-				minecraft.gui.setScreen(new PowerScreen());
-			} else if (com.jaymospowers.core.Affinity.ENABLED && !com.jaymospowers.core.Affinity.chosen(player)) {
+			// (0.21.60) the character menu, on the tab you had open last; an unmade affinity choice still comes first
+			if (power == null && !player.isCreative() && com.jaymospowers.core.Affinity.ENABLED && !com.jaymospowers.core.Affinity.chosen(player)) {
 				minecraft.gui.setScreen(new AffinityScreen());
+			} else {
+				com.jaymospowers.client.menu.MenuTabs.openLast();
 			}
 		}
 

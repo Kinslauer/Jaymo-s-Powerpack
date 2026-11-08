@@ -1,7 +1,9 @@
 """Writes docs/codemap/<project>.md: one line per Java class with what it does and its main methods.
 
 Agents read (or grep) the map first and open only the files they need, instead of searching thousands of files.
-Run `python3 tools/codemap.py` from anywhere after adding or renaming classes (an out-of-date map is still mostly right).
+The Release workflow (tools/release.py) runs this after every merge to master and commits the maps; PRs don't commit
+them, since every PR touching them conflicted with the next. Run it locally to see your own new classes, then put
+master's maps back before the PR (`git checkout origin/master -- docs/codemap`).
 `python3 tools/codemap.py --check` exits 1 if a map is out of date.
 """
 import os

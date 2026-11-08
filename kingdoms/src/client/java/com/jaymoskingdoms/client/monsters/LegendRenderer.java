@@ -5,7 +5,6 @@ import com.jaymoskingdoms.monsters.LegendMonster;
 import com.jaymoskingdoms.monsters.Mimic;
 import com.jaymoskingdoms.monsters.Monsters;
 import com.jaymoskingdoms.monsters.Ogre;
-import com.jaymoskingdoms.monsters.SilverSkeleton;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.function.Function;
@@ -64,10 +63,6 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		state.shield = monster instanceof Ogre ogre && ogre.shield();
 		state.guard = monster instanceof Ogre ogre && ogre.guarding();
 		state.shut = monster instanceof Mimic mimic && mimic.shut();
-		if (monster instanceof SilverSkeleton skeleton) {
-			state.sinceBlocked = skeleton.sinceBlocked() + partialTicks;
-			state.sinceGuardBroken = skeleton.sinceGuardBroken() + partialTicks;
-		}
 	}
 
 	@Override
@@ -133,8 +128,6 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 			state -> armoured[Math.floorMod(state.variant, armoured.length)], false);
 		register(Monsters.WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("wraith"), true);
 		register(Monsters.FLAME_WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("flame_wraith"), false);
-		EntityRenderers.register(Monsters.SILVER_SKELETON, context -> new LegendRenderer<>(context, new DeadTravelerModel(), 0.6F, 1.0F,
-			state -> DeadTravelerModel.TEXTURE, false));
 		Identifier[] mud = {texture("mud_golem"), texture("mud_golem_mossy")};
 		register(Monsters.MUD_GOLEM, MudGolemModel::new, MudGolemModel.createBodyLayer(), 0.9F, 1.2F, state -> mud[Math.floorMod(state.variant, mud.length)],
 			false);

@@ -200,6 +200,50 @@ public final class Mortality {
 	 */
 	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, @Nullable Runnable>> TURNINGS = new ArrayList<>();
 
+	/**
+	 * (0.21.42) Those already turning when they die (Kingdoms: a Hollow's blight, a vampire's bite before nightfall; Andy:
+	 * "players that get infected and are turning into hollow, shouldnt reincarnate the way everyone else does ... no prompt
+	 * on death, just a longer black screen, an appropriate vignette, and a wakeup as a full turned hollow"). Given the
+	 * player, each may hand back the vignette's colour (RGB) and what finishes the turning as they rise; the first to answer
+	 * has them. Asked before {@link #TURNINGS}; such a death is never final (no head, the void, lava or an execution aside),
+	 * has no come-to bar, and doesn't use up one of the sure wakes.
+	 */
+	public static final List<java.util.function.Function<ServerPlayer, java.util.Map.@Nullable Entry<Integer, Runnable>>> MID_TURNS = new ArrayList<>();
+
+	/** (0.21.42) The black before one dying mid-turn rises (ticks; a turned kill's is {@link #OUT_BEFORE}). */
+	static final int TURN_DARK = 20 * 14;
+
+	/**
+	 * (0.21.66) Andy: "you pass out and then turn as well, make sure the eyes animate closed too". A turning finishing in one
+	 * still alive (Kingdoms: the Hollow's blight run its course, a vampire's bite at nightfall): out cold where they stand for
+	 * {@code ticks}, the same vignette ({@code tint}, RGB) and a line of its own on the black as dying mid-turn
+	 * ({@link #MID_TURNS}). The caller finishes the turning once the black is over. False if they couldn't be put out.
+	 */
+	public static boolean turnOut(ServerPlayer player, int tint, int ticks) {
+		if (!player.isAlive() || WAKES.containsKey(player.getUUID())) {
+			return false;
+		}
+		player.closeContainer();
+		if (player.isPassenger()) {
+			player.stopRiding();
+		}
+		if (!Downed.knockOut(player.level(), player, ticks, false, "message.jaymospowers.mortality.turning_out", false)) {
+			return false;
+		}
+		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.turning_out");
+		player.setAttached(TURN_TINT, tint);
+		JaymosPowers.LOGGER.info("{} passed out turning", player.getScoreboardName());
+		return true;
+	}
+
+	/**
+	 * (0.21.42) The colour (RGB) of the vignette on the black while one dying mid-turn lies turning ({@link #MID_TURNS}).
+	 * Synced to them only; gone once they're up, and not kept over a log-out.
+	 */
+	public static final AttachmentType<Integer> TURN_TINT = AttachmentRegistry.create(JaymosPowers.id("mortality_turn_tint"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.INT,
+			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
+
 	static final Identifier PHASE = JaymosPowers.id("mortality");
 	private static final TicketType WAKING = new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_LOADING);
 
@@ -217,6 +261,8 @@ public final class Mortality {
 		final @Nullable Entity by;
 		/** (0.20.27) What they rise as (see {@link #TURNINGS}), or null for a plain wake. */
 		final @Nullable Runnable turn;
+		/** (0.21.42) Died mid-turn ({@link #MID_TURNS}): the longer black, its vignette, and the turned wake line. */
+		boolean midTurn;
 		int tries;
 		/** (0.21.7) Whether they've chosen to come to (the roll goes ahead), and how long they've held sneak towards it. */
 		boolean chosen;
@@ -341,16 +387,20 @@ public final class Mortality {
 			wake.carried = carried;
 			player.setAttached(WAKE_LINE, carried ? "message.jaymospowers.mortality.carried" : "message.jaymospowers.mortality.lying");
 		}
-		wake.held = player.isShiftKeyDown() && !dark ? wake.held + 1 : 0;
+		// (0.21.39) let go, the bar stays where it is and the next hold carries on (Andy: "every meter should work this way")
+		boolean holding = player.isShiftKeyDown() && !dark;
+		if (holding) {
+			wake.held++;
+		}
 		if (wake.held >= COME_TO_TICKS) {
 			comeTo(player, wake);
 			return;
 		}
-		if (!dark && (wake.held > 0 ? wake.held % 2 == 0 : now % 20 == 0)) {
+		if (!dark && (holding ? wake.held % 2 == 0 : now % 20 == 0)) {
 			int filled = Math.round(COME_TO_BAR * wake.held / (float) COME_TO_TICKS);
 			String bar = "|".repeat(filled) + ".".repeat(COME_TO_BAR - filled);
 			player.sendOverlayMessage(Component.translatable(carried ? "message.jaymospowers.mortality.come_to_carried"
-				: "message.jaymospowers.mortality.come_to", bar).withStyle(wake.held > 0 ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				: "message.jaymospowers.mortality.come_to", bar).withStyle(holding ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
 		}
 	}
 
@@ -405,8 +455,11 @@ public final class Mortality {
 	public static void cancelWake(ServerPlayer player) {
 		Wake wake = WAKES.remove(player.getUUID());
 		if (wake != null) {
-			// ((0.20.83) a death undone doesn't use up one of the sure wakes)
-			player.setAttached(WOKEN, Math.max(0, player.getAttachedOrElse(WOKEN, 0) - 1));
+			// ((0.20.83) a death undone doesn't use up one of the sure wakes; (0.21.42) a mid-turn one never did)
+			if (!wake.midTurn) {
+				player.setAttached(WOKEN, Math.max(0, player.getAttachedOrElse(WOKEN, 0) - 1));
+			}
+			player.removeAttached(TURN_TINT);
 			release(player.level().getServer().getLevel(wake.dimension), wake);
 		}
 	}
@@ -507,14 +560,21 @@ public final class Mortality {
 		Cause cause = cause(player, source, felled);
 		Entity by = (felled != null ? felled : source).getEntity();
 		// (0.20.27) the dead, a witch, a vampire may make one of their own of them instead
-		Runnable turn = Boolean.TRUE.equals(executed) || by == null || cause == Cause.LAVA || cause == Cause.VOID || cause == Cause.BEHEADED
-			? null : turning(player, by);
+		boolean unturnable = Boolean.TRUE.equals(executed) || cause == Cause.LAVA || cause == Cause.VOID || cause == Cause.BEHEADED;
+		// (0.21.42) already turning: they rise the rest of the way, whatever killed them
+		java.util.Map.Entry<Integer, Runnable> mid = unturnable ? null : midTurn(player);
+		if (mid != null) {
+			JaymosPowers.LOGGER.info("{} fell to {} ({}) mid-turn: rising turned", player.getScoreboardName(), cause.key(), source.getMsgId());
+			leftForDead(player, cause, sub(source, felled), by, mid.getValue(), mid.getKey());
+			return false;
+		}
+		Runnable turn = unturnable || by == null ? null : turning(player, by);
 		// (0.20.83) the first deaths of a life always wake (no head, the void, or a deliberate execution aside)
 		int woken = player.getAttachedOrElse(WOKEN, 0);
 		boolean sure = woken < SURE_WAKES && cause != Cause.BEHEADED && cause != Cause.VOID && !Boolean.TRUE.equals(executed);
 		if (turn != null) {
 			JaymosPowers.LOGGER.info("{} fell to {} ({}): turned", player.getScoreboardName(), cause.key(), source.getMsgId());
-			leftForDead(player, cause, sub(source, felled), by, turn);
+			leftForDead(player, cause, sub(source, felled), by, turn, null);
 			return false;
 		}
 		float chance = cause.chance;
@@ -530,8 +590,23 @@ public final class Mortality {
 			player.setAttached(FINAL, cause.key());
 			return true;
 		}
-		leftForDead(player, cause, sub(source, felled), by, null);
+		leftForDead(player, cause, sub(source, felled), by, null, null);
 		return false;
+	}
+
+	/** (0.21.42) What finishes {@code player}'s turning, and the colour of its vignette ({@link #MID_TURNS}), or null. */
+	private static java.util.Map.@Nullable Entry<Integer, Runnable> midTurn(ServerPlayer player) {
+		for (java.util.function.Function<ServerPlayer, java.util.Map.Entry<Integer, Runnable>> mid : MID_TURNS) {
+			try {
+				java.util.Map.Entry<Integer, Runnable> turn = mid.apply(player);
+				if (turn != null) {
+					return turn;
+				}
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("A turning under way failed for {}", player.getScoreboardName(), e);
+			}
+		}
+		return null;
 	}
 
 	/** (0.20.27) What {@code by}'s kill turns {@code player} into ({@link #TURNINGS}), or null. */
@@ -670,9 +745,13 @@ public final class Mortality {
 	 * The death is turned away: health back to a little, and out cold where they fell ({@link Downed#knockOut}: the black screen)
 	 * until they are moved to where they wake ({@link #tick}).
 	 */
-	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn) {
+	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn,
+		@Nullable Integer tint) {
 		ServerLevel level = player.level();
-		player.setAttached(WOKEN, player.getAttachedOrElse(WOKEN, 0) + 1);
+		boolean midTurn = tint != null && turn != null;
+		if (!midTurn) {
+			player.setAttached(WOKEN, player.getAttachedOrElse(WOKEN, 0) + 1);
+		}
 		player.setHealth(Math.max(1.0F, player.getMaxHealth() * WAKE_HEALTH));
 		player.clearFire();
 		player.setAirSupply(player.getMaxAirSupply());
@@ -685,9 +764,16 @@ public final class Mortality {
 			mob.setTarget(null);
 		}
 		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round)
-		Downed.knockOut(level, player, turn != null ? OUT_BEFORE + OUT_AFTER + 20 * 60 : LIE_TICKS, false, "message.jaymospowers.mortality.fading", false);
-		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.fading");
-		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(), level.getServer().getTickCount() + OUT_BEFORE, by, turn);
+		String fading = midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
+		Downed.knockOut(level, player, turn != null ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
+		player.setAttached(WAKE_LINE, fading);
+		if (midTurn) {
+			player.setAttached(TURN_TINT, tint);
+			level.playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.7F, 0.5F);
+		}
+		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(),
+			level.getServer().getTickCount() + (midTurn ? TURN_DARK : OUT_BEFORE), by, turn);
+		wake.midTurn = midTurn;
 		// ((0.21.7) the turned rise as they rise: nothing to carry them away from)
 		if (turn != null) {
 			wake.chosen = true;
@@ -745,6 +831,9 @@ public final class Mortality {
 				}
 				if (player.hasAttached(WAKE_LINE) && !WAKES.containsKey(player.getUUID()) && !Downed.isDowned(player)) {
 					player.removeAttached(WAKE_LINE);
+				}
+				if (player.hasAttached(TURN_TINT) && !WAKES.containsKey(player.getUUID()) && !Downed.isDowned(player)) {
+					player.removeAttached(TURN_TINT);
 				}
 			}
 		}
@@ -988,8 +1077,9 @@ public final class Mortality {
 		if (Downed.isDowned(player)) {
 			Downed.forgetQuietly(player);
 		}
-		Downed.knockOut(level, player, OUT_AFTER, false, "message.jaymospowers.mortality.wake." + (wake.turn != null ? "risen" : line), false);
-		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.wake." + (wake.turn != null ? "risen" : line));
+		String woke = "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
+		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
+		player.setAttached(WAKE_LINE, woke);
 		level.playSound(null, at, wake.turn != null ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F,
 			wake.turn != null ? 0.6F : 0.8F);
 		if (wake.turn != null) {

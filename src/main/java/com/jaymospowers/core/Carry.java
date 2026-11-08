@@ -329,6 +329,11 @@ public final class Carry {
 	/** Player → the lift they're holding. Not saved. */
 	private static final Map<UUID, Lift> LIFTING = new HashMap<>();
 
+	/** (0.21.39) A lift's job in {@link HoldProgress}: whom. */
+	private static String liftJob(Entity target) {
+		return "lift:" + target.getUUID();
+	}
+
 	private Carry() {
 	}
 
@@ -591,7 +596,10 @@ public final class Carry {
 				if (lift != null && lift.target == target) {
 					lift.last = now;
 				} else {
-					LIFTING.put(carrier.getUUID(), new Lift(target, now));
+					// (0.21.39) let go before: the bar carries on where it stopped
+					lift = new Lift(target, now - HoldProgress.get(carrier.getUUID(), liftJob(target)));
+					lift.last = now;
+					LIFTING.put(carrier.getUUID(), lift);
 				}
 			}
 		}
@@ -614,13 +622,15 @@ public final class Carry {
 			}
 			long now = player.level().getGameTime();
 			if (now - lift.last > LIFT_GRACE || !player.isShiftKeyDown() || liftGap(player, target) > LIFT_GAP + LIFT_SLACK) {
-				// let go too soon, stood up, or they slipped away: nothing
+				// let go too soon, stood up, or they slipped away: (0.21.39) the bar stays where it got to, for the next hold
 				it.remove();
+				HoldProgress.set(player.getUUID(), liftJob(target), (int) Math.min(LIFT_TICKS - 1, lift.last - lift.start));
 				continue;
 			}
 			long held = now - lift.start;
 			if (held >= LIFT_TICKS) {
 				it.remove();
+				HoldProgress.forget(player.getUUID(), liftJob(target));
 				if (!isCarrying(player) && !isCarried(player) && !Downed.isDowned(player) && !KitchenCompat.isCarryingCorpse(player)
 					&& !isCarried(target) && !isCarrying(target) && !target.isPassenger() && !target.isVehicle() && canBeCarriedBy(player, target)) {
 					// (0.19.55) someone downed is taken by the shoulder and dragged, armour and all; (0.18.84) anyone else too

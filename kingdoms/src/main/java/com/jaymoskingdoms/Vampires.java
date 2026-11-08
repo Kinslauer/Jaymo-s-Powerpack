@@ -51,6 +51,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -133,6 +134,26 @@ public final class Vampires {
 	/** A blow to the bat: the Elder takes this many times it, and he's knocked out of the form. */
 	static final float BAT_HURT_FACTOR = 2.0F;
 	static final String BAT_TAG = "jaymoskingdoms_elder_bat";
+	/**
+	 * Once its prey is down, what the vampire does: drains them to the death, kills them with one blow, or leaves them where
+	 * they lie (chances; the rest leave). An abstainer always leaves after its one bite. Whatever it chose, it then flees.
+	 */
+	static final float DRAIN_CHANCE = 0.4F, KILL_CHANCE = 0.3F;
+	/** The killing blow on the downed (Powers kills anyone downed at 6 or more). */
+	static final float KILL_DAMAGE = 10.0F;
+	/** Draining the downed stops after this long at most (ticks): it's had its fill and goes. */
+	static final int DRAIN_MAX_TICKS = 20 * 6;
+	/** Fleeing: for how long (ticks), how far it runs (blocks), how many spots it weighs for the darkest, its speed (times walking). */
+	static final int FLEE_TICKS = 20 * 20;
+	static final int FLEE_DISTANCE = 20, FLEE_TRIES = 6;
+	static final float VILLAGER_FLEE_SPEED = 1.1F;
+	static final double FOLK_FLEE_SPEED = 1.5;
+	/** It won't take on, or stay near, this many armed people (guards, a weapon or a torch in hand) within this range (blocks). */
+	static final int GROUP_ARMED = 2;
+	static final double GROUP_RANGE = 10.0;
+	/** A mob vampire's weaknesses: fire's damage (times; a vampire player's stays {@link #FIRE_FACTOR}), a blow from a torch in either hand (times, and the seconds it burns), a burning arrow (times), a silver weapon (times). */
+	static final float MOB_FIRE_FACTOR = 4.0F, TORCH_FACTOR = 3.0F, FLAME_ARROW_FACTOR = 3.0F, SILVER_FACTOR = 4.0F;
+	static final int TORCH_BURN_SECONDS = 5;
 
 	// ---- what's kept ---------------------------------------------------------------------------------------------------
 
@@ -198,18 +219,33 @@ public final class Vampires {
 		final long since;
 		long lastBite;
 		boolean bit;
+		/** What it does once the prey is down. */
+		final Outcome outcome;
+		/** When the prey went down under it (-1: not yet). */
+		long downedAt = -1L;
 
-		Hunt(UUID prey, long since) {
+		Hunt(UUID prey, long since, Outcome outcome) {
 			this.prey = prey;
 			this.since = since;
 			this.lastBite = since;
+			this.outcome = outcome;
 		}
+	}
+
+	/** Once the prey is down: drain them dead, kill them, or leave them. */
+	enum Outcome { DRAIN, KILL, LEAVE }
+
+	/** A vampire running from the scene: from where, until when (game time). */
+	private record Flee(Vec3 from, long until) {
 	}
 
 	/** Loaded vampires and bitten, by UUID; chases; who has shown itself (the night it did). */
 	private static final Map<UUID, PathfinderMob> LOADED = new HashMap<>();
 	private static final Map<UUID, Hunt> HUNTS = new HashMap<>();
 	private static final Map<UUID, Long> EXPOSED = new HashMap<>();
+	/** Vampires running from the scene; and the last one each fed on or left, never hunted again the same night. */
+	private static final Map<UUID, Flee> FLEES = new HashMap<>();
+	private static final Map<UUID, UUID> LAST_PREY = new HashMap<>();
 	/** Elders in flight (by their UUID), and when each may change again (game time). */
 	private static final Map<UUID, Flight> FLIGHTS = new HashMap<>();
 	private static final Map<UUID, Long> BAT_READY = new HashMap<>();
@@ -256,12 +292,16 @@ public final class Vampires {
 		ServerLivingEntityEvents.AFTER_DEATH.register(Vampires::died);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, dealt, taken, blocked) -> {
 			if (taken > 0.0F && source.is(DamageTypeTags.IS_FIRE) && isVampire(entity) && kind(entity) != Kind.DHAMPIR && entity.isAlive()) {
-				entity.setHealth(Math.max(0.5F, entity.getHealth() - taken * (FIRE_FACTOR - 1.0F)));
+				// (a mob vampire burns far worse; a vampire player as before)
+				float factor = entity instanceof Player ? FIRE_FACTOR : MOB_FIRE_FACTOR;
+				entity.setHealth(Math.max(0.5F, entity.getHealth() - taken * (factor - 1.0F)));
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LOADED.clear();
 			HUNTS.clear();
+			FLEES.clear();
+			LAST_PREY.clear();
 			FLIGHTS.clear();
 			BAT_READY.clear();
 			EXPOSED.clear();
@@ -304,6 +344,46 @@ public final class Vampires {
 			level.playSound(null, self.getX(), self.getY(), self.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.6F);
 		}
 		return amount * (kind == Kind.DHAMPIR ? STAKE_DHAMPIR_FACTOR : STAKE_FACTOR);
+	}
+
+	/**
+	 * A mob vampire's weaknesses, on top of the stake: a blow from someone with a torch in either hand lands
+	 * {@link #TORCH_FACTOR} times over and sets it burning; a burning arrow {@link #FLAME_ARROW_FACTOR} times; a silver
+	 * weapon (the silver sword, anything silver but the realms' coins) {@link #SILVER_FACTOR} times. Burning itself is
+	 * {@link #MOB_FIRE_FACTOR}. A vampire player's weaknesses are left as they are. For {@code LivingEntityHurtMixin}.
+	 */
+	public static float weakness(LivingEntity self, DamageSource source, float amount) {
+		if (amount <= 0.0F || self instanceof Player || !isVampire(self) || !(self.level() instanceof ServerLevel level)) {
+			return amount;
+		}
+		Entity direct = source.getDirectEntity();
+		if (direct instanceof net.minecraft.world.entity.projectile.Projectile arrow && arrow.isOnFire()) {
+			return amount * FLAME_ARROW_FACTOR;
+		}
+		if (!(source.getEntity() instanceof LivingEntity attacker) || direct != attacker) {
+			return amount;
+		}
+		float factor = 1.0F;
+		if (torch(attacker.getMainHandItem()) || torch(attacker.getOffhandItem())) {
+			factor *= TORCH_FACTOR;
+			self.igniteForSeconds(TORCH_BURN_SECONDS);
+			level.sendParticles(ParticleTypes.FLAME, self.getX(), self.getY(0.6), self.getZ(), 10, 0.2, 0.3, 0.2, 0.02);
+		}
+		if (silver(attacker.getMainHandItem())) {
+			factor *= SILVER_FACTOR;
+			level.sendParticles(ParticleTypes.SMOKE, self.getX(), self.getY(0.6), self.getZ(), 12, 0.2, 0.3, 0.2, 0.02);
+			level.playSound(null, self.getX(), self.getY(), self.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.8F, 1.4F);
+		}
+		return amount * factor;
+	}
+
+	static boolean torch(net.minecraft.world.item.ItemStack stack) {
+		return stack.is(net.minecraft.world.item.Items.TORCH) || stack.is(net.minecraft.world.item.Items.SOUL_TORCH);
+	}
+
+	/** A silver weapon (silver as {@link Garlic#bane} has it, without the garlic; a weapon, not an ingot or a nugget). */
+	static boolean silver(net.minecraft.world.item.ItemStack stack) {
+		return stack.has(net.minecraft.core.component.DataComponents.WEAPON) && !stack.is(Garlic.GARLIC) && Garlic.bane(stack);
 	}
 
 	public static boolean isVampire(Entity e) {
@@ -424,9 +504,10 @@ public final class Vampires {
 
 	/** By day: just one of the living, if a weak one. */
 	private static void dayStep(PathfinderMob mob) {
-		if (HUNTS.remove(mob.getUUID()) != null) {
+		if (HUNTS.remove(mob.getUUID()) != null | FLEES.remove(mob.getUUID()) != null) {
 			release(mob);
 		}
+		LAST_PREY.remove(mob.getUUID());
 		speed(mob, false);
 		if (mob.tickCount % 100 < 5) {
 			mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 140, 0, true, false, false));
@@ -436,29 +517,40 @@ public final class Vampires {
 	private static void nightStep(ServerLevel level, PathfinderMob mob, Vampire v, long clock, long now) {
 		Kind kind = v.type();
 		long nightNo = nightIndex(clock);
-		// someone hurt it: it runs if it's badly hurt, else it fights them
+		// running from the scene: it keeps running till it's well away, and hunts nobody meanwhile
+		Flee fleeing = FLEES.get(mob.getUUID());
+		if (fleeing != null) {
+			if (now < fleeing.until() && mob.position().distanceTo(fleeing.from()) < FLEE_DISTANCE * 1.5) {
+				speed(mob, true);
+				eyes(level, mob);
+				if (mob.getNavigation().isDone() || mob.tickCount % 40 < 5) {
+					runFrom(level, mob, fleeing.from());
+				}
+				return;
+			}
+			FLEES.remove(mob.getUUID());
+			release(mob);
+		}
+		// someone hurt it
 		LivingEntity foe = mob.getLastHurtByMob();
 		if (foe != null && (!foe.isAlive() || mob.tickCount - mob.getLastHurtByMobTimestamp() > GRUDGE_TICKS || foe.distanceTo(mob) > GRUDGE_RANGE
 			|| foe instanceof ServerPlayer p && (p.isCreative() || p.isSpectator()))) {
 			foe = null;
 		}
-		if (foe != null && mob.getHealth() < mob.getMaxHealth() * FLEE_AT) {
-			expose(mob, nightNo);
-			if (kind == Kind.ELDER && batReady(mob, now)) {
-				Vec3 away = mob.position().subtract(foe.position()).multiply(1.0, 0.0, 1.0).normalize().scale(BAT_FLEE).add(mob.position());
-				takeOff(level, mob, null, ground(level, away));
-				return;
-			}
-			flee(mob, foe);
-			eyes(level, mob);
-			return;
-		}
 		Hunt hunt = HUNTS.get(mob.getUUID());
 		LivingEntity prey = hunt == null ? null : level.getEntity(hunt.prey) instanceof LivingEntity l ? l : null;
-		if (foe != null && foe != prey) {
-			hunt = new Hunt(foe.getUUID(), now);
-			HUNTS.put(mob.getUUID(), hunt);
-			prey = foe;
+		// (Andy: "they are not equipped for fights with large parties"): hit by anyone but a lone prey, badly hurt, or with
+		// several armed people about, it runs at once; a lone victim who fights back is fair game
+		if (foe != null && (foe != prey || mob.getHealth() < mob.getMaxHealth() * FLEE_AT) || prey != null && armedNear(level, mob, mob) >= GROUP_ARMED) {
+			flee(level, mob, foe != null ? foe : prey, nightNo, now);
+			return;
+		}
+		if (prey != null && hunt.downedAt >= 0L && !Downed.isDowned(prey)) {
+			// (Andy: Morven "kept feeding on the person who was downed, and instantly downing them again") they were got up
+			// (tended, or rose): it never goes back for them; it's had what it came for, and goes
+			fed(mob, v, nightNo, now);
+			flee(level, mob, prey, nightNo, now);
+			return;
 		}
 		if (prey != null && (!prey.isAlive() || prey.distanceTo(mob) > LOSE_RANGE || now - hunt.lastBite > GIVE_UP_TICKS)) {
 			HUNTS.remove(mob.getUUID());
@@ -474,7 +566,7 @@ public final class Vampires {
 		if (prey == null && hungry(v, kind, nightNo, now)) {
 			prey = findPrey(level, mob, kind);
 			if (prey != null) {
-				hunt = new Hunt(prey.getUUID(), now);
+				hunt = new Hunt(prey.getUUID(), now, outcome(level.getRandom(), kind));
 				HUNTS.put(mob.getUUID(), hunt);
 			}
 		}
@@ -497,16 +589,79 @@ public final class Vampires {
 			return;
 		}
 		chase(mob, prey);
+		if (hunt.downedAt >= 0L && now - hunt.downedAt > DRAIN_MAX_TICKS) {
+			// (drained all it could hold: it leaves what's left of them)
+			fed(mob, v, nightNo, now);
+			flee(level, mob, prey, nightNo, now);
+			return;
+		}
 		if (mob.distanceTo(prey) <= BITE_REACH && now - hunt.lastBite >= BITE_EVERY && mob.hasLineOfSight(prey)) {
 			hunt.lastBite = now;
 			strike(level, mob, v, kind, prey, nightNo, now, foe == prey);
+			// whoever sees it feed cries out, runs or fights (VampireAlarm)
+			VampireAlarm.seen(level, mob, prey);
+			if (!prey.isAlive()) {
+				// (fed to the kill: fed() was had in strike; it leaves the body)
+				flee(level, mob, prey, nightNo, now);
+				return;
+			}
 			if (kind == Kind.ABSTAINER && hunt.bit) {
 				// (it let go after one bite: it's fed, ashamed, and it goes)
-				mob.setAttached(VAMPIRE, new Vampire(v.kind(), nightNo, now));
-				HUNTS.remove(mob.getUUID());
-				release(mob);
+				fed(mob, v, nightNo, now);
+				flee(level, mob, prey, nightNo, now);
+				return;
+			}
+			if (hunt.bit && Downed.isDowned(prey) && (person(prey) || mortal(prey))) {
+				afterDowned(level, mob, v, hunt, prey, nightNo, now);
 			}
 		}
+	}
+
+	/** What it does once a hunt starts and its prey falls: an abstainer only ever leaves them. */
+	private static Outcome outcome(RandomSource random, Kind kind) {
+		if (kind == Kind.ABSTAINER || kind == Kind.HUNTER) {
+			return Outcome.LEAVE;
+		}
+		float r = random.nextFloat();
+		return r < DRAIN_CHANCE ? Outcome.DRAIN : r < DRAIN_CHANCE + KILL_CHANCE ? Outcome.KILL : Outcome.LEAVE;
+	}
+
+	/**
+	 * Its prey lies downed: one feeding, then it's done with them. It drains them (biting on, up to
+	 * {@link #DRAIN_MAX_TICKS}, till they die), kills them with one blow, or leaves them; and then it flees. Never feeds on
+	 * them again, nor downs them again once they're up (nightStep).
+	 */
+	private static void afterDowned(ServerLevel level, PathfinderMob mob, Vampire v, Hunt hunt, LivingEntity prey, long nightNo, long now) {
+		if (hunt.downedAt < 0L) {
+			hunt.downedAt = now;
+		}
+		switch (hunt.outcome) {
+			case DRAIN -> {
+				// (bites on, next steps, till they're dead or it's full)
+			}
+			case KILL -> {
+				prey.hurtServer(level, level.damageSources().mobAttack(mob), KILL_DAMAGE);
+				fed(mob, v, nightNo, now);
+				flee(level, mob, prey, nightNo, now);
+			}
+			case LEAVE -> {
+				fed(mob, v, nightNo, now);
+				flee(level, mob, prey, nightNo, now);
+			}
+		}
+	}
+
+	/** Armed people within {@link #GROUP_RANGE} of {@code center} (not downed, not its own kind; {@code center} counts too, the vampire never): guards, anyone with a weapon or a torch in hand. */
+	static int armedNear(ServerLevel level, LivingEntity center, PathfinderMob vampire) {
+		return level.getEntitiesOfClass(LivingEntity.class, center.getBoundingBox().inflate(GROUP_RANGE),
+			e -> e != vampire && e.isAlive() && !isVampire(e) && !Downed.isDowned(e) && !(e instanceof ServerPlayer p && (p.isCreative() || p.isSpectator()))
+				&& (e instanceof Player || e instanceof Villager || e instanceof Folk) && armed(e)).size();
+	}
+
+	static boolean armed(LivingEntity e) {
+		net.minecraft.world.item.ItemStack main = e.getMainHandItem();
+		return Downed.isGuard(e) || e instanceof Folk folk && folk.combatant() || VampireAlarm.defending(e)
+			|| main.has(net.minecraft.core.component.DataComponents.WEAPON) || torch(main) || torch(e.getOffhandItem());
 	}
 
 	private static boolean hungry(Vampire v, Kind kind, long nightNo, long now) {
@@ -523,7 +678,10 @@ public final class Vampires {
 		LivingEntity best = null;
 		double bestD = Double.MAX_VALUE;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(kind == Kind.ELDER ? ELDER_PREY_RANGE : PREY_RANGE),
-			e -> e != mob && (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e) || mortal(e) && !(kind == Kind.ELDER && NightbornBlood.kin(e))))) {
+			e -> e != mob && !e.getUUID().equals(LAST_PREY.get(mob.getUUID())) && !Downed.isDowned(e)
+				&& (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e) || mortal(e) && !(kind == Kind.ELDER && NightbornBlood.kin(e)))
+				// (a lone victim: nobody it would go for with several armed about them)
+				&& armedNear(level, e, mob) < GROUP_ARMED)) {
 			double d = e.distanceToSqr(mob);
 			if (d < bestD) {
 				bestD = d;
@@ -595,7 +753,10 @@ public final class Vampires {
 
 	private static void fed(PathfinderMob mob, Vampire v, long nightNo, long now) {
 		mob.setAttached(VAMPIRE, new Vampire(v.kind(), nightNo, now));
-		HUNTS.remove(mob.getUUID());
+		Hunt had = HUNTS.remove(mob.getUUID());
+		if (had != null) {
+			LAST_PREY.put(mob.getUUID(), had.prey);
+		}
 		release(mob);
 	}
 
@@ -649,13 +810,61 @@ public final class Vampires {
 		}
 	}
 
-	private static void flee(PathfinderMob mob, LivingEntity from) {
-		Vec3 away = mob.position().subtract(from.position()).normalize().scale(12.0).add(mob.position());
-		if (mob instanceof Villager v) {
-			BehaviorUtils.setWalkAndLookTargetMemories(v, new BlockPosTracker(net.minecraft.core.BlockPos.containing(away)), VILLAGER_HUNT_SPEED, 1);
-		} else {
-			mob.getNavigation().moveTo(away.x, away.y, away.z, FOLK_HUNT_SPEED);
+	/**
+	 * It breaks off and runs from the scene ({@code from}: whoever it runs from, or the one it fed on), shown for what it
+	 * is, for {@link #FLEE_TICKS}: fast, toward the darkest place it can reach away from there (the Elder as a bat, when he
+	 * can change). Whoever it was hunting it won't hunt again tonight.
+	 */
+	private static void flee(ServerLevel level, PathfinderMob mob, @Nullable LivingEntity from, long nightNo, long now) {
+		expose(mob, nightNo);
+		Hunt had = HUNTS.remove(mob.getUUID());
+		if (had != null) {
+			LAST_PREY.put(mob.getUUID(), had.prey);
 		}
+		release(mob);
+		Vec3 at = from != null ? from.position() : mob.position();
+		FLEES.put(mob.getUUID(), new Flee(at, now + FLEE_TICKS));
+		eyes(level, mob);
+		if (kind(mob) == Kind.ELDER && batReady(mob, now)) {
+			Vec3 dir = mob.position().subtract(at).multiply(1.0, 0.0, 1.0);
+			dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, mob.getYRot()) : dir.normalize();
+			takeOff(level, mob, null, ground(level, dir.scale(BAT_FLEE).add(mob.position())));
+			return;
+		}
+		speed(mob, true);
+		runFrom(level, mob, at);
+	}
+
+	/** Off away from {@code from}, to the darkest of a few spots it can reach (straight away if it finds none). */
+	private static void runFrom(ServerLevel level, PathfinderMob mob, Vec3 from) {
+		Vec3 best = null;
+		int bestLight = Integer.MAX_VALUE;
+		for (int i = 0; i < FLEE_TRIES; i++) {
+			Vec3 to = LandRandomPos.getPosAway(mob, FLEE_DISTANCE, 7, from);
+			if (to == null) {
+				continue;
+			}
+			int light = level.getMaxLocalRawBrightness(BlockPos.containing(to));
+			if (light < bestLight) {
+				bestLight = light;
+				best = to;
+			}
+		}
+		if (best == null) {
+			Vec3 dir = mob.position().subtract(from).multiply(1.0, 0.0, 1.0);
+			dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, mob.getYRot()) : dir.normalize();
+			best = dir.scale(FLEE_DISTANCE).add(mob.position());
+		}
+		if (mob instanceof Villager v) {
+			BehaviorUtils.setWalkAndLookTargetMemories(v, new BlockPosTracker(BlockPos.containing(best)), VILLAGER_FLEE_SPEED, 1);
+		} else {
+			mob.getNavigation().moveTo(best.x, best.y, best.z, FOLK_FLEE_SPEED);
+		}
+	}
+
+	/** It's running from the scene just now. */
+	static boolean fleeing(Entity e) {
+		return FLEES.containsKey(e.getUUID());
 	}
 
 	static void release(PathfinderMob mob) {
@@ -880,6 +1089,8 @@ public final class Vampires {
 	private static void died(LivingEntity entity, DamageSource source) {
 		UUID id = entity.getUUID();
 		HUNTS.remove(id);
+		FLEES.remove(id);
+		LAST_PREY.remove(id);
 		EXPOSED.remove(id);
 		LOADED.remove(id);
 		if (kind(entity) != Kind.ELDER || !(entity.level() instanceof ServerLevel level)) {

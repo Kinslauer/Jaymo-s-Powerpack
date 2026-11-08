@@ -25,6 +25,7 @@ abstract class WebLivingEntityRendererMixin {
 		com.jaymospowers.client.water.SwimStrokePose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.freerun.RunPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.freerun.UpRunPose.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.freerun.moves.RunMovesPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebClimbPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebExecutionPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebBodyPose.rotate(state, poseStack, entityScale);
@@ -58,6 +59,7 @@ abstract class WebLivingEntityRendererMixin {
 		com.jaymospowers.client.armory.HeldItems.extract(entity, state, partialTicks);
 		com.jaymospowers.client.freerun.RunPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.freerun.UpRunPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.freerun.moves.RunMovesPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebHangPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebClimbPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebHeldGrabPose.extract(entity, state, partialTicks);

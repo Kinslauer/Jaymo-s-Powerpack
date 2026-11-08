@@ -26,6 +26,7 @@
 	"message.jaymospowers.downed.rise_hint": "You're down. Hold sneak to get yourself up",
 	"message.jaymospowers.downed.rising": "Getting to your feet... [%s]",
 	"message.jaymospowers.downed.rise_stopped": "You sink back down.",
+	"message.jaymospowers.downed.rise_winded": "Winded from the fall. A moment...",
 	"message.jaymospowers.downed.rise_knocked": "Knocked back down! Let go of sneak and try again",
 	"message.jaymospowers.downed.risen": "You drag yourself to your feet.",
 	"message.jaymospowers.downed.revive_broken": "The blows drive you off %s.",
@@ -253,5 +254,9 @@
 	"message.jaymospowers.limbs.gone": "%s gone: you can't do that without it",
 	"message.jaymospowers.limbs.no_arms": "No arms left to do that with",
 	"message.jaymospowers.halved": "Cut in two. You're bleeding out...",
-	"message.jaymospowers.rubber_split": "Cut in half! Swallow something within 10 seconds or you won't pull yourself together"
+	"message.jaymospowers.rubber_split": "Cut in half! Swallow something within 10 seconds or you won't pull yourself together",
+	"message.jaymospowers.downed.struggle": "Struggling with it... [%s]",
+	"message.jaymospowers.downed.bed": "You haul yourself up into the bed.",
+	"message.jaymospowers.downed.bed_resting": "Resting. Your %s is still too hurt to get up.",
+	"message.jaymospowers.downed.bed_ready": "Rested enough: hold sneak to get up, or lie on and keep mending."
 }

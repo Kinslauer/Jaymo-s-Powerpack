@@ -50,7 +50,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
 		// (0.7.529) town golems
 		EntityRenderers.register(com.jaymoskingdoms.TownGolem.TYPE, TownGolemRenderer::new);
-		EntityRenderers.register(com.jaymoskingdoms.SkeletonLord.TYPE, SkeletonLordRenderer::new);
+		// GeckoLib mobs: the barrow beetle, the draugr, the silver skeleton and the Skeleton Lord
+		com.jaymoskingdoms.client.inhabitants.InhabitantsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
@@ -101,6 +102,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
+		// 0.7.649: Kingdoms' tabs on Jaymo's Powers' character menu (H), when Powers is loaded
+		MenuCompat.register();
 		// (0.7.490) Hordes, Orc war journals: the Lore Codex screen
 		LoreCodexClient.register();
 		// 0.7.55: the wardrobe (MCA's editor, clothes only) from the inventory
@@ -179,6 +182,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SensesClient.register();
 		HiddenBladeClient.register();
 		VampireLooks.register();
+		StakeLayer.register();
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();

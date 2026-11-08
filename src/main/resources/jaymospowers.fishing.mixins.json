@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.fishing.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"FishingHookMixin",
+		"FishingRodItemMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

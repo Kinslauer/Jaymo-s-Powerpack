@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "L L",
+    "LLL"
+  ],
+  "result": {
+    "id": "jaymospowers:traceur_boots"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "caught=false,facing=north": {
+      "model": "jaymoskitchen:block/cage_trap"
+    },
+    "caught=false,facing=east": {
+      "model": "jaymoskitchen:block/cage_trap",
+      "y": 90
+    },
+    "caught=false,facing=south": {
+      "model": "jaymoskitchen:block/cage_trap",
+      "y": 180
+    },
+    "caught=false,facing=west": {
+      "model": "jaymoskitchen:block/cage_trap",
+      "y": 270
+    },
+    "caught=true,facing=north": {
+      "model": "jaymoskitchen:block/cage_trap_caught"
+    },
+    "caught=true,facing=east": {
+      "model": "jaymoskitchen:block/cage_trap_caught",
+      "y": 90
+    },
+    "caught=true,facing=south": {
+      "model": "jaymoskitchen:block/cage_trap_caught",
+      "y": 180
+    },
+    "caught=true,facing=west": {
+      "model": "jaymoskitchen:block/cage_trap_caught",
+      "y": 270
+    }
+  }
+}

@@ -19,5 +19,9 @@ abstract class BackpackAvatarRendererMixin {
 		BackpackClient.extract(entity, state, partialTicks);
 		// (Motion patch 4) after the backpack, so a lantern pole stands clear of it
 		com.jaymospowers.client.baubles.WornLanterns.extract(entity, state, partialTicks);
+		// (0.21.37) every other worn bauble's look
+		com.jaymospowers.client.baubles.WornLooks.extract(entity, state);
+		// (0.21.41) the archer hood's cloak, and its hood down on the back
+		com.jaymospowers.client.costume.HoodedCloakLayer.extract(entity, state);
 	}
 }

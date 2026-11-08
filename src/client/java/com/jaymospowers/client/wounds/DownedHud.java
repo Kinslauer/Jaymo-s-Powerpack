@@ -45,11 +45,19 @@ public final class DownedHud {
 
 	/** (0.18.84) Knocked out: how long the black takes to come over the screen, and to lift as they come round (ticks). */
 	static final float BLACK_IN_TICKS = 6.0F, BLACK_OUT_TICKS = 30.0F;
+	/** (0.21.66) Passing out to turn: the eyes take this long to close (ticks); the soft edge of a lid (share of the screen). */
+	static final float TURN_CLOSE_TICKS = 50.0F, LID_SOFT = 0.12F;
 	/**
 	 * (0.20.94) A death turned away (Mortality.WAKE_LINE): the black lifts this slowly, the line on it this big, and wrapped
 	 * at this share of the screen's width.
 	 */
 	static final float WAKE_OUT_TICKS = 80.0F, LINE_SCALE = 1.5F, LINE_WIDTH = 0.6F;
+
+	/**
+	 * (0.21.42) Dying mid-turn: the vignette's reach (as {@link #ring}'s strength, lower reaches further), how bright, and one
+	 * slow breath every this many ticks.
+	 */
+	static final float TURN_STRENGTH = 0.25F, TURN_GLOW = 1.1F, TURN_BREATH = 70.0F;
 
 	/** (0.20.94) The line on the black now (a lang key), kept while the black lifts. */
 	private static @org.jspecify.annotations.Nullable String line;
@@ -81,7 +89,9 @@ public final class DownedHud {
 		if (said != null) {
 			line = said;
 		}
-		black = knocked ? Math.min(1.0F, black + 1.0F / BLACK_IN_TICKS)
+		// ((0.21.66) passing out to turn, the eyes close slowly: Mortality.TURN_TINT)
+		boolean turning = player != null && player.hasAttached(com.jaymospowers.core.wounds.Mortality.TURN_TINT);
+		black = knocked ? Math.min(1.0F, black + 1.0F / (turning ? TURN_CLOSE_TICKS : BLACK_IN_TICKS))
 			: Math.max(0.0F, black - 1.0F / (line != null ? WAKE_OUT_TICKS : BLACK_OUT_TICKS));
 		if (black <= 0.0F) {
 			line = null;
@@ -130,6 +140,11 @@ public final class DownedHud {
 	 * {@code strength} fades, swelling a little on each heartbeat. Drawn as frames of bands, from the edge in.
 	 */
 	private static void ring(GuiGraphicsExtractor graphics, float strength, float swell, float fade) {
+		ring(graphics, strength, swell, fade, RING);
+	}
+
+	/** (0.21.42) {@link #ring} in {@code rgb}. */
+	private static void ring(GuiGraphicsExtractor graphics, float strength, float swell, float fade, int rgb) {
 		int w = graphics.guiWidth(), h = graphics.guiHeight();
 		float weak = 1.0F - strength;
 		float reach = Math.min(w, h) * net.minecraft.util.Mth.lerp(weak, RING_STRONG, RING_SPENT) * (1.0F + RING_PULSE * swell);
@@ -145,7 +160,7 @@ public final class DownedHud {
 			if (b <= a || a * 2 >= Math.min(w, h)) {
 				continue;
 			}
-			int color = Math.min(255, alpha) << 24 | RING;
+			int color = Math.min(255, alpha) << 24 | rgb;
 			// one frame: the top and bottom strips full width, the sides between them
 			graphics.fill(a, a, w - a, b, color);
 			graphics.fill(a, h - b, w - a, h - a, color);
@@ -154,11 +169,54 @@ public final class DownedHud {
 		}
 	}
 
+	/**
+	 * (0.21.66) Andy: "make sure the eyes animate closed too". The black comes as eyelids: a lid down from the top and one up
+	 * from the bottom, soft at their edges, meeting in the middle as {@code dark} reaches 1 (and parting again as it lifts),
+	 * the rest of the screen dimming behind them.
+	 */
+	private static void lids(GuiGraphicsExtractor graphics, float dark) {
+		int w = graphics.guiWidth(), h = graphics.guiHeight();
+		if (dark >= 1.0F) {
+			graphics.fill(0, 0, w, h, 0xFF000000);
+			return;
+		}
+		float eased = dark * dark * (3.0F - 2.0F * dark);
+		// behind the lids, the world dims as they close
+		graphics.fill(0, 0, w, h, Math.round(dark * dark * 200.0F) << 24);
+		float lid = h / 2.0F * eased;
+		float soft = h * LID_SOFT;
+		int solid = Math.max(0, Math.round(lid - soft));
+		if (solid > 0) {
+			graphics.fill(0, 0, w, solid, 0xFF000000);
+			graphics.fill(0, h - solid, w, h, 0xFF000000);
+		}
+		// the lid's edge, fading out over LID_SOFT of the screen
+		int bands = 8;
+		for (int i = 0; i < bands; i++) {
+			int a = solid + Math.round(soft * i / bands), b = solid + Math.round(soft * (i + 1) / bands);
+			if (b <= a || a >= h / 2) {
+				continue;
+			}
+			int alpha = Math.round(255.0F * (1.0F - (i + 0.5F) / bands));
+			graphics.fill(0, a, w, Math.min(b, h / 2), alpha << 24);
+			graphics.fill(0, Math.max(h - b, h / 2), w, h - a, alpha << 24);
+		}
+	}
+
 	/** (0.18.84) Out cold: black. */
 	private static void renderBlack(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		float dark = blackBefore + (black - blackBefore) * delta.getGameTimeDeltaPartialTick(false);
 		if (dark > 0.0F) {
-			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), Math.round(dark * 255.0F) << 24);
+			lids(graphics, dark);
+		}
+		// (0.21.42) dying mid-turn (Mortality.TURN_TINT): what they're becoming creeps in from the edges of the black, slowly
+		// breathing, the colour of it
+		LocalPlayer player = Minecraft.getInstance().player;
+		Integer tint = player == null ? null : player.getAttached(com.jaymospowers.core.wounds.Mortality.TURN_TINT);
+		if (tint != null && dark > 0.0F) {
+			float t = (player.tickCount + delta.getGameTimeDeltaPartialTick(false)) / TURN_BREATH;
+			float breath = 0.5F + 0.5F * net.minecraft.util.Mth.sin(t * net.minecraft.util.Mth.TWO_PI);
+			ring(graphics, TURN_STRENGTH, breath, dark * TURN_GLOW, tint);
 		}
 		// (0.20.94) what happened, large in the middle of it, to be read before the world comes back
 		int alpha = Math.round(dark * 255.0F);

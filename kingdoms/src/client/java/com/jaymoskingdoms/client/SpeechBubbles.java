@@ -43,10 +43,22 @@ public final class SpeechBubbles {
 	static final int MAX_LINES = 3, WRAP_WIDTH = 170;
 	/** Seen from no farther than this (blocks), as chat reached before. */
 	static final double MAX_DISTANCE = 24.0;
-	/** Height above the name tag spot (blocks), so a name tag still fits under it. */
-	static final double LIFT = 0.75;
-	/** Background behind the words: black at this opacity (0-255), faded with the words. */
-	static final int BACKGROUND_ALPHA = 0x60;
+	/**
+	 * Where a name tag sits over the name tag spot (blocks, as vanilla draws it), and the gap left above it: the bubble's
+	 * bottom sits there, so a name tag never runs into the words.
+	 */
+	static final double NAME_TAG_TOP = 0.5, NAME_TAG_GAP = 0.08;
+	/** Text size in the world (blocks per font pixel), as a name tag's. */
+	static final float SCALE = 0.025F;
+	/**
+	 * Andy's clip: words from a villager a block or two away filled the screen and ran off its top. Nearer than this
+	 * (blocks) the words shrink with the distance, so they look the size they would from here.
+	 */
+	static final double FULL_SIZE_FROM = 5.0;
+	/** Rows shown per speaker at most (the oldest go first), so a long talk doesn't tower over them. */
+	static final int MAX_ROWS = 5;
+	/** Background behind the words: black at this opacity (0-255), faded with the words; dark enough to read over sky or snow. */
+	static final int BACKGROUND_ALPHA = 0xB0;
 	/** (0.7.597) How strongly the words show through a block in the way (of their full opacity). */
 	static final float SEE_THROUGH_ALPHA = 0.5F;
 
@@ -134,6 +146,10 @@ public final class SpeechBubbles {
 				colors.add(ARGB.color(alpha, line.color));
 			}
 		}
+		while (rows.size() > MAX_ROWS) {
+			rows.removeFirst();
+			colors.removeFirst();
+		}
 		Vec3 at = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getYRot(partialTicks));
 		if (at == null) {
 			at = new Vec3(0.0, entity.getBbHeight(), 0.0);
@@ -149,10 +165,13 @@ public final class SpeechBubbles {
 		}
 		Font font = Minecraft.getInstance().font;
 		poseStack.pushPose();
-		poseStack.translate(bubble.attachment().x, bubble.attachment().y + LIFT, bubble.attachment().z);
-		poseStack.rotate(camera.orientation);
-		poseStack.scale(0.025F, -0.025F, 0.025F);
 		int n = bubble.rows().size();
+		float scale = SCALE * (float)Math.min(1.0, Math.sqrt(state.distanceToCameraSq) / FULL_SIZE_FROM);
+		// (the bottom row's foot just above the name tag; rows are drawn from their top, down)
+		double lift = NAME_TAG_TOP + NAME_TAG_GAP + font.lineHeight * scale;
+		poseStack.translate(bubble.attachment().x, bubble.attachment().y + lift, bubble.attachment().z);
+		poseStack.rotate(camera.orientation);
+		poseStack.scale(scale, -scale, scale);
 		for (int i = 0; i < n; i++) {
 			FormattedCharSequence row = bubble.rows().get(i);
 			int color = bubble.colors().get(i);
@@ -163,7 +182,7 @@ public final class SpeechBubbles {
 			// faint copy shows through blocks, and the full words wherever nothing is in the way
 			int faint = ARGB.color((int)(ARGB.alpha(color) * SEE_THROUGH_ALPHA), color);
 			collector.submitText(poseStack, x, y, row, false, Font.DisplayMode.SEE_THROUGH, 0xF000F0, faint, background, 0);
-			collector.submitText(poseStack, x, y, row, false, Font.DisplayMode.NORMAL, 0xF000F0, color, 0, 0);
+			collector.submitText(poseStack, x, y, row, true, Font.DisplayMode.NORMAL, 0xF000F0, color, 0, 0);
 		}
 		poseStack.popPose();
 	}

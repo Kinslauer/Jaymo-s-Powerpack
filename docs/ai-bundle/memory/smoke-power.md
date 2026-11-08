@@ -1,0 +1,22 @@
+---
+name: smoke-power
+description: Smoke power (Andy 2026-10-14, from a YouTube top-10 video), stage 1 draft PR #168 as pack 0.10.54; gas sim in power/smoke/SmokeField
+metadata:
+  type: project
+  modified: 2026-10-14T16:40:25.678Z
+---
+2026-10-14 Andy: "use this [youtube.com/watch?v=suH-0zIiLU4] to power a new Smoke power's logic". The cloud can't watch YouTube (captcha); the oEmbed title is AsianHalfSquat's "Top 10 Minecraft Mods (26.2)". The thread assumed Physics Mod's volumetric smoke (ARR) and asked Andy to name the mod if it was a different one.
+Stage 1: draft PR #168, branch claude/project-thread-rdney3, pack 0.10.54 (0.10.52/53 were taken by the immersion mods and web lines threads). Jar is in /mnt/project-files/smoke/. Smoke is a block-by-block gas: it rises, spreads, leaks, drifts on wind and fades in rain. It hides targets from mobs and greys the view. Kit: R Smokescreen (starter), G Vapour Form, V Smoke Bomb (a snowball wearing a firework star), B Smother (drains air, then chokes). Calling: 60 s near 3+ fires. Design notes: docs/smoke.md.
+Stage 2 (proposed, not built): Z Smoke Sight, X Smoke Step, C Pyroclasm, corrupted Smog, the cure, Vapour Form through 1-block gaps.
+2026-10-14 16:26Z Andy named the mod: Advanced Chimneys (CC BY-ND 4.0). It's now in packMods unchanged (with ForgeEndertech, dev: false). The gas follows its rules: heat sources boost the smoke (SmokeHeat), each block carries soot that changes with the path (fire darkens it, leaves clean it), and smoke rides its chimneys (ChimneyCompat reads block ids only).
+2026-10-14 16:48Z: PR #168 MERGED as pack 0.10.54 (master had web lines 0.10.53; immersion mods' 0.10.52 not merged yet). Andy liked the gas ('i like this'). Stage 2 only if Andy asks.
+**How to apply:** bring master in and take the next free version before merging; Andy merges only on "merge".
+2026-10-15 Andy asked for a map of the rest of Smoke (smog via corruption, ascension harnesses clouds / calms tornadoes). Plan: /mnt/project-files/smoke/Smoke-Plan.md (Z Smoke Sight, sneak+X Smoke Step, mastered Seep/Bank; Smog corruption from black-smoke use, Pyroclasm = corrupted C; Cloudshaper ascension via Storm Seed, C Harness the Sky with Kingdoms hooks Storms.calm / Tornadoes.unwind by reflection; Ash Storm for both). 4 open questions; build only on Andy's go.
+2026-10-15 Andy's answers: max mastery = cruising Vapour is wholly smoke/intangible; Cloudshaper only stops tornadoes forming + weakens; Ash Storm (both) at max mastery can kill one (drains corruption, harder to regain each time) and can create one; smog hits everyone but the user and may destroy blocks. Stage 1 (Sight, Step, wholly smoke, bank) = draft PR #201, branch claude/project-thread-lzhumq, pack 0.10.110 (0.10.108 merged, #197 holds one). Jar /mnt/project-files/smoke-stage1/.
+2026-10-15 00:54Z: PR #201 MERGED as pack 0.10.110.
+2026-10-15 01:1xZ: stage 2 Smog (corruption from black smoke, toxic clinging smog, wilting, Choke Bomb/Black Lung/Soot Jet, C Pyroclasm, cure air/rain/3 days) = draft PR #202, pack 0.10.112 (master 0.10.111). Not built: no-regen in clean air, MCA mood.
+2026-10-15 01:4xZ: PR #202 MERGED (0.10.112). Stage 3 Cloudshaper (ascend: 30 s in a storm at Y150+ in Vapour; white cloud smoke; C Harness the Sky: raincloud tap / calm storm / unwind tornado via Kingdoms disasters/SkyCalm by reflection) = draft PR #206, pack 0.10.117 / Kingdoms 0.7.34. Fate.purify is permanent, so stage 4 Ash Storm's 'kill drains corruption, harder each time' needs a re-corruptable Smoke (Andy 01:19Z: yes, it can be corrupted again, just more difficult each time).
+2026-10-15 01:5xZ: stage 4 Ash Storm (both fates: tap C storm, sneak+tap soot rain, hold unwinds to a kill = purify then un-purify, kills saved in smoke_tornado_kills, meter 1.5x slower per kill; sneak+hold feeds a supercell/own storm a tornado via SkyCalm.touchdown) built as pack 0.10.121 / Kingdoms 0.7.35 on LOCAL branch smoke-stage4 on top of #206; patch + jars /mnt/project-files/smoke-stage4/. Open its PR after #206 merges. All 4 stages done.
+2026-10-15 01:3xZ: PR #206 MERGED (0.10.117 / Kingdoms 0.7.34). Stage 4 Ash Storm = draft PR #208 (0.10.121 / 0.7.35).
+2026-10-15 01:3xZ: #208 renumbered to 0.10.126 / Kingdoms 0.7.39 (master 0.10.122 Void Crown); recheck master before merging.
+2026-10-15 01:4xZ: PR #208 MERGED (pack 0.10.126 / Kingdoms 0.7.39). All four Smoke stages merged.

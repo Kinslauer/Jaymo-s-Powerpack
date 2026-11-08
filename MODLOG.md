@@ -1331,13 +1331,436 @@ a weapon in hand keeps it the finisher's hold and the quick kill).
   out of a sprint; still held at the end = prone). The server's `Slide.valid` no longer checks Sneak (the client keeps it
   off through the hold). `SPRINT_GRACE_TICKS` stays 8. Compile-checked against the 26.3 jars; not played.
 
-## 0.21.37: Ultimates patch 2: seven more Ultimates, each its own alien
-- `docs/Ultimates-Plan.md` patch 2, built on the patch 0/1 framework. Each is a `XenoUltimate` with its own body, health bar, R G V B and C, a model in `client/.../ultimate/`, a 128x128 skin from `tools/ultimates/<id>.py` (run by `tools/gen_xeno_ultimates.py`, graded into the Excalibur pack), and a film part order. The base aliens lost their old 0.18.93 Ultimate-only code and return the new form from `evolved()`; their models and skins are unchanged. Renames in lang: Ironclad -> Ironpour (Rivet) and Tidecaller -> Brinecrown (Slipfin).
-  - **Wyrm -> Elder Wyrm** (2x, +12 hearts): R Void Breath (three clouds of purple fire), G Elder Wings (hold; free fast flight, sneak to dive, the landing throws things up), V Tempest Beat (9 blocks, throws out and up, swats projectiles), B Void Rift (24-block teleport, fire clouds at both ends), C Endfire Volley (five dragon fireballs).
-  - **Duplex -> Copper Storm** (0.9x, +6 hearts): R Storm Split (two charged doubles at once, up to 6), G Bolt Rally (doubles swarm a target, the first strikes it with lightning; sneak: Fetch), V Arc Switch (swap with a double, shocking the line; sneak: eyes), B Overcharge Merge (doubles run back in, heal and buff you), C Copper Storm (lightning on every double, 20 s charge).
-  - **Rivet -> Ironpour** (full size, +7 hearts): R Overmeld (into a shell from 8 blocks, every shell move half again as strong), G Twin Lash (two whips, two creatures), V Molten Pour (fast dash, nothing lands on you, lava wake), B Overdrive Ride (drive a minecart, golem or mech with Resistance II and a ram), C Foundry Slam (leap and slam, 10 damage in 5 blocks).
-  - **Gorger -> Worldmaw** (1.6x, +12 hearts): R Deep Gulp (3x3 face of blocks, gut of 24), G Rubble Cannon (cone plus up to 3 flying blocks), V Quake Charge (gore run, ledge slam), B Spiked Roll (hold), C Worldmaw (2 s inhale that eats a cone and drags creatures in, then a double-damage Gut Blast).
-  - **Slipfin -> Brinecrown** (1.3x, +6 hearts): R Tide Jet, G Undertow Slip, V Torrent Dart (bites everything on the way), B Bloom Regrow, C Brinecrown (12 s downpour: puts fires out, Slowness II, a push wave every 2 s).
-  - **Polestar -> Lodestar** (1.5x, +12 hearts): R Great Pull (24 blocks), G Shock Repel, V Triple Lift (three iron blocks orbit, then are thrown), B Bastion Field (hold; arrows fly back), C Lodestar (6 s magnetic pole holding every iron-wearer within 16, then thrown out).
-  - **Lurk -> Nightfall** (1.3x, +6 hearts): R Mark of Night (3 marks), G Nightstep (strike from behind, chains to the next mark), V Terror, B Deep Fade, C Nightfall (8 s of darkness and blindness within 16 blocks, creatures glow on your screen alone).
-  - Effects on players respect pvp and the base alien's `spared()`; block changes respect `mayBuild()`/`mayInteract`; nothing started is left behind on drop, break, revert, death, quick change, dimension change or server stop. Compile-checked; not played. Open items: Ironpour's bigger melded shell (`XenoformLayer`) and slam column act, Worldmaw's inhale act and Nightfall's first-person arm (`XenoformHand`) are not wired, so those poses fall back to the default look.
+## 0.21.37: every worn bauble shows on the body
+- Andy: "Would this trinkets' system animate any other baubles? If so i want them to be integrated" (picked: Artifacts'
+  ported baubles and our own starters). No other pack mod relied on Trinkets for drawing (scanned all 123 downloaded jars),
+  but our Artifacts port never drew anything on the player. Now 49 baubles do: hats, hoods, masks and the circlet on the
+  head; scarves and pendants at the neck; charms and belt gadgets at the belt; gloves, claws, gauntlets, bracers and rings
+  on the hands (ring slot 1 right hand, slot 2 left); shoes on both feet; the featherfall cloak down the back (hides the cape).
+- `Baubles.LOOKS`: each slot's item id, synced to everyone (`Baubles.looks`). `client/baubles/WornLooks` reads
+  `worn_looks.json`, bakes a player-model layer per look (wide and slim arms, and a left-hand ring variant), and draws each
+  worn look; scarf tails, pendants, charms, hanging pouches, feathers, jester horns and the cloak swing with the stride and
+  idle; parts scale out over the matching armour piece.
+- Our own boxes and textures (REA, docs/Worn-Looks-Spec.md): `tools/gen_worn_looks.py` writes the json and
+  `textures/entity/worn/*.png`. Lanterns, the coin purse, the hip bottles, the lantern pole, fairies and quivers keep their
+  own drawing.
+- Andy: "Can we not port their looks too?" The 25 baubles that kept their Artifacts look (villager and angler's hats,
+  scarves, necklaces, pendants, the neck charms, cloud bottle, skull, antidote, crystal heart, chorus totem, claws, fire
+  gauntlet, vampiric glove, golden hook, withered bracelet, hare boots, kitty slippers, snowshoes, spikes, rooted and
+  strider shoes) now use Artifacts' own worn models, textures and renderers (MIT, ported into
+  `client/baubles/artifacts/worn/`, textures in `textures/entity/wearable/artifacts/` with the licence): `WornArtifacts`
+  draws them from `Baubles.looks`, gloves and claws on both hands, belt charms at the front of the right hip. The
+  cloud bottle, skull and antidote leave `#jaymospowers:hip_shown` (no more flat sprite at the hip). Our own looks stay for
+  the 7 starters, the sky mask and the 16 we repainted medieval, whose Artifacts models are the modern things we renamed
+  away from. Gradle compile clean; not played.
+
+## 0.21.38: a traditional kneel, posed with the weapon; climbing hand over hand
+- Andy: "the newest kneel has both knees bent in front of the character, it should look more like a traditional kneel,
+  posing with a weapon in hand like a hand on the sword's pommel, blade in the ground, similar with an axe, or a low ready
+  with a rifle or bow". `CrouchPose` (the low crouch's kneel): the knee on the ground is now behind the hip (`BACK_LEG`
+  0.40, shin flat behind, `BACK_KNEE` 1.09), the front knee a touch above the hip with the shin straight down
+  (`FRONT_THIGH`/`FRONT_KNEE` 1.65), hips sunk 6.5 px (`SINK`). The hands pose by `CrouchPose.Style`, read from the main
+  hand through `Finishers.kind`: `PLANT` (sword, greatsword, axe, blunt) puts it point or head down in front of the knee
+  with both hands stacked on the pommel or haft end; `UPRIGHT` (spear, polearm, staff) stands it beside the knee; `BOW`
+  and `RIFLE` (gun, crossbow) hold it at a low ready, arrow or muzzle toward the ground ahead. The weapon is turned in the
+  hand by `CrouchPose.grip` (from `FinisherItemInHandLayerMixin`); the off hand joins only when empty; left-handed bodies
+  are mirrored. Aiming, drawing or swinging from the knee still leaves the arms to vanilla. The other kneels (tending,
+  finishers, executions) keep `KneelLegs`.
+- Andy: "a better climbing animation, moving hands and feet interchangeably". The cling (freerun climb and webbed fists)
+  no longer borrows Not Enough Animations' ladder pose (`NeaLadderMixin`, `WallClimbs` and the nea mixin config are gone).
+  `WebParkourPose.climbLimb`: each hand grips (`HAND_HOLD` 0.6 of the cycle) and stays on its spot while the body rises,
+  then lets go and reaches up to the next hold; the hands half a cycle apart, each foot stepping up with the opposite hand
+  (`FOOT_HOLD` 0.45), knees turned out. Keyed to the distance climbed (up, down or across, `CLIMB_CYCLE` 1.2 blocks), so
+  it holds still while you hang and runs backward climbing down. Two-bone reach (`reach`) bends the elbows and knees at
+  draw time (`bendLimbs`, from `TendModelFeatureRendererMixin`). Worked out on preview renders
+  (`art-overhaul/kneel-climb`); compile-checked, not played.
+## 0.21.39: every held bar keeps its progress
+- Andy: "the bar should stay where it is even after you stop scrolling, the same way tree chopping works, every meter
+  should work this way, especially washing rags" (throws and combat charges excepted). New `core/HoldProgress` keeps how
+  far each player got at each held job (not saved). Let go, step away or lose the target and the bar stays; the next hold
+  at the same job carries on. A job done empties it, and so does a hold broken off by blows (a revive or Second Wind broken by hits, a treatment spoiled by a hit).
+- Washing a rag (`RagWashing`): the wash counts its own ticks instead of the use time, so a rag half washed stays half
+  washed. Treating (`Treatment`): kept per patient, part and remedy. Reviving (`Downed`): kept per body and per downing.
+  Giving up: kept for the downing.
+- Getting up by yourself is the one exception (Andy: "they fall everytime they let go, that one should restart the meter
+  because the animation would break if not"): let go part way up and you drop back to the ground (a thud, and
+  `CrawlPose.sink` draws the body falling from where the rise had got to, quicker as it goes, over 7 ticks), and the
+  next hold starts from the ground. Andy: "unable to restart the getup until a second after you hit the ground", with
+  "slight particle dust as you thud into the ground, larger dust for larger characters": a second's wait after landing
+  ("Winded from the fall"), and `Downed.thud` puffs the ground's own dust along the body, more and wider by the body's
+  width squared (a great ape or a giant raises a cloud); a rise knocked down by blows thuds the same way. Second Wind (`SelfRevive`) and coming to where you lay
+  (`Mortality`): kept. Lifting someone (`Carry`): kept per target.
+- Not changed: throws (rocks, daggers), finishers, the stake struggle, spell and power charges, the knock-out mash, and
+  minigame bars (smithing, brewing, jewellery). Compile-checked; not played.
+
+## 0.21.40: sliding down the wall when the grip goes
+- Andy: "There should be a fluid transition to an animation while sliding after you lose grip". `WebParkourPose`: a
+  freerun cling moving down (only the slip does) eases a `slip` share in (`SLIP_EASE` a frame) and blends the climb into a
+  slide: both arms up and clawing (`SLIDE_CLAW`), elbows a little bent, legs straight with the toes scraping and kicking a
+  knee up in turn, body pressed into the wall (`SLIDE_LEAN` 6 degrees), head back looking up. The drop doesn't count as
+  climbed distance, so the climb's limbs hold still under the blend instead of running backward. Compile-checked, not played.
+
+## 0.21.44: Sora's Dagger stages keep their own look
+- Fixes what #1096 (Sora's Dagger 2.0 models) broke. The gold, diamond and tempest daggers point back at their own models
+  (`soras_dagger_<stage>` and `_reverse`); only the base dagger uses 2.0, since 2.0 has no per-stage textures yet.
+- `soras_dagger_2_0_reverse` was a copy of the forward model, so a reverse grip looked like a normal one. It now flips the
+  blade the way the old reverse did (third person X -170, first person X -60), with the translation worked out so the
+  grip (model point 8,5,6) stays in the hand.
+- The 2.0 models (and the wood variant) get a `ground` pose (scale 0.4) so a dropped dagger isn't full size.
+- Removed the stale `libs/jaymos-kitchen-0.5.38.jar` (#1096 added it; master builds Kitchen 0.5.57). Compile-checked; not played.
+
+## 0.21.45: dying mid-turn rises you turned
+- Andy: "players that get infected and are turning into hollow, shouldnt reincarnate the way everyone else does, if they
+  die before fully turning, then they dont get a prompt on death, just a longer black screen, an appropriate vignette, and
+  a wakeup as a full turned hollow whichever they may be." `Mortality.MID_TURNS` (Kingdoms fills it: the Hollow's blight,
+  a vampire's bite before nightfall) is asked before `TURNINGS`. Such a death is never final (beheaded, the void, lava or an
+  execution aside), skips the come-to bar, doesn't use up a sure wake, and lies `TURN_DARK` (14 s) in the black with the
+  line "Something in your blood keeps moving after your heart stops", then rises where it fell (the drowned on the shore)
+  as what it was becoming, with no new injury ("The turning is done").
+- `Mortality.TURN_TINT` (synced, not saved) carries the turning's colour; `DownedHud` draws it as a slow breathing ring
+  at the edges of the black. Chrono's R window on a waking is unchanged (a rewind clears the tint). Compile-checked; not played.
+
+## 0.21.46 (2026-11-07): up to 3 weapons on the body; the tool belt is a bauble and shows them all
+- Andy: "players should animate up to 3 weapons on them by default, and wearing the toolbelt animates everything like
+  before. it should go in the baubles slot."
+- Weapon Master draws up to 3 hotbar items on the body (the lowest slots not in hand; was 1 since 0.20.73), and all of
+  them while a Traveler Tool Belt is worn (`client/mixin/weaponmaster/WeaponMasterShownMixin`, `MAX_SHOWN`).
+- The tool belts (all six) fit the Baubles belt slot, and only a belt worn there counts: its radial menu, tool swap
+  and hip model all read that slot (`mixin/toolbelt/ToolBeltHelperMixin`, `compat/ToolBeltCompat`). A belt carried in
+  the inventory no longer counts, so move it to the belt slot. Smoke's vapour sheds it from the slot.
+- Andy: "lanterns and coin purses can work from inside the belt". The tool belt takes lanterns and coin purses
+  (`ToolBeltHelperMixin` on `isItemValid`), and one carried in a worn tool belt works as if worn in the belt slot: it
+  hangs at the hip, a lantern lights the way, and Kingdoms pays from and pickpockets lift the purse (`Baubles.belt` and
+  `setBelt` read and write the first purse, else lantern, inside the tool belt; `Baubles.beltSlot` is the slot itself).
+  Gradle build only, not played.
+
+## 0.21.48 (2026-11-07): the Ranger and Netherite Ranger hoods get the hooded cloak, each in its own colours
+- The Archers' ranger_armor_head and netherite_ranger_armor_head now work with the hooded cloak from #1095: the cloak's collar, back panel and mantles render on the wearer, the mask key lowers the hood onto the back and raises it again, and Kingdoms sees the wearer as hooded while it's up.
+- `HoodedCloakLayer` picks a per-hood cloak texture (`hooded_cloak.png`, `hooded_cloak_ranger.png`, `hooded_cloak_netherite_ranger.png` from `tools/gen_hooded_cloak.py`, coloured from each hood's own texture in the Archers jar).
+- `cloak_hoods.json` now lists exactly the three Archers hoods.
+- Compile-checked; not played.
+
+## 0.21.49 (2026-11-07): downed, every right-click is a struggle; doors push open, beds let you mend
+- Andy: "while downed, you cannot interact with doors or other right clickable things", then: "every downed right click
+  should be a 3s struggle ... making the door push open slowly for every second holding, right clicking a bed while downed
+  hauls you into it, so you can recover there without the need for meds or another player, it just takes time, more the
+  more you are hurt" and "you get back up whenever you want, but you recover the whole time".
+- Downed but awake, hold right-click on a block: a 3-second struggle bar fills (it keeps its place if you let go), then
+  the block works as if your hand were empty (doors, trapdoors, gates, buttons, levers, chests). What you hold is never
+  used; cakes stay off. Attacking, items and powers stay dead; passed out or knocked out, nothing works. Locks and other
+  mods' gates still apply.
+- **Doors** (with Spooky Doors, now in the pack): the door swings open a little more for every moment you push; an open
+  one is pushed shut. Without Spooky Doors it opens when the bar fills.
+- **Beds**: the struggle hauls you up onto the bed. Lying there you don't bleed out or pass out, the pain eases, and your
+  most hurt part mends every 2 seconds (1 health point), all the way to whole; after a minute a broken bone sets itself.
+  The worse you're hurt, the longer it takes. Hold sneak to get up whenever you're well enough; you rise with what you've
+  mended. Crawl off and the rest ends.
+- **Cuts in bed** (Andy: "the bleeding can hold up to two cuts by holding still. any others will still bleed. taking into
+  account each bleeding entity's mB"): lying still, you hold two open cuts shut (a severed stump counts as two); every
+  other cut still pours your blood, each at the downed rate of your own body's blood. Shift about and they all bleed.
+  Bled dry in bed, you pass out where you lie.
+- **Stemming the bleeding** (Andy: "animate the hands moving to stem the bleeding"): holding still in bed, your hands press
+  on the cuts they hold: under the chest, at the neck, back on a thigh, across to the other arm. Everyone sees it
+  (`DownedStruggle.HOLDING`, synced; `CrawlPose.stem`, tuning `STEM_*`).
+- **Who bleeds** (Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race. (emberborn should
+  have the magma blood)"): with Kingdoms 0.7.645, Stoneborn, Bio-built, and the Skeleton, Wraith and Reaper Hollow have no
+  blood: no cuts, no pools, no smears. Emberborn bleed magma. `BladeBlood.BLOOD` (new) lets another mod decide a body's
+  own blood; `Bleeding.bleeds` and a body's corpse now ask it.
+- `DownedStruggle` (new): the struggle and the bed rest; tuning at the top. `compat.SpookyDoorsCompat` (new) calls Spooky
+  Doors' public API by reflection. `Downed`: the use-block refusal moved to the FIRST phase and lets an awake main hand
+  through, a LAST-phase handler runs the struggle; `awake()`, `holdClock()`; rising after rest keeps the mended health.
+  `Wounds.restPart`/`restedHealth`; `BleedOut` pours a resting player's blood by `DownedStruggle.bleedingCuts`. `DownedKeysMixin` keeps `key.use` live with the crosshair on a block. Spooky Doors
+  26.3.0.2 joins `packModsNoCf` (needs Balm, already in the pack).
+- Not built locally (no JDK 25 here; GitHub's PR checks build it); not played.
+
+## 0.21.50 (2026-11-07): who bleeds what, settled; blood on the ground lies still; no redstone look
+- Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the magmavein
+  stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too. just no
+  redstone textures ... and the blood that falls on the ground shouldnt randomly sputter or splat or move unless directly
+  interacted with. right now you will see it erupting from trails on the ground like it was bubbling or something."
+- **Kinds of blood**: every zombie (zombies, husks, drowned, zombie villagers, zombified piglins, zoglins, anything in
+  `#minecraft:zombies` or `#c:zombies`, and any mod's mob that is a `Zombie` in code) bleeds dark, rotten blood
+  (`BladeBlood.ROTTEN`, tag `blood/rotten`). Magma cubes really bleed the glowing, cooling magma now: they were in both
+  `blood/dark` and `blood/magma` and dark won. New colours for Kingdoms' heritages: `GOLD` (Divine), `SAP` (Verdant).
+- **Corpses bleed the body's own blood**: a new body keeps the blood it died with (`BleedOut.CORPSE_OWN`, saved), so an
+  Emberborn's corpse pools magma, a zombie's rotten blood, and a bloodless heritage's corpse doesn't bleed when hit, blown
+  apart, dragged or hung (`BladeBlood.bleeds/color(Entity, EntityType)`).
+- **Blood that lands, and magma** (Andy: "the magma should bubble as it cools throwing off those popping lava particles, the
+  BLOOD should not. it can still move and fall and drip, like water does through blocks, but over ledges. this way a
+  bleeding body above a ledge can drip a pool up to 20 blocks below it"): magma blood keeps its lava pops and smoke as it
+  cools; blood still pours down ledges and drips off them. Blood now falls up to 20 blocks to the ground (was 6), its
+  stain showing once the drop could have got there (`BloodTrail.FALL`, `DROP_FALL`). The red "bubbling" on trails was most
+  likely the stump bleed's vanilla lava drips, which splash and sizzle where they land; those are gone (below).
+- **No redstone dust for blood**: the Z-Fighter's blood-for-ki spills blood flecks, not red dust.
+- **Skeletons don't bleed when cut apart** (Andy: "skeletons should not bleed"): losing a head or limb used to throw gore
+  and bleed from the stump whatever the body; a body with no blood now loses it in chips of bone, with no stump bleed, and
+  its severed head or limb never drips (`SeveredPart` keeps the body's blood).
+- **Kitchen's blood is the body's own** (Andy: "double check that", with Kitchen 0.5.86): `BladeBlood.bodyBlood(Entity)`
+  gives Kitchen a living body's or a corpse's blood, or none; a bloodless carcass on a meat hook no longer drips or pools.
+- **A stump spurts** (Andy: "the decapitation bleed effect looks just like lava drips, it can stay but the particle should
+  be red, and it should shoot multiple at once, in larger spurts as they fall if they do, less if they stay standing"): the
+  vanilla lava drip is gone; every few ticks a fresh stump throws several drops of the body's own blood out of it (up from a
+  neck), 2 small ones while the body stands, 5 bigger, faster ones once it has fallen (`Dismember.spurt`, tuning `SPURT_*`).
+- Built; not played.
+
+## 0.21.51 (2026-11-07): ParCool's running and falling moves, our own
+- Andy picked these off the ParCool comparison checklist ("Go to their tutorial on github and make a checklist of
+  everything we dont have yet"). Our own code after ParCool's ideas (alRex-U, LGPL, Forge-only): nothing of its code or
+  art. Everyone gets them; they cost Feathers. New package `freerun/moves` (`RunMoves` registers them all).
+- **Long jump** (`LongJump`): in a fast run, tap Sneak as you jump (up to 4 ticks before, 3 after): a long, flat leap
+  (about 7 blocks), legs reaching ahead; 3 feathers. A tap only: a held Sneak is still the slide, two taps the zoom, and
+  the air flip lets that tap go.
+- **Charge jump** (`ChargeJump`): stand still on the ground and hold Sneak; after 8 ticks a pale bar fills over the
+  Feathers row (1.5 s to full). Jump leaps up to about twice as high; moving lets it go. 1-4 feathers. Not for a web
+  slinger: Web keeps its own (`WebSwing#tickChargeJump`). A double tap (the zoom's) never charges.
+- **Trick jump** (`TrickJump`): a jump out of a fast run flips on its own a quarter of the time (front flip mostly,
+  back flip sometimes), in the air flip's pose. Free; never on a long jump. The Sneak-tap air flip is unchanged.
+- **Safety tap** (`LandingRoll.safetyTap`): the dodge at touchdown with no direction held (from the air, or just after
+  landing a fall of 2.5+ blocks) is now a crouched landing instead of the forward roll: 60% of the fall damage off, 3
+  feathers. Hold a direction to roll as before (all of it off, 6 feathers).
+- **Sky dive** (`SkyDive`): 6+ blocks into a fast fall, press Jump to spread out flat: falls at most 1.5 blocks a tick
+  (a plain fall reaches about 3.9), steers much faster; Jump again ends it. 2 feathers. Only if, two ticks after the press,
+  you're still plainly falling, so a cloud in a bottle's jump, wings or a flight keep their Jump. Fall damage is unchanged.
+- **Fast swim** (`FastSwim`): 2 s of sprint swimming breaks into a faster swim (a pull the way you look, up to 0.55
+  blocks a tick) with a butterfly stroke and dolphin kick (`SwimStrokePose`) and a bubble trail; a feather every 1.5 s.
+- **Hiding** (`Hiding`): hold Sneak and walk into a leaves block or a hay bale at your feet for 12 ticks and you squeeze
+  in, sunk so it covers you. Mobs drop you as a target and barely see you (only one right beside you notices), and your
+  name tag is hidden. Jump climbs out; so does taking damage, the block going, or using or swinging anything. Inside hay
+  you don't suffocate, aren't pushed out, and can see out (mixins in `freerun/moves/mixin` and the client's).
+- Poses for everyone (`RunMovesPose`): the long jump's sail, the safety tap's crouch, the sky dive spread flat.
+- The traceur gloves and boots come in a second PR.
+- Built; not played.
+
+## 0.21.52 (2026-11-07): ParCool track A: ledge shimmy, castaway, wall slide, moving along bars
+- Andy's picks from the ParCool checklist ("Go to their tutorial on github and make a checklist of everything we dont have
+  yet"), track A. Our own code after ParCool's ideas; nothing of theirs copied.
+- **Ledge shimmy**: hanging from a ledge, A or D moves you sideways along the edge, slowly (`Ledge.SHIMMY_SPEED`), hand
+  over hand; it stops where the edge ends, steps up or down, or something is in the way (`Ledge.shimmySpot`). The server
+  hears each new block held (`Ledge.Shimmy`). Everyone sees the hands shuffle and the body rock (`LedgePose`).
+- **Castaway**: hanging, Jump + Back kicks you off backwards, out and up (`Ledge.CASTAWAY_OUT/UP`, like the vertical wall
+  run's eject). Back alone still lets go, after a 3-tick wait for the Jump (`CASTAWAY_WAIT_TICKS`).
+- **Wall slide** (`WallSlide`, `WallSlideClient`, everyone): falling beside or facing a wall, hold right-click with an
+  empty hand to press against it and slow the fall to 0.15 blocks/tick. Each tick on the wall sheds half a block of the
+  fall, and 1.5 s on it takes all of it. Ice, glass and leaves are too slippery. 1 Feather (half-icon) to press on, then
+  1 a second. Bare hands burn on a long slide (half a heart every 2 s) unless guarded: `WallSlide.addHandGuard(Predicate)`
+  is the hook for track B's traceur gloves.
+- **Moving along bars and chains**: in Bar Swing, the movement keys (W/S, or A/D across) move you hand over hand along a
+  run of bars, chains or fences at the same height (`Freerun.BAR_MOVE_SPEED`, `Freerun.BAR_MOVE`); Jump still swings off
+  and Sneak drops. The swing calms and the hands alternate while moving (`BarHangPose`).
+
+## 0.21.54 (2026-11-07): traceur gloves and boots (ParCool track B part 2)
+
+- **Traceur gloves** (wrist bauble, leather and string): bare hands no longer burn on a long wall slide —
+  `WallSlide.addHandGuard` now registers the traceur gloves (`freerun/gear/TraceurGloves`).
+- **Traceur boots** (leather): more safe fall distance softens landings, and while worn they carry the freerun leaps
+  farther: long jump speed x 1.10 (`LONG_JUMP_BONUS`), charge jump +0.05 blocks a tick (`CHARGE_JUMP_BONUS`), and the
+  safety tap takes 85% of the fall damage off instead of 60% (`SAFETY_CUT` plus `SAFETY_CUT_BONUS`). Worn boots draw
+  their own equipment texture (`equipment/traceur_boots.json`), and the gloves' and boots' descriptions now show as
+  item tooltips.
+
+Built; not played.
+
+## 0.21.55 (2026-11-07): blood decals and overlays stop fighting their surfaces
+- Blood on the ground, on walls and on weapons no longer z-fights with the surface it's drawn on: puddles, footprints and wall marks sit a clear hair above blocks, and blood on swords and axes is drawn a clear step off the item's own faces. The flicker is stopped by a depth bias on the decals' own pipeline (`BloodDecals.DECAL_LAYER`: the translucent particle pipeline with a depth bias), not by the lift, so decals stay flush on slopes, slabs, stairs, carpets, snow layers and at block edges; the lift stays tiny (`DECAL_LIFT 0.002`, `BloodPuddle.java`).
+- Puddles and wall marks at the edge of view distance fade out over the last blocks instead of popping (`DRAW_DISTANCE_FADE`, `BloodPuddle.java`, `BloodWallMark.java`).
+- Audited the other flat overlays: blood on creatures and items (`BloodCoatLayer`, `BloodItemOverlay`), armour grime (`ArmourGrimeMixin`), wound overlays (`client/wounds`), Kingdoms Armory 3D pieces and `WornModel` over armour (`kingdoms/src/client/java/com/jaymoskingdoms/client/WornModel.java`) — they draw through cutout/entity layers or screen-space HUDs, not decals over surfaces, so nothing to change there; `WornModel` follows EMF/Fresh Animations poses through `keepBody`/`setupAnim`, and Kingdoms' `ArmorPoseLivingEntityRendererMixin`/`EmfWornPose` only keep the body's pose. Kitchen's corpse overlays come through `BloodCoatLayer`'s reflection hooks (`client/blood/BloodCoatLayer.java`) — nothing to change there either; its files stay out of this PR.
+- Built; not played.
+
+## 0.21.56 (2026-11-07): Critter Armour fits under Fresh Animations
+- Andy: "the new armor isnt mapped properly to the mobs": Critter Armory's pig, sheep and horse armour was drawn in
+  the vanilla pose while Fresh Animations re-animates the animal models, so the armour slid off the animated body.
+- client/compat/CritterArmoryFreshAnimationsCompat (EMF checks in CritterArmoryEmf) plus mixins on PoseLayersLivingEntityRendererMixin,
+  QuadrupedModel (pigs, sheep) and AbstractEquineModel (horses, donkeys, mules; head and neck, body, legs, not the tail)
+  keep Fresh Animations's animated body pose on the render state, only when EMF animated it that frame (not paused), just before the render layers, so Critter Armory's
+  armour models take it (Powers 0.21.56). Only active when both Entity Model Features and Critter Armory are loaded;
+  Critter Armory is linked, never edited.
+- Built; not played (Fresh Animations isn't in the dev environment).
+
+## 0.21.57 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
+
+- **Realistic fishing**: a bite hooks a live fish entity (cod, salmon, pufferfish, tropical fish) instead of dropping
+  vanilla loot, and you play a tug-of-war: hold use to reel, tension climbs while you do and falls when you ease off,
+  the fish takes line back while you ease, and the line snaps at full tension. Stronger fish pull tension up faster
+  (`FishingReal`, `FishingHookMixin`, `FishFight`). A wooden rod only ever hooks cod and salmon.
+- **Metal fishing rod** (`MetalFishingRodItem`): forged through Tinkering (an iron rod head cast at the smeltery, handle
+  and binding at the Tool Station). Its line holds to 1.25 tension, it keeps gaining on a fish at higher tension and
+  reels faster, and it casts and retrieves like a vanilla rod (`FishingHookMixin` also keeps its hook from being
+  discarded for not holding a vanilla rod). Only it hooks the big fish.
+- **Big fish**: on the metal rod a bite may be a tuna (a cod grown 2.4x, lands as 3 raw cod) or, with Jaymo's Kingdoms,
+  a great white shark (the Naturalist shark Kingdoms' whaling sharks use, brought up at the hook by
+  `KingdomsCompat.sharkDrawnIn`, held without AI and unkillable while on the line). Both fight harder and pull you
+  toward them while you reel; the shark is the hardest (a 45 s fight) and lands as 6 raw salmon. Without Kingdoms a
+  shark bite is a cod.
+- **Cleaning a catch** (Jaymo's Kitchen 0.5.88): a cod or salmon laid on a cutting board and cut with a knife now
+  gives 3 fillets and bone meal (was 2), so a tuna or shark catch cleans into many.
+- Fixed: the startup crash (the metal rod item had no id set) and a shark bite that fought a tropical fish.
+- Built; not played.
+
+## 0.21.61 (2026-11-07): One character menu on H
+Andy wanted one menu for the whole character (the idea from Kageborne's "Shinobi Menu"; ideas only, none of its code
+or art). Mockup approved first.
+- **H opens the character menu** on the tab you had open last. Tabs down the left edge of every page: **Character**,
+  **Powers**, then (with Jaymo's Kingdoms) **Skills**, **Journal & Quests**, **Faction**, then **Map & Waypoints**, then
+  (Kingdoms) **Party**. Each tab is its own existing screen, so nothing was rewritten: `client/menu/MenuTabs` draws the
+  tabs over whichever page is open (Fabric `afterExtract`/`allowMouseClick`, which a page's own widget rebuilds don't
+  clear) and switches between them. The old keys still open their page, which has the tabs, so K and M open their tab.
+- **Character** (`CharacterScreen`, new): you, turning to follow the mouse, and a sheet: power, fate, mastery, health,
+  armour, level; with Kingdoms also heritage, class, career, renown, skill levels, world tier, patron and realm.
+- **Powers**: the old H screen. Its own tabs (Overview, Abilities, Chrono, Mastery, Powers) moved from its left edge to
+  its top edge to make room. The inventory's power tab still opens it.
+- **Map & Waypoints** (`MapScreen`, new): the loaded land around you, zoom on the wheel, with Arsenal's remembered
+  places and (Kingdoms) the settlements you know and your party as pins, and a list of them by distance. With Xaero's
+  World Map installed, a World map button presses its open-map key.
+- Kingdoms is optional: it adds its tabs, rows and pins by reflection (`MenuTabs.register`, `characterRows`, `pins`
+  take only Java and Minecraft types). The key is now called "Character Menu".
+## 0.21.60: Sora's Dagger 2.0 for every stage
+- Andy's four Sora Dagger 2.0 Blockbench models are in: the base dagger is Iron, the gold stage Gilded, the diamond stage
+  Diamond Edged, the tempest stage Tempest (`models/item/soras_dagger_2_0_<iron|gilded|diamond|tempest>` and
+  `_reverse`, textures `soras_dagger_2_0_<stage>_hilt` and `_blade`). Stage logic is unchanged; each stage's item
+  definition points at its own model, with the reverse grip on custom_model_data flag 0 as before.
+- Converted by `tools/blockbench/sora_2_0.py` from `tools/bbmodels/sora-dagger-2-0-*.bbmodel`. It fixes what the #1096
+  conversion got wrong: faces now name their texture slot (`#0`/`#1`; the full paths showed the missing texture),
+  UVs are scaled to 0-16 (they were raw 128-pixel values), and the tilted cubes keep their rotations.
+- Each model keeps its own hand, GUI and item-frame transforms; on the ground all four use #1099's 0.4 pose, and the
+  reverse grip uses #1099's reverse hand transforms (the hand transforms are the same in all four models).
+- Tempest's 1240px hilt texture is cropped to what the model uses and saved at 512px, so the item atlas keeps its
+  mipmaps.
+- Removed the old `soras_dagger_2_0`, `_reverse` and `_wood` models and their textures (the Gilded and Iron models
+  replace them; nothing else used them).
+- Built; not looked at in game.
+## 0.21.59 (2026-11-07): Kingdoms 0.7.648, the Family farmhand's family stop being deadweight
+- The family you wake with on the Family farmhand start now run from zombies (spotting them from 20 blocks), go
+  indoors at dusk and stay in until morning, and only swing back, weakly, when a monster has them cornered.
+- By day they work the farm: harvest and replant crops, shear sheep, milk cows (given buckets), breed the animals from
+  the house chest's feed, and the child gathers eggs, wool and saplings; it all goes in the house chest. MCA's Work
+  button (chores) is open for them too.
+- Compile-checked; not played.
+## 0.21.58 (2026-11-07): Chrono's echoes stop piling up (one echo per Chrono, for real)
+Andy: "Whenver chrono uses his cheat death, an echo respawns, and the same echos will appear in the nether, meaning he can
+spawn up to 30 down there waiting to kill him."
+- Cause: "one echo per Chrono" only counted echoes in loaded chunks. An echo left behind (a cheat-death rewind throws
+  you minutes back, often far off or into another dimension) stopped counting once its chunks unloaded, so the next
+  timer brought another; the Nether blink-return and following through a portal didn't check at all.
+- Now each Chrono's memory names their one echo, loaded or not (`ChronoMemory.echo`, saved). No new echo comes while it
+  exists, a blinked-out Nether echo doesn't come back if another is out there, and any other echo of theirs outside the
+  future fades as soon as it's loaded, so existing piles (the Nether's too) clear themselves. It's cleared when that
+  echo really ends (killed, shattered, blinked, faded); with the owner offline that's noted in the overworld till
+  they're back (`ChronoEchoes.ENDED`).
+- Through a portal only that one echo follows you (the future's extra stalkers stay in the future).
+- Built; not played.
+
+## 0.21.62 (2026-11-07): real fish on the line, baited hooks, skipjack tuna, fish weights, shark meat
+
+Andy: "The goal is more realistic fishing", then: "i need there to be real fish ... they have to ACTUALLY be there",
+"you should have to manually and visually bait the hook", and "new tuna mob please. skipjack?". Ideas from Au Naturel
+(public domain) and Reel to Fish (all rights reserved, ideas only); our own code and art.
+- **Every bite is a real fish** (`FishBites`): a baited hook draws a fish swimming within 10 blocks. It turns and swims
+  to the hook, nibbles a few times (the bobber dips and splashes), then takes it, and the fight is with that same fish.
+  What you catch is whatever lives there (vanilla spawns: salmon in rivers and cold seas, cod at sea, tropical fish and
+  pufferfish in warm seas; skipjack tuna at sea; great whites with Naturalist). A landed fish is gone from the water, so
+  a spot is fished out when its fish are; one that gets away swims off at its own size. Tuna and sharks only go for the
+  metal rod's hook. The old random bite, the fish spawned at the hook and the made-up fish stock are gone.
+- Fish are keener at dawn and dusk (1.6x) and in rain (1.3x) (`FishWaters`).
+- **Bait the hook by hand** (`HookBait`): sneak and use the rod with bait in your other hand (Kitchen's fish bait,
+  bread, rotten flesh or a spider eye: tag `#jaymospowers:fishing_bait`). The bait hangs under the bobber when you
+  cast (client `FishingHookRendererMixin`), the rod's tooltip says what's on it, and a fish that takes the hook eats it,
+  caught or not. Nothing bites a bare hook (the hook reminds you every 10 s).
+- **Skipjack tuna** (`Skipjack`, `SkipjackModel`, `SkipjackRenderer`): a new schooling fish, dark blue-violet over
+  silver with belly stripes, in schools of 3 to 6 in every ocean but the frozen ones. Too big for a bucket; spawn egg.
+- **Fish weight** (`FishCatch`, component `jaymospowers:fish_weight`): every catch is weighed round its kind's usual
+  size (cod ~4 kg, salmon ~5, pufferfish ~0.8, tropical ~0.4, skipjack ~5, shark ~400) and shows it under the name. A
+  heavy fish pulls harder (up to 1.4x) and looks bigger on the line. Weighed fish of different weights don't stack.
+- **Tuna and shark meat**: a landed skipjack is a whole Raw Skipjack Tuna (edible, weighed); craft it into 3 Raw Tuna
+  Steaks, or cut it on Kitchen's board for a steak per 1.5 kg. A landed shark is cut up on the shore into Raw Shark
+  Meat, a piece per 50 kg (3 to 12). Steaks and shark meat cook in a furnace, smoker or campfire.
+- **Tideborn** (with Kingdoms 0.7.650): every bite calls `KingdomsCompat.fished`, see the Kingdoms log.
+- Built; not played.
+
+## 0.21.63 (2026-11-08): the fishing fight (Track A of docs/Plan-fishing.md)
+Andy picked "all three together": nibbles and a strike window, a charged cast, drag and fish runs, the rod bending.
+Ideas from Reel to Fish, Legendary Fishing, Advanced Fishing and True Fishing (all rights reserved: ideas only, our own code).
+- **Strike window** (`FishBite`): once a fish that swam to the baited hook has nibbled and taken it (`FishBites`), the
+  bobber is held under with "strike!"; use within 2.5 s hooks it and the fight starts. Too late, it spits the hook (the
+  bait's gone) and swims off; the hook rests 5 s. `FishBites` now calls `FishingReal.fishAtHook` instead of `startFight`.
+- **Fish spook**: no bites while you stand in water within 6 blocks of the hook.
+- **Charged cast** (`FishCast`, `FishingRodItemMixin`, `MetalFishingRodItem`): with no hook out, hold use to draw the
+  rod back and let go to throw, 0.55x (tap) to 1.6x (1.5 s) the old throw. Sneak + use with no hook out cycles the drag.
+  The metal rod no longer casts a `ClientLevel` to `ServerLevel` on the client.
+- **Drag** (`FishRun`, `jaymospowers:rod_drag` component, 1-5, default 3): past the drag's slip point (45-95% of the
+  breaking point) the reel clicks and line goes out instead of the line taking the strain; a tighter drag reels 0.7-1.3x
+  as fast. Sneak + scroll with a rod in hand turns it; the rod's tooltip shows it.
+- **Runs and jumps**: a hooked fish surges left or right for 0.75-1.75 s every few seconds (more often for strong fish),
+  a third of runs start with a jump. Reeling into a run triples the tension it adds and gains nothing; easing off, the
+  fish still pulls and takes line. The line snaps with a lead-break sound.
+- **HUD and sound**: the tension bar is now a share of the breaking point (the metal rod's line no longer runs off the
+  end), with the drag's slip mark, `<<`/`>>` for a run, and drag in the label; a cast bar while charging. The line creaks
+  (crossbow-loading sound) above 75% strain, faster near the break.
+- **Scroll to reel**: while a fish is on, each scroll notch reels for 3 ticks (holding use still works).
+- **Rod bend** (`FishingRodFirstPersonMixin`, `FishingRodThirdPersonMixin`): the plain rod tips down with strain, swings
+  toward a run and shakes near the break; drawn back while charging. Pose only, no new model. Third person shows for
+  your own player (the fight state still syncs to its player only); `THIRD_PERSON_SIGN` flips it if it bends the wrong way.
+- Lang in `lang/parts/fishing_fight.json`. Built; not played.
+
+## 0.21.64 (2026-11-08): fishing tackle - rods, baits, lures, groundbait, trolling, magnet, landing net
+
+Track B of `docs/Plan-fishing.md`. Ideas from Reel to Fish, Advanced Fishing, Legendary Fishing and True Fishing (all
+rights reserved: ideas only, our own code and art). Andy: their rods are "too realistic looking, the function is all i
+want", so every rod here looks like a plain Minecraft rod.
+- **Rods** (`Tackle.Rod`): vanilla's rod takes any small fish. The **Cane Pole** (bamboo and string) takes small fish
+  only (cod, pufferfish, tropical) but they notice bait 1.5x as fast and from 0.7x as far. The **Spinning Rod** works
+  lures and draws from 1.2x as far. The **Ledger Rod** fishes bait on the bottom and draws from 1.5x as far. The metal
+  rod is the sea rod: the only one tuna and sharks take, and it works lures too. Each new rod has a cast model.
+- **Baits** (eaten by the fish that takes them): Earthworms, Maggots, Dough Bait, Boilies, Lugworms, plus bread, rotten
+  flesh, spider eyes, Kitchen's fish bait, and live bait (a tropical fish on the hook draws tuna and sharks). Each draws
+  some fish more than others (`Tackle.Bait.draws`): lugworms are sea bait for cod, boilies and dough draw salmon.
+- **Lures** (stay on the line, spinning or sea rod only, 5-8% chance to snap off on a strike): Spinner and Wobbler for
+  salmon, Soft Shad for cod, Pirk (a heavy jig for cod, tuna, sharks) and Trolling Squid (tuna, sharks).
+- **Groundbait** (`FishingGear`): thrown at water, fish within 8 blocks notice bait twice as often for 2 minutes.
+- **Trolling**: fishing from a moving boat draws from 1.5x as far and 1.5x as keen (2.5x with a Trolling Squid).
+- **Fishing Magnet**: put on the hook like bait; it draws no fish but now and then snags scrap off the bottom (iron
+  nuggets, chain, rails, a bucket, shears, an old sword, a rare trident: `loot_table/gameplay/magnet_fishing`).
+- **Landing Net**: use it on the fish you're fighting once it's within 4 blocks to land it, or scoop a free tropical
+  fish or pufferfish straight out of the water.
+- **Fishermen sell tackle**: bait at levels 1-2, lures at 3-4, the spinning and ledger rods at 4-5.
+- Rod, bait and lure tooltips say what each is for. All craftable from vanilla materials.
+- Not in this round (still open in the plan): rod pod and bite alarm, crab pot (needs Track C's crabs), lure depth,
+  an ice auger.
+- Built; not played.
+
+## 0.21.66: eyes that close as you pass out to turn
+- Andy: "you pass out and then turn as well, make sure the eyes animate closed too". `Mortality.turnOut` (Kingdoms calls
+  it for the blight run its course and a vampire bite at nightfall): out cold where you stand with the turning's colour at
+  the edges of the black (`TURN_TINT`) and its own line ("Your legs give. Your eyes close by themselves...").
+- First person (`DownedHud.lids`): the black of every knock-out now comes as eyelids, a lid from the top and one from the
+  bottom with soft edges, meeting in the middle, and parting again as you come round; passing out to turn they take
+  `TURN_CLOSE_TICKS` (2.5 s) to close. Others see it on the body (`EyesClosing`): out cold, the eyes flutter shut over
+  1.5 s, each flutter shut a little longer, then stay shut. Compile-checked; not played.
+
+## 0.21.67 (2026-11-08): The game starts again (#1144)
+
+- Fix: every client crashed at startup ("Mixin transformation of com.jaymospowers.client.fishing.mixin.HookBaitState
+  failed"). `HookBaitState`, the interface that carries a hook's bait on its render state, sat in the fishing mixin
+  package, and Mixin refuses to load a plain class from a mixin package. Moved to `com.jaymospowers.client.fishing`.
+
+## 0.21.68 (2026-11-08): Blood puddles no longer crash the game (#1145)
+
+- Fix: the first blood puddle, footprint or wall mark on screen crashed the client ("Render pass color attachment
+  count must match pipeline color target state count"). The blood decal pipeline (`BloodDecals.decalPipeline`) was built
+  without a colour target; it now has the translucent one vanilla's translucent particles use.
+
+## 0.21.69 (2026-11-08): shift-click a bauble to put it on (#1148)
+
+- **Shift-click** something wearable (a bauble, a tool belt, a spell ring...; not lanterns or other placeable blocks, so sorting a stack of them still works) in the survival inventory, hotbar or offhand: one goes into a free bauble slot that takes it and the Baubles screen opens so you see it on. With every slot that takes it full, shift-click moves it as before and a short "No free bauble slot takes that" message shows. Other container screens (chests and so on) keep vanilla shift-click.
+- **Sneak-use** in the air with a bauble puts it on and opens the Baubles screen too (a plain right-click still just puts it on). Lanterns, totems and other wearables with no use of their own do the same; on a block a lantern is still placed. Items with their own sneak-use keep it (the Bottled Fairy still lets its fairy out, tool belts keep theirs).
+- All on the server (`InventoryMenu.quickMoveStack` mixin, `BaublesQuickEquipMixin`, and `BaublesQuickEquip`): it takes one from the clicked slot itself, so a double click or lag can only put on what's there; the screen opens the next tick, and only if you're still in your inventory with nothing on the cursor (then the bauble still goes on, the screen just stays). Opening it closes the inventory as vanilla does, so the 2x2 crafting grid goes back into your inventory.
+- Built; not played.
+
+## 0.21.70 (2026-11-08): skyfalls made before 0.21.4 dry up too
+
+Andy: "I saw another skyfall earlier today, i need them all removed until at least the world teir remember?" Since 0.21.4
+a new chunk gets no sky waterfall before the Dread tier, but chunks made earlier kept theirs. `aether/world/SkyfallCleanup`
+checks every chunk that loads in a One Dimension world: water running down out of the Aether's floor is traced back up
+through the Aether (at most 8000 water blocks) and each source feeding it is sealed with the commonest solid block beside
+it (else air), so the fall drains away. A heavenfall chunk's fall is kept once someone online has reached Dread, as for
+new chunks. Water that lands on the islands is untouched; a waterfall poured off an edge by hand before Dread goes too.
+Built, not played.

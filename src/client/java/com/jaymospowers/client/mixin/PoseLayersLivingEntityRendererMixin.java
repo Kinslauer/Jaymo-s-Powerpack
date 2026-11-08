@@ -1,6 +1,7 @@
 package com.jaymospowers.client.mixin;
 
 import com.jaymospowers.client.ModelPoses;
+import com.jaymospowers.client.compat.CritterArmoryFreshAnimationsCompat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -29,5 +30,11 @@ abstract class PoseLayersLivingEntityRendererMixin {
 	private void jaymospowers$poseForLayers(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera,
 		CallbackInfo ci) {
 		ModelPoses.apply(this.model, state);
+		if (CritterArmoryFreshAnimationsCompat.active()) {
+			// Fresh Animations re-animates the body after its pose was captured for the render layers: keep the animated
+			// pose on the state, so Critter Armory's armour models take it when they are posed from the state later
+			// (pigs and sheep through QuadrupedModel, horses through AbstractEquineModel).
+			CritterArmoryFreshAnimationsCompat.capture(this.model, state);
+		}
 	}
 }

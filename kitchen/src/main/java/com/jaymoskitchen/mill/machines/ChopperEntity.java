@@ -135,7 +135,7 @@ public class ChopperEntity extends BlockEntity implements ShaftDriven {
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, blade, LivingEntity::isAlive)) {
 			if (victim.hurtServer(level, source, CHOPPER_DAMAGE)) {
 				any = true;
-				com.jaymoskitchen.KitchenBlood.send(level, victim.getX(), victim.getY() + victim.getBbHeight() * 0.5, victim.getZ(), 14, 0.2, 0.25, 0.2, 0.1);
+				com.jaymoskitchen.KitchenBlood.send(level, victim, victim.getX(), victim.getY() + victim.getBbHeight() * 0.5, victim.getZ(), 14, 0.2, 0.25, 0.2, 0.1);
 			}
 		}
 		return any;

@@ -1658,6 +1658,8 @@ public class CorpseEntity extends Entity {
 				}
 			}
 			level.addFreshEntity(living);
+			// (0.5.84) it rises from where it lay, not standing at once
+			Reanimation.start(level, living);
 			play(level, kind == CorpseKind.SKELETON ? SoundEvents.SKELETON_AMBIENT : SoundEvents.ZOMBIE_INFECT, voice());
 			level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.5, getZ(), 10, 0.3, 0.4, 0.3, 0.02);
 		}
@@ -1816,8 +1818,9 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * (0.5.31) Sneak + use with an empty hand, held: the bar fills, and full, it's in your arms. Let go sooner (more than
-	 * {@link #HOLD_GRACE} without use) and it starts again. A big carcass can't be lifted at all.
+	 * (0.5.31) Sneak + use with an empty hand, held: the bar fills, and full, it's in your arms. (0.5.83) Let go sooner, the
+	 * bar stays where it got to and your next hold carries on (Andy: "every meter should work this way"); someone else's
+	 * hold starts it again. A big carcass can't be lifted at all.
 	 */
 	private InteractionResult lift(ServerLevel level, Player player) {
 		return grab(level, player, false);
@@ -1830,9 +1833,12 @@ public class CorpseEntity extends Entity {
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		long now = level.getGameTime();
-		if (!player.getUUID().equals(liftBy) || now - liftLast > HOLD_GRACE) {
+		if (!player.getUUID().equals(liftBy)) {
 			liftBy = player.getUUID();
 			liftStart = now;
+		} else if (now - liftLast > HOLD_GRACE) {
+			// (0.5.83) let go before: the bar carries on from where it got to
+			liftStart = now - Math.max(0L, liftLast - liftStart);
 		}
 		liftLast = now;
 		long held = now - liftStart;
@@ -2034,11 +2040,11 @@ public class CorpseEntity extends Entity {
 		jolt(true);
 		play(level, SoundEvents.AXE_STRIP.value(), 0.7F + random.nextFloat() * 0.2F);
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL, 0.6F, 0.7F);
-		com.jaymoskitchen.KitchenBlood.send(level, getX(), getY() + 0.3, getZ(), 10, 0.3, 0.1, 0.3, 0.1);
+		com.jaymoskitchen.KitchenBlood.send(level, this, getX(), getY() + 0.3, getZ(), 10, 0.3, 0.1, 0.3, 0.1);
 		ItemStack piece = nextPiece();
 		if (!piece.isEmpty()) {
-			if (butcherStage < Hanging.DRAINED) {
-				// (0.5.51) cut up unbled: spoils in a few days
+			if (butcherStage < Hanging.DRAINED || entityTags().contains(com.jaymoskitchen.rats.Rats.GNAWED_TAG)) {
+				// (0.5.51) cut up unbled (or rats got at it): spoils in a few days
 				com.jaymoskitchen.butchery.Spoilage.mark(piece, level.getOverworldClockTime() / 24000L);
 			}
 			spawnAtLocation(level, piece, 0.4F);
@@ -2184,7 +2190,7 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		// (0.5.51) never bled: its raw meat spoils in a few days (Spoilage)
-		boolean unbled = butcherStage < Hanging.DRAINED;
+		boolean unbled = butcherStage < Hanging.DRAINED || entityTags().contains(com.jaymoskitchen.rats.Rats.GNAWED_TAG);
 		long day = level.getOverworldClockTime() / 24000L;
 		if (onBlock) {
 			for (ItemStack extra : blockExtras()) {
@@ -2234,7 +2240,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** (0.4.32) Everything a proper job on a butcher block gets out of it (its loot and the extras), without dropping any of it. */
-	List<ItemStack> butcheredDrops() {
+	public List<ItemStack> butcheredDrops() {
 		List<ItemStack> drops = new ArrayList<>();
 		for (ItemStack stack : loot) {
 			drops.add(stack.copy());
@@ -2631,7 +2637,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** Puts a carried animal corpse back into the world. */
-	void restore(CorpseData data) {
+	public void restore(CorpseData data) {
 		List<ItemStack> stacks = new ArrayList<>();
 		for (ItemStackTemplate template : data.loot()) {
 			stacks.add(template.create());
@@ -3006,9 +3012,13 @@ public class CorpseEntity extends Entity {
 		return isTumbling() || falling() || super.shouldRenderAtSqrDistance(distanceSq);
 	}
 
-	/** In the air on its own: dropped, thrown, or falling off something (not held, not in a cart, not lying down). */
+	/**
+	 * In the air on its own: dropped, thrown, or falling off something (not held, not in a cart, not lying down).
+	 * A body floating in water isn't falling -- it's buoyant -- so it can be dragged onto dry ground.
+	 */
 	public boolean falling() {
-		return !onGround() && carrier() == null && !isPassenger() && !isNoGravity() && this.entityData.get(SLUNG) < 0;
+		return !onGround() && !isInWater() && carrier() == null && !isPassenger() && !isNoGravity()
+			&& this.entityData.get(SLUNG) < 0;
 	}
 
 	/** Ticks after being let go before it can be grabbed again. */

@@ -13,6 +13,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.jaymoskingdoms.dungeon.NoBuildDungeons;
+import com.jaymoskingdoms.dungeon.StormbornTomb;
 
 /**
  * Jaymo's Kingdoms: kingdoms rise at the world's villages, each under a king who is a boss in his own right; players
@@ -194,6 +196,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
+		// the Family farmhand's family: wary of monsters, indoors at night, at work on the farm
+		FarmFamily.register();
+		FarmhandWake.register();
 		// 0.7.576: monsters keep off a lit campfire near a player
 		CampfireWard.register();
 		Clearing.register();
@@ -362,9 +367,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		Captors.register();
 		CaptiveConduct.register();
 		Shackles.register();
+		// (Andy, 2026-11-08) tombs and other #jaymoskingdoms:no_build_dungeons structures: no digging or building inside
+		NoBuildDungeons.register();
+		// the Stormborn Tomb (MIT port): a barrow over a tomb, laid out by its own structure type
+		StormbornTomb.register();
 		// (0.7.573) or taken in by a village that thinks well enough of them
 		Shelter.register();
 		Hollows.register();
+		// (0.7.643) and the blight that turns one slowly, and the death mid-turn that finishes it
+		HollowBlight.register();
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);
 		StoryKit.register();
@@ -506,6 +517,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		TownProjects.register();
 		// 0.5.50: the traveller's journal (book + map): quests, a map, reputations, on M
 		Journal.register();
+		// 0.7.649: what Jaymo's Powers' character menu asks for (the Faction tab, the Map tab's settlements)
+		MenuNet.register();
 		// 0.7.55: tailors change your clothes for a fee (MCA's editor, clothing page only)
 		Tailors.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
@@ -614,6 +627,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.monsters.Monsters.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.beasts.Beasts.register();
+		// Kingdoms' GeckoLib mobs: the barrow beetle (the example to copy) and the Stormborn Tomb's draugr
+		com.jaymoskingdoms.inhabitants.Inhabitants.register();
 		// 0.7.137: the wind dragons (Notus first)
 		com.jaymoskingdoms.dragons.Dragons.register();
 		// 0.7.145: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier
@@ -634,6 +649,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.0: vampires: the Elder, the bite and the turned (their attachments)
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();
+		VampireAlarm.register();
 		Stakes.register();
 		// 0.7.0: lycanthropy: the cursed change under the full moon (their attachments)
 		LOGGER.debug("lycan attachments: {} {}", Lycans.CURSE, Lycans.FORCED);

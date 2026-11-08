@@ -21,6 +21,7 @@ abstract class WebModelFeatureRendererMixin {
 		com.jaymospowers.client.armory.HeldItems.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.RunPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.UpRunPose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.freerun.moves.RunMovesPose.applyModel(submit.model(), submit.state());
 		WebArms.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebFeral.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebSuitGrowth.applyModel(submit.model(), submit.state());

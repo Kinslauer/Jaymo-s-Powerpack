@@ -61,6 +61,12 @@ public final class BleedOut {
 	/** On a corpse: the blood it has still to pour out. Saved with the body. Gone once it's empty. */
 	public static final AttachmentType<Float> CORPSE_LEFT = AttachmentRegistry.create(JaymosPowers.id("corpse_blood_left"),
 		builder -> builder.persistent(Codec.FLOAT));
+	/**
+	 * (0.21.50) Andy: a corpse bleeds the body's own blood (an Emberborn's magma, a zombie's rotten blood), not its kind's:
+	 * on a corpse, the colour of the blood it died with, or {@code BladeBlood.NO_BLOOD}. Saved with the body.
+	 */
+	public static final AttachmentType<Integer> CORPSE_OWN = AttachmentRegistry.create(JaymosPowers.id("corpse_own_blood"),
+		builder -> builder.persistent(Codec.INT));
 
 	private BleedOut() {
 	}
@@ -108,9 +114,12 @@ public final class BleedOut {
 	 * blows) the blood it still had pours out of the corpse.
 	 */
 	private static void toCorpse(LivingEntity dead, Entity corpse) {
-		if (!BladeBlood.bleeds(dead.getType())) {
+		// (0.21.50) the corpse keeps the body's own blood, whatever its kind's
+		if (!BladeBlood.bleeds(dead)) {
+			corpse.setAttached(CORPSE_OWN, BladeBlood.NO_BLOOD);
 			return;
 		}
+		corpse.setAttached(CORPSE_OWN, BladeBlood.color(dead));
 		Bloodied.Coat coat = Bloodied.coat(dead);
 		boolean bleeding = Downed.isDowned(dead) || dead.hasAttached(LEFT) || com.jaymospowers.core.wounds.Hemomancy.cuts(dead) > 0
 			|| coat != null && coat.amount() > 0;
@@ -156,14 +165,14 @@ public final class BleedOut {
 				return;
 			}
 			EntityType<?> type = com.jaymospowers.power.web.KitchenCompat.bodyType(body);
-			if (type == null || !BladeBlood.bleeds(type)) {
+			if (type == null || !BladeBlood.bleeds(body, type)) {
 				body.removeAttached(CORPSE_LEFT);
 				return;
 			}
 			// a corpse's box is the body lying down: its blood is what it was standing
 			float full = full(type.getWidth(), type.getHeight());
 			float each = Math.max(0.02F, full * EVERY / CORPSE_TICKS);
-			float left = corpseLeft - bleed(level, body, null, BladeBlood.color(type), Math.min(each, corpseLeft), full - corpseLeft, full);
+			float left = corpseLeft - bleed(level, body, null, BladeBlood.color(body, type), Math.min(each, corpseLeft), full - corpseLeft, full);
 			if (left <= 0.01F) {
 				body.removeAttached(CORPSE_LEFT);
 			} else {
@@ -188,6 +197,14 @@ public final class BleedOut {
 			return;
 		}
 		float each = full * DOWNED_SHARE * EVERY / Downed.BLEED_OUT_TICKS;
+		// (0.21.49) resting in a bed only the cuts they aren't holding shut bleed, each at the downed rate of their own blood
+		int cuts = living instanceof ServerPlayer resting ? com.jaymospowers.core.wounds.DownedStruggle.bleedingCuts(resting) : -1;
+		if (cuts >= 0) {
+			each *= cuts;
+			if (each <= 0.0F) {
+				return;
+			}
+		}
 		if (left <= 0.0F) {
 			return;
 		}

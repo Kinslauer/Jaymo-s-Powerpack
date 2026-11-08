@@ -184,7 +184,7 @@ public final class Hanging {
 			if (onDrip != null) {
 				onDrip.accept(corpse, from);
 			} else {
-				com.jaymoskitchen.KitchenBlood.send(level, from.x, from.y - 0.1, from.z, 1, 0.03, 0.0, 0.03, 0.0);
+				com.jaymoskitchen.KitchenBlood.send(level, corpse, from.x, from.y - 0.1, from.z, 1, 0.03, 0.0, 0.03, 0.0);
 			}
 		}
 		// the blood that's come out by now, in grate levels, against what's been put somewhere already

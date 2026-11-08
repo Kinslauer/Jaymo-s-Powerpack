@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.fishing.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"FishingHookRenderStateMixin",
+		"FishingHookRendererMixin",
+		"FishingRodFirstPersonMixin",
+		"FishingRodThirdPersonMixin",
+		"FishingScrollMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

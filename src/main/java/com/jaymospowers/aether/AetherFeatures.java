@@ -55,6 +55,7 @@ public final class AetherFeatures {
 		register("pointed_holystone", PointedHolystoneFeature.CODEC);
 		register("sky_spring", SkySpringFeature.CODEC);
 		SkySpringFeature.init();
+		com.jaymospowers.aether.world.SkyfallCleanup.init();
 	}
 
 	private static void register(String id, MapCodec<? extends Feature> codec) {

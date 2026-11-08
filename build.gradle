@@ -431,6 +431,14 @@ def packModsNoCf = [
 	// harvest and replant it; needs JamLib; 4.6.2). CurseForge's pages for them show no 26.3 file yet (checked 2026-11-05).
 	[dep: "maven.modrinth:mmr-moogs-mineshafts-reimagined:JJc7pNHb", cf: null],
 	[dep: "maven.modrinth:rightclickharvest:MTui9kST", cf: null],
+	// Better Ping (MIT, UltimateGamerMC): exact ping in ms, color-coded, in the tab list. Client-only, works on any server.
+	// Fabric 26.3-native; CurseForge [project id, file id] to look up from the home PC (cloud can't reach CurseForge).
+	[dep: "maven.modrinth:betterping:ss1Ygqnx", cf: null],
+	// Spooky Doors (all rights reserved, BlayTheNinth; shipped unchanged, never copied): doors open partway, creak and slam.
+	// Andy, 2026-11-07: "include the mod". A downed player's struggle pushes one open a bit more every moment through its
+	// public API (compat.SpookyDoorsCompat, by reflection). Needs Balm (packMods). 26.3.0.2, by Blay's version number
+	// (Modrinth version id and CurseForge [project id, file id] to look up from the home PC; cloud can't reach either).
+	[dep: "maven.modrinth:spooky-doors:26.3.0.2+fabric-26.3", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).

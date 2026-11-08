@@ -55,8 +55,15 @@ public final class LedgePose {
 	/** (0.15.108) The prone climb: done tipping onto the belly by this far through it; the arms reach ahead past the head (radians). */
 	static final float PRONE_TIPPED = 0.85F, PRONE_REACH = -2.7F;
 
-	/** {@code climb}: 0-1 through the climb, or -1 while hanging; {@code time}: ticks, for the sway; {@code prone}: (0.15.108) the climb onto the belly. */
-	public record State(float climb, float time, boolean prone) {
+	/** (ParCool track A) The shimmy, hand over hand: radians a tick of the hands' turn, how far a hand comes off the edge and reaches along it, and the body's sway with it (radians, degrees). */
+	static final float SHUFFLE_RATE = 0.5F, SHUFFLE_LIFT = 0.45F, SHUFFLE_REACH = 0.35F, SHUFFLE_SWAY = 4.0F;
+
+	/**
+	 * {@code climb}: 0-1 through the climb, or -1 while hanging; {@code time}: ticks, for the sway; {@code prone}: (0.15.108)
+	 * the climb onto the belly; {@code shuffle}: (ParCool track A) shimmying along the edge, -1 (to the hanger's left) to 1
+	 * (to their right), 0 still.
+	 */
+	public record State(float climb, float time, boolean prone, float shuffle) {
 	}
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:ledge");
@@ -98,7 +105,11 @@ public final class LedgePose {
 			state.swimAmount = 0.0F;
 			state.isCrouching = false;
 		}
-		state.setData(KEY, new State(climb, player.tickCount + partialTicks, prone));
+		// (ParCool track A) moving along the wall: the shimmy (read from the body's own motion, so it shows for everyone)
+		net.minecraft.core.Direction right = hold.direction().getClockWise();
+		double moved = (player.getX() - player.xo) * right.getStepX() + (player.getZ() - player.zo) * right.getStepZ();
+		float shuffle = climb < 0.0F ? Mth.clamp((float)(moved / Ledge.SHIMMY_SPEED), -1.0F, 1.0F) : 0.0F;
+		state.setData(KEY, new State(climb, player.tickCount + partialTicks, prone, Math.abs(shuffle) < 0.15F ? 0.0F : shuffle));
 	}
 
 	/** After the body faces its way: hanging, a slow sway from the hands; climbing, the lean in over the edge. */
@@ -116,6 +127,8 @@ public final class LedgePose {
 			poseStack.translate(0.0F, HANDS, 0.0F);
 			poseStack.rotateDegrees(Axis.ZP, Mth.sin(ledge.time() * SWAY_SPEED) * SWAY_DEGREES * amount);
 			poseStack.rotateDegrees(Axis.XP, (Mth.sin(ledge.time() * SWAY_SPEED * 0.7F + 1.3F) * SWAY_DEGREES * 0.4F + swing * CATCH_SWING) * amount);
+			// (ParCool track A) the body rocks from hand to hand as it shimmies
+			poseStack.rotateDegrees(Axis.ZP, Mth.sin(ledge.time() * SHUFFLE_RATE) * SHUFFLE_SWAY * Math.abs(ledge.shuffle()) * amount);
 			poseStack.translate(0.0F, -HANDS, 0.0F);
 			return;
 		}
@@ -174,8 +187,12 @@ public final class LedgePose {
 			// the catch: the arms take the jolt, the legs swing on after the body (a beat behind it)
 			float jolt = (float)Math.exp(-age * CATCH_SWING_DECAY * 1.5F) * CATCH_ARMS;
 			float legs = catchSwing(Math.max(0.0F, age - 0.12F)) * CATCH_LEGS;
-			set(h.rightArm, ARM_UP + give + jolt, 0.0F, ARM_SPREAD);
-			set(h.leftArm, ARM_UP - give + jolt, 0.0F, -ARM_SPREAD);
+			// (ParCool track A) shimmying: one hand off the edge and along it, then the other after it
+			float hand = Mth.sin(t * SHUFFLE_RATE);
+			float shuffle = ledge.shuffle();
+			float rightOff = Math.abs(shuffle) * Math.max(0.0F, hand), leftOff = Math.abs(shuffle) * Math.max(0.0F, -hand);
+			set(h.rightArm, ARM_UP + give + jolt + rightOff * SHUFFLE_LIFT, 0.0F, ARM_SPREAD + Math.signum(shuffle) * rightOff * SHUFFLE_REACH);
+			set(h.leftArm, ARM_UP - give + jolt + leftOff * SHUFFLE_LIFT, 0.0F, -ARM_SPREAD + Math.signum(shuffle) * leftOff * SHUFFLE_REACH);
 			set(h.rightLeg, DANGLE * Mth.sin(t * 0.09F) + 0.05F - legs, 0.0F, 0.05F);
 			set(h.leftLeg, DANGLE * Mth.sin(t * 0.09F + 2.1F) - 0.03F - legs * 0.8F, 0.0F, -0.05F);
 			return;

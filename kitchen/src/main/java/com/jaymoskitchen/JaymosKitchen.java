@@ -52,6 +52,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.fishing.Bait.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
+		// (0.5.84) the risen dead get up from where they lay
+		com.jaymoskitchen.corpse.Reanimation.register();
 		com.jaymoskitchen.archery.StuckArrows.register();
 		Corpses.register();
 		// (0.5.18) spiders crushed flat leave loose legs, not a corpse
@@ -65,6 +67,7 @@ public class JaymosKitchen implements ModInitializer {
 		Mill.register();
 		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
+		com.jaymoskitchen.cooking.spit.SpitBlock.register();
 		// (0.5.28) Farmer's Delight's pot and pan over a fire, cutting board, feasts, Comfort, cabbages and rice
 		com.jaymoskitchen.delight.Delight.register();
 		// (0.5.33) Farmer's Delight's skillet, stove, cabinets, crates, baskets, canvas, tatami, safety net and canvas signs
@@ -85,6 +88,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.tanning.Hides.register();
 		// (0.5.51) meat hooks, blood grates and bottled blood (corpse/Hanging does the butchering)
 		com.jaymoskitchen.butchery.Butchery.register();
+		// rats after food left out, and the traps for them
+		com.jaymoskitchen.rats.Rats.register();
 		com.jaymoskitchen.farm.Manure.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
