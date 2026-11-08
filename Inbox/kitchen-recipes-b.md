@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes-b
 from: coordinator
 asked: 2026-11-07
 thread: Claude reviewer session (Andy asked both builders for five new recipes each)
 claimed_by: hermes-b
-pr: 
+pr: 1135
 suggested_owns:
   - kitchen/src/main/java/com/jaymoskitchen/cooking/Dish.java (5 new entries only)
   - kitchen textures, models, lang keys and recipe data for those 5 dishes
