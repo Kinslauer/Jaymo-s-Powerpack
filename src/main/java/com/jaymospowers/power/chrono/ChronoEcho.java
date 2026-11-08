@@ -365,7 +365,9 @@ public class ChronoEcho extends Monster {
 			return true; // offline: nothing to check against, it carries on
 		}
 		ChronoMemory memory = ChronoMemory.peek(player);
-		if (!Powers.has(player, ChronoPower.INSTANCE) || memory == null || memory.bond != this.bond) {
+		if (!Powers.has(player, ChronoPower.INSTANCE) || memory == null || memory.bond != this.bond
+			|| !ChronoEchoes.claims(this, level, memory)) {
+			// (0.21.58) or a leftover: their one echo is another (one echo per Chrono)
 			fade(level);
 			return false;
 		}
@@ -584,7 +586,12 @@ public class ChronoEcho extends Monster {
 			this.fight.end();
 			this.fight = null;
 		}
+		boolean ends = reason.shouldDestroy() && !this.isRemoved();
 		super.remove(reason);
+		if (ends && this.level() instanceof ServerLevel level) {
+			// (0.21.58) killed or discarded (not unloaded or moved to another dimension): no longer its owner's one echo
+			ChronoEchoes.ended(level.getServer(), this.owner, this.getUUID());
+		}
 	}
 
 		/**

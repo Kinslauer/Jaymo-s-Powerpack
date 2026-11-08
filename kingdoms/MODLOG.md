@@ -10223,3 +10223,37 @@ Andy: "tideborn will see fishing as an attack, and doing in their havens is seen
   reputation there drops, the guards come after you and a bounty goes up. Charged at most once per 30 s; the haven's
   own folk may fish freely (`TideFishing`).
 - Built; not played.
+## 0.7.649 (2026-11-07): Kingdoms' tabs on the character menu; everyone gets a journal
+- **Character menu tabs** (Jaymo's Powers 0.21.60's H menu, when Powers is loaded; `client/MenuCompat`, reflection
+  only): **Skills** (the K screen), **Journal & Quests** (the M journal; it still needs a journal on you, Andy: "keep
+  that rule"), **Faction** and **Party**, plus the Character page's "Your life" rows and the Map page's pins. K and M
+  open their page as before, with the menu's tabs on it. Without Powers nothing changes.
+- **Faction** (`FactionScreen`, new; `MenuNet` asks the server): the realm you're sworn to, its kind and overlord,
+  your rank and standing toward the next rank, sworn players, people, treasury, your patron, and its relations. Not
+  sworn: how to join one.
+- **Party** (`PartyScreen`, new): your party's members with health, hunger and distance; buttons that run the
+  `/party` commands (invite a player within 32 blocks, accept or turn down an invite, leave, PvP on/off for the leader).
+- **Everyone gets a traveller's journal** (Andy: "everyone spawns with a journal now"): newcomers with their life
+  story's kit, whatever the start; players from before get one the next time they join. Once only
+  (`Journal.GIVEN`); a lost journal isn't replaced.
+- Built; not played.
+## 0.7.648 (2026-11-07): the Family farmhand's family - wary of monsters, indoors at night, and a farm to work
+Andy: "for the farmhand start, those MCA should be far more wary of zombies and try to hide at night, as a very last
+resort they will have to swing back and defend themselves. they are just deadweight and they make life harder for the
+player. they need some kind of utility or function as of now." (`FarmFamily`, from `FarmhandHome.takeIn` and `Workers.step`.)
+- **Wary**: the family spot a monster from 20 blocks (`WARY_RANGE`) and run, home if that's away from it, else away,
+  until they're 14 blocks clear (`KEEP_AWAY`). They no longer stand about or walk into zombies.
+- **Indoors at night**: from dusk (`HIDE_FROM` 12000) to just before dawn they walk home to their house and stay
+  there; once inside, MCA's brain puts them to bed.
+- **Last resort**: a grown one with a monster at arm's length (`CORNERED` 2.3) and no ground gained running for
+  1.5 s swings back, weakly (`DEFEND_DAMAGE` 1.5, a shove), then tries to run again. Children only run.
+- **Work** (Andy picked all four): by day the grown ones harvest ripe crops within 24 blocks of the house and sow them
+  again, sow bare farmland from their seed, shear sheep, milk a cow when the chest holds an empty bucket, and feed
+  pairs of cows, sheep, pigs or chickens from the chest to breed them while there are fewer than 8 grown of a kind.
+  Everyone (the child too) gathers what's lain about the house for 10 s (eggs, wool, saplings) and carries it to the
+  house chest; a chest is put beside the home spot if the house has none. Each grown one gets a stone hoe.
+- **MCA's chores**: MCA's Work button (harvest, chop, hunt, fish) shows on the grown ones as on your own family
+  (`McaFarmWorkButtonMixin`, told by `InteractActions`); set to a chore, they leave the farm round to MCA's chore.
+- Who they are, their home spot and their chest are kept as entity tags, so it lasts; only new Family farmhand starts.
+- A gray line after the start tells the player what the family does.
+- Compile-checked; not played.

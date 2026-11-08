@@ -36,6 +36,16 @@ public final class PartyClient {
 	private PartyClient() {
 	}
 
+	/** (0.7.649) The party as last sent, you included (empty without one), for the character menu's Party tab ({@link PartyScreen}). */
+	static List<Parties.Entry> party() {
+		return party;
+	}
+
+	/** How far {@code e} is, or the dimension they are in (the HUD's words). */
+	static Component whereIs(LocalPlayer player, Parties.Entry e) {
+		return where(player, e, player.level().dimension().identifier().toString());
+	}
+
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(Parties.Sync.TYPE, (payload, context) -> party = List.copyOf(payload.members()));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> party = List.of());

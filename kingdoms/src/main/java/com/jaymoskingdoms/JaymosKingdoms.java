@@ -194,6 +194,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
+		// the Family farmhand's family: wary of monsters, indoors at night, at work on the farm
+		FarmFamily.register();
 		// 0.7.576: monsters keep off a lit campfire near a player
 		CampfireWard.register();
 		Clearing.register();
@@ -508,6 +510,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		TownProjects.register();
 		// 0.5.50: the traveller's journal (book + map): quests, a map, reputations, on M
 		Journal.register();
+		// 0.7.649: what Jaymo's Powers' character menu asks for (the Faction tab, the Map tab's settlements)
+		MenuNet.register();
 		// 0.7.55: tailors change your clothes for a fee (MCA's editor, clothing page only)
 		Tailors.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news

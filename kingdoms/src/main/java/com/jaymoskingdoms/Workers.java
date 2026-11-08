@@ -158,9 +158,13 @@ public final class Workers {
 					return false;
 				}
 			}
-			if (!McaCompat.reconcile(level, w)) {
+			if (!McaCompat.reconcile(level, w) && !FarmFamily.is(mob)) {
 				return false;
 			}
+		}
+		if (FarmFamily.is(mob)) {
+			// a farmhand's family (FarmhandHome): wary of monsters, indoors at night, at work on their farm by day
+			return FarmFamily.step(level, w);
 		}
 		if (Rulers.leaderRole(w.role()) && w instanceof Enlisted e) {
 			// (0.7.138) a realm's ruler, one of its villagers: their day at court and on their round
