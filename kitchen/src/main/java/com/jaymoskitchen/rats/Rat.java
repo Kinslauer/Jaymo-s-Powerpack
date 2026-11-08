@@ -278,8 +278,10 @@ public class Rat extends PathfinderMob {
 			Vec3 at = target.at();
 			getLookControl().setLookAt(at.x, at.y, at.z);
 			if (target.trap()) {
-				// a trap goes off when the rat's on it (see the traps' ticks): just walk in
-				if (!getNavigation().isInProgress()) {
+				// a trap goes off when the rat's in it (see the traps' entityInside): walk up, then step right onto the bait
+				if (distanceToSqr(at) < 2.25) {
+					getMoveControl().setWantedPosition(at.x, at.y, at.z, CREEP_SPEED);
+				} else if (!getNavigation().isInProgress()) {
 					getNavigation().moveTo(at.x, at.y, at.z, CREEP_SPEED);
 				}
 				stuckTicks++;
