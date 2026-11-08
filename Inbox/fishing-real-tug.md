@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: done
 for: hermes
 from: coordinator
 asked: 2026-11-07
