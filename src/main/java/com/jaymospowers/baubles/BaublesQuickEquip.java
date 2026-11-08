@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -81,7 +82,9 @@ public final class BaublesQuickEquip {
 	 */
 	public static boolean shiftClick(Player player, Slot slot) {
 		ItemStack stack = slot.getItem();
-		if (!wearable(stack)) {
+		// placeable blocks (lanterns go on the belt) keep vanilla's shift-click, so sorting a stack of them still works;
+		// sneak-using one in hand still puts it on
+		if (stack.getItem() instanceof BlockItem || !wearable(stack)) {
 			return false;
 		}
 		if (!(player instanceof ServerPlayer server)) {
