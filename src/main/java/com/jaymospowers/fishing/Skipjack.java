@@ -34,7 +34,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
- * (0.21.61, Andy: "new tuna mob please. skipjack?") The skipjack tuna: a fast, schooling fish of the open sea, dark
+ * (0.21.64, Andy: "new tuna mob please. skipjack?") The skipjack tuna: a fast, schooling fish of the open sea, dark
  * blue-violet above, silver below with dark stripes along its belly. Schools of {@link #SCHOOL_MIN}-{@link #SCHOOL_MAX}
  * swim in every ocean but the frozen ones; it's too big for a bucket, and takes only a metal rod's hook
  * ({@link FishBites}). Our own model and texture.

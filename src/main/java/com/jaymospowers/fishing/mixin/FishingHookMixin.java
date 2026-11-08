@@ -47,7 +47,7 @@ public abstract class FishingHookMixin {
         if (FishingReal.fight((net.minecraft.server.level.ServerPlayer) player).fighting()) {
             return;
         }
-        // (0.21.61, Andy: "they have to ACTUALLY be there") a real fish near a baited hook swims to it and takes it
+        // (0.21.64, Andy: "they have to ACTUALLY be there") a real fish near a baited hook swims to it and takes it
         net.minecraft.server.level.ServerPlayer angler = (net.minecraft.server.level.ServerPlayer) player;
         com.jaymospowers.fishing.FishBites.bare(hook, angler);
         com.jaymospowers.fishing.FishBites.tick((net.minecraft.server.level.ServerLevel) hook.level(), hook, angler);

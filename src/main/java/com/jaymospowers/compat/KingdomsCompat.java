@@ -134,7 +134,7 @@ public final class KingdomsCompat {
 	}
 
 	/**
-	 * (0.21.61, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime") A fish took
+	 * (0.21.64, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime") A fish took
 	 * {@code player}'s hook at {@code hook}: Kingdoms' {@code TideFishing} has any Tideborn who see it fight them, and calls it
 	 * poaching in a Tideborn haven. Nothing without Kingdoms.
 	 */

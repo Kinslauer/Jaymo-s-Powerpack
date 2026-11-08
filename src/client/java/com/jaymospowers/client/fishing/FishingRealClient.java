@@ -34,9 +34,9 @@ public final class FishingRealClient {
         ClientTickEvents.END_CLIENT_TICK.register(FishingRealClient::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
                 JaymosPowers.id("fishing_tension"), FishingRealClient::render);
-        // (0.21.61) the skipjack tuna
+        // (0.21.64) the skipjack tuna
         net.minecraft.client.renderer.entity.EntityRenderers.register(com.jaymospowers.fishing.Skipjack.SKIPJACK, SkipjackRenderer::new);
-        // (0.21.61) a landed fish shows its weight, a rod the bait on its hook
+        // (0.21.64) a landed fish shows its weight, a rod the bait on its hook
         ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
             Float kg = FishCatch.weight(stack);
             if (kg != null) {

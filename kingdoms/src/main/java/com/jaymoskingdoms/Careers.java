@@ -584,7 +584,7 @@ public final class Careers {
 	}
 
 	/** The title {@code player} goes by: their best-ranked job held now (most experience on a tie), or null for none. */
-	static @Nullable Component title(Player player) {
+	public static @Nullable Component title(Player player) {
 		Career c = of(player);
 		Post best = null;
 		for (Post p : c.posts()) {

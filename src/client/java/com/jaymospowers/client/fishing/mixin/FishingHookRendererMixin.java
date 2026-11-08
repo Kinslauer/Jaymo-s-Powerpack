@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.21.61, Andy: "you should have to manually and visually bait the hook") The bait on a hook ({@link HookBait}) hangs
+ * (0.21.64, Andy: "you should have to manually and visually bait the hook") The bait on a hook ({@link HookBait}) hangs
  * just under the bobber, small, turned to the camera like a dropped item.
  */
 @Mixin(FishingHookRenderer.class)

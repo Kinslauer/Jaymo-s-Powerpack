@@ -39,7 +39,21 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
+      # The cache keeps the Gradle download between runs. Without cache-read-only: false a pull request never writes
+      # it (this workflow doesn't run on master), so every run fetched Gradle again and failed when that server 504'd.
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      # services.gradle.org times out now and then: fetch Gradle on its own, a few tries, before the real build.
+      - name: Fetch Gradle
+        working-directory: ${{ matrix.dir }}
+        run: |
+          for try in 1 2 3 4 5; do
+            sh ./gradlew --version --no-daemon && exit 0
+            echo "Gradle download failed (try $try), waiting before the next one"
+            sleep $((try * 20))
+          done
+          exit 1
       - name: Build
         working-directory: ${{ matrix.dir }}
         run: sh ./gradlew build --no-daemon --stacktrace

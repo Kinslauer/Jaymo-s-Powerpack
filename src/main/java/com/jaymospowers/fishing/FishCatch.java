@@ -20,7 +20,7 @@ import net.minecraft.world.item.component.Consumables;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.21.61, Andy: "The goal is more realistic fishing") What a landed fish is. Every catch has a weight ({@link #WEIGHT},
+ * (0.21.64, Andy: "The goal is more realistic fishing") What a landed fish is. Every catch has a weight ({@link #WEIGHT},
  * shown under its name): drawn round its kind's usual size, a heavy one fights harder ({@link #pull}) and, gutted on
  * Jaymo's Kitchen's cutting board, gives more fillets. A tuna comes in whole ({@link #TUNA}: eat it, cook it, or cut it
  * into steaks, three by hand or by its weight on the board); a shark is far too big to carry, so it's cut up on the

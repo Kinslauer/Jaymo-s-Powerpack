@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.21.61, Andy: "i need there to be real fish, as in if you see them in the water, you can cast and potentially get the
+ * (0.21.64, Andy: "i need there to be real fish, as in if you see them in the water, you can cast and potentially get the
  * bite. but they have to ACTUALLY be there.") Every bite is a real fish. A baited hook draws a fish swimming within
  * {@link #DRAW_RANGE}: it turns and swims to the hook, nibbles it a few times (the bobber dips), then takes it, and the
  * fight is with that same fish. Which fish you get is whichever live there (vanilla's spawns put salmon in rivers and

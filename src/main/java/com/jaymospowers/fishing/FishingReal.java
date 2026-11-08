@@ -52,7 +52,7 @@ public final class FishingReal {
     private static final Map<UUID, FishingHook> HOOKS = new HashMap<>();
     /** Set true for one tick by the ReelInput packet when the player is holding use to reel. */
     private static final Map<UUID, Boolean> REELING = new HashMap<>();
-    /** (0.21.61) The weight of the fish each player is fighting (kg, {@link FishCatch}). */
+    /** (0.21.64) The weight of the fish each player is fighting (kg, {@link FishCatch}). */
     private static final Map<UUID, Float> WEIGHTS = new HashMap<>();
     /** A hooked fish's own size, put back if it gets away. */
     private static final Map<UUID, Float> BASE_SCALE = new HashMap<>();
@@ -252,7 +252,7 @@ public final class FishingReal {
         HOOKED.put(player.getUUID(), fish);
         HOOKS.put(player.getUUID(), hook);
         WEIGHTS.put(player.getUUID(), kg);
-        // (0.21.61, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime")
+        // (0.21.64, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime")
         com.jaymospowers.compat.KingdomsCompat.fished(player, hook.blockPosition());
         player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.fish_on").withStyle(net.minecraft.ChatFormatting.GOLD));
         if (fishKind == FISH_TUNA) {
@@ -275,7 +275,7 @@ public final class FishingReal {
         FishingHook hook = HOOKS.remove(player.getUUID());
         if (fish != null) {
             if (caught) {
-                // (0.21.61) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
+                // (0.21.64) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
                 float kg = weighed != null ? weighed : FishCatch.roll(kindFought, player.getRandom());
                 ItemStack loot = FishCatch.loot(kindFought, kg);
                 if (!loot.isEmpty()) {

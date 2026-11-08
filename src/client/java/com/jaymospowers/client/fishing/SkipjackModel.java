@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
 
 /**
- * (0.21.61) The skipjack tuna's model, our own: a deep, torpedo body with a pointed head, a narrow tail stalk and a tall
+ * (0.21.64) The skipjack tuna's model, our own: a deep, torpedo body with a pointed head, a narrow tail stalk and a tall
  * crescent tail, a first dorsal fin and two small side fins. The stalk and tail beat as it swims.
  */
 public final class SkipjackModel extends EntityModel<LivingEntityRenderState> {

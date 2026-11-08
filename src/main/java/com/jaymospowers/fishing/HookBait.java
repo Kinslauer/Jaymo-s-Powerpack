@@ -22,7 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.21.61, Andy: "you should have to manually and visually bait the hook") A hook has to be baited by hand before a fish
+ * (0.21.64, Andy: "you should have to manually and visually bait the hook") A hook has to be baited by hand before a fish
  * will come to it. Sneak and use the rod with bait in the other hand (anything in {@code #jaymospowers:fishing_bait}:
  * Jaymo's Kitchen's fish bait, bread, rotten flesh, a spider eye): one goes on the hook ({@link #BAIT} on the rod),
  * and it hangs under the bobber when you cast (drawn by the client's hook renderer mixin). A fish that takes the hook

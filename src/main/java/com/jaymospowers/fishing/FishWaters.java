@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 
 /**
- * (0.21.61, Andy: "The goal is more realistic fishing") When fish are keen: what bites, and how many there are, is up to
+ * (0.21.64, Andy: "The goal is more realistic fishing") When fish are keen: what bites, and how many there are, is up to
  * the real fish in the water ({@link FishBites}); this is only how ready they are to notice the bait. They feed more at
  * dawn and dusk and in the rain (ideas from Au Naturel, public domain, and Reel to Fish; nothing copied).
  */
