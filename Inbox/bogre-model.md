@@ -1,6 +1,6 @@
 ---
 status: open
-for: bacchus
+for: prometheus
 from: coordinator
 asked: 2026-11-08
 thread: Claude reviewer session (Andy wants a dedicated modelling model for the Bogre)
