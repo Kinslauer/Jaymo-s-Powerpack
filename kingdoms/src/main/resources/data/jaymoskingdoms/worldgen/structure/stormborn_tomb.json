@@ -1,0 +1,12 @@
+{
+  "type": "jaymoskingdoms:stormborn_tomb",
+  "biomes": "#jaymoskingdoms:has_structure/stormborn_tomb",
+  "step": "underground_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {
+    "monster": {
+      "bounding_box": "piece",
+      "spawns": []
+    }
+  }
+}
