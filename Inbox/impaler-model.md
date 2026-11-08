@@ -35,3 +35,4 @@ it hasn't been seen in game yet.
 
 ## Notes
 - The Impaler mob itself (entity, AI, spawning) is a separate task.
+- 2026-11-08 16:20 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
