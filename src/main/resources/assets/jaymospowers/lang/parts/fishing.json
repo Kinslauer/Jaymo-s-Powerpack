@@ -1,0 +1,12 @@
+{
+  "message.jaymospowers.fishing.line_broke": "The line snapped and the fish got away.",
+  "message.jaymospowers.fishing.fish_on": "Fish on!",
+  "message.jaymospowers.fishing.caught": "Caught a fish!",
+  "message.jaymospowers.fishing.fish_got_away": "The fish got away.",
+  "item.jaymospowers.metal_fishing_rod": "Metal Fishing Rod",
+  "item.jaymospowers.metal_rod_head": "Fishing Rod Head",
+  "message.jaymospowers.fishing.shark_hooked": "A shark's on the line!",
+  "message.jaymospowers.fishing.too_big": "Too big for this rod - it broke free.",
+  "message.jaymospowers.fishing.tuna_hooked": "A big tuna - hold on!",
+  "hud.jaymospowers.fishing.tension": "Fishing: %s%% tension"
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/weapon_part/metal_rod_head_stone",
+    "particle": "jaymospowers:item/tinkering/weapon_part/metal_rod_head_stone"
+  }
+}

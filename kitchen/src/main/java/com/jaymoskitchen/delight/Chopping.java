@@ -10,11 +10,14 @@ import net.minecraft.world.item.Items;
 /**
  * What a knife makes of things on the cutting board (Farmer's Delight's cuts): meat into two smaller cuts that cook
  * quicker into finger food, a cabbage into leaves, a rice panicle into rice and straw; (0.5.33) a cake, a pie, a pumpkin,
- * a melon or a kelp roll into slices, and a ham into chops.
+ * a melon or a kelp roll into slices, and a ham into chops. (0.5.88) A cod or a salmon (a catch from Powers' real fishing, a tuna or a shark among them) is gutted and
+ * cleaned into {@link #FISH_FILLETS} fillets and bone meal from the guts.
  */
 public final class Chopping {
 	/** Cuts from one piece of meat or fish. */
 	static final int MEAT_CUTS = 2;
+	/** (0.5.88) Gutting and cleaning a cod or a salmon on the board: fillets from one fish, worth more than the whole fish eaten raw. */
+	static final int FISH_FILLETS = 3;
 	static final int CABBAGE_LEAVES = 2;
 	static final int PANICLE_RICE = 2;
 	/** Slices from a cake, a pumpkin pie (a pie dish gives PieBlock.SLICES), a pumpkin, a melon and a kelp roll. */
@@ -46,10 +49,10 @@ public final class Chopping {
 			return List.of(new ItemStack(Delight.MUTTON_CHOPS, MEAT_CUTS));
 		}
 		if (item == Items.COD) {
-			return List.of(new ItemStack(Delight.COD_SLICE, MEAT_CUTS), new ItemStack(Items.BONE_MEAL));
+			return List.of(new ItemStack(Delight.COD_SLICE, FISH_FILLETS), new ItemStack(Items.BONE_MEAL));
 		}
 		if (item == Items.SALMON) {
-			return List.of(new ItemStack(Delight.SALMON_SLICE, MEAT_CUTS), new ItemStack(Items.BONE_MEAL));
+			return List.of(new ItemStack(Delight.SALMON_SLICE, FISH_FILLETS), new ItemStack(Items.BONE_MEAL));
 		}
 		if (item == Delight.CABBAGE) {
 			return List.of(new ItemStack(Delight.CABBAGE_LEAF, CABBAGE_LEAVES));

@@ -1575,3 +1575,23 @@ Built; not played.
   armour models take it (Powers 0.21.56). Only active when both Entity Model Features and Critter Armory are loaded;
   Critter Armory is linked, never edited.
 - Built; not played (Fresh Animations isn't in the dev environment).
+
+## 0.21.57 (2026-11-07): realistic fishing - a bite hooks a live fish, reel it in tug-of-war style
+
+- **Realistic fishing**: a bite hooks a live fish entity (cod, salmon, pufferfish, tropical fish) instead of dropping
+  vanilla loot, and you play a tug-of-war: hold use to reel, tension climbs while you do and falls when you ease off,
+  the fish takes line back while you ease, and the line snaps at full tension. Stronger fish pull tension up faster
+  (`FishingReal`, `FishingHookMixin`, `FishFight`). A wooden rod only ever hooks cod and salmon.
+- **Metal fishing rod** (`MetalFishingRodItem`): forged through Tinkering (an iron rod head cast at the smeltery, handle
+  and binding at the Tool Station). Its line holds to 1.25 tension, it keeps gaining on a fish at higher tension and
+  reels faster, and it casts and retrieves like a vanilla rod (`FishingHookMixin` also keeps its hook from being
+  discarded for not holding a vanilla rod). Only it hooks the big fish.
+- **Big fish**: on the metal rod a bite may be a tuna (a cod grown 2.4x, lands as 3 raw cod) or, with Jaymo's Kingdoms,
+  a great white shark (the Naturalist shark Kingdoms' whaling sharks use, brought up at the hook by
+  `KingdomsCompat.sharkDrawnIn`, held without AI and unkillable while on the line). Both fight harder and pull you
+  toward them while you reel; the shark is the hardest (a 45 s fight) and lands as 6 raw salmon. Without Kingdoms a
+  shark bite is a cod.
+- **Cleaning a catch** (Jaymo's Kitchen 0.5.88): a cod or salmon laid on a cutting board and cut with a knife now
+  gives 3 fillets and bone meal (was 2), so a tuna or shark catch cleans into many.
+- Fixed: the startup crash (the metal rod item had no id set) and a shark bite that fought a tropical fish.
+- Built; not played.

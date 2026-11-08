@@ -212,6 +212,8 @@ public final class WeaponParts {
 		balkon("boomerang_edge", "boomerang", 1, Assembly.ROD_BINDING);
 		// (0.15.36) Andy: "All tools need crafting routes through jaymos": the tools Tinkering doesn't make are forged too
 		add(new Kind("fishing_hook", "minecraft:fishing_rod", Scheme.SINGLE, Molten.NUGGET, Assembly.ROD_BINDING, 1));
+		// (0.21.53) a metal fishing rod: cast an iron rod head at the smeltery, fit handle and binding at the Tool Station
+		add(new Kind("metal_rod_head", "jaymospowers:metal_fishing_rod", Scheme.SINGLE, INGOT, Assembly.ROD_BINDING, 1));
 		add(new Kind("brush_ferrule", "minecraft:brush", Scheme.SINGLE_COPPER, INGOT, Assembly.ROD_BINDING, 1));
 		// Pantry for Blockheads' kitchen knife (its own recipe is dropped by id, tinkering/Uncraftable)
 		add(new Kind("kitchen_knife_blade", "pantryforblockheads:knife", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_BINDING, 1));

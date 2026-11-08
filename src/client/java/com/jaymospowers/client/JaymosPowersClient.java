@@ -235,6 +235,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.aether.AetherVeil.init();
 		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
 		com.jaymospowers.client.power.cryo.CryoPowerClient.init();
+		// (0.21.51) realistic fishing: client sends the reel input packet and draws the tension HUD
+		com.jaymospowers.client.fishing.FishingRealClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
 		com.jaymospowers.client.freerun.moves.RunMovesClient.init();

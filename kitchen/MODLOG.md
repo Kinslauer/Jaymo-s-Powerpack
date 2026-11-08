@@ -1607,3 +1607,10 @@ mobs should be possible".
   Right-click with an empty hand to tear a cooked chunk off, or sneak + right-click to take the whole cooked product when
   it's done (`cooking/spit/SpitBlock`, `cooking/spit/SpitBlockEntity`; `client/spit/SpitBlockEntityRenderer`). Tuning
   numbers (`COOK_TICKS`, `BURNT_TICKS`, `CHUNK`) are `static final` at the top of `SpitBlockEntity`. Compile-checked; not played.
+
+## 0.5.88 (2026-11-07): gutting a fish gives more fillets
+
+- With Jaymo's Powers 0.21.57's real fishing (a hooked cod or salmon, or a big tuna or shark catch that lands as
+  several): a cod or salmon laid on a cutting board and cut with a knife is gutted and cleaned into 3 fillets
+  (`Chopping.FISH_FILLETS`, was 2) and bone meal, more than the whole fish eaten raw is worth.
+- Built; not played.
