@@ -7,6 +7,7 @@ import com.jaymospowers.power.blindness.BlindnessPower;
 import com.jaymospowers.power.blindness.BlindnessState;
 import com.jaymospowers.power.blindness.BlindnessVariant;
 import com.jaymospowers.power.blindness.BlindSide;
+import com.jaymospowers.power.blindness.BlindnessEcho;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
@@ -58,7 +59,7 @@ public final class BlindnessPowerClient implements PowerClient {
     private float voidSightShade = 0.0F;
     private float blackoutShade = 0.0F;
     private int abyssalFlashTicks = 0;
-    private int lastGameTime = 0;
+    private long lastGameTime = 0;
 
     private BlindnessPowerClient() {
     }
@@ -69,6 +70,8 @@ public final class BlindnessPowerClient implements PowerClient {
         ClientTickEvents.END_CLIENT_TICK.register(BlindnessPowerClient::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("blindness_overlay"), BlindnessPowerClient::render);
         BlindnessEcholocationClient.init();
+        ClientPlayNetworking.registerGlobalReceiver(BlindnessEchoPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> BlindnessEcholocationClient.onEcho(payload)));
     }
 
     /** Client tick: update shades from server-synced BlindnessState. */

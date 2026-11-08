@@ -52,7 +52,7 @@ public final class BlindnessPower implements Power {
     /** Called once from {@link JaymosPowers#onInitialize()}. */
     public static void init() {
         com.jaymospowers.core.Powers.register(INSTANCE);
-        BlindnessNet.register();
+        BlindnessEcho.register();
         BlindnessEcholocation.init();
         BlindnessOneEye.init();
         BlindnessDeafen.init();

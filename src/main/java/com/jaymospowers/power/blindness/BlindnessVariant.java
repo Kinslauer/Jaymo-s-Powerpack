@@ -16,11 +16,7 @@ public enum BlindnessVariant {
             Enum::name
     );
 
-    public static final StreamCodec<ByteBuf, BlindnessVariant> STREAM_CODEC = ByteBufCodecs.idMapper(
-            ByteBufCodecs.VAR_INT,
-            BlindnessVariant[]::new,
-            Enum::ordinal
-    );
+    public static final StreamCodec<ByteBuf, BlindnessVariant> STREAM_CODEC = ByteBufCodecs.VAR_INT.map(i -> values()[i], Enum::ordinal);
 
     public String langKey() {
         return "blindness.jaymospowers.variant." + name().toLowerCase(java.util.Locale.ROOT);

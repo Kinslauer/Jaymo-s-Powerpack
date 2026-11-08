@@ -2,7 +2,7 @@ package com.jaymospowers.power.blindness;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
-import com.jaymospowers.net.PowerPayloads;
+
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -43,14 +43,14 @@ public final class BlindnessAbyssalEcho {
             if (other == player) continue;
             applyBlindness(other, BLIND_DURATION);
             // Also send echolocation pulse to them so they can "see" by sound
-            ServerPlayNetworking.send(other, new PowerPayloads.BlindnessEcho(
+            ServerPlayNetworking.send(other, new BlindnessEcho(
                     player.getX(), player.getY(), player.getZ(),
                     0.0F,
                     1.0F,
                     "jaymospowers:abyssal_echo"
             ));
         }
-        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarText(
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
                 net.minecraft.network.chat.Component.translatable("message.jaymospowers.blindness.abyssal_echo.on")
                         .withStyle(net.minecraft.ChatFormatting.DARK_PURPLE, net.minecraft.ChatFormatting.BOLD)
         ));
@@ -58,7 +58,7 @@ public final class BlindnessAbyssalEcho {
 
     private static void deactivate(ServerPlayer player) {
         ACTIVE.remove(player);
-        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarText(
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
                 net.minecraft.network.chat.Component.translatable("message.jaymospowers.blindness.abyssal_echo.off")
                         .withStyle(net.minecraft.ChatFormatting.GRAY)
         ));

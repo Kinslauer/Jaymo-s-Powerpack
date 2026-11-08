@@ -16,11 +16,7 @@ public enum BlindSide {
             Enum::name
     );
 
-    public static final StreamCodec<ByteBuf, BlindSide> STREAM_CODEC = ByteBufCodecs.idMapper(
-            ByteBufCodecs.VAR_INT,
-            BlindSide[]::new,
-            Enum::ordinal
-    );
+    public static final StreamCodec<ByteBuf, BlindSide> STREAM_CODEC = ByteBufCodecs.VAR_INT.map(i -> values()[i], Enum::ordinal);
 
     public String langKey() {
         return "blindness.jaymospowers.side." + name().toLowerCase(java.util.Locale.ROOT);

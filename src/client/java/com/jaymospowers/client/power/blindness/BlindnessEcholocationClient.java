@@ -1,16 +1,17 @@
 package com.jaymospowers.client.power.blindness;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.power.blindness.BlindnessEchoPayload;
-import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import com.jaymospowers.power.blindness.BlindnessEcho;
+
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
+
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +30,10 @@ public final class BlindnessEcholocationClient {
     }
 
     public static void init() {
-        // Packet handling is in BlindnessNet
+        ClientTickEvents.END_CLIENT_TICK.register(client -> tick());
     }
 
-    public static void onEcho(BlindnessEchoPayload payload) {
+    public static void onEcho(BlindnessEcho payload) {
         Vec3 origin = new Vec3(payload.x(), payload.y(), payload.z());
         RINGS.add(new ClientRing(origin, 0.0F, payload.distance(), payload.volume(), payload.soundId()));
         if (RINGS.size() > MAX_RINGS) {
@@ -58,22 +59,10 @@ public final class BlindnessEcholocationClient {
 
     /** Renders all active echolocation rings as expanding circles on screen. */
     public static void render(GuiGraphicsExtractor graphics) {
-        Minecraft minecraft = Minecraft.getInstance();
-        Camera camera = minecraft.gameRenderer.getMainCamera();
-        if (camera == null || camera.getEntity() == null) return;
-
-        DeltaTracker delta = minecraft.getDeltaTracker();
-        Vec3 camPos = camera.getPosition().add(camera.getEntity().getViewVector(delta.getGameTimeDeltaTicks()).scale(0)); // current position
-        Matrix4f projection = new Matrix4f(minecraft.gameRenderer.getProjectionMatrix());
+        int cx = graphics.guiWidth() / 2;
+        int cy = graphics.guiHeight() / 2;
 
         for (ClientRing ring : RINGS) {
-            // Project 3D origin to 2D screen
-            Vec3 rel = ring.origin.subtract(camPos);
-            // Simple orthographic projection for screen-space rings
-            // In a real implementation, we'd use the view/projection matrix
-            // For now, draw at screen center with radius based on currentRadius
-            int cx = graphics.guiWidth() / 2;
-            int cy = graphics.guiHeight() / 2;
             float screenRadius = ring.currentRadius * 4.0F; // scale factor for visibility
             if (screenRadius < 1.0F) continue;
 
@@ -81,18 +70,13 @@ public final class BlindnessEcholocationClient {
             if (alpha <= 0) continue;
             int colour = alpha << 24 | 0x00FFFF; // cyan rings
 
-            // Draw ring as hollow circle
+            // Draw the ring as a dotted circle at the screen centre
             int segments = 32;
-            float prevX = cx + screenRadius;
-            float prevY = cy;
-            for (int i = 1; i <= segments; i++) {
+            for (int i = 0; i < segments; i++) {
                 float angle = (float) (2.0 * Math.PI * i / segments);
                 float x = cx + screenRadius * Mth.cos(angle);
                 float y = cy + screenRadius * Mth.sin(angle);
-                graphics.hLine((int) prevX, (int) x, (int) prevY, colour);
-                graphics.hLine((int) prevX, (int) x, (int) y, colour);
-                prevX = x;
-                prevY = y;
+                graphics.fill((int) x - 1, (int) y - 1, (int) x + 1, (int) y + 1, colour);
             }
         }
     }

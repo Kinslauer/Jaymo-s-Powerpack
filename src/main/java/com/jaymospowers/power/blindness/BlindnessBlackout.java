@@ -33,7 +33,7 @@ public final class BlindnessBlackout {
 
     private static void activate(ServerPlayer player) {
         ACTIVE.add(player);
-        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarText(
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
                 net.minecraft.network.chat.Component.translatable("message.jaymospowers.blindness.blackout.on")
                         .withStyle(net.minecraft.ChatFormatting.DARK_RED, net.minecraft.ChatFormatting.BOLD)
         ));
@@ -41,7 +41,7 @@ public final class BlindnessBlackout {
 
     private static void deactivate(ServerPlayer player) {
         ACTIVE.remove(player);
-        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarText(
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
                 net.minecraft.network.chat.Component.translatable("message.jaymospowers.blindness.blackout.off")
                         .withStyle(net.minecraft.ChatFormatting.GRAY)
         ));

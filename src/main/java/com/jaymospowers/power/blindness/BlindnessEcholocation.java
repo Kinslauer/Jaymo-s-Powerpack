@@ -1,8 +1,9 @@
 package com.jaymospowers.power.blindness;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.net.PowerPayloads;
+
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,11 +51,11 @@ public final class BlindnessEcholocation {
             double dist = player.distanceToSqr(pos.x, pos.y, pos.z);
             if (dist > RANGE * RANGE) continue;
             // Send ring to this player's client
-            ServerPlayNetworking.send(player, new PowerPayloads.BlindnessEcho(
+            ServerPlayNetworking.send(player, new BlindnessEcho(
                     pos.x, pos.y, pos.z,
                     (float) Math.sqrt(dist),
                     volume,
-                    sound.getLocation().toString()
+                    BuiltInRegistries.SOUND_EVENT.getKey(sound).toString()
             ));
         }
     }
@@ -62,7 +63,7 @@ public final class BlindnessEcholocation {
     public static void pulse(ServerPlayer player) {
         // Active echolocation pulse: the player makes a sound that creates a ring
         Vec3 pos = player.position();
-        ServerPlayNetworking.send(player, new PowerPayloads.BlindnessEcho(
+        ServerPlayNetworking.send(player, new BlindnessEcho(
                 pos.x, pos.y, pos.z,
                 0.0F,
                 1.0F,
