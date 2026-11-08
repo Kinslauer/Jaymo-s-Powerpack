@@ -76,12 +76,20 @@ Check every Minecraft API against the 26.3 sources (`sh ./gradlew genSources`) b
 
 ## 4. Versions, branches, PRs and merging
 
-- **Bump the version on every release**: `version` in `gradle.properties` (pack/Powers), `kingdoms/gradle.properties`,
-  `kitchen/gradle.properties`. Bump only the mods you changed (the pack version follows Powers).
-- **Versions collide constantly** because several branches run at once. Right before merging, bring `master` into the
-  branch and take the next free version numbers then, not when you start. Tell anyone else working in parallel which
-  numbers you took.
-- On a MODLOG merge conflict, keep master's file and append only your branch's own entry at the end.
+- **Versions and change notes.** A PR never changes `version=` (`gradle.properties` for pack/Powers,
+  `kingdoms/gradle.properties`, `kitchen/gradle.properties`), never adds to a MODLOG and never commits
+  `docs/codemap/`. It adds one change note per mod it changes: `changes/<powers|kingdoms|kitchen>/<branch-name>.md`,
+  a `# <title>` line, then what the MODLOG entry would say (no version number). After Andy merges, the **Release**
+  workflow (`.github/workflows/release.yml` running `tools/release.py`) bumps that mod's patch version once per note,
+  appends `## <version> (<date>): <title> (#<PR>)` and the text to the MODLOG, deletes the note, updates the version
+  table on `docs/vault/Home.md`, regenerates `docs/codemap/` and commits to master. So PRs no longer collide on
+  version numbers or MODLOG ends, and nobody renumbers anything. `changes/README.md` has an example.
+- Why: every PR used to bump the same `version=` line and append to the same MODLOG end, so with PRs squash-merged one
+  after another every later PR "conflicted" and needed a re-merge, new numbers and another CI run.
+- An older branch that still bumps versions or appends to a MODLOG: `py -3 tools/change_note.py convert` turns its
+  entries into notes and puts master's version lines, MODLOGs and codemaps back. Check the notes, commit.
+- Don't write version numbers in code comments (`// 0.21.62: ...`): say what the code does; `git blame` finds the PR.
+  Leave existing ones alone (renumbering them is churn).
 - Kingdoms lang lives in `kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/*.json` (merged at build; no
   source `en_us.json`). Put a new feature's keys in its own part. If an old branch still has a single `en_us.json`,
   keep it on the conflict, then run `python3 tools/lang_split.py`.
@@ -98,8 +106,8 @@ Every tool (Claude, Hermes, Codex, Cursor, anyone) goes through this list. PR #1
 stages, so it's not optional. The **PR checks** GitHub Action (`.github/workflows/pr-checks.yml`) re-checks items 1 to 4
 on every PR and builds all three mods; a red check means don't merge. Run `python3 tools/pr_checks.py` yourself first.
 
-1. **Version bumped** for every mod you touched (`gradle.properties`, `kingdoms/gradle.properties`,
-   `kitchen/gradle.properties`), to the next number no open PR has taken.
+1. **Change note** for every mod you touched: `changes/<powers|kingdoms|kitchen>/<branch-name>.md` (`# <title>`, then
+   the entry). **Don't** change `version=` or the MODLOGs: the release step does both after the merge.
 2. **Builds pass**: `sh ./gradlew build` at the root, and in `kingdoms/` or `kitchen/` if you touched them.
 3. **libs/ jars**: never add a jar older than one already there (`libs/jaymos-kitchen-*`, `mca-fabric-*`). The Powers
    build picks the Kitchen jar matching `kitchen/gradle.properties`, else the newest. Only add a jar when the mod
@@ -109,8 +117,10 @@ on every PR and builds all three mods; a red check means don't merge. Run `pytho
    its own model; don't point several items at one new model to "upgrade" them. A new held model needs a `ground` pose
    too. A deliberate share goes in `tools/pr_checks_allow.txt` with a reason.
 5. **Kingdoms lang** keys go in `kingdoms/.../lang/parts/<feature>.json`, never a single `en_us.json`.
-6. **MODLOG.md**: append one entry at the end, headed with the new version, saying what a player will see.
-7. **Codemap**: added a class? Run `python3 tools/codemap.py` and commit the result.
+6. **The note's text** is the MODLOG entry: what a player will see, the main classes, what wasn't tested. No version
+   number, in the note or in code comments.
+7. **Codemap**: don't commit `docs/codemap/` (the release step regenerates it). If `tools/codemap.py` ran, put it back
+   with `git checkout origin/master -- docs/codemap`.
 8. **PR body** says what changed for players and what you did not test. Never commit `Serverfiles/` or secrets.
 9. Don't merge. Andy merges only on "merge".
 

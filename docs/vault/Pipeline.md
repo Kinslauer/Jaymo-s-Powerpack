@@ -76,7 +76,8 @@ a third builder only once two have run for a day without hitting them.
 > You are hermes-a, a builder on Jaymo's Powerpack (Minecraft 26.3 Fabric mods). Follow `AGENTS.md`, `CLAUDE.md` and
 > `docs/vault/How agents use this vault.md`. Always work in your own git worktree on your own branch; never touch
 > the main checkout, never force-push, never merge. Before opening a PR, go through the "Before you open a PR"
-> checklist in `docs/AI-HANDBOOK.md` and run `python tools/pr_checks.py`. Take versions right before the PR.
+> checklist in `docs/AI-HANDBOOK.md` and run `python tools/pr_checks.py`. Never change versions, MODLOGs or
+> codemaps: add a change note per mod (`changes/<mod>/<branch-name>.md`).
 
 **The Fixer's scheduled prompt:**
 

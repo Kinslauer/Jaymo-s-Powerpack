@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-# Checks PR vs master: versions, jars, item models.
+# Checks PR vs master: change notes (no version/MODLOG edits), jars, item models.
 """Checks a branch against master before it merges (run by .github/workflows/pr-checks.yml, or by hand).
 
     python3 tools/pr_checks.py [base-ref]      (default origin/master)
 
 Fails (exit 1) when:
-  1. a mod's code or resources changed but its version in gradle.properties wasn't raised above master's;
+  1. a mod's code or resources changed but the PR adds no change note for it (changes/<mod>/<slug>.md), or the PR
+     changes a `version=` line, adds to a MODLOG, or edits docs/codemap/. Those are done once, at merge time, by
+     tools/release.py (the Release workflow), so PRs no longer conflict on them (changes/README.md);
   2. a libs/*.jar was added that is older than another jar of the same mod already in libs/
      (PR #1096 added kitchen 0.5.38 next to 0.5.57);
   3. a changed item model (models/item/*.json) is an exact copy of another model (PR #1096's 2.0 "reverse" model
@@ -22,10 +24,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-MODS = [  # (name, properties file, source folders whose changes need a version bump)
-    ("Powers", "gradle.properties", ["src/"]),
-    ("Kingdoms", "kingdoms/gradle.properties", ["kingdoms/src/"]),
-    ("Kitchen", "kitchen/gradle.properties", ["kitchen/src/"]),
+MODS = [  # (name, note folder, properties file, MODLOG, source folders whose changes need a change note)
+    ("Powers", "powers", "gradle.properties", "MODLOG.md", ["src/"]),
+    ("Kingdoms", "kingdoms", "kingdoms/gradle.properties", "kingdoms/MODLOG.md", ["kingdoms/src/"]),
+    ("Kitchen", "kitchen", "kitchen/gradle.properties", "kitchen/MODLOG.md", ["kitchen/src/"]),
 ]
 
 
@@ -71,18 +73,35 @@ def main():
     allow = allowed()
     errors = []
 
-    # 1. version bumps
-    for name, props, folders in MODS:
-        if not any(p.startswith(f) for p in changed for f in folders):
-            continue
+    # 1. change notes instead of versions and MODLOGs
+    for name, folder, props, log, src in MODS:
+        notes = [p for p in added if p.startswith(f"changes/{folder}/") and p.endswith(".md")]
+        if any(p.startswith(f) for p in changed for f in src) and not notes:
+            errors.append(f"{name} changed but the PR adds no change note. Add changes/{folder}/<branch-name>.md: "
+                          f"first line '# <title>', then what a player will see (changes/README.md).")
+        for n in notes:
+            text = (ROOT / n).read_text(encoding="utf-8").strip()
+            if not text.startswith("# ") or len(text.splitlines()) < 2:
+                errors.append(f"{n}: start with a '# <title>' line, then the entry's text.")
+            if re.search(r"^##\s*\d+\.\d+", text, re.M):
+                errors.append(f"{n}: leave the version number out; the release step adds it.")
         try:
             old = version_of(git("show", f"{merge_base}:{props}"))
         except subprocess.CalledProcessError:
-            continue
-        new = version_of((ROOT / props).read_text())
-        if vtuple(new) <= vtuple(old):
-            errors.append(f"{name} changed but {props} version is {new} (master had {old}). Raise it to the next "
-                          f"free number (check open PRs, they take numbers too).")
+            old = None
+        if props in changed and old and version_of((ROOT / props).read_text()) != old:
+            errors.append(f"{props}: don't change version= (master's is {old}). The release step bumps it after "
+                          f"the merge; put a change note in changes/{folder}/ instead.")
+        if log in changed and int((git("diff", "--numstat", merge_base, "HEAD", "--", log).split() or ["0"])[0]):
+            errors.append(f"{log}: don't add to the MODLOG. Put the entry in changes/{folder}/<branch-name>.md; "
+                          f"the release step appends it with the new version after the merge.")
+    for p in sorted(changed):
+        note_path = re.match(r"changes/(powers|kingdoms|kitchen)/[^/]+\.md$", p)
+        if p.startswith("changes/") and p != "changes/README.md" and not note_path:
+            errors.append(f"{p}: change notes go in changes/<powers|kingdoms|kitchen>/<name>.md.")
+    if "tools/codemap.py" not in changed and any(p.startswith("docs/codemap/") for p in changed):
+        errors.append("docs/codemap/ changed: leave it out of the PR (git checkout origin/master -- docs/codemap); "
+                      "the release step regenerates it after the merge.")
 
     # 2. old jars in libs/
     jars = {}

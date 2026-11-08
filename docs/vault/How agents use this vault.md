@@ -88,10 +88,10 @@ Every agent, Hermes included, works only in **its own git worktree** on its own 
 
 ## When you finish
 
-1. Set your note's `status` to `in-review`, fill in `pr:` and the version numbers you took, and write a short
+1. Set your note's `status` to `in-review`, fill in `pr:` and the change notes you added, and write a short
    "Done" line: what a player will see, and what wasn't tested. If the work came from an Inbox task, also set the
    task to `in-review` (step 4 of the Inbox section above).
-2. If your PR changes versions, update the table on [[Home]] in the same PR.
+2. Don't touch the version table on [[Home]]: the Release workflow updates it after the merge.
 3. After Andy merges, the agent that merged it (usually the project thread) sets the note to `merged` and moves it to
    `Live/Agents/Done/`.
 
@@ -103,8 +103,8 @@ Claude and Hermes (or any two assistants) can share a PR: a PR is just a branch.
   (for example `- kingdoms/ (Claude)` and `- docs/ (Hermes)`). Never edit the other's files.
 - **Take turns on the branch.** `git pull` before you start, commit and `git push` when you stop. If the push is
   refused, `git pull`, resolve, push again. **Never force-push or rebase** a shared branch: it erases the other's work.
-- **One agent owns the shared files** (`gradle.properties` versions, MODLOG entries, `docs/codemap/*.md`) and does
-  them once, at the end, right before review. Say which agent on the note.
+- **Change notes are per agent**: each writes its own `changes/<mod>/<branch>-<agent>.md` if both changed a mod.
+  Nobody touches versions, MODLOGs or `docs/codemap/` (the Release workflow does after the merge).
 - Leave a line under *Notes* when you hand over ("Claude: done with the AI, Hermes can do the models"), so the other
   knows where things stand without asking Andy.
 - Both log Andy's rulings in [[Decisions]], so neither works from an old answer.
@@ -112,8 +112,8 @@ Claude and Hermes (or any two assistants) can share a PR: a PR is just a branch.
 ## Three agents at once
 
 - One task per agent, one branch and worktree each, one PR each.
-- Split by files, not by idea: two agents never own the same file. Shared hot spots (`gradle.properties`,
-  `MODLOG.md`, `kingdoms/MODLOG.md`, `JaymosPowers.java`, `docs/codemap/*.md`, this vault's [[Home]]) are
-  touched only at the very end, right before the PR, after merging master in.
-- Versions: take the next free numbers just before the PR and write them on your note, so the others can see them.
+- Split by files, not by idea: two agents never own the same file. Shared hot spots (`JaymosPowers.java`) are
+  touched only at the very end, right before the PR, after merging master in. Versions, MODLOGs, `docs/codemap/` and
+  the table on [[Home]] are never touched in a PR: each PR adds its own change note and the Release workflow does
+  the rest after the merge.
 - Report to Andy in a few plain sentences: "ready for you to merge as PR #N; compiles but hasn't been played yet."

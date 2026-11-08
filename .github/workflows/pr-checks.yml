@@ -1,4 +1,5 @@
 # Runs on every pull request to master. A red check means: don't merge yet, read the failing step's log.
+# PRs add change notes (changes/README.md); versions, MODLOGs and codemaps are written after the merge by release.yml.
 # What it checks and why: docs/AI-HANDBOOK.md, "Before you open a PR".
 name: PR checks
 
@@ -12,7 +13,7 @@ concurrency:
 
 jobs:
   checks:
-    name: Versions, libs jars, item models
+    name: Change notes, libs jars, item models
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
