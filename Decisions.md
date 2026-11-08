@@ -56,3 +56,8 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Applies to:** Kingdoms FarmhandHome / FarmFamily.
 - **Agent:** farm-family.
 - 2026-11-07: Andy started a Hermes model trial: hermes-a (Builder A) on nvidia/nemotron-3-ultra-550b-a55b, hermes-b (Builder B) stays on nvidia/nemotron-3.5-super-vl-120b-a12b, hermes-fixer on nvidia/nemotron-3.5-lightning-30b-a3b. Compare review rounds per task (Kanban timeline) before keeping or reverting. Config backups in the reviewer session scratchpad.
+
+### 2026-11-07: Fishing, all the fishing mods in one
+- **Decided:** Andy wants every fishing mod's functions in one (not their realistic 3D rods). Minigame: "all three together" (strike window, charged cast, drag, fish runs, rod bend). Ship the built round now as one PR, then the tracks in `docs/Plan-fishing.md` (fight, tackle, fish, records) each as their own PR, two at a time.
+- **Applies to:** Powers fishing, Kitchen, Kingdoms Tideborn.
+- **Agent:** fishing-tideborn.
