@@ -508,6 +508,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		TownProjects.register();
 		// 0.5.50: the traveller's journal (book + map): quests, a map, reputations, on M
 		Journal.register();
+		// 0.7.649: what Jaymo's Powers' character menu asks for (the Faction tab, the Map tab's settlements)
+		MenuNet.register();
 		// 0.7.55: tailors change your clothes for a fee (MCA's editor, clothing page only)
 		Tailors.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
