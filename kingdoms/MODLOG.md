@@ -10247,3 +10247,14 @@ player. they need some kind of utility or function as of now." (`FarmFamily`, fr
 - Who they are, their home spot and their chest are kept as entity tags, so it lasts; only new Family farmhand starts.
 - A gray line after the start tells the player what the family does.
 - Compile-checked; not played.
+
+## 0.7.650 (2026-11-07): the Tideborn and fishing
+
+Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime."
+- When a fish takes your hook (Powers 0.21.61's real fishing), any Tideborn within 24 blocks who can see you take it
+  as an attack on their kin: the nearest cries out and squares up, and their neighbours join in, exactly as if you'd
+  struck them (`Retaliation.struck`, an assault where a realm's law holds).
+- On a Tideborn haven's land it's also **poaching**, a new medium crime (`Theft.Crime.POACHING`): if its people see it,
+  reputation there drops, the guards come after you and a bounty goes up. Charged at most once per 30 s; the haven's
+  own folk may fish freely (`TideFishing`).
+- Built; not played.

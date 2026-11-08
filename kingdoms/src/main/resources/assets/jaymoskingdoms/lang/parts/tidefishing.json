@@ -1,0 +1,12 @@
+{
+  "message.jaymoskingdoms.tidefishing.cry.0": "You'd hook the sea's own children in front of us?",
+  "message.jaymoskingdoms.tidefishing.cry.1": "Put that line down! Those are our kin!",
+  "message.jaymoskingdoms.tidefishing.cry.2": "The Deep Mother sees what you do to her young!",
+  "message.jaymoskingdoms.tidefishing.attack": "The Tideborn saw you hook a fish, and take it as an attack on their kin.",
+  "message.jaymoskingdoms.theft.cry.poaching.0": "Poacher! They're fishing our waters!",
+  "message.jaymoskingdoms.theft.cry.poaching.1": "Thief of the tide! Guards, the shallows!",
+  "bounty.jaymoskingdoms.crime.poaching": "poaching",
+  "bust.jaymoskingdoms.crime.poaching": "poaching",
+  "crime.jaymoskingdoms.poaching": "poaching",
+  "recall.jaymoskingdoms.crime.poaching": "poaching"
+}

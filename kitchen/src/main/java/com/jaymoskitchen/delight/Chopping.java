@@ -3,6 +3,10 @@ package com.jaymoskitchen.delight;
 import com.jaymoskitchen.ModItems;
 import com.jaymoskitchen.cooking.Dish;
 import java.util.List;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -11,13 +15,24 @@ import net.minecraft.world.item.Items;
  * What a knife makes of things on the cutting board (Farmer's Delight's cuts): meat into two smaller cuts that cook
  * quicker into finger food, a cabbage into leaves, a rice panicle into rice and straw; (0.5.33) a cake, a pie, a pumpkin,
  * a melon or a kelp roll into slices, and a ham into chops. (0.5.88) A cod or a salmon (a catch from Powers' real fishing, a tuna or a shark among them) is gutted and
- * cleaned into {@link #FISH_FILLETS} fillets and bone meal from the guts.
+ * cleaned into {@link #FISH_FILLETS} fillets and bone meal from the guts. (0.5.92) A fish from Powers' real fishing carries its
+ * weight: the fillets go by it ({@link #KG_PER_FILLET}), and a whole tuna is cut into steaks by its weight too
+ * ({@link #KG_PER_TUNA_STEAK}).
  */
 public final class Chopping {
 	/** Cuts from one piece of meat or fish. */
 	static final int MEAT_CUTS = 2;
 	/** (0.5.88) Gutting and cleaning a cod or a salmon on the board: fillets from one fish, worth more than the whole fish eaten raw. */
 	static final int FISH_FILLETS = 3;
+	/** (0.5.92) A weighed cod or salmon: a fillet for each this many kg, at least and at most. */
+	static final float KG_PER_FILLET = 1.5F;
+	static final int FILLETS_LEAST = 2, FILLETS_MOST = 8;
+	/** (0.5.92) Powers' whole tuna: a steak for each this many kg, at least and at most (two for one with no weight). */
+	static final float KG_PER_TUNA_STEAK = 1.5F;
+	static final int TUNA_STEAKS_LEAST = 2, TUNA_STEAKS_MOST = 8;
+	static final Identifier POWERS_TUNA = Identifier.fromNamespaceAndPath("jaymospowers", "tuna");
+	static final Identifier POWERS_TUNA_STEAK = Identifier.fromNamespaceAndPath("jaymospowers", "tuna_steak");
+	static final Identifier POWERS_FISH_WEIGHT = Identifier.fromNamespaceAndPath("jaymospowers", "fish_weight");
 	static final int CABBAGE_LEAVES = 2;
 	static final int PANICLE_RICE = 2;
 	/** Slices from a cake, a pumpkin pie (a pie dish gives PieBlock.SLICES), a pumpkin, a melon and a kelp roll. */
@@ -49,10 +64,18 @@ public final class Chopping {
 			return List.of(new ItemStack(Delight.MUTTON_CHOPS, MEAT_CUTS));
 		}
 		if (item == Items.COD) {
-			return List.of(new ItemStack(Delight.COD_SLICE, FISH_FILLETS), new ItemStack(Items.BONE_MEAL));
+			return List.of(new ItemStack(Delight.COD_SLICE, fillets(stack)), new ItemStack(Items.BONE_MEAL));
 		}
 		if (item == Items.SALMON) {
-			return List.of(new ItemStack(Delight.SALMON_SLICE, FISH_FILLETS), new ItemStack(Items.BONE_MEAL));
+			return List.of(new ItemStack(Delight.SALMON_SLICE, fillets(stack)), new ItemStack(Items.BONE_MEAL));
+		}
+		if (BuiltInRegistries.ITEM.getKey(item).equals(POWERS_TUNA)) {
+			Item steak = BuiltInRegistries.ITEM.getOptional(POWERS_TUNA_STEAK).orElse(null);
+			if (steak != null) {
+				Float kg = weight(stack);
+				int steaks = kg == null ? TUNA_STEAKS_LEAST : Mth.clamp(Math.round(kg / KG_PER_TUNA_STEAK), TUNA_STEAKS_LEAST, TUNA_STEAKS_MOST);
+				return List.of(new ItemStack(steak, steaks), new ItemStack(Items.BONE_MEAL, 2));
+			}
 		}
 		if (item == Delight.CABBAGE) {
 			return List.of(new ItemStack(Delight.CABBAGE_LEAF, CABBAGE_LEAVES));
@@ -91,5 +114,17 @@ public final class Chopping {
 			return List.of(slices);
 		}
 		return List.of();
+	}
+
+	/** (0.5.92) Fillets from a cod or salmon: by its weight, if Powers' fishing weighed it. */
+	private static int fillets(ItemStack stack) {
+		Float kg = weight(stack);
+		return kg == null ? FISH_FILLETS : Mth.clamp(Math.round(kg / KG_PER_FILLET), FILLETS_LEAST, FILLETS_MOST);
+	}
+
+	/** The weight (kg) Powers' fishing put on {@code stack}, or null (none, or no Powers). */
+	private static Float weight(ItemStack stack) {
+		DataComponentType<?> type = BuiltInRegistries.DATA_COMPONENT_TYPE.getOptional(POWERS_FISH_WEIGHT).orElse(null);
+		return type != null && stack.get(type) instanceof Float kg ? kg : null;
 	}
 }

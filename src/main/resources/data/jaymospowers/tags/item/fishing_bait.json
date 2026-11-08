@@ -1,0 +1,11 @@
+{
+  "values": [
+    {
+      "id": "jaymoskitchen:fish_bait",
+      "required": false
+    },
+    "minecraft:bread",
+    "minecraft:rotten_flesh",
+    "minecraft:spider_eye"
+  ]
+}
