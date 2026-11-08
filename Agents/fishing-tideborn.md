@@ -3,7 +3,7 @@ status: in-review
 task: realistic fishing 2 + Tideborn react to fishing
 branch: claude/fishing-realism-tideborn
 with: Claude Code session (side session of the coordinator)
-pr: 1132
+pr: 1132, 1136
 mods: Powers, Kitchen, Kingdoms
 versions: Powers 0.21.61, Kingdoms 0.7.650, Kitchen 0.5.91
 started: 2026-11-07
@@ -30,3 +30,4 @@ owns:
 
 ## Done
 PR #1132. Players: fish depend on water, time and weather; spots fish out; every catch weighed; whole tuna, tuna steaks, shark meat; Tideborn fight anglers; poaching in Tideborn havens. Follow-up tracks A-D in docs/Plan-fishing.md (Andy: one PR each, two at a time). Compiles; not played.
+- PR #1136 (Track B tackle, Powers 0.21.63) on top of #1132. Track A is PR #1133 (its own session).
