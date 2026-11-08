@@ -8,12 +8,12 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · open
 
 
 ## Being built
 
-- [ ] [[Inbox/blindness|blindness]] · hermes-modeller · claimed
-- [ ] [[Inbox/mimic|mimic]] · hermes-b · claimed
+- [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
 
 
 ## In review
