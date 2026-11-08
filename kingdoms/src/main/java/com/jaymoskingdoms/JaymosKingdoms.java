@@ -194,6 +194,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
+		// the Family farmhand's family: wary of monsters, indoors at night, at work on the farm
+		FarmFamily.register();
 		// 0.7.576: monsters keep off a lit campfire near a player
 		CampfireWard.register();
 		Clearing.register();
