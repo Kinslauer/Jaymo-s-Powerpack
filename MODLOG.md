@@ -1596,24 +1596,29 @@ Built; not played.
 - Fixed: the startup crash (the metal rod item had no id set) and a shark bite that fought a tropical fish.
 - Built; not played.
 
-## 0.21.61 (2026-11-07): fishing by place and time, overfishing, tuna and shark meat, fish weights
+## 0.21.61 (2026-11-07): real fish on the line, baited hooks, skipjack tuna, fish weights, shark meat
 
-Andy: "The goal is more realistic fishing." Ideas from Au Naturel (public domain), our own code; nothing copied.
-- **Fish by place and time** (`FishWaters`): what bites depends on the water under the hook. Rivers are mostly salmon,
-  lakes cod and salmon, cold seas cod and salmon, open sea mostly cod with some pufferfish and tropical fish, warm seas
-  mostly tropical fish and pufferfish. Tuna and sharks (metal rod) only come at sea, more in warm water, fewer in cold,
-  never in a river or lake. Bites are 1.6x as likely at dawn and dusk and 1.3x in the rain. A pool more than 24 blocks
-  above sea level holds no fish (the hook says so every 10 s).
-- **Kitchen fish bait works again**: held in the other hand it makes bites 1.5x as likely, and one is used per fish
-  landed (the tug-of-war fishing had bypassed it).
-- **Overfishing**: each 32x32 patch of water holds 10 fish. Every fish landed thins it (bites fall to a tenth when it's
-  empty) and one comes back every 7200 ticks, so a fished-out spot is full again in 3 days. You're told when a spot gets
-  thin.
+Andy: "The goal is more realistic fishing", then: "i need there to be real fish ... they have to ACTUALLY be there",
+"you should have to manually and visually bait the hook", and "new tuna mob please. skipjack?". Ideas from Au Naturel
+(public domain) and Reel to Fish (all rights reserved, ideas only); our own code and art.
+- **Every bite is a real fish** (`FishBites`): a baited hook draws a fish swimming within 10 blocks. It turns and swims
+  to the hook, nibbles a few times (the bobber dips and splashes), then takes it, and the fight is with that same fish.
+  What you catch is whatever lives there (vanilla spawns: salmon in rivers and cold seas, cod at sea, tropical fish and
+  pufferfish in warm seas; skipjack tuna at sea; great whites with Naturalist). A landed fish is gone from the water, so
+  a spot is fished out when its fish are; one that gets away swims off at its own size. Tuna and sharks only go for the
+  metal rod's hook. The old random bite, the fish spawned at the hook and the made-up fish stock are gone.
+- Fish are keener at dawn and dusk (1.6x) and in rain (1.3x) (`FishWaters`).
+- **Bait the hook by hand** (`HookBait`): sneak and use the rod with bait in your other hand (Kitchen's fish bait,
+  bread, rotten flesh or a spider eye: tag `#jaymospowers:fishing_bait`). The bait hangs under the bobber when you
+  cast (client `FishingHookRendererMixin`), the rod's tooltip says what's on it, and a fish that takes the hook eats it,
+  caught or not. Nothing bites a bare hook (the hook reminds you every 10 s).
+- **Skipjack tuna** (`Skipjack`, `SkipjackModel`, `SkipjackRenderer`): a new schooling fish, dark blue-violet over
+  silver with belly stripes, in schools of 3 to 6 in every ocean but the frozen ones. Too big for a bucket; spawn egg.
 - **Fish weight** (`FishCatch`, component `jaymospowers:fish_weight`): every catch is weighed round its kind's usual
-  size (cod ~4 kg, salmon ~5, pufferfish ~0.8, tropical ~0.4, tuna ~120, shark ~400) and shows it under the name. A heavy
-  fish pulls harder (up to 1.4x) and looks bigger on the line. Weighed fish of different weights don't stack.
-- **Real tuna and shark meat**: a landed tuna is a whole Raw Tuna (edible, weighed); craft it into 3 Raw Tuna Steaks,
-  or cut it on Kitchen's board for a steak per 15 kg. A landed shark is cut up on the shore into Raw Shark Meat, a piece
-  per 50 kg (3 to 12). Steaks and shark meat cook in a furnace, smoker or campfire. New textures for all five.
+  size (cod ~4 kg, salmon ~5, pufferfish ~0.8, tropical ~0.4, skipjack ~5, shark ~400) and shows it under the name. A
+  heavy fish pulls harder (up to 1.4x) and looks bigger on the line. Weighed fish of different weights don't stack.
+- **Tuna and shark meat**: a landed skipjack is a whole Raw Skipjack Tuna (edible, weighed); craft it into 3 Raw Tuna
+  Steaks, or cut it on Kitchen's board for a steak per 1.5 kg. A landed shark is cut up on the shore into Raw Shark
+  Meat, a piece per 50 kg (3 to 12). Steaks and shark meat cook in a furnace, smoker or campfire.
 - **Tideborn** (with Kingdoms 0.7.650): every bite calls `KingdomsCompat.fished`, see the Kingdoms log.
 - Built; not played.

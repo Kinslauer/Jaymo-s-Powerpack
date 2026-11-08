@@ -9,7 +9,7 @@
   "message.jaymospowers.fishing.too_big": "Too big for this rod - it broke free.",
   "message.jaymospowers.fishing.tuna_hooked": "A big tuna - hold on!",
   "hud.jaymospowers.fishing.tension": "Fishing: %s%% tension",
-  "item.jaymospowers.tuna": "Raw Tuna",
+  "item.jaymospowers.tuna": "Raw Skipjack Tuna",
   "item.jaymospowers.tuna_steak": "Raw Tuna Steak",
   "item.jaymospowers.cooked_tuna_steak": "Seared Tuna Steak",
   "item.jaymospowers.shark_meat": "Raw Shark Meat",
@@ -17,6 +17,11 @@
   "tooltip.jaymospowers.fish_weight": "%s kg",
   "message.jaymospowers.fishing.caught_weighed": "Landed %s, %s kg!",
   "message.jaymospowers.fishing.shark_landed": "Landed a %2$s kg shark and cut it up on the shore: %1$s.",
-  "message.jaymospowers.fishing.fished_out": "The fish here are getting scarce. Give this water a few days, or try somewhere else.",
-  "message.jaymospowers.fishing.no_fish_here": "No fish live in water this high up."
+  "entity.jaymospowers.skipjack": "Skipjack Tuna",
+  "item.jaymospowers.skipjack_spawn_egg": "Skipjack Tuna Spawn Egg",
+  "message.jaymospowers.fishing.baited": "Baited the hook with %s.",
+  "message.jaymospowers.fishing.already_baited": "The hook is already baited.",
+  "message.jaymospowers.fishing.bare_hook": "Nothing will bite a bare hook. Sneak and use the rod with bait in your other hand.",
+  "tooltip.jaymospowers.hook_bait": "Baited: %s",
+  "tooltip.jaymospowers.hook_bare": "Hook not baited"
 }

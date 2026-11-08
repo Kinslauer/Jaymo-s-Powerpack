@@ -23,6 +23,7 @@
 		{ "config": "jaymospowers.bettercombat.client.mixins.json", "environment": "client" },
 		"jaymospowers.wind.mixins.json",
 		{ "config": "jaymospowers.wind.client.mixins.json", "environment": "client" },
+		{ "config": "jaymospowers.fishing.client.mixins.json", "environment": "client" },
 		"jaymospowers.arsenal.mixins.json",
 		{ "config": "jaymospowers.arsenal.client.mixins.json", "environment": "client" },
 		"jaymospowers.web.mixins.json",

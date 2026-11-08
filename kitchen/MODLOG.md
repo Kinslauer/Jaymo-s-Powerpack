@@ -1618,6 +1618,6 @@ mobs should be possible".
 ## 0.5.91 (2026-11-07): fillets by the fish's weight, tuna steaks
 
 - With Jaymo's Powers 0.21.61 a caught fish carries its weight. Gutting a weighed cod or salmon on the cutting board
-  gives a fillet per 1.5 kg (2 to 8; an unweighed one still gives 3), and Powers' whole Raw Tuna cuts into a steak per
-  15 kg (3 to 14) and bone meal (`Chopping`).
+  gives a fillet per 1.5 kg (2 to 8; an unweighed one still gives 3), and Powers' whole Raw Skipjack Tuna cuts into a steak
+  per 1.5 kg (2 to 8) and bone meal (`Chopping`).
 - Built; not played.

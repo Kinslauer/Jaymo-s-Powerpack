@@ -27,9 +27,9 @@ import org.jspecify.annotations.Nullable;
  * shore into {@link #SHARK_MEAT}, a piece for each {@link #SHARK_KG_PER_CUT} kg.
  */
 public final class FishCatch {
-    /** A fish's usual weight and how far either way it runs (kg): cod, salmon, pufferfish, tropical fish, shark, tuna. */
-    static final float[] KG = {4.0F, 5.0F, 0.8F, 0.4F, 400.0F, 120.0F};
-    static final float[] KG_SPREAD = {3.0F, 4.0F, 0.5F, 0.3F, 250.0F, 80.0F};
+    /** A fish's usual weight and how far either way it runs (kg): cod, salmon, pufferfish, tropical fish, shark, skipjack tuna. */
+    static final float[] KG = {4.0F, 5.0F, 0.8F, 0.4F, 400.0F, 5.0F};
+    static final float[] KG_SPREAD = {3.0F, 4.0F, 0.5F, 0.3F, 250.0F, 4.0F};
     /** No fish is lighter than this share of its usual weight. */
     static final float LIGHTEST = 0.2F;
     /** A fish's pull on the line grows with its weight (weight / usual), held between these. */

@@ -34,12 +34,25 @@ public final class FishingRealClient {
         ClientTickEvents.END_CLIENT_TICK.register(FishingRealClient::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
                 JaymosPowers.id("fishing_tension"), FishingRealClient::render);
-        // (0.21.61) a landed fish shows its weight
+        // (0.21.61) the skipjack tuna
+        net.minecraft.client.renderer.entity.EntityRenderers.register(com.jaymospowers.fishing.Skipjack.SKIPJACK, SkipjackRenderer::new);
+        // (0.21.61) a landed fish shows its weight, a rod the bait on its hook
         ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
             Float kg = FishCatch.weight(stack);
             if (kg != null) {
                 lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.fish_weight",
                         String.format(java.util.Locale.ROOT, "%.1f", kg)).withStyle(ChatFormatting.GRAY));
+            }
+            net.minecraft.resources.Identifier bait = com.jaymospowers.fishing.HookBait.BAIT == null ? null
+                    : stack.get(com.jaymospowers.fishing.HookBait.BAIT);
+            if (bait != null) {
+                net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(bait).orElse(null);
+                if (item != null) {
+                    lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.hook_bait",
+                            item.getName(new net.minecraft.world.item.ItemStack(item))).withStyle(ChatFormatting.GRAY));
+                }
+            } else if (com.jaymospowers.fishing.HookBait.isRod(stack)) {
+                lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.hook_bare").withStyle(ChatFormatting.DARK_GRAY));
             }
         });
     }
