@@ -71,3 +71,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - 2026-11-08: Andy named the bots: Apollo = hermes-a, Bacchus = hermes-b, Hephaestus = hermes-fixer; the modeller (hermes-modeller, kimi-k3.1-pro) is Prometheus and makes the Bogre. Inbox tasks may say `for: <name>`; E:/hermes/powerpack/vault.py maps names to bots.
 
 - 2026-11-08 (kitchen-rats): Andy chose to reuse the Rats mod's textures (LGPL-3.0, with credit) for Kitchen's rats, after seeing the look page.
+- 2026-11-08 (kingdoms-geckolib-groundwork): Andy: the Stormborn Tomb reuses the Skeleton Lord (boss) and the silver skeleton (Dead Traveler model) instead of a new tomb skeleton and draugr lord, both ported to GeckoLib with improved animations; the new Draugr is built too (GeckoLib, our own art). The example GeckoLib mob is the barrow beetle. PR #1149.

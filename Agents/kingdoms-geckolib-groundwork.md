@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: kingdoms-geckolib-groundwork
-branch: claude/eager-lehmann-ef2930
+branch: claude/kingdoms-geckolib-tomb-undead
 with: 
-pr: 
+pr: 1149
 mods: Kingdoms
 versions: 
 started: 2026-11-08
@@ -31,3 +31,7 @@ owns:
   (checked in the jar). PR #1146 (Bogre) puts its files in `geo/` and `animations/`: they need moving.
 
 ## Done
+PR #1149. GeckoLib 5.5.7 in Kingdoms, inhabitants/ with the barrow beetle (example) and the draugr; the silver skeleton
+(coffin rise) and Skeleton Lord (staff swing, slam, Grave Call) moved to GeckoLib; handbook section; tools/bbmodel_geckolib.py.
+Tomb ids: silver_skeleton, draugr, skeleton_lord {dormant:1b}. Built and pr_checks pass; not played, no server boot
+(the dev server's EULA file was refused).
