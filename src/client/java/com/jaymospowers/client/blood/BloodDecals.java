@@ -11,6 +11,8 @@ import java.util.Set;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
 import com.mojang.renderpearl.api.pipeline.CompareOp;
 import com.mojang.renderpearl.api.pipeline.DepthStencilState;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
@@ -171,6 +173,9 @@ public final class BloodDecals {
 			RenderPipeline.Snippet base = (RenderPipeline.Snippet) snippet.get(null);
 			return RenderPipeline.builder(base)
 				.withLocation("pipeline/jaymospowers_blood_decal")
+				// the snippet has no colour target; without one the pipeline doesn't match the particle pass and the
+				// game crashes on the first decal drawn ("color attachment count must match"): same as TRANSLUCENT_PARTICLE
+				.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
 				.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, true, 1.0F, 1.0F))
 				.build();
 		} catch (ReflectiveOperationException e) {
