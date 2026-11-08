@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: coordinator
 asked: 2026-11-08
 thread: Xeno-Band thread (session_01S8tFWxtVXYCM5eJxe3Uvjm)
 claimed_by: hermes-a
-pr:
+pr: 1160
 suggested_owns:
   - src/main/java/com/jaymospowers/power/xenoform/
   - src/client/java/com/jaymospowers/client/power/xenoform/
