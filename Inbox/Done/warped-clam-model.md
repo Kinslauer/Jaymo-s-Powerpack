@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-08
@@ -35,3 +35,4 @@ it hasn't been seen in game yet.
 
 ## Notes
 - The Warped Clam mob itself (entity, AI, spawning) is a separate task.
+- 2026-11-08 16:54 PR #1153 is merged into master; moved to Inbox/Done.
