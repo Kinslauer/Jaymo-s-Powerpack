@@ -10213,6 +10213,20 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
 - **Pass out, then turn**: when the blight finishes, you pass out first (eyes animate closed via Powers' downed black screen), then rise turned as the Hollow you were becoming. The pending turn is kept in a persistent attachment, so logging out or a restart while passed out still finishes the turn when you come round (`PowersCompat.knockOut` for `TURN_DARK`, wake at `wakeAt`).
 - Compile-checked; not played.
 
+## 0.7.649 (2026-11-07): Kingdoms' tabs on the character menu; everyone gets a journal
+- **Character menu tabs** (Jaymo's Powers 0.21.60's H menu, when Powers is loaded; `client/MenuCompat`, reflection
+  only): **Skills** (the K screen), **Journal & Quests** (the M journal; it still needs a journal on you, Andy: "keep
+  that rule"), **Faction** and **Party**, plus the Character page's "Your life" rows and the Map page's pins. K and M
+  open their page as before, with the menu's tabs on it. Without Powers nothing changes.
+- **Faction** (`FactionScreen`, new; `MenuNet` asks the server): the realm you're sworn to, its kind and overlord,
+  your rank and standing toward the next rank, sworn players, people, treasury, your patron, and its relations. Not
+  sworn: how to join one.
+- **Party** (`PartyScreen`, new): your party's members with health, hunger and distance; buttons that run the
+  `/party` commands (invite a player within 32 blocks, accept or turn down an invite, leave, PvP on/off for the leader).
+- **Everyone gets a traveller's journal** (Andy: "everyone spawns with a journal now"): newcomers with their life
+  story's kit, whatever the start; players from before get one the next time they join. Once only
+  (`Journal.GIVEN`); a lost journal isn't replaced.
+- Built; not played.
 ## 0.7.648 (2026-11-07): the Family farmhand's family - wary of monsters, indoors at night, and a farm to work
 Andy: "for the farmhand start, those MCA should be far more wary of zombies and try to hide at night, as a very last
 resort they will have to swing back and defend themselves. they are just deadweight and they make life harder for the

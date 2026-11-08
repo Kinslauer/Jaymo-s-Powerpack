@@ -72,6 +72,11 @@ final class JournalScreen extends Screen {
 		return Math.max(4, (this.height - PANEL_H) / 2);
 	}
 
+	/** (0.7.649) The panel's top-left corner, where Jaymo's Powers' character menu hangs its tabs ({@link MenuCompat}). */
+	int[] corner() {
+		return new int[] {left(), top()};
+	}
+
 	private int detailY() {
 		return top() + PANEL_H - FOOTER - (10 + DETAIL_LINES * Ui.LINE + 2);
 	}

@@ -42,22 +42,25 @@ import org.jspecify.annotations.Nullable;
  */
 public class PowerScreen extends Screen {
 	static final int W = 176, H = 186;
-	/** The tabs down the left edge: size, spacing, and where the first one starts below the top. */
-	static final int TAB_W = 28, TAB_H = 26, TAB_STEP = 28, TAB_TOP = 8, TAB_OUT = 26;
+	/**
+	 * The tabs along the top edge (0.21.60: the character menu's tabs have the left edge now): a tab's width, how far it
+	 * sticks up, the step between tabs, and where the first one starts from the left.
+	 */
+	static final int TAB_W = 26, TAB_H = 28, TAB_STEP = 28, TAB_LEFT = 8, TAB_OUT = 26;
 	static final int SLOT = 18;
 	// the vanilla window, dark
-	static final int COLOR_EDGE = 0xFF0A0A0E;
-	static final int COLOR_LIGHT = 0xFF4A4A52;
-	static final int COLOR_SHADE = 0xFF141418;
-	static final int COLOR_BODY = 0xFF2B2B2F;
-	static final int COLOR_CANVAS = 0xFF1E1E22;
-	static final int COLOR_WELL = 0xFF242429;
-	static final int COLOR_WELL_LIGHT = 0xFF3E3E46;
-	static final int COLOR_TAB = 0xFF222226;
-	static final int COLOR_TEXT = 0xFFE0E0E8;
-	static final int COLOR_DIM = 0xFF8A8A98;
-	static final int COLOR_GOLD = 0xFFFFD54A;
-	static final int COLOR_BAR_BACK = 0xFF141418;
+	public static final int COLOR_EDGE = 0xFF0A0A0E;
+	public static final int COLOR_LIGHT = 0xFF4A4A52;
+	public static final int COLOR_SHADE = 0xFF141418;
+	public static final int COLOR_BODY = 0xFF2B2B2F;
+	public static final int COLOR_CANVAS = 0xFF1E1E22;
+	public static final int COLOR_WELL = 0xFF242429;
+	public static final int COLOR_WELL_LIGHT = 0xFF3E3E46;
+	public static final int COLOR_TAB = 0xFF222226;
+	public static final int COLOR_TEXT = 0xFFE0E0E8;
+	public static final int COLOR_DIM = 0xFF8A8A98;
+	public static final int COLOR_GOLD = 0xFFFFD54A;
+	public static final int COLOR_BAR_BACK = 0xFF141418;
 	/** The inner canvas: inset from the window's edges, below the title. */
 	private static final int CANVAS_X = 7, CANVAS_Y = 18, CANVAS_W = W - 14, CANVAS_H = H - 25;
 	private static final int ROW = 18;
@@ -109,6 +112,18 @@ public class PowerScreen extends Screen {
 		}
 	}
 
+	/** The character menu's tab icon: your power's, or a star without one. */
+	public static ItemStack menuIcon() {
+		net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+		Power power = player == null ? null : Powers.of(player);
+		return power == null ? new ItemStack(Items.NETHER_STAR) : power.icon();
+	}
+
+	/** The window's top-left corner, where the character menu's tabs hang ({@link com.jaymospowers.client.menu.MenuTabs}). */
+	public int[] corner() {
+		return new int[] {left(), top()};
+	}
+
 	private boolean creative() {
 		return this.minecraft.player != null && this.minecraft.player.isCreative();
 	}
@@ -144,7 +159,8 @@ public class PowerScreen extends Screen {
 	}
 
 	private int top() {
-		return (this.height - H) / 2;
+		// room above for the tabs
+		return Math.max(TAB_OUT, (this.height - H + TAB_OUT) / 2);
 	}
 
 	private int cx() {
@@ -240,7 +256,7 @@ public class PowerScreen extends Screen {
 		int mx = (int)event.x(), my = (int)event.y();
 		List<Tab> tabs = tabs();
 		for (int i = 0; i < tabs.size(); i++) {
-			if (over(mx, my, left() - TAB_OUT, top() + TAB_TOP + i * TAB_STEP, TAB_OUT, TAB_H)) {
+			if (over(mx, my, left() + TAB_LEFT + i * TAB_STEP, top() - TAB_OUT, TAB_W, TAB_OUT)) {
 				select(tabs.get(i));
 				return true;
 			}
@@ -295,7 +311,7 @@ public class PowerScreen extends Screen {
 		return true;
 	}
 
-	static boolean over(int mouseX, int mouseY, int x, int y, int w, int h) {
+	public static boolean over(int mouseX, int mouseY, int x, int y, int w, int h) {
 		return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
 	}
 
@@ -355,23 +371,23 @@ public class PowerScreen extends Screen {
 		graphics.fill(x + 1, y + 1, x + SLOT - 1, y + SLOT - 1, COLOR_WELL);
 	}
 
-	/** A tab on the left edge; the picked one runs into the window. */
+	/** A tab on the top edge; the picked one runs into the window. */
 	private void tab(GuiGraphicsExtractor graphics, Tab tab, int i, boolean picked, int mouseX, int mouseY) {
-		int x = left() - TAB_OUT, y = top() + TAB_TOP + i * TAB_STEP;
+		int x = left() + TAB_LEFT + i * TAB_STEP, y = top() - TAB_OUT;
 		graphics.fill(x, y, x + TAB_W, y + TAB_H, COLOR_EDGE);
-		graphics.fill(x + 1, y + 1, x + TAB_W, y + TAB_H - 1, picked ? COLOR_LIGHT : COLOR_SHADE);
-		graphics.fill(x + 3, y + 3, x + TAB_W, y + TAB_H - 3, picked ? COLOR_BODY : COLOR_TAB);
+		graphics.fill(x + 1, y + 1, x + TAB_W - 1, y + TAB_H, picked ? COLOR_LIGHT : COLOR_SHADE);
+		graphics.fill(x + 3, y + 3, x + TAB_W - 3, y + TAB_H, picked ? COLOR_BODY : COLOR_TAB);
 		if (picked) {
-			// merge into the window: over its left edge
-			graphics.fill(x + TAB_W - 2, y + 1, left() + 3, y + TAB_H - 1, COLOR_BODY);
+			// merge into the window: over its top edge
+			graphics.fill(x + 1, y + TAB_H - 2, x + TAB_W - 1, top() + 3, COLOR_BODY);
 		}
-		int ix = x + 6, iy = y + 5;
+		int ix = x + 5, iy = y + 6;
 		if (tab == Tab.OVERVIEW && this.selected != null) {
 			graphics.item(this.selected.icon(), ix, iy);
 		} else {
 			icon(graphics, tab.id(), ix, iy);
 		}
-		if (over(mouseX, mouseY, x, y, TAB_OUT, TAB_H)) {
+		if (over(mouseX, mouseY, x, y, TAB_W, TAB_OUT)) {
 			graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.jaymospowers.tab." + tab.id()), mouseX, mouseY);
 		}
 	}
