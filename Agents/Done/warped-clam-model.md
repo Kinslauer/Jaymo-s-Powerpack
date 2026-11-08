@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: warped-clam-model
 branch: claude/warped-clam-model
 with: 
@@ -32,3 +32,4 @@ owns:
 
 ## Done
 Added the Warped Clam's GeckoLib geometry, unchanged Ender-variant texture, 4 source animations, editable Blockbench project, render and MIT credit as PR #1153. Root and Kingdoms builds and PR checks passed; closed and opened front/side/rear views were inspected. No gameplay Java was added and the assets were not tested on a live mob in game.
+- 2026-11-08 21:54 PR #1153 is merged into master; moved to Agents/Done.
