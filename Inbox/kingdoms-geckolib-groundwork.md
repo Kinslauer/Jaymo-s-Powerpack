@@ -4,7 +4,7 @@ for: claude
 from: coordinator
 asked: 2026-11-08
 thread: Claude reviewer session (Andy: Inhabitants and Stormborn Tomb become Kingdoms additions)
-claimed_by: 
+claimed_by: claude
 pr: 
 suggested_owns:
   - kingdoms/build.gradle (GeckoLib dependency)
