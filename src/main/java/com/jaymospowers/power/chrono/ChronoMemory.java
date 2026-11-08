@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +27,9 @@ import org.jspecify.annotations.Nullable;
  * their echoes repeat;</li>
  * <li>the echo timers: echoes still to come (one per level-up) and shattered echoes waiting to return;</li>
  * <li>how long they've spent in stopped or rewound time (the road to ascension);</li>
- * <li>the bond: a random number every echo is stamped with, so echoes of an old bond (the power was lost) fade.</li>
+ * <li>the bond: a random number every echo is stamped with, so echoes of an old bond (the power was lost) fade;</li>
+ * <li>(0.21.58) which echo is theirs: the one echo out there (outside the future), loaded or not. Any other echo of theirs
+ * fades the moment it's loaded, so a pile can never build up.</li>
  * </ul>
  * Mutable on purpose: the server edits it in place (player data is written whole on every save).
  */
@@ -52,7 +57,8 @@ public final class ChronoMemory {
 			Codec.INT.listOf().optionalFieldOf("returns_due", List.of()).forGetter(m -> m.returnsDue),
 			Codec.INT.optionalFieldOf("stopped_time", 0).forGetter(m -> m.stoppedTime),
 			Codec.BOOL.optionalFieldOf("sighted", false).forGetter(m -> m.sighted),
-			Codec.LONG.optionalFieldOf("bond", 0L).forGetter(m -> m.bond))
+			Codec.LONG.optionalFieldOf("bond", 0L).forGetter(m -> m.bond),
+			UUIDUtil.CODEC.optionalFieldOf("echo").forGetter(m -> Optional.ofNullable(m.echo)))
 		.apply(i, ChronoMemory::new));
 
 	public static final AttachmentType<ChronoMemory> MEMORY = AttachmentRegistry.create(JaymosPowers.id("chrono_memory"),
@@ -71,9 +77,11 @@ public final class ChronoMemory {
 	/** Whether the owner has already been whispered to about their first echo. */
 	boolean sighted;
 	long bond;
+	/** (0.21.58) The player's one echo outside the future (its entity UUID), wherever it is; null when there's none. */
+	@Nullable UUID echo;
 
 	private ChronoMemory(Map<Identifier, Integer> mined, Map<Identifier, Integer> placed, Map<Identifier, Integer> held, List<PathPoint> path,
-		List<Integer> echoesDue, List<Integer> returnsDue, int stoppedTime, boolean sighted, long bond) {
+		List<Integer> echoesDue, List<Integer> returnsDue, int stoppedTime, boolean sighted, long bond, Optional<UUID> echo) {
 		this.mined = new HashMap<>(mined);
 		this.placed = new HashMap<>(placed);
 		this.held = new HashMap<>(held);
@@ -83,10 +91,11 @@ public final class ChronoMemory {
 		this.stoppedTime = stoppedTime;
 		this.sighted = sighted;
 		this.bond = bond == 0L ? newBond() : bond;
+		this.echo = echo.orElse(null);
 	}
 
 	private ChronoMemory() {
-		this(Map.of(), Map.of(), Map.of(), List.of(), List.of(), List.of(), 0, false, 0L);
+		this(Map.of(), Map.of(), Map.of(), List.of(), List.of(), List.of(), 0, false, 0L, Optional.empty());
 	}
 
 	private static long newBond() {

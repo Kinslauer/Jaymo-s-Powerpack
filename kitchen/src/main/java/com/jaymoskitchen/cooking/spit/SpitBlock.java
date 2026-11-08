@@ -62,12 +62,13 @@ public class SpitBlock extends BaseEntityBlock {
 	public static BlockEntityType<SpitBlockEntity> ENTITY;
 
 	public static void register() {
+		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("spit"));
 		BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
 			.mapColor(MapColor.WOOD)
 			.instrument(NoteBlockInstrument.BASS)
 			.strength(2.0F)
-			.sound(SoundType.WOOD);
-		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("spit"));
+			.sound(SoundType.WOOD)
+			.setId(key);
 		SPIT = Registry.register(BuiltInRegistries.BLOCK, key, new SpitBlock(properties));
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id("spit"));
 		ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey,

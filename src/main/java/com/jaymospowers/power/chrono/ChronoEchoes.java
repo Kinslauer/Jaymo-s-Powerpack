@@ -47,6 +47,14 @@ import org.jspecify.annotations.Nullable;
  * back 1-10 minutes later; both count down only while the owner is online and in survival. Echoes appear 16-28 blocks
  * away, out of sight if possible, follow their owner through dimension changes when close, and fade if the owner loses
  * Chrono. A shattered echo of an offline owner waits in the overworld's attachment until they're back.
+ *
+ * <p>(0.21.58) One echo per Chrono, for real: Andy, "Whenver chrono uses his cheat death, an echo respawns, and the same
+ * echos will appear in the nether, meaning he can spawn up to 30 down there waiting to kill him." Only loaded echoes were
+ * counted, so one left behind in chunks that had unloaded (a rewind throws you minutes back, often far away or into
+ * another dimension) didn't count, and the next timer brought another; the Nether's blink-return and the portal follow
+ * didn't check at all. Now the player's memory names their one echo ({@code ChronoMemory.echo}), loaded or not: no other
+ * comes while it exists, only it follows them out of the future, and any other echo of theirs fades as soon as it's
+ * loaded (the old piles too). It's cleared when that echo really ends (killed, shattered, blinked out, faded).
  */
 public final class ChronoEchoes {
 	// ---- tuning (ticks / blocks) ----
@@ -72,6 +80,8 @@ public final class ChronoEchoes {
 	static final int FOLLOW_MAX_DISTANCE = 9;
 	/** How often an online owner picks up echoes that shattered while they were away. */
 	static final int ORPHAN_CHECK_INTERVAL = 100;
+	/** (0.21.58) Echoes that follow their owner out of a dimension into anywhere but the future (one echo per Chrono). */
+	static final int MAX_FOLLOWERS_HOME = 1;
 
 	public static EntityType<ChronoEcho> ECHO;
 
@@ -86,6 +96,17 @@ public final class ChronoEchoes {
 
 	static final AttachmentType<List<Orphan>> ORPHANS = AttachmentRegistry.create(JaymosPowers.id("chrono_orphans"),
 		builder -> builder.persistent(Orphan.CODEC.listOf()));
+
+	/** (0.21.58) An owner's echo that ended while they were offline: it's no longer theirs when they're back. */
+	record Ended(UUID owner, UUID echo) {
+		static final Codec<Ended> CODEC = RecordCodecBuilder.create(i -> i.group(
+				UUIDUtil.CODEC.fieldOf("owner").forGetter(Ended::owner),
+				UUIDUtil.CODEC.fieldOf("echo").forGetter(Ended::echo))
+			.apply(i, Ended::new));
+	}
+
+	static final AttachmentType<List<Ended>> ENDED = AttachmentRegistry.create(JaymosPowers.id("chrono_echoes_ended"),
+		builder -> builder.persistent(Ended.CODEC.listOf()));
 
 	/** A Nether echo that blinked out mid-fight: its health, its bond, and the ticks (in the Nether) until it's back. */
 	record NetherReturn(float health, long bond, int ticks) {
@@ -140,13 +161,57 @@ public final class ChronoEchoes {
 	 * echo. Returns whether it came.
 	 */
 	public static boolean spawnFutureEcho(ServerPlayer player) {
-		return spawn(player, ChronoMemory.of(player)) != null;
+		ChronoMemory memory = ChronoMemory.of(player);
+		return spawnAt(player, memory, findSpot(player, SPAWN_MIN_DISTANCE, SPAWN_MAX_DISTANCE, true), false) != null;
 	}
 
-	/** Whether the player's one echo exists: owed, on its way back, blinked out of a Nether fight, or loaded somewhere. */
+	/** Whether the player's one echo exists: owed, on its way back, blinked out of a Nether fight, out there (loaded or not). */
 	static boolean hasEcho(ServerPlayer player, ChronoMemory memory) {
 		return !memory.echoesDue.isEmpty() || !memory.returnsDue.isEmpty() || player.getAttached(NETHER_RETURN) != null
-			|| loadedEcho(player);
+			|| outThere(player, memory);
+	}
+
+	/** (0.21.58) Whether the player's one echo is out there: the one their memory names (loaded or not), or any loaded. */
+	private static boolean outThere(ServerPlayer player, ChronoMemory memory) {
+		return memory.echo != null || loadedEcho(player);
+	}
+
+	/**
+	 * (0.21.58) Every second from a loaded echo whose owner is online: whether it may stay. In the future any number may;
+	 * elsewhere only the one their memory names (an echo turning up while none is named becomes it). Any other is a
+	 * leftover (left behind in unloaded ground, an older save's pile) and fades.
+	 */
+	static boolean claims(ChronoEcho echo, ServerLevel level, ChronoMemory memory) {
+		if (level.dimension() == com.jaymospowers.power.chrono.future.Future.FUTURE) {
+			return true;
+		}
+		if (memory.echo == null) {
+			memory.echo = echo.getUUID();
+			return true;
+		}
+		return memory.echo.equals(echo.getUUID());
+	}
+
+	/**
+	 * (0.21.58) An echo really ended (killed, shattered, blinked out, faded, discarded; not unloaded or moved): if it was
+	 * its owner's one echo, it's theirs no longer. With them offline, noted in the overworld till they're back.
+	 */
+	static void ended(MinecraftServer server, @Nullable UUID owner, UUID echo) {
+		if (owner == null) {
+			return;
+		}
+		ServerPlayer player = server.getPlayerList().getPlayer(owner);
+		if (player != null) {
+			ChronoMemory memory = ChronoMemory.peek(player);
+			if (memory != null && echo.equals(memory.echo)) {
+				memory.echo = null;
+			}
+			return;
+		}
+		ServerLevel overworld = server.overworld();
+		List<Ended> ended = new ArrayList<>(overworld.getAttachedOrElse(ENDED, List.of()));
+		ended.add(new Ended(owner, echo));
+		overworld.setAttached(ENDED, ended);
 	}
 
 	private static boolean loadedEcho(ServerPlayer player) {
@@ -181,15 +246,16 @@ public final class ChronoEchoes {
 		if (pending == null || !Stacked.in(player, Level.NETHER)) {
 			return;
 		}
-		if (pending.bond() != memory.bond) {
-			player.removeAttached(NETHER_RETURN); // a new bond: that echo is gone
+		if (pending.bond() != memory.bond || outThere(player, memory)) {
+			// a new bond: that echo is gone; (0.21.58) or another is already out there: one echo per Chrono
+			player.removeAttached(NETHER_RETURN);
 			return;
 		}
 		if (pending.ticks() > 1) {
 			player.setAttached(NETHER_RETURN, new NetherReturn(pending.health(), pending.bond(), pending.ticks() - 1));
 			return;
 		}
-		ChronoEcho echo = spawnAt(player, memory, findSpot(player, NETHER_SPAWN_MIN, NETHER_SPAWN_MAX, false));
+		ChronoEcho echo = spawnAt(player, memory, findSpot(player, NETHER_SPAWN_MIN, NETHER_SPAWN_MAX, false), true);
 		if (echo == null) {
 			player.setAttached(NETHER_RETURN, new NetherReturn(pending.health(), pending.bond(), SPAWN_RETRY));
 			return;
@@ -204,7 +270,7 @@ public final class ChronoEchoes {
 			int left = timers.get(i) - 1;
 			if (left > 0) {
 				timers.set(i, left);
-			} else if (loadedEcho(player) || spawn(player, memory) != null) {
+			} else if (outThere(player, memory) || spawn(player, memory) != null) {
 				// (one echo per Chrono: with one already out there, this one is dropped)
 				timers.remove(i--);
 			} else {
@@ -239,6 +305,22 @@ public final class ChronoEchoes {
 
 	private static void adoptOrphans(ServerPlayer player, ChronoMemory memory) {
 		ServerLevel overworld = player.level().getServer().overworld();
+		List<Ended> ended = overworld.getAttached(ENDED);
+		if (ended != null && ended.stream().anyMatch(e -> e.owner().equals(player.getUUID()))) {
+			List<Ended> others = new ArrayList<>();
+			for (Ended e : ended) {
+				if (!e.owner().equals(player.getUUID())) {
+					others.add(e);
+				} else if (e.echo().equals(memory.echo)) {
+					memory.echo = null;
+				}
+			}
+			if (others.isEmpty()) {
+				overworld.removeAttached(ENDED);
+			} else {
+				overworld.setAttached(ENDED, others);
+			}
+		}
 		List<Orphan> orphans = overworld.getAttached(ORPHANS);
 		if (orphans == null || orphans.stream().noneMatch(o -> o.owner().equals(player.getUUID()))) {
 			return;
@@ -260,12 +342,13 @@ public final class ChronoEchoes {
 
 	// ---------------------------------------------------------------- spawning
 
-	/** Spawns one of the player's echoes near them, now. Returns null if there was nowhere to put it. */
+	/** Spawns the player's echo near them, now (their one echo from now on). Returns null if there was nowhere to put it. */
 	static @Nullable ChronoEcho spawn(ServerPlayer player, ChronoMemory memory) {
-		return spawnAt(player, memory, findSpot(player, SPAWN_MIN_DISTANCE, SPAWN_MAX_DISTANCE, true));
+		return spawnAt(player, memory, findSpot(player, SPAWN_MIN_DISTANCE, SPAWN_MAX_DISTANCE, true), true);
 	}
 
-	private static @Nullable ChronoEcho spawnAt(ServerPlayer player, ChronoMemory memory, @Nullable BlockPos spot) {
+	/** {@code theirs}: it becomes the player's one echo (not for the future's extra stalkers). */
+	private static @Nullable ChronoEcho spawnAt(ServerPlayer player, ChronoMemory memory, @Nullable BlockPos spot, boolean theirs) {
 		ServerLevel level = player.level();
 		if (spot == null) {
 			return null;
@@ -279,7 +362,12 @@ public final class ChronoEchoes {
 		echo.snapTo(at, yaw, 0.0F);
 		echo.setYHeadRot(yaw);
 		echo.bindTo(player, memory);
-		level.addFreshEntity(echo);
+		if (!level.addFreshEntity(echo)) {
+			return null;
+		}
+		if (theirs) {
+			memory.echo = echo.getUUID(); // (any other of theirs left about fades when next loaded)
+		}
 		arriveFx(level, at);
 		return echo;
 	}
@@ -344,10 +432,26 @@ public final class ChronoEchoes {
 
 	// ---------------------------------------------------------------- following and fading
 
-	/** The player just changed dimension: echoes that were close behind them come along. */
+	/**
+	 * The player just changed dimension: echoes that were close behind them come along. (0.21.58) Into the future, all of
+	 * them; anywhere else, only their one echo (or, with none named, the nearest, which becomes it): the future's extra
+	 * stalkers stay there, and no pile follows anyone into the Nether.
+	 */
 	static void follow(ServerPlayer player, ServerLevel from, Vec3 fromPos) {
 		List<ChronoEcho> close = new ArrayList<>(from.getEntities(ECHO,
 			e -> e.isAlive() && e.isEchoOf(player) && e.position().distanceToSqr(fromPos) < FOLLOW_RANGE * FOLLOW_RANGE));
+		if (player.level().dimension() != com.jaymospowers.power.chrono.future.Future.FUTURE) {
+			ChronoMemory memory = ChronoMemory.of(player);
+			close.sort(java.util.Comparator.comparingDouble(e -> e.position().distanceToSqr(fromPos)));
+			if (memory.echo != null) {
+				close.removeIf(e -> !e.getUUID().equals(memory.echo));
+			} else if (!close.isEmpty()) {
+				memory.echo = close.get(0).getUUID(); // (a cross-dimension move keeps its UUID)
+			}
+			while (close.size() > MAX_FOLLOWERS_HOME) {
+				close.remove(close.size() - 1);
+			}
+		}
 		for (ChronoEcho echo : close) {
 			BlockPos spot = findSpot(player, FOLLOW_MIN_DISTANCE, FOLLOW_MAX_DISTANCE, false);
 			Vec3 at = spot != null ? Vec3.atBottomCenterOf(spot) : player.position();
