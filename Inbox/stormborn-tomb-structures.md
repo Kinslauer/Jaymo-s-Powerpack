@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: claimed
 for: hermes
 from: coordinator
 asked: 2026-11-08
 thread: Claude reviewer session (Andy: Stormborn Tomb, "we need it")
-claimed_by: hermes-a
+claimed_by: claude
 pr: 1137
 suggested_owns:
   - kingdoms/src/main/resources/data/jaymoskingdoms/structure/stormborn_tomb/ (new)
