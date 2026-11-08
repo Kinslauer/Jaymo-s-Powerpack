@@ -8,13 +8,13 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/mimic|mimic]] · for prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/impaler-model|impaler-model]] · hermes-modeller · claimed
 - [ ] [[Inbox/blindness|blindness]] · hermes-a · claimed
+- [ ] [[Inbox/mimic|mimic]] · hermes-b · claimed
 
 
 ## In review
