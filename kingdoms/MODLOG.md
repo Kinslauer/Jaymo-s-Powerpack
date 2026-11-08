@@ -10371,3 +10371,9 @@ Andy: "get them, we need it" (Dungeon Conquest: Stormborn Tomb by Tada_no_ahiru,
 ## 0.7.661 (2026-11-08): Bogre art in GeckoLib's folders (#1154)
 
 - **Bogre art**: moved the Bogre model and animations into GeckoLib's `geckolib/models/entity/` and `geckolib/animations/entity/` folders and added GeckoLib's format marker, so the Bogre mob can load them when it is added.
+
+## 0.7.662 (2026-11-08): Impaler model, texture and animations (#1155)
+
+- **Impaler art**: added the Impaler's GeckoLib 5 model, original tan spike-covered texture, editable Blockbench project and all 7 source animations: idle, walk, run, bite, hurt, scream and spike throw, ready for the separate mob task.
+- Ported from Inhabitants by JeremySeq / Team Synapse, with artist Catalyst and the upstream MIT licence credited in `kingdoms/art/`.
+- Rendered and visually checked; not seen in game yet. The entity, AI and spawning are not included.
