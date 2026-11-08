@@ -10,11 +10,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/mimic|mimic]] · hermes-modeller · open
 - [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · for hermes · open
+- [ ] [[Inbox/blindness|blindness]] · hermes-b · open
 
 
 ## Being built
 
-- [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
 
 
 ## In review
