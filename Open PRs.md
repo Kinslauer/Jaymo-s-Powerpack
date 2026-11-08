@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-08 04:11
+updated: 2026-11-08 04:17
 ---
 # Open PRs
 
-3 open, as of 2026-11-08 04:11. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-08 04:17. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1130](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1130) One character menu on H (Powers 0.21.60, Kingdoms 0.7.649)
@@ -13,7 +13,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1131](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1131) Kitchen 0.5.90: five new savoury dishes (Rabbit Stew, Smoked Duck, Bushmeat Stew, Clam Chowder, Grilled Anglerfish)
 - **Branch:** `claude/kitchen-recipes-a` · **Updated:** 2026-11-08 (today)
-- **Checks:** ✅ 4 passed
+- **Checks:** ⏳ 1 of 4 running
 - **Agent:** [[kitchen-recipes-a]]
 
 ## [#1132](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1132) Fishing by place and time, overfishing, fish weights, tuna and shark meat; Tideborn react to fishing (Powers 0.21.61, Kingdoms 0.7.650, Kitchen 0.5.91)
