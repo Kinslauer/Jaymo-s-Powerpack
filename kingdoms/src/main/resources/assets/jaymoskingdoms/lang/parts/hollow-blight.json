@@ -3,5 +3,15 @@
   "message.jaymoskingdoms.hollow_blight.stage.1": "You're hungry all the time now, and nothing you eat fills you. The cold has spread.",
   "message.jaymoskingdoms.hollow_blight.stage.2": "Your hands are grey. Your heart is slow. Whatever is in you is nearly done with you.",
   "message.jaymoskingdoms.hollow_blight.cured": "The gold burns going down. The cold in you burns with it, and is gone.",
-  "gui.jaymoskingdoms.story.hint.124": "A blow from the dead can leave a cold in you that spreads. Eat a golden apple before it finishes, or die and rise one of them."
+  "gui.jaymoskingdoms.story.hint.124": "A blow from the dead can leave a cold in you that spreads. Drink weakness, then eat a golden apple before it finishes. Until then, the zombies will leave you be, and talk to you.",
+  "message.jaymoskingdoms.hollow_blight.kin.0": "Rest, %s. It's nearly over.",
+  "message.jaymoskingdoms.hollow_blight.kin.1": "You smell like us now, %s.",
+  "message.jaymoskingdoms.hollow_blight.kin.2": "Don't fight it. We didn't.",
+  "message.jaymoskingdoms.hollow_blight.kin.3": "Come with us. There's no hunger where we go. Only the one.",
+  "message.jaymoskingdoms.hollow_blight.kin.4": "Your heart's slowing. Listen to it.",
+  "message.jaymoskingdoms.hollow_blight.kin.5": "They'll stop looking at you soon. Then you're ours.",
+  "message.jaymoskingdoms.hollow_blight.kin.6": "Not long, %s. Not long.",
+  "message.jaymoskingdoms.hollow_blight.kin.7": "We heard you coming. We always hear our own.",
+  "message.jaymoskingdoms.hollow_blight.kin.8": "Cold, isn't it? It gets better. It gets quiet.",
+  "message.jaymoskingdoms.hollow_blight.kin.9": "Walk with us a while, %s."
 }

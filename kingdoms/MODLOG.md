@@ -10269,29 +10269,25 @@ Andy: "get them, we need it" (Stormborn Tomb, whose tombs rely on DungeonZ's no-
 - The tag is empty until the Stormborn Tomb structures land, so nothing changes in play yet.
 - Built; not played.
 
-## 0.7.652 (2026-11-08): Stormborn Tomb structures (MIT port from Dungeon Conquest: Stormborn Tomb)
-- Andy: "get them, we need it" (Dungeon Conquest: Stormborn Tomb, Modrinth `iMWTKEcK`, file "1.21.1 Nordic Structure 1.1.3", MIT licence). The original mod and its dependencies (Supplementaries, Draugr Invasion, DungeonZ, FrogiLib) have no 26.3 builds, so the tomb structures are ported into Kingdoms. Credit: Tada_no_ahiru.
-- **11 structure pieces** (`data/jaymoskingdoms/structure/stormborn_tomb/`): entrance (overworld), first hallway, main chamber, main right, right hallway, split, right split, parkour section, overworld upper, boss arena, and spawn piece. All upgraded to DataVersion 3955.
-- **Worldgen**: `stormborn_tomb` jigsaw structure (start pool `jaymoskingdoms:overworld_stormborn_tomb`), `stormborn_tomb` structure set (spacing 60, separation 30), 11 template pools, `stormborn_tomb_spawn_biomes` biome tag (vanilla cold/mountain biomes: snowy plains, taiga, windswept hills, grove, jagged peaks, frozen peaks, stony peaks).
-- **Block/entity swaps** (original mod blocks/entities replaced for 26.3):
-  - `supplementaries:cage` → `iron_bars`
-  - `supplementaries:candle_holder` → `candle`
-  - `supplementaries:fire_pit` → `soul_campfire`
-  - `supplementaries:globe_sepia` → `item_frame`
-  - `supplementaries:goblet` → `flower_pot`
-  - `supplementaries:hourglass` → `item_frame`
-  - `supplementaries:pedestal` → `lectern`
-  - `supplementaries:sconce`/`sconce_wall` → `soul_lantern`
-  - `supplementaries:statue` → `armor_stand`
-  - `supplementaries:urn` → `decorated_pot`
-  - `frogilib:spruce_trapdoor_open` → `spruce_trapdoor[open=true]`
-  - `frogilib:useless_anvil` → `damaged_anvil`
-  - `dungeonz:dungeon_portal` → `jigsaw` (entrance connection)
-  - `dungeonz:dungeon_portal_entity` → removed
-  - Block entities for all Supplementaries/FrogiLib/DungeonZ blocks → vanilla equivalents
-  - Spawners: `mebahelcreaturesdraugr:skeleton_warrior` → `minecraft:stray` (Kingdoms Hollows spawn naturally)
-  - Entity `supplementaries:hat_stand` → removed
-- **Chest loot** (8 loot tables): vanilla items only (bones, string, gunpowder, rotten flesh, pumpkin pie, candles, golden apples, potions, enchanted gear, diamonds, totems, music discs, TNT). All Draugr Invasion weapons (ebony/ancient nord swords, axes, daggers, bows) and Supplementaries bombs/music discs replaced.
-- **No-build rule**: `jaymoskingdoms:stormborn_tomb` added to `tags/worldgen/structure/no_build_dungeons.json` (from tomb-no-build-rule, Kingdoms 0.7.651+).
-- **Licence**: MIT — "Feel free to use it in any modpacks" (original Stormborn Tomb). Credit retained in structure files and this entry.
-- Built, `/place structure jaymoskingdoms:stormborn_tomb` loads all 11 pieces without missing blocks; worldgen placement in survival not tested.
+## 0.7.652 (2026-11-08): newcomers stay on the loading screen till they're at their start
+
+Andy: "the player is spawned into the world before they teleport to their start, instead of this it should keep them in
+the loading screen so they can read the tips for as long as it takes to load, rather than getting teleported".
+- His clip: once the story was told the newcomer was let down out of stasis onto the spawn village and could walk about
+  for ~7 s while the server searched for the farmhouse (`FarmhandHome.find`), then was put 6,000 blocks off in unloaded
+  land, and only then did the loading screen come up (it was only checked every 5 ticks, after the move).
+- The loading screen now goes up the moment the story sets out (`StoryGround.holdNow`, sent before any search or move),
+  and stays up while they're on their way (`LifeStory.departing`), through the move and the few seconds after.
+- Let go by the server, the screen still stays up (tips cycling) till the chunks round the player have come in and the
+  ground they stand on is drawn, as vanilla's own loading screen waits (at most 30 s), then half a second more.
+- Built; not played.
+- **0.7.653 (pack 0.21.65), a new world never finished starting:** 0.7.644's `WaterClusterMixin` had a non-private static
+  field (`WATER_CLUSTER`), which Mixin refuses ("contains non-private static field"), so `NaturalSpawner` failed to
+  load and chunk [0, 0] failed at its spawn step: the server sat at spawn preparation forever (Streams Reflowing's
+  stall watch: no progress for 180 s). The field is private now; no other mixin has one. Not built here.
+## 0.7.654: the dead talk to the turning
+- Andy's gaps on #1117: zombies standing down by a blighted player now and then stop, look at them and say a line over
+  their head (`hollow_blight.kin.0-9`, a speech bubble to that player, no chat; at most once every 15 s). The blight's
+  pass-out goes through Powers' `Mortality.turnOut` (the Hollow's colour on the black, eyes closing). A vampire's bite at
+  nightfall now passes you out for 14 s first, the black edged blood red, then you wake turned (`VampirePlayers.TURNING_OUT`;
+  at once as before without Powers). Hint 124 mentions weakness and the zombies. Compile-checked; not played.
