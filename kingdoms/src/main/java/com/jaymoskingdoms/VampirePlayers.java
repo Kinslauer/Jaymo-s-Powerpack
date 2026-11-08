@@ -173,7 +173,19 @@ public final class VampirePlayers {
 			}
 			Long bitten = player.getAttached(Vampires.BITTEN);
 			if (bitten != null && night && (nightIndex(bitten) < nightNo || NightbornBlood.oldBlood(player, bitten, clock))) {
-				turn(player, nightNo);
+				// (0.7.653) Andy: "you pass out and then turn as well": out cold first (the black edged in blood), then they
+				// wake turned; without Powers (or no knock-out), at once as before
+				Long out = TURNING_OUT.get(player.getUUID());
+				if (out == null) {
+					if (PowersCompat.turnOut(player, BITTEN_TINT, TURN_OUT_TICKS)) {
+						TURNING_OUT.put(player.getUUID(), overworld.getGameTime() + TURN_OUT_TICKS);
+					} else {
+						turn(player, nightNo);
+					}
+				} else if (overworld.getGameTime() >= out || overworld.getGameTime() < out - TURN_OUT_TICKS) {
+					TURNING_OUT.remove(player.getUUID());
+					turn(player, nightNo);
+				}
 			} else if (bitten != null && night) {
 				NightbornBlood.fever(player, bitten, clock);
 			}
@@ -246,6 +258,10 @@ public final class VampirePlayers {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.crypt").withStyle(ChatFormatting.DARK_RED));
 		}
 	}
+
+	/** (0.7.653) How long the bitten lie out cold at nightfall before they wake turned (ticks), and who's out for it now. */
+	static final int TURN_OUT_TICKS = 20 * 14;
+	private static final java.util.Map<java.util.UUID, Long> TURNING_OUT = new java.util.HashMap<>();
 
 	/** (0.7.643) The colour at the edges of the black for one dying bitten (RGB). */
 	static final int BITTEN_TINT = 0xA0101C;

@@ -55,6 +55,11 @@ public final class HollowBlight {
 	static final int SPEAK_EVERY = 100;
 	/** At most this many of the nearest zombies get a roll to speak each check. */
 	static final int SPEAK_MAX = 2;
+	/** (0.7.653) Their words to you (lines {@code hollow_blight.kin.0..}), in this colour, at most once every this many ticks. */
+	static final int KIN_LINES = 10, KIN_COLOR = 0xFF9FB58A, KIN_GAP = 20 * 15;
+
+	/** (0.7.653) When a zombie last spoke to each blighted player (game time). Not kept. */
+	private static final Map<java.util.UUID, Long> SPOKE = new java.util.HashMap<>();
 
 	/** The vignette each Hollow's turning casts over the black (RGB): the pallid one is {@link #PALLID_TINT}. */
 	static final int ZOMBIE_TINT = 0x5C8A24, SKELETON_TINT = 0xB8B094, WRAITH_TINT = 0x5A6EA8, REAPER_TINT = 0x3C8C82, PALLID_TINT = 0x8A8A8A;
@@ -193,6 +198,17 @@ public final class HollowBlight {
 			if (speaking < SPEAK_MAX && player.getRandom().nextInt(SPEAK_EVERY) == 0) {
 				level.playSound(null, z.blockPosition(), SoundEvents.ZOMBIE_AMBIENT, SoundSource.HOSTILE, 0.6F, 1.0F);
 				speaking++;
+				// (0.7.653) Andy: "you should be spoken to by the zombies". The groan comes with words over its head, to you,
+				// now and then (a speech bubble, no chat), while it stops and looks at you
+				long now = level.getGameTime();
+				Long last = SPOKE.get(player.getUUID());
+				if ((last == null || now - last >= KIN_GAP || now < last) && z.hasLineOfSight(player)) {
+					SPOKE.put(player.getUUID(), now);
+					z.getNavigation().stop();
+					z.getLookControl().setLookAt(player, 30.0F, 30.0F);
+					Speech.sayTo(player.level(), z, player, Component.translatable("message.jaymoskingdoms.hollow_blight.kin."
+						+ player.getRandom().nextInt(KIN_LINES), player.getDisplayName()), KIN_COLOR);
+				}
 			}
 		}
 	}
@@ -204,7 +220,8 @@ public final class HollowBlight {
 		player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.8F, 0.6F);
 		// Pass out via Powers' downing (eyes closed, black screen) instead of a scoreboard tag: Powers owns
 		// the downed state and wakes them itself. Kingdoms rises the turn at wakeAt, the same moment.
-		PowersCompat.knockOut(player.level(), player, TURN_DARK);
+		// ((0.7.653) with the Hollow's colour at the edges of the black, as dying mid-turn has)
+		PowersCompat.turnOut(player, tint(blight.variant()), TURN_DARK);
 	}
 
 	/** For Powers' death by cause: one dying with the blight in them rises the Hollow it was making ({@code Mortality.MID_TURNS}). */

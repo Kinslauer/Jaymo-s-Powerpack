@@ -33,7 +33,9 @@ abstract class DownedLivingEntityRendererMixin {
 		com.jaymospowers.client.pets.NameLooks.extract(entity, state);
 		com.jaymospowers.client.PoseTakeover.markMob(entity, state);
 		// (0.18.84) out cold (a rock to the head, too much poppy, bled out): eyes shut, as Kitchen shuts a corpse's
-		if (com.jaymospowers.core.wounds.Downed.passedOut(entity)) {
+		// ((0.21.65) closing over a moment as they go, a flutter that lengthens until they stay shut: EyesClosing)
+		if (com.jaymospowers.core.wounds.Downed.passedOut(entity) ? com.jaymospowers.client.wounds.EyesClosing.shut(entity)
+			: com.jaymospowers.client.wounds.EyesClosing.open(entity)) {
 			com.jaymoskitchen.client.corpse.ClosedEyes.mark(state);
 		}
 	}

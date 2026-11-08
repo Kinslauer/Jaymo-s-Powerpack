@@ -10281,3 +10281,9 @@ the loading screen so they can read the tips for as long as it takes to load, ra
 - Let go by the server, the screen still stays up (tips cycling) till the chunks round the player have come in and the
   ground they stand on is drawn, as vanilla's own loading screen waits (at most 30 s), then half a second more.
 - Built; not played.
+## 0.7.653: the dead talk to the turning
+- Andy's gaps on #1117: zombies standing down by a blighted player now and then stop, look at them and say a line over
+  their head (`hollow_blight.kin.0-9`, a speech bubble to that player, no chat; at most once every 15 s). The blight's
+  pass-out goes through Powers' `Mortality.turnOut` (the Hollow's colour on the black, eyes closing). A vampire's bite at
+  nightfall now passes you out for 14 s first, the black edged blood red, then you wake turned (`VampirePlayers.TURNING_OUT`;
+  at once as before without Powers). Hint 124 mentions weakness and the zombies. Compile-checked; not played.

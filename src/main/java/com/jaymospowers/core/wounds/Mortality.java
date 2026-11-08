@@ -214,6 +214,29 @@ public final class Mortality {
 	static final int TURN_DARK = 20 * 14;
 
 	/**
+	 * (0.21.65) Andy: "you pass out and then turn as well, make sure the eyes animate closed too". A turning finishing in one
+	 * still alive (Kingdoms: the Hollow's blight run its course, a vampire's bite at nightfall): out cold where they stand for
+	 * {@code ticks}, the same vignette ({@code tint}, RGB) and a line of its own on the black as dying mid-turn
+	 * ({@link #MID_TURNS}). The caller finishes the turning once the black is over. False if they couldn't be put out.
+	 */
+	public static boolean turnOut(ServerPlayer player, int tint, int ticks) {
+		if (!player.isAlive() || WAKES.containsKey(player.getUUID())) {
+			return false;
+		}
+		player.closeContainer();
+		if (player.isPassenger()) {
+			player.stopRiding();
+		}
+		if (!Downed.knockOut(player.level(), player, ticks, false, "message.jaymospowers.mortality.turning_out", false)) {
+			return false;
+		}
+		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.turning_out");
+		player.setAttached(TURN_TINT, tint);
+		JaymosPowers.LOGGER.info("{} passed out turning", player.getScoreboardName());
+		return true;
+	}
+
+	/**
 	 * (0.21.42) The colour (RGB) of the vignette on the black while one dying mid-turn lies turning ({@link #MID_TURNS}).
 	 * Synced to them only; gone once they're up, and not kept over a log-out.
 	 */
