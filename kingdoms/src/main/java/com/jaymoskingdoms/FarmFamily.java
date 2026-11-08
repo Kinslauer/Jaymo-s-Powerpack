@@ -216,6 +216,11 @@ public final class FarmFamily {
 			return true;
 		}
 		s.running = false;
+		if (FarmhandWake.greeting(mob)) {
+			// (come over to greet the farmhand just woken: FarmhandWake walks them)
+			drop(w, s);
+			return true;
+		}
 		long t = Royals.timeOfDay(level);
 		if (t >= HIDE_FROM && t < HIDE_TO) {
 			drop(w, s);
