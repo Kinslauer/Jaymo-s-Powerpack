@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,12 +22,12 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/bogre-model|bogre-model]] · hermes-modeller · #1146 · sent
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/bogre-model|bogre-model]]
 - [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
 - [x] [[Inbox/Done/kingdoms-geckolib-groundwork|kingdoms-geckolib-groundwork]]
 - [x] [[Inbox/Done/tomb-no-build-rule|tomb-no-build-rule]]
@@ -35,7 +35,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/kitchen-recipes-a|kitchen-recipes-a]]
 - [x] [[Inbox/Done/kitchen-spit-roast|kitchen-spit-roast]]
 - [x] [[Inbox/Done/fishing-real-tug|fishing-real-tug]]
-- [x] [[Inbox/Done/critter-armory-fit|critter-armory-fit]]
 
 
 %% kanban:settings
