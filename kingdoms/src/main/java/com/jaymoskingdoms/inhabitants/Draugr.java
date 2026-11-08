@@ -83,6 +83,8 @@ public class Draugr extends Monster implements GeoEntity {
 
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 	private int guardBroken;
+	/** It has been given its arms (a structure may place it without finalizeSpawn, so it arms itself on its first tick). */
+	private boolean armed;
 	/** (Client) the tick it last took a blow on its shield. */
 	private int blockedAt = -1000;
 
@@ -109,6 +111,7 @@ public class Draugr extends Monster implements GeoEntity {
 	}
 
 	private void arm(boolean axe) {
+		this.armed = true;
 		this.entityData.set(AXE, axe);
 		this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(axe ? Items.IRON_AXE : Items.IRON_SWORD));
 		this.setItemSlot(EquipmentSlot.OFFHAND, axe ? ItemStack.EMPTY : new ItemStack(Items.SHIELD));
@@ -138,6 +141,9 @@ public class Draugr extends Monster implements GeoEntity {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		if (!this.armed) {
+			this.arm(this.random.nextFloat() < AXE_SHARE);
+		}
 		if (this.guardBroken > 0) {
 			this.guardBroken--;
 		}
@@ -244,11 +250,13 @@ public class Draugr extends Monster implements GeoEntity {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.putBoolean("axe", this.axe());
+		output.putBoolean("armed", this.armed);
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.entityData.set(AXE, input.getBooleanOr("axe", false));
+		this.armed = input.getBooleanOr("armed", false);
 	}
 }
