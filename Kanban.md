@@ -16,13 +16,9 @@ kanban-plugin: board
 - [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · claimed
 
 
-## Text pass
-
-- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
-
-
 ## In review
 
+- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
 
 
 ## Needs Andy
