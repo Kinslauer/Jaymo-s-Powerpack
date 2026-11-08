@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: open
 for: hermes
 from: coordinator
 asked: 2026-11-08
@@ -26,3 +26,4 @@ suggested_owns:
 ## Notes
 - Debated whether it should be a "random-awakening (fated) power" or obtained via a calling/item.
 - No existing worktree or branch for this topic yet.
+- 2026-11-08 17:21 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
