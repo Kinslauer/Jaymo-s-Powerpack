@@ -37,4 +37,4 @@ A player should be able to cook it in the cooking minigame and eat it.
 - PR body: the five dishes, how each is cooked, what it gives, and "not tested in game".
 
 ## Notes
-- 
+- 2026-11-08 04:06 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
