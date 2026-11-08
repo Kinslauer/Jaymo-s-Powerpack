@@ -2,6 +2,7 @@ package com.jaymospowers;
 
 import com.jaymospowers.core.PowerEvents;
 import com.jaymospowers.power.arsenal.ArsenalPower;
+import com.jaymospowers.power.blindness.BlindnessPower;
 import com.jaymospowers.power.chrono.ChronoPower;
 import com.jaymospowers.power.gravity.GravityPower;
 import com.jaymospowers.power.web.WebPower;
@@ -95,8 +96,10 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.zfighter.ZFighterPower.init();
 		com.jaymospowers.power.smoke.SmokePower.init();
 		// (0.14.0) Cryokinesis, the ice power
-		com.jaymospowers.power.cryo.CryoPower.init();
-		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
+				com.jaymospowers.power.cryo.CryoPower.init();
+				// Blindness: echolocation and one-eye blind
+				BlindnessPower.init();
+				// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
 		com.jaymospowers.armory.FlintlockDraw.init();
