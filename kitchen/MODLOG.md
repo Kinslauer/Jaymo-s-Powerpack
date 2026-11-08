@@ -28,6 +28,9 @@ A cooking minigame for Minecraft Java 26.3 (Fabric).
   loader 0.19.5, Fabric API 0.161.0+26.3, Gradle 9.7.1.
 
 ## Log
+
+## 0.5.89: five new Kitchen dishes (Builder B)
+- Andy: "have them work on adding more recipes we dont already have". Five new dishes for the cooking minigame, all baked goods, desserts, breakfasts and sides: Honey Bun (oven: dough, honey bottle, sugar; gives SPEED), Chocolate Cookie (oven: wheat, wheat, cocoa beans; HASTE, comes out in a batch of six), Pancakes (campfire grill: dough, egg, milk bottle; REGENERATION and SPEED), French Toast (campfire grill: bread, egg, milk bottle, sugar; REGENERATION and ABSORPTION) and Hash Browns (cutting board: potato, potato, onion; SPEED). Hand-drawn item textures via `kitchen/tools/gen_assets.py`, plus minigame recipes and lang keys. Compile-checked; not played.
 - **Setup:**
   - Installed JDK 25 and Python 3.12 with winget. Minecraft 26.3's version JSON asks for Java 25.
   - `genSources` took about 4 minutes on the first run. I unzipped the sources jars to search them.
