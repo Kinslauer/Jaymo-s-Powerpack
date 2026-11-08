@@ -1,15 +1,13 @@
 ---
-status: running
+status: in-review
 task: impaler-model
 branch: claude/impaler-model
 with: 
-pr: 
+pr: 1155
 mods: Kingdoms
 versions: 
 started: 2026-11-08
 owns:
-  - kingdoms/src/main/resources/assets/jaymoskingdoms/geo/impaler.geo.json
-  - kingdoms/src/main/resources/assets/jaymoskingdoms/animations/impaler.animation.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/models/entity/impaler.geo.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/animations/entity/impaler.animation.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/impaler.png
@@ -33,4 +31,4 @@ owns:
 - The Impaler entity and AI are a separate task after the GeckoLib groundwork.
 
 ## Done
-Work in progress; the assets have not been tested on a live mob in game.
+PR #1155 adds the Impaler's source-faithful model, texture, editable Blockbench project and all 7 animations for the separate mob task. Rendered and visually checked; GeckoLib 5.5.7 deserialized the geometry and baked every animation; both full builds and PR checks passed. Not tested on a live mob in game.
