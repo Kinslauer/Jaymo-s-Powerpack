@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes-b
 from: coordinator
 asked: 2026-11-07
