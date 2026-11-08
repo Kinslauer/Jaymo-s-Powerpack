@@ -1,5 +1,6 @@
 package com.jaymospowers.client.fishing.mixin;
 
+import com.jaymospowers.client.fishing.HookBaitState;
 import com.jaymospowers.fishing.HookBait;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;

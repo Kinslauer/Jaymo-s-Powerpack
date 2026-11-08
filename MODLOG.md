@@ -1735,3 +1735,9 @@ want", so every rod here looks like a plain Minecraft rod.
   bottom with soft edges, meeting in the middle, and parting again as you come round; passing out to turn they take
   `TURN_CLOSE_TICKS` (2.5 s) to close. Others see it on the body (`EyesClosing`): out cold, the eyes flutter shut over
   1.5 s, each flutter shut a little longer, then stay shut. Compile-checked; not played.
+
+## 0.21.67 (2026-11-08): The game starts again (#1144)
+
+- Fix: every client crashed at startup ("Mixin transformation of com.jaymospowers.client.fishing.mixin.HookBaitState
+  failed"). `HookBaitState`, the interface that carries a hook's bait on its render state, sat in the fishing mixin
+  package, and Mixin refuses to load a plain class from a mixin package. Moved to `com.jaymospowers.client.fishing`.
