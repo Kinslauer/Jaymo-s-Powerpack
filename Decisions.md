@@ -44,3 +44,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Decided:** "Build a compat fix" (decision card): fit Critter Armory armour to Fresh Animations models for pigs, sheep, horses.
 - **Applies to:** Powers compat, task critter-armory-fit.
 - **Agent:** coordinator thread.
+- 2026-11-07: Andy, on the fishing send-back (metal rod, sharks, fish processing): "i phrased those as three separate things intentionally, its fine if they would have taken one each, next time break it up that way." When Andy lists separate features, the coordinator posts one Inbox task per feature (each its own branch and PR), not one bundled task.
