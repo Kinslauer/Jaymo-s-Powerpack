@@ -5,7 +5,7 @@ from: coordinator
 asked: 2026-11-08
 thread: Claude reviewer session (Andy: Inhabitants and Stormborn Tomb become Kingdoms additions)
 claimed_by: claude
-pr: 
+pr: 1149
 suggested_owns:
   - kingdoms/build.gradle (GeckoLib dependency)
   - kingdoms/src/main/java/com/jaymoskingdoms/inhabitants/ (new package)
