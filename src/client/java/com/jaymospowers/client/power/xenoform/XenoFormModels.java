@@ -175,6 +175,13 @@ public final class XenoFormModels {
 			ULTIMATES.put("wisp", new com.jaymospowers.client.power.xenoform.ultimate.UltimateRevenant()); // (0.20.21)
 			ULTIMATES.put("gremlin", new com.jaymospowers.client.power.xenoform.ultimate.UltimateSwarm()); // (0.20.21)
 			ULTIMATES.put("knell", new com.jaymospowers.client.power.xenoform.ultimate.UltimateTolling()); // (0.20.21)
+			ULTIMATES.put("wyrm", new com.jaymospowers.client.power.xenoform.ultimate.UltimateElderWyrm()); // (0.21.37)
+			ULTIMATES.put("duplex", new com.jaymospowers.client.power.xenoform.ultimate.UltimateCopperStorm()); // (0.21.37)
+			ULTIMATES.put("rivet", new com.jaymospowers.client.power.xenoform.ultimate.UltimateIronpour()); // (0.21.37)
+			ULTIMATES.put("gorger", new com.jaymospowers.client.power.xenoform.ultimate.UltimateWorldmaw()); // (0.21.37)
+			ULTIMATES.put("slipfin", new com.jaymospowers.client.power.xenoform.ultimate.UltimateBrinecrown()); // (0.21.37)
+			ULTIMATES.put("polestar", new com.jaymospowers.client.power.xenoform.ultimate.UltimateLodestar()); // (0.21.37)
+			ULTIMATES.put("lurk", new com.jaymospowers.client.power.xenoform.ultimate.UltimateNightfall()); // (0.21.37)
 		}
 		return ULTIMATES.get(form);
 	}

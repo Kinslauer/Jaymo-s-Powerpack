@@ -95,7 +95,14 @@ final class KeyGuide {
 		String own = player == null ? null : power.statusSuffix(player);
 		if (player != null && (power.ultimateAnswers(player)
 			|| own != null && Language.getInstance().has(base + "ultimate" + own))) {
-			add(lines, power, player, "ultimate", base, suffixes, args, JaymosPowersClient.ultimateKey(), COLOR_ULTIMATE, false);
+			// (0.21.37) the C line of a melded Ironpour is the Ultimate's (Foundry Slam), though its R/G/V/B are the shell's
+			List<String> ultimateSuffixes = suffixes;
+			com.jaymospowers.power.xenoform.XenoForm ultForm = com.jaymospowers.power.xenoform.XenoformState.form(player);
+			if (ultForm != null && com.jaymospowers.power.xenoform.XenoformState.ultimate(player) != null && own != null && !own.endsWith("_ultimate")) {
+				ultimateSuffixes = new ArrayList<>(suffixes);
+				ultimateSuffixes.add(0, "." + ultForm.id + "_ultimate");
+			}
+			add(lines, power, player, "ultimate", base, ultimateSuffixes, args, JaymosPowersClient.ultimateKey(), COLOR_ULTIMATE, false);
 		}
 		add(lines, power, player, "special", base, suffixes, args, special(), COLOR_SPECIAL, mastering);
 		if (player != null) {

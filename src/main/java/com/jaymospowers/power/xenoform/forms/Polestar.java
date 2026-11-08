@@ -58,6 +58,9 @@ public final class Polestar extends XenoForm {
 		Blocks.IRON_TRAPDOOR, Blocks.ANVIL, Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.CAULDRON, Blocks.IRON_CHAIN,
 		Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE);
 
+	/** (0.21.37) The Ultimate; it borrows this alien's iron ({@link #iron}, {@link #irony}, {@link #liftable}). */
+	private final com.jaymospowers.power.xenoform.XenoUltimate lodestar = new com.jaymospowers.power.xenoform.forms.ultimate.Lodestar(this);
+
 	public Polestar() {
 		super("polestar", 1.2F, 36.0F, 6.0, -0.05, 0.7, 0.5, Items.LODESTONE, 0xD84A4A);
 	}
@@ -90,12 +93,18 @@ public final class Polestar extends XenoForm {
 		return n;
 	}
 
-	static boolean irony(ItemStack stack) {
+	/** (0.21.37) Whether {@code stack} is iron or chainmail. */
+	public static boolean irony(ItemStack stack) {
 		if (stack.isEmpty()) {
 			return false;
 		}
 		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 		return path.contains("iron") || path.contains("chainmail");
+	}
+
+	/** (0.21.37) Whether {@code state} is one of the iron blocks Lift can tear out of the world. */
+	public static boolean liftable(BlockState state) {
+		return IRON_BLOCKS.contains(state.getBlock());
 	}
 
 	@Override
@@ -205,7 +214,7 @@ public final class Polestar extends XenoForm {
 		ServerLevel level = player.level();
 		BlockPos at = aimBlock(player, LIFT_REACH);
 		BlockState state = at == null ? null : level.getBlockState(at);
-		if (at == null || state == null || !IRON_BLOCKS.contains(state.getBlock()) || !player.mayBuild() || !level.mayInteract(player, at)) {
+		if (at == null || state == null || !liftable(state) || !player.mayBuild() || !level.mayInteract(player, at)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.polestar.no_iron").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 			return false;
 		}
@@ -260,11 +269,9 @@ public final class Polestar extends XenoForm {
 		}
 	}
 
+	/** (0.21.37) Lodestar is its own evolved form: the Ultimate move, health bar, model and kit are in {@code Lodestar}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), 3.0, 40);
-		sound(player, SoundEvents.LODESTONE_COMPASS_LOCK, 1.6F, 0.5F);
-		return true;
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return lodestar;
 	}
 }

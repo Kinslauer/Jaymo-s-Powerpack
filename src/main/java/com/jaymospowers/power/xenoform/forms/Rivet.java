@@ -126,6 +126,11 @@ public final class Rivet extends XenoForm {
 		Map.entry(Blocks.DISPENSER, "dispenser"), Map.entry(Blocks.DROPPER, "dispenser"), Map.entry(Blocks.NOTE_BLOCK, "note"));
 	private static final Identifier CLOCKWORK_GOLEM = Identifier.fromNamespaceAndPath("jaymoskingdoms", "clockwork_golem");
 
+	/** (0.21.37) The Ultimate; it borrows this alien's shells ({@link #shellKey}, {@link #shellTick}) and machines ({@link #ride}). */
+	private final com.jaymospowers.power.xenoform.XenoUltimate ironpour = new com.jaymospowers.power.xenoform.forms.ultimate.Ironpour(this);
+	/** (0.21.37) How much stronger the shell moves run right now (1: Rivet's own; Ironpour sets it for the length of one call). Server thread only. */
+	private float boost = 1.0F;
+
 	public Rivet() {
 		super("rivet", 0.6F, 20.0F, 4.0, 0.15, 0.2, 0.0, Items.COPPER_INGOT, 0x9FB4C0);
 	}
@@ -154,12 +159,10 @@ public final class Rivet extends XenoForm {
 		return !source.is(net.minecraft.tags.DamageTypeTags.IS_FALL);
 	}
 
-	/** (0.18.96) The Ultimate (Ironclad): only the band's own stronger body, no move of its own. */
+	/** (0.21.37) Ironpour is its own evolved form: the Ultimate move, health bar, model and kit are in {@code Ironpour}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		burst(player.level(), ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 0.6, 0.0), 40, 0.5, 0.2);
-		sound(player, SoundEvents.ANVIL_LAND, 1.0F, 0.6F);
-		return true;
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return ironpour;
 	}
 
 	@Override
@@ -175,6 +178,29 @@ public final class Rivet extends XenoForm {
 
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
+		if (live.shell == null) {
+			if (down) {
+				base(player, live, key);
+			}
+			return;
+		}
+		shellKey(player, live, key, down, 1.0F);
+	}
+
+	/**
+	 * (0.21.37) A key while melded into a shell, its moves {@code power} times as strong (1: Rivet's own; Ironpour's Overmeld passes 1.5).
+	 * Sneak + R pours out. Does nothing when not melded.
+	 */
+	public void shellKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down, float power) {
+		this.boost = power;
+		try {
+			shellKeys(player, live, key, down);
+		} finally {
+			this.boost = 1.0F;
+		}
+	}
+
+	private void shellKeys(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
 		if (live.shell == null) {
 			if (down) {
 				base(player, live, key);
@@ -200,23 +226,9 @@ public final class Rivet extends XenoForm {
 		ServerLevel level = player.level();
 		switch (key) {
 			case ABILITY_1 -> {
-				if (!ready(player, live, R)) {
-					return;
+				if (ready(player, live, R) && meld(player, live, MELD_REACH)) {
+					cooldown(player, live, R, MELD_COOLDOWN);
 				}
-				BlockPos at = aimedBlock(player, MELD_REACH);
-				String shell = at == null ? null : SHELL_OF.get(level.getBlockState(at).getBlock());
-				if (shell == null) {
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.no_shell").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-					return;
-				}
-				setShell(player, live, shell);
-				Vec3 c = Vec3.atCenterOf(at);
-				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(at)), player.getX(), player.getY() + 0.4, player.getZ(), 30, 0.3, 0.3, 0.3, 0.1);
-				line(level, player.position().add(0.0, 0.4, 0.0), c, ParticleTypes.ELECTRIC_SPARK, 8);
-				sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 0.8F, 1.4F);
-				sound(player, SoundEvents.ARMOR_EQUIP_IRON.value(), 1.0F, 0.8F);
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.shell." + shell).withStyle(ChatFormatting.GREEN));
-				cooldown(player, live, R, MELD_COOLDOWN);
 			}
 			case ABILITY_2 -> {
 				LivingEntity target = ready(player, live, G) ? aimed(player, LASH_REACH, e -> true) : null;
@@ -246,55 +258,83 @@ public final class Rivet extends XenoForm {
 				}
 			}
 			case ABILITY_4 -> {
-				if (!ready(player, live, B)) {
-					return;
-				}
-				if (driven(player) != null) {
-					player.stopRiding();
-					sound(player, SoundEvents.BUCKET_EMPTY, 0.8F, 1.2F);
+				if (ready(player, live, B) && ride(player, RIDE_REACH)) {
 					cooldown(player, live, B, RIDE_COOLDOWN);
-					return;
 				}
-				LivingEntity machine = aimed(player, RIDE_REACH, Rivet::machine);
-				Entity ride = machine;
-				if (ride == null) {
-					ride = aimedCart(player);
-				}
-				if (ride == null || !player.startRiding(ride, true, true)) {
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.no_machine").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-					return;
-				}
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, ride.getX(), ride.getY() + ride.getBbHeight() * 0.5, ride.getZ(), 30, 0.5, 0.6, 0.5, 0.2);
-				sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 1.0F, 0.9F);
-				cooldown(player, live, B, RIDE_COOLDOWN);
 			}
 			default -> {
 			}
 		}
 	}
 
+	/**
+	 * (0.21.37) Meld: flow into the shell block looked at within {@code reach} (the block itself is left as it was). False, with a word,
+	 * when it is no shell. Rivet's R, and Ironpour's Overmeld with a longer reach.
+	 */
+	public static boolean meld(ServerPlayer player, XenoformPower.Live live, double reach) {
+		ServerLevel level = player.level();
+		BlockPos at = aimedBlock(player, reach);
+		String shell = at == null ? null : SHELL_OF.get(level.getBlockState(at).getBlock());
+		if (shell == null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.no_shell").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+			return false;
+		}
+		setShell(player, live, shell);
+		Vec3 c = Vec3.atCenterOf(at);
+		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(at)), player.getX(), player.getY() + 0.4, player.getZ(), 30, 0.3, 0.3, 0.3, 0.1);
+		line(level, player.position().add(0.0, 0.4, 0.0), c, ParticleTypes.ELECTRIC_SPARK, 8);
+		sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 0.8F, 1.4F);
+		sound(player, SoundEvents.ARMOR_EQUIP_IRON.value(), 1.0F, 0.8F);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.shell." + shell).withStyle(ChatFormatting.GREEN));
+		return true;
+	}
+
+	/**
+	 * (0.21.37) Ride: climb out of the machine being driven, else into the one looked at within {@code reach}. True when either happened
+	 * (the caller starts the cooldown); a word when there is nothing to climb into. Rivet's B, and Ironpour's with a longer reach.
+	 */
+	public static boolean ride(ServerPlayer player, double reach) {
+		ServerLevel level = player.level();
+		if (driven(player) != null) {
+			player.stopRiding();
+			sound(player, SoundEvents.BUCKET_EMPTY, 0.8F, 1.2F);
+			return true;
+		}
+		Entity ride = aimed(player, reach, Rivet::machine);
+		if (ride == null) {
+			ride = aimedCart(player, reach);
+		}
+		if (ride == null || !player.startRiding(ride, true, true)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.no_machine").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+			return false;
+		}
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, ride.getX(), ride.getY() + ride.getBbHeight() * 0.5, ride.getZ(), 30, 0.5, 0.6, 0.5, 0.2);
+		sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 1.0F, 0.9F);
+		return true;
+	}
+
 	/** A machine Rivet can climb into and drive (a minecart is found separately). */
-	private static boolean machine(Entity e) {
+	public static boolean machine(Entity e) {
 		return e instanceof IronGolem || e instanceof com.jaymospowers.power.chrono.future.FutureMech
 			|| CLOCKWORK_GOLEM.equals(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()));
 	}
 
-	private static @Nullable Entity aimedCart(ServerPlayer player) {
+	private static @Nullable Entity aimedCart(ServerPlayer player, double reach) {
 		Vec3 eye = player.getEyePosition();
-		Vec3 end = eye.add(player.getLookAngle().scale(RIDE_REACH));
-		var box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(RIDE_REACH)).inflate(1.0);
+		Vec3 end = eye.add(player.getLookAngle().scale(reach));
+		var box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(reach)).inflate(1.0);
 		var hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player.level(), player, eye, end, box,
 			e -> e instanceof AbstractMinecart && e.getPassengers().isEmpty(), 0.3F);
 		return hit == null ? null : hit.getEntity();
 	}
 
 	/** The machine Rivet is driving, or null. */
-	private static @Nullable Entity driven(ServerPlayer player) {
+	public static @Nullable Entity driven(ServerPlayer player) {
 		Entity vehicle = player.getVehicle();
 		return vehicle instanceof AbstractMinecart || vehicle != null && machine(vehicle) ? vehicle : null;
 	}
 
-	private static void setShell(ServerPlayer player, XenoformPower.Live live, @Nullable String shell) {
+	public static void setShell(ServerPlayer player, XenoformPower.Live live, @Nullable String shell) {
 		live.shell = shell;
 		live.brace = live.spray = live.rebound = live.anvilDrop = false;
 		live.climb = false;
@@ -324,16 +364,16 @@ public final class Rivet extends XenoForm {
 					return;
 				}
 				Vec3 look = player.getLookAngle();
-				for (LivingEntity e : around(player, BREATH_REACH)) {
+				for (LivingEntity e : around(player, BREATH_REACH * boost)) {
 					Vec3 to = e.getBoundingBox().getCenter().subtract(player.getEyePosition()).normalize();
 					if (to.dot(look) > 0.6) {
-						e.hurtServer(level, player.damageSources().playerAttack(player), BREATH_DAMAGE);
-						e.igniteForSeconds(BREATH_FIRE_SECONDS);
+						e.hurtServer(level, player.damageSources().playerAttack(player), BREATH_DAMAGE * boost);
+						e.igniteForSeconds(BREATH_FIRE_SECONDS * boost);
 					}
 				}
 				Vec3 eye = player.getEyePosition().subtract(0.0, 0.3, 0.0);
 				for (int i = 1; i <= 10; i++) {
-					Vec3 p = eye.add(look.scale(i * BREATH_REACH / 10.0));
+					Vec3 p = eye.add(look.scale(i * BREATH_REACH * boost / 10.0));
 					level.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 3, 0.1 * i / 3.0, 0.1 * i / 3.0, 0.1 * i / 3.0, 0.01);
 				}
 				sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 0.8F);
@@ -457,7 +497,7 @@ public final class Rivet extends XenoForm {
 			}
 			case ABILITY_3 -> {
 				if (ready(player, live, V)) {
-					shoveAhead(player, SHOVE_RADIUS, SHOVE_DAMAGE, 0.3);
+					shoveAhead(player, SHOVE_RADIUS * boost, SHOVE_DAMAGE * boost, 0.3, SHOVE_OUT * boost);
 					sound(player, SoundEvents.PISTON_EXTEND, 1.2F, 0.7F);
 					cooldown(player, live, V, SHOVE_COOLDOWN);
 				}
@@ -617,7 +657,7 @@ public final class Rivet extends XenoForm {
 				cooldown(player, live, G, TEMPER_COOLDOWN);
 			}
 			case ABILITY_3 -> {
-				LivingEntity target = ready(player, live, V) ? aimed(player, HAMMER_REACH, e -> true) : null;
+				LivingEntity target = ready(player, live, V) ? aimed(player, HAMMER_REACH, e -> !(e instanceof ServerPlayer other) || player.canHarmPlayer(other)) : null;
 				if (target != null) {
 					target.hurtServer(level, player.damageSources().playerAttack(player), HAMMER_DAMAGE);
 					shove(target, player.position(), 1.0, 0.3);
@@ -654,13 +694,14 @@ public final class Rivet extends XenoForm {
 					return;
 				}
 				int shot = 0;
-				for (int i = 0; i < inv.getContainerSize() && shot < VOLLEY; i++) {
+				int volley = Math.round(VOLLEY * boost);
+				for (int i = 0; i < inv.getContainerSize() && shot < volley; i++) {
 					ItemStack s = inv.getItem(i);
-					while (s.is(ItemTags.ARROWS) && !s.isEmpty() && shot < VOLLEY) {
+					while (s.is(ItemTags.ARROWS) && !s.isEmpty() && shot < volley) {
 						ItemStack one = s.split(1);
 						Arrow arrow = new Arrow(level, player, one.is(Items.TIPPED_ARROW) || one.is(Items.SPECTRAL_ARROW) ? one : new ItemStack(Items.ARROW), null);
 						arrow.pickup = AbstractArrow.Pickup.ALLOWED;
-						arrow.shootFromRotation(player, player.getXRot(), player.getYRot() + (shot - 1) * 4.0F, 0.0F, 3.0F, 1.0F);
+						arrow.shootFromRotation(player, player.getXRot(), player.getYRot() + (shot - (volley - 1) * 0.5F) * 4.0F, 0.0F, 3.0F, 1.0F);
 						level.addFreshEntity(arrow);
 						shot++;
 					}
@@ -778,6 +819,20 @@ public final class Rivet extends XenoForm {
 
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
+		shellTick(player, live, 1.0F);
+	}
+
+	/** (0.21.37) The every-tick work (Brace, Rebound, Drop, Climb, the spray, Chord, driving a machine), the Drop's slam {@code power} times as strong. */
+	public void shellTick(ServerPlayer player, XenoformPower.Live live, float power) {
+		this.boost = power;
+		try {
+			tickShell(player, live);
+		} finally {
+			this.boost = 1.0F;
+		}
+	}
+
+	private void tickShell(ServerPlayer player, XenoformPower.Live live) {
 		if (live.rolls > 0) {
 			live.rolls--;
 		}
@@ -800,7 +855,7 @@ public final class Rivet extends XenoForm {
 		// Drop (anvil): the slam on landing, harder the farther it fell
 		if (live.anvilDrop && (player.onGround() || player.isInWater())) {
 			live.anvilDrop = false;
-			float hit = Math.min(DROP_MAX, DROP_DAMAGE + (float)Math.max(0.0, live.dropFrom - player.getY()) * DROP_PER_BLOCK);
+			float hit = Math.min(DROP_MAX * boost, (DROP_DAMAGE + (float)Math.max(0.0, live.dropFrom - player.getY()) * DROP_PER_BLOCK) * boost);
 			for (LivingEntity e : around(player, DROP_RADIUS)) {
 				e.hurtServer(level, player.damageSources().playerAttack(player), hit);
 				shove(e, player.position(), 0.6, 0.4);
@@ -835,7 +890,7 @@ public final class Rivet extends XenoForm {
 	}
 
 	/** The machine Rivet drives: steered toward where it looks while forward is held, faster and stronger, lit green. */
-	private static void drive(ServerPlayer player, XenoformPower.Live live) {
+	public static void drive(ServerPlayer player, XenoformPower.Live live) {
 		Entity machine = driven(player);
 		if (machine == null) {
 			return;
@@ -908,13 +963,13 @@ public final class Rivet extends XenoForm {
 
 	// ---------------------------------------------------------------- helpers
 
-	private static void shoveAhead(ServerPlayer player, double radius, float damage, double dot) {
+	private static void shoveAhead(ServerPlayer player, double radius, float damage, double dot, double out) {
 		Vec3 look = player.getLookAngle();
 		for (LivingEntity e : around(player, radius)) {
 			Vec3 to = e.position().subtract(player.position()).normalize();
 			if (to.dot(look) > dot) {
 				e.hurtServer(player.level(), player.damageSources().playerAttack(player), damage);
-				shove(e, player.position(), SHOVE_OUT, SHOVE_UP);
+				shove(e, player.position(), out, SHOVE_UP);
 			}
 		}
 	}
@@ -936,5 +991,12 @@ public final class Rivet extends XenoForm {
 		static int ceilDiv(int a, int b) {
 			return (a + b - 1) / b;
 		}
+	}
+
+	/** (0.21.37) Rivet's area moves (and Ironpour's, which runs them) leave a player that pvp protects alone: no burn, no shove. */
+	protected static List<LivingEntity> around(ServerPlayer player, double radius) {
+		List<LivingEntity> out = new java.util.ArrayList<>(XenoForm.around(player, radius));
+		out.removeIf(e -> e instanceof ServerPlayer other && !player.canHarmPlayer(other));
+		return out;
 	}
 }
