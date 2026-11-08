@@ -5,7 +5,7 @@ branch: claude/fishing-fight-track-a
 with: fishing-realism-tideborn (#1132, stacked on it)
 pr: 1133
 mods: Powers
-versions: 0.21.62
+versions: 0.21.66
 started: 2026-11-08
 owns:
   - src/main/java/com/jaymospowers/fishing/FishBite.java
@@ -20,4 +20,4 @@ owns:
 Nibbles, then a strike window. Also: a charged cast, drag (1-5 on the rod), fish runs and jumps, the rod bending with tension, a creaking line, scroll to reel, and fish spook while you wade near the hook.
 
 **Done:** built, PR checks pass, not played.
-**Left:** rebase onto #1132's bite rewrite once it's pushed. Their `FishBites.tick` will call `FishingReal.fishAtHook` instead of `startFight`, and the `FishBite.tick` check goes before their `FishBites` calls in the mixin.
+**Left:** merge the new #1132 push (Powers 0.21.64, Kitchen 0.5.92) and master again, build, push. Merge order: #1132, #1136, #1133.

@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: stormborn-tomb-structures
 branch: claude/stormborn-tomb-structures
 with:
-pr:
+pr: 1137
 mods: kingdoms
 versions:
 started: 2026-11-08
@@ -32,4 +32,4 @@ owns:
 - No-build rule is separate task (tomb-no-build-rule)
 
 ## Done
-What a player will see, and what wasn't tested.
+Structures compile and `/place structure` loads all 11 pieces without missing blocks. Worldgen placement in survival not tested. Loot tables contain modded item entries (Supplementaries bombs, Draugr Invasion weapons) that need vanilla/Kingdoms swaps in follow-up PR. PR #1137 opened for review.
