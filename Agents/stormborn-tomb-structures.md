@@ -5,7 +5,7 @@ branch: claude/stormborn-tomb-structures
 with:
 pr: 1137
 mods: kingdoms
-versions:
+versions: Kingdoms 0.7.651
 started: 2026-11-08
 owns:
   - kingdoms/src/main/resources/data/jaymoskingdoms/structure/stormborn_tomb/ (new)
@@ -32,4 +32,4 @@ owns:
 - No-build rule is separate task (tomb-no-build-rule)
 
 ## Done
-Structures compile and `/place structure` loads all 11 pieces without missing blocks. Worldgen placement in survival not tested. Loot tables contain modded item entries (Supplementaries bombs, Draugr Invasion weapons) that need vanilla/Kingdoms swaps in follow-up PR. PR #1137 opened for review.
+Structures compile and `/place structure` loads all 11 pieces without missing blocks. Worldgen placement in survival not tested. Loot tables contain modded item entries (Supplementaries bombs, Draugr Invasion weapons) that need vanilla/Kingdoms swaps in follow-up PR. PR #1137 opened for review. Kingdoms version bumped to 0.7.651.
