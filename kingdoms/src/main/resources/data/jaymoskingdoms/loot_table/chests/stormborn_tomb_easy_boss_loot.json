@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "mebahelcreaturesdraugr:bow/ebony_bow",
+          "name": "minecraft:bow",
           "weight": 2,
           "functions": [
             {
@@ -41,7 +41,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "mebahelcreaturesdraugr:weapon/ebony/ebony_axe",
+          "name": "minecraft:diamond_axe",
           "weight": 2,
           "functions": [
             {
@@ -71,7 +71,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "mebahelcreaturesdraugr:weapon/ebony/ebony_dagger",
+          "name": "minecraft:iron_sword",
           "weight": 2,
           "functions": [
             {
@@ -332,7 +332,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "supplementaries:music_disc_heave_ho",
+          "name": "minecraft:music_disc_5",
           "weight": 6,
           "functions": [
             {

@@ -1,4 +1,6 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    "nordic_structure:stormborn_tomb"
+  ]
 }

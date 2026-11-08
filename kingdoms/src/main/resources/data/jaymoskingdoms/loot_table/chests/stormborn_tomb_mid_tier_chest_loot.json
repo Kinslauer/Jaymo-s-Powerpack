@@ -43,7 +43,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "supplementaries:bomb",
+          "name": "minecraft:tnt",
           "weight": 2,
           "functions": [
             {
@@ -59,7 +59,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "supplementaries:bomb_blue",
+          "name": "minecraft:tnt",
           "weight": 1,
           "functions": [
             {
@@ -433,7 +433,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "mebahelcreaturesdraugr:weapon/ancient_nord/ancient_nord_sword",
+          "name": "minecraft:diamond_sword",
           "weight": 3,
           "functions": [
             {
@@ -463,7 +463,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "mebahelcreaturesdraugr:bow/ancient_nord/ancient_nord_bow",
+          "name": "minecraft:bow",
           "weight": 3,
           "functions": [
             {
