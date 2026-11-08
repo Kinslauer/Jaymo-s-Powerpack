@@ -43,7 +43,7 @@ import sys
 import time
 
 BRANCH = "vault-live"
-TASK_COMMANDS = ("--claim", "--tasks", "--show", "--set", "--note", "--send", "--reviewer-seen", "--reviewer-away")
+TASK_COMMANDS = ("--claim", "--review-queue", "--tasks", "--show", "--set", "--note", "--send", "--reviewer-seen", "--reviewer-away")
 REVIEWER_AWAY_MINUTES = 30  # no reviewer round for this long: the coordinator reviews in-review tasks itself
 SEED = {  # written by --setup when the branch doesn't exist yet
     ".gitattributes": "Decisions.md merge=union\n*.md text eol=lf\n",
@@ -159,6 +159,7 @@ def tidy_merged(live):
 KANBAN_LANES = (  # (lane, Inbox statuses); Obsidian's Kanban plugin shows Kanban.md as a board
     ("Waiting for a bot", ("open",)),
     ("Being built", ("claimed", "changes")),
+    ("Text pass", ("text-pass", "writing")),  # in-review but the writer bot hasn't gone over its text yet
     ("In review", ("in-review",)),
     ("Needs Andy", ("ready", "sent", "blocked")),
 )
@@ -177,8 +178,9 @@ def write_kanban(live):
     for _, name, p in sorted(tasks(live)):
         tasks_seen.add(name)
         for lane, statuses in KANBAN_LANES:
-            if p.get("status") in statuses:
-                lanes[lane].append(card("Inbox", name, p, "fixing review notes" if p.get("status") == "changes" else ""))
+            status = "text-pass" if awaiting_text_pass(p) else p.get("status")
+            if status in statuses:
+                lanes[lane].append(card("Inbox", name, p, "fixing review notes" if status == "changes" else ""))
     agents = os.path.join(live, "Agents")
     for name in sorted(os.listdir(agents)) if os.path.isdir(agents) else []:
         if name.endswith(".md") and name[:-3] not in tasks_seen:
@@ -346,6 +348,35 @@ def meant_for(props, agent):
     return target in (agent, "any") or agent.startswith(target + "-")
 
 
+def awaiting_text_pass(props):
+    """In-review tasks go to the writer bot before review: its text pass sets text_pass (done or none)."""
+    return props.get("status") == "in-review" and not (props.get("text_pass") or "").strip()
+
+
+def review_queue(live):
+    """In-review tasks the writer has finished with: the ones a reviewer may take."""
+    return sorted(t for t in tasks(live, ("in-review",)) if not awaiting_text_pass(t[2]))
+
+
+def claim_text_pass(live, agent):
+    """The writer bot: the oldest in-review task with no text pass yet. Sets status `writing` so no reviewer
+    takes it mid-edit; the writer sets it back to in-review with text_pass=done (or none). Exit 3 if none."""
+    waiting = sorted(t for t in tasks(live, ("in-review",)) if awaiting_text_pass(t[2]))
+    if not waiting:
+        print("No task waiting.")
+        sys.exit(3)
+    name = waiting[0][1]
+    path = task_path(live, name)
+    set_props(path, {"status": "writing", "writer": agent})
+    sync(live)
+    if frontmatter(path).get("writer") != agent:
+        print("No task waiting.")
+        sys.exit(3)
+    sys.stdout.reconfigure(encoding="utf-8")
+    print(f"Task: {name}  ({path})\n")
+    print(open(path, encoding="utf-8").read())
+
+
 def claim(live, agent, fixes=False):
     """The oldest task sent back to this agent, else the oldest open one meant for it. With fixes=True (a fixer
     bot), the oldest task sent back to anyone, which it takes over. Exit 3 if none."""
@@ -390,11 +421,17 @@ def task_command(live):
             if os.path.exists(os.path.join(live, "Reviewer.md")) else "0"
         if time.time() - int(seen or 0) < minutes * 60:
             return  # the reviewer is around: leave in-review tasks to it
-        for _, name, _ in sorted(tasks(live, ("in-review",))):
+        for _, name, _ in review_queue(live):
+            print(name)
+        return
+    if cmd == "--review-queue":
+        for _, name, _ in review_queue(live):
             print(name)
         return
     if cmd == "--claim":
         names = [a for a in rest if not a.startswith("--")]
+        if "--writes" in rest:
+            return claim_text_pass(live, names[0] if names else "hermes-writer")
         return claim(live, names[0] if names else "any", fixes="--fixes" in rest)
     if cmd == "--tasks":
         for _, name, _ in sorted(tasks(live, tuple(rest) or None)):
@@ -405,7 +442,10 @@ def task_command(live):
         sys.stdout.reconfigure(encoding="utf-8")
         return print(open(path, encoding="utf-8").read())
     if cmd == "--set":
-        set_props(path, dict(kv.split("=", 1) for kv in rest[1:]))
+        props = dict(kv.split("=", 1) for kv in rest[1:])
+        if props.get("status") == "changes":
+            props.setdefault("text_pass", "")  # the fixes get their own text pass before the next review
+        set_props(path, props)
     elif cmd == "--note":
         add_note(path, " ".join(rest[1:]))
     elif cmd == "--send":

@@ -49,7 +49,9 @@ name, or `any`), and the files it suggests owning.
    leave it and take another.
 3. Questions for Andy go under the task's *Notes* (and to Andy, if he's there): the coordinator reads them and asks him.
 4. When your PR is up, run `python tools/vault_sync.py --set <task> status=in-review pr=<number>`. The reviewer
-   only picks up tasks whose own status is `in-review`; setting just your agent note isn't enough. The coordinator
+   only picks up tasks whose own status is `in-review`; setting just your agent note isn't enough. The writer bot
+   (Quill) then gives your PR a text pass, rewriting player-visible text on your branch, so `git pull` before you
+   push again. The coordinator
    sets `done` and moves the task to `Live/Inbox/Done/` after Andy merges.
 
 The coordinator never edits an agent note. On a claimed task it only adds lines under *Notes*, except to set
