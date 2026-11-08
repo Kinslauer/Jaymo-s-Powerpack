@@ -28,17 +28,17 @@ owns:
 
 Existing (unrelated) "Mimic" mobs: Powers Aether dungeon mimic (sentry crate that's alive, `mimic_spawn_egg`) and Kingdoms chest mimic.
 
-## Open questions (to confirm with prometheus / Tiv; do not guess)
+## Confirmed design target
 
-1. Which "echos" are meant — Chrono echoes, the Quiet One echo strike, or both?
-2. What should the mimic be (mob, item, spawn egg?), and what does "prometheus can pick up the mimic" mean mechanically?
-3. Exactly what does the mimic take over from echos — spawning on level-up, behaviour, the orders screen, Nether/Future death, ascension?
-4. What replaces echos for Chrono players (curse, Stopped Clock, Timeless orders)?
+- The original Discord request was ItsJim's "Building a Minecraft Horror Mod that Mimics You" (https://www.youtube.com/watch?v=74QYqhvNHWk), especially the player-movement copying at 0:35. The mimic copies a player's skin, movement and behaviour; its revealed form is a distorted humanoid.
+- Andy then said this mimic should replace the way Chrono echoes function. Prometheus owns only the original true-form model, texture and animations; gameplay/AI replacement is separate work.
+- No art is copied from the video or Jim's Mine. The model is an original lanky, ashen humanoid with a hinged jaw, clawed hands and restless reveal/walk/attack animations. The copied-player disguise continues to use the player model.
 
 ## Plan
 
-- Wait on prometheus confirmation via Andy/Tiv (Discord thread 1569108674721357906).
-- Once confirmed: design the mimic feature, implement in Powers, `sh ./gradlew build`, `python tools/pr_checks.py`, open PR, set vault task `status=in-review`.
+- Build an editable GeckoLib Blockbench model facing north with feet at y=0, with idle, walk, run, attack, transform, hurt and death animations.
+- Export the GeckoLib 5 geometry, animation and texture assets for Powers; render and inspect front, side and back.
+- Run `sh ./gradlew build` and `python tools/pr_checks.py`, open the PR, and set the vault task to `in-review`.
 
 ## Done
 
