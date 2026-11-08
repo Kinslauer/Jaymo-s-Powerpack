@@ -20,6 +20,8 @@ Inbox tasks (each syncs first and after, so everyone sees the change at once):
                                                        # for 30 minutes: the coordinator then reviews them itself
 
 Task statuses: open -> claimed -> in-review -> (changes -> in-review)* -> ready -> sent -> done; blocked = waiting on Andy (moved to Inbox/Done/).
+Kanban.md: every sync rewrites a board of the Inbox (Waiting / Being built / In review / Needs Andy / Done) for
+Obsidian's Kanban plugin. It is read-only: change tasks with --set, not by dragging cards.
 Merged PRs: every sync marks an agent note or Inbox task whose pr: is merged into master as done and moves it to
 Agents/Done/ or Inbox/Done/, so the Board stays true whoever merged it.
 
@@ -154,6 +156,55 @@ def tidy_merged(live):
             os.replace(path, os.path.join(root, "Done", name))
 
 
+KANBAN_LANES = (  # (lane, Inbox statuses); Obsidian's Kanban plugin shows Kanban.md as a board
+    ("Waiting for a bot", ("open",)),
+    ("Being built", ("claimed", "changes")),
+    ("In review", ("in-review",)),
+    ("Needs Andy", ("ready", "sent", "blocked")),
+)
+KANBAN_DONE = 8  # how many finished tasks the Done lane shows
+
+
+def write_kanban(live):
+    """Rewrite Kanban.md (a read-only board for Obsidian's Kanban plugin) from the Inbox tasks and running agents.
+    It is regenerated on every sync, so drag-and-drop changes on it don't stick: change tasks with --set."""
+    def card(folder, name, p, extra=""):
+        who = p.get("claimed_by") or (("for " + p["for"]) if p.get("for") else "")
+        bits = [b for b in (who, f"#{p['pr']}" if p.get("pr") else "", p.get("status", ""), extra) if b]
+        return f"- [ ] [[{folder}/{name}|{name}]] · " + " · ".join(bits)
+    lanes = {lane: [] for lane, _ in KANBAN_LANES}
+    tasks_seen = set()
+    for _, name, p in sorted(tasks(live)):
+        tasks_seen.add(name)
+        for lane, statuses in KANBAN_LANES:
+            if p.get("status") in statuses:
+                lanes[lane].append(card("Inbox", name, p, "fixing review notes" if p.get("status") == "changes" else ""))
+    agents = os.path.join(live, "Agents")
+    for name in sorted(os.listdir(agents)) if os.path.isdir(agents) else []:
+        if name.endswith(".md") and name[:-3] not in tasks_seen:
+            p = frontmatter(os.path.join(agents, name))
+            if p.get("status") in ("running", "in-review", "blocked"):
+                lane = {"running": "Being built", "in-review": "In review", "blocked": "Needs Andy"}[p["status"]]
+                lanes[lane].append(card("Agents", name[:-3], p))
+    done_dir = os.path.join(live, "Inbox", "Done")
+    done = sorted((os.path.getmtime(os.path.join(done_dir, n)), n[:-3]) for n in os.listdir(done_dir)
+                  if n.endswith(".md")) if os.path.isdir(done_dir) else []
+    out = ["---", "", "kanban-plugin: board", "", "---", "",
+           f"<!-- Written by tools/vault_sync.py on every sync ({time.strftime('%Y-%m-%d %H:%M')}). Don't edit. -->", ""]
+    for lane, _ in KANBAN_LANES:
+        out += [f"## {lane}", ""] + (lanes[lane] or []) + ["", ""]
+    out += ["## Done", "", "**Complete**"]
+    out += [f"- [x] [[Inbox/Done/{n}|{n}]]" for _, n in reversed(done[-KANBAN_DONE:])]
+    out += ["", "", "%% kanban:settings", "```", '{"kanban-plugin":"board","list-collapse":[false,false,false,false,false]}',
+            "```", "%%", ""]
+    text = "\n".join(out)
+    path = os.path.join(live, "Kanban.md")
+    old = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
+    if old.split("-->", 1)[-1] != text.split("-->", 1)[-1]:  # only rewrite when a card changed, not just the time
+        with open(path, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(text)
+
+
 def sync(live):
     lock = os.path.join(live, ".sync-lock")
     try:
@@ -183,6 +234,13 @@ def sync(live):
                     if merged.returncode != 0:  # e.g. a note deleted on one side, edited on the other: keep local
                         git(live, "add", "-A")
                         git(live, "commit", "-q", "--no-edit", check=False)
+            try:  # the board reflects the merged state, so it's written after the merge
+                write_kanban(live)
+                git(live, "add", "Kanban.md")
+                if git(live, "diff", "--cached", "--quiet", check=False).returncode != 0:
+                    git(live, "commit", "-q", "-m", "Kanban board")
+            except Exception as e:
+                print(f"(kanban skipped: {e})", file=sys.stderr)
             if git(live, "push", "-q", "origin", f"HEAD:refs/heads/{BRANCH}", check=False).returncode == 0:
                 break
             time.sleep(2 ** attempt)
