@@ -15,8 +15,13 @@ Inbox tasks (each syncs first and after, so everyone sees the change at once):
     python tools/vault_sync.py --set <task> status=in-review pr=1234   # change a task's properties
     python tools/vault_sync.py --note <task> "Reviewer: ..."           # add a line under the task's Notes
     python tools/vault_sync.py --send <task>           # reviewed and passed: hand it to the coordinator (status: ready)
+    python tools/vault_sync.py --reviewer-seen         # the PC reviewer, every round: "I'm here" (Reviewer.md)
+    python tools/vault_sync.py --reviewer-away [30]    # in-review tasks, but only if the reviewer hasn't been seen
+                                                       # for 30 minutes: the coordinator then reviews them itself
 
 Task statuses: open -> claimed -> in-review -> (changes -> in-review)* -> ready -> sent -> done; blocked = waiting on Andy (moved to Inbox/Done/).
+Merged PRs: every sync marks an agent note or Inbox task whose pr: is merged into master as done and moves it to
+Agents/Done/ or Inbox/Done/, so the Board stays true whoever merged it.
 
 The live folder is docs/vault/Live in the main checkout: on Andy's PC a junction to E:/Jaymo Vault Live (outside git),
 in a cloud session a plain folder that --setup clones the branch into. Either way it is its own small git checkout of
@@ -29,12 +34,15 @@ local copy (merge -X ours), and the other side's version stays in the branch his
 """
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
 import time
 
 BRANCH = "vault-live"
+TASK_COMMANDS = ("--claim", "--tasks", "--show", "--set", "--note", "--send", "--reviewer-seen", "--reviewer-away")
+REVIEWER_AWAY_MINUTES = 30  # no reviewer round for this long: the coordinator reviews in-review tasks itself
 SEED = {  # written by --setup when the branch doesn't exist yet
     ".gitattributes": "Decisions.md merge=union\n*.md text eol=lf\n",
     ".gitignore": ".obsidian/\n.trash/\n.sync-stamp\n.sync-lock\n",
@@ -111,6 +119,41 @@ def identity(live):
         git(live, "config", "user.email", email or "vault-sync@localhost")
 
 
+def merged_prs():
+    """PR numbers squash-merged into origin/master (GitHub puts "(#1234)" at the end of the commit title). Empty if
+    master can't be fetched (offline): then nothing is tidied this time."""
+    repo = main_checkout()
+    if run(["git", "-C", repo, "fetch", "-q", "origin", "master"], check=False).returncode != 0:
+        return set()
+    log = run(["git", "-C", repo, "log", "-400", "--format=%s", "origin/master"], check=False).stdout
+    return {int(m) for m in re.findall(r"\(#(\d+)\)\s*$", log, re.M)}
+
+
+def tidy_merged(live):
+    """Once a note's PR is on master, mark it done and move it to Done/, whoever merged it (a bot, the reviewer,
+    the coordinator or Andy). Agent notes go to Agents/Done/, Inbox tasks to Inbox/Done/."""
+    merged = None
+    for folder in ("Agents", "Inbox"):
+        root = os.path.join(live, folder)
+        for name in sorted(os.listdir(root)) if os.path.isdir(root) else []:
+            path = os.path.join(root, name)
+            if not name.endswith(".md") or not os.path.isfile(path):
+                continue
+            props = frontmatter(path)
+            prs = {int(n) for n in re.findall(r"\d+", props.get("pr", ""))}
+            if not prs or props.get("status") == "done":
+                continue
+            if merged is None:
+                merged = merged_prs()
+            hit = sorted(prs & merged)
+            if not hit:
+                continue
+            set_props(path, {"status": "done"})
+            add_note(path, f"PR #{hit[0]} is merged into master; moved to {folder}/Done.")
+            os.makedirs(os.path.join(root, "Done"), exist_ok=True)
+            os.replace(path, os.path.join(root, "Done", name))
+
+
 def sync(live):
     lock = os.path.join(live, ".sync-lock")
     try:
@@ -122,6 +165,10 @@ def sync(live):
         os.remove(lock)
         return sync(live)
     try:
+        try:
+            tidy_merged(live)
+        except Exception as e:  # never let tidying stop a sync
+            print(f"(tidy skipped: {e})", file=sys.stderr)
         git(live, "add", "-A")
         if git(live, "diff", "--cached", "--quiet", check=False).returncode != 0:
             git(live, "commit", "-q", "-m", f"vault sync from {socket.gethostname()}")
@@ -264,9 +311,24 @@ def claim(live, agent, fixes=False):
 
 def task_command(live):
     args = sys.argv[1:]
-    cmd = next(a for a in args if a in ("--claim", "--tasks", "--show", "--set", "--note", "--send"))
+    cmd = next(a for a in args if a in TASK_COMMANDS)
     rest = args[args.index(cmd) + 1:]
     sync(live)
+    if cmd == "--reviewer-seen":
+        with open(os.path.join(live, "Reviewer.md"), "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(f"---\nlast_seen: {int(time.time())}\nseen_at: {time.strftime('%Y-%m-%d %H:%M')}\n---\n"
+                     "The PC reviewer writes this every round (/vault-review). If it's old, the coordinator reviews.\n")
+        sync(live)
+        return
+    if cmd == "--reviewer-away":
+        minutes = int(rest[0]) if rest else REVIEWER_AWAY_MINUTES
+        seen = frontmatter(os.path.join(live, "Reviewer.md")).get("last_seen", "0") \
+            if os.path.exists(os.path.join(live, "Reviewer.md")) else "0"
+        if time.time() - int(seen or 0) < minutes * 60:
+            return  # the reviewer is around: leave in-review tasks to it
+        for _, name, _ in sorted(tasks(live, ("in-review",))):
+            print(name)
+        return
     if cmd == "--claim":
         names = [a for a in rest if not a.startswith("--")]
         return claim(live, names[0] if names else "any", fixes="--fixes" in rest)
@@ -312,7 +374,7 @@ def main():
         if "--hook" in sys.argv:
             return
         raise SystemExit(f"{live} isn't set up yet: run python tools/vault_sync.py --setup")
-    if any(a in sys.argv for a in ("--claim", "--tasks", "--show", "--set", "--note", "--send")):
+    if any(a in sys.argv for a in TASK_COMMANDS):
         return task_command(live)
     if "--if-older" in sys.argv:
         seconds = int(sys.argv[sys.argv.index("--if-older") + 1])
