@@ -35,3 +35,4 @@ it hasn't been seen in game yet.
 
 ## Notes
 - The Warped Clam mob itself (entity, AI, spawning) is a separate task.
+- 2026-11-08 21:50 Coordinator reviewed #1153 (reviewer offline): assets valid, all animation bones exist, GeckoLib 5 paths, CI green. Sent to Andy.
