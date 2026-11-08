@@ -50,4 +50,9 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Decided:** Andy picked all four: fish by place and time (plus Kitchen bait working again), overfishing, real tuna and shark meat, fish size and weight. Tideborn react to fishing (attack, poaching crime in their havens) is built either way.
 - **Applies to:** Powers fishing, Kitchen chopping, Kingdoms Tideborn.
 - **Agent:** fishing-tideborn.
-- 2026-11-07 (farm family): Andy picked all four jobs for the Family farmhand's family: tend the crops, keep the animals, unlock MCA's chores (Work button), and the child gathers items into the house chest.
+
+### 2026-11-07: Family farmhand's family jobs
+- **Decided:** Andy picked all four: tend the crops, keep the animals, unlock MCA's chores (Work button), and the child gathers items into the house chest. Wary of zombies, hiding at night and last-resort defence are built either way.
+- **Applies to:** Kingdoms FarmhandHome / FarmFamily.
+- **Agent:** farm-family.
+- 2026-11-07: Andy started a Hermes model trial: hermes-a (Builder A) on nvidia/nemotron-3-ultra-550b-a55b, hermes-b (Builder B) stays on nvidia/nemotron-3.5-super-vl-120b-a12b, hermes-fixer on nvidia/nemotron-3.5-lightning-30b-a3b. Compare review rounds per task (Kanban timeline) before keeping or reverting. Config backups in the reviewer session scratchpad.
