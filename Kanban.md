@@ -17,11 +17,11 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/warped-clam-model|warped-clam-model]] · hermes-modeller · #1153 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Inbox/warped-clam-model|warped-clam-model]] · hermes-modeller · #1153 · sent
 
 
 ## Done
