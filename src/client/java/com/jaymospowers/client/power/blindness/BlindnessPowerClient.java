@@ -9,6 +9,7 @@ import com.jaymospowers.power.blindness.BlindnessVariant;
 import com.jaymospowers.power.blindness.BlindSide;
 import com.jaymospowers.power.blindness.BlindnessEcho;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
@@ -70,7 +71,7 @@ public final class BlindnessPowerClient implements PowerClient {
         ClientTickEvents.END_CLIENT_TICK.register(BlindnessPowerClient::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("blindness_overlay"), BlindnessPowerClient::render);
         BlindnessEcholocationClient.init();
-        ClientPlayNetworking.registerGlobalReceiver(BlindnessEchoPayload.TYPE, (payload, context) ->
+        ClientPlayNetworking.registerGlobalReceiver(BlindnessEcho.TYPE, (payload, context) ->
                 context.client().execute(() -> BlindnessEcholocationClient.onEcho(payload)));
     }
 
