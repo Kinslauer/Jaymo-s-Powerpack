@@ -1,6 +1,15 @@
 package com.jaymoskingdoms;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.monsters.Monsters;
+import com.jaymoskingdoms.monsters.SilverSkeleton;
 import java.util.List;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -24,6 +33,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -58,8 +68,13 @@ import net.minecraft.world.phys.Vec3;
  * laughs, and fights: blows of his staff, and every so often a spell that throws everything round him back and hurts it.
  * A purple boss bar once he and a player have traded blows. Drops bones, amethyst and silver coins. Ops can hatch one from
  * its spawn egg (it wakes at once).
+ *
+ * <p>Drawn with GeckoLib (SkeletonLordRenderer; the model and its animations, our three added, in
+ * kingdoms/art/skeleton_lord.bbmodel). He is the Stormborn Tomb's boss too, and fights with more than his spell: his staff
+ * swung at whoever he strikes; a slam of the staff's foot that cracks the ground round him and throws everything near up;
+ * and his Grave Call, at {@link #CALL_AT} of his health, raising silver skeletons that climb up out of the floor round him.
  */
-public class SkeletonLord extends Monster {
+public class SkeletonLord extends Monster implements GeoEntity {
 	public static EntityType<SkeletonLord> TYPE;
 	public static Item SPAWN_EGG;
 
@@ -79,6 +94,32 @@ public class SkeletonLord extends Monster {
 	/** What he drops: bones, amethyst shards, silver coins (0.7.486; once emeralds), (min, max of each). */
 	static final int BONES_MIN = 6, BONES_MAX = 10, AMETHYST_MIN = 4, AMETHYST_MAX = 8, SILVER_MIN = 3, SILVER_MAX = 6;
 	public static final byte WAKE = 96, CAST = 97;
+	/** The slam: how often (ticks), at a foe within this reach (blocks), how long it takes (its 1.5 s animation), the tick the
+	 * staff lands, how far round him it reaches, its harm and how hard it throws up. */
+	static final int SLAM_COOLDOWN = 160, SLAM_TICKS = 30, SLAM_LANDS = 15;
+	static final double SLAM_RANGE = 8.0, SLAM_RADIUS = 4.5, SLAM_LIFT = 0.8;
+	static final float SLAM_DAMAGE = 9.0F;
+	/** His Grave Call: at these shares of his health (each once), how long it takes (its 2 s animation), the tick the dead come
+	 * up, how many each time, how far from him (blocks), and the most of his risen alive near him at once. */
+	static final float[] CALL_AT = {0.75F, 0.4F};
+	static final int[] CALL_COUNT = {2, 3};
+	static final int CALL_TICKS = 40, CALL_LANDS = 24, CALL_MAX_RISEN = 6;
+	static final double CALL_MIN = 3.0, CALL_MAX = 6.0, RISEN_NEAR = 24.0;
+	/** Walking faster than this (the walk animation's speed) he runs. */
+	static final float RUN_FROM = 0.6F;
+
+	static final RawAnimation STATUE = RawAnimation.begin().thenLoop("statue");
+	static final RawAnimation LAUGH = RawAnimation.begin().thenLoop("NYEHEHEHE");
+	static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	static final RawAnimation RUN = RawAnimation.begin().thenLoop("run");
+	static final RawAnimation SPELL = RawAnimation.begin().thenPlay("spell_knockback");
+	static final RawAnimation STAFF_SWING = RawAnimation.begin().thenPlay("staff_swing");
+	static final RawAnimation SLAM = RawAnimation.begin().thenPlay("slam");
+	static final RawAnimation GRAVE_CALL = RawAnimation.begin().thenPlay("grave_call");
+
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+	private int slamming, slamIn = SLAM_COOLDOWN / 2, calling, calls;
 
 	private static final EntityDataAccessor<Boolean> DORMANT = SynchedEntityData.defineId(SkeletonLord.class, EntityDataSerializers.BOOLEAN);
 
@@ -162,7 +203,20 @@ public class SkeletonLord extends Monster {
 		if (this.waking > 0) {
 			this.waking--;
 		}
-		this.spell(level);
+		if (this.slamming > 0) {
+			if (--this.slamming == SLAM_TICKS - SLAM_LANDS) {
+				this.slamLands(level);
+			}
+		} else if (this.calling > 0) {
+			if (--this.calling == CALL_TICKS - CALL_LANDS) {
+				this.graveCall(level);
+			}
+		} else if (this.casting == 0 && this.waking == 0) {
+			this.nextMove(level);
+		}
+		if (this.slamming == 0 && this.calling == 0) {
+			this.spell(level);
+		}
 		this.bar.setVisible(this.engaged);
 		this.bar.setProgress(this.getHealth() / this.getMaxHealth());
 	}
@@ -205,6 +259,76 @@ public class SkeletonLord extends Monster {
 		level.broadcastEntityEvent(this, CAST);
 	}
 
+	/** Starts his Grave Call when his health has fallen past the next of {@link #CALL_AT}, else a slam when it's due. */
+	private void nextMove(ServerLevel level) {
+		if (this.calls < CALL_AT.length && this.getHealth() <= this.getMaxHealth() * CALL_AT[this.calls]) {
+			this.calling = CALL_TICKS;
+			this.getNavigation().stop();
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.HOSTILE, 2.0F, 0.5F);
+			this.triggerAnim("action", "grave_call");
+			return;
+		}
+		LivingEntity target = this.getTarget();
+		if (--this.slamIn > 0 || target == null || this.distanceTo(target) > SLAM_RANGE || !this.onGround()) {
+			return;
+		}
+		this.slamming = SLAM_TICKS;
+		this.slamIn = SLAM_COOLDOWN;
+		this.getNavigation().stop();
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.HOSTILE, 0.6F, 0.5F);
+		this.triggerAnim("action", "slam");
+	}
+
+	/** The staff's foot comes down: everything on the ground round him is hurt and thrown up. */
+	private void slamLands(ServerLevel level) {
+		BlockState ground = level.getBlockState(this.blockPosition().below());
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(SLAM_RADIUS),
+			e -> e != this && e.isAlive() && !(e instanceof Monster) && e.onGround() && this.distanceTo(e) <= SLAM_RADIUS)) {
+			e.hurtServer(level, this.damageSources().mobAttack(this), SLAM_DAMAGE);
+			e.push(0.0, SLAM_LIFT, 0.0);
+			e.needsSync = true;
+			if (e instanceof Player) {
+				this.engaged = true;
+			}
+		}
+		if (!ground.isAir()) {
+			for (int i = 0; i < 48; i++) {
+				double a = i * Math.PI * 2.0 / 48.0, r = 1.0 + this.random.nextDouble() * (SLAM_RADIUS - 1.0);
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), this.getX() + Math.cos(a) * r, this.getY() + 0.1,
+					this.getZ() + Math.sin(a) * r, 3, 0.1, 0.1, 0.1, 0.15);
+			}
+		}
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.2F, 0.6F);
+	}
+
+	/** The dead come up round him, climbing out of the floor, and go for whoever he fights. */
+	private void graveCall(ServerLevel level) {
+		int count = CALL_COUNT[Math.min(this.calls, CALL_COUNT.length - 1)];
+		this.calls++;
+		int near = level.getEntitiesOfClass(SilverSkeleton.class, this.getBoundingBox().inflate(RISEN_NEAR), Entity::isAlive).size();
+		count = Math.min(count, CALL_MAX_RISEN - near);
+		for (int i = 0; i < count; i++) {
+			double a = this.random.nextDouble() * Math.PI * 2.0, r = CALL_MIN + this.random.nextDouble() * (CALL_MAX - CALL_MIN);
+			BlockPos at = BlockPos.containing(this.getX() + Math.cos(a) * r, this.getY(), this.getZ() + Math.sin(a) * r);
+			if (!level.getBlockState(at).isAir() || level.getBlockState(at.below()).isAir()) {
+				continue;
+			}
+			SilverSkeleton risen = Monsters.SILVER_SKELETON.create(level, EntitySpawnReason.MOB_SUMMONED);
+			if (risen == null) {
+				continue;
+			}
+			risen.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, this.random.nextFloat() * 360.0F, 0.0F);
+			risen.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.MOB_SUMMONED, null);
+			risen.rise();
+			risen.setTarget(this.getTarget());
+			level.addFreshEntity(risen);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(at.below())), at.getX() + 0.5, at.getY() + 0.1,
+				at.getZ() + 0.5, 30, 0.4, 0.1, 0.4, 0.1);
+		}
+		level.sendParticles(ParticleTypes.SOUL, this.getX(), this.getY() + 3.0, this.getZ(), 30, 1.0, 1.5, 1.0, 0.05);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.HOSTILE, 2.0F, 0.4F);
+	}
+
 	private void blast(ServerLevel level) {
 		List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(SPELL_RADIUS),
 			e -> e != this && e.isAlive() && !(e instanceof Monster) && this.distanceTo(e) <= SPELL_RADIUS);
@@ -243,7 +367,7 @@ public class SkeletonLord extends Monster {
 	/** Asleep, laughing or casting, he stands where he is. */
 	@Override
 	protected boolean isImmobile() {
-		return super.isImmobile() || this.dormant() || this.waking > 0 || this.casting > 0;
+		return super.isImmobile() || this.dormant() || this.waking > 0 || this.casting > 0 || this.slamming > 0 || this.calling > 0;
 	}
 
 	@Override
@@ -261,7 +385,11 @@ public class SkeletonLord extends Monster {
 
 	@Override
 	public boolean doHurtTarget(ServerLevel level, Entity target) {
-		boolean hit = !this.dormant() && this.waking == 0 && this.casting == 0 && super.doHurtTarget(level, target);
+		boolean hit = !this.dormant() && this.waking == 0 && this.casting == 0 && this.slamming == 0 && this.calling == 0
+			&& super.doHurtTarget(level, target);
+		if (hit) {
+			this.triggerAnim("action", "staff_swing");
+		}
 		if (hit && target instanceof Player) {
 			this.engaged = true;
 		}
@@ -277,6 +405,33 @@ public class SkeletonLord extends Monster {
 		} else {
 			super.handleEntityEvent(id);
 		}
+	}
+
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<SkeletonLord>("move", 5, test -> {
+			SkeletonLord me = test.animatable();
+			if (me.dormant()) {
+				return test.setAndContinue(STATUE);
+			}
+			if (me.sinceWoke() < WAKE_TICKS) {
+				return test.setAndContinue(LAUGH);
+			}
+			if (me.sinceCast() < CAST_TICKS) {
+				return test.setAndContinue(SPELL);
+			}
+			if (!test.isMoving()) {
+				return test.setAndContinue(IDLE);
+			}
+			return test.setAndContinue(me.walkAnimation.speed() > RUN_FROM ? RUN : WALK);
+		}));
+		controllers.add(new AnimationController<SkeletonLord>("action", test -> PlayState.STOP).triggerableAnim("staff_swing", STAFF_SWING)
+			.triggerableAnim("slam", SLAM).triggerableAnim("grave_call", GRAVE_CALL));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	@Override
@@ -335,12 +490,14 @@ public class SkeletonLord extends Monster {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.putBoolean("dormant", this.dormant());
+		output.putInt("grave_calls", this.calls);
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.entityData.set(DORMANT, input.getBooleanOr("dormant", false));
+		this.calls = input.getIntOr("grave_calls", 0);
 		this.bar.setVisible(false);
 	}
 }

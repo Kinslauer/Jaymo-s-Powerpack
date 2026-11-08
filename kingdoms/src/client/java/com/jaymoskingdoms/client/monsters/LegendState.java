@@ -20,6 +20,4 @@ public final class LegendState extends HumanoidRenderState {
 	int look, rags;
 	/** (0.7.574) A werewolf player's lean wolf (LeanWolfModel). */
 	boolean lean;
-	/** (0.7.326) A silver skeleton: how long since it last took a blow on its buckler, and since its guard was broken (ticks). */
-	float sinceBlocked = 1000.0F, sinceGuardBroken = 1000.0F;
 }

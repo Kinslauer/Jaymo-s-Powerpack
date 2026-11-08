@@ -50,7 +50,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
 		// (0.7.529) town golems
 		EntityRenderers.register(com.jaymoskingdoms.TownGolem.TYPE, TownGolemRenderer::new);
-		EntityRenderers.register(com.jaymoskingdoms.SkeletonLord.TYPE, SkeletonLordRenderer::new);
+		// GeckoLib mobs: the barrow beetle, the draugr, the silver skeleton and the Skeleton Lord
+		com.jaymoskingdoms.client.inhabitants.InhabitantsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
