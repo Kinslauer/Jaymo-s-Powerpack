@@ -66,3 +66,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Decided:** Andy OK'd the mockup (tabs down the left edge: Character, Powers, Skills, Journal & Quests, Faction, Map & Waypoints, Party; old keys open their tab). The Journal tab keeps M's rule (needs a journal on you), "but everyone spawns with a journal now".
 - **Applies to:** Powers (menu, H), Kingdoms (its tabs, starting journal).
 - **Agent:** character-menu.
+- 2026-11-08: Andy: Inhabitants (JeremySeq, MIT, Forge 1.20.1) is "going to be a kingdoms addition": port its Bogre, Impaler and Warped Clam into Kingdoms (GeckoLib is already in the pack), one Inbox task per feature. Andy wants a dedicated modelling model for the Bogre ("claude doesnt do the best with models").
