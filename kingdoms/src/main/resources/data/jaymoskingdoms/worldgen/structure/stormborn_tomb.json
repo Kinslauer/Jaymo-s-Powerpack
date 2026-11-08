@@ -1,14 +1,12 @@
 {
-  "structures": [
-    {
-      "structure": "jaymoskingdoms:stormborn_tomb",
-      "weight": 1
+  "type": "jaymoskingdoms:stormborn_tomb",
+  "biomes": "#jaymoskingdoms:has_structure/stormborn_tomb",
+  "step": "underground_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {
+    "monster": {
+      "bounding_box": "piece",
+      "spawns": []
     }
-  ],
-  "placement": {
-    "type": "minecraft:random_spread",
-    "spacing": 60,
-    "separation": 30,
-    "salt": 963002566
   }
 }

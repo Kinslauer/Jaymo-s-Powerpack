@@ -10292,16 +10292,6 @@ the loading screen so they can read the tips for as long as it takes to load, ra
   nightfall now passes you out for 14 s first, the black edged blood red, then you wake turned (`VampirePlayers.TURNING_OUT`;
   at once as before without Powers). Hint 124 mentions weakness and the zombies. Compile-checked; not played.
 
-
-## 0.7.655: Stormborn Tomb structures (MIT port)
-Andy: "get them, we need it" (Dungeon Conquest: Stormborn Tomb).
-- **Structures:** ported from Stormborn Tomb's Fabric 1.21.1 build (Modrinth project `iMWTKEcK`, file "1.21.1 Nordic Structure 1.1.3", MIT licence). Kept the MIT notice and credit Tada_no_ahiru.
-- **Swaps:** every Supplementaries, Draugr Invasion, DungeonZ and FrogiLib block, block entity, spawner and item replaced with vanilla or Kingdoms equivalents (Supplementaries' licence and Draugr Invasion's All Rights Reserved mean none of their content comes along). Listed in the PR.
-- **Undead:** tombs use Kingdoms Hollows (spawners and structure entities); our own Draugr-style dead and the tomb boss come later, so the boss arena is left clear.
-- **Worldgen:** tombs generate in cold and mountain biomes (snowy plains, old growth taigas, windswept hills, jagged/frozen/stony peaks) with spacing 60, separation 30 (not too common).
-- **No-build rule:** the tomb structure id (`nordic_structure:stormborn_tomb`) added to `tags/worldgen/structure/no_build_dungeons.json` (from `tomb-no-build-rule`, merged in Kingdoms 0.7.651).
-- **Licence:** MIT — "Feel free to use it in any modpacks". Original by Tada_no_ahiru.
-- Built, `./gradlew build` passes, `/place structure nordic_structure:stormborn_tomb` assembles the full tomb; not played in survival.
 ## 0.7.655 (2026-11-08): Farmhand wakes in bed, family greets you; readable speech bubbles (#1147)
 
 - **Speech bubbles** (Andy: "almost all of the text here was unreadable", with Chat Bubbles as the look he wants): words over a speaker's head (ours and MCA villagers') no longer fill the screen and run off its top when the speaker is a block or two away; nearer than 5 blocks they shrink to the size they'd be from there. The bubble now sits just above the name tag instead of running into it, has a dark background (was faint) and shadowed words, and shows at most 5 rows per speaker. `SpeechBubbles`.
