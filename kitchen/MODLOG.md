@@ -1621,3 +1621,6 @@ mobs should be possible".
   `SpitBlock.register`). Its properties now carry `setId(key)` like every other block.
 - Fix: the spit's recipe used the old ingredient format and a 4-row pattern (3 is the most), so the recipe
   registry failed to load and the server stopped. It is now four sticks as two posts (`S S` / `S S`).
+- Fix: the vanilla rabbit-hide-to-leather recipe was switched off, but its vanilla recipe-book advancement still
+  pointed at it, so without another mod supplying `minecraft:leather` (the server has Naturalist) the recipe
+  registry failed with "Unbound values ... [minecraft:leather]". That advancement is now switched off too.
