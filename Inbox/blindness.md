@@ -27,3 +27,4 @@ suggested_owns:
 - Debated whether it should be a "random-awakening (fated) power" or obtained via a calling/item.
 - No existing worktree or branch for this topic yet.
 - 2026-11-08 17:21 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-08 17:24 Andy (2026-11-08): reassigned to Prometheus; hermes-a's run stopped before finishing.
