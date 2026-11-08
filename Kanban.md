@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 16:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:54). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -17,7 +17,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/warped-clam-model|warped-clam-model]] · hermes-modeller · #1153 · in-review
 
 
 ## Needs Andy
@@ -27,14 +26,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
+- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 - [x] [[Inbox/Done/bogre-model|bogre-model]]
+- [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
 - [x] [[Inbox/Done/kingdoms-geckolib-groundwork|kingdoms-geckolib-groundwork]]
 - [x] [[Inbox/Done/tomb-no-build-rule|tomb-no-build-rule]]
-- [x] [[Inbox/Done/kitchen-spit-roast|kitchen-spit-roast]]
 - [x] [[Inbox/Done/kitchen-recipes-b|kitchen-recipes-b]]
 - [x] [[Inbox/Done/kitchen-recipes-a|kitchen-recipes-a]]
-- [x] [[Inbox/Done/fishing-real-tug|fishing-real-tug]]
+- [x] [[Inbox/Done/kitchen-spit-roast|kitchen-spit-roast]]
 
 
 %% kanban:settings
