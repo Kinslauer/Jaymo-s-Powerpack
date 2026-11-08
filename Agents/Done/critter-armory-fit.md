@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: critter-armory-fit
 branch: claude/critter-armory-fit
 with:
@@ -45,3 +45,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-08 12:44 PR #1125 is merged into master; moved to Agents/Done.

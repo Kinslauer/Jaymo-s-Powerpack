@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: kitchen-recipes-a
 branch: claude/kitchen-recipes-a
 with: 
@@ -60,3 +60,4 @@ Five new savoury dishes added to Jaymo's Kitchen:
 5. Grilled Anglerfish (Grill, Campfire): anglerfish, lemon — 9 hunger, 0.8 sat. Perfect: Night Vision 180s + Conduit Power 60s
 
 Not tested in game: compiles and build passes, but dishes haven't been cooked in the minigame yet.
+- 2026-11-08 12:44 PR #1131 is merged into master; moved to Agents/Done.

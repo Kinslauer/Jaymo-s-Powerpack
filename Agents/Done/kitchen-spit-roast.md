@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: kitchen-spit-roast
 branch: claude/kitchen-spit-roast
 pr: 1123
@@ -30,3 +30,4 @@ owns:
 
 ## Done
 What a player will see: a stick-crafted spit block over a lit fire roasting a fish or carcass that changes colour as it cooks, with tear-off cooked chunks and a cooked-product take. What wasn't tested: in-game behaviour — not booted.
+- 2026-11-08 12:44 PR #1123 is merged into master; moved to Agents/Done.

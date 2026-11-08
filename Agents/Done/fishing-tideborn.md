@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: realistic fishing 2 + Tideborn react to fishing
 branch: claude/fishing-realism-tideborn
 with: Claude Code session (side session of the coordinator)
@@ -31,3 +31,4 @@ owns:
 ## Done
 PR #1132. Players: fish depend on water, time and weather; spots fish out; every catch weighed; whole tuna, tuna steaks, shark meat; Tideborn fight anglers; poaching in Tideborn havens. Follow-up tracks A-D in docs/Plan-fishing.md (Andy: one PR each, two at a time). Compiles; not played.
 - PR #1136 (Track B tackle, Powers 0.21.63) on top of #1132. Track A is PR #1133 (its own session).
+- 2026-11-08 12:44 PR #1136 is merged into master; moved to Agents/Done.

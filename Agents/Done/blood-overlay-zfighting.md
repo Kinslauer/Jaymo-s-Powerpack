@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: blood-overlay-zfighting
 branch: claude/blood-overlay-zfighting
 pr: 1124
@@ -33,3 +33,4 @@ Not tested in game: no client run here; Complementary shader interaction and Fre
 
 PR #1124 ready for review; not merged.
 ---
+- 2026-11-08 12:44 PR #1124 is merged into master; moved to Agents/Done.

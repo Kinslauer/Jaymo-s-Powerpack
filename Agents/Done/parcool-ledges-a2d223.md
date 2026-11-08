@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Inbox/parcool-ledge-and-wall-moves.md
 branch: claude/parcool-ledges-a2d223
 with: 
@@ -30,3 +30,4 @@ owns:
 
 ## Done
 Ledge shimmy (A/D on a ledge), castaway (Jump+Back), wall slide (hold empty-hand right-click falling by a wall; Feathers; hands burn unless guarded via WallSlide.addHandGuard), moving along bars/chains in Bar Swing. Powers 0.21.52, PR #1116. Compiles; not played.
+- 2026-11-08 12:44 PR #1116 is merged into master; moved to Agents/Done.

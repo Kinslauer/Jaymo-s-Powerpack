@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Family farmhand's MCA family - wary of zombies, hide at night, last-resort defence, farm work
 branch: claude/musing-tharp-a4b281
 with: Claude Code session (side session of the coordinator)
@@ -19,3 +19,4 @@ owns:
 
 ## Notes
 - Andy picked all four jobs (2026-11-07): tend crops, keep animals, unlock MCA chores, child gathers.
+- 2026-11-08 12:44 PR #1127 is merged into master; moved to Agents/Done.

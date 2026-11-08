@@ -1,5 +1,5 @@
 ---
-status: merged
+status: done
 task: fishing-fight-track-a
 branch: claude/fishing-fight-track-a
 with: fishing-realism-tideborn (#1132, stacked on it)
@@ -21,3 +21,6 @@ Nibbles, then a strike window. Also: a charged cast, drag (1-5 on the rod), fish
 
 **Done:** built, PR checks pass, not played.
 **Merged** by Task Hub as ab69e9a62 (Powers 0.21.63). Local merge branches discarded.
+
+## Notes
+- 2026-11-08 12:44 PR #1133 is merged into master; moved to Agents/Done.

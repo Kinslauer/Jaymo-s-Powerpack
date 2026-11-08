@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: parcool-traceur-gear
 branch: claude/parcool-traceur-gear
 with:
@@ -33,3 +33,4 @@ of Powers.
 
 ## Done
 Worn traceur boots now draw a complete boot: side faces painted edge to edge over the foot only (no see-through slits down the sides, no thigh-high wrap), with a solid sole and top face, in our own dark brown with a black sole edge — no ParCool art. Build `sh ./gradlew build` passes and `tools/pr_checks.py` is green. Not tested: playtested in game (Andy merges only on his word; merged = compiled, not played).
+- 2026-11-08 12:44 PR #1122 is merged into master; moved to Agents/Done.

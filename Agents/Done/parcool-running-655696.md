@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Inbox/parcool-running-and-falling.md
 branch: claude/parcool-running-655696
 with: 
@@ -32,3 +32,4 @@ owns:
 
 ## Done
 PR #1118 (Powers 0.21.51): long jump, charge jump, trick jump, safety tap, sky dive, fast swim, hiding in leaves/hay. Built, pr_checks and CI pass; not played. Traceur gloves and boots not started past research: a second PR (gloves in the wrist bauble slot with their own synced dye colour and render layer; boots as dyeable armour).
+- 2026-11-08 12:44 PR #1118 is merged into master; moved to Agents/Done.
