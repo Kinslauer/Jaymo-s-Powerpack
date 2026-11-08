@@ -13,8 +13,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-b · claimed
 - [ ] [[Inbox/mimic|mimic]] · hermes-modeller · claimed
+- [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-b · claimed
 
 
 ## In review
