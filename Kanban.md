@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 16:45). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 16:49). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/impaler-model|impaler-model]] · hermes-modeller · open
 
 
 ## Being built
 
+- [ ] [[Inbox/impaler-model|impaler-model]] · hermes-modeller · claimed
 
 
 ## In review
