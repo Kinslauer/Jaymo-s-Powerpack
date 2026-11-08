@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-08 04:58
+updated: 2026-11-08 05:09
 ---
 # Open PRs
 
-4 open, as of 2026-11-08 04:58. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-08 05:09. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1132](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1132) Fishing: real fish on the line, hand-baited hooks, skipjack tuna, fish weights, shark meat; Tideborn react to fishing (Powers 0.21.61, Kingdoms 0.7.650, Kitchen 0.5.91)
