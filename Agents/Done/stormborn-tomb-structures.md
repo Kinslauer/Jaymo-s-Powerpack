@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 task: stormborn-tomb-structures
 branch: claude/stormborn-tomb-structures
 with:
@@ -33,3 +33,4 @@ owns:
 
 ## Done
 Structures compile and `/place structure` loads all 11 pieces without missing blocks. Worldgen placement in survival not tested. Loot tables contain modded item entries (Supplementaries bombs, Draugr Invasion weapons) that need vanilla/Kingdoms swaps in follow-up PR. PR #1137 opened for review. Kingdoms version bumped to 0.7.651.
+- 2026-11-08 21:31 PR #1137 is merged into master; moved to Agents/Done.
