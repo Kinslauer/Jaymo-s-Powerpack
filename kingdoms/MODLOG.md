@@ -10268,3 +10268,16 @@ Andy: "get them, we need it" (Stormborn Tomb, whose tombs rely on DungeonZ's no-
 - A player's explosion spares blocks inside such a dungeon (`ServerExplosionNoBuildMixin`).
 - The tag is empty until the Stormborn Tomb structures land, so nothing changes in play yet.
 - Built; not played.
+
+## 0.7.652 (2026-11-08): newcomers stay on the loading screen till they're at their start
+
+Andy: "the player is spawned into the world before they teleport to their start, instead of this it should keep them in
+the loading screen so they can read the tips for as long as it takes to load, rather than getting teleported".
+- His clip: once the story was told the newcomer was let down out of stasis onto the spawn village and could walk about
+  for ~7 s while the server searched for the farmhouse (`FarmhandHome.find`), then was put 6,000 blocks off in unloaded
+  land, and only then did the loading screen come up (it was only checked every 5 ticks, after the move).
+- The loading screen now goes up the moment the story sets out (`StoryGround.holdNow`, sent before any search or move),
+  and stays up while they're on their way (`LifeStory.departing`), through the move and the few seconds after.
+- Let go by the server, the screen still stays up (tips cycling) till the chunks round the player have come in and the
+  ground they stand on is drawn, as vanilla's own loading screen waits (at most 30 s), then half a second more.
+- Built; not played.
