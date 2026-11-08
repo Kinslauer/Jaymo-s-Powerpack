@@ -61,3 +61,8 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - **Decided:** Andy wants every fishing mod's functions in one (not their realistic 3D rods). Minigame: "all three together" (strike window, charged cast, drag, fish runs, rod bend). Ship the built round now as one PR, then the tracks in `docs/Plan-fishing.md` (fight, tackle, fish, records) each as their own PR, two at a time.
 - **Applies to:** Powers fishing, Kitchen, Kingdoms Tideborn.
 - **Agent:** fishing-tideborn.
+
+### 2026-11-07: One character menu on H
+- **Decided:** Andy OK'd the mockup (tabs down the left edge: Character, Powers, Skills, Journal & Quests, Faction, Map & Waypoints, Party; old keys open their tab). The Journal tab keeps M's rule (needs a journal on you), "but everyone spawns with a journal now".
+- **Applies to:** Powers (menu, H), Kingdoms (its tabs, starting journal).
+- **Agent:** character-menu.
