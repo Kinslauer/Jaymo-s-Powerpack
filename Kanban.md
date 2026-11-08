@@ -14,11 +14,11 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
-- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · claimed
 
 
 ## Text pass
 
+- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
 
 
 ## In review
