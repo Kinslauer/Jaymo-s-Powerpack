@@ -10,6 +10,8 @@ started: 2026-11-08
 owns:
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geo/impaler.geo.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/animations/impaler.animation.json
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/models/entity/impaler.geo.json
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/animations/entity/impaler.animation.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/impaler.png
   - kingdoms/art/impaler.bbmodel
   - kingdoms/art/impaler-render.png
