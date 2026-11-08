@@ -52,7 +52,7 @@ public final class FishingReal {
     private static final Map<UUID, FishingHook> HOOKS = new HashMap<>();
     /** Set true for one tick by the ReelInput packet when the player is holding use to reel. */
     private static final Map<UUID, Boolean> REELING = new HashMap<>();
-    /** (0.21.61) The weight of the fish each player is fighting (kg, {@link FishCatch}). */
+    /** (0.21.62) The weight of the fish each player is fighting (kg, {@link FishCatch}). */
     private static final Map<UUID, Float> WEIGHTS = new HashMap<>();
     /** A hooked fish's own size, put back if it gets away. */
     private static final Map<UUID, Float> BASE_SCALE = new HashMap<>();
@@ -296,7 +296,7 @@ public final class FishingReal {
         FishingHook hook = HOOKS.remove(player.getUUID());
         if (fish != null) {
             if (caught) {
-                // (0.21.61) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
+                // (0.21.62) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
                 float kg = weighed != null ? weighed : FishCatch.roll(kindFought, player.getRandom());
                 ItemStack loot = FishCatch.loot(kindFought, kg);
                 if (!loot.isEmpty()) {

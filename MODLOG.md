@@ -1596,33 +1596,6 @@ Built; not played.
 - Fixed: the startup crash (the metal rod item had no id set) and a shark bite that fought a tropical fish.
 - Built; not played.
 
-## 0.21.61 (2026-11-07): real fish on the line, baited hooks, skipjack tuna, fish weights, shark meat
-
-Andy: "The goal is more realistic fishing", then: "i need there to be real fish ... they have to ACTUALLY be there",
-"you should have to manually and visually bait the hook", and "new tuna mob please. skipjack?". Ideas from Au Naturel
-(public domain) and Reel to Fish (all rights reserved, ideas only); our own code and art.
-- **Every bite is a real fish** (`FishBites`): a baited hook draws a fish swimming within 10 blocks. It turns and swims
-  to the hook, nibbles a few times (the bobber dips and splashes), then takes it, and the fight is with that same fish.
-  What you catch is whatever lives there (vanilla spawns: salmon in rivers and cold seas, cod at sea, tropical fish and
-  pufferfish in warm seas; skipjack tuna at sea; great whites with Naturalist). A landed fish is gone from the water, so
-  a spot is fished out when its fish are; one that gets away swims off at its own size. Tuna and sharks only go for the
-  metal rod's hook. The old random bite, the fish spawned at the hook and the made-up fish stock are gone.
-- Fish are keener at dawn and dusk (1.6x) and in rain (1.3x) (`FishWaters`).
-- **Bait the hook by hand** (`HookBait`): sneak and use the rod with bait in your other hand (Kitchen's fish bait,
-  bread, rotten flesh or a spider eye: tag `#jaymospowers:fishing_bait`). The bait hangs under the bobber when you
-  cast (client `FishingHookRendererMixin`), the rod's tooltip says what's on it, and a fish that takes the hook eats it,
-  caught or not. Nothing bites a bare hook (the hook reminds you every 10 s).
-- **Skipjack tuna** (`Skipjack`, `SkipjackModel`, `SkipjackRenderer`): a new schooling fish, dark blue-violet over
-  silver with belly stripes, in schools of 3 to 6 in every ocean but the frozen ones. Too big for a bucket; spawn egg.
-- **Fish weight** (`FishCatch`, component `jaymospowers:fish_weight`): every catch is weighed round its kind's usual
-  size (cod ~4 kg, salmon ~5, pufferfish ~0.8, tropical ~0.4, skipjack ~5, shark ~400) and shows it under the name. A
-  heavy fish pulls harder (up to 1.4x) and looks bigger on the line. Weighed fish of different weights don't stack.
-- **Tuna and shark meat**: a landed skipjack is a whole Raw Skipjack Tuna (edible, weighed); craft it into 3 Raw Tuna
-  Steaks, or cut it on Kitchen's board for a steak per 1.5 kg. A landed shark is cut up on the shore into Raw Shark
-  Meat, a piece per 50 kg (3 to 12). Steaks and shark meat cook in a furnace, smoker or campfire.
-- **Tideborn** (with Kingdoms 0.7.650): every bite calls `KingdomsCompat.fished`, see the Kingdoms log.
-- Built; not played.
-
 ## 0.21.61 (2026-11-07): One character menu on H
 Andy wanted one menu for the whole character (the idea from Kageborne's "Shinobi Menu"; ideas only, none of its code
 or art). Mockup approved first.
@@ -1676,7 +1649,34 @@ spawn up to 30 down there waiting to kill him."
 - Through a portal only that one echo follows you (the future's extra stalkers stay in the future).
 - Built; not played.
 
-## 0.21.66 (2026-11-08): the fishing fight (Track A of docs/Plan-fishing.md)
+## 0.21.62 (2026-11-07): real fish on the line, baited hooks, skipjack tuna, fish weights, shark meat
+
+Andy: "The goal is more realistic fishing", then: "i need there to be real fish ... they have to ACTUALLY be there",
+"you should have to manually and visually bait the hook", and "new tuna mob please. skipjack?". Ideas from Au Naturel
+(public domain) and Reel to Fish (all rights reserved, ideas only); our own code and art.
+- **Every bite is a real fish** (`FishBites`): a baited hook draws a fish swimming within 10 blocks. It turns and swims
+  to the hook, nibbles a few times (the bobber dips and splashes), then takes it, and the fight is with that same fish.
+  What you catch is whatever lives there (vanilla spawns: salmon in rivers and cold seas, cod at sea, tropical fish and
+  pufferfish in warm seas; skipjack tuna at sea; great whites with Naturalist). A landed fish is gone from the water, so
+  a spot is fished out when its fish are; one that gets away swims off at its own size. Tuna and sharks only go for the
+  metal rod's hook. The old random bite, the fish spawned at the hook and the made-up fish stock are gone.
+- Fish are keener at dawn and dusk (1.6x) and in rain (1.3x) (`FishWaters`).
+- **Bait the hook by hand** (`HookBait`): sneak and use the rod with bait in your other hand (Kitchen's fish bait,
+  bread, rotten flesh or a spider eye: tag `#jaymospowers:fishing_bait`). The bait hangs under the bobber when you
+  cast (client `FishingHookRendererMixin`), the rod's tooltip says what's on it, and a fish that takes the hook eats it,
+  caught or not. Nothing bites a bare hook (the hook reminds you every 10 s).
+- **Skipjack tuna** (`Skipjack`, `SkipjackModel`, `SkipjackRenderer`): a new schooling fish, dark blue-violet over
+  silver with belly stripes, in schools of 3 to 6 in every ocean but the frozen ones. Too big for a bucket; spawn egg.
+- **Fish weight** (`FishCatch`, component `jaymospowers:fish_weight`): every catch is weighed round its kind's usual
+  size (cod ~4 kg, salmon ~5, pufferfish ~0.8, tropical ~0.4, skipjack ~5, shark ~400) and shows it under the name. A
+  heavy fish pulls harder (up to 1.4x) and looks bigger on the line. Weighed fish of different weights don't stack.
+- **Tuna and shark meat**: a landed skipjack is a whole Raw Skipjack Tuna (edible, weighed); craft it into 3 Raw Tuna
+  Steaks, or cut it on Kitchen's board for a steak per 1.5 kg. A landed shark is cut up on the shore into Raw Shark
+  Meat, a piece per 50 kg (3 to 12). Steaks and shark meat cook in a furnace, smoker or campfire.
+- **Tideborn** (with Kingdoms 0.7.650): every bite calls `KingdomsCompat.fished`, see the Kingdoms log.
+- Built; not played.
+
+## 0.21.63 (2026-11-08): the fishing fight (Track A of docs/Plan-fishing.md)
 Andy picked "all three together": nibbles and a strike window, a charged cast, drag and fish runs, the rod bending.
 Ideas from Reel to Fish, Legendary Fishing, Advanced Fishing and True Fishing (all rights reserved: ideas only, our own code).
 - **Strike window** (`FishBite`): once a fish that swam to the baited hook has nibbled and taken it (`FishBites`), the

@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
-/** (0.21.61) Draws the skipjack tuna: swims with a sway, and flops on its side out of water, as a cod does. */
+/** (0.21.62) Draws the skipjack tuna: swims with a sway, and flops on its side out of water, as a cod does. */
 public final class SkipjackRenderer extends MobRenderer<Skipjack, LivingEntityRenderState, SkipjackModel> {
     private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/fish/skipjack.png");
 

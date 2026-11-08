@@ -26,7 +26,7 @@ Andy (2026-11-07): ship what's built as one PR now, then the tracks below each a
 
 ## Track A: the fight (the minigame)
 Andy picked "all three together": the strike window, then a charged cast, drag and fish runs, with the rod bending.
-Built in Powers 0.21.66 (branch `claude/fishing-fight-track-a`): `FishBite`, `FishCast`, `FishRun`, `FishingRealClient`.
+Built in Powers 0.21.63 (branch `claude/fishing-fight-track-a`): `FishBite`, `FishCast`, `FishRun`, `FishingRealClient`.
 - [x] Strike window: when a fish bites, the bobber dips and you have a few seconds to strike (use) or it's gone (Reel to Fish)
 - [x] Casting power: hold use to charge the cast, release to throw; farther casts reach deeper water (Legendary Fishing)
 - [x] Drag: a setting on the rod (scroll or sneak + use) that lets the fish take line instead of the line snapping;

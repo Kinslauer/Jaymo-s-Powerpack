@@ -15,7 +15,7 @@ import net.minecraft.world.item.Items;
  * What a knife makes of things on the cutting board (Farmer's Delight's cuts): meat into two smaller cuts that cook
  * quicker into finger food, a cabbage into leaves, a rice panicle into rice and straw; (0.5.33) a cake, a pie, a pumpkin,
  * a melon or a kelp roll into slices, and a ham into chops. (0.5.88) A cod or a salmon (a catch from Powers' real fishing, a tuna or a shark among them) is gutted and
- * cleaned into {@link #FISH_FILLETS} fillets and bone meal from the guts. (0.5.91) A fish from Powers' real fishing carries its
+ * cleaned into {@link #FISH_FILLETS} fillets and bone meal from the guts. (0.5.92) A fish from Powers' real fishing carries its
  * weight: the fillets go by it ({@link #KG_PER_FILLET}), and a whole tuna is cut into steaks by its weight too
  * ({@link #KG_PER_TUNA_STEAK}).
  */
@@ -24,10 +24,10 @@ public final class Chopping {
 	static final int MEAT_CUTS = 2;
 	/** (0.5.88) Gutting and cleaning a cod or a salmon on the board: fillets from one fish, worth more than the whole fish eaten raw. */
 	static final int FISH_FILLETS = 3;
-	/** (0.5.91) A weighed cod or salmon: a fillet for each this many kg, at least and at most. */
+	/** (0.5.92) A weighed cod or salmon: a fillet for each this many kg, at least and at most. */
 	static final float KG_PER_FILLET = 1.5F;
 	static final int FILLETS_LEAST = 2, FILLETS_MOST = 8;
-	/** (0.5.91) Powers' whole tuna: a steak for each this many kg, at least and at most (two for one with no weight). */
+	/** (0.5.92) Powers' whole tuna: a steak for each this many kg, at least and at most (two for one with no weight). */
 	static final float KG_PER_TUNA_STEAK = 1.5F;
 	static final int TUNA_STEAKS_LEAST = 2, TUNA_STEAKS_MOST = 8;
 	static final Identifier POWERS_TUNA = Identifier.fromNamespaceAndPath("jaymospowers", "tuna");
@@ -116,7 +116,7 @@ public final class Chopping {
 		return List.of();
 	}
 
-	/** (0.5.91) Fillets from a cod or salmon: by its weight, if Powers' fishing weighed it. */
+	/** (0.5.92) Fillets from a cod or salmon: by its weight, if Powers' fishing weighed it. */
 	private static int fillets(ItemStack stack) {
 		Float kg = weight(stack);
 		return kg == null ? FISH_FILLETS : Mth.clamp(Math.round(kg / KG_PER_FILLET), FILLETS_LEAST, FILLETS_MOST);

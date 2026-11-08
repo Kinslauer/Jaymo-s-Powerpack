@@ -10213,16 +10213,6 @@ Gradle compileJava + compileClientJava clean; not played, so the depth, lean and
 - **Pass out, then turn**: when the blight finishes, you pass out first (eyes animate closed via Powers' downed black screen), then rise turned as the Hollow you were becoming. The pending turn is kept in a persistent attachment, so logging out or a restart while passed out still finishes the turn when you come round (`PowersCompat.knockOut` for `TURN_DARK`, wake at `wakeAt`).
 - Compile-checked; not played.
 
-## 0.7.650 (2026-11-07): the Tideborn and fishing
-
-Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime."
-- When a fish takes your hook (Powers 0.21.61's real fishing), any Tideborn within 24 blocks who can see you take it
-  as an attack on their kin: the nearest cries out and squares up, and their neighbours join in, exactly as if you'd
-  struck them (`Retaliation.struck`, an assault where a realm's law holds).
-- On a Tideborn haven's land it's also **poaching**, a new medium crime (`Theft.Crime.POACHING`): if its people see it,
-  reputation there drops, the guards come after you and a bounty goes up. Charged at most once per 30 s; the haven's
-  own folk may fish freely (`TideFishing`).
-- Built; not played.
 ## 0.7.649 (2026-11-07): Kingdoms' tabs on the character menu; everyone gets a journal
 - **Character menu tabs** (Jaymo's Powers 0.21.60's H menu, when Powers is loaded; `client/MenuCompat`, reflection
   only): **Skills** (the K screen), **Journal & Quests** (the M journal; it still needs a journal on you, Andy: "keep
@@ -10257,3 +10247,14 @@ player. they need some kind of utility or function as of now." (`FarmFamily`, fr
 - Who they are, their home spot and their chest are kept as entity tags, so it lasts; only new Family farmhand starts.
 - A gray line after the start tells the player what the family does.
 - Compile-checked; not played.
+
+## 0.7.650 (2026-11-07): the Tideborn and fishing
+
+Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime."
+- When a fish takes your hook (Powers 0.21.61's real fishing), any Tideborn within 24 blocks who can see you take it
+  as an attack on their kin: the nearest cries out and squares up, and their neighbours join in, exactly as if you'd
+  struck them (`Retaliation.struck`, an assault where a realm's law holds).
+- On a Tideborn haven's land it's also **poaching**, a new medium crime (`Theft.Crime.POACHING`): if its people see it,
+  reputation there drops, the guards come after you and a bounty goes up. Charged at most once per 30 s; the haven's
+  own folk may fish freely (`TideFishing`).
+- Built; not played.
