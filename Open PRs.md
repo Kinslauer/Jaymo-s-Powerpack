@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-07 21:34
+updated: 2026-11-07 21:43
 ---
 # Open PRs
 
-6 open, as of 2026-11-07 21:34. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+7 open, as of 2026-11-07 21:43. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1126](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1126) Chrono: one echo per Chrono, no echo piles after cheat-death (Powers 0.21.58)
@@ -35,3 +35,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/kitchen-recipes-a` · **Updated:** 2026-11-08 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** [[kitchen-recipes-a]]
+
+## [#1132](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1132) Fishing by place and time, overfishing, fish weights, tuna and shark meat; Tideborn react to fishing (Powers 0.21.61, Kingdoms 0.7.650, Kitchen 0.5.91)
+- **Branch:** `claude/fishing-realism-tideborn` · **Updated:** 2026-11-08 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** [[fishing-tideborn]]

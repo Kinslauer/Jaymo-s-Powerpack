@@ -1,11 +1,11 @@
 ---
-status: running
+status: in-review
 task: realistic fishing 2 + Tideborn react to fishing
-branch: claude/relaxed-mcnulty-768327
+branch: claude/fishing-realism-tideborn
 with: Claude Code session (side session of the coordinator)
-pr: 
+pr: 1132
 mods: Powers, Kitchen, Kingdoms
-versions: 
+versions: Powers 0.21.61, Kingdoms 0.7.650, Kitchen 0.5.91
 started: 2026-11-07
 owns:
   - src/main/java/com/jaymospowers/fishing/
@@ -29,3 +29,4 @@ owns:
 - Andy picked all four fishing options (2026-11-07).
 
 ## Done
+PR #1132. Players: fish depend on water, time and weather; spots fish out; every catch weighed; whole tuna, tuna steaks, shark meat; Tideborn fight anglers; poaching in Tideborn havens. Follow-up tracks A-D in docs/Plan-fishing.md (Andy: one PR each, two at a time). Compiles; not played.
