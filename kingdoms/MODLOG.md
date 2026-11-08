@@ -10285,3 +10285,9 @@ the loading screen so they can read the tips for as long as it takes to load, ra
   field (`WATER_CLUSTER`), which Mixin refuses ("contains non-private static field"), so `NaturalSpawner` failed to
   load and chunk [0, 0] failed at its spawn step: the server sat at spawn preparation forever (Streams Reflowing's
   stall watch: no progress for 180 s). The field is private now; no other mixin has one. Not built here.
+## 0.7.654: the dead talk to the turning
+- Andy's gaps on #1117: zombies standing down by a blighted player now and then stop, look at them and say a line over
+  their head (`hollow_blight.kin.0-9`, a speech bubble to that player, no chat; at most once every 15 s). The blight's
+  pass-out goes through Powers' `Mortality.turnOut` (the Hollow's colour on the black, eyes closing). A vampire's bite at
+  nightfall now passes you out for 14 s first, the black edged blood red, then you wake turned (`VampirePlayers.TURNING_OUT`;
+  at once as before without Powers). Hint 124 mentions weakness and the zombies. Compile-checked; not played.

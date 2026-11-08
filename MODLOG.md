@@ -1726,3 +1726,12 @@ want", so every rod here looks like a plain Minecraft rod.
 - Not in this round (still open in the plan): rod pod and bite alarm, crab pot (needs Track C's crabs), lure depth,
   an ice auger.
 - Built; not played.
+
+## 0.21.66: eyes that close as you pass out to turn
+- Andy: "you pass out and then turn as well, make sure the eyes animate closed too". `Mortality.turnOut` (Kingdoms calls
+  it for the blight run its course and a vampire bite at nightfall): out cold where you stand with the turning's colour at
+  the edges of the black (`TURN_TINT`) and its own line ("Your legs give. Your eyes close by themselves...").
+- First person (`DownedHud.lids`): the black of every knock-out now comes as eyelids, a lid from the top and one from the
+  bottom with soft edges, meeting in the middle, and parting again as you come round; passing out to turn they take
+  `TURN_CLOSE_TICKS` (2.5 s) to close. Others see it on the body (`EyesClosing`): out cold, the eyes flutter shut over
+  1.5 s, each flutter shut a little longer, then stay shut. Compile-checked; not played.
