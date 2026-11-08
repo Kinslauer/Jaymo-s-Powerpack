@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: hermes
 claimed_by: hermes-b
 from: coordinator
