@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: kitchen-rats
 branch: claude/kitchen-rats
 with: 
@@ -25,3 +25,6 @@ owns:
 - Look page for Andy's OK: https://claude.ai/artifact/Suq8VYQKEur8T2j71iSFWY . No code written yet.
 - Andy chose the Rats mod's textures (LGPL, credited in LICENSE_rats). Built rats, snap trap, cage trap, cat hunting.
 - PR #1150 (https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1150). Built, pr_checks pass; not played.
+
+## Notes
+- 2026-11-08 15:34 PR #1150 is merged into master; moved to Agents/Done.

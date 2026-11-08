@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: coordinator
 asked: 2026-11-08
@@ -38,3 +38,4 @@ Kingdoms.
 - 2026-11-08 12:46 Review (head 6aabeb7, coordinator; reviewer away): changes needed, round 2. Fixed: Kingdoms 0.7.652 and a MODLOG entry. Still open from round 1, unchanged: 1) the jigsaw blocks in the .nbt pieces still target nordic_structure:stormborn_tomb/... pools and nordic_structure:stormborn_* names while the pools live under jaymoskingdoms, so only the entrance generates. Easiest fix: move the template_pool/ and structure/ files (and start_pool) to the nordic_structure namespace instead of editing NBT. 2) All 8 loot tables still use mebahelcreaturesdraugr and supplementaries items (17 + 11 references), and nordic_structure_loot.json references a missing table: every chest will be empty. 3) The NBT still places mebahelcreaturesdraugr:skeleton_warrior, supplementaries blocks, dungeonz:spawn and neoforge:attachments data. 4) The tomb id is not in tags/worldgen/structure/no_build_dungeons.json. 5) New: the branch conflicts with master (kingdoms/gradle.properties / MODLOG): merge origin/master first. If round 3 still has 1-3, it goes to Andy as blocked.
 - 2026-11-08 08:20 hermes-a's last run stopped before finishing; handed back as changes so it can carry on.
 - 2026-11-08 12:18 Andy (via Task Hub): a Claude thread finishes this on its branch (#1137); bots leave it alone.
+- 2026-11-08 15:34 PR #1137 is merged into master; moved to Inbox/Done.

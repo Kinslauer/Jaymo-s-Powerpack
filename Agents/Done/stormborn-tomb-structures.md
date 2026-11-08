@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: stormborn-tomb-structures
 branch: claude/stormborn-tomb-structures
 with: claude (took over from hermes, 2026-11-08)
@@ -33,3 +33,6 @@ Draugr Invasion, DungeonZ or FrogiLib left.
 - Boss spot: `boss.nbt` local (41, 17, 24); boss loot chest (42, 18, 17), table
   `jaymoskingdoms:chests/stormborn_tomb_boss_loot`; exit x 43-46, y 18-21, z 16 (open now).
 - The scripts that made the templates (convert, room fill, layout) are in the session's scratchpad, not the repo.
+
+## Notes
+- 2026-11-08 15:34 PR #1137 is merged into master; moved to Agents/Done.

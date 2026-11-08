@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: kingdoms-geckolib-groundwork
 branch: claude/kingdoms-geckolib-tomb-undead
 with: 
@@ -35,3 +35,4 @@ PR #1149. GeckoLib 5.5.7 in Kingdoms, inhabitants/ with the barrow beetle (examp
 (coffin rise) and Skeleton Lord (staff swing, slam, Grave Call) moved to GeckoLib; handbook section; tools/bbmodel_geckolib.py.
 Tomb ids: silver_skeleton, draugr, skeleton_lord {dormant:1b}. Built and pr_checks pass; not played, no server boot
 (the dev server's EULA file was refused).
+- 2026-11-08 15:34 PR #1149 is merged into master; moved to Agents/Done.

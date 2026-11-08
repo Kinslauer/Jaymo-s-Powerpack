@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: coordinator
 asked: 2026-11-08
@@ -34,3 +34,4 @@ GeckoLib API of the version the pack ships, against the 26.3 sources.
 
 ## Notes
 - Full plan and order: `Kingdoms port plan.md` in the vault's Live folder.
+- 2026-11-08 15:34 PR #1149 is merged into master; moved to Inbox/Done.
