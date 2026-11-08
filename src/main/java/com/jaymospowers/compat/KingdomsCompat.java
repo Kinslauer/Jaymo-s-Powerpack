@@ -19,6 +19,8 @@ public final class KingdomsCompat {
 	private static boolean blessingLooked;
 	private static Method grabbed;
 	private static boolean grabbedLooked;
+	private static Method fished;
+	private static boolean fishedLooked;
 
 	private KingdomsCompat() {
 	}
@@ -129,5 +131,33 @@ public final class KingdomsCompat {
 			mob.setPersistenceRequired();
 		}
 		return living;
+	}
+
+	/**
+	 * (0.21.61, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime") A fish took
+	 * {@code player}'s hook at {@code hook}: Kingdoms' {@code TideFishing} has any Tideborn who see it fight them, and calls it
+	 * poaching in a Tideborn haven. Nothing without Kingdoms.
+	 */
+	public static void fished(net.minecraft.server.level.ServerPlayer player, net.minecraft.core.BlockPos hook) {
+		if (!LOADED || player == null) {
+			return;
+		}
+		if (!fishedLooked) {
+			fishedLooked = true;
+			try {
+				fished = Class.forName("com.jaymoskingdoms.TideFishing").getMethod("fished",
+					net.minecraft.server.level.ServerPlayer.class, net.minecraft.core.BlockPos.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				fished = null;
+			}
+		}
+		if (fished == null) {
+			return;
+		}
+		try {
+			fished.invoke(null, player, hook);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (an older Kingdoms, or one that threw: the fishing goes on)
+		}
 	}
 }

@@ -147,7 +147,9 @@ public final class Theft {
 		/** (0.7.446) Powers' rival band worn where a realm that knows the band's aliens sees it ({@link Aliens#rivalBand}). */
 		RIVAL_BAND(Weight.HEAVY, "rival_band"),
 		/** (0.7.497) a lock picked or a locked block broken where a realm's law holds ({@link Locks}). */
-		BURGLARY(Weight.MEDIUM, "burglary");
+		BURGLARY(Weight.MEDIUM, "burglary"),
+		/** (0.7.650) fishing a Tideborn haven's waters ({@link TideFishing}). */
+		POACHING(Weight.MEDIUM, "poaching");
 
 		final Weight weight;
 		final String cry;

@@ -52,6 +52,8 @@ public final class FishingReal {
     private static final Map<UUID, FishingHook> HOOKS = new HashMap<>();
     /** Set true for one tick by the ReelInput packet when the player is holding use to reel. */
     private static final Map<UUID, Boolean> REELING = new HashMap<>();
+    /** (0.21.61) The weight of the fish each player is fighting (kg, {@link FishCatch}). */
+    private static final Map<UUID, Float> WEIGHTS = new HashMap<>();
 
     /** The metal fishing rod, forged through Tinkering: stronger line, bigger fish. Set in init(). */
     private static Item METAL_ROD;
@@ -90,14 +92,8 @@ public final class FishingReal {
     private static final float STRENGTH_SHARK = 1.0F;
     /** How big a hooked tuna is (a cod grown to this scale). */
     public static final double TUNA_SCALE = 2.4;
-    /** Raw fish a landed tuna and a landed shark give (cut on a Kitchen cutting board for fillets). */
-    private static final int TUNA_YIELD = 3;
-    private static final int SHARK_YIELD = 6;
-    /** Fish kinds: cod, salmon, pufferfish, tropical fish, shark and tuna (the last two on the metal rod only). */
+    /** Fish kinds: cod, salmon, pufferfish, tropical fish, shark and tuna (the last two on the metal rod only, at sea: {@link FishWaters}). */
     public static final int FISH_COD = 0, FISH_SALMON = 1, FISH_PUFFERFISH = 2, FISH_TROPICAL = 3, FISH_SHARK = 4, FISH_TUNA = 5;
-    /** Out of 100: chance a bite on the metal rod is a shark, and a tuna, instead of an ordinary fish. */
-    public static final int CHANCE_SHARK = 15;
-    public static final int CHANCE_TUNA = 20;
     /** How hard a hooked shark and a hooked tuna pull the player toward them while they reel (blocks per tick). */
     public static final double PULL_PLAYER = 0.04;
     public static final double PULL_PLAYER_TUNA = 0.02;
@@ -116,6 +112,7 @@ public final class FishingReal {
                 new MetalFishingRodItem(new Item.Properties()
                         .setId(ResourceKey.create(Registries.ITEM, JaymosPowers.id("metal_fishing_rod")))
                         .durability(256)));
+        FishCatch.init();
         FishingPayloads.register();
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -229,9 +226,22 @@ public final class FishingReal {
             case FISH_TUNA -> STRENGTH_TUNA; // tuna: big and strong
             default -> STRENGTH_TROPICAL; // tropical: varied
         };
+        // (0.21.61) a heavy fish fights harder, and looks it
+        float kg = FishCatch.roll(fishKind, player.getRandom());
+        strength *= FishCatch.pull(fishKind, kg);
+        if (fishKind != FISH_SHARK) {
+            net.minecraft.world.entity.ai.attributes.AttributeInstance scale =
+                    fish.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+            if (scale != null) {
+                scale.setBaseValue(scale.getBaseValue() * Math.cbrt(FishCatch.pull(fishKind, kg)));
+            }
+        }
         player.setAttached(FIGHTING, new FishFight(fishKind, strength, 0.0F, START_PROGRESS, player.level().getGameTime()));
         HOOKED.put(player.getUUID(), fish);
         HOOKS.put(player.getUUID(), hook);
+        WEIGHTS.put(player.getUUID(), kg);
+        // (0.21.61, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime")
+        com.jaymospowers.compat.KingdomsCompat.fished(player, hook.blockPosition());
         player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.fish_on").withStyle(net.minecraft.ChatFormatting.GOLD));
         if (fishKind == FISH_TUNA) {
             player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.tuna_hooked").withStyle(net.minecraft.ChatFormatting.GOLD));
@@ -248,24 +258,28 @@ public final class FishingReal {
         int kindFought = fight(player).fishKind();
         player.setAttached(FIGHTING, FishFight.NONE);
         REELING.remove(player.getUUID());
+        Float weighed = WEIGHTS.remove(player.getUUID());
         LivingEntity fish = HOOKED.remove(player.getUUID());
         FishingHook hook = HOOKS.remove(player.getUUID());
         if (fish != null) {
             if (caught) {
-                String kind = BuiltInRegistries.ENTITY_TYPE.getKey(fish.getType()).getPath();
-                ItemStack loot = kindFought == FISH_SHARK ? new ItemStack(Items.SALMON, SHARK_YIELD)
-                        : kindFought == FISH_TUNA ? new ItemStack(Items.COD, TUNA_YIELD) : switch (kind) {
-                    case "cod" -> new ItemStack(Items.COD);
-                    case "salmon" -> new ItemStack(Items.SALMON);
-                    case "pufferfish" -> new ItemStack(Items.PUFFERFISH);
-                    case "tropical_fish" -> new ItemStack(Items.TROPICAL_FISH);
-                    default -> ItemStack.EMPTY;
-                };
+                // (0.21.61) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
+                float kg = weighed != null ? weighed : FishCatch.roll(kindFought, player.getRandom());
+                ItemStack loot = FishCatch.loot(kindFought, kg);
                 if (!loot.isEmpty()) {
+                    Component name = loot.getHoverName();
                     if (!player.addItem(loot)) {
                         player.spawnAtLocation(player.level(), loot, 1.0F);
                     }
-                    player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.caught").withStyle(net.minecraft.ChatFormatting.GREEN));
+                    player.sendOverlayMessage(Component.translatable(kindFought == FISH_SHARK
+                                    ? "message.jaymospowers.fishing.shark_landed" : "message.jaymospowers.fishing.caught_weighed",
+                            name, String.format(java.util.Locale.ROOT, "%.1f", kg)).withStyle(net.minecraft.ChatFormatting.GREEN));
+                    FishWaters.useBait(player);
+                    if (hook != null && player.level() instanceof net.minecraft.server.level.ServerLevel level
+                            && FishWaters.landed(level, hook.blockPosition())) {
+                        player.sendSystemMessage(Component.translatable("message.jaymospowers.fishing.fished_out")
+                                .withStyle(net.minecraft.ChatFormatting.GRAY));
+                    }
                 }
             }
             fish.discard();
@@ -321,11 +335,14 @@ public final class FishingReal {
         return METAL_ROD != null && stack.is(METAL_ROD);
     }
 
-    /** Whether a bite should happen for a hook at {@code (x, y, z)} in {@code level} (used by the mixin). */
-    public static boolean shouldBite(Level level, double x, double y, double z) {
-        if (level.isClientSide() || level.getGameTime() % 4L != 0L) {
+    /**
+     * Whether {@code player}'s hook gets a bite this tick (used by the mixin): (0.21.61) likelier at dawn, dusk and in the
+     * rain and with bait, rarer where the fish are thinned out, never in a pool high up ({@link FishWaters#bites}).
+     */
+    public static boolean shouldBite(ServerPlayer player, FishingHook hook) {
+        if (!(hook.level() instanceof net.minecraft.server.level.ServerLevel level) || level.getGameTime() % 4L != 0L) {
             return false;
         }
-        return RANDOM.nextFloat() < BITE_CHANCE;
+        return RANDOM.nextFloat() < BITE_CHANCE * FishWaters.bites(level, hook.blockPosition(), player);
     }
 }

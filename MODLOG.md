@@ -1595,3 +1595,25 @@ Built; not played.
   gives 3 fillets and bone meal (was 2), so a tuna or shark catch cleans into many.
 - Fixed: the startup crash (the metal rod item had no id set) and a shark bite that fought a tropical fish.
 - Built; not played.
+
+## 0.21.61 (2026-11-07): fishing by place and time, overfishing, tuna and shark meat, fish weights
+
+Andy: "The goal is more realistic fishing." Ideas from Au Naturel (public domain), our own code; nothing copied.
+- **Fish by place and time** (`FishWaters`): what bites depends on the water under the hook. Rivers are mostly salmon,
+  lakes cod and salmon, cold seas cod and salmon, open sea mostly cod with some pufferfish and tropical fish, warm seas
+  mostly tropical fish and pufferfish. Tuna and sharks (metal rod) only come at sea, more in warm water, fewer in cold,
+  never in a river or lake. Bites are 1.6x as likely at dawn and dusk and 1.3x in the rain. A pool more than 24 blocks
+  above sea level holds no fish (the hook says so every 10 s).
+- **Kitchen fish bait works again**: held in the other hand it makes bites 1.5x as likely, and one is used per fish
+  landed (the tug-of-war fishing had bypassed it).
+- **Overfishing**: each 32x32 patch of water holds 10 fish. Every fish landed thins it (bites fall to a tenth when it's
+  empty) and one comes back every 7200 ticks, so a fished-out spot is full again in 3 days. You're told when a spot gets
+  thin.
+- **Fish weight** (`FishCatch`, component `jaymospowers:fish_weight`): every catch is weighed round its kind's usual
+  size (cod ~4 kg, salmon ~5, pufferfish ~0.8, tropical ~0.4, tuna ~120, shark ~400) and shows it under the name. A heavy
+  fish pulls harder (up to 1.4x) and looks bigger on the line. Weighed fish of different weights don't stack.
+- **Real tuna and shark meat**: a landed tuna is a whole Raw Tuna (edible, weighed); craft it into 3 Raw Tuna Steaks,
+  or cut it on Kitchen's board for a steak per 15 kg. A landed shark is cut up on the shore into Raw Shark Meat, a piece
+  per 50 kg (3 to 12). Steaks and shark meat cook in a furnace, smoker or campfire. New textures for all five.
+- **Tideborn** (with Kingdoms 0.7.650): every bite calls `KingdomsCompat.fished`, see the Kingdoms log.
+- Built; not played.

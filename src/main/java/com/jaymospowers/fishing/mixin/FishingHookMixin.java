@@ -29,6 +29,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin {
     private static final int RNG_TICKS = 4;
+    /** How often (ticks) a hook in a pool high above the sea says there are no fish there. */
+    private static final int NO_FISH_EVERY = 200;
 
     /** Decide whether this hook gets a bite this tick; on a bite, spawn a live fish and start the fight. */
     @Inject(method = "tick", at = @At("HEAD"))
@@ -47,28 +49,20 @@ public abstract class FishingHookMixin {
         if (FishingReal.fight((net.minecraft.server.level.ServerPlayer) player).fighting()) {
             return;
         }
-        if (!FishingReal.shouldBite(hook.level(), hook.getX(), hook.getY(), hook.getZ())) {
+        net.minecraft.server.level.ServerPlayer angler = (net.minecraft.server.level.ServerPlayer) player;
+        if (hook.tickCount % NO_FISH_EVERY == 0
+                && hook.blockPosition().getY() > hook.level().getSeaLevel() + com.jaymospowers.fishing.FishWaters.HIGH_POOL) {
+            // (0.21.61) a pool high above the sea holds no fish
+            angler.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.fishing.no_fish_here")
+                    .withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+        if (!FishingReal.shouldBite(angler, hook)) {
             return;
         }
         Level level = hook.level();
-        int r = level.getRandom().nextInt(100);
-        int kind;
-        if (!com.jaymospowers.fishing.FishingReal.isMetalRod((net.minecraft.server.level.ServerPlayer) player)) {
-            // a wooden rod stays small fish: cod or salmon
-            kind = r < 50 ? com.jaymospowers.fishing.FishingReal.FISH_COD : com.jaymospowers.fishing.FishingReal.FISH_SALMON;
-        } else if (r < com.jaymospowers.fishing.FishingReal.CHANCE_SHARK) {
-            kind = com.jaymospowers.fishing.FishingReal.FISH_SHARK;
-        } else if (r < FishingReal.CHANCE_SHARK + FishingReal.CHANCE_TUNA) {
-            kind = FishingReal.FISH_TUNA;
-        } else if (r < FishingReal.CHANCE_SHARK + FishingReal.CHANCE_TUNA + 25) {
-            kind = FishingReal.FISH_COD;
-        } else if (r < FishingReal.CHANCE_SHARK + FishingReal.CHANCE_TUNA + 50) {
-            kind = FishingReal.FISH_SALMON;
-        } else if (r < FishingReal.CHANCE_SHARK + FishingReal.CHANCE_TUNA + 56) {
-            kind = FishingReal.FISH_PUFFERFISH;
-        } else {
-            kind = FishingReal.FISH_TROPICAL;
-        }
+        // (0.21.61) which fish come depends on the water: river, lake, cold, open or warm sea (FishWaters)
+        int kind = com.jaymospowers.fishing.FishWaters.pick((net.minecraft.server.level.ServerLevel) level, hook.blockPosition(),
+                FishingReal.isMetalRod(angler), level.getRandom());
         // a shark only comes up for a metal rod, in water deep enough for it
         LivingEntity shark = null;
         if (kind == com.jaymospowers.fishing.FishingReal.FISH_SHARK) {

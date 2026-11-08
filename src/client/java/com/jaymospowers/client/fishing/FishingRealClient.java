@@ -1,10 +1,12 @@
 package com.jaymospowers.client.fishing;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.fishing.FishCatch;
 import com.jaymospowers.fishing.FishFight;
 import com.jaymospowers.fishing.FishingReal;
 import com.jaymospowers.fishing.FishingPayloads;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
@@ -13,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -31,6 +34,14 @@ public final class FishingRealClient {
         ClientTickEvents.END_CLIENT_TICK.register(FishingRealClient::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
                 JaymosPowers.id("fishing_tension"), FishingRealClient::render);
+        // (0.21.61) a landed fish shows its weight
+        ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+            Float kg = FishCatch.weight(stack);
+            if (kg != null) {
+                lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.fish_weight",
+                        String.format(java.util.Locale.ROOT, "%.1f", kg)).withStyle(ChatFormatting.GRAY));
+            }
+        });
     }
 
     /** Each tick while fighting a fish, tell the server whether the player is holding the reel key. */
