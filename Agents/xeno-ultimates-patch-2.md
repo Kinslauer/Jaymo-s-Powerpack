@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: xeno-ultimates-patch-2
 branch: hermes/xeno-ultimates-2
 with: 
-pr: 
+pr: 1160
 mods: powers
 versions: 
 started: 2026-11-08
