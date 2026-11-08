@@ -29,3 +29,4 @@ suggested_owns:
 - 2026-11-08 17:21 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-08 17:24 Andy (2026-11-08): reassigned to Prometheus; hermes-a's run stopped before finishing.
 - 2026-11-08 17:26 Andy (2026-11-08): swapped to Bacchus (hermes-b); Prometheus takes the mimic.
+- 2026-11-08 17:36 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
