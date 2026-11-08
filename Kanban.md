@@ -13,8 +13,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · claimed
 - [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
+- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · claimed
 
 
 ## In review
