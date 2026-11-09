@@ -14,7 +14,6 @@ kanban-plugin: board
 - [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for hermes · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · open
 - [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for hermes · open
-- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for hermes · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for hermes · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · for hermes · open
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for hermes · open
@@ -33,6 +32,7 @@ kanban-plugin: board
 - [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · for prometheus · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for prometheus · open
+- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for hermes · open
 
 
 ## Being built
