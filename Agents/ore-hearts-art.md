@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: ore-hearts-art
 branch: claude/ore-hearts-art
 with:
-pr:
+pr: 1167
 mods: powers
 versions:
 started: 2026-11-08
@@ -33,4 +33,4 @@ owns:
 - Original artwork; no Scaling Health assets used.
 
 ## Done
-Work in progress; not tested in game.
+PR #1167 adds original matching stone/deepslate heart-crystal ore art, a cut-crystal heart item sprite, model/blockstate JSONs and editable Blockbench projects. Full Powers build and PR checks passed; front/side/back renders inspected. Not tested in game; registration, worldgen, drops and health mechanics stay with ore-hearts.
