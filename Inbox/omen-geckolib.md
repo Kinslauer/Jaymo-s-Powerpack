@@ -40,3 +40,4 @@ suggested_owns:
 ## Notes
 - This is Powers, not Kingdoms. The pack already ships GeckoLib 5.5.7. If Powers doesn't compile against it yet, add it the way `kingdoms/build.gradle` does, and as a `depends` in `src/main/resources/fabric.mod.json`.
 - Red and blue share one class (two entity types). Keep one set of animations for both if the rigs match.
+- 2026-11-09 16:08 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
