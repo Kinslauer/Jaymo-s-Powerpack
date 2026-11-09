@@ -421,6 +421,11 @@ public final class Downed {
 			if (eat != null) {
 				return eat;
 			}
+			// and the struggle up with a healing item, too hurt to rise ({@link HealStruggle})
+			InteractionResult heal = HealStruggle.use(player, hand);
+			if (heal != null) {
+				return heal;
+			}
 			return DOWNED_USE_BLOCKS && hand == InteractionHand.MAIN_HAND && awake(player) ? InteractionResult.PASS : InteractionResult.FAIL;
 		});
 		UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
@@ -443,6 +448,10 @@ public final class Downed {
 			}
 			// (0.15.49) but Second Wind's eating to rise ({@link SelfRevive})
 			InteractionResult eat = SelfRevive.use(player, hand);
+			if (eat == null) {
+				// and the struggle up with a healing item ({@link HealStruggle})
+				eat = HealStruggle.use(player, hand);
+			}
 			return eat != null ? eat : InteractionResult.FAIL;
 		});
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> !isDowned(player));
@@ -1152,6 +1161,8 @@ public final class Downed {
 			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
 			BodyPart blocking = blocksRise(player);
 			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
+				: blocking != null && awake(player) ? Component.translatable("message.jaymospowers.downed.give_up_hurt_heal", blocking.displayName(),
+					Component.keybind("key.use"), bar)
 				: blocking != null ? Component.translatable("message.jaymospowers.downed.give_up_hurt", blocking.displayName(), bar)
 				: Component.translatable("message.jaymospowers.downed.give_up", bar);
 			player.sendOverlayMessage(message.copy().withStyle(sneaking ? ChatFormatting.RED : ChatFormatting.GRAY));
@@ -1291,6 +1302,7 @@ public final class Downed {
 				.withStyle(ChatFormatting.RED));
 		}
 		SelfRevive.struck(player, most);
+		HealStruggle.struck(player);
 	}
 
 	/**

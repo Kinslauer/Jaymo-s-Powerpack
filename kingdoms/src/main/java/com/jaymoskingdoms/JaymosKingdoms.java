@@ -376,6 +376,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Hollows.register();
 		// (0.7.643) and the blight that turns one slowly, and the death mid-turn that finishes it
 		HollowBlight.register();
+		// the Skeleton Lord's curse: the only way to rise a skeleton (and its attachment)
+		LOGGER.debug("skeleton curse attachment: {}", SkeletonCurse.CURSED);
+		SkeletonCurse.register();
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);
 		StoryKit.register();
