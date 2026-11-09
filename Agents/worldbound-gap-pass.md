@@ -8,7 +8,7 @@ mods:
 versions: 
 started: 2026-11-08
 owns:
-  -
+  - docs/worldbound-gap-pass.md
 ---
 
 # Worldbound: read its mod list once for gaps
