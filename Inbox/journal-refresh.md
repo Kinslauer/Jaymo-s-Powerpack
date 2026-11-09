@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by:
+claimed_by: hermes-modeller
 pr:
 suggested_owns: [kingdoms/src/client/java/com/jaymoskingdoms/client/JournalScreen.java, kingdoms/src/client/java/com/jaymoskingdoms/client/JournalClient.java, kingdoms/src/main/java/com/jaymoskingdoms/Journal.java, kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/]
 ---
