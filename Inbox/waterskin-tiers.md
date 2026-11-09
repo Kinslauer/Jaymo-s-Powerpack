@@ -8,6 +8,7 @@ claimed_by: hermes-a
 pr: 1176
 suggested_owns: [kitchen/src/main/java/com/jaymoskitchen/climate/WaterskinItem.java, kitchen/src/main/java/com/jaymoskitchen/climate/Thirst.java]
 writer: hermes-writer
+text_pass: done
 ---
 
 # Waterskin tiers
