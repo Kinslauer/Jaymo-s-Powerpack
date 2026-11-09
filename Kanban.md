@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 08:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 08:36). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · for prometheus · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for hermes · open
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · for hermes · open
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for hermes · open
@@ -35,6 +34,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · claimed
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · claimed
 
 
 ## Text pass
