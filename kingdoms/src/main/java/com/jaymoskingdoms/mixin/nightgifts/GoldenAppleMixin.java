@@ -25,6 +25,7 @@ abstract class GoldenAppleMixin {
 			VampirePlayers.ateGold(player);
 			if (player.hasEffect(MobEffects.WEAKNESS)) {
 				com.jaymoskingdoms.HollowBlight.ateGold(player); // (0.7.643) burns out a Hollow's blight only while the player is Weakened
+				com.jaymoskingdoms.SkeletonCurse.ateGold(player); // and lifts the Skeleton Lord's curse the same way
 			}
 		}
 	}
