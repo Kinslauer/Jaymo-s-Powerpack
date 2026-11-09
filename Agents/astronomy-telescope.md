@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: astronomy-telescope
 branch: claude/astronomy-telescope
 with:
-pr:
+pr: 1189
 mods: kingdoms
 versions:
 started: 2026-11-09
@@ -33,4 +33,4 @@ owns:
 - `astronomy-sky` and observation behaviour remain separate dependencies.
 
 ## Done
-Work in progress; not yet tested in game.
+PR #1189 supplies the articulated GeckoLib block rig (base/azimuth/elevation), editable animations and inspected four-view/posed renders. Kingdoms and root builds plus PR checks pass; generator output is deterministic. No registration, saved aim, observations or client visual playtest are included.
