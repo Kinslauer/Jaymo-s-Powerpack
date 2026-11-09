@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,8 +32,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · hermes-a · claimed
 - [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · hermes-modeller · claimed
-- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · #1176 · changes · fixing review notes
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · changes · fixing review notes
+- [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · running
 
 
 ## Text pass
@@ -47,20 +47,19 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
-- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · #1185 · ready
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/astronomy-art|astronomy-art]]
 - [x] [[Inbox/Done/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]]
 - [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
 - [x] [[Inbox/Done/blight-mobs|blight-mobs]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/mimic|mimic]]
-- [x] [[Inbox/Done/kitchen-brick-split|kitchen-brick-split]]
 
 
 %% kanban:settings
