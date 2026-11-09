@@ -34,7 +34,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · #1176 · writing
+- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · #1176 · in-review
 
 
 ## In review
