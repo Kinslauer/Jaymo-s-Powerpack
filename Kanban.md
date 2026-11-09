@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 10:00). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 10:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -37,7 +37,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · #1189 · in-review
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Quill · #1189 · writing
 
 
 ## In review
