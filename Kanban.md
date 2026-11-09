@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:49). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,7 +44,6 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · 🤖 Prometheus · #1192 · in-review
 
 
 ## In review
@@ -55,21 +54,19 @@ kanban-plugin: board
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · 🤖 Apollo · blocked
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🤖 Prometheus · blocked
-- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🤖 Prometheus · #1188 · ready
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · #1189 · ready
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
+- [x] [[Inbox/Done/journal-refresh|journal-refresh]]
+- [x] [[Inbox/Done/astronomy-telescope|astronomy-telescope]]
 - [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 - [x] [[Inbox/Done/astronomy-art|astronomy-art]]
 - [x] [[Inbox/Done/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]]
 - [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
 - [x] [[Inbox/Done/blight-mobs|blight-mobs]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 
 
 %% kanban:settings
