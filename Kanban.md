@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,6 +19,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · claimed
+- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · changes · fixing review notes
 
 
 ## Text pass
@@ -26,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
 - [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · #1160 · in-review
 - [ ] [[Inbox/blindness|blindness]] · hermes-b · #1159 · in-review
-- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · in-review
 
 
 ## In review
