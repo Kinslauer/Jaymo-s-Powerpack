@@ -3,7 +3,7 @@ type: picklist
 source: Astronomy (Jubileu_13)
 url: https://www.curseforge.com/minecraft/mc-mods/astronomy/gallery
 licence: MIT · NeoForge 1.21.1 · verdict: remake our own
-status: waiting-for-picks
+status: picked
 created: 2026-11-08
 tags: [inbox, picklist, astronomy]
 ---
