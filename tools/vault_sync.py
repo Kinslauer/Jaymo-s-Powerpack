@@ -166,21 +166,22 @@ KANBAN_LANES = (  # (lane, Inbox statuses); Obsidian's Kanban plugin shows Kanba
 KANBAN_DONE = 8  # how many finished tasks the Done lane shows
 # Who's on a card, at a glance (Andy, 2026-11-09: "the api and youth's bots need differentiators"): Hermes bots by
 # the names Andy gave them, the cloud agent (Anthropic API, tools/cloud-agent) and Claude Code threads each marked.
-HERMES_BOTS = {"hermes-a": "Apollo", "hermes-b": "Bacchus", "hermes-fixer": "Hephaestus",
-               "hermes-modeller": "Prometheus", "hermes-writer": "Quill"}
+# Each worker has its own emoji (Andy: "each should have a different emoji").
+HERMES_BOTS = {"hermes-a": "☀️ Apollo", "hermes-b": "🍇 Bacchus", "hermes-fixer": "🔨 Hephaestus",
+               "hermes-modeller": "🔥 Prometheus", "hermes-writer": "🪶 Quill"}
 CLOUD_AGENT = "claude-cloud"
 
 
 def worker_label(who):
-    """`hermes-a` -> `🤖 Apollo`, `claude-cloud` -> `☁️ Cloud`, `claude` -> `💻 Claude`; anything else unchanged."""
+    """`hermes-a` -> `☀️ Apollo`, `claude-cloud` -> `☁️ Cloud`, `claude` -> `💻 Claude`; anything else unchanged."""
     key = (who or "").strip().lower()
-    names = {**HERMES_BOTS, **{v.lower(): v for v in HERMES_BOTS.values()}}
+    names = {**HERMES_BOTS, **{v.split(" ", 1)[1].lower(): v for v in HERMES_BOTS.values()}}
     if key in names:
-        return "🤖 " + names[key]
+        return names[key]
     if key in (CLOUD_AGENT, "cloud"):
         return "☁️ Cloud"
     if key == "hermes":
-        return "🤖 a Hermes bot"
+        return "🪽 any Hermes bot"
     if key.startswith("claude"):
         return "💻 Claude"
     return who
