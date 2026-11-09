@@ -48,4 +48,4 @@ Existing (unrelated) "Mimic" mobs: Powers Aether dungeon mimic (sentry crate tha
 - No immediate player-visible change: behaviour and renderer wiring are separate. Validated 61 fully mapped opaque cubes, 21 unique bones and all animation targets; exact four-view render visually checked. Full `sh ./gradlew build` and `tools/pr_checks.py` passed. Not tested on a live entity in game.
 
 ## Notes
-- 2026-11-08 20:26 PR #1158 is merged into master; moved to Agents/Done.
+- 2026-11-09 02:13 PR #1158 is merged into master; moved to Agents/Done.

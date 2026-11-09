@@ -13,4 +13,4 @@ Done: wheel/roster/whistle at any trust for Riders, starter horse, faster taming
 - 2026-11-08 20:15 Review (Claude): pass; posted to Parthenon > PR Merges by YOUTH. Waiting on Andy.
 
 ## Notes
-- 2026-11-08 20:26 PR #1161 is merged into master; moved to Agents/Done.
+- 2026-11-09 02:13 PR #1161 is merged into master; moved to Agents/Done.
