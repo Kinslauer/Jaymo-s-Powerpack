@@ -40,12 +40,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · claimed
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🔨 Hephaestus · #1193 · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
 ## Text pass
 
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🔨 Hephaestus · #1193 · in-review
 
 
 ## In review
