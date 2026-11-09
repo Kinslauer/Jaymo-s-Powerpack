@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 task: thrown-ragdoll-perch
 branch: claude/thrown-ragdoll-perch
 with: 
@@ -27,3 +27,5 @@ owns:
 - Carry throw: weight scale from ThrowWeight (per-type kg, else hitbox bulk); thrown players knocked limp into Kitchen's ragdoll; mobs tumble/flail via ThrownFlight
 - Perch: sneak+use on #jaymospowers:rides_on_shoulder rides the player (shoulder/head/draped); sneak+empty use lets down; 3 hearts of damage knocks off
 - Kitchen corpse toss on the same weight curve
+
+- 2026-11-08 20:15 Review (Claude): pass; posted to Parthenon > PR Merges by YOUTH. Waiting on Andy.
