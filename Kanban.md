@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 22:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 22:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,7 +13,6 @@ kanban-plugin: board
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · for hermes · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for hermes · open
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · for prometheus · open
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · for hermes · open
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for hermes · open
 - [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · for hermes · open
@@ -29,6 +28,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · claimed
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
+- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 
 
 ## Text pass
