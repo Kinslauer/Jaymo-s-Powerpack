@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: hermes
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -8,7 +8,7 @@ claimed_by:
 pr: 1193
 suggested_owns: []
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Astronomy 1: a real sky
