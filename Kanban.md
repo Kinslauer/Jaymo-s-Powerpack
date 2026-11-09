@@ -4,50 +4,50 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 10:45). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:09). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · open
-- [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/ore-hearts|ore-hearts]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · 🔥 Prometheus · open
-- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
-- [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/unique-starts|unique-starts]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🤖 Bacchus · open
+- [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/ore-hearts|ore-hearts]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/journal-refresh|journal-refresh]] · 🤖 Prometheus · open
+- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · 🤖 Apollo · open
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🤖 Quill · open
+- [ ] [[Inbox/startup-crash|startup-crash]] · for 🤖 a Hermes bot · open
 
 
 ## Being built
 
-- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · ☀️ Apollo · claimed
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · claimed
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🤖 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🪶 Quill · #1189 · writing
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Quill · #1189 · writing
 
 
 ## In review
 
-- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🔥 Prometheus · #1188 · in-review
+- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🤖 Prometheus · #1188 · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · ☀️ Apollo · blocked
+- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · 🤖 Apollo · blocked
 
 
 ## Done
