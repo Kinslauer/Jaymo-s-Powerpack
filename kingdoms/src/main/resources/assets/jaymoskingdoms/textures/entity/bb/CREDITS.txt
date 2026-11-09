@@ -1,5 +1,6 @@
 Blockbench Workshop models drawn by Kingdoms (baked by tools/bbmodel_bake.py into assets/jaymoskingdoms/bbmodels/,
-their textures here). All are licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+their textures here). Except where an entry says otherwise, these Workshop models are licensed under CC BY 4.0:
+https://creativecommons.org/licenses/by/4.0/
 The makers claim them as their own work; we've changed them only as noted.
 
 chieftain.png, chieftain_1.png (bbmodels/chieftain.json): the orc warchief's body
@@ -20,6 +21,13 @@ and dragon/notus/ and dragon/boreas/ hide_*.png, marks_*.png: Notus and Boreas
   (kingdoms/art/fire_dragon.bbmodel, kingdoms/tools/gen_fire_dragon_geo.py); drawn at 0.53 (Notus) and 0.45
   (Boreas) size. Notus's hides are its texture and three re-shadings of it; Boreas's are it recoloured to ice; both
   species' glowing markings are its glow half (kingdoms/tools/gen_fire_dragons.py).
+
+geckolib/models/entity/aetherion.geo.json, geckolib/animations/entity/aetherion.animation.json,
+and dragon/aetherion/hide_*.png, marks_*.png: Aetherion
+  Body-plan reference: the public-domain/CC0 GeckoLib Aetherion supplied by Andy (its author and URL weren't recorded).
+  The model, hides, markings and animations are rebuilt as our own art; no external model, texture or animation is used.
+  kingdoms/art/aetherion.bbmodel and kingdoms/tools/gen_aetherion_geo.py: idle, walk, fly, glide, landing, sitting,
+  crashed, bite, Cataclysm and tail sweep; drawn at 1.25 size, hatchlings at the usual 0.35 of that.
 
 clockwork_golem.png, clockwork_golem_1.png (bbmodels/clockwork_golem.json), and textures/item/clockwork_golem.png:
 the clockwork golem

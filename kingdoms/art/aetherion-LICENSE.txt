@@ -1,0 +1,7 @@
+The Aetherion body-plan reference supplied by Andy was identified in the existing Kingdoms source as a public-domain
+GeckoLib dragon under CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
+Legal text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+The reference's author and URL were not recorded in that source. No external model, texture or animation file is used
+here. The rebuilt Blockbench geometry, existing hide/marking artwork and new animation keyframes are the project's own
+work; nothing from Saint's Dragons (whose art is All Rights Reserved) is included.
