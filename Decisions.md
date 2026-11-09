@@ -101,3 +101,8 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 - 2026-11-09: (follow-up) Hermes refuses terminal.env_passthrough for provider credentials (ANTHROPIC_API_KEY, GITHUB_TOKEN; GHSA-rhgp-j443-p4rf), so the passthrough line was removed again; cloud jobs need run.py to read the keys itself.
 - 2026-11-09: Andy chose option 1: the gateway watchdog (E:/hermes/scripts/gateway_watchdog.ps1) posts to a Discord webhook itself when the gateway is down and when it's back (user env var HERMES_ALERT_WEBHOOK; webhook named "Youth Heartbeat"). A cloud heartbeat check (PC off) is skipped unless remote wake is possible.
 - 2026-11-09: Andy: "do whatever you must" about the stale Kitchen jar blocking pulls in E:/Origins Mod. Moved libs/jaymos-kitchen-0.5.93.jar (untracked local build) to E:/Origins Mod backups/stale-jars and fast-forwarded master; deck/deploy.ps1 (untracked, Deploy to Deck) now moves any untracked/changed libs/jaymos-kitchen-*.jar there and restores libs/ before it pulls, like pbdr step 1.
+- 2026-11-09: Andy: live Kanban copy in Discord, Hotspot > parthenon > "Kanban" post: one message YOUTH edits in place, every 3 min when Kanban.md changed (cron discord-board, E:/hermes/scripts/discord_board.py; failures DM Andy).
+
+## Discord board location (2026-11-09)
+Andy, in the `parthenon` topic "Kanban": "new kanban goes here". The live board message is kept in that thread
+(id 1569368728901255309) by `E:/hermes/scripts/discord_board.py`, run by the `discord-kanban` cron job every 5 minutes.
