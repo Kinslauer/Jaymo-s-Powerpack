@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
 claimed_by: hermes-b
-pr:
+pr: 1165
 suggested_owns: [kitchen/src/main/java/com/jaymoskitchen/climate/Thirst.java]
 ---
 
@@ -24,3 +24,4 @@ Andy: "parasites and treatment methods should be added too", then "the treatment
 - **No new items.** Andy's ruling: the cure goes on an existing item. The pack's teas are Powers' `willow_bark_tea` and `chamomile_tea`; a Kitchen drink works too. Pick one and say which in the PR.
 - The parasite effect itself has to be ours (a Kitchen mob effect or a body component), since ours replaces poison rather than borrowing it.
 - Parasites should be slow and survivable — a reason to boil water, not a death sentence.
+- 2026-11-08 20:26 hermes-b's last run stopped before finishing; handed back as open so it can carry on.

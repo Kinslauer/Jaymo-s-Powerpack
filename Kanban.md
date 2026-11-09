@@ -4,34 +4,31 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:09). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/blight-mobs|blight-mobs]] · for hermes · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · for hermes · open
-- [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · for hermes · open
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
+- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · open
+- [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
+- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for hermes · open
 
 
 ## Being built
 
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · claimed
-- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
+- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · claimed
 
 
 ## Text pass
 
-- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
-- [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · #1160 · in-review
-- [ ] [[Inbox/blindness|blindness]] · hermes-b · #1159 · in-review
-- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · in-review
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · in-review
+- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
 
 
 ## In review
 
-- [ ] [[Agents/kitchen-cookware-melt|kitchen-cookware-melt]] · #1163 · in-review
 
 
 ## Needs Andy
@@ -41,14 +38,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/kitchen-brick-split|kitchen-brick-split]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/blindness|blindness]]
+- [x] [[Inbox/Done/mimic|mimic]]
 - [x] [[Inbox/Done/impaler-model|impaler-model]]
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
-- [x] [[Inbox/Done/bogre-model|bogre-model]]
 - [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
-- [x] [[Inbox/Done/kingdoms-geckolib-groundwork|kingdoms-geckolib-groundwork]]
-- [x] [[Inbox/Done/tomb-no-build-rule|tomb-no-build-rule]]
-- [x] [[Inbox/Done/kitchen-recipes-b|kitchen-recipes-b]]
-- [x] [[Inbox/Done/kitchen-recipes-a|kitchen-recipes-a]]
+- [x] [[Inbox/Done/bogre-model|bogre-model]]
 
 
 %% kanban:settings

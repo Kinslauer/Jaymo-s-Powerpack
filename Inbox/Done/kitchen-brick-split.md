@@ -4,9 +4,10 @@ for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
-claimed_by: hermes
+claimed_by: hermes-fixer
 pr: 1163
 suggested_owns: [kitchen/src/main/java/com/jaymoskitchen/delight/Chopping.java, kitchen/src/main/java/com/jaymoskitchen/delight/CuttingBoardBlock.java]
+text_pass: 
 ---
 
 # Split a seared-bricks block back into bricks
