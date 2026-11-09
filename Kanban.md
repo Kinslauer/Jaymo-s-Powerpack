@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -24,7 +24,6 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
 - [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · #1160 · in-review
 - [ ] [[Inbox/blindness|blindness]] · hermes-b · #1159 · in-review
 
@@ -36,12 +35,12 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Agents/rider-class|rider-class]] · #1161 · ready
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/mimic|mimic]]
 - [x] [[Inbox/Done/impaler-model|impaler-model]]
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 - [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
@@ -49,7 +48,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/kingdoms-geckolib-groundwork|kingdoms-geckolib-groundwork]]
 - [x] [[Inbox/Done/tomb-no-build-rule|tomb-no-build-rule]]
 - [x] [[Inbox/Done/kitchen-spit-roast|kitchen-spit-roast]]
-- [x] [[Inbox/Done/kitchen-recipes-b|kitchen-recipes-b]]
 
 
 %% kanban:settings
