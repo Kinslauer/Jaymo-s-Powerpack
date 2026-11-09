@@ -8,11 +8,11 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/blindness|blindness]] · hermes-b · open
 
 
 ## Being built
 
+- [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
 
 
 ## Text pass
