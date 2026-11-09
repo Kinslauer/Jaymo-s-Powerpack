@@ -350,6 +350,10 @@ public final class Classes {
 		if (cls == PlayerClass.MAGE) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.mage_staff").withStyle(ChatFormatting.GRAY));
 		}
+		// (but a Rider is nothing without a horse: Andy, "add everything you thought up")
+		if (cls == PlayerClass.RIDER) {
+			com.jaymoskingdoms.equestrian.Riders.starter(player);
+		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 0.9F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.chosen", Component.translatable("class.jaymoskingdoms." + cls.key()))
 			.withStyle(ChatFormatting.GOLD));

@@ -1,0 +1,19 @@
+{
+  "message.jaymoskingdoms.rider.starter": "A horse of your own: this %s is yours, saddled and already fond of you.",
+  "message.jaymoskingdoms.rider.rescued": "You pull %s up behind you.",
+  "gui.jaymoskingdoms.class.stat.lance": "Lance at the gallop %s",
+  "gui.jaymoskingdoms.stable.races": "Races",
+  "gui.jaymoskingdoms.stable.race.0": "Sprint: %s blocks",
+  "gui.jaymoskingdoms.stable.race.1": "Long run: %s blocks",
+  "gui.jaymoskingdoms.stable.race.prizes": "Gold %s, silver %s, finish %s",
+  "gui.jaymoskingdoms.stable.race.enter": "Race (%s)",
+  "message.jaymoskingdoms.race.start": "Off you go! The finish post is %s blocks away at %s, %s: look for the column of light.",
+  "message.jaymoskingdoms.race.progress": "%s blocks to the post, %s, head %s",
+  "message.jaymoskingdoms.race.lost": "Too slow: the race is lost.",
+  "message.jaymoskingdoms.race.finish.0": "Gold! Over the line in %s. Your prize: %s.",
+  "message.jaymoskingdoms.race.finish.1": "Silver: over the line in %s. Your prize: %s.",
+  "message.jaymoskingdoms.race.finish.2": "You finished, in %s. Your prize: %s.",
+  "message.jaymoskingdoms.race.already": "You're already in a race.",
+  "message.jaymoskingdoms.race.mount": "You race on your own horse: get in the saddle first.",
+  "message.jaymoskingdoms.race.no_course": "There's no open ground for a course from here. Your entry is back."
+}

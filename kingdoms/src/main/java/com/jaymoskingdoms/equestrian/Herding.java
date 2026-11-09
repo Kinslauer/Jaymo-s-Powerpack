@@ -306,7 +306,8 @@ public final class Herding {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.order_not_yours", Bonding.name(horse)));
 			return;
 		}
-		if (Bonding.trust(horse, player) < ORDER_TRUST) {
+		// a Rider's horse heeds every order from the first day (Riders)
+		if (!Riders.heeds(horse, player, ORDER_TRUST)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.order_wary", Bonding.name(horse), (int)ORDER_TRUST));
 			return;
 		}
@@ -688,7 +689,7 @@ public final class Herding {
 			sendHome(level, horse, player);
 			return;
 		}
-		if (Bonding.trust(horse, player) < ROSTER_CALL_TRUST || com.jaymoskingdoms.Stables.boarded(horse)) {
+		if (!Riders.heeds(horse, player, ROSTER_CALL_TRUST) || com.jaymoskingdoms.Stables.boarded(horse)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.whistle_shy"));
 			return;
 		}

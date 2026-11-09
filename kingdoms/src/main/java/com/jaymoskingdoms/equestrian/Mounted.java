@@ -178,7 +178,7 @@ public final class Mounted {
 		float c = was;
 		float seconds = STEP / 20.0F;
 		if (gait.ordinal() >= Gait.CANTER.ordinal() && speed > top * 0.4) {
-			float fill = (gait == Gait.GALLOP ? 1.0F : 0.5F) * (s.sprint() ? 2.0F : 1.0F);
+			float fill = (gait == Gait.GALLOP ? 1.0F : 0.5F) * (s.sprint() ? 2.0F : 1.0F) * Riders.chargeFill(rider);
 			c += fill * seconds / CHARGE_SECONDS;
 		} else {
 			c -= CHARGE_DRAIN * seconds;
@@ -206,7 +206,7 @@ public final class Mounted {
 				continue;
 			}
 			HIT.put(target.getId(), now + CHARGE_COOLDOWN);
-			float damage = CHARGE_HIT * c * (float)Mth.clamp(pace, 0.4, 1.3) * (1.0F + BARDING_HIT * horse.getArmorValue());
+			float damage = CHARGE_HIT * c * (float)Mth.clamp(pace, 0.4, 1.3) * (1.0F + BARDING_HIT * horse.getArmorValue()) * Riders.runDown(rider);
 			DamageSource source = level.damageSources().mobAttack(horse);
 			target.hurtServer(level, source, damage);
 			target.knockback(CHARGE_KNOCKBACK * c, -ahead.x, -ahead.z, source, damage);
