@@ -185,8 +185,10 @@ def write_kanban(live):
     for name in sorted(os.listdir(agents)) if os.path.isdir(agents) else []:
         if name.endswith(".md") and name[:-3] not in tasks_seen:
             p = frontmatter(os.path.join(agents, name))
-            if p.get("status") in ("running", "in-review", "blocked"):
-                lane = {"running": "Being built", "in-review": "In review", "blocked": "Needs Andy"}[p["status"]]
+            # (a thread's PR that passed review is "ready" or "sent": it waits on Andy like a blocked one)
+            if p.get("status") in ("running", "in-review", "ready", "sent", "blocked"):
+                lane = {"running": "Being built", "in-review": "In review", "ready": "Needs Andy", "sent": "Needs Andy",
+                        "blocked": "Needs Andy"}[p["status"]]
                 lanes[lane].append(card("Agents", name[:-3], p))
     done_dir = os.path.join(live, "Inbox", "Done")
     done = sorted((os.path.getmtime(os.path.join(done_dir, n)), n[:-3]) for n in os.listdir(done_dir)
