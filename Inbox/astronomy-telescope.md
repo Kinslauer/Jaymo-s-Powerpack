@@ -1,6 +1,6 @@
 ---
 status: open
-for: hermes
+for: prometheus
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
