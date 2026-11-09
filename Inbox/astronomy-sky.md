@@ -29,3 +29,4 @@ From the astronomy pick-list ("add this but in the high renaissance artstyle"), 
 - Light pollution should read as a place feeling different at night, not as a number in a menu.
 - Which mod this lives in is a real question: sky rendering is client-heavy. Suggest Kingdoms, since the same system's journal is the scholar side (see `astronomy-scholar-journal`), but do not split it across two mods.
 - Nothing downstream works without this: telescope, armillary sphere and journal all need discovered stars to point at.
+- 2026-11-09 12:46 Text pass: rewrote change note (changes/kingdoms/claude-astronomy-sky.md) to lead with what the player sees, cut implementation details, keep data credits concise
