@@ -9,11 +9,13 @@
 Inbox tasks (each syncs first and after, so everyone sees the change at once):
     python tools/vault_sync.py --claim hermes-a        # take the oldest task sent back to hermes-a, else the oldest
                                                        # open one for hermes-a, hermes or any; print it; exit 3 if none
-    python tools/vault_sync.py --claim hermes-fixer --fixes   # a fixer bot: the oldest task sent back to anyone
+    python tools/vault_sync.py --claim hermes-fixer --fixes   # a fixer bot: the oldest task sent back to anyone, else
+                                                       # the oldest open one for it (hermes-fixer or hephaestus)
     python tools/vault_sync.py --tasks in-review       # task names with that status, one per line
     python tools/vault_sync.py --show <task>           # print a task
     python tools/vault_sync.py --set <task> status=in-review pr=1234   # change a task's properties
     python tools/vault_sync.py --note <task> "Reviewer: ..."           # add a line under the task's Notes
+    python tools/vault_sync.py --new <task> for=hephaestus from=... < body.md   # a new open task, body from stdin
     python tools/vault_sync.py --send <task>           # reviewed and passed: hand it to the coordinator (status: ready)
     python tools/vault_sync.py --reviewer-seen         # the PC reviewer, every round: "I'm here" (Reviewer.md)
     python tools/vault_sync.py --reviewer-away [30]    # in-review tasks, but only if the reviewer hasn't been seen
@@ -43,7 +45,7 @@ import sys
 import time
 
 BRANCH = "vault-live"
-TASK_COMMANDS = ("--claim", "--review-queue", "--tasks", "--show", "--set", "--note", "--send", "--reviewer-seen", "--reviewer-away")
+TASK_COMMANDS = ("--claim", "--review-queue", "--tasks", "--show", "--set", "--note", "--send", "--new", "--reviewer-seen", "--reviewer-away")
 REVIEWER_AWAY_MINUTES = 30  # no reviewer round for this long: the coordinator reviews in-review tasks itself
 SEED = {  # written by --setup when the branch doesn't exist yet
     ".gitattributes": "Decisions.md merge=union\n*.md text eol=lf\n",
@@ -367,6 +369,7 @@ def tasks(live, wanted=None):
 
 
 SPECIALISTS = {"hermes-modeller": "prometheus", "hermes-writer": "quill"}  # bot name -> the name Andy calls it
+FIXER_NAMES = ("hermes-fixer", "hephaestus")  # open tasks the fixer bot takes when nothing was sent back (Bug hunter)
 
 
 def meant_for(props, agent):
@@ -412,7 +415,8 @@ def claim(live, agent, fixes=False):
     bot), the oldest task sent back to anyone, which it takes over. Exit 3 if none."""
     back = tasks(live, ("changes",))
     if fixes:
-        pick = sorted(back)[0] if back else None
+        mine = [t for t in tasks(live, ("open",)) if (t[2].get("for") or "").strip().lower() in FIXER_NAMES]
+        pick = sorted(back)[0] if back else (sorted(mine)[0] if mine else None)
     else:
         mine = [t for t in back if t[2].get("claimed_by", "") == agent]
         fresh = [t for t in tasks(live, ("open",)) if meant_for(t[2], agent)]
@@ -432,6 +436,20 @@ def claim(live, agent, fixes=False):
     sys.stdout.reconfigure(encoding="utf-8")
     print(f"Task: {pick[1]}  ({path})\n")
     print(open(path, encoding="utf-8").read())
+
+
+def new_task(live, name, props, body):
+    """A new open Inbox task (for scripts such as tools/cloud-agent/run.py hunt). Refuses a name already taken."""
+    name = re.sub(r"[^a-z0-9-]+", "-", name.lower()).strip("-")[:60]
+    path = os.path.join(live, "Inbox", name + ".md")
+    if os.path.exists(path) or os.path.exists(os.path.join(live, "Inbox", "Done", name + ".md")):
+        raise SystemExit(f"An Inbox task called {name} already exists")
+    head = {"status": "open", "for": "any", "from": "", "asked": time.strftime("%Y-%m-%d"), "claimed_by": "", "pr": ""}
+    head.update({k: v.replace("\n", " ") for k, v in props.items()})
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("---\n" + "".join(f"{k}: {v}\n" for k, v in head.items()) + "---\n\n" + body.strip() + "\n")
+    sync(live)
+    print(f"{name}: open")
 
 
 def task_command(live):
@@ -467,6 +485,8 @@ def task_command(live):
         for _, name, _ in sorted(tasks(live, tuple(rest) or None)):
             print(name)
         return
+    if cmd == "--new":
+        return new_task(live, rest[0], dict(kv.split("=", 1) for kv in rest[1:]), sys.stdin.read())
     path = task_path(live, rest[0])
     if cmd == "--show":
         sys.stdout.reconfigure(encoding="utf-8")

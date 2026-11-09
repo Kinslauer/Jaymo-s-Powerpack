@@ -66,6 +66,29 @@ Add to YOUTH's instructions (Hermes):
 > prints. When it ends, tell Andy the PR number (exit 0), the agent's question (exit 2), or that it stopped without a PR
 > (exit 1), with the session link. One cloud run at a time. Never put a key in a command line or a file.
 
+## Bug hunter (on demand only)
+
+A second agent, `agents/bug-hunter.md` (Andy's definition, 2026-11-09), in its own sandbox `environments/bug-hunt.yaml`
+(GitHub only, nothing installed). It reads an area of the code with many agents at once (a workflow run: readers, a
+second look at every slice, then one prover per suspicion), and reports only bugs a separate agent proved or confirmed
+by reading. Each confirmed bug becomes an Inbox task `for: hephaestus`, with the failing test and the suggested fix;
+Hephaestus (hermes-fixer) takes those when nothing is waiting in review fixes, and they go through review as usual.
+
+```
+py tools/cloud-agent/run.py hunt Downed --dry-run     # what it would read: files and lines, no cost
+py tools/cloud-agent/run.py hunt Downed               # a word from docs/codemap, a folder, or a .java file
+py tools/cloud-agent/run.py hunt kitchen/src --big --budget 120
+```
+
+Run it only when Andy asks. Cost grows with the lines read: one ordinary run is up to 30,000 lines (20 slices of
+~1,500), capped at $50 a session (`HUNT_BUDGET_CENTS`). A whole mod is far bigger (Powers ~380,000 lines, Kingdoms
+~340,000, Kitchen ~48,000), so hunt one area at a time; `--big` lifts the line cap, and needs Andy's OK and a higher
+`--budget`. The report and `bugs.json` are saved in `tools/cloud-agent/hunts/` (not committed). Exit 0 with the tasks
+made (or none), 1 if the hunt didn't finish.
+
+Setup, once, from this folder: `ant apply agents/bug-hunter.md environments/bug-hunt.yaml` and commit
+`claude-lock.json`.
+
 ## Changing it
 
 - Its instructions: the body of `agents/powerpack-builder.md`, then `ant apply` again.
