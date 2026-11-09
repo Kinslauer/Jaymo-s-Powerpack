@@ -3,14 +3,14 @@
   "category": "misc",
   "pattern": [
     " s ",
-    "l l",
-    " l "
+    "d d",
+    " d "
   ],
   "key": {
     "s": "minecraft:string",
-    "l": "minecraft:leather"
+    "d": "minecraft:dragon_breath"
   },
   "result": {
-    "id": "jaymoskitchen:waterskin"
+    "id": "jaymoskitchen:waterskin_dragon"
   }
 }

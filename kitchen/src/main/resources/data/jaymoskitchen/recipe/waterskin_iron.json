@@ -3,14 +3,14 @@
   "category": "misc",
   "pattern": [
     " s ",
-    "r r",
-    " r "
+    "i i",
+    " i "
   ],
   "key": {
-    "s": "#jaymoskitchen:cords",
-    "r": "jaymoskitchen:raw_hide"
+    "s": "minecraft:string",
+    "i": "minecraft:iron_ingot"
   },
   "result": {
-    "id": "jaymoskitchen:waterskin"
+    "id": "jaymoskitchen:waterskin_iron"
   }
 }
