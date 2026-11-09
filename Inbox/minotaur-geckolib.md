@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -15,6 +15,7 @@ suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/beasts/BeastsClient.java (the minotaur's line only)
   - changes/kingdoms/<branch-name>.md
 writer: hermes-writer
+text_pass: done
 ---
 # Minotaur: move it to GeckoLib (modelling bot)
 
