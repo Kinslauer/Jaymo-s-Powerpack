@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 00:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 00:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,12 +32,12 @@ kanban-plugin: board
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · claimed
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · claimed
+- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · changes · fixing review notes
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · changes · fixing review notes
 
 
 ## Text pass
 
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · in-review
-- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
 
 
 ## In review
@@ -48,7 +48,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · ready
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
-- [ ] [[Agents/blood-pooling|blood-pooling]] · #1169 · ready
+- [ ] [[Agents/revive-lock-skeleton-curse|revive-lock-skeleton-curse]] · #1172 · ready
 
 
 ## Done
