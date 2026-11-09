@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:52). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:53). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,11 +38,11 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🤖 Quill · #1188 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🤖 Prometheus · #1188 · in-review
 
 
 ## Needs Andy
