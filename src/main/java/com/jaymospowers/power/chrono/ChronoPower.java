@@ -147,6 +147,8 @@ public final class ChronoPower implements Power {
 		ChronoFlow.init();
 		// (0.21.23, Rivals patch 9) takedowns, the shadow-strike blink
 		ChronoTakedowns.init();
+		// Time Stop (sneak + C, Timeless): the whole server's tick freeze
+		ChronoTimeStop.init();
 		com.jaymospowers.power.chrono.future.Future.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
@@ -280,10 +282,14 @@ public final class ChronoPower implements Power {
 		}
 	}
 
-	/** Chrono Punch. */
+	/** Chrono Punch; sneaking, Time Stop ({@link ChronoTimeStop}, its own cooldown). */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
 		if (!down) {
+			return;
+		}
+		if (player.isShiftKeyDown()) {
+			ChronoTimeStop.start(player);
 			return;
 		}
 		ChronoState state = state(player);
