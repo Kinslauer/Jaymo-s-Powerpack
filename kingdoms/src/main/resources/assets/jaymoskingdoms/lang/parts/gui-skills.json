@@ -69,5 +69,7 @@
   "gui.jaymoskingdoms.skills.branch.medicine": "Medicine",
   "gui.jaymoskingdoms.skills.branch.thievery": "Thievery",
   "gui.jaymoskingdoms.skills.branch.freerunning": "Freerunning",
-  "gui.jaymoskingdoms.skills.branch.shadows": "Shadows"
+  "gui.jaymoskingdoms.skills.branch.shadows": "Shadows",
+  "gui.jaymoskingdoms.skills.panel.expand": "Expand panel",
+  "gui.jaymoskingdoms.skills.panel.collapse": "Collapse panel"
 }
