@@ -164,13 +164,40 @@ KANBAN_LANES = (  # (lane, Inbox statuses); Obsidian's Kanban plugin shows Kanba
     ("Needs Andy", ("ready", "sent", "blocked")),
 )
 KANBAN_DONE = 8  # how many finished tasks the Done lane shows
+# Who's on a card, at a glance (Andy, 2026-11-09: "the api and youth's bots need differentiators"): Hermes bots by
+# the names Andy gave them, the cloud agent (Anthropic API, tools/cloud-agent) and Claude Code threads each marked.
+HERMES_BOTS = {"hermes-a": "Apollo", "hermes-b": "Bacchus", "hermes-fixer": "Hephaestus",
+               "hermes-modeller": "Prometheus", "hermes-writer": "Quill"}
+CLOUD_AGENT = "claude-cloud"
+
+
+def worker_label(who):
+    """`hermes-a` -> `🤖 Apollo`, `claude-cloud` -> `☁️ Cloud`, `claude` -> `💻 Claude`; anything else unchanged."""
+    key = (who or "").strip().lower()
+    names = {**HERMES_BOTS, **{v.lower(): v for v in HERMES_BOTS.values()}}
+    if key in names:
+        return "🤖 " + names[key]
+    if key in (CLOUD_AGENT, "cloud"):
+        return "☁️ Cloud"
+    if key == "hermes":
+        return "🤖 a Hermes bot"
+    if key.startswith("claude"):
+        return "💻 Claude"
+    return who
 
 
 def write_kanban(live):
     """Rewrite Kanban.md (a read-only board for Obsidian's Kanban plugin) from the Inbox tasks and running agents.
     It is regenerated on every sync, so drag-and-drop changes on it don't stick: change tasks with --set."""
     def card(folder, name, p, extra=""):
-        who = p.get("claimed_by") or (("for " + p["for"]) if p.get("for") else "")
+        if p.get("status") == "writing" and p.get("writer"):
+            who = worker_label(p["writer"])  # Quill's text pass: the writer has it, not the builder
+        elif p.get("claimed_by"):
+            who = worker_label(p["claimed_by"])
+        elif folder == "Agents":
+            who = "💻 Claude"  # an agent note is a Claude Code thread's own work
+        else:
+            who = ("for " + worker_label(p["for"])) if p.get("for") else ""
         bits = [b for b in (who, f"#{p['pr']}" if p.get("pr") else "", p.get("status", ""), extra) if b]
         return f"- [ ] [[{folder}/{name}|{name}]] · " + " · ".join(bits)
     lanes = {lane: [] for lane, _ in KANBAN_LANES}
