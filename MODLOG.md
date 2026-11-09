@@ -1818,3 +1818,19 @@ Seven new Ultimate alien forms for the Xeno-Band, each with its own model, textu
 - **Nightfall** (Lurk's Ultimate): tall stalker at 1.3x, bone-black plated arms, spined ridge, four eye domes. R: Mark of Night (up to 3 creatures within 64 blocks glow, lose track of you). G: Nightstep (step behind target or first mark within 32 blocks, strike doubled if unseen, G again chains to next mark). V: Terror (everything looking at you and all marks: Darkness, Slowness II, Weakness II, Blindness, monsters drop target and shoved). B: Deep Fade (unseen with Speed I, first strike doesn't break it, second does). C: Nightfall (16 blocks for 160s: everything else Blinded, glows on your screen alone).
 
 Each Ultimate has its own model (Ultimate<Name>.java in client/power/xenoform/ultimate/) and its own 128x128 skin with glow map (tools/ultimates/<id>.py). Health bar sits on top of the base form's bar. All effects respect pvp and team protection. Nothing persists when the Ultimate ends, the player dies, changes dimension or quits, or the server stops.
+
+## 0.21.76 (2026-11-09): Blood pools grow, drag trails as wide as the body (#1169)
+
+- **Blood pools as it gathers** (Andy: puddles "should increase in size the more it accumulates"). Blood landing on or at
+  the edge of a pool of the same blood (rain of blood, a body bleeding on one spot, repeated hits, drips) now soaks into
+  it: the pool spreads out, lies thicker and darker the bigger it gets (up to a cap), and lies fresh again, instead of
+  many small puddles stacking. A pool grown into another of the same blood runs together with it into one. Holds for
+  the server's lasting stains and the client's splash pools alike; fewer decals lie about as a result. Heritage colours
+  only pool with their own (magma keeps its glow).
+- **Drag trails like the rest of the blood** (Andy: "a large body will drag and a single tiny trail of blood will be
+  there"). A dragged or crawling body, and a Kitchen carcass dragged behind a player, now leaves a smear as wide as its
+  hitbox (a man's broad, a cow's wide, a chicken's thin) made of overlapping blotchy pieces, with drops shaken off beside
+  it, a denser blot where it turned, and a pool where it lay still. Dragging back over the same trail darkens and widens
+  it rather than stacking pieces. A downed body's trail still thins as it weakens.
+- Tuning: `BloodTrail.TOUCH` / `GROW` / `MAX_SCALE` / `DRAG_*`, `BloodSmears.TRAIL_WIDTH` and the step, drop, turn and
+  stop constants, `BloodPuddle.THICK_*` / `POOL_*` / `DRAG_ALPHA`, `BloodClient.POOL_*`.
