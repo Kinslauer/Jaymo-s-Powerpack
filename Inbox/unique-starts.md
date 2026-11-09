@@ -24,3 +24,4 @@ Tiv, in the Tasks thread: "Every player should have their own start, it should s
 - So the work is in `spot` and whatever picks the settlement/seat/wreck: ask for the nearest free one, remember who started where, and keep the search bounded so a newcomer never waits on a long scan.
 - A full world still needs an answer: fall back to the next free thing, then to a plain free spot, and never leave a newcomer with no start.
 - Single player is unaffected — there's no one to be taken by.
+- 2026-11-09 17:50 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
