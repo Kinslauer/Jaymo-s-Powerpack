@@ -3,7 +3,7 @@ type: picklist
 source: Five mods Tiv linked
 url: https://www.curseforge.com/minecraft/mc-mods/simple-difficulty-reforged · https://www.curseforge.com/minecraft/mc-mods/dynamictrees · https://www.curseforge.com/minecraft/modpacks/worldbound/gallery · https://www.curseforge.com/minecraft/mc-mods/tinker-delight · https://github.com/sskaffy/Realistic-Water/releases
 licence: mixed, see each section
-status: waiting-for-picks
+status: picked
 created: 2026-11-08
 tags: [inbox, picklist, mods]
 ---
