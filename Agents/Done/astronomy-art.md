@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: astronomy-art
 branch: claude/astronomy-art
 with:
@@ -32,3 +32,4 @@ owns:
 
 ## Done
 PR #1185 supplies the original walnut/aged-brass telescope, item icon, editable Blockbench sources and inspected front/right/back/left renders. Kingdoms and root builds plus `tools/pr_checks.py` pass. The block/item are not registered here; in-game rendering, aiming and observations were not tested.
+- 2026-11-09 09:34 PR #1185 is merged into master; moved to Agents/Done.
