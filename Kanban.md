@@ -30,7 +30,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · claimed
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
@@ -48,6 +47,7 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · ☀️ Apollo · blocked
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🔥 Prometheus · blocked
 
 
 ## Done
