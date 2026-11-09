@@ -10403,3 +10403,10 @@ until it gives (nothing dropped). One zombie breaks a wooden door in about 5 sec
 adds 60% more, up to six. Iron and copper doors take about 45 seconds; a locked lock makes it take as much longer as it
 slows a player. With Spooky Doors each blow jars the door open a crack and it creaks shut. Villagers within 16 blocks
 hear it and run from the door. The mob_griefing rule turns it off. (`DoorPounding`, `SpookyDoors`)
+
+## 0.7.665 (2026-11-09): Deer herds of 3 to 10 (#1171)
+
+- Naturalist's deer now spawn in herds of 3 to 10 (any size in between as likely), never more than 10 at once. Before, a herd was 3-5 and stopped at 4. A herd can still come a deer or two short when some of its spots aren't grass it can stand on, as with any animal.
+- The "no new herd once 6 deer are nearby" rule no longer counts the herd that is arriving, so a herd isn't cut short halfway.
+- Only deer spawning on their own; spawn eggs, spawners and commands are unchanged. Nothing changes without Naturalist.
+- `ShyDeer.registerHerds` (biome spawn entry, `HERD_LEAST`/`HERD_MOST`), `mixin/tweaks/DeerHerdMixin` (cluster cap). Built; not played.
