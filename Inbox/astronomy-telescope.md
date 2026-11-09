@@ -35,3 +35,4 @@ Whether one telescope is enough or there are tiers (basic, mounted, brass) — d
 - 2026-11-09 08:34 Andy (2026-11-09): Prometheus to start on the telescope.
 - 2026-11-09 09:05 Question: PR #1185 now supplies the base telescope art. For continuous per-block azimuth/elevation, should I convert that model to an articulated GeckoLib rig after #1185 merges rather than open a duplicate static-model PR?
 - 2026-11-09 09:28 Andy (2026-11-09): use GeckoLib. After #1185 merges, convert its telescope model into an articulated GeckoLib rig (base, azimuth turn, elevation tilt) instead of a second static-model PR; follow docs/AI-HANDBOOK.md 'Adding a GeckoLib mob to Kingdoms' for the GeckoLib setup.
+- 2026-11-09 10:03 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.
