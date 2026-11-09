@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -46,9 +46,9 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · blocked
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · #1185 · ready
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · #1186 · ready
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · blocked
 
 
 ## Done
