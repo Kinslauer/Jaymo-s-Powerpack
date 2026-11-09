@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:18). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:19). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
@@ -31,6 +30,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
