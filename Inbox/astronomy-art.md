@@ -36,3 +36,4 @@ The look for the whole astronomy set. Andy: "add this but in the high renaissanc
 - Our own art, in our own style: nothing is copied from the Astronomy mod (its code and catalog are MIT and cited, its art is not needed).
 - Keep one palette across every asset in the set, so a telescope and a journal page look like they came from the same desk.
 - Deliver art with the code PRs that need it (`astronomy-sky`, `astronomy-telescope`, `astronomy-armillary`, `astronomy-scholar-journal`, `astronomy-sun-moon`) rather than as one giant drop; the first one that needs art is the telescope.
+- 2026-11-09 01:09 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
