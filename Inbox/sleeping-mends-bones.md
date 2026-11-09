@@ -24,4 +24,5 @@ Tiv, in the Tasks thread: "sleeping should set your broken bones. after hitting 
 - Say plainly in the PR how the time is counted: per break, added on top of each other, and whether a second night is needed or the sleep simply runs longer.
 - Bed rest (`BedRest`, our own take on Sleeping Overhaul) is already how a player lies down by day; check whether resting counts as sleeping here or only a real night does, and keep it consistent.
 - Don't remove the splint: it's what you use when there's no bed to be had.
+- There is already a "beds mend" change in Kingdoms 0.7.646 — look at what a bed already does before writing new code, and extend it to breaks rather than building a second path.
 - The break must still show as set, so the body renderer, the debuffs and the "patched up" check all agree afterwards.

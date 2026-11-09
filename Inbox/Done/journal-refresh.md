@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: done
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: hermes-modeller
-pr:
+pr: 1192
 suggested_owns: [kingdoms/src/client/java/com/jaymoskingdoms/client/JournalScreen.java, kingdoms/src/client/java/com/jaymoskingdoms/client/JournalClient.java, kingdoms/src/main/java/com/jaymoskingdoms/Journal.java, kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/]
 ---
 
@@ -27,3 +27,4 @@ Tiv, in the Tasks thread: "Have Prometheus try his hand at the travelers journal
 - Ask Tiv for a screenshot or two if you want to know which page bothers him most before you start.
 - 2026-11-08 23:00 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-09 08:35 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 11:49 PR #1192 is merged into master; moved to Inbox/Done.
