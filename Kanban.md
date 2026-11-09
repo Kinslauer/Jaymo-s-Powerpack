@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 12:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 12:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -45,7 +45,7 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
-- [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · for 🔥 Prometheus · #1194 · in-review
+- [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · 🪶 Quill · #1194 · writing
 
 
 ## In review
