@@ -1,14 +1,16 @@
 ---
-status: running
+status: in-review
 task: minotaur-geckolib
 branch: claude/minotaur-geckolib
 with:
-pr:
+pr: 1188
 mods: kingdoms
 versions:
 started: 2026-11-09
 owns:
   - kingdoms/art/minotaur.bbmodel
+  - kingdoms/art/minotaur-render.png
+  - kingdoms/art/minotaur-animations.png
   - kingdoms/art/minotaur-CREDITS.md
   - kingdoms/art/minotaur-LICENSE.txt
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/models/entity/minotaur.geo.json
@@ -35,4 +37,4 @@ owns:
 - Source: “Minotaur” by eanncrod, Blockbench Workshop, CC BY 4.0.
 
 ## Done
-Work in progress; not yet tested in game.
+PR #1188 moves the minotaur to GeckoLib with calm/hostile idles, walk, charge run, alternating hammer swings and slam, preserving its gameplay stats and AI. Editable CC BY 4.0 source, licence, credit and inspected front/side/back plus animation renders are included. Kingdoms and root builds and PR checks pass; a dedicated dev server reached `Done`. No client visual playtest was performed.
