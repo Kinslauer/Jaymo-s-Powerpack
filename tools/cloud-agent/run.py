@@ -5,7 +5,9 @@ sandbox (README.md beside this). Meant for YOUTH (Hermes) on Andy's PC; works fr
     py tools/cloud-agent/run.py task <inbox-task>      # do an Inbox task; keeps its status in the vault
     py tools/cloud-agent/run.py prompt "<what to do>"  # do something that isn't an Inbox task
 
-Needs ANTHROPIC_API_KEY and GITHUB_TOKEN in the environment (never in a file), `pip install anthropic`, and the IDs
+Needs ANTHROPIC_API_KEY and GITHUB_TOKEN in the environment (never in a file; on Windows, when the shell that runs this
+has them stripped, as Hermes does for every command, they're read from the user's saved environment variables),
+`pip install anthropic`, and the IDs
 `ant apply` wrote to tools/cloud-agent/claude-lock.json. Prints the agent's messages as it works and the session's
 Console link; exits 0 with a PR, 2 when the agent needs Andy, 1 on anything else.
 """
@@ -43,6 +45,32 @@ RUBRIC = """# Powerpack task rubric (starter)
 If the agent stopped because a decision is Andy's to make, criterion 1 is met instead by a last line
 `BLOCKED: <a specific question>`, and the rest are judged on the work done so far.
 """
+
+
+KEYS = ("ANTHROPIC_API_KEY", "GITHUB_TOKEN")
+
+
+def load_keys():
+    """Each key from the environment, or, on Windows when it's missing there, from the user's saved environment
+    variables (the registry's current-user Environment key). Hermes strips API keys and tokens from every command YOUTH runs, by
+    design, so this is how YOUTH's runs get them; they're only set in this process, and never printed or written."""
+    missing = [k for k in KEYS if not os.environ.get(k)]
+    if missing and sys.platform == "win32":
+        import winreg
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as env:
+                for k in missing:
+                    try:
+                        value, _ = winreg.QueryValueEx(env, k)
+                    except OSError:
+                        continue
+                    if value:
+                        os.environ[k] = str(value)
+        except OSError:
+            pass
+    still = [k for k in KEYS if not os.environ.get(k)]
+    if still:
+        raise SystemExit(f"Missing {', '.join(still)}: set it as a user environment variable (README.md, One-time setup)")
 
 
 def lock_id(path):
@@ -136,6 +164,7 @@ def run(client, title, task_text):
 def main():
     if len(sys.argv) < 2 or sys.argv[1] not in ("credentials", "task", "prompt"):
         raise SystemExit(__doc__)
+    load_keys()
     client = anthropic.Anthropic()
     if sys.argv[1] == "credentials":
         return credentials(client)

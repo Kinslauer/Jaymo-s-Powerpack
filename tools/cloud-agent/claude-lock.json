@@ -9,10 +9,10 @@
     "./agents/powerpack-builder.md": {
       "kind": "agent",
       "id": "agent_01C8KTpD7f5C6i5t71ccSToB",
-      "version": "1",
-      "hash": "295c6069c93e55268b8d367503e1f436",
-      "remote_hash": "19a7f97e57e48c12aa93d0872a13e6ae",
-      "stamp": "1"
+      "version": "2",
+      "hash": "41fd67ea83918757a5ed2c889a86369f",
+      "remote_hash": "4dd215077d11ecec1efdbfc0e3b34f8e",
+      "stamp": "2"
     },
     "./environments/powerpack-build.yaml": {
       "kind": "environment",
