@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: open
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -26,3 +26,4 @@ Tiv, in the Tasks thread: "Have Prometheus try his hand at the travelers journal
 - If the layout needs new textures, generate them and say in the PR what a player will see.
 - Ask Tiv for a screenshot or two if you want to know which page bothers him most before you start.
 - 2026-11-08 23:00 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 08:35 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.

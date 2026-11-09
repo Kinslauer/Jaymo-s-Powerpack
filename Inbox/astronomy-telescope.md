@@ -1,12 +1,14 @@
 ---
-status: open
+status: writing
 for: prometheus
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
-claimed_by:
-pr:
+claimed_by: hermes-modeller
+pr: 1189
 suggested_owns: []
+text_pass: 
+writer: hermes-writer
 ---
 
 # Astronomy 2: the telescope
@@ -30,3 +32,7 @@ From the pick-list, rows **The telescope** and **Measurements that can fail**:
 ## Also ours to decide
 
 Whether one telescope is enough or there are tiers (basic, mounted, brass) — decide and say why in the PR.
+- 2026-11-09 08:34 Andy (2026-11-09): Prometheus to start on the telescope.
+- 2026-11-09 09:05 Question: PR #1185 now supplies the base telescope art. For continuous per-block azimuth/elevation, should I convert that model to an articulated GeckoLib rig after #1185 merges rather than open a duplicate static-model PR?
+- 2026-11-09 09:28 Andy (2026-11-09): use GeckoLib. After #1185 merges, convert its telescope model into an articulated GeckoLib rig (base, azimuth turn, elevation tilt) instead of a second static-model PR; follow docs/AI-HANDBOOK.md 'Adding a GeckoLib mob to Kingdoms' for the GeckoLib setup.
+- 2026-11-09 10:03 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.

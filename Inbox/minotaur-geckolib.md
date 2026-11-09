@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "lets do the minotaur because its an actual blockbench model")
-claimed_by: 
-pr: 
+claimed_by: hermes-modeller
+pr: 1188
 suggested_owns:
   - kingdoms/art/minotaur.bbmodel (+ minotaur-CREDITS.md, minotaur-LICENSE.txt beside it)
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/models/entity/minotaur.geo.json
@@ -14,6 +14,8 @@ suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/beasts/Minotaur.java
   - kingdoms/src/client/java/com/jaymoskingdoms/client/beasts/BeastsClient.java (the minotaur's line only)
   - changes/kingdoms/<branch-name>.md
+writer: hermes-writer
+text_pass: done
 ---
 # Minotaur: move it to GeckoLib (modelling bot)
 
@@ -64,3 +66,4 @@ game yet (facing, size and the hammer's place need a look in game).
 ## Notes
 - Only the minotaur. If it goes well Andy may move the other `BbMobRenderer` beasts (Piglin King, redstone golem,
   skulk golem, ...) and later the hand-made dragon models (Stegonaut first) the same way: those are separate tasks.
+- 2026-11-09 09:52 Text pass: reviewed change note (changes/kingdoms/claude-minotaur-geckolib.md) — already clear, player-focused, has 'Not tested in game' line. No lang parts, dialogue, hints, or other player text added/changed for minotaur in this PR. Build and PR checks pass.

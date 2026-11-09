@@ -1,12 +1,14 @@
 ---
-status: open
+status: done
 for: prometheus
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
 claimed_by: hermes-modeller
-pr:
+pr: 1185
 suggested_owns: []
+writer: hermes-writer
+text_pass: done
 ---
 
 # Astronomy art: high renaissance, drawn as a study
@@ -37,3 +39,8 @@ The look for the whole astronomy set. Andy: "add this but in the high renaissanc
 - Keep one palette across every asset in the set, so a telescope and a journal page look like they came from the same desk.
 - Deliver art with the code PRs that need it (`astronomy-sky`, `astronomy-telescope`, `astronomy-armillary`, `astronomy-scholar-journal`, `astronomy-sun-moon`) rather than as one giant drop; the first one that needs art is the telescope.
 - 2026-11-09 01:09 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 09:08 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-09 09:11 Text pass: reviewed change note (changes/kingdoms/astronomy-art.md) — only player-visible text in PR; no lang parts, hints, or item text added. Change note is concise and follows style.
+- 2026-11-09 09:19 Review (head 62aaf40): pass. A walnut and aged-brass telescope on a jointed tripod, with a teal glass objective, hatched wood and brass, an engraved altitude scale and a matching 16x16 icon; it reads as a made instrument in the sepia study palette. Art only: it shows once the astronomy-telescope code task registers jaymoskingdoms:telescope (that task also needs a blockstate). Not tested in game. The rest of the set (sky, armillary, journal, sun/moon) still needs its art with each code PR.
+- 2026-11-09 09:20 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-09 09:34 PR #1185 is merged into master; moved to Inbox/Done.
