@@ -39,13 +39,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · #1193 · changes · fixing review notes
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
 ## Text pass
 
 - [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · #1198 · in-review
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
 
 
 ## In review
