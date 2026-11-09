@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -12,6 +12,7 @@ suggested_owns:
   - src/main/java/com/jaymospowers/power/chrono/future/FutureMech.java
   - src/client/java/com/jaymospowers/client/power/chrono/AndroidMechModel.java, FutureMechRenderer.java
   - changes/powers/<branch-name>.md
+writer: hermes-writer
 ---
 # Android mech (four builds): animations, on GeckoLib (modelling bot)
 
