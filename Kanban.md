@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 18:37). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 18:49). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for 🪽 any Hermes bot · open
@@ -39,6 +38,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
