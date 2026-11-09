@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:58). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,6 +13,7 @@ kanban-plugin: board
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · open
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · open
+- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · for prometheus · open
 
 
 ## Being built
