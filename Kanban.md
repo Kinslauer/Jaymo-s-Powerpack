@@ -41,18 +41,18 @@ kanban-plugin: board
 
 - [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · #1193 · changes · fixing review notes
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
 ## Text pass
 
 - [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · 🪶 Quill · #1194 · writing
-- [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🔥 Prometheus · #1195 · in-review
+- [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🪶 Quill · #1195 · writing
 
 
 ## In review
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · #1193 · in-review
 
 
 ## Needs Andy
