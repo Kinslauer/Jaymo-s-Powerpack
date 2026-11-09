@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by:
+claimed_by: hermes-b
 pr:
 suggested_owns: [kingdoms/src/main/java/com/jaymoskingdoms/FarmhandHome.java, kingdoms/src/main/java/com/jaymoskingdoms/Peoples.java, kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/talk.json]
 ---
