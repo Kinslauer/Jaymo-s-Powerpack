@@ -30,8 +30,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · 🤖 Apollo · claimed
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · claimed
+- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · 🤖 Apollo · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
