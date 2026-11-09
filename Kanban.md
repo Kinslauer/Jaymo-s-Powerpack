@@ -21,7 +21,6 @@ kanban-plugin: board
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · 🔥 Prometheus · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
@@ -30,6 +29,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/journal-refresh|journal-refresh]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
