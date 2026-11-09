@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: done
 task: ore-hearts
 branch: claude/ore-hearts
 with:
@@ -45,3 +45,4 @@ owns:
   (one missing `Identifier` import). Full remaining-work checklist is in the task's `## Stall report`.
 
 ## Done
+- 2026-11-09 Andy: remove the old note. Moved to Done; the task itself is open in the Inbox and the WIP is on `claude/ore-hearts` (fa72e7dea).
