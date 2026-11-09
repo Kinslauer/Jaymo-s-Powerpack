@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: android-mech-geckolib
 branch: claude/android-mech-geckolib
 with: 
@@ -41,3 +41,4 @@ owns:
 
 ## Done
 PR #1195: all four android mech builds share an editable 33-bone GeckoLib rig with idle, old-pose walk/aim, cannon, shell, smash, hurt and held death animations; original skins, optional equipment and glow are preserved. Full build and PR checks pass; generator output is reproducible and all renders were inspected. Not tested in game: two dev-server attempts stopped before world load on unrelated missing Fabric API/Resourceful Lib dependencies.
+- 2026-11-09 13:14 PR #1195 is merged into master; moved to Agents/Done.
