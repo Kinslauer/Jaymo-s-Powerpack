@@ -33,6 +33,7 @@ kanban-plugin: board
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · hermes-a · claimed
 - [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · hermes-modeller · claimed
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · #1176 · changes · fixing review notes
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · changes · fixing review notes
 
 
 ## Text pass
@@ -48,7 +49,6 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · #1185 · ready
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · #1186 · ready
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · blocked
 
 
 ## Done
