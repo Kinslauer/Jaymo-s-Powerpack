@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: parasites-and-cures
 branch: claude/parasites-and-cures
 with: 
@@ -27,4 +27,4 @@ owns:
 - Slow and survivable — a reason to boil water, not a death sentence.
 
 ## Done
-What a player will see, and what wasn't tested.
+Dirty water applies a slow, survivable parasite instead of nausea; hot chocolate cures it. PR #1165 opened; buildKitchen and pr_checks pass; not tested in game.
