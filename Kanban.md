@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 16:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 16:58). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -52,11 +52,11 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · #1198 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · #1198 · ready
 
 
 ## Done
