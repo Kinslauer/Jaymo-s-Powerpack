@@ -3,9 +3,29 @@
 The canon of Jaymo's Powerpack / Kingdoms. This is the one place lore lives: if a task, a plan doc or a line of
 dialogue disagrees with this page, this page wins until Andy changes it here.
 
-Everything below was already in the game or in a plan doc on 2026-11-09. Nothing here is new invention — it is the
-existing canon written down in one place so text can be written against it. Andy adds to it; nothing is removed
-without him saying so.
+Most of what is below was already in the game or in a plan doc; the rest is what Andy has added to this page since
+2026-11-09. Andy adds to it, and nothing is removed without him saying so.
+
+## The ages of the world
+
+**The Warrior-born age.** A fighting blood that lived by pillage and murder, and were still doing it when their own
+world was destroyed. They did not grieve it. They took to the dark between worlds and raided other people's worlds
+instead, the Overworld among them — which is why every settled people remembers lights in the sky and keeps a watch
+for them.
+
+**The long defence.** The mana spirits — Ambrose, Grimsby, Thessaly, Varro, the Quiet One — were each a talent in
+their own right before they were spirits, and between them they held the Overworld against the likes of the
+Warrior-born and the orcs alike.
+
+**The vacuum.** Raiding across the void could only be sustained so long. The Warrior-born thinned, and their place was
+taken from below: over time the **orcs** became the dominant force in the wild, and the **pillagers** rose into the
+Warrior-born's vacuum — the same work, done by people who never left the world to do it. What was a war from the sky
+became an ordinary, grinding one on the ground.
+
+**The taking back (now).** More and more Overworlders are uncovering ki control and going out to look at the world
+around them — and they are taking back the world they once knew. This is the present age, and the reason a player
+starts as a farmhand and ends up in the tier of songs: the world is not lost, it is being retaken, one village, one
+ruin and one raider at a time.
 
 ## The shape of the world
 
@@ -37,6 +57,21 @@ What folk believe about the sky (from village talk, not proven):
 - Some stars never move with the rest — "because they aren't hung on the same nail".
 - The giants by the old stones did not come out of the mountains; they came **down**. Some of the stones still hum.
 - Some days the rain tastes sweet, "like it fell from somewhere nobody's ever muddied".
+
+## The Maw
+
+The Maw is a black hole in an empty void, ringed in glowing glass, with nine wrecks floating round it and a landing
+pad at the edge. Salvagers go out along the deck plates to the wrecks for what they carry — netherite scrap, echo
+shards, elytra, enchanted golden apples, Hermit Beans — and come home with dust on their hands that no water takes.
+Maw dust still shines, and a lens made with it sees what lies ahead of a pod. The pull is slow; the tide at the hole
+kills.
+
+**What it is** (Andy, 2026-11-09): the Maw is the remnants of the Warrior-born's homeworld — the world that was
+destroyed. The wrecks are not strangers' pods; they are what is left of a murdered planet and the fleets that died
+with it.
+
+**Design consequence**, not yet built: the Maw should be remade as that — ruins of a dead world rather than a black
+hole with loot floats — so a player who goes there is walking in the grave of the people who now raid the Overworld.
 
 ## The eight faiths
 
@@ -103,7 +138,9 @@ finished the work. He is said to still wander.
 
 ## The spirits
 
-Four mage-spirits wake with you and share your mana; each has a voice of their own and keeps it.
+Four mage-spirits wake with you and share your mana; each has a voice of their own and keeps it. Each was a talent in
+their own right before they were a spirit — a keeper, a wizard, a scholar, a soldier — and together they held the
+Overworld when the Warrior-born and the orcs came at it. That is what they were made for, and they have not stopped.
 
 - **Ambrose, the Warden** — gentle, calls you "little one". Calms rather than kills; a beaten ogre walks with you after
   he lays a hand on it.
@@ -127,7 +164,11 @@ Twenty-two heritages. The plain folk and the elemental bloods:
 - **Emberborn** — born of the badlands and burning places; flame cannot touch them, the frost saps them.
 - **Frostborn** — highlanders of the snowfields and peaks; the heat wears them thin.
 - **Nightborn** — their mother's people kept to the night; the daylight dulls them. The Dawnborn have never trusted them.
-- **Warrior-born** — an old fighting blood that came down from the stars. Strongest when losing, and never full for long.
+- **Warrior-born** — an old fighting blood that came down from the stars, and the reason the word "star" makes an
+  Overworlder reach for a weapon. Their ancestry is pillage and murder: they took what they wanted, killed what
+  objected, and were still doing it when their own world was destroyed. They did not grieve it — they took to the dark
+  between worlds and have been raiding other people's worlds ever since. Strongest when losing, and never full for
+  long.
 - **Earthling** — plain human blood, born to train; whatever they set a hand to, they learn fast.
 - **Stormborn** — the people of the high peaks where the storms break. "Some say it wakes in those whose wind the storm
   has taken."
@@ -154,6 +195,51 @@ The peoples not born to the realms, born only to their own:
   human kingdom finds them repulsive and no mask hides it.
 
 Also in the world: ogres, giants, piglins with a king, and the drowned.
+
+## Why the peoples don't like each other
+
+Every grudge below rests on something the game already does to a blood, or on an old quarrel in the faiths. They
+should read as old, ordinary and inherited — nobody in a village is arguing about them; the villagers simply live by
+them.
+
+**Warrior-born against everyone, and everyone against them.** The load-bearing one. A Warrior-born is a raider's
+descendant, and their blood is pillage, murder and a murdered planet. Every settled people remembers the lights in the
+sky, and a Warrior-born is watched rather than welcomed — the one hatred shared by folk who hate each other.
+
+**Orc and Goblin against the realms.** No realm will have either. The orcs took the Warrior-born's place in the wild
+and are counted a threat in the same breath as them; goblins sell their own king and are trusted accordingly. A
+half-orc raised among folk catches the suspicion from both sides.
+
+**Nightborn and Dawnborn.** Daylight dulls the one and feeds the other, and neither has ever trusted the other. A
+Nightborn keeps the Lantern Warden, a Dawnborn keeps the Crowned Sun, and each quietly blames the other's god.
+
+**Emberborn and Frostborn.** Fire and frost, in the blood and in the land: each flourishes where the other starves, and
+each has spent generations being told the other's country is not worth having.
+
+**Emberborn and Verdant.** The Verdant are sun-fed and green, and fire burns them half again as long. The Emberborn are
+the people of the burning places. Nothing is forgiven there.
+
+**Tideborn and Stoneborn.** The sea against the mine, wearing the two gods' quarrel as a family argument: the Deep
+Mother has never forgiven the Anvil-Father, and the Tideborn and Stoneborn inherited all of it.
+
+**Stoneborn and Sylvan.** The mountain and the wood. One cuts the other's hills open; the other's trees keep falling
+across the miners' roads.
+
+**Deepborn and everyone above.** They came up from the deep dark changed, hear the world through stone, and find sun and
+noise hard to bear. Folk above call them things that crawled out of a hole, and are not entirely wrong.
+
+**Hollow and the living.** The grave's cold stays in them and the living know them on sight — a Hollow is what a dead
+man's wound makes of you, and no village is easy with the proof of that standing at the well.
+
+**Divine and the wicked**, and, quietly, Divine and everyone else. They are warm to the touch and quick to mend, and the
+wicked know them for what they are; ordinary folk are never quite sure which side of that line they are standing on.
+
+**Biobuilt and all the rest.** Made from the blood of every heritage but the Dawnborn and the Divine — to each bloodline
+that is an insult, a theft and a horror at once, and no mask hides what they are. Every human kingdom finds them
+repulsive.
+
+**The plain folk and every marked blood.** Heartlanders and Earthlings have nothing in their blood, which is exactly why
+they are the ones who keep the tally of what every other blood has done to them.
 
 ## The realms and their creeds
 
