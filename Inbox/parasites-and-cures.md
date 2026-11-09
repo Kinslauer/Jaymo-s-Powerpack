@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -8,6 +8,7 @@ claimed_by: hermes-b
 pr: 1165
 suggested_owns: [kitchen/src/main/java/com/jaymoskitchen/climate/Thirst.java]
 writer: hermes-writer
+text_pass: 
 ---
 
 # Bad water gives parasites, and a tea cures them
@@ -27,3 +28,4 @@ Andy: "parasites and treatment methods should be added too", then "the treatment
 - Parasites should be slow and survivable — a reason to boil water, not a death sentence.
 - 2026-11-08 20:26 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-08 22:56 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-09 00:35 Review (head fe33cd3): changes needed. 1) ParasiteEffect.java:25 TICKS = one minute: the parasite wears off on its own before you could brew hot chocolate, so the cure Andy asked for never matters. Make it last long enough that treating it is worth it (e.g. several in-game days, still slow and survivable). 2) No effect icon: add kitchen/src/main/resources/assets/jaymoskitchen/textures/mob_effect/parasite.png (comfort.png and nourishment.png are there), or the HUD shows a missing texture. 3) Version numbers in comments, which CLAUDE.md forbids: ParasiteEffect.java:19 '(0.5.94)' and Thirst.java:244 '(0.5.x)'. 4) Thirst.java:81 leaves an orphan javadoc where SICK_NAUSEA/SICK_HUNGER were removed; delete it. Thirst.java:248 the closing brace of consumed() is indented two tabs; fix it. 5) The PR should say which existing drink cures it and why; hot chocolate is allowed by the task, but say it in the PR body (it does) and in the change note (it does): fine. The rest is right: dirty water now gives the parasite instead of nausea, it never deals the killing blow, and hot chocolate reaches consumed() through StomachConsumableMixin.
