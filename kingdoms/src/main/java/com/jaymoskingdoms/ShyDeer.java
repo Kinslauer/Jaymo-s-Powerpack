@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -14,12 +18,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.random.Weighted;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -31,9 +39,14 @@ import org.jspecify.annotations.Nullable;
  * interaction".
  *
  * <ul>
+ * <li><b>Herds of 3 to 10</b> ({@link #registerHerds}, and {@code mixin/tweaks/DeerHerdMixin}): Andy (2026-11-08): "Packs
+ * of deer should vary anywhere from 3 to 10 but no more." Naturalist's deer entry in every biome comes as
+ * {@link #HERD_LEAST}-{@link #HERD_MOST} (any size in between as likely) at its own weight, and one natural spawn stops at
+ * {@link #HERD_MOST} deer (vanilla's cap is 4).</li>
  * <li><b>Fewer, still in herds</b> ({@link #mayGraze}, from {@code mixin/tweaks/DeerSpawnMixin}): whether a herd may
  * come is decided once for each {@link #CELL}-block patch of ground at a time ({@link #HERD_SHARE} of them), so a herd
- * that comes comes whole; none once {@link #CROWD} deer are already within {@link #CROWD_RANGE}; and never in the Nether.</li>
+ * that comes comes whole; none once {@link #CROWD} deer are already within {@link #CROWD_RANGE} (not counting the herd
+ * arriving right now, so it isn't cut short); and never in the Nether.</li>
  * <li><b>Skittish</b>: a deer bolts from any player within {@link #FLEE_RANGE} ({@link #SNEAK_RANGE} if they're sneaking),
  * running {@link #FLEE_RUN} blocks away.</li>
  * <li><b>Scared off your home</b>: a player's home is their bed. The first time a deer bolts from a player within
@@ -43,6 +56,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ShyDeer {
 	static final Identifier DEER = Identifier.fromNamespaceAndPath("naturalist", "deer");
+	/** A herd that spawns on its own is this many deer at least and at most (any size in between as likely). */
+	public static final int HERD_LEAST = 3, HERD_MOST = 10;
 	/** The share of patches of ground a herd may come to, how big a patch is (blocks), and how long one's choice holds (ticks). */
 	static final float HERD_SHARE = 0.15F;
 	static final int CELL = 64;
@@ -68,6 +83,32 @@ public final class ShyDeer {
 	static void register() {
 		JaymosKingdoms.LOGGER.debug("deer attachment: {}", SCARED);
 		ServerTickEvents.END_LEVEL_TICK.register(ShyDeer::tick);
+		registerHerds();
+	}
+
+	/** After every mod has added its spawns, Naturalist's deer come in herds of {@link #HERD_LEAST}-{@link #HERD_MOST}. */
+	private static void registerHerds() {
+		if (!FabricLoader.getInstance().isModLoaded(DEER.getNamespace())) {
+			return;
+		}
+		BiomeModifications.create(JaymosKingdoms.id("deer_herds")).add(ModificationPhase.POST_PROCESSING, BiomeSelectors.all(), context -> {
+			var spawns = context.getMobSpawnSettings();
+			for (MobCategory category : MobCategory.values()) {
+				List<Weighted<MobSpawnSettings.SpawnerData>> redo = new ArrayList<>();
+				for (Weighted<MobSpawnSettings.SpawnerData> entry : spawns.getMobs(category)) {
+					if (isDeer(entry.value().type())) {
+						redo.add(entry);
+					}
+				}
+				if (redo.isEmpty()) {
+					continue;
+				}
+				spawns.removeSpawns((cat, data) -> cat == category && isDeer(data.type()));
+				for (Weighted<MobSpawnSettings.SpawnerData> entry : redo) {
+					spawns.addSpawn(category, new MobSpawnSettings.SpawnerData(entry.value().type(), UniformInt.of(HERD_LEAST, HERD_MOST)), entry.weight());
+				}
+			}
+		});
 	}
 
 	private static @Nullable EntityType<?> deer() {
@@ -97,7 +138,8 @@ public final class ShyDeer {
 		}
 		if (reason == EntitySpawnReason.NATURAL && accessor instanceof ServerLevel server) {
 			EntityType<?> type = deer();
-			if (type != null && server.getEntities(type, new AABB(pos).inflate(CROWD_RANGE), e -> true).size() >= CROWD) {
+			// (deer that haven't ticked yet are the herd coming now: spawning runs before entities tick)
+			if (type != null && server.getEntities(type, new AABB(pos).inflate(CROWD_RANGE), e -> e.tickCount > 0).size() >= CROWD) {
 				return false;
 			}
 		}
