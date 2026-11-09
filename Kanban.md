@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:49). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,7 +36,6 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
 
 
 ## In review
@@ -51,6 +50,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/blight-mobs|blight-mobs]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
@@ -58,7 +58,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/kitchen-brick-split|kitchen-brick-split]]
 - [x] [[Inbox/Done/blindness|blindness]]
 - [x] [[Inbox/Done/impaler-model|impaler-model]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 
 
 %% kanban:settings
