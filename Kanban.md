@@ -4,43 +4,43 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:43). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 18:44). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · open
+- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
-- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☀️ Apollo · claimed
-- [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
+- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · claimed
+- [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
 ## Text pass
@@ -60,14 +60,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/astronomy-armillary|astronomy-armillary]]
-- [x] [[Inbox/Done/aetherion-geckolib|aetherion-geckolib]]
-- [x] [[Inbox/Done/android-mech-geckolib|android-mech-geckolib]]
 - [x] [[Inbox/Done/skilltree-sidebar-reflow|skilltree-sidebar-reflow]]
-- [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
 - [x] [[Inbox/Done/journal-refresh|journal-refresh]]
+- [x] [[Inbox/Done/astronomy-armillary|astronomy-armillary]]
+- [x] [[Inbox/Done/android-mech-geckolib|android-mech-geckolib]]
+- [x] [[Inbox/Done/aetherion-geckolib|aetherion-geckolib]]
+- [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
 - [x] [[Inbox/Done/astronomy-telescope|astronomy-telescope]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]]
 
 
 %% kanban:settings
