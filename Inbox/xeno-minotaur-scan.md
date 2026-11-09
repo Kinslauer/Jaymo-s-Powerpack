@@ -28,21 +28,23 @@ A bull-headed brute, heavy through the shoulders, horns, the same build as the t
 ## Its kit (Tiv's spec)
 
 1. **The charge (held).** Hold the key and it lowers its head and goes:
-   - it breaks blocks as it goes — it ploughs through the world rather than being stopped by it;
-   - an enemy caught on the horns is carried along with it;
+   - **it can steer, but barely**: a very narrow arc, under 30° — it goes where it was pointed, and turning is a slow lean, not a run round a corner;
+   - it breaks through **dirt, wood and leaves** — not stone, and it doesn't matter who placed the block: no owner is spared, no claim protects a wall of planks;
+   - an enemy caught on the horns is carried along with it, and **stunned after every impact** it takes on the way;
+   - that enemy is not helpless: they can swing at the xeno while being carried, with whatever they have in hand, and it plays out as a punch or a blow with that weapon;
    - damage climbs with every object it puts them through — the more it hits on the way, the worse it is for whoever it's carrying;
-   - hitting something solid, stone and the like, **runs the opponent through**: the charge stops and that one takes heavy damage to the torso;
-   - **the xeno is invulnerable for the whole charge.**
+   - **stone stops it dead**: hitting something solid runs the opponent through, the charge ends there, and that one takes heavy damage to the torso;
+   - **the xeno is invulnerable for the whole charge** (but the carried enemy can still hit it, per above — that's the one thing that gets through).
 2. **The roar (held).** A shockwave that goes out from it, and the longer the key is held the further and harder it goes.
 3. **Big weapons.** It can take up the same weapon the minotaur carries (the great hammer) and large weapons of all sorts — our `TwoHanded` (Better Combat's `two_handed`: claymores, war axes, glaives, spears, scythes and the rest) is the ready-made answer for what counts.
-4. **The minotaur's own attacks.** Its blows are the minotaur's: the hammer swing, the slam that throws everyone around it off their feet, and the gore.
+4. **The minotaur's own attacks.** Its blows are the minotaur's: the hammer swing, the slam that throws everyone around it off its feet, and the gore.
 
-## Open questions to settle in the build
+## Still to settle in the build
 
-- Who steers the charge once it starts, and can it be turned at all.
-- What the carried enemy is doing while carried (held on the horns? ridden along in front?) and whether they can be dropped early.
-- Whether "objects" means blocks only or creatures too, and whether the damage ramp resets per charge.
+- What the carried enemy is doing while carried — held on the horns, or ridden along in front — and whether they can be dropped early.
+- Whether the damage ramp counts creatures as well as blocks, and whether it resets per charge.
 - "Runs them through" wants the torso: `Breaks` already has body parts, so a torso wound or break is the honest result, not just a number.
-- Which blocks the charge may break — stone and dirt yes, but not obsidian, bedrock or anything a claim protects, and it must not chew through someone's build.
-- How long invulnerability lasts (whole charge, or a moment past its end) and what it does and doesn't stop.
+- How the carried enemy's blows land while they're pinned: normal damage through the invulnerability, or their own reduced number.
+- What the roar does to whoever is caught by it (damage, knockback, deafening, fear) and how the growth is measured.
+- How long invulnerability lasts (whole charge, or a moment past its end).
 
