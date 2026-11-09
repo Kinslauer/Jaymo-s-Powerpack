@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: mimic
 branch: claude/mimic
 with: hermes-b (initial investigation)
@@ -46,3 +46,6 @@ Existing (unrelated) "Mimic" mobs: Powers Aether dungeon mimic (sentry crate tha
 - Read ChronoEcho, ChronoEchoes, ChronoMemory, ChronoPower; lang parts/chrono.json echo keys.
 - PR #1158: original Mimic true-form `.bbmodel`, 128×128 texture, GeckoLib 5 geometry and seven animations, plus exact front/left/back/right inspection render and original-art credit.
 - No immediate player-visible change: behaviour and renderer wiring are separate. Validated 61 fully mapped opaque cubes, 21 unique bones and all animation targets; exact four-view render visually checked. Full `sh ./gradlew build` and `tools/pr_checks.py` passed. Not tested on a live entity in game.
+
+## Notes
+- 2026-11-08 20:26 PR #1158 is merged into master; moved to Agents/Done.
