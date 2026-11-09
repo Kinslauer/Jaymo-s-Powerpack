@@ -31,7 +31,6 @@ kanban-plugin: board
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · for 🪽 any Hermes bot · open
 
@@ -46,6 +45,7 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
+- [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · for 🔥 Prometheus · #1194 · in-review
 
 
 ## In review
