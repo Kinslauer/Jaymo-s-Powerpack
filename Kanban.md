@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:02). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,7 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · for 🔥 Prometheus · open
@@ -39,6 +38,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
