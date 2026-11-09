@@ -25,3 +25,4 @@ Tiv, in the Tasks thread: "Have Prometheus try his hand at the travelers journal
 - Our own art only — no assets lifted from another mod.
 - If the layout needs new textures, generate them and say in the PR what a player will see.
 - Ask Tiv for a screenshot or two if you want to know which page bothers him most before you start.
+- 2026-11-08 23:00 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
