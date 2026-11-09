@@ -30,3 +30,4 @@ From the pick-list, rows **The telescope** and **Measurements that can fail**:
 ## Also ours to decide
 
 Whether one telescope is enough or there are tiers (basic, mounted, brass) — decide and say why in the PR.
+- 2026-11-09 08:34 Andy (2026-11-09): Prometheus to start on the telescope.
