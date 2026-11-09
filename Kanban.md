@@ -19,7 +19,6 @@ kanban-plugin: board
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🤖 Bacchus · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for 🤖 a Hermes bot · open
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🤖 Prometheus · open
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🤖 a Hermes bot · open
@@ -32,6 +31,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · claimed
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🤖 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
