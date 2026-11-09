@@ -26,3 +26,4 @@ Andy: "parasites and treatment methods should be added too", then "the treatment
 - The parasite effect itself has to be ours (a Kitchen mob effect or a body component), since ours replaces poison rather than borrowing it.
 - Parasites should be slow and survivable — a reason to boil water, not a death sentence.
 - 2026-11-08 20:26 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-08 22:56 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
