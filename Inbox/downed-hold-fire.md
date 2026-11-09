@@ -32,3 +32,4 @@ Tiv posted a clip of it happening (message 1569172190673248330 in the Tasks thre
 - The player goes down: "You're down. They leave you lying there." Camera drops to grass level, an MCA villager lies prone nearby, an armoured MCA villager ("Tikes!") stands over them.
 - The player is then killed anyway, a few seconds later, while still on the ground: "Marcellino was slain by Mile", then the death screen ("You lie where you fell, left for dead...").
 - So the message says they leave you lying there and the guard/Villager finishes the job regardless. That contradiction is the bug in one line.
+- 2026-11-09 09:44 hermes-a's last run stopped before finishing; handed back as open so it can carry on.

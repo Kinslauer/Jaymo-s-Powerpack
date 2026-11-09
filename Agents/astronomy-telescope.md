@@ -28,7 +28,7 @@ owns:
 - Keep registration, saved aim, skills and observation rules for the gameplay implementation; no gameplay Java in this pass.
 
 ## Notes
-- PR #1185 has merged, and Andy confirmed GeckoLib on 2026-09-09.
+- PR #1185 has merged, and Andy confirmed GeckoLib on 2026-11-09.
 - One walnut/brass telescope is enough for this pass; the Altazimuth Mount can use the same rig and its physical scales rather than duplicating tiers.
 - `astronomy-sky` and observation behaviour remain separate dependencies.
 
