@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: skilltree-sidebar-reflow
 branch: claude/skilltree-sidebar-reflow
 with:
@@ -28,3 +28,4 @@ owns:
 
 ## Done
 Work in progress; not yet tested in game.
+- 2026-11-09 12:04 PR #1190 is merged into master; moved to Agents/Done.
