@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · for hermes · open
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · for hermes · open
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · for hermes · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
@@ -20,6 +19,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · claimed
+- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
 - [ ] [[Agents/kitchen-cookware-melt|kitchen-cookware-melt]] · running
 
 
