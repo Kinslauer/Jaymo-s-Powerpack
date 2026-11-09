@@ -60,18 +60,33 @@ What folk believe about the sky (from village talk, not proven):
 
 ## The Maw
 
-The Maw is a black hole in an empty void, ringed in glowing glass, with nine wrecks floating round it and a landing
-pad at the edge. Salvagers go out along the deck plates to the wrecks for what they carry — netherite scrap, echo
-shards, elytra, enchanted golden apples, Hermit Beans — and come home with dust on their hands that no water takes.
-Maw dust still shines, and a lens made with it sees what lies ahead of a pod. The pull is slow; the tide at the hole
-kills.
+The Maw is the remnants of the Warrior-born's homeworld — the world that was destroyed. The wrecks are not strangers'
+pods; they are what is left of a murdered planet and the fleets that died with it.
 
-**What it is** (Andy, 2026-11-09): the Maw is the remnants of the Warrior-born's homeworld — the world that was
-destroyed. The wrecks are not strangers' pods; they are what is left of a murdered planet and the fleets that died
-with it.
+What a player finds there (Andy's picture, 2026-11-09): the broken planet still hangs in its own gravitational pull,
+almost static, suspended in the air — and underneath it there is no void but a war-torn desolate wasteland, ruined
+buildings and broken architecture stretching away in every direction. The Lost Cities that were made for Los Perrito
+are so large they never generate on their own; under the Maw they can, which fills the ground beneath the planet
+instead of leaving nothing. So the place reads as a world caught mid-collapse over the country it used to be: the
+planet above, the wasteland below, and the pull between them.
 
-**Design consequence**, not yet built: the Maw should be remade as that — ruins of a dead world rather than a black
-hole with loot floats — so a player who goes there is walking in the grave of the people who now raid the Overworld.
+The salvager's trade stays as it is: deck plates out to the nine wrecks for netherite scrap, echo shards, elytra,
+enchanted golden apples and Hermit Beans, dust on your hands that no water takes, Maw dust that still shines and makes
+a lens that sees what lies ahead of a pod. The pull is slow; the tide at the hole kills.
+
+## The future: Los Perrito
+
+The future a Chrono can leap to is Los Perrito City ruined — always night, the streets wrecked, feral hordes in them,
+old guns and war machines still running. It is the same war that destroyed the Maw, seen from the other end: still
+being fought long after, only now the enemy is the dead rather than the living Warrior-born.
+
+The hints, all of them visible and none of them spoken (Andy, 2026-11-09):
+
+- The zombies and husks of the future are **Warrior-born** — tails tattered, or cut away entirely. You are fighting the
+  descendants of the people who lost that war, and they are still fighting it.
+- The ruin is neon and wreckage: the city as it was, destroyed in a way that looks recent because, in that place, it is.
+- Nothing explains any of this. It arrives through villager talk, rumour and gossip, and through what the player can see
+  for themselves. No book says "this is the Warrior-born homeworld"; a tail in the dark says it.
 
 ## The eight faiths
 
@@ -262,6 +277,9 @@ over to listen back. The writer stopped going to the shore.
 
 ## Rules for writing against this
 
+- **Nothing explains the old war.** The Warrior-born, the Maw, the future and the loss of the world are shown, never
+  told: a tattered tail, a street that was neon, a stone that hums, a villager who will not go to the shore after dark.
+  Villagers gossip and rumour; nobody lectures the player.
 - Villagers speak plainly and keep one attitude through a whole conversation. No discovery chat text — sounds and
   speech bubbles instead.
 - Study text (the astronomy pages, the bestiary's honest notes) is not lore: it teaches the mechanic, including where

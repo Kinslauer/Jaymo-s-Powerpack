@@ -19,9 +19,21 @@ pods — they are the ruins of a murdered planet and the fleets that died with i
 the dark between worlds and raided others instead; the Overworld among them.
 
 **What's wanted:** a plan, not code yet. Read what the Maw is today, then say what it should become so a player who
-flies out there feels they are standing in the grave of a world: the wrecks as broken land and dead cities rather than
-pods, the loot as salvage from a civilisation, the dust and the black hole given a reason. Keep the parts that already
-work (the slow pull, the tide at the hole that kills, the deck plates, the part sets, Maw dust and the starlit lens).
+flies out there feels they are standing in the grave of a world.
+
+Andy's picture of it (2026-11-09): the destroyed planet is caught in its own gravitational pull, almost static,
+suspended in midair — and beneath it there is **no void**. Under the planet is a war-torn desolate wasteland of ruined
+buildings and broken architecture. The Lost Cities that were made for Los Perrito are too large to generate there and
+never do; under the Maw they can, and that is what fills the ground below. So the shape is planet above, wasteland
+below, pull between them.
+
+Keep what already works: the deck plates, the nine wrecks and their part sets, the slow pull and the tide at the hole
+that kills, Maw dust and the starlit lens. Change what makes it read as a black hole with loot floats instead of a
+world caught mid-collapse.
+
+**Hints, not explanations** (Andy's rule, and it applies to every line written here): the old war is shown, never told.
+The visible hook for the Maw and the future is the Warrior-born — in the future, the zombies and husks are Warrior-born
+with their tails tattered or cut. Villagers gossip; nothing states the history outright.
 
 **Where to start:** Powers' Z Fighter space side — `ZFighterSpace` (`buildMaw`, `mawDecks`, `arrived`), `PodWrecks`
 (what the wrecks hold), `FarWorlds` (`mawDeck`), `BackHome` (Maw dust), `ZFighterSpaceArt` (the star map's art for the
