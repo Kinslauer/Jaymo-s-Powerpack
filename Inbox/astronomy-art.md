@@ -38,3 +38,4 @@ The look for the whole astronomy set. Andy: "add this but in the high renaissanc
 - Keep one palette across every asset in the set, so a telescope and a journal page look like they came from the same desk.
 - Deliver art with the code PRs that need it (`astronomy-sky`, `astronomy-telescope`, `astronomy-armillary`, `astronomy-scholar-journal`, `astronomy-sun-moon`) rather than as one giant drop; the first one that needs art is the telescope.
 - 2026-11-09 01:09 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 09:08 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.
