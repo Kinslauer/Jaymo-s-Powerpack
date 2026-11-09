@@ -13,13 +13,13 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · for hermes · open
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · open
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · open
 
 
 ## Being built
 
 - [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · changes · fixing review notes
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · claimed
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · claimed
 
 
 ## Text pass
