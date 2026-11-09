@@ -18,7 +18,6 @@ kanban-plugin: board
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · for hermes · open
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for hermes · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for hermes · open
-- [ ] [[Inbox/astronomy-art|astronomy-art]] · for prometheus · open
 - [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for hermes · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · for hermes · open
 - [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for hermes · open
@@ -31,6 +30,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · claimed
+- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · claimed
 
 
 ## Text pass
