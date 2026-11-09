@@ -8,9 +8,11 @@ import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.entity.ai.Genetics;
 import net.conczin.mca.entity.ai.Messenger;
 import net.conczin.mca.entity.ai.Pregnancy;
+import net.conczin.mca.entity.ai.brain.VillagerBrain;
 import net.conczin.mca.entity.ai.relationship.AgeState;
 import net.conczin.mca.entity.ai.relationship.EntityRelationship;
 import net.conczin.mca.entity.ai.relationship.Gender;
+import net.conczin.mca.entity.ai.relationship.RelationshipState;
 import net.conczin.mca.entity.VillagerFactory;
 import net.conczin.mca.registry.ProfessionsMCA;
 import net.conczin.mca.network.Network;
@@ -2100,5 +2102,34 @@ final class McaBridge {
 		save.setEntityDataSet(false);
 		net.conczin.mca.server.ServerInteractionManager.launchDestiny(player);
 		return true;
+	}
+
+	/**
+	 * (0.7.x) A new life is a stranger to MCA's villagers: every villager's memory of {@code player} (hearts, last
+	 * seen, what they talked about) is forgotten, the player's own MCA data is reset, and any MCA marriage,
+	 * engagement or promise the player had is ended. From LifeStory's reincarnation only.
+	 */
+	static void forgetPlayer(ServerPlayer player) {
+		ServerLevel level = player.level();
+		java.util.UUID id = player.getUUID();
+		PlayerSaveData save = PlayerSaveData.get(player);
+		RelationshipState state = save.getRelationshipState();
+		if (state != RelationshipState.SINGLE) {
+			save.endRelationShip(state);
+		}
+		save.reset();
+		save.setEntityDataSet(false);
+		FamilyTree.get(level).remove(id);
+		// (villagers still loaded who knew them: forget the player entirely)
+		AABB box = new AABB(-3.0E7, level.getMinY() - 1, -3.0E7, 3.0E7, level.getMinY() + level.getHeight() + 1, 3.0E7);
+		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box)) {
+			VillagerBrain brain = v.getVillagerBrain();
+			brain.getMemories().remove(id);
+			EntityRelationship r = v.getRelationships();
+			RelationshipState rs = r.getRelationshipState();
+			if (rs != RelationshipState.SINGLE && (r.isMarriedTo(id) || r.isEngagedWith(id) || r.isPromisedTo(id))) {
+				r.endRelationShip(rs);
+			}
+		}
 	}
 }
