@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
