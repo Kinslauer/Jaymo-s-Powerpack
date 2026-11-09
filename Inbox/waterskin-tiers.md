@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -7,6 +7,7 @@ thread: 1569144710264791172
 claimed_by: hermes-a
 pr: 1176
 suggested_owns: [kitchen/src/main/java/com/jaymoskitchen/climate/WaterskinItem.java, kitchen/src/main/java/com/jaymoskitchen/climate/Thirst.java]
+writer: hermes-writer
 ---
 
 # Waterskin tiers
