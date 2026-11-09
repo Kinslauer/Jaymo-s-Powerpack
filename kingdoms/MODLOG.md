@@ -10417,3 +10417,17 @@ hear it and run from the door. The mob_griefing rule turns it off. (`DoorPoundin
 - **The Skeleton Lord's Curse** (`SkeletonCurse`): his spell (half the time) and a blow of his staff (15%) put it on a player. It shows as an effect icon and is kept by a mark of its own, so milk doesn't wash it off. Die with it on you (anything but the void, lava, losing your head or an execution) and you get the long black with bone-grey edges, then rise a skeleton Hollow. A golden apple eaten while Weakened lifts it, the same as the blight. A real death takes it with them.
 - Zombie, wraith, reaper and pallid turnings and vampire bites are unchanged.
 - Built; not played.
+
+## 0.7.667 (2026-11-09): GeckoLib mobs' animations the right way round: the Skeleton Lord faces forward and holds his staff (#1174)
+
+- Andy's playtest: the Skeleton Lord's head and feet faced backward while his body faced forward, and his staff floated
+  off to one side behind him. The models were right; their animations were turned round. Blockbench projects in the
+  free / modded-entity formats (the Workshop models and ours) keep keyframes the Java model way, and
+  `tools/bbmodel_geckolib.py` wrote them unchanged, so GeckoLib read every animated rotation's x and y and every
+  position's x the other way. The converter now turns those round (Bedrock and GeckoLib projects stay as they are), and
+  the four GeckoLib mobs' animation files are rewritten with it.
+- The Skeleton Lord's idle, walk, statue and laugh now keep his face, feet and body facing where he walks, with the staff
+  in his left hand (it hangs from his hand bone, moved into the grip by its own animation). The same fix turns the silver
+  skeleton's, the draugr's and the barrow beetle's moves the right way: swords forward, the draugr's shield raised in
+  front, the skeleton's buckler and coffin rise.
+- Checked with GeckoLib 5.5.7's own bone math (from its jar) on each mob's file; built. Not seen in game.
