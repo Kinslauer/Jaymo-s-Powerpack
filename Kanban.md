@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · for hermes · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for hermes · open
@@ -31,6 +30,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
 
 
 ## Text pass
