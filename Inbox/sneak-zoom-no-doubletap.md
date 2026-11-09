@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by:
+claimed_by: hermes-a
 pr:
 suggested_owns: [src/client/java/com/jaymospowers/client/SneakZoom.java, docs/AI-HANDBOOK.md]
 ---
