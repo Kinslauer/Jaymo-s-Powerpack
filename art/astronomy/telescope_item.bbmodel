@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "format_version": "5.0",
+    "model_format": "java_block",
+    "box_uv": false
+  },
+  "name": "telescope_item",
+  "java_block_version": "26.3",
+  "ambientocclusion": true,
+  "front_gui_light": false,
+  "credit": "Original art for Jaymo's Kingdoms; no external assets used.",
+  "resolution": {
+    "width": 16,
+    "height": 16
+  },
+  "elements": [
+    {
+      "name": "engraved_telescope_sprite",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "from": [
+        0,
+        0,
+        7.75
+      ],
+      "to": [
+        16,
+        16,
+        8.25
+      ],
+      "autouv": 0,
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "7d66ec88-4f2c-5861-85b0-6a365d60cda7"
+    }
+  ],
+  "outliner": [
+    {
+      "name": "icon",
+      "origin": [
+        8,
+        10,
+        8
+      ],
+      "color": 0,
+      "uuid": "c6f9e451-9441-5f27-b33e-94a2ae99b427",
+      "export": true,
+      "mirrorUV": false,
+      "isOpen": true,
+      "locked": false,
+      "visibility": true,
+      "autouv": 0,
+      "children": [
+        "7d66ec88-4f2c-5861-85b0-6a365d60cda7"
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "name": "telescope_item",
+      "id": "0",
+      "width": 16,
+      "height": 16,
+      "uv_width": 16,
+      "uv_height": 16,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABDklEQVR4nGNgoBAwkqJYW1Hq/9IuBzg/uuwAAxOpNl65eIdhF6M7Q8omdjCfiRTbYexVGw/AxVkIabywOur/hbM/wOzulSfAdIH8VTDdfgRPGIBsLA23ALMNjDkYJsw+zXD69lcMdYzYAgnZRi9DeTA7OlIRHGhX7z9D0cOI7j+QrTAbRXlEwGLbzj/E0AgDTDBGZbQMmL566znD0uX3GQpSTcEaQTbjBdqKUv9BAQWiYRhZbkmNGYoYRhhoK0r9BzkPRiNrRleMzRtMMEFsmkHhAQtEEBuboUy4nAbSkNCxDm4oKEZg0YoXgGxZUBEE93dpkCWcDZPD6QJY4gHZhivaQFGMM1BhsYFPDF0eANn2h9pV0/M6AAAAAElFTkSuQmCC"
+    }
+  ]
+}
