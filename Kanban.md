@@ -26,12 +26,12 @@ kanban-plugin: board
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · 🤖 Prometheus · open
+- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · 🤖 Apollo · open
 
 
 ## Being built
 
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · claimed
-- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · 🤖 Apollo · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
