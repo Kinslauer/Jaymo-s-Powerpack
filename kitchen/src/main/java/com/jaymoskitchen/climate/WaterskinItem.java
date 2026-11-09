@@ -26,9 +26,35 @@ import net.minecraft.world.phys.HitResult;
 /**
  * (0.5.25) A leather waterskin ({@link Thirst}): use it on water to fill it ({@link #SIPS} drinks, dirty), hold use to
  * drink one. Boil it over a lit campfire like a bottle and what's in it is clean. Its bar shows how much is left.
+ * <p>
+ * (0.5.80) Comes in three tiers: Leather (3 sips), Iron (6 sips), Dragon (8 sips, cleans water as it fills).
  */
 public final class WaterskinItem extends Item {
-	public static final int SIPS = 5;
+
+	/** The tier of this waterskin. */
+	public enum Tier {
+		LEATHER(3, false, "leather"),
+		IRON(6, false, "iron"),
+		DRAGON(8, true, "dragon");
+
+		public final int sips;
+		public final boolean cleansOnFill;
+		public final String id;
+
+		Tier(int sips, boolean cleansOnFill, String id) {
+			this.sips = sips;
+			this.cleansOnFill = cleansOnFill;
+			this.id = id;
+		}
+
+		public static Tier byId(String id) {
+			for (Tier tier : values()) {
+				if (tier.id.equals(id)) return tier;
+			}
+			return LEATHER;
+		}
+	}
+
 	/** Water from a drink of it, dirty or boiled, and the chance dirty water turns your stomach. */
 	static final int DIRTY = 4, CLEAN = 6;
 	static final float SICK_CHANCE = 0.25F;
@@ -46,8 +72,23 @@ public final class WaterskinItem extends Item {
 			Water::new);
 	}
 
-	public WaterskinItem(Item.Properties properties) {
+	private final Tier tier;
+
+	public WaterskinItem(Tier tier, Item.Properties properties) {
 		super(properties);
+		this.tier = tier;
+	}
+
+	public Tier tier() {
+		return tier;
+	}
+
+	public int maxSips() {
+		return tier.sips;
+	}
+
+	public boolean cleansOnFill() {
+		return tier.cleansOnFill;
 	}
 
 	public static Water water(ItemStack stack) {
@@ -59,13 +100,14 @@ public final class WaterskinItem extends Item {
 		ItemStack stack = player.getItemInHand(hand);
 		BlockHitResult hit = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
 		Water water = water(stack);
-		if (hit.getType() == HitResult.Type.BLOCK && water.sips() < SIPS) {
+		if (hit.getType() == HitResult.Type.BLOCK && water.sips() < maxSips()) {
 			BlockPos pos = hit.getBlockPos();
 			if (level.mayInteract(player, pos) && level.getFluidState(pos).is(FluidTags.WATER)) {
 				level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 0.8F);
 				level.gameEvent(player, GameEvent.FLUID_PICKUP, pos);
-				// topping up clean water with river water makes it all dirty
-				stack.set(Climate.WATERSKIN_WATER, new Water(SIPS, false));
+				// topping up clean water with river water makes it all dirty, unless this tier cleans on fill
+				boolean clean = cleansOnFill();
+				stack.set(Climate.WATERSKIN_WATER, new Water(maxSips(), clean));
 				return InteractionResult.SUCCESS;
 			}
 		}
@@ -100,7 +142,7 @@ public final class WaterskinItem extends Item {
 
 	@Override
 	public int getBarWidth(ItemStack stack) {
-		return Mth.clamp(Math.round(13.0F * water(stack).sips() / SIPS), 0, 13);
+		return Mth.clamp(Math.round(13.0F * water(stack).sips() / maxSips()), 0, 13);
 	}
 
 	@Override
