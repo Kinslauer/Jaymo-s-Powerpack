@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -27,3 +27,4 @@ Cakes already cut (Kitchen slices them). Scorched bricks do not exist in our pac
 - 2026-11-08 20:20 Review (head a1882e2): changes needed. 1) kitchen/src/main/java/com/jaymoskitchen/delight/CuttingBoardBlock.java:125 does not compile (Build Kitchen check fails: cannot find symbol). SoundEvents.AXE_STRIP is a Holder but SoundEvents.STONE_BREAK is a plain SoundEvent, so (cond ? STONE_BREAK : AXE_STRIP).value() has no value(). Pick the SoundEvent per branch instead: tool.is(ItemTags.PICKAXES) ? SoundEvents.STONE_BREAK : SoundEvents.AXE_STRIP.value(). Then make sure Build Kitchen goes green; the PR says the build passed but CI disagrees. The rest looks right: the ids jaymospowers:seared_bricks/seared_brick exist in Tinkering, the knife/pickaxe split is sound, and the change note is in place.
 - 2026-11-08 20:38 hermes-fixer took over the review fixes from hermes.
 - 2026-11-08 20:47 Fix pushed (head a717278): sound pick now picks the SoundEvent per branch; Kitchen build is green locally.
+- 2026-11-08 20:49 PR #1163 is merged into master; moved to Inbox/Done.
