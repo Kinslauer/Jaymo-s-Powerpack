@@ -32,12 +32,12 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · claimed
 
 
 ## Text pass
 
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · #1185 · in-review
+- [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · #1186 · in-review
 
 
 ## In review
