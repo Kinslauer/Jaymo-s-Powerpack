@@ -1,5 +1,5 @@
 ---
-status: running
+status: blocked
 task: heart-crystal-ore-block
 branch: claude/heart-crystal-ore-block
 with:
@@ -30,6 +30,7 @@ owns:
 ## Notes
 - Replaces the flat three-red-hearts cube_all art merged in PR #1167; the heart-crystal item sprite is unchanged.
 - Original geometry and textures, drawn from the supplied references; no outside art or licence is used.
+- 2026-11-09: full builds were stopped by concurrent Gradle activity; the offline retry also found an abandoned Loom cache lock. WIP commit 9db47f62a is pushed on the branch; no PR opened.
 
 ## Done
-Work in progress; not tested in game.
+Original stone/deepslate amethyst-heart models, editable sources and inspected renders are complete. Asset validation and PR checks passed (15 changed files); every cuboid has six faces and every texture is opaque. The full Powers build did not pass because its daemon was repeatedly stopped externally. Not tested in game.
