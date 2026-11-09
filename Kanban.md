@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 16:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 16:45). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,6 +33,7 @@ kanban-plugin: board
 - [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · 🍇 Bacchus · open
+- [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 
 
 ## Being built
@@ -47,11 +48,11 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🪶 Quill · #1198 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · #1198 · in-review
 
 
 ## Needs Andy
