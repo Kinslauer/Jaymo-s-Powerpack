@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:12). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,7 +36,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · 🤖 Apollo · #1186 · in-review
+- [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · 🤖 Quill · #1186 · writing
 
 
 ## In review
