@@ -3,7 +3,7 @@ status: running
 task: astronomy-armillary
 branch: claude/astronomy-armillary
 with: 
-pr: 
+pr: 1196
 mods: kingdoms
 versions: 
 started: 2026-11-09
