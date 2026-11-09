@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -69,3 +69,4 @@ game yet (facing, size and the hammer's place need a look in game).
 - 2026-11-09 09:52 Text pass: reviewed change note (changes/kingdoms/claude-minotaur-geckolib.md) — already clear, player-focused, has 'Not tested in game' line. No lang parts, dialogue, hints, or other player text added/changed for minotaur in this PR. Build and PR checks pass.
 - 2026-11-09 11:43 Review (head a7f1193): pass. The minotaur now draws through GeckoLib with a calm and a hostile idle, its unused walk, the charge run, alternating hammer swings and the overhead slam; stats, AI, spawning and loot are unchanged, and the head still tracks. Swing/slam are triggered from ActingMonster.act on the server so they stay in step with the hits. Credit and CC BY licence are in kingdoms/art like the other GeckoLib mobs. Not tested in game: facing, size, ground contact and timing need a look.
 - 2026-11-09 11:43 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-09 11:49 PR #1188 is merged into master; moved to Inbox/Done.

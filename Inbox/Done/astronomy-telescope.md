@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: prometheus
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -40,3 +40,4 @@ Whether one telescope is enough or there are tiers (basic, mounted, brass) — d
 - 2026-11-09 11:33 Text pass: rewrote change note (changes/kingdoms/claude-astronomy-telescope.md) for player-facing clarity
 - 2026-11-09 11:44 Review (head a729532): pass for the rig. GeckoLib telescope with base > azimuth > elevation bones: the tripod stays put, the mount yaws and the barrel tilts on its axle; idle/azimuth/elevation/aim animations; one telescope, no tiers, reasons given. Not tested in game. THE TASK IS NOT FINISHED: no block registration, saved per-telescope aim, Altazimuth skill, or readings that fail with a plain reason. That gameplay needs a builder task (it also depends on astronomy-sky). For that task: models/block/telescope.json (merged in #1185) has UVs up to 64, but block-model UVs are 0-16, so it would sample outside its sprite if ever drawn; render the block through the GeckoLib renderer (invisible block model) or divide those UVs by 4.
 - 2026-11-09 11:44 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-09 11:49 PR #1189 is merged into master; moved to Inbox/Done.

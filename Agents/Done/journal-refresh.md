@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: journal-refresh
 branch: claude/journal-refresh
 with:
@@ -30,3 +30,4 @@ owns:
 
 ## Done
 PR #1192 refreshes the traveller's journal with original illustrated tabs, a larger responsive panel, hover/selection states and content wells while preserving all journal data and actions. The editable Blockbench source, generator, texture and inspected four-view render are included. Kingdoms clean build, root build and PR checks pass; not tested in game.
+- 2026-11-09 11:49 PR #1192 is merged into master; moved to Agents/Done.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: minotaur-geckolib
 branch: claude/minotaur-geckolib
 with:
@@ -38,3 +38,4 @@ owns:
 
 ## Done
 PR #1188 moves the minotaur to GeckoLib with calm/hostile idles, walk, charge run, alternating hammer swings and slam, preserving its gameplay stats and AI. Editable CC BY 4.0 source, licence, credit and inspected front/side/back plus animation renders are included. Kingdoms and root builds and PR checks pass; a dedicated dev server reached `Done`. No client visual playtest was performed.
+- 2026-11-09 11:49 PR #1188 is merged into master; moved to Agents/Done.
