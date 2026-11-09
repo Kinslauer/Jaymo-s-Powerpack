@@ -21,7 +21,6 @@
 	"message.jaymospowers.downed.down": "You're down. Crawl to safety, or wait for someone to bring you round.",
 	"message.jaymospowers.downed.give_up": "You're down. Hold sneak to give up [%s]",
 	"message.jaymospowers.downed.give_up_hurt": "%s too hurt to get up. Hold sneak to give up [%s]",
-	"message.jaymospowers.downed.give_up_hurt_heal": "%s too hurt to get up. Hold [%s] with a healing item to struggle up, or sneak to give up [%s]",
 	"message.jaymospowers.downed.heal_struggling": "Struggling up... [%s]",
 	"message.jaymospowers.downed.heal_struggled": "With the %s, you drag yourself to your feet.",
 	"message.jaymospowers.downed.heal_struggle_broken": "A blow knocks you flat again.",

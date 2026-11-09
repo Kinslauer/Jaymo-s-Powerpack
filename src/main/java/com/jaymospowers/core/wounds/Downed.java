@@ -1161,8 +1161,6 @@ public final class Downed {
 			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
 			BodyPart blocking = blocksRise(player);
 			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
-				: blocking != null && awake(player) ? Component.translatable("message.jaymospowers.downed.give_up_hurt_heal", blocking.displayName(),
-					Component.keybind("key.use"), bar)
 				: blocking != null ? Component.translatable("message.jaymospowers.downed.give_up_hurt", blocking.displayName(), bar)
 				: Component.translatable("message.jaymospowers.downed.give_up", bar);
 			player.sendOverlayMessage(message.copy().withStyle(sneaking ? ChatFormatting.RED : ChatFormatting.GRAY));

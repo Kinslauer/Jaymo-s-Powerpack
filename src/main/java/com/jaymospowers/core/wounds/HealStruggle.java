@@ -34,8 +34,8 @@ import org.jspecify.annotations.Nullable;
  * player who is awake but too hurt to rise ({@link Downed#tooHurt}), with a healing item in hand (the
  * {@link #SELF_REVIVE} tag: golden apples, our bandages, healing brews and the healer's satchel; and any potion of
  * healing, drunk or splash), holds use for {@link #STRUGGLE_TICKS}: the bar fills, the item is used up and they're up with
- * at least {@link #RISE_HEALTH}. Let go and the bar keeps where it got to; a blow breaks it off and it starts again. The
- * downed screen offers it ({@link Downed}'s give-up hint), and the downed keys let use through for it ({@code DownedKeysMixin}).
+ * at least {@link #RISE_HEALTH}. Let go and the bar keeps where it got to; a blow breaks it off and it starts again. Nothing
+ * tells you of it (Andy: "it shouldnt tell you this at all"); the downed keys let use through for it ({@code DownedKeysMixin}).
  */
 public final class HealStruggle {
 	/** How long the struggle up takes (ticks); how long use may go unpressed before it's let go (vanilla repeats it every 4). */
