@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · for hermes · open
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · for hermes · open
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · open
@@ -20,6 +19,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · claimed
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · claimed
 
 
 ## Text pass
