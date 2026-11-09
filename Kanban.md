@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:56). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,6 +16,13 @@ kanban-plugin: board
 - [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for hermes · open
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · for prometheus · open
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · for hermes · open
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for hermes · open
+- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · for hermes · open
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · for hermes · open
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for hermes · open
+- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for hermes · open
+- [ ] [[Inbox/unique-starts|unique-starts]] · for hermes · open
+- [ ] [[Inbox/astronomy-art|astronomy-art]] · for prometheus · open
 
 
 ## Being built
