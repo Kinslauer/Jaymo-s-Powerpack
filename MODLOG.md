@@ -1777,3 +1777,8 @@ Built, not played.
 
 - **Mimic art**: adds an original player-copying horror Mimic's revealed form: a lanky ashen humanoid with a hinged toothy jaw, exposed ribs, clawed hands and dark clothing remnants. Includes editable Blockbench source, texture, and idle, walk, run, attack, transform, hurt and death animations for the Chrono echo replacement.
 - Assets only; entity behaviour and renderer wiring are separate. Rendered and visually checked from front, both sides and back; built, but not tested on a live entity in game.
+
+## 0.21.73 (2026-11-09): Riders bring downed horses round faster (#1161)
+
+- A player tagged `jaymoskingdoms.rider` (Jaymo's Kingdoms' Rider class) gets a downed horse back on its feet in half the time and needs no treat for it ("Rider's know-how"). (`core/wounds/Downed`)
+- Built; not played.
