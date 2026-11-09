@@ -35,13 +35,13 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🪶 Quill · #1189 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🔥 Prometheus · #1188 · in-review
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · ☀️ Apollo · #1190 · in-review
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🔥 Prometheus · #1189 · in-review
 
 
 ## Needs Andy
