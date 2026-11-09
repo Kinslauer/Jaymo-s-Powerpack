@@ -12,6 +12,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -41,6 +42,15 @@ public final class BloodClient {
 	/** (0.17.182) The server's lasting stains lying in {@link #stainsIn}, by their mark id. */
 	private static final Map<Long, BloodPuddle> STAINS = new HashMap<>();
 	private static @Nullable ClientLevel stainsIn;
+	/** The splash pools lying in {@link #poolsIn}, by chunk, for more blood landing on them to pool into ({@link #splash}). */
+	private static final it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<List<BloodPuddle>> POOLS =
+		new it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<>();
+	private static @Nullable ClientLevel poolsIn;
+	/**
+	 * A splash pools into a pool whose edge it reaches: centres closer than this share of the two radii added (or than
+	 * this, blocks, for the smallest), and no more than this apart up or down.
+	 */
+	static final double POOL_TOUCH = 0.6, POOL_LEAST = 0.2, POOL_UP = 0.3;
 	/** (0.20.41) Sprites kept to draw with: the pools', a plain drop's, the footprints' and the runs down walls'. */
 	private static @Nullable SpriteSet puddles, drops, prints, runs;
 
@@ -114,7 +124,7 @@ public final class BloodClient {
 	 */
 	private static @Nullable Particle puddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, BloodParticles.Puddle options) {
 		if (options.mark() == 0L) {
-			return new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale(), 0, 0);
+			return splash(level, x, y, z, sprites, options);
 		}
 		if (level != stainsIn) {
 			STAINS.clear();
@@ -130,6 +140,63 @@ public final class BloodClient {
 			options.shape());
 		STAINS.put(options.mark(), stain);
 		return stain;
+	}
+
+	/**
+	 * Andy: puddles from blood rain or a body bleeding on one spot should "increase in size the more it accumulates". A
+	 * splash pool landing on (or at the edge of) one of the same blood pools into it ({@link BloodPuddle#pool}) instead of
+	 * lying as one more small puddle; the grown pool then runs together with any other it now touches. So a spot rained
+	 * on grows one thick pool, and the decal count stays down.
+	 */
+	private static @Nullable Particle splash(ClientLevel level, double x, double y, double z, SpriteSet sprites, BloodParticles.Puddle options) {
+		if (level != poolsIn) {
+			POOLS.clear();
+			poolsIn = level;
+		}
+		float size = BloodPuddle.SIZE * options.scale();
+		BloodPuddle pool = nearestPool(x, y, z, size, options.color(), null);
+		if (pool != null) {
+			pool.pool(size);
+			// grown into its neighbours: they run together into it
+			for (BloodPuddle other = nearestPool(pool.position().x, pool.position().y, pool.position().z, pool.grownSize(), options.color(), pool);
+				other != null && pool.absorb(other);
+				other = nearestPool(pool.position().x, pool.position().y, pool.position().z, pool.grownSize(), options.color(), pool)) {
+				// (absorb makes it unpoolable, so each is taken once)
+			}
+			return null;
+		}
+		BloodPuddle made = new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale(), 0, 0);
+		List<BloodPuddle> chunk = POOLS.computeIfAbsent(net.minecraft.world.level.ChunkPos.pack(Mth.floor(x) >> 4, Mth.floor(z) >> 4),
+			c -> new ArrayList<>());
+		chunk.removeIf(p -> !p.isAlive());
+		chunk.add(made);
+		return made;
+	}
+
+	/** The nearest splash pool of {@code color} (not {@code except}) that a splash {@code size} across at (x, y, z) reaches, or null. */
+	private static @Nullable BloodPuddle nearestPool(double x, double y, double z, float size, int color, @Nullable BloodPuddle except) {
+		BloodPuddle best = null;
+		double bestD = Double.MAX_VALUE;
+		int cx = Mth.floor(x) >> 4, cz = Mth.floor(z) >> 4;
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				List<BloodPuddle> chunk = POOLS.get(net.minecraft.world.level.ChunkPos.pack(cx + dx, cz + dz));
+				if (chunk == null) {
+					continue;
+				}
+				for (BloodPuddle pool : chunk) {
+					if (pool == except || !pool.poolable(color) || Math.abs(pool.position().y - y) > POOL_UP) {
+						continue;
+					}
+					double d = Math.hypot(pool.position().x - x, pool.position().z - z);
+					if (d < Math.max(POOL_LEAST, POOL_TOUCH * 0.5 * (pool.grownSize() + size)) && d < bestD) {
+						best = pool;
+						bestD = d;
+					}
+				}
+			}
+		}
+		return best;
 	}
 
 	static @Nullable SpriteSet puddleSprites() {

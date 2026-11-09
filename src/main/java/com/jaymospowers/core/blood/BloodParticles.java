@@ -64,6 +64,20 @@ public final class BloodParticles {
 	public record Puddle(int color, float scale, long mark, int age, int life, int shape) implements ParticleOptions {
 		public static final int ROUND = 0, SMEAR_X = 1, SMEAR_Z = 2;
 		/**
+		 * A piece of a dragged body's trail ({@link BloodTrail#drag}), lying east-west ({@code DRAG_X}) or north-south
+		 * ({@code DRAG_Z}): {@link #DRAG_WIDE} puddle-sizes across (so its scale sets its width: the body's) and
+		 * {@link #DRAG_LONG} of them along the way it was dragged.
+		 */
+		public static final int DRAG_X = 3, DRAG_Z = 4;
+		public static final float DRAG_WIDE = 1.0F, DRAG_LONG = 1.5F;
+		/** A puddle at scale 1 is this many blocks across (the client's {@code BloodPuddle.SIZE}). */
+		public static final float BLOCKS_PER_SCALE = 1.5F;
+
+		/** Whether {@code shape} is a piece of a drag trail. */
+		public static boolean drag(int shape) {
+			return shape == DRAG_X || shape == DRAG_Z;
+		}
+		/**
 		 * (0.20.41) A bloody footprint ({@link BloodTrail#print}): {@code PRINT} plus the way it points (sixteenths of a turn,
 		 * 0 = south, clockwise as yaw goes), plus {@link #PRINT_RIGHT} for a right foot.
 		 */
