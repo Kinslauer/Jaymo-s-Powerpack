@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -13,6 +13,7 @@ suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/dragons/AetherionDragonModel.java (removed) and its new renderer
   - DragonsClient.java (its register line only)
   - changes/kingdoms/<branch-name>.md
+writer: hermes-writer
 ---
 # Aetherion: a Blockbench model and animations, on GeckoLib (modelling bot)
 
