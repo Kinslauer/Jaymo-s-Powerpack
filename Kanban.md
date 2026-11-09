@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 00:46). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -48,7 +48,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · ready
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
-- [ ] [[Agents/revive-lock-skeleton-curse|revive-lock-skeleton-curse]] · #1172 · ready
 
 
 ## Done
