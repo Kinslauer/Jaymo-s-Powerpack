@@ -417,8 +417,10 @@ public final class Bonding {
 	public static void tamed(AbstractHorse horse, Player player) {
 		if (Equestrian.covered(horse) && !horse.level().isClientSide()) {
 			Bond b = bond(horse);
-			if (b.trustOf(player.getUUID()) < TAME_TRUST) {
-				horse.setAttached(BOND, b.withTrust(player.getUUID(), TAME_TRUST));
+			// a Rider's starts out trusting them more (Riders)
+			float start = Riders.tameTrust(player);
+			if (b.trustOf(player.getUUID()) < start) {
+				horse.setAttached(BOND, b.withTrust(player.getUUID(), start));
 			}
 		}
 	}
@@ -607,11 +609,12 @@ public final class Bonding {
 		AbstractHorse best = null;
 		boolean shy = false;
 		double bestDist = Double.MAX_VALUE;
-		for (AbstractHorse horse : level.getEntitiesOfClass(AbstractHorse.class, player.getBoundingBox().inflate(WHISTLE_RANGE),
+		// a Rider's whistle carries much further, and their horse comes whatever its trust (Riders)
+		for (AbstractHorse horse : level.getEntitiesOfClass(AbstractHorse.class, player.getBoundingBox().inflate(Riders.whistleRange(player)),
 			h -> Equestrian.covered(h) && h.isAlive() && h.isTamed() && owner(h, player) && !h.isVehicle()
 				// (0.5.47) a boarded horse stays in its stall till it's paid for
 				&& !com.jaymoskingdoms.Stables.boarded(h))) {
-			if (trust(horse, player) < WHISTLE_TRUST || horse.isLeashed()) {
+			if (!Riders.heeds(horse, player, WHISTLE_TRUST) || horse.isLeashed()) {
 				shy = true;
 				continue;
 			}
@@ -627,7 +630,7 @@ public final class Bonding {
 		}
 		CALLED.put(best.getId(), new Call(player.getUUID(), level.getGameTime() + WHISTLE_TICKS));
 		best.playSound(SoundEvents.HORSE_AMBIENT, 1.5F, 1.0F);
-		best.getNavigation().moveTo(player, WHISTLE_SPEED);
+		best.getNavigation().moveTo(player, Riders.whistleSpeed(player));
 	}
 
 	private static void trick(ServerPlayer player, boolean back) {

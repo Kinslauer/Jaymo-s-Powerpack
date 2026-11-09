@@ -1764,3 +1764,57 @@ through the Aether (at most 8000 water blocks) and each source feeding it is sea
 it (else air), so the fall drains away. A heavenfall chunk's fall is kept once someone online has reached Dread, as for
 new chunks. Water that lands on the islands is untouched; a waterfall poured off an edge by hand before Dread goes too.
 Built, not played.
+
+## 0.21.71 (2026-11-09): Thrown bodies ragdoll, throws have weight, small animals ride on you (#1162)
+
+- **Ragdoll in flight**: anything thrown from a carry goes limp the moment it leaves your hands. A thrown player drops straight into Jaymo's Kitchen's limp ragdoll (flies, tumbles, lands and gets up as after any knockdown). A thrown mob tumbles end over end along its flight, faster the lighter it is, with its limbs flailing and trailing. When it lands it rolls onto its side, front or back, lies there a moment and gets up. A cat, or anything as light, rights itself and lands on its feet (`ThrownFlight`, drawn through `CarryPose`).
+- **Weight**: every thrown thing has a weight (`ThrowWeight`): listed types (a cricket 0.05 kg, a parrot 0.4, a cat 4, a person 75, a pig 110, a horse 500, a cow 600...), else its hitbox's bulk. A level throw sends a person about 3 blocks, a cat about twice as far, a cricket or mouse about three times as far, a cow about half as far. Strength still adds on top (brawn: Strength, size, Might, Packhorse, a Z Fighter's). Tuning is at the top of `ThrowWeight`.
+- **Small animals ride on you**: sneak + right-click a parrot, cat, butterfly, cricket, mouse or rat and it climbs onto you instead of into your arms. A parrot, mouse, rat or butterfly sits on your left shoulder, a cricket on your head, and a cat lies draped across your shoulders. Your hands stay free to use items and fight. Sneak + right-click with an empty hand (at the air or a block) lets it down, and a hit of 3 hearts or more knocks it off. Everyone sees it, and in first person you see it at the edge of your view. Add more with the `#jaymospowers:rides_on_shoulder` tag (`#jaymospowers:rides_on_head` for the head) (`Perch`, `PerchRidingMixin`, `PerchClient`).
+- **Riding a player works on servers**: vanilla refused to let anything mount a player (a rider is saved inside its vehicle, and players aren't saved with the world), which also stopped the aerbunny and the Xenoform riders (Bulwark, Croaker, Titan) from mounting a player. Now anything may, and while it rides a player it's saved on its own in its chunk, so an autosave or a crash keeps it (`PerchRidingMixin`).
+- Built; not played. Not checked in game: the flight's look and distances, perching in multiplayer and across a portal, and the first-person view of a perched animal.
+
+## 0.21.72 (2026-11-09): Mimic true-form model (#1158)
+
+- **Mimic art**: adds an original player-copying horror Mimic's revealed form: a lanky ashen humanoid with a hinged toothy jaw, exposed ribs, clawed hands and dark clothing remnants. Includes editable Blockbench source, texture, and idle, walk, run, attack, transform, hurt and death animations for the Chrono echo replacement.
+- Assets only; entity behaviour and renderer wiring are separate. Rendered and visually checked from front, both sides and back; built, but not tested on a live entity in game.
+
+## 0.21.73 (2026-11-09): Riders bring downed horses round faster (#1161)
+
+- A player tagged `jaymoskingdoms.rider` (Jaymo's Kingdoms' Rider class) gets a downed horse back on its feet in half the time and needs no treat for it ("Rider's know-how"). (`core/wounds/Downed`)
+- Built; not played.
+
+## 0.21.74 (2026-11-09): Blindness: Echolocation Power (#1159)
+
+**What a player sees:**
+- New **Blindness** power obtainable via the calling (survive a fatal fall into darkness with <2 hearts).
+- **R (Echolocation)**: Sonar rings ripple outward from every nearby sound, briefly painting blocks and entities in cyan waves. Mastered cooldown: 25 ticks (1.25s).
+- **G (One-Eye Blind, hold)**: Close one eye — that half of the screen blurs (**Borrado**) or darkens (**Escuro**), the remaining view stretches, and your aim drifts toward the blind side.
+- **V (Blindside Swap)**: Toggle which eye is blind (left/right).
+- **B (Deafen, hold)**: Silence your own footsteps and actions so other echolocators can't hear you.
+- **Z (Variant Toggle)**: Switch between Borrado (blur) and Escuro (darken) for the one-eye effect.
+- **C (Ascended, Void Sight)**: Total blindness becomes true sight — see entity outlines through walls, hear heartbeats, but the world stays dark.
+- **C (Corrupted, Blackout)**: Your blindness spreads to nearby players; taking head/eye damage blinds everyone around you.
+- **C (Both, Abyssal Echo)**: A massive pulse that blinds everyone in 32 blocks and gives them echolocation rings for 20 seconds (60s cooldown).
+- **Global trigger**: When any player takes significant head damage (≥4 damage), nearby corrupted Blindness players trigger Blackout on themselves and others.
+
+Not tested in game.
+
+## 0.21.75 (2026-11-09): Xeno-Band Ultimates: seven new Ultimate forms (#1160)
+
+Seven new Ultimate alien forms for the Xeno-Band, each with its own model, texture, abilities and big move (C):
+
+- **Elder Wyrm** (Wyrm's Ultimate): grows to 2.0x, black scale plates, long spikes, barbed tail blade, swept-back horn crown, void purple seams. R: Void Breath (three clouds of purple fire ahead). G: Elder Wings (fly where you look, dive to slam). V: Tempest Beat (wide gust swatting projectiles). B: Void Rift (step through void up to 24 blocks). C: Endfire Volley (five dragon fireballs fanning out, each bursting into a cloud).
+
+- **Copper Storm** (Duplex's Ultimate): copper golem grown to 1.6 blocks, patina-green plate, coiled rod, crown spikes, blue-white seams. R: Storm Split (two charged doubles step out). G: Bolt Rally (doubles swarm a target, first strike lightning). V: Arc Switch (trade places with a double, arc shocks between). B: Overcharge Merge (doubles merge back, heal, Speed II + Strength, shock ring if three+). C: Copper Storm (lightning on every double, shock radius, all doubles charged).
+
+- **Ironpour** (Rivet's Ultimate): liquid-metal puddle standing up to player size, riveted steel plates, gear-tooth spikes. R: Overmeld (Meld from further, shell moves 1.5x stronger). G: Twin Lash (two metal whips drag different targets). V: Molten Pour (fast flowing dash, burns and slows what you pour through). B: Overdrive Ride (Ride from further, machine gets Resistance II + bolted plates, rams). C: Foundry Slam (surge up into pillar, slam both whip-arms down).
+
+- **Worldmaw** (Gorger's Ultimate): armadillo grown to 1.6x, thickened stone plates, forked horn, wider maw, ember cracks. R: Deep Gulp (eat block + 8 around it on that face). G: Rubble Cannon (gut fires as rubble cone, up to 3 eaten blocks fly as falling blocks). V: Quake Charge (long run goring creatures, off ledge becomes slam). B: Spiked Roll (curl into spiked ball, roll at walk pace, hurt and bounce). C: Worldmaw (unhinge jaw inhale: blocks gulped, creatures dragged in and bitten, then Gut Blast at double damage).
+
+- **Brinecrown** (Slipfin's Ultimate): axolotl grown long and plated, pearly scales, spined sail, frilled gill crowns. R: Tide Jet (longer wider Bubble Jet, slows, puts out fire). G: Undertow Slip (Slip that frees from holds, bursts water throwing foes). V: Torrent Dart (longer lunge with splash wake, bites every creature on the way). B: Bloom Regrow (Regrow with Regeneration III, also mends allies nearby). C: Brinecrown (downpour over 10 blocks for 12s: fire out, foes Slowed, waves push them).
+
+- **Lodestar** (Polestar's Ultimate): lodestone alien grown to magnetic pole, heavy plates, curved prongs, four iron shards orbiting. R: Great Pull (drags iron-wearers in wide cone, loose iron flies in). G: Shock Repel (wide burst hurts and throws back iron, shoves rest, turns arrows back). V: Triple Lift (tear up to 3 iron blocks to orbit, each V throws one). B: Bastion Field (hold: arrows near fly back faster, iron-wearers inside pushed out). C: Lodestar (6s magnetic pole: iron-wearers dragged and held, loose iron flies in, C again throws all out).
+
+- **Nightfall** (Lurk's Ultimate): tall stalker at 1.3x, bone-black plated arms, spined ridge, four eye domes. R: Mark of Night (up to 3 creatures within 64 blocks glow, lose track of you). G: Nightstep (step behind target or first mark within 32 blocks, strike doubled if unseen, G again chains to next mark). V: Terror (everything looking at you and all marks: Darkness, Slowness II, Weakness II, Blindness, monsters drop target and shoved). B: Deep Fade (unseen with Speed I, first strike doesn't break it, second does). C: Nightfall (16 blocks for 160s: everything else Blinded, glows on your screen alone).
+
+Each Ultimate has its own model (Ultimate<Name>.java in client/power/xenoform/ultimate/) and its own 128x128 skin with glow map (tools/ultimates/<id>.py). Health bar sits on top of the base form's bar. All effects respect pvp and team protection. Nothing persists when the Ultimate ends, the player dies, changes dimension or quits, or the server stops.

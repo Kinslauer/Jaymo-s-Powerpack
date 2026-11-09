@@ -35,8 +35,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>G (hold), Wings: fly where you look, for free; let go and you drift down.</li>
  * <li>V, Wing Gust: one great beat throws everything within {@link #GUST_RADIUS} away from you.</li>
  * <li>B, Rift: step through the void to where you look, up to {@link #RIFT_RANGE} blocks.</li>
- * <li>C (ascended), Elder Wyrm: twice your size with scales of {@link #ELDER_ARMOR} armour, wings that cost nothing, a
- * breath you can pour out every {@link #ELDER_BREATH_COOLDOWN} ticks, and a gust half again as wide.</li>
+ * <li>C (ascended), Elder Wyrm: (0.21.37) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.ElderWyrm}.</li>
  * </ul>
  */
 public final class Wyrm extends XenoForm {
@@ -50,20 +49,16 @@ public final class Wyrm extends XenoForm {
 	public static final int GUST_COOLDOWN = 120;
 	public static final double GUST_RADIUS = 6.0, GUST_OUT = 1.6, GUST_UP = 0.5, GUST_RECOIL = 0.5;
 	public static final float GUST_DAMAGE = 3.0F;
-	/** Screen shake (degrees, and how far it's felt): the wing gust, and growing into the Elder Wyrm. */
-	public static final float GUST_SHAKE = 0.8F, ELDER_SHAKE = 1.4F;
-	public static final double GUST_SHAKE_RANGE = 16.0, ELDER_SHAKE_RANGE = 28.0;
+	/** Screen shake (degrees, and how far it's felt): the wing gust. */
+	public static final float GUST_SHAKE = 0.8F;
+	public static final double GUST_SHAKE_RANGE = 16.0;
 	public static final int RIFT_COOLDOWN = 80;
 	public static final double RIFT_RANGE = 12.0;
 	/** In water or rain: this much damage every this many ticks. */
 	public static final float WET_DAMAGE = 1.0F;
 	public static final int WET_EVERY = 20;
-	/** Elder Wyrm: extra size (on the form's 1.2x), armour, the breath's cooldown, and the gust's reach multiplier. */
-	public static final double ELDER_EXTRA_SCALE = 0.8, ELDER_ARMOR = 8.0, ELDER_GUST = 1.5;
-	public static final int ELDER_BREATH_COOLDOWN = 40;
-
-	private static final net.minecraft.resources.Identifier ELDER_SCALE_ID = com.jaymospowers.JaymosPowers.id("xenoform_elder_scale");
-	private static final net.minecraft.resources.Identifier ELDER_ARMOR_ID = com.jaymospowers.JaymosPowers.id("xenoform_elder_armor");
+	/** (0.21.37) Elder Wyrm is its own evolved form: the Ultimate move, health bar, model and kit are in {@code ElderWyrm}. */
+	private final com.jaymospowers.power.xenoform.XenoUltimate elder = new com.jaymospowers.power.xenoform.forms.ultimate.ElderWyrm(this);
 
 	public Wyrm() {
 		super("wyrm", 1.2F, 36.0F, 5.0, 0.05, 0.4, 0.4, Items.DRAGON_BREATH, 0xC060E0);
@@ -100,12 +95,12 @@ public final class Wyrm extends XenoForm {
 			case ABILITY_1 -> {
 				if (ready(player, live, R)) {
 					breath(player, 1.0F);
-					cooldown(player, live, R, live.ultimate ? ELDER_BREATH_COOLDOWN : BREATH_COOLDOWN);
+					cooldown(player, live, R, BREATH_COOLDOWN);
 				}
 			}
 			case ABILITY_3 -> {
 				if (ready(player, live, V)) {
-					gust(player, live.ultimate ? ELDER_GUST : 1.0);
+					gust(player, 1.0);
 					cooldown(player, live, V, GUST_COOLDOWN);
 				}
 			}
@@ -133,6 +128,12 @@ public final class Wyrm extends XenoForm {
 				level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.6, 0.3, 0.6, 0.1);
 			}
 		}
+		ambient(player);
+	}
+
+	/** (0.21.37) The void drifting off it, and the water and rain that burn it: Wyrm's and the Elder Wyrm's. */
+	public static void ambient(ServerPlayer player) {
+		ServerLevel level = player.level();
 		if (player.tickCount % 4 == 0) {
 			level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.6, 0.4, 0.02);
 		}
@@ -171,45 +172,8 @@ public final class Wyrm extends XenoForm {
 	// ---- Elder Wyrm ----
 
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		var scale = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
-		var armor = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR);
-		if (scale == null || armor == null) {
-			return false;
-		}
-		scale.addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(ELDER_SCALE_ID, ELDER_EXTRA_SCALE,
-			net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
-		armor.addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(ELDER_ARMOR_ID, ELDER_ARMOR,
-			net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
-		player.refreshDimensions();
-		ServerLevel level = player.level();
-		Vec3 at = player.position().add(0.0, 1.0, 0.0);
-		level.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, 80, 1.0, 1.0, 1.0, 0.5);
-		ring(level, PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), player.position(), 3.0, 24);
-		sound(player, SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.9F);
-		com.jaymospowers.core.Shakes.heavy(player, player.position(), ELDER_SHAKE_RANGE, ELDER_SHAKE);
-		return true;
-	}
-
-	@Override
-	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
-		if (player.tickCount % 3 == 0) {
-			player.level().sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), player.getX(), player.getY() + 1.2, player.getZ(), 1,
-				0.6, 0.6, 0.6, 0.0);
-		}
-	}
-
-	@Override
-	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
-		var scale = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
-		var armor = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR);
-		if (scale != null) {
-			scale.removeModifier(ELDER_SCALE_ID);
-		}
-		if (armor != null) {
-			armor.removeModifier(ELDER_ARMOR_ID);
-		}
-		player.refreshDimensions();
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return elder;
 	}
 
 	private static void breath(ServerPlayer player, float linger) {

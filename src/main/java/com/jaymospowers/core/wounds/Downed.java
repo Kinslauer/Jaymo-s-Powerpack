@@ -166,6 +166,12 @@ public final class Downed {
 	static final int HINT_TICKS = 20, GIVE_UP_BAR = 12;
 	/** (0.7.93) A revive: how long use is held to get them up (ticks), and how long before the bar shows (a tap is Kingdoms' disarm). */
 	public static final int REVIVE_TICKS = 60, TAP_TICKS = 4;
+	/**
+	 * A Rider (Jaymo's Kingdoms' class, which tags them {@link #RIDER_TAG}) brings a downed horse round in this share of
+	 * the time, and needs no treat for it.
+	 */
+	static final float RIDER_HORSE_REVIVE = 0.5F;
+	static final String RIDER_TAG = "jaymoskingdoms.rider";
 	/** Holding use repeats every 4 ticks: no repeat for this long and you've let go. */
 	static final int REVIVE_GRACE = 8;
 	/** How far past your reach you may lean while reviving, and how often your hands work at it (a swing, a sound). */
@@ -1401,7 +1407,7 @@ public final class Downed {
 						.withStyle(ChatFormatting.GRAY));
 					continue;
 				}
-				if (cost(player, body) < 0) {
+				if (!riderHorse(player, body) && cost(player, body) < 0) {
 					r.over = true;
 					player.sendOverlayMessage(Component.translatable(tamed(body) ? "message.jaymospowers.downed.no_treat" : "message.jaymospowers.downed.no_food",
 						body.getDisplayName()).withStyle(ChatFormatting.GRAY));
@@ -1431,6 +1437,9 @@ public final class Downed {
 			}
 			// (0.15.49) Steady Hands: quicker ({@link MedicineSkill})
 			int need = MedicineSkill.ticks(player, REVIVE_TICKS);
+			if (riderHorse(player, body)) {
+				need = Math.max(TAP_TICKS + 1, Math.round(need * RIDER_HORSE_REVIVE));
+			}
 			if (r.ticks < need) {
 				if (r.ticks % 2 == 0) {
 					int filled = Math.round(REVIVE_BAR * r.ticks / (float) need);
@@ -1441,8 +1450,9 @@ public final class Downed {
 			}
 			r.over = true;
 			HoldProgress.forget(player.getUUID(), job);
-			int slot = cost(player, body);
-			if (slot < 0) {
+			boolean bare = riderHorse(player, body);
+			int slot = bare ? -1 : cost(player, body);
+			if (!bare && slot < 0) {
 				player.sendOverlayMessage(Component.translatable(tamed(body) ? "message.jaymospowers.downed.no_treat" : "message.jaymospowers.downed.no_food",
 					body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
@@ -1455,10 +1465,15 @@ public final class Downed {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.held_down", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 					continue;
 				}
-				ItemStack stack = player.getInventory().getItem(slot);
-				Component eaten = stack.getHoverName();
-				stack.consume(1, player);
-				player.getInventory().setChanged();
+				Component eaten;
+				if (bare) {
+					eaten = Component.translatable("message.jaymospowers.downed.rider_hands");
+				} else {
+					ItemStack stack = player.getInventory().getItem(slot);
+					eaten = stack.getHoverName();
+					stack.consume(1, player);
+					player.getInventory().setChanged();
+				}
 				getUp(level, body);
 				MedicineSkill.broughtRound(player, body);
 				MedicineSkill.treated(player);
@@ -1472,6 +1487,11 @@ public final class Downed {
 				WillSkill.reviver = null;
 			}
 		}
+	}
+
+	/** A Rider at a downed horse: quicker, and no treat. */
+	private static boolean riderHorse(Player player, LivingEntity body) {
+		return body instanceof AbstractHorse && player.entityTags().contains(RIDER_TAG);
 	}
 
 	private static boolean tamed(LivingEntity body) {

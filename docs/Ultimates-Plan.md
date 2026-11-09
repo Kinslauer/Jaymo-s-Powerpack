@@ -272,7 +272,7 @@ Every entry was checked against the code by a second pass. Drop-back is written 
 - **Health:** +18 hearts (36).
 - **Film:** MORPH on forearm, hump, right_rib, right_horn, then the whole body. First time: the sculk spikes erupt down the spine in slow motion, the ribs swing open on a heartbeat, and the horns curl out as the first toll shakes the screen.
 
-## Patch 2: Wyrm, Duplex, Rivet, Gorger, Slipfin, Polestar, Lurk
+## Patch 2: Wyrm, Duplex, Rivet, Gorger, Slipfin, Polestar, Lurk (done, 0.21.37)
 
 ### Wyrm -> Elder Wyrm
 - **Today:** Adds +0.8 scale (`ELDER_EXTRA_SCALE`) to the 1.2x drake, and the general +15% comes on top, so it ends about 2.15x. It also gets +8 armour (`ELDER_ARMOR`). The wings already cost nothing. Dragon's Breath has `ELDER_BREATH_COOLDOWN` 40, and the general halving cuts that to 20 ticks, so it is back every 1 s. Wing Gust reaches 1.5x as far (radius 9). It throws portal and dragon's-breath particles, roars (`ENDER_DRAGON_GROWL`) and shakes the screen (`ELDER_SHAKE`). `tickUltimate` trails dragon's-breath particles. There is no move of its own (no `ultimateHasMove`). On top come the general +50% health and fists and every base cooldown halved.

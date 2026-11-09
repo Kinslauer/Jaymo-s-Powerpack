@@ -520,7 +520,10 @@ public final class Quests {
 		remove(player, q.id());
 		// (0.7.0) a priest's hunt: the rite, there and then
 		Cures.rite(level, player, giver, q);
-		Money.pay(player, Factions.get(level.getServer(), q.giver().faction()), q.reward().milli());
+		// a Rider is paid more for carrying things and people (Riders.COURIER_PAY)
+		long pay = q.kind() == Quest.DELIVER || q.kind() == Quest.ESCORT ? com.jaymoskingdoms.equestrian.Riders.courierPay(player, q.reward().milli())
+			: q.reward().milli();
+		Money.pay(player, Factions.get(level.getServer(), q.giver().faction()), pay);
 		for (ItemStack stack : goods(level, q)) {
 			give(player, stack);
 		}

@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
  */
 public final class StableNet {
 	/** What a button does ({@code arg}: a horse's entity id, a market or tack index). */
-	public static final int BOARD = 0, COLLECT = 1, BUY = 2, SELL = 3, SHOE = 4, BUY_TACK = 5, QUESTS = 6;
+	public static final int BOARD = 0, COLLECT = 1, BUY = 2, SELL = 3, SHOE = 4, BUY_TACK = 5, QUESTS = 6, RACE = 7;
 
 	/** A button on a row. */
 	public record Button(Component text, int action, int arg, boolean active) {

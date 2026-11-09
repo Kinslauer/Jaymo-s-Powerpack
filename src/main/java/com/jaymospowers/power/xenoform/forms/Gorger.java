@@ -32,6 +32,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>V, Horn Charge: head down and run ({@link #HORN_TICKS} ticks), goring the first creature in the way. Run off a
  * ledge mid-charge and it turns into a slam: the landing hits everything round, harder the farther you fell.</li>
  * <li>B (hold), Roll Up: curl into the shell. Arrows and other shots glance off, nothing moves you, but you crawl.</li>
+ * <li>C (ascended), Worldmaw: (0.21.37) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Worldmaw}.</li>
  * </ul>
  */
 public final class Gorger extends XenoForm {
@@ -50,6 +51,8 @@ public final class Gorger extends XenoForm {
 	/** The ledge slam: its reach, base bite, and the bite per block fallen (up to {@link #SLAM_MAX}). */
 	public static final double SLAM_RADIUS = 4.0;
 	public static final float SLAM_DAMAGE = 5.0F, SLAM_PER_BLOCK = 1.0F, SLAM_MAX = 18.0F;
+
+	private final com.jaymospowers.power.xenoform.XenoUltimate worldmaw = new com.jaymospowers.power.xenoform.forms.ultimate.Worldmaw(this);
 
 	public Gorger() {
 		super("gorger", 1.1F, 30.0F, 5.0, -0.05, 0.5, 0.5, Items.ARMADILLO_SCUTE, 0xB06A54);
@@ -245,13 +248,11 @@ public final class Gorger extends XenoForm {
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.5F);
 	}
 
+	// ---- Worldmaw ----
+
+	/** (0.21.37) Worldmaw is its own evolved form now: the Ultimate move, health bar, model and kit are in {@code Worldmaw}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		ring(level, ParticleTypes.EXPLOSION, player.position(), 2.0, 8);
-		sound(player, SoundEvents.ARMADILLO_ROLL, 1.4F, 0.5F);
-		live.gorge = GORGE_MAX;
-		live.hudDirty = true;
-		return true;
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return worldmaw;
 	}
 }

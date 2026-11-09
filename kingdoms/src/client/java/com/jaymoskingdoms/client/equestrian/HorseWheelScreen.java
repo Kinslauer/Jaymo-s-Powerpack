@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * go (or click). Orders go to the horse under the crosshair, or the one you ride: let it be, follow, stay, wander here,
  * make this its home, go home. Ride on (in the saddle) keeps it going without holding forward. Horses opens the roster
  * of every horse you own; Handbook opens the horse handbook. Laid out like the Z Fighter technique wheel; it doesn't
- * pause, and the world stays in view.
+ * pause, and the world stays in view. A Rider's horses heed all of it from the start; anyone else's once they trust them.
  */
 final class HorseWheelScreen extends Screen {
 	private static final int RADIUS = 66;
@@ -243,6 +243,10 @@ final class HorseWheelScreen extends Screen {
 	}
 
 	private boolean trusted(LocalPlayer player) {
+		if (com.jaymoskingdoms.equestrian.Riders.is(player)) {
+			// a Rider's horses heed every order from the start
+			return true;
+		}
 		Bond b = this.horse == null ? null : this.horse.getAttached(Bonding.BOND);
 		return b != null && b.trustOf(player.getUUID()) >= Herding.ORDER_TRUST;
 	}

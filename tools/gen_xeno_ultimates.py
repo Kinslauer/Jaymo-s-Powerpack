@@ -184,6 +184,7 @@ if __name__ == "__main__":
         # (0.20.21) the later Ultimates have a painter of their own in tools/ultimates/<id>.py, each with paint()
         import importlib
         sys.path.insert(0, str(Path(__file__).resolve().parent / "ultimates"))
-        for name in ("pyre", "blur", "prism", "wisp", "gremlin", "knell"):
+        for name in ("pyre", "blur", "prism", "wisp", "gremlin", "knell",
+                     "wyrm", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk"):  # (0.21.37)
             importlib.import_module(name).paint()
         print("Ultimate skins written under", gx.ROOT)

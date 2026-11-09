@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -30,7 +31,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * (Farmer's Delight's cutting board, MIT; its model and art, our own code.) Right-click it with something that can be
  * cut ({@link Chopping}) to lay it on the board, then right-click with a knife ({@link Delight#KNIVES}: the primitive,
  * bone and iron knives) to cut it up; an empty hand takes it back. Sneak-click it with an empty hand for the prep
- * board and the chopped dishes, as at Cooking for Blockheads' cutting board.
+ * board and the chopped dishes, as at Cooking for Blockheads' cutting board. A sturdy block (seared bricks) is laid
+ * there the same way and split back into the bricks it was built from with a pickaxe ({@link Chopping#split}), so a
+ * smeltery builder can take a wall apart again.
  */
 public class CuttingBoardBlock extends BaseEntityBlock {
 	private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 1, 15);
@@ -68,7 +71,8 @@ public class CuttingBoardBlock extends BaseEntityBlock {
 		}
 		ItemStack lying = board.item();
 		if (!lying.isEmpty()) {
-			if (!held.is(Delight.KNIVES)) {
+			boolean splits = !Chopping.split(lying).isEmpty();
+			if (splits ? !held.is(ItemTags.PICKAXES) : !held.is(Delight.KNIVES)) {
 				return InteractionResult.TRY_WITH_EMPTY_HAND;
 			}
 			if (level instanceof ServerLevel server) {
@@ -76,7 +80,7 @@ public class CuttingBoardBlock extends BaseEntityBlock {
 			}
 			return InteractionResult.SUCCESS;
 		}
-		if (held.is(Delight.KNIVES) || Chopping.cut(held).isEmpty()) {
+		if (held.is(Delight.KNIVES) || (Chopping.cut(held).isEmpty() && Chopping.split(held).isEmpty())) {
 			if (!held.isEmpty() && !held.is(Delight.KNIVES) && !level.isClientSide()) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.board.cant_cut"));
 			}
@@ -104,9 +108,9 @@ public class CuttingBoardBlock extends BaseEntityBlock {
 		return InteractionResult.SUCCESS;
 	}
 
-	private static void cut(ServerLevel level, BlockPos pos, CuttingBoardEntity board, Player player, InteractionHand hand, ItemStack knife) {
+	private static void cut(ServerLevel level, BlockPos pos, CuttingBoardEntity board, Player player, InteractionHand hand, ItemStack tool) {
 		ItemStack lying = board.item();
-		List<ItemStack> pieces = Chopping.cut(lying);
+		List<ItemStack> pieces = tool.is(ItemTags.PICKAXES) ? Chopping.split(lying) : Chopping.cut(lying);
 		if (pieces.isEmpty()) {
 			// (laid there before a recipe changed) hand it back
 			Block.popResourceFromFace(level, pos, Direction.UP, board.take());
@@ -118,7 +122,8 @@ public class CuttingBoardBlock extends BaseEntityBlock {
 		}
 		level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, lying.getItem()), pos.getX() + 0.5, pos.getY() + 0.15, pos.getZ() + 0.5,
 			8, 0.15, 0.05, 0.15, 0.05);
-		level.playSound(null, pos, SoundEvents.AXE_STRIP.value(), SoundSource.BLOCKS, 0.7F, 1.4F);
-		knife.hurtAndBreak(1, player, hand);
+		level.playSound(null, pos, tool.is(ItemTags.PICKAXES) ? SoundEvents.STONE_BREAK : SoundEvents.AXE_STRIP.value(),
+			SoundSource.BLOCKS, 0.7F, 1.4F);
+		tool.hurtAndBreak(1, player, hand);
 	}
 }

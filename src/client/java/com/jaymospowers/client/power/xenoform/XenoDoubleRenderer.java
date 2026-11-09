@@ -35,6 +35,11 @@ public class XenoDoubleRenderer extends MobRenderer<XenoDouble, AvatarRenderStat
 		// (0.18.113) Mirage's false copies are drawn as Mirage
 		state.setData(XenoformClient.FORM, entity.look());
 		state.setData(XenoformClient.ENDING, false);
+		// (0.21.37) while its owner is Copper Storm, the double wears the same storm armour (only a true double, not Mirage's copy)
+		java.util.UUID ownerId = entity.owner();
+		net.minecraft.world.entity.player.Player owner = ownerId == null || entity.level() == null ? null : entity.level().getPlayerByUUID(ownerId);
+		state.setData(XenoformClient.ULTIMATE, "duplex".equals(entity.look()) && owner != null
+			&& Boolean.TRUE.equals(owner.getAttached(com.jaymospowers.power.xenoform.XenoformState.ULTIMATE)));
 		XenoformClient.hideBody(state);
 	}
 

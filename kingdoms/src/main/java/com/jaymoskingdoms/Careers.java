@@ -821,6 +821,10 @@ public final class Careers {
 				continue;
 			}
 			int owed = p.done() * wage(server, f, p.kind(), rank, held) + (apprentice ? APPRENTICE_CUT : 0);
+			if (p.kind() == Job.COURIER) {
+				// a Rider's courier work pays more (Riders.COURIER_PAY)
+				owed = (int)com.jaymoskingdoms.equestrian.Riders.courierPay(player, owed);
+			}
 			// (0.7.498) wages are paid in the coin of the settlement (silver where it keeps emeralds), out of the same coin and bits in
 			// its storehouse; its emeralds and other realms' coins are the reserve, counted at worth and paid out as the town's coin
 			Currency money = Currencies.of(server, f);

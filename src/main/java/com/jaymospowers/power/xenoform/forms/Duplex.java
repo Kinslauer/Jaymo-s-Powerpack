@@ -24,8 +24,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
@@ -49,8 +47,7 @@ import org.jspecify.annotations.Nullable;
  * sneak + G again and it sets it down where you aim.</li>
  * <li>V, Switch: trade places with the double you aim at (or the farthest one).</li>
  * <li>B, Merge: every double runs back into you, each healing you a little.</li>
- * <li>C (ascended), Copper Storm: lightning strikes every double, shocking everything round it, and leaves them
- * charged (fast, strong, glowing); up to {@link #STORM_MAX_DOUBLES} doubles while it lasts. C again strikes again.</li>
+ * <li>C (ascended), Copper Storm: (0.21.37) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.CopperStorm}.</li>
  * </ul>
  * (0.15.96) The doubles hunt: idle ones join a mate's fight, go for whatever hurts or hunts you or yours, and for
  * hostile creatures near you ({@link #HUNT_RANGE}); together they swarm it ({@link XenoDouble}). A double that dies
@@ -61,7 +58,7 @@ public final class Duplex extends XenoForm {
 	// ---- tuning ----
 	/** A copper golem's size: about a block to the top of its head (the player is 1.8), the rod above that. */
 	public static final float SCALE = 0.55F;
-	public static final int SPLIT_COOLDOWN = 40, MAX_DOUBLES = 3, STORM_MAX_DOUBLES = 6;
+	public static final int SPLIT_COOLDOWN = 40, MAX_DOUBLES = 3;
 	public static final int RALLY_COOLDOWN = 20;
 	public static final double RALLY_REACH = 16.0;
 	/** Fetch: how far off you can pick out a block (blocks, from the eyes). */
@@ -80,12 +77,11 @@ public final class Duplex extends XenoForm {
 	public static final double MERGE_RANGE = 24.0;
 	/** What a loyal double's death costs you. */
 	public static final float DEATH_STING = 2.0F;
-	/** Copper Storm: the shock round each double (radius, damage), C's cooldown between strikes, and how long the charge lasts. */
-	public static final double STORM_RADIUS = 3.0;
-	public static final float STORM_DAMAGE = 6.0F;
-	public static final int STORM_COOLDOWN = 400, CHARGE_TICKS = 400;
 	/** The name for each count of you (you and your doubles): 1 and 2 are both Duplex. */
 	private static final String[] TITLES = {"duplex", "duplex", "duplex", "triplex", "quadruplex", "quintuplex", "sextuplex", "septuplex"};
+
+	/** (0.21.37) Its Ultimate, built once and handed out by {@link #evolved()}. */
+	private final com.jaymospowers.power.xenoform.XenoUltimate copperStorm = new com.jaymospowers.power.xenoform.forms.ultimate.CopperStorm(this);
 
 	public Duplex() {
 		super("duplex", SCALE, 18.0F, 3.0, 0.1, 0.2, 0.0, Items.COPPER_INGOT, 0xE07B4A);
@@ -257,17 +253,17 @@ public final class Duplex extends XenoForm {
 	}
 
 	/** Your new name, over the hotbar. */
-	private static void announce(ServerPlayer player, int count) {
+	public static void announce(ServerPlayer player, int count) {
 		player.sendOverlayMessage(title(count).copy().withStyle(style -> style.withColor(TextColor.fromRgb(XenoForms.DUPLEX.color)).withBold(true)));
 	}
 
 	/** Whether {@code e} is one of the player's doubles. */
-	private static boolean mine(ServerPlayer player, Entity e) {
+	public static boolean mine(ServerPlayer player, Entity e) {
 		return e instanceof XenoDouble twin && twin.isDoubleOf(player);
 	}
 
 	/** The player's living doubles. */
-	private static List<XenoDouble> loyal(ServerPlayer player, XenoformPower.Live live) {
+	public static List<XenoDouble> loyal(ServerPlayer player, XenoformPower.Live live) {
 		List<XenoDouble> out = new ArrayList<>();
 		for (int id : live.doubles) {
 			if (player.level().getEntity(id) instanceof XenoDouble twin && twin.isAlive()) {
@@ -289,7 +285,7 @@ public final class Duplex extends XenoForm {
 	// ---- R: Split ----
 
 	private static boolean split(ServerPlayer player, XenoformPower.Live live) {
-		int cap = live.ultimate ? STORM_MAX_DOUBLES : MAX_DOUBLES;
+		int cap = MAX_DOUBLES;
 		live.doubles.removeIf(id -> !(player.level().getEntity(id) instanceof XenoDouble twin) || !twin.isAlive());
 		if (live.doubles.size() >= cap) {
 			return false;
@@ -304,7 +300,12 @@ public final class Duplex extends XenoForm {
 	}
 
 	/** A double beside you (left or right, whichever has room; else where you stand). */
-	private static @Nullable XenoDouble spawnDouble(ServerPlayer player, XenoformPower.Live live) {
+	public static @Nullable XenoDouble spawnDouble(ServerPlayer player, XenoformPower.Live live) {
+		return spawnDouble(player, live, false);
+	}
+
+	/** (0.21.37) As {@link #spawnDouble(ServerPlayer, XenoformPower.Live)}, stepping out to the other side first when {@code otherSide}. */
+	public static @Nullable XenoDouble spawnDouble(ServerPlayer player, XenoformPower.Live live, boolean otherSide) {
 		ServerLevel level = player.level();
 		XenoDouble twin = XenoDouble.TYPE.create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (twin == null) {
@@ -312,7 +313,7 @@ public final class Duplex extends XenoForm {
 		}
 		Vec3 side = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F).scale(1.2);
 		Vec3 at = player.position();
-		for (Vec3 candidate : new Vec3[] {at.add(side), at.subtract(side)}) {
+		for (Vec3 candidate : otherSide ? new Vec3[] {at.subtract(side), at.add(side)} : new Vec3[] {at.add(side), at.subtract(side)}) {
 			if (level.noCollision(XenoDouble.TYPE.getDimensions().makeBoundingBox(candidate))) {
 				at = candidate;
 				break;
@@ -367,7 +368,7 @@ public final class Duplex extends XenoForm {
 	 * A double carrying a block goes and sets it down where you aim (against the face you aim at, or in its place if
 	 * that's grass and the like); with none carrying, the nearest free double goes and picks up the block you aim at.
 	 */
-	private static boolean fetch(ServerPlayer player, XenoformPower.Live live) {
+	public static boolean fetch(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(FETCH_REACH)), ClipContext.Block.OUTLINE,
@@ -462,7 +463,7 @@ public final class Duplex extends XenoForm {
 	 * (0.18.96) Sneak + V: look out through the aimed double's eyes (or the farthest one): your own client's camera moves
 	 * to it ({@code XenoformState.EYES}, synced to you only) while your body stands where it was.
 	 */
-	private static boolean openEyes(ServerPlayer player, XenoformPower.Live live) {
+	public static boolean openEyes(ServerPlayer player, XenoformPower.Live live) {
 		LivingEntity aimedAt = aimedDouble(player);
 		XenoDouble pick = aimedAt instanceof XenoDouble twin ? twin : null;
 		if (pick == null) {
@@ -484,7 +485,7 @@ public final class Duplex extends XenoForm {
 		return true;
 	}
 
-	private static void closeEyes(ServerPlayer player, XenoformPower.Live live) {
+	public static void closeEyes(ServerPlayer player, XenoformPower.Live live) {
 		if (live.eyes >= 0) {
 			live.eyes = -1;
 			player.removeAttached(XenoformState.EYES);
@@ -493,7 +494,7 @@ public final class Duplex extends XenoForm {
 	}
 
 	/** The double under the crosshair (aimed() skips allies, and loyal doubles are your allies). */
-	private static @Nullable LivingEntity aimedDouble(ServerPlayer player) {
+	public static @Nullable LivingEntity aimedDouble(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getLookAngle().scale(SWITCH_REACH));
 		var hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player.level(), player, eye, end,
@@ -539,82 +540,14 @@ public final class Duplex extends XenoForm {
 
 	// ---- C: Copper Storm ----
 
+	/** (0.21.37) Copper Storm is its own evolved form now: the move, health bar, model and kit are in {@code CopperStorm}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		// the storm brings a full set of doubles with it
-		while (loyal(player, live).size() < MAX_DOUBLES && live.doubles.size() < STORM_MAX_DOUBLES) {
-			if (spawnDouble(player, live) == null) {
-				break;
-			}
-		}
-		if (loyal(player, live).isEmpty()) {
-			return false;
-		}
-		storm(player, live);
-		announce(player, 1 + live.doubles.size());
-		return true;
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return copperStorm;
 	}
 
-	@Override
-	public boolean ultimateHasMove() {
-		return true;
-	}
-
-	@Override
-	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
-		if (ultimateReady(player, live) && !loyal(player, live).isEmpty()) {
-			storm(player, live);
-		}
-	}
-
-	@Override
-	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
-		live.chargedUntil = 0L;
-		ServerLevel level = player.level();
-		// back down to the everyday count: the newest extras go first, and the name with them
-		live.doubles.removeIf(id -> !(level.getEntity(id) instanceof XenoDouble twin) || !twin.isAlive());
-		if (live.doubles.size() > MAX_DOUBLES) {
-			while (live.doubles.size() > MAX_DOUBLES) {
-				int id = live.doubles.remove(live.doubles.size() - 1);
-				if (level.getEntity(id) instanceof XenoDouble twin) {
-					twin.pop(level);
-				}
-			}
-			announce(player, 1 + MAX_DOUBLES);
-		}
-	}
-
-	/** Lightning (for show) on every double, a shock round each, and the charge. */
-	private static void storm(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		List<XenoDouble> doubles = loyal(player, live);
-		List<LivingEntity> shocked = new ArrayList<>();
-		for (XenoDouble twin : doubles) {
-			LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
-			if (bolt != null) {
-				bolt.snapTo(twin.getX(), twin.getY(), twin.getZ());
-				bolt.setVisualOnly(true);
-				level.addFreshEntity(bolt);
-			}
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, twin.getBoundingBox().inflate(STORM_RADIUS),
-				e -> e != player && e.isAlive() && !mine(player, e) && !spared(player, e) && !e.isSpectator()
-					&& e.distanceToSqr(twin) <= STORM_RADIUS * STORM_RADIUS)) {
-				if (!shocked.contains(e)) {
-					shocked.add(e);
-				}
-			}
-			charge(twin, CHARGE_TICKS);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, twin.getX(), twin.getY() + 1.0, twin.getZ(), 30, 0.5, 0.8, 0.5, 0.2);
-		}
-		for (LivingEntity e : shocked) {
-			e.hurtServer(level, player.damageSources().lightningBolt(), STORM_DAMAGE);
-		}
-		live.chargedUntil = level.getGameTime() + CHARGE_TICKS;
-		sound(player, SoundEvents.LIGHTNING_BOLT_THUNDER, 1.0F, 1.3F);
-		ultimateCooldown(player, live, STORM_COOLDOWN);
-	}
-
-	private static void charge(XenoDouble twin, int ticks) {
+	/** (0.21.37) Charges a double: fast, strong and glowing for {@code ticks}. */
+	public static void charge(XenoDouble twin, int ticks) {
 		twin.addEffect(new MobEffectInstance(MobEffects.SPEED, ticks, 1, false, false));
 		twin.addEffect(new MobEffectInstance(MobEffects.STRENGTH, ticks, 0, false, false));
 		twin.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0, false, false));
