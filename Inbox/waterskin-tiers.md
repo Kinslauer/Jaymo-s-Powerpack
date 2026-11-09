@@ -26,3 +26,4 @@ Andy's note: it should be the existing `WaterskinItem` gaining tiers, not a seco
 - Deciding question for Andy: are the tiers separate items (leather waterskin / iron canteen) or one item whose capacity upgrades? His note says tiers of one item.
 - Amounts are ours to pick; the source's 3/6/8 are only a suggestion.
 - 2026-11-08 20:21 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 05:56 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
