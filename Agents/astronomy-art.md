@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: astronomy-art
 branch: claude/astronomy-art
 with:
-pr:
+pr: 1185
 mods: kingdoms
 versions:
 started: 2026-11-08
@@ -31,4 +31,4 @@ owns:
 - Later astronomy code tasks own registration, aiming, observation rules and animations; this PR supplies only the first telescope art and shared palette guidance.
 
 ## Done
-Work in progress; not tested in game.
+PR #1185 supplies the original walnut/aged-brass telescope, item icon, editable Blockbench sources and inspected front/right/back/left renders. Kingdoms and root builds plus `tools/pr_checks.py` pass. The block/item are not registered here; in-game rendering, aiming and observations were not tested.
