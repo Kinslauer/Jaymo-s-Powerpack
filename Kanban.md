@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -37,7 +37,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · #1173 · in-review
+- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · #1173 · writing
 
 
 ## In review
