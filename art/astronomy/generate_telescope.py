@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import base64
+import copy
+import importlib
 import io
 import json
 from pathlib import Path
+import sys
 import uuid
 
 from PIL import Image, ImageDraw
@@ -175,6 +178,49 @@ class Model:
                           "uv_height": self.resolution, "source": png_source(self.texture)}],
         }
 
+    def geckolib_data(self) -> dict:
+        """The placed model centred for GeckoLib, with a fixed base and two aiming joints."""
+        assert self.name == "telescope"
+        data = self.data()
+        data["credit"] += " Articulated base/azimuth/elevation rig for GeckoLib."
+        data["elements"] = copy.deepcopy(self.elements)
+        for element in data["elements"]:
+            for key in ("from", "to", "origin"):
+                element[key][0] -= 8
+                element[key][1] += 0.82
+                element[key][2] -= 8
+
+        def node(name, origin, children):
+            return {"name": name, "origin": origin, "color": 0,
+                    "uuid": str(uuid.uuid5(NS, self.name + "/rig/" + name)),
+                    "export": True, "mirrorUV": False, "isOpen": True, "locked": False,
+                    "visibility": True, "autouv": 0, "children": children}
+
+        elevation = node("elevation", [0, 13.82, 0], self.groups["barrel"] + self.groups["optics"])
+        azimuth = node("azimuth", [0, 11.32, 0], self.groups["mount"] + [elevation])
+        data["outliner"] = [node("base", [0, 0, 0], self.groups["tripod"] + [azimuth])]
+
+        def keys(entries):
+            return [{"channel": "rotation", "data_points": [{"x": vector[0], "y": vector[1], "z": vector[2]}],
+                     "time": time, "interpolation": "linear"} for time, vector in entries]
+
+        def animation(name, tracks, length=1.0, loop="once"):
+            animators = {}
+            for bone, entries in tracks.items():
+                ident = str(uuid.uuid5(NS, self.name + "/rig/" + bone))
+                animators[ident] = {"name": bone, "type": "bone", "keyframes": keys(entries)}
+            return {"name": name, "loop": loop, "length": length, "animators": animators}
+
+        zero = {"azimuth": [(0, (0, 0, 0))], "elevation": [(0, (0, 0, 0))]}
+        data["animations"] = [
+            animation("idle", zero, loop="loop"),
+            animation("azimuth", {"azimuth": [(0, (0, 0, 0)), (1, (0, 90, 0)), (2, (0, 0, 0))]}, length=2.0),
+            animation("elevation", {"elevation": [(0, (0, 0, 0)), (1, (-22.5, 0, 0)), (2, (0, 0, 0))]}, length=2.0),
+            animation("aim", {"azimuth": [(0, (0, 0, 0)), (1, (0, 90, 0))],
+                              "elevation": [(0, (0, 0, 0)), (1, (-22.5, 0, 0))]}, loop="hold"),
+        ]
+        return data
+
 
 def stepped_barrel(model: Model, group: str, prefix: str, z0: float, z1: float,
                    material: str, rotation, origin, over=0.0):
@@ -263,7 +309,8 @@ def main():
     icon.save(ASSETS / "textures/item/telescope.png")
     block = build_block_model(atlas)
     item = build_item_model(icon)
-    dump(HERE / "telescope.bbmodel", block.data())
+    block_source = block.geckolib_data()
+    dump(HERE / "telescope.bbmodel", block_source)
     dump(HERE / "telescope_item.bbmodel", item.data())
     dump(ASSETS / "models/block/telescope.json", export_java_block(block))
     dump(ASSETS / "models/item/telescope.json", {
@@ -274,7 +321,13 @@ def main():
     dump(ASSETS / "items/telescope.json", {
         "model": {"type": "minecraft:model", "model": "jaymoskingdoms:item/telescope"}
     })
-    print(f"Wrote {len(block.elements)} block elements and the 16x16 item icon")
+
+    sys.path.insert(0, str(ROOT / "tools"))
+    convert = importlib.import_module("bbmodel_geckolib").convert
+    geo, animations, _ = convert(block_source, "telescope")
+    dump(ASSETS / "geckolib/models/block/telescope.geo.json", geo)
+    dump(ASSETS / "geckolib/animations/block/telescope.animation.json", animations)
+    print(f"Wrote {len(block.elements)} block elements, the GeckoLib aiming rig and the 16x16 item icon")
 
 
 if __name__ == "__main__":
