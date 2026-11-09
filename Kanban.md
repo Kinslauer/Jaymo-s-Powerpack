@@ -31,8 +31,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · changes · fixing review notes
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · changes · fixing review notes
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · changes · fixing review notes
 
 
 ## Text pass
