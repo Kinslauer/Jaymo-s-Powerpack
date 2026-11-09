@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 19:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,6 +20,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · claimed
+- [ ] [[Agents/kitchen-cookware-melt|kitchen-cookware-melt]] · running
 
 
 ## Text pass
