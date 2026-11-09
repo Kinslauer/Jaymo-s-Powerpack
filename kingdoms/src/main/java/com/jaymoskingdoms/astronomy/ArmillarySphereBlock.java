@@ -66,7 +66,15 @@ public final class ArmillarySphereBlock extends BaseEntityBlock {
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS)
                 .register(output -> output.insertAfter(Items.SMOKER, ITEM));
         PayloadTypeRegistry.clientboundPlay().register(ArmillaryNet.Open.TYPE, ArmillaryNet.Open.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(ArmillaryNet.Measure.TYPE, ArmillaryNet.Measure.CODEC);
+                PayloadTypeRegistry.serverboundPlay().register(ArmillaryNet.Measure.TYPE, ArmillaryNet.Measure.CODEC);
+                PayloadTypeRegistry.serverboundPlay().register(DiscoveryC2SPacket.TYPE, DiscoveryC2SPacket.CODEC);
+                ServerPlayNetworking.registerGlobalReceiver(DiscoveryC2SPacket.TYPE, (payload, context) -> {
+                    context.player().ifPresent(player -> {
+                        if (player.level() instanceof ServerLevel serverLevel) {
+                            DiscoveryAttachment.setDiscovered(serverLevel.getPlayerList().getPlayer(player.getUUID()), DiscoveryC2SPacket.readDiscovered(payload));
+                        }
+                    });
+                });
     }
 
     @Override

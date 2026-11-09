@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client.astronomy;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.astronomy.DiscoveryAttachment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import java.util.BitSet;
@@ -35,6 +36,13 @@ public final class Discovery {
         if (player == null) {
             return;
         }
-        // Client reports the look; the server (via attachment) tracks discovery state.
+        if (!(player.level() instanceof ServerLevel serverLevel)) {
+            return;
         }
+        ServerPlayer serverPlayer = serverLevel.getPlayerList().getPlayer(player.getUUID());
+        if (serverPlayer == null) {
+            return;
+        }
+        ServerPlayNetworking.send(serverPlayer, new DiscoveryC2SPacket(hip));
+    }
 }

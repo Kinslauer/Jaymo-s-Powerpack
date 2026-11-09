@@ -109,7 +109,6 @@ public final class SkyClient {
                 List<Star> stars = StarCatalog.stars();
                 Discovery discovery = Discovery.getOrCreate(minecraft);
                 PoseStack.Pose pose = context.poseStack().last();
-                context.submitNodeCollector().submitCustomGeometry(context.poseStack(),
                         RenderType.entityTranslucent(WHITE),
                         (pose2, buffer) -> {
                             clock++;
@@ -164,3 +163,4 @@ public final class SkyClient {
                     }
                 });
     }
+}
