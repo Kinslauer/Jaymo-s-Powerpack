@@ -27,3 +27,4 @@ Andy's note: it should be the existing `WaterskinItem` gaining tiers, not a seco
 - Amounts are ours to pick; the source's 3/6/8 are only a suggestion.
 - 2026-11-08 20:21 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-09 05:56 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-09 06:03 Text pass: added change note changes/kitchen/claude-waterskin-tiers.md (lang entries already clear: Leather Waterskin, Iron Canteen, Dragon Canteen; tooltip keys unchanged and correct)
