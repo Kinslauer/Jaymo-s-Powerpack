@@ -56,7 +56,7 @@ Tiv, in the Tasks thread: "create a task for using gecko lib to animate the musk
 - "Alotta smoke and fire": the blast should look like a blast — more and thicker smoke than today's eight LARGE_SMOKE particles, fire particles at the muzzle, lingering smoke after the shot. Say how many and how long in the PR.
 - Don't change how the guns behave (damage, range, reload, dual wield) — only how they look and sound when they go off.
 - The Void Armory's summoned flintlocks already dissolve with smoke; keep that consistent with the new animation.
-- Ask Tiv whether the musket and flintlock should share one animation rig or each get their own.
+- The musket and flintlock each get their own animation rig — they do not share one.
 
 ## Report
 
