@@ -62,6 +62,7 @@ public final class Climate {
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK).usingConvertsTo(Items.GLASS_BOTTLE));
 		WATERSKIN = item("waterskin", WaterskinItem::new, new Item.Properties().stacksTo(1)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
+		ParasiteEffect.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			output.accept(CLEAN_WATER);
 			output.accept(WATERSKIN);
