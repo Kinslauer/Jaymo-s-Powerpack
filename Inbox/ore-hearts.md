@@ -90,3 +90,49 @@ pushed as `fa72e7dea` so it cannot be lost — the triage note above saying "unc
 
 **Assets needed:** none — hermes-modeller delivered the ore and item art in PR #1167. The only missing
 art-side files are the three item-definition JSONs, which are code-side and listed above.
+
+## Text review
+
+All player-facing strings the feature introduces (from `HeartCrystals.java` and the stall report checklist), with exact keys and file paths for `src/main/resources/assets/jaymospowers/lang/parts/hearts.json`.
+
+### Block names
+- `block.jaymospowers.heart_crystal_ore` → **"Heart Crystal Ore"**
+- `block.jaymospowers.heart_crystal_ore_deepslate` → **"Deepslate Heart Crystal Ore"**
+
+Matches existing ore naming (e.g., `block.jaymospowers.vault_keystone` → "Vault Keystone"). Title Case, noun phrase.
+
+### Item name
+- `item.jaymospowers.heart_crystal` → **"Heart Crystal"**
+
+Matches the artifact `crystal_heart` ("Crystal Heart") but distinct — this is the raw consumable crystal, not the bauble. Title Case.
+
+### Creative tab
+- `itemGroup.jaymospowers.hearts` → **"Heart Crystals"**
+
+Follows `itemGroup.jaymospowers.armory` ("Jaymo's Armory"), `itemGroup.jaymospowers.alchemy` ("Alchemy") — short, descriptive, Title Case. "Heart Crystals" plural because the tab holds the crystal item (and future heart-related items).
+
+### Item tooltip (lore line, rendered gray italic via `DataComponents.LORE`)
+- `tooltip.jaymospowers.heart_crystal` → **"Consume for a permanent half-heart. Lost on death, but each grants an extra life."**
+
+Style: one sentence, imperative mood, explains effect and death behavior. Consistent with artifact tooltips like "Five more hearts" (crystal_heart) and "Turns a death aside once by throwing you somewhere near" (chorus_totem) — concise, no mechanic jargon.
+
+### System messages (sent via `player.sendSystemMessage`, colored)
+- `message.jaymospowers.hearts.granted` (arg: new half-heart count) → **"A heart crystal takes root in you. (%s half-hearts)"**
+
+Tone: atmospheric, second-person present, like mortality messages ("You wake cold. Nothing hurts."). Light purple color in code fits the "takes root" phrasing. Arg is half-heart count (code passes `current + 2`; see code note below).
+
+- `message.jaymospowers.hearts.full` → **"You cannot hold more heart crystals."**
+
+Direct, second-person. Matches `message.jaymospowers.baubles.full` ("No free bauble slot takes that") — blunt limitation feedback.
+
+- `message.jaymospowers.hearts.burned` (arg: remaining half-hearts) → **"A heart crystal shatters, turning death aside. (%s half-hearts remain)"**
+
+Atmospheric, matches mortality wake messages ("Everything goes dark. Something in your blood keeps moving after your heart stops."). Red color in code fits "shatters". Arg is remaining half-hearts (code passes `current - 1`).
+
+---
+
+### Code notes for the builder (not text changes)
+- `grantHeart` passes `current + 2` to `granted` but the new count is `current + 1`. The arg should be `current + 1` (the actual new half-heart total).
+- `tryBurnHeartOnDeath` increments `Mortality.WOKEN` itself *and* `leftForDead` increments it again — double-counts the sure wake. Keep only the `leftForDead` increment (the heart *is* the wake).
+- Cap is 10 half-hearts (5 full hearts). Messages show half-heart counts; consider whether to show full hearts instead (divide by 2) for player clarity.
+- Existing `crystal_heart` artifact ("Crystal Heart", tooltip "Five more hearts") stacks with this — both grant +10 max health. PR body should note this and flag if it reads as too much health.
