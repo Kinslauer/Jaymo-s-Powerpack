@@ -7,19 +7,30 @@ pr:
 mods: kingdoms
 versions:
 started: 2026-11-09
-owns: []
+owns:
+  - art/astronomy/telescope.bbmodel
+  - art/astronomy/generate_telescope.py
+  - art/astronomy/README.md
+  - art/astronomy/telescope_preview.png
+  - art/astronomy/telescope_rig_preview.png
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/models/block/telescope.geo.json
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/animations/block/telescope.animation.json
+  - changes/kingdoms/claude-astronomy-telescope.md
 ---
 # Astronomy telescope
 
 **Task:** Supply the placeable, aimable telescope art and animation support; gameplay registration and observation rules remain with the gameplay implementation.
 
 ## Plan
-- Reuse the original telescope art in PR #1185 after it merges rather than duplicating the same model in a second branch.
-- Convert it to an articulated rig only if Andy confirms that route for continuous per-telescope azimuth and elevation.
+- Reuse the original telescope art merged in PR #1185.
+- Convert it to a centred GeckoLib block rig with fixed `base`, yawing `azimuth` and tilting `elevation` bones.
+- Add editable idle/aim/reference animations, export the block geometry and animation JSON, and inspect front/side/back plus posed renders.
+- Keep registration, saved aim, skills and observation rules for the gameplay implementation; no gameplay Java in this pass.
 
 ## Notes
-- PR #1185 now owns the static block/item models, textures and editable telescope source.
-- This branch contains no edits; it is waiting on the base art and the rig decision recorded in the Inbox task.
+- PR #1185 has merged, and Andy confirmed GeckoLib on 2026-09-09.
+- One walnut/brass telescope is enough for this pass; the Altazimuth Mount can use the same rig and its physical scales rather than duplicating tiers.
+- `astronomy-sky` and observation behaviour remain separate dependencies.
 
 ## Done
-Blocked before editing. No uncommitted work; nothing was tested in game.
+Work in progress; not yet tested in game.
