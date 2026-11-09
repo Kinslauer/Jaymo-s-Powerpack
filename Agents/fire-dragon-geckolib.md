@@ -1,5 +1,5 @@
 ---
-status: running
+status: done-unmerged
 task: 
 branch: ccr-03d9471e-baz6ym
 with: Prometheus's minotaur-geckolib (Andy compares the two)
@@ -25,3 +25,4 @@ owns:
 - 
 
 ## Done
+Pushed to ccr-03d9471e-baz6ym (no PR yet: Andy compares it with Prometheus's minotaur first). Notus and Boreas animated by GeckoLib: idle, walk, sit, crash, land, glide, fly (synced to its stroke), new bite and tail sweep; head look, climb pitch and breath jaw in code. Built (kingdoms `gradlew build`), pr_checks pass; not played, no server run. Render: kingdoms/art/fire_dragon-render.png.
