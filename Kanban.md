@@ -28,9 +28,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · claimed
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · claimed
 
 
 ## Text pass
