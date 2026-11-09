@@ -10,7 +10,7 @@
 	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast, and mend your wounds and those of every creature near you). Sneak+B, once you've killed your echo for good: Fast Forward, a leap to the ruined future (and back) with everyone near you",
 	"power.jaymospowers.chrono.key.ability_4.name": "Time Bloom",
 	"power.jaymospowers.chrono.ascended": "Timeless",
-	"power.jaymospowers.chrono.key.ultimate": "Chrono Punch: ten punches in half a second into everything in front of you",
+	"power.jaymospowers.chrono.key.ultimate": "Chrono Punch: ten punches in half a second into everything in front of you. Sneak+C: Time Stop, the whole world frozen for 5 s (everyone else too); your blows land when time resumes (3 min cooldown)",
 	"power.jaymospowers.chrono.key.ultimate.name": "Chrono Punch",
 	"message.jaymospowers.chrono_rewind_short": "Not enough time has passed to rewind.",
 	"message.jaymospowers.chrono_rewind_tangled": "The timeline is tangled across dimensions.",
@@ -156,5 +156,7 @@
 	"talk.jaymospowers.omen.piece.4.1": "We held the bridge as long as there were buses to hold it for. The last one got out, I think. Nobody came back to tell me.",
 	"talk.jaymospowers.omen.piece.4.2": "The last stand was the east bridge. Six Omens at the start. I'm not going to say how many at the end.",
 	"talk.jaymospowers.omen.piece.5.1": "The little drones are Worky. They map the streets, find a way through if there is one, and tell you when there isn't. Be nice to them. They're the only ones left who still ask if you're okay.",
-	"talk.jaymospowers.omen.piece.5.2": "Worky doesn't sleep and doesn't leave. It'll hover over your shoulder and show you the clear way. Most days it's the best company I've got."
+	"talk.jaymospowers.omen.piece.5.2": "Worky doesn't sleep and doesn't leave. It'll hover over your shoulder and show you the clear way. Most days it's the best company I've got.",
+	"message.jaymospowers.chrono_time_stop_cooldown": "Time won't stop again for %s s.",
+	"message.jaymospowers.chrono_time_stop_taken": "Time already stands still."
 }
