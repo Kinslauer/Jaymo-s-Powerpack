@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:40). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,7 +31,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · 🤖 Apollo · claimed
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · changes · fixing review notes
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
