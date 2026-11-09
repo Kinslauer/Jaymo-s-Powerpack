@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 18:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 18:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,7 +39,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🔨 Hephaestus · #1193 · claimed
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
@@ -47,6 +46,7 @@ kanban-plugin: board
 
 ## Text pass
 
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🔨 Hephaestus · #1193 · in-review
 
 
 ## In review
