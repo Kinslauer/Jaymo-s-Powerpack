@@ -16,36 +16,36 @@ Only one of the five runs on our pack today (26.3 Fabric). The other four are ol
 
 `ship as-is` · Fabric 26.3 (1.3.2) · custom licence: unmodified in any pack, forks allowed with credit
 
-- [ ] **Decide whether the block physics can be separated from the volumetric look** `L` ^rw-split
+- [x] **Decide whether the block physics can be separated from the volumetric look** `L` ^rw-split
   It cannot. The physics and the picture are one subsystem: a client-side fluid solver drawn as volumetric water, with sand and lava running through the same solver. There is no "physics only" switch in the source.
   For us: the block physics you liked only exists inside the simulation you were planning to leave out.
-  Notes:
+  Notes: we can try it.
 
-- [ ] **Test launch it against the Sodium / Iris stack** `M` ^rw-vulkan
+- [x] **Test launch it against the Sodium / Iris stack** `M` ^rw-vulkan
   The mod asks you to set the game's graphics API to Vulkan and restart. Our renderer mods were built for the other path, so treat them as unknown until one launch says otherwise. This single test decides whether the mod is even possible for us.
   Notes:
 
-- [ ] **If it runs, dial it down rather than split it** `S` ^rw-perf
+- [x] **If it runs, dial it down rather than split it** `S` ^rw-perf
   The cost knobs are runtime commands, not a config file: `/water settings` lists them, `/water set resolution 3` turns the detail down, `/water pause` stops the sim, `/water stats` shows what it costs. Nothing is saved, so a tuned setup cannot ship with the pack yet.
   Notes:
 
-- [ ] **Settle who owns water** `S` ^rw-streams
+- [x] **Settle who owns water** `S` ^rw-streams
   Streams Reflowing already makes our rivers and lakes. Two water systems in one world need a rule about which one wins.
-  Notes:
+  Notes: streams wins obviously, i just want the blocks. 
 
 ## 2. Dynamic Trees — right mod, wrong version
 
 `build ourselves later` · MIT · last Fabric build 1.21.1, February 2026
 
-- [ ] **Park it until a 26.3 Fabric build exists** `M` ^dt-wait
+- [x] **Park it until a 26.3 Fabric build exists** `M` ^dt-wait
   There is no 26.3 file. The mod is MIT, so building it ourselves is allowed, but it is a world generator mod — a real port, not an afternoon.
   Notes:
 
-- [ ] **If we do port it, settle Felled first** `M` ^dt-felled
+- [x] **If we do port it, settle Felled first** `M` ^dt-felled
   Both chop a whole tree from the base. Felled is the cheap answer; Dynamic Trees is the pretty one — trees grow over time, spread into forests, thin branches can be climbed.
   Notes:
 
-- [ ] **Check tree generation against our biomes** `M` ^dt-worldgen
+- [x] **Check tree generation against our biomes** `M` ^dt-worldgen
   It takes over tree placement, which sits underneath Geophilic, Biome Blends and the structure packs.
   Notes:
 
@@ -53,25 +53,25 @@ Only one of the five runs on our pack today (26.3 Fabric). The other four are ol
 
 `ideas only` · MIT · Forge 1.20.1 · an add-on for thirst and temperature mods we do not run
 
-- [ ] **Canteens with limited sips** `S` ^sd-canteen
+- [x] **Canteens with limited sips** `S` ^sd-canteen
   Leather holds 3 uses, iron 6, dragon 8 and cleans the water as it fills.
   For us: WaterskinItem — give the one item tiers instead of adding a second item.
   Notes:
 
-- [ ] **Bad water gives a slow parasite instead of poison** `S` ^sd-parasite
+- [x] **Bad water gives a slow parasite instead of poison** `S` ^sd-parasite
   Dirty water ticks damage at random rather than a straight potion hit; a "thirsty" debuff replaces nausea.
   For us: Kitchen Thirst — our own effect rather than borrowing vanilla poison, which reads as cheap.
-  Notes:
+  Notes: parasites and treatment methods should be added too.
 
-- [ ] **Blight mobs** `M` ^sd-blight
+- [x] **Blight mobs** `M` ^sd-blight
   Occasional elites with boosted stats and a visible tell so you can choose the fight.
   For us: the monster roster, not a new system.
   Notes:
 
-- [ ] **Crystal hearts found in ore** `M` ^sd-hearts
+- [x] **Crystal hearts found in ore** `M` ^sd-hearts
   Extra hearts mined out of the world, so health becomes something you find.
   For us: Powers health and downed state — needs a ruling on whether health can be a find, not only a level.
-  Notes:
+  Notes: finding permanent hearts is a good addition
 
 ## 4. Tinker's Delight — ideas for Kitchen and our tinkering
 
@@ -82,7 +82,7 @@ Only one of the five runs on our pack today (26.3 Fabric). The other four are ol
   For us: our knives already cut straw on the cutting board; the per-metal effect is the new part.
   Notes:
 
-- [ ] **Melt our own cookware back down** `S` ^td-melt
+- [x] **Melt our own cookware back down** `S` ^td-melt
   Pot, pan, skillet and knives smelt back into their metal at the smeltery.
   For us: MeltingRecipes — cheap, and it fixes the "I cast the wrong pan" annoyance.
   Notes:
