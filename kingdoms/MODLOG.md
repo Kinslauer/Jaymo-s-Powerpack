@@ -10510,8 +10510,8 @@ Built on astronomy-sky's catalog and discovery (PR 1193).
 
 Built; not tested in game.
 
-## 0.7.676 (2026-11-09): reincarnation wipes the whole character
+## 0.7.676 (2026-11-09): Atroxiia moves smoothly now (#1198)
 
-Reincarnate (the final death's new life) now wipes absolutely everything from the old life: MCA's creator runs anew (new look and name), villagers forget the player - hearts, memories, relationships, marriage and family ties - the reincarnated player leaves their party (roster, pending invites, leadership), and no captain remembers having met them (`McaBridge.forgetPlayer`, `Parties.reborn`, `Captains.forgetPlayer`, called from `LifeStory.reincarnateAnew`).
-
-Built and compile-checked; not tested in game.
+- Atroxiia, the frost wyrm of the lesser dragons, is drawn and animated with GeckoLib. Its look is unchanged: the same two-armed serpent body, glowing markings, headdress variants, spinal ridges, saddle and straps, sizes, rider seats and reach.
+- Every pose and move is preserved: idle fidgets (taunt, sniff, grumble), the crutching walk and bounding run, sitting, crashed and swimming states, plus all attacks — slam, swipe, precise strike, Gungnir, devastating sweep, Helheim quake, bite, tail lash, hurt and the held death pose.
+- Kingdoms builds and the dev server starts; Atroxiia was not spawned or watched in game.
