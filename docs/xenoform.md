@@ -301,7 +301,7 @@ Scanning stays the main way in. Beside it:
   changes until you slam.
 - **The Ultimate (ascended; 0.20.9, Ultimates patch 0).** An Ultimate is its own evolved alien (`XenoUltimate`, one per base
   alien, `XenoForm.evolved()`), with its own model and skin, its own R G V B and its own C (the big move), and its own health bar
-  on top of the base alien's. Built so far: Bulwark's Titan (0.20.9) and, in 0.20.21, Pyre's Sunheart, Velox's Standstill, Prism's Geode, Wisp's Revenant, Gremlin's Swarm and Knell's The Tolling (table below); the others still use the old fallback buff (`XenoForm.onUltimate`).
+  on top of the base alien's. Built so far: Bulwark's Titan (0.20.9) and, in 0.20.21, Pyre's Sunheart, Velox's Standstill, Prism's Geode, Wisp's Revenant, Gremlin's Swarm and Knell's The Tolling (table below), and in 0.21.37 Wyrm's Elder Wyrm, Duplex's Copper Storm, Rivet's Ironpour, Gorger's Worldmaw, Slipfin's Brinecrown, Polestar's Lodestar and Lurk's Nightfall; the others still use the old fallback buff (`XenoForm.onUltimate`).
   - **Coming on.** Unforged band: C does not change you. The Ultimate comes on by itself, once per change, as a last stand: a hit
     that leaves you at or under `ULT_LAST_STAND` (25%) of your health, or would kill you, while fighting a great foe (`GreatFoes`:
     the Ender Dragon, the Wither, the Elder Guardian, the Warden, anything that holds a visible boss bar, Kingdoms' bosses through
@@ -331,8 +331,13 @@ Scanning stays the main way in. Beside it:
 | Wisp | Revenant | (0.20.21) 1.2x, +6 hearts: Wraithwalk, Veil, Banshee Wail, Drift; C Possession (15 s inside the creature you look at, your swing strikes through it). |
 | Gremlin | Swarm | (0.20.21) Tiny, +5 hearts: Pounce, Haywire, Leech Bite, Scuttle; C splits into 5 glowing gremlins that bite what you bite; C again swaps with the farthest (nearest, sneaking), every second. |
 | Knell | The Tolling | (0.20.21) 1.6x, +18 hearts: Sonic Lance, Deep Sense, Deep Shriek, Undertow; C The Tolling (7 tolls 2 s apart, 10 blocks, 7 damage, Resistance II). Again 30 s after the last. |
-| Wyrm | Elder Wyrm | 2x size, +8 armour, wings cost nothing, breath every 2 s, gust 1.5x wide. |
-| Duplex | Copper Storm | Fills up to 3 doubles, then visual-only lightning on each: 6 lightning damage to everything within 3 of a double (not you or yours), and the doubles get Speed II, Strength and Glowing for 20 s; up to 6 doubles while it lasts (the extras pop when it ends). C again every 20 s. |
+| Wyrm | Elder Wyrm | (0.21.37) 2x, +12 hearts: Void Breath, Elder Wings (free flight, dive), Tempest Beat, Void Rift; C Endfire Volley (five dragon fireballs). Every 20 s. |
+| Duplex | Copper Storm | (0.21.37) 0.9x, +6 hearts: Storm Split, Bolt Rally, Arc Switch, Overcharge Merge; C Copper Storm (lightning on every double, 20 s charge). Every 20 s. |
+| Rivet | Ironpour | (0.21.37) full size, +7 hearts: Overmeld (shell moves 1.5x), Twin Lash, Molten Pour, Overdrive Ride; C Foundry Slam (10 damage, 5 blocks). Every 20 s. |
+| Gorger | Worldmaw | (0.21.37) 1.6x, +12 hearts: Deep Gulp, Rubble Cannon, Quake Charge, Spiked Roll; C Worldmaw (inhale, then Gut Blast). Every 30 s. |
+| Slipfin | Brinecrown | (0.21.37) 1.3x, +6 hearts: Tide Jet, Undertow Slip, Torrent Dart, Bloom Regrow; C Brinecrown (12 s downpour). Every 30 s. |
+| Polestar | Lodestar | (0.21.37) 1.5x, +12 hearts: Great Pull, Shock Repel, Triple Lift, Bastion Field; C Lodestar (6 s magnetic pole). Every 30 s. |
+| Lurk | Nightfall | (0.21.37) 1.3x, +6 hearts: Mark of Night, Nightstep, Terror, Deep Fade; C Nightfall (8 s darkness, 16 blocks). Every 40 s. |
 
 - **The corruption** is the band's alone: corrupted, a slam may give the wrong alien and the band changes you on its
   own (above). No alien has a twist of its own (0.15.51 removed them at Andy's word); `XenoForm.corrupt` is the empty

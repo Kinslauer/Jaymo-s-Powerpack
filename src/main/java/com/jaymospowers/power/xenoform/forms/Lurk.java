@@ -44,8 +44,16 @@ public final class Lurk extends XenoForm {
 	public static final int DREAD_TICKS = 120, DREAD_COOLDOWN = 300;
 	public static final int FADE_COOLDOWN = 200;
 
+	private final com.jaymospowers.power.xenoform.XenoUltimate nightfall = new com.jaymospowers.power.xenoform.forms.ultimate.Nightfall(this);
+
 	public Lurk() {
 		super("lurk", 1.05F, 26.0F, 5.0, 0.15, 0.3, 0.0, Items.SPYGLASS, 0x6E52B0);
+	}
+
+	/** (0.21.37) Nightfall is its own evolved form: the Ultimate move, health bar, model and kit are in {@code Nightfall}. */
+	@Override
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return nightfall;
 	}
 
 	@Override
@@ -188,12 +196,5 @@ public final class Lurk extends XenoForm {
 				mob.setTarget(null);
 			}
 		}
-	}
-
-	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		burst(player.level(), ParticleTypes.SQUID_INK, player.position().add(0.0, 1.0, 0.0), 60, 0.8, 0.05);
-		sound(player, SoundEvents.ELDER_GUARDIAN_CURSE, 1.0F, 0.6F);
-		return true;
 	}
 }

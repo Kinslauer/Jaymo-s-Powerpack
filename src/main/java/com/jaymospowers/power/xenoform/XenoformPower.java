@@ -678,6 +678,10 @@ public final class XenoformPower implements Power {
 		// (0.18.95) Rivet melded into a shell: that shell's keys
 		// (0.20.9) the Ultimate has keys of its own ("_ultimate"), where the alien has an evolved form
 		if (form != null && XenoformState.ultimate(player) != null) {
+			// (0.21.37) a melded Ironpour runs the shell's moves, so the guide shows those
+			if (shell != null && form.id.equals("rivet")) {
+				return "." + form.id + "_" + shell;
+			}
 			return "." + form.id + "_ultimate";
 		}
 		return form == null ? null : shell != null ? "." + form.id + "_" + shell : "." + form.id;
@@ -1930,7 +1934,7 @@ public final class XenoformPower implements Power {
 		if (live.form != null) {
 			switch (live.form.id) {
 				case "tusk" -> act = live.rush > 0 ? "charge" : null;
-				case "gorger" -> act = live.rolled ? "roll" : live.horn > 0 ? "charge" : null;
+				case "gorger" -> act = live.ult instanceof com.jaymospowers.power.xenoform.forms.ultimate.Worldmaw && com.jaymospowers.power.xenoform.forms.ultimate.Worldmaw.inhaling(player) ? "inhale" : live.rolled ? "roll" : live.horn > 0 ? "charge" : null;
 				case "gyre" -> act = live.spin > 0 ? "spin" : live.rolled ? "roll" : null;
 				// (0.19.75) Keen hanging from a ceiling by its feet
 				case "keen" -> act = live.perched ? "hang" : null;
@@ -1943,7 +1947,8 @@ public final class XenoformPower implements Power {
 				case "shade" -> act = live.lifted != null ? "hold" : live.stalked >= 0 ? "stare" : null;
 				case "thornwild" -> act = live.latchTicks > 0 ? "roots" : live.brood > 0 ? "bloom" : null;
 				case "lurk" -> act = live.faded ? "fade" : null;
-				case "rivet" -> act = live.rolls > 0 ? "pour" : fighting(player, com.jaymospowers.power.xenoform.forms.Rivet.FIGHT_TICKS) ? "fight" : null;
+				// (0.21.37) the Ultimates' big-move poses come before the base alien's own
+				case "rivet" -> act = live.ult instanceof com.jaymospowers.power.xenoform.forms.ultimate.Ironpour && com.jaymospowers.power.xenoform.forms.ultimate.Ironpour.slamming(player) ? "slam" : live.rolls > 0 ? "pour" : fighting(player, com.jaymospowers.power.xenoform.forms.Rivet.FIGHT_TICKS) ? "fight" : null;
 				case "dud" -> act = live.horn > 0 ? "dead" : live.rolls > 0 ? "roll" : null;
 				default -> act = null;
 			}

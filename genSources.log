@@ -1,0 +1,17 @@
+Starting a Gradle Daemon, 4 busy and 1 incompatible Daemons could not be reused, use --status for details
+
+> Configure project :
+Fabric Loom: 1.18.4
+WARNING: libs/jaymos-kitchen-0.5.57.jar is not the Kitchen source's version (0.5.82). Build kitchen/ and replace the jar in libs/.
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Gradle build daemon has been stopped: stop command received
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.

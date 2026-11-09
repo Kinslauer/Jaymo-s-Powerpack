@@ -4296,7 +4296,8 @@ ULTIMATE_COLORS = {
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
 # (0.20.9) the Ultimates with their own model and skin, painted by gen_xeno_ultimates.py (never recoloured from the base skin here)
-OWN_ULTIMATES = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell")  # (0.20.21)
+OWN_ULTIMATES = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell",
+                 "wyrm", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk")  # (0.21.37)
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
 PATCH5 = ("gyre", "cortex", "locust", "croaker")
 SCAN_B = ("rime", "marrow", "swathe", "blight")
@@ -4432,7 +4433,8 @@ if __name__ == "__main__":
     polestar()
     lurk()
     for form in PATCH4:
-        ultimate(form)
+        if form not in OWN_ULTIMATES:  # (0.21.37)
+            ultimate(form)
     # (0.18.103) patch 5, after patch 4 for the same reason; Dud has no Ultimate
     gyre()
     cortex()

@@ -33,6 +33,7 @@ import org.jspecify.annotations.Nullable;
  * <li>G, Slip: wriggle out of anything holding you, shake off slowness and tangles, and a burst of speed.</li>
  * <li>V, Dart: a lunge where you look (a long one in water, a flop on land) that bites the first creature met.</li>
  * <li>B, Regrow: like the axolotl, it heals what's broken: a lost limb grows back, breaks knit, and it regenerates.</li>
+ * <li>C (ascended), Brinecrown: (0.21.37) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Brinecrown}.</li>
  * </ul>
  */
 public final class Slipfin extends XenoForm {
@@ -48,6 +49,9 @@ public final class Slipfin extends XenoForm {
 	public static final float DART_DAMAGE = 6.0F;
 	public static final int DART_COOLDOWN = 30, DART_TICKS = 10;
 	public static final int REGROW_COOLDOWN = 900, REGROW_TICKS = 100;
+
+	/** (0.21.37) Its Ultimate, built once. */
+	private final com.jaymospowers.power.xenoform.XenoUltimate brinecrown = new com.jaymospowers.power.xenoform.forms.ultimate.Brinecrown(this);
 
 	public Slipfin() {
 		super("slipfin", 0.8F, 22.0F, 4.0, 0.1, 0.2, 0.0, Items.AXOLOTL_BUCKET, 0xF08CB8);
@@ -148,8 +152,8 @@ public final class Slipfin extends XenoForm {
 		sound(player, wet ? SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE : SoundEvents.PLAYER_SPLASH, 1.0F, 1.4F);
 	}
 
-	/** Slips out of whatever holds it: a carry, a ride it didn't choose, a trip, a tangle. */
-	private static void free(ServerPlayer player) {
+	/** Slips out of whatever holds it: a carry, a ride it didn't choose, a trip, a tangle. (0.21.37: public, Brinecrown's Undertow Slip uses it.) */
+	public static void free(ServerPlayer player) {
 		Integer carrier = player.getAttached(com.jaymospowers.core.Carry.CARRIED_BY);
 		if (carrier != null && player.level().getEntity(carrier) instanceof ServerPlayer holder) {
 			com.jaymospowers.core.Carry.slip(holder);
@@ -203,12 +207,9 @@ public final class Slipfin extends XenoForm {
 		}
 	}
 
+	/** (0.21.37) Brinecrown is its own evolved form: the Ultimate move, health bar, model and kit are in {@code Brinecrown}. */
 	@Override
-	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		ServerLevel level = player.level();
-		burst(level, ParticleTypes.SPLASH, player.position().add(0.0, 1.0, 0.0), 60, 0.8, 0.2);
-		sound(player, SoundEvents.BUCKET_EMPTY_AXOLOTL, 1.4F, 0.7F);
-		live.dry = 0;
-		return true;
+	public com.jaymospowers.power.xenoform.XenoUltimate evolved() {
+		return brinecrown;
 	}
 }
