@@ -43,11 +43,11 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · in-review
-- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · ready
 
 
 ## Done
