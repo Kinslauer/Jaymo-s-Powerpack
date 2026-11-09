@@ -46,12 +46,21 @@ repo root already point here.
 
 - JDK 25 and the Gradle wrapper. `gradlew` isn't executable in git: run `sh ./gradlew build`.
 - Root `sh ./gradlew build` builds Powers. Run it in `kingdoms/` and `kitchen/` for those mods.
-- **Cloud build setup** (Andy's standing approval, 2026-10-11: "i approve the mirror period"): Maven Central returns
-  HTTP 429 from cloud containers, so builds go through the Google Maven mirror.
-  1. Install Temurin JDK 25 (from api.adoptium.net) into `/opt/jdk25`.
-  2. Add `~/.gradle/init.d/mirror.gradle` that swaps `repo.maven.apache.org` for
-     `https://maven-central.storage-download.googleapis.com/maven2/`.
-  3. `JAVA_HOME=/opt/jdk25 sh ./gradlew build`.
+- **Cloud build setup.** Use the cloud environment **Jaymo-s-Powerpack** (Andy's personal one, made 2026-11-09). It
+  allows the hosts the build needs (`maven.fabricmc.net`, `api.modrinth.com`, `cdn.modrinth.com`,
+  `piston-meta.mojang.com`, `piston-data.mojang.com`, `launchermeta.mojang.com`, `libraries.minecraft.net`,
+  `resources.download.minecraft.net`; package registries such as Maven Central are allowed by default). Its setup
+  script installs Temurin JDK 25 into `/root/jdk/jdk-25+36` (the image only has JDK 21).
+  1. If `/root/jdk/jdk-25+36` is missing (an older session, or the Default environment), download
+     `OpenJDK25U-jdk_x64_linux_hotspot_25_36.tar.gz` from the `adoptium/temurin25-binaries` GitHub release `jdk-25+36`
+     and untar it there. `api.adoptium.net` and `download.java.net` are blocked.
+  2. `export JAVA_HOME=/root/jdk/jdk-25+36 PATH=/root/jdk/jdk-25+36/bin:$PATH`, then `bash gradlew build`.
+  3. Maven Central sometimes answers HTTP 429 (too many requests) through the proxy. Wait 30-60 s and rerun; the
+     cached files stay, so each retry gets further. If it keeps failing, use the Google mirror (Andy approved it
+     2026-10-11, "i approve the mirror period"): add `~/.gradle/init.d/mirror.gradle` that swaps
+     `repo.maven.apache.org` for `https://maven-central.storage-download.googleapis.com/maven2/`.
+  4. Run one Gradle build at a time: two builds in the same folder delete each other's classes and fail with false
+     "cannot find symbol" errors.
 - If the root build fails because `libs/jaymos-kitchen-*.jar` is older than `kitchen/gradle.properties`' version,
   build `kitchen/` and swap its jar into `libs/` for the build. Don't commit the swap.
 - Andy's account needs trusted devices, so nothing can run on Andy's PC from a cloud session.
@@ -118,6 +127,42 @@ package `com.geckolib`, not GeckoLib 4's `software.bernie`). The example to copy
 Credits: never copy Draugr Invasion (All Rights Reserved) or Supplementaries in any form. Inhabitants (JeremySeq / Team
 Synapse), Stormborn Tomb (Tada_no_ahiru), DungeonZ and FrogiLib are MIT: reuse with their licence text kept beside what
 uses them and credit in the change note.
+
+### Animating a Blockbench model with keyframes of our own
+
+How Notus and Boreas moved to GeckoLib (2026-11-09; the example is `kingdoms/tools/gen_fire_dragon_geo.py`). Use it
+for a model that comes with too few animations, or to move a mob off our own loader (`BbModel`, `BbMobRenderer`, or
+a model posed in Java) without changing how it looks.
+
+1. **Write the animations in a script, not by hand.** The script reads the source `.bbmodel` (`tools/bbmodels/`), adds
+   animations in Blockbench's own format (an `animators` entry per bone, keyed by the bone's group `uuid`, keyframes
+   with `channel`, `data_points`, `time` and `interpolation`), and writes `kingdoms/art/<mob>.bbmodel`. Then it runs
+   `tools/bbmodel_geckolib.py` on that file. Andy can still open the result in Blockbench, but the script is the
+   source: change the numbers there and run it again.
+2. **Units and signs.** In a "free" or "modded entity" project, keyframe values are the game's way: degrees as a
+   `ModelPart`'s angles, positions with x and y turned round (+y is up). A bone's resting angle in the game is the
+   Blockbench rotation with x and y negated. Keyframes are *added* to the resting pose, so to hold a part at an
+   absolute angle `a`, key `a - rest`. Old Java posing code turns straight into keyframes this way: `part.xRot += d`
+   becomes a key of `d`, `part.xRot = a` a key of `a - rest`, and `top.y -= 19` a position y of +19.
+3. **Check every pose against the old one before writing Java.** Bake to scratch (`tools/bbmodel_bake.py <art> <scratch>
+   <mob>`) and render with `tools/bbmodel_preview.py <scratch> <mob> out.png <anim> <seconds> <texture>`. The old
+   code's pose renders with the `POSE` variable (`bone:=x:y:z` sets an angle, `bone=x:y:z` adds, `bone@=x:y:z` moves
+   the pivot), so you can put the two side by side. Pass `--drop` to the bake too, for any bone the GeckoLib files leave out.
+4. **Controllers.** A `move` controller picks the looping animation every frame from the entity's own client-side
+   state (`AnimationTest.animatable()`), and `test.setControllerSpeed(...)` keeps a loop in time with the game (the
+   dragons' wingbeat follows their stroke rate, the walk their walk speed). An `action` controller plays one-off moves
+   the server triggers (`triggerAnim`), from hooks the base class already has (`WindDragon.bitten`/`swept`).
+   Controllers aren't additive by default: a later controller replaces an earlier one on every bone it keys. So key
+   only the bones a move needs (the bite keys the neck, head and jaw) and the legs keep walking underneath.
+5. **Things that follow the game every frame** (head look, a jaw while breathing, pitching with a climb) go in the
+   renderer's `adjustModelBonesForRender`. GeckoLib's x and y rotations are the negative of a `ModelPart`'s (see
+   `DefaultAnimations.hardcodedHeadRotation`), so `part.xRot += d` becomes `bone.setRotX(bone.getRotX() - d)`.
+6. **Textures that change per mob** (hides, markings): override the model's `getTextureResource(GeoRenderState)` and
+   read a `DataTicket` the renderer adds in `addRenderData`. Glowing markings are a `TextureLayerGeoLayer` with
+   `RenderTypes::eyes` (`FireDragonRenderer`).
+7. Credit and licence beside the art (`<mob>-CREDITS.md`, `<mob>-LICENSE.txt`), a render (`<mob>-render.png`), and
+   update `textures/entity/bb/CREDITS.txt` if the mob was listed there. Build. Say plainly that the animations
+   haven't been seen in game.
 
 ## 4. Versions, branches, PRs and merging
 

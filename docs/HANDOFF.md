@@ -31,6 +31,8 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
 ## Building (in a cloud session)
 - JDK 25 and Gradle wrapper 9.7.1. `./gradlew build` in the root (or in `kingdoms/`, `kitchen/`). Build output goes
   to `build/` (on the home PC it goes to `E:\...`, kept out of OneDrive).
+- Cloud sessions: use the **Jaymo-s-Powerpack** environment (its hosts and JDK 25 setup are in `docs/AI-HANDBOOK.md`,
+  "3. Building"); run `bash gradlew`, since `gradlew` is not executable in git.
 - 26.3 ships unobfuscated (Mojang names, no mappings). There are no decompiled sources in the repo; on the home PC
   they were at `E:\mcsrc-26.3`. In a cloud session, `./gradlew genSources` (Loom) gives them; **always check an API
   in the 26.3 sources before using it**: much has changed since older versions.
