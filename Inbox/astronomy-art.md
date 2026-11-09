@@ -8,6 +8,7 @@ claimed_by: hermes-modeller
 pr: 1185
 suggested_owns: []
 writer: hermes-writer
+text_pass: done
 ---
 
 # Astronomy art: high renaissance, drawn as a study
