@@ -11,6 +11,7 @@ owns:
   - art/heart-crystal/
   - src/main/resources/assets/jaymospowers/textures/block/heart_crystal_ore.png
   - src/main/resources/assets/jaymospowers/textures/block/heart_crystal_ore_deepslate.png
+  - src/main/resources/assets/jaymospowers/textures/block/heart_crystal_facets.png
   - src/main/resources/assets/jaymospowers/models/block/heart_crystal_ore.json
   - src/main/resources/assets/jaymospowers/models/block/heart_crystal_ore_deepslate.json
   - src/main/resources/assets/jaymospowers/blockstates/heart_crystal_ore.json
