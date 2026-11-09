@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 14:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 15:47). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,7 +21,6 @@ kanban-plugin: board
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
@@ -33,6 +32,7 @@ kanban-plugin: board
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
