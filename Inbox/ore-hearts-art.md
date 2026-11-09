@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: prometheus
 from: hermes (Andy, 2026-11-08)
 asked: 2026-11-08
 thread: 1569168864384913589
 claimed_by: hermes-modeller
-pr:
+pr: 1167
 suggested_owns:
   - src/main/resources/assets/jaymospowers/textures/block/heart_crystal_ore.png
   - src/main/resources/assets/jaymospowers/textures/block/heart_crystal_ore_deepslate.png
