@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -67,3 +67,4 @@ game yet (facing, size and the hammer's place need a look in game).
 - Only the minotaur. If it goes well Andy may move the other `BbMobRenderer` beasts (Piglin King, redstone golem,
   skulk golem, ...) and later the hand-made dragon models (Stegonaut first) the same way: those are separate tasks.
 - 2026-11-09 09:52 Text pass: reviewed change note (changes/kingdoms/claude-minotaur-geckolib.md) — already clear, player-focused, has 'Not tested in game' line. No lang parts, dialogue, hints, or other player text added/changed for minotaur in this PR. Build and PR checks pass.
+- 2026-11-09 18:44 PR #1188 is merged into master; moved to Inbox/Done.

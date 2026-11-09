@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -38,3 +38,4 @@ Whether one telescope is enough or there are tiers (basic, mounted, brass) — d
 - 2026-11-09 10:03 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-09 11:31 Text pass: rewrote change note (changes/kingdoms/claude-astronomy-telescope.md) for player-facing clarity — changed technical GeckoLib rig description to focus on what the player will see (smooth aiming animation, mount turns/barrel tilts, single telescope tier with engraved scales). Build and pr_checks have pre-existing environment issues (Windows file locking, version not bumped per merge-time policy).
 - 2026-11-09 11:33 Text pass: rewrote change note (changes/kingdoms/claude-astronomy-telescope.md) for player-facing clarity
+- 2026-11-09 18:44 PR #1189 is merged into master; moved to Inbox/Done.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: astronomy-telescope
 branch: claude/astronomy-telescope
 with:
@@ -34,3 +34,4 @@ owns:
 
 ## Done
 PR #1189 supplies the articulated GeckoLib block rig (base/azimuth/elevation), editable animations and inspected four-view/posed renders. Kingdoms and root builds plus PR checks pass; generator output is deterministic. No registration, saved aim, observations or client visual playtest are included.
+- 2026-11-09 18:44 PR #1189 is merged into master; moved to Agents/Done.
