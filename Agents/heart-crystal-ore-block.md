@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: running
 task: heart-crystal-ore-block
 branch: claude/heart-crystal-ore-block
 with:
