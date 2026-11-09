@@ -37,12 +37,12 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · 🤖 Apollo · #1186 · in-review
-- [ ] [[Inbox/astronomy-art|astronomy-art]] · 🤖 Prometheus · #1185 · in-review
 
 
 ## In review
 
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · 🤖 Apollo · #1176 · in-review
+- [ ] [[Inbox/astronomy-art|astronomy-art]] · 🤖 Prometheus · #1185 · in-review
 
 
 ## Needs Andy
