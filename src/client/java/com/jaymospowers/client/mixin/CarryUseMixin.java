@@ -27,6 +27,9 @@ abstract class CarryUseMixin {
 	@Shadow
 	private int rightClickDelay;
 
+	@Shadow
+	public net.minecraft.world.phys.@Nullable HitResult hitResult;
+
 	/** (0.17.7) Use repeats this often while held (and a little slack): a call within it is the same hold. */
 	private static final int SAME_HOLD = RELEASE_DELAY + 1;
 
@@ -42,6 +45,16 @@ abstract class CarryUseMixin {
 		boolean sameHold = now - jaymospowers$lastUse <= SAME_HOLD;
 		jaymospowers$lastUse = now;
 		if (!Carry.isCarrying(this.player)) {
+			// an animal perched on you: sneak + use with an empty hand, at the air or a block, lets it down
+			if (com.jaymospowers.core.Perch.riderOf(this.player) != null && this.player.isShiftKeyDown()
+				&& this.player.getMainHandItem().isEmpty() && !(this.hitResult instanceof net.minecraft.world.phys.EntityHitResult)) {
+				if (!sameHold) {
+					ClientPlayNetworking.send(new com.jaymospowers.core.Perch.Off());
+					this.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+					this.rightClickDelay = RELEASE_DELAY;
+				}
+				ci.cancel();
+			}
 			return;
 		}
 		if (sameHold) {

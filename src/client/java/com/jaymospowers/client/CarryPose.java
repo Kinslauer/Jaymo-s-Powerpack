@@ -25,8 +25,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * How a carry looks, on both bodies. The carried body stands at its carrier's feet (see {@code CarryClient}); here it's
  * turned to the carrier's facing and moved into the hold (and tipped with the carrier when they cruise in Wind
- * flight), its limbs hanging loose and swaying; the carrier's arms take the hold. A thrown body tumbles and flops for
- * a moment. A Gravity user holds a big mob up overhead, arms raised, the body floating and bobbing there. Distances are
+ * flight), its limbs hanging loose and swaying; the carrier's arms take the hold. A thrown body ragdolls through the air
+ * ({@link ThrownFlight}). A Gravity user holds a big mob up overhead, arms raised, the body floating and bobbing there. Distances are
  * blocks (world-sized, whatever the body's scale) in the body's frame before the model is drawn (+X its right, +Y up,
  * -Z its front).
  * <p>
@@ -46,7 +46,7 @@ public final class CarryPose {
 	/** On a carrier: the hold their arms take. */
 	public static final RenderStateDataKey<Holding> CARRIER_KEY = RenderStateDataKey.create(() -> "jaymospowers:carry_holding");
 	/** On a thrown body: ticks since it was thrown. */
-	public static final RenderStateDataKey<Float> THROWN_KEY = RenderStateDataKey.create(() -> "jaymospowers:carry_thrown");
+	public static final RenderStateDataKey<ThrownFlight.Flight> THROWN_KEY = RenderStateDataKey.create(() -> "jaymospowers:carry_thrown");
 
 	/** The swing ({@code back}, {@code left}: radians-ish, from CarryClient) and wind {@code trail} (0-1) of a held body. */
 	public record Held(int hold, boolean animal, int carrierId, float partialTicks, float back, float left, float trail,
@@ -81,8 +81,6 @@ public final class CarryPose {
 	static final float DRAG_ARM = 0.8F, DRAG_ARM_OUT = 0.18F, DRAG_LEAN = 0.32F, DRAG_SINK = 1.8F;
 	/** How far (degrees) the whole held body swings per unit of sway, and how wide the limbs swing (radians). */
 	static final float BODY_SWAY = 7.0F, LIMB_SWAY = 0.55F;
-	/** A thrown body: how far it turns over in the air (degrees), and how hard its limbs flop. */
-	static final float THROWN_SPIN = 160.0F, THROWN_FLOP = 0.9F;
 	/** Overhead (Gravity): the underside this high over the carrier's feet, bobbing this far (blocks) at this pace. */
 	static final float OVERHEAD_Y = 2.15F, OVERHEAD_BOB = 0.07F, OVERHEAD_BOB_SPEED = 0.09F;
 	/** Overhead: it slowly drifts this far (degrees) round and over, and its limbs float this loosely. */
@@ -127,9 +125,7 @@ public final class CarryPose {
 		Entity target = carrying == null ? null : entity.level().getEntity(carrying.target());
 		state.setData(CARRIER_KEY, carrying == null ? null
 			: new Holding(carrying.hold(), !Carry.person(target), entity.tickCount + partialTicks, target == null ? 0.6F : target.getBbWidth()));
-		Long thrown = entity.getAttached(Carry.THROWN);
-		float since = thrown == null ? -1.0F : entity.level().getGameTime() - thrown + partialTicks;
-		state.setData(THROWN_KEY, since >= 0.0F && since < Carry.THROWN_TICKS ? since : null);
+		state.setData(THROWN_KEY, ThrownFlight.of(entity, state.bodyRot, partialTicks));
 		Player carrier = Carry.carrierOf(entity);
 		Carry.Carrying hold = carrier == null ? null : carrier.getAttached(Carry.CARRYING);
 		if (hold == null || hold.target() != entity.getId()) {
@@ -179,16 +175,10 @@ public final class CarryPose {
 			poseStack.scale(scale, scale, scale);
 			return;
 		}
-		Float thrown = state.getData(THROWN_KEY);
+		ThrownFlight.Flight thrown = state.getData(THROWN_KEY);
 		if (thrown != null && state.deathTime <= 0.0F) {
-			float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
-			float t = thrown / Carry.THROWN_TICKS;
-			// turning over through the air, settling back upright as it comes down
-			float spin = Mth.sin(t * Mth.PI) * THROWN_SPIN * 0.6F;
-			poseStack.translate(0.0F, middle, 0.0F);
-			poseStack.rotateDegrees(Axis.XP, -spin);
-			poseStack.rotateDegrees(Axis.ZP, Mth.sin(thrown * 0.7F) * 12.0F * (1.0F - t));
-			poseStack.translate(0.0F, -middle, 0.0F);
+			// limp from the throw: tumbling over along its flight, down on landing and up again
+			ThrownFlight.rotate(thrown, state, poseStack, entityScale);
 		}
 	}
 
@@ -345,9 +335,9 @@ public final class CarryPose {
 		if (model instanceof HumanoidModel<?> h) {
 			carrier(h, living, living.getData(CARRIER_KEY));
 		}
-		Float thrown = living.getData(THROWN_KEY);
+		ThrownFlight.Flight thrown = living.getData(THROWN_KEY);
 		if (thrown != null) {
-			flop(model.root(), thrown, THROWN_FLOP * (1.0F - thrown / Carry.THROWN_TICKS));
+			ThrownFlight.applyModel(model, thrown);
 		}
 	}
 

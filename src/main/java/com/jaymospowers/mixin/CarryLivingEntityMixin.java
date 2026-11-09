@@ -32,7 +32,8 @@ abstract class CarryLivingEntityMixin {
 
 	@Inject(method = "isPickable", at = @At("RETURN"), cancellable = true)
 	private void jaymospowers$carriedNotPickable(CallbackInfoReturnable<Boolean> cir) {
-		if (cir.getReturnValueZ() && Carry.isCarried((Entity)(Object)this)) {
+		// (an animal perched on someone too: their own swings and shots go past it)
+		if (cir.getReturnValueZ() && (Carry.isCarried((Entity)(Object)this) || com.jaymospowers.core.Perch.perched((Entity)(Object)this))) {
 			cir.setReturnValue(false);
 		}
 	}

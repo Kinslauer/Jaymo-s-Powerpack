@@ -24,6 +24,7 @@ abstract class CarryLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$carryState(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		CarryPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.PerchClient.extract(entity, state);
 	}
 
 	/** A held body is drawn above where it stands (up to overhead): don't cull it when only that part is in view. */

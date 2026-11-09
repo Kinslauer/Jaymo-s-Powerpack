@@ -191,6 +191,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		Ambience.init();
 		LeafRustle.init();
 		CarryClient.init();
+		PerchClient.init();
 		com.jaymospowers.client.stamina.DodgeClient.init();
 		com.jaymospowers.client.combat.TakedownClient.init();
 		SneakZoom.init();

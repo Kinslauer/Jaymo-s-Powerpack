@@ -189,16 +189,18 @@ public final class Carry {
 	 * (0.20.103) Andy: "throwing held items and mobs should follow the cursor, if you look high the trajectory is higher,
 	 * and smaller things can be flung further w/ higher strength stat". A throw goes along your look (up, level or down) at
 	 * {@link #THROW_SPEED} (overhead {@link #HEAVE_SPEED}), with {@link #THROW_LIFT} up so a level throw still arcs; times
-	 * how light it is for its size ({@link #lightness}) and how strong you are ({@link #BRAWN_THROW} more per point of
-	 * brawn, Kitchen's {@code Hauling}: Strength, size, Might, Packhorse; up to {@link #BRAWN_THROW_MAX} points).
+	 * its weight's scale ({@link ThrowWeight#throwScale}: a person 1, a cricket or mouse about 3, a cow about half; the
+	 * lift by its square root) and how strong you are ({@link #BRAWN_THROW} more per point of brawn, Kitchen's
+	 * {@code Hauling}: Strength, size, Might, Packhorse; up to {@link #BRAWN_THROW_MAX} points).
 	 */
 	static final double THROW_SPEED = 0.55, HEAVE_SPEED = 0.42, THROW_LIFT = 0.14;
 	public static final double BRAWN_THROW = 0.2;
 	public static final int BRAWN_THROW_MAX = 5;
-	/** (0.20.103) A person's bulk (width x width x height); something this bulky flies as far as a person, a lighter one further. */
-	public static final double PERSON_BULK = 0.6 * 0.6 * 1.8;
-	/** (0.20.103) How much further the lightest thing flies, and how much shorter the heaviest. */
-	public static final double LIGHTEST = 1.8, HEAVIEST = 0.5;
+	/**
+	 * A thrown player goes limp in Kitchen's ragdoll at once; Kitchen's limp start adds this share of the speed they
+	 * already have along the ground (its {@code KNOCK_CARRY}), so the knock sends only the rest.
+	 */
+	static final double LIMP_CARRY_SHARE = 0.7;
 	static final Identifier WEIGHT_ID = JaymosPowers.id("carry_weight");
 
 	/** Small animals anyone can pick up (wolves, cats, chickens...). Babies of any animal count too. */
@@ -556,6 +558,11 @@ public final class Carry {
 		Carrying already = player.getAttached(CARRYING);
 		if (already != null && already.target() == target.getId()) {
 			// (the same click seen twice)
+			return InteractionResult.SUCCESS;
+		}
+		if (hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown() && Perch.rides(target) && !isCarrying(player)
+			&& !KitchenCompat.isCarryingCorpse(player) && Perch.tryPerch(player, target)) {
+			// a parrot, a cat, a cricket... climbs onto you instead of into your arms (Perch)
 			return InteractionResult.SUCCESS;
 		}
 		if (!(target instanceof SeveredPart) && (player.isShiftKeyDown() || player.getMainHandItem().isEmpty())) {
@@ -954,16 +961,10 @@ public final class Carry {
 	/** (0.20.103) A throw's own speed (b/t): along {@code thrower}'s look, a little up, by its lightness and their brawn. */
 	static Vec3 fling(Player thrower, Entity thrown, double speed) {
 		int brawn = Math.min(BRAWN_THROW_MAX, KitchenCompat.brawn(thrower));
-		// (a carried block is a display, with no real size of its own: it flies as a block)
-		double light = CarryBlock.is(thrown) ? lightness(1.0, 1.0) : lightness(thrown.getBbWidth(), thrown.getBbHeight());
-		double fast = speed * light * (1.0 + BRAWN_THROW * brawn);
-		return thrower.getViewVector(1.0F).scale(fast).add(0.0, THROW_LIFT, 0.0);
-	}
-
-	/** (0.20.103) How far something of this size flies against a person ({@link #HEAVIEST} to {@link #LIGHTEST}). */
-	public static double lightness(double width, double height) {
-		double bulk = Math.max(1.0E-3, width * width * height);
-		return Math.clamp(Math.cbrt(PERSON_BULK / bulk), HEAVIEST, LIGHTEST);
+		// how heavy it is: a person goes a few blocks, a cricket far
+		double scale = ThrowWeight.throwScale(thrown);
+		double fast = speed * scale * (1.0 + BRAWN_THROW * brawn);
+		return thrower.getViewVector(1.0F).scale(fast).add(0.0, THROW_LIFT * Math.sqrt(scale), 0.0);
 	}
 
 	private static void end(@Nullable ServerPlayer carrier, Entry entry, Let how) {
@@ -1027,6 +1028,11 @@ public final class Carry {
 			GRACE.put(player.getUUID(), now + RELEASE_GRACE_TICKS);
 			ServerPlayNetworking.send(player, new Self(-1));
 			player.connection.teleport(new PositionMoveRotation(at, velocity, player.getYRot(), player.getXRot()), Set.of());
+			if (how == Let.THROW) {
+				// limp from the moment they leave your hands: Kitchen's ragdoll flies, tumbles and lands, and they get up
+				// as after any knock (the client carries on with the speed it was just given, so send the rest)
+				KitchenCompat.knockLimp(player, velocity.x * (1.0 - LIMP_CARRY_SHARE), velocity.y, velocity.z * (1.0 - LIMP_CARRY_SHARE));
+			}
 		} else {
 			carried.setPos(at.x, at.y, at.z);
 			carried.setDeltaMovement(velocity);
