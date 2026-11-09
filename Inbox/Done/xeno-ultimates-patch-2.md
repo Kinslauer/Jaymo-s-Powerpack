@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: coordinator
 asked: 2026-11-08
@@ -24,3 +24,4 @@ suggested_owns:
 - The branch is ~91 commits behind master and was made under the old rules: it edits `gradle.properties` (version=), `MODLOG.md` and `docs/codemap/`. Merge master in, revert those three to master's copy, and add `changes/powers/<branch>.md` instead (see changes/README.md).
 - Work on a fresh branch from it (e.g. `hermes/xeno-ultimates-2`), build Powers, run `python3 tools/pr_checks.py`, open the PR, set this task to in-review.
 - 2026-11-08 18:08 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-08 20:27 PR #1160 is merged into master; moved to Inbox/Done.

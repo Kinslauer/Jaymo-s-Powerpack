@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: blindness
 branch: claude/blindness
 with:
@@ -33,3 +33,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-08 20:27 PR #1159 is merged into master; moved to Agents/Done.
