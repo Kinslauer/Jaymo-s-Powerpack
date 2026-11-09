@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 05:56). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 06:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,11 +34,11 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · #1176 · in-review
 
 
 ## In review
 
+- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · #1176 · in-review
 
 
 ## Needs Andy
