@@ -43,3 +43,4 @@ suggested_owns:
 - Hides, glowing markings, looks, sizes, seats and the hatchling's size must not change. Riders must still sit where they sit now.
 - The five dragon tasks run as separate tracks. Each touches only its own dragon's files and its own line in `DragonsClient.java`. Don't edit `WindDragon.java` or `WindDragonRenderer.java`; if you need a shared change there, ask under this task's Notes.
 - The Kintsugi wyverns (Eurus, Aeolus, Ignivorus) already have a full Blockbench model with 28 animations, so they aren't part of this.
+- 2026-11-09 11:57 2026-11-09 11:58 The modeller's run on this was cut off when the gateway disconnected (job paused with the turn outcome unknown, nothing pushed); handed back as open so it can be taken again.
