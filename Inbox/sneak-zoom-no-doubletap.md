@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -28,3 +28,4 @@ Tiv, in the Tasks thread: "shift double tap should no longer zoom."
 - Ask Tiv if he wants anything to replace the double tap, or the gesture to simply go unbound.
 - 2026-11-09 09:14 Text pass: reviewed change note (changes/powers/sneak-zoom-no-doubletap.md) — only player-visible text in PR; no lang parts, chat lines, tooltips, or hints added. Change note is concise and follows style.
 - 2026-11-09 09:20 Review (head cbf4cd3): pass. Double-tapping Shift no longer zooms; Shift+Left Alt still zooms until Alt is let go, Alt alone still rolls, and the sprint slide is unchanged; the handbook line is updated. Not tested in game. Small leftovers for a later tidy-up, not worth another round: SneakZoom.java still keeps byAlt (now only written), held, sneakWasDown and TAP_HOLD_TICKS, which nothing reads any more; FreerunClient.java:491 newly adds a '(0.15.12)' version tag to a comment; KeyConflicts.java:28 still says double-tap Sneak zooms. Still open from the task: ask Tiv whether he wants anything to replace the double tap.
+- 2026-11-09 09:21 Reviewed; Andy allowed sending it to the coordinator.
