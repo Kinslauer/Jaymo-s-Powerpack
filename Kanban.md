@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 07:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 08:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,6 +26,10 @@ kanban-plugin: board
 - [ ] [[Inbox/startup-crash|startup-crash]] · for hermes · open
 - [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · for prometheus · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for prometheus · open
+- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for hermes · open
+- [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for hermes · open
+- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for hermes · open
 
 
 ## Being built
