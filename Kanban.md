@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 16:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 17:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,7 +47,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · 🍇 Bacchus · #1201 · in-review
+- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · 🪶 Quill · #1201 · writing
 
 
 ## In review
