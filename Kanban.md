@@ -38,13 +38,13 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
 ## Text pass
 
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · #1193 · in-review
 
 
 ## In review
