@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:28). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -48,12 +48,12 @@ kanban-plugin: board
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · #1185 · ready
-- [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · #1186 · ready
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]]
 - [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
 - [x] [[Inbox/Done/blight-mobs|blight-mobs]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
@@ -61,7 +61,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/mimic|mimic]]
 - [x] [[Inbox/Done/kitchen-brick-split|kitchen-brick-split]]
-- [x] [[Inbox/Done/blindness|blindness]]
 
 
 %% kanban:settings
