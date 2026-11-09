@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · for hermes · open
@@ -31,6 +30,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
+- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · claimed
 
 
 ## Text pass
