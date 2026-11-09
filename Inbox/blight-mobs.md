@@ -5,7 +5,7 @@ from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
 claimed_by: hermes-a
-pr:
+pr: 1166
 suggested_owns: []
 ---
 
