@@ -1,22 +1,12 @@
 ---
-updated: 2026-11-09 01:06
+updated: 2026-11-09 11:35
 ---
 # Open PRs
 
-3 open, as of 2026-11-09 01:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+1 open, as of 2026-11-09 11:35. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
-## [#1165](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1165) Kitchen: dirty water gives a slow parasite instead of nausea
-- **Branch:** `claude/parasites-and-cures` · **Updated:** 2026-11-09 (today)
+## [#1176](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1176) kitchen: waterskin tiers (leather 3, iron 6, dragon 8 cleans)
+- **Branch:** `claude/waterskin-tiers` · **Updated:** 2026-11-09 (today)
 - **Checks:** ✅ 4 passed
-- **Agent:** [[parasites-and-cures]]
-
-## [#1166](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1166) Blight mobs: elite variants of existing mobs
-- **Branch:** `claude/blight-mobs` · **Updated:** 2026-11-09 (today)
-- **Checks:** ❌ failing: Change notes, libs jars, item models
-- **Agent:** [[blight-mobs]]
-
-## [#1167](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1167) Add heart crystal ore and drop artwork
-- **Branch:** `claude/ore-hearts-art` · **Updated:** 2026-11-09 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** [[ore-hearts-art]]
+- **Agent:** no agent note
