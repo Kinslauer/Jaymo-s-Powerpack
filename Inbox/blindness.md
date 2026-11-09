@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes-b
 from: coordinator
 asked: 2026-11-08
 thread: Discord thread 1569108674721357906 (Tiv)
 claimed_by: hermes-b
-pr:
+pr: 1159
 suggested_owns:
 ---
 # Blindness: echolocation power
