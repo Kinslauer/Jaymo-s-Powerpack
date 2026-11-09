@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: done
 task: reincarnation-full-reset
 branch: claude/reincarnation-full-reset
 with:
 pr: 1201
 mods: powers, kingdoms
-versions: kingdoms 0.7.675 -> 0.7.676
+versions: kingdoms 0.7.676 (no version bump in this PR; release step bumps after merge)
 started: 2026-11-09
 owns:
   - src/main/java/com/jaymospowers/core/wounds/Mortality.java
@@ -30,3 +30,4 @@ owns:
 
 ## Done
 Player will see: reincarnation gives a fully fresh life — fresh MCA look and name, villagers forget the player (hearts, memories, relationships, marriage and family ties), a clean party exit with no stale roster, invites or leadership, and no captain remembers having met them (captain journal clean in the new life). Not tested in game; compile-checked only. PR #1201: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1201
+- 2026-11-09 18:01 PR #1201 is merged into master; moved to Agents/Done.
