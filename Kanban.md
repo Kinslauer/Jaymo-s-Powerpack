@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:16). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -46,8 +46,6 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · 🤖 Quill · #1194 · writing
-- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · 🤖 Quill · #1196 · writing
 
 
 ## In review
@@ -62,14 +60,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/astronomy-armillary|astronomy-armillary]]
+- [x] [[Inbox/Done/aetherion-geckolib|aetherion-geckolib]]
 - [x] [[Inbox/Done/android-mech-geckolib|android-mech-geckolib]]
 - [x] [[Inbox/Done/skilltree-sidebar-reflow|skilltree-sidebar-reflow]]
 - [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
 - [x] [[Inbox/Done/journal-refresh|journal-refresh]]
 - [x] [[Inbox/Done/astronomy-telescope|astronomy-telescope]]
 - [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
-- [x] [[Inbox/Done/astronomy-art|astronomy-art]]
-- [x] [[Inbox/Done/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]]
 
 
 %% kanban:settings
