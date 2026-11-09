@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for hermes · open
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · for hermes · open
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for hermes · open
 - [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · for hermes · open
@@ -32,6 +31,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · hermes-a · claimed
 
 
 ## Text pass
