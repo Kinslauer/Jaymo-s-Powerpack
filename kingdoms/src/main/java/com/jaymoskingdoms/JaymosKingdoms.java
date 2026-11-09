@@ -101,6 +101,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		MasonTable.register();
 		// (0.7.578) the cafe: menu boards, customers, the innkeeper's trade
 		CafeBoard.register();
+		// the armillary sphere: an observatory instrument that reads the discovered sky
+		com.jaymoskingdoms.astronomy.ArmillarySphereBlock.register();
 		Cafe.register();
 		// (0.7.579) our part of the "Jaymo's Powerpack" advancement tab
 		PackAdvancements.register();

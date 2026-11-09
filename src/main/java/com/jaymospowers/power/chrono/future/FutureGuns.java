@@ -220,20 +220,21 @@ public final class FutureGuns {
 	}
 
 	/** A mob with a built-in gun (the mech's cannons): fire at its foe a burst at a time, if in range and in sight. */
-	static void tickWith(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
-		shoot(level, mob, foe, gun, mob.distanceTo(foe), mob.hasLineOfSight(foe));
+	static boolean tickWith(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
+		return shoot(level, mob, foe, gun, mob.distanceTo(foe), mob.hasLineOfSight(foe));
 	}
 
-	private static void shoot(ServerLevel level, Mob mob, LivingEntity foe, Gun gun, double d, boolean sight) {
+	/** Returns true on a tick that actually fired, so a built-in cannon can recoil with the shot. */
+	private static boolean shoot(ServerLevel level, Mob mob, LivingEntity foe, Gun gun, double d, boolean sight) {
 		Kind kind = gun.kind;
 		long now = level.getGameTime();
 		if (now < NEXT.getOrDefault(mob, 0L)) {
-			return;
+			return false;
 		}
 		if (d < NEAREST || d > kind.range || !sight) {
 			BURST.remove(mob);
 			AIMING.remove(mob);
-			return;
+			return false;
 		}
 		if (!BURST.containsKey(mob)) {
 			Long fireAt = AIMING.get(mob);
@@ -241,10 +242,10 @@ public final class FutureGuns {
 				AIMING.put(mob, now + AIM_TICKS);
 				com.jaymospowers.combat.AttackTells.tell(level, mob, true);
 				level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.CROSSBOW_LOADING_END.value(), SoundSource.HOSTILE, 0.6F, 1.6F);
-				return;
+				return false;
 			}
 			if (now < fireAt) {
-				return;
+				return false;
 			}
 			AIMING.remove(mob);
 		}
@@ -257,6 +258,7 @@ public final class FutureGuns {
 			NEXT.put(mob, now + kind.reload + level.getRandom().nextInt(30));
 		}
 		fire(level, mob, foe, gun);
+		return true;
 	}
 
 	/** Close in until it has a shot, then hold there; back off from anyone who comes too near. */

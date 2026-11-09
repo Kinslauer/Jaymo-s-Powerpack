@@ -10489,3 +10489,23 @@ Not tested in game: block registration, per-telescope saved aim, Altazimuth Moun
   in reach only by panning the whole web away first.
 - **Nothing else changed**: the panel shows exactly what it did before, and only its position is different.
 - Built; not played. How the arrow reads in game and whether the strip is easy to find are unverified.
+
+## 0.7.674 (2026-11-09): Aetherion: an editable model and GeckoLib animations (#1194)
+
+- Aetherion keeps its star-dragon body, four hides, glowing markings, horns, spines, saddle, rider seats and hatchling scale, now drawn from an editable Blockbench model instead of Java-built parts.
+- Idle, walking, wingbeats, gliding, landing, sitting, crashing, biting, Cataclysm and tail sweeps are keyed animations; its head still follows its look and its jaw opens with the starlight beam.
+- Original project geometry and keyframes from `kingdoms/tools/gen_aetherion_geo.py`; the body-plan reference supplied by Andy was public-domain/CC0. No Saint's Dragons art or animation is used.
+- Geometry matched against all 88 original cubes; front/side/back and eleven old/new pose renders inspected. Kingdoms clean build and root build pass. A dedicated server boot was attempted, but concurrent Gradle activity deleted shared build output before startup; not tested in a client.
+
+## 0.7.675 (2026-11-09): Astronomy 3: the armillary sphere (#1196)
+
+An armillary sphere block for the observatory: a placed instrument whose brass rings turn in the world, and a
+screen opened by right-clicking it that reads off the night sky - which of the player's discovered stars are
+overhead, the world time and the player's place - and records the measurement on the block entity.
+
+Drawn as additive block-entity geometry (cord lines for the rings); the world render and the vanilla sky are
+never touched, so shader packs keep their own sky.
+
+Built on astronomy-sky's catalog and discovery (PR 1193).
+
+Built; not tested in game.
