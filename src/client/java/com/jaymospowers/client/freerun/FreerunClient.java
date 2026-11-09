@@ -488,7 +488,7 @@ public final class FreerunClient {
 	// ---- fast run slide -----------------------------------------------------------------------------------------------
 
 	/**
-	 * In a fast run (or, 0.18.85, a plain sprint), Sneak held {@link Slide#HOLD_TICKS} ticks (a tap is the zoom's): drop into
+	 * (0.15.12) In a fast run (or, 0.18.85, a plain sprint), Sneak held {@link Slide#HOLD_TICKS} ticks: drop into
 	 * a slide. Out of a fast run it's a head-first dive onto the belly, out of a plain sprint feet first on the back.
 	 */
 	private static boolean trySlide(LocalPlayer player, Input input) {
@@ -519,7 +519,7 @@ public final class FreerunClient {
 	/**
 	 * (0.21.36) Andy: "sprint slide should be activated after 1.5s of holding, it still activates too easy". While Sneak is
 	 * held in a run, short of {@link Slide#HOLD_TICKS}, the Sneak bit is kept off the movement ({@code StanceInputMixin}),
-	 * so you keep running (no slowing to a sneak, the sprint and the fast run kept) and a tap or a short hold does nothing;
+	 * so you keep running (no slowing to a sneak, the sprint and the fast run kept) and a short hold does nothing;
 	 * held the full 1.5 s, you slide. Let go early and you just run on.
 	 */
 	public static boolean slideWindup() {
