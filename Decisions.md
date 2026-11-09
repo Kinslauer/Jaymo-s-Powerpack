@@ -115,3 +115,4 @@ Andy, in the `parthenon` topic "Kanban": "new kanban goes here". The live board 
 ## 2026-11-09 - dependent PRs merge as a set
 
 Andy: "any feature that requires another PR to work as intended should be held and pushed together." A PR whose point needs a sibling PR (the night sky before the telescope, armillary and journal can read it) waits for the set instead of merging alone, even when the instruction is "merge everything".
+- 2026-11-09: Andy: Claude and Hermes (YOUTH and every bot) write times on a 12-hour clock with AM/PM. Added to every Hermes SOUL.md; bot_health/Bots.md, Kanban card times, dispatcher and watchdog Discord alerts now show 12-hour times.
