@@ -20,8 +20,7 @@ Tiv, in the Tasks thread: "Every player should have their own start, it should s
 ## Notes
 
 - The start is the last page of the life story (`LifeStory.Start`, thirty-odd of them: the capital, a village, banished, shipwrecked, chained, greenskin, the other worlds and the rest), and `LifeStory.spot` is what settles where you wake once it's chosen.
-- Read one way: the *place* is exclusive — a start that puts you in a village, a realm's seat or a camp needs a free one, so it looks for another settlement/spot when someone's already been born there. This is the reading "search for another" suggests.
-- Read the other way: the *start itself* is exclusive — once a player has had "shipwrecked", no one else in that world gets it.
-- Confirm which Tiv means before building; the first reading is the better story ("our own start" = our own corner of the world) and doesn't run out of starts on a big server.
+- Settled with Tiv: it's the *place* that's exclusive, not the card. A start that puts you in a village, a realm's seat, a camp or a wreck needs one nobody has been born in, so it looks for another free one. Two players may both be shipwrecked; they must not both wash up in the same place.
+- So the work is in `spot` and whatever picks the settlement/seat/wreck: ask for the nearest free one, remember who started where, and keep the search bounded so a newcomer never waits on a long scan.
 - A full world still needs an answer: fall back to the next free thing, then to a plain free spot, and never leave a newcomer with no start.
 - Single player is unaffected — there's no one to be taken by.
