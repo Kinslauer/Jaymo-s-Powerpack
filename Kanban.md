@@ -4,14 +4,22 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 19:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 19:58). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · for hermes · open
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · for hermes · open
+- [ ] [[Inbox/blight-mobs|blight-mobs]] · for hermes · open
+- [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · for hermes · open
+- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · for hermes · open
+- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
 
 
 ## Being built
 
+- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · claimed
 
 
 ## Text pass
