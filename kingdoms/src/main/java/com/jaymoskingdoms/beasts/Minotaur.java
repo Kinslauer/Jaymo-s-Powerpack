@@ -1,8 +1,18 @@
 package com.jaymoskingdoms.beasts;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -30,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * wilderness encounter there. It swings its hammer at anyone close, brings it down in a slam that throws everyone about
  * it off their feet, and from farther off lowers its horns and charges, goring whoever it runs into.
  */
-public class Minotaur extends ActingMonster {
+public class Minotaur extends ActingMonster implements GeoEntity {
 	static final double HEALTH = 140.0, ARMOR = 10.0, DAMAGE = 14.0, SPEED = 0.27, KNOCKBACK_RESIST = 0.8;
 	/** Its swing: how long (ticks), when it lands, its reach. */
 	static final int SWING_TICKS = 15, SWING_HIT = 8;
@@ -43,17 +53,33 @@ public class Minotaur extends ActingMonster {
 	static final int CHARGE_TICKS = 40, CHARGE_COOLDOWN = 200;
 	static final double CHARGE_SPEED = 0.55, CHARGE_MIN = 6.0, CHARGE_MAX = 16.0;
 	static final float GORE_DAMAGE = 12.0F;
-	/** Ticks between blows. */
-	static final int GAP = 12;
+	/** Ticks between blows, and the animation cross-fades. */
+	static final int GAP = 12, ANIMATION_BLEND = 4;
 
 	private static final String[] ACTIONS = {"swing_1", "slam", "running"};
+	private static final EntityDataAccessor<Boolean> HOSTILE = SynchedEntityData.defineId(Minotaur.class, EntityDataSerializers.BOOLEAN);
+	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	private static final RawAnimation IDLE_CALM = RawAnimation.begin().thenLoop("idle_calm");
+	private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	private static final RawAnimation RUN = RawAnimation.begin().thenLoop("run");
+	private static final RawAnimation SLAM = RawAnimation.begin().thenPlay("slam");
+	private static final RawAnimation SWING_1 = RawAnimation.begin().thenPlay("swing_1");
+	private static final RawAnimation SWING_2 = RawAnimation.begin().thenPlay("swing_2");
 
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 	private int gap, slamCooldown = SLAM_COOLDOWN / 2, chargeCooldown = CHARGE_COOLDOWN / 2;
 	private Vec3 chargeDir = Vec3.ZERO;
+	private boolean alternateSwing;
 
 	public Minotaur(EntityType<? extends Minotaur> type, Level level) {
 		super(type, level);
 		this.xpReward = 40;
+	}
+
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+		super.defineSynchedData(entityData);
+		entityData.define(HOSTILE, false);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -65,6 +91,42 @@ public class Minotaur extends ActingMonster {
 	@Override
 	protected String[] actions() {
 		return ACTIONS;
+	}
+
+	/** Keep GeckoLib's one-off blows in step with the server move that lands them. */
+	@Override
+	protected void act(String anim, int ticks) {
+		super.act(anim, ticks);
+		if (this.level().isClientSide()) {
+			return;
+		}
+		if ("swing_1".equals(anim)) {
+			this.triggerAnim("action", this.alternateSwing ? "swing_2" : "swing_1");
+			this.alternateSwing = !this.alternateSwing;
+		} else if ("slam".equals(anim)) {
+			this.triggerAnim("action", "slam");
+		}
+	}
+
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<Minotaur>("move", ANIMATION_BLEND, test -> {
+			Minotaur minotaur = test.animatable();
+			if ("running".equals(minotaur.action())) {
+				return test.setAndContinue(RUN);
+			}
+			if (test.isMoving()) {
+				return test.setAndContinue(WALK);
+			}
+			return test.setAndContinue(minotaur.entityData.get(HOSTILE) ? IDLE : IDLE_CALM);
+		}));
+		controllers.add(new AnimationController<Minotaur>("action", ANIMATION_BLEND, test -> PlayState.STOP)
+			.triggerableAnim("swing_1", SWING_1).triggerableAnim("swing_2", SWING_2).triggerableAnim("slam", SLAM));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	@Override
@@ -85,6 +147,10 @@ public class Minotaur extends ActingMonster {
 		this.slamCooldown--;
 		this.chargeCooldown--;
 		LivingEntity target = this.getTarget();
+		boolean hostile = target != null && target.isAlive();
+		if (this.entityData.get(HOSTILE) != hostile) {
+			this.entityData.set(HOSTILE, hostile);
+		}
 		if (this.acting("running")) {
 			this.charge(level);
 			return;

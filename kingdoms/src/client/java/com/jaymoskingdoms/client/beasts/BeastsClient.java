@@ -2,7 +2,9 @@ package com.jaymoskingdoms.client.beasts;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.beasts.Beasts;
+import com.jaymoskingdoms.beasts.Minotaur;
 import com.jaymoskingdoms.client.bb.BbModel;
+import com.jaymoskingdoms.client.inhabitants.InhabitantRenderer;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.util.Mth;
@@ -25,7 +27,8 @@ public final class BeastsClient {
 	}
 
 	public static void register() {
-		look(Beasts.MINOTAUR, new BbMobRenderer.Look("minotaur", 0.85F, 1.2F, "idle", "running", null, null, 0.35F, 1.0F, "head"));
+		EntityRenderers.register(Beasts.MINOTAUR,
+			context -> new InhabitantRenderer<Minotaur>(context, "minotaur", 0.85F, 1.2F, "head"));
 		// (0.7.403) Andy: "piglin arm is broken". The file's idle and walk hold a twisted fighting stance with the left arm
 		// thrust out, pushed off its shoulder and missing what it was drawn to hold; it stands and walks in its rest pose
 		// here instead, and its own moves (claw, volley, roar) still play as drawn

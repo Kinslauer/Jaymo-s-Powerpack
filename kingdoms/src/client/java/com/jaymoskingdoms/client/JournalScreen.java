@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.FactionType;
+import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Journal;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,12 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -26,12 +31,15 @@ import net.minecraft.world.level.material.MapColor;
  * story, what's left and which way it lies. <b>Map</b>: the land about you as a map draws it (only what your eyes have
  * loaded; the rest is blank parchment), with you, your quests' places and the settlements on it, and zoom. <b>Reputation</b>:
  * what each settlement you know thinks of you. (0.7.40) Restyled like the H screen: a header, striped rows that light up
- * under the mouse, and on the quests page a box at the bottom with the hovered (or pressed) quest in full.
+ * under the mouse, and on the quests page a box at the bottom with the hovered (or pressed) quest in full. The illustrated
+ * tabs show the current page and light up under the mouse.
  */
 final class JournalScreen extends Screen {
-	static final int PANEL_W = 360, PANEL_H = 230, HEADER = 34, TAB_H = 16, BODY_Y = 56, FOOTER = 22, QUEST_ROW = 16, REP_ROW = 22, DETAIL_LINES = 6;
-	/** The map: its size on screen (px), the size of one drawn cell (px), and the zooms (blocks per cell). */
-	static final int MAP_SIZE = 150, CELL = 2;
+	static final int PANEL_W = 400, PANEL_H = 280, HEADER = 34, TAB_H = 20, BODY_Y = 60, FOOTER = 24, QUEST_ROW = 18,
+		REP_ROW = 24, DETAIL_LINES = 7;
+	/** The map's largest size on screen, one drawn cell's size, and room kept for its legend (px; blocks per cell for zoom). */
+	static final int MAX_MAP_SIZE = 176, CELL = 2, MAP_SIDEBAR = 150;
+	private static final Identifier TAB_ICONS = JaymosKingdoms.id("textures/gui/journal/tabs.png");
 	static final int[] ZOOMS = {1, 2, 4, 8, 16, 32};
 	static final int DEFAULT_ZOOM = 2;
 	static final int COLOR_TEXT = Ui.TEXT, COLOR_DIM = Ui.DIM, COLOR_ROYAL = 0xFFFF6A50, COLOR_GOLD = Ui.GOLD, COLOR_DONE = 0xFF66EE66,
@@ -45,9 +53,9 @@ final class JournalScreen extends Screen {
 	private int page = lastPage, zoom = lastZoom, scroll;
 	/** The quest last pressed, shown in the box when none is pointed at. */
 	private int selected;
-	/** The drawn map (ARGB per cell, row by row), its centre when drawn and the zoom it was drawn at. */
+	/** The drawn map (ARGB per cell, row by row), its centre when drawn and the zoom and cell count it was drawn at. */
 	private int[] cells;
-	private int drawnX, drawnZ, drawnZoom = -1;
+	private int drawnX, drawnZ, drawnZoom = -1, drawnSize = -1;
 
 	JournalScreen(Journal.Book book, KeyMapping key) {
 		super(Component.translatable("item.jaymoskingdoms.journal"));
@@ -64,12 +72,30 @@ final class JournalScreen extends Screen {
 		return Math.min(PANEL_W, this.width - 12);
 	}
 
+	private int panelH() {
+		return Math.min(PANEL_H, this.height - 8);
+	}
+
 	private int left() {
 		return (this.width - panelW()) / 2;
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - PANEL_H) / 2);
+		return Math.max(4, (this.height - panelH()) / 2);
+	}
+
+	private int mapSize() {
+		int fit = Math.min(MAX_MAP_SIZE, Math.min(panelW() - MAP_SIDEBAR, panelH() - BODY_Y - FOOTER - 12));
+		return Math.max(96, fit / CELL * CELL);
+	}
+
+	private int tabW() {
+		return Math.min(122, (panelW() - 20) / 3);
+	}
+
+	private int tabX(int which) {
+		int w = tabW();
+		return left() + (panelW() - w * 3 - 8) / 2 + which * (w + 4);
 	}
 
 	/** (0.7.649) The panel's top-left corner, where Jaymo's Powers' character menu hangs its tabs ({@link MenuCompat}). */
@@ -78,7 +104,7 @@ final class JournalScreen extends Screen {
 	}
 
 	private int detailY() {
-		return top() + PANEL_H - FOOTER - (10 + DETAIL_LINES * Ui.LINE + 2);
+		return top() + panelH() - FOOTER - (10 + DETAIL_LINES * Ui.LINE + 2);
 	}
 
 	private int questRows() {
@@ -86,23 +112,14 @@ final class JournalScreen extends Screen {
 	}
 
 	private int repRows() {
-		return Math.max(1, (PANEL_H - FOOTER - 4 - BODY_Y) / REP_ROW);
+		return Math.max(1, (panelH() - FOOTER - 4 - BODY_Y) / REP_ROW);
 	}
 
 	@Override
 	protected void init() {
-		String[] tabs = {"quests", "map", "reputation"};
-		int w = 92;
-		int x = left() + (panelW() - w * 3 - 8) / 2, y = top() + HEADER + 2;
-		for (int i = 0; i < 3; i++) {
-			int which = i;
-			Button tab = Button.builder(Component.translatable("journal.jaymoskingdoms.tab." + tabs[i]), b -> show(which)).bounds(x + i * (w + 4), y, w, TAB_H).build();
-			tab.active = i != page;
-			addRenderableWidget(tab);
-		}
-		int fy = top() + PANEL_H - FOOTER + 3;
+		int fy = top() + panelH() - FOOTER + 4;
 		if (page == MAP) {
-			int bx = left() + 9 + MAP_SIZE + 12;
+			int bx = left() + 12 + mapSize() + 12;
 			Button in = Button.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
 			Button out = Button.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
 			in.active = zoom > 0;
@@ -148,12 +165,36 @@ final class JournalScreen extends Screen {
 		return true;
 	}
 
+	private int tabAt(int mouseX, int mouseY) {
+		int y = top() + HEADER + 2;
+		for (int i = 0; i < 3; i++) {
+			if (Ui.over(mouseX, mouseY, tabX(i), y, tabW(), TAB_H)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private void click() {
+		this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+	}
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		int mouseX = (int)event.x(), mouseY = (int)event.y();
+		int tab = tabAt(mouseX, mouseY);
+		if (tab >= 0) {
+			if (tab != page) {
+				show(tab);
+				click();
+			}
+			return true;
+		}
 		if (page == QUESTS) {
-			int index = questAt((int)event.x(), (int)event.y());
+			int index = questAt(mouseX, mouseY);
 			if (index >= 0) {
 				selected = index;
+				click();
 				return true;
 			}
 		}
@@ -163,25 +204,41 @@ final class JournalScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), w = panelW();
-		Ui.panel(graphics, x, y, w, PANEL_H, COLOR_GOLD);
+		Ui.panel(graphics, x, y, w, panelH(), COLOR_GOLD);
 		// the header: the journal, and what this page holds
 		graphics.item(new ItemStack(Journal.JOURNAL), x + 8, y + 8);
 		Ui.line(graphics, this.font, this.title, x + 28, y + 7, w - 36, COLOR_GOLD);
 		long rated = book.places().stream().filter(Journal.Place::rated).count();
 		Component sub = switch (page) {
-			case MAP -> Component.translatable("journal.jaymoskingdoms.sub.map", MAP_SIZE * ZOOMS[zoom] / CELL);
+			case MAP -> Component.translatable("journal.jaymoskingdoms.sub.map", mapSize() * ZOOMS[zoom] / CELL);
 			case REPUTATION -> Component.translatable("journal.jaymoskingdoms.sub.reputation", rated);
 			default -> Component.translatable("journal.jaymoskingdoms.sub.quests", book.entries().size());
 		};
 		Ui.line(graphics, this.font, sub, x + 28, y + 18, w - 36, COLOR_DIM);
 		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
+		tabs(graphics, mouseX, mouseY);
 		int bodyTop = y + BODY_Y;
 		switch (page) {
-			case MAP -> map(graphics, x + 9, bodyTop, mouseX, mouseY);
+			case MAP -> map(graphics, x + 12, bodyTop, mouseX, mouseY);
 			case REPUTATION -> reputation(graphics, x, bodyTop, mouseX, mouseY);
 			default -> quests(graphics, x, bodyTop, mouseX, mouseY);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** Original journal icons and labels, with the same hover and picked fills as the newer screens' chips. */
+	private void tabs(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		String[] names = {"quests", "map", "reputation"};
+		int y = top() + HEADER + 2;
+		for (int i = 0; i < names.length; i++) {
+			int x = tabX(i), w = tabW();
+			boolean picked = page == i, hover = Ui.over(mouseX, mouseY, x, y, w, TAB_H);
+			graphics.fill(x, y, x + w, y + TAB_H, picked ? Ui.ROW_PICKED : hover ? Ui.ROW_HOVER : Ui.CHIP);
+			graphics.fill(x, y + TAB_H - 2, x + w, y + TAB_H, picked ? COLOR_GOLD : hover ? Ui.ROW_HOVER : Ui.ROW);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, TAB_ICONS, x + 5, y + 2, i * 16.0F, 0.0F, 16, 16, 16, 16, 48, 16);
+			Ui.line(graphics, this.font, Component.translatable("journal.jaymoskingdoms.tab." + names[i]), x + 26, y + 6, w - 31,
+				picked ? COLOR_GOLD : hover ? COLOR_TEXT : COLOR_DIM);
+		}
 	}
 
 	// ---- quests ----------------------------------------------------------------------------------------------------------
@@ -205,6 +262,7 @@ final class JournalScreen extends Screen {
 	private void quests(GuiGraphicsExtractor graphics, int x, int top, int mouseX, int mouseY) {
 		int w = panelW();
 		List<Journal.Entry> entries = book.entries();
+		Ui.well(graphics, x + 5, top - 1, w - 10, questRows() * QUEST_ROW + 2);
 		if (entries.isEmpty()) {
 			graphics.centeredText(this.font, Component.translatable("journal.jaymoskingdoms.no_quests"), x + w / 2, top + 20, COLOR_DIM);
 			return;
@@ -259,15 +317,17 @@ final class JournalScreen extends Screen {
 		if (player == null || level == null) {
 			return;
 		}
-		int n = MAP_SIZE / CELL;
+		int size = mapSize();
+		int n = size / CELL;
 		int scale = ZOOMS[zoom];
-		if (cells == null || drawnZoom != zoom) {
+		if (cells == null || drawnZoom != zoom || drawnSize != size) {
 			cells = draw(level, player.getBlockX(), player.getBlockZ(), scale, n);
 			drawnX = player.getBlockX();
 			drawnZ = player.getBlockZ();
 			drawnZoom = zoom;
+			drawnSize = size;
 		}
-		Ui.well(graphics, x - 1, y - 1, MAP_SIZE + 2, MAP_SIZE + 2);
+		Ui.well(graphics, x - 1, y - 1, size + 2, size + 2);
 		for (int row = 0; row < n; row++) {
 			int run = 0;
 			// (a row's cells of one colour are filled as one)
@@ -279,17 +339,17 @@ final class JournalScreen extends Screen {
 			}
 		}
 		List<Component> hover = new ArrayList<>();
-		double half = MAP_SIZE / 2.0;
+		double half = size / 2.0;
 		double perPixel = scale / (double)CELL;
 		if (book.here()) {
 			for (Journal.Place p : book.places()) {
 				int color = 0xFF000000 | p.color();
 				int[] at = marker(x, y, p.seat(), perPixel, half);
 				boolean camp = p.type() == FactionType.BARBARIAN.ordinal();
-				int size = p.realm() ? 4 : 3;
-				graphics.fill(at[0] - size - 1, at[1] - size - 1, at[0] + size + 1, at[1] + size + 1, camp ? 0xFF8A1010 : 0xFF000000);
-				graphics.fill(at[0] - size, at[1] - size, at[0] + size, at[1] + size, color);
-				if (Math.abs(mouseX - at[0]) <= size + 1 && Math.abs(mouseY - at[1]) <= size + 1) {
+				int markerSize = p.realm() ? 4 : 3;
+				graphics.fill(at[0] - markerSize - 1, at[1] - markerSize - 1, at[0] + markerSize + 1, at[1] + markerSize + 1, camp ? 0xFF8A1010 : 0xFF000000);
+				graphics.fill(at[0] - markerSize, at[1] - markerSize, at[0] + markerSize, at[1] + markerSize, color);
+				if (Math.abs(mouseX - at[0]) <= markerSize + 1 && Math.abs(mouseY - at[1]) <= markerSize + 1) {
 					hover.add(Component.literal(p.name()));
 					hover.add(Component.translatable(p.kind()).withColor(COLOR_DIM));
 					if (p.rated()) {
@@ -328,7 +388,7 @@ final class JournalScreen extends Screen {
 			graphics.fill(px - 1, pz - 1, px + 1, pz + 1, 0xFFFFFFFF);
 		}
 		// beside it: the legend, where you stand
-		int lx = x + MAP_SIZE + 12, ly = y + 24;
+		int lx = x + size + 12, ly = y + 24;
 		legend(graphics, lx, ly, 0xFFFFFFFF, "you");
 		legend(graphics, lx, ly += 12, COLOR_GOLD, "quest");
 		legend(graphics, lx, ly += 12, COLOR_ROYAL, "decree");
@@ -355,7 +415,8 @@ final class JournalScreen extends Screen {
 	/** Where {@code pos} goes on the map (screen px), held to its edge when it's off it. */
 	private int[] marker(int x, int y, BlockPos pos, double perPixel, double half) {
 		double px = (pos.getX() - drawnX) / perPixel + half, pz = (pos.getZ() - drawnZ) / perPixel + half;
-		return new int[] {x + (int)Mth.clamp(px, 3, MAP_SIZE - 3), y + (int)Mth.clamp(pz, 4, MAP_SIZE - 4)};
+		int size = mapSize();
+		return new int[] {x + (int)Mth.clamp(px, 3, size - 3), y + (int)Mth.clamp(pz, 4, size - 4)};
 	}
 
 	/** The land about ({@code cx}, {@code cz}) as a map draws it: one sample per cell, shaded by the slope from the north. */
@@ -400,6 +461,7 @@ final class JournalScreen extends Screen {
 	private void reputation(GuiGraphicsExtractor graphics, int x, int top, int mouseX, int mouseY) {
 		List<Journal.Place> rated = book.places().stream().filter(Journal.Place::rated).toList();
 		int w = panelW();
+		Ui.well(graphics, x + 5, top - 1, w - 10, repRows() * REP_ROW + 2);
 		if (rated.isEmpty()) {
 			graphics.centeredText(this.font, Component.translatable("journal.jaymoskingdoms.no_places"), x + w / 2, top + 20, COLOR_DIM);
 			return;
