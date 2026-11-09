@@ -47,8 +47,7 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · 🤖 Quill · #1194 · writing
-- [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🤖 Quill · #1195 · writing
-- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · 🤖 Bacchus · #1196 · in-review
+- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · 🤖 Quill · #1196 · writing
 
 
 ## In review
@@ -58,6 +57,7 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · 🤖 Apollo · blocked
+- [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🤖 Prometheus · #1195 · ready
 
 
 ## Done
