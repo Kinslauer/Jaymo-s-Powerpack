@@ -173,7 +173,7 @@ CLOUD_AGENT = "claude-cloud"
 
 
 def worker_label(who):
-    """`hermes-a` -> `☀️ Apollo`, `claude-cloud` -> `☁️ Cloud`, `claude` -> `💻 Claude`; anything else unchanged."""
+    """`hermes-a` -> `☀️ Apollo`, `claude-cloud` -> `☁️ Cloud`, `claude` -> `💻 Odysseus`; anything else unchanged."""
     key = (who or "").strip().lower()
     names = {**HERMES_BOTS, **{v.split(" ", 1)[1].lower(): v for v in HERMES_BOTS.values()}}
     if key in names:
@@ -183,7 +183,7 @@ def worker_label(who):
     if key == "hermes":
         return "🪽 any Hermes bot"
     if key.startswith("claude"):
-        return "💻 Claude"
+        return "💻 Odysseus"  # Andy named the cloud Claude Odysseus (2026-11-09)
     return who
 
 
@@ -196,7 +196,7 @@ def write_kanban(live):
         elif p.get("claimed_by"):
             who = worker_label(p["claimed_by"])
         elif folder == "Agents":
-            who = "💻 Claude"  # an agent note is a Claude Code thread's own work
+            who = "💻 Odysseus"  # an agent note is a Claude Code thread's own work (Odysseus, the cloud Claude)
         else:
             who = ("for " + worker_label(p["for"])) if p.get("for") else ""
         bits = [b for b in (who, f"#{p['pr']}" if p.get("pr") else "", p.get("status", ""), extra) if b]
