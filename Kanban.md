@@ -39,8 +39,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · #1193 · changes · fixing review notes
-- [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · 🍇 Bacchus · #1201 · changes · fixing review notes
+- [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
