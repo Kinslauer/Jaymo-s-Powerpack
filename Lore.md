@@ -82,11 +82,25 @@ being fought long after, only now the enemy is the dead rather than the living W
 
 The hints, all of them visible and none of them spoken (Andy, 2026-11-09):
 
-- The zombies and husks of the future are **Warrior-born** — tails tattered, or cut away entirely. You are fighting the
-  descendants of the people who lost that war, and they are still fighting it.
+- Every zombie in the future is **Warrior-born** — husks, zombies and the dead of the player's own kind alike. Their
+  tails are mangled: **at least twelve different conditions**, from a bent and broken tail to one cut off at the root.
+  Across **thirty or more skins**, so the horde reads as a people rather than a spawn. You are fighting the descendants
+  of the people who lost that war, and they are still fighting it.
 - The ruin is neon and wreckage: the city as it was, destroyed in a way that looks recent because, in that place, it is.
 - Nothing explains any of this. It arrives through villager talk, rumour and gossip, and through what the player can see
   for themselves. No book says "this is the Warrior-born homeworld"; a tail in the dark says it.
+
+## The dead
+
+**The dead of the Overworld are old villagers.** Zombies and husks wear villager-like skins because that is what they
+are: villagers who died a long time ago, from ages this world has already forgotten. They are not the fresh dead. The
+MCA zombies are the recently dead — someone the village knew, turned within living memory; these are the older dead,
+much further gone, worn down to almost nothing of who they were.
+
+**The draugr are Warrior-born.** Every draugr is an undead Warrior-born ancestor — one of the raiders who lived on the
+Overworld in the old age, before they were stopped. A powerful Frostborn Z Fighter trapped them here forever: they
+cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb
+still, in horned helm, mail and fur, and they never leave it.
 
 ## The eight faiths
 
