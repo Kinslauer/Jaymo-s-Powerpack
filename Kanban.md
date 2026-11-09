@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:45). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,6 +39,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🤖 Bacchus · claimed
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · 🤖 Prometheus · claimed
+- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · #1190 · changes · fixing review notes
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
@@ -48,7 +49,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · #1190 · in-review
 
 
 ## Needs Andy
