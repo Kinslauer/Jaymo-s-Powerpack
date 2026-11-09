@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:32). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,12 +36,12 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🪶 Quill · #1189 · writing
-- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🪶 Quill · #1190 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🔥 Prometheus · #1188 · in-review
+- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · ☀️ Apollo · #1190 · in-review
 
 
 ## Needs Andy
