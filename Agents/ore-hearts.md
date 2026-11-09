@@ -1,5 +1,5 @@
 ---
-status: running
+status: blocked
 task: ore-hearts
 branch: claude/ore-hearts
 with:
@@ -34,5 +34,14 @@ owns:
   2. Cap: 5 full hearts (10 half-hearts) above base, shown as faint extra run on health bar
 - Art IDs: jaymospowers:heart_crystal_ore, heart_crystal_ore_deepslate, heart_crystal
 - Art is with modeller (ore-hearts-art task)
+
+## Notes
+
+- 2026-11-09 07:55 Apollo's run (`inbox-builder-a`, 05:55-07:20) died on a model-provider stall, not on the code:
+  the stream went silent at 06:05:57 and Hermes killed it at 07:18:35. The claim was released at 07:53 and the
+  task is back to `open` in the Inbox; this note stays here as the WIP marker.
+- Apollo's partial work is committed and pushed on `claude/ore-hearts` as `fa72e7dea` (worktree `E:/wt/ore-hearts`):
+  `core/wounds/HeartCrystals.java` plus hooks in `JaymosPowers`, `Downed` and `Mortality`. It does not compile yet
+  (one missing `Identifier` import). Full remaining-work checklist is in the task's `## Stall report`.
 
 ## Done
