@@ -44,8 +44,8 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
 - [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · 🪶 Quill · #1194 · writing
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
 
 
 ## In review
