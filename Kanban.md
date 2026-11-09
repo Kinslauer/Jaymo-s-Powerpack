@@ -20,7 +20,6 @@ kanban-plugin: board
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for hermes · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for hermes · open
-- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · for prometheus · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for prometheus · open
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for hermes · open
@@ -32,6 +31,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · hermes-a · claimed
+- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · hermes-modeller · claimed
 
 
 ## Text pass
