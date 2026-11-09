@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,11 +32,12 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Agents/kitchen-cookware-melt|kitchen-cookware-melt]] · #1163 · in-review
-- [ ] [[Agents/thrown-ragdoll-perch|thrown-ragdoll-perch]] · #1162 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Agents/rider-class|rider-class]] · #1161 · ready
+- [ ] [[Agents/thrown-ragdoll-perch|thrown-ragdoll-perch]] · #1162 · ready
 
 
 ## Done
