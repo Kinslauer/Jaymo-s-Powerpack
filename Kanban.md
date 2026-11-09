@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 12:00). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 12:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,8 +32,8 @@ kanban-plugin: board
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🤖 Prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🤖 Prometheus · open
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🤖 Prometheus · open
-- [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · for 🤖 Prometheus · open
+- [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🤖 a Hermes bot · open
 
 
 ## Being built
