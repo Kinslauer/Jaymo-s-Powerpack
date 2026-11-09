@@ -9,6 +9,11 @@ versions:
 started: 2026-11-08
 owns:
   - kitchen/src/main/java/com/jaymoskitchen/climate/Thirst.java
+  - kitchen/src/main/java/com/jaymoskitchen/climate/ParasiteEffect.java
+  - kitchen/src/main/java/com/jaymoskitchen/climate/Climate.java
+  - kitchen/src/main/resources/data/jaymoskitchen/damage_type/parasite.json
+  - kitchen/src/main/resources/assets/jaymoskitchen/lang/en_us.json
+  - changes/kitchen/parasites-and-cures.md
 ---
 # Bad water gives parasites, and a tea cures them
 
