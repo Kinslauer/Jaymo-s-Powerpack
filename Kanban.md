@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,6 +26,7 @@ kanban-plugin: board
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for hermes · open
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · open
+- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · open
 
 
 ## Being built
@@ -33,7 +34,6 @@ kanban-plugin: board
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · changes · fixing review notes
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · changes · fixing review notes
-- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · claimed
 
 
 ## Text pass
