@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:49). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,12 +22,10 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes-fixer · #1163 · in-review
 
 
 ## In review
 
-- [ ] [[Agents/kitchen-cookware-melt|kitchen-cookware-melt]] · #1163 · in-review
 
 
 ## Needs Andy
@@ -38,6 +36,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/kitchen-brick-split|kitchen-brick-split]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/blindness|blindness]]
 - [x] [[Inbox/Done/mimic|mimic]]
@@ -45,7 +44,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 - [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
 - [x] [[Inbox/Done/bogre-model|bogre-model]]
-- [x] [[Inbox/Done/kingdoms-geckolib-groundwork|kingdoms-geckolib-groundwork]]
 
 
 %% kanban:settings
