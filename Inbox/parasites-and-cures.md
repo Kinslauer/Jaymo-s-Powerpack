@@ -24,3 +24,4 @@ Andy: "parasites and treatment methods should be added too", then "the treatment
 - **No new items.** Andy's ruling: the cure goes on an existing item. The pack's teas are Powers' `willow_bark_tea` and `chamomile_tea`; a Kitchen drink works too. Pick one and say which in the PR.
 - The parasite effect itself has to be ours (a Kitchen mob effect or a body component), since ours replaces poison rather than borrowing it.
 - Parasites should be slow and survivable — a reason to boil water, not a death sentence.
+- 2026-11-08 20:26 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
