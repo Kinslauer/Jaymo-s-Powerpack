@@ -37,8 +37,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · in-review
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · in-review
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · writing
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · writing
 
 
 ## In review
