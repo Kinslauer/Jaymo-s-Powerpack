@@ -32,7 +32,7 @@ Tick what you want, add a note under any row, then set `status: picked`.
   Existing chunks keep the land they generated; the seam where new terrain starts is visible and ugly. Decide: do we ship this as the default for new worlds and leave the current server alone?
   Notes:
 
-- [ ] **A higher, wavy sea** `L` ^oc-sealevel
+- [x] **A higher, wavy sea** `L` ^oc-sealevel
   Water above Y63 whose surface is a gradient rather than flat blocks, with caves flooded beneath it.
   For us: this is the expensive one — it fights our water rendering (Streams Reflowing, shaders) and every mod that assumes flat water. Only if you want the ocean to be a place rather than a plane.
   Notes:
