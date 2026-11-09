@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: skilltree-sidebar-reflow
 branch: claude/skilltree-sidebar-reflow
 with:
-pr:
+pr: 1190
 mods: kingdoms
 versions:
 started: 2026-11-09
