@@ -16,13 +16,13 @@ import net.minecraft.world.entity.LivingEntity;
 import java.util.Random;
 
 /**
- * (0.5.94) The parasite from dirty water: instead of a straight potion hit, it ticks damage at random - slow,
- * survivable, a reason to boil water rather than a death sentence. It lasts a minute and deals a point of damage on
- * random ticks (roughly once every 15 seconds). A mug of hot chocolate clears it ({@link Thirst#consumed}).
+ * The parasite from dirty water: instead of a straight potion hit, it ticks damage at random - slow,
+ * survivable, a reason to boil water rather than a death sentence. It lasts two in-game days and deals a point of
+ * damage on random ticks (roughly once every 15 seconds). A mug of hot chocolate clears it ({@link Thirst#consumed}).
  */
 public final class ParasiteEffect extends MobEffect {
-	/** How long the parasite lasts (ticks): one minute. */
-	static final int TICKS = 20 * 60;
+	/** How long the parasite lasts (ticks): two in-game days, so curing it is worth the walk back to a fire. */
+	static final int TICKS = 24_000 * 2;
 
 	/** Damage ticks roll once in this many ticks on average: about once every 15 seconds. */
 	static final int ROLL_EVERY = 20 * 15;

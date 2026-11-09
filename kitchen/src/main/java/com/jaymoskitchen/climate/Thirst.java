@@ -78,7 +78,6 @@ public final class Thirst {
 	static final float HURT = 1.0F;
 	/** Chance a drink of dirty water turns your stomach, by how much of it you drank. */
 	static final float SICK_CHANCE = 0.35F, SIP_SICK_CHANCE = 0.15F;
-	/** How long dirty water's parasite lasts (ticks): see {@link ParasiteEffect#TICKS}. */
 	/** A sip from the bank or the sky: water it gives, and ticks before another. */
 	static final int SIP = 1, SIP_COOLDOWN = 10;
 	/** Water from the drinks themselves. */
@@ -241,11 +240,11 @@ public final class Thirst {
 		if (water != 0) {
 			set(player, water(player) + water);
 		}
-		// (0.5.x) an existing drink clears it: hot chocolate washes the parasite out
+		// an existing drink clears it: hot chocolate washes the parasite out
 		if (stack.is(KitchenBlocks.FOODS.get("hot_chocolate")) && player.removeEffect(ParasiteEffect.PARASITE)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.thirst.cured").withStyle(ChatFormatting.GREEN));
 		}
-		}
+	}
 
 	/** Water in a food or drink that isn't water itself (0 for most). */
 	static int waterIn(ItemStack stack) {
