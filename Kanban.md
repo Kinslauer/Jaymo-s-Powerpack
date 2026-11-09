@@ -33,8 +33,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · claimed
+- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 
 
 ## Text pass
