@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for 🪽 any Hermes bot · open
@@ -39,6 +38,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
