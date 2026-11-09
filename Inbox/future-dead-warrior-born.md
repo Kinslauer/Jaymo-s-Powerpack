@@ -17,7 +17,8 @@ dead villagers from time past. Like the mca zombies already in the game, except 
 older and much more deteriorated. Like the draugr, who are all undead warriorborn ancestors who lived on the overworld
 before being trapped there forever by a powerful frostborn z fighter"
 
-**What's wanted:** a plan first, not code.
+**What's wanted:** build it. Andy said **"Okay build all this"** on 2026-11-09, so the hold is lifted — this is real
+work with a PR, not a plan.
 
 1. **The future's dead are all Warrior-born.** Husks, zombies and the dead players alike carry mangled tails in at least
    twelve different conditions (bent, broken, half-cut, gone at the root, and so on) across thirty or more skins, so the
@@ -35,8 +36,9 @@ zombie path already in the pack, so the new Overworld dead read as older rather 
 
 ## Notes
 
-- Plan only: write it into this task's notes and stop. No code, no branch, no PR until Andy says go.
-- Art is the bulk of this. Skins and tail states are generated scripts in this project — say what the generator should
-  do rather than painting by hand, and say where the files land.
+- Build it and open a PR: what a player sees, and a "not tested in game" line if it hasn't been played.
+- Art is the bulk of this. Skins and tail states are generated scripts in this project — write the generator rather than
+  painting by hand, and say where the files land. If the volume is too much for one PR, land the generator plus a first
+  set of skins and say plainly what is still to come.
 - Lore lives in `E:/Jaymo Vault Live/Lore.md` ("The future: Los Perrito", "The dead"). Nothing written for this may
   explain the old war: tails, skins and ruin are the tell, and villagers only gossip.

@@ -9,17 +9,23 @@ pr:
 suggested_owns: []
 ---
 
-# The Maw is the Warrior-born's dead world — plan the remake
+# The Maw is the Warrior-born's dead world — build the remake
 
-**Andy's words:** "the maw is the remnants and should be remade as such!"
+**Andy's words:** "the maw is the remnants and should be remade as such!" — and then, 2026-11-09: **"Okay build all
+this"**. The plan-only hold is lifted: build it.
 
-**The lore** (now canon, `E:/Jaymo Vault Live/Lore.md`, "The Maw"): the Maw is what is left of the Warrior-born's
+**Scope for this task:** the Maw dimension itself — the broken planet suspended over a war-torn wasteland, the Lost
+Cities generating beneath it instead of a void, and the salvager's trade reading as salvage from a dead civilisation
+rather than loot floats. The future's dead (tails, skins, husks) are a separate task, `future-dead-warrior-born`; keep
+off its files.
+
+**The lore** (canon, `E:/Jaymo Vault Live/Lore.md`, "The Maw"): the Maw is what is left of the Warrior-born's
 homeworld, destroyed under them while they were still living by pillage and murder. The nine wrecks are not strangers'
 pods — they are the ruins of a murdered planet and the fleets that died with it. The Warrior-born who survived took to
 the dark between worlds and raided others instead; the Overworld among them.
 
-**What's wanted:** a plan, not code yet. Read what the Maw is today, then say what it should become so a player who
-flies out there feels they are standing in the grave of a world.
+**What's wanted:** build it. Read what the Maw is today, then make a player who flies out there feel they are standing
+in the grave of a world.
 
 Andy's picture of it (2026-11-09): the destroyed planet is caught in its own gravitational pull, almost static,
 suspended in midair — and beneath it there is **no void**. Under the planet is a war-torn desolate wasteland of ruined
@@ -42,6 +48,7 @@ Maw), plus the Kingdoms side that reads it: `tier.feat.maw_salvage`, `story-road
 
 ## Notes
 
-- Write the plan into this task's notes (or an agent note) and stop there. No code, no branch, no PR until Andy says go —
-  he is still writing the lore and the shape may change.
-- Anything the plan would contradict about the lore goes in the notes as a question for Andy, not a silent rewrite.
+- Build it and open a PR as usual: what a player sees, and a "not tested in game" line if it hasn't been played.
+- Andy said "build all this" on 2026-11-09, so the lore shape is settled enough to work from. If the code cannot do
+  something the lore page says, say so in the PR body rather than quietly shrinking the design.
+- Anything that would contradict the lore page goes to Andy as a question, not a silent rewrite.
