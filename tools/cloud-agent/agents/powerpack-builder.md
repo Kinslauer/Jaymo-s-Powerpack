@@ -33,7 +33,9 @@ task's status. Don't run `tools/vault_sync.py`.
 Building (the sandbox has no JDK 25 to start with):
 1. If `/root/jdk/jdk-25+36/bin/java` is missing, download
    `https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25%2B36/OpenJDK25U-jdk_x64_linux_hotspot_25_36.tar.gz`
-   and untar it into `/root/jdk`.
+   and untar it into `/root/jdk`. Then trust the sandbox's network proxy, or every download fails with PKIX/SSL
+   errors: `for f in /usr/local/share/ca-certificates/*.crt; do /root/jdk/jdk-25+36/bin/keytool -importcert -noprompt
+   -cacerts -storepass changeit -alias "$(basename "$f" .crt)" -file "$f"; done` (once per fresh JDK).
 2. `export JAVA_HOME=/root/jdk/jdk-25+36 PATH=/root/jdk/jdk-25+36/bin:$PATH`, then `bash gradlew build` in the mod's
    folder (the root for Powers, `kingdoms/`, `kitchen/`). Only one Gradle build at a time.
 3. A 429 from Maven Central means wait 30-60 s and run it again; downloads already made are kept.
