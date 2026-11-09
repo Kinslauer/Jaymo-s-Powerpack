@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: aetherion-geckolib
 branch: claude/aetherion-geckolib
 with:
@@ -40,3 +40,4 @@ owns:
 
 ## Done
 PR #1194 supplies Aetherion's editable 88-cube Blockbench model, unchanged hide/marking UVs, ten GeckoLib animations, movement/action controllers and a renderer preserving looks, scale, seats and per-frame head/jaw/flight posing. Geometry has zero mismatched source vertices; four-view and eleven old/new pose renders were inspected. Kingdoms clean build, root build and PR checks pass. A dev server boot was attempted but did not reach `Done` because concurrent Gradle activity deleted shared build output; no client playtest was performed.
+- 2026-11-09 13:16 PR #1194 is merged into master; moved to Agents/Done.

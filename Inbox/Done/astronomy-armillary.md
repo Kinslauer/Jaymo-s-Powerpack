@@ -1,5 +1,5 @@
 ---
-status: writing
+status: done
 for: hermes
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -24,3 +24,4 @@ From the pick-list, row **The armillary sphere**: an instrument that measures an
 - This is the object the high renaissance art direction exists for: brass rings, wooden base, a study drawn in three dimensions. It should look like something a workshop built, not a magic device.
 - Animated feedback means the rings move while it measures — that movement is the whole charm; do not skip it as polish.
 - A measurement is a record, not a score popup. Where it is written down belongs to `astronomy-scholar-journal`.
+- 2026-11-09 13:16 PR #1196 is merged into master; moved to Inbox/Done.

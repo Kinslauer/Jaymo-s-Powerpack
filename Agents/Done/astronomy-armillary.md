@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: astronomy-armillary
 branch: claude/astronomy-armillary
 with: 
@@ -29,3 +29,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-09 13:16 PR #1196 is merged into master; moved to Agents/Done.
