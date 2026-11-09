@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: prometheus
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -42,3 +42,4 @@ The look for the whole astronomy set. Andy: "add this but in the high renaissanc
 - 2026-11-09 09:08 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-09 09:11 Text pass: reviewed change note (changes/kingdoms/astronomy-art.md) — only player-visible text in PR; no lang parts, hints, or item text added. Change note is concise and follows style.
 - 2026-11-09 09:19 Review (head 62aaf40): pass. A walnut and aged-brass telescope on a jointed tripod, with a teal glass objective, hatched wood and brass, an engraved altitude scale and a matching 16x16 icon; it reads as a made instrument in the sepia study palette. Art only: it shows once the astronomy-telescope code task registers jaymoskingdoms:telescope (that task also needs a blockstate). Not tested in game. The rest of the set (sky, armillary, journal, sun/moon) still needs its art with each code PR.
+- 2026-11-09 09:20 Reviewed; Andy allowed sending it to the coordinator.
