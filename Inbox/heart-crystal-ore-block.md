@@ -33,3 +33,4 @@ Tiv, in the Tasks thread: "I want prometheus to work on a new heart crystal ore 
 ## Report
 
 PR says what a player will see when they find the ore in the dark, and a "not tested in game" line if it hasn't been placed in a world.
+- 2026-11-09 11:27 Question: The original amethyst-heart models, textures, editable sources and inspected renders are pushed as WIP 9db47f62a, and PR checks pass. Four full-build attempts were stopped or stalled by concurrent Gradle activity; the offline retry found an abandoned Loom cache lock. Can this be resumed for the build and PR once Gradle is free?
