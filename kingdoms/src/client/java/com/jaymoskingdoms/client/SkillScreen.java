@@ -70,6 +70,9 @@ final class SkillScreen extends Screen {
 	/** (0.7.540) How far the Attributes or Jobs rows are scrolled (pixels). */
 	private static int listScroll;
 
+	/** (0.7.650) Whether the Attributes/Jobs panel is collapsed to a thin tab on the left. */
+	private static boolean panelCollapsed;
+
 	SkillScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.skills.title"));
 	}
@@ -170,6 +173,13 @@ final class SkillScreen extends Screen {
 			// (0.7.82) the world tiers, beside Done
 			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
 				.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
+			// (0.7.650) collapse/expand tab on the panel's left edge
+			int tabX = left() - 28, tabY = top(), tabW2 = 24, tabH = panelH();
+			Component tabLabel = panelCollapsed ? Component.translatable("gui.jaymoskingdoms.skills.panel.expand") : Component.translatable("gui.jaymoskingdoms.skills.panel.collapse");
+			addRenderableWidget(Button.builder(tabLabel, b -> {
+				panelCollapsed = !panelCollapsed;
+				rebuildWidgets();
+			}).bounds(tabX, tabY, tabW2, tabH).build());
 			return;
 		}
 		// the web: the tabs at the header's right, the buttons along the foot
@@ -846,6 +856,17 @@ final class SkillScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		// (0.7.650) Handle expand tab click when panel is collapsed on stats/jobs tabs
+		if (panelCollapsed && (stats || jobs)) {
+			int tabX = 4, tabY = 4, tabW = 24, tabH = this.height - 8;
+			if (event.x() >= tabX && event.x() < tabX + tabW && event.y() >= tabY && event.y() < tabY + tabH) {
+				panelCollapsed = false;
+				rebuildWidgets();
+				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+				return true;
+			}
+		}
+
 		Stats.Stat stat = statAt(event.x(), event.y());
 		if (stat != null) {
 			if (this.minecraft.player != null && Stats.blocked(this.minecraft.player, progress(), stat) == null) {
@@ -920,11 +941,23 @@ final class SkillScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Skills.Progress shown = progress();
 		if (jobs) {
+			if (panelCollapsed) {
+				// (0.7.650) panel collapsed: render web + expand tab
+				renderWebAndExpandTab(graphics, shown, mouseX, mouseY);
+				super.extractRenderState(graphics, mouseX, mouseY, a);
+				return;
+			}
 			jobs(graphics, mouseX, mouseY);
 			super.extractRenderState(graphics, mouseX, mouseY, a);
 			return;
 		}
 		if (stats) {
+			if (panelCollapsed) {
+				// (0.7.650) panel collapsed: render web + expand tab
+				renderWebAndExpandTab(graphics, shown, mouseX, mouseY);
+				super.extractRenderState(graphics, mouseX, mouseY, a);
+				return;
+			}
 			attributes(graphics, shown, mouseX, mouseY);
 			super.extractRenderState(graphics, mouseX, mouseY, a);
 			return;
@@ -936,4 +969,24 @@ final class SkillScreen extends Screen {
 		card(graphics, shown, hovered, hovered == null ? crestAt(mouseX, mouseY) : null);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
+
+	/** (0.7.650) Renders the skill web with a thin expand tab on the left when the panel is collapsed. */
+	private void renderWebAndExpandTab(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
+		// Render the web as normal
+		Skills.Perk hovered = pressed && Math.abs(mouseX - pressX) + Math.abs(mouseY - pressY) >= 4.0 ? null : perkAt(mouseX, mouseY);
+		web(graphics, shown, mouseX, mouseY, hovered);
+		webHeader(graphics, shown);
+		graphics.fill(0, this.height - WEB_FOOTER, this.width, this.height, 0xF0101018);
+		card(graphics, shown, hovered, hovered == null ? crestAt(mouseX, mouseY) : null);
+		// Render the expand tab on the far left
+		int tabX = 4, tabY = 4, tabW = 24, tabH = this.height - 8;
+		int tabColor = 0x80FFFFFF;
+		graphics.fill(tabX, tabY, tabX + tabW, tabY + tabH, 0x80101018);
+		graphics.fill(tabX, tabY, tabX + 2, tabY + tabH, 0xFFFFC21A);
+		// Arrow pointing right (expand)
+		int cx = tabX + tabW - 8, cy = tabY + tabH / 2;
+		graphics.fill(cx - 4, cy - 4, cx, cy, 0xFFFFC21A);
+		graphics.fill(cx - 4, cy, cx, cy + 4, 0xFFFFC21A);
+	}
+
 }
