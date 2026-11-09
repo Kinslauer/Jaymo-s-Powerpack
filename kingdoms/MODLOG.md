@@ -10393,3 +10393,13 @@ Andy: "noone plays it as is", then "add everything you thought up, and everythin
 - **Races** (anyone, Riders win more): a stablehand's screen has a Races section, a 160-block sprint and a 320-block long run. Pay 1 emerald's worth on your own horse and a finish post (a column of light) goes up across open land; the action bar shows how far, which way and the time. Gold, silver or just finishing each pay a prize (Riders 1.5x); too slow and it's lost. (`Races`)
 - A downed horse is brought round by a Rider twice as fast and with no treat (Powers' side; the `jaymoskingdoms.rider` tag tells it).
 - Built; not played. The two new mixins (`Mob.isSaddled`, `RunAroundLikeCrazyGoal.tick`) are only checked at launch.
+
+## 0.7.664 (2026-11-09): Zombies beat down doors (#1168)
+
+Andy: "zombies should beat and break doors." Every zombie (husks, the drowned on land, zombie villagers, Kitchen's risen
+players, the Frostbite; not zombified piglins, thralls or Bio-built buds) now beats on a shut door between it and what
+it hunts, on every difficulty but Peaceful: arm swings, the door-bang sound, splinters, and cracks growing over the door
+until it gives (nothing dropped). One zombie breaks a wooden door in about 5 seconds; each other zombie on the same door
+adds 60% more, up to six. Iron and copper doors take about 45 seconds; a locked lock makes it take as much longer as it
+slows a player. With Spooky Doors each blow jars the door open a crack and it creaks shut. Villagers within 16 blocks
+hear it and run from the door. The mob_griefing rule turns it off. (`DoorPounding`, `SpookyDoors`)
