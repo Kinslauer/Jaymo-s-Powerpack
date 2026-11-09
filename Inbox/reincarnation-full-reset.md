@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by:
+claimed_by: hermes-b
 pr:
 suggested_owns: [src/main/java/com/jaymospowers/core/wounds/Mortality.java, kingdoms/src/main/java/com/jaymoskingdoms/LifeStory.java, kingdoms/src/main/java/com/jaymoskingdoms/McaBridge.java, kingdoms/src/main/java/com/jaymoskingdoms/Captains.java, kingdoms/src/main/java/com/jaymoskingdoms/Parties.java]
 ---
