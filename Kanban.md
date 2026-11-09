@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:56). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,6 +32,7 @@ kanban-plugin: board
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · for 🤖 Prometheus · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🤖 Prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🤖 Prometheus · open
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🤖 Prometheus · open
 
 
 ## Being built
@@ -53,7 +54,6 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · 🤖 Apollo · blocked
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🤖 Prometheus · blocked
 
 
 ## Done
