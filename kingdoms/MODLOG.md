@@ -10472,3 +10472,10 @@ Not tested in game: facing, final size, ground contact, hammer placement and ani
 The telescope block now animates smoothly when aimed. Its mount turns and its barrel tilts to track the sky, ready for the Altazimuth Mount skill. One telescope tier covers it — the skill uses the same instrument and its engraved scales. The static model stays as a fallback.
 
 Not tested in game: block registration, per-telescope saved aim, Altazimuth Mount skill checks, observations and failure messages remain with the gameplay implementation and the separate astronomy-sky dependency. No gameplay Java is changed here.
+
+## 0.7.672 (2026-11-09): traveller's journal refresh (#1192)
+
+- The journal opens on a larger, window-fitting panel with illustrated Quests, Map and Reputation tabs, gold selection and hover highlights, striped rows and sunken content wells.
+- Quests, orders, promises, captains, roads, map markers and reputation details stay unchanged; the map and lists adapt to the available screen space.
+- Original tab artwork by Prometheus, with an editable Blockbench model and generator in `kingdoms/art/journal/`.
+- Built and render-checked; not tested in game.
