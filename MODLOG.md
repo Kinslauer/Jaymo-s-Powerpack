@@ -1872,3 +1872,22 @@ Each Ultimate has its own model (Ultimate<Name>.java in client/power/xenoform/ul
 - It always ends: when its 5 s run out, or the Chrono dies, goes down, logs out, loses the power or turns spectator, or someone runs `/tick unfreeze`, and when the server stops. One at a time: it won't start while the server is already frozen (another Chrono's stop or `/tick freeze`). Held players' flying-kick counter is reset every tick, so nobody is kicked for floating.
 - `ChronoTimeStop`, `ChronoTimeStopSync`, `ChronoTimeStopClient`; `StasisField`'s locks and `ChronoStunInputMixin` also hold Time Stop's players. Tuning: `ChronoTimeStop.DURATION`, `COOLDOWN`, `MAX_HITS`, `MAX_RELEASE_SPEED`.
 - Built; not played.
+
+## 0.21.81 (2026-11-09): Remove double-tap Sneak zoom gesture (#1186)
+
+The double-tap Sneak (within 6 ticks) to activate OK Zoomer's zoom is removed. The Shift+Left Alt zoom gesture remains unchanged.
+
+## What the player will see
+- Double-tapping Shift no longer zooms the camera.
+- Holding Shift + Left Alt together still zooms until Alt is released.
+- Alt alone still rolls (dodges).
+- The slide gesture (holding Sneak for 1.5s in a sprint) is unaffected.
+
+## Changes
+- `SneakZoom.java`: Removed `DOUBLE_TAP_TICKS` constant and `sinceLastTap` field. Removed the double-tap detection logic in `tick()`. The Shift+Alt zoom path and cling/bar/slide blocking logic remain.
+- `Slide.java`: Updated javadoc to remove reference to "zoom's double-tap".
+- `FreerunClient.java`: Updated javadocs in `trySlide()` and `slideWindup()` to remove references to the zoom double-tap.
+- `docs/AI-HANDBOOK.md`: Updated Controls section to remove "tap then hold Shift" from the Zoom description.
+
+## Not tested in game
+Zoom behavior with OK Zoomer mod not verified in multiplayer.
