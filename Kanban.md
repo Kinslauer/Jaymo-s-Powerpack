@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 10:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 10:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -48,6 +48,7 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · 🤖 Apollo · blocked
+- [ ] [[Agents/kanban-bot-emoji|kanban-bot-emoji]] · 💻 Claude · #1187 · ready
 
 
 ## Done
