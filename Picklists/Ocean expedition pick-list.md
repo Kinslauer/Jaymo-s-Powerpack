@@ -39,7 +39,7 @@ Tick what you want, add a note under any row, then set `status: picked`.
 
 ## Sea life
 
-- [ ] **Life in the deep, quiet shallows** `M` ^oc-sealife
+- [x] **Life in the deep, quiet shallows** `M` ^oc-sealife
   Most fish and sea creatures spawn far from shore and in deep water, so a coastal walk is quiet and an expedition is where the life is.
   For us: spawn rules per biome and distance to land — Naturalist, Cube Animals and the pack's own fish are the stock.
   Notes:
