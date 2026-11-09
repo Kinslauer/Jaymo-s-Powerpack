@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 12:02). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 12:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,7 +39,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🤖 Bacchus · claimed
-- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · #1190 · changes · fixing review notes
 - [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🤖 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
@@ -60,6 +59,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/skilltree-sidebar-reflow|skilltree-sidebar-reflow]]
 - [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
 - [x] [[Inbox/Done/journal-refresh|journal-refresh]]
 - [x] [[Inbox/Done/astronomy-telescope|astronomy-telescope]]
@@ -67,7 +67,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/astronomy-art|astronomy-art]]
 - [x] [[Inbox/Done/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]]
 - [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
-- [x] [[Inbox/Done/blight-mobs|blight-mobs]]
 
 
 %% kanban:settings
