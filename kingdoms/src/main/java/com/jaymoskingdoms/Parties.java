@@ -457,25 +457,25 @@ public final class Parties {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.left").withStyle(ChatFormatting.YELLOW));
 		left(server, team, player);
 		return 1;
-		}
+	}
 
-		/**
-		 * (0.7.x) {@code player} is born again: they leave their party, any invite they made or took lapses, and the
-		 * rest are told once (an empty list to them, so the party list clears on every client). From LifeStory's
-		 * reincarnation only.
-		 */
-		static void reborn(ServerPlayer player) {
-			MinecraftServer server = player.level().getServer();
-			INVITES.remove(player.getUUID());
-			INVITES.values().removeIf(invite -> invite.from().equals(player.getUUID()));
-			LISTED.remove(player.getUUID());
-			PlayerTeam team = team(player);
-			if (team != null) {
-				leave(player);
-			}
+	/**
+	 * {@code player} is born again: they leave their party, any invite they made or took lapses, and the
+	 * rest are told once (an empty list to them, so the party list clears on every client). From LifeStory's
+	 * reincarnation only.
+	 */
+	static void reborn(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		INVITES.remove(player.getUUID());
+		INVITES.values().removeIf(invite -> invite.from().equals(player.getUUID()));
+		LISTED.remove(player.getUUID());
+		PlayerTeam team = team(player);
+		if (team != null) {
+			leave(player);
 		}
+	}
 
-		private static int kick(ServerPlayer leader, String who) {
+	private static int kick(ServerPlayer leader, String who) {
 		MinecraftServer server = leader.level().getServer();
 		PlayerTeam team = team(leader);
 		if (team == null) {

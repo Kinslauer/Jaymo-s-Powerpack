@@ -2439,15 +2439,17 @@ public final class LifeStory {
 		if (!canReincarnate(player)) {
 			return false;
 		}
-		Skills.refresh(player);
-		McaCompat.newDestiny(player);
-		// (0.7.x) EVERYTHING resets on reincarnation: MCA's villagers forget the player (hearts, memories,
+		// EVERYTHING resets on reincarnation: MCA's villagers forget the player (hearts, memories,
 		// relationships), the player leaves their party, and no captain remembers having met them.
+		// Forget first, then launch MCA's "Who are you?" creator - newDestiny resets MCA's own player data,
+		// so it must run after the wipes, not before them.
 		if (McaCompat.LOADED) {
 			McaBridge.forgetPlayer(player);
 		}
 		Parties.reborn(player);
 		Captains.forgetPlayer(player.level().getServer(), player);
+		Skills.refresh(player);
+		McaCompat.newDestiny(player);
 		return reincarnate(player);
 	}
 
