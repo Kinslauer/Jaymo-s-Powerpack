@@ -116,3 +116,5 @@ Andy, in the `parthenon` topic "Kanban": "new kanban goes here". The live board 
 
 Andy: "any feature that requires another PR to work as intended should be held and pushed together." A PR whose point needs a sibling PR (the night sky before the telescope, armillary and journal can read it) waits for the set instead of merging alone, even when the instruction is "merge everything".
 - 2026-11-09: Andy: Claude and Hermes (YOUTH and every bot) write times on a 12-hour clock with AM/PM. Added to every Hermes SOUL.md; bot_health/Bots.md, Kanban card times, dispatcher and watchdog Discord alerts now show 12-hour times.
+- 2026-11-08 (spirit visibility): other mana attuned players see a spirit that is out - not only its owner. Written into the spirit-manifestation task.
+- 2026-11-08 (ocean): Andy wants more water in the world, oceans as an expedition, most sea life spawning further out, maybe Tideborn settled islands and "definitely more and larger ships". Links: Ocean Worlds (Forge 1.18-1.20, ideas only) and the Water World datapack (sets continentalness -0.5, all ocean). Pick-list written; the lever is kingdoms' own continents.json offset (-0.06 today).
