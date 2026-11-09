@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-09 15:28
+updated: 2026-11-09 15:38
 ---
 # Open PRs
 
-2 open, as of 2026-11-09 15:28. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+2 open, as of 2026-11-09 15:38. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1193](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1193) Kingdoms: a real night sky -- HYG star catalog and constellations
