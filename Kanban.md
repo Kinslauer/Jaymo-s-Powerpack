@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:18). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,6 +14,7 @@ kanban-plugin: board
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · for hermes · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for hermes · open
+- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for hermes · open
 
 
 ## Being built
