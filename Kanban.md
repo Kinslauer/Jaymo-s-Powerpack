@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 08:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:05). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,11 +34,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · claimed
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · claimed
-- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · claimed
 
 
 ## Text pass
 
+- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · #1185 · in-review
 
 
 ## In review
