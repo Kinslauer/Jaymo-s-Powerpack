@@ -12,17 +12,17 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · for hermes · open
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · open
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · open
-- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · for prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · claimed
+- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · claimed
 
 
 ## Text pass
 
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · in-review
 
 
 ## In review
