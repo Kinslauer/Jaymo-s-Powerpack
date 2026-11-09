@@ -1798,3 +1798,23 @@ Built, not played.
 - **Global trigger**: When any player takes significant head damage (≥4 damage), nearby corrupted Blindness players trigger Blackout on themselves and others.
 
 Not tested in game.
+
+## 0.21.75 (2026-11-09): Xeno-Band Ultimates: seven new Ultimate forms (#1160)
+
+Seven new Ultimate alien forms for the Xeno-Band, each with its own model, texture, abilities and big move (C):
+
+- **Elder Wyrm** (Wyrm's Ultimate): grows to 2.0x, black scale plates, long spikes, barbed tail blade, swept-back horn crown, void purple seams. R: Void Breath (three clouds of purple fire ahead). G: Elder Wings (fly where you look, dive to slam). V: Tempest Beat (wide gust swatting projectiles). B: Void Rift (step through void up to 24 blocks). C: Endfire Volley (five dragon fireballs fanning out, each bursting into a cloud).
+
+- **Copper Storm** (Duplex's Ultimate): copper golem grown to 1.6 blocks, patina-green plate, coiled rod, crown spikes, blue-white seams. R: Storm Split (two charged doubles step out). G: Bolt Rally (doubles swarm a target, first strike lightning). V: Arc Switch (trade places with a double, arc shocks between). B: Overcharge Merge (doubles merge back, heal, Speed II + Strength, shock ring if three+). C: Copper Storm (lightning on every double, shock radius, all doubles charged).
+
+- **Ironpour** (Rivet's Ultimate): liquid-metal puddle standing up to player size, riveted steel plates, gear-tooth spikes. R: Overmeld (Meld from further, shell moves 1.5x stronger). G: Twin Lash (two metal whips drag different targets). V: Molten Pour (fast flowing dash, burns and slows what you pour through). B: Overdrive Ride (Ride from further, machine gets Resistance II + bolted plates, rams). C: Foundry Slam (surge up into pillar, slam both whip-arms down).
+
+- **Worldmaw** (Gorger's Ultimate): armadillo grown to 1.6x, thickened stone plates, forked horn, wider maw, ember cracks. R: Deep Gulp (eat block + 8 around it on that face). G: Rubble Cannon (gut fires as rubble cone, up to 3 eaten blocks fly as falling blocks). V: Quake Charge (long run goring creatures, off ledge becomes slam). B: Spiked Roll (curl into spiked ball, roll at walk pace, hurt and bounce). C: Worldmaw (unhinge jaw inhale: blocks gulped, creatures dragged in and bitten, then Gut Blast at double damage).
+
+- **Brinecrown** (Slipfin's Ultimate): axolotl grown long and plated, pearly scales, spined sail, frilled gill crowns. R: Tide Jet (longer wider Bubble Jet, slows, puts out fire). G: Undertow Slip (Slip that frees from holds, bursts water throwing foes). V: Torrent Dart (longer lunge with splash wake, bites every creature on the way). B: Bloom Regrow (Regrow with Regeneration III, also mends allies nearby). C: Brinecrown (downpour over 10 blocks for 12s: fire out, foes Slowed, waves push them).
+
+- **Lodestar** (Polestar's Ultimate): lodestone alien grown to magnetic pole, heavy plates, curved prongs, four iron shards orbiting. R: Great Pull (drags iron-wearers in wide cone, loose iron flies in). G: Shock Repel (wide burst hurts and throws back iron, shoves rest, turns arrows back). V: Triple Lift (tear up to 3 iron blocks to orbit, each V throws one). B: Bastion Field (hold: arrows near fly back faster, iron-wearers inside pushed out). C: Lodestar (6s magnetic pole: iron-wearers dragged and held, loose iron flies in, C again throws all out).
+
+- **Nightfall** (Lurk's Ultimate): tall stalker at 1.3x, bone-black plated arms, spined ridge, four eye domes. R: Mark of Night (up to 3 creatures within 64 blocks glow, lose track of you). G: Nightstep (step behind target or first mark within 32 blocks, strike doubled if unseen, G again chains to next mark). V: Terror (everything looking at you and all marks: Darkness, Slowness II, Weakness II, Blindness, monsters drop target and shoved). B: Deep Fade (unseen with Speed I, first strike doesn't break it, second does). C: Nightfall (16 blocks for 160s: everything else Blinded, glows on your screen alone).
+
+Each Ultimate has its own model (Ultimate<Name>.java in client/power/xenoform/ultimate/) and its own 128x128 skin with glow map (tools/ultimates/<id>.py). Health bar sits on top of the base form's bar. All effects respect pvp and team protection. Nothing persists when the Ultimate ends, the player dies, changes dimension or quits, or the server stops.
