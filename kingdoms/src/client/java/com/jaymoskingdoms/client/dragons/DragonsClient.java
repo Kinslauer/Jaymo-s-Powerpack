@@ -84,9 +84,10 @@ public final class DragonsClient {
 	}
 
 	public static void register() {
-		// (0.7.326) both nyxaris' Fire Dragon, drawn down to each one's size: Notus's back as high as its saddle, Boreas smaller
-		EntityRenderers.register(Dragons.NOTUS_DRAGON, c -> new WindDragonRenderer<>(c, "notus", new FireDragonModel(), NOTUS_SHADOW, NOTUS_SCALE));
-		EntityRenderers.register(Dragons.BOREAS_DRAGON, c -> new WindDragonRenderer<>(c, "boreas", new FireDragonModel(), BOREAS_SHADOW, BOREAS_SCALE));
+		// both nyxaris' Fire Dragon, drawn and animated by GeckoLib, down to each one's size: Notus's back as high as its
+		// saddle, Boreas smaller
+		EntityRenderers.register(Dragons.NOTUS_DRAGON, c -> new FireDragonRenderer<>(c, "notus", NOTUS_SHADOW, NOTUS_SCALE));
+		EntityRenderers.register(Dragons.BOREAS_DRAGON, c -> new FireDragonRenderer<>(c, "boreas", BOREAS_SHADOW, BOREAS_SCALE));
 		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new WindDragonRenderer<>(c, "zephyrus", new ZephyrusDragonModel(ZephyrusDragonModel
 			.createBodyLayer().bakeRoot()), ZEPHYRUS_SHADOW));
 		// (0.7.329) both eanncrod's Kintsugi wyvern: Eurus small enough to ride, Aeolus vast

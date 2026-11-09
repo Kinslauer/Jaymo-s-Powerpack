@@ -1,11 +1,16 @@
 package com.jaymoskingdoms.dragons;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.PowersCompat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -22,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
  * ({@link DragonFrost}: it freezes and slows what it meets, puts out fires, and turns still water to ice for a while); it
  * never freezes itself. Its favourite is raw salmon; the Frostborn and Cryokinesis users win it over twice as fast.
  */
-public class BoreasDragon extends WindDragon {
+public class BoreasDragon extends WindDragon implements GeoEntity {
 	static final double HEALTH = 180.0, ARMOR = 8.0, TOUGHNESS = 3.0, SPEED = 0.24, BITE = 10.0;
 	/** How fast it cruises and dives wild (Notus: 0.55 and 1.15). */
 	static final double CRUISE = 0.7, SWOOP = 1.35;
@@ -34,6 +39,8 @@ public class BoreasDragon extends WindDragon {
 	static final double SEAT_HEIGHT = 1.6;
 	/** Its mouth, on the ground and in the air: how far ahead of its middle, and how high above its feet. */
 	static final double MOUTH_AHEAD_GROUND = 3.3, MOUTH_UP_GROUND = 2.2, MOUTH_AHEAD_AIR = 4.2, MOUTH_UP_AIR = 1.3;
+
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
 	public BoreasDragon(EntityType<? extends BoreasDragon> type, Level level) {
 		super(type, level);
@@ -128,5 +135,26 @@ public class BoreasDragon extends WindDragon {
 	@Override
 	public boolean canFreeze() {
 		return false;
+	}
+
+	/** Drawn and animated by GeckoLib ({@link FireDragonAnimations}). */
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		FireDragonAnimations.register(controllers);
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
+	}
+
+	@Override
+	protected void bitten(LivingEntity target) {
+		this.triggerAnim("action", "bite");
+	}
+
+	@Override
+	protected void swept() {
+		this.triggerAnim("action", "sweep");
 	}
 }
