@@ -1673,3 +1673,8 @@ mobs should be possible".
   `MobAccessor` gained the target selector.
 - Built; not played. Not tested in game: spawning, the raids, the traps, the cage's rat, cats hunting, the mouth item's
   placement, and the snap trap's and spawn egg's item icons.
+
+## 0.5.94 (2026-11-09): Tossed corpses go by weight (#1162)
+
+- A tossed body flies by the same weight curve as Jaymo's Powers' live throws: a person's body goes a few blocks, a small one about three times as far, a cow's about half as far (`CorpseEntity#tossLightness`).
+- Built; not played.
