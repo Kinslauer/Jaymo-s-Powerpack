@@ -44,7 +44,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · #1193 · in-review
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
 
 
 ## In review
