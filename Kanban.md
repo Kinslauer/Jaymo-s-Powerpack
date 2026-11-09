@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -49,7 +49,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · blocked
-- [ ] [[Agents/kanban-worker-labels|kanban-worker-labels]] · #1184 · ready
 
 
 ## Done
