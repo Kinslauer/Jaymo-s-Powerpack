@@ -106,3 +106,4 @@ log started are in `docs/AI-HANDBOOK.md` section 7 (see [[Rules]]).
 ## Discord board location (2026-11-09)
 Andy, in the `parthenon` topic "Kanban": "new kanban goes here". The live board message is kept in that thread
 (id 1569368728901255309) by `E:/hermes/scripts/discord_board.py`, run by the `discord-kanban` cron job every 5 minutes.
+- 2026-11-09: Gateway freezes = disk stalls on E: (HDD RAID holding Hermes, builds and the page file). Andy: gateway loop watchdog now tolerates ~3 min (config.yaml gateway.loop_watchdog_probe_timeout_s 30, max_strikes 6); the Windows watchdog checks every minute; Andy moves the page file to C: (SSD) himself with E:/hermes/scripts/move_pagefile_to_ssd.ps1, then restarts.
