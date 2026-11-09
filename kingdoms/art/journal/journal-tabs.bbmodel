@@ -1,0 +1,320 @@
+{
+	"meta": {
+		"format_version": "5.0",
+		"model_format": "free",
+		"box_uv": false
+	},
+	"name": "journal_tabs",
+	"model_identifier": "journal_tabs",
+	"visible_box": [
+		3,
+		1,
+		1
+	],
+	"resolution": {
+		"width": 48,
+		"height": 16
+	},
+	"elements": [
+		{
+			"name": "quests",
+			"box_uv": false,
+			"from": [
+				0,
+				0,
+				-0.5
+			],
+			"to": [
+				16,
+				16,
+				0.5
+			],
+			"origin": [
+				8,
+				8,
+				0
+			],
+			"rotation": [
+				0,
+				0,
+				0
+			],
+			"inflate": 0,
+			"faces": {
+				"north": {
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"texture": 0
+				},
+				"south": {
+					"uv": [
+						16,
+						0,
+						0,
+						16
+					],
+					"texture": 0
+				},
+				"east": {
+					"uv": [
+						15,
+						0,
+						16,
+						16
+					],
+					"texture": 0
+				},
+				"west": {
+					"uv": [
+						0,
+						0,
+						1,
+						16
+					],
+					"texture": 0
+				},
+				"up": {
+					"uv": [
+						0,
+						0,
+						16,
+						1
+					],
+					"texture": 0
+				},
+				"down": {
+					"uv": [
+						0,
+						15,
+						16,
+						16
+					],
+					"texture": 0
+				}
+			},
+			"type": "cube",
+			"uuid": "journal-tab-0"
+		},
+		{
+			"name": "map",
+			"box_uv": false,
+			"from": [
+				18,
+				0,
+				-0.5
+			],
+			"to": [
+				34,
+				16,
+				0.5
+			],
+			"origin": [
+				26,
+				8,
+				0
+			],
+			"rotation": [
+				0,
+				0,
+				0
+			],
+			"inflate": 0,
+			"faces": {
+				"north": {
+					"uv": [
+						16,
+						0,
+						32,
+						16
+					],
+					"texture": 0
+				},
+				"south": {
+					"uv": [
+						32,
+						0,
+						16,
+						16
+					],
+					"texture": 0
+				},
+				"east": {
+					"uv": [
+						31,
+						0,
+						32,
+						16
+					],
+					"texture": 0
+				},
+				"west": {
+					"uv": [
+						16,
+						0,
+						17,
+						16
+					],
+					"texture": 0
+				},
+				"up": {
+					"uv": [
+						16,
+						0,
+						32,
+						1
+					],
+					"texture": 0
+				},
+				"down": {
+					"uv": [
+						16,
+						15,
+						32,
+						16
+					],
+					"texture": 0
+				}
+			},
+			"type": "cube",
+			"uuid": "journal-tab-1"
+		},
+		{
+			"name": "reputation",
+			"box_uv": false,
+			"from": [
+				36,
+				0,
+				-0.5
+			],
+			"to": [
+				52,
+				16,
+				0.5
+			],
+			"origin": [
+				44,
+				8,
+				0
+			],
+			"rotation": [
+				0,
+				0,
+				0
+			],
+			"inflate": 0,
+			"faces": {
+				"north": {
+					"uv": [
+						32,
+						0,
+						48,
+						16
+					],
+					"texture": 0
+				},
+				"south": {
+					"uv": [
+						48,
+						0,
+						32,
+						16
+					],
+					"texture": 0
+				},
+				"east": {
+					"uv": [
+						47,
+						0,
+						48,
+						16
+					],
+					"texture": 0
+				},
+				"west": {
+					"uv": [
+						32,
+						0,
+						33,
+						16
+					],
+					"texture": 0
+				},
+				"up": {
+					"uv": [
+						32,
+						0,
+						48,
+						1
+					],
+					"texture": 0
+				},
+				"down": {
+					"uv": [
+						32,
+						15,
+						48,
+						16
+					],
+					"texture": 0
+				}
+			},
+			"type": "cube",
+			"uuid": "journal-tab-2"
+		}
+	],
+	"outliner": [
+		{
+			"name": "quests",
+			"origin": [
+				8,
+				8,
+				0
+			],
+			"uuid": "journal-group-0",
+			"children": [
+				"journal-tab-0"
+			]
+		},
+		{
+			"name": "map",
+			"origin": [
+				26,
+				8,
+				0
+			],
+			"uuid": "journal-group-1",
+			"children": [
+				"journal-tab-1"
+			]
+		},
+		{
+			"name": "reputation",
+			"origin": [
+				44,
+				8,
+				0
+			],
+			"uuid": "journal-group-2",
+			"children": [
+				"journal-tab-2"
+			]
+		}
+	],
+	"textures": [
+		{
+			"name": "tabs.png",
+			"folder": "journal",
+			"namespace": "jaymoskingdoms",
+			"id": "0",
+			"uuid": "6b506d2d-6f79-4726-956c-6c6f6e616c00",
+			"relative_path": "../../src/main/resources/assets/jaymoskingdoms/textures/gui/journal/tabs.png",
+			"source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAQCAYAAABQrvyxAAAB1ElEQVR4nGNgGCng1c21/0H4/5dr/2lh/v9DUv9dTHVJNpsFmQMyoCTNFq+G10+vEzQUZM6e05cZSVHjWizMQA5A8cDu/SuJciA+R4FoaCCA2egegQVSz6zDWM3oj1UgKhYKFz9gxPAAuY7HFnPLljQwRMU0oHhqFa8ZQ9jnUwTNK0j9hVd+wmw2OBvFA8QAkKMIgeuHtjEY2TmDPQEDFec/E+V4EKh85gSmiwwDGfrOr8dgizMcYcDqAZDjQCEFshybQ5EdhA9o2nmB6aUtxQzRNb0MlIAiw0C88jhjgFjH4gMF07cx7AxLYzDqLwSHPrFJiBSA0wPoMUCKhw7wfmIwYmAAOx4Z0MITLNSOAZDjHT7zQdJrnALBJEAIgAISn1sIZuJzhf0Mug6aDJcPXAcnBWIcDwLYHE5s6ItvPcLw0tsGHAgmxfrwzAuTQwZMBE1jYAA7nhgAczwloBBavoMciu5YGB+mBmcMnDu0F4V/XfgJhIEmjg3AKyikigqWBEChj6sCQwYwB4IqNVhsYHM8Vg+gW+Ct8Zlh6w1eKG8bAwMDjI0JQHqx1byw4hlmNqFmBgyAHAvzBIzPQCpArtpxVfPENMLwqemPVfiPjnG5YdgBAMrF6sfeLxc7AAAAAElFTkSuQmCC",
+			"width": 48,
+			"height": 16
+		}
+	]
+}
