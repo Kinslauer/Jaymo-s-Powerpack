@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -41,26 +41,24 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · #1173 · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · ready
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/mimic|mimic]]
 - [x] [[Inbox/Done/kitchen-brick-split|kitchen-brick-split]]
 - [x] [[Inbox/Done/blindness|blindness]]
 - [x] [[Inbox/Done/impaler-model|impaler-model]]
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
-- [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
-- [x] [[Inbox/Done/bogre-model|bogre-model]]
 
 
 %% kanban:settings
