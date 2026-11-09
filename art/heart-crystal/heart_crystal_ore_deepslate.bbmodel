@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "format_version": "5.0",
+    "model_format": "java_block",
+    "box_uv": false
+  },
+  "name": "heart_crystal_ore_deepslate",
+  "java_block_version": "26.3",
+  "ambientocclusion": true,
+  "front_gui_light": false,
+  "resolution": {
+    "width": 16,
+    "height": 16
+  },
+  "elements": [
+    {
+      "name": "ore_block",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "autouv": 0,
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "8d21413b-682f-5df7-ad1f-d3b66d4260d1"
+    }
+  ],
+  "outliner": [
+    "8d21413b-682f-5df7-ad1f-d3b66d4260d1"
+  ],
+  "textures": [
+    {
+      "name": "heart_crystal_ore_deepslate",
+      "id": "0",
+      "width": 16,
+      "height": 16,
+      "uv_width": 16,
+      "uv_height": 16,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABh0lEQVR4nIVTPUsDQRCdHKe3fiR7BkUJBEQFIQiClT/AQrC0ESy0FCwULP0Fdpb+ATutxC6diI2V2AQMBITgqcSLMeROFOVNnHNzOZLX7M3M3ryZN7OpQmHxx3VdcpxBqtffKQgCUkoRgBP+MPwk3/cT/RaM47lhOttY4sDh2ADlnl4oCUhuAkmsk4UsG+XrO1rzX6OgmQQEV3urhEoPhr4pW3lkP1dAfXCUtxMJRkplPu2d+xqtBx9RoPLW4rM6NUHtjnvD1jpDRZ2hFa8aOfEzoHWa9h8aHcxCUJvOs7AW+gAu3XG68Vt0rkbZhqBBEPL3KbXbEDTnZ/8rIAPCLFDKYaEAJIawuKP/JgBYvcYkFZgEsguS2IqLggsY7cXWMtu7qSbN+I0uElksK75pmLmMzRQW5SMO0YWdK1DK6WDvB/NnwI73uX1bpU36imxzL3SsWrQTjVH6QwAjjYsH4LGhZay03GUNJKPZQnEyx3uBHRDhklq0zQokkQjruemuJ+x5zx3JfgEd6LxWwNRstQAAAABJRU5ErkJggg=="
+    }
+  ]
+}
