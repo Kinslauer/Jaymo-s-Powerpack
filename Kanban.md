@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,7 +30,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · claimed
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🤖 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
@@ -38,6 +37,7 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Quill · #1189 · writing
+- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · #1190 · in-review
 
 
 ## In review
