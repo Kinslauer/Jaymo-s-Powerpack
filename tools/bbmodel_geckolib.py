@@ -11,7 +11,10 @@ apart). Box-UV cubes are written per face as well; their faces already hold the 
 
 Space and signs are Blockbench's Bedrock export's: a bone's pivot and a cube's origin flip x (a cube's origin is its
 corner at -to.x), bone and cube rotations flip x and y, and the up and down faces' UVs are written from the far corner.
-Animation keyframes are written as Blockbench stores them (GeckoLib reads them that way).
+Animation keyframes: GeckoLib reads rotations with x and y turned round (and draws position x turned round), as the
+Bedrock and GeckoLib formats store them. A project in any other format (free, modded entity: the Workshop models and
+ours) stores them the Java model way, so its rotation x and y and position x are written turned round (checked against
+GeckoLib 5.5.7's own math: without it the Skeleton Lord's head and staff swung behind him).
 
 Run from the project root (needs Pillow):
   py -3 -I tools/bbmodel_geckolib.py <model.bbmodel> <assets dir> <name> [--drop a,b] [--anims a,b] [--rename old=new,...]
@@ -27,6 +30,9 @@ import sys
 from PIL import Image
 
 POSE_LENGTH = 0.05
+# Blockbench project formats whose keyframes are already Bedrock's (GeckoLib's) way round; every other format (free,
+# modded entity, Java) keeps them the Java model way: rotation x and y and position x the other way round
+BEDROCK_FORMATS = ("bedrock", "bedrock_old", "animated_entity_model")
 
 
 def r4(v):
@@ -172,6 +178,7 @@ def convert(data, name, drop=(), anim_names=None, rename=None):
 
 	anims = {}
 	bone_names = set(names)
+	java_keys = data.get("meta", {}).get("model_format") not in BEDROCK_FORMATS
 	for a in data.get("animations", []):
 		nm = a["name"].split(".")[-1]
 		if anim_names and nm not in anim_names:
@@ -194,6 +201,9 @@ def convert(data, name, drop=(), anim_names=None, rename=None):
 				if ch not in ("rotation", "position", "scale"):
 					continue
 				pts = [[number(dp.get(ax, 0)) for ax in "xyz"] for dp in k["data_points"]]
+				if java_keys:
+					flip = (0, 1) if ch == "rotation" else (0,) if ch == "position" else ()
+					pts = [[(-v if isinstance(v, (int, float)) else "-(" + v + ")") if i in flip else v for i, v in enumerate(p)] for p in pts]
 				pts = [[r4(float(v)) if isinstance(v, (int, float)) else v for v in p] for p in pts]
 				interp = k.get("interpolation", "linear")
 				if len(pts) > 1:
