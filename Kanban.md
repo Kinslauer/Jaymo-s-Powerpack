@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · for hermes · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for hermes · open
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · for hermes · open
@@ -30,6 +29,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/ore-hearts|ore-hearts]] · hermes-a · claimed
 
 
 ## Text pass
