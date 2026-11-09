@@ -3,7 +3,7 @@ status: running
 task: astronomy-sky
 branch: claude/astronomy-sky
 with: 
-pr: 
+pr: 1193
 mods: kingdoms
 versions: 
 started: 2026-11-09
