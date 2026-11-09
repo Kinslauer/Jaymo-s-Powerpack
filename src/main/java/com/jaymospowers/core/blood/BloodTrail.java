@@ -57,6 +57,22 @@ public final class BloodTrail {
 	static final double MERGE = 0.45, MERGE_UP = 0.5;
 	static final float GROW = 0.25F, MAX_SCALE = 1.8F;
 	/**
+	 * Andy: blood that keeps landing on one spot should pool, not stack. Blood landing on a round pool of the same blood
+	 * whose edge it reaches (centres closer than this share of the two radii added) soaks into it as if it fell inside
+	 * ({@link #MERGE} is still the least), and a pool grown into another of the same blood runs together with it: the two
+	 * become one as big as both (by area), if that fits under {@link #MAX_SCALE}.
+	 */
+	static final double TOUCH = 0.6;
+	/**
+	 * A drag-trail piece ({@link #drag}) laid this close to one lying the same way (a share of its width: dragged back over
+	 * its own trail, or stopped and nudged) soaks into it instead, which widens by this share of the new one's size, to at
+	 * most this size.
+	 */
+	static final double DRAG_OVERLAP = 0.3;
+	static final float DRAG_GROW = 0.1F, DRAG_MAX_SCALE = 2.0F;
+	/** A puddle's radius (blocks) at scale 1. */
+	private static final double RADIUS = BloodParticles.Puddle.BLOCKS_PER_SCALE * 0.5;
+	/**
 	 * How far under a bleeder blood can fall to the ground (blocks). (0.21.50) Andy: "a bleeding body above a ledge can drip
 	 * a pool up to 20 blocks below it". A stain that far down shows once the drop could have fallen there (a drop falls
 	 * {@link #DROP_FALL} blocks a tick per tick, the client's {@code BloodDrop}).
@@ -224,17 +240,29 @@ public final class BloodTrail {
 		}
 		long now = level.getGameTime();
 		Marks marks = LEVELS.computeIfAbsent(level, l -> new Marks());
-		List<Mark> chunk = marks.byChunk.computeIfAbsent(ChunkPos.pack(BlockPos.containing(at)), c -> new ArrayList<>());
-		for (Mark mark : shape != BloodParticles.Puddle.ROUND ? List.<Mark>of() : chunk) {
-			if (mark.shape == BloodParticles.Puddle.ROUND && Math.abs(mark.x - at.x) < MERGE && Math.abs(mark.z - at.z) < MERGE && Math.abs(mark.y - at.y) < MERGE_UP
-				&& java.util.Objects.equals(mark.by, by)) {
-				mark.scale = Math.max(Math.max(mark.scale, scale), Math.min(MAX_SCALE, mark.scale + GROW * scale));
-				mark.laid = now;
-				mark.expires = now + LIFE;
-				mark.version++;
-				return mark;
+		if (shape == BloodParticles.Puddle.ROUND) {
+			// blood landing on (or at the edge of) a pool of the same blood pools into it: it grows and lies fresh again
+			Mark pool = poolAt(marks, at, scale, color, by, now);
+			if (pool != null) {
+				pool.scale = Math.max(Math.max(pool.scale, scale), Math.min(MAX_SCALE, pool.scale + GROW * scale));
+				pool.laid = now;
+				pool.expires = now + LIFE;
+				pool.version++;
+				runTogether(marks, pool, now);
+				return pool;
+			}
+		} else if (BloodParticles.Puddle.drag(shape)) {
+			// a trail laid back over itself darkens and widens the piece already there rather than stacking another
+			Mark under = trailAt(marks, at, scale, shape, color, by, now);
+			if (under != null) {
+				under.scale = Math.max(under.scale, Math.min(DRAG_MAX_SCALE, under.scale + DRAG_GROW * scale));
+				under.laid = now;
+				under.expires = now + LIFE;
+				under.version++;
+				return under;
 			}
 		}
+		List<Mark> chunk = marks.byChunk.computeIfAbsent(ChunkPos.pack(BlockPos.containing(at)), c -> new ArrayList<>());
 		Mark mark = new Mark(marks.nextId++, at.x, at.y, at.z, color, by, scale, now, delay, shape);
 		chunk.add(mark);
 		marks.order.addLast(mark);
@@ -264,21 +292,20 @@ public final class BloodTrail {
 		Vec3 at = hit.getLocation();
 		long now = level.getGameTime();
 		Marks marks = LEVELS.computeIfAbsent(level, l -> new Marks());
-		List<Mark> chunk = marks.byChunk.computeIfAbsent(ChunkPos.pack(BlockPos.containing(at)), c -> new ArrayList<>());
-		for (Mark mark : chunk) {
-			if (mark.shape == BloodParticles.Puddle.ROUND && mark.expires > now && Math.abs(mark.x - at.x) < MERGE && Math.abs(mark.z - at.z) < MERGE
-				&& Math.abs(mark.y - at.y) < MERGE_UP && java.util.Objects.equals(mark.by, by)) {
-				float in = Math.min(amount, MAX_SCALE - mark.scale);
-				if (in <= 0.0F) {
-					return 0.0F;
-				}
-				mark.scale += in;
-				mark.laid = now;
-				mark.expires = now + LIFE;
-				mark.version++;
-				return in;
+		Mark pool = poolAt(marks, at, amount, color, by, now);
+		if (pool != null) {
+			float in = Math.min(amount, MAX_SCALE - pool.scale);
+			if (in <= 0.0F) {
+				return 0.0F;
 			}
+			pool.scale += in;
+			pool.laid = now;
+			pool.expires = now + LIFE;
+			pool.version++;
+			runTogether(marks, pool, now);
+			return in;
 		}
+		List<Mark> chunk = marks.byChunk.computeIfAbsent(ChunkPos.pack(BlockPos.containing(at)), c -> new ArrayList<>());
 		Mark mark = new Mark(marks.nextId++, at.x, at.y, at.z, color, by, Math.min(amount, MAX_SCALE), now, 0, BloodParticles.Puddle.ROUND);
 		chunk.add(mark);
 		marks.order.addLast(mark);
@@ -286,6 +313,98 @@ public final class BloodTrail {
 			forget(marks, marks.order.pollFirst());
 		}
 		return mark.scale;
+	}
+
+	/**
+	 * A piece of {@code body}'s drag trail (tracked like any stain if it's alive), {@code width} blocks across, lying
+	 * east-west ({@code alongX}) or north-south on the ground under (x, from, z): as wide as the body, a smear and not a
+	 * line. One laid over a piece already lying there the same way soaks into it ({@link #DRAG_OVERLAP}).
+	 */
+	public static @Nullable Mark drag(ServerLevel level, Entity body, int color, double x, double from, double z, boolean alongX, float width) {
+		UUID by = body instanceof LivingEntity living && living.isAlive() ? body.getUUID() : null;
+		float scale = width / (BloodParticles.Puddle.BLOCKS_PER_SCALE * BloodParticles.Puddle.DRAG_WIDE);
+		return lay(level, by, color, x, from, z, scale, 0, alongX ? BloodParticles.Puddle.DRAG_X : BloodParticles.Puddle.DRAG_Z);
+	}
+
+	/** A round splash of {@code body}'s blood this big under (x, from, z): pools into one of its own lying there. */
+	public static @Nullable Mark blot(ServerLevel level, Entity body, int color, double x, double from, double z, float scale) {
+		UUID by = body instanceof LivingEntity living && living.isAlive() ? body.getUUID() : null;
+		return lay(level, by, color, x, from, z, scale, 0, BloodParticles.Puddle.ROUND);
+	}
+
+	/** Whether blood bled by {@code by} may pool into a stain bled by {@code markBy}: its own, or anyone's for a dead body's. */
+	private static boolean pools(@Nullable UUID markBy, @Nullable UUID by) {
+		return by == null || by.equals(markBy);
+	}
+
+	/** The marks in the chunks around {@code at} (its own and the eight next to it), for {@code each} to look through. */
+	private static void around(Marks marks, double x, double z, java.util.function.Consumer<Mark> each) {
+		int cx = Mth.floor(x) >> 4, cz = Mth.floor(z) >> 4;
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				List<Mark> chunk = marks.byChunk.get(ChunkPos.pack(cx + dx, cz + dz));
+				if (chunk != null) {
+					chunk.forEach(each);
+				}
+			}
+		}
+	}
+
+	/** The nearest round pool of this blood that blood this big landing at {@code at} reaches ({@link #MERGE}, {@link #TOUCH}), or null. */
+	private static @Nullable Mark poolAt(Marks marks, Vec3 at, float scale, int color, @Nullable UUID by, long now) {
+		Mark[] best = {null};
+		double[] bestD = {Double.MAX_VALUE};
+		around(marks, at.x, at.z, mark -> {
+			if (mark.shape != BloodParticles.Puddle.ROUND || mark.expires <= now || mark.scale <= 0.0F || mark.color != color
+				|| Math.abs(mark.y - at.y) >= MERGE_UP || !pools(mark.by, by)) {
+				return;
+			}
+			double d = Math.hypot(mark.x - at.x, mark.z - at.z);
+			if (d < Math.max(MERGE, TOUCH * RADIUS * (mark.scale + scale)) && d < bestD[0]) {
+				best[0] = mark;
+				bestD[0] = d;
+			}
+		});
+		return best[0];
+	}
+
+	/** The drag-trail piece of this blood lying the same way ({@code shape}) close enough under {@code at} to take a new one, or null. */
+	private static @Nullable Mark trailAt(Marks marks, Vec3 at, float scale, int shape, int color, @Nullable UUID by, long now) {
+		Mark[] found = {null};
+		double reach = DRAG_OVERLAP * scale * BloodParticles.Puddle.BLOCKS_PER_SCALE;
+		around(marks, at.x, at.z, mark -> {
+			if (found[0] == null && mark.shape == shape && mark.expires > now && mark.color == color && Math.abs(mark.y - at.y) < MERGE_UP
+				&& pools(mark.by, by) && Math.hypot(mark.x - at.x, mark.z - at.z) < reach) {
+				found[0] = mark;
+			}
+		});
+		return found[0];
+	}
+
+	/**
+	 * {@code pool} has grown: every other round pool of its blood its edge now reaches runs into it (each gone in a moment,
+	 * as one drawn dry), so long as the two together, by area, fit under {@link #MAX_SCALE}.
+	 */
+	private static void runTogether(Marks marks, Mark pool, long now) {
+		List<Mark> touching = new ArrayList<>();
+		around(marks, pool.x, pool.z, mark -> {
+			if (mark != pool && mark.shape == BloodParticles.Puddle.ROUND && mark.expires > now && mark.scale > 0.0F && mark.color == pool.color
+				&& Math.abs(mark.y - pool.y) < MERGE_UP && pools(pool.by, mark.by)
+				&& Math.hypot(mark.x - pool.x, mark.z - pool.z) < TOUCH * RADIUS * (mark.scale + pool.scale)) {
+				touching.add(mark);
+			}
+		});
+		for (Mark mark : touching) {
+			float both = (float) Math.sqrt(pool.scale * pool.scale + mark.scale * mark.scale);
+			if (both > MAX_SCALE) {
+				continue;
+			}
+			pool.scale = both;
+			pool.version++;
+			mark.scale = 0.0F;
+			mark.expires = Math.min(mark.expires, now + DRAWN_GONE);
+			mark.version++;
+		}
 	}
 
 	private static void forget(Marks marks, Mark mark) {

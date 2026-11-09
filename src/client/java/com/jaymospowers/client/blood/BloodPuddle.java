@@ -67,6 +67,20 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	static final int WATER = 0x8EA4B6;
 	static final int WET_FADE = 400;
 	static final float WET_MAX_SCALE = 1.6F;
+	/**
+	 * A pool grown big lies thicker: from this scale up to that one it goes from {@link #ALPHA} to this opacity and its
+	 * colour to this share of itself (magma keeps its glow).
+	 */
+	static final float THICK_FROM = 0.6F, THICK_FULL = 1.8F, THICK_ALPHA = 0.88F, THICK_DARK = 0.72F;
+	/** A piece of a drag trail is this opaque: the pieces overlap, so the smear darkens where they pile up. */
+	static final float DRAG_ALPHA = 0.55F;
+	/**
+	 * Splash pools (not the server's stains): another drop landing on one adds this share of its own size (by area) to it,
+	 * to at most this scale; a grown pool eases out by this share of its size a tick.
+	 */
+	static final float POOL_GROW = 1.0F, POOL_MAX_SCALE = 1.8F, POOL_EASE = 0.15F;
+	/** A pool soaked into a bigger one it touched shrinks away over this many ticks. */
+	static final int POOLED_FADE = 20;
 
 	private float baseSize;
 	/** (0.19.62) The size it's easing to (blood magic drawing it down), and how long its last fade takes once drawn dry (ticks; 0: the usual). */
@@ -82,7 +96,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	private final float r, g, b;
 	private final float zFight;
 	private final TextureAtlasSprite sprite;
-	private float alpha = ALPHA;
+	/** Round (not a smear, drag piece or footprint), and a piece of a drag trail. */
+	private final boolean round, drag;
+	/** The game time it was made. */
+	private final long born;
 	/** (0.20.41) A footprint: its turn (radians, as yaw) and whether it's a right foot (its sole mirrored); its colour as it is. */
 	private final boolean print;
 	private final float printYaw;
@@ -125,14 +142,23 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.baseSize = SIZE * scale;
 		this.targetSize = this.baseSize;
 		boolean round = shape == BloodParticles.Puddle.ROUND;
+		this.round = round && !this.print;
+		this.born = level.getGameTime();
+		this.drag = BloodParticles.Puddle.drag(shape);
 		// (0.19.55) a smear is only ever turned end for end, so its sprite stays drawn out along its length
 		this.yaw = (round ? this.random.nextInt(4) : this.random.nextInt(2) * 2) * Mth.HALF_PI;
-		this.stretchX = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_X ? SMEAR_LONG : SMEAR_NARROW;
-		this.stretchZ = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_Z ? SMEAR_LONG : SMEAR_NARROW;
+		if (this.drag) {
+			// a drag-trail piece: as wide as the body that left it, a little longer the way it was dragged
+			boolean alongX = shape == BloodParticles.Puddle.DRAG_X;
+			this.stretchX = alongX ? BloodParticles.Puddle.DRAG_LONG : BloodParticles.Puddle.DRAG_WIDE;
+			this.stretchZ = alongX ? BloodParticles.Puddle.DRAG_WIDE : BloodParticles.Puddle.DRAG_LONG;
+		} else {
+			this.stretchX = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_X ? SMEAR_LONG : SMEAR_NARROW;
+			this.stretchZ = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_Z ? SMEAR_LONG : SMEAR_NARROW;
+		}
 		this.stain = !wet && life > 0;
 		if (wet) {
 			this.lifetime = life + WET_FADE;
-			this.alpha = WET_ALPHA;
 		} else if (this.stain) {
 			this.age = age;
 			this.lifetime = age + life;
@@ -220,6 +246,9 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		}
 		if (this.baseSize > this.targetSize) {
 			this.baseSize = Math.max(this.targetSize, this.baseSize - Math.max(DRAWN_EASE * this.baseSize, 0.01F));
+		} else if (this.baseSize < this.targetSize) {
+			// pooled into: it spreads out to its new size
+			this.baseSize = Math.min(this.targetSize, this.baseSize + Math.max(POOL_EASE * this.baseSize, 0.01F));
 		}
 	}
 
@@ -230,6 +259,46 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		}
 		this.lifetime = Math.max(this.lifetime, this.age + life + WET_FADE);
 		this.baseSize = Math.min(SIZE * WET_MAX_SCALE, this.baseSize + SIZE * grow);
+		// (kept: it no longer eases back down to the size it was laid at)
+		this.targetSize = Math.max(this.targetSize, this.baseSize);
+	}
+
+	/** Whether a splash of {@code color} landing on it may pool into it: a passing pool of that blood, round and not yet fading away. */
+	boolean poolable(int color) {
+		// (one the particle engine never took never ticks: past a few ticks unticked it's no pool to grow)
+		boolean lying = this.age > 0 || this.level.getGameTime() - this.born < 5L;
+		return lying && !this.wet && !this.stain && this.round && this.color == color && this.isAlive() && this.quickFade == 0
+			&& this.targetSize > 0.0F && this.lifetime - this.age > FADE;
+	}
+
+	/** The size it's growing to (blocks across). */
+	float grownSize() {
+		return this.targetSize;
+	}
+
+	/**
+	 * More blood landed on this pool, a splash {@code size} blocks across: it spreads out by that much more area (to at most
+	 * {@link #POOL_MAX_SCALE}), lies thicker and darker for it ({@link #THICK_FROM}), and lies fresh again. Returns whether
+	 * full, it stays as big but still lies fresh.
+	 */
+	void pool(float size) {
+		float grown = (float) Math.sqrt(this.targetSize * this.targetSize + POOL_GROW * size * size);
+		this.targetSize = Math.max(this.targetSize, Math.min(SIZE * POOL_MAX_SCALE, grown));
+		this.lifetime = Math.max(this.lifetime, this.age + LIFE);
+	}
+
+	/** Whether {@code other} (a pool it now touches) fits into it; if so it takes it, and {@code other} shrinks away. */
+	boolean absorb(BloodPuddle other) {
+		float both = (float) Math.sqrt(this.targetSize * this.targetSize + other.targetSize * other.targetSize);
+		if (both > SIZE * POOL_MAX_SCALE) {
+			return false;
+		}
+		this.targetSize = both;
+		this.lifetime = Math.max(this.lifetime, this.age + LIFE);
+		other.targetSize = 0.0F;
+		other.lifetime = Math.min(other.lifetime, other.age + POOLED_FADE);
+		other.quickFade = POOLED_FADE;
+		return true;
 	}
 
 	/** (0.19.63) Where it lies. */
@@ -264,7 +333,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	public boolean visible(net.minecraft.client.renderer.culling.Frustum frustum) {
 		// culled by the quad's own bounds, not just its centre point: a big puddle near the screen edge
 		// stays drawn until the whole quad is out of view instead of popping out
-		float r = this.baseSize * 0.6F;
+		float r = this.baseSize * Math.max(this.stretchX, this.stretchZ) * 0.6F;
 		return frustum.isVisible(new net.minecraft.world.phys.AABB(this.x - r, this.y - 0.1F, this.z - r,
 				this.x + r, this.y + 0.1F, this.z + r));
 	}
@@ -279,16 +348,18 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		}
 		int fade = this.quickFade > 0 ? this.quickFade : this.wet ? WET_FADE : this.stain ? BloodTrail.FADE : FADE;
 		int fadeFrom = this.lifetime - fade;
+		// a big pool lies thicker: more opaque and darker
+		float thick = this.round && !this.wet ? Mth.clamp((this.baseSize / SIZE - THICK_FROM) / (THICK_FULL - THICK_FROM), 0.0F, 1.0F) : 0.0F;
+		float alpha = this.wet ? WET_ALPHA : this.drag ? DRAG_ALPHA : Mth.lerp(thick, ALPHA, THICK_ALPHA);
 		if (age > fadeFrom) {
 			size *= Mth.smoothstep(1.0F - Math.max(age - fadeFrom - 60.0F, 0.0F) / fade);
-			float start = this.wet ? WET_ALPHA : ALPHA;
-			this.alpha = 1.0F - Mth.clamp((age - fadeFrom) / fade, 1.0F - start, 1.0F);
+			// (worked out each frame, so a pool that grows again after it began to fade is whole again)
+			alpha = Math.min(alpha, 1.0F - Mth.clamp((age - fadeFrom) / fade, 0.0F, 1.0F));
 		}
 		double cx = Mth.lerp(partialTick, this.xo, this.x);
 		double cy = Mth.lerp(partialTick, this.yo, this.y);
 		double cz = Mth.lerp(partialTick, this.zo, this.z);
 		// (0.21.x) at the edge of view distance fade out over the last blocks instead of popping at it
-		float alpha = this.alpha;
 		if (alpha > 0.0F) {
 			float drawDistance = Minecraft.getInstance().options.renderDistance().get() * 16.0F;
 			Vec3 at = new Vec3(cx, cy, cz);
@@ -307,6 +378,11 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		}
 		this.drawAlpha = alpha;
 		this.shown = shade(this.color, age, this.stain);
+		if (thick > 0.0F && !this.magma) {
+			float dark = Mth.lerp(thick, 1.0F, THICK_DARK);
+			this.shown = ARGB.color(0, Math.round(red(this.shown) * dark * 255.0F), Math.round(green(this.shown) * dark * 255.0F),
+				Math.round(blue(this.shown) * dark * 255.0F)) & 0xFFFFFF;
+		}
 		if (this.print) {
 			this.printQuad(decals, camera, cx, cy, cz, size, light);
 			return;
