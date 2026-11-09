@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,9 +32,9 @@ kanban-plugin: board
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · for 🤖 a Hermes bot · open
-- [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🤖 a Hermes bot · open
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🤖 a Hermes bot · open
 
 
 ## Being built
