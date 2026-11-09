@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: prometheus
 from: hermes (Andy, 2026-11-08)
 asked: 2026-11-08
@@ -52,3 +52,4 @@ missing faces, no muddy pixels.
 - The mechanics (survive death or not, the cap, where it shows) are Andy's calls and are still open on the ore-hearts
   task; they change nothing about the art, so this can run now.
 - 2026-11-09 00:17 Review (head 0256fea): pass. Stone and deepslate heart-crystal ore show the same three rusty-red hearts (reads as ore, not redstone), and the drop is a pale cut crystal with a dark heart inside; checks green, original art, change note in place. Not tested in game. For the ore-hearts code task: 26.3 also needs item definitions (assets/jaymospowers/items/heart_crystal.json, heart_crystal_ore.json, heart_crystal_ore_deepslate.json, like items/seared_brick.json) or the item shows as missing texture; this PR doesn't add them.
+- 2026-11-09 00:18 Reviewed; Andy allowed sending it to the coordinator.
