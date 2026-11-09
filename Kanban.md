@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:49). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,6 +26,7 @@ kanban-plugin: board
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for hermes · open
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · hermes-a · open
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for quill · open
 
 
 ## Being built
