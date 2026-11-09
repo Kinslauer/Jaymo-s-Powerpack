@@ -411,9 +411,10 @@ public final class Equestrian {
 		speed *= terrain(horse, e);
 		// a speed effect (or slowness) still tells
 		double base = horse.getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
-		if (base > 0.0) {
-			speed *= horse.getAttributeValue(Attributes.MOVEMENT_SPEED) / base;
-		}
+		double effects = base > 0.0 ? horse.getAttributeValue(Attributes.MOVEMENT_SPEED) / base : 1.0;
+		speed *= effects;
+		// a Rider's first horse is held to a little over a fast run till it masters racing (Riders#starterCap)
+		speed *= Riders.starterCap(horse, Bonding.topSpeed(horse, e) * SPRINT_SPEED * effects);
 		return (float)speed;
 	}
 

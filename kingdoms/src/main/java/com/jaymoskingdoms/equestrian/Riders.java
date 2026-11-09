@@ -1,6 +1,12 @@
 package com.jaymoskingdoms.equestrian;
 
 import com.jaymoskingdoms.Classes;
+import com.jaymoskingdoms.JaymosKingdoms;
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.network.codec.ByteBufCodecs;
 import com.jaymoskingdoms.Classes.PlayerClass;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +47,8 @@ import org.jspecify.annotations.Nullable;
  * and it starts out trusting them more ({@link #TAME_TRUST}); trust grows faster too ({@code ClassPerks.RIDER_TRUST}).</li>
  * <li><b>Bareback:</b> a Rider rides and steers any tamed horse, camel or llama without a saddle ({@link #bareback}).
  * Everyone else still needs one.</li>
- * <li><b>A horse of their own:</b> a new Rider gets a saddled horse that already trusts them ({@link #starter}).</li>
+ * <li><b>A horse of their own:</b> a new Rider gets a saddled horse that already trusts them ({@link #starter}), only a
+ * little faster than a fast run till it masters racing ({@link #starterCap}).</li>
  * <li><b>Lance charge:</b> a lance or spear from the saddle hits harder the faster the mount is going ({@link #lance}),
  * and their horse's gallop charge fills quicker and runs things down harder ({@link #CHARGE_FILL}, {@link #RUN_DOWN}).</li>
  * <li><b>Running mount:</b> jump at a sprint beside your own horse and you vault into the saddle ({@link #vault}); the
@@ -69,6 +76,16 @@ public final class Riders {
 	public static final double WHISTLE_RANGE = 256.0, WHISTLE_SPEED = 2.6;
 	/** What deliveries and the courier's job pay a Rider, as a share of what they'd pay. */
 	public static final double COURIER_PAY = 1.5;
+	/**
+	 * A Rider's first horse is no prize: flat out it's only a little faster than a fast run (Powers' FastRun: a sprint,
+	 * then 30% more), till it masters racing (level 5), when it opens up some. Andy: "riders are still incentivized to
+	 * gather more horses". The fast run's speed (movement speed: walk 0.1, sprint x1.3, fast run x1.3), the starter's
+	 * top as a share of it, and at racing mastery.
+	 */
+	public static final double FAST_RUN = 0.1 * 1.3 * 1.3, STARTER_EDGE = 1.1, STARTER_MASTERED = 1.35;
+	/** Marks a Rider's first horse (saved, and synced: its rider's client works out its speed). */
+	public static final AttachmentType<Boolean> STARTER = AttachmentRegistry.create(JaymosKingdoms.id("starter_horse"),
+		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** The scoreboard tag on a player who's had their first horse (so a reborn Rider doesn't get another). */
 	static final String STARTER_TAG = "jaymoskingdoms.rider_horse";
 
@@ -79,6 +96,7 @@ public final class Riders {
 	}
 
 	public static void register() {
+		JaymosKingdoms.LOGGER.debug("riders attachment: {}", STARTER);
 		ServerTickEvents.END_LEVEL_TICK.register(Riders::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> VAULTED.clear());
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
@@ -120,6 +138,20 @@ public final class Riders {
 		return is(player) ? TAME_TRUST : Bonding.TAME_TRUST;
 	}
 
+	/**
+	 * (From {@link Equestrian#riddenSpeed}) what share of its speed a horse keeps: a starter horse whose flat-out speed
+	 * ({@code flatOut}, galloping and sprinting) is over its cap is slowed to it at every gait; any other horse, all of it.
+	 */
+	public static double starterCap(AbstractHorse horse, double flatOut) {
+		if (!Boolean.TRUE.equals(horse.getAttached(STARTER)) || flatOut <= 0.0) {
+			return 1.0;
+		}
+		Bond b = horse.getAttached(Bonding.BOND);
+		boolean mastered = b != null && b.level(Discipline.RACING) >= Discipline.LEVELS.length;
+		double cap = FAST_RUN * (mastered ? STARTER_MASTERED : STARTER_EDGE);
+		return Math.min(1.0, cap / flatOut);
+	}
+
 	/** (From {@code Classes#set}) a new Rider's first horse, saddled and at their side (once per player). */
 	public static void starter(ServerPlayer player) {
 		if (player.entityTags().contains(STARTER_TAG)) {
@@ -141,6 +173,7 @@ public final class Riders {
 		Bond b = Bonding.bond(horse);
 		horse.setAttached(Bonding.BOND, b.withTrust(player.getUUID(), Math.max(STARTER_TRUST, b.trustOf(player.getUUID()))));
 		horse.setPersistenceRequired();
+		horse.setAttached(STARTER, true);
 		level.playSound(null, horse.blockPosition(), SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rider.starter", Component.translatable(breed.key())));
 	}
