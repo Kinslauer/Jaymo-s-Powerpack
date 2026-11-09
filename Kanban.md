@@ -31,13 +31,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · 🤖 Apollo · claimed
-- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🤖 Prometheus · claimed
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · changes · fixing review notes
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
 ## Text pass
 
+- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🤖 Prometheus · #1188 · in-review
 
 
 ## In review
