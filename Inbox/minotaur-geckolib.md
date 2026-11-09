@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "lets do the minotaur because its an actual blockbench model")
-claimed_by: 
+claimed_by: hermes-modeller
 pr: 
 suggested_owns:
   - kingdoms/art/minotaur.bbmodel (+ minotaur-CREDITS.md, minotaur-LICENSE.txt beside it)
