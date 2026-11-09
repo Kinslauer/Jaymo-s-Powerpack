@@ -9,14 +9,18 @@ versions:
 started: 2026-11-09
 owns:
   - tools/blockbench/android_mech/*.bbmodel
+  - art/android_mech.bbmodel
   - art/android_mech_*.bbmodel
-  - art/android_mech_*.png
-  - art/android_mech_*-CREDITS.md
-  - art/android_mech_*-LICENSE.txt
+  - art/android_mech*.png
+  - art/android_mech-CREDITS.md
+  - art/android_mech-LICENSE.txt
   - tools/gen_android_mech_gecko.py
+  - build.gradle (GeckoLib compile dependency only)
+  - src/main/resources/fabric.mod.json (GeckoLib dependency only)
   - src/main/resources/assets/jaymospowers/geckolib/** (android mech files)
   - src/main/resources/assets/jaymospowers/textures/entity/bb/CREDITS.txt
   - src/main/java/com/jaymospowers/power/chrono/future/FutureMech.java
+  - src/main/java/com/jaymospowers/power/chrono/future/FutureGuns.java (built-in cannon shot result only)
   - src/client/java/com/jaymospowers/client/power/chrono/AndroidMechModel.java
   - src/client/java/com/jaymospowers/client/power/chrono/FutureMechRenderer.java
   - changes/powers/android-mech-geckolib.md
