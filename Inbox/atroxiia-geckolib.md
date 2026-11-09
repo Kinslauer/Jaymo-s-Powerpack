@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "I want tasks set for all the models with no animations, the omen, redstone and sculk, and all the dragins need models and animations.")
 claimed_by: hermes-modeller
-pr: 
+pr: 1198
 suggested_owns:
   - kingdoms/art/atroxiia.bbmodel (+ the script that writes it)
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/**/atroxiia.*
