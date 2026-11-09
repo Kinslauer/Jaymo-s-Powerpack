@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: journal-refresh
 branch: claude/journal-refresh
 with:
-pr:
+pr: 1192
 mods: kingdoms
 versions:
 started: 2026-11-08
@@ -29,4 +29,4 @@ owns:
 - JournalClient and Journal gameplay/data code stay unchanged.
 
 ## Done
-Work in progress; not tested in game.
+PR #1192 refreshes the traveller's journal with original illustrated tabs, a larger responsive panel, hover/selection states and content wells while preserving all journal data and actions. The editable Blockbench source, generator, texture and inspected four-view render are included. Kingdoms clean build, root build and PR checks pass; not tested in game.
