@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:05). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,7 +19,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
-- [ ] [[Agents/kitchen-cookware-melt|kitchen-cookware-melt]] · running
 
 
 ## Text pass
@@ -32,6 +31,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Agents/kitchen-cookware-melt|kitchen-cookware-melt]] · #1163 · in-review
 - [ ] [[Agents/thrown-ragdoll-perch|thrown-ragdoll-perch]] · #1162 · in-review
 
 
