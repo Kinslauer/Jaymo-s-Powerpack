@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:26). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:27). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,8 +29,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
