@@ -25,3 +25,4 @@ Tiv, in the Tasks thread: "the sidebar needs to move out of the way in the skill
 - Whatever the answer, the web must stay fully usable: you can see and reach perks behind where the panel used to be.
 - Don't change what the panel shows — only where it sits and whether it can get out of the way.
 - Ducking away still has to be found again: whatever the gesture, getting the Attributes and Jobs back on screen should be obvious without a tooltip.
+- 2026-11-09 11:31 Text pass: reviewed gui-skills.json — two new keys 'gui.jaymoskingdoms.skills.panel.expand' ("Expand panel") and 'gui.jaymoskingdoms.skills.panel.collapse' ("Collapse panel") are clear, concise, and follow UI conventions. No rewrites needed.
