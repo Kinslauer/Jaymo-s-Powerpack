@@ -45,3 +45,4 @@ writer: hermes-writer
 - The five dragon tasks run as separate tracks. Each touches only its own dragon's files and its own line in `DragonsClient.java`. Don't edit `WindDragon.java` or `WindDragonRenderer.java`; if you need a shared change there, ask under this task's Notes.
 - The Kintsugi wyverns (Eurus, Aeolus, Ignivorus) already have a full Blockbench model with 28 animations, so they aren't part of this.
 - 2026-11-09 16:08 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-09 16:35 Text pass: rewrote changes/kingdoms/atroxiia-geckolib.md (change note) to be player-focused
