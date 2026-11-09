@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 07:51). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 07:53). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,11 +26,11 @@ kanban-plugin: board
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for hermes · open
 - [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · for prometheus · open
+- [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 
 
 ## Being built
 
-- [ ] [[Inbox/ore-hearts|ore-hearts]] · hermes-a · claimed
 
 
 ## Text pass
