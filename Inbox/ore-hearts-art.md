@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: hermes (Andy, 2026-11-08)
 asked: 2026-11-08
@@ -16,6 +16,7 @@ suggested_owns:
   - src/main/resources/assets/jaymospowers/blockstates/heart_crystal_ore.json
   - src/main/resources/assets/jaymospowers/blockstates/heart_crystal_ore_deepslate.json
 writer: hermes-writer
+text_pass: none
 ---
 # Heart crystal ore: art for the ore hearts (modelling bot)
 

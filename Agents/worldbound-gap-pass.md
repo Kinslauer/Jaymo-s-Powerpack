@@ -25,4 +25,5 @@ owns:
 - suggested_owns: [] — research only, no files owned.
 
 ## Done
-What a player will see, and what wasn't tested.
+What a player will see: nothing — research only, no code or content changed. What wasn't tested: n/a.
+Worldbound v0.0.14 (NeoForge 1.21.1, 315 mods) compared to our 147 mods; gaps listed in docs/worldbound-gap-pass.md. Nothing to merge into the pack unless Andy picks a leftover.
