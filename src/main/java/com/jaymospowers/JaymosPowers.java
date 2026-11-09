@@ -67,8 +67,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.ArmourWear.init();
 		com.jaymospowers.core.Dismember.init();
 		com.jaymospowers.core.wounds.Wounds.init();
-				com.jaymospowers.core.mobs.BlightMobs.init();
-				com.jaymospowers.core.Oddities.init();
+		com.jaymospowers.core.mobs.BlightMobs.init();
+		com.jaymospowers.core.Oddities.init();
 		com.jaymospowers.core.OffhandLanterns.init();
 		com.jaymospowers.core.Shakes.register();
 		com.jaymospowers.core.GroundCracks.register();

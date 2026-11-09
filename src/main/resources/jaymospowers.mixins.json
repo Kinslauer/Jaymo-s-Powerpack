@@ -13,9 +13,10 @@
 		"StackedHeightMixin",
 		"DroppedArmsDeathMixin",
 		"YoungLivingMixin",
-				"YoungSpawnMixin",
-				"BlightSpawnMixin",
-				"AttackTellBrainMixin",
+		"YoungSpawnMixin",
+		"BlightSpawnMixin",
+		"MobPersistenceAccess",
+		"AttackTellBrainMixin",
 		"AttackTellGoalMixin",
 		"CrowdWaitMixin",
 		"BackpackExplosionMixin",
@@ -25,6 +26,7 @@
 		"CarryLivingEntityMixin",
 		"CarryPacketListenerMixin",
 		"CarryPlayerMixin",
+		"PerchRidingMixin",
 		"RockSnowballMixin",
 		"CostumeNameMixin",
 		"CostumeTabListMixin",
@@ -63,7 +65,8 @@
 		"WoundsHurtMixin",
 		"WoundsPlayerHurtMixin",
 		"WoundsRegenMixin",
-		"StructureStateLockMixin"
+		"StructureStateLockMixin",
+		"BaublesQuickEquipMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

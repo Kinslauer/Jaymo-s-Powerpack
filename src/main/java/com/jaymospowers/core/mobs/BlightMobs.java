@@ -1,6 +1,7 @@
 package com.jaymospowers.core.mobs;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.mixin.MobPersistenceAccess;
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -10,6 +11,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -40,8 +42,6 @@ import java.util.WeakHashMap;
 public final class BlightMobs {
 	/** Mobs that can become blighted; defaults to all monsters but can be restricted via data pack. */
 	public static final TagKey<EntityType<?>> CAN_BE_BLIGHTED = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("can_be_blighted"));
-	/** Blighted mobs get this tag for easy targeting. */
-	public static final TagKey<EntityType<?>> IS_BLIGHTED = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("is_blighted"));
 
 	/** Base chance for a natural spawn to be blighted (per difficulty point). */
 	private static final float BASE_CHANCE_PER_DIFFICULTY = 0.008F; // ~0.8% at difficulty 1, ~3% at max
@@ -55,10 +55,8 @@ public final class BlightMobs {
 	private static final float DAMAGE_PER_TIER = 0.4F; // +40% per tier
 	/** Speed multiplier per tier. */
 	private static final float SPEED_PER_TIER = 0.15F; // +15% per tier
-	/** Blight name prefixes by tier. */
-	private static final String[] PREFIXES = {"Blighted", "Corrupted", "Plagueborn"};
-	/** Blight name suffixes. */
-	private static final String[] SUFFIXES = {"the Tainted", "the Risen", "the Hollow", "the Festering"};
+	/** How many name suffixes the blight names draw from (the words live in lang/parts/blight.json). */
+	private static final int SUFFIXES = 4;
 
 	/** Persistent attachment: holds the blight tier (0 = not blighted, 1-3 = tier). */
 	public static final AttachmentType<Integer> BLIGHT = AttachmentRegistry.create(JaymosPowers.id("blight"),
@@ -120,10 +118,6 @@ public final class BlightMobs {
 		if (difficultyValue > 3.0F && random.nextFloat() < 0.15F) tier = 3;
 
 		makeBlighted(mob, tier, random);
-		accessor.getLevel().getServer().getPlayerList().broadcastSystemMessage(
-			net.minecraft.network.chat.Component.literal("A " + getBlightName(mob, tier) + " has awakened..."),
-			false
-		);
 	}
 
 	/** Makes {@code mob} a blighted elite of the given {@code tier} (1-3). */
@@ -131,6 +125,9 @@ public final class BlightMobs {
 		tier = Mth.clamp(tier, 1, MAX_TIER);
 		mob.setAttached(BLIGHT, tier);
 		applyAttributes(mob);
+		// Only a fresh blight heals: ENTITY_LOAD re-applies the modifiers, and healing there would mend elites every
+		// time their chunk reloads.
+		mob.setHealth(mob.getMaxHealth());
 		setCustomName(mob, tier, random);
 		LOADED.add(mob);
 	}
@@ -145,9 +142,6 @@ public final class BlightMobs {
 		modify(mob, Attributes.MOVEMENT_SPEED, SPEED_ID, SPEED_PER_TIER * tier);
 		modify(mob, Attributes.ARMOR, ARMOR_ID, tier * 1.5); // +1.5 armor per tier
 		modify(mob, Attributes.FOLLOW_RANGE, FOLLOW_RANGE_ID, tier * 8.0); // +8 blocks follow range per tier
-
-		// Heal to new max health
-		mob.setHealth(mob.getMaxHealth());
 	}
 
 	private static void modify(Mob mob, Holder<Attribute> attribute, Identifier id, double amount) {
@@ -159,16 +153,12 @@ public final class BlightMobs {
 
 	/** Sets a custom name showing the blight tier. */
 	private static void setCustomName(Mob mob, int tier, RandomSource random) {
-		String prefix = PREFIXES[tier - 1];
-		String suffix = SUFFIXES[random.nextInt(SUFFIXES.length)];
-		String baseName = mob.getType().getDescription().getString();
-		mob.setCustomName(net.minecraft.network.chat.Component.literal(prefix + " " + baseName + " " + suffix));
+		Component prefix = Component.translatable("blight.jaymospowers.prefix." + tier);
+		Component suffix = Component.translatable("blight.jaymospowers.suffix." + (random.nextInt(SUFFIXES) + 1));
+		mob.setCustomName(Component.translatable("blight.jaymospowers.name", prefix, mob.getType().getDescription(), suffix));
 		mob.setCustomNameVisible(true);
-	}
-
-	/** Gets the display name for a blighted mob. */
-	public static String getBlightName(Mob mob, int tier) {
-		return PREFIXES[tier - 1] + " " + mob.getType().getDescription().getString();
+		// Vanilla keeps named mobs alive forever; a blighted elite should still time out with its chunk.
+		((MobPersistenceAccess) mob).jaymospowers$setPersistenceRequired(false);
 	}
 
 	/** Checks if an entity is blighted. */

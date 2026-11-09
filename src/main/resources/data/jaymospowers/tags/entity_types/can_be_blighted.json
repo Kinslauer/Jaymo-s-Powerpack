@@ -4,7 +4,8 @@
 		"jaymospowers:sky_warden",
 		"jaymospowers:zephyr",
 		"jaymospowers:tempest",
-		"jaymospowers:swet",
+		"jaymospowers:blue_swet",
+		"jaymospowers:golden_swet",
 		"jaymospowers:skephid",
 		"jaymospowers:gravitite_taluton",
 		"jaymospowers:cockatrice",
@@ -34,7 +35,6 @@
 		"minecraft:ravager",
 		"minecraft:zoglin",
 		"minecraft:piglin_brute",
-		"minecraft:warden",
 		"#minecraft:skeletons",
 		"#minecraft:zombies",
 		"#minecraft:raiders"
