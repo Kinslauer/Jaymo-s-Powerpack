@@ -42,9 +42,10 @@ A bull-headed brute, heavy through the shoulders, horns, the same build as the t
 ## Still to settle in the build
 
 - What the carried enemy is doing while carried — held on the horns, or ridden along in front — and whether they can be dropped early.
-- Whether the damage ramp counts creatures as well as blocks, and whether it resets per charge.
+- The damage ramp counts **blocks only** — creatures hit on the way don't add to it. (Whether it resets per charge still wants a number.)
+- The roar **ragdolls and knocks back** whoever it catches; the hold only decides how far and how hard that reaches.
 - "Runs them through" wants the torso: `Breaks` already has body parts, so a torso wound or break is the honest result, not just a number.
 - How the carried enemy's blows land while they're pinned: normal damage through the invulnerability, or their own reduced number.
-- What the roar does to whoever is caught by it (damage, knockback, deafening, fear) and how the growth is measured.
+- How the roar's growth is measured — reach, force, or both — and what it costs to hold that long.
 - How long invulnerability lasts (whole charge, or a moment past its end).
 
