@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 17:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 17:50). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -56,12 +56,12 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · #1198 · ready
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/atroxiia-geckolib|atroxiia-geckolib]]
 - [x] [[Inbox/Done/skilltree-sidebar-reflow|skilltree-sidebar-reflow]]
 - [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
 - [x] [[Inbox/Done/astronomy-telescope|astronomy-telescope]]
@@ -69,7 +69,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/aetherion-geckolib|aetherion-geckolib]]
 - [x] [[Inbox/Done/android-mech-geckolib|android-mech-geckolib]]
 - [x] [[Inbox/Done/journal-refresh|journal-refresh]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 
 
 %% kanban:settings
