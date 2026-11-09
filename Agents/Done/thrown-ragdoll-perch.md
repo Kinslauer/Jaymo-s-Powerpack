@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 task: thrown-ragdoll-perch
 branch: claude/thrown-ragdoll-perch
 with: 
@@ -29,3 +29,6 @@ owns:
 - Kitchen corpse toss on the same weight curve
 
 - 2026-11-08 20:15 Review (Claude): pass; posted to Parthenon > PR Merges by YOUTH. Waiting on Andy.
+
+## Notes
+- 2026-11-08 20:19 PR #1162 is merged into master; moved to Agents/Done.
