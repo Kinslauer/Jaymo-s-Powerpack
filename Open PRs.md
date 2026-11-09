@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-09 00:06
+updated: 2026-11-09 00:15
 ---
 # Open PRs
 
-3 open, as of 2026-11-09 00:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-09 00:15. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1165](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1165) Kitchen: dirty water gives a slow parasite instead of nausea
