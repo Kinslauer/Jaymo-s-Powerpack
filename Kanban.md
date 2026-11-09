@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 00:18). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 00:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -42,12 +42,12 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · ready
+- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
 
 
 ## Done
