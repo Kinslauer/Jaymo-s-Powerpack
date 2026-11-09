@@ -8,7 +8,7 @@
   "java_block_version": "26.3",
   "ambientocclusion": true,
   "front_gui_light": false,
-  "credit": "Original art for Jaymo's Kingdoms; no external assets used.",
+  "credit": "Original art for Jaymo's Kingdoms; no external assets used. Articulated base/azimuth/elevation rig for GeckoLib.",
   "resolution": {
     "width": 64,
     "height": 64
@@ -20,20 +20,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.6,
-        -0.82,
-        7.6
+        -0.40000000000000036,
+        0.0,
+        -0.40000000000000036
       ],
       "to": [
-        8.4,
-        9.1,
-        8.4
+        0.40000000000000036,
+        9.92,
+        0.40000000000000036
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         0,
@@ -105,20 +105,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.35,
-        8.2,
-        7.35
+        -0.6500000000000004,
+        9.02,
+        -0.6500000000000004
       ],
       "to": [
-        8.65,
-        10,
-        8.65
+        0.6500000000000004,
+        10.82,
+        0.6500000000000004
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         0,
@@ -190,20 +190,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.35,
-        -0.82,
-        7.35
+        -0.6500000000000004,
+        0.0,
+        -0.6500000000000004
       ],
       "to": [
-        8.65,
-        0.2,
-        8.65
+        0.6500000000000004,
+        1.02,
+        0.6500000000000004
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         0,
@@ -275,20 +275,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.6,
-        -0.82,
-        7.6
+        -0.40000000000000036,
+        0.0,
+        -0.40000000000000036
       ],
       "to": [
-        8.4,
-        9.1,
-        8.4
+        0.40000000000000036,
+        9.92,
+        0.40000000000000036
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         0,
@@ -360,20 +360,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.35,
-        8.2,
-        7.35
+        -0.6500000000000004,
+        9.02,
+        -0.6500000000000004
       ],
       "to": [
-        8.65,
-        10,
-        8.65
+        0.6500000000000004,
+        10.82,
+        0.6500000000000004
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         0,
@@ -445,20 +445,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.35,
-        -0.82,
-        7.35
+        -0.6500000000000004,
+        0.0,
+        -0.6500000000000004
       ],
       "to": [
-        8.65,
-        0.2,
-        8.65
+        0.6500000000000004,
+        1.02,
+        0.6500000000000004
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         0,
@@ -530,20 +530,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.6,
-        -0.82,
-        7.6
+        -0.40000000000000036,
+        0.0,
+        -0.40000000000000036
       ],
       "to": [
-        8.4,
-        9.1,
-        8.4
+        0.40000000000000036,
+        9.92,
+        0.40000000000000036
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -615,20 +615,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.35,
-        8.2,
-        7.35
+        -0.6500000000000004,
+        9.02,
+        -0.6500000000000004
       ],
       "to": [
-        8.65,
-        10,
-        8.65
+        0.6500000000000004,
+        10.82,
+        0.6500000000000004
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -700,20 +700,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.35,
-        -0.82,
-        7.35
+        -0.6500000000000004,
+        0.0,
+        -0.6500000000000004
       ],
       "to": [
-        8.65,
-        0.2,
-        8.65
+        0.6500000000000004,
+        1.02,
+        0.6500000000000004
       ],
       "autouv": 0,
       "origin": [
-        8,
-        10,
-        8
+        0,
+        10.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -785,20 +785,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.5,
-        9.3,
-        6.5
+        -1.5,
+        10.120000000000001,
+        -1.5
       ],
       "to": [
-        9.5,
-        11,
-        9.5
+        1.5,
+        11.82,
+        1.5
       ],
       "autouv": 0,
       "origin": [
-        0,
-        0,
-        0
+        -8,
+        0.82,
+        -8
       ],
       "rotation": [
         0,
@@ -870,20 +870,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.2,
-        9.7,
-        6.2
+        -1.7999999999999998,
+        10.52,
+        -1.7999999999999998
       ],
       "to": [
-        9.8,
-        10.5,
-        9.8
+        1.8000000000000007,
+        11.32,
+        1.8000000000000007
       ],
       "autouv": 0,
       "origin": [
-        0,
-        0,
-        0
+        -8,
+        0.82,
+        -8
       ],
       "rotation": [
         0,
@@ -955,20 +955,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        5.4,
-        10.5,
-        7.4
+        -2.5999999999999996,
+        11.32,
+        -0.5999999999999996
       ],
       "to": [
-        6.2,
-        13.2,
-        8.6
+        -1.7999999999999998,
+        14.02,
+        0.5999999999999996
       ],
       "autouv": 0,
       "origin": [
-        0,
-        0,
-        0
+        -8,
+        0.82,
+        -8
       ],
       "rotation": [
         0,
@@ -1040,20 +1040,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        9.8,
-        10.5,
-        7.4
+        1.8000000000000007,
+        11.32,
+        -0.5999999999999996
       ],
       "to": [
-        10.6,
-        13.2,
-        8.6
+        2.5999999999999996,
+        14.02,
+        0.5999999999999996
       ],
       "autouv": 0,
       "origin": [
-        0,
-        0,
-        0
+        -8,
+        0.82,
+        -8
       ],
       "rotation": [
         0,
@@ -1125,20 +1125,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        5,
-        12.4,
-        7.5
+        -3,
+        13.22,
+        -0.5
       ],
       "to": [
-        11,
-        13.4,
-        8.5
+        3,
+        14.22,
+        0.5
       ],
       "autouv": 0,
       "origin": [
-        0,
-        0,
-        0
+        -8,
+        0.82,
+        -8
       ],
       "rotation": [
         0,
@@ -1210,20 +1210,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        10.65,
-        10.2,
-        5.8
+        2.6500000000000004,
+        11.02,
+        -2.2
       ],
       "to": [
-        10.85,
-        13.4,
-        10.2
+        2.8499999999999996,
+        14.22,
+        2.1999999999999993
       ],
       "autouv": 0,
       "origin": [
-        0,
-        0,
-        0
+        -8,
+        0.82,
+        -8
       ],
       "rotation": [
         0,
@@ -1295,20 +1295,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.4,
-        10.8,
-        0
+        -1.5999999999999996,
+        11.620000000000001,
+        -8
       ],
       "to": [
-        9.6,
-        15.2,
-        15
+        1.5999999999999996,
+        16.02,
+        7
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -1380,20 +1380,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        5.5,
-        11.7,
-        0
+        -2.5,
+        12.52,
+        -8
       ],
       "to": [
-        6.4,
-        14.3,
-        15
+        -1.5999999999999996,
+        15.120000000000001,
+        7
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -1465,20 +1465,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        9.6,
-        11.7,
-        0
+        1.5999999999999996,
+        12.52,
+        -8
       ],
       "to": [
-        10.5,
-        14.3,
-        15
+        2.5,
+        15.120000000000001,
+        7
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -1550,20 +1550,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.220000000000001,
-        10.620000000000001,
-        1
+        -1.7799999999999994,
+        11.440000000000001,
+        -7
       ],
       "to": [
-        9.78,
-        15.379999999999999,
-        1.8
+        1.7799999999999994,
+        16.2,
+        -6.2
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -1635,20 +1635,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        5.32,
-        11.52,
-        1
+        -2.6799999999999997,
+        12.34,
+        -7
       ],
       "to": [
-        6.220000000000001,
-        14.48,
-        1.8
+        -1.7799999999999994,
+        15.3,
+        -6.2
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -1720,20 +1720,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        9.78,
-        11.52,
-        1
+        1.7799999999999994,
+        12.34,
+        -7
       ],
       "to": [
-        10.68,
-        14.48,
-        1.8
+        2.6799999999999997,
+        15.3,
+        -6.2
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -1805,20 +1805,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.220000000000001,
-        10.620000000000001,
-        5
+        -1.7799999999999994,
+        11.440000000000001,
+        -3
       ],
       "to": [
-        9.78,
-        15.379999999999999,
-        5.8
+        1.7799999999999994,
+        16.2,
+        -2.2
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -1890,20 +1890,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        5.32,
-        11.52,
-        5
+        -2.6799999999999997,
+        12.34,
+        -3
       ],
       "to": [
-        6.220000000000001,
-        14.48,
-        5.8
+        -1.7799999999999994,
+        15.3,
+        -2.2
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -1975,20 +1975,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        9.78,
-        11.52,
-        5
+        1.7799999999999994,
+        12.34,
+        -3
       ],
       "to": [
-        10.68,
-        14.48,
-        5.8
+        2.6799999999999997,
+        15.3,
+        -2.2
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2060,20 +2060,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.220000000000001,
-        10.620000000000001,
-        10.5
+        -1.7799999999999994,
+        11.440000000000001,
+        2.5
       ],
       "to": [
-        9.78,
-        15.379999999999999,
-        11.3
+        1.7799999999999994,
+        16.2,
+        3.3000000000000007
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2145,20 +2145,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        5.32,
-        11.52,
-        10.5
+        -2.6799999999999997,
+        12.34,
+        2.5
       ],
       "to": [
-        6.220000000000001,
-        14.48,
-        11.3
+        -1.7799999999999994,
+        15.3,
+        3.3000000000000007
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2230,20 +2230,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        9.78,
-        11.52,
-        10.5
+        1.7799999999999994,
+        12.34,
+        2.5
       ],
       "to": [
-        10.68,
-        14.48,
-        11.3
+        2.6799999999999997,
+        15.3,
+        3.3000000000000007
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2315,20 +2315,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.220000000000001,
-        10.620000000000001,
-        14
+        -1.7799999999999994,
+        11.440000000000001,
+        6
       ],
       "to": [
-        9.78,
-        15.379999999999999,
-        14.8
+        1.7799999999999994,
+        16.2,
+        6.800000000000001
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2400,20 +2400,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        5.32,
-        11.52,
-        14
+        -2.6799999999999997,
+        12.34,
+        6
       ],
       "to": [
-        6.220000000000001,
-        14.48,
-        14.8
+        -1.7799999999999994,
+        15.3,
+        6.800000000000001
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2485,20 +2485,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        9.78,
-        11.52,
-        14
+        1.7799999999999994,
+        12.34,
+        6
       ],
       "to": [
-        10.68,
-        14.48,
-        14.8
+        2.6799999999999997,
+        15.3,
+        6.800000000000001
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2570,20 +2570,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.1000000000000005,
-        10.5,
-        -0.7
+        -1.8999999999999995,
+        11.32,
+        -8.7
       ],
       "to": [
-        9.9,
-        15.5,
-        0.2
+        1.9000000000000004,
+        16.32,
+        -7.8
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2655,20 +2655,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        5.2,
-        11.399999999999999,
-        -0.7
+        -2.8,
+        12.219999999999999,
+        -8.7
       ],
       "to": [
-        6.1000000000000005,
-        14.600000000000001,
-        0.2
+        -1.8999999999999995,
+        15.420000000000002,
+        -7.8
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2740,20 +2740,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        9.9,
-        11.399999999999999,
-        -0.7
+        1.9000000000000004,
+        12.219999999999999,
+        -8.7
       ],
       "to": [
-        10.8,
-        14.600000000000001,
-        0.2
+        2.8000000000000007,
+        15.420000000000002,
+        -7.8
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2825,20 +2825,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        6.4,
-        11,
-        -0.78
+        -1.5999999999999996,
+        11.82,
+        -8.78
       ],
       "to": [
-        9.6,
-        15,
-        -0.7
+        1.5999999999999996,
+        15.82,
+        -8.7
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2910,20 +2910,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7,
-        11.8,
-        15
+        -1,
+        12.620000000000001,
+        7
       ],
       "to": [
-        9,
-        14.2,
-        16.8
+        1,
+        15.02,
+        8.8
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -2995,20 +2995,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        7.2,
-        12,
-        16.8
+        -0.7999999999999998,
+        12.82,
+        8.8
       ],
       "to": [
-        8.8,
-        14,
-        16.86
+        0.8000000000000007,
+        14.82,
+        8.86
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -3080,20 +3080,20 @@
       "rescale": false,
       "locked": false,
       "from": [
-        10.45,
-        12.4,
-        11.6
+        2.4499999999999993,
+        13.22,
+        3.5999999999999996
       ],
       "to": [
-        11.45,
-        13.6,
-        12.8
+        3.4499999999999993,
+        14.42,
+        4.800000000000001
       ],
       "autouv": 0,
       "origin": [
-        8,
-        13,
-        8
+        0,
+        13.82,
+        0
       ],
       "rotation": [
         22.5,
@@ -3162,14 +3162,14 @@
   ],
   "outliner": [
     {
-      "name": "tripod",
+      "name": "base",
       "origin": [
-        8,
-        10,
-        8
+        0,
+        0,
+        0
       ],
       "color": 0,
-      "uuid": "b6d7a407-4572-55bb-8ab1-ce8cbfcc0969",
+      "uuid": "d0b156d2-63d9-559f-8780-c116294dadde",
       "export": true,
       "mirrorUV": false,
       "isOpen": true,
@@ -3187,87 +3187,69 @@
         "3c78fe6a-4485-589e-912d-68649c5d266c",
         "d5c6399b-7938-54a5-a177-57b00a048429",
         "d2257f8c-7a25-5b74-a687-c5f0e90b0dc0",
-        "0f8b975c-90ca-56d6-8b1a-e0268088b978"
-      ]
-    },
-    {
-      "name": "mount",
-      "origin": [
-        8,
-        10,
-        8
-      ],
-      "color": 0,
-      "uuid": "567569fd-8963-5fef-b02b-e1559161f23a",
-      "export": true,
-      "mirrorUV": false,
-      "isOpen": true,
-      "locked": false,
-      "visibility": true,
-      "autouv": 0,
-      "children": [
-        "484d7698-59df-5b7a-96ec-af0ef4819d97",
-        "585a3dcf-eb46-5694-a7d4-ce423fa60d19",
-        "6ed01cda-ca9b-5e71-abc4-f4742f0befce",
-        "5152741e-bcb1-5a5f-944e-42d9073f9761"
-      ]
-    },
-    {
-      "name": "barrel",
-      "origin": [
-        8,
-        10,
-        8
-      ],
-      "color": 0,
-      "uuid": "5aafda75-8d8c-5138-b727-5ca924e514aa",
-      "export": true,
-      "mirrorUV": false,
-      "isOpen": true,
-      "locked": false,
-      "visibility": true,
-      "autouv": 0,
-      "children": [
-        "5d008050-760a-531e-b235-aa6c562bb623",
-        "cfc930b7-51d1-5b5a-aa4f-50fb572c19a6",
-        "97e6b719-ff66-5e68-a60b-d46a68a88855",
-        "664e2444-b046-5b84-8e55-2a962f4c6e69",
-        "8a750147-2001-5bab-97dc-ecc22ae38344",
-        "61430f21-8562-5c35-8ecc-76c69ed86201",
-        "5a1d529e-4b86-58fd-9271-ff098170964f",
-        "0054ec15-6ba9-54a2-81d0-86462f8e1d0c",
-        "f99047ac-1319-58c9-8979-eafd75086895",
-        "3852c046-a714-5eb0-81bf-4f7e4ce71d13",
-        "81b2e5e3-51db-561b-9869-eca6356267c9",
-        "fac2bdd2-ef17-51e9-8b3e-a7b0a93744a5",
-        "4001f7bf-e50e-5841-94ab-af6c63ce010d",
-        "cce2c902-281e-51e4-b8e3-8561b0aac4ca",
-        "e5caa0c2-728a-5f20-be72-607257238c56"
-      ]
-    },
-    {
-      "name": "optics",
-      "origin": [
-        8,
-        10,
-        8
-      ],
-      "color": 0,
-      "uuid": "f8ea750c-a0ee-5c8f-b774-6289b95dd234",
-      "export": true,
-      "mirrorUV": false,
-      "isOpen": true,
-      "locked": false,
-      "visibility": true,
-      "autouv": 0,
-      "children": [
-        "44dd0a8d-52f8-56aa-baed-027f5ddd1029",
-        "0e7cf970-13ed-5adc-859b-cdcb6f1437d4",
-        "cceb2b22-ff49-5b7d-a0c6-8d2faebb1d07",
-        "677032c4-431b-5ec1-ae9c-a2dfc183588f",
-        "de17963c-ac04-51d6-a23d-0086a78bf9c2",
-        "d60ce965-6d26-52ef-a6d5-62e8a2cea1d9",
-        "4ac8bf0f-8aa0-59a5-ab9e-c6f7aa96583d"
+        "0f8b975c-90ca-56d6-8b1a-e0268088b978",
+        {
+          "name": "azimuth",
+          "origin": [
+            0,
+            11.32,
+            0
+          ],
+          "color": 0,
+          "uuid": "44b59f02-9411-5518-8eeb-259575440846",
+          "export": true,
+          "mirrorUV": false,
+          "isOpen": true,
+          "locked": false,
+          "visibility": true,
+          "autouv": 0,
+          "children": [
+            "484d7698-59df-5b7a-96ec-af0ef4819d97",
+            "585a3dcf-eb46-5694-a7d4-ce423fa60d19",
+            "6ed01cda-ca9b-5e71-abc4-f4742f0befce",
+            "5152741e-bcb1-5a5f-944e-42d9073f9761",
+            {
+              "name": "elevation",
+              "origin": [
+                0,
+                13.82,
+                0
+              ],
+              "color": 0,
+              "uuid": "0f07066c-8969-5f4b-b762-c6f40319d6ab",
+              "export": true,
+              "mirrorUV": false,
+              "isOpen": true,
+              "locked": false,
+              "visibility": true,
+              "autouv": 0,
+              "children": [
+                "5d008050-760a-531e-b235-aa6c562bb623",
+                "cfc930b7-51d1-5b5a-aa4f-50fb572c19a6",
+                "97e6b719-ff66-5e68-a60b-d46a68a88855",
+                "664e2444-b046-5b84-8e55-2a962f4c6e69",
+                "8a750147-2001-5bab-97dc-ecc22ae38344",
+                "61430f21-8562-5c35-8ecc-76c69ed86201",
+                "5a1d529e-4b86-58fd-9271-ff098170964f",
+                "0054ec15-6ba9-54a2-81d0-86462f8e1d0c",
+                "f99047ac-1319-58c9-8979-eafd75086895",
+                "3852c046-a714-5eb0-81bf-4f7e4ce71d13",
+                "81b2e5e3-51db-561b-9869-eca6356267c9",
+                "fac2bdd2-ef17-51e9-8b3e-a7b0a93744a5",
+                "4001f7bf-e50e-5841-94ab-af6c63ce010d",
+                "cce2c902-281e-51e4-b8e3-8561b0aac4ca",
+                "e5caa0c2-728a-5f20-be72-607257238c56",
+                "44dd0a8d-52f8-56aa-baed-027f5ddd1029",
+                "0e7cf970-13ed-5adc-859b-cdcb6f1437d4",
+                "cceb2b22-ff49-5b7d-a0c6-8d2faebb1d07",
+                "677032c4-431b-5ec1-ae9c-a2dfc183588f",
+                "de17963c-ac04-51d6-a23d-0086a78bf9c2",
+                "d60ce965-6d26-52ef-a6d5-62e8a2cea1d9",
+                "4ac8bf0f-8aa0-59a5-ab9e-c6f7aa96583d"
+              ]
+            }
+          ]
+        }
       ]
     }
   ],
@@ -3280,6 +3262,216 @@
       "uv_width": 64,
       "uv_height": 64,
       "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFOElEQVR4nO1bvWsUQRSfW0YRYggSFfyIInhKSEQUo20KkWAjWNikCYJFIIWVX3+ABm2uOLAQgs0VWgS0EAuLlIkniiQhoCLkQwQ1yJGkSaO8Td757mVmZ3Z292aP+Cvc3dmZ3fn93pv33uzFQs+xg3/ENoaEfy6fORpezCwsb+nQe6Qz1RfSdywsr4bHu4OHhQ88qCxtCICTUpFViWIjjm4cHYMC+IQ0EXEhaRrH8ebtb+FVAI6eEweECbOfvluRjHrWqw/z4fHi+T11l6w87BczH7+IrEDfUf28tiEAnySQM8FGJNtn9Z4+Hh4rm0e8zgIN76hsxgCbSXK4jNEhS4ubEIhtDkkvFmvrWzp0dexM9YWqd3gPgoubk1KRVU3YRhzdODpmevOIQbDZqGIQjCLiQtI0Lk+QSQa3CsnM6gAb2NQBPiHzUAf4hMxDHeATgcgRoEzNsgpUvUPSm83eDnPAtjjrqpC/Q9JJ/d8Ok/yOKQ5FoW20X6220tDW0dEetlExdWN1gMqQF0dZtCnToG6yuraujk6rNtVYrAR9kIe2KlaCruTTasOgVHpSFTdv9DXcy7StsiQK8FEUvgnSiWGOf12dFwN9G98LEdhG02AUUVov8Oc9ejZZD0zNtPyWb4KLtfWGiQE5JKAiCm02IuGz+FgOH+QRBfQAH0th+uuGGH3FNuEDVR4Dmh0HdhXbwklQy3gPgqoUlTZ5wM/VX+EEfC8FSSelm6wqZ1NyUURVYgL5fbv3CiHWvMcBSSemI6hro+RsveYf+ZwHwYGIyM4zhYooArIFjp14Py36z56qPy83QbCH5eqo9BdHJPo8IA+Wp8LlJgjOslxNEdVmIxJ3e9qWhyBYyPrncXBvTlTV5guFoUtFr38f4FsIKXKAx/eHnMZV382JvnPdzu8dvvc0vgB8d8UBu61WgoxLfPDWRGQ/+Ok5SyHA6oCx8amGo6s3SRfiK52HlH3bl7/V+6UtBBDnZHVuHUcMaSKPhCjpkTsjW/qWR8sNfagQSUTgFqfkVDGACgDnJhEKuiygIq8izkXgHmESAbKAbpLc6ryfKQiavGFYFwQpeRg4ueNkw/3nL9RxYH93b3j8MTdTFw6XRVxPMJG3AYxBEXTeEJgsT8kDcR15LgSKgd4DzzRlEJ1lXdOkzdhAd4MHOhviHFyEOEDL6QhQ91ZdU1y/ekHbJ1BZn695F/Ic8EwbL7CN9nFAn8dFCETGQC9wAVo/yro60LUfhUC19tO2PkWUF+iiOg1mNsCAZ1MTSN6A7p8mcfACyAyYFUxQTRYJuWYDjAVc4EDkFCqLU6tyIehyUfXTeZAUOQBWe/QcrIWTxiiO56r+9D6vBukzeH8pcgB0Sx4D8Fzn+qZSGEDH8f5j41P5EMAE23UfdyMEyJ0ALiRsxuF9sDq9L3lHiNIQrSFqJ8nhFLg3MGUAdE/q+nGF4H1pDFClWIknsFGBDQutBa5d6U+9DoizKTIRB2uaNkzYxoOfVRosj5ZDEdKwvi3ASrrJcsva/l+jqG1zQC/QC6irggckFQEAz0z6cYQD/sAhKQLdDRQBLOgqQlzrx/UC9IAoTzB9NAl4A3oBFyHOcoD+lLyL9U0iwNpGD4CjbZ1glQZLJCBiVgCACFGbJG5xHOvq+lQEFRFdZI8aY10HlCJEAKAQ/DsgBYx5ebuYaN3TKpFeqxCHuFUhVCLLgX8WVwlBhQLi+Iw0wIVA0GuXX4mkqQMSoEJgbKBC4HXaxDkoyaQ/jcUqhbkQpn6tAhl3QKsRNKGw3X8e/wugKL+1W8bQQQAAAABJRU5ErkJggg=="
+    }
+  ],
+  "animations": [
+    {
+      "name": "idle",
+      "loop": "loop",
+      "length": 1.0,
+      "animators": {
+        "44b59f02-9411-5518-8eeb-259575440846": {
+          "name": "azimuth",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 0,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "0f07066c-8969-5f4b-b762-c6f40319d6ab": {
+          "name": "elevation",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 0,
+              "interpolation": "linear"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "azimuth",
+      "loop": "once",
+      "length": 2.0,
+      "animators": {
+        "44b59f02-9411-5518-8eeb-259575440846": {
+          "name": "azimuth",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 0,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 90,
+                  "z": 0
+                }
+              ],
+              "time": 1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 2,
+              "interpolation": "linear"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "elevation",
+      "loop": "once",
+      "length": 2.0,
+      "animators": {
+        "0f07066c-8969-5f4b-b762-c6f40319d6ab": {
+          "name": "elevation",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 0,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": -22.5,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 2,
+              "interpolation": "linear"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "aim",
+      "loop": "hold",
+      "length": 1.0,
+      "animators": {
+        "44b59f02-9411-5518-8eeb-259575440846": {
+          "name": "azimuth",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 0,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 90,
+                  "z": 0
+                }
+              ],
+              "time": 1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "0f07066c-8969-5f4b-b762-c6f40319d6ab": {
+          "name": "elevation",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 0,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": -22.5,
+                  "y": 0,
+                  "z": 0
+                }
+              ],
+              "time": 1,
+              "interpolation": "linear"
+            }
+          ]
+        }
+      }
     }
   ]
 }
