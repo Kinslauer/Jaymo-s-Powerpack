@@ -45,7 +45,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🤖 Quill · #1193 · writing
 
 
 ## In review
@@ -54,7 +54,7 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · ☀️ Apollo · blocked
+- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · 🤖 Apollo · blocked
 
 
 ## Done
