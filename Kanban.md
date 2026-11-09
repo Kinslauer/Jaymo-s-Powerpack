@@ -25,6 +25,7 @@ kanban-plugin: board
 - [ ] [[Inbox/startup-crash|startup-crash]] · for hermes · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for hermes · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · for hermes · open
+- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · for prometheus · open
 
 
 ## Being built
