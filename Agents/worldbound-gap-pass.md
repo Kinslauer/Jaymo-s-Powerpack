@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: worldbound-gap-pass
 branch: claude/worldbound-gap-pass
 with: 
-pr: 
+pr: 1173
 mods: 
 versions: 
 started: 2026-11-08
