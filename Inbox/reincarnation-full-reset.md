@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -8,7 +8,7 @@ claimed_by: hermes-b
 pr: 1201
 suggested_owns: [src/main/java/com/jaymospowers/core/wounds/Mortality.java, kingdoms/src/main/java/com/jaymoskingdoms/LifeStory.java, kingdoms/src/main/java/com/jaymoskingdoms/McaBridge.java, kingdoms/src/main/java/com/jaymoskingdoms/Captains.java, kingdoms/src/main/java/com/jaymoskingdoms/Parties.java]
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Reincarnating wipes the whole character: stats, skills, relationships
