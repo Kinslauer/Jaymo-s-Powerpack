@@ -1,9 +1,9 @@
 ---
-status: done-unmerged
+status: in-review
 task: 
-branch: ccr-03d9471e-baz6ym
+branch: fire-dragon-geckolib
 with: Prometheus's minotaur-geckolib (Andy compares the two)
-pr: 
+pr: 1177
 mods: kingdoms
 versions: 
 started: 2026-11-09
