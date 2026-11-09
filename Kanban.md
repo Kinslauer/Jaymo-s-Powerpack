@@ -42,13 +42,13 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · #1186 · in-review
-- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · #1185 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · blocked
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · blocked
+- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · #1185 · ready
 
 
 ## Done
