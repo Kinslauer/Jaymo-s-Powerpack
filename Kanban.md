@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 07:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 07:57). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,7 +21,6 @@ kanban-plugin: board
 - [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for hermes · open
 - [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for hermes · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · open
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for hermes · open
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for hermes · open
@@ -31,6 +30,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 
 
 ## Text pass
