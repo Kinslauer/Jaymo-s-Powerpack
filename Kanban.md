@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 14:45). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 14:48). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for 🪽 any Hermes bot · open
@@ -40,6 +39,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · #1193 · changes · fixing review notes
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
