@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:38). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -17,8 +17,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · changes · fixing review notes
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · claimed
+- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes-fixer · #1163 · claimed
 
 
 ## Text pass
