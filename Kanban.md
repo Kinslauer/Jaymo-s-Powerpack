@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 22:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 23:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,9 +28,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · claimed
+- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 
 
 ## Text pass
