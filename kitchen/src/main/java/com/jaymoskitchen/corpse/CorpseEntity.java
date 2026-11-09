@@ -3052,9 +3052,10 @@ public class CorpseEntity extends Entity {
 		boolean oneHand = oneHanded();
 		float[] size = standingSize();
 		letGo(player);
-		double fast = TOSS_SPEED * tossLightness(size[0], size[1]) * (1.0 + TOSS_BRAWN * Math.min(TOSS_BRAWN_MAX, Hauling.brawn(player)));
+		double light = tossLightness(size[0], size[1]);
+		double fast = TOSS_SPEED * light * (1.0 + TOSS_BRAWN * Math.min(TOSS_BRAWN_MAX, Hauling.brawn(player)));
 		Vec3 look = player.getViewVector(1.0F);
-		setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(look.scale(fast)).add(0.0, TOSS_LIFT, 0.0));
+		setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(look.scale(fast)).add(0.0, TOSS_LIFT * Math.sqrt(light), 0.0));
 		fallFromHold(getDeltaMovement(), oneHand);
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F);
@@ -3064,13 +3065,17 @@ public class CorpseEntity extends Entity {
 	/** (0.5.76) A tossed body's speed along the look (b/t) and its lift; brawn's share; a person's bulk (w x w x h). */
 	static final double TOSS_SPEED = 0.5, TOSS_LIFT = 0.14, TOSS_BRAWN = 0.2, PERSON_BULK = 0.6 * 0.6 * 1.8;
 	static final int TOSS_BRAWN_MAX = 5;
-	/** (0.5.76) How much further the smallest body flies than a person's, and how much shorter the biggest. */
-	static final double TOSS_LIGHTEST = 1.8, TOSS_HEAVIEST = 0.5;
+	/**
+	 * How much further the smallest body flies than a person's, how much shorter the biggest, and how steeply that goes
+	 * with its weight (its bulk): the same curve as Jaymo's Powers' live throws ({@code ThrowWeight}), so a person goes a
+	 * few blocks and a cow barely leaves your hands. The lift goes by the square root.
+	 */
+	static final double TOSS_LIGHTEST = 3.2, TOSS_HEAVIEST = 0.3, TOSS_CURVE = 0.3;
 
-	/** (0.5.76) How far a body of this standing size flies against a person's ({@link #TOSS_HEAVIEST} to {@link #TOSS_LIGHTEST}). */
+	/** How far a body of this standing size flies against a person's ({@link #TOSS_HEAVIEST} to {@link #TOSS_LIGHTEST}). */
 	static double tossLightness(double width, double height) {
 		double bulk = Math.max(1.0E-3, width * width * height);
-		return Math.clamp(Math.cbrt(PERSON_BULK / bulk), TOSS_HEAVIEST, TOSS_LIGHTEST);
+		return Math.clamp(Math.pow(PERSON_BULK / bulk, TOSS_CURVE), TOSS_HEAVIEST, TOSS_LIGHTEST);
 	}
 
 	/** (0.5.76) The dead one's standing size {width, height}: its rig's, else its type's, else a person's. */

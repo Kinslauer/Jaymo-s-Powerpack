@@ -1,0 +1,11 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:parrot",
+		"minecraft:cat",
+		{ "id": "naturalist:butterfly", "required": false },
+		{ "id": "cubeanimals:cricket", "required": false },
+		{ "id": "cubeanimals:mouse", "required": false },
+		{ "id": "jaymoskitchen:rat", "required": false }
+	]
+}

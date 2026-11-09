@@ -578,6 +578,30 @@ public final class KitchenCompat {
 	/** (0.17.203) A Z Fighter's hauling brawn. */
 	static final int ZFIGHTER_BRAWN = 2;
 
+	/** Knocks {@code player} limp into Kitchen's ragdoll, flung this fast (b/t); nothing without Kitchen. */
+	public static void knockLimp(net.minecraft.server.level.ServerPlayer player, double vx, double vy, double vz) {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			com.jaymoskitchen.ragdoll.LivingRagdolls.knock(player, vx, vy, vz);
+		} catch (LinkageError e) {
+			// an older Kitchen without living ragdolls: they fly as they are
+		}
+	}
+
+	/** Whether {@code entity} is a player lying limp in Kitchen's ragdoll (drawn by Kitchen, so our own poses keep off). */
+	public static boolean limp(Entity entity) {
+		if (!LOADED || !(entity instanceof Player)) {
+			return false;
+		}
+		try {
+			return com.jaymoskitchen.ragdoll.LivingRagdolls.isLimp(entity);
+		} catch (LinkageError e) {
+			return false;
+		}
+	}
+
 	/**
 	 * (0.18.84) How strong {@code player} is at hauling bodies, by Kitchen's {@code Hauling.brawn} (Strength, size, Might,
 	 * Packhorse, a Z Fighter's): 0 for most, and 0 without Kitchen.
