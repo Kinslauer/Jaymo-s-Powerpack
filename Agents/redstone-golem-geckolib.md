@@ -15,6 +15,7 @@ owns:
   - kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/bb/CREDITS.txt (Redstone Golem lines only)
   - kingdoms/src/main/java/com/jaymoskingdoms/beasts/RedstoneGolem.java (animation controllers and hooks only)
   - kingdoms/src/client/java/com/jaymoskingdoms/client/beasts/BeastsClient.java (Redstone Golem registration and old pose removal only)
+  - kingdoms/src/client/java/com/jaymoskingdoms/client/beasts/RedstoneGolemRenderer.java
   - changes/kingdoms/redstone-golem-geckolib.md
 ---
 # Redstone Golem GeckoLib
