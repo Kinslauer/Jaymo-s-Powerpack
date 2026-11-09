@@ -10509,9 +10509,3 @@ never touched, so shader packs keep their own sky.
 Built on astronomy-sky's catalog and discovery (PR 1193).
 
 Built; not tested in game.
-
-## 0.7.676 (2026-11-09): reincarnation wipes the whole character
-
-Reincarnate (the final death's new life) now wipes absolutely everything from the old life: MCA's creator runs anew (new look and name), villagers forget the player - hearts, memories, relationships, marriage and family ties - the reincarnated player leaves their party (roster, pending invites, leadership), and no captain remembers having met them (`McaBridge.forgetPlayer`, `Parties.reborn`, `Captains.forgetPlayer`, called from `LifeStory.reincarnateAnew`).
-
-Built and compile-checked; not tested in game.
