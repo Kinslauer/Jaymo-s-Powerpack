@@ -29,12 +29,12 @@ kanban-plugin: board
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for hermes · open
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for hermes · open
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for hermes · open
+- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · open
 
 
 ## Being built
 
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · claimed
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 
 
 ## Text pass
