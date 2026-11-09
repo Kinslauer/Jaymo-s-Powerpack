@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:05). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:06). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · for hermes · open
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · for hermes · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · for hermes · open
@@ -19,6 +18,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · claimed
 
 
 ## Text pass
