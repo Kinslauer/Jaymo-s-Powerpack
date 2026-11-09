@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: ore-hearts-art
 branch: claude/ore-hearts-art
 with:
@@ -34,3 +34,4 @@ owns:
 
 ## Done
 PR #1167 adds original matching stone/deepslate heart-crystal ore art, a cut-crystal heart item sprite, model/blockstate JSONs and editable Blockbench projects. Full Powers build and PR checks passed; front/side/back renders inspected. Not tested in game; registration, worldgen, drops and health mechanics stay with ore-hearts.
+- 2026-11-09 01:34 PR #1167 is merged into master; moved to Agents/Done.
