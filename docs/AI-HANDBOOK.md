@@ -321,7 +321,7 @@ These are game-design decisions Andy made. Keep them unless Andy changes them.
 
 **Controls** (defaults)
 - R/G/V/B = abilities 1-4, C = ultimate, Z = mode, H = menu, ' = costume mask. "G+B" means G, then B.
-- Zoom: tap then hold Shift, or Shift+Left Alt (Shift+Alt ends only on Alt release). Roll: Left Alt.
+- Zoom: Shift+Left Alt (Shift+Alt ends only on Alt release). Roll: Left Alt.
 - Ledge grab: Sneak+scroll down climbs 0.7-1.95 high blocks, bellies into 1-high gaps, vaults fences; empty-hand
   right-click grabs a ledge you can see over.
 - Right-click a foe with a weapon = guard; sneak+right-click talks.
