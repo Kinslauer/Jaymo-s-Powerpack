@@ -19,12 +19,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · claimed
-- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · claimed
 
 
 ## Text pass
 
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · in-review
+- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
 
 
 ## In review
