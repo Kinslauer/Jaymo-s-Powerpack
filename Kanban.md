@@ -24,13 +24,13 @@ kanban-plugin: board
 - [ ] [[Inbox/unique-starts|unique-starts]] · for hermes · open
 - [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for hermes · open
 - [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for hermes · open
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · open
 
 
 ## Being built
 
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · claimed
 
 
 ## Text pass
