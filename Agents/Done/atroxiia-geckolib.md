@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: atroxiia-geckolib
 branch: claude/atroxiia-geckolib
 with: 
@@ -39,3 +39,4 @@ owns:
 
 ## Done
 PR #1198: Atroxiia has an editable 61-bone Blockbench model and 19 GeckoLib animations covering every old state/action, with hides, markings, looks, tack, seats and scales unchanged. Kingdoms and root builds and PR checks pass; the dev server reached `Done` and was stopped. Not tested in game: Atroxiia was not spawned or watched.
+- 2026-11-09 17:50 PR #1198 is merged into master; moved to Agents/Done.
