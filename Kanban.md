@@ -24,8 +24,6 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · #1160 · in-review
-- [ ] [[Inbox/blindness|blindness]] · hermes-b · #1159 · in-review
 
 
 ## In review
@@ -40,14 +38,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/blindness|blindness]]
 - [x] [[Inbox/Done/mimic|mimic]]
 - [x] [[Inbox/Done/impaler-model|impaler-model]]
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 - [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
 - [x] [[Inbox/Done/bogre-model|bogre-model]]
 - [x] [[Inbox/Done/kingdoms-geckolib-groundwork|kingdoms-geckolib-groundwork]]
-- [x] [[Inbox/Done/tomb-no-build-rule|tomb-no-build-rule]]
-- [x] [[Inbox/Done/kitchen-spit-roast|kitchen-spit-roast]]
 
 
 %% kanban:settings
