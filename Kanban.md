@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 13:43). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
@@ -40,6 +39,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☀️ Apollo · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
