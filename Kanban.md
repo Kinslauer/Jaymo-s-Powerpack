@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 12:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 12:27). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,7 +40,6 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · #1176 · in-review
-- [ ] [[Agents/fire-dragon-geckolib|fire-dragon-geckolib]] · #1177 · in-review
 
 
 ## Needs Andy
