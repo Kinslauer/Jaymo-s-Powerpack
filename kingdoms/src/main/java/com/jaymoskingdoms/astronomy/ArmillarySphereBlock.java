@@ -50,8 +50,10 @@ public final class ArmillarySphereBlock extends BaseEntityBlock {
     }
 
     public static void register() {
-        Registry.register(BuiltInRegistries.BLOCK, JaymosKingdoms.id("armillary_sphere"),
+        ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("armillary_sphere"));
+        Registry.register(BuiltInRegistries.BLOCK, blockKey,
                 BLOCK = new ArmillarySphereBlock(BlockBehaviour.Properties.of()
+                        .setId(blockKey)
                         .mapColor(MapColor.STONE)
                         .strength(2.0F)
                         .sound(SoundType.METAL)
