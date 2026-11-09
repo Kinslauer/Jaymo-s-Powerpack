@@ -33,13 +33,13 @@ kanban-plugin: board
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · #1193 · changes · fixing review notes
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · 🍇 Bacchus · claimed
-- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
