@@ -25,3 +25,4 @@ Tiv, in the Tasks thread: "shift double tap should no longer zoom."
 - Side effect to tidy up: `Slide` and the freerunner's held-Sneak code treat a short tap as "the zoom's double tap" and leave it alone — that guard is dead once the double tap is gone.
 - `docs/AI-HANDBOOK.md` still describes "tap then hold Shift" as the zoom gesture; fix the doc in the same PR.
 - Ask Tiv if he wants anything to replace the double tap, or the gesture to simply go unbound.
+- 2026-11-09 09:14 Text pass: reviewed change note (changes/powers/sneak-zoom-no-doubletap.md) — only player-visible text in PR; no lang parts, chat lines, tooltips, or hints added. Change note is concise and follows style.
