@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:52). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,7 +31,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · changes · fixing review notes
 
 
 ## Text pass
@@ -50,6 +49,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
 - [x] [[Inbox/Done/blight-mobs|blight-mobs]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
@@ -57,7 +57,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/mimic|mimic]]
 - [x] [[Inbox/Done/kitchen-brick-split|kitchen-brick-split]]
 - [x] [[Inbox/Done/blindness|blindness]]
-- [x] [[Inbox/Done/impaler-model|impaler-model]]
 
 
 %% kanban:settings
