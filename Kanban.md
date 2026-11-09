@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:15). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:18). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,7 +18,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · claimed
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · claimed
 
 
@@ -26,6 +25,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · in-review
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
+- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · in-review
 
 
 ## In review
