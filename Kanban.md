@@ -17,9 +17,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · claimed
 - [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · changes · fixing review notes
+- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
 
 
 ## Text pass
