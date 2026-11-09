@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "lets do the minotaur because its an actual blockbench model")
 claimed_by: hermes-modeller
-pr: 
+pr: 1188
 suggested_owns:
   - kingdoms/art/minotaur.bbmodel (+ minotaur-CREDITS.md, minotaur-LICENSE.txt beside it)
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/models/entity/minotaur.geo.json
