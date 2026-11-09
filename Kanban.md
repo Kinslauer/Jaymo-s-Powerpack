@@ -23,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · for 🔥 Prometheus · open
@@ -41,6 +40,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · ☀️ Apollo · #1190 · changes · fixing review notes
+- [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
