@@ -1,0 +1,14 @@
+# The Bug hunter's sandbox. The repository is mounted by run.py before the session starts (Anthropic's git proxy,
+# not this network), and its agents install and download nothing, so the only hosts are the two its instructions name
+# for fetching code.
+name: bug-hunt
+description: Bug hunter sandbox for Jaymo's Powerpack. No package managers, no MCP; GitHub only, for code.
+config:
+  type: cloud
+  networking:
+    type: limited
+    allow_package_managers: false
+    allow_mcp_servers: false
+    allowed_hosts:
+      - github.com
+      - codeload.github.com
