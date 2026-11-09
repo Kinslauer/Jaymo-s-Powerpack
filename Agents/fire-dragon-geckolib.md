@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: fire-dragon-geckolib
 with: Prometheus's minotaur-geckolib (Andy compares the two)
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 Pushed to ccr-03d9471e-baz6ym (no PR yet: Andy compares it with Prometheus's minotaur first). Notus and Boreas animated by GeckoLib: idle, walk, sit, crash, land, glide, fly (synced to its stroke), new bite and tail sweep; head look, climb pitch and breath jaw in code. Built (kingdoms `gradlew build`), pr_checks pass; not played, no server run. Render: kingdoms/art/fire_dragon-render.png.
+- Merged: #1177 (fire dragon), #1178 (handbook), #1179 (cloud agent). Cloud agent's one-time PC setup still to do (tools/cloud-agent/README.md).
