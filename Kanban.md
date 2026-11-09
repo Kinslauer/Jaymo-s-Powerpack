@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 08:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 08:41). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,7 +20,6 @@ kanban-plugin: board
 - [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for hermes · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for hermes · open
-- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for hermes · open
 - [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · for prometheus · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
@@ -35,6 +34,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · hermes-a · claimed
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · hermes-modeller · claimed
+- [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · claimed
 
 
 ## Text pass
