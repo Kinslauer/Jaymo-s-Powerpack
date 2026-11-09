@@ -4,21 +4,21 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 20:18). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · for hermes · open
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · for hermes · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · for hermes · open
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · for hermes · open
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
 
 
 ## Being built
 
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · claimed
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
+- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · claimed
 
 
 ## Text pass
@@ -36,6 +36,8 @@ kanban-plugin: board
 
 ## Needs Andy
 
+- [ ] [[Agents/rider-class|rider-class]] · #1161 · ready
+- [ ] [[Agents/thrown-ragdoll-perch|thrown-ragdoll-perch]] · #1162 · ready
 
 
 ## Done
@@ -43,12 +45,12 @@ kanban-plugin: board
 **Complete**
 - [x] [[Inbox/Done/impaler-model|impaler-model]]
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
-- [x] [[Inbox/Done/bogre-model|bogre-model]]
 - [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
+- [x] [[Inbox/Done/bogre-model|bogre-model]]
 - [x] [[Inbox/Done/kingdoms-geckolib-groundwork|kingdoms-geckolib-groundwork]]
 - [x] [[Inbox/Done/tomb-no-build-rule|tomb-no-build-rule]]
+- [x] [[Inbox/Done/kitchen-spit-roast|kitchen-spit-roast]]
 - [x] [[Inbox/Done/kitchen-recipes-b|kitchen-recipes-b]]
-- [x] [[Inbox/Done/kitchen-recipes-a|kitchen-recipes-a]]
 
 
 %% kanban:settings
