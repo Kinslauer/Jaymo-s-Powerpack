@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/blight-mobs|blight-mobs]] · for hermes · open
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · for hermes · open
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · for hermes · open
@@ -20,6 +19,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · claimed
 - [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · changes · fixing review notes
+- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · claimed
 
 
 ## Text pass
