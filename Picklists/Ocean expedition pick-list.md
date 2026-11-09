@@ -23,7 +23,7 @@ Tick what you want, add a note under any row, then set `status: picked`.
 
 ## The world
 
-- [ ] **Turn the water up** `S` ^oc-dial
+- [x] **Turn the water up** `S` ^oc-dial
   Move the continent offset in `kingdoms/.../worldgen/density_function/overworld/continents.json` from −0.06 toward something wetter. The linked datapack is −0.5 (no land at all); a middle value gives seas you cross and coasts you still land on.
   For us: one number, but it changes every new world we generate and moves where structures and biomes fall.
   Notes:
