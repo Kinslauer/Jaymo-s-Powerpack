@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
 claimed_by: hermes-b
-pr:
+pr: 1193
 suggested_owns: []
 ---
 
