@@ -1842,3 +1842,9 @@ Each Ultimate has its own model (Ultimate<Name>.java in client/power/xenoform/ul
 - **Relogging** while rising turned: they're woken where they lie as they leave, the turning done, rather than losing the turn and coming back to the black.
 - **Struggle up with a healing item** (Andy: "if you are too damaged to get up, you can struggle with a healing item in hand to get yourself back up"): downed, awake and too hurt to rise, hold use with a healing item (`#jaymospowers:self_revive`: golden apples, linen bandages, the healer's satchel, Draught of Vigour, Bone-Knitting Elixir; and any potion of healing, drunk or splash) for 4 s. The bar fills, the item is used up and you're up with at least 2 hearts (`HealStruggle`). Let go and the bar keeps its place; a blow breaks it off. The downed screen doesn't mention it: it still says only "Hold sneak to give up".
 - Built; not played.
+
+## 0.21.78 (2026-11-09): Heart crystal ore artwork (#1167)
+
+- **Heart crystals**: original stone and deepslate ore artwork with matching clusters of small, deep rusty-red crystal hearts, plus a cut-crystal drop with a heart visible inside.
+- Art and models only; registration, generation, drops and health mechanics belong to the ore-hearts task. Editable Blockbench projects are in `art/heart-crystal/`; no third-party art used.
+- Built and visually rendered; not tested in game.
