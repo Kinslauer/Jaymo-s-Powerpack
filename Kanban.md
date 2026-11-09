@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 16:05). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 16:08). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -45,7 +45,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🪶 Quill · #1198 · writing
+- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · #1198 · in-review
 
 
 ## In review
