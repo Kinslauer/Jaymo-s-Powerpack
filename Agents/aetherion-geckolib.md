@@ -21,6 +21,7 @@ owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/dragons/AetherionDragonModel.java (removed)
   - kingdoms/src/client/java/com/jaymoskingdoms/client/dragons/AetherionDragonRenderer.java
   - kingdoms/src/client/java/com/jaymoskingdoms/client/dragons/DragonsClient.java (Aetherion registration only)
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/bb/CREDITS.txt (Aetherion lines only)
   - changes/kingdoms/aetherion-geckolib.md
 ---
 # Aetherion GeckoLib
