@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -49,3 +49,4 @@ text_pass: done
 - 2026-11-09 16:35 Text pass: rewrote changes/kingdoms/atroxiia-geckolib.md (change note) to be player-focused
 - 2026-11-09 16:35 Text pass: rewrote changes/kingdoms/atroxiia-geckolib.md (change note) to be player-focused
 - 2026-11-09 16:57 Review (head 829b970): pass. Atroxiia now draws from an editable atroxiia.bbmodel through GeckoLib with the same body, hides, markings, headdress, spines, tack, sizes and reach; 19 animations keyed from the old pose equations (breathing with a taunt/sniff/grumble every 16 s like the old 320-tick fidget, walk, run, sit, crash, swim, the eight moves from begin(), flinch, held death), shown side by side with the old poses. Not tested in game. Small follow-ups, not worth another round: kingdoms/tools/gen_atroxiia.py and the AtroxiiaDragon.java:35 javadoc still point at the deleted AtroxiiaDragonModel; the move-name switch is written twice (AtroxiiaAnimations.name and AtroxiiaDragon.begin), so keep one; GeoEntityRenderer may tip the corpse 90 degrees on top of the held death (getDeathMaxRotation); the hurt flinch shares the action controller and can cut off a move.
+- 2026-11-09 16:57 Reviewed; Andy allowed sending it to the coordinator.
