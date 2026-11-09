@@ -1,5 +1,9 @@
 package com.jaymoskingdoms.dragons;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.Heritage;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +35,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.522) Aetherion, the star dragon of the Aether. Andy sent an Aetherion (a public-domain, CC0 GeckoLib dragon) to
- * add, with its wings and head upgraded: our own model ({@code AetherionDragonModel}, {@code tools/gen_aetherion.py}) on
- * its body plan, its numbers and moves after it. It flies over the Aether's islands ({@link Dragons}, Andy: "Aether sky
+ * add, with its wings and head upgraded: our own model ({@code kingdoms/art/aetherion.bbmodel}, written by
+ * {@code kingdoms/tools/gen_aetherion_geo.py}) on its body plan, its numbers and moves after it. It flies over the
+ * Aether's islands ({@link Dragons}, Andy: "Aether sky
  * dragon, plus Nulljaw", who is the Aether's boss) and leaves players be until one hurts it. Then, besides the swoop, the
  * hover and the tail sweep every dragon has:
  * <ul>
@@ -45,7 +50,9 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Glow berries are its favourite; Nightborn win it over twice as fast; ridden, R is the beam.
  */
-public class AetherionDragon extends WindDragon {
+public class AetherionDragon extends WindDragon implements GeoEntity {
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
 	// ---- body ----
 	static final double HEALTH = 420.0, ARMOR = 12.0, TOUGHNESS = 5.0, SPEED = 0.25, BITE = 18.0;
 	/** Wild: a fast, light flier for its size. */
@@ -97,6 +104,17 @@ public class AetherionDragon extends WindDragon {
 	public AetherionDragon(EntityType<? extends AetherionDragon> type, Level level) {
 		super(type, level);
 		this.xpReward = 120;
+	}
+
+	/** Drawn and animated by GeckoLib from our editable Blockbench model ({@link AetherionAnimations}). */
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		AetherionAnimations.register(controllers);
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -196,6 +214,23 @@ public class AetherionDragon extends WindDragon {
 		this.moveStart = this.tickCount;
 		this.moveTarget = target;
 		this.entityData.set(DATA_ACTION, move);
+		if (move == BITE_MOVE) {
+			this.triggerAnim("action", "bite");
+		} else if (move == CATACLYSM_MOVE) {
+			this.triggerAnim("action", "cataclysm");
+		}
+	}
+
+	@Override
+	protected void bitten(LivingEntity target) {
+		if (this.move == NONE) {
+			this.triggerAnim("action", "bite");
+		}
+	}
+
+	@Override
+	protected void swept() {
+		this.triggerAnim("action", "sweep");
 	}
 
 	// ---- the beam ----

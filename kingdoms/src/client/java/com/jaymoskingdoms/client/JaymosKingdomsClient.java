@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
@@ -15,6 +16,7 @@ import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 
@@ -40,7 +42,11 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.sailing.Ship.TYPE, ShipRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.sailing.ShipShot.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.2F, false));
 		ShipClient.init();
-		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
+		BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
+		// the armillary sphere's animated rings and its screen
+		BlockEntityRenderers.register(com.jaymoskingdoms.astronomy.ArmillarySphereBlock.ENTITY, com.jaymoskingdoms.client.astronomy.ArmillaryBlockEntityRenderer::new);
+		ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.astronomy.ArmillaryNet.Open.TYPE,
+				(payload, context) -> context.client().gui.setScreen(new com.jaymoskingdoms.client.astronomy.ArmillaryScreen(payload.pos())));
 		// (batch 4) plot stakes' lines, path and grass slabs, wind chimes, the rope lift
 		BuildingClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
