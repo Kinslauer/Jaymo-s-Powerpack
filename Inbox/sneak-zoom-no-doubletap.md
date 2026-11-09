@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -8,6 +8,7 @@ claimed_by: hermes-a
 pr: 1186
 suggested_owns: [src/client/java/com/jaymospowers/client/SneakZoom.java, docs/AI-HANDBOOK.md]
 writer: hermes-writer
+text_pass: done
 ---
 
 # Double-tapping Sneak no longer zooms
