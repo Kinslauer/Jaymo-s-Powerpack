@@ -41,10 +41,6 @@ kintsugi.png (bbmodels/kintsugi.json), and dragon/eurus/, dragon/aeolus/ and dra
   storm-blue and violet, his markings its seams in electric cyan; Ignivorus (drawn at 0.55) has it in obsidian, basalt
   ash, ember and crimson, its seams glowing as lava cracks (kingdoms/tools/gen_kintsugi_dragons.py).
 
-minotaur.png (bbmodels/minotaur.json): the minotaur
-  "Minotaur" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/minotaur
-  Changes: baked to our loader's format; drawn at 0.85 size; walks with its run (it came without a walk).
-
 piglin_king.png (bbmodels/piglin_king.json): the Piglin King
   "Musclebound Piglin King" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/piglin-king
   Changes: baked to our loader's format; drawn at 0.96 size; its ice-themed moves play as fire attacks.
