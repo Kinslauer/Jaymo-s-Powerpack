@@ -34,5 +34,8 @@ All task changes go through `python tools/vault_sync.py` (it syncs before and af
         and say why in the note: the coordinator takes it to Andy.
       - **Passes:** `python tools/vault_sync.py --note <task> "Review (head abc1234): pass. <one or two sentences:
         what a player will see, what wasn't tested>"`, then `python tools/vault_sync.py --send <task>`. That is the
-        step Andy approves. If he says no, leave the task and note "Andy held it".
+        step Andy approves. If he says no, leave the task and note "Andy held it". `--send` sets `status: ready`,
+        which puts the card in the Kanban's **Needs Andy** lane (a Claude thread's own note in `Agents/` goes there
+        too once its `status:` is `ready`). Then have YOUTH (Hermes's Discord bot) post the PR in Andy's Discord,
+        forum **parthenon**, post **PR Merges**: the link, what a player will see, what wasn't tested, the verdict.
 3. Finish with one line per task you looked at: task, PR, verdict.
