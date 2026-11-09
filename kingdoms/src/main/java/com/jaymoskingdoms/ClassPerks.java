@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Marksman:</b> a heart fewer; light armour gives a point more a piece (the guns are stage 3).</li>
  * <li><b>Sorcerer:</b> nothing passive but their own element's harm halved (0.7.184): their element and blade are stage 2.</li>
  * <li><b>Rider:</b> (the ninth, ours) in the saddle their horse is quicker and tires slower, horses come to trust them
- * sooner, and they strike harder from horseback; on foot a little slower, bow-legged.</li>
+ * much sooner, and they strike harder from horseback (a lance or spear harder the faster they ride); on foot they take
+ * falls lighter from years of being thrown. The rest of what a Rider is lives in {@code equestrian/Riders}.</li>
  * </ul>
  */
 public final class ClassPerks {
@@ -119,13 +120,17 @@ public final class ClassPerks {
 	/** (0.7.184) Marksman's boon, Steady Aim: a shot (gun or crossbow) fired while sneaking hits this share harder again. */
 	public static final double MARKSMAN_STEADY = 0.25;
 	// Rider (was horse +15%, mounted blows +20%, -5% on foot)
-	static final double RIDER_MOUNT_SPEED = 0.25, RIDER_STAMINA = 0.75, RIDER_MOUNTED_DAMAGE = 0.3, RIDER_FOOT_MOVE = -0.03;
+	// Andy: "noone plays it as is": no slower walk on foot any more; a share off fall damage instead
+	static final double RIDER_MOUNT_SPEED = 0.25, RIDER_STAMINA = 0.75, RIDER_MOUNTED_DAMAGE = 0.3, RIDER_FOOT_MOVE = 0.0, RIDER_FALL = -0.2;
 	/** (0.7.184) Rider's boon, Barding: the mount a Rider is steering takes this share of the damage it would. */
 	static final float RIDER_BARDING = 0.7F;
 	/** (0.7.184) Sorcerer's boon, Kindred Element: the harm of their own element (fire burns, ice's freezing, lightning,
 	 * water's drowning, earth's blasts, air's falls) reaches them at this share. */
 	static final float SORCERER_WARD = 0.5F;
-	static final float RIDER_TRUST = 1.5F;
+	/** How much faster a Rider wins a horse's trust. */
+	static final float RIDER_TRUST = 2.5F;
+	/** The scoreboard tag a Rider carries, for Jaymo's Powers (a downed horse is brought round quicker, with no treat). */
+	public static final String RIDER_TAG = "jaymoskingdoms.rider";
 	/** Heavy armour's weight on everyone: this share off movement speed a piece. */
 	static final double HEAVY_ARMOR_SLOW = 0.015;
 
@@ -236,6 +241,8 @@ public final class ClassPerks {
 				lines.add(line("horses", pct(RIDER_MOUNT_SPEED)));
 				lines.add(line("mounted", pct(RIDER_MOUNTED_DAMAGE)));
 				lines.add(line("barding", pct(RIDER_BARDING - 1.0)));
+				lines.add(line("lance", pct(com.jaymoskingdoms.equestrian.Riders.LANCE_CHARGE)));
+				lines.add(line("fall", pct(RIDER_FALL)));
 			}
 		}
 		return lines;
@@ -349,7 +356,10 @@ public final class ClassPerks {
 				}
 				case SORCERER -> {
 				}
-				case RIDER -> move = RIDER_FOOT_MOVE;
+				case RIDER -> {
+					move = RIDER_FOOT_MOVE;
+					fall = RIDER_FALL;
+				}
 			}
 		}
 		float before = player.getMaxHealth();
@@ -431,6 +441,13 @@ public final class ClassPerks {
 
 	static void tick(ServerPlayer player) {
 		PlayerClass cls = Classes.classOf(player);
+		if ((cls == PlayerClass.RIDER) != player.entityTags().contains(RIDER_TAG)) {
+			if (cls == PlayerClass.RIDER) {
+				player.addTag(RIDER_TAG);
+			} else {
+				player.removeTag(RIDER_TAG);
+			}
+		}
 		if (cls == PlayerClass.ARCHER) {
 			drawing(player, drawingBow(player));
 		} else if (cls == PlayerClass.RIDER) {
@@ -496,6 +513,7 @@ public final class ClassPerks {
 		}
 		ItemStack held = HiddenBlade.weapon(sp);
 		switch (cls) {
+			case RIDER -> amount = com.jaymoskingdoms.equestrian.Riders.lance(sp, target, held, amount);
 			case THIEF -> {
 				if (held.is(LIGHT_BLADES) && behind(target, sp)) {
 					amount *= THIEF_BACKSTAB;

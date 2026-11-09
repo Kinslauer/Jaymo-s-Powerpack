@@ -922,6 +922,32 @@ public final class Stables {
 		return 1;
 	}
 
+	/** Enters {@code player} in race {@code course} from this stable: on their own horse, for the fee ({@link Races}). */
+	private static int race(ServerPlayer player, int course) {
+		Worker w = near(player, Folk.STABLEHAND);
+		Faction f = w == null ? null : served(player, w);
+		if (f == null || course < 0 || course >= Races.DISTANCE.length) {
+			return 0;
+		}
+		if (Races.racing(player)) {
+			tell(player, Component.translatable("message.jaymoskingdoms.race.already").withStyle(ChatFormatting.GRAY));
+			return 0;
+		}
+		if (Races.mount(player) == null) {
+			tell(player, Component.translatable("message.jaymoskingdoms.race.mount").withStyle(ChatFormatting.GRAY));
+			return 0;
+		}
+		if (!pay(player, f, Races.FEE)) {
+			return 0;
+		}
+		if (!Races.start(player, w.mob().position(), course)) {
+			giveSilver(player, Races.FEE);
+			tell(player, Component.translatable("message.jaymoskingdoms.race.no_course").withStyle(ChatFormatting.GRAY));
+			return 0;
+		}
+		return 1;
+	}
+
 	// ---- commands ---------------------------------------------------------------------------------------------------
 
 	/** {@code /kingdom stable [board | collect <horse> | market | buy <n> | sell <horse>]}: what the clickable offers run. */
@@ -1028,10 +1054,21 @@ public final class Stables {
 			market.add(new StableNet.Row(icon(e.breed()), Optional.of(e), name, stats(e), List.of(
 				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.buy", coins(player, offers.get(i).price())), StableNet.BUY, i, true))));
 		}
+		// races (Races): on your own horse, one at a time
+		List<StableNet.Row> races = new ArrayList<>();
+		boolean ready = Races.mount(player) != null && !Races.racing(player);
+		for (int i = 0; i < Races.DISTANCE.length; i++) {
+			int[] prize = Races.PRIZE[i];
+			races.add(new StableNet.Row(new ItemStack(i == 0 ? Items.GOLDEN_CARROT : Items.GOLDEN_HORSE_ARMOR), Optional.empty(),
+				Component.translatable("gui.jaymoskingdoms.stable.race." + i, Races.DISTANCE[i]),
+				Component.translatable("gui.jaymoskingdoms.stable.race.prizes", coins(player, prize[0]), coins(player, prize[1]), coins(player, prize[2])),
+				List.of(new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.race.enter", coins(player, Races.FEE)), StableNet.RACE, i, ready))));
+		}
 		return List.of(
 			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.yours"), Component.translatable("gui.jaymoskingdoms.stable.yours_none"), yours),
 			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.kept"), Component.translatable("gui.jaymoskingdoms.stable.kept_none"), kept),
-			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.market"), Component.translatable("message.jaymoskingdoms.stable.sold_out"), market));
+			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.market"), Component.translatable("message.jaymoskingdoms.stable.sold_out"), market),
+			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.races"), Component.empty(), races));
 	}
 
 	private static List<StableNet.Section> farrierScreen(ServerPlayer player, Faction f) {
@@ -1108,6 +1145,7 @@ public final class Stables {
 				case StableNet.SELL -> sell(player, act.arg());
 				case StableNet.SHOE -> shoe(player, act.arg());
 				case StableNet.BUY_TACK -> buyTack(player, act.arg());
+				case StableNet.RACE -> race(player, act.arg());
 				default -> {
 				}
 			}

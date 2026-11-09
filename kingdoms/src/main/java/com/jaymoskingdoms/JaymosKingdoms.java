@@ -490,9 +490,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.305: Jaymo's Equestrian, stage 3 (the herd: mares and stallions, orders, defending, the roster; riding extras; breed gifts)
 		com.jaymoskingdoms.equestrian.Herding.register();
 		com.jaymoskingdoms.equestrian.Mounted.register();
+		com.jaymoskingdoms.equestrian.Riders.register();
 		com.jaymoskingdoms.equestrian.BreedGifts.register();
 		// (0.5.47) stables at work: boarding, the horse market, the farrier
 		Stables.register();
+		Races.register();
 		Carriages.register();
 		Rickshaws.register();
 		Cabs.register();
