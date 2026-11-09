@@ -4,8 +4,6 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:20). Don't edit. -->
-
 ## Waiting for a bot
 
 - [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
@@ -31,7 +29,7 @@ kanban-plugin: board
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · in-review
 
 
-## In review
+## Needs review
 
 
 
@@ -50,6 +48,8 @@ kanban-plugin: board
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 - [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
 - [x] [[Inbox/Done/bogre-model|bogre-model]]
+
+
 
 
 %% kanban:settings
