@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "origin": {
+    "base_url": "https://api.anthropic.com",
+    "organization_id": "d7080dcc-1e63-49b3-8873-b2eb572aef3b",
+    "workspace_id": "wrkspc_01S5dmRpm54qToiokLjJoUEq"
+  },
+  "resources": {
+    "./agents/powerpack-builder.md": {
+      "kind": "agent",
+      "id": "agent_01C8KTpD7f5C6i5t71ccSToB",
+      "version": "1",
+      "hash": "295c6069c93e55268b8d367503e1f436",
+      "remote_hash": "19a7f97e57e48c12aa93d0872a13e6ae",
+      "stamp": "1"
+    },
+    "./environments/powerpack-build.yaml": {
+      "kind": "environment",
+      "id": "env_01QyFfWz2CwN12Sx2jCMQC7g",
+      "hash": "d471df1b5811f6d26fd23113c0b6a16b",
+      "remote_hash": "bc559ef634280de1641ddb7e4af253c7",
+      "stamp": "2026-11-09T12:38:20.822999Z"
+    },
+    "./vaults/powerpack-github.yaml": {
+      "kind": "vault",
+      "id": "vlt_011CgsNFuncgHznU9hcJgYiv",
+      "hash": "162620638c8555eab30d23647811ba0f",
+      "remote_hash": "162620638c8555eab30d23647811ba0f",
+      "stamp": "2026-11-09T12:38:21.011038Z"
+    }
+  }
+}
