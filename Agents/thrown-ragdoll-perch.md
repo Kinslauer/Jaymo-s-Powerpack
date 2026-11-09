@@ -1,9 +1,9 @@
 ---
-status: working
+status: in-review
 task: thrown-ragdoll-perch
-branch: claude/magical-diffie-b83781
+branch: claude/thrown-ragdoll-perch
 with: 
-pr: 
+pr: 1162
 mods: powers, kitchen
 versions: 
 started: 2026-11-08

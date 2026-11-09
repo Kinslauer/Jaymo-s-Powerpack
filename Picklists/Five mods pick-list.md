@@ -77,7 +77,7 @@ Only one of the five runs on our pack today (26.3 Fabric). The other four are ol
 
 `ideas only` · All Rights Reserved · Forge 1.20.1 · add-on for Tinkers' Construct and Farmer's Delight
 
-- [ ] **Knives as real tinkered tools** `M` ^td-knife
+- [x] **Knives as real tinkered tools** `M` ^td-knife
   Metal knives with a per-metal effect on hit — cobalt poisons, slimesteel slows, manyullyn weakens — and they also cut straw and board items.
   For us: our knives already cut straw on the cutting board; the per-metal effect is the new part.
   Notes:
@@ -87,7 +87,7 @@ Only one of the five runs on our pack today (26.3 Fabric). The other four are ol
   For us: MeltingRecipes — cheap, and it fixes the "I cast the wrong pan" annoyance.
   Notes:
 
-- [ ] **Cut cakes and bricks apart** `S` ^td-cut
+- [x] **Cut cakes and bricks apart** `S` ^td-cut
   Slime cakes into shareable slices, seared and scorched bricks back into singles.
   For us: cutting board recipes; splitting a block back into its parts is genuinely useful to a smeltery builder.
   Notes:
@@ -101,7 +101,7 @@ Only one of the five runs on our pack today (26.3 Fabric). The other four are ol
 
 `ideas only` · All Rights Reserved · NeoForge 1.21.1 · vanilla+ pack
 
-- [ ] **Read its mod list once for gaps, then drop it** `S` ^wb-list
+- [x] **Read its mod list once for gaps, then drop it** `S` ^wb-list
   Best at: dense structures in all three dimensions, a bigger Illager threat, an enchantment overhaul, bosses. We already run Dungeons & Taverns, Epic Structures, Structory, It Takes a Pillage and the spell mods.
   For us: one pass to name anything we are genuinely missing.
   Notes:
