@@ -10456,3 +10456,19 @@ hear it and run from the door. The mob_griefing rule turns it off. (`DoorPoundin
 - Includes editable Blockbench sources and inspected front/side/back renders; no outside art assets used.
 - Art and model JSON only. Telescope registration, aiming and observations come with their gameplay change.
 - Built and asset-checked; not tested in game.
+
+## 0.7.670 (2026-11-09): Minotaur moves to GeckoLib (#1188)
+
+The minotaur keeps its stats, AI, hammer, scale and shadow, but is now rendered by GeckoLib with its calm and hostile idles, previously unused walk, charge run, alternating hammer swings and overhead ground slam. Its head still turns toward what it is looking at.
+
+The editable Blockbench source, CC BY 4.0 licence, credit and inspected renders are in `kingdoms/art/`. Original model, texture and animations: “Minotaur” by eanncrod (https://blockbenchworkshop.com/model/eanncrod/minotaur). The rig and geometry were raised together to put its feet at y=0, animation names were shortened, and `swing_2` was made one-shot; no cubes or texture pixels were removed.
+
+The Kingdoms and root builds pass, and a dedicated development server reaches `Done` with GeckoLib 5.5.7 loaded.
+
+Not tested in game: facing, final size, ground contact, hammer placement and animation timing still need a visual playtest.
+
+## 0.7.671 (2026-11-09): Articulated GeckoLib telescope (#1189)
+
+The telescope block now animates smoothly when aimed. Its mount turns and its barrel tilts to track the sky, ready for the Altazimuth Mount skill. One telescope tier covers it — the skill uses the same instrument and its engraved scales. The static model stays as a fallback.
+
+Not tested in game: block registration, per-telescope saved aim, Altazimuth Mount skill checks, observations and failure messages remain with the gameplay implementation and the separate astronomy-sky dependency. No gameplay Java is changed here.
