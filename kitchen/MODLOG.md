@@ -1697,3 +1697,12 @@ mobs should be possible".
 - **Hot chocolate** (an existing Kitchen drink) clears the parasite when drunk.
 - Kitchen: `climate/Thirst.java` applies the parasite on dirty drinks and cures it on hot chocolate in `consumed()`, new `climate/ParasiteEffect` (a Kitchen mob effect: HARMFUL, random tick damage, never lethal), registered in `climate/Climate.java`, new `data/jaymoskitchen/damage_type/parasite.json`, lang keys `effect.jaymoskitchen.parasite` and `message.jaymoskitchen.thirst.cured`.
 - Built with `./gradlew buildKitchen` and `tools/pr_checks.py` pass; not tested in game.
+
+## 0.5.98 (2026-11-09): waterskin tiers - leather, iron, dragon canteens (#1176)
+
+- The waterskin now comes in three tiers instead of one item:
+  - **Leather Waterskin** (3 sips) — crafted with leather and string
+  - **Iron Canteen** (6 sips) — crafted with iron ingots and string
+  - **Dragon Canteen** (8 sips, cleans water as it fills) — crafted with dragon breath and string
+- Each tier has its own texture and tooltip showing the correct capacity. The dragon tier automatically cleans water when filled.
+- Built; not played.
