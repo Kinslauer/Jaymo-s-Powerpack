@@ -31,3 +31,4 @@ From the pick-list, rows **The telescope** and **Measurements that can fail**:
 
 Whether one telescope is enough or there are tiers (basic, mounted, brass) — decide and say why in the PR.
 - 2026-11-09 08:34 Andy (2026-11-09): Prometheus to start on the telescope.
+- 2026-11-09 09:05 Question: PR #1185 now supplies the base telescope art. For continuous per-block azimuth/elevation, should I convert that model to an articulated GeckoLib rig after #1185 merges rather than open a duplicate static-model PR?
