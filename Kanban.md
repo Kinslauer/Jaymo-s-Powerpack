@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 17:51). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 18:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,7 +40,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · #1193 · changes · fixing review notes
-- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · 🍇 Bacchus · #1201 · claimed
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
@@ -61,6 +60,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/reincarnation-full-reset|reincarnation-full-reset]]
 - [x] [[Inbox/Done/atroxiia-geckolib|atroxiia-geckolib]]
 - [x] [[Inbox/Done/skilltree-sidebar-reflow|skilltree-sidebar-reflow]]
 - [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
@@ -68,7 +68,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/astronomy-armillary|astronomy-armillary]]
 - [x] [[Inbox/Done/aetherion-geckolib|aetherion-geckolib]]
 - [x] [[Inbox/Done/android-mech-geckolib|android-mech-geckolib]]
-- [x] [[Inbox/Done/journal-refresh|journal-refresh]]
 
 
 %% kanban:settings
