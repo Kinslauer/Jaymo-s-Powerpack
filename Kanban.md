@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 23:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 23:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,9 +35,9 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · in-review
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · in-review
+- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · writing
 
 
 ## In review
