@@ -19,7 +19,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · claimed
-- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · claimed
 - [ ] [[Agents/kitchen-cookware-melt|kitchen-cookware-melt]] · running
 
 
@@ -28,6 +27,7 @@ kanban-plugin: board
 - [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
 - [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · #1160 · in-review
 - [ ] [[Inbox/blindness|blindness]] · hermes-b · #1159 · in-review
+- [ ] [[Inbox/kitchen-brick-split|kitchen-brick-split]] · hermes · #1163 · in-review
 
 
 ## In review
