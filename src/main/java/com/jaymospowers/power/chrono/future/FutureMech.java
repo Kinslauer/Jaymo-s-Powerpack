@@ -1,5 +1,12 @@
 package com.jaymospowers.power.chrono.future;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -12,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -44,7 +52,18 @@ import net.minecraft.world.phys.Vec3;
  * shells. One leads a patrol now and then, and the Mad Tinkerer sets one on you as his test unit. Both are drawn on our own
  * mech model in one of four builds (tools/gen_android_mech.py).
  */
-public class FutureMech extends Monster {
+public class FutureMech extends Monster implements GeoEntity {
+	/** GeckoLib blends and walk playback speed; animation names match art/android_mech.bbmodel. */
+	static final int ANIMATION_BLEND = 4, ACTION_BLEND = 2;
+	static final float WALK_AT = 0.6F, WALK_FLOOR = 0.5F;
+	static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	static final RawAnimation SMASH = RawAnimation.begin().thenPlay("smash");
+	static final RawAnimation CANNON_RECOIL = RawAnimation.begin().thenPlay("cannon");
+	static final RawAnimation SHELL_FIRE = RawAnimation.begin().thenPlay("shell");
+	static final RawAnimation HURT = RawAnimation.begin().thenPlay("hurt");
+	static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("death");
+
 	static final double HEALTH = 220.0, DAMAGE = 16.0, SPEED = 0.2, FOLLOW = 64.0, ARMOR = 20.0, TOUGHNESS = 8.0;
 	/** Its cannons: a heavy machine gun's bursts out to here, and closer than this it smashes instead. */
 	static final double CANNON_RANGE = 40.0, CANNON_NEAREST = 5.0;
@@ -65,6 +84,7 @@ public class FutureMech extends Monster {
 	private int aimingFor;
 	private int shellIn = SHELL_EVERY;
 	private final ServerBossEvent bar;
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
 	public FutureMech(EntityType<? extends FutureMech> type, Level level) {
 		super(type, level);
@@ -121,6 +141,26 @@ public class FutureMech extends Monster {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, FutureOmen.class, true));
 	}
 
+	/** Movement loops underneath whichever one-off move the server starts. */
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<FutureMech>("move", ANIMATION_BLEND, test -> {
+			FutureMech mech = test.animatable();
+			boolean moving = test.isMoving();
+			float speed = moving ? Math.max(WALK_FLOOR, mech.walkAnimation.speed() / WALK_AT) : 1.0F;
+			test.setControllerSpeed(Mth.clamp(speed, 0.25F, 2.0F));
+			return test.setAndContinue(moving ? WALK : IDLE);
+		}));
+		controllers.add(new AnimationController<FutureMech>("action", ACTION_BLEND, test -> PlayState.STOP)
+			.triggerableAnim("smash", SMASH).triggerableAnim("cannon", CANNON_RECOIL)
+			.triggerableAnim("shell", SHELL_FIRE).triggerableAnim("hurt", HURT).triggerableAnim("death", DEATH));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
+	}
+
 	/** Are its arm cannons up? */
 	public boolean aiming() {
 		return this.entityData.get(DATA_AIMING);
@@ -150,7 +190,9 @@ public class FutureMech extends Monster {
 				getLookControl().setLookAt(foe, 30.0F, 30.0F);
 				this.entityData.set(DATA_AIMING, true);
 				aimingFor = 30;
-				FutureGuns.tickWith(level, this, foe, android() ? ANDROID_CANNON : CANNON);
+				if (FutureGuns.tickWith(level, this, foe, android() ? ANDROID_CANNON : CANNON)) {
+					this.triggerAnim("action", "cannon");
+				}
 				if (!android() && --shellIn <= 0 && d > SHELL_NEAREST) {
 					shell(level, foe);
 					shellIn = SHELL_EVERY + getRandom().nextInt(40);
@@ -176,6 +218,7 @@ public class FutureMech extends Monster {
 
 	/** A shell from its shoulder: a smoke trail, then a blast where the target stands (nothing broken). */
 	private void shell(ServerLevel level, LivingEntity foe) {
+		this.triggerAnim("action", "shell");
 		Vec3 from = position().add(0.0, 3.6, 0.0);
 		Vec3 to = foe.position();
 		Vec3 step = to.subtract(from);
@@ -190,7 +233,17 @@ public class FutureMech extends Monster {
 	}
 
 	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		boolean hurt = super.hurtServer(level, source, amount);
+		if (hurt && this.isAlive()) {
+			this.triggerAnim("action", "hurt");
+		}
+		return hurt;
+	}
+
+	@Override
 	public boolean doHurtTarget(ServerLevel level, Entity target) {
+		this.triggerAnim("action", "smash");
 		this.attackAnimationTick = 10;
 		level.broadcastEntityEvent(this, (byte) 4);
 		float damage = (float) getAttributeValue(Attributes.ATTACK_DAMAGE);
@@ -211,6 +264,14 @@ public class FutureMech extends Monster {
 		} else {
 			super.handleEntityEvent(id);
 		}
+	}
+
+	@Override
+	public void die(DamageSource source) {
+		if (level() instanceof ServerLevel) {
+			this.triggerAnim("action", "death");
+		}
+		super.die(source);
 	}
 
 	@Override
