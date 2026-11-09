@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: running
 task: astronomy-telescope
 branch: claude/astronomy-telescope
 with:
