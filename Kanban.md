@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 19:42). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 19:47). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,6 +23,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Agents/thrown-ragdoll-perch|thrown-ragdoll-perch]] · #1162 · in-review
 
 
 ## Needs Andy
