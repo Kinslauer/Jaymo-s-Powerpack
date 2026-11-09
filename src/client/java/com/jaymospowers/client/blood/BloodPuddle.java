@@ -81,6 +81,15 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	static final float POOL_GROW = 1.0F, POOL_MAX_SCALE = 1.8F, POOL_EASE = 0.15F;
 	/** A pool soaked into a bigger one it touched shrinks away over this many ticks. */
 	static final int POOLED_FADE = 20;
+	/** Rain puddles run together up to this scale (bigger than one alone grows, {@link #WET_MAX_SCALE}), lying up to this opaque when full. */
+	static final float WET_POOL_MAX = 2.6F, WET_THICK_ALPHA = 0.62F;
+	/**
+	 * Andy: "rain should do the same smearing and spreading". Blood the rain falls on thins out as it washes away: over
+	 * {@link #RAIN_SPREAD_TICKS} of rain it spreads this share wider, runs this share longer one way (a smear), loses this
+	 * share of its opacity and goes this share of the way to a watery {@link #RAIN_TINT}.
+	 */
+	static final float RAIN_SPREAD = 0.6F, RAIN_RUN = 0.4F, RAIN_PALE = 0.45F, RAIN_THIN = 0.4F;
+	static final int RAIN_SPREAD_TICKS = 120, RAIN_TINT = 0xA89A92;
 
 	private float baseSize;
 	/** (0.19.62) The size it's easing to (blood magic drawing it down), and how long its last fade takes once drawn dry (ticks; 0: the usual). */
@@ -100,6 +109,11 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	private final boolean round, drag;
 	/** The game time it was made. */
 	private final long born;
+	/** How rained on it is (0 to 1), easing up to {@link #rainTarget}; and whether the rain runs it out east-west (or north-south). */
+	private float rain, rainTarget;
+	private final boolean runX;
+	/** This frame's stretch: its own, run out by the rain. */
+	private float drawStretchX = 1.0F, drawStretchZ = 1.0F;
 	/** (0.20.41) A footprint: its turn (radians, as yaw) and whether it's a right foot (its sole mirrored); its colour as it is. */
 	private final boolean print;
 	private final float printYaw;
@@ -144,6 +158,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		boolean round = shape == BloodParticles.Puddle.ROUND;
 		this.round = round && !this.print;
 		this.born = level.getGameTime();
+		this.runX = this.random.nextBoolean();
 		this.drag = BloodParticles.Puddle.drag(shape);
 		// (0.19.55) a smear is only ever turned end for end, so its sprite stays drawn out along its length
 		this.yaw = (round ? this.random.nextInt(4) : this.random.nextInt(2) * 2) * Mth.HALF_PI;
@@ -234,11 +249,17 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	@Override
 	public void tick() {
 		super.tick();
-		// (0.20.54) rain washes a passing pool away (a lasting stain is washed by the server, BloodTrail.wash)
-		if (!this.wet && !this.stain && this.age % RAIN_CHECK == 0 && this.lifetime - this.age > RAIN_WASH
-			&& rainedOn(this.level, this.x, this.y + 0.5, this.z)) {
-			this.lifetime = this.age + RAIN_WASH;
-			this.quickFade = RAIN_WASH;
+		// (0.20.54) rain washes a passing pool away (a lasting stain is washed by the server, BloodTrail.wash); and any blood
+		// it falls on spreads, runs and thins as it goes
+		if (!this.wet && this.age % RAIN_CHECK == 0 && rainedOn(this.level, this.x, this.y + 0.5, this.z)) {
+			this.rainTarget = Math.min(1.0F, this.rainTarget + RAIN_CHECK / (float) RAIN_SPREAD_TICKS);
+			if (!this.stain && this.lifetime - this.age > RAIN_WASH) {
+				this.lifetime = this.age + RAIN_WASH;
+				this.quickFade = RAIN_WASH;
+			}
+		}
+		if (this.rain < this.rainTarget) {
+			this.rain = Math.min(this.rainTarget, this.rain + 1.0F / RAIN_SPREAD_TICKS);
 		}
 		if (this.magma && this.age < BloodParticles.MAGMA_COOLS / 2 && this.random.nextFloat() < 0.03F) {
 			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, this.x + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6,
@@ -258,7 +279,8 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			return;
 		}
 		this.lifetime = Math.max(this.lifetime, this.age + life + WET_FADE);
-		this.baseSize = Math.min(SIZE * WET_MAX_SCALE, this.baseSize + SIZE * grow);
+		// (never shrinks one that ran together with its neighbours past what one alone grows to)
+		this.baseSize = Math.max(this.baseSize, Math.min(SIZE * WET_MAX_SCALE, this.baseSize + SIZE * grow));
 		// (kept: it no longer eases back down to the size it was laid at)
 		this.targetSize = Math.max(this.targetSize, this.baseSize);
 	}
@@ -272,7 +294,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	}
 
 	/** The size it's growing to (blocks across). */
-	float grownSize() {
+	public float grownSize() {
 		return this.targetSize;
 	}
 
@@ -288,13 +310,18 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	}
 
 	/** Whether {@code other} (a pool it now touches) fits into it; if so it takes it, and {@code other} shrinks away. */
-	boolean absorb(BloodPuddle other) {
-		float both = (float) Math.sqrt(this.targetSize * this.targetSize + other.targetSize * other.targetSize);
-		if (both > SIZE * POOL_MAX_SCALE) {
+	public boolean absorb(BloodPuddle other) {
+		float a = this.targetSize * this.targetSize, b = other.targetSize * other.targetSize;
+		float both = (float) Math.sqrt(a + b);
+		if (both > SIZE * (this.wet ? WET_POOL_MAX : POOL_MAX_SCALE)) {
 			return false;
 		}
 		this.targetSize = both;
-		this.lifetime = Math.max(this.lifetime, this.age + LIFE);
+		// it shifts toward what it took in (by area): two pools running together meet in the middle
+		double share = b / (a + b);
+		this.x = this.xo = Mth.lerp(share, this.x, other.x);
+		this.z = this.zo = Mth.lerp(share, this.z, other.z);
+		this.lifetime = Math.max(this.lifetime, this.age + (this.wet ? other.lifetime - other.age : LIFE));
 		other.targetSize = 0.0F;
 		other.lifetime = Math.min(other.lifetime, other.age + POOLED_FADE);
 		other.quickFade = POOLED_FADE;
@@ -333,7 +360,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	public boolean visible(net.minecraft.client.renderer.culling.Frustum frustum) {
 		// culled by the quad's own bounds, not just its centre point: a big puddle near the screen edge
 		// stays drawn until the whole quad is out of view instead of popping out
-		float r = this.baseSize * Math.max(this.stretchX, this.stretchZ) * 0.6F;
+		float r = this.baseSize * Math.max(this.stretchX, this.stretchZ) * (1.0F + RAIN_SPREAD * this.rain) * (1.0F + RAIN_RUN * this.rain) * 0.6F;
 		return frustum.isVisible(new net.minecraft.world.phys.AABB(this.x - r, this.y - 0.1F, this.z - r,
 				this.x + r, this.y + 0.1F, this.z + r));
 	}
@@ -349,8 +376,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		int fade = this.quickFade > 0 ? this.quickFade : this.wet ? WET_FADE : this.stain ? BloodTrail.FADE : FADE;
 		int fadeFrom = this.lifetime - fade;
 		// a big pool lies thicker: more opaque and darker
-		float thick = this.round && !this.wet ? Mth.clamp((this.baseSize / SIZE - THICK_FROM) / (THICK_FULL - THICK_FROM), 0.0F, 1.0F) : 0.0F;
-		float alpha = this.wet ? WET_ALPHA : this.drag ? DRAG_ALPHA : Mth.lerp(thick, ALPHA, THICK_ALPHA);
+		float thick = this.round ? Mth.clamp((this.baseSize / SIZE - THICK_FROM) / (THICK_FULL - THICK_FROM), 0.0F, 1.0F) : 0.0F;
+		float alpha = this.wet ? Mth.lerp(thick, WET_ALPHA, WET_THICK_ALPHA) : this.drag ? DRAG_ALPHA : Mth.lerp(thick, ALPHA, THICK_ALPHA);
+		// thinned by the rain
+		alpha *= 1.0F - RAIN_PALE * this.rain;
 		if (age > fadeFrom) {
 			size *= Mth.smoothstep(1.0F - Math.max(age - fadeFrom - 60.0F, 0.0F) / fade);
 			// (worked out each frame, so a pool that grows again after it began to fade is whole again)
@@ -370,7 +399,11 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 				alpha *= 1.0F - Mth.clamp((dist - fadeStart) / DRAW_DISTANCE_FADE, 0.0F, 1.0F);
 			}
 		}
-		double halfX = size * this.stretchX * 0.5, halfZ = size * this.stretchZ * 0.5;
+		// rained on: spread wider and run out one way
+		size *= 1.0F + RAIN_SPREAD * this.rain;
+		this.drawStretchX = this.stretchX * (this.runX ? 1.0F + RAIN_RUN * this.rain : 1.0F);
+		this.drawStretchZ = this.stretchZ * (this.runX ? 1.0F : 1.0F + RAIN_RUN * this.rain);
+		double halfX = size * this.drawStretchX * 0.5, halfZ = size * this.drawStretchZ * 0.5;
 		double minX = cx - halfX, maxX = cx + halfX, minZ = cz - halfZ, maxZ = cz + halfZ;
 		int light = this.getLightCoords(partialTick);
 		if (this.magma) {
@@ -378,7 +411,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		}
 		this.drawAlpha = alpha;
 		this.shown = shade(this.color, age, this.stain);
-		if (thick > 0.0F && !this.magma) {
+		if (this.rain > 0.0F && !this.magma) {
+			this.shown = ARGB.srgbLerp(RAIN_THIN * this.rain, this.shown, RAIN_TINT) & 0xFFFFFF;
+		}
+		if (thick > 0.0F && !this.magma && !this.wet) {
 			float dark = Mth.lerp(thick, 1.0F, THICK_DARK);
 			this.shown = ARGB.color(0, Math.round(red(this.shown) * dark * 255.0F), Math.round(green(this.shown) * dark * 255.0F),
 				Math.round(blue(this.shown) * dark * 255.0F)) & 0xFFFFFF;
@@ -493,8 +529,8 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			float dx = (float) (corner[0] - cx), dz = (float) (corner[1] - cz);
 			float lx = dx * cos - dz * sin, lz = dx * sin + dz * cos;
 			// (the yaw is a quarter turn: a smear's is half turns, so its local axes stay its world ones)
-			float u = (lx / (size * this.stretchX) + 0.5F) * (u1 - u0) + u0;
-			float v = (lz / (size * this.stretchZ) + 0.5F) * (v1 - v0) + v0;
+			float u = (lx / (size * this.drawStretchX) + 0.5F) * (u1 - u0) + u0;
+			float v = (lz / (size * this.drawStretchZ) + 0.5F) * (v1 - v0) + v0;
 			decals.add(BloodDecals.DECAL_LAYER, (float) (corner[0] - cam.x), (float) (y - cam.y) + lift,
 				(float) (corner[1] - cam.z), u, v, color, light);
 		}

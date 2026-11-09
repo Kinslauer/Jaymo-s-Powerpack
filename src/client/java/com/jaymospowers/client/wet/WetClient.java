@@ -71,6 +71,11 @@ public final class WetClient {
 	/** (0.20.54) The chance a flat open spot gets one, and how often every rained-on puddle is fed (ticks). */
 	static final float FLAT_CHANCE = 0.1F;
 	static final int RAIN_FEED_EVERY = 100;
+	/**
+	 * Andy: rain should spread like the blood pools do. Two rain puddles whose edges meet (centres closer than this share
+	 * of the two radii added, no more than this apart up or down) run together into one as big as both.
+	 */
+	static final double RAIN_TOUCH = 0.6, RAIN_TOUCH_UP = 0.3;
 	/** Light shafts: how often one is tried (ticks), how far out (blocks), how many at once, how long they last (ticks). */
 	static final int SHAFT_EVERY = 3, SHAFT_RANGE = 14, MAX_SHAFTS = 36, SHAFT_LIFE = 90, SHAFT_LIFE_SPREAD = 80;
 	/** How deep (blocks) the surface may be above the camera, and how bright a shaft is at noon. */
@@ -229,6 +234,7 @@ public final class WetClient {
 			BloodPuddle known = RAIN.get(key);
 			if (known != null && known.isAlive()) {
 				known.feed(RAIN_LIFE, RAIN_GROW);
+				runTogether(known);
 				continue;
 			}
 			if (RAIN.size() >= MAX_RAIN_PUDDLES) {
@@ -276,6 +282,7 @@ public final class WetClient {
 	/** (0.20.54) Every rain puddle the rain still falls on (or drips on, under the leaves) grows and keeps. */
 	private static void feedRain(ClientLevel level) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		List<BloodPuddle> fed = new ArrayList<>();
 		for (Long2ObjectMap.Entry<BloodPuddle> entry : RAIN.long2ObjectEntrySet()) {
 			BloodPuddle puddle = entry.getValue();
 			pos.set(entry.getLongKey());
@@ -287,7 +294,30 @@ public final class WetClient {
 			pos.setY(Math.max(ground, canopy));
 			if (level.getBiome(pos).value().getPrecipitationAt(pos, level.getSeaLevel()) == Biome.Precipitation.RAIN) {
 				puddle.feed(RAIN_LIFE, RAIN_GROW);
+				fed.add(puddle);
 			}
+		}
+		fed.forEach(WetClient::runTogether);
+	}
+
+	/** A rain puddle that grew: every other it now reaches runs together with it (into the bigger of each two). */
+	private static void runTogether(BloodPuddle puddle) {
+		boolean merged = false;
+		for (BloodPuddle other : RAIN.values()) {
+			if (other == puddle || !other.isAlive() || other.grownSize() <= 0.0F || !puddle.isAlive() || puddle.grownSize() <= 0.0F) {
+				continue;
+			}
+			Vec3 a = puddle.position(), b = other.position();
+			if (Math.abs(a.y - b.y) > RAIN_TOUCH_UP
+				|| Math.hypot(a.x - b.x, a.z - b.z) >= RAIN_TOUCH * 0.5 * (puddle.grownSize() + other.grownSize())) {
+				continue;
+			}
+			boolean taken = puddle.grownSize() >= other.grownSize() ? puddle.absorb(other) : other.absorb(puddle);
+			merged |= taken;
+		}
+		if (merged) {
+			// the ones taken in shrink away: no longer puddles to feed
+			RAIN.values().removeIf(p -> !p.isAlive() || p.grownSize() <= 0.0F);
 		}
 	}
 
