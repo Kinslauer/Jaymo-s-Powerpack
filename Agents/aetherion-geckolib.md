@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: aetherion-geckolib
 branch: claude/aetherion-geckolib
 with:
-pr:
+pr: 1194
 mods: kingdoms
 versions:
 started: 2026-11-09
@@ -39,4 +39,4 @@ owns:
 - Other dragons and shared WindDragon files are out of scope.
 
 ## Done
-Work in progress; not tested in game.
+PR #1194 supplies Aetherion's editable 88-cube Blockbench model, unchanged hide/marking UVs, ten GeckoLib animations, movement/action controllers and a renderer preserving looks, scale, seats and per-frame head/jaw/flight posing. Geometry has zero mismatched source vertices; four-view and eleven old/new pose renders were inspected. Kingdoms clean build, root build and PR checks pass. A dev server boot was attempted but did not reach `Done` because concurrent Gradle activity deleted shared build output; no client playtest was performed.
