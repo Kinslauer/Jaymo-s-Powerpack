@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:58). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,13 +34,13 @@ kanban-plugin: board
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🤖 Prometheus · open
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🤖 Prometheus · open
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🤖 a Hermes bot · open
+- [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · for 🤖 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🤖 Bacchus · claimed
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · #1190 · changes · fixing review notes
-- [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · 🤖 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
