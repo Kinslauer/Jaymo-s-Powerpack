@@ -23,3 +23,4 @@ Andy ticked it.
 
 - **CurseForge serves that page in chunks and blocks plain fetches.** A previous attempt got about twenty names and no more. Use a logged-in browser, or download the pack zip and read its `manifest.json` — do not guess names from memory.
 - Output is a short list: mod, what it does, and whether our pack already has it (Dungeons & Taverns, Epic Structures, Structory, It Takes a Pillage, our spell mods and our own Kingdoms content cover a lot). Anything left over goes to Andy as a one-liner each.
+- 2026-11-09 01:03 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
