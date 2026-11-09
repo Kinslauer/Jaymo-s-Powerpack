@@ -121,3 +121,11 @@ bbmodels/valor_wings_eurus.json, textures/entity/valor/wings_eurus_*.png: a Skyw
   "Kintsugi" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi
   Changes: only its two wings, turned to lie along the shoulders and drawn small on a player's back; its texture halved
   and recoloured into each Valor look, its gold seams picked out (kingdoms/tools/gen_valor_wing_designs.py).
+
+Original project art (no third-party art or licence):
+geckolib/models/entity/atroxiia.geo.json, geckolib/animations/entity/atroxiia.animation.json and dragon/atroxiia/
+  hide_*.png, marks_*.png: Atroxiia, the frost wyrm
+  Existing geometry, UVs and hides: kingdoms/tools/gen_atroxiia.py and the former AtroxiiaDragonModel. Editable rig
+  and original keyframes sampled from our old pose equations: Prometheus (hermes-modeller),
+  kingdoms/tools/gen_atroxiia_geo.py. Saint's Dragons is a motion reference only; none of its All Rights Reserved art
+  or animation data is used. Sources, provenance and renders: kingdoms/art/atroxiia*.

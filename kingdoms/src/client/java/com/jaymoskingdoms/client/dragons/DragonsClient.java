@@ -98,8 +98,8 @@ public final class DragonsClient {
 		// (0.7.522) our own model of Saint's Dragons' Stegonaut (its art isn't used)
 		EntityRenderers.register(Dragons.STEGONAUT_DRAGON, c -> new WindDragonRenderer<>(c, "stegonaut", new StegonautDragonModel(StegonautDragonModel
 			.createBodyLayer().bakeRoot()), STEGONAUT_SHADOW, STEGONAUT_SCALE, STEGONAUT_REACH));
-		EntityRenderers.register(Dragons.ATROXIIA_DRAGON, c -> new WindDragonRenderer<>(c, "atroxiia", new AtroxiiaDragonModel(AtroxiiaDragonModel
-			.createBodyLayer().bakeRoot()), ATROXIIA_SHADOW, ATROXIIA_SCALE, ATROXIIA_REACH));
+		EntityRenderers.register(Dragons.ATROXIIA_DRAGON, c -> new AtroxiiaDragonRenderer(c, ATROXIIA_SHADOW, ATROXIIA_SCALE,
+			ATROXIIA_REACH));
 		EntityRenderers.register(Dragons.VARASUCHUS_DRAGON, c -> new WindDragonRenderer<>(c, "varasuchus", new VarasuchusDragonModel(VarasuchusDragonModel
 			.createBodyLayer().bakeRoot()), VARASUCHUS_SHADOW, VARASUCHUS_SCALE, VARASUCHUS_REACH));
 		// (0.7.522) Ignivorus: the Kintsugi wyvern again, cooled from lava
