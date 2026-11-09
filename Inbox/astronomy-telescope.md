@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: prometheus
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -8,6 +8,7 @@ claimed_by: hermes-modeller
 pr: 1189
 suggested_owns: []
 text_pass: 
+writer: hermes-writer
 ---
 
 # Astronomy 2: the telescope
