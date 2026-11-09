@@ -228,6 +228,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
+		// zombies of every kind beat on and break the doors between them and their prey
+		DoorPounding.register();
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
