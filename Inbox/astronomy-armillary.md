@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -7,6 +7,7 @@ thread: 1569144710264791172
 claimed_by: hermes-b
 pr: 1196
 suggested_owns: []
+writer: hermes-writer
 ---
 
 # Astronomy 3: the armillary sphere
