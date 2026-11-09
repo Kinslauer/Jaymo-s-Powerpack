@@ -3,7 +3,7 @@ status: in-review
 task: parasites-and-cures
 branch: claude/parasites-and-cures
 with: 
-pr: 
+pr: 1165
 mods: kitchen
 versions: 
 started: 2026-11-08
