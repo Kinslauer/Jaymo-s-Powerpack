@@ -39,7 +39,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · 🤖 Bacchus · claimed
 - [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🤖 Prometheus · claimed
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🤖 Bacchus · #1193 · changes · fixing review notes
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
@@ -49,6 +48,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · 🤖 Quill · #1194 · writing
 - [ ] [[Inbox/android-mech-geckolib|android-mech-geckolib]] · 🤖 Quill · #1195 · writing
+- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · 🤖 Bacchus · #1196 · in-review
 
 
 ## In review
