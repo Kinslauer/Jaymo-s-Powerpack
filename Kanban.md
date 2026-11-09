@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 14:43). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 14:45). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,11 +33,11 @@ kanban-plugin: board
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · #1193 · changes · fixing review notes
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
