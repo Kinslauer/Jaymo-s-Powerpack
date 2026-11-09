@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 17:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 17:29). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · #1193 · changes · fixing review notes
 - [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · 🍇 Bacchus · #1201 · changes · fixing review notes
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
@@ -51,7 +52,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · 🍇 Bacchus · #1201 · in-review
 
 
 ## Needs Andy
