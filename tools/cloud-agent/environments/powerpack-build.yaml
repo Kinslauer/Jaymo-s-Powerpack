@@ -1,0 +1,33 @@
+# The sandbox the Powerpack Builder works in: only the hosts the mods' Gradle builds download from.
+name: powerpack-build
+description: Builds Jaymo's Powerpack (Fabric, Modrinth, CurseForge, Mojang, Gradle, Maven Central, JDK 25 from GitHub).
+config:
+  type: cloud
+  networking:
+    type: limited
+    allow_package_managers: true
+    allow_mcp_servers: true
+    allowed_hosts:
+      # Fabric Loom and the mods the builds depend on
+      - maven.fabricmc.net
+      - api.modrinth.com
+      - cdn.modrinth.com
+      - cursemaven.com
+      - mediafilez.forgecdn.net
+      - edge.forgecdn.net
+      - maven.enjarai.dev
+      - maven.bawnorton.com
+      # Minecraft itself
+      - piston-meta.mojang.com
+      - piston-data.mojang.com
+      - launchermeta.mojang.com
+      - libraries.minecraft.net
+      - resources.download.minecraft.net
+      # Gradle, Maven Central, and JDK 25 (Gradle and Temurin both download through GitHub releases)
+      - services.gradle.org
+      - plugins.gradle.org
+      - repo.maven.apache.org
+      - repo1.maven.org
+      - github.com
+      - release-assets.githubusercontent.com
+      - objects.githubusercontent.com
