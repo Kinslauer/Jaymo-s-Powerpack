@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: atroxiia-geckolib
 branch: claude/atroxiia-geckolib
 with: 
-pr: 
+pr: 1198
 mods: kingdoms
 versions: 
 started: 2026-11-09
@@ -38,4 +38,4 @@ owns:
 - No shared `WindDragon.java` or `WindDragonRenderer.java` edits; other dragons are out of scope.
 
 ## Done
-Work in progress; not tested in game.
+PR #1198: Atroxiia has an editable 61-bone Blockbench model and 19 GeckoLib animations covering every old state/action, with hides, markings, looks, tack, seats and scales unchanged. Kingdoms and root builds and PR checks pass; the dev server reached `Done` and was stopped. Not tested in game: Atroxiia was not spawned or watched.
