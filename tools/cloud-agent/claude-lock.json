@@ -6,6 +6,14 @@
     "workspace_id": "wrkspc_01S5dmRpm54qToiokLjJoUEq"
   },
   "resources": {
+    "./agents/bug-hunter.md": {
+      "kind": "agent",
+      "id": "agent_01B92Fm15AXviNJmFAWcKLvW",
+      "version": "1",
+      "hash": "94d0645893eb0d7c227fd84b38cd33fe",
+      "remote_hash": "d4591203afdf91b88ea45186974cc53b",
+      "stamp": "1"
+    },
     "./agents/powerpack-builder.md": {
       "kind": "agent",
       "id": "agent_01C8KTpD7f5C6i5t71ccSToB",
@@ -13,6 +21,13 @@
       "hash": "41fd67ea83918757a5ed2c889a86369f",
       "remote_hash": "4dd215077d11ecec1efdbfc0e3b34f8e",
       "stamp": "2"
+    },
+    "./environments/bug-hunt.yaml": {
+      "kind": "environment",
+      "id": "env_01RaXiDYLDwzqeTr6TakNAqs",
+      "hash": "50b2140ac30efa6a49343d68fe940c5b",
+      "remote_hash": "111617b2b6447a5bfea62b1614eae646",
+      "stamp": "2026-11-09T20:11:27.221845Z"
     },
     "./environments/powerpack-build.yaml": {
       "kind": "environment",
