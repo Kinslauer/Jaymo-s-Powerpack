@@ -3,6 +3,7 @@ package com.jaymoskitchen.delight;
 import com.jaymoskitchen.ModItems;
 import com.jaymoskitchen.cooking.Dish;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -126,5 +127,32 @@ public final class Chopping {
 	private static Float weight(ItemStack stack) {
 		DataComponentType<?> type = BuiltInRegistries.DATA_COMPONENT_TYPE.getOptional(POWERS_FISH_WEIGHT).orElse(null);
 		return type != null && stack.get(type) instanceof Float kg ? kg : null;
+	}
+
+	// --- sturdy blocks: Tinker's Delight's brick split ---
+
+	/**
+	 * Blocks a pickaxe takes back apart into the items they were built from, so a smeltery builder can undo a wall.
+	 * Named by id, not by class: Kitchen never compiles against Powers.
+	 */
+	private static final Map<Identifier, Split> SPLITS = Map.of(
+		Identifier.fromNamespaceAndPath("jaymospowers", "seared_bricks"),
+		new Split(Identifier.fromNamespaceAndPath("jaymospowers", "seared_brick"), 4));
+
+	/** A block that comes apart: the item it gives back and how many. */
+	record Split(Identifier piece, int count) {
+	}
+
+	/** The pieces {@code stack} splits into with a pickaxe, or empty if it is not one of ours (or its mod isn't here). */
+	public static List<ItemStack> split(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return List.of();
+		}
+		Split split = SPLITS.get(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+		if (split == null) {
+			return List.of();
+		}
+		Item piece = BuiltInRegistries.ITEM.getOptional(split.piece()).orElse(null);
+		return piece == null ? List.of() : List.of(new ItemStack(piece, split.count()));
 	}
 }
