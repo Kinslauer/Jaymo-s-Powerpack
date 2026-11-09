@@ -23,3 +23,12 @@ Tiv, in the Tasks thread: "When players are downed they should not still be atta
 - It applies everywhere — a war, the wild, out at sea — not only inside a safe settlement.
 - Don't turn downing into a bubble: "death is real and close", so whatever still hunts a downed player stays lethal. This is about stopping the finishing blows, not about immunity.
 - Ask Tiv which mobs belong on the list if it isn't obvious from the code.
+
+## Reference clip
+
+Tiv posted a clip of it happening (message 1569172190673248330 in the Tasks thread, `MedalTVMinecraft20261108140059233.mp4`, 30 s). What it shows:
+
+- A fight with an MCA village: the chat says "They hit back! Stop swinging and they'll cool off, or pay them off: use one with coins or a purse in hand."
+- The player goes down: "You're down. They leave you lying there." Camera drops to grass level, an MCA villager lies prone nearby, an armoured MCA villager ("Tikes!") stands over them.
+- The player is then killed anyway, a few seconds later, while still on the ground: "Marcellino was slain by Mile", then the death screen ("You lie where you fell, left for dead...").
+- So the message says they leave you lying there and the guard/Villager finishes the job regardless. That contradiction is the bug in one line.

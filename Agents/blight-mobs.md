@@ -1,15 +1,18 @@
 ---
-status: running
+status: in-review
 task: Blight mobs: named elites in the world with boosted stats and visible tell
 branch: claude/blight-mobs
 with:
-pr:
+pr: 1166
 mods: powers
 versions:
 started: 2026-11-08
 owns:
-  - src/main/java/com/jaymospowers/core/mobs/ (new package for blight mob logic)
-  - src/main/resources/data/jaymospowers/ (blight mob data/tags)
+  - src/main/java/com/jaymospowers/core/mobs/BlightMobs.java
+  - src/main/java/com/jaymospowers/mixin/BlightSpawnMixin.java
+  - src/main/resources/data/jaymospowers/tags/entity_types/can_be_blighted.json
+  - src/main/java/com/jaymospowers/JaymosPowers.java
+  - src/main/resources/jaymospowers.mixins.json
 ---
 
 # Blight Mobs
@@ -31,4 +34,8 @@ owns:
 - Our own take: a name, a tint or a mark, and stats that scale with local difficulty we already track.
 
 ## Done
-What a player will see, and what wasn't tested.
+Player sees rare blighted elites with custom names (e.g. "Blighted Zombie the Tainted"), green plague particles, dark smoke for higher tiers, and boosted health/damage/speed/armor/follow-range. Three tiers scale with local difficulty.
+
+Not tested in game: spawn rates and balance at different difficulties, particle visibility and performance with many blighted mobs, drop table modifications (not yet implemented), multiplayer sync of custom names and particles, interaction with other mods' custom mobs.
+
+Compiles; not tested in game yet. PR #1166 open for review.
