@@ -50,13 +50,13 @@ kanban-plugin: board
 
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · #1190 · in-review
 - [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · #1189 · in-review
-- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🤖 Prometheus · #1188 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · 🤖 Apollo · blocked
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🤖 Prometheus · blocked
+- [ ] [[Inbox/minotaur-geckolib|minotaur-geckolib]] · 🤖 Prometheus · #1188 · ready
 
 
 ## Done
