@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: hermes-b
-pr:
+pr: 1201
 suggested_owns: [src/main/java/com/jaymospowers/core/wounds/Mortality.java, kingdoms/src/main/java/com/jaymoskingdoms/LifeStory.java, kingdoms/src/main/java/com/jaymoskingdoms/McaBridge.java, kingdoms/src/main/java/com/jaymoskingdoms/Captains.java, kingdoms/src/main/java/com/jaymoskingdoms/Parties.java]
 ---
 
