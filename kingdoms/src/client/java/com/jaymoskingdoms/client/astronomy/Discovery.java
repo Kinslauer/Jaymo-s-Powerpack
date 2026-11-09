@@ -21,12 +21,14 @@ public final class Discovery {
     }
 
     public static BitSet getDiscovered() {
+        // Discovery state lives on the server as a player attachment, synced to clients.
+        // The client only reports looks; the server owns the authoritative state.
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
             return EMPTY;
         }
         return DiscoveryAttachment.getDiscovered(player);
-    }
+        }
 
     public static void reportLook(int hip) {
         LocalPlayer player = Minecraft.getInstance().player;
@@ -34,5 +36,5 @@ public final class Discovery {
             return;
         }
         // Client reports the look; the server (via attachment) tracks discovery state.
-    }
+        }
 }

@@ -11,6 +11,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -52,6 +53,28 @@ public final class SkyClient {
     public static void register() {
         Discovery.register();
         LevelRenderEvents.SKY.register(SkyClient::render);
+        ClientTickEvents.END.subscribe(SkyClient::onClientTick);
+    }
+
+    private static void onClientTick(Minecraft minecraft) {
+        if (minecraft.player == null) {
+            clientPollution = 0.0F;
+            return;
+        }
+        ClientLevel level = minecraft.level;
+        if (level == null) {
+            clientPollution = 0.0F;
+            return;
+        }
+        double pollution = 0.0;
+        for (var entity : level.getEntitiesOfClass(Villager.class,
+                entity -> entity.distanceTo(minecraft.player) < 192.0)) {
+            pollution += 1.0;
+        }
+        clientPollution = (float) (pollution / 10.0); // scale down
+        if (clientPollution > POLLUTION_MAX) {
+            clientPollution = POLLUTION_MAX;
+        }
     }
 
     private static void render(LevelRenderContext context) {
@@ -75,32 +98,34 @@ public final class SkyClient {
         Camera camera = minecraft.gameRenderer.mainCamera();
         Vec3 forward = vec(camera.forwardVector());
         float pollution = clientPollution; // computed in tick()
-        float scale = 1.0F - POLLUTION_MAX * pollution;
-        int width = minecraft.getWindow().getGuiScaledWidth();
-        int height = minecraft.getWindow().getGuiScaledHeight();
-        if (width <= 0 || height <= 0) {
-            return;
-        }
-        double aspect = width / (double) height;
-        double fovTan = Math.tan(Math.toRadians(camera.getFov()) / 2.0);
-        List<Star> stars = StarCatalog.stars();
-        Discovery discovery = Discovery.getOrCreate(minecraft);
-        PoseStack.Pose pose = context.poseStack().last();
-        context.submitNodeCollector().submitCustomGeometry(context.poseStack(),
-                RenderTypes.entityTranslucent(WHITE),
-                (pose2, buffer) -> {
-                    clock++;
-    double fovTan = Math.tan(Math.toRadians(camera.getFov()) / 2.0);
-    double aspect = (double) minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getGuiScaledHeight();
-    double halfFovTan = fovTan * aspect;
-    for (Star star : stars) {
-                                            Vec3 dir = SkyMath.direction(star, time, partial, lonDeg, days);
-                        if (dir.y <= 0.0) {
-                            continue; // below the horizon
-                        }
-                        // depth removed: stars are in the sky pass, behind terrain
-                        double nx = -dir.dot(vec(camera.leftVector())) / halfFovTan;
-                        double ny = dir.dot(vec(camera.upVector())) / fovTan;
+                float scale = 1.0F - POLLUTION_MAX * pollution;
+                int width = minecraft.getWindow().getGuiScaledWidth();
+                int height = minecraft.getWindow().getGuiScaledHeight();
+                if (width <= 0 || height <= 0) {
+                    return;
+                }
+                double aspect = width / (double) height;
+                double fovTan = Math.tan(Math.toRadians(camera.getFov()) / 2.0);
+                List<Star> stars = StarCatalog.stars();
+                Discovery discovery = Discovery.getOrCreate(minecraft);
+                PoseStack.Pose pose = context.poseStack().last();
+                context.submitNodeCollector().submitCustomGeometry(context.poseStack(),
+                        RenderType.entityTranslucent(WHITE),
+                        (pose2, buffer) -> {
+                            clock++;
+                            double fovTan = Math.tan(Math.toRadians(camera.getFov()) / 2.0);
+                            double aspect = (double) minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getGuiScaledHeight();
+                            double halfFovTan = fovTan * aspect;
+                            Vec3 left = vec(camera.leftVector());
+                            Vec3 up = vec(camera.upVector());
+                            for (Star star : stars) {
+                                Vec3 dir = SkyMath.direction(star, time, partial, lonDeg, days);
+                                if (dir.y <= 0.0) {
+                                    continue; // below the horizon
+                                }
+                                // depth removed: stars are in the sky pass, behind terrain
+                                double nx = -dir.dot(left) / halfFovTan;
+                                double ny = dir.dot(up) / fovTan;
                         if (Math.abs(nx) > 1.05 || Math.abs(ny) > 1.05) {
                             continue; // outside the field of view
                         }
