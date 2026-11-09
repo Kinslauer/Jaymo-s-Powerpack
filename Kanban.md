@@ -45,11 +45,11 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/aetherion-geckolib|aetherion-geckolib]] · 🪶 Quill · #1194 · writing
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🍇 Bacchus · #1193 · in-review
 
 
 ## Needs Andy
