@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -8,6 +8,7 @@ claimed_by: hermes-a
 pr: 1190
 suggested_owns: [kingdoms/src/client/java/com/jaymoskingdoms/client/SkillScreen.java, kingdoms/src/client/java/com/jaymoskingdoms/client/SkillWeb.java]
 writer: hermes-writer
+text_pass: done
 ---
 
 # Skill tree: the sidebar should get out of the way
