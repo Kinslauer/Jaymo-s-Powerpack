@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 19:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 19:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,13 +12,13 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/blindness|blindness]] · hermes-b · claimed
 
 
 ## Text pass
 
 - [ ] [[Inbox/mimic|mimic]] · hermes-modeller · #1158 · in-review
 - [ ] [[Inbox/xeno-ultimates-patch-2|xeno-ultimates-patch-2]] · hermes-a · #1160 · in-review
+- [ ] [[Inbox/blindness|blindness]] · hermes-b · #1159 · in-review
 
 
 ## In review
