@@ -38,8 +38,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for 🪽 any Hermes bot · #1193 · changes · fixing review notes
-- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
