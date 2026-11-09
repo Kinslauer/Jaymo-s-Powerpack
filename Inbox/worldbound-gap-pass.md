@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
 claimed_by: hermes-b
-pr:
+pr: 1173
 suggested_owns: []
 ---
 
