@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:12). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:14). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,13 +36,13 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · 🤖 Quill · #1186 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · 🤖 Apollo · #1176 · in-review
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · 🤖 Prometheus · #1185 · in-review
+- [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · 🤖 Apollo · #1186 · in-review
 
 
 ## Needs Andy
