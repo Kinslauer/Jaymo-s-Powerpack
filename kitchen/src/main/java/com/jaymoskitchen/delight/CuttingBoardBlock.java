@@ -122,7 +122,7 @@ public class CuttingBoardBlock extends BaseEntityBlock {
 		}
 		level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, lying.getItem()), pos.getX() + 0.5, pos.getY() + 0.15, pos.getZ() + 0.5,
 			8, 0.15, 0.05, 0.15, 0.05);
-		level.playSound(null, pos, (tool.is(ItemTags.PICKAXES) ? SoundEvents.STONE_BREAK : SoundEvents.AXE_STRIP).value(),
+		level.playSound(null, pos, tool.is(ItemTags.PICKAXES) ? SoundEvents.STONE_BREAK : SoundEvents.AXE_STRIP.value(),
 			SoundSource.BLOCKS, 0.7F, 1.4F);
 		tool.hurtAndBreak(1, player, hand);
 	}
