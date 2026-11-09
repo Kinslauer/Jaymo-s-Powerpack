@@ -2,7 +2,7 @@
 agent: rider-class (Claude session local_b95d9290)
 branch: claude/rider-class
 pr: 1161
-status: ready
+status: done
 ---
 # Rider class overhaul
 
@@ -11,3 +11,6 @@ Files owned: kingdoms equestrian/Riders.java, Races.java, mixin/equestrian/MobSa
 Done: wheel/roster/whistle at any trust for Riders, starter horse, faster taming and bond, bareback (incl. camels and llamas), lance charge, running mount, pillion rescue, no foot penalty, courier pay, stable races, faster no-treat horse revive. Built; not played.
 
 - 2026-11-08 20:15 Review (Claude): pass; posted to Parthenon > PR Merges by YOUTH. Waiting on Andy.
+
+## Notes
+- 2026-11-09 02:13 PR #1161 is merged into master; moved to Agents/Done.

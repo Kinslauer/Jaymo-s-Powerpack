@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: kitchen-brick-split
 branch: claude/kitchen-cookware-melt
 with: 
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 Built and pushed as PR #1163; `sh ./gradlew build` and `tools/pr_checks.py` pass. Not played: the split itself (pickaxe on a board with seared bricks) still needs a click in game.
+- 2026-11-09 02:13 PR #1163 is merged into master; moved to Agents/Done.

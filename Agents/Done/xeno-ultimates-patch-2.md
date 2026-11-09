@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: xeno-ultimates-patch-2
 branch: hermes/xeno-ultimates-2
 with: 
@@ -29,3 +29,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-09 02:13 PR #1160 is merged into master; moved to Agents/Done.

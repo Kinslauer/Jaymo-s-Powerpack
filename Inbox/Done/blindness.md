@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes-b
 from: coordinator
 asked: 2026-11-08
@@ -31,3 +31,4 @@ suggested_owns:
 - 2026-11-08 17:26 Andy (2026-11-08): swapped to Bacchus (hermes-b); Prometheus takes the mimic.
 - 2026-11-08 17:36 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-08 19:26 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 02:13 PR #1159 is merged into master; moved to Inbox/Done.

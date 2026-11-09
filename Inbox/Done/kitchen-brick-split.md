@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -23,3 +23,4 @@ Cakes already cut (Kitchen slices them). Scorched bricks do not exist in our pac
 
 - Being built now in `E:/wt/kitchen-cookware-melt`: Kitchen names the block by id (`jaymospowers:seared_bricks`), so Kitchen still never compiles against Powers.
 - The other half of that pick-list row — melting cookware back down — needs no code: `MeltingRecipes` already derives it from the crafting recipes (pot 3 iron, pan 3 iron, saucepan 2 iron). Said so rather than writing a duplicate.
+- 2026-11-09 02:13 PR #1163 is merged into master; moved to Inbox/Done.
