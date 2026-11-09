@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 22:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,7 +29,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · claimed
-- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · claimed
 
 
 ## Text pass
@@ -37,6 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · in-review
 - [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · in-review
+- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · in-review
 
 
 ## In review
