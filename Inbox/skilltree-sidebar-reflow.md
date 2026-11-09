@@ -20,7 +20,7 @@ Tiv, in the Tasks thread: "the sidebar needs to move out of the way in the skill
 ## Notes
 
 - `SkillScreen` keeps the Attributes (and Jobs) panel at a fixed `PANEL_W` of 340 on the left of the screen, over the web; the web is dragged and zoomed underneath it.
-- What "out of the way" means is still open: a tab that slides the panel in and out, auto-hide when the pointer is over the web, or the panel moving to a side that isn't in the way. Pick what plays best and say why in the PR.
+- Settled with Tiv: it can duck away. The panel gets out of the way rather than moving somewhere else — he'll say if he doesn't like the result, so keep the change small enough to try something else instead.
 - Whatever the answer, the web must stay fully usable: you can see and reach perks behind where the panel used to be.
 - Don't change what the panel shows — only where it sits and whether it can get out of the way.
-- Ask Tiv before building if the choice matters to him; he raised it as a look-and-feel complaint, not a spec.
+- Ducking away still has to be found again: whatever the gesture, getting the Attributes and Jobs back on screen should be obvious without a tooltip.
