@@ -25,7 +25,6 @@ kanban-plugin: board
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · open
 - [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for hermes · open
-- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · open
 - [ ] [[Inbox/astronomy-art|astronomy-art]] · hermes-modeller · open
 
 
@@ -38,6 +37,7 @@ kanban-plugin: board
 
 ## Text pass
 
+- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · hermes-b · #1173 · in-review
 
 
 ## In review
