@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 11:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,6 +31,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ore-hearts|ore-hearts]] · hermes-a · claimed
+- [ ] [[Agents/fire-dragon-geckolib|fire-dragon-geckolib]] · running
 
 
 ## Text pass
