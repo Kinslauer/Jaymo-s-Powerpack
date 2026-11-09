@@ -3,6 +3,7 @@ sandbox (README.md beside this). Meant for YOUTH (Hermes) on Andy's PC; works fr
 
     py tools/cloud-agent/run.py credentials            # once: put the GitHub token in the vault
     py tools/cloud-agent/run.py task <inbox-task>      # do an Inbox task; keeps its status in the vault
+    py tools/cloud-agent/run.py next                   # do the oldest open task for `cloud` or `prometheus`
     py tools/cloud-agent/run.py prompt "<what to do>"  # do something that isn't an Inbox task
 
 Needs ANTHROPIC_API_KEY and GITHUB_TOKEN in the environment (never in a file; on Windows, when the shell that runs this
@@ -26,6 +27,8 @@ BRANCH = "master"
 MCP_URL = "https://api.githubcopilot.com/mcp/"
 # The vault agent name the task is claimed under
 WHO = "claude-cloud"
+# `next` takes open Inbox tasks addressed to these (`for:`): its own, and the modelling bot's, which it shares
+TAKES = ("cloud", "prometheus", "hermes-modeller")
 # Most a session may spend, in US cents at list price (it pauses there; nothing is lost)
 BUDGET_CENTS = "2000"
 # How many times the grader may send the work back
@@ -89,6 +92,29 @@ def vault(*args):
     if out.returncode != 0:
         raise SystemExit(f"vault_sync {' '.join(args)} failed:\n{out.stdout}{out.stderr}")
     return out.stdout
+
+
+def props_of(text):
+    """A task's front matter (the lines between the first two `---`), as vault_sync --show prints it."""
+    props, lines = {}, text.split("\n")
+    if lines and lines[0].strip() == "---":
+        for line in lines[1:]:
+            if line.strip() == "---":
+                break
+            if ":" in line and not line.startswith(" "):
+                key, _, value = line.partition(":")
+                props[key.strip()] = value.strip()
+    return props
+
+
+def next_task():
+    """The oldest open Inbox task addressed to the cloud agent or the modelling bot (they share them), or None."""
+    found = []
+    for name in vault("--tasks", "open").split():
+        props = props_of(vault("--show", name))
+        if props.get("status") == "open" and props.get("for", "").lower() in TAKES:
+            found.append((props.get("asked", ""), name))
+    return min(found)[1] if found else None
 
 
 def credentials(client):
@@ -162,7 +188,7 @@ def run(client, title, task_text):
 
 
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in ("credentials", "task", "prompt"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("credentials", "task", "prompt", "next"):
         raise SystemExit(__doc__)
     load_keys()
     client = anthropic.Anthropic()
@@ -171,8 +197,18 @@ def main():
     if sys.argv[1] == "prompt":
         _, text = run(client, sys.argv[2][:80], sys.argv[2])
         return 0 if re.search(r"^PR: *#?\d+", text, re.M) else 1
-    task = sys.argv[2]
+    if sys.argv[1] == "next":
+        task = next_task()
+        if not task:
+            print("No task waiting for the cloud agent.")
+            return 3
+    else:
+        task = sys.argv[2]
     text = vault("--show", task)
+    props = props_of(text)
+    if props.get("status") != "open" and props.get("claimed_by") != WHO:
+        print(f"{task} is {props.get('status')} (claimed by {props.get('claimed_by') or 'nobody'}): not taking it.")
+        return 1
     vault("--set", task, "status=claimed", f"claimed_by={WHO}")
     session_id, said = run(client, task, f"The Inbox task `{task}` (its branch: `cloud/{task}`):\n\n{text}")
     pr = re.search(r"^PR: *#?(\d+)", said, re.M)

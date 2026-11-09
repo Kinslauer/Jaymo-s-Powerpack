@@ -42,7 +42,11 @@ $0.08 an hour of sandbox time), with a cap of $20 a session (`BUDGET_CENTS` in `
 ```
 py tools/cloud-agent/run.py task <inbox-task>      # e.g. run.py task ore-hearts
 py tools/cloud-agent/run.py prompt "<what to do>"
+py tools/cloud-agent/run.py next                   # the oldest open task for `cloud` or `prometheus`
 ```
+
+`next` shares Prometheus's tasks: whichever claims a task first does it (exit 3: nothing waiting). `task` and
+`next` never take a task someone else has claimed.
 
 `task` claims the Inbox task as `claude-cloud`, gives the agent the task's text, and afterwards sets it `in-review`
 with the PR number, `blocked` with the agent's question for Andy, or back to `open` if it ended without a PR. The rest
@@ -55,9 +59,10 @@ permission. It never merges.
 
 Add to YOUTH's instructions (Hermes):
 
-> When Andy asks for work to be done in the cloud, or an Inbox task has `for: cloud`, run
-> `py tools/cloud-agent/run.py task <task-name>` from the Jaymo's Powerpack checkout (for a request that isn't an
-> Inbox task: `run.py prompt "<the request, with all its detail>"`). It can take an hour; post Andy the Console link it
+> When Andy asks for work to be done in the cloud, run `py tools/cloud-agent/run.py task <task-name>` from the
+> Jaymo's Powerpack checkout (for a request that isn't an Inbox task: `run.py prompt "<the request, with all its
+> detail>"`). When no cloud run is going and Andy has said the cloud may pick up work, run `run.py next`: it takes the
+> oldest open task for `cloud` or `prometheus` (exit 3: nothing waiting). It can take an hour; post Andy the Console link it
 > prints. When it ends, tell Andy the PR number (exit 0), the agent's question (exit 2), or that it stopped without a PR
 > (exit 1), with the session link. One cloud run at a time. Never put a key in a command line or a file.
 
