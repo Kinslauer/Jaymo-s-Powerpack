@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 14:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 14:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,7 +38,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☀️ Apollo · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
@@ -46,6 +45,7 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
+- [ ] [[Inbox/atroxiia-geckolib|atroxiia-geckolib]] · 🔥 Prometheus · #1198 · in-review
 
 
 ## In review
