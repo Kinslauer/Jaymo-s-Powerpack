@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: open
 for: prometheus
 from: coordinator
 asked: 2026-11-09
