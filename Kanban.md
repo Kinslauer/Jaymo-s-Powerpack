@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 09:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 10:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,13 +31,13 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · claimed
 - [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · 🤖 Apollo · claimed
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
 
 
 ## Text pass
 
+- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · 🤖 Prometheus · #1189 · in-review
 
 
 ## In review
