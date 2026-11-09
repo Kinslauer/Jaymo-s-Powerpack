@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:05). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-08 21:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,8 +18,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · claimed
 - [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · claimed
+- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · claimed
 
 
 ## Text pass
