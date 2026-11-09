@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:40). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 01:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,12 +31,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
-- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · changes · fixing review notes
 - [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · changes · fixing review notes
 
 
 ## Text pass
 
+- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · in-review
 
 
 ## In review
