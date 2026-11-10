@@ -26,9 +26,11 @@ textures/entity/costume/suit/thief*.png and mask/thief_hood*.png: the costume ta
 
 Batch 4 (2026-10-29). Andy downloaded these from the Blockbench Workshop. The makers' names aren't in the files; fill
 them in from the model pages.
-omen_red.png, omen_blue.png (bbmodels/omen_red.json, omen_blue.json): the future's Omen mechs
+omen_red.png, omen_blue.png (geckolib/models/entity/omen_red.geo.json, omen_blue.geo.json, animations/entity/omen.animation.json):
+the future's Omen mechs
   "The Omen Red" and "The Omen Blue", Blockbench Workshop
-  Changes: baked to our loader's format; walking, aiming and smashing posed in code (client/power/chrono/OmenRenderer).
+  Changes: drawn by GeckoLib with animations of ours (idle, walk, run, turning, smash, cannon recoil, flinch, death), written
+  by tools/gen_omen_geo.py into art/the_omen_red.bbmodel and the blue one (credit and licence beside them).
 worky_drone.png (bbmodels/worky_drone.json): the Omens' Worky drones
   "bb-worky", Blockbench Workshop
   Changes: baked to our loader's format, first frame of its texture strip only, drawn at 0.45 scale.
