@@ -1,11 +1,12 @@
 ---
-status: writing
+status: in-review
 for: claude-cloud
 from: cloud thread (session ...DopwiG2E2RYHAfak), found on the Bogre branch 2026-11-10
 asked: 2026-11-10
 claimed_by: claude-cloud
 pr: 1251
 writer: hermes-writer
+text_pass: done
 ---
 
 # Freecam in the pack, creative only and off during our films
