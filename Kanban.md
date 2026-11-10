@@ -15,11 +15,11 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · claimed
-- [ ] [[Inbox/bogre-mob|bogre-mob]] · 🪶 Quill · #1251 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/bogre-mob|bogre-mob]] · ☁️ Cloud · #1251 · in-review
 
 
 ## Needs Andy
