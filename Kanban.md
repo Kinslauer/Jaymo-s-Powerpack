@@ -20,7 +20,6 @@ kanban-plugin: board
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · for ☁️ Cloud · open
-- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
@@ -31,6 +30,7 @@ kanban-plugin: board
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
 
 
 ## Being built
