@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -30,3 +30,4 @@ Andy ticked it. Our knives already cut straw and board items; the per-metal effe
 - 2026-11-09 20:11 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-09 20:38 Text pass: reviewed lang/parts/tinkering.json (4 new trait entries: poisonous, weakening, burning, withering - all consistent 'A [metal] knife sometimes [effect] what it hits.' pattern), changes/powers/knife-metal-effects.md (clear, complete). No rewrites needed. Slimesteel slowing effect lacks trait entry (code gap, not text).
 - 2026-11-09 20:45 Review (head 7d3811a): changes needed. 1) The four new metals (TinkerMaterial COBALT, MANYULLYN, QUEEN_SLIME, HEPATIZON; Tinkering.registerKnifeMetals) can't be got in survival: no ore, no recipe, no smeltery melting or alloy (the javadoc says so). Only the slimesteel knife works for a player. Either make them obtainable (ore/alloys in the smeltery, as silver and steel are) or map the five effects onto metals the pack already has, and say which in the PR. 2) Nothing draws the new tools: every tool type has items/tinker_<type>.json and per-part, per-material models (e.g. models/item/tinkering/battlesign/handle_<metal>.json). The PR adds ToolType.KNIFE with no tinker_knife item model or part models, and no part models for the four new metals on any existing tool type, so those tools show the missing texture. Generate them the way the existing tool models are made. 3) Check that the tool station's knife (SMALL_BLADE + TOOL_HANDLE) has its lang name and tooltip in lang/parts/tinkering.json and that the four trait names (poisonous, weakening, burning, withering) are there. The effect code itself is fine: a 10% mark on a knife hit, from the head metal, server side.
+- 2026-11-09 20:55 PR #1204 is merged into master; moved to Inbox/Done.
