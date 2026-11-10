@@ -324,7 +324,8 @@ public final class Thirst {
 		if (water(player) >= MAX) {
 			return true;
 		}
-		drink(player, SIP, rain, SIP_SICK_CHANCE);
+		// rain through soot (Soot) is dirty
+		drink(player, SIP, rain && !Soot.dirtyRain(player), SIP_SICK_CHANCE);
 		if (rain) {
 			BodyHeat.cool(player, CLEAN_COOL / 4.0F);
 		}

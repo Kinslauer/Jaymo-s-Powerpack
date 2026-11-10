@@ -19,6 +19,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -28,6 +30,9 @@ import net.minecraft.world.phys.HitResult;
  * drink one. Boil it over a lit campfire like a bottle and what's in it is clean. Its bar shows how much is left.
  * <p>
  * (0.5.80) Comes in three tiers: Leather (3 sips), Iron (6 sips), Dragon (8 sips, cleans water as it fills).
+ * <p>
+ * Filling it drinks up the water block it came from, the way Thirsty Bottles makes glass bottles do (Andy's Hardrock
+ * picks): a lone pool runs dry, while a river or the sea, where water flows back in, keeps giving.
  */
 public final class WaterskinItem extends Item {
 
@@ -58,18 +63,41 @@ public final class WaterskinItem extends Item {
 	/** Water from a drink of it, dirty or boiled, and the chance dirty water turns your stomach. */
 	static final int DIRTY = 4, CLEAN = 6;
 	static final float SICK_CHANCE = 0.25F;
+	/** Whether filling up takes the water block (a source, or a waterlogged block's water) with it. */
+	static final boolean DRINKS_SOURCE = true;
 
-	/** What's in it. */
-	public record Water(int sips, boolean clean) {
+	/**
+	 * What's in it. (Hardrock picks) {@code temp} is 1 for water hot off the fire, -1 for water chilled in snow or ice,
+	 * 0 otherwise, and it holds until the game time {@code until} ({@link Warmth#SKIN_KEEPS}).
+	 */
+	public record Water(int sips, boolean clean, int temp, long until) {
 		public static final Water EMPTY = new Water(0, false);
 		public static final Codec<Water> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("sips").forGetter(Water::sips),
-			Codec.BOOL.fieldOf("clean").forGetter(Water::clean)
+			Codec.BOOL.fieldOf("clean").forGetter(Water::clean),
+			Codec.INT.optionalFieldOf("temp", 0).forGetter(Water::temp),
+			Codec.LONG.optionalFieldOf("until", 0L).forGetter(Water::until)
 		).apply(i, Water::new));
 		public static final StreamCodec<ByteBuf, Water> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Water::sips,
 			ByteBufCodecs.BOOL, Water::clean,
+			ByteBufCodecs.VAR_INT, Water::temp,
+			ByteBufCodecs.VAR_LONG, Water::until,
 			Water::new);
+
+		public Water(int sips, boolean clean) {
+			this(sips, clean, 0, 0L);
+		}
+
+		/** Hot (1), cold (-1) or neither (0) at game time {@code now}. */
+		public int tempAt(long now) {
+			return sips > 0 && now < until ? temp : 0;
+		}
+
+		/** One sip less, the warmth or chill kept. */
+		Water sipped() {
+			return sips <= 1 ? EMPTY : new Water(sips - 1, clean, temp, until);
+		}
 	}
 
 	private final Tier tier;
@@ -108,6 +136,12 @@ public final class WaterskinItem extends Item {
 				// topping up clean water with river water makes it all dirty, unless this tier cleans on fill
 				boolean clean = cleansOnFill();
 				stack.set(Climate.WATERSKIN_WATER, new Water(maxSips(), clean));
+				if (DRINKS_SOURCE && !level.isClientSide()) {
+					BlockState state = level.getBlockState(pos);
+					if (state.getBlock() instanceof BucketPickup pickup) {
+						pickup.pickupBlock(player, level, pos, state);
+					}
+				}
 				return InteractionResult.SUCCESS;
 			}
 		}
@@ -125,12 +159,16 @@ public final class WaterskinItem extends Item {
 		}
 		if (entity instanceof ServerPlayer player) {
 			Thirst.drink(player, water.clean() ? CLEAN : DIRTY, water.clean(), SICK_CHANCE);
-			if (water.clean()) {
+			int temp = water.tempAt(level.getGameTime());
+			if (temp != 0) {
+				// (Hardrock picks) a warm drink keeps the cold off a while, a cold one the heat
+				Warmth.drink(player, temp > 0);
+			} else if (water.clean()) {
 				BodyHeat.cool(player, Thirst.CLEAN_COOL / 2.0F);
 			}
 		}
 		if (!(entity instanceof Player player && player.getAbilities().instabuild)) {
-			stack.set(Climate.WATERSKIN_WATER, water.sips() <= 1 ? Water.EMPTY : new Water(water.sips() - 1, water.clean()));
+			stack.set(Climate.WATERSKIN_WATER, water.sipped());
 		}
 		return stack;
 	}

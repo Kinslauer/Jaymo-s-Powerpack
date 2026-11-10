@@ -1734,3 +1734,82 @@ Dirty water gives a slow, survivable parasite instead of vanilla poison. Hot cho
 
 - The cures are the item tag `jaymoskitchen:cures_parasite` (`ParasiteEffect.CURES`, checked in `Thirst.consumed`). The two teas are optional entries, so Kitchen still loads without Powers and never compiles against it.
 - Built; not played in game.
+
+## 0.5.103 (2026-11-10): Hardrock patch 2 - waterskins drink up the water (#1253)
+
+- **Waterskins use up the water they're filled from** (Andy's TFC Hardrock picks): filling one now takes the water block
+  it came from (a source block, or the water in a waterlogged block), the same rule Thirsty Bottles gives glass bottles.
+  A lone pool runs dry; a river, lake or the sea, where water flows back in, keeps giving. `WaterskinItem.DRINKS_SOURCE`.
+- Compile-checked; not played.
+
+## 0.5.104 (2026-11-10): Hardrock patch 6 - familiar animals and small game traps (#1253)
+
+Andy's TFC Hardrock picks:
+- **Familiar farm animals** (`farm/Familiarity`, `#jaymoskitchen:farm_animals`: cows, sheep, pigs, chickens, goats,
+  mooshrooms, rabbits): feeding one its food once a day makes it a fifth more familiar. Only one at least 60% familiar
+  can be bred; before that the food goes to winning it over (a second feed the same day does nothing). Babies still grow
+  from it. Familiar hens lay up to half again as fast, and a familiar sheep gives an extra wool when shorn.
+- **Small game traps**: a baited snap trap or cage trap now also catches rabbits, chickens, foxes and Naturalist's
+  squirrels, ducks, snails and lizards (`#jaymoskitchen:small_game`), killing it so its body can be butchered. Now and then
+  the bait draws one in from up to 12 blocks. Tame, leashed and baby animals are left alone. JEI info on both traps.
+- Compile-checked; not played.
+
+## 0.5.105 (2026-11-10): Hardrock patch 5 - food that doesn't keep (#1253)
+
+Andy's TFC Hardrock picks (ideas after TerraFirmaCraft, our own code and art, `tools/gen_fresh.py`):
+- **Food rots**: food you carry is stamped with the day it was made (`jaymoskitchen:made`; food made the same day still
+  stacks) and shows a freshness bar, green to red, with Fresh, Going stale or Nearly off on its tooltip. Raw meat keeps
+  a week, raw fish 4 days, cooked meat and fish 2 weeks, fruit 2 weeks, vegetables and bread a season (21 days), soup 5
+  days, anything else 2 weeks (`fresh/Freshness`). Rotten meat turns to rotten flesh, anything else to the new Spoiled
+  Food, which goes into organic compost. Golden food, honey, dried kelp, candy and the like never rot
+  (`#jaymoskitchen:keeps`). Creative players' food doesn't age.
+- **Preserving**: salt in your hand and food in the other, use: it's salted (one salt to 8 food). A dish smoked well (good
+  or perfect) in the smoker's minigame comes out preserved too. Preserved food keeps four times as long.
+- **Cold cellars**: a chest or barrel somewhere dark and out of the sky, and below height 40 or within 2 blocks of ice,
+  packed or blue ice or an icebox, ages its food half as fast (counted each time it's opened).
+- **Food groups**: grain, fruit, vegetables, protein and dairy (`stomach/FoodGroups`; a Kitchen dish counts every group its
+  ingredients do). Four or more groups in your stomach's slots at once add two hearts, three add one, and two or more
+  meals of one group alone take a heart off. Five pips beside the stomach slots light up for the groups you've eaten, and
+  a food's tooltip names its groups. This adds on top of Survivalist health and every other bonus.
+- **Cheese** (`fresh/Cheese`): three buckets of milk and salt make a Cheese Wheel. Set down in a cold cellar it ages over
+  about three days (young to aged, it darkens). Use it with an empty hand for a slice, four to a wheel: Cheese (3 food),
+  or Aged Cheese (6 food, never goes off) once it's aged. An uncut wheel picks back up young; a cut one breaks.
+- **Tired fields** (`farm/TiredSoil`): farmland keeps three nutrients, for grain, roots (carrots, potatoes, beetroot) and
+  everything else. Each ripe harvest wears that one and lets the other two recover a step, so rotating crops pays. After 3
+  harvests of one kind more than the soil has recovered, that kind grows at half speed, after 6 at a quarter. Fertilizer
+  (bone meal or manure) rests the soil at once.
+- The clay oven and greenhouse in the plan already exist (Kitchen's oven, Seasons' `#jaymoskitchen:greenhouse_roof`).
+- JEI info pages on Spoiled Food, salt and the cheese wheel.
+- Compile-checked; not played.
+
+## 0.5.106 (2026-11-10): Hand Quern (#1253)
+
+Andy's TFC Hardrock picks ("Replace our hand grinder"): the Hand Grindstone is now the Hand Quern, two round stones on a
+spruce tray, the upper one with a feed hole and a wooden handle. Same block, same recipes and JEI page, so placed ones
+just change their look.
+
+## 0.5.107 (2026-11-10): Hardrock patch 7 - soot pollution (#1253)
+
+Andy's TFC Hardrock picks: lit furnaces, smokers, campfires, smelteries and forges put soot into their chunk, which
+thins over time (faster in rain) and drifts into the chunks around it. One furnace stays harmless; a town of forges
+doesn't. In sooty air ash drifts about and rain is no longer clean to drink; thicker, you cough now and then (a little
+hunger); thickest, crops in the open wilt back a stage.
+
+## 0.5.108 (2026-11-10): Hardrock patch 1 - warmth you build (#1253)
+
+Andy's TFC Hardrock picks (ideas after Cold Sweat, GPL-3.0, written afresh; art painted by `tools/gen_warmth.py`):
+- **Hearth** (8 stone around a campfire): feed it coal, charcoal, logs, planks or sticks (up to a day's fuel). While lit it
+  walks the closed room around it every 5 s (`HearthEntity`: through open doors, gates and trapdoors, not walls, closed
+  doors, panes or open sky; up to 640 blocks, 12 away) and the cold can't push anyone standing in that room past
+  comfortable (`Warmth.HEARTH`). Flames in its mouth, smoke, a crackle, light 13.
+- **Icebox** (8 planks around packed ice): the same for heat, fed ice, packed ice, blue ice, snow blocks or snowballs.
+- **Linings**: armour or clothes in the main hand, wool, rabbit hide or leather in the other, used on a loom. Wool counts
+  as a warm piece, rabbit hide as a cool piece, leather half of each (`Lining`); shown on the tooltip.
+- **Thermometer** (2 glass panes over a copper ingot): held in either hand, a brass-framed tube beside the body-heat tube
+  shows the place's own heat, before clothes, meals and drinks (new synced `BodyHeat.Heat.air`).
+- **Hot and cold waterskins**: a waterskin used on a lit campfire comes off clean and hot, used on snow or ice it comes
+  away cold; for 5 minutes a drink of it warms or cools you for 2 minutes (`Warmth.HOT_DRINK`/`COLD_DRINK`).
+- **Colder to the north**: the overworld's land is 5 colder per 1000 blocks north of the world spawn and warmer to the
+  south, up to 25 (`Warmth.NORTH_COLD`).
+- JEI info pages for the hearth, icebox, thermometer, the loom (linings) and the waterskins.
+- Compile-checked; not played.

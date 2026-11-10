@@ -42,6 +42,7 @@ public class FertilizerItem extends Item {
 			BlockState fertile = Manure.FERTILE_FARMLAND.defaultBlockState()
 				.setValue(FarmlandBlock.MOISTURE, soil.getValue(FarmlandBlock.MOISTURE));
 			server.setBlock(pos, fertile, Block.UPDATE_ALL);
+			TiredSoil.rest(server, pos);
 			Player player = context.getPlayer();
 			server.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, fertile));
 			server.playSound(null, pos, SoundEvents.BONE_MEAL_USE, SoundSource.BLOCKS, 1.0F, 0.8F);

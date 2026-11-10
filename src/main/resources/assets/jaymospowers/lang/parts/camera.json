@@ -1,3 +1,5 @@
 {
-	"key.jaymospowers.front_camera": "Toggle Front Camera"
+	"key.jaymospowers.front_camera": "Toggle Front Camera",
+	"jaymospowers.freecam.creative_only": "Freecam requires creative mode",
+	"jaymospowers.freecam.film": "Freecam disabled during films"
 }

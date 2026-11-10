@@ -35,6 +35,10 @@ abstract class HandshakeCameraMixin {
 			// (two spirits locked arm to arm: the clash's film)
 			view = com.jaymoskingdoms.client.spirits.ClashCinematic.view(this.minecraft, partialTicks);
 		}
+		if (view == null) {
+			// (a lore film: LoreFilmClient)
+			view = com.jaymoskingdoms.client.films.LoreFilmClient.view(this.minecraft, partialTicks);
+		}
 		if (view != null) {
 			this.setRotation((float)view[3], (float)view[4]);
 			this.setPosition(view[0], view[1], view[2]);

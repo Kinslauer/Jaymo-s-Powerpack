@@ -41,7 +41,9 @@ public final class InteractActions {
 	public static final String ENVOY = "envoy";
 	/** (0.7.523) Keep Your Word: hand over what you promised to bring ({@link Promises}). */
 	public static final String PROMISE = "promise";
-	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE);
+	/** Ask About the Old War: a court wizard tells the story of the long defence, as a film ({@code LoreFilms}). */
+	public static final String STORY = "story";
+	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -96,6 +98,7 @@ public final class InteractActions {
 			case RITE -> Accusations.priest(v) && player.level() instanceof ServerLevel l && Turning.rite(player, Patrons.today(l.getServer())) != null;
 			case ENVOY -> Envoys.hearable(player, v);
 			case PROMISE -> v instanceof Villager villager && Promises.handable(player, villager);
+			case STORY -> CourtWizards.is(v) && com.jaymoskingdoms.films.LoreFilms.canPlay(player);
 			default -> false;
 		};
 	}
@@ -159,6 +162,10 @@ public final class InteractActions {
 			}
 			case PROMISE -> {
 				return Promises.handOver(player, (Villager)v);
+			}
+			case STORY -> {
+				com.jaymoskingdoms.films.LoreFilms.told(player, v);
+				return null;
 			}
 			default -> {
 				return null;

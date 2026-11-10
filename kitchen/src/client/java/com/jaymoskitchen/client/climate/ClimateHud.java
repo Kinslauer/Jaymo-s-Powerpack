@@ -4,6 +4,8 @@ import com.jaymoskitchen.client.hud.HudZones;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.climate.BodyHeat;
 import com.jaymoskitchen.climate.Climate;
+import com.jaymoskitchen.climate.Lining;
+import com.jaymoskitchen.climate.Warmth;
 import com.jaymoskitchen.climate.Thirst;
 import com.jaymoskitchen.climate.WaterskinItem;
 import com.jaymoskitchen.net.Payloads;
@@ -65,8 +67,23 @@ public final class ClimateHud {
 				lines.add(water.sips() <= 0 ? Component.translatable("tooltip.jaymoskitchen.waterskin.empty").withStyle(ChatFormatting.GRAY)
 					: Component.translatable(water.clean() ? "tooltip.jaymoskitchen.waterskin.clean" : "tooltip.jaymoskitchen.waterskin.dirty",
 						water.sips(), ((WaterskinItem) stack.getItem()).maxSips()).withStyle(water.clean() ? ChatFormatting.AQUA : ChatFormatting.DARK_GREEN));
+				// (Hardrock picks) hot off the fire, or cold from the snow
+				Minecraft minecraft = Minecraft.getInstance();
+				int temp = minecraft.level == null ? 0 : water.tempAt(minecraft.level.getGameTime());
+				if (temp != 0) {
+					lines.add(Component.translatable(temp > 0 ? "tooltip.jaymoskitchen.waterskin.hot" : "tooltip.jaymoskitchen.waterskin.cold")
+						.withStyle(temp > 0 ? ChatFormatting.GOLD : ChatFormatting.AQUA));
+				}
 			} else if (stack.is(Climate.CLEAN_WATER)) {
 				lines.add(Component.translatable("tooltip.jaymoskitchen.clean_water").withStyle(ChatFormatting.AQUA));
+			} else if (stack.is(Warmth.THERMOMETER)) {
+				lines.add(Component.translatable("tooltip.jaymoskitchen.thermometer").withStyle(ChatFormatting.GRAY));
+			}
+			// (Hardrock picks) a lining sewn in at a loom
+			Lining lining = stack.get(Warmth.LINING);
+			if (lining != null) {
+				lines.add(Component.translatable("tooltip.jaymoskitchen.lining." + lining.id)
+					.withStyle(lining.warm > lining.cool ? ChatFormatting.GOLD : lining.cool > lining.warm ? ChatFormatting.AQUA : ChatFormatting.YELLOW));
 			}
 		});
 	}
@@ -150,6 +167,34 @@ public final class ClimateHud {
 			edges(graphics, Mth.clamp((body - BodyHeat.OVERHEATING) / (BodyHeat.MAX - BodyHeat.OVERHEATING), 0.0F, 1.0F));
 		}
 		thermometer(graphics, body, heat.ambient());
+		LocalPlayer player = minecraft.player;
+		if (player.getMainHandItem().is(Warmth.THERMOMETER) || player.getOffhandItem().is(Warmth.THERMOMETER)) {
+			air(graphics, heat.air());
+		}
+	}
+
+	/**
+	 * (Hardrock picks) Held, the thermometer shows the air beside your body heat: a brass-framed tube in the same row,
+	 * filled to how hot or cold this place is, before what you wear (BodyHeat.Heat#air).
+	 */
+	private static void air(GuiGraphicsExtractor graphics, float ambient) {
+		int boxH = TUBE + 6;
+		int[] at = HudZones.place(HudZones.DOCK_LEFT, "jaymoskitchen:air_heat", 30, 7, boxH);
+		if (at == null) {
+			return;
+		}
+		int cx = at[0] + 3;
+		int bottom = at[1] + boxH;
+		int top = bottom - 5 - TUBE;
+		int colour = colour(ambient);
+		graphics.fill(cx - 2, top - 1, cx + 2, bottom - 4, 0xFF6B4A1E);
+		graphics.fill(cx - 3, bottom - 6, cx + 3, bottom, 0xFF6B4A1E);
+		graphics.fill(cx - 1, top, cx + 1, bottom - 4, 0xFF505050);
+		int filled = Math.round(TUBE * Mth.clamp((ambient - BodyHeat.MIN) / (BodyHeat.MAX - BodyHeat.MIN), 0.0F, 1.0F));
+		graphics.fill(cx - 1, bottom - 5 - filled, cx + 1, bottom - 4, colour);
+		graphics.fill(cx - 2, bottom - 5, cx + 2, bottom - 1, colour);
+		int comfort = bottom - 5 - TUBE / 2;
+		graphics.fill(cx - 3, comfort, cx - 2, comfort + 1, 0xA0FFFFFF);
 	}
 
 	/** Red-orange edges creeping in as the heat climbs. */

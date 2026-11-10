@@ -122,17 +122,22 @@ public final class BodyHeat {
 	public static final String DOWNED_TAG = "jaymospowers_downed";
 	static final ResourceKey<DamageType> HEATSTROKE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosKitchen.id("heatstroke"));
 
-	/** Where your body is and where the world is pushing it. */
-	public record Heat(float body, float ambient) {
+	/**
+	 * Where your body is and where the world is pushing it. (Hardrock picks) {@code air} is the push of the place alone,
+	 * before what you wear, eat and drink: what a held thermometer shows.
+	 */
+	public record Heat(float body, float ambient, float air) {
 		static final Codec<Heat> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.FLOAT.fieldOf("body").forGetter(Heat::body),
-			Codec.FLOAT.fieldOf("ambient").forGetter(Heat::ambient)
+			Codec.FLOAT.fieldOf("ambient").forGetter(Heat::ambient),
+			Codec.FLOAT.optionalFieldOf("air", 0.0F).forGetter(Heat::air)
 		).apply(i, Heat::new));
 		static final StreamCodec<ByteBuf, Heat> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.FLOAT, Heat::body,
 			ByteBufCodecs.FLOAT, Heat::ambient,
+			ByteBufCodecs.FLOAT, Heat::air,
 			Heat::new);
-		public static final Heat NEUTRAL = new Heat(0.0F, 0.0F);
+		public static final Heat NEUTRAL = new Heat(0.0F, 0.0F, 0.0F);
 	}
 
 	/** Synced to you for the HUD; back to comfortable when you die. */
@@ -147,6 +152,8 @@ public final class BodyHeat {
 
 	private static final Map<UUID, Long> WET_UNTIL = new HashMap<>();
 	private static final Map<UUID, Integer> STATE = new HashMap<>();
+	/** (Hardrock picks) The place's own push on each player, from the last {@link #ambient}: see {@link Heat#air}. */
+	private static final Map<UUID, Float> BARE = new HashMap<>();
 
 	private BodyHeat() {
 	}
@@ -193,19 +200,22 @@ public final class BodyHeat {
 	static void forget(UUID id) {
 		WET_UNTIL.remove(id);
 		STATE.remove(id);
+		BARE.remove(id);
+		Warmth.forget(id);
 	}
 
 	/** A cooling drink or the like. */
 	static void cool(ServerPlayer player, float by) {
 		Heat heat = heat(player);
 		if (heat.body() > 0.0F) {
-			set(player, new Heat(Math.max(0.0F, heat.body() - by), heat.ambient()));
+			set(player, new Heat(Math.max(0.0F, heat.body() - by), heat.ambient(), heat.air()));
 		}
 	}
 
 	private static void set(ServerPlayer player, Heat heat) {
 		Heat old = heat(player);
-		if (Math.abs(old.body() - heat.body()) >= 0.25F || Math.abs(old.ambient() - heat.ambient()) >= 1.0F) {
+		if (Math.abs(old.body() - heat.body()) >= 0.25F || Math.abs(old.ambient() - heat.ambient()) >= 1.0F
+			|| Math.abs(old.air() - heat.air()) >= 1.0F) {
 			player.setAttached(HEAT, heat);
 		}
 	}
@@ -258,10 +268,10 @@ public final class BodyHeat {
 		float body = heat.body();
 		float drift = player.isInWater() ? WATER_DRIFT : DRIFT;
 		if (ambient < body && body <= 0.0F) {
-			drift *= Math.max(0.2F, 1.0F - WARM_SLOWS * pieces(player, WinterCold.WARM_CLOTHING));
+			drift *= Math.max(0.2F, 1.0F - WARM_SLOWS * warmPieces(player));
 		}
 		body = Mth.clamp(body + (ambient - body) * drift, MIN, MAX);
-		set(player, new Heat(body, ambient));
+		set(player, new Heat(body, ambient, BARE.getOrDefault(player.getUUID(), ambient)));
 		announce(player, body);
 
 		boolean downed = player.entityTags().contains(DOWNED_TAG);
@@ -357,6 +367,10 @@ public final class BodyHeat {
 			if (above > 0) {
 				land -= above * HEIGHT_COLD;
 			}
+			if (realm == Level.OVERWORLD) {
+				// (Hardrock picks) colder the further north you travel, warmer to the south
+				land += Warmth.north(level, player.getZ());
+			}
 		}
 		float air = land;
 
@@ -377,10 +391,14 @@ public final class BodyHeat {
 		}
 
 		air += fire(level, at);
+		// (Hardrock picks) a lit hearth's or icebox's room
+		air = Warmth.room(player, air);
+
+		BARE.put(player.getUUID(), Mth.clamp(air, MIN - 10.0F, MAX + 10.0F));
 
 		// what you wear
-		int warm = pieces(player, WinterCold.WARM_CLOTHING);
-		int cool = pieces(player, COOL_CLOTHING);
+		float warm = warmPieces(player);
+		float cool = pieces(player, COOL_CLOTHING) + Warmth.lined(player, false);
 		if (air < 0.0F) {
 			air = Math.min(0.0F, air + warm * WARM_PIECE);
 		} else {
@@ -392,6 +410,7 @@ public final class BodyHeat {
 		if (hotMeal(player)) {
 			air += HOT_MEAL;
 		}
+		air += Warmth.drinkPush(player);
 		for (ToDoubleFunction<ServerPlayer> weather : WEATHER) {
 			air += (float) weather.applyAsDouble(player);
 		}
@@ -428,6 +447,11 @@ public final class BodyHeat {
 			best = Math.max(best, strength * near);
 		}
 		return best;
+	}
+
+	/** Warm clothes worn, and warm linings sewn into what's worn ({@link Lining}). */
+	static float warmPieces(Player player) {
+		return pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true);
 	}
 
 	static int pieces(Player player, TagKey<Item> tag) {

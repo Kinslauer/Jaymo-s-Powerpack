@@ -99,6 +99,21 @@ public final class MillJei implements IModPlugin {
 				List.of(note("drying.time", com.jaymoskitchen.tanning.Hides.DRY_TICKS / 1200))));
 		}
 		registration.addRecipes(DRYING, drying);
+		// (Hardrock picks) warmth you build: how the hearth, icebox, thermometer, linings and warm or cold water work
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.HEARTH_BLOCK, note("hearth"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.ICEBOX_BLOCK, note("icebox"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.THERMOMETER, note("thermometer"));
+		registration.addIngredientInfo(Items.LOOM, note("lining"));
+		for (Item skin : List.of(com.jaymoskitchen.climate.Climate.WATERSKIN_LEATHER, com.jaymoskitchen.climate.Climate.WATERSKIN_IRON,
+			com.jaymoskitchen.climate.Climate.WATERSKIN_DRAGON)) {
+			registration.addIngredientInfo(skin, note("waterskin_temp"));
+		}
+		// (Hardrock picks) food that doesn't keep: rot, salting, smoking, cellars
+		registration.addIngredientInfo(com.jaymoskitchen.fresh.Freshness.SPOILED_FOOD, note("spoiled_food"));
+		registration.addIngredientInfo(com.jaymoskitchen.tanning.Hides.SALT, note("spoiled_food"));
+		registration.addIngredientInfo(com.jaymoskitchen.fresh.Cheese.CHEESE_WHEEL, note("cheese_wheel"));
+		registration.addIngredientInfo(com.jaymoskitchen.rats.Rats.SNAP_TRAP, note("traps_small_game"));
+		registration.addIngredientInfo(com.jaymoskitchen.rats.Rats.CAGE_TRAP, note("traps_small_game"));
 	}
 
 	private static Component title(String id) {

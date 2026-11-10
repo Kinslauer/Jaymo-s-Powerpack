@@ -219,6 +219,8 @@ public final class WeaponParts {
 		add(new Kind("kitchen_knife_blade", "pantryforblockheads:knife", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_BINDING, 1));
 		// (0.17.116) the layer blocks' saw (layers/SawItem): Andy: "it is an iron tool", so it's forged, not crafted
 		add(new Kind("saw_blade", "jaymospowers:saw", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		// Andy's TFC Hardrock picks: the prospector's pick (ground/ProspectorPickItem), a copper head so it comes early
+		add(new Kind("prospector_pick_head", "jaymospowers:prospector_pick", Scheme.SINGLE_COPPER, INGOT, Assembly.ROD_BINDING, 1));
 		// (Smithing) the smith's own tools are forged too (Andy's rule: iron tools come through Tinkers): tongs' jaws and
 		// hammer heads; the copper hammer's head casts, so there's always a way to make the first hammer
 		add(new Kind("tongs_jaws", "jaymospowers:iron_tongs", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
