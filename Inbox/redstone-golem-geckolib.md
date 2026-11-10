@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "I want tasks set for all the models with no animations, the omen, redstone and sculk, and all the dragins need models and animations.")
-claimed_by: hermes-modeller
+claimed_by: 
 pr: 
 suggested_owns:
   - kingdoms/art/redstone_golem.bbmodel (+ credits, licence)
