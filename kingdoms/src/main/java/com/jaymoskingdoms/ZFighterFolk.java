@@ -205,6 +205,24 @@ public final class ZFighterFolk {
 
 	/** "Talk about work" with one of them: Powers' talk (the Judge's rebirth and writs, the Keeper's blessing...). */
 	public static void talk(ServerPlayer player, LivingEntity speaker) {
+		if ("demon_master".equals(kind(speaker)) && com.jaymoskingdoms.films.LoreFilms.canPlay(player)) {
+			// a demon master will tell the old war too, if you ask for the story over the work (LoreFilms)
+			ask(player, speaker, Component.translatable("talk.jaymoskingdoms.zfighter.demon_master.story"),
+				List.of(Component.translatable("talk.jaymoskingdoms.zfighter.demon_master.work"),
+					Component.translatable("talk.jaymoskingdoms.zfighter.demon_master.old_war")),
+				List.of(true, true), pick -> {
+					if (pick == 1) {
+						com.jaymoskingdoms.films.LoreFilms.told(player, speaker);
+					} else if (pick == 0) {
+						work(player, speaker);
+					}
+				});
+			return;
+		}
+		work(player, speaker);
+	}
+
+	private static void work(ServerPlayer player, LivingEntity speaker) {
 		if (!PowersCompat.zfighterTalk(player, speaker)) {
 			Speech.tell(player.level(), speaker, player, Component.translatable("talk.jaymoskingdoms.zfighter.nothing"), Speech.WHITE);
 		}
