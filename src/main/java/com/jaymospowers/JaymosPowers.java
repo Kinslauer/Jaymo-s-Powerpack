@@ -40,6 +40,7 @@ public class JaymosPowers implements ModInitializer {
 		// (ParCool track B) long jump, charge jump, trick jump, safety tap, sky dive, fast swim, hiding in leaves or hay
 		com.jaymospowers.freerun.moves.RunMoves.init();
 		com.jaymospowers.water.Dives.init();
+		com.jaymospowers.water.Currents.init();
 		// (0.15.5) feathers (stamina) and the dodge, in place of Combat Roll
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();

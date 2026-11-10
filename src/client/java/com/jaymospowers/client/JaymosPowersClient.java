@@ -185,6 +185,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.sound.ShellWhistle.init();
 		PanicCam.init();
 		com.jaymospowers.client.water.BoatWakes.init();
+		com.jaymospowers.client.water.CurrentsClient.init();
 		BeamClashClient.init();
 		BeamCinematic.init();
 		UltimateCinematic.init();
