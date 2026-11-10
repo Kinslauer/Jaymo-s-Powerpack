@@ -50,3 +50,4 @@ text_pass: done
 - 2026-11-10 00:18 Cloud agent session sesn_0165Np5QFFty3nV9WywnemtY ended without a PR; see its transcript.
 - 2026-11-10 05:16 Cloud agent session sesn_01Y8aSJ1r7givv7YS15R7rby: PR #1239.
 - 2026-11-10 05:32 Text pass: reviewed entity.json ('Varasuchus'), item.json ('Varasuchus Spawn Egg'), and changes/kingdoms/varasuchus-geckolib.md — all clear, in voice, no rewrites needed.
+- 2026-11-10 16:22 Already in master (merged from Andy's PC, Nov 10 morning); the GitHub PR was left open. Marked done by the cloud vault check.
