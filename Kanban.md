@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -49,8 +49,8 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · #1213 · in-review
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · in-review
+- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · #1213 · in-review
 
 
 ## Needs Andy
