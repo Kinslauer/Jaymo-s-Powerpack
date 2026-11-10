@@ -102,4 +102,4 @@ Atmospheric, matches mortality wake messages ("Everything goes dark. Something i
 - `tryBurnHeartOnDeath` increments `Mortality.WOKEN` itself *and* `leftForDead` increments it again — double-counts the sure wake. Keep only the `leftForDead` increment (the heart *is* the wake).
 - Cap is 10 half-hearts (5 full hearts). Messages show half-heart counts; consider whether to show full hearts instead (divide by 2) for player clarity.
 - Existing `crystal_heart` artifact ("Crystal Heart", tooltip "Five more hearts") stacks with this — both grant +10 max health. PR body should note this and flag if it reads as too much health.
-- 2026-11-09 22:17 PR #1210 is merged into master; moved to Inbox/Done.
+- 2026-11-09 22:19 PR #1210 is merged into master; moved to Inbox/Done.
