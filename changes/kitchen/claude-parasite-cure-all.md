@@ -1,6 +1,6 @@
-# dirty water's parasite is cured by any of the three teas
+# Dirty water's parasite is cured by hot chocolate or either tea
 
-Dirty water inflicts a slow, survivable parasite instead of vanilla poison. Hot chocolate already washed it out; now willow bark tea and chamomile tea do the same, so any of the three drinks clears it.
+Dirty water gives a slow, survivable parasite instead of vanilla poison. Hot chocolate already washed it out; now Jaymo's Powers' willow bark tea and chamomile tea do too, so any of the three drinks clears it ("The warm drink washes the parasite out.").
 
-- Thirst.java (kitchen): `curesParasite` checks hot chocolate, willow bark tea and chamomile tea. Powers' tea items are resolved by id at runtime — Kitchen never compiles against Powers.
+- The cures are the item tag `jaymoskitchen:cures_parasite` (`ParasiteEffect.CURES`, checked in `Thirst.consumed`). The two teas are optional entries, so Kitchen still loads without Powers and never compiles against it.
 - Built; not played in game.
