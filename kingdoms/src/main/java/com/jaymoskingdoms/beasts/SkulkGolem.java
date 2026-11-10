@@ -1,5 +1,12 @@
 package com.jaymoskingdoms.beasts;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -31,8 +38,12 @@ import net.minecraft.world.level.storage.ValueOutput;
  * guardian, a figure of deepslate overgrown with sculk. It stands as still as a statue (and is as hard to hurt) until
  * someone comes near without creeping or strikes it; then it wakes and hunts them, its blows bringing the darkness
  * down on them. With nobody about for a while it stands still again.
+ * <p>
+ * Drawn by GeckoLib with animations of ours added to the model's walk, statue pose and blow
+ * ({@code kingdoms/tools/gen_skulk_golem_geo.py}): an idle, waking from the statue and settling back into it, a flinch
+ * when hit and a death.
  */
-public class SkulkGolem extends ActingMonster {
+public class SkulkGolem extends ActingMonster implements GeoEntity {
 	static final double HEALTH = 90.0, ARMOR = 8.0, DAMAGE = 12.0, SPEED = 0.26;
 	/** Someone this near (blocks) who isn't sneaking wakes it; sneaking, this near. */
 	static final double WAKE_RANGE = 10.0, SNEAK_WAKE_RANGE = 3.0;
@@ -47,7 +58,20 @@ public class SkulkGolem extends ActingMonster {
 	static final int RARITY = 20;
 	static final double ALONE_RANGE = 48.0;
 
+	/** The animation cross-fades (ticks). */
+	static final int ANIMATION_BLEND = 4;
+
 	private static final String[] ACTIONS = {"estatue", "attack"};
+	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	private static final RawAnimation STATUE = RawAnimation.begin().thenLoop("statue");
+	private static final RawAnimation ATTACK = RawAnimation.begin().thenPlay("attack");
+	private static final RawAnimation WAKE = RawAnimation.begin().thenPlay("wake");
+	private static final RawAnimation SETTLE = RawAnimation.begin().thenPlay("settle");
+	private static final RawAnimation HURT = RawAnimation.begin().thenPlay("hurt");
+	private static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("death");
+
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
 	private boolean statue = true;
 	private int quiet;
@@ -71,6 +95,33 @@ public class SkulkGolem extends ActingMonster {
 	@Override
 	protected String[] actions() {
 		return ACTIONS;
+	}
+
+	/** Keep GeckoLib's blow in step with the server move that lands it. */
+	@Override
+	protected void act(String anim, int ticks) {
+		super.act(anim, ticks);
+		if (!this.level().isClientSide() && "attack".equals(anim)) {
+			this.triggerAnim("action", "attack");
+		}
+	}
+
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<SkulkGolem>("move", ANIMATION_BLEND, test -> {
+			if ("estatue".equals(test.animatable().action())) {
+				return test.setAndContinue(STATUE);
+			}
+			return test.setAndContinue(test.isMoving() ? WALK : IDLE);
+		}));
+		controllers.add(new AnimationController<SkulkGolem>("action", ANIMATION_BLEND, test -> PlayState.STOP)
+			.triggerableAnim("attack", ATTACK).triggerableAnim("wake", WAKE).triggerableAnim("settle", SETTLE)
+			.triggerableAnim("hurt", HURT).triggerableAnim("death", DEATH));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	@Override
@@ -99,6 +150,7 @@ public class SkulkGolem extends ActingMonster {
 		if (target == null || !target.isAlive()) {
 			if (++this.quiet > REST_TICKS) {
 				this.statue = true;
+				this.triggerAnim("action", "settle");
 			}
 			return;
 		}
@@ -124,6 +176,7 @@ public class SkulkGolem extends ActingMonster {
 		this.statue = false;
 		this.quiet = 0;
 		this.stopActing();
+		this.triggerAnim("action", "wake");
 		level.sendParticles(ParticleTypes.SCULK_SOUL, this.getX(), this.getY() + 1.5, this.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 1.5F, 0.7F);
 	}
@@ -134,8 +187,18 @@ public class SkulkGolem extends ActingMonster {
 		boolean hurt = super.hurtServer(level, source, was ? amount * STATUE_GUARD : amount);
 		if (was && source.getEntity() instanceof LivingEntity) {
 			this.wake(level);
+		} else if (hurt && !was && this.isAlive() && !this.acting("attack")) {
+			this.triggerAnim("action", "hurt");
 		}
 		return hurt;
+	}
+
+	@Override
+	public void die(DamageSource source) {
+		if (this.level() instanceof ServerLevel) {
+			this.triggerAnim("action", "death");
+		}
+		super.die(source);
 	}
 
 	@Override
