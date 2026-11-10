@@ -10533,3 +10533,12 @@ Built; not tested in game.
 - **The new character is safe**: the reset now runs before MCA's "Who are you?" creator opens, so it can't wipe the look and name being chosen.
 - `McaBridge.forgetPlayer` writes a stranger's memory back through MCA's `updateMemories` and records the rebirth on the Overworld (`mca_reborn`); each villager marks the rebirths it has forgotten (`mca_forgotten`) and checks on load. `LifeStory.reincarnateAnew` wipes first, then calls `newDestiny`.
 - Built; not played.
+
+## 0.7.680 (2026-11-10): A real night sky (#1193)
+
+- **Real stars**: the overworld night sky shows 8,870 real stars from the HYG catalog, turning with the world's time and with how far east or west you stand (the latitude is fixed at 45 degrees). Rain and daylight fade them; far hills and mountains hide the stars behind them.
+- **Constellations you find**: keep a star in view for about four seconds at night, under open sky, and you've discovered it; the 88 constellation figures draw their lines between the stars you know. What you've discovered is kept on the server with your character (through death, cleared by reincarnation), so the armillary sphere reads the same sky.
+- **Light pollution**: the stars dim near villages.
+- Shader packs keep their own sky; these stars are drawn alongside it.
+- Data credits: star positions from the HYG Database v4.1 (The Astronomy Nexus, CC BY-SA 4.0); constellation lines from ConstellationLines (MarcvdSluys, CC BY 4.0). Notices in `licenses/astronomy/NOTICE.txt`.
+- Built; not tested in game.
