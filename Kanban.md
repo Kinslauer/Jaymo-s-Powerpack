@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:12). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:17). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -56,13 +56,12 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 💻 Odysseus · #1193 · ready
-- [ ] [[Agents/claude-review-takeovers|claude-review-takeovers]] · 💻 Odysseus · #1193, 1205 · ready
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/astronomy-sky|astronomy-sky]]
 - [x] [[Inbox/Done/reincarnation-full-reset|reincarnation-full-reset]]
 - [x] [[Inbox/Done/atroxiia-geckolib|atroxiia-geckolib]]
 - [x] [[Inbox/Done/skilltree-sidebar-reflow|skilltree-sidebar-reflow]]
@@ -70,7 +69,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/astronomy-telescope|astronomy-telescope]]
 - [x] [[Inbox/Done/astronomy-armillary|astronomy-armillary]]
 - [x] [[Inbox/Done/aetherion-geckolib|aetherion-geckolib]]
-- [x] [[Inbox/Done/android-mech-geckolib|android-mech-geckolib]]
 
 
 %% kanban:settings
