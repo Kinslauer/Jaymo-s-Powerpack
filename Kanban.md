@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 17:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 18:44). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · for 🪶 Quill · open
@@ -16,6 +15,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · 🪶 Quill · claimed
 
 
 ## In review
