@@ -1,0 +1,411 @@
+package com.jaymoskingdoms.client.spirits;
+
+import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.client.ManaClient;
+import com.jaymoskingdoms.spirits.Poses;
+import com.jaymoskingdoms.spirits.SpiritState;
+import com.jaymoskingdoms.spirits.Spirits;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import java.util.HashMap;
+import java.util.Map;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * The spirit as a faint warrior that comes fully into being when it speaks. Andy (2026-11-08), after Johnny Silverhand in
+ * Cyberpunk 2077: "exactly what i want for the visuals on spirits. a faint but visible warrior. They should also appear fully
+ * manifested as you level up when they speak ... noone else other than the mana attuned can see them", then "other mana
+ * attuned should see it", and "the first person view of the arms should be more like this".
+ * <p>
+ * Drawn in the world (not as a layer on its keeper, so the keeper sees it in first person and it is hidden by walls like
+ * anything else), from the synced {@link SpiritState} alone: nothing new on the server. For every spirit that is out within
+ * {@link #VIEW_RANGE}, seen only by a viewer who can see mana (the same gate as the arms, {@link SpiritArms#visibleToAttuned}):
+ * <ul>
+ * <li><b>Faint</b>: its figure over its keeper's back at {@link #FAINT}, a translucent body under the aura's shells so it reads
+ * in daylight, flaring as its arms strike ({@link SpiritFigure#strength}). Not drawn for its own keeper in first person (it
+ * would stand round the camera).</li>
+ * <li><b>Manifested</b>: when it speaks ({@code SpiritVoice} stamps {@link Poses#SPEAK}) and when it levels up, it steps out:
+ * standing on the ground {@link #STAGE_AHEAD} in front of its keeper and a little to one side, facing them, at about a
+ * person's size, gesturing as it talks. It forms and goes with a glitch (it jolts sideways, drops out, splits into its colours)
+ * and data rain falls through it. The higher its level, the more solid it is ({@link #solid}) and the longer it holds
+ * ({@link #hold}); a level up holds longest, fully solid, arms flung up. It keeps its spot (as Johnny does) unless its keeper
+ * walks off, then it glitches back in front of them.</li>
+ * </ul>
+ * The Quiet One never shows a body (Andy: "only animating the large arms for the quiet one"). The chat line still prints: it
+ * survives distance and looking away; the figure is the line's body, not its replacement.
+ */
+public final class SpiritManifest {
+	/** The figure's translucent body: white with scanlines (its alpha carries the lines), tinted per spirit. */
+	static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/spirit_figure.png");
+	/** How far away a spirit is drawn at all (blocks). */
+	static final double VIEW_RANGE = 48.0;
+	/** The faint figure's light, as a share of the manifested one's, and its body's alpha. */
+	static final float FAINT = 0.3F, FAINT_CORE_ALPHA = 0.14F;
+	/** The manifested figure: its shells' light over the faint figure's numbers, and its body's alpha at full solidity. */
+	static final float STAGE_LIGHT = 1.7F, CORE_ALPHA = 0.6F;
+	/** How solid it is at level 1 (share of full; full at the top level), and the top level. */
+	static final float SOLID_MIN = 0.5F;
+	static final int TOP_LEVEL = 20;
+	/** How long a spoken line keeps it manifested (ticks), and how much longer per level above the first; a level up's hold. */
+	static final float SPEAK_HOLD = 70.0F, HOLD_PER_LEVEL = 4.0F, LEVEL_UP_HOLD = 110.0F;
+	/** Ticks it takes to form, and to go. */
+	static final float IN_TICKS = 6.0F, OUT_TICKS = 12.0F;
+	/** Where it stands: blocks ahead of its keeper and off to one side, and how far its keeper may walk before it follows. */
+	static final double STAGE_AHEAD = 2.3, STAGE_SIDE = 0.9, STAGE_LEAVE = 6.0;
+	/** The glitch: how long it lasts round forming and going (ticks), the jolt (blocks), the colour split (blocks), and the chance of a stray blip each step. */
+	static final float GLITCH_TICKS = 9.0F, JOLT = 0.07F, SPLIT = 0.045F, BLIP_CHANCE = 0.04F, DROPOUT = 0.3F;
+	/** Ticks per glitch step (it jumps, it doesn't slide). */
+	static final int GLITCH_STEP = 2;
+	/** The colour split's two edges. */
+	static final int SPLIT_A = 0xFF35F0FF, SPLIT_B = 0xFFFF3FC8;
+	/** Data rain: motes per tick through a manifested figure, their fall speed, and the figure's height they fall from (blocks). */
+	static final int RAIN_PER_TICK = 2;
+	static final double RAIN_FALL = 0.14, RAIN_HEIGHT = 2.3, RAIN_WIDTH = 0.45;
+	/** A level up's ring of light: motes, and how fast they run out. */
+	static final int LEVEL_RING = 24;
+	static final double LEVEL_RING_SPEED = 0.18;
+	/** Self-lit: the ghost's light doesn't come from the world. */
+	static final int FULL_BRIGHT = 0xF000F0;
+	/** The draw order after the aura's and the arms'. */
+	static final int ORDER = SpiritArms.ORDER + 6;
+
+	/** Where each being's spirit last manifested, by entity id. */
+	private static final Map<Integer, Stage> STAGES = new HashMap<>();
+	/** The figure models, by kind and shell, baked when first needed. */
+	private static final SpiritFigure.Model[][] MODELS = new SpiritFigure.Model[Spirits.QUIET + 1][SpiritFigure.SHELLS.length];
+
+	private SpiritManifest() {
+	}
+
+	/** One being's manifestation: which line it is for, where it stands, when it began, how long it holds and how solid it is. */
+	private static final class Stage {
+		long show;
+		int level = -1;
+		double x, y, z;
+		double start = -1.0E9;
+		float hold, solid;
+		double levelAt = -1.0E9;
+		boolean placed;
+	}
+
+	public static void register() {
+		LevelRenderEvents.COLLECT_SUBMITS.register(SpiritManifest::render);
+		ClientTickEvents.END_CLIENT_TICK.register(SpiritManifest::tick);
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> STAGES.clear());
+	}
+
+	/** How long a line keeps {@code spirit} manifested (ticks): longer as it grows. */
+	static float hold(SpiritState spirit) {
+		return SPEAK_HOLD + HOLD_PER_LEVEL * (Math.max(1, spirit.level()) - 1);
+	}
+
+	/** How solid a spirit of {@code level} is when manifested (0-1). */
+	static float solid(int level) {
+		return Mth.lerp(Mth.clamp((level - 1) / (float)(TOP_LEVEL - 1), 0.0F, 1.0F), SOLID_MIN, 1.0F);
+	}
+
+	/** Whether {@code spirit}'s figure is standing out in front now (its arms over its keeper's back are hidden meanwhile). */
+	static boolean speaking(SpiritState spirit, double now) {
+		if (spirit.kind() == Spirits.QUIET || spirit.show() == 0L || spirit.pose() != Poses.SPEAK) {
+			return false;
+		}
+		double age = now - spirit.shownAt();
+		return age >= 0.0 && age < hold(spirit) + OUT_TICKS;
+	}
+
+	private static float smooth(float k) {
+		k = Mth.clamp(k, 0.0F, 1.0F);
+		return k * k * (3.0F - 2.0F * k);
+	}
+
+	/** How far manifested a stage is at {@code now} (0-1). */
+	private static float manifest(Stage stage, double now) {
+		float a = (float)(now - stage.start);
+		if (a < 0.0F || a > stage.hold + OUT_TICKS) {
+			return 0.0F;
+		}
+		return Math.min(smooth(a / IN_TICKS), 1.0F - smooth((a - stage.hold) / OUT_TICKS));
+	}
+
+	/** Keeps a being's stage in step with its spirit: a new line or a level up manifests it, a long walk moves it. */
+	private static Stage stage(LivingEntity entity, SpiritState spirit, double now) {
+		Stage stage = STAGES.computeIfAbsent(entity.getId(), id -> new Stage());
+		boolean up = false;
+		if (stage.level < 0) {
+			stage.level = spirit.level();
+		} else if (spirit.level() > stage.level) {
+			stage.level = spirit.level();
+			stage.levelAt = now;
+			up = true;
+		}
+		boolean line = spirit.pose() == Poses.SPEAK && spirit.show() != stage.show && now - spirit.shownAt() < hold(spirit);
+		if (line) {
+			stage.show = spirit.show();
+		}
+		if (up || line) {
+			float hold = up ? LEVEL_UP_HOLD : hold(spirit);
+			float solid = up ? 1.0F : solid(spirit.level());
+			boolean already = manifest(stage, now) > 0.5F;
+			if (already) {
+				// still standing there from the last line: it goes on talking, no new entrance
+				float left = stage.hold - (float)(now - stage.start);
+				stage.hold = Math.max(left, hold) + (float)(now - stage.start);
+				stage.solid = Math.max(stage.solid, solid);
+			} else {
+				stage.start = up ? now : Math.min(now, spirit.shownAt());
+				stage.hold = hold;
+				stage.solid = solid;
+				place(stage, entity, spirit.show());
+			}
+			if (up) {
+				flourish(entity, stage);
+			}
+		}
+		if (stage.placed && manifest(stage, now) > 0.0F && entity.distanceToSqr(stage.x, stage.y, stage.z) > STAGE_LEAVE * STAGE_LEAVE) {
+			// its keeper walked off: it blinks back in front of them, entering again
+			place(stage, entity, stage.show + 1L);
+			stage.start = now - IN_TICKS * 0.5F;
+		}
+		return stage;
+	}
+
+	/** Puts the stage in front of {@code entity}, to one side (picked by the line, so every viewer picks the same side). */
+	private static void place(Stage stage, LivingEntity entity, long seed) {
+		float yaw = entity.getYHeadRot() * Mth.DEG_TO_RAD;
+		double side = ((seed >>> 6) & 1L) == 0L ? 1.0 : -1.0;
+		// ahead is (-sin, cos); its right hand (-cos, -sin)
+		stage.x = entity.getX() - Mth.sin(yaw) * STAGE_AHEAD - Mth.cos(yaw) * STAGE_SIDE * side;
+		stage.z = entity.getZ() + Mth.cos(yaw) * STAGE_AHEAD - Mth.sin(yaw) * STAGE_SIDE * side;
+		stage.y = entity.getY();
+		stage.placed = true;
+	}
+
+	/** A level up's entrance: a ring of light and a chime where it stands (only for those who can see it). */
+	private static void flourish(LivingEntity entity, Stage stage) {
+		Minecraft minecraft = Minecraft.getInstance();
+		ClientLevel level = minecraft.level;
+		if (level == null || !SpiritArms.visibleToAttuned(entity) || entity.getAttached(Spirits.SPIRIT) == null) {
+			return;
+		}
+		if (stage.placed) {
+			for (int n = 0; n < LEVEL_RING; n++) {
+				double a = n * Mth.TWO_PI / LEVEL_RING;
+				level.addParticle(ParticleTypes.END_ROD, stage.x, stage.y + 0.1, stage.z, Math.cos(a) * LEVEL_RING_SPEED, 0.04, Math.sin(a) * LEVEL_RING_SPEED);
+			}
+			level.playLocalSound(stage.x, stage.y + 1.0, stage.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 0.7F, false);
+		}
+	}
+
+	// ---- drawing -----------------------------------------------------------------------------------------------------------
+
+	private static SpiritFigure.Model model(int kind, int shell) {
+		if (MODELS[kind][shell] == null) {
+			MODELS[kind][shell] = new SpiritFigure.Model(LayerDefinition.create(SpiritFigure.mesh(kind, SpiritFigure.SHELLS[shell]), 64, 64).bakeRoot(), kind);
+		}
+		return MODELS[kind][shell];
+	}
+
+	private static void render(LevelRenderContext context) {
+		Minecraft minecraft = Minecraft.getInstance();
+		ClientLevel level = minecraft.level;
+		if (level == null || minecraft.player == null || STAGES.isEmpty() && !anySpirit(level)) {
+			return;
+		}
+		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		double now = level.getGameTime() + partial;
+		Vec3 camera = context.levelState().cameraRenderState.pos;
+		Entity cameraEntity = minecraft.getCameraEntity();
+		boolean firstPerson = minecraft.options.getCameraType().isFirstPerson();
+		for (Entity e : level.entitiesForRendering()) {
+			if (!(e instanceof LivingEntity entity) || entity.distanceToSqr(camera) > VIEW_RANGE * VIEW_RANGE) {
+				continue;
+			}
+			SpiritState spirit = entity.getAttached(Spirits.SPIRIT);
+			if (spirit == null || spirit.kind() < 0 || spirit.kind() >= Spirits.QUIET) {
+				// (no spirit, or the Quiet One: no body, ever)
+				continue;
+			}
+			Stage stage = stage(entity, spirit, now);
+			if (!spirit.out() || entity.isInvisible() || !SpiritArms.visibleToAttuned(entity)) {
+				continue;
+			}
+			float m = stage.placed ? manifest(stage, now) : 0.0F;
+			float age = (float)(now - spirit.shownAt());
+			float flare = spirit.show() != 0L && spirit.pose() > Poses.IDLE && spirit.pose() != Poses.SPEAK ? SpiritFigure.strength(age) : 0.0F;
+			float faint = (FAINT + (1.0F - FAINT) * flare) * (1.0F - m);
+			if (faint > 0.01F && !(entity == cameraEntity && firstPerson)) {
+				drawFaint(context, entity, spirit, partial, camera, faint, now);
+			}
+			if (m > 0.01F) {
+				drawStage(context, entity, spirit, stage, partial, camera, m, now);
+			}
+		}
+	}
+
+	private static boolean anySpirit(ClientLevel level) {
+		for (Entity e : level.entitiesForRendering()) {
+			if (e instanceof LivingEntity living && living.getAttached(Spirits.SPIRIT) != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The faint figure over its keeper's back, placed as the living renderer places a body (so its arms' layer meets it). */
+	private static void drawFaint(LevelRenderContext context, LivingEntity entity, SpiritState spirit, float partial, Vec3 camera, float light, double now) {
+		PoseStack pose = context.poseStack();
+		Vec3 at = entity.getPosition(partial).subtract(camera);
+		float bodyRot = Mth.rotLerp(partial, entity.yBodyRotO, entity.yBodyRot);
+		float headRot = Mth.rotLerp(partial, entity.yHeadRotO, entity.yHeadRot);
+		pose.pushPose();
+		pose.translate(at.x, at.y, at.z);
+		pose.scale(entity.getScale(), entity.getScale(), entity.getScale());
+		pose.rotateDegrees(Axis.YP, 180.0F - bodyRot);
+		pose.scale(-1.0F, -1.0F, 1.0F);
+		pose.scale(SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE);
+		pose.translate(0.0F, SpiritArms.MODEL_DROP, 0.0F);
+		int kind = spirit.kind();
+		SpiritFigure.Frame frame = new SpiritFigure.Frame(kind, false, SpiritArms.style(kind, spirit.scale()), Spirits.of(kind).size(spirit), 1.0F, 0.0F, -1.0F,
+			Mth.wrapDegrees(headRot - bodyRot) * Mth.DEG_TO_RAD, entity.getXRot(partial) * Mth.DEG_TO_RAD, false);
+		submit(context.submitNodeCollector(), pose, entity, frame, kind, light, FAINT_CORE_ALPHA * light / FAINT, now, 0.0F);
+		pose.popPose();
+	}
+
+	/** The manifested figure standing on the ground in front of its keeper, facing them. */
+	private static void drawStage(LevelRenderContext context, LivingEntity entity, SpiritState spirit, Stage stage, float partial, Vec3 camera, float m, double now) {
+		int kind = spirit.kind();
+		float a = (float)(now - stage.start);
+		// the glitch: hard round forming and going, and the odd stray blip while it talks
+		long step = (long)Math.floor(now / GLITCH_STEP);
+		float glitch = Math.max(1.0F - a / GLITCH_TICKS, 0.0F);
+		glitch = Math.max(glitch, 1.0F - (stage.hold + OUT_TICKS - a) / GLITCH_TICKS);
+		if (noise(step, entity.getId(), 1) < BLIP_CHANCE) {
+			glitch = Math.max(glitch, 0.6F);
+		}
+		glitch = Mth.clamp(glitch, 0.0F, 1.0F);
+		float jolt = (noise(step, entity.getId(), 2) - 0.5F) * 2.0F * JOLT * glitch;
+		float light = m * stage.solid;
+		if (glitch > 0.5F && noise(step, entity.getId(), 3) < DROPOUT) {
+			light *= 0.25F;
+		}
+		// it faces its keeper, its head turned to their eyes
+		Vec3 eye = entity.getEyePosition(partial);
+		double dx = eye.x - stage.x, dz = eye.z - stage.z;
+		float yaw = (float)(Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
+		double headY = stage.y + SpiritFigure.FOOT[kind] * SpiritFigure.STAGE[kind] * SpiritArms.PX;
+		float pitch = (float)-Mth.atan2(eye.y - headY, Math.sqrt(dx * dx + dz * dz));
+		float levelAge = (float)(now - stage.levelAt);
+		boolean levelling = levelAge >= 0.0F && levelAge < LEVEL_UP_HOLD;
+		float talk = spirit.pose() == Poses.SPEAK && now - spirit.shownAt() < hold(spirit) ? 1.0F : levelling ? 0.0F : 0.4F;
+		if (levelling) {
+			talk *= 1.0F - SpiritFigure.levelRaise(levelAge);
+		}
+		boolean fading = a > stage.hold;
+		SpiritFigure.Frame frame = new SpiritFigure.Frame(kind, true, kind, Spirits.of(kind).size(spirit), m, talk * m, levelling ? levelAge : -1.0F, 0.0F,
+			pitch, fading);
+		PoseStack pose = context.poseStack();
+		pose.pushPose();
+		pose.translate(stage.x - camera.x, stage.y - camera.y, stage.z - camera.z);
+		pose.rotateDegrees(Axis.YP, 180.0F - yaw);
+		pose.translate(jolt, 0.0F, 0.0F);
+		pose.scale(-1.0F, -1.0F, 1.0F);
+		pose.scale(SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE);
+		pose.translate(0.0F, SpiritArms.MODEL_DROP, 0.0F);
+		submit(context.submitNodeCollector(), pose, entity, frame, kind, light * STAGE_LIGHT, CORE_ALPHA * light, now, glitch);
+		pose.popPose();
+	}
+
+	/** One figure: its translucent body, then the aura's shells over it, and while it glitches, its colours split either side. */
+	private static void submit(SubmitNodeCollector collector, PoseStack pose, LivingEntity entity, SpiritFigure.Frame frame, int kind, float light, float coreAlpha,
+		double now, float glitch) {
+		HumanoidRenderState state = new HumanoidRenderState();
+		state.ageInTicks = (float)(now % 100000.0) + (entity.getId() & 63);
+		state.setData(SpiritFigure.FRAME, frame);
+		int color = GrueClient.tint(entity, SpiritArms.mix(Spirits.of(kind).color()));
+		int pale = SpiritArms.ghost(color);
+		if (coreAlpha > 0.01F) {
+			int alpha = (int)(Mth.clamp(coreAlpha, 0.0F, 1.0F) * 255.0F);
+			collector.order(ORDER).submitModel(model(kind, 0), state, pose, RenderTypes.entityTranslucent(TEXTURE), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+				ARGB.color(alpha, ARGB.red(pale), ARGB.green(pale), ARGB.blue(pale)), null, 0);
+		}
+		float rise = (state.ageInTicks * ManaClient.RISE * SpiritArms.ARM_FLOW) % 1.0F;
+		float pulse = SpiritFigure.pulse(state.ageInTicks);
+		for (int i = 0; i < SpiritFigure.SHELLS.length; i++) {
+			float l = Mth.clamp(SpiritFigure.SHELL_LIGHT[i] * pulse * light, 0.0F, 1.0F);
+			collector.order(ORDER + 1 + i).submitModel(model(kind, i), state, pose,
+				RenderTypes.energySwirl(ManaClient.TEXTURE, i * 0.37F + 0.21F, -rise * (1 + i)), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+				ManaClient.tint(i == 0 ? pale : color, l), null, 0);
+		}
+		if (glitch > 0.05F) {
+			int outer = SpiritFigure.SHELLS.length - 1;
+			for (int s = -1; s <= 1; s += 2) {
+				pose.pushPose();
+				pose.translate(s * SPLIT * glitch / SpiritArms.PLAYER_SCALE, 0.0F, 0.0F);
+				collector.order(ORDER + 1 + SpiritFigure.SHELLS.length).submitModel(model(kind, outer), state, pose,
+					RenderTypes.energySwirl(ManaClient.TEXTURE, 0.5F, -rise * 3.0F), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+					ManaClient.tint(s < 0 ? SPLIT_A : SPLIT_B, 0.5F * glitch * Math.max(light, 0.4F)), null, 0);
+				pose.popPose();
+			}
+		}
+	}
+
+	/** A steady hash in 0-1 for one glitch step of one being (every viewer's figure jumps the same way). */
+	private static float noise(long step, int id, int salt) {
+		long h = step * 0x9E3779B97F4A7C15L + id * 0xC2B2AE3D27D4EB4FL + salt * 0x165667B19E3779F9L;
+		h ^= h >>> 29;
+		h *= 0xBF58476D1CE4E5B9L;
+		h ^= h >>> 32;
+		return (h & 0xFFFFFF) / (float)0x1000000;
+	}
+
+	// ---- the rain, and forgetting ------------------------------------------------------------------------------------------
+
+	/** Each tick: data rain through every manifested figure in view, and stages forgotten for beings that are gone. */
+	private static void tick(Minecraft minecraft) {
+		ClientLevel level = minecraft.level;
+		if (level == null || minecraft.isPaused() || STAGES.isEmpty()) {
+			return;
+		}
+		double now = level.getGameTime();
+		if (level.getGameTime() % 100L == 0L) {
+			STAGES.keySet().removeIf(id -> !(level.getEntity(id) instanceof LivingEntity living) || living.getAttached(Spirits.SPIRIT) == null);
+		}
+		for (Map.Entry<Integer, Stage> entry : STAGES.entrySet()) {
+			Stage stage = entry.getValue();
+			if (!stage.placed || manifest(stage, now) < 0.3F || !(level.getEntity(entry.getKey()) instanceof LivingEntity entity)) {
+				continue;
+			}
+			SpiritState spirit = entity.getAttached(Spirits.SPIRIT);
+			if (spirit == null || !spirit.out() || !SpiritArms.visibleToAttuned(entity)) {
+				continue;
+			}
+			int color = SpiritArms.ghost(SpiritArms.mix(Spirits.of(spirit.kind()).color()));
+			DustParticleOptions mote = new DustParticleOptions(GrueClient.tint(entity, color) & 0xFFFFFF, 0.5F);
+			var random = entity.getRandom();
+			for (int n = 0; n < RAIN_PER_TICK; n++) {
+				level.addParticle(mote, stage.x + (random.nextDouble() - 0.5) * 2.0 * RAIN_WIDTH, stage.y + random.nextDouble() * RAIN_HEIGHT,
+					stage.z + (random.nextDouble() - 0.5) * 2.0 * RAIN_WIDTH, 0.0, -RAIN_FALL, 0.0);
+			}
+		}
+	}
+}

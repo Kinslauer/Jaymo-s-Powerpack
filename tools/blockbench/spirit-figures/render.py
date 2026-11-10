@@ -179,6 +179,31 @@ def scene(k, g_arm, g_fig, pose="idle", t=0.0):
     return arms, fig
 
 
+def staged(k, g, talk=0.0, t=0.0, up=0.0):
+    """The manifested figure standing on the ground (feet at y 24), its own arms out (SpiritFigure.Model, staged)."""
+    F = FIG[k]
+    out = []
+    sc = F["stage"]
+    fm = part(np.eye(4), 0, 24 - F["foot"] * sc - 0.6, 0, 0, 0, 0, (sc,) * 3)
+    for b in F["torso"]: box(out, fm, *b[:6], g)
+    sk = part(fm, 0, 0, 0, talk * 0.08 * math.sin(t * 0.54), 0, talk * 0.06 * math.sin(t * 0.31))
+    for b in F["skull"]: box(out, sk, *b[:6], g)
+    tm = part(fm, 0, F["tail_y"], 0, 0.03 * math.sin(t * 0.07))
+    for b in F["tail"]: box(out, tm, *b[:6], g)
+    ax, ay = F["arm_at"]
+    rx = (1 - talk) * -0.1 + talk * (-0.85 - 0.28 * math.sin(t * 0.3))
+    ry = talk * 0.35
+    rz = (1 - talk) * 0.12 + talk * -0.1
+    lx = 0.05 - talk * 0.25
+    rx, lx = rx + (-2.75 - rx) * up, lx + (-2.75 - lx) * up
+    rz, lz = rz + (0.45 - rz) * up, -0.12 + (-0.45 + 0.12) * up
+    for side, (x, y_, z_) in ((1, (rx, ry, rz)), (-1, (lx, 0.0, lz))):
+        am = part(fm, ax * side, ay, 0, x, y_, z_)
+        for (cx, y, cz, w, h, d, c) in F["arm"]:
+            box(out, am, cx * side, y, cz, w, h, d, g)
+    return out
+
+
 def player():
     out = []
     m = np.eye(4)
@@ -225,7 +250,7 @@ def render(k, yaw, pitch, figure_alpha, arms_alpha=1.0, pose="idle", t=0.0, scal
                 yield fidx, poly
 
     # the player, opaque, with depth (bigger z is nearer the camera here: v[2] toward the viewer)
-    for fidx, poly in sorted(faces_of(player()), key=lambda fp: sum(p[2] for p in fp[1]) / 4):
+    for fidx, poly in sorted(faces_of([] if pose in ("stage", "talk", "level") else player()), key=lambda fp: sum(p[2] for p in fp[1]) / 4):
         mask = Image.new("L", (W, H), 0)
         ImageDraw.Draw(mask).polygon([(p[0], p[1]) for p in poly], fill=255)
         mk = np.array(mask) > 0
@@ -249,6 +274,14 @@ def render(k, yaw, pitch, figure_alpha, arms_alpha=1.0, pose="idle", t=0.0, scal
     pale = col * 0.6 + 0.4
     fig_shells = [(0.0, 0.10), (0.5, 0.04), (1.2, 0.016)]
     arm_shells = [(0.0, 0.14), (0.45, 0.05), (1.0, 0.02)]
+    if pose in ("stage", "talk", "level"):
+        talk = 1.0 if pose == "talk" else 0.0
+        for g, light in fig_shells:
+            glow(staged(k, g, talk, t, 1.0 if pose == "level" else 0.0), pale if g == 0 else col, light * 0.8 * figure_alpha)
+        im = Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
+        if label:
+            ImageDraw.Draw(im).text((12, 10), label, fill=(230, 230, 230), font=FONT)
+        return im
     if figure_alpha > 0.01:
         for g, light in fig_shells:
             _, fig = scene(k, None, g, pose, t)
@@ -275,6 +308,9 @@ def sheet(k, path):
         render(k, math.radians(35), math.radians(-18), 0.4, t=1.5, label="figure fading"),
         render(k, math.radians(35), math.radians(-18), 0.0, label="arms stay"),
         render(k, math.radians(95), math.radians(-5), 1.0, pose="blow", label="side, mid-blow"),
+        render(k, math.radians(160), math.radians(-12), 1.0, pose="stage", scale=9.0, label="manifested: facing you"),
+        render(k, math.radians(165), math.radians(-8), 1.0, pose="talk", t=4.0, scale=9.0, label="manifested: talking"),
+        render(k, math.radians(180), math.radians(-8), 1.0, pose="level", scale=9.0, label="manifested: level up"),
     ]
     out = Image.new("RGB", (W * len(tiles), H + 40), (20, 20, 24))
     for i, tl in enumerate(tiles):

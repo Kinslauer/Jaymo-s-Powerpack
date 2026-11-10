@@ -1,5 +1,5 @@
 # Writes SpiritFigure.java from figures.py and the template (run after changing a figure, then bbexport.py and render.py).
-from figures import FIG, java, ARM_INNER
+from figures import FIG, java, fmt, ARM_INNER
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 KINDS = ["GRIMSBY", "VARRO", "AMBROSE", "THESSALY", "QUIET"]
@@ -8,7 +8,7 @@ def cases(group, ind="\t\t\t"):
     for k, name in enumerate(KINDS):
         label = "default" if name == "QUIET" else "case Spirits." + name
         out.append(ind + label + " -> {")
-        for l in java(k, group):
+        for l in java(k, group, mirror=(group == "arm")):
             out.append(ind + "\t" + l)
         out.append(ind + "}")
     return "\n".join(out)
@@ -19,5 +19,7 @@ def arr2(d):
 T = open(os.path.join(HERE, "SpiritFigure.java.in")).read()
 T = T.replace("@SCALE@", arr("scale")).replace("@HALF@", arr("half")).replace("@FRONT@", arr("front")).replace("@TAIL@", arr("tail_y"))
 T = T.replace("@INNER@", arr2(ARM_INNER))
-T = T.replace("@TORSO@", cases("torso")).replace("@SKULL@", cases("skull")).replace("@TAILS@", cases("tail"))
+T = T.replace("@FOOT@", arr("foot")).replace("@STAGE@", arr("stage"))
+T = T.replace("@ARMX@", ", ".join(fmt(FIG[k]["arm_at"][0]) for k in range(5))).replace("@ARMY@", ", ".join(fmt(FIG[k]["arm_at"][1]) for k in range(5)))
+T = T.replace("@TORSO@", cases("torso")).replace("@SKULL@", cases("skull")).replace("@TAILS@", cases("tail")).replace("@ARMS@", cases("arm"))
 open(os.path.join(HERE, "../../../kingdoms/src/client/java/com/jaymoskingdoms/client/spirits/SpiritFigure.java"), "w").write(T)
