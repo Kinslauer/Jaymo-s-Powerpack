@@ -21,18 +21,21 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * and spawn egg, through {@link Beasts#type}), where it may spawn and where in the world it does. How to add one:
  * docs/AI-HANDBOOK.md, "Adding a GeckoLib mob".
  *
- * <p>The barrow beetle is the small example the others copy; the draugr guards the Stormborn Tomb's halls (placed by the
+ * <p>The barrow beetle is the small example the others copy; the Bogre (Inhabitants') keeps to itself in the mangroves; the draugr guards the Stormborn Tomb's halls (placed by the
  * tomb's spawners, never in the open). The tomb's skeletons and its boss are the silver skeleton and the Skeleton Lord,
  * drawn with GeckoLib too ({@code SilverSkeleton}, {@code SkeletonLord}).
  */
 public final class Inhabitants {
 	public static EntityType<BarrowBeetle> BARROW_BEETLE;
 	public static EntityType<Draugr> DRAUGR;
+	public static EntityType<Bogre> BOGRE;
 
 	/** The beetle's natural spawn: its weight among the ambient mobs, and how many come together. */
 	static final int BEETLE_WEIGHT = 6, BEETLE_MIN = 2, BEETLE_MAX = 4;
 	/** Where beetles live: the cold biomes the Stormborn Tomb is built in (its own tag, so a datapack can change it). */
 	static final TagKey<Biome> HAS_BARROW_BEETLE = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_barrow_beetle"));
+	/** Where Bogres live: the mangrove swamps (its own tag). One at a time, and never near another ({@link Bogre#checkSpawn}). */
+	static final TagKey<Biome> HAS_BOGRE = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_bogre"));
 
 	private Inhabitants() {
 	}
@@ -42,9 +45,13 @@ public final class Inhabitants {
 			.clientTrackingRange(8), BarrowBeetle.createAttributes());
 		DRAUGR = Beasts.type("draugr", EntityType.Builder.of(Draugr::new, MobCategory.MONSTER).sized(0.7F, 2.2F).clientTrackingRange(8),
 			Draugr.createAttributes());
+		BOGRE = Beasts.type("bogre", EntityType.Builder.of(Bogre::new, MobCategory.MONSTER).sized(1.75F, 3.5F).clientTrackingRange(10),
+			Bogre.createAttributes());
 
 		SpawnPlacements.register(BARROW_BEETLE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BarrowBeetle::checkSpawn);
 		SpawnPlacements.register(DRAUGR, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
+		SpawnPlacements.register(BOGRE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Bogre::checkSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_BOGRE), MobCategory.MONSTER, BOGRE, Bogre.SPAWN_WEIGHT, 1, 1);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_BARROW_BEETLE), MobCategory.AMBIENT, BARROW_BEETLE, BEETLE_WEIGHT, BEETLE_MIN, BEETLE_MAX);
 	}
 }
