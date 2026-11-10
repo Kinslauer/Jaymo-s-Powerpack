@@ -4,17 +4,17 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:24). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · for ☁️ Cloud · open
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 
 
 ## Being built
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · claimed
 
 
 ## Text pass
