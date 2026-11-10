@@ -25,9 +25,10 @@ import net.minecraft.world.phys.AABB;
  * they hear you: anyone running within {@link #HEAR_RUNNING} blocks, or
  * walking within {@link #HEAR_WALKING}, draws the nearest ferals to them, and a feral that sees you attacks. They're
  * the game's own zombies, so Kitchen treats them like any other: the dead they leave are torn into by scavenging
- * zombies, and a zombie's body left lying gets back up. The horde is husks and plain zombies in our civilian skins; a
+ * zombies, and a zombie's body left lying gets back up. The horde is husks and plain zombies in our own skins; a
  * few are Kitchen's corpse zombies in random skins ({@link FutureKitchen}), and every one of those carries a modern gun
- * and uses it, badly ({@link FutureGuns}).
+ * and uses it, badly ({@link FutureGuns}). All of them are Warrior-born, with mangled tails (the client's
+ * {@code FutureDeadLooks}).
  */
 public final class FutureFerals {
 	public static final String TAG = "jaymospowers.feral";
